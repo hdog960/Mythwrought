@@ -38,3 +38,11 @@ If real device fails, profile and optimize chunk/texture/meshing before cutting 
 - Camera angle math is shared by pointer/arrow controls and bounded, with persisted adjustable sensitivity. The global keyboard handler does not intercept input/select/button controls; iPhone menus can scroll vertically while movement/look pads and the canvas block gameplay panning.
 - Node checks verify shared chunk-boundary face culling and camera math. Chromium checks verify live GPU rendering and correct control location, actual world edits, seed changes and screenshot colors.
 - Actual Safari/iPhone thermal, touch accessibility and real game-world streaming acceptance still require device testing; v0.03 is not Gate A or an art approval.
+
+## v0.04 implementation checkpoint
+- Shared pure input functions normalize both thumb pads radially, with deadzone (prevent resting-finger drift), rate-based optional stick look and bounded relative swipe deltas; precise movement/camera are owned by independent browser pointer IDs and safely released on cancel, blur, app hide, menu open and pagehide.
+- A selectable stored swipe/stick camera mode, original controls inside decorated side grips, a temporary fine-aim modifier and saved sensitivity do NOT place HUD elements over the viewport.
+- Replace step-sampled targeting with voxel grid DDA, including exact signed chunk seams, tie traversal and true adjacent empty-cell placement. World-space cube outline is drawn in WebGL with depth testing.
+- React to WebGL context loss by pausing stale GL draw calls and showing a reload explanation; no false claim of GPU state restoration.
+- Static browser verification uses two Chromium suites including Chrome DevTools-dispatched simultaneous two-finger touches; these are **not** substitutes for actual iPhone Safari, assistive touch or thermal profiling.
+- Maintain seed-specific localStorage saves and export/import as temporary engineering foundation, not production-safe backups. Stored format remains unchanged.

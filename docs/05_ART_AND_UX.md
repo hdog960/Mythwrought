@@ -20,3 +20,8 @@ Brightness/underground visibility without punitive gameplay, color-independent c
 No major art approval claim before authored original animation and cohesive scenery exist. Placeholder assets may be used in engineering foundations but are tagged prototype-only in ledger and app.
 ## v0.03 nonfinal art foundation
 An original low-cost daylight sky has been added, with warm horizon, sun, pale clouds and far-off atmospheric ridgelines. These are *prototype original graphics*. The block terrain remains a simple shaded test landscape; no characters, authored architecture, premium art approval or complete biome palette are present. Keep user visual review gate open. The sky is not a replacement for authored 3D scenery.
+
+## v0.04 interaction/readability checkpoint
+- Keep center 3D world unobstructed. A faint outline belongs to the selected 3D block itself, while physical control widgets and compass live only on the outer frame. No fake aiming overlay in screen center.
+- Adjustable swipe/stick camera control and tap target minimums are emerging UX foundations, not validated final ergonomics. Real iPhone landscape screenshot and two-thumb acceptance are still outstanding.
+- Existing prototype terrain has no premium original characters, handcrafted architecture or authored cave city; the visual quality gate remains **unapproved**.

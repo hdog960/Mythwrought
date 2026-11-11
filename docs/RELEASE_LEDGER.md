@@ -5,9 +5,17 @@ This is the source of truth for ACTUALLY implemented and independently verified 
 |---|---|---|---|---|
 | Initial repository | `784739d` | Initial README | Legacy Pages build | Baseline |
 | Design authority | `41e3550` | Seven canonical docs, 100 release acceptance entries | GitHub main | Documents committed |
+| v0.04 independent precision camera/voxel targeting | `2ad8e4e` (merged PR #3) | **25/25 Node** on main; WebGL browser screenshot, seed/edit/targeting, simultaneous Chromium touch movement+look, mode persistence, precision, blur cancellation | [Pages deployment/HTTP PASS](https://github.com/hdog960/Mythwrought/actions/runs/42965722891) | **Automated verification passed; iPhone/art gates OPEN** |
 | v0.03 WebGL landscape/sky | `0adbb31` (merged PR #2) | **17/17 Node** on main, Chromium sky/camera/sensitivity, mining, seed-save and full-chunk screenshot checks | [Pages deploy and public HTTP PASS](https://github.com/hdog960/Mythwrought/actions/runs/42956423659) | **Verified prototype, iPhone and visual gates OPEN** |
 | v0.02 deterministic multi-seed terrain | `401e1df` (merged PR #1) | **12/12 Node** on main; syntax; Chromium WebGL2 layout, mine/edit, saved seed switching, reload, chunk rebuild | [Pages + HTTP verification PASS](https://github.com/hdog960/Mythwrought/actions/runs/42948496495) | **Automated and live public site checks passed; art/iPhone gates OPEN** |
 | v0.01 foundation prototype | `4dd132a` | Node **7/7**; JS syntax; headless Chromium landscape rendering, side grips, help, actual MINE operation and persisted block edit | [Pages + public resource fetch PASS](https://github.com/hdog960/Mythwrought/actions/runs/42945013696) | **v0.01 code proven by automated checks; iPhone and art gates OPEN** |
+
+## v0.04 verification and limitations
+- [Merged PR #3](https://github.com/hdog960/Mythwrought/pull/3), implementation merge commit `2ad8e4e78c744d141f4abce3522552c80f8fb1ab`.
+- [Main CI 42965722843](https://github.com/hdog960/Mythwrought/actions/runs/42965722843): **25/25 Node tests** and both Chromium suites passed. Tests cover UI grip containment, sky rendering, voxel edit saving, persistent world seeds, exact DDA voxel selection across signed chunk boundaries, controller math, simultaneous two-finger input with movement and look, button-held precision, stick mode continuing only while held, saved mode preferences, blur release, keyboard focus and scroll prevention.
+- [Pages workflow 42965722891](https://github.com/hdog960/Mythwrought/actions/runs/42965722891): merge deployed and public HTML/JS fetch verified. Main screenshot artifact `mythwrought-browser-smoke` is attached to main CI.
+- Implemented two independent thumb controllers; swipe or stick look modes; radial movement deadzone; fine-aim temporary hold; exact voxel DDA and subtle 3D block outlining (not HUD); safe input state reset on blur/menu/background and paused drawing after lost context.
+- No claims about real iPhone acceptance. No production-grade saves (prototype uses localStorage), premium original character art, combat, companions, story quests, magical machinery or deep city world yet. Hardware/performance and visual acceptance gates remain **OPEN**.
 
 ## v0.03 verification and limitations
 - [Merged PR #2](https://github.com/hdog960/Mythwrought/pull/2), implementation merge commit `0adbb31cac5ca31c428eab2427b731177be8784b`.
