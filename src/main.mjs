@@ -1,7 +1,8 @@
-import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,collides} from './voxel.mjs';
+import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
 import {clampLook,forwardVector,compassDegrees} from './camera.mjs';
+import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget} from './input.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -87,12 +88,19 @@ function start(){
   gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);
 
   let selected=BLOCK.STONE;
+  const outlineBuffer=gl.createBuffer();
+  let outlineKey='',outlineCount=0;
   const chunks=new Map(),pending=new Map();
   const name=(x,z)=>x+','+z;
   const player={x:.5,z:.5,feet:terrainHeight(0,0,world.seed)+1.02,yaw:Math.PI,pitch:-.12,vY:0,onGround:false};
-  const keys=new Set(),joystick={x:0,y:0};
+  const keys=new Set(),joystick={x:0,y:0},lookStick={x:0,y:0};
+  const heldPointers=new Map();
+  let precisionHeld=false;
   let frame=0,lastFrame=performance.now(),changed=false;
   const CAMERA_PREF='mythwrought-v003-look-percent';
+  const LOOK_MODE_KEY='mythwrought-v004-look-mode';
+  let lookMode='swipe';
+  try{lookMode=selectedLookMode(localStorage.getItem(LOOK_MODE_KEY));}catch(_){}
   let sensitivity=1;
   try{
     const stored=Number(localStorage.getItem(CAMERA_PREF));
@@ -101,7 +109,8 @@ function start(){
   const eye=()=>[player.x,player.feet+1.55,player.z];
   const facing=()=>forwardVector(player.yaw,player.pitch);
   function look(dx,dy,scale=.008){
-    const adjusted=clampLook(player.yaw,player.pitch,dx,dy,sensitivity,scale);
+    const precise=precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight');
+    const adjusted=clampLook(player.yaw,player.pitch,dx,dy,sensitivity,scale*(precise ? .4 : 1));
     player.yaw=adjusted.yaw;player.pitch=adjusted.pitch;
   }
   function save(){
@@ -188,11 +197,15 @@ function start(){
     const arrowsX=(keys.has('ArrowRight')?1:0)-(keys.has('ArrowLeft')?1:0);
     const arrowsY=(keys.has('ArrowDown')?1:0)-(keys.has('ArrowUp')?1:0);
     if(arrowsX||arrowsY)look(arrowsX*dt*1.9,arrowsY*dt*1.6,1);
+    if(lookMode==='stick'&&(lookStick.x||lookStick.y)){
+      const d=stickLookDelta(lookStick,dt);
+      look(d.x,d.y);
+    }
     if(player.feet<-15)respawnPrototype();
   }
   function draw(now){
     const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
-    if(!document.hidden){
+    if(!document.hidden&&!graphicsLost){
       frame++;if(help.hidden)move(dt);
       const w=Math.max(1,Math.floor(canvas.clientWidth*Math.min(devicePixelRatio||1,1.5)));
       const h=Math.max(1,Math.floor(canvas.clientHeight*Math.min(devicePixelRatio||1,1.5)));
@@ -224,36 +237,112 @@ function start(){
         gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
       }
+      // A faint world-space targeted-block outline, never a HUD covering the scene.
+      const focused=help.hidden?raycast(world,eye(),facing(),6):null;
+      const focusKey=focused?focused.hit.join(','):'';
+      canvas.dataset.targetBlock=focusKey;
+      if(focusKey!==outlineKey){
+        outlineKey=focusKey;
+        const data=focused?outlineVertices(focused.hit):new Float32Array();
+        gl.bindBuffer(gl.ARRAY_BUFFER,outlineBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
+        outlineCount=data.length/9;
+      }
+      if(outlineCount){
+        gl.bindBuffer(gl.ARRAY_BUFFER,outlineBuffer);
+        gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
+        gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
+        gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
+        gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
+        gl.drawArrays(gl.LINES,0,outlineCount);
+      }
       const deg=compassDegrees(player.yaw);
       compass.textContent=['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8]+' · '+String(deg).padStart(3,'0')+'°';
       canvas.dataset.skyDrawn='true';
       canvas.dataset.cameraYaw=String(player.yaw);
+      canvas.dataset.cameraPitch=String(player.pitch);
+      canvas.dataset.playerX=String(player.x);
+      canvas.dataset.playerZ=String(player.z);
+      canvas.dataset.lookMode=lookMode;
+      canvas.dataset.precision=String(precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight'));
     }
     requestAnimationFrame(draw);
   }
+  // Capture is per grip: moving and aiming simultaneously never compete for one pointer.
   function pointerPad(el,update,release){
-    let id=null,lx=0,ly=0;
-    el.addEventListener('pointerdown',e=>{e.preventDefault();id=e.pointerId;lx=e.clientX;ly=e.clientY;el.setPointerCapture(id);update(e,0,0,true);});
-    el.addEventListener('pointermove',e=>{if(e.pointerId!==id)return;e.preventDefault();const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;update(e,dx,dy,false);});
-    const finish=e=>{if(id===e.pointerId){id=null;release();}};
-    el.addEventListener('pointerup',finish);el.addEventListener('pointercancel',finish);el.addEventListener('lostpointercapture',()=>{id=null;release();});
+    let active=null,lastX=0,lastY=0;
+    function stop(){
+      if(active===null)return;
+      heldPointers.delete(active);active=null;release();el.classList.remove('engaged');
+    }
+    el.addEventListener('pointerdown',e=>{
+      if(active!==null)return;
+      e.preventDefault();active=e.pointerId;lastX=e.clientX;lastY=e.clientY;
+      heldPointers.set(active,stop);
+      try{el.setPointerCapture(active);}catch(_){}
+      el.classList.add('engaged');update(e,0,0,true);
+    });
+    el.addEventListener('pointermove',e=>{
+      if(active!==e.pointerId)return;
+      e.preventDefault();
+      const dx=e.clientX-lastX,dy=e.clientY-lastY;
+      lastX=e.clientX;lastY=e.clientY;update(e,dx,dy,false);
+    });
+    for(const event of ['pointerup','pointercancel'])el.addEventListener(event,e=>{if(active===e.pointerId)stop();});
+    el.addEventListener('lostpointercapture',stop);
+    return stop;
   }
   const movementPad=document.getElementById('movePad'),knob=document.getElementById('moveKnob');
+  const cameraPad=document.getElementById('lookPad'),cameraKnob=document.getElementById('lookKnob');
+  function padPosition(el,e){
+    const r=el.getBoundingClientRect();
+    return {x:e.clientX-r.left-r.width/2,y:e.clientY-r.top-r.height/2,radius:Math.max(1,Math.min(r.width,r.height)*.36)};
+  }
   pointerPad(movementPad,e=>{
-    const r=movementPad.getBoundingClientRect();
-    joystick.x=Math.max(-1,Math.min(1,(e.clientX-r.left-r.width/2)/(r.width*.35)));
-    joystick.y=Math.max(-1,Math.min(1,(e.clientY-r.top-r.height/2)/(r.height*.35)));
-    knob.style.transform='translate('+joystick.x*23+'px,'+joystick.y*23+'px)';
+    if(!help.hidden)return;
+    const p=padPosition(movementPad,e);
+    const next=normalizedStick(p.x,p.y,p.radius);
+    joystick.x=next.x;joystick.y=next.y;
+    knob.style.transform='translate('+Math.round(next.x*27)+'px,'+Math.round(next.y*27)+'px)';
   },()=>{joystick.x=joystick.y=0;knob.style.transform='';});
-  pointerPad(document.getElementById('lookPad'),(_e,dx,dy,initial)=>{
-    if(initial)return;
-    look(dx,dy);
-  },()=>{});
+  pointerPad(cameraPad,(e,dx,dy,initial)=>{
+    if(!help.hidden)return;
+    if(lookMode==='stick'){
+      const p=padPosition(cameraPad,e);
+      const next=normalizedStick(p.x,p.y,p.radius,.1);
+      lookStick.x=next.x;lookStick.y=next.y;
+      cameraKnob.style.transform='translate('+Math.round(next.x*26)+'px,'+Math.round(next.y*26)+'px)';
+    }else if(!initial){
+      const d=safePointerDelta(dx,dy);
+      look(d.x,d.y);
+    }
+  },()=>{lookStick.x=lookStick.y=0;cameraKnob.style.transform='';});
+  const precisionButton=document.getElementById('precision');
+  let precisionPointer=null;
+  function releasePrecision(e){
+    if(precisionPointer===null||(e&&e.pointerId!==precisionPointer))return;
+    precisionPointer=null;precisionHeld=false;precisionButton.classList.remove('held');
+  }
+  precisionButton.addEventListener('pointerdown',e=>{
+    e.preventDefault();precisionPointer=e.pointerId;precisionHeld=true;
+    precisionButton.classList.add('held');
+    try{precisionButton.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  for(const event of ['pointerup','pointercancel'])precisionButton.addEventListener(event,releasePrecision);
+  precisionButton.addEventListener('lostpointercapture',()=>releasePrecision());
+  function cancelAllPointers(){
+    for(const stop of [...heldPointers.values()])stop();
+    lookStick.x=lookStick.y=0;
+    precisionPointer=null;precisionHeld=false;
+    keys.clear();joystick.x=joystick.y=0;
+    precisionButton.classList.remove('held');
+    cameraKnob.style.transform='';knob.style.transform='';
+  }
   let drag=null;
   canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
   canvas.addEventListener('pointermove',e=>{
     if(!drag||drag.id!==e.pointerId)return;
-    const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+    const {x:dx,y:dy}=safePointerDelta(e.clientX-drag.x,e.clientY-drag.y);
     if(Math.abs(dx)+Math.abs(dy)>1)drag.moved=true;
     look(dx,dy,.006);
     drag.x=e.clientX;drag.y=e.clientY;
@@ -262,13 +351,24 @@ function start(){
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
   document.addEventListener('keydown',e=>{
     // Do not steal arrows, space or WASD from accessibility controls and form fields.
-    if(e.target?.isContentEditable||['INPUT','SELECT','TEXTAREA','BUTTON'].includes(e.target?.tagName))return;
+    if(!isWorldControlTarget(e.target)||!help.hidden)return;
     if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
     if(e.code==='Space'&&!e.repeat)jump();
     keys.add(e.code);
   });
   document.addEventListener('keyup',e=>keys.delete(e.code));
-  window.addEventListener('blur',()=>{keys.clear();joystick.x=joystick.y=0;});
+  window.addEventListener('blur',cancelAllPointers);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)cancelAllPointers();
+    lastFrame=performance.now();
+  });
+  const lookModeSelect=document.getElementById('lookMode');
+  lookModeSelect.value=lookMode;
+  lookModeSelect.addEventListener('change',()=>{
+    lookMode=selectedLookMode(lookModeSelect.value);
+    lookStick.x=lookStick.y=0;cameraKnob.style.transform='';
+    try{localStorage.setItem(LOOK_MODE_KEY,lookMode);}catch(_){}
+  });
   const sensitivitySlider=document.getElementById('lookSensitivity');
   const sensitivityValue=document.getElementById('lookValue');
   function syncSensitivity(){
@@ -289,8 +389,12 @@ function start(){
     document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
     message('Selected '+({3:'stone',4:'wood',5:'crystal'})[selected]);
   });
-  document.getElementById('menu').onclick=()=>{help.hidden=false;keys.clear();};
-  document.getElementById('closeHelp').onclick=()=>help.hidden=true;
+  document.getElementById('menu').onclick=()=>{cancelAllPointers();help.hidden=false;};
+  document.getElementById('closeHelp').onclick=()=>{
+    cancelAllPointers();help.hidden=true;
+    // Return keyboard/gamepad-like input focus to world after closing modal.
+    canvas.focus({preventScroll:true});
+  };
   document.getElementById('save').onclick=()=>{save();message('Local world edits saved');};
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);
@@ -301,7 +405,7 @@ function start(){
       save();
       const candidate=loadWorld(next); // Validate before changing the active world.
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();world=candidate;respawnPrototype();
+      chunks.clear();pending.clear();outlineKey='';outlineCount=0;world=candidate;respawnPrototype();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       save();seedMessage.textContent='World '+world.seed+' ready. Other seed saves remain separate.';
       message('Loaded seed '+world.seed+' — building nearby chunks');
@@ -321,13 +425,20 @@ function start(){
       save(); // Keep the previously active world's slot before replacing.
       world=imported;
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
+      chunks.clear();pending.clear();outlineKey='';outlineCount=0;respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       save();message('Imported voxel world');
     }catch(err){message('Import rejected: '+err.message);}
     e.target.value='';
   });
-  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();fatal('Graphics context lost. Reload to resume saved terrain edits.');});
-  window.addEventListener('pagehide',save);
+  let graphicsLost=false;
+  canvas.addEventListener('webglcontextlost',e=>{
+    e.preventDefault();graphicsLost=true;cancelAllPointers();
+    fatal('Graphics context lost. Reload to resume saved terrain edits.');
+  });
+  canvas.addEventListener('webglcontextrestored',()=>{
+    fatal('Graphics restarted. Reload to rebuild shaders and saved terrain safely.');
+  });
+  window.addEventListener('pagehide',()=>{cancelAllPointers();save();});
   message('Move, look, mine and place · ☰ for help');
   requestAnimationFrame(draw);
 }

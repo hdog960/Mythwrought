@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {VoxelWorld,BLOCK,CHUNK_SIZE,chunkCoord,chunkWindow,terrainHeight,baseBlock,meshChunk,raycast,collides,WORLD_MAX_Y} from '../src/voxel.mjs';
+import {VoxelWorld,BLOCK,CHUNK_SIZE,chunkCoord,chunkWindow,terrainHeight,baseBlock,meshChunk,raycast,outlineVertices,collides,WORLD_MAX_Y} from '../src/voxel.mjs';
 
 test('deterministic positive and negative coordinates',()=>{
   const a=new VoxelWorld(917),b=new VoxelWorld(917);
@@ -91,4 +91,32 @@ test('shared chunk border does not emit interior cube faces or cracks',()=>{
   const rightSurface=Array.from({length:right.length/9},(_,i)=>right[i*9]).filter(x=>x===16).length;
   // Shared faces absent; vertices on x=16 still appear on the adjoining visible top/bottom/front/back faces.
   assert.ok(leftSurface>0&&rightSurface>0);
+});
+
+test('exact ray traverses 3D voxel cell boundaries without missing thin faces',()=>{
+  const w=new VoxelWorld(42);
+  for(const x of [-17,-16,-1,0,15,16,17])w.set(x,16,1,BLOCK.CRYSTAL);
+  for(const x of [-17,-16,-1,0,15,16,17]){
+    const hit=raycast(w,[x+.5,16.5,4.5],[0,0,-2],8);
+    assert.deepEqual(hit.hit,[x,16,1]);
+    assert.deepEqual(hit.adjacent,[x,16,2]);
+    assert.ok(Math.abs(hit.distance-2.5)<.00001);
+  }
+});
+test('exact ray targets diagonals, negative boundaries, and permits zero-distance hits',()=>{
+  const w=new VoxelWorld(42);
+  w.set(-17,17,-17,BLOCK.CRYSTAL);
+  assert.deepEqual(raycast(w,[-14.5,17.5,-14.5],[-1,0,-1],6).hit,[-17,17,-17]);
+  const inside=raycast(w,[-16.5,17.5,-16.5],[-1,0,0],3);
+  assert.deepEqual(inside.hit,[-17,17,-17]);
+  assert.equal(inside.adjacent,null);
+  assert.ok(raycast(w,[0,15.5,0],[0,0,0])===null);
+  assert.equal(raycast(w,[0,15.5,0],[NaN,0,0]),null);
+});
+test('highlight wireframe has exactly twelve world-space cube edges',()=>{
+  const vertices=outlineVertices([16,14,-1]);
+  assert.equal(vertices.length,12*2*9);
+  assert.ok([...vertices].every(Number.isFinite));
+  assert.ok(vertices[0]<16&&vertices[0]>15.9);
+  assert.equal(outlineVertices([1.2,3,4]).length,0);
 });
