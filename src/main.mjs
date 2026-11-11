@@ -562,7 +562,12 @@ function start(){
   canvas.addEventListener('webglcontextrestored',()=>{
     fatal('Graphics restarted. Reload to rebuild shaders and saved terrain safely.');
   });
-  window.addEventListener('pagehide',()=>{cancelAllPointers();save();});
+  window.addEventListener('pagehide',()=>{
+    cancelAllPointers();
+    // Do not rewrite valid/externally damaged saves on an ordinary reload.
+    // Actual edits already save synchronously; only retry if still dirty.
+    if(changed&&!storageReadOnly)save();
+  });
   if(['localhost','127.0.0.1'].includes(location.hostname)){
     // Local-only regression interface; absent from the public Pages runtime.
     window.__mythwroughtTest=Object.freeze({
