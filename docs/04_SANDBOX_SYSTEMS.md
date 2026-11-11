@@ -16,6 +16,13 @@ Four high-level families: energy sources (crystal, waterwheel, contained lava he
 ## Farming and cozy life
 Minecraft farming freedom with Stardew-like optional farming, seasonal/regional crops, orchard, livestock/pets/mounts, fishing minigame, aquarium, cooking with varied recipes/bonuses/gifting, alchemy and magical crops. No constant upkeep or oppressive hunger meter. Structures/roads/bridges/farms recognized where functional.
 
+## Pets, mounts and distinctive city pet shops — discussion direction (2026-11-11)
+**Keep this simple and charming.** The player wants **adorable pets and rideable mounts**, primarily for companionship, personality and enjoyable travel. Some individual pets or mounts may provide **modest optional help in combat**, but pets should not become a complicated combat-build, creature-breeding, management or upkeep system.
+
+**Major cities can each have unique pet shops**, with a small memorable selection reflecting the city's culture, location and ecology rather than every shop selling identical animals. Cute companions can be named, follow the player, and spend time around a home or settlement. Mounts can carry the player through the editable world, with navigation and controls kept practical. Optional finding, befriending or rescue in the wild may complement shops without becoming mandatory collection gameplay.
+
+Maintain the existing promise of no forced feeding/cleaning chores or mandatory creature collection. This is a **design note, not an implementation order**; no pet species list, shop inventory, mount mechanics, artwork approval or release milestone is finalized by the discussion.
+
 ## Settlements and trade
 Build optional living settlements, recognized by flexible functional home/workstation detection (entrances, furnishings, valid path). Up to modest active local NPC count within performance budget; distant abstract simulation. NPC jobs, visits, social spaces, trade, local economy, relations, routes and permission rules. Surface/deep connections by physically passable, safe, agreed-upon routes; trade only after conditions met. No forced mayor simulator. Terraria-like unique service resident acquisition combines milestones and world discovery with normal immigration; not every NPC an authored companion.
 
