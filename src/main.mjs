@@ -71,6 +71,10 @@ function start(){
     'if(vMat==5)shade*=.83+.24*step(.48,fract(vUv.x*3.0+vUv.y*2.0));',
     'if(vMat==5)shade*=.91+.13*step(.82,speckle(floor(vUv*vec2(12.0))+5.0));',
     'if(vMat==6)shade*=.90+.18*step(.69,speckle(floor(vUv*15.0)+vec2(26.0,19.0)));',
+    // Intentional solid-color pixel-voxel wildflowers. No alpha blending,
+    // transparent overdraw, texture downloads, extra shader passes or HUD.
+    'if(vMat==7)shade=.94+.10*step(.48,speckle(floor(vUv*9.0)+31.0));',
+    'if(vMat==8||vMat==9)shade=1.0;',
     'float fog=smoothstep(29.0,68.0,vDistance);',
     'vec3 colored=mix(vColor,vColor*shade,closeDetail*.8);',
     'if(vMat==5)colored=mix(colored,vec3(.52,.85,.95),closeDetail*.12);',
