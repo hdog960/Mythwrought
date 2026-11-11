@@ -141,6 +141,15 @@ test('large frame is clamped; invalid time rejected',()=>{
   assert.throws(()=>stepPlayer(world,p,{},NaN));
   assert.throws(()=>stepPlayer(world,p,{},-.01));
 });
+test('releasing movement input brings the hero to an immediate comfortable stop',()=>{
+  const {world,areaFloor}=fixture();areaFloor();
+  const p=hero();
+  progress(world,p,{forward:1,strafe:0},60);
+  progress(world,p,{forward:0,strafe:0},6);
+  const oldX=p.x,oldZ=p.z;
+  progress(world,p,{forward:0,strafe:0},16);
+  assert.ok(Math.hypot(p.x-oldX,p.z-oldZ)<.035,'Hero kept drifting after release');
+});
 test('frame rate maintains similar travel within tolerance',()=>{
   const {world,areaFloor}=fixture();areaFloor();
   const a=hero(),b=hero();

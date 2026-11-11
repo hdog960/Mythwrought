@@ -103,9 +103,12 @@ export function stepPlayer(world,p,input,dt){
     if(p.jumpBuffer>0&&(p.onGround||p.coyote>0)){
       p.vY=JUMP_VELOCITY;p.onGround=false;p.coyote=0;p.jumpBuffer=0;out.jumped=true;
     }
-    const easing=Math.min(1,h*(p.onGround?17:8));
-    p.vX+=(targetX-p.vX)*easing;
-    p.vZ+=(targetZ-p.vZ)*easing;
+    // Two-thumb release must stop promptly; gradual build-up is pleasant but
+    // lingering acceleration after finger-up feels like a stuck joystick.
+    const easingX=Math.min(1,h*(Math.abs(targetX)<.0001?(p.onGround?105:50):(p.onGround?17:8)));
+    const easingZ=Math.min(1,h*(Math.abs(targetZ)<.0001?(p.onGround?105:50):(p.onGround?17:8)));
+    p.vX+=(targetX-p.vX)*easingX;
+    p.vZ+=(targetZ-p.vZ)*easingZ;
     for(const axis of ['x','z']){
       const velocityAxis=axis==='x'?'vX':'vZ';
       const collision=resolveAxis(world,p,axis,p[velocityAxis]*h);
