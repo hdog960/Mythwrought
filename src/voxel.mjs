@@ -111,21 +111,56 @@ export function meshChunk(world,cx,cz){
       }
   return new Float32Array(vertices);
 }
+// Exact voxel grid traversal: consistent selection through chunk borders and negative space.
+// Start at the eye point, traverse each crossed cell, and preserve the adjacent empty cell
+// so placement and removal share the same pixel-accurate targeting rule.
 export function raycast(world,eye,direction,maxDistance=7){
-  let lastKey=null,previous=null;
-  const count=Math.ceil(maxDistance/.035);
-  for(let i=0;i<=count;i++){
-    const t=i*.035;
-    const x=Math.floor(eye[0]+direction[0]*t);
-    const y=Math.floor(eye[1]+direction[1]*t);
-    const z=Math.floor(eye[2]+direction[2]*t);
-    const k=worldKey(x,y,z);
-    if(k===lastKey)continue;
-    lastKey=k;
-    if(world.get(x,y,z)!==BLOCK.AIR)return {hit:[x,y,z],adjacent:previous,distance:t};
-    previous=[x,y,z];
+  if(!Array.isArray(eye)||!Array.isArray(direction)||eye.length!==3||direction.length!==3||
+     ![...eye,...direction,maxDistance].every(Number.isFinite)||maxDistance<0)return null;
+  const len=Math.hypot(...direction);
+  if(len<1e-9)return null;
+  const dir=direction.map(v=>v/len),cell=eye.map(Math.floor);
+  const step=dir.map(v=>Math.sign(v));
+  const tDelta=dir.map(v=>v===0?Infinity:Math.abs(1/v));
+  const tMax=dir.map((v,i)=>{
+    if(v===0)return Infinity;
+    return ((v>0?cell[i]+1:cell[i])-eye[i])/v;
+  });
+  let previous=null,distance=0;
+  const epsilon=1e-9;
+  for(let i=0;i<Math.ceil(maxDistance*3)+5;i++){
+    if(world.get(cell[0],cell[1],cell[2])!==BLOCK.AIR){
+      return {hit:[...cell],adjacent:previous,distance};
+    }
+    const next=Math.min(...tMax);
+    if(!Number.isFinite(next)||next>maxDistance+epsilon)return null;
+    previous=[...cell];distance=Math.max(0,next);
+    // Traverse touching grid planes together so an edge hit cannot select a phantom cell.
+    for(let axis=0;axis<3;axis++){
+      if(tMax[axis]<=next+epsilon){
+        cell[axis]+=step[axis];
+        tMax[axis]+=tDelta[axis];
+      }
+    }
   }
   return null;
+}
+export function outlineVertices(cell,color=[.81,.91,.63]){
+  if(!Array.isArray(cell)||cell.length!==3||!cell.every(Number.isInteger))return new Float32Array();
+  const [x,y,z]=cell,e=.004;
+  const segments=[
+    [0,0,0,1,0,0],[0,1,0,1,1,0],[0,0,1,1,0,1],[0,1,1,1,1,1],
+    [0,0,0,0,1,0],[1,0,0,1,1,0],[0,0,1,0,1,1],[1,0,1,1,1,1],
+    [0,0,0,0,0,1],[1,0,0,1,0,1],[0,1,0,0,1,1],[1,1,0,1,1,1]
+  ];
+  const result=[];
+  for(const segment of segments){
+    for(let i=0;i<6;i+=3){
+      const p=segment.slice(i,i+3).map((v,j)=>cell[j]+v+(v===0?-e:e));
+      result.push(...p,...color,0,0,1);
+    }
+  }
+  return new Float32Array(result);
 }
 export function collides(world,x,feet,z){
   for(const xx of [x-.25,x+.25])for(const zz of [z-.25,z+.25])
