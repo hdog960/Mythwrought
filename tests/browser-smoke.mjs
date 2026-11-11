@@ -60,6 +60,8 @@ try{
   assert.ok(oldEdits.length>0,'Seed switching lost the previous world edit');
   await page.locator('#closeHelp').click();
   assert.ok(!(await page.locator('#help').isVisible()),'Help should close');
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,null,{timeout:15000});
+  await page.waitForTimeout(300); // Capture a fully rebuilt seed, not a transient partial-frame stream.
   await mkdir('artifacts',{recursive:true});
   await page.screenshot({path:'artifacts/mythwrought-landscape-smoke.png',fullPage:true});
   assert.deepEqual(errors,[],'Browser JavaScript errors');

@@ -135,7 +135,7 @@ function start(){
     }
   }
   function respawnPrototype(){
-    player.x=.5;player.z=.5;player.feet=terrainHeight(0,0,world.seed)+1.02;player.vY=0;
+    player.x=.5;player.z=.5;player.feet=terrainHeight(0,0,world.seed)+1.02;player.vY=0;player.yaw=Math.PI;player.pitch=-.12;
     message('Returned to spawn (temporary prototype safety reset)');
   }
   function jump(){if(player.onGround){player.vY=6.6;player.onGround=false;}}
@@ -189,6 +189,7 @@ function start(){
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
       gl.uniform3f(U.uFog,.52,.69,.72);
       stream();
+      canvas.dataset.loadedChunks=String(chunks.size); // Read-only diagnostic for real browser chunk completion.
       for(const c of chunks.values()){
         gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);
         gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
