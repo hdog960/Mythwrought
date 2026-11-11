@@ -574,6 +574,7 @@ function start(){
   async function useVault(action){
     if(vaultBusy)return;
     vaultBusy=true;vaultButtons.forEach(button=>button.disabled=true);
+    vaultStatus.textContent='Checking on-device backup storage…';
     try{await action();}
     catch(error){vaultStatus.textContent='Device vault: '+String(error.message||error)+'. Live world unchanged unless explicitly stated.';}
     finally{vaultButtons.forEach(button=>button.disabled=false);vaultBusy=false;}
