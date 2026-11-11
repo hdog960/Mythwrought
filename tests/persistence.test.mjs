@@ -135,3 +135,13 @@ test('corrupted legacy world never silently becomes empty new seed',()=>{
   assert.throws(()=>loadWorldSafe(storage,179),/Legacy world data is damaged/);
   assert.equal(storage.getItem(worldSlotKey(179)),null);
 });
+
+test('explicit import repair preserves exact damaged bytes while restoring valid data',()=>{
+  const key=worldSlotKey(179),storage=store({[key]:'not-json-data'}),w=changed();
+  const blocked=saveWorldSafe(storage,w);
+  assert.equal(blocked.ok,false);
+  const approved=saveWorldSafe(storage,w,{allowReplaceCorrupt:true});
+  assert.equal(approved.ok,true);
+  assert.equal(storage.getItem(key+SAVE_DAMAGED_SUFFIX),'not-json-data');
+  assert.deepEqual(loadWorldSafe(storage,179).world.save(),w.save());
+});

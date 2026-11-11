@@ -67,7 +67,7 @@ export function loadWorldSafe(storage,seed){
   }
   return {world:new VoxelWorld(seed),source:'new',recovered:false};
 }
-export function saveWorldSafe(storage,world,{select=true}={}){
+export function saveWorldSafe(storage,world,{select=true,allowReplaceCorrupt=false}={}){
   let key,raw,oldPrimary;
   try{
     key=worldSlotKey(world.seed);
@@ -80,11 +80,14 @@ export function saveWorldSafe(storage,world,{select=true}={}){
       let preserved=oldPrimary,backupKey=key+SAVE_BACKUP_SUFFIX;
       try{parseWorldData(oldPrimary,world.seed);}
       catch(_){
-        const recovered=loadWorldSafe(storage,world.seed);
+        let recovered={recovered:false};
+        try{recovered=loadWorldSafe(storage,world.seed);}
+        catch(error){if(!allowReplaceCorrupt)throw error;}
         preserved=oldPrimary;
         backupKey=key+SAVE_DAMAGED_SUFFIX;
-        // Only recovery from journal/backup permits a safe repair.
-        if(!recovered.recovered)throw Error('Damaged save has no valid recovery');
+        // Explicit user-approved import may replace damaged bytes only after
+        // writing and verifying a separate copy of those original bytes.
+        if(!recovered.recovered&&!allowReplaceCorrupt)throw Error('Damaged save has no valid recovery');
       }
       storage.setItem(backupKey,preserved);
       if(storage.getItem(backupKey)!==preserved)throw Error('Backup could not be verified');
