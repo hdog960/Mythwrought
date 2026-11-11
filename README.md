@@ -27,11 +27,11 @@ Free static GitHub Pages deployment; no paid services, no mandatory external API
 The initial prototype is intentionally dependency-free. Open `index.html` with a static HTTP server, e.g. `python3 -m http.server 8000`. Run `npm test` for the Node built-in test suite. Later milestones may change internal technology only if acceptance tests are preserved.
 
 **Versioning:** v0.01–v1.00; release numbers are planned targets, not automatically attained. The next release begins only after the current acceptance gate is met.
-## Current implementation status — v0.05
+## Current implementation status — v0.06
 - [Play the WebGL2 foundation prototype](https://hdog960.github.io/Mythwrought/) (landscape). Current art and terrain are engineering graphics with initial material detail and an original WebGL daytime sky; **not approved premium art**.
-- Seeded 3D voxel terrain with named/numeric seeds and isolated saves, priority-bounded chunk streaming, original atmospheric shader and prototype materials, decorated responsive fantasy handheld side grips (balanced/large size preference), independent dual-thumb movement and swipe/stick aiming, precision hold, exact world-space DDA targeting, jump, mine/place blocks and JSON save backup/export.
-- [Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/43030671792): **29/29 Node tests**, syntax, WebGL rendering, dual-touch camera/movement, seed/save regressions, exact targeting, plus multi-viewport clipping/safe-inset/controller persistence screenshots.
-- [GitHub Pages deployment and public HTML/JS HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/43030672007) for the v0.05 merge commit.
+- Seeded 3D voxel terrain with named/numeric seeds and isolated saves, bounded chunk meshes and faster off-screen GPU disposal, original sky/material shading, fantasy handheld side grips, independent two-thumb aiming, world-space precise targeting, accurate full-body collision, wall sliding, one-block climbs with clearance checks, responsive grounded jumping, safe spawn and landing, mine/place blocks and JSON backup/export.
+- [Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/43036157896): **43/43 Node tests**, full-body voxel physics and exact collision, jumping/landing, wall sliding, one-block steps, negative world-space movement, bounded mesh streaming, seeded saves, touch controls, responsive layouts, and the new live browser walk/jump checks.
+- [GitHub Pages deployment and public HTML/JS HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/43036157699) for the v0.06 merge commit.
 - Gate A remains **open** pending actual iPhone Safari/Home Screen hardware testing, stronger save architecture and premium art approval. No combat, companions, story or magic implemented yet.
 
 ### v0.02 release verification
@@ -59,3 +59,11 @@ The initial prototype is intentionally dependency-free. Open `index.html` with a
 - [Pages publication 43030672007](https://github.com/hdog960/Mythwrought/actions/runs/43030672007): merged main deployed; live public HTML/JavaScript retrieval verified.
 - Screenshot assets `mythwrought-v005-small-landscape.png`, `mythwrought-v005-regular-landscape.png`, `mythwrought-v005-large-landscape.png` are in the main CI artifact `mythwrought-browser-smoke`. These prove layout screenshots, not user-approved premium fantasy artwork.
 - No world save migration: the previous version's seed slots, localStorage schema and JSON exports remain compatible. Persistent IndexedDB migration and real iPhone testing remain open.
+
+### v0.06 release verification
+- [Merged PR #5](https://github.com/hdog960/Mythwrought/pull/5), implementation merge commit `c33948bc3955b2b3980562c5240c8dfc936652a6`.
+- [Main CI 43036157896](https://github.com/hdog960/Mythwrought/actions/runs/43036157896): **43/43 Node tests**, existing 3 Chromium suites, and new **fourth** live movement/collision browser suite passed. Tests include ground contact, head clearance, safe respawning on edited terrain, 1-block steps, no two-block wall clipping, ledges, fall from mined floors, ceilings, jump landing, motion stop after finger release, slow-frame cap, world seeds and GPU chunk count.
+- [Pages publication 43036157699](https://github.com/hdog960/Mythwrought/actions/runs/43036157699): successful static deployment and public HTML/JS retrieval.
+- Browser screenshot `mythwrought-v006-walking-landscape.png` is available as `mythwrought-browser-smoke` workflow artifact on main CI. This is an engineering prototype screenshot, not premium visual approval.
+- Physics is local, deterministic and compatible with existing world-save schema 1 and named-seed localStorage keys. No migration and no user terrain edits removed.
+- **Still OPEN:** physical iPhone Safari/Home Screen control acceptance, production-safe IndexedDB/export integrity, long-session performance/thermal tests and premium original voxel-art acceptance.

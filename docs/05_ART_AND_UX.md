@@ -30,3 +30,7 @@ An original low-cost daylight sky has been added, with warm horizon, sun, pale c
 - Original non-final handheld fantasy framing: layered metallic gold borders, engraved accents, subtle carved-grain panels, responsive twin thumb-pad rings, readable buttons and consistent ornate controller caps. All control art is restricted to grips and frame; the central 3D world has no overlay HUD.
 - User can choose normal/large control sizing; high-contrast and reduced-motion preferences are honored through CSS, but real accessibility/user acceptance remains untested.
 - **Visual art gate remains OPEN**: no premium original voxel character animation, finished architectural materials, magical cavern art or fully authored scenery is claimed. The present controller design is a meaningful stylistic foundation, not final visual approval.
+
+## v0.06 non-final material and movement visibility
+- Procedural dirt and ore material variation were refined within the existing lightweight voxel shader. Grounded movement is now visually and physically consistent with actual editable block terrain, without new world-view HUD overlays.
+- The full authored premium fantasy look (characters, high-quality custom voxel textures, architecture, cave biomes, expressive animation and art direction) remains a future acceptance gate requiring user approval. v0.06 adds physics foundations, not a completed artwork pass.

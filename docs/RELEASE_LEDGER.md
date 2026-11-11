@@ -5,11 +5,21 @@ This is the source of truth for ACTUALLY implemented and independently verified 
 |---|---|---|---|---|
 | Initial repository | `784739d` | Initial README | Legacy Pages build | Baseline |
 | Design authority | `41e3550` | Seven canonical docs, 100 release acceptance entries | GitHub main | Documents committed |
+| v0.06 grounded voxel movement and collision | `c33948bc` (merged PR #5) | **43/43 Node** on main; 4 Chromium suites including real walking/jump landing, voxel corner/ceiling collision, step climbing, compact landscape and existing save/dual-thumb tests | [Pages + public file retrieval PASS](https://github.com/hdog960/Mythwrought/actions/runs/43036157699) | **Verified v0.06 engine, iPhone/art gates OPEN** |
 | v0.05 original landscape handheld grips | `3e4ca3c` (merged PR #4) | **29/29 Node** on main; Chromium WebGL, dual-touch controls, five landscape sizes, footer/controls fit, persisted large controls, safe-area simulation | [Pages + public files PASS](https://github.com/hdog960/Mythwrought/actions/runs/43030672007) | **CI/Pages verified; real iPhone/visual approval OPEN** |
 | v0.04 independent precision camera/voxel targeting | `2ad8e4e` (merged PR #3) | **25/25 Node** on main; WebGL browser screenshot, seed/edit/targeting, simultaneous Chromium touch movement+look, mode persistence, precision, blur cancellation | [Pages deployment/HTTP PASS](https://github.com/hdog960/Mythwrought/actions/runs/42965722891) | **Automated verification passed; iPhone/art gates OPEN** |
 | v0.03 WebGL landscape/sky | `0adbb31` (merged PR #2) | **17/17 Node** on main, Chromium sky/camera/sensitivity, mining, seed-save and full-chunk screenshot checks | [Pages deploy and public HTTP PASS](https://github.com/hdog960/Mythwrought/actions/runs/42956423659) | **Verified prototype, iPhone and visual gates OPEN** |
 | v0.02 deterministic multi-seed terrain | `401e1df` (merged PR #1) | **12/12 Node** on main; syntax; Chromium WebGL2 layout, mine/edit, saved seed switching, reload, chunk rebuild | [Pages + HTTP verification PASS](https://github.com/hdog960/Mythwrought/actions/runs/42948496495) | **Automated and live public site checks passed; art/iPhone gates OPEN** |
 | v0.01 foundation prototype | `4dd132a` | Node **7/7**; JS syntax; headless Chromium landscape rendering, side grips, help, actual MINE operation and persisted block edit | [Pages + public resource fetch PASS](https://github.com/hdog960/Mythwrought/actions/runs/42945013696) | **v0.01 code proven by automated checks; iPhone and art gates OPEN** |
+
+## v0.06 verification and limitations
+- [Merged PR #5](https://github.com/hdog960/Mythwrought/pull/5), implementation merge SHA `c33948bc3955b2b3980562c5240c8dfc936652a6`.
+- [Main CI 43036157896](https://github.com/hdog960/Mythwrought/actions/runs/43036157896): **43 passing Node tests**, 4 Chromium suites (scene render and save edits, actual two-finger movement/look, five landscape layouts and the new live grounded jump/walk test). Browser screenshots archived in `mythwrought-browser-smoke`.
+- [Pages 43036157699](https://github.com/hdog960/Mythwrought/actions/runs/43036157699): deploy + externally fetched public site HTML and JavaScript verified.
+- New deterministic voxel physics: exact player-sized AABB against cubes, capped time steps, axis sliding/clearance, one-block steps with support and ceiling protection, coyote/jump-buffered input, real gravity/landing, spawn search on built/edited terrain, safe void recovery. No save schema changes.
+- Movement now stops rapidly after lifting thumb; earlier drift defect caught by Chromium and fixed. Early-landed/hover defect caught by Node regression and fixed. Chromium test updated to observe actual motion states on slower software GPU rather than depending on fixed 210ms.
+- Chunk meshes are cached by current chunk center and stale GPU buffers released when changing chunk radius; original atmospheric materials and rough procedural dirt/ore shading advanced slightly.
+- Still missing premium voxel character animation, substantial authored settlements, playable RPG story, robust IndexedDB saves and mobile hardware evidence; no Gate A or art sign-off has been claimed.
 
 ## v0.05 verification and limitations
 - [Merged PR #4](https://github.com/hdog960/Mythwrought/pull/4), implementation merge SHA `3e4ca3c56fc5c6a191ae046430e4f9b25ea3133a`.
