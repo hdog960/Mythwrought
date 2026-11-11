@@ -157,6 +157,24 @@ try{
  assert.ok(economy.width<low.width,'Economy mode did not reduce GPU pixel work');
  assert.equal(economy.cssWidth,low.cssWidth,'Economy mode shifted viewport geometry');
  assert.ok(economy.leftGap>=-2&&economy.rightGap>=-2);
+
+ // A completely corrupted disposable seed must remain protected. Attempting
+ // to opt into mirroring here must not persist an enabled preference.
+ await page.evaluate(()=>{
+   localStorage.setItem('mythwrought-v002-world-765','{damaged-protected-seed');
+   localStorage.setItem('mythwrought-v002-selected-seed','765');
+ });
+ await page.reload({waitUntil:'networkidle'});
+ await scene();
+ assert.match(await page.locator('#status').textContent(),/SAVE PROTECTION/);
+ await page.locator('#menu').click();
+ await page.locator('#mirrorEnabled').check();
+ assert.equal(await page.locator('#mirrorEnabled').isChecked(),false,
+   'Read-only startup wrongly enabled mirroring');
+ assert.equal(await saved('mythwrought-v010-enable-mirror'),'disabled',
+   'Mirror preference enabled despite protected damaged save');
+ assert.equal(await saved('mythwrought-v002-world-765'),'{damaged-protected-seed',
+   'Mirror opt-in damaged a protected original world');
  assert.deepEqual(errors,[],'Browser JavaScript errors');
  assert.deepEqual(missing,[],'Missing app resource');
  console.log('PASS v0.10 opt-in serialized IndexedDB mirror: unchanged default, 2 generations, export, refused/approved restore, per-seed isolation, corruption hard-stop, opt-out and reversible rendering budgets');
