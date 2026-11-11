@@ -31,6 +31,7 @@ try{
   assert.deepEqual(await probes(),[],'Diagnostic temporary storage leaked');
   assert.equal(await saved(),before,'Device diagnostic modified canonical world save');
   await page.locator('#copyAudit').click();
+  await page.waitForFunction(()=>/copied|selected/.test(document.querySelector('#auditStatus').textContent),null,{timeout:8000});
   assert.match(await page.locator('#auditStatus').textContent(),/copied|selected/);
   await mkdir('artifacts',{recursive:true});
   await page.screenshot({path:'artifacts/mythwrought-v010-audit-settings.png'});
