@@ -16,7 +16,10 @@ const loaded=()=>page.waitForFunction(()=>Number(document.querySelector('#scene'
   Number(document.querySelector('#scene')?.dataset.pendingChunks)===0,null,{timeout:30000});
 const saved=()=>page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
 const stats=()=>page.evaluate(()=>({
-  d:document.querySelector('#scene').dataset,
+  d:{
+    loadedChunks:document.querySelector('#scene').dataset.loadedChunks,
+    renderedMeshVertices:document.querySelector('#scene').dataset.renderedMeshVertices
+  },
   gap:(()=>{
     const left=document.querySelector('.left').getBoundingClientRect();
     const right=document.querySelector('.right').getBoundingClientRect();
