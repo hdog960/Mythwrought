@@ -1,5 +1,7 @@
 import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,collides} from './voxel.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
+import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
+import {clampLook,forwardVector,compassDegrees} from './camera.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -61,20 +63,27 @@ function start(){
     if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));
     return s;
   }
-  let program;
+  let program,skyProgram;
   try{
-    program=gl.createProgram();
-    gl.attachShader(program,shader(gl.VERTEX_SHADER,VS));
-    gl.attachShader(program,shader(gl.FRAGMENT_SHADER,FS));
-    gl.linkProgram(program);
-    if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
-  }catch(err){fatal('Voxel shader failed to initialize: '+err.message);return;}
+    function linkProgram(vertexSource,fragmentSource){
+      const p=gl.createProgram();
+      gl.attachShader(p,shader(gl.VERTEX_SHADER,vertexSource));
+      gl.attachShader(p,shader(gl.FRAGMENT_SHADER,fragmentSource));
+      gl.linkProgram(p);
+      if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));
+      return p;
+    }
+    program=linkProgram(VS,FS);
+    skyProgram=linkProgram(SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER);
+  }catch(err){fatal('Voxel/sky shader failed to initialize: '+err.message);return;}
   gl.useProgram(program);
   const atPos=gl.getAttribLocation(program,'aPos'),atColor=gl.getAttribLocation(program,'aColor');
   const atUv=gl.getAttribLocation(program,'aUv'),atMat=gl.getAttribLocation(program,'aMat');
   for(const index of [atPos,atColor,atUv,atMat])gl.enableVertexAttribArray(index);
   const U={};
   for(const k of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog'])U[k]=gl.getUniformLocation(program,k);
+  const skyU={resolution:gl.getUniformLocation(skyProgram,'uResolution'),
+    yaw:gl.getUniformLocation(skyProgram,'uYaw'),pitch:gl.getUniformLocation(skyProgram,'uPitch')};
   gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);
 
   let selected=BLOCK.STONE;
@@ -83,8 +92,18 @@ function start(){
   const player={x:.5,z:.5,feet:terrainHeight(0,0,world.seed)+1.02,yaw:Math.PI,pitch:-.12,vY:0,onGround:false};
   const keys=new Set(),joystick={x:0,y:0};
   let frame=0,lastFrame=performance.now(),changed=false;
+  const CAMERA_PREF='mythwrought-v003-look-percent';
+  let sensitivity=1;
+  try{
+    const stored=Number(localStorage.getItem(CAMERA_PREF));
+    if(stored>=50&&stored<=180)sensitivity=stored/100;
+  }catch(_){}
   const eye=()=>[player.x,player.feet+1.55,player.z];
-  const facing=()=>[Math.sin(player.yaw)*Math.cos(player.pitch),Math.sin(player.pitch),Math.cos(player.yaw)*Math.cos(player.pitch)];
+  const facing=()=>forwardVector(player.yaw,player.pitch);
+  function look(dx,dy,scale=.008){
+    const adjusted=clampLook(player.yaw,player.pitch,dx,dy,sensitivity,scale);
+    player.yaw=adjusted.yaw;player.pitch=adjusted.pitch;
+  }
   function save(){
     try{localStorage.setItem(worldSlotKey(world.seed),JSON.stringify(world.save()));localStorage.setItem(SELECTED_SEED_KEY,String(world.seed));changed=false;}
     catch(err){message('Local save failed — export from the menu');}
@@ -166,10 +185,9 @@ function start(){
       }
       player.vY=0;
     }else{player.feet=next;player.onGround=false;}
-    if(keys.has('ArrowLeft'))player.yaw-=dt*1.9;
-    if(keys.has('ArrowRight'))player.yaw+=dt*1.9;
-    if(keys.has('ArrowUp'))player.pitch=Math.min(1.3,player.pitch+dt*1.6);
-    if(keys.has('ArrowDown'))player.pitch=Math.max(-1.3,player.pitch-dt*1.6);
+    const arrowsX=(keys.has('ArrowRight')?1:0)-(keys.has('ArrowLeft')?1:0);
+    const arrowsY=(keys.has('ArrowDown')?1:0)-(keys.has('ArrowUp')?1:0);
+    if(arrowsX||arrowsY)look(arrowsX*dt*1.9,arrowsY*dt*1.6,1);
     if(player.feet<-15)respawnPrototype();
   }
   function draw(now){
@@ -179,7 +197,15 @@ function start(){
       const w=Math.max(1,Math.floor(canvas.clientWidth*Math.min(devicePixelRatio||1,1.5)));
       const h=Math.max(1,Math.floor(canvas.clientHeight*Math.min(devicePixelRatio||1,1.5)));
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
-      gl.clearColor(.52,.69,.72,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+      gl.clearColor(...DISTANCE_FOG_COLOR,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+      // Cheap procedural WebGL sky; the depth buffer is reserved for editable voxels.
+      gl.disable(gl.DEPTH_TEST);
+      gl.useProgram(skyProgram);
+      gl.uniform2f(skyU.resolution,w,h);
+      gl.uniform1f(skyU.yaw,player.yaw);
+      gl.uniform1f(skyU.pitch,player.pitch);
+      gl.drawArrays(gl.TRIANGLES,0,3);
+      gl.enable(gl.DEPTH_TEST);
       gl.useProgram(program);
       gl.uniform3fv(U.uEye,eye());
       gl.uniform3fv(U.uForward,facing());
@@ -187,7 +213,7 @@ function start(){
       gl.uniform3fv(U.uUp,[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),-Math.sin(player.pitch)*Math.cos(player.yaw)]);
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
-      gl.uniform3f(U.uFog,.52,.69,.72);
+      gl.uniform3fv(U.uFog,DISTANCE_FOG_COLOR);
       stream();
       canvas.dataset.loadedChunks=String(chunks.size); // Read-only diagnostic for real browser chunk completion.
       for(const c of chunks.values()){
@@ -198,8 +224,10 @@ function start(){
         gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
       }
-      const deg=(540-player.yaw*180/Math.PI)%360;
-      compass.textContent=['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8]+' · '+String(Math.round(deg)).padStart(3,'0')+'°';
+      const deg=compassDegrees(player.yaw);
+      compass.textContent=['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8]+' · '+String(deg).padStart(3,'0')+'°';
+      canvas.dataset.skyDrawn='true';
+      canvas.dataset.cameraYaw=String(player.yaw);
     }
     requestAnimationFrame(draw);
   }
@@ -219,7 +247,7 @@ function start(){
   },()=>{joystick.x=joystick.y=0;knob.style.transform='';});
   pointerPad(document.getElementById('lookPad'),(_e,dx,dy,initial)=>{
     if(initial)return;
-    player.yaw+=dx*.008;player.pitch=Math.max(-1.3,Math.min(1.3,player.pitch-dy*.008));
+    look(dx,dy);
   },()=>{});
   let drag=null;
   canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
@@ -227,14 +255,32 @@ function start(){
     if(!drag||drag.id!==e.pointerId)return;
     const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
     if(Math.abs(dx)+Math.abs(dy)>1)drag.moved=true;
-    player.yaw+=dx*.006;player.pitch=Math.max(-1.3,Math.min(1.3,player.pitch-dy*.006));
+    look(dx,dy,.006);
     drag.x=e.clientX;drag.y=e.clientY;
   });
   canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved)edit(drag.button===2?'place':'mine');drag=null;}});
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
-  document.addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space'&&!e.repeat)jump();keys.add(e.code);});
+  document.addEventListener('keydown',e=>{
+    // Do not steal arrows, space or WASD from accessibility controls and form fields.
+    if(e.target?.isContentEditable||['INPUT','SELECT','TEXTAREA','BUTTON'].includes(e.target?.tagName))return;
+    if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+    if(e.code==='Space'&&!e.repeat)jump();
+    keys.add(e.code);
+  });
   document.addEventListener('keyup',e=>keys.delete(e.code));
   window.addEventListener('blur',()=>{keys.clear();joystick.x=joystick.y=0;});
+  const sensitivitySlider=document.getElementById('lookSensitivity');
+  const sensitivityValue=document.getElementById('lookValue');
+  function syncSensitivity(){
+    sensitivitySlider.value=String(Math.round(sensitivity*100));
+    sensitivityValue.textContent=Math.round(sensitivity*100)+'%';
+  }
+  syncSensitivity();
+  sensitivitySlider.addEventListener('input',()=>{
+    sensitivity=Math.max(.5,Math.min(1.8,Number(sensitivitySlider.value)/100));
+    syncSensitivity();
+    try{localStorage.setItem(CAMERA_PREF,String(Math.round(sensitivity*100)));}catch(_){}
+  });
   document.getElementById('jump').onclick=jump;
   document.getElementById('dig').onclick=()=>edit('mine');
   document.getElementById('place').onclick=()=>edit('place');

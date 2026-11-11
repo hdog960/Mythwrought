@@ -25,14 +25,18 @@ try{
   assert.ok(state.webgl,'WebGL2 is not initialized');
   assert.ok(state.width>200&&state.height>100,'Viewport too small');
   assert.ok(state.noticeHidden,'Fatal error overlay is showing');
+  assert.equal(await page.locator('#scene').getAttribute('data-sky-drawn'),'true','Sky pass did not render');
   assert.ok(state.layout,'Controller grips overlap the world viewport');
   // Aim toward the ground with the actual right-pad pointer interaction.
   const pad=await page.locator('#lookPad').boundingBox();
   assert.ok(pad,'Missing look pad');
+  const initialYaw=Number(await page.locator('#scene').getAttribute('data-camera-yaw'));
   await page.mouse.move(pad.x+pad.width/2,pad.y+pad.height/2);
   await page.mouse.down();
-  await page.mouse.move(pad.x+pad.width/2,pad.y+pad.height/2+72,{steps:8});
+  await page.mouse.move(pad.x+pad.width/2+42,pad.y+pad.height/2+72,{steps:8});
   await page.mouse.up();
+  const changedYaw=Number(await page.locator('#scene').getAttribute('data-camera-yaw'));
+  assert.ok(Math.abs(changedYaw-initialYaw)>.15,'Right thumb pad did not rotate the camera');
   await page.locator('#dig').click();
   const editStatus=await page.locator('#status').textContent();
   assert.match(editStatus,/Block removed and saved/,'Touch-side mining control did not edit terrain');
@@ -40,6 +44,17 @@ try{
   assert.ok(Array.isArray(edits)&&edits.length>0,'Mining did not persist a real block edit');
   await page.locator('#menu').click();
   assert.ok(await page.locator('#help').isVisible(),'Help should open');
+  const helpTouchAction=await page.locator('.helpbody').evaluate(el=>getComputedStyle(el).touchAction);
+  assert.equal(helpTouchAction,'pan-y','Settings modal must permit vertical finger scrolling on iPhone');
+  const canvasTouchAction=await page.locator('#scene').evaluate(el=>getComputedStyle(el).touchAction);
+  assert.equal(canvasTouchAction,'none','Gameplay canvas must not drag or scroll the page');
+  await page.locator('#lookSensitivity').focus();
+  await page.keyboard.press('End');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await page.locator('#lookValue').textContent(),'150%','Camera sensitivity did not update');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v003-look-percent')),'150');
   await page.locator('#save').click();
   const save=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
   assert.ok(save?.includes('"schema":1'),'Prototype save missing');
@@ -51,6 +66,9 @@ try{
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>document.querySelector('#scene')?.width>0);
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-selected-seed')),savedSeed);
+  await page.locator('#menu').click();
+  assert.equal(await page.locator('#lookValue').textContent(),'150%','Camera preference failed to survive reload');
+  await page.locator('#closeHelp').click();
   await page.locator('#menu').click();
   await page.locator('#seedInput').fill('179');
   await page.locator('#switchWorld').click();
