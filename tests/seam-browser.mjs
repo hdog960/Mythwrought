@@ -85,6 +85,9 @@ try{
   const mined=await get();
   assert.ok(mined.batches>beforeEdit.batches);
   assert.deepEqual(mined.last,['1,0','0,0','1,-1'],'Edit did not atomically update visible seam neighbors');
+  // Re-aim at the backing block; the player is looking uphill at a floating
+  // test fixture, so the original ray would overshoot it after mining.
+  await page.evaluate(()=>window.__mythwroughtTest.aimAt(17,18,0));
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='17,18,0',null,{timeout:7000});
   await page.locator('#place').click();
   assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),3,'PLACE failed across seam');
