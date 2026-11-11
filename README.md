@@ -40,6 +40,12 @@ The initial prototype is intentionally dependency-free. Open `index.html` with a
 - [Required manual iPhone test guide](docs/GATE_A_DEVICE_AUDIT.md). Actual iPhone Safari/Home Screen, thermal/endurance, production-scale IndexedDB persistence and premium art approval are **NOT complete**; release version remains v0.09 foundation while Gate A is open.
 
 
+### v0.10 Gate A optional device backup vault — **NOT GATE A APPROVAL**
+- ☰ **Settings → DEVICE VAULT** now offers an optional verified IndexedDB snapshot of the current world. Use **BACK UP THIS WORLD**, select a snapshot, **PREPARE JSON DOWNLOAD** and tap the resulting separate link for an off-device backup. **RESTORE SELECTED** and **DELETE SELECTED** each require confirmation, and invalid/corrupted snapshots are rejected.
+- Snapshots preserve original schema-1 exports and never auto-migrate or replace the existing localStorage saves, journals or seeded terrain. Up to six separate snapshots per seed are kept until explicitly deleted. This protects against some single-copy corruption but **not** whole-site storage eviction or loss of your device.
+- [PR #13 merged](https://github.com/hdog960/Mythwrought/pull/13) as \`3993a40\`. [Repaired merged-main CI](https://github.com/hdog960/Mythwrought/actions/runs/43100845908) passed **86/86 Node and 9/9 Chromium browser suites**; [Pages and public HTML/JS checks passed](https://github.com/hdog960/Mythwrought/actions/runs/43100846020). Screenshots inspected from CI show a readable settings vault without obstructing gameplay grips.
+- [Gate A device audit procedure](docs/GATE_A_DEVICE_AUDIT.md). **Real Safari/Home Screen hardware, durable production-grade IndexedDB primary saves, long-play memory/thermals and user premium-art approval remain OPEN.** Neither v0.10 Gate A nor v0.11 has been unlocked.
+
 ### v0.02 release verification
 - [v0.02 merged PR #1](https://github.com/hdog960/Mythwrought/pull/1), merge commit `401e1df`.
 - [Main CI run](https://github.com/hdog960/Mythwrought/actions/runs/42948496448): 12/12 Node tests, syntax and Chromium terrain interaction tests passed.
