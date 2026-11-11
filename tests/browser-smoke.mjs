@@ -39,7 +39,7 @@ try{
   assert.ok(Math.abs(changedYaw-initialYaw)>.15,'Right thumb pad did not rotate the camera');
   await page.locator('#dig').click();
   const editStatus=await page.locator('#status').textContent();
-  assert.match(editStatus,/Block removed and saved/,'Touch-side mining control did not edit terrain');
+  assert.match(editStatus,/Removed (?:stone|earth|grass|ore|crystal|timber) · saved/,'Touch-side mining did not edit and save terrain');
   const edits=await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v002-world-179')||'{}').edits);
   assert.ok(Array.isArray(edits)&&edits.length>0,'Mining did not persist a real block edit');
   await page.locator('#menu').click();
