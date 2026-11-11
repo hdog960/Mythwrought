@@ -2,9 +2,10 @@ import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
 import {clampLook,forwardVector,compassDegrees} from './camera.mjs';
-import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget} from './input.mjs';
+import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
+import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
-import {newPlayer,stepPlayer} from './physics.mjs';
+import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -95,7 +96,7 @@ function start(){
   const outlineBuffer=gl.createBuffer();
   let outlineKey='',outlineCount=0;
   const chunks=new Map(),pending=new Map();
-  const name=(x,z)=>x+','+z;
+  const name=chunkKey;
   const player=newPlayer(world);
   let jumpQueued=false;
   const keys=new Set(),joystick={x:0,y:0},lookStick={x:0,y:0};
@@ -125,9 +126,33 @@ function start(){
     try{localStorage.setItem(worldSlotKey(world.seed),JSON.stringify(world.save()));localStorage.setItem(SELECTED_SEED_KEY,String(world.seed));changed=false;}
     catch(err){message('Local save failed — export from the menu');}
   }
-  function invalidate(x,z){
-    const cx=chunkCoord(x),cz=chunkCoord(z);
-    for(const [dx,dz] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]])pending.set(name(cx+dx,cz+dz),[cx+dx,cz+dz]);
+  let editMeshBatches=0;
+  let lastEditMeshKeys=[];
+  function refreshEditedMeshes(x,z){
+    // Rebuild adjacent LOADED meshes in one event turn; no partially updated
+    // chunk-boundary frame can be shown between the neighbor replacements.
+    const batch=prepareSeamBatch(world,chunks,x,z);
+    const ready=[];
+    try{
+      for(const item of batch){
+        const buffer=gl.createBuffer();
+        if(!buffer)throw Error('WebGL buffer allocation failed');
+        ready.push({...item,buffer,count:item.vertices.length/9});
+        gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+        gl.bufferData(gl.ARRAY_BUFFER,item.vertices,gl.STATIC_DRAW);
+      }
+    }catch(err){
+      for(const item of ready)gl.deleteBuffer(item.buffer);
+      throw err;
+    }
+    for(const item of ready){
+      const old=chunks.get(item.key);
+      chunks.set(item.key,{x:item.cx,z:item.cz,buffer:item.buffer,count:item.count});
+      if(old)gl.deleteBuffer(old.buffer);
+    }
+    editMeshBatches++;
+    lastEditMeshKeys=ready.map(item=>item.key);
+    // Not-yet-loaded chunks read the current global voxel world when meshed.
   }
   function edit(mode){
     const target=raycast(world,eye(),facing(),6);
@@ -141,7 +166,9 @@ function start(){
     if(mode==='place'&&collides(world,player.x,player.feet,player.z)){
       world.set(x,y,z,old);message('Cannot place a block inside the player');return;
     }
-    invalidate(x,z);changed=true;save();message(mode==='mine'?'Block removed and saved':'Block placed and saved');
+    try{refreshEditedMeshes(x,z);}
+    catch(err){world.set(x,y,z,old);message('Mesh edit failed: '+err.message);return;}
+    changed=true;save();message(mode==='mine'?'Block removed and saved':'Block placed and saved');
   }
   let lastStreamingCenter='';
   let wanted=new Set();
@@ -162,13 +189,9 @@ function start(){
     }
     // Edit invalidations may add neighbors; never mesh outside the active bounded window.
     for(const k of pending.keys())if(!wanted.has(k))pending.delete(k);
-    // Edit invalidations and new chunks are prioritized by proximity every frame.
+    // Bounded missing mesh uploads, nearest to the player first.
     const cx=chunkCoord(player.x),cz=chunkCoord(player.z);
-    const queue=[...pending.entries()].sort((a,b)=>{
-      const da=(a[1][0]-cx)**2+(a[1][1]-cz)**2;
-      const db=(b[1][0]-cx)**2+(b[1][1]-cz)**2;
-      return da-db;
-    });
+    const queue=priorityMissingChunks(pending,cx,cz);
     if(queue.length){
       const [k,[x,z]]=queue[0];pending.delete(k);
       const old=chunks.get(k);if(old)gl.deleteBuffer(old.buffer);
@@ -226,7 +249,12 @@ function start(){
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
       gl.uniform3fv(U.uFog,DISTANCE_FOG_COLOR);
       stream();
-      canvas.dataset.loadedChunks=String(chunks.size); // Read-only diagnostic for real browser chunk completion.
+      canvas.dataset.loadedChunks=String(chunks.size);
+      canvas.dataset.pendingChunks=String(pending.size);
+      canvas.dataset.chunkCenter=lastStreamingCenter;
+      canvas.dataset.meshEditBatches=String(editMeshBatches);
+      canvas.dataset.lastEditedChunks=lastEditMeshKeys.join(';');
+      canvas.dataset.renderedMeshVertices=String([...chunks.values()].reduce((sum,c)=>sum+c.count,0));
       for(const c of chunks.values()){
         gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);
         gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
@@ -329,7 +357,7 @@ function start(){
     if(!help.hidden)return;
     const p=padPosition(movementPad,e);
     const next=normalizedStick(p.x,p.y,p.radius);
-    joystick.x=next.x;joystick.y=next.y;
+    joystick.x=touchMovementX(next.x);joystick.y=next.y;
     const travel=Math.max(0,(movementPad.clientWidth-knob.offsetWidth)/2-7);
     knob.style.transform='translate('+Math.round(next.x*travel)+'px,'+Math.round(next.y*travel)+'px)';
   },()=>{joystick.x=joystick.y=0;knob.style.transform='';});
@@ -338,12 +366,12 @@ function start(){
     if(lookMode==='stick'){
       const p=padPosition(cameraPad,e);
       const next=normalizedStick(p.x,p.y,p.radius,.1);
-      lookStick.x=next.x;lookStick.y=next.y;
+      lookStick.x=touchCameraX(next.x);lookStick.y=next.y;
       const travel=Math.max(0,(cameraPad.clientWidth-cameraKnob.offsetWidth)/2-7);
       cameraKnob.style.transform='translate('+Math.round(next.x*travel)+'px,'+Math.round(next.y*travel)+'px)';
     }else if(!initial){
       const d=safePointerDelta(dx,dy);
-      look(d.x,d.y);
+      look(touchCameraX(d.x),d.y);
     }
   },()=>{lookStick.x=lookStick.y=0;cameraKnob.style.transform='';});
   const precisionButton=document.getElementById('precision');
@@ -434,7 +462,7 @@ function start(){
       save();
       const candidate=loadWorld(next); // Validate before changing the active world.
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();outlineKey='';outlineCount=0;world=candidate;respawnPrototype();
+      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];world=candidate;respawnPrototype();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       save();seedMessage.textContent='World '+world.seed+' ready. Other seed saves remain separate.';
       message('Loaded seed '+world.seed+' — building nearby chunks');
@@ -454,7 +482,7 @@ function start(){
       save(); // Keep the previously active world's slot before replacing.
       world=imported;
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();outlineKey='';outlineCount=0;respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
+      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       save();message('Imported voxel world');
     }catch(err){message('Import rejected: '+err.message);}
     e.target.value='';
@@ -468,6 +496,32 @@ function start(){
     fatal('Graphics restarted. Reload to rebuild shaders and saved terrain safely.');
   });
   window.addEventListener('pagehide',()=>{cancelAllPointers();save();});
+  if(['localhost','127.0.0.1'].includes(location.hostname)){
+    // Local-only regression interface; absent from the public Pages runtime.
+    window.__mythwroughtTest=Object.freeze({
+      teleport(x,z){
+        if(![x,z].every(Number.isFinite))throw Error('Invalid debug position');
+        const pos=findSafeSpawn(world,x,z);
+        Object.assign(player,pos,{vX:0,vZ:0,vY:0,onGround:true});
+        jumpQueued=false;
+        return {...pos};
+      },
+      aimAt(x,y,z){
+        const dx=x+.5-player.x,dy=y+.5-(player.feet+1.55),dz=z+.5-player.z;
+        player.yaw=Math.atan2(dx,dz);
+        player.pitch=Math.atan2(dy,Math.hypot(dx,dz));
+      },
+      block(x,y,z){return world.get(x,y,z);},
+      placeFixture(x,y,z,id){
+        const old=world.get(x,y,z);
+        if(!world.set(x,y,z,id))throw Error('Invalid test block');
+        try{refreshEditedMeshes(x,z);}catch(err){world.set(x,y,z,old);throw err;}
+        save();
+      },
+      snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
+        lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed};}
+    });
+  }
   message('Move, look, mine and place · ☰ for help');
   requestAnimationFrame(draw);
 }
