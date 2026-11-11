@@ -46,3 +46,9 @@ If real device fails, profile and optimize chunk/texture/meshing before cutting 
 - React to WebGL context loss by pausing stale GL draw calls and showing a reload explanation; no false claim of GPU state restoration.
 - Static browser verification uses two Chromium suites including Chrome DevTools-dispatched simultaneous two-finger touches; these are **not** substitutes for actual iPhone Safari, assistive touch or thermal profiling.
 - Maintain seed-specific localStorage saves and export/import as temporary engineering foundation, not production-safe backups. Stored format remains unchanged.
+
+## v0.05 technical checkpoint
+- Physical controller side widths are computed from available CSS safe-area-adjusted space, protected world-viewport minimum and persisted normal/large control size. Browser mobile viewport height is synchronized at resize/visualViewport events to keep buttons and footer fully on-screen; portrait orientation message remains.
+- Grip graphical treatment is pure original CSS with no external textures or assets; grips and decorative ornamentation are outside the world canvas. Larger thumb targets and proportional knob translations preserve bounded joystick values from v0.04.
+- Automated acceptance explicitly measures control and footer containment in 568×320, 667×375, 844×390, 932×430, 1180×520, saved control preference after reload and simulated nonzero left/right safe insets; normal world-render, saved seeds, mining, DDA targeting and real Chromium dual-touch suites continue to pass.
+- A first screenshot-based inspection exposed lower controls clipped at compact landscape sizes; the defect was corrected and the test strengthened, not waived. Real iPhone Safari/installed PWA must still be tested independently.

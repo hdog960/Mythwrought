@@ -25,3 +25,8 @@ An original low-cost daylight sky has been added, with warm horizon, sun, pale c
 - Keep center 3D world unobstructed. A faint outline belongs to the selected 3D block itself, while physical control widgets and compass live only on the outer frame. No fake aiming overlay in screen center.
 - Adjustable swipe/stick camera control and tap target minimums are emerging UX foundations, not validated final ergonomics. Real iPhone landscape screenshot and two-thumb acceptance are still outstanding.
 - Existing prototype terrain has no premium original characters, handcrafted architecture or authored cave city; the visual quality gate remains **unapproved**.
+
+## v0.05 visual checkpoint
+- Original non-final handheld fantasy framing: layered metallic gold borders, engraved accents, subtle carved-grain panels, responsive twin thumb-pad rings, readable buttons and consistent ornate controller caps. All control art is restricted to grips and frame; the central 3D world has no overlay HUD.
+- User can choose normal/large control sizing; high-contrast and reduced-motion preferences are honored through CSS, but real accessibility/user acceptance remains untested.
+- **Visual art gate remains OPEN**: no premium original voxel character animation, finished architectural materials, magical cavern art or fully authored scenery is claimed. The present controller design is a meaningful stylistic foundation, not final visual approval.

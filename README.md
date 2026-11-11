@@ -27,11 +27,11 @@ Free static GitHub Pages deployment; no paid services, no mandatory external API
 The initial prototype is intentionally dependency-free. Open `index.html` with a static HTTP server, e.g. `python3 -m http.server 8000`. Run `npm test` for the Node built-in test suite. Later milestones may change internal technology only if acceptance tests are preserved.
 
 **Versioning:** v0.01–v1.00; release numbers are planned targets, not automatically attained. The next release begins only after the current acceptance gate is met.
-## Current implementation status — v0.04
+## Current implementation status — v0.05
 - [Play the WebGL2 foundation prototype](https://hdog960.github.io/Mythwrought/) (landscape). Current art and terrain are engineering graphics with initial material detail and an original WebGL daytime sky; **not approved premium art**.
-- Seeded 3D voxel terrain with repeatable named/numeric seeds and independent saved worlds, priority-bounded chunks, original atmospheric shader and prototype material detail, independent dual-thumb controls with swipe/stick aim, fine aiming hold, exact voxel DDA targeting with world-space selection outline, jumping, mine/place blocks and JSON backup import/export.
-- [Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/42965722843): **25/25 Node tests**, syntax, screenshot rendering, real two-thumb camera/movement, swipe/stick aim, precision hold, blur cancellation, input focus, seeded saves, mining, chunk rebuilding and nonblank composited screenshot.
-- [GitHub Pages deployment and public HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/42965722891) for the v0.04 merge commit.
+- Seeded 3D voxel terrain with named/numeric seeds and isolated saves, priority-bounded chunk streaming, original atmospheric shader and prototype materials, decorated responsive fantasy handheld side grips (balanced/large size preference), independent dual-thumb movement and swipe/stick aiming, precision hold, exact world-space DDA targeting, jump, mine/place blocks and JSON save backup/export.
+- [Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/43030671792): **29/29 Node tests**, syntax, WebGL rendering, dual-touch camera/movement, seed/save regressions, exact targeting, plus multi-viewport clipping/safe-inset/controller persistence screenshots.
+- [GitHub Pages deployment and public HTML/JS HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/43030672007) for the v0.05 merge commit.
 - Gate A remains **open** pending actual iPhone Safari/Home Screen hardware testing, stronger save architecture and premium art approval. No combat, companions, story or magic implemented yet.
 
 ### v0.02 release verification
@@ -52,3 +52,10 @@ The initial prototype is intentionally dependency-free. Open `index.html` with a
 - [Pages publication 42965722891](https://github.com/hdog960/Mythwrought/actions/runs/42965722891): deployment and public HTML/JavaScript HTTP checks completed successfully.
 - Saved worlds remain the same v0.02 localStorage slots and schema 1; *no migration or destructive reset*. **The localStorage save method is still prototype-only.**
 - v0.04 is **NOT** a passed mobile-hardware/visual approval gate. Art remains nonfinal; real iPhone thermal, Safari touch and Home Screen persistence require testing.
+
+### v0.05 release verification
+- [Merged PR #4](https://github.com/hdog960/Mythwrought/pull/4), implementation merge commit `3e4ca3c56fc5c6a191ae046430e4f9b25ea3133a`.
+- [Main CI 43030671792](https://github.com/hdog960/Mythwrought/actions/runs/43030671792): **29/29 Node tests**, WebGL scene/edit/save checks, simultaneous real Chromium touch interaction, and responsive browser geometry checks on 568×320, 667×375, 844×390, 932×430 and 1180×520 with footer/controls not clipped. Includes persisted large-controls and artificial safe-area inset checks.
+- [Pages publication 43030672007](https://github.com/hdog960/Mythwrought/actions/runs/43030672007): merged main deployed; live public HTML/JavaScript retrieval verified.
+- Screenshot assets `mythwrought-v005-small-landscape.png`, `mythwrought-v005-regular-landscape.png`, `mythwrought-v005-large-landscape.png` are in the main CI artifact `mythwrought-browser-smoke`. These prove layout screenshots, not user-approved premium fantasy artwork.
+- No world save migration: the previous version's seed slots, localStorage schema and JSON exports remain compatible. Persistent IndexedDB migration and real iPhone testing remain open.
