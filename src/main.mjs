@@ -4,6 +4,7 @@ import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mj
 import {clampLook,forwardVector,compassDegrees} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget} from './input.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
+import {newPlayer,stepPlayer} from './physics.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -93,7 +94,8 @@ function start(){
   let outlineKey='',outlineCount=0;
   const chunks=new Map(),pending=new Map();
   const name=(x,z)=>x+','+z;
-  const player={x:.5,z:.5,feet:terrainHeight(0,0,world.seed)+1.02,yaw:Math.PI,pitch:-.12,vY:0,onGround:false};
+  const player=newPlayer(world);
+  let jumpQueued=false;
   const keys=new Set(),joystick={x:0,y:0},lookStick={x:0,y:0};
   const heldPointers=new Map();
   let precisionHeld=false;
@@ -139,15 +141,21 @@ function start(){
     }
     invalidate(x,z);changed=true;save();message(mode==='mine'?'Block removed and saved':'Block placed and saved');
   }
+  let lastStreamingCenter='';
+  let wanted=new Set();
   function stream(){
-    const desired=chunkWindow(player.x,player.z,2);
-    const wanted=new Set(desired.map(c=>name(c.cx,c.cz)));
-    // Discard stale pending meshes after fast travel across chunk boundaries.
-    for(const k of pending.keys())if(!wanted.has(k))pending.delete(k);
-    for(const c of desired){
-      const k=name(c.cx,c.cz);
-      if(!chunks.has(k)&&!pending.has(k))pending.set(k,[c.cx,c.cz]);
+    const center=name(chunkCoord(player.x),chunkCoord(player.z));
+    if(center!==lastStreamingCenter){
+      lastStreamingCenter=center;
+      const desired=chunkWindow(player.x,player.z,2);
+      wanted=new Set(desired.map(c=>name(c.cx,c.cz)));
+      for(const c of desired){
+        const k=name(c.cx,c.cz);
+        if(!chunks.has(k)&&!pending.has(k))pending.set(k,[c.cx,c.cz]);
+      }
     }
+    // Edit invalidations may add neighbors; never mesh outside the active bounded window.
+    for(const k of pending.keys())if(!wanted.has(k))pending.delete(k);
     // Edit invalidations and new chunks are prioritized by proximity every frame.
     const cx=chunkCoord(player.x),cz=chunkCoord(player.z);
     const queue=[...pending.entries()].sort((a,b)=>{
@@ -167,37 +175,17 @@ function start(){
     }
   }
   function respawnPrototype(){
-    player.x=.5;player.z=.5;player.feet=terrainHeight(0,0,world.seed)+1.02;player.vY=0;player.yaw=Math.PI;player.pitch=-.12;
-    message('Returned to spawn (temporary prototype safety reset)');
+    Object.assign(player,newPlayer(world));
+    jumpQueued=false;
+    message('Returned to a safe surface near spawn (prototype void recovery)');
   }
-  function jump(){if(player.onGround){player.vY=6.6;player.onGround=false;}}
+  function jump(){if(help.hidden)jumpQueued=true;}
   function move(dt){
-    let strafe=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joystick.x;
-    let forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)-joystick.y;
-    const len=Math.hypot(strafe,forward);
-    if(len>1){strafe/=len;forward/=len;}
-    const dx=(Math.sin(player.yaw)*forward+Math.cos(player.yaw)*strafe)*dt*4.25;
-    const dz=(Math.cos(player.yaw)*forward-Math.sin(player.yaw)*strafe)*dt*4.25;
-    function axis(axis,n){
-      if(!n)return;
-      const x=player.x+(axis==='x'?n:0),z=player.z+(axis==='z'?n:0);
-      if(!collides(world,x,player.feet,z)){player[axis]=axis==='x'?x:z;return;}
-      if(player.onGround&&!collides(world,x,player.feet+1.01,z)){
-        player.feet+=1.01;player[axis]=axis==='x'?x:z;player.onGround=false;
-      }
-    }
-    axis('x',dx);axis('z',dz);
-    player.onGround=collides(world,player.x,player.feet-.12,player.z);
-    player.vY-=18*dt;
-    const next=player.feet+player.vY*dt;
-    if(collides(world,player.x,next,player.z)){
-      if(player.vY<0){
-        let low=next,high=player.feet;
-        for(let i=0;i<10;i++){const mid=(low+high)/2;if(collides(world,player.x,mid,player.z))low=mid;else high=mid;}
-        player.feet=high;player.onGround=true;
-      }
-      player.vY=0;
-    }else{player.feet=next;player.onGround=false;}
+    const strafe=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joystick.x;
+    const forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)-joystick.y;
+    const result=stepPlayer(world,player,{strafe,forward,jump:jumpQueued},dt);
+    jumpQueued=false;
+    if(result.landed && !result.stepped)canvas.dataset.landings=String((Number(canvas.dataset.landings)||0)+1);
     const arrowsX=(keys.has('ArrowRight')?1:0)-(keys.has('ArrowLeft')?1:0);
     const arrowsY=(keys.has('ArrowDown')?1:0)-(keys.has('ArrowUp')?1:0);
     if(arrowsX||arrowsY)look(arrowsX*dt*1.9,arrowsY*dt*1.6,1);
@@ -267,6 +255,10 @@ function start(){
       canvas.dataset.cameraPitch=String(player.pitch);
       canvas.dataset.playerX=String(player.x);
       canvas.dataset.playerZ=String(player.z);
+      canvas.dataset.playerFeet=String(player.feet);
+      canvas.dataset.playerGrounded=String(player.onGround);
+      canvas.dataset.playerVelocityY=String(player.vY);
+      canvas.dataset.playerColliding=String(collides(world,player.x,player.feet,player.z));
       canvas.dataset.lookMode=lookMode;
       canvas.dataset.precision=String(precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight'));
     }
@@ -434,7 +426,7 @@ function start(){
       save();
       const candidate=loadWorld(next); // Validate before changing the active world.
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();outlineKey='';outlineCount=0;world=candidate;respawnPrototype();
+      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();outlineKey='';outlineCount=0;world=candidate;respawnPrototype();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       save();seedMessage.textContent='World '+world.seed+' ready. Other seed saves remain separate.';
       message('Loaded seed '+world.seed+' — building nearby chunks');
@@ -454,7 +446,7 @@ function start(){
       save(); // Keep the previously active world's slot before replacing.
       world=imported;
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();outlineKey='';outlineCount=0;respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
+      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();outlineKey='';outlineCount=0;respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       save();message('Imported voxel world');
     }catch(err){message('Import rejected: '+err.message);}
     e.target.value='';
