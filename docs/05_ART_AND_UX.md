@@ -39,3 +39,8 @@ An original low-cost daylight sky has been added, with warm horizon, sun, pale c
 - World-space low-frequency material tint helps reduce abrupt procedural coloring across adjacent chunk borders. Real Chromium screenshots of positive and negative seams were inspected; this is engineering prototype terrain, **not** a premium art gate pass.
 - The player's reported inverted left/right touch directions on both sticks were corrected in code and covered by Chromium tests. Up/down remains unchanged. Await explicit physical iPhone acceptance.
 - The two-grip handheld console still leaves the central 3D viewport clear of touch controls and HUD. Finished premium authored materials, expressive characters and fantasy architecture are still unimplemented.
+
+## v0.08 interaction and material artwork checkpoint (not approved)
+- Basic mining now has a subtle teal cube outline in 3D; valid adjacent placement space has an amber outline, not a screen-space HUD overlay. Right-grip guidance describes current target material, distance and whether space is suitable for building.
+- Original lightweight pixel-texturing refinements improve stone irregularity, timber grain, crystal facets and ore glints, with material-specific bronze-framed selection swatches. The overall biome, architecture and character art still fall far short of the user-approved premium target and require substantial future development.
+- The verified v0.08 browser screenshot `mythwrought-v008-crystal-target.png` was inspected. No visual approval is assumed; horizontal touch corrections remain and vertical controls have not been inverted.

@@ -5,6 +5,7 @@ This is the source of truth for ACTUALLY implemented and independently verified 
 |---|---|---|---|---|
 | Initial repository | `784739d` | Initial README | Legacy Pages build | Baseline |
 | Design authority | `41e3550` | Seven canonical docs, 100 release acceptance entries | GitHub main | Documents committed |
+| v0.08 transactional basic block interactions and targeting | `8ab0eb0` (merged PR #7) | **61/61 Node**, 6 Chromium suites: real mining/placing, material selection, blocked placement, reach, full-body collision, 3D preview, seam-safe save/reload, existing two-thumb axes | [Pages and public files PASS](https://github.com/hdog960/Mythwrought/actions/runs/43076661735) | **Verified v0.08 prototype; iPhone/art gates OPEN** |
 | v0.07 seamless adjacent chunk borders + touch-axis correction | `2ba4254` (merged PR #6) | **50/50 Node**, 5 Chromium suites: positive/negative seam traversal, real edge mining/placement and reload, bounded GPU meshes, two-thumb horizontal fix | [Pages + public resources PASS](https://github.com/hdog960/Mythwrought/actions/runs/43062355830) | **Verified v0.07 prototype; iPhone/art gates OPEN** |
 | v0.06 grounded voxel movement and collision | `c33948bc` (merged PR #5) | **43/43 Node** on main; 4 Chromium suites including real walking/jump landing, voxel corner/ceiling collision, step climbing, compact landscape and existing save/dual-thumb tests | [Pages + public file retrieval PASS](https://github.com/hdog960/Mythwrought/actions/runs/43036157699) | **Verified v0.06 engine, iPhone/art gates OPEN** |
 | v0.05 original landscape handheld grips | `3e4ca3c` (merged PR #4) | **29/29 Node** on main; Chromium WebGL, dual-touch controls, five landscape sizes, footer/controls fit, persisted large controls, safe-area simulation | [Pages + public files PASS](https://github.com/hdog960/Mythwrought/actions/runs/43030672007) | **CI/Pages verified; real iPhone/visual approval OPEN** |
@@ -12,6 +13,15 @@ This is the source of truth for ACTUALLY implemented and independently verified 
 | v0.03 WebGL landscape/sky | `0adbb31` (merged PR #2) | **17/17 Node** on main, Chromium sky/camera/sensitivity, mining, seed-save and full-chunk screenshot checks | [Pages deploy and public HTTP PASS](https://github.com/hdog960/Mythwrought/actions/runs/42956423659) | **Verified prototype, iPhone and visual gates OPEN** |
 | v0.02 deterministic multi-seed terrain | `401e1df` (merged PR #1) | **12/12 Node** on main; syntax; Chromium WebGL2 layout, mine/edit, saved seed switching, reload, chunk rebuild | [Pages + HTTP verification PASS](https://github.com/hdog960/Mythwrought/actions/runs/42948496495) | **Automated and live public site checks passed; art/iPhone gates OPEN** |
 | v0.01 foundation prototype | `4dd132a` | Node **7/7**; JS syntax; headless Chromium landscape rendering, side grips, help, actual MINE operation and persisted block edit | [Pages + public resource fetch PASS](https://github.com/hdog960/Mythwrought/actions/runs/42945013696) | **v0.01 code proven by automated checks; iPhone and art gates OPEN** |
+
+## v0.08 verification and limitations
+- [PR #7 merged](https://github.com/hdog960/Mythwrought/pull/7), implementation merge SHA `8ab0eb094363b6815c2a4d69b345e0c0889b703a`.
+- [Merged-main CI 43076661825](https://github.com/hdog960/Mythwrought/actions/runs/43076661825): **61 of 61 Node tests** and all **six Chromium suites passed**. A new real-browser suite verifies stone removal, wood/crystal building at a chunk seam, persisted edits, material palette controls, non-obstructing target hints, safe no-target action rejection and attempts to build inside the player.
+- [Pages workflow 43076661735](https://github.com/hdog960/Mythwrought/actions/runs/43076661735): deployment and public HTML/JavaScript HTTP verification passed.
+- The active tool checks reach and line of sight, eligible materials, destination emptiness and player's full collision body before mutating. If GPU seam refresh throws, the world edit is rolled back. Only valid actions enter the unchanged schema-1 save. Save feedback does not falsely claim success when localStorage writes fail.
+- The world-space teal target outline and amber adjacent build-space preview occupy real terrain coordinates. The target material/distance and valid/blocked build state appear inside the right grip, never as an overlay across the center 3D world. Material patterns and select swatches gained original procedural detail.
+- A screenshot inspected from the final PR browser artifact confirms both selection outlines and a functioning grip layout; no premium handcrafted voxel biome, character, or authored fantasy town was delivered in this release.
+- **OPEN:** real iPhone Safari/Home Screen verification, device memory/thermal performance, robust IndexedDB saves, Gate A, and explicit user artwork acceptance. No invented completion of later roadmap items.
 
 ## v0.07 verification and limitations
 - [Merged PR #6](https://github.com/hdog960/Mythwrought/pull/6); implementation merge `2ba4254c61fd24312897059f60f6167d0f94e629`.
@@ -69,7 +79,7 @@ This is the source of truth for ACTUALLY implemented and independently verified 
 - Earlier failed browser workflow `42944546572` was an unsupported Playwright/Ubuntu 26.04 runner issue. Fixed by explicit `ubuntu-24.04`; later browser runs pass.
 
 ## Features NOT implemented
-The v0.02 prototype is procedurally shaded voxel terrain, not premium handcrafted fantasy artwork. No authored village, deep cavern cities, NPCs, combat, classless progression, actual magic, water/lava simulation, blueprint editor, crafting, companions, wildlife, runic machinery, portals, or Death Echo yet. These remain locked design targets, not shipped systems.
+The verified v0.08 prototype remains procedurally shaded voxel terrain, not approved premium handcrafted fantasy artwork. No authored village, deep cavern cities, NPCs, combat, classless progression, actual magic, water/lava simulation, blueprint editor, crafting, companions, wildlife, runic machinery, portals, or Death Echo yet. These remain locked design targets, not shipped systems.
 
 ## Open validation gates
 1. **Gate A:** Actual iPhone Safari and installed landscape Home Screen visual, performance, control ergonomics, persistence across termination, error handling and save-integrity tests; not yet verified.
