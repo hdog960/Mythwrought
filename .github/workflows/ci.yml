@@ -28,6 +28,7 @@ jobs:
           node tests/browser-smoke.mjs
           node tests/touch-browser.mjs
           node tests/layout-browser.mjs
+          node tests/seam-browser.mjs
           node tests/movement-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
