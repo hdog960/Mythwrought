@@ -515,7 +515,7 @@ function start(){
   document.addEventListener('keyup',e=>keys.delete(e.code));
   window.addEventListener('blur',cancelAllPointers);
   document.addEventListener('visibilitychange',()=>{
-    if(document.hidden)cancelAllPointers();
+    if(document.hidden){cancelAllPointers();if(mirrorEnabled&&pendingMirrors.size)flushMirror();}
     lastFrame=performance.now();
   });
   const lookModeSelect=document.getElementById('lookMode');
@@ -701,6 +701,7 @@ function start(){
     saveHealth.textContent='Restored a verified IndexedDB snapshot; original schema-1 live save confirmed.';
     message('Restored device backup for seed '+world.seed+' · '+snapshot.edits+' edits');
     vaultStatus.textContent='Restore complete. Export JSON for an independent off-device backup.';
+    scheduleMirrorForWorld();
   });
   document.getElementById('vaultDelete').onclick=()=>useVault(async()=>{
     clearVaultLink();
@@ -732,6 +733,7 @@ function start(){
       localStorage.setItem(MIRROR_PREF,requested?'enabled':'disabled');
       if(localStorage.getItem(MIRROR_PREF)!==(requested?'enabled':'disabled'))
         throw Error('Preference read-back failed');
+      if(requested&&storageReadOnly)throw Error('Selected world is protected read-only; export or select a healthy seed first');
       mirrorEnabled=requested;
       if(!requested){
         if(mirrorTimer!==null){clearTimeout(mirrorTimer);mirrorTimer=null;}
@@ -803,8 +805,8 @@ function start(){
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
     message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
-    mirrorStatus.textContent='Restore verified for seed '+seed+'. Export JSON for storage outside the browser.';
     scheduleMirrorForWorld();
+    mirrorStatus.textContent='Restore verified for seed '+seed+'. Export JSON for storage outside the browser.';
   });
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);
@@ -824,6 +826,7 @@ function start(){
       saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';
       seedMessage.textContent='World '+world.seed+' loaded safely. Other seeds remain separate.';
       message('Loaded seed '+world.seed+' with saved world edits');
+      scheduleMirrorForWorld();
     }catch(err){seedMessage.textContent='World not changed: '+err.message;}
   };
   document.getElementById('export').onclick=()=>{
@@ -865,6 +868,7 @@ function start(){
       seedInput.value=String(world.seed);
       saveHealth.textContent='Imported verified schema-1 world with previous data preserved.';
       message('Imported world safely · '+world.edits.size+' block edit deltas');
+      scheduleMirrorForWorld();
     }catch(err){message('Import rejected; existing world unchanged: '+err.message);}
     finally{e.target.value='';}
   });
@@ -881,6 +885,9 @@ function start(){
     // Do not rewrite valid/externally damaged saves on an ordinary reload.
     // Actual edits already save synchronously; only retry if still dirty.
     if(changed&&!storageReadOnly)save();
+    // Best effort only: Safari may terminate pending IndexedDB transactions.
+    // Already-verified localStorage remains authoritative on force quit.
+    if(mirrorEnabled&&pendingMirrors.size)flushMirror();
   });
   if(['localhost','127.0.0.1'].includes(location.hostname)){
     // Local-only regression interface; absent from the public Pages runtime.
