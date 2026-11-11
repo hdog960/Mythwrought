@@ -14,7 +14,7 @@ const get=k=>page.evaluate(k=>localStorage.getItem(k),k);
 const block=(x,y,z)=>page.evaluate(v=>window.__mythwroughtTest.block(...v),[x,y,z]);
 const seen=async(fragment)=>page.waitForFunction(fragment=>document.querySelector('#vaultStatus').textContent.includes(fragment),fragment,{timeout:12000});
 const scene=async()=>page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>=18,null,{timeout:25000});
-const firstOption=()=>page.locator('#vaultSelect option[value!=""]').first().getAttribute('value');
+const firstOption=()=>page.locator('#vaultSelect option:not([value=""])').first().getAttribute('value');
 try{
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
  await scene();
@@ -30,7 +30,7 @@ try{
  assert.match(firstId,/^v010:/);
  assert.equal(await get(primary),woodBytes,'IndexedDB snapshot touched canonical localStorage');
  assert.equal(await get(primary+'-integrity-v009'),unchangedJournal,'Vault changed journal');
- assert.equal(await page.locator('#vaultSelect option[value!=""]').count(),1);
+ assert.equal(await page.locator('#vaultSelect option:not([value=""])').count(),1);
  await page.locator('#vaultPrepare').click();
  await seen('Tap DOWNLOAD VERIFIED');
  assert.equal(await page.locator('#vaultDownloadLink').isVisible(),true,'No iPhone-friendly explicit download link');
@@ -55,7 +55,7 @@ try{
  await page.locator('#menu').click();
  await page.locator('#vaultBackup').click();
  await seen('Verified device backup');
- assert.equal(await page.locator('#vaultSelect option[value!=""]').count(),2,'Second snapshot should not replace first');
+ assert.equal(await page.locator('#vaultSelect option:not([value=""])').count(),2,'Second snapshot should not replace first');
  await page.locator('#vaultSelect').selectOption(firstId);
 
  // A declined restore may not touch live world, journal or either vault record.
@@ -79,7 +79,7 @@ try{
  await page.locator('#menu').click();
  await page.locator('#vaultRefresh').click();
  await seen('device backups found');
- assert.equal(await page.locator('#vaultSelect option[value!=""]').count(),2,'IndexedDB backups lost on page reload');
+ assert.equal(await page.locator('#vaultSelect option:not([value=""])').count(),2,'IndexedDB backups lost on page reload');
 
  // Corrupt an IndexedDB *test snapshot*, never the live world. Verify the
  // checksum stops download/restore and leaves localStorage untouched.
@@ -106,7 +106,7 @@ try{
  page.once('dialog',d=>d.accept());
  await page.locator('#vaultDelete').click();
  await seen('snapshot deleted and verified');
- assert.equal(await page.locator('#vaultSelect option[value!=""]').count(),1,'Targeted deletion did not preserve other snapshot');
+ assert.equal(await page.locator('#vaultSelect option:not([value=""])').count(),1,'Targeted deletion did not preserve other snapshot');
  assert.equal(await get(primary),canonicalAfter,'Deleting vault item changed canonical world');
  assert.deepEqual(errors,[],'Browser JavaScript errors');
  assert.deepEqual(missing,[],'Missing HTTP resources');
