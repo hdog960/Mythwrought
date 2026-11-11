@@ -10,6 +10,8 @@ import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
+import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
+import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -116,6 +118,57 @@ function start(){
   let precisionHeld=false;
   let frame=0,lastFrame=performance.now(),changed=false;
   const frameHistory=new FrameHistory(360);
+  const mirrorQueue=new MirrorWriteQueue();
+  const mirrorStatus=document.getElementById('mirrorStatus');
+  const mirrorSlot=document.getElementById('mirrorSlot');
+  const mirrorDownload=document.getElementById('mirrorDownload');
+  let mirrorEnabled=false,mirrorTimer=null,mirrorDownloadUrl=null;
+  const pendingMirrors=new Map();
+  try{mirrorEnabled=localStorage.getItem(MIRROR_PREF)==='enabled';}catch(_){}
+  function clearMirrorDownload(){
+    if(mirrorDownloadUrl){URL.revokeObjectURL(mirrorDownloadUrl);mirrorDownloadUrl=null;}
+    mirrorDownload.hidden=true;mirrorDownload.removeAttribute('href');
+  }
+  function verifiedLiveBytes(){
+    if(storageReadOnly)throw Error('Protected read-only world: keep original damaged data');
+    const raw=localStorage.getItem(worldSlotKey(world.seed));
+    if(!raw||raw!==JSON.stringify(world.save()))
+      throw Error('Live world does not match a verified primary save. Use SAVE first.');
+    return raw;
+  }
+  function queueMirror(seed,raw){
+    return mirrorQueue.enqueue(raw).then(
+      result=>{mirrorStatus.textContent='Verified device mirror for seed '+seed+
+        ', '+result.edits+' edits. The prior verified copy is retained.';return result;},
+      error=>{mirrorStatus.textContent='MIRROR NOT VERIFIED for seed '+seed+': '+String(error)+
+        '. Local world save is unchanged; export JSON.';throw error;}
+    );
+  }
+  function flushMirror(){
+    if(mirrorTimer!==null){clearTimeout(mirrorTimer);mirrorTimer=null;}
+    const tasks=[...pendingMirrors.entries()];pendingMirrors.clear();
+    return Promise.allSettled(tasks.map(([seed,raw])=>queueMirror(seed,raw)));
+  }
+  function scheduleMirrorForWorld(){
+    if(!mirrorEnabled)return;
+    try{
+      const raw=verifiedLiveBytes();
+      pendingMirrors.set(world.seed,raw);
+      if(mirrorTimer!==null)clearTimeout(mirrorTimer);
+      mirrorTimer=setTimeout(()=>{flushMirror();},400);
+      mirrorStatus.textContent='Local save verified; device mirror queued (not yet verified).';
+    }catch(error){mirrorStatus.textContent='Device mirror pending: '+String(error.message||error);}
+  }
+  async function settleMirrorWrites(){await flushMirror();await mirrorQueue.idle();}
+  let renderPreset='balanced';
+  try{renderPreset=normalizeRenderPreset(localStorage.getItem(RENDER_PREF));}catch(_){}
+  const renderSelect=document.getElementById('renderPreset');
+  renderSelect.value=renderPreset;
+  renderSelect.addEventListener('change',()=>{
+    renderPreset=normalizeRenderPreset(renderSelect.value);
+    try{localStorage.setItem(RENDER_PREF,renderPreset);}catch(_){}
+    message('3D pixel workload: '+renderSelect.selectedOptions[0].textContent);
+  });
   const CONTROL_SIZE_KEY='mythwrought-v005-control-size';
   let controlSize='regular';
   try{controlSize=normalizeControlSize(localStorage.getItem(CONTROL_SIZE_KEY));}catch(_){}
@@ -149,6 +202,7 @@ function start(){
       return false;
     }
     changed=false;
+    scheduleMirrorForWorld();
     saveHealth.textContent=result.warning||'Verified save: schema-1 deltas, checksum journal and previous-good backup.';
     if(result.warning)message(result.warning);
     return true;
@@ -249,8 +303,10 @@ function start(){
     frameHistory.frame(now,!document.hidden&&help.hidden&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
       frame++;if(help.hidden)move(dt);
-      const w=Math.max(1,Math.floor(canvas.clientWidth*Math.min(devicePixelRatio||1,1.5)));
-      const h=Math.max(1,Math.floor(canvas.clientHeight*Math.min(devicePixelRatio||1,1.5)));
+      const buffer=bufferDimensions(canvas.clientWidth,canvas.clientHeight,renderPreset,devicePixelRatio||1);
+      const w=buffer.width,h=buffer.height;
+      canvas.dataset.renderPreset=renderPreset;
+      canvas.dataset.renderScale=String(buffer.scale);
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
       gl.clearColor(...DISTANCE_FOG_COLOR,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
       // Cheap procedural WebGL sky; the depth buffer is reserved for editable voxels.
@@ -538,7 +594,7 @@ function start(){
         dimensions:innerWidth+'×'+innerHeight+' CSS px, DPR '+(devicePixelRatio||1),
         homeScreen:standalone?'standalone reported, not independently confirmed':'browser or unknown',
         grips,frames:frameHistory.stats(),
-        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks',
+        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels',
         save:saved,probe,quota
       });
       auditStatus.textContent='Report ready. Copy it for Gate A review; manual iPhone and art approval remain open.';
