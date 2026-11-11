@@ -27,12 +27,12 @@ Free static GitHub Pages deployment; no paid services, no mandatory external API
 The initial prototype is intentionally dependency-free. Open `index.html` with a static HTTP server, e.g. `python3 -m http.server 8000`. Run `npm test` for the Node built-in test suite. Later milestones may change internal technology only if acceptance tests are preserved.
 
 **Versioning:** v0.01–v1.00; release numbers are planned targets, not automatically attained. The next release begins only after the current acceptance gate is met.
-## Current implementation status — v0.08
+## Current implementation status — v0.09
 - [Play the WebGL2 foundation prototype](https://hdog960.github.io/Mythwrought/) (landscape). Current art and terrain are engineering graphics with initial material detail and an original WebGL daytime sky; **not approved premium art**.
-- Seeded 3D voxel terrain and isolated save slots, seamless chunk-border remeshing, grounded movement, protected handheld side-grip controls with corrected horizontal axes, **transactional 6-block-range MINE/PLACE** (stone/wood/crystal), body-intersection checks and rollback on failed mesh refresh, teal 3D mine outline plus amber 3D placement preview, right-grip target/distance information, improved procedural material shading and JSON world backup/export.
-- [Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/43076661825): **61/61 Node tests and six Chromium suites** covering legitimate mining/building, unsupported operations, blocked player-body placement, editing seam boundaries, real 2-thumb input, material selection, save reload, non-overlapping grip guidance, movement and mobile layout.
-- [GitHub Pages deployment and public HTML/JS HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/43076661735) for the v0.08 merge commit.
-- Gate A remains **open** pending actual iPhone Safari/Home Screen hardware testing, stronger save architecture and premium art approval. No combat, companions, story or magic implemented yet.
+- Seeded 3D voxel terrain with deterministic separate world seeds and **durable prototype edit-delta journaling**: unchanged original schema-1 save keys plus checksum sidecar, previous-good backup, corruption recovery and explicit import conflict approval. Seamless chunk-border remeshing, grounded movement, protected handheld controls with corrected horizontal axes, 6-block MINE/PLACE, teal/amber world-space target previews and original procedural material shading remain intact.
+- [Merged-main Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/43084781057): **77/77 Node tests and seven Chromium suites** verifying schema-1 compatibility, independent seed slots, corruption/backup recovery, import consent and validation, exported file restoration, no unwanted page-exit save writes, and all prior world, two-thumb and mobile regressions.
+- [GitHub Pages deployment and public HTML/JS HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/43084781232) for the v0.09 merge commit.
+- v0.10 Gate A remains **open** pending actual iPhone Safari/Home Screen testing, measurable long-run performance, production-scale save architecture and explicit premium art approval. No combat, companions, story or magic implemented yet.
 
 ### v0.02 release verification
 - [v0.02 merged PR #1](https://github.com/hdog960/Mythwrought/pull/1), merge commit `401e1df`.
@@ -84,3 +84,12 @@ The initial prototype is intentionally dependency-free. Open `index.html` with a
 - Original procedural stone/timber/crystal/ore surface treatments and palette buttons improved. Browser screenshot `mythwrought-v008-crystal-target.png` is archived in the `mythwrought-browser-smoke` CI artifact and has been visually inspected. **This is not user-approved premium art.**
 - Existing schema-1 saved worlds, named seeds, chunk remesh behavior, build materials, and corrected left/right touch controls remain compatible. Full inventory, RPG, NPCs and world simulation are not part of v0.08.
 - Hardware iPhone Safari/Home Screen comfort, performance/thermal tests, safe IndexedDB migration and **both Gate A and premium-art signoff remain OPEN**.
+
+### v0.09 release verification
+- [Merged PR #8](https://github.com/hdog960/Mythwrought/pull/8); implementation merge `af317c34ffc85dfc44a20ac3729eff90441f07e9`.
+- [Merged-main CI 43084781057](https://github.com/hdog960/Mythwrought/actions/runs/43084781057): **77/77 Node tests**, **seven passing real Chromium suites** including the v0.09 browser recovery/import/export/seed-safety suite, unchanged landscape WebGL/movement/dual-thumb tests and 3D block editing.
+- [Pages deployment 43084781232](https://github.com/hdog960/Mythwrought/actions/runs/43084781232): successful publication and public HTML/JS fetch verification.
+- World edits continue to use the exact `mythwrought-v002-world-<seed>` JSON schema-1 slot. Verified checksum sidecars and previous-good backups protect the canonical original bytes. No migration, deletion or new paid backend. Damaged primary data can be recovered from journal/backup; user can export the original schema-1 JSON.
+- Failed writes, broken imports and damaged selected worlds are explicitly warned about and never silently replaced with an empty world. Conflicting imported edits require consent. A real browser test caught an unnecessary `pagehide` rewrite of a damaged key, which was fixed before merge.
+- Browser screenshot `mythwrought-v009-persistent-edits.png` is available from the CI workflow artifact and was inspected. It shows working prototype 3D building and unobstructed side controls, **not approved premium voxel art**.
+- Still OPEN: IndexedDB/production save architecture, actual iPhone hardware controls/thermals/offline behavior, Gate A, and explicit user premium-art acceptance.

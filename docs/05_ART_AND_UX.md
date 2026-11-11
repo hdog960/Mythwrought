@@ -44,3 +44,7 @@ An original low-cost daylight sky has been added, with warm horizon, sun, pale c
 - Basic mining now has a subtle teal cube outline in 3D; valid adjacent placement space has an amber outline, not a screen-space HUD overlay. Right-grip guidance describes current target material, distance and whether space is suitable for building.
 - Original lightweight pixel-texturing refinements improve stone irregularity, timber grain, crystal facets and ore glints, with material-specific bronze-framed selection swatches. The overall biome, architecture and character art still fall far short of the user-approved premium target and require substantial future development.
 - The verified v0.08 browser screenshot `mythwrought-v008-crystal-target.png` was inspected. No visual approval is assumed; horizontal touch corrections remain and vertical controls have not been inverted.
+
+## v0.09 visual/controls checkpoint
+- This milestone focused on persistent edit-delta integrity, **not** a premium art acceptance review. The existing original procedural materials, world-space teal mining outline, amber placement preview, readable grip controls and corrected left/right horizontal directions were retained with no HUD covering the central game scene.
+- The verified `mythwrought-v009-persistent-edits.png` browser screenshot was inspected; it remains an engineering voxel terrain prototype, with full fantasy architecture, expressive characters and authored biome art still outstanding. Actual iPhone landscape comfort and premium visual approval remain OPEN.
