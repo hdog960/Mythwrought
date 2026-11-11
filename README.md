@@ -27,11 +27,11 @@ Free static GitHub Pages deployment; no paid services, no mandatory external API
 The initial prototype is intentionally dependency-free. Open `index.html` with a static HTTP server, e.g. `python3 -m http.server 8000`. Run `npm test` for the Node built-in test suite. Later milestones may change internal technology only if acceptance tests are preserved.
 
 **Versioning:** v0.01–v1.00; release numbers are planned targets, not automatically attained. The next release begins only after the current acceptance gate is met.
-## Current implementation status — v0.02
-- [Play the WebGL2 foundation prototype](https://hdog960.github.io/Mythwrought/) (landscape). Current art and terrain are engineering graphics with initial per-material procedural pixel detail, **not approved premium art**.
+## Current implementation status — v0.03
+- [Play the WebGL2 foundation prototype](https://hdog960.github.io/Mythwrought/) (landscape). Current art and terrain are engineering graphics with initial material detail and an original WebGL daytime sky; **not approved premium art**.
 - Seeded 3D voxel terrain with repeatable named/numeric world seeds, separate saved seed slots compatible with v0.01 edits, proximity-prioritized bounded chunk meshes, initial material detail, side-grip movement/look controls, jump, mine/place stone/wood/crystal, local edited-block persistence and JSON backup import/export.
-- [Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/42945013621): twelve pure-model tests, syntax validation, rendered browser viewport, grip boundaries, live mining interaction and saved world-edit assertion.
-- [GitHub Pages deployment and public HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/42945013696).
+- [Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/42956423673): **17/17 tests**, syntax, sky rendering, grip boundaries, touch-pad camera rotation, saved sensitivity, real block editing, named seed reloads, chunk reconstruction and a nonblank screenshot.
+- [GitHub Pages deployment and public HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/42956423659) for the v0.03 merge commit.
 - Gate A remains **open** pending actual iPhone Safari/Home Screen hardware testing, stronger save architecture and premium art approval. No combat, companions, story or magic implemented yet.
 
 ### v0.02 release verification
@@ -39,3 +39,9 @@ The initial prototype is intentionally dependency-free. Open `index.html` with a
 - [Main CI run](https://github.com/hdog960/Mythwrought/actions/runs/42948496448): 12/12 Node tests, syntax and Chromium terrain interaction tests passed.
 - [Main Pages release](https://github.com/hdog960/Mythwrought/actions/runs/42948496495): deploy and public HTML/JS fetch passed.
 - Hardware iPhone and Gate A remain **not approved**. Prototype localStorage is **not production-grade persistence**.
+
+### v0.03 release verification
+- [Merged PR #2](https://github.com/hdog960/Mythwrought/pull/2), release implementation commit `0adbb31`.
+- [Main CI](https://github.com/hdog960/Mythwrought/actions/runs/42956423673) passed **17/17** Node tests and headless Chromium browser smoke. Original GPU sky gradient, sun/cloud silhouettes, distant mountain bands, matching distance fog and saved camera sensitivity form a better landscape foundation, not the final art.
+- [Pages publication](https://github.com/hdog960/Mythwrought/actions/runs/42956423659) successfully deployed and fetched public HTML and JS files.
+- Browser screenshot is archived as `mythwrought-browser-smoke` workflow artifact in main CI. **No physical iPhone acceptance or premium art approval has occurred.**

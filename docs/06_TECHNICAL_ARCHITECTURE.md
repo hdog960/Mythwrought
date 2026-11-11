@@ -32,3 +32,9 @@ If real device fails, profile and optimize chunk/texture/meshing before cutting 
 - Prototype worlds store edits under per-seed localStorage keys; startup prefers previously selected seed and falls back to the legacy v0.01 default slot. Do not claim this is production-grade save architecture.
 - Browser test now checks screen pixels from an actual Chromium screenshot rather than relying on a WebGL backbuffer (which may be discarded after compositing). This guards against a visually blank canvas.
 - Chunk meshes are rebuilt nearest-first with a bounded active radius, and old queued requests are discarded. Actual iPhone memory and touch responsiveness are not yet measured.
+
+## v0.03 technical checkpoint (verified code, not final iPhone acceptance)
+- Separate fullscreen WebGL2 sky pass uses original fragment art (daylight gradient, sun, light cloud streaks, distant hazy mountain silhouette) without network asset dependencies or physics-changing terrain geometry. Material pass restores depth testing and uses a matching sky horizon fog palette.
+- Camera angle math is shared by pointer/arrow controls and bounded, with persisted adjustable sensitivity. The global keyboard handler does not intercept input/select/button controls; iPhone menus can scroll vertically while movement/look pads and the canvas block gameplay panning.
+- Node checks verify shared chunk-boundary face culling and camera math. Chromium checks verify live GPU rendering and correct control location, actual world edits, seed changes and screenshot colors.
+- Actual Safari/iPhone thermal, touch accessibility and real game-world streaming acceptance still require device testing; v0.03 is not Gate A or an art approval.

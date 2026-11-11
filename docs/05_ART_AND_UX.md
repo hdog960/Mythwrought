@@ -18,3 +18,5 @@ Brightness/underground visibility without punitive gameplay, color-independent c
 
 ## Art release gate
 No major art approval claim before authored original animation and cohesive scenery exist. Placeholder assets may be used in engineering foundations but are tagged prototype-only in ledger and app.
+## v0.03 nonfinal art foundation
+An original low-cost daylight sky has been added, with warm horizon, sun, pale clouds and far-off atmospheric ridgelines. These are *prototype original graphics*. The block terrain remains a simple shaded test landscape; no characters, authored architecture, premium art approval or complete biome palette are present. Keep user visual review gate open. The sky is not a replacement for authored 3D scenery.

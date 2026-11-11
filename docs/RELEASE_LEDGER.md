@@ -5,8 +5,17 @@ This is the source of truth for ACTUALLY implemented and independently verified 
 |---|---|---|---|---|
 | Initial repository | `784739d` | Initial README | Legacy Pages build | Baseline |
 | Design authority | `41e3550` | Seven canonical docs, 100 release acceptance entries | GitHub main | Documents committed |
+| v0.03 WebGL landscape/sky | `0adbb31` (merged PR #2) | **17/17 Node** on main, Chromium sky/camera/sensitivity, mining, seed-save and full-chunk screenshot checks | [Pages deploy and public HTTP PASS](https://github.com/hdog960/Mythwrought/actions/runs/42956423659) | **Verified prototype, iPhone and visual gates OPEN** |
 | v0.02 deterministic multi-seed terrain | `401e1df` (merged PR #1) | **12/12 Node** on main; syntax; Chromium WebGL2 layout, mine/edit, saved seed switching, reload, chunk rebuild | [Pages + HTTP verification PASS](https://github.com/hdog960/Mythwrought/actions/runs/42948496495) | **Automated and live public site checks passed; art/iPhone gates OPEN** |
 | v0.01 foundation prototype | `4dd132a` | Node **7/7**; JS syntax; headless Chromium landscape rendering, side grips, help, actual MINE operation and persisted block edit | [Pages + public resource fetch PASS](https://github.com/hdog960/Mythwrought/actions/runs/42945013696) | **v0.01 code proven by automated checks; iPhone and art gates OPEN** |
+
+## v0.03 verification and limitations
+- [Merged PR #2](https://github.com/hdog960/Mythwrought/pull/2), implementation merge commit `0adbb31cac5ca31c428eab2427b731177be8784b`.
+- [Main CI 42956423673](https://github.com/hdog960/Mythwrought/actions/runs/42956423673): **17 passing Node tests**, syntax checks and Chromium landscape/WebGL2 smoke. Tests include deterministic seed behavior, material vertex and adjacent-chunk face culling, camera math, touch-pad rotation, saved look sensitivity, editable terrain, menus, save isolation, and composited screenshot with multiple colors.
+- [Pages deploy 42956423659](https://github.com/hdog960/Mythwrought/actions/runs/42956423659): published merged main, with public HTML and game JavaScript HTTP verification.
+- Original GPU sky shader adds warm horizon, daylight gradient, sun, restrained clouds and distant atmospheric mountain silhouettes. Terrain world generation and serialized schema remain compatible with v0.02.
+- Camera keyboard controls now defer to focused form controls. Help panel permits vertical scrolling; game canvas and touch grips remain touch-captured.
+- The landscape is **still an engineering prototype**, not a polished fantasy world. Actual iPhone performance, Home Screen comfort, premium world material/character standards, long-session play and crash-proof persistence **NOT VERIFIED**.
 
 ## v0.02 verification and limitations
 - [Merged PR #1](https://github.com/hdog960/Mythwrought/pull/1), implementation merge commit `401e1df050f7017e8690134bf24657dd8049098c`.
