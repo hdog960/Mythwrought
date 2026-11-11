@@ -30,12 +30,16 @@ try{
   assert.match(text,/MANUAL iPhone Safari/);
   assert.deepEqual(await probes(),[],'Diagnostic temporary storage leaked');
   assert.equal(await saved(),before,'Device diagnostic modified canonical world save');
+  // Capture readable, unselected diagnostic text *before* the clipboard
+  // fallback selects it. Preserve evidence of both the menu and report.
+  await mkdir('artifacts',{recursive:true});
+  await audit.evaluate(el=>{el.scrollTop=0;el.setSelectionRange(0,0);});
+  await audit.screenshot({path:'artifacts/mythwrought-v010-audit-report.png'});
+  await page.locator('#runAudit').scrollIntoViewIfNeeded();
+  await page.screenshot({path:'artifacts/mythwrought-v010-audit-settings.png'});
   await page.locator('#copyAudit').click();
   await page.waitForFunction(()=>/copied|selected/.test(document.querySelector('#auditStatus').textContent),null,{timeout:8000});
   assert.match(await page.locator('#auditStatus').textContent(),/copied|selected/);
-  await mkdir('artifacts',{recursive:true});
-  await page.screenshot({path:'artifacts/mythwrought-v010-audit-settings.png'});
-  await audit.screenshot({path:'artifacts/mythwrought-v010-audit-report.png'});
 
   await page.locator('#closeHelp').click();
   await page.evaluate(()=>window.__mythwroughtTest.placeFixture(15,18,-1,4));
