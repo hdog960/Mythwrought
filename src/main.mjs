@@ -6,6 +6,7 @@ import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorld
 import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
+import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -56,12 +57,17 @@ function start(){
     'float shade=.93+.14*tiled;',
     'if(vMat==1)shade*=.97+.05*step(.73,speckle(floor(vUv*17.0)+17.0));',
     'if(vMat==2)shade*=.91+.16*speckle(floor(vUv*vec2(11.0,15.0))+41.0);',
-    'if(vMat==3)shade*=.94+.10*speckle(floor(vUv*vec2(7.0,13.0))+3.0);',
-    'if(vMat==4)shade*=.96+.07*sin(vUv.x*56.0);',
-    'if(vMat==5)shade*=.98+.12*step(.65,fract(vUv.x*3.0+vUv.y*2.0));',
+    'if(vMat==3)shade*=.88+.18*speckle(floor(vUv*vec2(11.0,13.0))+3.0);',
+    'if(vMat==3)shade*=.97+.06*step(.93,speckle(floor(vUv*vec2(9.0,11.0))+vec2(4.0,2.0)));',
+    'if(vMat==4)shade*=.85+.18*smoothstep(.20,.92,abs(sin(vUv.x*22.0+sin(vUv.y*9.0))));',
+    'if(vMat==4)shade*=.98+.04*step(.88,speckle(floor(vUv*vec2(12.0,8.0))+4.0));',
+    'if(vMat==5)shade*=.83+.24*step(.48,fract(vUv.x*3.0+vUv.y*2.0));',
+    'if(vMat==5)shade*=.91+.13*step(.82,speckle(floor(vUv*vec2(12.0))+5.0));',
     'if(vMat==6)shade*=.90+.18*step(.69,speckle(floor(vUv*15.0)+vec2(26.0,19.0)));',
     'float fog=smoothstep(29.0,68.0,vDistance);',
     'vec3 colored=mix(vColor,vColor*shade,closeDetail*.8);',
+    'if(vMat==5)colored=mix(colored,vec3(.52,.85,.95),closeDetail*.12);',
+    'if(vMat==6)colored=mix(colored,vec3(.84,.69,.40),closeDetail*.07);',
     'outColor=vec4(mix(colored,uFog,fog),1.0); }'
   ].join('\n');
   function shader(type,src){
@@ -95,6 +101,8 @@ function start(){
   let selected=BLOCK.STONE;
   const outlineBuffer=gl.createBuffer();
   let outlineKey='',outlineCount=0;
+  const targetInfo=document.getElementById('targetInfo');
+  let lastTargetText='';
   const chunks=new Map(),pending=new Map();
   const name=chunkKey;
   const player=newPlayer(world);
@@ -123,8 +131,15 @@ function start(){
     player.yaw=adjusted.yaw;player.pitch=adjusted.pitch;
   }
   function save(){
-    try{localStorage.setItem(worldSlotKey(world.seed),JSON.stringify(world.save()));localStorage.setItem(SELECTED_SEED_KEY,String(world.seed));changed=false;}
-    catch(err){message('Local save failed — export from the menu');}
+    try{
+      localStorage.setItem(worldSlotKey(world.seed),JSON.stringify(world.save()));
+      localStorage.setItem(SELECTED_SEED_KEY,String(world.seed));
+      changed=false;
+      return true;
+    }catch(err){
+      message('Local save failed — export from the menu');
+      return false;
+    }
   }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
@@ -155,20 +170,13 @@ function start(){
     // Not-yet-loaded chunks read the current global voxel world when meshed.
   }
   function edit(mode){
-    const target=raycast(world,eye(),facing(),6);
-    if(!target){message('Look at a nearby block');return;}
-    const p=mode==='mine'?target.hit:target.adjacent;
-    if(!p){message('No free space for placement');return;}
-    const [x,y,z]=p,old=world.get(x,y,z);
-    if(mode==='place'&&old!==BLOCK.AIR)return;
-    if(mode==='mine'&&old===BLOCK.AIR)return;
-    if(!world.set(x,y,z,mode==='mine'?BLOCK.AIR:selected)){message('Outside editable prototype height');return;}
-    if(mode==='place'&&collides(world,player.x,player.feet,player.z)){
-      world.set(x,y,z,old);message('Cannot place a block inside the player');return;
-    }
-    try{refreshEditedMeshes(x,z);}
-    catch(err){world.set(x,y,z,old);message('Mesh edit failed: '+err.message);return;}
-    changed=true;save();message(mode==='mine'?'Block removed and saved':'Block placed and saved');
+    const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
+    if(!result.ok){message(result.reason);return;}
+    changed=true;
+    const persisted=save();
+    const label=BLOCK_NAMES[result.block]||'block';
+    const action=mode==='mine'?'Removed':'Placed';
+    message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
   }
   let lastStreamingCenter='';
   let wanted=new Set();
@@ -264,12 +272,34 @@ function start(){
         gl.drawArrays(gl.TRIANGLES,0,c.count);
       }
       // A faint world-space targeted-block outline, never a HUD covering the scene.
-      const focused=help.hidden?raycast(world,eye(),facing(),6):null;
-      const focusKey=focused?focused.hit.join(','):'';
+      const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player):null;
+      const focusKey=focused?.hit?.join(',')||'';
+      const placeKey=focused?.canPlace?focused.adjacent.join(','):'';
       canvas.dataset.targetBlock=focusKey;
-      if(focusKey!==outlineKey){
-        outlineKey=focusKey;
-        const data=focused?outlineVertices(focused.hit):new Float32Array();
+      canvas.dataset.targetPlace=placeKey;
+      canvas.dataset.canPlace=String(Boolean(placeKey));
+      const display=focused?.hit?
+        (BLOCK_NAMES[focused.block]||'block').toUpperCase()+' · '+focused.distance.toFixed(1)+'m'+
+        '\n'+(focused.canPlace?'GOLD = BUILD SPACE':'PLACE BLOCKED'):
+        'LOOK AT A BLOCK';
+      if(display!==lastTargetText){
+        lastTargetText=display;targetInfo.textContent=display;
+        // Do not leave a previous "no target" or "blocked" warning on the
+        // footer after the player successfully re-aims elsewhere.
+        if(focused?.hit&&status.textContent==='Look at a nearby block')
+          message('Target found · use MINE or PLACE');
+        if(focused?.canPlace&&status.textContent==='Cannot place inside the player')
+          message('Build space clear · choose MINE or PLACE');
+      }
+      const nextOutlineKey=focusKey+'|'+placeKey;
+      if(nextOutlineKey!==outlineKey){
+        outlineKey=nextOutlineKey;
+        // Teal indicates the mineable target; amber marks the adjacent
+        // valid placement cell. Both are world-space geometry, not HUD.
+        const mine=focused?.hit?outlineVertices(focused.hit,[.44,.90,.81]):new Float32Array();
+        const preview=placeKey?outlineVertices(focused.adjacent,[.97,.76,.38]):new Float32Array();
+        const data=new Float32Array(mine.length+preview.length);
+        data.set(mine);data.set(preview,mine.length);
         gl.bindBuffer(gl.ARRAY_BUFFER,outlineBuffer);
         gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
         outlineCount=data.length/9;
