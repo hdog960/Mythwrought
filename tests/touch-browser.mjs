@@ -57,10 +57,15 @@ try{
   // Holding precision must be a distinct action, never a persistent toggle.
   const precision=center(await page.locator('#precision').boundingBox());
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[touch(4,precision.x,precision.y)]});
-  await page.waitForTimeout(70);
+  // The pointer event changes the button synchronously, but the canvas data
+  // attribute is published on the NEXT WebGL frame. Software GPU CI may need
+  // >70 ms for that frame; keep both assertions instead of sleeping blindly.
+  await page.waitForFunction(()=>document.querySelector('#precision').classList.contains('held'),null,{timeout:2500});
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.precision==='true',null,{timeout:2500});
   assert.equal((await v()).precision,'true','Precision button did not engage while pressed');
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-  await page.waitForTimeout(70);
+  await page.waitForFunction(()=>!document.querySelector('#precision').classList.contains('held'),null,{timeout:2500});
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.precision==='false',null,{timeout:2500});
   assert.equal((await v()).precision,'false','Precision button stuck after release');
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
