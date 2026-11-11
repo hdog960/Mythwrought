@@ -94,9 +94,11 @@ export function stepPlayer(world,p,input,dt){
   const targetX=(Math.sin(yaw)*front+Math.cos(yaw)*side)*WALK_SPEED;
   const targetZ=(Math.cos(yaw)*front-Math.sin(yaw)*side)*WALK_SPEED;
   for(let i=0;i<count;i++){
-    const supported=collides(world,p.x,p.feet-GROUND_PROBE,p.z);
-    if(supported&&p.vY<=0){p.onGround=true;p.coyote=COYOTE_TIME;}
-    else if(!supported){p.onGround=false;p.coyote=Math.max(0,(p.coyote||0)-h);}
+    // A support probe helps with step checks, but it must NOT freeze a falling
+    // player several centimeters above the floor. Ground contact is near-exact.
+    const touchingFloor=collides(world,p.x,p.feet-.002,p.z);
+    if(touchingFloor&&p.vY<=0){p.onGround=true;p.coyote=COYOTE_TIME;}
+    else if(!touchingFloor){p.onGround=false;p.coyote=Math.max(0,(p.coyote||0)-h);}
     p.jumpBuffer=Math.max(0,(p.jumpBuffer||0)-h);
     if(p.jumpBuffer>0&&(p.onGround||p.coyote>0)){
       p.vY=JUMP_VELOCITY;p.onGround=false;p.coyote=0;p.jumpBuffer=0;out.jumped=true;

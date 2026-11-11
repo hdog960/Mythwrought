@@ -57,6 +57,14 @@ test('standing ground remains stable for 300 frames',()=>{
   assert.equal(p.onGround,true);
   assert.equal(collides(world,p.x,p.feet,p.z),false);
 });
+test('a falling hero never hovers above ground while within support probe distance',()=>{
+  const {world,areaFloor}=fixture();areaFloor();
+  const p=hero(.5,.5,1.045);
+  p.onGround=false;p.vY=-.25;
+  progress(world,p,{forward:0,strafe:0},70);
+  assert.ok(Math.abs(p.feet-1)<.002,'early ground contact stopped fall at '+p.feet);
+  assert.equal(p.onGround,true);
+});
 test('jump leaves ground, peaks and lands without tunneling',()=>{
   const {world,areaFloor}=fixture();areaFloor();
   const p=hero();
