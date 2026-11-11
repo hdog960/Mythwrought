@@ -57,6 +57,11 @@ The initial prototype is intentionally dependency-free. Open `index.html` with a
 - [Merged-main CI 43118801117](https://github.com/hdog960/Mythwrought/actions/runs/43118801117) passed **98/98 Node and all 11 Chromium suites**, including simulated visibility, input cancellation, pagehide/pageshow, save-byte equality, and full negative-coordinate chunk restoration. [Pages/public asset publishing 43118800980](https://github.com/hdog960/Mythwrought/actions/runs/43118800980) passed on the exact merged game commit. Authentic headless browser screenshots were inspected; they **do not** certify actual Safari.
 - Whimsical art and charming city pet shops/mounts with optional modest combat assistance and temporary pet buffs have been captured as **future design direction**, not implemented or approved. Real iPhone testing, canonical production IndexedDB persistence, offline behavior and premium art signoff all remain open. v0.11 stays locked.
 
+### v0.10 Gate A compact landscape resize safety — **Gate A still OPEN**
+- A slow real Chromium resize run caught a **genuine** 568×320 control-clipping regression after the foreground runtime merge. [PR #21](https://github.com/hdog960/Mythwrought/pull/21) repaired the actual layout: the console is CSS-bounded to the current viewport height even when a resize handler is late, and each external side grip stays at or below 27.5% of the width. The pre-existing layout checks were **strengthened**, not relaxed.
+- [Repaired merged-main CI passed 98/98 Node and all 11 Chromium suites](https://github.com/hdog960/Mythwrought/actions/runs/43120294951), including intentionally stale layout values; [Pages + public assets passed](https://github.com/hdog960/Mythwrought/actions/runs/43120294932). The authentic 568×320 landscape screenshot was inspected. Existing saves, gameplay and touch controls remain intact.
+- **No physical iPhone or Home Screen acceptance, thermal certification, premium art approval or Gate A promotion has occurred.** v0.11 remains locked.
+
 ### v0.02 release verification
 - [v0.02 merged PR #1](https://github.com/hdog960/Mythwrought/pull/1), merge commit `401e1df`.
 - [Main CI run](https://github.com/hdog960/Mythwrought/actions/runs/42948496448): 12/12 Node tests, syntax and Chromium terrain interaction tests passed.
