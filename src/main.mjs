@@ -500,6 +500,8 @@ function start(){
   const auditReport=document.getElementById('auditReport');
   const auditStatus=document.getElementById('auditStatus');
   document.getElementById('runAudit').onclick=async()=>{
+    // Never show or copy an outdated report while a new asynchronous probe runs.
+    auditReport.value='';
     auditStatus.textContent='Gathering read-only session measurements…';
     try{
       const left=document.querySelector('.left').getBoundingClientRect();
