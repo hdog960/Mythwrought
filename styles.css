@@ -128,3 +128,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .vault-download{display:block;margin:8px 0;padding:10px;text-align:center;border:2px solid #ba9b66;border-radius:9px;background:#375345;color:#fef0cd;font-weight:800;font-size:12px;touch-action:manipulation}
 .vault-download[hidden]{display:none}
 .vault-download:focus-visible{outline:3px solid #fff1bd;outline-offset:2px}
+
+/* Gate A opt-in mirror and render budget: only within deliberate Settings. */
+.mirror-settings{display:block}
+.mirror-settings .mirror-toggle{display:flex;align-items:center;justify-content:flex-start;gap:9px;padding:7px 2px;font-size:12px;line-height:1.4}
+.mirror-settings input[type="checkbox"]{width:19px;height:19px;min-width:19px;accent-color:#d7b575;touch-action:manipulation}
+.mirror-settings>label:not(.mirror-toggle){display:block;margin:9px 0 4px;font-size:12px}
+#mirrorSlot{display:block;width:100%;min-height:39px;padding:7px;border-radius:8px;border:1px solid #c7a772;background:#15282a;color:#f4dfb9;font-size:12px;touch-action:manipulation}
+.mirror-settings .helpbuttons{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}
+.mirror-settings .helpbuttons button{flex:1 1 145px;padding:9px 7px;min-height:37px;font-size:12px}
+.mirror-settings .helpbuttons button:disabled{opacity:.55}
+#mirrorStatus{min-height:35px;overflow-wrap:anywhere;white-space:normal}
+#mirrorDownload[hidden]{display:none}
