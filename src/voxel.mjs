@@ -162,10 +162,16 @@ export function outlineVertices(cell,color=[.81,.91,.63]){
   }
   return new Float32Array(result);
 }
+// Exact player-sized axis-aligned bounds against every intersecting voxel.
+// Sampling only three body heights missed low ceilings and thin corner contacts.
+export const BODY_RADIUS=.28;
+export const BODY_HEIGHT=1.78;
 export function collides(world,x,feet,z){
-  for(const xx of [x-.25,x+.25])for(const zz of [z-.25,z+.25])
-    for(const yy of [feet+.06,feet+.90,feet+1.60]){
-      if(world.get(Math.floor(xx),Math.floor(yy),Math.floor(zz))!==BLOCK.AIR)return true;
-    }
+  if(![x,feet,z].every(Number.isFinite))return true;
+  const e=1e-5;
+  for(let bx=Math.floor(x-BODY_RADIUS+e);bx<=Math.floor(x+BODY_RADIUS-e);bx++)
+    for(let bz=Math.floor(z-BODY_RADIUS+e);bz<=Math.floor(z+BODY_RADIUS-e);bz++)
+      for(let by=Math.floor(feet+e);by<=Math.floor(feet+BODY_HEIGHT-e);by++)
+        if(world.get(bx,by,bz)!==BLOCK.AIR)return true;
   return false;
 }

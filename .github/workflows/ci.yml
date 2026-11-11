@@ -21,13 +21,14 @@ jobs:
       - name: Install free browser test tools
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
-          npx playwright install --with-deps chromium
+          npx playwright install chromium
       - name: Landscape WebGL2 browser smoke
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-site.log 2>&1 &
           node tests/browser-smoke.mjs
           node tests/touch-browser.mjs
           node tests/layout-browser.mjs
+          node tests/movement-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
