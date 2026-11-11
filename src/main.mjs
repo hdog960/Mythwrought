@@ -498,33 +498,61 @@ function start(){
     try{
       const next=worldSeedFromText(seedInput.value);
       if(next===world.seed){seedMessage.textContent='Already exploring this seed.';return;}
-      save();
-      const candidate=loadWorld(next); // Validate before changing the active world.
+      if(!storageReadOnly&&!save())throw Error('Current world is not verified saved. Export before switching.');
+      const candidate=loadWorld(next);
+      const result=saveWorldSafe(localStorage,candidate);
+      if(!result.ok)throw Error(result.reason);
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];world=candidate;respawnPrototype();
+      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      outlineKey='';outlineCount=0;lastEditMeshKeys=[];
+      world=candidate;storageReadOnly=false;changed=false;respawnPrototype();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
-      save();seedMessage.textContent='World '+world.seed+' ready. Other seed saves remain separate.';
-      message('Loaded seed '+world.seed+' — building nearby chunks');
+      saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';
+      seedMessage.textContent='World '+world.seed+' loaded safely. Other seeds remain separate.';
+      message('Loaded seed '+world.seed+' with saved world edits');
     }catch(err){seedMessage.textContent='World not changed: '+err.message;}
   };
   document.getElementById('export').onclick=()=>{
-    const blob=new Blob([JSON.stringify(world.save(),null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob),a=document.createElement('a');
-    a.href=url;a.download='mythwrought-seed-'+world.seed+'-prototype.json';document.body.appendChild(a);a.click();a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),3000);message('Exported world edit backup');
+    try{
+      const data=JSON.stringify(world.save(),null,2);
+      importWorldData(data); // Ensure the export is a valid original schema-1 file.
+      const blob=new Blob([data],{type:'application/json'});
+      const url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download='mythwrought-seed-'+world.seed+'-prototype.json';
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
+      message('Exported verified world backup · '+saveFingerprint(data));
+    }catch(err){message('Export failed: '+err.message);}
   };
   document.getElementById('import').onclick=()=>document.getElementById('importFile').click();
   document.getElementById('importFile').addEventListener('change',async e=>{
     const f=e.target.files?.[0];if(!f)return;
     try{
-      const imported=VoxelWorld.restore(JSON.parse(await f.text()));
-      save(); // Keep the previously active world's slot before replacing.
-      world=imported;
+      if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
+      const imported=importWorldData(await f.text()); // Validate before mutation.
+      if(!storageReadOnly&&!save())throw Error('Current world could not be verified saved; export first.');
+      let existing=null,damaged=false;
+      try{existing=loadWorldSafe(localStorage,imported.seed).world;}
+      catch(_){damaged=true;}
+      const conflict=existing&&JSON.stringify(existing.save())!==JSON.stringify(imported.save())&&
+        (existing.edits.size>0||imported.seed===world.seed);
+      if((damaged||conflict)&&!window.confirm(
+        'Replace saved edits for seed '+imported.seed+'? The previous data will be preserved in the local backup slot. Cancel leaves the current world unchanged.'
+      )){
+        message('Import cancelled; existing world unchanged');return;
+      }
+      const outcome=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
+      if(!outcome.ok)throw Error(outcome.reason);
+      world=imported;storageReadOnly=false;changed=false;
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
-      save();message('Imported voxel world');
-    }catch(err){message('Import rejected: '+err.message);}
-    e.target.value='';
+      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      outlineKey='';outlineCount=0;lastEditMeshKeys=[];
+      respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
+      seedInput.value=String(world.seed);
+      saveHealth.textContent='Imported verified schema-1 world with previous data preserved.';
+      message('Imported world safely · '+world.edits.size+' block edit deltas');
+    }catch(err){message('Import rejected; existing world unchanged: '+err.message);}
+    finally{e.target.value='';}
   });
   let graphicsLost=false;
   canvas.addEventListener('webglcontextlost',e=>{
