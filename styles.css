@@ -13,7 +13,8 @@
    All decorative detailing lives inside the console frame, not over the 3D world. */
 :root{--grip-width:clamp(122px,18vw,174px);--old-gold:#e5c891;--etched-bronze:#b18b50;--deep-wood:#172926;color-scheme:dark}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-.console{grid-template-columns:var(--grip-width) minmax(0,1fr) var(--grip-width)}
+/* Prevent stale JS grip values from shrinking the game below 45% of the available width. */
+.console{grid-template-columns:min(var(--grip-width),27.5%) minmax(0,1fr) min(var(--grip-width),27.5%)}
 .grip{
   isolation:isolate;position:relative;overflow:hidden;
   background:
