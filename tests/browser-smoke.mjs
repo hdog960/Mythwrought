@@ -44,7 +44,11 @@ try{
   assert.ok(Array.isArray(edits)&&edits.length>0,'Mining did not persist a real block edit');
   await page.locator('#menu').click();
   assert.ok(await page.locator('#help').isVisible(),'Help should open');
-  await page.locator('#lookSensitivity').fill('150');
+  await page.locator('#lookSensitivity').focus();
+  await page.keyboard.press('End');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
   assert.equal(await page.locator('#lookValue').textContent(),'150%','Camera sensitivity did not update');
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v003-look-percent')),'150');
   await page.locator('#save').click();
