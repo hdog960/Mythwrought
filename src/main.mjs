@@ -9,6 +9,7 @@ import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
+import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
@@ -118,6 +119,7 @@ function start(){
   let precisionHeld=false;
   let frame=0,lastFrame=performance.now(),changed=false;
   const frameHistory=new FrameHistory(360);
+  const meshCadence=new MeshFrameCadence({budgetMs:12,maxCooldown:2});
   const mirrorQueue=new MirrorWriteQueue();
   const mirrorStatus=document.getElementById('mirrorStatus');
   const mirrorSlot=document.getElementById('mirrorSlot');
@@ -250,6 +252,7 @@ function start(){
     const center=name(chunkCoord(player.x),chunkCoord(player.z));
     if(center!==lastStreamingCenter){
       lastStreamingCenter=center;
+      meshCadence.resetCooldown(); // prioritize freshly entered chunk windows
       const desired=chunkWindow(player.x,player.z,2);
       wanted=new Set(desired.map(c=>name(c.cx,c.cz)));
       // Eagerly delete GPU buffers behind the player; never accumulate old border chunks.
@@ -266,13 +269,30 @@ function start(){
     // Bounded missing mesh uploads, nearest to the player first.
     const cx=chunkCoord(player.x),cz=chunkCoord(player.z);
     const queue=priorityMissingChunks(pending,cx,cz);
-    if(queue.length){
-      const [k,[x,z]]=queue[0];pending.delete(k);
-      const old=chunks.get(k);if(old)gl.deleteBuffer(old.buffer);
+    if(queue.length&&meshCadence.ready()){
+      const [k,[x,z]]=queue[0];
+      const begin=performance.now();
       const data=meshChunk(world,x,z),buffer=gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+      if(!buffer){
+        // Never destroy an existing chunk when GPU resources are unavailable.
+        meshCadence.finished(performance.now()-begin);
+        return;
+      }
+      try{
+        gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+        gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+      }catch(error){
+        gl.deleteBuffer(buffer);
+        meshCadence.finished(performance.now()-begin);
+        message('GPU chunk upload deferred; existing world remains intact');
+        return;
+      }
+      pending.delete(k);
+      const old=chunks.get(k);
       chunks.set(k,{x,z,buffer,count:data.length/9});
-    } // one chunk mesh per frame, bounded visible radius
+      if(old)gl.deleteBuffer(old.buffer);
+      meshCadence.finished(performance.now()-begin);
+    } // at most one mesh upload per eligible frame, bounded delayed work
     if(frame%45===0)for(const [k,c] of chunks){
       if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
     }
@@ -326,6 +346,8 @@ function start(){
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
       gl.uniform3fv(U.uFog,DISTANCE_FOG_COLOR);
       stream();
+      canvas.dataset.renderedFrames=String(frame);
+      canvas.dataset.meshCadenceSkipped=String(meshCadence.skipped);
       canvas.dataset.loadedChunks=String(chunks.size);
       canvas.dataset.pendingChunks=String(pending.size);
       canvas.dataset.chunkCenter=lastStreamingCenter;
@@ -397,8 +419,10 @@ function start(){
       canvas.dataset.lookMode=lookMode;
       canvas.dataset.precision=String(precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight'));
     }
-    requestAnimationFrame(draw);
   }
+  const frameDriver=new ForegroundFrameDriver(
+    callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),draw
+  );
   // Capture is per grip: moving and aiming simultaneously never compete for one pointer.
   function pointerPad(el,update,release){
     let active=null,lastX=0,lastY=0;
@@ -515,8 +539,15 @@ function start(){
   document.addEventListener('keyup',e=>keys.delete(e.code));
   window.addEventListener('blur',cancelAllPointers);
   document.addEventListener('visibilitychange',()=>{
-    if(document.hidden){cancelAllPointers();if(mirrorEnabled&&pendingMirrors.size)flushMirror();}
-    lastFrame=performance.now();
+    if(document.hidden){
+      frameDriver.pause();
+      frameHistory.frame(performance.now(),false);
+      cancelAllPointers();
+      if(mirrorEnabled&&pendingMirrors.size)flushMirror();
+    }else if(!graphicsLost){
+      lastFrame=performance.now(); // never simulate hidden time as movement
+      frameDriver.resume();
+    }
   });
   const lookModeSelect=document.getElementById('lookMode');
   lookModeSelect.value=lookMode;
@@ -594,7 +625,7 @@ function start(){
         dimensions:innerWidth+'×'+innerHeight+' CSS px, DPR '+(devicePixelRatio||1),
         homeScreen:standalone?'standalone reported, not independently confirmed':'browser or unknown',
         grips,frames:frameHistory.stats(),
-        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels',
+        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels; mesh uploads '+meshCadence.meshes+', deferred frames '+meshCadence.skipped+', longest measured mesh '+meshCadence.slowestMs+' ms',
         save:saved,probe,quota
       });
       auditStatus.textContent='Report ready. Copy it for Gate A review; manual iPhone and art approval remain open.';
@@ -882,13 +913,15 @@ function start(){
   });
   let graphicsLost=false;
   canvas.addEventListener('webglcontextlost',e=>{
-    e.preventDefault();graphicsLost=true;cancelAllPointers();
+    e.preventDefault();graphicsLost=true;frameDriver.pause();cancelAllPointers();
     fatal('Graphics context lost. Reload to resume saved terrain edits.');
   });
   canvas.addEventListener('webglcontextrestored',()=>{
     fatal('Graphics restarted. Reload to rebuild shaders and saved terrain safely.');
   });
   window.addEventListener('pagehide',()=>{
+    frameDriver.pause();
+    frameHistory.frame(performance.now(),false);
     cancelAllPointers();
     // Do not rewrite valid/externally damaged saves on an ordinary reload.
     // Actual edits already save synchronously; only retry if still dirty.
@@ -896,6 +929,13 @@ function start(){
     // Best effort only: Safari may terminate pending IndexedDB transactions.
     // Already-verified localStorage remains authoritative on force quit.
     if(mirrorEnabled&&pendingMirrors.size)flushMirror();
+  });
+  window.addEventListener('pageshow',()=>{
+    // iOS Safari BFCache restoration can resume without rerunning this module.
+    if(!document.hidden&&!graphicsLost){
+      lastFrame=performance.now();
+      frameDriver.resume();
+    }
   });
   if(['localhost','127.0.0.1'].includes(location.hostname)){
     // Local-only regression interface; absent from the public Pages runtime.
@@ -924,12 +964,13 @@ function start(){
         save();
       },
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
-        lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed};}
+        lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
+        frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats()};}
     });
   }
   saveHealth.textContent=storageReadOnly?
     'READ ONLY: damaged world data preserved; import or select another seed.':
     'Schema-1 saved edits; checksum journal and verified previous-world backup.';
   message(recoveryNote||'Move, look, mine and place · ☰ for help');
-  requestAnimationFrame(draw);
+  if(!document.hidden)frameDriver.resume();
 }
