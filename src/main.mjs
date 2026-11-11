@@ -9,6 +9,7 @@ import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
+import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -554,6 +555,110 @@ function start(){
       auditStatus.textContent='Clipboard blocked; text selected for manual Copy.';
     }
   };
+  // Optional Gate A snapshots live in IndexedDB; v0.02 localStorage remains
+  // the canonical save. No startup migration or automatic destructive restore.
+  const vaultSelect=document.getElementById('vaultSelect');
+  const vaultStatus=document.getElementById('vaultStatus');
+  const vaultLink=document.getElementById('vaultDownloadLink');
+  const vaultButtons=[...document.querySelectorAll('.vault-settings button')];
+  let vaultBusy=false,vaultObjectUrl=null;
+  function clearVaultLink(){
+    if(vaultObjectUrl){URL.revokeObjectURL(vaultObjectUrl);vaultObjectUrl=null;}
+    vaultLink.hidden=true;vaultLink.removeAttribute('href');
+  }
+  function chosenVaultId(){
+    const id=vaultSelect.value;
+    if(!id)throw Error('Show device backups and select a snapshot first');
+    return id;
+  }
+  async function useVault(action){
+    if(vaultBusy)return;
+    vaultBusy=true;vaultButtons.forEach(button=>button.disabled=true);
+    try{await action();}
+    catch(error){vaultStatus.textContent='Device vault: '+String(error.message||error)+'. Live world unchanged unless explicitly stated.';}
+    finally{vaultButtons.forEach(button=>button.disabled=false);vaultBusy=false;}
+  }
+  async function refreshVault(prefer=''){
+    clearVaultLink();
+    const records=await listVaultBackups();
+    const selected=prefer||vaultSelect.value;
+    vaultSelect.replaceChildren();
+    const prompt=document.createElement('option');
+    prompt.value='';prompt.textContent='Choose a device backup';vaultSelect.append(prompt);
+    for(const record of records){
+      const option=document.createElement('option');
+      option.value=record.id;
+      option.textContent=(record.valid?'✓ ':'⚠ DAMAGED · ')+
+        'Seed '+(record.seed??'?')+' · '+String(record.createdAt).slice(0,16).replace('T',' ')+
+        (record.valid?' · '+record.edits+' edits':' · cannot restore');
+      vaultSelect.append(option);
+    }
+    if(records.some(record=>record.id===selected))vaultSelect.value=selected;
+    vaultStatus.textContent=records.length+' device backups found; select one to prepare JSON or restore. No automatic migration.';
+    return records;
+  }
+  vaultSelect.addEventListener('change',clearVaultLink);
+  document.getElementById('vaultRefresh').onclick=()=>useVault(()=>refreshVault());
+  document.getElementById('vaultBackup').onclick=()=>useVault(async()=>{
+    if(storageReadOnly)throw Error('Current world is in protected read-only mode; select a healthy seed or import a backup');
+    const capturedSeed=world.seed;
+    const raw=JSON.stringify(world.save());
+    const snapshot=await createVaultBackup(raw);
+    if(capturedSeed!==snapshot.seed)throw Error('Snapshot seed mismatch');
+    await refreshVault(snapshot.id);
+    vaultStatus.textContent='Verified device backup for seed '+snapshot.seed+
+      ' ('+snapshot.edits+' edits). This does NOT replace a downloadable JSON backup.';
+  });
+  document.getElementById('vaultPrepare').onclick=()=>useVault(async()=>{
+    clearVaultLink();
+    const snapshot=await inspectVaultBackup(chosenVaultId());
+    // A second user tap on the actual link preserves Safari's download gesture.
+    vaultObjectUrl=URL.createObjectURL(new Blob([snapshot.raw],{type:'application/json'}));
+    vaultLink.href=vaultObjectUrl;
+    vaultLink.download='mythwrought-vault-seed-'+snapshot.seed+'-'+snapshot.id.replace(/:/g,'-')+'.json';
+    vaultLink.hidden=false;
+    vaultStatus.textContent='Backup verified. Tap DOWNLOAD VERIFIED JSON BACKUP; use regular IMPORT to restore this file later.';
+  });
+  document.getElementById('vaultRestore').onclick=()=>useVault(async()=>{
+    clearVaultLink();
+    const activeSeed=world.seed;
+    const snapshot=await inspectVaultBackup(chosenVaultId());
+    const imported=importWorldData(snapshot.raw);
+    // Always require approval, including when restoring a different seed.
+    if(!window.confirm('RESTORE device backup for seed '+snapshot.seed+' with '+snapshot.edits+
+      ' edits? The current saved world will be preserved in the previous-good slot where possible. Cancel changes nothing.')) {
+      vaultStatus.textContent='Restore cancelled. Current world and backups unchanged.';return;
+    }
+    if(world.seed!==activeSeed)throw Error('Current world changed while restoring; retry');
+    if(!storageReadOnly&&changed&&!save())throw Error('Current world has unsaved edits. Export it before restoring');
+    let damaged=false;
+    try{loadWorldSafe(localStorage,imported.seed);}catch(_){damaged=true;}
+    const result=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
+    if(!result.ok)throw Error('Restore failed without replacing the active game: '+result.detail);
+    for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    outlineKey='';outlineCount=0;lastEditMeshKeys=[];
+    world=imported;storageReadOnly=false;changed=false;
+    respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
+    document.getElementById('seedInput').value=String(world.seed);
+    saveHealth.textContent='Restored a verified IndexedDB snapshot; original schema-1 live save confirmed.';
+    message('Restored device backup for seed '+world.seed+' · '+snapshot.edits+' edits');
+    vaultStatus.textContent='Restore complete. Export JSON for an independent off-device backup.';
+  });
+  document.getElementById('vaultDelete').onclick=()=>useVault(async()=>{
+    clearVaultLink();
+    const id=chosenVaultId();
+    const all=await listVaultBackups();
+    const entry=all.find(item=>item.id===id);
+    if(!entry)throw Error('Selected backup no longer exists');
+    if(!window.confirm('Permanently DELETE only this device backup from seed '+(entry.seed??'?')+
+      '? This cannot be undone. Your live world and other snapshots will not be touched.')){
+      vaultStatus.textContent='Deletion cancelled. No backup changed.';return;
+    }
+    await deleteVaultBackup(id);
+    const remaining=await refreshVault();
+    vaultStatus.textContent='Selected snapshot deleted and verified; '+remaining.length+' backups remain. Live world unchanged.';
+  });
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);
   document.getElementById('switchWorld').onclick=()=>{
