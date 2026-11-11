@@ -1,4 +1,4 @@
-import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,collides} from './voxel.mjs';
+import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
 import {clampLook,forwardVector,compassDegrees} from './camera.mjs';
@@ -88,6 +88,8 @@ function start(){
   gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);
 
   let selected=BLOCK.STONE;
+  const outlineBuffer=gl.createBuffer();
+  let outlineKey='',outlineCount=0;
   const chunks=new Map(),pending=new Map();
   const name=(x,z)=>x+','+z;
   const player={x:.5,z:.5,feet:terrainHeight(0,0,world.seed)+1.02,yaw:Math.PI,pitch:-.12,vY:0,onGround:false};
@@ -108,7 +110,7 @@ function start(){
   const facing=()=>forwardVector(player.yaw,player.pitch);
   function look(dx,dy,scale=.008){
     const precise=precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight');
-    const adjusted=clampLook(player.yaw,player.pitch,dx,dy,sensitivity*(precise ? .4 : 1),scale);
+    const adjusted=clampLook(player.yaw,player.pitch,dx,dy,sensitivity,scale*(precise ? .4 : 1));
     player.yaw=adjusted.yaw;player.pitch=adjusted.pitch;
   }
   function save(){
@@ -234,6 +236,25 @@ function start(){
         gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
         gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
+      }
+      // A faint world-space targeted-block outline, never a HUD covering the scene.
+      const focused=help.hidden?raycast(world,eye(),facing(),6):null;
+      const focusKey=focused?focused.hit.join(','):'';
+      canvas.dataset.targetBlock=focusKey;
+      if(focusKey!==outlineKey){
+        outlineKey=focusKey;
+        const data=focused?outlineVertices(focused.hit):new Float32Array();
+        gl.bindBuffer(gl.ARRAY_BUFFER,outlineBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
+        outlineCount=data.length/9;
+      }
+      if(outlineCount){
+        gl.bindBuffer(gl.ARRAY_BUFFER,outlineBuffer);
+        gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
+        gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
+        gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
+        gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
+        gl.drawArrays(gl.LINES,0,outlineCount);
       }
       const deg=compassDegrees(player.yaw);
       compass.textContent=['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8]+' · '+String(deg).padStart(3,'0')+'°';
@@ -380,7 +401,7 @@ function start(){
       save();
       const candidate=loadWorld(next); // Validate before changing the active world.
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();world=candidate;respawnPrototype();
+      chunks.clear();pending.clear();outlineKey='';outlineCount=0;world=candidate;respawnPrototype();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       save();seedMessage.textContent='World '+world.seed+' ready. Other seed saves remain separate.';
       message('Loaded seed '+world.seed+' — building nearby chunks');
@@ -400,7 +421,7 @@ function start(){
       save(); // Keep the previously active world's slot before replacing.
       world=imported;
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
+      chunks.clear();pending.clear();outlineKey='';outlineCount=0;respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       save();message('Imported voxel world');
     }catch(err){message('Import rejected: '+err.message);}
     e.target.value='';
