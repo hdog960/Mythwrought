@@ -1,4 +1,5 @@
-import {VoxelWorld,BLOCK,CHUNK_SIZE,chunkCoord,terrainHeight,meshChunk,raycast,collides} from './voxel.mjs';
+import {VoxelWorld,BLOCK,chunkCoord,terrainHeight,meshChunk,raycast,collides} from './voxel.mjs';
+import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -6,7 +7,6 @@ const status=document.getElementById('status');
 const compass=document.getElementById('compass');
 const seedLabel=document.getElementById('seed');
 const help=document.getElementById('help');
-const SAVE_KEY='mythwrought-v001-world';
 const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,powerPreference:'high-performance'});
 function message(s){status.textContent=s;}
 function fatal(s){notice.hidden=false;notice.textContent=s;message('3D renderer unavailable');}
@@ -15,9 +15,19 @@ else start();
 
 function start(){
   let world;
-  try{const s=localStorage.getItem(SAVE_KEY);world=s?VoxelWorld.restore(JSON.parse(s)):new VoxelWorld(179);}
-  catch(e){world=new VoxelWorld(179);message('Save unavailable; beginning a fresh prototype world');}
-  seedLabel.textContent='WORLD '+String(world.seed).padStart(4,'0');
+  function loadWorld(seed){
+    let raw=localStorage.getItem(worldSlotKey(seed));
+    if(raw===null&&seed===DEFAULT_WORLD_SEED)raw=localStorage.getItem(LEGACY_WORLD_KEY);
+    if(raw===null)return new VoxelWorld(seed);
+    const found=VoxelWorld.restore(JSON.parse(raw));
+    if(found.seed!==seed)throw Error('Save seed does not match requested world');
+    return found;
+  }
+  try{
+    const choice=localStorage.getItem(SELECTED_SEED_KEY);
+    world=loadWorld(choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice));
+  }catch(err){world=new VoxelWorld(DEFAULT_WORLD_SEED);message('Saved data unavailable; no old saves were deleted');}
+  seedLabel.textContent='WORLD '+world.seed;
   const VS=[
     '#version 300 es','precision highp float;',
     'in vec3 aPos; in vec3 aColor;',
@@ -65,7 +75,7 @@ function start(){
   const eye=()=>[player.x,player.feet+1.55,player.z];
   const facing=()=>[Math.sin(player.yaw)*Math.cos(player.pitch),Math.sin(player.pitch),Math.cos(player.yaw)*Math.cos(player.pitch)];
   function save(){
-    try{localStorage.setItem(SAVE_KEY,JSON.stringify(world.save()));changed=false;}
+    try{localStorage.setItem(worldSlotKey(world.seed),JSON.stringify(world.save()));localStorage.setItem(SELECTED_SEED_KEY,String(world.seed));changed=false;}
     catch(err){message('Local save failed — export from the menu');}
   }
   function invalidate(x,z){
@@ -215,6 +225,21 @@ function start(){
   document.getElementById('menu').onclick=()=>{help.hidden=false;keys.clear();};
   document.getElementById('closeHelp').onclick=()=>help.hidden=true;
   document.getElementById('save').onclick=()=>{save();message('Local world edits saved');};
+  const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
+  seedInput.value=String(world.seed);
+  document.getElementById('switchWorld').onclick=()=>{
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(next===world.seed){seedMessage.textContent='Already exploring this seed.';return;}
+      save();
+      const candidate=loadWorld(next); // Validate before changing the active world.
+      for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+      chunks.clear();pending.clear();world=candidate;respawnPrototype();
+      seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
+      save();seedMessage.textContent='World '+world.seed+' ready. Other seed saves remain separate.';
+      message('Loaded seed '+world.seed+' — building nearby chunks');
+    }catch(err){seedMessage.textContent='World not changed: '+err.message;}
+  };
   document.getElementById('export').onclick=()=>{
     const blob=new Blob([JSON.stringify(world.save(),null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -225,9 +250,11 @@ function start(){
   document.getElementById('importFile').addEventListener('change',async e=>{
     const f=e.target.files?.[0];if(!f)return;
     try{
-      world=VoxelWorld.restore(JSON.parse(await f.text()));
+      const imported=VoxelWorld.restore(JSON.parse(await f.text()));
+      save(); // Keep the previously active world's slot before replacing.
+      world=imported;
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();respawnPrototype();seedLabel.textContent='WORLD '+String(world.seed).padStart(4,'0');
+      chunks.clear();pending.clear();respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       save();message('Imported voxel world');
     }catch(err){message('Import rejected: '+err.message);}
     e.target.value='';
