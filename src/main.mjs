@@ -497,7 +497,7 @@ function start(){
   document.getElementById('switchWorld').onclick=()=>{
     try{
       const next=worldSeedFromText(seedInput.value);
-      if(next===world.seed){seedMessage.textContent='Already exploring this seed.';return;}
+      if(next===world.seed&&!storageReadOnly){seedMessage.textContent='Already exploring this seed.';return;}
       if(!storageReadOnly&&!save())throw Error('Current world is not verified saved. Export before switching.');
       const candidate=loadWorld(next);
       const result=saveWorldSafe(localStorage,candidate);

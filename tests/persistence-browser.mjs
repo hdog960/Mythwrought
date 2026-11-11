@@ -101,6 +101,8 @@ try{
   await page.locator('#switchWorld').click();
   assert.equal(await page.locator('#seed').textContent(),'WORLD 179','Could not leave protected world');
   assert.equal(await get('mythwrought-v002-world-987'),'corrupted-987-world','Switch erased damaged seed');
+  await page.locator('#save').click();
+  assert.match(await page.locator('#status').textContent(),/verified and saved/,'World remained read-only after loading a healthy seed');
   await page.locator('#closeHelp').click();
   await page.evaluate(()=>{
     window.__mythwroughtTest.teleport(14.5,.5);
