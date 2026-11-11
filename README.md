@@ -27,3 +27,9 @@ Free static GitHub Pages deployment; no paid services, no mandatory external API
 The initial prototype is intentionally dependency-free. Open `index.html` with a static HTTP server, e.g. `python3 -m http.server 8000`. Run `npm test` for the Node built-in test suite. Later milestones may change internal technology only if acceptance tests are preserved.
 
 **Versioning:** v0.01–v1.00; release numbers are planned targets, not automatically attained. The next release begins only after the current acceptance gate is met.
+## Current implementation status — v0.01
+- [Play the WebGL2 foundation prototype](https://hdog960.github.io/Mythwrought/) (landscape). Current art and terrain are placeholder engineering graphics, **not approved premium art**.
+- Seeded 3D voxel terrain, bounded chunk meshes, side-grip movement/look controls, jump, mine/place stone/wood/crystal, local edited-block persistence and JSON backup import/export.
+- [Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/42945013621): seven pure-model tests, syntax validation, rendered browser viewport, grip boundaries, live mining interaction and saved world-edit assertion.
+- [GitHub Pages deployment and public HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/42945013696).
+- Gate A remains **open** pending actual iPhone Safari/Home Screen hardware testing, stronger save architecture and premium art approval. No combat, companions, story or magic implemented yet.
