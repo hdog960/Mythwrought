@@ -34,3 +34,8 @@ An original low-cost daylight sky has been added, with warm horizon, sun, pale c
 ## v0.06 non-final material and movement visibility
 - Procedural dirt and ore material variation were refined within the existing lightweight voxel shader. Grounded movement is now visually and physically consistent with actual editable block terrain, without new world-view HUD overlays.
 - The full authored premium fantasy look (characters, high-quality custom voxel textures, architecture, cave biomes, expressive animation and art direction) remains a future acceptance gate requiring user approval. v0.06 adds physics foundations, not a completed artwork pass.
+
+## v0.07 visual/interaction checkpoint
+- World-space low-frequency material tint helps reduce abrupt procedural coloring across adjacent chunk borders. Real Chromium screenshots of positive and negative seams were inspected; this is engineering prototype terrain, **not** a premium art gate pass.
+- The player's reported inverted left/right touch directions on both sticks were corrected in code and covered by Chromium tests. Up/down remains unchanged. Await explicit physical iPhone acceptance.
+- The two-grip handheld console still leaves the central 3D viewport clear of touch controls and HUD. Finished premium authored materials, expressive characters and fantasy architecture are still unimplemented.

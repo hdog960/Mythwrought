@@ -27,11 +27,11 @@ Free static GitHub Pages deployment; no paid services, no mandatory external API
 The initial prototype is intentionally dependency-free. Open `index.html` with a static HTTP server, e.g. `python3 -m http.server 8000`. Run `npm test` for the Node built-in test suite. Later milestones may change internal technology only if acceptance tests are preserved.
 
 **Versioning:** v0.01–v1.00; release numbers are planned targets, not automatically attained. The next release begins only after the current acceptance gate is met.
-## Current implementation status — v0.06
+## Current implementation status — v0.07
 - [Play the WebGL2 foundation prototype](https://hdog960.github.io/Mythwrought/) (landscape). Current art and terrain are engineering graphics with initial material detail and an original WebGL daytime sky; **not approved premium art**.
-- Seeded 3D voxel terrain with named/numeric seeds and isolated saves, bounded chunk meshes and faster off-screen GPU disposal, original sky/material shading, fantasy handheld side grips, independent two-thumb aiming, world-space precise targeting, accurate full-body collision, wall sliding, one-block climbs with clearance checks, responsive grounded jumping, safe spawn and landing, mine/place blocks and JSON backup/export.
-- [Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/43036157896): **43/43 Node tests**, full-body voxel physics and exact collision, jumping/landing, wall sliding, one-block steps, negative world-space movement, bounded mesh streaming, seeded saves, touch controls, responsive layouts, and the new live browser walk/jump checks.
-- [GitHub Pages deployment and public HTML/JS HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/43036157699) for the v0.06 merge commit.
+- Seeded 3D voxel terrain with named/numeric seeds and isolated saves; correct adjacent chunk-boundary face culling; atomic remeshing of loaded neighbors after edge edits; world-space terrain coloring; bounded chunk streaming/GPU disposal; original sky; dedicated side-grip thumb controls with corrected horizontal axes; full-body collision, grounded movement, real mining/placement and JSON save backup/export.
+- [Node + Chromium CI passed](https://github.com/hdog960/Mythwrought/actions/runs/43062355962): **50/50 Node tests and five Chromium suites**, covering seam topology, real mining and placement across positive/negative chunk borders, cross-chunk streaming and save reload, horizontally corrected touch controls and preserved vertical input, plus the existing movement, rendering and mobile-layout regressions.
+- [GitHub Pages deployment and public HTML/JS HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/43062355830) for the v0.07 merge commit.
 - Gate A remains **open** pending actual iPhone Safari/Home Screen hardware testing, stronger save architecture and premium art approval. No combat, companions, story or magic implemented yet.
 
 ### v0.02 release verification
@@ -67,3 +67,11 @@ The initial prototype is intentionally dependency-free. Open `index.html` with a
 - Browser screenshot `mythwrought-v006-walking-landscape.png` is available as `mythwrought-browser-smoke` workflow artifact on main CI. This is an engineering prototype screenshot, not premium visual approval.
 - Physics is local, deterministic and compatible with existing world-save schema 1 and named-seed localStorage keys. No migration and no user terrain edits removed.
 - **Still OPEN:** physical iPhone Safari/Home Screen control acceptance, production-safe IndexedDB/export integrity, long-session performance/thermal tests and premium original voxel-art acceptance.
+
+### v0.07 release verification
+- [Merged PR #6](https://github.com/hdog960/Mythwrought/pull/6), main implementation merge `2ba4254c61fd24312897059f60f6167d0f94e629`.
+- [Merged-main CI 43062355962](https://github.com/hdog960/Mythwrought/actions/runs/43062355962): **50/50 Node tests**; **five Chromium suites** passed (landscape WebGL smoke, real dual-touch, five-sized responsive controls, positive/negative seam mine/place and streaming, live movement/landing).
+- [Pages deployment 43062355830](https://github.com/hdog960/Mythwrought/actions/runs/43062355830): deployed and verified public HTML/JS. Verified browser screenshots of positive/negative seam travel are attached to the CI artifact `mythwrought-browser-smoke`.
+- Adjacent **loaded** edge-chunk meshes are rebuilt and replaced in the same JavaScript event turn; off-screen meshes continue to load in bounded chunks. This is an interim approach rather than worker-based asynchronous mesh generation. Low-frequency world-coordinate tints help avoid visible color jumps between chunks.
+- **Horizontal touch direction reversed on both sticks (swipe and continuous-stick look)** in response to player feedback; vertical axes and keyboard controls unchanged. The direction change has automated tests but still requires real iPhone acceptance.
+- **Save compatibility:** unchanged schema 1, named-seed storage slots and local voxel edit deltas. **Still open:** physical iPhone Safari/Home Screen tests, thermal/resource profiling, production save safety, premium original voxel-art approval and Gate A.
