@@ -30,17 +30,17 @@ try{
     await page.setViewportSize({width,height});
     await page.waitForTimeout(160);
     const d=await inspect();
-    assert.equal(d.rotate,'none',\`Unexpected landscape rotate overlay at \${width}x\${height}\`);
-    assert.ok(d.world.width>=245,\`World collapsed at \${width}x\${height}\`);
-    assert.ok(d.world.width>=width*.45,\`World too narrow at \${width}x\${height}\`);
-    assert.ok(d.left.right<=d.world.x+3&&d.right.x>=d.world.right-3,\`Controls overlap gameplay at \${width}x\${height}\`);
+    assert.equal(d.rotate,'none',`Unexpected landscape rotate overlay at ${width}x${height}`);
+    assert.ok(d.world.width>=245,`World collapsed at ${width}x${height}`);
+    assert.ok(d.world.width>=width*.45,`World too narrow at ${width}x${height}`);
+    assert.ok(d.left.right<=d.world.x+3&&d.right.x>=d.world.right-3,`Controls overlap gameplay at ${width}x${height}`);
     assert.ok(Math.abs(d.left.right-d.world.x)<6&&Math.abs(d.right.x-d.world.right)<6,'Broken grip/world boundaries');
     assert.ok(d.left.x>=-1&&d.right.right<=d.app.right+1,'Grip extends beyond device');
     for(const b of d.parts){
       const parent=['#menu','#movePad','#jump'].includes(b.sel)?d.left:d.right;
-      assert.ok(b.x>=parent.x-3&&b.right<=parent.right+3,\`\${b.sel} escapes horizontal grip at \${width}x\${height}\`);
-      assert.ok(b.y>=parent.y-3&&b.bottom<=parent.bottom+3,\`\${b.sel} escapes vertical grip at \${width}x\${height}\`);
-      assert.ok(b.width>=28&&b.height>=28,\`\${b.sel} touch target too small at \${width}x\${height}\`);
+      assert.ok(b.x>=parent.x-3&&b.right<=parent.right+3,`${b.sel} escapes horizontal grip at ${width}x${height}`);
+      assert.ok(b.y>=parent.y-3&&b.bottom<=parent.bottom+3,`${b.sel} escapes vertical grip at ${width}x${height}`);
+      assert.ok(b.width>=28&&b.height>=28,`${b.sel} touch target too small at ${width}x${height}`);
     }
     if(width===568)await page.screenshot({path:'artifacts/mythwrought-v005-small-landscape.png'});
     if(width===932)await page.screenshot({path:'artifacts/mythwrought-v005-regular-landscape.png'});
