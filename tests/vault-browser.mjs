@@ -108,6 +108,19 @@ try{
  await seen('snapshot deleted and verified');
  assert.equal(await page.locator('#vaultSelect option:not([value=""])').count(),1,'Targeted deletion did not preserve other snapshot');
  assert.equal(await get(primary),canonicalAfter,'Deleting vault item changed canonical world');
+
+ // A separate seed gets its own vault snapshot; the original seed's backup
+ // and canonical saved deltas remain independently recoverable.
+ await page.locator('#seedInput').fill('987');
+ await page.locator('#switchWorld').click();
+ await page.waitForFunction(()=>document.querySelector('#seed').textContent==='WORLD 987',null,{timeout:8000});
+ await page.locator('#vaultBackup').click();
+ await seen('Verified device backup for seed 987');
+ assert.equal(await page.locator('#vaultSelect option:not([value=""])').count(),2);
+ const options=await page.locator('#vaultSelect option:not([value=""])').allTextContents();
+ assert.ok(options.some(s=>s.includes('Seed 179')),'Original seed backup vanished after switching');
+ assert.ok(options.some(s=>s.includes('Seed 987')),'New seed not archived independently');
+ assert.equal(await get(primary),canonicalAfter,'Switching and vaulting another seed changed the old one');
  assert.deepEqual(errors,[],'Browser JavaScript errors');
  assert.deepEqual(missing,[],'Missing HTTP resources');
  console.log('PASS optional IndexedDB vault: separate verified snapshots, independent downloadable schema-1 exports, explicit restore consent, prior-live save backup, reload, corruption rejection, selective deletion, original grips and no resource errors');
