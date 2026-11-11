@@ -96,9 +96,15 @@ try{
  assert.equal(await page.locator('#renderPreset').inputValue(),'battery','Render preset not persisted');
  assert.ok((await dims()).width<(await dims()).cssWidth,'Battery preset was ignored after reload');
 
- // Another seed must not replace the first seed's transactional mirror.
- const old179=(await inspect(179)).current.raw;
+ // Force an acknowledged read-back sync of seed 179 before comparing its
+ // bytes across a seed switch. Previously the test could snapshot an older
+ // mirror while the restored seed's 400ms follow-up was still pending.
  await page.locator('#menu').click();
+ await page.locator('#mirrorSync').click();
+ await waitMirror('Verified mirror synced for seed 179');
+ const old179=(await inspect(179)).current.raw;
+ assert.equal(old179,await saved(primary),'Seed 179 mirror is not actually up-to-date');
+ // Another seed must never replace seed 179's acknowledged mirror.
  await page.locator('#seedInput').fill('987');
  await page.locator('#switchWorld').click();
  await page.waitForFunction(()=>document.querySelector('#seed').textContent==='WORLD 987');
