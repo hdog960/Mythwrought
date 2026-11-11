@@ -34,6 +34,12 @@ The initial prototype is intentionally dependency-free. Open `index.html` with a
 - [GitHub Pages deployment and public HTML/JS HTTP check passed](https://github.com/hdog960/Mythwrought/actions/runs/43084781232) for the v0.09 merge commit.
 - v0.10 Gate A remains **open** pending actual iPhone Safari/Home Screen testing, measurable long-run performance, production-scale save architecture and explicit premium art approval. No combat, companions, story or magic implemented yet.
 
+### v0.10 Gate A device-evidence increment — **NOT GATE A APPROVAL**
+- Open **☰ → GATE A · DEVICE CHECK → RUN DEVICE CHECK** in the existing Settings sheet. After some active landscape play, it reports frame intervals, frame/viewport clearance, active GPU chunks, saved-world consistency, separate temporary storage write/read/delete and browser quota estimate. **COPY REPORT** can share the measurements; no automatic server telemetry or world migration occurs.
+- [Repaired merged-main verification PASS](https://github.com/hdog960/Mythwrought/actions/runs/43092123202): **82/82 Node tests and 8/8 Chromium suites**, including checks for the new diagnostic, compact landscape, journal recovery, original save preservation and repeated report refresh. [Pages and public HTML/JS publication PASS](https://github.com/hdog960/Mythwrought/actions/runs/43092122969). The failed initial main regression was fixed in [PR #10](https://github.com/hdog960/Mythwrought/pull/10); see [ledger](docs/RELEASE_LEDGER.md) for details.
+- [Required manual iPhone test guide](docs/GATE_A_DEVICE_AUDIT.md). Actual iPhone Safari/Home Screen, thermal/endurance, production-scale IndexedDB persistence and premium art approval are **NOT complete**; release version remains v0.09 foundation while Gate A is open.
+
+
 ### v0.02 release verification
 - [v0.02 merged PR #1](https://github.com/hdog960/Mythwrought/pull/1), merge commit `401e1df`.
 - [Main CI run](https://github.com/hdog960/Mythwrought/actions/runs/42948496448): 12/12 Node tests, syntax and Chromium terrain interaction tests passed.
