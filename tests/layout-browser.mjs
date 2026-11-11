@@ -48,7 +48,24 @@ try{
       assert.ok(b.y>=parent.y-3&&b.bottom<=parent.bottom+3,`${b.sel} escapes vertical grip at ${width}x${height}`);
       assert.ok(b.width>=28&&b.height>=28,`${b.sel} touch target too small at ${width}x${height}`);
     }
-    if(width===568)await page.screenshot({path:'artifacts/mythwrought-v005-small-landscape.png'});
+    if(width===568){
+      // Reproduce the actual merged-main race: under slow GPU work the JS
+      // resize handler may still hold the old 430px console/grip dimensions.
+      // CSS must hard-cap both axes *before* another JS resize event arrives.
+      await page.evaluate(()=>{
+        const el=document.querySelector('.console');
+        el.style.setProperty('--console-height','430px');
+        el.style.setProperty('--grip-width','168px');
+      });
+      const stale=await inspect();
+      assert.ok(stale.app.bottom<=height+1,'Stale JS height clipped compact landscape controls');
+      assert.ok(stale.world.width>=245&&stale.world.width>=width*.45,
+        'Stale JS grip width covered too much of compact world');
+      assert.ok(stale.left.bottom<=height+1&&stale.right.bottom<=height+1,
+        'Compact grips clipped when stale JS resize values persisted');
+      await page.evaluate(()=>window.dispatchEvent(new Event('resize')));
+      await page.screenshot({path:'artifacts/mythwrought-v005-small-landscape.png'});
+    }
     if(width===932)await page.screenshot({path:'artifacts/mythwrought-v005-regular-landscape.png'});
   }
   // Enlarged controllers must persist and not cover world on subsequent reloads.
