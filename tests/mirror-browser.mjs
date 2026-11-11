@@ -174,7 +174,9 @@ try{
  await scene();
  assert.match(await page.locator('#status').textContent(),/SAVE PROTECTION/);
  await page.locator('#menu').click();
- await page.locator('#mirrorEnabled').check();
+ // Intentionally click rather than Playwright.check(): the correct UX
+ // *rejects* the requested checked state for a protected damaged world.
+ await page.locator('#mirrorEnabled').click();
  assert.equal(await page.locator('#mirrorEnabled').isChecked(),false,
    'Read-only startup wrongly enabled mirroring');
  assert.equal(await saved('mythwrought-v010-enable-mirror'),'disabled',
