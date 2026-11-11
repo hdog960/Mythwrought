@@ -39,7 +39,7 @@ try{
     assert.ok(d.left.right<=d.world.x+3&&d.right.x>=d.world.right-3,`Controls overlap gameplay at ${width}x${height}`);
     assert.ok(Math.abs(d.left.right-d.world.x)<6&&Math.abs(d.right.x-d.world.right)<6,'Broken grip/world boundaries');
     assert.ok(d.left.x>=-1&&d.right.right<=d.app.right+1,'Grip extends beyond device');
-    assert.ok(d.left.bottom<=height+1&&d.right.bottom<=height+1,`Grips clipped below screen at ${width}x${height}`);
+    assert.ok(d.left.bottom<=height+1&&d.right.bottom<=height+1,`Grips clipped below screen at ${width}x${height}: ${JSON.stringify(d)}`);
     const footer=await page.locator('.bezel.foot').boundingBox();
     assert.ok(footer.y+footer.height<=height+1,`Footer clipped off-screen at ${width}x${height}`);
     for(const b of d.parts){

@@ -92,3 +92,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
 /* Keep every action within the visible mobile viewport, even during browser-toolbar/rotation changes. */
 .console{height:var(--console-height,100dvh)}
+
+/* Compact landscape widths must never make the implicit grid row taller than the visible viewport. */
+.console,.grip,.screen{min-height:0;min-width:0}
+.grip{max-height:100%}
+@media(max-height:410px){
+ .grip{padding:4px 5px;gap:2px}
+ .grip .action,.grip .palette button{min-height:35px;padding:2px 4px}
+ .grip .small{min-height:30px}
+ .pad{width:min(100%,clamp(68px,22vh,106px));min-height:58px;max-height:26vh}
+ .ornament,.tiny{display:none}
+ .bezel{height:26px}
+ .bezel.foot{height:23px}
+ .precision{min-height:33px}
+}
