@@ -1,4 +1,4 @@
-// MYTHWROUGHT v0.02: deterministic, editable, dependency-free voxel foundation.
+// MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
@@ -99,7 +99,11 @@ export function meshChunk(world,cx,cz){
         const id=world.get(x,y,z);
         if(id===BLOCK.AIR)continue;
         const color=COLORS[id]||COLORS[3];
-        const variance=.93+hash(x+y*5,z-y*3,world.seed+91)*.14;
+        // Low-frequency world-space tint is independent of chunk coordinates, so
+        // materials transition naturally at x/z = n*CHUNK_SIZE instead of
+        // changing color when a new mesh happens to start.
+        const variance=.90+noise(x/9,z/9,world.seed+91)*.14+
+          hash(x+y*5,z-y*3,world.seed+91)*.08;
         for(const face of FACE){
           if(world.get(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
           for(const k of [0,1,2,0,2,3]){

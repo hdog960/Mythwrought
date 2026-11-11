@@ -24,3 +24,15 @@ export function isWorldControlTarget(element){
   return !element.isContentEditable&&!['INPUT','SELECT','TEXTAREA','BUTTON'].includes(element.tagName);
 }
 export function selectedLookMode(mode){return LOOK_MODES.includes(mode)?mode:'swipe';}
+
+// The v0.06 iPhone build's horizontal touch directions felt inverted.
+// Normalize ONLY horizontal TOUCH input: do not change vertical travel,
+// keyboard arrows, or physical thumb-knob tracking.
+export function touchMovementX(rawX){
+  if(!Number.isFinite(rawX))throw Error('Invalid horizontal movement input');
+  return -rawX;
+}
+export function touchCameraX(rawX){
+  if(!Number.isFinite(rawX))throw Error('Invalid horizontal camera input');
+  return -rawX;
+}
