@@ -44,6 +44,10 @@ try{
   assert.ok(Array.isArray(edits)&&edits.length>0,'Mining did not persist a real block edit');
   await page.locator('#menu').click();
   assert.ok(await page.locator('#help').isVisible(),'Help should open');
+  const helpTouchAction=await page.locator('.helpbody').evaluate(el=>getComputedStyle(el).touchAction);
+  assert.equal(helpTouchAction,'pan-y','Settings modal must permit vertical finger scrolling on iPhone');
+  const canvasTouchAction=await page.locator('#scene').evaluate(el=>getComputedStyle(el).touchAction);
+  assert.equal(canvasTouchAction,'none','Gameplay canvas must not drag or scroll the page');
   await page.locator('#lookSensitivity').focus();
   await page.keyboard.press('End');
   await page.keyboard.press('ArrowLeft');
