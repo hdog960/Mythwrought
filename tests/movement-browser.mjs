@@ -23,6 +23,8 @@ try{
     return d?.playerFeet!==undefined&&Number(d.loadedChunks)===25;
   },null,{timeout:20000});
   const origin=await position();
+  assert.match(await page.title(),/v0\.06/i,'Browser title still advertises previous release');
+  assert.match(await page.locator('.bezel.foot strong').textContent(),/v0\.06/i,'Footer still advertises previous release');
   assert.ok(Number.isFinite(origin.feet)&&origin.feet>0);
   assert.equal(origin.touching,'false','Player starts embedded in ground');
   // Explicitly focus the game, then observe simulation states instead of assuming
