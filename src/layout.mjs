@@ -6,7 +6,7 @@ export function calculateGripWidth(availableWidth,availableHeight,mode='regular'
   if(![availableWidth,availableHeight].every(Number.isFinite)||availableWidth<=0||availableHeight<=0)throw Error('Invalid viewport dimensions');
   const size=normalizeControlSize(mode);
   const ratio=size==='large'?1.14:1;
-  const ideal=Math.max(122,Math.min(174,availableWidth*.18))*ratio;
+  const ideal=Math.max(142,Math.min(174,availableWidth*.18))*ratio;
   const compressed=availableHeight<345?ideal*.94:ideal;
   const protectedWorld=Math.max(245,Math.min(390,availableWidth*.5));
   const maxGrip=Math.max(76,(availableWidth-protectedWorld)/2);
