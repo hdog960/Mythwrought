@@ -730,10 +730,12 @@ function start(){
   mirrorEnabledCheck.addEventListener('change',()=>{
     const requested=mirrorEnabledCheck.checked;
     try{
+      // Refuse enabling before changing preferences when startup has protected
+      // a damaged world; otherwise a reload could accidentally opt the user in.
+      if(requested&&storageReadOnly)throw Error('Selected world is protected read-only; export or select a healthy seed first');
       localStorage.setItem(MIRROR_PREF,requested?'enabled':'disabled');
       if(localStorage.getItem(MIRROR_PREF)!==(requested?'enabled':'disabled'))
         throw Error('Preference read-back failed');
-      if(requested&&storageReadOnly)throw Error('Selected world is protected read-only; export or select a healthy seed first');
       mirrorEnabled=requested;
       if(!requested){
         if(mirrorTimer!==null){clearTimeout(mirrorTimer);mirrorTimer=null;}
