@@ -43,7 +43,7 @@ async function withVault(factory,task){
   try{return await task(db);}finally{db.close();}
 }
 function assertRecordId(id){
-  if(typeof id!=='string'||!/^[-0-9a-z:.]{8,120}$/i.test(id))throw Error('Invalid vault snapshot identifier');
+  if(typeof id!=='string'||!/^v010:[0-9a-z]+:[0-9a-z]{8,}$/i.test(id))throw Error('Invalid vault snapshot identifier');
 }
 export function makeVaultRecord(raw,id,createdAt=new Date().toISOString()){
   assertRecordId(id);
