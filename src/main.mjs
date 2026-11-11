@@ -264,6 +264,8 @@ function start(){
       canvas.dataset.playerFeet=String(player.feet);
       canvas.dataset.playerGrounded=String(player.onGround);
       canvas.dataset.playerVelocityY=String(player.vY);
+      canvas.dataset.playerVelocityX=String(player.vX);
+      canvas.dataset.playerVelocityZ=String(player.vZ);
       canvas.dataset.playerColliding=String(collides(world,player.x,player.feet,player.z));
       canvas.dataset.lookMode=lookMode;
       canvas.dataset.precision=String(precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight'));

@@ -25,28 +25,43 @@ try{
   const origin=await position();
   assert.ok(Number.isFinite(origin.feet)&&origin.feet>0);
   assert.equal(origin.touching,'false','Player starts embedded in ground');
-  // Jump from actual first-person world using a key event, observe peak and landing.
+  // Explicitly focus the game, then observe simulation states instead of assuming
+  // SwiftShader can render a fixed number of frames in 210 milliseconds.
+  await page.locator('#scene').focus();
   await page.keyboard.press('Space');
-  await page.waitForTimeout(210);
+  await page.waitForFunction((base)=>{
+    const c=document.querySelector('#scene');
+    return Number(c.dataset.playerFeet)>base+.25;
+  },origin.feet,{timeout:6500});
   const airborne=await position();
-  assert.ok(airborne.feet>origin.feet+.20,'Jump did not lift player');
+  assert.ok(airborne.feet>origin.feet+.25,'Jump did not lift player');
   assert.equal(airborne.touching,'false','Jump embedded player into voxel');
-  await page.waitForTimeout(1150);
+  await page.waitForFunction(base=>{
+    const d=document.querySelector('#scene').dataset;
+    return d.playerGrounded==='true'&&Math.abs(Number(d.playerFeet)-base)<.05;
+  },origin.feet,{timeout:8500});
   const landed=await position();
   assert.equal(landed.touching,'false');
-  assert.equal(landed.grounded,'true','Player never landed again');
-  assert.ok(Math.abs(landed.feet-origin.feet)<.05,'Player landed at wrong height');
+  assert.equal(landed.grounded,'true');
   // Landscape keyboard movement plus corner and chunk streaming safety.
   await page.keyboard.down('w');
-  await page.waitForTimeout(650);
+  await page.waitForFunction(origin=>{
+    const d=document.querySelector('#scene').dataset;
+    return Math.hypot(Number(d.playerX)-origin.x,Number(d.playerZ)-origin.z)>.75;
+  },origin,{timeout:7500});
   await page.keyboard.up('w');
   const walking=await position();
   assert.ok(Math.hypot(walking.x-origin.x,walking.z-origin.z)>.7,'Real player never moved');
   assert.equal(walking.touching,'false','Walk embedded player in edited terrain');
   assert.ok(walking.chunks>0&&walking.chunks<=25,'Unbounded GPU chunk cache');
-  await page.waitForTimeout(200);
+  await page.waitForFunction(()=>{
+    const d=document.querySelector('#scene').dataset;
+    return Math.hypot(Number(d.playerVelocityX),Number(d.playerVelocityZ))<.1;
+  },null,{timeout:3500});
+  const stopped=await position();
+  await page.waitForTimeout(250);
   const atRest=await position();
-  assert.ok(Math.hypot(atRest.x-walking.x,atRest.z-walking.z)<.45,'Input released but movement kept drifting');
+  assert.ok(Math.hypot(atRest.x-stopped.x,atRest.z-stopped.z)<.035,'Released input still drifted');
   // Camera, block editing and backup regression remain functional.
   await page.locator('#menu').click();
   await page.locator('#save').click();
