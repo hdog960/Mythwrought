@@ -3,6 +3,7 @@ import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
 import {clampLook,forwardVector,compassDegrees} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget} from './input.mjs';
+import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -97,6 +98,9 @@ function start(){
   const heldPointers=new Map();
   let precisionHeld=false;
   let frame=0,lastFrame=performance.now(),changed=false;
+  const CONTROL_SIZE_KEY='mythwrought-v005-control-size';
+  let controlSize='regular';
+  try{controlSize=normalizeControlSize(localStorage.getItem(CONTROL_SIZE_KEY));}catch(_){}
   const CAMERA_PREF='mythwrought-v003-look-percent';
   const LOOK_MODE_KEY='mythwrought-v004-look-mode';
   let lookMode='swipe';
@@ -293,6 +297,25 @@ function start(){
     return stop;
   }
   const movementPad=document.getElementById('movePad'),knob=document.getElementById('moveKnob');
+  const consoleFrame=document.querySelector('.console');
+  const sizeSelect=document.getElementById('controlSize');
+  sizeSelect.value=controlSize;
+  function updateControllerLayout(){
+    const style=getComputedStyle(consoleFrame);
+    const inset=(parseFloat(style.paddingLeft)||0)+(parseFloat(style.paddingRight)||0);
+    const width=Math.max(280,consoleFrame.getBoundingClientRect().width-inset);
+    const grip=calculateGripWidth(width,consoleFrame.getBoundingClientRect().height,controlSize);
+    consoleFrame.style.setProperty('--grip-width',grip+'px');
+    canvas.dataset.gripWidth=String(grip);
+  }
+  sizeSelect.addEventListener('change',()=>{
+    controlSize=normalizeControlSize(sizeSelect.value);
+    try{localStorage.setItem(CONTROL_SIZE_KEY,controlSize);}catch(_){}
+    updateControllerLayout();
+  });
+  window.addEventListener('resize',updateControllerLayout,{passive:true});
+  window.visualViewport?.addEventListener('resize',updateControllerLayout,{passive:true});
+  updateControllerLayout();
   const cameraPad=document.getElementById('lookPad'),cameraKnob=document.getElementById('lookKnob');
   function padPosition(el,e){
     const r=el.getBoundingClientRect();
@@ -303,7 +326,8 @@ function start(){
     const p=padPosition(movementPad,e);
     const next=normalizedStick(p.x,p.y,p.radius);
     joystick.x=next.x;joystick.y=next.y;
-    knob.style.transform='translate('+Math.round(next.x*27)+'px,'+Math.round(next.y*27)+'px)';
+    const travel=Math.max(0,(movementPad.clientWidth-knob.offsetWidth)/2-7);
+    knob.style.transform='translate('+Math.round(next.x*travel)+'px,'+Math.round(next.y*travel)+'px)';
   },()=>{joystick.x=joystick.y=0;knob.style.transform='';});
   pointerPad(cameraPad,(e,dx,dy,initial)=>{
     if(!help.hidden)return;
@@ -311,7 +335,8 @@ function start(){
       const p=padPosition(cameraPad,e);
       const next=normalizedStick(p.x,p.y,p.radius,.1);
       lookStick.x=next.x;lookStick.y=next.y;
-      cameraKnob.style.transform='translate('+Math.round(next.x*26)+'px,'+Math.round(next.y*26)+'px)';
+      const travel=Math.max(0,(cameraPad.clientWidth-cameraKnob.offsetWidth)/2-7);
+      cameraKnob.style.transform='translate('+Math.round(next.x*travel)+'px,'+Math.round(next.y*travel)+'px)';
     }else if(!initial){
       const d=safePointerDelta(dx,dy);
       look(d.x,d.y);
