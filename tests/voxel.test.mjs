@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {VoxelWorld,BLOCK,CHUNK_SIZE,chunkCoord,terrainHeight,baseBlock,meshChunk,raycast,collides,WORLD_MAX_Y} from '../src/voxel.mjs';
+import {VoxelWorld,BLOCK,CHUNK_SIZE,chunkCoord,chunkWindow,terrainHeight,baseBlock,meshChunk,raycast,collides,WORLD_MAX_Y} from '../src/voxel.mjs';
 
 test('deterministic positive and negative coordinates',()=>{
   const a=new VoxelWorld(917),b=new VoxelWorld(917);
@@ -35,7 +35,7 @@ test('chunk mesh has valid triangles and non-empty geometry',()=>{
   const a=new VoxelWorld(179);
   const mesh=meshChunk(a,-1,0);
   assert.ok(mesh.length>100);
-  assert.equal(mesh.length%18,0);
+  assert.equal(mesh.length%27,0);
   assert.ok([...mesh.slice(0,60)].every(Number.isFinite));
 });
 test('raycasts meet real block and report prior adjacent air',()=>{
@@ -50,4 +50,32 @@ test('collision detects solid voxels without treating air as solid',()=>{
   w.set(0,15,0,BLOCK.STONE);
   assert.equal(collides(w,.5,15,.5),true);
   assert.equal(collides(w,.5,17,.5),false);
+});
+
+test('material vertex stride includes tile coordinates and valid material IDs',()=>{
+  const data=meshChunk(new VoxelWorld(179),0,0);
+  assert.equal(data.length%9,0);
+  for(let i=0;i<Math.min(data.length,9*100);i+=9){
+    assert.ok(data[i+6]>=0&&data[i+6]<=1);
+    assert.ok(data[i+7]>=0&&data[i+7]<=1);
+    assert.ok(Number.isInteger(data[i+8])&&data[i+8]>=1&&data[i+8]<=6);
+  }
+});
+test('chunk window has unique deterministic nearest-first coordinates at negative bounds',()=>{
+  const a=chunkWindow(-.5,-16.5),b=chunkWindow(-.5,-16.5);
+  assert.deepEqual(a,b);
+  assert.equal(a.length,25);
+  assert.deepEqual(a[0],{cx:-1,cz:-2,distance:0});
+  assert.equal(new Set(a.map(c=>c.cx+','+c.cz)).size,25);
+  assert.throws(()=>chunkWindow(0,0,20));
+});
+test('seeded voxel samples are stable at positive and negative chunk boundaries',()=>{
+  for(const seed of [179,-184,2147483647,-2147483648,0]){
+    const one=new VoxelWorld(seed),two=VoxelWorld.restore(one.save());
+    for(const x of [-33,-32,-17,-16,-1,0,15,16,31,32,48]){
+      for(const z of [-18,-16,-1,0,15,16,33]){
+        for(const y of [-3,0,4,8,12,19])assert.equal(one.get(x,y,z),two.get(x,y,z));
+      }
+    }
+  }
 });

@@ -1,4 +1,4 @@
-// MYTHWROUGHT v0.01: deterministic, editable, dependency-free voxel foundation.
+// MYTHWROUGHT v0.02: deterministic, editable, dependency-free voxel foundation.
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
@@ -17,6 +17,7 @@ const FACE = [
   {d:[0,0,-1],q:[[0,0,0],[0,1,0],[1,1,0],[1,0,0]],lit:.67}
 ];
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const FACE_UV=[[0,0],[0,1],[1,1],[1,0]];
 function hash(x,z,seed){
   let h=Math.imul((x|0)^seed,0x27d4eb2d) ^ Math.imul((z|0)+seed,0x165667b1);
   h^=h>>>15;h=Math.imul(h,0x85ebca6b);h^=h>>>13;
@@ -31,6 +32,14 @@ function noise(x,z,seed){
   return p*(1-v)+q*v;
 }
 export function chunkCoord(x){return Math.floor(x/CHUNK_SIZE);}
+export function chunkWindow(x,z,radius=2){
+  if(!Number.isInteger(radius)||radius<0||radius>4)throw Error('Invalid chunk radius');
+  const cx=chunkCoord(x),cz=chunkCoord(z),list=[];
+  for(let dz=-radius;dz<=radius;dz++)for(let dx=-radius;dx<=radius;dx++)
+    list.push({cx:cx+dx,cz:cz+dz,distance:dx*dx+dz*dz});
+  list.sort((a,b)=>a.distance-b.distance||a.cz-b.cz||a.cx-b.cx);
+  return list;
+}
 export function terrainHeight(x,z,seed=179){
   const n=noise(x/29,z/29,seed)*7+noise(x/11,z/11,seed+17)*3;
   return clamp(Math.floor(2+n),2,12);
@@ -74,7 +83,7 @@ export class VoxelWorld{
     return {schema:1,seed:this.seed,edits};
   }
   static restore(payload){
-    if(!payload||payload.schema!==1||!Number.isInteger(payload.seed)||!Array.isArray(payload.edits)||payload.edits.length>300000)throw Error('Unsupported or invalid Mythwrought save');
+    if(!payload||payload.schema!==1||!Number.isInteger(payload.seed)||payload.seed!==(payload.seed|0)||!Array.isArray(payload.edits)||payload.edits.length>300000)throw Error('Unsupported or invalid Mythwrought save');
     const world=new VoxelWorld(payload.seed);
     for(const row of payload.edits){
       if(!Array.isArray(row)||row.length!==4||!world.set(...row))throw Error('Save contains invalid voxel edit');
@@ -95,7 +104,8 @@ export function meshChunk(world,cx,cz){
           if(world.get(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
           for(const k of [0,1,2,0,2,3]){
             const p=face.q[k];
-            vertices.push(x+p[0],y+p[1],z+p[2],...color.map(c=>clamp(c*variance*face.lit,0,1)));
+            const uv=FACE_UV[k];
+            vertices.push(x+p[0],y+p[1],z+p[2],...color.map(c=>clamp(c*variance*face.lit,0,1)),uv[0],uv[1],id);
           }
         }
       }

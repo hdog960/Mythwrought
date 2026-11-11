@@ -1,4 +1,5 @@
-import {VoxelWorld,BLOCK,CHUNK_SIZE,chunkCoord,terrainHeight,meshChunk,raycast,collides} from './voxel.mjs';
+import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,collides} from './voxel.mjs';
+import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -6,7 +7,6 @@ const status=document.getElementById('status');
 const compass=document.getElementById('compass');
 const seedLabel=document.getElementById('seed');
 const help=document.getElementById('help');
-const SAVE_KEY='mythwrought-v001-world';
 const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,powerPreference:'high-performance'});
 function message(s){status.textContent=s;}
 function fatal(s){notice.hidden=false;notice.textContent=s;message('3D renderer unavailable');}
@@ -15,26 +15,46 @@ else start();
 
 function start(){
   let world;
-  try{const s=localStorage.getItem(SAVE_KEY);world=s?VoxelWorld.restore(JSON.parse(s)):new VoxelWorld(179);}
-  catch(e){world=new VoxelWorld(179);message('Save unavailable; beginning a fresh prototype world');}
-  seedLabel.textContent='WORLD '+String(world.seed).padStart(4,'0');
+  function loadWorld(seed){
+    let raw=localStorage.getItem(worldSlotKey(seed));
+    if(raw===null&&seed===DEFAULT_WORLD_SEED)raw=localStorage.getItem(LEGACY_WORLD_KEY);
+    if(raw===null)return new VoxelWorld(seed);
+    const found=VoxelWorld.restore(JSON.parse(raw));
+    if(found.seed!==seed)throw Error('Save seed does not match requested world');
+    return found;
+  }
+  try{
+    const choice=localStorage.getItem(SELECTED_SEED_KEY);
+    world=loadWorld(choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice));
+  }catch(err){world=new VoxelWorld(DEFAULT_WORLD_SEED);message('Saved data unavailable; no old saves were deleted');}
+  seedLabel.textContent='WORLD '+world.seed;
   const VS=[
     '#version 300 es','precision highp float;',
-    'in vec3 aPos; in vec3 aColor;',
+    'in vec3 aPos; in vec3 aColor; in vec2 aUv; in float aMat;',
     'uniform vec3 uEye,uForward,uRight,uUp;',
     'uniform float uAspect,uTan;',
-    'out vec3 vColor; out float vDistance;',
+    'out vec3 vColor; out float vDistance; out vec2 vUv; flat out int vMat;',
     'void main(){ vec3 d=aPos-uEye;',
     'float x=dot(d,uRight); float y=dot(d,uUp); float z=dot(d,uForward);',
     'gl_Position=vec4(x/(uAspect*uTan),y/uTan,1.0015*z-0.1501,z);',
-    'vColor=aColor; vDistance=length(d); }'
+    'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(aMat+.5); }'
   ].join('\n');
   const FS=[
     '#version 300 es','precision highp float;',
-    'in vec3 vColor; in float vDistance; out vec4 outColor;',
+    'in vec3 vColor; in float vDistance; in vec2 vUv; flat in int vMat; out vec4 outColor;',
     'uniform vec3 uFog;',
-    'void main(){ float fog=smoothstep(29.0,68.0,vDistance);',
-    'outColor=vec4(mix(vColor,uFog,fog),1.0); }'
+    'float speckle(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
+    'void main(){',
+    'float closeDetail=1.0-smoothstep(10.0,36.0,vDistance);',
+    'float tiled=speckle(floor(vUv*vec2(13.0))+float(vMat)*17.3);',
+    'float shade=.93+.14*tiled;',
+    'if(vMat==1)shade*=.97+.05*step(.73,speckle(floor(vUv*17.0)+17.0));',
+    'if(vMat==3)shade*=.94+.10*speckle(floor(vUv*vec2(7.0,13.0))+3.0);',
+    'if(vMat==4)shade*=.96+.07*sin(vUv.x*56.0);',
+    'if(vMat==5)shade*=.98+.12*step(.65,fract(vUv.x*3.0+vUv.y*2.0));',
+    'float fog=smoothstep(29.0,68.0,vDistance);',
+    'vec3 colored=mix(vColor,vColor*shade,closeDetail*.8);',
+    'outColor=vec4(mix(colored,uFog,fog),1.0); }'
   ].join('\n');
   function shader(type,src){
     const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
@@ -51,7 +71,8 @@ function start(){
   }catch(err){fatal('Voxel shader failed to initialize: '+err.message);return;}
   gl.useProgram(program);
   const atPos=gl.getAttribLocation(program,'aPos'),atColor=gl.getAttribLocation(program,'aColor');
-  gl.enableVertexAttribArray(atPos);gl.enableVertexAttribArray(atColor);
+  const atUv=gl.getAttribLocation(program,'aUv'),atMat=gl.getAttribLocation(program,'aMat');
+  for(const index of [atPos,atColor,atUv,atMat])gl.enableVertexAttribArray(index);
   const U={};
   for(const k of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog'])U[k]=gl.getUniformLocation(program,k);
   gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);
@@ -65,7 +86,7 @@ function start(){
   const eye=()=>[player.x,player.feet+1.55,player.z];
   const facing=()=>[Math.sin(player.yaw)*Math.cos(player.pitch),Math.sin(player.pitch),Math.cos(player.yaw)*Math.cos(player.pitch)];
   function save(){
-    try{localStorage.setItem(SAVE_KEY,JSON.stringify(world.save()));changed=false;}
+    try{localStorage.setItem(worldSlotKey(world.seed),JSON.stringify(world.save()));localStorage.setItem(SELECTED_SEED_KEY,String(world.seed));changed=false;}
     catch(err){message('Local save failed — export from the menu');}
   }
   function invalidate(x,z){
@@ -87,27 +108,34 @@ function start(){
     invalidate(x,z);changed=true;save();message(mode==='mine'?'Block removed and saved':'Block placed and saved');
   }
   function stream(){
-    const cx=chunkCoord(player.x),cz=chunkCoord(player.z),needed=[];
-    for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++){
-      const x=cx+dx,z=cz+dz,k=name(x,z);
-      if(!chunks.has(k)&&!pending.has(k))needed.push([x,z,dx*dx+dz*dz]);
+    const desired=chunkWindow(player.x,player.z,2);
+    const wanted=new Set(desired.map(c=>name(c.cx,c.cz)));
+    // Discard stale pending meshes after fast travel across chunk boundaries.
+    for(const k of pending.keys())if(!wanted.has(k))pending.delete(k);
+    for(const c of desired){
+      const k=name(c.cx,c.cz);
+      if(!chunks.has(k)&&!pending.has(k))pending.set(k,[c.cx,c.cz]);
     }
-    needed.sort((a,b)=>a[2]-b[2]);
-    for(const [x,z] of needed)pending.set(name(x,z),[x,z]);
-    for(const [k,[x,z]] of pending){
-      pending.delete(k);
-      if(Math.abs(cx-x)>2||Math.abs(cz-z)>2)continue;
+    // Edit invalidations and new chunks are prioritized by proximity every frame.
+    const cx=chunkCoord(player.x),cz=chunkCoord(player.z);
+    const queue=[...pending.entries()].sort((a,b)=>{
+      const da=(a[1][0]-cx)**2+(a[1][1]-cz)**2;
+      const db=(b[1][0]-cx)**2+(b[1][1]-cz)**2;
+      return da-db;
+    });
+    if(queue.length){
+      const [k,[x,z]]=queue[0];pending.delete(k);
       const old=chunks.get(k);if(old)gl.deleteBuffer(old.buffer);
       const data=meshChunk(world,x,z),buffer=gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
-      chunks.set(k,{x,z,buffer,count:data.length/6});
-      break; // only one chunk meshed/uploaded per frame
+      chunks.set(k,{x,z,buffer,count:data.length/9});
+    } // one chunk mesh per frame, bounded visible radius
+    if(frame%45===0)for(const [k,c] of chunks){
+      if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
     }
-    if(frame%90===0)for(const [k,c] of chunks)
-      if(Math.abs(c.x-cx)>2||Math.abs(c.z-cz)>2){gl.deleteBuffer(c.buffer);chunks.delete(k);}
   }
   function respawnPrototype(){
-    player.x=.5;player.z=.5;player.feet=terrainHeight(0,0,world.seed)+1.02;player.vY=0;
+    player.x=.5;player.z=.5;player.feet=terrainHeight(0,0,world.seed)+1.02;player.vY=0;player.yaw=Math.PI;player.pitch=-.12;
     message('Returned to spawn (temporary prototype safety reset)');
   }
   function jump(){if(player.onGround){player.vY=6.6;player.onGround=false;}}
@@ -161,10 +189,13 @@ function start(){
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
       gl.uniform3f(U.uFog,.52,.69,.72);
       stream();
+      canvas.dataset.loadedChunks=String(chunks.size); // Read-only diagnostic for real browser chunk completion.
       for(const c of chunks.values()){
         gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);
-        gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,24,0);
-        gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,24,12);
+        gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
+        gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
+        gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
+        gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
       }
       const deg=(540-player.yaw*180/Math.PI)%360;
@@ -215,6 +246,21 @@ function start(){
   document.getElementById('menu').onclick=()=>{help.hidden=false;keys.clear();};
   document.getElementById('closeHelp').onclick=()=>help.hidden=true;
   document.getElementById('save').onclick=()=>{save();message('Local world edits saved');};
+  const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
+  seedInput.value=String(world.seed);
+  document.getElementById('switchWorld').onclick=()=>{
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(next===world.seed){seedMessage.textContent='Already exploring this seed.';return;}
+      save();
+      const candidate=loadWorld(next); // Validate before changing the active world.
+      for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+      chunks.clear();pending.clear();world=candidate;respawnPrototype();
+      seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
+      save();seedMessage.textContent='World '+world.seed+' ready. Other seed saves remain separate.';
+      message('Loaded seed '+world.seed+' — building nearby chunks');
+    }catch(err){seedMessage.textContent='World not changed: '+err.message;}
+  };
   document.getElementById('export').onclick=()=>{
     const blob=new Blob([JSON.stringify(world.save(),null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -225,9 +271,11 @@ function start(){
   document.getElementById('importFile').addEventListener('change',async e=>{
     const f=e.target.files?.[0];if(!f)return;
     try{
-      world=VoxelWorld.restore(JSON.parse(await f.text()));
+      const imported=VoxelWorld.restore(JSON.parse(await f.text()));
+      save(); // Keep the previously active world's slot before replacing.
+      world=imported;
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();respawnPrototype();seedLabel.textContent='WORLD '+String(world.seed).padStart(4,'0');
+      chunks.clear();pending.clear();respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       save();message('Imported voxel world');
     }catch(err){message('Import rejected: '+err.message);}
     e.target.value='';
