@@ -94,6 +94,8 @@ try{
   await mkdir('artifacts',{recursive:true});
   await page.evaluate(()=>window.__mythwroughtTest.aimAt(16,18,0));
   await waitHit('16,18,0');
+  await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Target found'));
+  assert.match(await page.locator('#status').textContent(),/Target found/,'Old invalid-target warning remained after successful re-aim');
   await page.screenshot({path:'artifacts/mythwrought-v008-crystal-target.png'});
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);

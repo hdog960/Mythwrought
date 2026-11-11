@@ -282,7 +282,15 @@ function start(){
         (BLOCK_NAMES[focused.block]||'block').toUpperCase()+' · '+focused.distance.toFixed(1)+'m'+
         '\n'+(focused.canPlace?'GOLD = BUILD SPACE':'PLACE BLOCKED'):
         'LOOK AT A BLOCK';
-      if(display!==lastTargetText){lastTargetText=display;targetInfo.textContent=display;}
+      if(display!==lastTargetText){
+        lastTargetText=display;targetInfo.textContent=display;
+        // Do not leave a previous "no target" or "blocked" warning on the
+        // footer after the player successfully re-aims elsewhere.
+        if(focused?.hit&&status.textContent==='Look at a nearby block')
+          message('Target found · use MINE or PLACE');
+        if(focused?.canPlace&&status.textContent==='Cannot place inside the player')
+          message('Build space clear · choose MINE or PLACE');
+      }
       const nextOutlineKey=focusKey+'|'+placeKey;
       if(nextOutlineKey!==outlineKey){
         outlineKey=nextOutlineKey;
