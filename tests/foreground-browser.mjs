@@ -29,14 +29,24 @@ try{
  await page.evaluate(()=>window.__mythwroughtTest.placeFixture(15,18,-1,4));
  const original=await saved();assert.ok(original?.includes('[15,18,-1,4]'));
 
- // Hold a movement key, let it move, then simulate genuine browser visibility.
+ // Hold a movement key, let it move, then simulate the real visibilitychange
+ // handler in Chromium. CDP has no setPageVisibilityState command in this build.
  await page.locator('#scene').focus();
  await page.keyboard.down('w');
  await page.waitForFunction(old=>Math.hypot(
   Number(document.querySelector('#scene').dataset.playerX)-old[0],
   Number(document.querySelector('#scene').dataset.playerZ)-old[1])>.15,before.pos,{timeout:7000});
- const cdp=await context.newCDPSession(page);
- await cdp.send('Emulation.setPageVisibilityState',{visibilityState:'hidden'});
+ const simulateVisibility=hidden=>page.evaluate(hidden=>{
+   // Synthetic visibility input, real DOM event handlers/RAF/physics in Chromium.
+   // Browser OS tab throttling and physical Safari require separate manual tests.
+   if(!Object.prototype.hasOwnProperty.call(document,'hidden')){
+     Object.defineProperty(document,'hidden',{configurable:true,
+       get:()=>window.__testHidden});
+   }
+   window.__testHidden=hidden;
+   document.dispatchEvent(new Event('visibilitychange'));
+ },hidden);
+ await simulateVisibility(true);
  const hidden=await page.evaluate(()=>({hidden:document.hidden,driver:window.__mythwroughtTest.snapshot().frameDriver}));
  assert.equal(hidden.hidden,true,'Chromium visibility override did not hide page');
  assert.equal(hidden.driver.running,false,'RAF remained scheduled in background');
@@ -46,7 +56,7 @@ try{
  assert.equal((await state()).rendered,frozen.rendered,'Hidden world continued rendering frames');
  assert.equal(await saved(),original,'Background transition overwrote canonical world bytes');
 
- await cdp.send('Emulation.setPageVisibilityState',{visibilityState:'visible'});
+ await simulateVisibility(false);
  await page.waitForFunction(()=>window.__mythwroughtTest.snapshot().frameDriver.running);
  await page.waitForFunction(base=>Number(document.querySelector('#scene').dataset.renderedFrames)>base,
   frozen.rendered,{timeout:9000});
@@ -98,5 +108,5 @@ try{
  await page.screenshot({path:'artifacts/mythwrought-v010-foreground-grip-landscape.png'});
  assert.deepEqual(errors,[],'JavaScript errors after hidden/resume/streaming');
  assert.deepEqual(failed,[],'Missing resources');
- console.log('PASS v0.10 background pause/RAF resume, no stuck movement, BFCache, preserved schema-1 save, bounded meshing and diagnostic screenshot');
+ console.log('PASS v0.10 simulated visibility pause/RAF resume, no stuck movement, BFCache-style events, preserved schema-1 save, bounded meshing and diagnostic screenshot');
 }finally{await browser.close();}
