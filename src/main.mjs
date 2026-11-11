@@ -512,6 +512,10 @@ function start(){
         player.pitch=Math.atan2(dy,Math.hypot(dx,dz));
       },
       block(x,y,z){return world.get(x,y,z);},
+      setOrientation(yaw,pitch){
+        if(![yaw,pitch].every(Number.isFinite))throw Error('Invalid debug camera orientation');
+        player.yaw=yaw;player.pitch=Math.max(-1.3,Math.min(1.3,pitch));
+      },
       placeFixture(x,y,z,id){
         const old=world.get(x,y,z);
         if(!world.set(x,y,z,id))throw Error('Invalid test block');
