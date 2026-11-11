@@ -390,7 +390,11 @@ function start(){
     message('Selected '+({3:'stone',4:'wood',5:'crystal'})[selected]);
   });
   document.getElementById('menu').onclick=()=>{cancelAllPointers();help.hidden=false;};
-  document.getElementById('closeHelp').onclick=()=>{cancelAllPointers();help.hidden=true;};
+  document.getElementById('closeHelp').onclick=()=>{
+    cancelAllPointers();help.hidden=true;
+    // Return keyboard/gamepad-like input focus to world after closing modal.
+    canvas.focus({preventScroll:true});
+  };
   document.getElementById('save').onclick=()=>{save();message('Local world edits saved');};
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);

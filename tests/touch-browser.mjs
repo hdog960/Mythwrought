@@ -37,6 +37,7 @@ try{
   const stopped=await v();
   assert.ok(Math.hypot(stopped.x-released.x,stopped.z-released.z)<.035,'Movement continued after both thumbs lifted');
   assert.ok(Math.abs(deltaYaw(stopped.yaw,released.yaw))<.005,'Camera drifted after release');
+  assert.equal(await page.evaluate(()=>window.scrollY),0,'Multi-touch gesture scrolled the game page');
   // Continuous stick mode must rotate only while held, using a radial dead zone.
   await page.locator('#menu').click();
   await page.locator('#lookMode').selectOption('stick');

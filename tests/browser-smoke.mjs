@@ -77,6 +77,14 @@ try{
   assert.ok(oldEdits.length>0,'Seed switching lost the previous world edit');
   await page.locator('#closeHelp').click();
   assert.ok(!(await page.locator('#help').isVisible()),'Help should close');
+  assert.equal(await page.evaluate(()=>document.activeElement?.id),'scene','Closing settings should restore world keyboard focus');
+  const grip=await page.locator('.right').boundingBox();
+  for(const id of ['#lookPad','#precision','#dig','#place']){
+    const b=await page.locator(id).boundingBox();
+    assert.ok(b.x>=grip.x-2&&b.x+b.width<=grip.x+grip.width+2,'Control '+id+' horizontally escaped right grip');
+    assert.ok(b.y>=grip.y-2&&b.y+b.height<=grip.y+grip.height+2,'Control '+id+' vertically escaped right grip');
+  }
+
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,null,{timeout:15000});
   await page.waitForTimeout(300); // Capture a fully rebuilt seed, not a transient partial-frame stream.
   await mkdir('artifacts',{recursive:true});
