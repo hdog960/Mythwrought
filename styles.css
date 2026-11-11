@@ -114,3 +114,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .palette button[data-block="5"]{background:linear-gradient(135deg,#7ce5e8,#346e87 42%,#183f58 64%,#62b4ca);color:#e2ffff;text-shadow:0 0 4px #d3fbff}
 .palette button.selected{outline:2px solid #f5d9a0;outline-offset:1px;filter:brightness(1.18)}
 @media(max-height:350px){.target-info{display:none}}
+
+/* Gate A diagnostic stays inside the deliberately opened settings sheet, never on the game canvas. */
+.audit-title{font-size:14px;color:#f2d69e;letter-spacing:.06em;margin:3px 0 8px}.auditReport,#auditReport{display:block;width:100%;min-height:128px;padding:10px;margin-top:8px;background:#101d22;color:#e8dfc7;border:1px solid #af976a;border-radius:8px;font:12px/1.45 ui-monospace,monospace;resize:vertical;user-select:text;-webkit-user-select:text;touch-action:pan-y;overflow:auto}.looksetting .helpbuttons{margin:9px 0}.looksetting .helpbuttons button{font-size:12px}
