@@ -54,9 +54,11 @@ function start(){
     'float tiled=speckle(floor(vUv*vec2(13.0))+float(vMat)*17.3);',
     'float shade=.93+.14*tiled;',
     'if(vMat==1)shade*=.97+.05*step(.73,speckle(floor(vUv*17.0)+17.0));',
+    'if(vMat==2)shade*=.91+.16*speckle(floor(vUv*vec2(11.0,15.0))+41.0);',
     'if(vMat==3)shade*=.94+.10*speckle(floor(vUv*vec2(7.0,13.0))+3.0);',
     'if(vMat==4)shade*=.96+.07*sin(vUv.x*56.0);',
     'if(vMat==5)shade*=.98+.12*step(.65,fract(vUv.x*3.0+vUv.y*2.0));',
+    'if(vMat==6)shade*=.90+.18*step(.69,speckle(floor(vUv*15.0)+vec2(26.0,19.0)));',
     'float fog=smoothstep(29.0,68.0,vDistance);',
     'vec3 colored=mix(vColor,vColor*shade,closeDetail*.8);',
     'outColor=vec4(mix(colored,uFog,fog),1.0); }'
@@ -149,6 +151,10 @@ function start(){
       lastStreamingCenter=center;
       const desired=chunkWindow(player.x,player.z,2);
       wanted=new Set(desired.map(c=>name(c.cx,c.cz)));
+      // Eagerly delete GPU buffers behind the player; never accumulate old border chunks.
+      for(const [k,c] of chunks){
+        if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
+      }
       for(const c of desired){
         const k=name(c.cx,c.cz);
         if(!chunks.has(k)&&!pending.has(k))pending.set(k,[c.cx,c.cz]);
