@@ -22,6 +22,11 @@ Settings → **VERIFIED SAVE MIRROR** is **OFF by default**. Enabling it stores 
 
 Settings → **3D pixel workload** adds Balanced (the old rendering cap, default), Battery saver and Economy. The latter two lower only the internal WebGL framebuffer pixel count; **left and right grips, canvas CSS viewport and touch targets do not move**. No claimed iPhone FPS, battery or thermal improvement without actual hardware measurements. The diagnostic report now includes framebuffer resolution and selected preset. Test all three on a real landscape iPhone, noting textural clarity/readability and 10+ minute thermals before accepting a setting.
 
+## Foreground rendering and chunk-work continuity — browser evidence only
+A foreground-only animation driver suspends WebGL rendering when the document becomes hidden, on pagehide and on WebGL context loss. It resumes at most one frame loop after a visibility or Back/Forward Cache return; previously held movement/aiming inputs must not remain stuck and inactive time must not become simulated gameplay time. A bounded chunk-upload cadence can spread heavy mesh builds over a few visible frames without changing chunk order, world saves or the playable 3D viewport. A failed GPU upload retains the previous chunk buffer instead of immediately deleting it. Gate A **DEVICE CHECK** now includes estimated mesh upload count, deferred frames and longest measured upload.
+
+The new Chromium lifecycle regression emulates tab visibility, verifies stopped rendering and no stuck movement, exercises pagehide/pageshow, traverses a negative chunk window, reopens Settings and captures screenshots while preserving original seed-save bytes. **This does not replace real iPhone Safari or installed Home Screen testing.** Physically test interruptions, app switching, force quit and low-memory/thermal conditions, recording any retained input or blank world, before accepting Gate A.
+
 ## Player-owned real device verification checklist
 Test **Safari** and separately test **Add to Home Screen** at https://hdog960.github.io/Mythwrought/:
 1. Open landscape, check central viewport is completely unobstructed, notch and safe areas do not clip grips or footer. Use both thumbs at once for movement, look, jump, MINE/PLACE; verify horizontal controls are intuitive and the help menu scrolls.
