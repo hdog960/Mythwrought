@@ -79,3 +79,16 @@ test('seeded voxel samples are stable at positive and negative chunk boundaries'
     }
   }
 });
+
+test('shared chunk border does not emit interior cube faces or cracks',()=>{
+  const world={seed:179,get(x,y,z){
+    return y===12&&z===0&&(x===15||x===16)?BLOCK.STONE:BLOCK.AIR;
+  }};
+  const left=meshChunk(world,0,0),right=meshChunk(world,1,0);
+  assert.equal(left.length/9,30,'Left chunk block should have 5 visible faces');
+  assert.equal(right.length/9,30,'Right chunk block should have 5 visible faces');
+  const leftSurface=Array.from({length:left.length/9},(_,i)=>left[i*9]).filter(x=>x===16).length;
+  const rightSurface=Array.from({length:right.length/9},(_,i)=>right[i*9]).filter(x=>x===16).length;
+  // Shared faces absent; vertices on x=16 still appear on the adjoining visible top/bottom/front/back faces.
+  assert.ok(leftSurface>0&&rightSurface>0);
+});
