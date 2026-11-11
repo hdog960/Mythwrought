@@ -260,7 +260,13 @@ function start(){
   });
   canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved)edit(drag.button===2?'place':'mine');drag=null;}});
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
-  document.addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space'&&!e.repeat)jump();keys.add(e.code);});
+  document.addEventListener('keydown',e=>{
+    // Do not steal arrows, space or WASD from accessibility controls and form fields.
+    if(e.target?.isContentEditable||['INPUT','SELECT','TEXTAREA','BUTTON'].includes(e.target?.tagName))return;
+    if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+    if(e.code==='Space'&&!e.repeat)jump();
+    keys.add(e.code);
+  });
   document.addEventListener('keyup',e=>keys.delete(e.code));
   window.addEventListener('blur',()=>{keys.clear();joystick.x=joystick.y=0;});
   const sensitivitySlider=document.getElementById('lookSensitivity');
