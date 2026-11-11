@@ -35,6 +35,7 @@ jobs:
           node tests/preflight-browser.mjs
           node tests/vault-browser.mjs
           node tests/mirror-browser.mjs
+          node tests/foreground-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
