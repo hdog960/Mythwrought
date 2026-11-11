@@ -696,6 +696,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     world=imported;storageReadOnly=false;changed=false;
+    clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
     saveHealth.textContent='Restored a verified IndexedDB snapshot; original schema-1 live save confirmed.';
@@ -740,10 +741,11 @@ function start(){
       if(!requested){
         if(mirrorTimer!==null){clearTimeout(mirrorTimer);mirrorTimer=null;}
         pendingMirrors.clear();
-      }else scheduleMirrorForWorld();
+      }
       mirrorStatus.textContent=requested?
         'Mirroring enabled; existing snapshots are unchanged. Sync to verify the current seed.':
         'Mirroring disabled. Already committed copies remain; automatic future copies stopped.';
+      if(requested)scheduleMirrorForWorld();
     }catch(error){
       mirrorEnabledCheck.checked=mirrorEnabled;
       mirrorStatus.textContent='Could not persist mirror preference: '+String(error)+'. Current setting unchanged.';
@@ -756,7 +758,7 @@ function start(){
     mirrorStatus.textContent='Checking verified local saves and on-device mirror…';
     try{await action();}
     catch(error){mirrorStatus.textContent='Mirror operation refused: '+String(error.message||error)+
-      '. Canonical saved world has not been replaced by this operation.';}
+      '. Check the current world and exported backups before retrying.';}
     finally{mirrorBusy=false;mirrorButtons.forEach(button=>button.disabled=false);}
   }
   document.getElementById('mirrorSync').onclick=()=>withMirror(async()=>{
@@ -779,10 +781,12 @@ function start(){
   mirrorSlot.addEventListener('change',clearMirrorDownload);
   document.getElementById('mirrorPrepare').onclick=()=>withMirror(async()=>{
     await settleMirrorWrites();
-    const snap=await getMirrorCopy(world.seed,mirrorSlot.value);
+    const selectedSeed=world.seed,selectedVersion=mirrorSlot.value;
+    const snap=await getMirrorCopy(selectedSeed,selectedVersion);
+    if(world.seed!==selectedSeed)throw Error('Active world changed during export; select this seed again');
     mirrorDownloadUrl=URL.createObjectURL(new Blob([snap.raw],{type:'application/json'}));
     mirrorDownload.href=mirrorDownloadUrl;
-    mirrorDownload.download='mythwrought-mirror-seed-'+world.seed+'-'+mirrorSlot.value+'.json';
+    mirrorDownload.download='mythwrought-mirror-seed-'+selectedSeed+'-'+selectedVersion+'.json';
     mirrorDownload.hidden=false;
     mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap the separate DOWNLOAD link to export this original schema-1 JSON file.';
   });
@@ -824,6 +828,7 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       world=candidate;storageReadOnly=false;changed=false;respawnPrototype();
+      clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';
       seedMessage.textContent='World '+world.seed+' loaded safely. Other seeds remain separate.';
@@ -863,6 +868,7 @@ function start(){
       const outcome=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
       if(!outcome.ok)throw Error(outcome.reason);
       world=imported;storageReadOnly=false;changed=false;
+      clearMirrorDownload();
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
