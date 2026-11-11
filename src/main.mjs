@@ -8,6 +8,7 @@ import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
+import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -113,6 +114,7 @@ function start(){
   const heldPointers=new Map();
   let precisionHeld=false;
   let frame=0,lastFrame=performance.now(),changed=false;
+  const frameHistory=new FrameHistory(360);
   const CONTROL_SIZE_KEY='mythwrought-v005-control-size';
   let controlSize='regular';
   try{controlSize=normalizeControlSize(localStorage.getItem(CONTROL_SIZE_KEY));}catch(_){}
@@ -243,6 +245,7 @@ function start(){
   }
   function draw(now){
     const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
+    frameHistory.frame(now,!document.hidden&&help.hidden&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
       frame++;if(help.hidden)move(dt);
       const w=Math.max(1,Math.floor(canvas.clientWidth*Math.min(devicePixelRatio||1,1.5)));
@@ -492,6 +495,63 @@ function start(){
     canvas.focus({preventScroll:true});
   };
   document.getElementById('save').onclick=()=>{if(save())message('World edits verified and saved');};
+  // User-initiated diagnostics only; no world write, migration, auto-repair or
+  // fabricated physical-device acceptance. On-screen report can be copied on iOS.
+  const auditReport=document.getElementById('auditReport');
+  const auditStatus=document.getElementById('auditStatus');
+  document.getElementById('runAudit').onclick=async()=>{
+    auditStatus.textContent='Gathering read-only session measurements…';
+    try{
+      const left=document.querySelector('.left').getBoundingClientRect();
+      const right=document.querySelector('.right').getBoundingClientRect();
+      const view=canvas.getBoundingClientRect();
+      const grips=gripClearance(left,right,view);
+      let saved='unknown';
+      if(storageReadOnly)saved='READ ONLY: damaged selected save preserved; no automatic repair';
+      else if(changed)saved='UNSAVED world edits; export a backup';
+      else try{
+        const raw=localStorage.getItem(worldSlotKey(world.seed));
+        if(raw===null)saved='No canonical save for this seed yet';
+        else{
+          const loaded=loadWorldSafe(localStorage,world.seed);
+          const same=JSON.stringify(loaded.world.save())===JSON.stringify(world.save());
+          saved=(same?'Current world matches stored edits':'MISMATCH: world edits differ')+
+            '; source='+loaded.source;
+        }
+      }catch(err){saved='UNVERIFIED: '+String(err);}
+      const probe=probeTemporaryStorage(localStorage,
+        'mythwrought-v010-probe-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,11));
+      let quota='not exposed by browser';
+      try{
+        const estimate=await navigator.storage?.estimate?.();
+        if(estimate){
+          const mb=n=>Number.isFinite(n)?(n/1048576).toFixed(1)+' MiB':'unknown';
+          quota='usage '+mb(estimate.usage)+' / browser quota '+mb(estimate.quota)+' (eviction still possible)';
+        }
+      }catch(err){quota='unavailable: '+String(err);}
+      const standalone=Boolean(navigator.standalone||matchMedia('(display-mode: standalone)').matches);
+      auditReport.value=formatPreflightReport({
+        stamp:new Date().toISOString(),agent:navigator.userAgent,
+        dimensions:innerWidth+'×'+innerHeight+' CSS px, DPR '+(devicePixelRatio||1),
+        homeScreen:standalone?'standalone reported, not independently confirmed':'browser or unknown',
+        grips,frames:frameHistory.stats(),
+        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks',
+        save:saved,probe,quota
+      });
+      auditStatus.textContent='Report ready. Copy it for Gate A review; manual iPhone and art approval remain open.';
+    }catch(err){auditStatus.textContent='Device check could not finish: '+String(err);}
+  };
+  document.getElementById('copyAudit').onclick=async()=>{
+    if(!auditReport.value){auditStatus.textContent='Run the check before copying.';return;}
+    try{
+      if(!navigator.clipboard?.writeText)throw Error('Clipboard API unavailable');
+      await navigator.clipboard.writeText(auditReport.value);
+      auditStatus.textContent='Diagnostic text copied; no world edits were changed.';
+    }catch(_){
+      auditReport.focus();auditReport.select();
+      auditStatus.textContent='Clipboard blocked; text selected for manual Copy.';
+    }
+  };
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);
   document.getElementById('switchWorld').onclick=()=>{
