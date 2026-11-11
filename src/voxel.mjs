@@ -1,4 +1,5 @@
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
+import {meadowAccentVertices} from './meadow.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
@@ -113,7 +114,17 @@ export function meshChunk(world,cx,cz){
           }
         }
       }
-  return new Float32Array(vertices);
+  // Decorative meadows are purely rendered geometry anchored to the current
+  // grass voxel. They never enter world.get(), raycasts, collisions or saves.
+  // Crucially, they piggyback the existing chunk buffer and mesh invalidation.
+  const accents=meadowAccentVertices(world,cx,cz,{
+    chunkSize:CHUNK_SIZE,heightAt:terrainHeight,grass:BLOCK.GRASS,air:BLOCK.AIR
+  });
+  if(!accents.length)return new Float32Array(vertices);
+  const solid=new Float32Array(vertices);
+  const combined=new Float32Array(solid.length+accents.length);
+  combined.set(solid);combined.set(accents,solid.length);
+  return combined;
 }
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.
 // Start at the eye point, traverse each crossed cell, and preserve the adjacent empty cell

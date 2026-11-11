@@ -27,6 +27,11 @@ A foreground-only animation driver suspends WebGL rendering when the document be
 
 The new Chromium lifecycle regression emulates tab visibility, verifies stopped rendering and no stuck movement, exercises pagehide/pageshow, traverses a negative chunk window, reopens Settings and captures screenshots while preserving original seed-save bytes. **This does not replace real iPhone Safari or installed Home Screen testing.** Physically test interruptions, app switching, force quit and low-memory/thermal conditions, recording any retained input or blank world, before accepting Gate A.
 
+## Gate A non-solid meadow artwork and performance evidence (not approved)
+The new original voxel wildflower and grass-tuft accents are render-only, deterministic, capped per chunk, and tied to editable grass surfaces. No original world data, collision, block availability, or saved schema-1 fields change. A new real Chromium regression checks wildflowers appear, disappear when their supporting grass is mined, stay absent after save/reload, and return when the original grass is restored. It also captures a real browser screenshot of the meadow and checks the separate left/right grips remain outside the world viewport. These are **prototype flora details**, not a finished whimsical biome or any authorization to start pet/mount systems.
+
+**Manual iPhone check still required:** inspect the meadow from natural first-person distance in Safari and installed Home Screen landscape, confirm no shimmering/aliasing or accidental obstructed mining targets, navigate multiple chunk seams for 10+ minutes, and compare Balanced/Battery/Economy rendering clarity and heat. No FPS, thermals or user art acceptance is assumed.
+
 ## Player-owned real device verification checklist
 Test **Safari** and separately test **Add to Home Screen** at https://hdog960.github.io/Mythwrought/:
 1. Open landscape, check central viewport is completely unobstructed, notch and safe areas do not clip grips or footer. Use both thumbs at once for movement, look, jump, MINE/PLACE; verify horizontal controls are intuitive and the help menu scrolls.
