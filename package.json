@@ -1,0 +1,10 @@
+{
+  "name": "mythwrought",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Mythwrought original voxel RPG foundation",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}
