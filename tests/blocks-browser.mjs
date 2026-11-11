@@ -19,7 +19,7 @@ const waitHit=async(key)=>page.waitForFunction(key=>document.querySelector('#sce
 try{
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,null,{timeout:20000});
-  assert.match(await page.title(),/v0\.08/);
+  assert.match(await page.title(),/v0\.09/);
   await page.evaluate(()=>{
     const dev=window.__mythwroughtTest;
     dev.placeFixture(14,13,0,3);

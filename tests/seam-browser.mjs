@@ -29,7 +29,7 @@ try{
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
   await populated();
   assert.equal(await page.evaluate(()=>typeof window.__mythwroughtTest),'object');
-  assert.match(await page.title(),/v0\.08/);
+  assert.match(await page.title(),/v0\.09/);
   const cdp=await context.newCDPSession(page);
   const left=center(await page.locator('#movePad').boundingBox());
   const right=center(await page.locator('#lookPad').boundingBox());
