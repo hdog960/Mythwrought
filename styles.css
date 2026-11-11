@@ -89,3 +89,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .emblem,.grip button,.bezel{color:#fff6dc}
   .grip button:focus-visible{outline:3px solid white}
 }
+
+/* Keep every action within the visible mobile viewport, even during browser-toolbar/rotation changes. */
+.console{height:var(--console-height,100dvh)}

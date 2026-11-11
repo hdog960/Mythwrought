@@ -15,7 +15,8 @@ const inspect=async()=>page.evaluate(()=>{
   const parts=['#menu','#movePad','#jump','#dig','#place','#lookPad','#precision','[data-block="3"]','[data-block="4"]','[data-block="5"]'];
   return {left:{x:left.x,y:left.y,right:left.right,bottom:left.bottom},right:{x:right.x,y:right.y,right:right.right,bottom:right.bottom},
     world:{x:world.x,y:world.y,right:world.right,bottom:world.bottom,width:world.width,height:world.height},
-    app:{x:app.x,y:app.y,right:app.right,bottom:app.bottom,width:app.width},
+    app:{x:app.x,y:app.y,right:app.right,bottom:app.bottom,width:app.width,height:app.height},
+    windowHeight:window.innerHeight,visualHeight:window.visualViewport?.height,bodyScrollHeight:document.body.scrollHeight,
     loaded:document.querySelector('#scene').dataset.loadedChunks,
     gripWidth:Number(document.querySelector('#scene').dataset.gripWidth),
     rotate:getComputedStyle(document.querySelector('#rotate')).display,
@@ -31,11 +32,16 @@ try{
     await page.waitForTimeout(160);
     const d=await inspect();
     assert.equal(d.rotate,'none',`Unexpected landscape rotate overlay at ${width}x${height}`);
+    assert.ok(d.app.bottom<=height+1,`Console extends below physical screen at ${width}x${height}: ${JSON.stringify(d)}`);
+    assert.ok(d.app.height<=height+1,`Console height exceeds mobile viewport at ${width}x${height}`);
     assert.ok(d.world.width>=245,`World collapsed at ${width}x${height}`);
     assert.ok(d.world.width>=width*.45,`World too narrow at ${width}x${height}`);
     assert.ok(d.left.right<=d.world.x+3&&d.right.x>=d.world.right-3,`Controls overlap gameplay at ${width}x${height}`);
     assert.ok(Math.abs(d.left.right-d.world.x)<6&&Math.abs(d.right.x-d.world.right)<6,'Broken grip/world boundaries');
     assert.ok(d.left.x>=-1&&d.right.right<=d.app.right+1,'Grip extends beyond device');
+    assert.ok(d.left.bottom<=height+1&&d.right.bottom<=height+1,`Grips clipped below screen at ${width}x${height}`);
+    const footer=await page.locator('.bezel.foot').boundingBox();
+    assert.ok(footer.y+footer.height<=height+1,`Footer clipped off-screen at ${width}x${height}`);
     for(const b of d.parts){
       const parent=['#menu','#movePad','#jump'].includes(b.sel)?d.left:d.right;
       assert.ok(b.x>=parent.x-3&&b.right<=parent.right+3,`${b.sel} escapes horizontal grip at ${width}x${height}`);

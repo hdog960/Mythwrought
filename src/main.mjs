@@ -301,6 +301,10 @@ function start(){
   const sizeSelect=document.getElementById('controlSize');
   sizeSelect.value=controlSize;
   function updateControllerLayout(){
+    // Mobile viewport units can lag behind orientation/Chrome emulation resize.
+    // Pin the physical console to the visible viewport height before sizing grips.
+    const visibleHeight=Math.max(1,Math.floor(window.visualViewport?.height||window.innerHeight));
+    consoleFrame.style.setProperty('--console-height',visibleHeight+'px');
     const style=getComputedStyle(consoleFrame);
     const inset=(parseFloat(style.paddingLeft)||0)+(parseFloat(style.paddingRight)||0);
     const width=Math.max(280,consoleFrame.getBoundingClientRect().width-inset);
