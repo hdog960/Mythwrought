@@ -106,3 +106,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  .bezel.foot{height:23px}
  .precision{min-height:33px}
 }
+
+/* v0.08 — ergonomic guidance stays on the right-hand controller, never atop gameplay. */
+.target-info{display:block;width:100%;min-height:24px;max-height:30px;text-align:center;white-space:pre-line;overflow-wrap:anywhere;overflow:hidden;line-height:1.1;font-size:clamp(8px,1vw,10px);letter-spacing:.025em;color:#eddaad;text-shadow:0 1px 2px #101719;font-weight:750;opacity:1}
+.palette button[data-block="3"]{background:linear-gradient(145deg,#84939d,#475b66 51%,#303e49);color:#fff1d0}
+.palette button[data-block="4"]{background:repeating-linear-gradient(100deg,#70482a 0 3px,#845b3d 3px 5px,#5b3f31 5px 7px);color:#f5deb7}
+.palette button[data-block="5"]{background:linear-gradient(135deg,#7ce5e8,#346e87 42%,#183f58 64%,#62b4ca);color:#e2ffff;text-shadow:0 0 4px #d3fbff}
+.palette button.selected{outline:2px solid #f5d9a0;outline-offset:1px;filter:brightness(1.18)}
+@media(max-height:350px){.target-info{display:none}}
