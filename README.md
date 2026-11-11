@@ -46,6 +46,12 @@ The initial prototype is intentionally dependency-free. Open `index.html` with a
 - [PR #13 merged](https://github.com/hdog960/Mythwrought/pull/13) as `3993a40`. [Repaired merged-main CI](https://github.com/hdog960/Mythwrought/actions/runs/43100845908) passed **86/86 Node and 9/9 Chromium browser suites**; [Pages and public HTML/JS checks passed](https://github.com/hdog960/Mythwrought/actions/runs/43100846020). Screenshots inspected from CI show a readable settings vault without obstructing gameplay grips.
 - [Gate A device audit procedure](docs/GATE_A_DEVICE_AUDIT.md). **Real Safari/Home Screen hardware, durable production-grade IndexedDB primary saves, long-play memory/thermals and user premium-art approval remain OPEN.** Neither v0.10 Gate A nor v0.11 has been unlocked.
 
+### v0.10 Gate A serialized save mirror and render workload — **Gate A still OPEN**
+- The existing manual vault remains. A new **VERIFIED SAVE MIRROR** control is **off by default** and, when opted in, copies successful canonical saves into a separate IndexedDB store with latest and previous verified snapshots per seed. It queues writes, rejects corrupted mirrors, and only restores after confirmation. This is **not** production-grade canonical IndexedDB persistence.
+- The **3D pixel workload** setting offers Balanced (same prior framebuffer cap), Battery and Economy. It changes WebGL pixel count without moving the 3D CSS viewport or either controller grip. Actual device performance effects remain unmeasured.
+- [PR #15](https://github.com/hdog960/Mythwrought/pull/15) merged into main `febcd9c`, [94/94 Node + 10 Chromium suites passed on final PR](https://github.com/hdog960/Mythwrought/actions/runs/43109672224), [published Pages/public resources passed](https://github.com/hdog960/Mythwrought/actions/runs/43112019974); [merged-main CI](https://github.com/hdog960/Mythwrought/actions/runs/43112020222) was queued when this entry was written.
+- Real iPhone Safari and installed Home Screen acceptance, memory/thermal testing, robust primary save architecture and explicit premium art signoff remain **unverified and OPEN**. Keep v0.11 locked and export external JSON backups.
+
 ### v0.02 release verification
 - [v0.02 merged PR #1](https://github.com/hdog960/Mythwrought/pull/1), merge commit `401e1df`.
 - [Main CI run](https://github.com/hdog960/Mythwrought/actions/runs/42948496448): 12/12 Node tests, syntax and Chromium terrain interaction tests passed.
