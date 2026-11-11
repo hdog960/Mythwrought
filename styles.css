@@ -91,7 +91,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 
 /* Keep every action within the visible mobile viewport, even during browser-toolbar/rotation changes. */
-.console{height:var(--console-height,100dvh)}
+/* CSS viewport ceiling is immediate even if a slow GPU frame delays JS resize events. */
+.console{height:min(var(--console-height,100dvh),100dvh)}
 
 /* Compact landscape widths must never make the implicit grid row taller than the visible viewport. */
 .console,.grip,.screen{min-height:0;min-width:0}
