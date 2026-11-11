@@ -117,3 +117,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
 /* Gate A diagnostic stays inside the deliberately opened settings sheet, never on the game canvas. */
 .audit-title{font-size:14px;color:#f2d69e;letter-spacing:.06em;margin:3px 0 8px}.auditReport,#auditReport{display:block;width:100%;min-height:128px;padding:10px;margin-top:8px;background:#101d22;color:#e8dfc7;border:1px solid #af976a;border-radius:8px;font:12px/1.45 ui-monospace,monospace;resize:vertical;user-select:text;-webkit-user-select:text;touch-action:pan-y;overflow:auto}.looksetting .helpbuttons{margin:9px 0}.looksetting .helpbuttons button{font-size:12px}
+
+/* v0.10 Gate A optional backup vault; confined to the scrollable settings sheet. */
+.vault-settings{display:block}
+.vault-settings>label{display:block;margin:10px 0 6px;font-size:12px}
+#vaultSelect{display:block;width:100%;min-height:39px;padding:7px;border:1px solid #c7a772;border-radius:8px;background:#15282a;color:#f4dfb9;font-size:12px;touch-action:manipulation}
+.vault-settings .helpbuttons{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.vault-settings .helpbuttons button{flex:1 1 145px;padding:9px 7px;min-height:37px}
+.vault-settings .helpbuttons button:disabled{opacity:.55;cursor:wait}
+.vault-download{display:block;margin:8px 0;padding:10px;text-align:center;border:2px solid #ba9b66;border-radius:9px;background:#375345;color:#fef0cd;font-weight:800;font-size:12px;touch-action:manipulation}
+.vault-download[hidden]{display:none}
+.vault-download:focus-visible{outline:3px solid #fff1bd;outline-offset:2px}
