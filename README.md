@@ -62,6 +62,11 @@ The initial prototype is intentionally dependency-free. Open `index.html` with a
 - [Repaired merged-main CI passed 98/98 Node and all 11 Chromium suites](https://github.com/hdog960/Mythwrought/actions/runs/43120294951), including intentionally stale layout values; [Pages + public assets passed](https://github.com/hdog960/Mythwrought/actions/runs/43120294932). The authentic 568×320 landscape screenshot was inspected. Existing saves, gameplay and touch controls remain intact.
 - **No physical iPhone or Home Screen acceptance, thermal certification, premium art approval or Gate A promotion has occurred.** v0.11 remains locked.
 
+### v0.10 Gate A whimsical meadow art foundation — **NOT PREMIUM ART APPROVAL**
+- [PR #23](https://github.com/hdog960/Mythwrought/pull/23) adds small original seed-consistent voxel wildflowers and grass tufts to existing exposed editable terrain, with rose, lilac, blue and golden flower accents. The bounded cosmetic geometry shares original chunk GPU buffers and never changes existing block saves, collision or edit mechanics. Flowers disappear when their grass is removed or covered and reappear when the original patch is restored.
+- The actual browser screenshots were inspected after [PR CI PASS](https://github.com/hdog960/Mythwrought/actions/runs/43122861793). [Merged-main verification passed **103/103 Node and 12/12 Chromium suites**](https://github.com/hdog960/Mythwrought/actions/runs/43123257138); [Pages/public files also passed](https://github.com/hdog960/Mythwrought/actions/runs/43123256969). User visual acceptance has not been requested or inferred.
+- This is **just an original visual foundation**, not fully authored fantastical settlements, biomes, creatures or the concept-art level of detail. No pets, mounts or future spells were implemented; they remain documented design goals. Physical iPhone Safari/Home Screen, long-play performance, production saves, complete art acceptance and v0.10 Gate A all remain OPEN; v0.11 locked.
+
 ### v0.02 release verification
 - [v0.02 merged PR #1](https://github.com/hdog960/Mythwrought/pull/1), merge commit `401e1df`.
 - [Main CI run](https://github.com/hdog960/Mythwrought/actions/runs/42948496448): 12/12 Node tests, syntax and Chromium terrain interaction tests passed.
