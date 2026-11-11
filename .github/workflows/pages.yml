@@ -29,3 +29,17 @@ jobs:
         with:
           path: '.'
       - uses: actions/deploy-pages@v4
+      - name: Verify public HTML and JavaScript after deployment
+        run: |
+          ok=0
+          for i in $(seq 1 12); do
+            if curl -fsSL --max-time 15 https://hdog960.github.io/Mythwrought/ -o /tmp/mythwrought-live.html && grep -q 'MYTHWROUGHT' /tmp/mythwrought-live.html; then
+              ok=1
+              break
+            fi
+            sleep 5
+          done
+          test "$ok" = "1"
+          grep -q 'src/main.mjs' /tmp/mythwrought-live.html
+          curl -fsSL --max-time 20 https://hdog960.github.io/Mythwrought/src/main.mjs -o /tmp/mythwrought-main.mjs
+          grep -q 'VoxelWorld' /tmp/mythwrought-main.mjs

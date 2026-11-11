@@ -27,6 +27,18 @@ try{
   assert.ok(state.noticeHidden,'Fatal error overlay is showing');
   assert.ok(state.layout,'Controller grips overlap the world viewport');
   assert.ok(state.pixel.some(v=>v!==0),'Viewport pixel appears unrendered');
+  // Aim toward the ground with the actual right-pad pointer interaction.
+  const pad=await page.locator('#lookPad').boundingBox();
+  assert.ok(pad,'Missing look pad');
+  await page.mouse.move(pad.x+pad.width/2,pad.y+pad.height/2);
+  await page.mouse.down();
+  await page.mouse.move(pad.x+pad.width/2,pad.y+pad.height/2+72,{steps:8});
+  await page.mouse.up();
+  await page.locator('#dig').click();
+  const editStatus=await page.locator('#status').textContent();
+  assert.match(editStatus,/Block removed and saved/,'Touch-side mining control did not edit terrain');
+  const edits=await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v001-world')||'{}').edits);
+  assert.ok(Array.isArray(edits)&&edits.length>0,'Mining did not persist a real block edit');
   await page.locator('#menu').click();
   assert.ok(await page.locator('#help').isVisible(),'Help should open');
   await page.locator('#save').click();
