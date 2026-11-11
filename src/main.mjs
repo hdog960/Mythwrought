@@ -716,6 +716,96 @@ function start(){
     const remaining=await refreshVault();
     vaultStatus.textContent='Selected snapshot deleted and verified; '+remaining.length+' backups remain. Live world unchanged.';
   });
+  // Explicit opt-in. No existing seed is migrated, restored or mirrored on
+  // startup. Only successful, read-back-verified canonical writes enqueue a
+  // secondary copy, and only while the player has enabled this preference.
+  const mirrorEnabledCheck=document.getElementById('mirrorEnabled');
+  const mirrorButtons=[...document.querySelectorAll('.mirror-settings button')];
+  let mirrorBusy=false;
+  mirrorEnabledCheck.checked=mirrorEnabled;
+  mirrorStatus.textContent=mirrorEnabled?
+    'Mirroring enabled. New verified local saves will be copied after a short delay.':
+    'Mirroring off. Existing backups can still be inspected or exported.';
+  mirrorEnabledCheck.addEventListener('change',()=>{
+    const requested=mirrorEnabledCheck.checked;
+    try{
+      localStorage.setItem(MIRROR_PREF,requested?'enabled':'disabled');
+      if(localStorage.getItem(MIRROR_PREF)!==(requested?'enabled':'disabled'))
+        throw Error('Preference read-back failed');
+      mirrorEnabled=requested;
+      if(!requested){
+        if(mirrorTimer!==null){clearTimeout(mirrorTimer);mirrorTimer=null;}
+        pendingMirrors.clear();
+      }else scheduleMirrorForWorld();
+      mirrorStatus.textContent=requested?
+        'Mirroring enabled; existing snapshots are unchanged. Sync to verify the current seed.':
+        'Mirroring disabled. Already committed copies remain; automatic future copies stopped.';
+    }catch(error){
+      mirrorEnabledCheck.checked=mirrorEnabled;
+      mirrorStatus.textContent='Could not persist mirror preference: '+String(error)+'. Current setting unchanged.';
+    }
+  });
+  async function withMirror(action){
+    if(mirrorBusy)return;
+    mirrorBusy=true;mirrorButtons.forEach(button=>button.disabled=true);
+    clearMirrorDownload();
+    mirrorStatus.textContent='Checking verified local saves and on-device mirror…';
+    try{await action();}
+    catch(error){mirrorStatus.textContent='Mirror operation refused: '+String(error.message||error)+
+      '. Canonical saved world has not been replaced by this operation.';}
+    finally{mirrorBusy=false;mirrorButtons.forEach(button=>button.disabled=false);}
+  }
+  document.getElementById('mirrorSync').onclick=()=>withMirror(async()=>{
+    const raw=verifiedLiveBytes(),seed=world.seed;
+    await settleMirrorWrites();
+    const result=await queueMirror(seed,raw);
+    mirrorStatus.textContent='Verified mirror synced for seed '+seed+' ('+result.edits+
+      ' edits). Current and prior copies retained separately from live localStorage.';
+  });
+  document.getElementById('mirrorCheck').onclick=()=>withMirror(async()=>{
+    await settleMirrorWrites();
+    const state=await inspectMirror(world.seed);
+    if(!state.exists){mirrorStatus.textContent='No device mirror for seed '+world.seed+'. Save and SYNC to make one.';return;}
+    const summarize=(label,slot)=>label+': '+(slot===null?'absent':
+      slot.valid?'verified, '+slot.edits+' edits, '+slot.createdAt:'DAMAGED ('+slot.error+')');
+    mirrorStatus.textContent='Seed '+world.seed+' — '+
+      summarize('latest',state.current)+'; '+summarize('previous',state.previous)+
+      '. No restoration performed.';
+  });
+  mirrorSlot.addEventListener('change',clearMirrorDownload);
+  document.getElementById('mirrorPrepare').onclick=()=>withMirror(async()=>{
+    await settleMirrorWrites();
+    const snap=await getMirrorCopy(world.seed,mirrorSlot.value);
+    mirrorDownloadUrl=URL.createObjectURL(new Blob([snap.raw],{type:'application/json'}));
+    mirrorDownload.href=mirrorDownloadUrl;
+    mirrorDownload.download='mythwrought-mirror-seed-'+world.seed+'-'+mirrorSlot.value+'.json';
+    mirrorDownload.hidden=false;
+    mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap the separate DOWNLOAD link to export this original schema-1 JSON file.';
+  });
+  document.getElementById('mirrorRestore').onclick=()=>withMirror(async()=>{
+    if(storageReadOnly)throw Error('Read-only startup protection active; use the regular IMPORT flow to repair damaged saved bytes');
+    await settleMirrorWrites(); // Never let an older queued write race a restore.
+    const seed=world.seed,which=mirrorSlot.value;
+    const snap=await getMirrorCopy(seed,which);
+    const restored=importWorldData(snap.raw);
+    if(restored.seed!==seed)throw Error('Mirror seed does not match the active world');
+    if(!window.confirm('RESTORE the '+which+' verified mirror of seed '+seed+
+      ' with '+snap.edits+' edits? The current primary will be kept in the previous-good local backup. Cancel changes nothing.')){
+      mirrorStatus.textContent='Restore cancelled. No world or mirror copy changed.';return;
+    }
+    if(world.seed!==seed||changed)throw Error('World changed or contains unsaved edits; export or SAVE before restoring');
+    const out=saveWorldSafe(localStorage,restored);
+    if(!out.ok)throw Error('Canonical world restore failed; '+out.detail);
+    for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    outlineKey='';outlineCount=0;lastEditMeshKeys=[];
+    world=restored;changed=false;respawnPrototype();
+    seedLabel.textContent='WORLD '+seed;
+    saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
+    message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
+    mirrorStatus.textContent='Restore verified for seed '+seed+'. Export JSON for storage outside the browser.';
+    scheduleMirrorForWorld();
+  });
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);
   document.getElementById('switchWorld').onclick=()=>{
