@@ -7,6 +7,7 @@ import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
+import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -21,19 +22,20 @@ if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or deskt
 else start();
 
 function start(){
-  let world;
+  let world,storageReadOnly=false,recoveryNote='';
   function loadWorld(seed){
-    let raw=localStorage.getItem(worldSlotKey(seed));
-    if(raw===null&&seed===DEFAULT_WORLD_SEED)raw=localStorage.getItem(LEGACY_WORLD_KEY);
-    if(raw===null)return new VoxelWorld(seed);
-    const found=VoxelWorld.restore(JSON.parse(raw));
-    if(found.seed!==seed)throw Error('Save seed does not match requested world');
-    return found;
+    const result=loadWorldSafe(localStorage,seed);
+    if(result.recovered)recoveryNote=result.warning;
+    return result.world;
   }
   try{
     const choice=localStorage.getItem(SELECTED_SEED_KEY);
     world=loadWorld(choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice));
-  }catch(err){world=new VoxelWorld(DEFAULT_WORLD_SEED);message('Saved data unavailable; no old saves were deleted');}
+  }catch(err){
+    // A damaged seed is NEVER replaced by auto-saving a fresh starter world.
+    storageReadOnly=true;world=new VoxelWorld(DEFAULT_WORLD_SEED);
+    recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
+  }
   seedLabel.textContent='WORLD '+world.seed;
   const VS=[
     '#version 300 es','precision highp float;',
@@ -130,16 +132,23 @@ function start(){
     const adjusted=clampLook(player.yaw,player.pitch,dx,dy,sensitivity,scale*(precise ? .4 : 1));
     player.yaw=adjusted.yaw;player.pitch=adjusted.pitch;
   }
+  const saveHealth=document.getElementById('saveHealth');
   function save(){
-    try{
-      localStorage.setItem(worldSlotKey(world.seed),JSON.stringify(world.save()));
-      localStorage.setItem(SELECTED_SEED_KEY,String(world.seed));
-      changed=false;
-      return true;
-    }catch(err){
-      message('Local save failed — export from the menu');
+    if(storageReadOnly){
+      message('SAVE PROTECTION ACTIVE — damaged original world not overwritten');
+      saveHealth.textContent='READ ONLY: original damaged save preserved. Import a verified backup or choose another seed.';
       return false;
     }
+    const result=saveWorldSafe(localStorage,world);
+    if(!result.ok){
+      message(result.reason+' — EXPORT your world');
+      saveHealth.textContent='UNSAVED: '+result.detail+'. Export current world before leaving.';
+      return false;
+    }
+    changed=false;
+    saveHealth.textContent=result.warning||'Verified save: schema-1 deltas, checksum journal and previous-good backup.';
+    if(result.warning)message(result.warning);
+    return true;
   }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
@@ -482,40 +491,68 @@ function start(){
     // Return keyboard/gamepad-like input focus to world after closing modal.
     canvas.focus({preventScroll:true});
   };
-  document.getElementById('save').onclick=()=>{save();message('Local world edits saved');};
+  document.getElementById('save').onclick=()=>{if(save())message('World edits verified and saved');};
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);
   document.getElementById('switchWorld').onclick=()=>{
     try{
       const next=worldSeedFromText(seedInput.value);
-      if(next===world.seed){seedMessage.textContent='Already exploring this seed.';return;}
-      save();
-      const candidate=loadWorld(next); // Validate before changing the active world.
+      if(next===world.seed&&!storageReadOnly){seedMessage.textContent='Already exploring this seed.';return;}
+      if(!storageReadOnly&&!save())throw Error('Current world is not verified saved. Export before switching.');
+      const candidate=loadWorld(next);
+      const result=saveWorldSafe(localStorage,candidate);
+      if(!result.ok)throw Error(result.reason);
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];world=candidate;respawnPrototype();
+      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      outlineKey='';outlineCount=0;lastEditMeshKeys=[];
+      world=candidate;storageReadOnly=false;changed=false;respawnPrototype();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
-      save();seedMessage.textContent='World '+world.seed+' ready. Other seed saves remain separate.';
-      message('Loaded seed '+world.seed+' — building nearby chunks');
+      saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';
+      seedMessage.textContent='World '+world.seed+' loaded safely. Other seeds remain separate.';
+      message('Loaded seed '+world.seed+' with saved world edits');
     }catch(err){seedMessage.textContent='World not changed: '+err.message;}
   };
   document.getElementById('export').onclick=()=>{
-    const blob=new Blob([JSON.stringify(world.save(),null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob),a=document.createElement('a');
-    a.href=url;a.download='mythwrought-seed-'+world.seed+'-prototype.json';document.body.appendChild(a);a.click();a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),3000);message('Exported world edit backup');
+    try{
+      const data=JSON.stringify(world.save(),null,2);
+      importWorldData(data); // Ensure the export is a valid original schema-1 file.
+      const blob=new Blob([data],{type:'application/json'});
+      const url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download='mythwrought-seed-'+world.seed+'-prototype.json';
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
+      message('Exported verified world backup · '+saveFingerprint(data));
+    }catch(err){message('Export failed: '+err.message);}
   };
   document.getElementById('import').onclick=()=>document.getElementById('importFile').click();
   document.getElementById('importFile').addEventListener('change',async e=>{
     const f=e.target.files?.[0];if(!f)return;
     try{
-      const imported=VoxelWorld.restore(JSON.parse(await f.text()));
-      save(); // Keep the previously active world's slot before replacing.
-      world=imported;
+      if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
+      const imported=importWorldData(await f.text()); // Validate before mutation.
+      if(!storageReadOnly&&!save())throw Error('Current world could not be verified saved; export first.');
+      let existing=null,damaged=false;
+      try{existing=loadWorldSafe(localStorage,imported.seed).world;}
+      catch(_){damaged=true;}
+      const conflict=existing&&JSON.stringify(existing.save())!==JSON.stringify(imported.save())&&
+        (existing.edits.size>0||imported.seed===world.seed);
+      if((damaged||conflict)&&!window.confirm(
+        'Replace saved edits for seed '+imported.seed+'? The previous data will be preserved in the local backup slot. Cancel leaves the current world unchanged.'
+      )){
+        message('Import cancelled; existing world unchanged');return;
+      }
+      const outcome=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
+      if(!outcome.ok)throw Error(outcome.reason);
+      world=imported;storageReadOnly=false;changed=false;
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];respawnPrototype();seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
-      save();message('Imported voxel world');
-    }catch(err){message('Import rejected: '+err.message);}
-    e.target.value='';
+      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      outlineKey='';outlineCount=0;lastEditMeshKeys=[];
+      respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
+      seedInput.value=String(world.seed);
+      saveHealth.textContent='Imported verified schema-1 world with previous data preserved.';
+      message('Imported world safely · '+world.edits.size+' block edit deltas');
+    }catch(err){message('Import rejected; existing world unchanged: '+err.message);}
+    finally{e.target.value='';}
   });
   let graphicsLost=false;
   canvas.addEventListener('webglcontextlost',e=>{
@@ -525,7 +562,12 @@ function start(){
   canvas.addEventListener('webglcontextrestored',()=>{
     fatal('Graphics restarted. Reload to rebuild shaders and saved terrain safely.');
   });
-  window.addEventListener('pagehide',()=>{cancelAllPointers();save();});
+  window.addEventListener('pagehide',()=>{
+    cancelAllPointers();
+    // Do not rewrite valid/externally damaged saves on an ordinary reload.
+    // Actual edits already save synchronously; only retry if still dirty.
+    if(changed&&!storageReadOnly)save();
+  });
   if(['localhost','127.0.0.1'].includes(location.hostname)){
     // Local-only regression interface; absent from the public Pages runtime.
     window.__mythwroughtTest=Object.freeze({
@@ -556,6 +598,9 @@ function start(){
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed};}
     });
   }
-  message('Move, look, mine and place · ☰ for help');
+  saveHealth.textContent=storageReadOnly?
+    'READ ONLY: damaged world data preserved; import or select another seed.':
+    'Schema-1 saved edits; checksum journal and verified previous-world backup.';
+  message(recoveryNote||'Move, look, mine and place · ☰ for help');
   requestAnimationFrame(draw);
 }

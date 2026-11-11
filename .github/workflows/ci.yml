@@ -31,6 +31,7 @@ jobs:
           node tests/seam-browser.mjs
           node tests/movement-browser.mjs
           node tests/blocks-browser.mjs
+          node tests/persistence-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
