@@ -133,8 +133,10 @@ try{
  await waitMirror('MIRROR NOT VERIFIED');
  assert.equal((await inspect(987)).current.valid,false,'Corrupt mirror silently overwritten');
  assert.equal(await saved('mythwrought-v002-world-987'),healthyCanonical);
+ await page.locator('#mirrorSlot').selectOption('current');
  await page.locator('#mirrorPrepare').click();
  await waitMirror('Mirror operation refused');
+ assert.match(await page.locator('#mirrorStatus').textContent(),/checksum|Mirror copy rejected/);
  assert.equal(await page.locator('#mirrorDownload').isVisible(),false);
  assert.equal(await saved('mythwrought-v002-world-987'),healthyCanonical);
 
