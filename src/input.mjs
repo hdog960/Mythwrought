@@ -30,9 +30,9 @@ export function selectedLookMode(mode){return LOOK_MODES.includes(mode)?mode:'sw
 // keyboard arrows, or physical thumb-knob tracking.
 export function touchMovementX(rawX){
   if(!Number.isFinite(rawX))throw Error('Invalid horizontal movement input');
-  return -rawX;
+  return rawX===0?0:-rawX;
 }
 export function touchCameraX(rawX){
   if(!Number.isFinite(rawX))throw Error('Invalid horizontal camera input');
-  return -rawX;
+  return rawX===0?0:-rawX;
 }
