@@ -1,0 +1,26 @@
+# Authority 03 — Hero, combat, companions, NPCs and death
+**Status:** target RPG authority.
+
+## Hero creation & progression
+Custom ancestry (original fantasy cultures; no intrinsic evil ancestry), appearance, and background. Example backgrounds: soldier/scholar/miner/merchant/criminal/outlander/artisan/acolyte. Background influences arrival motive, first possessions, knowledge, dialogue, modest starting proficiencies. NO classes or exclusive skill trees; learning by doing, quests, practice, exploration and teachers. Noncombat crafting, farming, engineering, construction and alchemy can be serious progression paths without mandatory grind. Early essential building available to every background.
+
+## First-person combat
+Responsive but weighty real-time attacks, modest recovery, crisp audiovisual impacts, clear readable enemy windups, basic reliable shield blocks, approachable movement. The two hands support sword+shield, sword+spell, suitable dual weapons, bows and pure magic. Avoid Soulslike harsh perfect parry, opaque status stacking or button spam. Normal magic also affects eligible terrain/fluids. Boss encounter logic must tolerate tunneling/alternate access; no blanket invulnerable geography. Environmental damage from random enemies should not destroy player settlements by default. Small starter cave creature can warn, be avoided or be confronted; not every wildlife encounter is compulsory combat.
+
+## Magic
+Modular ESSENCE + FORM + MODIFIER experimentation: fire, water, frost, storm, nature, earth, illusion, spirit, alteration and related schools. Uses for offense, warding, utility, excavation, freezing, irrigation, alchemy, enchanting, farming and summoning. Normal magic SAFE and understandable. Powerful FORBIDDEN ancient magic explicitly previews exceptional ethical/faction/world consequences before commitment. Temporary magical bridges/barriers/platforms expire. Permanent spell construction spends real gathered materials and magic, with placement conflict/permission checks. No fabricated free matter loops.
+
+## Major companions
+Aspirational 8–10 carefully authored recruitable companions, exactly TWO active at once. Preliminary concepts include Brindle goblin engineer, Edda disgraced knight, Thalen exiled druid, Ysra dwarven scholar; names/personas not yet finalized. Rich questlines, friendship/trust/rivalry, paired banter and responses to decisions; STRICT NO ROMANCE. Companion-initiated significant conversation is occasional and postponeable, never interrupts building/combat. Follow/wait/return home/authorized assist, combat stance and equipment; mostly REACTIVE. No unauthorized digging, block edits, resource consumption, player commitment, fishing or crafting. Lightweight nav on edited terrain, anti-obstruction placement and stuck recovery. Their equipped items do not enter the player's Death Echo on player death.
+
+## Residents & recruitment
+Terraria-like mixed approach: ordinary immigration if housing, path accessibility and suitability exist; special resident services unlocked via milestones, world discovery, rescue and specific workspaces; story NPCs require earned invites/quest events; travelers visit without moving in. Resident ledger reveals known conditions without spoiling hidden NPCs. Ordinary occupations mostly INTERCHANGEABLE with minimal career leveling: blacksmith/farmer/scholar/merchant/innkeeper/fisher/guard/engineer/sanctuary caretaker etc. Workspaces recognized by functional furniture, valid access and permitted resource supplies, NOT mandatory prefab size. Residents have lightweight personality, schedules, social ties and contextual dialogue; authored NPCs deeper. Player controls housing/immigration.
+
+## Permissions
+All consequential assigned resident work is bounded by work area, permitted task, supply container and restrictions; caretakers observe wildlife, tend specified plants and approved water/lighting repair, but may not relocate creatures, consume rare supplies or edit terrain independently. Companions assisting blueprint building ONLY follow player's exact blueprint with assigned materials and protected zone checks. Distant residents use abstract schedules.
+
+## Death Echo
+On defeat, all equipped and carried possessions move atomically to a unique persistent floating luminous dimensional distortion at a SAFE recoverable nearby position. Respawn with empty carried inventory and no equipped gear at chosen safe bed/home, or fallback village; retain levels, known spells, quest flags, edited world and companion equipment. Instant ONE interaction returns entire Echo payload; protected spill/cache if inventory capacity insufficient; preserve multiple outstanding Echoes after repeated defeats; no timers, fees or despawn. Do not spawn empty Echo. Mark Echo on correct atlas depth and compass. Echo NOT fast travel anchor. Rescue grace must prevent instant re-death but terminate on offensive action. Implement transactional save semantics so interruption cannot duplicate or delete items. Quest flags never lost; if essential quest tokens are physical, provide recovery-safe rules.
+
+## Safety/difficulty
+Accessible default, adjustable visibility/contrast, combat difficulty and incidental structure damage. Hunger/weather optional, sleep never mandatory, no forced upkeep.

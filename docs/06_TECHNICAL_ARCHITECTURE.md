@@ -1,0 +1,29 @@
+# Authority 06 — Technical architecture, data integrity, verification
+**Status:** proposed implementation contract subject to measured iPhone validation.
+
+## Deployment/requirements
+Static GitHub Pages with zero paid services. Offline-capable PWA once implemented and verified. Landscape iPhone Safari and installed Home Screen tested independently. Browser code runs locally; GitHub Pages DOES NOT host an always-on AI/NPC simulation, multiplayer state or backend. Avoid mandatory third-party CDN dependencies and external API keys. Deploy from main only after CI; preserve rollbacks and previous saves.
+
+## Voxel architecture
+Deterministic PRNG/noise and stable versioned world-seed generator; chunk partition, mesh greedy face culling where appropriate, terrain LOD for long cave sightlines, asynchronous time-sliced generation/meshing and bounded upload/frame work. Real block edits persisted separately from untouched seeded terrain, with provenance for automation and wildlife exclusion. Water/lava local work queues and capped propagation. Cave/city procedural overlays reserve placeable story structures. Save surfaces, underground and player modifications in ONE world coordinate system.
+
+## Input/rendering
+WebGL2 baseline with capabilities checks; evaluate WebGPU later as optional optimization only if tests justify. On GPU failure, recover or clearly show a descriptive message rather than blank screen. Separate world canvas viewport from side controls/compass; no pointer capture requirement for touch aiming. Tune pixel resolution and draw range dynamically after profiling; never claim 60 FPS or any particular chunk distance without measurement.
+
+## Persistence contract
+Versioned world manifest {seed,generatorVersion,schemaVersion}, chunk edit deltas, protagonist inventory/stats/learned spells, authored quest flags, companions, residents, wiring/energy/machines, ecology/sanctuaries, custom map pins, named colored portal anchors, Death Echoes and game preferences. IndexedDB preferred for sizable data; localStorage only for tiny prototype state/preferences if clearly labeled. Atomic/transactional restoration of Echo payloads, item conservation across machines, consistent seed/coord mapping, backup export and reimport, schema migration with fixtures, storage-quota warnings, save replay tests. “Persist” means recoverable after crash/reload, not just surviving in live JS memory. Save older schemas, create backups before migrations and provide user-owned export.
+
+## World simulation budgets
+Active local chunks: per-entity AI, pathing, animations, fluid stepping, circuit events and machine actions. Far-away: deterministic bounded offline/event summaries, never generate free resources or fabricate quests. Stable event ordering with safety quotas and circuit cycle prevention. No recursive unbounded machinery loop. NPC pathfinding locally recomputed upon modified walkable terrain. Sanctuary/quarry zones saved explicitly. Mobile memory headroom and pausing/resuming tab are treated as first-class test cases.
+
+## Test matrix
+1. Node pure logic tests: seed determinism, chunk coordinate mapping at negatives, edit overrides, save/restore and corruption handling, no duplicate Death Echo recovery, inventory invariants, progression rules and safe bounds.
+2. Automated Chromium/browser tests: first world draws without black screen, landscape grips stay outside central canvas, world edits visually apply/persist after reload, controls respond, touch emulation, resume from background, fallback message on context loss and no console errors.
+3. Real iPhone Safari + Home Screen manual visual gate: movement/look/attack hand reach, device thermal/memory behavior, deep cave graphics, long play, orientation/safe area, storage after force quit, airplane/offline behavior if PWA.
+4. Deployment test: exact main SHA, Actions run status, HTML/asset HTTP retrieval, live page functionality; wait to claim deployment until evidence available.
+
+## Verification honesty
+Release ledger reports implemented vs design-only, file scope, automated tests run, actual commit SHA, Pages status (enabled/verified/unknown), remaining risks and user's next acceptance question. Do not say deployed merely because branch was pushed. Preserve no-cost requirements and never enable paid infrastructure by assumption.
+
+## Feasibility contingency
+If real device fails, profile and optimize chunk/texture/meshing before cutting locked creative goals; explicitly bring forward any genuine incompatibility for user decision. Gate A = engine/control/persistence stability, Gate B = premium art approval, subsequent gates = feature/system quality. Gate names are not permission to bypass visual approval.
