@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {chromium} from 'playwright';
+import pngjs from 'pngjs';
+const {PNG}=pngjs;
 
 const browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const context=await browser.newContext({viewport:{width:932,height:430},deviceScaleFactor:1,hasTouch:true,isMobile:true});
@@ -16,17 +18,14 @@ try{
     const canvas=document.querySelector('#scene'),left=document.querySelector('.left').getBoundingClientRect();
     const right=document.querySelector('.right').getBoundingClientRect(),view=canvas.getBoundingClientRect();
     const gl=canvas.getContext('webgl2');
-    const pixels=new Uint8Array(4),cx=Math.floor(canvas.width/2),cy=Math.floor(canvas.height/2);
-    gl?.readPixels(cx,cy,1,1,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
     return {webgl:!!gl,width:canvas.width,height:canvas.height,noticeHidden:document.querySelector('#notice').hidden,
-      layout:left.right<=view.left+3&&right.left>=view.right-3,pixel:[...pixels],
+      layout:left.right<=view.left+3&&right.left>=view.right-3,
       status:document.querySelector('#status').textContent};
   });
   assert.ok(state.webgl,'WebGL2 is not initialized');
   assert.ok(state.width>200&&state.height>100,'Viewport too small');
   assert.ok(state.noticeHidden,'Fatal error overlay is showing');
   assert.ok(state.layout,'Controller grips overlap the world viewport');
-  assert.ok(state.pixel.some(v=>v!==0),'Viewport pixel appears unrendered');
   // Aim toward the ground with the actual right-pad pointer interaction.
   const pad=await page.locator('#lookPad').boundingBox();
   assert.ok(pad,'Missing look pad');
@@ -63,7 +62,17 @@ try{
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,null,{timeout:15000});
   await page.waitForTimeout(300); // Capture a fully rebuilt seed, not a transient partial-frame stream.
   await mkdir('artifacts',{recursive:true});
-  await page.screenshot({path:'artifacts/mythwrought-landscape-smoke.png',fullPage:true});
+  const screenshot=await page.screenshot({path:'artifacts/mythwrought-landscape-smoke.png',fullPage:true});
+  const shot=PNG.sync.read(screenshot),rect=await page.locator('#scene').boundingBox();
+  assert.ok(rect,'Canvas disappeared before screenshot');
+  const colors=new Set();
+  // Sample the rendered COMPOSITED canvas, not a discarded WebGL backbuffer.
+  for(let y=1;y<=6;y++)for(let x=1;x<=9;x++){
+    const px=Math.floor(rect.x+rect.width*x/10),py=Math.floor(rect.y+rect.height*y/7);
+    const i=(py*shot.width+px)*4;
+    colors.add([shot.data[i]>>4,shot.data[i+1]>>4,shot.data[i+2]>>4].join(','));
+  }
+  assert.ok(colors.size>=4,'World screenshot is visually blank or uniform; unique color groups='+colors.size);
   assert.deepEqual(errors,[],'Browser JavaScript errors');
   assert.deepEqual(badRequests,[],'Missing app resources');
   console.log('PASS landscape WebGL smoke',JSON.stringify(state));

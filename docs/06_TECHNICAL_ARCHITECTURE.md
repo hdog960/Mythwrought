@@ -27,3 +27,8 @@ Release ledger reports implemented vs design-only, file scope, automated tests r
 
 ## Feasibility contingency
 If real device fails, profile and optimize chunk/texture/meshing before cutting locked creative goals; explicitly bring forward any genuine incompatibility for user decision. Gate A = engine/control/persistence stability, Gate B = premium art approval, subsequent gates = feature/system quality. Gate names are not permission to bypass visual approval.
+## v0.02 implementation note (not a new design requirement)
+- Seed text is NFC-normalized; decimal integer strings wrap to signed 32-bit with BigInt, other text uses a fixed 32-bit hash. Signed numeric IDs are displayed, and the unchanged generator reads their values deterministically.
+- Prototype worlds store edits under per-seed localStorage keys; startup prefers previously selected seed and falls back to the legacy v0.01 default slot. Do not claim this is production-grade save architecture.
+- Browser test now checks screen pixels from an actual Chromium screenshot rather than relying on a WebGL backbuffer (which may be discarded after compositing). This guards against a visually blank canvas.
+- Chunk meshes are rebuilt nearest-first with a bounded active radius, and old queued requests are discarded. Actual iPhone memory and touch responsiveness are not yet measured.
