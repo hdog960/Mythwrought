@@ -82,3 +82,6 @@ Candidate branch `gate-a-journal-divergence-guard-20261112-1227` refuses an unre
 
 ## Creator multitouch control defect — 2026-11-12 (OPEN)
 Creator reports MINE, PLACE and JUMP do not work while movement thumb is held. Gate A candidate `gate-a-multitouch-actions-20261112-1358` dispatches touch actions on pointerdown rather than relying on Safari's possibly suppressed synthetic click; mouse/keyboard clicks remain available. Added genuine CDP multitouch browser regression for all three actions while holding the left movement pad. Await CI, visual review, guarded merge, deployment and creator physical iPhone verification. Do not mark ergonomics approved.
+
+## 2026-11-12 15:00 Central — multitouch CI repair remains unverified
+PR #47 browser test failed at line 67 in Actions run 43300905907; the test's second fixture became untargetable after the hero moved. Candidate `9e857eb3` resets the visible fixture and verifies placement against its adjacent empty cell. This does not establish real-iPhone behavior. Require complete green Node/Chromium CI, actual landscape screenshot review, guarded merge, Pages verification, and creator's own Safari/Home Screen two-thumb check before closing the control issue.
