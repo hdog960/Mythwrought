@@ -186,3 +186,6 @@ Never label planned roadmap releases complete without independently tested imple
 
 
 **Control candidate pending verification (Nov 12, 2026):** Rebased the stone-house camera-pitch and grip-action-swap changes from conflicting PR #39 onto verified woodland main `5fada312` without overwriting the merged canopy. Do not call shipped until full Node/Chromium green CI, genuine screenshots and guarded merge/Pages verification. No owner art/physical iPhone acceptance.
+
+## Gate A compact landscape status candidate — 2026-11-12
+Branch gate-a-compact-status-20261112-1128 from verified main 6f64005b: CSS reallocates footer space to the real live status at 568x320 and similarly compact landscapes; the decorative prototype tag hides only in the compact breakpoint. Browser layout test asserts status geometry, ellipsis and full-width allocation without changing world/grips. Candidate requires CI and authentic screenshot review before merge. This is a usability refinement, NOT an art or physical iPhone approval, persistence migration or v0.11 unlock.

@@ -57,6 +57,23 @@ try{
     assert.ok(d.left.bottom<=height+1&&d.right.bottom<=height+1,`Grips clipped below screen at ${width}x${height}: ${JSON.stringify(d)}`);
     const footer=await page.locator('.bezel.foot').boundingBox();
     assert.ok(footer.y+footer.height<=height+1,`Footer clipped off-screen at ${width}x${height}`);
+    // The live status must receive the full compact footer rather than
+    // competing with the decorative prototype label. Test actual DOM pixels.
+    const status=await page.evaluate(()=>{
+      const foot=document.querySelector('.bezel.foot');
+      const live=document.querySelector('#status');
+      const badge=foot.querySelector('strong');
+      const a=live.getBoundingClientRect(),b=foot.getBoundingClientRect();
+      return {width:a.width,footWidth:b.width,within:a.left>=b.left-1&&a.right<=b.right+1,
+        badgeDisplay:getComputedStyle(badge).display,overflow:getComputedStyle(live).textOverflow};
+    });
+    assert.ok(status.within&&status.width>0,'Live status escapes compact footer');
+    assert.equal(status.overflow,'ellipsis','Status must truncate safely instead of covering viewport');
+    if(width<=700&&height<=380){
+      assert.equal(status.badgeDisplay,'none','Decorative prototype label steals compact status width');
+      assert.ok(status.width>=status.footWidth-16,'Compact status does not use reclaimed footer width');
+    }
+
     assert.ok(d.parts.find(p=>p.sel==='#precision').x<d.world.x,'Precision aim must be on left grip');
     assert.ok(d.parts.find(p=>p.sel==='#jump').x>=d.world.right,'Jump must be on right grip');
     for(const b of d.parts){
