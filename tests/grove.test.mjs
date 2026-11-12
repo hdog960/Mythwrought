@@ -122,3 +122,21 @@ test('sculpted blossom petals retain the exact 66-vertex per-clump safety ceilin
   assert.equal(GROVE_LIMITS.maxVerticesPerClump,66);
   assert.equal(GROVE_LIMITS.newDrawCalls,0);
 });
+
+test('tall bellflower spires remain deterministic, nonphysical and respect overhead edits',()=>{
+  const w=new VoxelWorld(179),before=JSON.stringify(w.save());
+  let foundTall=false;
+  for(let cz=-3;cz<=3;cz++)for(let cx=-3;cx<=3;cx++){
+    const vertices=grove(w,cx,cz);
+    assert.ok(vertices.length/9<=GROVE_LIMITS.maxClumpsPerChunk*66);
+    const pts=coords(vertices);
+    for(const [x,y,z] of pts){
+      const h=terrainHeight(Math.floor(x),Math.floor(z),w.seed);
+      if(y>h+2.3)foundTall=true;
+    }
+  }
+  assert.ok(foundTall,'No tall original flowering silhouette was generated');
+  assert.equal(JSON.stringify(w.save()),before);
+  assert.equal(GROVE_LIMITS.newDrawCalls,0);
+  assert.equal(GROVE_LIMITS.maxHeight,1.8);
+});

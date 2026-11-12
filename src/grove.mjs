@@ -76,6 +76,33 @@ function blossom(out,x,y,z,variation){
   }
   tri(out,[x-.07,centerY+.055,z],[x,centerY+.15,z],[x+.07,centerY+.055,z],GOLD,9);
 }
+// Tall bellflower spires provide a second, unmistakable mid-distance silhouette.
+// Entirely authored triangles in the same chunk mesh; no block or save IDs.
+function bellspire(out,x,y,z,variation){
+  const a=variation*TWO_PI, stem=[x,y+.07,z];
+  const crown=[x,y+1.48+variation*.18,z];
+  // Six tapering leaf fins and a narrow emerald stalk.
+  for(let i=0;i<4;i++){
+    const angle=a+i*TWO_PI/4;
+    const foot=polar(x,y+.10,z,.12,angle);
+    const tip=polar(x,y+.48,z,.42,angle);
+    const shoulder=polar(x,y+.68,z,.12,angle+.19);
+    tri(out,foot,tip,shoulder,LEAVES[i%4],7);
+    const high=polar(x,y+.94,z,.16,angle);
+    tri(out,shoulder,tip,high,LEAVES[(i+1)%4],7);
+  }
+  for(let i=0;i<4;i++){
+    const angle=a+i*TWO_PI/4;
+    const base=polar(x,y+1.05,z,.12,angle);
+    const bell=polar(x,y+1.28,z,.33,angle);
+    const upper=polar(x,y+1.48+variation*.18,z,.11,angle+.30);
+    tri(out,base,bell,upper,BLOOMS[(i+Math.floor(variation*4))%4],8);
+    tri(out,upper,bell,crown,BLOOMS[(i+1)%4],8);
+  }
+  tri(out,stem,[x+.055,y+.74,z],[x,y+1.14,z],LEAVES[0],7);
+  tri(out,[x,y+1.14,z],[x-.055,y+.74,z],stem,LEAVES[1],7);
+  tri(out,[x-.07,crown[1]-.03,z],crown,[x+.07,crown[1]-.03,z],GOLD,9);
+}
 function moss(out,x,y,z,variation){
   const turn=variation*TWO_PI;
   for(let i=0;i<9;i++){
@@ -119,7 +146,8 @@ export function storybookGroveVertices(world,cx,cz,{
       // No sprouts on a mined floor, filled pocket, artificial structure or
       // freshly placed grass above a different original voxel.
       if(baseAt(x,h,z,world.seed)!==grass||world.get(x,h,z)!==grass||
-        world.get(x,h+1,z)!==air||world.get(x,h+2,z)!==air)continue;
+        world.get(x,h+1,z)!==air||world.get(x,h+2,z)!==air||
+        world.get(x,h+3,z)!==air)continue;
       const strength=patchStrength(x,z,world.seed);
       if(strength<.19||hash(x,z,world.seed,97)>=.43*strength)continue;
       const v=hash(x,z,world.seed,103),
@@ -128,7 +156,8 @@ export function storybookGroveVertices(world,cx,cz,{
       const xx=x+u,zz=z+w,yy=h+1.008;
       if(v<.45)fern(out,xx,yy,zz,v*2.1);
       else if(v<.79)blossom(out,xx,yy,zz,(v-.45)/.34);
-      else moss(out,xx,yy,zz,(v-.79)/.21);
+      else if(v<.93)bellspire(out,xx,yy,zz,(v-.79)/.14);
+      else moss(out,xx,yy,zz,(v-.93)/.07);
       count++;
     }
   }
@@ -138,6 +167,6 @@ export function storybookGroveVertices(world,cx,cz,{
 }
 export const GROVE_LIMITS=Object.freeze({
   maxClumpsPerChunk:MAX_CLUMPS,maxVerticesPerClump:MAX_VERTICES,
-  maxHeight:.8,materialIds:Object.freeze([7,8,9]),stride:STRIDE,
+  maxHeight:1.8,materialIds:Object.freeze([7,8,9]),stride:STRIDE,
   newDrawCalls:0,newTextures:0
 });
