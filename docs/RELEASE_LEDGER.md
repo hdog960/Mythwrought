@@ -198,3 +198,7 @@ Creator reported inability to mine, place or jump while holding movement on iPho
 
 ## 2026-11-12 15:00 Central — multitouch regression correction, candidate only
 PR #47 head `9e857eb3a5b24104f8dc23a67f245025ada24042` corrects the browser placement fixture after the previous genuine Chromium run 43300905907 failed at line 67 waiting for a target block. The regression now restores a visible adjacent target after mining and asserts placement into the exposed cell with the movement thumb still held. **New full CI and screenshot inspection outstanding; not merged or shipped; no physical iPhone confirmation.**
+
+
+## 2026-11-12 15:20 Central — multitouch regression fixture revision (UNMERGED)
+PR #47 candidate `d6483df8e` adopts the already-tested construction seam from `tests/blocks-browser.mjs` and requires `targetPlace=16,18,0` before the second-thumb Place action. Previous run 43300905907 failed on target acquisition. No registered exact-head CI or genuine screenshot inspection yet; main remains `e71fa5afa`, deployed and verified. Not shipped or physically approved; v0.10 Gate A remains OPEN.
