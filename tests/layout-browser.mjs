@@ -26,6 +26,21 @@ const inspect=async()=>page.evaluate(()=>{
 try{
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>=20,{timeout:20000});
+  // The old archaic rune codepoints became empty tofu squares with several
+  // mobile/system fonts. CSS-drawn diamonds must remain visible without fonts.
+  const identity=await page.evaluate(()=>({
+    titles:[...document.querySelectorAll('.grip .emblem')].map(e=>e.textContent.trim()),
+    marks:[...document.querySelectorAll('.grip .emblem-mark')].map(e=>({
+      width:e.getBoundingClientRect().width,
+      border:getComputedStyle(e).borderTopStyle,
+      hidden:e.getAttribute('aria-hidden')
+    })),
+    ornaments:[...document.querySelectorAll('.grip .ornament')].map(e=>e.textContent)
+  }));
+  assert.deepEqual(identity.titles,['MOVE','ACTION']);
+  assert.equal(identity.marks.length,2);
+  assert.ok(identity.marks.every(m=>m.width>=3&&m.border==='solid'&&m.hidden==='true'));
+  assert.ok(identity.ornaments.every(s=>!/[ᚠ-ᛪ]/u.test(s)),'Unsupported runes leaked into controller header');
   await mkdir('artifacts',{recursive:true});
   for(const [width,height] of sizes){
     await page.setViewportSize({width,height});
