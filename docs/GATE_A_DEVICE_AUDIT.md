@@ -89,3 +89,7 @@ PR #47 browser test failed at line 67 in Actions run 43300905907; the test's sec
 
 ## 2026-11-12 15:20 Central — PR #47 retargeted construction test
 Candidate `d6483df8e` changes the real-CDP multitouch test to the established seam target (17,18,0) with adjacent placement cell (16,18,0), asserting the preview before pressing Place. This is not proof of passing CI or real iPhone controls; PR remains unmerged pending full exact-head Node/Chromium and screenshot inspection, guarded merge, Pages verification, and owner device check.
+
+
+## 2026-11-12 15:37 Central — held-thumb regression stabilization (UNMERGED)
+Verified main `e71fa5afa`; PR #47 test now uses the established seam build fixture, checks the exact legal placement cell, and holds the movement pointer at neutral during the placement tap after exercising moving-thumb jump and mine. Latest candidate commit `8db78893d`; **no exact-head GitHub CI run has appeared for recent bot-authored PR commits**, so neither browser success nor deploy is claimed. Prior Chromium run 43300905907 failed on target acquisition. Keep PR #47 unmerged until fresh Node/Chromium CI, genuine screenshot review, guarded merge, and Pages verification. Other open PRs #43 (woodland screenshot review) and #45 (superseded backup); avoid collisions. Next: (1) obtain exact-head CI and repair actual failures; (2) inspect #43 visual artifacts and safely integrate woodland art. Physical iPhone approval and v0.11 remain locked.
