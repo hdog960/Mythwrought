@@ -51,8 +51,16 @@ export function loadWorldSafe(storage,seed){
   const journalRaw=storage.getItem(key+SAVE_JOURNAL_SUFFIX);
   const backupRaw=storage.getItem(key+SAVE_BACKUP_SUFFIX);
   const primary=readCandidate(primaryRaw,seed);
-  if(primary?.world)return {world:primary.world,source:'primary',recovered:false};
   const journal=readJournal(journalRaw,seed);
+  // The verified write-ahead journal may be newer than a still-valid primary
+  // when a quota/crash interrupts the final canonical write. Never silently
+  // discard those edits: expose recovery without mutating either record.
+  if(primary?.world){
+    if(journal?.world&&journal.raw!==primary.raw)
+      return {world:journal.world,source:'journal',recovered:true,
+        warning:'Verified newer journal differs from primary; export a backup and SAVE to reconcile'};
+    return {world:primary.world,source:'primary',recovered:false};
+  }
   if(journal?.world)return {world:journal.world,source:'journal',recovered:true,
     warning:'Recovered from verified edit journal; export a backup'};
   const backup=readCandidate(backupRaw,seed);
@@ -88,6 +96,12 @@ export function saveWorldSafe(storage,world,{select=true,allowReplaceCorrupt=fal
         // Explicit user-approved import may replace damaged bytes only after
         // writing and verifying a separate copy of those original bytes.
         if(!recovered.recovered&&!allowReplaceCorrupt)throw Error('Damaged save has no valid recovery');
+      }
+      // A damaged original must not overwrite an earlier damaged snapshot on
+      // repeated recovery attempts; keep the first exact evidence intact.
+      if(backupKey===key+SAVE_DAMAGED_SUFFIX){
+        const existing=storage.getItem(backupKey);
+        if(existing!==null&&existing!==preserved)throw Error('Prior damaged bytes already preserved; export before replacing');
       }
       storage.setItem(backupKey,preserved);
       if(storage.getItem(backupKey)!==preserved)throw Error('Backup could not be verified');
