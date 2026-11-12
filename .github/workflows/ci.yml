@@ -19,6 +19,8 @@ jobs:
           node --check src/voxel.mjs
           node --check src/meadow.mjs
           node --check src/storybook-materials.mjs
+          node --check src/grotto.mjs
+          node --check src/gpu-recovery.mjs
           node --check src/sky.mjs
           npm test
       - name: Install free browser test tools
@@ -41,6 +43,7 @@ jobs:
           node tests/foreground-browser.mjs
           node tests/meadow-browser.mjs
           node tests/storybook-browser.mjs
+          node tests/grotto-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
