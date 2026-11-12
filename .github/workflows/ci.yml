@@ -18,6 +18,8 @@ jobs:
           node --check src/main.mjs
           node --check src/voxel.mjs
           node --check src/meadow.mjs
+          node --check src/storybook-materials.mjs
+          node --check src/sky.mjs
           npm test
       - name: Install free browser test tools
         run: |
@@ -38,6 +40,7 @@ jobs:
           node tests/mirror-browser.mjs
           node tests/foreground-browser.mjs
           node tests/meadow-browser.mjs
+          node tests/storybook-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

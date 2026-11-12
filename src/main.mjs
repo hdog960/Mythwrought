@@ -1,6 +1,7 @@
 import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
+import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
 import {clampLook,forwardVector,compassDegrees} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
 import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
@@ -53,34 +54,7 @@ function start(){
     'gl_Position=vec4(x/(uAspect*uTan),y/uTan,1.0015*z-0.1501,z);',
     'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(aMat+.5); }'
   ].join('\n');
-  const FS=[
-    '#version 300 es','precision highp float;',
-    'in vec3 vColor; in float vDistance; in vec2 vUv; flat in int vMat; out vec4 outColor;',
-    'uniform vec3 uFog;',
-    'float speckle(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
-    'void main(){',
-    'float closeDetail=1.0-smoothstep(10.0,36.0,vDistance);',
-    'float tiled=speckle(floor(vUv*vec2(13.0))+float(vMat)*17.3);',
-    'float shade=.93+.14*tiled;',
-    'if(vMat==1)shade*=.97+.05*step(.73,speckle(floor(vUv*17.0)+17.0));',
-    'if(vMat==2)shade*=.91+.16*speckle(floor(vUv*vec2(11.0,15.0))+41.0);',
-    'if(vMat==3)shade*=.88+.18*speckle(floor(vUv*vec2(11.0,13.0))+3.0);',
-    'if(vMat==3)shade*=.97+.06*step(.93,speckle(floor(vUv*vec2(9.0,11.0))+vec2(4.0,2.0)));',
-    'if(vMat==4)shade*=.85+.18*smoothstep(.20,.92,abs(sin(vUv.x*22.0+sin(vUv.y*9.0))));',
-    'if(vMat==4)shade*=.98+.04*step(.88,speckle(floor(vUv*vec2(12.0,8.0))+4.0));',
-    'if(vMat==5)shade*=.83+.24*step(.48,fract(vUv.x*3.0+vUv.y*2.0));',
-    'if(vMat==5)shade*=.91+.13*step(.82,speckle(floor(vUv*vec2(12.0))+5.0));',
-    'if(vMat==6)shade*=.90+.18*step(.69,speckle(floor(vUv*15.0)+vec2(26.0,19.0)));',
-    // Intentional solid-color pixel-voxel wildflowers. No alpha blending,
-    // transparent overdraw, texture downloads, extra shader passes or HUD.
-    'if(vMat==7)shade=.94+.10*step(.48,speckle(floor(vUv*9.0)+31.0));',
-    'if(vMat==8||vMat==9)shade=1.0;',
-    'float fog=smoothstep(29.0,68.0,vDistance);',
-    'vec3 colored=mix(vColor,vColor*shade,closeDetail*.8);',
-    'if(vMat==5)colored=mix(colored,vec3(.52,.85,.95),closeDetail*.12);',
-    'if(vMat==6)colored=mix(colored,vec3(.84,.69,.40),closeDetail*.07);',
-    'outColor=vec4(mix(colored,uFog,fog),1.0); }'
-  ].join('\n');
+  const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER;
   function shader(type,src){
     const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
     if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));
@@ -104,7 +78,7 @@ function start(){
   const atUv=gl.getAttribLocation(program,'aUv'),atMat=gl.getAttribLocation(program,'aMat');
   for(const index of [atPos,atColor,atUv,atMat])gl.enableVertexAttribArray(index);
   const U={};
-  for(const k of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog'])U[k]=gl.getUniformLocation(program,k);
+  for(const k of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog','uArtQuality'])U[k]=gl.getUniformLocation(program,k);
   const skyU={resolution:gl.getUniformLocation(skyProgram,'uResolution'),
     yaw:gl.getUniformLocation(skyProgram,'uYaw'),pitch:gl.getUniformLocation(skyProgram,'uPitch')};
   gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);
@@ -330,6 +304,7 @@ function start(){
       const buffer=bufferDimensions(canvas.clientWidth,canvas.clientHeight,renderPreset,devicePixelRatio||1);
       const w=buffer.width,h=buffer.height;
       canvas.dataset.renderPreset=renderPreset;
+      canvas.dataset.storybookQuality=renderPreset==='economy'?'base-colors':'painted-materials';
       canvas.dataset.renderScale=String(buffer.scale);
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
       gl.clearColor(...DISTANCE_FOG_COLOR,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
@@ -349,6 +324,7 @@ function start(){
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
       gl.uniform3fv(U.uFog,DISTANCE_FOG_COLOR);
+      gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
       stream();
       canvas.dataset.renderedFrames=String(frame);
       canvas.dataset.meshCadenceSkipped=String(meshCadence.skipped);
