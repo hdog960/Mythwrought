@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
-import {makeVaultRecord,validateVaultRecord,listVaultBackups,VAULT_DB,MAX_SNAPSHOTS_PER_SEED} from '../src/vault.mjs';
+import {makeVaultRecord,validateVaultRecord,listVaultBackups,vaultSeedAtCapacity,VAULT_DB,MAX_SNAPSHOTS_PER_SEED} from '../src/vault.mjs';
 function sample(){const w=new VoxelWorld(179);w.set(15,19,-1,BLOCK.WOOD);return JSON.stringify(w.save());}
 test('vault records preserve exact original schema-1 JSON and independent checksum',()=>{
  const raw=sample(),r=makeVaultRecord(raw,'v010:fixed:abcdefghij','2026-11-11T19:00:00.000Z');
@@ -29,4 +29,15 @@ test('unavailable IndexedDB rejects without changing world state',async()=>{
  const storage={['mythwrought-v002-world-179']:sample()};
  await assert.rejects(listVaultBackups(null),/unavailable/);
  assert.equal(JSON.parse(storage['mythwrought-v002-world-179']).seed,179);
+});
+
+test('optional vault cap counts same-seed records including damaged records, never other seeds',()=>{
+ const seed=179;
+ const five=Array.from({length:5},(_,i)=>({id:'a'+i,seed}));
+ assert.equal(vaultSeedAtCapacity(five,seed),false);
+ assert.equal(vaultSeedAtCapacity([...five,{id:'other',seed:-201}],seed),false);
+ assert.equal(vaultSeedAtCapacity([...five,{id:'corrupt',seed,raw:'damaged'}],seed),true);
+ assert.equal(vaultSeedAtCapacity([...five,{id:'corrupt',seed,raw:'damaged'}],-201),false);
+ assert.throws(()=>vaultSeedAtCapacity(null,seed),/Invalid/);
+ assert.throws(()=>vaultSeedAtCapacity(five,'179'),/Invalid/);
 });

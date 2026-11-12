@@ -90,19 +90,31 @@ export async function inspectVaultBackup(id,factory=globalThis.indexedDB){
     return validateVaultRecord(record);
   });
 }
+// Corrupt records claiming a seed still occupy capacity: never rotate away
+// or silently discard user-owned bytes during an unrelated backup write.
+export function vaultSeedAtCapacity(records,seed){
+  if(!Array.isArray(records)||!Number.isInteger(seed))throw Error('Invalid vault capacity inputs');
+  return records.filter(item=>item?.seed===seed).length>=MAX_SNAPSHOTS_PER_SEED;
+}
 export async function createVaultBackup(raw,factory=globalThis.indexedDB){
   // Snapshot construction/validation is outside the transaction, so an invalid
   // world can never touch a healthy prior IndexedDB snapshot.
   const stamp=new Date().toISOString();
   const id='v010:'+Date.now().toString(36)+':'+Math.random().toString(36).slice(2,12);
   const record=makeVaultRecord(raw,id,stamp);
-  const existing=await listVaultBackups(factory);
-  if(existing.filter(item=>item.seed===record.seed).length>=MAX_SNAPSHOTS_PER_SEED)
-    throw Error('This seed already has six device backups. Download one and delete an old snapshot before making another.');
+  // Check capacity in the SAME readwrite transaction as insertion.
+  // Separate reads allow two tabs to both see five backups and create seven.
   await withVault(factory,async db=>{
     const tx=db.transaction(VAULT_STORE,'readwrite');
     const done=transactionFinished(tx);
-    tx.objectStore(VAULT_STORE).add(record);
+    const store=tx.objectStore(VAULT_STORE);
+    const existing=await requestResult(store.getAll());
+    if(vaultSeedAtCapacity(existing,record.seed)){
+      tx.abort();
+      await done.catch(()=>{});
+      throw Error('This seed already has six device backups. Download one and delete an old snapshot before making another.');
+    }
+    store.add(record);
     await done;
   });
   const saved=await inspectVaultBackup(record.id,factory);
