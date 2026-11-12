@@ -179,3 +179,35 @@ test('damaged evidence cannot be silently replaced with different damaged bytes'
   assert.equal(storage.getItem(key),'damaged-B');
   assert.equal(storage.getItem(key+SAVE_DAMAGED_SUFFIX),'damaged-A');
 });
+
+test('unreconciled verified journal cannot be overwritten by unrelated later save',()=>{
+  const storage=store(),first=changed(),key=worldSlotKey(179);
+  assert.equal(saveWorldSafe(storage,first).ok,true);
+  const canonical=storage.getItem(key);
+  first.set(6,19,6,BLOCK.WOOD);
+  storage.fail((op,k)=>op==='set'&&k===key);
+  assert.equal(saveWorldSafe(storage,first).ok,false);
+  const journal=storage.getItem(key+SAVE_JOURNAL_SUFFIX);
+  storage.fail(()=>false);
+  const unrelated=changed();unrelated.set(7,19,7,BLOCK.STONE);
+  const refused=saveWorldSafe(storage,unrelated);
+  assert.equal(refused.ok,false);
+  assert.match(refused.detail,/Unreconciled verified journal/);
+  assert.equal(storage.getItem(key),canonical);
+  assert.equal(storage.getItem(key+SAVE_JOURNAL_SUFFIX),journal);
+  assert.deepEqual(loadWorldSafe(storage,179).world.save(),first.save());
+  assert.equal(saveWorldSafe(storage,first).ok,true,'explicit recovery can reconcile journal');
+  assert.equal(loadWorldSafe(storage,179).source,'primary');
+});
+test('valid pending journal protects missing canonical key without resetting world',()=>{
+  const storage=store(),w=changed(),key=worldSlotKey(179);
+  assert.equal(saveWorldSafe(storage,w).ok,true);
+  const journal=storage.getItem(key+SAVE_JOURNAL_SUFFIX);
+  storage.removeItem(key);
+  const fresh=new VoxelWorld(179);
+  assert.equal(saveWorldSafe(storage,fresh).ok,false);
+  assert.equal(storage.getItem(key),null);
+  assert.equal(storage.getItem(key+SAVE_JOURNAL_SUFFIX),journal);
+  assert.equal(saveWorldSafe(storage,w).ok,true);
+  assert.deepEqual(loadWorldSafe(storage,179).world.save(),w.save());
+});

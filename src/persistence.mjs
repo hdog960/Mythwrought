@@ -82,6 +82,12 @@ export function saveWorldSafe(storage,world,{select=true,allowReplaceCorrupt=fal
     raw=JSON.stringify(world.save());
     parseWorldData(raw,world.seed);
     oldPrimary=storage.getItem(key);
+    // A verified write-ahead journal may contain edits that failed to reach
+    // the canonical key. Refuse an unrelated save until those edits have been
+    // explicitly recovered; otherwise the next journal write destroys them.
+    const pendingJournal=readJournal(storage.getItem(key+SAVE_JOURNAL_SUFFIX),world.seed);
+    if(pendingJournal?.world&&pendingJournal.raw!==oldPrimary&&pendingJournal.raw!==raw)
+      throw Error('Unreconciled verified journal contains different world edits; export/recover before saving');
     if(oldPrimary!==null&&oldPrimary!==raw){
       // If the old key is damaged, save the exact damaged bytes before any
       // repair; otherwise preserve the last verified canonical world.
