@@ -189,3 +189,6 @@ Never label planned roadmap releases complete without independently tested imple
 
 ## Gate A compact landscape status candidate — 2026-11-12
 Branch gate-a-compact-status-20261112-1128 from verified main 6f64005b: CSS reallocates footer space to the real live status at 568x320 and similarly compact landscapes; the decorative prototype tag hides only in the compact breakpoint. Browser layout test asserts status geometry, ellipsis and full-width allocation without changing world/grips. Candidate requires CI and authentic screenshot review before merge. This is a usability refinement, NOT an art or physical iPhone approval, persistence migration or v0.11 unlock.
+
+## Gate A rooted woodland visual candidate — 2026-11-12
+Branch `gate-a-woodland-depth-20261112-1202` based on merged compact-status main `0b1d66e`: adds four original tapered bark root buttresses to both seeded tree silhouettes, light-catching crown facets and layered evergreen needle facets, all render-only within the existing terrain draw call. Adds explicit finite-geometry/chunk-bound/save-invariance regression. **UNMERGED until full Node/Chromium green CI and genuine screenshots inspected.** No physical iPhone art approval, no production IndexedDB migration, no harvesting or v0.11.
