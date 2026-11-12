@@ -57,8 +57,10 @@ try{
     assert.ok(d.left.bottom<=height+1&&d.right.bottom<=height+1,`Grips clipped below screen at ${width}x${height}: ${JSON.stringify(d)}`);
     const footer=await page.locator('.bezel.foot').boundingBox();
     assert.ok(footer.y+footer.height<=height+1,`Footer clipped off-screen at ${width}x${height}`);
+    assert.ok(d.parts.find(p=>p.sel==='#precision').x<d.world.x,'Precision aim must be on left grip');
+    assert.ok(d.parts.find(p=>p.sel==='#jump').x>=d.world.right,'Jump must be on right grip');
     for(const b of d.parts){
-      const parent=['#menu','#movePad','#jump'].includes(b.sel)?d.left:d.right;
+      const parent=['#menu','#movePad','#precision'].includes(b.sel)?d.left:d.right;
       assert.ok(b.x>=parent.x-3&&b.right<=parent.right+3,`${b.sel} escapes horizontal grip at ${width}x${height}`);
       assert.ok(b.y>=parent.y-3&&b.bottom<=parent.bottom+3,`${b.sel} escapes vertical grip at ${width}x${height}`);
       assert.ok(b.width>=28&&b.height>=28,`${b.sel} touch target too small at ${width}x${height}`);
