@@ -54,14 +54,14 @@ try{
   await page.evaluate(()=>{
     const t=window.__mythwroughtTest;
     t.teleport(14.5,.5);
-    t.placeFixture(14,13,0,3);
+    t.placeFixture(14,13,0,0);
     t.placeFixture(16,18,0,3);
     t.placeFixture(17,18,0,3);
     t.aimAt(16,18,0);
   });
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='16,18,0',null,{timeout:8000}).catch(async error=>{
     const state=await page.evaluate(()=>({scene:{...document.querySelector('#scene').dataset},
-      hero:window.__mythwroughtTest.teleport(14.5,.5),
+      hero:{x:document.querySelector('#scene').dataset.playerX,feet:document.querySelector('#scene').dataset.playerFeet,z:document.querySelector('#scene').dataset.playerZ},
       block:window.__mythwroughtTest.block(16,18,0)}));
     throw new Error('Mine fixture target unavailable: '+JSON.stringify(state),{cause:error});
   });
@@ -73,7 +73,7 @@ try{
   // The movement thumb remains held at the neutral pad center.
   await page.evaluate(()=>{
     window.__mythwroughtTest.teleport(14.5,.5);
-    window.__mythwroughtTest.placeFixture(14,13,0,3);
+    window.__mythwroughtTest.placeFixture(14,13,0,0);
     window.__mythwroughtTest.placeFixture(17,18,0,3);
     window.__mythwroughtTest.aimAt(17,18,0);
   });
