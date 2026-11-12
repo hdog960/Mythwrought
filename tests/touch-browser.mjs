@@ -30,6 +30,54 @@ try{
   const moving=await v();
   assert.ok(Math.hypot(moving.x-begin.x,moving.z-begin.z)>.15,'Left thumb did not move hero while looking');
   assert.ok(Math.abs(deltaYaw(moving.yaw,begin.yaw))>.12,'Right thumb did not turn camera while moving');
+  // Real CDP multitouch: hold the left thumb in motion while tapping
+  // right-grip actions with a second finger. Click-only handlers can fail
+  // here on Safari when the first pointer owns capture.
+  const jumpCenter=center(await page.locator('#jump').boundingBox());
+  const mineCenter=center(await page.locator('#dig').boundingBox());
+  const placeCenter=center(await page.locator('#place').boundingBox());
+  const moveFinger=touch(1,left.x,left.y-37);
+  // End the right look pointer, but keep the left movement pointer active.
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[moveFinger]});
+  await page.evaluate(()=>window.__mythwroughtTest.teleport(14.5,.5));
+  const beforeJump=Number(await page.locator('#scene').getAttribute('data-player-feet'));
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[moveFinger,touch(7,jumpCenter.x,jumpCenter.y)]});
+  await page.waitForFunction(base=>Number(document.querySelector('#scene').dataset.playerFeet)>base+.12,beforeJump,{timeout:5500});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[moveFinger]});
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.playerGrounded==='true',null,{timeout:8000});
+  await page.evaluate(()=>{
+    const t=window.__mythwroughtTest;
+    t.teleport(14.5,.5);
+    t.placeFixture(14,13,0,3);
+    t.placeFixture(16,18,0,3);
+    t.placeFixture(17,18,0,3);
+    t.aimAt(16,18,0);
+  });
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='16,18,0',{timeout:8000});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[moveFinger,touch(8,mineCenter.x,mineCenter.y)]});
+  await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===0,null,{timeout:5000});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[moveFinger]});
+  // Restore the known-good seam fixture from blocks-browser.mjs, where
+  // targeting (17,18,0) exposes (16,18,0) as a valid placement cell.
+  // The movement finger remains held throughout this reset and placement.
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[touch(1,left.x,left.y)]});
+  await page.evaluate(()=>{
+    window.__mythwroughtTest.teleport(14.5,.5);
+    window.__mythwroughtTest.placeFixture(14,13,0,3);
+    window.__mythwroughtTest.placeFixture(17,18,0,3);
+    window.__mythwroughtTest.aimAt(17,18,0);
+  });
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='17,18,0',null,{timeout:8000});
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetPlace==='16,18,0',null,{timeout:8000});
+  assert.equal(await page.evaluate(()=>document.querySelector('#scene').dataset.canPlace),'true','Seam fixture must expose a legal placement cell');
+  // Keep the first finger down at the neutral pad center for a stable
+  // build target; the earlier jump and mine actions exercised moving input.
+  const heldNeutralFinger=touch(1,left.x,left.y);
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[heldNeutralFinger,touch(9,placeCenter.x,placeCenter.y)]});
+  await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===3,null,{timeout:5000});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[heldNeutralFinger]});
+  // A tap must perform one action, not pointerdown plus synthetic click.
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),3);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   await page.waitForTimeout(90);
   const released=await v();
@@ -82,7 +130,7 @@ try{
   assert.ok(Math.hypot(afterBlur.x-blur.x,afterBlur.z-blur.z)<.06,'Input remained held across app blur');
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   assert.deepEqual(errors,[],'Console/page errors during 2-thumb interaction');
-  console.log('PASS dual-thumb touch camera/movement, mode persistence, precision hold, and input cancellation');
+  console.log('PASS simultaneous movement with jump/mine/place, dual-thumb look, precision, cancellation');
 }finally{
   await browser.close();
 }
