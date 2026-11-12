@@ -9,6 +9,7 @@ in float vDistance;
 in vec2 vUv;
 flat in int vMat;
 uniform vec3 uFog;
+uniform float uArtQuality;
 out vec4 outColor;
 float hashCell(vec2 p){
   return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);
@@ -18,6 +19,13 @@ float blockLine(vec2 p,float width){
   return 1.0-step(width,min(d.x,d.y));
 }
 void main(){
+  // Economy mode deliberately skips expensive per-pixel procedural hashes;
+  // the same existing mesh, shapes and solid colors remain visible.
+  if(uArtQuality<.5){
+    float distant=smoothstep(29.0,68.0,vDistance);
+    outColor=vec4(mix(vColor,uFog,distant),1.0);
+    return;
+  }
   // Decorative work fades at distance rather than shimmering across pixels.
   float near=1.0-smoothstep(10.0,38.0,vDistance);
   float tile=hashCell(floor(vUv*14.0)+float(vMat)*13.1);
