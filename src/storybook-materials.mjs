@@ -76,6 +76,9 @@ void main(){
     shade=1.0;
   }else if(vMat==12){ // Warm gold spores; preserves art readability.
     shade=1.0;
+  }else if(vMat==13||vMat==14){ // Original carved tree-star cave-wall sigils.
+    // Matte warm gold or cool turquoise pigment, no transparent glow pass.
+    shade=1.0;
   }
   float fog=smoothstep(29.0,68.0,vDistance);
   vec3 colored=mix(vColor,base*shade,near*.92);
@@ -86,6 +89,7 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   existingSolidMaterials:Object.freeze([1,2,3,4,5,6]),
   existingFloraMaterials:Object.freeze([7,8,9]),
   renderOnlyGrottoMaterials:Object.freeze([10,11,12]),
+  renderOnlyCaveRuneMaterials:Object.freeze([13,14]),
   detailStartDistance:10,
   detailEndDistance:38,
   fogStartDistance:29,

@@ -1,6 +1,7 @@
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
 import {meadowAccentVertices} from './meadow.mjs';
 import {grottoAccentVertices} from './grotto.mjs';
+import {caveRuneVertices} from './cave-runes.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
@@ -128,11 +129,18 @@ export function meshChunk(world,cx,cz){
     heightAt:terrainHeight,baseAt:baseBlock,
     air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
+  const runes=caveRuneVertices(world,cx,cz,{
+    chunkSize:CHUNK_SIZE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y,
+    heightAt:terrainHeight,baseAt:baseBlock,
+    air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
+  });
   const solid=new Float32Array(vertices);
-  if(!meadow.length&&!grotto.length)return solid;
-  const combined=new Float32Array(solid.length+meadow.length+grotto.length);
+  if(!meadow.length&&!grotto.length&&!runes.length)return solid;
+  const combined=new Float32Array(solid.length+meadow.length+runes.length+grotto.length);
   combined.set(solid);combined.set(meadow,solid.length);
-  combined.set(grotto,solid.length+meadow.length);
+  combined.set(runes,solid.length+meadow.length);
+  // The grotto remains the final tail for older save/geometry regression tests.
+  combined.set(grotto,solid.length+meadow.length+runes.length);
   return combined;
 }
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.

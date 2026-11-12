@@ -12,6 +12,7 @@ import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_B
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
+import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
@@ -56,36 +57,23 @@ function start(){
     'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(aMat+.5); }'
   ].join('\n');
   const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER;
-  function shader(type,src){
-    const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
-    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));
-    return s;
+  let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
+  function initializeGpuPipeline(){
+    const resources=buildGpuPipeline(gl,{
+      terrainVertex:VS,terrainFragment:FS,
+      skyVertex:SKY_VERTEX_SHADER,skyFragment:SKY_FRAGMENT_SHADER
+    });
+    program=resources.terrainProgram;skyProgram=resources.skyProgram;
+    atPos=resources.atPos;atColor=resources.atColor;
+    atUv=resources.atUv;atMat=resources.atMat;
+    U=resources.uniforms;skyU=resources.skyUniforms;
+    outlineBuffer=resources.outlineBuffer;
+    gl.viewport(0,0,canvas.width,canvas.height);
   }
-  let program,skyProgram;
-  try{
-    function linkProgram(vertexSource,fragmentSource){
-      const p=gl.createProgram();
-      gl.attachShader(p,shader(gl.VERTEX_SHADER,vertexSource));
-      gl.attachShader(p,shader(gl.FRAGMENT_SHADER,fragmentSource));
-      gl.linkProgram(p);
-      if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));
-      return p;
-    }
-    program=linkProgram(VS,FS);
-    skyProgram=linkProgram(SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER);
-  }catch(err){fatal('Voxel/sky shader failed to initialize: '+err.message);return;}
-  gl.useProgram(program);
-  const atPos=gl.getAttribLocation(program,'aPos'),atColor=gl.getAttribLocation(program,'aColor');
-  const atUv=gl.getAttribLocation(program,'aUv'),atMat=gl.getAttribLocation(program,'aMat');
-  for(const index of [atPos,atColor,atUv,atMat])gl.enableVertexAttribArray(index);
-  const U={};
-  for(const k of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog','uArtQuality'])U[k]=gl.getUniformLocation(program,k);
-  const skyU={resolution:gl.getUniformLocation(skyProgram,'uResolution'),
-    yaw:gl.getUniformLocation(skyProgram,'uYaw'),pitch:gl.getUniformLocation(skyProgram,'uPitch')};
-  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);
+  try{initializeGpuPipeline();}
+  catch(error){fatal('Voxel/sky shader failed to initialize: '+error.message);return;}
 
   let selected=BLOCK.STONE;
-  const outlineBuffer=gl.createBuffer();
   let outlineKey='',outlineCount=0;
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
@@ -890,13 +878,37 @@ function start(){
     }catch(err){message('Import rejected; existing world unchanged: '+err.message);}
     finally{e.target.value='';}
   });
-  let graphicsLost=false;
+  let graphicsLost=false,graphicsLossCount=0,graphicsRestoreCount=0;
   canvas.addEventListener('webglcontextlost',e=>{
-    e.preventDefault();graphicsLost=true;frameDriver.pause();cancelAllPointers();
-    fatal('Graphics context lost. Reload to resume saved terrain edits.');
+    // Safari/WebKit can evict the WebGL context without losing JS or local
+    // storage. Prevent default allows the browser to attempt recovery.
+    e.preventDefault();
+    if(graphicsLost)return;
+    graphicsLost=true;graphicsLossCount++;
+    frameDriver.pause();cancelAllPointers();
+    frameHistory.frame(performance.now(),false);
+    fatal('Graphics paused — attempting a safe WebGL recovery. Your saved world is untouched.');
   });
   canvas.addEventListener('webglcontextrestored',()=>{
-    fatal('Graphics restarted. Reload to rebuild shaders and saved terrain safely.');
+    if(!graphicsLost)return;
+    try{
+      // Context loss invalidates EVERY old WebGL object; rebuilding only the
+      // terrain mesh buffers while keeping old programs produces black frames.
+      initializeGpuPipeline();
+      // Invalidate ephemeral GPU cache, never world edits or save metadata.
+      chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
+      gpuRetry.clear();meshCadence.resetCooldown();
+      outlineKey='';outlineCount=0;lastTargetText='';
+      lastEditMeshKeys=[];lastFrame=performance.now();
+      graphicsLost=false;graphicsRestoreCount++;
+      notice.hidden=true;
+      message('Graphics restored · rebuilding the nearby world without reloading saves');
+      if(!document.hidden)frameDriver.resume();
+    }catch(error){
+      // Fail closed: no half-initialized rendering loop and no world writes.
+      graphicsLost=true;frameDriver.pause();
+      fatal('Graphics recovery failed safely: '+error.message+' Reload to retry; saved worlds were not changed.');
+    }
   });
   window.addEventListener('pagehide',()=>{
     frameDriver.pause();
@@ -955,7 +967,9 @@ function start(){
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
         frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats(),
-        gpuRetry:gpuRetry.stats()};}
+        gpuRetry:gpuRetry.stats(),
+        graphics:{lost:graphicsLost,lossCount:graphicsLossCount,
+          restoredCount:graphicsRestoreCount,shaderReady:Boolean(program&&skyProgram)}};}
     });
   }
   saveHealth.textContent=storageReadOnly?
