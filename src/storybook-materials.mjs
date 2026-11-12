@@ -43,13 +43,15 @@ void main(){
     float pebble=step(.91,hashCell(p+vec2(5.0,17.0)));
     shade=.82+.18*tile+.09*band+.08*pebble;
     base=mix(base,vec3(.68,.45,.30),.10*near);
-  }else if(vMat==3){ // Hand-cut warm stone: staggered chips + etched mortar.
-    vec2 p=vUv*vec2(3.5,5.5);
-    p.x+=.5*mod(floor(p.y),2.0);
-    float mortar=blockLine(p,.052);
-    float chip=step(.82,hashCell(floor(vUv*vec2(13.0,13.0))+5.0));
-    shade=.87+.15*tile+.07*chip-.21*mortar;
-    base=mix(base,vec3(.65,.63,.59),.14*near);
+  }else if(vMat==3){ // Natural storybook stone: wavy strata, mica + weathered creases.
+    // The source rock is geological, not a wall of tiny rectangular bricks.
+    // Variation is intentionally low contrast at phone scale and fades with near.
+    vec2 p=floor(vUv*vec2(11.0,13.0));
+    float strata=.5+.5*sin(vUv.y*34.0+2.0*sin(vUv.x*6.5+tile));
+    float crease=1.0-smoothstep(.045,.19,abs(sin(vUv.y*7.0+vUv.x*2.2)));
+    float mica=step(.94,hashCell(p+vec2(11.0,5.0)));
+    shade=.82+.15*tile+.11*strata-.09*crease+.12*mica;
+    base=mix(base,vec3(.68,.68,.61),.14*near);
   }else if(vMat==4){ // Honey-colored timber, distinct planks and warm grain.
     float plank=blockLine(vec2(vUv.x*3.0,vUv.y*1.0),.035);
     float grain=.5+.5*sin(vUv.x*23.0+2.0*sin(vUv.y*7.0));
