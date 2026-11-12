@@ -56,7 +56,14 @@ try{
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[moveFinger,touch(8,mineCenter.x,mineCenter.y)]});
   await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===0,null,{timeout:5000});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[moveFinger]});
-  await page.evaluate(()=>window.__mythwroughtTest.aimAt(17,18,0));
+  // Reset camera origin after the moving-thumb mine: otherwise the hero may
+  // have walked past the fixture, leaving the next target behind the camera.
+  // The movement finger remains held throughout this reset and placement.
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[touch(1,left.x,left.y)]});
+  await page.evaluate(()=>{
+    window.__mythwroughtTest.teleport(14.5,.5);
+    window.__mythwroughtTest.aimAt(17,18,0);
+  });
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='17,18,0',{timeout:8000});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[moveFinger,touch(9,placeCenter.x,placeCenter.y)]});
   await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===3,null,{timeout:5000});
