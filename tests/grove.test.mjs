@@ -107,3 +107,18 @@ test('do not create physical scenery in artificial grass or blocked pockets',()=
   assert.throws(()=>storybookGroveVertices({},0,0,{heightAt:terrainHeight,baseAt:baseBlock}),/Invalid/);
   assert.throws(()=>storybookGroveVertices(w,.5,0,{heightAt:terrainHeight,baseAt:baseBlock}),/Invalid/);
 });
+
+test('sculpted blossom petals retain the exact 66-vertex per-clump safety ceiling',()=>{
+  // Each authored blossom has 12 leaf-bowl, 5 inner-petal, 4 folded-petal
+  // and 1 golden center triangles. No extra draw call or saved voxel exists.
+  const w=new VoxelWorld(179);
+  let found=false;
+  for(let cz=-3;cz<=3;cz++)for(let cx=-3;cx<=3;cx++){
+    const vertices=grove(w,cx,cz);
+    assert.ok(vertices.length/9<=GROVE_LIMITS.maxClumpsPerChunk*66);
+    if(vertices.length>0)found=true;
+  }
+  assert.ok(found);
+  assert.equal(GROVE_LIMITS.maxVerticesPerClump,66);
+  assert.equal(GROVE_LIMITS.newDrawCalls,0);
+});

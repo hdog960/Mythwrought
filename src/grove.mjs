@@ -64,6 +64,16 @@ function blossom(out,x,y,z,variation){
       side2=polar(x,centerY,z,.07,a+.67);
     tri(out,side,tip,side2,petal,8);
   }
+  // Four raised, folded outer petals add a readable flower silhouette from
+  // oblique first-person views without a billboard, transparency or new pass.
+  // The 4 extra triangles keep blossoms at 66 vertices, the existing cap.
+  for(let i=0;i<4;i++){
+    const a=turn+i*TWO_PI/4;
+    const root=polar(x,centerY-.035,z,.075,a);
+    const rim=polar(x,centerY+.13,z,.235,a);
+    const wing=polar(x,centerY+.045,z,.17,a+.48);
+    tri(out,root,rim,wing,BLOOMS[(Math.floor(variation*4)+i)%4],8);
+  }
   tri(out,[x-.07,centerY+.055,z],[x,centerY+.15,z],[x+.07,centerY+.055,z],GOLD,9);
 }
 function moss(out,x,y,z,variation){
