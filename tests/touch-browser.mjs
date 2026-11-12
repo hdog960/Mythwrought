@@ -72,12 +72,19 @@ try{
   // targeting (17,18,0) exposes (16,18,0) as a valid placement cell.
   // The movement thumb remains held at the neutral pad center.
   await page.evaluate(()=>{
+    window.__mythwroughtTest.placeFixture(14,13,0,3);
     window.__mythwroughtTest.teleport(14.5,.5);
-    window.__mythwroughtTest.placeFixture(14,13,0,0);
+    window.__mythwroughtTest.placeFixture(16,18,0,0);
     window.__mythwroughtTest.placeFixture(17,18,0,3);
     window.__mythwroughtTest.aimAt(17,18,0);
   });
-  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='17,18,0',null,{timeout:8000});
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='17,18,0',null,{timeout:8000}).catch(async error=>{
+    const state=await page.evaluate(()=>({scene:{...document.querySelector('#scene').dataset},
+      support:window.__mythwroughtTest.block(14,13,0),
+      empty:window.__mythwroughtTest.block(16,18,0),
+      target:window.__mythwroughtTest.block(17,18,0)}));
+    throw new Error('Place fixture target unavailable: '+JSON.stringify(state),{cause:error});
+  });
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetPlace==='16,18,0',null,{timeout:8000});
   assert.equal(await page.evaluate(()=>document.querySelector('#scene').dataset.canPlace),'true','Seam fixture must expose a legal placement cell');
   // Keep the first finger down at the neutral pad center for a stable
