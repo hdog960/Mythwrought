@@ -76,3 +76,6 @@ A proposed original 3D woodland canopy adds layered faceted green crowns, bark t
 
 ## Creator stone-house control refinement — rebased candidate, November 12, 2026
 The creator's physical iPhone building session reported insufficient downward look and requested exchanging HOLD · AIM and JUMP between side grips. Rebased from prior PR #39 onto woodland main `5fada312`: camera pitch nearly vertical with a small singularity margin, HOLD · AIM on left, JUMP on right, and targeted Node/Chromium layout assertions. This is a **candidate**, not a verified release or iPhone approval. The existing schema-1 saves, world seeds and woodland canopy are preserved. Full CI, genuine screenshots, deployment and creator ergonomic review remain mandatory.
+
+
+Optional backup vault concurrency gate (Nov 12): candidate checks the six-snapshot limit atomically in the IndexedDB write transaction. This prevents an overlapping-tab race without changing the authoritative localStorage schema-1 saves or existing backup records. Requires real multi-tab Safari testing; no claim of canonical IndexedDB migration or iPhone validation.
