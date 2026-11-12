@@ -1,7 +1,7 @@
 // Original sculpted woodland silhouettes; render-only Gate A visual prototype.
 // Trees use the existing terrain draw call and never modify saved schema-1 voxels.
 // A mined anchor or obstructed crown removes the entire tree on normal remesh.
-const STRIDE=9, MAX_TREES=2, MAX_VERTICES=300;
+const STRIDE=9, MAX_TREES=2, MAX_VERTICES=450;
 function hash(x,z,seed,salt){
   let h=Math.imul((x|0)^Math.imul(seed|0,0x45d9f3b),0x27d4eb2d);
   h^=Math.imul((z|0)^salt,0x9e3779b1);
