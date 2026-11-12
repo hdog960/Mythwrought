@@ -51,6 +51,10 @@ An original **golden/turquoise tree-star cave mural** may be seen on the exposed
 
 New full Chromium tests must use **genuine `WEBGL_lose_context`** to simulate two loss/restore cycles, rebuild programs/chunks, preserve an existing saved edit byte-for-byte, keep the cave view visible, recover the Economy setting and keep separate left/right thumb grips uncovered. These are browser-simulated GPU events, not real iPhone low-memory context loss. On an actual landscape iPhone Safari and Home Screen: verify loss/recovery after app switching, orientation transitions, low-memory reload and 10+ minutes of chunk movement; watch for a blank sky or stale joystick, inspect glyph aliasing and visibility, then record performance/thermal and long-term save results. No actual iPhone test or owner's premium art approval has occurred; v0.10 Gate A remains OPEN.
 
+
+## v0.10 sculpted surface and controller-glyph audit — simulated evidence
+New automatic tests cover deterministic garden artwork, finite triangle budgets, negative-chunk boundaries, natural editable-grass support, mining/restoration/save/reload, painted versus Economy shader behavior, and readable CSS-only grip ornamentation at compact and regular iPhone landscape Chromium sizes. Final PR candidates passed 130 Node tests and 16 real Chromium scripts, and actual screenshots were retrieved and inspected. This proves neither a physical iPhone benchmark nor creator art approval. On real Safari and Home Screen, check foliage aliasing, target clarity, thumb comfort, thermal load after 10+ minutes, force-quit save recovery and long play across edited chunk seams. No verified offline service worker, canonical IndexedDB migration or final premium materials are supplied.
+
 ## Player-owned real device verification checklist
 Test **Safari** and separately test **Add to Home Screen** at https://hdog960.github.io/Mythwrought/:
 1. Open landscape, check central viewport is completely unobstructed, notch and safe areas do not clip grips or footer. Use both thumbs at once for movement, look, jump, MINE/PLACE; verify horizontal controls are intuitive and the help menu scrolls.
