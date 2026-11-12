@@ -1,5 +1,7 @@
 // MYTHWROUGHT v0.03: stable camera math shared by desktop and touch input.
-export const MAX_PITCH=1.3;
+// Leave a small horizon-independent safety margin from the vertical singularity.
+// The previous 1.3 radian cap prevented builders from aiming at their feet.
+export const MAX_PITCH=Math.PI/2-.015;
 export function clampLook(yaw,pitch,dx,dy,sensitivity=1,scale=.008){
   if(![yaw,pitch,dx,dy,sensitivity,scale].every(Number.isFinite))throw Error('Invalid camera input');
   const safe=Math.max(.5,Math.min(1.8,sensitivity));

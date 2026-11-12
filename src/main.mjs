@@ -2,7 +2,7 @@ import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
-import {clampLook,forwardVector,compassDegrees} from './camera.mjs';
+import {clampLook,forwardVector,compassDegrees,MAX_PITCH} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
 import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
@@ -956,7 +956,7 @@ function start(){
       block(x,y,z){return world.get(x,y,z);},
       setOrientation(yaw,pitch){
         if(![yaw,pitch].every(Number.isFinite))throw Error('Invalid debug camera orientation');
-        player.yaw=yaw;player.pitch=Math.max(-1.3,Math.min(1.3,pitch));
+        player.yaw=yaw;player.pitch=Math.max(-MAX_PITCH,Math.min(MAX_PITCH,pitch));
       },
       placeFixture(x,y,z,id){
         const old=world.get(x,y,z);

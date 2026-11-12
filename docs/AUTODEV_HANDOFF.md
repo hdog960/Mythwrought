@@ -1,0 +1,7 @@
+# Mythwrought staggered Gate A development handoff
+
+As of 2026-11-12, last independently checked main: `5fada312c14884b477eeb97d55aa2d9c6e0c12f8` (woodland PR #38 merged; main verification and Pages completed green). The original control PR #39 head `0fb7be90ddd632c7d6662b33e3caee8e60e8ed71` conflicts with woodland main and must not be merged stale.
+
+This branch is a clean woodland-main-based control candidate containing the same six source/test files from PR #39, preserving merged woodland source and adding notes. Next runner: check exact current GitHub main and all open PRs before editing or merging. Run full Node/Chromium suite on THIS head; inspect actual 568x320 and 932x430 screenshot artifacts and test both physical grips and nearly-downward targeting. If all green and visual evidence inspected, guarded-merge this candidate, close superseded PR #39 only after safe resolution, then verify main and Pages. If CI or artifact inspection unavailable, leave open and hand off exact run and blocker.
+
+After control candidate, next two v0.10 objectives: (1) cohesive woodland composition and original voxel scene depth without altering seed/schema-1 save compatibility; (2) design/test a safe canonical IndexedDB transactional migration preserving existing localStorage primary and previous-good copies. Do not prematurely enable migration, offline PWA, harvesting, pets/mounts or v0.11. User art and physical iPhone control approval remain OPEN. Trees/flowers harvesting is future design only.

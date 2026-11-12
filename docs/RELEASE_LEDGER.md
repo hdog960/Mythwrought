@@ -182,3 +182,6 @@ The verified v0.09 prototype remains procedurally shaded voxel terrain, not appr
 
 ## Reporting rule
 Never label planned roadmap releases complete without independently tested implementation evidence and user-required gates. No guarantee the page works on every iPhone solely because headless Chromium and HTTP fetch pass.
+
+
+**Control candidate pending verification (Nov 12, 2026):** Rebased the stone-house camera-pitch and grip-action-swap changes from conflicting PR #39 onto verified woodland main `5fada312` without overwriting the merged canopy. Do not call shipped until full Node/Chromium green CI, genuine screenshots and guarded merge/Pages verification. No owner art/physical iPhone acceptance.
