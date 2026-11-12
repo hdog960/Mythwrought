@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,terrainHeight,meshChunk,CHUNK_SIZE} from '../src/voxel.mjs';
-import {woodlandCanopyVertices,CANOPY_LIMITS} from '../src/canopy.mjs';
+import {woodlandCanopyVertices,woodlandTreeStyle,CANOPY_LIMITS} from '../src/canopy.mjs';
 
 const base=(x,y,z,seed)=>new VoxelWorld(seed).get(x,y,z);
 const options={chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:base,grass:BLOCK.GRASS,air:BLOCK.AIR};
@@ -45,4 +45,19 @@ test('mining natural tree anchors or building into canopy removes visuals on rem
   assert.deepEqual(woodlandCanopyVertices(restored,cx,cz,options),woodlandCanopyVertices(world,cx,cz,options));
   assert.equal(world.set(x,h,z,BLOCK.GRASS),true);
   assert.deepEqual(woodlandCanopyVertices(world,cx,cz,options),before);
+});
+
+test('seeded woodland includes distinct original evergreen and broadleaf silhouettes without altering world edits',()=>{
+  const world=new VoxelWorld(179),before=JSON.stringify(world.save());
+  const styles=new Set();
+  for(let cx=-8;cx<=8;cx++)for(let cz=-8;cz<=8;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+    styles.add(woodlandTreeStyle(x,z,world.seed));
+    if(styles.size===2)break;
+  }
+  assert.deepEqual([...styles].sort(),['broadleaf','evergreen']);
+  assert.equal(JSON.stringify(world.save()),before);
+  assert.equal(woodlandTreeStyle(10,-4,179),woodlandTreeStyle(10,-4,179));
 });
