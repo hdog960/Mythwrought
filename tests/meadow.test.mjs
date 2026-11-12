@@ -73,3 +73,19 @@ test('flowers do not grow through ceiling blocks, and density stays finite at se
  assert.throws(()=>meadowAccentVertices(w,0.5,0,{heightAt:terrainHeight}),/Invalid/);
  assert.throws(()=>meadowAccentVertices({},0,0,{heightAt:terrainHeight}),/Invalid/);
 });
+
+test('flower artwork has sculpted tapered petals rather than flat rectangular cards',()=>{
+ const w=new VoxelWorld(179),foliage=accents(w,0,0);
+ const flower=xyzs(foliage).find(row=>row[3]===8);
+ assert.ok(flower,'Expected original colorful flowers');
+ const bx=Math.floor(flower[0]),bz=Math.floor(flower[2]);
+ const petals=[];
+ for(let i=0;i<foliage.length;i+=9){
+   if(foliage[i+8]===8&&Math.floor(foliage[i])===bx&&Math.floor(foliage[i+2])===bz)
+     petals.push([foliage[i],foliage[i+1],foliage[i+2]]);
+ }
+ assert.equal(petals.length,12,'A blossom needs four distinct triangular petals');
+ assert.ok(new Set(petals.map(p=>p[1])).size>=3,'Petals must taper in height, not form square cards');
+ assert.ok(Math.max(...petals.map(p=>p[0]))-Math.min(...petals.map(p=>p[0]))<.5);
+ assert.ok(Math.max(...petals.map(p=>p[2]))-Math.min(...petals.map(p=>p[2]))<.5);
+});
