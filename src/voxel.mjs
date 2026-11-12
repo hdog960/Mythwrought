@@ -1,5 +1,6 @@
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
 import {meadowAccentVertices} from './meadow.mjs';
+import {storybookGroveVertices} from './grove.mjs';
 import {grottoAccentVertices} from './grotto.mjs';
 import {caveRuneVertices} from './cave-runes.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
@@ -119,6 +120,10 @@ export function meshChunk(world,cx,cz){
   // Decorative meadows are purely rendered geometry anchored to the current
   // grass voxel. They never enter world.get(), raycasts, collisions or saves.
   // Crucially, they piggyback the existing chunk buffer and mesh invalidation.
+  const grove=storybookGroveVertices(world,cx,cz,{
+    chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,
+    grass:BLOCK.GRASS,air:BLOCK.AIR
+  });
   const meadow=meadowAccentVertices(world,cx,cz,{
     chunkSize:CHUNK_SIZE,heightAt:terrainHeight,grass:BLOCK.GRASS,air:BLOCK.AIR
   });
@@ -135,12 +140,13 @@ export function meshChunk(world,cx,cz){
     air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
   const solid=new Float32Array(vertices);
-  if(!meadow.length&&!grotto.length&&!runes.length)return solid;
-  const combined=new Float32Array(solid.length+meadow.length+runes.length+grotto.length);
-  combined.set(solid);combined.set(meadow,solid.length);
-  combined.set(runes,solid.length+meadow.length);
-  // The grotto remains the final tail for older save/geometry regression tests.
-  combined.set(grotto,solid.length+meadow.length+runes.length);
+  if(!grove.length&&!meadow.length&&!grotto.length&&!runes.length)return solid;
+  const combined=new Float32Array(solid.length+grove.length+meadow.length+runes.length+grotto.length);
+  combined.set(solid);combined.set(grove,solid.length);
+  combined.set(meadow,solid.length+grove.length);
+  combined.set(runes,solid.length+grove.length+meadow.length);
+  // Existing meadow and grotto tail positions retain their regression invariants.
+  combined.set(grotto,solid.length+grove.length+meadow.length+runes.length);
   return combined;
 }
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.
