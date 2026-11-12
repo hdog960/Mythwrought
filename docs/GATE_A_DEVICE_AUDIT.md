@@ -37,6 +37,13 @@ A new original procedural material shader gives grass, soil, stone, timber, crys
 
 The new real Chromium suite captures authentic painted/Balanced, Economy and compact-landscape scenes, checks screenshot colors, WebGL shader readiness, unchanged original save bytes, consistent central viewport geometry, physically separate side grips, and restoration of the painted preset. Still **unverified** until real iPhone Safari + installed Home Screen inspection: watch for fine texture shimmer/moire on stone and timber, overbusy near-ground floral contrast, washed-out Economy readability, performance/heat under 10+ minute travel, and thumb-control comfort. Do not infer premium art acceptance or hardware performance from desktop Chromium.
 
+## Natural underground color and GPU upload recovery — simulated evidence, NOT device acceptance
+The v0.10 natural-grotto prototype adds original cyan, purple and rose fungi and small faceted turquoise crystal artwork to **naturally exposed stone cave floors**. All accents are visual-only, per-seed deterministic, bounded per active chunk, and respond to the original mine/build/save/reload path. It does not change deep-cave gameplay, carve caves, add saved blocks, implement pet/mount mechanics, or create actual dynamic light. Real Chromium screenshots are captured from inside a naturally existing cave using a *local-only* test camera. It is **not** a final underground environment or approved art.
+
+Chunk uploads now validate staging size and WebGL error codes. On a failed upload, the old buffer must remain intact, the pending chunk retries with a bounded delay, and the saved world must not be lost. An automated Chromium scenario deliberately injects GPU buffer errors to prove edit rollback and recovery. **These are simulations**, not proof of recovery from genuine iPhone GPU OOM or OS force quit.
+
+Manual iPhone Safari and installed Home Screen acceptance: inspect natural grotto details at close, far and narrow landscape sizes; verify no shimmery or clipped prism faces, no false collision, no hidden mining targets, no thumbnail-sized cave exits; run 10+ minutes of real chunk travel and edited cave reloads, watch responsiveness, thermals and GPU restarts. Keep the user-owned premium art gate, canonical IndexedDB save migration, offline PWA verification and v0.11 promotion OPEN.
+
 ## Player-owned real device verification checklist
 Test **Safari** and separately test **Add to Home Screen** at https://hdog960.github.io/Mythwrought/:
 1. Open landscape, check central viewport is completely unobstructed, notch and safe areas do not clip grips or footer. Use both thumbs at once for movement, look, jump, MINE/PLACE; verify horizontal controls are intuitive and the help menu scrolls.
