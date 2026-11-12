@@ -32,6 +32,11 @@ The new original voxel wildflower and grass-tuft accents are render-only, determ
 
 **Manual iPhone check still required:** inspect the meadow from natural first-person distance in Safari and installed Home Screen landscape, confirm no shimmering/aliasing or accidental obstructed mining targets, navigate multiple chunk seams for 10+ minutes, and compare Balanced/Battery/Economy rendering clarity and heat. No FPS, thermals or user art acceptance is assumed.
 
+## Original painted voxel materials / Economy shader budget — browser evidence only
+A new original procedural material shader gives grass, soil, stone, timber, crystal and ore distinct storybook detail and keeps wildflower materials opaque; the existing sky pass adds pastel ridges and soft wisps. No new saved blocks, character mechanics, geometry or texture fetches are introduced. The existing **Economy** preset bypasses most pixel-detail hashes and renders original base colors and fog, while Balanced/Battery show more elaborate painted pixels. It is a rendering preference, not a new game mode or a proven battery saving.
+
+The new real Chromium suite captures authentic painted/Balanced, Economy and compact-landscape scenes, checks screenshot colors, WebGL shader readiness, unchanged original save bytes, consistent central viewport geometry, physically separate side grips, and restoration of the painted preset. Still **unverified** until real iPhone Safari + installed Home Screen inspection: watch for fine texture shimmer/moire on stone and timber, overbusy near-ground floral contrast, washed-out Economy readability, performance/heat under 10+ minute travel, and thumb-control comfort. Do not infer premium art acceptance or hardware performance from desktop Chromium.
+
 ## Player-owned real device verification checklist
 Test **Safari** and separately test **Add to Home Screen** at https://hdog960.github.io/Mythwrought/:
 1. Open landscape, check central viewport is completely unobstructed, notch and safe areas do not clip grips or footer. Use both thumbs at once for movement, look, jump, MINE/PLACE; verify horizontal controls are intuitive and the help menu scrolls.
