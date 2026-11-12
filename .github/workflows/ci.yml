@@ -19,6 +19,7 @@ jobs:
           node --check src/voxel.mjs
           node --check src/meadow.mjs
           node --check src/grove.mjs
+          node --check src/canopy.mjs
           node --check src/storybook-materials.mjs
           node --check src/grotto.mjs
           node --check src/gpu-recovery.mjs
@@ -46,6 +47,7 @@ jobs:
           node tests/foreground-browser.mjs
           node tests/meadow-browser.mjs
           node tests/grove-browser.mjs
+          node tests/canopy-browser.mjs
           node tests/storybook-browser.mjs
           node tests/grotto-browser.mjs
           node tests/context-restore-browser.mjs
