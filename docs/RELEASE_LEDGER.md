@@ -1,6 +1,8 @@
 # Mythwrought — Release ledger
 This is the source of truth for ACTUALLY implemented and independently verified features, separate from the 100 planned releases.
 
+**Unmerged Gate A candidate (not a release):** `gate-a-iphone-pitch-and-grip-swap` addresses the creator's November 12 stone-house building report by extending vertical look and swapping physical HOLD · AIM / JUMP grip positions. Includes unit and Chromium layout regression updates. Do not call shipped or tested until full CI, screenshot inspection and guarded merge/deployment; actual iPhone acceptance remains open.
+
 | Release | Git commit | Tested behavior | Deployment | Result |
 |---|---|---|---|---|
 | Initial repository | `784739d` | Initial README | Legacy Pages build | Baseline |
