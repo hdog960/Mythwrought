@@ -69,9 +69,13 @@ try{
   });
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='17,18,0',null,{timeout:8000});
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetPlace==='16,18,0',null,{timeout:8000});
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[moveFinger,touch(9,placeCenter.x,placeCenter.y)]});
+  assert.equal(await page.evaluate(()=>document.querySelector('#scene').dataset.canPlace),'true','Seam fixture must expose a legal placement cell');
+  // Keep the first finger down at the neutral pad center for a stable
+  // build target; the earlier jump and mine actions exercised moving input.
+  const heldNeutralFinger=touch(1,left.x,left.y);
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[heldNeutralFinger,touch(9,placeCenter.x,placeCenter.y)]});
   await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===3,null,{timeout:5000});
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[moveFinger]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[heldNeutralFinger]});
   // A tap must perform one action, not pointerdown plus synthetic click.
   assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),3);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
