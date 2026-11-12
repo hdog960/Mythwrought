@@ -189,3 +189,6 @@ Never label planned roadmap releases complete without independently tested imple
 
 ## Gate A compact landscape status candidate — 2026-11-12
 Branch gate-a-compact-status-20261112-1128 from verified main 6f64005b: CSS reallocates footer space to the real live status at 568x320 and similarly compact landscapes; the decorative prototype tag hides only in the compact breakpoint. Browser layout test asserts status geometry, ellipsis and full-width allocation without changing world/grips. Candidate requires CI and authentic screenshot review before merge. This is a usability refinement, NOT an art or physical iPhone approval, persistence migration or v0.11 unlock.
+
+
+Gate A optional IndexedDB backup race-safety candidate — Nov 12: branch `gate-a-vault-atomic-capacity-20261112-1302` changes `src/vault.mjs` to check per-seed six-snapshot capacity and insert inside the same IndexedDB readwrite transaction, preventing concurrent tabs from both observing five and creating seven. `tests/vault.test.mjs` checks seed isolation and fail-closed accounting of malformed records. This is NOT canonical save migration, not shipped until green CI and required review/merge; physical iPhone and art approvals remain open.
