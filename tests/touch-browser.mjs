@@ -45,6 +45,12 @@ try{
   await page.waitForFunction(base=>Number(document.querySelector('#scene').dataset.playerFeet)>base+.12,beforeJump,{timeout:5500});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[moveFinger]});
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.playerGrounded==='true',null,{timeout:8000});
+  // Release movement displacement without lifting the movement thumb.
+  // A moving pad was previously advancing the hero after teleport and
+  // invalidating the known-good seam target before the next render.
+  const heldNeutralFinger=touch(1,left.x,left.y);
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[heldNeutralFinger]});
+  await page.waitForTimeout(150);
   await page.evaluate(()=>{
     const t=window.__mythwroughtTest;
     t.teleport(14.5,.5);
@@ -54,13 +60,12 @@ try{
     t.aimAt(16,18,0);
   });
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='16,18,0',{timeout:8000});
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[moveFinger,touch(8,mineCenter.x,mineCenter.y)]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[heldNeutralFinger,touch(8,mineCenter.x,mineCenter.y)]});
   await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===0,null,{timeout:5000});
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[moveFinger]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[heldNeutralFinger]});
   // Restore the known-good seam fixture from blocks-browser.mjs, where
   // targeting (17,18,0) exposes (16,18,0) as a valid placement cell.
-  // The movement finger remains held throughout this reset and placement.
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[touch(1,left.x,left.y)]});
+  // The movement thumb remains held at the neutral pad center.
   await page.evaluate(()=>{
     window.__mythwroughtTest.teleport(14.5,.5);
     window.__mythwroughtTest.placeFixture(14,13,0,3);
@@ -72,7 +77,6 @@ try{
   assert.equal(await page.evaluate(()=>document.querySelector('#scene').dataset.canPlace),'true','Seam fixture must expose a legal placement cell');
   // Keep the first finger down at the neutral pad center for a stable
   // build target; the earlier jump and mine actions exercised moving input.
-  const heldNeutralFinger=touch(1,left.x,left.y);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[heldNeutralFinger,touch(9,placeCenter.x,placeCenter.y)]});
   await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===3,null,{timeout:5000});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[heldNeutralFinger]});
