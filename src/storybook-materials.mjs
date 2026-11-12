@@ -69,6 +69,13 @@ void main(){
     shade=.92+.10*step(.5,tile);
   }else if(vMat==8||vMat==9){ // Flower petals and golden centers.
     shade=1.0;
+  }else if(vMat==10){ // Natural grotto fungus stems, softly teal.
+    shade=.91+.06*tile;
+  }else if(vMat==11){ // Opaque luminous-color fungal caps and crystal faces.
+    // Bright local colors without fake dynamic lights or transparency.
+    shade=1.0;
+  }else if(vMat==12){ // Warm gold spores; preserves art readability.
+    shade=1.0;
   }
   float fog=smoothstep(29.0,68.0,vDistance);
   vec3 colored=mix(vColor,base*shade,near*.92);
@@ -78,6 +85,7 @@ void main(){
 export const STORYBOOK_ART_RULES=Object.freeze({
   existingSolidMaterials:Object.freeze([1,2,3,4,5,6]),
   existingFloraMaterials:Object.freeze([7,8,9]),
+  renderOnlyGrottoMaterials:Object.freeze([10,11,12]),
   detailStartDistance:10,
   detailEndDistance:38,
   fogStartDistance:29,
