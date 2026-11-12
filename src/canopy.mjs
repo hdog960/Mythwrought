@@ -36,6 +36,34 @@ function crown(out,x,y,z,r,variation){
     tri(out,upper[i],upper[j],[x,y+1.14,z],tint[(i+2)%4],7);
   }
 }
+// Distinct upright evergreen silhouette: stacked, faceted needle tiers.
+function evergreen(out,x,y,z,variation){
+  const height=4.1+variation*.8;
+  const bark=[.48,.30,.19],ring=[[-.16,-.16],[.16,-.16],[.16,.16],[-.16,.16]];
+  for(let i=0;i<4;i++){
+    const j=(i+1)%4;
+    quad(out,[x+ring[i][0],y,z+ring[i][1]],
+      [x+ring[j][0],y,z+ring[j][1]],
+      [x+ring[j][0]*.65,y+height*.83,z+ring[j][1]*.65],
+      [x+ring[i][0]*.65,y+height*.83,z+ring[i][1]*.65],
+      i%2?bark:[.59,.39,.24],4);
+  }
+  const needles=[[.19,.43,.38],[.26,.54,.43],[.34,.61,.46],[.40,.68,.48]];
+  for(let tier=0;tier<4;tier++){
+    const base=y+.65+tier*.77,rad=1.32-tier*.19;
+    const top=base+1.22;
+    for(let i=0;i<8;i++){
+      const a=(i+variation)*Math.PI/4,b=(i+1+variation)*Math.PI/4;
+      const col=needles[(i+tier)%needles.length];
+      tri(out,[x+Math.cos(a)*rad,base,z+Math.sin(a)*rad],
+        [x+Math.cos(b)*rad,base,z+Math.sin(b)*rad],
+        [x,top,z],col,7);
+    }
+  }
+}
+export function woodlandTreeStyle(x,z,seed){
+  return hash(x,z,seed,67)<.43?'evergreen':'broadleaf';
+}
 function tree(out,x,y,z,variation){
   const h=3.2+variation*.8, bark=[.52,.34,.23];
   const ring=[[ -.22,-.22],[.22,-.22],[.22,.22],[-.22,.22]];
@@ -70,7 +98,8 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
       for(let dy=1;dy<=6;dy++)
         if(world.get(x+dx,h+dy,z+dz)!==air){clear=false;break;}
     if(!clear)continue;
-    tree(out,x+.5,h+1.01,z+.5,hash(x,z,world.seed,59));count++;
+    const style=woodlandTreeStyle(x,z,world.seed);
+    (style==='evergreen'?evergreen:tree)(out,x+.5,h+1.01,z+.5,hash(x,z,world.seed,59));count++;
   }
   if(out.length/STRIDE>MAX_TREES*MAX_VERTICES)
     throw Error('Woodland canopy exceeded vertex budget');
