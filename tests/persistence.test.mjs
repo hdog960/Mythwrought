@@ -99,7 +99,15 @@ test('write failure after journal leaves old canonical, but does not report succ
   const outcome=saveWorldSafe(storage,w);
   assert.equal(outcome.ok,false);
   assert.equal(storage.getItem(key),old);
+  const recovered=loadWorldSafe(storage,179);
+  assert.equal(recovered.source,'journal');
+  assert.equal(recovered.recovered,true);
+  assert.deepEqual(recovered.world.save(),w.save());
+  assert.equal(storage.getItem(key),old,'Failed primary write must not mutate canonical bytes');
+  storage.fail(()=>false);
+  assert.equal(saveWorldSafe(storage,recovered.world).ok,true);
   assert.equal(loadWorldSafe(storage,179).source,'primary');
+  assert.deepEqual(parseWorldData(storage.getItem(key+SAVE_BACKUP_SUFFIX)).save(),JSON.parse(old));
 });
 test('journal write corruption is detected via read-after-write verification',()=>{
   const storage=store(),w=changed(),key=worldSlotKey(179);
@@ -144,4 +152,30 @@ test('explicit import repair preserves exact damaged bytes while restoring valid
   assert.equal(approved.ok,true);
   assert.equal(storage.getItem(key+SAVE_DAMAGED_SUFFIX),'not-json-data');
   assert.deepEqual(loadWorldSafe(storage,179).world.save(),w.save());
+});
+
+test('verified stale journal takes precedence only when it differs from the primary',()=>{
+  const storage=store(),w=changed(),key=worldSlotKey(179);
+  assert.equal(saveWorldSafe(storage,w).ok,true);
+  const original=storage.getItem(key);
+  w.set(4,18,4,BLOCK.WOOD);
+  storage.fail((op,k)=>op==='set'&&k===key);
+  assert.equal(saveWorldSafe(storage,w).ok,false);
+  const recovered=loadWorldSafe(storage,179);
+  assert.equal(recovered.source,'journal');
+  assert.deepEqual(recovered.world.save(),w.save());
+  assert.equal(storage.getItem(key),original);
+  storage.fail(()=>false);
+  assert.equal(saveWorldSafe(storage,recovered.world).ok,true);
+  assert.equal(loadWorldSafe(storage,179).source,'primary');
+});
+test('damaged evidence cannot be silently replaced with different damaged bytes',()=>{
+  const storage=store(),w=changed(),key=worldSlotKey(179);
+  storage.setItem(key,'damaged-A');
+  assert.equal(saveWorldSafe(storage,w,{allowReplaceCorrupt:true}).ok,true);
+  assert.equal(storage.getItem(key+SAVE_DAMAGED_SUFFIX),'damaged-A');
+  storage.setItem(key,'damaged-B');
+  assert.equal(saveWorldSafe(storage,w,{allowReplaceCorrupt:true}).ok,false);
+  assert.equal(storage.getItem(key),'damaged-B');
+  assert.equal(storage.getItem(key+SAVE_DAMAGED_SUFFIX),'damaged-A');
 });
