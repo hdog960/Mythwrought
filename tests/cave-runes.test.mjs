@@ -73,7 +73,7 @@ test('mining an original glyph wall removes its render-only art and restores it 
 test('cave rune geometry is in the existing chunk GPU data and separate from seeded flora',()=>{
   const w=new VoxelWorld(179),saved=JSON.stringify(w.save());
   let found=false;
-  for(const [cx,cz] of [[0,0],[-1,-1],[1,1],[-2,0]]){
+  for(let cx=-2;cx<=2;cx++)for(let cz=-2;cz<=2;cz++){
     const mesh=meshChunk(w,cx,cz),actual=runes(w,cx,cz);
     assert.equal(mesh.length%9,0);
     const fromChunk=[];
