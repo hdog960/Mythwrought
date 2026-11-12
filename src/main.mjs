@@ -943,6 +943,16 @@ function start(){
         jumpQueued=false;
         return {...pos};
       },
+      teleportCave(x,y,z){
+        // Local regression-only camera for inspecting actual underground art.
+        // Never accessible from the public GitHub Pages build.
+        if(![x,y,z].every(Number.isInteger)||collides(world,x+.5,y+.01,z+.5))
+          throw Error('Unsafe local-only underground camera position');
+        Object.assign(player,{x:x+.5,feet:y+.01,z:z+.5,
+          vX:0,vY:0,vZ:0,onGround:true});
+        jumpQueued=false;
+        return {x:player.x,feet:player.feet,z:player.z};
+      },
       aimAt(x,y,z){
         const dx=x+.5-player.x,dy=y+.5-(player.feet+1.55),dz=z+.5-player.z;
         player.yaw=Math.atan2(dx,dz);
