@@ -531,9 +531,29 @@ function start(){
     syncSensitivity();
     try{localStorage.setItem(CAMERA_PREF,String(Math.round(sensitivity*100)));}catch(_){}
   });
-  document.getElementById('jump').onclick=jump;
-  document.getElementById('dig').onclick=()=>edit('mine');
-  document.getElementById('place').onclick=()=>edit('place');
+  // Safari can suppress a synthesized click on a second touch while the
+  // movement pad holds pointer capture. Execute touch actions on pointerdown,
+  // but preserve click for mouse, keyboard and accessibility activation.
+  function bindGameplayAction(id,action){
+    const button=document.getElementById(id);
+    let lastTouchAt=-Infinity;
+    button.addEventListener('pointerdown',e=>{
+      if(e.pointerType!=='touch')return;
+      e.preventDefault();
+      lastTouchAt=performance.now();
+      action();
+    });
+    button.addEventListener('click',e=>{
+      if(e.detail!==0&&performance.now()-lastTouchAt<750){
+        e.preventDefault();
+        return;
+      }
+      action();
+    });
+  }
+  bindGameplayAction('jump',jump);
+  bindGameplayAction('dig',()=>edit('mine'));
+  bindGameplayAction('place',()=>edit('place'));
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
     selected=Number(b.dataset.block);
     document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
