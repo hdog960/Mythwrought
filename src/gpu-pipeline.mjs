@@ -13,9 +13,10 @@ function compiledShader(gl,type,source){
   return shader;
 }
 function linkedProgram(gl,vs,fs){
-  const vertex=compiledShader(gl,gl.VERTEX_SHADER,vs),fragment=compiledShader(gl,gl.FRAGMENT_SHADER,fs);
-  let program=null;
+  const vertex=compiledShader(gl,gl.VERTEX_SHADER,vs);
+  let fragment=null,program=null;
   try{
+    fragment=compiledShader(gl,gl.FRAGMENT_SHADER,fs);
     program=gl.createProgram();
     if(!program)throw Error('WebGL program allocation failed');
     gl.attachShader(program,vertex);
@@ -28,7 +29,8 @@ function linkedProgram(gl,vs,fs){
     if(program)gl.deleteProgram(program);
     throw error;
   }finally{
-    gl.deleteShader(vertex);gl.deleteShader(fragment);
+    gl.deleteShader(vertex);
+    if(fragment)gl.deleteShader(fragment);
   }
 }
 export function buildGpuPipeline(gl,{terrainVertex,terrainFragment,skyVertex,skyFragment}){
