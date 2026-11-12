@@ -62,14 +62,15 @@ try{
   await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[touch(1,left.x,left.y)]});
   await page.evaluate(()=>{
     window.__mythwroughtTest.teleport(14.5,.5);
-    window.__mythwroughtTest.aimAt(17,18,0);
+    window.__mythwroughtTest.placeFixture(16,18,0,3);
+    window.__mythwroughtTest.aimAt(16,18,0);
   });
-  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='17,18,0',{timeout:8000});
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='16,18,0',{timeout:8000});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[moveFinger,touch(9,placeCenter.x,placeCenter.y)]});
-  await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===3,null,{timeout:5000});
+  await page.waitForFunction(()=>window.__mythwroughtTest.block(15,18,0)===3,null,{timeout:5000});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[moveFinger]});
   // A tap must perform one action, not pointerdown plus synthetic click.
-  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),3);
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(15,18,0)),3);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   await page.waitForTimeout(90);
   const released=await v();
