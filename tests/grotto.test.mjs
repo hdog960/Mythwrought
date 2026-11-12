@@ -59,19 +59,15 @@ test('changing a natural grotto floor or filling its air removes only its artwor
  for(let cx=-2;cx<=2&&!found;cx++)for(let cz=-2;cz<=2&&!found;cz++){
    const mesh=accents(w,cx,cz);
    if(mesh.length<9)continue;
-   // A base voxel is at the foot of any first triangle/quad. Search the
-   // currently eligible natural cave cells directly for this test.
-   for(let x=cx*16;x<(cx+1)*16&&!found;x++)
-     for(let z=cz*16;z<(cz+1)*16&&!found;z++)
-       for(let y=WORLD_MIN_Y+2;y<terrainHeight(x,z,w.seed)-2;y++){
-         if(baseBlock(x,y,z,w.seed)!==BLOCK.AIR||
-           (baseBlock(x,y-1,z,w.seed)!==BLOCK.STONE&&baseBlock(x,y-1,z,w.seed)!==BLOCK.ORE))continue;
-         const before=accents(w,cx,cz);
-         w.set(x,y,z,BLOCK.STONE);
-         const filled=accents(w,cx,cz);
-         w.set(x,y,z,BLOCK.AIR);
-         if(filled.length<before.length)found={x,y,z,cx,cz,before};
-       }
+   // The first drawn vertex begins above the original floor and lies inside
+   // that 1×1 natural cave cell, including negative-coordinate chunks.
+   const x=Math.floor(mesh[0]),y=Math.floor(mesh[1]),z=Math.floor(mesh[2]);
+   const before=mesh;
+   assert.equal(baseBlock(x,y,z,w.seed),BLOCK.AIR);
+   w.set(x,y,z,BLOCK.STONE);
+   const filled=accents(w,cx,cz);
+   w.set(x,y,z,BLOCK.AIR);
+   if(filled.length<before.length)found={x,y,z,cx,cz,before};
  }
  assert.ok(found,'Could not identify a naturally anchored edit-sensitive grotto accent');
  const {x,y,z,cx,cz,before}=found;
