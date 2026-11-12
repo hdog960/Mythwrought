@@ -82,8 +82,8 @@ function bellspire(out,x,y,z,variation){
   const a=variation*TWO_PI, stem=[x,y+.07,z];
   const crown=[x,y+1.48+variation*.18,z];
   // Six tapering leaf fins and a narrow emerald stalk.
-  for(let i=0;i<6;i++){
-    const angle=a+i*TWO_PI/6;
+  for(let i=0;i<4;i++){
+    const angle=a+i*TWO_PI/4;
     const foot=polar(x,y+.10,z,.12,angle);
     const tip=polar(x,y+.48,z,.42,angle);
     const shoulder=polar(x,y+.68,z,.12,angle+.19);
@@ -91,8 +91,8 @@ function bellspire(out,x,y,z,variation){
     const high=polar(x,y+.94,z,.16,angle);
     tri(out,shoulder,tip,high,LEAVES[(i+1)%4],7);
   }
-  for(let i=0;i<6;i++){
-    const angle=a+i*TWO_PI/6;
+  for(let i=0;i<4;i++){
+    const angle=a+i*TWO_PI/4;
     const base=polar(x,y+1.05,z,.12,angle);
     const bell=polar(x,y+1.28,z,.33,angle);
     const upper=polar(x,y+1.48+variation*.18,z,.11,angle+.30);
