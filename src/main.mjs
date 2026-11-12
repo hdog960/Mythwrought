@@ -11,6 +11,7 @@ import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
+import {GpuUploadRetry,validateChunkUploadBytes} from './gpu-recovery.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
@@ -98,6 +99,7 @@ function start(){
   let frame=0,lastFrame=performance.now(),changed=false;
   const frameHistory=new FrameHistory(360);
   const meshCadence=new MeshFrameCadence({budgetMs:12,maxCooldown:2});
+  const gpuRetry=new GpuUploadRetry({baseDelayMs:250,maxDelayMs:8000});
   const mirrorQueue=new MirrorWriteQueue();
   const mirrorStatus=document.getElementById('mirrorStatus');
   const mirrorSlot=document.getElementById('mirrorSlot');
@@ -187,6 +189,23 @@ function start(){
     if(result.warning)message(result.warning);
     return true;
   }
+  // A WebGL error code need not throw. Allocate a NEW buffer and verify its
+  // upload before touching the last good chunk. Shared by edits and streaming.
+  function uploadChunkBuffer(vertices){
+    validateChunkUploadBytes(vertices);
+    const buffer=gl.createBuffer();
+    if(!buffer)throw Error('WebGL buffer allocation unavailable');
+    try{
+      // Clear stale errors from unrelated previous GL drawing operations.
+      for(let i=0;i<8&&gl.getError()!==gl.NO_ERROR;i++){}
+      gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+      gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
+      const error=gl.getError();
+      if(error!==gl.NO_ERROR)
+        throw Error('WebGL buffer upload error '+error);
+      return buffer;
+    }catch(error){gl.deleteBuffer(buffer);throw error;}
+  }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
   function refreshEditedMeshes(x,z){
@@ -196,11 +215,8 @@ function start(){
     const ready=[];
     try{
       for(const item of batch){
-        const buffer=gl.createBuffer();
-        if(!buffer)throw Error('WebGL buffer allocation failed');
+        const buffer=uploadChunkBuffer(item.vertices);
         ready.push({...item,buffer,count:item.vertices.length/9});
-        gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-        gl.bufferData(gl.ARRAY_BUFFER,item.vertices,gl.STATIC_DRAW);
       }
     }catch(err){
       for(const item of ready)gl.deleteBuffer(item.buffer);
@@ -233,6 +249,7 @@ function start(){
       meshCadence.resetCooldown(); // prioritize freshly entered chunk windows
       const desired=chunkWindow(player.x,player.z,2);
       wanted=new Set(desired.map(c=>name(c.cx,c.cz)));
+      gpuRetry.keepOnly(wanted);
       // Eagerly delete GPU buffers behind the player; never accumulate old border chunks.
       for(const [k,c] of chunks){
         if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
@@ -247,30 +264,25 @@ function start(){
     // Bounded missing mesh uploads, nearest to the player first.
     const cx=chunkCoord(player.x),cz=chunkCoord(player.z);
     const queue=priorityMissingChunks(pending,cx,cz);
-    if(queue.length&&meshCadence.ready()){
-      const [k,[x,z]]=queue[0];
+    const now=performance.now();
+    const next=queue.find(([k])=>gpuRetry.ready(k,now));
+    if(next&&meshCadence.ready()){
+      const [k,[x,z]]=next;
       const begin=performance.now();
-      const data=meshChunk(world,x,z),buffer=gl.createBuffer();
-      if(!buffer){
-        // Never destroy an existing chunk when GPU resources are unavailable.
-        meshCadence.finished(performance.now()-begin);
-        return;
-      }
       try{
-        gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-        gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+        const data=meshChunk(world,x,z);
+        const buffer=uploadChunkBuffer(data);
+        pending.delete(k);gpuRetry.success(k);
+        const old=chunks.get(k);
+        chunks.set(k,{x,z,buffer,count:data.length/9});
+        if(old)gl.deleteBuffer(old.buffer);
       }catch(error){
-        gl.deleteBuffer(buffer);
+        const state=gpuRetry.fail(k,performance.now(),error.message);
+        if(state.attempt===1)message('Chunk GPU upload deferred safely; retry scheduled');
+      }finally{
         meshCadence.finished(performance.now()-begin);
-        message('GPU chunk upload deferred; existing world remains intact');
-        return;
       }
-      pending.delete(k);
-      const old=chunks.get(k);
-      chunks.set(k,{x,z,buffer,count:data.length/9});
-      if(old)gl.deleteBuffer(old.buffer);
-      meshCadence.finished(performance.now()-begin);
-    } // at most one mesh upload per eligible frame, bounded delayed work
+    } // one safe candidate per eligible frame, with finite backoff on GPU faults
     if(frame%45===0)for(const [k,c] of chunks){
       if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
     }
@@ -605,7 +617,7 @@ function start(){
         dimensions:innerWidth+'×'+innerHeight+' CSS px, DPR '+(devicePixelRatio||1),
         homeScreen:standalone?'standalone reported, not independently confirmed':'browser or unknown',
         grips,frames:frameHistory.stats(),
-        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels; mesh uploads '+meshCadence.meshes+', deferred frames '+meshCadence.skipped+', longest measured mesh '+meshCadence.slowestMs+' ms',
+        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels; mesh uploads '+meshCadence.meshes+', deferred frames '+meshCadence.skipped+', longest measured mesh '+meshCadence.slowestMs+' ms; GPU upload retry faults '+gpuRetry.stats().failures+', pending '+gpuRetry.stats().pendingRetries,
         save:saved,probe,quota
       });
       auditStatus.textContent='Report ready. Copy it for Gate A review; manual iPhone and art approval remain open.';
@@ -705,6 +717,7 @@ function start(){
     if(!result.ok)throw Error('Restore failed without replacing the active game: '+result.detail);
     for(const c of chunks.values())gl.deleteBuffer(c.buffer);
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     world=imported;storageReadOnly=false;changed=false;
     clearMirrorDownload();
@@ -817,6 +830,7 @@ function start(){
     if(!out.ok)throw Error('Canonical world restore failed; '+out.detail);
     for(const c of chunks.values())gl.deleteBuffer(c.buffer);
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     world=restored;changed=false;respawnPrototype();
     seedLabel.textContent='WORLD '+seed;
@@ -837,6 +851,7 @@ function start(){
       if(!result.ok)throw Error(result.reason);
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       world=candidate;storageReadOnly=false;changed=false;respawnPrototype();
       clearMirrorDownload();
@@ -882,6 +897,7 @@ function start(){
       clearMirrorDownload();
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
       seedInput.value=String(world.seed);
@@ -945,7 +961,8 @@ function start(){
       },
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
-        frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats()};}
+        frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats(),
+        gpuRetry:gpuRetry.stats()};}
     });
   }
   saveHealth.textContent=storageReadOnly?
