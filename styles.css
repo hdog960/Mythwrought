@@ -142,3 +142,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .mirror-settings .helpbuttons button:disabled{opacity:.55}
 #mirrorStatus{min-height:35px;overflow-wrap:anywhere;white-space:normal}
 #mirrorDownload[hidden]{display:none}
+
+
+/* Gate A art clarity: original reliable CSS-engraved diamond replaces rare
+   Unicode runes that displayed as missing-font squares on real Chromium.
+   The diamond is purely visual; touch target geometry and canvas stay fixed. */
+.grip .emblem{display:flex;align-items:center;justify-content:center;gap:.65em}
+.grip .emblem-mark{display:inline-block;flex:none;width:.55em;height:.55em;
+  border:1px solid currentColor;border-radius:1px;transform:rotate(45deg);
+  box-shadow:0 0 0 2px #1e302d,0 0 5px #e7c98277}
