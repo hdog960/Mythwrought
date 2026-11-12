@@ -78,7 +78,7 @@ function start(){
   const atUv=gl.getAttribLocation(program,'aUv'),atMat=gl.getAttribLocation(program,'aMat');
   for(const index of [atPos,atColor,atUv,atMat])gl.enableVertexAttribArray(index);
   const U={};
-  for(const k of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog'])U[k]=gl.getUniformLocation(program,k);
+  for(const k of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog','uArtQuality'])U[k]=gl.getUniformLocation(program,k);
   const skyU={resolution:gl.getUniformLocation(skyProgram,'uResolution'),
     yaw:gl.getUniformLocation(skyProgram,'uYaw'),pitch:gl.getUniformLocation(skyProgram,'uPitch')};
   gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);
@@ -304,6 +304,7 @@ function start(){
       const buffer=bufferDimensions(canvas.clientWidth,canvas.clientHeight,renderPreset,devicePixelRatio||1);
       const w=buffer.width,h=buffer.height;
       canvas.dataset.renderPreset=renderPreset;
+      canvas.dataset.storybookQuality=renderPreset==='economy'?'base-colors':'painted-materials';
       canvas.dataset.renderScale=String(buffer.scale);
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
       gl.clearColor(...DISTANCE_FOG_COLOR,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
@@ -323,6 +324,7 @@ function start(){
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
       gl.uniform3fv(U.uFog,DISTANCE_FOG_COLOR);
+      gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
       stream();
       canvas.dataset.renderedFrames=String(frame);
       canvas.dataset.meshCadenceSkipped=String(meshCadence.skipped);
