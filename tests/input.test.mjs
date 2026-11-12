@@ -36,3 +36,14 @@ test('look mode and keyboard focus gracefully ignore invalid controls',()=>{
   assert.equal(isWorldControlTarget({tagName:'DIV',isContentEditable:true}),false);
   assert.equal(isWorldControlTarget({tagName:'CANVAS'}),true);
 });
+
+import {MAX_PITCH,clampLook,forwardVector} from '../src/camera.mjs';
+test('builder can aim almost straight down and up without crossing the vertical singularity',()=>{
+  assert.ok(MAX_PITCH>1.54&&MAX_PITCH<Math.PI/2);
+  const down=clampLook(0,0,0,2000);
+  assert.equal(down.pitch,-MAX_PITCH);
+  assert.ok(forwardVector(down.yaw,down.pitch)[1]<-.999,'Downward ray should reach blocks directly beneath the player');
+  assert.equal(clampLook(0,0,0,-2000).pitch,MAX_PITCH);
+  assert.equal(clampLook(0,down.pitch,0,500).pitch,-MAX_PITCH,'Pitch cannot flip after over-drag');
+  assert.ok(forwardVector(0,down.pitch).every(Number.isFinite));
+});
