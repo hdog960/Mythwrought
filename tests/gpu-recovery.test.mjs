@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {GpuUploadRetry,validateChunkUploadBytes,MAX_CHUNK_UPLOAD_BYTES} from '../src/gpu-recovery.mjs';
+import {GpuUploadRetry,validateChunkUploadBytes,MAX_CHUNK_UPLOAD_BYTES,uploadChunkBuffer} from '../src/gpu-recovery.mjs';
 test('only packed finite-sized mesh buffers are uploaded to WebGL',()=>{
  assert.equal(validateChunkUploadBytes(new Float32Array(9)),36);
  assert.throws(()=>validateChunkUploadBytes(new Float32Array(8)),/packed vertex/);
@@ -45,4 +45,34 @@ test('invalid retry budgets and timestamps hard fail',()=>{
  const r=new GpuUploadRetry();
  assert.throws(()=>r.ready('a',NaN),/Invalid/);
  assert.throws(()=>r.fail('a',Infinity),/Invalid/);
+});
+
+test('the exact production upload rejects silent OUT_OF_MEMORY and frees staged buffer',()=>{
+ let deleted=0,bound=0,uploaded=0,checks=0;
+ const gl={
+   NO_ERROR:0,OUT_OF_MEMORY:1285,ARRAY_BUFFER:34962,STATIC_DRAW:35044,
+   createBuffer:()=>({id:8}),
+   bindBuffer:()=>{bound++;},
+   bufferData:()=>{uploaded++;},
+   getError:()=>{checks++;return checks===2?1285:0;},
+   deleteBuffer:()=>{deleted++;}
+ };
+ assert.throws(()=>uploadChunkBuffer(gl,new Float32Array(9)),/WebGL buffer upload error 1285/);
+ assert.equal(bound,1);assert.equal(uploaded,1);assert.equal(deleted,1);
+});
+test('the same production upload returns validated buffer on success and cleans thrown errors',()=>{
+ let deleted=0;
+ const good={
+   NO_ERROR:0,ARRAY_BUFFER:34962,STATIC_DRAW:35044,
+   createBuffer:()=>({id:9}),bindBuffer:()=>{},bufferData:()=>{},
+   getError:()=>0,deleteBuffer:()=>{deleted++;}
+ };
+ assert.deepEqual(uploadChunkBuffer(good,new Float32Array(9)),{id:9});
+ assert.equal(deleted,0);
+ const bad={...good,bufferData:()=>{throw Error('Simulated allocation failure');}};
+ assert.throws(()=>uploadChunkBuffer(bad,new Float32Array(9)),/Simulated allocation/);
+ assert.equal(deleted,1);
+ const impossible={...good,createBuffer:()=>null};
+ assert.throws(()=>uploadChunkBuffer(impossible,new Float32Array(9)),/allocation unavailable/);
+ assert.equal(deleted,1,'Null allocation has nothing to delete');
 });
