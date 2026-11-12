@@ -192,3 +192,6 @@ Branch gate-a-compact-status-20261112-1128 from verified main 6f64005b: CSS real
 
 ## Gate A divergent-journal save protection candidate — 2026-11-12
 Branch `gate-a-journal-divergence-guard-20261112-1227` from verified `0b1d66e`: `src/persistence.mjs` rejects stale/unrelated saves when a verified newer write-ahead journal has not been reconciled, preserving interrupted-write edits. `tests/persistence.test.mjs` adds both divergent-edit and missing-primary regression cases. **Unmerged and unshipped pending full Node/Chromium CI; no IndexedDB canonical migration, physical device or premium-art approval.**
+
+## 2026-11-12 Gate A simultaneous thumb-action candidate (UNMERGED)
+Creator reported inability to mine, place or jump while holding movement on iPhone. Branch `gate-a-multitouch-actions-20261112-1358` moves touch gameplay actions to pointerdown with synthesized-click deduplication; mouse/keyboard activation remains click-based. `tests/touch-browser.mjs` exercises CDP two-finger movement plus jump, mine and place. This is a candidate pending full Node/Chromium CI, real screenshot inspection, guarded merge and Pages. Physical iPhone confirmation remains user-only; no schema/seed/renderer changes or v0.11 unlock.

@@ -79,3 +79,6 @@ The creator's physical iPhone building session reported insufficient downward lo
 
 ## Pending interrupted-write journal divergence protection (2026-11-12)
 Candidate branch `gate-a-journal-divergence-guard-20261112-1227` refuses an unrelated canonical write when an intact, checksum-verified journal contains different edits than both the current primary and proposed save. This prevents an interrupted-write recovery from being silently discarded by a later stale in-memory save. The user must explicitly recover/reconcile that journal; existing keys, backup behavior and schema-1 data are unchanged. New regression tests cover interrupted writes and missing primary. **Candidate only, not shipped or hardware validated; canonical IndexedDB migration still unfinished.**
+
+## Creator multitouch control defect — 2026-11-12 (OPEN)
+Creator reports MINE, PLACE and JUMP do not work while movement thumb is held. Gate A candidate `gate-a-multitouch-actions-20261112-1358` dispatches touch actions on pointerdown rather than relying on Safari's possibly suppressed synthetic click; mouse/keyboard clicks remain available. Added genuine CDP multitouch browser regression for all three actions while holding the left movement pad. Await CI, visual review, guarded merge, deployment and creator physical iPhone verification. Do not mark ergonomics approved.
