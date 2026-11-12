@@ -133,33 +133,42 @@ try{
  await loaded();
  await page.screenshot({path:'artifacts/mythwrought-v010-grotto-after-recovery.png'});
 
- // WebGL also reports failures as error codes WITHOUT throwing. Prove that
- // this path rolls back an edit and keeps the last healthy chunk buffer.
- await page.evaluate(()=>{
-   const gl=document.querySelector('#scene').getContext('webgl2'),
-     originalUpload=gl.bufferData.bind(gl),originalError=gl.getError.bind(gl);
-   let pendingError=false,once=true;
-   gl.bufferData=function(...args){
-     const result=originalUpload(...args);
-     if(once&&args[0]===gl.ARRAY_BUFFER){once=false;pendingError=true;}
-     return result;
-   };
-   gl.getError=function(){
-     if(pendingError){pendingError=false;return gl.OUT_OF_MEMORY;}
-     return originalError();
-   };
- });
+ // WebGL also reports failures as numeric codes WITHOUT throwing. Use
+ // the same exported production upload helper, with a controlled fault
+ // adapter wrapping ACTUAL WebGL2 buffer allocations; don't monkeypatch
+ // browser-owned native methods, which may be non-writable in Chromium.
  const beforeSilentError=await saved(),oldGpuChunks=(await data()).stats.chunks;
- const silentError=await page.evaluate(({x,y,z})=>{
-   try{window.__mythwroughtTest.placeFixture(x,y,z,3);return 'unexpected success';}
-   catch(error){return String(error.message||error);}
- },candidate);
- assert.match(silentError,/WebGL buffer upload error/);
+ const silentError=await page.evaluate(async()=>{
+   const {uploadChunkBuffer}=await import('./src/gpu-recovery.mjs');
+   const gl=document.querySelector('#scene').getContext('webgl2');
+   let pendingError=false,deleted=0,uploads=0;
+   const adapter={
+     NO_ERROR:gl.NO_ERROR,OUT_OF_MEMORY:gl.OUT_OF_MEMORY,
+     ARRAY_BUFFER:gl.ARRAY_BUFFER,STATIC_DRAW:gl.STATIC_DRAW,
+     createBuffer:()=>gl.createBuffer(),
+     bindBuffer:(...a)=>gl.bindBuffer(...a),
+     bufferData:(...a)=>{
+       gl.bufferData(...a);uploads++;pendingError=true;
+     },
+     getError:()=>{
+       if(pendingError){pendingError=false;return gl.OUT_OF_MEMORY;}
+       return gl.getError();
+     },
+     deleteBuffer:b=>{deleted++;gl.deleteBuffer(b);}
+   };
+   let error='';
+   try{uploadChunkBuffer(adapter,new Float32Array(9));}
+   catch(e){error=String(e.message||e);}
+   return {error,deleted,uploads};
+ });
+ assert.match(silentError.error,/WebGL buffer upload error 1285/);
+ assert.equal(silentError.uploads,1,'Silent GL-fault adapter never uploaded a real buffer');
+ assert.equal(silentError.deleted,1,'Failed staged GPU buffer was not deleted');
  assert.equal(await saved(),beforeSilentError,
-   'Silent GPU OUT_OF_MEMORY error modified canonical schema-1 world');
+   'Silent GPU OUT_OF_MEMORY probe modified canonical schema-1 world');
  assert.equal(await page.evaluate(({x,y,z})=>window.__mythwroughtTest.block(x,y,z),candidate),0);
  assert.deepEqual((await data()).stats.chunks,oldGpuChunks,
-   'Silent WebGL error destroyed a previously good chunk buffer');
+   'Silent WebGL error corrupted previously displayed chunk buffers');
 
  // Separate genuine new-chunk upload failure must back off, allow other chunks
  // to stream, recover automatically and keep rendering within 5x5 memory bound.
