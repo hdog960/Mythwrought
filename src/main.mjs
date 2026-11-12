@@ -11,7 +11,7 @@ import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
-import {GpuUploadRetry,validateChunkUploadBytes} from './gpu-recovery.mjs';
+import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
@@ -189,23 +189,6 @@ function start(){
     if(result.warning)message(result.warning);
     return true;
   }
-  // A WebGL error code need not throw. Allocate a NEW buffer and verify its
-  // upload before touching the last good chunk. Shared by edits and streaming.
-  function uploadChunkBuffer(vertices){
-    validateChunkUploadBytes(vertices);
-    const buffer=gl.createBuffer();
-    if(!buffer)throw Error('WebGL buffer allocation unavailable');
-    try{
-      // Clear stale errors from unrelated previous GL drawing operations.
-      for(let i=0;i<8&&gl.getError()!==gl.NO_ERROR;i++){}
-      gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-      gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
-      const error=gl.getError();
-      if(error!==gl.NO_ERROR)
-        throw Error('WebGL buffer upload error '+error);
-      return buffer;
-    }catch(error){gl.deleteBuffer(buffer);throw error;}
-  }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
   function refreshEditedMeshes(x,z){
@@ -215,7 +198,7 @@ function start(){
     const ready=[];
     try{
       for(const item of batch){
-        const buffer=uploadChunkBuffer(item.vertices);
+        const buffer=uploadChunkBuffer(gl,item.vertices);
         ready.push({...item,buffer,count:item.vertices.length/9});
       }
     }catch(err){
@@ -271,7 +254,7 @@ function start(){
       const begin=performance.now();
       try{
         const data=meshChunk(world,x,z);
-        const buffer=uploadChunkBuffer(data);
+        const buffer=uploadChunkBuffer(gl,data);
         pending.delete(k);gpuRetry.success(k);
         const old=chunks.get(k);
         chunks.set(k,{x,z,buffer,count:data.length/9});
