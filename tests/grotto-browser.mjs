@@ -123,7 +123,43 @@ try{
  assert.equal(JSON.parse(savedAfterRecovery).schema,1);
  assert.ok(!JSON.parse(savedAfterRecovery).edits.some(r=>
   r[0]===candidate.x&&r[1]===candidate.y&&r[2]===candidate.z));
+ // The screenshot should show the restored original cave, not the spawn
+ // surface where a test reload starts the player.
+ await page.evaluate(({candidate,viewpoint})=>{
+   const dev=window.__mythwroughtTest;
+   dev.teleportCave(viewpoint.x,viewpoint.y,viewpoint.z);
+   dev.aimAt(candidate.x,candidate.y,candidate.z);
+ },{candidate,viewpoint});
+ await loaded();
  await page.screenshot({path:'artifacts/mythwrought-v010-grotto-after-recovery.png'});
+
+ // WebGL also reports failures as error codes WITHOUT throwing. Prove that
+ // this path rolls back an edit and keeps the last healthy chunk buffer.
+ await page.evaluate(()=>{
+   const gl=document.querySelector('#scene').getContext('webgl2'),
+     originalUpload=gl.bufferData.bind(gl),originalError=gl.getError.bind(gl);
+   let pendingError=false,once=true;
+   gl.bufferData=function(...args){
+     const result=originalUpload(...args);
+     if(once&&args[0]===gl.ARRAY_BUFFER){once=false;pendingError=true;}
+     return result;
+   };
+   gl.getError=function(){
+     if(pendingError){pendingError=false;return gl.OUT_OF_MEMORY;}
+     return originalError();
+   };
+ });
+ const beforeSilentError=await saved(),oldGpuChunks=(await data()).stats.chunks;
+ const silentError=await page.evaluate(({x,y,z})=>{
+   try{window.__mythwroughtTest.placeFixture(x,y,z,3);return 'unexpected success';}
+   catch(error){return String(error.message||error);}
+ },candidate);
+ assert.match(silentError,/WebGL buffer upload error/);
+ assert.equal(await saved(),beforeSilentError,
+   'Silent GPU OUT_OF_MEMORY error modified canonical schema-1 world');
+ assert.equal(await page.evaluate(({x,y,z})=>window.__mythwroughtTest.block(x,y,z),candidate),0);
+ assert.deepEqual((await data()).stats.chunks,oldGpuChunks,
+   'Silent WebGL error destroyed a previously good chunk buffer');
 
  // Separate genuine new-chunk upload failure must back off, allow other chunks
  // to stream, recover automatically and keep rendering within 5x5 memory bound.
