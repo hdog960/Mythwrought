@@ -31,6 +31,11 @@ function pushQuad(out,x,y,z,dx,dz,width,height,color,mat){
     out.push(...points[i],...color,uv[i][0],uv[i][1],mat);
   }
 }
+function pushPetalTriangle(out,a,b,c,color,material){
+  const points=[a,b,c],uv=[[0,0],[.5,1],[1,0]];
+  for(let i=0;i<3;i++)
+    out.push(...points[i],...color,...uv[i],material);
+}
 function drawGrass(out,x,y,z,h,kind){
   const color=kind?GRASS_B:GRASS_A;
   // Crossed, low geometric tufts; no animated alpha textures or new draw call.
@@ -39,15 +44,24 @@ function drawGrass(out,x,y,z,h,kind){
 }
 function drawFlower(out,x,y,z,color,reach){
   const height=.48+reach*.20;
-  // Two crossed stems and two crossed, deliberately chunky flower heads.
+  // Fine crossed stems and four individually sculpted tapered petals.
+  // The old flat, giant rectangular heads read as purple squares on iPhone.
   pushQuad(out,x,y,z,1,0,.060,height*.76,STEM,7);
   pushQuad(out,x,y,z,0,1,.060,height*.76,STEM,7);
-  const headY=y+height*.62;
-  pushQuad(out,x,headY,z,1,0,.29,.20,color,8);
-  pushQuad(out,x,headY,z,0,1,.29,.20,color,8);
-  const coreY=headY+.055;
-  pushQuad(out,x,coreY,z,1,0,.078,.090,GOLD,9);
-  pushQuad(out,x,coreY,z,0,1,.078,.090,GOLD,9);
+  const headY=y+height*.62,outer=.135+reach*.035;
+  for(const side of [-1,1]){
+    pushPetalTriangle(out,
+      [x+side*.015,headY-.025,z],
+      [x+side*outer,headY+.12,z],
+      [x+side*.04,headY+.055,z],color,8);
+    pushPetalTriangle(out,
+      [x,headY-.025,z+side*.015],
+      [x,headY+.12,z+side*outer],
+      [x,headY+.055,z+side*.04],color,8);
+  }
+  const goldY=headY+.045;
+  pushPetalTriangle(out,[x-.04,goldY,z],[x,goldY+.095,z],[x+.04,goldY,z],GOLD,9);
+  pushPetalTriangle(out,[x,goldY,z-.04],[x,goldY+.095,z],[x,goldY,z+.04],GOLD,9);
 }
 // Deterministic global coordinate placement across positive/negative seams.
 // The optional biome detail sits in the EXISTING chunk buffer, never a new
