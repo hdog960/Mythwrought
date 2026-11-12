@@ -26,6 +26,21 @@ test('storybook detail fades before distant fog and uses only one original opaqu
  for(const prohibited of [/sampler2D/,/texture2D/,/discard;/,/gl_FragDepth/,/alpha.*blend/i])
    assert.doesNotMatch(FS,prohibited);
 });
+test('native rocky cliffs show natural striations, not artificial masonry block lines',()=>{
+ const stoneStart=FS.indexOf('}else if(vMat==3)');
+ const timberStart=FS.indexOf('}else if(vMat==4)');
+ assert.ok(stoneStart>0&&timberStart>stoneStart);
+ const stone=FS.slice(stoneStart,timberStart);
+ assert.match(stone,/float strata=/);
+ assert.match(stone,/float crease=/);
+ assert.match(stone,/float mica=/);
+ assert.doesNotMatch(stone,/blockLine|mortar|p\.x\+=\.5\*mod/);
+ // Painterly stone remains inside the quality branch. Economy still returns first.
+ assert.ok(FS.indexOf('return;')<stoneStart);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
+
 test('Economy mode returns physical voxel base colors without costly material-cell hashes',()=>{
  const beginning=FS.indexOf('if(uArtQuality<.5)');
  const returnAt=FS.indexOf('return;',beginning);
