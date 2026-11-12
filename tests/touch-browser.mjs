@@ -59,7 +59,12 @@ try{
     t.placeFixture(17,18,0,3);
     t.aimAt(16,18,0);
   });
-  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='16,18,0',{timeout:8000});
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='16,18,0',null,{timeout:8000}).catch(async error=>{
+    const state=await page.evaluate(()=>({scene:{...document.querySelector('#scene').dataset},
+      hero:window.__mythwroughtTest.teleport(14.5,.5),
+      block:window.__mythwroughtTest.block(16,18,0)}));
+    throw new Error('Mine fixture target unavailable: '+JSON.stringify(state),{cause:error});
+  });
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[heldNeutralFinger,touch(8,mineCenter.x,mineCenter.y)]});
   await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===0,null,{timeout:5000});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[heldNeutralFinger]});
