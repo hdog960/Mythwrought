@@ -195,3 +195,6 @@ Branch `gate-a-journal-divergence-guard-20261112-1227` from verified `0b1d66e`: 
 
 ## 2026-11-12 Gate A simultaneous thumb-action candidate (UNMERGED)
 Creator reported inability to mine, place or jump while holding movement on iPhone. Branch `gate-a-multitouch-actions-20261112-1358` moves touch gameplay actions to pointerdown with synthesized-click deduplication; mouse/keyboard activation remains click-based. `tests/touch-browser.mjs` exercises CDP two-finger movement plus jump, mine and place. This is a candidate pending full Node/Chromium CI, real screenshot inspection, guarded merge and Pages. Physical iPhone confirmation remains user-only; no schema/seed/renderer changes or v0.11 unlock.
+
+## 2026-11-12 15:00 Central — multitouch regression correction, candidate only
+PR #47 head `9e857eb3a5b24104f8dc23a67f245025ada24042` corrects the browser placement fixture after the previous genuine Chromium run 43300905907 failed at line 67 waiting for a target block. The regression now restores a visible adjacent target after mining and asserts placement into the exposed cell with the movement thumb still held. **New full CI and screenshot inspection outstanding; not merged or shipped; no physical iPhone confirmation.**
