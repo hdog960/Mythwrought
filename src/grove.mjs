@@ -146,7 +146,8 @@ export function storybookGroveVertices(world,cx,cz,{
       // No sprouts on a mined floor, filled pocket, artificial structure or
       // freshly placed grass above a different original voxel.
       if(baseAt(x,h,z,world.seed)!==grass||world.get(x,h,z)!==grass||
-        world.get(x,h+1,z)!==air||world.get(x,h+2,z)!==air||\n        world.get(x,h+3,z)!==air)continue;
+        world.get(x,h+1,z)!==air||world.get(x,h+2,z)!==air||
+        world.get(x,h+3,z)!==air)continue;
       const strength=patchStrength(x,z,world.seed);
       if(strength<.19||hash(x,z,world.seed,97)>=.43*strength)continue;
       const v=hash(x,z,world.seed,103),
