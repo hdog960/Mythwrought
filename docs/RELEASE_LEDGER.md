@@ -189,3 +189,6 @@ Never label planned roadmap releases complete without independently tested imple
 
 ## Gate A compact landscape status candidate — 2026-11-12
 Branch gate-a-compact-status-20261112-1128 from verified main 6f64005b: CSS reallocates footer space to the real live status at 568x320 and similarly compact landscapes; the decorative prototype tag hides only in the compact breakpoint. Browser layout test asserts status geometry, ellipsis and full-width allocation without changing world/grips. Candidate requires CI and authentic screenshot review before merge. This is a usability refinement, NOT an art or physical iPhone approval, persistence migration or v0.11 unlock.
+
+## Gate A divergent-journal save protection candidate — 2026-11-12
+Branch `gate-a-journal-divergence-guard-20261112-1227` from verified `0b1d66e`: `src/persistence.mjs` rejects stale/unrelated saves when a verified newer write-ahead journal has not been reconciled, preserving interrupted-write edits. `tests/persistence.test.mjs` adds both divergent-edit and missing-primary regression cases. **Unmerged and unshipped pending full Node/Chromium CI; no IndexedDB canonical migration, physical device or premium-art approval.**
