@@ -44,6 +44,13 @@ Chunk uploads now validate staging size and WebGL error codes. On a failed uploa
 
 Manual iPhone Safari and installed Home Screen acceptance: inspect natural grotto details at close, far and narrow landscape sizes; verify no shimmery or clipped prism faces, no false collision, no hidden mining targets, no thumbnail-sized cave exits; run 10+ minutes of real chunk travel and edited cave reloads, watch responsiveness, thermals and GPU restarts. Keep the user-owned premium art gate, canonical IndexedDB save migration, offline PWA verification and v0.11 promotion OPEN.
 
+## Recoverable WebGL graphics and natural rune-painted caverns — Chromium, NOT device acceptance
+The renderer now rebuilds its original shader programs, camera uniforms, outline buffer and 25 nearby chunk buffers if the actual WebGL2 context is lost and restored. It pauses frames, cancels held input, shows a status, and resumes the same live world without reloading, overwriting valid schema-1 saves or losing the existing two-thumb layout. The code never assumes recovery is guaranteed: failed shader initialization remains a safe reload with no data mutation. This is more resilient than the previous unconditional “reload to rebuild” response.
+
+An original **golden/turquoise tree-star cave mural** may be seen on the exposed faces of genuine cavern rock; it is seed-stable, purely visual, bounded and removed by ordinary edits. It is not a physical magical ability, quest trigger, added block ID, real dynamic illumination, combat/pet feature or premium art acceptance.
+
+New full Chromium tests must use **genuine `WEBGL_lose_context`** to simulate two loss/restore cycles, rebuild programs/chunks, preserve an existing saved edit byte-for-byte, keep the cave view visible, recover the Economy setting and keep separate left/right thumb grips uncovered. These are browser-simulated GPU events, not real iPhone low-memory context loss. On an actual landscape iPhone Safari and Home Screen: verify loss/recovery after app switching, orientation transitions, low-memory reload and 10+ minutes of chunk movement; watch for a blank sky or stale joystick, inspect glyph aliasing and visibility, then record performance/thermal and long-term save results. No actual iPhone test or owner's premium art approval has occurred; v0.10 Gate A remains OPEN.
+
 ## Player-owned real device verification checklist
 Test **Safari** and separately test **Add to Home Screen** at https://hdog960.github.io/Mythwrought/:
 1. Open landscape, check central viewport is completely unobstructed, notch and safe areas do not clip grips or footer. Use both thumbs at once for movement, look, jump, MINE/PLACE; verify horizontal controls are intuitive and the help menu scrolls.
