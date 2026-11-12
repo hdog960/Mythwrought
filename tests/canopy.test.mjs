@@ -61,3 +61,24 @@ test('seeded woodland includes distinct original evergreen and broadleaf silhoue
   assert.equal(JSON.stringify(world.save()),before);
   assert.equal(woodlandTreeStyle(10,-4,179),woodlandTreeStyle(10,-4,179));
 });
+
+test('sculpted roots and sunlit facets stay inside editable chunk budget and preserve saves',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  let broad=0,ever=0;
+  for(let cx=-7;cx<=7;cx++)for(let cz=-7;cz<=7;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    assert.equal(mesh.length%CANOPY_LIMITS.stride,0);
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+    const style=woodlandTreeStyle(Math.floor(mesh[0]),Math.floor(mesh[2]),world.seed);
+    if(style==='broadleaf')broad++;else ever++;
+    // Every authored foliage/root vertex remains finite and local.
+    for(let i=0;i<mesh.length;i+=9){
+      assert.ok(Number.isFinite(mesh[i])&&Number.isFinite(mesh[i+1])&&Number.isFinite(mesh[i+2]));
+      assert.ok(mesh[i]>=cx*CHUNK_SIZE&&mesh[i]<(cx+1)*CHUNK_SIZE);
+      assert.ok(mesh[i+2]>=cz*CHUNK_SIZE&&mesh[i+2]<(cz+1)*CHUNK_SIZE);
+    }
+  }
+  assert.ok(broad>0&&ever>0,'both rooted silhouettes must exist');
+  assert.equal(JSON.stringify(world.save()),saved,'render-only woodland may not mutate saves');
+});
