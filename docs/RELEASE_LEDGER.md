@@ -202,3 +202,7 @@ PR #47 head `9e857eb3a5b24104f8dc23a67f245025ada24042` corrects the browser plac
 
 ## 2026-11-12 15:20 Central — multitouch regression fixture revision (UNMERGED)
 PR #47 candidate `d6483df8e` adopts the already-tested construction seam from `tests/blocks-browser.mjs` and requires `targetPlace=16,18,0` before the second-thumb Place action. Previous run 43300905907 failed on target acquisition. No registered exact-head CI or genuine screenshot inspection yet; main remains `e71fa5afa`, deployed and verified. Not shipped or physically approved; v0.10 Gate A remains OPEN.
+
+
+## 2026-11-12 15:37 Central — held-thumb regression stabilization (UNMERGED)
+Verified main `e71fa5afa`; PR #47 test now uses the established seam build fixture, checks the exact legal placement cell, and holds the movement pointer at neutral during the placement tap after exercising moving-thumb jump and mine. Latest candidate commit `8db78893d`; **no exact-head GitHub CI run has appeared for recent bot-authored PR commits**, so neither browser success nor deploy is claimed. Prior Chromium run 43300905907 failed on target acquisition. Keep PR #47 unmerged until fresh Node/Chromium CI, genuine screenshot review, guarded merge, and Pages verification. Other open PRs #43 (woodland screenshot review) and #45 (superseded backup); avoid collisions. Next: (1) obtain exact-head CI and repair actual failures; (2) inspect #43 visual artifacts and safely integrate woodland art. Physical iPhone approval and v0.11 remain locked.
