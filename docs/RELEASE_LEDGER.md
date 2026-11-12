@@ -192,3 +192,7 @@ Branch gate-a-compact-status-20261112-1128 from verified main 6f64005b: CSS real
 
 ## Gate A divergent-journal save protection candidate — 2026-11-12
 Branch `gate-a-journal-divergence-guard-20261112-1227` from verified `0b1d66e`: `src/persistence.mjs` rejects stale/unrelated saves when a verified newer write-ahead journal has not been reconciled, preserving interrupted-write edits. `tests/persistence.test.mjs` adds both divergent-edit and missing-primary regression cases. **Unmerged and unshipped pending full Node/Chromium CI; no IndexedDB canonical migration, physical device or premium-art approval.**
+
+
+## 2026-11-12 13:33 Central — vault atomic backup rebased candidate
+PR #44 journal protection merged as `e18d163283`; its merged-main CI and Pages still need verification. PR #45's original candidate conflicts on shared docs; this branch ports its `src/vault.mjs` and `tests/vault.test.mjs` atomic same-transaction cap logic without overwriting PR #44. Candidate must pass fresh Node/Chromium CI before merge. Next: authentic 568×320 and 932×430 visual review of PR #43; then safely integrate this vault candidate. Gate A open; no canonical IndexedDB migration, harvesting, pets, mounts, v0.11 or device/art approval.

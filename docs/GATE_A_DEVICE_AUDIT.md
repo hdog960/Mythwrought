@@ -79,3 +79,7 @@ The creator's physical iPhone building session reported insufficient downward lo
 
 ## Pending interrupted-write journal divergence protection (2026-11-12)
 Candidate branch `gate-a-journal-divergence-guard-20261112-1227` refuses an unrelated canonical write when an intact, checksum-verified journal contains different edits than both the current primary and proposed save. This prevents an interrupted-write recovery from being silently discarded by a later stale in-memory save. The user must explicitly recover/reconcile that journal; existing keys, backup behavior and schema-1 data are unchanged. New regression tests cover interrupted writes and missing primary. **Candidate only, not shipped or hardware validated; canonical IndexedDB migration still unfinished.**
+
+
+## 2026-11-12 13:33 Central — vault atomic backup rebased candidate
+PR #44 journal protection merged as `e18d163283`; its merged-main CI and Pages still need verification. PR #45's original candidate conflicts on shared docs; this branch ports its `src/vault.mjs` and `tests/vault.test.mjs` atomic same-transaction cap logic without overwriting PR #44. Candidate must pass fresh Node/Chromium CI before merge. Next: authentic 568×320 and 932×430 visual review of PR #43; then safely integrate this vault candidate. Gate A open; no canonical IndexedDB migration, harvesting, pets, mounts, v0.11 or device/art approval.
