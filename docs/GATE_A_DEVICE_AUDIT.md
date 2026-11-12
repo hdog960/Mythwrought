@@ -85,3 +85,7 @@ Creator reports MINE, PLACE and JUMP do not work while movement thumb is held. G
 
 ## 2026-11-12 15:00 Central — multitouch CI repair remains unverified
 PR #47 browser test failed at line 67 in Actions run 43300905907; the test's second fixture became untargetable after the hero moved. Candidate `9e857eb3` resets the visible fixture and verifies placement against its adjacent empty cell. This does not establish real-iPhone behavior. Require complete green Node/Chromium CI, actual landscape screenshot review, guarded merge, Pages verification, and creator's own Safari/Home Screen two-thumb check before closing the control issue.
+
+
+## 2026-11-12 15:20 Central — PR #47 retargeted construction test
+Candidate `d6483df8e` changes the real-CDP multitouch test to the established seam target (17,18,0) with adjacent placement cell (16,18,0), asserting the preview before pressing Place. This is not proof of passing CI or real iPhone controls; PR remains unmerged pending full exact-head Node/Chromium and screenshot inspection, guarded merge, Pages verification, and owner device check.
