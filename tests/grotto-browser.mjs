@@ -14,6 +14,11 @@ page.on('response',r=>{if(r.status()>=400)missing.push(r.status()+' '+r.url());}
 const saved=()=>page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
 const loaded=()=>page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25&&
   Number(document.querySelector('#scene')?.dataset.pendingChunks)===0,null,{timeout:40000});
+const settledAt=point=>page.waitForFunction(({x,z})=>{
+ const canvas=document.querySelector('#scene');
+ return canvas?.dataset.chunkCenter===Math.floor((x+.5)/16)+','+Math.floor((z+.5)/16)&&
+   Number(canvas.dataset.loadedChunks)===25&&Number(canvas.dataset.pendingChunks)===0;
+},point,{timeout:45000});
 const data=()=>page.evaluate(()=>{
  const c=document.querySelector('#scene'),world=c.getBoundingClientRect(),
    left=document.querySelector('.left').getBoundingClientRect(),
@@ -68,7 +73,7 @@ try{
    dev.teleportCave(viewpoint.x,viewpoint.y,viewpoint.z);
    dev.aimAt(candidate.x,candidate.y,candidate.z);
  },{candidate,viewpoint});
- await loaded();
+ await settledAt(viewpoint);
  const underground=await data();
  assert.ok(underground.gaps.every(n=>n>=-2),'Underground art obstructs landscape grips');
  assert.ok(underground.center>=932*.45);
@@ -130,7 +135,7 @@ try{
    dev.teleportCave(viewpoint.x,viewpoint.y,viewpoint.z);
    dev.aimAt(candidate.x,candidate.y,candidate.z);
  },{candidate,viewpoint});
- await loaded();
+ await settledAt(viewpoint);
  await page.screenshot({path:'artifacts/mythwrought-v010-grotto-after-recovery.png'});
 
  // WebGL also reports failures as numeric codes WITHOUT throwing. Use
