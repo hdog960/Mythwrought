@@ -536,22 +536,20 @@ function start(){
   // but preserve click for mouse, keyboard and accessibility activation.
   function bindGameplayAction(id,action){
     const button=document.getElementById(id);
-    let consumedTouch=false;
+    let lastTouchAt=-Infinity;
     button.addEventListener('pointerdown',e=>{
-      if(e.pointerType!=='touch'||!e.isPrimary&&e.pointerId===undefined)return;
+      if(e.pointerType!=='touch')return;
       e.preventDefault();
-      consumedTouch=true;
+      lastTouchAt=performance.now();
       action();
     });
     button.addEventListener('click',e=>{
-      if(consumedTouch){
-        consumedTouch=false;
+      if(e.detail!==0&&performance.now()-lastTouchAt<750){
         e.preventDefault();
         return;
       }
       action();
     });
-    button.addEventListener('pointercancel',()=>{consumedTouch=false;});
   }
   bindGameplayAction('jump',jump);
   bindGameplayAction('dig',()=>edit('mine'));
