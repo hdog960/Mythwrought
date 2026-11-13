@@ -24,7 +24,18 @@ export function waystoneVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
  const gold=[.95,.76,.34],glow=[.39,.83,.83];
  triangle(out,[px-.24,y+1.64,pz-.258],[px+.24,y+1.64,pz-.258],[px,y+1.15,pz-.30],gold,6);
  triangle(out,[px-.21,y+1.64,pz+.33],[px,y+1.15,pz+.36],[px+.21,y+1.64,pz+.33],glow,5);
- // Contrasting inset side facets make the landmark readable when approached east-west.\n // These hand-shaped shards do not create interactive blocks or collision.\n const amber=[.89,.64,.27],jade=[.25,.70,.61];\n triangle(out,[px+.327,y+1.52,pz-.13],[px+.318,y+1.52,pz+.18],[px+.35,y+.93,pz+.01],amber,6);\n triangle(out,[px-.323,y+1.52,pz+.16],[px-.33,y+1.52,pz-.12],[px-.36,y+.93,pz+.01],jade,5);\n // Raised irregular crown fins and dark contrasting ledges give the silhouette\n // a recognizable profile against either bright sky or dense canopy.\n triangle(out,[px-.28,y+2.58,pz-.20],[px-.13,y+3.12,pz-.10],[px+.01,y+2.70,pz-.14],[.73,.76,.70]);\n triangle(out,[px+.03,y+2.70,pz+.20],[px+.22,y+3.02,pz+.11],[px+.26,y+2.58,pz+.23],[.33,.44,.50]);\n triangle(out,[px-.45,y+.62,pz-.32],[px+.42,y+.57,pz-.34],[px+.28,y+.49,pz-.39],[.25,.35,.39]);\n triangle(out,[px-.42,y+.61,pz+.39],[px+.42,y+.55,pz+.39],[px+.30,y+.46,pz+.43],[.29,.40,.44]);\n // Asymmetric moss footing, not a repeated tree or block-stack stamp.
+ // Contrasting inset side facets make the landmark readable when approached east-west.
+ // These hand-shaped shards do not create interactive blocks or collision.
+ const amber=[.89,.64,.27],jade=[.25,.70,.61];
+ triangle(out,[px+.327,y+1.52,pz-.13],[px+.318,y+1.52,pz+.18],[px+.35,y+.93,pz+.01],amber,6);
+ triangle(out,[px-.323,y+1.52,pz+.16],[px-.33,y+1.52,pz-.12],[px-.36,y+.93,pz+.01],jade,5);
+ // Raised irregular crown fins and dark contrasting ledges give the silhouette
+ // a recognizable profile against either bright sky or dense canopy.
+ triangle(out,[px-.28,y+2.58,pz-.20],[px-.13,y+3.12,pz-.10],[px+.01,y+2.70,pz-.14],[.73,.76,.70]);
+ triangle(out,[px+.03,y+2.70,pz+.20],[px+.22,y+3.02,pz+.11],[px+.26,y+2.58,pz+.23],[.33,.44,.50]);
+ triangle(out,[px-.45,y+.62,pz-.32],[px+.42,y+.57,pz-.34],[px+.28,y+.49,pz-.39],[.25,.35,.39]);
+ triangle(out,[px-.42,y+.61,pz+.39],[px+.42,y+.55,pz+.39],[px+.30,y+.46,pz+.43],[.29,.40,.44]);
+ // Asymmetric moss footing, not a repeated tree or block-stack stamp.
  triangle(out,[px-.65,y+.03,pz+.28],[px-.16,y+.06,pz+.57],[px-.41,y+.35,pz+.33],[.27,.54,.36],1);
  triangle(out,[px+.19,y+.04,pz-.54],[px+.61,y+.02,pz-.17],[px+.30,y+.28,pz-.24],[.38,.62,.42],1);
  return new Float32Array(out);
