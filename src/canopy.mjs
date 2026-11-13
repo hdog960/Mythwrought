@@ -85,7 +85,7 @@ function evergreen(out,x,y,z,variation,beacon=false){
     const top=base+(beacon?1.8:1.22);
     for(let i=0;i<8;i++){
       const a=(i+variation)*Math.PI/4,b=(i+1+variation)*Math.PI/4;
-      const col=needles[(i+tier)%needles.length];
+      const col=beacon&&tier===3?[[.91,.79,.42],[.98,.87,.55]][i%2]:needles[(i+tier)%needles.length];
       tri(out,[x+Math.cos(a)*rad,base,z+Math.sin(a)*rad],
         [x+Math.cos(b)*rad,base,z+Math.sin(b)*rad],
         [x,top,z],col,7);
