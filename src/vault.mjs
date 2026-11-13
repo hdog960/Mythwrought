@@ -19,7 +19,13 @@ function openVault(factory=globalThis.indexedDB){
     req.onupgradeneeded=()=>{
       // A previously blocked open may complete after its caller has given up.
       // Never mutate the schema for an abandoned request.
-      if(settled)return;
+      if(settled){
+        // A blocked open can later enter versionchange. Abort its upgrade
+        // transaction: merely skipping createObjectStore still commits an
+        // empty database and mutates persistent browser state.
+        try{req.transaction?.abort();}catch{}
+        return;
+      }
       const db=req.result;
       if(!db.objectStoreNames.contains(VAULT_STORE))db.createObjectStore(VAULT_STORE,{keyPath:'id'});
     };
