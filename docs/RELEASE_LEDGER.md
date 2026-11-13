@@ -219,3 +219,6 @@ Verified main `d2c16ed1ad0f362ec39d53ff3f010b76b99d63ce`: merged-main Mythwrough
 
 ## 2026-11-12 19:00 Central — candidate woodland floor composition (UNMERGED)
 PR #51 based on verified ceb7fafdac adds original fern, leaf litter and mossy stone triangles around existing render-only trees, with mesh/material/save regression. No new draw calls, blocks, collision, harvesting or schema changes. Exact-head CI, real landscape screenshots, guarded merge and Pages remain pending; no claim of shipped artwork. Gate A open.
+
+## 2026-11-12 20:56 Central — PR #51 per-tree budget guard (UNMERGED)
+Visual branch `gate-a-woodland-floor-composition-20261112-1900` adds explicit per-tree 450-vertex enforcement in `src/canopy.mjs` and isolated broadleaf regression in `tests/canopy.test.mjs`; branch head after handoff `baa0ce528094b3e1a5a4332c7c9274b92dac6e0a` (will advance with ledger/audit commits). This is candidate-only, NOT verified or shipped. Exact-head Node/Chromium, authentic screenshots, fresh-main reconciliation, guarded merge and Pages are pending. No save-schema or user-only approval changes.
