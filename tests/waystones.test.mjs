@@ -33,3 +33,20 @@ test('waystones disappear when their natural anchor is mined or occupied, withou
  assert.equal(JSON.stringify(new VoxelWorld(179).save()),JSON.stringify(VoxelWorld.restore(new VoxelWorld(179).save()).save()));
  assert.ok(meshChunk(w,site.cx,site.cz).length>0);
 });
+
+test('landmark crown and all approach faces remain legible within the per-chunk mesh budget',()=>{
+ const world=new VoxelWorld(179);let mesh;
+ for(let cx=-12;cx<=12&&!mesh;cx++)for(let cz=-12;cz<=12&&!mesh;cz++){
+  const candidate=waystoneVertices(world,cx,cz,opts);
+  if(candidate.length)mesh=candidate;
+ }
+ assert.ok(mesh,'fixture seed must expose a landmark');
+ assert.equal(mesh.length,WAYSTONE_LIMITS.maxVerticesPerChunk*WAYSTONE_LIMITS.stride);
+ const y=[];const material=new Set();const hues=new Set();
+ for(let i=0;i<mesh.length;i+=9){y.push(mesh[i+1]);material.add(mesh[i+8]);hues.add(mesh.slice(i+3,i+6).join(','));}
+ assert.ok(Math.max(...y)-Math.min(...y)>3,'crown must break above the main stone silhouette');
+ assert.ok(material.has(5)&&material.has(6),'both contrasting carved materials must be present');
+ assert.ok(hues.size>=8,'stone, crown, glyphs and moss need differentiated palettes');
+ assert.equal(WAYSTONE_LIMITS.newDrawCalls,0);
+ assert.equal(WAYSTONE_LIMITS.newTextures,0);
+});
