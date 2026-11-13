@@ -102,6 +102,26 @@ try{
   assert.ok(Math.hypot(stopped.x-released.x,stopped.z-released.z)<.035,'Movement continued after both thumbs lifted');
   assert.ok(Math.abs(deltaYaw(stopped.yaw,released.yaw))<.005,'Camera drifted after release');
   assert.equal(await page.evaluate(()=>window.scrollY),0,'Multi-touch gesture scrolled the game page');
+  // Safari can cancel a mouse pointer after down without sending a normal up.
+  // A late pointerup must not turn that cancelled gesture into a world edit.
+  await page.locator('#closeHelp').click();
+  await page.evaluate(()=>{
+    const scene=document.getElementById('scene');
+    window.__cancelledMousePointer=91;
+    scene.dispatchEvent(new PointerEvent('pointerdown',{
+      pointerId:91,pointerType:'mouse',button:0,bubbles:true,cancelable:true
+    }));
+    scene.dispatchEvent(new PointerEvent('pointercancel',{
+      pointerId:91,pointerType:'mouse',button:0,bubbles:true,cancelable:true
+    }));
+  });
+  const beforeCancelledEdit=await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0));
+  await page.evaluate(()=>document.getElementById('scene').dispatchEvent(new PointerEvent('pointerup',{
+    pointerId:91,pointerType:'mouse',button:0,bubbles:true,cancelable:true
+  })));
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),beforeCancelledEdit,
+    'Cancelled mouse gesture must not edit the world');
+  await page.locator('#menu').click();
   // Continuous stick mode must rotate only while held, using a radial dead zone.
   await page.locator('#menu').click();
   // Queued synthetic iOS events must not activate action buttons behind settings.
