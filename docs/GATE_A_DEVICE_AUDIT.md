@@ -109,3 +109,7 @@ PR #51 adds purely visual forest-floor fern, leaf and mossy stone geometry to se
 
 ## 2026-11-12 20:56 Central — visual GPU-budget candidate, not device approved
 PR #51 now guards EACH authored tree against exceeding 450 vertices and adds a seeded isolated broadleaf regression. No current-head Chromium screenshots or physical-iPhone evidence were inspected; no thermal, ergonomics, save force-quit or premium-art acceptance is claimed. Branch unmerged and v0.10 Gate A remains OPEN; canonical IndexedDB migration and v0.11 remain locked.
+
+
+### 2026-11-12 22:04 Central — visual-owner woodland candidate
+PR #51 adjusts seeded forest-floor fern, leaf-litter and moss-stone grouping without extra triangles, blocks, draw calls or save writes; adds deterministic/finite/budget regression. Main checked `92a3f234324e5953ff242b3755f518f6daf76090`; source/test head `80abe03bc2027d3d259bbb3a857a5e13ac01ff14` before documentation updates. Exact-head Node/Chromium and actual phone-size screenshot inspection remain pending; PR conflicts on stale docs and is NOT shipped. Creator-only physical iPhone ergonomics, thermal, force-quit and premium art approval remain open; no canonical IndexedDB migration or v0.11.
