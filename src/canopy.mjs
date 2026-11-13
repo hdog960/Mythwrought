@@ -141,7 +141,15 @@ export function woodlandSentinelChunk(cx,cz,seed){
     throw Error('Invalid woodland sentinel coordinates');
   return hash(cx,cz,seed,211)<.075;
 }
-// Broad connected woodland districts create readable groves and open vistas.\n// Districts are 4x4 chunks and change only canopy placement, never terrain.\nexport function woodlandDistrict(cx,cz,seed){\n  if(!Number.isInteger(cx)||!Number.isInteger(cz)||!Number.isInteger(seed))\n    throw Error('Invalid woodland district');\n  const v=hash(Math.floor(cx/4),Math.floor(cz/4),seed,317);\n  return v<.28?'open':v<.68?'grove':'mixed';\n}\nexport function woodlandTreeStyle(x,z,seed){
+// Broad connected woodland districts create readable groves and open vistas.
+// Districts are 4x4 chunks and change only canopy placement, never terrain.
+export function woodlandDistrict(cx,cz,seed){
+  if(!Number.isInteger(cx)||!Number.isInteger(cz)||!Number.isInteger(seed))
+    throw Error('Invalid woodland district');
+  const v=hash(Math.floor(cx/4),Math.floor(cz/4),seed,317);
+  return v<.28?'open':v<.68?'grove':'mixed';
+}
+export function woodlandTreeStyle(x,z,seed){
   return hash(x,z,seed,67)<.43?'evergreen':'broadleaf';
 }
 function tree(out,x,y,z,variation){
@@ -166,12 +174,16 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
      typeof heightAt!=='function'||typeof baseAt!=='function'||
      !Number.isInteger(chunkSize)||chunkSize<12||chunkSize>64)
     throw Error('Invalid woodland canopy inputs');
-  const out=[];let count=0;\n  const district=woodlandDistrict(cx,cz,world.seed);
+  const out=[];let count=0;
+  const district=woodlandDistrict(cx,cz,world.seed);
   // Candidate centers stay within each chunk: no canopy crosses a chunk seam.
   for(let i=0;i<4&&count<MAX_TREES;i++){
     const x=cx*chunkSize+3+Math.floor(hash(cx+i,cz,world.seed,19)*(chunkSize-6));
     const z=cz*chunkSize+3+Math.floor(hash(cx,cz+i,world.seed,31)*(chunkSize-6));
-    // Keep a contiguous four-chunk-wide vista or denser grove, rather than\n    // scattering decorative differences independently in every chunk.\n    const chance=district==='open'?.16:district==='grove'?.76:.45;\n    if(hash(cx+i,cz-i,world.seed,43)>chance)continue;
+    // Keep a contiguous four-chunk-wide vista or denser grove, rather than
+    // scattering decorative differences independently in every chunk.
+    const chance=district==='open'?.16:district==='grove'?.76:.45;
+    if(hash(cx+i,cz-i,world.seed,43)>chance)continue;
     const h=heightAt(x,z,world.seed);
     if(baseAt(x,h,z,world.seed)!==grass||world.get(x,h,z)!==grass)continue;
     const sentinel=count===0&&woodlandSentinelChunk(cx,cz,world.seed);
