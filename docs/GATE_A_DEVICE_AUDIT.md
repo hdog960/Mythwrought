@@ -113,3 +113,7 @@ A proposed Gate A vault-only fix rejects deletion of an already-missing snapshot
 
 ## Optional vault blocked-open lifecycle — candidate, NOT device verified
 A blocked IndexedDB open can later succeed after the caller already rejected; the candidate closes that late connection and skips abandoned schema upgrade. Simulated Node regression added, but full CI and genuine mobile screenshots remain pending. This is optional backup robustness only, not canonical transactional migration or physical iPhone acceptance.
+
+
+### 2026-11-13 — woodland clearing candidate (browser and hardware evidence pending)
+The :00 visual-owner candidate renders connected 2×2-chunk tree-free clearings inside selected 4×4 chunk regions, preserving underlying editable terrain and schema-1 saves. This is an unmerged visual experiment; check 568×320 and 932×430 genuine Chromium captures, scenery continuity, seed reproducibility and mesh budget before guarded integration. Physical Safari thermals/ergonomics and creator art approval remain open.
