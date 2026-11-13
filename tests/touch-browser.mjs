@@ -219,6 +219,20 @@ try{
     const before=Number(scene.dataset.playerFeet);
     Object.defineProperty(document,'hidden',{configurable:true,value:true});
     try{
+      // A delayed input burst during backgrounding must not mutate a voxel,
+      // even if Safari delivers both touch and accessibility click events.
+      const beforeBlock=window.__mythwroughtTest.block(16,18,0);
+      for(const id of ['dig','place']){
+        const action=document.getElementById(id);
+        action.dispatchEvent(new PointerEvent('pointerdown',{
+          bubbles:true,cancelable:true,pointerType:'touch',pointerId:81
+        }));
+        action.dispatchEvent(new MouseEvent('click',{
+          bubbles:true,cancelable:true,detail:0
+        }));
+      }
+      assert.equal(window.__mythwroughtTest.block(16,18,0),beforeBlock,
+        'Hidden-page delayed mine/place mutated a saved voxel');
       scene.dispatchEvent(new KeyboardEvent('keydown',{
         code:'Space',bubbles:true,cancelable:true
       }));
