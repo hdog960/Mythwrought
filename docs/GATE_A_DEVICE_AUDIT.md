@@ -110,3 +110,6 @@ Verified main `ceb7fafdaca5a1566ee69a9ebc5df9165a4523f2` has green Node/Chromium
 
 ## 2026-11-12 optional backup deletion reliability candidate — UNVERIFIED
 A proposed Gate A vault-only fix rejects deletion of an already-missing snapshot rather than presenting false success after another tab removes it. The existence check and deletion share one IndexedDB readwrite transaction; malformed user-owned snapshots can still be explicitly deleted. This does not change canonical schema-1 saves, journals, backup payloads or migrate IndexedDB. Node/Chromium and actual device checks remain pending. Real iPhone acceptance and art approval remain open.
+
+## Optional vault blocked-open lifecycle — candidate, NOT device verified
+A blocked IndexedDB open can later succeed after the caller already rejected; the candidate closes that late connection and skips abandoned schema upgrade. Simulated Node regression added, but full CI and genuine mobile screenshots remain pending. This is optional backup robustness only, not canonical transactional migration or physical iPhone acceptance.

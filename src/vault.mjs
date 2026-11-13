@@ -14,15 +14,29 @@ function openVault(factory=globalThis.indexedDB){
   if(!factory||typeof factory.open!=='function')
     return Promise.reject(Error('IndexedDB unavailable in this browser. Export JSON instead.'));
   return new Promise((resolve,reject)=>{
-    let req;
+    let req,settled=false;
     try{req=factory.open(VAULT_DB,1);}catch(error){reject(Error('Cannot open device vault: '+problem(error)));return;}
     req.onupgradeneeded=()=>{
+      // A previously blocked open may complete after its caller has given up.
+      // Never mutate the schema for an abandoned request.
+      if(settled)return;
       const db=req.result;
       if(!db.objectStoreNames.contains(VAULT_STORE))db.createObjectStore(VAULT_STORE,{keyPath:'id'});
     };
-    req.onsuccess=()=>resolve(req.result);
-    req.onerror=()=>reject(Error('Device vault unavailable: '+problem(req.error)));
-    req.onblocked=()=>reject(Error('Device vault is blocked by another tab; close other tabs and retry.'));
+    req.onsuccess=()=>{
+      // IndexedDB can unblock after onblocked rejected the operation. Close
+      // that late connection instead of leaking it and blocking other tabs.
+      if(settled){req.result?.close();return;}
+      settled=true;resolve(req.result);
+    };
+    req.onerror=()=>{
+      if(settled)return;
+      settled=true;reject(Error('Device vault unavailable: '+problem(req.error)));
+    };
+    req.onblocked=()=>{
+      if(settled)return;
+      settled=true;reject(Error('Device vault is blocked by another tab; close other tabs and retry.'));
+    };
   });
 }
 function requestResult(req){
