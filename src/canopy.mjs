@@ -63,8 +63,10 @@ function crown(out,x,y,z,r,variation){
   }
 }
 // Distinct upright evergreen silhouette: stacked, faceted needle tiers.
-function evergreen(out,x,y,z,variation){
-  const height=4.1+variation*.8;
+function evergreen(out,x,y,z,variation,beacon=false){
+  // Rare golden-tipped sentinel pines are visual landmarks, not world objects.
+  // Keep their original footprint and triangle count; only silhouette/colour vary.
+  const height=(beacon?6.6:4.1)+variation*.8;
   const bark=[.48,.30,.19],ring=[[-.16,-.16],[.16,-.16],[.16,.16],[-.16,.16]];
   for(let i=0;i<4;i++){
     const j=(i+1)%4;
@@ -75,10 +77,12 @@ function evergreen(out,x,y,z,variation){
       i%2?bark:[.59,.39,.24],4);
   }
   roots(out,x,y,z,variation);
-  const needles=[[.19,.43,.38],[.26,.54,.43],[.34,.61,.46],[.40,.68,.48]];
+  const needles=beacon?
+    [[.25,.48,.40],[.39,.62,.43],[.58,.70,.39],[.78,.77,.45]]:
+    [[.19,.43,.38],[.26,.54,.43],[.34,.61,.46],[.40,.68,.48]];
   for(let tier=0;tier<4;tier++){
-    const base=y+.65+tier*.77,rad=1.32-tier*.19;
-    const top=base+1.22;
+    const base=y+.65+tier*(beacon?1.26:.77),rad=(beacon?1.48:1.32)-tier*.19;
+    const top=base+(beacon?1.8:1.22);
     for(let i=0;i<8;i++){
       const a=(i+variation)*Math.PI/4,b=(i+1+variation)*Math.PI/4;
       const col=needles[(i+tier)%needles.length];
@@ -91,6 +95,13 @@ function evergreen(out,x,y,z,variation){
         [x,top-.15,z],needles[(i+tier+1)%needles.length],7);
     }
   }
+}
+// One distinctive sentinel candidate in a small fraction of wooded chunks.
+// A deterministic, render-only visual marker; never persisted or harvested.
+export function woodlandSentinelChunk(cx,cz,seed){
+  if(!Number.isInteger(cx)||!Number.isInteger(cz)||!Number.isInteger(seed))
+    throw Error('Invalid woodland sentinel coordinates');
+  return hash(cx,cz,seed,211)<.075;
 }
 export function woodlandTreeStyle(x,z,seed){
   return hash(x,z,seed,67)<.43?'evergreen':'broadleaf';
@@ -125,14 +136,16 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
     if(hash(cx+i,cz-i,world.seed,43)>.45)continue;
     const h=heightAt(x,z,world.seed);
     if(baseAt(x,h,z,world.seed)!==grass||world.get(x,h,z)!==grass)continue;
+    const sentinel=count===0&&woodlandSentinelChunk(cx,cz,world.seed);
     let clear=true;
-    // Clear the trunk and broad crown footprint; do not visually obscure builds.
+    // Tall sentinel tiers must not visually cover player-built blocks above the old six-block clearance.
     for(let dx=-2;dx<=2&&clear;dx++)for(let dz=-2;dz<=2&&clear;dz++)
-      for(let dy=1;dy<=6;dy++)
+      for(let dy=1;dy<=(sentinel?9:6);dy++)
         if(world.get(x+dx,h+dy,z+dz)!==air){clear=false;break;}
     if(!clear)continue;
     const style=woodlandTreeStyle(x,z,world.seed);
-    (style==='evergreen'?evergreen:tree)(out,x+.5,h+1.01,z+.5,hash(x,z,world.seed,59));count++;
+    (sentinel?evergreen:(style==='evergreen'?evergreen:tree))(
+      out,x+.5,h+1.01,z+.5,hash(x,z,world.seed,59),sentinel);count++;
   }
   if(out.length/STRIDE>MAX_TREES*MAX_VERTICES)
     throw Error('Woodland canopy exceeded vertex budget');

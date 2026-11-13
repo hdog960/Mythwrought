@@ -1,6 +1,8 @@
 # Mythwrought — Release ledger
 This is the source of truth for ACTUALLY implemented and independently verified features, separate from the 100 planned releases.
 
+
+| v0.10 Gate A **gold-tipped sentinel woodland landmarks — CANDIDATE ONLY** | Branch `gate-a-woodland-beacon-20261113-0802` based on `d36a86452d1d` | Actual `src/canopy.mjs` rare deterministic tall gilded sentinel silhouettes, `tests/canopy.test.mjs` determinism/height/mesh/save checks; exact-head CI and screenshot review PENDING | Not merged; not Pages | **Gate A OPEN; no iPhone/art approval** |
 | Release | Git commit | Tested behavior | Deployment | Result |
 |---|---|---|---|---|
 | v0.10 Gate A **faceted woodland canopy candidate — NOT SHIPPED** | [PR #38](https://github.com/hdog960/Mythwrought/pull/38) (head subject to CI) | Proposed `src/canopy.mjs`, chunk integration, `tests/canopy.test.mjs`: original 3D trees on natural grass, edit/remesh and deterministic budget assertions. **Node/Chromium and screenshot review PENDING at ledger authoring.** | PR branch only, not Pages | **Unmerged; no art approval, physical iPhone test or canonical IndexedDB migration; Gate A OPEN** |
@@ -228,3 +230,6 @@ Verified main `ceb7fafdaca5a1566ee69a9ebc5df9165a4523f2` has green Node/Chromium
 
 ## 2026-11-13 :40 — abandoned optional vault upgrade abort candidate (UNMERGED)
 Verified main `e79a8a7b8fea5315cdf8d0b482e2a252667ea590`. Integration owner :40: a blocked IndexedDB open can later receive `onupgradeneeded` after the caller rejected; skipping store creation alone can still commit an empty version-1 database. Candidate explicitly aborts the abandoned versionchange transaction and adds two Node regressions. Files `src/vault.mjs`, `tests/vault.test.mjs`; branch `gate-a-vault-abandoned-upgrade-abort-20261113-0540`. No canonical schema-1 migration, save overwrite, art or controls edits. Collision risk: shared ledger/audit/handoff docs with :00/#59 and :20/#58; keep this independent and recheck main before guarded merge. CI and genuine screenshots pending; no deployment claim. Next: (1) exact-head Node/Chromium and genuine screenshot review for this candidate; (2) inspect #59 clearing-specific visuals and #58 corrected browser tests before integrating either. Creator-only device/art gates remain open; v0.11 locked.
+
+## 2026-11-13 09:00 — Sentinel high-crown obstruction regression (UNMERGED)
+PR #61 visual :00 owner: original sentinel candidate a69944b passed Actions 43439313725; new correction ensures a player-built voxel 8 above the natural anchor prevents the tall golden crown from obscuring the build, with schema-1 restore/remesh regression. Renderer and test changes committed; corrected exact-head Node/Chromium and real screenshot inspection still pending. No merge/Pages claim, no new gameplay or migration; Gate A OPEN.
