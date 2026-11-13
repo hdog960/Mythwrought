@@ -21,7 +21,15 @@ export function stickLookDelta(stick,seconds){
 }
 // Keyboard events bubble from nested icons, labels and custom interactive
 // controls. Only the game surface (not an ancestor widget) may own shortcuts.
-export function isWorldControlTarget(element){
+export function isWorldControlTarget(element,event){
+  // Composed keyboard events may be retargeted to a custom-element host.
+  // Check the original shadow-tree path before the public target so an
+  // editable or accessible widget cannot accidentally move the world.
+  const path=typeof event?.composedPath==='function'?event.composedPath():null;
+  if(Array.isArray(path))for(const part of path){
+    if(part===element)break;
+    if(part?.nodeType===1&&!isWorldControlTarget(part))return false;
+  }
   for(let node=element;node;node=node.parentElement){
     if(node.isContentEditable||node.hasAttribute?.('contenteditable')||node.getAttribute?.('contenteditable')!==null&&node.getAttribute?.('contenteditable')!==undefined)return false;
     if(['INPUT','SELECT','TEXTAREA','BUTTON','A','SUMMARY'].includes(node.tagName))return false;
