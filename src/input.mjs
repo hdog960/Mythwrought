@@ -26,7 +26,10 @@ export function isWorldControlTarget(element){
     if(node.isContentEditable||node.hasAttribute?.('contenteditable')||node.getAttribute?.('contenteditable')!==null&&node.getAttribute?.('contenteditable')!==undefined)return false;
     if(['INPUT','SELECT','TEXTAREA','BUTTON','A','SUMMARY'].includes(node.tagName))return false;
     const role=node.getAttribute?.('role');
-    if(['button','link','textbox','combobox','slider','spinbutton','menuitem','menuitemcheckbox','menuitemradio','tab','treeitem','gridcell','rowheader','columnheader','option','switch','checkbox','radio'].includes(role))return false;
+    if(['button','link','textbox','combobox','slider','spinbutton','menuitem','menuitemcheckbox','menuitemradio','tab','treeitem','gridcell','rowheader','columnheader','option','switch','checkbox','radio',
+      // Composite containers own arrows/Space even when their focused child
+      // is an undecorated span or SVG rather than an individually roled item.
+      'menu','menubar','listbox','tree','grid','tablist','toolbar','radiogroup','dialog','alertdialog'].includes(role))return false;
   }
   return true;
 }
