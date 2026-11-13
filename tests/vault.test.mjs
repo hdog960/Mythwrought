@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
-import {makeVaultRecord,validateVaultRecord,listVaultBackups,vaultSeedAtCapacity,VAULT_DB,MAX_SNAPSHOTS_PER_SEED} from '../src/vault.mjs';
+import {makeVaultRecord,validateVaultRecord,listVaultBackups,vaultSeedAtCapacity,requireVaultBackup,VAULT_DB,MAX_SNAPSHOTS_PER_SEED} from '../src/vault.mjs';
 function sample(){const w=new VoxelWorld(179);w.set(15,19,-1,BLOCK.WOOD);return JSON.stringify(w.save());}
 test('vault records preserve exact original schema-1 JSON and independent checksum',()=>{
  const raw=sample(),r=makeVaultRecord(raw,'v010:fixed:abcdefghij','2026-11-11T19:00:00.000Z');
@@ -40,4 +40,10 @@ test('optional vault cap counts same-seed records including damaged records, nev
  assert.equal(vaultSeedAtCapacity([...five,{id:'corrupt',seed,raw:'damaged'}],-201),false);
  assert.throws(()=>vaultSeedAtCapacity(null,seed),/Invalid/);
  assert.throws(()=>vaultSeedAtCapacity(five,'179'),/Invalid/);
+});
+
+test('missing optional vault backup cannot be silently reported as deleted',()=>{
+ assert.throws(()=>requireVaultBackup(undefined),/no longer exists; nothing was deleted/);
+ const corrupt={id:'v010:fixed:abcdefghij',raw:'damaged'};
+ assert.equal(requireVaultBackup(corrupt),corrupt,'damaged user-owned snapshot may still be explicitly deleted');
 });
