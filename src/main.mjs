@@ -8,7 +8,7 @@ import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
-import {createEditEcho,sampleEditEcho} from './edit-echo.mjs';
+import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
@@ -75,7 +75,7 @@ function start(){
   catch(error){fatal('Voxel/sky shader failed to initialize: '+error.message);return;}
 
   let selected=BLOCK.STONE;
-  let outlineKey='',outlineCount=0,editEcho=null;
+  let outlineKey='',outlineCount=0,editFeedback=[];
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
   const chunks=new Map(),pending=new Map();
@@ -206,9 +206,10 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||document.hidden||graphicsLost)return;
+    const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
+    editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
-    editEcho=createEditEcho(result,performance.now());
     changed=true;
     const persisted=save();
     const label=BLOCK_NAMES[result.block]||'block';
@@ -349,7 +350,7 @@ function start(){
         if(focused?.canPlace&&status.textContent==='Cannot place inside the player')
           message('Build space clear · choose MINE or PLACE');
       }
-      const echo=help.hidden?sampleEditEcho(editEcho,now):{key:'',vertices:new Float32Array()};
+      const echo=help.hidden?sampleWorldEditFeedback(editFeedback,now):{key:'',vertices:new Float32Array()};
       const nextOutlineKey=focusKey+'|'+placeKey+'|'+echo.key;
       if(nextOutlineKey!==outlineKey){
         outlineKey=nextOutlineKey;
