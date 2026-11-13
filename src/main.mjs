@@ -8,6 +8,7 @@ import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
+import {createEditEcho,sampleEditEcho} from './edit-echo.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
@@ -74,7 +75,7 @@ function start(){
   catch(error){fatal('Voxel/sky shader failed to initialize: '+error.message);return;}
 
   let selected=BLOCK.STONE;
-  let outlineKey='',outlineCount=0;
+  let outlineKey='',outlineCount=0,editEcho=null;
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
   const chunks=new Map(),pending=new Map();
@@ -205,6 +206,7 @@ function start(){
   function edit(mode){
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
     if(!result.ok){message(result.reason);return;}
+    editEcho=createEditEcho(result,performance.now());
     changed=true;
     const persisted=save();
     const label=BLOCK_NAMES[result.block]||'block';
@@ -345,15 +347,17 @@ function start(){
         if(focused?.canPlace&&status.textContent==='Cannot place inside the player')
           message('Build space clear · choose MINE or PLACE');
       }
-      const nextOutlineKey=focusKey+'|'+placeKey;
+      const echo=help.hidden?sampleEditEcho(editEcho,now):{key:'',vertices:new Float32Array()};
+      const nextOutlineKey=focusKey+'|'+placeKey+'|'+echo.key;
       if(nextOutlineKey!==outlineKey){
         outlineKey=nextOutlineKey;
         // Teal indicates the mineable target; amber marks the adjacent
         // valid placement cell. Both are world-space geometry, not HUD.
         const mine=focused?.hit?outlineVertices(focused.hit,[.44,.90,.81]):new Float32Array();
         const preview=placeKey?outlineVertices(focused.adjacent,[.97,.76,.38]):new Float32Array();
-        const data=new Float32Array(mine.length+preview.length);
+        const data=new Float32Array(mine.length+preview.length+echo.vertices.length);
         data.set(mine);data.set(preview,mine.length);
+        data.set(echo.vertices,mine.length+preview.length);
         gl.bindBuffer(gl.ARRAY_BUFFER,outlineBuffer);
         gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
         outlineCount=data.length/9;
