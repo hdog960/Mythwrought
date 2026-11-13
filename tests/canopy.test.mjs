@@ -103,3 +103,28 @@ test('connected woodland clearings are deterministic, render-only and preserve n
   assert.equal(JSON.stringify(world.save()),before,'render-only clearing cannot write schema-1 edits');
   assert.equal(woodlandClearing(cx,cz,world.seed),woodlandClearing(cx,cz,world.seed));
 });
+
+
+test('clearing quadrants vary by region without fragmented pockets or seed writes',()=>{
+  const world=new VoxelWorld(179),original=JSON.stringify(world.save());
+  const quadrants=new Set();let active=0;
+  for(let mx=-12;mx<=12;mx++)for(let mz=-12;mz<=12;mz++){
+    const cells=[];
+    for(let dx=0;dx<4;dx++)for(let dz=0;dz<4;dz++){
+      if(woodlandClearing(mx*4+dx,mz*4+dz,world.seed))cells.push([dx,dz]);
+    }
+    assert.ok(cells.length===0||cells.length===4,'pockets must remain exactly 2x2');
+    if(!cells.length)continue;
+    active++;
+    const xs=cells.map(p=>p[0]),zs=cells.map(p=>p[1]);
+    const minX=Math.min(...xs),minZ=Math.min(...zs);
+    assert.ok(minX===0||minX===2);
+    assert.ok(minZ===0||minZ===2);
+    for(let dx=0;dx<2;dx++)for(let dz=0;dz<2;dz++)
+      assert.ok(cells.some(p=>p[0]===minX+dx&&p[1]===minZ+dz));
+    quadrants.add(minX+','+minZ);
+  }
+  assert.ok(active>10,'expect visible clearings across the region');
+  assert.equal(quadrants.size,4,'all four clearing orientations should occur');
+  assert.equal(JSON.stringify(world.save()),original);
+});
