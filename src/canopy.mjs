@@ -34,8 +34,8 @@ function roots(out,x,y,z,variation){
 // not new blocks: mining the anchor removes the whole composition on remesh.
 function woodlandFloor(out,x,y,z,variation){
   const greens=[[.28,.55,.37],[.40,.64,.39],[.51,.69,.40]];
-  for(let fan=0;fan<5;fan++){
-    const a=fan*Math.PI*2/5+variation*.7,dx=Math.cos(a),dz=Math.sin(a);
+  for(let fan=0;fan<3;fan++){
+    const a=fan*Math.PI*2/3+variation*.7,dx=Math.cos(a),dz=Math.sin(a);
     const reach=.57+(fan%2)*.17,side=[-dz,dx];
     const center=[x+dx*.20,y+.08,z+dz*.20];
     const tip=[x+dx*reach,y+.20+(fan%2)*.10,z+dz*reach];
@@ -51,7 +51,7 @@ function woodlandFloor(out,x,y,z,variation){
     tri(out,[px-.10,y+.035,pz-.08],[px+.12,y+.038,pz-.04],
       [px+.01,y+.04,pz+.12],amber[i],7);
   }
-  for(let i=0;i<2;i++){
+  for(let i=0;i<1;i++){
     const a=(i+.35+variation)*Math.PI,dx=Math.cos(a),dz=Math.sin(a);
     const px=x+dx*.88,pz=z+dz*.88;
     const grey=i?[.47,.53,.43]:[.55,.59,.47];
