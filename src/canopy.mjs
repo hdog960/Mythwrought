@@ -14,6 +14,32 @@ function tri(out,a,b,c,color,mat){
 function quad(out,a,b,c,d,color,mat){
   tri(out,a,b,c,color,mat);tri(out,a,c,d,color,mat);
 }
+
+// Four low, tapered root buttresses anchor trees visually into editable ground.
+// Pure mesh detail: no collision, drops, world writes or saved data changes.
+function roots(out,x,y,z,variation){
+  const colors=[[.43,.28,.18],[.56,.36,.22],[.64,.43,.27],[.49,.32,.20]];
+  for(let i=0;i<4;i++){
+    const a=i*Math.PI/2+variation*.18,dx=Math.cos(a),dz=Math.sin(a);
+    const side=[-dz,dx],spread=.47+variation*.15;
+    const foot=[x+dx*spread,y+.025,z+dz*spread];
+    const left=[x+side[0]*.17,y+.54,z+side[1]*.17];
+    const right=[x-side[0]*.17,y+.54,z-side[1]*.17];
+    tri(out,left,right,foot,colors[i],4);
+  }
+}
+// Sparse faceted sunlit leaf tips add depth without transparent sprites.
+function crownHighlights(out,x,y,z,r,variation){
+  const hues=[[.61,.79,.49],[.50,.72,.42],[.70,.81,.52]];
+  for(let i=0;i<4;i++){
+    const a=(i+variation)*Math.PI/2;
+    const dx=Math.cos(a),dz=Math.sin(a);
+    tri(out,[x+dx*r*.50,y+.72,z+dz*r*.50],
+      [x+dx*r*.80-dz*.13,y+.40,z+dz*r*.80+dx*.13],
+      [x+dx*r*.80+dz*.13,y+.40,z+dz*r*.80-dx*.13],
+      hues[i%hues.length],7);
+  }
+}
 function branch(out,x,y,z,rise,angle,reach){
   const end=[x+Math.cos(angle)*reach,y+rise,z+Math.sin(angle)*reach];
   tri(out,[x-.10,y-.1,z],[x+.10,y-.1,z],end,[.49,.31,.20],4);
@@ -48,6 +74,7 @@ function evergreen(out,x,y,z,variation){
       [x+ring[i][0]*.65,y+height*.83,z+ring[i][1]*.65],
       i%2?bark:[.59,.39,.24],4);
   }
+  roots(out,x,y,z,variation);
   const needles=[[.19,.43,.38],[.26,.54,.43],[.34,.61,.46],[.40,.68,.48]];
   for(let tier=0;tier<4;tier++){
     const base=y+.65+tier*.77,rad=1.32-tier*.19;
@@ -58,6 +85,10 @@ function evergreen(out,x,y,z,variation){
       tri(out,[x+Math.cos(a)*rad,base,z+Math.sin(a)*rad],
         [x+Math.cos(b)*rad,base,z+Math.sin(b)*rad],
         [x,top,z],col,7);
+      // A small sun-facing facet makes layered needle tiers readable at phone scale.
+      if(i%2===0)tri(out,[x+Math.cos(a)*rad*.79,base+.10,z+Math.sin(a)*rad*.79],
+        [x+Math.cos(b)*rad*.79,base+.10,z+Math.sin(b)*rad*.79],
+        [x,top-.15,z],needles[(i+tier+1)%needles.length],7);
     }
   }
 }
@@ -73,10 +104,12 @@ function tree(out,x,y,z,variation){
     const c=[x+ring[j][0]*.6,y+h,z+ring[j][1]*.6],d=[x+ring[i][0]*.6,y+h,z+ring[i][1]*.6];
     quad(out,a,b,c,d,i%2?bark:[.63,.43,.27],4);
   }
+  roots(out,x,y,z,variation);
   for(let i=0;i<3;i++)branch(out,x,y+h*.62,z,.8,i*Math.PI*2/3+variation,1.05);
   crown(out,x,y+h-.35,z,1.25,variation);
   crown(out,x-.45,y+h-.85,z+.18,.83,variation+.3);
   crown(out,x+.48,y+h-.7,z-.22,.87,variation+.7);
+  crownHighlights(out,x,y+h-.35,z,1.25,variation);
 }
 export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass=1,air=0}={}){
   if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
