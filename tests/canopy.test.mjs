@@ -127,3 +127,19 @@ test('sentinel crowns yield to high player-built blocks and restore deterministi
   assert.equal(world.set(x,h+8,z,BLOCK.AIR),true);
   assert.deepEqual(woodlandCanopyVertices(world,cx,cz,options),mesh);
 });
+
+
+test('golden sentinel tips are distinct foliage facets without extra vertices or save writes',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  let found=false;
+  for(let cx=-16;cx<=16&&!found;cx++)for(let cz=-16;cz<=16&&!found;cz++){
+    if(!woodlandSentinelChunk(cx,cz,world.seed))continue;
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    for(let i=0;i<mesh.length;i+=CANOPY_LIMITS.stride){
+      if(mesh[i+3]>.9&&mesh[i+4]>.75&&mesh[i+5]>.4&&mesh[i+5]<.6){found=true;break;}
+    }
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+  }
+  assert.ok(found,'a deterministic sentinel should show gold-tipped crown facets');
+  assert.equal(JSON.stringify(world.save()),saved);
+});
