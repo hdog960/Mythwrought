@@ -115,3 +115,7 @@ Unmerged PR #53 adds cancellation of mouse drag on pointercancel/lostpointercapt
 
 ### 2026-11-12 22:20 Central — delayed modal input guard, no device approval
 Unmerged PR #53 now refuses pointerdown capture for movement/look pads, precision button and mouse canvas while settings are open or page hidden. Chromium test exercises modal-open delayed pointer events; this does not establish real Safari multitouch, thermal, force-quit or ergonomics acceptance. Require latest-head green CI and genuine 568×320/932×430 visual inspection before integration. No new service worker, save migration or Gate A approval.
+
+
+### 2026-11-12 23:25 Central — :20 gameplay candidate (unmerged)
+PR #53 head `fb5283e057329a10b54ab0eb32343ab26a0afff3` corrects a genuine Chromium test setup failure (hidden close button, duplicate menu open) and rejects keyboard gameplay events while document.hidden, with a browser regression for delayed Space. Starting main `21b5b77fd5f819643a56f05509025fc7c27bd87d`; exact-head CI/screenshots, merge and Pages unverified. Preserve v0.10 Gate A, independent controller grips and schema-1 saves. Physical iPhone, artwork and thermals remain creator-only acceptance.
