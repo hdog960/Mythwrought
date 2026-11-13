@@ -104,7 +104,7 @@ try{
   assert.equal(await page.evaluate(()=>window.scrollY),0,'Multi-touch gesture scrolled the game page');
   // Safari can cancel a mouse pointer after down without sending a normal up.
   // A late pointerup must not turn that cancelled gesture into a world edit.
-  await page.locator('#closeHelp').click();
+  // The settings dialog is initially closed; no hidden close-button click here.
   const sceneBox=await page.locator('#scene').boundingBox();
   const mouseX=Math.round(sceneBox.x+sceneBox.width/2);
   const mouseY=Math.round(sceneBox.y+sceneBox.height/2);
@@ -122,9 +122,9 @@ try{
   await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:mouseX,y:mouseY,button:'left',clickCount:1});
   assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),beforeCancelledEdit,
     'Cancelled mouse gesture must not edit the world');
+  // Open settings once for modal-safe input assertions and stick-mode selection.
   await page.locator('#menu').click();
   // Continuous stick mode must rotate only while held, using a radial dead zone.
-  await page.locator('#menu').click();
   // Queued synthetic iOS events must not activate action buttons behind settings.
   const blocked=await page.evaluate(()=>{
     const scene=document.querySelector('#scene');
