@@ -47,3 +47,14 @@ test('builder can aim almost straight down and up without crossing the vertical 
   assert.equal(clampLook(0,down.pitch,0,500).pitch,-MAX_PITCH,'Pitch cannot flip after over-drag');
   assert.ok(forwardVector(0,down.pitch).every(Number.isFinite));
 });
+
+// Accessible nested controls must not trigger global Jump/WASD shortcuts.
+test('keyboard focus in nested interactive controls never leaks into world input',()=>{
+  const el=(tagName,parentElement=null,attrs={})=>({tagName,parentElement,isContentEditable:false,getAttribute:name=>attrs[name]??null});
+  assert.equal(isWorldControlTarget(el('SPAN',el('BUTTON'))),false);
+  assert.equal(isWorldControlTarget(el('SVG',el('A'))),false);
+  assert.equal(isWorldControlTarget(el('SPAN',el('DIV',null,{role:'slider'}))),false);
+  assert.equal(isWorldControlTarget(el('SPAN',el('DIV',null,{contenteditable:'true'}))),false);
+  assert.equal(isWorldControlTarget(el('SUMMARY')),false);
+  assert.equal(isWorldControlTarget(el('SPAN',el('CANVAS'))),true);
+});
