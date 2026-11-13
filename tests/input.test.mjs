@@ -88,3 +88,16 @@ test('ARIA composite containers reserve keyboard shortcuts for nested controls',
     'Presentation-only wrappers must not disable gameplay');
   assert.equal(isWorldControlTarget(el('CANVAS')),true);
 });
+
+
+test('retargeted shadow DOM keyboard shortcuts respect the actual focused widget',()=>{
+  const host={tagName:'MY-WIDGET',nodeType:1,parentElement:null,getAttribute:()=>null};
+  const inner={tagName:'INPUT',nodeType:1,parentElement:null,getAttribute:()=>null};
+  const icon={tagName:'SPAN',nodeType:1,parentElement:null,getAttribute:()=>null};
+  const dialog={tagName:'DIV',nodeType:1,parentElement:null,getAttribute:n=>n==='role'?'dialog':null};
+  assert.equal(isWorldControlTarget(host,{composedPath:()=>[inner,host]}),false);
+  assert.equal(isWorldControlTarget(host,{composedPath:()=>[icon,dialog,host]}),false);
+  assert.equal(isWorldControlTarget(host,{composedPath:()=>[icon,host]}),true);
+  assert.equal(isWorldControlTarget(host,{composedPath:()=>[]}),true);
+  assert.equal(isWorldControlTarget(host),true);
+});

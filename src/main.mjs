@@ -494,7 +494,7 @@ function start(){
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
   document.addEventListener('keydown',e=>{
     // Do not steal arrows, space or WASD from accessibility controls and form fields.
-    if(!isWorldControlTarget(e.target)||!help.hidden)return;
+    if(!isWorldControlTarget(e.target,e)||!help.hidden)return;
     if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
     if(e.code==='Space'&&!e.repeat)jump();
     keys.add(e.code);

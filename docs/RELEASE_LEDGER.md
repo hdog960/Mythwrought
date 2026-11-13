@@ -243,3 +243,5 @@ Owner :20 gameplay; base verified main e3ddaa6987d0a815473ab31b8e2b28e0aaa371c0 
 
 
 | v0.10 Gate A ARIA composite keyboard ownership — **UNMERGED** | gate-a-composite-keyboard-guard-20261113-1220 based on verified main c99f8d32bcbde | src/input.mjs isolates keyboard shortcuts within nested menu/listbox/tree/grid/tablist/toolbar/dialog widgets; Node + genuine Chromium regression source added. Exact-head CI and authentic screenshot inspection pending. | Not deployed | :20 owner; :40 integration only after green checks, visual review and current-main recheck; user-only art/iPhone gates OPEN. |
+
+| 2026-11-13 :20 shadow-root keyboard retargeting — UNMERGED | gate-a-shadow-keyboard-20261113-1320, base 7267bc8 | src/input.mjs, src/main.mjs and tests/input.test.mjs guard composed keyboard event path to prevent editable/accessibility shadow widgets from moving/jumping the world; exact-head Node/Chromium and screenshot review PENDING | No Pages claim | :40 integration after green checks and genuine visual review; Gate A open |

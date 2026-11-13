@@ -135,3 +135,6 @@ Real Chromium regression expanded for nested plaintext-only editable regions and
 
 ## 2026-11-13 :20 — composite keyboard focus regression candidate (not device-approved)
 Proposed input isolation now recognizes ARIA composite container ancestors (menu, listbox, tree, grid, tablist, toolbar, radiogroup and dialogs) so keyboard Space/arrows from nested spans/icons cannot leak into world movement or Jump. Node and genuine Chromium browser regression cases are added; **exact-head CI and actual 568×320/932×430 screenshot review are pending**. No touch-grip geometry, canvas footprint, world edits, schema-1 saves, or rendering budgets changed. Test on a real iPhone and with external keyboard before device acceptance; this is not proof of physical ergonomics, offline PWA, canonical IndexedDB migration or premium artwork approval.
+
+## 2026-11-13 :20 shadow-root keyboard input candidate (not device verified)
+A proposed keyboard event composed-path guard prevents retargeted events from editable or accessible shadow-root controls reaching world movement/Jump handlers; normal game canvas shortcuts remain eligible. Node regression source added. Exact-head Node, genuine Chromium, screenshots, and real iPhone checks remain outstanding. No change to save schema, grip layout or physical acceptance.
