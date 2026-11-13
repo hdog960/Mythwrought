@@ -488,8 +488,13 @@ function start(){
     precisionButton.classList.add('held');
     try{precisionButton.setPointerCapture(e.pointerId);}catch(_){}
   });
-  for(const event of ['pointerup','pointercancel'])precisionButton.addEventListener(event,releasePrecision);
-  precisionButton.addEventListener('lostpointercapture',()=>releasePrecision());
+  for(const event of ['pointerup','pointercancel']){
+    precisionButton.addEventListener(event,releasePrecision);
+    // Safari may deliver the final release to the window after losing capture.
+    // Match the owning finger so an unrelated action finger cannot end AIM.
+    window.addEventListener(event,releasePrecision,true);
+  }
+  precisionButton.addEventListener('lostpointercapture',releasePrecision);
   function cancelAllPointers(){
     for(const stop of [...heldPointers.values()])stop();
     lookStick.x=lookStick.y=0;
