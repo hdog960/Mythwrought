@@ -120,3 +120,6 @@ Verified main `e79a8a7b8fea5315cdf8d0b482e2a252667ea590`. Integration owner :40:
 
 ## 2026-11-13 :00 sentinel visual candidate — not device certified
 The independent :00 branch gate-a-woodland-beacon-20261113-0802 adds rare seed-stable taller gilded sentinel pine silhouettes in the existing canopy mesh and deterministic/geometry/save regression coverage. No new texture or draw call, schema migration, harvesting, collision, or controls. Genuine Chromium phone-size screenshots, physical-iPhone readability/thermals and creator premium-art approval are NOT verified by this candidate. Gate A OPEN.
+
+## Sentinel high-build clearance — candidate only (2026-11-13)
+PR #61 corrects the taller sentinel pine's crown clearance from six to nine voxels while ordinary tree checks remain unchanged. Focused test places a block eight above a sentinel anchor, checks render suppression and schema-1 restoration, then removes the block and checks deterministic reappearance. This is render-only and not proof of actual iPhone readability or thermals. Corrected-head Chromium screenshots and creator artwork/control approval remain outstanding.
