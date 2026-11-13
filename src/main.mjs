@@ -9,6 +9,7 @@ import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
+import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
@@ -74,6 +75,7 @@ function start(){
   try{initializeGpuPipeline();}
   catch(error){fatal('Voxel/sky shader failed to initialize: '+error.message);return;}
 
+  let caveDiscovery={inside:false,last:-Infinity,discoveries:0};
   let selected=BLOCK.STONE;
   let outlineKey='',outlineCount=0,editFeedback=[];
   const targetInfo=document.getElementById('targetInfo');
@@ -289,6 +291,11 @@ function start(){
     frameHistory.frame(now,!document.hidden&&help.hidden&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
       frame++;if(help.hidden)move(dt);
+      // Low-frequency real-cave check: no synthetic map markers or geometry.
+      if(help.hidden&&frame%24===0){
+        caveDiscovery=updateCaveDiscovery(caveDiscovery,naturalCaveCorridor(world,player),now);
+        if(caveDiscovery.entered)message('Natural cave passage discovered · explore carefully');
+      }
       const buffer=bufferDimensions(canvas.clientWidth,canvas.clientHeight,renderPreset,devicePixelRatio||1);
       const w=buffer.width,h=buffer.height;
       canvas.dataset.renderPreset=renderPreset;
