@@ -168,3 +168,26 @@ test('sentinel crown-star is an eight-spoke, bounded render-only landmark',()=>{
   assert.ok(found,'a seeded sentinel must be visible');
   assert.equal(JSON.stringify(world.save()),saved,'crown-star never persists as voxels');
 });
+
+test('sentinel lower golden canopy band remains visible below the high crown-star',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  let found=false;
+  for(let cx=-16;cx<=16&&!found;cx++)for(let cz=-16;cz<=16&&!found;cz++){
+    if(!woodlandSentinelChunk(cx,cz,world.seed))continue;
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+    const h=terrainHeight(x,z,world.seed);
+    let band=0;
+    for(let i=0;i<mesh.length;i+=CANOPY_LIMITS.stride*3){
+      const ys=[mesh[i+1],mesh[i+10],mesh[i+19]];
+      const r=mesh[i+3],g=mesh[i+4],b=mesh[i+5];
+      if(r>.7&&g>.75&&b>.35&&b<.5&&ys.every(y=>y>h+3.5&&y<h+5.1))band++;
+    }
+    assert.ok(band>=8,'eight contrasting mid-canopy facets remain below the crown-star');
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+    found=true;
+  }
+  assert.ok(found,'find a seeded sentinel with lower band');
+  assert.equal(JSON.stringify(world.save()),saved);
+});
