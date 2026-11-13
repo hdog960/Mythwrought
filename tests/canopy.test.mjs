@@ -104,3 +104,26 @@ test('rare golden sentinel pines create taller deterministic landmarks within un
   assert.equal(CANOPY_LIMITS.newDrawCalls,0);
   assert.equal(woodlandSentinelChunk(-2,3,179),woodlandSentinelChunk(-2,3,179));
 });
+
+test('sentinel crowns yield to high player-built blocks and restore deterministically',()=>{
+  const world=new VoxelWorld(179);
+  let target;
+  for(let cx=-16;cx<=16&&!target;cx++)for(let cz=-16;cz<=16&&!target;cz++){
+    if(!woodlandSentinelChunk(cx,cz,world.seed))continue;
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+    const h=terrainHeight(x,z,world.seed);
+    target={cx,cz,x,z,h,mesh};
+  }
+  assert.ok(target,'find an unobstructed sentinel');
+  const {cx,cz,x,z,h,mesh}=target;
+  assert.equal(world.get(x,h+8,z),BLOCK.AIR);
+  assert.equal(world.set(x,h+8,z,BLOCK.STONE),true);
+  const obstructed=woodlandCanopyVertices(world,cx,cz,options);
+  assert.ok(obstructed.length<mesh.length,'high placed blocks suppress overlapping sentinel');
+  const restored=VoxelWorld.restore(world.save());
+  assert.deepEqual(woodlandCanopyVertices(restored,cx,cz,options),obstructed);
+  assert.equal(world.set(x,h+8,z,BLOCK.AIR),true);
+  assert.deepEqual(woodlandCanopyVertices(world,cx,cz,options),mesh);
+});
