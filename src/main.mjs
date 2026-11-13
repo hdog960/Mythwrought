@@ -394,7 +394,9 @@ function start(){
       heldPointers.delete(active);active=null;release();el.classList.remove('engaged');
     }
     el.addEventListener('pointerdown',e=>{
-      if(active!==null)return;
+      // A second touch must never steal a held grip. Settings and background
+      // transitions cannot create invisible held pointers behind the overlay.
+      if(active!==null||!help.hidden||document.hidden)return;
       e.preventDefault();active=e.pointerId;lastX=e.clientX;lastY=e.clientY;
       heldPointers.set(active,stop);
       try{el.setPointerCapture(active);}catch(_){}
@@ -406,7 +408,13 @@ function start(){
       const dx=e.clientX-lastX,dy=e.clientY-lastY;
       lastX=e.clientX;lastY=e.clientY;update(e,dx,dy,false);
     });
-    for(const event of ['pointerup','pointercancel'])el.addEventListener(event,e=>{if(active===e.pointerId)stop();});
+    for(const event of ['pointerup','pointercancel']){
+      el.addEventListener(event,e=>{if(active===e.pointerId)stop();});
+      // iOS can release capture during a second-finger action or resize.
+      // A window capture listener catches the release even if the grip
+      // no longer receives its own pointerup; stop() is idempotent.
+      window.addEventListener(event,e=>{if(active===e.pointerId)stop();},true);
+    }
     el.addEventListener('lostpointercapture',stop);
     return stop;
   }
@@ -467,6 +475,9 @@ function start(){
     precisionPointer=null;precisionHeld=false;precisionButton.classList.remove('held');
   }
   precisionButton.addEventListener('pointerdown',e=>{
+    // Retain the first precision finger until it actually releases.
+    // Otherwise a second touch overwrites its ID and leaves AIM stuck.
+    if(precisionPointer!==null||!help.hidden||document.hidden)return;
     e.preventDefault();precisionPointer=e.pointerId;precisionHeld=true;
     precisionButton.classList.add('held');
     try{precisionButton.setPointerCapture(e.pointerId);}catch(_){}
