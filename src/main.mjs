@@ -8,6 +8,7 @@ import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
+import {createEditEcho,sampleEditEcho} from './edit-echo.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
@@ -74,7 +75,7 @@ function start(){
   catch(error){fatal('Voxel/sky shader failed to initialize: '+error.message);return;}
 
   let selected=BLOCK.STONE;
-  let outlineKey='',outlineCount=0;
+  let outlineKey='',outlineCount=0,editEcho=null;
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
   const chunks=new Map(),pending=new Map();
@@ -203,8 +204,11 @@ function start(){
     // Not-yet-loaded chunks read the current global voxel world when meshed.
   }
   function edit(mode){
+    // No world mutation behind settings, during app suspension, or on lost WebGL.
+    if(!help.hidden||document.hidden||graphicsLost)return;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
     if(!result.ok){message(result.reason);return;}
+    editEcho=createEditEcho(result,performance.now());
     changed=true;
     const persisted=save();
     const label=BLOCK_NAMES[result.block]||'block';
@@ -263,7 +267,7 @@ function start(){
     jumpQueued=false;
     message('Returned to a safe surface near spawn (prototype void recovery)');
   }
-  function jump(){if(help.hidden)jumpQueued=true;}
+  function jump(){if(help.hidden&&!document.hidden&&!graphicsLost)jumpQueued=true;}
   function move(dt){
     const strafe=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joystick.x;
     const forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)-joystick.y;
@@ -345,15 +349,17 @@ function start(){
         if(focused?.canPlace&&status.textContent==='Cannot place inside the player')
           message('Build space clear · choose MINE or PLACE');
       }
-      const nextOutlineKey=focusKey+'|'+placeKey;
+      const echo=help.hidden?sampleEditEcho(editEcho,now):{key:'',vertices:new Float32Array()};
+      const nextOutlineKey=focusKey+'|'+placeKey+'|'+echo.key;
       if(nextOutlineKey!==outlineKey){
         outlineKey=nextOutlineKey;
         // Teal indicates the mineable target; amber marks the adjacent
         // valid placement cell. Both are world-space geometry, not HUD.
         const mine=focused?.hit?outlineVertices(focused.hit,[.44,.90,.81]):new Float32Array();
         const preview=placeKey?outlineVertices(focused.adjacent,[.97,.76,.38]):new Float32Array();
-        const data=new Float32Array(mine.length+preview.length);
+        const data=new Float32Array(mine.length+preview.length+echo.vertices.length);
         data.set(mine);data.set(preview,mine.length);
+        data.set(echo.vertices,mine.length+preview.length);
         gl.bindBuffer(gl.ARRAY_BUFFER,outlineBuffer);
         gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
         outlineCount=data.length/9;
@@ -394,7 +400,9 @@ function start(){
       heldPointers.delete(active);active=null;release();el.classList.remove('engaged');
     }
     el.addEventListener('pointerdown',e=>{
-      if(active!==null)return;
+      // A second touch must never steal a held grip. Settings and background
+      // transitions cannot create invisible held pointers behind the overlay.
+      if(active!==null||!help.hidden||document.hidden)return;
       e.preventDefault();active=e.pointerId;lastX=e.clientX;lastY=e.clientY;
       heldPointers.set(active,stop);
       try{el.setPointerCapture(active);}catch(_){}
@@ -406,7 +414,13 @@ function start(){
       const dx=e.clientX-lastX,dy=e.clientY-lastY;
       lastX=e.clientX;lastY=e.clientY;update(e,dx,dy,false);
     });
-    for(const event of ['pointerup','pointercancel'])el.addEventListener(event,e=>{if(active===e.pointerId)stop();});
+    for(const event of ['pointerup','pointercancel']){
+      el.addEventListener(event,e=>{if(active===e.pointerId)stop();});
+      // iOS can release capture during a second-finger action or resize.
+      // A window capture listener catches the release even if the grip
+      // no longer receives its own pointerup; stop() is idempotent.
+      window.addEventListener(event,e=>{if(active===e.pointerId)stop();},true);
+    }
     el.addEventListener('lostpointercapture',stop);
     return stop;
   }
@@ -467,6 +481,9 @@ function start(){
     precisionPointer=null;precisionHeld=false;precisionButton.classList.remove('held');
   }
   precisionButton.addEventListener('pointerdown',e=>{
+    // Retain the first precision finger until it actually releases.
+    // Otherwise a second touch overwrites its ID and leaves AIM stuck.
+    if(precisionPointer!==null||!help.hidden||document.hidden)return;
     e.preventDefault();precisionPointer=e.pointerId;precisionHeld=true;
     precisionButton.classList.add('held');
     try{precisionButton.setPointerCapture(e.pointerId);}catch(_){}
@@ -478,11 +495,12 @@ function start(){
     lookStick.x=lookStick.y=0;
     precisionPointer=null;precisionHeld=false;
     keys.clear();joystick.x=joystick.y=0;
+    jumpQueued=false;drag=null;
     precisionButton.classList.remove('held');
     cameraKnob.style.transform='';knob.style.transform='';
   }
   let drag=null;
-  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
+  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&help.hidden&&!document.hidden){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
   canvas.addEventListener('pointermove',e=>{
     if(!drag||drag.id!==e.pointerId)return;
     const {x:dx,y:dy}=safePointerDelta(e.clientX-drag.x,e.clientY-drag.y);
@@ -490,11 +508,14 @@ function start(){
     look(dx,dy,.006);
     drag.x=e.clientX;drag.y=e.clientY;
   });
-  canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved)edit(drag.button===2?'place':'mine');drag=null;}});
+  canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved&&help.hidden&&!document.hidden)edit(drag.button===2?'place':'mine');drag=null;}});
+  // Interrupted mouse drags must not become delayed mine/place actions.
+  canvas.addEventListener('pointercancel',e=>{if(drag?.id===e.pointerId)drag=null;});
+  canvas.addEventListener('lostpointercapture',e=>{if(drag?.id===e.pointerId)drag=null;});
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
   document.addEventListener('keydown',e=>{
     // Do not steal arrows, space or WASD from accessibility controls and form fields.
-    if(!isWorldControlTarget(e.target)||!help.hidden)return;
+    if(!isWorldControlTarget(e.target,e)||!help.hidden||document.hidden)return;
     if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
     if(e.code==='Space'&&!e.repeat)jump();
     keys.add(e.code);

@@ -4,6 +4,7 @@ import {storybookGroveVertices} from './grove.mjs';
 import {woodlandCanopyVertices} from './canopy.mjs';
 import {grottoAccentVertices} from './grotto.mjs';
 import {caveRuneVertices} from './cave-runes.mjs';
+import {waystoneVertices} from './waystones.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
@@ -104,17 +105,21 @@ export function meshChunk(world,cx,cz){
         const id=world.get(x,y,z);
         if(id===BLOCK.AIR)continue;
         const color=COLORS[id]||COLORS[3];
-        // Low-frequency world-space tint is independent of chunk coordinates, so
-        // materials transition naturally at x/z = n*CHUNK_SIZE instead of
-        // changing color when a new mesh happens to start.
-        const variance=.90+noise(x/9,z/9,world.seed+91)*.14+
-          hash(x+y*5,z-y*3,world.seed+91)*.08;
+        // Most underground voxels are fully enclosed. Defer the two noise
+        // samples and tint calculation until the FIRST exposed face; otherwise
+        // a solid chunk pays for shading thousands of invisible blocks.
+        // Keep world-space inputs and face order identical for save/seed parity.
+        let variance;
         for(const face of FACE){
           if(world.get(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
+          if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
+            hash(x+y*5,z-y*3,world.seed+91)*.08;
+          const r=clamp(color[0]*variance*face.lit,0,1);
+          const g=clamp(color[1]*variance*face.lit,0,1);
+          const b=clamp(color[2]*variance*face.lit,0,1);
           for(const k of [0,1,2,0,2,3]){
-            const p=face.q[k];
-            const uv=FACE_UV[k];
-            vertices.push(x+p[0],y+p[1],z+p[2],...color.map(c=>clamp(c*variance*face.lit,0,1)),uv[0],uv[1],id);
+            const p=face.q[k],uv=FACE_UV[k];
+            vertices.push(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id);
           }
         }
       }
@@ -144,15 +149,17 @@ export function meshChunk(world,cx,cz){
     heightAt:terrainHeight,baseAt:baseBlock,
     air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
+  const waystones=waystoneVertices(world,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const solid=new Float32Array(vertices);
-  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length)return solid;
-  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length);
+  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length)return solid;
+  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length);
   combined.set(solid);combined.set(canopy,solid.length);
   combined.set(grove,solid.length+canopy.length);
   combined.set(meadow,solid.length+canopy.length+grove.length);
   combined.set(runes,solid.length+canopy.length+grove.length+meadow.length);
   // Existing meadow and grotto tail positions retain their regression invariants.
   combined.set(grotto,solid.length+canopy.length+grove.length+meadow.length+runes.length);
+  combined.set(waystones,combined.length-waystones.length);
   return combined;
 }
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.
