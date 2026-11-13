@@ -540,6 +540,9 @@ function start(){
     button.addEventListener('pointerdown',e=>{
       if(e.pointerType!=='touch')return;
       e.preventDefault();
+      // iOS may deliver a queued touch while the menu is opening or the
+      // app is backgrounding. Never edit the world behind a closed gate.
+      if(!help.hidden||document.hidden||button.disabled)return;
       lastTouchAt=performance.now();
       action();
     });
@@ -548,6 +551,7 @@ function start(){
         e.preventDefault();
         return;
       }
+      if(!help.hidden||document.hidden||button.disabled){e.preventDefault();return;}
       action();
     });
   }

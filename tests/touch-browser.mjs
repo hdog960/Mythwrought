@@ -104,6 +104,19 @@ try{
   assert.equal(await page.evaluate(()=>window.scrollY),0,'Multi-touch gesture scrolled the game page');
   // Continuous stick mode must rotate only while held, using a radial dead zone.
   await page.locator('#menu').click();
+  // A delayed iOS pointerdown/click after opening settings must not jump,
+  // mine or place behind the menu, even if delivered to a hidden grip button.
+  const blocked=await page.evaluate(()=>{
+    const scene=document.querySelector('#scene');
+    const before={jump:scene.dataset.playerVelocityY,edits:window.__mythwroughtTest.block(16,18,0)};
+    for(const id of ['jump','dig','place']){
+      const button=document.getElementById(id);
+      button.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true,pointerType:'touch'}));
+      button.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,detail:0}));
+    }
+    return {before,after:{jump:scene.dataset.playerVelocityY,edits:window.__mythwroughtTest.block(16,18,0)}};
+  });
+  assert.deepEqual(blocked.after,blocked.before,'Menu-open touch actions modified gameplay state');
   await page.locator('#lookMode').selectOption('stick');
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v004-look-mode')),'stick');
   await page.locator('#closeHelp').click();
