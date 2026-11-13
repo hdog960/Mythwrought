@@ -33,7 +33,7 @@ try{
     };
     const nestedSpace=dispatch(nested,'Space');
     const nestedArrow=dispatch(nested,'ArrowUp');
-    const canvasSpace=dispatch(document.querySelector('#scene'),'Space');
+    const canvasSpace=dispatch(document.querySelector('#scene'),'ArrowUp');
     button.remove();
     return {nestedSpace,nestedArrow,canvasSpace};
   });
