@@ -122,12 +122,25 @@ export async function createVaultBackup(raw,factory=globalThis.indexedDB){
     throw Error('Device backup read-back does not match the original bytes');
   return {id:record.id,seed:record.seed,createdAt:record.createdAt,edits:record.edits};
 }
+export function requireVaultBackup(record){
+  if(record===undefined)throw Error('Selected device backup no longer exists; nothing was deleted');
+  return record;
+}
 export async function deleteVaultBackup(id,factory=globalThis.indexedDB){
   assertRecordId(id);
   await withVault(factory,async db=>{
     const tx=db.transaction(VAULT_STORE,'readwrite');
     const done=transactionFinished(tx);
-    tx.objectStore(VAULT_STORE).delete(id);
+    const store=tx.objectStore(VAULT_STORE);
+    // Never report success for an absent snapshot. Read and delete inside one
+    // write transaction so another tab cannot remove it between those steps.
+    const existing=await requestResult(store.get(id));
+    if(existing===undefined){
+      tx.abort();
+      await done.catch(()=>{});
+      requireVaultBackup(existing);
+    }
+    store.delete(id);
     await done;
   });
   // Verify deletion without altering any other backup or live save.
