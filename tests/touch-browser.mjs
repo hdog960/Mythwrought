@@ -19,6 +19,26 @@ const deltaYaw=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 try{
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,{timeout:20000});
+  // Browser-level keyboard focus contract: nested controls must keep their
+  // own Space/arrow handling; the game canvas still receives shortcuts.
+  const focusIsolation=await page.evaluate(()=>{
+    const button=document.createElement('button');
+    const nested=document.createElement('span');
+    button.append(nested);document.body.append(button);
+    const dispatch=(target,code)=>{
+      const event=new KeyboardEvent('keydown',{code,bubbles:true,cancelable:true});
+      target.dispatchEvent(event);
+      document.dispatchEvent(new KeyboardEvent('keyup',{code,bubbles:true}));
+      return event.defaultPrevented;
+    };
+    const nestedSpace=dispatch(nested,'Space');
+    const nestedArrow=dispatch(nested,'ArrowUp');
+    const canvasSpace=dispatch(document.querySelector('#scene'),'Space');
+    button.remove();
+    return {nestedSpace,nestedArrow,canvasSpace};
+  });
+  assert.deepEqual(focusIsolation,{nestedSpace:false,nestedArrow:false,canvasSpace:true},
+    'Nested accessibility controls must retain keyboard events while canvas shortcuts remain active');
   const left=center(await page.locator('#movePad').boundingBox());
   const right=center(await page.locator('#lookPad').boundingBox());
   const cdp=await context.newCDPSession(page);
