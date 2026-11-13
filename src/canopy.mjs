@@ -96,6 +96,18 @@ function evergreen(out,x,y,z,variation,beacon=false){
     }
   }
   if(beacon){
+    // Grounded eight-sided moss-and-amber root halo: a readable landmark
+    // footprint at eye level even when the tall crown is outside the frame.
+    // All points remain within the two-block checked crown footprint.
+    for(let i=0;i<8;i++){
+      const a=(i+variation)*Math.PI/4,b=(i+1+variation)*Math.PI/4;
+      const outerA=[x+Math.cos(a)*1.35,y+.08,z+Math.sin(a)*1.35];
+      const outerB=[x+Math.cos(b)*1.35,y+.08,z+Math.sin(b)*1.35];
+      tri(out,[x,y+.13,z],outerA,outerB,
+        i%2?[.52,.62,.31]:[.66,.54,.27],7);
+    }
+  }
+  if(beacon){
     // Mid-canopy gold facets form a second, lower landmark band that stays
     // visible when the top crown-star is clipped by a compact phone viewport.
     // Opaque geometry only; no new draw calls or persistent voxel changes.
