@@ -137,6 +137,23 @@ try{
     return {before,after:{jump:scene.dataset.playerVelocityY,edits:window.__mythwroughtTest.block(16,18,0)}};
   });
   assert.deepEqual(blocked.after,blocked.before,'Menu-open touch actions modified gameplay state');
+  // A delayed grip/precision/mouse pointerdown while settings is visible
+  // must not become active input after the modal closes.
+  const modalInput=await page.evaluate(()=>{
+    const pad=document.getElementById('movePad');
+    const look=document.getElementById('lookPad');
+    const precision=document.getElementById('precision');
+    const scene=document.getElementById('scene');
+    for(const element of [pad,look,precision,scene])
+      element.dispatchEvent(new PointerEvent('pointerdown',{
+        bubbles:true,cancelable:true,pointerType:element===scene?'mouse':'touch',
+        pointerId:71,clientX:30,clientY:30,button:0
+      }));
+    return {move:pad.classList.contains('engaged'),look:look.classList.contains('engaged'),
+      precision:precision.classList.contains('held')};
+  });
+  assert.deepEqual(modalInput,{move:false,look:false,precision:false},
+    'Modal-open delayed pointers captured a gameplay grip');
   await page.locator('#lookMode').selectOption('stick');
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v004-look-mode')),'stick');
   await page.locator('#closeHelp').click();
