@@ -540,6 +540,8 @@ function start(){
     button.addEventListener('pointerdown',e=>{
       if(e.pointerType!=='touch')return;
       e.preventDefault();
+      // A queued iOS touch must not edit the world behind settings or on app suspension.
+      if(!help.hidden||document.hidden||button.disabled)return;
       lastTouchAt=performance.now();
       action();
     });
@@ -548,6 +550,7 @@ function start(){
         e.preventDefault();
         return;
       }
+      if(!help.hidden||document.hidden||button.disabled){e.preventDefault();return;}
       action();
     });
   }
