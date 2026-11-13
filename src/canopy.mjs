@@ -98,10 +98,10 @@ function crown(out,x,y,z,r,variation){
   }
 }
 // Distinct upright evergreen silhouette: stacked, faceted needle tiers.
-function evergreen(out,x,y,z,variation,beacon=false){
+function evergreen(out,x,y,z,variation,beacon=false,profile='mixed'){
   // Rare golden-tipped sentinel pines are visual landmarks, not world objects.
   // Keep their original footprint and triangle count; only silhouette/colour vary.
-  const height=(beacon?6.6:4.1)+variation*.8;
+  const height=(beacon?6.6:profile==='grove'?4.75:profile==='open'?3.55:4.1)+variation*.8;
   const bark=[.48,.30,.19],ring=[[-.16,-.16],[.16,-.16],[.16,.16],[-.16,.16]];
   for(let i=0;i<4;i++){
     const j=(i+1)%4;
@@ -117,7 +117,7 @@ function evergreen(out,x,y,z,variation,beacon=false){
     [[.25,.48,.40],[.39,.62,.43],[.58,.70,.39],[.78,.77,.45]]:
     [[.19,.43,.38],[.26,.54,.43],[.34,.61,.46],[.40,.68,.48]];
   for(let tier=0;tier<4;tier++){
-    const base=y+.65+tier*(beacon?1.26:.77),rad=(beacon?1.48:1.32)-tier*.19;
+    const base=y+.65+tier*(beacon?1.26:profile==='grove'?.86:profile==='open'?.70:.77),rad=(beacon?1.48:profile==='grove'?1.49:profile==='open'?1.12:1.32)-tier*.19;
     const top=base+(beacon?1.8:1.22);
     for(let i=0;i<8;i++){
       const a=(i+variation)*Math.PI/4,b=(i+1+variation)*Math.PI/4;
@@ -185,11 +185,17 @@ export function woodlandDistrict(cx,cz,seed){
   const v=hash(Math.floor(cx/4),Math.floor(cz/4),seed,317);
   return v<.28?'open':v<.68?'grove':'mixed';
 }
+// Districts alter real tree silhouettes, not just the chance of placing trees.
+// Open glades favor broad, low crowns; groves rise into taller layered canopies.
+export function woodlandTreeProfile(cx,cz,seed){
+  return woodlandDistrict(cx,cz,seed);
+}
 export function woodlandTreeStyle(x,z,seed){
   return hash(x,z,seed,67)<.43?'evergreen':'broadleaf';
 }
-function tree(out,x,y,z,variation){
-  const h=3.2+variation*.8, bark=[.52,.34,.23];
+function tree(out,x,y,z,variation,profile='mixed'){
+  const h=(profile==='grove'?3.85:profile==='open'?2.85:3.2)+variation*.8, bark=[.52,.34,.23];
+  const spread=profile==='open'?1.19:profile==='grove'?.92:1;
   const ring=[[ -.22,-.22],[.22,-.22],[.22,.22],[-.22,.22]];
   for(let i=0;i<4;i++){
     const j=(i+1)%4;
@@ -200,10 +206,10 @@ function tree(out,x,y,z,variation){
   roots(out,x,y,z,variation);
   woodlandFloor(out,x,y,z,variation);
   for(let i=0;i<3;i++)branch(out,x,y+h*.62,z,.8,i*Math.PI*2/3+variation,1.05);
-  crown(out,x,y+h-.35,z,1.25,variation);
-  crown(out,x-.45,y+h-.85,z+.18,.83,variation+.3);
-  crown(out,x+.48,y+h-.7,z-.22,.87,variation+.7);
-  crownHighlights(out,x,y+h-.35,z,1.25,variation);
+  crown(out,x,y+h-.35,z,1.25*spread,variation);
+  crown(out,x-.45,y+h-.85,z+.18,.83*spread,variation+.3);
+  crown(out,x+.48,y+h-.7,z-.22,.87*spread,variation+.7);
+  crownHighlights(out,x,y+h-.35,z,1.25*spread,variation);
 }
 export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass=1,air=0}={}){
   if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
@@ -212,7 +218,7 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
      !Number.isInteger(chunkSize)||chunkSize<12||chunkSize>64)
     throw Error('Invalid woodland canopy inputs');
   const out=[];let count=0;
-  const district=woodlandDistrict(cx,cz,world.seed);
+  const district=woodlandTreeProfile(cx,cz,world.seed);
   // A winding open-air sightline passes through each four-chunk district.
   // Grove interiors remain thick on either side; open districts keep wider
   // breathing room. Chunk-local sampling makes the vista seed-repeatable.
@@ -240,8 +246,9 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
     if(!clear)continue;
     const style=woodlandTreeStyle(x,z,world.seed);
     const beforeTree=out.length;
-    (sentinel?evergreen:(style==='evergreen'?evergreen:tree))(
-      out,x+.5,h+1.01,z+.5,hash(x,z,world.seed,59),sentinel);
+    const variation=hash(x,z,world.seed,59);
+    if(sentinel||style==='evergreen')evergreen(out,x+.5,h+1.01,z+.5,variation,sentinel,district);
+    else tree(out,x+.5,h+1.01,z+.5,variation,district);
     // A dense tree must not borrow capacity from the other tree's budget.
     if((out.length-beforeTree)/STRIDE>MAX_VERTICES)
       throw Error('Woodland tree exceeded per-tree vertex budget');
