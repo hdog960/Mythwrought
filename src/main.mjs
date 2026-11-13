@@ -493,7 +493,11 @@ function start(){
     look(dx,dy,.006);
     drag.x=e.clientX;drag.y=e.clientY;
   });
-  canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved)edit(drag.button===2?'place':'mine');drag=null;}});
+  canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved&&help.hidden&&!document.hidden)edit(drag.button===2?'place':'mine');drag=null;}});
+  // A cancelled mouse gesture must never be converted into a mine/place tap.
+  // Safari may cancel capture on interruption without delivering pointerup.
+  canvas.addEventListener('pointercancel',e=>{if(drag?.id===e.pointerId)drag=null;});
+  canvas.addEventListener('lostpointercapture',e=>{if(drag?.id===e.pointerId)drag=null;});
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
   document.addEventListener('keydown',e=>{
     // Do not steal arrows, space or WASD from accessibility controls and form fields.
