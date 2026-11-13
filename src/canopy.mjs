@@ -136,14 +136,14 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
     if(hash(cx+i,cz-i,world.seed,43)>.45)continue;
     const h=heightAt(x,z,world.seed);
     if(baseAt(x,h,z,world.seed)!==grass||world.get(x,h,z)!==grass)continue;
+    const sentinel=count===0&&woodlandSentinelChunk(cx,cz,world.seed);
     let clear=true;
-    // Clear the trunk and broad crown footprint; do not visually obscure builds.
+    // Tall sentinel tiers must not visually cover player-built blocks above the old six-block clearance.
     for(let dx=-2;dx<=2&&clear;dx++)for(let dz=-2;dz<=2&&clear;dz++)
-      for(let dy=1;dy<=6;dy++)
+      for(let dy=1;dy<=(sentinel?9:6);dy++)
         if(world.get(x+dx,h+dy,z+dz)!==air){clear=false;break;}
     if(!clear)continue;
     const style=woodlandTreeStyle(x,z,world.seed);
-    const sentinel=count===0&&woodlandSentinelChunk(cx,cz,world.seed);
     (sentinel?evergreen:(style==='evergreen'?evergreen:tree))(
       out,x+.5,h+1.01,z+.5,hash(x,z,world.seed,59),sentinel);count++;
   }
