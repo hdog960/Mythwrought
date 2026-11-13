@@ -104,17 +104,21 @@ export function meshChunk(world,cx,cz){
         const id=world.get(x,y,z);
         if(id===BLOCK.AIR)continue;
         const color=COLORS[id]||COLORS[3];
-        // Low-frequency world-space tint is independent of chunk coordinates, so
-        // materials transition naturally at x/z = n*CHUNK_SIZE instead of
-        // changing color when a new mesh happens to start.
-        const variance=.90+noise(x/9,z/9,world.seed+91)*.14+
-          hash(x+y*5,z-y*3,world.seed+91)*.08;
+        // Most underground voxels are fully enclosed. Defer the two noise
+        // samples and tint calculation until the FIRST exposed face; otherwise
+        // a solid chunk pays for shading thousands of invisible blocks.
+        // Keep world-space inputs and face order identical for save/seed parity.
+        let variance;
         for(const face of FACE){
           if(world.get(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
+          if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
+            hash(x+y*5,z-y*3,world.seed+91)*.08;
+          const r=clamp(color[0]*variance*face.lit,0,1);
+          const g=clamp(color[1]*variance*face.lit,0,1);
+          const b=clamp(color[2]*variance*face.lit,0,1);
           for(const k of [0,1,2,0,2,3]){
-            const p=face.q[k];
-            const uv=FACE_UV[k];
-            vertices.push(x+p[0],y+p[1],z+p[2],...color.map(c=>clamp(c*variance*face.lit,0,1)),uv[0],uv[1],id);
+            const p=face.q[k],uv=FACE_UV[k];
+            vertices.push(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id);
           }
         }
       }
