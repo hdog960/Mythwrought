@@ -232,3 +232,7 @@ Gameplay :20 updated `src/main.mjs` to reject new movement/look/precision and mo
 
 ### 2026-11-12 23:25 Central — :20 gameplay candidate (unmerged)
 PR #53 head `fb5283e057329a10b54ab0eb32343ab26a0afff3` corrects a genuine Chromium test setup failure (hidden close button, duplicate menu open) and rejects keyboard gameplay events while document.hidden, with a browser regression for delayed Space. Starting main `21b5b77fd5f819643a56f05509025fc7c27bd87d`; exact-head CI/screenshots, merge and Pages unverified. Preserve v0.10 Gate A, independent controller grips and schema-1 saves. Physical iPhone, artwork and thermals remain creator-only acceptance.
+
+
+## 2026-11-13 00:20 Central — :20 hidden-page and GPU-recovery input guard (UNMERGED)
+PR #53: `src/main.mjs` rejects mine/place edits and queued jumps at their mutation boundaries while settings are open, the page is hidden, or WebGL context is lost. `tests/touch-browser.mjs` exercises delayed hidden-page touch and accessibility clicks plus Space in genuine Chromium. Source/test candidate `4973692779a073734eb4c03205744a2c503ddbe0` from verified main `21b5b77fd5f819643a56f05509025fc7c27bd87d` ancestry; latest-head CI, actual screenshot review, merge and Pages are NOT verified. Existing schema-1 saves and two-thumb grips unchanged. No physical iPhone validation or premium art approval; Gate A remains open and v0.11 locked.
