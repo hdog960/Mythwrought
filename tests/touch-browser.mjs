@@ -217,11 +217,11 @@ try{
   const hiddenKey=await page.evaluate(()=>{
     const scene=document.getElementById('scene');
     const before=Number(scene.dataset.playerFeet);
+    const beforeBlock=window.__mythwroughtTest.block(16,18,0);
     Object.defineProperty(document,'hidden',{configurable:true,value:true});
     try{
       // A delayed input burst during backgrounding must not mutate a voxel,
       // even if Safari delivers both touch and accessibility click events.
-      const beforeBlock=window.__mythwroughtTest.block(16,18,0);
       for(const id of ['dig','place']){
         const action=document.getElementById(id);
         action.dispatchEvent(new PointerEvent('pointerdown',{
