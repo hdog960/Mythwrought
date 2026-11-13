@@ -478,6 +478,9 @@ function start(){
     lookStick.x=lookStick.y=0;
     precisionPointer=null;precisionHeld=false;
     keys.clear();joystick.x=joystick.y=0;
+    // Cancel queued one-shot actions too: a Space/touch jump can be queued
+    // immediately before Safari blurs or the settings modal opens.
+    jumpQueued=false;drag=null;
     precisionButton.classList.remove('held');
     cameraKnob.style.transform='';knob.style.transform='';
   }
