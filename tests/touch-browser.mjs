@@ -231,22 +231,23 @@ try{
           bubbles:true,cancelable:true,detail:0
         }));
       }
-      assert.equal(window.__mythwroughtTest.block(16,18,0),beforeBlock,
-        'Hidden-page delayed mine/place mutated a saved voxel');
+      const afterBlock=window.__mythwroughtTest.block(16,18,0);
       scene.dispatchEvent(new KeyboardEvent('keydown',{
         code:'Space',bubbles:true,cancelable:true
       }));
     }finally{
       delete document.hidden;
     }
-    return before;
+    return {before, beforeBlock, afterBlock};
   });
+  assert.equal(hiddenKey.afterBlock,hiddenKey.beforeBlock,
+    'Hidden-page delayed mine/place mutated a saved voxel');
   await page.waitForTimeout(220);
   const hiddenAfter=await page.evaluate(()=>({
     feet:Number(document.querySelector('#scene').dataset.playerFeet),
     velocity:Number(document.querySelector('#scene').dataset.playerVelocityY)
   }));
-  assert.ok(hiddenAfter.feet<=hiddenKey+.06,'Hidden-page keyboard event triggered jump');
+  assert.ok(hiddenAfter.feet<=hiddenKey.before+.06,'Hidden-page keyboard event triggered jump');
   assert.ok(hiddenAfter.velocity<=.01,'Hidden-page keyboard event queued jump velocity');
   assert.deepEqual(errors,[],'Console/page errors during 2-thumb interaction');
   console.log('PASS simultaneous movement with jump/mine/place, dual-thumb look, precision, cancellation');
