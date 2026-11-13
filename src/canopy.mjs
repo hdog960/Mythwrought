@@ -167,7 +167,13 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
         if(world.get(x+dx,h+dy,z+dz)!==air){clear=false;break;}
     if(!clear)continue;
     const style=woodlandTreeStyle(x,z,world.seed);
-    (style==='evergreen'?evergreen:tree)(out,x+.5,h+1.01,z+.5,hash(x,z,world.seed,59));count++;
+    const before=out.length;
+    (style==='evergreen'?evergreen:tree)(out,x+.5,h+1.01,z+.5,hash(x,z,world.seed,59));
+    // Enforce the per-tree GPU budget, not just an aggregate chunk allowance:
+    // a dense broadleaf must never borrow unused vertices from an evergreen.
+    if((out.length-before)/STRIDE>MAX_VERTICES)
+      throw Error('Woodland tree exceeded per-tree vertex budget');
+    count++;
   }
   if(out.length/STRIDE>MAX_TREES*MAX_VERTICES)
     throw Error('Woodland canopy exceeded vertex budget');
