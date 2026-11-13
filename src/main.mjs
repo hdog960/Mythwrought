@@ -203,6 +203,9 @@ function start(){
     // Not-yet-loaded chunks read the current global voxel world when meshed.
   }
   function edit(mode){
+    // Reject edits at the authoritative mutation boundary, including delayed
+    // events after Safari suspension or while WebGL context recovery is active.
+    if(!help.hidden||document.hidden||graphicsLost)return;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
     if(!result.ok){message(result.reason);return;}
     changed=true;
@@ -263,7 +266,7 @@ function start(){
     jumpQueued=false;
     message('Returned to a safe surface near spawn (prototype void recovery)');
   }
-  function jump(){if(help.hidden)jumpQueued=true;}
+  function jump(){if(help.hidden&&!document.hidden&&!graphicsLost)jumpQueued=true;}
   function move(dt){
     const strafe=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joystick.x;
     const forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)-joystick.y;
