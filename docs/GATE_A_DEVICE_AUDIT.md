@@ -113,3 +113,7 @@ A proposed Gate A vault-only fix rejects deletion of an already-missing snapshot
 
 ## Optional vault blocked-open lifecycle — candidate, NOT device verified
 A blocked IndexedDB open can later succeed after the caller already rejected; the candidate closes that late connection and skips abandoned schema upgrade. Simulated Node regression added, but full CI and genuine mobile screenshots remain pending. This is optional backup robustness only, not canonical transactional migration or physical iPhone acceptance.
+
+
+## 2026-11-13 :40 — abandoned optional vault upgrade abort candidate (UNMERGED)
+Verified main `e79a8a7b8fea5315cdf8d0b482e2a252667ea590`. Integration owner :40: a blocked IndexedDB open can later receive `onupgradeneeded` after the caller rejected; skipping store creation alone can still commit an empty version-1 database. Candidate explicitly aborts the abandoned versionchange transaction and adds two Node regressions. Files `src/vault.mjs`, `tests/vault.test.mjs`; branch `gate-a-vault-abandoned-upgrade-abort-20261113-0540`. No canonical schema-1 migration, save overwrite, art or controls edits. Collision risk: shared ledger/audit/handoff docs with :00/#59 and :20/#58; keep this independent and recheck main before guarded merge. CI and genuine screenshots pending; no deployment claim. Next: (1) exact-head Node/Chromium and genuine screenshot review for this candidate; (2) inspect #59 clearing-specific visuals and #58 corrected browser tests before integrating either. Creator-only device/art gates remain open; v0.11 locked.
