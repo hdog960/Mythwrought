@@ -35,7 +35,7 @@ function roots(out,x,y,z,variation){
 function woodlandFloor(out,x,y,z,variation){
   const greens=[[.28,.55,.37],[.40,.64,.39],[.51,.69,.40]];
   for(let fan=0;fan<3;fan++){
-    const a=fan*Math.PI*2/3+variation*.7,dx=Math.cos(a),dz=Math.sin(a);
+    // Ferns gather into a readable sunward patch instead of an even ring.\n    const a=variation*Math.PI*2+fan*.42-.42,dx=Math.cos(a),dz=Math.sin(a);
     const reach=.57+(fan%2)*.17,side=[-dz,dx];
     const center=[x+dx*.20,y+.08,z+dz*.20];
     const tip=[x+dx*reach,y+.20+(fan%2)*.10,z+dz*reach];
@@ -46,13 +46,13 @@ function woodlandFloor(out,x,y,z,variation){
   }
   const amber=[[.80,.52,.25],[.70,.39,.23],[.88,.67,.32]];
   for(let i=0;i<3;i++){
-    const a=(i+variation)*Math.PI*2/3,dx=Math.cos(a),dz=Math.sin(a);
+    // Leaf litter collects on the opposite side of the trunk.\n    const a=variation*Math.PI*2+Math.PI+(i-1)*.52,dx=Math.cos(a),dz=Math.sin(a);
     const px=x+dx*.72,pz=z+dz*.72;
     tri(out,[px-.10,y+.035,pz-.08],[px+.12,y+.038,pz-.04],
       [px+.01,y+.04,pz+.12],amber[i],7);
   }
-  for(let i=0;i<1;i++){
-    const a=(i+.35+variation)*Math.PI,dx=Math.cos(a),dz=Math.sin(a);
+  // One low stone offsets the fern patch without extra GPU allocation.\n  for(let i=0;i<1;i++){
+    const a=variation*Math.PI*2+Math.PI*.62,dx=Math.cos(a),dz=Math.sin(a);
     const px=x+dx*.88,pz=z+dz*.88;
     const grey=i?[.47,.53,.43]:[.55,.59,.47];
     tri(out,[px-.17,y+.035,pz-.12],[px+.15,y+.035,pz-.12],
