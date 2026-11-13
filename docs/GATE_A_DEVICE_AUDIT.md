@@ -117,3 +117,6 @@ A blocked IndexedDB open can later succeed after the caller already rejected; th
 
 ### 2026-11-13 — woodland clearing candidate (browser and hardware evidence pending)
 The :00 visual-owner candidate renders connected 2×2-chunk tree-free clearings inside selected 4×4 chunk regions, preserving underlying editable terrain and schema-1 saves. This is an unmerged visual experiment; check 568×320 and 932×430 genuine Chromium captures, scenery continuity, seed reproducibility and mesh budget before guarded integration. Physical Safari thermals/ergonomics and creator art approval remain open.
+
+### 2026-11-13 woodland pocket variation — candidate only
+The visual candidate varies which quadrant of each 4×4 chunk region holds its connected 2×2 tree-free pocket, reducing repeated diagonal alignments. Regression checks four orientations, negative chunk coordinates and unchanged world save. Previous candidate passed browser CI (run 43382487498), but its screenshots have not been visually inspected; new revision requires fresh Node/Chromium, actual 568×320/932×430 captures and user-only iPhone approval. No physical performance or art acceptance claimed.
