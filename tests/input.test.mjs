@@ -58,3 +58,18 @@ test('keyboard focus in nested interactive controls never leaks into world input
   assert.equal(isWorldControlTarget(el('SUMMARY')),false);
   assert.equal(isWorldControlTarget(el('SPAN',el('CANVAS'))),true);
 });
+
+// HTML contenteditable="" and ARIA composite widgets are keyboard-owned surfaces.
+test('empty editable attributes and composite widget descendants isolate shortcuts',()=>{
+  const el=(tagName,parentElement=null,attrs={})=>({
+    tagName,parentElement,isContentEditable:false,
+    hasAttribute:name=>Object.prototype.hasOwnProperty.call(attrs,name),
+    getAttribute:name=>Object.prototype.hasOwnProperty.call(attrs,name)?attrs[name]:null
+  });
+  assert.equal(isWorldControlTarget(el('SPAN',el('DIV',null,{contenteditable:''}))),false);
+  assert.equal(isWorldControlTarget(el('SPAN',el('DIV',null,{contenteditable:'plaintext-only'}))),false);
+  for(const role of ['tab','treeitem','gridcell','menuitemcheckbox','menuitemradio']){
+    assert.equal(isWorldControlTarget(el('SPAN',el('DIV',null,{role}))),false,role);
+  }
+  assert.equal(isWorldControlTarget(el('SPAN',el('CANVAS'))),true);
+});
