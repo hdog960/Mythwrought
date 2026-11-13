@@ -227,3 +227,6 @@ Verified main `ceb7fafdaca5a1566ee69a9ebc5df9165a4523f2` has green Node/Chromium
 
 ## 2026-11-13 03:02 Central — Gate A woodland clearing replay (UNMERGED)
 Visual :00 replayed conflicted PR #57 render-only clearing logic and seed/terrain regression tests onto verified main e79a8a7b8fea. Branch gate-a-clearing-reconcile-20261113-0302; source/test changes in src/canopy.mjs and tests/canopy.test.mjs. Exact-head Node/Chromium, genuine screenshots, guarded merge and Pages verification remain pending. No save schema, controls, harvesting or future features changed. Owner :40 integration; v0.11 locked.
+
+### 2026-11-13 04:55 Central — Gate A visual PR #59 unmerged
+Visual-owner branch adds restored-schema-1-edits, negative-region and seed-variation regression coverage for deterministic 2×2 woodland clearing geometry. Candidate source/test commit `3ac521c130ecf8ca6f6377c98aee8c0bdfcc3333`; exact-head CI, genuine mobile screenshots, guarded merge and Pages remain pending. No new gameplay or canonical IndexedDB migration. Physical iPhone and artwork acceptance remain creator-only; v0.11 locked.
