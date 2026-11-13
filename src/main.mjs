@@ -394,7 +394,7 @@ function start(){
       heldPointers.delete(active);active=null;release();el.classList.remove('engaged');
     }
     el.addEventListener('pointerdown',e=>{
-      if(active!==null)return;
+      if(active!==null||!help.hidden||document.hidden)return;
       e.preventDefault();active=e.pointerId;lastX=e.clientX;lastY=e.clientY;
       heldPointers.set(active,stop);
       try{el.setPointerCapture(active);}catch(_){}
@@ -467,6 +467,7 @@ function start(){
     precisionPointer=null;precisionHeld=false;precisionButton.classList.remove('held');
   }
   precisionButton.addEventListener('pointerdown',e=>{
+    if(!help.hidden||document.hidden||precisionPointer!==null)return;
     e.preventDefault();precisionPointer=e.pointerId;precisionHeld=true;
     precisionButton.classList.add('held');
     try{precisionButton.setPointerCapture(e.pointerId);}catch(_){}
@@ -485,7 +486,7 @@ function start(){
     cameraKnob.style.transform='';knob.style.transform='';
   }
   let drag=null;
-  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
+  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&help.hidden&&!document.hidden){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
   canvas.addEventListener('pointermove',e=>{
     if(!drag||drag.id!==e.pointerId)return;
     const {x:dx,y:dy}=safePointerDelta(e.clientX-drag.x,e.clientY-drag.y);
