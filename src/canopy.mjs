@@ -176,13 +176,21 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
     throw Error('Invalid woodland canopy inputs');
   const out=[];let count=0;
   const district=woodlandDistrict(cx,cz,world.seed);
+  // A winding open-air sightline passes through each four-chunk district.
+  // Grove interiors remain thick on either side; open districts keep wider
+  // breathing room. Chunk-local sampling makes the vista seed-repeatable.
+  const localX=((cx%4)+4)%4,localZ=((cz%4)+4)%4;
+  const bend=hash(Math.floor(cx/4),Math.floor(cz/4),world.seed,389)*1.5-.75;
+  const distance=Math.abs(localX-(1.5+bend+.32*Math.sin((localZ+.5)*1.2)));
+  const vista=distance<(district==='open'?1.15:.53);
+  const baseChance=district==='open'?.27:district==='grove'?.83:.56;
+  const chance=vista?baseChance*.23:baseChance;
   // Candidate centers stay within each chunk: no canopy crosses a chunk seam.
   for(let i=0;i<4&&count<MAX_TREES;i++){
     const x=cx*chunkSize+3+Math.floor(hash(cx+i,cz,world.seed,19)*(chunkSize-6));
     const z=cz*chunkSize+3+Math.floor(hash(cx,cz+i,world.seed,31)*(chunkSize-6));
     // Keep a contiguous four-chunk-wide vista or denser grove, rather than
     // scattering decorative differences independently in every chunk.
-    const chance=district==='open'?.16:district==='grove'?.76:.45;
     if(hash(cx+i,cz-i,world.seed,43)>chance)continue;
     const h=heightAt(x,z,world.seed);
     if(baseAt(x,h,z,world.seed)!==grass||world.get(x,h,z)!==grass)continue;
