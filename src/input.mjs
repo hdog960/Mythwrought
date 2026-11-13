@@ -19,9 +19,16 @@ export function stickLookDelta(stick,seconds){
   const dt=Math.min(seconds,.05);
   return {x:stick.x*dt*185,y:stick.y*dt*145};
 }
+// Keyboard events bubble from nested icons, labels and custom interactive
+// controls. Only the game surface (not an ancestor widget) may own shortcuts.
 export function isWorldControlTarget(element){
-  if(!element)return true;
-  return !element.isContentEditable&&!['INPUT','SELECT','TEXTAREA','BUTTON'].includes(element.tagName);
+  for(let node=element;node;node=node.parentElement){
+    if(node.isContentEditable||node.getAttribute?.('contenteditable')==='true')return false;
+    if(['INPUT','SELECT','TEXTAREA','BUTTON','A','SUMMARY'].includes(node.tagName))return false;
+    const role=node.getAttribute?.('role');
+    if(['button','link','textbox','combobox','slider','spinbutton','menuitem','option','switch','checkbox','radio'].includes(role))return false;
+  }
+  return true;
 }
 export function selectedLookMode(mode){return LOOK_MODES.includes(mode)?mode:'swipe';}
 
