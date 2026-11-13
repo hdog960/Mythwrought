@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,terrainHeight,meshChunk,CHUNK_SIZE} from '../src/voxel.mjs';
-import {woodlandCanopyVertices,woodlandTreeStyle,woodlandSentinelChunk,CANOPY_LIMITS} from '../src/canopy.mjs';
+import {woodlandCanopyVertices,woodlandTreeStyle,woodlandSentinelChunk,woodlandDistrict,CANOPY_LIMITS} from '../src/canopy.mjs';
 
 const base=(x,y,z,seed)=>new VoxelWorld(seed).get(x,y,z);
 const options={chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:base,grass:BLOCK.GRASS,air:BLOCK.AIR};
@@ -212,4 +212,21 @@ test('sentinel landmark has a grounded eight-facet halo without save writes or b
   }
   assert.ok(found,'find an unobstructed sentinel halo');
   assert.equal(JSON.stringify(world.save()),saved);
+});
+
+
+test('connected four-chunk woodland districts create seed-stable open vistas and groves',()=>{
+  const seed=179,world=new VoxelWorld(seed),saved=JSON.stringify(world.save());
+  const types=new Set();
+  for(let dx=-5;dx<=5;dx++)for(let dz=-5;dz<=5;dz++){
+    const cx=dx*4,cz=dz*4,type=woodlandDistrict(cx,cz,seed);
+    types.add(type);
+    for(let x=cx;x<cx+4;x++)for(let z=cz;z<cz+4;z++){
+      assert.equal(woodlandDistrict(x,z,seed),type,'district seams must not split four-chunk vistas');
+      assert.deepEqual(woodlandCanopyVertices(world,x,z,options),woodlandCanopyVertices(world,x,z,options));
+    }
+  }
+  assert.ok(types.has('open')&&types.has('grove')&&types.has('mixed'));
+  assert.equal(JSON.stringify(world.save()),saved,'district art must not write world edits');
+  assert.throws(()=>woodlandDistrict(1.5,0,seed),/Invalid woodland district/);
 });
