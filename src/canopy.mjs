@@ -92,6 +92,21 @@ function evergreen(out,x,y,z,variation){
     }
   }
 }
+// A sparse two-by-two pocket in selected four-by-four chunk regions forms
+// a readable woodland clearing. This is strictly render-only: the terrain,
+// editable grass and schema-1 world remain untouched.
+export function woodlandClearing(cx,cz,seed){
+  if(!Number.isInteger(cx)||!Number.isInteger(cz)||!Number.isInteger(seed))
+    throw Error('Invalid woodland clearing coordinates');
+  const mx=Math.floor(cx/4),mz=Math.floor(cz/4);
+  // Vary the quadrant of each open pocket by seed and region; fixed-corner
+  // pockets created visible repeating diagonal lanes across the landscape.
+  const ox=hash(mx,mz,seed,127)<.5?0:2;
+  const oz=hash(mx,mz,seed,131)<.5?0:2;
+  return hash(mx,mz,seed,113)<.54 &&
+    ((cx%4+4)%4)>=ox && ((cx%4+4)%4)<ox+2 &&
+    ((cz%4+4)%4)>=oz && ((cz%4+4)%4)<oz+2;
+}
 export function woodlandTreeStyle(x,z,seed){
   return hash(x,z,seed,67)<.43?'evergreen':'broadleaf';
 }
@@ -117,6 +132,8 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
      typeof heightAt!=='function'||typeof baseAt!=='function'||
      !Number.isInteger(chunkSize)||chunkSize<12||chunkSize>64)
     throw Error('Invalid woodland canopy inputs');
+  // Clearings retain editable ground and remove only render-time canopy geometry.
+  if(woodlandClearing(cx,cz,world.seed))return new Float32Array(0);
   const out=[];let count=0;
   // Candidate centers stay within each chunk: no canopy crosses a chunk seam.
   for(let i=0;i<4&&count<MAX_TREES;i++){
