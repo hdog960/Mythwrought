@@ -73,3 +73,18 @@ test('empty editable attributes and composite widget descendants isolate shortcu
   }
   assert.equal(isWorldControlTarget(el('SPAN',el('CANVAS'))),true);
 });
+
+test('ARIA composite containers reserve keyboard shortcuts for nested controls',()=>{
+  const el=(tagName,parentElement=null,role=null)=>({
+    tagName,parentElement,isContentEditable:false,
+    getAttribute:name=>name==='role'?role:null
+  });
+  for(const role of ['menu','menubar','listbox','tree','grid','tablist','toolbar','radiogroup','dialog','alertdialog']){
+    const container=el('DIV',null,role);
+    assert.equal(isWorldControlTarget(el('SPAN',container)),false,role+' nested text');
+    assert.equal(isWorldControlTarget(el('SVG',el('SPAN',container))),false,role+' nested icon');
+  }
+  assert.equal(isWorldControlTarget(el('SPAN',el('DIV',null,'presentation'))),true,
+    'Presentation-only wrappers must not disable gameplay');
+  assert.equal(isWorldControlTarget(el('CANVAS')),true);
+});
