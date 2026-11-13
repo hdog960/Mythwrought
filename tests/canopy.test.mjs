@@ -130,3 +130,22 @@ test('individual broadleaf mesh respects the 450-vertex cap even when alone',()=
   }
   assert.ok(inspected>0,'seeded world contains broadleaf fixtures');
 });
+
+test('seeded forest-floor clusters vary without mutating either world',()=>{
+  const first=new VoxelWorld(179),second=new VoxelWorld(180);
+  const beforeA=JSON.stringify(first.save()),beforeB=JSON.stringify(second.save());
+  let varied=0,visible=0;
+  for(let cx=-3;cx<=3;cx++)for(let cz=-3;cz<=3;cz++){
+    const a=woodlandCanopyVertices(first,cx,cz,options);
+    const b=woodlandCanopyVertices(second,cx,cz,options);
+    if(a.length||b.length)visible++;
+    if(a.length!==b.length||a.some((value,i)=>value!==b[i]))varied++;
+    for(const mesh of [a,b]){
+      assert.ok(mesh.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+      for(let i=0;i<mesh.length;i++)assert.ok(Number.isFinite(mesh[i]));
+    }
+  }
+  assert.ok(visible>0&&varied>0,'woodland floor remains visibly seed-dependent');
+  assert.equal(JSON.stringify(first.save()),beforeA);
+  assert.equal(JSON.stringify(second.save()),beforeB);
+});
