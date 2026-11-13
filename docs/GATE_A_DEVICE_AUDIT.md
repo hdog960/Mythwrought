@@ -123,3 +123,7 @@ The independent :00 branch gate-a-woodland-beacon-20261113-0802 adds rare seed-s
 
 ## Sentinel high-build clearance — candidate only (2026-11-13)
 PR #61 corrects the taller sentinel pine's crown clearance from six to nine voxels while ordinary tree checks remain unchanged. Focused test places a block eight above a sentinel anchor, checks render suppression and schema-1 restoration, then removes the block and checks deterministic reappearance. This is render-only and not proof of actual iPhone readability or thermals. Corrected-head Chromium screenshots and creator artwork/control approval remain outstanding.
+
+
+## 2026-11-13 :00 visual legibility candidate — not device approval
+PR #61 adds golden upper facets to sentinel pines, with mesh/save regression. Previous-head Chromium screenshots 932x430 and 568x320 inspected, but neither establishes sentinel-specific appearance or physical iPhone readability. New head CI and screenshots pending; no device/art approval, Gate A remains OPEN.
