@@ -224,3 +224,7 @@ Verified main `ceb7fafdaca5a1566ee69a9ebc5df9165a4523f2` has green Node/Chromium
 
 ### 2026-11-12 21:20 Central — gameplay candidate PR #53 (UNMERGED)
 On the :20-owned PR #53 branch, `src/main.mjs` now discards cancelled/lost-capture mouse gestures rather than converting a delayed pointerup to mine/place, alongside queued-jump blur cancellation. `tests/touch-browser.mjs` adds a genuine Chromium mouse-cancellation regression. Source/test candidate `99431c76a10734991464668c6c6ef197b8675543`; handoff advances final head. Previous head `2f6629ae01db` had green CI run 43351930153, **not evidence for this updated candidate**. New exact-head Node/Chromium, screenshot inspection, merge and Pages are pending. No schema-1, woodland or Gate A approval changes.
+
+
+### 2026-11-12 22:20 Central — PR #53 delayed grip guard (UNMERGED)
+Gameplay :20 updated `src/main.mjs` to reject new movement/look/precision and mouse-canvas pointerdown while settings are visible or the document is hidden, preventing a late pointer from latching after resume. `tests/touch-browser.mjs` now asserts modal-open synthetic pointerdown cannot engage grips or precision. This is actual source/test work, not a hardware result. Source/test commit `8a5812f16a6176e7065b68ad48cb567d206119de`; final docs head advances separately. Exact-head Node/Chromium and authentic landscape screenshot review remain pending. :40 integration owner handles guarded merge; :00 woodland #51 and :40 vault #54 untouched. v0.10 Gate A, schema-1, 25 chunks and central viewport constraints unchanged.
