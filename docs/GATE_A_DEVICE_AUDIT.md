@@ -106,3 +106,6 @@ Verified main `d2c16ed1ad0f362ec39d53ff3f010b76b99d63ce`: merged-main Mythwrough
 
 ## 2026-11-12 19:00 Central — woodland floor candidate (not device approved)
 PR #51 adds purely visual forest-floor fern, leaf and mossy stone geometry to seeded tree meshes. Automated mesh and save regression added; browser screenshot review and CI pending. No physical iPhone thermals, force-quit save or art acceptance evidence. Gate A remains OPEN.
+
+## 2026-11-12 20:56 Central — visual GPU-budget candidate, not device approved
+PR #51 now guards EACH authored tree against exceeding 450 vertices and adds a seeded isolated broadleaf regression. No current-head Chromium screenshots or physical-iPhone evidence were inspected; no thermal, ergonomics, save force-quit or premium-art acceptance is claimed. Branch unmerged and v0.10 Gate A remains OPEN; canonical IndexedDB migration and v0.11 remain locked.
