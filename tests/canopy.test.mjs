@@ -230,3 +230,26 @@ test('connected four-chunk woodland districts create seed-stable open vistas and
   assert.equal(JSON.stringify(world.save()),saved,'district art must not write world edits');
   assert.throws(()=>woodlandDistrict(1.5,0,seed),/Invalid woodland district/);
 });
+
+test('winding woodland sightlines create real canopy gaps inside connected groves without touching edits',()=>{
+  const seed=179,world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  let corridor=0,flanks=0,corridorChunks=0,flankChunks=0,groves=0;
+  for(let dx=-4;dx<=4;dx++)for(let dz=-4;dz<=4;dz++){
+    const startX=dx*4,startZ=dz*4;
+    if(woodlandDistrict(startX,startZ,seed)!=='grove')continue;
+    groves++;
+    for(let lx=0;lx<4;lx++)for(let lz=0;lz<4;lz++){
+      const mesh=woodlandCanopyVertices(world,startX+lx,startZ+lz,options);
+      assert.ok(mesh.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+      assert.deepEqual(mesh,woodlandCanopyVertices(world,startX+lx,startZ+lz,options));
+      // Interior chunks follow a winding view corridor; exterior flanks
+      // retain the thicker grove silhouette.
+      if(lx===1||lx===2){corridor+=mesh.length;corridorChunks++;}
+      else {flanks+=mesh.length;flankChunks++;}
+    }
+  }
+  assert.ok(groves>=8,'sample enough independent seeded grove districts');
+  assert.ok(flanks/flankChunks>corridor/corridorChunks*1.25,
+    'grove flanks should retain visibly more foliage than the interior vista');
+  assert.equal(JSON.stringify(world.save()),before,'sightlines remain render-only');
+});
