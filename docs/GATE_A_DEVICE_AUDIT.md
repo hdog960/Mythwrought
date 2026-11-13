@@ -113,3 +113,6 @@ A proposed Gate A vault-only fix rejects deletion of an already-missing snapshot
 
 ## Optional vault blocked-open lifecycle — candidate, NOT device verified
 A blocked IndexedDB open can later succeed after the caller already rejected; the candidate closes that late connection and skips abandoned schema upgrade. Simulated Node regression added, but full CI and genuine mobile screenshots remain pending. This is optional backup robustness only, not canonical transactional migration or physical iPhone acceptance.
+
+## 2026-11-13 03:02 Central — unmerged woodland clearing replay
+Visual :00 clean replay of PR #57 seeded 2×2 canopy-only clearings from verified main e79a8a7b8fea. Node/Chromium and 568×320/932×430 authentic screenshot checks pending. Does not establish physical iPhone controls, thermals, force-quit save or artwork approval. Preserve schema-1 and v0.10 Gate A. Integration :40 owns guarded merge and Pages verification.
