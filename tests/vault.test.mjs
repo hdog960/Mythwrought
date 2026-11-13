@@ -47,3 +47,20 @@ test('missing optional vault backup cannot be silently reported as deleted',()=>
  const corrupt={id:'v010:fixed:abcdefghij',raw:'damaged'};
  assert.equal(requireVaultBackup(corrupt),corrupt,'damaged user-owned snapshot may still be explicitly deleted');
 });
+
+test('blocked optional vault open closes a late connection without touching canonical saves',async()=>{
+ const {inspectVaultBackup}=await import('../src/vault.mjs');
+ const request={result:null,error:null};
+ const factory={open(){return request;}};
+ const pending=inspectVaultBackup('v010:fixed:abcdefghij',factory);
+ // Wait for the async open to register its handlers.
+ await Promise.resolve();
+ request.onblocked();
+ await assert.rejects(pending,/blocked by another tab/);
+ let closes=0,upgrades=0;
+ request.result={close(){closes++;},objectStoreNames:{contains(){return false;}},createObjectStore(){upgrades++;}};
+ request.onupgradeneeded();
+ request.onsuccess();
+ assert.equal(closes,1,'late IndexedDB connection must not hold the vault lock');
+ assert.equal(upgrades,0,'abandoned open must not upgrade the vault');
+});
