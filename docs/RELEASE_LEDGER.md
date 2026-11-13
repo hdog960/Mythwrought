@@ -228,3 +228,7 @@ On the :20-owned PR #53 branch, `src/main.mjs` now discards cancelled/lost-captu
 
 ### 2026-11-12 22:20 Central — PR #53 delayed grip guard (UNMERGED)
 Gameplay :20 updated `src/main.mjs` to reject new movement/look/precision and mouse-canvas pointerdown while settings are visible or the document is hidden, preventing a late pointer from latching after resume. `tests/touch-browser.mjs` now asserts modal-open synthetic pointerdown cannot engage grips or precision. This is actual source/test work, not a hardware result. Source/test commit `8a5812f16a6176e7065b68ad48cb567d206119de`; final docs head advances separately. Exact-head Node/Chromium and authentic landscape screenshot review remain pending. :40 integration owner handles guarded merge; :00 woodland #51 and :40 vault #54 untouched. v0.10 Gate A, schema-1, 25 chunks and central viewport constraints unchanged.
+
+
+### 2026-11-12 23:25 Central — :20 gameplay candidate (unmerged)
+PR #53 head `fb5283e057329a10b54ab0eb32343ab26a0afff3` corrects a genuine Chromium test setup failure (hidden close button, duplicate menu open) and rejects keyboard gameplay events while document.hidden, with a browser regression for delayed Space. Starting main `21b5b77fd5f819643a56f05509025fc7c27bd87d`; exact-head CI/screenshots, merge and Pages unverified. Preserve v0.10 Gate A, independent controller grips and schema-1 saves. Physical iPhone, artwork and thermals remain creator-only acceptance.
