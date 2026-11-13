@@ -143,3 +143,28 @@ test('golden sentinel tips are distinct foliage facets without extra vertices or
   assert.ok(found,'a deterministic sentinel should show gold-tipped crown facets');
   assert.equal(JSON.stringify(world.save()),saved);
 });
+
+test('sentinel crown-star is an eight-spoke, bounded render-only landmark',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  let found=false;
+  for(let cx=-16;cx<=16&&!found;cx++)for(let cz=-16;cz<=16&&!found;cz++){
+    if(!woodlandSentinelChunk(cx,cz,world.seed))continue;
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+    const h=terrainHeight(x,z,world.seed);
+    let spokes=0;
+    for(let i=0;i<mesh.length;i+=27){
+      const colors=[mesh[i+3],mesh[i+4],mesh[i+5]];
+      if(colors[0]>.7&&colors[1]>.79&&colors[2]>.4&&colors[2]<.61){
+        const ys=[mesh[i+1],mesh[i+10],mesh[i+19]];
+        if(ys.some(y=>y>h+7))spokes++;
+      }
+    }
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+    assert.ok(spokes>=8,'sentinel crown-star must have eight high contrasting facets');
+    found=true;
+  }
+  assert.ok(found,'a seeded sentinel must be visible');
+  assert.equal(JSON.stringify(world.save()),saved,'crown-star never persists as voxels');
+});
