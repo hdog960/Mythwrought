@@ -224,3 +224,7 @@ Verified main `ceb7fafdaca5a1566ee69a9ebc5df9165a4523f2` has green Node/Chromium
 | v0.10 Gate A optional vault missing-deletion guard — **candidate only** | `gate-a-vault-delete-missing-guard-20261112-2143` | Read and delete the selected optional snapshot in one write transaction, fail closed if missing; Node unit regression added. Exact-head CI, screenshots and merge pending. | Not deployed | No canonical save migration, no user-only hardware/art approval; v0.11 locked. |
 
 | v0.10 Gate A **blocked optional vault open cleanup — UNMERGED** | Branch `gate-a-vault-blocked-open-recovery-20261112-2336` | Proposed late-open connection close and abandoned-upgrade guard in `src/vault.mjs`; new simulated blocked->success regression in `tests/vault.test.mjs`. Exact-head Node/Chromium and screenshots NOT YET VERIFIED. | Branch only, Pages not updated | **Pending verification; canonical schema-1 and IndexedDB migration unchanged; Gate A OPEN** |
+
+
+### 2026-11-13 — v0.10 Gate A woodland clearing candidate (UNMERGED)
+From verified main `e79a8a7b8fea5315cdf8d0b482e2a252667ea590`: visual-owner branch `gate-a-woodland-clearing-composition-20261113-0100` creates deterministic connected open sightlines in canopy rendering without changing editable voxel ground, world saves, draw-call count or texture inventory. Focused Node regression added. Exact-head CI, real Chromium screenshots, merge and Pages remain PENDING; no premium artwork or physical-iPhone acceptance claimed.
