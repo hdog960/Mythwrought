@@ -131,3 +131,7 @@ Owner :20 gameplay; base verified main e3ddaa6987d0a815473ab31b8e2b28e0aaa371c0 
 
 ### 2026-11-13 11:23 Central — unmerged PR #63 browser-focus verification candidate
 Real Chromium regression expanded for nested plaintext-only editable regions and ARIA grid cells; this is committed on PR #63, not yet verified green or deployed. Physical iPhone ergonomics, force-quit saves and premium art acceptance remain user-only/open.
+
+
+## 2026-11-13 :20 — composite keyboard focus regression candidate (not device-approved)
+Proposed input isolation now recognizes ARIA composite container ancestors (menu, listbox, tree, grid, tablist, toolbar, radiogroup and dialogs) so keyboard Space/arrows from nested spans/icons cannot leak into world movement or Jump. Node and genuine Chromium browser regression cases are added; **exact-head CI and actual 568×320/932×430 screenshot review are pending**. No touch-grip geometry, canvas footprint, world edits, schema-1 saves, or rendering budgets changed. Test on a real iPhone and with external keyboard before device acceptance; this is not proof of physical ergonomics, offline PWA, canonical IndexedDB migration or premium artwork approval.
