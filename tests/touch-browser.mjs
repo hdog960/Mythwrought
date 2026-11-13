@@ -218,6 +218,7 @@ try{
     const scene=document.getElementById('scene');
     const before=Number(scene.dataset.playerFeet);
     const beforeBlock=window.__mythwroughtTest.block(16,18,0);
+    let afterBlock;
     Object.defineProperty(document,'hidden',{configurable:true,value:true});
     try{
       // A delayed input burst during backgrounding must not mutate a voxel,
@@ -231,7 +232,7 @@ try{
           bubbles:true,cancelable:true,detail:0
         }));
       }
-      const afterBlock=window.__mythwroughtTest.block(16,18,0);
+      afterBlock=window.__mythwroughtTest.block(16,18,0);
       scene.dispatchEvent(new KeyboardEvent('keydown',{
         code:'Space',bubbles:true,cancelable:true
       }));
