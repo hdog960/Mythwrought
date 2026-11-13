@@ -203,6 +203,9 @@ function start(){
     // Not-yet-loaded chunks read the current global voxel world when meshed.
   }
   function edit(mode){
+    // Reject edits at the authoritative mutation boundary, including delayed
+    // events after Safari suspension or while WebGL context recovery is active.
+    if(!help.hidden||document.hidden||graphicsLost)return;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
     if(!result.ok){message(result.reason);return;}
     changed=true;
@@ -263,7 +266,7 @@ function start(){
     jumpQueued=false;
     message('Returned to a safe surface near spawn (prototype void recovery)');
   }
-  function jump(){if(help.hidden)jumpQueued=true;}
+  function jump(){if(help.hidden&&!document.hidden&&!graphicsLost)jumpQueued=true;}
   function move(dt){
     const strafe=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joystick.x;
     const forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)-joystick.y;
@@ -394,7 +397,7 @@ function start(){
       heldPointers.delete(active);active=null;release();el.classList.remove('engaged');
     }
     el.addEventListener('pointerdown',e=>{
-      if(active!==null)return;
+      if(active!==null||!help.hidden||document.hidden)return;
       e.preventDefault();active=e.pointerId;lastX=e.clientX;lastY=e.clientY;
       heldPointers.set(active,stop);
       try{el.setPointerCapture(active);}catch(_){}
@@ -467,6 +470,7 @@ function start(){
     precisionPointer=null;precisionHeld=false;precisionButton.classList.remove('held');
   }
   precisionButton.addEventListener('pointerdown',e=>{
+    if(!help.hidden||document.hidden||precisionPointer!==null)return;
     e.preventDefault();precisionPointer=e.pointerId;precisionHeld=true;
     precisionButton.classList.add('held');
     try{precisionButton.setPointerCapture(e.pointerId);}catch(_){}
@@ -478,11 +482,14 @@ function start(){
     lookStick.x=lookStick.y=0;
     precisionPointer=null;precisionHeld=false;
     keys.clear();joystick.x=joystick.y=0;
+    // Cancel queued one-shot actions too: a Space/touch jump can be queued
+    // immediately before Safari blurs or the settings modal opens.
+    jumpQueued=false;drag=null;
     precisionButton.classList.remove('held');
     cameraKnob.style.transform='';knob.style.transform='';
   }
   let drag=null;
-  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
+  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&help.hidden&&!document.hidden){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
   canvas.addEventListener('pointermove',e=>{
     if(!drag||drag.id!==e.pointerId)return;
     const {x:dx,y:dy}=safePointerDelta(e.clientX-drag.x,e.clientY-drag.y);
@@ -490,11 +497,15 @@ function start(){
     look(dx,dy,.006);
     drag.x=e.clientX;drag.y=e.clientY;
   });
-  canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved)edit(drag.button===2?'place':'mine');drag=null;}});
+  canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved&&help.hidden&&!document.hidden)edit(drag.button===2?'place':'mine');drag=null;}});
+  // A cancelled mouse gesture must never be converted into a mine/place tap.
+  // Safari may cancel capture on interruption without delivering pointerup.
+  canvas.addEventListener('pointercancel',e=>{if(drag?.id===e.pointerId)drag=null;});
+  canvas.addEventListener('lostpointercapture',e=>{if(drag?.id===e.pointerId)drag=null;});
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
   document.addEventListener('keydown',e=>{
     // Do not steal arrows, space or WASD from accessibility controls and form fields.
-    if(!isWorldControlTarget(e.target)||!help.hidden)return;
+    if(!isWorldControlTarget(e.target)||!help.hidden||document.hidden)return;
     if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
     if(e.code==='Space'&&!e.repeat)jump();
     keys.add(e.code);
