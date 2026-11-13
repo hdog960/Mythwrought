@@ -105,20 +105,21 @@ try{
   // Safari can cancel a mouse pointer after down without sending a normal up.
   // A late pointerup must not turn that cancelled gesture into a world edit.
   await page.locator('#closeHelp').click();
+  const sceneBox=await page.locator('#scene').boundingBox();
+  const mouseX=Math.round(sceneBox.x+sceneBox.width/2);
+  const mouseY=Math.round(sceneBox.y+sceneBox.height/2);
+  await page.evaluate(()=>document.getElementById('scene').addEventListener('pointerdown',
+    e=>{window.__cancelledMousePointer=e.pointerId;},{once:true}));
+  await cdp.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:mouseX,y:mouseY});
+  await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',x:mouseX,y:mouseY,button:'left',clickCount:1});
   await page.evaluate(()=>{
     const scene=document.getElementById('scene');
-    window.__cancelledMousePointer=91;
-    scene.dispatchEvent(new PointerEvent('pointerdown',{
-      pointerId:91,pointerType:'mouse',button:0,bubbles:true,cancelable:true
-    }));
     scene.dispatchEvent(new PointerEvent('pointercancel',{
-      pointerId:91,pointerType:'mouse',button:0,bubbles:true,cancelable:true
+      pointerId:window.__cancelledMousePointer,pointerType:'mouse',button:0,bubbles:true
     }));
   });
   const beforeCancelledEdit=await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0));
-  await page.evaluate(()=>document.getElementById('scene').dispatchEvent(new PointerEvent('pointerup',{
-    pointerId:91,pointerType:'mouse',button:0,bubbles:true,cancelable:true
-  })));
+  await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:mouseX,y:mouseY,button:'left',clickCount:1});
   assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),beforeCancelledEdit,
     'Cancelled mouse gesture must not edit the world');
   await page.locator('#menu').click();
