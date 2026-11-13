@@ -48,11 +48,17 @@ try{
     grid.append(gridChild);document.body.append(grid);
     const gridSpace=dispatch(gridChild,'Space');
     const gridArrow=dispatch(gridChild,'ArrowUp');
+    const composite=document.createElement('div');
+    composite.setAttribute('role','listbox');
+    const compositeIcon=document.createElement('span');
+    composite.append(compositeIcon);document.body.append(composite);
+    const compositeSpace=dispatch(compositeIcon,'Space');
+    const compositeArrow=dispatch(compositeIcon,'ArrowUp');
     const canvasSpace=dispatch(document.querySelector('#scene'),'ArrowUp');
-    button.remove();editable.remove();grid.remove();
-    return {nestedSpace,nestedArrow,editableSpace,editableArrow,gridSpace,gridArrow,canvasSpace};
+    button.remove();editable.remove();grid.remove();composite.remove();
+    return {nestedSpace,nestedArrow,editableSpace,editableArrow,gridSpace,gridArrow,compositeSpace,compositeArrow,canvasSpace};
   });
-  assert.deepEqual(focusIsolation,{nestedSpace:false,nestedArrow:false,editableSpace:false,editableArrow:false,gridSpace:false,gridArrow:false,canvasSpace:true},
+  assert.deepEqual(focusIsolation,{nestedSpace:false,nestedArrow:false,editableSpace:false,editableArrow:false,gridSpace:false,gridArrow:false,compositeSpace:false,compositeArrow:false,canvasSpace:true},
     'Nested accessibility controls must retain keyboard events while canvas shortcuts remain active');
   const left=center(await page.locator('#movePad').boundingBox());
   const right=center(await page.locator('#lookPad').boundingBox());
