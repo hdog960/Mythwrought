@@ -133,3 +133,6 @@ Owner :00 visual. Fresh verified main before edits: `e3ddaa6987d0a815473ab31b8e2
 
 ## 2026-11-13 :00 visual candidate — lower sentinel landmark band
 Unmerged PR #61 candidate adds eight gold/lime mid-canopy triangles below the existing crown-star, aiming to preserve landmark recognition when phone framing clips the tip. Source/test head `2ffd3ef10a1a4dccf53c9b6d3862dfdc954ee435` at documentation time. Seed, saved voxels, grip placement and draw-call count unchanged by design. Exact-head CI, genuine phone-size screenshot visibility and physical iPhone approval NOT VERIFIED. No Gate A acceptance.
+
+## 2026-11-13 :00 sentinel root-halo visual candidate (UNMERGED)
+PR #61 adds eight opaque low moss/amber ground facets around rare sentinel pines to improve recognition below the tall crown. Renderer and Node regression changed, no saved voxel edits, draw calls, textures or control placement. Candidate final source/test head `dc282a941d479e737cfba6fdfe266148a0b9ecfe`; exact-head CI and actual 568×320/932×430 landmark screenshots pending. This does not establish real-device visibility, physical ergonomics, thermal behavior, force-quit persistence, canonical IndexedDB migration or creator art approval. :40 must reconcile overlapping woodland branches before any guarded merge.
