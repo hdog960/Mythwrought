@@ -99,7 +99,13 @@ export function woodlandClearing(cx,cz,seed){
   if(!Number.isInteger(cx)||!Number.isInteger(cz)||!Number.isInteger(seed))
     throw Error('Invalid woodland clearing coordinates');
   const mx=Math.floor(cx/4),mz=Math.floor(cz/4);
-  return hash(mx,mz,seed,113)<.54 && ((cx%4+4)%4)<2 && ((cz%4+4)%4)<2;
+  // Vary the quadrant of each open pocket by seed and region; fixed-corner
+  // pockets created visible repeating diagonal lanes across the landscape.
+  const ox=hash(mx,mz,seed,127)<.5?0:2;
+  const oz=hash(mx,mz,seed,131)<.5?0:2;
+  return hash(mx,mz,seed,113)<.54 &&
+    ((cx%4+4)%4)>=ox && ((cx%4+4)%4)<ox+2 &&
+    ((cz%4+4)%4)>=oz && ((cz%4+4)%4)<oz+2;
 }
 export function woodlandTreeStyle(x,z,seed){
   return hash(x,z,seed,67)<.43?'evergreen':'broadleaf';
