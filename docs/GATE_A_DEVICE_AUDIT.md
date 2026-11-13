@@ -113,3 +113,11 @@ A proposed Gate A vault-only fix rejects deletion of an already-missing snapshot
 
 ## Optional vault blocked-open lifecycle — candidate, NOT device verified
 A blocked IndexedDB open can later succeed after the caller already rejected; the candidate closes that late connection and skips abandoned schema upgrade. Simulated Node regression added, but full CI and genuine mobile screenshots remain pending. This is optional backup robustness only, not canonical transactional migration or physical iPhone acceptance.
+
+
+## 2026-11-13 :20 controls replay — not device verified
+A clean current-main candidate replays PR #53's suspended-page/graphics-loss input guards and genuine Chromium regressions without changing canonical schema-1 or grip placement. Exact-head CI, landscape screenshots and physical iPhone validation are outstanding. No Gate A acceptance claimed.
+
+
+### 2026-11-13 04:23 Central — input candidate evidence, not device verified
+PR #58 browser input candidate remains UNMERGED. Actions 43400655017 passed Node/model and WebGL smoke but failed Chromium due to test lexical-scope error `afterBlock is not defined`; test-only fix committed as `473ea5153a9a`. Await full new-head Chromium, authentic 568x320/932x430 screenshots and guarded integration. No real iPhone, thermal, force-quit or artwork acceptance claim. Schema-1 and v0.11 gate unchanged.
