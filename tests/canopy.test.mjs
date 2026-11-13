@@ -191,3 +191,25 @@ test('sentinel lower golden canopy band remains visible below the high crown-sta
   assert.ok(found,'find a seeded sentinel with lower band');
   assert.equal(JSON.stringify(world.save()),saved);
 });
+
+test('sentinel landmark has a grounded eight-facet halo without save writes or budget growth',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  let found=false;
+  for(let cx=-16;cx<=16&&!found;cx++)for(let cz=-16;cz<=16&&!found;cz++){
+    if(!woodlandSentinelChunk(cx,cz,world.seed))continue;
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]),h=terrainHeight(x,z,world.seed);
+    let facets=0;
+    for(let i=0;i<mesh.length;i+=27){
+      const ys=[mesh[i+1],mesh[i+10],mesh[i+19]];
+      const r=mesh[i+3],g=mesh[i+4],b=mesh[i+5];
+      if(r>.5&&r<.7&&g>.5&&g<.7&&b>.2&&b<.4&&ys.every(y=>y>h+1&&y<h+1.3))facets++;
+    }
+    assert.ok(facets>=8,'eight low moss/amber facets ground the sentinel visually');
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+    found=true;
+  }
+  assert.ok(found,'find an unobstructed sentinel halo');
+  assert.equal(JSON.stringify(world.save()),saved);
+});
