@@ -222,3 +222,7 @@ PR #51 based on verified ceb7fafdac adds original fern, leaf litter and mossy st
 
 ## 2026-11-12 20:56 Central — PR #51 per-tree budget guard (UNMERGED)
 Visual branch `gate-a-woodland-floor-composition-20261112-1900` adds explicit per-tree 450-vertex enforcement in `src/canopy.mjs` and isolated broadleaf regression in `tests/canopy.test.mjs`; branch head after handoff `baa0ce528094b3e1a5a4332c7c9274b92dac6e0a` (will advance with ledger/audit commits). This is candidate-only, NOT verified or shipped. Exact-head Node/Chromium, authentic screenshots, fresh-main reconciliation, guarded merge and Pages are pending. No save-schema or user-only approval changes.
+
+
+### 2026-11-12 22:04 Central — woodland floor cluster refinement, candidate only
+PR #51 visual-owner branch refines original render-only fern/leaf/stone distribution into asymmetric seeded clusters in `src/canopy.mjs` and adds seed-variation/finite/mesh/schema-1 regression in `tests/canopy.test.mjs`. Latest source/test commit `80abe03bc2027d3d259bbb3a857a5e13ac01ff14` (docs commits follow). Main observed `92a3f234324e5953ff242b3755f518f6daf76090`. No exact-head CI, authentic screenshots, merge or Pages confirmation for this candidate; local GitHub DNS failed. :40 must rebase visual-only changes safely and verify. v0.10 Gate A still open; v0.11 locked.
