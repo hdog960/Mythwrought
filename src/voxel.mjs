@@ -98,11 +98,27 @@ export class VoxelWorld{
   }
 }
 export function meshChunk(world,cx,cz){
+  // A face check repeatedly visits the same neighboring voxel (often six
+  // times). Cache only cells actually queried by this synchronous rebuild.
+  // The one-block halo includes chunk boundaries and the vertical limits;
+  // reads still go through world.get so schema-1 edits override seeded caves.
+  const side=CHUNK_SIZE+2, depth=WORLD_MAX_Y-WORLD_MIN_Y+3;
+  const minX=cx*CHUNK_SIZE-1,minZ=cz*CHUNK_SIZE-1,minY=WORLD_MIN_Y-1;
+  const cells=new Uint8Array(side*side*depth);
+  cells.fill(255); // AIR is 0; 255 is the sole unvisited sentinel.
+  const blockAt=(x,y,z)=>{
+    const index=((x-minX)*side+(z-minZ))*depth+(y-minY);
+    const cached=cells[index];
+    if(cached!==255)return cached;
+    const id=world.get(x,y,z);
+    cells[index]=id;
+    return id;
+  };
   const vertices=[];
   for(let x=cx*CHUNK_SIZE;x<(cx+1)*CHUNK_SIZE;x++)
     for(let z=cz*CHUNK_SIZE;z<(cz+1)*CHUNK_SIZE;z++)
       for(let y=WORLD_MIN_Y;y<=WORLD_MAX_Y;y++){
-        const id=world.get(x,y,z);
+        const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
         const color=COLORS[id]||COLORS[3];
         // Most underground voxels are fully enclosed. Defer the two noise
@@ -111,7 +127,7 @@ export function meshChunk(world,cx,cz){
         // Keep world-space inputs and face order identical for save/seed parity.
         let variance;
         for(const face of FACE){
-          if(world.get(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
+          if(blockAt(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
           if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
             hash(x+y*5,z-y*3,world.seed+91)*.08;
           const r=clamp(color[0]*variance*face.lit,0,1);
