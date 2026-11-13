@@ -228,6 +228,29 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
   const vista=distance<(district==='open'?1.15:.53);
   const baseChance=district==='open'?.27:district==='grove'?.83:.56;
   const chance=vista?baseChance*.23:baseChance;
+  // Never mask a naturally traversable hillside opening with a decorative tree.
+// This only suppresses render-only foliage; terrain, cave coordinates and saves
+// remain untouched. A mouth needs two natural air cells, a solid floor and a
+// genuinely open exterior approach (not a player-dug artificial opening).
+export function naturalCaveApproach(baseAt,heightAt,x,z,seed,air=0){
+  for(let dx=-5;dx<=5;dx++)for(let dz=-5;dz<=5;dz++){
+    if(dx*dx+dz*dz>25)continue;
+    const px=x+dx,pz=z+dz,h=heightAt(px,pz,seed);
+    for(const [ax,az] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const outsideH=heightAt(px+ax,pz+az,seed);
+      for(let y=Math.max(0,outsideH+1);y<=h-4;y++){
+        if(baseAt(px,y,pz,seed)!==air||baseAt(px,y+1,pz,seed)!==air)continue;
+        if(baseAt(px,y-1,pz,seed)===air)continue;
+        if(baseAt(px-ax,y,pz-az,seed)!==air||
+           baseAt(px-ax,y+1,pz-az,seed)!==air)continue;
+        if(baseAt(px+ax,y,pz+az,seed)!==air||
+           baseAt(px+ax,y+1,pz+az,seed)!==air)continue;
+        return true;
+      }
+    }
+  }
+  return false;
+}
   // Candidate centers stay within each chunk: no canopy crosses a chunk seam.
   for(let i=0;i<4&&count<MAX_TREES;i++){
     const x=cx*chunkSize+3+Math.floor(hash(cx+i,cz,world.seed,19)*(chunkSize-6));
@@ -235,6 +258,9 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
     // Keep a contiguous four-chunk-wide vista or denser grove, rather than
     // scattering decorative differences independently in every chunk.
     if(hash(cx+i,cz-i,world.seed,43)>chance)continue;
+    // Keep the real hillside opening visible from the forest approach.
+    // Scan only selected tree anchors, never every voxel in the chunk.
+    if(naturalCaveApproach(baseAt,heightAt,x,z,world.seed,air))continue;
     const h=heightAt(x,z,world.seed);
     if(baseAt(x,h,z,world.seed)!==grass||world.get(x,h,z)!==grass)continue;
     const sentinel=count===0&&woodlandSentinelChunk(cx,cz,world.seed);
