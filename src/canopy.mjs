@@ -28,6 +28,41 @@ function roots(out,x,y,z,variation){
     tri(out,left,right,foot,colors[i],4);
   }
 }
+// Low-poly fern fans, forest-floor amber leaves and mossy stones give each
+// woodland anchor a grounded clearing. These are decorative render vertices,
+// not new blocks: mining the anchor removes the whole composition on remesh.
+function woodlandFloor(out,x,y,z,variation){
+  const greens=[[.28,.55,.37],[.40,.64,.39],[.51,.69,.40]];
+  for(let fan=0;fan<3;fan++){
+    // Ferns gather into a readable sunward patch instead of an even ring.
+    const a=variation*Math.PI*2+fan*.42-.42,dx=Math.cos(a),dz=Math.sin(a);
+    const reach=.57+(fan%2)*.17,side=[-dz,dx];
+    const center=[x+dx*.20,y+.08,z+dz*.20];
+    const tip=[x+dx*reach,y+.20+(fan%2)*.10,z+dz*reach];
+    tri(out,center,
+      [tip[0]+side[0]*.15,tip[1]-.08,tip[2]+side[1]*.15],
+      [tip[0]-side[0]*.15,tip[1]-.08,tip[2]-side[1]*.15],
+      greens[fan%greens.length],7);
+  }
+  const amber=[[.80,.52,.25],[.70,.39,.23],[.88,.67,.32]];
+  for(let i=0;i<3;i++){
+    // Leaf litter collects on the opposite side of the trunk.
+    const a=variation*Math.PI*2+Math.PI+(i-1)*.52,dx=Math.cos(a),dz=Math.sin(a);
+    const px=x+dx*.72,pz=z+dz*.72;
+    tri(out,[px-.10,y+.035,pz-.08],[px+.12,y+.038,pz-.04],
+      [px+.01,y+.04,pz+.12],amber[i],7);
+  }
+  // One low stone offsets the fern patch without extra GPU allocation.
+  for(let i=0;i<1;i++){
+    const a=variation*Math.PI*2+Math.PI*.62,dx=Math.cos(a),dz=Math.sin(a);
+    const px=x+dx*.88,pz=z+dz*.88;
+    const grey=i?[.47,.53,.43]:[.55,.59,.47];
+    tri(out,[px-.17,y+.035,pz-.12],[px+.15,y+.035,pz-.12],
+      [px,y+.22,pz+.04],grey,3);
+    tri(out,[px+.15,y+.035,pz-.12],[px+.08,y+.035,pz+.15],
+      [px,y+.22,pz+.04],grey,3);
+  }
+}
 // Sparse faceted sunlit leaf tips add depth without transparent sprites.
 function crownHighlights(out,x,y,z,r,variation){
   const hues=[[.61,.79,.49],[.50,.72,.42],[.70,.81,.52]];
@@ -77,6 +112,7 @@ function evergreen(out,x,y,z,variation,beacon=false){
       i%2?bark:[.59,.39,.24],4);
   }
   roots(out,x,y,z,variation);
+  woodlandFloor(out,x,y,z,variation);
   const needles=beacon?
     [[.25,.48,.40],[.39,.62,.43],[.58,.70,.39],[.78,.77,.45]]:
     [[.19,.43,.38],[.26,.54,.43],[.34,.61,.46],[.40,.68,.48]];
@@ -162,6 +198,7 @@ function tree(out,x,y,z,variation){
     quad(out,a,b,c,d,i%2?bark:[.63,.43,.27],4);
   }
   roots(out,x,y,z,variation);
+  woodlandFloor(out,x,y,z,variation);
   for(let i=0;i<3;i++)branch(out,x,y+h*.62,z,.8,i*Math.PI*2/3+variation,1.05);
   crown(out,x,y+h-.35,z,1.25,variation);
   crown(out,x-.45,y+h-.85,z+.18,.83,variation+.3);
@@ -202,8 +239,13 @@ export function woodlandCanopyVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
         if(world.get(x+dx,h+dy,z+dz)!==air){clear=false;break;}
     if(!clear)continue;
     const style=woodlandTreeStyle(x,z,world.seed);
+    const beforeTree=out.length;
     (sentinel?evergreen:(style==='evergreen'?evergreen:tree))(
-      out,x+.5,h+1.01,z+.5,hash(x,z,world.seed,59),sentinel);count++;
+      out,x+.5,h+1.01,z+.5,hash(x,z,world.seed,59),sentinel);
+    // A dense tree must not borrow capacity from the other tree's budget.
+    if((out.length-beforeTree)/STRIDE>MAX_VERTICES)
+      throw Error('Woodland tree exceeded per-tree vertex budget');
+    count++;
   }
   if(out.length/STRIDE>MAX_TREES*MAX_VERTICES)
     throw Error('Woodland canopy exceeded vertex budget');

@@ -94,6 +94,73 @@ test('sculpted roots and sunlit facets stay inside editable chunk budget and pre
   assert.equal(JSON.stringify(world.save()),saved,'render-only woodland may not mutate saves');
 });
 
+test('woodland floor detail uses decorative foliage and stone facets within GPU and save budgets',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  let found=false,stone=false,foliage=false;
+  for(let cx=-6;cx<=6;cx++)for(let cz=-6;cz<=6;cz++){
+    const vertices=woodlandCanopyVertices(world,cx,cz,options);
+    if(!vertices.length)continue;
+    found=true;
+    for(let i=0;i<vertices.length;i+=CANOPY_LIMITS.stride){
+      const material=vertices[i+8];
+      if(material===3)stone=true;
+      if(material===7)foliage=true;
+      assert.ok(Number.isFinite(material));
+    }
+    assert.ok(vertices.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+  }
+  assert.ok(found&&stone&&foliage,'seeded woodland includes grounded stone and foliage');
+  assert.equal(JSON.stringify(world.save()),saved,'visual forest floor never mutates schema-1 edits');
+});
+
+// The broadleaf uses the tightest authored vertex budget; test its exact
+// standalone allocation so future decoration cannot hide behind a sparse tree.
+test('individual broadleaf mesh respects the 450-vertex cap even when alone',()=>{
+  const world=new VoxelWorld(179);
+  let inspected=0;
+  for(let cx=-8;cx<=8;cx++)for(let cz=-8;cz<=8;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+    if(woodlandTreeStyle(x,z,world.seed)!=='broadleaf')continue;
+    // Remove every other tree's natural grass anchor in this chunk, leaving
+    // the first authored broadleaf. This must not alter the persisted fixture.
+    const h=terrainHeight(x,z,world.seed);
+    const isolated=new VoxelWorld(179);
+    for(let dx=0;dx<CHUNK_SIZE;dx++)for(let dz=0;dz<CHUNK_SIZE;dz++){
+      const px=cx*CHUNK_SIZE+dx,pz=cz*CHUNK_SIZE+dz;
+      if(px===x&&pz===z)continue;
+      const py=terrainHeight(px,pz,world.seed);
+      if(isolated.get(px,py,pz)===BLOCK.GRASS)isolated.set(px,py,pz,BLOCK.AIR);
+    }
+    const solo=woodlandCanopyVertices(isolated,cx,cz,options);
+    assert.ok(solo.length>0,'the selected broadleaf survives isolation');
+    assert.ok(solo.length/CANOPY_LIMITS.stride<=CANOPY_LIMITS.maxVerticesPerTree);
+    inspected++;
+    if(inspected===3)return;
+  }
+  assert.ok(inspected>0,'seeded world contains broadleaf fixtures');
+});
+
+test('seeded forest-floor clusters vary without mutating either world',()=>{
+  const first=new VoxelWorld(179),second=new VoxelWorld(180);
+  const beforeA=JSON.stringify(first.save()),beforeB=JSON.stringify(second.save());
+  let varied=0,visible=0;
+  for(let cx=-3;cx<=3;cx++)for(let cz=-3;cz<=3;cz++){
+    const a=woodlandCanopyVertices(first,cx,cz,options);
+    const b=woodlandCanopyVertices(second,cx,cz,options);
+    if(a.length||b.length)visible++;
+    if(a.length!==b.length||a.some((value,i)=>value!==b[i]))varied++;
+    for(const mesh of [a,b]){
+      assert.ok(mesh.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+      for(let i=0;i<mesh.length;i++)assert.ok(Number.isFinite(mesh[i]));
+    }
+  }
+  assert.ok(visible>0&&varied>0,'woodland floor remains visibly seed-dependent');
+  assert.equal(JSON.stringify(first.save()),beforeA);
+  assert.equal(JSON.stringify(second.save()),beforeB);
+});
+
 test('rare golden sentinel pines create taller deterministic landmarks within unchanged mesh budgets',()=>{
   const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
   let sentinels=0,ordinary=0;
