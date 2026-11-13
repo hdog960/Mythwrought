@@ -96,6 +96,18 @@ function evergreen(out,x,y,z,variation,beacon=false){
     }
   }
   if(beacon){
+    // Mid-canopy gold facets form a second, lower landmark band that stays
+    // visible when the top crown-star is clipped by a compact phone viewport.
+    // Opaque geometry only; no new draw calls or persistent voxel changes.
+    for(let i=0;i<8;i++){
+      const a=(i+variation)*Math.PI/4;
+      const b=(i+1+variation)*Math.PI/4;
+      tri(out,[x+Math.cos(a)*1.06,y+3.05,z+Math.sin(a)*1.06],
+        [x+Math.cos(b)*1.06,y+3.05,z+Math.sin(b)*1.06],
+        [x,y+3.63,z],i%2?[.92,.77,.39]:[.72,.84,.43],7);
+    }
+  }
+  if(beacon){
     // A small eight-pointed crown-star makes the rare landmark legible against
     // the sky. These are opaque mesh facets in the existing draw call.
     // Keep all points inside the checked nine-block vertical clearance.
