@@ -40,7 +40,18 @@ test('mining natural tree anchors or building into canopy removes visuals on rem
   const {cx,cz,x,z,h,before}=match;
   assert.ok(meshChunk(world,cx,cz).length>=before.length);
   assert.equal(world.set(x,h,z,BLOCK.AIR),true);
-  assert.ok(woodlandCanopyVertices(world,cx,cz,options).length<before.length);
+  // Four candidates can fill two tree slots. Removing the first tree may
+  // reveal a previously capped replacement, so vertex count need not drop.
+  // Verify the *specific original trunk geometry* is gone instead.
+  const afterRemoval=woodlandCanopyVertices(world,cx,cz,options);
+  assert.notDeepEqual(afterRemoval,before,'editing the original anchor must remesh the woodland');
+  let oldTrunkStillPresent=false;
+  for(let i=0;i<afterRemoval.length;i+=CANOPY_LIMITS.stride){
+    if(afterRemoval[i]===before[0]&&afterRemoval[i+1]===before[1]&&afterRemoval[i+2]===before[2]){
+      oldTrunkStillPresent=true;break;
+    }
+  }
+  assert.equal(oldTrunkStillPresent,false,'mined tree trunk must not survive a replacement tree');
   const saved=world.save(),restored=VoxelWorld.restore(saved);
   assert.deepEqual(woodlandCanopyVertices(restored,cx,cz,options),woodlandCanopyVertices(world,cx,cz,options));
   assert.equal(world.set(x,h,z,BLOCK.GRASS),true);
