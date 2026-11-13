@@ -57,10 +57,28 @@ test('blocked optional vault open closes a late connection without touching cano
  await Promise.resolve();
  request.onblocked();
  await assert.rejects(pending,/blocked by another tab/);
- let closes=0,upgrades=0;
+ let closes=0,upgrades=0,aborts=0;
+ request.transaction={abort(){aborts++;}};
  request.result={close(){closes++;},objectStoreNames:{contains(){return false;}},createObjectStore(){upgrades++;}};
  request.onupgradeneeded();
  request.onsuccess();
  assert.equal(closes,1,'late IndexedDB connection must not hold the vault lock');
  assert.equal(upgrades,0,'abandoned open must not upgrade the vault');
+ assert.equal(aborts,1,'abandoned versionchange must abort rather than commit an empty database');
+});
+
+
+test('blocked vault upgrade is aborted even when no database connection is delivered',async()=>{
+ const {inspectVaultBackup}=await import('../src/vault.mjs');
+ const request={result:null,error:null};
+ const pending=inspectVaultBackup('v010:fixed:abcdefghij',{open(){return request;}});
+ await Promise.resolve();
+ request.onblocked();
+ await assert.rejects(pending,/blocked by another tab/);
+ let aborted=0;
+ request.transaction={abort(){aborted++;}};
+ request.result={objectStoreNames:{contains(){throw Error('abandoned upgrade must not inspect schema');}}};
+ request.onupgradeneeded();
+ request.onerror();
+ assert.equal(aborted,1);
 });
