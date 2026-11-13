@@ -110,3 +110,7 @@ Verified main `ceb7fafdaca5a1566ee69a9ebc5df9165a4523f2` has green Node/Chromium
 
 ## 2026-11-12 optional backup deletion reliability candidate — UNVERIFIED
 A proposed Gate A vault-only fix rejects deletion of an already-missing snapshot rather than presenting false success after another tab removes it. The existence check and deletion share one IndexedDB readwrite transaction; malformed user-owned snapshots can still be explicitly deleted. This does not change canonical schema-1 saves, journals, backup payloads or migrate IndexedDB. Node/Chromium and actual device checks remain pending. Real iPhone acceptance and art approval remain open.
+
+
+## 2026-11-12 23:00 Central — visual candidate PR #55 (UNMERGED)
+Clean current-main replay of woodland floor art from conflicted PR #51: decorative seeded ferns, fallen leaves, moss stones, per-tree vertex-budget and save-invariance regressions. Not a verified phone render or user art approval. Exact-head Chromium, authentic compact landscape screenshots, merge, Pages and physical iPhone testing remain pending. No schema-1 migration, new harvesting, offline-PWA claim or v0.11.
