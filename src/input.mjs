@@ -23,10 +23,10 @@ export function stickLookDelta(stick,seconds){
 // controls. Only the game surface (not an ancestor widget) may own shortcuts.
 export function isWorldControlTarget(element){
   for(let node=element;node;node=node.parentElement){
-    if(node.isContentEditable||node.getAttribute?.('contenteditable')==='true')return false;
+    if(node.isContentEditable||node.hasAttribute?.('contenteditable')||node.getAttribute?.('contenteditable')!==null&&node.getAttribute?.('contenteditable')!==undefined)return false;
     if(['INPUT','SELECT','TEXTAREA','BUTTON','A','SUMMARY'].includes(node.tagName))return false;
     const role=node.getAttribute?.('role');
-    if(['button','link','textbox','combobox','slider','spinbutton','menuitem','option','switch','checkbox','radio'].includes(role))return false;
+    if(['button','link','textbox','combobox','slider','spinbutton','menuitem','menuitemcheckbox','menuitemradio','tab','treeitem','gridcell','rowheader','columnheader','option','switch','checkbox','radio'].includes(role))return false;
   }
   return true;
 }
