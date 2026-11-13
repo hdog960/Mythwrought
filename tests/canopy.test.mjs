@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,terrainHeight,meshChunk,CHUNK_SIZE} from '../src/voxel.mjs';
-import {woodlandCanopyVertices,woodlandTreeStyle,woodlandSentinelChunk,woodlandDistrict,woodlandTreeProfile,CANOPY_LIMITS} from '../src/canopy.mjs';
+import {woodlandCanopyVertices,woodlandTreeStyle,woodlandSentinelChunk,woodlandDistrict,woodlandTreeProfile,naturalCaveApproach,CANOPY_LIMITS} from '../src/canopy.mjs';
 
 const base=(x,y,z,seed)=>new VoxelWorld(seed).get(x,y,z);
 const options={chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:base,grass:BLOCK.GRASS,air:BLOCK.AIR};
@@ -354,4 +354,36 @@ test('open glades and tall groves have deterministic distinct tree profiles with
   assert.ok((seen.get('mixed')||0)>0,'mixed districts bridge the two forest forms');
   assert.equal(JSON.stringify(world.save()),saved,'district art never changes saved edits');
   assert.equal(CANOPY_LIMITS.newDrawCalls,0);
+});
+
+test('woodland cave approach only recognizes naturally traversable two-high hillside mouths',()=>{
+  const seed=179,air=BLOCK.AIR,stone=BLOCK.STONE;
+  // Synthetic terrain fixture isolates the geometric contract from the
+  // rarity of the actual seed-generated caves. Hillside is 8, outside 2.
+  const height=(x,z)=>x>=0?8:2;
+  const natural=(x,y,z)=>{
+    if(y>height(x,z))return air;
+    if(x>=0&&x<=2&&z===0&&(y===3||y===4))return air;
+    return stone;
+  };
+  assert.equal(naturalCaveApproach(natural,height,0,0,seed,air),true);
+  assert.equal(naturalCaveApproach(natural,height,40,40,seed,air),false);
+  const oneHigh=(x,y,z)=>x>=0&&x<=2&&z===0&&y===3?air:
+    y>height(x,z)?air:stone;
+  assert.equal(naturalCaveApproach(oneHigh,height,0,0,seed,air),false,
+    'a one-high crack must not clear a forest approach');
+  const blocked=(x,y,z)=>x===1&&y===4&&z===0?stone:natural(x,y,z);
+  assert.equal(naturalCaveApproach(blocked,height,0,0,seed,air),false,
+    'a passage blocked one step into the hillside is not traversable');
+});
+
+test('cave approach preservation is render-only and seed-stable',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  for(let cx=-3;cx<=3;cx++)for(let cz=-3;cz<=3;cz++){
+    const a=woodlandCanopyVertices(world,cx,cz,options);
+    const b=woodlandCanopyVertices(world,cx,cz,options);
+    assert.deepEqual(a,b);
+    assert.ok(a.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+  }
+  assert.equal(JSON.stringify(world.save()),saved);
 });
