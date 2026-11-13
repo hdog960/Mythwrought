@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,terrainHeight,meshChunk,CHUNK_SIZE} from '../src/voxel.mjs';
-import {woodlandCanopyVertices,woodlandTreeStyle,CANOPY_LIMITS} from '../src/canopy.mjs';
+import {woodlandCanopyVertices,woodlandTreeStyle,woodlandSentinelChunk,CANOPY_LIMITS} from '../src/canopy.mjs';
 
 const base=(x,y,z,seed)=>new VoxelWorld(seed).get(x,y,z);
 const options={chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:base,grass:BLOCK.GRASS,air:BLOCK.AIR};
@@ -81,4 +81,26 @@ test('sculpted roots and sunlit facets stay inside editable chunk budget and pre
   }
   assert.ok(broad>0&&ever>0,'both rooted silhouettes must exist');
   assert.equal(JSON.stringify(world.save()),saved,'render-only woodland may not mutate saves');
+});
+
+test('rare golden sentinel pines create taller deterministic landmarks within unchanged mesh budgets',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  let sentinels=0,ordinary=0;
+  for(let cx=-16;cx<=16;cx++)for(let cz=-16;cz<=16;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    assert.deepEqual(mesh,woodlandCanopyVertices(world,cx,cz,options));
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+    if(woodlandSentinelChunk(cx,cz,world.seed)){
+      sentinels++;
+      let top=-Infinity;
+      for(let i=1;i<mesh.length;i+=CANOPY_LIMITS.stride)top=Math.max(top,mesh[i]);
+      const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+      assert.ok(top>terrainHeight(x,z,world.seed)+6,'sentinel silhouette rises clearly above ordinary trees');
+    }else ordinary++;
+  }
+  assert.ok(sentinels>4&&ordinary>30,'landmarks should be sparse but present');
+  assert.equal(JSON.stringify(world.save()),saved);
+  assert.equal(CANOPY_LIMITS.newDrawCalls,0);
+  assert.equal(woodlandSentinelChunk(-2,3,179),woodlandSentinelChunk(-2,3,179));
 });
