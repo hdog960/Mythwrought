@@ -82,3 +82,22 @@ test('sculpted roots and sunlit facets stay inside editable chunk budget and pre
   assert.ok(broad>0&&ever>0,'both rooted silhouettes must exist');
   assert.equal(JSON.stringify(world.save()),saved,'render-only woodland may not mutate saves');
 });
+
+test('woodland floor detail uses decorative foliage and stone facets within GPU and save budgets',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  let found=false,stone=false,foliage=false;
+  for(let cx=-6;cx<=6;cx++)for(let cz=-6;cz<=6;cz++){
+    const vertices=woodlandCanopyVertices(world,cx,cz,options);
+    if(!vertices.length)continue;
+    found=true;
+    for(let i=0;i<vertices.length;i+=CANOPY_LIMITS.stride){
+      const material=vertices[i+8];
+      if(material===3)stone=true;
+      if(material===7)foliage=true;
+      assert.ok(Number.isFinite(material));
+    }
+    assert.ok(vertices.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+  }
+  assert.ok(found&&stone&&foliage,'seeded woodland includes grounded stone and foliage');
+  assert.equal(JSON.stringify(world.save()),saved,'visual forest floor never mutates schema-1 edits');
+});
