@@ -76,3 +76,28 @@ test('the same production upload returns validated buffer on success and cleans 
  assert.throws(()=>uploadChunkBuffer(impossible,new Float32Array(9)),/allocation unavailable/);
  assert.equal(deleted,1,'Null allocation has nothing to delete');
 });
+
+test('uncleared pre-existing GPU errors fail closed without submitting a chunk',()=>{
+ let bound=0,uploaded=0,deleted=0,checks=0;
+ const gl={
+   NO_ERROR:0,OUT_OF_MEMORY:1285,ARRAY_BUFFER:34962,STATIC_DRAW:35044,
+   createBuffer:()=>({id:10}),bindBuffer:()=>{bound++;},
+   bufferData:()=>{uploaded++;},getError:()=>{checks++;return 1285;},
+   deleteBuffer:()=>{deleted++;}
+ };
+ assert.throws(()=>uploadChunkBuffer(gl,new Float32Array(9)),/error queue did not clear/);
+ assert.equal(checks,8,'A faulty driver must not spin forever');
+ assert.equal(bound,0);assert.equal(uploaded,0);assert.equal(deleted,1);
+});
+test('bounded stale GPU errors drain before a healthy upload',()=>{
+ let checks=0,uploaded=0;
+ const gl={
+   NO_ERROR:0,INVALID_OPERATION:1282,ARRAY_BUFFER:34962,STATIC_DRAW:35044,
+   createBuffer:()=>({id:11}),bindBuffer:()=>{},
+   bufferData:()=>{uploaded++;},
+   getError:()=>++checks<=7?1282:0,
+   deleteBuffer:()=>{throw Error('Healthy buffer must not be deleted');}
+ };
+ assert.deepEqual(uploadChunkBuffer(gl,new Float32Array(9)),{id:11});
+ assert.equal(uploaded,1);assert.equal(checks,9);
+});

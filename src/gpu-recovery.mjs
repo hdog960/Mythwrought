@@ -55,7 +55,13 @@ export function uploadChunkBuffer(gl,vertices){
   try{
     // Some drivers carry unrelated GL errors from an earlier drawing command.
     // Drain a bounded number of stale codes before inspecting this upload.
-    for(let i=0;i<8&&gl.getError()!==gl.NO_ERROR;i++){}
+    // Never confuse a ninth pre-existing driver error with this upload.
+    // A bounded drain avoids unresponsive loops on a broken context.
+    let cleared=false;
+    for(let i=0;i<8;i++){
+      if(gl.getError()===gl.NO_ERROR){cleared=true;break;}
+    }
+    if(!cleared)throw Error('WebGL error queue did not clear before upload');
     gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
     gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
     const error=gl.getError();
