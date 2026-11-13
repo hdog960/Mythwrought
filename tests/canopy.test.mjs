@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,terrainHeight,meshChunk,CHUNK_SIZE} from '../src/voxel.mjs';
-import {woodlandCanopyVertices,woodlandTreeStyle,CANOPY_LIMITS} from '../src/canopy.mjs';
+import {woodlandCanopyVertices,woodlandTreeStyle,woodlandClearing,CANOPY_LIMITS} from '../src/canopy.mjs';
 
 const base=(x,y,z,seed)=>new VoxelWorld(seed).get(x,y,z);
 const options={chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:base,grass:BLOCK.GRASS,air:BLOCK.AIR};
@@ -81,4 +81,25 @@ test('sculpted roots and sunlit facets stay inside editable chunk budget and pre
   }
   assert.ok(broad>0&&ever>0,'both rooted silhouettes must exist');
   assert.equal(JSON.stringify(world.save()),saved,'render-only woodland may not mutate saves');
+});
+
+
+test('connected woodland clearings are deterministic, render-only and preserve natural terrain',()=>{
+  const world=new VoxelWorld(179),before=JSON.stringify(world.save());
+  let pocket=null,forest=0;
+  for(let cx=-12;cx<=12;cx++)for(let cz=-12;cz<=12;cz++){
+    const clear=woodlandClearing(cx,cz,world.seed);
+    assert.equal(clear,woodlandClearing(cx,cz,world.seed));
+    if(clear){
+      assert.equal(woodlandCanopyVertices(world,cx,cz,options).length,0);
+      if(woodlandClearing(cx+1,cz,world.seed)&&woodlandClearing(cx,cz+1,world.seed))pocket={cx,cz};
+    }else if(woodlandCanopyVertices(world,cx,cz,options).length)forest++;
+  }
+  assert.ok(pocket,'at least one connected multi-chunk clearing must be visible');
+  assert.ok(forest>0,'woodland still surrounds clearing pockets');
+  const {cx,cz}=pocket;
+  const x=cx*CHUNK_SIZE+7,z=cz*CHUNK_SIZE+7,y=terrainHeight(x,z,world.seed);
+  assert.equal(world.get(x,y,z),base(x,y,z,world.seed),'clearing keeps editable natural ground');
+  assert.equal(JSON.stringify(world.save()),before,'render-only clearing cannot write schema-1 edits');
+  assert.equal(woodlandClearing(cx,cz,world.seed),woodlandClearing(cx,cz,world.seed));
 });
