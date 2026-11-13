@@ -107,3 +107,11 @@ Verified main `d2c16ed1ad0f362ec39d53ff3f010b76b99d63ce`: merged-main Mythwrough
 
 ## 2026-11-12 19:20 Central — :20 rebase of modal-safe action input (UNMERGED)
 Verified main `ceb7fafdaca5a1566ee69a9ebc5df9165a4523f2` has green Node/Chromium and Pages. Prior PR #50 head `8fe469e268` passed CI but conflicts with woodland-merged main because its handoff/ledger files diverged. :20 owns new branch `gate-a-touch-modal-guard-rebased-20261112-1920`, replaying only actual `src/main.mjs` action gating and `tests/touch-browser.mjs` delayed-pointer menu regression on latest main. :40 owns exact-head CI, genuine screenshot review, guarded merge and Pages verification; :00 owns visual PR #51 (its latest CI failed, do not touch visual files). Old PR #50 must not be force-merged. This branch is NOT yet shipped. Next: (1) inspect exact-head verification and actual landscape artifacts, repair substantive failures and hand to :40 for guarded merge; (2) independent nonconflicting mobile control/render responsiveness improvement. Preserve Gate A, schema-1 saves, user-only device/art acceptance, no v0.11 or harvesting.
+
+
+### 2026-11-12 21:20 Central — input cancellation candidate (not hardware evidence)
+Unmerged PR #53 adds cancellation of mouse drag on pointercancel/lostpointercapture and blocks stale pointerup mine/place when settings are open or page hidden. A genuine Chromium mouse-pointer regression was added to `tests/touch-browser.mjs`, alongside the queued-jump blur regression. Exact-head full CI and real landscape screenshot review remain pending. This does not establish physical Safari behavior, real multitouch ergonomics or art approval; canonical IndexedDB and Gate A remain open.
+
+
+### 2026-11-12 22:20 Central — delayed modal input guard, no device approval
+Unmerged PR #53 now refuses pointerdown capture for movement/look pads, precision button and mouse canvas while settings are open or page hidden. Chromium test exercises modal-open delayed pointer events; this does not establish real Safari multitouch, thermal, force-quit or ergonomics acceptance. Require latest-head green CI and genuine 568×320/932×430 visual inspection before integration. No new service worker, save migration or Gate A approval.

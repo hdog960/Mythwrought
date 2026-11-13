@@ -102,6 +102,27 @@ try{
   assert.ok(Math.hypot(stopped.x-released.x,stopped.z-released.z)<.035,'Movement continued after both thumbs lifted');
   assert.ok(Math.abs(deltaYaw(stopped.yaw,released.yaw))<.005,'Camera drifted after release');
   assert.equal(await page.evaluate(()=>window.scrollY),0,'Multi-touch gesture scrolled the game page');
+  // Safari can cancel a mouse pointer after down without sending a normal up.
+  // A late pointerup must not turn that cancelled gesture into a world edit.
+  await page.locator('#closeHelp').click();
+  const sceneBox=await page.locator('#scene').boundingBox();
+  const mouseX=Math.round(sceneBox.x+sceneBox.width/2);
+  const mouseY=Math.round(sceneBox.y+sceneBox.height/2);
+  await page.evaluate(()=>document.getElementById('scene').addEventListener('pointerdown',
+    e=>{window.__cancelledMousePointer=e.pointerId;},{once:true}));
+  await cdp.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:mouseX,y:mouseY});
+  await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',x:mouseX,y:mouseY,button:'left',clickCount:1});
+  await page.evaluate(()=>{
+    const scene=document.getElementById('scene');
+    scene.dispatchEvent(new PointerEvent('pointercancel',{
+      pointerId:window.__cancelledMousePointer,pointerType:'mouse',button:0,bubbles:true
+    }));
+  });
+  const beforeCancelledEdit=await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0));
+  await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:mouseX,y:mouseY,button:'left',clickCount:1});
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),beforeCancelledEdit,
+    'Cancelled mouse gesture must not edit the world');
+  await page.locator('#menu').click();
   // Continuous stick mode must rotate only while held, using a radial dead zone.
   await page.locator('#menu').click();
   // Queued synthetic iOS events must not activate action buttons behind settings.
@@ -116,6 +137,23 @@ try{
     return {before,after:{jump:scene.dataset.playerVelocityY,edits:window.__mythwroughtTest.block(16,18,0)}};
   });
   assert.deepEqual(blocked.after,blocked.before,'Menu-open touch actions modified gameplay state');
+  // A delayed grip/precision/mouse pointerdown while settings is visible
+  // must not become active input after the modal closes.
+  const modalInput=await page.evaluate(()=>{
+    const pad=document.getElementById('movePad');
+    const look=document.getElementById('lookPad');
+    const precision=document.getElementById('precision');
+    const scene=document.getElementById('scene');
+    for(const element of [pad,look,precision,scene])
+      element.dispatchEvent(new PointerEvent('pointerdown',{
+        bubbles:true,cancelable:true,pointerType:element===scene?'mouse':'touch',
+        pointerId:71,clientX:30,clientY:30,button:0
+      }));
+    return {move:pad.classList.contains('engaged'),look:look.classList.contains('engaged'),
+      precision:precision.classList.contains('held')};
+  });
+  assert.deepEqual(modalInput,{move:false,look:false,precision:false},
+    'Modal-open delayed pointers captured a gameplay grip');
   await page.locator('#lookMode').selectOption('stick');
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v004-look-mode')),'stick');
   await page.locator('#closeHelp').click();
@@ -157,6 +195,22 @@ try{
   const afterBlur=await v();
   assert.ok(Math.hypot(afterBlur.x-blur.x,afterBlur.z-blur.z)<.06,'Input remained held across app blur');
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  // A jump queued just before app suspension must never fire on resume.
+  // Dispatch keydown and blur in one JS turn, before the next animation frame.
+  await page.evaluate(()=>{
+    const scene=document.getElementById('scene');
+    scene.focus({preventScroll:true});
+    scene.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',bubbles:true,cancelable:true}));
+    window.dispatchEvent(new Event('blur'));
+  });
+  const beforeResume=await page.evaluate(()=>Number(document.querySelector('#scene').dataset.playerFeet));
+  await page.waitForTimeout(250);
+  const afterResume=await page.evaluate(()=>({
+    feet:Number(document.querySelector('#scene').dataset.playerFeet),
+    velocity:Number(document.querySelector('#scene').dataset.playerVelocityY)
+  }));
+  assert.ok(afterResume.feet<=beforeResume+.06,'Queued jump fired after blur');
+  assert.ok(afterResume.velocity<=.01,'Jump velocity persisted after blur');
   assert.deepEqual(errors,[],'Console/page errors during 2-thumb interaction');
   console.log('PASS simultaneous movement with jump/mine/place, dual-thumb look, precision, cancellation');
 }finally{
