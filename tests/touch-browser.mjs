@@ -162,7 +162,7 @@ try{
   await page.evaluate(()=>{
     const scene=document.getElementById('scene');
     scene.focus({preventScroll:true});
-    document.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',bubbles:true,cancelable:true}));
+    scene.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',bubbles:true,cancelable:true}));
     window.dispatchEvent(new Event('blur'));
   });
   const beforeResume=await page.evaluate(()=>Number(document.querySelector('#scene').dataset.playerFeet));
