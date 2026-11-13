@@ -95,6 +95,20 @@ function evergreen(out,x,y,z,variation,beacon=false){
         [x,top-.15,z],needles[(i+tier+1)%needles.length],7);
     }
   }
+  if(beacon){
+    // A small eight-pointed crown-star makes the rare landmark legible against
+    // the sky. These are opaque mesh facets in the existing draw call.
+    // Keep all points inside the checked nine-block vertical clearance.
+    const crownY=y+6.35;
+    for(let i=0;i<8;i++){
+      const angle=i*Math.PI/4+variation*.15;
+      const dx=Math.cos(angle),dz=Math.sin(angle);
+      const outer=[x+dx*.60,crownY+.12,z+dz*.60];
+      const left=[x+Math.cos(angle-.32)*.20,crownY-.22,z+Math.sin(angle-.32)*.20];
+      const right=[x+Math.cos(angle+.32)*.20,crownY-.22,z+Math.sin(angle+.32)*.20];
+      tri(out,left,outer,right,i%2?[.96,.80,.43]:[.76,.91,.58],7);
+    }
+  }
 }
 // One distinctive sentinel candidate in a small fraction of wooded chunks.
 // A deterministic, render-only visual marker; never persisted or harvested.
