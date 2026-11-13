@@ -1,6 +1,8 @@
 # Mythwrought — Release ledger
 This is the source of truth for ACTUALLY implemented and independently verified features, separate from the 100 planned releases.
 
+
+| v0.10 Gate A **gold-tipped sentinel woodland landmarks — CANDIDATE ONLY** | Branch `gate-a-woodland-beacon-20261113-0802` based on `d36a86452d1d` | Actual `src/canopy.mjs` rare deterministic tall gilded sentinel silhouettes, `tests/canopy.test.mjs` determinism/height/mesh/save checks; exact-head CI and screenshot review PENDING | Not merged; not Pages | **Gate A OPEN; no iPhone/art approval** |
 | Release | Git commit | Tested behavior | Deployment | Result |
 |---|---|---|---|---|
 | v0.10 Gate A **faceted woodland canopy candidate — NOT SHIPPED** | [PR #38](https://github.com/hdog960/Mythwrought/pull/38) (head subject to CI) | Proposed `src/canopy.mjs`, chunk integration, `tests/canopy.test.mjs`: original 3D trees on natural grass, edit/remesh and deterministic budget assertions. **Node/Chromium and screenshot review PENDING at ledger authoring.** | PR branch only, not Pages | **Unmerged; no art approval, physical iPhone test or canonical IndexedDB migration; Gate A OPEN** |
