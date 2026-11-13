@@ -211,6 +211,29 @@ try{
   }));
   assert.ok(afterResume.feet<=beforeResume+.06,'Queued jump fired after blur');
   assert.ok(afterResume.velocity<=.01,'Jump velocity persisted after blur');
+  // Safari may deliver a delayed keyboard event after the page is hidden.
+  // Simulate the visibility property without suspending the Chromium runner;
+  // a hidden-page Space must not enqueue a jump on the next live frame.
+  const hiddenKey=await page.evaluate(()=>{
+    const scene=document.getElementById('scene');
+    const before=Number(scene.dataset.playerFeet);
+    Object.defineProperty(document,'hidden',{configurable:true,value:true});
+    try{
+      scene.dispatchEvent(new KeyboardEvent('keydown',{
+        code:'Space',bubbles:true,cancelable:true
+      }));
+    }finally{
+      delete document.hidden;
+    }
+    return before;
+  });
+  await page.waitForTimeout(220);
+  const hiddenAfter=await page.evaluate(()=>({
+    feet:Number(document.querySelector('#scene').dataset.playerFeet),
+    velocity:Number(document.querySelector('#scene').dataset.playerVelocityY)
+  }));
+  assert.ok(hiddenAfter.feet<=hiddenKey+.06,'Hidden-page keyboard event triggered jump');
+  assert.ok(hiddenAfter.velocity<=.01,'Hidden-page keyboard event queued jump velocity');
   assert.deepEqual(errors,[],'Console/page errors during 2-thumb interaction');
   console.log('PASS simultaneous movement with jump/mine/place, dual-thumb look, precision, cancellation');
 }finally{
