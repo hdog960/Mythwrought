@@ -127,3 +127,32 @@ test('clearing quadrants vary by region without fragmented pockets or seed write
   assert.equal(quadrants.size,4,'all four clearing orientations should occur');
   assert.equal(JSON.stringify(world.save()),original);
 });
+
+
+test('clearing boundaries and seed changes preserve edited terrain across save restore',()=>{
+  const seed=179, world=new VoxelWorld(seed);
+  let changed=false;
+  for(let mx=-8;mx<=8;mx++)for(let mz=-8;mz<=8;mz++){
+    for(let dx=0;dx<4;dx++)for(let dz=0;dz<4;dz++){
+      const cx=mx*4+dx,cz=mz*4+dz;
+      if(woodlandClearing(cx,cz,seed)!==woodlandClearing(cx,cz,seed+1))changed=true;
+    }
+  }
+  assert.ok(changed,'distinct seeds must produce different clearing maps');
+  // Negative region boundaries must use floor division, not truncation.
+  for(const [cx,cz] of [[-4,-4],[-1,-1],[-5,3],[3,-5],[0,0]]){
+    assert.equal(typeof woodlandClearing(cx,cz,seed),'boolean');
+    assert.equal(woodlandClearing(cx,cz,seed),woodlandClearing(cx,cz,seed));
+  }
+  let pocket;
+  for(let cx=-12;cx<=12&&!pocket;cx++)for(let cz=-12;cz<=12&&!pocket;cz++)
+    if(woodlandClearing(cx,cz,seed))pocket={cx,cz};
+  assert.ok(pocket);
+  const x=pocket.cx*CHUNK_SIZE+7,z=pocket.cz*CHUNK_SIZE+7;
+  const y=terrainHeight(x,z,seed);
+  assert.equal(world.set(x,y,z,BLOCK.AIR),true);
+  const saved=world.save(),restored=VoxelWorld.restore(saved);
+  assert.deepEqual(restored.save(),saved,'existing schema-1 edits survive clearing regeneration');
+  assert.equal(restored.get(x,y,z),BLOCK.AIR);
+  assert.equal(woodlandCanopyVertices(restored,pocket.cx,pocket.cz,options).length,0);
+});
