@@ -157,6 +157,22 @@ try{
   const afterBlur=await v();
   assert.ok(Math.hypot(afterBlur.x-blur.x,afterBlur.z-blur.z)<.06,'Input remained held across app blur');
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  // A jump queued just before app suspension must never fire on resume.
+  // Dispatch keydown and blur in one JS turn, before the next animation frame.
+  await page.evaluate(()=>{
+    const scene=document.getElementById('scene');
+    scene.focus({preventScroll:true});
+    document.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',bubbles:true,cancelable:true}));
+    window.dispatchEvent(new Event('blur'));
+  });
+  const beforeResume=await page.evaluate(()=>Number(document.querySelector('#scene').dataset.playerFeet));
+  await page.waitForTimeout(250);
+  const afterResume=await page.evaluate(()=>({
+    feet:Number(document.querySelector('#scene').dataset.playerFeet),
+    velocity:Number(document.querySelector('#scene').dataset.playerVelocityY)
+  }));
+  assert.ok(afterResume.feet<=beforeResume+.06,'Queued jump fired after blur');
+  assert.ok(afterResume.velocity<=.01,'Jump velocity persisted after blur');
   assert.deepEqual(errors,[],'Console/page errors during 2-thumb interaction');
   console.log('PASS simultaneous movement with jump/mine/place, dual-thumb look, precision, cancellation');
 }finally{
