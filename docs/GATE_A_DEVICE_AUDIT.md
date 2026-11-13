@@ -111,3 +111,7 @@ Verified main `ceb7fafdaca5a1566ee69a9ebc5df9165a4523f2` has green Node/Chromium
 
 ### 2026-11-12 21:20 Central — input cancellation candidate (not hardware evidence)
 Unmerged PR #53 adds cancellation of mouse drag on pointercancel/lostpointercapture and blocks stale pointerup mine/place when settings are open or page hidden. A genuine Chromium mouse-pointer regression was added to `tests/touch-browser.mjs`, alongside the queued-jump blur regression. Exact-head full CI and real landscape screenshot review remain pending. This does not establish physical Safari behavior, real multitouch ergonomics or art approval; canonical IndexedDB and Gate A remain open.
+
+
+### 2026-11-12 22:20 Central — delayed modal input guard, no device approval
+Unmerged PR #53 now refuses pointerdown capture for movement/look pads, precision button and mouse canvas while settings are open or page hidden. Chromium test exercises modal-open delayed pointer events; this does not establish real Safari multitouch, thermal, force-quit or ergonomics acceptance. Require latest-head green CI and genuine 568×320/932×430 visual inspection before integration. No new service worker, save migration or Gate A approval.
