@@ -228,3 +228,5 @@ Verified main `ceb7fafdaca5a1566ee69a9ebc5df9165a4523f2` has green Node/Chromium
 
 ### 2026-11-13 — v0.10 Gate A woodland clearing candidate (UNMERGED)
 From verified main `e79a8a7b8fea5315cdf8d0b482e2a252667ea590`: visual-owner branch `gate-a-woodland-clearing-composition-20261113-0100` creates deterministic connected open sightlines in canopy rendering without changing editable voxel ground, world saves, draw-call count or texture inventory. Focused Node regression added. Exact-head CI, real Chromium screenshots, merge and Pages remain PENDING; no premium artwork or physical-iPhone acceptance claimed.
+
+| v0.10 Gate A clearing quadrant variation — **UNMERGED** | PR #57, source/test `3771eb76bd254c08d689b4891d5924e5addf2661` | Seed/region-varying 2×2 open pockets, regression for connected quadrants and save invariance. Prior head `26aec2d` Actions 43382487498 green; final-head checks and visual review PENDING. | Not deployed | Gate A OPEN; no new gameplay or schema migration. |
