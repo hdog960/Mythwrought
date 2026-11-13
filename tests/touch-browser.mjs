@@ -33,11 +33,26 @@ try{
     };
     const nestedSpace=dispatch(nested,'Space');
     const nestedArrow=dispatch(nested,'ArrowUp');
+    // Actual DOM focus targets: an empty contenteditable is not necessarily
+    // isContentEditable in lightweight DOM stubs, and composite ARIA widgets
+    // can contain non-interactive SVG/span descendants.
+    const editable=document.createElement('div');
+    editable.setAttribute('contenteditable','plaintext-only');
+    const editableChild=document.createElement('span');
+    editable.append(editableChild);document.body.append(editable);
+    const editableSpace=dispatch(editableChild,'Space');
+    const editableArrow=dispatch(editableChild,'ArrowUp');
+    const grid=document.createElement('div');
+    grid.setAttribute('role','gridcell');
+    const gridChild=document.createElement('span');
+    grid.append(gridChild);document.body.append(grid);
+    const gridSpace=dispatch(gridChild,'Space');
+    const gridArrow=dispatch(gridChild,'ArrowUp');
     const canvasSpace=dispatch(document.querySelector('#scene'),'ArrowUp');
-    button.remove();
-    return {nestedSpace,nestedArrow,canvasSpace};
+    button.remove();editable.remove();grid.remove();
+    return {nestedSpace,nestedArrow,editableSpace,editableArrow,gridSpace,gridArrow,canvasSpace};
   });
-  assert.deepEqual(focusIsolation,{nestedSpace:false,nestedArrow:false,canvasSpace:true},
+  assert.deepEqual(focusIsolation,{nestedSpace:false,nestedArrow:false,editableSpace:false,editableArrow:false,gridSpace:false,gridArrow:false,canvasSpace:true},
     'Nested accessibility controls must retain keyboard events while canvas shortcuts remain active');
   const left=center(await page.locator('#movePad').boundingBox());
   const right=center(await page.locator('#lookPad').boundingBox());
