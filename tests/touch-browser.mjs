@@ -233,6 +233,24 @@ try{
   await page.waitForFunction(()=>!document.querySelector('#precision').classList.contains('held'),null,{timeout:2500});
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.precision==='false',null,{timeout:2500});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  // AIM must follow the owning finger even if Safari releases outside the
+  // button after a second action finger interrupts pointer capture.
+  const escapedAim=await page.evaluate(()=>{
+    const aim=document.getElementById('precision');
+    const event=(target,type,id)=>target.dispatchEvent(new PointerEvent(type,{
+      bubbles:true,pointerType:'touch',pointerId:id,cancelable:true
+    }));
+    event(aim,'pointerdown',992);
+    const engaged=aim.classList.contains('held');
+    event(window,'pointerup',993); // unrelated action finger
+    const retained=aim.classList.contains('held');
+    event(window,'pointerup',992); // owning finger escaped capture
+    const released=!aim.classList.contains('held');
+    return {engaged,retained,released};
+  });
+  assert.deepEqual(escapedAim,{engaged:true,retained:true,released:true},
+    'Escaped precision owner must release, unrelated finger must not steal AIM');
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.precision==='false',null,{timeout:2500});
   // Simulate Safari dropping pointer capture and delivering pointerup to
   // window instead of the pad: movement must release, never remain stuck.
   const escapedGrip=await page.evaluate(()=>{
