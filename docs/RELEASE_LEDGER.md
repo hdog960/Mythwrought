@@ -226,3 +226,7 @@ Verified main `ceb7fafdaca5a1566ee69a9ebc5df9165a4523f2` has green Node/Chromium
 | v0.10 Gate A **blocked optional vault open cleanup — UNMERGED** | Branch `gate-a-vault-blocked-open-recovery-20261112-2336` | Proposed late-open connection close and abandoned-upgrade guard in `src/vault.mjs`; new simulated blocked->success regression in `tests/vault.test.mjs`. Exact-head Node/Chromium and screenshots NOT YET VERIFIED. | Branch only, Pages not updated | **Pending verification; canonical schema-1 and IndexedDB migration unchanged; Gate A OPEN** |
 
 | v0.10 Gate A :20 clean gameplay input replay — UNMERGED | `gate-a-input-guard-replay-20261113-0125` from `e79a8a7b8fea` | Replayed `src/main.mjs` and `tests/touch-browser.mjs` from conflicting #53 onto unchanged latest-main gameplay file blobs. Input cancellation and Chromium regressions; latest-head CI/screenshots pending. | Branch only, not Pages | **Unverified candidate; physical iPhone/art gates OPEN, v0.11 LOCKED** |
+
+
+### 2026-11-13 04:23 Central — PR #58 verification (UNMERGED)
+PR #58 exact-head `b0343d0088c5` failed [Actions 43400655017](https://github.com/hdog960/Mythwrought/actions/runs/43400655017): Node/model and WebGL smoke passed; Chromium touch test failed at line 217 (`afterBlock` out of scope). Test-only correction `473ea5153a9a` keeps the hidden-page voxel invariant intact. New exact-head checks, genuine phone-size screenshot review, guarded merge, merged-main checks and Pages verification are PENDING. No new player-visible deployment.
