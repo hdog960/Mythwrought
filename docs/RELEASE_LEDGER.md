@@ -233,3 +233,7 @@ Verified main `e79a8a7b8fea5315cdf8d0b482e2a252667ea590`. Integration owner :40:
 
 ## 2026-11-13 09:00 — Sentinel high-crown obstruction regression (UNMERGED)
 PR #61 visual :00 owner: original sentinel candidate a69944b passed Actions 43439313725; new correction ensures a player-built voxel 8 above the natural anchor prevents the tall golden crown from obscuring the build, with schema-1 restore/remesh regression. Renderer and test changes committed; corrected exact-head Node/Chromium and real screenshot inspection still pending. No merge/Pages claim, no new gameplay or migration; Gate A OPEN.
+
+
+## 2026-11-13 :00 — sentinel golden-tip contrast (UNMERGED)
+PR #61 `src/canopy.mjs` now colors the top crown facets golden to improve landmark contrast at phone size, plus `tests/canopy.test.mjs` checks gold facets, mesh budget and save invariance. Previous head `81da110bf122` green Actions 43448458116; authentic prior-head landscape and compact canopy screenshots viewed, but sentinel visibility not established. New head `7a98069598f1` exact-head CI/visuals pending; main `e3ddaa6987d0` has advanced and PR conflicts. Not shipped, no Pages or device/art approval.
