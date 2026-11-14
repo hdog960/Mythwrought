@@ -94,6 +94,8 @@ const BY_KEY=new Map(defs.flatMap(d=>[0,1,2,3].map(r=>[d.id+':'+r,build(d,r)])))
 export const PACK3_MONUMENTAL_IDS=Object.freeze(defs.map(d=>d.id));
 export const PACK3_MONUMENTAL_ASSETS=Object.freeze(defs.map(d=>BY_KEY.get(d.id+':0')));
 export function pack3MonumentalById(id,rotation=0){
+  // ID ownership is numeric; never coerce string, BigInt or object aliases.
+  if(!Number.isInteger(id))return null;
   if(!Number.isInteger(rotation)||rotation<0||rotation>3)
     throw new RangeError('Monument rotation must be 0..3');
   return BY_KEY.get(id+':'+rotation)??null;
