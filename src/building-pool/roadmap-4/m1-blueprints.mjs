@@ -118,7 +118,8 @@ function emitBlueprint(type,biome,size){
     // A doorway must have an actual supported walking tile on *both* sides.
     const doorZ=bi===1&&l>0?entranceZ+3:dz;
     for(const x of [left,right])for(let z=entranceZ+3;z<=d-6;z++){
-      if(!interior(x,z)||z===doorZ)continue;
+      // The 4-riser stair shaft must stay free of partition masonry on both levels.
+      if(!interior(x,z)||z===doorZ||z===entranceZ+3)continue;
       for(let h=0;h<=2;h++)set(x,ly+h,z,'partition',l%2?'base:wood':'base:stone');
     }
     for(const x of [left,right])if(interior(x,doorZ))openings.push({kind:'door',at:[x,ly,doorZ],facing:x===left?'west':'east'});
