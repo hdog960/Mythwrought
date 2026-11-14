@@ -69,6 +69,23 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
                  tierPeak,pale);
           }
         }
+        // Crestward fracture on truly tall, exposed escarpments. Its broken
+        // diagonal joins the upper bedding to the next stone level without
+        // painting across a mined opening or changing the underlying voxels.
+        if(top-adjacent>=9){
+          const crestY=y+2;
+          if(crestY<=top && world.get(x,crestY,z)===stone &&
+             world.get(x+dx,crestY,z+dz)===air){
+            const k=hash(x,z,seed+3941);
+            const crestWidth=.24+k*.16;
+            const base=[cx0-tx*crestWidth,crestY-.39,cz0-tz*crestWidth];
+            const tip=[cx0+tx*(k-.5)*.22,crestY-.07,cz0+tz*(k-.5)*.22];
+            const edge=[cx0+tx*(crestWidth*.86),crestY-.32,cz0+tz*(crestWidth*.86)];
+            emit(base,edge,tip,shadow);
+            const split=[cx0+tx*(k-.5)*.12,crestY-.53,cz0+tz*(k-.5)*.12];
+            emit(base,tip,split,highlight);
+          }
+        }
         // Broad foot-of-cliff talus is only painted on genuinely exposed
         // stone above an open approach. It connects the bedding to the
         // valley floor without inventing a passable cave or changing terrain.
