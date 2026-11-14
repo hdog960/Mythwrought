@@ -94,14 +94,23 @@
 - [x] Rechecked the *previous* exact candidate HEAD `8a91b19c6fb7f1b966a0b6b236d081f0e5ea665d`: GitHub Actions [#43634960361](https://github.com/hdog960/Mythwrought/actions/runs/43634960361) **SUCCESS** for the **standard root Node + genuine landscape Chromium baseline**, which does NOT execute nested Pack 2 tests or show the candidate gallery in the game.
 - [x] Found and FIXED a substantial authentic rendering defect: `definitions.mjs` and `joinery.mjs` emitted *inward-facing triangles* despite correctly outward-facing normals, breaking normal parity and future back-face culling. Reversed the index winding on both physical and surface-detail quads. No shape, ID, physical geometry or fixture data were changed by this fix.
 - [x] Independent exhaustive triangle-normal audit of **121 authored states across all 18 families and 25,742 triangles**. Before fix, **12,430 triangles** in timber/joinery had incorrect winding. After the fix, **zero inverted / degenerate normal-triangle pairs**, all 121 variants in local [0,1] bounds and no single state exceeding **740 triangles**. This proves source geometry consistency, NOT iPhone WebGL acceptance.
-- [x] New `tests/block-packs/pack-2/acceptance.test.mjs` adds **8 strict regression cases** covering all 121 states, normals/winding, mobile preview triangle budgets, collision bounds, exact fluid ray targeting, complete 18-ID inventory, 18 independent fixture selection/removal and mixed format snapshots.
-- [x] All **87/87 checked-in test function bodies** (12 M1 + 15 M2 + 14 M3 + 17 M4 + 21 M5 + 8 M6) passed when executed in an isolated V8 JS harness with portable assertions against actual branch source; native `node --test` was NOT executed. Prior 79/79 had missed normal winding, which is now explicitly guarded.
+- [x] New `tests/block-packs/pack-2/acceptance.test.mjs` adds **9 strict regression cases** covering all 121 states, normals/winding, mobile preview triangle budgets, collision bounds, exact fluid ray targeting, complete 18-ID inventory, 18 independent fixture selection/removal and mixed format snapshots.
+- [x] All **88/88 checked-in test function bodies** (12 M1 + 15 M2 + 14 M3 + 17 M4 + 21 M5 + 9 M6) passed when executed in an isolated V8 JS harness with portable assertions against actual branch source; native `node --test` was NOT executed. Prior 79/79 had missed normal winding, which is now explicitly guarded.
 - [x] `M6_ACCEPTANCE.md` documents full roster, native and browser tests, exhaustive repairs and unfulfilled production integration gates. Candidate-only acceptance SOURCE REVIEW COMPLETE; final production acceptance **NOT APPROVED**.
 - [ ] Native direct Node `node --test tests/block-packs/pack-2/*.test.mjs` on this exact head: sandbox's GitHub DNS is blocked and exact source cannot be mounted from the connector into the Node container. **Not passed/unrun.**
 - [ ] Real local Chromium inspector screenshots via `node tests/block-packs/pack-2/browser-verify.mjs`: same checkout limitation, Playwright runtime unavailable locally. **Not passed/unrun** (standard root GitHub Chromium game checks are separate).
 - [ ] Recheck **new exact-head** GitHub Actions after these two render fixes + M6 tests/docs; no claim of green until GitHub reports success.
 - [ ] Central shape registry, transparent water renderer, level/flow simulation, backward-safe production schema-1 state sidecar and integrated iPhone landscape/offline performance remain separate creator-authorized integration gates.
 - [ ] No claim of physical iPhone testing, Gate A owner approval or v0.11 release.
+
+## Session 7 — Milestone 6 follow-up (2026-11-14)
+
+- [x] Reaudited main, checkpoint 006, Issues #109/#117, Packs 1/3/4 current draft PR heads, Pack 2 ID 59–76 manifest, all exclusive PR paths and earlier exact-head standard CI.
+- [x] Added **900** physically accurate source-level water ray height checks across 36 canonical fluid states and 25 `[x,z]` sample points per state; **9 M6 cases / 88 total authored cases** pass in exact-source V8 assertions (not Node).
+- [x] Improved optional genuine Chromium inspector harness to render all **18** candidates across 667×375, 844×390, 932×430 and, when run with screenshots enabled, save **authentic full-page water and focused water/gate/parapet canvas screenshots**, plus check layout overflow. It remains *unrun* because checkout/runtime availability is blocked.
+- [ ] Native `node --test tests/block-packs/pack-2/*.test.mjs` and real Playwright verification/screenshots remain unexecuted locally due GitHub DNS and missing Node Playwright module, **not green**.
+- [ ] Exact-head GitHub standard Node/Chromium must be verified for the current PR commit. This root workflow does not include nested Pack 2 suites.
+- [ ] Central engine registry, shape collision, water alpha/flow/neighbor updates, per-cell schema-1 sidecar, offline iPhone control/art approval remain blocked. No merge/deploy/world placement.
 
 ## Outstanding engine integration (manual incorporation only)
 
