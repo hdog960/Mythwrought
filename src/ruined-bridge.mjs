@@ -13,26 +13,36 @@ function block(out,x,y,z,w,h,d,color){
 // Crossing must be supplied by the terrain-owning lane and must describe an
 // ACTUAL naturally occurring channel with firm banks. Until connected to that
 // verified signal, no bridge is emitted (never fabricate a river).
-export function ruinedBridgeVertices(world,cx,cz,{crossingAt,air=0}={}){
+export function ruinedBridgeVertices(world,cx,cz,{crossingAt,baseAt,air=0}={}){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||!Number.isInteger(cx)||!Number.isInteger(cz))throw Error('Invalid bridge world/chunk');
- if(typeof crossingAt!=='function')return EMPTY();
+ if(typeof crossingAt!=='function'||typeof baseAt!=='function')return EMPTY();
  const crossing=crossingAt(cx,cz,world.seed);
- if(!crossing||crossing.natural!==true||crossing.width<2||crossing.width>5||
+ if(!crossing||crossing.natural!==true||!Number.isInteger(crossing.width)||crossing.width<2||crossing.width>5||
     !Number.isInteger(crossing.x)||!Number.isInteger(crossing.z)||
     !Number.isInteger(crossing.bankY)||!['x','z'].includes(crossing.axis))return EMPTY();
  const {x,z,bankY,axis,width}=crossing;
  if(x<cx*16+4||x>cx*16+11||z<cz*16+4||z>cz*16+11||bankY<2||bankY>30)return EMPTY();
  if((hash(cx,cz,world.seed+7391)%5)!==0)return EMPTY();
  const along=(t)=>axis==='x'?[x+t,z]:[x,z+t];
- // Validate both dry bank approaches and preserve all saved edits. The
- // channel remains open beneath the deck, and no terrain is overwritten.
- for(const t of [-width-2,-width-1,width+1,width+2]){
-  const [px,pz]=along(t);
-  if(world.get(px,bankY,pz)===air||world.get(px,bankY+1,pz)!==air)return EMPTY();
- }
- for(let t=-width;t<=width;t++){
-  const [px,pz]=along(t);
-  if(world.get(px,bankY+1,pz)!==air||world.get(px,bankY+2,pz)!==air)return EMPTY();
+ // A terrain-lane hint is not proof by itself. Independently inspect the
+ // entire two-block-wide span against the seeded, unedited base terrain.
+ // Require a real depression with lower natural ground, clear headroom and
+ // stable, matching-height banks. Any edited cell suppresses the bridge.
+ const across=(t,side)=>axis==='x'?[x+t,z+side]:[x+side,z+t];
+ for(let side=-1;side<=1;side++){
+  for(let t=-width-2;t<=width+2;t++){
+   const [px,pz]=across(t,side);
+   const bank=Math.abs(t)>=width+1;
+   const natural=baseAt(px,bankY,pz,world.seed);
+   const current=world.get(px,bankY,pz);
+   if(current!==natural)return EMPTY();
+   if(bank ? natural===air : natural!==air)return EMPTY();
+   if(!bank&&baseAt(px,bankY-1,pz,world.seed)===air)return EMPTY();
+   for(let dy=1;dy<=3;dy++){
+    if(baseAt(px,bankY+dy,pz,world.seed)!==air||
+       world.get(px,bankY+dy,pz)!==air)return EMPTY();
+   }
+  }
  }
  const out=[],stone=[.49,.57,.62],light=[.69,.73,.70],deckY=bankY+1.02;
  // Deliberately interrupted masonry walkway: only rendered over a
