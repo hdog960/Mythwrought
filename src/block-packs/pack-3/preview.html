@@ -32,13 +32,29 @@ function shade(hex,factor){
  const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
  return '#'+rgb.map(n=>Math.max(0,Math.min(255,Math.round(n*factor))).toString(16).padStart(2,'0')).join('');
 }
-const point=(x,y,z)=>[160+(x-z)*98,90+(x+z)*40-y*140];
+// Project the SAME occupied box geometry while fitting every tall part into
+// the candidate canvas. Previous fixed camera clipped upper arch/merlon tops.
+const rawPoint=(x,y,z)=>[(x-z)*98,(x+z)*40-y*140];
+function fitProjection(parts){
+ const xs=[],ys=[];
+ for(const {box:b} of parts)
+  for(const x of [b[0],b[3]])for(const y of [b[1],b[4]])for(const z of [b[2],b[5]]){
+   const [px,py]=rawPoint(x,y,z);xs.push(px);ys.push(py);
+  }
+ const left=Math.min(...xs),right=Math.max(...xs),top=Math.min(...ys),bottom=Math.max(...ys);
+ const scale=Math.min(1.18,288/(right-left),172/(bottom-top));
+ const midX=(left+right)/2,midY=(top+bottom)/2;
+ return (x,y,z)=>{
+  const [px,py]=rawPoint(x,y,z);
+  return [160+(px-midX)*scale,100+(py-midY)*scale];
+ };
+}
 function poly(ctx,pts,color){
  ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
  ctx.closePath();ctx.fillStyle=color;ctx.fill();
  ctx.strokeStyle='rgba(9,17,25,.29)';ctx.lineWidth=.7;ctx.stroke();
 }
-function paintBox(ctx,b,color){
+function paintBox(ctx,b,color,point){
  const [x,y,z,X,Y,Z]=b;
  poly(ctx,[point(X,y,z),point(X,y,Z),point(X,Y,Z),point(X,Y,z)],shade(color,.76));
  poly(ctx,[point(x,y,Z),point(X,y,Z),point(X,Y,Z),point(x,Y,Z)],shade(color,.88));
@@ -66,7 +82,8 @@ for(const initial of [...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY,...PACK3_FO
   ctx.fillStyle='#15212a';ctx.fillRect(0,0,320,200);
   // Draws EXACT source part.box volumes, not an artistic stand-in mesh.
   const parts=[...asset.parts].sort((a,b)=>a.box[1]-b.box[1]||a.box[2]+a.box[0]-b.box[2]-b.box[0]);
-  for(const part of parts)paintBox(ctx,part.box,asset.colors[part.tone]);
+  const project=fitProjection(parts);
+  for(const part of parts)paintBox(ctx,part.box,asset.colors[part.tone],project);
   canvas.setAttribute('aria-label',asset.name+' physical box preview, rotation '+(asset.rotation??0));
  };
  draw();
