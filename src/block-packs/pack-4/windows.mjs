@@ -79,7 +79,7 @@ frame.push(part([.035,.035,.36,.965,.075,.64],'oakShade',false));
 // Two separately silhouetted hinged leaves with visible raised slat courses.
 const shutters=[
   part([.065,.09,.43,.485,.91,.59],'oak'),
-  part([.515,.09,.43,.935,.91,.59]
+  part([.515,.09,.43,.935,.91,.59],'oak')
 ];
 for(const x of [.065,.515]){
   for(let i=0;i<6;i++){
