@@ -235,3 +235,18 @@ test('snowline pockets are seeded, highland-only and preserve player roof edits'
  const flat=ridgeStrataVertices(world,0,0,{heightAt:()=>6});
  assert.equal(flat.length,0,'no frost on flat lowlands');
 });
+
+test('normal grass high points never acquire false blue-white snowline triangles',()=>{
+ const heights=(x,z)=>x<0?12:6;
+ const world={seed:1,get(x,y,z){
+   const h=heights(x,z);
+   return y>h?0:y===h?1:y>=h-3?2:3;
+ }};
+ const baseline=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(baseline.length>0,'Keep the original geological relief decoration');
+ for(let i=0;i<baseline.length;i+=9){
+   const r=baseline[i+3],g=baseline[i+4],b=baseline[i+5];
+   assert.ok(!(r>=.55&&g>=.70&&b>=.75),'Ordinary grass gained pale blue faux snow: '+[r,g,b]);
+ }
+ assert.deepEqual(baseline,ridgeStrataVertices(world,-1,0,{heightAt:heights}));
+});

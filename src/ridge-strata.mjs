@@ -269,13 +269,14 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
       const gold=[.52+variation*.06,.57+variation*.05,.32+variation*.04];
       emit(a,b,c,green,grass);emit(a,c,d,gold,grass);
     }
-  // Snowline pockets: broad pale frostfields on actual upper grass surfaces.
-  // Region-scale placement is seed-stable across chunks and never replaces
-  // seeded terrain, cave geometry, collision, or player-edited blocks.
+  // Snowline pockets are dormant at the prototype's ordinary meadow heights.
+  // At current terrain heights (2..12) an icy blue overlay was falsely painting
+  // broad triangles on green grassy slopes. Wait for future actual alpine
+  // height/biome support; preserve render-only and save-neutral behavior.
   for(let x=cx*chunkSize;x<(cx+1)*chunkSize;x++)
     for(let z=cz*chunkSize;z<(cz+1)*chunkSize;z++){
       const top=heightAt(x,z,seed);
-      if(top<11||world.get(x,top,z)!==grass||world.get(x,top+1,z)!==air)continue;
+      if(top<15||world.get(x,top,z)!==grass||world.get(x,top+1,z)!==air)continue;
       const zone=hash(Math.floor(x/24),Math.floor(z/24),seed+17231);
       if(zone>.36)continue;
       const crest=Math.max(...faces.map(([dx,dz])=>top-heightAt(x+dx*4,z+dz*4,seed)));
