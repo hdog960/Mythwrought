@@ -176,3 +176,11 @@ Checkpoint 007 includes opt-in :00 targeting and :12 generic shape source but **
 3. Independently review live engine registration and schema-1 rotation persistence, WebGL2 cutout/meshing, iPhone two-grip controls and creator art approval before any integration; those live tests are outside this draft's authority.
 
 **Disposition: M6 final acceptance OPEN / NOT ACCEPTED.** All 30 source assets remain unmerged, undeployed, unregistered and absent from worldgen; v0.11 LOCKED.
+
+## M6 late-main reconciliation: integration checkpoint 008 (2026-11-14)
+
+**Newest main commit:** `f416a2b26c4c00b5944f3bd37e9360030a247cc9`, commit message **“Gate A checkpoint 008: make automation voxel trees, caves and courts playable.”** This explicitly excludes manual Block Packs 1–5 and building projects, and uses only the **existing persistent block IDs 0–8**. The latest `docs/INTEGRATION_CHECKPOINTS.md` file still ends at checkpoint 007; treat this as documentation lag, **not evidence that 008 failed or that Pack 1 was incorporated**. Checkpoint 008 also updates root CI and live-world rendering code, but does not change the Pack 1 draft branch or register any of IDs 9–38. Issues #109/#117 remain OPEN.
+
+**Post-008 ownership and API implications:** the live `src/voxel.mjs` block registry still enumerates `AIR:0` through `DEEPSTONE:8`; 30 Pack 1 physical candidates remain an independent, unmerged opt-in catalog. Checkpoint 008's root workflow adds a live-world browser smoke script but continues to execute `npm test` with top-level `tests/*.test.mjs`; it **does not run** the nine nested Pack 1 acceptance files. The prior 120/120 prototype-shape V8 compatibility checks apply to unchanged opt-in `src/shape-prototypes.mjs` and `src/voxel-shape-interactions.mjs`; actual production WebGL2 and native Pack 1 tests remain pending.
+
+**Current additional real native Node evidence:** 12/12 tests across the isolated `gallery-count` (5) and `png-proof` (7) test modules passed genuine Node 22.16.0 against files matching GitHub blob hashes. The other seven candidate suites (81 authored test bodies) remain source-V8-tested only. Full Pack 1 gallery screenshots and physical iPhone review are still **not available** in this restricted local browser; no merge, deploy, worldgen placement or v0.11 unlock authorized.
