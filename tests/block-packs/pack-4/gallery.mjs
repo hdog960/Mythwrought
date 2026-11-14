@@ -1,6 +1,7 @@
 // An isolated WebGL2 visual inspection harness; NEVER imported by production main.
 import {PACK4_WINDOW_ASSETS,windowPreviewMesh} from '../../../src/block-packs/pack-4/windows.mjs';
 import {PACK4_LIGHT_ASSETS,lightingPreviewMesh} from '../../../src/block-packs/pack-4/lighting.mjs';
+import {PACK4_FURNISHING_ASSETS,furnishingPreviewMesh} from '../../../src/block-packs/pack-4/furnishings.mjs';
 const VS = `#version 300 es
 precision highp float;
 layout(location=0) in vec3 aPosition;
@@ -41,7 +42,8 @@ function buildProgram(gl){
 function drawOne(canvas,id,rotation){
   const gl=canvas.getContext('webgl2',{alpha:false,preserveDrawingBuffer:true,antialias:true});
   if(!gl)throw Error('WebGL2 unavailable; cannot validate real candidate preview');
-  const mesh=id>=165?lightingPreviewMesh(id,rotation):windowPreviewMesh(id,rotation);
+  const mesh=id>=169?furnishingPreviewMesh(id,rotation):
+    id>=165?lightingPreviewMesh(id,rotation):windowPreviewMesh(id,rotation);
   const prog=buildProgram(gl);
   gl.viewport(0,0,canvas.width,canvas.height);
   gl.clearColor(.12,.18,.21,1);
@@ -71,7 +73,10 @@ function drawOne(canvas,id,rotation){
 }
 const grid=document.querySelector('#gallery');
 const outcomes=[];
-const allAssets=[...PACK4_WINDOW_ASSETS,...PACK4_LIGHT_ASSETS];
+const allAssets=[...PACK4_WINDOW_ASSETS,...PACK4_LIGHT_ASSETS,...PACK4_FURNISHING_ASSETS];
+// One WebGL2 drawing surface, not 17 simultaneous GPU contexts on mobile.
+const sharedCanvas=document.createElement('canvas');
+sharedCanvas.width=340;sharedCanvas.height=296;
 for(const a of allAssets){
   const card=document.createElement('article');
   card.className='item';
@@ -91,7 +96,14 @@ for(const a of allAssets){
     option.value=String(r);option.textContent='Rotation '+r*90+'°';select.append(option);
   }
   card.append(canvas,heading,description,select);grid.append(card);
-  const render=()=>drawOne(canvas,a.id,Number(select.value));
+  const render=()=>{
+    const metrics=drawOne(sharedCanvas,a.id,Number(select.value));
+    const ctx=canvas.getContext('2d');
+    if(!ctx)throw Error('Canvas snapshot surface unavailable');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(sharedCanvas,0,0,canvas.width,canvas.height);
+    return metrics;
+  };
   select.addEventListener('change',()=>{
     try{render();}catch(error){description.textContent=String(error);}
   });
@@ -102,4 +114,5 @@ const success=outcomes.filter(x=>x.ok).length;
 document.querySelector('#status').textContent=
   success+'/'+outcomes.length+' candidate models rendered in isolated WebGL2. Not deployed.';
 window.__PACK4_GALLERY_RESULT=Object.freeze({ready:true,success,results:outcomes,
-  allIds:allAssets.map(a=>a.id), unmerged:true});
+  allIds:allAssets.map(a=>a.id), unmerged:true,
+  sharedWebglSurface:true});
