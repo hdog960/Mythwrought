@@ -37,3 +37,27 @@ test('site results never imply automatic construction',()=>{
   const fake={origin:[0,4,0],optIn:true};
   assert.equal(placeSurveyedPilgrimCourt(w,fake),false);
 });
+
+test('previously discovered sites are excluded before expensive terrain planning',()=>{
+  const w=new VoxelWorld(179);
+  const planned=[];
+  const planner=(_w,x,z)=>{planned.push([x,z]);return {origin:[x,4,z],optIn:true};};
+  const options={minDistance:48,maxDistance:80,step:8,maxCandidates:128,maxResults:2,planner};
+  const initial=surveyPilgrimCourtSites(w,0,0,options);
+  assert.equal(initial.length,2);
+  const prior=initial.map(p=>[p.origin[0],p.origin[2]]);
+  planned.length=0;
+  const next=surveyPilgrimCourtSites(w,0,0,{...options,excludeSites:prior,exclusionRadius:48});
+  assert.ok(next.every(p=>prior.every(([x,z])=>Math.hypot(x-p.origin[0],z-p.origin[2])>=48)));
+  assert.ok(planned.every(([x,z])=>prior.every(([px,pz])=>Math.hypot(px-x,pz-z)>=48)));
+  assert.deepEqual(surveyPilgrimCourtSites(w,0,0,{...options,excludeSites:prior,exclusionRadius:48}),next);
+});
+test('malformed planner results and invalid exclusion requests cannot produce sites',()=>{
+  const w=new VoxelWorld(179);
+  const opts={minDistance:48,maxDistance:64,step:8,maxCandidates:16};
+  for(const planner of [()=>({origin:[999,4,999],optIn:true}),()=>({origin:[0,4,0],optIn:false}),()=>({origin:[0,4,0]})])
+    assert.deepEqual(surveyPilgrimCourtSites(w,0,0,{...opts,planner}),[]);
+  for(const excludeSites of [[[0]],[[0,'1']],Array.from({length:129},()=>[0,0])])
+    assert.deepEqual(surveyPilgrimCourtSites(w,0,0,{...opts,excludeSites}),[]);
+  assert.deepEqual(surveyPilgrimCourtSites(w,0,0,{...opts,exclusionRadius:0}),[]);
+});
