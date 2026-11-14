@@ -29,6 +29,14 @@ Actual source/test files were reconstructed in the independent test container an
 
 **Additional technical acceptance hardening:** checked all five independent candidate fixture formats are mutually distinct, each contains no production `schema:1` field, malformed production-stamped candidate snapshots are rejected, and 90° rotation preserves actual physical occupancy across eight interior samples per axis for 13 orientation-aware families. Two existing preview-only fixture implementations and three owned regression files were corrected; no shared save codec or registry was changed. **Genuine local Node tests: 64 PASS / 0 FAIL**. The original 62-case suite passed before this refinement.
 
+### Repeatable Chromium visual-proof acceptance (M6 follow-up)
+
+An optional dedicated Pack 3-owned runner now exists at `tests/block-packs/pack-3/gallery-browser.py`. It requires Python Playwright and a local Chromium executable (via `PACK3_CHROMIUM`, default `/usr/bin/chromium`). It uses the committed `preview.html` and the same five immutable authored source modules, inlined in-memory only because sandbox file/localhost navigation is blocked; it reads NO production world or saves. `PACK3_SCREENSHOT_DIR` optionally enables authentic full-page PNG outputs.
+
+**Executed in actual headless Chromium 144 at all three required landscape sizes** (667×375, 844×390, 932×430): **17 distinct pixel hashes across 17 physical candidates**, minimum 12,410 non-background pixels per model, **13 working 90° rotation buttons**, each returning to its exact starting image after **four turns**. Seven intentionally directional pieces (IDs 113, 114, 116, 118, 121, 123, 125) all changed their rendered pixel signatures when rotated. **Zero JS page exceptions**. Screenshots were captured and visually inspected at all three sizes.
+
+This is **genuine Chromium, but still a 2D canvas review of the actual occupied geometry**, not production WebGL2. An attempted separate 3D/WebGL2 review was **blocked by this container's Chromium returning null for both WebGL1 and WebGL2**, even with software-render flags; no WebGL-only result is claimed, and no unverified viewer was shipped. No physical iPhone/Safari test or production mesh/renderer performance claim. The runner is opt-in, not wired into the central CI workflow without explicit authorization.
+
 **Prototype triangle budget (one piece each, surface-only mesh):** 17,140 triangles total across the 17 archetypes; maximum **2,464 triangles / 4,928 vertices** on the guardian statue at any of its four rotations. No out-of-cell vertices, 32-box-limit violations, or unsigned 16-bit index overflow seen. These are synthetic prototype counts, **not measured production mobile GPU utilization**. Do not mass-place pieces without benchmark and performance acceptance.
 
 ## Production engine boundaries; NOT authorized changes
