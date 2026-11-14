@@ -37,8 +37,11 @@ export const STORYBOOK_ROOF_GLSL=String.raw`
     float roofRidgeMedallion=1.0-smoothstep(.022,.075,
       abs(length((fract(vUv.x*8.0)-.5)*vec2(1.0,0.0)+vec2(0.0,vUv.y*2.0-.12))-.16));
     shade=.78+.18*roofVariation+.10*roofGlaze-.22*roofSeam-.15*roofLap
-      -.09*roofScallop+.13*roofRib+.09*roofEmblem-.17*roofChip\n      +.17*roofRidgeBand+.12*roofRidgeLip-.12*roofRidgeBand*roofRidgeSegment\n      +.08*roofRidgeBand*roofRidgeMedallion;
-    base=mix(base,vec3(.75,.31,.24),(.35+.12*roofVariation)*near);\n    base=mix(base,vec3(.88,.49,.30),roofRidgeBand*.34*near);
+      -.09*roofScallop+.13*roofRib+.09*roofEmblem-.17*roofChip
+      +.17*roofRidgeBand+.12*roofRidgeLip-.12*roofRidgeBand*roofRidgeSegment
+      +.08*roofRidgeBand*roofRidgeMedallion;
+    base=mix(base,vec3(.75,.31,.24),(.35+.12*roofVariation)*near);
+    base=mix(base,vec3(.88,.49,.30),roofRidgeBand*.34*near);
 `;
 export const STORYBOOK_ROOF_RULES=Object.freeze({
   renderTag:16,placeableBlockId:null,rows:7,columns:6,
