@@ -25,7 +25,7 @@ Each biome has **one unique small, medium and large blacksmith** and **one uniqu
 
 ## Verification evidence
 
-- **Native Node 22.16.0:** `node --test tests/building-pool/roadmap-3/*.test.mjs` — **22/22 PASS** locally on source matching the committed GitHub file blob hashes for the six M0 files and exact M1 source/test modules. No surrogate browser or V8-shim tests counted.
+- **Native Node 22.16.0:** `node --test tests/building-pool/roadmap-3/*.test.mjs` — **25/25 PASS** locally on source matching the committed GitHub file blob hashes for the six M0 files and exact M1 source/test/manifest modules; includes three additional manifest/JSON-roundtrip cases. No surrogate browser or V8-shim tests counted.
 - Independent voxel-grid flood traversal: checks two-wide unobstructed, floor-supported paths from entrance to blacksmith work/storage nodes and through stair steps to watchtower observation deck on all 30 structural proposals. This is theoretical cell-occupancy QA, **not production player collision verification**.
 - Reversible serialization / uniqueness: stable canonical generator output; 30 distinct design identities and geometry fingerprints; duplicate occupancy, unknown family references, malformed clearances, invalid type/size and missing routes rejected by tests.
 - Authored snapshot is reproducible from `createM1Pool()` and was independently materialized as local `M1_SNAPSHOT.json` (30 enumerated layouts, 1,846,816 bytes). Snapshot is a local transfer/verification artifact, **not committed** to keep the draft PR source-driven and lightweight.
