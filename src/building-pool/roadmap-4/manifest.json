@@ -3,7 +3,7 @@
   "title": "Government & Arcane Knowledge",
   "repository": "hdog960/Mythwrought",
   "authority": "Theoretical 3D voxel buildings only; not integrated into game",
-  "state": "M0 foundation accepted; M1 30/30 authored, 0 accepted; physical integration and WebGL2 pending",
+  "state": "M0 TECHNICALLY COMPLETE; M1 30/30 AUTHORS, 0/30 FINAL ACCEPTED — WEBGL2, SHAPE AND CREATOR REVIEW OPEN",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "integrationCheckpoint": "006",
   "governanceIssues": [
@@ -114,7 +114,7 @@
   },
   "milestoneState": {
     "M0": "TECHNICAL COMPLETE: exact source native Node 11/11 and PR CI",
-    "M1": "30 authored theoretical designs, 0 creator-accepted; native Node 33/33 with load-bearing stairs and roof joists; 180 updated Chromium Canvas2D QA; WebGL2 environment blocked",
+    "M1": "30 of 30 theoretical geometric blueprints authored, 0 accepted. 47/47 exact-source native Node; 180 fresh Chromium Canvas2D screenshots; WebGL2 and real physical colliders not verified",
     "M2": "NOT STARTED",
     "M3": "NOT STARTED",
     "M4": "NOT STARTED",
@@ -137,14 +137,14 @@
   ],
   "qa": {
     "m0NativeNode": "11/11 PASS, exact schema/test Git blobs",
-    "m1PlusM0NativeNode": "33/33 PASS native Node 22.16.0 on exact-blob source after roof/stair support repairs",
-    "m1ExactSourceBlob": "0be6587f95d191dce8bc0e62ae8d42727ad472fa",
+    "m1PlusM0NativeNode": "47/47 PASS native Node 22.16.0 on SHA-matching Roadmap 4 branch files; 14 additional shape/WebGL source regressions",
+    "m1ExactSourceBlob": "e35ec8b7992bcff1ce56a19e8a72223b0d46ed10",
     "coreSchemaBlob": "9293f0fae6254f2fbdb7cf519f2114cab0ade69e",
     "uniqueGeometrySignatures": 30,
     "actualChromiumCanvas2DScreenshots": 180,
-    "coverage": "30 blueprints × exterior+section × 667×375,844×390,932×430; rerendered from structural-support exact-source",
-    "webgl2": "BLOCKED: verified Chromium WebGL2 null with GPU flags; page navigation ERR_BLOCKED_BY_ADMINISTRATOR; no genuine GPU timings or candidate screenshots",
-    "physicalIphone": "NOT RUN",
+    "coverage": "180/180 freshly regenerated Chromium Canvas2D reference images from updated builder at 667×375,844×390,932×430 (complete/section all 30) with zero page errors; not source-shape GPU renders",
+    "webgl2": "NOT RUN successfully; page navigation ERR_BLOCKED_BY_ADMINISTRATOR and GPU context null under Chromium even with software renderer; new instanced reviewer authored, syntax/face winding checked only",
+    "physicalIphone": "NOT TESTED",
     "creatorVisualApproval": "NOT GIVEN",
     "inGameIntegration": "NONE",
     "unresolved": [
@@ -169,7 +169,16 @@
     "unsupportedStairOrLandingCells": 0,
     "exposedCubeFaces": 199812,
     "previewTriangles": 399624,
-    "largestPreviewBufferBytes": 2590848
+    "largestPreviewBufferBytes": 2590848,
+    "m1PhysicalHandoff": "35 elevated landing contacts changed from full block to source-referenced Pack 1 lower slab; rotated stair schema-1 orientation still blocked",
+    "newPreviewShapeSourceBlob": "0c8f0a3fb078c6abfd80d05613ad140a5c6bb211",
+    "previewShapeSource": "read-only source-box references to unmerged manual Packs 1/3/4; explicit full-cell proxies for still-unresolved materials",
+    "previewNaiveUnindexedUpperBoundMiB": 27.0263671875,
+    "previewBatchedInstancingModelMiB": 2.6409912109375,
+    "actualSubmittedWebGLBytes": null,
+    "actualGPUFrameTimeMs": null,
+    "currentMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+    "incorporationCheckpoint": "008"
   },
   "lastVerifiedMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
   "lastVerifiedCheckpoint": "008",
@@ -182,6 +191,8 @@
     "candidateSymbolFamiliesUsed": 12,
     "stairTreads": 140,
     "upperLandings": 35,
-    "overheadRoofJoists": 4310
+    "overheadRoofJoists": 4310,
+    "landingMaterial": "pack1:007 lower half slab (not live)",
+    "stairMaterial": "pack1:008 rotated stone stair (not live)"
   }
 }
