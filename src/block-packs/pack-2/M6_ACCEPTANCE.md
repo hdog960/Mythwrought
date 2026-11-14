@@ -2,7 +2,7 @@
 
 **Review status:** `SOURCE CANDIDATE REVIEW COMPLETE; NATIVE/PRODUCTION ACCEPTANCE OPEN`  
 **Pack:** 2 — Timber & Infrastructure | **Draft PR:** #114 | **Coordinated in:** Issues #109/#117  
-**Latest audited integrated main:** `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84` | **Incorporation checkpoint:** 006  
+**Latest audited integrated main:** `caf47776b723a36684edc1a72749e49268ccc688` | **Incorporation checkpoint:** 007  
 **Ownership:** `src/block-packs/pack-2/`, `tests/block-packs/pack-2/` only  
 **Persistent candidate ID allocation:** exactly IDs 59–76, 18 unique families. No shared engine, renderer, world generation, CI, unrelated packs, deployment or main changes. Existing IDs 0–8 frozen; cache sentinel 255 reserved.
 
@@ -92,6 +92,17 @@ bash tests/block-packs/pack-2/run-acceptance.sh
 ```
 
 The command does not approve incorporation: Gate A and v0.11 remain locked behind creator approval and production integration checks.
+
+## Session 11 — checkpoint 007 automation-only incorporation and compatibility audit (2026-11-14)
+
+- [x] **Main advanced during this Pack 2 session:** new main `caf47776b723a36684edc1a72749e49268ccc688`, checkpoint **007**; diff from previous checkpoint 006 is automation-owned integration of opt-in shape APIs, 130-family symbolic biome catalog, cave/structure/tree prototypes and their tests. Checkpoint document **explicitly excluded manual Packs 1–5 and all independent building roadmaps**. The Pack 2 draft remains unmerged and its current branch is **two main commits behind**; no automatic rebase/merge performed.
+- [x] Rechecked Issue #109, Issue #117 and current draft ownership/heads for Pack 1 #113, Pack 3 #112, Pack 4 #115, Pack 5 #119; **all 18 Pack 2 IDs 59–76 remain unique and isolated**. Live `VoxelWorld.set` still rejects IDs above 8.
+- [x] Executed the *actual newly integrated main source* `validateShape`, `raycastShapes`, `canPlaceShape`, `prototypeSurfaceMesh` against **85 Pack 2 solid geometry states** in standalone V8: **85/85** shape validation, **85/85** genuine shared ray hits, **85/85** free-vs-overlap placement decisions, **85/85** surface prototype meshes. Maximum shared prototype geometry **380 triangles**. This is direct source interface evaluation in V8, **not native Node, live WebGL2 or the production renderer**.
+- [x] Verified checkpoint-007 orientation sidecar accepts representative candidate rotations when the supplied block-reader matches the ID. **Water ID 76 correctly fails the shared solid-`{boxes}` validator**, since it has zero solid collision boxes and requires its own fluid-prism raycast, transparent pass and simulation hooks; do not replace it with a fake cube.
+- [x] **Python browser runner defect corrected:** system Chromium fallback used when Playwright's bundled browser is missing. A real Chromium 144 launch plus nested inline `data:text/javascript` module import passed on a small tooling-only page, **not on Pack 2 asset geometry**.
+- [x] Added `--expected-head` and clean Pack 2 tree verification in the Python runner, plus committed one-command `tests/block-packs/pack-2/run-acceptance.sh` covering six direct native Node suites and 54 original candidate captures when a real checkout is available.
+- [x] **88/88** existing Pack 2 test bodies still pass the source-level V8 harness. Prior checkpoint 006 exact-head standard CI run [#43642512460](https://github.com/hdog960/Mythwrought/actions/runs/43642512460) **SUCCESS**. The latest candidate-head CI must be checked against its own SHA.
+- [ ] Native direct Node execution, exact Pack 2 candidate Chromium preview screenshots, screenshot visual review, production fluid/render/save integration and physical iPhone controls **remain unverified** due local exact-checkout access restriction. This is **NOT** final certification.
 
 ## Required real test gates — NOT certified by the source-level checks
 
