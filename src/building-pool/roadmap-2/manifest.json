@@ -4,7 +4,9 @@
   "gate": "v0.10 Gate A OPEN / v0.11 LOCKED",
   "baselineMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
-  "pendingIntegration": "PR #120 unmerged at audit",
+  "latestReauditMain": "caf47776b723a36684edc1a72749e49268ccc688",
+  "latestReauditCheckpoint": "007",
+  "integrationPR120": "merged externally after this branch was founded; Roadmap 2 did not participate",
   "issues": [
     109,
     117
@@ -27,7 +29,7 @@
     "M4": 165
   },
   "milestones": {
-    "M0": "open-browser-blocked",
+    "M0": "open-browser-and-exact-head-qa",
     "M1": "not-started",
     "M2": "not-started",
     "M3": "not-started",
@@ -46,7 +48,7 @@
   "physicalInterfacesApproved": 0,
   "sourceScope": "Roadmap 2 exclusive",
   "verification": {
-    "localNode": "7/7 staged source pass; exact committed CI pending",
+    "localNode": "7/7 staged source pass; exact committed nested tests not yet executed",
     "chromium": "headless EGL/timeout; no authentic screenshots",
     "realIphone": "not tested"
   },
