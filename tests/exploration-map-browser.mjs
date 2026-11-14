@@ -15,16 +15,35 @@ try{
       const start=Number(await page.locator('#miniMap').getAttribute('data-discovered'));
       assert.ok(start>0&&start<60,'fresh seed must reveal only nearby spawn cells');
       const placement=await page.evaluate(()=>{
-        const b=document.querySelector('#miniMapButton').getBoundingClientRect();
-        const l=document.querySelector('.left').getBoundingClientRect();
-        const w=document.querySelector('#scene').getBoundingClientRect();
-        return {contained:b.left>=l.left&&b.right<=l.right&&b.top>=l.top&&b.bottom<=l.bottom,
-          separate:b.right<=w.left+2,
-          mapWidth:b.width,sceneWidth:w.width};
+        const button=document.querySelector('#miniMapButton');
+        const b=button.getBoundingClientRect();
+        const viewport=document.querySelector('.viewport').getBoundingClientRect();
+        const left=document.querySelector('.left').getBoundingClientRect();
+        const right=document.querySelector('.right').getBoundingClientRect();
+        const scene=document.querySelector('#scene').getBoundingClientRect();
+        return {
+          parent:button.parentElement?.className,
+          position:getComputedStyle(button).position,
+          contained:b.left>=viewport.left&&b.right<=viewport.right&&b.top>=viewport.top&&b.bottom<=viewport.bottom,
+          top:b.top-viewport.top,right:viewport.right-b.right,
+          separated:b.left>=left.right&&b.right<=right.left,
+          mapWidth:b.width,sceneWidth:scene.width,viewportWidth:viewport.width,
+          clearWorldWidth:scene.width-b.width
+        };
       });
-      assert.ok(placement.contained,'minimap escapes left controller at '+width+'x'+height);
-      assert.ok(placement.separate,'minimap obstructs central 3D view');
-      assert.ok(placement.sceneWidth>230,'map squeezes center gameplay viewport');
+      assert.equal(placement.parent,'viewport','minimap must live inside the game screen');
+      assert.equal(placement.position,'absolute','minimap should float in upper-right corner');
+      assert.ok(placement.contained,'minimap clips outside game screen at '+width+'x'+height);
+      assert.ok(placement.top>=0&&placement.top<=16&&placement.right>=0&&placement.right<=16,
+        'minimap is not anchored to the upper right at '+width+'x'+height);
+      assert.ok(placement.separated,'minimap overlaps the controller rails at '+width+'x'+height);
+      assert.equal(placement.sceneWidth,placement.viewportWidth,'minimap must not resize the 3D canvas');
+      assert.ok(placement.clearWorldWidth>=230,'minimap consumes too much of compact game view');
+      assert.ok(placement.mapWidth>=48&&placement.mapWidth<=90,'minimap touch target is outside compact target budget');
+      if(width===932||width===568){
+        await mkdir('artifacts',{recursive:true});
+        await page.screenshot({path:'artifacts/mythwrought-minimap-upper-right-'+width+'.png'});
+      }
       await page.locator('#miniMapButton').click();
       assert.equal(await page.locator('#explorationOverlay').isVisible(),true);
       assert.equal(await page.locator('#expandedMap').isVisible(),true);

@@ -164,10 +164,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 
 
-/* Creator-requested discovery map. In the LEFT GRIP, never over the 3D viewport. */
-.map-button{
-  position:relative;display:block;flex:0 1 auto;width:min(84px,100%,22dvh);
-  min-height:53px;max-height:84px;aspect-ratio:1;
+/* Creator-requested discovery map: upper-right WORLD HUD; all action buttons stay on the grips.
+   A compact anchored touch target overlays only a small viewport corner and never moves
+   the independent two-thumb control rails or changes the canvas size. */
+.viewport>.map-button{
+  position:absolute;z-index:2;top:8px;right:8px;display:block;
+  width:clamp(52px,18dvh,84px);height:clamp(52px,18dvh,84px);
+  min-height:0;max-height:none;aspect-ratio:1;
   padding:3px;border:2px solid #c3a46b;border-radius:10px;
   background:#12272b;overflow:hidden;box-shadow:inset 0 0 12px #050d16,0 2px 7px #060d1299;
   touch-action:manipulation;
@@ -176,6 +179,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .map-caption{position:absolute;bottom:0;left:0;right:0;background:#101e24d9;
   color:#efdbad;font-size:8px;font-weight:850;line-height:12px;letter-spacing:.08em;pointer-events:none}
 .map-button:focus-visible{outline:3px solid #fff1bd;outline-offset:2px}
+/* Error notice must supersede the map if WebGL becomes unavailable. */
+#notice:not([hidden]){z-index:3}
 #explorationOverlay[hidden]{display:none}
 #explorationOverlay{
   position:fixed;inset:0;z-index:10;display:grid;place-items:center;
@@ -205,7 +210,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .map-controls{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;width:100%}
 .map-controls button{flex:1 1 auto;min-width:0}
 @media(max-height:355px){
- .map-button{width:min(62px,100%,19dvh);min-height:49px;max-height:62px}
+ .viewport>.map-button{width:clamp(50px,18dvh,60px);height:clamp(50px,18dvh,60px);top:6px;right:6px}
  .map-caption{font-size:7px;line-height:10px}
  .exploration-panel{padding:6px 9px;gap:3px}
  #expandedMap{width:min(55dvh,280px,75vw);max-height:55dvh}
