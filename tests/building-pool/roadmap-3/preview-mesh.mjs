@@ -1,0 +1,44 @@
+// Isolated geometry QA visualization only. Cube ENVELOPES for unintegrated symbolic
+// families, not fabricated implementations of their unknown physical shapes.
+const FACE_DATA=Object.freeze([
+  {offset:[1,0,0], shade:.84, vertices:[[1,0,1],[1,1,0],[1,0,0],[1,0,1],[1,1,1],[1,1,0]]}, // +x
+  {offset:[-1,0,0],shade:.66, vertices:[[0,0,0],[0,1,1],[0,0,1],[0,0,0],[0,1,0],[0,1,1]]}, // -x
+  {offset:[0,1,0], shade:1,vertices:[[0,1,0],[1,1,1],[0,1,1],[0,1,0],[1,1,0],[1,1,1]]}, // +y
+  {offset:[0,-1,0],shade:.54,vertices:[[0,0,1],[1,0,0],[0,0,0],[0,0,1],[1,0,1],[1,0,0]]}, // -y
+  {offset:[0,0,1], shade:.9, vertices:[[0,0,1],[0,1,1],[1,1,1],[0,0,1],[1,1,1],[1,0,1]]}, // +z
+  {offset:[0,0,-1],shade:.73,vertices:[[1,0,0],[1,1,0],[0,1,0],[1,0,0],[0,1,0],[0,0,0]]} // -z
+]);
+const BASE=Object.freeze({foundation:[.32,.31,.36],floor:[.63,.55,.47],wall:[.73,.7,.64],roof:[.69,.32,.24],structure:[.47,.36,.26],rafter:[.51,.35,.23],fixture:[.85,.63,.30],stair:[.7,.59,.42],'stair-support':[.47,.43,.39],battlement:[.76,.73,.70],'upper-support':[.46,.37,.26]});
+const BIOMES=Object.freeze({'temperate':[1,1,1],desert:[1.12,.95,.74],snow:[.81,.92,1.15],'enchanted-forest':[.75,1.15,.91],mountain:[.79,.85,.94]});
+const key=(x,y,z)=>`${x},${y},${z}`;
+export function createPreviewMesh(blueprint,{cutaway=false}={}){
+ if(!blueprint?.modules||!blueprint.envelope)throw new TypeError('real authored blueprint required');
+ const {width,depth}=blueprint.envelope;
+ const cells=[];
+ for(const m of blueprint.modules)for(const c of m.cells){
+  const [x,y,z]=c;
+  // Remove the south facade for cutaways. Workshop roofs/rafters are removed
+  // to examine furnished interior; tower upper decks remain to inspect stairs.
+  if(cutaway && ((m.role==='wall'&&(z===depth-1||x===width-1))||
+   (blueprint.type==='blacksmith'&&['roof','rafter'].includes(m.role))||
+   (blueprint.type==='watchtower'&&m.role==='roof'&&z>=Math.floor(depth/2))||
+   (m.role==='battlement'&&(z===depth-1||x===width-1))))continue;
+  cells.push({x,y,z,role:m.role});
+ }
+ const occupied=new Set(cells.map(c=>key(c.x,c.y,c.z)));
+ if(occupied.size!==cells.length)throw new Error('overlapping authored geometry in candidate');
+ const floats=[],facesByRole={};let faceCount=0;
+ const tint=BIOMES[blueprint.biome]||[1,1,1];
+ for(const c of cells){
+  const rgb=BASE[c.role]||[.65,.55,.55];
+  for(const face of FACE_DATA){
+   const [dx,dy,dz]=face.offset;
+   if(occupied.has(key(c.x+dx,c.y+dy,c.z+dz)))continue;
+   faceCount++;facesByRole[c.role]=(facesByRole[c.role]||0)+1;
+   const color=rgb.map((v,i)=>Math.min(1,v*tint[i]*face.shade));
+   for(const v of face.vertices)floats.push(c.x+v[0],c.y+v[1],c.z+v[2],...color);
+  }
+ }
+ return {vertices:new Float32Array(floats),sourceCells:cells.length,faceCount,triangleCount:faceCount*2,facesByRole,
+  isDiagnosticEnvelope:true,notAssetShapeProof:true,cutaway};
+}
