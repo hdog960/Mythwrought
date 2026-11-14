@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "MILESTONE 1 — NATIVE NODE + GENUINE INLINE WEBGL2 TECHNICAL CHECKS PASS; SOURCE-SERVED/CREATOR APPROVAL OPEN",
+  "status": "M1 isolated technical WebGL2/Node validated; creator/live approval OPEN. M2 four residential physical CANDIDATE families, acceptance OPEN.",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -76,44 +76,92 @@
       "symbolicId": "pack5:082",
       "name": "Beds",
       "milestone": 2,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/residential-furnishings.mjs",
       "distinction": "Head/foot identifiable multi-cell residential bedding; no sleeping",
-      "integrated": false
+      "integrated": false,
+      "variants": [
+        "wanderer-quilt",
+        "moonwatch-canopy"
+      ],
+      "preview": "tests/block-packs/pack-5/residential-gallery.html",
+      "verification": "22/22 M2 genuine native Node tests PASS; six genuine native ES-module WebGL2 landscape screenshots with all 8 variants distinct; creator art/production integration OPEN",
+      "integrationDependencies": [
+        "central numeric block registry/atlas",
+        "engine shape-aware collision/raycast",
+        "safe orientation+variant state and schema-1 save compatibility",
+        "per-cell multi-part support"
+      ]
     },
     {
       "roster": 83,
       "symbolicId": "pack5:083",
       "name": "Chairs & Stools",
       "milestone": 2,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/residential-furnishings.mjs",
       "distinction": "Separate one-seat chair and backless stool silhouettes, not benches",
-      "integrated": false
+      "integrated": false,
+      "variants": [
+        "hearthside-highback",
+        "riveted-round-stool"
+      ],
+      "preview": "tests/block-packs/pack-5/residential-gallery.html",
+      "verification": "22/22 M2 genuine native Node tests PASS; six genuine native ES-module WebGL2 landscape screenshots with all 8 variants distinct; creator art/production integration OPEN",
+      "integrationDependencies": [
+        "central numeric block registry/atlas",
+        "engine shape-aware collision/raycast",
+        "safe orientation+variant state and schema-1 save compatibility",
+        "per-cell multi-part support"
+      ]
     },
     {
       "roster": 84,
       "symbolicId": "pack5:084",
       "name": "Bookshelves",
       "milestone": 2,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/residential-furnishings.mjs",
       "distinction": "Modeled book spines, not merchandise displays",
-      "integrated": false
+      "integrated": false,
+      "variants": [
+        "scholar-oak-stack",
+        "starbound-scrollcase"
+      ],
+      "preview": "tests/block-packs/pack-5/residential-gallery.html",
+      "verification": "22/22 M2 genuine native Node tests PASS; six genuine native ES-module WebGL2 landscape screenshots with all 8 variants distinct; creator art/production integration OPEN",
+      "integrationDependencies": [
+        "central numeric block registry/atlas",
+        "engine shape-aware collision/raycast",
+        "safe orientation+variant state and schema-1 save compatibility",
+        "per-cell multi-part support"
+      ]
     },
     {
       "roster": 85,
       "symbolicId": "pack5:085",
       "name": "Cabinets & Wardrobes",
       "milestone": 2,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/residential-furnishings.mjs",
       "distinction": "Enclosed furniture, not inventory containers",
-      "integrated": false
+      "integrated": false,
+      "variants": [
+        "pantry-cupboard",
+        "heritage-wardrobe"
+      ],
+      "preview": "tests/block-packs/pack-5/residential-gallery.html",
+      "verification": "22/22 M2 genuine native Node tests PASS; six genuine native ES-module WebGL2 landscape screenshots with all 8 variants distinct; creator art/production integration OPEN",
+      "integrationDependencies": [
+        "central numeric block registry/atlas",
+        "engine shape-aware collision/raycast",
+        "safe orientation+variant state and schema-1 save compatibility",
+        "per-cell multi-part support"
+      ]
     },
     {
       "roster": 86,
@@ -237,17 +285,18 @@
       "integrated": false
     }
   ],
-  "candidateFamilies": 3,
+  "candidateFamilies": 7,
   "testEvidence": {
-    "nativeNode": "44/44 actual native Node 22.16.0 focused tests PASS, exact committed candidate source and test Git blobs matched",
+    "nativeNode": "66/66 genuine native Node 22.16.0 Pack 5 tests passed against exact committed source/test blobs; 44 M0/M1 + 22 M2",
     "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
     "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
-    "webgl2": "GENUINE Chromium WebGL2 (OpenGL ES 3.0) Xvfb/software OpenGL: six physical source meshes rendered, 3 landscape viewports (667x375,844x390,932x430) x 2 rotations, all GPU readback hashes distinguish six visible panels. Offline about:blank inline source bundle (NOT served gallery; localhost blocked).",
+    "webgl2": "M1 six variants AND M2 eight variants rendered in real Chromium WebGL2 with native data-URL ES modules; each 667x375,844x390,932x430 x 0/1 rotations: 12 real WebGL2 screenshots total, panel hashes/readback verified; localhost served HTTP still blocked by administrator",
     "screenshots": "Six new genuine Chromium WebGL2 PNGs inspected; separate working artifacts, not checked into PR. Earlier six genuine Chromium Canvas2D captures remain fallback evidence only.",
-    "production": "NOT INTEGRATED; no source-served ES module gallery verification, user art approval, physical iPhone GPU validation, central numeric IDs or production schema-1 variant save verification",
+    "production": "NO live numeric IDs, gameplay placement, production schema-1 candidate save, physical iPhone test or creator artwork approval. M1 formal creator approval OPEN, M2 candidate review OPEN.",
     "acceptanceDossier": "src/block-packs/pack-5/M1_ACCEPTANCE.md",
-    "browserRunner": "tests/block-packs/pack-5/gallery-webgl-browser.py — genuine WebGL2 six-screenshot runner, exact source with import/export boundary assembly; not game or device testing",
-    "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only"
+    "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py m1|m2 (Xvfb/software OpenGL), genuine native ES module imports + WebGL2, not source-served HTTP or production",
+    "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only",
+    "m2": "8 source-authored physical furniture variants across 4 families: beds occupy two real cells with per-cell support; chairs/stools have honest partial collision; shelves contain modeled books; cabinets have enclosed doors, physical rear/side joinery"
   },
   "preview": {
     "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
