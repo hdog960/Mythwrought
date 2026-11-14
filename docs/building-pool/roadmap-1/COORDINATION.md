@@ -25,3 +25,10 @@
 - Main remains checkpoint **008** at `ac263720`, separate building PRs #122/#123/#124 and candidate Pack PRs #112/#113/#114/#115/#119 remain independently owned. Issue #109/#117 ID reservations checked. Latest Pack5 bed descriptor is a 2-cell physical candidate and **unmerged**, never numerically allocated in Roadmap 1.
 - New Roadmap1-only footprint reservations fix real accessibility in 15 houses. A clean SHA-verified Roadmap1 source snapshot passed **62/62 native Node 22.16.0** cases. Central CI still does not discover nested tests. Exact-head shared CI final conclusion remains unverified; no combined latest-main world/engine interaction is claimed.
 - Screenshots are genuine local Chromium Canvas2D architectural schematics, not live WebGL2 or physical iPhone. No integrations, merges, deployments, save/seed/controller changes or v0.11 unlock.
+
+## Later 2026-11-14 independent facade + stable boundary correction
+
+- PR #121 remains draft and isolated. Rechecked current `main` `ac263720`, checkpoint 008, Issues #109/#117, the current Pack 1–5 manifests and #118 biome130 plus neighboring building-roadmap draft ownership.
+- Candidate wall materials corrected to respect Pack 2 and Pack 5 *actual physical shape categories*. Separate tests reject use of thin plaster, stripped logs and horizontal beams as full-volume wall cores.
+- Pack 5 `pack5:096` is NOT STARTED. All 120 flanks of 60 stable open bays now use live wood with real existing block collision; future specialty Pack 5 fixtures remain symbolic only. This is a substantive safety/feasibility correction within Roadmap 1 source files only.
+- Genuine 68/68 native local Node tests, 54 real Chromium Canvas2D cutaway/exterior screenshots at all three mobile landscape sizes; WebGL2 and creator/physical iPhone approval remain OPEN. Central root CI excludes nested Roadmap 1 tests. No merge/deploy/registration or external-lane writes.

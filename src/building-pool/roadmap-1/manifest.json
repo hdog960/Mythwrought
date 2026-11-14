@@ -2,8 +2,8 @@
   "schema": "mythwrought.building-pool.roadmap-1.manifest.v1",
   "title": "Homes & Regional Life",
   "gate": "v0.10 Gate A OPEN; v0.11 LOCKED",
-  "milestone": "M1 candidate technical acceptance — 62 dedicated native tests source-exact; physical mesh approval OPEN",
-  "status": "45_UNMERGED_COORDINATE_CANDIDATES_WITH_MULTI_CELL_BED_RESERVATIONS",
+  "milestone": "M1 physical candidate acceptance: solid-profile shells, live stable gate flanks, exact-source checks open",
+  "status": "45_UNMERGED_CANDIDATES_M1_SOLID_SHELL_AND_LIVE_STALL_GATE_REPAIRED",
   "target": 885,
   "authoredBlueprintCount": 45,
   "biomes": [
@@ -55,7 +55,7 @@
     "auto130": "12 candidate families now in main as opt-in symbolic library, not runtime registered",
     "manualPackHeads": {
       "pack1": "c9630ac6bad5e06a645f74bd319beebea736e9ce",
-      "pack2": "89cbec3fa17ee233aa91e9abefd8af12ea2e4203",
+      "pack2": "8fb1a189c20b22144d2e501fde76500385ee44ba",
       "pack3": "78b63e224c52bd3c79a73847b56661157a73a806",
       "pack4": "c5a9f2715abe6911b79f373ce924dca44a0d9617",
       "pack5": "7b968ffdacccfee7b08e7318ade56c00c1e0b540"
@@ -88,21 +88,21 @@
   },
   "testEvidence": {
     "nativeNode": {
-      "run": "Native Node v22.16.0 on a clean Roadmap 1-only source/test reconstruction; exact SHA-verified Git blobs from PR #121 at commit 1a3ae20ffe11f886a580f835bfd10d18c3737dfc",
-      "cases": "62/62 passed, 0 failed, 0 skipped, 0 todo; five pre-existing nested test modules plus new Pack5 bed-footprint tests",
-      "exactPRHead": "YES for isolated Roadmap 1-owned source, manifest and nested tests; NO claim of newest-main+PR combined integration because GitHub CI excludes these nested tests"
+      "run": "Node v22.16.0 on local Roadmap 1 source checkout whose eight newly edited/created source/test Git blobs were verified against PR branch in this session",
+      "cases": "68/68 pass, 0 fail, 0 skip, 0 todo; 62 previous + 5 exterior-envelope regressions + 1 stable live-flank regression",
+      "exactPRHead": "Focused code/test blobs SHA-matched before commits; fresh full merged-main+PR exact-head CI is not certified (root Actions excludes nested suites)"
     },
     "chromium": {
-      "renderer": "Genuine Chromium Canvas2D schematic in about:blank; physical pack meshes and WebGL2 NOT verified",
+      "renderer": "Genuine headless Chromium Canvas2D schematic, NOT a physical WebGL2/asset-mesh preview",
       "screenshots": 54,
       "viewports": [
         "667x375",
         "844x390",
         "932x430"
       ],
-      "samples": "9 authored blueprint IDs × exterior/cutaway × 3 landscape viewports; 15 Pack5 bed-foot cells reserved in source, and reviewer overlays reserved cells",
+      "samples": "9 candidates × exterior/cutaway × 3 viewports; rerendered after BOTH wall-core and live-stable-gate repairs",
       "authentic": true,
-      "source": "local screenshots produced from corresponding candidate data; screenshots are not uploaded to PR or deployed"
+      "source": "Local test runner, 54 PNG images; not committed as screenshot artifacts or used as physical-iPhone proof"
     },
     "physicalIPhone": false,
     "ci": {
@@ -111,12 +111,13 @@
     }
   },
   "pending": [
-    "Full production main checkpoint008 plus Roadmap1 integration regression not performed; no merge permission",
-    "Real served and genuine WebGL2 source-rendered candidate geometry and mobile performance review, unavailable locally",
-    "Pack2 beam spans/door hinges, Pack3 partial roof tile seam/support, Pack4 fixture mounting and Pack5 two-cell bed collision/resolution/rotation ABI",
-    "Remaining Pack5 stall-partition or future multi-cell family offsets await physical authoring approval",
-    "Creator evaluation of architectural visual identity, nearest pair 71.99% advisory only",
-    "840 unstarted independent coordinate-authored blueprints; no world placement, integration or saved-game migration"
+    "Clean exact-current-PR-head dedicated 68-case native Node/CI replay in combined latest-main checkout (root GitHub Actions does not discover nested Roadmap 1 tests)",
+    "Actual server-rendered Chromium/WebGL2 with approved physical asset mesh geometry and visual inspection (this local browser has no available WebGL2 context)",
+    "Final roof profile/gap/seams and beam load/span with Pack 2 & 3 physical candidates",
+    "Actual Pack 4 window mount/glass sealing and Pack 2 real hinged-door orientation/swing collision ABI",
+    "Pack 5 multi-cell bed full box union and save-state sidecar; Pack5:096 stall partition is NOT STARTED, only symbolic future fixtures",
+    "Creator independent regional-design silhouette and near-duplicate acceptance (71.99% nearest similarity is advisory)",
+    "840 additional original blueprints; no settlement integration or world placement"
   ],
   "mirroredAndRotatedGeometryCheck": {
     "result": "45/45 distinct under 4 rotations and mirrored counterparts, material-independent",
@@ -141,7 +142,9 @@
   },
   "stablePortals": {
     "openStallBays": 60,
-    "hingedDoorPlaceholders": "separate explicitly mounted stowed leaves",
+    "liveWoodGateFlanks": 120,
+    "unbuiltPack5GateFlanks": 0,
+    "pack5Family096": "NOT STARTED at latest PR #119; four symbolic future fixture anchors per stable only",
     "animals": 0
   },
   "nearDuplicateReview": {
@@ -195,5 +198,29 @@
     "orientation": "north only; maps to Pack5 isolated rotation 0, NOT live saved orientation",
     "finalCollisionApproved": false,
     "worldIntegrated": false
+  },
+  "physicalEnvelopeAudit": {
+    "testedCandidateBuildings": 45,
+    "authoredPerimeterSolidProfileCells": 13227,
+    "windowApertures": 180,
+    "unresolvedDoorLeafCells": 45,
+    "unobstructedExteriorEntranceCells": 90,
+    "regionWallCore": {
+      "temperate": "pack2:013",
+      "desert": "pack5:080",
+      "snow": "live:wood",
+      "enchanted-forest": "pack2:013",
+      "mountain": "pack1:006"
+    },
+    "knownIncompatibleFacadeFamilies": [
+      "pack5:079 thin plaster facing",
+      "pack2:014 partial log profile",
+      "pack2:015 narrow horizontal beam profile"
+    ],
+    "candidateAssetGeometrySource": "Pack 1 core-masonry full cube; Pack 2 definitions planed-oak full cube; Pack 5 architectural-surfaces fired brick full collision cube",
+    "fullWeatherSealingApproved": false,
+    "windowSealingApproved": false,
+    "doorSwingApproved": false,
+    "finalMeshIntegrationApproved": false
   }
 }
