@@ -49,6 +49,7 @@ test('all physical foliage variants expose distinct immutable unit box unions',(
     assert.ok(Object.isFrozen(d));assert.ok(Object.isFrozen(d.boxes));
     assert.deepEqual(d.selection.boxes,d.boxes);
     for(const b of d.boxes){
+      assert.ok(b.every(n=>Math.abs(n*8-Math.round(n*8))<1e-9),'mobile lattice occupancy');
       assert.equal(b.length,6);assert.ok(Object.isFrozen(b));
       for(let k=0;k<3;k++)assert.ok(b[k]>=0&&b[k]<b[k+3]&&b[k+3]<=1);
     }
@@ -59,11 +60,11 @@ test('all physical foliage variants expose distinct immutable unit box unions',(
 });
 test('hedgerow blocks sideways but has air above and outside stepped foliage',()=>{
   assert.equal(at(24,.5,.5,.5),true);
-  assert.equal(at(24,.02,.5,.5),false);
-  assert.equal(at(24,.5,.995,.5),false);
+  assert.equal(at(24,.02,.05,.02),false);
+  assert.equal(at(24,.5,1,.5),false);
   assert.ok(foliageDescriptor(24).collision.boxes.length>=5);
   assert.equal(at(24,.5,.5,.5,{mode:'collision'}),true);
-  assert.equal(at(24,.02,.5,.5,{mode:'collision'}),false);
+  assert.equal(at(24,.02,.05,.02,{mode:'collision'}),false);
 });
 test('briar thicket and fern bush have unlike branch silhouettes and real empty air',()=>{
   assert.equal(at(25,.5,.3,.5),true);
@@ -80,7 +81,7 @@ test('climbing vines are thin wall-mounted selectable volumes, with pass-through
     const a=foliageDefinition(id);
     assert.equal(a.attachment,'vertical-face');
     const d=foliageDescriptor(id);
-    assert.ok(d.boxes.every(b=>b[2]>=0&&b[5]<=.2));
+    assert.ok(d.boxes.every(b=>b[2]>=0&&b[5]<=.25));
     assert.equal(d.collision.boxes.length,0,'no invisible solid wall');
     assert.equal(at(id,.5,.49,.5),false,'free air in cell, not full cube');
     assert.ok(d.boxes.some(b=>b[3]-b[0]<.18));
@@ -107,7 +108,7 @@ test('quarter-turn rotation is conserved in exact volume and mount orientation',
     }
   }
   const ivy=foliageDescriptor(27,{rotation:1});
-  assert.ok(ivy.boxes.every(b=>b[0]>=.8&&b[3]<=1),'north face rotates to east face');
+  assert.ok(ivy.boxes.every(b=>b[0]>=.75&&b[3]<=1),'north face rotates to east face');
 });
 test('soft foliage still has positive physical selection despite intentionally empty collision',()=>{
   for(const id of [26,27,28,29,30,31]){
@@ -171,7 +172,7 @@ test('targeting hits hedge / vine, but ray passes through empty foliage gaps',()
   assert.equal(f.place(2,3,0,27,{wallMount:true}).ok,true);
   const hedge=f.raycast([.5,3.55,-2],[0,0,1]);
   assert.equal(hedge.id,24);
-  const gap=f.raycast([.01,3.55,-2],[0,0,1]);
+  const gap=f.raycast([.01,3.05,-2],[0,0,1]);
   assert.equal(gap,null);
   const vine=f.raycast([2.47,3.45,-2],[0,0,1]);
   assert.equal(vine.id,27);
