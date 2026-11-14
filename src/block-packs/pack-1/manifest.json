@@ -83,7 +83,12 @@
     "m6FreshRunnerFixes": "galleries-browser.mjs standalone mode now clears only its 30 expected screenshot filenames plus its prior evidence report before any attempt; run-acceptance.mjs now requires Node TAP >=86 tests all passed, 0 failed/skipped/todo, stores actual counts.",
     "m6RunnerCodeQuality": "A temporary source replacement error was caught by syntax check and repaired before handoff; current exact GitHub files both syntax-checked PASS and strict guards inspected.",
     "m6StillBlocked": "git ls-remote/clone DNS unavailable from local Node/Chromium workspace; Chrome data/local navigation blocked by administrator. No exact full-branch native asset tests, no genuine gallery screenshots, no physical iPhone.",
-    "m6MainReference": "main caf47776b723a36684edc1a72749e49268ccc688 remains automation-only checkpoint 007, Pack1 excluded and live IDs 0–8 only."
+    "m6MainReference": "main caf47776b723a36684edc1a72749e49268ccc688 remains automation-only checkpoint 007, Pack1 excluded and live IDs 0–8 only.",
+    "m6NewPngNativeNode": "7/7 genuine Node 22.16.0 tests PASSED on tests/block-packs/pack-1/png-proof.test.mjs, 0 failed/skipped. Local executed png-proof.mjs SHA dfb955ae86be27438d85befe727c5b0f955cca28; test SHA 5b74fa756c384cf6354c453eb63afe25df3b3cf9, both match current GitHub.",
+    "m6TotalRealNodeSubset": "12/12 genuine Node tests PASS across only gallery-count.test.mjs (5) + png-proof.test.mjs (7); 4 local files matched GitHub blob hashes. THIS IS NOT REAL NATIVE EXECUTION OF 7 ASSET SUITES.",
+    "m6NineModuleGate": "Opt-in run-acceptance.mjs now invokes 9 Pack1-owned Node test modules and requires actual TAP >=93 tests, 0 fail/skip/TODO; all 30 Chromium PNGs receive zlib IDAT decompression, chunk CRC32, viewport width/min height, SHA256 verification. Source syntax PASS; NOT EXECUTED full run.",
+    "m6FullAssetVerification": "81/81 seven candidate-focused test groups passed exact GitHub source in V8 compatibility harness; native Node NOT RUN, Chromium capture NOT RUN due container GitHub DNS + Chromium ERR_BLOCKED_BY_ADMINISTRATOR.",
+    "m6CurrentMain": "main caf47776b723a36684edc1a72749e49268ccc688, incorporation checkpoint 007 automation-only, manual pack ownership excluded; Issues #109/#117 OPEN."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -513,7 +518,7 @@
   ],
   "pr": "https://github.com/hdog960/Mythwrought/pull/113",
   "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED",
-  "nextMilestone": "Use authorized clean exact PR checkout to execute eight real native Node suites and five galleries at 667x375,844x390,932x430; review 30 authentic PNG screenshots and real provenance, repair Pack1 only, seek creator approval. No merge/deploy.",
+  "nextMilestone": "Recheck main/checkpoint/PR exact-head CI and obtain authorized full branch checkout. Run 9 actual native Node modules >=93 tests plus five real Chromium galleries across three iPhone landscape viewports; inspect 30 CRC-verified PNGs. Do not integrate/merge/deploy before separate creator approval.",
   "allocations": [
     {
       "range": [
@@ -558,8 +563,8 @@
       "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "M6 continues: all 21 families/30 IDs CANDIDATE. Repaired standalone screenshot stale-proof cleanup and strict >=86 real Node TAP gate, validated source syntax; seven authored suites 81/81 V8, helper 5/5 real Node. Full native/browser/device evidence blocked.",
-  "finalAcceptance": "NOT ACCEPTED. Pack 1 candidates unregistered; real full native Node, Chromium galleries, production save/shape/controls and creator physical iPhone tests remain outstanding.",
+  "latestMilestone": "Milestone 6 acceptance: new isolated CRC32/DEFLATE PNG integrity helper and 7 genuine Node regressions pass, now 12/12 real helper tests total; 9-module 93-native-test acceptance runner source verified. All 30 ID candidates draft only, real asset Node and Chromium blocked.",
+  "finalAcceptance": "OPEN/NOT ACCEPTED: 21/21 families, 30/30 unique IDs 9-38 source-authored and all CANDIDATE; seven native asset suites, 15 real Chromium views/30 screenshots, production shape/save and physical iPhone approval missing.",
   "acceptanceMatrix": {
     "all_21_family_source_candidates": "CANDIDATE",
     "30_distinct_persistent_candidate_IDs": "VERIFIED_SOURCE_V8",
@@ -599,7 +604,13 @@
     "chromium_15_views_30_png": "NOT_CAPTURED_ADMIN_BLOCK",
     "standalone_stale_report_protection": "REPAIRED_SOURCE",
     "required_TAP_86_test_gate": "REPAIRED_SOURCE_SYNTAX_PASS",
-    "final_acceptance": "OPEN_NOT_APPROVED"
+    "final_acceptance": "OPEN_NOT_APPROVED",
+    "real_native_helper_tests": "12_OF_12_PASS_GITHUB_BLOB_VERIFIED",
+    "png_crc32_inflate_dimensions": "7_OF_7_REAL_NODE_PASS",
+    "exact_head_native_acceptance": "NINE_MODULES_MINIMUM_93_TESTS_NOT_RUN_FULL",
+    "genuine_candidate_browser": "NOT_RUN_ADMINISTRATOR_BLOCK",
+    "screenshots_15_views_30_png": "NOT_CAPTURED",
+    "production_IDs_9_38": "UNREGISTERED_CANDIDATE"
   },
   "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md"
 }
