@@ -14,7 +14,7 @@ test('all ten IDs have physical selection and collision bounds',()=>{
  }
 });
 test('five window/opening families place separately and remove only target cell',()=>{
- const f=createPack4Fixture();
+ const f=createPack4Fixture([[163,5,1]]);
  for(let id=159;id<=164;id++){
   assert.deepEqual(f.place([id,5,0],id).ok,true);
   assert.equal(f.get([id,5,0]).id,id);
@@ -71,11 +71,11 @@ test('partial collisions do not occupy the full cell',()=>{
  assert.equal(f.collidesWithAabb([.28,.35,.45,.32,.65,.55]),false);
 });
 test('fixture saves every unique ID and rotation without changing schema-1 game saves',()=>{
- const supports=[[10,0,0],[11,0,0],[12,1,1],[13,1,1]];
+ const supports=[[10,0,0],[11,0,0],[12,1,1],[13,1,1],[163,1,1]];
  const a=createPack4Fixture(supports);
- for(let id=159;id<=164;id++)a.place([id,1,0],id,id%4);
+ for(let id=159;id<=164;id++)assert.equal(a.place([id,1,0],id,id===163?0:id%4).ok,true);
  for(const [id,x] of [[165,10],[167,11],[166,12],[168,13]])
-  assert.equal(a.place([x,1,0],id,id%4).ok,true);
+  assert.equal(a.place([x,1,0],id,id===166?0:id%4).ok,true);
  const json=JSON.parse(JSON.stringify(a.save()));
  assert.equal(json.schemaVersion,1);
  assert.equal(json.fixture,'mythwrought.pack4.fixture');
