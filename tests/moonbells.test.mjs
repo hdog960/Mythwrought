@@ -224,3 +224,17 @@ test('amber shelf fungi are deterministic and never appear without natural stone
  }
  assert.ok(amber>0,'amber shelves decorate actual exposed natural stone');
 });
+
+test('dew fronds occur only against real stone and stay within the existing mesh budget',()=>{
+ const rocky={seed:123,get(x,y,z){if(y===5&&x%4===0)return 3;return baseAt(x,y,z);}};
+ let seen=0;
+ for(let cx=-8;cx<=8;cx++)for(let cz=-8;cz<=8;cz++){
+  const a=moonbellVertices(rocky,cx,cz,opts);
+  assert.deepEqual(a,moonbellVertices(rocky,cx,cz,opts));
+  assert.ok(a.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+  const plain=moonbellVertices(world(123),cx,cz,opts);
+  for(let i=0;i<a.length;i+=9)if(Math.abs(a[i+3]-.55)<1e-5&&Math.abs(a[i+4]-.80)<1e-5&&Math.abs(a[i+5]-.74)<1e-5)seen++;
+  for(let i=0;i<plain.length;i+=9)assert.ok(!(Math.abs(plain[i+3]-.55)<1e-5&&Math.abs(plain[i+4]-.80)<1e-5&&Math.abs(plain[i+5]-.74)<1e-5));
+ }
+ assert.ok(seen>0,'stone-facing dew fronds appear in seeded rock edges');
+});
