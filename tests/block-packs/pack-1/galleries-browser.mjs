@@ -8,7 +8,7 @@
 // executed. Do not claim screenshots exist merely because this source exists.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {readFile,mkdir,writeFile,rm} from 'node:fs/promises';
 import {resolve,extname,join,sep} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {chromium} from 'playwright';
@@ -59,7 +59,16 @@ const shell=async()=>{
     await closeServer();
     throw new Error('Candidate branch HEAD mismatch: '+gitHead+' != '+process.env.PACK1_EXPECTED_HEAD);
   }
-  try{await mkdir(screenshots,{recursive:true});}
+  try{
+    await mkdir(screenshots,{recursive:true});
+    // Delete ONLY this runner's known output names. A failed new run must not
+    // leave the previous PASS report or old screenshots looking like fresh proof.
+    const stale=['acceptance-report.json'];
+    for(const g of galleries)for(const [width,height] of viewports)
+      for(const suffix of ['-candidate.png','-placed.png'])
+        stale.push(g.name+'-'+width+'x'+height+suffix);
+    await Promise.all(stale.map(name=>rm(join(screenshots,name),{force:true})));
+  }
   catch(error){await closeServer();throw error;}
   try{
     browser=await chromium.launch({headless:true,
