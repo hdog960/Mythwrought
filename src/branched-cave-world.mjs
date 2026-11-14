@@ -46,3 +46,32 @@ export function northWingTraversal(world,origin=CAVE_CANDIDATE){
   return {samples,failures,walkable:failures.length===0,
     bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
 }
+
+/**
+ * Connected entrance-to-north-chamber trace. Sample the complete eastbound
+ * descent before turning north; every sample uses the production collision
+ * radius/height, and adjacent steps must not exceed one voxel vertically.
+ * This is a static opt-in geometry proof, NOT a simulated controller walk.
+ */
+export function northWingEntranceTrace(world,origin=CAVE_CANDIDATE){
+  const candidate=branchedCaveWorld(world,origin);
+  const {floorAt}=caveRoute(world.seed,origin);
+  const turn=origin.length-14;
+  const points=[];
+  for(let t=0;t<=turn;t++)
+    points.push({x:origin.x+t,z:origin.z,floor:floorAt(t)});
+  for(let dz=-1;dz>=-10;dz--)
+    points.push({x:origin.x+turn,z:origin.z+dz,floor:floorAt(turn)});
+  const samples=points.map((p,i)=>{
+    const feet=p.floor+1,previous=points[i-1];
+    const supported=candidate.get(p.x,p.floor,p.z)!==BLOCK.AIR;
+    const clear=!collides(candidate,p.x+.5,feet,p.z+.5);
+    const rise=previous?p.floor-previous.floor:0;
+    return {...p,y:feet,supported,clear,rise,
+      stepValid:Math.abs(rise)<=1};
+  });
+  const failures=samples.filter(p=>!p.supported||!p.clear||!p.stepValid);
+  return {entrance:samples[0],turn:samples[turn],chamber:samples.at(-1),
+    samples,failures,walkable:failures.length===0,
+    bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
+}
