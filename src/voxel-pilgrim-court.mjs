@@ -13,8 +13,8 @@ export function planVoxelPilgrimCourt(world,x,z){
   const keys=new Set(cells.map(([a,b,c])=>a+','+b+','+c));
   if(keys.size!==cells.length)return null;
   const h=south.origin[1];
-  // The entire connecting corridor must be naturally walkable and untouched.
-  for(let dz=-6;dz<=6;dz++)for(let dx=-1;dx<=1;dx++){
+  // Protect the full public approach, including both outer entrances. The old\n  // -6..6 check could build gates with obstructed entry/exit at z +/-11.\n  // All three walking columns must retain natural ground and body headroom.
+  for(let dz=-11;dz<=11;dz++)for(let dx=-1;dx<=1;dx++){
     const px=x+dx,pz=z+dz;
     if(terrainHeight(px,pz,world.seed)!==h||baseBlock(px,h,pz,world.seed)!==BLOCK.GRASS)return null;
     for(let dy=-2;dy<=3;dy++){
