@@ -7,7 +7,7 @@
 // and 15 real Chromium page views/30 authentic screenshots actually succeed.
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {readFile,mkdir,writeFile,rm} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve,join} from 'node:path';
 
@@ -68,7 +68,10 @@ async function main(){
   const nodeResult=run(process.execPath,['--test',...files]);
   assert.match(nodeResult,/fail\s+0\b/,'Native Node produced failures');
   process.stdout.write(nodeResult);
-  const previous=process.env.PACK1_ARTIFACT_DIR;
+  // Remove stale success markers before this attempt; any failed run must
+  // leave no prior PASS file that could be mistaken for fresh evidence.
+  await rm(join(reportDir,'native-acceptance-PASS.json'),{force:true});
+  await rm(join(reportDir,'acceptance-report.json'),{force:true});
   const gallery=run(process.execPath,[own+'galleries-browser.mjs'],{
     env:{...process.env,PACK1_EXPECTED_HEAD:commit}
   });
