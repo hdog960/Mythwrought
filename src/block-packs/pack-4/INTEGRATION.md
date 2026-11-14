@@ -9,9 +9,10 @@ or put candidate structures into the seeded world without the creator's explicit
 manual incorporation command. No game files, CI workflows, existing saves or
 current on-device UI are altered.
 
-Verified base: `main f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`
-and integration checkpoint 006. Main at that cutoff has persistent IDs 0–8,
-not these candidates. IDs 159–181 are PROVISIONAL, exclusive to Pack 4.
+Branch fork base: `main f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84` (checkpoint 006).
+Latest verified main: `caf47776b723a36684edc1a72749e49268ccc688` (**checkpoint 007**),
+automation-only and excludes this manual pack. Main has opt-in shared shape/orientation
+modules but still no Pack 4 registration. IDs 159–181 are PROVISIONAL, exclusive to Pack 4.
 
 ## Source surface
 `windows.mjs` exports `PACK4_WINDOW_ASSETS`, `PACK4_WINDOW_IDS`,
