@@ -16,7 +16,8 @@ export function createPack3RoofGeometryFixture(seed=179){
   const placed=new Map();
   return Object.freeze({
     place(cell,id,rotation=0){
-      if(!validCell(cell)||!pack3GeometryById(id,rotation)||placed.has(key(cell)))
+      if(!validCell(cell)||!Number.isInteger(rotation)||rotation<0||rotation>3||
+        !pack3GeometryById(id,rotation)||placed.has(key(cell)))
         return false;
       placed.set(key(cell),Object.freeze({id,rotation}));
       return true;
