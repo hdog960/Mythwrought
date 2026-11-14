@@ -28,11 +28,11 @@
 | 73 | 120 | Twilight Dentil Cornice | Isolated physical candidate | 4 rotations, 13 volumes, projecting crown and three brackets | :00 targeting/rotation save, :12 mesh |
 | 74 | 121 | Dawnward Arch Window Surround | Isolated physical candidate | 4 rotations, 13 volumes, hollow arch and keystone, NO glazing | :00 targeting/rotation save; Pack 4 owns glass |
 | 75 | 122 | Sunleaf Carved Relief | Isolated physical candidate | 4 rotations, 12 volumes, raised front-facing relief | :00 targeting/rotation save, :12 mesh |
-| 76 | — | Aqueduct channels | Not started | — | physical containment only, no fluid engine |
-| 77 | — | Crystal spires | Not started | — | separate from CRYSTAL 5 |
-| 78 | — | Carved statues | Not started | — | selection/removal per piece |
+| 76 | 123 | Greywater Aqueduct Channel | Isolated physical candidate | 4 rotations, 11 boxes, hollow dry trough and raised banks | :00 placement/save; future fluid engine for water only |
+| 77 | 124 | Aethercrown Crystal Spire | Isolated physical candidate | 4 rotations, 10 boxes, tapered stone neck and faceted inlay crystal | :00 placement/save; optional light engine |
+| 78 | 125 | Sentinel of the Dawn Statue | Isolated physical candidate | 4 rotations, 11 boxes, legs/arms/helmet/shield figure | :00 placement/save; no NPC or assembly |
 
-**Three remaining families (76–78) have no assigned IDs.** No unassigned ID is promised or counted as completed. Each roofing family has multiple genuine raised/layered box parts; its collision and selection boxes are *the exact same occupied volumes* as preview geometry. Box count remains below the :00 32-box contract. Color palettes are candidate material metadata only, not installed shader code.
+**All 17 roster families now have unique candidate IDs 109–125.** No unassigned ID is promised or counted as completed. Each roofing family has multiple genuine raised/layered box parts; its collision and selection boxes are *the exact same occupied volumes* as preview geometry. Box count remains below the :00 32-box contract. Color palettes are candidate material metadata only, not installed shader code.
 
 ## Opt-in preview and test fixture
 
@@ -45,6 +45,9 @@
 - `fortified-fixture.mjs`: separate candidate-only per-cell placement/rotation, selection-shape callback, removal, and state round-trip; **not** the live save codec.
 - `ornamental-pieces.mjs`: four sculpted geometry/material families 119–122 with four Y rotations, raised depth and true arch void.
 - `ornamental-fixture.mjs`: isolated candidate-only place/rotate/target/remove/snapshot; intentionally not schema-1.
+- `monumental-pieces.mjs`: open dry aqueduct channel (123), inactive nonemissive crystal spire finial (124), and freestanding guardian statue (125), with 4 rotated precise box-union contracts each.
+- `monumental-fixture.mjs`: isolated place/remove/target/rotation state, candidate format (NEVER production schema-1 save).
+- `tests/block-packs/pack-3/monumental-pieces.test.mjs`: 14 additional targeted physical/regression cases.
 - `tests/block-packs/pack-3/ornamental-pieces.test.mjs`: 12 independently authored geometry, ray/occupancy, rotation, and candidate restore regressions.
 - `tests/block-packs/pack-3/fortified-pieces.test.mjs`: 11 physical profile, rotation, ID, placement/removal and fail-closed candidate restore regressions.
 - New test suite: `node --test tests/block-packs/pack-3/roof-geometry.test.mjs` (nested; not in current default CI glob).
@@ -52,7 +55,7 @@
 - Reproducible isolated regression: `node --test tests/block-packs/pack-3/roofing.test.mjs`.
 - The existing `npm test` script only globs `tests/*.test.mjs`; this nested suite needs an explicit invocation. Do not claim CI exercised it without evidence.
 
-**Honest integration boundary:** the fixture writes `{schema:1,seed,edits}`-shaped candidate samples, but the live `VoxelWorld.restore` currently **rejects candidate IDs 109–122**. Rotation is locked at 0 for the first four surface candidates. The three shaped profiles support four rotations only inside a separate opt-in preview fixture, **not** in the current game's schema-1 save system. For non-cube roof stairs/corners/ridges, require merged :12 meshing and :00 selection/collision/save handling plus a creator-approved backward-compatible rotation persistence contract before promising live rotation persistence. Do not use these fixture snapshots as player saves. Integration must preserve existing player data and fail closed for unsupported states.
+**Honest integration boundary:** the fixture writes `{schema:1,seed,edits}`-shaped candidate samples, but the live `VoxelWorld.restore` currently **rejects candidate IDs 109–125**. Rotation is locked at 0 for the first four surface candidates. The three shaped profiles support four rotations only inside a separate opt-in preview fixture, **not** in the current game's schema-1 save system. For non-cube roof stairs/corners/ridges, require merged :12 meshing and :00 selection/collision/save handling plus a creator-approved backward-compatible rotation persistence contract before promising live rotation persistence. Do not use these fixture snapshots as player saves. Integration must preserve existing player data and fail closed for unsupported states.
 
 ## Session handoff
 
@@ -112,4 +115,23 @@ The initial column/relief geometric complexity was reduced by removing redundant
 
 **Authentic Chromium preview check:** local Playwright launched system Chromium at 667×375, 844×390, 932×430 CSS px. All **14** distinct asset model cards rendered from source-faithful box geometry; **10** rotate controls each completed two 90° turns; **zero** JavaScript page exceptions. Three real PNG screenshots were captured and visually inspected. The local gallery HTML and the four original/updated physical source modules were Git-blob-matched to GitHub. The browser fixture inlines those **exact** module sources to bypass the environment's localhost restriction; this verifies authentic client-side presentation/rotation but is **not** production WebGL, HTTP-module loading, Safari or actual iPhone proof.
 
-**Status:** Milestone 4 physical source candidates authored; creator approval and live integration pending. **Three** final monumental families 76–78 remain to be developed under Milestone 5. Nothing added to world generation, no completed structures, no shared engine edits, merge, or deployment.
+**Status:** Milestones 0–4 have authored isolated candidates; user approval and live integration pending. The three final monumental families were subsequently authored in Milestone 5; acceptance/integration remains an independent Milestone 6 process. Nothing added to world generation, no completed structures, no shared engine edits, merge, or deployment.
+
+
+## Milestone 5 — monument component candidates (2026-11-14)
+
+**Audited:** unchanged main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84` / checkpoint **006** / Issues [#109](https://github.com/hdog960/Mythwrought/issues/109), [#117](https://github.com/hdog960/Mythwrought/issues/117). Other pack ownership checked; the new components differ from Pack 2's proposed *water block*, Pack 1's decorative stone cubes, automation :12's natural crystal outcrops, and :36's already-authored *assembled* stone monuments. Existing `BLOCK.CRYSTAL=5` is a full voxel and is NOT the narrow stone-backed spire.
+
+| Roster | Candidate ID | Isolated one-cell physical component | Rotations | AABB parts | :12 surface-mesh triangles |
+|---:|---:|---|---:|---:|---:|
+| 76 | 123 | Greywater open channel: two raised banks, open sky/ends, actual empty center over solid floor | 4 | 11 | 924 |
+| 77 | 124 | Aethercrown spire: masonry plinth and tapering stone neck, separate narrow stacked crystal crown | 4 | 10 | 1932 |
+| 78 | 125 | Sentinel carved statue: two legs with gap, torso/arms, helmet, projecting shield | 4 | 11 | 2464 |
+
+The statue's initial 17-sub-box art produced 5,140 triangles in the opt-in :12 surface mesher; removed redundant micro-detail while retaining physical silhouette, reducing to **2,464**. Crystal crown similarly reduced from 2,468 to **1,932** triangles. Source geometry is the *actual collision/selection union*, not cosmetic box art on a full cube. All twelve orientations verified with the actual unmerged :00 `validateShape`, `rotateShape`, `canPlaceShape` and :12 `prototypeSurfaceMesh` source contract (geometry-only compatibility, **not live integration**).
+
+**Water boundary:** aqueduct has explicit `waterEngineRequired:true`, `flowSimulation:false`, `fluidLevelSupported:false`, `currentContents:'empty'`. It **does not carry real water today**, and does not create or modify a separate fluid system. The later central engine owns fluid levels, flow and save compatibility. **Light boundary:** spire inlay has `lightEngineRequired:true`, `emitsLight:false`, `lightRadius:null`; no fake functional glow or hidden CRYSTAL 5 reuse. **Statue boundary:** static component, not an NPC, animation or assembled monument.
+
+`monumental-fixture.mjs` uses explicit `mythwrought-pack3-monumental-preview-v1` and stores ID/rotation in a candidate-only `parts` list with **no `schema:1` key**, rejecting unsupported IDs, rotations and duplicate placements. Production `VoxelWorld.set/restore` still permits only 0–8; neither these candidates nor their local snapshots may be loaded as a real player save. :00 engine integration, backward-safe orientation persistence and 255 sentinel preservation remain required.
+
+**Testing:** 14 source-exact regression bodies for these three M5 components passed in an isolated JavaScript harness; these are not an actual Node/Chromium result. Node and genuine Chromium results should be recorded only after independent execution. Full Milestone 6 acceptance is **not** approved or complete merely because 17/17 candidates have been authored. The user retains manual integration approval.
