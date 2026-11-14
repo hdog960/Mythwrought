@@ -138,6 +138,21 @@ test('floor and orientation-specific wall support offsets require independent su
  for(const id of [177,179,180])
   assert.deepEqual([0,1,2,3].map(r=>civicMountOffset(id,r)),
    [[0,0,1],[-1,0,0],[0,0,-1],[1,0,0]]);
+ // The earlier civic pieces had a 0.04–0.12 cell gap between their
+ // supposed supporting neighbor and the nearest REAL physical sub-box.
+ // Assert the targetable/collidable masonry or bracket reaches that face.
+ for(let id=176;id<=181;id++)for(let rotation=0;rotation<4;rotation++){
+  const offset=civicMountOffset(id,rotation);
+  const axis=offset.findIndex(v=>v!==0);
+  const face=offset[axis]>0?axis+3:axis;
+  const boundary=offset[axis]>0?1:0;
+  const shape=civicShape(id,rotation);
+  for(const purpose of ['collision','selection']){
+   assert.ok(shape[purpose].some(bounds=>Math.abs(bounds[face]-boundary)<1e-9),
+    'civic '+id+' '+purpose+' not physically joined to support, r='+rotation);
+   assert.ok(shape[purpose].length<=32,'shared AABB descriptor budget '+id);
+  }
+ }
 });
 test('malformed saved states and unreserved candidate IDs fail closed',()=>{
  for(const id of [0,5,159,175,182,208,209,255,-1,1.5,NaN]){
