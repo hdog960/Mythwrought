@@ -27,14 +27,17 @@
     "forbiddenSentinel": 255
   },
   "evidence": {
-    "node": "NOT RUN (nested pack tests excluded from existing npm test pattern)",
-    "chromium": "NOT RUN for pack-local gallery or shape integration",
+    "node": "NOT RUN for nested pack-specific test files",
+    "chromium": "NOT RUN for isolated garden gallery",
     "physicalIphone": "NOT RUN",
     "candidatePreview": "Two standalone HTML test-gallery source files committed; no authentic browser screenshot inspected yet",
     "logic": "9/9 authored Node test bodies evaluated successfully in V8 compatibility harness against exact GitHub branch source; this is NOT Node execution",
     "shapeLogic": "11/11 authored M2 test bodies passed with exact branch source in V8 compatibility harness. NOT a Node run.",
     "oldCoreLogic": "9/9 authored M1 test bodies previously passed in V8; no production test claim.",
-    "shapeMesher": "24/24 orientation cases passed V8 cross-lane surface-mesh probe against exact unmerged :12 source; 12–324 triangles per piece, valid finite unit-cell geometry and indices. NOT actual Node/browser rendering."
+    "shapeMesher": "24/24 orientation cases passed V8 cross-lane surface-mesh probe against exact unmerged :12 source; 12–324 triangles per piece, valid finite unit-cell geometry and indices. NOT actual Node/browser rendering.",
+    "gardenLogic": "14/14 authored garden test bodies pass V8 compatibility harness on exact committed branch source (not Node). One distinct-art texture assertion initially failed and was fixed before final validation.",
+    "gardenCrossLane": "17/17 V8 cross-lane checks pass against unmerged :00 raycast and :12 shape-meshing prototypes. 12 rotation/shape combinations; 108–468 triangles in prototype, not measured game GPU performance.",
+    "gardenPreview": "Isolated garden-gallery.html + garden-gallery.mjs with box-derived isometric art and clickable physical slices committed; genuine Chromium screenshot not captured."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -196,23 +199,50 @@
     {
       "roster": 47,
       "name": "Farmland soil",
-      "status": "NOT STARTED",
-      "duplicateAudit": "PENDING fresh main duplicate audit",
-      "testEvidence": null
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: Tilled fertile loam with physical ridges/grooves; independent placeable/collidable/targetable unit-cell object, not legacy DIRT/WOOD or render-only decoration",
+      "testEvidence": "14/14 exact garden test bodies passed V8 compatibility harness after one original-art defect fixed; 17/17 cross-lane :00/:12 V8 interface checks passed; real Node/Chromium and production world integration NOT RUN",
+      "candidateId": 21,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee8f9bf0f10eef29040420fcd57bc9b9a727a6d6",
+      "dependencies": [
+        ":00 engine physical voxel ID registry and rotation/save-state support",
+        ":12 generic shape-aware surface mesh integration",
+        "Production save-schema-1 compatibility and ID >8 validation pending",
+        "No plant growth, harvesting, crafting, or world placement"
+      ]
     },
     {
       "roster": 48,
       "name": "Garden planter boxes",
-      "status": "NOT STARTED",
-      "duplicateAudit": "PENDING fresh main duplicate audit",
-      "testEvidence": null
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: Independent cedar-rimmed planter with open cavity and internal soil, no crops; independent placeable/collidable/targetable unit-cell object, not legacy DIRT/WOOD or render-only decoration",
+      "testEvidence": "14/14 exact garden test bodies passed V8 compatibility harness after one original-art defect fixed; 17/17 cross-lane :00/:12 V8 interface checks passed; real Node/Chromium and production world integration NOT RUN",
+      "candidateId": 22,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee8f9bf0f10eef29040420fcd57bc9b9a727a6d6",
+      "dependencies": [
+        ":00 engine physical voxel ID registry and rotation/save-state support",
+        ":12 generic shape-aware surface mesh integration",
+        "Production save-schema-1 compatibility and ID >8 validation pending",
+        "No plant growth, harvesting, crafting, or world placement"
+      ]
     },
     {
       "roster": 49,
       "name": "Flower pots",
-      "status": "NOT STARTED",
-      "duplicateAudit": "PENDING fresh main duplicate audit",
-      "testEvidence": null
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: Standalone hollow terracotta vessel, physical walls/base/lip, no flowers; independent placeable/collidable/targetable unit-cell object, not legacy DIRT/WOOD or render-only decoration",
+      "testEvidence": "14/14 exact garden test bodies passed V8 compatibility harness after one original-art defect fixed; 17/17 cross-lane :00/:12 V8 interface checks passed; real Node/Chromium and production world integration NOT RUN",
+      "candidateId": 23,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee8f9bf0f10eef29040420fcd57bc9b9a727a6d6",
+      "dependencies": [
+        ":00 engine physical voxel ID registry and rotation/save-state support",
+        ":12 generic shape-aware surface mesh integration",
+        "Production save-schema-1 compatibility and ID >8 validation pending",
+        "No plant growth, harvesting, crafting, or world placement"
+      ]
     },
     {
       "roster": 50,
@@ -259,7 +289,7 @@
   ],
   "pr": "https://github.com/hdog960/Mythwrought/pull/113",
   "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED",
-  "nextMilestone": "Milestone 2: real Node verification and :00/:12 engine integration blockers; then Milestone 3 garden components 47-49.",
+  "nextMilestone": "Finish real Node/Chromium verification for all candidates where executable; then Milestone 4: physical hedges, bushes, climbing vines and colored leaf variants (roster 50,51,52,55).",
   "allocations": [
     {
       "range": [
@@ -276,6 +306,15 @@
       ],
       "families": 6,
       "kind": "partial-volume stone shapes, candidate"
+    },
+    {
+      "range": [
+        21,
+        23
+      ],
+      "families": 3,
+      "kind": "Milestone 3 physical garden components, candidate"
     }
-  ]
+  ],
+  "latestMilestone": "Milestone 3: three garden component candidates authored; isolated compatibility checks passed; focused Node/real Chromium and eventual runtime integration remain pending."
 }
