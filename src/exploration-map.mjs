@@ -156,7 +156,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
   }
   function close(){
     if(overlay.hidden)return;
-    overlay.hidden=true;map.flush();render();openButton.focus({preventScroll:true});
+    overlay.hidden=true;map.flush();render();document.getElementById('scene').focus({preventScroll:true});
   }
   openButton.addEventListener('click',()=>{
     if(!overlay.hidden||!canOpen())return;
