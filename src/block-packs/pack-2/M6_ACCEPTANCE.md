@@ -50,6 +50,15 @@ All 18 are *candidate source definitions* with independent IDs and meaningful oc
 - Rechecked local capability: Node v22 and Chromium are installed, but there is no exact-head repository checkout, `github.com` / `raw.githubusercontent.com` DNS fails and the Node Playwright package is not installed. No genuine native/Chromium pass can be claimed on the restricted local runtime.
 - This follow-up leaves source candidates, collision, fluid simulation, worldgen and main untouched. The exact new PR head and standard root CI must be checked against the latest commit.
 
+## Milestone 6 technical acceptance follow-up — 2026-11-14
+
+- **Verified exact prior PR HEAD** `8da5931d5e82b0fbcb2f557d897382846aa3a969`: standard GitHub Actions [#43639594993](https://github.com/hdog960/Mythwrought/actions/runs/43639594993) **SUCCESS** (root Node tests and real Chromium landscape WebGL2 baseline). This workflow's `npm test` glob `tests/*.test.mjs` excludes every nested Pack 2 test file, and its browser smoke does not visit Pack 2 preview. Do **not** infer candidate acceptance.
+- Reconfirmed main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, incorporation checkpoint 006, Issues #109 and #117, competing manual pack ownership, and draft PR #114. No ID range overlaps; source files owned solely by Pack 2.
+- Local exact-checkout attempt remains **BLOCKED**: Node 22.16.0, Chromium 144 and the Python Playwright package are present, but GitHub DNS/network access prevents obtaining the full exact PR files; no complete checkout was available. Node Playwright is not installed locally. Accordingly, neither `node --test tests/block-packs/pack-2/*.test.mjs` nor the dedicated browser inspector was executed.
+- **Expanded the committed optional Chromium test**: all 18 candidate meshes must render with **distinct geometry-only pixel hashes** and nonempty painted regions at 667×375, 844×390 and 932×430. When screenshots are enabled, it now writes **54 individual asset gallery canvases** (18 × 3) plus original water, open-gate, drain-slot and full-page views. The script's JavaScript syntax was checked; **no actual screenshots were captured**.
+- The last isolated, source-level results remain **88/88 checked-in test bodies passed under V8**, including 121 full-state mesh/normal configurations (25,742 triangles, zero inverted or degenerate after Pack 2-only winding fix) and 900 water surface-ray comparison samples. Those checks are **not native Node or browser evidence**.
+- Exact new commit root CI must be checked independently once reported; source candidate review is complete, but full native/visual/production acceptance and creator Gate A approval remain **OPEN**.
+
 ## Required real test gates — NOT certified by the source-level checks
 
 | Gate | Evidence required | Current status |
@@ -61,7 +70,7 @@ All 18 are *candidate source definitions* with independent IDs and meaningful oc
 | Production controls & saves | Exact mobile device tests, unobstructed left/right grip rails, opt-in schema-1 state sidecar with atomic recovery, offline PWA tests | **BLOCKED, not claimed** |
 | Creator visual / Gate A | Creator reviews actual in-game art and independently confirms physical iPhone controls | **NOT approved; v0.11 LOCKED** |
 
-The optional browser verifier visits all 18 candidate mesh choices at three iPhone landscape viewport sizes and, when executed, saves authentic full-page and detailed water/open-gate/parapet screenshots. It checks a **Canvas 2D demonstration of authentic Pack 2 candidate triangle data**, not a production WebGL2 fluid simulation. Even a green optional browser inspector must not be used as proof that flowing water, collision, source updates, saved edits or integrated game controls are functional.
+The optional browser verifier visits all 18 candidate mesh choices at three iPhone landscape viewport sizes and, when actually executed, can save 54 distinct candidate canvas screenshots plus authentic full-page and detailed water/open-gate/parapet screenshots. It checks a **Canvas 2D demonstration of authentic Pack 2 candidate triangle data**, not a production WebGL2 fluid simulation. Even a green optional browser inspector must not be used as proof that flowing water, collision, source updates, saved edits or integrated game controls are functional.
 
 ## How to run the pending independent acceptance checks
 
