@@ -1,9 +1,20 @@
 # MYTHWROUGHT — Pack 3 Milestone 6 independent acceptance handoff
 **2026-11-14 · CHECKPOINT 007 SOURCE-COMPATIBILITY REVERIFIED. CANDIDATES ONLY; NEVER MERGED/DEPLOYED.**
 
-**CURRENT AUTHORITATIVE BASELINE:** integrated main `caf47776b723a36684edc1a72749e49268ccc688`, checkpoint **007** (creator-requested **automation-only** incorporation); Pack 3 remains isolated in draft PR #112. This replaces the formerly current checkpoint 006 baseline and the older, pre-007 non-greedy 17,140-triangle mesh estimates below. Historical M0–M6 test notes are retained for provenance. Current candidate geometry, names, IDs and save fixtures are unchanged; latest merged generic mesher significantly reduces prototype faces. Actual player/gameplay certification is still open.
+**CURRENT AUTHORITATIVE BASELINE:** integrated main `caf47776b723a36684edc1a72749e49268ccc688`, checkpoint **007** (creator-requested **automation-only** incorporation); Pack 3 remains isolated in draft PR #112. This replaces the formerly current checkpoint 006 baseline and the older, pre-007 non-greedy 17,140-triangle mesh estimates below. Historical M0–M6 test notes are retained for provenance. Current candidate geometry, names, IDs and the five preview formats are unchanged; three preview **restore guards** were strengthened after an adversarial test proved they accepted extra production schema markers. Latest merged generic mesher significantly reduces prototype faces. Actual player/gameplay certification is still open.
 
 This document is a review checklist and integration request, not live player-game certification or creator Gate A approval.
+
+
+## M6 candidate preview schema-boundary defect — repaired 2026-11-14
+
+**Proven failing behavior:** `restorePack3FortifiedFixture`, `restorePack3OrnamentalFixture` and `restorePack3MonumentalFixture` accepted an otherwise valid candidate preview object even when an additional own `schema:1` marker was attached. The two roof fixtures already rejected that marker. This made the intended separation between candidate snapshots and game saves inconsistent. The issue was reproduced with a newly authored Node acceptance test: initially **11 PASS / 1 FAIL**, reporting `candidate ID 116 accepted schema-marked preview`.
+
+**Correction (Pack 3-owned only):** added `Object.hasOwn(payload,'schema')` rejection to the three loaders before validating their independent `format` markers. Added one cross-family regression in `tests/block-packs/pack-3/acceptance.test.mjs` covering **all five** candidate codecs, normal JSON round-trips and rejection of own `schema` values `1`, `2`, `undefined` and `null`. No change to the snapshot serialization layouts, five format strings, placement geometry, central codec, production `schema:1` player saves, collision or registry.
+
+**Actual native Node v22.16.0, six committed Pack 3 nested modules: 65 PASS / 0 FAIL**, following the source repair (53 original family tests + **12** all-family acceptance tests). Exact local Git blobs match remote Pack 3 source and test files: fortified fixture `fd75ecae5ca36bd1968d6e973134b699ed1f3492`, ornamental fixture `db02b503ca3285fcac14a717458757f1864a6b4e`, monumental fixture `c06a9adeded58bbeeff16739241d72eba06a90e4`, and acceptance suite `4aeb12369aa1360c718fd25395bd7adc1647af76`.
+
+**Authentic Chromium 144** rerun of unchanged committed `gallery-browser.py`, captured at **667×375**, **844×390**, **932×430**: 17 unique candidate models, all 13 rotation controls returning to identical pixels after four turns, seven distinctive directional changes, **207/207 framed review images**, **0 JS errors**. Geometry/gallery source did not change. This still does **not** certify live WebGL2, iPhone controls, production collision, FPS, offline PWA, schema-1 save migration, integration or owner art approval.
 
 ## Baseline, ownership, and duplication
 - Verified GitHub `main`: `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`; checkpoint **006**; v0.10 Gate A OPEN and v0.11 LOCKED.
