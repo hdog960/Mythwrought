@@ -65,9 +65,23 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
     float inlayLine=1.0-smoothstep(.009,.026,abs(min(rimX,rimY)-.22));
     float frameCell=step(.68,hashCell(boardCell+vec2(97.0,31.0)));
     float craftedFrame=frame*frameCell;
+    // Occasional carpenter's arched lattice: a readable structural motif
+    // spanning a whole panel, rather than tiny noisy grain. It follows the
+    // existing board UVs and fades with the same near-field art budget.
+    float latticeCell=step(.87,hashCell(boardCell+vec2(121.0,67.0)));
+    vec2 latticeUv=(boardLocal-vec2(.5))*vec2(1.0,1.08);
+    float archRadius=length(vec2(latticeUv.x,latticeUv.y+.13));
+    float archBand=(1.0-smoothstep(.025,.065,abs(archRadius-.34)))
+      *step(-.08,latticeUv.y);
+    float archPillar=(1.0-smoothstep(.018,.055,abs(abs(latticeUv.x)-.31)))
+      *(1.0-smoothstep(-.30,-.13,latticeUv.y));
+    float lattice=clamp(archBand+archPillar,0.0,1.0)
+      *latticeCell*panel*near;
+    float latticeEdge=(1.0-smoothstep(.06,.11,abs(archRadius-.34)))
+      *latticeCell*panel*near;
     sideShade += .11*craftedFrame-.065*panel*frameCell
       +.085*cornerBoss*frameCell-.045*inlayLine*frameCell;
-    sideShade += .095*bevel-.035*innerBorder-.07*ornament
+    sideShade += -.15*lattice+.045*latticeEdge+.095*bevel-.035*innerBorder-.07*ornament
       -.11*braceBand+.045*braceHighlight-.065*mortise;
     // End-grain also has a softly planed perimeter.
     float topEdge=min(min(vUv.x,1.0-vUv.x),min(vUv.y,1.0-vUv.y));
@@ -78,5 +92,5 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
 `;
 export const CRAFTED_TIMBER_RULES=Object.freeze({
   existingBlockId:4, boardsAcross:3, boardsHigh:2,
-  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, sparseDiagonalJoinery:true, pairedMortises:true, framedPanels:true, cornerBosses:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
+  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, sparseDiagonalJoinery:true, pairedMortises:true, framedPanels:true, cornerBosses:true, archedLatticePanels:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
 });
