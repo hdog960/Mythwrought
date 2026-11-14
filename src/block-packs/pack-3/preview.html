@@ -18,14 +18,15 @@ button{border:1px solid #cba879;border-radius:8px;background:#394b59;color:#fbe1
 </head>
 <body>
 <div class="warning">UNMERGED CANDIDATE — NOT IN LIVE GAME — ISOLATED PHYSICAL BOX PREVIEW</div>
-<h1>Mythwrought · Roof, Fortress & Ornamental Craft Samples</h1>
-<p>Fourteen original Pack 3 voxel candidates: four roofing materials, three roof profiles, three fortified parts, and four standalone ornamental components (columns, cornices, arched surrounds and reliefs). Material-specific geometric occupancy comes directly from the Pack 3 definitions. All visible raised tile and fiber parts are genuine box volumes with the same selection/collision definitions. This gallery does not place blocks, modify player saves, or depict the shipped WebGL game.</p>
+<h1>Mythwrought · Roof, Fortress & Monumental Voxel Craft</h1>
+<p>Seventeen original standalone Pack 3 voxel candidates: four roofing materials, three roof profiles, three fortified pieces, four ornamental pieces, and three monumental pieces (dry aqueduct channel, crystal finial and carved guardian). Material-specific geometric occupancy comes directly from the Pack 3 definitions. All visible raised tile and fiber parts are genuine box volumes with the same selection/collision definitions. Dry channel contains no water simulation and crystal crown emits no engine light. This gallery does not place blocks, modify player saves, or depict shipped WebGL gameplay.</p>
 <main id="gallery"></main>
 <script type="module">
 import {PACK3_ROOFING_ASSETS} from './roofing-materials.mjs';
 import {PACK3_ROOF_GEOMETRY,pack3GeometryById} from './roof-geometry.mjs';
 import {PACK3_FORTIFIED_ASSETS,pack3FortifiedById} from './fortified-pieces.mjs';
 import {PACK3_ORNAMENTAL_ASSETS,pack3OrnamentalById} from './ornamental-pieces.mjs';
+import {PACK3_MONUMENTAL_ASSETS,pack3MonumentalById} from './monumental-pieces.mjs';
 const gallery=document.querySelector('#gallery');
 function shade(hex,factor){
  const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
@@ -43,7 +44,7 @@ function paintBox(ctx,b,color){
  poly(ctx,[point(x,y,Z),point(X,y,Z),point(X,Y,Z),point(x,Y,Z)],shade(color,.88));
  poly(ctx,[point(x,Y,z),point(X,Y,z),point(X,Y,Z),point(x,Y,Z)],shade(color,1.12));
 }
-for(const initial of [...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY,...PACK3_FORTIFIED_ASSETS,...PACK3_ORNAMENTAL_ASSETS]){
+for(const initial of [...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY,...PACK3_FORTIFIED_ASSETS,...PACK3_ORNAMENTAL_ASSETS,...PACK3_MONUMENTAL_ASSETS]){
  let asset=initial;
  const card=document.createElement('article');
  const canvas=document.createElement('canvas');canvas.width=320;canvas.height=200;
@@ -54,7 +55,7 @@ for(const initial of [...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY,...PACK3_FO
   ' · roster '+asset.roster+' · '+asset.boxes.length+' collision/selection volumes';card.append(sub);
  const detail=document.createElement('p');detail.textContent=asset.style??asset.profile;card.append(detail);
  let turnButton=null;
- if(asset.kind==='roof-geometry'||asset.kind==='fortified-component'||asset.kind==='ornamental-component'){
+ if(asset.kind==='roof-geometry'||asset.kind==='fortified-component'||asset.kind==='ornamental-component'||asset.kind==='monumental-component'){
   turnButton=document.createElement('button');
   turnButton.type='button';turnButton.textContent='Rotate 90° · orientation 0';
   card.append(turnButton);
@@ -75,6 +76,8 @@ for(const initial of [...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY,...PACK3_FO
     ?pack3FortifiedById(initial.id,next)
     :asset.kind==='ornamental-component'
       ?pack3OrnamentalById(initial.id,next)
+      :asset.kind==='monumental-component'
+      ?pack3MonumentalById(initial.id,next)
       :pack3GeometryById(initial.id,next);
   turnButton.textContent='Rotate 90° · orientation '+next;
   draw();
