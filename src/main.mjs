@@ -483,10 +483,11 @@ function start(){
     }
   },()=>{lookStick.x=lookStick.y=0;cameraKnob.style.transform='';});
   const precisionButton=document.getElementById('precision');
-  let precisionPointer=null;
+  let precisionPointer=null,precisionTouchId=null;
   function releasePrecision(e){
     if(precisionPointer===null||(e&&e.pointerId!==precisionPointer))return;
-    precisionPointer=null;precisionHeld=false;precisionButton.classList.remove('held');
+    precisionPointer=null;precisionTouchId=null;precisionHeld=false;
+    precisionButton.classList.remove('held');
   }
   precisionButton.addEventListener('pointerdown',e=>{
     // Retain the first precision finger until it actually releases.
@@ -501,10 +502,20 @@ function start(){
     window.addEventListener(event,releasePrecision,true);
   }
   precisionButton.addEventListener('lostpointercapture',releasePrecision);
+  // Preserve the owning touch across Safari pointer-capture interruptions.
+  // TouchEnd identifies the finger even if the matching pointerup is lost.
+  precisionButton.addEventListener('touchstart',e=>{
+    if(precisionPointer!==null&&precisionTouchId===null&&e.changedTouches.length)
+      precisionTouchId=e.changedTouches[0].identifier;
+  },{passive:true});
+  for(const name of ['touchend','touchcancel'])window.addEventListener(name,e=>{
+    if(precisionTouchId!==null&&Array.from(e.changedTouches)
+      .some(t=>t.identifier===precisionTouchId))releasePrecision();
+  },true);
   function cancelAllPointers(){
     for(const stop of [...heldPointers.values()])stop();
     lookStick.x=lookStick.y=0;
-    precisionPointer=null;precisionHeld=false;
+    precisionPointer=null;precisionTouchId=null;precisionHeld=false;
     keys.clear();joystick.x=joystick.y=0;
     jumpQueued=false;drag=null;
     precisionButton.classList.remove('held');
