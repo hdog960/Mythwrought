@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "M1 isolated technical WebGL2/Node validated; creator/live approval OPEN. M2 four residential physical CANDIDATE families, acceptance OPEN.",
+  "status": "M1 technical source QA PASS, creator and served HTTP review OPEN; M2 eight physical variants pass native Node/WebGL2 source QA, creator/integration review OPEN",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -86,7 +86,7 @@
         "moonwatch-canopy"
       ],
       "preview": "tests/block-packs/pack-5/residential-gallery.html",
-      "verification": "24/24 focused M2 native Node cases and 6/6 native ES-module WebGL2 screenshots PASS; exact part collider and multi-cell support checked; creator art/served-page/live integration OPEN.",
+      "verification": "25/25 M2 native Node regression cases PASS, native ES-module Chromium WebGL2 at 3 landscape viewports × 2 rotations, creator visual/served HTTP/live integration OPEN",
       "integrationDependencies": [
         "central numeric block registry/atlas",
         "engine shape-aware collision/raycast",
@@ -109,7 +109,7 @@
         "riveted-round-stool"
       ],
       "preview": "tests/block-packs/pack-5/residential-gallery.html",
-      "verification": "24/24 focused M2 native Node cases and 6/6 native ES-module WebGL2 screenshots PASS; exact part collider and multi-cell support checked; creator art/served-page/live integration OPEN.",
+      "verification": "25/25 M2 native Node regression cases PASS, native ES-module Chromium WebGL2 at 3 landscape viewports × 2 rotations, creator visual/served HTTP/live integration OPEN",
       "integrationDependencies": [
         "central numeric block registry/atlas",
         "engine shape-aware collision/raycast",
@@ -132,7 +132,7 @@
         "starbound-scrollcase"
       ],
       "preview": "tests/block-packs/pack-5/residential-gallery.html",
-      "verification": "24/24 focused M2 native Node cases and 6/6 native ES-module WebGL2 screenshots PASS; exact part collider and multi-cell support checked; creator art/served-page/live integration OPEN.",
+      "verification": "25/25 M2 native Node regression cases PASS, native ES-module Chromium WebGL2 at 3 landscape viewports × 2 rotations, creator visual/served HTTP/live integration OPEN; physically exposed book/scroll spines inspected",
       "integrationDependencies": [
         "central numeric block registry/atlas",
         "engine shape-aware collision/raycast",
@@ -155,7 +155,7 @@
         "heritage-wardrobe"
       ],
       "preview": "tests/block-packs/pack-5/residential-gallery.html",
-      "verification": "24/24 focused M2 native Node cases and 6/6 native ES-module WebGL2 screenshots PASS; exact part collider and multi-cell support checked; creator art/served-page/live integration OPEN.",
+      "verification": "25/25 M2 native Node regression cases PASS, native ES-module Chromium WebGL2 at 3 landscape viewports × 2 rotations, creator visual/served HTTP/live integration OPEN",
       "integrationDependencies": [
         "central numeric block registry/atlas",
         "engine shape-aware collision/raycast",
@@ -287,16 +287,18 @@
   ],
   "candidateFamilies": 7,
   "testEvidence": {
-    "nativeNode": "68/68 genuine native Node 22.16.0 Pack 5 tests pass against source-exact GitHub blob-matched files; M0/M1 44 + M2 24",
+    "nativeNode": "69/69 genuine native Node 22.16.0 Pack 5 cases PASS, 0 failures/skips; M0/M1 44, M2 25; source and test Git blobs match local executed files",
     "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
     "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
     "webgl2": "M1 six variants AND M2 eight variants rendered in real Chromium WebGL2 with native data-URL ES modules; each 667x375,844x390,932x430 x 0/1 rotations: 12 real WebGL2 screenshots total, panel hashes/readback verified; localhost served HTTP still blocked by administrator",
     "screenshots": "Six new genuine Chromium WebGL2 PNGs inspected; separate working artifacts, not checked into PR. Earlier six genuine Chromium Canvas2D captures remain fallback evidence only.",
-    "production": "NOT INTEGRATED. Source-served HTTP ES modules blocked by browser administrator; native data-URL imports and real WebGL2 verified. Creator artwork approval, production schema-1, numeric ID allocation, physical iPhone and in-world placement NOT TESTED.",
+    "production": "No registered numeric IDs, schema-1 production saves, live placement, device FPS, creator artwork approval or physical iPhone controls tests; no integration/deployment",
     "acceptanceDossier": "src/block-packs/pack-5/M1_ACCEPTANCE.md",
     "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py m1|m2 (Xvfb/software OpenGL), genuine native ES module imports + WebGL2, not source-served HTTP or production",
     "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only",
-    "m2": "8 physical residential furniture variants in 4 symbolic families; beds occupy 2 cells with support for each, exact sub-cell authored collider unions for beds/seats/bookshelves, physical closed cabinets/wardrobes, no storage/sleeping gameplay"
+    "m2": "8 original physical residential variants; genuine 2-cell beds with per-part support, accurate collider union, modeled book spines now visible beyond shelves, no storage/sleeping gameplay. 6 fresh genuine Chromium native ES module WebGL2 captures across 667x375,844x390,932x430 and rotations 0/1, panel hashes pass",
+    "visualCorrection": "Physical bookshelf and scrollcase spines project beyond shelf lips; 844x390 WebGL2 review changed only the 2 bookshelf panels (2821 and 2444 pixels), other 6 panels identical; real material geometry, not recoloring",
+    "servedGallery": "Localhost real HTTP-served module page explicitly reattempted using Xvfb/Chromium and was blocked by ERR_BLOCKED_BY_ADMINISTRATOR; native offline data URL ES modules and genuine WebGL2 passed, but served page remains unverified"
   },
   "preview": {
     "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
