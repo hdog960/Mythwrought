@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseFixtureCount} from './gallery-count.mjs';
+import {parseFixtureCount,saveWasVerified} from './gallery-count.mjs';
 
 const samples=[
   ['masonry','Physical candidate IDs in test fixture: 9, 10, 11, 12, 13, 14\nFixture schema: 1; edits: 6','edits: ',6],
@@ -32,4 +32,14 @@ test('parser accepts last exact label and refuses malformed input',()=>{
   assert.ok(Number.isNaN(parseFixtureCount('', 'edits: ')));
   assert.ok(Number.isNaN(parseFixtureCount(null, 'edits: ')));
   assert.ok(Number.isNaN(parseFixtureCount('edits: 6', '')));
+});
+
+test('browser save acceptance requires positive confirmation and rejects blocker text',()=>{
+  assert.equal(saveWasVerified('PASS: canonical schema-1-shaped fixture save and restore.','PASS:'),true);
+  assert.equal(saveWasVerified('Isolated schema-1-shaped save/restore verified (6 edits).','save/restore verified'),true);
+  assert.equal(saveWasVerified('SAFE SAVE BLOCKER: invalid rotation','PASS:'),false);
+  assert.equal(saveWasVerified('PASS: previous operation\\nBLOCKED: unsafe save','PASS:'),false);
+  assert.equal(saveWasVerified('Fixture cells: 6','PASS:'),false);
+  assert.equal(saveWasVerified(null,'PASS:'),false);
+  assert.equal(saveWasVerified('PASS: valid',''),false);
 });
