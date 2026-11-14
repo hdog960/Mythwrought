@@ -94,3 +94,6 @@ All under the isolated 64-box / 768-triangle / 1536-vertex preview contract. The
 - New `tests/block-packs/pack-5/esm-webgl-browser.py m1 <out>` verified **native ES module import/export graph execution**, real Chromium WebGL2 GPU rendering, pixel readback and six unique source-authored panels at all 3 landscape viewports × two rotations. It uses absolute `data:` URLs to replace *only relative import specifiers*; local HTTP-served navigation remains blocked (`ERR_BLOCKED_BY_ADMINISTRATOR`), so HTTP/served loader is still **not tested**.
 - All six source-derived M1 visual screenshots reviewed; no new candidate geometry defect detected. No physical-iPhone measurements or creator artwork approval.
 - M1 **creator final acceptance remains OPEN**. Creator's conditional direction allowed M2 **separate source-only candidate development**, not integration, approval of M1, or v0.11 unlock.
+
+## Final M1 status when M2 candidate work reached 68 native tests
+- M1 original **44/44** isolated native Node tests remain passing; current combined M0/M1/M2 Pack 5 suite **68/68** passes (24 independent M2 cases). Native ES module WebGL2 tests for M1 and M2 passed; HTTP-served gallery and creator art/live gameplay acceptance remain separate and open.
