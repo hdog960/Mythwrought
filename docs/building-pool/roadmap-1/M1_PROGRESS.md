@@ -14,7 +14,7 @@ Asset identities reference verified manual rosters: Pack 1 stone, Pack 2 doors/s
 
 ## Tests and proof limitations
 
-- **28/28 focused native Node v22.16.0 tests passed** in the local working tree (16 earlier M0 and 12 new M1). Tests cover full 45-category matrix, distinct geometry fingerprints, coordinates, slab coverage, roof/wall/window/door/furnishing presence, passable empty two-cell headroom and connected portal graph, six stable zones, animal absence, deterministic serialization and symbolic dependency completeness.
+- **30/30 focused native Node v22.16.0 tests passed** in the local working tree (16 earlier M0 and 12 new M1). Tests cover full 45-category matrix, distinct geometry fingerprints, coordinates, slab coverage, roof/wall/window/door/furnishing presence, passable empty two-cell headroom and connected portal graph, six stable zones, animal absence, deterministic serialization and symbolic dependency completeness.
 - **36 real Chromium screenshots** from a standalone Canvas2D schematic fallback: 6 representative candidates × exterior/cutaway × 667×375, 844×390, 932×430. Browser was Chromium 144. Script injection via about:blank was required because this environment blocks local HTTP/file URL navigation. The screenshots were generated from genuine blueprint placements, not illustrations.
 - WebGL2 was **not available** in local Chromium despite software-GL flags. **No WebGL2 success claim**. Schematic preview represents unit-cell positions and NOT actual future block-pack mesh contours, alpha/collisions or final creator art.
 - Precise head clearance beyond two cells, door-swing and actual candidate shape fit/physical targeting, exterior terrain interfaces, multi-level stairs, mirrored+rotated near-duplicate rejection and physical iPhone controls **remain unresolved**.
@@ -23,3 +23,7 @@ Asset identities reference verified manual rosters: Pack 1 stone, Pack 2 doors/s
 ## Next M1 acceptance slice
 
 Reverify newest main, newest incorporation checkpoint, Issues #109/#117 and five manual manifests, whether the automated 130-family catalog has changed, and PR #121. Improve building-specific individual architectural variety, support/collision enclosure constraints, mirrored and rotated uniqueness tests and actual candidate preview realism. Run dedicated nested Node source-exact tests from PR contents and genuine WebGL2 where possible. Do not count unreviewed candidates as final visual approval. Stay exclusively inside the three Roadmap 1 directories.
+
+## Added D4 uniqueness regression
+
+A standalone M1-only orientation-invariant structural signature compares four quarter-turn rotations and their mirrors, ignoring material/repaint and room labels. All 45 candidates are pairwise distinct under this test (30/30 native local focused tests pass overall). The second dedicated test constructs a deliberately renamed, recolored mirror of an authored house and verifies its rejection. This does **not** substitute for creator appraisal of meaningful architectural differences or near-duplicate geometry.
