@@ -43,14 +43,14 @@ test('placement requires actual support and physical cell vacancy',()=>{
   assert.deepEqual(f.cell([2,4,3]).anchor,[2,4,3]);
 });
 test('multi-cell bed reserves both cells, can remove by far end',()=>{
-  const f=makePack5Fixture([bed,sample('pack5:083')]);f.setSupport([4,0,4]);
+  const f=makePack5Fixture([bed,sample('pack5:083')]);f.setSupport([4,0,4]);f.setSupport([4,0,5]);
   assert.equal(f.place('pack5:082',[4,1,4]).ok,true);assert.equal(f.cell([4,1,5]).symbolicId,'pack5:082');
   f.setSupport([4,0,5]);assert.equal(f.place('pack5:083',[4,1,5]).ok,false);
   assert.equal(f.remove([4,1,5]),true);assert.equal(f.cell([4,1,4]),null);
   assert.equal(f.cell([4,1,5]),null);
 });
 test('rotated beds use different occupied cardinal cells without allocating IDs',()=>{
-  const f=makePack5Fixture([bed]);f.setSupport([2,-1,2]);
+  const f=makePack5Fixture([bed]);f.setSupport([2,-1,2]);f.setSupport([1,-1,2]);
   assert.equal(f.place('pack5:082',[2,0,2],1).ok,true);
   assert.equal(f.cell([1,0,2]).rotation,1);assert.equal(f.cell([2,0,3]),null);
 });
