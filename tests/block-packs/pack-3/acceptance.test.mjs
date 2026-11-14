@@ -280,3 +280,40 @@ test('Hearthclay hip corner mates flush to pitched roof stairs on both arms at a
       `Unjoinable clay hip-to-pitch roof course: yaw ${yaw}, arm ${arm}, mismatched cross-section ${mismatch}`);
   }
 });
+
+// A separate stone buttress must actually attach to the intended fortress wall
+// when placed in the neighboring cell on the wall's ornamental/front side.
+// The merlon above the wall must still attach, and the central arrow slit must
+// stay genuinely open. Test true face area, not projection or corner grazing.
+test('fortress wall footing joins neighboring buttress and supports battlement at all four turns',()=>{
+  const worldBoxes=(id,turn,cell)=>pack3CandidateById(id,turn).boxes.map(b=>
+    b.map((v,i)=>v+cell[i%3]));
+  const faceArea=(first,second)=>{
+    let total=0;
+    for(const a of first)for(const b of second)for(let axis=0;axis<3;axis++){
+      if(Math.abs(a[axis+3]-b[axis])>1e-10 &&
+        Math.abs(b[axis+3]-a[axis])>1e-10)continue;
+      const others=[0,1,2].filter(i=>i!==axis);
+      total+=Math.max(0,Math.min(a[others[0]+3],b[others[0]+3])-
+        Math.max(a[others[0]],b[others[0]]))*
+        Math.max(0,Math.min(a[others[1]+3],b[others[1]+3])-
+        Math.max(a[others[1]],b[others[1]]));
+    }
+    return total;
+  };
+  for(let turn=0;turn<4;turn++){
+    const wall=worldBoxes(116,turn,[0,0,0]);
+    const buttressOffsets=[[0,0,-1],[1,0,0],[0,0,1],[-1,0,0]];
+    const buttress=worldBoxes(118,turn,buttressOffsets[turn]);
+    const battlement=worldBoxes(117,turn,[0,1,0]);
+    const buttressArea=faceArea(wall,buttress);
+    assert.ok(buttressArea>1e-6,
+      `No load-bearing wall/buttress face contact at turn ${turn}; area ${buttressArea}`);
+    assert.ok(faceArea(wall,battlement)>1e-6,
+      `No physical wall/battlement contact at turn ${turn}`);
+    assert.equal(filled(pack3CandidateShape(116,turn),.5,.65,.5),false,
+      `Footing repair unexpectedly blocked arrow slit at turn ${turn}`);
+    assert.equal(filled(pack3CandidateShape(117,turn),.5,.7,.5),false,
+      `Footing repair unexpectedly blocked central crenel at turn ${turn}`);
+  }
+});
