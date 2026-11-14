@@ -182,3 +182,23 @@ test('stone-edge fan moss grows only by actual adjacent rock and respects edits'
   'no stone-edge moss appears on ordinary open grass');
  assert.ok(sample.vertices.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
 });
+
+test('pale lichen requires real natural stone and never marks decorative construction',()=>{
+ const scene=(kind)=>({seed:123,get(x,y,z){
+  if(y===5&&x%16===8)return kind;
+  return baseAt(x,y,z);
+ }});
+ let natural=0,constructed=0;
+ for(let cx=-12;cx<=12;cx++)for(let cz=-12;cz<=12;cz++){
+  const a=moonbellVertices(scene(3),cx,cz,opts);
+  const b=moonbellVertices(scene(4),cx,cz,opts);
+  assert.deepEqual(a,moonbellVertices(scene(3),cx,cz,opts));
+  assert.ok(a.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+  for(let i=0;i<a.length;i+=9)
+   if(Math.abs(a[i+3]-.79)<1e-5&&Math.abs(a[i+4]-.84)<1e-5)natural++;
+  for(let i=0;i<b.length;i+=9)
+   if(Math.abs(b[i+3]-.79)<1e-5&&Math.abs(b[i+4]-.84)<1e-5)constructed++;
+ }
+ assert.ok(natural>0,'natural exposed rock receives pale hanging lichen');
+ assert.equal(constructed,0,'constructed block faces never receive cave-edge lichen');
+});
