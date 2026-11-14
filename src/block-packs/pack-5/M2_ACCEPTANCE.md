@@ -58,3 +58,9 @@ All material variants have physically different geometry. This work creates **no
 - Verified targeted pixel difference at 844×390 rotation 0: bookshelf card 1 changed **2,821 pixels**, bookshelf card 2 changed **2,444 pixels**; the other six furniture cards were pixel-identical. Fresh contact sheet is a local review artifact only, not committed to GitHub.
 - Reattempted local HTTP-served gallery: `net::ERR_BLOCKED_BY_ADMINISTRATOR`. Offline native `data:` ES modules and WebGL2 remain authentic but served-page certification remains BLOCKED. No creator premium-art sign-off, no physical-iPhone test, no numeric IDs, no game schema-1 integration, no deploy.
 - **Decision:** M2 physical candidate source QA and isolated visual review PASS; final creator/served/runtime acceptance OPEN. All 4 M2 families remain CANDIDATE, not installed. Pack 5 totals **7 CANDIDATE / 11 NOT STARTED / 0 INTEGRATED**; M3 untouched.
+
+## M2 technical follow-up before isolated M3 development
+
+- All original **69/69 M0–M2 genuine native Node tests** re-executed against blob-matched source and test files. Six M2 native ES-module/real Chromium WebGL2 captures PASS at 667×375, 844×390, 932×430 with rotations 0,1. Reviewed all eight authentic candidate images; no new defect warranted a change to M2-owned candidate geometry.
+- **M2 technical candidate review was adequate for starting isolated M3 authored source**; this does NOT grant creator artwork approval, live schema-1/ID integration, HTTP-served module loading, physical iPhone controls or deployment. Original M2 82–85 remain **CANDIDATE**, not INTEGRATED.
+- Subsequent Milestone 3 source/test additions bring the full Pack 5 to **83/83 native Node PASS**, with separate 14-case M3 suite. See `M3_ACCEPTANCE.md`. M1 creator final review remains open and independent.
