@@ -279,3 +279,12 @@ On the checkpoint-007 main baseline, the Pack 1-owned `galleries-browser.mjs` ha
 The latest exact-source source-level check passed **81/81 candidate test bodies** via V8 shims; these are **not actual native Node runs**. The five small gallery-helper tests again genuinely passed Node 22.16.0. All 21 roster families and 30 IDs 9–38 remain CANDIDATE, unmerged and unregistered in the live game. GitHub DNS restrictions and administrator-blocked Chromium navigation continue to prevent the full exact-checkout native and authentic screenshot run in the local environment.
 
 See `M6_ACCEPTANCE.md` and `manifest.json` for the precise test evidence, provenance and open blockers. The acceptance tool changes do not modify shared CI/engine/worldgen or imply creator physical-iPhone/art approval. Gate A remains open, v0.11 locked.
+
+
+## M6 screenshot-integrity native Node tests (2026-11-14)
+
+New Pack 1-only screenshot evidence code: `tests/block-packs/pack-1/png-proof.mjs` + `png-proof.test.mjs`. A real **Node 22.16.0 run passed 7/7** independent PNG corruption/dimension tests, executed files byte-identical to GitHub committed blobs. It validates PNG IHDR, per-chunk CRC32, IDAT zlib decompression, row filters, RGB/RGBA format, actual dimensions and SHA-256. Combined with existing native gallery-count parser tests (5/5), **12/12 helper tests genuinely pass Node**. This is precise evidence only for acceptance tooling; the **81 authored asset test bodies remain V8-only**, not genuine Node-verified.
+
+The optional Pack 1-owned `run-acceptance.mjs` now requires **nine** nested native Node modules and **at least 93 executed passing tests**, zero failed/skipped/TODO, plus 15 genuine Chromium gallery views and 30 fully parsed, CRC-verified authentic PNG screenshots. Its source syntax checks passed, but no full real Node+Chromium run or screenshots exist. No changes to live block registry, main CI, other packs or gameplay.
+
+The current main remains automation-only checkpoint 007, and **all 21 families and 30 reserved ID 9–38 physical assets stay CANDIDATE**. See `M6_ACCEPTANCE.md` for the exact test evidence, blockers and next steps. Gate A open; v0.11 locked.
