@@ -45,3 +45,14 @@ test('top-facing timber receives end-grain rings while side planks retain stagge
   assert.match(TIMBER,/float topShade=.*endRings/);
   assert.doesNotMatch(TIMBER,/texture\(|sampler2D|discard;|gl_FragDepth/);
 });
+
+test('refined boards have deterministic per-board tint, paired pegs and edge wear',()=>{
+  assert.equal(RULES.perBoardTint,true);
+  assert.equal(RULES.pairedJoineryPegs,true);
+  for(const token of ['boardTone=hashCell(boardCell','edgeWear=','pegPair=','boardTone','peg+pegPair'])
+    assert.ok(TIMBER.includes(token),token);
+  assert.doesNotMatch(TIMBER,/sampler2D|texture\(|discard;|gl_FragDepth/);
+  assert.equal(RULES.existingBlockId,4);
+  assert.equal(RULES.extraTextures,0);
+  assert.equal(RULES.extraDrawCalls,0);
+});
