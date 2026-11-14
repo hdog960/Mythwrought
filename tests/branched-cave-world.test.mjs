@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,collides,meshChunk,CHUNK_SIZE} from '../src/voxel.mjs';
-import {branchedCaveWorld,northWingTraversal} from '../src/branched-cave-world.mjs';
+import {branchedCaveWorld,northWingTraversal,northWingEntranceTrace} from '../src/branched-cave-world.mjs';
 import {CAVE_CANDIDATE,caveRoute,experimentalCaveWorld} from '../src/experimental-cave-route.mjs';
 for(const seed of [179,1,2026,-77]){
   test('north cave wing is solid-floored, head-clear and meshes for seed '+seed,()=>{
@@ -63,3 +63,26 @@ test('north wing uses actual player body collision, not only center voxel checks
   assert.equal(blocked.walkable,false);
   assert.ok(blocked.failures.some(p=>p.x===middle.x&&p.z===middle.z));
 });
+
+for(const seed of [179,1,2026,-77]){
+  test('continuous entrance-to-north-chamber physical route '+seed,()=>{
+    const world=new VoxelWorld(seed);
+    const before=JSON.stringify(world.save());
+    const route=northWingEntranceTrace(world);
+    assert.equal(route.samples.length,CAVE_CANDIDATE.length-14+11);
+    assert.equal(route.walkable,true,JSON.stringify(route.failures));
+    assert.deepEqual(route.failures,[]);
+    assert.ok(route.samples.every(p=>p.supported&&p.clear&&p.stepValid));
+    for(let i=1;i<route.samples.length;i++){
+      const a=route.samples[i-1],b=route.samples[i];
+      assert.equal(Math.abs(a.x-b.x)+Math.abs(a.z-b.z),1,'contiguous walking step');
+      assert.ok(Math.abs(a.y-b.y)<=1,'no inaccessible vertical step');
+    }
+    assert.equal(JSON.stringify(world.save()),before);
+    const obstruction=route.samples[Math.floor(route.samples.length/2)];
+    assert.equal(world.set(obstruction.x,obstruction.y,obstruction.z,BLOCK.WOOD),true);
+    const blocked=northWingEntranceTrace(world);
+    assert.equal(blocked.walkable,false);
+    assert.ok(blocked.failures.some(p=>p.x===obstruction.x&&p.z===obstruction.z));
+  });
+}
