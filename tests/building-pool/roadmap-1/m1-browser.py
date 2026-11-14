@@ -16,7 +16,7 @@ IDS=['r1:house:temperate:small:001','r1:tavern:desert:medium:002','r1:stable:sno
      'r1:house:enchanted-forest:large:003','r1:tavern:mountain:small:001','r1:stable:desert:medium:002',
      'r1:house:mountain:large:003','r1:tavern:mountain:large:003','r1:stable:enchanted-forest:large:003']
 def bundled_html():
- sources=[(SRC/p).read_text() for p in ['schema.mjs','m1-designs.mjs','m1-buildings.mjs']]
+ sources=[(SRC/p).read_text() for p in ['schema.mjs','m1-designs.mjs','m1-candidate-footprints.mjs','m1-buildings.mjs']]
  sources=['\n'.join(line for line in s.splitlines() if not line.startswith('import ')).replace('export ','') for s in sources]
  gallery=(TEST/'m1-canvas-gallery.html').read_text()
  gallery=gallery.replace("import {getM1Blueprints} from '../../../src/building-pool/roadmap-1/m1-buildings.mjs';",'')
@@ -35,6 +35,7 @@ with sync_playwright() as p:
     r=page.evaluate('window.__REVIEW__')
     assert r['viewport']==[w,h] and r['id']==ident and r['placements']>=200,r
     assert r['canvas2d'] and r['faces']>0 and r['cutaway']==cut,r
+    assert r['reservedFootprintCells']==(1 if ':house:' in ident else 0),r
     assert not errs,errs
     file=ident.replace(':','-')+'-'+str(w)+'x'+str(h)+'-'+('interior' if cut else 'exterior')+'.png'
     page.screenshot(path=str(OUT/file))

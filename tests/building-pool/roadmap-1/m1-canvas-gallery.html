@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Mythwrought Roadmap 1 — authored voxel candidate gallery</title>
 <style>*{box-sizing:border-box}body{margin:0;background:#172832;color:#eee8d7;font:12px system-ui;overflow:hidden}canvas{display:block;width:100vw;height:100dvh}#head{position:fixed;left:7px;top:5px;padding:7px 9px;background:#10212bdc;border-radius:6px}#heading{font-weight:700;font-size:13px}#detail{font-size:11px;color:#b8cbca}#controls{position:fixed;right:8px;bottom:8px;display:flex;gap:6px}select,button{background:#28404d;color:#fff;border:1px solid #819493;border-radius:5px;padding:5px;font:11px system-ui}#warning{position:fixed;left:8px;bottom:8px;max-width:48vw;font-size:10px;background:#11212bdc;color:#d8bc7c;padding:5px}</style>
-<canvas id="scene"></canvas><div id="head"><div id="heading">Voxel blueprint preview</div><div id="detail"></div></div><div id="controls"><select id="pick"></select><button id="cut">Cutaway</button></div><div id="warning">Schematic cell envelopes (Canvas2D fallback). Not final block geometry or WebGL2 certification.</div>
+<canvas id="scene"></canvas><div id="head"><div id="heading">Voxel blueprint preview</div><div id="detail"></div></div><div id="controls"><select id="pick"></select><button id="cut">Cutaway</button></div><div id="warning">Schematic cell envelopes (Canvas2D fallback). Purple cells indicate reserved second-bed cells; physical mesh and WebGL2 unverified.</div>
 <script type="module">
 import {getM1Blueprints} from '../../../src/building-pool/roadmap-1/m1-buildings.mjs';
 const all=getM1Blueprints(),canvas=document.querySelector('#scene'),ctx=canvas.getContext('2d'),pick=document.querySelector('#pick'),cut=document.querySelector('#cut');
@@ -9,10 +9,11 @@ let b=all[0],cutaway=false;
 for(const x of all){const opt=document.createElement('option');opt.value=x.id;opt.textContent=x.category+' '+x.biome+' '+x.size;pick.append(opt);}
 const rgb=(c,k)=>'rgb('+c.map(x=>Math.max(0,Math.min(255,Math.round(255*x*k)))).join(',')+')';
 const material={temperate:[[.72,.51,.31],[.46,.27,.19],[.45,.42,.37]],desert:[[.87,.72,.43],[.64,.41,.23],[.65,.55,.40]],snow:[[.57,.48,.38],[.27,.39,.49],[.44,.49,.55]],'enchanted-forest':[[.47,.44,.60],[.20,.46,.37],[.40,.44,.37]],mountain:[[.56,.57,.62],[.31,.40,.49],[.45,.46,.49]]};
-const color=(p)=>{const m=material[b.biome];return p.role==='wall'?m[0]:p.role==='roof'?m[1]:p.role==='foundation'?m[2]:p.role==='window'?[.43,.83,.89]:p.role==='door'?[.82,.49,.20]:p.role==='furnishing'?[.83,.65,.32]:p.role==='partition'?[.55,.43,.30]:p.role==='decoration'?[.93,.79,.33]:[.59,.55,.42];};
+const color=(p)=>{const m=material[b.biome];return p.sourceFootprint?[.77,.58,.95]:p.role==='wall'?m[0]:p.role==='roof'?m[1]:p.role==='foundation'?m[2]:p.role==='window'?[.43,.83,.89]:p.role==='door'?[.82,.49,.20]:p.role==='furnishing'?[.83,.65,.32]:p.role==='partition'?[.55,.43,.30]:p.role==='decoration'?[.93,.79,.33]:[.59,.55,.42];};
 function render(){
  canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);ctx.fillStyle='#172832';ctx.fillRect(0,0,innerWidth,innerHeight);
- const visible=b.placements.filter(p=>!cutaway||p.role!=='roof'&&!(p.role==='wall'&&(p.at[2]===b.footprint.depth-2||p.at[0]===b.footprint.width-2)));
+ const extras=(b.footprintReservations??[]).flatMap(r=>r.extraCells.map(at=>({at,role:'furnishing',asset:r.asset,sourceFootprint:true})));
+ const visible=[...b.placements.filter(p=>!cutaway||p.role!=='roof'&&!(p.role==='wall'&&(p.at[2]===b.footprint.depth-2||p.at[0]===b.footprint.width-2))),...extras];
  const occ=new Set(visible.map(p=>p.at.join(','))),iso=(x,y,z)=>[(x-z)*.866,(x+z)*.48-y*.95];
  const [w,h,d]=[b.footprint.width,b.footprint.height,b.footprint.depth],bounds=[];
  for(const x of [0,w])for(const y of [0,h])for(const z of [0,d])bounds.push(iso(x,y,z));
@@ -28,7 +29,7 @@ function render(){
  }
  document.querySelector('#heading').textContent=b.title;
  document.querySelector('#detail').textContent=b.category+' / '+b.biome+' / '+b.size+' / '+b.placements.length+' voxels / '+b.rooms.length+' rooms / '+(cutaway?'cutaway':'exterior');
- window.__REVIEW__={rendered:true,webgl2:false,canvas2d:true,viewport:[innerWidth,innerHeight],id:b.id,cutaway,placements:b.placements.length,rooms:b.rooms.length,faces};
+ window.__REVIEW__={rendered:true,webgl2:false,canvas2d:true,viewport:[innerWidth,innerHeight],id:b.id,cutaway,placements:b.placements.length,reservedFootprintCells:extras.length,rooms:b.rooms.length,faces};
 }
 pick.onchange=()=>{b=all.find(x=>x.id===pick.value);render()};cut.onclick=()=>{cutaway=!cutaway;cut.textContent=cutaway?'Exterior':'Cutaway';render()};window.addEventListener('resize',render);render();
 </script></html>
