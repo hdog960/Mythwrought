@@ -1,6 +1,6 @@
 // Seed-stable, render-only moonbell flowers: no new blocks, collisions or saves.
 // Low opaque petal geometry shares the existing terrain mesh and draw call.
-const STRIDE=9, MAX_FLOWERS=7, VERTICES_PER_FLOWER=72;
+const STRIDE=9, MAX_FLOWERS=7, VERTICES_PER_FLOWER=96;
 function hash(x,z,seed,salt){
  let n=Math.imul((x|0)^seed^salt,0x9e3779b1)^Math.imul((z|0)+salt,0x85ebca6b);
  n^=n>>>16;n=Math.imul(n,0x7feb352d);n^=n>>>15;return (n>>>0)/4294967296;
@@ -102,6 +102,24 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
     const green=j%2?[.38,.62,.35]:[.30,.54,.32];
     tri(out,[fx,level,fz],[fx-reach,level-.09,fz-.065],[fx-.025,level+.045,fz+.025],green,7);
     tri(out,[fx,level,fz],[fx+reach,level-.09,fz+.065],[fx+.025,level+.045,fz-.025],green,7);
+   }
+  }
+  // Rare silverleaf spires mark meadow margins with a tall, readable silhouette.
+  // Each is an opaque, wind-swept stem with paired silver-green blades; it
+  // inherits the anchor's roof/edit suppression and costs no new draw call.
+  if(hash(x,z,world.seed,691)>.89){
+   const rx=px+.17,rz=pz+.16,rh=.64+hash(x,z,world.seed,697)*.16;
+   const lean=(hash(x,z,world.seed,701)-.5)*.22;
+   const apex=[rx+lean,ground+rh,rz-lean*.4];
+   tri(out,[rx-.027,ground,rz],[rx+.027,ground,rz],apex,[.35,.54,.43],7);
+   tri(out,[rx,ground,rz-.027],[rx,ground,rz+.027],apex,[.43,.61,.48],7);
+   for(let j=0;j<3;j++){
+    const t=.28+j*.23,level=ground+rh*t,reach=.19-j*.035;
+    const mid=rx+lean*t;
+    tri(out,[mid,level,rz],[mid-reach,level+.12,rz-.055],
+      [mid-.035,level+.18,rz+.025],j%2?[.63,.75,.65]:[.74,.83,.73],7);
+    tri(out,[mid,level,rz],[mid+reach,level+.12,rz+.055],
+      [mid+.035,level+.18,rz-.025],j%2?[.54,.70,.61]:[.68,.80,.70],7);
    }
   }
   flowers++;
