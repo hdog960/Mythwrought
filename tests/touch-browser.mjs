@@ -229,10 +229,10 @@ try{
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[
     touch(41,precision.x,precision.y),touch(42,precision.x+5,precision.y+5)
   ]});
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[touch(41,precision.x,precision.y)]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[touch(42,precision.x+5,precision.y+5)]});
   assert.equal(await page.locator('#precision').evaluate(e=>e.classList.contains('held')),true,
     'Lifting unrelated second finger cleared owning AIM');
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[touch(41,precision.x,precision.y)]});
   await page.waitForFunction(()=>!document.querySelector('#precision').classList.contains('held'),null,{timeout:2500});
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.precision==='false',null,{timeout:2500});
   // AIM must follow the owning finger even if Safari releases outside the
