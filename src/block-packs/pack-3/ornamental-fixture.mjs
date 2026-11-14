@@ -33,7 +33,7 @@ export function createPack3OrnamentalFixture(seed=179){
   });
 }
 export function restorePack3OrnamentalFixture(payload){
-  if(!payload||payload.format!==ORNAMENTAL_FIXTURE_FORMAT||
+  if(!payload||Object.hasOwn(payload,'schema')||payload.format!==ORNAMENTAL_FIXTURE_FORMAT||
     !Number.isInteger(payload.seed)||payload.seed!==(payload.seed|0)||
     !Array.isArray(payload.parts)||payload.parts.length>300000)
     throw new TypeError('Invalid ornamental fixture payload');
