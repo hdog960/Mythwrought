@@ -1,6 +1,6 @@
 // Seed-stable, render-only moonbell flowers: no new blocks, collisions or saves.
 // Low opaque petal geometry shares the existing terrain mesh and draw call.
-const STRIDE=9, MAX_FLOWERS=7, VERTICES_PER_FLOWER=54;
+const STRIDE=9, MAX_FLOWERS=7, VERTICES_PER_FLOWER=60;
 function hash(x,z,seed,salt){
  let n=Math.imul((x|0)^seed^salt,0x9e3779b1)^Math.imul((z|0)+salt,0x85ebca6b);
  n^=n>>>16;n=Math.imul(n,0x7feb352d);n^=n>>>15;return (n>>>0)/4294967296;
@@ -27,13 +27,23 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
   const tip=[px,ground+h,pz],base=[px,ground,pz];
   tri(out,[px-.035,ground,pz], [px+.035,ground,pz],tip,[.31,.53,.33],7);
   tri(out,[px,ground,pz-.035],[px,ground,pz+.035],tip,[.43,.65,.36],7);
-  const tint=hash(x,z,world.seed,659)>.5?[[.74,.68,.94],[.89,.80,.98]]:[[.64,.79,.94],[.82,.91,.98]];
-  // Four downward bell petals, visible from every walking direction.
-  for(let k=0;k<4;k++){
-   const a=turn+k*Math.PI/2,dx=Math.cos(a),dz=Math.sin(a);
-   const side=[-dz,dx],r=.17;
-   tri(out,tip,[px+dx*r+side[0]*.095,ground+h-.20,pz+dz*r+side[1]*.095],
-      [px+dx*r-side[0]*.095,ground+h-.20,pz+dz*r-side[1]*.095],tint[k%2],7);
+  // A second, uncommon wildflower silhouette brings pale-gold starblooms to
+  // the same meadow without changing world blocks, anchors or distribution.
+  // Their six pointed petals and lifted centers read differently from bells.
+  const starbloom=hash(x,z,world.seed,673)>.76;
+  const tint=starbloom
+   ? [[.97,.86,.54],[.99,.94,.73]]
+   : hash(x,z,world.seed,659)>.5
+     ? [[.74,.68,.94],[.89,.80,.98]]
+     : [[.64,.79,.94],[.82,.91,.98]];
+  const petalCount=starbloom?6:4;
+  for(let k=0;k<petalCount;k++){
+   const a=turn+k*Math.PI*2/petalCount,dx=Math.cos(a),dz=Math.sin(a);
+   const side=[-dz,dx],r=starbloom?.22:.17;
+   const droop=starbloom?-.055:-.20;
+   const spread=starbloom?.065:.095;
+   tri(out,tip,[px+dx*r+side[0]*spread,ground+h+droop,pz+dz*r+side[1]*spread],
+      [px+dx*r-side[0]*spread,ground+h+droop,pz+dz*r-side[1]*spread],tint[k%2],7);
   }
   // Two ground-level leaves keep flowers legible without transparent quads.
   for(let k=0;k<2;k++){
