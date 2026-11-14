@@ -172,7 +172,15 @@ function buildWatchtower(biome,size){
   const stairSlot=a>=runX&&a<runX+2&&z>=stairStartZ&&z<stairStartZ+steps;
   if(!stairSlot)put('roof',a,deckY,z,p.deck);
   const perimeter=a===0||a===w-1||z===0||z===d-1;
-  if(perimeter&&((a+z+si)%3!==0))put('battlement',a,deckY+1,z,'pack3:070');
+  // A few periodic snow crenels created tiny, reachable-looking two-wide
+  // lookout ledges disconnected from the actual stair landing. Relocate a
+  // single block in medium and large towers, preserving battlement counts.
+  const snowMedium=biome==='snow'&&si===1;
+  const snowLarge=biome==='snow'&&si===2;
+  const shiftAway=(snowMedium&&a===0&&z===1)||(snowLarge&&a===w-1&&z===1);
+  const shiftHere=(snowMedium&&a===0&&z===d-3)||(snowLarge&&a===0&&z===1);
+  if(perimeter&&(((a+z+si)%3!==0)&&!shiftAway||shiftHere))
+   put('battlement',a,deckY+1,z,'pack3:070');
  }
  // Upper corridor meets the last tread horizontally; observation is fully traversable.
  nav.push(navNode('platform',runX+2,platformFoot,stairStartZ+steps-1,'observation'));
