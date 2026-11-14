@@ -117,3 +117,16 @@ test('rare carved sunwheels are broad opaque panel-local ornaments with determin
   assert.equal(RULES.extraDrawCalls,0);
   assert.equal(RULES.saveSchemaChanged,false);
 });
+
+test('rare double-door timber carving uses opaque face-local details and no new IDs',()=>{
+  assert.equal(RULES.rareDoubleDoorCarving,true);
+  for(const token of ['doorCell=step(.965','doorBody=','doorStile=','doorRecess=',
+    'doorHinges=','pullRing=','doorCell*doorBody*near','doorCarving'])
+    assert.ok(TIMBER.includes(token),token);
+  assert.match(TIMBER,/hashCell\(boardCell\+vec2\(173\.0,103\.0\)\)/);
+  assert.doesNotMatch(TIMBER,/sampler2D|texture\(|discard;|gl_FragDepth/);
+  assert.equal(RULES.existingBlockId,BLOCK.WOOD);
+  assert.equal(RULES.extraTextures,0);
+  assert.equal(RULES.extraDrawCalls,0);
+  assert.equal(RULES.saveSchemaChanged,false);
+});
