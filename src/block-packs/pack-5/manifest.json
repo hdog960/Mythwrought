@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "MILESTONE 1 — 3 CANDIDATE FAMILIES; BROWSER REVIEW OPEN",
+  "status": "MILESTONE 1 — SOURCE CANDIDATES VERIFIED; WEBGL2/CREATOR ACCEPTANCE OPEN",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -34,8 +34,8 @@
         "chalk-lime",
         "hand-troweled"
       ],
-      "verification": "Native Node test-backed isolated physical candidate; browser/creator art approval pending; engine integration blocked",
-      "preview": "tests/block-packs/pack-5/architectural-gallery.html"
+      "verification": "43/43 native Pack 5 Node tests pass; source-derived Chromium Canvas2D inspected; true WebGL2, creator art review, and engine integration OPEN",
+      "preview": "tests/block-packs/pack-5/canvas-gallery.html"
     },
     {
       "roster": 80,
@@ -51,8 +51,8 @@
         "hearth-running-bond",
         "kiln-soldier-course"
       ],
-      "verification": "Native Node test-backed isolated physical candidate; browser/creator art approval pending; engine integration blocked",
-      "preview": "tests/block-packs/pack-5/architectural-gallery.html"
+      "verification": "43/43 native Pack 5 Node tests pass; source-derived Chromium Canvas2D inspected; true WebGL2, creator art review, and engine integration OPEN",
+      "preview": "tests/block-packs/pack-5/canvas-gallery.html"
     },
     {
       "roster": 81,
@@ -68,8 +68,8 @@
         "sunburst-encaustic",
         "moonwoven-glaze"
       ],
-      "verification": "Native Node test-backed isolated physical candidate; browser/creator art approval pending; engine integration blocked",
-      "preview": "tests/block-packs/pack-5/architectural-gallery.html"
+      "verification": "43/43 native Pack 5 Node tests pass; source-derived Chromium Canvas2D inspected; true WebGL2, creator art review, and engine integration OPEN",
+      "preview": "tests/block-packs/pack-5/canvas-gallery.html"
     },
     {
       "roster": 82,
@@ -239,9 +239,16 @@
   ],
   "candidateFamilies": 3,
   "testEvidence": {
-    "nativeNode": "34/34 focused cases pass, Node 22.16.0; includes original M0 16 and new M1 18",
-    "browser": "Blocked by local headless Chromium EGL/GPU initialization; no genuine browser result",
-    "screenshots": "None; authored 6-card WebGL2 gallery source only",
-    "production": "No runtime integration, no live schema-1 acceptance"
+    "nativeNode": "43/43 native Node 22.16.0 tests pass in isolated Pack 5 local checkout; exact committed source and test Git blob SHAs matched",
+    "webgl2": "BLOCKED / NOT VERIFIED: Chromium localhost navigation ERR_BLOCKED_BY_ADMINISTRATOR; getContext(webgl2) false under tested software GPU configurations",
+    "canvas2D": "GENUINE CHROMIUM 144: six source-derived Canvas2D screenshots at 667x375, 844x390, 932x430 and 0/1 rotations; NOT WebGL2 or served page, not live gameplay",
+    "screenshots": "Six genuine PNGs inspected in this development session and provided separately; not committed to repository",
+    "production": "NO integration/production schema-1 save testing for candidate IDs; live engine still only IDs 0–8",
+    "acceptanceDossier": "src/block-packs/pack-5/M1_ACCEPTANCE.md"
+  },
+  "preview": {
+    "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
+    "canvas2D": "tests/block-packs/pack-5/canvas-gallery.html",
+    "reproScript": "tests/block-packs/pack-5/capture-canvas.py"
   }
 }
