@@ -11,7 +11,7 @@
 | M0 original exact-head CI | SUCCESS at commit f57d4a6543ba4907d02bf86b1d8c47ac58e6c37a |
 | Source-authored M1 candidates | 45/885; 15 house + 15 tavern + 15 empty stable |
 | Actual authored voxel coordinates | 46,299 across 45 candidates |
-| Native local Node tests | 28/28 PASS (16 M0 + 12 M1); PR-head source-specific rerun pending |
+| Native local Node tests | 30/30 PASS (16 M0 + 12 M1 + 2 uniqueness); PR-head source-specific rerun pending |
 | Chromium schematic previews | 36 authentic Canvas2D exterior/cutaway screenshots at 3 landscape sizes |
 | Native WebGL2 geometry gallery | Not certified: software GL unavailable in testing environment |
 | Candidate physical asset substitution | BLOCKED on exact family dimensions, collision, orientation, support and widened-ID registry |
@@ -33,3 +33,7 @@ These candidates have true coordinate-level slab/wall/roof/partitions, walkable 
 - r1:stable:desert:medium:002 — Sandway Covered Pens
 
 Images generated locally under working artifact review directory, not committed to the repository; never claim remote screenshot artifact until actually attached and verified. Dedicated gallery source/testing tools remain separate from production app.
+
+## Added D4 uniqueness regression
+
+A standalone M1-only orientation-invariant structural signature compares four quarter-turn rotations and their mirrors, ignoring material/repaint and room labels. All 45 candidates are pairwise distinct under this test (30/30 native local focused tests pass overall). The second dedicated test constructs a deliberately renamed, recolored mirror of an authored house and verifies its rejection. This does **not** substitute for creator appraisal of meaningful architectural differences or near-duplicate geometry.
