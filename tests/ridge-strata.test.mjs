@@ -234,3 +234,19 @@ test('snowline pockets are seeded, highland-only and preserve player roof edits'
  const flat=ridgeStrataVertices(world,0,0,{heightAt:()=>6});
  assert.equal(flat.length,0,'no frost on flat lowlands');
 });
+
+test('alpine ridge rims follow exposed high ledges and disappear under saved roofs',()=>{
+ const heights=(x,z)=>x<0?17:10,edits=new Map();
+ const world={seed:179,get(x,y,z){
+  const k=[x,y,z].join(',');if(edits.has(k))return edits.get(k);
+  const h=heights(x,z);return y>h?0:y===h?1:y>=h-3?2:3;
+ }};
+ const original=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.deepEqual(original,ridgeStrataVertices(world,-1,0,{heightAt:heights}));
+ assert.ok(original.length<16*16*4*55*27,'alpine ledge art stays within mobile budget');
+ for(let x=-16;x<0;x++)for(let z=0;z<16;z++)edits.set([x,18,z].join(','),3);
+ const blocked=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(blocked.length<original.length,'saved roof blocks suppress alpine surface art');
+ assert.equal(edits.size,256);
+ assert.equal(ridgeStrataVertices(world,0,0,{heightAt:()=>6}).length,0);
+});
