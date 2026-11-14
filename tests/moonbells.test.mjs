@@ -35,3 +35,21 @@ test('mined anchors and player roof edits remove flowers without touching saves'
  assert.ok(moonbellVertices(world(123,roof),cx,cz,opts).length<original.length);
  assert.equal(world(123,mined).get(x,4,z),0);
 });
+
+test('fern silhouettes are seeded, budgeted and removed with their grass anchor',()=>{
+ let sample;
+ for(let cx=-9;cx<=9&&!sample;cx++)for(let cz=-9;cz<=9&&!sample;cz++){
+  const vertices=moonbellVertices(world(123),cx,cz,opts);
+  // Fern fronds use a distinct dark-green leaf tint from the moonbell petals.
+  for(let i=0;i<vertices.length;i+=9){
+   if(Math.abs(vertices[i+3]-.30)<1e-5&&Math.abs(vertices[i+4]-.54)<1e-5){
+    sample={cx,cz,x:Math.floor(vertices[i]),z:Math.floor(vertices[i+2]),vertices};break;
+   }
+  }
+ }
+ assert.ok(sample,'at least one deterministic fern grows in representative meadow chunks');
+ const {cx,cz,x,z,vertices}=sample;
+ const removed=moonbellVertices(world(123,new Map([[[x,4,z].join(','),0]])),cx,cz,opts);
+ assert.ok(removed.length<vertices.length,'removing supporting grass removes fern-bearing decoration');
+ assert.ok(vertices.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+});
