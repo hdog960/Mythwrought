@@ -81,12 +81,25 @@ function buildBlacksmith(biome,size){
   if(p.roofStyle==='asymmetric-canopy')return 8+Math.min(4,Math.floor((dist+(a<w/2?2:0))/3));
   return 8+Math.min(3,Math.floor(a/4));
  };
+ // A one-voxel-thick roof follows the actual regional roofline. End gables
+ // close the open triangular wall, without filling the whole roof volume with stone.
+ // A deliberate vertical void above the hearth reserves a chimney flue; the true
+ // hollow shape of future Pack 4 chimney courses remains an integration dependency.
+ const chimneyX=2,chimneyZ=d-6;
  for(let a=0;a<w;a++)for(let z=0;z<d;z++){
   const top=highRoof(a);
-  for(let y=8;y<=top;y++)put('roof',a,y,z,p.roof);
+  if(a!==chimneyX||z!==chimneyZ)put('roof',a,top,z,p.roof);
+  if(z===0||z===d-1)for(let y=8;y<top;y++)put('wall',a,y,z,p.wall);
  }
- // A physically mounted chimney opening is a future candidate shape; smoke is not simulated.
- for(let y=highRoof(2)+1;y<=Math.min(h-2,highRoof(2)+3);y++)put('structure',2,y,2,'pack4:063');
+ // Exposed rafters supply real below-roof supporting members rather than floating eaves.
+ for(let z=2;z<d-2;z+=4)for(let a=1;a<w-1;a++){
+  if(a===chimneyX&&z===chimneyZ)continue;
+  const y=highRoof(a)-1;
+  if(y>7)put('rafter',a,y,z,p.trim);
+ }
+ // The future hollow chimney courses align with the hearth (not an unrelated wall).
+ for(let y=highRoof(chimneyX)+1;y<=Math.min(h-2,highRoof(chimneyX)+3);y++)
+  put('structure',chimneyX,y,chimneyZ,'pack4:063');
  // Work equipment is in labelled exact family slots; no functionality is attributed to these modules.
  put('fixture',2,2,d-6,'pack4:064');
  put('fixture',w-4,2,d-6,'pack5:088');
@@ -106,11 +119,11 @@ function buildBlacksmith(biome,size){
  const nav=[navNode('entry',x,2,d-1,'entry'),navNode('work',x,2,d-5,'work'),navNode('stock',x,2,3,'storage')];
  const clearances=[clearance(x,2,2,2,3,d-2),clearance(x,5,2,2,2,d-3)];
  const features=[feature('forge-mouth',2,2,d-6,'pack4:064'),feature('anvil',w-4,2,d-6,'pack5:088'),
- feature('non-operational bench',w-3,2,3,'pack2:013'),feature('chimney ventilation',2,highRoof(2)+1,2,'pack4:063'),
+ feature('non-operational bench',w-3,2,3,'pack2:013'),feature('chimney ventilation',chimneyX,highRoof(chimneyX)+1,chimneyZ,'pack4:063'),
  feature('fuel separation',2,2,4,null,'Dedicated heat/fire-safety simulation and fireproof wall core not available')];
  return b.finish({clearances,openings:[{id:'main-entrance',facing:'south',x,y:2,z:d-1,width:2,height:3}],spaces,
   navigation:{entry:'entry',nodes:nav,edges:[{from:'entry',to:'work',kind:'level'},{from:'work',to:'stock',kind:'level'}]},
-  features,architecture:{style:p.roofStyle,roofStyle:p.roofStyle,workshopZones:['forge','anvil','stock','ventilation'],chimney:'symbolic static physical candidate',roofCrossSection:Array.from({length:w},(_,i)=>highRoof(i)),interiorPartition:biome},
+  features,architecture:{style:p.roofStyle,roofStyle:p.roofStyle,workshopZones:['forge','anvil','stock','ventilation'],chimney:'symbolic hollow candidate above hearth; geometry/airflow not yet certified',flueVoid:[chimneyX,chimneyZ],roofShellThickness:1,roofCrossSection:Array.from({length:w},(_,i)=>highRoof(i)),interiorPartition:biome},
   dependencies:['pack5:088','pack4:064','pack4:063','unknown live shape and collision dimensions','future integration approval']});
 }
 function buildWatchtower(biome,size){
@@ -129,7 +142,12 @@ function buildWatchtower(biome,size){
  const nav=[navNode('entry',x,2,d-1,'entry'),navNode('base',x,2,3,'ground-circulation')];
  for(let i=0;i<steps;i++){
   const z=stairStartZ+i;
-  for(let a=runX;a<runX+2;a++)put('stair',a,1+i,z,'pack1:008');
+  for(let a=runX;a<runX+2;a++){
+   // Support every elevated tread with a structural pier down to the foundation.
+   // This is a static shape plan; final stair collider fit remains unresolved.
+   for(let y=1;y<1+i;y++)put('stair-support',a,y,z,p.wall);
+   put('stair',a,1+i,z,'pack1:008');
+  }
   nav.push(navNode('step-'+i,runX,2+i,z,'stairs'));
  }
  // Top observation deck with genuine stairwell cut-out and carved parapet blocks.
@@ -151,17 +169,28 @@ function buildWatchtower(biome,size){
  }else if(biome==='desert'){
   for(let z=2;z<d-1;z+=3)for(let y=2;y<=wallTop-2;y++)put('structure',w-2,y,z,p.accent);
   for(let a=w-5;a<w-1;a++)for(let z=2;z<d-2;z++)put('structure',a,deckY+4,z,p.trim);
+  for(const a of [w-5,w-2])for(const z of [2,d-3])for(let y=deckY+1;y<deckY+4;y++)
+   put('upper-support',a,y,z,p.accent);
  }else if(biome==='snow'){
   for(let a=2;a<w-2;a++)for(let z=2;z<d-2;z++){
    const rise=Math.min(4,Math.floor(Math.min(a,w-1-a)/3));
    put('structure',a,deckY+4+rise,z,p.roof);
   }
+  // Timber braces from the deck to the heavy overhead snow roof.
+  for(const a of [2,w-3])for(const z of [2,d-3]){
+   const rise=Math.min(4,Math.floor(Math.min(a,w-1-a)/3));
+   for(let y=deckY+1;y<deckY+4+rise;y++)put('upper-support',a,y,z,p.trim);
+  }
  }else if(biome==='enchanted-forest'){
   for(let z=2;z<d-2;z+=4)for(let y=2;y<=wallTop;y++)put('structure',w-2,y,z,p.accent);
-  for(let a=5;a<w-2;a+=3)put('structure',a,deckY+3,2,p.trim);
+  for(let a=8;a<w-2;a+=3){
+   put('structure',a,deckY+3,2,p.trim);
+   for(let y=deckY+1;y<deckY+3;y++)put('upper-support',a,y,2,p.accent);
+  }
  }else{
   for(let z=2;z<d-2;z+=3)for(let y=2;y<=wallTop;y++)put('structure',w-2,y,z,p.accent);
   for(let a=4;a<w-1;a++)put('structure',a,deckY+3,d-3,p.roof);
+  for(let a=8;a<w-1;a+=4)for(let y=deckY+1;y<deckY+3;y++)put('upper-support',a,y,d-3,p.accent);
  }
  const clearances=[clearance(x,2,2,2,3,d-2),clearance(runX,2,3,2,2,1),
   ...Array.from({length:steps},(_,i)=>clearance(runX,2+i,stairStartZ+i)),
@@ -175,7 +204,7 @@ function buildWatchtower(biome,size){
    feature('static observation signal mount',w-3,platformFoot,3,null,'Signal mount is not a catalogued functioning block family')];
  return b.finish({clearances,openings:[{id:'main-entrance',facing:'south',x,y:2,z:d-1,width:2,height:3}],spaces,
   navigation:{entry:'entry',nodes:nav,edges},features,
-  architecture:{style:p.buttress,roofStyle:p.roofStyle,stairSteps:steps,observationY:platformFoot,observationAccess:true,regionalButtresses:p.buttress},
+  architecture:{style:p.buttress,roofStyle:p.roofStyle,stairSteps:steps,observationY:platformFoot,observationAccess:true,stairPiers:true,upperDetailsSupported:true,regionalButtresses:p.buttress},
   dependencies:['pack1:008','pack3:070','physical stair profile and collision fit pending','future integration approval']});
 }
 export function createM1Blueprint(type,biome,size){
