@@ -110,6 +110,22 @@ test('floor and wall-mount offsets resolve to the correct rotated supporting cel
  for(const id of [166,168])
   assert.deepEqual([0,1,2,3].map(r=>lightingMountOffset(id,r)),
    [[0,0,1],[-1,0,0],[0,0,-1],[1,0,0]]);
+ // Regression: lantern feet previously floated above y=0 and wall plates
+ // ended at z=.96, leaving a gap before their mandatory support blocks.
+ // Each candidate must have REAL collision/selection geometry touching its
+ // support at all four rotations, not just a fixture permission flag.
+ for(let id=165;id<=168;id++)for(let r=0;r<4;r++){
+  const offset=lightingMountOffset(id,r);
+  const axis=offset.findIndex(v=>v!==0);
+  const face=offset[axis]>0?axis+3:axis;
+  const boundary=offset[axis]>0?1:0;
+  const s=lightingShape(id,r);
+  for(const purpose of ['collision','selection']){
+   assert.ok(s[purpose].some(b=>Math.abs(b[face]-boundary)<1e-9),
+    'missing physical support contact '+id+' rotation '+r+' '+purpose);
+   assert.ok(s[purpose].length<=32,'shared shape-box cap '+id+' '+purpose);
+  }
+ }
 });
 test('wall fixtures contain a backplate and physical forward support, not a whole structure',()=>{
  for(const id of [166,168]){
