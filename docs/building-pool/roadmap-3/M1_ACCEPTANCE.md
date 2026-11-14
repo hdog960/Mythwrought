@@ -9,6 +9,10 @@
 - Cross-lane: Issues [#109](https://github.com/hdog960/Mythwrought/issues/109) and [#117](https://github.com/hdog960/Mythwrought/issues/117), manual pack PRs #112–#115/#119, biome130 PR #118, automated #120 and building PRs #121/#123/#124 checked. No owned-path overlap.
 - [M0 exact-head GitHub Actions #43643210989](https://github.com/hdog960/Mythwrought/actions/runs/43643210989) **SUCCESS**; its configured root tests/browser smoke do *not* separately execute the nested Roadmap 3 suite.
 
+## Concurrent-main compatibility checkpoint (latest session)
+
+During this review, a separately authorized world activation PR [#126](https://github.com/hdog960/Mythwrought/pull/126) merged and advanced `main` to `f416a2b26c4c00b5944f3bd37e9360030a247cc9`. Its changed paths are `.github/workflows/ci.yml`, `src/live-voxel-world.mjs`, `src/voxel.mjs`, `tests/live-world-browser.mjs`, and `tests/live-world-incorporation.test.mjs`. **No Roadmap 3 paths overlap**, and PR #122 remains draft/mergeable. Its expanded CI browser smoke is baseline live-world verification and does **not** execute the nested Roadmap 3 tests or render unintegrated M1 candidates. No M1 building may be activated based on this separate merge.
+
 ## Authored design pool
 
 The generator in `src/building-pool/roadmap-3/m1.mjs` exports `createM1Blueprint(type,biome,size)` and `createM1Pool()`, producing 30 complete theoretical serialized structures with **76,376 total integral voxel-coordinate slots**. They contain authored foundation, floor, wall, roof, optional stair, battlement, fixture and buttress modules. Every occupied coordinate references a named already-existing built-in physical block or an exact symbolic planned family; no engine IDs are assigned. The engine does not yet activate or physically render these buildings.
