@@ -31,8 +31,8 @@
     "lighthouse": 4
   },
   "sourceOfTruth": {
-    "main": "caf47776b723a36684edc1a72749e49268ccc688",
-    "checkpoint": "007",
+    "main": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+    "checkpoint": "008",
     "issues": [
       109,
       117
@@ -59,6 +59,11 @@
       "pack3": "63f7328ae49e3ebe82213ad113a21c29084e5da1",
       "pack4": "969eba8609d44899ec2eced8789f98a645fefa4b",
       "pack5": "e24b4c0f168785d32ef98393664f1b0f23ae3705"
+    },
+    "checkpoint008": {
+      "status": "main automatic-world physical voxels now active; only pre-existing automation-owned tree/cave/court structures; 12 biome130 candidates unregistered",
+      "comparedAgainst": "caf47776b723a36684edc1a72749e49268ccc688",
+      "overlap": "No Roadmap 1, manual Block Pack, or other building-roadmap paths in checkpoint 008 diff"
     }
   },
   "assetRefPolicy": "live:name | pack1..5:three-digit-family-roster | biome130:three-digit-ordinal; never assign numeric persistent IDs",
@@ -99,7 +104,11 @@
       "authentic": true,
       "source": "locally generated screenshot set; not a GitHub CI artifact"
     },
-    "physicalIPhone": false
+    "physicalIPhone": false,
+    "ci": {
+      "exactNewRoadmap1Head": "queued at authored-code commit c83d62ae; conclusion pending",
+      "coverageNote": "Root CI runs npm test (tests/*.test.mjs), does not automatically execute nested Roadmap1 39-case tests; local native Node is separate evidence"
+    }
   },
   "pending": [
     "Exact new PR-head CI and true WebGL2 if available",

@@ -7,3 +7,8 @@
 - Latest live voxel source: 0 air; 1 grass; 2 dirt; 3 stone; 4 wood; 5 crystal; 6 ore; 7 leaves; 8 deepstone. **255 is reserved sentinel.** No numeric candidate IDs are assigned in this roadmap.
 - Exclusively authored 3D pool with isolated tests, no placement, settlement generator, NPCs, game systems, gameplay or updates to saves. The current manifest records **0/885** and may advance only when actual unique coordinate-based designs pass tests and preview review.
 - Before future sessions, refresh main/checkpoint/issues/manifests/PRs; original seed, schema-1 persistence, PWA/offline, twin controller grips, Gate A OPEN and v0.11 LOCKED remain untouched.
+
+## Concurrent main refresh — checkpoint 008 (late session)
+- Reverified main `ac263720b60641c65b02330348dd76d0ef9cb75e`, checkpoint **008** after the initial checkpoint-007 M1 review. Main added automation-owned live voxel-tree/cave/court integration and its own tests/workflow; no Block Pack or building-pool source paths changed in two-commit comparison from `caf47776`.
+- **Roadmap 1 is still unmerged draft PR #121** and still requires symbolic family resolution from all manual packs; biome130 source lives in main but stays unregistered. No Roadmap 1 building or other roadmap may be placed by automation incorporation.
+- Root Actions test glob excludes nested Roadmap 1 test modules; the focused 39/39 is a local native Node result, not CI-covered. Keep exact-head central CI and source-derived screenshot evidence separate.
