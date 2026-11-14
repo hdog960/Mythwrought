@@ -88,3 +88,16 @@ Reproduce genuine native ES-module Chromium WebGL2 for the six new workshop vari
 Original M3 86–87 commercial fixtures remain in separate `m3` gallery mode. Native source-exact tests: `node --test tests/block-packs/pack-5/*.test.mjs` (**102/102 PASS**). Source mesher upper bound 276 unculled triangles for each new model, not real device GPU timing. Both local data-URL ES modules and actual WebGL2 rendering are verified, NOT HTTP-served app module loading or playable-world integration.
 
 **Candidate roster: 12 authored, 6 unstarted (M4/M5), 0 integrated.** All IDs are symbolic. M1, M2 and M3 creator visual, physical-iPhone and integration approvals are still separately OPEN. See `M3_ACCEPTANCE.md` for the actual source/test Git blob evidence and remaining art deficiencies.
+
+## M3 silhouette refinement and isolated M4 civic furnishings
+
+Physical M3 source repair: `workshop-fixtures.mjs` now has longer visibly tapered anvil horns and an **actually hollow stepped-octagonal iron cauldron**, backed by native collision/raycast regressions. No production physics changed; view `M3_ACCEPTANCE.md` for exact Git hashes, six real Chromium captures, per-cell budgets and open creator acceptance.
+
+**M4 (CANDIDATE only)**: `civic-interiors.mjs` authors `pack5:091` cartographer desk + high stone lectern, `pack5:092` two-cell physical woven runner + shallow patterned single-cell rug, and `pack5:093` inlaid indoor altar + slender reliquary pedestal. No gameplay, writing, inventory, magic, NPCs, town assembly or world placement. Accurate physical shapes, front/rear openings, floor support, rotations, ray select/remove and candidate-only variant snapshots tested.
+
+To reproduce honest native Chromium ES-module/WebGL2 M4 screenshots with virtual X software GL:
+`LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/esm-webgl-browser.py m4 <output-dir>`
+
+For earlier groups use `m1`, `m2`, `m3`, or `m3b`. Latest native full `node --test tests/block-packs/pack-5/*.test.mjs` **120/120 PASS**. Direct localhost HTTP remains blocked; these genuine WebGL2 renders use offline native `data:` ES-module imports and cannot certify production pages, Safari or iPhone GPU. See `M4_ACCEPTANCE.md`.
+
+**15 symbolic candidate families / 3 not started / 0 integrated**. M5 94–96 is NOT STARTED. No persistent numeric IDs assigned, no Gate A/v0.11 approval; draft PR only.
