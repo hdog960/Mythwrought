@@ -64,19 +64,25 @@ export async function runPack2BrowserVerification(){
       const mesh=await page.evaluate(async()=>{
         const {infrastructurePreviewMesh}=await import('/src/block-packs/pack-2/infrastructure.mjs');
         const values=[73,74,75].map(id=>infrastructurePreviewMesh(id));
+        // Center crop excludes the label text; canvas is transparent where
+        // geometry was NOT drawn. Water's RGB is low-red, so never test "red>100".
         const pixels=document.querySelector('#preview').getContext('2d')
-          .getImageData(120,100,600,300).data;
-        let visible=0;for(let i=0;i<pixels.length;i+=4)
-          if(pixels[i]>100&&pixels[i+1]>70&&pixels[i+2]>35)visible++;
+          .getImageData(250,100,390,220).data;
+        let visible=0,translucent=0;
+        for(let i=0;i<pixels.length;i+=4){
+          if(pixels[i+3]>5)visible++;
+          if(pixels[i+3]>5&&pixels[i+3]<250)translucent++;
+        }
         const {waterPreviewMesh,waterShape}=await import('/src/block-packs/pack-2/water.mjs');
         const w=waterPreviewMesh({level:1,flow:'north'});
         const volume=waterShape({level:1,flow:'north'});
         return {triangles:values.map(x=>x.triangles),visible,
           fluidTriangles:w.triangles,alphaMin:Math.min(...w.alpha),
-          fluidSolid:volume.solidCollision,fluidTop:volume.broadPhaseBox[4]};
+          fluidSolid:volume.solidCollision,fluidTop:volume.broadPhaseBox[4],translucent};
       });
       assert.ok(mesh.triangles.every(x=>x>=60&&x<=900));
-      assert.ok(mesh.visible>200,'Candidate canvas must draw visible asset geometry');
+      assert.ok(mesh.visible>500,'Fluid preview must draw actual center-area geometry');
+      assert.ok(mesh.translucent>200,'Fluid preview must retain transparency in rendered pixels');
       assert.equal(mesh.fluidTriangles,18);
       assert.ok(mesh.alphaMin>0&&mesh.alphaMin<1);
       assert.equal(mesh.fluidSolid,false);
