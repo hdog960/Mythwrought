@@ -57,3 +57,34 @@ export function pack4ReviewSidecar(entries){
   out.sort((a,b)=>a.cell[0]-b.cell[0]||a.cell[1]-b.cell[1]||a.cell[2]-b.cell[2]);
   return Object.freeze(out);
 }
+
+// Pack 4 fixture snapshots are test-only; never change production saves.
+export function pack4FixtureToSidecarSnapshot(snapshot){
+ if(!snapshot||typeof snapshot!=='object'||Array.isArray(snapshot)||
+   snapshot.fixture!=='mythwrought.pack4.fixture'||snapshot.schemaVersion!==1||
+   !Array.isArray(snapshot.cells))
+  throw TypeError('Invalid Pack 4 fixture snapshot');
+ return pack4ReviewSidecar(snapshot.cells);
+}
+// Reverse is a fixture test input only; support cells must still exist on replay.
+export function pack4SidecarToFixtureSnapshot(entries){
+ if(!Array.isArray(entries)||entries.length>4096)
+  throw TypeError('Invalid orientation sidecar snapshot');
+ const used=new Set(),cells=[];
+ for(const entry of entries){
+  if(!entry||typeof entry!=='object'||Array.isArray(entry)||
+     !Object.hasOwn(entry,'cell')||!Object.hasOwn(entry,'blockId')||
+     !Object.hasOwn(entry,'turns'))
+   throw TypeError('Malformed sidecar entry');
+  const state=pack4SidecarHandoff(entry.cell,entry.blockId,entry.turns);
+  const key=state.cell.join(',');
+  if(used.has(key))throw TypeError('Duplicate Pack 4 orientation cell');
+  used.add(key);
+  cells.push({cell:[...state.cell],id:state.blockId,rotation:state.turns});
+ }
+ cells.sort((a,b)=>a.cell.join(',').localeCompare(b.cell.join(',')));
+ return Object.freeze({fixture:'mythwrought.pack4.fixture',schemaVersion:1,
+  cells:Object.freeze(cells.map(c=>Object.freeze({
+   cell:Object.freeze(c.cell),id:c.id,rotation:c.rotation
+  })))});
+}
