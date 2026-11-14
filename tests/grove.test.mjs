@@ -1,3 +1,4 @@
+import {moonbellVertices} from '../src/moonbells.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,CHUNK_SIZE,terrainHeight,baseBlock,meshChunk} from '../src/voxel.mjs';
@@ -84,7 +85,8 @@ test('true renderer integrates surface foliage into the existing single chunk me
     minY:-3,maxY:19,air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
   const mesh=meshChunk(w,cx,cz);
-  const solids=mesh.length-foliage.length-meadow.length-runes.length-grotto.length;
+  const moonbells=moonbellVertices(w,cx,cz,{heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
+  const solids=mesh.length-foliage.length-meadow.length-runes.length-grotto.length-moonbells.length;
   assert.ok(solids>0,'No real voxel triangles');
   assert.deepEqual(mesh.slice(solids,solids+foliage.length),foliage,
     'Grove not integrated into actual renderer buffer');
