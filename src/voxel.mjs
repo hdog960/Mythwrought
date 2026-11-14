@@ -190,9 +190,10 @@ export function meshChunk(world,cx,cz){
   combined.set(runes,solid.length+canopy.length+grove.length+meadow.length);
   // Existing meadow and grotto tail positions retain their regression invariants.
   combined.set(grotto,solid.length+canopy.length+grove.length+meadow.length+runes.length);
-  combined.set(waystones,combined.length-waystones.length-watchtowers.length-shrines.length-caveThresholds.length);
-  combined.set(watchtowers,combined.length-watchtowers.length-shrines.length-caveThresholds.length);
-  combined.set(shrines,combined.length-shrines.length-caveThresholds.length);
+  combined.set(waystones,combined.length-waystones.length-watchtowers.length-shrines.length-arches.length-caveThresholds.length);
+  combined.set(watchtowers,combined.length-watchtowers.length-shrines.length-arches.length-caveThresholds.length);
+  combined.set(shrines,combined.length-shrines.length-arches.length-caveThresholds.length);
+  combined.set(arches,combined.length-arches.length-caveThresholds.length);
   combined.set(caveThresholds,combined.length-caveThresholds.length);
   return combined;
 }
