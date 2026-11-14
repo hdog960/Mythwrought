@@ -1,0 +1,195 @@
+import {BIOMES,SIZES} from './catalog.mjs';
+import {SCHEMA,validateBlueprint,assertDistinctArchitecture} from './schema.mjs';
+import {TEMPERATE_SMALL_GENERAL_STORE} from './temperate-store.mjs';
+
+// 29 additional complete coordinate-authored architectural concepts, plus the M0 store.
+// All materials refer to symbolic ROSTER positions, not numeric block IDs.
+const REFS=Object.freeze({
+  temperate:{foundation:'pack1:001',floor:'pack2:013',wall:'pack2:013',roof:'pack3:023',trim:'pack2:015'},
+  desert:{foundation:'biome130:006',floor:'pack5:081',wall:'pack5:079',roof:'pack5:080',trim:'biome130:091'},
+  snow:{foundation:'pack1:004',floor:'pack2:013',wall:'biome130:094',roof:'pack3:025',trim:'pack2:015'},
+  'enchanted-forest':{foundation:'biome130:038',floor:'pack2:013',wall:'biome130:096',roof:'pack3:026',trim:'biome130:044'},
+  mountain:{foundation:'biome130:047',floor:'pack1:005',wall:'pack1:002',roof:'pack3:025',trim:'biome130:098'}
+});
+const FIXTURE={store:'pack5:087',counter:'pack5:086',altar:'pack3:075',seat:'pack4:058',light:'pack4:037',glass:'pack4:030',frame:'pack4:032',crate:'pack4:057',banner:'pack4:061',column:'pack3:072',garden:'pack1:047'};
+const DIM={small:[12,12,6],medium:[16,16,7],large:[21,21,9]};
+const COORD=(x,y,z)=>`${x},${y},${z}`;
+function build({biome,size,category}){
+  const isTemple=category==='temple';
+  const [baseW,baseD,baseWall]=DIM[size];
+  const index=BIOMES.indexOf(biome);
+  const width=baseW+(index===3?2:0)+(isTemple?2:0);
+  const depth=baseD+(index===1?2:0)+(isTemple?3:0);
+  const top=baseWall+(isTemple?1:0);
+  const center=Math.floor(width/2);
+  const partition=depth-(size==='large'?7:5);
+  const m=REFS[biome];
+  const cells=new Map();
+  const put=(x,y,z,material,kind,overwrite=true)=>{
+    if([x,y,z].some(a=>!Number.isInteger(a)||a<0))throw Error('negative coordinate');
+    const key=COORD(x,y,z);
+    if(!overwrite&&cells.has(key))throw Error('duplicate '+key);
+    cells.set(key,{x,y,z,material,kind});
+  };
+  const remove=(x,y,z)=>cells.delete(COORD(x,y,z));
+  // These area outlines are biome-specific, not recolors of the same rectangle.
+  const footprint=(x,z)=>{
+    if(x<0||x>=width||z<0||z>=depth)return false;
+    if(biome==='temperate')return !(x===0&&z===depth-1)||(isTemple&&z===depth-1);
+    if(biome==='desert')return !(z===0&&(x<2||x>=width-2)) && !(x===0&&z>=depth-3);
+    if(biome==='snow')return !(x===width-1&&z<2)&&!(x===0&&z===0);
+    if(biome==='enchanted-forest')return !((x<=1&&z<=1)||(x>=width-2&&z>=depth-2)|| (x===0&&z>=depth-3));
+    // mountainside has a terraced diagonal southwest face and rear spur.
+    return !(x<3&&z<4-x)&&!(x===width-1&&z>=depth-3);
+  };
+  // Primary foundation and interior walking level.
+  for(let x=0;x<width;x++)for(let z=0;z<depth;z++)if(footprint(x,z)){
+    put(x,0,z,m.foundation,'foundation');put(x,1,z,m.floor,'floor');
+  }
+  const bounds=(x,z)=>footprint(x,z)&&(!footprint(x-1,z)||!footprint(x+1,z)||!footprint(x,z-1)||!footprint(x,z+1));
+  for(let x=0;x<width;x++)for(let z=0;z<depth;z++)if(bounds(x,z))for(let y=2;y<=top;y++)put(x,y,z,m.wall,'wall');
+  // Explicit, walkable three-high street entrance.
+  const entranceX=center;
+  for(let y=2;y<=4;y++)remove(entranceX,y,0);
+  // Exterior glazing stays real occupied window cells, not text metadata.
+  for(const x of [3,width-4])for(let y=3;y<=4;y++)if(footprint(x,0))put(x,y,0,y===3?FIXTURE.glass:FIXTURE.frame,'window');
+  for(const z of [4,Math.min(depth-3,7)])for(let y=3;y<=4;y++)for(const x of [0,width-1])if(footprint(x,z)&&bounds(x,z))put(x,y,z,FIXTURE.glass,'window');
+  // Room separation: shops have a real rear stockroom; temples have an elevated sanctuary.
+  const openingX=isTemple?center:Math.min(width-3,center+2);
+  for(let x=1;x<width-1;x++)if(footprint(x,partition))for(let y=2;y<=top-1;y++){
+    if(x===openingX || (isTemple&&Math.abs(x-openingX)<=1))continue;
+    put(x,y,partition,m.trim,'wall');
+  }
+  // Category-specific fixtures, arranged around a central traversable aisle.
+  if(!isTemple){
+    for(const z of [3,5,Math.min(partition-2,8)])for(const x of [2,width-3]){
+      if(x===center)continue;
+      for(let y=2;y<=3;y++)if(footprint(x,z)&&!bounds(x,z))put(x,y,z,FIXTURE.store,'fixture');
+    }
+    for(let x=center+2;x<=Math.min(center+4,width-3);x++)if(footprint(x,3))put(x,2,3,FIXTURE.counter,'fixture');
+    for(const [x,z] of [[3,depth-3],[width-4,depth-3],[3,depth-2],[width-4,depth-2]])
+      if(footprint(x,z)&&!bounds(x,z))put(x,2,z,FIXTURE.crate,'decor');
+  }else{
+    // Distinct nave, colonnade/pews, symbolic altar and physically projecting dais.
+    for(const z of [4,6,Math.min(partition-2,10)])for(const x of [center-3,center+3]){
+      if(x>=2&&x<width-2&&z<partition&&footprint(x,z))put(x,2,z,FIXTURE.seat,'fixture');
+    }
+    for(const x of [2,width-3])for(const z of [4,Math.min(partition-2,9)])if(footprint(x,z)&&!bounds(x,z)){
+      for(let y=2;y<top;y++)put(x,y,z,FIXTURE.column,'fixture');
+    }
+    for(let x=center-2;x<=center+2;x++)if(footprint(x,depth-3)){
+      put(x,2,depth-3,m.trim,'fixture');
+    }
+    if(footprint(center,depth-2))put(center,2,depth-2,FIXTURE.altar,'fixture');
+  }
+  for(const [x,z] of [[2,3],[width-3,3],[2,depth-3],[width-3,depth-3]])
+    if(footprint(x,z)&&!bounds(x,z)&&!cells.has(COORD(x,top-1,z)))put(x,top-1,z,FIXTURE.light,'decor');
+  // Facade and regional structural identities; not purely aesthetic variants.
+  if(biome==='temperate'){
+    // Cross-porch timber structure and cantilevered corner bays.
+    for(const x of [1,width-2])for(let y=2;y<=4;y++)put(x,y,1,m.trim,'wall');
+    for(let x=1;x<width-1;x++)put(x,5,1,m.trim,'roof');
+    for(let z=depth-4;z<depth-1;z++)if(footprint(width-1,z))put(width-1,top+1,z,m.roof,'roof');
+  }else if(biome==='desert'){
+    // Real open-roof courtyard pocket inside a split flat roof, shade lintels, crenellated rim.
+    for(let x=2;x<width-2;x++)for(const z of [1,2])put(x,top+2,z,m.trim,'roof');
+    for(let z=0;z<depth;z+=3)for(const x of [1,width-2])if(footprint(x,z))put(x,top+2,z,m.trim,'roof');
+  }else if(biome==='snow'){
+    // Insulated snow-shed vestibule and north-oriented steep ridge.
+    for(let x=center-2;x<=center+2;x++)for(let z=1;z<=2;z++)if(footprint(x,z))put(x,top+1,z,m.roof,'roof');
+    for(const x of [center-2,center+2])for(let y=2;y<=4;y++)if(footprint(x,2))put(x,y,2,m.trim,'wall');
+  }else if(biome==='enchanted-forest'){
+    // Root-woven buttresses and two unequal livingwood spire-shafts.
+    for(const [x,z] of [[1,depth-4],[width-3,2]])for(let y=2;y<=top+3;y++)if(footprint(x,z))put(x,y,z,m.trim,y<=top?'wall':'roof');
+    for(let x=2;x<width-2;x+=3)if(footprint(x,depth-1))put(x,top+2,depth-1,m.trim,'roof');
+  }else{
+    // High cliff-side terraces anchored at distinct elevations, with stone landing spurs.
+    for(let z=3;z<depth;z+=4)for(let y=2;y<=3+(z%3);y++)if(footprint(1,z))put(1,y,z,m.trim,'wall');
+    for(let x=width-4;x<width-1;x++)for(let z=depth-5;z<depth-2;z++)if(footprint(x,z))put(x,top+2,z,m.trim,'roof');
+  }
+  // Roof is composed of coordinate blocks, with true shape/mass differences.
+  const roofAt=(x,z)=>{
+    if(biome==='desert')return top+1; // shade courtyard exposed below
+    if(biome==='snow')return top+1+Math.max(0,Math.floor((Math.min(x,width-1-x))*0.85));
+    if(biome==='mountain')return top+1+Math.floor(z/(size==='small'?5:6));
+    if(biome==='enchanted-forest')return top+1+Math.min(4,Math.floor(Math.min(x,width-1-x)/2))+(z>depth/2?1:0);
+    return top+1+Math.floor(Math.min(x,width-1-x)/2);
+  };
+  for(let x=0;x<width;x++)for(let z=0;z<depth;z++)if(footprint(x,z)){
+    if(biome==='desert' && x>=center-2&&x<=center+2&&z>=3&&z<=Math.min(depth-6,8))continue; // courtyard skylight
+    put(x,roofAt(x,z),z,m.roof,'roof');
+  }
+  // Decorated gable ends have physical material filling the gap to roof.
+  if(biome==='snow'||biome==='temperate'||biome==='enchanted-forest')for(const z of [0,depth-1])for(let x=1;x<width-1;x++)if(footprint(x,z)){
+    for(let y=top+1;y<roofAt(x,z);y++)put(x,y,z,m.wall,'wall');
+  }
+  // Category-defining exterior silhouette, not merely a changed title/material:
+  // temples are monumental: paired physically modeled towers, shrine gables,
+  // a stepped central belfry, and enlarged large-class lantern pinnacles.
+  if(isTemple){
+    for(const x of [2,width-3])for(const z of [1,2])if(footprint(x,z)){
+      for(let y=2;y<=top+3;y++)put(x,y,z,m.trim,y<=top?'wall':'roof');
+      put(x,top+4,z,m.roof,'roof');
+    }
+    const naveZ=Math.max(4,Math.floor(partition/2));
+    const ridge=roofAt(center,naveZ);
+    for(let y=ridge+1;y<=ridge+3;y++)put(center,y,naveZ,m.trim,'roof');
+    put(center,ridge+4,naveZ,m.roof,'decor');
+    if(size==='large')for(const z of [5,partition-2])for(const x of [3,width-4]){
+      if(footprint(x,z)){
+        for(let y=top+1;y<=top+3;y++)put(x,y,z,m.trim,'roof');
+        put(x,top+4,z,m.roof,'decor');
+      }
+    }
+  }else{
+    // Stores have a lower storefront lintel and hanging sign, but no sanctuary towers.
+    for(let x=center-2;x<=center+2;x++)put(x,top+1,0,m.trim,'roof');
+    if(size!=='small')put(center,top+2,0,'pack4:060','decor');
+    if(size==='large')for(let z=depth-4;z<depth-1;z++)if(footprint(2,z)){
+      put(2,top+1,z,m.trim,'roof');put(2,top+2,z,m.roof,'roof');
+    }
+  }
+  const voxels=[...cells.values()].sort((a,b)=>a.y-b.y||a.z-b.z||a.x-b.x);
+  const extents={x:width,y:Math.max(...voxels.map(v=>v.y))+1,z:depth};
+  const entry={type:'entrance',x:center,y:2,z:0,clearHeightCells:3,doorSymbol:'pack2:020',doorOpenState:'unverified'};
+  const rooms=isTemple?[
+   {name:'Ceremonial nave',bounds:{x0:1,x1:width-2,z0:1,z1:partition-1},uses:['ceremonial-space','public-circulation']},
+   {name:'Raised altar sanctuary',bounds:{x0:1,x1:width-2,z0:partition+1,z1:depth-2},uses:['altar']}
+  ]:[
+   {name:'Customer hall',bounds:{x0:1,x1:width-2,z0:1,z1:partition-1},uses:['sales-floor','service-counter','display-shelves']},
+   {name:'Rear stockroom',bounds:{x0:1,x1:width-2,z0:partition+1,z1:depth-2},uses:['storage']}
+  ];
+  const circulation=isTemple?[
+   {from:'exterior',to:'ceremonial-space',via:`front x${center} triple-head clearance`},
+   {from:'ceremonial-space',to:'altar',via:`three-aisle sanctuary partition at z${partition}`}
+  ]:[
+   {from:'exterior',to:'sales-floor',via:`front x${center} triple-head clearance`},
+   {from:'sales-floor',to:'storage',via:`offset doorway x${openingX} at z${partition}`}
+  ];
+  const refs=[...new Set(voxels.map(v=>v.material).concat([entry.doorSymbol]))];
+  const roofNames={temperate:'cross-beam timber gable',desert:'open courtyard shaded flat terraces',snow:'steep double-insulated ridge', 'enchanted-forest':'grown stepped livingwood spires', mountain:'cliff-terrace stone roof progression'};
+  const blueprint={schema:SCHEMA,
+   id:`r2:${category}:${biome}:${size}:01`,category,biome,size,variation:1,
+   title:`${({temperate:'Hearth',desert:'Sunveil',snow:'Frostward','enchanted-forest':'Whisperbloom',mountain:'Highcrag'})[biome]} ${isTemple?'Sanctuary':'Exchange'} — ${size}`,
+   status:'authored-candidate',isolated:true,worldPlaced:false,numericIdsAssigned:false,
+   extents,units:'conceptual occupied voxels; shape/rotation ABI unresolved',
+   architecturalSignature:`${roofNames[biome]}, ${category}, ${size}, x${width} z${depth}, partition ${partition}, distinct footprint`,
+   roof:{form:roofNames[biome],biomeSpecific:true},
+   rooms,features:isTemple?['physically separated sanctuary','altar','structural columns','ceremonial rows']:['counter','display shelves','stockroom crates','real storeroom wall'],
+   openings:[entry,{type:'window',x:3,y:3,z:0},{type:'window',x:width-4,y:3,z:0},
+    {type:'internal-doorway',x:openingX,y:2,z:partition,clearHeightCells:3}],
+   circulation,
+   unresolvedDependencies:refs.map(ref=>({ref,issue:'The physical shape, orientation, collision, support, appearance and save integration of this symbolic roster asset require central ABI verification'})),
+   voxels
+  };
+  validateBlueprint(blueprint);
+  return Object.freeze(blueprint);
+}
+export const M1_REPRESENTATIVES=Object.freeze([
+  TEMPERATE_SMALL_GENERAL_STORE,
+  ...['general-store','temple'].flatMap(category=>BIOMES.flatMap(biome=>SIZES.flatMap(size=>
+    category==='general-store'&&biome==='temperate'&&size==='small'?[]:[build({category,biome,size})]
+  )))
+]);
+export const M1_COUNTS=Object.freeze({total:M1_REPRESENTATIVES.length,stores:M1_REPRESENTATIVES.filter(b=>b.category==='general-store').length,temples:M1_REPRESENTATIVES.filter(b=>b.category==='temple').length});
+export function checkM1Architectures(){return assertDistinctArchitecture(M1_REPRESENTATIVES);}
