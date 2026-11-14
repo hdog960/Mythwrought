@@ -88,7 +88,9 @@ export function pack2PreviewMesh(id,rotation=0){
       pos.push(p[0]+n[0]*offset,p[1]+n[1]*offset,p[2]+n[2]*offset);
       rgb.push(...color);normal.push(...n);
     }
-    indices.push(start,start+1,start+2,start,start+2,start+3);
+    // The face corner order is inward; reverse both triangle windings so
+    // renderer backface culling agrees with the outward face normals.
+    indices.push(start,start+2,start+1,start,start+3,start+2);
   }
   function addFace(c,n){
     const shade=n[1]>0?1.07:n[1]<0?.69:n[0]!==0?.86:.94;
