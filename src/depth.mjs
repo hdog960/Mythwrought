@@ -32,6 +32,16 @@ export function sectionWindow(feet){
   if(section===0)return feet<3?[0,-1]:[0];
   return [section,section+1,section-1].filter(s=>s<=0&&s>=LOWEST_SECTION);
 }
+// Surface receives the original 5x5 view only while it is the active
+// player section. Underground, every section (including the overhead
+// legacy surface) uses a 3x3 view: at most 27 resident GPU buffers.
+export function sectionChunkRadius(section,activeSection){
+  if(![section,activeSection].every(Number.isInteger)||
+     section>0||section<LOWEST_SECTION||
+     activeSection>0||activeSection<LOWEST_SECTION)
+    throw Error('Invalid vertical streaming section');
+  return section===0&&activeSection===0?2:1;
+}
 export function verticalEditSections(y){
   if(!Number.isInteger(y))return [];
   const section=sectionForY(y);
