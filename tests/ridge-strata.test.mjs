@@ -109,3 +109,26 @@ test('valley contour seams follow real exposed dirt and disappear after edits',(
  const flat=ridgeStrataVertices(world,-1,0,{heightAt:()=>8});
  assert.equal(flat.length,0,'flat ground has no valley contour');
 });
+
+test('steep grass valleys receive continuous sediment terraces without changing edits',()=>{
+ const heights=(x,z)=>x<0?12:7;
+ const edits=new Map();
+ const world={seed:179,get(x,y,z){
+  const key=[x,y,z].join(',');
+  if(edits.has(key))return edits.get(key);
+  const h=heights(x,z);
+  return y>h?0:y===h?1:y>=h-3?2:3;
+ }};
+ const original=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(original.length>0,'steep valley should have terrain bands');
+ assert.deepEqual(original,ridgeStrataVertices(world,-1,0,{heightAt:heights}));
+ const highYs=[];
+ for(let i=0;i<original.length;i+=9)highYs.push(original[i+1]);
+ assert.ok(highYs.some(y=>y>10&&y<11),'terrace must follow exposed dirt at y=top-2');
+ for(let z=0;z<16;z++)edits.set('0,10,'+z,3);
+ const blocked=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(blocked.length<original.length,'covering terrace exterior hides bands');
+ assert.equal(edits.size,16,'decorations never rewrite saved edits');
+ const flat=ridgeStrataVertices(world,-1,0,{heightAt:()=>12});
+ assert.equal(flat.length,0,'no fake terraces on flat terrain');
+});
