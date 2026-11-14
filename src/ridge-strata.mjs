@@ -6,8 +6,8 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
   if(typeof heightAt!=='function')throw Error('heightAt required');
   const out=[],seed=world.seed|0;
   const faces=[[1,0],[-1,0],[0,1],[0,-1]];
-  const emit=(a,b,c,color)=>{
-    for(const p of [a,b,c])out.push(...p,...color,0,0,stone);
+  const emit=(a,b,c,color,material=stone)=>{
+    for(const p of [a,b,c])out.push(...p,...color,0,0,material);
   };
   // Bounded, sparse, world-coordinate sampling prevents cloned chunk stamps.
   for(let x=cx*chunkSize;x<(cx+1)*chunkSize;x++)
@@ -267,7 +267,7 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
       const c=[x+1-margin,y,z+1-margin],d=[x+margin,y,z+1-margin];
       const green=[.31+variation*.05,.48+variation*.07,.29+variation*.04];
       const gold=[.52+variation*.06,.57+variation*.05,.32+variation*.04];
-      emit(a,b,c,green);emit(a,c,d,gold);
+      emit(a,b,c,green,grass);emit(a,c,d,gold,grass);
     }
   return new Float32Array(out);
 }
