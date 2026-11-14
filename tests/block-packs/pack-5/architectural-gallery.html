@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Mythwrought Pack 5 M1 — Physical Candidate Gallery</title>
+<style>
+body{background:#17212a;color:#f5e9d3;margin:0;padding:14px;font:14px system-ui,sans-serif}
+h1{font-size:19px;margin:0 0 6px}p{margin:5px 0 10px;color:#c4c8ca}
+#stage{width:100%;max-width:930px;aspect-ratio:3/2;position:relative;border:1px solid #627073;border-radius:9px;overflow:hidden}
+canvas{width:100%;height:100%;display:block}
+#labels{pointer-events:none;position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr)}
+#labels span{font-size:clamp(9px,1.3vw,13px);padding:7px;background:linear-gradient(#14212ac7,#14212a00 45%);font-weight:600;white-space:normal}
+#result{margin:8px 0;font-size:13px}
+</style>
+<h1>Pack 5 — Architectural Surfaces</h1>
+<p>Six physical, selectable voxel-compatible variants; isolated draft candidates, NOT in playable Mythwrought.</p>
+<div id="stage"><canvas id="gl" width="900" height="600"></canvas><div id="labels"></div></div>
+<div id="result" data-status="pending">WebGL2 preview starting</div>
+<script type="module" src="./architectural-gallery.mjs"></script>
+</html>
