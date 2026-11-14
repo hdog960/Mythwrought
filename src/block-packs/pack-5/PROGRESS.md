@@ -36,3 +36,14 @@
 2. Central integration must design/approve extended numeric registry and shape-aware raycast/collision, support/rotation/variant state and backwards-safe schema-1 persistence. Do **not** implement these in Pack 5.
 3. No switching to Milestone 2 as accepted until outstanding M1 acceptance is transparently addressed; if browser remains blocked, continue source-only candidate work with blockers clearly reported.
 4. v0.10 Gate A remains OPEN; v0.11 LOCKED; never merge/deploy/place world assets without separate authorization.
+
+## Milestone 1 acceptance rerun — 2026-11-14, creator approval OPEN
+
+- Reverified main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, latest checkpoint **006**, issues #109/#117, latest draft PR branch heads and manifests for Packs 1–4 and biome130.
+- Original Pack 5 draft PR #119 continues to own changes only in `src/block-packs/pack-5/` and `tests/block-packs/pack-5/`; **no live registry/world/UI/CI/saves/automations altered**.
+- Native Node **43/43 PASS** in exactly matched source/test modules. Added nine tests for 24 outward-winding rotated meshes, precise bounding ranges, 240-triangle ceiling, variant shape/material differentiation, all four backing wall directions, floor collision clearance and snapshot atomicity.
+- Source-only defect fixed: preview mesh now supports `rotation: 0..3` using exactly the same rotated part-box coordinate system as fixture targeting/collision. No new IDs or runtime hooks.
+- Render fallback defect fixed: source-derived Canvas2D review gallery now auto-fits all six candidates and correctly orders raised tile overlay layers. Generated genuine Chromium 144 Canvas2D screenshots at **667×375, 844×390, 932×430** with rotations 0 and 1; inspected six PNGs. Source-repro script is `tests/block-packs/pack-5/capture-canvas.py`.
+- Browser limitations: localhost source gallery navigation returned `ERR_BLOCKED_BY_ADMINISTRATOR`; WebGL2 context unavailable with tested GPU software rendering configurations. **These Canvas2D screenshots are NOT WebGL2 acceptance**. No physical iPhone, live schema-1, in-world collision or creator visual approval.
+- All six visual variants remain **CANDIDATE** across 3 symbolic families; other 15 families **NOT STARTED**; 0 integrated. See `M1_ACCEPTANCE.md`.
+- Next: obtain genuine served WebGL2 gallery and visual approval before completing M1. Begin M2 only after adequate M1 acceptance, respecting the v0.10 Gate A and v0.11 lock.
