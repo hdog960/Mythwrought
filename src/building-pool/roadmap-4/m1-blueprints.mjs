@@ -232,9 +232,28 @@ function emitBlueprint(type,biome,size){
     const tiles=footprint.filter(([x,z])=>interior(x,z)&&filter(x,z)&&
       occupied.has(pos(x,y-1,z))&&!occupied.has(pos(x,y,z))&&!occupied.has(pos(x,y+1,z)));
     const foot=tiles.filter(([x,z])=>navigation.has(pos(x,y,z)));
-    if(foot.length<2)throw Error('room too small '+[id,type,biome,size]);
-    const center=foot[Math.floor(foot.length/2)];
-    spaces.push({id,kind,level:y,access:[center[0],y,center[1]],footprint:foot});
+    // Room labels must describe ONE coherent floor area: an inner court or
+    // irregular biome facade can split a simple rectangular room mask into
+    // islands. Choose the largest cardinally connected authored region.
+    const candidates=new Map(foot.map(tile=>[tile.join(','),tile]));
+    const groups=[];
+    while(candidates.size){
+      const first=candidates.values().next().value,queue=[first],component=[];
+      candidates.delete(first.join(','));
+      while(queue.length){
+        const tile=queue.pop();component.push(tile);
+        for(const [dx,dz] of [[-1,0],[0,-1],[0,1],[1,0]]){
+          const key=[tile[0]+dx,tile[1]+dz].join(','),next=candidates.get(key);
+          if(next){candidates.delete(key);queue.push(next);}
+        }
+      }
+      groups.push(component);
+    }
+    groups.sort((a,b)=>b.length-a.length||a[0][0]-b[0][0]||a[0][1]-b[0][1]);
+    const contiguous=groups[0]||[];
+    if(contiguous.length<2)throw Error('room too small '+[id,type,biome,size]);
+    const center=contiguous[Math.floor(contiguous.length/2)];
+    spaces.push({id,kind,level:y,access:[center[0],y,center[1]],footprint:contiguous});
   }
   if(type==='civic-hall'){
     room('council-hall','meeting',0,(x,z)=>x<left&&z>entranceZ+1&&z<d-5);
