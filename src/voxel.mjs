@@ -6,6 +6,12 @@ import {grottoAccentVertices} from './grotto.mjs';
 import {caveRuneVertices} from './cave-runes.mjs';
 import {waystoneVertices} from './waystones.mjs';
 import {caveThresholdVertices} from './cave-thresholds.mjs';
+import {moonbellVertices} from './moonbells.mjs';
+import {ridgeStrataVertices} from './ridge-strata.mjs';
+import {ruinWatchtowerVertices} from './ruin-watchtower.mjs';
+import {roadsideShrineVertices} from './roadside-shrine.mjs';
+import {pilgrimArchVertices} from './pilgrim-arch.mjs';
+import {ruinedCausewayVertices} from './ruined-causeway.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
@@ -122,7 +128,20 @@ export function meshChunk(world,cx,cz){
     return id;
   };
   const readWorld={seed:world.seed,get:blockAt};
-  const vertices=[];
+  // Typed solid-mesh staging: conserve allocations while preserving exactly
+  // the original 9-float vertex layout and existing seed/save semantics.
+  let solidBuffer=new Float32Array(16384),solidLength=0;
+  const appendVertex=(x,y,z,r,g,b,u,w,id)=>{
+    if(solidLength+9>solidBuffer.length){
+      const grown=new Float32Array(solidBuffer.length*2);
+      grown.set(solidBuffer);solidBuffer=grown;
+    }
+    solidBuffer[solidLength++]=x;solidBuffer[solidLength++]=y;
+    solidBuffer[solidLength++]=z;solidBuffer[solidLength++]=r;
+    solidBuffer[solidLength++]=g;solidBuffer[solidLength++]=b;
+    solidBuffer[solidLength++]=u;solidBuffer[solidLength++]=w;
+    solidBuffer[solidLength++]=id;
+  };
   for(let x=cx*CHUNK_SIZE;x<(cx+1)*CHUNK_SIZE;x++)
     for(let z=cz*CHUNK_SIZE;z<(cz+1)*CHUNK_SIZE;z++)
       for(let y=WORLD_MIN_Y;y<=WORLD_MAX_Y;y++){
@@ -143,7 +162,7 @@ export function meshChunk(world,cx,cz){
           const b=clamp(color[2]*variance*face.lit,0,1);
           for(const k of [0,1,2,0,2,3]){
             const p=face.q[k],uv=FACE_UV[k];
-            vertices.push(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id);
+            appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id);
           }
         }
       }
@@ -175,17 +194,24 @@ export function meshChunk(world,cx,cz){
   });
   const waystones=waystoneVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const caveThresholds=caveThresholdVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,air:BLOCK.AIR,stoneId:BLOCK.STONE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y});
-  const solid=new Float32Array(vertices);
-  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length&&!caveThresholds.length)return solid;
-  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length+caveThresholds.length);
-  combined.set(solid);combined.set(canopy,solid.length);
-  combined.set(grove,solid.length+canopy.length);
-  combined.set(meadow,solid.length+canopy.length+grove.length);
-  combined.set(runes,solid.length+canopy.length+grove.length+meadow.length);
-  // Existing meadow and grotto tail positions retain their regression invariants.
-  combined.set(grotto,solid.length+canopy.length+grove.length+meadow.length+runes.length);
-  combined.set(waystones,combined.length-waystones.length-caveThresholds.length);
-  combined.set(caveThresholds,combined.length-caveThresholds.length);
+  // All new world scenery remains render-only in the original chunk buffer.
+  const moonbells=moonbellVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
+  const ridgeStrata=ridgeStrataVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,stone:BLOCK.STONE,air:BLOCK.AIR});
+  const watchtowers=ruinWatchtowerVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
+  const shrines=roadsideShrineVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
+  const arches=pilgrimArchVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
+  const causeways=ruinedCausewayVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
+  // Ruined bridge prototype remains staged but disabled: terrain must first
+  // establish a REAL natural crossing; never paint an invented river.
+  const solid=solidBuffer.slice(0,solidLength);
+  const ornaments=[canopy,grove,meadow,runes,grotto,moonbells,ridgeStrata,watchtowers,shrines,arches,causeways,waystones,caveThresholds];
+  let total=solid.length;
+  for(const part of ornaments)total+=part.length;
+  if(total===solid.length)return solid;
+  const combined=new Float32Array(total);
+  combined.set(solid);
+  let offset=solid.length;
+  for(const part of ornaments){combined.set(part,offset);offset+=part.length;}
   return combined;
 }
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.

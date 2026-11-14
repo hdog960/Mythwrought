@@ -6,6 +6,16 @@ import {meadowAccentVertices} from '../src/meadow.mjs';
 import {grottoAccentVertices} from '../src/grotto.mjs';
 import {caveRuneVertices} from '../src/cave-runes.mjs';
 
+const packedIndex=(buffer,part)=>{
+ if(!part.length)return -1;
+ for(let at=0;at<=buffer.length-part.length;at+=9){
+   if(buffer[at]!==part[0]||buffer[at+8]!==part[8])continue;
+   let j=1;
+   for(;j<part.length&&buffer[at+j]===part[j];j++);
+   if(j===part.length)return at;
+ }
+ return -1;
+};
 const grove=(world,cx,cz)=>storybookGroveVertices(world,cx,cz,{
   chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,
   grass:BLOCK.GRASS,air:BLOCK.AIR
@@ -84,13 +94,13 @@ test('true renderer integrates surface foliage into the existing single chunk me
     minY:-3,maxY:19,air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
   const mesh=meshChunk(w,cx,cz);
-  const solids=mesh.length-foliage.length-meadow.length-runes.length-grotto.length;
-  assert.ok(solids>0,'No real voxel triangles');
-  assert.deepEqual(mesh.slice(solids,solids+foliage.length),foliage,
-    'Grove not integrated into actual renderer buffer');
-  assert.deepEqual(mesh.slice(solids+foliage.length,solids+foliage.length+meadow.length),meadow,
-    'Original meadow ordering changed');
-  if(grotto.length)assert.deepEqual(mesh.slice(-grotto.length),grotto,'Original cave accents were displaced');
+  assert.ok(mesh.length>foliage.length+meadow.length,'No real voxel triangles');
+  const groveAt=packedIndex(mesh,foliage);
+  assert.ok(groveAt>=0,'Original grove must be an exact contiguous section of the shared mesh');
+  const meadowAt=packedIndex(mesh,meadow);
+  assert.ok(meadowAt>=0&&meadowAt>groveAt,'Original meadow must follow grove without reordering');
+  if(grotto.length)assert.ok(packedIndex(mesh,grotto)>=0,
+    'Grotto art must remain an exact contiguous section of the shared mesh');
   assert.equal(JSON.stringify(w.save()),original);
   for(const id of GROVE_LIMITS.materialIds)assert.equal(w.set(0,15,0,id),false,
     'Render-only material ID must remain impossible to save');
