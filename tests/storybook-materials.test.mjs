@@ -152,3 +152,21 @@ test('cold natural geology accents remain opaque, near-faded, and save-neutral',
  assert.equal(RULES.newDrawCalls,0);
  assert.equal(RULES.newTextures,0);
 });
+
+test('weathered sediment fans and exposed erosion scars are distance-faded opaque natural faces',()=>{
+ assert.deepEqual(RULES.weatheredStrataAccents,[
+  'soil-ochre-sediment-fans','soil-damp-pockets','stone-erosion-scars'
+ ]);
+ for(const [id,next,terms] of [[2,3,['fan','fanEdge','damp']],[3,4,['erosion','scar']]]){
+  const start=FS.indexOf('}else if(vMat=='+id+')');
+  const end=FS.indexOf('}else if(vMat=='+next+')',start);
+  assert.ok(start>=0&&end>start);
+  const part=FS.slice(start,end);
+  for(const term of terms)assert.match(part,new RegExp('float '+term+'='));
+  assert.match(part,/\*near/);
+  assert.doesNotMatch(part,/discard;|sampler2D|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
