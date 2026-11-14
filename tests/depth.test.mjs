@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,baseBlock,VoxelWorld,meshChunk,WORLD_MAX_Y,WORLD_MIN_Y as LEGACY_PUBLIC_MIN_Y} from '../src/voxel.mjs';
 import {meshDepthSection} from '../src/depth-mesh.mjs';
+import {caveRoute} from '../src/experimental-cave-route.mjs';
 import {
   WORLD_MIN_Y,LEGACY_WORLD_MIN_Y,LEGACY_WORLD_HEIGHT,WORLD_DEPTH_MULTIPLIER,
   DEPTH_SECTION_HEIGHT,LOWEST_SECTION,MAX_ACTIVE_SECTIONS,
@@ -127,4 +128,15 @@ test('deep shaft edits produce deterministic, finite, saved solid meshes',()=>{
   assert.ok(first.byteLength<8*1024*1024);
   assert.ok([...first].every(Number.isFinite));
   for(let i=8;i<first.length;i+=9)assert.equal(first[i],19);
+});
+
+test('preexisting authored cave floors retain their legacy -3 generation clamp',()=>{
+  for(const seed of [179,0,-54,2147483647]){
+    const route=caveRoute(seed,{x:64,z:64,length:28,width:3});
+    for(const t of [0,5,15,25,28,100]){
+      const top=route.entrance[1];
+      assert.equal(route.floorAt(t),Math.max(-1,top-1-Math.floor(t/5)));
+    }
+    assert.equal(route.floorAt(100),-1,'depth ABI must not retarget :24 cave floor');
+  }
 });
