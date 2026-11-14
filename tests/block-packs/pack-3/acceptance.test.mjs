@@ -5,14 +5,15 @@ import {PACK3_CANDIDATE_ASSETS,PACK3_CANDIDATE_IDS,pack3CandidateById,
   from '../../../src/block-packs/pack-3/catalog.mjs';
 import {PACK3_ROSTER,validatePack3Manifest}
   from '../../../src/block-packs/pack-3/manifest.mjs';
-import {createPack3Fixture} from '../../../src/block-packs/pack-3/fixture.mjs';
-import {restorePack3RoofGeometryFixture}
+import {createPack3Fixture,restorePack3Fixture,ROOF_MATERIAL_FIXTURE_FORMAT}
+  from '../../../src/block-packs/pack-3/fixture.mjs';
+import {createPack3RoofGeometryFixture,restorePack3RoofGeometryFixture}
   from '../../../src/block-packs/pack-3/roof-geometry-fixture.mjs';
-import {restorePack3FortifiedFixture}
+import {createPack3FortifiedFixture,restorePack3FortifiedFixture}
   from '../../../src/block-packs/pack-3/fortified-fixture.mjs';
-import {restorePack3OrnamentalFixture}
+import {createPack3OrnamentalFixture,restorePack3OrnamentalFixture}
   from '../../../src/block-packs/pack-3/ornamental-fixture.mjs';
-import {restorePack3MonumentalFixture}
+import {createPack3MonumentalFixture,restorePack3MonumentalFixture}
   from '../../../src/block-packs/pack-3/monumental-fixture.mjs';
 const filled=(shape,x,y,z)=>shape.boxes.some(b=>
   x>=b[0]&&x<b[3]&&y>=b[1]&&y<b[4]&&z>=b[2]&&z<b[5]);
@@ -100,17 +101,27 @@ test('uniform handoff manifest marks ALL entries as candidate-only and never liv
     assert.deepEqual(a.rotations,a.id<=112?[0]:[0,1,2,3]);
   }
 });
-test('preview fixture formats cannot be silently fed into another Pack 3 candidate fixture',()=>{
-  const legacy=createPack3Fixture();
-  assert.equal(legacy.place([1,2,3],109),true);
-  const schemaShapedPreview=legacy.snapshot();
-  assert.equal(schemaShapedPreview.schema,1);
-  // This object intentionally resembles schema 1 and MUST never be used as a player save:
-  // production live VoxelWorld.set rejects ID 109; candidate restore paths refuse it.
-  assert.equal(schemaShapedPreview.edits[0][3],109);
-  for(const restore of [restorePack3RoofGeometryFixture,restorePack3FortifiedFixture,
-    restorePack3OrnamentalFixture,restorePack3MonumentalFixture])
-    assert.throws(()=>restore(schemaShapedPreview),TypeError);
+test('ALL candidate fixture snapshots lack player save schema and cannot cross-restore',()=>{
+  const surfaces=createPack3Fixture(),slopes=createPack3RoofGeometryFixture();
+  assert.equal(surfaces.place([1,2,3],109),true);
+  assert.equal(slopes.place([2,2,3],113,1),true);
+  const snapshots=[surfaces.snapshot(),slopes.snapshot()];
+  assert.equal(snapshots[0].format,ROOF_MATERIAL_FIXTURE_FORMAT);
+  assert.equal(snapshots[0].edits[0][3],109);
+  for(const payload of snapshots){
+    assert.equal(Object.hasOwn(payload,'schema'),false);
+    for(const restore of [restorePack3Fixture,restorePack3RoofGeometryFixture,
+      restorePack3FortifiedFixture,restorePack3OrnamentalFixture,
+      restorePack3MonumentalFixture]){
+      // Only the matching preview decoder is allowed to accept this input.
+      const accepts=payload===snapshots[0]?restore===restorePack3Fixture:
+        restore===restorePack3RoofGeometryFixture;
+      if(accepts)assert.doesNotThrow(()=>restore(payload));
+      else assert.throws(()=>restore(payload),TypeError);
+    }
+  }
+  assert.throws(()=>restorePack3Fixture({...snapshots[0],schema:1}),TypeError);
+  assert.throws(()=>restorePack3RoofGeometryFixture({...snapshots[1],schema:1}),TypeError);
 });
 test('missing generic functionality stays explicitly blocked, never falsely implemented',()=>{
   const channel=pack3CandidateById(123),spire=pack3CandidateById(124),statue=pack3CandidateById(125);
@@ -123,5 +134,38 @@ test('missing generic functionality stays explicitly blocked, never falsely impl
       assert.equal(a.persistence.liveIdRegistered,false);
     if(a.persistence?.integrated!==undefined)
       assert.equal(a.persistence.integrated,false);
+  }
+});
+
+// Strong guard: neither old nor later candidate preview formats ever advertise
+// themselves to VoxelWorld.restore as schema-1 player save objects.
+test('every one of five preview fixtures has a non-game format and no schema field',()=>{
+  const fixtures=[
+    [createPack3Fixture(),109,0],
+    [createPack3RoofGeometryFixture(),113,1],
+    [createPack3FortifiedFixture(),116,2],
+    [createPack3OrnamentalFixture(),119,3],
+    [createPack3MonumentalFixture(),123,0]
+  ];
+  const formats=new Set();
+  for(const [f,id,r] of fixtures){
+    assert.equal(f.place([2,4,6],id,r),true);
+    const state=f.snapshot();
+    assert.equal(Object.hasOwn(state,'schema'),false);
+    assert.equal(typeof state.format,'string');
+    assert.match(state.format,/^mythwrought-pack3-.*(?:preview|candidate)-v1$/);
+    assert.equal(formats.has(state.format),false);
+    formats.add(state.format);
+  }
+  assert.equal(formats.size,5);
+});
+test('rotated physical occupancy preserves 90-degree Y turn for all 13 shaped families',()=>{
+  const samples=[.071,.193,.314,.439,.567,.691,.818,.939];
+  for(let id=113;id<=125;id++)for(let r=0;r<4;r++){
+    const current=pack3CandidateShape(id,r),next=pack3CandidateShape(id,(r+1)%4);
+    for(const x of samples)for(const y of samples)for(const z of samples){
+      assert.equal(filled(current,x,y,z),filled(next,1-z,y,x),
+        `rotation occupancy mismatch at ID ${id}, rot ${r}, point ${x},${y},${z}`);
+    }
   }
 });
