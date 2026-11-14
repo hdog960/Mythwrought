@@ -1,49 +1,31 @@
-# MYTHWROUGHT Pack 5 — Interiors & Specialty Architecture: development ledger
+# MYTHWROUGHT — Pack 5 Interiors & Specialty Architecture progress ledger
 
-## Coordination reverified — 2026-11-14
-- Latest verified main: `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84` / incorporation checkpoint **006**.
-- Creator-led manual pack ownership checked: Packs 1–4, their current manifests and draft PRs #113/#114/#112/#115.
-- Automated biome130 catalog checked against Issue #117 and catalog PR #118; unrelated desert, underground, dungeon and raw-species candidates are NOT Pack 5.
-- Rechecked coordination Issues #109/#117. No active placeable IDs above 8 on main. No overlapping Pack 5 source ownership observed.
-- Pack 5 draft PR: [#119](https://github.com/hdog960/Mythwrought/pull/119). Exclusive branch `manual-pack-5-interiors-foundations-20261114`.
-- **No persistent numeric block IDs allocated.** 209–254 remain unassigned; 255 sentinel; biome130 256–385 forward-only.
-- No changes to main, engine, save schema, renderer, shared tooling, minimap, controller, worldgen, checkpoint, CI or automations.
+## Authority / owner
+- Main reverified at `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`; incorporation checkpoint **006**; [Issues #109](https://github.com/hdog960/Mythwrought/issues/109) and [#117](https://github.com/hdog960/Mythwrought/issues/117) read, with latest Pack 1–4 manifests and biome130 catalog.
+- Exclusive branch `manual-pack-5-interiors-foundations-20261114`, [draft PR #119](https://github.com/hdog960/Mythwrought/pull/119).
+- Only permitted changes: `src/block-packs/pack-5/` and `tests/block-packs/pack-5/`. All shared engine, registry, save, interaction, collision, UI/controller/minimap, worldgen, automation, CI and checkpoint files untouched.
+- **NO persistent numeric IDs assigned.** Only `pack5:079` through `pack5:096` symbolic roster identifiers. Live IDs 0–8; 255 internal sentinel; 209–254 unassigned; future biome130 256–385 are not current-byte-compatible.
+- v0.10 Gate A **OPEN**, v0.11 **LOCKED**. No merges, deployments, worldgen placement, buildings, or gameplay systems.
 
-## Milestone 0
-- Complete as a source foundation. 18 symbolic roster records `pack5:079`–`pack5:096`; independent shape/placement fixture and browser smoke source.
-- Earlier baseline GitHub Actions [run 43639264156](https://github.com/hdog960/Mythwrought/actions/runs/43639264156) is **SUCCESS**, but root CI does NOT include nested Pack 5 tests.
-- Native Node 22.16.0 foundational fixture: 16/16 cases passed before Milestone 1.
+## Milestone 0 — source foundation COMPLETE
+- 18 symbolic entries and isolated reproducible physical fixture.
+- Shape metadata, quarter-turn rotation, multi-cell occupancy, partial collision and ray target, wall/floor/ceiling support, reversible isolated snapshots; **not production schema-1 save integration**.
+- Dedicated browser smoke source, default root CI does **not** discover nested Pack 5 tests.
 
-## Milestone 1 — source authored; visual/production acceptance remains OPEN
-**Three original physical CANDIDATE families; six authored mesh and material variants. Not integrated.**
-- **79** Plaster & Stucco: wall-mounted chalk-lime and raised hand-troweled finishes, thin real geometry with wall-support direction and cladding-only collision.
-- **80** Fired Brick Masonry: kiln-fired running-bond and vertical soldier-course manufactured bricks, actual mortar/brick faces, with substantial masonry collision. Not Pack 1 stone brick or Pack 3 clay roofing.
-- **81** Ceramic Interior Floor Tiles: sunburst-encaustic and moonwoven-glaze arrangements with patterned raised ceramic details, shallow floor-support and partial collision. Not Pack 2 paving or biome130 underground calcite mosaics.
+## Milestone 1 — source CANDIDATES complete; acceptance OPEN
+- **3/18 CANDIDATE**, **15/18 NOT STARTED**, **0/18 INTEGRATED**, **0 accepted as production**.
+- **079 Plaster & Stucco:** two original front-facing wall cladding variants with shallow physical attachment and backing support.
+- **080 Fired Brick Masonry:** two distinct kiln-fired brick-course arrangements, now covering *all four lateral sides* with physical box relief and solid structural collision. Plain reverse/side faces in original screenshot review were an authored-source defect, corrected.
+- **081 Ceramic Interior Floor Tiles:** two decorative shallow walkable tile variants with distinct 2×2 and 3×3 raised panels, not exterior paving.
+- Tested 6 source variants over all four rotation states: **44/44 native Node 22.16.0 PASS** (16 foundation + 19 M1 + 9 acceptance cases), with exact GitHub blob parity. Key shape/material/rotation/collision/snapshot/mesh/visual-uniqueness assertions documented in `M1_ACCEPTANCE.md`.
+- Preview-only budgets: 079 96/144 triangles; 080 504/636; 081 204/180. Max **636 triangles and 1272 vertices**, below the existing per-cell 768 triangles / 1536 vertices prototype limits. **Not measured production GPU performance**.
+- Replaced misleading Canvas2D polygon sorting with authored-triangle software depth buffering. **Six genuine Chromium 144 Canvas2D screenshot captures** generated and visually inspected at 667×375, 844×390 and 932×430, rotations 0 and 1. Each of six panels has a unique sampled pixel fingerprint in every capture. Corrected screenshots show solid brick tops with visible side courses and readable floor tiles without clipping.
+- **Not WebGL2 evidence.** Real WebGL2 context creation returns null here under regular and software configurations; served gallery previously blocked by `net::ERR_BLOCKED_BY_ADMINISTRATOR`. The original six-asset WebGL2 gallery remains committed for later testing. No physical iPhone art approval.
+- Original and updated native Node suite: `node --test tests/block-packs/pack-5/*.test.mjs`. Actual Chromium fallback capture: `python tests/block-packs/pack-5/capture-canvas.py <output-directory>` (requires Chromium and Playwright). Root GitHub CI does not include nested Pack 5 tests; inspect its exact-head result separately.
 
-**Physical contracts:** 0–3 Y-quarter-turn variants per placed cell with original symbolic identity, physical box selection/removal, honest wall/floor/standalone occupancy, reversible candidate-only fixtures. Variant-selected fixture snapshots use a sixth test-only field while the original five-field rows remain valid; no production schema-1 save changes. Invalid variant restore rolls back atomically.
+## Remaining gates
+1. Genuine source-served WebGL2 with three viewport screenshot review, and creator-approved visual art.
+2. Independent central-engine expanded-ID/shape support, physical raycast/collision, variant/support save metadata, schema-1 backward compatibility, performance and physical-iPhone tests before incorporation.
+3. Until those gates are verified, keep **M1 final acceptance OPEN** and **M2 Beds/Chairs/Bookshelves/Cabinets NOT STARTED**. No additional development session unless user explicitly says/clicks Continue Development.
 
-**Mesh evidence (isolated authored box preview, NOT live GPU timing):**
-- 079 chalk-lime: 8 boxes / 96 triangles; hand-troweled: 12 / 144.
-- 080 running bond: 15 / 180; soldier course: 20 / 240.
-- 081 sunburst: 17 / 204; moonwoven: 15 / 180.
-- Exact committed source blobs: `architectural-surfaces.mjs` `0bb60d87642d36fa9ed632af34eada47463f76d8`, fixture `1956e096ba9b3c13ab20aac596c87c493eda1d52`; dedicated Node tests `architectural-surfaces.test.mjs` `47a58200f19cbfbd086a8616f964dabf5a67cdd4`, original fixture regressions `4a463281212fa2ce04e8afe1727f227a512cb6a0`.
-- **Native Node 22.16.0: 34/34 PASS** for `node --test tests/block-packs/pack-5/*.test.mjs` in the local isolated Pack 5 checkout; source/test blob hashes matched remote branch, and local manifest was semantically aligned. 18 new tests + 16 original.
-- **Chromium/WebGL2: NOT VERIFIED.** Installed Chromium headless failed EGL/ANGLE GPU initialization and timed out. No authentic new screenshots; the 6-card WebGL2 gallery is SOURCE ONLY at `tests/block-packs/pack-5/architectural-gallery.html`.
-- No physical iPhone testing, no creator visual acceptance, no game-level targeting/collision/save checks. Root GitHub Actions does not discover this nested suite and must not be reported as Pack 5 acceptance.
-
-## Shared engine dependencies / next session
-1. Keep current three M1 entries `CANDIDATE` until true gallery rendering and creator visual review, then run full mobile viewport/browser QA if available.
-2. Central integration must design/approve extended numeric registry and shape-aware raycast/collision, support/rotation/variant state and backwards-safe schema-1 persistence. Do **not** implement these in Pack 5.
-3. No switching to Milestone 2 as accepted until outstanding M1 acceptance is transparently addressed; if browser remains blocked, continue source-only candidate work with blockers clearly reported.
-4. v0.10 Gate A remains OPEN; v0.11 LOCKED; never merge/deploy/place world assets without separate authorization.
-
-## Milestone 1 acceptance rerun — 2026-11-14, creator approval OPEN
-
-- Reverified main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, latest checkpoint **006**, issues #109/#117, latest draft PR branch heads and manifests for Packs 1–4 and biome130.
-- Original Pack 5 draft PR #119 continues to own changes only in `src/block-packs/pack-5/` and `tests/block-packs/pack-5/`; **no live registry/world/UI/CI/saves/automations altered**.
-- Native Node **43/43 PASS** in exactly matched source/test modules. Added nine tests for 24 outward-winding rotated meshes, precise bounding ranges, 240-triangle ceiling, variant shape/material differentiation, all four backing wall directions, floor collision clearance and snapshot atomicity.
-- Source-only defect fixed: preview mesh now supports `rotation: 0..3` using exactly the same rotated part-box coordinate system as fixture targeting/collision. No new IDs or runtime hooks.
-- Render fallback defect fixed: source-derived Canvas2D review gallery now auto-fits all six candidates and correctly orders raised tile overlay layers. Generated genuine Chromium 144 Canvas2D screenshots at **667×375, 844×390, 932×430** with rotations 0 and 1; inspected six PNGs. Source-repro script is `tests/block-packs/pack-5/capture-canvas.py`.
-- Browser limitations: localhost source gallery navigation returned `ERR_BLOCKED_BY_ADMINISTRATOR`; WebGL2 context unavailable with tested GPU software rendering configurations. **These Canvas2D screenshots are NOT WebGL2 acceptance**. No physical iPhone, live schema-1, in-world collision or creator visual approval.
-- All six visual variants remain **CANDIDATE** across 3 symbolic families; other 15 families **NOT STARTED**; 0 integrated. See `M1_ACCEPTANCE.md`.
-- Next: obtain genuine served WebGL2 gallery and visual approval before completing M1. Begin M2 only after adequate M1 acceptance, respecting the v0.10 Gate A and v0.11 lock.
+**Full evidence/metrics:** `M1_ACCEPTANCE.md`. **Asset-level statuses:** `manifest.json`.
