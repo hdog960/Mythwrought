@@ -14,7 +14,7 @@ test("840 unique planned identities across 13 categories",()=>{
 });
 test("planned slots do not masquerade as authored buildings",()=>{
  assert(plannedSlots().every(s=>s.status==="planned"));assert.equal(manifest.plannedSlots,840);
- assert.equal(manifest.authoredCandidates,1);assert.equal(manifest.acceptedBlueprints,0);
+ assert.equal(manifest.authoredCandidates,30);assert.equal(manifest.authored.length,30);assert.equal(manifest.acceptedBlueprints,0);
  assert.equal(manifest.worldPlacements,0);
 });
 test("actual authored store contains roof, windows, foundation and interiors",()=>{

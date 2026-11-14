@@ -29,3 +29,8 @@ For genuine screenshots after the browser environment is operational, run `pytho
 
 ### No-network Chromium fallback (genuine browser rendering)
 Where localhost navigation is blocked, `python3 tests/building-pool/roadmap-2/gallery-offline-browser.py` runs the original concept-gallery materials inside actual headless Chromium using browser `set_content` and inline module bundling, without HTTP or alternate fake image generation. Produces three full-frame landscape screenshots at 667×375, 844×390, 932×430 plus six focused exterior/cutaway canvases. These do **not** certify production-game WebGL2 or iPhone hardware.
+
+## M0/M1 update (2026-11-14)
+M0 technically accepted after exact-head Actions #43644864326 SUCCESS. M1 authored 30 concept blueprints—15 general stores and 15 temples across five biomes and three sizes—inside `m1-representatives.mjs`, including the original Hearthlane fixture. All are CANDIDATE, not creator accepted or live. Each has structural xyz voxel occupancy with floor, shell, roof, windows, entrance and inner doorway, fixtures, room requirements and corridor. Temples have actual altar/columns/towers/spires; stores have shelves/counter/stockroom. Biome roof/footprint changes are not recolors.
+
+Genuine native Node: `node --test tests/building-pool/roadmap-2/*.test.mjs` (18/18 PASS). Free Playwright Chromium `python3 tests/building-pool/roadmap-2/m1-gallery-browser.py` captures 30 × 3 = 90 true no-network standalone Canvas2D screenshots in three landscape sizes; this is not a production WebGL2 or physical iPhone test. Symbolic asset ABIs remain unresolved. See M1_ACCEPTANCE.md. Never merge/deploy from this draft.

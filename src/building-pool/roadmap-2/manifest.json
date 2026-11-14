@@ -20,7 +20,7 @@
   ],
   "biome130PR": 118,
   "plannedSlots": 840,
-  "authoredCandidates": 1,
+  "authoredCandidates": 30,
   "acceptedBlueprints": 0,
   "worldPlacements": 0,
   "milestoneTargets": {
@@ -29,8 +29,8 @@
     "M4": 165
   },
   "milestones": {
-    "M0": "local-source-and-browser-qa-passed; exact-head GitHub Actions still pending",
-    "M1": "not-started",
+    "M0": "technical-accepted-at-71838311-exact-head-CI-and-real-chromium",
+    "M1": "30-authored-candidates-native-and-canvas-QA-complete-creator-review-open",
     "M2": "not-started",
     "M3": "not-started",
     "M4": "not-started",
@@ -41,6 +41,151 @@
       "id": "r2:general-store:temperate:small:01",
       "source": "src/building-pool/roadmap-2/temperate-store.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:temperate:medium:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:temperate:large:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:desert:small:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:desert:medium:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:desert:large:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:snow:small:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:snow:medium:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:snow:large:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:enchanted-forest:small:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:enchanted-forest:medium:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:enchanted-forest:large:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:mountain:small:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:mountain:medium:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:general-store:mountain:large:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:temperate:small:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:temperate:medium:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:temperate:large:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:desert:small:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:desert:medium:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:desert:large:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:snow:small:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:snow:medium:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:snow:large:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:enchanted-forest:small:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:enchanted-forest:medium:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:enchanted-forest:large:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:mountain:small:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:mountain:medium:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:mountain:large:01",
+      "source": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "status": "authored-candidate"
     }
   ],
   "registryChanges": 0,
@@ -48,9 +193,12 @@
   "physicalInterfacesApproved": 0,
   "sourceScope": "Roadmap 2 exclusive",
   "verification": {
-    "localNode": "Exact PR-head committed source hashes matched and native Node v22.16.0 dedicated 9/9 PASS.",
-    "chromium": "Actual headless Chromium standalone Canvas2D: PASS at 667x375, 844x390, 932x430 via no-network inline source bundle; 9 authentic PNG files captured (3 composites + 6 canvases), all 3 composite views inspected; production WebGL2 NOT tested.",
+    "M0ExactHeadCI": "GitHub Actions #43644864326 PASS at 71838311c39a0cf4a2fdeeeac8e5d28c317f5aed",
+    "M0Node": "9/9 genuine native Node v22.16.0",
+    "M0Browser": "nine real Chromium Canvas2D screenshots at three landscape sizes, preview inspector-reviewed",
+    "M1LocalNode": "18/18 genuine native Node v22.16.0 against local M1 sources; new exact-head GitHub CI not yet run",
+    "M1Browser": "90 genuine headless Chromium composite captures (30 designs x 3 landscape viewports); programmatic 30x3 screenshot checks, sample visuals inspected; conceptual Canvas2D NOT live WebGL2",
     "realIphone": "not tested"
   },
-  "status": "DRAFT / UNMERGED / UNDEPLOYED / NOT IN LIVE WORLD"
+  "status": "M0 TECHNICAL ACCEPTED; M1 30 AUTHOR-CANDIDATE CONCEPTS; DRAFT/UNMERGED/UNDEPLOYED"
 }
