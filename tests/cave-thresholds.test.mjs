@@ -35,3 +35,21 @@ test('existing voxel meshing and schema-1 roundtrip remain valid',()=>{
  const restored=VoxelWorld.restore(w.save());
  assert.deepEqual(meshChunk(restored,1,2),before);
 });
+
+test('real natural cave approach receives fractured rock and moss geometry without changing voxels',()=>{
+ const heightAt=(x)=>x<=8?10:3;
+ const baseAt=(x,y)=>y>=4?BLOCK.AIR:BLOCK.STONE;
+ const world={seed:179,get:(x,y,z)=>baseAt(x,y,z)};
+ const before=world.get(8,4,8);
+ const art=caveThresholdVertices(world,0,0,{...options,heightAt,baseAt});
+ assert.ok(art.length>=42*9,'authentic natural opening should carry the complete layered silhouette');
+ assert.equal(art.length%9,0);
+ assert.ok(art.length<=CAVE_THRESHOLD_LIMITS.maxVerticesPerChunk*9);
+ const colors=new Set();
+ for(let i=0;i<art.length;i+=9){
+  assert.ok(Number.isFinite(art[i])&&Number.isFinite(art[i+1])&&Number.isFinite(art[i+2]));
+  colors.add(art.slice(i+3,i+6).join(','));
+ }
+ assert.ok(colors.size>=3,'shale, shadow and moss should remain visually distinct');
+ assert.equal(world.get(8,4,8),before);
+});
