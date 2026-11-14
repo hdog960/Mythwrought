@@ -1,5 +1,6 @@
 import {createM1Blueprint} from '../../../src/building-pool/roadmap-3/m1.mjs';
 import {createPreviewMesh} from './preview-mesh.mjs';
+import {fitPreviewCamera} from './preview-camera.mjs';
 const canvas=document.getElementById('render'),details=document.getElementById('details');
 const selections=Object.fromEntries(['type','biome','size','view'].map(k=>[k,document.getElementById(k)]));
 const gl=canvas.getContext('webgl2',{antialias:true,preserveDrawingBuffer:true,alpha:false});
@@ -20,21 +21,12 @@ gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);
 gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
 gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.frontFace(gl.CCW);gl.useProgram(program);
 const uMVP=gl.getUniformLocation(program,'u_mvp');
-const unit=v=>{const n=Math.hypot(...v);return v.map(x=>x/n);};
-const sub=(a,b)=>a.map((x,i)=>x-b[i]);
-const dot=(a,b)=>a.reduce((n,x,i)=>n+x*b[i],0);
-const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
-function lookAt(eye,at){const f=unit(sub(at,eye)),s=unit(cross(f,[0,1,0])),u=cross(s,f);
- return [s[0],u[0],-f[0],0, s[1],u[1],-f[1],0, s[2],u[2],-f[2],0, -dot(s,eye),-dot(u,eye),dot(f,eye),1];}
-function ortho(l,r,b,t,n,f){return [2/(r-l),0,0,0,0,2/(t-b),0,0,0,0,-2/(f-n),0,-(r+l)/(r-l),-(t+b)/(t-b),-(f+n)/(f-n),1];}
-function multiply(a,b){const out=new Array(16).fill(0);for(let j=0;j<4;j++)for(let i=0;i<4;i++)for(let k=0;k<4;k++)out[j*4+i]+=a[k*4+i]*b[j*4+k];return out;}
 let current=null;
 function resize(){const dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(2,Math.floor(canvas.clientWidth*dpr)),h=Math.max(2,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}gl.viewport(0,0,w,h);}
 function draw(){
- resize();const {width:w,height:h,depth:d}=current.b.envelope;
- const aspect=canvas.width/canvas.height,span=Math.max(w,d,h)*.87;
- const eye=[w*1.8,h*1.6,d*1.8],look=[w*.5,h*.48,d*.5];
- gl.uniformMatrix4fv(uMVP,false,multiply(ortho(-span*aspect,span*aspect,-span,span,-150,150),lookAt(eye,look)));
+ resize();
+ const camera=fitPreviewCamera(current.b.envelope,current.geometry.vertices,canvas.width,canvas.height);
+ gl.uniformMatrix4fv(uMVP,false,camera.matrix);
  gl.clearColor(.07,.11,.16,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,current.geometry.vertices.length/6);
 }
 function update(){
