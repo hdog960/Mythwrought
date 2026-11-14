@@ -51,6 +51,40 @@ export function ruinWatchtowerVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
  // Carved arch spandrels leave a clearly readable opening beneath the lintel.
  tri(out,[x-1.18,y+4.06,z-2.04],[x-.65,y+3.57,z-2.04],[x-.14,y+4.06,z-2.04],trim[1]);
  tri(out,[x+.56,y+4.06,z-2.04],[x+1.05,y+3.60,z-2.04],[x+1.46,y+4.06,z-2.04],trim[2]);
+ // Two individually authored ruin profiles keep distant discoveries from
+ // reading as identical towers. Both preserve the open ground-level corridor.
+ // The eastern profile retains a split signal platform; the western profile
+ // exposes a collapsed gate and an off-axis lookout shelf.
+ const profile=hash(Math.floor(cx/12)+41,Math.floor(cz/12)-17,world.seed);
+ if(profile<.5){
+   // Remnant signal platform: a stepped western stone landing with a missing
+   // center span and a jagged crown; no floating full roof.
+   prism(out,x-2.12,y+3.45,z+.73,.65,.28,1.13,trim);
+   prism(out,x-2.13,y+3.75,z+1.47,.68,.35,.42,stone);
+   prism(out,x+1.98,y+4.35,z+1.20,.60,.28,.76,trim);
+   prism(out,x+2.08,y+4.63,z+1.66,.41,.31,.36,stone);
+   // Three surviving broken cornice teeth, separated by visible sky.
+   prism(out,x-1.66,y+5.08,z-2.12,.38,.35,.48,stone);
+   prism(out,x-.68,y+5.08,z-2.12,.30,.19,.46,trim);
+   prism(out,x+1.22,y+5.08,z-2.12,.43,.29,.45,stone);
+ }else{
+   // The other ruin has a lower fractured entrance portal, a substantial
+   // diagonal buttress and an offset lookout remnant, not a rotated clone.
+   prism(out,x-2.06,y+2.40,z-1.92,.68,.38,.64,trim);
+   prism(out,x-1.62,y+2.70,z-1.94,.78,.28,.58,stone);
+   prism(out,x+1.92,y+2.65,z-1.84,.59,.35,.61,trim);
+   prism(out,x+1.93,y+3.00,z-1.83,.46,.23,.52,stone);
+   prism(out,x+1.95,y+4.20,z+.66,.67,.31,1.10,trim);
+   prism(out,x+2.02,y+4.51,z+1.24,.49,.43,.46,stone);
+   // Low displaced stones mark the edge, leaving the central gap empty.
+   prism(out,x-2.33,y+.05,z-1.15,.52,.24,.69,stone);
+   prism(out,x+1.77,y+.05,z+2.25,.60,.19,.45,trim);
+ }
+ // Shattered approach paving reads as an entrance without creating a
+ // misleading sealed doorway. Render-only: never added to world collision.
+ for(const [dx,dz,w,d] of [[-.98,-2.73,.71,.42],[.22,-2.71,.66,.38],[-.74,-2.23,.53,.29],[.36,-2.18,.62,.24]]){
+   prism(out,x+dx,y+.014,z+dz,w,.055,d,trim);
+ }
  // Colored inset masonry and a readable ancient sigil facing the approach.
  const gold=[.91,.70,.32],jade=[.34,.78,.70];
  tri(out,[x-.8,y+4.12,z-2.03],[x+.1,y+4.12,z-2.03],[x-.35,y+4.58,z-2.03],gold,6);
