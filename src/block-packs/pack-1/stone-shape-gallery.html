@@ -1,0 +1,30 @@
+<!doctype html><html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mythwrought — Pack 1 Partial Stone Gallery</title>
+<style>
+:root{font-family:system-ui,sans-serif;background:#10202c;color:#f1efe6}
+*{box-sizing:border-box}body{max-width:1080px;margin:auto;padding:18px}
+h1{font-family:Georgia,serif;font-weight:700;letter-spacing:.02em}
+aside{padding:12px;border:1px solid #b89b63;background:#302d26;color:#f6d9a1;border-radius:8px;font-weight:700}
+p{color:#bdd0d2;line-height:1.55}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0}
+.card{background:#1a3340;padding:14px;border:1px solid #49606c;border-radius:12px;text-align:center}
+.card.active{border-color:#e4c07e;box-shadow:0 0 0 2px #af8650}
+.card canvas{width:100%;max-width:260px;height:auto;image-rendering:pixelated}
+.card h2{font-family:Georgia,serif;font-size:1.1rem;margin:4px 0}.card p{font-size:.82rem;min-height:48px}
+button{border-radius:8px;padding:10px 12px;border:1px solid #92adb5;background:#324d5b;color:#fff;cursor:pointer;margin:3px}
+button:hover{background:#476774}.toolbar{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+code{color:#efcf94}output{display:block;white-space:pre-wrap;font:12px/1.6 monospace;border:1px solid #486d5b;background:#0c2820;padding:12px;border-radius:9px}
+@media(max-width:650px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:390px){.grid{grid-template-columns:1fr}}
+</style></head><body>
+<h1>Stone Shapes — Mythwrought Pack 1</h1>
+<aside>UNMERGED CANDIDATE / NO LIVE GAME MODIFICATIONS. This is an isolated canvas gallery rendering the shape descriptors, not an in-game screenshot.</aside>
+<p>Six individually targetable, removable partial-volume pieces, each represented by boxes inside one voxel. Rotate previewed pieces, inspect open volumes, and place/remove cells in a non-persistent test fixture. Rotated and upper variants deliberately cannot be serialized into the old production schema-1 save format.</p>
+<div class="toolbar">
+<button type="button" id="place-all">Place 6 canonical blocks</button>
+<button type="button" id="clear-all">Remove all</button>
+<button type="button" id="save-check">Check canonical save</button>
+</div>
+<div id="grid" class="grid"></div>
+<output id="status" role="status" aria-live="polite"></output>
+<script type="module" src="./stone-shape-gallery.mjs"></script></body></html>
