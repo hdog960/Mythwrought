@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import {createPack4Fixture,pack4Shape,pack4MountOffset,pack4State}
   from '../../../src/block-packs/pack-4/fixture.mjs';
 
-test('all seventeen IDs have physical selection and collision bounds',()=>{
+test('all twenty-three IDs have physical selection and collision bounds',()=>{
  const f=createPack4Fixture();
- assert.deepEqual(f.availableIds,[159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175]);
+ assert.deepEqual(f.availableIds,Array.from({length:23},(_,i)=>159+i));
  for(const id of f.availableIds){
   const s=pack4Shape(id,0);
   assert.ok(s.collision.length>=1&&s.selection.length>=1);
