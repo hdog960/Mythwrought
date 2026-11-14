@@ -181,3 +181,23 @@ test('fragment shader contains no escaped source newlines and retains valid boun
  assert.equal(RULES.newTextures,0);
  assert.equal(RULES.newDrawCalls,0);
 });
+
+test('agate crystal and hematite ore retain bounded opaque near-faded natural pigment',()=>{
+ assert.deepEqual(RULES.agateHematiteAccents,[
+  'crystal-nested-agate-bands','crystal-indigo-growth-core',
+  'ore-hematite-host-plates','ore-pale-plate-boundaries'
+ ]);
+ for(const [id,next,names] of [[5,6,['bandPhase','agateBand','agateCore']],[6,7,['hematite','plate','plateEdge']]]){
+  const start=FS.indexOf('}else if(vMat=='+id+')');
+  const end=FS.indexOf('}else if(vMat=='+next+')',start);
+  assert.ok(start>=0&&end>start);
+  const material=FS.slice(start,end);
+  for(const name of names)assert.match(material,new RegExp('float '+name+'='));
+  assert.match(material,/\*near/);
+  assert.doesNotMatch(material,/sampler2D|discard;|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.doesNotMatch(FS,/\\\\n/);
+});
