@@ -1,13 +1,15 @@
-# M0 checkpoint — contract foundation (review candidate)
+# Roadmap 3 — M0 accepted; M1 source review in progress
 
-- [x] Current-main/checkpoint 006, issues 109/117, manual pack manifests 1–5, biome130 source lane and PR ownership reviewed.
-- [x] Exact 705 design-slot generator across 11 types, 5 biomes and 3 sizes; milestone totals tested.
-- [x] Physical-coordinate blueprint schema, named future-family references, unresolved fixture policy.
-- [x] Duplicate geometry/palette-swap rejection, entrance and clearance guards, interior route checks and fortification stair/wall-perimeter constraints.
-- [x] 11 native Node focused tests passing in local authored working copy.
-- [ ] Exact remote draft PR-head Node execution and CI reviewed.
-- [ ] M1: 30 representative blacksmith/watchtower designs; not yet authored.
-- [ ] Real three-size Chromium/WebGL2 preview + creator art review; not attempted.
-- [ ] All M2/M3/M4 designs and M5 integration-fit/acceptance; not started.
+- [x] Read main, integration checkpoints 006/007, Issues #109/#117, all manual pack manifests, biome130 and open PR ownership.
+- [x] Exclusive ownership under `src/building-pool/roadmap-3/`, `tests/building-pool/roadmap-3/`, `docs/building-pool/roadmap-3/`; draft [PR #122](https://github.com/hdog960/Mythwrought/pull/122) never merged or deployed.
+- [x] Validated 705 exact design identities (225 M2, 240 M3, 240 M4).
+- [x] M0 foundation: physical voxel coordinate contract, named symbolic future families, navigation and collision clearance rules, geometry uniqueness and deterministic serialization.
+- [x] M0 authored native Node 22.16.0 checks **11/11 PASS**, source matched exact remote GitHub blob SHAs.
+- [x] M0 exact-head [GitHub Actions #43643210989](https://github.com/hdog960/Mythwrought/actions/runs/43643210989) **SUCCESS** at commit `4aa9e5e8bf641b58421d370a11e42d9ddbc70008`; baseline browser checks passed.
+- [x] M1: **30/30 representative source-authored theoretical structures**, 15 blacksmiths + 15 watchtowers in five biomes and three sizes. **76,376 conceptual physical voxel-coordinate slots**, no live registration.
+- [x] M1 local source-exact native Node **25/25 PASS** across three nested suites; new exact-head GitHub CI still requires independent review.
+- [ ] M1: genuine WebGL2 source-served candidate screenshots for 667×375, 844×390 and 932×430, and actual engine collision/shape integration, remain **NOT VERIFIED**. Local Chromium minimal navigation failed with `net::ERR_BLOCKED_BY_ADMINISTRATOR`.
+- [ ] Creator art acceptance, physical iPhone testing and incorporation are NOT AUTHORIZED / NOT RUN.
+- [ ] M2/M3/M4 remaining designs and M5 final acceptance not started.
 
-**Authored full blueprints = 0 / 705.** Test fixtures are schema demonstrations only and do not count as designs. All materials stay conceptual, and no physical in-game building or production block IDs are activated. No merge or Pages deployment authorized.
+Current roadmap authored count **30/705**, not 705. Test fixtures are not counted. All new work is candidate source only; v0.10 Gate A OPEN and v0.11 LOCKED.
