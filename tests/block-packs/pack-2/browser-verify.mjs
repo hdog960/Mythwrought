@@ -36,7 +36,7 @@ export async function runPack2BrowserVerification(){
       page.on('pageerror',error=>errors.push(String(error)));
       const response=await page.goto(base+'/tests/block-packs/pack-2/preview.html');
       assert.equal(response.status(),200);
-      await page.locator('#asset option').first().waitFor();
+      await page.waitForFunction(()=>document.querySelectorAll('#asset option').length===17);
       assert.equal(await page.locator('#asset option').count(),17);
       for(const id of [73,74,75]){
         await page.selectOption('#asset',String(id));
