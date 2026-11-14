@@ -135,3 +135,75 @@ snapshot is FOR TESTING ONLY, not the production world edit format.
 This pack must not be installed into the live world until the creator
 authorizes manual integration. Issue #117 is the separate :12 automated
 130-item catalog; Pack 4 retains only original Issue #109 families.
+
+## Milestone 3 — Seven independent furniture / market pieces, not assembled structures
+
+Physical reusable candidate block identities **169–175** in
+`furnishings.mjs`. These correspond to original Issue #109 roster
+**56–62** and have no overlap with automated biome130 Issue #117:
+
+| ID | Physical family | Exact distinct silhouette | Placement |
+|---:|---|---|---|
+| 169 | Barrel | Eight tapered timber staves, horizontal iron hoops, inset lid and bung | Stable floor |
+| 170 | Crate | Timber plank courses, raised top, iron corner straps and battens | Stable floor |
+| 171 | Bench | Open below-seat space, four feet, gapped slats and raised backrest | Stable floor |
+| 172 | Table | Open underside, raised tabletop, four corner legs and carved edge | Stable floor |
+| 173 | Sign | Single narrow floor post, double-sided blank signboard, trim and nail heads | Stable floor |
+| 174 | Banner | Suspended crossbar, cloth panels with twin cut tails and central heraldry | Fixed ceiling |
+| 175 | Canopy panel | One striped/scalloped fabric tile with separate structural ribs and rope | Fixed wall |
+
+Each family has a separate ID and immutable box parts. All parts are
+occupiable local unit-cell geometry, physical hit/collision sub-boxes and
+selection volumes; ambient/edge detail that should not obstruct movement
+is separately flagged `collision:false`. Each has four right-angle
+orientations, stable `{id,rotation}` fixture state, material-specific
+palette and bounded preview mesh. The sign is **blank** and has no text
+editing; the banner has no wind animation. The canopy is a **single
+piece**; no completed stall/building is authored. Barrels and crates
+are NOT inventory containers and cannot be harvested or crafted.
+
+The original Pack 4 `fixture.mjs` is extended from IDs 159–168 to
+**all IDs 159–175**. It enforces floor/ceiling/wall support cells,
+unique occupancy, independent whole-cell removal, AABB raycast,
+partial collision and fail-closed, atomic fixture snapshot restore.
+This is a fixture-local test format only. **Do not reuse its snapshot
+object as an unreviewed live schema-1 world-save migration.**
+
+## Real execution commands and acceptance gates
+
+On an authorized checkout with Node v22+:
+```sh
+node --test tests/block-packs/pack-4/*.test.mjs
+```
+When Playwright + genuine Chromium are installed:
+```sh
+node tests/block-packs/pack-4/gallery-browser.mjs
+```
+The isolated browser script starts an ephemeral local-only HTTP
+server, loads precisely its own three source modules and gallery, and
+checks 17 WebGL2 candidate cards at **667×375, 844×390, 932×430**.
+It writes authentic screenshots under
+`artifacts/pack-4/pack4-UNMERGED-*.png`. The gallery has a
+permanent visible **UNMERGED CANDIDATE — NOT IN LIVE GAME** heading.
+A single shared WebGL2 surface is reused for all 17 image previews
+to avoid creating 17 independent graphics contexts on iPhone.
+Do not misrepresent preview geometry or drawn lights as in-engine
+functionality.
+
+**Verified in this session:** exact source test bodies 100/100 PASS
+through JavaScript V8 compatibility harness; this is NOT native
+Node test execution. Prior PR HEAD `6fc1b21d...` passed the
+existing root GitHub CI baseline [Actions #43630645050](https://github.com/hdog960/Mythwrought/actions/runs/43630645050),
+before this M3 work was added. Local checkout Git fetch blocked by
+network/DNS, and prior local Chromium preview command timed out
+during software graphics initialization. **Native new-head Node,
+new-head browser gallery and physical iPhone screenshots are
+NOT VERIFIED.** The reviewer must run both above commands and
+inspect 17 distinct candidate silhouettes and rotations before
+requesting any integration. Central renderer alpha/depth, rotated
+collision and actual schema-1 saves still require owner-controlled
+integration testing.
+
+**Never merge, push to main, deploy Pages, construct a building,
+spawn a well/fountain or place Pack 4 assets into world generation.**
+Gate A remains open; v0.11 remains locked.
