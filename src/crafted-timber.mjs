@@ -94,6 +94,25 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
     float sunCore=1.0-smoothstep(.075,.12,sunRadius);
     float sunEmblem=clamp(sunRing+sunRays+sunCore,0.0,1.0)
       *sunCell*panel*near;
+    // Rare broad double-door carving: two recessed leaves, central meeting
+    // stile, iron hinge plates and a circular pull. A whole-board silhouette
+    // rather than extra tiny grain; fade at distance for mobile stability.
+    float doorCell=step(.965,hashCell(boardCell+vec2(173.0,103.0)));
+    vec2 doorUv=boardLocal-vec2(.5);
+    float doorOuterX=1.0-smoothstep(.33,.39,abs(doorUv.x));
+    float doorOuterY=1.0-smoothstep(.35,.42,abs(doorUv.y));
+    float doorBody=doorOuterX*doorOuterY;
+    float doorStile=1.0-smoothstep(.013,.038,abs(doorUv.x));
+    float doorRecess=smoothstep(.07,.13,min(.35-abs(doorUv.x),.37-abs(doorUv.y)));
+    float hingeY=max(1.0-smoothstep(.025,.07,abs(doorUv.y-.23)),
+                     1.0-smoothstep(.025,.07,abs(doorUv.y+.23)));
+    float hingeX=1.0-smoothstep(.025,.075,abs(abs(doorUv.x)-.27));
+    float doorHinges=hingeX*hingeY*doorBody;
+    float pullRing=1.0-smoothstep(.012,.035,
+      abs(length(doorUv-vec2(.085,0.0))-.055));
+    float doorCarving=doorCell*doorBody*near;
+    sideShade += doorCarving*(-.11*doorRecess-.17*doorStile
+      +.16*doorHinges+.12*pullRing);
     sideShade += -.13*sunEmblem;
     sideShade += -.15*lattice+.045*latticeEdge+.095*bevel-.035*innerBorder-.07*ornament
       -.11*braceBand+.045*braceHighlight-.065*mortise;
@@ -106,5 +125,5 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
 `;
 export const CRAFTED_TIMBER_RULES=Object.freeze({
   existingBlockId:4, boardsAcross:3, boardsHigh:2,
-  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, sparseDiagonalJoinery:true, pairedMortises:true, framedPanels:true, cornerBosses:true, archedLatticePanels:true, rareSunwheelCarving:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
+  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, sparseDiagonalJoinery:true, pairedMortises:true, framedPanels:true, cornerBosses:true, archedLatticePanels:true, rareSunwheelCarving:true, rareDoubleDoorCarving:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
 });
