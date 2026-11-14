@@ -55,15 +55,30 @@ try{
     await page.screenshot({path:'artifacts/live-008-physical-trees-'+w+'x'+h+'.png'});
   }
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),trunk.slice(0,3)),BLOCK.WOOD);
-  await aim(court.origin[0]-6,court.origin[2]+14,
-    court.origin[0],court.origin[1]+3,court.origin[2]);
   const [x,h,z]=court.origin;
+  await page.evaluate(p=>{
+    const d=window.__mythwroughtTest;
+    // The court route is known to be clear; stand at walking height instead of
+    // landing on a nearby treetop when using a generic surface teleport.
+    d.teleportCave(p.x,p.h+1,p.z+11);
+    d.aimAt(p.x,p.h+4,p.z+9);
+  },{x,h,z});
+  await loaded();
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),court.gates[0].cells[0].slice(0,3)),BLOCK.STONE);
   await page.screenshot({path:'artifacts/live-008-explorable-pilgrim-court-932x430.png'});
   const {floorAt}=caveRoute(179,cave);
   await aim(cave.x-4,cave.z+7,cave.x+3,floorAt(3)+2,cave.z);
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),[cave.x+3,floorAt(3)+2,cave.z]),BLOCK.AIR);
   await page.screenshot({path:'artifacts/live-008-open-cave-branch-932x430.png'});
+  await page.evaluate(p=>{
+    const d=window.__mythwroughtTest;
+    d.teleportCave(p.x+14,p.floor+1,p.z);
+    d.aimAt(p.x+14,p.floor+2,p.z-7);
+  },{x:cave.x,z:cave.z,floor:floorAt(14)});
+  await loaded();
+  assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
+    [cave.x+14,floorAt(14)+1,cave.z-7]),BLOCK.AIR);
+  await page.screenshot({path:'artifacts/live-008-underground-north-wing-932x430.png'});
   // A generated object is a real editable voxel, with unchanged schema-one persistence.
   await page.evaluate(p=>window.__mythwroughtTest.placeFixture(...p,0),trunk.slice(0,3));
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),trunk.slice(0,3)),BLOCK.AIR);
