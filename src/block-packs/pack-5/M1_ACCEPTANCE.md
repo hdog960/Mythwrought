@@ -86,3 +86,11 @@ All under the isolated 64-box / 768-triangle / 1536-vertex preview contract. The
 - All M1 families `pack5:079`, `pack5:080`, `pack5:081` remain **CANDIDATE**; other 15 are **NOT STARTED**, 0 **INTEGRATED**. M2 residential furnishings are not started because source-served/gallery verification and explicit creator artwork approval remain outstanding.
 
 **Current main compatibility:** `caf47776b723a36684edc1a72749e49268ccc688`, checkpoint **007**. That automation-only incorporation excludes Pack 5. All new changes stay under exclusive Pack 5 source/test paths, with no merge, ID assignment, shared-engine mutation, or deployment.
+
+## Latest recheck after checkpoint 008 — technical candidate review only
+
+- Newest main `ac263720b60641c65b02330348dd76d0ef9cb75e`; checkpoint **008** only activated existing automation-owned physical voxel trees, caves and stone court. Ledger explicitly excludes manual Packs 1–5, including this PR.
+- Genuine native Node: original M0/M1 **44/44 PASS**; full Pack 5 including new M2 tests **66/66 PASS** against exact source/test Git blobs.
+- New `tests/block-packs/pack-5/esm-webgl-browser.py m1 <out>` verified **native ES module import/export graph execution**, real Chromium WebGL2 GPU rendering, pixel readback and six unique source-authored panels at all 3 landscape viewports × two rotations. It uses absolute `data:` URLs to replace *only relative import specifiers*; local HTTP-served navigation remains blocked (`ERR_BLOCKED_BY_ADMINISTRATOR`), so HTTP/served loader is still **not tested**.
+- All six source-derived M1 visual screenshots reviewed; no new candidate geometry defect detected. No physical-iPhone measurements or creator artwork approval.
+- M1 **creator final acceptance remains OPEN**. Creator's conditional direction allowed M2 **separate source-only candidate development**, not integration, approval of M1, or v0.11 unlock.
