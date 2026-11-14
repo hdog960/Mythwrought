@@ -233,6 +233,23 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
      [rx+sx*.05,ground+.29,rz+sz*.05],
      [rx-sx*.05,ground+.29,rz-sz*.05],[.88,.96,.90],7);
   }
+  // Saffron cliffbells are tiny amber-gold, five-petaled blossoms tucked
+  // against exposed natural stone. They share the opaque flora mesh, require
+  // an unedited grass anchor and introduce no lights, blocks or collisions.
+  if(rockEdges.length&&hash(x,z,world.seed,839)>.86){
+   const [dx,dz]=rockEdges[Math.floor(hash(x,z,world.seed,853)*rockEdges.length)];
+   const bx=px+dx*.27,bz=pz+dz*.27,stemH=.24+hash(x,z,world.seed,857)*.12;
+   const crown=[bx-dx*.07,ground+stemH,bz-dz*.07];
+   tri(out,[bx-.02,ground,bz],[bx+.02,ground,bz],crown,[.39,.55,.31],7);
+   for(let petal=0;petal<5;petal++){
+    const angle=turn+petal*Math.PI*2/5;
+    const vx=Math.cos(angle),vz=Math.sin(angle);
+    tri(out,crown,
+      [crown[0]+vx*.15-vz*.045,crown[1]-.07,crown[2]+vz*.15+vx*.045],
+      [crown[0]+vx*.15+vz*.045,crown[1]-.07,crown[2]+vz*.15-vx*.045],
+      petal%2?[.96,.67,.26]:[.99,.81,.39],7);
+   }
+  }
   flowers++;
  }
  if(out.length/STRIDE>MAX_FLOWERS*VERTICES_PER_FLOWER)throw Error('Moonbell vertex budget');
