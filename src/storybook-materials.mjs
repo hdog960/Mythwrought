@@ -105,6 +105,14 @@ void main(){
     float core=smoothstep(.68,.91,.5+.5*sin(vUv.x*6.0+vUv.y*4.0)*sin(vUv.y*8.0-vUv.x*3.0));
     base=mix(base,vec3(.22,.24,.54),.19*core*near);
     base=mix(base,vec3(.87,.94,1.0),.24*inclusion*near);
+    // Agate-like nested mineral bands follow warped crystal growth planes.
+    // All pigment is opaque and near-faded, with no new mesh or sampler.
+    float bandPhase=length((vUv-vec2(.52,.48))*vec2(1.15,.85))*22.0
+      +2.2*sin(vUv.x*9.0+vUv.y*4.0);
+    float agateBand=1.0-smoothstep(.07,.22,abs(sin(bandPhase)));
+    float agateCore=smoothstep(.72,.93,.5+.5*cos(bandPhase*.42));
+    base=mix(base,vec3(.92,.69,.84),.16*agateBand*near);
+    base=mix(base,vec3(.31,.43,.71),.11*agateCore*near);
     // Fine glacial cleavage gives some crystal faces a blue-white icy rim.
     float iceRim=1.0-smoothstep(.025,.11,abs(sin(vUv.x*7.0-vUv.y*9.0+sin(vUv.y*4.0))));
     float blueFacet=step(.79,hashCell(floor(vUv*vec2(5.0,6.0))+vec2(42.0,3.0)));
@@ -118,6 +126,12 @@ void main(){
     float gold=clamp(.48*trace+.42*vein+.24*branch,0.0,1.0);
     shade=.77+.15*tile+.19*gold;
     base=mix(base,vec3(.96,.69,.28),.28*gold*near);
+    // Hematite-red host-rock plates and thin pale mineral boundaries.
+    float hematite=.5+.5*sin(vUv.x*5.0+1.4*sin(vUv.y*6.0))*sin(vUv.y*7.0-vUv.x*2.0);
+    float plate=smoothstep(.67,.84,hematite);
+    float plateEdge=1.0-smoothstep(.035,.11,abs(hematite-.67));
+    base=mix(base,vec3(.51,.27,.29),.18*plate*(1.0-gold)*near);
+    base=mix(base,vec3(.82,.75,.62),.09*plateEdge*(1.0-gold)*near);
     // Oxidized teal seams frame the precious ore without transparency or glow passes.
     float oxidation=smoothstep(.67,.87,.5+.5*sin(vUv.x*8.0-vUv.y*6.0+sin(vUv.y*11.0)));
     base=mix(base,vec3(.19,.43,.39),.17*oxidation*(1.0-gold)*near);
@@ -157,5 +171,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   mineralInclusions:Object.freeze(['crystal-indigo-core','crystal-frost-inclusions','ore-oxidized-seams']),
   coldGeologyAccents:Object.freeze(['stone-frost-quartz-ridges','stone-cold-pockets','crystal-glacial-cleavage']),
   weatheredStrataAccents:Object.freeze(['soil-ochre-sediment-fans','soil-damp-pockets','stone-erosion-scars']),
-  ironstoneAccents:Object.freeze(['stone-ironstone-lenses','stone-pale-mineral-rims'])
+  ironstoneAccents:Object.freeze(['stone-ironstone-lenses','stone-pale-mineral-rims']),
+  agateHematiteAccents:Object.freeze(['crystal-nested-agate-bands','crystal-indigo-growth-core','ore-hematite-host-plates','ore-pale-plate-boundaries'])
 });
