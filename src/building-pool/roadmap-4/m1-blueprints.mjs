@@ -213,11 +213,12 @@ function emitBlueprint(type,biome,size){
   if(type==='civic-hall'){
     room('council-hall','meeting',0,(x,z)=>x<left&&z>entranceZ+1&&z<d-5);
     room('municipal-records','administration',0,(x,z)=>x>right&&z>entranceZ+1&&z<d-5);
-    if(storeys>1)room('upper-public-gallery','public-gallery',storeys-1,(x,z)=>x>left&&x<right&&z>entranceZ+5&&z<d-5);
+    for(let l=1;l<storeys;l++)room('upper-public-gallery-'+l,'public-gallery',l,(x,z)=>x>left&&x<right&&z>entranceZ+5&&z<d-5);
   }else{
     room('receiving-hall','entrance-hall',0,(x,z)=>x>left&&x<right&&z>entranceZ+1&&z<d-4);
     room('great-chamber','grand-chamber',0,(x,z)=>x<left&&z>entranceZ+1&&z<d-4);
     room('east-wing','tower-or-wing',storeys-1,(x,z)=>x>right&&z>entranceZ+1&&z<d-4);
+    for(let l=1;l<storeys-1;l++)room('upper-ambassadorial-gallery-'+l,'gallery',l,(x,z)=>x>left&&x<right&&z>entranceZ+5&&z<d-5);
   }
   // Explicitly navigate from the main entry; remove isolated decorative ledges from interior route graph.
   // Early M1 acceptance requires every authored route cell to be connected (validator checks this).
