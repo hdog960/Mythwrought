@@ -68,3 +68,11 @@ The runner changes relative imports to absolute `data:` module URLs for offline 
 **Latest candidate-only QA:** 68/68 native Node cases pass (44 M0/M1 + 24 M2), including precise authored body-part collision unions for beds, seats and shelves. Eight M2 variants were rendered via genuine WebGL2 native ES-module data-URL loader at three iPhone landscape resolutions and both preview rotations. No persistent IDs, production saves, live placement or actual iPhone controls were tested.
 
 **Current isolated M2 refinement QA:** 69/69 native Node cases PASS, including a new assertion that both physical bookshelf variants show at least twelve modeled book/scroll spines past their wooden shelf lips. Genuine Chromium native ES-module WebGL2 review passed at all three mobile landscape sizes and both orientations. Browser-admin localhost HTTP navigation is STILL blocked; no source-served gallery, real mobile GPU or creator visual signoff. All 7 developed families stay symbolic CANDIDATES.
+
+## Milestone 3 — initial commercial shop and display source candidates
+
+`shop-workshop.mjs` contains **two** new symbolically named **CANDIDATE** physical reusable voxel families: 86 Shop Counters (ledger-service; festival-fascia) and 87 Display Shelves (stepped-market-tray; curio-arcade). These are genuine independent selectable and collider-bearing part unions; neither defines trading, inventory contents, crafting, shop NPCs, buildings or world placement.
+
+`shop-gallery.html` renders all 4 candidates as actual WebGL2 source meshes. Reproduce six browser views through `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/esm-webgl-browser.py m3 <output-directory>`. Native Node `node --test tests/block-packs/pack-5/*.test.mjs` currently **83/83 PASS**. All source/test blobs were compared with the exact remote draft PR version. See `M3_ACCEPTANCE.md`.
+
+**Status:** nine of eighteen physical families are authored **CANDIDATES**, nine remain **NOT STARTED**, zero are integrated. Families 88–90 still require source authoring. Milestones 1/2 creator artwork and production acceptance stay OPEN; preview screenshots are not deployed gameplay and no physical iPhone device was tested. Latest inspected main checkpoint **008**; v0.11 locked.
