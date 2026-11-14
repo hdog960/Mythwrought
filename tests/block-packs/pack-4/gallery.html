@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mythwrought Pack 4 — isolated Windows Gallery</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,Arial,sans-serif;background:#131d27;color:#e8e2d3}
+body{margin:0;padding:18px 18px 40px;background:linear-gradient(150deg,#172331,#26332c)}
+h1{font-size:1.5rem;margin:.15rem 0 10px}
+.warning{border:2px solid #e9a35e;background:#463022;color:#fff0d9;font-weight:800;letter-spacing:.04em;padding:12px;margin-bottom:13px}
+.note{max-width:850px;color:#c7d5d4;line-height:1.5}
+#gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:14px;margin-top:16px}
+.item{border:1px solid #60746c;border-radius:12px;overflow:hidden;background:#18252b;box-shadow:0 8px 20px #0b111750}
+.item h2{font-size:1.04rem;margin:12px 12px 3px}
+.item p{font-size:.85rem;margin:0 12px 12px;color:#d2cec0;line-height:1.35}
+canvas{width:100%;height:auto;aspect-ratio:1.15;display:block;touch-action:none}
+.status{font-variant-numeric:tabular-nums}
+small{color:#c3c7b7}
+</style>
+</head>
+<body>
+<div class="warning">UNMERGED CANDIDATE — NOT IN LIVE GAME</div>
+<h1>Mythwrought • Pack 4 Windows &amp; Openings</h1>
+<p class="note">Opt-in, isolated physical single-cell previews. Each shape uses independent
+selection and collision sub-boxes, saved candidate IDs, four-way orientation, and physically
+separate opaque/translucent geometry. This does not install blocks, structures or lighting in
+the playable game. Transparent depth sorting requires central renderer integration.</p>
+<p id="status" class="status">Loading original candidate geometry…</p>
+<main id="gallery" aria-label="Window asset gallery"></main>
+<script type="module" src="./gallery.mjs"></script>
+</body>
+</html>
