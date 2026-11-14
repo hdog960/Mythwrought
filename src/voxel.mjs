@@ -185,10 +185,10 @@ export function meshChunk(world,cx,cz){
   combined.set(meadow,solid.length+canopy.length+grove.length);
   combined.set(runes,solid.length+canopy.length+grove.length+meadow.length);
   // Existing meadow and grotto tail positions retain their regression invariants.
-  combined.set(grotto,solid.length+canopy.length+grove.length+meadow.length+runes.length);
-  combined.set(waystones,combined.length-waystones.length-caveThresholds.length);
-  combined.set(caveThresholds,combined.length-caveThresholds.length-moonbells.length);
-  combined.set(moonbells,combined.length-moonbells.length);
+  combined.set(grotto,combined.length-grotto.length);
+  combined.set(waystones,combined.length-grotto.length-waystones.length-caveThresholds.length-moonbells.length);
+  combined.set(caveThresholds,combined.length-grotto.length-caveThresholds.length-moonbells.length);
+  combined.set(moonbells,combined.length-grotto.length-moonbells.length);
   return combined;
 }
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.
