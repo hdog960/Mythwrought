@@ -1,5 +1,5 @@
 /** Pack 5 M1 candidate surfaces. Source-only; never registers gameplay block IDs. */
-import {validatePhysicalDescriptor} from './fixture.mjs';
+import {validatePhysicalDescriptor,rotateLocalBox} from './fixture.mjs';
 const b=(x0,y0,z0,x1,y1,z1,material)=>({box:[x0,y0,z0,x1,y1,z1],material});
 const MAT=Object.freeze({
   lime:[0.89,0.86,0.74,1],chalk:[0.97,0.95,0.85,1],pearl:[0.82,0.87,0.82,1],sage:[0.55,0.67,0.57,1],
@@ -96,7 +96,8 @@ export const PACK5_SURFACE_FAMILIES=Object.freeze(Object.keys(PACK5_SURFACE_VARI
 }));
 
 /** Immutable, bounded color-indexed triangles from authored physical boxes; preview only. */
-export function surfaceBoxMesh(descriptor){
+export function surfaceBoxMesh(descriptor,{rotation=0}={}){
+  if(!Number.isInteger(rotation)||rotation<0||rotation>3)throw Error('Invalid mesh rotation');
   validatePhysicalDescriptor(descriptor);
   if(!Array.isArray(descriptor.art)||descriptor.art.length!==descriptor.parts[0].boxes.length)throw Error('Invalid surface artwork');
   const faces=[
@@ -106,7 +107,7 @@ export function surfaceBoxMesh(descriptor){
   ];
   const p=[],color=[],indices=[];let v=0;
   for(const part of descriptor.art){
-    const [x0,y0,z0,x1,y1,z1]=part.box,c=MAT[part.material];if(!c)throw Error('Unknown physical material');
+    const [x0,y0,z0,x1,y1,z1]=rotateLocalBox(part.box,rotation),c=MAT[part.material];if(!c)throw Error('Unknown physical material');
     for(const quad of faces){
       for(const vertex of quad){p.push(vertex[0]?x1:x0,vertex[1]?y1:y0,vertex[2]?z1:z0);color.push(...c);}
       indices.push(v,v+1,v+2,v,v+2,v+3);v+=4;
