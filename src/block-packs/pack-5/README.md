@@ -54,3 +54,13 @@ Run in a Chromium/Xvfb environment with Mesa software OpenGL:
 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/gallery-webgl-browser.py <output-dir>`
 
 This Pack 5-only Python Playwright runner verifies six *genuine* WebGL2 draws at 667×375, 844×390 and 932×430, for 0° and 90° shape rotations; it writes screenshots and requires unique nonblank pixel readback for all six candidates. Browser navigation to localhost is blocked in the current test sandbox, so the runner assembles the exact checked-out JavaScript sources inline in an offline `about:blank` page. This is **not** proof that the original served HTML/module graph loads correctly. Do not describe this as physical iPhone testing, deployed renderer output, premium art approval or live schema-1 state support. See `M1_ACCEPTANCE.md`.
+
+## Milestone 2 — isolated physical residential candidate pool
+
+`residential-furnishings.mjs` defines four **CANDIDATE** physical families, each with two distinct original geometric variants: 82 Beds (genuine two-cell head/foot with per-cell floor support and canopy), 83 Chairs & Stools (single-person seat silhouettes, no sitting), 84 Bookshelves (modeled books/scrolls with rear/side joinery, not retail display shelving), and 85 Cabinets & Wardrobes (closed paneled furniture, not gameplay inventory). No housing, room assembly, NPCs or new gameplay.
+
+`residential-gallery.html` previews the eight candidates in a responsive WebGL2 4×2 grid. Native Node: `node --test tests/block-packs/pack-5/*.test.mjs` (**66/66** currently pass). Reproducible genuine Chromium WebGL2 **with actual native ES module execution** for both M1 and M2:
+`LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/esm-webgl-browser.py m2 <output-directory>`
+(use `m1` for previous architectural surfaces).
+
+The runner changes relative imports to absolute `data:` module URLs for offline about:blank because the environment prevents localhost HTTP navigation; it **does not certify source-served module loading**, real iPhone GPU performance, live registry/collision/save state, or creator visual approval. Review `M2_ACCEPTANCE.md` and `M1_ACCEPTANCE.md`. Latest checked `main` is checkpoint **008**; Pack 5 is still unmerged/development-only.
