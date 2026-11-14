@@ -12,8 +12,8 @@ canvas{display:block;width:100%;background:linear-gradient(#1b353a,#26382f);
 border:1px solid #698575;border-radius:12px;aspect-ratio:16/9}
 small{color:#a9c5b3}pre{white-space:pre-wrap;overflow:auto}
 </style></head>
-<body><h1>Timber & Infrastructure — isolated physical inspector</h1>
-<p>Original candidate timber meshes, genuine selectable AABB occupancy, and fixture-only placement.
+<body><h1>Timber, joinery & paving — isolated physical inspector</h1>
+<p>Original timber, hinge, gravel and paving candidate meshes, genuine selectable AABB occupancy, and fixture-only placement.
 Nothing here is installed in Mythwrought or written to its world save.</p>
 <nav>
 <select id="asset" aria-label="Candidate material"></select>
@@ -26,16 +26,19 @@ Use the browser console for fixture-targeted raycast and snapshot inspection: wi
 <script type="module">
 import {PACK_2_ASSETS,pack2PreviewMesh} from '../../../src/block-packs/pack-2/definitions.mjs';
 import {PACK_2_JOINERY,joineryAsset,joineryPreviewMesh} from '../../../src/block-packs/pack-2/joinery.mjs';
+import {PACK_2_GROUND,groundAsset,groundPreviewMesh} from '../../../src/block-packs/pack-2/ground.mjs';
 import {Pack2Fixture} from './fixture.mjs';
 let fixture=new Pack2Fixture(),placed=[];
 window.pack2Fixture=fixture;
 const el=id=>document.getElementById(id),canvas=el('preview'),ctx=canvas.getContext('2d');
-const assets=[...PACK_2_ASSETS,...PACK_2_JOINERY];
+const assets=[...PACK_2_ASSETS,...PACK_2_JOINERY,...PACK_2_GROUND];
 const list=el('asset');for(const a of assets){const o=document.createElement('option');
   o.value=String(a.id);o.textContent=a.id+' · '+a.name;list.append(o);}
 let yaw=.7,tilt=.56;
 function drawMesh(state,cx,cy,scale){
-  const mesh=joineryAsset(state.id)?joineryPreviewMesh(state.id,state):pack2PreviewMesh(state.id,state.rotation);
+  const mesh=groundAsset(state.id)?groundPreviewMesh(state.id,state.rotation):
+    joineryAsset(state.id)?joineryPreviewMesh(state.id,state):
+    pack2PreviewMesh(state.id,state.rotation);
   const p=mesh.positions,n=mesh.normals,c=mesh.colors,ix=mesh.indices;
   const cs=Math.cos(yaw),sn=Math.sin(yaw),ct=Math.cos(tilt),st=Math.sin(tilt);
   function transform(i){
@@ -71,7 +74,7 @@ function render(){
   ctx.fillText(asset.name+' · rotation '+choice.rotation*90+'°'+(joint?' · '+choice.variant+' · '+(choice.open?'OPEN':'CLOSED'):''),24,375);
   ctx.fillText('Solid face quads: '+m.physicalQuads+'   Grain / joint quads: '+m.decorationQuads,24,402);
   ctx.fillText('Fixture placements: '+placed.length+' / 4 · camera drag changes viewpoint only',24,433);
-  el('status').textContent='ID '+choice.id+'  |  '+(asset.profile??asset.surface.feature)+'  |  '+(asset.surface.finish??asset.surface.pattern)+
+  el('status').textContent='ID '+choice.id+'  |  '+(asset.profile??asset.surface.feature??asset.surface.pattern)+'  |  '+(asset.surface.finish??asset.surface.pattern)+
     '  |  '+(placed.length?JSON.stringify(fixture.serialize().cells):'No fixtures placed');
 }
 list.onchange=()=>{fixture.select(Number(list.value));render();};
