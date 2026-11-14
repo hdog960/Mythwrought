@@ -46,3 +46,6 @@ Twenty-three generated non-Desert M1 models now model high truss ribs every four
 
 ### Session 7 — structural support connectivity gate
 New dedicated `structural-connectivity.test.mjs` validates that **every actual structural cell** (foundation/floor/wall/window/roof) can reach an authored ground-level foundation through face-sharing adjacency, across all 30 M1 candidate buildings. Fixes five previously floating roof/lantern sections: rear gable supports for Mountain stepped terraces and covered porch position for Desert temple lanterns, without blocking the open Desert courtyard. It does not represent certified game-world load physics, stair/roof slope or real renderer shape ABI.
+
+### M1 Session 8: sealed stepped-roof envelope
+Connectivity tests alone do not prove exterior enclosures are weather-tight: the 12 Mountain and Enchanted Forest representative shops/temples had 248 empty perimeter cells between top wall plates and roof terraces. The candidate geometry now fills those exposed side eaves with symbolic `wall` cells only, while separate Node tests enforce complete outer roof-edge closure and preservation of physical window cells, street door openings and intentionally uncovered Desert courtyards. All physical shape/air/water/collision claims remain conditional on future actual block integration.

@@ -153,6 +153,16 @@ function build({biome,size,category}){
     for(let y=top+1;y<roofAt(x,depth-1);y++)
       if(!cells.has(COORD(x,y,depth-1)))put(x,y,depth-1,m.trim,'wall');
   }
+  // Weather-seal exposed mountain and livingwood exterior edges below roofs.
+  // Earlier roof ribs connected to foundations, but left 248 upper-wall gaps
+  // distributed along irregular side perimeters in 12 models. Solidify only
+  // perimeter cells strictly below the roof, never glazing, doors, skylights,
+  // or the open Desert courtyards; all are authored symbolic material voxels.
+  if(biome==='mountain'||biome==='enchanted-forest')for(let x=0;x<width;x++)for(let z=0;z<depth;z++){
+    if(!footprint(x,z)||!bounds(x,z))continue;
+    for(let y=top+1;y<roofAt(x,z);y++)
+      if(!cells.has(COORD(x,y,z)))put(x,y,z,m.wall,'wall');
+  }
   // Category-defining exterior monumentality: actual paired belfry volumes,
   // a three-wide processional entrance, and a visible roof-crossing lantern tower.
   // A single antenna-shaped post is NOT a belfry. These occupy a 2x2 footprint

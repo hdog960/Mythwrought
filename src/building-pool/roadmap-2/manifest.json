@@ -30,7 +30,7 @@
   },
   "milestones": {
     "M0": "technical-accepted-at-71838311-exact-head-CI-and-real-chromium",
-    "M1": "30 authored candidates; 28/28 native Node and 90/90 genuine Chromium; five detached roof islands repaired; creator review and production asset interfaces OPEN",
+    "M1": "30 authored candidates; 248 exposed exterior upper-wall gaps sealed in 12 Enchanted Forest and Mountain models; 30/30 native Node and 90/90 genuine Chromium; creator and physical shape ABI approval open",
     "M2": "not-started",
     "M3": "not-started",
     "M4": "not-started",
@@ -196,14 +196,15 @@
     "M0ExactHeadCI": "GitHub Actions #43644864326 PASS at 71838311c39a0cf4a2fdeeeac8e5d28c317f5aed",
     "M0Node": "9/9 genuine native Node v22.16.0",
     "M0Browser": "nine real Chromium Canvas2D screenshots at three landscape sizes, preview inspector-reviewed",
-    "M1LocalNode": "28/28 native Node v22.16.0 tests PASS on byte-verified committed code; new structural-connectivity module validates all 30",
-    "M1Browser": "90/90 real headless Chromium Canvas2D 667x375/844x390/932x430 captures after support repairs, representative Desert and Mountain visuals inspected",
+    "M1LocalNode": "30/30 genuine native Node 22.16.0 PASS, zero skips, exact Git blob verified source and two new enclosure tests; PR-head CI independent",
+    "M1Browser": "90/90 real Chromium Canvas2D screenshots across 30 models at 667x375 844x390 932x430 after weather envelope corrections; representative views inspected; not in-game WebGL2",
     "realIphone": "not tested",
     "M1VisualReview": "Earlier 30-design contact sheet showed similarly boxy stores and temples. Rebuilt all 15 temples with 2x2 roof-overriding paired belfries, triple-width ceremonial portal, raised two-row dais and higher visible roof lantern; creator aesthetic approval remains OPEN.",
     "M1StructuralFinding": "BEFORE: mountain temple left belfry 0/4 lower support cells, enchanted forest 2/4, desert 3/4. AFTER: 4/4 foundation and floor cells at both belfries across all 15 temples. Two symbolic pack1:008 stair candidate approaches added to raised dais; actual stair geometry ABI unverified.",
-    "M1Review": "Not creator accepted, NOT real game WebGL2, stair slope/collision/rotation/save ABI unresolved, 0 integrated, M2 not started",
+    "M1Review": "0 accepted, 0 world placed; genuine asset shapes/stairs, collision and creator visual approval OPEN; M2 locked.",
     "M1RoofStructure": "New high-level truss beams and roof-post ribs added above interior three-high walk clearance in 23 generated non-desert buildings (original M0 store unchanged). Desert courtyard skylight intentionally remains open. Actual physical sloped-mesh/rotation and collision interfaces remain unverified.",
-    "M1StructuralConnectivity": "Before: floating structural islands in Mountain general store small (22), large (60), Mountain temple medium (17), Desert temple small (11), medium (11). After: all structural wall/window/roof/floor voxels six-neighbor connected to y0 foundations in all 30 authored M1 candidates."
+    "M1StructuralConnectivity": "Before: floating structural islands in Mountain general store small (22), large (60), Mountain temple medium (17), Desert temple small (11), medium (11). After: all structural wall/window/roof/floor voxels six-neighbor connected to y0 foundations in all 30 authored M1 candidates.",
+    "M1WeatherEnvelope": "A new comprehensive perimeter audit found 248 exposed upper-wall gaps across all 12 Enchanted Forest and Mountain generated models despite all structural voxels being foundation connected; new symbolic wall cells close them without modifying windows, doors or Desert courtyards."
   },
   "status": "M0 TECHNICAL ACCEPTED; M1 30 AUTHOR-CANDIDATE CONCEPTS; DRAFT/UNMERGED/UNDEPLOYED",
   "integrationPR126": "Checkpoint 008 live automation-world activation; no building-pool or pack paths changed; not included in this draft."
