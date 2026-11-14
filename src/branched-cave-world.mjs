@@ -1,5 +1,5 @@
 // Optional second cave wing: real collision/mesh voxels, never enabled for existing saves.
-import {BLOCK, WORLD_MIN_Y, WORLD_MAX_Y, worldKey} from './voxel.mjs';
+import {BLOCK, WORLD_MIN_Y, WORLD_MAX_Y, worldKey, collides, BODY_HEIGHT, BODY_RADIUS} from './voxel.mjs';
 import {CAVE_CANDIDATE, caveRoute, experimentalCaveWorld} from './experimental-cave-route.mjs';
 
 export function branchedCaveWorld(world,origin=CAVE_CANDIDATE){
@@ -37,10 +37,12 @@ export function northWingTraversal(world,origin=CAVE_CANDIDATE){
   for(let dz=0;dz>=-10;dz--){
     const z=origin.z+dz, floor=floorAt(t), feet=floor+1;
     const supported=candidate.get(x,floor,z)!==BLOCK.AIR;
-    const clear=candidate.get(x,feet,z)===BLOCK.AIR &&
+    const clear=!collides(candidate,x+.5,feet,z+.5) &&
+      candidate.get(x,feet,z)===BLOCK.AIR &&
       candidate.get(x,feet+1,z)===BLOCK.AIR;
     samples.push({x,y:feet,z,supported,clear});
   }
-  return {samples,failures:samples.filter(p=>!p.supported||!p.clear),
-    walkable:samples.every(p=>p.supported&&p.clear)};
+  const failures=samples.filter(p=>!p.supported||!p.clear);
+  return {samples,failures,walkable:failures.length===0,
+    bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
 }
