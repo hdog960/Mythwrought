@@ -4,6 +4,7 @@ import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mj
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
 import {clampLook,forwardVector,compassDegrees,MAX_PITCH} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
+import {createTouchActionOwner} from './touch-action-owner.mjs';
 import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
@@ -562,17 +563,15 @@ function start(){
   // but preserve click for mouse, keyboard and accessibility activation.
   function bindGameplayAction(id,action){
     const button=document.getElementById(id);
-    let lastTouchAt=-Infinity,owner=null;
-    function release(e){
-      if(owner===e.pointerId)owner=null;
-    }
+    let lastTouchAt=-Infinity;
+    const owner=createTouchActionOwner();
+    function release(e){owner.release(e.pointerId);}
     button.addEventListener('pointerdown',e=>{
       if(e.pointerType!=='touch')return;
       e.preventDefault();
       // Only the first finger owns a discrete action until it releases.
       // A second finger landing on Mine/Place must not perform a duplicate edit.
-      if(owner!==null||!help.hidden||document.hidden||button.disabled)return;
-      owner=e.pointerId;
+      if(!help.hidden||document.hidden||button.disabled||!owner.claim(e.pointerId))return;
       lastTouchAt=performance.now();
       action();
     });
@@ -580,8 +579,8 @@ function start(){
       window.addEventListener(type,release,true);
     }
     button.addEventListener('lostpointercapture',release);
-    window.addEventListener('blur',()=>{owner=null;});
-    document.addEventListener('visibilitychange',()=>{if(document.hidden)owner=null;});
+    window.addEventListener('blur',()=>owner.cancel());
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)owner.cancel();});
     button.addEventListener('click',e=>{
       if(e.detail!==0&&performance.now()-lastTouchAt<750){
         e.preventDefault();
