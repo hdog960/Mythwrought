@@ -247,5 +247,27 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
         emit(a,b,c,dark);emit(a,c,d,light);
       }
     }
+  // Highland shoulder meadows: broad, continuous color fields on existing
+  // grass tops at the crest of real slopes. This is a non-colliding overlay,
+  // not a changed biome, block, terrain height, or save migration.
+  // Require the actual top voxel and air above, so edits suppress the effect.
+  for(let x=cx*chunkSize;x<(cx+1)*chunkSize;x++)
+    for(let z=cz*chunkSize;z<(cz+1)*chunkSize;z++){
+      const top=heightAt(x,z,seed);
+      if(top<13||world.get(x,top,z)!==grass||world.get(x,top+1,z)!==air)continue;
+      const relief=Math.max(...faces.map(([dx,dz])=>top-heightAt(x+dx*3,z+dz*3,seed)));
+      if(relief<3)continue;
+      // Coarse world-space fields, not per-block noise, keep neighboring
+      // chunks visually coherent and the overlay sparse on mobile GPUs.
+      const field=hash(Math.floor(x/12),Math.floor(z/12),seed+14983);
+      if(field>.43)continue;
+      const variation=hash(Math.floor(x/6),Math.floor(z/6),seed+14989);
+      const y=top+1.014, margin=.035;
+      const a=[x+margin,y,z+margin],b=[x+1-margin,y,z+margin];
+      const c=[x+1-margin,y,z+1-margin],d=[x+margin,y,z+1-margin];
+      const green=[.31+variation*.05,.48+variation*.07,.29+variation*.04];
+      const gold=[.52+variation*.06,.57+variation*.05,.32+variation*.04];
+      emit(a,b,c,green);emit(a,c,d,gold);
+    }
   return new Float32Array(out);
 }
