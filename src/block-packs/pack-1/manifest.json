@@ -102,7 +102,11 @@
     "m6VisualSelectionRunnerFix": "Pack1-only five-gallery Playwright runner now asserts visible selected/placed card-state counts at empty, place-all, offline canonical save/restore, and clear. Source selector classes verified against corresponding gallery modules; exact source JS parses. RUNNER NOT EXECUTED IN CHROMIUM.",
     "m6ChromiumAdminPolicyRetested": "System Chromium can launch, but actual data:, file:, and 127.0.0.1 HTTP navigations return net::ERR_BLOCKED_BY_ADMINISTRATOR. Genuine 15 candidate views/30 screenshots cannot be captured in current environment, no bypass attempted.",
     "m6NativeNodeUnchanged": "93/93 genuine Node 22.16.0 nested Pack1 tests PASS, zero fail/skip/TODO on 21 GitHub-blob-verified files (M6_NATIVE_NODE_EVIDENCE.md). No candidate code changed since these tests.",
-    "m6CurrentCommitReference": "Main ac263720b60641c65b02330348dd76d0ef9cb75e, integration checkpoint 008, Pack1 excluded; PR #113 remains draft/unmerged and candidate-only. GitHub Actions queued on prior head, and current exact-head CI must be rechecked."
+    "m6CurrentCommitReference": "Main ac263720b60641c65b02330348dd76d0ef9cb75e, integration checkpoint 008, Pack1 excluded; PR #113 remains draft/unmerged and candidate-only. GitHub Actions queued on prior head, and current exact-head CI must be rechecked.",
+    "m6NativePartialVoxelProbeReference": "3/3 genuine Node v22.16.0 canonical fixture probe cases PASS for ID21 garden solid/empty, ID24 foliage solid/empty, ID32 floral targetable-passable/empty, source previously exact GitHub blob-verified.",
+    "m6RealBrowserCutawayProbePending": "Pack1 Playwright gallery runner now adds 2 real canvas cutaway click checks in each of 3 partial-shape galleries x 3 viewports (18 pending genuine browser checks), matching source-authored selection/collision semantics. Modified run-acceptance.mjs requires 63 browser interactions instead of 45; both scripts parsed. This is NOT browser execution.",
+    "m6ChromiumNavigationBlocker": "Chromium launches, but data:/file:/localhost navigation returns ERR_BLOCKED_BY_ADMINISTRATOR. 0 of 15 real gallery views and 0 of 30 authentic PNGs. No bypass attempted.",
+    "m6NativeGatePreserved": "93/93 genuine Node PASS from nine modules and 21 GitHub-blob-verified sources; asset source unchanged and that evidence preserved in M6_NATIVE_NODE_EVIDENCE.md."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -532,7 +536,7 @@
   ],
   "pr": "https://github.com/hdog960/Mythwrought/pull/113",
   "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED",
-  "nextMilestone": "Obtain permitted browser environment with actual navigation and exact PR gallery source, run 5 Canvas2D galleries x 3 viewports, capture and inspect 30 real PNGs and provenance. Fix Pack1 visual defects only, then creator review; no merge/deploy/live integration.",
+  "nextMilestone": "In authorized Chromium runtime run 5 galleries at 667×375/844×390/932×430, including 18 source-grounded cutaway probes and 63 total interaction checks; inspect all 30 authentic PNGs and record any Pack1-only art/selection fixes. Do not repeat native or V8 suites without code change.",
   "allocations": [
     {
       "range": [
@@ -577,8 +581,8 @@
       "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "M6: Pack1 genuine 93/93 Node gate already PASS and preserved; strengthened gallery browser runner's visual selected-card parity through empty/place/offline-save/clear across all five galleries. Source checked; Chromium navigation blocked by admin, genuine screenshot gate still OPEN. All 30 candidates unchanged.",
-  "finalAcceptance": "OPEN: 93/93 Pack1 native Node VERIFIED. Chromium 15 views/30 authentic screenshots, production WebGL2 material/selection/collision/rotation save and physical iPhone creator review NOT VERIFIED. 21 families/30 IDs 9-38 CANDIDATE.",
+  "latestMilestone": "M6 native 93/93 Node PASS preserved; independently verified real fixture selection/collision probe points for garden ID21, foliage ID24, floral ID32. Pack1-only browser runner now requires 18 cutaway clicks and 63 total interactions across 15 views; Chromium admin navigation block persists, 0 screenshots captured.",
+  "finalAcceptance": "OPEN: Native 93/93 Node PASS, 3 native reference probe cases PASS. 15 real Chromium gallery views/30 screenshots, production WebGL2/schema-1 and physical-iPhone/creator review missing. All 30 IDs 9-38 CANDIDATE.",
   "acceptanceMatrix": {
     "family_roster": "21_OF_21_ALL_CANDIDATE",
     "candidate_ids": "30_UNIQUE_9_THROUGH_38_UNMERGED",
@@ -602,7 +606,10 @@
     "authentic_30_screenshots": "ZERO_CAPTURED",
     "native_node_93_gate": "PASSED_GENUINE_NODE_EXACT_COMMITTED_SOURCE",
     "pack1_candidate_registry": "30_RESERVED_UNMERGED_UNDEPLOYED",
-    "latest_main_checkpoint": "008"
+    "latest_main_checkpoint": "008",
+    "native_partial_shape_probe_cases": "THREE_OF_THREE_PASS_NODE_SOURCE_FIXTURE",
+    "real_chromium_cutaway_probe_cases": "18_ADDED_RUNNER_SOURCE_NOT_EXECUTED",
+    "browser_interaction_total": "63_REQUIRED_ZERO_RUN"
   },
   "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md",
   "baselineAtCreation": {
