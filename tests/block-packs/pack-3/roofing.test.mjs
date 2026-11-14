@@ -12,7 +12,8 @@ test('ownership: 17 families, four material, three roof, three fortified, four o
   assert.deepEqual(PACK3_ROSTER.map(x=>x.roster),[23,24,25,26,27,28,29,69,70,71,72,73,74,75,76,77,78]);
   assert.deepEqual(PACK3_INITIAL_IDS,[109,110,111,112]);
   assert.equal(new Set(PACK3_INITIAL_IDS).size,4);
-  assert.equal(PACK3_COORDINATION.integratedCheckpoint,'006');
+  assert.equal(PACK3_COORDINATION.integratedCheckpoint,'007');
+  assert.equal(PACK3_COORDINATION.auditedMain,'caf47776b723a36684edc1a72749e49268ccc688');
   for(const x of PACK3_ROSTER)if(x.id!==null){
     assert.ok(x.id>=109&&x.id<=158&&x.id!==255);
     assert.equal(x.implementation,'physical-candidate');
