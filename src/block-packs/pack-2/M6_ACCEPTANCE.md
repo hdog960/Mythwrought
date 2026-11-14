@@ -1,8 +1,8 @@
 # MYTHWROUGHT — Pack 2 Milestone 6 final candidate acceptance review
 
-**Review status:** `SOURCE CANDIDATE REVIEW COMPLETE; NATIVE/PRODUCTION ACCEPTANCE OPEN`  
+**Review status:** `SOURCE + ISOLATED NATIVE NODE + ORIGINAL CHROMIUM GALLERY PASS; FULL-GIT/PRODUCTION ACCEPTANCE OPEN`  
 **Pack:** 2 — Timber & Infrastructure | **Draft PR:** #114 | **Coordinated in:** Issues #109/#117  
-**Latest audited integrated main:** `caf47776b723a36684edc1a72749e49268ccc688` | **Incorporation checkpoint:** 007  
+**Latest audited integrated main:** `ac263720b60641c65b02330348dd76d0ef9cb75e` | **Incorporation checkpoint:** 008  
 **Ownership:** `src/block-packs/pack-2/`, `tests/block-packs/pack-2/` only  
 **Persistent candidate ID allocation:** exactly IDs 59–76, 18 unique families. No shared engine, renderer, world generation, CI, unrelated packs, deployment or main changes. Existing IDs 0–8 frozen; cache sentinel 255 reserved.
 
@@ -123,12 +123,55 @@ The command does not approve incorporation: Gate A and v0.11 remain locked behin
 - [x] Pack-wide **89/89** checked-in test bodies still passed isolated V8 evaluation; the new tenth M6 test verifies **18/18 unique exact geometry/material mesh signatures**. Native water smoke does not certify the other 17 candidates.
 - [ ] The **six complete committed native Node suites**, **all 18 candidate meshes in the committed Python gallery runner**, **54 authentic Pack 2 gallery screenshots**, production WebGL2 water alpha/neighbor handling, actual liquid simulation, schema-1 persistence and physical iPhone Gate A art/control approval remain **NOT VERIFIED**. The local container still lacks a faithful complete GitHub checkout; no native whole-pack certification is implied.
 
+## Session 14 — all six real Node suites and all 18 Chromium candidates VERIFIED (2026-11-14)
+
+**Evidence provenance:** Pack 2 source, fixture, six committed tests, preview and the committed Python gallery runner were reconstructed into a local staging folder from approved GitHub connector content. All **14 relevant staged source/test/gallery files** were independently checked with `git hash-object` and matched the **exact blobs on PR #114 head `89cbec3fa17ee233aa91e9abefd8af12ea2e4203`**. No Pack 2 production module, test body, or gallery runner was rewritten for acceptance. The folder is **NOT a complete Git checkout**, so its `git_head` is null and `exact_head_verified` is false: this limitation is intentionally preserved rather than inventing Git HEAD proof.
+
+### Genuine Node v22.16.0 — six committed nested suites
+
+Ran all six original `node --test` suites together in the local verified-source tree:
+
+| Committed suite | Native test pass |
+|---|---:|
+| `pack-2.test.mjs` — foundation | 12/12 |
+| `joinery.test.mjs` | 15/15 |
+| `ground.test.mjs` | 14/14 |
+| `infrastructure.test.mjs` | 17/17 |
+| `water.test.mjs` | 21/21 |
+| `acceptance.test.mjs` | 10/10 |
+| **TOTAL** | **89/89 passed, 0 failed, 0 skipped** |
+
+The full native Node run was **repeated**, with 89/89 passing again; the final log is locally preserved as `node-all-six-verified-pack2.log` and included in the user-facing screenshot proof ZIP.
+
+**Important production-boundary qualification:** The Pack 2 modules and test bodies are exact GitHub blobs, but the reconstructed tree contains a **local, explicitly marked, test-only stand-in for `src/voxel.mjs`**. That facade is used *solely* where the first five suites check the legacy enum 0–8, rejection of provisional ID 76, and rejection of Pack 2 fixture envelopes. It is **NOT** the production `VoxelWorld` module, and the 10 cross-family M6 tests do not import it. This is genuine native **candidate-suite execution**, not full-production-engine or schema-1-save integration certification. The faithful production `VoxelWorld` import/interaction should be checked on a real full repo checkout before merging.
+
+### Genuine Chromium — all 18 mesh candidates, three landscapes
+
+Executed the **original committed** `tests/block-packs/pack-2/gallery-browser.py` again with Python Playwright + real system Chromium against exact-blob Pack 2 source:
+
+| CSS landscape viewport | Assets rendered | Unique geometry image hashes | Fixture save round trip | Water translucent pixels | JavaScript errors |
+|---|---:|---:|---|---:|---:|
+| 667×375 | 18/18 | 18/18 | PASS (18 rows) | 77,199 | 0 |
+| 844×390 | 18/18 | 18/18 | PASS (18 rows) | 77,199 | 0 |
+| 932×430 | 18/18 | 18/18 | PASS (18 rows) | 77,199 | 0 |
+
+- **66 authentic PNG screenshots** captured: **54 individually rendered physical candidate canvases (IDs 59–76 × 3 viewports)**, plus **12** water/full-page/open-gate/drain-slot-parapet detail images. All three complete 18-asset contact sheets were visually inspected; every preview has clearly distinguishable 3D geometry with no obvious cropping/clipping. Separate open-gate and real parapet drain-slot captures inspected.
+- The gallery independently confirmed no empty candidate, no duplicate *rendered* geometry image hash in a given viewport, actual water alpha, page layout within the viewport width, and deterministic fixture-only state snapshots after placing all 18 IDs. `gallery-recheck.log` captured the repeated genuine browser PASS result; screenshot proof ZIP and three contact sheets are available in the conversation.
+- **This is a genuine Canvas 2D rendering of original physical triangle preview meshes**, **not** the playable game's WebGL2 renderer, production fluid physics, Safari or a real iPhone test. The browser runner did not verify a Git checkout HEAD because the local source tree is non-git; Git blob matching establishes the provenance of the candidate source files instead.
+
+### Remaining gates (unchanged authorization boundary)
+
+- [ ] Full checkout containing the **real** production `src/voxel.mjs` and its imports: repeat native six suites and true integrated browser/WebGL2/offline checks without a boundary facade.
+- [ ] Register provisional Pack 2 IDs 59–76 only in an independently creator-authorized shared-engine integration, validate collision/hinge/gravel gravity, fluid alpha sorting, water source propagation and schema-1 backward-safe state sidecar; **none of those gameplay systems were changed or validated here**.
+- [ ] Physical iPhone controls and creator visual/art Gate A approval remain OPEN; v0.11 LOCKED.
+- [ ] No merge, Pages deployment, world-placement, other-manual-pack edits, or shared CI/code changes are authorized by this acceptance proof.
+
 ## Required real test gates — NOT certified by the source-level checks
 
 | Gate | Evidence required | Current status |
 |---|---|---|
-| Dedicated native Node | Run `node --test tests/block-packs/pack-2/*.test.mjs` from an exact-head checkout | **OPEN / unavailable locally** (GitHub DNS prevents checkout; external repo unavailable in sandbox) |
-| Browser inspector | Run `node tests/block-packs/pack-2/browser-verify.mjs` with Playwright/Chromium and capture authentic screenshots for 667×375, 844×390, 932×430 | **OPEN / not executed** |
+| Dedicated native Node | Run all six exact committed Pack 2 suites | **89/89 genuine Node PASS against exact Pack 2 blobs in staged local folder**; **full-git/production-VoxelWorld rerun OPEN**, test-only legacy facade explicitly disclosed |
+| Browser inspector | Run committed Python `gallery-browser.py` with authentic Chromium screenshots at 667×375, 844×390, 932×430 | **PASS: 18×3 candidate renders + 12 detail images = 66 real PNGs**; 18 distinct image hashes per viewport, water alpha, fixture restore, 0 JS errors; **git-head-full-checkout / production WebGL2 OPEN** |
 | Standard CI | Recheck exact PR head and Github Actions Node + Chromium baseline, not a previous commit | **Check on PR; root glob excludes nested Pack 2 tests** |
 | Production renderer | Real WebGL2 composite with transparent water, correct back-face culling, neighboring face omission, water alpha sorting, 25 loaded chunks and iPhone landscape GPU budget | **BLOCKED on centrally approved integration** |
 | Production controls & saves | Exact mobile device tests, unobstructed left/right grip rails, opt-in schema-1 state sidecar with atomic recovery, offline PWA tests | **BLOCKED, not claimed** |
@@ -136,7 +179,7 @@ The command does not approve incorporation: Gate A and v0.11 remain locked behin
 
 The optional browser verifier visits all 18 candidate mesh choices at three iPhone landscape viewport sizes and, when actually executed, can save 54 distinct candidate canvas screenshots plus authentic full-page and detailed water/open-gate/parapet screenshots. It checks a **Canvas 2D demonstration of authentic Pack 2 candidate triangle data**, not a production WebGL2 fluid simulation. Even a green optional browser inspector must not be used as proof that flowing water, collision, source updates, saved edits or integrated game controls are functional.
 
-## How to run the pending independent acceptance checks
+## How to repeat the now-passing isolated acceptance checks on a full Git checkout
 
 From an exact checkout of [draft PR #114](https://github.com/hdog960/Mythwrought/pull/114):
 
