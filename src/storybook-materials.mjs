@@ -80,6 +80,13 @@ void main(){
     base=mix(base,vec3(.84,.85,.77),.15*quartz*near);
     base=mix(base,vec3(.68,.82,.91),(.12*frostRidge+.09*coldPocket)*near);
     base=mix(base,vec3(.39,.35,.32),.17*scar*near);
+    // Long sweeping pale calcite seams distinguish exposed limestone shelves.
+    // Coordinates are face-local and deterministic; no terrain or save changes.
+    float calciteFlow=vUv.y*6.0+1.4*sin(vUv.x*3.5)+.35*sin(vUv.x*10.0);
+    float calcite=1.0-smoothstep(.055,.17,abs(sin(calciteFlow*3.14159)));
+    float shaleShelf=smoothstep(.63,.82,.5+.5*sin(calciteFlow*.75+vUv.x*1.3));
+    base=mix(base,vec3(.91,.86,.71),.21*calcite*near);
+    base=mix(base,vec3(.34,.42,.47),.12*shaleShelf*(1.0-calcite)*near);
     // Broad weathered ironstone lenses add warm mineral contrast to cliff faces.
     float ironLens=smoothstep(.70,.91,.5+.5*sin(vUv.x*3.7+sin(vUv.y*4.1))*sin(vUv.y*5.6-vUv.x*1.3));
     float rim=1.0-smoothstep(.025,.10,abs(sin(vUv.x*3.7+sin(vUv.y*4.1))*sin(vUv.y*5.6-vUv.x*1.3)));
@@ -171,6 +178,7 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   mineralInclusions:Object.freeze(['crystal-indigo-core','crystal-frost-inclusions','ore-oxidized-seams']),
   coldGeologyAccents:Object.freeze(['stone-frost-quartz-ridges','stone-cold-pockets','crystal-glacial-cleavage']),
   weatheredStrataAccents:Object.freeze(['soil-ochre-sediment-fans','soil-damp-pockets','stone-erosion-scars']),
+  limestoneShelfAccents:Object.freeze(['stone-sweeping-calcite','stone-blue-shale-shelves']),
   ironstoneAccents:Object.freeze(['stone-ironstone-lenses','stone-pale-mineral-rims']),
   agateHematiteAccents:Object.freeze(['crystal-nested-agate-bands','crystal-indigo-growth-core','ore-hematite-host-plates','ore-pale-plate-boundaries'])
 });
