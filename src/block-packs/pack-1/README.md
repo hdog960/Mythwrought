@@ -212,3 +212,15 @@ All **21 assigned Stone & Nature roster families** now have source-authored opt-
 Milestone 6 remains **OPEN** until dedicated genuine Node/Chromium and original screenshot review, source ID and geometry integrity audits, shape-aware live integration validation and historical schema-1 save test evidence. Production VoxelWorld.set still rejects IDs above 8, unmerged :00/:12 generic shape contracts are not live-wired, and old schema-1 edit rows cannot persist arbitrary rotations. A creator-authorized manual integration, followed by iPhone visual/controls approval, is required before any of these candidate assets are player-usable. Do not merge PR #113, deploy Pages, place flowers in the generated world, start v0.11 or alter central engine files without that separate explicit authorization.
 
 **STATUS: 21/21 SOURCE CANDIDATE FAMILIES; 30/30 DISTINCT CANDIDATE IDS; 0/30 LIVE-INTEGRATED PACK 1 IDS.**
+
+## Milestone 6 — updated real-test handoff
+
+The source-development roster is complete (21/21 families, 30 candidate IDs 9–38), but Milestone 6 final acceptance is still **OPEN / NOT READY**. The canonical final review matrix, exact-code commands, and blockers are now in **M6_ACCEPTANCE.md** (same Pack 1 directory). The pack-specific manifest is the machine-readable ledger.
+
+Two NEW pack-owned opt-in acceptance tools:
+- tests/block-packs/pack-1/all-families.test.mjs: real-Node-ready unified 30-ID and 21-roster consistency suite with 10 additional test groups. All 10 test bodies passed V8 compatibility evaluation on exact branch source; **not yet run under real Node**. Overall six Pack 1 authored suites contain 75 groups.
+- tests/block-packs/pack-1/galleries-browser.mjs: free Playwright-based *genuine* Chromium acceptance runner **source**, currently unexecuted. Once a full PR branch checkout and Playwright are available, it will inspect all five actual source galleries at landscape 667×375, 844×390 and 932×430, producing 30 authentic before/after fixture screenshots, and check rendered canvas variety, placement/removal, offline in-memory save and no localStorage mutations. No screenshots can be claimed until the real run produces them.
+
+The exact previous-head default GitHub Actions run **43635324085** succeeded (genuine baseline Node/browser, not nested candidate tests). Using the exact unmerged :00 validator and :12 prototype mesher, all **120/120** Pack 1 ID×rotation source cases passed a V8 audit with 12–532 prototype triangles. These checks do not certify real-world physics, WebGL GPU performance, browser screenshots or iPhone visual/control approval.
+
+Neither local network-restricted Node/Chromium nor the standard GitHub workflow could run the **exact nested Pack 1 test suite** against the repository branch during this session. Do not upgrade candidate status, merge, deploy, edit production ID/geometry/save logic or start v0.11. A future explicitly requested continuation should finish these missing real tests, genuine screenshot review and creator-directed central integration checks before claiming Milestone 6 acceptance.
