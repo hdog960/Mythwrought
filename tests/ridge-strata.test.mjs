@@ -172,3 +172,23 @@ test('valley drainage fans are deterministic, sparse, and disappear behind saved
  assert.equal(ridgeStrataVertices(world,-1,0,{heightAt:()=>12}).length,0);
  assert.ok(original.length<16*16*4*24*27,'mobile vertex budget remains bounded');
 });
+
+test('rolling one-step slopes gain broad deterministic contour ribbons without terrain edits',()=>{
+ const heights=(x,z)=>x<0?7:6,edits=new Map();
+ const world={seed:179,get(x,y,z){
+   const k=[x,y,z].join(',');
+   if(edits.has(k))return edits.get(k);
+   const h=heights(x,z);
+   return y>h?0:y===h?1:y>=h-3?2:3;
+ }};
+ const a=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(a.length>0,'ordinary one-step hills should receive visible terrain accents');
+ assert.deepEqual(a,ridgeStrataVertices(world,-1,0,{heightAt:heights}));
+ assert.equal(a.length%27,0);
+ for(let z=0;z<16;z++)edits.set('0,7,'+z,3);
+ const covered=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.equal(covered.length,0,'player-built wall suppresses the contour');
+ assert.equal(edits.size,16);
+ assert.equal(ridgeStrataVertices(world,-1,0,{heightAt:()=>7}).length,0);
+ assert.ok(a.length<16*16*4*30*27,'mobile geometry remains bounded');
+});
