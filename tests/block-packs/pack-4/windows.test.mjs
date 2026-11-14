@@ -164,6 +164,30 @@ test('invalid IDs and unsafe orientation/save states fail closed',()=>{
 test('wall-mounted shutters track 4-way support direction; other panes do not claim wall mounts',()=>{
   assert.deepEqual([0,1,2,3].map(r=>windowMountOffset(163,r)),
     [[0,0,1],[-1,0,0],[0,0,-1],[1,0,0]]);
+  // Regression: the earlier leaf hinges stopped at z=.645 while their
+  // required neighbor support started at z=1, leaving a .355-cell gap.
+  // Physical, targetable hinge pintles must actually join that support
+  // in every quarter-turn, while staying under the shared 32-box cap.
+  for(let rotation=0;rotation<4;rotation++){
+    const shape=windowShape(163,rotation);
+    const offset=windowMountOffset(163,rotation);
+    const axis=offset.findIndex(v=>v!==0);
+    const face=offset[axis]>0?axis+3:axis;
+    const wall=offset[axis]>0?1:0;
+    const anchors=shape.visible.filter(p=>p.material==='brass'&&
+      Math.abs(p.bounds[face]-wall)<1e-9);
+    assert.equal(anchors.length,4,'four physical hinges reach support: r='+rotation);
+    assert.ok(shape.selection.length<=32&&shape.collision.length<=32);
+    for(const anchor of anchors){
+      assert.equal(anchor.collision,true);
+      assert.equal(anchor.selection,true);
+      assert.ok(shape.visible.some(other=>other!==anchor&&
+        other.material==='brass'&&[0,1,2].every(a=>
+          anchor.bounds[a]<other.bounds[a+3]&&
+          other.bounds[a]<anchor.bounds[a+3])),
+        'hinge must connect to existing leaf hardware: r='+rotation);
+    }
+  }
   for(const id of ids.filter(id=>id!==163))
     assert.equal(windowMountOffset(id),null);
 });
