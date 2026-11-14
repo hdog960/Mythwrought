@@ -80,7 +80,15 @@ void main(){
     base=mix(base,vec3(.85,.53,.28),.20*fan*near);
     base=mix(base,vec3(.35,.28,.24),.19*damp*near);
     base=mix(base,vec3(.33,.24,.17),.24*rootNetwork*near);
-    // Rounded river-worn pebbles nest in exposed loam; sparse, face-local,
+    // Dry clay shrinkage polygons: broken, uneven hairlines rather than masonry.
+    // Only near-field pigment, so saved soil and chunk geometry remain unchanged.
+    vec2 clayGrid=vUv*vec2(7.0,6.0);
+    vec2 clayWarp=clayGrid+vec2(.16*sin(clayGrid.y*2.7),.13*sin(clayGrid.x*3.1));
+    vec2 clayEdge=min(fract(clayWarp),1.0-fract(clayWarp));
+    float dryingCrack=1.0-smoothstep(.018,.055,min(clayEdge.x,clayEdge.y));
+    float dryPatch=smoothstep(.55,.78,.5+.5*sin(vUv.x*4.1+sin(vUv.y*3.2))*sin(vUv.y*5.2));
+    base=mix(base,vec3(.29,.22,.19),.16*dryingCrack*dryPatch*near);
+        // Rounded river-worn pebbles nest in exposed loam; sparse, face-local,
     // stable across frames and faded before they become pixel noise.
     vec2 gravelCell=floor(vUv*vec2(9.0,8.0));
     vec2 gravelUv=fract(vUv*vec2(9.0,8.0))-.5;
@@ -119,7 +127,16 @@ void main(){
     float shaleShelf=smoothstep(.63,.82,.5+.5*sin(calciteFlow*.75+vUv.x*1.3));
     base=mix(base,vec3(.91,.86,.71),.21*calcite*near);
     base=mix(base,vec3(.34,.42,.47),.12*shaleShelf*(1.0-calcite)*near);
-    // Broad weathered ironstone lenses add warm mineral contrast to cliff faces.
+    // Dark volcanic vesicles are small rounded pits in occasional exposed rock.
+    // This is geological pigment, not new block generation or a collision change.
+    vec2 vesicleCell=floor(vUv*vec2(8.0,7.0));
+    vec2 vesicleUv=fract(vUv*vec2(8.0,7.0))-.5;
+    float vesicleSeed=hashCell(vesicleCell+vec2(83.0,47.0));
+    float vesiclePit=step(.87,vesicleSeed)*(1.0-smoothstep(.10,.21,length(vesicleUv)));
+    float vesicleLip=step(.87,vesicleSeed)*(1.0-smoothstep(.19,.28,length(vesicleUv)))*(1.0-smoothstep(.08,.15,length(vesicleUv)));
+    base=mix(base,vec3(.19,.23,.27),.20*vesiclePit*near);
+    base=mix(base,vec3(.69,.66,.58),.08*vesicleLip*near);
+        // Broad weathered ironstone lenses add warm mineral contrast to cliff faces.
     float ironLens=smoothstep(.70,.91,.5+.5*sin(vUv.x*3.7+sin(vUv.y*4.1))*sin(vUv.y*5.6-vUv.x*1.3));
     float rim=1.0-smoothstep(.025,.10,abs(sin(vUv.x*3.7+sin(vUv.y*4.1))*sin(vUv.y*5.6-vUv.x*1.3)));
     base=mix(base,vec3(.64,.38,.27),.20*ironLens*near);
@@ -237,5 +254,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   woodlandDewAccents:Object.freeze(['grass-morning-dew','grass-fern-litter-streaks']),
   crystalFrostStarAccents:Object.freeze(['crystal-six-ray-frost-stars']),
   riverPebbleAccents:Object.freeze(['soil-rounded-river-pebbles','soil-dark-pebble-rims']),
+  dryClayAndVesicleAccents:Object.freeze(['soil-drying-clay-cracks','stone-volcanic-vesicles']),
   copperOreAccents:Object.freeze(['ore-malachite-halos','ore-copper-boundaries','ore-host-rock-fractures'])
 });
