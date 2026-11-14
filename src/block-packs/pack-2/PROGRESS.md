@@ -2,7 +2,7 @@
 
 **Governance:** [coordination Issue #109](https://github.com/hdog960/Mythwrought/issues/109) / seven authoritative docs / v0.10 Gate A, v0.11 locked.
 **Status:** **18/18 distinct physical candidate families authored** (not integrated, merged, deployed or playable). 0 families remain to author; native acceptance and live integration are still blocked.
-**Latest checked main:** `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`; incorporation checkpoint **006**. Live IDs 0–8 only. Wood ID 4 is not a substitute for these independent candidate shapes.
+**Latest checked main:** `caf47776b723a36684edc1a72749e49268ccc688`; incorporation checkpoint **007**. Live IDs 0–8 only. Wood ID 4 is not a substitute for these independent candidate shapes.
 **Draft PR:** https://github.com/hdog960/Mythwrought/pull/114
 **Dedicated branch:** `manual-pack-2-timber-foundation-20261114`; see PR for live exact HEAD / CI.
 **Exclusive provisional ID range:** 59–108. Only **59–76** allocated, and those IDs are not installed in the game. 255 reserved. No per-rotation/upper/lower/open/closed ID inflation.
@@ -139,6 +139,15 @@
 - [x] Re-executed all six checked-in suites' **88 test bodies in an isolated V8 compatibility harness**, **88/88 passed** on current source. Native Node not run; V8 test execution must not be represented as such.
 - [ ] No complete verified local checkout: container cannot resolve/reach GitHub, and Github-connector-returned source has not been mounted here. Accordingly **actual native Node, candidate Chromium PNGs and screenshot inspection remain UNRUN**.
 - [ ] Full production WebGL2, real iPhone, saved player schema 1, fluid simulation/transparent alpha handling and Gate A art/control approval still not certified. No merge/deploy/world placement/v0.11 unlock.
+
+## Session 11 — checkpoint 007 shape compatibility and exact-head QA tooling (2026-11-14)
+
+- [x] Main **changed from checkpoint 006 to checkpoint 007** at `caf47776b723a36684edc1a72749e49268ccc688`. New code only incorporated automation-owned :00/:12/:24/:36/:48 candidates plus the :12 biome130 library. The five manual block PRs and all building roadmaps were **explicitly excluded**. Draft Pack 2 PR #114 remains unmerged, now behind main by two commits; no rebase/merge, shared-system edits or new ID registration.
+- [x] **85/85** Pack 2 solid state descriptors match checkpoint-007 exact shared `validateShape` contract and **85/85** work with the shared `raycastShapes`, `canPlaceShape` and `prototypeSurfaceMesh` in isolated V8; shared prototype mesh maximum **380 triangles**. The optional orientation sidecar accepted representative 64/75 rotations with the matching fixture reader.
+- [x] Water ID 76 intentionally has **zero solid AABBs** and is not accepted by the generic solid validator; retain its **separate fluid prism** targeting and transparent render requirements.
+- [x] Python Playwright runner updated to support free system Chromium and `--expected-head` clean source validation; local Chromium successfully loaded a toy inline ES module, but **none of the Pack 2 candidate snapshots or screenshots** were run.
+- [x] Committed a free exact-head `tests/block-packs/pack-2/run-acceptance.sh` script for all six real nested Node suites plus the Python 18×3 landscape gallery review. **88/88 V8 test bodies** still passed, native and real gallery pending.
+- [ ] Full native Node tests, actual candidate Chromium PNGs and inspection, production save schema-1/fluids/render/gameplay, physical iPhone Gate A and v0.11 remain OPEN. No merge, deployment, building placement or other pack edits.
 
 ## Outstanding engine integration (manual incorporation only)
 
