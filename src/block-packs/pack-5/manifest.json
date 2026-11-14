@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "MILESTONE 0 — FOUNDATIONS",
+  "status": "MILESTONE 1 — 3 CANDIDATE FAMILIES; BROWSER REVIEW OPEN",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -25,33 +25,51 @@
       "symbolicId": "pack5:079",
       "name": "Plaster & Stucco",
       "milestone": 1,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/architectural-surfaces.mjs",
       "distinction": "Smooth and textured wall finish; distinct from desert adobe",
-      "integrated": false
+      "integrated": false,
+      "variants": [
+        "chalk-lime",
+        "hand-troweled"
+      ],
+      "verification": "Native Node test-backed isolated physical candidate; browser/creator art approval pending; engine integration blocked",
+      "preview": "tests/block-packs/pack-5/architectural-gallery.html"
     },
     {
       "roster": 80,
       "symbolicId": "pack5:080",
       "name": "Fired Brick Masonry",
       "milestone": 1,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/architectural-surfaces.mjs",
       "distinction": "Manufactured fired brick courses, not stone brick or clay roofing",
-      "integrated": false
+      "integrated": false,
+      "variants": [
+        "hearth-running-bond",
+        "kiln-soldier-course"
+      ],
+      "verification": "Native Node test-backed isolated physical candidate; browser/creator art approval pending; engine integration blocked",
+      "preview": "tests/block-packs/pack-5/architectural-gallery.html"
     },
     {
       "roster": 81,
       "symbolicId": "pack5:081",
       "name": "Ceramic Interior Floor Tiles",
       "milestone": 1,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/architectural-surfaces.mjs",
       "distinction": "Purpose-made interior decorative floor panels, not outdoor paving or calcite mosaics",
-      "integrated": false
+      "integrated": false,
+      "variants": [
+        "sunburst-encaustic",
+        "moonwoven-glaze"
+      ],
+      "verification": "Native Node test-backed isolated physical candidate; browser/creator art approval pending; engine integration blocked",
+      "preview": "tests/block-packs/pack-5/architectural-gallery.html"
     },
     {
       "roster": 82,
@@ -218,5 +236,12 @@
       "distinction": "Physical stall division and feed/water basins, not fences/wells",
       "integrated": false
     }
-  ]
+  ],
+  "candidateFamilies": 3,
+  "testEvidence": {
+    "nativeNode": "34/34 focused cases pass, Node 22.16.0; includes original M0 16 and new M1 18",
+    "browser": "Blocked by local headless Chromium EGL/GPU initialization; no genuine browser result",
+    "screenshots": "None; authored 6-card WebGL2 gallery source only",
+    "production": "No runtime integration, no live schema-1 acceptance"
+  }
 }
