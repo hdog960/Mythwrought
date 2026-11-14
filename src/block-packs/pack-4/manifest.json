@@ -302,7 +302,8 @@
     "tests/block-packs/pack-4/hearth-civic.test.mjs",
     "tests/block-packs/pack-4/hearth-civic-fixture.test.mjs",
     "tests/block-packs/pack-4/preview-utils.test.mjs",
-    "tests/block-packs/pack-4/acceptance.test.mjs"
+    "tests/block-packs/pack-4/acceptance.test.mjs",
+    "tests/block-packs/pack-4/mesh-budget.test.mjs"
   ],
   "dependencies": [
     "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
@@ -334,10 +335,10 @@
     117
   ],
   "lastV8FocusedChecks": 142,
-  "currentAcceptanceStatus": "M0–M4 source authored; M5 CONDITIONAL pending whole-pack native Node, genuine 23-card Chromium screenshots and creator visual/physical-iPhone Gate A review",
-  "latestAcceptanceV8": 152,
+  "currentAcceptanceStatus": "M0-M4 candidate source complete; M5 REVIEW INCOMPLETE: 156 source-backed V8 checks and 5 native Node preview-utils checks pass; full checkout-native Node and genuine 23-image Chromium/WebGL2 review blocked; Gate A still open.",
+  "latestAcceptanceV8": 156,
   "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
-  "galleryEvidence": "Source-derived gallery implementation hardened with GPU resource disposal, fixed-view alpha sorting and fit-to-frame; genuine Chromium remains blocked by browser navigation policy",
+  "galleryEvidence": "Browser QA caught and fixed nonblack-background false positive in preview pixel check; now requires real foreground contrast plus 23 unique image hashes and asymmetric rotation; still blocked on local Chromium/WebGL2.",
   "reviewDocuments": [
     "src/block-packs/pack-4/PROGRESS.md",
     "src/block-packs/pack-4/INTEGRATION.md",
