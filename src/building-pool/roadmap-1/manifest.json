@@ -77,7 +77,7 @@
   "testEvidence": {
     "nativeNode": {
       "run": "local isolated source",
-      "cases": "28/28 passed",
+      "cases": "30/30 passed (16 M0 + 12 M1 + 2 mirror/rotation)",
       "scope": "16 M0 + 12 M1",
       "exactPRHead": "await rerun; committed files differ only by safe string style; final CI still pending"
     },
@@ -97,8 +97,13 @@
   "pending": [
     "Exact PR-head nested Node test reproduction",
     "WebGL2 candidate geometry/mounting acceptance",
-    "45 creator architectural distinction reviews",
     "Actual Pack 1–5 replacement footprint/collision/orientation acceptance",
-    "Additional 840 distinct coordinates"
-  ]
+    "Additional 840 distinct coordinates",
+    "Creator visual near-duplicate distinction review still pending; 45 structural D4 shapes are pairwise unique"
+  ],
+  "mirroredAndRotatedGeometryCheck": {
+    "result": "45/45 distinct under 4 rotations and mirrored counterparts, material-independent",
+    "nativeNodeCases": 2,
+    "visualNearDuplicateReview": "OPEN"
+  }
 }
