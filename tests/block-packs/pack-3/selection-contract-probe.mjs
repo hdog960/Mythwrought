@@ -79,10 +79,57 @@ for(const a of assets)for(const b of assets){
 assert.equal(raySamples,40656);
 assert.equal(placements,3136);
 assert.equal(solidTargets+seeThrough,raySamples);
+// Separate, NEW oblique camera-targeting acceptance: the legacy 43,792
+// straight rays / overlap checks above remain an independent regression.
+// This covers glancing sightlines, elevated camera pitch, genuine voids and
+// behind-the-opening backstops in a sparse two-cell candidate assembly.
+// The oracle checks every box analytically, without reusing the merged DDA.
+let obliqueRays=0,obliqueSolids=0,obliqueBackstops=0,obliqueEmpty=0;
+for(const a of assets){
+  for(const axis of [0,2])for(const direction of [-1,1]){
+    const perpendicular=axis===0?2:0;
+    const back=[0,0,0];back[axis]=direction>0?2:-2;
+    const reader=(x,y,z)=>x===0&&y===0&&z===0?a.shape:
+      x===back[0]&&y===back[1]&&z===back[2]?FULL_CUBE:null;
+    for(let i=0;i<11;i++)for(let j=0;j<11;j++)for(const slope of [-.57,-.31,-.13,.13,.31,.57]){
+      const origin=[.5,.5,.5],ray=[0,0,0];
+      origin[axis]=direction>0?-.4:1.4;
+      origin[perpendicular]=.05591+.08529*i;
+      origin[1]=.05183+.08671*j;
+      ray[axis]=direction;ray[perpendicular]=slope;ray[1]=-.09+slope*.18;
+      const mag=Math.hypot(...ray);const dir=ray.map(v=>v/mag);
+      const actual=raycastShapes(origin,dir,reader,4.6);
+      const contacts=[];
+      for(const [cell,shape] of [[[0,0,0],a.shape],[back,FULL_CUBE]]){
+        for(const b of shape.boxes){
+          const shifted=b.map((v,k)=>v+cell[k%3]);
+          const t=rayBox(origin,dir,shifted);
+          if(t!==null&&t<=4.6)contacts.push({cell,distance:t});
+        }
+      }
+      contacts.sort((x,y)=>x.distance-y.distance);
+      const expected=contacts[0]??null;
+      assert.equal(Boolean(actual),Boolean(expected),
+        `Oblique hit existence mismatch ID ${a.id} yaw ${a.yaw}, axis ${axis}, slope ${slope}`);
+      if(expected){
+        assert.deepEqual(actual.cell,expected.cell,
+          `Oblique wrong target cell ID ${a.id} yaw ${a.yaw}, axis ${axis}, slope ${slope}`);
+        assert.ok(Math.abs(actual.distance-expected.distance)<1e-7,
+          `Oblique distance mismatch ID ${a.id} yaw ${a.yaw}, axis ${axis}, slope ${slope}`);
+        if(expected.cell[axis]===0)obliqueSolids++;else obliqueBackstops++;
+      } else obliqueEmpty++;
+      obliqueRays++;
+    }
+  }
+}
+assert.equal(obliqueRays,162624);
+assert.equal(obliqueSolids+obliqueBackstops+obliqueEmpty,obliqueRays);
 console.log(JSON.stringify({
   verdict:'PASS',sharedShapeSourceGitBlob:sha,source,
   physicalCandidateFamilies:17,supportedYawAssets:56,
   raySamples,solidTargets,seeThrough,placementPairs:placements,overlapPairs:overlaps,
-  totalIndependentChecks:raySamples+placements,
+  legacyIndependentChecks:raySamples+placements,
+  obliqueRays,obliqueSolids,obliqueBackstops,obliqueEmpty,
+  totalIndependentChecks:raySamples+placements+obliqueRays,
   productionWebGLTested:false,productionSavesModified:false
 }));
