@@ -53,7 +53,7 @@ try{
       await page.locator('#switchWorld').click();
       await page.locator('#closeHelp').click();
       await page.waitForFunction(()=>document.querySelector('#seed')?.textContent==='WORLD 28629');
-      await page.waitForFunction(()=>Number(document.querySelector('#miniMap')?.dataset.discovered)>0);
+      await page.waitForFunction(()=>document.querySelector('#miniMap')?.dataset.seed==='28629');
       assert.ok(Number(await page.locator('#miniMap').getAttribute('data-discovered'))<explored,
         'different seed must begin unexplored');
       assert.deepEqual(errors,[],'Map browser JavaScript errors at '+width+'x'+height);
