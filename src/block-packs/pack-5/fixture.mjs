@@ -94,6 +94,10 @@ export function makePack5Fixture(descriptors=[]){
       if(parts.some(p=>occupied.has(key(...p.cell))))return {ok:false,reason:'Occupied cell'};
       const support=requiredSupport(d,anchor,rotation);
       if(support&&!supports.has(key(...support)))return {ok:false,reason:'Missing attachment'};
+      // Every occupied floor-supported cell must actually stand on material.
+      // A long bed cannot hang in midair merely because its head has support.
+      if(d.attachment==='floor' && parts.some(p=>!supports.has(key(p.cell[0],p.cell[1]-1,p.cell[2]))))
+        return {ok:false,reason:'Missing attachment'};
       placed.set(anchorKey,{id,anchor:[...anchor],rotation,variant,parts});
       for(const p of parts)occupied.set(key(...p.cell),anchorKey);
       return {ok:true,cells:parts.map(p=>[...p.cell])};
