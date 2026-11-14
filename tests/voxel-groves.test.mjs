@@ -82,7 +82,7 @@ test('whole-grove installation writes physical voxels and survives schema-1 roun
  assert.equal(placeVoxelGrove(w,grove),true);
  for(const p of grove.plans)for(const [x,y,z,id] of p.cells)
   assert.equal(w.get(x,y,z),id);
- const restored=VoxelWorld.load(w.save());
+ const restored=VoxelWorld.restore(w.save());
  for(const p of grove.plans)for(const [x,y,z,id] of p.cells)
   assert.equal(restored.get(x,y,z),id);
 });
