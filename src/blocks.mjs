@@ -47,7 +47,7 @@ export function applyBlockAction(world,eye,direction,mode,selected,player,rebuil
   if(previous===next)return {ok:false,reason:'Block is already in that state'};
   if(!world.set(...cell,next))return {ok:false,reason:'Outside editable height'};
   try{
-    if(typeof rebuild==='function')rebuild(cell[0],cell[2]);
+    if(typeof rebuild==='function')rebuild(cell[0],cell[2],cell[1]);
   }catch(error){
     world.set(...cell,previous);
     return {ok:false,reason:'Block update failed; nothing changed',error:String(error)};
