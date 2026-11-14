@@ -343,17 +343,17 @@
     117
   ],
   "lastV8FocusedChecks": 142,
-  "currentAcceptanceStatus": "M5 NOT ACCEPTED: 22 physical candidate families / 23 unique IDs 159–181, 177/177 exact source-backed V8 checks PASS; 7/7 actual Node alpha/loader subset PASS; strict runner syntax+fail-closed verified; complete combined-checkout 179 native cases and true 23-card Chromium/WebGL2 screenshots NOT VERIFIED. Latest main checkpoint 008 automation-only; creator Gate A pending; v0.11 locked.",
+  "currentAcceptanceStatus": "M5 OPEN / NOT ACCEPTED. All 22 families / 23 IDs 159–181 authored; prior 177/177 source-backed V8 checks; 9/9 byte-verified genuine native Node subset passes; full 181-case combined-checkout Node suite and authentic 12 WebGL2 gallery PNGs remain NOT VERIFIED; Gate A/iPhone creator sign-off pending.",
   "latestAcceptanceV8": 177,
   "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
-  "galleryEvidence": "Browser QA caught and fixed nonblack-background false positive in preview pixel check; now requires real foreground contrast plus 23 unique image hashes and asymmetric rotation; still blocked on local Chromium/WebGL2.",
+  "galleryEvidence": "Actual WebGL2 review is still blocked locally. Authored script now renders 23 candidate canvas images across four 90-degree orientations at 667×375, 844×390 and 932×430, asserting foreground contrast, initial 23 distinct images and asymmetric rotations, and creates 12 screenshots.",
   "reviewDocuments": [
     "src/block-packs/pack-4/PROGRESS.md",
     "src/block-packs/pack-4/INTEGRATION.md",
     "src/block-packs/pack-4/M5_ACCEPTANCE.md"
   ],
-  "nativeNodeVerifiedTests": 7,
-  "nativeNodeScope": "Exact blob-hash-verified Node v22.16.0: preview-utils.test.mjs (5/5) and current-main-loader.test.mjs (2/2), 7/7. Complete Pack4 suite still unavailable to local runner.",
+  "nativeNodeVerifiedTests": 9,
+  "nativeNodeScope": "Nine exact-Git-blob-native Node 22 passes: preview-utils.test.mjs 7/7 (including GPU depth/blend/partial allocation cleanup) plus current-main-loader.test.mjs 2/2. Full 181-case native suite still not verified.",
   "galleryScope": "23 original geometry candidate cards; browser script authored for three iPhone landscape widths, no genuine screenshots verified",
   "nextMilestone": "M5 final acceptance blocked on full native Node suite, genuine Chromium gallery, shared contract integration and explicit creator review",
   "reviewedSharedContracts": {
@@ -389,7 +389,14 @@
     "creatorGateA": "OPEN — no physical-iPhone approval"
   },
   "checkpoint007TestContext": "Nine current-main-dependent acceptance tests run on checkpoint007+PR combined source; they SKIP with explicit status on raw pre-007 Pack4 HEAD, and import failures when modules are present are not hidden.",
-  "strictAcceptanceRunner": "node tests/block-packs/pack-4/verify-final.mjs (combined latest-main + Pack4 sources/tests): exactly 16 enumerated dedicated suites, 179 native cases, zero unexpected suites, zero skips, 23 genuine WebGL2 candidate cards at three landscape sizes. --node-only checks only Node.",
+  "strictAcceptanceRunner": "node tests/block-packs/pack-4/verify-final.mjs on combined current-main + Pack4 checkout: exactly 16 native suites, 181 test cases, zero skips, genuine 23 candidates × 4 rotations × 3 iPhone landscape sizes in WebGL2, 12 authentic PNG files. --node-only verifies native suites only.",
   "latestNonPack4MainChange": "Checkpoint 008: f416a2b introduced live automation-only voxel districts and root baseline CI; ac263720 records checkpoint008 and release ledger. Neither registers manual Pack4 IDs 159–181, nor edits Pack4-owned paths.",
-  "nativeRunnerEnvironmentEvidence": "Verified exact Git blob 1162fa6501ae07218721a7a1e180675d65c9539b with Node 22 syntax check and fail-closed native smoke: aborts on incomplete checkout instead of false pass; full combined acceptance blocked by GitHub DNS and Chromium local navigation."
+  "nativeRunnerEnvironmentEvidence": "Verified exact Git blob 1162fa6501ae07218721a7a1e180675d65c9539b with Node 22 syntax check and fail-closed native smoke: aborts on incomplete checkout instead of false pass; full combined acceptance blocked by GitHub DNS and Chromium local navigation.",
+  "nativeNodeVerifiedBlobShas": {
+    "previewUtility": "723f1e4c87d87e97aede6fea1272a4201b87e336",
+    "previewUtilityTests": "7b4b2e597e2fdf92f580e161b2844770e8f04211",
+    "mainLoader": "2ce3374326e91376cd93dd022a1ddd9e97e6cf59",
+    "mainLoaderTests": "5d6b62385379c7992ae979b06090746eeb061eba"
+  },
+  "previewResourceFix": "Isolated gallery shader/error handling, GPU allocation lifecycle, depth-mask/blending reset across failed translucent draws; 2 native Node GPU resource teardown checks added. No production renderer touched."
 }
