@@ -119,3 +119,19 @@ test('natural surface accents use bounded opaque shader details and stable exist
  assert.equal(RULES.newTextures,0);
  assert.ok(FS.indexOf('return;')<FS.indexOf('float moss='));
 });
+
+test('mineral geodes and oxidized ore remain opaque, distance-faded and use existing IDs',()=>{
+ assert.deepEqual(RULES.mineralInclusions,['crystal-indigo-core','crystal-frost-inclusions','ore-oxidized-seams']);
+ for(const [id,next,terms] of [[5,6,['inclusion','core']],[6,7,['oxidation']]]){
+  const start=FS.indexOf('}else if(vMat=='+id+')');
+  const end=FS.indexOf('}else if(vMat=='+next+')',start);
+  assert.ok(start>=0&&end>start);
+  const part=FS.slice(start,end);
+  for(const term of terms)assert.match(part,new RegExp('float '+term+'='));
+  assert.match(part,/near/);
+  assert.doesNotMatch(part,/discard;|sampler2D|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+});
