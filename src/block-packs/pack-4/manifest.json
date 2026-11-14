@@ -276,7 +276,8 @@
     "tests/block-packs/pack-4/gallery.html",
     "tests/block-packs/pack-4/gallery.mjs",
     "tests/block-packs/pack-4/furnishings.test.mjs",
-    "tests/block-packs/pack-4/furnishings-fixture.test.mjs"
+    "tests/block-packs/pack-4/furnishings-fixture.test.mjs",
+    "tests/block-packs/pack-4/gallery-browser.mjs"
   ],
   "dependencies": [
     "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
@@ -304,5 +305,7 @@
   "lastComparedIssues": [
     109,
     117
-  ]
+  ],
+  "lastV8FocusedChecks": 100,
+  "currentAcceptanceStatus": "UNMERGED CANDIDATE — exact Pack 4 nested Node / genuine Chromium gallery acceptance not yet verified"
 }
