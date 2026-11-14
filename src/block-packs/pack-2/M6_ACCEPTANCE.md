@@ -104,6 +104,14 @@ The command does not approve incorporation: Gate A and v0.11 remain locked behin
 - [x] **88/88** existing Pack 2 test bodies still pass the source-level V8 harness. Prior checkpoint 006 exact-head standard CI run [#43642512460](https://github.com/hdog960/Mythwrought/actions/runs/43642512460) **SUCCESS**. The latest candidate-head CI must be checked against its own SHA.
 - [ ] Native direct Node execution, exact Pack 2 candidate Chromium preview screenshots, screenshot visual review, production fluid/render/save integration and physical iPhone controls **remain unverified** due local exact-checkout access restriction. This is **NOT** final certification.
 
+## Session 12 — full-roster uniqueness regression and exact-source test review (2026-11-14)
+
+- [x] Latest main `caf47776b723a36684edc1a72749e49268ccc688`, integration checkpoint **007**, Issues #109/#117, and the manual Pack 1/3/4/5 draft PRs were reverified. Draft Pack 2 PR #114 remains unmerged and all changed files are Pack 2-exclusive; no numeric ID overlap with the other packs.
+- [x] Added a tenth `acceptance.test.mjs` case: sample every one of the **18 distinct asset IDs 59–76**, retain each authored candidate's actual typed mesh positions, color palette and optional alpha values, and assert **18 unique full mesh/material signatures**. This is a full-data exact-equality check, not a name-only or potentially-colliding pixel-hash check.
+- [x] Re-executed the committed test bodies using fetched Pack 2 source in standalone V8 with a portable assertion shim: **89/89 passed** — 12 timber, 15 joinery, 14 paving, 17 infrastructure, 21 water, **10 M6**. Separate mesh signature audit produced **18/18 distinct pairs of geometry and palette**. These checks do NOT constitute actual `node:test` or browser screenshot execution.
+- [ ] **Native Node six-suite command and actual Python Playwright asset gallery remain unexecuted.** The local runtime has Node 22, Python Playwright and Chromium, but its GitHub DNS/network cannot obtain an exact complete repository checkout; the partial transfer staging directory was not a verified source tree and was deliberately not used for certification. No 54-canvas screenshot artifact exists from this session.
+- [ ] Production WebGL2 alpha sorting, water flow/buoyancy, schema-1 state restoration, mobile iPhone controls and creator Gate A approval remain separate blocked integration/acceptance requirements. No merge/deploy/other-pack/shared-engine/world-gen edit made.
+
 ## Required real test gates — NOT certified by the source-level checks
 
 | Gate | Evidence required | Current status |
