@@ -135,3 +135,20 @@ test('mineral geodes and oxidized ore remain opaque, distance-faded and use exis
  assert.equal(RULES.newTextures,0);
  assert.equal(RULES.newDrawCalls,0);
 });
+
+
+test('cold natural geology accents remain opaque, near-faded, and save-neutral',()=>{
+ assert.deepEqual(RULES.coldGeologyAccents,['stone-frost-quartz-ridges','stone-cold-pockets','crystal-glacial-cleavage']);
+ for(const [id,next,terms] of [[3,4,['frostRidge','coldPocket']],[5,6,['iceRim','blueFacet']]]){
+  const start=FS.indexOf('}else if(vMat=='+id+')');
+  const end=FS.indexOf('}else if(vMat=='+next+')',start);
+  assert.ok(start>=0&&end>start);
+  const part=FS.slice(start,end);
+  for(const term of terms)assert.match(part,new RegExp('float '+term+'='));
+  assert.match(part,/\*near/);
+  assert.doesNotMatch(part,/sampler2D|discard;|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
