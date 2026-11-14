@@ -9,7 +9,7 @@ test('real exposed highland wall gains bounded deterministic face strata',()=>{
  assert.ok(a.length>0,'expected a visible escarpment');
  assert.deepEqual(a,b);
  assert.equal(a.length%9,0);
- assert.ok(a.length<=16*16*4*54*9);
+ assert.ok(a.length<=16*16*4*8*3*9);
  for(let i=0;i<a.length;i++)assert.ok(Number.isFinite(a[i]));
 });
 test('a filled approach hides geological face art without changing edits',()=>{
@@ -28,9 +28,8 @@ test('no false cliffs on lowland or shallow transitions',()=>{
 test('connected shale shoulders add distinct lower bands without fake cave faces',()=>{
  const world=make(),vertices=ridgeStrataVertices(world,-1,0,{heightAt});
  assert.ok(vertices.length>0);
- // Each eligible exposed wall receives six triangles (three original, three
- // connected shoulder); the geometry remains in the original 9-float format.
- assert.equal(vertices.length%(6*3*9),0);
+ // Tall exposed walls carry six bedding triangles plus two talus triangles.
+ assert.equal(vertices.length%(8*3*9),0);
  const ys=[],colors=new Set();
  for(let i=0;i<vertices.length;i+=9){
    ys.push(vertices[i+1]);
@@ -40,4 +39,16 @@ test('connected shale shoulders add distinct lower bands without fake cave faces
  assert.ok(colors.size>=4,'separate shale, shadow and mineral bands');
  const hidden={seed:179,get(){return 3;}};
  assert.equal(ridgeStrataVertices(hidden,-1,0,{heightAt}).length,0,'no face artwork behind filled rock');
+});
+
+test('talus foothill details require a real exposed stone foot and open approach',()=>{
+ const baseline=ridgeStrataVertices(make(),-1,0,{heightAt});
+ assert.ok(baseline.length>0);
+ const filled=new Map();
+ for(let z=0;z<16;z++)filled.set('0,7,'+z,3);
+ const blocked=ridgeStrataVertices(make(filled),-1,0,{heightAt});
+ assert.ok(blocked.length<baseline.length,'filled approach suppresses talus');
+ const short=ridgeStrataVertices(make(),-1,0,{heightAt:(x,z)=>x<0?11:8});
+ assert.ok(short.length<baseline.length,'short cliff has no lower talus');
+ assert.equal(baseline.length%(8*27),0,'eight triangles per eligible tall face');
 });
