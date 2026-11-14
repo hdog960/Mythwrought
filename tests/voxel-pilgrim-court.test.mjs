@@ -38,3 +38,22 @@ test('saved corridor edits prevent construction without altering the save',()=>{
  assert.equal(placeVoxelPilgrimCourt(w,plan),false);
  assert.deepEqual(w.save(),before);
 });
+
+test('failed second-gateway write rolls back every court block and prior edits',()=>{
+ const found=find(179);assert.ok(found);
+ const {w,plan}=found;
+ const before=w.save(),original=w.set.bind(w);
+ const failure=plan.gates[1].cells[0].join(',');
+ w.set=(x,y,z,id)=>[x,y,z,id].join(',')===failure?false:original(x,y,z,id);
+ assert.equal(placeVoxelPilgrimCourt(w,plan),false);
+ assert.deepEqual(w.save(),before);
+});
+test('edited natural corridor surface cannot masquerade as valid grass',()=>{
+ const found=find(179);assert.ok(found);
+ const {w,plan}=found;const [x,h,z]=plan.origin;
+ assert.equal(w.set(x,h,z,BLOCK.STONE),true);
+ const before=w.save();
+ assert.equal(planVoxelPilgrimCourt(w,x,z),null);
+ assert.equal(placeVoxelPilgrimCourt(w,plan),false);
+ assert.deepEqual(w.save(),before);
+});
