@@ -24,13 +24,19 @@ const PLANS={
   ]
 };
 const SYMBOLS={
-  stair:'pack1:008',roof:'pack3:023',glass:'pack4:030',
+  stair:'pack1:008',glass:'pack4:030',
+  roofs:{temperate:'pack3:023',desert:'pack3:024',snow:'pack3:025',
+    'enchanted-forest':'pack3:026',mountain:'pack3:025'},
   temperate:'pack2:015',desert:'biome130:091',snow:'biome130:094',
   'enchanted-forest':'biome130:096',mountain:'biome130:098'
 };
 const DEPS={
+  'pack1:002': ['candidate','single-cell','fixed','none',['masonry candidate-ID registration','full-cube face material confirmation']],
   'pack1:008': ['candidate','partial','rotatable','floor',['stair rise profile','collision slope','orientation mapping','safe tread alignment']],
-  'pack3:023': ['candidate','partial','rotatable','adjacent',['roof pitch','ridge and valley junctions','supporting attachment geometry']],
+  'pack3:023': ['candidate','partial','rotatable','adjacent',['shingle roof pitch','ridge and valley junctions','supporting attachment geometry']],
+  'pack3:024': ['candidate','partial','rotatable','adjacent',['desert clay-tile roof pitch','ridge joins','physical attachment geometry']],
+  'pack3:025': ['candidate','partial','rotatable','adjacent',['snow/mountain slate roof pitch','ridge joins','physical attachment geometry']],
+  'pack3:026': ['candidate','partial','rotatable','adjacent',['organic thatch roof pitch','ridge joins','physical attachment geometry']],
   'pack4:030': ['candidate','partial','rotatable','wall',['pane thickness','alpha/depth ordering','rotated wall mounting']],
   'pack2:015': ['candidate','partial','rotatable','floor',['beam joint dimensions','mesh joinery','support bounds']],
   'biome130:091': ['planned','single-cell','fixed','none',['wide-ID registry migration','adobe physical face material']],
@@ -85,8 +91,10 @@ function emitBlueprint(type,biome,size){
   const has=(x,z)=>inside(x,z);
   const interior=(x,z)=>has(x,z)&&has(x-1,z)&&has(x+1,z)&&has(x,z-1)&&has(x,z+1);
   const roofY=cy;
-  const roofAsset=SYMBOLS.roof;
-  const wallAsset=SYMBOLS[biome];
+  const roofAsset=SYMBOLS.roofs[biome];
+  // Functional wall cells use genuine masonry / wall-core materials, never
+  // cross-sectional beams, livingwood ribs or mountain anchor fittings.
+  const wallAsset=bi===0||bi===4?'pack1:002':bi===3?'base:wood':SYMBOLS[biome];
   for(const [x,z] of footprint){
     // Desert courts must remain sky-open through all upper floors, not merely the roof.
     // Ground level remains supported and walkable; galleries circulate around the void.
@@ -110,6 +118,14 @@ function emitBlueprint(type,biome,size){
   // Ground plan is intentionally independent of world placement / terrain edits.
   for(let z=0;z<entranceZ;z++)for(let x=mid-1;x<=mid+1;x++)
     set(x,0,z,'floor',bi===1?'base:stone':'base:deepstone');
+  // Regional specialty pieces are individual accents outside the actual wall
+  // envelope, not falsely substituted for masonry or a full roof cell.
+  if(bi===0||bi===3||bi===4){
+    for(const x of [mid-4,mid+4]){
+      set(x,0,entranceZ-1,'floor','base:stone');
+      set(x,1,entranceZ-1,'fixture',SYMBOLS[biome], 'north');
+    }
+  }
   // Inner corridor partitions with accessible two-high door cutouts left and right.
   const left=mid-2,right=mid+2;
   for(let l=0;l<storeys;l++){
