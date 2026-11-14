@@ -180,6 +180,28 @@ test('all 36 water states match analytic top-height ray intersection on a 25-poi
   }
   assert.equal(rays,900);
 });
+test('all 18 independent candidates produce unique authentic mesh-and-palette signatures',()=>{
+  const samples=[
+    ...PACK_2_ASSETS.map(a=>({id:a.id,mesh:pack2PreviewMesh(a.id,0)})),
+    ...PACK_2_JOINERY.map(a=>({id:a.id,
+      mesh:joineryPreviewMesh(a.id,{rotation:0,variant:a.variants[0],open:false})})),
+    ...PACK_2_GROUND.map(a=>({id:a.id,mesh:groundPreviewMesh(a.id,0)})),
+    ...PACK_2_INFRASTRUCTURE.map(a=>({id:a.id,
+      mesh:infrastructurePreviewMesh(a.id,{rotation:0,variant:a.variants[0]})})),
+    {id:WATER_CANDIDATE_ID,mesh:waterPreviewMesh()}
+  ];
+  assert.equal(samples.length,18);
+  const signature=mesh=>JSON.stringify({
+    positions:Array.from(mesh.positions),
+    colors:Array.from(mesh.colors),
+    alpha:mesh.alpha?Array.from(mesh.alpha):null
+  });
+  const unique=new Set(samples.map(s=>signature(s.mesh)));
+  assert.equal(unique.size,18,
+    'An authored asset duplicates the physical rendered geometry and material of another family');
+  assert.deepEqual(samples.map(s=>s.id).sort((a,b)=>a-b),
+    Array.from({length:18},(_,i)=>59+i));
+});
 test('no animation, fluid propagation, world generation or production save integration can be implied',()=>{
   assert.equal(WATER_ASSET.fluidSimulationImplemented,false);
   assert.equal(WATER_ASSET.worldGenerationEnabled,false);
