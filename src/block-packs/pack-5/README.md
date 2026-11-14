@@ -46,3 +46,11 @@ Read `PROGRESS.md` and `manifest.json` for true candidate/verification statuses 
 - `tests/block-packs/pack-5/capture-canvas.py` reproducibly captures six screenshots across 667×375, 844×390, 932×430 and rotations 0/1; it verifies six unique asset-panel pixel hashes per image and meaningful rotation changes.
 - Authentic source-served WebGL2 is **NOT VERIFIED** in this environment. Pixel fingerprints and candidate snapshots cannot substitute for actual engine integration, premium-art approval, in-game target/collision, or backward-safe schema-1 save tests.
 - `M1_ACCEPTANCE.md` contains full verified evidence; **M1 acceptance remains open** and M2 residential furniture is not authorized to begin merely because the source was authored.
+
+## Reproducible landscape WebGL2 preview
+
+Run in a Chromium/Xvfb environment with Mesa software OpenGL:
+
+`LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/gallery-webgl-browser.py <output-dir>`
+
+This Pack 5-only Python Playwright runner verifies six *genuine* WebGL2 draws at 667×375, 844×390 and 932×430, for 0° and 90° shape rotations; it writes screenshots and requires unique nonblank pixel readback for all six candidates. Browser navigation to localhost is blocked in the current test sandbox, so the runner assembles the exact checked-out JavaScript sources inline in an offline `about:blank` page. This is **not** proof that the original served HTML/module graph loads correctly. Do not describe this as physical iPhone testing, deployed renderer output, premium art approval or live schema-1 state support. See `M1_ACCEPTANCE.md`.
