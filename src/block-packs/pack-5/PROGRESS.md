@@ -34,3 +34,11 @@
 - New main `caf47776b723a36684edc1a72749e49268ccc688` resulted from creator-authorized automation-only PR #120. **Manual Pack 5 PR #119 explicitly excluded.** Original branch base `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`/checkpoint 006 remains its historical source point.
 - Shared opt-in :00/:12 geometry prototypes and 12 biome130 candidates have entered main, **but not new runtime registered block IDs, Pack 5 assets, or production schema-1 variant support**. Pack 5-owned paths remain disjoint from the two intervening main commits.
 - No rebase, merge, deployment, source overlap or change to acceptance decision. Reverify checkpoint before any later new work.
+
+## Genuine WebGL2 visual review after checkpoint 007
+- **44/44 native Node tests PASS** on exact source/test blobs, after the Pack 5-only browser gallery repair.
+- Chromium Xvfb + software OpenGL established an **actual WebGL2 2.0 context**. Six source-derived WebGL2 screenshots across 667×375, 844×390, 932×430 and rotations 0/1 inspected, all six candidates visible with nonblank unique panel GPU readback fingerprints at every size.
+- Real defect fixed: the old fixed-height mobile WebGL2 gallery cropped its bottom row and oriented wall faces edge-on. Source gallery HTML/JS now fits the available landscape viewport, preserves tile scale and exposes physical wall material faces.
+- Reproducible: `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/gallery-webgl-browser.py <output-dir>`.
+- **Not a source-served test**: local HTTP navigation is blocked by administrator; exact Pack 5 JS modules are concatenated for an offline about:blank genuine WebGL2 run. **Not iPhone hardware** or production renderer/game acceptance.
+- M1 final acceptance still OPEN for actual source-served browser module loading, creator visual review and future central registry/shape/save integration. M2 NOT STARTED; 3 CANDIDATE, 15 NOT STARTED, 0 INTEGRATED. PR remains draft and unmerged.
