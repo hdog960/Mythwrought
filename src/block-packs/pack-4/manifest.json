@@ -237,10 +237,10 @@
     "tests/block-packs/pack-4/windows.test.mjs"
   ],
   "dependencies": [
-    "Generic :12 rotated-box shape/mesh contract (PR #107 candidate, not integrated at checkpoint 006)",
-    "Generic :00 partial-block selection/collision/placement contract (PR #108 candidate, not integrated at checkpoint 006)",
-    "Central manual integration of new persistent IDs and schema-1 sidecar orientation state",
-    "Transparent sorted pass and depth-write handling in shared WebGL2 renderer"
+    "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
+    "Generic :00 shape-aware selection/collision/placement (PR #106 — unmerged at checkpoint 006)",
+    "Creator-authorized centralized registration of candidate IDs, with nonbreaking schema-1 orientation state",
+    "Transparency sorting, depth-writing and multi-material faces in the shared renderer"
   ],
   "restrictions": {
     "noMainEdits": true,
