@@ -51,3 +51,48 @@ export function planVoxelGrove(world,{minX,minZ,maxX,maxZ,spacing=9,maxTrees=12,
  }
  return {seed:world.seed,plans,treeCount:plans.length,optIn:true};
 }
+
+/**
+ * Install a previously planned grove as one reversible edit. This is opt-in:
+ * :24 still chooses regions and when installation is appropriate.
+ * Never accept caller-supplied voxel contents without regenerating each tree.
+ */
+export function placeVoxelGrove(world,grove){
+ if(!world||typeof world.get!=='function'||typeof world.set!=='function'||
+    !grove?.optIn||grove.seed!==world.seed||
+    !Array.isArray(grove.plans)||grove.plans.length<1||grove.plans.length>64||
+    grove.treeCount!==grove.plans.length)return false;
+ const cells=[],seen=new Set();
+ for(const plan of grove.plans){
+  if(!plan?.optIn||plan.seed!==world.seed||!Array.isArray(plan.origin)||
+     !Array.isArray(plan.cells)||!TREE_VARIANTS.includes(plan.variant))return false;
+  const fresh=planVoxelTree(world,plan.origin[0],plan.origin[2],
+   {variant:plan.variant,leafId:plan.leafId});
+  if(!fresh||fresh.cells.length!==plan.cells.length||
+     fresh.origin.some((v,i)=>v!==plan.origin[i]))return false;
+  for(let i=0;i<fresh.cells.length;i++){
+   const expected=fresh.cells[i],actual=plan.cells[i];
+   if(!Array.isArray(actual)||actual.length!==4||
+      actual.some((v,j)=>v!==expected[j]))return false;
+   const k=expected.slice(0,3).join(',');
+   if(seen.has(k))return false;
+   seen.add(k);
+   cells.push(expected);
+  }
+ }
+ const written=[];
+ try{
+  for(const [x,y,z,id] of cells){
+   if(!world.set(x,y,z,id))throw Error('grove write rejected');
+   written.push([x,y,z]);
+  }
+ }catch{
+  for(let i=written.length-1;i>=0;i--){
+   const [x,y,z]=written[i];
+   if(!world.set(x,y,z,0))
+    throw Error('grove rollback failed; world may be partially edited');
+  }
+  return false;
+ }
+ return true;
+}
