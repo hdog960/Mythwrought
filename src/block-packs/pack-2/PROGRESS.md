@@ -121,6 +121,15 @@
 - The last isolated, source-level results remain **88/88 checked-in test bodies passed under V8**, including 121 full-state mesh/normal configurations (25,742 triangles, zero inverted or degenerate after Pack 2-only winding fix) and 900 water surface-ray comparison samples. Those checks are **not native Node or browser evidence**.
 - Exact new commit root CI must be checked independently once reported; source candidate review is complete, but full native/visual/production acceptance and creator Gate A approval remain **OPEN**.
 
+## Session 9 — Python Playwright in-memory gallery fallback (2026-11-14)
+
+- [x] Reconfirmed previous exact-head [standard CI #43641062727](https://github.com/hdog960/Mythwrought/actions/runs/43641062727) **SUCCESS** for root Node/real landscape Chromium baseline, still excluding nested Pack 2 tests.
+- [x] Authored Pack 2-exclusive `tests/block-packs/pack-2/gallery-browser.py`: free Chromium via Python Playwright, rewriting original source imports to in-memory base64 ES modules so browser checks do not depend on localhost access or the missing Node Playwright package.
+- [x] Verified **genuine Chromium 144** can load simple and nested in-memory JavaScript modules via Python Playwright. This tests the browser loader only, **not** any Pack 2 source/candidate.
+- [x] The new runner checks all 18 candidate meshes for unique painted pixel hashes at 667×375, 844×390 and 932×430, fluid translucent pixels, controls/variants, exact fixture snapshot recovery, and optionally produces 54 authentic candidate screenshots with water/gate/parapet details **when actually executed**. No screenshots have been generated.
+- [ ] Exact checkout is unavailable in the restricted local runtime (GitHub DNS/direct HTTPS failure), so all six native Node suites and both candidate Chromium runners remain unexecuted. Source-level 88/88 V8 tests, 121-state winding audit, and 900 water rays do **not** substitute for them.
+- [ ] Check the new exact PR HEAD GitHub Actions result; keep Gate A open, v0.11 locked, no merge/deployment/shared code or world placement.
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
