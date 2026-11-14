@@ -87,6 +87,7 @@ export function validateBlueprint(b){
   for(const o of b.openings){
     if(!o||!['entrance','door','window'].includes(o.kind)||!FACING.has(o.facing))fail('invalid opening');
     position(o.at,bounds,'opening');
+    if(o.kind==='window'&&occupied.has(key(o.at))&&occupied.get(key(o.at)).role!=='window')fail('window position occupied by non-window masonry');
     if(o.kind!=='window'&&occupied.has(key(o.at)))fail('doorway occupied by a solid cell');
     if(o.kind==='entrance')entries.add(key(o.at));
   }
@@ -118,20 +119,24 @@ export function validateBlueprint(b){
       if(roomFootprints.has(rk))fail('overlapping interior room footprints');
       roomFootprints.add(rk);
       if(tile[0]===s.access[0]&&tile[1]===s.access[2])containsAccess=true;
-      if(!occupied.has(key([tile[0],s.level-1,tile[1]])))fail('room footprint missing floor support');
+      const support=occupied.get(key([tile[0],s.level-1,tile[1]]));
+      if(!support||!['floor','landing','stair','foundation'].includes(support.role))fail('room footprint missing floor support');
+      if(occupied.has(key([tile[0],s.level,tile[1]]))||
+         occupied.has(key([tile[0],s.level+1,tile[1]])))fail('room footprint blocked at feet or head');
     }
     if(!containsAccess)fail('room access outside its footprint');
   }
   for(const kind of p.spaces)if(!kinds.has(kind))fail('required '+b.type+' interior missing: '+kind);
+  // Constant-neighbor flood fill: large archives cannot afford O(pathCells squared).
   const pending=[...entries],visited=new Set(entries);
   while(pending.length){
     const here=nav.get(pending.pop());
     if(!here)continue;
-    for(const n of nav.values()){
-      if(visited.has(key(n.at)))continue;
-      const dx=Math.abs(here.at[0]-n.at[0]),dy=Math.abs(here.at[1]-n.at[1]),dz=Math.abs(here.at[2]-n.at[2]);
-      if(dx+dz!==1||dy>1||dy===1&&here.mode!=='stair'&&n.mode!=='stair')continue;
-      const k=key(n.at);visited.add(k);pending.push(k);
+    for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])for(const dy of [-1,0,1]){
+      const point=[here.at[0]+dx,here.at[1]+dy,here.at[2]+dz],k=key(point);
+      const n=nav.get(k);
+      if(!n||visited.has(k)||dy!==0&&here.mode!=='stair'&&n.mode!=='stair')continue;
+      visited.add(k);pending.push(k);
     }
   }
   if(visited.size!==nav.size)fail('unreachable walkable route');
@@ -167,7 +172,8 @@ export function geometrySignature(b){
       ...b.openings.map(o=>[...rot([o.at[0],o.at[2]]),o.at[1],'opening',o.kind]),
       ...b.spaces.flatMap(s=>s.footprint.map(f=>[...rot(f),s.level,'room',s.kind]))
     ];
-    const minX=Math.min(...entries.map(e=>e[0])),minZ=Math.min(...entries.map(e=>e[1]));
+    let minX=Infinity,minZ=Infinity;
+    for(const entry of entries){minX=Math.min(minX,entry[0]);minZ=Math.min(minZ,entry[1]);}
     signatures.push(JSON.stringify(entries.map(([x,z,...rest])=>[x-minX,z-minZ,...rest]).sort(compare)));
   }
   return signatures.sort()[0];

@@ -77,6 +77,12 @@ test('reject missing functional rooms, unsupported navigation and disconnected p
   const b=fixture();b.navigation=b.navigation.filter(n=>n.at[2]!==1);fails(b,/unreachable|room/);
   const c=fixture();c.cells=c.cells.filter(n=>n.at.join(',')!=='2,0,2');fails(c,/navigation lacks authored support|room footprint missing floor support/);
 });
+test('a complete room footprint must have supported, clear foot and head space',()=>{
+  const a=fixture();a.cells.push({at:[1,1,2],asset:'base:stone',role:'column',facing:'north'});
+  fails(a,/room footprint blocked at feet or head/);
+  const b=fixture();b.cells.push({at:[1,2,2],asset:'base:stone',role:'trim',facing:'north'});
+  fails(b,/room footprint blocked at feet or head/);
+});
 test('symbolic assets must include realistic unresolved dependency contracts and never numeric IDs',()=>{
   const a=fixture();a.cells.find(c=>c.role==='partition').asset='pack1:008';
   a.dependencies=[{ref:'pack1:008',state:'candidate',intendedShape:'partial',
