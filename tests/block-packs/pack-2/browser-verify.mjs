@@ -42,16 +42,38 @@ export async function runPack2BrowserVerification(){
         options.map(option=>Number(option.value)));
       assert.deepEqual([...allIds].sort((a,b)=>a-b),
         Array.from({length:18},(_,i)=>i+59));
-      // Select and render EVERY candidate before testing specific state controls.
-      // A browser-side error in just one module/asset must fail the session.
+      // Select and RENDER EVERY candidate, hashing only the drawn geometry crop.
+      // Label text cannot falsely make an empty/duplicate mesh pass this check.
+      const galleryHashes=[],galleryPixels=[];
+      const screenshotDir=process.env.MYTHWROUGHT_PACK2_SCREENSHOTS
+        ?resolve(process.env.MYTHWROUGHT_PACK2_SCREENSHOTS):null;
+      if(screenshotDir)await mkdir(screenshotDir,{recursive:true});
       for(const id of allIds){
         await page.selectOption('#asset',String(id));
-        const displayed=await page.evaluate(()=>
-          ({id:window.pack2Fixture.selection().id,
-            status:document.querySelector('#status').textContent}));
+        const displayed=await page.evaluate(()=>{
+          const ctx=document.querySelector('#preview').getContext('2d');
+          const data=ctx.getImageData(230,90,430,230).data;
+          let hash=2166136261,painted=0;
+          for(let i=0;i<data.length;i+=4){
+            if(data[i+3]>3)painted++;
+            for(let j=0;j<4;j++){
+              hash=Math.imul(hash^data[i+j],16777619);
+            }
+          }
+          return {id:window.pack2Fixture.selection().id,
+            status:document.querySelector('#status').textContent,
+            hash:hash>>>0,painted};
+        });
         assert.equal(displayed.id,id);
         assert.ok(displayed.status.startsWith('ID '+id+'  |  '));
+        assert.ok(displayed.painted>150,'Candidate '+id+' drew no physical mesh');
+        galleryHashes.push(displayed.hash);galleryPixels.push(displayed.painted);
+        if(screenshotDir)await page.locator('#preview').screenshot({
+          path:resolve(screenshotDir,'pack2-'+String(id)+'-'+width+'x'+height+'.png')
+        });
       }
+      assert.equal(new Set(galleryHashes).size,18,
+        'Two candidate gallery images are identical in the geometry-only crop');
       for(const id of [73,74,75]){
         await page.selectOption('#asset',String(id));
         assert.equal(await page.evaluate(()=>window.pack2Fixture.selection().id),id);
@@ -113,8 +135,7 @@ export async function runPack2BrowserVerification(){
       });
       assert.ok(scrolled.scrollWidth<=width+4,'Unexpected horizontal page overflow');
       if(process.env.MYTHWROUGHT_PACK2_SCREENSHOTS){
-        const dir=resolve(process.env.MYTHWROUGHT_PACK2_SCREENSHOTS);
-        await mkdir(dir,{recursive:true});
+        const dir=screenshotDir;
         await page.screenshot({path:resolve(dir,'pack2-water-fullpage-'+width+'x'+height+'.png'),
           fullPage:true});
         await page.locator('#preview').screenshot({
@@ -131,6 +152,7 @@ export async function runPack2BrowserVerification(){
       results.push({viewport:width+'x'+height,candidates:allIds.length,
         ids:[73,74,75,76],triangleCounts:mesh.triangles,
         waterState,visiblePixelCount:mesh.visible,translucentPixelCount:mesh.translucent,
+        galleryUniqueHashes:new Set(galleryHashes).size,galleryPaintedPixels:galleryPixels,
         canvasWidth:canvasRect.width});
       await page.close();
     }
