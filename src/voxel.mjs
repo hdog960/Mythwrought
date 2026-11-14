@@ -5,6 +5,7 @@ import {woodlandCanopyVertices} from './canopy.mjs';
 import {grottoAccentVertices} from './grotto.mjs';
 import {caveRuneVertices} from './cave-runes.mjs';
 import {waystoneVertices} from './waystones.mjs';
+import {ruinWatchtowerVertices} from './ruin-watchtower.mjs';
 import {caveThresholdVertices} from './cave-thresholds.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
@@ -174,17 +175,19 @@ export function meshChunk(world,cx,cz){
     air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
   const waystones=waystoneVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
+  const watchtowers=ruinWatchtowerVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const caveThresholds=caveThresholdVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,air:BLOCK.AIR,stoneId:BLOCK.STONE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y});
   const solid=new Float32Array(vertices);
-  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length&&!caveThresholds.length)return solid;
-  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length+caveThresholds.length);
+  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length&&!watchtowers.length&&!caveThresholds.length)return solid;
+  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length+watchtowers.length+caveThresholds.length);
   combined.set(solid);combined.set(canopy,solid.length);
   combined.set(grove,solid.length+canopy.length);
   combined.set(meadow,solid.length+canopy.length+grove.length);
   combined.set(runes,solid.length+canopy.length+grove.length+meadow.length);
   // Existing meadow and grotto tail positions retain their regression invariants.
   combined.set(grotto,solid.length+canopy.length+grove.length+meadow.length+runes.length);
-  combined.set(waystones,combined.length-waystones.length-caveThresholds.length);
+  combined.set(waystones,combined.length-waystones.length-watchtowers.length-caveThresholds.length);
+  combined.set(watchtowers,combined.length-watchtowers.length-caveThresholds.length);
   combined.set(caveThresholds,combined.length-caveThresholds.length);
   return combined;
 }
