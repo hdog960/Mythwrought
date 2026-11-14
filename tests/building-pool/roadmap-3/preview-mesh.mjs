@@ -36,7 +36,9 @@ export function createPreviewMesh(blueprint,{cutaway=false}={}){
    if(occupied.has(key(c.x+dx,c.y+dy,c.z+dz)))continue;
    faceCount++;facesByRole[c.role]=(facesByRole[c.role]||0)+1;
    const color=rgb.map((v,i)=>Math.min(1,v*tint[i]*face.shade));
-   for(const v of face.vertices)floats.push(c.x+v[0],c.y+v[1],c.z+v[2],...color);
+   // All six original templates are inward-wound; flip each triangle for CCW outward faces.
+   for(let t=0;t<6;t+=3)for(const v of [face.vertices[t],face.vertices[t+2],face.vertices[t+1]])
+    floats.push(c.x+v[0],c.y+v[1],c.z+v[2],...color);
   }
  }
  return {vertices:new Float32Array(floats),sourceCells:cells.length,faceCount,triangleCount:faceCount*2,facesByRole,
