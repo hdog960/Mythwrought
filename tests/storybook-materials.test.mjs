@@ -275,3 +275,18 @@ test('raw crystal frost stars use deterministic cell-local opaque pigment with n
  assert.equal(RULES.newDrawCalls,0);
  assert.equal(RULES.newTextures,0);
 });
+
+
+test('rounded river pebbles are sparse, opaque and distance-faded in existing loam',()=>{
+ assert.deepEqual(RULES.riverPebbleAccents,['soil-rounded-river-pebbles','soil-dark-pebble-rims']);
+ const soil=FS.slice(FS.indexOf('}else if(vMat==2)'),FS.indexOf('}else if(vMat==3)'));
+ for(const term of ['gravelCell','gravelUv','gravelSeed','gravelRadius','gravelPebble','gravelRim'])
+  assert.match(soil,new RegExp('(float|vec2) '+term+'='));
+ assert.match(soil,/step\(\.81,gravelSeed\)/);
+ assert.match(soil,/\.24\*gravelPebble\*near/);
+ assert.match(soil,/\.12\*gravelRim\*near/);
+ assert.doesNotMatch(soil,/sampler2D|discard;|texture\(|uTime/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+});
