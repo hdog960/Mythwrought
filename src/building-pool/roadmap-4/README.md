@@ -12,15 +12,21 @@
 
 ## Current native QA
 
-- Run \`node --test tests/building-pool/roadmap-4/*.test.mjs\` from repository root: **31/31** native Node 22 tests passed on exact GitHub SHA-matching sources in the last developer session.
+- Run \`node --test tests/building-pool/roadmap-4/*.test.mjs\` from repository root: **33/33** native Node 22 tests passed on exact GitHub SHA-matching sources in the last developer session.
 - **180 real Chromium Canvas2D** engineering screenshots captured: all 30 M1 structures × complete exterior and floor section × 667×375, 844×390 and 932×430. Reproduce with `python3 tests/building-pool/roadmap-4/m1-gallery-browser.py`. A fail-closed genuine WebGL2 preview and test runner are also owned here, but its browser execution remains blocked by this environment. **WebGL2 was disabled by the available browser environment**, so none is accepted as a WebGL2 performance screenshot.
 - M1 candidate floor plans have explicitly assigned rooms on every floor. Partial stairs/roofing, pane mounts and tall-world integration remain unverified and unresolved.
 - Read \`docs/building-pool/roadmap-4/M1_CANDIDATE_ACCEPTANCE.md\` for the full dossier and hard blockers.
 
 ## Latest M1 candidate corrections
 
-Sky-open desert atria across upper storeys, supported upper gallery doors, unobstructed four-rise stairwells, crenellated castle crowns above the main roof, and biome-correct candidate roof/masonry/specialty families are all authored in the isolated M1 builder. **31/31** exact-source native Node regressions now pass. No in-game integration, premium-art or actual-iPhone acceptance has occurred. See the M1 dossier for the safety failures and remaining WebGL2 blocker.
+Sky-open desert atria across upper storeys, supported upper gallery doors, unobstructed four-rise stairwells, crenellated castle crowns above the main roof, and biome-correct candidate roof/masonry/specialty families are all authored in the isolated M1 builder. **33/33** exact-source native Node regressions now pass. No in-game integration, premium-art or actual-iPhone acceptance has occurred. See the M1 dossier for the safety failures and remaining WebGL2 blocker.
 
 ## Independent M1 readiness audit
 
-Run `node --test tests/building-pool/roadmap-4/*.test.mjs` to execute **31 dedicated Node tests**, including the connected-room, courtyard, staircase, and entrance-to-room route checks. The read-only `m1-readiness.mjs` module provides an exposed-face/vertex-buffer census and audits all symbolic dependencies. It does **not** activate buildings or demonstrate real physical collisions, GPU frame times, or real iPhone performance. All room floorplans are now cardinally connected after a five-room false-access defect was repaired. The M1 dossier has exact test hashes and open acceptance gates.
+Run `node --test tests/building-pool/roadmap-4/*.test.mjs` to execute **33 dedicated Node tests**, including the connected-room, courtyard, staircase, and entrance-to-room route checks. The read-only `m1-readiness.mjs` module provides an exposed-face/vertex-buffer census and audits all symbolic dependencies. It does **not** activate buildings or demonstrate real physical collisions, GPU frame times, or real iPhone performance. All room floorplans are now cardinally connected after a five-room false-access defect was repaired. The M1 dossier has exact test hashes and open acceptance gates.
+
+## Latest structural foundation work (checkpoint 008)
+
+A dedicated load-path audit exposed **115 unsupported raised staircase treads**. The M1 source now builds continuous stone support piers beneath all raised stairs and landings, shifting the third-storey flight to a separate shaft to avoid blocking intermediate circulation. It also adds **4,310 overhead roof joists** above two-cell room clearance, with checked wall/partition connections at both ends. The current 30 blueprints contain 129,484 authored cells, 36,385 theoretical walking positions and 95 room definitions. **33/33 genuine native Node 22.16.0 tests passed** against matching GitHub file blobs, including both new support regressions. All 180 Canvas2D Chromium QA captures were refreshed after these changes, with no page errors or blank images.
+
+The standalone genuine WebGL2 runner is still **blocked** by `ERR_BLOCKED_BY_ADMINISTRATOR` for local Chromium navigation, while direct WebGL2 contexts remain unavailable. Please do not interpret Canvas2D screenshots, conceptual geometry buffer counts, or full-cube stair reservations as genuine physical shape integration or GPU performance proof. No M1 final creator acceptance, merge, build activation, or M2 development has occurred.
