@@ -1,0 +1,252 @@
+{
+  "schema": "mythwrought.pack4.candidate-manifest.v1",
+  "title": "Pack 4 — Windows & Furnishings",
+  "productionState": "UNMERGED CANDIDATE — NOT IN LIVE GAME",
+  "repository": "hdog960/Mythwrought",
+  "branch": "pack-4-m0-m1-windows-openings-20261114",
+  "mainAtStart": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "integrationCheckpoint": "006",
+  "reservedIdBand": [
+    159,
+    208
+  ],
+  "protectedIds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    255
+  ],
+  "assignedIds": [
+    159,
+    160,
+    161,
+    162,
+    163,
+    164
+  ],
+  "unassignedBand": [
+    165,
+    208
+  ],
+  "candidateVariants": 6,
+  "completeFamilies": 0,
+  "implementedCandidateFamilies": 5,
+  "statusGlossary": {
+    "candidate": "Implemented in isolated PR only; engine integration and live compatibility not certified",
+    "planned": "Not yet implemented"
+  },
+  "entries": [
+    {
+      "roster": 30,
+      "name": "Clear glass",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        159
+      ],
+      "note": "Thin pale transparent glaze"
+    },
+    {
+      "roster": 31,
+      "name": "Stained glass",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        160,
+        161
+      ],
+      "note": "Sunfire and Moonveil tracery variants"
+    },
+    {
+      "roster": 32,
+      "name": "Wooden window frames",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        162
+      ],
+      "note": "Open oak sash and cross mullions"
+    },
+    {
+      "roster": 33,
+      "name": "Wooden shutters",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        163
+      ],
+      "note": "Two closed slatted hinged leaves; open state deferred"
+    },
+    {
+      "roster": 34,
+      "name": "Iron bars",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        164
+      ],
+      "note": "Four wrought iron rods and two braces"
+    },
+    {
+      "roster": 35,
+      "name": "Lantern blocks",
+      "category": "windows-lighting",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Floor/suspended luminous fixtures; dynamic light dependency"
+    },
+    {
+      "roster": 36,
+      "name": "Wall-mounted lanterns",
+      "category": "windows-lighting",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Wall bracket, orientation and support"
+    },
+    {
+      "roster": 37,
+      "name": "Crystal lanterns",
+      "category": "windows-lighting",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Physical crystal cage, not existing CRYSTAL 5"
+    },
+    {
+      "roster": 38,
+      "name": "Torch blocks",
+      "category": "windows-lighting",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Wall or floor mounting"
+    },
+    {
+      "roster": 56,
+      "name": "Barrels",
+      "category": "furnishings",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Physical staves, rim and top/bottom"
+    },
+    {
+      "roster": 57,
+      "name": "Wooden crates",
+      "category": "furnishings",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Reinforced corner geometry"
+    },
+    {
+      "roster": 58,
+      "name": "Wooden benches",
+      "category": "furnishings",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Seat and separate legs"
+    },
+    {
+      "roster": 59,
+      "name": "Wooden tables",
+      "category": "furnishings",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Top and support geometry"
+    },
+    {
+      "roster": 60,
+      "name": "Wooden signs",
+      "category": "furnishings",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Distinct face and mounting"
+    },
+    {
+      "roster": 61,
+      "name": "Hanging banners",
+      "category": "furnishings",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Suspended cloth silhouette"
+    },
+    {
+      "roster": 62,
+      "name": "Market canopy blocks",
+      "category": "furnishings",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Individual canopy segment; no stall assembly"
+    },
+    {
+      "roster": 63,
+      "name": "Chimney blocks",
+      "category": "hearth-civic",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Chimney component, not built fireplace"
+    },
+    {
+      "roster": 64,
+      "name": "Fireplace blocks",
+      "category": "hearth-civic",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Hearth fixture, decorative heat metadata only"
+    },
+    {
+      "roster": 65,
+      "name": "Well rim blocks",
+      "category": "hearth-civic",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Standalone rim segment; no built well"
+    },
+    {
+      "roster": 66,
+      "name": "Well roof blocks",
+      "category": "hearth-civic",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Well-specific cap; not generic roof"
+    },
+    {
+      "roster": 67,
+      "name": "Well pulley blocks",
+      "category": "hearth-civic",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Separate bracket/wheel and attachment"
+    },
+    {
+      "roster": 68,
+      "name": "Fountain blocks",
+      "category": "hearth-civic",
+      "status": "planned",
+      "blockIds": [],
+      "note": "Basin segment distinct from water/aqueduct"
+    }
+  ],
+  "sourceFiles": [
+    "src/block-packs/pack-4/windows.mjs"
+  ],
+  "testFiles": [
+    "tests/block-packs/pack-4/windows.test.mjs"
+  ],
+  "dependencies": [
+    "Generic :12 rotated-box shape/mesh contract (PR #107 candidate, not integrated at checkpoint 006)",
+    "Generic :00 partial-block selection/collision/placement contract (PR #108 candidate, not integrated at checkpoint 006)",
+    "Central manual integration of new persistent IDs and schema-1 sidecar orientation state",
+    "Transparent sorted pass and depth-write handling in shared WebGL2 renderer"
+  ],
+  "restrictions": {
+    "noMainEdits": true,
+    "noWorldPlacement": true,
+    "noAutoMerge": true,
+    "noPwaChanges": true,
+    "noSharedFiles": true
+  }
+}
