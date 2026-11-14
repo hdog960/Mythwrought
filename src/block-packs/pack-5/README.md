@@ -2,7 +2,7 @@
 
 **Draft-only isolated pack.** No production registration or world placement; no numeric ID assigned.
 The creator reserved 18 roster entries `pack5:079`–`pack5:096`. These are **symbolic**, not game block IDs.
-Latest checked main: `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, checkpoint 006. Read Issues
+Latest checked main: `caf47776b723a36684edc1a72749e49268ccc688`, checkpoint 007 (branch historically based on checkpoint 006). Read Issues
 #109 and #117 every session. Never touch the four other manual packs or biome130 catalog.
 
 ## Milestone 1 — physical architectural surfaces (CANDIDATE)
