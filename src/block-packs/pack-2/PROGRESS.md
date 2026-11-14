@@ -1,40 +1,55 @@
-# Pack 2 — isolated candidate progress ledger
+# Mythwrought Pack 2 — Timber & Infrastructure candidate ledger
 
-**Status:** candidate-only, unmerged, not deployed, not installed in the playable palette.
-**Pack authority:** [Issue #109](https://github.com/hdog960/Mythwrought/issues/109).
-**Verification base:** main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`.
-**Newest incorporation at branch creation:** 006; no persistent IDs beyond 0–8 in main.
-**Current candidate branch:** `manual-pack-2-timber-foundation-20261114`.
-**One source of truth for allocations:** `manifest.json`, 59–62 only; 63–108 unallocated.
+**Governance:** [coordination Issue #109](https://github.com/hdog960/Mythwrought/issues/109) / seven authoritative docs / v0.10 Gate A, v0.11 locked.
+**Status:** **10/18 distinct physical candidate families authored** (not integrated, merged, deployed or playable). 8 families remain.
+**Latest checked main:** `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`; incorporation checkpoint **006**. Live IDs 0–8 only. Wood ID 4 is not a substitute for these independent candidate shapes.
+**Draft PR:** https://github.com/hdog960/Mythwrought/pull/114
+**Dedicated branch:** `manual-pack-2-timber-foundation-20261114`; see PR for live exact HEAD / CI.
+**Exclusive provisional ID range:** 59–108. Only **59–68** allocated, and those IDs are not installed in the game. 255 reserved. No per-rotation/upper/lower/open/closed ID inflation.
 
-## Completed foundation and first timber batch
+## Roster-level asset progress
 
-- [x] Milestone 0: inspect all seven governing docs, ledger, checkpoint 006, current block registry, existing crafted-timber shader, related open PRs, and other pack paths (not present at branch creation).
-- [x] Isolation: only pack-2 source and pack-2 tests were edited; no new world generation, gameplay changes, automation changes or global texture replacements.
-- [x] Candidate ID 59 — roster 13, planed oak plank block; distinct dressed 4-board course visuals, dark staggered joints, full-cube collision/selection.
-- [x] Candidate ID 60 — roster 14, peeled ash log; pale horizontal faceted cross-section, grain and end treatment, x/z rotation, 2-box physical union.
-- [x] Candidate ID 61 — roster 15, ironbound heartwood beam; smoked brown slender core, wider end collars, joint-pins, x/z rotation, 3-box physical union.
-- [x] Candidate ID 62 — roster 22, dovetailed support post; vertical load-bearing shaft with distinct cap/foot, 3-box physical union, no redundant rotational ID.
+| Milestone | Roster | Candidate ID | Family / original visual and physical distinction | States | Status |
+|---|---:|---:|---|---|---|
+| M1 | 13 | 59 | Planed honey-oak planks with actual course seam triangles, full cube | 1 | Candidate |
+| M1 | 14 | 60 | Peeled ash log, two-box rounded horizontal profile, pale long grain and end rings | 4 rotations | Candidate |
+| M1 | 15 | 61 | Dark heartwood beam, slim core, expanded ironbound shoulders, physical collars | 4 rotations | Candidate |
+| M1 | 22 | 62 | Vertical dovetailed support post with wide bearing collar and flared foot | 1 | Candidate |
+| M2 | 16 | 63 | Oak half-slab, true lower or upper half-cell shape, horizontal planed seam art | lower/upper | Candidate |
+| M2 | 17 | 64 | Genuine two-step stair with riser + upper tread | 4 rotations × 2 half-states | Candidate |
+| M2 | 18 | 65 | Open two-rail timber fence, two vertical stakes and spaced rails, NOT bridge guardrail | 4 rotations | Candidate |
+| M2 | 19 | 66 | Hinged latticed fence gate with physically different open vs closed rail AABBs | 4 rotations × 2 hinge states | Candidate |
+| M2 | 20 | 67 | Single-cell carved hinged timber door leaf with actual swung-open collision shape | 4 rotations × 2 hinge states | Candidate |
+| M2 | 21 | 68 | Hinge-mounted horizontal trapdoor that swings into a vertical physical panel | 4 rotations × 2 mounts × 2 hinge states | Candidate |
+| M3 | 39–42 | — | Gravel, compacted dirt paths, cobblestone paving, decorative paving | — | Not started |
+| M4 | 43–44, 46 | — | Bridge-specific reinforcement rail, wide stone parapet, elevated boardwalk | — | Not started |
+| M5 | 45 | — | True water voxel requiring shared transparent fluid rules; NOT a static cyan cube | — | Not started |
 
-Each record has independent color recipes, true selection/collision AABBs and separately generated preview triangles; surface marks are decoration ON the actual physical shape, never simulated placeable voxel material. Only distinct block types consume IDs; orientation is stored as state.
+**Physical evidence:** `definitions.mjs` and `joinery.mjs` expose genuine occupied local AABB unions that are independently ray-targetable/collidable when connected. Each exports original palette and actual triangle meshes, with surface details anchored to physical geometry. `fixture.mjs` can select, rotate, choose upper/lower, toggle hinges, place, ray-select, mine/remove, serialize and restore isolated candidate cells. Fixture snapshots preserve the old five-number record rows and use seven fields for new stateful joinery.
 
-## Acceptance/evidence
+## Session 2 — Milestone 2 delivery (2026-11-14)
 
-- Test source: `tests/block-packs/pack-2/pack-2.test.mjs` (Node test runner; run explicitly with `node --test tests/block-packs/pack-2/pack-2.test.mjs`).
-- Interactive fixture: `tests/block-packs/pack-2/fixture.mjs`; optional browser inspector `preview.html`.
-- Fixture supports 4 candidates, selection, 90° orientation where meaningful, placement, shape-aware ray targeting, removal and deterministic separate snapshot recovery. Fixture snapshots are NOT live `VoxelWorld.save()` schema-1 saves.
-- Actual playable integration remains BLOCKED. Main `VoxelWorld.set` rejects candidate IDs above 8; main rendering only knows legacy materials; oriented state requires a separate validated save-compatible persistence strategy. Shared :00 targeting and :12 shape mesher were open candidates in PRs #106 and #108, not production contracts at start. Real iPhone testing and Chromium review not claimed.
-- Preview performance acceptance remains open until genuine Chromium/WebGL2 tests on an integrated opt-in candidate are possible.
-- Full test results and exact PR head to be updated as verified in PR handoff; do not interpret the presence of test code as proof that tests passed.
+- [x] Rechecked newest main, source registry, checkpoint 006, Issue #109 and four coordination comments, same Pack 2 draft PR, and competing ownership/IDs in other 3 manual pack PRs.
+- [x] All six joinery families (63–68), independent physical shapes and true state-dependent shapes. Rotations share IDs.
+- [x] Safe pure state transition helper for gate/door/trapdoor without changing actual game interaction or engine.
+- [x] Standalone fixture updated with stateful targeting, placement, open/close and backwards-compatible isolated fixture snapshots.
+- [x] Original face-shaded physical triangle meshes and joint/grain highlights for all six.
+- [x] Interactive browser gallery extended to all 10 assets, quarter-turn, half-variant, state toggle and placed-piece toggle.
+- [x] 15 new dedicated joinery test cases, plus existing 12 material tests: **27/27 checked-in test functions passed in an isolated V8 compatibility harness**. This is not Node/Chromium certification and tests must be run directly under Node.
+- [x] Candidate-specific engine handoff documented in `INTEGRATION_CONTRACT.md`; no changes to generic shared files.
+- [ ] Genuine dedicated `node --test tests/block-packs/pack-2/*.test.mjs` execution in a checkout: not yet available through GitHub API; existing root CI glob does not include these nested tests.
+- [ ] Actual integrated browser WebGL2 screenshot/performance/offline testing: blocked pending authorized engine integration. Isolated preview is Canvas 2D and not playable game proof.
+- [ ] Real iPhone inspection and creator art/control approval: not claimed.
 
-## Remaining 14 roster families / next work
+## Outstanding engine integration (manual incorporation only)
 
-**Milestone 2 (next):** 16 slabs, 17 stairs, 18 fences, 19 gates, 20 doors, 21 trapdoors.
-**Milestone 3:** 39 gravel, 40 packed dirt, 41 cobblestone paving, 42 decorative paving.
-**Milestone 4:** 43 bridge railings, 44 stone parapets, 46 elevated boardwalks.
-**Milestone 5:** 45 true water voxel candidate; declare shared-engine fluid/lighting/selection requirements.
-**Milestone 6:** all 18 acceptance tests, visual and mobile evidence, dependencies.
+1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
+2. Generic :00 shape-target/raycast/collision (opt-in [PR #106](https://github.com/hdog960/Mythwrought/pull/106)) and :12 shape descriptor/mesher ([PR #108](https://github.com/hdog960/Mythwrought/pull/108)) are separate engineering; Pack 2 may not edit or merge them.
+3. Production shape mesh/collision/targeting must respect exposed surfaces, rotation, upper/lower, actual hinge position and player intersection.
+4. Save schema-1 stores legacy `[x,y,z,id]`, no rotation/hinge state. Need central, opt-in metadata storage and atomic rollback, no migration of existing saves.
+5. Hinges need engine-owned input, obstruction checks, animation and safe transitions. Standalone fixture state swaps are not production interaction implementation.
+6. No world generation placement, roads, bridges, houses, settlements, inventories, mobs, harvesting, crafting or paid services.
 
-## Coordination contract and next-session checks
+## Session 3 / next incomplete milestone
 
-Read newest main + `docs/INTEGRATION_CHECKPOINTS.md` + Issue #109 + other manual pack manifests and PRs **again** before allocating 63+. Do not duplicate WOOD 4 or any newly integrated independent block, do not claim current candidates are in-world. If main now contains an equivalent physical block, mark already-in-main, reconcile and do not allocate duplicate IDs. Do not merge, deploy, change main, or update this checkpoint ledger during manual pack development.
+**Milestone 3** — audit latest main/checkpoint/Issue #109/other pack manifests again, then create 39 gravel, 40 packed dirt paths, 41 shallow cobblestone paving, 42 decorative paving with distinct physical top profile and materials. Coordinate gravel falling physics with automation :00 and terrain with :24; do not implement a simulation in this pack. IDs 69–72 are *possible provisional candidates only*, not reserved until live duplicate-prevention audit. Continue maintaining PR #114; do not merge or deploy.
