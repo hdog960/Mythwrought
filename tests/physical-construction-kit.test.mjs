@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,VoxelWorld,WORLD_MAX_Y} from '../src/voxel.mjs';
-import {stoneColumn,stoneGateway,timberFrame,planUneditedConstruction,CONSTRUCTION_IDS,CONSTRUCTION_CONTRACT} from '../src/physical-construction-kit.mjs';
+import {stoneColumn,stoneGateway,timberFrame,planUneditedConstruction,ruinedWall,stoneSteps,CONSTRUCTION_IDS,CONSTRUCTION_CONTRACT} from '../src/physical-construction-kit.mjs';
 
 test('physical palette reuses stable saved block IDs and cube collision',()=>{
   assert.deepEqual({...CONSTRUCTION_IDS},{masonry:BLOCK.STONE,timber:BLOCK.WOOD,inset:BLOCK.CRYSTAL});
@@ -51,4 +51,32 @@ test('deterministic geometry and bounded input reject malformed templates',()=>{
   assert.throws(()=>stoneGateway([0,0,0],{span:2}),/span/);
   assert.throws(()=>timberFrame([0,0,0],{axis:'diagonal'}),/axis/);
   assert.throws(()=>stoneColumn([0,0.5,0]),/integer/);
+});
+
+test('ruined walls have traversable 3-wide doorway and deterministic broken silhouette',()=>{
+  for(const axis of ['x','z']){
+    const cells=ruinedWall([50,4,50],{axis,length:11,height:6,thickness:2});
+    assert.deepEqual(cells,ruinedWall([50,4,50],{axis,length:11,height:6,thickness:2}));
+    assert.equal(new Set(cells.map(c=>c.slice(0,3).join(','))).size,cells.length);
+    const key=(s,y,d)=>axis==='x'?[50+s,4+y,50+d]:[50+d,4+y,50+s];
+    for(let s=4;s<7;s++)for(let y=0;y<3;y++)for(let d=0;d<2;d++)
+      assert(!cells.some(c=>c.slice(0,3).every((v,i)=>v===key(s,y,d)[i])));
+    assert(cells.some(c=>c[1]===9));
+    assert(cells.some(c=>c[1]===7));
+    assert(cells.every(c=>c[3]===BLOCK.STONE));
+  }
+  assert.throws(()=>ruinedWall([0,3,0],{doorWidth:10}),/doorWidth/);
+  assert.throws(()=>ruinedWall([0,3,0],{axis:'y'}),/axis/);
+});
+test('full-block stairs are one-step increments on both axes and remain inside world bounds',()=>{
+  for(const axis of ['x','z']){
+    const cells=stoneSteps([10,4,10],{axis,steps:5,width:3});
+    assert.equal(cells.length,15);
+    assert.equal(new Set(cells.map(c=>c.slice(0,3).join(','))).size,15);
+    for(let s=0;s<5;s++)assert.equal(cells.filter(c=>c[1]===4+s).length,3);
+    assert(cells.every(c=>c[3]===BLOCK.STONE));
+  }
+  assert.equal(stoneSteps([0,8,0],{rise:-1,steps:3}).at(-1)[1],6);
+  assert.throws(()=>stoneSteps([0,WORLD_MAX_Y,0],{steps:3}),/bounds/);
+  assert.throws(()=>stoneSteps([0,3,0],{rise:2}),/rise/);
 });
