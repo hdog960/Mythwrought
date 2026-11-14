@@ -191,3 +191,27 @@ test('all five candidate-only restore codecs reject a production schema marker',
     }
   }
 });
+
+
+// An architectural voxel should be one face-connected solid union. Decorations
+// with an air gap to their parent masonry would visually float and become
+// separately targetable/collidable pieces. Check all supported orientations.
+test('every physical candidate remains face-connected at each supported quarter turn',()=>{
+  const e=1e-10;
+  const joined=(a,b)=>{
+    const overlap=[0,1,2].map(i=>Math.min(a[i+3],b[i+3])-Math.max(a[i],b[i]));
+    return overlap.every(n=>n>e)||
+      overlap.filter(n=>n>e).length===2&&overlap.some(n=>Math.abs(n)<=e);
+  };
+  for(let id=109;id<=125;id++)for(let yaw=0;yaw<=(id<=112?0:3);yaw++){
+    const boxes=pack3CandidateShape(id,yaw).boxes;
+    const seen=new Set([0]),queue=[0];
+    while(queue.length){
+      const index=queue.pop();
+      for(let j=0;j<boxes.length;j++)if(!seen.has(j)&&joined(boxes[index],boxes[j])){
+        seen.add(j);queue.push(j);
+      }
+    }
+    assert.equal(seen.size,boxes.length,`Disconnected solid parts: ID ${id} yaw ${yaw} (${seen.size}/${boxes.length} attached)`);
+  }
+});
