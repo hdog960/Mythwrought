@@ -154,6 +154,15 @@ void main(){
     float plateEdge=1.0-smoothstep(.035,.11,abs(hematite-.67));
     base=mix(base,vec3(.51,.27,.29),.18*plate*(1.0-gold)*near);
     base=mix(base,vec3(.82,.75,.62),.09*plateEdge*(1.0-gold)*near);
+    // Broad malachite-like copper halos and sparse dark host-rock fractures.
+    // These are surface pigment only: no new ore block or world-generation edits.
+    float copperField=.5+.5*sin(vUv.x*4.7+1.2*sin(vUv.y*5.3))*sin(vUv.y*6.1-vUv.x*2.0);
+    float copperHalo=smoothstep(.64,.83,copperField)*(1.0-gold);
+    float copperEdge=1.0-smoothstep(.025,.09,abs(copperField-.64));
+    float hostFracture=1.0-smoothstep(.018,.07,abs(sin(vUv.x*8.0+vUv.y*11.0+sin(vUv.y*5.0))));
+    base=mix(base,vec3(.22,.59,.46),.19*copperHalo*near);
+    base=mix(base,vec3(.58,.78,.63),.10*copperEdge*(1.0-gold)*near);
+    base=mix(base,vec3(.24,.25,.28),.12*hostFracture*(1.0-gold)*near);
     // Oxidized teal seams frame the precious ore without transparency or glow passes.
     float oxidation=smoothstep(.67,.87,.5+.5*sin(vUv.x*8.0-vUv.y*6.0+sin(vUv.y*11.0)));
     base=mix(base,vec3(.19,.43,.39),.17*oxidation*(1.0-gold)*near);
@@ -196,5 +205,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   limestoneShelfAccents:Object.freeze(['stone-sweeping-calcite','stone-blue-shale-shelves']),
   ironstoneAccents:Object.freeze(['stone-ironstone-lenses','stone-pale-mineral-rims']),
   agateHematiteAccents:Object.freeze(['crystal-nested-agate-bands','crystal-indigo-growth-core','ore-hematite-host-plates','ore-pale-plate-boundaries']),
-  forestFloorMaterialAccents:Object.freeze(['grass-fallen-leaf-clusters','soil-branching-exposed-roots'])
+  forestFloorMaterialAccents:Object.freeze(['grass-fallen-leaf-clusters','soil-branching-exposed-roots']),
+  copperOreAccents:Object.freeze(['ore-malachite-halos','ore-copper-boundaries','ore-host-rock-fractures'])
 });
