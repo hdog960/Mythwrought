@@ -88,9 +88,9 @@
   },
   "testEvidence": {
     "nativeNode": {
-      "run": "native Node 22.16.0 local isolated Roadmap 1 source: SHA-matched all seven new/edited code/test files to PR branch",
+      "run": "Native Node 22.16.0 on local isolated working source; six newly edited/created Roadmap 1 code/test file blobs matched the remote PR source. Exact full PR-head checkout with nested suites not yet executed.",
       "cases": "50/50 passed (16 M0 + 12 M1 + 2 D4 + 17 physical acceptance + 3 near-duplicate review)",
-      "exactPRHead": "current commit CI pending; central workflow does NOT execute nested Roadmap 1 suites"
+      "exactPRHead": "PENDING dedicated 50-test source-checkout verification; root GitHub Actions excludes nested suites"
     },
     "chromium": {
       "renderer": "Genuine Chromium Canvas2D schematic fallback; WebGL2 unavailable",
