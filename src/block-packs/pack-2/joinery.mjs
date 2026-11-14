@@ -141,7 +141,8 @@ export function joineryPreviewMesh(id,state={}){
       pos.push(v[0]+n[0]*offset,v[1]+n[1]*offset,v[2]+n[2]*offset);
       colors.push(...color);normals.push(...n);
     }
-    indices.push(st,st+1,st+2,st,st+2,st+3);
+    // Keep outward-facing triangle winding consistent with the AABB normals.
+    indices.push(st,st+2,st+1,st,st+3,st+2);
   };
   const colorOf=(x,y,z)=>{
     const role=parts.find(p=>within(p.box,x,y,z))?.role??'wood';
