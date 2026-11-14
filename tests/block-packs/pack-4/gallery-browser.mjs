@@ -16,7 +16,8 @@ const allowed=new Set([
  '/tests/block-packs/pack-4/gallery.mjs',
  '/src/block-packs/pack-4/windows.mjs',
  '/src/block-packs/pack-4/lighting.mjs',
- '/src/block-packs/pack-4/furnishings.mjs'
+ '/src/block-packs/pack-4/furnishings.mjs',
+ '/src/block-packs/pack-4/hearth-civic.mjs'
 ]);
 const mime={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8'};
 const server=createServer(async (req,res)=>{
@@ -45,16 +46,16 @@ try{
   await page.goto(url,{waitUntil:'load'});
   await page.waitForFunction(()=>window.__PACK4_GALLERY_RESULT?.ready,{timeout:20000});
   const report=await page.evaluate(()=>window.__PACK4_GALLERY_RESULT);
-  if(report.success!==17||report.results.length!==17||!report.sharedWebglSurface||
+  if(report.success!==23||report.results.length!==23||!report.sharedWebglSurface||
      report.results.some(x=>!x.ok)||
-     report.allIds.join(',')!==Array.from({length:17},(_,i)=>159+i).join(','))
+     report.allIds.join(',')!==Array.from({length:23},(_,i)=>159+i).join(','))
     throw Error('Pack4 WebGL2 source rendering failed: '+JSON.stringify(report));
   if(errors.length)throw Error('Pack4 browser page errors: '+errors.join(' | '));
   const selector=page.locator('select').last();
   await selector.selectOption('3');
   await page.waitForTimeout(80);
   const allCanvases=await page.locator('#gallery canvas').count();
-  if(allCanvases!==17)throw Error('Expected 17 reviewable candidate cards');
+  if(allCanvases!==23)throw Error('Expected 23 reviewable candidate cards');
   const warning=await page.locator('.warning').innerText();
   if(!warning.includes('UNMERGED CANDIDATE'))throw Error('Missing mandatory candidate watermark');
   const directory=resolve(root,'artifacts/pack-4');
@@ -64,7 +65,7 @@ try{
   await page.close();
  }
  console.log(JSON.stringify({result:'PASS',browser:'Chromium/WebGL2',landscapeSizes:passed,
-  candidateIDs:'159–175',screenshots:'artifacts/pack-4/pack4-UNMERGED-*.png',
+  candidateIDs:'159–181',screenshots:'artifacts/pack-4/pack4-UNMERGED-*.png',
   warning:'Isolated gallery ONLY, no live world or physical iPhone validation'}));
 }finally{
  await browser?.close();
