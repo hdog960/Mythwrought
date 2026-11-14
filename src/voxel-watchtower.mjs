@@ -34,9 +34,14 @@ export function planVoxelWatchtower(world,x,z){
   if((Math.abs(dx)===3&&Math.abs(dz)%2===1)||(Math.abs(dz)===3&&Math.abs(dx)%2===1))
    put(dx,7,dz,BLOCK.STONE);
  }
- // Roof-level walkable stone platform, with a central open hatch.
+ // A five-step interior stone stair rises along the west wall to a roof landing.
+ // These are real collision/editable voxels, not a decorative mesh. The two
+ // roof apertures provide headroom for the final steps, without sealing the climb.
+ const stair=[[-2,2,1],[-2,1,2],[-2,0,3],[-2,-1,4],[-2,-2,5]];
+ for(const [dx,dz,dy] of stair)put(dx,dy,dz,BLOCK.STONE);
+ // Roof-level walkable platform, with a stairwell opening.
  for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++)
-  if(!(dx===0&&dz===0))put(dx,6,dz,BLOCK.STONE);
+  if(!(dx===-2&&(dz===-2||dz===-1)))put(dx,6,dz,BLOCK.STONE);
  // External approach marker is also a real voxel.
  for(let dz=4;dz<=5;dz++)put(0,0,dz,BLOCK.STONE);
  const cells=[...blocks.values()];
@@ -49,7 +54,7 @@ export function planVoxelWatchtower(world,x,z){
  }
  return Object.freeze({origin:[x,ground,z],cells,entrance:[x,ground+1,z+3],blockCount:cells.length,
   // Explicitly staged construction, never silently installed into old worlds.
-  optIn:true,materialIds:[BLOCK.STONE]});
+  optIn:true,stairSteps:stair.map(([dx,dz,dy])=>[x+dx,ground+dy,z+dz]),materialIds:[BLOCK.STONE]});
 }
 export function placeVoxelWatchtower(world,plan){
  if(!plan||!Array.isArray(plan.cells)||!Array.isArray(plan.origin)||typeof world?.set!=='function')return false;
