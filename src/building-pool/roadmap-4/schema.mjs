@@ -20,7 +20,7 @@ export const REGISTERED=Object.freeze({
   'base:grass':1,'base:dirt':2,'base:stone':3,'base:wood':4,
   'base:crystal':5,'base:ore':6,'base:leaves':7,'base:deepstone':8
 });
-const ROLE=new Set(['foundation','floor','wall','partition','roof','column','stair','landing','railing','window','fixture','trim','parapet']);
+const ROLE=new Set(['foundation','floor','wall','partition','roof','column','beam','stair','landing','railing','window','fixture','trim','parapet']);
 const FACING=new Set(['north','east','south','west']);
 const PATH_LIMIT=60000, CELL_LIMIT=250000;
 const fail=m=>{throw new Error('Roadmap 4 blueprint: '+m);};
