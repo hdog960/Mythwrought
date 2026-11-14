@@ -87,7 +87,22 @@ export function placeVoxelTree(world,plan){
   if(!Array.isArray(actual)||actual.length!==4||
      actual.some((v,j)=>v!==expected[j]))return false;
  }
- // Validate before writing. World.set is the existing ordinary voxel edit API.
- for(const [x,y,z,id] of fresh.cells)if(!world.set(x,y,z,id))return false;
+ // Placement is all-or-nothing for ordinary set failures. Revalidation above
+ // ensures every target is originally AIR, so reversing successful writes
+ // restores both occupancy and the schema-1 edit representation.
+ const written=[];
+ try{
+  for(const [x,y,z,id] of fresh.cells){
+   if(!world.set(x,y,z,id))throw Error('tree voxel write rejected');
+   written.push([x,y,z]);
+  }
+ }catch{
+  for(let i=written.length-1;i>=0;i--){
+   const [x,y,z]=written[i];
+   if(!world.set(x,y,z,BLOCK.AIR))
+    throw Error('tree placement rollback failed; world may be partially edited');
+  }
+  return false;
+ }
  return true;
 }
