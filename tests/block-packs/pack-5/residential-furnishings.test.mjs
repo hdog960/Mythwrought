@@ -167,7 +167,7 @@ test('M2 source variants correspond only to planned Pack 5 roster names',()=>{
   const names={'pack5:082':'Beds','pack5:083':'Chairs & Stools','pack5:084':'Bookshelves','pack5:085':'Cabinets & Wardrobes'};
   for(const d of RESIDENTIAL_FAMILIES){
     const r=manifest.entries.find(x=>x.symbolicId===d.symbolicId);
-    assert.equal(r.name,names[d.symbolicId]);assert.equal(r.milestone,2);
+    assert.equal(r.name,names[d.symbolicId]);assert.equal(r.milestone,2);assert.equal(r.status,'CANDIDATE');assert.equal(r.persistentNumericId,null);
   }
 });
 test('original bookshelf/cabinet joinery is physical on rear and exposed side, not a painted cube',()=>{
