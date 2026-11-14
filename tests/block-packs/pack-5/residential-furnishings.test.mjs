@@ -200,3 +200,16 @@ test('real bed canopy and headboard can be collided at height and selected from 
  assert.equal(f.collides([.38,.70,.3,.48,.82,.45]),false); // empty air between posts
  assert.equal(f.raycast([.10,1.4,.10],[0,-1,0])?.symbolicId,'pack5:082');
 });
+
+
+test('books and scroll spines project beyond shelf lips and remain physical frontal geometry',()=>{
+  for(const variant of RESIDENTIAL_VARIANTS['pack5:084']){
+    const d=p('pack5:084',variant),details=d.art[0].details;
+    const spines=details.filter(x=>x.material.startsWith('book')&&x.box[5]>.93);
+    const metallicSpineMarks=details.filter(x=>x.material==='bronze'&&x.box[2]>=.94&&x.box[5]>.95);
+    assert.ok(spines.length>=12,variant+' book spines hidden behind shelving');
+    assert.ok(metallicSpineMarks.length>=12,variant+' no visible spine detail');
+    assert.ok(d.parts[0].collisionBoxes.some(b=>b[5]>.94));
+    assert.ok(d.parts[0].boxes.length<=64);
+  }
+});
