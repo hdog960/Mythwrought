@@ -133,5 +133,32 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
              [px+tx*(r-.5)*.10,y+.69-drop*.48,pz+tz*(r-.5)*.10],sunlit);
       }
     }
+  // Broad valley-side terraces: coherent horizontal sediment lines on real
+  // exposed dirt, with a low-frequency seed-stable meander across columns.
+  // Render-only and edit-aware; no terrain generation or block IDs change.
+  for(let x=cx*chunkSize;x<(cx+1)*chunkSize;x++)
+    for(let z=cz*chunkSize;z<(cz+1)*chunkSize;z++){
+      const top=heightAt(x,z,seed);
+      if(top<10||world.get(x,top,z)!==grass)continue;
+      for(const [dx,dz] of faces){
+        const neighbor=heightAt(x+dx,z+dz,seed);
+        if(top-neighbor<3||top-neighbor>7)continue;
+        const y=top-2;
+        if(world.get(x,y,z)!==dirt||world.get(x+dx,y,z+dz)!==air)continue;
+        // Neighboring cells share a continuous bedding height; tiny offsets
+        // vary the edge without producing isolated floating ornaments.
+        const wave=hash(Math.floor(x/7),Math.floor(z/7),seed+7193);
+        const offset=.514,tx=-dz,tz=dx;
+        const px=x+.5+dx*offset,pz=z+.5+dz*offset;
+        const rise=.40+wave*.12;
+        const a=[px-tx*.49,y+rise,pz-tz*.49];
+        const b=[px+tx*.49,y+rise+.035,pz+tz*.49];
+        const c=[px+tx*.49,y+rise-.095,pz+tz*.49];
+        const dark=[.30+wave*.06,.24+wave*.04,.18+wave*.03];
+        const light=[.57+wave*.07,.44+wave*.05,.28+wave*.04];
+        emit(a,b,c,dark);
+        emit(a,c,[px-tx*.49,y+rise-.07,pz-tz*.49],light);
+      }
+    }
   return new Float32Array(out);
 }
