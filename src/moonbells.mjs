@@ -122,6 +122,20 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
       [mid+.035,level+.18,rz-.025],j%2?[.54,.70,.61]:[.68,.80,.70],7);
    }
   }
+  // Rare ivory seedheads create a light, upright meadow accent. Their compact
+  // four-facet crown is opaque and inherits the existing grass/roof edit guard.
+  if(hash(x,z,world.seed,709)>.92){
+   const sx=px-.12,sz=pz-.16,sh=.48+hash(x,z,world.seed,719)*.13;
+   const crown=[sx,ground+sh,sz];
+   tri(out,[sx-.018,ground,sz],[sx+.018,ground,sz],crown,[.42,.56,.37],7);
+   tri(out,[sx,ground,sz-.018],[sx,ground,sz+.018],crown,[.50,.62,.43],7);
+   for(let k=0;k<4;k++){
+    const a=turn+k*Math.PI/2,dx=Math.cos(a),dz=Math.sin(a);
+    tri(out,crown,[sx+dx*.115-dz*.045,ground+sh-.07,sz+dz*.115+dx*.045],
+      [sx+dx*.115+dz*.045,ground+sh-.07,sz+dz*.115-dx*.045],
+      k%2?[.91,.91,.76]:[.98,.96,.85],7);
+   }
+  }
   flowers++;
  }
  if(out.length/STRIDE>MAX_FLOWERS*VERTICES_PER_FLOWER)throw Error('Moonbell vertex budget');
