@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
-import {planVoxelGrove} from '../src/voxel-groves.mjs';
+import {planVoxelGrove,placeVoxelGrove} from '../src/voxel-groves.mjs';
 test('grove composition is deterministic, bounded, nonmutating and physical',()=>{
  for(const seed of [179,917,-184]){
   const world=new VoxelWorld(seed),before=world.save();
@@ -73,4 +73,37 @@ test('rejects malformed and excessive protected sites without modifying saves',(
   [[0,0,1]],[[0,0,25]],[[0,0,NaN]],[[1000,0,5]],[[0,0]],[[0,0,3.5]]])
   assert.equal(planVoxelGrove(w,{...bounds,protectedSites}),null);
  assert.deepEqual(w.save(),before);
+});
+
+test('whole-grove installation writes physical voxels and survives schema-1 roundtrip',()=>{
+ const w=new VoxelWorld(179);
+ const grove=planVoxelGrove(w,{minX:-32,minZ:-32,maxX:32,maxZ:32,maxTrees:4});
+ assert.ok(grove.treeCount>=2);
+ assert.equal(placeVoxelGrove(w,grove),true);
+ for(const p of grove.plans)for(const [x,y,z,id] of p.cells)
+  assert.equal(w.get(x,y,z),id);
+ const restored=VoxelWorld.load(w.save());
+ for(const p of grove.plans)for(const [x,y,z,id] of p.cells)
+  assert.equal(restored.get(x,y,z),id);
+});
+test('whole-grove rejects tampering and rolls back failed writes',()=>{
+ const w=new VoxelWorld(917),before=w.save();
+ const grove=planVoxelGrove(w,{minX:-32,minZ:-32,maxX:32,maxZ:32,maxTrees:4});
+ assert.ok(grove.treeCount>=2);
+ const corrupt=structuredClone(grove);
+ corrupt.plans[1].cells[0][3]=BLOCK.STONE;
+ assert.equal(placeVoxelGrove(w,corrupt),false);
+ assert.deepEqual(w.save(),before);
+ const originalSet=w.set.bind(w);
+ let writes=0,failed=false;
+ w.set=(x,y,z,id)=>{
+  if(id!==BLOCK.AIR&&++writes===grove.plans[0].cells.length+3&&!failed){
+   failed=true;return false;
+  }
+  return originalSet(x,y,z,id);
+ };
+ assert.equal(placeVoxelGrove(w,grove),false);
+ assert.deepEqual(w.save(),before);
+ w.set=originalSet;
+ assert.equal(placeVoxelGrove(w,grove),true);
 });
