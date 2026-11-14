@@ -81,6 +81,20 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
       *latticeCell*panel*near;
     sideShade += .11*craftedFrame-.065*panel*frameCell
       +.085*cornerBoss*frameCell-.045*inlayLine*frameCell;
+    // Large-scale hand-carved sunwheel medallion on selected framed boards.
+    // The eight rays and outer ring are deliberately broader than grain lines
+    // so the motif remains recognizable on compact landscape displays.
+    float sunCell=step(.945,hashCell(boardCell+vec2(143.0,89.0)));
+    vec2 sunUv=(boardLocal-.5)*vec2(1.0,1.0);
+    float sunRadius=length(sunUv);
+    float sunRing=1.0-smoothstep(.023,.053,abs(sunRadius-.265));
+    float sunAngle=atan(sunUv.y,sunUv.x);
+    float sunRays=(1.0-smoothstep(.035,.09,abs(sin(sunAngle*4.0))))
+      *smoothstep(.26,.30,sunRadius)*(1.0-smoothstep(.36,.40,sunRadius));
+    float sunCore=1.0-smoothstep(.075,.12,sunRadius);
+    float sunEmblem=clamp(sunRing+sunRays+sunCore,0.0,1.0)
+      *sunCell*panel*near;
+    sideShade += -.13*sunEmblem;
     sideShade += -.15*lattice+.045*latticeEdge+.095*bevel-.035*innerBorder-.07*ornament
       -.11*braceBand+.045*braceHighlight-.065*mortise;
     // End-grain also has a softly planed perimeter.
@@ -92,5 +106,5 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
 `;
 export const CRAFTED_TIMBER_RULES=Object.freeze({
   existingBlockId:4, boardsAcross:3, boardsHigh:2,
-  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, sparseDiagonalJoinery:true, pairedMortises:true, framedPanels:true, cornerBosses:true, archedLatticePanels:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
+  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, sparseDiagonalJoinery:true, pairedMortises:true, framedPanels:true, cornerBosses:true, archedLatticePanels:true, rareSunwheelCarving:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
 });
