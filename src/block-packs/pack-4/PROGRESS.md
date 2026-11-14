@@ -1,10 +1,10 @@
 # Pack 4 — Windows & Furnishings progress ledger
 **UNMERGED CANDIDATE — NOT IN LIVE GAME • Gate A v0.10**
 
-**Branch:** \`pack-4-m0-m1-windows-openings-20261114\`
-**Base main:** \`f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84\`
-**Latest creator incorporation:** checkpoint 006, game code \`1006e5cd5fd44e5696943d2651e63fb30a393003\`.
-**Exact PR HEAD:** GitHub PR \`head.sha\` and PR description provide the
+**Branch:** `pack-4-m0-m1-windows-openings-20261114`
+**Base main:** `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`
+**Latest creator incorporation:** checkpoint 006, game code `1006e5cd5fd44e5696943d2651e63fb30a393003`.
+**Exact PR HEAD:** GitHub PR `head.sha` and PR description provide the
 final immutable review SHA after the last commit. Do not embed a commit's
 own SHA inside itself. New commits require updating PR handoff and re-testing.
 **Ownership:** Pack 4 source/tests ONLY; ID band 159–208. Protected 0–8 / 255.
@@ -40,7 +40,7 @@ own SHA inside itself. New commits require updating PR handoff and re-testing.
   isolated test directory created. Other manual packs and automated lanes
   remain untouched.
 - **M1 Windows/openings:** six visual/physical variants across five
-  exclusively owned families implemented in \`windows.mjs\`, with actual
+  exclusively owned families implemented in `windows.mjs`, with actual
   partial selection/collision boxes, four-way Y rotations, transparent
   material separation and strict state serialization. **Candidate only,
   awaiting Node + browser and integration acceptance.**
