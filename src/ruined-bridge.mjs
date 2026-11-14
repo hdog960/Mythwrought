@@ -60,6 +60,18 @@ export function ruinedBridgeVertices(world,cx,cz,{crossingAt,baseAt,air=0}={}){
   const bz=axis==='x'?pz+side*1.02-.2:pz-.35;
   block(out,bx,deckY,bz,axis==='x'?.7:.4,1.1+(Math.abs(t)%2)*.65,axis==='x'?.4:.7,stone);
  }
+ // Ruined parapets are interrupted to keep the center visibly open. Their
+ // short capped posts give the crossing a readable silhouette from either bank.
+ // All masonry remains render-only and uses the existing stone material.
+ for(const side of [-1,1]){
+  for(const t of [-width,-width+1,width-1,width]){
+   if(t===1)continue;
+   const [px,pz]=along(t);
+   const bx=axis==='x'?px-.42:px+side*1.03-.14;
+   const bz=axis==='x'?pz+side*1.03-.14:pz-.42;
+   block(out,bx,deckY+.20,bz,axis==='x'?.84:.28,.42,axis==='x'?.28:.84,light);
+  }
+ }
  return new Float32Array(out);
 }
 export const RUINED_BRIDGE_LIMITS=Object.freeze({stride:9,maxVerticesPerChunk:1800,newDrawCalls:0,newTextures:0,collidable:false,requiresVerifiedCrossing:true});
