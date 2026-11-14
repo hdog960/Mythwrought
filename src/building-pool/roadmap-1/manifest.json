@@ -2,8 +2,8 @@
   "schema": "mythwrought.building-pool.roadmap-1.manifest.v1",
   "title": "Homes & Regional Life",
   "gate": "v0.10 Gate A OPEN; v0.11 LOCKED",
-  "milestone": "M1 representative homes, taverns, empty stables — architectural uniqueness and symbolic asset fit acceptance OPEN",
-  "status": "45_AUTHORED_UNMERGED_COORDINATE_BLUEPRINT_CANDIDATES_M1_ACCEPTANCE_OPEN",
+  "milestone": "M1 candidate technical acceptance — 62 dedicated native tests source-exact; physical mesh approval OPEN",
+  "status": "45_UNMERGED_COORDINATE_CANDIDATES_WITH_MULTI_CELL_BED_RESERVATIONS",
   "target": 885,
   "authoredBlueprintCount": 45,
   "biomes": [
@@ -54,11 +54,11 @@
     },
     "auto130": "12 candidate families now in main as opt-in symbolic library, not runtime registered",
     "manualPackHeads": {
-      "pack1": "9c57729e71de97215fd400297b18dfe3dce014cc",
-      "pack2": "7d099cb338d6dc32a4d9f51c5fcb57a73507aef2",
-      "pack3": "63f7328ae49e3ebe82213ad113a21c29084e5da1",
-      "pack4": "969eba8609d44899ec2eced8789f98a645fefa4b",
-      "pack5": "e24b4c0f168785d32ef98393664f1b0f23ae3705"
+      "pack1": "c9630ac6bad5e06a645f74bd319beebea736e9ce",
+      "pack2": "89cbec3fa17ee233aa91e9abefd8af12ea2e4203",
+      "pack3": "78b63e224c52bd3c79a73847b56661157a73a806",
+      "pack4": "c5a9f2715abe6911b79f373ce924dca44a0d9617",
+      "pack5": "7b968ffdacccfee7b08e7318ade56c00c1e0b540"
     },
     "checkpoint008": {
       "status": "main automatic-world physical voxels now active; only pre-existing automation-owned tree/cave/court structures; 12 biome130 candidates unregistered",
@@ -88,34 +88,35 @@
   },
   "testEvidence": {
     "nativeNode": {
-      "run": "Native local Node 22.16.0; 56/56 focused tests passed on source-equivalent local Roadmap 1 modules; exact GitHub PR-head checkout NOT verified",
-      "cases": "56/56 local (prior 50, 3 gallery/roof/zoning additions, 3 dependency-ABI additions)",
-      "exactPRHead": "unverified; pending clean PR-head checkout and nested suite; root Actions omits nested tests"
+      "run": "Native Node v22.16.0 on a clean Roadmap 1-only source/test reconstruction; exact SHA-verified Git blobs from PR #121 at commit 1a3ae20ffe11f886a580f835bfd10d18c3737dfc",
+      "cases": "62/62 passed, 0 failed, 0 skipped, 0 todo; five pre-existing nested test modules plus new Pack5 bed-footprint tests",
+      "exactPRHead": "YES for isolated Roadmap 1-owned source, manifest and nested tests; NO claim of newest-main+PR combined integration because GitHub CI excludes these nested tests"
     },
     "chromium": {
-      "renderer": "Genuine Chromium Canvas2D source-derived schematic; local WebGL2 context unavailable",
+      "renderer": "Genuine Chromium Canvas2D schematic in about:blank; physical pack meshes and WebGL2 NOT verified",
       "screenshots": 54,
       "viewports": [
         "667x375",
         "844x390",
         "932x430"
       ],
-      "samples": "9 candidate IDs × exterior/cutaway × 3 actual viewport sizes",
+      "samples": "9 authored blueprint IDs × exterior/cutaway × 3 landscape viewports; 15 Pack5 bed-foot cells reserved in source, and reviewer overlays reserved cells",
       "authentic": true,
-      "source": "locally rendered source-derived evidence, not stored in draft PR or game"
+      "source": "local screenshots produced from corresponding candidate data; screenshots are not uploaded to PR or deployed"
     },
     "physicalIPhone": false,
     "ci": {
-      "exactNewRoadmap1Head": "queued at authored-code commit c83d62ae; conclusion pending",
-      "coverageNote": "Root CI runs npm test (tests/*.test.mjs), does not automatically execute nested Roadmap1 39-case tests; local native Node is separate evidence"
+      "exactNewRoadmap1Head": "Queued as of PR-head 1a3ae20ffe11f886a580f835bfd10d18c3737dfc; final conclusion not observed yet",
+      "coverageNote": "Central GitHub Actions runs root tests/*.test.mjs and does not run Roadmap1 nested 62-test suite; clean independent native Node replay achieved separately."
     }
   },
   "pending": [
-    "Dedicated 56-case native Node from clean exact PR-head checkout; central Actions root glob excludes nested suites",
-    "Genuine source-served WebGL2 previews of candidate physical mesh assets (browser environment unavailable)",
-    "Physical Pack 2/3/4/5 substitution, support, door swing, collisions, multi-cell occupancy and rotation/save sidecar compatibility",
-    "Creator appraisal of meaningful architectural variety; nearest similarity 71.99% is only advisory",
-    "Complete 840 remaining independently authored blueprints in subsequent M2-M4; no deployment or placement"
+    "Full production main checkpoint008 plus Roadmap1 integration regression not performed; no merge permission",
+    "Real served and genuine WebGL2 source-rendered candidate geometry and mobile performance review, unavailable locally",
+    "Pack2 beam spans/door hinges, Pack3 partial roof tile seam/support, Pack4 fixture mounting and Pack5 two-cell bed collision/resolution/rotation ABI",
+    "Remaining Pack5 stall-partition or future multi-cell family offsets await physical authoring approval",
+    "Creator evaluation of architectural visual identity, nearest pair 71.99% advisory only",
+    "840 unstarted independent coordinate-authored blueprints; no world placement, integration or saved-game migration"
   ],
   "mirroredAndRotatedGeometryCheck": {
     "result": "45/45 distinct under 4 rotations and mirrored counterparts, material-independent",
@@ -128,7 +129,8 @@
     "realFoundationSupport": "local deterministic pass",
     "roomFurnishings": "category-appropriate physical placements",
     "stables": "four physical empty stall bays",
-    "assetIDs": "symbolic only"
+    "assetIDs": "symbolic only",
+    "multiCellBed": "15/15 house beds reserve Pack5:082 candidate foot at +Z outside walkable graph; head/foot floor supported; final collision geometry remains UNRESOLVED"
   },
   "roofFrame": {
     "cells": 2883,
@@ -171,5 +173,27 @@
     "uniqueDependencyRecordPerCandidate": true,
     "ghostDependenciesRejected": true,
     "saveSchema": "1 unchanged"
+  },
+  "pack5BedFootprint": {
+    "asset": "pack5:082",
+    "sourcePR": 119,
+    "sourceFile": "src/block-packs/pack-5/residential-furnishings.mjs",
+    "verifiedSourceBlob": "7e7ffa78176f9f8a806c7274b93df6f4963a23ab",
+    "candidateCells": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ],
+    "reservations": 15,
+    "orientation": "north only; maps to Pack5 isolated rotation 0, NOT live saved orientation",
+    "finalCollisionApproved": false,
+    "worldIntegrated": false
   }
 }

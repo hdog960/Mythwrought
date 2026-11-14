@@ -20,3 +20,8 @@
 ## Current Roadmap 1 M1 continuation — checkpoint 008
 - The M1 branch now has 45 preserved coordinate-authored candidates with real new gallery partitions and regional roof/stall footprints. All five block-pack PR heads were inspected anew; no references were installed into the live ID registry. Exact local source Node 56 cases passed, but clean PR-head Node 56 cases remain outstanding.
 - Only Roadmap 1-owned source/tests/docs changed; no shared engine/CI/save/world placement, competing building roadmaps or block-pack source edits. Browser proof remains Canvas2D schematic 54 screenshots, not WebGL2 or creator art acceptance.
+
+## 2026-11-14 — isolation refreshed through Pack5 bed-foot correction
+- Main remains checkpoint **008** at `ac263720`, separate building PRs #122/#123/#124 and candidate Pack PRs #112/#113/#114/#115/#119 remain independently owned. Issue #109/#117 ID reservations checked. Latest Pack5 bed descriptor is a 2-cell physical candidate and **unmerged**, never numerically allocated in Roadmap 1.
+- New Roadmap1-only footprint reservations fix real accessibility in 15 houses. A clean SHA-verified Roadmap1 source snapshot passed **62/62 native Node 22.16.0** cases. Central CI still does not discover nested tests. Exact-head shared CI final conclusion remains unverified; no combined latest-main world/engine interaction is claimed.
+- Screenshots are genuine local Chromium Canvas2D architectural schematics, not live WebGL2 or physical iPhone. No integrations, merges, deployments, save/seed/controller changes or v0.11 unlock.

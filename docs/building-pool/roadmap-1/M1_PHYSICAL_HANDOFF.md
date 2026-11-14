@@ -42,3 +42,13 @@ New Mountain **three-aisle** large house and tavern alter walls, doors, room par
 Physical AABBs remain **explicitly unresolved** for all non-live symbolic parts, which now fails schema validation if somebody pretends they are final or duplicates/omits an asset dependency. Rotation, hinge state, multi-cell support and save-state integration remain BLOCKED until those independent packs are accepted. This session made no changes to manual packs, the biome130 library or common voxel systems.
 
 Nine actual model candidates / 54 Chromium Canvas2D exterior/cutaway samples (3 landscape viewports) produced locally. Visual approval and native WebGL2 still OPEN. Normalized reviewer top similarity now **71.99%**, down from **82.20%**. **56/56 local Node passed, exact PR-head 56-case native reproduction still open**; root Actions does not execute this nested suite.
+
+## 2026-11-14 physical bed footprint correction — confirmed against latest Pack5
+
+**Critical cross-pack feasibility finding:** Current Pack 5 source `src/block-packs/pack-5/residential-furnishings.mjs` (blob `7e7ffa78176f9f8a806c7274b93df6f4963a23ab`, PR #119) defines candidate bed `pack5:082` with distinct head part `[0,0,0]` and foot part `[0,0,1]`. Prior Roadmap 1 only reserved a single anchor while marking its adjacent bed-foot cell walkable in all 15 houses. The newly introduced `m1-candidate-footprints.mjs` creates an explicit *planning reservation* for the second cell, and `m1-acceptance.mjs` checks actual support, room containment, exact candidate offset, collision avoidance and no walkable overlap. No synthetic live bed is spawned; no new block ID assigned.
+
+- **15/15 residential bed anchors** preserve their original location and symbolic `pack5:082` identity.
+- **15 additional cell reservations** prevent planned player circulation through bed feet. They are **not** countable additional physical placement anchors, and are not an approved 3D collision envelope.
+- Corresponding fixture is planned **north / Pack5 rotation 0** only. The isolated Pack5 descriptor's other rotation/variant sidecar, complete box unions and safe schema-1 persistence are still not adopted or validated against the live engine.
+- The same footprint-reservation audit is not yet generalized to other proposed Pack5 and shaped Pack3 families; any non-unit family must be checked before final M1 integration.
+- Exact-source **62/62 native Node** passed in a clean standalone Roadmap 1 reconstruction. **54 Chromium Canvas2D** review captures include purple reserved candidate bed cells; WebGL2 unavailable in this browser context. Still **zero creator-accepted or merged buildings**; 45 candidate IDs and 50,331 authored placement anchors remain unchanged.
