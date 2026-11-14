@@ -310,7 +310,8 @@
     "tests/block-packs/pack-4/integrated-main-contract.test.mjs",
     "tests/block-packs/pack-4/integrated-main-surface.test.mjs",
     "tests/block-packs/pack-4/current-main-loader.mjs",
-    "tests/block-packs/pack-4/current-main-loader.test.mjs"
+    "tests/block-packs/pack-4/current-main-loader.test.mjs",
+    "tests/block-packs/pack-4/verify-final.mjs"
   ],
   "dependencies": [
     "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
@@ -342,7 +343,7 @@
     117
   ],
   "lastV8FocusedChecks": 142,
-  "currentAcceptanceStatus": "M0-M4 source complete, 22/22 families 23 candidate IDs 159–181, M5 NOT ACCEPTED. 177/177 source-backed V8 cases vs checkpoint 007; 7/7 genuine native Node subset cases; 9 main-dependent cases require combined checkout; full native suite, Chromium WebGL2 gallery and creator art/physical-iPhone Gate A review remain pending.",
+  "currentAcceptanceStatus": "M5 OPEN — 22 families/23 IDs source authored; 177 source-backed current-main V8 checks passed and 7 real Node subset checks passed. Strict full 179-case native Node + real 3-viewport Chromium acceptance runner added but not yet executed successfully; creator iPhone approval pending.",
   "latestAcceptanceV8": 177,
   "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
   "galleryEvidence": "Browser QA caught and fixed nonblack-background false positive in preview pixel check; now requires real foreground contrast plus 23 unique image hashes and asymmetric rotation; still blocked on local Chromium/WebGL2.",
@@ -387,5 +388,6 @@
     "authenticChromium": "PENDING — local Chromium fails ANGLE/EGL initialization; no genuine 23-card iPhone landscape screenshots",
     "creatorGateA": "OPEN — no physical-iPhone approval"
   },
-  "checkpoint007TestContext": "Nine current-main-dependent acceptance tests run on checkpoint007+PR combined source; they SKIP with explicit status on raw pre-007 Pack4 HEAD, and import failures when modules are present are not hidden."
+  "checkpoint007TestContext": "Nine current-main-dependent acceptance tests run on checkpoint007+PR combined source; they SKIP with explicit status on raw pre-007 Pack4 HEAD, and import failures when modules are present are not hidden.",
+  "strictAcceptanceRunner": "node tests/block-packs/pack-4/verify-final.mjs on a combined main checkpoint 007 + Pack 4 PR checkout: 179 native cases, zero skips, three true Chromium/WebGL2 viewport screenshots. --node-only checks native only."
 }
