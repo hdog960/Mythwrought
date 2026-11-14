@@ -12,15 +12,16 @@ canvas{display:block;width:100%;background:linear-gradient(#1b353a,#26382f);
 border:1px solid #698575;border-radius:12px;aspect-ratio:16/9}
 small{color:#a9c5b3}pre{white-space:pre-wrap;overflow:auto}
 </style></head>
-<body><h1>Timber, joinery, paving & infrastructure — isolated physical inspector</h1>
-<p>Original timber, hinge, gravel, paving and standalone bridge-component candidate meshes, genuine selectable AABB occupancy, and fixture-only placement.
+<body><h1>Timber, paving, infrastructure & water — isolated physical inspector</h1>
+<p>Authentic physical timber, hinge, paving, infrastructure and transparent fluid-volume candidate meshes, with fixture-only targeting and placement. Water uses a sloped fluid prism rather than solid AABB collision.
 Nothing here is installed in Mythwrought or written to its world save.</p>
 <nav>
 <select id="asset" aria-label="Candidate material"></select>
 <button id="rotate">Rotate 90°</button><button id="variant">Switch variant</button><button id="hinge">Open / close</button><button id="place">Place candidate</button>
+<button id="waterLevel">Cycle water depth</button><button id="waterFlow">Cycle current direction</button>
 <button id="toggleLast">Swing last placed</button><button id="remove">Remove last</button><button id="reset">Clear fixture</button>
 </nav>
-<canvas id="preview" width="900" height="506" aria-label="Rotatable timber candidate mesh preview"></canvas>
+<canvas id="preview" width="900" height="506" aria-label="Physical timber, infrastructure and transparent water candidate mesh preview"></canvas>
 <p id="status" class="status" aria-live="polite"></p><small>Preview is an authentic rendering of the candidate's generated triangles.
 Use the browser console for fixture-targeted raycast and snapshot inspection: window.pack2Fixture.</small>
 <script type="module">
@@ -29,16 +30,19 @@ import {PACK_2_JOINERY,joineryAsset,joineryPreviewMesh} from '../../../src/block
 import {PACK_2_GROUND,groundAsset,groundPreviewMesh} from '../../../src/block-packs/pack-2/ground.mjs';
 import {PACK_2_INFRASTRUCTURE,infrastructureAsset,infrastructurePreviewMesh}
   from '../../../src/block-packs/pack-2/infrastructure.mjs';
+import {WATER_ASSET,WATER_CANDIDATE_ID,WATER_FLOW_DIRECTIONS,waterPreviewMesh}
+  from '../../../src/block-packs/pack-2/water.mjs';
 import {Pack2Fixture} from './fixture.mjs';
 let fixture=new Pack2Fixture(),placed=[];
 window.pack2Fixture=fixture;
 const el=id=>document.getElementById(id),canvas=el('preview'),ctx=canvas.getContext('2d');
-const assets=[...PACK_2_ASSETS,...PACK_2_JOINERY,...PACK_2_GROUND,...PACK_2_INFRASTRUCTURE];
+const assets=[...PACK_2_ASSETS,...PACK_2_JOINERY,...PACK_2_GROUND,...PACK_2_INFRASTRUCTURE,WATER_ASSET];
 const list=el('asset');for(const a of assets){const o=document.createElement('option');
   o.value=String(a.id);o.textContent=a.id+' · '+a.name;list.append(o);}
 let yaw=.7,tilt=.56;
 function drawMesh(state,cx,cy,scale){
-  const mesh=infrastructureAsset(state.id)?infrastructurePreviewMesh(state.id,state):
+  const mesh=state.id===WATER_CANDIDATE_ID?waterPreviewMesh(state):
+    infrastructureAsset(state.id)?infrastructurePreviewMesh(state.id,state):
     groundAsset(state.id)?groundPreviewMesh(state.id,state.rotation):
     joineryAsset(state.id)?joineryPreviewMesh(state.id,state):
     pack2PreviewMesh(state.id,state.rotation);
@@ -52,14 +56,14 @@ function drawMesh(state,cx,cy,scale){
   const triangles=[];
   for(let k=0;k<ix.length;k+=3){
     const i=ix[k],j=ix[k+1],h=ix[k+2],a=transform(i),b=transform(j),d=transform(h);
-    const color=c.slice(i*3,i*3+3),face=[a,b,d];
-    triangles.push({face,depth:(a.depth+b.depth+d.depth)/3,color});
+    const color=c.slice(i*3,i*3+3),opacity=mesh.alpha?.[i]??1,face=[a,b,d];
+    triangles.push({face,depth:(a.depth+b.depth+d.depth)/3,color,opacity});
   }
   triangles.sort((a,b)=>a.depth-b.depth);
   for(const t of triangles){
     ctx.beginPath();ctx.moveTo(t.face[0].x,t.face[0].y);
     ctx.lineTo(t.face[1].x,t.face[1].y);ctx.lineTo(t.face[2].x,t.face[2].y);
-    ctx.closePath();ctx.fillStyle='rgb('+t.color.map(x=>Math.round(x*255)).join(',')+')';
+    ctx.closePath();ctx.fillStyle='rgba('+t.color.map(x=>Math.round(x*255)).join(',')+','+t.opacity+')';
     ctx.fill();
   }
   return mesh;
@@ -73,17 +77,31 @@ function render(){
   el('variant').disabled=!(joint||infra)||(joint||infra).variants.length===1;
   el('hinge').disabled=!joint?.toggleable;
   el('toggleLast').disabled=!placed.length||!joineryAsset(fixture.read(placed[placed.length-1])?.id)?.toggleable;
+  const isWater=choice.id===WATER_CANDIDATE_ID;
+  el('waterLevel').disabled=!isWater;el('waterFlow').disabled=!isWater;
   ctx.fillStyle='#d2c3a0';ctx.font='17px system-ui';
-  ctx.fillText(asset.name+' · rotation '+choice.rotation*90+'°'+((joint||infra)?' · '+choice.variant+(joint?' · '+(choice.open?'OPEN':'CLOSED'):''):''),24,375);
-  ctx.fillText('Solid face quads: '+m.physicalQuads+'   Grain / joint quads: '+m.decorationQuads,24,402);
+  ctx.fillText(isWater?asset.name+' · '+(choice.source?'source':'level '+choice.level)+' · '+choice.flow:
+    asset.name+' · rotation '+choice.rotation*90+'°'+((joint||infra)?' · '+choice.variant+(joint?' · '+(choice.open?'OPEN':'CLOSED'):''):''),24,375);
+  ctx.fillText(isWater?'Fluid boundary triangles: '+m.physicalTriangles+'   Surface ripples: '+m.detailTriangles:
+    'Solid face quads: '+m.physicalQuads+'   Grain / joint quads: '+m.decorationQuads,24,402);
   ctx.fillText('Fixture placements: '+placed.length+' / 4 · camera drag changes viewpoint only',24,433);
-  el('status').textContent='ID '+choice.id+'  |  '+(asset.profile??asset.surface?.feature??asset.surface?.pattern)+'  |  '+(asset.surface?.finish??asset.finish??asset.surface?.pattern)+
+  el('status').textContent='ID '+choice.id+'  |  '+(asset.profile??asset.surface?.feature??asset.surface?.pattern??asset.physicalType)+'  |  '+(asset.surface?.finish??asset.finish??asset.surface?.pattern??'transparent fluid volume; engine flow not simulated')+
     '  |  '+(placed.length?JSON.stringify(fixture.serialize().cells):'No fixtures placed');
 }
 list.onchange=()=>{fixture.select(Number(list.value));render();};
 el('rotate').onclick=()=>{fixture.turn();render();};
 el('variant').onclick=()=>{fixture.cycleVariant();render();};
 el('hinge').onclick=()=>{fixture.toggleSelection();render();};
+el('waterLevel').onclick=()=>{
+  const s=fixture.selection(),level=(s.level+1)%8;
+  fixture.setWaterSelection({level,flow:level===0?'still':s.flow});render();
+};
+el('waterFlow').onclick=()=>{
+  const s=fixture.selection(),level=s.level===0?1:s.level;
+  const idx=WATER_FLOW_DIRECTIONS.indexOf(s.flow);
+  const flow=WATER_FLOW_DIRECTIONS[(idx+1)%WATER_FLOW_DIRECTIONS.length];
+  fixture.setWaterSelection({level,flow});render();
+};
 el('toggleLast').onclick=()=>{if(placed.length)fixture.toggleCell(placed[placed.length-1]);render();};
 el('place').onclick=()=>{const cell=[placed.length*2,1,0];if(placed.length<4&&fixture.place(cell))placed.push(cell);render();};
 el('remove').onclick=()=>{const cell=placed.pop();if(cell)fixture.remove(cell);render();};
