@@ -1,0 +1,196 @@
+{
+  "pack": 1,
+  "title": "Stone & Nature",
+  "gate": "v0.10 Gate A",
+  "integration": "NOT MERGED / NOT DEPLOYED",
+  "basedOnMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "incorporationCheckpoint": "006",
+  "coordinationIssue": "https://github.com/hdog960/Mythwrought/issues/109",
+  "ownership": {
+    "source": "src/block-packs/pack-1/",
+    "tests": "tests/block-packs/pack-1/",
+    "candidateIdRange": [
+      9,
+      58
+    ],
+    "reservedExisting": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "forbiddenSentinel": 255
+  },
+  "evidence": {
+    "node": "NOT RUN",
+    "chromium": "NOT RUN",
+    "physicalIphone": "NOT RUN",
+    "candidatePreview": "Standalone gallery source authored; browser evidence not yet captured"
+  },
+  "integrationDependencies": [
+    "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
+    "Existing production mesh/collision is whole-cube only. Core masonry uses full cubes; future shaped pieces depend on :12 shape engine and :00 targeting/collision.",
+    "No world placement or live UI wiring is authorized.",
+    "Existing Stone 3 and Deepstone 8 remain untouched. Shader-only masonry treatments are not physical blocks."
+  ],
+  "assignments": [
+    {
+      "roster": 1,
+      "name": "Cobblestone",
+      "candidateId": 9,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+    },
+    {
+      "roster": 2,
+      "name": "Stone bricks",
+      "candidateId": 10,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+    },
+    {
+      "roster": 3,
+      "name": "Mossy stone bricks",
+      "candidateId": 11,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+    },
+    {
+      "roster": 4,
+      "name": "Cracked stone bricks",
+      "candidateId": 12,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+    },
+    {
+      "roster": 5,
+      "name": "Polished stone",
+      "candidateId": 13,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+    },
+    {
+      "roster": 6,
+      "name": "Carved decorative stone",
+      "candidateId": 14,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+    },
+    {
+      "roster": 7,
+      "name": "Stone slabs",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 8,
+      "name": "Stone stairs",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 9,
+      "name": "Stone walls",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 10,
+      "name": "Stone pillars",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 11,
+      "name": "Stone arches",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 12,
+      "name": "Stone railings",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 47,
+      "name": "Farmland soil",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 48,
+      "name": "Garden planter boxes",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 49,
+      "name": "Flower pots",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 50,
+      "name": "Hedge blocks",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 51,
+      "name": "Bush blocks",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 52,
+      "name": "Climbing vine blocks",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 53,
+      "name": "Flower blocks (4+ species)",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 54,
+      "name": "Mushroom blocks (3+ species)",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    },
+    {
+      "roster": 55,
+      "name": "Decorative leaf blocks (multiple variants)",
+      "status": "NOT STARTED",
+      "duplicateAudit": "PENDING fresh main duplicate audit",
+      "testEvidence": null
+    }
+  ]
+}
