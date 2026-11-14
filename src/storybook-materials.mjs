@@ -1,6 +1,7 @@
 import {CRAFTED_TIMBER_GLSL} from './crafted-timber.mjs';
 import {CARVED_MASONRY_GLSL} from './carved-masonry.mjs';
 import {STORYBOOK_ROOF_GLSL} from './storybook-roof.mjs';
+import {CARVED_TRIM_GLSL} from './carved-trim.mjs';
 // Original MYTHWROUGHT v0.10 storybook voxel material artwork.
 // Shader-only: unchanged world generator, block IDs, schema-1 saves, physics,
 // GPU chunk buffers/draw counts, and controller viewport. No fetched textures.
@@ -205,7 +206,8 @@ ${CRAFTED_TIMBER_GLSL}  }else if(vMat==5){ // Raw crystal: angled amethyst and t
     shade=1.0;
   }else if(vMat==15){ // Render-only dressed ashlar.
 ${CARVED_MASONRY_GLSL}  }else if(vMat==16){ // Render-only shingled roof.
-${STORYBOOK_ROOF_GLSL}  }else if(vMat==13||vMat==14){ // Original carved tree-star cave-wall sigils.
+${STORYBOOK_ROOF_GLSL}  }else if(vMat==17){ // Render-only carved limestone trim.
+${CARVED_TRIM_GLSL}  }else if(vMat==13||vMat==14){ // Original carved tree-star cave-wall sigils.
     // Matte warm gold or cool turquoise pigment, no transparent glow pass.
     shade=1.0;
   }
@@ -219,7 +221,7 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   existingFloraMaterials:Object.freeze([7,8,9]),
   renderOnlyGrottoMaterials:Object.freeze([10,11,12]),
   renderOnlyCaveRuneMaterials:Object.freeze([13,14]),
-  renderOnlyArchitecturalMaterials:Object.freeze([15,16]),
+  renderOnlyArchitecturalMaterials:Object.freeze([15,16,17]),
   detailStartDistance:10,
   detailEndDistance:38,
   fogStartDistance:29,
