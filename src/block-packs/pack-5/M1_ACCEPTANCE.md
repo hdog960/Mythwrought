@@ -1,42 +1,67 @@
-# Pack 5 — Milestone 1 technical candidate acceptance (creator review remains OPEN)
+# MYTHWROUGHT — Pack 5 / Milestone 1 candidate acceptance dossier
 
-## Coordination & scope (2026-11-14)
-- Main verified at `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`; checkpoint **006** is newest.
-- Rechecked GitHub Issues [#109](https://github.com/hdog960/Mythwrought/issues/109) and [#117](https://github.com/hdog960/Mythwrought/issues/117), Pack 1–4 current draft manifests/PRs #113/#114/#112/#115 and automated biome130 catalog PR #118.
-- Dedicated Pack 5 draft PR [#119](https://github.com/hdog960/Mythwrought/pull/119). No other developer files, shared engine/registry/physics/saves, CI, controller/minimap, worldgen or automations touched.
-- Persistent IDs **NOT ASSIGNED**. `pack5:079`–`pack5:096` are symbolic roadmap keys; live main accepts 0–8, 255 is an internal sentinel, 209–254 unassigned; biome130 256–385 future-only until approved widened IDs.
+**Decision: M1 remains OPEN. Three original physical candidate families, six variants. No playable integration, no final creator artwork approval, no true WebGL2 certification.**
 
-## Authored families — 3/18 CANDIDATE, 15/18 NOT STARTED
-| Symbolic ID | Physical family | Two distinct geometric material variants | Geometry / attachment |
+## Reverification — 2026-11-14
+
+- Main: `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`; latest incorporation checkpoint **006**.
+- Read [manual coordination #109](https://github.com/hdog960/Mythwrought/issues/109), [biome130 #117](https://github.com/hdog960/Mythwrought/issues/117); rechecked independent Pack 1–4 manifests/PRs #113, #114, #112, #115 and automated catalog PR #118.
+- This candidate stays on Pack 5 draft [PR #119](https://github.com/hdog960/Mythwrought/pull/119). Only `src/block-packs/pack-5/` and `tests/block-packs/pack-5/` may change.
+- Live block IDs **0–8** unchanged; 209–254 unassigned, 255 internal sentinel, biome130 256–385 *future-only*; `pack5:079`–`pack5:096` are symbolic roster identifiers, **not persistent numeric block IDs**.
+- v0.10 Gate A **OPEN**, v0.11 **LOCKED**. No merge, deploy, changes to shared engine/worldgen/save/UI/CI/controller/minimap or automation.
+
+## All six authored physical material variants
+
+| Symbolic | Family | Variants | Attachment / physical behavior |
 | --- | --- | --- | --- |
-| `pack5:079` | Plaster & Stucco | chalk-lime, hand-troweled | physical thin front wall facing, wall backing required, selection and partial collision |
-| `pack5:080` | Fired Brick Masonry | hearth running bond, kiln soldier course | raised manufactured brick courses over true masonry core, independent targeting, solid collision |
-| `pack5:081` | Ceramic Interior Floor Tiles | sunburst encaustic, moonwoven glaze | distinct 2×2 and 3×3 raised floor tile composition, thin headroom-preserving floor collision |
+| `pack5:079` | Plaster & Stucco | chalk-lime; hand-troweled | thin physically selectable wall-facing cladding, partial collision, requires wall backing |
+| `pack5:080` | Fired Brick Masonry | hearth-running-bond; kiln-soldier-course | solid manufactured masonry with raised physical courses on **all four lateral faces** |
+| `pack5:081` | Ceramic Interior Floor Tiles | sunburst-encaustic; moonwoven-glaze | shallow embossed patterned flooring, floor support and headroom-preserving collider |
 
-**Not duplicates:** plaster/stucco is manufactured wall finishing, not biome130 desert adobe or Pack 1 stone masonry. Fired kiln brick is neither Pack 1 stone brick nor Pack 3 clay roofing. Ceramics are interior tile geometry, not Pack 2 path/paving or biome130 cavern calcite mosaics. All six art/shape signatures differ, rather than shader-only re-labeling.
+Not aliases of Pack 1 stone brick, Pack 2 outdoor paving, Pack 3 clay roofing, Pack 4 fireplaces/chimneys or biome130 desert adobe / underground calcite mosaics. Variants change authored geometry, not only colors. No NPC, building or world placement work.
 
-## Genuine source-backed technical results
-- `node --test tests/block-packs/pack-5/*.test.mjs` executed in native **Node 22.16.0: 43/43 PASS** (16 M0 fixture, 18 M1 material/fixture, 9 additional M1 acceptance cases).
-- Exact Github blob parity checked for both source and tests:
-  - `architectural-surfaces.mjs`: `333314a970c9810e960b541d23659c828f3796ae`
+## Visual defect found and repaired this session
+
+Prior six real Chromium Canvas2D captures correctly exposed a **brick-shape defect**: back and side faces of both manufactured-brick variants were almost undecorated and resembled a featureless brown cube when rotated.
+
+1. `architectural-surfaces.mjs` now models independent mortared running-bond and soldier-course brick relief on back (-Z), left (-X) and right (+X), in addition to the existing front (+Z). Keeps the true solid collision cell; no fake full-cube decoration aliases.
+2. The old Canvas fallback sorted overlapping cuboid polygons incorrectly and could portray the repaired solid brick as a **hollow open-topped object**. Replaced it with a minimal source-mesh-derived Canvas2D CPU depth buffer. The new screenshots show solid tops and properly occluded brickwork on both visible sides.
+3. Added a 44th native Node regression requiring independently visible brick courses after every quarter-turn for both variants, and adjusted the preview mesh caps within the existing 64-box / 1536-vertex source limits.
+4. The preview screenshot runner now rejects blank images and nonunique six-panel pixel fingerprints, and confirms rotation produces a changed visual hash set.
+
+**True asset costs (original, uncullled source-box preview triangles; not integrated mesh or GPU timings):**
+
+| Variant | Physical boxes | Source triangles | Source vertices |
+| --- | ---: | ---: | ---: |
+| 079 chalk-lime | 8 | 96 | 192 |
+| 079 hand-troweled | 12 | 144 | 288 |
+| 080 hearth-running-bond | 42 | 504 | 1008 |
+| 080 kiln-soldier-course | 53 | 636 | 1272 |
+| 081 sunburst-encaustic | 17 | 204 | 408 |
+| 081 moonwoven-glaze | 15 | 180 | 360 |
+
+All under the isolated 64-box / 768-triangle / 1536-vertex preview contract. They are not optimized production draw calls or measured iPhone GPU performance.
+
+## Reproducible verification
+
+- **Genuine native Node 22.16.0, 44/44 PASS:** `node --test tests/block-packs/pack-5/*.test.mjs`. This includes 16 foundational fixture cases, 19 architectural-surface cases and 9 additional acceptance cases. Tests cover geometry uniqueness, source materials, all 24 six-variant/four-rotation meshes, outward triangle winding, exact AABB bounds, wall attachment directions, floor clearance, solid brick occupancy, ray selection/removal, deterministic variant snapshots, and atomic rollback.
+- Exact committed Git blob parity verified after local Node execution:
+  - `architectural-surfaces.mjs`: `e22b14a54bf565e46afb64c0dff3a0d252228905`
   - `fixture.mjs`: `1956e096ba9b3c13ab20aac596c87c493eda1d52`
-  - `architectural-surfaces.test.mjs`: `47a58200f19cbfbd086a8616f964dabf5a67cdd4`
+  - `architectural-surfaces.test.mjs`: `6d80c006cbd51cbb67666e397dfd463ae67056a7`
+  - `acceptance-m1.test.mjs`: `7f2dac420b903501cf3dcacb4f3aa67f66fe59ff`
   - `fixture.test.mjs`: `4a463281212fa2ce04e8afe1727f227a512cb6a0`
-  - `acceptance-m1.test.mjs`: `79b0e91b8dc5d06e08fcdb012b047169b5e29857`
-- 24 variants × quarter-turn rotations audited for bounded vertices, outward triangle winding, exact rotated AABB, mesh color finiteness, geometric uniqueness and preview budget.
-- Isolated fixture verifies attachments, partial collision, ray selection/removal, variant placement, atomic invalid-record recovery and reversible fixture-only snapshots. **Not production schema-1 save compatibility evidence**; schemas in live runtime remain unchanged.
-- Prototype mesh budget per variant **96, 144, 180, 240, 204, 180 triangles**, respectively (maximum 240), NOT measured game GPU throughput.
+  - `canvas-gallery.mjs`: `19d11ff18242a186c5c5ba81ed77780baa1271ac`
+  - `capture-canvas.py`: `57783e33ef79d6f1171253bc152df62916d7f971`
+- **Genuine Chromium 144, Canvas2D (NOT WebGL2):** generated and inspected six revised images at viewport **667×375, 844×390, 932×430**, each for rotations 0 and 1, using the exact authored source in an offline about:blank document. All six panel pixel fingerprints differed in every capture; 0 and 1 rotation hash sets differed at every viewport. All screenshots were nonblank; no candidate was clipped in inspected contact sheet. Source: `tests/block-packs/pack-5/capture-canvas.py`. PNGs and contact sheet available separately for creator review; not committed to GitHub.
+- **WebGL2 genuinely unavailable here:** local Chromium context creation returned null with regular and multiple software-GPU configurations. Local served-page navigation previously returned `net::ERR_BLOCKED_BY_ADMINISTRATOR`. Neither actual WebGL2 renderer output nor deployed-game screenshots nor mobile GPU timing were obtained.
+- **GitHub Actions:** default root workflow does not discover nested `tests/block-packs/pack-5/*.test.mjs`. Its outcome does not certify these native Pack 5 regressions; check the *latest exact-head CI* separately before later handoff.
+- **Not performed:** real physical iPhone checks, creator art approval, production schema-1 candidate restore, production lighting/physics/selection, and creator-authorized incorporation.
 
-## Browser image evidence — accurately scoped
-- Real **Chromium 144, Canvas2D** screen rendering succeeded via the offline `about:blank` harness (no remote or local HTTP) with **six authored source-derived variants** at **667×375, 844×390, 932×430**, each at rotation 0 and 1 (**six genuine PNGs**). The companion `tests/block-packs/pack-5/capture-canvas.py` can reproduce this using Python Playwright and a locally installed Chromium; direct local screenshots were supplied separately to the creator, not committed to GitHub.
-- Inspected actual PNGs; fixed fallback preview face ordering and automatic shape fit so raised interior tiles are visible instead of clipped/covered. Pairwise screenshot pixel differences were positive across all three sizes, providing limited independent visual-difference evidence, not art approval.
-- These captures use **Canvas2D** and an assembled same-source script in an offline page, **not real WebGL2, not the production renderer, not the served HTML module loader**.
-- Direct Chromium navigation to local HTTP gallery failed with `net::ERR_BLOCKED_BY_ADMINISTRATOR`. Local WebGL2 context creation returned false under multiple GPU flag configurations. **WebGL2 / served gallery / in-game screenshots are UNVERIFIED**. Do not claim a WebGL2 pass or physical-iPhone result. The original opt-in `architectural-gallery.html` remains available for future genuine WebGL2 testing in an allowed browser.
+## Outstanding decisions / next development session
 
-## Remaining acceptance and creator integration blockers
-1. Obtain actual source-served WebGL2 gallery screenshots at all three landscape sizes; inspect material fidelity, geometry layering, transparency/depth, 4-way rotations, performance budgets and output contrast.
-2. Have creator assess premium art visual quality. No approval was inferred from source or fallback previews.
-3. Engine-owned :00/:12 design must centrally authorize widened numeric IDs, geometry-aware target/collision, state/rotation/attachment persistence, registry/mesher integration, and legacy schema-1 save compatibility. **Pack 5 does not implement these shared systems**.
-4. No merge, deploy, world placement, settlement creation or v0.11 unlock. v0.10 Gate A OPEN.
-
-**Decision:** M1 technical source candidates passed native Node, but **Milestone 1 final acceptance remains OPEN** because WebGL2/creator/production gates are unverified. Do not label these assets `INTEGRATED` or begin Milestone 2 on the basis of unverified browser results.
+1. Keep 079–081 status **CANDIDATE**, not `INTEGRATED` or `TESTED CANDIDATE` certification.
+2. Execute the real served six-variant WebGL2 preview at all three required viewports and inspect output; run dedicated native Node suites against latest PR head. Reassess if environment access becomes available.
+3. Creator visual review has not occurred. Do not infer approval from authored geometry or Canvas2D fallback images.
+4. Production shape-aware collision/raycast, support, registered numeric IDs, variant persistence and backward-safe schema-1 save compatibility are centralized :00/:12 and manual-incorporation concerns; document dependencies, never edit shared modules from Pack 5.
+5. **Milestone 2 residential furnishings is NOT STARTED** pending adequate Milestone 1 acceptance. Keep existing independent manual packs, biome130 lane, automations, game version and Pages deployment unchanged.
