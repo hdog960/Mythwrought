@@ -2,6 +2,7 @@
 // No randomness, worldgen, engine modification, block-ID allocation or external imports.
 import {BIOMES,SIZES,SCHEMA,blueprintId,validateBlueprint,validatePool} from './schema.mjs';
 import {DESIGN_MATRIX} from './m1-designs.mjs';
+import {extraCandidateCells} from './m1-candidate-footprints.mjs';
 
 const FULL=Object.freeze({kind:'full-cell',bounds:[0,0,0,1,1,1]});
 const FUTURE=(asset)=>({kind:'unresolved',bounds:null,reason:asset+' remains a separate physical candidate; orientation, exact bounds and support are not integrated'});
@@ -17,14 +18,14 @@ function compile(category,biome,size,index,row){
   const [name,w,d,plan,roof,feature,offset]=row;
   const wallTop=4+SIZES.indexOf(size),h=wallTop+7;
   const midX=Math.floor(w/2),midZ=Math.floor(d/2),entry=category==='stable'?midX:Math.min(w-4,Math.max(3,midX+offset));
-  const theme=region[biome],occupied=new Map(),reserved=new Set(),doors=[];
+  const theme=region[biome],occupied=new Map(),reserved=new Set(),doors=[],footprintReservations=[],fixtureReserved=new Set();
   const place=(x,y,z,role,asset,orientation='none',extra={})=>{
     if(x<0||x>=w||y<0||y>=h||z<0||z>=d)throw new Error(name+': location out of bounds '+at(x,y,z));
-    const pos=at(x,y,z);if(occupied.has(pos))throw new Error(name+': duplicate '+pos);
+    const pos=at(x,y,z);if(occupied.has(pos)||fixtureReserved.has(pos))throw new Error(name+': duplicate or multi-cell fixture conflict '+pos);
     occupied.set(pos,{at:[x,y,z],role,asset,orientation,occupancy:asset.startsWith('live:')?FULL:FUTURE(asset),...extra});
   };
   const remove=(x,y,z)=>occupied.delete(at(x,y,z));
-  const free=(x,y,z)=>!occupied.has(at(x,y,z));
+  const free=(x,y,z)=>!occupied.has(at(x,y,z))&&!fixtureReserved.has(at(x,y,z));
   const wall=(x,y,z,role='wall')=>place(x,y,z,role,role==='partition'?'live:wood':theme.wall);
   const gap=(x,z,dir='north')=>{for(const y of [1,2])remove(x,y,z);doors.push([x,z,dir]);reserved.add(at(x,1,z));};
   // Entire continuous slab is authored as real walk-on voxel coordinates.
@@ -236,7 +237,14 @@ function compile(category,biome,size,index,row){
     for(const [i,ref] of refs.entries()){
       const c=candidates.find(({x,z})=>free(x,1,z)&&!foyer.has(at(x,1,z))&&Math.abs(x-midX)+Math.abs(z-midZ)>1);
       if(!c)break;
-      place(c.x,1,c.z,'furnishing',ref,i%2?'east':'north',{room:r.id});placed++;
+      const orientation=i%2?'east':'north';
+      const extras=extraCandidateCells(ref,[c.x,1,c.z],orientation);
+      if(extras.some(pos=>!pos.every((v,k)=>v>=0&&v<[w,h,d][k])||!free(...pos)||!free(pos[0],pos[1]+1,pos[2])||!pos.every((v,k)=>v>=r.min[k]&&v<r.max[k])))continue;
+      place(c.x,1,c.z,'furnishing',ref,orientation,{room:r.id});placed++;
+      if(extras.length){
+        footprintReservations.push({asset:ref,anchor:[c.x,1,c.z],extraCells:extras.map(pos=>[...pos]),source:'pack5:082-candidate-cell-offset',approval:'unresolved'});
+        for(const pos of extras)fixtureReserved.add(at(...pos));
+      }
       candidates.splice(candidates.indexOf(c),1);
     }
     placedByRoom[r.id]=placed;
@@ -252,7 +260,7 @@ function compile(category,biome,size,index,row){
   // Walkable portal thresholds must remain empty at standing/head level.
   for(const portal of portals){const [x,y,z]=portal.at;if(!free(x,y,z)||!free(x,y+1,z))throw new Error(name+': portal blocked '+at(x,y,z));}
   const deps=[...new Set([...occupied.values()].map(p=>p.asset).filter(a=>!a.startsWith('live:')))].sort().map(asset=>({asset,status:'unresolved',requires:['exact physical dimensions and orientation','support/mount and selection/collision bounds','schema-1 safe asset substitution and load-time dependency resolution']}));
-  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roofFrame:{cellCount:frameCells,sections:frameSections,asset:'pack2:015',postAsset:'pack2:022',spanApproval:'unresolved'},roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
+  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roofFrame:{cellCount:frameCells,sections:frameSections,asset:'pack2:015',postAsset:'pack2:022',spanApproval:'unresolved'},roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],footprintReservations,rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
   validateBlueprint(b);return b;
 }
 export function getM1Blueprints(){

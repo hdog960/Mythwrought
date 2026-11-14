@@ -2,6 +2,7 @@
 // Standalone examination of candidate geometry, never a production-world adapter.
 import {BIOMES,validateBlueprint} from './schema.mjs';
 import {invariantGeometrySignature} from './m1-uniqueness.mjs';
+import {extraCandidateCells} from './m1-candidate-footprints.mjs';
 
 const ASSETS={
  pack1:[1,2,3,4,5,6,7,8,9,10,11,12,47,48,49,50,51,52,53,54,55],
@@ -71,6 +72,22 @@ export function auditM1Building(b){
   assert(matched && ASSETS[matched[1]]?.includes(Number(matched[2])),b.id+': '+p.asset+' is missing from the actual five-pack roster');
   assert(p.occupancy.kind==='unresolved' && p.occupancy.bounds===null,b.id+': pretending a manual candidate is registered/has approved occupancy');
   assert(b.dependencies.some(d=>d.asset===p.asset&&d.status==='unresolved'&&d.requires.length>=3),b.id+': unresolved candidate lacks handoff');
+ }
+ // Check candidate multi-cell physical offsets against their ORIGINAL authoring
+ // footprint, without treating their detailed collision boxes as live/approved.
+ const planned=b.placements.filter(p=>p.asset==='pack5:082');
+ const reservedParts=b.footprintReservations??[];
+ assert(reservedParts.length===planned.length,b.id+': Pack5 two-cell beds require one extra-cell reservation per authored bed');
+ for(const bed of planned){
+  const match=reservedParts.filter(r=>r.asset===bed.asset&&key(r.anchor)===key(bed.at));
+  assert(match.length===1,b.id+': missing candidate bed footprint reservation');
+  assert(match[0].approval==='unresolved',b.id+': candidate bed falsely approved');
+  assert(JSON.stringify(match[0].extraCells)===JSON.stringify(extraCandidateCells(bed.asset,bed.at,bed.orientation)),b.id+': bed footprint disagrees with Pack5 head/foot offsets');
+  for(const v of match[0].extraCells){
+   assert(occupied.has(key([v[0],v[1]-1,v[2]])),b.id+': Pack5 bed foot hangs over unsupported floor');
+   const room=rooms.get(bed.room);
+   assert(room&&cellInRoom(v,room),b.id+': candidate bed foot crosses room boundary');
+  }
  }
  const regional=b.architecturalIdentity;
  assert(typeof regional.regionalDetail==='string' && regional.physicalProfileCells>=4,b.id+': unsupported generic silhouette, regional outside-detail absent');

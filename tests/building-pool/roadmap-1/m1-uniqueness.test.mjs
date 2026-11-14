@@ -14,6 +14,7 @@ test('mirror copies are caught even with different IDs and renamed/recolored mat
  for(const v of copy.walkable)v[0]=w-1-v[0];
  for(const r of copy.rooms){const mn=r.min[0],mx=r.max[0];r.min[0]=w-mx;r.max[0]=w-mn;}
  for(const d of copy.portals)d.at[0]=w-1-d.at[0];
+ for(const r of copy.footprintReservations??[]){r.anchor[0]=w-1-r.anchor[0];for(const v of r.extraCells)v[0]=w-1-v[0];}
  assert.equal(invariantGeometrySignature(copy),invariantGeometrySignature(original));
  assert.deepEqual(findMirroredOrRotatedDuplicates([original,copy]),[[original.id,copy.id]]);
 });

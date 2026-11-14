@@ -74,6 +74,21 @@ export function validateBlueprint(b){
   const visited=new Set([outside]),queue=[outside];
   while(queue.length){const u=queue.shift();for(const v of neighbors.get(u))if(!visited.has(v)){visited.add(v);queue.push(v);}}
   assert(visited.size===rooms.size+1,'not every room is reachable from an exterior entrance');
+  if(b.footprintReservations!==undefined){
+    assert(Array.isArray(b.footprintReservations),'future multi-cell reservations must be a list');
+    const claimed=new Set();
+    for(const r of b.footprintReservations){
+      assert(r&&r.approval==='unresolved'&&Array.isArray(r.anchor)&&vec(r.anchor)&&Array.isArray(r.extraCells)&&r.extraCells.length>0,'invalid unresolved multi-cell footprint reservation');
+      const owner=b.placements.find(p=>key(p.at)===key(r.anchor));
+      assert(owner&&owner.asset===r.asset&&!r.asset.startsWith('live:'),'multi-cell reservation must reference its physical candidate anchor');
+      for(const c of r.extraCells){
+        assert(vec(c)&&c.every((n,i)=>n>=0&&n<[f.width,f.height,f.depth][i]),'multi-cell reservation outside blueprint footprint');
+        assert(!occupied.has(key(c))&&!walk.has(key(c))&&!claimed.has(key(c)),'multi-cell part overlaps authored placement or walkable space');
+        claimed.add(key(c));
+        assert(!occupied.has(key([c[0],c[1]+1,c[2]])),'multi-cell part has obstructed head clearance');
+      }
+    }
+  }
   assert(Array.isArray(b.dependencies),'missing dependency ledger');
   // Require a bijection between unresolved assets and dependency entries.
   const declared=new Set();
