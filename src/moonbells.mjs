@@ -210,6 +210,29 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
     }
    }
   }
+  // Frostglass rosettes are rare, unlit stone-facing cave-edge accents.
+  // The layered turquoise blades read as a crystalline flower without adding
+  // a block ID, transparency, dynamic lights, particles or new draw calls.
+  // They only grow at exposed natural stone beside an unedited grass anchor.
+  if(rockEdges.length&&hash(x,z,world.seed,823)>.91){
+   const [dx,dz]=rockEdges[Math.floor(hash(x,z,world.seed,827)*rockEdges.length)];
+   const sx=-dz,sz=dx,rx=px+dx*.30,rz=pz+dz*.30;
+   const center=[rx-dx*.045,ground+.15,rz-dz*.045];
+   for(let blade=0;blade<6;blade++){
+    const angle=blade*Math.PI/3+turn;
+    const lateral=Math.cos(angle),forward=Math.sin(angle);
+    const reach=.12+(blade%2)*.055;
+    const bx=rx+sx*lateral*reach-dx*forward*.08;
+    const bz=rz+sz*lateral*reach-dz*forward*.08;
+    tri(out,center,
+      [bx+sx*.035,ground+.06,bz+sz*.035],
+      [bx-sx*.035,ground+.06,bz-sz*.035],
+      blade%2?[.54,.83,.79]:[.72,.91,.85],7);
+   }
+   tri(out,[rx,ground+.15,rz],
+     [rx+sx*.05,ground+.29,rz+sz*.05],
+     [rx-sx*.05,ground+.29,rz-sz*.05],[.88,.96,.90],7);
+  }
   flowers++;
  }
  if(out.length/STRIDE>MAX_FLOWERS*VERTICES_PER_FLOWER)throw Error('Moonbell vertex budget');
