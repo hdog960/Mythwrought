@@ -2,7 +2,7 @@
 // Nested so the authoritative existing 16-suite / 181-case acceptance is unchanged.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,readFile,rm,readdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {gitBlobSha,selectPackFiles,TESTS,REQUIRED_MAIN,buildReviewCheckout} from '../rebuild-review-checkout.mjs';
@@ -70,6 +70,7 @@ test('rejects byte-modified responses instead of accepting a plausible source',a
  try{
   await assert.rejects(()=>buildReviewCheckout({mainSha:hex,packSha:other,output,
    fetcher:mock({corruptPath:packPaths[0]}).fetcher,concurrency:1}),/MISMATCH/);
+  assert.deepEqual(await readdir(output),[],'a failed review cannot leave misleading partial source');
  }finally{await rm(output,{recursive:true,force:true});}
 });
 test('does not silently fill missing main modules or accept floating refs',async()=>{
