@@ -7,3 +7,10 @@ export function parseFixtureCount(status,label){
   const match=status.slice(at+label.length).match(/^\d+/);
   return match?Number(match[0]):NaN;
 }
+
+// Positive confirmation is mandatory. A 'SAFE SAVE BLOCKER' status is not PASS.
+export function saveWasVerified(status,successMarker){
+  return typeof status==='string'&&typeof successMarker==='string'&&
+    successMarker.length>0&&status.includes(successMarker)&&
+    !/ERROR|FAIL|unexpected|INVALID|BLOCKED|BLOCKER/i.test(status);
+}
