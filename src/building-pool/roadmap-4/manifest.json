@@ -3,7 +3,7 @@
   "title": "Government & Arcane Knowledge",
   "repository": "hdog960/Mythwrought",
   "authority": "Theoretical 3D voxel buildings only; not integrated into game",
-  "state": "M0 COMPLETE; M1 30/30 AUTHORED THEORETICAL BLUEPRINTS — FINAL ACCEPTANCE OPEN",
+  "state": "M0 foundation accepted; M1 30/30 authored, 0 accepted; physical integration and WebGL2 pending",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "integrationCheckpoint": "006",
   "governanceIssues": [
@@ -114,7 +114,7 @@
   },
   "milestoneState": {
     "M0": "TECHNICAL COMPLETE: exact source native Node 11/11 and PR CI",
-    "M1": "30/30 authored theoretical; 0 accepted. 31/31 native Node; 180 Chromium Canvas2D captures; WebGL2/real physics/creator approval BLOCKED",
+    "M1": "30 authored theoretical designs, 0 creator-accepted; native Node 33/33 with load-bearing stairs and roof joists; 180 updated Chromium Canvas2D QA; WebGL2 environment blocked",
     "M2": "NOT STARTED",
     "M3": "NOT STARTED",
     "M4": "NOT STARTED",
@@ -137,13 +137,13 @@
   ],
   "qa": {
     "m0NativeNode": "11/11 PASS, exact schema/test Git blobs",
-    "m1PlusM0NativeNode": "31/31 PASS: original 26 plus 1 contiguous-room regression and 4 dedicated room/geometry/dependency readiness tests, Node 22.16.0, local Git object parity",
-    "m1ExactSourceBlob": "4d8e6f7e10c477a790aa41a7f5794be7d65281a3",
-    "coreSchemaBlob": "e3db140109b8537a201377f27724e0b1fb53d643",
+    "m1PlusM0NativeNode": "33/33 PASS native Node 22.16.0 on exact-blob source after roof/stair support repairs",
+    "m1ExactSourceBlob": "0be6587f95d191dce8bc0e62ae8d42727ad472fa",
+    "coreSchemaBlob": "9293f0fae6254f2fbdb7cf519f2114cab0ade69e",
     "uniqueGeometrySignatures": 30,
     "actualChromiumCanvas2DScreenshots": 180,
-    "coverage": "30 blueprints x exterior+section x (667x375,844x390,932x430)",
-    "webgl2": "BLOCKED: local Chromium context unavailable and local navigation denied; a fail-closed WebGL2 runner is checked in, not certified",
+    "coverage": "30 blueprints × exterior+section × 667×375,844×390,932×430; rerendered from structural-support exact-source",
+    "webgl2": "BLOCKED: verified Chromium WebGL2 null with GPU flags; page navigation ERR_BLOCKED_BY_ADMINISTRATOR; no genuine GPU timings or candidate screenshots",
     "physicalIphone": "NOT RUN",
     "creatorVisualApproval": "NOT GIVEN",
     "inGameIntegration": "NONE",
@@ -153,7 +153,7 @@
       "actual iPhone testing",
       "out-of-main-vertical-range placement and wide ID registry implementation"
     ],
-    "mainCheckpointAudit": "Checkpoint 008 independently verified: live automation groves/caves/pilgrim courts activated using IDs 0-8; no manual pack or building roadmap incorporation; Roadmap 4 isolated",
+    "mainCheckpointAudit": "checkpoint 008 confirmed, main ac263720; no manual pack/building incorporation; all 15 PR files Roadmap 4-owned",
     "routeReadiness": "All 95 functional room accesses reached from authored exterior entrances; upper-level route contains symbolic stairs; not real player AABB",
     "geometryCensus": {
       "exposedCubeFaces": 192868,
@@ -163,16 +163,25 @@
       "webgl2Measured": false
     },
     "newAuditSourceBlob": "97303802d73960a8c7f2cdfb7020e395f95e7c77",
-    "newAuditTestBlob": "dc0128892ceab1d380a51adf312bcd9be7d7d3d7"
+    "newAuditTestBlob": "dc0128892ceab1d380a51adf312bcd9be7d7d3d7",
+    "structuralAcceptanceTestBlob": "48c5bb2f46019caa4e03010e7619f4b2e65cc1aa",
+    "readinessTestBlob": "4e6171586b5ae53aa101b80e751eb30c2497d33a",
+    "unsupportedStairOrLandingCells": 0,
+    "exposedCubeFaces": 199812,
+    "previewTriangles": 399624,
+    "largestPreviewBufferBytes": 2590848
   },
   "lastVerifiedMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
   "lastVerifiedCheckpoint": "008",
   "m1CandidateStats": {
     "uniqueBlueprints": 30,
-    "occupiedCells": 125192,
+    "occupiedCells": 129484,
     "authoredRoomDefinitions": 95,
-    "walkableSampleCoordinates": 36401,
+    "walkableSampleCoordinates": 36385,
     "doorways": 160,
-    "candidateSymbolFamiliesUsed": 12
+    "candidateSymbolFamiliesUsed": 12,
+    "stairTreads": 140,
+    "upperLandings": 35,
+    "overheadRoofJoists": 4310
   }
 }
