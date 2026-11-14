@@ -160,5 +160,35 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
         emit(a,c,[px-tx*.49,y+rise-.07,pz-tz*.49],light);
       }
     }
+  // Wider valley amphitheatre contours: terraces trace the actual dirt wall
+  // at two depths, making steep valleys read as connected landforms at range.
+  // Every visible segment is conditioned on an exposed, unedited dirt voxel;
+  // no generated block, collision surface or cave opening is introduced.
+  for(let x=cx*chunkSize;x<(cx+1)*chunkSize;x++)
+    for(let z=cz*chunkSize;z<(cz+1)*chunkSize;z++){
+      const top=heightAt(x,z,seed);
+      if(top<9||world.get(x,top,z)!==grass)continue;
+      for(const [dx,dz] of faces){
+        const low=heightAt(x+dx,z+dz,seed);
+        if(top-low<4||top-low>8)continue;
+        const tx=-dz,tz=dx,px=x+.5+dx*.515,pz=z+.5+dz*.515;
+        // Multiple steps follow a shared elevation, so neighboring columns
+        // join rather than forming randomly placed individual ornaments.
+        for(const depth of [2,3]){
+          const y=top-depth;
+          if(y<=low||world.get(x,y,z)!==dirt||world.get(x+dx,y,z+dz)!==air)continue;
+          const variation=hash(Math.floor(x/9),Math.floor(z/9),seed+8347+depth);
+          const rise=.34+variation*.08;
+          const a=[px-tx*.49,y+rise,pz-tz*.49];
+          const b=[px+tx*.49,y+rise,pz+tz*.49];
+          const c=[px+tx*.49,y+rise-.15,pz+tz*.49];
+          const d=[px-tx*.49,y+rise-.15,pz-tz*.49];
+          const dark=depth===2?[.29,.26,.22]:[.34,.29,.22];
+          const light=depth===2?[.59,.47,.32]:[.52,.40,.27];
+          emit(a,b,c,dark);
+          emit(a,c,d,light);
+        }
+      }
+    }
   return new Float32Array(out);
 }
