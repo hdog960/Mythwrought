@@ -1,11 +1,11 @@
 # Mythwrought Pack 2 — Timber & Infrastructure candidate ledger
 
 **Governance:** [coordination Issue #109](https://github.com/hdog960/Mythwrought/issues/109) / seven authoritative docs / v0.10 Gate A, v0.11 locked.
-**Status:** **14/18 distinct physical candidate families authored** (not integrated, merged, deployed or playable). 4 families remain.
+**Status:** **17/18 distinct physical candidate families authored** (not integrated, merged, deployed or playable). 1 family remains.
 **Latest checked main:** `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`; incorporation checkpoint **006**. Live IDs 0–8 only. Wood ID 4 is not a substitute for these independent candidate shapes.
 **Draft PR:** https://github.com/hdog960/Mythwrought/pull/114
 **Dedicated branch:** `manual-pack-2-timber-foundation-20261114`; see PR for live exact HEAD / CI.
-**Exclusive provisional ID range:** 59–108. Only **59–72** allocated, and those IDs are not installed in the game. 255 reserved. No per-rotation/upper/lower/open/closed ID inflation.
+**Exclusive provisional ID range:** 59–108. Only **59–75** allocated, and those IDs are not installed in the game. 255 reserved. No per-rotation/upper/lower/open/closed ID inflation.
 
 ## Roster-level asset progress
 
@@ -25,7 +25,9 @@
 | M3 | 40 | 70 | Trampled umber packed dirt path with genuinely depressed double ruts and raised side shoulders | 4 rotations | Candidate |
 | M3 | 41 | 71 | Shallow staggered, flattop limestone walking cobbles above distinct recessed mortar | 4 rotations | Candidate |
 | M3 | 42 | 72 | Sculpted ivory/slate suncompass paving with tangible blue raised inlay and asymmetrical orientation | 4 rotations | Candidate |
-| M4 | 43–44, 46 | — | Bridge-specific reinforcement rail, wide stone parapet, elevated boardwalk | — | Not started |
+| M4 | 43 | 73 | Riveted double-post structural guardrail with broad protective handrail, iron diagonal bracing and optional terminal plate; not light wooden fence | 4 rotations × through/terminal | Candidate |
+| M4 | 44 | 74 | Full protective limestone parapet with heavy cap, broad coping and optional physical scupper through middle of wall; not Pack 1 balustrade | 2 axes × solid/drain-slot | Candidate |
+| M4 | 46 | 75 | Elevated larch deck with separated raised plank slats, twin real lower joists and optional flush edge trim; not full-cube wooden plank | 2 axes × open-deck/edge-trim | Candidate |
 | M5 | 45 | — | True water voxel requiring shared transparent fluid rules; NOT a static cyan cube | — | Not started |
 
 **Physical evidence:** `definitions.mjs` and `joinery.mjs` expose genuine occupied local AABB unions that are independently ray-targetable/collidable when connected. Each exports original palette and actual triangle meshes, with surface details anchored to physical geometry. `fixture.mjs` can select, rotate, choose upper/lower, toggle hinges, place, ray-select, mine/remove, serialize and restore isolated candidate cells. Fixture snapshots preserve the old five-number record rows and use seven fields for new stateful joinery.
@@ -57,6 +59,20 @@
 - [ ] Genuine WebGL2/offline/mobile rendering and production save tests remain separate integration gates, unclaimed.
 - [ ] Falling gravel **not implemented**. `physics.gravity:'engine-required'` declares shared-engine ownership; no fake simulation, particle gravity or world placement.
 
+## Session 4 — Milestone 4 standalone infrastructure (2026-11-14)
+
+- [x] Current main SHA `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, latest checkpoint 006, coordination Issues #109/#117, PR #114, and other three manual packs rechecked. Live remains IDs 0–8, new candidates 73–75 distinct from prior packs and existing voxel-assembled bridges/arches.
+- [x] Exclusive provisional IDs **73 reinforced bridge guardrail**, **74 solid stone parapet**, **75 raised boardwalk slat tile**, all individually reusable physical cell components without assembled structures/world placement.
+- [x] `infrastructure.mjs` provides original palettes and face-anchored grain/stone cuts, physically spaced guard posts and iron bracing, actual 3D drain-slot void variant, real gapped deck planks over supporting joists, canonical rotations/variants and 5–15 cell-local collision/selection AABB boxes per asset.
+- [x] Candidate mesh uses per-face hidden-area culling, physically backed triangles and outward normals. Isolated measured mesh complexity: **610–740 triangles guardrails, 100–196 stone parapets, 444–672 boardwalk tiles** (variant + axis differences; not iPhone runtime FPS).
+- [x] Fixture extended to all **17 IDs** for select/rotate/cycle variant/place/target/mine/remove; original five-column timber/ground and seven-column joinery saved fixtures still restore exactly, alongside six-column infrastructure state. This does NOT certify live schema-1 save compatibility.
+- [x] `infrastructure.test.mjs` adds **17 dedicated cases** for original physical profiles, open gaps, scupper ray pass-through, boardwalk spaces, corrupt state, mesh winding, triangle budgets, fixture targeting/removal and serialization.
+- [x] Four Pack 2 test suites now contain **58/58 test cases passed when their checked-in test bodies were executed in an isolated V8 assertion harness** (12 M1 + 15 M2 + 14 M3 + 17 M4). This evidence is **not the native Node runner**.
+- [x] `preview.html` expanded to select 17 authentic candidate triangle meshes including infrastructure variant/rotation controls; `browser-verify.mjs` creates a local HTTP preview server and an optional **real Playwright Chromium** regression at 667×375, 844×390, 932×430 if an authorized runtime has the browser library. Browser test source exists but **has not been run**; no fabricated screenshots.
+- [ ] Exact-head standard GitHub Actions Node + Chromium to be checked independently; the root suite `npm test` **does not include nested Pack 2 tests** (its glob is `tests/*.test.mjs`).
+- [ ] Native `node --test tests/block-packs/pack-2/*.test.mjs` in an authorized checkout outstanding. Local container has Node 22 and Chromium, but GitHub DNS resolution blocks obtaining the exact branch files for a faithful execution. Do not misrepresent V8 results as Node.
+- [ ] Production collision/render/save integration, browser render/performance, physical iPhone approval remain blocked until explicit creator authorization. **Main/PWA/gameplay/seed/saves untouched.**
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
@@ -68,4 +84,4 @@
 
 ## Session 3 / next incomplete milestone
 
-**Milestone 4** — recheck latest main/checkpoint/Issues #109 and #117 and manual pack changes; implement individual bridge railing, solid parapet and freestanding elevated boardwalk units (roster 43, 44 and 46), NOT a bridge or village construction. Earliest available Pack 2 candidate IDs are 73–75, subject to a fresh duplicate-prevention check. Keep the existing fourteen candidates intact and never merge/deploy/place world content.
+**Milestone 5** — genuine water voxel candidate (roster 45), only after a new duplicate-prevention audit of latest main/checkpoint/Issues #109/#117 and other packs. ID 76 is the earliest *potential* allocation, NOT allocated. Define real water voxel occupancy/material targeting and explicit compatibility requirements for transparent rendering, fluid updates, level/flow state, collision and schema-1 safety. **Never** create a static cyan fake-water cube or independently implement a generic fluid simulation. Milestone 6 final acceptance follows, with all 18 families, dedicated Node + real Chromium proofs as possible, no merge/deploy.
