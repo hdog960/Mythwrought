@@ -1,0 +1,132 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-4.manifest.v1",
+  "title": "Government & Arcane Knowledge",
+  "repository": "hdog960/Mythwrought",
+  "authority": "Theoretical 3D voxel buildings only; not integrated into game",
+  "state": "M0 FOUNDATION — NO AUTHORED BUILDINGS YET",
+  "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "integrationCheckpoint": "006",
+  "governanceIssues": [
+    109,
+    117
+  ],
+  "plannedBiomes": [
+    "temperate",
+    "desert",
+    "snow",
+    "enchanted-forest",
+    "mountain"
+  ],
+  "plannedSizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "categories": [
+    {
+      "type": "civic-hall",
+      "perSizePerBiome": 5,
+      "total": 75,
+      "milestone": 2
+    },
+    {
+      "type": "guildhall",
+      "perSizePerBiome": 4,
+      "total": 60,
+      "milestone": 2
+    },
+    {
+      "type": "embassy",
+      "perSizePerBiome": 3,
+      "total": 45,
+      "milestone": 2
+    },
+    {
+      "type": "castle-palace",
+      "perSizePerBiome": 3,
+      "total": 45,
+      "milestone": 2
+    },
+    {
+      "type": "healers-house",
+      "perSizePerBiome": 5,
+      "total": 75,
+      "milestone": 3
+    },
+    {
+      "type": "library",
+      "perSizePerBiome": 4,
+      "total": 60,
+      "milestone": 3
+    },
+    {
+      "type": "schoolhouse",
+      "perSizePerBiome": 4,
+      "total": 60,
+      "milestone": 3
+    },
+    {
+      "type": "magical-research-institute",
+      "perSizePerBiome": 3,
+      "total": 45,
+      "milestone": 4
+    },
+    {
+      "type": "arcane-academy",
+      "perSizePerBiome": 3,
+      "total": 45,
+      "milestone": 4
+    },
+    {
+      "type": "observatory",
+      "perSizePerBiome": 3,
+      "total": 45,
+      "milestone": 4
+    },
+    {
+      "type": "grand-archive",
+      "perSizePerBiome": 3,
+      "total": 45,
+      "milestone": 4
+    }
+  ],
+  "plannedTotal": 600,
+  "authoredTotal": 0,
+  "acceptedTotal": 0,
+  "persistentNumericIdsAllocated": 0,
+  "registeredCoreIds": {
+    "base:grass": 1,
+    "base:dirt": 2,
+    "base:stone": 3,
+    "base:wood": 4,
+    "base:crystal": 5,
+    "base:ore": 6,
+    "base:leaves": 7,
+    "base:deepstone": 8
+  },
+  "symbolicDependencies": {
+    "pack1": "manual pack 1 roster 001–012 and 047–055; candidate only",
+    "pack2": "manual pack 2 roster 013–022 and 039–046; candidate only",
+    "pack3": "manual pack 3 roster 023–029 and 069–078; candidate only",
+    "pack4": "manual pack 4 roster 030–038 and 056–068; candidate only",
+    "pack5": "manual pack 5 roster 079–096; candidate only",
+    "biome130": "automated :12 catalog 001–130; candidate only, 16-bit migration blocker"
+  },
+  "milestoneState": {
+    "M0": "IN PROGRESS",
+    "M1": "NOT STARTED",
+    "M2": "NOT STARTED",
+    "M3": "NOT STARTED",
+    "M4": "NOT STARTED",
+    "M5": "NOT STARTED"
+  },
+  "integrated": false,
+  "worldPlaced": false,
+  "creatorVisualApproved": false,
+  "physicalIphoneVerified": false,
+  "ownedPaths": [
+    "src/building-pool/roadmap-4/",
+    "tests/building-pool/roadmap-4/",
+    "docs/building-pool/roadmap-4/"
+  ]
+}
