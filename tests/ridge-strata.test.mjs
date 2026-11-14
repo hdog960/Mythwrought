@@ -61,7 +61,7 @@ test('tall highland adds a second tier only where its face remains open',()=>{
  // Each eligible face has eight base triangles and two upper-tier triangles.
  assert.equal(original.length%(10*27),0);
  const edits=new Map();
- for(let z=0;z<16;z++)edits.set('0,11,'+z,3);
+ for(let z=0;z<16;z++)edits.set('0,8,'+z,3);
  const modified={seed:179,get(x,y,z){
    const k=[x,y,z].join(',');
    return edits.has(k)?edits.get(k):(x<0&&y<=15?3:0);
