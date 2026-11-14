@@ -152,7 +152,7 @@ function compile(category,biome,size,index,row){
       if(x%3!==0)continue;
       const roofBottom=roofY(x,z)-1;
       for(let y=wallTop+1;y<=roofBottom;y++)if(free(x,y,z)){
-        place(x,y,z,'support','pack2:015','up',{roofFrame:'tie-post'});
+        place(x,y,z,'support','pack2:022','none',{roofFrame:'tie-post'});
         frameCells++;
       }
     }
@@ -239,7 +239,7 @@ function compile(category,biome,size,index,row){
   // Walkable portal thresholds must remain empty at standing/head level.
   for(const portal of portals){const [x,y,z]=portal.at;if(!free(x,y,z)||!free(x,y+1,z))throw new Error(name+': portal blocked '+at(x,y,z));}
   const deps=[...new Set([...occupied.values()].map(p=>p.asset).filter(a=>!a.startsWith('live:')))].sort().map(asset=>({asset,status:'unresolved',requires:['exact physical dimensions and orientation','support/mount and selection/collision bounds','schema-1 safe asset substitution and load-time dependency resolution']}));
-  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roofFrame:{cellCount:frameCells,sections:frameSections,asset:'pack2:015',spanApproval:'unresolved'},roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
+  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roofFrame:{cellCount:frameCells,sections:frameSections,asset:'pack2:015',postAsset:'pack2:022',spanApproval:'unresolved'},roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
   validateBlueprint(b);return b;
 }
 export function getM1Blueprints(){

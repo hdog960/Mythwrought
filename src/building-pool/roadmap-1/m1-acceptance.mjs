@@ -81,7 +81,7 @@ export function auditM1Building(b){
  // can be tested in the live engine.
  const frame=b.placements.filter(p=>p.roofFrame);
  assert(regional.roofFrame?.spanApproval==='unresolved',b.id+': future timber strength must not be falsely certified');
- assert(regional.roofFrame.asset==='pack2:015'&&regional.roofFrame.cellCount===frame.length,
+ assert(regional.roofFrame.asset==='pack2:015'&&regional.roofFrame.postAsset==='pack2:022'&&regional.roofFrame.cellCount===frame.length,
         b.id+': roof frame metadata does not match actual physical voxel count');
  assert(regional.roofFrame.sections>=2&&frame.length>=b.footprint.width-4,b.id+': roof lacks complete crossbeam spans');
  const beamZs=new Set(frame.filter(p=>p.roofFrame==='crossbeam').map(p=>p.at[2]));
@@ -89,7 +89,7 @@ export function auditM1Building(b){
  for(const z of beamZs){
   for(let x=2;x<b.footprint.width-2;x++){
    const beam=frame.find(p=>p.roofFrame==='crossbeam'&&p.at[0]===x&&p.at[2]===z);
-   assert(beam,b.id+': roof frame contains an unsupported empty span at '+x+','+z);
+   assert(beam&&beam.asset==='pack2:015'&&beam.orientation==='east',b.id+': roof frame beam must use east-oriented horizontal Pack 2 timber');
   }
   const y=frame.find(p=>p.roofFrame==='crossbeam'&&p.at[2]===z).at[1];
   assert(occupied.has(key([1,y,z]))&&occupied.has(key([b.footprint.width-2,y,z])),
@@ -97,6 +97,7 @@ export function auditM1Building(b){
  }
  for(const p of frame.filter(p=>p.roofFrame==='tie-post')){
   const [x,y,z]=p.at;
+  assert(p.asset==='pack2:022'&&p.orientation==='none',b.id+': vertical roof tie-post must use Pack 2 support post, never horizontal beam');
   assert(occupied.has(key([x,y+1,z])),b.id+': floating roof tie-post without immediate roof/beam contact');
  }
  const intended=regional.roomFurniture;

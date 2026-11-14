@@ -88,3 +88,8 @@ test('roof span approval cannot be invented before physical Pack 2 beam and roof
  const b=sample(b=>{b.architecturalIdentity.roofFrame.spanApproval='approved';});
  assert.throws(()=>auditM1Building(b),/future timber strength must not be falsely certified/);
 });
+test('horizontal Pack 2 timber beams cannot substitute for upright roof support-posts',()=>{
+ const b=structuredClone(buildings.find(b=>b.placements.some(p=>p.roofFrame==='tie-post')));
+ const post=b.placements.find(p=>p.roofFrame==='tie-post');post.asset='pack2:015';post.orientation='up';
+ assert.throws(()=>auditM1Building(b),/vertical roof tie-post must use Pack 2 support post/);
+});
