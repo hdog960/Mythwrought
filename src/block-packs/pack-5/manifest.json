@@ -251,5 +251,8 @@
     "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
     "canvas2D": "tests/block-packs/pack-5/canvas-gallery.html",
     "reproScript": "tests/block-packs/pack-5/capture-canvas.py"
-  }
+  },
+  "latestMainReviewed": "caf47776b723a36684edc1a72749e49268ccc688",
+  "latestCheckpointReviewed": "007",
+  "reviewNotes": "Checkpoint 007 automation-only incorporation excluded all manual Block Packs including Pack 5; source-only draft remains open and exclusive, no persistent IDs."
 }
