@@ -4,7 +4,7 @@ import {PACK3_ROOFING_ASSETS,PACK3_INITIAL_IDS,pack3RoofById,
   pack3ShapeForId,pack3PrototypeDescriptor} from '../../../src/block-packs/pack-3/roofing-materials.mjs';
 import {PACK3_COORDINATION,PACK3_ROSTER,validatePack3Manifest}
   from '../../../src/block-packs/pack-3/manifest.mjs';
-import {createPack3Fixture,restorePack3Fixture}
+import {createPack3Fixture,restorePack3Fixture,ROOF_MATERIAL_FIXTURE_FORMAT}
   from '../../../src/block-packs/pack-3/fixture.mjs';
 
 test('ownership: 17 families, four material, three roof, three fortified, four ornament and three monumental IDs',()=>{
@@ -91,7 +91,10 @@ test('isolated fixture places, rejects overlap, removes and restores all four ID
   assert.equal(f.place([8,7,2],112),true);
   assert.equal(f.place([0,25,0],109),false);
   assert.equal(f.place([1,4,1],8),false);
-  const before=JSON.stringify(f.snapshot());
+  const state=f.snapshot();
+  assert.equal(state.format,ROOF_MATERIAL_FIXTURE_FORMAT);
+  assert.equal(Object.hasOwn(state,'schema'),false);
+  const before=JSON.stringify(state);
   const r=restorePack3Fixture(JSON.parse(before));
   assert.equal(JSON.stringify(r.snapshot()),before);
   assert.deepEqual(r.shapeAt(2,4,2).boxes,pack3RoofById(109).boxes);
@@ -102,8 +105,9 @@ test('isolated fixture places, rejects overlap, removes and restores all four ID
   assert.equal(f.get([2,4,2]),109,'restored fixture is independent');
 });
 test('isolated snapshot guards invalid, duplicate, unsupported and future IDs',()=>{
-  const base={schema:1,seed:179,edits:[[0,1,0,109]]};
-  assert.throws(()=>restorePack3Fixture({...base,schema:2}),TypeError);
+  const base={format:ROOF_MATERIAL_FIXTURE_FORMAT,seed:179,edits:[[0,1,0,109]]};
+  assert.throws(()=>restorePack3Fixture({...base,schema:1}),TypeError);
+  assert.throws(()=>restorePack3Fixture({...base,format:'game-save'}),TypeError);
   assert.throws(()=>restorePack3Fixture({...base,edits:[[0,1,0,109],[0,1,0,110]]}),TypeError);
   assert.throws(()=>restorePack3Fixture({...base,edits:[[0,1,0,255]]}),TypeError);
   assert.throws(()=>restorePack3Fixture({...base,edits:[[0,1,0,113]]}),TypeError);
