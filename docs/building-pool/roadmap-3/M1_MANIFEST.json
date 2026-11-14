@@ -1,0 +1,582 @@
+{
+  "schema": "mythwrought.building-roadmap-3.m1-review.v1",
+  "status": "THEORETICAL_UNMERGED",
+  "productionIntegrated": false,
+  "gate": "v0.10 Gate A",
+  "baselineCheckpoint": "007",
+  "designSlots": 705,
+  "m1Authored": 30,
+  "coordinateSlots": 76376,
+  "designs": [
+    {
+      "id": "r3:blacksmith:temperate:small:1",
+      "type": "blacksmith",
+      "biome": "temperate",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 14,
+        "height": 19,
+        "depth": 16
+      },
+      "occupiedCoordinates": 1174,
+      "roofStyle": "gabled",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:temperate:medium:1",
+      "type": "blacksmith",
+      "biome": "temperate",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 18,
+        "height": 19,
+        "depth": 20
+      },
+      "occupiedCoordinates": 1881,
+      "roofStyle": "gabled",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:temperate:large:1",
+      "type": "blacksmith",
+      "biome": "temperate",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 22,
+        "height": 19,
+        "depth": 24
+      },
+      "occupiedCoordinates": 2844,
+      "roofStyle": "gabled",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:desert:small:1",
+      "type": "blacksmith",
+      "biome": "desert",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 16,
+        "height": 19,
+        "depth": 15
+      },
+      "occupiedCoordinates": 1159,
+      "roofStyle": "flat-shaded",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:desert:medium:1",
+      "type": "blacksmith",
+      "biome": "desert",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 20,
+        "height": 19,
+        "depth": 19
+      },
+      "occupiedCoordinates": 1707,
+      "roofStyle": "flat-shaded",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:desert:large:1",
+      "type": "blacksmith",
+      "biome": "desert",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 24,
+        "height": 19,
+        "depth": 23
+      },
+      "occupiedCoordinates": 2346,
+      "roofStyle": "flat-shaded",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:snow:small:1",
+      "type": "blacksmith",
+      "biome": "snow",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 15,
+        "height": 19,
+        "depth": 18
+      },
+      "occupiedCoordinates": 1577,
+      "roofStyle": "steep-snow",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:snow:medium:1",
+      "type": "blacksmith",
+      "biome": "snow",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 19,
+        "height": 19,
+        "depth": 22
+      },
+      "occupiedCoordinates": 2537,
+      "roofStyle": "steep-snow",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:snow:large:1",
+      "type": "blacksmith",
+      "biome": "snow",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 23,
+        "height": 19,
+        "depth": 26
+      },
+      "occupiedCoordinates": 3817,
+      "roofStyle": "steep-snow",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:enchanted-forest:small:1",
+      "type": "blacksmith",
+      "biome": "enchanted-forest",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 17,
+        "height": 19,
+        "depth": 17
+      },
+      "occupiedCoordinates": 1648,
+      "roofStyle": "asymmetric-canopy",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:enchanted-forest:medium:1",
+      "type": "blacksmith",
+      "biome": "enchanted-forest",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 21,
+        "height": 19,
+        "depth": 21
+      },
+      "occupiedCoordinates": 2553,
+      "roofStyle": "asymmetric-canopy",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:enchanted-forest:large:1",
+      "type": "blacksmith",
+      "biome": "enchanted-forest",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 25,
+        "height": 19,
+        "depth": 25
+      },
+      "occupiedCoordinates": 3696,
+      "roofStyle": "asymmetric-canopy",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:mountain:small:1",
+      "type": "blacksmith",
+      "biome": "mountain",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 18,
+        "height": 19,
+        "depth": 19
+      },
+      "occupiedCoordinates": 2042,
+      "roofStyle": "terraced",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:mountain:medium:1",
+      "type": "blacksmith",
+      "biome": "mountain",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 22,
+        "height": 19,
+        "depth": 23
+      },
+      "occupiedCoordinates": 3033,
+      "roofStyle": "terraced",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:blacksmith:mountain:large:1",
+      "type": "blacksmith",
+      "biome": "mountain",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 26,
+        "height": 19,
+        "depth": 27
+      },
+      "occupiedCoordinates": 4219,
+      "roofStyle": "terraced",
+      "stairSteps": 0,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:temperate:small:1",
+      "type": "watchtower",
+      "biome": "temperate",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 15,
+        "height": 20,
+        "depth": 20
+      },
+      "occupiedCoordinates": 1474,
+      "roofStyle": "gabled",
+      "stairSteps": 10,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:temperate:medium:1",
+      "type": "watchtower",
+      "biome": "temperate",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 19,
+        "height": 22,
+        "depth": 24
+      },
+      "occupiedCoordinates": 2249,
+      "roofStyle": "gabled",
+      "stairSteps": 12,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:temperate:large:1",
+      "type": "watchtower",
+      "biome": "temperate",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 23,
+        "height": 24,
+        "depth": 28
+      },
+      "occupiedCoordinates": 3183,
+      "roofStyle": "gabled",
+      "stairSteps": 14,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:desert:small:1",
+      "type": "watchtower",
+      "biome": "desert",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 17,
+        "height": 20,
+        "depth": 19
+      },
+      "occupiedCoordinates": 1624,
+      "roofStyle": "flat-shaded",
+      "stairSteps": 10,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:desert:medium:1",
+      "type": "watchtower",
+      "biome": "desert",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 21,
+        "height": 22,
+        "depth": 23
+      },
+      "occupiedCoordinates": 2443,
+      "roofStyle": "flat-shaded",
+      "stairSteps": 12,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:desert:large:1",
+      "type": "watchtower",
+      "biome": "desert",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 25,
+        "height": 24,
+        "depth": 27
+      },
+      "occupiedCoordinates": 3425,
+      "roofStyle": "flat-shaded",
+      "stairSteps": 14,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:snow:small:1",
+      "type": "watchtower",
+      "biome": "snow",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 16,
+        "height": 20,
+        "depth": 22
+      },
+      "occupiedCoordinates": 1866,
+      "roofStyle": "steep-snow",
+      "stairSteps": 10,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:snow:medium:1",
+      "type": "watchtower",
+      "biome": "snow",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 20,
+        "height": 22,
+        "depth": 26
+      },
+      "occupiedCoordinates": 2817,
+      "roofStyle": "steep-snow",
+      "stairSteps": 12,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:snow:large:1",
+      "type": "watchtower",
+      "biome": "snow",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 24,
+        "height": 24,
+        "depth": 30
+      },
+      "occupiedCoordinates": 3959,
+      "roofStyle": "steep-snow",
+      "stairSteps": 14,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:enchanted-forest:small:1",
+      "type": "watchtower",
+      "biome": "enchanted-forest",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 18,
+        "height": 20,
+        "depth": 21
+      },
+      "occupiedCoordinates": 1789,
+      "roofStyle": "asymmetric-canopy",
+      "stairSteps": 10,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:enchanted-forest:medium:1",
+      "type": "watchtower",
+      "biome": "enchanted-forest",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 22,
+        "height": 22,
+        "depth": 25
+      },
+      "occupiedCoordinates": 2641,
+      "roofStyle": "asymmetric-canopy",
+      "stairSteps": 12,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:enchanted-forest:large:1",
+      "type": "watchtower",
+      "biome": "enchanted-forest",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 26,
+        "height": 24,
+        "depth": 29
+      },
+      "occupiedCoordinates": 3657,
+      "roofStyle": "asymmetric-canopy",
+      "stairSteps": 14,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:mountain:small:1",
+      "type": "watchtower",
+      "biome": "mountain",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 19,
+        "height": 20,
+        "depth": 23
+      },
+      "occupiedCoordinates": 2044,
+      "roofStyle": "terraced",
+      "stairSteps": 10,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:mountain:medium:1",
+      "type": "watchtower",
+      "biome": "mountain",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 23,
+        "height": 22,
+        "depth": 27
+      },
+      "occupiedCoordinates": 2951,
+      "roofStyle": "terraced",
+      "stairSteps": 12,
+      "status": "THEORETICAL_UNMERGED"
+    },
+    {
+      "id": "r3:watchtower:mountain:large:1",
+      "type": "watchtower",
+      "biome": "mountain",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 27,
+        "height": 24,
+        "depth": 31
+      },
+      "occupiedCoordinates": 4021,
+      "roofStyle": "terraced",
+      "stairSteps": 14,
+      "status": "THEORETICAL_UNMERGED"
+    }
+  ]
+}
