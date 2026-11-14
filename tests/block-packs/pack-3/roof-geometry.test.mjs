@@ -89,6 +89,8 @@ test('isolated fixture supports per-cell rotated placement, physical targeting, 
   assert.equal(f.place([5,5,5],115,1),true);
   assert.equal(f.place([5,20,5],113,0),false);
   assert.equal(f.place([8,3,4],255,0),false);
+  assert.equal(f.place([8,3,4],113,4),false);
+  assert.equal(f.place([8,3,4],113,-1),false);
   assert.deepEqual(f.inspect([0,3,4]),{id:113,rotation:0});
   assert.deepEqual(f.shapeAt(1,3,4).boxes,pack3GeometryShape(113,1).boxes);
   assert.equal(f.shapeAt(9,2,9),null);
