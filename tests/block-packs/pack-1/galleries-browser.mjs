@@ -16,11 +16,11 @@ import {parseFixtureCount} from './gallery-count.mjs';
 const root=resolve(process.cwd());
 const screenshots=resolve(process.env.PACK1_ARTIFACT_DIR||'artifacts/pack-1');
 const galleries=[
-  {name:'masonry',path:'gallery.html',count:6,place:'#place',clear:'#clear',save:'#restore',countLabel:'edits: '},
-  {name:'stone-shapes',path:'stone-shape-gallery.html',count:6,place:'#place-all',clear:'#clear-all',save:'#save-check',countLabel:'Physically placed test cells: '},
-  {name:'garden',path:'garden-gallery.html',count:3,place:'#all',clear:'#clear',save:'#save',countLabel:'Independent placed voxel cells: '},
-  {name:'foliage',path:'foliage-gallery.html',count:8,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed candidate cells: '},
-  {name:'floral',path:'floral-gallery.html',count:7,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed physical specimens: '}
+  {name:'masonry',path:'gallery.html',count:6,place:'#place',clear:'#clear',save:'#restore',countLabel:'edits: ',saveSuccess:'save/restore verified'},
+  {name:'stone-shapes',path:'stone-shape-gallery.html',count:6,place:'#place-all',clear:'#clear-all',save:'#save-check',countLabel:'Physically placed test cells: ',saveSuccess:'PASS:'},
+  {name:'garden',path:'garden-gallery.html',count:3,place:'#all',clear:'#clear',save:'#save',countLabel:'Independent placed voxel cells: ',saveSuccess:'PASS:'},
+  {name:'foliage',path:'foliage-gallery.html',count:8,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed candidate cells: ',saveSuccess:'PASS:'},
+  {name:'floral',path:'floral-gallery.html',count:7,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed physical specimens: ',saveSuccess:'PASS:'}
 ];
 const viewports=[[667,375],[844,390],[932,430]];
 const mime={'.mjs':'text/javascript','.js':'text/javascript','.html':'text/html','.css':'text/css','.json':'application/json'};
@@ -113,7 +113,9 @@ const shell=async()=>{
           await context.setOffline(true);
           await page.locator(g.save).click();
           const status=(await page.locator('#status').textContent())||'';
-          assert.doesNotMatch(status,/ERROR|FAIL|unexpected|INVALID/i,
+          assert.ok(status.includes(g.saveSuccess),
+            g.name+' save/restore failed or reported a safe blocker rather than success');
+          assert.doesNotMatch(status,/ERROR|FAIL|unexpected|INVALID|BLOCKED|BLOCKER/i,
             g.name+' isolated canonical fixture save failed');
           assert.equal(parseCount(status),g.count,g.name+' save changed fixture count');
           await page.locator(g.clear).click();
