@@ -164,7 +164,8 @@ export function windowSaveState(id,rotation=0){
   return Object.freeze({id,rotation});
 }
 export function restoreWindowSaveState(saved){
-  if(!saved||typeof saved!=='object'||Array.isArray(saved))
+  if(!saved||typeof saved!=='object'||Array.isArray(saved)||
+     !Object.hasOwn(saved,'id')||!Object.hasOwn(saved,'rotation'))
     throw TypeError('Invalid window cell state');
   return windowSaveState(saved.id,saved.rotation);
 }
