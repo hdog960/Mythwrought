@@ -363,7 +363,7 @@
   "completedFamilies": 18,
   "unallocatedFamilies": 0,
   "lastVerifiedMain": "caf47776b723a36684edc1a72749e49268ccc688",
-  "progress": "M0–M5: 18 physical source candidates authored; M6 source review and 85/85 checkpoint-007 opt-in shape compatibility checked in isolated V8. Native nested Node + authentic candidate Chromium screenshots and production Gate A integration remain OPEN. Candidate-only, no merge/deploy.",
+  "progress": "M0–M5 all 18 source candidate families authored, M6 exact-source geometry/mesh uniqueness audited (18/18 unique), 89/89 checked-in test bodies pass isolated V8 and checkpoint-007 solid shape interop 85/85 V8. Dedicated native Node, real Chromium candidate screenshots and production Gate A remain OPEN; none are certified by V8 or baseline CI.",
   "pendingEngineAPIs": [
     "generic non-cube raycast/collision",
     "material registry expansion for candidate IDs 59–68",
