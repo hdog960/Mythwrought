@@ -11,19 +11,19 @@ test('far glass is ordered before near glass, preserving vertex records',()=>{
   const stream=new Float32Array([...near,...far]);
   const result=sortPack4PreviewTranslucent(stream);
   assert.equal(result.length,stream.length);
-  assert.deepEqual([...result],new Float32Array([...far,...near]).slice());
-  assert.deepEqual([...stream],new Float32Array([...near,...far]).slice(),
+  assert.deepEqual([...result],[...new Float32Array([...far,...near])]);
+  assert.deepEqual([...stream],[...new Float32Array([...near,...far])],
     'input is never mutated');
 });
 test('a tie retains authoring order deterministically',()=>{
   const one=tri(.3,.1),two=tri(.3,.9);
   const result=sortPack4PreviewTranslucent(new Float32Array([...one,...two]));
-  assert.deepEqual([...result],new Float32Array([...one,...two]).slice());
+  assert.deepEqual([...result],[...new Float32Array([...one,...two])]);
 });
 test('preview camera X inclination contributes to depth ordering',()=>{
   const left=tri(.5,.1,.1),right=tri(.5,.9,.9);
   const result=sortPack4PreviewTranslucent(new Float32Array([...right,...left]));
-  assert.deepEqual([...result],new Float32Array([...left,...right]).slice());
+  assert.deepEqual([...result],[...new Float32Array([...left,...right])]);
 });
 test('empty triangle stream is still a new zero-length Float32Array',()=>{
   const a=new Float32Array(0);
