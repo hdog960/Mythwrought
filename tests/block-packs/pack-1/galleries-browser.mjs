@@ -86,6 +86,10 @@ const shell=async()=>{
         const page=await context.newPage();
         const errors=[],requests=[];
         page.on('pageerror',e=>errors.push(e.message));
+        // Console errors are not necessarily uncaught exceptions; they must also fail acceptance.
+        page.on('console',m=>{if(m.type()==='error')errors.push('Console: '+m.text());});
+        // A request may fail before receiving any HTTP response (DNS, connection, or offline).
+        page.on('requestfailed',r=>requests.push('Failed request '+r.url()+': '+(r.failure()?.errorText||'unknown')));
         page.on('response',r=>{if(r.status()>=400)requests.push(r.url()+' HTTP '+r.status());});
         page.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:'+port+'/'))requests.push('Unexpected external URL '+r.url());});
         try{
