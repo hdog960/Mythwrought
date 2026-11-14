@@ -46,6 +46,7 @@ test('load-bearing vertical support stays vertical and uses one ID',()=>{
   assert.ok(post.boxes.some(b=>b[1]===0&&b[4]===1));
   assert.ok(post.boxes.some(b=>b[0]<.33&&b[4]<=.14));
   assert.throws(()=>pack2Shape(62,1),RangeError);
+  assert.throws(()=>pack2Shape(59,1),RangeError); // plank cube has no meaningful quarter-turn
   assert.throws(()=>pack2Shape(59,4),RangeError);
 });
 test('candidate cell record round trips while rejecting unknown IDs and states',()=>{
@@ -89,6 +90,13 @@ test('fixture can place, target, mine and avoid the empty side of a narrow suppo
   assert.ok(selected.distance>1&&selected.distance<2);
   assert.equal(f.mineRay([.5,.5,-1],[0,0,1]).removed,true);
   assert.equal(f.target([.5,.5,-1],[0,0,1]),null);
+});
+test('only visibly directional timber turns in the inspector',()=>{
+  const f=new Pack2Fixture();
+  f.select(59);f.turn();assert.equal(f.selection().rotation,0);
+  f.select(62);f.turn();assert.equal(f.selection().rotation,0);
+  f.select(60);f.turn();assert.equal(f.selection().rotation,1);
+  f.select(61);f.turn();assert.equal(f.selection().rotation,1);
 });
 test('fixture snapshot is deterministic and separate from world schema-1 saves',()=>{
   const f=new Pack2Fixture(); f.place([4,1,6]);f.select(60);f.turn();f.place([-2,1,-3]);
