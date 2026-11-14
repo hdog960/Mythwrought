@@ -36,3 +36,26 @@ test('preexisting player edits prevent construction, without overwrites',()=>{
  assert.equal(placeVoxelWatchtower(w,plan),false);
  assert.deepEqual(w.save(),before);
 });
+
+test('stale plan refuses later interior construction even where no tower stone is placed',()=>{
+ const w=new VoxelWorld(179),plan=find(w),[x,y,z]=plan.origin;
+ assert.equal(w.set(x,y+2,z,BLOCK.WOOD),true);
+ const before=w.save();
+ assert.equal(placeVoxelWatchtower(w,plan),false);
+ assert.deepEqual(w.save(),before);
+ assert.equal(planVoxelWatchtower(w,x,z),null);
+});
+test('tampered candidate cells are rejected before writing any voxels',()=>{
+ const w=new VoxelWorld(179),plan=find(w);
+ const altered={...plan,cells:plan.cells.map(c=>[...c])};
+ altered.cells[0][0]+=1;
+ const before=w.save();
+ assert.equal(placeVoxelWatchtower(w,altered),false);
+ assert.deepEqual(w.save(),before);
+});
+test('fresh plans reject shallow excavated voids beneath foundations',()=>{
+ const w=new VoxelWorld(179),plan=find(w),[x,y,z]=plan.origin;
+ assert.equal(w.set(x,y-2,z,BLOCK.AIR),true);
+ assert.equal(planVoxelWatchtower(w,x,z),null);
+ assert.equal(placeVoxelWatchtower(w,plan),false);
+});
