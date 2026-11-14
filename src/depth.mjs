@@ -25,11 +25,28 @@ export function sectionBounds(section){
     maxY:LEGACY_WORLD_MIN_Y+(section+1)*DEPTH_SECTION_HEIGHT-1
   };
 }
-export function sectionWindow(feet){
-  if(!Number.isFinite(feet))throw Error('Invalid player depth');
+// The original -3 floor is naturally solid. Only an explicit player-mined
+// AIR delta can connect the legacy volume to deeper rock. No generated cave
+// (whose legacy minimum remains -3) should silently expand its GPU footprint.
+export function surfaceOpeningNearby(world,x,z,radius=2){
+  if(!world||!(world.edits instanceof Map)||
+     ![x,z].every(Number.isFinite)||
+     !Number.isInteger(radius)||radius<0||radius>2)
+    throw Error('Invalid surface opening query');
+  if(world.edits.size===0)return false;
+  const bx=Math.floor(x),bz=Math.floor(z);
+  for(let dx=-radius;dx<=radius;dx++)
+    for(let dz=-radius;dz<=radius;dz++)
+      if(world.edits.get((bx+dx)+','+LEGACY_WORLD_MIN_Y+','+(bz+dz))===0)return true;
+  return false;
+}
+export function sectionWindow(feet,openShaft=false){
+  if(!Number.isFinite(feet)||typeof openShaft!=='boolean')
+    throw Error('Invalid player depth/window');
   const section=sectionForY(Math.max(WORLD_MIN_Y,Math.min(WORLD_MAX_Y,Math.floor(feet))));
-  // At normal surface elevations preserve the original 25-chunk GPU window.
-  if(section===0)return feet<3?[0,-1]:[0];
+  // Preserve the original 25 GPU chunks inside all authored legacy caves.
+  // Expand to 34 only for a real edited floor breach near the player's feet.
+  if(section===0)return feet<3&&openShaft?[0,-1]:[0];
   return [section,section+1,section-1].filter(s=>s<=0&&s>=LOWEST_SECTION);
 }
 // Surface receives the original 5x5 view only while it is the active
