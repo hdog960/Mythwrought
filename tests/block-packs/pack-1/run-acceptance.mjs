@@ -8,8 +8,8 @@
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {readFile,mkdir,writeFile,rm} from 'node:fs/promises';
-import {createHash} from 'node:crypto';
 import {resolve,join} from 'node:path';
+import {verifyScreenshotPng} from './png-proof.mjs';
 
 const repo=resolve(process.cwd());
 const own='tests/block-packs/pack-1/';
@@ -21,7 +21,8 @@ const groups=[
   'floral-forms.test.mjs',
   'all-families.test.mjs',
   'raycast-regression.test.mjs',
-  'gallery-count.test.mjs'
+  'gallery-count.test.mjs',
+  'png-proof.test.mjs'
 ];
 const views=[
   'masonry','stone-shapes','garden','foliage','floral'
@@ -55,11 +56,9 @@ function verifyContext(){
   assert.equal(dirty,'','Pack 1 source/test checkout is dirty; cannot certify exact committed source');
   return {commit,branch};
 }
-const checkImage=async(path)=>{
+const checkImage=async(path,width,minHeight)=>{
   const data=await readFile(path);
-  assert.ok(data.byteLength>400,'Screenshot file too small: '+path);
-  assert.equal(data.subarray(0,8).toString('hex'),'89504e470d0a1a0a','Not a PNG: '+path);
-  return {sha256:createHash('sha256').update(data).digest('hex'),bytes:data.length};
+  return verifyScreenshotPng(data,{width,minHeight});
 };
 async function main(){
   const {commit,branch}=verifyContext();
@@ -71,7 +70,7 @@ async function main(){
   const files=groups.map(x=>own+x);
   const nodeResult=run(process.execPath,['--test',...files]);
   // A zero exit alone can hide a suite that skipped everything. Require an
-  // authentic Node TAP summary with at least 86 tests (81 candidate + 5 helper).
+  // authentic Node TAP summary with at least 93 tests (81 candidate + 5 gallery + 7 PNG proof).
   const metric=(key)=>{
     const match=nodeResult.match(new RegExp('^# '+key+'\\s+(\\d+)\\s*$','m'));
     assert.ok(match,'Native Node TAP summary missing '+key);
@@ -79,7 +78,7 @@ async function main(){
   };
   const tests=metric('tests'),passed=metric('pass'),failed=metric('fail');
   const skipped=metric('skipped'),todo=metric('todo');
-  assert.ok(tests>=86,'Too few native Pack 1 tests executed: '+tests);
+  assert.ok(tests>=93,'Too few native Pack 1 tests executed: '+tests);
   assert.equal(passed,tests,'Native Pack 1 tests were not all passing');
   assert.equal(failed,0,'Native Pack 1 tests failed');
   assert.equal(skipped,0,'Native Pack 1 tests were skipped');
@@ -102,7 +101,10 @@ async function main(){
   const images=[];
   for(const v of views)for(const suffix of ['-candidate.png','-placed.png']){
     const filename=v+suffix;
-    images.push({file:filename,...await checkImage(join(reportDir,filename))});
+    const dims=/-(\d+)x(\d+)$/.exec(v);
+    assert.ok(dims,'Malformed screenshot viewport identifier '+v);
+    images.push({file:filename,...await checkImage(join(reportDir,filename),
+      Number(dims[1]),Number(dims[2]))});
   }
   assert.equal(images.length,30);
   const finished={
@@ -115,7 +117,7 @@ async function main(){
   await mkdir(reportDir,{recursive:true});
   await writeFile(join(reportDir,'native-acceptance-PASS.json'),
     JSON.stringify(finished,null,2)+'\n');
-  process.stdout.write('PACK1_NATIVE_ACCEPTANCE_PASS '+commit+' (8 Node suites, 15 Chromium views, 30 PNGs)\n');
+  process.stdout.write('PACK1_NATIVE_ACCEPTANCE_PASS '+commit+' (9 Node suites, 15 Chromium views, 30 decoded PNGs)\n');
 }
 try{await main()}catch(error){
   // Do not fabricate a PASS file on any partial run. A pre-existing report
