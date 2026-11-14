@@ -97,7 +97,7 @@ test('restore remains atomic on truncated state, duplicate cell or unsupported m
 });
 test('reject unknown IDs, unsafe coordinates and unsupported rotations',()=>{
  const f=createPack4Fixture(supports);
- for(const x of [0,175,182,208,255,1.5])
+ for(const x of [0,158,182,208,255,1.5])
   assert.throws(()=>f.place([0,2,0],x));
  for(const r of [-1,4,NaN,1.5,null,'0'])
   assert.throws(()=>f.place([0,2,0],176,r));
