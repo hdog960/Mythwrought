@@ -14,7 +14,8 @@ void main(){
   vec3 p=aPosition-vec3(.5);
   vec3 yaw=vec3(.79*p.x+.61*p.z,p.y,-.61*p.x+.79*p.z);
   vec3 tilt=vec3(yaw.x,.94*yaw.y-.34*yaw.z,.34*yaw.y+.94*yaw.z);
-  gl_Position=vec4(tilt.x*1.56,tilt.y*1.56,tilt.z*.55,1.);
+  // Keep the entire one-cell silhouette in frame at all four 90-degree turns.
+  gl_Position=vec4(tilt.x*1.34,tilt.y*1.34,tilt.z*.55,1.);
   vColor=vec4(aColor.rgb*(.82+.18*abs(aNormal.y)),aColor.a);
 }
 `;
