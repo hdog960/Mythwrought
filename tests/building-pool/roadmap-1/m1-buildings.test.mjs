@@ -75,10 +75,15 @@ test('all symbolic candidate family dependencies are unresolved, no live IDs are
   assert.ok(b.placements.every(p=>typeof p.asset==='string'&&!/^\d+$/.test(p.asset)));
  }
 });
-test('plaster, snowy timber, enchanted beams, and mountain stone are physically referenced where intended',()=>{
- for(const [biome,asset] of [['temperate','pack2:013'],['desert','pack5:079'],['snow','pack2:014'],['enchanted-forest','pack2:015'],['mountain','pack1:006']]){
-  for(const b of buildings.filter(b=>b.biome===biome))assert.ok(b.placements.some(p=>p.asset===asset&&p.role==='wall'));
+test('regional full-volume wall cores use physical solid candidate families; accent beams/logs remain nonstructural',()=>{
+ for(const [biome,asset] of [['temperate','pack2:013'],['desert','pack5:080'],['snow','live:wood'],['enchanted-forest','pack2:013'],['mountain','pack1:006']]){
+  for(const b of buildings.filter(b=>b.biome===biome)){
+   const walls=b.placements.filter(p=>p.role==='wall');assert.ok(walls.length>20,b.id);
+   assert.ok(walls.every(p=>p.asset===asset),b.id+' partial decorative cell used as load-bearing wall');
+  }
  }
+ for(const b of buildings.filter(b=>b.biome==='snow'))assert.ok(b.placements.some(p=>p.asset==='pack2:014'&&p.role==='support'),b.id+' missing exposed snowbreak logs');
+ for(const b of buildings.filter(b=>b.biome==='enchanted-forest'))assert.ok(b.placements.some(p=>p.asset==='pack2:015'&&p.roofFrame==='crossbeam'),b.id+' missing ornamental timber');
 });
 test('every candidate is standalone, not a world placement or functioning tavern/merchant/animal source',()=>{
  assert.ok(buildings.every(b=>b.worldPlacement===false&&b.liveIntegration===false));

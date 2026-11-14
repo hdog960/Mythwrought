@@ -8,9 +8,9 @@ const FULL=Object.freeze({kind:'full-cell',bounds:[0,0,0,1,1,1]});
 const FUTURE=(asset)=>({kind:'unresolved',bounds:null,reason:asset+' remains a separate physical candidate; orientation, exact bounds and support are not integrated'});
 const region={
   temperate:{wall:'pack2:013',roof:'pack3:023',floor:'live:wood',trim:'pack1:002',window:'pack4:030'},
-  desert:{wall:'pack5:079',roof:'pack3:024',floor:'live:stone',trim:'pack5:080',window:'pack4:032'},
-  snow:{wall:'pack2:014',roof:'pack3:025',floor:'live:wood',trim:'pack1:005',window:'pack4:033'},
-  'enchanted-forest':{wall:'pack2:015',roof:'pack3:023',floor:'live:wood',trim:'pack1:003',window:'pack4:031'},
+  desert:{wall:'pack5:080',roof:'pack3:024',floor:'live:stone',trim:'pack5:080',window:'pack4:032'},
+  snow:{wall:'live:wood',roof:'pack3:025',floor:'live:wood',trim:'pack1:005',window:'pack4:033'},
+  'enchanted-forest':{wall:'pack2:013',roof:'pack3:023',floor:'live:wood',trim:'pack1:003',window:'pack4:031'},
   mountain:{wall:'pack1:006',roof:'pack3:025',floor:'live:stone',trim:'pack1:004',window:'pack4:030'}
 };
 const at=(x,y,z)=>[x,y,z].join(',');
