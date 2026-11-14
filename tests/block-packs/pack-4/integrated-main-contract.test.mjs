@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {loadCheckpoint007} from './current-main-loader.mjs';
 import assert from 'node:assert/strict';
 import {PACK4_WINDOW_ASSETS} from '../../../src/block-packs/pack-4/windows.mjs';
 import {PACK4_LIGHT_ASSETS} from '../../../src/block-packs/pack-4/lighting.mjs';
@@ -9,16 +10,15 @@ import {
 } from '../../../src/block-packs/pack-4/fixture.mjs';
 import {pack4ShapeHandoff,pack4FixtureToSidecarSnapshot,
  pack4SidecarToFixtureSnapshot} from '../../../src/block-packs/pack-4/interaction-handoff.mjs';
-import {validateShape,rotateShape,raycastShapes,canPlaceShape}
- from '../../../src/voxel-shape-interactions.mjs';
-import {inspectBodyFit} from '../../../src/voxel-shape-fit.mjs';
-import {makeOrientationSidecar,restoreOrientationSidecar}
- from '../../../src/voxel-orientation-sidecar.mjs';
 
 const all=[...PACK4_WINDOW_ASSETS,...PACK4_LIGHT_ASSETS,
  ...PACK4_FURNISHING_ASSETS,...PACK4_CIVIC_ASSETS];
 
-test('current integrated main shape system accepts all 23 Pack 4 IDs at all quarter turns',()=>{
+test('current integrated main shape system accepts all 23 Pack 4 IDs at all quarter turns',async t=>{
+ const shared=await loadCheckpoint007(t);
+ if(!shared)return;
+ const {validateShape,rotateShape,raycastShapes,canPlaceShape,
+   inspectBodyFit,makeOrientationSidecar,restoreOrientationSidecar}=shared;
  assert.deepEqual(all.map(a=>a.id),Array.from({length:23},(_,i)=>159+i));
  for(const a of all)for(let r=0;r<4;r++){
   const sh=pack4ShapeHandoff(a.id,r,'collision');
@@ -36,7 +36,11 @@ test('current integrated main shape system accepts all 23 Pack 4 IDs at all quar
  }
 });
 
-test('current main raycast selects each candidate within a six-block reach',()=>{
+test('current main raycast selects each candidate within a six-block reach',async t=>{
+ const shared=await loadCheckpoint007(t);
+ if(!shared)return;
+ const {validateShape,rotateShape,raycastShapes,canPlaceShape,
+   inspectBodyFit,makeOrientationSidecar,restoreOrientationSidecar}=shared;
  for(const a of all)for(let r=0;r<4;r++){
   const box=pack4ShapeHandoff(a.id,r,'selection').boxes[0];
   const x=a.id+(box[0]+box[3])/2,y=2+(box[1]+box[4])/2;
@@ -48,7 +52,11 @@ test('current main raycast selects each candidate within a six-block reach',()=>
  }
 });
 
-test('current main body-fit rejects actual partial solids but preserves genuine empty spaces',()=>{
+test('current main body-fit rejects actual partial solids but preserves genuine empty spaces',async t=>{
+ const shared=await loadCheckpoint007(t);
+ if(!shared)return;
+ const {validateShape,rotateShape,raycastShapes,canPlaceShape,
+   inspectBodyFit,makeOrientationSidecar,restoreOrientationSidecar}=shared;
  for(const a of all)for(let r=0;r<4;r++){
   const shape=pack4ShapeHandoff(a.id,r,'collision');
   const b=shape.boxes[0];
@@ -60,7 +68,11 @@ test('current main body-fit rejects actual partial solids but preserves genuine 
  }
 });
 
-test('all 23 candidate cells roundtrip through the REAL current main orientation sidecar',()=>{
+test('all 23 candidate cells roundtrip through the REAL current main orientation sidecar',async t=>{
+ const shared=await loadCheckpoint007(t);
+ if(!shared)return;
+ const {validateShape,rotateShape,raycastShapes,canPlaceShape,
+   inspectBodyFit,makeOrientationSidecar,restoreOrientationSidecar}=shared;
  const cells=all.map((a,i)=>({id:a.id,rotation:i%4,
   cell:[1000000+i*4,2,65537]}));
  const supports=cells.map(item=>{
@@ -84,7 +96,11 @@ test('all 23 candidate cells roundtrip through the REAL current main orientation
  assert.deepEqual(testFixture.save(),fixture.save());
 });
 
-test('current main orientation recovery drops stale identity records and preserves distant cells',()=>{
+test('current main orientation recovery drops stale identity records and preserves distant cells',async t=>{
+ const shared=await loadCheckpoint007(t);
+ if(!shared)return;
+ const {validateShape,rotateShape,raycastShapes,canPlaceShape,
+   inspectBodyFit,makeOrientationSidecar,restoreOrientationSidecar}=shared;
  const cell=[Number.MAX_SAFE_INTEGER,0,0];
  const states=makeOrientationSidecar([{cell,blockId:169,turns:3},
   {cell:[-1000000,2,65537],blockId:181,turns:1}]);
@@ -94,7 +110,11 @@ test('current main orientation recovery drops stale identity records and preserv
  assert.equal(states.get(cell,170),0);
 });
 
-test('transparent window and framed openings remain physically hollow under current main',()=>{
+test('transparent window and framed openings remain physically hollow under current main',async t=>{
+ const shared=await loadCheckpoint007(t);
+ if(!shared)return;
+ const {validateShape,rotateShape,raycastShapes,canPlaceShape,
+   inspectBodyFit,makeOrientationSidecar,restoreOrientationSidecar}=shared;
  for(const id of [162,164,176,177,178,181]){
   const shape=pack4ShapeHandoff(id,0,'collision');
   assert.equal(validateShape(shape),true);
