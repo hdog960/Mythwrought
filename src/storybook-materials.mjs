@@ -146,6 +146,17 @@ void main(){
     float iceRim=1.0-smoothstep(.025,.11,abs(sin(vUv.x*7.0-vUv.y*9.0+sin(vUv.y*4.0))));
     float blueFacet=step(.79,hashCell(floor(vUv*vec2(5.0,6.0))+vec2(42.0,3.0)));
     base=mix(base,vec3(.64,.88,.98),(.11*iceRim+.08*blueFacet)*near);
+    // Sparse six-ray frost stars make individual raw geode faces legible at arm's length.
+    // Cell-local placement is stable across frames and uses no new block or texture.
+    vec2 frostCell=floor(vUv*vec2(6.0,6.0));
+    vec2 frostUv=fract(vUv*vec2(6.0,6.0))-.5;
+    float frostSeed=hashCell(frostCell+vec2(61.0,17.0));
+    float frostRayA=1.0-smoothstep(.025,.07,abs(frostUv.x));
+    float frostRayB=1.0-smoothstep(.025,.07,abs(.5*frostUv.x+.866*frostUv.y));
+    float frostRayC=1.0-smoothstep(.025,.07,abs(.5*frostUv.x-.866*frostUv.y));
+    float frostStar=step(.92,frostSeed)*max(frostRayA,max(frostRayB,frostRayC))
+      *(1.0-smoothstep(.13,.34,length(frostUv)));
+    base=mix(base,vec3(.92,.97,1.0),.25*frostStar*near);
   }else if(vMat==6){ // Raw ore: continuous amber mineral seams in weathered host rock.
     vec2 p=floor(vUv*vec2(12.0,15.0));
     float trace=step(.72,hashCell(p+17.0));
@@ -214,5 +225,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   agateHematiteAccents:Object.freeze(['crystal-nested-agate-bands','crystal-indigo-growth-core','ore-hematite-host-plates','ore-pale-plate-boundaries']),
   forestFloorMaterialAccents:Object.freeze(['grass-fallen-leaf-clusters','soil-branching-exposed-roots']),
   woodlandDewAccents:Object.freeze(['grass-morning-dew','grass-fern-litter-streaks']),
+  crystalFrostStarAccents:Object.freeze(['crystal-six-ray-frost-stars']),
   copperOreAccents:Object.freeze(['ore-malachite-halos','ore-copper-boundaries','ore-host-rock-fractures'])
 });
