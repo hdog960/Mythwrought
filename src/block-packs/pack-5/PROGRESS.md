@@ -29,3 +29,8 @@
 3. Until those gates are verified, keep **M1 final acceptance OPEN** and **M2 Beds/Chairs/Bookshelves/Cabinets NOT STARTED**. No additional development session unless user explicitly says/clicks Continue Development.
 
 **Full evidence/metrics:** `M1_ACCEPTANCE.md`. **Asset-level statuses:** `manifest.json`.
+
+## Post-incorporation 007 lane safety recheck
+- New main `caf47776b723a36684edc1a72749e49268ccc688` resulted from creator-authorized automation-only PR #120. **Manual Pack 5 PR #119 explicitly excluded.** Original branch base `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`/checkpoint 006 remains its historical source point.
+- Shared opt-in :00/:12 geometry prototypes and 12 biome130 candidates have entered main, **but not new runtime registered block IDs, Pack 5 assets, or production schema-1 variant support**. Pack 5-owned paths remain disjoint from the two intervening main commits.
+- No rebase, merge, deployment, source overlap or change to acceptance decision. Reverify checkpoint before any later new work.
