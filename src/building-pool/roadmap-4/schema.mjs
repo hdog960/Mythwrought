@@ -89,6 +89,7 @@ export function validateBlueprint(b){
     position(o.at,bounds,'opening');
     if(o.kind==='window'&&occupied.has(key(o.at))&&occupied.get(key(o.at)).role!=='window')fail('window position occupied by non-window masonry');
     if(o.kind!=='window'&&occupied.has(key(o.at)))fail('doorway occupied by a solid cell');
+    if(o.kind!=='window'&&(o.at[1]+1>=bounds[1]||occupied.has(key([o.at[0],o.at[1]+1,o.at[2]]))))fail('two-cell doorway has blocked headroom');
     if(o.kind==='entrance')entries.add(key(o.at));
   }
   if(!Array.isArray(b.navigation)||!b.navigation.length||b.navigation.length>PATH_LIMIT)fail('missing or oversized walkable route');
@@ -101,9 +102,11 @@ export function validateBlueprint(b){
     if(n.at[1]===0||!occupied.has(key([n.at[0],n.at[1]-1,n.at[2]])))fail('navigation lacks authored support');
     const below=occupied.get(key([n.at[0],n.at[1]-1,n.at[2]]));
     if(!['floor','landing','stair','foundation'].includes(below.role))fail('navigation support is not a walking surface');
+    if(n.mode==='stair'&&below.role!=='stair')fail('stair path has no authored stair-tread support');
     nav.set(k,n);
   }
   for(const e of entries)if(!nav.has(e))fail('entrance missing from authored navigation');
+  for(const o of b.openings)if(o.kind==='door'&&!nav.has(key(o.at)))fail('interior doorway disconnected from walkable route');
   if(!Array.isArray(b.spaces)||!b.spaces.length)fail('interior room inventory missing');
   const kinds=new Set(),roomIds=new Set(),roomFootprints=new Set(),levels=new Set();
   for(const s of b.spaces){
