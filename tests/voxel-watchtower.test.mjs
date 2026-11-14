@@ -59,3 +59,20 @@ test('fresh plans reject shallow excavated voids beneath foundations',()=>{
  assert.equal(planVoxelWatchtower(w,x,z),null);
  assert.equal(placeVoxelWatchtower(w,plan),false);
 });
+
+test('real stone stairs connect interior to an open roof landing',()=>{
+ const w=new VoxelWorld(179),plan=find(w),[x,y,z]=plan.origin;
+ assert.equal(plan.stairSteps.length,5);
+ assert.deepEqual(plan.stairSteps,[
+  [x-2,y+1,z+2],[x-2,y+2,z+1],[x-2,y+3,z],
+  [x-2,y+4,z-1],[x-2,y+5,z-2]]);
+ for(const [sx,sy,sz] of plan.stairSteps)
+  assert.ok(plan.cells.some(c=>c[0]===sx&&c[1]===sy&&c[2]===sz&&c[3]===BLOCK.STONE));
+ for(const dz of [-2,-1])
+  assert.ok(!plan.cells.some(c=>c[0]===x-2&&c[1]===y+6&&c[2]===z+dz));
+ assert.ok(plan.cells.some(c=>c[0]===x-1&&c[1]===y+6&&c[2]===z-2));
+ assert.equal(placeVoxelWatchtower(w,plan),true);
+ for(const [sx,sy,sz] of plan.stairSteps)
+  assert.equal(w.get(sx,sy,sz),BLOCK.STONE);
+ assert.deepEqual(VoxelWorld.restore(w.save()).save(),w.save());
+});
