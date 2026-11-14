@@ -51,3 +51,26 @@ test('rejects malformed and unbounded path reservations',()=>{
   assert.equal(planVoxelGrove(w,{...bounds,paths}),null);
  }
 });
+
+test('protected cave approaches and landmark clearings exclude all tree voxels',()=>{
+ for(const seed of [179,917,-184]){
+  const w=new VoxelWorld(seed),before=w.save();
+  const opts={minX:-48,minZ:-48,maxX:48,maxZ:48,maxTrees:48,
+   protectedSites:[[0,0,15],[24,-24,9],[-24,24,7]]};
+  const a=planVoxelGrove(w,opts);
+  assert.deepEqual(a,planVoxelGrove(new VoxelWorld(seed),opts));
+  assert.ok(a.treeCount>0);
+  for(const plan of a.plans)for(const [x,,z] of plan.cells)
+   for(const [sx,sz,r] of opts.protectedSites)
+    assert.ok((x-sx)**2+(z-sz)**2>r*r,'cave/landmark clearance must include canopy');
+  assert.deepEqual(w.save(),before);
+ }
+});
+test('rejects malformed and excessive protected sites without modifying saves',()=>{
+ const w=new VoxelWorld(179),before=w.save();
+ const bounds={minX:-16,minZ:-16,maxX:16,maxZ:16};
+ for(const protectedSites of [null,{},Array(17).fill([0,0,2]),
+  [[0,0,1]],[[0,0,25]],[[0,0,NaN]],[[1000,0,5]],[[0,0]],[[0,0,3.5]]])
+  assert.equal(planVoxelGrove(w,{...bounds,protectedSites}),null);
+ assert.deepEqual(w.save(),before);
+});
