@@ -78,6 +78,19 @@ test('rotated meshes are real geometry with stable material identity',()=>{
   assert.equal(m.triangles,n.triangles);
   assert.ok(m.decorationQuads>0);
 });
+test('rotated end grain and metal shoulder colors follow the physical timber axis',()=>{
+  const log0=pack2PreviewMesh(60,0),log1=pack2PreviewMesh(60,1);
+  assert.equal(log0.decorationQuads,log1.decorationQuads);
+  assert.notDeepEqual(log0.positions,log1.positions);
+  const beam=pack2Asset(61);
+  assert.ok(beam.palette.metal&&beam.palette.metal.length===3);
+  for(const rotation of [0,1,2,3]){
+    const mesh=pack2PreviewMesh(61,rotation);
+    const oneMetalShade=beam.palette.metal[0]*.86;
+    assert.ok([...mesh.colors].some(v=>Math.abs(v-oneMetalShade)<.0002));
+    assert.ok(mesh.triangles<1600);
+  }
+});
 test('fixture can place, target, mine and avoid the empty side of a narrow support post',()=>{
   const f=new Pack2Fixture();
   f.select(62);
