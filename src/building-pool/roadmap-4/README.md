@@ -12,7 +12,11 @@
 
 ## Current native QA
 
-- Run \`node --test tests/building-pool/roadmap-4/*.test.mjs\` from repository root: **18/18** native Node 22 tests passed on exact GitHub SHA-matching sources in the last developer session.
-- Thirty real Chromium **Canvas2D** engineering screenshots captured, 10 representative structures in each of 667×375, 844×390 and 932×430. **WebGL2 was disabled by the available browser environment**, so none is accepted as a WebGL2 performance screenshot.
+- Run \`node --test tests/building-pool/roadmap-4/*.test.mjs\` from repository root: **26/26** native Node 22 tests passed on exact GitHub SHA-matching sources in the last developer session.
+- **180 real Chromium Canvas2D** engineering screenshots captured: all 30 M1 structures × complete exterior and floor section × 667×375, 844×390 and 932×430. Reproduce with `python3 tests/building-pool/roadmap-4/m1-gallery-browser.py`. A fail-closed genuine WebGL2 preview and test runner are also owned here, but its browser execution remains blocked by this environment. **WebGL2 was disabled by the available browser environment**, so none is accepted as a WebGL2 performance screenshot.
 - M1 candidate floor plans have explicitly assigned rooms on every floor. Partial stairs/roofing, pane mounts and tall-world integration remain unverified and unresolved.
 - Read \`docs/building-pool/roadmap-4/M1_CANDIDATE_ACCEPTANCE.md\` for the full dossier and hard blockers.
+
+## Latest M1 candidate corrections
+
+Sky-open desert atria across upper storeys, supported upper gallery doors, unobstructed four-rise stairwells, crenellated castle crowns above the main roof, and biome-correct candidate roof/masonry/specialty families are all authored in the isolated M1 builder. **26/26** exact-source native Node regressions now pass. No in-game integration, premium-art or actual-iPhone acceptance has occurred. See the M1 dossier for the safety failures and remaining WebGL2 blocker.
