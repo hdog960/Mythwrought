@@ -48,7 +48,7 @@ function bed(variant){
   }else{
     foot.push(b(.16,.57,.62,.84,.60,.68,'rose'));
   }
-  const occ=(arr)=>[[.08,.28,.07,.92,.57,.93],[.09,.04,.09,.22,.38,.22],[.78,.04,.78,.91,.38,.91]];
+  const occ=(arr)=>arr.map(piece=>piece.box); // exact occupied source volumes, including headboard/canopy posts
   return family('pack5:082','Beds',variant,'floor',[
     {cell:[0,0,0],art:head,collision:occ(head)},
     {cell:[0,0,1],art:foot,collision:occ(foot)}]);
@@ -76,7 +76,7 @@ function seat(variant){
     art.push(b(.14,.42,.16,.86,.48,.24,'shadow'));
   }
   return family('pack5:083','Chairs & Stools',variant,'floor',[
-    {cell:[0,0,0],art,collision:stool?[[.16,.49,.16,.84,.62,.84]]:[[.11,.47,.11,.89,.60,.86],[.11,.60,.11,.89,.97,.24]]}]);
+    {cell:[0,0,0],art,collision:art.map(piece=>piece.box)}]);
 }
 function bookshelf(variant){
   if(!['scholar-oak-stack','starbound-scrollcase'].includes(variant))throw Error('Unknown bookshelf');
@@ -112,7 +112,7 @@ function bookshelf(variant){
   }
   art.push(b(.46,.11,.032,.54,.89,.077,star?'bookGold':'oakLight'));
   return family('pack5:084','Bookshelves',variant,'floor',[
-    {cell:[0,0,0],art,collision:[[.07,.03,.075,.93,.98,.92]]}]);
+    {cell:[0,0,0],art,collision:art.map(piece=>piece.box)}]);
 }
 function cabinet(variant){
   if(!['pantry-cupboard','heritage-wardrobe'].includes(variant))throw Error('Unknown cabinetry');
