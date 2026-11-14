@@ -3,7 +3,8 @@
 // install IDs, or generate a single world block. It is a test-gallery adapter.
 import {windowShape,windowSaveState,windowMountOffset} from './windows.mjs';
 import {lightingShape,lightingSaveState,lightingMountOffset} from './lighting.mjs';
-const includedIds=Object.freeze([159,160,161,162,163,164,165,166,167,168]);
+import {furnishingShape,furnishingSaveState,furnishingMountOffset} from './furnishings.mjs';
+const includedIds=Object.freeze([159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175]);
 const key=(x,y,z)=>x+','+y+','+z;
 function validCell(cell){
  if(!Array.isArray(cell)||cell.length!==3||
@@ -16,15 +17,18 @@ function assertId(id){
 }
 export function pack4Shape(id,rotation=0){
  assertId(id);
- return id<=164?windowShape(id,rotation):lightingShape(id,rotation);
+ return id<=164?windowShape(id,rotation):
+  id<=168?lightingShape(id,rotation):furnishingShape(id,rotation);
 }
 export function pack4MountOffset(id,rotation=0){
  assertId(id);
- return id<=164?windowMountOffset(id,rotation):lightingMountOffset(id,rotation);
+ return id<=164?windowMountOffset(id,rotation):
+  id<=168?lightingMountOffset(id,rotation):furnishingMountOffset(id,rotation);
 }
 export function pack4State(id,rotation=0){
  assertId(id);
- return id<=164?windowSaveState(id,rotation):lightingSaveState(id,rotation);
+ return id<=164?windowSaveState(id,rotation):
+  id<=168?lightingSaveState(id,rotation):furnishingSaveState(id,rotation);
 }
 function hit(origin,direction,box,maxReach){
  let tMin=-Infinity,tMax=Infinity,normal=null;
