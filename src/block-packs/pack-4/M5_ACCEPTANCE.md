@@ -50,11 +50,11 @@
 | 68 | Fountain blocks | 181 | One dry carved basin and spout | Candidate; no water engine |
 
 ## Evidence actually established
-1. **152/152** authored JavaScript test bodies passed when evaluating
+1. **156/156** authored JavaScript test bodies passed when evaluating
    exact branch sources under a V8 compatibility harness. This includes
    23 candidate definitions, IDs/manifest, four orientations, accurate
    multi-box geometry, fixed supports, ray targeting, partial collisions,
-   deterministic fixture-only saving/removal, preview vertex bounds,
+   deterministic fixture-only saving/removal, preview vertex bounds, all-asset mobile mesh budgets,
    transparent triangle ordering and cross-family differences.
    This is **NOT the Node built-in test runner**.
 2. **5/5 native Node 22 tests passed** for the isolated
@@ -125,3 +125,8 @@ No creator authorization to integrate has been given. **The next task
 is to resolve the true native/visual test blockers and present the
 result for manual, creator-controlled integration—not to start another
 set of blocks or auto-merge.**
+
+## Additional M5 QA evidence
+- **Four new cross-family mesh-budget cases PASS in the V8 source harness**, raising the total to **156/156 V8 checks**. Per candidate the peak original preview is 1,224 vertices, below 1,300; cumulative 23 candidate shapes total 14,436 vertices, below 16,000 (only one is uploaded to shared WebGL2 at a time). Each of 23 meshes remains deterministic and finite across four 90-degree rotations. This does not prove actual GPU performance or production world mesh integration.
+- **Fixed a false-positive browser visual assertion**: nonblack GL clear pixels previously counted as nonblank rendered geometry. Now the 23-card browser acceptance script requires genuine foreground RGB contrast against each canvas corner, distinct image hashes, and a changed rotation image. The browser remains blocked by environment policy; these corrected assertions are authored, **not passed in Chromium**.
+- Final artifacts still require exact HEAD full native Node tests, genuine WebGL2 screenshots and creator approval. `M5` remains **NOT ACCEPTED**.
