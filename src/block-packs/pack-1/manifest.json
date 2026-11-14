@@ -46,7 +46,9 @@
       "candidateId": 9,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
     },
     {
       "roster": 2,
@@ -54,7 +56,9 @@
       "candidateId": 10,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
     },
     {
       "roster": 3,
@@ -62,7 +66,9 @@
       "candidateId": 11,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
     },
     {
       "roster": 4,
@@ -70,7 +76,9 @@
       "candidateId": 12,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
     },
     {
       "roster": 5,
@@ -78,7 +86,9 @@
       "candidateId": 13,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
     },
     {
       "roster": 6,
@@ -86,7 +96,9 @@
       "candidateId": 14,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
     },
     {
       "roster": 7,
@@ -193,5 +205,7 @@
       "duplicateAudit": "PENDING fresh main duplicate audit",
       "testEvidence": null
     }
-  ]
+  ],
+  "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+  "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED"
 }
