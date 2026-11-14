@@ -55,3 +55,34 @@ A full Node and genuine Chromium browser run must occur before integration. The 
 6. Gate A stays OPEN; no merge, deployment or creator visual/iPhone approval is inferred from source code.
 
 **Additional evidence:** Eight focused V8 source-evaluation checks passed on fetched branch files for candidate IDs, 24px opaque face textures, texture variation, unique faces, moss appearance, independent place/remove, AABB targeting and save/restore. **Node: NOT RUN; Chromium: NOT RUN; physical iPhone: NOT RUN; screenshots: NOT CAPTURED.** The nine authored Node test groups must still run in a proper Node environment.
+
+## Milestone 2 — physical stone shapes (new candidate work)
+
+**Six additional independent shape candidates, IDs 15–20** (roster 7–12), are implemented in pack-owned modules:
+
+- Stone slab **15**: lower half-height stone surface; optional upper preview (requires engine save state).
+- Stone stair **16**: two solid risers, empty upper-front half; four quarter-turn orientations and optional upper preview.
+- Stone wall **17**: substantial narrow stone spine and wider cap, not a full-meter cube.
+- Stone pillar **18**: broad plinth, slender shaft, solid capital.
+- Stone arch **19**: one-cell arch opening with independent solid piers and crown; a *decorative modular arch component*, **not** a completed gateway with player-sized clearance.
+- Stone railing **20**: separate balusters, foot rail and handrail with empty targeting gaps. Different from Pack 2 bridge railing and Pack 3 parapets.
+
+**Source:** stone-shapes.mjs. **Fixture:** stone-shape-fixture.mjs. Geometry uses immutable [x0,y0,z0,x1,y1,z1] local-unit occupancy boxes. stoneShapeDescriptor(id,{rotation,variant}) produces the :12/:00 standard occupancy shape interface. stoneShapeTexture(id,face,size) generates original detailed pixel-art surface motifs. No shared engine modifications.
+
+**Preview:** stone-shape-gallery.html + stone-shape-gallery.mjs is a standalone 2D canvas rendering the exact shape boxes with four-way rotation, optional upper variants and isolated place/remove actions. It is NOT a genuine production game screenshot.
+
+### Verification and blockers
+
+Run (in an authorized Node environment) from the repo root:
+
+    node --test tests/block-packs/pack-1/core-masonry.test.mjs tests/block-packs/pack-1/stone-shapes.test.mjs
+
+- Milestone 1: 9/9 Node test bodies passed V8 compatibility evaluation (NOT actual Node execution).
+- Milestone 2: 11/11 Node test bodies passed V8 compatibility evaluation against fetched branch source, including rotation, partial occupancy, unique artwork, individual removal and explicit unsafe-save refusal.
+- Cross-lane :00 opt-in shape API: 8/8 V8 probes passed with the actual unmerged generic targeting source: 24 valid orientations, open arch void, physical pier, open railing gaps, solid baluster, rear stair riser, compatible stacked slabs and collision prevention. **Not production integration.**
+- Existing project CI runs npm test against tests/*.test.mjs and genuine Chromium scripts, but DOES NOT discover nested Pack 1 tests. Exact-head baseline CI must be checked separately and is not direct Pack 1 test proof.
+- Focused Node, actual Pack 1 Chromium preview, mobile/offline test and authentic screenshot: **NOT RUN / NOT CAPTURED.**
+- **Orientation persistence BLOCKED BY ENGINE:** production schema-1 edit rows [x,y,z,id] cannot carry rotation or upper variant. The pack fixture refuses a rotated/upper save rather than silently dropping state. Canonical orientation-0/variant-lower edits roundtrip in the isolated schema-1-shaped fixture only.
+- Central manual integration must establish safe persistent orientation encoding, full material registration, shape-aware mesh/targeting/collision, legacy save fixtures and iPhone performance checks without changing the existing production systems prematurely.
+
+**Ownership preserved:** no edits to :00/:12/:24/:36/:48, world generation, source registry, controls, other pack files or CI. **Milestone 3 garden components remain NOT STARTED.**
