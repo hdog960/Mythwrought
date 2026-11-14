@@ -55,7 +55,13 @@
     "m6AllFixtureRayAudit": "29,988 face-oriented rays across 30 candidates and supported orientations had 0 expected/actual intersection mismatches, combining exact Pack 1 fixture or unmerged :00 generic source in V8. Not production runtime.",
     "m6AuthoredTests": "81/81 authored tests (65 initial + 10 unified + 6 ray regression) pass exact-source V8 shim across seven nested Node modules; REAL NODE NOT RUN.",
     "localNetworkAttempt": "Confirmed Node 22.16.0 and /usr/bin/chromium locally; neither GitHub DNS nor pinned GitHub IP connections are allowed. Python Playwright available; exact branch modules cannot be mounted from connected GitHub into container here, so genuine candidate gallery browser not run.",
-    "previousExactHeadCI": "Head aa639a1306abea596333c0921a024f6f3ea93d50 completed SUCCESS via GitHub Actions 43638833572 (baseline Node + Chromium only, nested Pack 1 tests not included)."
+    "previousExactHeadCI": "Head aa639a1306abea596333c0921a024f6f3ea93d50 completed SUCCESS via GitHub Actions 43638833572 (baseline Node + Chromium only, nested Pack 1 tests not included).",
+    "m6NativeNodeRunnerUnit": "Genuine Node 22.16.0 5/5 PASS in local container for tests/block-packs/pack-1/gallery-count.test.mjs; executed fixture helper and test byte-for-byte identical to GitHub Blob SHAs 6e941cf73b310eb2400b274cb878e1d56d3214c9 + ab02c4712f525d9f964794ce0952ae581ad1b113. Only browser-runner parser, NOT seven asset-specific suites.",
+    "m6BrowserRunnerDefectsFixed": "Two misplaced double escapes in decimal-count regex produced false negatives even on healthy gallery placement. Replaced with dedicated native Node-tested count parser; additionally require explicit positive save confirmation, rejecting SAFE SAVE BLOCKER messages as success.",
+    "m6ChromiumLocalBlocker": "Chromium starts but even data:text/html and http://127.0.0.1 navigation return net::ERR_BLOCKED_BY_ADMINISTRATOR in local Python Playwright. No genuine Pack 1 gallery screenshots captured/reviewed; no environment restrictions bypassed.",
+    "m6PreviousExactHeadCI": "Baseline CI run 43639942311 on PR SHA 5e9c855268d7efff4cb6541b9803a304937d1f81 completed SUCCESS, including its configured baseline Node and Chromium steps only; nested Pack 1 suites excluded.",
+    "m6FullAssetSuite": "Seven candidate-specific Node test modules (81 authored groups) STILL NOT RUN under genuine native Node; 81/81 exact-source V8 shim remains latest honest coverage.",
+    "m6TotalTestsAuthored": "86 authored test groups across 8 Pack 1 test modules: 81 source-level V8 candidate assertions + 5 genuine native Node browser-runner helper assertions. Not all 86 native Node."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -485,7 +491,7 @@
   ],
   "pr": "https://github.com/hdog960/Mythwrought/pull/113",
   "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED",
-  "nextMilestone": "Run SEVEN nested dedicated Node modules and Pack 1 Playwright gallery runner against exact checked-out PR branch; inspect actual mobile landscape screenshots and verify registration/rotation/save integration under separate creator approval. Do not merge/deploy.",
+  "nextMilestone": "Recheck latest main/checkpoint/Issues #109/#117/PR #113. Run seven asset-focused Node modules plus the now-native-tested parser suite and Pack 1 browser gallery runner at three mobile landscape sizes in a permitted real checkout environment; inspect authentic images, fix only Pack 1 defects.",
   "allocations": [
     {
       "range": [
@@ -530,14 +536,14 @@
       "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "M6 in progress: 21/21 source candidate families, 30 unique IDs, 120/120 mesh orientations, 81/81 authored test bodies in V8, 29,988 independent source ray probes, previous head baseline exact CI green; real nested Node/browser/iPhone and central engine acceptance OPEN.",
-  "finalAcceptance": "NOT ACCEPTED: all source candidates remain draft; dedicated real Node/Chromium, physical iPhone, real engine ID registration and backward compatible rotation/save tests pending.",
+  "latestMilestone": "M6 continuation: exact-head baseline CI verified green; two browser acceptance runner defects repaired; 5/5 exact-GitHub-byte helper tests genuinely pass Node 22.16; all seven candidate suites and real Chromium screenshots still unverified, all 30 IDs remain CANDIDATE.",
+  "finalAcceptance": "OPEN. 21/21 source candidate families, 30 unique candidate IDs 9-38; real integrated engine/rotations/physical iPhone, seven dedicated native Node suites and authentic Pack1 gallery screenshots missing. NO MERGE/DEPLOY.",
   "acceptanceMatrix": {
     "all_21_family_source_candidates": "CANDIDATE",
     "30_distinct_persistent_candidate_IDs": "VERIFIED_SOURCE_V8",
     "all_120_rotated_shape_mesher_cases": "PASSED_EXACT_OPT_IN_GENERIC_SOURCE_V8_NOT_GPU",
-    "genuine_dedicated_Node": "NOT_RUN",
-    "genuine_Chromium_candidate_galleries": "NOT_RUN",
+    "genuine_dedicated_Node": "SEVEN_ASSET_SUITES_NOT_RUN",
+    "genuine_Chromium_candidate_galleries": "BLOCKED_BY_ADMINISTRATOR",
     "real_gallery_landscape_screenshots": "NOT_CAPTURED",
     "candidate_offline_browser_interaction": "NOT_RUN",
     "production_placement_targeting_save": "BLOCKED_BY_ENGINE",
@@ -545,7 +551,9 @@
     "merged_or_deployed": "NO",
     "all_Pack1_authored_test_bodies_81_of_81": "PASSED_EXACT_SOURCE_V8_SHIM_NOT_NODE",
     "independent_ray_regression": "22932_RAYS_PLUS_8232_STONE_PROBES_PASSED_V8_NOT_NODE",
-    "source_generic_ray_fuzz": "29988_RAYS_NO_MISMATCH_V8_NOT_PRODUCTION"
+    "source_generic_ray_fuzz": "29988_RAYS_NO_MISMATCH_V8_NOT_PRODUCTION",
+    "genuine_gallery_parser_Node": "5_OF_5_PASS_NATIVE_NODE_EXACT_GITHUB_BLOBS_ONLY",
+    "real_browser_runner_source_defects": "TWO_FIXED_COUNT_AND_SAVE_FALSE_POSITIVE"
   },
   "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md"
 }
