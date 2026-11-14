@@ -17,15 +17,29 @@ if(chromium){
  try{
   for(const [width,height] of [[667,375],[844,390],[932,430]]){
    const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
-   page.on('pageerror',e=>console.error('Page error:',e.message));
+   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));
    try{
     await page.goto(url,{waitUntil:'networkidle',timeout:15000});
     for(const type of ['blacksmith','watchtower'])for(const biome of ['temperate','desert','snow','enchanted-forest','mountain'])for(const size of ['small','medium','large']){
      await page.selectOption('#type',type);await page.selectOption('#biome',biome);await page.selectOption('#size',size);
      for(const view of ['exterior','cutaway']){
       await page.selectOption('#view',view);
-      const evidence=await page.evaluate(()=>({webgl2:!!document.getElementById('render').getContext('webgl2'),details:document.getElementById('details').textContent}));
-      if(!evidence.webgl2||!evidence.details.includes('WebGL2 active'))throw new Error('No genuine WebGL2 render: '+JSON.stringify(evidence));
+      const evidence=await page.evaluate(()=>{
+       const canvas=document.getElementById('render'),gl=canvas.getContext('webgl2'),details=document.getElementById('details').textContent;
+       if(!gl)return {webgl2:false,details};
+       gl.finish();
+       const pixels=new Uint8Array(canvas.width*canvas.height*4);
+       gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+       const gpuError=gl.getError();let foreground=0;
+       // Clear color is RGB(18,28,41); sample all viewports, including tall cutaways.
+       for(let i=0;i<pixels.length;i+=4*32)
+        if(Math.abs(pixels[i]-18)>17||Math.abs(pixels[i+1]-28)>17||Math.abs(pixels[i+2]-41)>17)foreground++;
+       return {webgl2:true,details,foreground,gpuError,width:canvas.width,height:canvas.height};
+      });
+      const id=`r3:${type}:${biome}:${size}:1`;
+      if(pageErrors.length||!evidence.webgl2||!evidence.details.includes(id)||
+         !evidence.details.includes(`WebGL2 active · ${view}`)||evidence.gpuError!==0||evidence.foreground<20)
+       throw new Error('Invalid/blank genuine WebGL2 render: '+JSON.stringify({evidence,pageErrors}));
       await page.screenshot({path:resolve(out,`${type}-${biome}-${size}-${view}-${width}x${height}.png`)});
       completed++;
      }
