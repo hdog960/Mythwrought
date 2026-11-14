@@ -94,3 +94,30 @@ test('reserved physical leaf material is accepted only when present in registry'
   assert.ok(leaves.cells.some(c=>c[3]===BLOCK.LEAVES));
  }
 });
+
+test('elderwood has substantial physical buttress roots, limbs, and broad canopy',()=>{
+ for(const seed of [179,917,-184]){
+  const world=new VoxelWorld(seed),p=site(world,'elderwood');
+  const [x,y,z]=p.origin;
+  assert.ok(p.blockCount>100,'large tree should be visibly larger than saplings');
+  assert.ok(p.cells.some(c=>c[0]===x+2&&c[1]===y+1&&c[2]===z&&c[3]===BLOCK.WOOD),'buttress root');
+  assert.ok(p.cells.some(c=>c[0]===x+3&&c[1]===y+6&&c[2]===z&&c[3]===BLOCK.WOOD),'long branch');
+  assert.ok(p.cells.some(c=>c[3]===BLOCK.LEAVES),'physical leaves');
+  assert.deepEqual(planVoxelTree(world,x,z,{variant:'elderwood'}),p);
+  assert.equal(placeVoxelTree(world,p),true);
+  const saved=VoxelWorld.restore(world.save());
+  assert.equal(saved.get(x+2,y+1,z),BLOCK.WOOD);
+  assert.equal(saved.set(x+2,y+1,z,BLOCK.AIR),true);
+  assert.equal(saved.get(x+2,y+1,z),BLOCK.AIR);
+  assert.equal(placeVoxelTree(world,p),false,'must not overwrite an installed tree');
+ }
+});
+test('elderwood rejects tampered cells and player edits before installation',()=>{
+ const w=new VoxelWorld(179),p=site(w,'elderwood');
+ const forged=structuredClone(p);forged.cells[0][3]=BLOCK.STONE;
+ assert.equal(placeVoxelTree(w,forged),false);
+ const [x,y,z]=p.cells.at(-1);
+ assert.equal(w.set(x,y,z,BLOCK.CRYSTAL),true);
+ assert.equal(placeVoxelTree(w,p),false);
+ assert.equal(w.get(x,y,z),BLOCK.CRYSTAL);
+});
