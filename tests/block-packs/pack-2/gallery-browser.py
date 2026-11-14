@@ -13,6 +13,8 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
+import shutil
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -77,7 +79,18 @@ def verify(root: Path, screenshots: Path | None = None) -> list[dict]:
     html = make_inline_html(root)
     results = []
     with sync_playwright() as playwright:
+        # Use Playwright's bundled browser when installed, or the available
+        # free system Chromium. No network install/paid service required.
+        bundled = Path(playwright.chromium.executable_path)
+        chromium_bin = (os.environ.get("MYTHWROUGHT_PACK2_CHROMIUM")
+                        or (str(bundled) if bundled.is_file() else None)
+                        or shutil.which("chromium")
+                        or shutil.which("chromium-browser"))
+        if not chromium_bin:
+            raise RuntimeError("No Chromium executable installed: provide "
+                               "MYTHWROUGHT_PACK2_CHROMIUM or install Chromium")
         browser = playwright.chromium.launch(
+            executable_path=chromium_bin,
             headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"]
         )
         try:
