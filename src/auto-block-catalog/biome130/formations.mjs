@@ -30,8 +30,8 @@ export function formationMesh(id,rotation=0){
  for(const b of d.shape.boxes){const corners=boxCorners(b);for(const [quad,normal] of faceDefs){
   const start=positions.length/3;
   for(const index of quad){positions.push(...corners[index]);normals.push(...normal);}
-  // Quads are ordered inward on the -X,+X faces; reverse those two to guarantee outward winding.
-  const flip=normal[0]!==0;
+  // The negative-X quad is inward-wound; reverse it for outward winding.
+  const flip=normal[0]===-1;
   indices.push(...(flip?[start,start+2,start+1,start,start+3,start+2]:[start,start+1,start+2,start,start+2,start+3]));
  }}
  return Object.freeze({positions:Object.freeze(positions),normals:Object.freeze(normals),indices:Object.freeze(indices),vertexCount:positions.length/3,triangleCount:indices.length/3});
