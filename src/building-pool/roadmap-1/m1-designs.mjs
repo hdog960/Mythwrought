@@ -21,7 +21,7 @@ export const DESIGN_MATRIX = Object.freeze({
     mountain: [
       ['Switchback Stone Hut',12,12,'rear','shed','buttress',-1],
       ['Cliffbraced Terrace Home',17,15,'side','shed','buttress',2],
-      ['Highridge Buttressed Hall',24,20,'cross','hip','tower',-2]]
+      ['Highridge Buttressed Hall',24,20,'gallery','hip','tower',-2]]
   }),
   tavern: Object.freeze({
     temperate: [
@@ -43,7 +43,7 @@ export const DESIGN_MATRIX = Object.freeze({
     mountain: [
       ['Quarry Cup Tavern',13,13,'rear','shed','buttress',2],
       ['Stonebridge Ale Gallery',18,17,'split','shed','buttress',-1],
-      ['Cragspire Banquet House',24,22,'cross','steep','buttress',-2]]
+      ['Cragspire Banquet House',24,22,'gallery','steep','buttress',-2]]
   }),
   stable: Object.freeze({
     temperate: [
@@ -61,7 +61,7 @@ export const DESIGN_MATRIX = Object.freeze({
     'enchanted-forest': [
       ['Mossbridge Empty Pens',13,15,'stable','dome','skylight',0],
       ['Rootlantern Shelter',19,18,'stable','butterfly','arcade',0],
-      ['Faelight Sanctuary Stable',25,21,'stable','monitor','tower',0]],
+      ['Faelight Sanctuary Stable',25,21,'stable','butterfly','tower',0]],
     mountain: [
       ['Talus Road Stable',14,15,'stable','shed','buttress',0],
       ['Highpass Shelter Barn',19,19,'stable','hip','chimney',0],

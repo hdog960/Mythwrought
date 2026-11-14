@@ -84,3 +84,36 @@ test('every candidate is standalone, not a world placement or functioning tavern
  assert.ok(buildings.every(b=>b.worldPlacement===false&&b.liveIntegration===false));
  assert.ok(buildings.every(b=>b.placements.every(p=>!['npc','animal','merchant','harvest','gameplay'].includes(p.role))));
 });
+
+test('mountain large halls have three actual longitudinal aisles rather than recolored four-square cross rooms',()=>{
+ for(const id of ['r1:house:mountain:large:003','r1:tavern:mountain:large:003']){
+  const b=getM1Blueprint(id);
+  assert.equal(b.architecturalIdentity.plan,'gallery');
+  assert.equal(b.rooms.length,3);
+  assert.equal(b.portals.length,3);
+  const central=b.rooms[0],side=b.rooms.slice(1);
+  assert.ok(side.every(r=>r.min[0]>=2&&r.max[0]<=b.footprint.width-2));
+  assert.ok(central.min[0]>side[0].min[0]&&central.max[0]<side[1].max[0]);
+  assert.ok(b.placements.some(p=>p.role==='partition'&&p.at[0]===central.min[0]-1));
+  assert.ok(b.placements.some(p=>p.role==='partition'&&p.at[0]===central.max[0]));
+ }
+});
+test('enchanted forest large stable has physically inward-sloping butterfly roofing',()=>{
+ const b=getM1Blueprint('r1:stable:enchanted-forest:large:003');
+ assert.equal(b.architecturalIdentity.roof,'butterfly');
+ const {width,depth}=b.footprint;
+ const z=Math.floor(depth/2),yAt=x=>b.placements.find(p=>p.role==='roof'&&p.at[0]===x&&p.at[2]===z)?.at[1];
+ assert.ok(yAt(0)>yAt(Math.floor(width/2)));
+ assert.ok(yAt(width-1)>yAt(Math.floor(width/2)));
+ assert.deepEqual(b.animals,[]);
+});
+test('desert medium and large stable pen zone layout differs physically from temperate equivalents',()=>{
+ for(const size of ['medium','large']){
+  const ix=size==='medium'?'002':'003';
+  const a=getM1Blueprint('r1:stable:desert:'+size+':'+ix);
+  const b=getM1Blueprint('r1:stable:temperate:'+size+':'+ix);
+  const front=d=>d.rooms.find(r=>r.id==='west-front');
+  assert.ok(front(a).max[2]<front(b).max[2],a.id);
+  assert.ok(a.placements.some(p=>p.role==='partition'&&p.at[2]===front(a).max[2]));
+ }
+});

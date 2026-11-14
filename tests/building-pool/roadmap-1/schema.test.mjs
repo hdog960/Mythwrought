@@ -5,9 +5,9 @@ import {readFileSync} from 'node:fs';
 const manifest=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-1/manifest.json',import.meta.url),'utf8'));
 const full={kind:'full-cell',bounds:[0,0,0,1,1,1]};
 function sample(){return {schema:SCHEMA,id:blueprintId('house','temperate','small',1),index:1,category:'house',biome:'temperate',size:'small',status:'candidate',frame:'local-x-east-y-up-z-south',footprint:{width:7,height:5,depth:7},worldPlacement:false,liveIntegration:false,
-  placements:[{at:[0,0,0],role:'foundation',asset:'live:stone',orientation:'none',occupancy:full},{at:[2,1,2],role:'furnishing',asset:'pack4:040',orientation:'north',occupancy:{kind:'unresolved',bounds:null,reason:'candidate requires approved physical bounds'}}],
+  placements:[{at:[0,0,0],role:'foundation',asset:'live:stone',orientation:'none',occupancy:full},{at:[2,1,2],role:'furnishing',asset:'pack4:059',orientation:'north',occupancy:{kind:'unresolved',bounds:null,reason:'candidate requires approved physical bounds'}}],
   rooms:[{id:'common',min:[1,1,1],max:[6,4,6]}],walkable:[[1,1,1],[1,1,2],[1,1,3]],portals:[{from:'outside',to:'common',at:[1,1,1],passable:true}],
-  dependencies:[{asset:'pack4:040',status:'unresolved',requires:['approved occupancy dimensions','collision/selection interface','state/rotation ABI']}]
+  dependencies:[{asset:'pack4:059',status:'unresolved',requires:['approved occupancy dimensions','collision/selection interface','state/rotation ABI']}]
 };}
 function mutate(fn){const b=sample();fn(b);return b;}
 test('exact quota matrix is 885 with 300 houses and all five biomes/three sizes',()=>{assert.equal(TARGET,885);assert.equal(QUOTAS.house*BIOMES.length*SIZES.length,300);assert.equal(Object.values(QUOTAS).reduce((a,b)=>a+b,0),59);assert.deepEqual(manifest.designsPerSizePerBiome,QUOTAS);assert.ok(manifest.authoredBlueprintCount>=0&&manifest.authoredBlueprintCount<=TARGET);assert.equal(manifest.authoredBlueprintCount,manifest.candidateBlueprintCount??manifest.authoredBlueprintCount);});
@@ -26,3 +26,14 @@ test('no world placement or live engine integration allowed',()=>assert.throws((
 test('reject mismatched category and index',()=>assert.throws(()=>validateBlueprint(mutate(b=>{b.category='tavern';})),/noncanonical/));
 test('reject disconnected walkable voxel island',()=>assert.throws(()=>validateBlueprint(mutate(b=>{b.walkable.push([5,1,5]);})),/disconnected voxel circulation/));
 test('reject unregistered live asset',()=>assert.throws(()=>validateBlueprint(mutate(b=>{b.placements[0].asset='live:imaginary';})),/unknown live voxel family/));
+
+test('unintegrated candidate cannot masquerade as a resolved full-cell physical asset',()=>{
+ assert.throws(()=>validateBlueprint(mutate(b=>{b.placements[1].occupancy=full;})),/future asset requires unresolved/);
+});
+test('duplicate or ghost placeholder dependency cannot silently pass substitution validation',()=>{
+ assert.throws(()=>validateBlueprint(mutate(b=>{b.dependencies.push({...b.dependencies[0]});})),/duplicate or invalid asset dependency/);
+ assert.throws(()=>validateBlueprint(mutate(b=>{b.dependencies.push({asset:'pack5:095',status:'unresolved',requires:['bounds']});})),/dependency refers to no unresolved placement/);
+});
+test('placeholder dependency must state at least one concrete unresolved requirement',()=>{
+ assert.throws(()=>validateBlueprint(mutate(b=>{b.dependencies[0].requires=[' '];})),/incomplete unresolved dependency contract/);
+});

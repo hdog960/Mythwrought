@@ -53,7 +53,7 @@ function compile(category,biome,size,index,row){
     // room, desert shifts the tack partition forward to widen its shaded rear
     // service area, and mountain shortens the rear zone for cliff-side storage.
     const tackZ=d-5-(biome==='desert'?1:biome==='mountain'?2:0);
-    const penZ=midZ-2+(biome==='mountain'?-1:biome==='snow'?1:0);
+    const penZ=midZ-2+(biome==='mountain'?-1:biome==='snow'?1:biome==='desert'&&size!=='small'?-2:0);
     // True physical stall fences/partitions on either side of the accessible longitudinal aisle.
     for(let y=1;y<=2;y++)for(let x=2;x<w-2;x++)if(x!==midX)wall(x,y,tackZ,'partition');
     gap(midX,tackZ);
@@ -84,6 +84,19 @@ function compile(category,biome,size,index,row){
     room(label[category][0],[2,2],[midX, d-2]);room(label[category][1],[midX+1,2],[w-2,d-2]);
     link('outside',entry<midX?label[category][0]:label[category][1],entry,1);
     link(label[category][0],label[category][1],midX,midZ);
+  }else if(plan==='gallery'){
+    // Physically distinct three-aisle hall: central circulation and two side wings.
+    const leftWall=Math.floor(w/3),rightWall=Math.floor(2*w/3);
+    for(let y=1;y<wallTop;y++)for(let z=2;z<d-2;z++){
+      wall(leftWall,y,z,'partition');wall(rightWall,y,z,'partition');
+    }
+    gap(leftWall,midZ);gap(rightWall,midZ);
+    room(label[category][0],[leftWall+1,2],[rightWall,d-2]);
+    room(label[category][1],[2,2],[leftWall,d-2]);
+    room(label[category][2],[rightWall+1,2],[w-2,d-2]);
+    link('outside',label[category][0],entry,1);
+    link(label[category][0],label[category][1],leftWall,midZ);
+    link(label[category][0],label[category][2],rightWall,midZ);
   }else if(plan==='split'){
     for(let y=1;y<wallTop;y++){
       for(let x=2;x<w-2;x++)wall(x,y,midZ,'partition');

@@ -32,6 +32,8 @@ export function validateBlueprint(b){
     assert(!p.asset.startsWith('live:')||LIVE.has(p.asset.slice(5)),'unknown live voxel family');
     assert(ORIENTATIONS.has(p.orientation),'orientation must be explicit');
     assert(p.occupancy&&KINDS.has(p.occupancy.kind),'occupancy must be explicit');
+    // Future assets cannot be silently given fabricated final physical bounds.
+    assert(p.asset.startsWith('live:')||p.occupancy.kind==='unresolved','future asset requires unresolved physical occupancy until integration');
     if(p.occupancy.kind==='unresolved'){
       assert(p.occupancy.bounds===null&&typeof p.occupancy.reason==='string'&&p.occupancy.reason.length>3,'unresolved dimensions need reason and null bounds');
       unknown.add(p.asset);
@@ -73,7 +75,15 @@ export function validateBlueprint(b){
   while(queue.length){const u=queue.shift();for(const v of neighbors.get(u))if(!visited.has(v)){visited.add(v);queue.push(v);}}
   assert(visited.size===rooms.size+1,'not every room is reachable from an exterior entrance');
   assert(Array.isArray(b.dependencies),'missing dependency ledger');
-  for(const ref of unknown)assert(b.dependencies.some(d=>d.asset===ref&&d.status==='unresolved'&&Array.isArray(d.requires)&&d.requires.length>0),'unknown asset omitted from unresolved dependency ledger');
+  // Require a bijection between unresolved assets and dependency entries.
+  const declared=new Set();
+  for(const d of b.dependencies){
+    assert(d&&typeof d.asset==='string'&&!declared.has(d.asset),'duplicate or invalid asset dependency');
+    declared.add(d.asset);
+    assert(unknown.has(d.asset),'dependency refers to no unresolved placement');
+    assert(d.status==='unresolved'&&Array.isArray(d.requires)&&d.requires.length>0&&d.requires.every(x=>typeof x==='string'&&x.trim().length>0),'incomplete unresolved dependency contract');
+  }
+  for(const ref of unknown)assert(declared.has(ref),'unknown asset omitted from unresolved dependency ledger');
   assert(b.worldPlacement===false&&b.liveIntegration===false,'no world placement or engine integration permitted');
   return true;
 }

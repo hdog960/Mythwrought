@@ -4,6 +4,9 @@ import {getM1Blueprints} from '../../../src/building-pool/roadmap-1/m1-buildings
 import {auditM1Building,auditM1Set,assertNoRepeatedBlueprintsInSettlement} from '../../../src/building-pool/roadmap-1/m1-acceptance.mjs';
 const buildings=getM1Blueprints();
 const sample=(f)=>{const b=structuredClone(buildings[0]);f(b);return b;};
+// Geometry-negative fixtures remove abandoned symbolic refs so that the intended
+// spatial check fires instead of the stricter dependency-ledger check.
+const pruneUnusedDependencies=b=>{const used=new Set(b.placements.filter(p=>p.occupancy.kind==='unresolved').map(p=>p.asset));b.dependencies=b.dependencies.filter(d=>used.has(d.asset));return b;};
 
 test('all 45 M1 structures have genuine reachable interior clearance, physical weather profiles and room-fitted fixtures',()=>{
  const report=auditM1Set(buildings);
@@ -38,12 +41,12 @@ test('unresolved physically absent pack candidate is rejected rather than receiv
  assert.throws(()=>auditM1Building(b),/missing from the actual five-pack roster/);
 });
 test('architectural Massing and outside columns must be real voxel placements',()=>{
- const b=sample(b=>{b.placements=b.placements.filter(p=>p.role!=='support');});
+ const b=sample(b=>{b.placements=b.placements.filter(p=>p.role!=='support');});pruneUnusedDependencies(b);
  assert.throws(()=>auditM1Building(b),/regional physical profile missing/);
 });
 test('a tavern cannot be cosmetically relabeled without an authored actual bar counter',()=>{
  const b=structuredClone(buildings.find(x=>x.category==='tavern'));
- b.placements=b.placements.filter(p=>p.asset!=='pack5:086');
+ b.placements=b.placements.filter(p=>p.asset!=='pack5:086');pruneUnusedDependencies(b);
  assert.throws(()=>auditM1Building(b),/furnishing mismatch|lacks dedicated/);
 });
 test('45 candidates distinguish mounted hinged doorways from 60 intentionally open empty-stall gates',()=>{
@@ -56,7 +59,7 @@ test('45 candidates distinguish mounted hinged doorways from 60 intentionally op
  }
 });
 test('a claimed hinged portal without an authored adjacent stowed door is rejected',()=>{
- const b=sample(b=>{b.placements=b.placements.filter(p=>p.role!=='door');});
+ const b=sample(b=>{b.placements=b.placements.filter(p=>p.role!=='door');});pruneUnusedDependencies(b);
  assert.throws(()=>auditM1Building(b),/hinged opening has no authored stowed leaf/);
 });
 test('a stable bay cannot masquerade as a hinged door',()=>{

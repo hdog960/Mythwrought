@@ -13,7 +13,8 @@ OUT=Path(os.environ.get('R1_ARTIFACT_DIR','/mnt/data/mythwrought-roadmap1-review
 OUT.mkdir(parents=True,exist_ok=True)
 SIZES=[(667,375),(844,390),(932,430)]
 IDS=['r1:house:temperate:small:001','r1:tavern:desert:medium:002','r1:stable:snow:large:003',
-     'r1:house:enchanted-forest:large:003','r1:tavern:mountain:small:001','r1:stable:desert:medium:002']
+     'r1:house:enchanted-forest:large:003','r1:tavern:mountain:small:001','r1:stable:desert:medium:002',
+     'r1:house:mountain:large:003','r1:tavern:mountain:large:003','r1:stable:enchanted-forest:large:003']
 def bundled_html():
  sources=[(SRC/p).read_text() for p in ['schema.mjs','m1-designs.mjs','m1-buildings.mjs']]
  sources=['\n'.join(line for line in s.splitlines() if not line.startswith('import ')).replace('export ','') for s in sources]
