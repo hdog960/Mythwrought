@@ -15,7 +15,7 @@ function findSite(world){
 test('rotunda is an opt-in physical template with four clear entries and open center',()=>{
   const world=new VoxelWorld(179),before=world.save();
   const plan=findSite(world);
-  if(!plan){ assert.deepEqual(world.save(),before);return; }
+  assert.ok(plan,'seed 179 must contain an eligible rotunda site within survey bounds');
   assert.equal(plan.optIn,true);
   assert.deepEqual(plan.materialIds,[BLOCK.STONE]);
   assert.equal(plan.blockCount,plan.cells.length);
@@ -35,7 +35,7 @@ test('no construction occurs on import, invalid plans or edited terrain',()=>{
   assert.equal(planStoneRotunda(world,0,Number.POSITIVE_INFINITY),null);
   assert.deepEqual(world.save(),before);
   const plan=findSite(world);
-  if(!plan)return;
+  assert.ok(plan,'expected an eligible fixed-seed site');
   const [x,h,z]=plan.origin;
   assert.equal(world.set(x,h+1,z,BLOCK.STONE),true);
   assert.equal(planStoneRotunda(world,x,z),null);
@@ -46,7 +46,7 @@ test('no construction occurs on import, invalid plans or edited terrain',()=>{
 test('failed construction rolls back all schema-1 edits',()=>{
   const world=new VoxelWorld(179);
   const plan=findSite(world);
-  if(!plan)return;
+  assert.ok(plan,'expected an eligible fixed-seed site');
   const before=world.save(),originalSet=world.set.bind(world);
   let writes=0;
   world.set=(...args)=>{if(++writes===12)return false;return originalSet(...args);};
@@ -57,7 +57,7 @@ test('failed construction rolls back all schema-1 edits',()=>{
 test('placement creates real selectable and removable stone voxels',()=>{
   const world=new VoxelWorld(179);
   const plan=findSite(world);
-  if(!plan)return;
+  assert.ok(plan,'expected an eligible fixed-seed site');
   assert.equal(placeStoneRotunda(world,plan),true);
   const [x,y,z]=plan.cells[0];
   assert.equal(world.get(x,y,z),BLOCK.STONE);
