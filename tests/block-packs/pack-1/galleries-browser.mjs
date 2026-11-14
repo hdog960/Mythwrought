@@ -102,16 +102,15 @@ const shell=async()=>{
           const parseCount=(v)=>{
             const index=v.lastIndexOf(g.countLabel);
             if(index<0)return NaN;
-            return Number(v.slice(index+g.countLabel.length).match(/^\\d+/)?.[0]);
+            return Number(v.slice(index+g.countLabel.length).match(/^\d+/)?.[0]);
           };
           assert.equal(parseCount(before.status||''),0,'Fixture not initially empty');
           await page.locator(g.place).click();
-          await page.waitForFunction(({label,n})=>{
-            const v=document.querySelector('#status')?.textContent||'';
-            const i=v.lastIndexOf(label);
-            if(i<0)return false;
-            return Number(v.slice(i+label.length).match(/^\\d+/)?.[0])===n;
-          },{label:g.countLabel,n:g.count},{timeout:9000});
+          // All five fixture handlers update synchronously. Assert exact count
+          // after the click instead of accepting unrelated digits in status.
+          const afterPlace=(await page.locator('#status').textContent())||'';
+          assert.equal(parseCount(afterPlace),g.count,
+            g.name+' place-all did not create exactly '+g.count+' cells');
           await page.screenshot({path:join(screenshots,filename+'-placed.png'),fullPage:true});
           totals.screenshots++;
           await context.setOffline(true);
