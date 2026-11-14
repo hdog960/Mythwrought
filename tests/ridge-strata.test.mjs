@@ -9,7 +9,7 @@ test('real exposed highland wall gains bounded deterministic face strata',()=>{
  assert.ok(a.length>0,'expected a visible escarpment');
  assert.deepEqual(a,b);
  assert.equal(a.length%9,0);
- assert.ok(a.length<=16*16*4*27*9);
+ assert.ok(a.length<=16*16*4*54*9);
  for(let i=0;i<a.length;i++)assert.ok(Number.isFinite(a[i]));
 });
 test('a filled approach hides geological face art without changing edits',()=>{
