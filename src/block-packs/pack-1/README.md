@@ -231,3 +231,14 @@ Neither local network-restricted Node/Chromium nor the standard GitHub workflow 
 Added `tests/block-packs/pack-1/raycast-regression.test.mjs` as the **seventh** optional Pack 1-only Node test module. It runs independent analytic AABB ray references against 22,932 candidate fixture rays plus 8,232 shaped-stone occupancy points and empty-fixture rejection. Six added test bodies pass the exact GitHub source under V8 compatibility shims; the current **81/81** authored body total remains **NOT a genuine Node execution**. A further 29,988 ray comparison against the unmerged :00 generic source found zero discrepancies in V8. See `M6_ACCEPTANCE.md` for exact reproducible commands and honest certification blockers.
 
 The prior GitHub head `aa639a1306abea596333c0921a024f6f3ea93d50` completed its configured baseline Node/Chromium Actions run [#43638833572](https://github.com/hdog960/Mythwrought/actions/runs/43638833572) successfully; those tests exclude Pack 1 nested suites. No real candidate gallery Chromium run, screenshot or physical iPhone test has been performed. This PR remains draft, unmerged and undeployed; no production engine or save files have been edited.
+
+
+## Milestone 6: strict browser acceptance repair and native Node subset
+
+Two **Pack 1-only** browser acceptance defects were repaired: a double-escaped fixture count regex rejected valid placement, and the old save-status check could mistake an expected safe-blocker message for success. The Playwright runner now uses the `gallery-count.mjs` strict parser and requires explicit success messages for all five galleries, with no successful result on `BLOCKED` or `BLOCKER`.
+
+New `tests/block-packs/pack-1/gallery-count.test.mjs`: **5/5 genuinely passed Node 22.16.0** on byte-for-byte identical GitHub source (verified git blob hashes). The complete candidate asset suites remain **seven separate nested Node test files with 81 authored V8-passing bodies, not yet native-Node-verified**. The new five are an eighth, small browser-harness test module and do not certify asset geometry.
+
+Local Chromium starts but both local HTTP and data-page navigation return `ERR_BLOCKED_BY_ADMINISTRATOR`. Genuine gallery screenshot generation is therefore blocked in this environment; none were captured, examined or claimed. The previous PR exact-head configured baseline CI [#43639942311](https://github.com/hdog960/Mythwrought/actions/runs/43639942311) completed **SUCCESS**, but baseline Node/Chromium smoke does not cover nested Pack 1 tests.
+
+See `M6_ACCEPTANCE.md` for the updated command including all eight nested modules and the explicit missing evidence. All 21 families and 30 unique IDs 9–38 remain **CANDIDATE** with no merged, deployed, world-generated or physical-iPhone-approved content.
