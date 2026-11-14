@@ -46,3 +46,31 @@ test('ruin geometry keeps a clear central sightline, valid atlas IDs and stable 
  assert.ok(maxY-minY>5,'distinctive multi-level skyline');
  assert.ok(v.length/9<=WATCHTOWER_LIMITS.maxVerticesPerChunk);
 });
+
+test('ruin districts offer two distinct authored skyline profiles and intact approach edits suppress them',()=>{
+ const world=new VoxelWorld(179),profiles=new Map();
+ for(let cx=-79;cx<=79&&profiles.size<2;cx++)for(let cz=-79;cz<=79;cz++){
+   const vertices=ruinWatchtowerVertices(world,cx,cz,opts);
+   if(!vertices.length)continue;
+   // Distinct authored profile prism counts yield distinct vertex budgets.
+   const count=vertices.length/9;
+   if(!profiles.has(count))profiles.set(count,{cx,cz,vertices});
+ }
+ assert.ok(profiles.size>=2,'representative seeded districts should expose both ruin silhouettes');
+ for(const {cx,cz,vertices} of profiles.values()){
+   const x=cx*16+8,z=cz*16+8,h=terrainHeight(x,z,world.seed);
+   assert.ok(vertices.length/9<=WATCHTOWER_LIMITS.maxVerticesPerChunk);
+   assert.deepEqual(vertices,ruinWatchtowerVertices(world,cx,cz,opts));
+   // Paving and ruin pieces remain entirely inside the chunk footprint.
+   for(let i=0;i<vertices.length;i+=9){
+     assert.ok(Math.abs(vertices[i]-x)<4&&Math.abs(vertices[i+2]-z)<4);
+   }
+   const before=JSON.stringify(world.save());
+   assert.equal(world.set(x,h+1,z,BLOCK.STONE),true);
+   assert.equal(ruinWatchtowerVertices(world,cx,cz,opts).length,0,
+     'placed blocks in the central approach must suppress the render-only ruin');
+   assert.notEqual(JSON.stringify(world.save()),before);
+   assert.equal(world.set(x,h+1,z,BLOCK.AIR),true);
+   assert.deepEqual(vertices,ruinWatchtowerVertices(world,cx,cz,opts));
+ }
+});
