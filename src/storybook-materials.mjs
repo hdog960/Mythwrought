@@ -80,6 +80,16 @@ void main(){
     base=mix(base,vec3(.85,.53,.28),.20*fan*near);
     base=mix(base,vec3(.35,.28,.24),.19*damp*near);
     base=mix(base,vec3(.33,.24,.17),.24*rootNetwork*near);
+    // Rounded river-worn pebbles nest in exposed loam; sparse, face-local,
+    // stable across frames and faded before they become pixel noise.
+    vec2 gravelCell=floor(vUv*vec2(9.0,8.0));
+    vec2 gravelUv=fract(vUv*vec2(9.0,8.0))-.5;
+    float gravelSeed=hashCell(gravelCell+vec2(71.0,23.0));
+    float gravelRadius=length(gravelUv*vec2(1.0,1.25));
+    float gravelPebble=step(.81,gravelSeed)*(1.0-smoothstep(.17,.28,gravelRadius));
+    float gravelRim=step(.81,gravelSeed)*(1.0-smoothstep(.25,.32,gravelRadius))*(1.0-smoothstep(.12,.21,gravelRadius));
+    base=mix(base,vec3(.61,.65,.62),.24*gravelPebble*near);
+    base=mix(base,vec3(.28,.31,.29),.12*gravelRim*near);
   }else if(vMat==3){ // Bedrock: three interleaved natural strata, fracture seams and mica.
     vec2 p=floor(vUv*vec2(11.0,13.0));
     float strata=.5+.5*sin(vUv.y*34.0+2.0*sin(vUv.x*6.5+tile));
@@ -226,5 +236,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   forestFloorMaterialAccents:Object.freeze(['grass-fallen-leaf-clusters','soil-branching-exposed-roots']),
   woodlandDewAccents:Object.freeze(['grass-morning-dew','grass-fern-litter-streaks']),
   crystalFrostStarAccents:Object.freeze(['crystal-six-ray-frost-stars']),
+  riverPebbleAccents:Object.freeze(['soil-rounded-river-pebbles','soil-dark-pebble-rims']),
   copperOreAccents:Object.freeze(['ore-malachite-halos','ore-copper-boundaries','ore-host-rock-fractures'])
 });
