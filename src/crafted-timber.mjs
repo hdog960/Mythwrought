@@ -33,11 +33,27 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
     float pegPair=1.0-smoothstep(.024,.063,length(fract(boards)-vec2(.88,.15)));
     float sideShade=.76+.13*grain+.045*fineGrain+.12*boardTone+.045*tile
       -.22*seam+.055*edgeWear-.075*knotMask*knotRing-.055*(peg+pegPair);
-    float topShade=.83+.16*endRings+.06*tile-.10*endCracks;
+    // Hand-planed raised board edges and occasional carved diamond ornaments.
+    // These are opaque, face-local details, with no additional geometry.
+    vec2 boardLocal=fract(vec2(boards.x+offset,boards.y));
+    float rimX=min(boardLocal.x,1.0-boardLocal.x);
+    float rimY=min(boardLocal.y,1.0-boardLocal.y);
+    float bevel=smoothstep(.012,.11,min(rimX,rimY));
+    float innerBorder=1.0-smoothstep(.010,.032,abs(min(rimX,rimY)-.12));
+    vec2 emblemUv=(boardLocal-vec2(.5))*vec2(1.0,1.2);
+    float diamond=abs(emblemUv.x)+abs(emblemUv.y);
+    float etchedDiamond=1.0-smoothstep(.018,.042,abs(diamond-.27));
+    float ornamentCell=step(.79,hashCell(boardCell+vec2(59.0,23.0)));
+    float ornament=etchedDiamond*ornamentCell*near;
+    sideShade += .095*bevel-.035*innerBorder-.07*ornament;
+    // End-grain also has a softly planed perimeter.
+    float topEdge=min(min(vUv.x,1.0-vUv.x),min(vUv.y,1.0-vUv.y));
+    float topBevel=smoothstep(.015,.13,topEdge);
+    float topShade=.83+.16*endRings+.06*tile-.10*endCracks+.085*topBevel;
     shade=mix(sideShade,topShade,topFace);
     base=mix(base,vec3(.85,.56,.34),(.11+.06*grain)*near);
 `;
 export const CRAFTED_TIMBER_RULES=Object.freeze({
   existingBlockId:4, boardsAcross:3, boardsHigh:2,
-  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
+  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
 });
