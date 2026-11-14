@@ -50,6 +50,25 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
         // Split lower fracture reads as a continuation, not an isolated stamp.
         const crack=[cx0+tx*(r-.5)*.19,y-.47,cz0+tz*(r-.5)*.19];
         emit(a,c,crack,shadow);
+        // A second, offset bedding tier ties high cliff faces into a single
+        // geological wall instead of leaving isolated floating rock stamps.
+        // Sample the actual exposed voxel at each tier: caves and user edits
+        // interrupt the band rather than being painted over.
+        if(top-adjacent>=7){
+          const upperY=y+1;
+          if(upperY<=top && world.get(x,upperY,z)===stone &&
+             world.get(x+dx,upperY,z+dz)===air){
+            const drift=hash(x,z,seed+2207);
+            const tierW=.32+drift*.12;
+            const tierA=[cx0-tx*tierW,upperY-.28,cz0-tz*tierW];
+            const tierB=[cx0+tx*(tierW*.86),upperY-.23,cz0+tz*(tierW*.86)];
+            const tierPeak=[cx0+tx*(drift-.5)*.18,upperY-.05,cz0+tz*(drift-.5)*.18];
+            emit(tierA,tierB,tierPeak,deep);
+            emit([cx0-tx*(tierW*.54),upperY-.20,cz0-tz*(tierW*.54)],
+                 [cx0+tx*(tierW*.31),upperY-.18,cz0+tz*(tierW*.31)],
+                 tierPeak,pale);
+          }
+        }
         // Broad foot-of-cliff talus is only painted on genuinely exposed
         // stone above an open approach. It connects the bedding to the
         // valley floor without inventing a passable cave or changing terrain.
