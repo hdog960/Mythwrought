@@ -7,7 +7,7 @@ import {PACK3_COORDINATION,PACK3_ROSTER,validatePack3Manifest}
 import {createPack3Fixture,restorePack3Fixture}
   from '../../../src/block-packs/pack-3/fixture.mjs';
 
-test('ownership: 17 families, four unique material IDs plus three separate geometry IDs',()=>{
+test('ownership: 17 families, four roofing material IDs, three roof shapes and three fortified IDs',()=>{
   assert.equal(validatePack3Manifest(),true);
   assert.deepEqual(PACK3_ROSTER.map(x=>x.roster),[23,24,25,26,27,28,29,69,70,71,72,73,74,75,76,77,78]);
   assert.deepEqual(PACK3_INITIAL_IDS,[109,110,111,112]);
@@ -18,8 +18,8 @@ test('ownership: 17 families, four unique material IDs plus three separate geome
     assert.equal(x.implementation,'physical-candidate');
     assert.equal(x.integrated,false);
   }
-  for(const x of PACK3_ROSTER.slice(7))assert.equal(x.id,null);
-  assert.equal(PACK3_ROSTER.filter(x=>x.id!==null).length,7);
+  for(const x of PACK3_ROSTER.slice(10))assert.equal(x.id,null);
+  assert.equal(PACK3_ROSTER.filter(x=>x.id!==null).length,10);
 });
 test('four independent original physical roofing families and matching selection/collision',()=>{
   const geometries=new Set(),slugs=new Set(),palettes=new Set();
