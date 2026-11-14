@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "M1 technical source QA PASS, creator and served HTTP review OPEN; M2 eight physical variants pass native Node/WebGL2 source QA, creator/integration review OPEN",
+  "status": "M1 source technical QA passed; M2 8 physical residential variants technically reviewed; M3 shop counters/display shelves 4 isolated physical variants CANDIDATE; creator and production acceptance OPEN",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -168,22 +168,46 @@
       "symbolicId": "pack5:086",
       "name": "Shop Counters",
       "milestone": 3,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/shop-workshop.mjs",
       "distinction": "Customer-facing fascia, not dining tables",
-      "integrated": false
+      "integrated": false,
+      "variants": [
+        "ledger-service",
+        "festival-fascia"
+      ],
+      "preview": "tests/block-packs/pack-5/shop-gallery.html",
+      "verification": "14 M3 native Node tests and 6 real native ES module WebGL2 captures pass on original physical fixtures; source-served, creator visual, production integration OPEN",
+      "integrationDependencies": [
+        "central physical registry and persistent numeric IDs",
+        "shape-aware raycast/collision and rotation serialization",
+        "schema-1 safe saves",
+        "physical iPhone GPU/art acceptance"
+      ]
     },
     {
       "roster": 87,
       "symbolicId": "pack5:087",
       "name": "Display Shelves",
       "milestone": 3,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/shop-workshop.mjs",
       "distinction": "Open commercial tiered product fixtures, not bookshelves",
-      "integrated": false
+      "integrated": false,
+      "variants": [
+        "stepped-market-tray",
+        "curio-arcade"
+      ],
+      "preview": "tests/block-packs/pack-5/shop-gallery.html",
+      "verification": "14 M3 native Node tests and 6 real native ES module WebGL2 captures pass on original physical fixtures; source-served, creator visual, production integration OPEN",
+      "integrationDependencies": [
+        "central physical registry and persistent numeric IDs",
+        "shape-aware raycast/collision and rotation serialization",
+        "schema-1 safe saves",
+        "physical iPhone GPU/art acceptance"
+      ]
     },
     {
       "roster": 88,
@@ -285,20 +309,21 @@
       "integrated": false
     }
   ],
-  "candidateFamilies": 7,
+  "candidateFamilies": 9,
   "testEvidence": {
-    "nativeNode": "69/69 genuine native Node 22.16.0 Pack 5 cases PASS, 0 failures/skips; M0/M1 44, M2 25; source and test Git blobs match local executed files",
+    "nativeNode": "83/83 native Node 22.16.0 Pack 5 tests PASS, 0 skipped: 44 M0/M1, 25 M2, 14 M3 (source/test files Git blob parity checked)",
     "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
     "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
     "webgl2": "M1 six variants AND M2 eight variants rendered in real Chromium WebGL2 with native data-URL ES modules; each 667x375,844x390,932x430 x 0/1 rotations: 12 real WebGL2 screenshots total, panel hashes/readback verified; localhost served HTTP still blocked by administrator",
     "screenshots": "Six new genuine Chromium WebGL2 PNGs inspected; separate working artifacts, not checked into PR. Earlier six genuine Chromium Canvas2D captures remain fallback evidence only.",
-    "production": "No registered numeric IDs, schema-1 production saves, live placement, device FPS, creator artwork approval or physical iPhone controls tests; no integration/deployment",
+    "production": "M1/M2 creator premium-art approval OPEN; M3 candidate art approval OPEN; localhost-served gallery blocked by browser administrator; no persistent block ID, schema-1 integration, physical iPhone GPU test, world placement or merge",
     "acceptanceDossier": "src/block-packs/pack-5/M1_ACCEPTANCE.md",
-    "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py m1|m2 (Xvfb/software OpenGL), genuine native ES module imports + WebGL2, not source-served HTTP or production",
+    "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py m1|m2|m3; native data URL ES module graph + actual WebGL2 software OpenGL and per-panel GPU readback, NOT HTTP-served gallery or playable engine",
     "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only",
     "m2": "8 original physical residential variants; genuine 2-cell beds with per-part support, accurate collider union, modeled book spines now visible beyond shelves, no storage/sleeping gameplay. 6 fresh genuine Chromium native ES module WebGL2 captures across 667x375,844x390,932x430 and rotations 0/1, panel hashes pass",
     "visualCorrection": "Physical bookshelf and scrollcase spines project beyond shelf lips; 844x390 WebGL2 review changed only the 2 bookshelf panels (2821 and 2444 pixels), other 6 panels identical; real material geometry, not recoloring",
-    "servedGallery": "Localhost real HTTP-served module page explicitly reattempted using Xvfb/Chromium and was blocked by ERR_BLOCKED_BY_ADMINISTRATOR; native offline data URL ES modules and genuine WebGL2 passed, but served page remains unverified"
+    "servedGallery": "Localhost real HTTP-served module page explicitly reattempted using Xvfb/Chromium and was blocked by ERR_BLOCKED_BY_ADMINISTRATOR; native offline data URL ES modules and genuine WebGL2 passed, but served page remains unverified",
+    "m3": "Source-authored pack5:086 Shop Counters ledger-service/festival-fascia; pack5:087 Display Shelves stepped-market-tray/curio-arcade, genuine solid partial colliders and support, four original independent geometry variants; 6 authentic native ES module Chromium WebGL2 screenshots at 667x375,844x390,932x430 and rotations 0/1."
   },
   "preview": {
     "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
