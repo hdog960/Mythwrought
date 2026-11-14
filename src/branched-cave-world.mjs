@@ -43,7 +43,7 @@ export function northWingTraversal(world,origin=CAVE_CANDIDATE){
     samples.push({x,y:feet,z,supported,clear});
   }
   const failures=samples.filter(p=>!p.supported||!p.clear);
-  return {samples,failures,walkable:failures.length===0,
+  return {samples,failures,walkable:failures.length===0 && blockedTransitions.length===0,
     bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
 }
 
@@ -70,8 +70,19 @@ export function northWingEntranceTrace(world,origin=CAVE_CANDIDATE){
     return {...p,y:feet,supported,clear,rise,
       stepValid:Math.abs(rise)<=1};
   });
+  // Midpoint body sweeps catch tight corners and ceiling collisions that
+  // center-only samples can miss. Do not mistake a discrete trace for gameplay.
+  const transitions=[];
+  for(let i=1;i<samples.length;i++){
+    const a=samples[i-1],b=samples[i];
+    const mx=(a.x+b.x)/2+.5,mz=(a.z+b.z)/2+.5;
+    const feet=Math.max(a.y,b.y);
+    const clear=!collides(candidate,mx,feet,mz);
+    transitions.push({from:i-1,to:i,clear});
+  }
   const failures=samples.filter(p=>!p.supported||!p.clear||!p.stepValid);
-  return {entrance:samples[0],turn:samples[turn],chamber:samples.at(-1),
+  const blockedTransitions=transitions.filter(p=>!p.clear);
+  return {transitions,blockedTransitions,entrance:samples[0],turn:samples[turn],chamber:samples.at(-1),
     samples,failures,walkable:failures.length===0,
     bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
 }
