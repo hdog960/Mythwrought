@@ -21,9 +21,9 @@ export function geometryFingerprint(blueprint){
   const cells=blueprint.modules.flatMap(m=>m.cells.map(c=>c.slice(0,3).join(','))).sort();
   const nodeCoords=new Map(blueprint.navigation.nodes.map(n=>[n.id,`${n.x},${n.y},${n.z}`]));
   return JSON.stringify({envelope:blueprint.envelope,cells,
-    openings:blueprint.openings.map(o=>[o.x,o.y,o.z,o.width,o.height,o.facing]).sort(),
-    spaces:blueprint.spaces.map(s=>[s.kind,s.bounds.x,s.bounds.y,s.bounds.z,s.bounds.width,s.bounds.height,s.bounds.depth]).sort(),
-    nodes:blueprint.navigation.nodes.map(n=>[n.x,n.y,n.z,n.width,n.headroom,n.kind]).sort(),
+    openings:blueprint.openings.map(o=>[o.x,o.y,o.z,o.width,o.height]).sort(),
+    spaces:blueprint.spaces.map(s=>[s.bounds.x,s.bounds.y,s.bounds.z,s.bounds.width,s.bounds.height,s.bounds.depth]).sort(),
+    nodes:blueprint.navigation.nodes.map(n=>[n.x,n.y,n.z,n.width,n.headroom]).sort(),
     edges:blueprint.navigation.edges.map(e=>[...([nodeCoords.get(e.from),nodeCoords.get(e.to)].sort()),e.kind]).sort()});
 }
 export function validateBlueprint(b, assetCatalog){
@@ -34,6 +34,7 @@ export function validateBlueprint(b, assetCatalog){
   const env=b.envelope;
   if(!Array.isArray(b.modules)||!b.modules.length)fail('structural modules missing');
   const cellKeys=[], roles=new Set();
+  if(!distinct(b.modules.map(m=>m.id)))fail('duplicate structural module identity');
   for(const m of b.modules){
     if(!m||typeof m.id!=='string'||!m.id||typeof m.role!=='string'||!Array.isArray(m.cells)||!m.cells.length)fail('empty or invalid structural module');
     roles.add(m.role);
@@ -59,8 +60,10 @@ export function validateBlueprint(b, assetCatalog){
   if(!Array.isArray(b.openings)||!b.openings.length)fail('entrance absent');
   for(const o of b.openings){
     if(!o||!['north','south','east','west'].includes(o.facing)||!isInt(o.x)||!isInt(o.y)||!isInt(o.z)||!isInt(o.width)||!isInt(o.height)||o.width<2||o.height<2)fail('entrance insufficient or invalid');
-    if(!inBox(o.x,o.y,o.z,env)||!inBox(o.x+o.width-1,o.y+o.height-1,o.z,env))fail('entrance outside envelope');
-    if(!b.clearances.some(c=>inBox(o.x,o.y,o.z,c)&&inBox(o.x+o.width-1,o.y+o.height-1,o.z,c)))fail('entrance not reserved as walkable clearance');
+    const eastWest=o.facing==='east'||o.facing==='west';
+    const endX=o.x+(eastWest?0:o.width-1),endZ=o.z+(eastWest?o.width-1:0),endY=o.y+o.height-1;
+    if(!inBox(o.x,o.y,o.z,env)||!inBox(endX,endY,endZ,env))fail('entrance outside envelope');
+    if(!b.clearances.some(c=>inBox(o.x,o.y,o.z,c)&&inBox(endX,endY,endZ,c)))fail('entrance not reserved as walkable clearance');
   }
   if(!Array.isArray(b.spaces)||!b.spaces.length)fail('rooms/working areas absent');
   if(!distinct(b.spaces.map(s=>s.id)))fail('duplicate room identity');
@@ -71,7 +74,7 @@ export function validateBlueprint(b, assetCatalog){
   const nav=b.navigation;
   if(!nav||!Array.isArray(nav.nodes)||!Array.isArray(nav.edges)||!nav.nodes.length)fail('navigation graph missing');
   const ids=nav.nodes.map(n=>n.id);
-  if(!distinct(ids)||!ids.includes(nav.entry))fail('navigation nodes/entry invalid');
+  if(!ids.every(id=>typeof id==='string'&&id)||!distinct(ids)||!ids.includes(nav.entry))fail('navigation nodes/entry invalid');
   const byId=new Map(nav.nodes.map(n=>[n.id,n]));
   const links=new Map(ids.map(id=>[id,[]]));
   for(const n of nav.nodes){
