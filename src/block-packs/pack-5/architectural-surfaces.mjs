@@ -35,7 +35,7 @@ const plaster=(kind)=>{
   return desc('pack5:079','Plaster & Stucco','wall',kind,art,[[.025,.025,.025,.975,.975,kind==='chalk-lime'?.141:.164]]);
 };
 function brick(kind){
-  const art=[b(0,0,0,1,1,.895,'mortar'),b(0,0,.895,1,1,.91,'mortar')];
+  const art=[b(.03,0,.03,.97,1,.895,'mortar'),b(0,0,.895,1,1,.91,'mortar')];
   if(kind==='hearth-running-bond'){
     for(let r=0;r<5;r++){
       const y=.02+r*.198,offset=r%2?.24:0;
@@ -56,7 +56,35 @@ function brick(kind){
     }
     art.push(b(.01,.535,.91,.99,.563,.985,'cream'));
   }else throw Error('Unknown brick variant');
-  // The interior is a solid manufactured wall core; the modeled courses are true face relief.
+  // The first review screenshots exposed a plain opposite/side silhouette.
+  // Dress the other three exterior faces with *physical* kiln-brick courses.
+  // Insets and proud exposed faces are genuine relief, not a material shader;
+  // the structural collision remains one honestly solid masonry cell.
+  art.push(b(.03,0,.02,.97,1,.06,'mortar'));
+  art.push(b(.02,0,.04,.065,1,.96,'mortar'));
+  art.push(b(.935,0,.04,.98,1,.96,'mortar'));
+  const wrapBrick=(u0,y0,u1,y1,material)=>{
+    art.push(b(u0,y0,0,u1,y1,.019,material)); // rear wall (-Z)
+    art.push(b(0,y0,u0,.019,y1,u1,material)); // left (-X)
+    art.push(b(.981,y0,u0,1,y1,u1,material)); // right (+X)
+  };
+  if(kind==='hearth-running-bond'){
+    for(let row=0;row<4;row++)for(let col=0;col<2;col++){
+      const u0=.035+col*.47+(row%2?.085:0),u1=Math.min(.97,u0+.405);
+      wrapBrick(u0,.033+row*.241,u1,.231+row*.241,(row+col)%3===0?'burnt':col?'terra':'baked');
+    }
+  }else{
+    for(let row=0;row<3;row++)for(let col=0;col<2;col++){
+      const u0=.03+col*.475+(row%2?.065:0);
+      wrapBrick(u0,.026+row*.174,Math.min(.97,u0+.405),.177+row*.174,(row+col)%2?'terra':'baked');
+    }
+    for(let col=0;col<4;col++){
+      const u0=.03+col*.245;
+      wrapBrick(u0,.585,Math.min(.975,u0+.208),.973,col%2?'burnt':'terra');
+    }
+  }
+  if(art.length>64)throw Error('Fired brick geometry exceeds per-cell limit');
+  // This full-cell masonry is not Pack 1 dressed stone bricks or clay roof tile.
   return desc('pack5:080','Fired Brick Masonry','none',kind,art,[[0,0,0,1,1,1]]);
 }
 function tiles(kind){
