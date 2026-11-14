@@ -53,6 +53,20 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
     float mortiseX=1.0-smoothstep(.025,.065,abs(boardLocal.x-.18));
     float mortiseY=1.0-smoothstep(.045,.095,abs(boardLocal.y-.72));
     float mortise=mortiseX*mortiseY*(1.0-seam);
+    // Distinct crafted beam framing: broad corner posts, inset panel and
+    // small square ironwood corner bosses. All remain opaque shader relief.
+    float frameX=1.0-smoothstep(.09,.18,rimX);
+    float frameY=1.0-smoothstep(.09,.18,rimY);
+    float frame=max(frameX,frameY);
+    float panel=smoothstep(.17,.25,min(rimX,rimY));
+    float bossX=1.0-smoothstep(.035,.085,abs(rimX-.13));
+    float bossY=1.0-smoothstep(.035,.085,abs(rimY-.13));
+    float cornerBoss=bossX*bossY;
+    float inlayLine=1.0-smoothstep(.009,.026,abs(min(rimX,rimY)-.22));
+    float frameCell=step(.68,hashCell(boardCell+vec2(97.0,31.0)));
+    float craftedFrame=frame*frameCell;
+    sideShade += .11*craftedFrame-.065*panel*frameCell
+      +.085*cornerBoss*frameCell-.045*inlayLine*frameCell;
     sideShade += .095*bevel-.035*innerBorder-.07*ornament
       -.11*braceBand+.045*braceHighlight-.065*mortise;
     // End-grain also has a softly planed perimeter.
@@ -64,5 +78,5 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
 `;
 export const CRAFTED_TIMBER_RULES=Object.freeze({
   existingBlockId:4, boardsAcross:3, boardsHigh:2,
-  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, sparseDiagonalJoinery:true, pairedMortises:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
+  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, sparseDiagonalJoinery:true, pairedMortises:true, framedPanels:true, cornerBosses:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
 });
