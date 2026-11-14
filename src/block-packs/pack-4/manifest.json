@@ -277,7 +277,8 @@
     "tests/block-packs/pack-4/gallery.mjs",
     "tests/block-packs/pack-4/furnishings.test.mjs",
     "tests/block-packs/pack-4/furnishings-fixture.test.mjs",
-    "tests/block-packs/pack-4/gallery-browser.mjs"
+    "tests/block-packs/pack-4/gallery-browser.mjs",
+    "tests/block-packs/pack-4/manifest.test.mjs"
   ],
   "dependencies": [
     "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
