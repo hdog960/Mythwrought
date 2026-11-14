@@ -20,7 +20,7 @@ export function geometryFingerprint(blueprint){
   // Ignore biome, type, asset palette and labels: palette swaps cannot masquerade as new architecture.
   const cells=blueprint.modules.flatMap(m=>m.cells.map(c=>c.slice(0,3).join(','))).sort();
   const nodeCoords=new Map(blueprint.navigation.nodes.map(n=>[n.id,`${n.x},${n.y},${n.z}`]));
-  return JSON.stringify({envelope:blueprint.envelope,cells,
+  return JSON.stringify({cells,
     openings:blueprint.openings.map(o=>[o.x,o.y,o.z,o.width,o.height]).sort(),
     spaces:blueprint.spaces.map(s=>[s.bounds.x,s.bounds.y,s.bounds.z,s.bounds.width,s.bounds.height,s.bounds.depth]).sort(),
     nodes:blueprint.navigation.nodes.map(n=>[n.x,n.y,n.z,n.width,n.headroom]).sort(),
