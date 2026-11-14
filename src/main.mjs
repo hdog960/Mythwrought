@@ -18,6 +18,7 @@ import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
+import {installExplorationMap} from './exploration-map.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -83,6 +84,9 @@ function start(){
   const chunks=new Map(),pending=new Map();
   const name=chunkKey;
   const player=newPlayer(world);
+  // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
+  const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
+    onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost});
   let jumpQueued=false;
   const keys=new Set(),joystick={x:0,y:0},lookStick={x:0,y:0};
   const heldPointers=new Map();
@@ -207,7 +211,7 @@ function start(){
   }
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
-    if(!help.hidden||document.hidden||graphicsLost)return;
+    if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
@@ -270,7 +274,7 @@ function start(){
     jumpQueued=false;
     message('Returned to a safe surface near spawn (prototype void recovery)');
   }
-  function jump(){if(help.hidden&&!document.hidden&&!graphicsLost)jumpQueued=true;}
+  function jump(){if(help.hidden&&!exploration.isOpen()&&!document.hidden&&!graphicsLost)jumpQueued=true;}
   function move(dt){
     const strafe=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joystick.x;
     const forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)-joystick.y;
@@ -288,11 +292,12 @@ function start(){
   }
   function draw(now){
     const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
-    frameHistory.frame(now,!document.hidden&&help.hidden&&!graphicsLost);
+    frameHistory.frame(now,!document.hidden&&help.hidden&&!exploration.isOpen()&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
-      frame++;if(help.hidden)move(dt);
+      frame++;if(help.hidden&&!exploration.isOpen())move(dt);
+      if(frame%16===0)exploration.tick(now);
       // Low-frequency real-cave check: no synthetic map markers or geometry.
-      if(help.hidden&&frame%24===0){
+      if(help.hidden&&!exploration.isOpen()&&frame%24===0){
         caveDiscovery=updateCaveDiscovery(caveDiscovery,naturalCaveCorridor(world,player),now);
         if(caveDiscovery.entered)message('Natural cave passage discovered · explore carefully');
       }
@@ -410,7 +415,7 @@ function start(){
     el.addEventListener('pointerdown',e=>{
       // A second touch must never steal a held grip. Settings and background
       // transitions cannot create invisible held pointers behind the overlay.
-      if(active!==null||!help.hidden||document.hidden)return;
+      if(active!==null||!help.hidden||exploration.isOpen()||document.hidden)return;
       e.preventDefault();active=e.pointerId;lastX=e.clientX;lastY=e.clientY;
       heldPointers.set(active,stop);
       try{el.setPointerCapture(active);}catch(_){}
@@ -492,7 +497,7 @@ function start(){
   precisionButton.addEventListener('pointerdown',e=>{
     // Retain the first precision finger until it actually releases.
     // Otherwise a second touch overwrites its ID and leaves AIM stuck.
-    if(precisionPointer!==null||!help.hidden||document.hidden)return;
+    if(precisionPointer!==null||!help.hidden||exploration.isOpen()||document.hidden)return;
     e.preventDefault();precisionPointer=e.pointerId;precisionHeld=true;
     precisionButton.classList.add('held');
     try{precisionButton.setPointerCapture(e.pointerId);}catch(_){}
@@ -507,7 +512,7 @@ function start(){
   precisionButton.addEventListener('touchstart',e=>{
     // touchstart precedes pointerdown on Chromium/Safari. Remember the first
     // finger before a second touch can race into the AIM button.
-    if(precisionTouchId===null&&help.hidden&&!document.hidden&&e.changedTouches.length)
+    if(precisionTouchId===null&&help.hidden&&!exploration.isOpen()&&!document.hidden&&e.changedTouches.length)
       precisionTouchId=e.changedTouches[0].identifier;
   },{passive:true});
   for(const name of ['touchend','touchcancel'])window.addEventListener(name,e=>{
@@ -524,7 +529,7 @@ function start(){
     cameraKnob.style.transform='';knob.style.transform='';
   }
   let drag=null;
-  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&help.hidden&&!document.hidden){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
+  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&help.hidden&&!exploration.isOpen()&&!document.hidden){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
   canvas.addEventListener('pointermove',e=>{
     if(!drag||drag.id!==e.pointerId)return;
     const {x:dx,y:dy}=safePointerDelta(e.clientX-drag.x,e.clientY-drag.y);
@@ -532,14 +537,14 @@ function start(){
     look(dx,dy,.006);
     drag.x=e.clientX;drag.y=e.clientY;
   });
-  canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved&&help.hidden&&!document.hidden)edit(drag.button===2?'place':'mine');drag=null;}});
+  canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved&&help.hidden&&!exploration.isOpen()&&!document.hidden)edit(drag.button===2?'place':'mine');drag=null;}});
   // Interrupted mouse drags must not become delayed mine/place actions.
   canvas.addEventListener('pointercancel',e=>{if(drag?.id===e.pointerId)drag=null;});
   canvas.addEventListener('lostpointercapture',e=>{if(drag?.id===e.pointerId)drag=null;});
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
   document.addEventListener('keydown',e=>{
     // Do not steal arrows, space or WASD from accessibility controls and form fields.
-    if(!isWorldControlTarget(e.target,e)||!help.hidden||document.hidden)return;
+    if(!isWorldControlTarget(e.target,e)||!help.hidden||exploration.isOpen()||document.hidden)return;
     if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
     if(e.code==='Space'&&!e.repeat)jump();
     keys.add(e.code);
@@ -586,7 +591,7 @@ function start(){
       if(e.pointerType!=='touch')return;
       e.preventDefault();
       // A queued iOS touch must not edit the world behind settings or on app suspension.
-      if(!help.hidden||document.hidden||button.disabled)return;
+      if(!help.hidden||exploration.isOpen()||document.hidden||button.disabled)return;
       lastTouchAt=performance.now();
       action();
     });
@@ -595,7 +600,7 @@ function start(){
         e.preventDefault();
         return;
       }
-      if(!help.hidden||document.hidden||button.disabled){e.preventDefault();return;}
+      if(!help.hidden||exploration.isOpen()||document.hidden||button.disabled){e.preventDefault();return;}
       action();
     });
   }

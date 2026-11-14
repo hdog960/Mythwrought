@@ -35,6 +35,7 @@ jobs:
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-site.log 2>&1 &
           node tests/browser-smoke.mjs
+          node tests/exploration-map-browser.mjs
           node tests/touch-browser.mjs
           node tests/layout-browser.mjs
           node tests/seam-browser.mjs

@@ -162,3 +162,53 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .bezel.foot{padding-inline:5px}
   .bezel.foot #status{font-size:clamp(9px,1.8vw,11px);letter-spacing:0}
 }
+
+
+/* Creator-requested discovery map. In the LEFT GRIP, never over the 3D viewport. */
+.map-button{
+  position:relative;display:block;flex:0 1 auto;width:min(84px,100%,22dvh);
+  min-height:53px;max-height:84px;aspect-ratio:1;
+  padding:3px;border:2px solid #c3a46b;border-radius:10px;
+  background:#12272b;overflow:hidden;box-shadow:inset 0 0 12px #050d16,0 2px 7px #060d1299;
+  touch-action:manipulation;
+}
+.map-button #miniMap{width:100%;height:100%;display:block;image-rendering:pixelated;pointer-events:none;touch-action:none}
+.map-caption{position:absolute;bottom:0;left:0;right:0;background:#101e24d9;
+  color:#efdbad;font-size:8px;font-weight:850;line-height:12px;letter-spacing:.08em;pointer-events:none}
+.map-button:focus-visible{outline:3px solid #fff1bd;outline-offset:2px}
+#explorationOverlay[hidden]{display:none}
+#explorationOverlay{
+  position:fixed;inset:0;z-index:10;display:grid;place-items:center;
+  background:#071319ed;padding:8px;touch-action:none;overscroll-behavior:contain;
+}
+.exploration-panel{
+  width:min(470px,96vw);max-height:97dvh;min-height:0;overflow:hidden;
+  display:flex;align-items:center;flex-direction:column;gap:5px;
+  padding:10px 12px;background:radial-gradient(ellipse at 50% 10%,#314c45,#12272b 73%);
+  border:2px solid #c4a26b;border-radius:14px;box-shadow:0 12px 40px #000b;
+}
+.exploration-heading{display:flex;align-items:center;justify-content:space-between;gap:9px;width:100%;
+  font-size:clamp(11px,1.8vw,14px);color:#f0d3a0;letter-spacing:.035em}
+#closeExploration,.map-controls button{
+  min-height:31px;padding:5px 9px;color:#ffedc9;font-weight:850;font-size:11px;
+  background:linear-gradient(#586b5c,#304e48);border:1px solid #bda474;border-radius:7px;
+  touch-action:manipulation;
+}
+.map-coordinates,.map-summary{margin:0;max-width:100%;text-align:center;
+  font-size:11px;color:#decda9;min-height:14px;line-height:1.25}
+.map-summary{color:#b9d1c4}
+#expandedMap{
+  width:min(59dvh,320px,84vw);height:auto;max-height:58dvh;
+  aspect-ratio:1;flex:0 1 auto;display:block;image-rendering:pixelated;
+  border:3px double #c9af7f;border-radius:6px;background:#122126;touch-action:none;
+}
+.map-controls{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;width:100%}
+.map-controls button{flex:1 1 auto;min-width:0}
+@media(max-height:355px){
+ .map-button{width:min(62px,100%,19dvh);min-height:49px;max-height:62px}
+ .map-caption{font-size:7px;line-height:10px}
+ .exploration-panel{padding:6px 9px;gap:3px}
+ #expandedMap{width:min(55dvh,280px,75vw);max-height:55dvh}
+ .exploration-heading{font-size:11px}
+ .map-controls button,#closeExploration{min-height:28px;padding:3px 6px;font-size:10px}
+}
