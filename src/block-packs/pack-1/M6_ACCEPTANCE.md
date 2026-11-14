@@ -111,3 +111,20 @@ Main remains `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84` at incorporation **check
 **Local execution blockers confirmed again:** GitHub DNS/network is unavailable for `git ls-remote`, clone and raw/API HTTP, so no full exact Pack 1 asset checkout could be populated for native Node. Python Playwright launches Chromium but navigation to `data:` or `file:` pages returns `ERR_BLOCKED_BY_ADMINISTRATOR`; local HTTP navigation was independently blocked as well. No browser policy bypass was attempted. Therefore **the seven native asset suites, the candidate Chromium gallery runs at 667×375 / 844×390 / 932×430, their screenshots and review remain UNVERIFIED**. Do not reclassify any of the 30 assets as accepted or integrated.
 
 **Exit state unchanged:** all 21 manual roster families and 30 unique IDs 9–38 stay **CANDIDATE / UNMERGED / UNDEPLOYED**; M6 OPEN, v0.11 LOCKED. Future work must first obtain an authorized full branch checkout in an environment allowing genuine Node and Chromium navigation. Recheck the newer PR exact-head workflow, run all eight nested Node suites and the gallery runner, inspect all screenshot artifacts, then request creator approval before any central-engine integration.
+
+
+## Interrupted-session recovery and exact-checkout acceptance handoff — 2026-11-14
+
+This continuation independently confirmed unchanged integrated main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, incorporation **checkpoint 006**, Issues #109/#117 OPEN, and draft PR #113 with **only Pack 1 paths**. The missing README handoff is now committed. All **21 roadmap families, 30 unique candidate IDs 9–38** retain status CANDIDATE; there is no production ID registration or deployment.
+
+A new opt-in, Pack 1-owned `tests/block-packs/pack-1/run-acceptance.mjs` provides a single reproducible, **strict exact-commit** local acceptance procedure. Run from a clean checkout after reading the fresh PR head from GitHub:
+
+```bash
+PACK1_EXPECTED_HEAD=<independently_verified_40_hex_PR_head> node tests/block-packs/pack-1/run-acceptance.mjs
+```
+
+The script requires the checked-out 40-hex commit to match the supplied head and the Pack 1 source/test paths to be clean; it executes all **eight** nested native Node test modules, then invokes `galleries-browser.mjs` for five actual asset galleries × 667×375, 844×390, 932×430. Only after 15 genuine views pass, the gallery evidence contains 30 authentic PNGs, and the checkout SHA matches does it write a PASS report including PNG signatures, sizes and SHA-256 checksums. Stale PASS markers are cleared **before Node testing**, so a failure cannot reuse a prior success. This script is **SOURCE-READY, NOT A COMPLETED RUN**; no shared CI modification.
+
+**Current real execution evidence:** Local native Node 22.16.0 repeated `gallery-count.test.mjs`: **5 PASS / 0 FAIL**. Both on-disk test/helper files matched GitHub Git-blob hashes `ab02c4712f525d9f964794ce0952ae581ad1b113` and `6e941cf73b310eb2400b274cb878e1d56d3214c9`. These five tests validate the acceptance-runner count/save logic only. **Seven candidate-specific suites containing 81 authored bodies remain V8-shim-tested, NOT genuine native-Node-tested**. The local machine still fails GitHub DNS resolution and does not have the full source checkout. Its Chromium browser navigation is blocked by administrator restrictions, so no candidate-gallery screenshot has been captured/reviewed; no bypass was attempted.
+
+**Gate decision remains OPEN / NOT ACCEPTED.** Source candidates 9–38 must not be merged, deployed, placed in generated terrain, or registered without separate creator authorization. Production schema-1 save/rotation, generic mesh targeting, iPhone side-grip controls and art approval remain independent blockers. Recheck latest exact-head GitHub Actions run (baseline-only root workflow), and require real native Node + 15 gallery views + 30 screenshot review before upgrading any candidate evidence.
