@@ -87,7 +87,7 @@ test('category interiors are actually different physical assemblies',()=>{
   const shopMaterials=new Set(shop.voxels.filter(v=>v.kind==='fixture').map(v=>v.material));
   const templeMaterials=new Set(shrine.voxels.filter(v=>v.kind==='fixture').map(v=>v.material));
   assert(shopMaterials.has('pack5:086')&&shopMaterials.has('pack5:087'),shop.id);
-  assert(templeMaterials.has('pack3:075')&&templeMaterials.has('pack3:072'),shrine.id);
+  assert(templeMaterials.has('pack5:093')&&templeMaterials.has('pack3:072'),shrine.id);
   assert(!templeMaterials.has('pack5:086'),shrine.id);
  }
 });
@@ -117,7 +117,7 @@ test('temples have genuinely raised ceremonial dais and an accessible approach',
   const cells=occupied(bp),center=Math.floor(bp.extents.x/2),z=bp.extents.z-3;
   for(let dx=-2;dx<=2;dx++)
    assert.equal(cells.get([center+dx,2,z].join(','))?.kind,'fixture',`dais absent: ${bp.id}`);
-  assert.equal(cells.get([center,3,z].join(','))?.material,'pack3:075',`raised altar absent: ${bp.id}`);
+  assert.equal(cells.get([center,3,z].join(','))?.material,'pack5:093',`raised altar absent: ${bp.id}`);
   assert(canReachRear(bp),`ceremonial aisle blocked by dais: ${bp.id}`);
  }
 });

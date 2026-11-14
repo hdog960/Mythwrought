@@ -76,3 +76,13 @@ test("internal and auxiliary room door declarations require physically clear thr
  assert.throws(()=>validateBlueprint({...bp,openings:bp.openings.map(o=>o===door?{...o,clearHeightCells:2}:o)}),
    /invalid three-high opening clearance/);
 });
+
+
+test("all placed symbolic materials and door symbols require explicit unresolved ABI handoff",()=>{
+ const missing="pack1:001";
+ assert(bp.voxels.some(v=>v.material===missing));
+ const altered={...bp,unresolvedDependencies:bp.unresolvedDependencies.filter(d=>d.ref!==missing)};
+ assert.throws(()=>validateBlueprint(altered),/missing symbolic material dependency: pack1:001/);
+ const absentDoor={...bp,unresolvedDependencies:bp.unresolvedDependencies.filter(d=>d.ref!=="pack2:020")};
+ assert.throws(()=>validateBlueprint(absentDoor),/missing symbolic material dependency: pack2:020/);
+});

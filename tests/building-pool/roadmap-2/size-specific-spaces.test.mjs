@@ -55,7 +55,7 @@ test('all five large temples have two physical side chapels accessible from the 
    assert(bp.rooms.some(room=>room.uses.includes(use)),`missing chapel room: ${bp.id} ${use}`);
    assert(bp.circulation.some(edge=>edge.to===use),`missing nave-to-chapel circulation: ${bp.id} ${use}`);
   }
-  for(const x of [2,w-3])assert.equal(c.get(cellKey(x,2,8))?.material,'pack3:075',`side altar missing: ${bp.id}`);
+  for(const x of [2,w-3])assert.equal(c.get(cellKey(x,2,8))?.material,'pack5:093',`side altar missing: ${bp.id}`);
  }
 });
 test('fifteen symbolic temple stairs declare z-forward rises between supported lower and upper landings',()=>{

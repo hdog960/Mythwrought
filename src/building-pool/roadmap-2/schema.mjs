@@ -20,14 +20,24 @@ export function validateBlueprint(bp){
  check(Array.isArray(bp.openings)&&bp.openings.some(o=>o.type==="entrance")&&bp.openings.some(o=>o.type==="window"),"missing entrance/windows");
  check(Array.isArray(bp.circulation)&&bp.circulation.length>0,"missing circulation");
  check(Array.isArray(bp.unresolvedDependencies)&&bp.unresolvedDependencies.length>0&&bp.unresolvedDependencies.every(d=>validateSymbol(d.ref)&&d.issue),"unresolved asset ABI must be explicit");
- const occupied=new Set(),kinds=new Set();
+ const occupied=new Set(),kinds=new Set(),usedSymbols=new Set();
  for(const v of bp.voxels){
    check(["x","y","z"].every(k=>Number.isInteger(v[k])&&v[k]>=0&&v[k]<bp.extents[k]),"out of bounds");
    check(validateSymbol(v.material),"unknown symbolic roster material");
+   usedSymbols.add(v.material);
    const coord=[v.x,v.y,v.z].join(",");
    check(!occupied.has(coord),"overlapping voxel");
    occupied.add(coord);kinds.add(v.kind);
  }
+ // A real M0 dependency-audit found five physically used but undeclared roster
+ // families. Future designs must disclose EVERY used material and hinged-door
+ // symbol as unresolved until the producer ABI actually accepts them.
+ for(const o of bp.openings)if(o.doorSymbol){
+   check(validateSymbol(o.doorSymbol),"unregistered symbolic door");
+   usedSymbols.add(o.doorSymbol);
+ }
+ const declared=new Set(bp.unresolvedDependencies.map(d=>d.ref));
+ for(const ref of usedSymbols)check(declared.has(ref),"missing symbolic material dependency: "+ref);
  for(const kind of ["foundation","floor","wall","roof","fixture","decor"])check(kinds.has(kind),"missing architectural element: "+kind);
  const category=CATEGORIES.find(c=>c.key===bp.category);
  for(const name of category.requirements)check(bp.rooms.some(r=>r.uses?.includes(name))||bp.features?.includes(name),"missing functional space: "+name);

@@ -43,6 +43,11 @@ export const TEMPERATE_SMALL_GENERAL_STORE=Object.freeze({
  circulation:[{from:"exterior",to:"sales-floor",via:"south x6 entrance"},
  {from:"sales-floor",to:"storage",via:"offset x9 opening in partition z7"}],
  unresolvedDependencies:[
+ {ref:"pack1:001",issue:"stone foundation durability and real registered block geometry unverified"},
+ {ref:"pack2:013",issue:"plank floor geometry, rotation and collision unverified"},
+ {ref:"pack2:015",issue:"wooden beam spans and real beam shape unverified"},
+ {ref:"pack4:032",issue:"physical window frame dimensions, glass fit and collision unverified"},
+ {ref:"pack4:057",issue:"storage crate mesh, placement and collision unverified"},
  {ref:"pack5:079",issue:"plaster thickness and support unverified"},
  {ref:"pack3:023",issue:"real sloped roof mesh and orientation unverified"},
  {ref:"pack2:020",issue:"real hinged-door swing/open collision unverified"},

@@ -11,7 +11,10 @@ const REFS=Object.freeze({
   'enchanted-forest':{foundation:'biome130:038',floor:'pack2:013',wall:'biome130:096',roof:'pack3:026',trim:'biome130:044'},
   mountain:{foundation:'biome130:047',floor:'pack1:005',wall:'pack1:002',roof:'pack3:025',trim:'biome130:098'}
 });
-const FIXTURE={store:'pack5:087',counter:'pack5:086',altar:'pack3:075',seat:'pack4:058',light:'pack4:037',glass:'pack4:030',frame:'pack4:032',crate:'pack4:057',banner:'pack4:061',column:'pack3:072',garden:'pack1:047'};
+// Verified symbolic roster positions from manual Pack 1–5 manifests. These are
+// future dependencies, NOT runtime numeric IDs, shape/rotation approval or saves.
+export const M1_FIXTURE_ROSTER=Object.freeze({store:'pack5:087',counter:'pack5:086',altar:'pack5:093',seat:'pack4:058',light:'pack4:037',glass:'pack4:030',frame:'pack4:032',crate:'pack4:057',banner:'pack4:061',column:'pack3:072',garden:'pack1:047'});
+const FIXTURE=M1_FIXTURE_ROSTER;
 const DIM={small:[12,12,6],medium:[16,16,7],large:[21,21,9]};
 const COORD=(x,y,z)=>`${x},${y},${z}`;
 function build({biome,size,category}){
