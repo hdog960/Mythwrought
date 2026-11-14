@@ -58,3 +58,11 @@
 - Fixed actual source-defined collision overstatement: M2 beds, chairs/stools and bookshelves now collide with their precise authored physical piece unions instead of coarse box approximations. Verified actual collision of tall bed posts/headboard and correct empty space between components.
 - **68/68 native Node 22.16.0 PASS** (44 M0/M1 + 24 M2). Six fresh real Chromium native ES-module/WebGL2 M2 screenshots pass again after the fix; no mobile hardware timing inferred.
 - Pack 5 remains **7 candidate / 11 not started / 0 integrated**, M1 creator final approval open, M2 candidate acceptance open; next scope M2 art/refinement and later M3 only on new explicit Continue Development.
+
+## M2 art and acceptance recheck — latest session, 2026-11-14
+- Reverified current main `ac263720b60641c65b02330348dd76d0ef9cb75e` and checkpoint **008**, Issues #109/#117, Packs 1–4 current manifests/draft PRs, and the incorporated-but-symbolic biome130 catalog. No ownership or numeric ID conflicts with Pack 5.
+- Executed genuine Node 22.16.0 **69/69 PASS**, 0 skipped/failures; original M0/M1 44 cases and 25 M2 cases. Updated candidate source and dedicated test Git hashes match executed files.
+- Visually substantiated **asset 84** shelf defect (books hidden by projecting front shelf lips). Adjusted the actual source volumes and modeled brass spine marks for both bookshelf variants. New test checks physical collision/selection volume and at least 12 visible spines per variant. Other six M2 candidates' 844×390 source-rendered pixels unchanged.
+- Executed source-authentic native ES-module Chromium **WebGL2 M1 six PNGs and M2 six PNGs** with software OpenGL/Xvfb at 667×375, 844×390, 932×430 and rotations 0/1; real WebGL2 drawing/pixel fingerprints pass. Local HTTP-served gallery still denied by browser administrator; no iPhone device/production renderer result.
+- Preview budgets unchanged (M2 max 636 source triangles / 1272 vertices per variant; max per-cell <=64 authored AABB parts), no claim of live GPU performance.
+- Manifest remains **7 CANDIDATE / 11 NOT STARTED / 0 INTEGRATED**; M1/M2 creator final artwork and saved-game/runtime checks OPEN. No merger, deployment, worldgen placement, changes to shared systems or other packs, or v0.11 unlock.
