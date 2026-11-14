@@ -88,6 +88,21 @@
 - [ ] Shared engineering is required for registering ID 76, transparent WebGL2 pass, water neighbor seams/visibility, true fluid updates, source flow propagation, swimming/buoyancy, save sidecar and offline integrity. **No playable fluid physics, animated water or world placement implemented.**
 - [ ] Real iPhone control/art testing and v0.10 Gate A creator approval remain unclaimed; v0.11 stays locked.
 
+## Session 6 — exhaustive candidate acceptance and corrected mesh winding (2026-11-14)
+
+- [x] Reverified production main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, checkpoint **006**, Issues #109/#117 and current open manual Packs 1/3/4 PRs. No candidate ID overlaps or unexpected shared-file modifications. Pack 2 remains draft PR #114, 18/18 authored, IDs 59–76 only.
+- [x] Rechecked the *previous* exact candidate HEAD `8a91b19c6fb7f1b966a0b6b236d081f0e5ea665d`: GitHub Actions [#43634960361](https://github.com/hdog960/Mythwrought/actions/runs/43634960361) **SUCCESS** for the **standard root Node + genuine landscape Chromium baseline**, which does NOT execute nested Pack 2 tests or show the candidate gallery in the game.
+- [x] Found and FIXED a substantial authentic rendering defect: `definitions.mjs` and `joinery.mjs` emitted *inward-facing triangles* despite correctly outward-facing normals, breaking normal parity and future back-face culling. Reversed the index winding on both physical and surface-detail quads. No shape, ID, physical geometry or fixture data were changed by this fix.
+- [x] Independent exhaustive triangle-normal audit of **121 authored states across all 18 families and 25,742 triangles**. Before fix, **12,430 triangles** in timber/joinery had incorrect winding. After the fix, **zero inverted / degenerate normal-triangle pairs**, all 121 variants in local [0,1] bounds and no single state exceeding **740 triangles**. This proves source geometry consistency, NOT iPhone WebGL acceptance.
+- [x] New `tests/block-packs/pack-2/acceptance.test.mjs` adds **8 strict regression cases** covering all 121 states, normals/winding, mobile preview triangle budgets, collision bounds, exact fluid ray targeting, complete 18-ID inventory, 18 independent fixture selection/removal and mixed format snapshots.
+- [x] All **87/87 checked-in test function bodies** (12 M1 + 15 M2 + 14 M3 + 17 M4 + 21 M5 + 8 M6) passed when executed in an isolated V8 JS harness with portable assertions against actual branch source; native `node --test` was NOT executed. Prior 79/79 had missed normal winding, which is now explicitly guarded.
+- [x] `M6_ACCEPTANCE.md` documents full roster, native and browser tests, exhaustive repairs and unfulfilled production integration gates. Candidate-only acceptance SOURCE REVIEW COMPLETE; final production acceptance **NOT APPROVED**.
+- [ ] Native direct Node `node --test tests/block-packs/pack-2/*.test.mjs` on this exact head: sandbox's GitHub DNS is blocked and exact source cannot be mounted from the connector into the Node container. **Not passed/unrun.**
+- [ ] Real local Chromium inspector screenshots via `node tests/block-packs/pack-2/browser-verify.mjs`: same checkout limitation, Playwright runtime unavailable locally. **Not passed/unrun** (standard root GitHub Chromium game checks are separate).
+- [ ] Recheck **new exact-head** GitHub Actions after these two render fixes + M6 tests/docs; no claim of green until GitHub reports success.
+- [ ] Central shape registry, transparent water renderer, level/flow simulation, backward-safe production schema-1 state sidecar and integrated iPhone landscape/offline performance remain separate creator-authorized integration gates.
+- [ ] No claim of physical iPhone testing, Gate A owner approval or v0.11 release.
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
@@ -100,4 +115,4 @@
 
 ## Session 3 / next incomplete milestone
 
-**Milestone 6 — next / final acceptance:** all **18/18 families have isolated candidate source**. Recheck latest `main`, checkpoint, Issues #109 and #117, and all other pack allocations. Then run the native Node nested suites `node --test tests/block-packs/pack-2/*.test.mjs` and genuine Chromium inspector `node tests/block-packs/pack-2/browser-verify.mjs` in an authorized checkout **if available**, fix any defects inside exclusive Pack 2 paths only; validate representative authentic screenshot(s), source geometry/mesh budgets, exact HEAD and save fixture transitions. **Do not certify real water flow, transparency in the production renderer, production schema-1 persistence, or physical iPhone tests** without shared integration and creator approval. Maintain draft PR #114 and the coordination handoff; never merge/deploy/world-place candidates automatically.
+**Milestone 6 — source review complete, acceptance gates remain open.** All 18 physical candidate families have authoring/geometry/fixtures, and the cross-state triangle winding defect is repaired and regression-tested. The native Node nested suites, authentic local Chromium candidate screenshots, production integration save/renderer/interaction and physical iPhone Gate A approval are **still unverified**. See `M6_ACCEPTANCE.md`. The next authorized session should run the exact-head real native tests from a valid checkout if available and fix any Pack 2-only acceptance defects. Do not merge/deploy/modify main without the separate creator incorporation and Gate A decision.
