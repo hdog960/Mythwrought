@@ -159,6 +159,19 @@ test('original fixture 5-column save rows still round-trip for legacy fixture te
  const snap=f.snapshot();assert.equal(snap.entries[0].length,5);assert.equal(f.restore(snap),true);
 });
 
+test('fired brick wraps independently visible courses onto every lateral face for all four orientations',()=>{
+ for(const kind of PACK5_SURFACE_VARIANTS['pack5:080']){
+  const d=getPack5Surface('pack5:080',kind);
+  assert.ok(d.art.length<=64);
+  for(const rotation of [0,1,2,3]){
+   const rotated=orientedParts(d,rotation)[0].boxes;
+   assert.ok(rotated.filter(b=>b[2]===0&&b[5]<=.12).length>=8,kind+' back face unbricked at rotation '+rotation);
+   assert.ok(rotated.filter(b=>b[0]===0&&b[3]<=.12).length>=8,kind+' left face unbricked at rotation '+rotation);
+   assert.ok(rotated.filter(b=>b[3]===1&&b[0]>=.88).length>=8,kind+' right face unbricked at rotation '+rotation);
+  }
+ }
+});
+
 test('no extra runtime systems, active gameplay IDs, or chunk/world placement were imported',()=>{
  const src=readFileSync(new URL('../../../src/block-packs/pack-5/architectural-surfaces.mjs',import.meta.url),'utf8');
  assert.ok(!/from\s+['"]\.{1,2}\/(?:\.\.\/)*?(?:voxel|blocks|main|physics|persistence)/.test(src));
