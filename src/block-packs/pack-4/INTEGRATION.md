@@ -277,3 +277,41 @@ integration. **There are no simulated effects in Pack 4.**
 incorporation after exact-head checks, collision/selection integration,
 transparent depth correctness, schema-1 compatibility, physical-iPhone
 controls review and art approval. Never merge or deploy autonomously.
+
+
+## M5 verification addendum — current reviewer truth (supersedes earlier counts)
+
+- **All 22/22 assigned family definitions remain candidate-only**, with
+  23 independent persistent prospective IDs **159–181**, 182–208 free.
+- Exact authored source and tests from this review branch were checked:
+  **152/152 JS V8 compatibility test bodies PASS** (including new
+  cross-family shape/mesh/physical fixture/save tests and 5 alpha-sort
+  tests). Do NOT call these 152 full native Node results.
+- **Real Node 22: 5/5 PASS**, specifically
+  `tests/block-packs/pack-4/preview-utils.test.mjs` with
+  `src/block-packs/pack-4/preview-utils.mjs`. Both were reconstructed
+  locally and their Git blob hashes checked against exact GitHub content
+  before the native run. The rest of the nested Pack 4 suite was not run
+  natively because this runner cannot clone/fetch the GitHub branch.
+- Pre-M5 candidate `c7dfee578523f3a1c3ac91f9c4f2ce38c7ce34fb`
+  passed standard GitHub Node/browser baseline CI
+  [run 43634712543](https://github.com/hdog960/Mythwrought/actions/runs/43634712543).
+  This baseline did not execute nested Pack 4 tests, so it does not
+  certify candidate rendering/physics. New exact-head CI requires
+  separate review.
+- Isolated WebGL2 gallery was hardened: reusable GPU context with
+  program/shader/VAO/buffer teardown after every asset, a standalone
+  preview-only back-to-front alpha triangle sorter, a non-clipping
+  camera fit scale, 23 nonblank distinct canvas-image fingerprint
+  checks and a true rotation-pixel comparison. No change was made to
+  the live renderer. Actual Chromium navigation in this environment
+  is denied by administrator policy; zero genuine 23-card screenshots
+  are accepted.
+- **M5 remains open.** `M5_ACCEPTANCE.md` is the canonical final
+  checklist including per-family provisional status and exact commands
+  for the native Node and Chromium reviewer. The creator has not
+  approved art or physical iPhone controls, and no world-save registry
+  integration or deployment is authorized.
+
+All six M4 civic components remain **static dry/ornamental geometry**;
+no simulated fire/heat/smoke/fluid/light/pulley state may be claimed.
