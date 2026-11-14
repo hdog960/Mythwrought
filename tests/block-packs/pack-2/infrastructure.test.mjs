@@ -19,7 +19,8 @@ test('three unique physical infrastructure IDs 73–75 stay inside exclusive Pac
     ...PACK_2_INFRASTRUCTURE_IDS];
   assert.equal(ids.length,17);
   assert.equal(new Set(ids).size,ids.length);
-  assert.deepEqual(PACK_2_FIXTURE_IDS,ids);
+  assert.deepEqual(PACK_2_FIXTURE_IDS.slice(0,17),ids);
+  assert.equal(PACK_2_FIXTURE_IDS.length,18);
   assert.ok(ids.every(id=>id>=59&&id<=108&&id!==255));
   assert.deepEqual(Object.values(BLOCK).sort((a,b)=>a-b),[0,1,2,3,4,5,6,7,8]);
 });
