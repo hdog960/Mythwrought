@@ -55,9 +55,12 @@ const shell=async()=>{
   let gitHead=null;
   try{gitHead=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();}
   catch{console.warn('No Git HEAD available: screenshot provenance unverified');}
-  if(process.env.PACK1_EXPECTED_HEAD&&gitHead!==process.env.PACK1_EXPECTED_HEAD)
+  if(process.env.PACK1_EXPECTED_HEAD&&gitHead!==process.env.PACK1_EXPECTED_HEAD){
+    await closeServer();
     throw new Error('Candidate branch HEAD mismatch: '+gitHead+' != '+process.env.PACK1_EXPECTED_HEAD);
-  await mkdir(screenshots,{recursive:true});
+  }
+  try{await mkdir(screenshots,{recursive:true});}
+  catch(error){await closeServer();throw error;}
   try{
     browser=await chromium.launch({headless:true,
       ...(process.env.CHROMIUM_EXECUTABLE?{executablePath:process.env.CHROMIUM_EXECUTABLE}:{}),
