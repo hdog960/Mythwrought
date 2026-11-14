@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {pack4Shape} from '../../../src/block-packs/pack-4/fixture.mjs';
-import {prototypeSurfaceMesh} from '../../../src/shape-prototypes.mjs';
+import {loadCheckpoint007} from './current-main-loader.mjs';
 
 // The :12 opt-in prototypeSurfaceMesh source is now included in integration
 // checkpoint 007. This tests its integration cost only; this is not a
@@ -12,7 +12,10 @@ const descriptor=(id,turns)=>({
  boxes:pack4Shape(id,turns).collision
 });
 
-test('all 23 × four rotations produce bounded physical boundary-only geometry with integrated main',()=>{
+test('all 23 × four rotations produce bounded physical boundary-only geometry with integrated main',async t=>{
+ const shared=await loadCheckpoint007(t,{surface:true});
+ if(!shared)return;
+ const {prototypeSurfaceMesh}=shared;
  let vertexCount=0,maxModel=0,models=0;
  for(const id of ids)for(let rotation=0;rotation<4;rotation++){
   const shape=descriptor(id,rotation);
@@ -37,7 +40,10 @@ test('all 23 × four rotations produce bounded physical boundary-only geometry w
  assert.ok(maxModel<=1000);
 });
 
-test('mesh faces retain unit axis normals and consistently outward-oriented winding',()=>{
+test('mesh faces retain unit axis normals and consistently outward-oriented winding',async t=>{
+ const shared=await loadCheckpoint007(t,{surface:true});
+ if(!shared)return;
+ const {prototypeSurfaceMesh}=shared;
  for(const id of ids)for(let r=0;r<4;r++){
   const m=prototypeSurfaceMesh(descriptor(id,r));
   for(let i=0;i<m.indices.length;i+=3){
@@ -54,7 +60,10 @@ test('mesh faces retain unit axis normals and consistently outward-oriented wind
  }
 });
 
-test('rods, rims, pulley and hollow civic shapes remain bounded despite exposed-face subdivisions',()=>{
+test('rods, rims, pulley and hollow civic shapes remain bounded despite exposed-face subdivisions',async t=>{
+ const shared=await loadCheckpoint007(t,{surface:true});
+ if(!shared)return;
+ const {prototypeSurfaceMesh}=shared;
  for(const id of [164,170,176,177,178,180,181]){
   const sh=pack4Shape(id,0);
   const m=prototypeSurfaceMesh(descriptor(id,0));
