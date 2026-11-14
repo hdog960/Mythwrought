@@ -1,6 +1,23 @@
 # MYTHWROUGHT — Pack 3 Milestone 6 independent acceptance handoff
 **2026-11-14 · CHECKPOINT 008 REVERIFIED; ALL-ANGLE CREATOR REVIEW READY. CANDIDATES ONLY; NEVER MERGED/DEPLOYED.**
 
+## M6 strict candidate ID contract — repaired 2026-11-14 (current authoritative acceptance)
+
+**New reproducible Pack 3-owned defect, fixed without changing geometry:** All four direct specialty providers (`pack3GeometryById`, `pack3FortifiedById`, `pack3OrnamentalById`, `pack3MonumentalById`) build an internal variant-cache key by concatenating the input `id` and `rotation`. Before repair, direct calls with `'113'`, `113n` or `{toString(){return '113'}}` silently resolved the same physical candidate as numeric **113**, even though the canonical Pack 3 catalog correctly rejected these nonnumeric IDs. The direct shape accessors and prototype-descriptor factories inherited the alias. This inconsistency could admit ambiguous identity types at a future integration boundary; **no live block registry or player-save exploitation was demonstrated**.
+
+**Red-to-green regression:** Added a 67th native acceptance case (`direct asset providers reject coercible nonnumeric ID aliases`) that tests all four lookup, shape, and prototype APIs against string, BigInt, object, boxed-string, NaN, Infinity, undefined, and null inputs, plus numeric IDs at four valid rotations. The test initially produced **13 pass / 1 fail** within the isolated acceptance module, with `pack3GeometryById('113')` returning asset 113. Added one strict `Number.isInteger(id)` check at each of the four direct provider boundaries, before string-cache key construction. These bad aliases now return `null` for lookups/shapes or throw `RangeError` for prototype factories, while valid numeric IDs and quarter-turns remain unchanged. The canonical catalog and the four roofing-material lookups required no changes.
+
+**Exact native execution and Git blob provenance:** Six committed Pack 3 nested suites executed with **Node v22.16.0**, **67 PASS / 0 FAIL / 0 SKIP**. The 5 edited files are source-exact to the locally tested Git blobs:
+- `roof-geometry.mjs`: `e37c71fd5d9c9a9f56ea495a8ee684e146b78363`
+- `fortified-pieces.mjs`: `11313c0bc51e4ff71eb6eab80fe76817dc973fbd`
+- `ornamental-pieces.mjs`: `6b8c44369b31dd2fbb7747533a295d4c1ecb5161`
+- `monumental-pieces.mjs`: `df5ec0d8e37940591619e051f44204417d7a2f31`
+- `tests/block-packs/pack-3/acceptance.test.mjs`: `3032c04a2d077bd30143c91762b8074c95fdc80a`.
+
+**Independent regressions:** The committed `selection-contract-probe.mjs` against unchanged merged main shape-interaction Git blob `01be82e6c308e47a35fa6588cc6ed1ebeafca307` passed **40,656 ray tests and 3,136 placement comparisons = 43,792/43,792**, with **27,250 solid hits, 13,406 through-hollow hits**, 3,100 overlapping placement pairs. Actual Chromium 144.0.7559.96 executed the unchanged committed browser scripts at **667×375, 844×390, 932×430**: original gallery **207/207 silhouette frames**, 17 unique source art images, 13 exact four-turn resets, 0 JS errors; all-angle `creator-review-matrix.py` **56 supported candidate/yaw frames per viewport** with stable raw canvas hashes and no errors. This is original Canvas2D candidate proof, **not live WebGL2**.
+
+**Visual/physical asset scope:** The previous four face-continuity repairs remain intact; no AABB boxes, palettes, roof surfaces, 17 candidate IDs (109–125), five preview-only codecs, mesh budgets or actual architectural appearance were modified by this ID-type fix. Checkpoint **008** integrated main `ac263720b60641c65b02330348dd76d0ef9cb75e`, Issues #109/#117, other isolated packs and user-created building roadmaps remain separately owned. Pack 3 is still **DRAFT / UNMERGED / UNREGISTERED**; real iPhone control/art approval, offline PWA, live WebGL2/placement and save/persistent-rotation integration remain open. No production schema-1 writes, worldgen, shared engine, central CI, deployment, Gate A approval or v0.11 unlock.
+
 ## M6 physical continuity correction — NEW authoritative candidate geometry (2026-11-14)
 
 **Actual defect found; physical shapes repaired in this isolated draft.** A new independent box-union face-adjacency check found three geometrically disconnected assets, even though existing selection/mesh tests all passed:
