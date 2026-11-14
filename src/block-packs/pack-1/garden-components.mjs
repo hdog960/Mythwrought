@@ -113,6 +113,9 @@ function pixelArt(id,role,face,u,v,size){
       if(bands<-.56)rgb=tint([41,31,25],.78+.28*grain);
       else if(bands>.82)rgb=tint([150,107,67],.88+.16*grain);
     }
+    // Recessed earth is intentionally darker than raised farmland ridge faces.
+    // Keeping them distinct avoids a misleading flat-looking tilled surface.
+    if(id===21&&role==='earth'&&face==='top')rgb=tint(rgb,.76,-3);
     // Light straw fibers, dark loam speckles, and occasional mineral chips.
     const cellX=Math.floor(u*24),cellY=Math.floor(v*24);
     if(hash(cellX,cellY,seed+11)>.971)rgb=[204,164,97];
