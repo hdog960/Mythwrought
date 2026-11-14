@@ -101,3 +101,45 @@ export function planUneditedConstruction(world,cells){
   return Object.freeze({additions:finish(additions),blocked:finish(blocked),
     safe:blocked.length===0});
 }
+
+
+// Ruined masonry wall with a genuinely traversable doorway, staggered
+// broken parapet and deterministic missing upper stones. Full cube voxels.
+// Geometry only: the structures lane chooses where it belongs.
+export function ruinedWall(at,{length=11,height=6,thickness=2,axis='x',doorWidth=3,doorHeight=3}={}){
+  const [ox,oy,oz]=origin(at);
+  dimensions(length,7,25,'length');dimensions(height,4,12,'height');
+  dimensions(thickness,1,3,'thickness');
+  dimensions(doorWidth,2,length-4,'doorWidth');
+  dimensions(doorHeight,2,height-2,'doorHeight');
+  if(axis!=='x'&&axis!=='z')throw new RangeError('axis must be x or z');
+  const cells=[],seen=new Set();
+  const doorStart=Math.floor((length-doorWidth)/2);
+  for(let s=0;s<length;s++)for(let y=0;y<height;y++){
+    const doorway=s>=doorStart&&s<doorStart+doorWidth&&y<doorHeight;
+    // Bounded jagged silhouette: no random state, no floating isolated stones.
+    const topLoss=(s*7+3)%5===0?2:(s*11+1)%4===0?1:0;
+    if(doorway||y>=height-topLoss)continue;
+    for(let d=0;d<thickness;d++){
+      const x=ox+(axis==='x'?s:d),z=oz+(axis==='x'?d:s);
+      emit(cells,seen,x,oy+y,z,BLOCK.STONE);
+    }
+  }
+  return finish(cells);
+}
+
+// A physical, one-block-step stone stair flight for reachable elevations.
+// The existing cube collider and raycaster work without special mesh shapes.
+export function stoneSteps(at,{steps=5,width=3,axis='x',rise=1}={}){
+  const [ox,oy,oz]=origin(at);
+  dimensions(steps,2,12,'steps');dimensions(width,1,7,'width');
+  if(axis!=='x'&&axis!=='z')throw new RangeError('axis must be x or z');
+  if(rise!==1&&rise!==-1)throw new RangeError('rise must be 1 or -1');
+  const cells=[],seen=new Set();
+  for(let s=0;s<steps;s++)for(let w=0;w<width;w++){
+    const y=oy+rise*s;
+    const x=ox+(axis==='x'?s:w),z=oz+(axis==='x'?w:s);
+    emit(cells,seen,x,y,z,BLOCK.STONE);
+  }
+  return finish(cells);
+}
