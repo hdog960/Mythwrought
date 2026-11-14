@@ -7,8 +7,8 @@ import {PACK3_ORNAMENTAL_ASSETS} from './ornamental-pieces.mjs';
 import {PACK3_MONUMENTAL_ASSETS} from './monumental-pieces.mjs';
 export const PACK3_COORDINATION=Object.freeze({
   issue:'https://github.com/hdog960/Mythwrought/issues/109',
-  auditedMain:'caf47776b723a36684edc1a72749e49268ccc688',
-  integratedCheckpoint:'007',
+  auditedMain:'ac263720b60641c65b02330348dd76d0ef9cb75e',
+  integratedCheckpoint:'008',
   provisionalIdMin:109,provisionalIdMax:158,reservedId:255,
   sourceOwner:'src/block-packs/pack-3/',
   testOwner:'tests/block-packs/pack-3/',
@@ -31,7 +31,7 @@ export const PACK3_ROSTER=Object.freeze([...roofing,...monumental].map(([roster,
   Object.freeze({
     roster,name,id,
     implementation:id===null?'not-started':'physical-candidate',
-    duplicateAudit:id===null?'pending-new-main-review':'new-vs-main-007',
+    duplicateAudit:id===null?'pending-new-main-review':'new-vs-main-008',
     dependency:roster>=27&&roster<=29?'generic :12 shapes and :00 stateful rotation':
       roster===76?'generic :00 rotated shape/persistence; water containment requires future fluid engine':
       roster===77?'generic :00 rotation save; lighting requires a shared light engine':
