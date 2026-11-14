@@ -59,6 +59,20 @@ All 18 are *candidate source definitions* with independent IDs and meaningful oc
 - The last isolated, source-level results remain **88/88 checked-in test bodies passed under V8**, including 121 full-state mesh/normal configurations (25,742 triangles, zero inverted or degenerate after Pack 2-only winding fix) and 900 water surface-ray comparison samples. Those checks are **not native Node or browser evidence**.
 - Exact new commit root CI must be checked independently once reported; source candidate review is complete, but full native/visual/production acceptance and creator Gate A approval remain **OPEN**.
 
+### Pack 2 Python Chromium browser fallback, 2026-11-14
+
+- Added **`tests/block-packs/pack-2/gallery-browser.py`** as a free Python Playwright renderer of **exact checked-in** candidate modules, bypassing local HTTP/file navigation and Node Playwright dependencies. It reads the five source modules, fixture and existing gallery from an exact working-tree checkout; rewrites the original ES-module imports into in-memory `data:text/javascript;base64` URLs. No asset definitions, colors, mesh geometry or fixture rules are synthesized or modified.
+- Once run on real candidate sources, it exercises all **18 candidate asset IDs 59–76 at each 667×375, 844×390 and 932×430 viewport**, checks nonempty and 18 unique geometry-only pixel hashes per viewport, validates infrastructure state/rotation, water translucent pixels, and all 18 fixture placement/save round trips, monitors page errors and horizontal overflow, and optionally saves **54 authentic candidate canvas screenshots** plus water, gate and parapet detail and full-page shots.
+- **Genuine Chromium 144 bootstrap proof only:** the local Python Playwright runtime launched headless Chromium and successfully loaded both a `data:` ES module and a nested `data:` module importing another in-memory module. This confirms the proposed loader mechanism, **not** Pack 2's asset imagery, gallery execution or screenshot acceptance.
+- Local `git clone`, HTTPS fetch and direct GitHub IP connection remain inaccessible; exact Pack 2 source could not be materialized to the browser container. **Native Node and real candidate-gallery acceptance remain UNRUN**, with zero claimed screenshots. Running the new fallback requires an exact GitHub checkout or an authorized source handoff, not a new paid provider.
+- Earlier exact-head standard CI [run #43641062727](https://github.com/hdog960/Mythwrought/actions/runs/43641062727) **SUCCESS**; its root tests and real Chromium baseline still exclude Pack 2. New exact-head CI must be verified independently after this commit.
+
+Run from an exact source checkout with installed Python Playwright and free Chromium:
+
+```sh
+python3 tests/block-packs/pack-2/gallery-browser.py --screenshots /tmp/pack2-gallery
+```
+
 ## Required real test gates — NOT certified by the source-level checks
 
 | Gate | Evidence required | Current status |
