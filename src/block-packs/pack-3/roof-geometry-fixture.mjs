@@ -1,6 +1,6 @@
 // Pack 3 opt-in geometry interaction/save PROPOSAL fixture. Not production.
-// Explicitly separate from the current schema-1 VoxelWorld restore path: it
-// rejects candidate IDs 113–115 and has no orientation-state reader yet.
+// Explicit preview marker and NO schema-1 field: candidate IDs/yaw are never
+// mistakenly passed into the player save path.
 import {pack3GeometryById,pack3GeometryShape} from './roof-geometry.mjs';
 const FORMAT='mythwrought-pack3-oriented-preview-v1';
 const validCell=c=>Array.isArray(c)&&c.length===3&&c.every(Number.isSafeInteger)&&
@@ -34,7 +34,7 @@ export function createPack3RoofGeometryFixture(seed=179){
         cell:loc.split(',').map(Number),id,rotation
       })).sort((a,b)=>cellsort(a.cell,b.cell));
       return Object.freeze({
-        format:FORMAT,schema:1,seed,
+        format:FORMAT,seed,
         edits:rows.map(({cell,id})=>[...cell,id]),
         // Candidate-only additive rotation sidecar; NOT readable by live game.
         orientations:rows.map(({cell,rotation})=>[...cell,rotation])
@@ -43,7 +43,8 @@ export function createPack3RoofGeometryFixture(seed=179){
   });
 }
 export function restorePack3RoofGeometryFixture(value){
-  if(!value||value.format!==FORMAT||value.schema!==1||!Number.isInteger(value.seed)||
+  if(!value||value.format!==FORMAT||Object.hasOwn(value,'schema')||
+    !Number.isInteger(value.seed)||
     value.seed!==(value.seed|0)||!Array.isArray(value.edits)||
     !Array.isArray(value.orientations)||value.edits.length!==value.orientations.length||
     value.edits.length>300000)throw new TypeError('Invalid oriented roofing preview');
