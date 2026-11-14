@@ -98,7 +98,11 @@
     "m6NativeNode93Latest": "SUPERSEDES prior V8-only/native-NOT-RUN entries: GENUINE Node 22.16.0 nine-module combined run, 93/93 PASS, fail 0 skipped 0 TODO 0 cancelled 0. Isolated exact Pack1 file mirror from source head 84001dbddd9fa9630ad9382c9f9d85c986590a9c; all 21 Git blobs independently verified against current PR branch. No shim.",
     "m6NativeNodeProvenance": "src/block-packs/pack-1/M6_NATIVE_NODE_EVIDENCE.md contains nine suite counts, exact Node command and 21 Git blob identities; complete TAP log generated as a separate user-downloadable artifact.",
     "m6RemainingBrowser": "Chromium started but file:/data: navigation ERR_BLOCKED_BY_ADMINISTRATOR; no genuine five-gallery × three-size runs nor 30 screenshots. Root baseline CI not candidate-gallery acceptance.",
-    "m6CurrentCheckpoints": "Latest main ac263720b60641c65b02330348dd76d0ef9cb75e checkpoint 008 automation-only; manual Pack 1 excluded; game registry BLOCK IDs 0–8 only."
+    "m6CurrentCheckpoints": "Latest main ac263720b60641c65b02330348dd76d0ef9cb75e checkpoint 008 automation-only; manual Pack 1 excluded; game registry BLOCK IDs 0–8 only.",
+    "m6VisualSelectionRunnerFix": "Pack1-only five-gallery Playwright runner now asserts visible selected/placed card-state counts at empty, place-all, offline canonical save/restore, and clear. Source selector classes verified against corresponding gallery modules; exact source JS parses. RUNNER NOT EXECUTED IN CHROMIUM.",
+    "m6ChromiumAdminPolicyRetested": "System Chromium can launch, but actual data:, file:, and 127.0.0.1 HTTP navigations return net::ERR_BLOCKED_BY_ADMINISTRATOR. Genuine 15 candidate views/30 screenshots cannot be captured in current environment, no bypass attempted.",
+    "m6NativeNodeUnchanged": "93/93 genuine Node 22.16.0 nested Pack1 tests PASS, zero fail/skip/TODO on 21 GitHub-blob-verified files (M6_NATIVE_NODE_EVIDENCE.md). No candidate code changed since these tests.",
+    "m6CurrentCommitReference": "Main ac263720b60641c65b02330348dd76d0ef9cb75e, integration checkpoint 008, Pack1 excluded; PR #113 remains draft/unmerged and candidate-only. GitHub Actions queued on prior head, and current exact-head CI must be rechecked."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -528,7 +532,7 @@
   ],
   "pr": "https://github.com/hdog960/Mythwrought/pull/113",
   "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED",
-  "nextMilestone": "Prioritize actual Chromium five-source-gallery × three landscape viewports + 30 reviewed genuine PNGs in a permitted runtime; then evaluate separately authorized live registration/rotation/save, production collisions and physical iPhone creator approval. Native nine-module Node gate already PASSED; do not repeat shim work.",
+  "nextMilestone": "Obtain permitted browser environment with actual navigation and exact PR gallery source, run 5 Canvas2D galleries x 3 viewports, capture and inspect 30 real PNGs and provenance. Fix Pack1 visual defects only, then creator review; no merge/deploy/live integration.",
   "allocations": [
     {
       "range": [
@@ -573,8 +577,8 @@
       "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "M6 native Pack1 Node gate VERIFIED: 93/93 exact committed-file tests PASS in genuine Node v22.16.0, 0 fail/skip/TODO; 21 file blob SHAs checked. M6_NATIVE_NODE_EVIDENCE.md committed. Chromium 15 views/30 PNGs, production WebGL2/schema1/physical iPhone approval remain open.",
-  "finalAcceptance": "OPEN: genuine native Pack1 Node verified 93/93, but real candidate Chromium visuals/offline, live registry/partial meshes/save and physical-iPhone creator approval missing. All 30 IDs 9-38 CANDIDATE, unmerged/undeployed.",
+  "latestMilestone": "M6: Pack1 genuine 93/93 Node gate already PASS and preserved; strengthened gallery browser runner's visual selected-card parity through empty/place/offline-save/clear across all five galleries. Source checked; Chromium navigation blocked by admin, genuine screenshot gate still OPEN. All 30 candidates unchanged.",
+  "finalAcceptance": "OPEN: 93/93 Pack1 native Node VERIFIED. Chromium 15 views/30 authentic screenshots, production WebGL2 material/selection/collision/rotation save and physical iPhone creator review NOT VERIFIED. 21 families/30 IDs 9-38 CANDIDATE.",
   "acceptanceMatrix": {
     "family_roster": "21_OF_21_ALL_CANDIDATE",
     "candidate_ids": "30_UNIQUE_9_THROUGH_38_UNMERGED",
@@ -591,7 +595,14 @@
     "merged": "NO",
     "deployed": "NO",
     "gate": "M6_OPEN",
-    "v011": "LOCKED"
+    "v011": "LOCKED",
+    "visible_card_placement_save_clear_assertions": "PACK1_RUNNER_SOURCE_VERIFIED_FIVE_GALLERIES_NOT_CHROMIUM_RUN",
+    "chromium_admin_navigation": "ERR_BLOCKED_BY_ADMINISTRATOR_DATA_FILE_LOCAL_HTTP",
+    "candidate_15_real_views": "ZERO_COMPLETED",
+    "authentic_30_screenshots": "ZERO_CAPTURED",
+    "native_node_93_gate": "PASSED_GENUINE_NODE_EXACT_COMMITTED_SOURCE",
+    "pack1_candidate_registry": "30_RESERVED_UNMERGED_UNDEPLOYED",
+    "latest_main_checkpoint": "008"
   },
   "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md",
   "baselineAtCreation": {
