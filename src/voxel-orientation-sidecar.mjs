@@ -1,0 +1,46 @@
+// Staged orientation sidecar. Never modifies legacy schema-1 save payloads.
+// A future explicit integration must persist this separately and validate block identity.
+const KEY=/^-?(?:0|[1-9]\d*),-?(?:0|[1-9]\d*),-?(?:0|[1-9]\d*)$/;
+export function cellKey(cell) {
+  if (!Array.isArray(cell)||cell.length!==3||!cell.every(Number.isSafeInteger)) throw new TypeError('Invalid cell');
+  return cell.join(',');
+}
+export function makeOrientationSidecar(entries=[],{maxEntries=4096}={}) {
+  if (!Number.isSafeInteger(maxEntries)||maxEntries<1||!Array.isArray(entries)||entries.length>maxEntries) throw new TypeError('Invalid sidecar');
+  const states=new Map();
+  for (const entry of entries) {
+    if (!entry||!Array.isArray(entry.cell)||!Number.isSafeInteger(entry.blockId)||entry.blockId<1||entry.blockId>=255||!Number.isInteger(entry.turns)||entry.turns<0||entry.turns>3) throw new TypeError('Invalid orientation');
+    const key=cellKey(entry.cell);
+    if(states.has(key)) throw new TypeError('Duplicate orientation cell');
+    states.set(key,{cell:[...entry.cell],blockId:entry.blockId,turns:entry.turns});
+  }
+  return {
+    get(cell,blockId) {
+      const entry=states.get(cellKey(cell));
+      return entry&&entry.blockId===blockId?entry.turns:0;
+    },
+    set(cell,blockId,turns) {
+      const key=cellKey(cell);
+      if(!Number.isSafeInteger(blockId)||blockId<1||blockId>=255||!Number.isInteger(turns)||turns<0||turns>3) throw new TypeError('Invalid orientation');
+      if(!states.has(key)&&states.size>=maxEntries) throw new RangeError('Sidecar capacity exceeded');
+      states.set(key,{cell:[...cell],blockId,turns});
+    },
+    clear(cell) {states.delete(cellKey(cell));},
+    // Caller must pass current world block reader; stale records are never restored onto edits.
+    snapshot(readBlock) {
+      if(typeof readBlock!=='function') throw new TypeError('Missing block reader');
+      return [...states.values()].filter(e=>readBlock(...e.cell)===e.blockId)
+        .sort((a,b)=>a.cell[0]-b.cell[0]||a.cell[1]-b.cell[1]||a.cell[2]-b.cell[2])
+        .map(e=>({cell:[...e.cell],blockId:e.blockId,turns:e.turns}));
+    },
+    size() {return states.size;}
+  };
+}
+export function restoreOrientationSidecar(serialized,readBlock,options) {
+  if(typeof readBlock!=='function') throw new TypeError('Missing block reader');
+  if(!Array.isArray(serialized)) throw new TypeError('Invalid serialized sidecar');
+  const valid=serialized.filter(e=>e&&Array.isArray(e.cell)&&e.cell.length===3&&e.cell.every(Number.isSafeInteger)&&
+    Number.isSafeInteger(e.blockId)&&e.blockId>0&&e.blockId<255&&Number.isInteger(e.turns)&&e.turns>=0&&e.turns<=3&&
+    readBlock(...e.cell)===e.blockId);
+  return makeOrientationSidecar(valid,options);
+}
