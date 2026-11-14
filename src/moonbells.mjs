@@ -41,6 +41,14 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
    tri(out,base,[px+dx*.20-dz*.065,ground+.045,pz+dz*.20+dx*.065],
      [px+dx*.20+dz*.065,ground+.045,pz+dz*.20-dx*.065],[.33,.59,.35],7);
   }
+  // Occasional tiny amber forest-floor mushroom beside the bellflower.
+  // Both cap triangles are opaque and anchored to the same unedited grass cell.
+  if(hash(x,z,world.seed,661)>.67){
+   const mx=px+.23,mz=pz-.19,mh=.19+hash(x,z,world.seed,663)*.08;
+   const ochre=hash(x,z,world.seed,665)>.5?[.82,.48,.29]:[.93,.68,.40];
+   tri(out,[mx-.10,ground+.10,mz],[mx+.10,ground+.10,mz],[mx,ground+mh,mz],ochre,7);
+   tri(out,[mx,ground+.10,mz-.10],[mx,ground+.10,mz+.10],[mx,ground+mh,mz],[.95,.77,.54],7);
+  }
   flowers++;
  }
  if(out.length/STRIDE>MAX_FLOWERS*VERTICES_PER_FLOWER)throw Error('Moonbell vertex budget');
