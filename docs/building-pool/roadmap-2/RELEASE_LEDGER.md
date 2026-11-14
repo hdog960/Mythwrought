@@ -16,3 +16,5 @@ M1 visual QA follow-up: 21/21 local native Node cases, 90 genuine Chromium Canva
 M1 Session 5: corrected unsupported belfry footings in 15 temples (Mountain previously 0/4, Enchanted Forest 2/4, Desert 3/4), added two symbolic stair approaches per altar with unresolved Pack 1 shape ABI. Native Node 24/24 and authentic Chromium 90/90 on revised local source; creator/physical-asset approval OPEN, exact new head CI must be verified.
 
 Session 6: rebuilt unsupported non-Desert pitched and stepped roof spans with real high truss tie beams/purlin posts above walkable clearance; Desert courtyard skylight preserved. Native Node 26/26 and genuine Chromium 90/90 on patched source. All 30 remain conceptual M1 candidates, 0 creator-approved; PR-head CI and true shape ABI OPEN.
+
+Session 7: full y0 grounded six-neighbor audit discovered 5 floating roof islands (Mountain 22+60+17, Desert temple lanterns 11+11). Fixed rear upper gables and relocated Desert lanterns to covered entry porch; 28/28 genuine native Node, 90/90 real Chromium Canvas2D, 30 M1 candidates unapproved, M2 locked.

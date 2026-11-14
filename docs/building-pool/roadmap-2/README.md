@@ -43,3 +43,6 @@ The previous 21-case tests allowed a tower to have zero foundations if its regio
 
 ### Session 6: supported roof-span concept geometry
 Twenty-three generated non-Desert M1 models now model high truss ribs every four interior longitudinal cells: uninterrupted wall-to-wall tie beams at top-of-wall height (above y2–4 circulation) and posts rising to stepped roof cells. This fixes an earlier structural sketch omission where sloped and terraced roofs visually spanned empty interior with no authored load-path members. Desert courtyard skylights are intentionally NOT crossed. These are symbolic voxel coordinates, not real partial-shape or live physics verification; the hand-authored M0 Temperate Small store is unchanged.
+
+### Session 7 — structural support connectivity gate
+New dedicated `structural-connectivity.test.mjs` validates that **every actual structural cell** (foundation/floor/wall/window/roof) can reach an authored ground-level foundation through face-sharing adjacency, across all 30 M1 candidate buildings. Fixes five previously floating roof/lantern sections: rear gable supports for Mountain stepped terraces and covered porch position for Desert temple lanterns, without blocking the open Desert courtyard. It does not represent certified game-world load physics, stair/roof slope or real renderer shape ABI.

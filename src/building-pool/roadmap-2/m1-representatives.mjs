@@ -144,6 +144,15 @@ function build({biome,size,category}){
   if(biome==='snow'||biome==='temperate'||biome==='enchanted-forest')for(const z of [0,depth-1])for(let x=1;x<width-1;x++)if(footprint(x,z)){
     for(let y=top+1;y<roofAt(x,z);y++)put(x,y,z,m.wall,'wall');
   }
+  // Mountain terrace roofs rise in discrete levels toward the rear.
+  // The final roof tier previously floated above the back wall in multiple
+  // footprints because recurring trusses ended before the rear boundary.
+  // Fill the actual rear gable UNDER the last roof tier so every plate is
+  // load-path connected without covering the walkable interior below y=5.
+  if(biome==='mountain')for(let x=0;x<width;x++)if(footprint(x,depth-1)){
+    for(let y=top+1;y<roofAt(x,depth-1);y++)
+      if(!cells.has(COORD(x,y,depth-1)))put(x,y,depth-1,m.trim,'wall');
+  }
   // Category-defining exterior monumentality: actual paired belfry volumes,
   // a three-wide processional entrance, and a visible roof-crossing lantern tower.
   // A single antenna-shaped post is NOT a belfry. These occupy a 2x2 footprint
@@ -170,7 +179,11 @@ function build({biome,size,category}){
       }
       put(x,highestRoof+5,z,m.roof,'roof');
     }
-    const naveZ=Math.max(4,Math.floor(partition/2));
+    // Desert temples have a genuine open-air central courtyard. Their
+    // original roof lantern was suspended within that skylight with no
+    // supporting cell beneath it. Place the lantern over the actual covered
+    // processional porch (z=2), retaining the courtyard fully open to sky.
+    const naveZ=biome==='desert'?2:Math.max(4,Math.floor(partition/2));
     const lanternFoot=roofAt(center,naveZ);
     // Lantern crosses over the regular roof height: avoids a hidden spire.
     for(let y=lanternFoot+1;y<=highestRoof+5;y++){
