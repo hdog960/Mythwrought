@@ -24,13 +24,16 @@ function anvil(v){
   for(const x of [.23,.68])for(const z of [.23,.68])a.push(B(x,.015,z,x+.09,.09,z+.09,'iron'));
   a.push(B(.28,.19,.27,.72,.30,.73,moon?'steel':'charcoal'));
   a.push(B(.35,.30,.34,.66,.63,.67,moon?'steel':'iron'));
-  a.push(B(.19,.63,.24,.80,.73,.77,moon?'steel':'iron'));
-  a.push(B(.19,.73,.23,.80,.81,.78,moon?'steel':'steel'));
-  // The beak/horn is visibly tapered into 3 progressively narrower solid volumes.
-  for(let i=0;i<4;i++){
-    const start=.19-i*.044,wide=.13-i*.022;
-    a.push(B(start-.035,.66+i*.026,.50-wide,start+.040,.73+i*.014,.50+wide,moon?'steel':'iron'));
+  a.push(B(.40,.63,.24,.78,.73,.77,moon?'steel':'iron'));
+  a.push(B(.40,.73,.23,.78,.81,.78,moon?'steel':'steel'));
+  // Five physical tapered horn tiers deliberately extend well beyond the table's left end.
+  // Wide root and narrow elevated tip read as an anvil even at phone-landscape scale.
+  for(let i=0;i<5;i++){
+    const left=.395-i*.077, halfWidth=.16-i*.028;
+    const lower=.66+i*.015, upper=.79-i*.008;
+    a.push(B(left-.075,lower,.50-halfWidth,left+.055,upper,.50+halfWidth,'steel'));
   }
+  a.push(B(.01,.725,.477,.086,.77,.523,moon?'brass':'steel'));
   // Flat square peen projects right of the rectangular face.
   a.push(B(.78,.64,.35,.94,.76,.66,moon?'steel':'charcoal'));
   a.push(B(.85,.69,.40,.985,.73,.61,moon?'rivet':'steel'));
@@ -47,19 +50,32 @@ function cauldron(v){
   if(!['iron-tripod-cauldron','alchemists-spiral-stand'].includes(v))throw Error('Unknown cauldron variant');
   const alchemy=v==='alchemists-spiral-stand',a=[];
   if(!alchemy){
-    // Hollow eight-sided rim and curved vessel walls built from real straight voxel bands.
-    for(let n=0;n<3;n++){
-      const y=.26+n*.165,margin=.16-n*.025;
-      a.push(B(margin,y,.17,1-margin,y+.142,.27,'iron'));
-      a.push(B(margin,y,.73,1-margin,y+.142,.83,'iron'));
-      a.push(B(.17,y,.27,.28,y+.142,.73,'steel'));
-      a.push(B(.72,y,.27,.83,y+.142,.73,'steel'));
+    // Genuine hollow, stepped octagonal pot: three differently sized 8-piece rings.
+    // Corner blocks join but do not fill the basin. Smaller lower footprint forms a bowl,
+    // not a straight-walled rectangular trough. No liquid simulation or render-only shell.
+    const rings=[{lo:.275,hi:.725,y:.20},{lo:.125,hi:.875,y:.35},{lo:.185,hi:.815,y:.50}];
+    const ring=(lo,hi,y,height,material)=>{
+      const h=hi-lo;
+      a.push(B(lo+.135,y,lo,hi-.135,y+height,lo+.085,material));
+      a.push(B(lo+.135,y,hi-.085,hi-.135,y+height,hi,material));
+      a.push(B(lo,y,lo+.135,lo+.085,y+height,hi-.135,material));
+      a.push(B(hi-.085,y,lo+.135,hi,y+height,hi-.135,material));
+      for(const x of [lo+.04,hi-.17])for(const z of [lo+.04,hi-.17])
+        a.push(B(x,y,z,x+.13,y+height,z+.13,material));
+    };
+    for(const row of rings)ring(row.lo,row.hi,row.y,.14,'iron');
+    // Continuous bright physical lip frames the opening without capping it.
+    ring(.14,.86,.64,.055,'steel');
+    a.push(B(.30,.18,.30,.70,.26,.70,'charcoal'));
+    for(const x of [.275,.655])for(const z of [.275,.655])
+      a.push(B(x,.035,z,x+.07,.25,z+.07,'iron'));
+    // Physical front/rear hanging lugs preserve a rounded silhouette even at screen scale.
+    for(const z of [.11,.85])a.push(B(.34,.70,z,.66,.754,z+.04,'rivet'));
+    // Handles extend left and right, not a painted rim illusion.
+    for(const x of [.04,.86]){
+      a.push(B(x,.625,.36,x+.10,.705,.64,'rivet'));
+      a.push(B(x+.03,.705,.39,x+.07,.765,.61,'steel'));
     }
-    a.push(B(.23,.21,.23,.77,.285,.77,'charcoal'));
-    for(const x of [.15,.75])for(const z of [.15,.75])a.push(B(x,.035,z,x+.10,.28,z+.10,'iron'));
-    // Handles and metallic lip, with a *physically empty* top; no liquid/fluid sim.
-    for(const z of [.11,.82])a.push(B(.32,.69,z,.68,.75,z+.07,'rivet'));
-    for(const x of [.20,.74])a.push(B(x,.67,.20,x+.055,.73,.80,'rivet'));
   }else{
     a.push(B(.12,.05,.12,.88,.13,.88,'wood'));
     for(const x of [.16,.77])for(const z of [.16,.77])a.push(B(x,.12,z,x+.07,.78,z+.07,'copper'));
