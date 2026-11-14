@@ -115,3 +115,49 @@ test('invalid sizes, regions or deferred building families cannot be counted as 
  assert.throws(()=>createM1Blueprint('watchtower','desert','giant'),/unknown size/);
  assert.throws(()=>createM1Blueprint('mill','temperate','small'),/M1 only/);
 });
+
+test('blacksmith roofs are one-unit shell profiles, with closed end gables and clear vent shaft over hearth',()=>{
+ for(const b of pool.filter(b=>b.type==='blacksmith')){
+  const w=b.envelope.width,d=b.envelope.depth;
+  const roof=b.modules.find(m=>m.role==='roof').cells;
+  const shell=new Map(roof.map(([x,y,z])=>[`${x},${z}`,y]));
+  const [vx,vz]=b.architecture.flueVoid;
+  assert.deepEqual([vx,vz],[2,d-6],b.id);
+  assert.equal(shell.size,w*d-1,b.id);
+  assert.equal(b.architecture.roofShellThickness,1,b.id);
+  const solid=occupied(b);
+  const featureFlue=b.features.find(f=>f.name==='chimney ventilation');
+  assert.deepEqual([featureFlue.position[0],featureFlue.position[2]],[vx,vz],b.id);
+  const forge=b.features.find(f=>f.name==='forge-mouth');
+  assert.deepEqual([forge.position[0],forge.position[2]],[vx,vz],b.id);
+  const top=b.architecture.roofCrossSection[vx];
+  for(let y=3;y<=top;y++)assert.equal(solid.has(`${vx},${y},${vz}`),false,`${b.id} flue plugged at ${y}`);
+  for(let x=0;x<w;x++)for(let z=0;z<d;z++){
+   if(x===vx&&z===vz)continue;
+   assert.equal(shell.get(`${x},${z}`),b.architecture.roofCrossSection[x],`${b.id} missing roof ${x},${z}`);
+   if(z===0||z===d-1)for(let y=8;y<shell.get(`${x},${z}`);y++)
+    assert.ok(solid.has(`${x},${y},${z}`),`${b.id} end gable open at ${x},${y},${z}`);
+  }
+ }
+});
+test('watchtower stair treads have explicit piers down to physical foundations',()=>{
+ for(const b of pool.filter(b=>b.type==='watchtower')){
+  const piers=new Set(b.modules.find(m=>m.role==='stair-support').cells.map(coord));
+  const steps=b.architecture.stairSteps;
+  assert.equal(piers.size,steps*(steps-1),b.id);
+  for(let i=0;i<steps;i++)for(let x=3;x<=4;x++)for(let y=1;y<=i;y++)
+   assert.ok(piers.has(`${x},${y},${3+i}`),`${b.id} floating tread ${i}`);
+  assert.equal(b.architecture.stairPiers,true);
+ }
+});
+test('biome-specific tall lookout detailing includes grounded supporting uprights',()=>{
+ for(const b of pool.filter(b=>b.type==='watchtower')){
+  assert.equal(b.architecture.upperDetailsSupported,true);
+  if(b.biome==='temperate')continue;
+  const supports=b.modules.find(m=>m.role==='upper-support');
+  assert.ok(supports?.cells.length>=4,`${b.id} missing elevated-brace posts`);
+  const deck=b.architecture.observationY-1;
+  const cols=new Map();for(const [x,y,z] of supports.cells){const k=`${x},${z}`;if(!cols.has(k))cols.set(k,[]);cols.get(k).push(y);}
+  for(const [k,ys] of cols){ys.sort((a,b)=>a-b);assert.equal(ys[0],deck+1,`${b.id} floating upper strut ${k}`);for(let i=1;i<ys.length;i++)assert.equal(ys[i],ys[i-1]+1);}
+ }
+});
