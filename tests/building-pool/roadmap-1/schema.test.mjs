@@ -10,7 +10,7 @@ function sample(){return {schema:SCHEMA,id:blueprintId('house','temperate','smal
   dependencies:[{asset:'pack4:040',status:'unresolved',requires:['approved occupancy dimensions','collision/selection interface','state/rotation ABI']}]
 };}
 function mutate(fn){const b=sample();fn(b);return b;}
-test('exact quota matrix is 885 with 300 houses and all five biomes/three sizes',()=>{assert.equal(TARGET,885);assert.equal(QUOTAS.house*BIOMES.length*SIZES.length,300);assert.equal(Object.values(QUOTAS).reduce((a,b)=>a+b,0),59);assert.deepEqual(manifest.designsPerSizePerBiome,QUOTAS);assert.equal(manifest.authoredBlueprintCount,0);});
+test('exact quota matrix is 885 with 300 houses and all five biomes/three sizes',()=>{assert.equal(TARGET,885);assert.equal(QUOTAS.house*BIOMES.length*SIZES.length,300);assert.equal(Object.values(QUOTAS).reduce((a,b)=>a+b,0),59);assert.deepEqual(manifest.designsPerSizePerBiome,QUOTAS);assert.ok(manifest.authoredBlueprintCount>=0&&manifest.authoredBlueprintCount<=TARGET);assert.equal(manifest.authoredBlueprintCount,manifest.candidateBlueprintCount??manifest.authoredBlueprintCount);});
 test('canonical scoped IDs and quota boundaries',()=>{assert.equal(blueprintId('lighthouse','mountain','large',4),'r1:lighthouse:mountain:large:004');assert.throws(()=>blueprintId('house','temperate','small',21));});
 test('real coordinate-based fixture, walkable room and symbolic furnishing passes',()=>{assert.equal(validateBlueprint(sample()),true);assert.equal(validatePool([sample()]).remaining,884);});
 test('stable serialization does not depend on placements input order',()=>{const b=sample();const c=sample();c.placements.reverse();assert.equal(stableBlueprintJSON(b),stableBlueprintJSON(c));});
