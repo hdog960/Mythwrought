@@ -39,8 +39,16 @@ All 18 are *candidate source definitions* with independent IDs and meaningful oc
 2. **Full-state mesh and face direction:** 121 combinations across all 18 candidates evaluated against **25,742 triangles**. Before M6, the entirety of the original timber and joinery meshes had inward-facing triangle winding opposite their outward normals. The bug was corrected exclusively in `definitions.mjs` and `joinery.mjs`. **Post-fix: 0 inverted or degenerate triangle/normal pairs** among all tested candidate states. No state exceeds 740 triangles in this isolated preview set.
 3. **Physical occupancy:** AABB-backed materials and joinery retain real selected/collidable volumes, including hollow/gapped components. Water ID 76 deliberately uses zero solid boxes and a genuine, sloped passable prism with an exact triangle raycast.
 4. **Candidate controls/snapshots:** 18 candidate selections/place/remove and representative variants (upper/lower, rotation, gate state, infrastructure variant, water source/level/flow) can be serialized/recovered via an *isolated fixture-only* envelope; the mix of five-, six- and seven-field rows remains unchanged.
-5. **Dedicated test source:** all 87 authored test bodies evaluated in an isolated V8 JavaScript harness with portable assertion wrappers and passed: 12 foundation, 15 joinery, 14 ground, 17 infrastructure, 21 water, **8 new acceptance**. **This is not native Node `node:test`**. The updated `acceptance.test.mjs` contains exhaustive mesh winding verification to prevent regression.
+5. **Dedicated test source:** all 88 authored test bodies evaluated in an isolated V8 JavaScript harness with portable assertion wrappers and passed: 12 foundation, 15 joinery, 14 ground, 17 infrastructure, 21 water, **9 new acceptance**. **This is not native Node `node:test`**. The updated `acceptance.test.mjs` contains exhaustive mesh winding verification to prevent regression.
 6. **Cross-pack/source ownership:** issue #109 and #117 plus contemporaneous draft packs 1/3/4 re-audited; PR #114's diff contains only Pack 2 files. No matching new ID, merging or player-save modification observed.
+
+### Milestone 6 verification follow-up (same-day, 2026-11-14)
+
+- Authored a ninth cross-family regression in `tests/block-packs/pack-2/acceptance.test.mjs` exercising **900 exact fluid top-surface rays across all 36 canonical source/level/flow states**. Every triangle hit matched the independently computed local surface height within tolerance in the V8 source harness.
+- **88/88 checked-in test functions** now pass in that same isolated V8 assertion harness, including all earlier six suites. This is **NOT native Node**.
+- Strengthened `tests/block-packs/pack-2/browser-verify.mjs`: genuine Playwright (when run) now selects and renders **all 18 candidate IDs**, tests state changes and fluid opacity, checks for unexpected page horizontal overflow, and saves full-page water plus focused real-canvas water, open gate and drain-slot parapet screenshots at **667×375, 844×390, 932×430** if screenshot output is enabled. The script is committed but has **NOT** run; screenshots are **not** claimed as delivered.
+- Rechecked local capability: Node v22 and Chromium are installed, but there is no exact-head repository checkout, `github.com` / `raw.githubusercontent.com` DNS fails and the Node Playwright package is not installed. No genuine native/Chromium pass can be claimed on the restricted local runtime.
+- This follow-up leaves source candidates, collision, fluid simulation, worldgen and main untouched. The exact new PR head and standard root CI must be checked against the latest commit.
 
 ## Required real test gates — NOT certified by the source-level checks
 
@@ -53,7 +61,7 @@ All 18 are *candidate source definitions* with independent IDs and meaningful oc
 | Production controls & saves | Exact mobile device tests, unobstructed left/right grip rails, opt-in schema-1 state sidecar with atomic recovery, offline PWA tests | **BLOCKED, not claimed** |
 | Creator visual / Gate A | Creator reviews actual in-game art and independently confirms physical iPhone controls | **NOT approved; v0.11 LOCKED** |
 
-The optional browser verifier checks a **Canvas 2D demonstration of authentic Pack 2 candidate triangle data**, not a production WebGL2 fluid simulation. Even a green optional browser inspector must not be used as proof that flowing water, collision, source updates, saved edits or integrated game controls are functional.
+The optional browser verifier visits all 18 candidate mesh choices at three iPhone landscape viewport sizes and, when executed, saves authentic full-page and detailed water/open-gate/parapet screenshots. It checks a **Canvas 2D demonstration of authentic Pack 2 candidate triangle data**, not a production WebGL2 fluid simulation. Even a green optional browser inspector must not be used as proof that flowing water, collision, source updates, saved edits or integrated game controls are functional.
 
 ## How to run the pending independent acceptance checks
 
