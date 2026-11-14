@@ -211,3 +211,26 @@ test('highland shoulder fields are seed-stable, bounded and edit-aware',()=>{
  const flat=ridgeStrataVertices(world,-1,0,{heightAt:()=>17});
  assert.equal(flat.length,0,'no highland shoulder effect on flat plateau');
 });
+
+test('snowline pockets are seeded, highland-only and preserve player roof edits',()=>{
+ const heights=(x,z)=>x<0?12:6;
+ const edits=new Map();
+ const world={seed:179,get(x,y,z){
+   const key=[x,y,z].join(',');
+   if(edits.has(key))return edits.get(key);
+   const h=heights(x,z);
+   return y>h?0:y===h?1:y>=h-3?2:3;
+ }};
+ const before=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.deepEqual(before,ridgeStrataVertices(world,-1,0,{heightAt:heights}));
+ assert.equal(before.length%27,0);
+ assert.ok(before.length<16*16*4*48*27);
+ const other={...world,seed:180};
+ assert.notDeepEqual(before,ridgeStrataVertices(other,-1,0,{heightAt:heights}));
+ for(let x=-16;x<0;x++)for(let z=0;z<16;z++)edits.set([x,13,z].join(','),3);
+ const after=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(after.length<before.length,'roof edits suppress highland surface overlays');
+ assert.equal(edits.size,256);
+ const flat=ridgeStrataVertices(world,0,0,{heightAt:()=>6});
+ assert.equal(flat.length,0,'no frost on flat lowlands');
+});
