@@ -93,7 +93,8 @@
     "m6Main008Registry": "Current main src/voxel.mjs BLOCK registry 0–8 only; Pack1 9–38 are all unregistered candidate source.",
     "m6Main008CI": "Current main .github/workflows/ci.yml adds live-world browser smoke but still root npm test tests/*.test.mjs; 9 nested Pack1 native suites are not executed by root CI.",
     "m6LatestNativeHelperEvidence": "Genuine Node 22.16.0 12/12 helper groups pass (5 gallery count +7 PNG integrity), all 4 local module/test Git blobs exactly match current GitHub files. Native Pack1 asset modules 81 authored bodies still NOT run.",
-    "m6CurrentAcceptanceOrchestrator": "Standalone Pack1-only run-acceptance.mjs requires nine Node modules >=93 tests no skips/todo and 15 genuine Chromium views / 30 fully decoded CRC-validated screenshot PNGs. Full run not executed."
+    "m6CurrentAcceptanceOrchestrator": "Standalone Pack1-only run-acceptance.mjs requires nine Node modules >=93 tests no skips/todo and 15 genuine Chromium views / 30 fully decoded CRC-validated screenshot PNGs. Full run not executed.",
+    "m6LatestMainAfter008Documentation": "Main ac263720b60641c65b02330348dd76d0ef9cb75e is documentation-only follow-up recording checkpoint 008 into INTEGRATION_CHECKPOINTS.md and RELEASE_LEDGER.md; docs lag resolved. Prior runtime activation SHA f416a2b26c4c00b5944f3bd37e9360030a247cc9, manual Pack1 excluded, live registered IDs remain 0–8."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -568,7 +569,7 @@
       "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "M6 after checkpoint 008: automation live-world trees/caves/courts integrated using existing IDs 0–8, manual Pack1 excluded. Candidate source complete 21/21 families and 30 unique IDs 9–38. 12/12 helper tests genuinely Node; seven candidate test suites + candidate browser not native-run.",
+  "latestMilestone": "M6 checkpoint 008 synchronized in main docs; Pack1 remains candidate-only 21/21 families, 30 unique IDs 9–38. Added genuine 7/7 PNG integrity Node tests (12/12 helper tests total) and nine-module >=93 real-test gate; seven asset suites and 15 browser gallery views still unverified.",
   "finalAcceptance": "NOT ACCEPTED. No Pack1 merge or registration. Native asset tests, actual candidate browser screenshot review, real engine partial collision/save and physical iPhone creator approvals missing.",
   "acceptanceMatrix": {
     "all_21_family_source_candidates": "CANDIDATE",
@@ -621,7 +622,10 @@
     "native_helper_test_groups": "12_OF_12_REAL_NODE_PASS",
     "native_candidate_suites": "81_BODIES_V8_SHIM_NOT_NATIVE_NODE",
     "real_candidate_browser_screenshots": "0_CAPTURED",
-    "acceptance_decision": "OPEN_NOT_ACCEPTED"
+    "acceptance_decision": "OPEN_NOT_ACCEPTED",
+    "latest_main": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+    "checkpoint_008_documented": "YES",
+    "Pack1_registered": "NO"
   },
   "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md"
 }
