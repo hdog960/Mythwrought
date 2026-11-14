@@ -30,7 +30,7 @@
   },
   "milestones": {
     "M0": "technical-accepted-at-71838311-exact-head-CI-and-real-chromium",
-    "M1": "30-authored-candidates; modeled roof-rib support on all 24 generated non-desert models; 26/26 native Node and 90/90 genuine Chromium Canvas2D; creator review/physical-ABI/exact-head CI open",
+    "M1": "30-authored-candidates; modeled roof-rib support on all 23 generated non-desert models; 26/26 native Node and 90/90 genuine Chromium Canvas2D; creator review/physical-ABI/exact-head CI open",
     "M2": "not-started",
     "M3": "not-started",
     "M4": "not-started",
@@ -202,7 +202,7 @@
     "M1VisualReview": "Earlier 30-design contact sheet showed similarly boxy stores and temples. Rebuilt all 15 temples with 2x2 roof-overriding paired belfries, triple-width ceremonial portal, raised two-row dais and higher visible roof lantern; creator aesthetic approval remains OPEN.",
     "M1StructuralFinding": "BEFORE: mountain temple left belfry 0/4 lower support cells, enchanted forest 2/4, desert 3/4. AFTER: 4/4 foundation and floor cells at both belfries across all 15 temples. Two symbolic pack1:008 stair candidate approaches added to raised dais; actual stair geometry ABI unverified.",
     "M1Review": "Creator art/architecture approval OPEN; no M2, no live world or shared systems; exact-head Actions separately pending.",
-    "M1RoofStructure": "New high-level truss beams and roof-post ribs added above interior three-high walk clearance in 24 generated non-desert buildings (original M0 store unchanged). Desert courtyard skylight intentionally remains open. Actual physical sloped-mesh/rotation and collision interfaces remain unverified."
+    "M1RoofStructure": "New high-level truss beams and roof-post ribs added above interior three-high walk clearance in 23 generated non-desert buildings (original M0 store unchanged). Desert courtyard skylight intentionally remains open. Actual physical sloped-mesh/rotation and collision interfaces remain unverified."
   },
   "status": "M0 TECHNICAL ACCEPTED; M1 30 AUTHOR-CANDIDATE CONCEPTS; DRAFT/UNMERGED/UNDEPLOYED",
   "integrationPR126": "Checkpoint 008 live automation-world activation; no building-pool or pack paths changed; not included in this draft."
