@@ -89,8 +89,12 @@ for(const x of [.065,.515]){
   shutters.push(part([x+.03,.115,.59,x+.06,.885,.63],'oakShade',false));
   shutters.push(part([x+.36,.115,.59,x+.39,.885,.63],'oakShade',false));
 }
-for(const x of [.07,.905])for(const y of [.2,.73])
+for(const x of [.07,.905])for(const y of [.2,.73]) {
   shutters.push(part([x,y,.385,x+.025,y+.08,.645],'brass'));
+  // Physical hinge pintles connect these centered leaves all the way to the
+  // adjacent support wall (+Z=1), not merely to empty space at z=.645.
+  shutters.push(part([x,y+.02,.59,x+.025,y+.06,1],'brass'));
+}
 shutters.push(part([.474,.465,.39,.526,.535,.435],'brass',false));
 
 // Open air remains between true narrow bars. A full collision cube is incorrect.
