@@ -47,9 +47,19 @@ export function ruinedCausewayVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
  }
  prism(o,x-1.63,y+3.00,z+2.19,1.05,.42,.48,pale);
  prism(o,x+.24,y+3.00,z+2.19,1.78,.34,.48,slate);
- // Shattered roadside rails deliberately stop short of the open approaches.
- for(const [dx,dz,len] of [[-2.08,-.98,1.11],[1.72,-.76,.90],[-2.08,.65,.81],[1.72,.84,.67]])
-  prism(o,x+dx,y+.25,z+dz,.38,.38,len,slate);
+ // Broken rails follow the two independently sampled roadside terraces.
+ // End caps and intermediate masonry are deliberately interrupted so the
+ // old road remains visibly ruined rather than a continuous impassable wall.
+ for(const [dx,dz,len] of [[-2.08,-.98,1.11],[1.72,-.76,.90],[-2.08,.65,.81],[1.72,.84,.67]]){
+  const px=x+dx,pz=z+dz;
+  const near=roadY(px+.19,pz+.12),far=roadY(px+.19,pz+len-.12);
+  // A steep discontinuity would create a hovering rail; omit it instead.
+  if(Math.abs(near-far)>1.01)continue;
+  const low=Math.min(near,far);
+  prism(o,px,low+.25,pz,.38,.38,len,slate);
+  // A small uneven coping stone provides a clear silhouette above the wall.
+  prism(o,px-.045,low+.63,pz+.12,.47,.12,Math.max(.18,len-.24),pale);
+ }
  // A broken elevated waymarker, with an intentional wide gap between its
  // surviving halves. Its irregular stepped crown reads at distance without
  // blocking the road or requiring collision/terrain edits.
