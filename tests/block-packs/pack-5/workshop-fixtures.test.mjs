@@ -134,6 +134,7 @@ test('three new workshop symbols never register numeric IDs or import engine sys
 test('every part remains under 64-box and 768-triangle mobile preview ceiling',()=>{
  for(const d of all)for(const p of d.parts){assert.ok(p.boxes.length<=64);assert.ok(p.boxes.length*12<=768)}
 });
+
 test('manifest keeps all 88–90 M3 workshop candidates isolated and 91+ unstarted',()=>{
  const data=JSON.parse(readFileSync(new URL('../../../src/block-packs/pack-5/manifest.json',import.meta.url)));
  for(const d of WORKSHOP_FAMILIES){const entry=data.entries.find(e=>e.symbolicId===d.symbolicId);
