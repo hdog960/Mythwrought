@@ -11,10 +11,10 @@ const FACE_DATA=Object.freeze([
 const BASE=Object.freeze({foundation:[.32,.31,.36],floor:[.63,.55,.47],wall:[.73,.7,.64],roof:[.69,.32,.24],structure:[.47,.36,.26],rafter:[.51,.35,.23],fixture:[.85,.63,.30],'entry-frame':[.95,.76,.44],stair:[.7,.59,.42],'stair-support':[.47,.43,.39],battlement:[.76,.73,.70],'upper-support':[.46,.37,.26]});
 const BIOMES=Object.freeze({'temperate':[1,1,1],desert:[1.12,.95,.74],snow:[.81,.92,1.15],'enchanted-forest':[.75,1.15,.91],mountain:[.79,.85,.94]});
 const key=(x,y,z)=>`${x},${y},${z}`;
-export function createPreviewMesh(blueprint,{cutaway=false}={}){
+export function collectPreviewCells(blueprint,{cutaway=false}={}){
  if(!blueprint?.modules||!blueprint.envelope)throw new TypeError('real authored blueprint required');
  const {width,depth}=blueprint.envelope;
- const cells=[];
+ let cells=[];
  for(const m of blueprint.modules)for(const c of m.cells){
   const [x,y,z]=c;
   // Remove the south facade for cutaways. Workshop roofs/rafters are removed
@@ -28,6 +28,33 @@ export function createPreviewMesh(blueprint,{cutaway=false}={}){
    (m.role==='battlement'&&(z===depth-1||x===width-1))))continue;
   cells.push({x,y,z,role:m.role});
  }
+ // Hiding walls and roofs exposes orphaned chimney, parapet and overhead
+ // ornament islands. Exclude those islands from a diagnostic cutaway instead
+ // of depicting them as magically floating pieces. This NEVER changes the
+ // underlying authored blueprint or its live/production placement rules.
+ let removedUnsupportedCells=0;
+ if(cutaway){
+  const byKey=new Map(cells.map(c=>[key(c.x,c.y,c.z),c]));
+  const connected=new Set(),queue=[];
+  for(const c of cells)if(c.role==='foundation'){
+   const k=key(c.x,c.y,c.z);
+   if(!connected.has(k)){connected.add(k);queue.push(c);}
+  }
+  if(queue.length===0)throw new Error('cutaway has no foundation anchors');
+  for(let i=0;i<queue.length;i++){
+   const c=queue[i];
+   for(const [dx,dy,dz] of [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]]){
+    const k=key(c.x+dx,c.y+dy,c.z+dz),next=byKey.get(k);
+    if(next&&!connected.has(k)){connected.add(k);queue.push(next);}
+   }
+  }
+  removedUnsupportedCells=cells.length-connected.size;
+  cells=cells.filter(c=>connected.has(key(c.x,c.y,c.z)));
+ }
+ return {cells,removedUnsupportedCells};
+}
+export function createPreviewMesh(blueprint,{cutaway=false}={}){
+ const {cells,removedUnsupportedCells}=collectPreviewCells(blueprint,{cutaway});
  const occupied=new Set(cells.map(c=>key(c.x,c.y,c.z)));
  if(occupied.size!==cells.length)throw new Error('overlapping authored geometry in candidate');
  const floats=[],facesByRole={};let faceCount=0;
@@ -45,5 +72,5 @@ export function createPreviewMesh(blueprint,{cutaway=false}={}){
   }
  }
  return {vertices:new Float32Array(floats),sourceCells:cells.length,faceCount,triangleCount:faceCount*2,facesByRole,
-  isDiagnosticEnvelope:true,notAssetShapeProof:true,cutaway};
+  isDiagnosticEnvelope:true,notAssetShapeProof:true,cutaway,removedUnsupportedCells};
 }
