@@ -236,3 +236,19 @@ set of blocks or auto-merge.**
   ```
 - **Still not passed:** obtaining the combined exact GitHub main+Pack4 source checkout is blocked by local GitHub DNS/HTTP policy, so the **181-case native Node suite** and the real **23-candidate Chromium gallery** have **not executed** in this session; **0 genuine Pack4 gallery PNGs inspected or approved**. The standalone actual Chromium/WebGL2 preflight does not render any candidate and is *not* substituted for that gate. The regular exact-head [Actions run #43649969149](https://github.com/hdog960/Mythwrought/actions/runs/43649969149) was queued when checked and does not execute nested Pack4 acceptance tests.
 - **M5 OPEN**, Gate A OPEN, v0.11 LOCKED. No merge, deployment, live ID registration, schema-1 production save modification, other pack or shared-engine changes.
+
+### M5 native source-reconstruction recovery — 2026-11-14
+- Added **Pack 4-only** `tests/block-packs/pack-4/rebuild-review-checkout.mjs`, a temporary local combined-checkout builder, and `tests/block-packs/pack-4/fixtures/rebuild-review-checkout.test.mjs`, five standalone native Node tests. This does **not** modify GitHub workflows, game/shared-engine code, registries, existing main, or other packs.
+- Builder requires **explicit, immutable 40-hex** main and draft-PR Git SHAs. It reads both Git trees from GitHub, rejects truncated or incomplete Pack 4 inventories, requires the exact 16 native suite filenames and the four integrated main shape modules, downloads only Pack 4-owned files and these four main modules, and verifies **byte count and Git blob SHA-1** before writing each path to a fresh isolated checkout. Rejects path traversal and nonempty output destinations; has bounded concurrency and per-file size limits. The 16-suite/181-case strict verifier is untouched.
+- Native `node --test tests/block-packs/pack-4/fixtures/rebuild-review-checkout.test.mjs`: **5/5 PASS**, zero skipped/failed, Node v22.16.0, using deterministic mock Git API/raw endpoints. Covered correct reconstruction of 32 simulated Pack 4 paths plus four main dependencies; SHA1 blob framing; truncated/unsafe trees; byte tampering; incomplete main dependencies and invalid floating refs. **These five helper tests are nested and separate from (not added to) the 16-suite, 181-case acceptance count.**
+- Both committed source blobs match exact local `git hash-object` results: `rebuild-review-checkout.mjs` `261a2010dbdb4798056b7af0c166b7d3f1de6509`; nested recovery tests `ebdfc301010910a77b71ddcd337d925854c9310b`.
+- Real checkout attempt at main `ac263720b60641c65b02330348dd76d0ef9cb75e` and PR head `54329c6a271629f3010d1006a4368dacdeb4d3a4` returned native Node `TypeError: fetch failed` during GitHub tree retrieval (DNS/network restrictions). No full source checkout or actual asset suites were produced. **Do not call the 181-case native suite passed.**
+- Reproduction on a GitHub-network-accessible host (requires Node 22):
+  ```sh
+  node tests/block-packs/pack-4/rebuild-review-checkout.mjs \\
+    --main ac263720b60641c65b02330348dd76d0ef9cb75e \\
+    --pack 54329c6a271629f3010d1006a4368dacdeb4d3a4 \\
+    --run-node
+  ```
+  For genuine Chromium/WebGL2, install Playwright and Chromium and run the same with `--run-gallery`; virtual-display Linux hosts can wrap the invocation in `xvfb-run -a env PACK4_CHROMIUM_HEADFUL=1 PACK4_CHROMIUM_PATH=/usr/bin/chromium`. The main/pack SHAs must be rechecked for newer changes before repeating. No mocked candidate galleries or images may be accepted.
+- **M5 ACCEPTANCE OPEN.** Full 181 native Node cases and all 276 genuine candidate WebGL2 rotation states/12 screenshots still await execution and visual inspection. Creator art/physical iPhone signoff outstanding; Gate A open; v0.11 locked. The new utility is not integration, registration, deployment or merge authorization.
