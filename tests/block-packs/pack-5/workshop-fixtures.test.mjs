@@ -135,13 +135,13 @@ test('every part remains under 64-box and 768-triangle mobile preview ceiling',(
  for(const d of all)for(const p of d.parts){assert.ok(p.boxes.length<=64);assert.ok(p.boxes.length*12<=768)}
 });
 
-test('manifest keeps all 88–90 M3 workshop candidates isolated and 91+ unstarted',()=>{
+test('manifest keeps all 88–90 M3 workshop candidates isolated and 94+ unstarted',()=>{
  const data=JSON.parse(readFileSync(new URL('../../../src/block-packs/pack-5/manifest.json',import.meta.url)));
  for(const d of WORKSHOP_FAMILIES){const entry=data.entries.find(e=>e.symbolicId===d.symbolicId);
   assert.equal(entry.milestone,3);assert.equal(entry.status,'CANDIDATE');assert.equal(entry.persistentNumericId,null);
  }
- for(const e of data.entries.filter(e=>e.roster>=91))assert.equal(e.status,'NOT STARTED');
- assert.equal(data.candidateFamilies,12);assert.equal(data.completedFamilies,0);
+ for(const e of data.entries.filter(e=>e.roster>=94))assert.equal(e.status,'NOT STARTED');
+ assert.equal(data.candidateFamilies,15);assert.equal(data.completedFamilies,0);
 });
 
 test('all six material-box faces maintain outward winding through every Y quarter-turn',()=>{
