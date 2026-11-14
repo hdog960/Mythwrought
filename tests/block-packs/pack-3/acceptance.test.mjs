@@ -169,3 +169,25 @@ test('rotated physical occupancy preserves 90-degree Y turn for all 13 shaped fa
     }
   }
 });
+
+
+test('all five candidate-only restore codecs reject a production schema marker',()=>{
+  const cases=[
+    [createPack3Fixture,restorePack3Fixture,109,0],
+    [createPack3RoofGeometryFixture,restorePack3RoofGeometryFixture,113,1],
+    [createPack3FortifiedFixture,restorePack3FortifiedFixture,116,2],
+    [createPack3OrnamentalFixture,restorePack3OrnamentalFixture,119,3],
+    [createPack3MonumentalFixture,restorePack3MonumentalFixture,123,0]
+  ];
+  for(const [create,restore,id,rotation] of cases){
+    const f=create(179);assert.equal(f.place([2,4,6],id,rotation),true);
+    const snapshot=f.snapshot();
+    assert.equal(Object.hasOwn(snapshot,'schema'),false);
+    assert.deepEqual(restore(JSON.parse(JSON.stringify(snapshot))).snapshot(),snapshot);
+    for(const schema of [1,2,undefined,null]){
+      const tampered={...snapshot,schema};
+      assert.throws(()=>restore(tampered),TypeError,
+        `candidate ID ${id} accepted schema-marked preview`);
+    }
+  }
+});
