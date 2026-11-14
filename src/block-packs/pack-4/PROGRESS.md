@@ -20,13 +20,13 @@ own SHA inside itself. New commits require updating PR handoff and re-testing.
 | 36 | Wall-mounted lanterns | 166 | Hawthorn wall sconce | Candidate built, tests authored |
 | 37 | Crystal lanterns | 167 | Aetherglass caged blue crystal | Candidate built, tests authored |
 | 38 | Torch blocks | 168 | Wayfarer bracket wall torch | Candidate built, tests authored |
-| 56 | Barrels | — | — | Planned, M3 |
-| 57 | Wooden crates | — | — | Planned, M3 |
-| 58 | Wooden benches | — | — | Planned, M3 |
-| 59 | Wooden tables | — | — | Planned, M3 |
-| 60 | Wooden signs | — | — | Planned, M3 |
-| 61 | Hanging banners | — | — | Planned, M3 |
-| 62 | Market canopy blocks | — | — | Planned, M3 |
+| 56 | Barrels | 169 | Eight-stave copperhoop barrel with iron hoops and lid | Candidate built, tests authored |
+| 57 | Wooden crates | 170 | Ironbound crate with separate slats and corner ferrules | Candidate built, tests authored |
+| 58 | Wooden benches | 171 | Four-legged oak bench with open seat underside and raised back | Candidate built, tests authored |
+| 59 | Wooden tables | 172 | Four-legged table, open underframe and decorated top | Candidate built, tests authored |
+| 60 | Wooden signs | 173 | Standing waymark sign, post, framed blank and fasteners | Candidate built, tests authored |
+| 61 | Hanging banners | 174 | Ceiling-hung burgundy banner with split swallowtail | Candidate built, tests authored |
+| 62 | Market canopy blocks | 175 | Single wall-mounted scalloped Seaglass canopy segment | Candidate built, tests authored |
 | 63 | Chimney blocks | — | — | Planned, M4 |
 | 64 | Fireplace blocks | — | — | Planned, M4 |
 | 65 | Well rim blocks | — | — | Planned, M4 |
@@ -46,24 +46,26 @@ own SHA inside itself. New commits require updating PR handoff and re-testing.
   awaiting Node + browser and integration acceptance.**
 - **M2 Lighting:** Four physically independent candidate families (35–38) authored in `lighting.mjs`, with distinct iron/copper/wood/crystal/fire material silhouettes, floor or wall mounting requirements, four-way orientation, partial collision/selection and strict candidate state. Light color/intensity/radius metadata is recorded, but engine emission is explicitly `engineEnabled:false`. **Candidate source implemented; live integration and visual acceptance pending.**
 - **Isolated interactions:** `fixture.mjs` adds isolated place/remove, sub-box raycast, partial collision and fail-closed atomic schema-1-style fixture snapshot replay. This is NOT a production save format or a generated-world change.
-- **M3** seven furniture/market families (56–62) not started.
+- **M3 Furniture & market components:** seven physically individual assets across 56–62 authored as candidate IDs 169–175 in `furnishings.mjs` (barrel, crate, bench, table, sign, banner, canopy **component only**). All include distinct box-union silhouettes, material profiles, 4-way rotation, per-cell selection/collision, supported placement and strict state. `fixture.mjs` extended to 17 IDs including ceiling-hung banner and wall-supported canopy, with focused tests. **Candidate implementation done, native isolated Node / Chromium / live integration acceptance pending.**
 - **M4** six hearth/civic families (63–68) not started.
 - **M5** full 22-family review and manual handoff pending.
 
-### Verification status — current candidate source
-- Base/current main checked: `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, checkpoint 006. Physical main block registry remains 0–8. Issue #109 still reserves Pack 4 IDs 159–208; Issue #117 gives auto :12 a **different** symbolic namespace; no cross-pack duplicates.
-- Candidate IDs **159–168**, ten distinct persistent variants spanning **nine out of 22** authored roster families. IDs 169–208 available for subsequent Pack 4 entries, 255 reserved.
-- **V8 compatibility harness (not Node): 59/59 exact Pack 4 test bodies passed**, across windows (29), lighting (19), isolated place/raycast/save fixture (11). Regression-detected test fixture support errors were corrected; no game engine files edited.
-- **Local Node 22, 33/33 PASS on a source-derived, 0.0001-unit-quantized geometry snapshot** of the ten GitHub candidate assets. This check tests mesh-coordinate validity and material/silhouette distinctions, NOT the full GitHub checkout or native Node import of the nested Pack 4 tests.
-- **Prior exact PR HEAD** `3a09f18e4338bbf61674f72dffaf7abc93c2d245`: existing GitHub Actions baseline Node and configured Chromium regression suites **SUCCESS**, run [43628322485](https://github.com/hdog960/Mythwrought/actions/runs/43628322485), before M2 was added. Must reverify new exact PR HEAD separately.
-- **Pack 4 nested Node** `node --test tests/block-packs/pack-4/*.test.mjs`: NOT YET run on an actual checkout; existing root CI glob excludes nested files and shared workflow changes are prohibited.
-- **Standalone Pack 4 gallery** now includes all ten original source candidates and four-way rotation selector. A source-derived local Chromium WebGL2 attempt failed/hung due EGL/SwiftShader initialization on the available headless host; **no authentic successful browser screenshot or real iPhone certification**. This is not a game defect verdict.
-- **No merge/deploy/world placement.** No dynamic light simulation, open/close animation, particle fire, generation, shared registry, game save schema or controller code changed.
+### Verification status — 17-asset M3 candidate
+- Current main independently checked at `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, integration checkpoint **006** (`1006e5cd...`), `src/voxel.mjs` and `src/blocks.mjs` registry still limited to persistent IDs 0–8. Compared Issues [#109](https://github.com/hdog960/Mythwrought/issues/109) and [#117](https://github.com/hdog960/Mythwrought/issues/117); auto :12's biome130 roster is exclusive and does not duplicate the seven generic furniture entries. Other manual pack IDs remain untouched.
+- **Pack 4 IDs 159–175** are provisional, 17 **different physical candidates** covering **16/22 families**; IDs 176–208 remain unallocated; protected 0–8 / 255 preserved.
+- Exact GitHub source and five nested Pack 4 Node-style test bodies executed in V8 JavaScript compatibility harness: **100/100 PASS** (29 windows, 19 lighting, 31 furniture, 11 original fixture, 10 furnishing fixture). This runs real source logic under V8 but **NOT native Node's test runner**; all failure reports remain honest.
+- **GitHub Actions standard Node and Chromium baseline SUCCESS** at prior PR HEAD `6fc1b21d1f878b4908c95e264a8965a7ab1670f2`: [run 43630645050](https://github.com/hdog960/Mythwrought/actions/runs/43630645050). This run is **pre-M3**, the root CI glob excludes Pack 4's nested tests, and it does not prove candidate gallery rendering.
+- Existing source-derived ten-ID geometry snapshot previously exercised with local native Node 22, **33/33 PASS**, but NOT direct source import. It does not cover the newly authored M3 IDs.
+- **Native Node for entire exact Pack 4 branch:** NOT VERIFIED. Local git checkout cannot fetch GitHub (DNS/network unavailable), and shared CI workflows are off-limits. Required manual command: `node --test tests/block-packs/pack-4/*.test.mjs`.
+- **Genuine Chromium gallery:** an isolated 17-candidate WebGL2 test script is authored at `tests/block-packs/pack-4/gallery-browser.mjs`, with 667×375 / 844×390 / 932×430 viewports and UNMERGED screenshot labels. A local headless Chromium attempt against earlier source-derived preview **timed out in software WebGL startup**. Therefore NO new authentic 17-candidate WebGL screenshot, no accepted shader depth/transparency proof and NO physical iPhone certification.
+- Candidate gallery reworked to use **one** shared WebGL2 canvas and 17 separate 2D preview cards to avoid exhausting WebGL contexts on mobile. This is authored but not browser-approved.
+- All changes isolated to `src/block-packs/pack-4/` and `tests/block-packs/pack-4/`. **No merge, deployment, world placement, renderer/regional mesher, saves, central registry, CI workflow or iPhone control edit.**
 
-### Integration dependencies
-- Generic shape meshes/rotated sub-boxes [#108](https://github.com/hdog960/Mythwrought/pull/108), targeting/placement/collision [#106](https://github.com/hdog960/Mythwrought/pull/106), both unmerged and separately owned.
-- Central registry for candidate physical IDs, schema-1 sidecar for rotations, transparent depth ordering and renderer material contract.
-- Wall/floor support validation, bounded dynamic point light engine (metadata only), original PWA/mobility/seed/save compatibility and user iPhone art approval.
-- Automated :12's **130-family separate catalog** in [Issue #117](https://github.com/hdog960/Mythwrought/issues/117) is not part of Pack 4. None of its symbolic variants are reused here.
+### Dependencies and integration contract
+- Generic opt-in shape/mesh [#108](https://github.com/hdog960/Mythwrought/pull/108) and partial-cell targeting/collision/save [#106](https://github.com/hdog960/Mythwrought/pull/106) are separately owned. Pack 4 geometry must be mapped to those *when integrated*; no false full-cube collisions.
+- Lighting: candidate color/radius/intensity metadata ONLY, no dynamic light sources. Glass: candidate alpha, no proof of production transparent depth ordering.
+- Furniture: sign is a blank physical panel, NOT a functional text editor. Banner has no wind motion. Market canopy is **one** segment, not a built market. Barrel/crate do not add inventory or harvesting, bench/table do not implement sitting/use interactions.
+- Fixed floor supports for barrels, crates, benches, tables and signs; fixed ceiling support for banner; rotated fixed wall support for canopy. Integration must validate support survival and safe deletion, backwards-compatible orientation persistence and independent selection/removal.
+- Preserve schema-1 saves, deterministic world seed, original artwork, offline PWA, landscape side grips, no paid tooling; Gate A OPEN / v0.11 LOCKED.
 
-**Next task (Milestone 3):** Before allocating IDs 169+, recheck current main, Issues #109/#117, other pack manifests/PRs and exact PR #115 head. Run nested Pack 4 Node and genuine Chromium where workable, then develop the independent physical barrel, crate, bench, table, sign, banner, and canopy component families 56–62. Update this ledger and draft PR; never merge or place assembled structures.
+**Next task — Milestone 4:** Before allocating IDs 176+, recheck latest main/checkpoint, Issues #109/#117 and exact-head PR #115 CI. Develop individually targetable **chimney, fireplace, well rim, well roof, well pulley and fountain** candidates (roster 63–68) within Pack 4 only. They are discrete reusable pieces, NOT assembled wells, fountains, houses or structures; declare fire/smoke/water engine dependencies without building simulation. Finish M5 acceptance only after actual Node and genuine Chromium proof.
