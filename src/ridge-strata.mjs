@@ -190,5 +190,35 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
         }
       }
     }
+  // Alluvial fan at the foot of an existing steep dirt valley wall. The
+  // triangular sediment apron follows the OPEN approach cell and only rests
+  // against real exposed dirt; it is not a generated block or a new path.
+  // World-coordinate grouping creates broad recognizable drainage mouths.
+  for(let x=cx*chunkSize;x<(cx+1)*chunkSize;x++)
+    for(let z=cz*chunkSize;z<(cz+1)*chunkSize;z++){
+      const top=heightAt(x,z,seed);
+      if(top<10||world.get(x,top,z)!==grass)continue;
+      for(const [dx,dz] of faces){
+        const low=heightAt(x+dx,z+dz,seed);
+        if(top-low<4||top-low>8)continue;
+        const foot=low+1;
+        if(world.get(x,foot,z)!==dirt||world.get(x+dx,foot,z+dz)!==air)continue;
+        // Require open ground directly ahead, not a built retaining wall.
+        if(world.get(x+dx,foot+1,z+dz)!==air)continue;
+        const along=dx===0?z:x;
+        const basin=hash(Math.floor(x/11),Math.floor(z/11),seed+9917);
+        if(basin>.30||Math.abs(along%7)>2)continue;
+        const drift=hash(x,z,seed+9919),tx=-dz,tz=dx;
+        const px=x+.5+dx*.518,pz=z+.5+dz*.518;
+        const w=.33+drift*.13;
+        const a=[px-tx*w,foot+.08,pz-tz*w];
+        const b=[px+tx*w,foot+.08,pz+tz*w];
+        const tip=[px+dx*.04,foot+.54+drift*.12,pz+dz*.04];
+        const silt=[.53+drift*.06,.43+drift*.05,.29+drift*.04];
+        const shade=[.33+drift*.05,.29+drift*.04,.22+drift*.03];
+        emit(a,b,tip,silt);
+        emit(a,tip,[px-tx*w*.48,foot+.06,pz-tz*w*.48],shade);
+      }
+    }
   return new Float32Array(out);
 }
