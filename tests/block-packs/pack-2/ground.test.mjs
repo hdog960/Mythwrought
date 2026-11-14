@@ -15,7 +15,7 @@ test('four independent ground families allocate exclusive Pack 2 IDs 69–72',()
   assert.equal(new Set(PACK_2_GROUND.map(x=>x.surface.pattern)).size,4);
   assert.equal(new Set(PACK_2_GROUND.map(x=>JSON.stringify(x.palette))).size,4);
   assert.equal(new Set([...PACK_2_IDS,...PACK_2_JOINERY_IDS,...PACK_2_GROUND_IDS]).size,14);
-  assert.equal(PACK_2_FIXTURE_IDS.length,17);
+  assert.equal(PACK_2_FIXTURE_IDS.length,18);
   assert.deepEqual(Object.values(BLOCK).sort((a,b)=>a-b),[0,1,2,3,4,5,6,7,8]);
 });
 test('every orientation is backed by independently selectable physical local boxes',()=>{
