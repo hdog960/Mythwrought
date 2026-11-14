@@ -95,7 +95,14 @@ async function main(){
   assert.equal(manifest.evidence.length,15,'Not all landscape gallery views ran');
   assert.equal(manifest.totals.viewports,15);
   assert.equal(manifest.totals.screenshots,30);
-  assert.equal(manifest.totals.interactionChecks,45);
+  // 15 place/save/clear cycles = 45, plus two true cross-section
+  // selection/collision probes in each of the 9 partial-shape views = 18.
+  assert.equal(manifest.totals.interactionChecks,63);
+  for(const entry of manifest.evidence){
+    const expected=['garden','foliage','floral'].includes(entry.gallery)?2:0;
+    assert.equal(entry.cutawayProbeResults?.length,expected,
+      'Missing actual cutaway probe evidence for '+entry.gallery);
+  }
   assert.deepEqual(manifest.evidence.map(x=>
     x.gallery+'-'+x.viewport.width+'x'+x.viewport.height).sort(),views.slice().sort());
   const images=[];
