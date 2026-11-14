@@ -56,3 +56,16 @@ test('refined boards have deterministic per-board tint, paired pegs and edge wea
   assert.equal(RULES.extraTextures,0);
   assert.equal(RULES.extraDrawCalls,0);
 });
+
+test('crafted timber has deterministic planed relief and sparse carved ornaments',()=>{
+  assert.equal(RULES.handPlanedBevel,true);
+  assert.equal(RULES.rareEngravedDiamond,true);
+  for(const token of ['boardLocal=fract','float bevel=smoothstep','innerBorder=','etchedDiamond=','ornamentCell=step(.79','sideShade +=','topBevel='])
+    assert.ok(TIMBER.includes(token),token);
+  assert.match(TIMBER,/hashCell\(boardCell\+vec2\(59\.0,23\.0\)\)/);
+  assert.match(TIMBER,/ornament=etchedDiamond\*ornamentCell\*near/);
+  assert.doesNotMatch(TIMBER,/sampler2D|texture\(|discard;|gl_FragDepth/);
+  assert.equal(RULES.extraDrawCalls,0);
+  assert.equal(RULES.extraTextures,0);
+  assert.equal(RULES.saveSchemaChanged,false);
+});
