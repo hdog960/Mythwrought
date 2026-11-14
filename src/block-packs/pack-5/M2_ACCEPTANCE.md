@@ -23,7 +23,7 @@ M1's 3 architectural-surface families and 6 variants passed genuine **44/44 nati
 All material variants have physically different geometry. This work creates **no bedrooms, rooms, buildings, citizens, shops, crafting/storage/sleeping gameplay or world generation**.
 
 ## Genuine execution and artifact evidence
-- **66/66 native Node 22.16.0 tests PASS**: original 44 Pack 5 source/fixture cases and **22 new M2 tests**. Dedicated command `node --test tests/block-packs/pack-5/*.test.mjs`. Source and exact committed test Git hashes compared:
+- **68/68 native Node 22.16.0 tests PASS**: original 44 Pack 5 source/fixture cases and **24 new M2 tests**. Dedicated command `node --test tests/block-packs/pack-5/*.test.mjs`. Source and exact committed test Git hashes compared:
   - `src/block-packs/pack-5/residential-furnishings.mjs` `798592fc5241cffe5a9db5c8914ba9ea85524064`
   - `src/block-packs/pack-5/fixture.mjs` `b9f31dadecd093fc93e8fc4287e88c455022493b`
   - `tests/block-packs/pack-5/residential-furnishings.test.mjs` `f66c33eba92d45114d58dc4a126e7b8ddca8a08d`
@@ -44,3 +44,8 @@ All material variants have physically different geometry. This work creates **no
 - Pack 5 total **7 CANDIDATE / 11 NOT STARTED / 0 INTEGRATED** of 18 planned physical families.
 - Before playable incorporation, central ownership must separately approve persistent numeric IDs and renderer/atlas, multi-cell atomic placement, shape-aware raycast and collision, variant + orientation metadata, backward-safe schema-1 saves, real mobile GPU budgets, physical iPhone controls and creator visual approval.
 - **Do not merge, deploy, place assets in worldgen, alter automations, edit other pack/engine/CI files or unlock v0.11.**
+
+## Final collision fidelity correction (Pack 5-owned)
+- Additional M2 test review detected overly broad approximate collision bounds for beds, open chairs/stools and bookshelves. Replaced those candidate-only collider arrays with the actual authored union of AABB piece boxes. Canopy posts, headboard, narrow seat/rail details and books are now physically collidable in the isolated fixture, while empty gaps remain non-solid.
+- Two new native regressions verify **exact part/collision equality for all six applicable residential variants** and hit/empty-air probes on tall canopy/headboard. The full dedicated suite is now **68/68 PASS (44 M0/M1 + 24 M2)**. No production physics or save file changed.
+- The corrected source `residential-furnishings.mjs` Git blob is `080436a8fb841ce953899045e44c7c0ac98f5f3d` and corrected M2 test blob is `9e07c7470ec21e9e084822b4717ad89ec6686e17`. Real ES-module Chromium WebGL2 screenshots across three viewports and two rotations passed again after this change.
