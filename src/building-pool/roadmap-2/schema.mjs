@@ -51,10 +51,15 @@ export function validateBlueprint(bp){
  check(bp.rooms.every(room=>room.uses.some(use=>reached.has(use))),"inaccessible room in circulation graph");
  for(const o of bp.openings){
    check(["x","y","z"].every(k=>Number.isInteger(o[k])&&o[k]>=0&&o[k]<bp.extents[k]),"opening out of bounds");
-   if(o.type==="entrance"){
-     const height=o.clearHeightCells??1;
-     check(Number.isInteger(height)&&height>=1&&o.y+height<=bp.extents.y,"invalid entrance clearance");
-     for(let dy=0;dy<height;dy++)check(!occupied.has([o.x,o.y+dy,o.z].join(",")),"blocked entrance");
+   // An opening in the metadata must correspond to actual three-high air,
+   // including auxiliary doors: earlier graph-only room markers and a pew
+   // concealed blocked or bypassable accesses in otherwise valid blueprints.
+   if(o.type==="entrance"||o.type==="internal-doorway"){
+     const height=o.clearHeightCells;
+     check(Number.isInteger(height)&&height>=3&&o.y+height<=bp.extents.y,
+       "invalid three-high opening clearance");
+     for(let dy=0;dy<height;dy++)check(!occupied.has([o.x,o.y+dy,o.z].join(",")),
+       o.type==="entrance"?"blocked entrance":"blocked internal doorway");
    }
  }
  check(kinds.has("window"),"missing physical window geometry");

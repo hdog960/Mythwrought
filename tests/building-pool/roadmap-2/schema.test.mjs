@@ -66,3 +66,13 @@ test("entrance clearance, window geometry and opening bounds are enforced",()=>{
  assert.throws(()=>validateBlueprint({...bp,openings:bp.openings.map(o=>o.type==="entrance"?{...o,x:100}:o)}),/opening out of bounds/);
  assert.throws(()=>validateBlueprint({...bp,voxels:bp.voxels.map(v=>v.kind==="window"?{...v,kind:"wall"}:v)}),/missing physical window/);
 });
+
+
+test("internal and auxiliary room door declarations require physically clear three-high openings",()=>{
+ const door=bp.openings.find(o=>o.type==="internal-doorway");
+ assert(door);
+ assert.throws(()=>validateBlueprint({...bp,voxels:[...bp.voxels,
+   {x:door.x,y:3,z:door.z,kind:"wall",material:"pack1:001"}]}),/blocked internal doorway/);
+ assert.throws(()=>validateBlueprint({...bp,openings:bp.openings.map(o=>o===door?{...o,clearHeightCells:2}:o)}),
+   /invalid three-high opening clearance/);
+});

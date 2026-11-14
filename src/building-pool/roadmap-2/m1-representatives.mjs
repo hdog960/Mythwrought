@@ -62,6 +62,7 @@ function build({biome,size,category}){
   }
   const supplementalRooms=[];
   const supplementalCirculation=[];
+  const supplementalOpenings=[];
   // Category-specific fixtures, arranged around a central traversable aisle.
   if(!isTemple){
     for(const z of [3,5,Math.min(partition-2,8)])for(const x of [2,width-3]){
@@ -74,7 +75,13 @@ function build({biome,size,category}){
   }else{
     // Distinct nave, colonnade/pews, symbolic altar and physically projecting dais.
     for(const z of [4,6,Math.min(partition-2,10)])for(const x of [center-3,center+3]){
-      if(x>=2&&x<width-2&&z<partition&&footprint(x,z))put(x,2,z,FIXTURE.seat,'fixture');
+      if(x>=2&&x<width-2&&z<partition&&footprint(x,z)){
+        // The medium east-side chapel doorway at x(width-5),z6 needs a clear
+        // approach from the nave. The old pew at center+3,z6 blocked it;
+        // before end-wall sealing, a back-door bypass concealed that failure.
+        const seatZ=size==='medium'&&z===6&&x===center+3?7:z;
+        put(x,2,seatZ,FIXTURE.seat,'fixture');
+      }
     }
     for(const x of [2,width-3])for(const z of [4,Math.min(partition-2,9)])if(footprint(x,z)&&!bounds(x,z)){
       for(let y=2;y<top;y++)put(x,y,z,FIXTURE.column,'fixture');
@@ -110,11 +117,18 @@ function build({biome,size,category}){
     const screenX=width-5,doorZ=6,screenEnd=Math.min(partition-2,9);
     for(let z=4;z<=screenEnd;z++)if(z!==doorZ)
       for(let y=2;y<=4;y++)put(screenX,y,z,m.trim,'wall');
+    // Enclose both exposed ends. Without these end caps the room is
+    // approachable around the screen even if its intended door is blocked.
+    // Only the registered z6 opening enters the office/meditation chapel.
+    for(const capZ of [3,screenEnd+1])for(let x=screenX+1;x<=width-2;x++)
+      for(let y=2;y<=4;y++)put(x,y,capZ,m.trim,'wall');
     const roomUse=isTemple?'meditation-chapel':'counting-office';
     supplementalRooms.push({name:isTemple?'Side meditation chapel':'Merchant counting office',
       bounds:{x0:screenX+1,x1:width-2,z0:4,z1:screenEnd},uses:[roomUse]});
     supplementalCirculation.push({from:isTemple?'ceremonial-space':'sales-floor',to:roomUse,
       via:`three-high east side opening x${screenX},z${doorZ}`});
+    supplementalOpenings.push({type:'internal-doorway',role:'auxiliary-room',roomUse,
+      x:screenX,y:2,z:doorZ,clearHeightCells:3});
     put(width-3,2,7,isTemple?FIXTURE.altar:FIXTURE.counter,'fixture');
   }else if(size==='large'&&!isTemple){
     const screenX=4,doorZ=partition+2;
@@ -124,18 +138,28 @@ function build({biome,size,category}){
       bounds:{x0:1,x1:screenX-1,z0:partition+1,z1:depth-2},uses:['loading-bay']});
     supplementalCirculation.push({from:'storage',to:'loading-bay',
       via:`three-high rear stockroom passage x${screenX},z${doorZ}`});
+    supplementalOpenings.push({type:'internal-doorway',role:'auxiliary-room',roomUse:'loading-bay',
+      x:screenX,y:2,z:doorZ,clearHeightCells:3});
     put(2,2,partition+4,FIXTURE.crate,'fixture');
   }else if(size==='large'&&isTemple){
     for(const screenX of [4,width-5]){
       for(let z=4;z<=11;z++)if(z!==6)
         for(let y=2;y<=4;y++)put(screenX,y,z,m.trim,'wall');
     }
+    // Two formerly open-ended screen partitions did not separate chapels:
+    // the nave could enter each side around z3 and z12. Give both chapels
+    // actual side-to-exterior end caps while preserving one 3-high door.
+    for(const [x0,x1] of [[1,3],[width-4,width-2]])
+      for(const capZ of [3,12])for(let x=x0;x<=x1;x++)
+        for(let y=2;y<=4;y++)put(x,y,capZ,m.trim,'wall');
     for(const [use,x0,x1,altarX] of [
       ['west-chapel',1,3,2],['east-chapel',width-4,width-2,width-3]]){
       supplementalRooms.push({name:use==='west-chapel'?'West votive chapel':'East votive chapel',
         bounds:{x0,x1,z0:4,z1:11},uses:[use]});
       supplementalCirculation.push({from:'ceremonial-space',to:use,
         via:`three-high side-chapel opening z6, x${use==='west-chapel'?4:width-5}`});
+      supplementalOpenings.push({type:'internal-doorway',role:'auxiliary-room',roomUse:use,
+        x:use==='west-chapel'?4:width-5,y:2,z:6,clearHeightCells:3});
       put(altarX,2,8,FIXTURE.altar,'fixture');
     }
   }
@@ -293,7 +317,7 @@ function build({biome,size,category}){
    roof:{form:roofNames[biome],biomeSpecific:true},
    rooms:[...rooms,...supplementalRooms],features:isTemple?['physically separated sanctuary','raised altar dais','paired symbolic stair approaches pending slope ABI','paired fully founded belfries','triple-wide processional entrance','roof lantern tower','structural columns','ceremonial rows']:['counter','display shelves','stockroom crates','real storeroom wall'],
    openings:[entry,{type:'window',x:3,y:3,z:0},{type:'window',x:width-4,y:3,z:0},
-    {type:'internal-doorway',x:openingX,y:2,z:partition,clearHeightCells:3}],
+    {type:'internal-doorway',x:openingX,y:2,z:partition,clearHeightCells:3},...supplementalOpenings],
    circulation:[...circulation,...supplementalCirculation],
    unresolvedDependencies:refs.map(ref=>({ref,issue:'The physical shape, orientation, collision, support, appearance and save integration of this symbolic roster asset require central ABI verification'})),
    voxels
