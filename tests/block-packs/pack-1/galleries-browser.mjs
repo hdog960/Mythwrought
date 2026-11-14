@@ -11,7 +11,7 @@ import {createServer} from 'node:http';
 import {readFile,mkdir} from 'node:fs/promises';
 import {resolve,extname,join,relative,sep} from 'node:path';
 import {chromium} from 'playwright';
-import {parseFixtureCount} from './gallery-count.mjs';
+import {parseFixtureCount,saveWasVerified} from './gallery-count.mjs';
 
 const root=resolve(process.cwd());
 const screenshots=resolve(process.env.PACK1_ARTIFACT_DIR||'artifacts/pack-1');
@@ -113,10 +113,8 @@ const shell=async()=>{
           await context.setOffline(true);
           await page.locator(g.save).click();
           const status=(await page.locator('#status').textContent())||'';
-          assert.ok(status.includes(g.saveSuccess),
+          assert.ok(saveWasVerified(status,g.saveSuccess),
             g.name+' save/restore failed or reported a safe blocker rather than success');
-          assert.doesNotMatch(status,/ERROR|FAIL|unexpected|INVALID|BLOCKED|BLOCKER/i,
-            g.name+' isolated canonical fixture save failed');
           assert.equal(parseCount(status),g.count,g.name+' save changed fixture count');
           await page.locator(g.clear).click();
           const cleared=(await page.locator('#status').textContent())||'';
