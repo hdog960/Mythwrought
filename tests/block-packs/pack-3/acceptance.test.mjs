@@ -215,3 +215,28 @@ test('every physical candidate remains face-connected at each supported quarter 
     assert.equal(seen.size,boxes.length,`Disconnected solid parts: ID ${id} yaw ${yaw} (${seen.size}/${boxes.length} attached)`);
   }
 });
+
+// Each exported specialty provider is independently callable. Catalog-only ID
+// validation is insufficient: constructing Map keys via string concatenation
+// previously admitted strings, BigInts, and objects with custom toString().
+test('direct asset providers reject coercible nonnumeric ID aliases', async()=>{
+  const groups=[
+    [113,await import('../../../src/block-packs/pack-3/roof-geometry.mjs'),'pack3GeometryById','pack3GeometryShape','pack3PrototypeGeometry'],
+    [116,await import('../../../src/block-packs/pack-3/fortified-pieces.mjs'),'pack3FortifiedById','pack3FortifiedShape','pack3FortifiedPrototype'],
+    [119,await import('../../../src/block-packs/pack-3/ornamental-pieces.mjs'),'pack3OrnamentalById','pack3OrnamentalShape','pack3OrnamentalPrototype'],
+    [123,await import('../../../src/block-packs/pack-3/monumental-pieces.mjs'),'pack3MonumentalById','pack3MonumentalShape','pack3MonumentalPrototype']
+  ];
+  for(const [id,api,lookup,shape,proto] of groups){
+    for(let yaw=0;yaw<4;yaw++){
+      assert.equal(api[lookup](id,yaw)?.id,id);
+      assert.equal(api[shape](id,yaw)?.boxes,api[lookup](id,yaw).boxes);
+    }
+    const aliases=[String(id),BigInt(id),{toString(){return String(id)}},
+      new String(String(id)),Number.NaN,Infinity,undefined,null];
+    for(const bad of aliases){
+      assert.equal(api[lookup](bad,0),null,`${lookup} resolved nonnumeric ID ${String(bad)}`);
+      assert.equal(api[shape](bad,0),null,`${shape} resolved nonnumeric ID ${String(bad)}`);
+      assert.throws(()=>api[proto](bad,0),RangeError,`${proto} resolved nonnumeric ID ${String(bad)}`);
+    }
+  }
+});
