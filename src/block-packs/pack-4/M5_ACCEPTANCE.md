@@ -50,7 +50,7 @@
 | 68 | Fountain blocks | 181 | One dry carved basin and spout | Candidate; no water engine |
 
 ## Evidence actually established
-1. **156/156** authored JavaScript test bodies passed when evaluating
+1. **161/161** authored JavaScript test bodies passed when evaluating
    exact branch sources under a V8 compatibility harness. This includes
    23 candidate definitions, IDs/manifest, four orientations, accurate
    multi-box geometry, fixed supports, ray targeting, partial collisions,
@@ -127,6 +127,15 @@ result for manual, creator-controlled integration—not to start another
 set of blocks or auto-merge.**
 
 ## Additional M5 QA evidence
-- **Four new cross-family mesh-budget cases PASS in the V8 source harness**, raising the total to **156/156 V8 checks**. Per candidate the peak original preview is 1,224 vertices, below 1,300; cumulative 23 candidate shapes total 14,436 vertices, below 16,000 (only one is uploaded to shared WebGL2 at a time). Each of 23 meshes remains deterministic and finite across four 90-degree rotations. This does not prove actual GPU performance or production world mesh integration.
+- **Four new cross-family mesh-budget cases PASS in the V8 source harness**, raising the total to **161/161 V8 checks**. Per candidate the peak original preview is 1,224 vertices, below 1,300; cumulative 23 candidate shapes total 14,436 vertices, below 16,000 (only one is uploaded to shared WebGL2 at a time). Each of 23 meshes remains deterministic and finite across four 90-degree rotations. This does not prove actual GPU performance or production world mesh integration.
 - **Fixed a false-positive browser visual assertion**: nonblack GL clear pixels previously counted as nonblank rendered geometry. Now the 23-card browser acceptance script requires genuine foreground RGB contrast against each canvas corner, distinct image hashes, and a changed rotation image. The browser remains blocked by environment policy; these corrected assertions are authored, **not passed in Chromium**.
 - Final artifacts still require exact HEAD full native Node tests, genuine WebGL2 screenshots and creator approval. `M5` remains **NOT ACCEPTED**.
+
+
+### Shared :00/:12 source compatibility review — November 14, 2026
+- **Real Pack 4-only defect fixed:** crate candidate **170** had **34 selectable AABB volumes**, exceeding the unmerged :00 [PR #106](https://github.com/hdog960/Mythwrought/pull/106) `validateShape` maximum of **32**. Eight ornamental corner ferrules/front battens now have `selection:false`; original visuals **34 rendered sub-parts** and **1,224 preview vertices** are preserved while selection/collision use **26** bounding boxes. It remains a single independent targetable crate.
+- New isolated `src/block-packs/pack-4/interaction-handoff.mjs` exports `pack4ShapeHandoff`, `pack4SidecarHandoff`, and `pack4ReviewSidecar`. It generates candidate-only `{boxes}` descriptors within the exact :00 shape cap and converts fixture `{id,rotation}` to staged `{blockId,turns}` sidecar entries. It **does not import, activate or modify any shared module**, registry, game save or renderer.
+- **161/161 exact current Pack 4 test bodies PASS in V8 compatibility evaluation**, adding five tests for the 32-AABB limit, crate render-versus-selection count, hollow structures, real sidecar field formats and malformed-state rejection. **Not native Node.**
+- Evaluated the **actual unmerged :00 source at head `2054e00ead30736726d53d5aed8a1f9dc4e080a0`**, including `validateShape`, `raycastShapes`, `canPlaceShape`, `rotateShape`, `inspectBodyFit` and `makeOrientationSidecar`. Across all **23 IDs × four orientations**, every collision and selection descriptor, empty placement, precise selected-box raycast, interior-body collision, rotation parity and real sidecar snapshot passed: **644/644 independent cross-source V8 probes**. This is **not integrated gameplay or native Node testing**.
+- Reviewed actual :12 [PR #108](https://github.com/hdog960/Mythwrought/pull/108) head `31be6f32adcfbb461b7a57e7db2e1567f8c1891a`. Its opt-in boundary-only `prototypeSurfaceMesh` tessellates unions more heavily than the Pack 4 preview meshes; sample **fireplace 177 produced 8,336 boundary-mesh vertices** and **pulley 180 produced 8,136**, compared with Pack 4's self-contained preview limits of 1,500 vertices per candidate. This is a **mobile-mesh integration budget warning**, not a runtime acceptance pass or a reason to edit shared mesher sources.
+- Existing live world still has only persistent IDs **0–8**. Pack 4 candidate IDs **159–181** remain **not registered**; no creator integration permission. M5 is still OPEN pending full native exact-HEAD Node suite, authentic Chromium WebGL2 gallery/screenshots and explicit art/physical iPhone Gate A approval.
