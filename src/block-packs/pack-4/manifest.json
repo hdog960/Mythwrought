@@ -32,15 +32,22 @@
     165,
     166,
     167,
-    168
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175
   ],
   "unassignedBand": [
-    169,
+    176,
     208
   ],
-  "candidateVariants": 10,
+  "candidateVariants": 17,
   "completeFamilies": 0,
-  "implementedCandidateFamilies": 9,
+  "implementedCandidateFamilies": 16,
   "statusGlossary": {
     "candidate": "Implemented in isolated PR only; engine integration and live compatibility not certified",
     "planned": "Not yet implemented"
@@ -141,57 +148,71 @@
       "roster": 56,
       "name": "Barrels",
       "category": "furnishings",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Physical staves, rim and top/bottom"
+      "status": "candidate",
+      "blockIds": [
+        169
+      ],
+      "note": "Copperhoop coopered barrel: eight stepped staves, iron hoops, lid and bung"
     },
     {
       "roster": 57,
       "name": "Wooden crates",
       "category": "furnishings",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Reinforced corner geometry"
+      "status": "candidate",
+      "blockIds": [
+        170
+      ],
+      "note": "Ironbound crate: separate interlocking side slats, metal corner ferrules and battens"
     },
     {
       "roster": 58,
       "name": "Wooden benches",
       "category": "furnishings",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Seat and separate legs"
+      "status": "candidate",
+      "blockIds": [
+        171
+      ],
+      "note": "Hearthwood bench: raised seat, four legs and physical backrest, open underside"
     },
     {
       "roster": 59,
       "name": "Wooden tables",
       "category": "furnishings",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Top and support geometry"
+      "status": "candidate",
+      "blockIds": [
+        172
+      ],
+      "note": "Wayfarer tavern table: elevated top and trim, four narrow legs, open underside"
     },
     {
       "roster": 60,
       "name": "Wooden signs",
       "category": "furnishings",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Distinct face and mounting"
+      "status": "candidate",
+      "blockIds": [
+        173
+      ],
+      "note": "Village waymark sign: narrow floor post and framed blank panel, no text/UI"
     },
     {
       "roster": 61,
       "name": "Hanging banners",
       "category": "furnishings",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Suspended cloth silhouette"
+      "status": "candidate",
+      "blockIds": [
+        174
+      ],
+      "note": "Burgundy hearth banner: ceiling supported physical cloth with swallowtail split"
     },
     {
       "roster": 62,
       "name": "Market canopy blocks",
       "category": "furnishings",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Individual canopy segment; no stall assembly"
+      "status": "candidate",
+      "blockIds": [
+        175
+      ],
+      "note": "Seaglass festival canopy: one wall-mounted fabric panel and braces, no market stall"
     },
     {
       "roster": 63,
@@ -245,21 +266,26 @@
   "sourceFiles": [
     "src/block-packs/pack-4/windows.mjs",
     "src/block-packs/pack-4/lighting.mjs",
-    "src/block-packs/pack-4/fixture.mjs"
+    "src/block-packs/pack-4/fixture.mjs",
+    "src/block-packs/pack-4/furnishings.mjs"
   ],
   "testFiles": [
     "tests/block-packs/pack-4/windows.test.mjs",
     "tests/block-packs/pack-4/lighting.test.mjs",
     "tests/block-packs/pack-4/fixture.test.mjs",
     "tests/block-packs/pack-4/gallery.html",
-    "tests/block-packs/pack-4/gallery.mjs"
+    "tests/block-packs/pack-4/gallery.mjs",
+    "tests/block-packs/pack-4/furnishings.test.mjs",
+    "tests/block-packs/pack-4/furnishings-fixture.test.mjs"
   ],
   "dependencies": [
     "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
     "Generic :00 shape-aware selection/collision/placement (PR #106 — unmerged at checkpoint 006)",
     "Creator-authorized centralized registration of candidate IDs, with nonbreaking schema-1 orientation state",
     "Transparency sorting, depth-writing and multi-material faces in the shared renderer",
-    "Working dynamic lighting, alpha/depth order, wall/floor support and light source budgets are central engine dependencies, NOT implemented here"
+    "Working dynamic lighting, alpha/depth order, wall/floor support and light source budgets are central engine dependencies, NOT implemented here",
+    "Fabric billow, text-editable signs and usable sit/interact behaviors are not implemented; individual physical pieces and attachment metadata only.",
+    "Wall-mounted canopy requires a verified adjacent fixed support; ceiling banner needs fixed support overhead."
   ],
   "restrictions": {
     "noMainEdits": true,
@@ -272,5 +298,11 @@
     "https://github.com/hdog960/Mythwrought/issues/109",
     "https://github.com/hdog960/Mythwrought/issues/117"
   ],
-  "familyCount": 22
+  "familyCount": 22,
+  "lastVerifiedMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "lastVerifiedCheckpoint": "006",
+  "lastComparedIssues": [
+    109,
+    117
+  ]
 }
