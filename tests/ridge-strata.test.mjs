@@ -132,3 +132,26 @@ test('steep grass valleys receive continuous sediment terraces without changing 
  const flat=ridgeStrataVertices(world,-1,0,{heightAt:()=>12});
  assert.equal(flat.length,0,'no fake terraces on flat terrain');
 });
+
+test('amphitheatre contour tiers trace exposed valley dirt and honor saved wall edits',()=>{
+ const heights=(x,z)=>x<0?13:7;
+ const edits=new Map();
+ const world={seed:179,get(x,y,z){
+  const key=[x,y,z].join(',');
+  if(edits.has(key))return edits.get(key);
+  const h=heights(x,z);
+  return y>h?0:y===h?1:y>=h-3?2:3;
+ }};
+ const original=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(original.length>0);
+ const levels=new Set();
+ for(let i=0;i<original.length;i+=9)levels.add(Math.floor(original[i+1]));
+ assert.ok(levels.has(11)&&levels.has(10),'two distinct dirt depths receive contours');
+ assert.deepEqual(original,ridgeStrataVertices(world,-1,0,{heightAt:heights}));
+ for(let z=0;z<16;z++){edits.set('0,11,'+z,3);edits.set('0,10,'+z,3);}
+ const covered=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(covered.length<original.length,'covering the approach suppresses bands');
+ assert.equal(edits.size,32);
+ assert.equal(ridgeStrataVertices(world,-1,0,{heightAt:()=>13}).length,0);
+ assert.ok(original.length<16*16*4*20*27,'mobile geometry remains bounded');
+});
