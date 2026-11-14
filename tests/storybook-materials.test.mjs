@@ -262,3 +262,16 @@ test('woodland dew and fern litter remain opaque near-faded details on existing 
  assert.equal(RULES.newDrawCalls,0);
  assert.equal(RULES.newTextures,0);
 });
+
+test('raw crystal frost stars use deterministic cell-local opaque pigment with no added IDs',()=>{
+ assert.deepEqual(RULES.crystalFrostStarAccents,['crystal-six-ray-frost-stars']);
+ const crystal=FS.slice(FS.indexOf('}else if(vMat==5)'),FS.indexOf('}else if(vMat==6)'));
+ for(const name of ['frostCell','frostUv','frostSeed','frostRayA','frostRayB','frostRayC','frostStar'])
+   assert.match(crystal,new RegExp('(float|vec2) '+name+'='));
+ assert.match(crystal,/\.25\*frostStar\*near/);
+ assert.match(crystal,/step\(\.92,frostSeed\)/);
+ assert.doesNotMatch(crystal,/sampler2D|discard;|texture\(|uTime/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
