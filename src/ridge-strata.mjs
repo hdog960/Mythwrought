@@ -50,6 +50,24 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
         // Split lower fracture reads as a continuation, not an isolated stamp.
         const crack=[cx0+tx*(r-.5)*.19,y-.47,cz0+tz*(r-.5)*.19];
         emit(a,c,crack,shadow);
+        // Broad foot-of-cliff talus is only painted on genuinely exposed
+        // stone above an open approach. It connects the bedding to the
+        // valley floor without inventing a passable cave or changing terrain.
+        const footY=Math.max(adjacent+1,y-2);
+        if(top-adjacent>=5 && footY<y && world.get(x,footY,z)===stone &&
+           world.get(x+dx,footY,z+dz)===air){
+          const lean=hash(x,z,seed+1273);
+          const baseW=.30+lean*.14;
+          const baseL=[cx0-tx*baseW,footY+.09,cz0-tz*baseW];
+          const baseR=[cx0+tx*(baseW*.82),footY+.07,cz0+tz*(baseW*.82)];
+          const apex=[cx0+tx*(lean-.5)*.20,footY+.65+lean*.22,cz0+tz*(lean-.5)*.20];
+          const scree=[.32+lean*.09,.37+lean*.08,.38+lean*.06];
+          emit(baseL,baseR,apex,scree);
+          // Offset secondary slate chip makes each foothill contour less
+          // repetitive while remaining inside the same exposed face.
+          const chip=[cx0+tx*(.08+lean*.12),footY+.26,cz0+tz*(.08+lean*.12)];
+          emit(baseR,chip,apex,highlight);
+        }
       }
     }
   return new Float32Array(out);
