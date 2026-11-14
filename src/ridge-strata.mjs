@@ -290,5 +290,33 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
       const blue=[.58+grain*.06,.72+grain*.05,.79+grain*.04];
       emit(a,b,c,frost,grass);emit(a,c,d,blue,grass);
     }
+  // Wind-scoured alpine ridges: a narrow, connected pale rim follows real
+  // exposed high-elevation grass ledges above a substantial drop. This creates
+  // a readable snowline silhouette from valleys without changing a single
+  // block or painting over a player-built wall. Geometry is face-only.
+  for(let x=cx*chunkSize;x<(cx+1)*chunkSize;x++)
+    for(let z=cz*chunkSize;z<(cz+1)*chunkSize;z++){
+      const top=heightAt(x,z,seed);
+      if(top<14||world.get(x,top,z)!==grass||world.get(x,top+1,z)!==air)continue;
+      const region=hash(Math.floor(x/24),Math.floor(z/24),seed+17231);
+      if(region>.36)continue; // same alpine regions as the frostfield
+      for(const [dx,dz] of faces){
+        const lower=heightAt(x+dx,z+dz,seed);
+        if(top-lower<3||world.get(x+dx,top,z+dz)!==air)continue;
+        // Only draw a rim where the immediate ledge face remains natural.
+        if(world.get(x,top-1,z)!==dirt)continue;
+        const grain=hash(x,z,seed+18791);
+        if(grain>.85)continue;
+        const tx=-dz,tz=dx,px=x+.5+dx*.514,pz=z+.5+dz*.514;
+        const y=top+.02, width=.48, depth=.13+grain*.10;
+        const a=[px-tx*width,y,pz-tz*width];
+        const b=[px+tx*width,y,pz+tz*width];
+        const c=[px+tx*width,y-depth,pz+tz*width];
+        const d=[px-tx*width,y-depth,pz-tz*width];
+        const white=[.84+grain*.06,.90+grain*.04,.89+grain*.03];
+        const shade=[.56+grain*.07,.71+grain*.06,.78+grain*.05];
+        emit(a,b,c,white,grass);emit(a,c,d,shade,grass);
+      }
+    }
   return new Float32Array(out);
 }
