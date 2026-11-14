@@ -9,11 +9,11 @@ const bed=sample('pack5:082',{name:'Synthetic two-cell bed',parts:[
   {cell:[0,0,0],boxes:[[.1,.2,.1,.9,.7,.9]],collisionBoxes:[[.1,.2,.1,.9,.7,.9]]},
   {cell:[0,0,1],boxes:[[.1,.2,.1,.9,.5,.9]],collisionBoxes:[[.1,.2,.1,.9,.5,.9]]}]});
 test('manifest tracks exactly 18 unique symbolic IDs with independent candidate status',()=>{
-  assert.equal(base.entries.length,18);assert.equal(base.completedFamilies,0);assert.equal(base.candidateFamilies,3);assert.equal(base.numericIdAllocation,null);
+  assert.equal(base.entries.length,18);assert.equal(base.completedFamilies,0);assert.equal(base.candidateFamilies,7);assert.equal(base.numericIdAllocation,null);
   assert.deepEqual(base.entries.map(x=>x.roster),Array.from({length:18},(_,i)=>i+79));
   assert.deepEqual(base.entries.map(x=>x.symbolicId),Array.from({length:18},(_,i)=>`pack5:${String(i+79).padStart(3,'0')}`));
   assert.equal(new Set(base.entries.map(x=>x.symbolicId)).size,18);
-  for(const e of base.entries){assert.equal(e.status,e.roster<=81?'CANDIDATE':'NOT STARTED');assert.equal(e.persistentNumericId,null);assert.equal(e.integrated,false);}
+  for(const e of base.entries){assert.equal(e.status,e.roster<=85?'CANDIDATE':'NOT STARTED');assert.equal(e.persistentNumericId,null);assert.equal(e.integrated,false);}
 });
 test('unit boxes accept true partial volumes and reject overlaps with empty/invalid geometry',()=>{
   assert.equal(validatePhysicalDescriptor(sample()),true);
