@@ -28,15 +28,17 @@ const SLOPE=Object.freeze([
 // Roster 28: a genuine hip-corner profile, stepping upward along BOTH axes.
 // It cannot be substituted by a generic straight roof stair.
 const HIP=Object.freeze([
-  P('body',B(0,0,0,1,.15625,1)),
-  P('body',B(.1875,.15625,.1875,1,.34375,1)),
-  P('body',B(.375,.34375,.375,1,.53125,1)),
-  P('body',B(.5625,.53125,.5625,1,.71875,1)),
-  P('edge',B(.1875,.34375,.1875,1,.390625,1)),
-  P('edge',B(.375,.53125,.375,1,.578125,1)),
-  P('crest',B(.5625,.71875,.5625,1,.765625,1)),
-  P('crest',B(.1875,.390625,.1875,.25,.4375,.25)),
-  P('crest',B(.375,.578125,.375,.4375,.625,.4375))
+  // Matching four-course eave heights and offsets to the pitched roof stair
+  // along the two perpendicular exposed edges: quarter-cell course spacing.
+  P('body',B(0,0,0,1,.1875,1)),
+  P('body',B(.25,.1875,.25,1,.375,1)),
+  P('body',B(.5,.375,.5,1,.5625,1)),
+  P('body',B(.75,.5625,.75,1,.75,1)),
+  P('edge',B(.25,.375,.25,1,.421875,1)),
+  P('edge',B(.5,.5625,.5,1,.609375,1)),
+  P('crest',B(.75,.75,.75,1,.796875,1)),
+  P('crest',B(.25,.421875,.25,.3125,.46875,.3125)),
+  P('crest',B(.5,.609375,.5,.5625,.65625,.5625))
 ]);
 // Roster 29: a longitudinal ridge with wide shoulders, raised spine and
 // capped ends. Its x/z symmetry intentionally repeats after a half turn.
