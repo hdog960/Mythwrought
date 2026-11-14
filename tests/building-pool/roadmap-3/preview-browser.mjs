@@ -20,19 +20,19 @@ if(chromium){
    page.on('pageerror',e=>console.error('Page error:',e.message));
    try{
     await page.goto(url,{waitUntil:'networkidle',timeout:15000});
-    for(const type of ['blacksmith','watchtower'])for(const biome of ['temperate','desert','snow','enchanted-forest','mountain']){
-     await page.selectOption('#type',type);await page.selectOption('#biome',biome);
+    for(const type of ['blacksmith','watchtower'])for(const biome of ['temperate','desert','snow','enchanted-forest','mountain'])for(const size of ['small','medium','large']){
+     await page.selectOption('#type',type);await page.selectOption('#biome',biome);await page.selectOption('#size',size);
      for(const view of ['exterior','cutaway']){
       await page.selectOption('#view',view);
       const evidence=await page.evaluate(()=>({webgl2:!!document.getElementById('render').getContext('webgl2'),details:document.getElementById('details').textContent}));
       if(!evidence.webgl2||!evidence.details.includes('WebGL2 active'))throw new Error('No genuine WebGL2 render: '+JSON.stringify(evidence));
-      await page.screenshot({path:resolve(out,`${type}-${biome}-${view}-${width}x${height}.png`)});
+      await page.screenshot({path:resolve(out,`${type}-${biome}-${size}-${view}-${width}x${height}.png`)});
       completed++;
      }
     }
    }finally{await page.close();}
   }
-  if(completed!==60)throw new Error(`Only ${completed}/60 authentic browser specimens`);
+  if(completed!==180)throw new Error(`Only ${completed}/180 authentic browser specimens`);
   console.log('Real WebGL2 screenshot files:',completed,'in',out);
  }finally{await browser.close();}
 }
