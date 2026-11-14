@@ -2,8 +2,8 @@
   "schema": "mythwrought.building-pool.roadmap-1.manifest.v1",
   "title": "Homes & Regional Life",
   "gate": "v0.10 Gate A OPEN; v0.11 LOCKED",
-  "milestone": "M1 — representative homes/taverns/empty stables",
-  "status": "45_COORDINATE_AUTHORING_CANDIDATES_UNMERGED_UNDEPLOYED",
+  "milestone": "M1 — 45 representative homes/taverns/empty stables; expanded physical/near-duplicate acceptance",
+  "status": "45_UNMERGED_COORDINATE_VOXEL_CANDIDATES_TESTED_LOCAL_CREATOR_APPROVAL_OPEN",
   "target": 885,
   "authoredBlueprintCount": 45,
   "biomes": [
@@ -79,7 +79,7 @@
   "certifiedPhysicalIPhone": false,
   "candidateBlueprintCount": 45,
   "creatorAcceptedBlueprintCount": 0,
-  "authoredVoxelPlacements": 47696,
+  "authoredVoxelPlacements": 50331,
   "remainingDesigns": 840,
   "representativesByType": {
     "house": 15,
@@ -88,21 +88,21 @@
   },
   "testEvidence": {
     "nativeNode": {
-      "run": "local Node 22.16.0 against Roadmap 1 working source",
-      "cases": "39/39 passed (16 M0 + 12 M1 + 2 D4 uniqueness + 9 deeper access/profile acceptance)",
-      "exactPRHead": "await CI on new committed head"
+      "run": "native Node 22.16.0 local isolated Roadmap 1 source: SHA-matched all seven new/edited code/test files to PR branch",
+      "cases": "50/50 passed (16 M0 + 12 M1 + 2 D4 + 17 physical acceptance + 3 near-duplicate review)",
+      "exactPRHead": "current commit CI pending; central workflow does NOT execute nested Roadmap 1 suites"
     },
     "chromium": {
-      "renderer": "genuine headless Chromium Canvas2D fallback, WebGL2 unavailable",
+      "renderer": "Genuine Chromium Canvas2D schematic fallback; WebGL2 unavailable",
       "screenshots": 36,
       "viewports": [
         "667x375",
         "844x390",
         "932x430"
       ],
-      "samples": "6 candidate IDs each exterior and interior cutaway",
+      "samples": "6 representative IDs, exterior and interior cutaway",
       "authentic": true,
-      "source": "locally generated screenshot set; not a GitHub CI artifact"
+      "source": "local browser-generated images only, not shipped or accepted game WebGL2"
     },
     "physicalIPhone": false,
     "ci": {
@@ -111,10 +111,13 @@
     }
   },
   "pending": [
-    "Exact new PR-head CI and true WebGL2 if available",
-    "Manual candidate asset dimensions, support/mount, collisions and rotations remain unresolved",
-    "840 additional distinct blueprint designs",
-    "Creator close-visual near-duplicate evaluation and physically tested iPhone travel"
+    "creator close-visual review of 45 candidate silhouettes and near-duplicate scores",
+    "safe real Pack 2 beam spanning and joinery; crossbeams horizontal, tie-posts fixed upright",
+    "Pack 2 doors/Pack 5 stable partitions multi-cell footprint, collision, support, sidecar orientation compatibility",
+    "Pack 3 roof surfaces single-cell shape, actual collision/mesher surfaces and span support",
+    "actual source-served Chromium/WebGL2 acceptance at three landscape sizes",
+    "additional 840 authored unique building designs; no world placement",
+    "exact-head dedicated Node re-execution on clean joined repo (root Actions tests exclude nested suites)"
   ],
   "mirroredAndRotatedGeometryCheck": {
     "result": "45/45 distinct under 4 rotations and mirrored counterparts, material-independent",
@@ -128,5 +131,27 @@
     "roomFurnishings": "category-appropriate physical placements",
     "stables": "four physical empty stall bays",
     "assetIDs": "symbolic only"
+  },
+  "roofFrame": {
+    "cells": 2883,
+    "horizontalFamily": "pack2:015",
+    "verticalFamily": "pack2:022",
+    "safeSpanApproval": "UNRESOLVED",
+    "engineIntegration": false
+  },
+  "stablePortals": {
+    "openStallBays": 60,
+    "hingedDoorPlaceholders": "separate explicitly mounted stowed leaves",
+    "animals": 0
+  },
+  "nearDuplicateReview": {
+    "metric": "12x12 normalized, materials ignored; category-specific Jaccard ranking; not an acceptance threshold",
+    "nearestSimilarity": 0.822,
+    "nearestPair": [
+      "r1:house:enchanted-forest:large:003",
+      "r1:house:mountain:large:003"
+    ],
+    "creatorReviewed": false,
+    "exactD4CollisionCount": 0
   }
 }

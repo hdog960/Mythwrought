@@ -12,3 +12,7 @@
 - Reverified main `ac263720b60641c65b02330348dd76d0ef9cb75e`, checkpoint **008** after the initial checkpoint-007 M1 review. Main added automation-owned live voxel-tree/cave/court integration and its own tests/workflow; no Block Pack or building-pool source paths changed in two-commit comparison from `caf47776`.
 - **Roadmap 1 is still unmerged draft PR #121** and still requires symbolic family resolution from all manual packs; biome130 source lives in main but stays unregistered. No Roadmap 1 building or other roadmap may be placed by automation incorporation.
 - Root Actions test glob excludes nested Roadmap 1 test modules; the focused 39/39 is a local native Node result, not CI-covered. Keep exact-head central CI and source-derived screenshot evidence separate.
+
+## M1 late external-catalog dependency fit check
+- Examined latest candidate Pack 2 beam/post and hinged-door geometry contracts, Pack 3 thin roofing AABB geometry and Pack 5 multi-cell attachment contract. Corrected the vertical support-post reference mismatch without modifying any other pack. See `M1_PHYSICAL_HANDOFF.md` for exact symbolic identities and outstanding real-integration blockers.
+- Added 50 native focused tests/near-duplicate reviewer, all within the Roadmap 1 ownership prefixes; no root CI or engine change. Retain checkpoint 008 as last verified integration and refresh before next session.
