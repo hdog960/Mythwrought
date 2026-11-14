@@ -18,7 +18,8 @@ test('17 distinct roster families receive unique provisional Pack 3 IDs 109–12
   assert.deepEqual(PACK3_ROSTER.map(r=>r.id),Array.from({length:17},(_,i)=>i+109));
   assert.equal(new Set(PACK3_ROSTER.map(r=>r.id)).size,17);
   assert.ok(PACK3_ROSTER.every(r=>r.implementation==='physical-candidate'&&!r.integrated));
-  assert.equal(PACK3_COORDINATION.integratedCheckpoint,'006');
+  assert.equal(PACK3_COORDINATION.integratedCheckpoint,'007');
+  assert.equal(PACK3_COORDINATION.auditedMain,'caf47776b723a36684edc1a72749e49268ccc688');
   assert.equal(PACK3_COORDINATION.reservedId,255);
 });
 test('12 rotated monumental candidates have immutable and identical physical targeting/collision boxes',()=>{
