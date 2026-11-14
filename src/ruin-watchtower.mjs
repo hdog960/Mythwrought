@@ -60,4 +60,4 @@ export function ruinWatchtowerVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
  tri(out,[x+.8,y+.04,z+2.4],[x+1.9,y+.05,z+2.3],[x+1.3,y+.76,z+1.8],stone[2]);
  return new Float32Array(out);
 }
-export const WATCHTOWER_LIMITS=Object.freeze({stride:STRIDE,maxVerticesPerChunk:650,newDrawCalls:0,newTextures:0,collidable:false});
+export const WATCHTOWER_LIMITS=Object.freeze({stride:STRIDE,maxVerticesPerChunk:1600,newDrawCalls:0,newTextures:0,collidable:false});
