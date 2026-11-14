@@ -27,7 +27,7 @@ export class Pack2Fixture{
     return this.selection();
   }
   turn(){
-    this.rotation=pack2Shape(this.selected,(this.rotation+1)%4).rotation;
+    this.rotation=this.selected===62?0:pack2Shape(this.selected,(this.rotation+1)%4).rotation;
     return this.selection();
   }
   selection(){return pack2Cell(this.selected,this.rotation);}
