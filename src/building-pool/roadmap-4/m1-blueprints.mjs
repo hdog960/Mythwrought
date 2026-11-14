@@ -160,15 +160,18 @@ function emitBlueprint(type,biome,size){
       if(interior(x,z))for(let y=1;y<4;y++)if(!occupied.has(pos(x,y,z)))set(x,y,z,'column','base:stone');
   }
   if(type==='castle-palace'){
-    // Corner tower crowns are hollow masonry, not sealed cubes. Adjacent interior wings remain walkable.
+    // Crowned battlement towers rise above the *highest* roof ridge even on small castles.
+    // The hollow intermediate shell is a recognisable skyline mass, not a promise that the
+    // future tower-top space has already passed player-collision/access integration.
     for(const [tx,tz] of [[4,entranceZ+4],[w-7,d-8]]){
-      const R=si+2;
-      for(let y=roofY+1;y<=roofY+3+si;y++)for(let z=tz;z<=tz+R;z++)for(let x=tx;x<=tx+R;x++){
-        if(x<2||z<front||x>w-3||z>d-3)continue;
-        if(!has(x,z))continue;
-        if(y===roofY+3+si ||x===tx||x===tx+R||z===tz||z===tz+R){
-          const k=pos(x,y,z);if(!occupied.has(k))set(x,y,z,y===roofY+3+si?'roof':'parapet',y===roofY+3+si?roofAsset:wallAsset);
-        }
+      const R=si+2,top=roofY+pitch+3+si;
+      for(let y=roofY+1;y<=top+1;y++)for(let z=tz;z<=tz+R;z++)for(let x=tx;x<=tx+R;x++){
+        if(x<2||z<front||x>w-3||z>d-3||!has(x,z))continue;
+        const edge=x===tx||x===tx+R||z===tz||z===tz+R;
+        if(y===top+1&&(!edge||(x+z)%2))continue; // alternating crenels
+        if(y<top&&!edge)continue;
+        const k=pos(x,y,z);
+        if(!occupied.has(k))set(x,y,z,y===top?'roof':'parapet',y===top?roofAsset:wallAsset);
       }
     }
   }
