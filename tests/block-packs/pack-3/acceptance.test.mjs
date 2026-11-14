@@ -240,3 +240,44 @@ test('direct asset providers reject coercible nonnumeric ID aliases', async()=>{
     }
   }
 });
+
+
+// Paired clay hip and straight-slope cells must share the same structural
+// elevation at BOTH hip edges. Decorations may vary, but a mismatched load-
+// bearing roof course creates a visible, unjoinable slit or sudden ledge.
+// Check the *exact* exposed body occupancy on each shared plane, not a grid
+// of approximate sample points, for every rotated hip orientation.
+test('Hearthclay hip corner mates flush to pitched roof stairs on both arms at all four yaws',async()=>{
+  const {pack3GeometryById}=await import('../../../src/block-packs/pack-3/roof-geometry.mjs');
+  const xDirs=[[0,1],[2,1],[0,-1],[2,-1]];
+  const zDirs=[[2,1],[0,-1],[2,-1],[0,1]];
+  function mismatchedArea(a,b,axis,edgeA,edgeB){
+    const others=[0,1,2].filter(k=>k!==axis);
+    const bodyParts=[...a.parts,...b.parts].filter(p=>p.tone==='body');
+    const grid=others.map(k=>[...new Set([0,1,...bodyParts.flatMap(p=>[
+      p.box[k],p.box[k+3]])])].sort((x,y)=>x-y));
+    const occupied=(asset,edge,u,v)=>asset.parts.some(p=>{
+      if(p.tone!=='body')return false;
+      const box=p.box;
+      return box[axis]<=edge&&box[axis+3]>=edge&&
+        u>=box[others[0]]&&u<box[others[0]+3]&&
+        v>=box[others[1]]&&v<box[others[1]+3];
+    });
+    let area=0;
+    for(let i=0;i<grid[0].length-1;i++)for(let j=0;j<grid[1].length-1;j++){
+      const u=(grid[0][i]+grid[0][i+1])/2;
+      const v=(grid[1][j]+grid[1][j+1])/2;
+      if(occupied(a,edgeA,u,v)!==occupied(b,edgeB,u,v))
+        area+=(grid[0][i+1]-grid[0][i])*(grid[1][j+1]-grid[1][j]);
+    }
+    return area;
+  }
+  for(let yaw=0;yaw<4;yaw++)for(let arm=0;arm<2;arm++){
+    const direction=(arm?zDirs:xDirs)[yaw],axis=direction[0],face=direction[1]>0?1:0;
+    const hip=pack3GeometryById(114,yaw);
+    const stair=pack3GeometryById(113,(yaw+(arm?3:0))%4);
+    const mismatch=mismatchedArea(hip,stair,axis,face,1-face);
+    assert.equal(mismatch,0,
+      `Unjoinable clay hip-to-pitch roof course: yaw ${yaw}, arm ${arm}, mismatched cross-section ${mismatch}`);
+  }
+});
