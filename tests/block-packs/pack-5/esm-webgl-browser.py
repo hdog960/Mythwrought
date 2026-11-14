@@ -12,12 +12,12 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 root=Path(__file__).resolve().parents[3]
 mode=sys.argv[1] if len(sys.argv)>1 else 'm1'
-if mode not in ('m1','m2'):raise ValueError('Choose m1 or m2')
+if mode not in ('m1','m2','m3'):raise ValueError('Choose m1 or m2')
 out=Path(sys.argv[2]).resolve() if len(sys.argv)>2 else root/f'pack5-{mode}-webgl-previews'
 out.mkdir(parents=True,exist_ok=True)
-src='architectural-surfaces.mjs' if mode=='m1' else 'residential-furnishings.mjs'
-gallery='architectural-gallery' if mode=='m1' else 'residential-gallery'
-count,cols=(6,3) if mode=='m1' else (8,4)
+src={'m1':'architectural-surfaces.mjs','m2':'residential-furnishings.mjs','m3':'shop-workshop.mjs'}[mode]
+gallery={'m1':'architectural-gallery','m2':'residential-gallery','m3':'shop-gallery'}[mode]
+count,cols={'m1':(6,3),'m2':(8,4),'m3':(4,2)}[mode]
 def uri(s):return 'data:text/javascript;base64,'+base64.b64encode(s.encode()).decode()
 fixture=uri((root/'src/block-packs/pack-5/fixture.mjs').read_text())
 asset=(root/'src/block-packs/pack-5'/src).read_text()
