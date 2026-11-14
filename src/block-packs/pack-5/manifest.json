@@ -1,0 +1,222 @@
+{
+  "schema": "mythwrought.pack5.manifest.v1",
+  "title": "Interiors & Specialty Architecture",
+  "pack": 5,
+  "gate": "v0.10 Gate A",
+  "integration": "NOT INTEGRATED",
+  "status": "MILESTONE 0 — FOUNDATIONS",
+  "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "checkpoint": "006",
+  "coordinationIssues": [
+    109,
+    117
+  ],
+  "ownPaths": [
+    "src/block-packs/pack-5/",
+    "tests/block-packs/pack-5/"
+  ],
+  "numericIdAllocation": null,
+  "idPolicy": "Symbolic only; 209–254 unassigned, 255 sentinel; 256–385 future wide-ID reservation only; centrally coordinate before assigning",
+  "integrated": false,
+  "completedFamilies": 0,
+  "entries": [
+    {
+      "roster": 79,
+      "symbolicId": "pack5:079",
+      "name": "Plaster & Stucco",
+      "milestone": 1,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Smooth and textured wall finish; distinct from desert adobe",
+      "integrated": false
+    },
+    {
+      "roster": 80,
+      "symbolicId": "pack5:080",
+      "name": "Fired Brick Masonry",
+      "milestone": 1,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Manufactured fired brick courses, not stone brick or clay roofing",
+      "integrated": false
+    },
+    {
+      "roster": 81,
+      "symbolicId": "pack5:081",
+      "name": "Ceramic Interior Floor Tiles",
+      "milestone": 1,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Purpose-made interior decorative floor panels, not outdoor paving or calcite mosaics",
+      "integrated": false
+    },
+    {
+      "roster": 82,
+      "symbolicId": "pack5:082",
+      "name": "Beds",
+      "milestone": 2,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Head/foot identifiable multi-cell residential bedding; no sleeping",
+      "integrated": false
+    },
+    {
+      "roster": 83,
+      "symbolicId": "pack5:083",
+      "name": "Chairs & Stools",
+      "milestone": 2,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Separate one-seat chair and backless stool silhouettes, not benches",
+      "integrated": false
+    },
+    {
+      "roster": 84,
+      "symbolicId": "pack5:084",
+      "name": "Bookshelves",
+      "milestone": 2,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Modeled book spines, not merchandise displays",
+      "integrated": false
+    },
+    {
+      "roster": 85,
+      "symbolicId": "pack5:085",
+      "name": "Cabinets & Wardrobes",
+      "milestone": 2,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Enclosed furniture, not inventory containers",
+      "integrated": false
+    },
+    {
+      "roster": 86,
+      "symbolicId": "pack5:086",
+      "name": "Shop Counters",
+      "milestone": 3,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Customer-facing fascia, not dining tables",
+      "integrated": false
+    },
+    {
+      "roster": 87,
+      "symbolicId": "pack5:087",
+      "name": "Display Shelves",
+      "milestone": 3,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Open commercial tiered product fixtures, not bookshelves",
+      "integrated": false
+    },
+    {
+      "roster": 88,
+      "symbolicId": "pack5:088",
+      "name": "Anvils & Forge Fixtures",
+      "milestone": 3,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Smithy tools without functional forging, not fireplace",
+      "integrated": false
+    },
+    {
+      "roster": 89,
+      "symbolicId": "pack5:089",
+      "name": "Cauldrons & Alchemy Stations",
+      "milestone": 3,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Alchemy apparatus without brewing or fluid simulation",
+      "integrated": false
+    },
+    {
+      "roster": 90,
+      "symbolicId": "pack5:090",
+      "name": "Ovens & Cooking Ranges",
+      "milestone": 3,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Cooking chambers and ranges, not fireplaces or crafting",
+      "integrated": false
+    },
+    {
+      "roster": 91,
+      "symbolicId": "pack5:091",
+      "name": "Desks & Lecterns",
+      "milestone": 4,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Writing/presentation furniture, not tables/counters",
+      "integrated": false
+    },
+    {
+      "roster": 92,
+      "symbolicId": "pack5:092",
+      "name": "Carpets & Rugs",
+      "milestone": 4,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Thin independently selectable nonblocking floor coverings",
+      "integrated": false
+    },
+    {
+      "roster": 93,
+      "symbolicId": "pack5:093",
+      "name": "Altars & Pedestals",
+      "milestone": 4,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Ceremonial furniture not statues/relief/ruin plinth",
+      "integrated": false
+    },
+    {
+      "roster": 94,
+      "symbolicId": "pack5:094",
+      "name": "Heavy Gates & Portcullis Panels",
+      "milestone": 5,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Defensive leaves/lattice, not fence gates or dungeon guides/teeth",
+      "integrated": false
+    },
+    {
+      "roster": 95,
+      "symbolicId": "pack5:095",
+      "name": "Chandeliers",
+      "milestone": 5,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Ceiling-attached multiple-arm hanging fixture; light metadata only",
+      "integrated": false
+    },
+    {
+      "roster": 96,
+      "symbolicId": "pack5:096",
+      "name": "Stable Stall Partitions & Troughs",
+      "milestone": 5,
+      "status": "NOT STARTED",
+      "persistentNumericId": null,
+      "source": null,
+      "distinction": "Physical stall division and feed/water basins, not fences/wells",
+      "integrated": false
+    }
+  ]
+}
