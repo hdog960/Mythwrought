@@ -51,13 +51,12 @@ export function prototypeMesh(descriptor){
 }
 
 // Boundary-only mesh for unions of axis-aligned occupancy boxes.
-// Partitions at every box boundary, emitting only faces adjacent to empty space.
-// Opt-in: existing prototypeMesh remains unchanged for compatibility.
+// Greedy-merges adjacent coplanar exposed grid cells; never emits buried faces.
+// Opt-in: the original prototypeMesh remains unchanged for compatibility.
 export function prototypeSurfaceMesh(descriptor){
   if(!descriptor?.prototypeOnly||!Array.isArray(descriptor.boxes))throw new TypeError('Expected shape descriptor');
   const boxes=descriptor.boxes;
   const axes=[0,1,2].map(axis=>[...new Set(boxes.flatMap(b=>[b[axis],b[axis+3]]))].sort((a,b)=>a-b));
-  const [xs,ys,zs]=axes;
   const occupied=(x,y,z)=>boxes.some(b=>x>=b[0]&&x<b[3]&&y>=b[1]&&y<b[4]&&z>=b[2]&&z<b[5]);
   const positions=[],normals=[],indices=[];
   const emit=(corners,n)=>{
@@ -65,17 +64,46 @@ export function prototypeSurfaceMesh(descriptor){
     for(const p of corners){positions.push(...p);normals.push(...n);}
     indices.push(start,start+1,start+2,start,start+2,start+3);
   };
-  for(let i=0;i<xs.length-1;i++)for(let j=0;j<ys.length-1;j++)for(let k=0;k<zs.length-1;k++){
-    const x=xs[i],X=xs[i+1],y=ys[j],Y=ys[j+1],z=zs[k],Z=zs[k+1];
-    if(!occupied((x+X)/2,(y+Y)/2,(z+Z)/2))continue;
-    const empty=(a,b,c)=>!occupied(a,b,c);
-    const eps=1e-7;
-    if(empty(x-eps,(y+Y)/2,(z+Z)/2))emit([[x,y,z],[x,y,Z],[x,Y,Z],[x,Y,z]],[-1,0,0]);
-    if(empty(X+eps,(y+Y)/2,(z+Z)/2))emit([[X,y,Z],[X,y,z],[X,Y,z],[X,Y,Z]],[1,0,0]);
-    if(empty((x+X)/2,y-eps,(z+Z)/2))emit([[x,y,Z],[x,y,z],[X,y,z],[X,y,Z]],[0,-1,0]);
-    if(empty((x+X)/2,Y+eps,(z+Z)/2))emit([[x,Y,z],[x,Y,Z],[X,Y,Z],[X,Y,z]],[0,1,0]);
-    if(empty((x+X)/2,(y+Y)/2,z-eps))emit([[X,y,z],[x,y,z],[x,Y,z],[X,Y,z]],[0,0,-1]);
-    if(empty((x+X)/2,(y+Y)/2,Z+eps))emit([[x,y,Z],[X,y,Z],[X,Y,Z],[x,Y,Z]],[0,0,1]);
+  const at=(axis,p,u,v)=>axis===0?[p,u,v]:axis===1?[u,p,v]:[u,v,p];
+  const emitFace=(axis,p,u0,u1,v0,v1,dir)=>{
+    if(axis===0){
+      if(dir===-1)emit([[p,u0,v0],[p,u0,v1],[p,u1,v1],[p,u1,v0]],[-1,0,0]);
+      else emit([[p,u0,v1],[p,u0,v0],[p,u1,v0],[p,u1,v1]],[1,0,0]);
+    }else if(axis===1){
+      if(dir===-1)emit([[u0,p,v1],[u0,p,v0],[u1,p,v0],[u1,p,v1]],[0,-1,0]);
+      else emit([[u0,p,v0],[u0,p,v1],[u1,p,v1],[u1,p,v0]],[0,1,0]);
+    }else{
+      if(dir===-1)emit([[u1,v0,p],[u0,v0,p],[u0,v1,p],[u1,v1,p]],[0,0,-1]);
+      else emit([[u0,v0,p],[u1,v0,p],[u1,v1,p],[u0,v1,p]],[0,0,1]);
+    }
+  };
+  // Each axis-aligned plane has two possible outward normals. A surface cell
+  // exists only where the immediately interior sample is solid and exterior is air.
+  const eps=1e-7;
+  for(let axis=0;axis<3;axis++){
+    const planeCoords=axes[axis],other=[0,1,2].filter(a=>a!==axis);
+    const us=axes[other[0]],vs=axes[other[1]];
+    for(const p of planeCoords)for(const dir of [-1,1]){
+      const width=us.length-1,height=vs.length-1;
+      const grid=Array.from({length:height},(_,v)=>Array.from({length:width},(_,u)=>{
+        const midU=(us[u]+us[u+1])/2,midV=(vs[v]+vs[v+1])/2;
+        return occupied(...at(axis,p-dir*eps,midU,midV)) &&
+          !occupied(...at(axis,p+dir*eps,midU,midV));
+      }));
+      const used=grid.map(row=>row.map(()=>false));
+      for(let v=0;v<height;v++)for(let u=0;u<width;u++){
+        if(!grid[v][u]||used[v][u])continue;
+        let w=1;
+        while(u+w<width&&grid[v][u+w]&&!used[v][u+w])w++;
+        let h=1;
+        extend:while(v+h<height){
+          for(let j=0;j<w;j++)if(!grid[v+h][u+j]||used[v+h][u+j])break extend;
+          h++;
+        }
+        for(let y=v;y<v+h;y++)for(let x=u;x<u+w;x++)used[y][x]=true;
+        emitFace(axis,p,us[u],us[u+w],vs[v],vs[v+h],dir);
+      }
+    }
   }
   return {positions:new Float32Array(positions),normals:new Float32Array(normals),
     indices:new Uint16Array(indices),boxes:boxes.length,triangles:indices.length/3,
