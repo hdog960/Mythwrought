@@ -337,5 +337,14 @@
   "currentAcceptanceStatus": "M0–M4 source authored; M5 CONDITIONAL pending whole-pack native Node, genuine 23-card Chromium screenshots and creator visual/physical-iPhone Gate A review",
   "latestAcceptanceV8": 152,
   "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
-  "galleryEvidence": "Source-derived gallery implementation hardened with GPU resource disposal, fixed-view alpha sorting and fit-to-frame; genuine Chromium remains blocked by browser navigation policy"
+  "galleryEvidence": "Source-derived gallery implementation hardened with GPU resource disposal, fixed-view alpha sorting and fit-to-frame; genuine Chromium remains blocked by browser navigation policy",
+  "reviewDocuments": [
+    "src/block-packs/pack-4/PROGRESS.md",
+    "src/block-packs/pack-4/INTEGRATION.md",
+    "src/block-packs/pack-4/M5_ACCEPTANCE.md"
+  ],
+  "nativeNodeVerifiedTests": 5,
+  "nativeNodeScope": "preview-utils.test.mjs ONLY; all other Pack 4 nested Node suites not yet run from actual checkout",
+  "galleryScope": "23 original geometry candidate cards; browser script authored for three iPhone landscape widths, no genuine screenshots verified",
+  "nextMilestone": "M5 final acceptance blocked on full native Node suite, genuine Chromium gallery, shared contract integration and explicit creator review"
 }
