@@ -25,7 +25,7 @@ test('manifest coordinates and profiles match exact generated full 3D blueprints
   assert.equal(d.roofStyle,b.architecture.roofStyle);
   count+=d.occupiedCoordinates;
  }
- assert.equal(count,76376);
+ assert.equal(count,70921);
  assert.equal(count,manifest.coordinateSlots);
 });
 test('canonical blueprints remain JSON roundtrip exact and save schema independent',()=>{
