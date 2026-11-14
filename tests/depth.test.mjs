@@ -42,6 +42,7 @@ test('vertical sections partition the full range without gaps or double cells',(
 test('GPU section selection is bounded and original surface window preserved',()=>{
   assert.deepEqual(sectionWindow(10),[0]);
   assert.deepEqual(sectionWindow(3),[0]);
+  assert.deepEqual(sectionWindow(2),[0,-1],'show deep rock when a player excavates below surface feet');
   assert.deepEqual(sectionWindow(-1),[0,-1]);
   assert.deepEqual(sectionWindow(-6),[-1,0,-2]);
   assert.deepEqual(sectionWindow(-210),[LOWEST_SECTION,LOWEST_SECTION+1]);
