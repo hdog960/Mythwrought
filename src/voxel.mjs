@@ -113,7 +113,7 @@ export class VoxelWorld{
       if(this.liveDistrictCache.size>LIVE_DISTRICT_CACHE_LIMIT)
         this.liveDistrictCache.delete(this.liveDistrictCache.keys().next().value);
     }
-    return district.get(x,y,z);
+    return district.get(x,y,z,ordinary);
   }
 
   get(x,y,z){
