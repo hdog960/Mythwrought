@@ -70,7 +70,59 @@ async function main(){
   process.stdout.write('Verified Pack 1 exact checkout '+commit+' ('+branch+')\n');
   const files=groups.map(x=>own+x);
   const nodeResult=run(process.execPath,['--test',...files]);
-  assert.match(nodeResult,/fail\s+0\b/,'Native Node produced failures');
+  // A zero exit alone can hide a suite that skipped everything. Require the
+  // exact native TAP footer and at least 86 executed tests (81+5 owned tests).
+  const metric=(key)=>{
+    const match=nodeResult.match(new RegExp('^# '+key+'\\s+(\\d+)\\s*
+  const gallery=run(process.execPath,[own+'galleries-browser.mjs'],{
+    env:{...process.env,PACK1_EXPECTED_HEAD:commit}
+  });
+  process.stdout.write(gallery);
+  // The gallery runner writes this manifest ONLY after its own 15-view pass.
+  const manifest=JSON.parse(await readFile(join(reportDir,'acceptance-report.json'),'utf8'));
+  assert.equal(manifest.checkoutGitHead,commit,'Chromium report has wrong checkout commit');
+  assert.equal(manifest.playwrightChromeRealRun,true);
+  assert.equal(manifest.evidence.length,15,'Not all landscape gallery views ran');
+  assert.equal(manifest.totals.viewports,15);
+  assert.equal(manifest.totals.screenshots,30);
+  assert.equal(manifest.totals.interactionChecks,45);
+  assert.deepEqual(manifest.evidence.map(x=>
+    x.gallery+'-'+x.viewport.width+'x'+x.viewport.height).sort(),views.slice().sort());
+  const images=[];
+  for(const v of views)for(const suffix of ['-candidate.png','-placed.png']){
+    const filename=v+suffix;
+    images.push({file:filename,...await checkImage(join(reportDir,filename))});
+  }
+  assert.equal(images.length,30);
+  const finished={
+    status:'PASS',kind:'pack-1-standalone-final-candidate-acceptance',
+    gitHead:commit,createdAt:new Date().toISOString(),
+    nativeNode:{testFiles:files,executed:true,result:'PASS',tests,passed,failed,skipped,todo},
+    chromium:{executed:true,views:15,screenshots:30,images},
+    note:'Source candidate gallery acceptance only; NOT integrated WebGL2, offline PWA reload, or physical-iPhone review'
+  };
+  await mkdir(reportDir,{recursive:true});
+  await writeFile(join(reportDir,'native-acceptance-PASS.json'),
+    JSON.stringify(finished,null,2)+'\n');
+  process.stdout.write('PACK1_NATIVE_ACCEPTANCE_PASS '+commit+' (8 Node suites, 15 Chromium views, 30 PNGs)\n');
+}
+try{await main()}catch(error){
+  // Do not fabricate a PASS file on any partial run. A pre-existing report
+  // should be considered valid only when its gitHead equals the run's exact SHA.
+  process.stderr.write('PACK1_NATIVE_ACCEPTANCE_BLOCKED: '+String(error)+'\n');
+  process.exitCode=1;
+}
+,'m'));
+    assert.ok(match,'Native Node TAP summary missing '+key);
+    return Number(match[1]);
+  };
+  const tests=metric('tests'),passed=metric('pass'),failed=metric('fail');
+  const skipped=metric('skipped'),todo=metric('todo');
+  assert.ok(tests>=86,'Too few native Pack 1 tests executed: '+tests);
+  assert.equal(passed,tests,'Native Pack 1 tests were not all passing');
+  assert.equal(failed,0,'Native Pack 1 tests failed');
+  assert.equal(skipped,0,'Native Pack 1 tests were skipped');
+  assert.equal(todo,0,'Native Pack 1 tests remained TODO');
   process.stdout.write(nodeResult);
   const gallery=run(process.execPath,[own+'galleries-browser.mjs'],{
     env:{...process.env,PACK1_EXPECTED_HEAD:commit}
