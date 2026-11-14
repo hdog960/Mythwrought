@@ -94,3 +94,22 @@ test('reserved physical leaf material is accepted only when present in registry'
   assert.ok(leaves.cells.some(c=>c[3]===BLOCK.LEAVES));
  }
 });
+
+test('elderwood creates a broad real-voxel crown with four limbs and respects edits',()=>{
+ for(const seed of [179,917,-184]){
+  const w=new VoxelWorld(seed),p=site(w,'elderwood');
+  assert.ok(p.blockCount>80,'elderwood should be a visibly substantial tree');
+  const [x,y,z]=p.origin;
+  assert.ok(p.cells.some(c=>c[0]===x+3&&c[2]===z&&c[3]===BLOCK.WOOD),'east limb');
+  assert.ok(p.cells.some(c=>c[0]===x-3&&c[2]===z&&c[3]===BLOCK.WOOD),'west limb');
+  assert.ok(p.cells.some(c=>c[0]===x&&c[2]===z+3&&c[3]===BLOCK.WOOD),'south limb');
+  assert.ok(p.cells.some(c=>c[0]===x&&c[2]===z-3&&c[3]===BLOCK.WOOD),'north limb');
+  assert.equal(placeVoxelTree(w,p),true);
+  const crown=p.cells.find(c=>c[3]===p.leafId);
+  assert.equal(w.get(...crown.slice(0,3)),p.leafId);
+  assert.equal(VoxelWorld.restore(w.save()).get(...crown.slice(0,3)),p.leafId);
+  assert.equal(placeVoxelTree(w,p),false,'existing tree cannot be overwritten');
+  assert.equal(w.set(...crown.slice(0,3),BLOCK.AIR),true);
+  assert.equal(w.get(...crown.slice(0,3)),BLOCK.AIR);
+ }
+});
