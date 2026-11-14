@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
  PACK4_SHARED_AABB_LIMIT,pack4ShapeHandoff,
- pack4SidecarHandoff,pack4ReviewSidecar
+ pack4SidecarHandoff,pack4ReviewSidecar,
+ pack4FixtureToSidecarSnapshot,pack4SidecarToFixtureSnapshot
 } from '../../../src/block-packs/pack-4/interaction-handoff.mjs';
-import {pack4Shape} from '../../../src/block-packs/pack-4/fixture.mjs';
+import {pack4Shape,pack4MountOffset,createPack4Fixture} from '../../../src/block-packs/pack-4/fixture.mjs';
 
 const ids=Array.from({length:23},(_,i)=>159+i);
 function sharedValidateShape(shape){
@@ -86,4 +87,40 @@ test('invalid rotations, unassigned IDs, collision aliases and duplicate sidecar
   {cell:[0,0,0],id:170,rotation:2}
  ]));
  assert.throws(()=>pack4ReviewSidecar([null]));
+});
+
+test('all 23 mounted candidates roundtrip from isolated fixture to staged sidecar and back',()=>{
+ const cells=ids.map((id,index)=>({id,cell:[1000000+index*4,2,65537],rotation:index%4}));
+ const supports=cells.map(item=>{
+  const off=pack4MountOffset(item.id,item.rotation);
+  return off?item.cell.map((n,i)=>n+off[i]):null;
+ }).filter(Boolean);
+ const original=createPack4Fixture(supports);
+ for(const item of cells)
+  assert.equal(original.place(item.cell,item.id,item.rotation).ok,true,'place '+item.id);
+ const before=JSON.parse(JSON.stringify(original.save()));
+ const sidecar=pack4FixtureToSidecarSnapshot(before);
+ assert.equal(sidecar.length,23);
+ assert.ok(sidecar.every(e=>Object.hasOwn(e,'blockId')&&Object.hasOwn(e,'turns')));
+ const fixture=pack4SidecarToFixtureSnapshot(JSON.parse(JSON.stringify(sidecar)));
+ const restored=createPack4Fixture(supports);
+ assert.equal(restored.restore(fixture),23);
+ assert.deepEqual(restored.save(),original.save());
+ assert.deepEqual(pack4FixtureToSidecarSnapshot(restored.save()),sidecar);
+});
+test('sidecar-to-fixture conversion rejects invalid formats and duplicate cells without mutation',()=>{
+ assert.throws(()=>pack4FixtureToSidecarSnapshot(null));
+ assert.throws(()=>pack4FixtureToSidecarSnapshot({fixture:'wrong',schemaVersion:1,cells:[]}));
+ assert.throws(()=>pack4FixtureToSidecarSnapshot({
+  fixture:'mythwrought.pack4.fixture',schemaVersion:2,cells:[]
+ }));
+ for(const invalid of [
+  null,{},[null],[{cell:[0,0,0],blockId:169}],
+  [{cell:[0,0,0],blockId:169,turns:4}],
+  [{cell:[0,0,0],blockId:255,turns:0}],
+  [{cell:[0,0,0],blockId:169,turns:0},{cell:[0,0,0],blockId:170,turns:1}]
+ ])assert.throws(()=>pack4SidecarToFixtureSnapshot(invalid));
+ assert.deepEqual(pack4SidecarToFixtureSnapshot([]),{
+  fixture:'mythwrought.pack4.fixture',schemaVersion:1,cells:[]
+ });
 });
