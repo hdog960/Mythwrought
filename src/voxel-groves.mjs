@@ -13,12 +13,16 @@ const distanceSq=(x,z,a,b)=>{
  const t=dx||dz?Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz))):0;
  return (x-a[0]-t*dx)**2+(z-a[1]-t*dz)**2;
 };
-export function planVoxelGrove(world,{minX,minZ,maxX,maxZ,spacing=9,maxTrees=12,paths=[]}={}){
+export function planVoxelGrove(world,{minX,minZ,maxX,maxZ,spacing=9,maxTrees=12,paths=[],protectedSites=[]}={}){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
   ![minX,minZ,maxX,maxZ,spacing,maxTrees].every(Number.isInteger)||
   minX>maxX||minZ>maxZ||spacing<7||spacing>32||maxTrees<1||maxTrees>64||
   (maxX-minX+1)*(maxZ-minZ+1)>65536||
   !Array.isArray(paths)||paths.length>8||
+  !Array.isArray(protectedSites)||protectedSites.length>16||
+  protectedSites.some(site=>!Array.isArray(site)||site.length!==3||
+   site.some(n=>!Number.isSafeInteger(n))||site[2]<2||site[2]>24||
+   site[0]<minX-24||site[0]>maxX+24||site[1]<minZ-24||site[1]>maxZ+24)||
   paths.some(segment=>!Array.isArray(segment)||segment.length!==2||
    segment.some(p=>!Array.isArray(p)||p.length!==2||
     p.some(n=>!Number.isSafeInteger(n)))||
@@ -37,6 +41,10 @@ export function planVoxelGrove(world,{minX,minZ,maxX,maxZ,spacing=9,maxTrees=12,
   // Reserve ground-level walking clearance, not an artificial tunnel.
   if(paths.some(([a,b])=>p.cells.some(([cx,cy,cz])=>
    cy<=p.origin[1]+3&&distanceSq(cx,cz,a,b)<=4)))continue;
+  // :24 can reserve cave mouths, overlooks and landmark approaches without
+  // changing landforms. Protect the entire tree silhouette, including crowns.
+  if(protectedSites.some(([sx,sz,r])=>p.cells.some(([cx,,cz])=>
+   (cx-sx)**2+(cz-sz)**2<=r*r)))continue;
   if(p.cells.some(([cx,cy,cz])=>occupied.has(cx+','+cy+','+cz)))continue;
   for(const [cx,cy,cz] of p.cells)occupied.add(cx+','+cy+','+cz);
   plans.push(p);
