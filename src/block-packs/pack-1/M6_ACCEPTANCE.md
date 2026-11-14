@@ -205,3 +205,22 @@ The complete Git blob list, exact `node --test` command, qualification, and new 
 **Current integrated main:** `ac263720b60641c65b02330348dd76d0ef9cb75e`, checkpoint **008**, explicitly automation-owned and excluding all five manual Block Packs. Production BLOCK IDs still only **0–8**. Candidate IDs **9–38** all remain exclusive and CANDIDATE. Real live-game material/atlas registration, partial occupancy meshing and targeting, schema-1 rotated save compatibility, WebGL2/iPhone performance and creator art/control approval still require a separately authorized integration gate.
 
 **M6 exit state: NODE VERIFIED; CHROMIUM/PRODUCTION/CREATOR OPEN. Draft PR #113 remains unmerged/undeployed; v0.10 Gate A OPEN, v0.11 LOCKED.**
+
+
+## M6 browser visual-state acceptance hardening — 2026-11-14
+
+**Current verified repository baseline:** integrated main `ac263720b60641c65b02330348dd76d0ef9cb75e`, documented **checkpoint 008**; Issues #109/#117 OPEN; draft PR #113 unmerged and exclusive to Pack 1 paths. **21 families / 30 IDs 9–38 remain CANDIDATE**. Exact GitHub Actions workflow [#43649027647](https://github.com/hdog960/Mythwrought/actions/runs/43649027647) for prior head `745886a95037d4bdce9555536b2e4149995de15f` is still QUEUED, not green; check the newer head separately. Root CI never runs the nested Pack 1 browser gallery.
+
+**Native source test gate remains conclusively PASSED:** **93/93 genuine Node 22.16.0 tests, 0 fail, 0 skipped, 0 TODO**, over nine nested modules and 21 byte-for-byte GitHub blob-verified source/test files. See `M6_NATIVE_NODE_EVIDENCE.md`. No new candidate source module changed in this cycle and this established native result need not be reinterpreted as a V8 shim or re-executed just for reporting.
+
+**Pack 1-exclusive browser acceptance fix:** While analyzing the exact committed five gallery implementations, found a blind spot in `tests/block-packs/pack-1/galleries-browser.mjs`: it tested the fixture edit count but did **not** verify that the visible selected/placed states of every gallery card agreed with that count. A broken `refresh()` implementation could have passed all save/fixture counters while the preview UI incorrectly showed blocks as unplaced. The source runner now enforces **four visible card-state checks for every gallery/viewport**:
+1. Initial: **0** visibly selected cards and empty fixture;
+2. After place-all: exactly **6/6 masonry**, **6/6 stone**, **3/3 garden**, **8/8 foliage**, or **7/7 floral** selected cards, matching the canonical fixture IDs;
+3. After offline canonical save/restore: selected card count remains the exact canonical count;
+4. After clear-all: selected card count returns to **0**.
+
+The implementation uses grounded actual CSS classes from each corresponding source module: masonry `#grid > .card.selected`, stone `#grid > .card.active`, garden `#grid > .card.placed`, foliage `#grid > .card.active`, floral `#grid > .item.active`. All five exact gallery modules explicitly set those classes in their `refresh` logic. Updated runner and all five gallery JS sources passed JavaScript syntax checks; **these are static/source checks, NOT Chromium browser execution**. The report includes the four visible state counts per gallery run. No source asset geometry, IDs or renderer was modified.
+
+**Genuine browser blocker independently reproduced again** using installed Chromium and Python Playwright: `data:`, `file:`, and `http://127.0.0.1` navigation each fail with `net::ERR_BLOCKED_BY_ADMINISTRATOR` despite successful browser launch. This blocks all **15 source-gallery Chromium views and 30 authentic PNG screenshots**. No attempt was made to bypass browser administrator rules and no synthetic/generated image is claimed as actual browser evidence.
+
+**Gate disposition:** Pack 1 native Node PASS, Chromium/visual review OPEN, live engine/partial-voxel integration and schema-1 orientation save approval OPEN, physical iPhone and creator art/control sign-off OPEN. M6 overall NOT ACCEPTED; all 30 assets remain **CANDIDATE**, draft PR #113 unmerged/undeployed, no shared engine/CI/worldgen/other pack changes, v0.11 LOCKED.
