@@ -6,6 +6,7 @@ import {grottoAccentVertices} from './grotto.mjs';
 import {caveRuneVertices} from './cave-runes.mjs';
 import {waystoneVertices} from './waystones.mjs';
 import {caveThresholdVertices} from './cave-thresholds.mjs';
+import {moonbellVertices} from './moonbells.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
@@ -175,9 +176,10 @@ export function meshChunk(world,cx,cz){
   });
   const waystones=waystoneVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const caveThresholds=caveThresholdVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,air:BLOCK.AIR,stoneId:BLOCK.STONE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y});
+  const moonbells=moonbellVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const solid=new Float32Array(vertices);
-  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length&&!caveThresholds.length)return solid;
-  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length+caveThresholds.length);
+  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length&&!caveThresholds.length&&!moonbells.length)return solid;
+  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length+caveThresholds.length+moonbells.length);
   combined.set(solid);combined.set(canopy,solid.length);
   combined.set(grove,solid.length+canopy.length);
   combined.set(meadow,solid.length+canopy.length+grove.length);
@@ -185,7 +187,8 @@ export function meshChunk(world,cx,cz){
   // Existing meadow and grotto tail positions retain their regression invariants.
   combined.set(grotto,solid.length+canopy.length+grove.length+meadow.length+runes.length);
   combined.set(waystones,combined.length-waystones.length-caveThresholds.length);
-  combined.set(caveThresholds,combined.length-caveThresholds.length);
+  combined.set(caveThresholds,combined.length-caveThresholds.length-moonbells.length);
+  combined.set(moonbells,combined.length-moonbells.length);
   return combined;
 }
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.
