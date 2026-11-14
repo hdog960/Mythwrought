@@ -66,3 +66,14 @@
 - Executed source-authentic native ES-module Chromium **WebGL2 M1 six PNGs and M2 six PNGs** with software OpenGL/Xvfb at 667×375, 844×390, 932×430 and rotations 0/1; real WebGL2 drawing/pixel fingerprints pass. Local HTTP-served gallery still denied by browser administrator; no iPhone device/production renderer result.
 - Preview budgets unchanged (M2 max 636 source triangles / 1272 vertices per variant; max per-cell <=64 authored AABB parts), no claim of live GPU performance.
 - Manifest remains **7 CANDIDATE / 11 NOT STARTED / 0 INTEGRATED**; M1/M2 creator final artwork and saved-game/runtime checks OPEN. No merger, deployment, worldgen placement, changes to shared systems or other packs, or v0.11 unlock.
+
+## Milestone 2 isolated technical closeout and Milestone 3 source candidate start — 2026-11-14
+
+- Reverified main `ac263720b60641c65b02330348dd76d0ef9cb75e` / checkpoint 008, Issues #109/#117, current Packs 1–4 manifests/draft PR heads and :12 biome130 reservation. Entire Pack 5 remains an unmerged, exclusive draft.
+- Milestone 2: **69/69 original dedicated Node tests passed**; six **genuine native ES-module Chromium WebGL2** captures at 667×375, 844×390, 932×430 and rotations 0,1 passed. All eight residential variants visually inspected. No new material technical defect discovered; M2 isolated *technical* review acceptable to proceed to source-only M3. **Creator art/physical-iPhone and production engine integration are NOT accepted**.
+- Milestone 1 WebGL2 six-preview rerun also PASS; creator art and original HTTP-served load remain OPEN. Local browser administrator blocks localhost navigation.
+- Began **Milestone 3** with symbolic `pack5:086` Shop Counters (ledger-service; festival-fascia) and `pack5:087` Display Shelves (stepped-market-tray; curio-arcade): four source-authored physical box-union variants, floor backing, real selection/removal/colliders and fixture-only snapshot restore, no trade or inventory systems.
+- Genuine native Node 22.16.0 suite **83/83 PASS** (69 inherited + 14 M3), exact local source/test Git blob parity. New fixture preview costs 26/31/23/26 source boxes (312/372/276/312 unculled triangles) per 1-cell candidate, within existing box budgets; no mobile GPU benchmark claimed.
+- Six real Chromium WebGL2 native ES-module M3 screenshots passed with four distinct nonblank candidate cards and 0/1 rotation change per viewport; actual source-served HTTP still blocked. `esm-webgl-browser.py m3 <output-directory>` reproduces evidence.
+- Pack 5 statuses **9 CANDIDATE / 9 NOT STARTED / 0 INTEGRATED**. M3 remaining 88 Anvils & Forge Fixtures, 89 Cauldrons & Alchemy Stations, and 90 Ovens & Cooking Ranges are **NOT STARTED**. See `M3_ACCEPTANCE.md`.
+- No assignment of production IDs, changes to main/schema-1, shared systems, other developer paths, automated work, world placement, merge, deployment or v0.11 unlock.
