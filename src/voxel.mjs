@@ -16,10 +16,11 @@ import {ruinedCausewayVertices} from './ruined-causeway.mjs';
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
 export const WORLD_MAX_Y = 19;
-export const BLOCK = Object.freeze({ AIR:0, GRASS:1, DIRT:2, STONE:3, WOOD:4, CRYSTAL:5, ORE:6 });
+export const BLOCK = Object.freeze({ AIR:0, GRASS:1, DIRT:2, STONE:3, WOOD:4, CRYSTAL:5, ORE:6, LEAVES:7, DEEPSTONE:8 });
 const COLORS = {
   1:[0.35,0.64,0.32], 2:[0.48,0.34,0.24], 3:[0.48,0.51,0.55],
-  4:[0.60,0.39,0.23], 5:[0.36,0.79,0.92], 6:[0.70,0.58,0.33]
+  4:[0.60,0.39,0.23], 5:[0.36,0.79,0.92], 6:[0.70,0.58,0.33],
+  7:[0.27,0.57,0.31], 8:[0.32,0.39,0.48]
 };
 const FACE = [
   {d:[1,0,0],q:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],lit:.77},
@@ -84,7 +85,7 @@ export class VoxelWorld{
     return this.edits.has(key)?this.edits.get(key):baseBlock(x,y,z,this.seed);
   }
   set(x,y,z,id){
-    if(![x,y,z,id].every(Number.isInteger)||y<WORLD_MIN_Y||y>WORLD_MAX_Y||id<0||id>6)return false;
+    if(![x,y,z,id].every(Number.isInteger)||y<WORLD_MIN_Y||y>WORLD_MAX_Y||id<0||id>8)return false;
     const key=worldKey(x,y,z);
     if(baseBlock(x,y,z,this.seed)===id)this.edits.delete(key);
     else this.edits.set(key,id);
@@ -162,7 +163,7 @@ export function meshChunk(world,cx,cz){
           const b=clamp(color[2]*variance*face.lit,0,1);
           for(const k of [0,1,2,0,2,3]){
             const p=face.q[k],uv=FACE_UV[k];
-            appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id);
+            appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
           }
         }
       }
