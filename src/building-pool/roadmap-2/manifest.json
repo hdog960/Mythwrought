@@ -29,7 +29,7 @@
     "M4": 165
   },
   "milestones": {
-    "M0": "open-genuine-Chromium-visual-review-and-exact-PR-head-QA",
+    "M0": "local-source-and-browser-qa-passed; exact-head GitHub Actions still pending",
     "M1": "not-started",
     "M2": "not-started",
     "M3": "not-started",
@@ -48,8 +48,8 @@
   "physicalInterfacesApproved": 0,
   "sourceScope": "Roadmap 2 exclusive",
   "verification": {
-    "localNode": "Exact previous HEAD Git blobs reconstructed (five exact SHA matches), original 7/7 PASS; corrected schema and expanded test suite native Node 9/9 PASS on local working patch; latest committed head requires recheck",
-    "chromium": "headless blank Chrome and gallery failed to initialize (EGL/SwANGLE timeout; Xvfb fallback timeout), no screenshots; dedicated reproducible gallery-browser.py authored",
+    "localNode": "Exact PR-head committed source hashes matched and native Node v22.16.0 dedicated 9/9 PASS.",
+    "chromium": "Actual headless Chromium standalone Canvas2D: PASS at 667x375, 844x390, 932x430 via no-network inline source bundle; 9 authentic PNG files captured (3 composites + 6 canvases), all 3 composite views inspected; production WebGL2 NOT tested.",
     "realIphone": "not tested"
   },
   "status": "DRAFT / UNMERGED / UNDEPLOYED / NOT IN LIVE WORLD"

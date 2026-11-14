@@ -26,3 +26,6 @@ Standalone conceptual browser source: tests/building-pool/roadmap-2/preview.html
 The M0 schema now requires each named room to be reachable from the exterior via a graph of its declared room uses, rather than assuming every category contains a shop storeroom. Test-only temple schema fixtures are NOT authored temple blueprints. Entrance clearance verifies all declared vertical cells; window apertures must exist as actual `window` geometry.
 
 For genuine screenshots after the browser environment is operational, run `python3 tests/building-pool/roadmap-2/gallery-browser.py` with free Playwright Chromium installed. Six actual canvas screenshots (exterior/cutaway at three iPhone landscape widths) must be manually inspected before M0 approval. This is conceptual Canvas2D, not native game WebGL2.
+
+### No-network Chromium fallback (genuine browser rendering)
+Where localhost navigation is blocked, `python3 tests/building-pool/roadmap-2/gallery-offline-browser.py` runs the original concept-gallery materials inside actual headless Chromium using browser `set_content` and inline module bundling, without HTTP or alternate fake image generation. Produces three full-frame landscape screenshots at 667×375, 844×390, 932×430 plus six focused exterior/cutaway canvases. These do **not** certify production-game WebGL2 or iPhone hardware.
