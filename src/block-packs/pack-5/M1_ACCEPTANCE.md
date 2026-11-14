@@ -65,3 +65,10 @@ All under the isolated 64-box / 768-triangle / 1536-vertex preview contract. The
 3. Creator visual review has not occurred. Do not infer approval from authored geometry or Canvas2D fallback images.
 4. Production shape-aware collision/raycast, support, registered numeric IDs, variant persistence and backward-safe schema-1 save compatibility are centralized :00/:12 and manual-incorporation concerns; document dependencies, never edit shared modules from Pack 5.
 5. **Milestone 2 residential furnishings is NOT STARTED** pending adequate Milestone 1 acceptance. Keep existing independent manual packs, biome130 lane, automations, game version and Pages deployment unchanged.
+
+## Later central incorporation 007 coordination recheck (same day)
+- Newest merged `main` is `caf47776b723a36684edc1a72749e49268ccc688` and the newest checkpoint is **007**. The original Pack 5 branch was created from `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84` / checkpoint 006; do not mistake that historical base for current main.
+- Creator-authorized incorporation [PR #120](https://github.com/hdog960/Mythwrought/pull/120) explicitly **excluded** manual Pack 1–5 projects, their draft PRs and all building-pool projects. No Pack 5 paths were merged; 0–8 are still the only runtime block IDs.
+- Checkpoint 007 integrated generic opt-in :00 shape interactions, :12 shape prototypes and 12 biome130 desert candidate source assets **without** live block IDs or generated placements. These do **not** constitute Pack 5's production registry, shape/collision/save integration, or creator artwork approval.
+- Comparison of new main to Pack 5 PR shows two newer central commits, 28 Pack 5-only branch commits and **no overlapping changed paths**. Keep Pack 5 draft unmerged and avoid an unnecessary branch rewrite.
+- Future creator-authorized incorporation must compare Pack 5 against 007 or newer and re-run full native/Chromium/production save verification on the final integration head.
