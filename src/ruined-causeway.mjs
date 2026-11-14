@@ -18,23 +18,32 @@ export function ruinedCausewayVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
  for(let dx=-3;dx<=3;dx++)for(let dz=-4;dz<=4;dz++){
   const xx=x+dx,zz=z+dz,g=heightAt(xx,zz,world.seed);
   if(Math.abs(g-h)>1||world.get(xx,g,zz)!==baseAt(xx,g,zz,world.seed))return new Float32Array();
-  for(let dy=1;dy<=5;dy++)if(world.get(xx,h+dy,zz)!==air)return new Float32Array();
+  for(let dy=1;dy<=6;dy++)if(world.get(xx,g+dy,zz)!==air)return new Float32Array();
  }
  const o=[],y=h+1.018;
+ // Each paving stone follows the actual existing grass height. This avoids
+ // floating roads on one-block terrace steps without reshaping saved terrain.
+ const roadY=(xx,zz)=>heightAt(Math.floor(xx),Math.floor(zz),world.seed)+1.018;
  const slate=[[.51,.58,.62],[.40,.48,.55],[.36,.43,.49],[.46,.54,.59],[.66,.70,.69]];
  const pale=[[.70,.73,.69],[.55,.63,.65],[.48,.57,.60],[.62,.68,.67],[.78,.79,.73]];
  // A lost stone road with broken, staggered paving and an uninterrupted
  // central sightline. This is NOT a bridge over an unsupported water feature.
  for(let iz=-4;iz<=3;iz++){
   const offset=(iz%2===0?.13:-.16);
-  prism(o,x-1.05+offset,y+.012,z+iz+.12,.94,.085,.73,iz%3===0?pale:slate);
-  prism(o,x+.08+offset,y+.014,z+iz+.07,.92,.075,.77,iz%3===1?pale:slate);
+  const leftX=x-1.05+offset,rightX=x+.08+offset,frontZ=z+iz+.12;
+  // Two separately grounded paving lanes, with exposed risers on grade changes.
+  const ly=roadY(leftX+.45,frontZ+.35),ry=roadY(rightX+.45,z+iz+.42);
+  prism(o,leftX,ly+.012,frontZ,.94,.085,.73,iz%3===0?pale:slate);
+  prism(o,rightX,ry+.014,z+iz+.07,.92,.075,.77,iz%3===1?pale:slate);
+  if(ly<y-.25)prism(o,leftX,ly-.22,frontZ,.94,.23,.73,slate);
+  if(ry<y-.25)prism(o,rightX,ry-.22,z+iz+.07,.92,.23,.77,slate);
  }
  // Four ruined balustrade piers and a single fractured overhead gateway
  // make a recognizable silhouette without sealing the path.
  for(const [dx,dz,t] of [[-2.10,-2.35,2.6],[1.60,-2.35,3.3],[-2.10,2.15,3.8],[1.60,2.15,2.45]]){
-  prism(o,x+dx,y,z+dz,.51,t,.57,slate);
-  prism(o,x+dx-.13,y+t,z+dz-.12,.77,.18,.80,pale);
+  const py=roadY(x+dx+.25,z+dz+.28);
+  prism(o,x+dx,py,z+dz,.51,t,.57,slate);
+  prism(o,x+dx-.13,py+t,z+dz-.12,.77,.18,.80,pale);
  }
  prism(o,x-1.63,y+3.00,z+2.19,1.05,.42,.48,pale);
  prism(o,x+.24,y+3.00,z+2.19,1.78,.34,.48,slate);
