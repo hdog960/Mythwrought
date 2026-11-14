@@ -42,6 +42,9 @@ with sync_playwright() as p:
           page.wait_for_function('(id) => document.documentElement.dataset.ready===id',arg=expected,timeout=10000)
           status=page.locator('#status').inner_text()
           assert expected in status and 'actual coordinate cells' in status
+          # The gallery footer must report TRUE authored functional-space count.
+          expected_rooms=2 if size=='small' else (4 if category=='temple' and size=='large' else 3)
+          assert f'{expected_rooms} rooms' in status, f'gallery stale room count: {expected}, {status}'
           assert page.locator('canvas').count()==2
           for cid in ('external','interior'):
            assert page.locator('#'+cid).evaluate('(el)=>el.width>20&&el.height>20')

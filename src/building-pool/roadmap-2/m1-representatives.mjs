@@ -60,6 +60,8 @@ function build({biome,size,category}){
     if(x===openingX || (isTemple&&Math.abs(x-openingX)<=1))continue;
     put(x,y,partition,m.trim,'wall');
   }
+  const supplementalRooms=[];
+  const supplementalCirculation=[];
   // Category-specific fixtures, arranged around a central traversable aisle.
   if(!isTemple){
     for(const z of [3,5,Math.min(partition-2,8)])for(const x of [2,width-3]){
@@ -88,8 +90,54 @@ function build({biome,size,category}){
     // Raised platforms need planned physical access, not an imaginary 1-block jump.
     // These are SYMBOLIC stair candidates; slope, facing, physical collision and
     // multi-cell connectivity remain unapproved until Pack 1/central ABI handoff.
-    for(const x of [center-2,center+2])if(footprint(x,depth-4))
+    for(const x of [center-2,center+2])if(footprint(x,depth-4)){
       put(x,2,depth-4,'pack1:008','fixture');
+      // Intent for manual physical-shape handoff, NOT a runtime rotation/save ABI.
+      const symbolicStair=cells.get(COORD(x,2,depth-4));
+      symbolicStair.intendedFacing='+z';
+      symbolicStair.lowerLanding={x,y:1,z:depth-5};
+      symbolicStair.upperLanding={x,y:2,z:depth-3};
+      symbolicStair.shapeRotationStatus='unresolved-symbolic';
+    }
+  }
+  // M1 size-specific spatial planning, not a stretched copy of one two-room
+  // plan. Medium buildings have a SIDE clerk/meditation cell enclosed by a
+  // 3-high screen and a genuinely open crossing at z6. Large shops have a
+  // separately enclosed unloading bay in rear storage; large sanctuaries get
+  // two physically partitioned side chapels with open nave-facing doors.
+  // These are rooms with actual independent access and dedicated fixtures.
+  if(size==='medium'){
+    const screenX=width-5,doorZ=6,screenEnd=Math.min(partition-2,9);
+    for(let z=4;z<=screenEnd;z++)if(z!==doorZ)
+      for(let y=2;y<=4;y++)put(screenX,y,z,m.trim,'wall');
+    const roomUse=isTemple?'meditation-chapel':'counting-office';
+    supplementalRooms.push({name:isTemple?'Side meditation chapel':'Merchant counting office',
+      bounds:{x0:screenX+1,x1:width-2,z0:4,z1:screenEnd},uses:[roomUse]});
+    supplementalCirculation.push({from:isTemple?'ceremonial-space':'sales-floor',to:roomUse,
+      via:`three-high east side opening x${screenX},z${doorZ}`});
+    put(width-3,2,7,isTemple?FIXTURE.altar:FIXTURE.counter,'fixture');
+  }else if(size==='large'&&!isTemple){
+    const screenX=4,doorZ=partition+2;
+    for(let z=partition+1;z<=depth-2;z++)if(z!==doorZ)
+      for(let y=2;y<=4;y++)put(screenX,y,z,m.trim,'wall');
+    supplementalRooms.push({name:'Separated supply loading bay',
+      bounds:{x0:1,x1:screenX-1,z0:partition+1,z1:depth-2},uses:['loading-bay']});
+    supplementalCirculation.push({from:'storage',to:'loading-bay',
+      via:`three-high rear stockroom passage x${screenX},z${doorZ}`});
+    put(2,2,partition+4,FIXTURE.crate,'fixture');
+  }else if(size==='large'&&isTemple){
+    for(const screenX of [4,width-5]){
+      for(let z=4;z<=11;z++)if(z!==6)
+        for(let y=2;y<=4;y++)put(screenX,y,z,m.trim,'wall');
+    }
+    for(const [use,x0,x1,altarX] of [
+      ['west-chapel',1,3,2],['east-chapel',width-4,width-2,width-3]]){
+      supplementalRooms.push({name:use==='west-chapel'?'West votive chapel':'East votive chapel',
+        bounds:{x0,x1,z0:4,z1:11},uses:[use]});
+      supplementalCirculation.push({from:'ceremonial-space',to:use,
+        via:`three-high side-chapel opening z6, x${use==='west-chapel'?4:width-5}`});
+      put(altarX,2,8,FIXTURE.altar,'fixture');
+    }
   }
   for(const [x,z] of [[2,3],[width-3,3],[2,depth-3],[width-3,depth-3]])
     if(footprint(x,z)&&!bounds(x,z)&&!cells.has(COORD(x,top-1,z)))put(x,top-1,z,FIXTURE.light,'decor');
@@ -243,10 +291,10 @@ function build({biome,size,category}){
    extents,units:'conceptual occupied voxels; shape/rotation ABI unresolved',
    architecturalSignature:`${roofNames[biome]}, ${category}, ${size}, x${width} z${depth}, partition ${partition}, distinct footprint`,
    roof:{form:roofNames[biome],biomeSpecific:true},
-   rooms,features:isTemple?['physically separated sanctuary','raised altar dais','paired symbolic stair approaches pending slope ABI','paired fully founded belfries','triple-wide processional entrance','roof lantern tower','structural columns','ceremonial rows']:['counter','display shelves','stockroom crates','real storeroom wall'],
+   rooms:[...rooms,...supplementalRooms],features:isTemple?['physically separated sanctuary','raised altar dais','paired symbolic stair approaches pending slope ABI','paired fully founded belfries','triple-wide processional entrance','roof lantern tower','structural columns','ceremonial rows']:['counter','display shelves','stockroom crates','real storeroom wall'],
    openings:[entry,{type:'window',x:3,y:3,z:0},{type:'window',x:width-4,y:3,z:0},
     {type:'internal-doorway',x:openingX,y:2,z:partition,clearHeightCells:3}],
-   circulation,
+   circulation:[...circulation,...supplementalCirculation],
    unresolvedDependencies:refs.map(ref=>({ref,issue:'The physical shape, orientation, collision, support, appearance and save integration of this symbolic roster asset require central ABI verification'})),
    voxels
   };

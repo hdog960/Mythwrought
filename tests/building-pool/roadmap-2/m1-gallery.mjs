@@ -31,7 +31,7 @@ function refresh(){
  const bp=M1_REPRESENTATIVES.find(b=>b.id===`r2:${category}:${biome}:${size}:01`);
  if(!bp)throw Error('No authored candidate for selection');
  render(bp,'external',false);render(bp,'interior',true);
- document.getElementById('status').textContent=`${bp.id} · ${bp.voxels.length} actual coordinate cells · ${bp.roof.form||'gable'} · 2 rooms · symbolic not in live world`;
+ document.getElementById('status').textContent=`${bp.id} · ${bp.voxels.length} actual coordinate cells · ${bp.roof.form||'gable'} · ${bp.rooms.length} rooms · symbolic not in live world`;
  document.documentElement.dataset.ready=bp.id;
 }
 for(const id of ids)document.getElementById(id).addEventListener('change',refresh);
