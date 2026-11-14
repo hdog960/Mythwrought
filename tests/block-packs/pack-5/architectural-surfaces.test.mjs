@@ -25,7 +25,7 @@ test('all six original authored geometric variants satisfy the physical schema, 
 });
 
 test('M1 names, slots, symbolic identities, and candidate statuses align with manifest',()=>{
- for(const d of PACK5_SURFACE_FAMILIES){let e=manifest.entries.find(x=>x.symbolicId===d.symbolicId);assert.ok(e);assert.equal(d.name,e.name);assert.equal(e.milestone,1);}
+ for(const d of PACK5_SURFACE_FAMILIES){let e=manifest.entries.find(x=>x.symbolicId===d.symbolicId);assert.ok(e);assert.equal(d.name,e.name);assert.equal(e.milestone,1);assert.equal(e.status,'CANDIDATE');assert.equal(e.persistentNumericId,null);assert.equal(e.integrated,false);}
  assert.ok(!PACK5_SURFACES.some(x=>Object.hasOwn(x,'persistentNumericId')));
 });
 
