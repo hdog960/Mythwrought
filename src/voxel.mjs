@@ -1,6 +1,10 @@
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
-import {WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
-export {WORLD_MIN_Y,WORLD_MAX_Y} from './depth.mjs';
+import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
+// Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
+// Keep that public contract at -3; the expanded editable engine range is
+// separately exported by depth.mjs so old cave floors do not shift.
+export const WORLD_MIN_Y=LEGACY_WORLD_MIN_Y;
+export {WORLD_MAX_Y} from './depth.mjs';
 import {meadowAccentVertices} from './meadow.mjs';
 import {storybookGroveVertices} from './grove.mjs';
 import {woodlandCanopyVertices} from './canopy.mjs';
@@ -62,7 +66,7 @@ function cave(x,y,z,seed){
 }
 export function baseBlock(x,y,z,seed=179){
   if(!Number.isInteger(x)||!Number.isInteger(y)||!Number.isInteger(z))return BLOCK.AIR;
-  if(y<WORLD_MIN_Y||y>WORLD_MAX_Y)return BLOCK.AIR;
+  if(y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y)return BLOCK.AIR;
   // New geology begins strictly BELOW the unmodified original [-3,19] world.
   // :24 retains exclusive ownership of all future deep-cave generation.
   if(y<LEGACY_WORLD_MIN_Y)return y<-32?BLOCK.DEEPSTONE:BLOCK.STONE;
@@ -106,7 +110,7 @@ export class VoxelWorld{
     // Construct only inside the valid voxel height. This overlay is a pure
     // deterministic view; it never writes to this.edits or schema-1 storage.
     const ordinary=this.legacyBlockAt(x,y,z);
-    if(![x,y,z].every(Number.isInteger)||y<WORLD_MIN_Y||y>WORLD_MAX_Y)return ordinary;
+    if(![x,y,z].every(Number.isInteger)||y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y)return ordinary;
     const dx=Math.floor(x/LIVE_DISTRICT_SIZE),dz=Math.floor(z/LIVE_DISTRICT_SIZE);
     const districtKey=dx+','+dz;
     let district=this.liveDistrictCache.get(districtKey);
@@ -124,7 +128,7 @@ export class VoxelWorld{
     return this.edits.has(key)?this.edits.get(key):this.naturalAndLandmarkBlock(x,y,z);
   }
   set(x,y,z,id){
-    if(![x,y,z,id].every(Number.isInteger)||y<WORLD_MIN_Y||y>WORLD_MAX_Y||id<0||id>8)return false;
+    if(![x,y,z,id].every(Number.isInteger)||y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y||id<0||id>8)return false;
     const key=worldKey(x,y,z);
     if(this.naturalAndLandmarkBlock(x,y,z)===id)this.edits.delete(key);
     else this.edits.set(key,id);
