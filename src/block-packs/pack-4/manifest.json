@@ -28,15 +28,19 @@
     161,
     162,
     163,
-    164
+    164,
+    165,
+    166,
+    167,
+    168
   ],
   "unassignedBand": [
-    165,
+    169,
     208
   ],
-  "candidateVariants": 6,
+  "candidateVariants": 10,
   "completeFamilies": 0,
-  "implementedCandidateFamilies": 5,
+  "implementedCandidateFamilies": 9,
   "statusGlossary": {
     "candidate": "Implemented in isolated PR only; engine integration and live compatibility not certified",
     "planned": "Not yet implemented"
@@ -97,33 +101,41 @@
       "roster": 35,
       "name": "Lantern blocks",
       "category": "windows-lighting",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Floor/suspended luminous fixtures; dynamic light dependency"
+      "status": "candidate",
+      "blockIds": [
+        165
+      ],
+      "note": "Hearthbound freestanding copper/glass lantern; floor-support fixture, metadata-only amber light"
     },
     {
       "roster": 36,
       "name": "Wall-mounted lanterns",
       "category": "windows-lighting",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Wall bracket, orientation and support"
+      "status": "candidate",
+      "blockIds": [
+        166
+      ],
+      "note": "Hawthorn wall sconce with solid mounting plate and forward lantern body; warm light metadata only"
     },
     {
       "roster": 37,
       "name": "Crystal lanterns",
       "category": "windows-lighting",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Physical crystal cage, not existing CRYSTAL 5"
+      "status": "candidate",
+      "blockIds": [
+        167
+      ],
+      "note": "Aetherglass blue-cyan crystal lantern inside physical rune cage; not CRYSTAL 5"
     },
     {
       "roster": 38,
       "name": "Torch blocks",
       "category": "windows-lighting",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Wall or floor mounting"
+      "status": "candidate",
+      "blockIds": [
+        168
+      ],
+      "note": "Wayfarer wall torch with timber handle, iron bracket and decorative non-colliding flame"
     },
     {
       "roster": 56,
@@ -231,16 +243,23 @@
     }
   ],
   "sourceFiles": [
-    "src/block-packs/pack-4/windows.mjs"
+    "src/block-packs/pack-4/windows.mjs",
+    "src/block-packs/pack-4/lighting.mjs",
+    "src/block-packs/pack-4/fixture.mjs"
   ],
   "testFiles": [
-    "tests/block-packs/pack-4/windows.test.mjs"
+    "tests/block-packs/pack-4/windows.test.mjs",
+    "tests/block-packs/pack-4/lighting.test.mjs",
+    "tests/block-packs/pack-4/fixture.test.mjs",
+    "tests/block-packs/pack-4/gallery.html",
+    "tests/block-packs/pack-4/gallery.mjs"
   ],
   "dependencies": [
     "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
     "Generic :00 shape-aware selection/collision/placement (PR #106 — unmerged at checkpoint 006)",
     "Creator-authorized centralized registration of candidate IDs, with nonbreaking schema-1 orientation state",
-    "Transparency sorting, depth-writing and multi-material faces in the shared renderer"
+    "Transparency sorting, depth-writing and multi-material faces in the shared renderer",
+    "Working dynamic lighting, alpha/depth order, wall/floor support and light source budgets are central engine dependencies, NOT implemented here"
   ],
   "restrictions": {
     "noMainEdits": true,
@@ -248,5 +267,10 @@
     "noAutoMerge": true,
     "noPwaChanges": true,
     "noSharedFiles": true
-  }
+  },
+  "verifiedCoordination": [
+    "https://github.com/hdog960/Mythwrought/issues/109",
+    "https://github.com/hdog960/Mythwrought/issues/117"
+  ],
+  "familyCount": 22
 }
