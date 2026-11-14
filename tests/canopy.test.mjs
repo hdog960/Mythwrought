@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,terrainHeight,meshChunk,CHUNK_SIZE} from '../src/voxel.mjs';
-import {woodlandCanopyVertices,woodlandTreeStyle,woodlandSentinelChunk,woodlandDistrict,CANOPY_LIMITS} from '../src/canopy.mjs';
+import {woodlandCanopyVertices,woodlandTreeStyle,woodlandSentinelChunk,woodlandDistrict,woodlandTreeProfile,naturalCaveApproach,CANOPY_LIMITS} from '../src/canopy.mjs';
 
 const base=(x,y,z,seed)=>new VoxelWorld(seed).get(x,y,z);
 const options={chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:base,grass:BLOCK.GRASS,air:BLOCK.AIR};
@@ -330,4 +330,60 @@ test('winding woodland sightlines create real canopy gaps inside connected grove
   assert.ok(flanks/flankChunks>corridor/corridorChunks*1.25,
     'grove flanks should retain visibly more foliage than the interior vista');
   assert.equal(JSON.stringify(world.save()),before,'sightlines remain render-only');
+});
+
+test('open glades and tall groves have deterministic distinct tree profiles within mesh and save limits',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  const seen=new Map();
+  for(let cx=-16;cx<=16;cx++)for(let cz=-16;cz<=16;cz++){
+    const profile=woodlandTreeProfile(cx,cz,world.seed);
+    assert.equal(profile,woodlandDistrict(cx,cz,world.seed));
+    assert.equal(profile,woodlandTreeProfile(cx,cz,world.seed));
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    assert.deepEqual(mesh,woodlandCanopyVertices(world,cx,cz,options));
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+    for(let i=0;i<mesh.length;i+=CANOPY_LIMITS.stride){
+      assert.ok(Number.isFinite(mesh[i])&&Number.isFinite(mesh[i+1])&&Number.isFinite(mesh[i+2]));
+      assert.ok(mesh[i]>=cx*CHUNK_SIZE&&mesh[i]<(cx+1)*CHUNK_SIZE);
+      assert.ok(mesh[i+2]>=cz*CHUNK_SIZE&&mesh[i+2]<(cz+1)*CHUNK_SIZE);
+    }
+    if(mesh.length)seen.set(profile,(seen.get(profile)||0)+1);
+  }
+  assert.ok((seen.get('open')||0)>0,'open glades retain trees with low broad silhouettes');
+  assert.ok((seen.get('grove')||0)>0,'dense groves retain taller canopy silhouettes');
+  assert.ok((seen.get('mixed')||0)>0,'mixed districts bridge the two forest forms');
+  assert.equal(JSON.stringify(world.save()),saved,'district art never changes saved edits');
+  assert.equal(CANOPY_LIMITS.newDrawCalls,0);
+});
+
+test('woodland cave approach only recognizes naturally traversable two-high hillside mouths',()=>{
+  const seed=179,air=BLOCK.AIR,stone=BLOCK.STONE;
+  // Synthetic terrain fixture isolates the geometric contract from the
+  // rarity of the actual seed-generated caves. Hillside is 8, outside 2.
+  const height=(x,z)=>x>=0?8:2;
+  const natural=(x,y,z)=>{
+    if(y>height(x,z))return air;
+    if(x>=0&&x<=2&&z===0&&(y===3||y===4))return air;
+    return stone;
+  };
+  assert.equal(naturalCaveApproach(natural,height,0,0,seed,air),true);
+  assert.equal(naturalCaveApproach(natural,height,40,40,seed,air),false);
+  const oneHigh=(x,y,z)=>x>=0&&x<=2&&z===0&&y===3?air:
+    y>height(x,z)?air:stone;
+  assert.equal(naturalCaveApproach(oneHigh,height,0,0,seed,air),false,
+    'a one-high crack must not clear a forest approach');
+  const blocked=(x,y,z)=>x===1&&y===4&&z===0?stone:natural(x,y,z);
+  assert.equal(naturalCaveApproach(blocked,height,0,0,seed,air),false,
+    'a passage blocked one step into the hillside is not traversable');
+});
+
+test('cave approach preservation is render-only and seed-stable',()=>{
+  const world=new VoxelWorld(179),saved=JSON.stringify(world.save());
+  for(let cx=-3;cx<=3;cx++)for(let cz=-3;cz<=3;cz++){
+    const a=woodlandCanopyVertices(world,cx,cz,options);
+    const b=woodlandCanopyVertices(world,cx,cz,options);
+    assert.deepEqual(a,b);
+    assert.ok(a.length<=CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.stride);
+  }
+  assert.equal(JSON.stringify(world.save()),saved);
 });
