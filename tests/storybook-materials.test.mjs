@@ -290,3 +290,20 @@ test('rounded river pebbles are sparse, opaque and distance-faded in existing lo
  assert.equal(RULES.newTextures,0);
  assert.equal(RULES.newDrawCalls,0);
 });
+
+test('dry clay cracks and volcanic vesicles remain deterministic, near-faded and opaque',()=>{
+ assert.deepEqual(RULES.dryClayAndVesicleAccents,['soil-drying-clay-cracks','stone-volcanic-vesicles']);
+ const soil=FS.slice(FS.indexOf('}else if(vMat==2)'),FS.indexOf('}else if(vMat==3)'));
+ const stone=FS.slice(FS.indexOf('}else if(vMat==3)'),FS.indexOf('}else if(vMat==4)'));
+ for(const name of ['clayGrid','clayWarp','clayEdge','dryingCrack','dryPatch'])
+  assert.match(soil,new RegExp('(float|vec2) '+name+'='));
+ for(const name of ['vesicleCell','vesicleUv','vesicleSeed','vesiclePit','vesicleLip'])
+  assert.match(stone,new RegExp('(float|vec2) '+name+'='));
+ assert.match(soil,/\.16\*dryingCrack\*dryPatch\*near/);
+ assert.match(stone,/\.20\*vesiclePit\*near/);
+ assert.match(stone,/\.08\*vesicleLip\*near/);
+ for(const material of [soil,stone])assert.doesNotMatch(material,/sampler2D|discard;|texture\(|uTime/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+});
