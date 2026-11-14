@@ -27,8 +27,8 @@
     "forbiddenSentinel": 255
   },
   "evidence": {
-    "node": "NOT RUN for Pack 1 dedicated nested tests; GitHub baseline CI excludes nested",
-    "chromium": "NOT RUN for Pack 1 standalone gallery; no original screenshot captured",
+    "node": "NOT RUN actual dedicated Node test suite (GitHub CI glob excludes nested Pack 1 tests)",
+    "chromium": "NOT RUN dedicated floral gallery Chromium, offline or screenshots",
     "physicalIphone": "NOT RUN",
     "candidatePreview": "Two standalone HTML test-gallery source files committed; no authentic browser screenshot inspected yet",
     "logic": "9/9 authored Node test bodies evaluated successfully in V8 compatibility harness against exact GitHub branch source; this is NOT Node execution",
@@ -40,7 +40,10 @@
     "gardenPreview": "Isolated garden-gallery.html + garden-gallery.mjs with box-derived isometric art and clickable physical slices committed; genuine Chromium screenshot not captured.",
     "foliageLogic": "16/16 authored M4 test bodies passed V8 harness on exact committed source after mobile-lattice adjustment; NOT genuine Node.",
     "foliageCrossLane": "40/40 V8 probes passed against exact :00 and :12 opt-in sources: 32 shape/rotation meshes between 208 and 532 triangles, plus 8 targeting/collision contracts. NOT measured production GPU performance.",
-    "foliagePerformance": "Initial fine-detail box unions produced ~1480–4412 mesh triangles. Replaced with 1/8-voxel aligned physical parts and reverified 208–532. Visually inspect genuine Chromium later."
+    "foliagePerformance": "Initial fine-detail box unions produced ~1480–4412 mesh triangles. Replaced with 1/8-voxel aligned physical parts and reverified 208–532. Visually inspect genuine Chromium later.",
+    "floralLogic": "15/15 authored Milestone 5 Node-style test bodies executed on exact GitHub branch source in a V8 assertion shim; NOT genuine Node.",
+    "floralCrossLane": "39/39 V8 opt-in targeting and surface mesher probes passed: 28 shapes × rotation; 204–376 triangles per unmerged prototype; ten nontrivial targeting/space/mount/light consistency probes; source gallery syntax parsed. NOT production WebGL2.",
+    "floralPreview": "Standalone HTML+JS gallery source committed with seven actual box-derived Canvas2D specimens, cross-section probes, rotate/place/remove and canonical fixture save/restore; authentic Chromium screenshots NOT CAPTURED."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -346,16 +349,86 @@
     {
       "roster": 53,
       "name": "Flower blocks (4+ species)",
-      "status": "NOT STARTED",
-      "duplicateAudit": "PENDING fresh main duplicate audit",
-      "testEvidence": null
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006, manual packs #112/#114/#115, and Issue #117 130-family biome catalog: independent physical one-cell floral/mushroom identities, not integrated render-only flora/shader and not automated magic mycelium or naturally glowing resources",
+      "testEvidence": "15/15 authored M5 Node-test bodies pass exact source V8 shim; 39/39 cross-lane :00/:12 V8 probes pass (28 orientations with 204–376 surface triangles); genuine dedicated Node, genuine Chromium gallery and physical iPhone still pending",
+      "candidateId": 32,
+      "variantIds": [
+        32,
+        33,
+        34,
+        35
+      ],
+      "variants": [
+        {
+          "id": 32,
+          "name": "Skybell",
+          "kind": "soft drooping blue bells and leaves; solid stem targeting; passable petals"
+        },
+        {
+          "id": 33,
+          "name": "Ember lily",
+          "kind": "orange six-petal upward lily and raised central stamen; passable"
+        },
+        {
+          "id": 34,
+          "name": "Moonstar flower",
+          "kind": "ivory star-point bloom with separate leaf/stalk boxes; passable"
+        },
+        {
+          "id": 35,
+          "name": "Thornrose",
+          "kind": "layered crimson rose petals, branched woody stalk; passable"
+        }
+      ],
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "3af2f0a1636a24ee54fb94ca469099b4b90d746a",
+      "dependencies": [
+        "Existing engine block registry only permits IDs 0–8; central manual integration needed",
+        "Generic :00 shape-aware raycast/collision and :12 meshing opt-in, not live-wired",
+        "Canonical schema-1-shaped isolated save roundtrip only; rotation needs production orientation persistence",
+        "Part-role original textures require integrated atlas/renderer, transparency and mobile performance proof",
+        "No harvesting, crops, mushroom eating, lighting, spawning or generated-world placement permitted"
+      ]
     },
     {
       "roster": 54,
       "name": "Mushroom blocks (3+ species)",
-      "status": "NOT STARTED",
-      "duplicateAudit": "PENDING fresh main duplicate audit",
-      "testEvidence": null
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006, manual packs #112/#114/#115, and Issue #117 130-family biome catalog: independent physical one-cell floral/mushroom identities, not integrated render-only flora/shader and not automated magic mycelium or naturally glowing resources",
+      "testEvidence": "15/15 authored M5 Node-test bodies pass exact source V8 shim; 39/39 cross-lane :00/:12 V8 probes pass (28 orientations with 204–376 surface triangles); genuine dedicated Node, genuine Chromium gallery and physical iPhone still pending",
+      "candidateId": 36,
+      "variantIds": [
+        36,
+        37,
+        38
+      ],
+      "variants": [
+        {
+          "id": 36,
+          "name": "Amber cap mushroom",
+          "kind": "one domed warm amber cap, visible underside and stem-only collision"
+        },
+        {
+          "id": 37,
+          "name": "Violet shelf mushroom",
+          "kind": "three independent tiered violet shelves and branch-stalk"
+        },
+        {
+          "id": 38,
+          "name": "Pearl gill mushroom",
+          "kind": "ivory fan cap, four gill ledges, stem-only collision, no emitted light"
+        }
+      ],
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "3af2f0a1636a24ee54fb94ca469099b4b90d746a",
+      "dependencies": [
+        "Existing engine block registry only permits IDs 0–8; central manual integration needed",
+        "Generic :00 shape-aware raycast/collision and :12 meshing opt-in, not live-wired",
+        "Canonical schema-1-shaped isolated save roundtrip only; rotation needs production orientation persistence",
+        "Part-role original textures require integrated atlas/renderer, transparency and mobile performance proof",
+        "No harvesting, crops, mushroom eating, lighting, spawning or generated-world placement permitted"
+      ]
     },
     {
       "roster": 55,
@@ -400,7 +473,7 @@
   ],
   "pr": "https://github.com/hdog960/Mythwrought/pull/113",
   "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED",
-  "nextMilestone": "Verify dedicated Node/Chromium and exact PR CI. Then Milestone 5 individual physically targetable flower varieties (>=4) and mushrooms (>=3), with candidate IDs >=32; avoid :12's separate raw natural leaf species.",
+  "nextMilestone": "Milestone 6 final acceptance: run complete dedicated Node and genuine Chromium/offline tests, audit unique IDs 9–38, view authentic gallery screenshots at mobile landscape widths, resolve shared-engine rotation/target/save/mesh blockers and hand off; NO merge/deploy without creator authorization.",
   "allocations": [
     {
       "range": [
@@ -434,7 +507,17 @@
       "families": 4,
       "variants": 8,
       "kind": "Milestone 4: physical hedge, bushes, face vines and ornamental leaves (not raw natural leaf species)"
+    },
+    {
+      "range": [
+        32,
+        38
+      ],
+      "families": 2,
+      "variants": 7,
+      "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "Milestone 4: 4 foliage families, 8 independently IDed physical variants source-authored. Isolated tests V8 pass; actual Node+browser, renderer, save-state integration remain pending."
+  "latestMilestone": "M5 authored: all 21 assigned families with 30 unique ID-bearing source candidates (9–38). All remain CANDIDATE pending real Node/Chromium and production engine integration.",
+  "finalAcceptance": "NOT READY: All families source CANDIDATE; real node+browser results, original art acceptance, production shape integration, save orientation encoding, physical iPhone still outstanding."
 }
