@@ -58,8 +58,8 @@ test('tall highland adds a second tier only where its face remains open',()=>{
  const world={seed:179,get(x,y,z){return x<0&&y<=15?3:0;}};
  const original=ridgeStrataVertices(world,-1,0,{heightAt:tall});
  assert.ok(original.length>0);
- // Each eligible face has eight base triangles and two upper-tier triangles.
- assert.equal(original.length%(10*27),0);
+ // Each eligible face has eight base triangles, two upper-tier triangles and two crest fractures.
+ assert.equal(original.length%(12*27),0);
  const edits=new Map();
  for(let z=0;z<16;z++)edits.set('0,8,'+z,3);
  const modified={seed:179,get(x,y,z){
@@ -70,4 +70,20 @@ test('tall highland adds a second tier only where its face remains open',()=>{
  assert.ok(after.length<original.length,'upper band must respect filled exterior edits');
  assert.deepEqual(ridgeStrataVertices(modified,-1,0,{heightAt:tall}),after);
  assert.equal(edits.size,16,'render-only art never mutates saved edits');
+});
+
+test('crest fractures appear only on tall exposed stone and respect exterior edits',()=>{
+ const tall=(x,z)=>x<0?15:6;
+ const edits=new Map();
+ const world={seed:179,get(x,y,z){
+  const key=[x,y,z].join(',');
+  return edits.has(key)?edits.get(key):(x<0&&y<=15?3:0);
+ }};
+ const before=ridgeStrataVertices(world,-1,0,{heightAt:tall});
+ assert.ok(before.length>0);
+ for(let z=0;z<16;z++)edits.set('0,9,'+z,3);
+ const after=ridgeStrataVertices(world,-1,0,{heightAt:tall});
+ assert.ok(after.length<before.length,'closed crest exterior hides fracture');
+ assert.deepEqual(ridgeStrataVertices(world,-1,0,{heightAt:tall}),after);
+ assert.equal(edits.size,16,'saved world edits are never mutated');
 });
