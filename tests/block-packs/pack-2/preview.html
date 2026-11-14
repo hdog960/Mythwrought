@@ -17,23 +17,26 @@ small{color:#a9c5b3}pre{white-space:pre-wrap;overflow:auto}
 Nothing here is installed in Mythwrought or written to its world save.</p>
 <nav>
 <select id="asset" aria-label="Candidate material"></select>
-<button id="rotate">Rotate 90°</button><button id="place">Place candidate</button>
-<button id="remove">Remove last</button><button id="reset">Clear fixture</button>
+<button id="rotate">Rotate 90°</button><button id="variant">Switch half</button><button id="hinge">Open / close</button><button id="place">Place candidate</button>
+<button id="toggleLast">Swing last placed</button><button id="remove">Remove last</button><button id="reset">Clear fixture</button>
 </nav>
 <canvas id="preview" width="900" height="506" aria-label="Rotatable timber candidate mesh preview"></canvas>
 <p id="status" class="status" aria-live="polite"></p><small>Preview is an authentic rendering of the candidate's generated triangles.
 Use the browser console for fixture-targeted raycast and snapshot inspection: window.pack2Fixture.</small>
 <script type="module">
 import {PACK_2_ASSETS,pack2PreviewMesh} from '../../../src/block-packs/pack-2/definitions.mjs';
+import {PACK_2_JOINERY,joineryAsset,joineryPreviewMesh} from '../../../src/block-packs/pack-2/joinery.mjs';
 import {Pack2Fixture} from './fixture.mjs';
 let fixture=new Pack2Fixture(),placed=[];
 window.pack2Fixture=fixture;
 const el=id=>document.getElementById(id),canvas=el('preview'),ctx=canvas.getContext('2d');
-const list=el('asset');for(const a of PACK_2_ASSETS){const o=document.createElement('option');
+const assets=[...PACK_2_ASSETS,...PACK_2_JOINERY];
+const list=el('asset');for(const a of assets){const o=document.createElement('option');
   o.value=String(a.id);o.textContent=a.id+' · '+a.name;list.append(o);}
 let yaw=.7,tilt=.56;
-function drawMesh(id,rotation,cx,cy,scale){
-  const mesh=pack2PreviewMesh(id,rotation),p=mesh.positions,n=mesh.normals,c=mesh.colors,ix=mesh.indices;
+function drawMesh(state,cx,cy,scale){
+  const mesh=joineryAsset(state.id)?joineryPreviewMesh(state.id,state):pack2PreviewMesh(state.id,state.rotation);
+  const p=mesh.positions,n=mesh.normals,c=mesh.colors,ix=mesh.indices;
   const cs=Math.cos(yaw),sn=Math.sin(yaw),ct=Math.cos(tilt),st=Math.sin(tilt);
   function transform(i){
     const x=p[i*3]-.5,y=p[i*3+1]-.5,z=p[i*3+2]-.5;
@@ -59,17 +62,23 @@ function render(){
   ctx.clearRect(0,0,900,506);
   ctx.fillStyle='#e0d1a7';ctx.font='20px system-ui';
   ctx.fillText('Physical candidate mesh',24,36);
-  const choice=fixture.selection(),asset=PACK_2_ASSETS.find(x=>x.id===choice.id);
-  const m=drawMesh(choice.id,choice.rotation,440,215,250);
+  const choice=fixture.selection(),asset=assets.find(x=>x.id===choice.id),joint=joineryAsset(choice.id);
+  const m=drawMesh(choice,440,215,250);
+  el('variant').disabled=!joint||joint.variants.length===1;
+  el('hinge').disabled=!joint?.toggleable;
+  el('toggleLast').disabled=!placed.length||!joineryAsset(fixture.read(placed[placed.length-1])?.id)?.toggleable;
   ctx.fillStyle='#d2c3a0';ctx.font='17px system-ui';
-  ctx.fillText(asset.name+' · rotation '+choice.rotation*90+'°',24,375);
+  ctx.fillText(asset.name+' · rotation '+choice.rotation*90+'°'+(joint?' · '+choice.variant+' · '+(choice.open?'OPEN':'CLOSED'):''),24,375);
   ctx.fillText('Solid face quads: '+m.physicalQuads+'   Grain / joint quads: '+m.decorationQuads,24,402);
-  ctx.fillText('Fixture placements: '+placed.length+' / 4',24,433);
-  el('status').textContent='ID '+choice.id+'  |  '+asset.profile+'  |  '+asset.surface.finish+
+  ctx.fillText('Fixture placements: '+placed.length+' / 4 · camera drag changes viewpoint only',24,433);
+  el('status').textContent='ID '+choice.id+'  |  '+(asset.profile??asset.surface.feature)+'  |  '+(asset.surface.finish??asset.surface.pattern)+
     '  |  '+(placed.length?JSON.stringify(fixture.serialize().cells):'No fixtures placed');
 }
 list.onchange=()=>{fixture.select(Number(list.value));render();};
 el('rotate').onclick=()=>{fixture.turn();render();};
+el('variant').onclick=()=>{fixture.cycleVariant();render();};
+el('hinge').onclick=()=>{fixture.toggleSelection();render();};
+el('toggleLast').onclick=()=>{if(placed.length)fixture.toggleCell(placed[placed.length-1]);render();};
 el('place').onclick=()=>{const cell=[placed.length*2,1,0];if(placed.length<4&&fixture.place(cell))placed.push(cell);render();};
 el('remove').onclick=()=>{const cell=placed.pop();if(cell)fixture.remove(cell);render();};
 el('reset').onclick=()=>{fixture=new Pack2Fixture();window.pack2Fixture=fixture;
