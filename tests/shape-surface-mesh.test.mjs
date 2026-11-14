@@ -19,7 +19,7 @@ test('surface mesh removes internal faces without modifying descriptor occupancy
 test('adjacent unit halves share no internal face and preserve exterior winding',()=>{
  const d={prototypeOnly:true,boxes:[[0,0,0,.5,1,1],[.5,0,0,1,1,1]]};
  const mesh=prototypeSurfaceMesh(d);
- assert.equal(mesh.triangles,20); // 10 exposed quads; no faces on shared x=.5
+ assert.equal(mesh.triangles,12); // 6 merged exterior quads; no face at shared x=.5
  for(let i=0;i<mesh.indices.length;i+=3){
   const v=j=>Array.from(mesh.positions.slice(mesh.indices[i+j]*3,mesh.indices[i+j]*3+3));
   const a=v(0),b=v(1),c=v(2);
