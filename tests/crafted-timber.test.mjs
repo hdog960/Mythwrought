@@ -81,3 +81,15 @@ test('crafted structural braces and mortises remain opaque face-local art',()=>{
   assert.equal(RULES.extraDrawCalls,0);
   assert.equal(RULES.saveSchemaChanged,false);
 });
+
+test('framed timber panels use deterministic inset joinery without extra mesh or save IDs',()=>{
+  assert.equal(RULES.framedPanels,true);
+  assert.equal(RULES.cornerBosses,true);
+  for(const token of ['frameX=','frameY=','cornerBoss=','inlayLine=','frameCell=','craftedFrame='])
+    assert.ok(TIMBER.includes(token),token);
+  assert.match(TIMBER,/hashCell\(boardCell\+vec2\(97\.0,31\.0\)\)/);
+  assert.doesNotMatch(TIMBER,/sampler2D|texture\(|discard;|gl_FragDepth/);
+  assert.equal(RULES.extraTextures,0);
+  assert.equal(RULES.extraDrawCalls,0);
+  assert.equal(RULES.saveSchemaChanged,false);
+});
