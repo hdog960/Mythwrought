@@ -63,15 +63,15 @@ const checkImage=async(path)=>{
 };
 async function main(){
   const {commit,branch}=verifyContext();
+  // Delete stale PASS markers BEFORE either Node or Chromium tests begin.
+  // An early Node failure may not leave a previous success report behind.
+  await rm(join(reportDir,'native-acceptance-PASS.json'),{force:true});
+  await rm(join(reportDir,'acceptance-report.json'),{force:true});
   process.stdout.write('Verified Pack 1 exact checkout '+commit+' ('+branch+')\n');
   const files=groups.map(x=>own+x);
   const nodeResult=run(process.execPath,['--test',...files]);
   assert.match(nodeResult,/fail\s+0\b/,'Native Node produced failures');
   process.stdout.write(nodeResult);
-  // Remove stale success markers before this attempt; any failed run must
-  // leave no prior PASS file that could be mistaken for fresh evidence.
-  await rm(join(reportDir,'native-acceptance-PASS.json'),{force:true});
-  await rm(join(reportDir,'acceptance-report.json'),{force:true});
   const gallery=run(process.execPath,[own+'galleries-browser.mjs'],{
     env:{...process.env,PACK1_EXPECTED_HEAD:commit}
   });
