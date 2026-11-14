@@ -23,6 +23,9 @@ node --test tests/block-packs/pack-2/pack-2.test.mjs \
   tests/block-packs/pack-2/infrastructure.test.mjs \
   tests/block-packs/pack-2/water.test.mjs \
   tests/block-packs/pack-2/acceptance.test.mjs
+echo "Running EXTRA production-boundary suite against the REAL VoxelWorld graph..."
+echo "A fixture facade is deliberately rejected by this suite."
+node --test tests/block-packs/pack-2/production-boundary.test.mjs
 echo "Running REAL local Chromium Canvas 2D candidate gallery..."
 if ! python3 -c 'from playwright.sync_api import sync_playwright' >/dev/null 2>&1; then
   echo "REFUSED: free Python Playwright is not installed" >&2
