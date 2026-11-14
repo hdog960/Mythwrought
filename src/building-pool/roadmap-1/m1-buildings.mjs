@@ -8,8 +8,8 @@ const FULL=Object.freeze({kind:'full-cell',bounds:[0,0,0,1,1,1]});
 const FUTURE=(asset)=>({kind:'unresolved',bounds:null,reason:asset+' remains a separate physical candidate; orientation, exact bounds and support are not integrated'});
 const region={
   temperate:{wall:'pack2:013',roof:'pack3:023',floor:'live:wood',trim:'pack1:002',window:'pack4:030'},
-  desert:{wall:'pack5:080',roof:'pack3:024',floor:'live:stone',trim:'pack5:080',window:'pack4:032'},
-  snow:{wall:'live:wood',roof:'pack3:025',floor:'live:wood',trim:'pack1:005',window:'pack4:033'},
+  desert:{wall:'pack5:080',roof:'pack3:024',floor:'live:stone',trim:'pack5:080',window:'pack4:031'},
+  snow:{wall:'live:wood',roof:'pack3:025',floor:'live:wood',trim:'pack1:005',window:'pack4:030'},
   'enchanted-forest':{wall:'pack2:013',roof:'pack3:023',floor:'live:wood',trim:'pack1:003',window:'pack4:031'},
   mountain:{wall:'pack1:006',roof:'pack3:025',floor:'live:stone',trim:'pack1:004',window:'pack4:030'}
 };
@@ -37,7 +37,10 @@ function compile(category,biome,size,index,row){
   // Windows remain real placeholder objects at fixed wall coordinates, never empty painted facade triangles.
   for(const [x,z] of [[3,1],[w-4,1],[1,Math.floor(d/3)],[w-2,Math.floor(2*d/3)]]){
     if(x===entry&&z===1)continue;
-    remove(x,2,z);place(x,2,z,'window',theme.window,'north');
+    // Pack4 pane candidate is an XY glazing plane. Yaw to the east/west
+    // when inset into a longitudinal side wall, rather than facing north.
+    const face=x===1?'west':x===w-2?'east':z===d-2?'south':'north';
+    remove(x,2,z);place(x,2,z,'window',theme.window,face,{mount:'opening',glazingApproved:false});
   }
   const rooms=[],portals=[];
   const room=(id,min,max)=>rooms.push({id,min:[min[0],1,min[1]],max:[max[0],wallTop,max[1]]});
@@ -176,6 +179,38 @@ function compile(category,biome,size,index,row){
     }
   }
   if(frameCells===0)throw new Error(name+': no actual roof frame voxels');
+  // Pack3 tile underlays are only 0.125 cell high. A raised roof tile next to
+  // a lower one needs a solid riser BELOW its own tile: the thin tile cannot
+  // physically seal a 1-cell cliff between courses. We fill demonstrably open
+  // step risers with registered live wood/stone; a few intersecting candidate
+  // beam/post cells are left EXPLICITLY UNRESOLVED rather than overwriting
+  // their future physical geometry. This is not full roof load/seal approval.
+  const roofColumns=new Map();
+  for(const p of occupied.values())if(p.role==='roof'){
+    const col=at(p.at[0],0,p.at[2]);
+    if(!roofColumns.has(col)||roofColumns.get(col).at[1]>p.at[1])roofColumns.set(col,p);
+  }
+  const riserTargets=new Set();
+  for(const p of roofColumns.values()){
+    const [x,y,z]=p.at;
+    for(const [dx,dz] of [[-1,0],[1,0],[0,-1],[0,1]]){
+      const q=roofColumns.get(at(x+dx,0,z+dz));
+      if(q&&q.at[1]<y)for(let level=q.at[1];level<y;level++)riserTargets.add(at(x,level,z));
+    }
+  }
+  let roofStepFilled=0;
+  const roofStepPending=[];
+  for(const k of [...riserTargets].sort()){
+    const [x,y,z]=k.split(',').map(Number);
+    if(free(x,y,z)){
+      place(x,y,z,'support',biome==='mountain'||biome==='desert'?'live:stone':'live:wood','none',{roofRiser:'live-solid-step-backing'});
+      roofStepFilled++;
+    }else{
+      const occupant=occupied.get(k);
+      if(!occupant?.asset.startsWith('live:'))roofStepPending.push({cell:[x,y,z],asset:occupant?.asset??'untracked'});
+    }
+  }
+  const roofStepAudit={needed:riserTargets.size,filled:roofStepFilled,unresolved:roofStepPending,weatherSealApproved:false};
   if(feature==='porch'||feature==='arcade'){
     for(const x of feature==='porch'?[entry-2,entry+2]:[3,entry,w-4])for(let y=1;y<=wallTop;y++)if(x!==entry&&free(x,y,0))place(x,y,0,'support','pack2:022');
   }else if(feature==='buttress'){
@@ -187,7 +222,20 @@ function compile(category,biome,size,index,row){
       const y=roofY(x,z);for(let u=y+1;u<Math.min(h,y+4);u++)if(free(x,u,z))place(x,u,z,'decoration','pack3:077');
     }
   }else if(feature==='skylight'){
-    const x=midX,z=midZ,y=roofY(x,z);if(occupied.has(at(x,y,z))){remove(x,y,z);place(x,y,z,'window','pack4:030','up');}
+    // Future roof daylight feature: Pack4 windows rotate only around Y (0..3).
+    // Do NOT put a vertical glass pane horizontally in a roof with 'up'.
+    // Instead author a three-cell-wide *raised vertical-glass dormer*.
+    // The roof below it stays closed: actual daylight/weather sealing remains
+    // pending Pack3+Pack4 physical integration and creator review.
+    const x=midX,z=midZ,y=roofY(x,z)+1;
+    if(y+1>=h)throw Error(name+': raised roof lantern exceeds footprint');
+    for(const px of [x-1,x+1]){
+      if(!free(px,y,z))throw Error(name+': raised roof lantern support blocked');
+      place(px,y,z,'support','pack2:022','none',{roofLantern:'side-post'});
+    }
+    if(!free(x,y,z)||!free(x,y+1,z))throw Error(name+': raised roof lantern aperture blocked');
+    place(x,y,z,'window','pack4:030','north',{mount:'opening',roofLantern:'vertical-glazing',glazingApproved:false});
+    place(x,y+1,z,'roof',theme.roof,'none',{roofLantern:'cap',weatherSealApproved:false});
   }
   // Regionally specific, *physical* external profiles. They change the authored
   // outline and supports, not merely the coloration of shared templates.
@@ -264,7 +312,7 @@ function compile(category,biome,size,index,row){
   // Walkable portal thresholds must remain empty at standing/head level.
   for(const portal of portals){const [x,y,z]=portal.at;if(!free(x,y,z)||!free(x,y+1,z))throw new Error(name+': portal blocked '+at(x,y,z));}
   const deps=[...new Set([...occupied.values()].map(p=>p.asset).filter(a=>!a.startsWith('live:')))].sort().map(asset=>({asset,status:'unresolved',requires:['exact physical dimensions and orientation','support/mount and selection/collision bounds','schema-1 safe asset substitution and load-time dependency resolution']}));
-  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roofFrame:{cellCount:frameCells,sections:frameSections,asset:'pack2:015',postAsset:'pack2:022',spanApproval:'unresolved'},roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],footprintReservations,rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
+  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roofFrame:{cellCount:frameCells,sections:frameSections,asset:'pack2:015',postAsset:'pack2:022',spanApproval:'unresolved'},roofStepAudit,roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],footprintReservations,rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
   validateBlueprint(b);return b;
 }
 export function getM1Blueprints(){
