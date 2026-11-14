@@ -1,21 +1,39 @@
-# Mythwrought Block Pack 5 — isolated foundation
+# Mythwrought Block Pack 5 — isolated interiors and specialty architecture
 
-**Status:** Milestone 0; 0/18 physical families authored. **NOT INSTALLED IN GAME.**
+**Draft-only isolated pack.** No production registration or world placement; no numeric ID assigned.
+The creator reserved 18 roster entries `pack5:079`–`pack5:096`. These are **symbolic**, not game block IDs.
+Latest checked main: `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, checkpoint 006. Read Issues
+#109 and #117 every session. Never touch the four other manual packs or biome130 catalog.
 
-Source and tests are exclusively owned by Pack 5. No numeric IDs allocated. Symbolic roster
-identifiers `pack5:079` through `pack5:096` are **not** game block IDs. Follow the creator's
-Milestones 1–6 in order. Recheck live `main`, checkpoint and coordination Issues #109/#117
-before writing assets or proposing any numeric candidate IDs.
+## Milestone 1 — physical architectural surfaces (CANDIDATE)
+`architectural-surfaces.mjs` authors six ORIGINAL physical box-part variants across three symbolic
+families, each with an explicit material palette, actual selectable 3D box volumes, bounded typed
+mesh vertices/triangles, appropriate support and *partial-volume* collision where applicable.
 
-`fixture.mjs` supplies a test-only, multi-cell occupancy, rotation, partial-box collision, precise
-shape selection, wall/floor/ceiling support and reversible snapshot adapter. It is not a runtime
-registry, general physics engine or production schema-1 save adapter. Descriptor geometry
-uses per-cell `[x0,y0,z0,x1,y1,z1]` unit-box unions as in the separate :12 prototype.
-`parts[].boxes` are selectable while `parts[].collisionBoxes` may be empty for a thin rug.
+| Symbolic | Family | Distinct variants | Support |
+| --- | --- | --- | --- |
+| pack5:079 | Plaster & Stucco | chalk-lime; hand-troweled | wall behind negative local Z |
+| pack5:080 | Fired Brick Masonry | hearth-running-bond; kiln-soldier-course | free/standalone |
+| pack5:081 | Ceramic Interior Floor Tiles | sunburst-encaustic; moonwoven-glaze | floor below negative Y |
 
-Run: `node --test tests/block-packs/pack-5/*.test.mjs` from repo root. Root `npm test`
-only discovers `tests/*.test.mjs` and does not run this nested suite.
+All variants are currently **CANDIDATE**, not integrated. A variant is authored geometric material
+state under the same symbolic family, not a separately allocated numeric game ID. There is no desert
+adobe duplicate, exterior paving clone, original STONE 3 alias or worldgen-generated placement.
 
-No assets should be described as candidate/tested/integrated until their own source and
-actual evidence exist. Future shared-engine shape, support, rotation, multiple-cell state,
-raycast and save integration belongs to :00/:12 and creator-authorized incorporation.
+`fixture.mjs` remains a test-only, multi-cell occupancy, shape raycast, partial collider,
+four-way rotation, support, and reversible **fixture-specific** snapshot adapter. Tests can supply
+variant names to `place(symbolicId,cell,rotation,variant)` and roundtrip a 6-column candidate-only
+snapshot; original 5-column fixture rows still work. Neither envelope is Mythwrought schema 1.
+
+Test natively from repository root:
+`node --test tests/block-packs/pack-5/*.test.mjs`
+The default CI `npm test` only discovers `tests/*.test.mjs` and does **not** run these nested tests.
+
+For a genuine browser art check after Chromium access is repaired, serve the isolated tree and
+open `tests/block-packs/pack-5/architectural-gallery.html`: it renders actual physical box
+triangle meshes with WebGL2. Its source alone is not screenshot evidence. Never claim actual
+mobile performance, physical iPhone controls, or premium art acceptance without direct evidence.
+
+Future shared registry, engine shape/collision, attachment support, persistent variant state,
+save compatibility and world-placements belong to central creator-authorized integration.
+Read `PROGRESS.md` and `manifest.json` for true candidate/verification statuses and handoff.
