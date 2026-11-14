@@ -113,3 +113,36 @@ test('elderwood creates a broad real-voxel crown with four limbs and respects ed
   assert.equal(w.get(...crown.slice(0,3)),BLOCK.AIR);
  }
 });
+
+test('rejected mid-tree writes roll back every placed voxel and preserve saves',()=>{
+ for(const variant of TREE_VARIANTS){
+  const w=new VoxelWorld(179),p=site(w,variant),before=w.save();
+  let writes=0;
+  const guarded={
+   seed:w.seed,
+   get:(...args)=>w.get(...args),
+   set:(x,y,z,id)=>{
+    if(id!==BLOCK.AIR&&++writes===Math.ceil(p.blockCount/2))return false;
+    return w.set(x,y,z,id);
+   }
+  };
+  assert.equal(placeVoxelTree(guarded,p),false,variant);
+  assert.deepEqual(w.save(),before,variant+' must not leave partial edits');
+  assert.ok(p.cells.every(c=>w.get(...c.slice(0,3))===BLOCK.AIR));
+  assert.equal(placeVoxelTree(w,p),true,'valid retry must remain possible');
+ }
+});
+test('exceptions during tree installation also restore the original world',()=>{
+ const w=new VoxelWorld(917),p=site(w,'elderwood'),before=w.save();
+ let writes=0;
+ const guarded={
+  seed:w.seed,
+  get:(...args)=>w.get(...args),
+  set:(x,y,z,id)=>{
+   if(id!==BLOCK.AIR&&++writes===12)throw Error('injected write failure');
+   return w.set(x,y,z,id);
+  }
+ };
+ assert.equal(placeVoxelTree(guarded,p),false);
+ assert.deepEqual(w.save(),before);
+});
