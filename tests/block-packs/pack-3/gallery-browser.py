@@ -92,7 +92,11 @@ async def verify():
                 for rotation in (1,2,3,0):
                     await button.click()
                     assert f"orientation {rotation}" in await button.inner_text()
-                    hashes.append((await page.evaluate(HASHES))[index]["hash"])
+                    candidate=(await page.evaluate(HASHES))[index]
+                    assert candidate["bounds"][0]>=10 and candidate["bounds"][1]>=10 and \
+                        candidate["bounds"][2]<=309 and candidate["bounds"][3]<=189, \
+                        f"Rotated silhouette clipped: {id}, orientation {rotation}"
+                    hashes.append(candidate["hash"])
                 assert hashes[-1]==before, f"Four-turn pixel reset mismatch {id}"
                 variations[id]=len(set(hashes))
             for id in (113,114,116,118,121,123,125):
@@ -105,6 +109,7 @@ async def verify():
                 "rotationControls":13,"fourTurnReset":True,"directionalShapesChanged":7,
                 "minPaintedPixels":min(a["paint"] for a in initial),
                 "allSilhouettesFramed":True,
+                "framedRotatedCanvases":52,
                 "errors":len(errors)}))
             await page.close()
         await browser.close()
