@@ -6,7 +6,7 @@ import {caveRoute} from '../src/experimental-cave-route.mjs';
 import {
   WORLD_MIN_Y,LEGACY_WORLD_MIN_Y,LEGACY_WORLD_HEIGHT,WORLD_DEPTH_MULTIPLIER,
   DEPTH_SECTION_HEIGHT,LOWEST_SECTION,MAX_ACTIVE_SECTIONS,
-  sectionForY,sectionBounds,sectionWindow,verticalEditSections,depthMeshKey
+  sectionForY,sectionBounds,sectionWindow,sectionChunkRadius,verticalEditSections,depthMeshKey
 } from '../src/depth.mjs';
 
 test('tenfold depth keeps exact original Y coordinates intact',()=>{
@@ -157,4 +157,32 @@ test('deep streaming reads never instantiate a surface district or landmark',()=
   const restored=VoxelWorld.restore(w.save());
   assert.equal(restored.get(-17,-120,33),BLOCK.AIR);
   assert.equal(restored.liveDistrictCache.size,0);
+});
+
+test('GPU streaming near the legacy floor cannot grow to 43 chunk buffers',()=>{
+  // Legacy surface 5x5 + first underground 3x3 => 34 total near a shaft.
+  const surface=sectionWindow(2);
+  assert.deepEqual(surface,[0,-1]);
+  assert.deepEqual(surface.map(s=>sectionChunkRadius(s,surface[0])),[2,1]);
+  assert.equal(surface.reduce((n,s)=>{
+    const radius=sectionChunkRadius(s,surface[0]);
+    return n+(radius*2+1)**2;
+  },0),34);
+  // Below the original floor there may be three visible height slices;
+  // every one, including the overhead surface, must use only 3x3.
+  for(const feet of [-3.1,-4,-19,-20,-100,-210]){
+    const visible=sectionWindow(feet),active=visible[0];
+    const sum=visible.reduce((n,s)=>{
+      const radius=sectionChunkRadius(s,active);
+      return n+(radius*2+1)**2;
+    },0);
+    assert.ok(sum<=27,feet+' resident chunks='+sum);
+  }
+  const normal=sectionWindow(10);
+  assert.equal(normal.reduce((n,s)=>{
+    const radius=sectionChunkRadius(s,normal[0]);
+    return n+(radius*2+1)**2;
+  },0),25);
+  assert.throws(()=>sectionChunkRadius(1,0));
+  assert.throws(()=>sectionChunkRadius(0,-999));
 });
