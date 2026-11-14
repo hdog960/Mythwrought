@@ -233,3 +233,20 @@ test('forest floor has deterministic leaf silhouettes and exposed branching root
  assert.equal(RULES.newDrawCalls,0);
  assert.doesNotMatch(FS,/uniform float uTime/);
 });
+
+
+test('raw ore copper halos are near-faded, opaque and do not allocate block IDs',()=>{
+ assert.deepEqual(RULES.copperOreAccents,[
+  'ore-malachite-halos','ore-copper-boundaries','ore-host-rock-fractures'
+ ]);
+ const ore=FS.slice(FS.indexOf('}else if(vMat==6)'),FS.indexOf('}else if(vMat==7)'));
+ for(const name of ['copperField','copperHalo','copperEdge','hostFracture'])
+  assert.match(ore,new RegExp('float '+name+'='));
+ for(const name of ['copperHalo','copperEdge','hostFracture'])
+  assert.match(ore,new RegExp(name+'[^;]*\\*near'));
+ assert.match(ore,/\(1\.0-gold\)/);
+ assert.doesNotMatch(ore,/sampler2D|discard;|texture\(|uTime/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
