@@ -1,0 +1,60 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-1.manifest.v1",
+  "title": "Homes & Regional Life",
+  "gate": "v0.10 Gate A OPEN; v0.11 LOCKED",
+  "milestone": "M0",
+  "status": "SCHEMA_CANDIDATE_NOT_INTEGRATED",
+  "target": 885,
+  "authoredBlueprintCount": 0,
+  "biomes": [
+    "temperate",
+    "desert",
+    "snow",
+    "enchanted-forest",
+    "mountain"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "designsPerSizePerBiome": {
+    "house": 20,
+    "tavern": 5,
+    "inn": 5,
+    "bathhouse": 4,
+    "stable": 5,
+    "farm-barn": 4,
+    "greenhouse": 4,
+    "fishing-lodge": 4,
+    "harbor-office": 4,
+    "lighthouse": 4
+  },
+  "sourceOfTruth": {
+    "main": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+    "checkpoint": "006",
+    "issues": [
+      109,
+      117
+    ],
+    "manualPackPRs": [
+      113,
+      114,
+      112,
+      115,
+      119
+    ],
+    "automatedCatalogPR": 118
+  },
+  "assetRefPolicy": "live:name | pack1..5:three-digit-family-roster | biome130:three-digit-ordinal; never assign numeric persistent IDs",
+  "outputPaths": [
+    "src/building-pool/roadmap-1/",
+    "tests/building-pool/roadmap-1/",
+    "docs/building-pool/roadmap-1/"
+  ],
+  "integration": false,
+  "worldPlacement": false,
+  "certifiedNode": false,
+  "certifiedChromium": false,
+  "certifiedPhysicalIPhone": false
+}
