@@ -284,9 +284,9 @@ controls review and art approval. Never merge or deploy autonomously.
 - **All 22/22 assigned family definitions remain candidate-only**, with
   23 independent persistent prospective IDs **159–181**, 182–208 free.
 - Exact authored source and tests from this review branch were checked:
-  **152/152 JS V8 compatibility test bodies PASS** (including new
+  **156/156 JS V8 compatibility test bodies PASS** (including new
   cross-family shape/mesh/physical fixture/save tests and 5 alpha-sort
-  tests). Do NOT call these 152 full native Node results.
+  tests). Do NOT call these 156 full native Node results.
 - **Real Node 22: 5/5 PASS**, specifically
   `tests/block-packs/pack-4/preview-utils.test.mjs` with
   `src/block-packs/pack-4/preview-utils.mjs`. Both were reconstructed
@@ -315,3 +315,8 @@ controls review and art approval. Never merge or deploy autonomously.
 
 All six M4 civic components remain **static dry/ornamental geometry**;
 no simulated fire/heat/smoke/fluid/light/pulley state may be claimed.
+
+## Subsequent M5 mesh and screenshot validation amendments
+- Exact source-backed V8 checks **156/156 PASS** following four all-asset mesh-budget/determinism/alpha tests in `tests/block-packs/pack-4/mesh-budget.test.mjs`. Native Node remains **5/5 only for preview-utils**; no general native Node pass can be inferred.
+- The stand-alone Chromium gallery browser script now rejects mere nonblack frame clears by measuring per-card foreground RGB difference from the image corner (minimum 700 pixels, contrast at least 24 across RGB). This is a test-harness correction, not evidence that the browser passed. Local Chromium WebGL2 remains unavailable and page navigation administrator-blocked.
+- Exact HEAD CI remains subject to separate verification; `M5` approval still withheld. No production renderer, registry, shared files or world generation touched.
