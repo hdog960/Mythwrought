@@ -23,3 +23,24 @@ export function branchedCaveWorld(world,origin=CAVE_CANDIDATE){
     }
   };
 }
+
+/**
+ * Sample the complete north-wing route using the same collision reader as gameplay.
+ * Coordinates are voxel feet positions, not an illustrative route.
+ * Explicitly report obstructed cells instead of claiming every saved world is walkable.
+ */
+export function northWingTraversal(world,origin=CAVE_CANDIDATE){
+  const candidate=branchedCaveWorld(world,origin);
+  const {floorAt}=caveRoute(world.seed,origin);
+  const t=origin.length-14,x=origin.x+t;
+  const samples=[];
+  for(let dz=0;dz>=-10;dz--){
+    const z=origin.z+dz, floor=floorAt(t), feet=floor+1;
+    const supported=candidate.get(x,floor,z)!==BLOCK.AIR;
+    const clear=candidate.get(x,feet,z)===BLOCK.AIR &&
+      candidate.get(x,feet+1,z)===BLOCK.AIR;
+    samples.push({x,y:feet,z,supported,clear});
+  }
+  return {samples,failures:samples.filter(p=>!p.supported||!p.clear),
+    walkable:samples.every(p=>p.supported&&p.clear)};
+}
