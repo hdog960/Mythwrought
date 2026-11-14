@@ -47,9 +47,9 @@ test('catalog has exactly 600 stable IDs, 5 biomes, 3 sizes, 11 kinds and correc
     .reduce((n,p)=>n+p.perSizeBiome*15,0)),[225,195,180]);
 });
 
-test('checked-in manifest equals executable counts and claims zero authored buildings',()=>{
+test('checked-in manifest reconciles 30 authored theoretical candidates without acceptance',()=>{
   const m=JSON.parse(fs.readFileSync(new URL('../../../src/building-pool/roadmap-4/manifest.json',import.meta.url),'utf8'));
-  assert.equal(m.plannedTotal,600);assert.equal(m.authoredTotal,0);
+  assert.equal(m.plannedTotal,600);assert.equal(m.authoredTotal,30);
   assert.equal(m.acceptedTotal,0);assert.equal(m.integrated,false);assert.equal(m.worldPlaced,false);
   assert.deepEqual(m.registeredCoreIds,REGISTERED);
   assert.deepEqual(m.categories.map(c=>c.type),PROGRAM.map(p=>p.type));
