@@ -562,15 +562,26 @@ function start(){
   // but preserve click for mouse, keyboard and accessibility activation.
   function bindGameplayAction(id,action){
     const button=document.getElementById(id);
-    let lastTouchAt=-Infinity;
+    let lastTouchAt=-Infinity,owner=null;
+    function release(e){
+      if(owner===e.pointerId)owner=null;
+    }
     button.addEventListener('pointerdown',e=>{
       if(e.pointerType!=='touch')return;
       e.preventDefault();
-      // A queued iOS touch must not edit the world behind settings or on app suspension.
-      if(!help.hidden||document.hidden||button.disabled)return;
+      // Only the first finger owns a discrete action until it releases.
+      // A second finger landing on Mine/Place must not perform a duplicate edit.
+      if(owner!==null||!help.hidden||document.hidden||button.disabled)return;
+      owner=e.pointerId;
       lastTouchAt=performance.now();
       action();
     });
+    for(const type of ['pointerup','pointercancel']){
+      window.addEventListener(type,release,true);
+    }
+    button.addEventListener('lostpointercapture',release);
+    window.addEventListener('blur',()=>{owner=null;});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)owner=null;});
     button.addEventListener('click',e=>{
       if(e.detail!==0&&performance.now()-lastTouchAt<750){
         e.preventDefault();
