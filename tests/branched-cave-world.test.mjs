@@ -46,3 +46,20 @@ for(const seed of [179,1,2026,-77]){
     assert.equal(world.get(obstruct.x,obstruct.y,obstruct.z),BLOCK.WOOD);
   });
 }
+
+test('north wing uses actual player body collision, not only center voxel checks',()=>{
+  const world=new VoxelWorld(179);
+  const route=northWingTraversal(world);
+  assert.equal(route.walkable,true);
+  assert.ok(route.bodyHeight>1 && route.bodyRadius>0);
+  const middle=route.samples[5];
+  // A player-sized body must remain clear at each route sample.
+  const candidate=branchedCaveWorld(world);
+  for(const point of route.samples)
+    assert.equal(collides(candidate,point.x+.5,point.y,point.z+.5),false);
+  // A saved block at a sampled center is a physical obstruction.
+  assert.equal(world.set(middle.x,middle.y,middle.z,BLOCK.STONE),true);
+  const blocked=northWingTraversal(world);
+  assert.equal(blocked.walkable,false);
+  assert.ok(blocked.failures.some(p=>p.x===middle.x&&p.z===middle.z));
+});
