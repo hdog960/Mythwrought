@@ -100,6 +100,22 @@ test('per-face occlusion partition stays below naive global-grid overhead',()=>{
   assert.ok(inlay.triangles<500);
   assert.ok(gravel.physicalQuads>gravel.decorationQuads);
 });
+test('physical and decorative triangle winding faces outward on all four profiles',()=>{
+  for(const asset of PACK_2_GROUND){
+    const m=groundPreviewMesh(asset.id);
+    for(let i=0;i<m.indices.length;i+=3){
+      const points=[m.indices[i],m.indices[i+1],m.indices[i+2]]
+        .map(index=>Array.from(m.positions.slice(index*3,index*3+3)));
+      const u=points[1].map((v,j)=>v-points[0][j]);
+      const v=points[2].map((w,j)=>w-points[0][j]);
+      const n=Array.from(m.normals.slice(m.indices[i]*3,m.indices[i]*3+3));
+      const cross=[u[1]*v[2]-u[2]*v[1],
+        u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+      const dot=cross.reduce((sum,val,j)=>sum+val*n[j],0);
+      assert.ok(dot>0,'inverted triangle for '+asset.key+' at index '+i);
+    }
+  }
+});
 test('ground state only needs compass orientation, never a fresh persistent ID',()=>{
   for(const a of PACK_2_GROUND)for(let rotation=0;rotation<a.orientation.turns;rotation++)
     assert.deepEqual(parseGroundCell(JSON.parse(JSON.stringify(groundCell(a.id,rotation)))),
