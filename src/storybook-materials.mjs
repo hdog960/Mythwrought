@@ -81,6 +81,11 @@ void main(){
     shade=.82+.17*facet+.13*glint+.09*cleavage+.13*prism;
     base=mix(base,vec3(.74,.59,1.0),(.25*facet+.11*glint)*near);
     base=mix(base,vec3(.37,.93,.83),(.12*cleavage+.16*prism)*near);
+    // Sparse frost-white inclusions and deep indigo cores distinguish natural geodes.
+    float inclusion=step(.955,hashCell(floor(vUv*vec2(7.0,9.0))+vec2(31.0,12.0)));
+    float core=smoothstep(.68,.91,.5+.5*sin(vUv.x*6.0+vUv.y*4.0)*sin(vUv.y*8.0-vUv.x*3.0));
+    base=mix(base,vec3(.22,.24,.54),.19*core*near);
+    base=mix(base,vec3(.87,.94,1.0),.24*inclusion*near);
   }else if(vMat==6){ // Raw ore: continuous amber mineral seams in weathered host rock.
     vec2 p=floor(vUv*vec2(12.0,15.0));
     float trace=step(.72,hashCell(p+17.0));
@@ -90,6 +95,9 @@ void main(){
     float gold=clamp(.48*trace+.42*vein+.24*branch,0.0,1.0);
     shade=.77+.15*tile+.19*gold;
     base=mix(base,vec3(.96,.69,.28),.28*gold*near);
+    // Oxidized teal seams frame the precious ore without transparency or glow passes.
+    float oxidation=smoothstep(.67,.87,.5+.5*sin(vUv.x*8.0-vUv.y*6.0+sin(vUv.y*11.0)));
+    base=mix(base,vec3(.19,.43,.39),.17*oxidation*(1.0-gold)*near);
   }else if(vMat==7){ // Solid polygon grass accents (opaque, no overdraw).
     shade=.92+.10*step(.5,tile);
   }else if(vMat==8||vMat==9){ // Flower petals and golden centers.
@@ -122,5 +130,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   newDrawCalls:0,
   newTextures:0,
   naturalDetailFamilies:Object.freeze(['sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins']),
-  secondaryNaturalAccents:Object.freeze(['grass-moss-pollen','soil-clay-lenses','stone-quartz-seams','crystal-chevron-prisms','ore-branch-veins'])
+  secondaryNaturalAccents:Object.freeze(['grass-moss-pollen','soil-clay-lenses','stone-quartz-seams','crystal-chevron-prisms','ore-branch-veins']),
+  mineralInclusions:Object.freeze(['crystal-indigo-core','crystal-frost-inclusions','ore-oxidized-seams'])
 });
