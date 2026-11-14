@@ -106,5 +106,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   fogStartDistance:29,
   fogEndDistance:68,
   newDrawCalls:0,
-  newTextures:0,\n  naturalDetailFamilies:Object.freeze(['sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins'])
+  newTextures:0,
+  naturalDetailFamilies:Object.freeze(['sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins'])
 });
