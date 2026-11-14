@@ -36,9 +36,34 @@ function buildProgram(gl){
   gl.attachShader(prog,compile(gl,gl.VERTEX_SHADER,VS));
   gl.attachShader(prog,compile(gl,gl.FRAGMENT_SHADER,FS));
   gl.linkProgram(prog);
+  // Defer shader destruction until program detaches them; avoid a shader leak per model.
+  for(const shader of gl.getAttachedShaders(prog)||[])gl.deleteShader(shader);
   if(!gl.getProgramParameter(prog,gl.LINK_STATUS))
     throw Error(gl.getProgramInfoLog(prog)||'Link failed');
   return prog;
+}
+// Sort translucent triangles far to near for this fixed review camera only.
+function sortedTranslucent(mesh){
+  const data=mesh.translucent,stride=mesh.stride,triangleSize=stride*3;
+  if(!data.length)return data;
+  const triangles=[];
+  for(let start=0;start<data.length;start+=triangleSize){
+    let depth=0;
+    for(let vertex=0;vertex<3;vertex++){
+      const i=start+vertex*stride;
+      const x=data[i]-.5,y=data[i+1]-.5,z=data[i+2]-.5;
+      depth+=(.34*y+.94*(-.61*x+.79*z))/3;
+    }
+    triangles.push({start,depth});
+  }
+  triangles.sort((a,b)=>b.depth-a.depth||a.start-b.start);
+  const sorted=new Float32Array(data.length);
+  let i=0;
+  for(const triangle of triangles){
+    sorted.set(data.subarray(triangle.start,triangle.start+triangleSize),i);
+    i+=triangleSize;
+  }
+  return sorted;
 }
 function drawOne(canvas,id,rotation){
   const gl=canvas.getContext('webgl2',{alpha:false,preserveDrawingBuffer:true,antialias:true});
@@ -47,12 +72,14 @@ function drawOne(canvas,id,rotation){
     id>=169?furnishingPreviewMesh(id,rotation):
     id>=165?lightingPreviewMesh(id,rotation):windowPreviewMesh(id,rotation);
   const prog=buildProgram(gl);
+  const vao=gl.createVertexArray(),buf=gl.createBuffer();
+  if(!vao||!buf)throw Error('Pack 4 preview GPU allocation failed');
+  try{
   gl.viewport(0,0,canvas.width,canvas.height);
   gl.clearColor(.12,.18,.21,1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
   gl.useProgram(prog);
-  const vao=gl.createVertexArray(),buf=gl.createBuffer();
   gl.bindVertexArray(vao);
   gl.bindBuffer(gl.ARRAY_BUFFER,buf);
   const stride=mesh.stride*4;
@@ -65,13 +92,21 @@ function drawOne(canvas,id,rotation){
   // Visual preview only: a sorted translucent pass is NOT integrated in live renderer.
   gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
   gl.depthMask(false);
-  gl.bufferData(gl.ARRAY_BUFFER,mesh.translucent,gl.STATIC_DRAW);
-  gl.drawArrays(gl.TRIANGLES,0,mesh.translucent.length/mesh.stride);
+  const sorted=sortedTranslucent(mesh);
+  gl.bufferData(gl.ARRAY_BUFFER,sorted,gl.STATIC_DRAW);
+  gl.drawArrays(gl.TRIANGLES,0,sorted.length/mesh.stride);
   gl.depthMask(true);
   const err=gl.getError();
   if(err!==gl.NO_ERROR)throw Error('WebGL error '+err);
   return {opaqueVertices:mesh.opaque.length/mesh.stride,
           transparentVertices:mesh.translucent.length/mesh.stride};
+  }finally{
+    gl.bindVertexArray(null);
+    gl.bindBuffer(gl.ARRAY_BUFFER,null);
+    gl.deleteBuffer(buf);
+    gl.deleteVertexArray(vao);
+    gl.deleteProgram(prog);
+  }
 }
 const grid=document.querySelector('#gallery');
 const outcomes=[];
