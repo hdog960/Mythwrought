@@ -50,7 +50,12 @@
     "m6AllSourceCrossLane": "120/120 shape/rotation cases (30 candidate IDs x 4 orientations) passed exact-source V8 checks with unmerged :00 validateShape and :12 prototypeSurfaceMesh. 12–532 triangles, bounded indices, valid coordinates. Not actual Node/renderer.",
     "m6AllFamilyAudit": "10/10 new authored unified acceptance test bodies executed successfully on exact PR branch source in V8 test shim (30 IDs/21 rosters, 120 rotations, textures, collision/selection, reversible 30-item fixture save/restore, rotated-save rejection). NOT real Node.",
     "m6AllPackAuthoredV8": "75/75 authored test bodies passed in V8 shims across six nested Pack 1 Node test modules (existing 65 + M6 new 10). Genuine Node execution still NOT performed.",
-    "m6BrowserSource": "New optional Pack 1-only Playwright runner tests gallery.html, stone-shape-gallery.html, garden-gallery.html, foliage-gallery.html, floral-gallery.html at 667x375,844x390,932x430. Source committed and V8 syntax parsed, but authentic screenshots NOT CAPTURED."
+    "m6BrowserSource": "New optional Pack 1-only Playwright runner tests gallery.html, stone-shape-gallery.html, garden-gallery.html, foliage-gallery.html, floral-gallery.html at 667x375,844x390,932x430. Source committed and V8 syntax parsed, but authentic screenshots NOT CAPTURED.",
+    "m6RayRegression": "6/6 new authored ray regression test bodies passed exact-source V8 shim; 22,932 independent analytic rays against isolated candidate fixtures + 8,232 shaped-stone occupancy probes; NOT genuine Node.",
+    "m6AllFixtureRayAudit": "29,988 face-oriented rays across 30 candidates and supported orientations had 0 expected/actual intersection mismatches, combining exact Pack 1 fixture or unmerged :00 generic source in V8. Not production runtime.",
+    "m6AuthoredTests": "81/81 authored tests (65 initial + 10 unified + 6 ray regression) pass exact-source V8 shim across seven nested Node modules; REAL NODE NOT RUN.",
+    "localNetworkAttempt": "Confirmed Node 22.16.0 and /usr/bin/chromium locally; neither GitHub DNS nor pinned GitHub IP connections are allowed. Python Playwright available; exact branch modules cannot be mounted from connected GitHub into container here, so genuine candidate gallery browser not run.",
+    "previousExactHeadCI": "Head aa639a1306abea596333c0921a024f6f3ea93d50 completed SUCCESS via GitHub Actions 43638833572 (baseline Node + Chromium only, nested Pack 1 tests not included)."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -480,7 +485,7 @@
   ],
   "pr": "https://github.com/hdog960/Mythwrought/pull/113",
   "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED",
-  "nextMilestone": "Milestone 6 remains open: run six dedicated nested Node suites and real gallery Chromium at 667x375/844x390/932x430 from an actual GitHub branch checkout; inspect authentic screenshots, repair pack-only defects; creator controls integration/merge.",
+  "nextMilestone": "Run SEVEN nested dedicated Node modules and Pack 1 Playwright gallery runner against exact checked-out PR branch; inspect actual mobile landscape screenshots and verify registration/rotation/save integration under separate creator approval. Do not merge/deploy.",
   "allocations": [
     {
       "range": [
@@ -525,12 +530,11 @@
       "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "Milestone 6 acceptance audit: all 30 IDs and 120 rotations source-reviewed; 75 authored test bodies passed V8. New pack-only unified Node acceptance suite and real Chromium screenshot runner committed. Genuine runs & engine integration remain blocked.",
-  "finalAcceptance": "OPEN / NOT ACCEPTED: 21/21 SOURCE CANDIDATE families and 30/30 candidate IDs; 0/30 registered in live game; real pack-specific Node/Chromium, screenshot/device, engine/save/rotation integration not complete.",
+  "latestMilestone": "M6 in progress: 21/21 source candidate families, 30 unique IDs, 120/120 mesh orientations, 81/81 authored test bodies in V8, 29,988 independent source ray probes, previous head baseline exact CI green; real nested Node/browser/iPhone and central engine acceptance OPEN.",
+  "finalAcceptance": "NOT ACCEPTED: all source candidates remain draft; dedicated real Node/Chromium, physical iPhone, real engine ID registration and backward compatible rotation/save tests pending.",
   "acceptanceMatrix": {
     "all_21_family_source_candidates": "CANDIDATE",
     "30_distinct_persistent_candidate_IDs": "VERIFIED_SOURCE_V8",
-    "all_Pack1_authored_test_bodies_75_of_75": "PASSED_V8_SHIM_NOT_NODE",
     "all_120_rotated_shape_mesher_cases": "PASSED_EXACT_OPT_IN_GENERIC_SOURCE_V8_NOT_GPU",
     "genuine_dedicated_Node": "NOT_RUN",
     "genuine_Chromium_candidate_galleries": "NOT_RUN",
@@ -538,7 +542,10 @@
     "candidate_offline_browser_interaction": "NOT_RUN",
     "production_placement_targeting_save": "BLOCKED_BY_ENGINE",
     "physical_iPhone_and_creator_approval": "NOT_GRANTED",
-    "merged_or_deployed": "NO"
+    "merged_or_deployed": "NO",
+    "all_Pack1_authored_test_bodies_81_of_81": "PASSED_EXACT_SOURCE_V8_SHIM_NOT_NODE",
+    "independent_ray_regression": "22932_RAYS_PLUS_8232_STONE_PROBES_PASSED_V8_NOT_NODE",
+    "source_generic_ray_fuzz": "29988_RAYS_NO_MISMATCH_V8_NOT_PRODUCTION"
   },
   "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md"
 }
