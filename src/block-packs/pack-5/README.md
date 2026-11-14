@@ -37,3 +37,12 @@ mobile performance, physical iPhone controls, or premium art acceptance without 
 Future shared registry, engine shape/collision, attachment support, persistent variant state,
 save compatibility and world-placements belong to central creator-authorized integration.
 Read `PROGRESS.md` and `manifest.json` for true candidate/verification statuses and handoff.
+
+## Latest Milestone 1 candidate acceptance review
+
+- Genuine Node 22.16.0 dedicated suite: **44/44 PASS**, exact checked-in source and tests matched Git blob hashes.
+- Physical fired brick now wraps original manufactured running/soldier courses around all four lateral faces; both have real solid collision, not plain reverse-face paint. Source-box budgets are 504 and 636 triangles, respectively, under the existing preview bounds.
+- `canvas-gallery.mjs` uses the same source-derived physical mesh triangles and a CPU depth buffer, avoiding previously mis-sorted painter-order artifacts. This is **genuine Chromium Canvas2D** only, not WebGL2.
+- `tests/block-packs/pack-5/capture-canvas.py` reproducibly captures six screenshots across 667×375, 844×390, 932×430 and rotations 0/1; it verifies six unique asset-panel pixel hashes per image and meaningful rotation changes.
+- Authentic source-served WebGL2 is **NOT VERIFIED** in this environment. Pixel fingerprints and candidate snapshots cannot substitute for actual engine integration, premium-art approval, in-game target/collision, or backward-safe schema-1 save tests.
+- `M1_ACCEPTANCE.md` contains full verified evidence; **M1 acceptance remains open** and M2 residential furniture is not authorized to begin merely because the source was authored.
