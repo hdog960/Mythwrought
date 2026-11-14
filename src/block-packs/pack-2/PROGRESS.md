@@ -149,6 +149,15 @@
 - [x] Committed a free exact-head `tests/block-packs/pack-2/run-acceptance.sh` script for all six real nested Node suites plus the Python 18×3 landscape gallery review. **88/88 V8 test bodies** still passed, native and real gallery pending.
 - [ ] Full native Node tests, actual candidate Chromium PNGs and inspection, production save schema-1/fluids/render/gameplay, physical iPhone Gate A and v0.11 remain OPEN. No merge, deployment, building placement or other pack edits.
 
+## Session 12 — full-asset uniqueness and native-test access audit (2026-11-14)
+
+- [x] Reverified checkpoint **007** on main `caf47776b723a36684edc1a72749e49268ccc688`, coordination Issues #109/#117, Packs 1/3/4/5, draft PR #114 and all provisional IDs 59–76. The pack branch has not been merged/rebased; source, tests and preview paths remain exclusively Pack 2.
+- [x] Added a strict `acceptance.test.mjs` regression checking **all 18 candidate meshes' actual positions/colors/transparency for distinct full authored signatures**. Standalone V8 execution found **18/18 different asset mesh/material signatures**. No reliance on candidate names or representative renderer screenshots.
+- [x] All **89/89 checked-in Pack 2 test bodies** still pass in the isolated V8 assertion harness: 12 foundation + 15 joinery + 14 paving + 17 infrastructure + 21 water + **10** M6 acceptance.
+- [ ] Authentic native `node --test tests/block-packs/pack-2/*.test.mjs` and `gallery-browser.py` at 667×375 / 844×390 / 932×430 remain **UNRUN**: exact GitHub checkout unavailable in the local Node/Chromium container due network/DNS restrictions. No fabricated screenshot evidence or claim of real iPhone testing.
+- [ ] Current PR-head standard GitHub CI must be verified against the latest commit, not an earlier successful baseline. Root CI does not include Pack 2 nested tests.
+- [ ] Production fluid render/simulation, shape registration, save schema-1 metadata and creator Gate A approval remain separate. No merge, deployment, shared system edit or generated placements.
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
