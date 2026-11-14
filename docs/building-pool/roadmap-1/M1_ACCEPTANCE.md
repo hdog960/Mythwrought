@@ -10,8 +10,8 @@
 | M0 schema / dedicated draft PR | complete; PR #121 remains draft |
 | M0 original exact-head CI | SUCCESS at commit f57d4a6543ba4907d02bf86b1d8c47ac58e6c37a |
 | Source-authored M1 candidates | 45/885; 15 house + 15 tavern + 15 empty stable |
-| Actual authored voxel coordinates | 46,299 across 45 candidates |
-| Native local Node tests | 30/30 PASS (16 M0 + 12 M1 + 2 uniqueness); PR-head source-specific rerun pending |
+| Actual authored voxel coordinates | 47,696 across 45 candidates |
+| Native local Node tests | 39/39 PASS (16 M0 + 12 M1 + 2 uniqueness); PR-head source-specific rerun pending |
 | Chromium schematic previews | 36 authentic Canvas2D exterior/cutaway screenshots at 3 landscape sizes |
 | Native WebGL2 geometry gallery | Not certified: software GL unavailable in testing environment |
 | Candidate physical asset substitution | BLOCKED on exact family dimensions, collision, orientation, support and widened-ID registry |
@@ -36,4 +36,15 @@ Images generated locally under working artifact review directory, not committed 
 
 ## Added D4 uniqueness regression
 
-A standalone M1-only orientation-invariant structural signature compares four quarter-turn rotations and their mirrors, ignoring material/repaint and room labels. All 45 candidates are pairwise distinct under this test (30/30 native local focused tests pass overall). The second dedicated test constructs a deliberately renamed, recolored mirror of an authored house and verifies its rejection. This does **not** substitute for creator appraisal of meaningful architectural differences or near-duplicate geometry.
+A standalone M1-only orientation-invariant structural signature compares four quarter-turn rotations and their mirrors, ignoring material/repaint and room labels. All 45 candidates are pairwise distinct under this test (39/39 native local focused tests pass overall). The second dedicated test constructs a deliberately renamed, recolored mirror of an authored house and verifies its rejection. This does **not** substitute for creator appraisal of meaningful architectural differences or near-duplicate geometry.
+
+### Follow-up M1 refinement and real accessibility audit (2026-11-14)
+
+- Latest verified main caf47776, automation-only incorporation checkpoint 007. Issues #109/#117 and each current manual Pack 1–5 manifest rechecked before changes; biome130 remains opt-in symbolic source without live registry adoption.
+- Existing count **45/885** preserved. The 45 actual coordinate-authored candidates now encode **47,696 placed voxel cells**; new interior furniture and stable rails are real authored cells, not a diagram annotation. Individual generator and architectural names/footprints remain deterministic.
+- Authored non-cosmetic, biome-specific **physical exterior support and weather profiles** across all candidates; added stable *left and right* stall-edge partitions and four deliberately empty bays, plus room-specific bed, cabinet, bar, kitchen, and tack-area furnishings. These placements retain symbolic unresolved physical assets and are **not live world content**.
+- New independent M1-only validator audits all 45 for entry-to-room flood-fill reachability, passable two-high thresholds, foundation under every declared standing voxel, spatial adjacency of named portals to the actual source/target rooms, proper furniture location, physical regional features, and use of exact roster **symbolic asset families** from all five packs. Negative tests catch omitted floor, misleading portal labels, nonexistent roster refs, missing architectural supports, and missing tavern counters.
+- **Native local Node 22.16.0: 39/39 tests PASSED** across the complete owned test suites (16 M0 / 12 M1 / 2 D4 / 9 deep acceptance). Exact new PR-head GitHub CI **pending after commit**, not claimed.
+- **Genuine Chromium:** 36 new Canvas2D schematic exterior/cutaway screenshots rendered at 667×375, 844×390 and 932×430, six sampled IDs. Local HTTP page navigation was blocked by administrator; browser source was bundled into a real Chromium about:blank page. WebGL2 test attempted and returned **"no WebGL2 context"** in this environment. A true WebGL2 source-served 3D gallery and final asset geometry remain outstanding.
+- **Remaining:** hand-fitting unresolved multi-voxel Pack meshes, support/mount and rotation ABI, head/collision/door swing with actual target engine APIs, real rendered WebGL2 when supported, stronger visually meaningful near-duplicate creator acceptance, and all unstarted 840 designs. No user art sign-off or physical-iPhone approval has been asserted.
+- **Scope:** only Roadmap 1 source/test/docs; draft PR #121 unchanged in its draft/unmerged status. No world placement, registry updates, save schema, other roadmaps, merges, deployments or v0.11 unlock.

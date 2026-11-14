@@ -54,6 +54,13 @@ function compile(category,biome,size,index,row){
     room('west-front',[2,2],[midX-1,penZ]);room('east-front',[midX+2,2],[w-2,penZ]);
     room('west-rear',[2,penZ+1],[midX-1,tackZ]);room('east-rear',[midX+2,penZ+1],[w-2,tackZ]);
     room('tack-room',[2,tackZ+1],[w-2,d-2]);
+    // Four real empty stall bays: fence/partition rails along both aisle edges;
+    // each bay keeps its own one-cell-wide open entrance, not a virtual room label.
+    // Use physical Pack 5 stall partitions as unresolved occupancy candidates.
+    for(const x of [midX-2,midX+2])for(let z=2;z<tackZ;z++){
+      if(z===3||z===penZ+2||!free(x,1,z))continue;
+      place(x,1,z,'partition','pack5:096','north');
+    }
     link('outside','aisle',entry,1);link('aisle','tack-room',midX,tackZ);
     for(const [name,x,z] of [['west-front',midX-2,3],['east-front',midX+2,3],['west-rear',midX-2,penZ+2],['east-rear',midX+2,penZ+2]])link('aisle',name,x,z);
   }else if(plan==='rear'){
@@ -133,11 +140,67 @@ function compile(category,biome,size,index,row){
   }else if(feature==='skylight'){
     const x=midX,z=midZ,y=roofY(x,z);if(occupied.has(at(x,y,z))){remove(x,y,z);place(x,y,z,'window','pack4:030','up');}
   }
-  // Physically allocated furnishings: corners selected away from open corridors/partition thresholds.
-  const furnishings=category==='house'?[['pack5:082',w-4,d-4],['pack4:059',3,3],['pack4:064',w-4,3]]:
-    category==='tavern'?[['pack5:086',w-4,d-4],['pack4:059',3,3],['pack4:058',w-4,3],['pack5:090',3,d-4]]:
-    [['pack5:096',3,3],['pack5:096',w-4,3],['pack5:096',3,midZ],['pack5:096',w-4,midZ],['pack5:085',w-4,d-3]];
-  for(const [asset,x,z] of furnishings)if(free(x,1,z)&&!reserved.has(at(x,1,z)))place(x,1,z,'furnishing',asset,'north');
+  // Regionally specific, *physical* external profiles. They change the authored
+  // outline and supports, not merely the coloration of shared templates.
+  // These cells are outside the interior circulation and outside the clear gate.
+  const regionalDetail={
+    temperate:{asset:'pack2:022',label:'lane-front colonnade',xs:[-3,-1,1,3],zs:[0],maxHeight:wallTop-1},
+    desert:{asset:'pack5:080',label:'sand-shade front arcade',xs:[-4,-2,2,4],zs:[0],maxHeight:wallTop},
+    snow:{asset:'pack2:014',label:'windward insulated snowbreak',xs:[-3,-2,2,3],zs:[0],maxHeight:2},
+    'enchanted-forest':{asset:'pack1:010',label:'living-root threshold columns',xs:[-4,-3,3,4],zs:[0],maxHeight:3},
+    mountain:{asset:'pack1:010',label:'cliffside retaining piers',xs:[-4,-2,2,4],zs:[0],maxHeight:wallTop-1}
+  }[biome];
+  let profileCount=0;
+  for(const delta of regionalDetail.xs){
+    const x=entry+delta;if(x<=1||x>=w-2||x===entry)continue;
+    for(const z of regionalDetail.zs)for(let y=1;y<=regionalDetail.maxHeight;y++){
+      if(free(x,y,z)){
+        place(x,y,z,'support',regionalDetail.asset,'north');profileCount++;
+      }
+    }
+  }
+  // Physical corner-braces / flank piers make the weather-side massing and rear
+  // approach differ between biome families. They never overlap entrances.
+  const flankZ=category==='stable'?[3,d-4]:[Math.max(3,midZ-3),Math.min(d-4,midZ+2)];
+  for(const x of [0,w-1])for(const z of flankZ)for(let y=1;y<=(biome==='snow'?2:3);y++){
+    if(free(x,y,z)){
+      place(x,y,z,'support',biome==='desert'?'pack5:080':biome==='mountain'?'pack1:010':'pack2:022','north');profileCount++;
+    }
+  }
+  if(profileCount<4)throw new Error(name+': missing meaningful physical regional building profile');
+  // Place different intended physical furnishings *inside the relevant room*.
+  // Keep central access and door thresholds clear; materials remain unresolved
+  // until their real mesh occupancy/support properties are approved.
+  const roomProgram={
+    house:{hearth:['pack4:064','pack4:059'],sleeping:['pack5:082','pack5:085'],pantry:['pack5:085','pack4:057'],study:['pack5:084','pack5:091']},
+    tavern:{taproom:['pack5:086','pack4:059','pack4:058'],kitchen:['pack5:090','pack4:056'],storeroom:['pack4:057','pack4:056'],alcove:['pack4:058','pack5:083']},
+    stable:{'west-front':['pack5:096'],'east-front':['pack5:096'],'west-rear':['pack5:096'],'east-rear':['pack5:096'],'tack-room':['pack5:085','pack4:057']}
+  }[category];
+  const foyer=new Set(portals.flatMap(p=>[at(p.at[0],1,p.at[2]),at(p.at[0]+1,1,p.at[2]),at(p.at[0]-1,1,p.at[2]),at(p.at[0],1,p.at[2]+1),at(p.at[0],1,p.at[2]-1)]));
+  const placedByRoom={};
+  for(const r of rooms){
+    const refs=roomProgram[r.id]??[];
+    const candidates=[];
+    for(let x=r.min[0];x<r.max[0];x++)for(let z=r.min[2];z<r.max[2];z++){
+      if(!free(x,1,z)||!free(x,2,z)||reserved.has(at(x,1,z))||foyer.has(at(x,1,z)))continue;
+      // Perimeter-first placement leaves the center of each room walkable.
+      const edge=Math.min(x-r.min[0],r.max[0]-1-x,z-r.min[2],r.max[2]-1-z);
+      candidates.push({x,z,edge});
+    }
+    candidates.sort((a,b)=>a.edge-b.edge||a.z-b.z||a.x-b.x);
+    let placed=0;
+    for(const [i,ref] of refs.entries()){
+      const c=candidates.find(({x,z})=>free(x,1,z)&&!foyer.has(at(x,1,z))&&Math.abs(x-midX)+Math.abs(z-midZ)>1);
+      if(!c)break;
+      place(c.x,1,c.z,'furnishing',ref,i%2?'east':'north',{room:r.id});placed++;
+      candidates.splice(candidates.indexOf(c),1);
+    }
+    placedByRoom[r.id]=placed;
+  }
+  // A counter, service zone and independent seating make every tavern an
+  // inhabitable interior, not merely a roofed hall labeled 'tavern'.
+  if(category==='tavern'&&!Object.keys(placedByRoom).some(k=>k==='taproom'&&placedByRoom[k]>=2))
+    throw new Error(name+': tavern taproom lacks distinct counter and seating');
   // Accessible coordinates are actual empty 3D cells; no furnishing, wall or pen can occupy them.
   const walkable=[];
   for(let x=2;x<w-2;x++)for(let z=2;z<d-2;z++)if(free(x,1,z)&&free(x,2,z))walkable.push([x,1,z]);
@@ -145,7 +208,7 @@ function compile(category,biome,size,index,row){
   // Walkable portal thresholds must remain empty at standing/head level.
   for(const portal of portals){const [x,y,z]=portal.at;if(!free(x,y,z)||!free(x,y+1,z))throw new Error(name+': portal blocked '+at(x,y,z));}
   const deps=[...new Set([...occupied.values()].map(p=>p.asset).filter(a=>!a.startsWith('live:')))].sort().map(asset=>({asset,status:'unresolved',requires:['exact physical dimensions and orientation','support/mount and selection/collision bounds','schema-1 safe asset substitution and load-time dependency resolution']}));
-  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
+  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
   validateBlueprint(b);return b;
 }
 export function getM1Blueprints(){
