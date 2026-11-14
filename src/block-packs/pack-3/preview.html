@@ -18,12 +18,13 @@ button{border:1px solid #cba879;border-radius:8px;background:#394b59;color:#fbe1
 </head>
 <body>
 <div class="warning">UNMERGED CANDIDATE — NOT IN LIVE GAME — ISOLATED PHYSICAL BOX PREVIEW</div>
-<h1>Mythwrought · Roof Craft Samples</h1>
-<p>Seven original roofing candidates: four flat material families and three independently physical rotated roof profiles. Material-specific geometric occupancy comes directly from the Pack 3 definitions. All visible raised tile and fiber parts are genuine box volumes with the same selection/collision definitions. This gallery does not place blocks, modify player saves, or depict the shipped WebGL game.</p>
+<h1>Mythwrought · Roof & Fortress Craft Samples</h1>
+<p>Ten original Pack 3 voxel candidates: four flat roofing materials, three pitched/rotated roof profiles, and three standalone fortified architectural parts. Material-specific geometric occupancy comes directly from the Pack 3 definitions. All visible raised tile and fiber parts are genuine box volumes with the same selection/collision definitions. This gallery does not place blocks, modify player saves, or depict the shipped WebGL game.</p>
 <main id="gallery"></main>
 <script type="module">
 import {PACK3_ROOFING_ASSETS} from './roofing-materials.mjs';
 import {PACK3_ROOF_GEOMETRY,pack3GeometryById} from './roof-geometry.mjs';
+import {PACK3_FORTIFIED_ASSETS,pack3FortifiedById} from './fortified-pieces.mjs';
 const gallery=document.querySelector('#gallery');
 function shade(hex,factor){
  const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
@@ -41,7 +42,7 @@ function paintBox(ctx,b,color){
  poly(ctx,[point(x,y,Z),point(X,y,Z),point(X,Y,Z),point(x,Y,Z)],shade(color,.88));
  poly(ctx,[point(x,Y,z),point(X,Y,z),point(X,Y,Z),point(x,Y,Z)],shade(color,1.12));
 }
-for(const initial of [...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY]){
+for(const initial of [...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY,...PACK3_FORTIFIED_ASSETS]){
  let asset=initial;
  const card=document.createElement('article');
  const canvas=document.createElement('canvas');canvas.width=320;canvas.height=200;
@@ -52,7 +53,7 @@ for(const initial of [...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY]){
   ' · roster '+asset.roster+' · '+asset.boxes.length+' collision/selection volumes';card.append(sub);
  const detail=document.createElement('p');detail.textContent=asset.style??asset.profile;card.append(detail);
  let turnButton=null;
- if(asset.kind==='roof-geometry'){
+ if(asset.kind==='roof-geometry'||asset.kind==='fortified-component'){
   turnButton=document.createElement('button');
   turnButton.type='button';turnButton.textContent='Rotate 90° · orientation 0';
   card.append(turnButton);
@@ -69,7 +70,9 @@ for(const initial of [...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY]){
  draw();
  if(turnButton)turnButton.addEventListener('click',()=>{
   const next=(asset.rotation+1)%4;
-  asset=pack3GeometryById(initial.id,next);
+  asset=asset.kind==='fortified-component'
+    ?pack3FortifiedById(initial.id,next)
+    :pack3GeometryById(initial.id,next);
   turnButton.textContent='Rotate 90° · orientation '+next;
   draw();
  });
