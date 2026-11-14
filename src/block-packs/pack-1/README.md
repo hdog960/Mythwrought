@@ -242,3 +242,22 @@ New `tests/block-packs/pack-1/gallery-count.test.mjs`: **5/5 genuinely passed No
 Local Chromium starts but both local HTTP and data-page navigation return `ERR_BLOCKED_BY_ADMINISTRATOR`. Genuine gallery screenshot generation is therefore blocked in this environment; none were captured, examined or claimed. The previous PR exact-head configured baseline CI [#43639942311](https://github.com/hdog960/Mythwrought/actions/runs/43639942311) completed **SUCCESS**, but baseline Node/Chromium smoke does not cover nested Pack 1 tests.
 
 See `M6_ACCEPTANCE.md` for the updated command including all eight nested modules and the explicit missing evidence. All 21 families and 30 unique IDs 9–38 remain **CANDIDATE** with no merged, deployed, world-generated or physical-iPhone-approved content.
+
+
+## M6 continuation after interrupted README handoff (2026-11-14)
+
+**Verified coordination:** At the start of this continuation, latest main was `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, incorporation checkpoint 006; Issues [#109](https://github.com/hdog960/Mythwrought/issues/109) and [#117](https://github.com/hdog960/Mythwrought/issues/117) open, draft [PR #113](https://github.com/hdog960/Mythwrought/pull/113) exclusively Pack 1 owned. Main `VoxelWorld.set` still registers only IDs 0–8. **21/21 source candidate families, 30/30 IDs 9–38**, no registry or worldgen integration.
+
+**New pack-owned acceptance orchestrator:** `tests/block-packs/pack-1/run-acceptance.mjs` is an **opt-in** free Node-only script, not a workflow or change to shared CI. It validates the exact checkout commit and clean Pack 1 source, executes **all eight existing nested native Node test modules** (seven asset suites plus five genuine gallery-parser tests), then executes the opt-in `galleries-browser.mjs` under a real installed Chromium/Playwright runtime. It requires all 5 galleries × 3 landscape viewports (667×375, 844×390, 932×430), **30 real PNG files**, nonempty PNG signatures and SHA-256 checksums, and the gallery runner's genuine provenance manifest before producing `artifacts/pack-1/native-acceptance-PASS.json`. Old success files are removed before the browser step, so a partial run cannot count prior evidence. The script is not an executed acceptance result.
+
+**Reproducible command**, run from a **real clean checkout of the independently verified exact draft PR head**, after installing the existing project's free Playwright/Chromium dependencies:
+
+```bash
+PACK1_EXPECTED_HEAD=$(git rev-parse HEAD) node tests/block-packs/pack-1/run-acceptance.mjs
+```
+
+For audit-grade provenance, set `PACK1_EXPECTED_HEAD` to the SHA independently read from PR #113 rather than relying on the current checkout's own SHA. Do not use a detached, outdated, dirty or merged checkout; this runner refuses a different commit or dirty Pack 1 paths. No additional shared file modifications are required or authorized.
+
+**Actual evidence in this continuation:** the last real Node verification of `gallery-count.test.mjs` from exact GitHub-compatible local sources passed **5/5**. Separately, **81/81** asset-focused authored test bodies passed exact GitHub source V8-compatible shims on the last reviewed branch, **not genuine Node**. A fresh direct GitHub clone/raw URL request from the local isolated Node/Chromium workspace still failed DNS. The previously observed local Chromium administrator block prevents authentic gallery navigation; **all seven true asset Node suites, 15 candidate gallery views, 30 real screenshots and physical-iPhone acceptance remain NOT VERIFIED**. No images were fabricated and no certification granted.
+
+**Latest acceptance evidence and blockers:** see `M6_ACCEPTANCE.md` and `manifest.json`. Pack 1 stays **CANDIDATE, draft, unmerged, undeployed, no production ID registration, no gameplay harvest/craft/mobs**. Gate A OPEN; v0.11 LOCKED. Final acceptance requires actual complete native Node/browser runs, screenshot inspection and separately creator-approved shared-engine/controls/save integration.
