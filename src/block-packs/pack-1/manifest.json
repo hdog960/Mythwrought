@@ -43,7 +43,10 @@
     "foliagePerformance": "Initial fine-detail box unions produced ~1480–4412 mesh triangles. Replaced with 1/8-voxel aligned physical parts and reverified 208–532. Visually inspect genuine Chromium later.",
     "floralLogic": "15/15 authored Milestone 5 Node-style test bodies executed on exact GitHub branch source in a V8 assertion shim; NOT genuine Node.",
     "floralCrossLane": "39/39 V8 opt-in targeting and surface mesher probes passed: 28 shapes × rotation; 204–376 triangles per unmerged prototype; ten nontrivial targeting/space/mount/light consistency probes; source gallery syntax parsed. NOT production WebGL2.",
-    "floralPreview": "Standalone HTML+JS gallery source committed with seven actual box-derived Canvas2D specimens, cross-section probes, rotate/place/remove and canonical fixture save/restore; authentic Chromium screenshots NOT CAPTURED."
+    "floralPreview": "Standalone HTML+JS gallery source committed with seven actual box-derived Canvas2D specimens, cross-section probes, rotate/place/remove and canonical fixture save/restore; authentic Chromium screenshots NOT CAPTURED.",
+    "allPackV8": "65/65 authored test bodies pass on exact PR branch in one V8 harness: M1 9/9; M2 11/11; M3 14/14; M4 16/16; M5 15/15. All 10 dependency modules loaded. NOT actual Node.",
+    "latestBaselineCI": "PR #113 previous exact head 1d8fcc91d1d27e560caae8b35917c5dd07f4077d Github Actions run 43633561238 completed SUCCESS; default project CI excludes nested Pack 1 tests. Current new head requires separate check.",
+    "localTestBlocker": "Local Node 22 and /usr/bin/chromium exist but sandboxed local filesystem cannot fetch GitHub source (DNS/network restricted). No fabricated execution of unmounted branch source."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -519,5 +522,17 @@
     }
   ],
   "latestMilestone": "M5 authored: all 21 assigned families with 30 unique ID-bearing source candidates (9–38). All remain CANDIDATE pending real Node/Chromium and production engine integration.",
-  "finalAcceptance": "NOT READY: All families source CANDIDATE; real node+browser results, original art acceptance, production shape integration, save orientation encoding, physical iPhone still outstanding."
+  "finalAcceptance": "NOT READY: All families source CANDIDATE; real node+browser results, original art acceptance, production shape integration, save orientation encoding, physical iPhone still outstanding.",
+  "acceptanceMatrix": {
+    "all_21_family_source_candidates": "CANDIDATE",
+    "30_distinct_persistent_candidate_IDs": "VERIFIED_SOURCE_V8",
+    "all_Pack1_authored_test_bodies_65_of_65": "PASSED_V8_SHIM_NOT_NODE",
+    "cross_lane_opt_in_shape_geometry": "SOURCE_PROBED_NOT_LIVE",
+    "genuine_dedicated_Node": "NOT_RUN",
+    "genuine_Chromium_mobile_offline": "NOT_RUN",
+    "authentic_candidate_screenshots": "NOT_CAPTURED",
+    "production_placement_targeting_save": "BLOCKED_BY_ENGINE",
+    "physical_iPhone": "NOT_RUN",
+    "merged_or_deployed": "NO"
+  }
 }
