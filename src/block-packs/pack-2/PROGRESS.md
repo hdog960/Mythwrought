@@ -1,11 +1,11 @@
 # Mythwrought Pack 2 — Timber & Infrastructure candidate ledger
 
 **Governance:** [coordination Issue #109](https://github.com/hdog960/Mythwrought/issues/109) / seven authoritative docs / v0.10 Gate A, v0.11 locked.
-**Status:** **17/18 distinct physical candidate families authored** (not integrated, merged, deployed or playable). 1 family remains.
+**Status:** **18/18 distinct physical candidate families authored** (not integrated, merged, deployed or playable). 0 families remain to author; native acceptance and live integration are still blocked.
 **Latest checked main:** `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`; incorporation checkpoint **006**. Live IDs 0–8 only. Wood ID 4 is not a substitute for these independent candidate shapes.
 **Draft PR:** https://github.com/hdog960/Mythwrought/pull/114
 **Dedicated branch:** `manual-pack-2-timber-foundation-20261114`; see PR for live exact HEAD / CI.
-**Exclusive provisional ID range:** 59–108. Only **59–75** allocated, and those IDs are not installed in the game. 255 reserved. No per-rotation/upper/lower/open/closed ID inflation.
+**Exclusive provisional ID range:** 59–108. Only **59–76** allocated, and those IDs are not installed in the game. 255 reserved. No per-rotation/upper/lower/open/closed ID inflation.
 
 ## Roster-level asset progress
 
@@ -28,7 +28,7 @@
 | M4 | 43 | 73 | Riveted double-post structural guardrail with broad protective handrail, iron diagonal bracing and optional terminal plate; not light wooden fence | 4 rotations × through/terminal | Candidate |
 | M4 | 44 | 74 | Full protective limestone parapet with heavy cap, broad coping and optional physical scupper through middle of wall; not Pack 1 balustrade | 2 axes × solid/drain-slot | Candidate |
 | M4 | 46 | 75 | Elevated larch deck with separated raised plank slats, twin real lower joists and optional flush edge trim; not full-cube wooden plank | 2 axes × open-deck/edge-trim | Candidate |
-| M5 | 45 | — | True water voxel requiring shared transparent fluid rules; NOT a static cyan cube | — | Not started |
+| M5 | 45 | 76 | Clear rill water: genuine nonblocking *fluid-volume* prism with exact surface triangle targeting, tinted alpha geometry, 8 physical heights and 4 cardinal sloping currents; engine flow/transparent rendering/saves BLOCKED | source 1 + seven levels × five flow directions = 36 metadata states | Candidate — ENGINE BLOCKED |
 
 **Physical evidence:** `definitions.mjs` and `joinery.mjs` expose genuine occupied local AABB unions that are independently ray-targetable/collidable when connected. Each exports original palette and actual triangle meshes, with surface details anchored to physical geometry. `fixture.mjs` can select, rotate, choose upper/lower, toggle hinges, place, ray-select, mine/remove, serialize and restore isolated candidate cells. Fixture snapshots preserve the old five-number record rows and use seven fields for new stateful joinery.
 
@@ -73,6 +73,21 @@
 - [ ] Native `node --test tests/block-packs/pack-2/*.test.mjs` in an authorized checkout outstanding. Local container has Node 22 and Chromium, but GitHub DNS resolution blocks obtaining the exact branch files for a faithful execution. Do not misrepresent V8 results as Node.
 - [ ] Production collision/render/save integration, browser render/performance, physical iPhone approval remain blocked until explicit creator authorization. **Main/PWA/gameplay/seed/saves untouched.**
 
+## Session 5 — Milestone 5 water candidate (2026-11-14)
+
+- [x] Audited exact main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, latest checkpoint **006**, both coordination Issues #109/#117, new-other-pack candidate allocations and existing draft PR #114. No overlapping candidate ID 76 (exclusive Pack 2 59–108).
+- [x] Reserved candidate **ID 76 / roster 45** only. All **18/18 family source candidates** now defined; 59–76 inclusive reserved, 255 untouched, no extra ID per level/flow.
+- [x] `water.mjs` implements a *genuine non-solid fluid volume*, with eight discrete heights (source level 0 and flowing/resting levels 1–7), four cardinal slope directions plus still, strict immutable source/level/flow states, exact analytic volume membership, actual 12-triangle closed prism shell, exact two-sided triangle ray targeting on upper/side/bottom surfaces and a cheap coarse broad-phase volume. Fluid deliberately exposes **zero solid collision boxes**; do not treat the water as a stone cube.
+- [x] Transparent static candidate material geometry: 12 physically backed prism boundary triangles plus six surface-anchored current ripple triangles, typed UV/colors/alpha/normals, explicit alpha blend/sort/depth-write/fog engine contract. The candidate has physical selection geometry even when transparent; no fake cyan decorative cube.
+- [x] Standalone Pack 2 fixture can now select ID 76, explicitly edit level/flow, target and remove the *actual sloped surface*, reject mixed or malformed states and restore water as seven fields `[x,y,z,76,level,flow,source]` without altering earlier 5-field timber/ground, 6-field infrastructure, and 7-field hinged joinery fixture records. This is **NOT** live schema-1 persistence.
+- [x] Original isolated `preview.html` extended to **18 items** with water level/flow controls and genuine canvas alpha compositing; optional Playwright inspector now checks water and all 18 entries on three mobile landscape viewports **when executed**.
+- [x] `water.test.mjs` adds **21 cases**, bringing **79/79** checked-in test function bodies passing in local V8 execution with portable assertions (12 M1, 15 M2, 14 M3, 17 M4, 21 M5). **These are not native Node-runner or Chromium claims.**
+- [x] Previous PR-head M4 GitHub Actions [#43633243649](https://github.com/hdog960/Mythwrought/actions/runs/43633243649) **SUCCESS** for configured root Node and genuine Chromium WebGL2 baseline (nested Pack 2 suites excluded by CI glob).
+- [ ] Native Pack 2 `node --test tests/block-packs/pack-2/*.test.mjs` and genuine `browser-verify.mjs` still not executed in exact repo checkout; local git clone remains blocked by DNS. Root CI runs `tests/*.test.mjs`, not the Pack 2 nested tests; their coverage must be separately verified before incorporation.
+- [ ] M5 exact branch HEAD standard GitHub CI Node/Chromium completion (check the latest PR run rather than earlier green runs).
+- [ ] Shared engineering is required for registering ID 76, transparent WebGL2 pass, water neighbor seams/visibility, true fluid updates, source flow propagation, swimming/buoyancy, save sidecar and offline integrity. **No playable fluid physics, animated water or world placement implemented.**
+- [ ] Real iPhone control/art testing and v0.10 Gate A creator approval remain unclaimed; v0.11 stays locked.
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
@@ -80,8 +95,9 @@
 3. Production shape mesh/collision/targeting must respect exposed surfaces, rotation, upper/lower, actual hinge position and player intersection.
 4. Save schema-1 stores legacy `[x,y,z,id]`, no rotation/hinge state. Need central, opt-in metadata storage and atomic rollback, no migration of existing saves.
 5. Hinges need engine-owned input, obstruction checks, animation and safe transitions. Standalone fixture state swaps are not production interaction implementation.
-6. No world generation placement, roads, bridges, houses, settlements, inventories, mobs, harvesting, crafting or paid services.
+6. Water ID 76 has exact fluid-volume selection but deliberately non-solid collision. Its transparent renderer and source/level updates are engine responsibilities, not validated by fixture screenshots.
+7. No world generation placement, roads, bridges, houses, settlements, inventories, mobs, harvesting, crafting or paid services.
 
 ## Session 3 / next incomplete milestone
 
-**Milestone 5** — genuine water voxel candidate (roster 45), only after a new duplicate-prevention audit of latest main/checkpoint/Issues #109/#117 and other packs. ID 76 is the earliest *potential* allocation, NOT allocated. Define real water voxel occupancy/material targeting and explicit compatibility requirements for transparent rendering, fluid updates, level/flow state, collision and schema-1 safety. **Never** create a static cyan fake-water cube or independently implement a generic fluid simulation. Milestone 6 final acceptance follows, with all 18 families, dedicated Node + real Chromium proofs as possible, no merge/deploy.
+**Milestone 6 — next / final acceptance:** all **18/18 families have isolated candidate source**. Recheck latest `main`, checkpoint, Issues #109 and #117, and all other pack allocations. Then run the native Node nested suites `node --test tests/block-packs/pack-2/*.test.mjs` and genuine Chromium inspector `node tests/block-packs/pack-2/browser-verify.mjs` in an authorized checkout **if available**, fix any defects inside exclusive Pack 2 paths only; validate representative authentic screenshot(s), source geometry/mesh budgets, exact HEAD and save fixture transitions. **Do not certify real water flow, transparency in the production renderer, production schema-1 persistence, or physical iPhone tests** without shared integration and creator approval. Maintain draft PR #114 and the coordination handoff; never merge/deploy/world-place candidates automatically.
