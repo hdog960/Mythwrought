@@ -3,7 +3,7 @@
 
 **Branch:** `pack-4-m0-m1-windows-openings-20261114`
 **Base main:** `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`
-**Latest creator incorporation:** checkpoint 006, game code `1006e5cd5fd44e5696943d2651e63fb30a393003`.
+**Latest creator incorporation:** checkpoint **007**, integrated main `caf47776b723a36684edc1a72749e49268ccc688` (automations only; Pack 4 excluded).
 **Exact PR HEAD:** GitHub PR `head.sha` and PR description provide the
 final immutable review SHA after the last commit. Do not embed a commit's
 own SHA inside itself. New commits require updating PR handoff and re-testing.
