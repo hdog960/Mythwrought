@@ -8,6 +8,7 @@ import {caveThresholdVertices} from './cave-thresholds.mjs';
 import {voxelLandmarksForChunk,VOXEL_LANDMARK_CACHE_LIMIT} from './voxel-landmarks.mjs';
 import {moonbellVertices} from './moonbells.mjs';
 import {ridgeStrataVertices} from './ridge-strata.mjs';
+import {liveVoxelDistrict,LIVE_DISTRICT_SIZE,LIVE_DISTRICT_CACHE_LIMIT} from './live-voxel-world.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
@@ -78,8 +79,9 @@ export class VoxelWorld{
     // Limited per-world cache: streaming an endless world cannot retain every
     // visited district forever. Geometry is recreated from the original seed.
     this.landmarkCache=new Map();
+    this.liveDistrictCache=new Map();
   }
-  naturalAndLandmarkBlock(x,y,z){
+  legacyBlockAt(x,y,z){
     const natural=baseBlock(x,y,z,this.seed);
     if(natural!==BLOCK.AIR||y<=0||y>WORLD_MAX_Y||
        ![x,y,z].every(Number.isInteger))return natural;
@@ -97,6 +99,23 @@ export class VoxelWorld{
     }
     return blocks.get(worldKey(x,y,z))??natural;
   }
+  naturalAndLandmarkBlock(x,y,z){
+    // Construct only inside the valid voxel height. This overlay is a pure
+    // deterministic view; it never writes to this.edits or schema-1 storage.
+    const ordinary=this.legacyBlockAt(x,y,z);
+    if(![x,y,z].every(Number.isInteger)||y<WORLD_MIN_Y||y>WORLD_MAX_Y)return ordinary;
+    const dx=Math.floor(x/LIVE_DISTRICT_SIZE),dz=Math.floor(z/LIVE_DISTRICT_SIZE);
+    const districtKey=dx+','+dz;
+    let district=this.liveDistrictCache.get(districtKey);
+    if(!district){
+      district=liveVoxelDistrict(this.seed,dx,dz,(px,py,pz)=>this.legacyBlockAt(px,py,pz));
+      this.liveDistrictCache.set(districtKey,district);
+      if(this.liveDistrictCache.size>LIVE_DISTRICT_CACHE_LIMIT)
+        this.liveDistrictCache.delete(this.liveDistrictCache.keys().next().value);
+    }
+    return district.get(x,y,z,ordinary);
+  }
+
   get(x,y,z){
     const key=worldKey(x,y,z);
     return this.edits.has(key)?this.edits.get(key):this.naturalAndLandmarkBlock(x,y,z);
