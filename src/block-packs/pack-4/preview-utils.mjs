@@ -29,3 +29,20 @@ export function sortPack4PreviewTranslucent(data,stride=10){
   }
   return ordered;
 }
+
+
+// Restores shared WebGL2 state even if one candidate render fails.
+// A failed transparent draw must never leave depth writes disabled for the
+// following item in the isolated single-context review gallery.
+export function releasePack4PreviewGpu(gl,{buffer=null,vertexArray=null,program=null}={}){
+  if(!gl||typeof gl.depthMask!=='function'||typeof gl.disable!=='function')
+    throw new TypeError('Expected Pack 4 WebGL2 preview context');
+  gl.depthMask(true);
+  gl.disable(gl.BLEND);
+  gl.useProgram(null);
+  gl.bindVertexArray(null);
+  gl.bindBuffer(gl.ARRAY_BUFFER,null);
+  if(buffer)gl.deleteBuffer(buffer);
+  if(vertexArray)gl.deleteVertexArray(vertexArray);
+  if(program)gl.deleteProgram(program);
+}
