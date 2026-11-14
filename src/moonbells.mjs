@@ -1,6 +1,6 @@
 // Seed-stable, render-only moonbell flowers: no new blocks, collisions or saves.
 // Low opaque petal geometry shares the existing terrain mesh and draw call.
-const STRIDE=9, MAX_FLOWERS=7, VERTICES_PER_FLOWER=30;
+const STRIDE=9, MAX_FLOWERS=7, VERTICES_PER_FLOWER=54;
 function hash(x,z,seed,salt){
  let n=Math.imul((x|0)^seed^salt,0x9e3779b1)^Math.imul((z|0)+salt,0x85ebca6b);
  n^=n>>>16;n=Math.imul(n,0x7feb352d);n^=n>>>15;return (n>>>0)/4294967296;
@@ -48,6 +48,21 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
    const ochre=hash(x,z,world.seed,665)>.5?[.82,.48,.29]:[.93,.68,.40];
    tri(out,[mx-.10,ground+.10,mz],[mx+.10,ground+.10,mz],[mx,ground+mh,mz],ochre,7);
    tri(out,[mx,ground+.10,mz-.10],[mx,ground+.10,mz+.10],[mx,ground+mh,mz],[.95,.77,.54],7);
+  }
+  // A few shaded meadow edges grow a fern beside the flower. Each frond is
+  // opaque, double-facing in silhouette, and shares this anchor's edit rules.
+  if(hash(x,z,world.seed,667)>.48){
+   const fx=px-.23,fz=pz+.18,fh=.42+hash(x,z,world.seed,669)*.16;
+   const stem=[fx,ground+fh,fz];
+   tri(out,[fx-.024,ground,fz],[fx+.024,ground,fz],stem,[.27,.47,.29],7);
+   tri(out,[fx,ground,fz-.024],[fx,ground,fz+.024],stem,[.36,.57,.31],7);
+   // Three paired leaflets widen toward the base for a recognisable fern shape.
+   for(let j=0;j<3;j++){
+    const t=.28+j*.23,level=ground+fh*(1-t),reach=.13+t*.15;
+    const green=j%2?[.38,.62,.35]:[.30,.54,.32];
+    tri(out,[fx,level,fz],[fx-reach,level-.09,fz-.065],[fx-.025,level+.045,fz+.025],green,7);
+    tri(out,[fx,level,fz],[fx+reach,level-.09,fz+.065],[fx+.025,level+.045,fz-.025],green,7);
+   }
   }
   flowers++;
  }
