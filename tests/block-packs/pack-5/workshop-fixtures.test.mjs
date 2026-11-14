@@ -143,3 +143,19 @@ test('manifest keeps all 88–90 M3 workshop candidates isolated and 91+ unstart
  for(const e of data.entries.filter(e=>e.roster>=91))assert.equal(e.status,'NOT STARTED');
  assert.equal(data.candidateFamilies,12);assert.equal(data.completedFamilies,0);
 });
+
+
+test('all six material-box faces maintain outward winding through every Y quarter-turn',()=>{
+ const axes=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+ for(const d of all)for(let rotation=0;rotation<4;rotation++){
+  const m=workshopBoxMesh(d,{rotation});
+  for(let i=0;i<m.vertexCount;i+=4){
+   const vert=j=>Array.from(m.positions.subarray((i+j)*3,(i+j+1)*3));
+   const a=vert(0),b=vert(1),c=vert(2);
+   const u=b.map((v,k)=>v-a[k]),v=c.map((x,k)=>x-a[k]);
+   const normal=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+   const expected=axes[(i/4)%6];
+   assert.ok(normal.reduce((sum,n,k)=>sum+n*expected[k],0)>1e-9,'inward or degenerate physical face');
+  }
+ }
+});
