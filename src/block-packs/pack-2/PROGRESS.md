@@ -1,8 +1,8 @@
 # Mythwrought Pack 2 — Timber & Infrastructure candidate ledger
 
 **Governance:** [coordination Issue #109](https://github.com/hdog960/Mythwrought/issues/109) / seven authoritative docs / v0.10 Gate A, v0.11 locked.
-**Status:** **18/18 distinct physical candidate families authored** (not integrated, merged, deployed or playable). 0 families remain to author; native acceptance and live integration are still blocked.
-**Latest checked main:** `caf47776b723a36684edc1a72749e49268ccc688`; incorporation checkpoint **007**. Live IDs 0–8 only. Wood ID 4 is not a substitute for these independent candidate shapes.
+**Status:** **18/18 distinct physical candidate families authored** (not integrated, merged, deployed or playable). **Isolated six-suite native Node 89/89 and all-18 genuine Chromium gallery PASS**, with local test-only VoxelWorld facade/full Git checkout qualification; production integration and creator Gate A still blocked.
+**Latest checked main:** `ac263720b60641c65b02330348dd76d0ef9cb75e`; incorporation checkpoint **008**. Live IDs 0–8 only. Wood ID 4 is not a substitute for these independent candidate shapes.
 **Draft PR:** https://github.com/hdog960/Mythwrought/pull/114
 **Dedicated branch:** `manual-pack-2-timber-foundation-20261114`; see PR for live exact HEAD / CI.
 **Exclusive provisional ID range:** 59–108. Only **59–76** allocated, and those IDs are not installed in the game. 255 reserved. No per-rotation/upper/lower/open/closed ID inflation.
@@ -166,6 +166,17 @@
 - [x] **89/89 V8-assertion test bodies passed** (12+15+14+17+21+10) with the new 18-asset unique physical mesh/material-signature regression committed.
 - [ ] Full native six-suite command, committed all-18 browser gallery screenshots, integrated engine fluid behavior, schema-1 player save compatibility, iPhone art/controls and Gate A approval **remain pending**. Do not merge, deploy, modify shared systems, world-place assets or unlock v0.11.
 
+## Session 14 — genuine six-suite Node + full 66-image Chromium gallery pass (2026-11-14)
+
+- [x] Reverified latest production main `ac263720b60641c65b02330348dd76d0ef9cb75e`, **checkpoint 008** (live visibility of automation-only checkpoint 007), coordination Issues #109/#117, all other Pack 1/3/4/5 draft heads and Pack 2 draft PR #114. No manual pack incorporation, duplicate ID or unauthorized file ownership.
+- [x] Reconstructed an isolated local Pack 2 test/gallery tree. **All 14 candidate source/tests/preview/gallery files matched GitHub's exact PR-head Git blob SHA** when checked with local `git hash-object`. The folder is **not an actual checked-out Git repository**; real Git HEAD verification was not possible and is not claimed.
+- [x] Executed **all six exact, unmodified committed Pack 2 suites in real Node v22.16.0**: `pack-2` **12/12**, `joinery` **15/15**, `ground` **14/14**, `infrastructure` **17/17**, `water` **21/21**, `acceptance` **10/10** = **89/89 PASS**, **0 fail**, **0 skip**. Repeated with same result. Full output in local `node-all-six-verified-pack2.log`.
+- [x] **IMPORTANT runtime caveat:** The staged `src/voxel.mjs` was a **local test-only facade** for the first five suites' narrow legacy BLOCK 0–8 / ID-rejection / fixture-rejection checks; it is NOT production `VoxelWorld`, and was **never committed**. All actual Pack 2 source, tests and fixture used were exact SHA-verified GitHub blobs. The 10 M6 acceptance cases do not use this facade. A real full-repo production-VoxelWorld compatibility recheck remains OPEN.
+- [x] Executed the original Python Playwright `gallery-browser.py` in genuine system Chromium at **667×375**, **844×390**, **932×430**, all **18/18 IDs** per viewport, with **18 distinct image hashes**, **18 fixture snapshot rows round-tripped exactly**, **77,199 translucent water pixels**, and **zero browser JS errors** at each. Reran and reproduced PASS.
+- [x] Captured **66 authentic PNG screenshots** (18 IDs × 3 viewports = 54; twelve additional water/fullpage/open-gate/parapet details), visually inspected all three complete contact sheets and gate/parapet details, and prepared a ZIP with original images, three contact sheets, Node and browser QA logs, and SHA256 image manifest for creator review. No obvious preview clipping or duplicate rendered art observed.
+- [x] The repaired timber/joinery winding remains protected by exhaustive 121-shape/25,742-triangle test suite, and water 76 retains exact non-solid fluid volume targeting. **No production WebGL2 render, fluid propagation, schema-1 save migration or physical iPhone check was performed.**
+- [ ] **Still open:** rerun all six suites in a full exact Git checkout with real `VoxelWorld`, manually authorized integration to live renderer/physics/save/UI/offline PWA and physical iPhone Gate A creator art/control approval. v0.11 remains locked; no merge, deploy or world placement.
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
@@ -178,4 +189,4 @@
 
 ## Next acceptance requirements
 
-**Milestone 6 — source review complete, acceptance gates remain open.** All 18 physical candidate families have authoring/geometry/fixtures, and the cross-state triangle winding defect is repaired and regression-tested. The native Node nested suites, authentic local Chromium candidate screenshots, production integration save/renderer/interaction and physical iPhone Gate A approval are **still unverified**. See `M6_ACCEPTANCE.md`. The next authorized session should run the exact-head real native tests from a valid checkout if available and fix any Pack 2-only acceptance defects. Do not merge/deploy/modify main without the separate creator incorporation and Gate A decision.
+**Milestone 6 — isolated technical candidate tests PASS, production acceptance OPEN.** All 18 physical candidate families are authored, winding corrected, original six Node suites passed **89/89** in a blob-verified local tree, and original Chromium gallery passed at all three target sizes with 66 genuine images. **Full Git checkout + real production VoxelWorld rerun remains unverified because local first-five suites used a clearly disclosed temporary test-only legacy facade.** Production save/renderer/fluids/offline/iPhone and creator Gate A remain separate integration/approval gates. See `M6_ACCEPTANCE.md`; do not merge/deploy/modify main without explicit separate creator authorization.
