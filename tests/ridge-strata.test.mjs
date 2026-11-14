@@ -52,3 +52,22 @@ test('talus foothill details require a real exposed stone foot and open approach
  assert.ok(short.length<baseline.length,'short cliff has no lower talus');
  assert.equal(baseline.length%(8*27),0,'eight triangles per eligible tall face');
 });
+
+test('tall highland adds a second tier only where its face remains open',()=>{
+ const tall=(x,z)=>x<0?15:6;
+ const world={seed:179,get(x,y,z){return x<0&&y<=15?3:0;}};
+ const original=ridgeStrataVertices(world,-1,0,{heightAt:tall});
+ assert.ok(original.length>0);
+ // Each eligible face has eight base triangles and two upper-tier triangles.
+ assert.equal(original.length%(10*27),0);
+ const edits=new Map();
+ for(let z=0;z<16;z++)edits.set('0,11,'+z,3);
+ const modified={seed:179,get(x,y,z){
+   const k=[x,y,z].join(',');
+   return edits.has(k)?edits.get(k):(x<0&&y<=15?3:0);
+ }};
+ const after=ridgeStrataVertices(modified,-1,0,{heightAt:tall});
+ assert.ok(after.length<original.length,'upper band must respect filled exterior edits');
+ assert.deepEqual(ridgeStrataVertices(modified,-1,0,{heightAt:tall}),after);
+ assert.equal(edits.size,16,'render-only art never mutates saved edits');
+});
