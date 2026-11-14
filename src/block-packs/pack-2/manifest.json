@@ -299,14 +299,45 @@
     {
       "roster": 45,
       "name": "Water blocks",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "requires explicit shared fluid + transparent selection systems",
-      "visualVariants": 0,
+      "candidateId": 76,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 36,
+      "distinction": "true selectable clear-rill transparent sloped fluid volume, one source plus 7 levels × 5 flow descriptors; non-solid physical water with exact-triangle targeting, no standalone liquid simulation",
+      "visualVariants": 8,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "sourceType": "level-0-still",
+      "engineReadiness": "BLOCKED_BY_SHARED_FLUID_RENDERING_SIMULATION_AND_SCHEMA1",
+      "collision": "passable-fluid-nonblocking",
+      "targeting": "exact-closed-prism-triangle-narrowphase",
+      "flowStates": [
+        "still",
+        "north",
+        "east",
+        "south",
+        "west"
+      ],
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "fluidSimulationImplemented": false,
+      "integrationDependencies": [
+        "engine-owned transparent geometry pass and depth sorting, surface lighting and refraction/fog",
+        "engine-owned fluid neighbor culling and water level seam matching",
+        "engine-owned source/flow propagation, water updates and edit protection",
+        "engine-owned passable fluid collision plus swimming/buoyancy rules",
+        "engine-owned save schema-1 backward-safe fluid state metadata",
+        "engine-owned material registry and target/placement APIs for candidate ID 76"
+      ]
     },
     {
       "roster": 46,
@@ -328,11 +359,11 @@
       ]
     }
   ],
-  "currentMilestone": 4,
-  "completedFamilies": 17,
-  "unallocatedFamilies": 1,
+  "currentMilestone": 5,
+  "completedFamilies": 18,
+  "unallocatedFamilies": 0,
   "lastVerifiedMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
-  "progress": "M0 foundation, M1 four timber materials, M2 six joinery, M3 four shallow paving, M4 three infrastructure pieces. All remain source candidates; only water milestone 5 and full acceptance milestone 6 remain.",
+  "progress": "Milestones 0–5 candidate source complete: 18 independently defined physical voxel families, including fluid volume ID 76; milestone 6 final acceptance still BLOCKED by native nested tests and central engine integration.",
   "pendingEngineAPIs": [
     "generic non-cube raycast/collision",
     "material registry expansion for candidate IDs 59–68",
@@ -340,6 +371,8 @@
     "hinged state transition handling",
     "gravel gravity policy owned by :00; no falling behavior in candidate",
     "shape-aware lower path tile support/mesh occlusion and collision integration",
-    "bridge guard/parapet/boardwalk opt-in shape renderer, local collision and save metadata; no structures"
+    "bridge guard/parapet/boardwalk opt-in shape renderer, local collision and save metadata; no structures",
+    "transparent render pass, fluid boundary culling, fluid source/level/flow updates, buoyancy/swimming, schema-1 fluid metadata",
+    "exact fluid triangle selection (not generic solid AABBs) and non-blocking liquid occupancy"
   ]
 }
