@@ -158,3 +158,32 @@ test('all six material-box faces maintain outward winding through every Y quarte
   }
  }
 });
+
+
+test('refined anvil horn is a long tapered selectable steel silhouette, not merely a surface tint',()=>{
+  for(const variant of WORKSHOP_VARIANTS['pack5:088']){
+    const a=descriptor('pack5:088',variant).art[0].details;
+    const horn=a.filter(x=>x.material==='steel'&&x.box[0]<.34&&x.box[1]>.65);
+    assert.ok(horn.length>=5,'Five physical taper tiers are required');
+    assert.ok(Math.min(...horn.map(x=>x.box[0]))<.025,'Anvil horn must extend to leftmost edge');
+    assert.ok(horn.some(x=>x.box[0]<.1&&x.box[5]-x.box[2]<.15),'A narrow actual nose is required');
+  }
+});
+test('refined iron cauldron has stepped octagonal belly, narrower neck, open top and a solid bottom',()=>{
+  const d=descriptor('pack5:089','iron-tripod-cauldron');
+  const b=d.parts[0].boxes;
+  const frontBands=b.filter(x=>x[1]>.19&&x[1]<.60&&x[3]-x[0]>.1);
+  const rows=[.20,.35,.50];
+  assert.ok(rows.every(y=>frontBands.some(x=>Math.abs(x[1]-y)<.001)),'Three stepped shell tiers must exist');
+  assert.ok(b.filter(x=>x[1]===.64).length>=8,'Physical octagonal top lip is required');
+  assert.ok(b.filter(x=>x[1]>=.69&&x[5]<.16).length>0,'Top handles must protrude');
+  for(const y of [.42,.58,.72])assert.ok(!b.some(x=>x[0]<=.5&&x[3]>=.5&&x[1]<=y&&x[4]>=y&&x[2]<=.5&&x[5]>=.5),'Basin interior may not be filled');
+});
+test('refined cauldron targeted vertical ray enters empty vessel and strikes physical bottom, not fake liquid',()=>{
+  const f=makePack5Fixture(WORKSHOP_FAMILIES);f.setSupport([1,-1,2]);
+  assert.equal(f.place('pack5:089',[1,0,2],0,'iron-tripod-cauldron').ok,true);
+  const hit=f.raycast([1.5,1.8,2.5],[0,-1,0],3);
+  assert.equal(hit?.symbolicId,'pack5:089');
+  assert.ok(hit.distance>1.4,'Ray from above must reach basin bottom below open rim');
+  assert.equal(f.collides([1.45,.57,2.45,1.55,.66,2.55]),false);
+});
