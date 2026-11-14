@@ -15,11 +15,11 @@ import {chromium} from 'playwright';
 const root=resolve(process.cwd());
 const screenshots=resolve(process.env.PACK1_ARTIFACT_DIR||'artifacts/pack-1');
 const galleries=[
-  {name:'masonry',path:'gallery.html',count:6,place:'#place',clear:'#clear',save:'#restore'},
-  {name:'stone-shapes',path:'stone-shape-gallery.html',count:6,place:'#place-all',clear:'#clear-all',save:'#save-check'},
-  {name:'garden',path:'garden-gallery.html',count:3,place:'#all',clear:'#clear',save:'#save'},
-  {name:'foliage',path:'foliage-gallery.html',count:8,place:'#all',clear:'#clear',save:'#save'},
-  {name:'floral',path:'floral-gallery.html',count:7,place:'#all',clear:'#clear',save:'#save'}
+  {name:'masonry',path:'gallery.html',count:6,place:'#place',clear:'#clear',save:'#restore',countLabel:'edits: '},
+  {name:'stone-shapes',path:'stone-shape-gallery.html',count:6,place:'#place-all',clear:'#clear-all',save:'#save-check',countLabel:'Physically placed test cells: '},
+  {name:'garden',path:'garden-gallery.html',count:3,place:'#all',clear:'#clear',save:'#save',countLabel:'Independent placed voxel cells: '},
+  {name:'foliage',path:'foliage-gallery.html',count:8,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed candidate cells: '},
+  {name:'floral',path:'floral-gallery.html',count:7,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed physical specimens: '}
 ];
 const viewports=[[667,375],[844,390],[932,430]];
 const mime={'.mjs':'text/javascript','.js':'text/javascript','.html':'text/html','.css':'text/css','.json':'application/json'};
@@ -27,6 +27,7 @@ const server=createServer(async(req,res)=>{
   try{
     const url=new URL(req.url||'/', 'http://127.0.0.1');
     const path=decodeURIComponent(url.pathname);
+    if(path==='/favicon.ico'){res.writeHead(204);res.end();return;}
     if(path.includes('\0'))throw new Error('Unsafe path');
     const file=resolve(root,'.'+path);
     if(file!==root&&!file.startsWith(root+sep))throw new Error('Escaping repository root');
@@ -98,11 +99,19 @@ const shell=async()=>{
           const filename=g.name+'-'+width+'x'+height;
           await page.screenshot({path:join(screenshots,filename+'-candidate.png'),fullPage:true});
           totals.screenshots++;
+          const parseCount=(v)=>{
+            const index=v.lastIndexOf(g.countLabel);
+            if(index<0)return NaN;
+            return Number(v.slice(index+g.countLabel.length).match(/^\\d+/)?.[0]);
+          };
+          assert.equal(parseCount(before.status||''),0,'Fixture not initially empty');
           await page.locator(g.place).click();
-          await page.waitForFunction(n=>{
+          await page.waitForFunction(({label,n})=>{
             const v=document.querySelector('#status')?.textContent||'';
-            return new RegExp('\\b'+n+'\\b').test(v);
-          },g.count,{timeout:9000});
+            const i=v.lastIndexOf(label);
+            if(i<0)return false;
+            return Number(v.slice(i+label.length).match(/^\\d+/)?.[0])===n;
+          },{label:g.countLabel,n:g.count},{timeout:9000});
           await page.screenshot({path:join(screenshots,filename+'-placed.png'),fullPage:true});
           totals.screenshots++;
           await context.setOffline(true);
@@ -110,9 +119,10 @@ const shell=async()=>{
           const status=(await page.locator('#status').textContent())||'';
           assert.doesNotMatch(status,/ERROR|FAIL|unexpected|INVALID/i,
             g.name+' isolated canonical fixture save failed');
+          assert.equal(parseCount(status),g.count,g.name+' save changed fixture count');
           await page.locator(g.clear).click();
           const cleared=(await page.locator('#status').textContent())||'';
-          assert.ok(/\b0\b/.test(cleared),g.name+' clear did not return 0 cells');
+          assert.equal(parseCount(cleared),0,g.name+' clear did not return 0 cells');
           assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage)),[],
             g.name+' wrote to user local storage');
           assert.deepEqual(errors,[],g.name+' uncaught browser exceptions at '+width+'x'+height);
