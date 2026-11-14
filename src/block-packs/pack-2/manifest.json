@@ -261,26 +261,40 @@
     {
       "roster": 43,
       "name": "Bridge railing blocks",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "reinforced cross-braced bridge-specific rail",
-      "visualVariants": 0,
+      "candidateId": 73,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 8,
+      "distinction": "riveted double-stanchion bridge-specific reinforced guard with broad cap, load-braces and terminal end plate variant",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware collision and per-box targeting",
+        "material + exposed-face renderer registration",
+        "rotation/variant metadata with backward-safe schema-1 saves",
+        "central obstruction and chunk mesh invalidation"
+      ]
     },
     {
       "roster": 44,
       "name": "Stone parapets",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "broad protective solid guard; not Pack 1 rail",
-      "visualVariants": 0,
+      "candidateId": 74,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "thick solid limestone protective parapet with overhanging coping and genuinely open optional drain channel",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware collision and per-box targeting",
+        "material + exposed-face renderer registration",
+        "rotation/variant metadata with backward-safe schema-1 saves",
+        "central obstruction and chunk mesh invalidation"
+      ]
     },
     {
       "roster": 45,
@@ -297,27 +311,35 @@
     {
       "roster": 46,
       "name": "Wooden boardwalk blocks",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "elevated structural slats; not plank cube",
-      "visualVariants": 0,
+      "candidateId": 75,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "raised larch open slat deck, structural underside joists, real slat gaps, optional edge trim",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware collision and per-box targeting",
+        "material + exposed-face renderer registration",
+        "rotation/variant metadata with backward-safe schema-1 saves",
+        "central obstruction and chunk mesh invalidation"
+      ]
     }
   ],
-  "currentMilestone": 3,
-  "completedFamilies": 14,
-  "unallocatedFamilies": 4,
+  "currentMilestone": 4,
+  "completedFamilies": 17,
+  "unallocatedFamilies": 1,
   "lastVerifiedMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
-  "progress": "M0 foundation, M1 4 timber materials, M2 6 shapes/joinery, M3 4 physical paving materials; unmerged only",
+  "progress": "M0 foundation, M1 four timber materials, M2 six joinery, M3 four shallow paving, M4 three infrastructure pieces. All remain source candidates; only water milestone 5 and full acceptance milestone 6 remain.",
   "pendingEngineAPIs": [
     "generic non-cube raycast/collision",
     "material registry expansion for candidate IDs 59–68",
     "orientation/variant/open metadata storage preserving schema 1",
     "hinged state transition handling",
     "gravel gravity policy owned by :00; no falling behavior in candidate",
-    "shape-aware lower path tile support/mesh occlusion and collision integration"
+    "shape-aware lower path tile support/mesh occlusion and collision integration",
+    "bridge guard/parapet/boardwalk opt-in shape renderer, local collision and save metadata; no structures"
   ]
 }
