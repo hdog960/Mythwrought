@@ -17,11 +17,11 @@ import {parseFixtureCount,saveWasVerified} from './gallery-count.mjs';
 const root=resolve(process.cwd());
 const screenshots=resolve(process.env.PACK1_ARTIFACT_DIR||'artifacts/pack-1');
 const galleries=[
-  {name:'masonry',path:'gallery.html',count:6,place:'#place',clear:'#clear',save:'#restore',countLabel:'edits: ',saveSuccess:'save/restore verified'},
-  {name:'stone-shapes',path:'stone-shape-gallery.html',count:6,place:'#place-all',clear:'#clear-all',save:'#save-check',countLabel:'Physically placed test cells: ',saveSuccess:'PASS:'},
-  {name:'garden',path:'garden-gallery.html',count:3,place:'#all',clear:'#clear',save:'#save',countLabel:'Independent placed voxel cells: ',saveSuccess:'PASS:'},
-  {name:'foliage',path:'foliage-gallery.html',count:8,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed candidate cells: ',saveSuccess:'PASS:'},
-  {name:'floral',path:'floral-gallery.html',count:7,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed physical specimens: ',saveSuccess:'PASS:'}
+  {name:'masonry',path:'gallery.html',count:6,place:'#place',clear:'#clear',save:'#restore',countLabel:'edits: ',saveSuccess:'save/restore verified',activeSelector:'#grid > .card.selected'},
+  {name:'stone-shapes',path:'stone-shape-gallery.html',count:6,place:'#place-all',clear:'#clear-all',save:'#save-check',countLabel:'Physically placed test cells: ',saveSuccess:'PASS:',activeSelector:'#grid > .card.active'},
+  {name:'garden',path:'garden-gallery.html',count:3,place:'#all',clear:'#clear',save:'#save',countLabel:'Independent placed voxel cells: ',saveSuccess:'PASS:',activeSelector:'#grid > .card.placed'},
+  {name:'foliage',path:'foliage-gallery.html',count:8,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed candidate cells: ',saveSuccess:'PASS:',activeSelector:'#grid > .card.active'},
+  {name:'floral',path:'floral-gallery.html',count:7,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed physical specimens: ',saveSuccess:'PASS:',activeSelector:'#grid > .item.active'}
 ];
 const viewports=[[667,375],[844,390],[932,430]];
 const mime={'.mjs':'text/javascript','.js':'text/javascript','.html':'text/html','.css':'text/css','.json':'application/json'};
@@ -126,6 +126,8 @@ const shell=async()=>{
               saves:Object.keys(localStorage)};
           });
           assert.equal(before.cards,g.count,'Gallery missing candidate card');
+          assert.equal(await page.locator(g.activeSelector).count(),0,
+            g.name+' initially marks a specimen as placed when fixture is empty');
           assert.ok(before.previewStats.every(p=>p.colors>=12&&p.pixels>=60),
             g.name+' includes a blank, tiny or monochrome primary specimen preview: '+
               JSON.stringify(before.previewStats));
@@ -145,6 +147,8 @@ const shell=async()=>{
           const afterPlace=(await page.locator('#status').textContent())||'';
           assert.equal(parseCount(afterPlace),g.count,
             g.name+' place-all did not create exactly '+g.count+' cells');
+          assert.equal(await page.locator(g.activeSelector).count(),g.count,
+            g.name+' placed fixture cells are not reflected in visible card selection');
           await page.screenshot({path:join(screenshots,filename+'-placed.png'),fullPage:true});
           totals.screenshots++;
           await context.setOffline(true);
@@ -153,9 +157,13 @@ const shell=async()=>{
           assert.ok(saveWasVerified(status,g.saveSuccess),
             g.name+' save/restore failed or reported a safe blocker rather than success');
           assert.equal(parseCount(status),g.count,g.name+' save changed fixture count');
+          assert.equal(await page.locator(g.activeSelector).count(),g.count,
+            g.name+' canonical save/restore lost visible placement selections');
           await page.locator(g.clear).click();
           const cleared=(await page.locator('#status').textContent())||'';
           assert.equal(parseCount(cleared),0,g.name+' clear did not return 0 cells');
+          assert.equal(await page.locator(g.activeSelector).count(),0,
+            g.name+' clear did not remove the visible placement selections');
           assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage)),[],
             g.name+' wrote to user local storage');
           assert.deepEqual(errors,[],g.name+' uncaught browser exceptions at '+width+'x'+height);
@@ -166,6 +174,7 @@ const shell=async()=>{
             previewStats:before.previewStats,
             screenshots:[filename+'-candidate.png',filename+'-placed.png'],
             canonicalOfflineSave:true,clearedAfterwards:true,
+            cardSelectionChecks:{empty:0,placed:g.count,saved:g.count,cleared:0},
             errors:errors.length,failedRequests:requests.length});
           console.log('PASS '+g.name+' '+width+'x'+height+' previews, place, offline save, remove');
         }finally{await context.close();}
