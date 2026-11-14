@@ -63,6 +63,8 @@ const wall=[
   box([.43,.75,.34,.57,.83,.44],'gold'),
   box([.48,.82,.36,.52,.87,.42],'forgedIron')
 ];
+// Crystal-cage uprights overlap the grounded base; the prior y=.23 starts
+// left four physical pillars floating above the .0–.14 lower cage plate.
 const crystal=[
   // Bright suspended rune-cage structure with stacked multifaceted crystals.
   box([.29,0,.29,.71,.14,.71],'forgedIron'),
@@ -74,10 +76,10 @@ const crystal=[
   box([.42,.71,.42,.58,.76,.58],'gold'),
   box([.47,.76,.47,.53,.87,.53],'ironRim'),
   box([.46,.87,.46,.54,.92,.54],'oldCopper'),
-  box([.26,.23,.24,.33,.69,.34],'forgedIron'),
-  box([.67,.23,.24,.74,.69,.34],'forgedIron'),
-  box([.26,.23,.66,.33,.69,.76],'forgedIron'),
-  box([.67,.23,.66,.74,.69,.76],'forgedIron'),
+  box([.26,.10,.24,.33,.69,.34],'forgedIron'),
+  box([.67,.10,.24,.74,.69,.34],'forgedIron'),
+  box([.26,.10,.66,.33,.69,.76],'forgedIron'),
+  box([.67,.10,.66,.74,.69,.76],'forgedIron'),
   box([.25,.40,.36,.33,.46,.64],'gold',{solid:false}),
   box([.67,.40,.36,.75,.46,.64],'gold',{solid:false}),
   box([.36,.40,.25,.64,.46,.33],'gold',{solid:false}),
