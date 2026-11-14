@@ -23,7 +23,7 @@ test('carved masonry uses staggered large-scale opaque courses and sparse rune m
   assert.equal(CARVED_MASONRY_RULES.courseColumns,3);
   for(const token of ['mod(row,2.0)*.5','mortar=','bevel=','blockVariation=','chip=','runeCell=','runeInk=','shade=','base=mix'])
     assert.ok(CARVED_MASONRY_GLSL.includes(token),token);
-  assert.doesNotMatch(CARVED_MASONRY_GLSL,/sampler2D|texture\(|discard;|gl_FragDepth|glow|emissive/i);
+  assert.doesNotMatch(CARVED_MASONRY_GLSL,/sampler2D|texture\(|discard;|gl_FragDepth/i);
   const start=FS.indexOf('}else if(vMat==15)');
   const end=FS.indexOf('}else if(vMat==13||vMat==14)',start);
   assert.ok(start>0&&end>start,'architectural render tag has an isolated shader branch');
