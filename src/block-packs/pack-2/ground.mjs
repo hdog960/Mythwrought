@@ -12,7 +12,7 @@ export const PACK_2_GROUND=Object.freeze([
       stoneB:[.48,.47,.43],stoneC:[.76,.65,.50],grain:[.26,.23,.20]},
     surface:{pattern:'eight raised uneven pea-shingle stones over compact aggregate',
       finish:'river-sorted-tan-grey',bands:2},
-    physics:{material:'granular',fallsWhenSupported:false,
+    physics:{material:'granular',gravity:'engine-required',
       requires:'central gravity/falling voxel support owned by :00',simulateLocally:false}}),
   freezeAsset({id:70,roster:40,key:'trampered-path',name:'Trampled umber path',
     family:'packed-dirt-path',orientation:{turns:4,default:0},
@@ -20,7 +20,7 @@ export const PACK_2_GROUND=Object.freeze([
       tread:[.62,.43,.26],grain:[.30,.21,.14]},
     surface:{pattern:'shallow broad top with pair of lower worn ruts and raised margins',
       finish:'dried clay and gravel dust',bands:3},
-    physics:{material:'compacted-earth',fallsWhenSupported:false,
+    physics:{material:'compacted-earth',gravity:'none',
       requires:'shape-aware surface collision and save state',simulateLocally:false}}),
   freezeAsset({id:71,roster:41,key:'limestone-cobbled-walk',name:'Limestone walking cobbles',
     family:'cobblestone-paving',orientation:{turns:4,default:0},
@@ -28,7 +28,7 @@ export const PACK_2_GROUND=Object.freeze([
       stoneB:[.53,.56,.55],stoneC:[.72,.68,.60],grain:[.39,.41,.40]},
     surface:{pattern:'shallow hand-laid offset flat walking stones with real mortar gaps',
       finish:'worn silver limestone',bands:2},
-    physics:{material:'stone-paving',fallsWhenSupported:false,
+    physics:{material:'stone-paving',gravity:'none',
       requires:'shape-aware collision and neighboring tile meshing',simulateLocally:false}}),
   freezeAsset({id:72,roster:42,key:'suncompass-inlay',name:'Suncompass inlaid paving',
     family:'decorative-paving',orientation:{turns:4,default:0},
@@ -36,7 +36,7 @@ export const PACK_2_GROUND=Object.freeze([
       stoneB:[.55,.57,.61],inlay:[.34,.56,.63],grain:[.36,.36,.39]},
     surface:{pattern:'physical inset cardinal stones framing raised blue suncompass tile',
       finish:'chiseled ivory and weathered blue inlay',bands:2},
-    physics:{material:'decorative-stone-paving',fallsWhenSupported:false,
+    physics:{material:'decorative-stone-paving',gravity:'none',
       requires:'shape-aware collision and material mesh support',simulateLocally:false}})
 ]);
 export const PACK_2_GROUND_IDS=Object.freeze(PACK_2_GROUND.map(a=>a.id));
