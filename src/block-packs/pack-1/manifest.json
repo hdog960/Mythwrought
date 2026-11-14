@@ -30,7 +30,8 @@
     "node": "NOT RUN",
     "chromium": "NOT RUN",
     "physicalIphone": "NOT RUN",
-    "candidatePreview": "Standalone gallery source authored; browser evidence not yet captured"
+    "candidatePreview": "Standalone HTML isometric gallery source authored; browser screenshot NOT CAPTURED",
+    "logic": "9/9 authored Node test bodies evaluated successfully in V8 compatibility harness against exact GitHub branch source; this is NOT Node execution"
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -45,7 +46,7 @@
       "candidateId": 9,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
     },
     {
       "roster": 2,
@@ -53,7 +54,7 @@
       "candidateId": 10,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
     },
     {
       "roster": 3,
@@ -61,7 +62,7 @@
       "candidateId": 11,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
     },
     {
       "roster": 4,
@@ -69,7 +70,7 @@
       "candidateId": 12,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
     },
     {
       "roster": 5,
@@ -77,7 +78,7 @@
       "candidateId": 13,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
     },
     {
       "roster": 6,
@@ -85,7 +86,7 @@
       "candidateId": 14,
       "status": "CANDIDATE",
       "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
-      "testEvidence": "Isolated physical definition, RGBA texture and test assertions authored; execution pending"
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run"
     },
     {
       "roster": 7,
