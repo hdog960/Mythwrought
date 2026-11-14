@@ -37,36 +37,45 @@ void main(){
     float golden=step(.962,hashCell(p+vec2(21.0,4.0)));
     shade=.90+.13*tile+.075*leaf;
     base=mix(base,vec3(.62,.78,.36),golden*.17*near);
-  }else if(vMat==2){ // Warm earthen loam, fine layered soil and pebbles.
-    vec2 p=floor(vUv*vec2(16.0,18.0));
-    float band=.5+.5*sin(vUv.y*42.0+hashCell(p)*.9);
-    float pebble=step(.91,hashCell(p+vec2(5.0,17.0)));
-    shade=.82+.18*tile+.09*band+.08*pebble;
-    base=mix(base,vec3(.68,.45,.30),.10*near);
-  }else if(vMat==3){ // Natural storybook stone: wavy strata, mica + weathered creases.
-    // The source rock is geological, not a wall of tiny rectangular bricks.
-    // Variation is intentionally low contrast at phone scale and fades with near.
+  }else if(vMat==2){ // Natural loam: ochre sediment shelves, embedded pebbles, root fibers.
+    vec2 p=floor(vUv*vec2(18.0,17.0));
+    float shelf=.5+.5*sin(vUv.y*27.0+2.0*sin(vUv.x*5.0));
+    float silt=smoothstep(.48,.68,shelf);
+    float pebble=step(.94,hashCell(p+vec2(5.0,17.0)));
+    float root=1.0-smoothstep(.015,.06,abs(sin(vUv.x*9.0+vUv.y*3.0)));
+    shade=.83+.12*tile+.11*silt+.10*pebble-.065*root;
+    base=mix(base,vec3(.72,.48,.31),(.12*silt+.07*pebble)*near);
+  }else if(vMat==3){ // Bedrock: three interleaved natural strata, fracture seams and mica.
     vec2 p=floor(vUv*vec2(11.0,13.0));
     float strata=.5+.5*sin(vUv.y*34.0+2.0*sin(vUv.x*6.5+tile));
     float crease=1.0-smoothstep(.045,.19,abs(sin(vUv.y*7.0+vUv.x*2.2)));
     float mica=step(.94,hashCell(p+vec2(11.0,5.0)));
-    shade=.82+.15*tile+.11*strata-.09*crease+.12*mica;
-    base=mix(base,vec3(.68,.68,.61),.14*near);
+    // Long diagonal slate veins and warmer limestone pockets break uniform cliffs.
+    float slate=.5+.5*sin(vUv.x*8.0-vUv.y*15.0+2.0*tile);
+    float limestone=step(.82,hashCell(floor(vUv*vec2(4.0,5.0))+vec2(19.0,3.0)));
+    shade=.79+.13*tile+.10*strata-.085*crease+.11*mica+.065*slate;
+    base=mix(base,vec3(.41,.53,.61),.16*slate*near);
+    base=mix(base,vec3(.76,.69,.54),.14*limestone*near);
   }else if(vMat==4){ // Honey-colored timber, distinct planks and warm grain.
     float plank=blockLine(vec2(vUv.x*3.0,vUv.y*1.0),.035);
     float grain=.5+.5*sin(vUv.x*23.0+2.0*sin(vUv.y*7.0));
     float knots=step(.92,hashCell(floor(vUv*vec2(12.0,7.0))+4.0));
     shade=.80+.19*grain+.11*tile-.16*plank+.08*knots;
     base=mix(base,vec3(.83,.54,.31),.13*near);
-  }else if(vMat==5){ // Faceted turquoise crystal, cool/lilac glints.
+  }else if(vMat==5){ // Raw crystal: angled amethyst and turquoise growth planes.
     float facet=step(.5,fract(vUv.x*2.5+vUv.y*1.75));
+    float cleavage=1.0-smoothstep(.02,.09,abs(fract(vUv.x*3.0-vUv.y*2.0)-.5));
     float glint=step(.935,hashCell(floor(vUv*vec2(10.0,10.0))+7.0));
-    shade=.89+.17*facet+.13*glint;
-    base=mix(base,vec3(.74,.59,1.0),(.24*facet+.12*glint)*near);
-  }else if(vMat==6){ // Warm brass-gold specks in dark mineral seams.
-    float trace=step(.72,hashCell(floor(vUv*vec2(12.0,15.0))+17.0));
-    shade=.79+.15*tile+.24*trace;
-    base=mix(base,vec3(1.0,.72,.30),.23*trace*near);
+    shade=.84+.19*facet+.13*glint+.09*cleavage;
+    base=mix(base,vec3(.74,.59,1.0),(.25*facet+.11*glint)*near);
+    base=mix(base,vec3(.37,.93,.83),.12*cleavage*near);
+  }else if(vMat==6){ // Raw ore: continuous amber mineral seams in weathered host rock.
+    vec2 p=floor(vUv*vec2(12.0,15.0));
+    float trace=step(.72,hashCell(p+17.0));
+    float vein=1.0-smoothstep(.06,.18,abs(sin(vUv.x*11.0+vUv.y*7.0+tile)));
+    float gold=clamp(.65*trace+.45*vein,0.0,1.0);
+    shade=.77+.15*tile+.19*gold;
+    base=mix(base,vec3(.96,.69,.28),.28*gold*near);
   }else if(vMat==7){ // Solid polygon grass accents (opaque, no overdraw).
     shade=.92+.10*step(.5,tile);
   }else if(vMat==8||vMat==9){ // Flower petals and golden centers.
@@ -97,5 +106,5 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   fogStartDistance:29,
   fogEndDistance:68,
   newDrawCalls:0,
-  newTextures:0
+  newTextures:0,\n  naturalDetailFamilies:Object.freeze(['sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins'])
 });
