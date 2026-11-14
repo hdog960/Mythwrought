@@ -144,7 +144,6 @@ test('manifest keeps all 88–90 M3 workshop candidates isolated and 91+ unstart
  assert.equal(data.candidateFamilies,12);assert.equal(data.completedFamilies,0);
 });
 
-
 test('all six material-box faces maintain outward winding through every Y quarter-turn',()=>{
  const axes=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
  for(const d of all)for(let rotation=0;rotation<4;rotation++){
