@@ -69,7 +69,7 @@ for(let n=0;n<4;n++){
 }
 for(const x of [.115,.81])for(const z of [.115,.81]){
  crate.push(piece([x,.11,z,x+.075,.84,z+.075],'iron'));
- crate.push(piece([x,.84,z,x+.075,.88,z+.075],'brass',{collision:false}));
+ crate.push(piece([x,.84,z,x+.075,.88,z+.075],'brass',{collision:false,selection:false}));
 }
 for(let n=0;n<5;n++){
  const x=.12+n*.152;
@@ -77,7 +77,7 @@ for(let n=0;n<5;n++){
 }
 for(let n=0;n<4;n++){
  const x=.17+n*.16;
- crate.push(piece([x,.20,.075,x+.07,.80,.115],'walnut',{collision:false}));
+ crate.push(piece([x,.20,.075,x+.07,.80,.115],'walnut',{collision:false,selection:false}));
 }
 // Seating surface at half cell; four feet and a backrest pushed toward +Z.
 const bench=[
