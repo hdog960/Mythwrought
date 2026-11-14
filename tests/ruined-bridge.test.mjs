@@ -33,3 +33,20 @@ test('bridge geometry is deterministic, bounded and uses existing stone',()=>{
  assert.ok(first.length/RUINED_BRIDGE_LIMITS.stride<=RUINED_BRIDGE_LIMITS.maxVerticesPerChunk);
  for(let i=8;i<first.length;i+=9)assert.equal(first[i],3);
 });
+
+test('rotated z-axis crossing uses the same deterministic masonry budget',()=>{
+ const zBase=(x,y,z)=>y===5?(z>=5&&z<=11?0:1):y===4?1:0;
+ const zWorld={seed:4,get:zBase};
+ const zCross=()=>({natural:true,width:3,x:8,z:8,bankY:5,axis:'z'});
+ const vertices=ruinedBridgeVertices(zWorld,0,0,{crossingAt:zCross,baseAt:zBase});
+ assert.ok(vertices.length>0,'rotated natural crossing should render');
+ assert.equal(vertices.length%9,0);
+ assert.ok(vertices.length/9<=RUINED_BRIDGE_LIMITS.maxVerticesPerChunk);
+ for(let i=8;i<vertices.length;i+=9)assert.equal(vertices[i],3);
+});
+test('missing terrain floor or unsupported bridge banks suppress geometry',()=>{
+ const noBed=(x,y,z)=>y===4&&x===8?0:baseAt(x,y,z);
+ assert.equal(render({seed:4,get:noBed},crossingAt,noBed).length,0);
+ const unsupported=(x,y,z)=>y===5&&x===4?0:baseAt(x,y,z);
+ assert.equal(render({seed:4,get:unsupported},crossingAt,unsupported).length,0);
+});
