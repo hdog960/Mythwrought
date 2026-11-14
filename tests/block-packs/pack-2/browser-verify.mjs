@@ -36,8 +36,8 @@ export async function runPack2BrowserVerification(){
       page.on('pageerror',error=>errors.push(String(error)));
       const response=await page.goto(base+'/tests/block-packs/pack-2/preview.html');
       assert.equal(response.status(),200);
-      await page.waitForFunction(()=>document.querySelectorAll('#asset option').length===17);
-      assert.equal(await page.locator('#asset option').count(),17);
+      await page.waitForFunction(()=>document.querySelectorAll('#asset option').length===18);
+      assert.equal(await page.locator('#asset option').count(),18);
       for(const id of [73,74,75]){
         await page.selectOption('#asset',String(id));
         assert.equal(await page.evaluate(()=>window.pack2Fixture.selection().id),id);
@@ -51,6 +51,16 @@ export async function runPack2BrowserVerification(){
         const data=await page.evaluate(()=>window.pack2Fixture.serialize());
         assert.ok(data.cells.some(c=>c[3]===id));
       }
+      await page.selectOption('#asset','76');
+      await page.click('#waterLevel');
+      await page.click('#waterFlow');
+      const waterState=await page.evaluate(()=>window.pack2Fixture.selection());
+      assert.equal(waterState.id,76);
+      assert.equal(waterState.level,1);
+      assert.equal(waterState.flow,'north');
+      await page.click('#place');
+      const full=await page.evaluate(()=>window.pack2Fixture.serialize());
+      assert.ok(full.cells.some(row=>row[3]===76&&row.length===7));
       const mesh=await page.evaluate(async()=>{
         const {infrastructurePreviewMesh}=await import('/src/block-packs/pack-2/infrastructure.mjs');
         const values=[73,74,75].map(id=>infrastructurePreviewMesh(id));
@@ -58,17 +68,26 @@ export async function runPack2BrowserVerification(){
           .getImageData(120,100,600,300).data;
         let visible=0;for(let i=0;i<pixels.length;i+=4)
           if(pixels[i]>100&&pixels[i+1]>70&&pixels[i+2]>35)visible++;
-        return {triangles:values.map(x=>x.triangles),visible};
+        const {waterPreviewMesh,waterShape}=await import('/src/block-packs/pack-2/water.mjs');
+        const w=waterPreviewMesh({level:1,flow:'north'});
+        const volume=waterShape({level:1,flow:'north'});
+        return {triangles:values.map(x=>x.triangles),visible,
+          fluidTriangles:w.triangles,alphaMin:Math.min(...w.alpha),
+          fluidSolid:volume.solidCollision,fluidTop:volume.broadPhaseBox[4]};
       });
       assert.ok(mesh.triangles.every(x=>x>=60&&x<=900));
       assert.ok(mesh.visible>200,'Candidate canvas must draw visible asset geometry');
+      assert.equal(mesh.fluidTriangles,18);
+      assert.ok(mesh.alphaMin>0&&mesh.alphaMin<1);
+      assert.equal(mesh.fluidSolid,false);
+      assert.ok(mesh.fluidTop>0&&mesh.fluidTop<1);
       assert.deepEqual(errors,[],'No browser module/runtime errors');
       if(process.env.MYTHWROUGHT_PACK2_SCREENSHOTS){
         const dir=resolve(process.env.MYTHWROUGHT_PACK2_SCREENSHOTS);
         await mkdir(dir,{recursive:true});
-        await page.screenshot({path:resolve(dir,'pack2-infrastructure-'+width+'x'+height+'.png')});
+        await page.screenshot({path:resolve(dir,'pack2-infrastructure-water-'+width+'x'+height+'.png')});
       }
-      results.push({viewport:width+'x'+height,ids:[73,74,75],triangleCounts:mesh.triangles});
+      results.push({viewport:width+'x'+height,ids:[73,74,75,76],triangleCounts:mesh.triangles,waterState});
       await page.close();
     }
     return results;
