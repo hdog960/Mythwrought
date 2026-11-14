@@ -111,11 +111,14 @@ function emitBlueprint(type,biome,size){
   for(let z=0;z<entranceZ;z++)for(let x=mid-1;x<=mid+1;x++)
     set(x,0,z,'floor',bi===1?'base:stone':'base:deepstone');
   // Inner corridor partitions with accessible two-high door cutouts left and right.
-  const left=mid-2,right=mid+2,doorZ=dz;
+  const left=mid-2,right=mid+2;
   for(let l=0;l<storeys;l++){
     const ly=1+4*l;
+    // Upper desert gallery doors step away from the central open-air court.
+    // A doorway must have an actual supported walking tile on *both* sides.
+    const doorZ=bi===1&&l>0?entranceZ+3:dz;
     for(const x of [left,right])for(let z=entranceZ+3;z<=d-6;z++){
-      if(!interior(x,z)||Math.abs(z-doorZ)<1)continue;
+      if(!interior(x,z)||z===doorZ)continue;
       for(let h=0;h<=2;h++)set(x,ly+h,z,'partition',l%2?'base:wood':'base:stone');
     }
     for(const x of [left,right])if(interior(x,doorZ))openings.push({kind:'door',at:[x,ly,doorZ],facing:x===left?'west':'east'});
