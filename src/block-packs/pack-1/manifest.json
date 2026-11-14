@@ -88,7 +88,12 @@
     "m6TotalRealNodeSubset": "12/12 genuine Node tests PASS across only gallery-count.test.mjs (5) + png-proof.test.mjs (7); 4 local files matched GitHub blob hashes. THIS IS NOT REAL NATIVE EXECUTION OF 7 ASSET SUITES.",
     "m6NineModuleGate": "Opt-in run-acceptance.mjs now invokes 9 Pack1-owned Node test modules and requires actual TAP >=93 tests, 0 fail/skip/TODO; all 30 Chromium PNGs receive zlib IDAT decompression, chunk CRC32, viewport width/min height, SHA256 verification. Source syntax PASS; NOT EXECUTED full run.",
     "m6FullAssetVerification": "81/81 seven candidate-focused test groups passed exact GitHub source in V8 compatibility harness; native Node NOT RUN, Chromium capture NOT RUN due container GitHub DNS + Chromium ERR_BLOCKED_BY_ADMINISTRATOR.",
-    "m6CurrentMain": "main caf47776b723a36684edc1a72749e49268ccc688, incorporation checkpoint 007 automation-only, manual pack ownership excluded; Issues #109/#117 OPEN."
+    "m6CurrentMain": "main caf47776b723a36684edc1a72749e49268ccc688, incorporation checkpoint 007 automation-only, manual pack ownership excluded; Issues #109/#117 OPEN.",
+    "m6CurrentMain008": "Latest main f416a2b26c4c00b5944f3bd37e9360030a247cc9 = commit-level Gate A checkpoint 008 (voxel trees/caves/courts activated using IDs 0–8). Explicitly manual Pack1–5 and building projects excluded. docs/INTEGRATION_CHECKPOINTS.md still ends at 007 (docs lag).",
+    "m6Main008Registry": "Current main src/voxel.mjs BLOCK registry 0–8 only; Pack1 9–38 are all unregistered candidate source.",
+    "m6Main008CI": "Current main .github/workflows/ci.yml adds live-world browser smoke but still root npm test tests/*.test.mjs; 9 nested Pack1 native suites are not executed by root CI.",
+    "m6LatestNativeHelperEvidence": "Genuine Node 22.16.0 12/12 helper groups pass (5 gallery count +7 PNG integrity), all 4 local module/test Git blobs exactly match current GitHub files. Native Pack1 asset modules 81 authored bodies still NOT run.",
+    "m6CurrentAcceptanceOrchestrator": "Standalone Pack1-only run-acceptance.mjs requires nine Node modules >=93 tests no skips/todo and 15 genuine Chromium views / 30 fully decoded CRC-validated screenshot PNGs. Full run not executed."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -518,7 +523,7 @@
   ],
   "pr": "https://github.com/hdog960/Mythwrought/pull/113",
   "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED",
-  "nextMilestone": "Recheck main/checkpoint/PR exact-head CI and obtain authorized full branch checkout. Run 9 actual native Node modules >=93 tests plus five real Chromium galleries across three iPhone landscape viewports; inspect 30 CRC-verified PNGs. Do not integrate/merge/deploy before separate creator approval.",
+  "nextMilestone": "Recheck main checkpoint 008 or newer and PR #113 exact CI; obtain authorized exact branch checkout; execute 9 nested native Node modules >=93 tests and genuine Playwright 15 landscape views/30 decoded PNGs; inspect artwork/screenshots; repair Pack1-only defects without merge/deploy.",
   "allocations": [
     {
       "range": [
@@ -563,8 +568,8 @@
       "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "Milestone 6 acceptance: new isolated CRC32/DEFLATE PNG integrity helper and 7 genuine Node regressions pass, now 12/12 real helper tests total; 9-module 93-native-test acceptance runner source verified. All 30 ID candidates draft only, real asset Node and Chromium blocked.",
-  "finalAcceptance": "OPEN/NOT ACCEPTED: 21/21 families, 30/30 unique IDs 9-38 source-authored and all CANDIDATE; seven native asset suites, 15 real Chromium views/30 screenshots, production shape/save and physical iPhone approval missing.",
+  "latestMilestone": "M6 after checkpoint 008: automation live-world trees/caves/courts integrated using existing IDs 0–8, manual Pack1 excluded. Candidate source complete 21/21 families and 30 unique IDs 9–38. 12/12 helper tests genuinely Node; seven candidate test suites + candidate browser not native-run.",
+  "finalAcceptance": "NOT ACCEPTED. No Pack1 merge or registration. Native asset tests, actual candidate browser screenshot review, real engine partial collision/save and physical iPhone creator approvals missing.",
   "acceptanceMatrix": {
     "all_21_family_source_candidates": "CANDIDATE",
     "30_distinct_persistent_candidate_IDs": "VERIFIED_SOURCE_V8",
@@ -610,7 +615,13 @@
     "exact_head_native_acceptance": "NINE_MODULES_MINIMUM_93_TESTS_NOT_RUN_FULL",
     "genuine_candidate_browser": "NOT_RUN_ADMINISTRATOR_BLOCK",
     "screenshots_15_views_30_png": "NOT_CAPTURED",
-    "production_IDs_9_38": "UNREGISTERED_CANDIDATE"
+    "production_IDs_9_38": "UNREGISTERED_CANDIDATE",
+    "latest_incorporation_checkpoint": "008_MANUAL_PACK1_EXCLUDED",
+    "main_registry": "0_8_ONLY",
+    "native_helper_test_groups": "12_OF_12_REAL_NODE_PASS",
+    "native_candidate_suites": "81_BODIES_V8_SHIM_NOT_NATIVE_NODE",
+    "real_candidate_browser_screenshots": "0_CAPTURED",
+    "acceptance_decision": "OPEN_NOT_ACCEPTED"
   },
   "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md"
 }
