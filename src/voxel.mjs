@@ -122,7 +122,21 @@ export function meshChunk(world,cx,cz){
     return id;
   };
   const readWorld={seed:world.seed,get:blockAt};
-  const vertices=[];
+  // Append solid faces directly into a geometrically grown typed buffer.
+  // The former JS number array boxed every coordinate/color and duplicated
+  // the whole solid mesh when converting to Float32Array for GPU upload.
+  let solidBuffer=new Float32Array(16384),solidLength=0;
+  const appendVertex=(x,y,z,r,g,b,u,v,id)=>{
+    if(solidLength+9>solidBuffer.length){
+      const grown=new Float32Array(solidBuffer.length*2);
+      grown.set(solidBuffer);solidBuffer=grown;
+    }
+    solidBuffer[solidLength++]=x;solidBuffer[solidLength++]=y;
+    solidBuffer[solidLength++]=z;solidBuffer[solidLength++]=r;
+    solidBuffer[solidLength++]=g;solidBuffer[solidLength++]=b;
+    solidBuffer[solidLength++]=u;solidBuffer[solidLength++]=v;
+    solidBuffer[solidLength++]=id;
+  };
   for(let x=cx*CHUNK_SIZE;x<(cx+1)*CHUNK_SIZE;x++)
     for(let z=cz*CHUNK_SIZE;z<(cz+1)*CHUNK_SIZE;z++)
       for(let y=WORLD_MIN_Y;y<=WORLD_MAX_Y;y++){
@@ -143,7 +157,7 @@ export function meshChunk(world,cx,cz){
           const b=clamp(color[2]*variance*face.lit,0,1);
           for(const k of [0,1,2,0,2,3]){
             const p=face.q[k],uv=FACE_UV[k];
-            vertices.push(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id);
+            appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id);
           }
         }
       }
@@ -175,7 +189,7 @@ export function meshChunk(world,cx,cz){
   });
   const waystones=waystoneVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const caveThresholds=caveThresholdVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,air:BLOCK.AIR,stoneId:BLOCK.STONE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y});
-  const solid=new Float32Array(vertices);
+  const solid=solidBuffer.slice(0,solidLength);
   if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length&&!caveThresholds.length)return solid;
   const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length+caveThresholds.length);
   combined.set(solid);combined.set(canopy,solid.length);
