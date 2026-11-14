@@ -1,0 +1,54 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-2.manifest.v1",
+  "title": "Commerce & Culture",
+  "gate": "v0.10 Gate A OPEN / v0.11 LOCKED",
+  "baselineMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "checkpoint": "006",
+  "pendingIntegration": "PR #120 unmerged at audit",
+  "issues": [
+    109,
+    117
+  ],
+  "manualPackPRs": [
+    113,
+    114,
+    112,
+    115,
+    119
+  ],
+  "biome130PR": 118,
+  "plannedSlots": 840,
+  "authoredCandidates": 1,
+  "acceptedBlueprints": 0,
+  "worldPlacements": 0,
+  "milestoneTargets": {
+    "M2": 375,
+    "M3": 300,
+    "M4": 165
+  },
+  "milestones": {
+    "M0": "open-browser-blocked",
+    "M1": "not-started",
+    "M2": "not-started",
+    "M3": "not-started",
+    "M4": "not-started",
+    "M5": "not-started"
+  },
+  "authored": [
+    {
+      "id": "r2:general-store:temperate:small:01",
+      "source": "src/building-pool/roadmap-2/temperate-store.mjs",
+      "status": "authored-candidate"
+    }
+  ],
+  "registryChanges": 0,
+  "persistentIdsAssigned": 0,
+  "physicalInterfacesApproved": 0,
+  "sourceScope": "Roadmap 2 exclusive",
+  "verification": {
+    "localNode": "7/7 staged source pass; exact committed CI pending",
+    "chromium": "headless EGL/timeout; no authentic screenshots",
+    "realIphone": "not tested"
+  },
+  "status": "DRAFT / UNMERGED / UNDEPLOYED / NOT IN LIVE WORLD"
+}
