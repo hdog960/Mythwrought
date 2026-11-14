@@ -32,6 +32,7 @@ const SYMBOLS={
 };
 const DEPS={
   'pack1:002': ['candidate','single-cell','fixed','none',['masonry candidate-ID registration','full-cube face material confirmation']],
+  'pack1:007': ['candidate','partial','fixed','floor',['half-height landing surface and AABB body-fit','shape-aware selection/collision','candidate ID registration in live world']],
   'pack1:008': ['candidate','partial','rotatable','floor',['stair rise profile','collision slope','orientation mapping','safe tread alignment']],
   'pack3:023': ['candidate','partial','rotatable','adjacent',['shingle roof pitch','ridge and valley junctions','supporting attachment geometry']],
   'pack3:024': ['candidate','partial','rotatable','adjacent',['desert clay-tile roof pitch','ridge joins','physical attachment geometry']],
@@ -217,7 +218,10 @@ function emitBlueprint(type,biome,size){
       if(!occupied.has(pos(stairXs[4],supportY,flightDepth)))
         set(stairXs[4],supportY,flightDepth,'column','base:stone');
     }
-    set(stairXs[4],yy+4,flightDepth,'landing','base:stone');
+    // Pack 1 lower half-slab bridges the 0.5-block height between the last
+    // raised stair surface and the full-height upper floor. Full STONE made
+    // this final rise a physically discontinuous 1.0-block lip.
+    set(stairXs[4],yy+4,flightDepth,'landing','pack1:007');
   }
   // Real overhead joists below the roof deck prevent unsupported wide roof spans.
   // A joist has full height clearance above the last usable 2-block room envelope;
