@@ -505,7 +505,9 @@ function start(){
   // Preserve the owning touch across Safari pointer-capture interruptions.
   // TouchEnd identifies the finger even if the matching pointerup is lost.
   precisionButton.addEventListener('touchstart',e=>{
-    if(precisionPointer!==null&&precisionTouchId===null&&e.changedTouches.length)
+    // touchstart precedes pointerdown on Chromium/Safari. Remember the first
+    // finger before a second touch can race into the AIM button.
+    if(precisionTouchId===null&&help.hidden&&!document.hidden&&e.changedTouches.length)
       precisionTouchId=e.changedTouches[0].identifier;
   },{passive:true});
   for(const name of ['touchend','touchcancel'])window.addEventListener(name,e=>{
