@@ -221,7 +221,7 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   existingFloraMaterials:Object.freeze([7,8,9]),
   renderOnlyGrottoMaterials:Object.freeze([10,11,12]),
   renderOnlyCaveRuneMaterials:Object.freeze([13,14]),
-  renderOnlyArchitecturalMaterials:Object.freeze([15,16]),
+  renderOnlyArchitecturalMaterials:Object.freeze([15,16,17]),
   detailStartDistance:10,
   detailEndDistance:38,
   fogStartDistance:29,
