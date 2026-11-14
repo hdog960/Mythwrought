@@ -2,14 +2,14 @@
 // Foliage temporarily uses existing GRASS (ID 1) until :00 reserves a leaf block.
 // Each occupied cell is a real world voxel, not a decorative mesh triangle.
 import {BLOCK,terrainHeight,baseBlock,WORLD_MAX_Y} from './voxel.mjs';
-export const TREE_VARIANTS=Object.freeze(['roundwood','spire','windswept']);
+export const TREE_VARIANTS=Object.freeze(['roundwood','spire','windswept','elderwood']);
 const key=(x,y,z)=>x+','+y+','+z;
 export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES??BLOCK.GRASS}={}){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
     !Number.isInteger(x)||!Number.isInteger(z)||!TREE_VARIANTS.includes(variant)||
     ![BLOCK.GRASS,BLOCK.CRYSTAL,BLOCK.LEAVES].includes(leafId))return null;
  const ground=terrainHeight(x,z,world.seed);
- const height=variant==='spire'?7:variant==='windswept'?6:5;
+ const height=variant==='elderwood'?8:variant==='spire'?7:variant==='windswept'?6:5;
  if(ground+height+2>WORLD_MAX_Y||world.get(x,ground,z)!==BLOCK.GRASS)return null;
  const cells=new Map();
  const put=(dx,dy,dz,id)=>{
@@ -34,12 +34,28 @@ export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES
     if(Math.abs(dx)+Math.abs(dz)<=radius+1&&!cells.has(key(x+dx,ground+dy,z+dz)))
      put(dx,dy,dz,leafId);
   }
- }else{
+ }else if(variant==='windswept'){
   for(let dx=1;dx<=3;dx++)put(dx,height-1,0,BLOCK.WOOD);
   for(let dx=0;dx<=4;dx++)for(let dz=-2;dz<=2;dz++)
    for(let dy=height-1;dy<=height+1;dy++)
     if(Math.abs(dz)+Math.abs(dy-height)+(dx===4?1:0)<=2 &&
        !cells.has(key(x+dx,ground+dy,z+dz)))put(dx,dy,dz,leafId);
+ }else{
+  // Elderwood: broad, walk-around buttress roots, branching limbs and layered crown.
+  // All components are real full voxels, not render-only decorations.
+  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+   put(dx,1,dz,BLOCK.WOOD);
+   put(dx*2,1,dz,BLOCK.WOOD);
+   for(let step=1;step<=3;step++)put(dx*step,height-2,dz*step,BLOCK.WOOD);
+   put(dx*3,height-1,dz*3,BLOCK.WOOD);
+  }
+  for(let dy=height-2;dy<=height+1;dy++){
+   const radius=dy===height+1?2:dy===height-2?3:4;
+   for(let dx=-radius;dx<=radius;dx++)for(let dz=-radius;dz<=radius;dz++){
+    if(Math.abs(dx)+Math.abs(dz)>radius+2)continue;
+    if(!cells.has(key(x+dx,ground+dy,z+dz)))put(dx,dy,dz,leafId);
+   }
+  }
  }
  const occupied=[...cells.values()];
  // Never touch player edits, another structure, terrain or a cave opening.
