@@ -4,6 +4,7 @@ import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mj
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
 import {clampLook,forwardVector,compassDegrees,MAX_PITCH} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
+import {createTouchActionOwner} from './touch-action-owner.mjs';
 import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
@@ -488,8 +489,13 @@ function start(){
     precisionButton.classList.add('held');
     try{precisionButton.setPointerCapture(e.pointerId);}catch(_){}
   });
-  for(const event of ['pointerup','pointercancel'])precisionButton.addEventListener(event,releasePrecision);
-  precisionButton.addEventListener('lostpointercapture',()=>releasePrecision());
+  for(const event of ['pointerup','pointercancel']){
+    precisionButton.addEventListener(event,releasePrecision);
+    // Safari may deliver the final release to the window after losing capture.
+    // Match the owning finger so an unrelated action finger cannot end AIM.
+    window.addEventListener(event,releasePrecision,true);
+  }
+  precisionButton.addEventListener('lostpointercapture',releasePrecision);
   function cancelAllPointers(){
     for(const stop of [...heldPointers.values()])stop();
     lookStick.x=lookStick.y=0;
@@ -558,14 +564,23 @@ function start(){
   function bindGameplayAction(id,action){
     const button=document.getElementById(id);
     let lastTouchAt=-Infinity;
+    const owner=createTouchActionOwner();
+    function release(e){owner.release(e.pointerId);}
     button.addEventListener('pointerdown',e=>{
       if(e.pointerType!=='touch')return;
       e.preventDefault();
-      // A queued iOS touch must not edit the world behind settings or on app suspension.
-      if(!help.hidden||document.hidden||button.disabled)return;
+      // Only the first finger owns a discrete action until it releases.
+      // A second finger landing on Mine/Place must not perform a duplicate edit.
+      if(!help.hidden||document.hidden||button.disabled||!owner.claim(e.pointerId))return;
       lastTouchAt=performance.now();
       action();
     });
+    for(const type of ['pointerup','pointercancel']){
+      window.addEventListener(type,release,true);
+    }
+    button.addEventListener('lostpointercapture',release);
+    window.addEventListener('blur',()=>owner.cancel());
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)owner.cancel();});
     button.addEventListener('click',e=>{
       if(e.detail!==0&&performance.now()-lastTouchAt<750){
         e.preventDefault();
