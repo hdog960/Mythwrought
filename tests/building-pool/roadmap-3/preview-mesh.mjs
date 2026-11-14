@@ -20,6 +20,9 @@ export function createPreviewMesh(blueprint,{cutaway=false}={}){
   // Remove the south facade for cutaways. Workshop roofs/rafters are removed
   // to examine furnished interior; tower upper decks remain to inspect stairs.
   if(cutaway && ((m.role==='wall'&&(z===depth-1||x===width-1))||
+   // Removing the south wall but keeping the attached portal frame made
+   // cutaway jambs and lintels float without their supporting facade.
+   (m.role==='entry-frame'&&z===depth-1)||
    (blueprint.type==='blacksmith'&&['roof','rafter'].includes(m.role))||
    (blueprint.type==='watchtower'&&m.role==='roof'&&z>=Math.floor(depth/2))||
    (m.role==='battlement'&&(z===depth-1||x===width-1))))continue;
