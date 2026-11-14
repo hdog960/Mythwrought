@@ -119,3 +119,45 @@ For a future local browser proof (not performed yet), run the free local static 
 Then visit http://localhost:4173/src/block-packs/pack-1/garden-gallery.html in real Chromium at mobile landscape widths. Capture actual screenshot evidence and verify the visible slice, role texture previews, buttons and no console errors. Do not substitute concept art.
 
 **Milestone 3 source candidates are complete, but integration and genuine device/browser acceptance are pending.** The next source category is Milestone 4's physical hedge, bush, climbing vine and colored decorative leaf variants. Before developing, recheck main, checkpoint and Issues #109/#117 to avoid duplicate integrated or automated-biome equivalents. Keep PR #113 draft/unmerged, v0.10 Gate A open, and all other pack/automation ownership unchanged.
+
+## Milestone 4 — independent physical foliage (source candidates)
+
+**Four roster families, eight truly different ID-bearing physical candidates:**
+
+| Candidate | Roster family | Distinct independent physical silhouette and interaction |
+|---|---|---|
+| 24 Clipped yew hedge | 50 Hedge | Dense, irregular lattice of dark branch and stepped top-leaf boxes; solid barrier collision and individually removable as one cell. |
+| 25 Briar thicket | 51 Bush | Wide low branching twig thicket and airy leaf clusters; woody stalk boxes collidable, foliage selectable. No berries or harvest. |
+| 26 Woodland fern bush | 51 Bush | Vertical central stalk, splayed thin fronds and genuine open spaces; passable but ray-selectable and removable. |
+| 27 Climbing ivy | 52 Climbing vine | Thin face-attached vertical twig lattice and spaced leaves; optional support metadata, mount precondition in isolated fixture, real raycast hit geometry; no full-cube wall collision. |
+| 28 Wisteria foliage vine | 52 Climbing vine | Separate hanging foliage runners and draping leaves, wall-mounted, passable but targetable; no blossom/crop gameplay. |
+| 29 Golden ornamental fan leaves | 55 Decorative leaf | Sculpted fan arrangement with thin stems and projecting gold leaf facets. |
+| 30 Ruby curled ornamental leaves | 55 Decorative leaf | Red curled banded foliage volume with open lobes and different arrangement from golden fans. |
+| 31 Silver star ornamental leaves | 55 Decorative leaf | Pale spiky star/spray clusters on slender twig arms, separate from other colors' silhouettes. |
+
+All eight are **not** simply recolored LEAVES ID 7, shader tags, or natural leaf species from automation Issue #117. All foliage assets are independent single-cell physical pieces with exact local unit voxel occupancy boxes and original seeded RGBA material art per leaf/twig role. Soft plants and vines deliberately have empty or minimal physical collision boxes while retaining nonempty selection/hit boxes; this is real selectable geometry rather than uneditable scenery.
+
+### Shape-budget correction, not a performance claim
+
+The :12 prototype surface mesher partitions every unique box boundary. An initial Milestone 4 compatibility probe exposed **1,480–4,412** triangles per piece with hand-authored microbox edges, which was unacceptable for mobile-candidate geometry. The source now quantizes the **actual physical occupancy** boxes (not just the art preview) to a deterministic **1/8-voxel lattice**. This lowered source-prototype :12 surface-mesh output to **208–532 triangles per shape across all 32 combinations (8 assets × 4 rotations)**, with valid indices and bounded unit-cell coordinates. This is an isolated source arithmetic result, **NOT a measured WebGL2 draw/fragment workload, frame rate, memory budget, or real device acceptance**.
+
+### Files and tests
+
+- physical-foliage.mjs — original garden/ornamental foliage definitions, per-material pixel art, collision/selection boxes and four-way rotations.
+- foliage-fixture.mjs — opt-in individual place/remove, AABB ray targeting, wall-mount precondition, exact canonical schema-1-shaped edit roundtrip and fail-closed orientation serialization.
+- foliage-gallery.html + foliage-gallery.mjs — responsive standalone Canvas2D 3D-like gallery using candidate box shapes, per-face material art, selectable cross sections, rotation and reversible fixture test. **This is source code for an optional preview, not an authentic gameplay screenshot.**
+- tests/block-packs/pack-1/physical-foliage.test.mjs — 16 focused authored Node test groups.
+
+To execute all dedicated Pack 1 tests (requires a real Node 22 runtime and a complete checked-out candidate branch):
+
+    node --test tests/block-packs/pack-1/core-masonry.test.mjs tests/block-packs/pack-1/stone-shapes.test.mjs tests/block-packs/pack-1/garden-components.test.mjs tests/block-packs/pack-1/physical-foliage.test.mjs
+
+The configured root npm test glob excludes all these nested tests. Its passing CI checks prove the unchanged baseline continues to work, not that new Pack 1 asset tests executed.
+
+**Evidence:** exact branch source evaluated by V8 with Node assertion/test compatibility shims: **16/16 authored foliage test bodies PASS**. Additionally, **40/40 V8 integration probes PASS** against exact unmerged :00 targeting and :12 shape-mesh source: all 32 optimized shape/rotation meshes and 8 physically meaningful open/solid space, targeting and placement guards. These are **not actual Node or Chromium executions**. Direct GitHub branch checkout/download into the local Node/Chromium test runtime was unavailable (network sandbox), so **dedicated Node, actual gallery Chromium, offline browser, authentic screenshots and physical iPhone: NOT RUN / NOT CAPTURED**. Do not upgrade candidate states to TESTED without genuine test evidence.
+
+**Integration blockers:** production VoxelWorld still only knows IDs 0–8; :00/:12 candidate engines are not wired into the live renderer; orientation state not representable by legacy edit row [x,y,z,id], so rotated fixtures refuse to save; face-climbing vines need host support validation. Physics, save data, UI, terrain, shaders, PWA and world placement were not touched.
+
+**Milestone 4 source work completed for review only.** Pack 1 now tracks **19/21 candidate families**, **23 ID-bearing variants (IDs 9–31)**. **NEXT**: verify focused Node and authentic Chromium if accessible, then develop Milestone 5's individual physical flower species (at least four) and mushroom species (at least three) beginning at unused Pack 1 candidate ID 32, without overwriting foliage or adopting the separate Issue #117 biome130 leaf catalog.
+
+**STATUS: CANDIDATE — NOT MERGED / NOT DEPLOYED. Gate A open; v0.11 locked.**
