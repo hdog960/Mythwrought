@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,collides,meshChunk,CHUNK_SIZE} from '../src/voxel.mjs';
-import {branchedCaveWorld} from '../src/branched-cave-world.mjs';
+import {branchedCaveWorld,northWingTraversal} from '../src/branched-cave-world.mjs';
 import {CAVE_CANDIDATE,caveRoute,experimentalCaveWorld} from '../src/experimental-cave-route.mjs';
 for(const seed of [179,1,2026,-77]){
   test('north cave wing is solid-floored, head-clear and meshes for seed '+seed,()=>{
@@ -29,3 +29,20 @@ test('explicit saved placement blocks the new branch without altering the save',
   assert.equal(collides(candidate,x+.5,y,z+.5),true);
   assert.equal(JSON.stringify(world.save()),saved);
 });
+
+for(const seed of [179,1,2026,-77]){
+  test('north wing full route trace and saved-edit override '+seed,()=>{
+    const world=new VoxelWorld(seed),original=JSON.stringify(world.save());
+    const route=northWingTraversal(world);
+    assert.equal(route.samples.length,11);
+    assert.deepEqual(route.failures,[]);
+    assert.equal(route.walkable,true);
+    assert.equal(JSON.stringify(world.save()),original);
+    const obstruct=route.samples[7];
+    assert.equal(world.set(obstruct.x,obstruct.y,obstruct.z,BLOCK.WOOD),true);
+    const blocked=northWingTraversal(world);
+    assert.equal(blocked.walkable,false);
+    assert.ok(blocked.failures.some(p=>p.x===obstruct.x&&p.z===obstruct.z));
+    assert.equal(world.get(obstruct.x,obstruct.y,obstruct.z),BLOCK.WOOD);
+  });
+}
