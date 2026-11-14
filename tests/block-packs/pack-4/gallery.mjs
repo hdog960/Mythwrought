@@ -3,7 +3,7 @@ import {PACK4_WINDOW_ASSETS,windowPreviewMesh} from '../../../src/block-packs/pa
 import {PACK4_LIGHT_ASSETS,lightingPreviewMesh} from '../../../src/block-packs/pack-4/lighting.mjs';
 import {PACK4_FURNISHING_ASSETS,furnishingPreviewMesh} from '../../../src/block-packs/pack-4/furnishings.mjs';
 import {PACK4_CIVIC_ASSETS,civicPreviewMesh} from '../../../src/block-packs/pack-4/hearth-civic.mjs';
-import {sortPack4PreviewTranslucent} from '../../../src/block-packs/pack-4/preview-utils.mjs';
+import {sortPack4PreviewTranslucent,releasePack4PreviewGpu} from '../../../src/block-packs/pack-4/preview-utils.mjs';
 const VS = `#version 300 es
 precision highp float;
 layout(location=0) in vec3 aPosition;
@@ -27,22 +27,34 @@ void main(){color=vColor;}
 `;
 function compile(gl,type,source){
   const shader=gl.createShader(type);
+  if(!shader)throw Error('Pack 4 shader allocation failed');
   gl.shaderSource(shader,source);
   gl.compileShader(shader);
-  if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))
-    throw Error(gl.getShaderInfoLog(shader)||'Shader compilation failed');
+  if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)){
+    const reason=gl.getShaderInfoLog(shader)||'Shader compilation failed';
+    gl.deleteShader(shader);
+    throw Error(reason);
+  }
   return shader;
 }
 function buildProgram(gl){
   const prog=gl.createProgram();
-  gl.attachShader(prog,compile(gl,gl.VERTEX_SHADER,VS));
-  gl.attachShader(prog,compile(gl,gl.FRAGMENT_SHADER,FS));
-  gl.linkProgram(prog);
-  // Defer shader destruction until program detaches them; avoid a shader leak per model.
-  for(const shader of gl.getAttachedShaders(prog)||[])gl.deleteShader(shader);
-  if(!gl.getProgramParameter(prog,gl.LINK_STATUS))
-    throw Error(gl.getProgramInfoLog(prog)||'Link failed');
-  return prog;
+  if(!prog)throw Error('Pack 4 program allocation failed');
+  const shaders=[];
+  try{
+    shaders.push(compile(gl,gl.VERTEX_SHADER,VS));
+    shaders.push(compile(gl,gl.FRAGMENT_SHADER,FS));
+    for(const shader of shaders)gl.attachShader(prog,shader);
+    gl.linkProgram(prog);
+    if(!gl.getProgramParameter(prog,gl.LINK_STATUS))
+      throw Error(gl.getProgramInfoLog(prog)||'Link failed');
+    return prog;
+  }catch(error){
+    gl.deleteProgram(prog);
+    throw error;
+  }finally{
+    for(const shader of shaders)gl.deleteShader(shader);
+  }
 }
 function drawOne(canvas,id,rotation){
   const gl=canvas.getContext('webgl2',{alpha:false,preserveDrawingBuffer:true,antialias:true});
@@ -50,10 +62,12 @@ function drawOne(canvas,id,rotation){
   const mesh=id>=176?civicPreviewMesh(id,rotation):
     id>=169?furnishingPreviewMesh(id,rotation):
     id>=165?lightingPreviewMesh(id,rotation):windowPreviewMesh(id,rotation);
-  const prog=buildProgram(gl);
-  const vao=gl.createVertexArray(),buf=gl.createBuffer();
-  if(!vao||!buf)throw Error('Pack 4 preview GPU allocation failed');
+  let prog=null,vao=null,buf=null;
   try{
+  prog=buildProgram(gl);
+  vao=gl.createVertexArray();buf=gl.createBuffer();
+  if(!vao||!buf)throw Error('Pack 4 preview GPU allocation failed');
+  gl.depthMask(true); // clear must write depth, even after an earlier failed draw
   gl.viewport(0,0,canvas.width,canvas.height);
   gl.clearColor(.12,.18,.21,1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
@@ -80,11 +94,7 @@ function drawOne(canvas,id,rotation){
   return {opaqueVertices:mesh.opaque.length/mesh.stride,
           transparentVertices:mesh.translucent.length/mesh.stride};
   }finally{
-    gl.bindVertexArray(null);
-    gl.bindBuffer(gl.ARRAY_BUFFER,null);
-    gl.deleteBuffer(buf);
-    gl.deleteVertexArray(vao);
-    gl.deleteProgram(prog);
+    releasePack4PreviewGpu(gl,{buffer:buf,vertexArray:vao,program:prog});
   }
 }
 const grid=document.querySelector('#gallery');
