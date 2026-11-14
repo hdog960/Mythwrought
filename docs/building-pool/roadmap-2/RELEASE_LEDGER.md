@@ -10,3 +10,5 @@
 | M5 | 840 unique final blueprints | Not verified | PLANNED |
 
 No merge, deployment, shared-system edit, persistent ID assignment, game placement or physical-iPhone approval. v0.10 Gate A OPEN; v0.11 LOCKED.
+
+M1 visual QA follow-up: 21/21 local native Node cases, 90 genuine Chromium Canvas2D renders, 15 temple silhouettes corrected. Creator review and exact-head PR CI open; 0 production-approved / world placed.

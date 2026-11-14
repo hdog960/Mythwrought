@@ -91,3 +91,34 @@ test('category interiors are actually different physical assemblies',()=>{
   assert(!templeMaterials.has('pack5:086'),shrine.id);
  }
 });
+
+test('all temples have substantial paired 2x2 high belfries rather than antenna-like roof posts',()=>{
+ for(const temple of M1_REPRESENTATIVES.filter(b=>b.category==='temple')){
+  const cells=occupied(temple),width=temple.extents.x,center=Math.floor(width/2);
+  const towerTop=temple.extents.y-2; // a full cell below central lantern pinnacle
+  for(const x0 of [1,width-3])for(const dx of [0,1])for(const z of [0,1]){
+   // Some footprint bevels may remove an upper outer corner in enchanted wood,
+   // but there must be at least three supporting positions per tower footprint.
+   if(!cells.has([x0+dx,0,z].join(',')))continue;
+   assert(cells.has([x0+dx,towerTop,z].join(',')),`missing tall belfry ${temple.id} at ${x0+dx},${z}`);
+  }
+  assert(temple.voxels.filter(v=>v.kind==='window'&&v.y>=towerTop-3).length>=1,`no belfry aperture: ${temple.id}`);
+ }
+});
+test('all temple processional portals are three cells wide and physically clear',()=>{
+ for(const bp of M1_REPRESENTATIVES.filter(b=>b.category==='temple')){
+  const cells=occupied(bp),center=Math.floor(bp.extents.x/2);
+  for(let dx=-1;dx<=1;dx++)for(let y=2;y<=4;y++)
+   assert(!cells.has([center+dx,y,0].join(',')),`blocked ${bp.id} portal at ${center+dx},${y}`);
+  assert(cells.has([center,5,0].join(',')),`no true portal lintel: ${bp.id}`);
+ }
+});
+test('temples have genuinely raised ceremonial dais and an accessible approach',()=>{
+ for(const bp of M1_REPRESENTATIVES.filter(b=>b.category==='temple')){
+  const cells=occupied(bp),center=Math.floor(bp.extents.x/2),z=bp.extents.z-3;
+  for(let dx=-2;dx<=2;dx++)
+   assert.equal(cells.get([center+dx,2,z].join(','))?.kind,'fixture',`dais absent: ${bp.id}`);
+  assert.equal(cells.get([center,3,z].join(','))?.material,'pack3:075',`raised altar absent: ${bp.id}`);
+  assert(canReachRear(bp),`ceremonial aisle blocked by dais: ${bp.id}`);
+ }
+});

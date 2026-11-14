@@ -80,7 +80,11 @@ function build({biome,size,category}){
     for(let x=center-2;x<=center+2;x++)if(footprint(x,depth-3)){
       put(x,2,depth-3,m.trim,'fixture');
     }
-    if(footprint(center,depth-2))put(center,2,depth-2,FIXTURE.altar,'fixture');
+    // A raised two-row ceremonial dais, distinct from the level public nave.
+    // The rest of the sanctuary floor remains approachable at y=1.
+    for(const z of [depth-3,depth-2])for(let x=center-2;x<=center+2;x++)
+      if(footprint(x,z))put(x,2,z,m.trim,'fixture');
+    if(footprint(center,depth-3))put(center,3,depth-3,FIXTURE.altar,'fixture');
   }
   for(const [x,z] of [[2,3],[width-3,3],[2,depth-3],[width-3,depth-3]])
     if(footprint(x,z)&&!bounds(x,z)&&!cells.has(COORD(x,top-1,z)))put(x,top-1,z,FIXTURE.light,'decor');
@@ -123,23 +127,43 @@ function build({biome,size,category}){
   if(biome==='snow'||biome==='temperate'||biome==='enchanted-forest')for(const z of [0,depth-1])for(let x=1;x<width-1;x++)if(footprint(x,z)){
     for(let y=top+1;y<roofAt(x,z);y++)put(x,y,z,m.wall,'wall');
   }
-  // Category-defining exterior silhouette, not merely a changed title/material:
-  // temples are monumental: paired physically modeled towers, shrine gables,
-  // a stepped central belfry, and enlarged large-class lantern pinnacles.
+  // Category-defining exterior monumentality: actual paired belfry volumes,
+  // a three-wide processional entrance, and a visible roof-crossing lantern tower.
+  // A single antenna-shaped post is NOT a belfry. These occupy a 2x2 footprint
+  // each and tower ABOVE the highest roof ridge, even in the Snow region.
   if(isTemple){
-    for(const x of [2,width-3])for(const z of [1,2])if(footprint(x,z)){
-      for(let y=2;y<=top+3;y++)put(x,y,z,m.trim,y<=top?'wall':'roof');
-      put(x,top+4,z,m.roof,'roof');
+    const highestRoof=Math.max(...Array.from({length:width},(_,x)=>
+      Array.from({length:depth},(_,z)=>footprint(x,z)?roofAt(x,z):0)).flat());
+    for(let x=center-1;x<=center+1;x++)for(let y=2;y<=4;y++)remove(x,y,0);
+    // Physical portal shoulders and the spanning arch, not a metadata-only entrance.
+    for(const x of [center-2,center+2])for(let y=2;y<=5;y++)put(x,y,0,m.trim,'wall');
+    for(let x=center-1;x<=center+1;x++)put(x,5,0,m.trim,'wall');
+    // Independent silhouettes: two hollow-looking but watertight 2x2 masonry
+    // belfry masses. The glazed high openings do not imply accessible tower rooms.
+    for(const sx of [1,width-3])for(let dx=0;dx<2;dx++)for(const z of [0,1]){
+      const x=sx+dx;
+      if(!footprint(x,z))continue;
+      for(let y=2;y<=highestRoof+4;y++){
+        const upperWindow=y===highestRoof+2&&z===0&&dx===0;
+        put(x,y,z,upperWindow?FIXTURE.glass:m.trim,upperWindow?'window':'wall');
+      }
+      put(x,highestRoof+5,z,m.roof,'roof');
     }
     const naveZ=Math.max(4,Math.floor(partition/2));
-    const ridge=roofAt(center,naveZ);
-    for(let y=ridge+1;y<=ridge+3;y++)put(center,y,naveZ,m.trim,'roof');
-    put(center,ridge+4,naveZ,m.roof,'decor');
-    if(size==='large')for(const z of [5,partition-2])for(const x of [3,width-4]){
-      if(footprint(x,z)){
-        for(let y=top+1;y<=top+3;y++)put(x,y,z,m.trim,'roof');
-        put(x,top+4,z,m.roof,'decor');
-      }
+    const lanternFoot=roofAt(center,naveZ);
+    // Lantern crosses over the regular roof height: avoids a hidden spire.
+    for(let y=lanternFoot+1;y<=highestRoof+5;y++){
+      put(center,y,naveZ,m.trim,'roof');
+      if(y>=highestRoof+1&&y<=highestRoof+3)
+        for(const x of [center-1,center+1])put(x,y,naveZ,m.trim,'roof');
+    }
+    put(center,highestRoof+6,naveZ,m.roof,'decor');
+    if(size==='large')for(const z of [5,partition-2])for(const x of [4,width-5]){
+      if(!footprint(x,z))continue;
+      // Short lantern dormers on the flanking nave, below the belfry caps.
+      for(let y=roofAt(x,z)+1;y<=Math.min(highestRoof+1,roofAt(x,z)+3);y++)
+        put(x,y,z,m.trim,'roof');
+      put(x,Math.min(highestRoof+2,roofAt(x,z)+4),z,m.roof,'decor');
     }
   }else{
     // Stores have a lower storefront lintel and hanging sign, but no sanctuary towers.
@@ -154,7 +178,7 @@ function build({biome,size,category}){
   const entry={type:'entrance',x:center,y:2,z:0,clearHeightCells:3,doorSymbol:'pack2:020',doorOpenState:'unverified'};
   const rooms=isTemple?[
    {name:'Ceremonial nave',bounds:{x0:1,x1:width-2,z0:1,z1:partition-1},uses:['ceremonial-space','public-circulation']},
-   {name:'Raised altar sanctuary',bounds:{x0:1,x1:width-2,z0:partition+1,z1:depth-2},uses:['altar']}
+   {name:'Altar sanctuary with raised ceremonial dais',bounds:{x0:1,x1:width-2,z0:partition+1,z1:depth-2},uses:['altar']}
   ]:[
    {name:'Customer hall',bounds:{x0:1,x1:width-2,z0:1,z1:partition-1},uses:['sales-floor','service-counter','display-shelves']},
    {name:'Rear stockroom',bounds:{x0:1,x1:width-2,z0:partition+1,z1:depth-2},uses:['storage']}
@@ -175,7 +199,7 @@ function build({biome,size,category}){
    extents,units:'conceptual occupied voxels; shape/rotation ABI unresolved',
    architecturalSignature:`${roofNames[biome]}, ${category}, ${size}, x${width} z${depth}, partition ${partition}, distinct footprint`,
    roof:{form:roofNames[biome],biomeSpecific:true},
-   rooms,features:isTemple?['physically separated sanctuary','altar','structural columns','ceremonial rows']:['counter','display shelves','stockroom crates','real storeroom wall'],
+   rooms,features:isTemple?['physically separated sanctuary','raised altar dais','paired two-cell belfries','triple-wide processional entrance','roof lantern tower','structural columns','ceremonial rows']:['counter','display shelves','stockroom crates','real storeroom wall'],
    openings:[entry,{type:'window',x:3,y:3,z:0},{type:'window',x:width-4,y:3,z:0},
     {type:'internal-doorway',x:openingX,y:2,z:partition,clearHeightCells:3}],
    circulation,
