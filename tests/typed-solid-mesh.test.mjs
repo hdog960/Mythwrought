@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {meshChunk,VoxelWorld,BLOCK,CHUNK_SIZE} from '../src/voxel.mjs';
+import {meshChunk,VoxelWorld,BLOCK,CHUNK_SIZE,terrainHeight} from '../src/voxel.mjs';
 
 test('typed solid mesh grows past initial capacity without dropping vertices',()=>{
   // A deliberately exposed vertical wall creates more than the initial 16K
@@ -22,11 +22,13 @@ test('typed solid mesh grows past initial capacity without dropping vertices',()
 });
 
 test('chunk rebuild after mining retains exact stable vertex layout',()=>{
-  const world=new VoxelWorld(179),original=meshChunk(world,-1,0);
-  assert.equal(world.set(-1,4,1,BLOCK.CRYSTAL),true);
+  const world=new VoxelWorld(179),x=-1,z=1,y=terrainHeight(-1,1,world.seed);
+  const original=meshChunk(world,-1,0);
+  assert.equal(world.get(x,y,z),BLOCK.GRASS,'fixture must mine a genuinely exposed grass top');
+  assert.equal(world.set(x,y,z,BLOCK.AIR),true);
   const changed=meshChunk(world,-1,0);
-  assert.notDeepEqual(changed,original);
+  assert.notDeepEqual(changed,original,'removing an exposed voxel changes the mesh');
   assert.deepEqual(changed,meshChunk(VoxelWorld.restore(world.save()),-1,0));
-  assert.equal(world.set(-1,4,1,world.get(-1,4,1)),true);
-  assert.deepEqual(meshChunk(world,-1,0),changed);
+  assert.equal(world.set(x,y,z,BLOCK.GRASS),true);
+  assert.deepEqual(meshChunk(world,-1,0),original,'restoring the natural grass restores original mesh');
 });

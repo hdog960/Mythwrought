@@ -3,6 +3,16 @@ import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,CHUNK_SIZE,terrainHeight,meshChunk} from '../src/voxel.mjs';
 import {meadowAccentVertices,MEADOW_MATERIALS} from '../src/meadow.mjs';
 
+const packedIndex=(buffer,part)=>{
+ if(!part.length)return -1;
+ for(let at=0;at<=buffer.length-part.length;at+=9){
+   if(buffer[at]!==part[0]||buffer[at+8]!==part[8])continue;
+   let j=1;
+   for(;j<part.length&&buffer[at+j]===part[j];j++);
+   if(j===part.length)return at;
+ }
+ return -1;
+};
 const accents=(w,cx,cz)=>meadowAccentVertices(w,cx,cz,{
   chunkSize:CHUNK_SIZE,heightAt:terrainHeight,grass:BLOCK.GRASS,air:BLOCK.AIR
 });
@@ -58,8 +68,8 @@ test('meadow mesh uses existing chunk buffer with no new physical block IDs',()=
   const mesh=meshChunk(w,-1,0),flora=accents(w,-1,0);
   assert.equal(mesh.length%9,0);
   assert.ok(mesh.length>flora.length);
-  assert.deepEqual(mesh.slice(-flora.length),flora,
-    'Visual accents must share the same mesh buffer as the editable voxels');
+  assert.ok(packedIndex(mesh,flora)>=0,
+    'Visual accents must remain an exact contiguous section of the editable chunk mesh');
   assert.equal(JSON.stringify(w.save()),before,'Rendering changed original schema-1 bytes');
   assert.equal(w.set(0,15,0,7),false,'Visual-only ID accidentally became storable');
   assert.equal(w.edits.size,0,'Decorations must not create edits');

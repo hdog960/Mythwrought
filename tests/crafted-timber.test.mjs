@@ -41,8 +41,8 @@ test('original single-pass opaque wood face has staggered joints and woodgrain',
 test('top-facing timber receives end-grain rings while side planks retain staggered joints',()=>{
   for(const token of ['topFace=step(.59,vColor.r)','ringRadius','ringWobble','endRings','endCracks','mix(sideShade,topShade,topFace)'])
     assert.ok(TIMBER.includes(token),token);
-  assert.match(TIMBER,/float sideShade=.*seam/);
-  assert.match(TIMBER,/float topShade=.*endRings/);
+  assert.match(TIMBER,/float sideShade=[\s\S]*?seam/);
+  assert.match(TIMBER,/float topShade=[\s\S]*?endRings/);
   assert.doesNotMatch(TIMBER,/texture\(|sampler2D|discard;|gl_FragDepth/);
 });
 

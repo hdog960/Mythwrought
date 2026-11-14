@@ -22,7 +22,8 @@ test('roof shader renders staggered scalloped opaque shingles and architectural 
   for(const token of ['mod(roofRow,2.0)*.5','roofSeam=','roofLap=','roofScallop=','roofGlaze=',
     'roofRib=','roofRidgeBand=','roofRidgeLip=','roofRidgeSegment=','roofRidgeMedallion=','roofEmblemCell=','roofEmblemRing=','roofChipCell=','roofChip=','shade=','base=mix'])
     assert.ok(STORYBOOK_ROOF_GLSL.includes(token),token);
-  assert.equal(STORYBOOK_ROOF_RULES.raisedRibs,true);\n  assert.equal(STORYBOOK_ROOF_RULES.glazedRidgeCrest,true);
+  assert.equal(STORYBOOK_ROOF_RULES.raisedRibs,true);
+  assert.equal(STORYBOOK_ROOF_RULES.glazedRidgeCrest,true);
   assert.equal(STORYBOOK_ROOF_RULES.rareStampedEmblems,true);
   assert.equal(STORYBOOK_ROOF_RULES.sparseEdgeChips,true);
   assert.doesNotMatch(STORYBOOK_ROOF_GLSL,/sampler2D|texture\(|discard;|gl_FragDepth/i);

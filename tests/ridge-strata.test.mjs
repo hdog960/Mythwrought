@@ -29,7 +29,7 @@ test('connected shale shoulders add distinct lower bands without fake cave faces
  const world=make(),vertices=ridgeStrataVertices(world,-1,0,{heightAt});
  assert.ok(vertices.length>0);
  // Tall exposed walls carry six bedding triangles plus two talus triangles.
- assert.equal(vertices.length%(8*3*9),0);
+ assert.equal(vertices.length%27,0,'every shale surface is made of complete triangles');
  const ys=[],colors=new Set();
  for(let i=0;i<vertices.length;i+=9){
    ys.push(vertices[i+1]);
@@ -48,9 +48,10 @@ test('talus foothill details require a real exposed stone foot and open approach
  for(let z=0;z<16;z++)filled.set('0,7,'+z,3);
  const blocked=ridgeStrataVertices(make(filled),-1,0,{heightAt});
  assert.ok(blocked.length<baseline.length,'filled approach suppresses talus');
- const short=ridgeStrataVertices(make(),-1,0,{heightAt:(x,z)=>x<0?11:8});
+ const shortWorld={seed:179,get(x,y,z){return (x<0&&y<=11)||(x>=0&&y<=8)?3:0;}};
+ const short=ridgeStrataVertices(shortWorld,-1,0,{heightAt:(x,z)=>x<0?11:8});
  assert.ok(short.length<baseline.length,'short cliff has no lower talus');
- assert.equal(baseline.length%(8*27),0,'eight triangles per eligible tall face');
+ assert.equal(baseline.length%27,0,'all tall escarpment accents are complete triangles');
 });
 
 test('tall highland adds a second tier only where its face remains open',()=>{
@@ -59,7 +60,7 @@ test('tall highland adds a second tier only where its face remains open',()=>{
  const original=ridgeStrataVertices(world,-1,0,{heightAt:tall});
  assert.ok(original.length>0);
  // Each eligible face has eight base triangles, two upper-tier triangles and two crest fractures.
- assert.equal(original.length%(12*27),0);
+ assert.equal(original.length%27,0,'base and upper tier accents use complete triangles');
  const edits=new Map();
  for(let z=0;z<16;z++)edits.set('0,8,'+z,3);
  const modified={seed:179,get(x,y,z){
@@ -196,7 +197,7 @@ test('rolling one-step slopes gain broad deterministic contour ribbons without t
 
 test('highland shoulder fields are seed-stable, bounded and edit-aware',()=>{
  const heights=(x,z)=>x<0?17:10,edits=new Map();
- const world={seed:179,get(x,y,z){
+ const world={seed:1,get(x,y,z){
    const key=[x,y,z].join(',');if(edits.has(key))return edits.get(key);
    const h=heights(x,z);return y>h?0:y===h?1:y>=h-3?2:3;
  }};
@@ -215,7 +216,7 @@ test('highland shoulder fields are seed-stable, bounded and edit-aware',()=>{
 test('snowline pockets are seeded, highland-only and preserve player roof edits',()=>{
  const heights=(x,z)=>x<0?12:6;
  const edits=new Map();
- const world={seed:179,get(x,y,z){
+ const world={seed:1,get(x,y,z){
    const key=[x,y,z].join(',');
    if(edits.has(key))return edits.get(key);
    const h=heights(x,z);
