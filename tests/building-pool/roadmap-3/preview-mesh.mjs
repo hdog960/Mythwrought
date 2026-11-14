@@ -8,7 +8,7 @@ const FACE_DATA=Object.freeze([
   {offset:[0,0,1], shade:.9, vertices:[[0,0,1],[0,1,1],[1,1,1],[0,0,1],[1,1,1],[1,0,1]]}, // +z
   {offset:[0,0,-1],shade:.73,vertices:[[1,0,0],[1,1,0],[0,1,0],[1,0,0],[0,1,0],[0,0,0]]} // -z
 ]);
-const BASE=Object.freeze({foundation:[.32,.31,.36],floor:[.63,.55,.47],wall:[.73,.7,.64],roof:[.69,.32,.24],structure:[.47,.36,.26],rafter:[.51,.35,.23],fixture:[.85,.63,.30],stair:[.7,.59,.42],'stair-support':[.47,.43,.39],battlement:[.76,.73,.70],'upper-support':[.46,.37,.26]});
+const BASE=Object.freeze({foundation:[.32,.31,.36],floor:[.63,.55,.47],wall:[.73,.7,.64],roof:[.69,.32,.24],structure:[.47,.36,.26],rafter:[.51,.35,.23],fixture:[.85,.63,.30],'entry-frame':[.95,.76,.44],stair:[.7,.59,.42],'stair-support':[.47,.43,.39],battlement:[.76,.73,.70],'upper-support':[.46,.37,.26]});
 const BIOMES=Object.freeze({'temperate':[1,1,1],desert:[1.12,.95,.74],snow:[.81,.92,1.15],'enchanted-forest':[.75,1.15,.91],mountain:[.79,.85,.94]});
 const key=(x,y,z)=>`${x},${y},${z}`;
 export function createPreviewMesh(blueprint,{cutaway=false}={}){
