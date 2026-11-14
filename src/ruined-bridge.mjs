@@ -37,7 +37,7 @@ export function ruinedBridgeVertices(world,cx,cz,{crossingAt,baseAt,air=0}={}){
    const current=world.get(px,bankY,pz);
    if(current!==natural)return EMPTY();
    if(bank ? natural===air : natural!==air)return EMPTY();
-   if(!bank&&baseAt(px,bankY-1,pz,world.seed)===air)return EMPTY();
+   if(!bank&&(baseAt(px,bankY-1,pz,world.seed)===air||\n      world.get(px,bankY-1,pz)!==baseAt(px,bankY-1,pz,world.seed)))return EMPTY();
    for(let dy=1;dy<=3;dy++){
     if(baseAt(px,bankY+dy,pz,world.seed)!==air||
        world.get(px,bankY+dy,pz)!==air)return EMPTY();
