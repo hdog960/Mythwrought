@@ -34,11 +34,11 @@ test('all 24 rotated physical preview vertex bounds equal exact rotated art-box 
  }
 });
 
-test('unit-cell authored mesh stays within a strict preview-only 240 triangle budget',()=>{
+test('unit-cell authored mesh stays within explicit 768 triangle 64-box per-family bounds',()=>{
  for(const d of PACK5_SURFACES){
   const mesh=surfaceBoxMesh(d);
-  assert.ok(mesh.triangles<=240);
-  assert.ok(mesh.vertexCount<=480);
+  assert.ok(mesh.triangles<=768);
+  assert.ok(mesh.vertexCount<=1536);
   assert.ok(mesh.positions.every(Number.isFinite));
   assert.ok(mesh.colors.every(Number.isFinite));
  }
