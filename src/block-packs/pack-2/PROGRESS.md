@@ -1,11 +1,11 @@
 # Mythwrought Pack 2 — Timber & Infrastructure candidate ledger
 
 **Governance:** [coordination Issue #109](https://github.com/hdog960/Mythwrought/issues/109) / seven authoritative docs / v0.10 Gate A, v0.11 locked.
-**Status:** **10/18 distinct physical candidate families authored** (not integrated, merged, deployed or playable). 8 families remain.
+**Status:** **14/18 distinct physical candidate families authored** (not integrated, merged, deployed or playable). 4 families remain.
 **Latest checked main:** `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`; incorporation checkpoint **006**. Live IDs 0–8 only. Wood ID 4 is not a substitute for these independent candidate shapes.
 **Draft PR:** https://github.com/hdog960/Mythwrought/pull/114
 **Dedicated branch:** `manual-pack-2-timber-foundation-20261114`; see PR for live exact HEAD / CI.
-**Exclusive provisional ID range:** 59–108. Only **59–68** allocated, and those IDs are not installed in the game. 255 reserved. No per-rotation/upper/lower/open/closed ID inflation.
+**Exclusive provisional ID range:** 59–108. Only **59–72** allocated, and those IDs are not installed in the game. 255 reserved. No per-rotation/upper/lower/open/closed ID inflation.
 
 ## Roster-level asset progress
 
@@ -21,7 +21,10 @@
 | M2 | 19 | 66 | Hinged latticed fence gate with physically different open vs closed rail AABBs | 4 rotations × 2 hinge states | Candidate |
 | M2 | 20 | 67 | Single-cell carved hinged timber door leaf with actual swung-open collision shape | 4 rotations × 2 hinge states | Candidate |
 | M2 | 21 | 68 | Hinge-mounted horizontal trapdoor that swings into a vertical physical panel | 4 rotations × 2 mounts × 2 hinge states | Candidate |
-| M3 | 39–42 | — | Gravel, compacted dirt paths, cobblestone paving, decorative paving | — | Not started |
+| M3 | 39 | 69 | Mixed warm-grey river shingle gravel: physical uneven aggregate cap over compact base | 1; falling **engine dependency only** | Candidate |
+| M3 | 40 | 70 | Trampled umber packed dirt path with genuinely depressed double ruts and raised side shoulders | 4 rotations | Candidate |
+| M3 | 41 | 71 | Shallow staggered, flattop limestone walking cobbles above distinct recessed mortar | 4 rotations | Candidate |
+| M3 | 42 | 72 | Sculpted ivory/slate suncompass paving with tangible blue raised inlay and asymmetrical orientation | 4 rotations | Candidate |
 | M4 | 43–44, 46 | — | Bridge-specific reinforcement rail, wide stone parapet, elevated boardwalk | — | Not started |
 | M5 | 45 | — | True water voxel requiring shared transparent fluid rules; NOT a static cyan cube | — | Not started |
 
@@ -35,11 +38,24 @@
 - [x] Standalone fixture updated with stateful targeting, placement, open/close and backwards-compatible isolated fixture snapshots.
 - [x] Original face-shaded physical triangle meshes and joint/grain highlights for all six.
 - [x] Interactive browser gallery extended to all 10 assets, quarter-turn, half-variant, state toggle and placed-piece toggle.
-- [x] 15 new dedicated joinery test cases, plus existing 12 material tests: **27/27 checked-in test functions passed in an isolated V8 compatibility harness**. This is not Node/Chromium certification and tests must be run directly under Node.
+- [x] 15 new dedicated joinery test cases, plus existing 12 material tests: **27/27 previous checked-in test functions passed in an isolated V8 compatibility harness**. This is not Node/Chromium certification and tests must be run directly under Node.
 - [x] Candidate-specific engine handoff documented in `INTEGRATION_CONTRACT.md`; no changes to generic shared files.
 - [ ] Genuine dedicated `node --test tests/block-packs/pack-2/*.test.mjs` execution in a checkout: not yet available through GitHub API; existing root CI glob does not include these nested tests.
 - [ ] Actual integrated browser WebGL2 screenshot/performance/offline testing: blocked pending authorized engine integration. Isolated preview is Canvas 2D and not playable game proof.
 - [ ] Real iPhone inspection and creator art/control approval: not claimed.
+
+## Session 3 — Milestone 3 ground and paving components (2026-11-14)
+
+- [x] Audited latest `main`, physical registry and palette: only 0–8; checkpoint 006; Issue #109 plus newly created 130-family Issue #117 (separate automation namespace), other three manual packs and draft PR #114. New paving candidates do not duplicate Pack 1's rough, full-cube masonry cobblestone or the automated lane's natural rock varieties.
+- [x] Provisional IDs **69–72**, allocated exclusively within the Pack 2 band, for physical gravel, compacted dirt path, low-profile cobbled walking surface and decorative inlaid pavement. No new ID for rotation.
+- [x] `ground.mjs`: four independent original material recipes, 6–11 bounded physical box unions per component, different exposed top surfaces, typed triangle meshes and true shape-aware fixture targeting. Decorative joints/inlays are anchored in **physical** surfaces; none is render-only scenery standing in for a block.
+- [x] Optimized visible-surface mesh generation with **face-local occlusion partition** instead of a global X/Y/Z split. Observed triangle counts via the actual candidate mesh functions: gravel **576** (previous draft 2,032), packed path **140**, cobble paving **404**, suncompass paving **422** (orientation preserves triangle budgets). This is fixture mesh complexity evidence, **not** a live WebGL frame-rate measurement.
+- [x] `fixture.mjs`: all fourteen IDs selectable, shallow shapes ray-targetable and removable, meaningful quarter-turns and deterministic snapshot restore. Ground material uses existing `[x,y,z,id,rotation]` fixture row width; previous timber/joinery snapshots remain accepted.
+- [x] `ground.test.mjs`: **13 new test cases** for ID uniqueness, physical height/pattern differences, graveled top facets, depressed paths, cobble mortar gaps, distinct inlays, geometry budgets, orientation, target removal and corrupt snapshot rejection. Together with twelve M1 and fifteen M2 cases, **40/40 test function bodies passed** in local isolated V8 with assertion shim (NOT genuine Node or Chromium verification).
+- [x] Expanded authentic opt-in Canvas 2D preview from 10 to 14 candidates. Never claim it is an actual integrated-world screenshot.
+- [ ] Actual dedicated Node invocation `node --test tests/block-packs/pack-2/*.test.mjs` still required; the standard root `npm test` glob excludes these three nested suites. Local GitHub clone failed because internet DNS was unavailable in the isolated runtime; do not misrepresent V8 checks as Node.
+- [ ] Genuine WebGL2/offline/mobile rendering and production save tests remain separate integration gates, unclaimed.
+- [ ] Falling gravel **not implemented**. `physics.gravity:'engine-required'` declares shared-engine ownership; no fake simulation, particle gravity or world placement.
 
 ## Outstanding engine integration (manual incorporation only)
 
@@ -52,4 +68,4 @@
 
 ## Session 3 / next incomplete milestone
 
-**Milestone 3** — audit latest main/checkpoint/Issue #109/other pack manifests again, then create 39 gravel, 40 packed dirt paths, 41 shallow cobblestone paving, 42 decorative paving with distinct physical top profile and materials. Coordinate gravel falling physics with automation :00 and terrain with :24; do not implement a simulation in this pack. IDs 69–72 are *possible provisional candidates only*, not reserved until live duplicate-prevention audit. Continue maintaining PR #114; do not merge or deploy.
+**Milestone 4** — recheck latest main/checkpoint/Issues #109 and #117 and manual pack changes; implement individual bridge railing, solid parapet and freestanding elevated boardwalk units (roster 43, 44 and 46), NOT a bridge or village construction. Earliest available Pack 2 candidate IDs are 73–75, subject to a fresh duplicate-prevention check. Keep the existing fourteen candidates intact and never merge/deploy/place world content.
