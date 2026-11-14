@@ -97,9 +97,8 @@ test('all temples have substantial paired 2x2 high belfries rather than antenna-
   const cells=occupied(temple),width=temple.extents.x,center=Math.floor(width/2);
   const towerTop=temple.extents.y-2; // a full cell below central lantern pinnacle
   for(const x0 of [1,width-3])for(const dx of [0,1])for(const z of [0,1]){
-   // Some footprint bevels may remove an upper outer corner in enchanted wood,
-   // but there must be at least three supporting positions per tower footprint.
-   if(!cells.has([x0+dx,0,z].join(',')))continue;
+   assert.equal(cells.get([x0+dx,0,z].join(','))?.kind,'foundation',`missing supported belfry footing ${temple.id} at ${x0+dx},${z}`);
+   assert.equal(cells.get([x0+dx,1,z].join(','))?.kind,'floor',`missing belfry floor ${temple.id} at ${x0+dx},${z}`);
    assert(cells.has([x0+dx,towerTop,z].join(',')),`missing tall belfry ${temple.id} at ${x0+dx},${z}`);
   }
   assert(temple.voxels.filter(v=>v.kind==='window'&&v.y>=towerTop-3).length>=1,`no belfry aperture: ${temple.id}`);
@@ -120,5 +119,40 @@ test('temples have genuinely raised ceremonial dais and an accessible approach',
    assert.equal(cells.get([center+dx,2,z].join(','))?.kind,'fixture',`dais absent: ${bp.id}`);
   assert.equal(cells.get([center,3,z].join(','))?.material,'pack3:075',`raised altar absent: ${bp.id}`);
   assert(canReachRear(bp),`ceremonial aisle blocked by dais: ${bp.id}`);
+ }
+});
+
+test('all 30 models have a physically clear three-high passage from entry to rear room',()=>{
+ for(const bp of M1_REPRESENTATIVES){
+  const c=occupied(bp),entry=bp.openings.find(o=>o.type==='entrance');
+  const rear=bp.openings.find(o=>o.type==='internal-doorway');
+  const floor=(x,z)=>c.get([x,1,z].join(','))?.kind==='floor';
+  const clear=(x,z)=>[2,3,4].every(y=>!c.has([x,y,z].join(',')));
+  const seen=new Set(),queue=[[entry.x,1]];
+  for(let i=0;i<queue.length;i++){
+   const [x,z]=queue[i],k=x+','+z;
+   if(seen.has(k)||x<1||z<1||x>=bp.extents.x-1||z>=bp.extents.z-1||!floor(x,z)||!clear(x,z))continue;
+   seen.add(k);
+   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])queue.push([x+dx,z+dz]);
+  }
+  assert(seen.has(rear.x+','+(rear.z+1)),`three-high rear circulation blocked: ${bp.id}`);
+ }
+});
+test('all advertised windows remain actual occupied window cells after biome facades',()=>{
+ for(const bp of M1_REPRESENTATIVES){
+  const c=occupied(bp);
+  for(const o of bp.openings.filter(o=>o.type==='window'))
+   assert.equal(c.get([o.x,o.y,o.z].join(','))?.kind,'window',`incorrect window location: ${bp.id}`);
+ }
+});
+
+test('raised temple dais has two adjacent symbolic stair approach cells but no claim of physical stair ABI',()=>{
+ for(const bp of M1_REPRESENTATIVES.filter(b=>b.category==='temple')){
+  const cells=occupied(bp),center=Math.floor(bp.extents.x/2),z=bp.extents.z-4;
+  for(const x of [center-2,center+2]){
+   assert.equal(cells.get([x,2,z].join(','))?.material,'pack1:008',`missing side stair plan: ${bp.id}`);
+   assert.equal(cells.get([x,2,z+1].join(','))?.kind,'fixture',`stair does not face dais: ${bp.id}`);
+  }
+  assert(bp.unresolvedDependencies.some(d=>d.ref==='pack1:008'),`stair ABI not listed as unverified: ${bp.id}`);
  }
 });

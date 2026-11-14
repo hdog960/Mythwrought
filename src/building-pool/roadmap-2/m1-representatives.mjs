@@ -85,6 +85,11 @@ function build({biome,size,category}){
     for(const z of [depth-3,depth-2])for(let x=center-2;x<=center+2;x++)
       if(footprint(x,z))put(x,2,z,m.trim,'fixture');
     if(footprint(center,depth-3))put(center,3,depth-3,FIXTURE.altar,'fixture');
+    // Raised platforms need planned physical access, not an imaginary 1-block jump.
+    // These are SYMBOLIC stair candidates; slope, facing, physical collision and
+    // multi-cell connectivity remain unapproved until Pack 1/central ABI handoff.
+    for(const x of [center-2,center+2])if(footprint(x,depth-4))
+      put(x,2,depth-4,'pack1:008','fixture');
   }
   for(const [x,z] of [[2,3],[width-3,3],[2,depth-3],[width-3,depth-3]])
     if(footprint(x,z)&&!bounds(x,z)&&!cells.has(COORD(x,top-1,z)))put(x,top-1,z,FIXTURE.light,'decor');
@@ -138,11 +143,15 @@ function build({biome,size,category}){
     // Physical portal shoulders and the spanning arch, not a metadata-only entrance.
     for(const x of [center-2,center+2])for(let y=2;y<=5;y++)put(x,y,0,m.trim,'wall');
     for(let x=center-1;x<=center+1;x++)put(x,5,0,m.trim,'wall');
-    // Independent silhouettes: two hollow-looking but watertight 2x2 masonry
-    // belfry masses. The glazed high openings do not imply accessible tower rooms.
+    // Pair of complete 2x2 belfries with actual foundations at *every* cell.
+    // Mountain/clipped footprints previously left the left tower unsupported
+    // (0/4 foundation cells), while desert/enchanted corners were incomplete.
+    // New footings are temple-only piers, not changes to landscape/worldgen.
+    // High apertures are conceptual: true light/collision requires asset ABI.
     for(const sx of [1,width-3])for(let dx=0;dx<2;dx++)for(const z of [0,1]){
       const x=sx+dx;
-      if(!footprint(x,z))continue;
+      if(!cells.has(COORD(x,0,z)))put(x,0,z,m.foundation,'foundation');
+      if(!cells.has(COORD(x,1,z)))put(x,1,z,m.floor,'floor');
       for(let y=2;y<=highestRoof+4;y++){
         const upperWindow=y===highestRoof+2&&z===0&&dx===0;
         put(x,y,z,upperWindow?FIXTURE.glass:m.trim,upperWindow?'window':'wall');
@@ -199,7 +208,7 @@ function build({biome,size,category}){
    extents,units:'conceptual occupied voxels; shape/rotation ABI unresolved',
    architecturalSignature:`${roofNames[biome]}, ${category}, ${size}, x${width} z${depth}, partition ${partition}, distinct footprint`,
    roof:{form:roofNames[biome],biomeSpecific:true},
-   rooms,features:isTemple?['physically separated sanctuary','raised altar dais','paired two-cell belfries','triple-wide processional entrance','roof lantern tower','structural columns','ceremonial rows']:['counter','display shelves','stockroom crates','real storeroom wall'],
+   rooms,features:isTemple?['physically separated sanctuary','raised altar dais','paired symbolic stair approaches pending slope ABI','paired fully founded belfries','triple-wide processional entrance','roof lantern tower','structural columns','ceremonial rows']:['counter','display shelves','stockroom crates','real storeroom wall'],
    openings:[entry,{type:'window',x:3,y:3,z:0},{type:'window',x:width-4,y:3,z:0},
     {type:'internal-doorway',x:openingX,y:2,z:partition,clearHeightCells:3}],
    circulation,

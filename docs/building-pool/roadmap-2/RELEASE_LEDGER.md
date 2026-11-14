@@ -12,3 +12,5 @@
 No merge, deployment, shared-system edit, persistent ID assignment, game placement or physical-iPhone approval. v0.10 Gate A OPEN; v0.11 LOCKED.
 
 M1 visual QA follow-up: 21/21 local native Node cases, 90 genuine Chromium Canvas2D renders, 15 temple silhouettes corrected. Creator review and exact-head PR CI open; 0 production-approved / world placed.
+
+M1 Session 5: corrected unsupported belfry footings in 15 temples (Mountain previously 0/4, Enchanted Forest 2/4, Desert 3/4), added two symbolic stair approaches per altar with unresolved Pack 1 shape ABI. Native Node 24/24 and authentic Chromium 90/90 on revised local source; creator/physical-asset approval OPEN, exact new head CI must be verified.

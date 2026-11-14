@@ -37,3 +37,6 @@ Genuine native Node: `node --test tests/building-pool/roadmap-2/*.test.mjs` (18/
 
 ### M1 temple silhouette remedy
 The M1 geometry generator was revised after viewing authentic candidate PNGs: every temple now includes a massed, roof-exceeding pair of belfries, a triple-wide processional arch and a raised two-row altar dais placed behind the open sanctuary passage. New dedicated Node tests preserve those architectural, geometric and circulation invariants. These are conceptual voxel structures using symbolic assets; not production-confirmed shape ABI or creator-approved art.
+
+### M1 load-bearing belfry and raised-dais access review
+The previous 21-case tests allowed a tower to have zero foundations if its regional beveled footprint excluded that location. The corrected temple builder now adds complete four-cell pier foundations and floors beneath BOTH 2x2 belfries even at beveled Mountain, Desert and Enchanted Forest corners. Tests assert every footing, not merely already-existing ones. Two symbolic Pack 1 stone stair cells (`pack1:008`) are added next to the raised altar dais; slope orientation, actual collision/climb behavior and save-compatible shape states are **not approved**. M1 remains candidate-only until creator art review; the standalone Chromium viewer is not game WebGL2.
