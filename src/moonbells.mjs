@@ -1,6 +1,6 @@
 // Seed-stable, render-only moonbell flowers: no new blocks, collisions or saves.
 // Low opaque petal geometry shares the existing terrain mesh and draw call.
-const STRIDE=9, MAX_FLOWERS=7, VERTICES_PER_FLOWER=60;
+const STRIDE=9, MAX_FLOWERS=7, VERTICES_PER_FLOWER=72;
 function hash(x,z,seed,salt){
  let n=Math.imul((x|0)^seed^salt,0x9e3779b1)^Math.imul((z|0)+salt,0x85ebca6b);
  n^=n>>>16;n=Math.imul(n,0x7feb352d);n^=n>>>15;return (n>>>0)/4294967296;
@@ -51,13 +51,28 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
    tri(out,base,[px+dx*.20-dz*.065,ground+.045,pz+dz*.20+dx*.065],
      [px+dx*.20+dz*.065,ground+.045,pz+dz*.20-dx*.065],[.33,.59,.35],7);
   }
-  // Occasional tiny amber forest-floor mushroom beside the bellflower.
-  // Both cap triangles are opaque and anchored to the same unedited grass cell.
+  // Rare violet lantern fungi punctuate shaded meadow edges. Their opaque,
+  // pointed four-sided caps and pale stalks contrast with squat ochre caps.
+  // Both varieties remain decorative, edit-sensitive and unlit (no glow cost).
   if(hash(x,z,world.seed,661)>.67){
    const mx=px+.23,mz=pz-.19,mh=.19+hash(x,z,world.seed,663)*.08;
-   const ochre=hash(x,z,world.seed,665)>.5?[.82,.48,.29]:[.93,.68,.40];
-   tri(out,[mx-.10,ground+.10,mz],[mx+.10,ground+.10,mz],[mx,ground+mh,mz],ochre,7);
-   tri(out,[mx,ground+.10,mz-.10],[mx,ground+.10,mz+.10],[mx,ground+mh,mz],[.95,.77,.54],7);
+   const lantern=hash(x,z,world.seed,683)>.77;
+   if(lantern){
+    const stemTop=ground+mh+.12,capY=stemTop-.055;
+    tri(out,[mx-.023,ground,mz],[mx+.023,ground,mz],[mx,stemTop,mz],[.73,.77,.67],7);
+    tri(out,[mx,ground,mz-.023],[mx,ground,mz+.023],[mx,stemTop,mz],[.61,.69,.62],7);
+    const tip=[mx,stemTop+.095,mz],r=.13;
+    for(let k=0;k<4;k++){
+     const a=turn+k*Math.PI/2,b=a+Math.PI/2;
+     tri(out,[mx+Math.cos(a)*r,capY,mz+Math.sin(a)*r],
+       [mx+Math.cos(b)*r,capY,mz+Math.sin(b)*r],tip,
+       k%2?[.65,.49,.86]:[.82,.67,.95],7);
+    }
+   }else{
+    const ochre=hash(x,z,world.seed,665)>.5?[.82,.48,.29]:[.93,.68,.40];
+    tri(out,[mx-.10,ground+.10,mz],[mx+.10,ground+.10,mz],[mx,ground+mh,mz],ochre,7);
+    tri(out,[mx,ground+.10,mz-.10],[mx,ground+.10,mz+.10],[mx,ground+mh,mz],[.95,.77,.54],7);
+   }
   }
   // A few shaded meadow edges grow a fern beside the flower. Each frond is
   // opaque, double-facing in silhouette, and shares this anchor's edit rules.
