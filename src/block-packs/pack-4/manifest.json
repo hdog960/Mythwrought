@@ -287,7 +287,8 @@
     "src/block-packs/pack-4/fixture.mjs",
     "src/block-packs/pack-4/furnishings.mjs",
     "src/block-packs/pack-4/hearth-civic.mjs",
-    "src/block-packs/pack-4/preview-utils.mjs"
+    "src/block-packs/pack-4/preview-utils.mjs",
+    "src/block-packs/pack-4/interaction-handoff.mjs"
   ],
   "testFiles": [
     "tests/block-packs/pack-4/windows.test.mjs",
@@ -303,7 +304,8 @@
     "tests/block-packs/pack-4/hearth-civic-fixture.test.mjs",
     "tests/block-packs/pack-4/preview-utils.test.mjs",
     "tests/block-packs/pack-4/acceptance.test.mjs",
-    "tests/block-packs/pack-4/mesh-budget.test.mjs"
+    "tests/block-packs/pack-4/mesh-budget.test.mjs",
+    "tests/block-packs/pack-4/interaction-handoff.test.mjs"
   ],
   "dependencies": [
     "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
@@ -335,8 +337,8 @@
     117
   ],
   "lastV8FocusedChecks": 142,
-  "currentAcceptanceStatus": "M0-M4 candidate source complete; M5 REVIEW INCOMPLETE: 156 source-backed V8 checks and 5 native Node preview-utils checks pass; full checkout-native Node and genuine 23-image Chromium/WebGL2 review blocked; Gate A still open.",
-  "latestAcceptanceV8": 156,
+  "currentAcceptanceStatus": "M5 OPEN; 22/22 source authored and 23 candidate IDs 159–181 unique. 161/161 current branch V8 test bodies pass, cross-PR #106 644 V8 compatibility probes pass, 5 native Node preview-utils pass. Full native checkout and actual WebGL2/physical-iPhone acceptance still blocked.",
+  "latestAcceptanceV8": 161,
   "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
   "galleryEvidence": "Browser QA caught and fixed nonblack-background false positive in preview pixel check; now requires real foreground contrast plus 23 unique image hashes and asymmetric rotation; still blocked on local Chromium/WebGL2.",
   "reviewDocuments": [
@@ -347,5 +349,22 @@
   "nativeNodeVerifiedTests": 5,
   "nativeNodeScope": "preview-utils.test.mjs ONLY; all other Pack 4 nested Node suites not yet run from actual checkout",
   "galleryScope": "23 original geometry candidate cards; browser script authored for three iPhone landscape widths, no genuine screenshots verified",
-  "nextMilestone": "M5 final acceptance blocked on full native Node suite, genuine Chromium gallery, shared contract integration and explicit creator review"
+  "nextMilestone": "M5 final acceptance blocked on full native Node suite, genuine Chromium gallery, shared contract integration and explicit creator review",
+  "reviewedSharedContracts": {
+    "shapeAndTargetingPR": 106,
+    "sharedHead": "2054e00ead30736726d53d5aed8a1f9dc4e080a0",
+    "shapePrototypePR": 108,
+    "shapeHead": "31be6f32adcfbb461b7a57e7db2e1567f8c1891a",
+    "sharedMaxBoxes": 32,
+    "actualCrossContractProbes": "92 candidates × rotation × 7 assertions = 644 source-to-source V8 checks; native Node not claimed"
+  },
+  "reviewedSelectionCaps": {
+    "barrelID170": {
+      "visibleParts": 34,
+      "selectableBoxes": 26,
+      "collisionBoxes": 26
+    },
+    "maxAabbForAllPack4Handoffs": 32
+  },
+  "meshIntegrationRisk": "Opt-in PR #108 boundary-only mesher can exceed Pack4 preview vertex budgets: sample candidate 177 = 8336 vertices, 180 = 8136 vertices. Do not claim surface mesh mobile acceptance without dedicated optimization/testing."
 }
