@@ -33,8 +33,8 @@ const BATTLEMENT=Object.freeze([
   part('ash',0,.296875,.109375,1,.34375,.890625),
   part('trim',.0625,.5,.09375,.359375,.5625,.15625),
   part('trim',.640625,.5,.09375,.9375,.5625,.15625),
-  part('rune',.140625,.65625,.078125,.234375,.75,.09375),
-  part('rune',.765625,.65625,.078125,.859375,.75,.09375)
+  part('rune',.140625,.65625,.078125,.234375,.75,.15625),
+  part('rune',.765625,.65625,.078125,.859375,.75,.15625)
 ]);
 // A single wall-facing flying-foot buttress (NOT a tower or prefab assembly).
 // Five independently tapered stone steps retreat towards the rear wall face.
