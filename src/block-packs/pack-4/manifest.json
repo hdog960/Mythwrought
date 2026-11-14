@@ -306,7 +306,9 @@
     "tests/block-packs/pack-4/acceptance.test.mjs",
     "tests/block-packs/pack-4/mesh-budget.test.mjs",
     "tests/block-packs/pack-4/interaction-handoff.test.mjs",
-    "tests/block-packs/pack-4/mesh-winding.test.mjs"
+    "tests/block-packs/pack-4/mesh-winding.test.mjs",
+    "tests/block-packs/pack-4/integrated-main-contract.test.mjs",
+    "tests/block-packs/pack-4/integrated-main-surface.test.mjs"
   ],
   "dependencies": [
     "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
@@ -332,14 +334,14 @@
   ],
   "familyCount": 22,
   "lastVerifiedMain": "caf47776b723a36684edc1a72749e49268ccc688",
-  "lastVerifiedCheckpoint": "007 — automation-only; b62728e integrated source, caf47776 recorded checkpoint; manual Pack 4 remains excluded",
+  "lastVerifiedCheckpoint": "007 — 2026-11-14 automation-only integration; manual Pack 4 draft PR #115 explicitly excluded",
   "lastComparedIssues": [
     109,
     117
   ],
   "lastV8FocusedChecks": 142,
-  "currentAcceptanceStatus": "M5 OPEN. Full 22 families/23 IDs source complete. V8 authored tests 168/168; current main :00 interaction probes 552/552, current-main :12 source mesh 92/92 within 836 vertices; native Node only preview-utils subset 5/5; real Chromium/WebGL2 screenshots and physical iPhone approval pending.",
-  "latestAcceptanceV8": 168,
+  "currentAcceptanceStatus": "M0–M4 source complete (22 families/23 candidate IDs 159–181), M5 NOT ACCEPTED: 177/177 source-backed V8 test cases, 5/5 exact-file native Node subset, full native suite and Chromium WebGL2 review pending; main checkpoint 007 now contains opt-in shape/interaction contracts, but no Pack4 registration.",
+  "latestAcceptanceV8": 177,
   "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
   "galleryEvidence": "Browser QA caught and fixed nonblack-background false positive in preview pixel check; now requires real foreground contrast plus 23 unique image hashes and asymmetric rotation; still blocked on local Chromium/WebGL2.",
   "reviewDocuments": [
@@ -375,5 +377,12 @@
   "browserAcceptance": "Chromium executable available but minimal headless data URL hangs; no genuine WebGL2 gallery/screenshots or iPhone art acceptance.",
   "currentMainInteractionInterfaces": "Shapes/sidecar sources from former shared PR #106 now opt-in in main at b62728e; Pack4 23 IDs remain unregistered.",
   "currentMainSourceProbe": "552/552 V8 direct current-main opt-in interaction/sidecar checks across 23 IDs×4 orientations×6 contracts; 23/23 staged sidecar replay, no real engine/world activation.",
-  "currentMainMesherProbe": "Current-main checkpoint007 greedy opt-in prototypeSurfaceMesh: 92/92 Pack4 rotated collision-union meshes produced within preview 1500 vertex cap, maximum 836 vertices (crate ID170 at 90/270 degrees). V8 source-only, not GPU or real WebGL2."
+  "currentMainMesherProbe": "Current-main checkpoint007 greedy opt-in prototypeSurfaceMesh: 92/92 Pack4 rotated collision-union meshes produced within preview 1500 vertex cap, maximum 836 vertices (crate ID170 at 90/270 degrees). V8 source-only, not GPU or real WebGL2.",
+  "acceptanceEvidence": {
+    "currentMainShapeContract": "six checks in integrated-main-contract.test.mjs pass exact current-main APIs, source-backed V8 only",
+    "currentMainSurfaceMesher": "92/92 Pack4 candidate orientations pass real checkpoint 007 boundary-surface mesher (max 836 vertices) and three authored geometry tests, source-backed V8 only",
+    "fullNativeNode": "PENDING — genuine checkout inaccessible from local sandbox, no root CI discovery for nested tests",
+    "authenticChromium": "PENDING — local Chromium fails ANGLE/EGL initialization; no genuine 23-card iPhone landscape screenshots",
+    "creatorGateA": "OPEN — no physical-iPhone approval"
+  }
 }
