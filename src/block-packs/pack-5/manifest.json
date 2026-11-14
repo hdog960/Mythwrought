@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "MILESTONE 1 — SOURCE CANDIDATES VERIFIED; WEBGL2/CREATOR ACCEPTANCE OPEN",
+  "status": "MILESTONE 1 — SOURCE/CHROMIUM CANVAS REVIEW UPDATED; WEBGL2/CREATOR FINAL ACCEPTANCE OPEN",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -34,7 +34,7 @@
         "chalk-lime",
         "hand-troweled"
       ],
-      "verification": "43/43 native Pack 5 Node tests pass; source-derived Chromium Canvas2D inspected; true WebGL2, creator art review, and engine integration OPEN",
+      "verification": "44/44 native Node source-level suite PASS; distinct genuine Chromium Canvas2D screenshots inspected; WebGL2/creator visual and production integration pending",
       "preview": "tests/block-packs/pack-5/canvas-gallery.html"
     },
     {
@@ -51,7 +51,7 @@
         "hearth-running-bond",
         "kiln-soldier-course"
       ],
-      "verification": "43/43 native Pack 5 Node tests pass; source-derived Chromium Canvas2D inspected; true WebGL2, creator art review, and engine integration OPEN",
+      "verification": "44/44 native Node source-level suite PASS; distinct genuine Chromium Canvas2D screenshots inspected; WebGL2/creator visual and production integration pending",
       "preview": "tests/block-packs/pack-5/canvas-gallery.html"
     },
     {
@@ -68,7 +68,7 @@
         "sunburst-encaustic",
         "moonwoven-glaze"
       ],
-      "verification": "43/43 native Pack 5 Node tests pass; source-derived Chromium Canvas2D inspected; true WebGL2, creator art review, and engine integration OPEN",
+      "verification": "44/44 native Node source-level suite PASS; distinct genuine Chromium Canvas2D screenshots inspected; WebGL2/creator visual and production integration pending",
       "preview": "tests/block-packs/pack-5/canvas-gallery.html"
     },
     {
@@ -239,11 +239,12 @@
   ],
   "candidateFamilies": 3,
   "testEvidence": {
-    "nativeNode": "43/43 native Node 22.16.0 tests pass in isolated Pack 5 local checkout; exact committed source and test Git blob SHAs matched",
-    "webgl2": "BLOCKED / NOT VERIFIED: Chromium localhost navigation ERR_BLOCKED_BY_ADMINISTRATOR; getContext(webgl2) false under tested software GPU configurations",
-    "canvas2D": "GENUINE CHROMIUM 144: six source-derived Canvas2D screenshots at 667x375, 844x390, 932x430 and 0/1 rotations; NOT WebGL2 or served page, not live gameplay",
-    "screenshots": "Six genuine PNGs inspected in this development session and provided separately; not committed to repository",
-    "production": "NO integration/production schema-1 save testing for candidate IDs; live engine still only IDs 0–8",
+    "nativeNode": "44/44 genuine Node 22.16.0 focused tests pass against exact committed Pack 5 source/test blobs (16 fixture + 19 surface + 9 acceptance)",
+    "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
+    "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
+    "webgl2": "BLOCKED: browser WebGL2 getContext returned null including software rendering; locally served gallery previously ERR_BLOCKED_BY_ADMINISTRATOR; NOT a WebGL2 pass",
+    "screenshots": "Six revised authentic screenshots generated and inspected locally; not committed to GitHub, no in-game render or physical iPhone certification",
+    "production": "NOT INTEGRATED; no production schema-1 candidate save tests, shared numeric ID registry, world placement, live raycast/collision or creator art approval",
     "acceptanceDossier": "src/block-packs/pack-5/M1_ACCEPTANCE.md"
   },
   "preview": {
