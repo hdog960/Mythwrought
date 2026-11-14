@@ -36,9 +36,9 @@ CI detail: the project's root npm test command covers tests/*.test.mjs, not nest
 
 After checking out the exact PR branch, run from repository root:
 
-    node --test tests/block-packs/pack-1/core-masonry.test.mjs tests/block-packs/pack-1/stone-shapes.test.mjs tests/block-packs/pack-1/garden-components.test.mjs tests/block-packs/pack-1/physical-foliage.test.mjs tests/block-packs/pack-1/floral-forms.test.mjs tests/block-packs/pack-1/all-families.test.mjs tests/block-packs/pack-1/raycast-regression.test.mjs
+    node --test tests/block-packs/pack-1/core-masonry.test.mjs tests/block-packs/pack-1/stone-shapes.test.mjs tests/block-packs/pack-1/garden-components.test.mjs tests/block-packs/pack-1/physical-foliage.test.mjs tests/block-packs/pack-1/floral-forms.test.mjs tests/block-packs/pack-1/all-families.test.mjs tests/block-packs/pack-1/raycast-regression.test.mjs tests/block-packs/pack-1/gallery-count.test.mjs
 
-Seven test modules containing 81 authored groups, including the new unified 30-ID audit. A passed V8 assertion shim is never enough to mark this real Node requirement passed. Capture actual process exit status and standard output before recording verified acceptance.
+Seven asset-focused modules contain 81 authored groups, plus an eighth browser-runner parser suite with five additional genuinely Node-tested groups. The seven asset suites have not been run under real Node. A passed V8 assertion shim is never enough to mark this real Node requirement passed. Capture actual process exit status and standard output before recording verified acceptance.
 
 ## Authentic Chromium gallery and screenshot runner, not yet executed
 
@@ -72,3 +72,22 @@ The dedicated optional file `tests/block-packs/pack-1/raycast-regression.test.mj
 Separately, **29,988** face-oriented rays were evaluated via V8 using exact Pack 1 source and the unmerged :00 generic raycast for the six stone shapes, with **zero** analytic expected-distance mismatches. These are valuable source audits, NOT true Node, real production collision, iPhone or browser testing.
 
 The seven dedicated nested test files now contain **81 authored groups** (65 initial + 10 unified + 6 new). Current root GitHub Actions test wildcard does not include them. The previously verified PR exact-head default workflow [#43638833572](https://github.com/hdog960/Mythwrought/actions/runs/43638833572) succeeded; any subsequent changed branch head must be verified independently before stating its CI conclusion. Final Milestone 6 acceptance remains **OPEN**.
+
+
+## Additional M6 continuation — browser acceptance harness repair and exact native Node subset
+
+**New verified defect:** the original isolated Playwright gallery runner had two incorrect regex literals, `/^\\d+/`, with double-escaped backslashes. They matched a literal backslash and letter d, rather than decimal fixture counts, so a healthy 0->N place-all operation would always fail its acceptance gate. This was a **real bug in the Pack 1-owned acceptance runner**, not a defect in the live game or source asset geometry.
+
+**Fixes made strictly within Pack 1 test ownership:**
+
+1. Extracted strict `parseFixtureCount(status,label)` into `tests/block-packs/pack-1/gallery-count.mjs`; the actual browser runner now imports this tested helper and asserts the exact fixture size synchronously after the place-all click, instead of matching unrelated numerical IDs or schema version lines.
+2. Added `saveWasVerified(status,successMarker)` and declared the explicit positive save marker for each of the five galleries. A “SAFE SAVE BLOCKER”, “EXPECTED BLOCKER”, or missing success marker is **now a test failure**, never counted as a successful offline fixture roundtrip.
+3. Added `tests/block-packs/pack-1/gallery-count.test.mjs` with **five tests** covering five real gallery status formats, empty/placed transitions, false positives from unrelated digits, malformed inputs, and positive-save-versus-blocker behavior.
+
+**Genuine native Node evidence:** the new parser suite ran in Node **22.16.0** in the local test environment with TAP output **5 passed / 0 failed**. Both executed files were compared byte-for-byte using Git blob hashes: helper `6e941cf73b310eb2400b274cb878e1d56d3214c9` and test `ab02c4712f525d9f964794ce0952ae581ad1b113`; these match the actual committed GitHub file blobs. This is valid genuine Node evidence **for only these five small browser-harness tests**; it is **NOT execution of the seven asset-focused test suites**.
+
+**Chromium environment blocker independently reproduced:** the local system has Chromium installed and Python Playwright can start it, but navigating even a minimal `data:` document or a local `http://127.0.0.1` HTTP server fails with `net::ERR_BLOCKED_BY_ADMINISTRATOR`. This means the real gallery screenshots at 667×375, 844×390 and 932×430 could not be captured, and no authentic screenshot has been reviewed or fabricated. Network/DNS restrictions also prevent cloning the complete exact GitHub branch into this container. No override of sandbox browser restrictions is attempted.
+
+**CI evidence:** the previous exact PR head `5e9c855268d7efff4cb6541b9803a304937d1f81`, GitHub Actions [#43639942311](https://github.com/hdog960/Mythwrought/actions/runs/43639942311), has completed **SUCCESS** for the configured baseline Node and Chromium smoke. These baseline tests do not include Pack 1's nested suites or candidate-gallery screenshots. Any new head after this documentation and test repair requires its own exact-head CI result.
+
+**Milestone 6 remains OPEN** with 21 of 21 source candidate families and 30 distinct candidate IDs 9–38. There are now **eight** owned Node test modules: seven asset-focused modules with 81 test groups (exact-source V8 shim only) and one browser-runner helper module with five genuine native Node tests. No candidate is certified, live-integrated, merged, deployed or placed into worldgen. Physical iPhone art/control acceptance and backwards-compatible rotation/state-save verification remain blocked on separately authorized integration.
