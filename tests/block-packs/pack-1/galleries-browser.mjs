@@ -8,8 +8,9 @@
 // executed. Do not claim screenshots exist merely because this source exists.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {readFile,mkdir} from 'node:fs/promises';
-import {resolve,extname,join,relative,sep} from 'node:path';
+import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {resolve,extname,join,sep} from 'node:path';
+import {execFileSync} from 'node:child_process';
 import {chromium} from 'playwright';
 import {parseFixtureCount,saveWasVerified} from './gallery-count.mjs';
 
@@ -50,6 +51,12 @@ const shell=async()=>{
   const port=await listen();
   let browser;
   const totals={galleries:0,viewports:0,screenshots:0,interactionChecks:0};
+  const evidence=[];
+  let gitHead=null;
+  try{gitHead=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();}
+  catch{console.warn('No Git HEAD available: screenshot provenance unverified');}
+  if(process.env.PACK1_EXPECTED_HEAD&&gitHead!==process.env.PACK1_EXPECTED_HEAD)
+    throw new Error('Candidate branch HEAD mismatch: '+gitHead+' != '+process.env.PACK1_EXPECTED_HEAD);
   await mkdir(screenshots,{recursive:true});
   try{
     browser=await chromium.launch({headless:true,
@@ -143,11 +150,21 @@ const shell=async()=>{
           assert.deepEqual(requests,[],g.name+' missing/external asset at '+width+'x'+height);
           totals.interactionChecks+=3;
           totals.viewports++;
+          evidence.push({gallery:g.name,viewport:{width,height},candidateCount:g.count,
+            previewStats:before.previewStats,
+            screenshots:[filename+'-candidate.png',filename+'-placed.png'],
+            canonicalOfflineSave:true,clearedAfterwards:true,
+            errors:errors.length,failedRequests:requests.length});
           console.log('PASS '+g.name+' '+width+'x'+height+' previews, place, offline save, remove');
         }finally{await context.close();}
       }
       totals.galleries++;
     }
+    // Only write the PASS evidence manifest after ALL 15 views finish cleanly.
+    const report={kind:'Pack1 real Chromium candidate gallery acceptance',
+      checkoutGitHead:gitHead,executedAt:new Date().toISOString(),
+      playwrightChromeRealRun:true,totals,evidence};
+    await writeFile(join(screenshots,'acceptance-report.json'),JSON.stringify(report,null,2)+'\n');
     console.log('PACK1_CHROMIUM_ACCEPTANCE',JSON.stringify(totals));
     console.log('Authentic screenshots:',screenshots);
   }finally{
