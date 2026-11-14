@@ -4,7 +4,8 @@
 import {windowShape,windowSaveState,windowMountOffset} from './windows.mjs';
 import {lightingShape,lightingSaveState,lightingMountOffset} from './lighting.mjs';
 import {furnishingShape,furnishingSaveState,furnishingMountOffset} from './furnishings.mjs';
-const includedIds=Object.freeze([159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175]);
+import {civicShape,civicSaveState,civicMountOffset} from './hearth-civic.mjs';
+const includedIds=Object.freeze([159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181]);
 const key=(x,y,z)=>x+','+y+','+z;
 function validCell(cell){
  if(!Array.isArray(cell)||cell.length!==3||
@@ -18,17 +19,20 @@ function assertId(id){
 export function pack4Shape(id,rotation=0){
  assertId(id);
  return id<=164?windowShape(id,rotation):
-  id<=168?lightingShape(id,rotation):furnishingShape(id,rotation);
+  id<=168?lightingShape(id,rotation):
+  id<=175?furnishingShape(id,rotation):civicShape(id,rotation);
 }
 export function pack4MountOffset(id,rotation=0){
  assertId(id);
  return id<=164?windowMountOffset(id,rotation):
-  id<=168?lightingMountOffset(id,rotation):furnishingMountOffset(id,rotation);
+  id<=168?lightingMountOffset(id,rotation):
+  id<=175?furnishingMountOffset(id,rotation):civicMountOffset(id,rotation);
 }
 export function pack4State(id,rotation=0){
  assertId(id);
  return id<=164?windowSaveState(id,rotation):
-  id<=168?lightingSaveState(id,rotation):furnishingSaveState(id,rotation);
+  id<=168?lightingSaveState(id,rotation):
+  id<=175?furnishingSaveState(id,rotation):civicSaveState(id,rotation);
 }
 function hit(origin,direction,box,maxReach){
  let tMin=-Infinity,tMax=Infinity,normal=null;
