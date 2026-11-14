@@ -1,0 +1,33 @@
+# Roadmap 4 — M0 acceptance and M1 authored structure candidate dossier
+
+**Status on 2026-11-14:** M0 foundational contract **COMPLETE** after native exact-GitHub-blob Node tests; M1 has 30/30 **authored theoretical candidates**, **0 integrated/0 creator-accepted**. The 30 are genuine voxel-coordinate arrays produced by 30 individually specified geometric blueprints, not mere exterior render prompts. No main/CI/engine/terrain/registry/worldgen/save modifications.
+
+## Coordination refresh
+- Latest independently observed `main` `caf47776b723a36684edc1a72749e49268ccc688`, incorporation **007**; M0 branch originally forked from 006. Checkpoint 007 incorporated opt-in automation-only candidates, not manual block packs or building blueprints. The world still registers IDs **0–8**, and has only -3..19 current-world vertical coordinates.
+- [Issues #109](https://github.com/hdog960/Mythwrought/issues/109) / [#117](https://github.com/hdog960/Mythwrought/issues/117) and unmerged manual Packs 1–5 PRs #113/#114/#112/#115/#119, autonomous biome catalog #118, and building Roadmaps 1/2/3 PRs #121/#124/#122 checked for ownership. None of their files touched. Unregistered partial-shape IDs and widened-ID migration remain dependencies.
+- Only `src/building-pool/roadmap-4/`, `tests/building-pool/roadmap-4/` and `docs/building-pool/roadmap-4/` may be changed.
+
+## M0 exact-source native Node acceptance
+- Local pure Node 22.16.0 ran `node --test tests/building-pool/roadmap-4/schema.test.mjs`, **11 passed, 0 failed**, duration approximately 0.15 seconds.
+- Local Git object hashes exactly matched GitHub at M0 revision: `schema.mjs` blob `a90f8a9fcc1e1996ff354e5ba26acf0daab49c1f`, `schema.test.mjs` blob `88d9b0fab88947009cb5d1b0ddba34a1338910f3`, `manifest.json` original blob `8db89923e59212754d4ce1b33e3f7bced4f10be6`. Thus this was a **real native Node test of exact branch bytes** (not V8 emulation).
+- M0 PR-head [Actions run #43643150362](https://github.com/hdog960/Mythwrought/actions/runs/43643150362) **SUCCESS** at head `11f5539afb29056baa0b17a3a8d6f1add1276a9f`; root CI itself does NOT discover nested Roadmap 4 tests. Independent native Node run supplies dedicated-suite evidence.
+- M0 schema and manifest, structural occupancy/no-overlap/navigation/footprint validation, canonical persistence-independent serialization, unique geometry signatures and isolated draft PR therefore meet M0's foundation acceptance requirements. No visual approval or integration is implied.
+
+## M1 committed blueprint construction, not an asset or settlement installer
+`src/building-pool/roadmap-4/m1-blueprints.mjs` contains 30 explicit per-biome/per-size architectural plan tuples, rendered into full 3D occupied cells using an isolated deterministic compiler:
+- 15 civic halls + 15 castles/palaces, covering **5 biomes × 3 sizes × 2 categories**, exactly one each.
+- Temperate: timber and stone cruciform halls and chambered wings; Desert: inward-facing courts, chamfered front and colonnaded arcade supports; Snow: insulated recessed entrances and steep roof ridges; Enchanted Forest: asymmetric stepped livingwood silhouette; Mountain: projecting stone terraces, narrowed rear cliff-facing halls and roof terraces.
+- Every output has floor planes for each level, exterior masonry, real window voids/frames, opening voids, internal multi-cell partition walls with two-high door openings, distinct civic meeting/administration or castle entrance/grand/wing room footprints, accessible exterior approach, walkable interior graph, supporting multi-level symbolic stair routes, symbolic roof and glazing surfaces, and region-appropriate roof geometry. Castles include additional tower-crown construction cells.
+- No voxel placement into game world, no quests, NPCs, magic engines, guard systems, town assembly, real-player controls or save writes. Roof/stair/window/culture assets remain symbolic until candidate shapes, attachments, collision, real persistence IDs, and actual game performance are verified.
+
+### Technical candidate evidence
+- Native Node 22.16.0 `node --test tests/building-pool/roadmap-4/*.test.mjs` **18/18 PASS** (11 schema + 7 dedicated M1 regressions), approximately 13.5 seconds. Source bytes for M1 compiler and M1 tests match exact GitHub blobs `e9dc082b0dbe340ea13992468f6ee28c818ea21e` and `23a4c1a222f7a4435f045232b2ee5944237310bd`.
+- `auditM1()` validates all **30 unique geometric fingerprints**; explicit selection/collision proxy, room clearance, support, canonical serialization, exact 30 IDs, biome-driven silhouette differentiation, category-specific functional rooms, symbolic future dependency manifests; zero duplicate 3D cells.
+- 30 genuine **Chromium Canvas2D**, not WebGL2, QA screenshots generated from exact-source voxel cell representations: 10 cross-biome/size examples × **667×375**, **844×390**, **932×430**, both full-roof and cross-section views. Host Chromium navigation to loopback and file URLs was blocked by administrator policy; `page.set_content` with browser Canvas2D succeeded. Captures were inspected, but these are simplified engineering galleries and lack premium art assets.
+- Native Chromium in this environment returned `null` for `getContext('webgl2')` even with SwiftShader flags; **WebGL2 acceptance is NOT achieved**. No physical iPhone Safari/installed-PWA control testing, GPU performance signoff, or creator premium-art approval. Capture files are session QA artifacts, not embedded in this PR.
+- Theoretical world elevations extend above the main engine's height ceiling, deliberately **no live placement** and no schema-1 migration. Unresolved multi-cell physical shape extents, actual player swept-body stair clearance, ceiling attachments and future IDs remain integration blockers.
+
+### M1 review status
+- **30 authored M1 theoretical blueprints exist in branch source**; 0/30 physically integrated or visually creator-accepted.
+- M1 is **CANDIDATE**, not ready for final creator signoff until genuine dedicated WebGL2 gallery, real screenshot inspection, asset-shape/support integration, camera-accessible multilevel path checks and measured mobile budgets are documented.
+- Next session should reverify live main/checkpoint/Issues #109/#117/all pack and building PRs; confirm exact M1 PR head and CI outcome; improve gallery fidelity and interior navigation, and resolve genuine WebGL2 environment or compatible CI-based browser runner **only in Roadmap 4-owned files**. Never merge, incorporate or deploy.
