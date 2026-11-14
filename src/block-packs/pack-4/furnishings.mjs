@@ -36,10 +36,13 @@ function fixture(id,roster,key,name,mount,parts,detail){
     interactions:Object.freeze({individuallySelectable:true,
       independentlyRemovable:true,inventory:false,harvest:false})});
 }
+// M5 support-contact repair: floor bases/legs reach y=0, the banner header
+// meets its ceiling at y=1 and the canopy wall tie meets +Z=1. These are
+// physical solids, not invisible test-only placement patches.
 // A coopered tapered stave silhouette: staggered vertical cedar strips,
 // horizontal iron hoops, lid and inset bung, never a single recolored cube.
 const barrel=[
-  piece([.20,.15,.20,.80,.82,.80],'oakShadow'),
+  piece([.20,0,.20,.80,.82,.80],'oakShadow'),
   piece([.17,.25,.17,.83,.31,.83],'iron'),
   piece([.16,.65,.16,.84,.71,.84],'iron'),
   piece([.21,.79,.21,.79,.86,.79],'oakSun'),
@@ -59,7 +62,7 @@ for(const y of [.265,.655]){
  }
 }
 // Braced transport crate with slatted sides, exposed corner ferrules and base.
-const crate=[piece([.115,.12,.115,.885,.18,.885],'walnut')];
+const crate=[piece([.115,0,.115,.885,.18,.885],'walnut')];
 for(let n=0;n<4;n++){
   const y=.22+n*.15;
   crate.push(piece([.12,y,.115,.88,y+.12,.19],n%2?'oak':'oakSun'));
@@ -85,10 +88,10 @@ const bench=[
  piece([.08,.51,.19,.92,.535,.32],'oakSun'),
  piece([.08,.51,.39,.92,.535,.54],'oak'),
  piece([.08,.51,.60,.92,.535,.72],'oakSun'),
- piece([.10,.10,.22,.20,.44,.34],'oakShadow'),
- piece([.80,.10,.22,.90,.44,.34],'oakShadow'),
- piece([.10,.10,.61,.20,.44,.71],'oakShadow'),
- piece([.80,.10,.61,.90,.44,.71],'oakShadow'),
+ piece([.10,0,.22,.20,.44,.34],'oakShadow'),
+ piece([.80,0,.22,.90,.44,.34],'oakShadow'),
+ piece([.10,0,.61,.20,.44,.71],'oakShadow'),
+ piece([.80,0,.61,.90,.44,.71],'oakShadow'),
  piece([.11,.52,.67,.20,.88,.75],'oak'),
  piece([.80,.52,.67,.89,.88,.75],'oak'),
  piece([.16,.73,.67,.84,.84,.76],'walnut'),
@@ -107,7 +110,7 @@ const table=[
  piece([.82,.655,.18,.91,.723,.82],'walnut')
 ];
 for(const x of [.15,.77])for(const z of [.15,.77]){
- table.push(piece([x,.08,z,x+.08,.72,z+.08],'oakShadow'));
+ table.push(piece([x,0,z,x+.08,.72,z+.08],'oakShadow'));
  table.push(piece([x-.015,.09,z-.015,x+.095,.155,z+.095],'brass'));
 }
 table.push(piece([.24,.46,.20,.76,.51,.28],'walnut'));
@@ -115,8 +118,8 @@ table.push(piece([.24,.46,.72,.76,.51,.80],'walnut'));
 table.push(piece([.47,.74,.46,.53,.835,.54],'brass',{collision:false}));
 // Floor-mounted writable-sign *blank*: no actual text editing or NPC UI.
 const sign=[
- piece([.46,.065,.46,.54,.77,.54],'walnut'),
- piece([.41,.065,.41,.59,.13,.59],'oakShadow'),
+ piece([.46,0,.46,.54,.77,.54],'walnut'),
+ piece([.41,0,.41,.59,.13,.59],'oakShadow'),
  piece([.16,.58,.43,.84,.93,.57],'oakSun'),
  piece([.19,.61,.419,.81,.90,.44],'parchment',{collision:false}),
  piece([.19,.61,.56,.81,.90,.581],'oak'),
@@ -131,7 +134,7 @@ for(const x of [.18,.77])for(const y of [.65,.83])
 // Individual ceiling-hung two-tail pennant: physical header, cloth strips,
 // custom swallowtail gap. Deliberately NO flag animation or wind system.
 const banner=[
- piece([.14,.91,.42,.86,.974,.58],'oakShadow'),
+ piece([.14,.91,.42,.86,1,.58],'oakShadow'),
  piece([.17,.86,.43,.83,.91,.57],'brass'),
  piece([.18,.30,.465,.82,.875,.535],'burgundy'),
  piece([.22,.33,.45,.38,.84,.465],'saffron',{collision:false}),
@@ -150,7 +153,7 @@ const banner=[
 const canopy=[
  piece([.06,.685,.14,.14,.77,.94],'walnut'),
  piece([.86,.685,.14,.94,.77,.94],'walnut'),
- piece([.07,.69,.88,.93,.79,.96],'oakShadow'),
+ piece([.07,.69,.88,.93,.79,1],'oakShadow'),
  piece([.07,.71,.08,.93,.77,.16],'oakShadow'),
  piece([.11,.75,.16,.89,.80,.86],'rope',{collision:false})
 ];
