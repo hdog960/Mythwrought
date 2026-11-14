@@ -188,3 +188,20 @@ Checkpoint 007 includes opt-in :00 targeting and :12 generic shape source but **
 ### Checkpoint 008 ledger synchronization (final recheck, 2026-11-14)
 
 After the activation commit, main advanced again to `ac263720b60641c65b02330348dd76d0ef9cb75e`, **documentation-only**, adding checkpoint 008 to `docs/INTEGRATION_CHECKPOINTS.md` and the release ledger. This resolves the temporary documentation lag described earlier; it **does not** change runtime block IDs, Pack 1 files or ownership. The live registry still supports 0–8. All 30 Pack 1 candidate IDs 9–38 remain isolated, unmerged and unregistered. Native candidate tests and authentic candidate screenshots remain pending.
+
+
+## Milestone 6 — NATIVE NODE GATE VERIFIED, superseding earlier V8-only statements (2026-11-14)
+
+**IMPORTANT STATUS UPDATE:** Earlier parts of this chronological dossier correctly described the seven asset test modules as "V8 shim only / native Node NOT RUN" at the time. That limitation has now been **resolved**. This section supersedes those older native-Node status fields. Do not continue reporting the Pack 1 Node requirement as blocked.
+
+**Actual native Node v22.16.0 full-suite execution: 93 of 93 PASS**, with **0 fail, 0 skipped, 0 TODO, 0 cancelled**. The nine nested committed Pack 1 test modules were run **together in one real Node process** against 21 staged code/test files whose **git-blob SHA-1 hashes exactly matched GitHub PR #113's source at `84001dbddd9fa9630ad9382c9f9d85c986590a9c`**. The source modules have not been modified since the transfer; subsequent commits in this PR modify only Pack 1 acceptance documentation. The physical files were reconstructed in an isolated local Pack 1 mirror, not a complete root Git checkout. No V8 test shim was used for this native result. Test counts: masonry 9; stone shapes 11; garden 14; foliage 16; floral 15; unified all-family 10; ray/collision regression 6; gallery-count 5; PNG-proof 7.
+
+The complete Git blob list, exact `node --test` command, qualification, and new evidence references are in [M6_NATIVE_NODE_EVIDENCE.md](M6_NATIVE_NODE_EVIDENCE.md), contained entirely within Pack 1-owned source paths. A complete genuine TAP log and a hash report were also generated as separate user-accessible test artifacts during the same session.
+
+**What this really clears:** M6's dedicated native Pack 1 Node asset/unit/fixture/geometry/selection/save-safety verification gate, previously repeatedly blocked, is now **PASSED** with exact GitHub bytes. The standalone `run-acceptance.mjs` orchestration has **NOT** itself completed successfully because its required browser half cannot navigate in this environment; do not label overall M6 as passed.
+
+**Browser acceptance remains blocked:** System Chromium launches but both minimal `file://` and `data:` navigation return `net::ERR_BLOCKED_BY_ADMINISTRATOR`, and earlier local HTTP was also blocked. Five candidate Canvas2D galleries × three landscape viewports (**667×375, 844×390, 932×430**), their thirty genuine PNG screenshots, actual screenshot inspections and offline browser fixtures were **NOT RUN / NOT CAPTURED**. No illustrated substitutes or proxy screenshots counted. Current baseline root GitHub Actions CI does not execute these nested Pack 1 candidate galleries; exact-head CI must be checked independently.
+
+**Current integrated main:** `ac263720b60641c65b02330348dd76d0ef9cb75e`, checkpoint **008**, explicitly automation-owned and excluding all five manual Block Packs. Production BLOCK IDs still only **0–8**. Candidate IDs **9–38** all remain exclusive and CANDIDATE. Real live-game material/atlas registration, partial occupancy meshing and targeting, schema-1 rotated save compatibility, WebGL2/iPhone performance and creator art/control approval still require a separately authorized integration gate.
+
+**M6 exit state: NODE VERIFIED; CHROMIUM/PRODUCTION/CREATOR OPEN. Draft PR #113 remains unmerged/undeployed; v0.10 Gate A OPEN, v0.11 LOCKED.**
