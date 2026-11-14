@@ -4,7 +4,7 @@
   "role": "CREATOR-LED MANUAL ASSET CANDIDATES",
   "status": "UNMERGED — NOT PLAYABLE",
   "auditBaseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
-  "integrationCheckpoint": "007",
+  "integrationCheckpoint": "008",
   "coordinationIssue": 109,
   "provisionalIdRange": [
     59,
@@ -362,8 +362,8 @@
   "currentMilestone": 6,
   "completedFamilies": 18,
   "unallocatedFamilies": 0,
-  "lastVerifiedMain": "caf47776b723a36684edc1a72749e49268ccc688",
-  "progress": "18/18 distinct physical source candidates authored (IDs 59–76). M6: 89/89 test bodies pass isolated V8, all 18 geometry/palette signatures unique, 85/85 solid states check checkpoint-007 opt-in APIs; genuine SHA-matched water-only Node smoke 8/8 and real Chromium water-only 6 screenshots pass. All SIX checked-in native Node suites, ALL-18 genuine gallery, production fluid/render/save integration, iPhone control/art approval and Gate A remain OPEN. Candidate-only: no merge/deploy/world placements.",
+  "lastVerifiedMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+  "progress": "M0–M5: all 18 unique physical source candidates authored (IDs 59–76). M6 isolated acceptance: six original byte-verified Pack2 native Node v22 suites 89/89 PASS (legacy VoxelWorld boundary supplied by local TEST-ONLY facade; not production integration); original Chromium+Python Playwright inspector all 18 IDs x 3 landscapes PASS, 66 authentic images, 18 unique image hashes per viewport, fixture saves and water alpha PASS. Full Git repo with actual VoxelWorld, live WebGL2/fluids/schema-1/offline/real-iPhone/Gate A approvals remain OPEN. Candidate-only, never merge/deploy/world-place.",
   "pendingEngineAPIs": [
     "generic non-cube raycast/collision",
     "material registry expansion for candidate IDs 59–68",
