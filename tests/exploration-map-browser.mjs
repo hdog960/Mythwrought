@@ -39,6 +39,7 @@ try{
       await page.locator('#mapRecenter').click();
       await page.locator('#closeExploration').click();
       assert.equal(await page.locator('#explorationOverlay').isVisible(),false);
+      assert.equal(await page.evaluate(()=>document.activeElement?.id),'scene','Close must restore world keyboard focus');
       await page.evaluate(()=>window.__mythwroughtTest.teleport(120,120));
       await page.waitForFunction(n=>Number(document.querySelector('#miniMap')?.dataset.discovered)>n,start);
       const explored=Number(await page.locator('#miniMap').getAttribute('data-discovered'));
