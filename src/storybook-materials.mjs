@@ -205,7 +205,23 @@ ${CRAFTED_TIMBER_GLSL}  }else if(vMat==5){ // Raw crystal: angled amethyst and t
     shade=1.0;
   }else if(vMat==15){ // Render-only dressed ashlar.
 ${CARVED_MASONRY_GLSL}  }else if(vMat==16){ // Render-only shingled roof.
-${STORYBOOK_ROOF_GLSL}  }else if(vMat==13||vMat==14){ // Original carved tree-star cave-wall sigils.
+${STORYBOOK_ROOF_GLSL}  }else if(vMat==18){ // Physical leaf voxels: layered canopy cells, never flower material 7.
+    vec2 cell=floor(vUv*vec2(7.0,7.0));
+    vec2 p=fract(vUv*vec2(7.0,7.0))-.5;
+    float leafGrain=.5+.5*sin(p.x*7.0+p.y*4.0+hashCell(cell)*6.28318);
+    float leafVein=1.0-smoothstep(.035,.12,abs(p.x+.25*sin(p.y*4.0)));
+    float leafCluster=step(.38,hashCell(cell+vec2(19.0,23.0)));
+    shade=.82+.17*leafGrain+.08*leafVein;
+    base=mix(base,vec3(.49,.72,.30),.26*leafCluster*near);
+    base=mix(base,vec3(.19,.37,.24),.15*(1.0-leafCluster)*near);
+  }else if(vMat==19){ // Physical deepstone: slate bands and pale calcite joints.
+    float band=.5+.5*sin(vUv.y*22.0+1.5*sin(vUv.x*4.0));
+    float seam=1.0-smoothstep(.035,.12,abs(band-.5));
+    float fleck=step(.94,hashCell(floor(vUv*vec2(12.0,12.0))+vec2(7.0,31.0)));
+    shade=.81+.14*band+.09*fleck;
+    base=mix(base,vec3(.23,.32,.43),.19*band*near);
+    base=mix(base,vec3(.68,.76,.79),.15*seam*near);
+  }else if(vMat==13||vMat==14){ // Original carved tree-star cave-wall sigils.
     // Matte warm gold or cool turquoise pigment, no transparent glow pass.
     shade=1.0;
   }
@@ -220,6 +236,7 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   renderOnlyGrottoMaterials:Object.freeze([10,11,12]),
   renderOnlyCaveRuneMaterials:Object.freeze([13,14]),
   renderOnlyArchitecturalMaterials:Object.freeze([15,16]),
+  physicalNaturalMaterials:Object.freeze({leaves:{blockId:7,shaderTag:18},deepstone:{blockId:8,shaderTag:19}}),
   detailStartDistance:10,
   detailEndDistance:38,
   fogStartDistance:29,
