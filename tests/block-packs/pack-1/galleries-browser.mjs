@@ -19,9 +19,12 @@ const screenshots=resolve(process.env.PACK1_ARTIFACT_DIR||'artifacts/pack-1');
 const galleries=[
   {name:'masonry',path:'gallery.html',count:6,place:'#place',clear:'#clear',save:'#restore',countLabel:'edits: ',saveSuccess:'save/restore verified',activeSelector:'#grid > .card.selected'},
   {name:'stone-shapes',path:'stone-shape-gallery.html',count:6,place:'#place-all',clear:'#clear-all',save:'#save-check',countLabel:'Physically placed test cells: ',saveSuccess:'PASS:',activeSelector:'#grid > .card.active'},
-  {name:'garden',path:'garden-gallery.html',count:3,place:'#all',clear:'#clear',save:'#save',countLabel:'Independent placed voxel cells: ',saveSuccess:'PASS:',activeSelector:'#grid > .card.placed'},
-  {name:'foliage',path:'foliage-gallery.html',count:8,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed candidate cells: ',saveSuccess:'PASS:',activeSelector:'#grid > .card.active'},
-  {name:'floral',path:'floral-gallery.html',count:7,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed physical specimens: ',saveSuccess:'PASS:',activeSelector:'#grid > .item.active'}
+  {name:'garden',path:'garden-gallery.html',count:3,place:'#all',clear:'#clear',save:'#save',countLabel:'Independent placed voxel cells: ',saveSuccess:'PASS:',activeSelector:'#grid > .card.placed',
+   probes:[{x:0,z:6,expect:['SOLID: targetable piece ID 21']},{x:2,z:6,expect:['EMPTY: real air in piece ID 21']}]},
+  {name:'foliage',path:'foliage-gallery.html',count:8,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed candidate cells: ',saveSuccess:'PASS:',activeSelector:'#grid > .card.active',
+   probes:[{x:5,z:6,expect:['TARGETABLE physical voxel','(collidable)']},{x:11,z:0,expect:['EMPTY selection space','(not collidable)']}]},
+  {name:'floral',path:'floral-gallery.html',count:7,place:'#all',clear:'#clear',save:'#save',countLabel:'Individually placed physical specimens: ',saveSuccess:'PASS:',activeSelector:'#grid > .item.active',
+   probes:[{x:5,z:5,expect:['TARGETABLE:','/ passable']},{x:0,z:0,expect:['EMPTY:','/ passable']}]}
 ];
 const viewports=[[667,375],[844,390],[932,430]];
 const mime={'.mjs':'text/javascript','.js':'text/javascript','.html':'text/html','.css':'text/css','.json':'application/json'};
@@ -151,6 +154,29 @@ const shell=async()=>{
             g.name+' placed fixture cells are not reflected in visible card selection');
           await page.screenshot({path:join(screenshots,filename+'-placed.png'),fullPage:true});
           totals.screenshots++;
+          // Exercise the real interactive cross-section grid. All expected
+          // hits were independently checked against the authored Pack 1
+          // fixture modules under genuine Node, not inferred from an image.
+          const probeStatus=[];
+          if(g.probes){
+            const cutaway=page.locator('#grid canvas.slice').first();
+            assert.equal(await cutaway.count(),1,g.name+' missing selectable cutaway canvas');
+            for(const probe of g.probes){
+              const bounds=await cutaway.boundingBox();
+              assert.ok(bounds&&bounds.width>12&&bounds.height>12,
+                g.name+' cutaway is hidden or too small to target');
+              await cutaway.click({position:{
+                x:(probe.x+.5)*bounds.width/12,y:(probe.z+.5)*bounds.height/12
+              }});
+              const actual=(await page.locator('#status').textContent())||'';
+              for(const expected of probe.expect)assert.ok(actual.includes(expected),
+                g.name+' cross-section '+probe.x+','+probe.z+
+                ' did not report '+expected+': '+actual);
+              assert.equal(parseCount(actual),g.count,
+                g.name+' cross-section probe unexpectedly mutated placed cells');
+              probeStatus.push({x:probe.x,z:probe.z,status:actual});
+            }
+          }
           await context.setOffline(true);
           await page.locator(g.save).click();
           const status=(await page.locator('#status').textContent())||'';
@@ -168,13 +194,14 @@ const shell=async()=>{
             g.name+' wrote to user local storage');
           assert.deepEqual(errors,[],g.name+' uncaught browser exceptions at '+width+'x'+height);
           assert.deepEqual(requests,[],g.name+' missing/external asset at '+width+'x'+height);
-          totals.interactionChecks+=3;
+          totals.interactionChecks+=3+probeStatus.length;
           totals.viewports++;
           evidence.push({gallery:g.name,viewport:{width,height},candidateCount:g.count,
             previewStats:before.previewStats,
             screenshots:[filename+'-candidate.png',filename+'-placed.png'],
             canonicalOfflineSave:true,clearedAfterwards:true,
             cardSelectionChecks:{empty:0,placed:g.count,saved:g.count,cleared:0},
+            cutawayProbeResults:probeStatus,
             errors:errors.length,failedRequests:requests.length});
           console.log('PASS '+g.name+' '+width+'x'+height+' previews, place, offline save, remove');
         }finally{await context.close();}
