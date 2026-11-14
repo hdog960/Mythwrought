@@ -172,7 +172,7 @@ test('weathered sediment fans and exposed erosion scars are distance-faded opaqu
 });
 
 test('fragment shader contains no escaped source newlines and retains valid bounded mineral lenses',()=>{
- assert.doesNotMatch(FS,/\\\\n/,'literal escaped newlines break GLSL compilation');
+ assert.doesNotMatch(FS,/\\n/,'literal escaped newlines break GLSL compilation');
  assert.deepEqual(RULES.ironstoneAccents,['stone-ironstone-lenses','stone-pale-mineral-rims']);
  const stone=FS.slice(FS.indexOf('}else if(vMat==3)'),FS.indexOf('}else if(vMat==4)'));
  for(const term of ['ironLens','rim'])assert.match(stone,new RegExp('float '+term+'='));
