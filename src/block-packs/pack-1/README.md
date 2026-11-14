@@ -311,3 +311,14 @@ The exact 21 Git blob hashes, full test command and qualification are in `M6_NAT
 **Remaining mandatory Milestone 6 acceptance:** run five authentic Pack 1 galleries × 3 Chromium landscape sizes (667×375, 844×390, 932×430), capture and inspect all 30 real screenshot files, verify real browser offline fixture interactions, and obtain separately authorized live-engine material IDs/shape collision/selection/rotation/schema-1 save and physical iPhone artwork/control approval. Local Chromium launches but `file:` and `data:` navigation return `ERR_BLOCKED_BY_ADMINISTRATOR` (no workaround attempted), so those screenshot gates have **not passed**. The all-in-one `run-acceptance.mjs` has not produced its final PASS report.
 
 Latest verified main `ac263720b60641c65b02330348dd76d0ef9cb75e` is automation-only checkpoint 008; Pack 1 was explicitly excluded and live production IDs remain 0–8. All 21 families / 30 reserved IDs 9–38 remain CANDIDATE, draft/unmerged/undeployed; Gate A OPEN and v0.11 LOCKED.
+
+
+## M6 visual card-state parity acceptance (2026-11-14)
+
+The native Pack 1 gate remains **93/93 genuine Node 22.16.0 PASS**, with 21 source/test files matched to GitHub blobs. No need to substitute earlier V8 shim runs or repeat that resolved native gate.
+
+The Pack 1-only `tests/block-packs/pack-1/galleries-browser.mjs` now additionally checks actual selected-card state across **all five** source galleries: 0 visible placements before interaction, precisely 6 masonry/6 stone/3 garden/8 foliage/7 floral visibly selected after place-all, the same visible selection after canonical offline fixture save/restore, and 0 visible selections after clear. Each test uses the exact `.selected`, `.active` or `.placed` class its real gallery module toggles. These checks prevent a fixture with correct internal ID/count values but misleading visible state from being certified. The runner and galleries pass JS source parsing; **Chromium execution of these assertions is not yet proven**.
+
+Actual local Chromium launch works, but even simple `data:`, `file:` or `http://127.0.0.1` pages immediately fail with administrator navigation denial. Thus **none of the 15 required landscape gallery views or 30 authentic candidate screenshots** has been run/captured. No workaround of browser administrator policy or generated replacement imagery was used. The next source-acceptance requirement is genuine screenshots from an allowed environment, followed by separate creator approval and production integration. The `M6_ACCEPTANCE.md` evidence ledger has exact details.
+
+Main remains checkpoint 008 and does **not** include manual Pack 1. All **21 families/30 candidate IDs 9–38** remain draft, unmerged, undeployed, unregistered. v0.10 Gate A OPEN and v0.11 LOCKED.
