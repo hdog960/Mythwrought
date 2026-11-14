@@ -103,3 +103,8 @@ All under the isolated 64-box / 768-triangle / 1536-vertex preview contract. The
 - **M1 6/6 authentic native ES-module Chromium WebGL2 captures** renewed at 667×375, 844×390 and 932×430 in rotations 0 and 1; all six isolated M1 variants rendered with unique GPU readback fingerprints.
 - Full local native Node Pack 5 suite now **69/69 PASS** (original M0/M1 44; M2 25), 0 skip/fail; M1 source and tests unchanged from prior committed hashes.
 - The original real HTTP-served page was independently retried via local Python HTTP server on 127.0.0.1 and Chromium under Xvfb; browser raised **`net::ERR_BLOCKED_BY_ADMINISTRATOR`**. Data-URL native ES module imports and real WebGL2 therefore **do not certify served HTTP**. Creator artwork and physical-iPhone control approval remain OPEN; no M1 integration authorized.
+
+## Recheck at start of separate Milestone 3 source work
+
+- Six genuine native ES-module Chromium WebGL2 views of the unchanged M1 six variants passed again at all three required mobile landscape sizes with two rotations. The original M1 **44** Node acceptance cases remain a passing subset of the **83/83** current full Pack 5 native suite.
+- This does **NOT** change the M1 creator artwork, HTTP-served load, physical-iPhone or live integration gates. Its three physical families remain unmerged **CANDIDATE** assets.
