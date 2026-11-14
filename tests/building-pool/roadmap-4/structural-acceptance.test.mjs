@@ -119,3 +119,17 @@ test('small and large castles have elevated roofline crowns with readable crenel
   }
   assert.equal(castles,15);
 });
+
+test('biome roof references are appropriate physical families, and specialty ribs/anchors never replace full walls',()=>{
+  const roofs={temperate:'pack3:023',desert:'pack3:024',snow:'pack3:025','enchanted-forest':'pack3:026',mountain:'pack3:025'};
+  const walls={temperate:'pack1:002',desert:'biome130:091',snow:'biome130:094','enchanted-forest':'base:wood',mountain:'pack1:002'};
+  const accents={temperate:'pack2:015','enchanted-forest':'biome130:096',mountain:'biome130:098'};
+  for(const b of models){
+    assert.ok(b.cells.some(c=>c.role==='roof'&&c.asset===roofs[b.biome]),b.id+': wrong roofing reference');
+    assert.ok(b.cells.some(c=>c.role==='wall'&&c.asset===walls[b.biome]),b.id+': wrong physical wall reference');
+    if(accents[b.biome]){
+      assert.ok(b.cells.filter(c=>c.role==='fixture'&&c.asset===accents[b.biome]).length>=2,b.id+': regional detailing missing');
+      assert.ok(!b.cells.some(c=>c.role==='wall'&&c.asset===accents[b.biome]),b.id+': accent masquerades as masonry');
+    }
+  }
+});
