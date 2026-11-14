@@ -4,8 +4,8 @@
   "gate": "v0.10 Gate A OPEN / v0.11 LOCKED",
   "baselineMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
-  "latestReauditMain": "caf47776b723a36684edc1a72749e49268ccc688",
-  "latestReauditCheckpoint": "007",
+  "latestReauditMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+  "latestReauditCheckpoint": "008",
   "integrationPR120": "merged externally after this branch was founded; Roadmap 2 did not participate",
   "issues": [
     109,
@@ -200,5 +200,6 @@
     "M1Browser": "90 genuine headless Chromium composite captures (30 designs x 3 landscape viewports); programmatic 30x3 screenshot checks, sample visuals inspected; conceptual Canvas2D NOT live WebGL2",
     "realIphone": "not tested"
   },
-  "status": "M0 TECHNICAL ACCEPTED; M1 30 AUTHOR-CANDIDATE CONCEPTS; DRAFT/UNMERGED/UNDEPLOYED"
+  "status": "M0 TECHNICAL ACCEPTED; M1 30 AUTHOR-CANDIDATE CONCEPTS; DRAFT/UNMERGED/UNDEPLOYED",
+  "integrationPR126": "Checkpoint 008 live automation-world activation; no building-pool or pack paths changed; not included in this draft."
 }

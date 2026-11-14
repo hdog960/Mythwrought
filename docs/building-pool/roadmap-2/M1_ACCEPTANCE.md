@@ -20,3 +20,6 @@ All physical materials are symbolic manual-pack roster keys or biome130 planned 
 Checked main `caf47776b723a36684edc1a72749e49268ccc688`, incorporation checkpoint 007, Issues #109/#117, manual Pack PRs #113/#114/#112/#115/#119/manifests, biome130 status and #118, and Building Roadmaps 1/3/4 #121/#122/#123. Scope stays exclusively Roadmap 2 paths. v0.10 Gate A OPEN, v0.11 LOCKED; schema-1 saves, seed, PWA, controls and shared systems unchanged. No merge or deploy.
 
 **M1 creator review OPEN**. Do not count these as production-approved or begin M2 until creator review and exact-head CI are resolved.
+
+## Concurrent checkpoint 008 re-audit
+After M1 authoring, main advanced independently to `ac263720b60641c65b02330348dd76d0ef9cb75e` with checkpoint **008** via PR #126 (automation-only live voxel activation). Exact diff against checkpoint 007 touched shared game/CI/docs files, not `src/building-pool/roadmap-2/`, `tests/building-pool/roadmap-2/`, `docs/building-pool/roadmap-2/`, manual Block Packs or other building roadmaps. No rebase/cherry-pick or production activation was performed in this draft. Future sessions must recheck this cutoff before editing.
