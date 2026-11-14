@@ -62,10 +62,14 @@ void main(){
     float limestone=step(.82,hashCell(floor(vUv*vec2(4.0,5.0))+vec2(19.0,3.0)));
     // Jagged pale quartz seams track natural bedding rather than brick joints.
     float quartz=1.0-smoothstep(.025,.10,abs(sin(vUv.x*4.0+vUv.y*13.0+sin(vUv.x*7.0))));
-    shade=.79+.13*tile+.10*strata-.085*crease+.11*mica+.065*slate;
+    // Frost-quartz ridges collect on high stone strata without changing terrain IDs.
+    float frostRidge=1.0-smoothstep(.035,.13,abs(sin(vUv.y*18.0+sin(vUv.x*5.0)*1.6)));
+    float coldPocket=smoothstep(.76,.93,.5+.5*sin(vUv.x*5.0+vUv.y*3.0)*sin(vUv.y*7.0));
+    shade=.79+.13*tile+.10*strata-.085*crease+.11*mica+.065*slate+.06*frostRidge;
     base=mix(base,vec3(.41,.53,.61),.16*slate*near);
     base=mix(base,vec3(.76,.69,.54),.14*limestone*near);
     base=mix(base,vec3(.84,.85,.77),.15*quartz*near);
+    base=mix(base,vec3(.68,.82,.91),(.12*frostRidge+.09*coldPocket)*near);
   }else if(vMat==4){ // Honey-colored timber, distinct planks and warm grain.
     float plank=blockLine(vec2(vUv.x*3.0,vUv.y*1.0),.035);
     float grain=.5+.5*sin(vUv.x*23.0+2.0*sin(vUv.y*7.0));
@@ -86,6 +90,10 @@ void main(){
     float core=smoothstep(.68,.91,.5+.5*sin(vUv.x*6.0+vUv.y*4.0)*sin(vUv.y*8.0-vUv.x*3.0));
     base=mix(base,vec3(.22,.24,.54),.19*core*near);
     base=mix(base,vec3(.87,.94,1.0),.24*inclusion*near);
+    // Fine glacial cleavage gives some crystal faces a blue-white icy rim.
+    float iceRim=1.0-smoothstep(.025,.11,abs(sin(vUv.x*7.0-vUv.y*9.0+sin(vUv.y*4.0))));
+    float blueFacet=step(.79,hashCell(floor(vUv*vec2(5.0,6.0))+vec2(42.0,3.0)));
+    base=mix(base,vec3(.64,.88,.98),(.11*iceRim+.08*blueFacet)*near);
   }else if(vMat==6){ // Raw ore: continuous amber mineral seams in weathered host rock.
     vec2 p=floor(vUv*vec2(12.0,15.0));
     float trace=step(.72,hashCell(p+17.0));
@@ -131,5 +139,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   newTextures:0,
   naturalDetailFamilies:Object.freeze(['sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins']),
   secondaryNaturalAccents:Object.freeze(['grass-moss-pollen','soil-clay-lenses','stone-quartz-seams','crystal-chevron-prisms','ore-branch-veins']),
-  mineralInclusions:Object.freeze(['crystal-indigo-core','crystal-frost-inclusions','ore-oxidized-seams'])
+  mineralInclusions:Object.freeze(['crystal-indigo-core','crystal-frost-inclusions','ore-oxidized-seams']),
+  coldGeologyAccents:Object.freeze(['stone-frost-quartz-ridges','stone-cold-pockets','crystal-glacial-cleavage'])
 });
