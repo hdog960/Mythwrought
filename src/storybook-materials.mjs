@@ -47,7 +47,14 @@ void main(){
     vec2 litterRot=vec2(dot(litterUv,litterAxis),dot(litterUv,vec2(-litterAxis.y,litterAxis.x)));
     float litterShape=1.0-smoothstep(.07,.14,length(litterRot*vec2(.75,1.7)));
     float fallenLeaf=step(.68,litterSeed)*litterShape;
+    // Small blue-green dew pockets and ochre fern-litter streaks lend damp
+    // woodland turf a readable morning sheen without a transparency pass.
+    float dewField=.5+.5*sin(vUv.x*12.0+sin(vUv.y*8.0))*sin(vUv.y*13.0);
+    float dew=smoothstep(.88,.97,dewField);
+    float fernLitter=1.0-smoothstep(.025,.09,abs(sin(vUv.x*11.0-vUv.y*4.0+sin(vUv.y*6.0))));
     shade=.87+.12*tile+.075*leaf+.09*moss;
+    base=mix(base,vec3(.42,.73,.69),.13*dew*near);
+    base=mix(base,vec3(.57,.43,.25),.08*fernLitter*near);
     base=mix(base,vec3(.33,.52,.28),.23*moss*near);
     base=mix(base,vec3(.93,.76,.31),(.20*golden+.14*pollen)*near);
     base=mix(base,vec3(.77,.49,.21),.28*fallenLeaf*near);
@@ -206,5 +213,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   ironstoneAccents:Object.freeze(['stone-ironstone-lenses','stone-pale-mineral-rims']),
   agateHematiteAccents:Object.freeze(['crystal-nested-agate-bands','crystal-indigo-growth-core','ore-hematite-host-plates','ore-pale-plate-boundaries']),
   forestFloorMaterialAccents:Object.freeze(['grass-fallen-leaf-clusters','soil-branching-exposed-roots']),
+  woodlandDewAccents:Object.freeze(['grass-morning-dew','grass-fern-litter-streaks']),
   copperOreAccents:Object.freeze(['ore-malachite-halos','ore-copper-boundaries','ore-host-rock-fractures'])
 });
