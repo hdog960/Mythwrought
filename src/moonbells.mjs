@@ -189,6 +189,27 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
       [rootX-dx*reach-sideX*spread,level-.035,rootZ-dz*reach-sideZ*spread],tint,7);
    }
   }
+  // Rare blue-green dew fronds lean out from genuine natural rock faces.
+  // They are opaque, unlit and use the same stone adjacency and grass edit guard.
+  if(rockEdges.length&&hash(x,z,world.seed,787)>.84){
+   const [dx,dz]=rockEdges[Math.floor(hash(x,z,world.seed,797)*rockEdges.length)];
+   const sideX=-dz,sideZ=dx,rootX=px+dx*.30,rootZ=pz+dz*.30;
+   const rise=.35+hash(x,z,world.seed,809)*.16;
+   const top=[rootX-dx*.12,ground+rise,rootZ-dz*.12];
+   tri(out,[rootX-.025,ground+.02,rootZ],[rootX+.025,ground+.02,rootZ],
+     top,[.24,.48,.48],7);
+   for(let j=0;j<4;j++){
+    const t=.22+j*.19,level=ground+rise*t,spread=.10+j*.016;
+    const midX=rootX-dx*.12*t,midZ=rootZ-dz*.12*t;
+    const tipX=midX-dx*.06,tipZ=midZ-dz*.06;
+    for(const sign of [-1,1]){
+     tri(out,[midX,level,midZ],
+       [tipX+sideX*spread*sign,level+.075,tipZ+sideZ*spread*sign],
+       [midX+sideX*.025*sign,level+.115,midZ+sideZ*.025*sign],
+       j%2?[.42,.72,.67]:[.55,.80,.74],7);
+    }
+   }
+  }
   flowers++;
  }
  if(out.length/STRIDE>MAX_FLOWERS*VERTICES_PER_FLOWER)throw Error('Moonbell vertex budget');
