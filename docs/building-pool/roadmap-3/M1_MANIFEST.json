@@ -6,7 +6,7 @@
   "baselineCheckpoint": "007",
   "designSlots": 705,
   "m1Authored": 30,
-  "coordinateSlots": 70921,
+  "coordinateSlots": 71293,
   "designs": [
     {
       "id": "r3:blacksmith:temperate:small:1",
@@ -79,7 +79,7 @@
         "height": 19,
         "depth": 15
       },
-      "occupiedCoordinates": 1115,
+      "occupiedCoordinates": 1116,
       "roofStyle": "flat-shaded",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -98,7 +98,7 @@
         "height": 19,
         "depth": 19
       },
-      "occupiedCoordinates": 1650,
+      "occupiedCoordinates": 1651,
       "roofStyle": "flat-shaded",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -117,7 +117,7 @@
         "height": 19,
         "depth": 23
       },
-      "occupiedCoordinates": 2276,
+      "occupiedCoordinates": 2277,
       "roofStyle": "flat-shaded",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -136,7 +136,7 @@
         "height": 19,
         "depth": 18
       },
-      "occupiedCoordinates": 1284,
+      "occupiedCoordinates": 1285,
       "roofStyle": "steep-snow",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -155,7 +155,7 @@
         "height": 19,
         "depth": 22
       },
-      "occupiedCoordinates": 1891,
+      "occupiedCoordinates": 1892,
       "roofStyle": "steep-snow",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -174,7 +174,7 @@
         "height": 19,
         "depth": 26
       },
-      "occupiedCoordinates": 2610,
+      "occupiedCoordinates": 2611,
       "roofStyle": "steep-snow",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -193,7 +193,7 @@
         "height": 19,
         "depth": 17
       },
-      "occupiedCoordinates": 1369,
+      "occupiedCoordinates": 1370,
       "roofStyle": "asymmetric-canopy",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -212,7 +212,7 @@
         "height": 19,
         "depth": 21
       },
-      "occupiedCoordinates": 1991,
+      "occupiedCoordinates": 1992,
       "roofStyle": "asymmetric-canopy",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -231,7 +231,7 @@
         "height": 19,
         "depth": 25
       },
-      "occupiedCoordinates": 2717,
+      "occupiedCoordinates": 2718,
       "roofStyle": "asymmetric-canopy",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -250,7 +250,7 @@
         "height": 19,
         "depth": 19
       },
-      "occupiedCoordinates": 1583,
+      "occupiedCoordinates": 1584,
       "roofStyle": "terraced",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -269,7 +269,7 @@
         "height": 19,
         "depth": 23
       },
-      "occupiedCoordinates": 2235,
+      "occupiedCoordinates": 2236,
       "roofStyle": "terraced",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -288,7 +288,7 @@
         "height": 19,
         "depth": 27
       },
-      "occupiedCoordinates": 2994,
+      "occupiedCoordinates": 2995,
       "roofStyle": "terraced",
       "stairSteps": 0,
       "status": "THEORETICAL_UNMERGED"
@@ -421,7 +421,7 @@
         "height": 20,
         "depth": 22
       },
-      "occupiedCoordinates": 1968,
+      "occupiedCoordinates": 2040,
       "roofStyle": "steep-snow",
       "stairSteps": 10,
       "status": "THEORETICAL_UNMERGED"
@@ -440,7 +440,7 @@
         "height": 22,
         "depth": 26
       },
-      "occupiedCoordinates": 2961,
+      "occupiedCoordinates": 3093,
       "roofStyle": "steep-snow",
       "stairSteps": 12,
       "status": "THEORETICAL_UNMERGED"
@@ -459,7 +459,7 @@
         "height": 24,
         "depth": 30
       },
-      "occupiedCoordinates": 4153,
+      "occupiedCoordinates": 4309,
       "roofStyle": "steep-snow",
       "stairSteps": 14,
       "status": "THEORETICAL_UNMERGED"
