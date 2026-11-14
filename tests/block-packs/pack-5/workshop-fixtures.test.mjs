@@ -159,7 +159,6 @@ test('all six material-box faces maintain outward winding through every Y quarte
  }
 });
 
-
 test('refined anvil horn is a long tapered selectable steel silhouette, not merely a surface tint',()=>{
   for(const variant of WORKSHOP_VARIANTS['pack5:088']){
     const a=descriptor('pack5:088',variant).art[0].details;
