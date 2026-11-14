@@ -69,6 +69,7 @@ test('reject unreachable rooms and fake multi-level stair links',()=>{
 test('palette swaps and renames alone cannot count as new architecture',()=>{
  const a=blueprint(1),b=blueprint(2);
  b.modules[1].cells[0][3]='builtin:wood';
+ b.spaces[0].kind='storage';b.navigation.nodes[1].kind='storage';b.openings[0].facing='north';
  assert.equal(geometryFingerprint(a),geometryFingerprint(b));
  assert.throws(()=>validatePool([a,b],ASSET_CATALOG),/repeated architectural geometry/);
  const c=blueprint(2,1);
@@ -84,4 +85,10 @@ test('require accessible observation on towers and gateway in gatehouses',()=>{
   const b=blueprint();b.type=type;b.id=slotId(type,'temperate','small',1);
   assert.throws(()=>validateBlueprint(b,ASSET_CATALOG),pattern);
  }
+});
+test('east/west door width uses z extent; duplicate modules are invalid',()=>{
+ const b=blueprint();b.openings[0].facing='east';assert.doesNotThrow(()=>validateBlueprint(b,ASSET_CATALOG));
+ b.openings[0].z=11;assert.throws(()=>validateBlueprint(b,ASSET_CATALOG),/outside envelope/);
+ const c=blueprint();c.modules[1].id=c.modules[0].id;
+ assert.throws(()=>validateBlueprint(c,ASSET_CATALOG),/duplicate structural module/);
 });
