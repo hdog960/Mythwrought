@@ -300,3 +300,14 @@ The current main remains automation-only checkpoint 007, and **all 21 families a
 ### Checkpoint 008 ledger synchronization (final recheck, 2026-11-14)
 
 After the activation commit, main advanced again to `ac263720b60641c65b02330348dd76d0ef9cb75e`, **documentation-only**, adding checkpoint 008 to `docs/INTEGRATION_CHECKPOINTS.md` and the release ledger. This resolves the temporary documentation lag described earlier; it **does not** change runtime block IDs, Pack 1 files or ownership. The live registry still supports 0–8. All 30 Pack 1 candidate IDs 9–38 remain isolated, unmerged and unregistered. Native candidate tests and authentic candidate screenshots remain pending.
+
+
+## Milestone 6 native Node gate CLOSED (PASS) — browser gate still OPEN
+
+**Supersedes the older “81 candidate tests only ran in V8 shims” chronology above.** The isolated Pack 1 source + tests have now been reconstructed from exact GitHub source at PR #113 reference `84001dbddd9fa9630ad9382c9f9d85c986590a9c`, all **21 source/test file blobs** checked byte-for-byte using `git hash-object`. **All nine nested Pack 1 modules actually executed together under genuine Node 22.16.0: 93/93 PASS, 0 fail, 0 skipped, 0 TODO.** This includes **81 actual native asset/fixture/cross-family/ray tests** plus **12 genuine native gallery-helper/PNG-proof tests**. No V8 shims were involved.
+
+The exact 21 Git blob hashes, full test command and qualification are in `M6_NATIVE_NODE_EVIDENCE.md`. The local test environment was a verified Pack 1-only module mirror rather than a complete live game checkout; accordingly this result certifies **Pack 1 standalone native source tests**, not production engine integration or real browser rendering.
+
+**Remaining mandatory Milestone 6 acceptance:** run five authentic Pack 1 galleries × 3 Chromium landscape sizes (667×375, 844×390, 932×430), capture and inspect all 30 real screenshot files, verify real browser offline fixture interactions, and obtain separately authorized live-engine material IDs/shape collision/selection/rotation/schema-1 save and physical iPhone artwork/control approval. Local Chromium launches but `file:` and `data:` navigation return `ERR_BLOCKED_BY_ADMINISTRATOR` (no workaround attempted), so those screenshot gates have **not passed**. The all-in-one `run-acceptance.mjs` has not produced its final PASS report.
+
+Latest verified main `ac263720b60641c65b02330348dd76d0ef9cb75e` is automation-only checkpoint 008; Pack 1 was explicitly excluded and live production IDs remain 0–8. All 21 families / 30 reserved IDs 9–38 remain CANDIDATE, draft/unmerged/undeployed; Gate A OPEN and v0.11 LOCKED.
