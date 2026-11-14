@@ -4,10 +4,10 @@
 import {BLOCK,terrainHeight,baseBlock,WORLD_MAX_Y} from './voxel.mjs';
 export const TREE_VARIANTS=Object.freeze(['roundwood','spire','windswept']);
 const key=(x,y,z)=>x+','+y+','+z';
-export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.GRASS}={}){
+export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES??BLOCK.GRASS}={}){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
     !Number.isInteger(x)||!Number.isInteger(z)||!TREE_VARIANTS.includes(variant)||
-    ![BLOCK.GRASS,BLOCK.CRYSTAL].includes(leafId))return null;
+    ![BLOCK.GRASS,BLOCK.CRYSTAL,BLOCK.LEAVES].includes(leafId))return null;
  const ground=terrainHeight(x,z,world.seed);
  const height=variant==='spire'?7:variant==='windswept'?6:5;
  if(ground+height+2>WORLD_MAX_Y||world.get(x,ground,z)!==BLOCK.GRASS)return null;
@@ -52,22 +52,26 @@ export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.GRASS}
   const h=terrainHeight(x+dx,z+dz,world.seed);
   if(Math.abs(h-ground)>1||world.get(x+dx,h,z+dz)!==baseBlock(x+dx,h,z+dz,world.seed))return null;
  }
- return {origin:[x,ground,z],variant,leafId,cells:occupied,blockCount:occupied.length,optIn:true};
+ return {origin:[x,ground,z],seed:world.seed,variant,leafId,cells:occupied,blockCount:occupied.length,optIn:true};
 }
 export function placeVoxelTree(world,plan){
  if(!world||typeof world.set!=='function'||typeof world.get!=='function'||
-    !plan?.optIn||!Array.isArray(plan.cells)||!plan.cells.length||
-    !TREE_VARIANTS.includes(plan.variant))return false;
- // Revalidate all coordinates and the exact original air before any write.
- const seen=new Set();
- for(const cell of plan.cells){
-  if(!Array.isArray(cell)||cell.length!==4||!cell.every(Number.isInteger))return false;
-  const [x,y,z,id]=cell,k=key(x,y,z);
-  if(seen.has(k)||![BLOCK.WOOD,plan.leafId].includes(id)||
-     y>WORLD_MAX_Y||world.get(x,y,z)!==BLOCK.AIR||
-     baseBlock(x,y,z,world.seed)!==BLOCK.AIR)return false;
-  seen.add(k);
+    !plan?.optIn||!Array.isArray(plan.origin)||plan.origin.length!==3||
+    !Number.isInteger(plan.seed)||plan.seed!==world.seed||
+    !TREE_VARIANTS.includes(plan.variant)||!Number.isInteger(plan.leafId))return false;
+ // Replan from the actual seed and unedited surroundings. A caller cannot
+ // truncate the canopy, inject arbitrary voxels, or replay onto another seed.
+ const fresh=planVoxelTree(world,plan.origin[0],plan.origin[2],
+   {variant:plan.variant,leafId:plan.leafId});
+ if(!fresh||!Array.isArray(plan.cells)||plan.cells.length!==fresh.cells.length||
+    plan.blockCount!==fresh.blockCount||
+    plan.origin.some((v,i)=>v!==fresh.origin[i]))return false;
+ for(let i=0;i<fresh.cells.length;i++){
+  const expected=fresh.cells[i],actual=plan.cells[i];
+  if(!Array.isArray(actual)||actual.length!==4||
+     actual.some((v,j)=>v!==expected[j]))return false;
  }
- for(const [x,y,z,id] of plan.cells)if(!world.set(x,y,z,id))return false;
+ // Validate before writing. World.set is the existing ordinary voxel edit API.
+ for(const [x,y,z,id] of fresh.cells)if(!world.set(x,y,z,id))return false;
  return true;
 }
