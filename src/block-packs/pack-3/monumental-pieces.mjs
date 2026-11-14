@@ -54,7 +54,7 @@ const GUARDIAN=Object.freeze([
   part('body',.359375,.640625,.359375,.640625,.71875,.640625),
   part('body',.328125,.71875,.328125,.671875,.859375,.671875),
   part('edge',.375,.859375,.359375,.625,.9375,.640625),
-  part('body',.125,.453125,.140625,.3125,.6875,.21875)
+  part('body',.125,.453125,.140625,.3125,.6875,.34375)
 ]);
 const defs=Object.freeze([
   Object.freeze({id:123,roster:76,name:'Greywater Aqueduct Channel',slug:'aqueduct-open-trough',
