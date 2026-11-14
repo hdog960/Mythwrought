@@ -36,6 +36,15 @@ export function validatePhysicalDescriptor(descriptor){
     cells.add(cellKey);boxes+=part.boxes.length;
   }
   if(boxes>256||!cells.has('0,0,0'))throw Error('Invalid anchor or mesh budget');
+  if(descriptor.variants!==undefined){
+    if(!Array.isArray(descriptor.variants)||!descriptor.variants.length||!descriptor.variant)throw Error('Invalid variants');
+    const seen=new Set([descriptor.variant]);
+    for(const v of descriptor.variants){
+      if(typeof v.variant!=='string'||seen.has(v.variant))throw Error('Duplicate/invalid variant');
+      seen.add(v.variant);
+      validatePhysicalDescriptor({...descriptor,parts:v.parts,variant:v.variant,variants:undefined});
+    }
+  }
   return true;
 }
 export function orientedParts(descriptor,rotation=0){
@@ -60,9 +69,17 @@ function rayBox(origin,direction,box){
 export function makePack5Fixture(descriptors=[]){
   const registry=new Map(),placed=new Map(),occupied=new Map(),supports=new Set();
   for(const d of descriptors){validatePhysicalDescriptor(d);if(registry.has(d.symbolicId))throw Error('Duplicate symbolic ID');registry.set(d.symbolicId,d);}
-  const plan=(id,anchor,rotation=0)=>{
-    if(!registry.has(id)||!integer3(anchor)||!Number.isInteger(rotation)||rotation<0||rotation>3)throw Error('Invalid placement');
-    return orientedParts(registry.get(id),rotation).map(p=>({cell:p.cell.map((v,i)=>v+anchor[i]),boxes:p.boxes,collisionBoxes:p.collisionBoxes}));
+  const resolve=(id,variant)=>{
+    const d=registry.get(id);
+    if(!d)throw Error('Unknown symbolic ID');
+    if(variant===null||variant===d.variant)return d;
+    const v=d.variants?.find(v=>v.variant===variant);
+    if(!v)throw Error('Unknown geometry variant');
+    return {...d,parts:v.parts,variant:v.variant,variants:undefined};
+  };
+  const plan=(id,anchor,rotation=0,variant=null)=>{
+    if(!integer3(anchor)||!Number.isInteger(rotation)||rotation<0||rotation>3)throw Error('Invalid placement');
+    return orientedParts(resolve(id,variant),rotation).map(p=>({cell:p.cell.map((v,i)=>v+anchor[i]),boxes:p.boxes,collisionBoxes:p.collisionBoxes}));
   };
   const requiredSupport=(d,a,rotation)=>{
     if(d.attachment==='none')return null;
@@ -71,19 +88,19 @@ export function makePack5Fixture(descriptors=[]){
   };
   const fixture={
     setSupport(cell,enabled=true){if(!integer3(cell))throw Error('Invalid support cell');if(enabled)supports.add(key(...cell));else supports.delete(key(...cell));},
-    place(id,anchor,rotation=0){
-      const parts=plan(id,anchor,rotation),d=registry.get(id),anchorKey=key(...anchor);
+    place(id,anchor,rotation=0,variant=null){
+      const parts=plan(id,anchor,rotation,variant),d=registry.get(id),anchorKey=key(...anchor);
       if(placed.has(anchorKey))return {ok:false,reason:'Anchor occupied'};
       if(parts.some(p=>occupied.has(key(...p.cell))))return {ok:false,reason:'Occupied cell'};
       const support=requiredSupport(d,anchor,rotation);
       if(support&&!supports.has(key(...support)))return {ok:false,reason:'Missing attachment'};
-      placed.set(anchorKey,{id,anchor:[...anchor],rotation,parts});
+      placed.set(anchorKey,{id,anchor:[...anchor],rotation,variant,parts});
       for(const p of parts)occupied.set(key(...p.cell),anchorKey);
       return {ok:true,cells:parts.map(p=>[...p.cell])};
     },
     remove(cell){if(!integer3(cell))throw Error('Invalid removal cell');const a=occupied.get(key(...cell));if(!a)return false;
       for(const p of placed.get(a).parts)occupied.delete(key(...p.cell));placed.delete(a);return true;},
-    cell(cell){if(!integer3(cell))throw Error('Invalid query cell');const a=occupied.get(key(...cell));const p=a&&placed.get(a);return p?{symbolicId:p.id,anchor:[...p.anchor],rotation:p.rotation}:null;},
+    cell(cell){if(!integer3(cell))throw Error('Invalid query cell');const a=occupied.get(key(...cell));const p=a&&placed.get(a);return p?{symbolicId:p.id,anchor:[...p.anchor],rotation:p.rotation,variant:p.variant}:null;},
     collides(box){if(!Array.isArray(box)||box.length!==6||!box.every(Number.isFinite)||box.some((v,i)=>i<3&&v>=box[i+3]))throw Error('Invalid collision probe');
       for(const p of placed.values())for(const part of p.parts)for(const b of part.collisionBoxes)
         if(overlaps(asAabb(b,part.cell),box))return true;
@@ -95,7 +112,7 @@ export function makePack5Fixture(descriptors=[]){
         if(t!==null&&t<=maxDistance&&(!hit||t<hit.distance))hit={symbolicId:p.id,anchor:[...p.anchor],cell:[...part.cell],distance:t};
       }return hit;},
     removeRay(origin,direction,maxDistance=6){const hit=fixture.raycast(origin,direction,maxDistance);return hit?fixture.remove(hit.cell):false;},
-    snapshot(){const entries=[...placed.values()].map(p=>[...p.anchor,p.id,p.rotation]);
+    snapshot(){const entries=[...placed.values()].map(p=>p.variant===null?[...p.anchor,p.id,p.rotation]:[...p.anchor,p.id,p.rotation,p.variant]);
       entries.sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]||a[3].localeCompare(b[3]));
       return {format:PACK5_FIXTURE_FORMAT,entries};},
     restore(snapshot){
@@ -103,10 +120,10 @@ export function makePack5Fixture(descriptors=[]){
         snapshot.schema!==undefined)throw Error('Not a Pack 5 fixture snapshot');
       const backup=fixture.snapshot(),positions=[...supports];
       placed.clear();occupied.clear();
-      try{for(const row of snapshot.entries){if(!Array.isArray(row)||row.length!==5||
-          !fixture.place(row[3],row.slice(0,3),row[4]).ok)throw Error('Invalid snapshot entry');}}
+      try{for(const row of snapshot.entries){if(!Array.isArray(row)||(row.length!==5&&row.length!==6)||
+          !fixture.place(row[3],row.slice(0,3),row[4],row[5]??null).ok)throw Error('Invalid snapshot entry');}}
       catch(err){placed.clear();occupied.clear();supports.clear();for(const k of positions)supports.add(k);
-        for(const row of backup.entries)fixture.place(row[3],row.slice(0,3),row[4]);throw err;}
+        for(const row of backup.entries)fixture.place(row[3],row.slice(0,3),row[4],row[5]??null);throw err;}
       return true;
     },
     count(){return placed.size;}
