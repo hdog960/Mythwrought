@@ -1,5 +1,7 @@
 # MYTHWROUGHT — Pack 3 Milestone 6 independent acceptance handoff
-**2026-11-14 · FINAL CANDIDATE ACCEPTANCE REFINEMENT: READY FOR CREATOR REVIEW ONLY. NEVER MERGED/DEPLOYED.**
+**2026-11-14 · CHECKPOINT 007 SOURCE-COMPATIBILITY REVERIFIED. CANDIDATES ONLY; NEVER MERGED/DEPLOYED.**
+
+**CURRENT AUTHORITATIVE BASELINE:** integrated main `caf47776b723a36684edc1a72749e49268ccc688`, checkpoint **007** (creator-requested **automation-only** incorporation); Pack 3 remains isolated in draft PR #112. This replaces the formerly current checkpoint 006 baseline and the older, pre-007 non-greedy 17,140-triangle mesh estimates below. Historical M0–M6 test notes are retained for provenance. Current candidate geometry, names, IDs and save fixtures are unchanged; latest merged generic mesher significantly reduces prototype faces. Actual player/gameplay certification is still open.
 
 This document is a review checklist and integration request, not live player-game certification or creator Gate A approval.
 
@@ -72,4 +74,39 @@ Reverified latest integrated main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84` / i
 **New independent, source-exact mesh/contract audit (actual pending source from :00 PR #106 and :12 PR #108):** all **68 quarter-turn trial meshes** (17 physical families × four trial orientations; the exported review catalog supports only **56** combinations because the four unrotated surface materials remain yaw-zero) passed `validateShape`, `rotateShape`, `canPlaceShape` isolation, within-cell position bounds, buffer-length and Uint16 index checks. Checked the **actual cross-product of the 68,560 triangle faces** against their emitted normals; **zero reversed-winding or degenerate faces**. Maximum per-piece mesh **2,464 triangles / 4,928 vertices** (statue); one of each archetype totals **17,140 triangles**. These are synthetic :12 candidate prototype costs, not iPhone FPS, memory, draw-call or live GPU measurements.
 
 **QA decision:** no new Pack 3-only source/art defect was found; therefore no speculative modifications to candidate physical geometry, engines, registry, player saves, workflows or other packs. Previous reviewer framing and preview-save guard repairs remain intact. Draft PR and candidate acceptance remain review-ready, not incorporated. Recheck **exact PR HEAD CI** separately: a successful older workflow must not be represented as the latest head's result. All actual creator art/control approval and production registry/save/renderer/offline/iPhone gates remain OPEN; v0.11 stays LOCKED. This round is **acceptance verification, not gameplay integration**.
+
+
+## Checkpoint 007 compatibility addendum — current authoritative acceptance
+
+**Change origin:** checkpoint 007 merged only approved :00 and :12 opt-in automation contributions (and three other automation lanes) into main through PR #120; manual Packs 1–5 and the independent building PRs were explicitly excluded. The Pack 3 branch remains **two main commits behind**. Do **not** rebase, merge, register or auto-place in this isolated review. PR #106/#108 remain listed as open while approved portions of their code are now on `main`; use **actual merged main** for compatibility, not the old pending-source triangle metrics. Live registry still accepts **only IDs 0–8**; schema-1 edits and 255 unvisited sentinel remain unchanged.
+
+**Updated Pack 3-owned manifest:** `PACK3_COORDINATION.auditedMain` now records `caf47776b723a36684edc1a72749e49268ccc688`, `integratedCheckpoint:'007'`, and all 17 row `duplicateAudit` statuses `new-vs-main-007`. Tests in `roofing.test.mjs` and `monumental-pieces.test.mjs` assert the new audit baseline. Exact-GitHub-blob local copies of these three edited files were checked after commit.
+
+**Genuine native Node** v22.16.0, exact six committed nested suites: **64 passed, 0 failed** after checkpoint manifest update. The current exact committed Chromium `gallery-browser.py` also passed on **667×375**, **844×390**, **932×430**: 17 distinct models, 13 working four-turn-reset controls, seven directional signatures changing, **207 framed initial/rotated canvas images**, zero JS page errors. Three authentic full-page screenshots captured.
+
+**Current merged-main interface compatibility**, source files `src/voxel-shape-interactions.mjs` blob `01be82e6c308e47a35fa6588cc6ed1ebeafca307` and `src/shape-prototypes.mjs` blob `868bbb9372b09e321f8db38b54c4ca52fabb7bc6`: **68/68** authored candidate × 4 quarter-turn shape/rotation/placement/prototype-mesh trials passed. The new greedy surface mesh emits only **9,250 triangles across all 68 trial orientations**, zero reversed-winding or degenerate triangles, all indices/bounds valid. An independent *six-normal exposed-area* reference algorithm compared all mesh face areas to the exact original AABB union for **68/68** rotations: maximum absolute discrepancy `4.66e-9`, no missing/extra exterior area detected. The 17 default orientations now contain **2,326 triangles in total**, **86.4% fewer** than the old 17,140 non-greedy output. The largest single piece is **238 triangles** (ID 121 arch window at turns 1/3), down from the old 2,464-triangle maximum (**90.3% fewer**). No Pack 3 geometry change caused the reduction; it is shared mesher work from checkpoint 007. These are **prototype triangle/vertex counts only**, NOT FPS/GPU measurements.
+
+| Candidate ID | Family | Merged greedy prototype triangles (orientations 0–3) |
+|---:|---|---|
+|109|Honeywood shingles|118 / 118 / 118 / 118|
+|110|Hearthclay roof tiles|98 / 98 / 98 / 98|
+|111|Moonshale slate|92 / 92 / 92 / 92|
+|112|Sunfield thatch|140 / 140 / 140 / 140|
+|113|Pitched roof stair|88 / 88 / 88 / 88|
+|114|Hip roof corner|72 / 72 / 72 / 72|
+|115|Crown ridge|88 / 94 / 88 / 94|
+|116|Fortress wall|190 / 188 / 190 / 188|
+|117|Crenel battlement|142 / 136 / 134 / 136|
+|118|Stone buttress|128 / 128 / 128 / 128|
+|119|Ornamental column|174 / 170 / 174 / 170|
+|120|Dentil cornice|194 / 178 / 184 / 178|
+|121|Arched surround|230 / 238 / 230 / 238|
+|122|Carved relief|180 / 180 / 180 / 180|
+|123|Dry aqueduct channel|60 / 60 / 60 / 60|
+|124|Crystal spire (nonemissive)|164 / 164 / 164 / 164|
+|125|Static carved statue|168 / 164 / 168 / 164|
+
+**Merged :00 staged orientation and body-fit compatibility**: tested **52/52** candidate IDs 113–125 × turns 0–3 through merged `src/voxel-orientation-sidecar.mjs` blob `69d7cabb7cb16fec19a69496f02bc358f424a447`, confirming safe round-trip, identity matching and ignoring stale edits; this does **not persist** anything into production schema-1 saves. Six independent `src/voxel-shape-fit.mjs` blob `ec5adc274d8b45c91d3dade81c3d9c2830380849` body fit/miss probes confirmed correct empty arrow-slit, crenel, arch, dry aqueduct and statue leg-gap volumes plus solid channel bank. All passed in a source-exact isolated JavaScript harness; they are **not** connected to current player physics.
+
+**Still blocked before creator-approved integration:** full player-driven WebGL2, iPhone landscape two-thumb controls/art review, old schema-1 save migration, rotation sidecar persistence and stale-edit handling through a live player, live registration of candidate IDs, actual construction/collision, mass placement FPS, real offline reload, and any water/lighting/NPC behavior. Root CI's green status does not run the nested Pack 3 tests; exact-head CI and dedicated Node/Chromium evidence are distinct. No approval to merge, deploy, generate world placements, edit shared systems, unlock v0.11 or presume physical device certification.
 
