@@ -65,74 +65,113 @@
     {
       "roster": 16,
       "name": "Wooden slabs",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "half-block; requires shared shape API",
-      "visualVariants": 0,
+      "candidateId": 63,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 2,
+      "distinction": "planed half-height oak slab, upper/lower occupancy state",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage"
+      ]
     },
     {
       "roster": 17,
       "name": "Wooden stairs",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "two-step authored wood silhouette",
-      "visualVariants": 0,
+      "candidateId": 64,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 8,
+      "distinction": "two-step tread and riser, four compass rotations plus upper/lower variant",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage"
+      ]
     },
     {
       "roster": 18,
       "name": "Wooden fences",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "slim rail and upright posts",
-      "visualVariants": 0,
+      "candidateId": 65,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "split-rail open-air fence with twin uprights and two rails",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage"
+      ]
     },
     {
       "roster": 19,
       "name": "Wooden fence gates",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "state-dependent open/close collision",
-      "visualVariants": 0,
+      "candidateId": 66,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 8,
+      "distinction": "hinged lattice gate; actual AABB changes between open and closed",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage",
+        "central-engine state change event + safe open/close transition"
+      ]
     },
     {
       "roster": 20,
       "name": "Wooden doors",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "state-dependent vertical hinged panel",
-      "visualVariants": 0,
+      "candidateId": 67,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 8,
+      "distinction": "carved single-cell hinged door leaf with actual swing profile",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage",
+        "central-engine state change event + safe open/close transition"
+      ]
     },
     {
       "roster": 21,
       "name": "Wooden trapdoors",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "state-dependent horizontal hatch",
-      "visualVariants": 0,
+      "candidateId": 68,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 16,
+      "distinction": "top/bottom horizontal hatch converts to vertical open panel",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage",
+        "central-engine state change event + safe open/close transition"
+      ]
     },
     {
       "roster": 22,
@@ -242,5 +281,16 @@
       "worldPlaced": false,
       "integrated": false
     }
+  ],
+  "currentMilestone": 2,
+  "completedFamilies": 10,
+  "unallocatedFamilies": 8,
+  "lastVerifiedMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "progress": "M0 foundation + M1 four material candidates + M2 six physical shape/joinery candidates; review only",
+  "pendingEngineAPIs": [
+    "generic non-cube raycast/collision",
+    "material registry expansion for candidate IDs 59–68",
+    "orientation/variant/open metadata storage preserving schema 1",
+    "hinged state transition handling"
   ]
 }
