@@ -2,8 +2,8 @@
   "schema": "mythwrought.building-pool.roadmap-1.manifest.v1",
   "title": "Homes & Regional Life",
   "gate": "v0.10 Gate A OPEN; v0.11 LOCKED",
-  "milestone": "M1 physical candidate acceptance: solid-profile shells, live stable gate flanks, exact-source checks open",
-  "status": "45_UNMERGED_CANDIDATES_M1_SOLID_SHELL_AND_LIVE_STALL_GATE_REPAIRED",
+  "milestone": "M1 — window-plane compatibility and roof-step backing; physical candidate integration OPEN",
+  "status": "45_UNMERGED_CANDIDATES_80_NODE_SOURCE_EXACT_ROOF_AND_WINDOW_REPAIR",
   "target": 885,
   "authoredBlueprintCount": 45,
   "biomes": [
@@ -56,9 +56,9 @@
     "manualPackHeads": {
       "pack1": "c9630ac6bad5e06a645f74bd319beebea736e9ce",
       "pack2": "8fb1a189c20b22144d2e501fde76500385ee44ba",
-      "pack3": "78b63e224c52bd3c79a73847b56661157a73a806",
-      "pack4": "c5a9f2715abe6911b79f373ce924dca44a0d9617",
-      "pack5": "7b968ffdacccfee7b08e7318ade56c00c1e0b540"
+      "pack3": "803391b0a60078d81e0d049f917a5e1eab6ec51f",
+      "pack4": "30def508e9d555a65a1b4190f27ecb9ca36f8e22",
+      "pack5": "3703699086a8c61a8e93057383682ebf8dda8ba3"
     },
     "checkpoint008": {
       "status": "main automatic-world physical voxels now active; only pre-existing automation-owned tree/cave/court structures; 12 biome130 candidates unregistered",
@@ -79,7 +79,7 @@
   "certifiedPhysicalIPhone": false,
   "candidateBlueprintCount": 45,
   "creatorAcceptedBlueprintCount": 0,
-  "authoredVoxelPlacements": 50331,
+  "authoredVoxelPlacements": 52652,
   "remainingDesigns": 840,
   "representativesByType": {
     "house": 15,
@@ -88,36 +88,36 @@
   },
   "testEvidence": {
     "nativeNode": {
-      "run": "Node v22.16.0 on local Roadmap 1 source checkout whose eight newly edited/created source/test Git blobs were verified against PR branch in this session",
-      "cases": "68/68 pass, 0 fail, 0 skip, 0 todo; 62 previous + 5 exterior-envelope regressions + 1 stable live-flank regression",
-      "exactPRHead": "Focused code/test blobs SHA-matched before commits; fresh full merged-main+PR exact-head CI is not certified (root Actions excludes nested suites)"
+      "run": "Clean isolated Roadmap 1 local source checkout; Node v22.16.0, all module blob hashes match remote PR source/test Git objects",
+      "cases": "80/80 pass, 0 fail, 0 skips, 0 todo (68 previous + 6 glazing + 6 roof step)",
+      "exactPRHead": "YES for isolated Roadmap 1-owned code/test blobs SHA-matched to draft PR #121 head; combined latest-main + PR and central Actions NOT certified"
     },
     "chromium": {
-      "renderer": "Genuine headless Chromium Canvas2D schematic, NOT a physical WebGL2/asset-mesh preview",
+      "renderer": "Genuine headless Chromium Canvas2D, source-derived schematic, NOT WebGL2 asset mesher",
       "screenshots": 54,
       "viewports": [
         "667x375",
         "844x390",
         "932x430"
       ],
-      "samples": "9 candidates × exterior/cutaway × 3 viewports; rerendered after BOTH wall-core and live-stable-gate repairs",
+      "samples": "9 designs × exterior and cutaway × 3 sizes after roof/window repairs",
       "authentic": true,
-      "source": "Local test runner, 54 PNG images; not committed as screenshot artifacts or used as physical-iPhone proof"
+      "source": "local /mnt/data/mythwrought-roadmap1-r2-captures, not PR artifact or gameplay"
     },
     "physicalIPhone": false,
     "ci": {
-      "exactNewRoadmap1Head": "Queued as of PR-head 1a3ae20ffe11f886a580f835bfd10d18c3737dfc; final conclusion not observed yet",
-      "coverageNote": "Central GitHub Actions runs root tests/*.test.mjs and does not run Roadmap1 nested 62-test suite; clean independent native Node replay achieved separately."
+      "exactNewRoadmap1Head": "await fresh GitHub exact-head Actions check; no green status seen before final update",
+      "coverageNote": "Root CI runs tests/*.test.mjs and does not execute nested Roadmap 1 80-case suite; separate source-exact Node run performed locally"
     }
   },
   "pending": [
-    "Clean exact-current-PR-head dedicated 68-case native Node/CI replay in combined latest-main checkout (root GitHub Actions does not discover nested Roadmap 1 tests)",
-    "Actual server-rendered Chromium/WebGL2 with approved physical asset mesh geometry and visual inspection (this local browser has no available WebGL2 context)",
-    "Final roof profile/gap/seams and beam load/span with Pack 2 & 3 physical candidates",
-    "Actual Pack 4 window mount/glass sealing and Pack 2 real hinged-door orientation/swing collision ABI",
-    "Pack 5 multi-cell bed full box union and save-state sidecar; Pack5:096 stall partition is NOT STARTED, only symbolic future fixtures",
-    "Creator independent regional-design silhouette and near-duplicate acceptance (71.99% nearest similarity is advisory)",
-    "840 additional original blueprints; no settlement integration or world placement"
+    "Combined latest-main+PR exact-head native/Chromium smoke remains unverified; central CI excludes 80 nested Roadmap 1 cases",
+    "True native source-served WebGL2 physical mesh preview at all 3 iPhone landscape sizes; local WebGL2 unavailable",
+    "210 thin-roof step intersections with candidate Pack2 beams/posts need physical fill/join without colliding",
+    "Pack3 thin roof tiles horizontal water/air seam, roof pitches, skylight lantern cap/vertical pane waterproofing and load strength unresolved",
+    "Pack4 pane orientation/transparent render ordering, glass-to-frame mount and schema-1 safe rotation sidecar not integrated",
+    "Pack2 hinged door sweep, safe wide/tall entrance clearance, Pack5 furniture and candidate cells, creator artistic review remain open",
+    "840 future unique authored blueprints; no runtime world placement or deployment"
   ],
   "mirroredAndRotatedGeometryCheck": {
     "result": "45/45 distinct under 4 rotations and mirrored counterparts, material-independent",
@@ -222,5 +222,35 @@
     "windowSealingApproved": false,
     "doorSwingApproved": false,
     "finalMeshIntegrationApproved": false
+  },
+  "glazingFeasibility": {
+    "perimeterWindows": 180,
+    "panesByBiome": {
+      "temperate": "pack4:030",
+      "desert": "pack4:031",
+      "snow": "pack4:030",
+      "enchanted-forest": "pack4:031",
+      "mountain": "pack4:030"
+    },
+    "paneYaw": "north/east/west based on wall; pack4 rotation sidecar unresolved",
+    "raisedLanterns": 3,
+    "unsupportedHorizontalUpPanes": 0,
+    "actualPaneSealApproved": false,
+    "roofDaylightApproved": false,
+    "liveWindowIntegrated": false
+  },
+  "roofStepFeasibility": {
+    "exposedHeightStepTargets": 2519,
+    "liveFilledBackingCells": 2309,
+    "unresolvedBeamPostIntersections": 210,
+    "preservation": "open courtyards remain open",
+    "pack3RoofUnderlayHeight": 0.125,
+    "livePlacedCells": [
+      "live:wood",
+      "live:stone"
+    ],
+    "waterproofingApproved": false,
+    "structuralSpanApproved": false,
+    "unresolvedCandidatePartCollisions": true
   }
 }

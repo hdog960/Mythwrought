@@ -32,3 +32,9 @@
 - Candidate wall materials corrected to respect Pack 2 and Pack 5 *actual physical shape categories*. Separate tests reject use of thin plaster, stripped logs and horizontal beams as full-volume wall cores.
 - Pack 5 `pack5:096` is NOT STARTED. All 120 flanks of 60 stable open bays now use live wood with real existing block collision; future specialty Pack 5 fixtures remain symbolic only. This is a substantive safety/feasibility correction within Roadmap 1 source files only.
 - Genuine 68/68 native local Node tests, 54 real Chromium Canvas2D cutaway/exterior screenshots at all three mobile landscape sizes; WebGL2 and creator/physical iPhone approval remain OPEN. Central root CI excludes nested Roadmap 1 tests. No merge/deploy/registration or external-lane writes.
+
+## Current follow-up M1 independent candidate geometry review
+- Reconfirmed `main ac263720`, integration checkpoint **008**, ownership Issues #109/#117, candidate packs #113/#114/#112/#115/#119 at current heads, biome130 source and other draft building pools #122–#124; PR #121 retains exclusive Roadmap 1 source/test/doc ownership.
+- Pack4 transparent panes and usable Y-axis rotations were examined against its independent `windows.mjs`. Replaced 180 wrong/unglazed/misrotated window cells and three invalid horizontal roof panes with supported vertical-lantern candidates, keeping sealing/state unresolved.
+- Pack3 shallow physical roofing underlays were inspected. Repaired 2,309 exposed roof riser cells with current registered solids; another 210 beam/post intersections require later approval. **80/80 native local Node; 54 genuine Chromium Canvas2D mobile captures**; no final WebGL2 or iPhone certification.
+- 45 IDs, 15 bed-foot reservations, all independent developer ownership, original seed/schema-1 persistence, and v0.10 Gate A pending/v0.11 locked retained. No shared CI, merge, deploy, asset registration or world placement.
