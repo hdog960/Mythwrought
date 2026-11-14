@@ -11,6 +11,7 @@ test('refined timber remains the original editable wood block, with no new save 
   assert.equal(RULES.saveSchemaChanged,false);
   assert.equal(RULES.boardsAcross,3);
   assert.equal(RULES.boardsHigh,2);
+  assert.equal(RULES.endGrainOnTop,true);
   const world=new VoxelWorld(179);
   assert.equal(world.set(1,17,1,BLOCK.WOOD),true);
   const restored=VoxelWorld.restore(world.save());
@@ -34,4 +35,13 @@ test('original single-pass opaque wood face has staggered joints and woodgrain',
   assert.match(FS,/if\(uArtQuality<\.5\)/);
   assert.ok(FS.indexOf('return;')<start,'Economy path must bypass detailed wood');
   assert.match(FS,/outColor=vec4\(mix\(colored,uFog,fog\),1\.0\)/);
+});
+
+
+test('top-facing timber receives end-grain rings while side planks retain staggered joints',()=>{
+  for(const token of ['topFace=step(.59,vColor.r)','ringRadius','ringWobble','endRings','endCracks','mix(sideShade,topShade,topFace)'])
+    assert.ok(TIMBER.includes(token),token);
+  assert.match(TIMBER,/float sideShade=.*seam/);
+  assert.match(TIMBER,/float topShade=.*endRings/);
+  assert.doesNotMatch(TIMBER,/texture\(|sampler2D|discard;|gl_FragDepth/);
 });
