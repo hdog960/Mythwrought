@@ -1,6 +1,6 @@
 // Isolated interactive acceptance fixture. NEVER passed to Mythwrought's VoxelWorld.
 // It models candidate per-cell orientation until the :00 / :12 engines are integrated.
-import {PACK_2_IDS,pack2Cell,pack2Shape,parsePack2Cell} from '../../../src/block-packs/pack-2/definitions.mjs';
+import {PACK_2_IDS,pack2Asset,pack2Cell,pack2Shape,parsePack2Cell} from '../../../src/block-packs/pack-2/definitions.mjs';
 
 const key=c=>c.join(',');
 const cellCheck=c=>Array.isArray(c)&&c.length===3&&c.every(Number.isSafeInteger)&&c[1]>=-3&&c[1]<=19;
@@ -27,7 +27,7 @@ export class Pack2Fixture{
     return this.selection();
   }
   turn(){
-    this.rotation=this.selected===62?0:pack2Shape(this.selected,(this.rotation+1)%4).rotation;
+    this.rotation=pack2Asset(this.selected).rotatable?(this.rotation+1)%4:0;
     return this.selection();
   }
   selection(){return pack2Cell(this.selected,this.rotation);}
