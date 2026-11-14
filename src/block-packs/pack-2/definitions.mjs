@@ -20,7 +20,7 @@ export const PACK_2_ASSETS=Object.freeze([
     profile:'square horizontal beam with reinforced shoulders',axis:'x',rotatable:true,
     boxes:[box(0,.26,.26,1,.74,.74),box(0,.20,.20,.14,.80,.80),
       box(.86,.20,.20,1,.80,.80)],
-    palette:{base:[.40,.24,.17],grain:[.22,.13,.11],edge:[.65,.40,.26]},
+    palette:{base:[.40,.24,.17],grain:[.22,.13,.11],edge:[.65,.40,.26],metal:[.29,.32,.33]},
     surface:{grain:'dark-directional-sawn-fibre',bands:2,finish:'smoked-heartwood',visibleJoint:'shoulder collars'},
     integration:{collision:'solid-box-union',selection:'shape-aware',save:'candidate-rotation-sidecar'} }),
   asset({id:62,roster:22,key:'dovetailed-support-post',name:'Dovetailed support post',family:'wooden-support-posts',
@@ -79,6 +79,8 @@ export function pack2PreviewMesh(id,rotation=0){
   const a=pack2Asset(id),boxes=pack2Shape(id,rotation).boxes;
   const axes=[0,1,2].map(j=>[...new Set(boxes.flatMap(b=>[b[j],b[j+3]]))].sort((u,v)=>u-v));
   const [xs,ys,zs]=axes,pos=[],rgb=[],normal=[],indices=[];
+  const grainAxis=a.axis==='x'&&rotation%2===1?'z':a.axis;
+  const axisIndex=grainAxis==='x'?0:grainAxis==='y'?1:2;
   let physicalQuads=0,decorationQuads=0;
   function emit(c,n,color,offset=0){
     const start=pos.length/3;
@@ -90,12 +92,15 @@ export function pack2PreviewMesh(id,rotation=0){
   }
   function addFace(c,n){
     const shade=n[1]>0?1.07:n[1]<0?.69:n[0]!==0?.86:.94;
-    const base=a.palette.base.map(v=>Math.min(1,v*shade));
+    const span=c.map(p=>p[axisIndex]);
+    const ironCollar=id===61&&(Math.max(...span)<=.140001||Math.min(...span)>=.859999);
+    const base=(ironCollar?a.palette.metal:a.palette.base).map(v=>Math.min(1,v*shade));
     emit(c,n,base);physicalQuads++;
     const u=Math.hypot(...c[1].map((v,i)=>v-c[0][i]));
     const v=Math.hypot(...c[3].map((w,i)=>w-c[0][i]));
     if(u<.18||v<.18)return;
-    const longitudinal=(a.axis==='y'&&n[1]===0)||(a.axis==='x'&&n[0]===0);
+    const longitudinal=(grainAxis==='y'&&n[1]===0)||
+      (grainAxis==='x'&&n[0]===0)||(grainAxis==='z'&&n[2]===0);
     // Actual embedded linework: tiny mesh ribbons mark handmade saw/grain seams.
     // Lines are overlays on the SAME physically registered volume, never faux blocks.
     const bands=longitudinal?a.surface.bands:Math.max(1,a.surface.bands-1);
@@ -116,7 +121,9 @@ export function pack2PreviewMesh(id,rotation=0){
       emit([bilinear(c,t,t),bilinear(c,t+.035,t),
         bilinear(c,t+.035,t+.035),bilinear(c,t,t+.035)],n,a.palette.edge,.0019);decorationQuads++;
     }
-    if(id===60 && Math.abs(n[0])+Math.abs(n[2])===1 && !longitudinal && u>.3 && v>.3){
+    const endFace=(grainAxis==='x'&&Math.abs(n[0])===1)||
+      (grainAxis==='z'&&Math.abs(n[2])===1);
+    if(id===60 && endFace && u>.3 && v>.3){
       for(const f of [.22,.32]){
         const q=[bilinear(c,f,f),bilinear(c,1-f,f),
           bilinear(c,1-f,f+.014),bilinear(c,f,f+.014)];
