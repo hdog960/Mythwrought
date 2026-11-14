@@ -16,3 +16,7 @@
 ## M1 late external-catalog dependency fit check
 - Examined latest candidate Pack 2 beam/post and hinged-door geometry contracts, Pack 3 thin roofing AABB geometry and Pack 5 multi-cell attachment contract. Corrected the vertical support-post reference mismatch without modifying any other pack. See `M1_PHYSICAL_HANDOFF.md` for exact symbolic identities and outstanding real-integration blockers.
 - Added 50 native focused tests/near-duplicate reviewer, all within the Roadmap 1 ownership prefixes; no root CI or engine change. Retain checkpoint 008 as last verified integration and refresh before next session.
+
+## Current Roadmap 1 M1 continuation — checkpoint 008
+- The M1 branch now has 45 preserved coordinate-authored candidates with real new gallery partitions and regional roof/stall footprints. All five block-pack PR heads were inspected anew; no references were installed into the live ID registry. Exact local source Node 56 cases passed, but clean PR-head Node 56 cases remain outstanding.
+- Only Roadmap 1-owned source/tests/docs changed; no shared engine/CI/save/world placement, competing building roadmaps or block-pack source edits. Browser proof remains Canvas2D schematic 54 screenshots, not WebGL2 or creator art acceptance.

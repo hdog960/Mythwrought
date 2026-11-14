@@ -34,3 +34,11 @@ The independent `m1-near-duplicate-review.mjs` normalizes coordinates into 12×1
 - **36 genuine Chromium Canvas2D** exterior/interior screenshots at 667×375, 844×390, 932×430 using a schematic, source-derived renderer. This is **NOT WebGL2 production preview** and images are local, not committed into PR.
 - Central GitHub Actions `npm test` runs root `tests/*.test.mjs`, **not** nested Roadmap 1 tests; green Actions cannot be reported as 50-case certification.
 - M1 remains **OPEN** for actual WebGL2, physical Pack substitution/rotation/clearance, creator visual uniqueness and physical-iPhone controller acceptance. Main checkpoint 008; no merge, deployment, engine change, world placement, save migration or v0.11 unlock.
+
+## M1 latest material-fit and creative uniqueness addendum
+
+New Mountain **three-aisle** large house and tavern alter walls, doors, room partitions and circulation; no placeholder-only prose design. Desert medium and large stables now use genuinely different internal rear/forward stall dimensions. Enchanted large stable physically changes the roof from monitor to butterfly, without claiming safe water drainage, tile continuity or live physics. Recheck eventual Pack 3 roof family availability and the Pack 2 horizontal-beam/vertical-post interface for these new roof forms.
+
+Physical AABBs remain **explicitly unresolved** for all non-live symbolic parts, which now fails schema validation if somebody pretends they are final or duplicates/omits an asset dependency. Rotation, hinge state, multi-cell support and save-state integration remain BLOCKED until those independent packs are accepted. This session made no changes to manual packs, the biome130 library or common voxel systems.
+
+Nine actual model candidates / 54 Chromium Canvas2D exterior/cutaway samples (3 landscape viewports) produced locally. Visual approval and native WebGL2 still OPEN. Normalized reviewer top similarity now **71.99%**, down from **82.20%**. **56/56 local Node passed, exact PR-head 56-case native reproduction still open**; root Actions does not execute this nested suite.
