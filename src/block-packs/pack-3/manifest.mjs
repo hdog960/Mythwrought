@@ -1,6 +1,7 @@
 // Pack 3 ownership ledger. Roster numbers are NOT persistent block IDs.
 // Reaudit against main + coordination Issue #109 before allocating another ID.
 import {PACK3_ROOFING_ASSETS} from './roofing-materials.mjs';
+import {PACK3_ROOF_GEOMETRY} from './roof-geometry.mjs';
 export const PACK3_COORDINATION=Object.freeze({
   issue:'https://github.com/hdog960/Mythwrought/issues/109',
   auditedMain:'f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84',
@@ -13,8 +14,8 @@ export const PACK3_COORDINATION=Object.freeze({
 const roofing=Object.freeze([
   [23,'Wooden shingles',109],[24,'Clay roof tiles',110],
   [25,'Slate roof tiles',111],[26,'Thatched roofing',112],
-  [27,'Roof stair blocks',null],[28,'Roof corner blocks',null],
-  [29,'Roof ridge blocks',null]
+  [27,'Roof stair blocks',113],[28,'Roof corner blocks',114],
+  [29,'Roof ridge blocks',115]
 ]);
 const monumental=Object.freeze([
   [69,'Castle wall blocks'],[70,'Battlement blocks'],[71,'Stone buttresses'],
@@ -40,8 +41,13 @@ export function validatePack3Manifest(){
   if(new Set(ids).size!==ids.length)throw new Error('Pack 3 duplicate persistent ID');
   for(const id of ids)if(!Number.isInteger(id)||id<109||id>158||id===255)
     throw new RangeError('Pack 3 ID outside reserved range');
-  if(ids.length!==PACK3_ROOFING_ASSETS.length||PACK3_ROOFING_ASSETS.some(a=>
+  const assets=[...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY];
+  if(ids.length!==assets.length||assets.some(a=>
     !PACK3_ROSTER.some(row=>row.roster===a.roster&&row.id===a.id)))
     throw new Error('Ledger and physical roofing definitions disagree');
+  for(const a of PACK3_ROOF_GEOMETRY){
+    if(a.boxes.length>32||a.collision.boxes!==a.selection.boxes||a.integrated)
+      throw new Error('Invalid isolated Pack 3 roof geometry contract');
+  }
   return true;
 }
