@@ -6,7 +6,7 @@ const asset=(x)=>Object.freeze({...x,boxes:Object.freeze(x.boxes),palette:Object
   surface:Object.freeze(x.surface),integration:Object.freeze(x.integration)});
 export const PACK_2_ASSETS=Object.freeze([
   asset({id:59,roster:13,key:'planed-oak-planks',name:'Planed oak plank block',family:'wooden-planks',
-    profile:'solid dressed board courses',axis:'y',rotatable:true,
+    profile:'solid dressed board courses',axis:'y',rotatable:false,
     boxes:[box(0,0,0,1,1,1)],palette:{base:[.69,.44,.24],grain:[.37,.22,.12],edge:[.86,.61,.34]},
     surface:{grain:'staggered-planed-boards',bands:4,finish:'honey-oak',visibleJoint:'dark shallow board seams'},
     integration:{collision:'solid-box-union',selection:'shape-aware',save:'candidate-rotation-sidecar'} }),
@@ -47,7 +47,7 @@ export function pack2Shape(id,rotation=0){
   const a=pack2Asset(id);
   if(!a)throw new RangeError('Unknown Pack 2 candidate ID');
   normalizeRotation(rotation);
-  if(!a.rotatable&&rotation!==0)throw new RangeError('This post is not rotatable');
+  if(!a.rotatable&&rotation!==0)throw new RangeError('Asset has a fixed, nonrotatable profile');
   const boxes=Object.freeze(a.boxes.map(b=>rotatedBox(b,rotation)));
   // Compatible with :00 opt-in shape-aware targeting contract, NOT live world.get.
   return Object.freeze({id,rotation,boxes,units:'cell',occupancy:'union-of-boxes',
