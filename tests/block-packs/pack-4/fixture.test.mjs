@@ -104,6 +104,28 @@ test('bad save state never partially destroys already placed cells',()=>{
   assert.equal(JSON.stringify(f.save()),before);
  }
 });
+test('distant-world independent placement, collisions and fixture snapshot replay use safe integers',()=>{
+ const floor=[1000000,2,65537],floorSupport=[1000000,1,65537];
+ const wall=[-1000000,4,-65537],wallSupport=[-1000000,4,-65536];
+ const supports=[floorSupport,wallSupport];
+ const f=createPack4Fixture(supports);
+ assert.equal(f.place(floor,165,2).ok,true);
+ assert.equal(f.place(wall,166,0).ok,true);
+ assert.equal(f.place([Number.MAX_SAFE_INTEGER,0,0],159,1).ok,true);
+ assert.equal(f.count(),3);
+ assert.equal(f.get(wall).rotation,0);
+ assert.equal(f.collidesWithAabb([1000000.25,2.2,65537.25,
+   1000000.75,2.75,65537.75]),true);
+ const copy=JSON.parse(JSON.stringify(f.save()));
+ const replay=createPack4Fixture(supports);
+ assert.equal(replay.restore(copy),3);
+ assert.deepEqual(replay.save(),f.save());
+ assert.equal(replay.remove([Number.MAX_SAFE_INTEGER,0,0]).removed.id,159);
+ assert.equal(f.place([0,Number.MIN_SAFE_INTEGER,0],165).reason,
+   'support beyond safe world coordinates');
+ assert.throws(()=>f.place([Number.MAX_SAFE_INTEGER+1,1,0],159));
+ assert.throws(()=>f.get([0.5,2,0]));
+});
 test('reject invalid orientation, impossible cell coordinates and invalid ray',()=>{
  const f=createPack4Fixture();
  assert.throws(()=>f.place([1.5,0,0],159));
