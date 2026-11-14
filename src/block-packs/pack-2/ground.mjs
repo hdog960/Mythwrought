@@ -127,8 +127,6 @@ const corner=(c,u,v)=>[0,1,2].map(i=>
   c[0][i]*(1-u)*(1-v)+c[1][i]*u*(1-v)+c[2][i]*u*v+c[3][i]*(1-u)*v);
 export function groundPreviewMesh(id,rotation=0){
   const spec=groundAsset(id),parts=groundShape(id,rotation).parts;
-  const cuts=[0,1,2].map(a=>[...new Set(parts.flatMap(p=>[p.box[a],p.box[a+3]]))]
-    .sort((a,b)=>a-b));
   const occupied=(x,y,z)=>parts.some(p=>inside(p.box,x,y,z));
   const positions=[],colors=[],normals=[],indices=[];
   let physicalQuads=0,decorationQuads=0;
@@ -157,27 +155,46 @@ export function groundPreviewMesh(id,rotation=0){
       push(decal,n,spec.palette.grain,.0015);decorationQuads++;
     }
   };
-  const [xs,ys,zs]=cuts,e=1e-7;
-  for(let i=0;i<xs.length-1;i++)for(let j=0;j<ys.length-1;j++)
-    for(let k=0;k<zs.length-1;k++){
-      const x=xs[i],X=xs[i+1],y=ys[j],Y=ys[j+1],z=zs[k],Z=zs[k+1];
-      const mid=[(x+X)/2,(y+Y)/2,(z+Z)/2];
-      if(!occupied(...mid))continue;
-      const p=parts.find(p=>inside(p.box,...mid));
-      const color=spec.palette[p.role];
-      if(!occupied(x-e,mid[1],mid[2]))
-        face([[x,y,Z],[x,y,z],[x,Y,z],[x,Y,Z]],[-1,0,0],color);
-      if(!occupied(X+e,mid[1],mid[2]))
-        face([[X,y,z],[X,y,Z],[X,Y,Z],[X,Y,z]],[1,0,0],color);
-      if(!occupied(mid[0],y-e,mid[2]))
-        face([[x,y,z],[x,y,Z],[X,y,Z],[X,y,z]],[0,-1,0],color);
-      if(!occupied(mid[0],Y+e,mid[2]))
-        face([[x,Y,Z],[x,Y,z],[X,Y,z],[X,Y,Z]],[0,1,0],color);
-      if(!occupied(mid[0],mid[1],z-e))
-        face([[x,y,z],[X,y,z],[X,Y,z],[x,Y,z]],[0,0,-1],color);
-      if(!occupied(mid[0],mid[1],Z+e))
-        face([[X,y,Z],[x,y,Z],[x,Y,Z],[X,Y,Z]],[0,0,1],color);
+  // Partition each *actual exposed face* only where another box can occlude it.
+  // Global XYZ cuts would subdivide intact base walls into hundreds of triangles.
+  const EPS=1e-7,axes=[0,1,2];
+  for(const part of parts){
+    const b=part.box;
+    for(let axis=0;axis<3;axis++)for(const sign of [-1,1]){
+      const normal=[0,0,0];normal[axis]=sign;
+      const plane=b[axis+(sign===1?3:0)];
+      const u=axes[(axis+1)%3],v=axes[(axis+2)%3];
+      const uMin=b[u],uMax=b[u+3],vMin=b[v],vMax=b[v+3];
+      const outside=plane+sign*EPS;
+      const candidates=parts.filter(p=>p!==part&&
+        p.box[axis]<=outside&&outside<p.box[axis+3]&&
+        p.box[u]<uMax&&p.box[u+3]>uMin&&
+        p.box[v]<vMax&&p.box[v+3]>vMin);
+      const U=[uMin,uMax],V=[vMin,vMax];
+      for(const p of candidates){
+        U.push(Math.max(uMin,p.box[u]),Math.min(uMax,p.box[u+3]));
+        V.push(Math.max(vMin,p.box[v]),Math.min(vMax,p.box[v+3]));
+      }
+      const us=[...new Set(U)].sort((a,b)=>a-b);
+      const vs=[...new Set(V)].sort((a,b)=>a-b);
+      for(let i=0;i<us.length-1;i++)for(let j=0;j<vs.length-1;j++){
+        const lo=us[i],hi=us[i+1],bottom=vs[j],top=vs[j+1];
+        if(hi-lo<EPS||top-bottom<EPS)continue;
+        const probe=[0,0,0];probe[axis]=outside;
+        probe[u]=(lo+hi)/2;probe[v]=(bottom+top)/2;
+        if(candidates.some(p=>inside(p.box,...probe)))continue;
+        const vertex=(uu,vv)=>{const point=[0,0,0];point[axis]=plane;point[u]=uu;point[v]=vv;return point;};
+        let corners=[vertex(lo,bottom),vertex(hi,bottom),vertex(hi,top),vertex(lo,top)];
+        // Correct orientation for outward-facing normals.
+        const e1=corners[1].map((x,k)=>x-corners[0][k]);
+        const e2=corners[3].map((x,k)=>x-corners[0][k]);
+        const cross=[e1[1]*e2[2]-e1[2]*e2[1],
+          e1[2]*e2[0]-e1[0]*e2[2],e1[0]*e2[1]-e1[1]*e2[0]];
+        if(cross[axis]*sign<0)corners=[corners[0],corners[3],corners[2],corners[1]];
+        face(corners,normal,spec.palette[part.role]);
+      }
     }
+  }
   return Object.freeze({positions:new Float32Array(positions),
     colors:new Float32Array(colors),normals:new Float32Array(normals),
     indices:new Uint16Array(indices),triangles:indices.length/3,
