@@ -156,3 +156,29 @@ test('ivory seedheads are rare, deterministic, edit-sensitive and bounded',()=>{
  assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
  assert.equal(MOONBELL_LIMITS.newTextures,0);
 });
+
+test('stone-edge fan moss grows only by actual adjacent rock and respects edits',()=>{
+ const rockWorld=(seed=123,edits=new Map())=>({
+  seed,get(x,y,z){
+   const key=[x,y,z].join(',');
+   if(edits.has(key))return edits.get(key);
+   if(y===5 && x%16===8)return 3;
+   return baseAt(x,y,z);
+  }
+ });
+ let sample=null;
+ for(let cx=-10;cx<=10&&!sample;cx++)for(let cz=-10;cz<=10&&!sample;cz++){
+  const vertices=moonbellVertices(rockWorld(),cx,cz,opts);
+  for(let i=0;i<vertices.length;i+=9){
+   if(Math.abs(vertices[i+3]-.56)<1e-5&&Math.abs(vertices[i+4]-.73)<1e-5){
+    sample={cx,cz,vertices};break;
+   }
+  }
+ }
+ assert.ok(sample,'real stone adjacency produces fan moss');
+ assert.deepEqual(sample.vertices,moonbellVertices(rockWorld(),sample.cx,sample.cz,opts));
+ const plain=moonbellVertices(world(),sample.cx,sample.cz,opts);
+ assert.ok(!Array.from(plain).some((v,i,a)=>i%9===3&&Math.abs(v-.56)<1e-5&&Math.abs(a[i+1]-.73)<1e-5),
+  'no stone-edge moss appears on ordinary open grass');
+ assert.ok(sample.vertices.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+});
