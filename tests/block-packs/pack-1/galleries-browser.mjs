@@ -11,6 +11,7 @@ import {createServer} from 'node:http';
 import {readFile,mkdir} from 'node:fs/promises';
 import {resolve,extname,join,relative,sep} from 'node:path';
 import {chromium} from 'playwright';
+import {parseFixtureCount} from './gallery-count.mjs';
 
 const root=resolve(process.cwd());
 const screenshots=resolve(process.env.PACK1_ARTIFACT_DIR||'artifacts/pack-1');
@@ -99,11 +100,7 @@ const shell=async()=>{
           const filename=g.name+'-'+width+'x'+height;
           await page.screenshot({path:join(screenshots,filename+'-candidate.png'),fullPage:true});
           totals.screenshots++;
-          const parseCount=(v)=>{
-            const index=v.lastIndexOf(g.countLabel);
-            if(index<0)return NaN;
-            return Number(v.slice(index+g.countLabel.length).match(/^\d+/)?.[0]);
-          };
+          const parseCount=(status)=>parseFixtureCount(status,g.countLabel);
           assert.equal(parseCount(before.status||''),0,'Fixture not initially empty');
           await page.locator(g.place).click();
           // All five fixture handlers update synchronously. Assert exact count
