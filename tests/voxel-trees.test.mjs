@@ -66,3 +66,31 @@ test('reject invalid variants and already occupied space without mutation',()=>{
  assert.equal(placeVoxelTree(w,p),false);
  assert.equal(w.get(x,y,z),BLOCK.STONE);
 });
+
+test('rejects tampered tree plans, cross-seed replay and stale ground edits',()=>{
+ const w=new VoxelWorld(179),p=site(w,'roundwood');
+ const mutated=structuredClone(p);
+ mutated.cells[0][3]=BLOCK.CRYSTAL;
+ assert.equal(placeVoxelTree(w,mutated),false);
+ const clipped=structuredClone(p);
+ clipped.cells.pop();clipped.blockCount--;
+ assert.equal(placeVoxelTree(w,clipped),false);
+ const swapped=structuredClone(p);
+ [swapped.cells[0],swapped.cells[1]]=[swapped.cells[1],swapped.cells[0]];
+ assert.equal(placeVoxelTree(w,swapped),false);
+ const other=new VoxelWorld(917);
+ assert.equal(placeVoxelTree(other,p),false);
+ const [gx,gy,gz]=p.origin;
+ w.set(gx,gy,gz,BLOCK.STONE);
+ assert.equal(placeVoxelTree(w,p),false);
+ assert.equal(w.get(gx,gy,gz),BLOCK.STONE);
+ assert.equal(w.save().edits.some(e=>e[0]===gx&&e[1]===gy&&e[2]===gz),true);
+});
+test('reserved physical leaf material is accepted only when present in registry',()=>{
+ const w=new VoxelWorld(179),p=site(w,'spire');
+ assert.equal(p.leafId,BLOCK.LEAVES??BLOCK.GRASS);
+ if(BLOCK.LEAVES!==undefined){
+  const leaves=planVoxelTree(w,p.origin[0],p.origin[2],{variant:'spire',leafId:BLOCK.LEAVES});
+  assert.ok(leaves.cells.some(c=>c[3]===BLOCK.LEAVES));
+ }
+});
