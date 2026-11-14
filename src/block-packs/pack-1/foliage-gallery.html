@@ -1,0 +1,36 @@
+<!doctype html><html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mythwrought — Pack 1 physical foliage test gallery</title>
+<style>
+:root{color-scheme:dark;background:#101e25;color:#f1ead8;font-family:system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box}body{max-width:1120px;margin:0 auto;padding:clamp(14px,3vw,28px)}
+h1,h2{font-family:Georgia,serif;letter-spacing:.01em}h1{margin:.25em 0}h2{font-size:1.07rem;margin:8px 0}
+p{color:#bfd2c5;line-height:1.46}.warning{padding:12px 14px;border:1px solid #b49d5d;background:#322e23;color:#f4dea8;border-radius:8px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+.card{background:linear-gradient(154deg,#1c3337,#152831);border:1px solid #405e62;border-radius:12px;padding:10px;min-width:0;text-align:center}
+.card.active{border-color:#f0c97f;outline:1px solid #f0c97f}
+.preview{width:100%;max-width:238px;height:auto;display:block;margin:auto;image-rendering:pixelated}
+.slice{width:100%;max-width:144px;height:auto;image-rendering:pixelated;cursor:crosshair;border:1px solid #627470;border-radius:5px}
+.desc{font-size:.77rem;min-height:54px}.metadata{font:11px/1.5 ui-monospace,monospace;color:#efcc92}
+button{background:#395a5a;color:white;border:1px solid #a3b8a7;padding:8px 11px;border-radius:7px;cursor:pointer;margin:3px}
+button:hover{background:#507676}
+button:focus-visible,.slice:focus-visible{outline:2px solid #f0d096}
+.controls{display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
+output{white-space:pre-wrap;display:block;font:12px/1.65 ui-monospace,monospace;background:#122b29;border:1px solid #537e6b;border-radius:8px;padding:12px;margin-top:16px}
+footer{color:#c4c9ae;font-size:.82rem;margin:12px 0}
+@media(max-width:840px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:625px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:370px){.grid{grid-template-columns:1fr}}
+</style></head><body>
+<h1>Physical Foliage / Stone & Nature</h1>
+<div class="warning">CANDIDATE — NOT MERGED / NOT DEPLOYED. Standalone asset fixture, not a screenshot or build of the playable world.</div>
+<p>Eight independent editable physical voxel candidates: hedge, two bushes, two face-clinging vines, and three decorative leaf shapes. Each piece has its own selection boxes and (where appropriate) separate solid collision boxes; open spaces are not fake full-cube collisions. Click a gold cross-section cell to inspect physical targeting. No tree/biome placement or farming/harvesting.</p>
+<div class="controls">
+<button id="all" type="button">Place all canonical</button>
+<button id="clear" type="button">Remove all</button>
+<button id="save" type="button">Verify isolated save</button>
+</div>
+<div id="grid" class="grid"></div>
+<output id="status" role="status" aria-live="polite"></output>
+<footer>Cross-section shows yellow = physically selectable occupancy; dark = empty space. Passable leaves/vines remain individually targetable and removable. Nonzero orientations must wait for :00 save-state support.</footer>
+<script type="module" src="./foliage-gallery.mjs"></script></body></html>
