@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {BLOCK,baseBlock,VoxelWorld,meshChunk,WORLD_MIN_Y,WORLD_MAX_Y} from '../src/voxel.mjs';
+import {BLOCK,baseBlock,VoxelWorld,meshChunk,WORLD_MAX_Y,WORLD_MIN_Y as LEGACY_PUBLIC_MIN_Y} from '../src/voxel.mjs';
 import {meshDepthSection} from '../src/depth-mesh.mjs';
 import {
-  LEGACY_WORLD_MIN_Y,LEGACY_WORLD_HEIGHT,WORLD_DEPTH_MULTIPLIER,
+  WORLD_MIN_Y,LEGACY_WORLD_MIN_Y,LEGACY_WORLD_HEIGHT,WORLD_DEPTH_MULTIPLIER,
   DEPTH_SECTION_HEIGHT,LOWEST_SECTION,MAX_ACTIVE_SECTIONS,
   sectionForY,sectionBounds,sectionWindow,verticalEditSections,depthMeshKey
 } from '../src/depth.mjs';
@@ -11,6 +11,7 @@ import {
 test('tenfold depth keeps exact original Y coordinates intact',()=>{
   assert.equal(WORLD_MAX_Y,19);
   assert.equal(LEGACY_WORLD_MIN_Y,-3);
+  assert.equal(LEGACY_PUBLIC_MIN_Y,-3,'existing cave generators must retain original lower bound');
   assert.equal(WORLD_DEPTH_MULTIPLIER,10);
   assert.equal(WORLD_MAX_Y-WORLD_MIN_Y+1,LEGACY_WORLD_HEIGHT*10);
   assert.equal(WORLD_MIN_Y,-210);
