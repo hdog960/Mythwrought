@@ -48,10 +48,10 @@ const hearth=[
   box([.27,.19,.27,.73,.23,.73],'oldCopper')
 ];
 for(const [x,z] of [[.29,.29],[.64,.29],[.29,.64],[.64,.64]])
-  hearth.push(box([x,.04,z,x+.07,.10,z+.07],'gold'));
+  hearth.push(box([x,0,z,x+.07,.10,z+.07],'gold'));
 const wall=[
   // Sconce backplate on +Z face: visible bracket projects forward into room (-Z).
-  box([.35,.30,.87,.65,.83,.96],'forgedIron'),
+  box([.35,.30,.87,.65,.83,1],'forgedIron'),
   box([.40,.36,.83,.60,.79,.88],'oldCopper'),
   box([.475,.51,.32,.525,.59,.91],'gold'),
   box([.35,.46,.32,.65,.51,.42],'oldCopper'),
@@ -65,7 +65,7 @@ const wall=[
 ];
 const crystal=[
   // Bright suspended rune-cage structure with stacked multifaceted crystals.
-  box([.29,.07,.29,.71,.14,.71],'forgedIron'),
+  box([.29,0,.29,.71,.14,.71],'forgedIron'),
   box([.38,.14,.38,.62,.22,.62],'copperEdge'),
   box([.39,.22,.39,.61,.64,.61],'quartz'),
   box([.44,.25,.43,.56,.69,.57],'sapphire',{solid:false}),
@@ -85,7 +85,7 @@ const crystal=[
 ];
 const torch=[
   // Bracket (+Z wall), tapered timber shaft, charcoal bowl, layered flame.
-  box([.39,.20,.88,.61,.70,.96],'forgedIron'),
+  box([.39,.20,.88,.61,.70,1],'forgedIron'),
   box([.47,.32,.54,.53,.43,.92],'ironRim'),
   box([.46,.23,.47,.54,.65,.59],'darkOak'),
   box([.43,.63,.43,.57,.70,.63],'rope'),
