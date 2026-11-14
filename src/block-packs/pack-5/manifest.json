@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "M1 source technical QA passed; M2 8 physical residential variants technically reviewed; M3 shop counters/display shelves 4 isolated physical variants CANDIDATE; creator and production acceptance OPEN",
+  "status": "M3 source/Node/WebGL2 CANDIDATES 86–90 authored; M1–M3 creator, served-page and production acceptance OPEN",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -214,33 +214,69 @@
       "symbolicId": "pack5:088",
       "name": "Anvils & Forge Fixtures",
       "milestone": 3,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/workshop-fixtures.mjs",
       "distinction": "Smithy tools without functional forging, not fireplace",
-      "integrated": false
+      "integrated": false,
+      "preview": "tests/block-packs/pack-5/workshop-gallery.html",
+      "variants": [
+        "blackiron-horn",
+        "moonsteel-stake"
+      ],
+      "verification": "19 new M3 workshop native Node tests including hollow/empty space, 24 meshes and outward winding, support, physical collision, ray select/remove, variant snapshot/atomic rollback; real native ES-module WebGL2 six images; creator/production gates OPEN",
+      "integrationDependencies": [
+        "central registered numeric ID policy",
+        "engine shape-aware collision/raycast",
+        "schema-1 safe orientation/variant state",
+        "physical iPhone GPU and creator artwork approval"
+      ]
     },
     {
       "roster": 89,
       "symbolicId": "pack5:089",
       "name": "Cauldrons & Alchemy Stations",
       "milestone": 3,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/workshop-fixtures.mjs",
       "distinction": "Alchemy apparatus without brewing or fluid simulation",
-      "integrated": false
+      "integrated": false,
+      "preview": "tests/block-packs/pack-5/workshop-gallery.html",
+      "variants": [
+        "iron-tripod-cauldron",
+        "alchemists-spiral-stand"
+      ],
+      "verification": "19 new M3 workshop native Node tests including hollow/empty space, 24 meshes and outward winding, support, physical collision, ray select/remove, variant snapshot/atomic rollback; real native ES-module WebGL2 six images; creator/production gates OPEN",
+      "integrationDependencies": [
+        "central registered numeric ID policy",
+        "engine shape-aware collision/raycast",
+        "schema-1 safe orientation/variant state",
+        "physical iPhone GPU and creator artwork approval"
+      ]
     },
     {
       "roster": 90,
       "symbolicId": "pack5:090",
       "name": "Ovens & Cooking Ranges",
       "milestone": 3,
-      "status": "NOT STARTED",
+      "status": "CANDIDATE",
       "persistentNumericId": null,
-      "source": null,
+      "source": "src/block-packs/pack-5/workshop-fixtures.mjs",
       "distinction": "Cooking chambers and ranges, not fireplaces or crafting",
-      "integrated": false
+      "integrated": false,
+      "preview": "tests/block-packs/pack-5/workshop-gallery.html",
+      "variants": [
+        "ashstone-bake-oven",
+        "copper-range-top"
+      ],
+      "verification": "19 new M3 workshop native Node tests including hollow/empty space, 24 meshes and outward winding, support, physical collision, ray select/remove, variant snapshot/atomic rollback; real native ES-module WebGL2 six images; creator/production gates OPEN",
+      "integrationDependencies": [
+        "central registered numeric ID policy",
+        "engine shape-aware collision/raycast",
+        "schema-1 safe orientation/variant state",
+        "physical iPhone GPU and creator artwork approval"
+      ]
     },
     {
       "roster": 91,
@@ -309,21 +345,22 @@
       "integrated": false
     }
   ],
-  "candidateFamilies": 9,
+  "candidateFamilies": 12,
   "testEvidence": {
-    "nativeNode": "83/83 native Node 22.16.0 Pack 5 tests PASS, 0 skipped: 44 M0/M1, 25 M2, 14 M3 (source/test files Git blob parity checked)",
+    "nativeNode": "102/102 genuine native Node 22.16.0 Pack 5 tests PASSED; 44 M0/M1, 25 M2, 14 earlier M3, 19 new workshop M3, 0 skips; executed on exact Git blob-matched sources and tests",
     "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
     "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
     "webgl2": "M1 six variants AND M2 eight variants rendered in real Chromium WebGL2 with native data-URL ES modules; each 667x375,844x390,932x430 x 0/1 rotations: 12 real WebGL2 screenshots total, panel hashes/readback verified; localhost served HTTP still blocked by administrator",
     "screenshots": "Six new genuine Chromium WebGL2 PNGs inspected; separate working artifacts, not checked into PR. Earlier six genuine Chromium Canvas2D captures remain fallback evidence only.",
-    "production": "M1/M2 creator premium-art approval OPEN; M3 candidate art approval OPEN; localhost-served gallery blocked by browser administrator; no persistent block ID, schema-1 integration, physical iPhone GPU test, world placement or merge",
+    "production": "No persistent IDs, live registered assets, world placements, production schema-1 save/target, physical iPhone controls, art approval or merge. HTTP-served gallery still administrator-blocked; creator Gate A and v0.11 remain unchanged.",
     "acceptanceDossier": "src/block-packs/pack-5/M1_ACCEPTANCE.md",
-    "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py m1|m2|m3; native data URL ES module graph + actual WebGL2 software OpenGL and per-panel GPU readback, NOT HTTP-served gallery or playable engine",
+    "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py modes m1/m2/m3/m3b; genuine Chromium native data URL ES modules and WebGL2 under software OpenGL/Xvfb; 6 screenshots per gallery at 667x375, 844x390, 932x430 and rotations 0,1, not HTTP-served production gallery",
     "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only",
     "m2": "8 original physical residential variants; genuine 2-cell beds with per-part support, accurate collider union, modeled book spines now visible beyond shelves, no storage/sleeping gameplay. 6 fresh genuine Chromium native ES module WebGL2 captures across 667x375,844x390,932x430 and rotations 0/1, panel hashes pass",
     "visualCorrection": "Physical bookshelf and scrollcase spines project beyond shelf lips; 844x390 WebGL2 review changed only the 2 bookshelf panels (2821 and 2444 pixels), other 6 panels identical; real material geometry, not recoloring",
     "servedGallery": "Localhost real HTTP-served module page explicitly reattempted using Xvfb/Chromium and was blocked by ERR_BLOCKED_BY_ADMINISTRATOR; native offline data URL ES modules and genuine WebGL2 passed, but served page remains unverified",
-    "m3": "Source-authored pack5:086 Shop Counters ledger-service/festival-fascia; pack5:087 Display Shelves stepped-market-tray/curio-arcade, genuine solid partial colliders and support, four original independent geometry variants; 6 authentic native ES module Chromium WebGL2 screenshots at 667x375,844x390,932x430 and rotations 0/1."
+    "m3": "Five M3 source families 86–90: 86/87 shop counters/open display shelves, 88 two forged physical anvils, 89 hollow iron cauldron and alchemy stand, 90 masonry open-mouth bake oven and copper range. 10 original variants. No heat, fluid, crafting, trading or inventory. All collision/selection/snapshot test-fixture only.",
+    "m3bPreview": "6 original physical workshop variants source-authored and drawn in 6/6 genuine native ES-module Chromium WebGL2 landscape views, with unique nonblank GPU pixel fingerprints and rotation changes; per-cell 18–23 boxes and 216–276 unculled source triangles, not real iPhone GPU timings"
   },
   "preview": {
     "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
