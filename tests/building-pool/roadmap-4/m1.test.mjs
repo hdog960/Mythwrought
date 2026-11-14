@@ -62,7 +62,9 @@ test('no numeric future IDs or game saves, no asset aliasing, every future mater
       assert.ok(d.unresolved.length>0);
     }
     assert.ok(b.dependencies.some(d=>d.ref==='pack1:008')||b.size==='small'&&b.type==='civic-hall');
-    assert.ok(assets.has('pack3:023'),b.id);
+    const roofForBiome={temperate:'pack3:023',desert:'pack3:024',snow:'pack3:025',
+      'enchanted-forest':'pack3:026',mountain:'pack3:025'};
+    assert.ok(assets.has(roofForBiome[b.biome]),b.id+': wrong regional roof material');
     if(b.type==='castle-palace')assert.ok(b.dependencies.length>=3);
   }
 });
