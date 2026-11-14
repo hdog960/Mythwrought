@@ -54,12 +54,19 @@ test('mesh faces retain unit axis normals and consistently outward-oriented wind
  }
 });
 
-test('hollow civic geometry remains non-full and uses fewer triangles than naive box faces',()=>{
+test('rods, rims, pulley and hollow civic shapes remain bounded despite exposed-face subdivisions',()=>{
  for(const id of [164,170,176,177,178,180,181]){
-  const s=pack4Shape(id,0);
+  const sh=pack4Shape(id,0);
   const m=prototypeSurfaceMesh(descriptor(id,0));
-  const naiveTriangles=s.collision.length*12;
-  assert.ok(m.triangles<naiveTriangles*2,
-   'civic opt-in surface unexpectedly excessive for id '+id);
+  // Boundary tessellation may legitimately split a box face into several
+  // quads; the naive 12-triangles-per-box count is NOT a safe upper bound.
+  assert.ok(m.triangles>0&&m.triangles<=450,
+   'opt-in surface exceeded explicit mobile QA triangle cap for id '+id);
+  assert.ok(sh.collision.length<=32);
  }
+ const empty=(id,x,y,z)=>!pack4Shape(id,0).collision.some(b=>
+  x>=b[0]&&x<b[3]&&y>=b[1]&&y<b[4]&&z>=b[2]&&z<b[5]);
+ assert.equal(empty(176,.5,.5,.5),true);
+ assert.equal(empty(178,.63,.32,.63),true);
+ assert.equal(empty(181,.5,.41,.5),true);
 });
