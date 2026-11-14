@@ -9,8 +9,8 @@ const includedIds=Object.freeze([159,160,161,162,163,164,165,166,167,168,169,170
 const key=(x,y,z)=>x+','+y+','+z;
 function validCell(cell){
  if(!Array.isArray(cell)||cell.length!==3||
-    !cell.every(n=>Number.isSafeInteger(n)&&Math.abs(n)<=65536))
-    throw RangeError('Pack 4 fixture coordinates must be bounded integers');
+    !cell.every(Number.isSafeInteger))
+    throw RangeError('Pack 4 fixture coordinates must be safe integers');
  return [...cell];
 }
 function assertId(id){
@@ -69,7 +69,10 @@ export function createPack4Fixture(initialSupports=[]){
   if(placed.has(k)||supports.has(k))return Object.freeze({ok:false,reason:'occupied'});
   const offset=pack4MountOffset(id,rotation);
   if(offset){
-   const anchor=key(x+offset[0],y+offset[1],z+offset[2]);
+   const anchorCell=[x+offset[0],y+offset[1],z+offset[2]];
+   if(!anchorCell.every(Number.isSafeInteger))
+    return Object.freeze({ok:false,reason:'support beyond safe world coordinates'});
+   const anchor=key(...anchorCell);
    if(!supports.has(anchor))
     return Object.freeze({ok:false,reason:'missing fixed support'});
   }
@@ -140,7 +143,8 @@ export function createPack4Fixture(initialSupports=[]){
   }
   for(const item of candidates){
    const off=pack4MountOffset(item.id,item.rotation);
-   if(off&&!supports.has(key(...item.cell.map((n,i)=>n+off[i]))))
+   if(off&&(!item.cell.map((n,i)=>n+off[i]).every(Number.isSafeInteger)||
+      !supports.has(key(...item.cell.map((n,i)=>n+off[i])))))
     throw TypeError('Unsupported fixture cell');
   }
   // Atomic: reject malformed data before replacing any valid live fixture cells.
