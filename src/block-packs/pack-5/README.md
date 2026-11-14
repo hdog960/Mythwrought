@@ -64,3 +64,5 @@ This Pack 5-only Python Playwright runner verifies six *genuine* WebGL2 draws at
 (use `m1` for previous architectural surfaces).
 
 The runner changes relative imports to absolute `data:` module URLs for offline about:blank because the environment prevents localhost HTTP navigation; it **does not certify source-served module loading**, real iPhone GPU performance, live registry/collision/save state, or creator visual approval. Review `M2_ACCEPTANCE.md` and `M1_ACCEPTANCE.md`. Latest checked `main` is checkpoint **008**; Pack 5 is still unmerged/development-only.
+
+**Latest candidate-only QA:** 68/68 native Node cases pass (44 M0/M1 + 24 M2), including precise authored body-part collision unions for beds, seats and shelves. Eight M2 variants were rendered via genuine WebGL2 native ES-module data-URL loader at three iPhone landscape resolutions and both preview rotations. No persistent IDs, production saves, live placement or actual iPhone controls were tested.
