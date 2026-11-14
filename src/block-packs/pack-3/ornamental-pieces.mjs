@@ -107,6 +107,8 @@ const BY_KEY=new Map(DEFINITIONS.flatMap(d=>[0,1,2,3].map(r=>[d.id+':'+r,create(
 export const PACK3_ORNAMENTAL_IDS=Object.freeze(DEFINITIONS.map(d=>d.id));
 export const PACK3_ORNAMENTAL_ASSETS=Object.freeze(DEFINITIONS.map(d=>BY_KEY.get(d.id+':0')));
 export function pack3OrnamentalById(id,rotation=0){
+  // ID ownership is numeric; never coerce string, BigInt or object aliases.
+  if(!Number.isInteger(id))return null;
   if(!Number.isInteger(rotation)||rotation<0||rotation>3)
     throw new RangeError('Ornament rotation must be 0..3');
   return BY_KEY.get(id+':'+rotation)??null;
