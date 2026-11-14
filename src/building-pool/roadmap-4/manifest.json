@@ -3,7 +3,7 @@
   "title": "Government & Arcane Knowledge",
   "repository": "hdog960/Mythwrought",
   "authority": "Theoretical 3D voxel buildings only; not integrated into game",
-  "state": "M0 FOUNDATION — NO AUTHORED BUILDINGS YET",
+  "state": "M0 ACCEPTED — M1 30 GEOMETRIC CANDIDATES; BROWSER WEBGL2 ACCEPTANCE OPEN",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "integrationCheckpoint": "006",
   "governanceIssues": [
@@ -91,7 +91,7 @@
     }
   ],
   "plannedTotal": 600,
-  "authoredTotal": 0,
+  "authoredTotal": 30,
   "acceptedTotal": 0,
   "persistentNumericIdsAllocated": 0,
   "registeredCoreIds": {
@@ -110,11 +110,11 @@
     "pack3": "manual pack 3 roster 023–029 and 069–078; candidate only",
     "pack4": "manual pack 4 roster 030–038 and 056–068; candidate only",
     "pack5": "manual pack 5 roster 079–096; candidate only",
-    "biome130": "automated :12 catalog 001–130; candidate only, 16-bit migration blocker"
+    "biome130": "12 source candidates integrated checkpoint 007 as opt-in catalog; no live block registration; remaining families planned; 16-bit persistence blocker"
   },
   "milestoneState": {
-    "M0": "IN PROGRESS",
-    "M1": "NOT STARTED",
+    "M0": "COMPLETE — 11/11 true Node 22 exact Git blob tests; PR-head CI #43643150362 success",
+    "M1": "30 OF 30 AUTHOR-CODED CANDIDATES — NATIVE NODE 18/18, 30 CHROMIUM CANVAS2D QA; WEBGL2/ART OPEN",
     "M2": "NOT STARTED",
     "M3": "NOT STARTED",
     "M4": "NOT STARTED",
@@ -128,5 +128,20 @@
     "src/building-pool/roadmap-4/",
     "tests/building-pool/roadmap-4/",
     "docs/building-pool/roadmap-4/"
-  ]
+  ],
+  "coordinationLatestMain": "caf47776b723a36684edc1a72749e49268ccc688",
+  "coordinationLatestCheckpoint": "007",
+  "sourceFiles": [
+    "src/building-pool/roadmap-4/schema.mjs",
+    "src/building-pool/roadmap-4/m1-blueprints.mjs"
+  ],
+  "qa": {
+    "m0NativeNode": "11/11 PASS exact GitHub blob SHA parity",
+    "m1NativeNode": "18/18 PASS exact GitHub blob SHA parity",
+    "m1DuplicateSignatures": "30/30 distinct",
+    "m1Screenshots": "30 local real Chromium Canvas2D captures, 10 representative blueprints times 3 viewports",
+    "m1WebGL2": "NOT VERIFIED: browser context disabled WebGL2; not interchangeable with Canvas2D",
+    "m1PhysicalIphone": "NOT RUN",
+    "worldPlacement": "NONE"
+  }
 }
