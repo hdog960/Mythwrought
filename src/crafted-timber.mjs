@@ -25,12 +25,19 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
     float ringWobble=.018*sin(atan(ringsUv.y,ringsUv.x)*7.0);
     float endRings=.5+.5*cos((ringRadius+ringWobble)*48.0);
     float endCracks=1.0-smoothstep(.012,.045,abs(ringsUv.x+sin(ringsUv.y*13.0)*.018));
-    float sideShade=.80+.13*grain+.045*fineGrain+.08*tile-.24*seam-.075*knotMask*knotRing-.07*peg;
+    // Each board receives a stable individual honey/amber tint, without texture lookups.
+    // Subtle edge wear follows the seam and never adds translucent geometry.
+    float boardTone=hashCell(boardCell+vec2(37.0,19.0));
+    float edgeDist=min(fract(boards.y),1.0-fract(boards.y));
+    float edgeWear=1.0-smoothstep(.035,.14,edgeDist);
+    float pegPair=1.0-smoothstep(.024,.063,length(fract(boards)-vec2(.88,.15)));
+    float sideShade=.76+.13*grain+.045*fineGrain+.12*boardTone+.045*tile
+      -.22*seam+.055*edgeWear-.075*knotMask*knotRing-.055*(peg+pegPair);
     float topShade=.83+.16*endRings+.06*tile-.10*endCracks;
     shade=mix(sideShade,topShade,topFace);
     base=mix(base,vec3(.85,.56,.34),(.11+.06*grain)*near);
 `;
 export const CRAFTED_TIMBER_RULES=Object.freeze({
   existingBlockId:4, boardsAcross:3, boardsHigh:2,
-  endGrainOnTop:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
+  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
 });
