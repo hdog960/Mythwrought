@@ -286,7 +286,8 @@
     "src/block-packs/pack-4/lighting.mjs",
     "src/block-packs/pack-4/fixture.mjs",
     "src/block-packs/pack-4/furnishings.mjs",
-    "src/block-packs/pack-4/hearth-civic.mjs"
+    "src/block-packs/pack-4/hearth-civic.mjs",
+    "src/block-packs/pack-4/preview-utils.mjs"
   ],
   "testFiles": [
     "tests/block-packs/pack-4/windows.test.mjs",
@@ -299,7 +300,9 @@
     "tests/block-packs/pack-4/gallery-browser.mjs",
     "tests/block-packs/pack-4/manifest.test.mjs",
     "tests/block-packs/pack-4/hearth-civic.test.mjs",
-    "tests/block-packs/pack-4/hearth-civic-fixture.test.mjs"
+    "tests/block-packs/pack-4/hearth-civic-fixture.test.mjs",
+    "tests/block-packs/pack-4/preview-utils.test.mjs",
+    "tests/block-packs/pack-4/acceptance.test.mjs"
   ],
   "dependencies": [
     "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
@@ -331,5 +334,8 @@
     117
   ],
   "lastV8FocusedChecks": 142,
-  "currentAcceptanceStatus": "M0–M4 source authored, unmerged; M5 ACCEPTANCE OPEN pending exact-head native Node/Chromium, source screenshots and creator review."
+  "currentAcceptanceStatus": "M0–M4 source authored; M5 CONDITIONAL pending whole-pack native Node, genuine 23-card Chromium screenshots and creator visual/physical-iPhone Gate A review",
+  "latestAcceptanceV8": 152,
+  "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
+  "galleryEvidence": "Source-derived gallery implementation hardened with GPU resource disposal, fixed-view alpha sorting and fit-to-frame; genuine Chromium remains blocked by browser navigation policy"
 }
