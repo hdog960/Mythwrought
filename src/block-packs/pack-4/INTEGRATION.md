@@ -190,7 +190,7 @@ to avoid creating 17 independent graphics contexts on iPhone.
 Do not misrepresent preview geometry or drawn lights as in-engine
 functionality.
 
-**Verified in this session:** exact source test bodies 100/100 PASS
+**Verified in this session:** exact source/manifest test bodies 104/104 PASS
 through JavaScript V8 compatibility harness; this is NOT native
 Node test execution. Prior PR HEAD `6fc1b21d...` passed the
 existing root GitHub CI baseline [Actions #43630645050](https://github.com/hdog960/Mythwrought/actions/runs/43630645050),
