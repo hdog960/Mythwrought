@@ -5,6 +5,7 @@ import {woodlandCanopyVertices} from './canopy.mjs';
 import {grottoAccentVertices} from './grotto.mjs';
 import {caveRuneVertices} from './cave-runes.mjs';
 import {waystoneVertices} from './waystones.mjs';
+import {caveThresholdVertices} from './cave-thresholds.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
@@ -98,11 +99,34 @@ export class VoxelWorld{
   }
 }
 export function meshChunk(world,cx,cz){
+  // A face check repeatedly visits the same neighboring voxel (often six
+  // times). Cache only cells actually queried by this synchronous rebuild.
+  // The one-block halo includes chunk boundaries and the vertical limits;
+  // reads still go through world.get so schema-1 edits override seeded caves.
+  const side=CHUNK_SIZE+2, depth=WORLD_MAX_Y-WORLD_MIN_Y+3;
+  const minX=cx*CHUNK_SIZE-1,minZ=cz*CHUNK_SIZE-1,minY=WORLD_MIN_Y-1;
+  const cells=new Uint8Array(side*side*depth);
+  cells.fill(255); // AIR is 0; 255 is the sole unvisited sentinel.
+  const extra=new Map();
+  const blockAt=(x,y,z)=>{
+    if(x<minX||x>=minX+side||z<minZ||z>=minZ+side||y<minY||y>=minY+depth){
+      const key=x+','+y+','+z;
+      if(extra.has(key))return extra.get(key);
+      const id=world.get(x,y,z);extra.set(key,id);return id;
+    }
+    const index=((x-minX)*side+(z-minZ))*depth+(y-minY);
+    const cached=cells[index];
+    if(cached!==255)return cached;
+    const id=world.get(x,y,z);
+    cells[index]=id;
+    return id;
+  };
+  const readWorld={seed:world.seed,get:blockAt};
   const vertices=[];
   for(let x=cx*CHUNK_SIZE;x<(cx+1)*CHUNK_SIZE;x++)
     for(let z=cz*CHUNK_SIZE;z<(cz+1)*CHUNK_SIZE;z++)
       for(let y=WORLD_MIN_Y;y<=WORLD_MAX_Y;y++){
-        const id=world.get(x,y,z);
+        const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
         const color=COLORS[id]||COLORS[3];
         // Most underground voxels are fully enclosed. Defer the two noise
@@ -111,7 +135,7 @@ export function meshChunk(world,cx,cz){
         // Keep world-space inputs and face order identical for save/seed parity.
         let variance;
         for(const face of FACE){
-          if(world.get(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
+          if(blockAt(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
           if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
             hash(x+y*5,z-y*3,world.seed+91)*.08;
           const r=clamp(color[0]*variance*face.lit,0,1);
@@ -126,40 +150,42 @@ export function meshChunk(world,cx,cz){
   // Decorative meadows are purely rendered geometry anchored to the current
   // grass voxel. They never enter world.get(), raycasts, collisions or saves.
   // Crucially, they piggyback the existing chunk buffer and mesh invalidation.
-  const grove=storybookGroveVertices(world,cx,cz,{
+  const grove=storybookGroveVertices(readWorld,cx,cz,{
     chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,
     grass:BLOCK.GRASS,air:BLOCK.AIR
   });
-  const canopy=woodlandCanopyVertices(world,cx,cz,{
+  const canopy=woodlandCanopyVertices(readWorld,cx,cz,{
     chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,
     grass:BLOCK.GRASS,air:BLOCK.AIR
   });
-  const meadow=meadowAccentVertices(world,cx,cz,{
+  const meadow=meadowAccentVertices(readWorld,cx,cz,{
     chunkSize:CHUNK_SIZE,heightAt:terrainHeight,grass:BLOCK.GRASS,air:BLOCK.AIR
   });
   // Underground mushrooms and crystal tips reuse this SAME chunk mesh and
   // existing edit invalidation; no physics, lighting pass or persisted blocks.
-  const grotto=grottoAccentVertices(world,cx,cz,{
+  const grotto=grottoAccentVertices(readWorld,cx,cz,{
     chunkSize:CHUNK_SIZE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y,
     heightAt:terrainHeight,baseAt:baseBlock,
     air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
-  const runes=caveRuneVertices(world,cx,cz,{
+  const runes=caveRuneVertices(readWorld,cx,cz,{
     chunkSize:CHUNK_SIZE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y,
     heightAt:terrainHeight,baseAt:baseBlock,
     air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
-  const waystones=waystoneVertices(world,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
+  const waystones=waystoneVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
+  const caveThresholds=caveThresholdVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,air:BLOCK.AIR,stoneId:BLOCK.STONE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y});
   const solid=new Float32Array(vertices);
-  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length)return solid;
-  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length);
+  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length&&!caveThresholds.length)return solid;
+  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length+caveThresholds.length);
   combined.set(solid);combined.set(canopy,solid.length);
   combined.set(grove,solid.length+canopy.length);
   combined.set(meadow,solid.length+canopy.length+grove.length);
   combined.set(runes,solid.length+canopy.length+grove.length+meadow.length);
   // Existing meadow and grotto tail positions retain their regression invariants.
   combined.set(grotto,solid.length+canopy.length+grove.length+meadow.length+runes.length);
-  combined.set(waystones,combined.length-waystones.length);
+  combined.set(waystones,combined.length-waystones.length-caveThresholds.length);
+  combined.set(caveThresholds,combined.length-caveThresholds.length);
   return combined;
 }
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.

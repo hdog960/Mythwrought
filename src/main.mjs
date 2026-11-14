@@ -8,7 +8,8 @@ import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
-import {createEditEcho,sampleEditEcho} from './edit-echo.mjs';
+import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
+import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
@@ -74,8 +75,9 @@ function start(){
   try{initializeGpuPipeline();}
   catch(error){fatal('Voxel/sky shader failed to initialize: '+error.message);return;}
 
+  let caveDiscovery={inside:false,last:-Infinity,discoveries:0};
   let selected=BLOCK.STONE;
-  let outlineKey='',outlineCount=0,editEcho=null;
+  let outlineKey='',outlineCount=0,editFeedback=[];
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
   const chunks=new Map(),pending=new Map();
@@ -206,9 +208,10 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||document.hidden||graphicsLost)return;
+    const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
+    editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
-    editEcho=createEditEcho(result,performance.now());
     changed=true;
     const persisted=save();
     const label=BLOCK_NAMES[result.block]||'block';
@@ -288,6 +291,11 @@ function start(){
     frameHistory.frame(now,!document.hidden&&help.hidden&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
       frame++;if(help.hidden)move(dt);
+      // Low-frequency real-cave check: no synthetic map markers or geometry.
+      if(help.hidden&&frame%24===0){
+        caveDiscovery=updateCaveDiscovery(caveDiscovery,naturalCaveCorridor(world,player),now);
+        if(caveDiscovery.entered)message('Natural cave passage discovered · explore carefully');
+      }
       const buffer=bufferDimensions(canvas.clientWidth,canvas.clientHeight,renderPreset,devicePixelRatio||1);
       const w=buffer.width,h=buffer.height;
       canvas.dataset.renderPreset=renderPreset;
@@ -349,7 +357,7 @@ function start(){
         if(focused?.canPlace&&status.textContent==='Cannot place inside the player')
           message('Build space clear · choose MINE or PLACE');
       }
-      const echo=help.hidden?sampleEditEcho(editEcho,now):{key:'',vertices:new Float32Array()};
+      const echo=help.hidden?sampleWorldEditFeedback(editFeedback,now):{key:'',vertices:new Float32Array()};
       const nextOutlineKey=focusKey+'|'+placeKey+'|'+echo.key;
       if(nextOutlineKey!==outlineKey){
         outlineKey=nextOutlineKey;
@@ -475,10 +483,11 @@ function start(){
     }
   },()=>{lookStick.x=lookStick.y=0;cameraKnob.style.transform='';});
   const precisionButton=document.getElementById('precision');
-  let precisionPointer=null;
+  let precisionPointer=null,precisionTouchId=null;
   function releasePrecision(e){
     if(precisionPointer===null||(e&&e.pointerId!==precisionPointer))return;
-    precisionPointer=null;precisionHeld=false;precisionButton.classList.remove('held');
+    precisionPointer=null;precisionTouchId=null;precisionHeld=false;
+    precisionButton.classList.remove('held');
   }
   precisionButton.addEventListener('pointerdown',e=>{
     // Retain the first precision finger until it actually releases.
@@ -488,12 +497,27 @@ function start(){
     precisionButton.classList.add('held');
     try{precisionButton.setPointerCapture(e.pointerId);}catch(_){}
   });
-  for(const event of ['pointerup','pointercancel'])precisionButton.addEventListener(event,releasePrecision);
-  precisionButton.addEventListener('lostpointercapture',()=>releasePrecision());
+  for(const event of ['pointerup','pointercancel']){
+    precisionButton.addEventListener(event,releasePrecision);
+    window.addEventListener(event,releasePrecision,true);
+  }
+  precisionButton.addEventListener('lostpointercapture',releasePrecision);
+  // Preserve the owning touch across Safari pointer-capture interruptions.
+  // TouchEnd identifies the finger even if the matching pointerup is lost.
+  precisionButton.addEventListener('touchstart',e=>{
+    // touchstart precedes pointerdown on Chromium/Safari. Remember the first
+    // finger before a second touch can race into the AIM button.
+    if(precisionTouchId===null&&help.hidden&&!document.hidden&&e.changedTouches.length)
+      precisionTouchId=e.changedTouches[0].identifier;
+  },{passive:true});
+  for(const name of ['touchend','touchcancel'])window.addEventListener(name,e=>{
+    if(precisionTouchId!==null&&Array.from(e.changedTouches)
+      .some(t=>t.identifier===precisionTouchId))releasePrecision();
+  },true);
   function cancelAllPointers(){
     for(const stop of [...heldPointers.values()])stop();
     lookStick.x=lookStick.y=0;
-    precisionPointer=null;precisionHeld=false;
+    precisionPointer=null;precisionTouchId=null;precisionHeld=false;
     keys.clear();joystick.x=joystick.y=0;
     jumpQueued=false;drag=null;
     precisionButton.classList.remove('held');
