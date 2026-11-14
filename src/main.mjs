@@ -1,10 +1,12 @@
-import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
+import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides,WORLD_MIN_Y} from './voxel.mjs';
+import {sectionForY,sectionWindow,verticalEditSections,depthMeshKey} from './depth.mjs';
+import {meshDepthSection} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
 import {clampLook,forwardVector,compassDegrees,MAX_PITCH} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
-import {chunkKey,prepareSeamBatch,priorityMissingChunks} from './chunks.mjs';
+import {chunkKey,editAffectedChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
@@ -186,10 +188,18 @@ function start(){
   }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
-  function refreshEditedMeshes(x,z){
-    // Rebuild adjacent LOADED meshes in one event turn; no partially updated
-    // chunk-boundary frame can be shown between the neighbor replacements.
-    const batch=prepareSeamBatch(world,chunks,x,z);
+  function refreshEditedMeshes(x,z,y=0){
+    // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
+    // sections at Y-seams. All buffers stage before any published replacement.
+    const batch=[];
+    for(const section of verticalEditSections(y))
+      for(const {cx,cz} of editAffectedChunks(x,z)){
+        const key=depthMeshKey(cx,cz,section);
+        if(!chunks.has(key))continue;
+        const vertices=section===0?meshChunk(world,cx,cz):
+          meshDepthSection(world,cx,cz,section);
+        batch.push({key,cx,cz,section,vertices});
+      }
     const ready=[];
     try{
       for(const item of batch){
@@ -202,12 +212,13 @@ function start(){
     }
     for(const item of ready){
       const old=chunks.get(item.key);
-      chunks.set(item.key,{x:item.cx,z:item.cz,buffer:item.buffer,count:item.count});
+      chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
+        buffer:item.buffer,count:item.count});
       if(old)gl.deleteBuffer(old.buffer);
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
-    // Not-yet-loaded chunks read the current global voxel world when meshed.
+    // Unloaded deep sections always use the current saved world.get on arrival.
   }
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
@@ -225,38 +236,48 @@ function start(){
   let lastStreamingCenter='';
   let wanted=new Set();
   function stream(){
-    const center=name(chunkCoord(player.x),chunkCoord(player.z));
+    const horizontalCenter=name(chunkCoord(player.x),chunkCoord(player.z));
+    const visibleSections=sectionWindow(player.feet);
+    const center=visibleSections.length===1&&visibleSections[0]===0?
+      horizontalCenter:horizontalCenter+'|'+visibleSections.join(',');
     if(center!==lastStreamingCenter){
       lastStreamingCenter=center;
-      meshCadence.resetCooldown(); // prioritize freshly entered chunk windows
-      const desired=chunkWindow(player.x,player.z,2);
-      wanted=new Set(desired.map(c=>name(c.cx,c.cz)));
+      meshCadence.resetCooldown();
+      const desired=visibleSections.flatMap(section=>
+        chunkWindow(player.x,player.z,section===0?2:1).map(c=>({...c,section})));
+      wanted=new Set(desired.map(c=>depthMeshKey(c.cx,c.cz,c.section)));
       gpuRetry.keepOnly(wanted);
-      // Eagerly delete GPU buffers behind the player; never accumulate old border chunks.
+      // Keep only the immediate bounded vertical section neighborhood.
+      // At normal surface height this remains the original 25 GPU chunks.
       for(const [k,c] of chunks){
         if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
       }
       for(const c of desired){
-        const k=name(c.cx,c.cz);
-        if(!chunks.has(k)&&!pending.has(k))pending.set(k,[c.cx,c.cz]);
+        const k=depthMeshKey(c.cx,c.cz,c.section);
+        if(!chunks.has(k)&&!pending.has(k))
+          pending.set(k,[c.cx,c.cz,c.section]);
       }
     }
-    // Edit invalidations may add neighbors; never mesh outside the active bounded window.
     for(const k of pending.keys())if(!wanted.has(k))pending.delete(k);
-    // Bounded missing mesh uploads, nearest to the player first.
     const cx=chunkCoord(player.x),cz=chunkCoord(player.z);
-    const queue=priorityMissingChunks(pending,cx,cz);
+    const activeSection=sectionForY(Math.max(WORLD_MIN_Y,Math.min(19,Math.floor(player.feet))))??0;
+    const weight=([x,z,section])=>
+      (x-cx)**2+(z-cz)**2+(section-activeSection)**2*12;
+    const queue=[...pending.entries()].sort((a,b)=>
+      weight(a[1])-weight(b[1])||
+      a[1][2]-b[1][2]||a[1][1]-b[1][1]||a[1][0]-b[1][0]);
     const now=performance.now();
     const next=queue.find(([k])=>gpuRetry.ready(k,now));
     if(next&&meshCadence.ready()){
-      const [k,[x,z]]=next;
+      const [k,[x,z,section]]=next;
       const begin=performance.now();
       try{
-        const data=meshChunk(world,x,z);
+        const data=section===0?meshChunk(world,x,z):
+          meshDepthSection(world,x,z,section);
         const buffer=uploadChunkBuffer(gl,data);
         pending.delete(k);gpuRetry.success(k);
         const old=chunks.get(k);
-        chunks.set(k,{x,z,buffer,count:data.length/9});
+        chunks.set(k,{x,z,section,buffer,count:data.length/9});
         if(old)gl.deleteBuffer(old.buffer);
       }catch(error){
         const state=gpuRetry.fail(k,performance.now(),error.message);
@@ -264,7 +285,7 @@ function start(){
       }finally{
         meshCadence.finished(performance.now()-begin);
       }
-    } // one safe candidate per eligible frame, with finite backoff on GPU faults
+    }
     if(frame%45===0)for(const [k,c] of chunks){
       if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
     }
@@ -288,7 +309,7 @@ function start(){
       const d=stickLookDelta(lookStick,dt);
       look(d.x,d.y);
     }
-    if(player.feet<-15)respawnPrototype();
+    if(player.feet<WORLD_MIN_Y-12)respawnPrototype();
   }
   function draw(now){
     const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
@@ -1034,7 +1055,7 @@ function start(){
       placeFixture(x,y,z,id){
         const old=world.get(x,y,z);
         if(!world.set(x,y,z,id))throw Error('Invalid test block');
-        try{refreshEditedMeshes(x,z);}catch(err){world.set(x,y,z,old);throw err;}
+        try{refreshEditedMeshes(x,z,y);}catch(err){world.set(x,y,z,old);throw err;}
         save();
       },
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
