@@ -37,3 +37,10 @@
 - Underground ruins, cities, constructed placements (:36).
 - Lighting, mushrooms, flora, storytelling props (:48).
 - Actual real-iPhone thermal/memory review belongs to creator's Gate A evidence, not CI.
+
+## Exact-head verification log — 2026-11-14
+
+- First candidate `3ffc6742010ba2f1da5696e417d20acd375299d7`: [dedicated Actions #43649997288](https://github.com/hdog960/Mythwrought/actions/runs/43649997288) **FAIL**, 376/378 native Node tests; Chromium step skipped, no PNGs produced. The two legitimate compatibility regressions were `tests/hidden-voxel-mesh.test.mjs` (the public `WORLD_MIN_Y` grew from -3 and altered its original 23-cell surface fixture), and `tests/physical-construction-kit.test.mjs` (existing causeway pier bounds stopped rejecting a too-deep pier).
+- Root cause: legacy terrain/cave/structure callers depend on `WORLD_MIN_Y === -3`. **Corrected without editing any automation-owned generator or construction module:** `src/voxel.mjs` continues exporting legacy `WORLD_MIN_Y=-3`; `src/depth.mjs` exclusively exports the expanded editable-engine `WORLD_MIN_Y=-210`. `VoxelWorld` set/get/baseBlock and `src/blocks.mjs` use expanded bound directly, while existing :24 `caveRoute` and the existing mesh/physical-construction callers retain the old clamp. New dedicated regression proves cave floors unchanged across four seeds.
+- Corrected exact candidate `37203768b62ea9528444e17edeb625912a8f71ae` (or newer): [full CI #43650757680](https://github.com/hdog960/Mythwrought/actions/runs/43650757680), [depth CI #43650757693](https://github.com/hdog960/Mythwrought/actions/runs/43650757693) were **QUEUED when authored**; do not count as pass. The earlier failed job has no genuine screenshots; depth imagery requires a successful new browser stage.
+- Temporary :24, :36, :48 automation guards stay active; no workflow schedule changes, :00 activation, merge, Pages deployment, Gate A approval or block/roadmap edits.
