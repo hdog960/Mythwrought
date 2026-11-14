@@ -4,6 +4,10 @@
 // On Linux hosts where headless software GL is disabled, opt into real
 // headed Chromium with: xvfb-run -a env PACK4_CHROMIUM_HEADFUL=1
 // PACK4_CHROMIUM_PATH=/usr/bin/chromium node tests/block-packs/pack-4/gallery-browser.mjs
+// In sandboxed Chromium where HTTP navigation is blocked, opt into source-exact
+// in-memory ESM: PACK4_INJECT_SOURCE=1. This loads the SAME candidate modules
+// as Blob URLs, retains genuine GPU renders and ALL visual assertions, and
+// never substitutes mocked geometry or manufactured screenshot pixels.
 // This still requires a genuine WebGL2 context; it never falls back to mocks.
 // Never opens/changes the live world or GitHub Pages.
 import {createServer} from 'node:http';
@@ -40,6 +44,7 @@ try{
  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve)});
  const url='http://127.0.0.1:'+server.address().port+
   '/tests/block-packs/pack-4/gallery.html';
+ const injectSource=process.env.PACK4_INJECT_SOURCE==='1';
  // A real virtual-display Chromium session may expose SwiftShader/WebGL2
  // even where headless Chromium cannot. This is an opt-in execution mode,
  // not a reduced visual acceptance criterion.
@@ -71,7 +76,52 @@ try{
    isMobile:true,hasTouch:true});
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  await page.goto(url,{waitUntil:'load'});
+  if(injectSource){
+   // Load exactly the checked-out Pack 4 gallery and five asset modules.
+   // A quarantined runner can block ALL page navigations, even localhost.
+   // Blob ESM is genuine browser execution and genuine WebGL2; no mocks.
+   const pack='src/block-packs/pack-4/';
+   const keys=['windows.mjs','lighting.mjs','furnishings.mjs',
+    'hearth-civic.mjs','preview-utils.mjs'];
+   const modules={};
+   for(const name of keys)
+    modules[name]=await readFile(resolve(root,pack+name),'utf8');
+   const gallerySource=await readFile(resolve(root,
+    'tests/block-packs/pack-4/gallery.mjs'),'utf8');
+   const html=await readFile(resolve(root,
+    'tests/block-packs/pack-4/gallery.html'),'utf8');
+   const tag='<script type="module" src="./gallery.mjs"></script>';
+   if(!html.includes(tag)||html.split(tag).length!==2)
+    throw Error('Expected exactly one original Pack4 module script tag');
+   await page.setContent(html.replace(tag,''),{waitUntil:'load'});
+   await page.evaluate(async({modules,gallerySource})=>{
+    const urls={};
+    const toBlob=source=>URL.createObjectURL(new Blob([source],
+     {type:'text/javascript'}));
+    try{
+     for(const [name,source] of Object.entries(modules))
+      urls[name]=toBlob(source);
+     let rewritten=gallerySource;
+     for(const [name,uri] of Object.entries(urls)){
+      const spec='../../../src/block-packs/pack-4/'+name;
+      if(!rewritten.includes(spec)||rewritten.split(spec).length!==2)
+       throw Error('Unexpected Pack4 gallery import '+spec);
+      rewritten=rewritten.replace(spec,uri);
+     }
+     // Do not allow unresolved original Pack4 module specifiers to fall back
+     // to a blocked network request or silently skip visual verification.
+     if(rewritten.includes('../../../src/block-packs/pack-4/'))
+      throw Error('Unresolved source-exact Pack4 imports');
+     const entry=toBlob(rewritten);
+     urls.gallery=entry;
+     await import(entry);
+    }finally{
+     for(const uri of Object.values(urls))URL.revokeObjectURL(uri);
+    }
+   },{modules,gallerySource});
+  }else{
+   await page.goto(url,{waitUntil:'load'});
+  }
   await page.waitForFunction(()=>window.__PACK4_GALLERY_RESULT?.ready,{timeout:20000});
   const report=await page.evaluate(()=>window.__PACK4_GALLERY_RESULT);
   if(report.success!==23||report.results.length!==23||!report.sharedWebglSurface||
