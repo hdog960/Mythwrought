@@ -331,14 +331,14 @@
     "https://github.com/hdog960/Mythwrought/issues/117"
   ],
   "familyCount": 22,
-  "lastVerifiedMain": "b62728e1756140ab189b006dab85da091b0eeedc",
-  "lastVerifiedCheckpoint": "Main commit message: automation-only Gate A integration 007; docs/INTEGRATION_CHECKPOINTS.md still ends at 006",
+  "lastVerifiedMain": "caf47776b723a36684edc1a72749e49268ccc688",
+  "lastVerifiedCheckpoint": "007 — automation-only; b62728e integrated source, caf47776 recorded checkpoint; manual Pack 4 remains excluded",
   "lastComparedIssues": [
     109,
     117
   ],
   "lastV8FocusedChecks": 142,
-  "currentAcceptanceStatus": "M5 OPEN: 168/168 authored JS V8 checks; current main opt-in interface 552/552 V8 compatibility; 5/5 native preview-utils subset; whole pack native Node and Chromium screenshots not verified. Main automation-only integration 007 does NOT include manual Pack4.",
+  "currentAcceptanceStatus": "M5 OPEN. Full 22 families/23 IDs source complete. V8 authored tests 168/168; current main :00 interaction probes 552/552, current-main :12 source mesh 92/92 within 836 vertices; native Node only preview-utils subset 5/5; real Chromium/WebGL2 screenshots and physical iPhone approval pending.",
   "latestAcceptanceV8": 168,
   "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
   "galleryEvidence": "Browser QA caught and fixed nonblack-background false positive in preview pixel check; now requires real foreground contrast plus 23 unique image hashes and asymmetric rotation; still blocked on local Chromium/WebGL2.",
@@ -368,11 +368,12 @@
     },
     "maxAabbForAllPack4Handoffs": 32
   },
-  "meshIntegrationRisk": "Opt-in PR #108 boundary-only mesher can exceed Pack4 preview vertex budgets: sample candidate 177 = 8336 vertices, 180 = 8136 vertices. Do not claim surface mesh mobile acceptance without dedicated optimization/testing.",
+  "meshIntegrationRisk": "Prior PR108 prototype snapshot was higher-cost, but current incorporated main has optimized greedy face merging. New main opt-in prototype mesh fits <=836 vertices for all Pack4 collision AABB unions across four turns. Real iPhone rendering still unverified.",
   "meshValidation": "19,248 nondegenerate outward-facing preview triangles across IDs 159–181 × 4 orientations; 0 inverted / 0 degenerate; individual meshes retain max 1,224 preview vertices and 14,436 cumulative (V8 exact-source checks, not native WebGL2).",
   "sharedSidecarSourceProbe": "23/23 physical IDs roundtrip through exact unmerged PR #106 makeOrientationSidecar, snapshot/readBlock, restoreOrientationSidecar and isolated Pack 4 fixture state in V8 source-to-source test; stale block identity is filtered.",
   "fixtureSafeIntegerCoordinates": "Pack 4 candidate fixture now accepts any Number.isSafeInteger cell coordinates, with guarded floor/wall/ceiling support offset overflow; does not affect real schema-1 saves.",
   "browserAcceptance": "Chromium executable available but minimal headless data URL hangs; no genuine WebGL2 gallery/screenshots or iPhone art acceptance.",
   "currentMainInteractionInterfaces": "Shapes/sidecar sources from former shared PR #106 now opt-in in main at b62728e; Pack4 23 IDs remain unregistered.",
-  "currentMainSourceProbe": "552/552 exact current-main opt-in source-to-source V8 probes for 23 IDs × 4 orientations × 6 interaction facets, plus 23/23 real shared sidecar snapshot replay, NOT native Node or production engine."
+  "currentMainSourceProbe": "552/552 V8 direct current-main opt-in interaction/sidecar checks across 23 IDs×4 orientations×6 contracts; 23/23 staged sidecar replay, no real engine/world activation.",
+  "currentMainMesherProbe": "Current-main checkpoint007 greedy opt-in prototypeSurfaceMesh: 92/92 Pack4 rotated collision-union meshes produced within preview 1500 vertex cap, maximum 836 vertices (crate ID170 at 90/270 degrees). V8 source-only, not GPU or real WebGL2."
 }
