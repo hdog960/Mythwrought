@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,VoxelWorld,meshChunk,WORLD_MIN_Y,WORLD_MAX_Y,baseBlock,raycast,collides} from '../src/voxel.mjs';
+import {BUILD_MATERIALS,BLOCK_NAMES,applyBlockAction} from '../src/blocks.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER as FS,STORYBOOK_ART_RULES as ART} from '../src/storybook-materials.mjs';
 
 test('stable natural block allocation keeps legacy IDs and independent render-only tags',()=>{
@@ -51,5 +52,22 @@ test('legacy seeded terrain and existing save edits remain unchanged',()=>{
   assert.equal(w.get(4,3,4),original);
   assert.equal(w.set(4,3,4,BLOCK.ORE),true);
   assert.equal(VoxelWorld.restore(w.save()).get(4,3,4),BLOCK.ORE);
+ }
+});
+
+test('physical natural blocks can be placed through the existing reversible edit API',()=>{
+ for(const id of [BLOCK.LEAVES,BLOCK.DEEPSTONE]){
+  assert.ok(BUILD_MATERIALS.includes(id));
+  assert.ok(BLOCK_NAMES[id]);
+  const world=new VoxelWorld(179);
+  assert.equal(world.set(0,16,0,BLOCK.STONE),true);
+  let rebuilt=0;
+  const result=applyBlockAction(world,[.5,16.5,-2],[0,0,1],'place',id,
+    {x:5,feet:16,z:5},()=>{rebuilt++;});
+  assert.equal(result.ok,true,result.reason);
+  assert.deepEqual(result.cell,[0,16,-1]);
+  assert.equal(world.get(0,16,-1),id);
+  assert.equal(rebuilt,1);
+  assert.equal(VoxelWorld.restore(world.save()).get(0,16,-1),id);
  }
 });
