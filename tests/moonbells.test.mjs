@@ -114,3 +114,25 @@ test('rare violet lantern fungi have four-sided caps, remain bounded and respect
  assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
  assert.equal(MOONBELL_LIMITS.newTextures,0);
 });
+
+
+test('silverleaf spires are seed-stable, tall, mesh-bounded and suppressed by edits',()=>{
+ let found=null,spireFacets=0;
+ for(let cx=-16;cx<=16;cx++)for(let cz=-16;cz<=16;cz++){
+  const v=moonbellVertices(world(123),cx,cz,opts);
+  assert.deepEqual(v,moonbellVertices(world(123),cx,cz,opts));
+  assert.ok(v.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+  for(let i=0;i<v.length;i+=9){
+   if(Math.abs(v[i+3]-.74)<1e-5&&Math.abs(v[i+4]-.83)<1e-5){
+    spireFacets++;
+    if(!found)found={cx,cz,x:Math.floor(v[i]),z:Math.floor(v[i+2]),length:v.length};
+   }
+  }
+ }
+ assert.ok(spireFacets>0,'silverleaf spires occur in seeded meadow chunks');
+ assert.ok(found);
+ const edited=world(123,new Map([[[found.x,4,found.z].join(','),0]]));
+ assert.ok(moonbellVertices(edited,found.cx,found.cz,opts).length<found.length);
+ assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
+ assert.equal(MOONBELL_LIMITS.newTextures,0);
+});
