@@ -88,3 +88,20 @@ test('broken crown preserves a wide open center and grounded approach markers',(
  assert.ok(markers>0,'approach milestones are present');
  assert.ok(vertices.length/9<=CAUSEWAY_LIMITS.maxVerticesPerChunk);
 });
+
+test('terrace-aware broken rails add coping without affecting saves or mesh budgets',()=>{
+ const {world,cx,cz,vertices}=find();
+ const before=world.save();
+ const x=cx*16+8,z=cz*16+8,h=terrainHeight(x,z,world.seed);
+ // Rail coping adds thin elevated horizontal stones along both sides,
+ // while leaving the central roadway and approaches free.
+ let coping=0;
+ for(let i=0;i<vertices.length;i+=9){
+  const px=vertices[i],py=vertices[i+1],pz=vertices[i+2];
+  if((px<x-1.5||px>x+1.5)&&pz>z-1.2&&pz<z+1.7&&py>h+1.4&&py<h+3.1)coping++;
+ }
+ assert.ok(coping>0,'terrace rails and coping are visible');
+ assert.ok(vertices.length/9<=CAUSEWAY_LIMITS.maxVerticesPerChunk);
+ assert.deepEqual(ruinedCausewayVertices(world,cx,cz,options),vertices);
+ assert.deepEqual(world.save(),before);
+});
