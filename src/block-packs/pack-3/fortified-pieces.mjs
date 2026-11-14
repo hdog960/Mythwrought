@@ -10,7 +10,7 @@ const PALETTE=Object.freeze({
 // Unlike a modest boundary wall, the faceted side buttresses and deep coping
 // establish a fortified segment; individual cells may be placed/removed.
 const WALL=Object.freeze([
-  part('ash',0,0,.125,1,.21875,.875),
+  part('ash',0,0,0,1,.21875,.875),
   part('face',0,.21875,.125,.375,.90625,.875),
   part('face',.625,.21875,.125,1,.90625,.875),
   part('ash',0,.90625,.09375,1,1,.90625),
