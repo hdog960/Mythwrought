@@ -1,6 +1,6 @@
 # Mythwrought Roadmap 3 — Industry & Fortifications
 
-**State:** v0.10 Gate A, **M0 contract only**. Nothing in this pool is installed, spawned, merged or deployed. **M1 is next.** Only this roadmap's `src/`, `tests/`, and `docs/` subdirectories are owned by this development lane.
+**State:** v0.10 Gate A; **M0 accepted, M1 has 30 authored theoretical candidate structures and geometry QA in progress**. Nothing in this pool is installed, spawned, merged or deployed. Only this roadmap's `src/`, `tests/`, and `docs/` subdirectories are owned by this development lane.
 
 ## Design allocation
 
@@ -21,3 +21,7 @@ The `geometryFingerprint` excludes palette, biome and naming metadata, so copies
 Source main at M0 audit: `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, [incorporation checkpoint 006](https://github.com/hdog960/Mythwrought/blob/main/docs/INTEGRATION_CHECKPOINTS.md). Open automation incorporation PR #120 and manual PRs #112–115/#119 were reviewed; none owned this roadmap's directories. New automated assets on #118/#120 are candidates, not guaranteed runtime materials. Reaudit live main, issues, source packs, biome lane, and PRs before **every** session. Do not edit shared engine, integration ledger, world generation, maps, other roadmaps/packs, saves, controls or CI. No NPCs, military behavior, crafting or working machines.
 
 **M0 local evidence:** `node --test tests/building-pool/roadmap-3/contract.test.mjs`: 11/11 passing under Node 22.16.0 on a local authored source copy. These tests are nested and **not automatically run** by main's existing `node --test tests/*.test.mjs` CI script. Review exact PR HEAD and arrange independently verified execution before declaring M0 acceptance. No genuine WebGL2/Chromium asset gallery or physical-iPhone verification is claimed because the initial milestone authors no production buildings/preview. Gate A stays open, v0.11 locked.
+
+## Current M1 review slice (not live)
+
+30 blacksmith/watchtower proposals exist at `src/building-pool/roadmap-3/m1.mjs`. Reviewed roofs now have meaningful single-cell shells/rafters, forge-aligned conceptual flues, upper tower braces and supported stair treads. Manifest count is **70,921** physical voxel-coordinate records. Dedicated `node --test tests/building-pool/roadmap-3/*.test.mjs` passes **31/31** locally on exact candidate source. Authored WebGL2 preview source lives under the owned nested test folder; genuine three-viewport browser screenshots and future installed-asset collision dimensions remain **UNVERIFIED**. The optional browser runner is not wired into the shared project CI, which this lane must never edit. Main checkpoint 008 automation activation is separate and excluded.
