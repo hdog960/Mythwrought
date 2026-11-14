@@ -338,8 +338,8 @@
     117
   ],
   "lastV8FocusedChecks": 142,
-  "currentAcceptanceStatus": "M5 acceptance OPEN: 22/22 families and 23 candidate IDs 159–181 source-authored; 165/165 V8 exact test bodies pass; 5/5 exact-hash native Node subset pass; full native Node and genuine Chromium/WebGL2 23-model screenshots remain blocked. Creator Gate A/iPhone approval required.",
-  "latestAcceptanceV8": 165,
+  "currentAcceptanceStatus": "M5 OPEN. 22/22 families/23 candidate IDs source authored; 168/168 V8 exact source test bodies pass; 5/5 native Node preview utility subset pass; full native Node and 23-asset Chromium screenshots unavailable; no merge/integration.",
+  "latestAcceptanceV8": 168,
   "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
   "galleryEvidence": "Browser QA caught and fixed nonblack-background false positive in preview pixel check; now requires real foreground contrast plus 23 unique image hashes and asymmetric rotation; still blocked on local Chromium/WebGL2.",
   "reviewDocuments": [
@@ -348,7 +348,7 @@
     "src/block-packs/pack-4/M5_ACCEPTANCE.md"
   ],
   "nativeNodeVerifiedTests": 5,
-  "nativeNodeScope": "Verified via node v22.16.0: preview-utils.test.mjs 5/5 with source/test Git blob SHA parity. Full nested checkout-based suite remains unverified because local GitHub DNS access is blocked.",
+  "nativeNodeScope": "Only exact-Git-blob preview-utils.test.mjs 5 cases were run in Node 22; full branch checkout cannot be fetched by local runner because github.com and raw.githubusercontent.com DNS fail.",
   "galleryScope": "23 original geometry candidate cards; browser script authored for three iPhone landscape widths, no genuine screenshots verified",
   "nextMilestone": "M5 final acceptance blocked on full native Node suite, genuine Chromium gallery, shared contract integration and explicit creator review",
   "reviewedSharedContracts": {
@@ -369,5 +369,8 @@
     "maxAabbForAllPack4Handoffs": 32
   },
   "meshIntegrationRisk": "Opt-in PR #108 boundary-only mesher can exceed Pack4 preview vertex budgets: sample candidate 177 = 8336 vertices, 180 = 8136 vertices. Do not claim surface mesh mobile acceptance without dedicated optimization/testing.",
-  "meshValidation": "19,248 nondegenerate outward-facing preview triangles across IDs 159–181 × 4 orientations; 0 inverted / 0 degenerate; individual meshes retain max 1,224 preview vertices and 14,436 cumulative (V8 exact-source checks, not native WebGL2)."
+  "meshValidation": "19,248 nondegenerate outward-facing preview triangles across IDs 159–181 × 4 orientations; 0 inverted / 0 degenerate; individual meshes retain max 1,224 preview vertices and 14,436 cumulative (V8 exact-source checks, not native WebGL2).",
+  "sharedSidecarSourceProbe": "23/23 physical IDs roundtrip through exact unmerged PR #106 makeOrientationSidecar, snapshot/readBlock, restoreOrientationSidecar and isolated Pack 4 fixture state in V8 source-to-source test; stale block identity is filtered.",
+  "fixtureSafeIntegerCoordinates": "Pack 4 candidate fixture now accepts any Number.isSafeInteger cell coordinates, with guarded floor/wall/ceiling support offset overflow; does not affect real schema-1 saves.",
+  "browserAcceptance": "Chromium executable available but minimal headless data URL hangs; no genuine WebGL2 gallery/screenshots or iPhone art acceptance."
 }
