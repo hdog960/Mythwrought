@@ -7,7 +7,7 @@ test('nine exclusive symbolic candidates have future IDs 256..264 and no live ID
 });
 test('six deterministic voxel faces per family with distinct color and pattern',()=>{
  const descriptors=DESERT_CANDIDATE_IDS.map(desertCandidate);
- assert.equal(new Set(descriptors.map(d=>JSON.stringify(d.texture))).size,4);
+ assert.equal(new Set(descriptors.map(d=>JSON.stringify(d.texture))).size,DESERT_CANDIDATE_IDS.length);
  for(const d of descriptors){assert.equal(d.texture.faces.length,6);for(const f of d.texture.faces){assert.equal(f.length,16);for(const pixel of f)assert.ok(pixel>=0&&pixel<4);}assert.deepEqual(desertCandidate(d.symbolicId),d);}
 });
 test('isolated placement selection removal and reversible snapshot never touches world saves',()=>{
