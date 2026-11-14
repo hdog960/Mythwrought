@@ -161,3 +161,54 @@ The configured root npm test glob excludes all these nested tests. Its passing C
 **Milestone 4 source work completed for review only.** Pack 1 now tracks **19/21 candidate families**, **23 ID-bearing variants (IDs 9–31)**. **NEXT**: verify focused Node and authentic Chromium if accessible, then develop Milestone 5's individual physical flower species (at least four) and mushroom species (at least three) beginning at unused Pack 1 candidate ID 32, without overwriting foliage or adopting the separate Issue #117 biome130 leaf catalog.
 
 **STATUS: CANDIDATE — NOT MERGED / NOT DEPLOYED. Gate A open; v0.11 locked.**
+
+## Milestone 5 — seven physically independent flowers and mushrooms (IDs 32–38)
+
+**Source-authored and committed. Candidate-only, not registered in the live game.**
+
+| Candidate ID | Roster | Species | Physical identity and distinguishing 3D shape |
+|---|---:|---|---|
+| 32 | 53 Flower | Skybell | One curved thin stem, two opposing leaves, four individually bounded downward blue bells; solid-selection box union but passable petals. |
+| 33 | 53 Flower | Ember lily | Six separate angular upturned copper-orange petals, stem, leaves and raised gold center; different topology from Skybell. |
+| 34 | 53 Flower | Moonstar | Pale ivory four-point open star bloom, slender stem, basal leaves and central pollen core; no emitted light. |
+| 35 | 53 Flower | Thornrose | Layered ruby-red rose-petal shells, twig branching and small leaves with separate central bud. |
+| 36 | 54 Mushroom | Amber cap | Single honey-gold faceted mushroom canopy, pale stalk and distinctly bounded gill underside; only physical stem boxes block collision. |
+| 37 | 54 Mushroom | Violet shelf | Three staggered, separately bounded purple shelf caps along one branching stalk, with gaps below; not a repainted single-cap fungus. |
+| 38 | 54 Mushroom | Pearl gill | Pale fan cap with at least four distinct gill-ledged surfaces and a tapered central stalk; **lightEmission: 0**, no fake glowing gameplay. |
+
+Unlike pre-existing render-only floral accents, these candidates each have a unique persistent candidate ID, local-unit AABB selection geometry, independently reversible fixture placement/removal, original deterministic RGBA art separated by stem/leaf/petal/center or stem/cap/gill roles, and orientation metadata. All physical parts are aligned on an 1/8-voxel coordinate lattice to avoid unbounded prototype surface mesh partitioning. The four soft flowers have passable collision but remain ray-targetable; mushrooms offer stem-only collision, with air below/around their cap. No crop growth, collection, pot planting, food, spore spread, illumination, gameplay or world generation.
+
+Files created exclusively in Pack 1:
+- src/block-packs/pack-1/floral-forms.mjs — all seven physical voxel box arrangements, part-role color art, four rotations, independent IDs and metadata.
+- src/block-packs/pack-1/floral-fixture.mjs — isolated exact partial-AABB raycast, test-only reversible cell placement/removal, canonical schema-1-shaped save/restore, fail-closed rotated saves.
+- src/block-packs/pack-1/floral-gallery.html and floral-gallery.mjs — standalone responsive Canvas2D 3D-style preview, derived from true physical boxes and part-role textures, individual probeable physical slices, rotate/place/remove, test-only save.
+- tests/block-packs/pack-1/floral-forms.test.mjs — fifteen focused authored test groups.
+
+### Tests and honest certification boundary
+
+**15/15 new authored test groups pass** in a V8 compatibility harness using the **exact fetched GitHub source** and compatible Node-style assert/test shims. A first pass detected two incorrect expectations: a shelf cap reaches y=1 after 1/8-voxel lattice quantization, and the amber cap reaches the top of the cell. The test assertions were corrected to match authored geometry, and **15/15 pass** on the corrected exact branch. The physical geometry was not made fake or flattened to bypass these failures.
+
+**39/39 cross-lane opt-in compatibility checks pass** in V8 using the exact :00 generic targeting source, the exact :12 prototype surface mesher and the Pack 1 floral source. These cover 7 shapes × 4 rotations (28 meshes, between 204 and 376 triangles, finite unit-cell positions and valid indices), open-space targeting, cap/stalk rays, overlap guards, no simulated light and standalone gallery script parse. The triangle counts are prototype source output, **not real GPU/draw-call or device performance**.
+
+**Dedicated real Node:** NOT RUN; **dedicated authentic Chromium WebGL2 / offline gallery:** NOT RUN; **authentic screenshots:** NOT CAPTURED; **real iPhone:** NOT RUN. Actual GitHub project CI verifies the unchanged baseline but its root npm test glob does not auto-run the nested Pack 1 test suites. The local Node/Chromium runtime cannot network-fetch the GitHub branch through this session's container (DNS/network blocked); do not present V8 compatibility results as genuine Node or Chromium evidence.
+
+To run all five nested Pack 1 Node test modules in the correct environment:
+
+    node --test tests/block-packs/pack-1/core-masonry.test.mjs tests/block-packs/pack-1/stone-shapes.test.mjs tests/block-packs/pack-1/garden-components.test.mjs tests/block-packs/pack-1/physical-foliage.test.mjs tests/block-packs/pack-1/floral-forms.test.mjs
+
+Then serve the full branch locally and use genuine mobile landscape Chromium to inspect:
+- gallery.html (masonry)
+- stone-shape-gallery.html
+- garden-gallery.html
+- foliage-gallery.html
+- floral-gallery.html
+
+Check console failures, original role-texture composition, actual physical empty gaps, selection and remove actions, rotation refusal on unsafe old saves, bounded mesh budgets and offline handling where applicable. Screenshots must be captured from those running pages, not illustrations or fabricated before/after comparisons.
+
+### Milestone 6 handoff and blockers
+
+All **21 assigned Stone & Nature roster families** now have source-authored opt-in candidate assets across **30 unique candidate IDs 9–38**. This is source-development progress, **not final acceptance, real device testing, production block registration or deployment**. The manifest retains all IDs, each family status **CANDIDATE**, PR link, source commit, dependency and evidence. No other manual pack or :00/:12/:24/:36/:48 source was edited. No additional 130-biome-program assets were duplicated or taken over.
+
+Milestone 6 remains **OPEN** until dedicated genuine Node/Chromium and original screenshot review, source ID and geometry integrity audits, shape-aware live integration validation and historical schema-1 save test evidence. Production VoxelWorld.set still rejects IDs above 8, unmerged :00/:12 generic shape contracts are not live-wired, and old schema-1 edit rows cannot persist arbitrary rotations. A creator-authorized manual integration, followed by iPhone visual/controls approval, is required before any of these candidate assets are player-usable. Do not merge PR #113, deploy Pages, place flowers in the generated world, start v0.11 or alter central engine files without that separate explicit authorization.
+
+**STATUS: 21/21 SOURCE CANDIDATE FAMILIES; 30/30 DISTINCT CANDIDATE IDS; 0/30 LIVE-INTEGRATED PACK 1 IDS.**
