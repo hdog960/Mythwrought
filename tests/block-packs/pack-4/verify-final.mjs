@@ -69,10 +69,10 @@ if(args.length>1||args.some(arg=>arg!=='--node-only')){
    console.log('PACK4_NATIVE_ACCEPTANCE '+JSON.stringify(result));
    // An ordinary zero exit from node --test can include SKIPPED integrated
    // tests. M5 cannot accept that as complete evidence.
-   if(run.error||run.status!==0||result.tests!==179||
-      result.passed!==179||result.failed!==0||
+   if(run.error||run.status!==0||result.tests!==181||
+      result.passed!==181||result.failed!==0||
       result.skipped!==0||result.cancelled!==0){
-    console.error('M5 FAIL: Expected 179 genuine native Node cases and ZERO skips.');
+    console.error('M5 FAIL: Expected 181 genuine native Node cases and ZERO skips.');
     process.exitCode=1;
    }else if(args.includes('--node-only')){
     console.log('PACK4_ACCEPTANCE: native Node PASS; Chromium not executed (--node-only).');
