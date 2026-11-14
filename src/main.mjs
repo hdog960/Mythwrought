@@ -1,5 +1,5 @@
 import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
-import {WORLD_MIN_Y,sectionForY,sectionWindow,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
+import {WORLD_MIN_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
@@ -237,7 +237,8 @@ function start(){
   let wanted=new Set();
   function stream(){
     const horizontalCenter=name(chunkCoord(player.x),chunkCoord(player.z));
-    const visibleSections=sectionWindow(player.feet);
+    const nearShaft=player.feet<3&&surfaceOpeningNearby(world,player.x,player.z);
+    const visibleSections=sectionWindow(player.feet,nearShaft);
     const center=visibleSections.length===1&&visibleSections[0]===0?
       horizontalCenter:horizontalCenter+'|'+visibleSections.join(',');
     if(center!==lastStreamingCenter){
