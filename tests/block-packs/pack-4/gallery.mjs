@@ -3,6 +3,7 @@ import {PACK4_WINDOW_ASSETS,windowPreviewMesh} from '../../../src/block-packs/pa
 import {PACK4_LIGHT_ASSETS,lightingPreviewMesh} from '../../../src/block-packs/pack-4/lighting.mjs';
 import {PACK4_FURNISHING_ASSETS,furnishingPreviewMesh} from '../../../src/block-packs/pack-4/furnishings.mjs';
 import {PACK4_CIVIC_ASSETS,civicPreviewMesh} from '../../../src/block-packs/pack-4/hearth-civic.mjs';
+import {sortPack4PreviewTranslucent} from '../../../src/block-packs/pack-4/preview-utils.mjs';
 const VS = `#version 300 es
 precision highp float;
 layout(location=0) in vec3 aPosition;
@@ -42,29 +43,6 @@ function buildProgram(gl){
     throw Error(gl.getProgramInfoLog(prog)||'Link failed');
   return prog;
 }
-// Sort translucent triangles far to near for this fixed review camera only.
-function sortedTranslucent(mesh){
-  const data=mesh.translucent,stride=mesh.stride,triangleSize=stride*3;
-  if(!data.length)return data;
-  const triangles=[];
-  for(let start=0;start<data.length;start+=triangleSize){
-    let depth=0;
-    for(let vertex=0;vertex<3;vertex++){
-      const i=start+vertex*stride;
-      const x=data[i]-.5,y=data[i+1]-.5,z=data[i+2]-.5;
-      depth+=(.34*y+.94*(-.61*x+.79*z))/3;
-    }
-    triangles.push({start,depth});
-  }
-  triangles.sort((a,b)=>b.depth-a.depth||a.start-b.start);
-  const sorted=new Float32Array(data.length);
-  let i=0;
-  for(const triangle of triangles){
-    sorted.set(data.subarray(triangle.start,triangle.start+triangleSize),i);
-    i+=triangleSize;
-  }
-  return sorted;
-}
 function drawOne(canvas,id,rotation){
   const gl=canvas.getContext('webgl2',{alpha:false,preserveDrawingBuffer:true,antialias:true});
   if(!gl)throw Error('WebGL2 unavailable; cannot validate real candidate preview');
@@ -92,7 +70,7 @@ function drawOne(canvas,id,rotation){
   // Visual preview only: a sorted translucent pass is NOT integrated in live renderer.
   gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
   gl.depthMask(false);
-  const sorted=sortedTranslucent(mesh);
+  const sorted=sortPack4PreviewTranslucent(mesh.translucent,mesh.stride);
   gl.bufferData(gl.ARRAY_BUFFER,sorted,gl.STATIC_DRAW);
   gl.drawArrays(gl.TRIANGLES,0,sorted.length/mesh.stride);
   gl.depthMask(true);
