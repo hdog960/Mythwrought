@@ -73,6 +73,26 @@ Run from an exact source checkout with installed Python Playwright and free Chro
 python3 tests/block-packs/pack-2/gallery-browser.py --screenshots /tmp/pack2-gallery
 ```
 
+## Session 10 — verified local Chromium launcher and exact-head QA command (2026-11-14)
+
+- [x] Rechecked production main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, integration checkpoint **006**, Issues #109/#117 and the latest draft ownership heads for Packs 1, 3, 4 and 5. Pack 2's provisional IDs **59–76** remain unique, and all changed files remain under Pack 2's exclusive directories. Draft PR #114 stays open/unmerged.
+- [x] Found a **genuine local browser-tooling defect**: Python Playwright's default Chromium binary was not installed, even though free `/usr/bin/chromium` is present. An actual headless Chromium session using `executable_path='/usr/bin/chromium'` successfully imported a `data:text/javascript` module via a live HTML page and returned its expected value. This validates **the launch and inline-module technique**, NOT actual Pack 2 gallery rendering.
+- [x] Corrected `tests/block-packs/pack-2/gallery-browser.py` within exclusive Pack 2 ownership: use a configured `MYTHWROUGHT_PACK2_CHROMIUM` executable, then Playwright's installed browser, then free system Chromium. Missing binaries now cause explicit failure, not a misleading success. Added optional `--expected-head` and clean-worktree enforcement so real screenshots cannot be misattributed to a stale or modified checkout.
+- [x] Committed `tests/block-packs/pack-2/run-acceptance.sh`: a one-command **opt-in exact-head acceptance harness** that refuses dirty/mismatched Pack 2 sources, runs all six direct native Node suites (not the root glob), and invokes the Python Playwright gallery for 54 real candidate captures (18 IDs × 3 viewports) plus detailed screenshots. It uses **only free Node, Python Playwright and Chromium** and does not merge, deploy or edit production files.
+- [x] Re-ran **all 88 checked-in test functions** from the current exact branch modules in the isolated V8 harness (12 timber + 15 joinery + 14 ground + 17 infrastructure + 21 water + 9 acceptance): **88 passed / 0 failures**. The direct Node runner and Chromium candidate gallery **have NOT run**, because exact GitHub source could not be placed in this sandbox (GitHub DNS/TCP blocked and no repo checkout). That distinction remains a hard acceptance gate.
+- [x] Previous exact-head standard baseline CI `e028682cb0310c48120b73207f14c9201c30c200` [run #43642512460](https://github.com/hdog960/Mythwrought/actions/runs/43642512460) **SUCCESS**, but does not execute nested Pack 2 tests. Later heads must have their own CI result.
+- [ ] No authentic Pack 2 screenshot pixels, native `node:test` results, integrated WebGL2 water, schema-1 persistence validation, FPS results or physical iPhone control certification. **M6 candidate source review complete; native/browser/production acceptance OPEN.**
+
+**Direct once-checkout-exists command** (from exact clean PR HEAD, free tooling only):
+
+```sh
+MYTHWROUGHT_PACK2_EXPECT_HEAD="$(git rev-parse HEAD)" \
+MYTHWROUGHT_PACK2_SCREENSHOTS=/tmp/mythwrought-pack2-qa \
+bash tests/block-packs/pack-2/run-acceptance.sh
+```
+
+The command does not approve incorporation: Gate A and v0.11 remain locked behind creator approval and production integration checks.
+
 ## Required real test gates — NOT certified by the source-level checks
 
 | Gate | Evidence required | Current status |
