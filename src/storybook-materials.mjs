@@ -34,17 +34,24 @@ void main(){
   if(vMat==1){ // Grass: sun-dappled meadow with petite golden leaf flecks.
     vec2 p=floor(vUv*vec2(19.0,15.0));
     float leaf=step(.89,hashCell(p+vec2(2.0,7.0)));
+    // Broad moss islands and scattered tiny butter-yellow pollen break up flat lawns.
+    float moss=smoothstep(.48,.72,.5+.5*sin(vUv.x*9.0+sin(vUv.y*7.0)*1.7)*sin(vUv.y*8.0-vUv.x*2.0));
+    float pollen=step(.974,hashCell(p+vec2(8.0,29.0)));
     float golden=step(.962,hashCell(p+vec2(21.0,4.0)));
-    shade=.90+.13*tile+.075*leaf;
-    base=mix(base,vec3(.62,.78,.36),golden*.17*near);
+    shade=.87+.12*tile+.075*leaf+.09*moss;
+    base=mix(base,vec3(.33,.52,.28),.23*moss*near);
+    base=mix(base,vec3(.93,.76,.31),(.20*golden+.14*pollen)*near);
   }else if(vMat==2){ // Natural loam: ochre sediment shelves, embedded pebbles, root fibers.
     vec2 p=floor(vUv*vec2(18.0,17.0));
     float shelf=.5+.5*sin(vUv.y*27.0+2.0*sin(vUv.x*5.0));
     float silt=smoothstep(.48,.68,shelf);
     float pebble=step(.94,hashCell(p+vec2(5.0,17.0)));
     float root=1.0-smoothstep(.015,.06,abs(sin(vUv.x*9.0+vUv.y*3.0)));
-    shade=.83+.12*tile+.11*silt+.10*pebble-.065*root;
+    // Irregular pale clay lenses make exposed soil banks visibly different from rock.
+    float clay=smoothstep(.72,.9,.5+.5*sin(vUv.x*6.0+sin(vUv.y*5.0))*sin(vUv.y*9.0));
+    shade=.81+.12*tile+.11*silt+.10*pebble-.065*root+.045*clay;
     base=mix(base,vec3(.72,.48,.31),(.12*silt+.07*pebble)*near);
+    base=mix(base,vec3(.77,.65,.47),.20*clay*near);
   }else if(vMat==3){ // Bedrock: three interleaved natural strata, fracture seams and mica.
     vec2 p=floor(vUv*vec2(11.0,13.0));
     float strata=.5+.5*sin(vUv.y*34.0+2.0*sin(vUv.x*6.5+tile));
@@ -53,9 +60,12 @@ void main(){
     // Long diagonal slate veins and warmer limestone pockets break uniform cliffs.
     float slate=.5+.5*sin(vUv.x*8.0-vUv.y*15.0+2.0*tile);
     float limestone=step(.82,hashCell(floor(vUv*vec2(4.0,5.0))+vec2(19.0,3.0)));
+    // Jagged pale quartz seams track natural bedding rather than brick joints.
+    float quartz=1.0-smoothstep(.025,.10,abs(sin(vUv.x*4.0+vUv.y*13.0+sin(vUv.x*7.0))));
     shade=.79+.13*tile+.10*strata-.085*crease+.11*mica+.065*slate;
     base=mix(base,vec3(.41,.53,.61),.16*slate*near);
     base=mix(base,vec3(.76,.69,.54),.14*limestone*near);
+    base=mix(base,vec3(.84,.85,.77),.15*quartz*near);
   }else if(vMat==4){ // Honey-colored timber, distinct planks and warm grain.
     float plank=blockLine(vec2(vUv.x*3.0,vUv.y*1.0),.035);
     float grain=.5+.5*sin(vUv.x*23.0+2.0*sin(vUv.y*7.0));
@@ -66,14 +76,18 @@ void main(){
     float facet=step(.5,fract(vUv.x*2.5+vUv.y*1.75));
     float cleavage=1.0-smoothstep(.02,.09,abs(fract(vUv.x*3.0-vUv.y*2.0)-.5));
     float glint=step(.935,hashCell(floor(vUv*vec2(10.0,10.0))+7.0));
-    shade=.84+.19*facet+.13*glint+.09*cleavage;
+    // Twin chevron growth faces suggest clustered natural crystal prisms.
+    float prism=1.0-smoothstep(.025,.10,abs(fract(vUv.x*4.0+abs(vUv.y-.5)*3.0)-.5));
+    shade=.82+.17*facet+.13*glint+.09*cleavage+.13*prism;
     base=mix(base,vec3(.74,.59,1.0),(.25*facet+.11*glint)*near);
-    base=mix(base,vec3(.37,.93,.83),.12*cleavage*near);
+    base=mix(base,vec3(.37,.93,.83),(.12*cleavage+.16*prism)*near);
   }else if(vMat==6){ // Raw ore: continuous amber mineral seams in weathered host rock.
     vec2 p=floor(vUv*vec2(12.0,15.0));
     float trace=step(.72,hashCell(p+17.0));
     float vein=1.0-smoothstep(.06,.18,abs(sin(vUv.x*11.0+vUv.y*7.0+tile)));
-    float gold=clamp(.65*trace+.45*vein,0.0,1.0);
+    // Small branching mineral seams read as embedded ore, not painted confetti.
+    float branch=1.0-smoothstep(.03,.13,abs(sin(vUv.x*18.0-vUv.y*5.0+sin(vUv.y*12.0))));
+    float gold=clamp(.48*trace+.42*vein+.24*branch,0.0,1.0);
     shade=.77+.15*tile+.19*gold;
     base=mix(base,vec3(.96,.69,.28),.28*gold*near);
   }else if(vMat==7){ // Solid polygon grass accents (opaque, no overdraw).
@@ -107,5 +121,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   fogEndDistance:68,
   newDrawCalls:0,
   newTextures:0,
-  naturalDetailFamilies:Object.freeze(['sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins'])
+  naturalDetailFamilies:Object.freeze(['sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins']),
+  secondaryNaturalAccents:Object.freeze(['grass-moss-pollen','soil-clay-lenses','stone-quartz-seams','crystal-chevron-prisms','ore-branch-veins'])
 });
