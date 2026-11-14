@@ -49,7 +49,16 @@ export const FOLIAGE_ASSETS=Object.freeze(DATA.map(([id,roster,slug,name,kind,co
     integration:'CANDIDATE — NOT MERGED / NOT DEPLOYED'})));
 const LOOKUP=new Map(FOLIAGE_ASSETS.map(a=>[a.id,a]));
 export function foliageDefinition(id){return LOOKUP.get(id)??null;}
-const B=(role,x0,y0,z0,x1,y1,z1)=>Object.freeze({role,box:Object.freeze([x0,y0,z0,x1,y1,z1])});
+// Align all physical foliage box boundaries to an eighth-cell lattice.
+// The :12 boundary-surface mesher partitions at every distinct axis value;
+// unaligned micro-box edges multiplied triangle counts by ~3–10x.
+// Quantized physical occupancy (not only graphics) bounds this deterministically.
+const B=(role,x0,y0,z0,x1,y1,z1)=>{
+  const lower=n=>Math.floor(n*8)/8,upper=n=>Math.ceil(n*8)/8;
+  return Object.freeze({role,box:Object.freeze([
+    lower(x0),lower(y0),lower(z0),upper(x1),upper(y1),upper(z1)
+  ])});
+};
 // Each candidate deliberately has a DIFFERENT topology, not a shared cube with
 // a material swap. Every box is a bounded, editable partial-cell occupancy part.
 function partsFor(kind) {
