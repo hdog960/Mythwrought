@@ -135,7 +135,7 @@ function emitBlueprint(type,biome,size){
     const doorZ=bi===1&&l>0?entranceZ+3:dz;
     for(const x of [left,right])for(let z=entranceZ+3;z<=d-6;z++){
       // The 4-riser stair shaft must stay free of partition masonry on both levels.
-      if(!interior(x,z)||z===doorZ||z===entranceZ+3)continue;
+      if(!interior(x,z)||z===doorZ||z===entranceZ+3||z===entranceZ+6)continue;
       for(let h=0;h<=2;h++)set(x,ly+h,z,'partition',l%2?'base:wood':'base:stone');
     }
     for(const x of [left,right])if(interior(x,doorZ))openings.push({kind:'door',at:[x,ly,doorZ],facing:x===left?'west':'east'});
@@ -193,17 +193,56 @@ function emitBlueprint(type,biome,size){
   }
   // Deliberately reserved symbolic rotated partial stairs, directly alongside their rising tread path.
   const stairXs=[mid-2,mid-1,mid,mid+1,mid+2],stairZ=entranceZ+3;
+  // Adjacent storeys need separate shafts so raised supporting piers cannot
+  // block circulation on the intermediate landing. This is a two-flight core.
+  const flightZ=l=>stairZ+(l%2)*3;
   for(let l=0;l<storeys-1;l++){
-    const yy=l*4;
+    const yy=l*4,flightDepth=flightZ(l);
     for(let i=0;i<4;i++){
       const x=stairXs[i],y=yy+i;
-      del(x,y,stairZ);
-      if(i>0)del(x,yy+4,stairZ); // open stair shaft in upper floor
-      set(x,y,stairZ,'stair',SYMBOLS.stair,'east');
+      del(x,y,flightDepth);
+      if(i>0)del(x,yy+4,flightDepth); // open stair shaft in upper floor
+      // A walkable route must also be a real buildable structure. Fill the
+      // vertical riser pier beneath each lifted tread, never the walking cell.
+      // The ground-level riser rests on the authored pad and future site grade.
+      for(let supportY=1;supportY<y;supportY++){
+        if(!occupied.has(pos(x,supportY,flightDepth)))
+          set(x,supportY,flightDepth,'column','base:stone');
+      }
+      set(x,y,flightDepth,'stair',SYMBOLS.stair,'east');
     }
-    // End step flows into upper-floor landing at stairXs[4], yy+4.
-    del(stairXs[4],yy+4,stairZ);
-    set(stairXs[4],yy+4,stairZ,'landing','base:stone');
+    // Upper-floor landing is physically pier-supported rather than floating.
+    del(stairXs[4],yy+4,flightDepth);
+    for(let supportY=1;supportY<yy+4;supportY++){
+      if(!occupied.has(pos(stairXs[4],supportY,flightDepth)))
+        set(stairXs[4],supportY,flightDepth,'column','base:stone');
+    }
+    set(stairXs[4],yy+4,flightDepth,'landing','base:stone');
+  }
+  // Real overhead joists below the roof deck prevent unsupported wide roof spans.
+  // A joist has full height clearance above the last usable 2-block room envelope;
+  // it is only placed across spans anchored by walls at BOTH ends of its run.
+  // Desert courts retain an open central sky; no beam crosses a courtyard aperture.
+  for(let z=front;z<=d-3;z+=3){
+    const row=footprint.filter(([x,zz])=>zz===z&&occupied.has(pos(x,roofY,z))).map(([x])=>x).sort((a,b)=>a-b);
+    const spans=[];
+    let group=[];
+    for(const x of row){
+      if(group.length&&x!==group[group.length-1]+1){spans.push(group);group=[];}
+      group.push(x);
+    }
+    if(group.length)spans.push(group);
+    for(const span of spans){
+      if(span.length<4)continue;
+      const [lo,hi]=[span[0],span.at(-1)];
+      const left=occupied.get(pos(lo,roofY-1,z));
+      const right=occupied.get(pos(hi,roofY-1,z));
+      if(left?.role!=='wall'||right?.role!=='wall')continue;
+      for(let x=lo+1;x<hi;x++){
+        if(!occupied.has(pos(x,roofY,z))||occupied.has(pos(x,roofY-1,z)))continue;
+        set(x,roofY-1,z,'beam','base:wood','east');
+      }
+    }
   }
   // Full explicit walkable-voxel route network: every supported non-wall interior footprint.
   const navigation=new Map();
@@ -221,11 +260,11 @@ function emitBlueprint(type,biome,size){
   }
   for(let z=0;z<entranceZ;z++)for(let x=mid-1;x<=mid+1;x++)addNav(x,1,z,'walk');
   for(let l=0;l<storeys-1;l++)for(let i=0;i<4;i++){
-    const [x,y,z]=[stairXs[i],l*4+i+1,stairZ];
+    const [x,y,z]=[stairXs[i],l*4+i+1,flightZ(l)];
     addNav(x,y,z,'stair');
   }
   // Avoid missing a landing when it belongs to a second storey rather than ground-level nav.
-  for(let l=1;l<storeys;l++)addNav(stairXs[4],l*4+1,stairZ,'landing');
+  for(let l=1;l<storeys;l++)addNav(stairXs[4],l*4+1,flightZ(l-1),'landing');
   // Utility: make the exact floorplan for each true room, rather than only labeling the outer shell.
   function room(id,kind,level,filter){
     const y=1+4*level;
