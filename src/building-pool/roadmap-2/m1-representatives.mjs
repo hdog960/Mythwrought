@@ -128,6 +128,18 @@ function build({biome,size,category}){
     if(biome==='desert' && x>=center-2&&x<=center+2&&z>=3&&z<=Math.min(depth-6,8))continue; // courtyard skylight
     put(x,roofAt(x,z),z,m.roof,'roof');
   }
+  // Physical high-level truss ribs: pitched/stepped roof layers otherwise span
+  // open air with no authored support. A wall-to-wall tie beam is laid at y=top,
+  // above the guaranteed 3-high interior walking clearance (y=2..4), then
+  // raised purlin posts fill the air gap up to the actual roof layer.
+  // The open Desert courtyard intentionally retains its unbridged skylight.
+  if(biome!=='desert')for(let z=3;z<depth-2;z+=4){
+    for(let x=0;x<width;x++)if(footprint(x,z)){
+      if(!cells.has(COORD(x,top,z)))put(x,top,z,m.trim,'wall');
+      for(let y=top+1;y<roofAt(x,z);y++)
+        if(!cells.has(COORD(x,y,z)))put(x,y,z,m.trim,'wall');
+    }
+  }
   // Decorated gable ends have physical material filling the gap to roof.
   if(biome==='snow'||biome==='temperate'||biome==='enchanted-forest')for(const z of [0,depth-1])for(let x=1;x<width-1;x++)if(footprint(x,z)){
     for(let y=top+1;y<roofAt(x,z);y++)put(x,y,z,m.wall,'wall');

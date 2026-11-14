@@ -156,3 +156,40 @@ test('raised temple dais has two adjacent symbolic stair approach cells but no c
   assert(bp.unresolvedDependencies.some(d=>d.ref==='pack1:008'),`stair ABI not listed as unverified: ${bp.id}`);
  }
 });
+
+// Structural QA, not gameplay/collision certification: the high-level ribs are
+ // actual voxel cells and cannot be substituted by a plan label.
+test('generated pitched and stepped roofs have linked high truss rows across actual footprint',()=>{
+ for(const bp of M1_REPRESENTATIVES.filter(b=>b.biome!=='desert'&&b.id!=='r2:general-store:temperate:small:01')){
+  const c=occupied(bp);
+  const sizeTop={small:6,medium:7,large:9}[bp.size]+(bp.category==='temple'?1:0);
+  let ribs=0,posted=0;
+  for(let z=3;z<bp.extents.z-2;z+=4){
+   const xs=[];
+   for(let x=0;x<bp.extents.x;x++){
+    if(c.get([x,0,z].join(','))?.kind!=='foundation')continue;
+    const floors=c.get([x,1,z].join(','));
+    assert.equal(floors?.kind,'floor',`missing truss foot support: ${bp.id} x${x} z${z}`);
+    assert(c.has([x,sizeTop,z].join(',')),`missing high tie beam: ${bp.id} x${x} z${z}`);
+    const roofCells=bp.voxels.filter(v=>v.x===x&&v.z===z&&v.kind==='roof'&&v.y>sizeTop);
+    assert(roofCells.length>0,`no roof above rib: ${bp.id} x${x} z${z}`);
+    const roofY=Math.min(...roofCells.map(v=>v.y));
+    for(let y=sizeTop+1;y<roofY;y++){
+     assert(c.has([x,y,z].join(',')),`floating roof above rib: ${bp.id} at ${x},${y},${z}`);
+     posted++;
+    }
+    xs.push(x);
+   }
+   assert(xs.length>=bp.extents.x-4,`short roof rib: ${bp.id} z${z}`);
+   ribs++;
+  }
+  assert(ribs>=2&&posted>0,`no modeled pitched roof posts: ${bp.id}`);
+ }
+});
+test('open Desert courtyard remains skylit and no cross-roof truss fills it',()=>{
+ for(const bp of M1_REPRESENTATIVES.filter(b=>b.biome==='desert')){
+  const c=occupied(bp),cx=Math.floor(bp.extents.x/2),top={small:6,medium:7,large:9}[bp.size]+(bp.category==='temple'?1:0);
+  for(let z=3;z<=Math.min(bp.extents.z-6,8);z++)
+   assert(!c.has([cx,top+1,z].join(',')),`Desert courtyard skylight covered: ${bp.id} z${z}`);
+ }
+});
