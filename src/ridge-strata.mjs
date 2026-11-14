@@ -220,5 +220,32 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
         emit(a,tip,[px-tx*w*.48,foot+.06,pz-tz*w*.48],shade);
       }
     }
+  // Lowland contour ribbons follow genuine one-block grass steps. Unlike
+  // rare sheer cliffs these are common in the existing gently rolling world.
+  // They add broad, readable terrain transitions without altering voxels.
+  for(let x=cx*chunkSize;x<(cx+1)*chunkSize;x++)
+    for(let z=cz*chunkSize;z<(cz+1)*chunkSize;z++){
+      const top=heightAt(x,z,seed);
+      if(top<4||world.get(x,top,z)!==grass)continue;
+      const basin=hash(Math.floor(x/13),Math.floor(z/13),seed+12091);
+      if(basin>.64)continue;
+      for(const [dx,dz] of faces){
+        const lower=heightAt(x+dx,z+dz,seed);
+        if(top-lower!==1||world.get(x+dx,top,z+dz)!==air)continue;
+        // A player-modified top or adjacent cell immediately suppresses art.
+        if(world.get(x,top-1,z)!==dirt)continue;
+        const tx=-dz,tz=dx,px=x+.5+dx*.514,pz=z+.5+dz*.514;
+        const drift=hash(Math.floor(x/5),Math.floor(z/5),seed+12113);
+        const y=top+.08+drift*.035;
+        const width=.48;
+        const a=[px-tx*width,y,pz-tz*width];
+        const b=[px+tx*width,y,pz+tz*width];
+        const c=[px+tx*width,y-.12,pz+tz*width];
+        const d=[px-tx*width,y-.12,pz-tz*width];
+        const dark=[.24+basin*.07,.38+basin*.06,.23+basin*.04];
+        const light=[.57+drift*.07,.65+drift*.05,.35+drift*.05];
+        emit(a,b,c,dark);emit(a,c,d,light);
+      }
+    }
   return new Float32Array(out);
 }
