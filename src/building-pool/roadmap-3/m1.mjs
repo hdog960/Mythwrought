@@ -43,13 +43,20 @@ function space(id,kind,x,y,z,width,height,depth,accessNode){return {id,kind,boun
 function clearance(x,y,z,width=2,height=2,depth=1){return {x,y,z,width,height,depth};}
 function navNode(id,x,y,z,kind='passage'){return {id,x,y,z,kind,width:2,headroom:2};}
 function feature(name,x,y,z,assetRef,unresolvedDependency=null){return {name,position:[x,y,z],assetRef,unresolvedDependency};}
-function raiseWalls(b,top,wallRef,door,openWindow){
+function raiseWalls(b,top,wallRef,door,openWindow,frameRef){
  const {w,d,put}=b;
  for(let y=2;y<=top;y++)for(let x=0;x<w;x++)for(let z=0;z<d;z++){
   if(x!==0&&x!==w-1&&z!==0&&z!==d-1)continue;
   if(z===d-1&&x>=door&&x<door+2&&y<=4)continue;
   if(openWindow(x,y,z))continue;
-  put('wall',x,y,z,wallRef);
+  // Entrance is a real two-wide three-high void, visually framed by separate
+  // future trim voxels rather than an unlabeled dark gap in uniform masonry.
+  // This reclassifies existing wall cells, never adds an obstruction or changes
+  // the authored cell total, player corridor, save schema, or envelope.
+  const jamb=z===d-1&&(x===door-1||x===door+2)&&y>=2&&y<=6;
+  const lintel=z===d-1&&(x===door||x===door+1)&&y>=5&&y<=7;
+  const framed=jamb||lintel;
+  put(framed?'entry-frame':'wall',x,y,z,framed?frameRef:wallRef);
  }
 }
 function buildBlacksmith(biome,size){
@@ -58,7 +65,7 @@ function buildBlacksmith(biome,size){
  // Integral full-cell foundation and walkable deck, physically present at every foot location.
  for(let a=0;a<w;a++)for(let z=0;z<d;z++){put('foundation',a,0,z,'builtin:stone');put('floor',a,1,z,p.deck);}
  const window=(a,y,z)=>y>=4&&y<=5&&((a===0&&z===Math.floor(d/3))||(a===w-1&&z===d-5));
- raiseWalls(b,7,p.wall,x,window);
+ raiseWalls(b,7,p.wall,x,window,p.trim);
  const spaces=[space('forge-room','forge',2,2,2,x+1,4,d-4,'work'),
    space('stock-room','storage',x,2,2,w-x-2,4,d-4,'stock')];
  // Actual interior divider structure differs by biome; 2-wide central route stays unobstructed.
@@ -143,7 +150,7 @@ function buildWatchtower(biome,size){
   if(!(a>=runX&&a<runX+2&&z>=stairStartZ&&z<stairStartZ+steps))put('floor',a,1,z,p.deck);
  }
  const window=(a,y,z)=>y>=4&&y<=5&&((a===0&&z===Math.floor(d/2))||(a===w-1&&z===Math.floor(d/3)));
- raiseWalls(b,wallTop,p.wall,x,window);
+ raiseWalls(b,wallTop,p.wall,x,window,p.trim);
  // A real stack of solid two-wide voxel stair treads, each a unit higher.
  const nav=[navNode('entry',x,2,d-1,'entry'),navNode('base',x,2,3,'ground-circulation')];
  for(let i=0;i<steps;i++){
