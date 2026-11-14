@@ -10,13 +10,13 @@ import {createPack3RoofGeometryFixture,restorePack3RoofGeometryFixture}
 const occupied=(shape,x,y,z)=>shape.boxes.some(b=>
   x>=b[0]&&y>=b[1]&&z>=b[2]&&x<=b[3]&&y<=b[4]&&z<=b[5]);
 const turn=b=>[1-b[5],b[1],b[0],1-b[2],b[4],b[3]];
-test('manifest owns fourteen unique 109–122 candidates, including 27/28/29',()=>{
+test('manifest owns seventeen unique 109–125 candidates, including 27/28/29',()=>{
   assert.equal(validatePack3Manifest(),true);
   assert.deepEqual(PACK3_GEOMETRY_IDS,[113,114,115]);
   assert.deepEqual(PACK3_ROSTER.filter(r=>r.id!==null).map(r=>r.id),
-    [109,110,111,112,113,114,115,116,117,118,119,120,121,122]);
+    [109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125]);
   for(const roster of [27,28,29])assert.equal(PACK3_ROSTER.find(r=>r.roster===roster).integrated,false);
-  assert.equal(PACK3_ROSTER.filter(r=>r.id===null).length,3);
+  assert.equal(PACK3_ROSTER.filter(r=>r.id===null).length,0);
 });
 test('all four quarter-turns preserve unit-cell occupancy, immutable physical bounds and budgets',()=>{
   for(const id of PACK3_GEOMETRY_IDS)for(let rotation=0;rotation<4;rotation++){
