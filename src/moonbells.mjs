@@ -141,7 +141,7 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
   const edgeDirs=[[1,0],[-1,0],[0,1],[0,-1]];
   const rockEdges=edgeDirs.filter(([dx,dz])=>{
    const b=world.get(x+dx,y+1,z+dz);
-   return b!==air&&b!==grass;
+   return b===3; // Natural exposed stone only; never decorate constructed blocks.
   });
   if(rockEdges.length&&hash(x,z,world.seed,733)>.42){
    const [dx,dz]=rockEdges[Math.floor(hash(x,z,world.seed,739)*rockEdges.length)];
@@ -154,6 +154,23 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
       [ox+vx*reach-vz*.065,ground+.13+reach*.4,oz+vz*reach+vx*.065],
       [ox+vx*reach+vz*.065,ground+.13+reach*.4,oz+vz*reach-vx*.065],
       j%2?[.40,.65,.43]:[.56,.73,.49],7);
+   }
+  }
+  // Pale cave-edge lichen drapes from genuine exposed stone beside this grass.
+  // No false entrance marker: the rock must be natural stone and its front
+  // face must be exposed above the same walkable ground as the anchor.
+  if(rockEdges.length&&hash(x,z,world.seed,751)>.72){
+   const [dx,dz]=rockEdges[0],rx=px+dx*.37,rz=pz+dz*.37;
+   // Only the stone's open-facing edge gets lichen; never buried faces.
+   if(world.get(x,y+1,z)===air){
+    for(let k=0;k<3;k++){
+     const offset=(k-1)*.095,drop=.18+hash(x+k,z,world.seed,757)*.17;
+     const sidewaysX=-dz*offset,sidewaysZ=dx*offset;
+     tri(out,[rx+sidewaysX,ground+.32,rz+sidewaysZ],
+       [rx+sidewaysX-dx*.045,ground+.32-drop,rz+sidewaysZ-dz*.045],
+       [rx+sidewaysX-dz*.035,ground+.30-drop*.65,rz+sidewaysZ+dx*.035],
+       k%2?[.68,.79,.60]:[.79,.84,.68],7);
+    }
    }
   }
   flowers++;
