@@ -18,6 +18,12 @@ export function ruinedCausewayVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
  for(let dx=-3;dx<=3;dx++)for(let dz=-4;dz<=4;dz++){
   const xx=x+dx,zz=z+dz,g=heightAt(xx,zz,world.seed);
   if(Math.abs(g-h)>1||world.get(xx,g,zz)!==baseAt(xx,g,zz,world.seed))return new Float32Array();
+  // Do not disguise shallow cave roofs or span mined-out foundations.
+  // Read-only: existing cave positions and edits stay intact.
+  for(let depth=1;depth<=2;depth++){
+   const yy=g-depth,expected=baseAt(xx,yy,zz,world.seed);
+   if(expected===air||world.get(xx,yy,zz)!==expected)return new Float32Array();
+  }
   for(let dy=1;dy<=6;dy++)if(world.get(xx,g+dy,zz)!==air)return new Float32Array();
  }
  const o=[],y=h+1.018;
