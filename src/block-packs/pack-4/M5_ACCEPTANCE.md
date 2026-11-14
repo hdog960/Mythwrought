@@ -9,8 +9,8 @@
 - Exclusive draft: [PR #115](https://github.com/hdog960/Mythwrought/pull/115).
 - Authoritative exact HEAD: **use PR #115 head SHA**, not a cached release
   checkpoint; final HEAD changes as the acceptance dossier is committed.
-- Base integrated main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`
-  and last creator integration checkpoint **006**.
+- Pack 4 branch originally forked at `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`.
+  **Current main** `caf47776b723a36684edc1a72749e49268ccc688`, latest creator incorporation checkpoint **007** (automation-only; excludes Pack 4). Branch is two commits behind, with no conflicting Pack 4-owned paths.
 - Issue [#109](https://github.com/hdog960/Mythwrought/issues/109)
   manual exclusive ID band 159–208 and Issue
   [#117](https://github.com/hdog960/Mythwrought/issues/117) separate
