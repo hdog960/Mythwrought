@@ -158,6 +158,14 @@
 - [ ] Current PR-head standard GitHub CI must be verified against the latest commit, not an earlier successful baseline. Root CI does not include Pack 2 nested tests.
 - [ ] Production fluid render/simulation, shape registration, save schema-1 metadata and creator Gate A approval remain separate. No merge, deployment, shared system edit or generated placements.
 
+## Session 13 — first genuine water-only runtime proofs (2026-11-14)
+
+- [x] Used authorized GitHub source access to reconstruct **byte-identical `water.mjs`** in local Node/Chromium, independently verified by `git hash-object` `180510e7b603e5daf104963b115895819fd23d39`. Other Pack 2 source files were **not** verified/assembled into a full checkout.
+- [x] **Native Node 22: 8/8 temporary water smoke tests passed**, including 900 actual physical triangle ray intersections and transparency/non-solid/winding/state invariants. This is **not** a pass for the six checked-in nested suites.
+- [x] **Genuine Chromium 144: 6 original water-mesh Canvas2D screenshots captured** — source and east-flowing state at each 667×375, 844×390 and 932×430 landscape viewport. Pixels proved real alpha and bounded rendered geometry; representative shots visually inspected. This local water-only smoke is **not** the unrun committed 18-asset `gallery-browser.py` or production WebGL2.
+- [x] **89/89 V8-assertion test bodies passed** (12+15+14+17+21+10) with the new 18-asset unique physical mesh/material-signature regression committed.
+- [ ] Full native six-suite command, committed all-18 browser gallery screenshots, integrated engine fluid behavior, schema-1 player save compatibility, iPhone art/controls and Gate A approval **remain pending**. Do not merge, deploy, modify shared systems, world-place assets or unlock v0.11.
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
