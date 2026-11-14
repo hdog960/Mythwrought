@@ -43,10 +43,18 @@ export function caveThresholdVertices(world,cx,cz,{heightAt,baseAt,air=0,stoneId
     tri(out,p(-.44,top-.08),p(-.06,top+.22),p(.24,top+.07),moss,1);
     tri(out,p(.38,.32),p(.62,.09),p(.54,.58),moss,1);
     tri(out,p(-.62,.06),p(-.40,.45),p(-.30,.08),variant===1?light:moss,1);
+    // Fractured shale striations and moss footing frame only the real mouth.
+    // All new facets remain outside the central open passage.
+    tri(out,p(-.60,.28),p(-.57,.83),p(-.48,.51),light);
+    tri(out,p(.58,.61),p(.64,1.13),p(.49,.88),shadow);
+    tri(out,p(-.52,1.52),p(-.39,1.78),p(-.46,1.18),light);
+    tri(out,p(.48,1.39),p(.40,1.74),p(.55,1.58),light);
+    tri(out,p(-.72,.02,.11),p(-.53,.02,.06),p(-.64,.21,.08),moss,1);
+    tri(out,p(.55,.02,.11),p(.76,.02,.07),p(.65,.25,.08),moss,1);
     mouths++;break;
    }
   }
  }
  return new Float32Array(out);
 }
-export const CAVE_THRESHOLD_LIMITS=Object.freeze({maxMouthsPerChunk:2,maxVerticesPerChunk:48,stride:STRIDE,newDrawCalls:0,newTextures:0});
+export const CAVE_THRESHOLD_LIMITS=Object.freeze({maxMouthsPerChunk:2,maxVerticesPerChunk:84,stride:STRIDE,newDrawCalls:0,newTextures:0});
