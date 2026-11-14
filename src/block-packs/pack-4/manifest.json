@@ -331,14 +331,14 @@
     "https://github.com/hdog960/Mythwrought/issues/117"
   ],
   "familyCount": 22,
-  "lastVerifiedMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
-  "lastVerifiedCheckpoint": "006",
+  "lastVerifiedMain": "b62728e1756140ab189b006dab85da091b0eeedc",
+  "lastVerifiedCheckpoint": "Main commit message: automation-only Gate A integration 007; docs/INTEGRATION_CHECKPOINTS.md still ends at 006",
   "lastComparedIssues": [
     109,
     117
   ],
   "lastV8FocusedChecks": 142,
-  "currentAcceptanceStatus": "M5 OPEN. 22/22 families/23 candidate IDs source authored; 168/168 V8 exact source test bodies pass; 5/5 native Node preview utility subset pass; full native Node and 23-asset Chromium screenshots unavailable; no merge/integration.",
+  "currentAcceptanceStatus": "M5 OPEN: 168/168 authored JS V8 checks; current main opt-in interface 552/552 V8 compatibility; 5/5 native preview-utils subset; whole pack native Node and Chromium screenshots not verified. Main automation-only integration 007 does NOT include manual Pack4.",
   "latestAcceptanceV8": 168,
   "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
   "galleryEvidence": "Browser QA caught and fixed nonblack-background false positive in preview pixel check; now requires real foreground contrast plus 23 unique image hashes and asymmetric rotation; still blocked on local Chromium/WebGL2.",
@@ -372,5 +372,7 @@
   "meshValidation": "19,248 nondegenerate outward-facing preview triangles across IDs 159–181 × 4 orientations; 0 inverted / 0 degenerate; individual meshes retain max 1,224 preview vertices and 14,436 cumulative (V8 exact-source checks, not native WebGL2).",
   "sharedSidecarSourceProbe": "23/23 physical IDs roundtrip through exact unmerged PR #106 makeOrientationSidecar, snapshot/readBlock, restoreOrientationSidecar and isolated Pack 4 fixture state in V8 source-to-source test; stale block identity is filtered.",
   "fixtureSafeIntegerCoordinates": "Pack 4 candidate fixture now accepts any Number.isSafeInteger cell coordinates, with guarded floor/wall/ceiling support offset overflow; does not affect real schema-1 saves.",
-  "browserAcceptance": "Chromium executable available but minimal headless data URL hangs; no genuine WebGL2 gallery/screenshots or iPhone art acceptance."
+  "browserAcceptance": "Chromium executable available but minimal headless data URL hangs; no genuine WebGL2 gallery/screenshots or iPhone art acceptance.",
+  "currentMainInteractionInterfaces": "Shapes/sidecar sources from former shared PR #106 now opt-in in main at b62728e; Pack4 23 IDs remain unregistered.",
+  "currentMainSourceProbe": "552/552 exact current-main opt-in source-to-source V8 probes for 23 IDs × 4 orientations × 6 interaction facets, plus 23/23 real shared sidecar snapshot replay, NOT native Node or production engine."
 }
