@@ -185,3 +185,18 @@ test('all physical furniture parts individually honor the 64-box / 768-triangle 
      assert.ok(part.boxes.length*12<=768);}
  }
 });
+test('furniture open-slot collision uses actual body parts, not whole-cube aliases',()=>{
+ for(const id of ['pack5:082','pack5:083','pack5:084'])for(const variant of RESIDENTIAL_VARIANTS[id]){
+  const d=p(id,variant);
+  for(const part of d.parts)assert.deepEqual(part.collisionBoxes,part.boxes);
+ }
+});
+test('real bed canopy and headboard can be collided at height and selected from afar',()=>{
+ const bed=p('pack5:082','moonwatch-canopy'),f=makePack5Fixture(RESIDENTIAL_FAMILIES);
+ f.setSupport([0,-1,0]);f.setSupport([0,-1,1]);
+ assert.ok(f.place('pack5:082',[0,0,0],0,'moonwatch-canopy').ok);
+ assert.equal(f.collides([.07,.92,.07,.14,.98,.14]),true); // physical canopy post
+ assert.equal(f.collides([.3,.74,.06,.5,.82,.15]),true);  // headboard
+ assert.equal(f.collides([.38,.70,.3,.48,.82,.45]),false); // empty air between posts
+ assert.equal(f.raycast([.10,1.4,.10],[0,-1,0])?.symbolicId,'pack5:082');
+});
