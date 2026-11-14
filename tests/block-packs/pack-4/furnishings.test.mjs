@@ -134,6 +134,21 @@ test('mount offsets distinguish floor, ceiling and 4-way wall faces',()=>{
  for(let r=0;r<4;r++)assert.deepEqual(furnishingMountOffset(174,r),[0,1,0]);
  assert.deepEqual([0,1,2,3].map(r=>furnishingMountOffset(175,r)),
   [[0,0,1],[-1,0,0],[0,0,-1],[1,0,0]]);
+ // Every supported furnishing needs physical mesh/occupancy contact with the
+ // neighbor that authorizes its mount. Bare fixture support flags are not
+ // sufficient: centered bases, legs and banners must not visibly float.
+ for(let id=169;id<=175;id++)for(let rotation=0;rotation<4;rotation++){
+  const offset=furnishingMountOffset(id,rotation);
+  const axis=offset.findIndex(x=>x!==0);
+  const face=offset[axis]>0?axis+3:axis;
+  const supportFace=offset[axis]>0?1:0;
+  const shape=furnishingShape(id,rotation);
+  for(const purpose of ['collision','selection']){
+   assert.ok(shape[purpose].some(box=>Math.abs(box[face]-supportFace)<1e-9),
+    'physical '+purpose+' support contact missing: id '+id+' rotation '+rotation);
+   assert.ok(shape[purpose].length<=32,'shared AABB cap id '+id);
+  }
+ }
 });
 test('candidate save state rejects unknown/truncated IDs or orientations fail-closed',()=>{
  for(const bad of [0,8,168,176,208,209,255,-1,NaN,1.5])
