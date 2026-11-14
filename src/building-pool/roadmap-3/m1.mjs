@@ -66,8 +66,12 @@ function buildBlacksmith(biome,size){
  for(let a=0;a<w;a++)for(let z=0;z<d;z++){put('foundation',a,0,z,'builtin:stone');put('floor',a,1,z,p.deck);}
  const window=(a,y,z)=>y>=4&&y<=5&&((a===0&&z===Math.floor(d/3))||(a===w-1&&z===d-5));
  raiseWalls(b,7,p.wall,x,window,p.trim);
- const spaces=[space('forge-room','forge',2,2,2,x+1,4,d-4,'work'),
-   space('stock-room','storage',x,2,2,w-x-2,4,d-4,'stock')];
+ // Separate, non-overlapping floor-plan zones. The original full-depth
+ // bounds overlapped for every blacksmith, making future room/fixture handoffs
+ // ambiguous. These are accessible workflow bays, not fictional sealed rooms:
+ // the open plan remains physically walkable and its geometry is unchanged.
+ const spaces=[space('forge-bay','forge',2,2,d-9,w-3,4,7,'work'),
+   space('stock-bay','storage',2,2,2,w-3,4,d-11,'stock')];
  // Actual interior divider structure differs by biome; 2-wide central route stays unobstructed.
  const dividerZ=d-7-si;
  if(biome==='snow'||biome==='desert'){
