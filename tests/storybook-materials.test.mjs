@@ -250,3 +250,15 @@ test('raw ore copper halos are near-faded, opaque and do not allocate block IDs'
  assert.equal(RULES.newDrawCalls,0);
  assert.equal(RULES.newTextures,0);
 });
+
+test('woodland dew and fern litter remain opaque near-faded details on existing grass ID',()=>{
+ assert.deepEqual(RULES.woodlandDewAccents,['grass-morning-dew','grass-fern-litter-streaks']);
+ const grass=FS.slice(FS.indexOf('if(vMat==1)'),FS.indexOf('}else if(vMat==2)'));
+ for(const term of ['dewField','dew','fernLitter'])assert.match(grass,new RegExp('float '+term+'='));
+ assert.match(grass,/vec3\\(\\.42,\\.73,\\.69\\),\\.13\\*dew\\*near/);
+ assert.match(grass,/vec3\\(\\.57,\\.43,\\.25\\),\\.08\\*fernLitter\\*near/);
+ assert.doesNotMatch(grass,/sampler2D|discard;|texture\\(/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
