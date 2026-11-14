@@ -98,8 +98,14 @@ function buildBlacksmith(biome,size){
   if(y>7)put('rafter',a,y,z,p.trim);
  }
  // The future hollow chimney courses align with the hearth (not an unrelated wall).
- for(let y=highRoof(chimneyX)+1;y<=Math.min(h-2,highRoof(chimneyX)+3);y++)
+ const firstChimneyY=highRoof(chimneyX)+1;
+ for(let y=firstChimneyY;y<=Math.min(h-2,highRoof(chimneyX)+3);y++)
   put('structure',chimneyX,y,chimneyZ,'pack4:063');
+ // A small side-borne corbel carries the hollow candidate above the deliberately
+ // open flue tile. Without it the chimney is a floating three-cell island on
+ // flatter regional roofs. A naturally higher neighboring roof tile also counts.
+ const braceX=chimneyX+1,braceKey=`${braceX},${firstChimneyY},${chimneyZ}`;
+ if(!b.occupied.has(braceKey))put('flue-support',braceX,firstChimneyY,chimneyZ,p.trim);
  // Work equipment is in labelled exact family slots; no functionality is attributed to these modules.
  put('fixture',2,2,d-6,'pack4:064');
  put('fixture',w-4,2,d-6,'pack5:088');
@@ -172,9 +178,21 @@ function buildWatchtower(biome,size){
   for(const a of [w-5,w-2])for(const z of [2,d-3])for(let y=deckY+1;y<deckY+4;y++)
    put('upper-support',a,y,z,p.accent);
  }else if(biome==='snow'){
+  const snowRise=a=>Math.min(4,Math.floor(Math.min(a,w-1-a)/3));
   for(let a=2;a<w-2;a++)for(let z=2;z<d-2;z++){
-   const rise=Math.min(4,Math.floor(Math.min(a,w-1-a)/3));
+   const rise=snowRise(a);
    put('structure',a,deckY+4+rise,z,p.roof);
+  }
+  // Roof tiers that meet only on a diagonal are physically disconnected islands.
+  // Add a single-cell step riser at each height transition, NOT a solid slab
+  // beneath the whole shelter. Four existing columns still carry its full load.
+  for(let a=3;a<w-2;a++)for(let z=2;z<d-2;z++){
+   const rise=snowRise(a),prior=snowRise(a-1);
+   if(rise===prior)continue;
+   const upperX=rise>prior?a:a-1,upperRise=Math.max(rise,prior);
+   const y=deckY+3+upperRise;
+   const k=`${upperX},${y},${z}`;
+   if(!b.occupied.has(k))put('roof-step-brace',upperX,y,z,p.trim);
   }
   // Timber braces from the deck to the heavy overhead snow roof.
   for(const a of [2,w-3])for(const z of [2,d-3]){
