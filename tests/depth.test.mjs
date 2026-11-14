@@ -141,3 +141,20 @@ test('preexisting authored cave floors retain their legacy -3 generation clamp',
     assert.equal(route.floorAt(100),-1,'depth ABI must not retarget :24 cave floor');
   }
 });
+
+
+test('deep streaming reads never instantiate a surface district or landmark',()=>{
+  const w=new VoxelWorld(179);
+  for(const y of [-4,-19,-20,-70,-120,-210]){
+    assert.notEqual(w.get(-17,y,33),BLOCK.AIR);
+  }
+  assert.equal(w.landmarkCache.size,0);
+  assert.equal(w.liveDistrictCache.size,0);
+  assert.equal(w.set(-17,-120,33,BLOCK.AIR),true);
+  assert.equal(w.get(-17,-120,33),BLOCK.AIR);
+  assert.equal(w.landmarkCache.size,0);
+  assert.equal(w.liveDistrictCache.size,0);
+  const restored=VoxelWorld.restore(w.save());
+  assert.equal(restored.get(-17,-120,33),BLOCK.AIR);
+  assert.equal(restored.liveDistrictCache.size,0);
+});
