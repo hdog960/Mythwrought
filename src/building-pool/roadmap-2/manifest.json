@@ -29,7 +29,7 @@
     "M4": 165
   },
   "milestones": {
-    "M0": "open-browser-and-exact-head-qa",
+    "M0": "open-genuine-Chromium-visual-review-and-exact-PR-head-QA",
     "M1": "not-started",
     "M2": "not-started",
     "M3": "not-started",
@@ -48,8 +48,8 @@
   "physicalInterfacesApproved": 0,
   "sourceScope": "Roadmap 2 exclusive",
   "verification": {
-    "localNode": "7/7 staged source pass; exact committed nested tests not yet executed",
-    "chromium": "headless EGL/timeout; no authentic screenshots",
+    "localNode": "Exact previous HEAD Git blobs reconstructed (five exact SHA matches), original 7/7 PASS; corrected schema and expanded test suite native Node 9/9 PASS on local working patch; latest committed head requires recheck",
+    "chromium": "headless blank Chrome and gallery failed to initialize (EGL/SwANGLE timeout; Xvfb fallback timeout), no screenshots; dedicated reproducible gallery-browser.py authored",
     "realIphone": "not tested"
   },
   "status": "DRAFT / UNMERGED / UNDEPLOYED / NOT IN LIVE WORLD"

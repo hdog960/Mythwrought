@@ -18,7 +18,7 @@ export function validateBlueprint(bp){
  check(Array.isArray(bp.voxels)&&bp.voxels.length>=50,"missing actual geometry");
  check(Array.isArray(bp.rooms)&&bp.rooms.length>=2,"missing rooms");
  check(Array.isArray(bp.openings)&&bp.openings.some(o=>o.type==="entrance")&&bp.openings.some(o=>o.type==="window"),"missing entrance/windows");
- check(Array.isArray(bp.circulation)&&bp.circulation.some(c=>c.from==="exterior")&&bp.circulation.some(c=>c.to==="storage"),"missing circulation");
+ check(Array.isArray(bp.circulation)&&bp.circulation.length>0,"missing circulation");
  check(Array.isArray(bp.unresolvedDependencies)&&bp.unresolvedDependencies.length>0&&bp.unresolvedDependencies.every(d=>validateSymbol(d.ref)&&d.issue),"unresolved asset ABI must be explicit");
  const occupied=new Set(),kinds=new Set();
  for(const v of bp.voxels){
@@ -31,7 +31,33 @@ export function validateBlueprint(bp){
  for(const kind of ["foundation","floor","wall","roof","fixture","decor"])check(kinds.has(kind),"missing architectural element: "+kind);
  const category=CATEGORIES.find(c=>c.key===bp.category);
  for(const name of category.requirements)check(bp.rooms.some(r=>r.uses?.includes(name))||bp.features?.includes(name),"missing functional space: "+name);
- for(const o of bp.openings)if(o.type==="entrance")check(!occupied.has([o.x,o.y,o.z].join(",")),"blocked entrance");
+ // Circulation is category-dependent: temples, theaters and public squares do not
+ // require a shop stockroom. All named rooms must connect from the exterior.
+ const roomUses=new Set(bp.rooms.flatMap(room=>room.uses||[]));
+ check(bp.rooms.every(room=>Array.isArray(room.uses)&&room.uses.length>0),"room must declare uses");
+ const graph=new Map();
+ for(const edge of bp.circulation){
+   check(typeof edge.from==="string"&&typeof edge.to==="string"&&typeof edge.via==="string"&&edge.via.length>0,"incomplete circulation edge");
+   check(edge.from==="exterior"||roomUses.has(edge.from),"circulation origin not a room use");
+   check(roomUses.has(edge.to),"circulation destination not a room use");
+   if(!graph.has(edge.from))graph.set(edge.from,new Set());
+   graph.get(edge.from).add(edge.to);
+ }
+ const reached=new Set(["exterior"]),queue=["exterior"];
+ while(queue.length){
+   const at=queue.shift();
+   for(const next of graph.get(at)||[])if(!reached.has(next)){reached.add(next);queue.push(next);}
+ }
+ check(bp.rooms.every(room=>room.uses.some(use=>reached.has(use))),"inaccessible room in circulation graph");
+ for(const o of bp.openings){
+   check(["x","y","z"].every(k=>Number.isInteger(o[k])&&o[k]>=0&&o[k]<bp.extents[k]),"opening out of bounds");
+   if(o.type==="entrance"){
+     const height=o.clearHeightCells??1;
+     check(Number.isInteger(height)&&height>=1&&o.y+height<=bp.extents.y,"invalid entrance clearance");
+     for(let dy=0;dy<height;dy++)check(!occupied.has([o.x,o.y+dy,o.z].join(",")),"blocked entrance");
+   }
+ }
+ check(kinds.has("window"),"missing physical window geometry");
  return {valid:true,voxels:bp.voxels.length,uniqueCells:occupied.size,rooms:bp.rooms.length};
 }
 // Rotate and reflect an architecture; ignore materials, names, metadata and translations.

@@ -21,3 +21,8 @@ Pack 1-5 material symbols such as pack5:086 and biome130 symbols represent ROSTE
 Dedicated native command from a complete checkout: node --test tests/building-pool/roadmap-2/schema.test.mjs.
 
 Standalone conceptual browser source: tests/building-pool/roadmap-2/preview.html. It uses Canvas2D, NOT playable-game WebGL2. Genuine Chromium screenshots should be attempted at 667×375, 844×390, 932×430 and inspected. Never count nonexistent screenshots.
+
+### Category-specific circulation acceptance
+The M0 schema now requires each named room to be reachable from the exterior via a graph of its declared room uses, rather than assuming every category contains a shop storeroom. Test-only temple schema fixtures are NOT authored temple blueprints. Entrance clearance verifies all declared vertical cells; window apertures must exist as actual `window` geometry.
+
+For genuine screenshots after the browser environment is operational, run `python3 tests/building-pool/roadmap-2/gallery-browser.py` with free Playwright Chromium installed. Six actual canvas screenshots (exterior/cutaway at three iPhone landscape widths) must be manually inspected before M0 approval. This is conceptual Canvas2D, not native game WebGL2.

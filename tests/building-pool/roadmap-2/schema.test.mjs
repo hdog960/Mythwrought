@@ -51,3 +51,18 @@ test("mirrors and recolors fail uniqueness",()=>{
  assert.throws(()=>assertDistinctArchitecture([bp,{...recolor,id:"r2:general-store:temperate:small:02"}]),/duplicate/);
  assert.deepEqual(assertDistinctArchitecture([bp]),{authored:1,distinctArchitectures:1});
 });
+
+test("public circulation is category-dependent: temples need no shop storage",()=>{
+ const temple={...bp,id:"r2:temple:temperate:small:01",category:"temple",
+ rooms:[{name:"Ceremonial nave",uses:["ceremonial-space","public-circulation"]},{name:"Sanctuary",uses:["altar"]}],
+ circulation:[{from:"exterior",to:"ceremonial-space",via:"nave entrance"},{from:"ceremonial-space",to:"altar",via:"sanctuary aisle"}]};
+ // Schema contract fixture only: store geometry reused here is NOT an authored temple.
+ assert.equal(validateBlueprint(temple).valid,true);
+ assert.throws(()=>validateBlueprint({...temple,circulation:[{from:"exterior",to:"ceremonial-space",via:"door"}]}),/inaccessible room/);
+ assert.throws(()=>validateBlueprint({...temple,circulation:[{from:"exterior",to:"nonexistent",via:"door"}]}),/destination not a room use/);
+});
+test("entrance clearance, window geometry and opening bounds are enforced",()=>{
+ assert.throws(()=>validateBlueprint({...bp,voxels:[...bp.voxels,{x:6,y:3,z:0,kind:"wall",material:"pack1:001"}]}),/blocked entrance/);
+ assert.throws(()=>validateBlueprint({...bp,openings:bp.openings.map(o=>o.type==="entrance"?{...o,x:100}:o)}),/opening out of bounds/);
+ assert.throws(()=>validateBlueprint({...bp,voxels:bp.voxels.map(v=>v.kind==="window"?{...v,kind:"wall"}:v)}),/missing physical window/);
+});

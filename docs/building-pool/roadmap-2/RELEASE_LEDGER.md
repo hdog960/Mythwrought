@@ -2,7 +2,7 @@
 
 | Stage | Work | Evidence | State |
 | --- | --- | --- | --- |
-| M0 | Schema, manifest, 840 planned slots, one actual store candidate, geometry dedupe, Node suite and conceptual browser source | Local native Node 7/7; Chromium timed out; exact PR CI pending | OPEN / DRAFT |
+| M0 | Schema, manifest, 840 planned slots, one actual store candidate, geometry dedupe, Node suite and conceptual browser source | Original exact SHA verified native Node 7/7; repaired working patch 9/9; authentic Chromium timed out; final head CI pending | OPEN / DRAFT |
 | M1 | General stores and temples across 5 biomes × 3 sizes | One fixture only, unapproved | NOT STARTED |
 | M2 | 375 distinct shops | Not authored | NOT STARTED |
 | M3 | 300 markets and specialty buildings | Not authored | NOT STARTED |
