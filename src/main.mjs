@@ -610,7 +610,7 @@ function start(){
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
     selected=Number(b.dataset.block);
     document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
-    message('Selected '+({3:'stone',4:'wood',5:'crystal'})[selected]);
+    message('Selected '+({3:'stone',4:'wood',5:'crystal',7:'leaf canopy',8:'deepstone'})[selected]);
   });
   document.getElementById('menu').onclick=()=>{cancelAllPointers();help.hidden=false;};
   document.getElementById('closeHelp').onclick=()=>{

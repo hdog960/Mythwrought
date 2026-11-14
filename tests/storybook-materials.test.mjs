@@ -72,7 +72,7 @@ test('material artwork does not change deterministic worlds, edits or original s
    assert.equal(copy.get(x,y,z),BLOCK.AIR);
    assert.deepEqual(copy.save(),w.save());
    assert.equal(copy.save().schema,1);
-   assert.equal(copy.set(3,14,3,8),false,'Visual IDs must remain uneditable');
+   assert.equal(copy.set(3,14,3,17),false,'Render-only IDs must remain uneditable');
  }
 });
 

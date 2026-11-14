@@ -260,3 +260,25 @@ test('frostglass rosettes require natural rock, repeat by seed and obey the mesh
  assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
  assert.equal(MOONBELL_LIMITS.newTextures,0);
 });
+
+
+test('saffron cliffbells appear only by natural stone, remain deterministic and budgeted',()=>{
+ const scene=(rock)=>({seed:123,get(x,y,z){
+  if(y===5&&x%4===0)return rock;
+  return baseAt(x,y,z);
+ }});
+ let blossoms=0;
+ for(let cx=-9;cx<=9;cx++)for(let cz=-9;cz<=9;cz++){
+  const natural=moonbellVertices(scene(3),cx,cz,opts);
+  const built=moonbellVertices(scene(4),cx,cz,opts);
+  assert.deepEqual(natural,moonbellVertices(scene(3),cx,cz,opts));
+  assert.ok(natural.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+  for(let i=0;i<natural.length;i+=9)
+   if(Math.abs(natural[i+3]-.96)<1e-5&&Math.abs(natural[i+4]-.67)<1e-5&&Math.abs(natural[i+5]-.26)<1e-5)blossoms++;
+  for(let i=0;i<built.length;i+=9)
+   assert.ok(!(Math.abs(built[i+3]-.96)<1e-5&&Math.abs(built[i+4]-.67)<1e-5&&Math.abs(built[i+5]-.26)<1e-5));
+ }
+ assert.ok(blossoms>0,'saffron cliffbells occur at natural stone edges');
+ assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
+ assert.equal(MOONBELL_LIMITS.newTextures,0);
+});

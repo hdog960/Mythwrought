@@ -102,9 +102,13 @@ test('true renderer integrates surface foliage into the existing single chunk me
   if(grotto.length)assert.ok(packedIndex(mesh,grotto)>=0,
     'Grotto art must remain an exact contiguous section of the shared mesh');
   assert.equal(JSON.stringify(w.save()),original);
-  for(const id of GROVE_LIMITS.materialIds)assert.equal(w.set(0,15,0,id),false,
-    'Render-only material ID must remain impossible to save');
-  assert.equal(w.edits.size,0);
+  // Decorative mesh tags 7/8 now deliberately share numbers with physical
+  // LEAVES/DEEPSTONE block IDs, but solid faces use distinct tags 18/19.
+  assert.deepEqual(GROVE_LIMITS.materialIds,[7,8,9]);
+  assert.equal(w.set(0,15,0,9),false,'Unknown decorative tag must remain unplaceable');
+  assert.equal(w.edits.size,0,'Rendering must not create saved edits');
+  assert.equal(w.set(0,15,0,BLOCK.LEAVES),true);
+  assert.equal(VoxelWorld.restore(w.save()).get(0,15,0),BLOCK.LEAVES);
 });
 test('do not create physical scenery in artificial grass or blocked pockets',()=>{
   const w=new VoxelWorld(179),{anchor:[x,z],cx,cz,foliage}=findFirst(w);
