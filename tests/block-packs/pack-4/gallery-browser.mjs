@@ -119,9 +119,9 @@ try{
     throw Error('Pack4 WebGL2 orientation-reset replay differs from original '+
       width+'x'+height+' zero-degree render: '+JSON.stringify(replayFingerprints));
   const replayErrors=await page.locator('#gallery article p').allTextContents();
-  if(replayErrors.some(x=>/^\\s*(Error|TypeError|RangeError):/.test(x)))
+  if(replayErrors.some(x=>/^(Error|TypeError|RangeError):/.test(x.trimStart())))
     throw Error('Pack4 reset render failed: '+replayErrors.filter(x=>
-      /^\\s*(Error|TypeError|RangeError):/.test(x)).join(' | '));
+      /^(Error|TypeError|RangeError):/.test(x.trimStart())).join(' | '));
   for(const id of [177,181]){
     if(new Set(rotationHashes.map(row=>row[id-159])).size<2)
       throw Error('Asymmetric candidate '+id+' has no visible rotation');
