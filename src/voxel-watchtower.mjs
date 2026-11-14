@@ -12,8 +12,10 @@ export function planVoxelWatchtower(world,x,z){
   const px=x+dx,pz=z+dz,h=terrainHeight(px,pz,world.seed);
   heights.push(h);
   if(world.get(px,h,pz)!==BLOCK.GRASS||world.get(px,h+1,pz)!==BLOCK.AIR)return null;
-  // No construction over excavations, existing player work, or shallow caves.
-  for(let y=h-2;y<=h+3;y++)if(world.get(px,y,pz)!==baseBlock(px,y,pz,world.seed))return null;
+  // Preserve the entire future interior/air volume, not just cells replaced by stone.
+  // Otherwise a saved player build could become trapped inside the new tower.
+  for(let y=h-2;y<=h+8;y++)if(world.get(px,y,pz)!==baseBlock(px,y,pz,world.seed))return null;
+  if(baseBlock(px,h-2,pz,world.seed)===BLOCK.AIR)return null;
  }
  const ground=heights[0];
  if(heights.some(h=>h!==ground)||ground+8>WORLD_MAX_Y||ground-2<WORLD_MIN_Y)return null;
@@ -55,9 +57,14 @@ export function placeVoxelWatchtower(world,plan){
  // plan and explicitly opt in. World edits then persist using existing schema 1.
  const [ox,gy,oz]=plan.origin;
  if(!Number.isInteger(ox)||!Number.isInteger(gy)||!Number.isInteger(oz))return false;
- for(const [x,y,z,id] of plan.cells){
-  if(![x,y,z,id].every(Number.isInteger)||id!==BLOCK.STONE||
-     world.get(x,y,z)!==baseBlock(x,y,z,world.seed))return false;
+ // Re-plan against CURRENT world state, including untouched interior clearance.
+ // A stale plan must not enclose later player edits or span a newly excavated cave.
+ const fresh=planVoxelWatchtower(world,ox,oz);
+ if(!fresh||fresh.cells.length!==plan.cells.length)return false;
+ const expected=new Map(fresh.cells.map(c=>[key(c[0],c[1],c[2]),c[3]]));
+ for(const cell of plan.cells){
+  if(!Array.isArray(cell)||cell.length!==4||!cell.every(Number.isInteger)||
+     expected.get(key(cell[0],cell[1],cell[2]))!==cell[3])return false;
  }
  for(const [x,y,z,id] of plan.cells)if(!world.set(x,y,z,id))return false;
  return true;
