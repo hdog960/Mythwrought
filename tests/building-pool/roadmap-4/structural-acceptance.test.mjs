@@ -104,3 +104,18 @@ test('validator refuses falsely declared stair navigation and blocked doorway he
   b.cells.push({at:[x,y+1,z],role:'wall',asset:'base:stone',facing:'south'});
   assert.throws(()=>validateBlueprint(b),/two-cell doorway has blocked headroom/);
 });
+
+test('small and large castles have elevated roofline crowns with readable crenellations',()=>{
+  let castles=0;
+  for(const b of models.filter(b=>b.type==='castle-palace')){
+    const [,,stories,,,,pitch]=b.architecturalNotes.structuralSignature;
+    const top=stories*4+pitch+3+['small','medium','large'].indexOf(b.size);
+    const cap=b.cells.filter(c=>c.at[1]===top&&c.role==='roof');
+    const cren=b.cells.filter(c=>c.at[1]===top+1&&c.role==='parapet');
+    assert.ok(cap.length>=15,b.id+': no readable tower crown');
+    assert.ok(cren.length>=6,b.id+': no crenellated skyline');
+    assert.ok(top+1<b.bounds[1],b.id+': crown over bounds');
+    castles++;
+  }
+  assert.equal(castles,15);
+});
