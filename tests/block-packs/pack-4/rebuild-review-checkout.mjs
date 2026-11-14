@@ -6,7 +6,7 @@
 // Gallery needs Playwright/Chromium installed on the invoking machine; on Linux
 // with software-only GL use xvfb-run + PACK4_CHROMIUM_HEADFUL=1.
 import {createHash} from 'node:crypto';
-import {mkdir,readFile,writeFile,symlink,stat} from 'node:fs/promises';
+import {mkdir,writeFile,symlink,stat,rm} from 'node:fs/promises';
 import {mkdtempSync,existsSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve,join,dirname} from 'node:path';
@@ -120,7 +120,15 @@ export async function buildReviewCheckout({mainSha,packSha,output,fetcher=fetch,
    completed++;
   }
  }
- await Promise.all(Array.from({length:Math.min(concurrency,entries.length)},()=>worker()));
+ // Wait for ALL in-flight downloads before cleanup to avoid partial checkouts.
+ const attempts=await Promise.allSettled(
+  Array.from({length:Math.min(concurrency,entries.length)},()=>worker()));
+ const failed=attempts.find(r=>r.status==='rejected');
+ if(failed){
+  await rm(out,{recursive:true,force:true});
+  if(output)await mkdir(out,{recursive:true}); // preserve requested empty directory
+  throw failed.reason;
+ }
  const dependencies=resolve(process.cwd(),'node_modules');
  if(existsSync(dependencies)&&!existsSync(resolve(out,'node_modules')))
   await symlink(dependencies,resolve(out,'node_modules'),'dir');
