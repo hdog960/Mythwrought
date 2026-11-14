@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MYTHWROUGHT — Pack 1 Garden Components Laboratory</title>
+<style>
+:root{color-scheme:dark;background:#10232a;color:#f6f0df;font-family:system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box}body{margin:auto;padding:clamp(12px,3vw,30px);max-width:1030px}
+h1{font-family:Georgia,serif;margin:14px 0 8px}h2{font-family:Georgia,serif;font-size:1.18rem;margin:10px 0}
+p{line-height:1.5;color:#bfd0cc}.warning{background:#352f23;color:#f6dfac;border:1px solid #c69b64;border-radius:10px;padding:12px;font-weight:650}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0}
+.card{min-width:0;border:1px solid #59776f;border-radius:13px;background:linear-gradient(155deg,#1d3940,#142b31);padding:12px;text-align:center}
+.card.placed{border-color:#ecc58b;outline:1px solid #ecc58b}
+.preview{width:100%;height:auto;max-width:278px;display:block;margin:auto;image-rendering:pixelated}
+.slice{width:100%;max-width:160px;image-rendering:pixelated;cursor:crosshair;border:1px solid #587a72;border-radius:6px}
+.desc{font-size:.85rem;min-height:66px}.tiny{font-size:.76rem;color:#d6b88f}
+button{padding:8px 11px;border-radius:8px;border:1px solid #b6b0a0;background:#425e60;color:white;cursor:pointer;margin:3px}
+button:hover{background:#57787a}button:focus-visible,.slice:focus-visible{outline:3px solid #d9bd75}
+.toolbar{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+output{display:block;background:#0c302b;border:1px solid #548576;border-radius:9px;padding:12px;font:12px/1.55 ui-monospace,monospace;white-space:pre-wrap}
+footer{font-size:.8rem;color:#b6c6c2;padding:12px 0}
+@media(max-width:680px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.grid{grid-template-columns:1fr}} 
+</style></head><body>
+<h1>Stone & Nature / Garden Laboratory</h1>
+<div class="warning">UNMERGED CANDIDATES — NOT DEPLOYED. Standalone canvas preview and test fixture, not the live Mythwrought engine.</div>
+<p>Three independent physical voxel pieces: furrowed farmland, an empty-of-plants cedar planter, and a hollow terracotta pot. Each piece is removable as one cell; its detailed volume consists of real solid and empty regions. Rotate previews, inspect cross-sections, and test isolated placement. No planting, farming, crafting or world placement.</p>
+<div class="toolbar">
+<button id="all" type="button">Place all canonical</button>
+<button id="clear" type="button">Clear fixture</button>
+<button id="save" type="button">Verify test save/restore</button>
+</div>
+<div class="grid" id="grid"></div>
+<output id="status" aria-live="polite"></output>
+<footer>Cross-section: gold = solid occupancy, dark = real empty space. A cross-section click probes one physical cell at the displayed elevation. Nonzero rotations deliberately fail fixture save until the central engine adds save-state support.</footer>
+<script type="module" src="./garden-gallery.mjs"></script>
+</body></html>
