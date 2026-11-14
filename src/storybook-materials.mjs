@@ -1,3 +1,6 @@
+import {CRAFTED_TIMBER_GLSL} from './crafted-timber.mjs';
+import {CARVED_MASONRY_GLSL} from './carved-masonry.mjs';
+import {STORYBOOK_ROOF_GLSL} from './storybook-roof.mjs';
 // Original MYTHWROUGHT v0.10 storybook voxel material artwork.
 // Shader-only: unchanged world generator, block IDs, schema-1 saves, physics,
 // GPU chunk buffers/draw counts, and controller viewport. No fetched textures.
@@ -52,13 +55,8 @@ void main(){
     float mica=step(.94,hashCell(p+vec2(11.0,5.0)));
     shade=.82+.15*tile+.11*strata-.09*crease+.12*mica;
     base=mix(base,vec3(.68,.68,.61),.14*near);
-  }else if(vMat==4){ // Honey-colored timber, distinct planks and warm grain.
-    float plank=blockLine(vec2(vUv.x*3.0,vUv.y*1.0),.035);
-    float grain=.5+.5*sin(vUv.x*23.0+2.0*sin(vUv.y*7.0));
-    float knots=step(.92,hashCell(floor(vUv*vec2(12.0,7.0))+4.0));
-    shade=.80+.19*grain+.11*tile-.16*plank+.08*knots;
-    base=mix(base,vec3(.83,.54,.31),.13*near);
-  }else if(vMat==5){ // Faceted turquoise crystal, cool/lilac glints.
+  }else if(vMat==4){ // Refined timber: staggered boards, grain and joinery.
+${CRAFTED_TIMBER_GLSL}  }else if(vMat==5){ // Faceted turquoise crystal, cool/lilac glints.
     float facet=step(.5,fract(vUv.x*2.5+vUv.y*1.75));
     float glint=step(.935,hashCell(floor(vUv*vec2(10.0,10.0))+7.0));
     shade=.89+.17*facet+.13*glint;
@@ -78,7 +76,9 @@ void main(){
     shade=1.0;
   }else if(vMat==12){ // Warm gold spores; preserves art readability.
     shade=1.0;
-  }else if(vMat==13||vMat==14){ // Original carved tree-star cave-wall sigils.
+  }else if(vMat==15){ // Dressed ashlar on render-only landmark faces.
+${CARVED_MASONRY_GLSL}  }else if(vMat==16){ // Opaque overlapping ceramic roof shingles.
+${STORYBOOK_ROOF_GLSL}  }else if(vMat==13||vMat==14){ // Original carved tree-star cave-wall sigils.
     // Matte warm gold or cool turquoise pigment, no transparent glow pass.
     shade=1.0;
   }
@@ -92,6 +92,7 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   existingFloraMaterials:Object.freeze([7,8,9]),
   renderOnlyGrottoMaterials:Object.freeze([10,11,12]),
   renderOnlyCaveRuneMaterials:Object.freeze([13,14]),
+  renderOnlyArchitecturalMaterials:Object.freeze([15,16]),
   detailStartDistance:10,
   detailEndDistance:38,
   fogStartDistance:29,
