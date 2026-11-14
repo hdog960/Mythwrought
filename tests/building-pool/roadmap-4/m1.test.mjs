@@ -23,7 +23,7 @@ test('all 30 physical coordinate-authored cell volumes have protected entrance, 
     assert.ok(result.occupiedCells>=300,b.id);
     assert.ok(result.walkableCells>=30,b.id);
     assert.ok(result.rooms >= (b.type==='castle-palace'?3:2),b.id);
-    assert.equal(result.levels,b.type==='castle-palace'?(b.size==='large'?2:2):b.size==='small'?1:2,b.id);
+    assert.equal(result.levels,b.architecturalNotes.storyCount,b.id);
     assert.equal(result.unresolvedAssets,b.dependencies.length);
     assert.equal(b.openings.filter(o=>o.kind==='entrance').length,1,b.id);
     assert.ok(b.cells.some(c=>c.role==='roof'),b.id);
