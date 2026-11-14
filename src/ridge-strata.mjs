@@ -2,7 +2,7 @@
 // Never alters seeded voxels, collision, saves or traversable cave openings.
 const fract=n=>n-Math.floor(n);
 const hash=(x,z,s)=>fract(Math.sin(x*127.1+z*311.7+s*0.013)*43758.5453);
-export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,air=0}={}){
+export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,air=0,dirt=2,grass=1}={}){
   if(typeof heightAt!=='function')throw Error('heightAt required');
   const out=[],seed=world.seed|0;
   const faces=[[1,0],[-1,0],[0,1],[0,-1]];
@@ -104,6 +104,33 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
           const chip=[cx0+tx*(.08+lean*.12),footY+.26,cz0+tz*(.08+lean*.12)];
           emit(baseR,chip,apex,highlight);
         }
+      }
+    }
+  // Valley-to-highland transition: short, earthy contour seams appear only
+  // where an existing grass-topped slope exposes its natural dirt side.
+  // No voxel, seed, biome boundary, collision or save is changed. Sampling
+  // world.get makes player-built retaining walls suppress these decals.
+  for(let x=cx*chunkSize;x<(cx+1)*chunkSize;x++)
+    for(let z=cz*chunkSize;z<(cz+1)*chunkSize;z++){
+      const top=heightAt(x,z,seed);
+      if(top<6||world.get(x,top,z)!==grass||hash(x,z,seed+6017)>.38)continue;
+      for(const [dx,dz] of faces){
+        const neighbor=heightAt(x+dx,z+dz,seed);
+        if(top-neighbor<2||top-neighbor>5)continue;
+        const y=top-1;
+        if(world.get(x,y,z)!==dirt||world.get(x+dx,y,z+dz)!==air)continue;
+        const r=hash(x+dx*7,z+dz*7,seed+6089);
+        const tx=-dz,tz=dx,offset=.513;
+        const px=x+.5+dx*offset,pz=z+.5+dz*offset;
+        const w=.28+r*.14,drop=.12+r*.10;
+        const left=[px-tx*w,y+.68,pz-tz*w];
+        const right=[px+tx*w*.85,y+.63,pz+tz*w*.85];
+        const low=[px+tx*(r-.5)*.16,y+.68-drop,pz+tz*(r-.5)*.16];
+        const soil=[.35+r*.08,.27+r*.05,.19+r*.04];
+        const sunlit=[.60+r*.08,.47+r*.07,.30+r*.05];
+        emit(left,right,low,soil);
+        emit([px-tx*w*.63,y+.69,pz-tz*w*.63],right,
+             [px+tx*(r-.5)*.10,y+.69-drop*.48,pz+tz*(r-.5)*.10],sunlit);
       }
     }
   return new Float32Array(out);
