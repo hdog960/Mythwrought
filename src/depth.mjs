@@ -29,7 +29,7 @@ export function sectionWindow(feet){
   if(!Number.isFinite(feet))throw Error('Invalid player depth');
   const section=sectionForY(Math.max(WORLD_MIN_Y,Math.min(WORLD_MAX_Y,Math.floor(feet))));
   // At normal surface elevations preserve the original 25-chunk GPU window.
-  if(section===0)return feet<LEGACY_WORLD_MIN_Y+7?[0,-1]:[0];
+  if(section===0)return feet<0?[0,-1]:[0];
   return [section,section+1,section-1].filter(s=>s<=0&&s>=LOWEST_SECTION);
 }
 export function verticalEditSections(y){
