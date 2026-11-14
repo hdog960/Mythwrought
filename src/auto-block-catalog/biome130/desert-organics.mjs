@@ -59,7 +59,7 @@ export function desertOrganicFixture(){
   remove(x,y,z){const k=key(x,y,z),v=cells.get(k);cells.delete(k);return v?{...v}:null;},
   snapshot(){return JSON.stringify([...cells].sort(([a],[b])=>a.localeCompare(b)));},
   restore(json){const entries=JSON.parse(json);if(!Array.isArray(entries))throw new TypeError('Invalid snapshot');
-   const next=new Map();for(const e of entries){if(!Array.isArray(e)||e.length!==2||typeof e[0]!=='string'||!/^[-]?\\d+,[-]?\\d+,[-]?\\d+$/.test(e[0])||next.has(e[0]))throw new TypeError('Invalid entry');
+   const next=new Map();for(const e of entries){if(!Array.isArray(e)||e.length!==2||typeof e[0]!=='string'||!/^[-]?\d+,[-]?\d+,[-]?\d+$/.test(e[0])||next.has(e[0]))throw new TypeError('Invalid entry');
     desertOrganic(e[1]?.id,e[1]?.rotation);next.set(e[0],{id:e[1].id,rotation:e[1].rotation});}
    cells.clear();for(const [k,v] of next)cells.set(k,v);}
  });
