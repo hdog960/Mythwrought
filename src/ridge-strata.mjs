@@ -34,6 +34,22 @@ export function ridgeStrataVertices(world,cx,cz,{chunkSize=16,heightAt,stone=3,a
         // One short broken seam creates a recognizable jagged highland stratum.
         const lower=[cx0-tx*.14,y-.13,cz0-tz*.14];
         emit(lower,[cx0+tx*.16,y-.10,cz0+tz*.16],[cx0+tx*.03,y-.04,cz0+tz*.03],shadow);
+        // Connected two-level fractured rock band: a broad, irregular shale
+        // shoulder with an offset pale mineral lens. Both are face-only and
+        // sit below the exposed crown, never crossing a traversable opening.
+        const width=.29+r*.13, step=.19+r*.09;
+        const a=[cx0-tx*width,y-.30,cz0-tz*width];
+        const b=[cx0+tx*(width*.79),y-.26,cz0+tz*(width*.79)];
+        const c=[cx0+tx*(r-.5)*.24,y-.30+step,cz0+tz*(r-.5)*.24];
+        const deep=[.22+r*.08,.28+r*.06,.32+r*.05];
+        emit(a,b,c,deep);
+        const pale=[.66+r*.08,.65+r*.07,.55+r*.08];
+        const lensA=[cx0-tx*(width*.63),y-.30+step*.58,cz0-tz*(width*.63)];
+        const lensB=[cx0+tx*(width*.37),y-.30+step*.65,cz0+tz*(width*.37)];
+        emit(lensA,lensB,c,pale);
+        // Split lower fracture reads as a continuation, not an isolated stamp.
+        const crack=[cx0+tx*(r-.5)*.19,y-.47,cz0+tz*(r-.5)*.19];
+        emit(a,c,crack,shadow);
       }
     }
   return new Float32Array(out);
