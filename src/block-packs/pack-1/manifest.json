@@ -73,7 +73,11 @@
     "m6NativeOrchestratorFailClosed": "Removes stale PASS evidence BEFORE Node testing; refuses wrong head/dirty candidate paths, failed test run or missing/mismatched screenshot artifacts. Does not alter root CI.",
     "m6RecentNativeNodeHelper": "Local Node 22.16.0 re-executed 5/5 gallery-count.test.mjs PASS; both exact files verified against Git blobs ab02c4712f525d9f964794ce0952ae581ad1b113 and 6e941cf73b310eb2400b274cb878e1d56d3214c9.",
     "m6NativeAssetBlocker": "Local GitHub clone/source fetching remains blocked by DNS; seven exact candidate-focused test suites NOT run under native Node. Prior 81/81 V8 shim evidence is not a native pass.",
-    "m6ChromiumBlocker": "Playwright Chrome navigation to local/data pages remains administrator-blocked; no authentic screenshot captures/review and no physical iPhone testing."
+    "m6ChromiumBlocker": "Playwright Chrome navigation to local/data pages remains administrator-blocked; no authentic screenshot captures/review and no physical iPhone testing.",
+    "m6LatestIntegratedMain": "Fresh main caf47776b723a36684edc1a72749e49268ccc688 records automation-only checkpoint 007, PR #120. Manual Blocks 1–5 and building projects explicitly excluded. Original checkpoint 006 data is historical.",
+    "m6NewMainShapeAudit": "30 candidate IDs x 4 quarter rotations = 120/120 V8 source checks PASSED against latest checkpoint 007 main src/shape-prototypes.mjs and src/voxel-shape-interactions.mjs, 12–136 prototype triangles. Six full masonry cubes passed with opt-in prototypeOnly audit wrapper; no Pack 1 source change. NOT native Node/WebGL2.",
+    "m6LiveRegistryAt007": "src/voxel.mjs still supports IDs 0–8 only; Pack 1 IDs 9–38 remain entirely unregistered and cannot be placed into worldgen. No conflict with automated biome130 symbolic assets.",
+    "m6NativeOrchestratorRunStatus": "Pack 1-owned run-acceptance.mjs source committed and V8 syntax/fail-safe audit passed; NEVER completed genuine native all-eight Node+15-view Chromium execution. Missing results remain blockers."
   },
   "integrationDependencies": [
     "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
@@ -503,7 +507,7 @@
   ],
   "pr": "https://github.com/hdog960/Mythwrought/pull/113",
   "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED",
-  "nextMilestone": "On clean authorized exact PR #113 checkout, run eight native nested suites and 15 landscape gallery views through Pack 1-owned run-acceptance.mjs. Inspect 30 real PNGs, repair Pack 1 defects, then seek creator approval separately. No merge/deploy.",
+  "nextMilestone": "Confirm latest main (007 or newer), verify PR #113 exact-head CI, run eight nested Node suites and 5 galleries x 3 real Chromium viewports on a genuine checked-out branch. Inspect 30 authentic PNGs. Keep candidates draft; no merge or live world placement.",
   "allocations": [
     {
       "range": [
@@ -548,8 +552,8 @@
       "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "M6 continuation handoff complete: source remains 21 families/30 candidate IDs; native-safe exact-Git acceptance orchestrator created, README and M6 ledger reconciled; 5 genuine helper Node passes, 81 candidate test bodies only V8-shim. No genuine full asset Node/Chromium yet.",
-  "finalAcceptance": "OPEN / NOT ACCEPTED: candidate-only, 0 of 30 registered in production; genuine seven asset-suite Node, Chromium gallery, iPhone artwork/control/save and engine integration blockers remain.",
+  "latestMilestone": "M6 interrupted handoff resolved. Main now automation-only checkpoint 007; all 30 Pack1 candidates remain unmerged/unregistered. Rechecked 120/120 against newer main generic mesher/target API via V8. Pack-only exact-head native acceptance orchestrator and README/ledger committed. Full native Node and genuine screenshots still unrun.",
+  "finalAcceptance": "NOT ACCEPTED. Post-checkpoint-007 compatibility shown only by V8 source checks; real Node candidate suites, Chromium, physical iPhone, central ID registry and schema-1 rotation persistence remain outstanding.",
   "acceptanceMatrix": {
     "all_21_family_source_candidates": "CANDIDATE",
     "30_distinct_persistent_candidate_IDs": "VERIFIED_SOURCE_V8",
@@ -558,7 +562,7 @@
     "genuine_Chromium_candidate_galleries": "BLOCKED_BY_ADMINISTRATOR",
     "real_gallery_landscape_screenshots": "NOT_CAPTURED",
     "candidate_offline_browser_interaction": "NOT_RUN",
-    "production_placement_targeting_save": "BLOCKED_BY_ENGINE",
+    "production_placement_targeting_save": "BLOCKED_PACK1_NOT_REGISTERED",
     "physical_iPhone_and_creator_approval": "NOT_GRANTED",
     "merged_or_deployed": "NO",
     "all_Pack1_authored_test_bodies_81_of_81": "PASSED_EXACT_SOURCE_V8_SHIM_NOT_NODE",
@@ -578,7 +582,10 @@
     "seven_asset_Node_suites": "NOT_RUN_GENUINE_NODE",
     "native_gallery_helper_5_tests": "PASS_NODE_22_GIT_BLOB_VERIFIED",
     "gallery_15_views_30_real_PNG": "NOT_EXECUTED_OR_CAPTURED",
-    "production_integration": "NOT_AUTHORIZED"
+    "production_integration": "NOT_AUTHORIZED",
+    "integrated_main_checkpoint": "007_AUTOMATION_ONLY_PACK1_EXCLUDED",
+    "latest_main_generic_shape_audit": "120_OF_120_V8_SOURCE_PASS_POST_007_NOT_NATIVE",
+    "full_native_acceptance": "OPEN"
   },
   "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md"
 }
