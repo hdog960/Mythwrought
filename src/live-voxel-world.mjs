@@ -25,8 +25,8 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
   const origins=[{x:minX+24,z:minZ+24,length:28,width:3},
                  {x:minX+80,z:minZ+80,length:28,width:3}];
   const caves=origins.map(origin=>({origin,world:branchedCaveWorld(baseWorld,origin)}));
-  const caveGet=(x,y,z)=>{
-    const original=legacyGet(x,y,z);
+  const caveGet=(x,y,z,baseline)=>{
+    const original=baseline??legacyGet(x,y,z);
     // Pre-existing physical landmark cells retain priority over new caves.
     if(original!==baseBlock(x,y,z,seed))return original;
     for(const cave of caves)
@@ -73,6 +73,6 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
   }
   return {
     seed,dx,dz,trees,court,caves:origins,blockCount:blocks.size,
-    get(x,y,z){return blocks.get(key(x,y,z))??caveGet(x,y,z);}
+    get(x,y,z,baseline){return blocks.get(key(x,y,z))??caveGet(x,y,z,baseline);}
   };
 }
