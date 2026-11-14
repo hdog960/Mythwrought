@@ -73,27 +73,45 @@ const shell=async()=>{
           await page.waitForFunction(n=>document.querySelector('#grid')?.children.length===n,
             g.count,{timeout:15000});
           const before=await page.evaluate(()=>{
-            const all=[...document.querySelectorAll('#grid canvas')];
-            const swatch=all.map(canvas=>{
-              if(!canvas.width||!canvas.height)return 0;
-              const image=canvas.getContext('2d')?.getImageData(0,0,canvas.width,canvas.height)?.data;
-              if(!image)return 0;
+            // Inspect the FIRST canvas in EACH specimen card, not any
+            // unrelated cross-section canvas. Ignore labels/ID text at top;
+            // otherwise unique IDs can disguise duplicated or blank art.
+            const cards=[...document.querySelector('#grid').children];
+            const previewStats=cards.map(card=>{
+              const canvas=card.querySelector('canvas');
+              if(!canvas?.width||!canvas?.height)return {colors:0,pixels:0,hash:0};
+              const {width,height}=canvas;
+              const rgba=canvas.getContext('2d')?.getImageData(0,0,width,height)?.data;
+              if(!rgba)return {colors:0,pixels:0,hash:0};
               const colors=new Set();
-              for(let i=0;i<image.length;i+=16){
-                if(image[i+3]>0)colors.add([image[i],image[i+1],image[i+2]].join(','));
+              let pixels=0,hash=2166136261;
+              for(let y=Math.floor(height*.19);y<Math.ceil(height*.78);y+=2){
+                for(let x=Math.floor(width*.12);x<Math.ceil(width*.88);x+=2){
+                  const i=(y*width+x)*4;
+                  if(rgba[i+3]<40)continue;
+                  pixels++;
+                  const rr=rgba[i],gg=rgba[i+1],bb=rgba[i+2];
+                  colors.add(rr+','+gg+','+bb);
+                  hash=Math.imul(hash^rr,16777619)>>>0;
+                  hash=Math.imul(hash^gg,16777619)>>>0;
+                  hash=Math.imul(hash^bb,16777619)>>>0;
+                }
               }
-              return colors.size;
+              return {colors:colors.size,pixels,hash};
             });
-            return {cards:document.querySelector('#grid').children.length,
-              richPreviews:swatch.filter(x=>x>8).length,
+            return {cards:cards.length,
+              previewStats,
               pageWidth:document.documentElement.scrollWidth,
               viewportWidth:window.innerWidth,
               status:document.querySelector('#status')?.textContent,
               saves:Object.keys(localStorage)};
           });
           assert.equal(before.cards,g.count,'Gallery missing candidate card');
-          assert.ok(before.richPreviews>=g.count,
-            g.name+' has blank or monochrome physical preview canvas');
+          assert.ok(before.previewStats.every(p=>p.colors>=12&&p.pixels>=60),
+            g.name+' includes a blank, tiny or monochrome primary specimen preview: '+
+              JSON.stringify(before.previewStats));
+          assert.equal(new Set(before.previewStats.map(p=>p.hash)).size,g.count,
+            g.name+' has visually duplicate specimen previews inside the artwork crop');
           assert.ok(before.pageWidth<=before.viewportWidth+2,
             g.name+' overflows mobile landscape width '+width+'x'+height);
           assert.deepEqual(before.saves,[],g.name+' changed localStorage before interaction');
