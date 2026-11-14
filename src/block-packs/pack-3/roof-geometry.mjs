@@ -87,6 +87,8 @@ const VARIANTS=new Map(DEFINITIONS.flatMap(def=>[0,1,2,3].map(r=>[
 ])));
 export const PACK3_ROOF_GEOMETRY=Object.freeze(DEFINITIONS.map(d=>VARIANTS.get(d.id+':0')));
 export function pack3GeometryById(id,rotation=0){
+  // ID ownership is numeric; never coerce string, BigInt or object aliases.
+  if(!Number.isInteger(id))return null;
   if(!Number.isInteger(rotation)||rotation<0||rotation>3)
     throw new RangeError('Roof geometry rotation must be 0..3');
   return VARIANTS.get(id+':'+rotation)??null;
