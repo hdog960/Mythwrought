@@ -188,50 +188,75 @@
     {
       "roster": 39,
       "name": "Gravel",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "loose angular ground material; falling system owned by engine",
-      "visualVariants": 0,
+      "candidateId": 69,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 1,
+      "distinction": "loose shingle aggregate with 8 physically raised mixed-stone facets and separated foot-grain; engine gravity only",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware targeting/collision and selection",
+        "candidate ID registry/palette and exposed-face rendering",
+        "backwards-compatible orientation storage",
+        "engine-owned falling granular material policy; no local gravity behavior"
+      ]
     },
     {
       "roster": 40,
       "name": "Packed dirt paths",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "compacted shallow path surface",
-      "visualVariants": 0,
+      "candidateId": 70,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "shallow compacted-umber path with visibly depressed double ruts and raised earthen shoulders",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware targeting/collision and selection",
+        "candidate ID registry/palette and exposed-face rendering",
+        "backwards-compatible orientation storage"
+      ]
     },
     {
       "roster": 41,
       "name": "Cobblestone paving",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "walkable low-profile cut stones; not Pack 1 masonry",
-      "visualVariants": 0,
+      "candidateId": 71,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "shallow limestone walking-cobble tray with 7 physical irregular flat stones and visible mortar channels",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware targeting/collision and selection",
+        "candidate ID registry/palette and exposed-face rendering",
+        "backwards-compatible orientation storage"
+      ]
     },
     {
       "roster": 42,
       "name": "Decorative paving stones",
-      "candidateId": null,
-      "status": "planned",
-      "physical": false,
-      "orientationVariants": 0,
-      "distinction": "deliberate geometric low-profile paving",
-      "visualVariants": 0,
+      "candidateId": 72,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "low sculpted ivory paving with 10 distinctly physical inlaid tile/rune stone profiles",
+      "visualVariants": 1,
       "worldPlaced": false,
-      "integrated": false
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware targeting/collision and selection",
+        "candidate ID registry/palette and exposed-face rendering",
+        "backwards-compatible orientation storage"
+      ]
     },
     {
       "roster": 43,
@@ -282,15 +307,17 @@
       "integrated": false
     }
   ],
-  "currentMilestone": 2,
-  "completedFamilies": 10,
-  "unallocatedFamilies": 8,
+  "currentMilestone": 3,
+  "completedFamilies": 14,
+  "unallocatedFamilies": 4,
   "lastVerifiedMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
-  "progress": "M0 foundation + M1 four material candidates + M2 six physical shape/joinery candidates; review only",
+  "progress": "M0 foundation, M1 4 timber materials, M2 6 shapes/joinery, M3 4 physical paving materials; unmerged only",
   "pendingEngineAPIs": [
     "generic non-cube raycast/collision",
     "material registry expansion for candidate IDs 59–68",
     "orientation/variant/open metadata storage preserving schema 1",
-    "hinged state transition handling"
+    "hinged state transition handling",
+    "gravel gravity policy owned by :00; no falling behavior in candidate",
+    "shape-aware lower path tile support/mesh occlusion and collision integration"
   ]
 }
