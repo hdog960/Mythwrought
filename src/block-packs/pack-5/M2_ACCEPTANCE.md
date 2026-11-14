@@ -64,3 +64,8 @@ All material variants have physically different geometry. This work creates **no
 - All original **69/69 M0–M2 genuine native Node tests** re-executed against blob-matched source and test files. Six M2 native ES-module/real Chromium WebGL2 captures PASS at 667×375, 844×390, 932×430 with rotations 0,1. Reviewed all eight authentic candidate images; no new defect warranted a change to M2-owned candidate geometry.
 - **M2 technical candidate review was adequate for starting isolated M3 authored source**; this does NOT grant creator artwork approval, live schema-1/ID integration, HTTP-served module loading, physical iPhone controls or deployment. Original M2 82–85 remain **CANDIDATE**, not INTEGRATED.
 - Subsequent Milestone 3 source/test additions bring the full Pack 5 to **83/83 native Node PASS**, with separate 14-case M3 suite. See `M3_ACCEPTANCE.md`. M1 creator final review remains open and independent.
+
+## M2 regression protection after extending source-only M3 to family 90
+
+- All existing M2 candidate source and test blobs remained unchanged while authoring distinct workshop assets 88–90. The original 25 M2 native regressions passed within the new **102/102** full Pack 5 Node run.
+- M2 eight physical residential variants and earlier real WebGL2 native ES-module evidence remain unaffected, and no new residency/sitting/storage/sleep systems were added. M2 creator visual and production integration approval remain OPEN.
