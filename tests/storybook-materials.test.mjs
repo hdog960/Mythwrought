@@ -75,3 +75,25 @@ test('material artwork does not change deterministic worlds, edits or original s
    assert.equal(copy.set(3,14,3,8),false,'Visual IDs must remain uneditable');
  }
 });
+
+test('natural geology has four original bounded shader detail families without new block IDs',()=>{
+ assert.deepEqual(RULES.naturalDetailFamilies,[
+   'sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins'
+ ]);
+ for(const [id,next,terms] of [
+   [2,3,['shelf','silt','pebble','root']],
+   [3,4,['strata','crease','mica','slate','limestone']],
+   [5,6,['facet','cleavage','glint']],
+   [6,7,['trace','vein','gold']]
+ ]){
+   const start=FS.indexOf('}else if(vMat=='+id+')');
+   const end=FS.indexOf('}else if(vMat=='+next+')',start);
+   assert.ok(start>=0&&end>start,'dedicated natural material '+id);
+   const shader=FS.slice(start,end);
+   for(const term of terms)assert.match(shader,new RegExp('float '+term+'='));
+   assert.doesNotMatch(shader,/sampler2D|discard;|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
