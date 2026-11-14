@@ -1,15 +1,15 @@
 // Gate A :48: physical tree voxel templates, opt-in only; never change seeded terrain.
-// Foliage temporarily uses existing GRASS (ID 1) until :00 reserves a leaf block.
+// Real LEAVES (ID 7) provide physical foliage; never replace saved world edits.
 // Each occupied cell is a real world voxel, not a decorative mesh triangle.
 import {BLOCK,terrainHeight,baseBlock,WORLD_MAX_Y} from './voxel.mjs';
-export const TREE_VARIANTS=Object.freeze(['roundwood','spire','windswept']);
+export const TREE_VARIANTS=Object.freeze(['roundwood','spire','windswept','elderwood']);
 const key=(x,y,z)=>x+','+y+','+z;
 export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES??BLOCK.GRASS}={}){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
     !Number.isInteger(x)||!Number.isInteger(z)||!TREE_VARIANTS.includes(variant)||
     ![BLOCK.GRASS,BLOCK.CRYSTAL,BLOCK.LEAVES].includes(leafId))return null;
  const ground=terrainHeight(x,z,world.seed);
- const height=variant==='spire'?7:variant==='windswept'?6:5;
+ const height=variant==='elderwood'?8:variant==='spire'?7:variant==='windswept'?6:5;
  if(ground+height+2>WORLD_MAX_Y||world.get(x,ground,z)!==BLOCK.GRASS)return null;
  const cells=new Map();
  const put=(dx,dy,dz,id)=>{
@@ -33,6 +33,22 @@ export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES
    for(let dx=-radius;dx<=radius;dx++)for(let dz=-radius;dz<=radius;dz++)
     if(Math.abs(dx)+Math.abs(dz)<=radius+1&&!cells.has(key(x+dx,ground+dy,z+dz)))
      put(dx,dy,dz,leafId);
+  }
+ }else if(variant==='elderwood'){
+  // A broad ancient crown with four heavy limbs and stepped aerial roots.
+  // Every component is a real editable voxel; no render-only canopy.
+  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+   put(dx,1,dz,BLOCK.WOOD);
+   put(dx,2,dz,BLOCK.WOOD);
+   for(let reach=1;reach<=3;reach++)put(dx*reach,height-2,dz*reach,BLOCK.WOOD);
+  }
+  for(let dy=height-3;dy<=height+2;dy++){
+   const radius=dy===height+2?1:dy===height-3?2:3;
+   for(let dx=-radius;dx<=radius;dx++)for(let dz=-radius;dz<=radius;dz++){
+    if(Math.abs(dx)+Math.abs(dz)>radius+2||
+       cells.has(key(x+dx,ground+dy,z+dz)))continue;
+    put(dx,dy,dz,leafId);
+   }
   }
  }else{
   for(let dx=1;dx<=3;dx++)put(dx,height-1,0,BLOCK.WOOD);

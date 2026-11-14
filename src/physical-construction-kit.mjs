@@ -143,3 +143,25 @@ export function stoneSteps(at,{steps=5,width=3,axis='x',rise=1}={}){
   }
   return finish(cells);
 }
+
+
+// A full-voxel, walkable causeway with low side parapets. The central deck
+// is one block thick; the air above it is intentionally left empty.
+// This is a reusable component, NOT landmark placement or world mutation.
+export function stoneCauseway(at,{length=11,width=5,axis='x',parapets=true,pierSpacing=0,pierHeight=0}={}){
+  const [ox,oy,oz]=origin(at);
+  dimensions(length,5,31,'length');dimensions(width,3,9,'width');
+  if(axis!=='x'&&axis!=='z')throw new RangeError('axis must be x or z');
+  if(!integer(pierSpacing)||pierSpacing<0||pierSpacing>12)throw new RangeError('pierSpacing');
+  if(!integer(pierHeight)||pierHeight<0||pierHeight>12)throw new RangeError('pierHeight');
+  if((pierSpacing===0)!==(pierHeight===0))throw new RangeError('piers require spacing and height');
+  const cells=[],seen=new Set();
+  const put=(s,w,y)=>emit(cells,seen,ox+(axis==='x'?s:w),oy+y,oz+(axis==='x'?w:s),BLOCK.STONE);
+  for(let s=0;s<length;s++)for(let w=0;w<width;w++){
+    put(s,w,0);
+    if(parapets&&(w===0||w===width-1)&&s>0&&s<length-1)put(s,w,1);
+    if(pierSpacing&&s>0&&s<length-1&&s%pierSpacing===0&&(w===0||w===width-1))
+      for(let y=1;y<=pierHeight;y++)put(s,w,-y);
+  }
+  return finish(cells);
+}

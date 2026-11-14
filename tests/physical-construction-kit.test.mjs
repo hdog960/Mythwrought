@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,VoxelWorld,WORLD_MAX_Y,terrainHeight} from '../src/voxel.mjs';
-import {stoneColumn,stoneGateway,timberFrame,planUneditedConstruction,ruinedWall,stoneSteps,CONSTRUCTION_IDS,CONSTRUCTION_CONTRACT} from '../src/physical-construction-kit.mjs';
+import {stoneColumn,stoneGateway,timberFrame,planUneditedConstruction,ruinedWall,stoneSteps,CONSTRUCTION_IDS,CONSTRUCTION_CONTRACT,stoneCauseway} from '../src/physical-construction-kit.mjs';
 
 test('physical palette reuses stable saved block IDs and cube collision',()=>{
   assert.deepEqual({...CONSTRUCTION_IDS},{masonry:BLOCK.STONE,timber:BLOCK.WOOD,inset:BLOCK.CRYSTAL});
@@ -81,4 +81,27 @@ test('full-block stairs are one-step increments on both axes and remain inside w
   assert.equal(stoneSteps([0,8,0],{rise:-1,steps:3}).at(-1)[1],6);
   assert.throws(()=>stoneSteps([0,WORLD_MAX_Y,0],{steps:3}),/bounds/);
   assert.throws(()=>stoneSteps([0,3,0],{rise:2}),/rise/);
+});
+
+test('causeway forms a walkable deck with clear center and bounded parapets',()=>{
+  for(const axis of ['x','z']){
+    const cells=stoneCauseway([20,6,20],{axis,length:9,width:5,parapets:true});
+    assert.deepEqual(cells,stoneCauseway([20,6,20],{axis,length:9,width:5,parapets:true}));
+    assert.equal(cells.length,9*5+7*2);
+    assert.equal(new Set(cells.map(c=>c.slice(0,3).join(','))).size,cells.length);
+    assert(cells.every(c=>c[3]===BLOCK.STONE));
+    for(let s=0;s<9;s++)for(let w=1;w<4;w++){
+      const x=20+(axis==='x'?s:w),z=20+(axis==='x'?w:s);
+      assert(cells.some(c=>c[0]===x&&c[1]===6&&c[2]===z));
+      assert(!cells.some(c=>c[0]===x&&c[1]===7&&c[2]===z));
+    }
+  }
+});
+test('causeway optional piers are below the deck and respect world limits',()=>{
+  const cells=stoneCauseway([0,5,0],{length:9,width:3,pierSpacing:3,pierHeight:2});
+  assert.equal(cells.filter(c=>c[1]<5).length,8);
+  assert.throws(()=>stoneCauseway([0,5,0],{pierSpacing:3}),/piers/);
+  assert.throws(()=>stoneCauseway([0,5,0],{width:2}),/width/);
+  assert.throws(()=>stoneCauseway([0,5,0],{axis:'y'}),/axis/);
+  assert.throws(()=>stoneCauseway([0,5,0],{pierSpacing:2,pierHeight:12}),/bounds/);
 });
