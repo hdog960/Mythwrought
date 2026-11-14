@@ -42,3 +42,42 @@ Every candidate has 1 occupied voxel cell, `attachment:'floor'`, true 3D box geo
 - Stop before runtime registration. Central :00/:12 systems must separately authorize new persistent numeric IDs and backward-safe schema-1 saves, multi-part atomic placement, collision/raycast, variant persistence, and production render mesh. Never merge/deploy/world-place/change another lane or unlock v0.11.
 
 **Next review:** further original art refinement on 86–87, investigate 3D shape silhouette clarity and mobile budgets, then conditionally author unique physical 88–90 under *only Pack 5 source/test paths*. No feature/gameplay authoring.
+
+## Milestone 3 full physical source candidate completion — next session, 2026-11-14
+
+**Decision:** All **five** M3 families (86–90) now have physically authored candidate geometry; this is NOT final creator art acceptance, source-served HTTP verification, game registration, production save compatibility, or permission to merge.
+
+### Three additional physical M3 families authored this session
+
+| Symbol | Original physical variant | Independent actual geometry | Candidate-only gameplay limits |
+| --- | --- | --- | --- |
+| `pack5:088` Anvils & Forge Fixtures | `blackiron-horn` | 22 real boxes, 264 unculled mesh triangles: heavy base, raised anvil face, layered tapered horn and rear peen, individual rivets | no forging or heat |
+| `pack5:088` | `moonsteel-stake` | 23 boxes, 276 triangles: pale metal face, anvil horn, peen, brass inlays and separately modeled emblem | no forging or magic effect |
+| `pack5:089` Cauldrons & Alchemy Stations | `iron-tripod-cauldron` | 21 boxes, 252 triangles: multiple side-wall bands, four supports, metal rim, two handles and an actually **empty center** above a structural bottom | no fluids, fire, alchemy or crafting |
+| `pack5:089` | `alchemists-spiral-stand` | 19 boxes, 228 triangles: raised three-tier open rack, three individually modeled small flask rests and ornaments | no interactable inventory or mixing |
+| `pack5:090` Ovens & Cooking Ranges | `ashstone-bake-oven` | 18 boxes, 216 triangles: masonry piers and roof, physically **open oven mouth**, staggered front lintel, ash-colored support bands | no cooking, glow or fuel |
+| `pack5:090` | `copper-range-top` | 21 boxes, 252 triangles: low copper range frame with four independent raised burner discs, cabinet-facing front panel and three fittings | no heat/cooking or fuel |
+
+All six are real box-union physics candidates, single-cell floor-supported, with exact material-part colliders, original geometry signatures, quarter-turn orientation, shape ray selection/removal and isolated fixture-only variant snapshots. None has a persistent numeric block ID or any live world integration. They are distinct from Pack 4's fireplace and shop signage, Pack 3 roofing, and other manually authored furniture.
+
+### Actual source-exact execution
+
+- Full `node --test tests/block-packs/pack-5/*.test.mjs`: **102/102 native Node 22.16.0 tests PASS** (44 M0/M1, 25 M2, 14 previous M3 shop fixtures, **19 new M3 workshop cases**), zero skipped/failure. Verified new source/test Git blob exact parity:
+  - `src/block-packs/pack-5/workshop-fixtures.mjs` `40269db707db061992091c09d09cd311405d6f31`
+  - `tests/block-packs/pack-5/workshop-fixtures.test.mjs` `55ed235b152d1f2218ad8f52c0d815575476f148`
+  - `tests/block-packs/pack-5/workshop-gallery.mjs` `fa345fba2e8a38d2cad36c327bac4d916291511a`
+  - `tests/block-packs/pack-5/workshop-gallery.html` `b782a9277f3213c8cb3f233f42cee8418a0edb5b`
+  - `tests/block-packs/pack-5/esm-webgl-browser.py` `98fe1e8d557c1b3269b3caeeb3be1bac6465c3f5`
+  - `tests/block-packs/pack-5/fixture.test.mjs` `0b299274f1a0a15b3a5485c3aed1c51ca65ae6ba`
+  - `tests/block-packs/pack-5/shop-workshop.test.mjs` `78514262d23eadcdec7d24210a8ae9cbd0bcb9bd`
+- Tests include 24 six-variant/four-rotation source mesh bounds, actual **outward** triangle winding for every box face at every rotation, distinct original material and shape variants, real hollow cauldron collider gap and solid base, open oven-mouth gap, front-face anvil horn, per-cell floor support, ray selection/removal, deterministic isolated fixture snapshots and invalid-record atomic rollback.
+- New workshop source-box budget: **18–23 boxes per cell**, **216–276 unculled triangles** per asset, well below current test-only limits 64 boxes / 768 triangles per cell. Not hardware GPU timing, draw-call cost, occlusion culling or production game performance proof.
+- **6/6 genuine Chromium WebGL2 native ES-module screenshots** captured at 667×375, 844×390, 932×430 with 0 and 1 quarter-turn rotations. Every capture contains **six physically distinct nonblank source-authored variants**, each with a unique GPU readback fingerprint. Native `import`/`export` semantics validated via offline `data:` module URLs under Xvfb software OpenGL. Reproduce: `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/esm-webgl-browser.py m3b <output-dir>`.
+- **Visual limitation remains**: at iPhone screenshot scale, the forged horn is somewhat subdued and the box-built cauldron reads like a rectangular trough. Genuine shape physics is present, but these are **not premium-art accepted**. Further silhouette and palette refinement is appropriate before creator acceptance. Previous M3 86–87 gallery remains available as separate `m3` mode.
+
+### Hard M3 disposition and future work
+
+- **12/18 Pack 5 families authored as CANDIDATE** (M1 3 + M2 4 + M3 5); **6 NOT STARTED** (M4/M5 91–96); **0 INTEGRATED**; zero persistent numeric IDs allocated. M3 source *candidate* milestone now authored, but **M3 formal art/performance/served-gallery acceptance OPEN**.
+- GitHub main checkpoint **008**, `ac263720b60641c65b02330348dd76d0ef9cb75e`. Checkpoints 007–008 explicitly excluded every manual Pack, and candidate code changes stay exclusively on [draft PR #119](https://github.com/hdog960/Mythwrought/pull/119).
+- Real localhost HTTP browser is still blocked by `ERR_BLOCKED_BY_ADMINISTRATOR`. Only genuine offline ES-module/WebGL2 was tested. Not actual iPhone Safari, mobile GPU timing, production schema-1 save/raycast/collision/registry or creator Gate A sign-off.
+- **Next**: focused M3 creator art/silhouette refinement and performance acceptance without modifying shared systems; M4 Desks & Lecterns, Carpets & Rugs, Altars & Pedestals are NOT STARTED. Never merge/deploy/world-place, change other developers' files, or unlock v0.11 without separate explicit creator authorization.
