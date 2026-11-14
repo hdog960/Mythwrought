@@ -105,3 +105,23 @@ test('terrace-aware broken rails add coping without affecting saves or mesh budg
  assert.deepEqual(ruinedCausewayVertices(world,cx,cz,options),vertices);
  assert.deepEqual(world.save(),before);
 });
+
+test('shallow natural voids and excavated supports prevent false causeway crossings',()=>{
+ const {world,cx,cz,vertices}=find();
+ const x=cx*16+8,z=cz*16+8,g=terrainHeight(x,z,world.seed);
+ const before=world.save();
+ // A hypothetical naturally hollow roof must not receive a decorative road.
+ const caveOptions={...options,baseAt:(xx,yy,zz,seed)=>
+  xx===x&&zz===z&&yy===g-1?BLOCK.AIR:baseBlock(xx,yy,zz,seed)};
+ assert.equal(ruinedCausewayVertices(world,cx,cz,caveOptions).length,0);
+ assert.deepEqual(world.save(),before);
+ // A player's underground excavation is also protected across schema-1 restore.
+ assert.equal(world.set(x,g-1,z,BLOCK.AIR),true);
+ assert.equal(ruinedCausewayVertices(world,cx,cz,options).length,0);
+ const restored=VoxelWorld.restore(world.save());
+ assert.equal(ruinedCausewayVertices(restored,cx,cz,options).length,0);
+ assert.equal(restored.get(x,g-1,z),BLOCK.AIR);
+ assert.equal(world.set(x,g-1,z,baseBlock(x,g-1,z,world.seed)),true);
+ assert.deepEqual(world.save(),before);
+ assert.deepEqual(ruinedCausewayVertices(world,cx,cz,options),vertices);
+});
