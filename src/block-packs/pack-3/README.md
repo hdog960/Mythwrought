@@ -18,9 +18,9 @@
 | 24 | 110 | Clay roof tiles | Isolated physical candidate | fired barrel-tile surface | :00 registry/raycast/save integration |
 | 25 | 111 | Slate roof tiles | Isolated physical candidate | cleft blue-grey slate surface | :00 registry/raycast/save integration |
 | 26 | 112 | Thatched roofing | Isolated physical candidate | thick golden straw surface | :00 registry/raycast/save integration |
-| 27 | — | Roof stairs/slopes | Not started | — | :12 rotational shape contract |
-| 28 | — | Roof corners | Not started | — | :12 corner shape contract |
-| 29 | — | Roof ridge | Not started | — | :12 ridge profile contract |
+| 27 | 113 | Pitched roof stair/slope | Isolated physical candidate | four quarter-turns, 16 box parts | :00 stateful rotation and :12 mesher |
+| 28 | 114 | Hip roof corner | Isolated physical candidate | four diagonal hip orientations, 9 box parts | :00 stateful rotation and :12 mesher |
+| 29 | 115 | Crown roof ridge | Isolated physical candidate | four rotations, 6 box parts (180° symmetric) | :00 stateful rotation and :12 mesher |
 | 69 | — | Castle wall sections | Not started | — | own distinct fortified unit |
 | 70 | — | Battlements | Not started | — | not Pack 2 parapet |
 | 71 | — | Stone buttresses | Not started | — | anchored physical projection |
@@ -32,21 +32,32 @@
 | 77 | — | Crystal spires | Not started | — | separate from CRYSTAL 5 |
 | 78 | — | Carved statues | Not started | — | selection/removal per piece |
 
-**No unassigned ID is promised or counted as completed.** Each roofing family has multiple genuine raised/layered box parts; its collision and selection boxes are *the exact same occupied volumes* as preview geometry. Box count remains below the :00 32-box contract. Color palettes are candidate material metadata only, not installed shader code.
+**Ten remaining families (69–78) have no assigned IDs.** No unassigned ID is promised or counted as completed. Each roofing family has multiple genuine raised/layered box parts; its collision and selection boxes are *the exact same occupied volumes* as preview geometry. Box count remains below the :00 32-box contract. Color palettes are candidate material metadata only, not installed shader code.
 
 ## Opt-in preview and test fixture
 
 - `roofing-materials.mjs`: four stable ID/geometry/material definitions.
 - `manifest.mjs`: 17-family ownership/duplicate-audit ledger.
-- `fixture.mjs`: isolated manual place, remove, inspect geometry, and save/restore demonstration.
-- `preview.html`: optional gallery depicting actual box parts (not a screenshot of the live WebGL game).
+- `fixture.mjs`: isolated manual place, remove, inspect geometry, and save/restore demonstration for IDs 109–112.
+- `roof-geometry.mjs`: separate physical roof-pitch, hip-corner, and ridge-cap shape profiles (IDs 113–115) with four cached quarter-turn box descriptors each; same boxes used for selection and collision; original hearthclay visual material metadata.
+- `roof-geometry-fixture.mjs`: independent placement/removal/shape-target callback and candidate **orientation-sidecar** snapshot/restore. NOT a game save, NOT live runtime wiring.
+- New test suite: `node --test tests/block-packs/pack-3/roof-geometry.test.mjs` (nested; not in current default CI glob).
+- `preview.html`: optional **seven-asset** gallery depicting actual box parts, with 90-degree interactive rotation for pitch/hip/ridge (not a screenshot of live WebGL).
 - Reproducible isolated regression: `node --test tests/block-packs/pack-3/roofing.test.mjs`.
 - The existing `npm test` script only globs `tests/*.test.mjs`; this nested suite needs an explicit invocation. Do not claim CI exercised it without evidence.
 
-**Honest integration boundary:** the fixture writes `{schema:1,seed,edits}`-shaped candidate samples, but the live `VoxelWorld.restore` currently **rejects IDs 109–112**. Rotation is locked at 0 for these surface candidates; the existing schema has no orientation state. For the non-cube roof stairs/corners/ridges, require merged :12 shape geometry and :00 selection/collision/save handling before promising rotation persistence. Do not use these fixture snapshots as player saves. Integration must preserve existing player data and fail closed for unsupported states.
+**Honest integration boundary:** the fixture writes `{schema:1,seed,edits}`-shaped candidate samples, but the live `VoxelWorld.restore` currently **rejects IDs 109–112**. Rotation is locked at 0 for these surface candidates; the existing schema has no orientation state. For non-cube roof stairs/corners/ridges, require merged :12 meshing and :00 selection/collision/save handling plus a creator-approved backward-compatible rotation persistence contract before promising live rotation persistence. Do not use these fixture snapshots as player saves. Integration must preserve existing player data and fail closed for unsupported states.
 
 ## Session handoff
 
-Milestone 0: verified authorities/contracts, dedicated manifest and isolated fixture; candidate module authored. Milestone 1: **four isolated original material/physical geometry candidates authored**; tests and preview to be verified; **not approved or integrated**. Milestones 2–6 remain open. Branch and exact PR HEAD live in the reviewable PR; never infer a later HEAD from this initial audit.
+Milestone 0: verified authorities/contracts, dedicated manifest and isolated fixture; candidate module authored. Milestone 1: **four isolated original material/physical geometry candidates authored**, previous exact-source local Node 7/7 passed. Milestone 2: **three original physically occupied roof profiles and all 12 rotations authored**, :00 raycast/canPlace and :12 surface-mesh source contract V8-tested with 7 rays/12 shape variants; 324–420 surface triangles per candidate under opt-in :12 prototype. Separate rotation sidecar fixture authored. Local Node/Chromium for new geometry pending independent verification. Milestones 3–6 remain open. Branch and exact PR HEAD live in the reviewable PR; never infer a later HEAD from this initial audit.
 
 No actual iPhone or live-world verification. Manual creator incorporation only, after independent tests and explicit approval.
+
+
+## Milestone 2 compatibility and acceptance evidence (2026-11-14)
+
+- :00 [PR #106](https://github.com/hdog960/Mythwrought/pull/106) unmerged source blob `01be82e6c308e47a35fa6588cc6ed1ebeafca307`: its actual `validateShape`, `rotateShape`, `raycastShapes`, and `canPlaceShape` functions accepted all **12** Pack 3 oriented descriptors in a one-off isolated V8 source-harness run. Positive/negative ray targets verified front/back pitch, diagonal hip, ridge spine/empty margins; same-cell overlap disallowed, empty-cell insertion allowed.
+- :12 [PR #108](https://github.com/hdog960/Mythwrought/pull/108) unmerged source blob `cedf79c201d6fb2b18465893d62d867e5a991220`: actual `prototypeSurfaceMesh` accepted all **12** rotated descriptors; 324 triangles (pitch), 384 (hip), 420 (ridge), finite unit bounds. No extra generic shape engine authored here.
+- These checks validate prototype adapter behavior, **not production runtime registration, live player collision, canonical schema-1 save support, phone screenshot fidelity, or FPS**. Run the nested Node suites separately. `npm test` on main excludes them until a centrally authorized CI change.
+- Old integrated physical temples, ruins, waystones, and render-only roof shader remain distinct from these standalone asset IDs. No world placement or architected structures are included.
