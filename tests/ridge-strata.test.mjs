@@ -155,3 +155,20 @@ test('amphitheatre contour tiers trace exposed valley dirt and honor saved wall 
  assert.equal(ridgeStrataVertices(world,-1,0,{heightAt:()=>13}).length,0);
  assert.ok(original.length<16*16*4*20*27,'mobile geometry remains bounded');
 });
+
+test('valley drainage fans are deterministic, sparse, and disappear behind saved retaining walls',()=>{
+ const heights=(x,z)=>x<0?12:8,edits=new Map();
+ const world={seed:8,get(x,y,z){
+  const k=[x,y,z].join(',');if(edits.has(k))return edits.get(k);
+  const h=heights(x,z);return y>h?0:y===h?1:y>=h-3?2:3;
+ }};
+ const original=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(original.length>0);
+ assert.deepEqual(original,ridgeStrataVertices(world,-1,0,{heightAt:heights}));
+ for(let z=0;z<16;z++)edits.set('0,10,'+z,3);
+ const covered=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(covered.length<original.length,'blocking the open valley approach hides fan details');
+ assert.equal(edits.size,16,'render-only terrain never mutates edits');
+ assert.equal(ridgeStrataVertices(world,-1,0,{heightAt:()=>12}).length,0);
+ assert.ok(original.length<16*16*4*24*27,'mobile vertex budget remains bounded');
+});
