@@ -18,7 +18,7 @@ if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgram
 const vao=gl.createVertexArray();gl.bindVertexArray(vao);const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
 gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);
 gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
-gl.enable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);gl.useProgram(program);
+gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.frontFace(gl.CCW);gl.useProgram(program);
 const uMVP=gl.getUniformLocation(program,'u_mvp');
 const unit=v=>{const n=Math.hypot(...v);return v.map(x=>x/n);};
 const sub=(a,b)=>a.map((x,i)=>x-b[i]);
