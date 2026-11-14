@@ -224,3 +224,24 @@ The implementation uses grounded actual CSS classes from each corresponding sour
 **Genuine browser blocker independently reproduced again** using installed Chromium and Python Playwright: `data:`, `file:`, and `http://127.0.0.1` navigation each fail with `net::ERR_BLOCKED_BY_ADMINISTRATOR` despite successful browser launch. This blocks all **15 source-gallery Chromium views and 30 authentic PNG screenshots**. No attempt was made to bypass browser administrator rules and no synthetic/generated image is claimed as actual browser evidence.
 
 **Gate disposition:** Pack 1 native Node PASS, Chromium/visual review OPEN, live engine/partial-voxel integration and schema-1 orientation save approval OPEN, physical iPhone and creator art/control sign-off OPEN. M6 overall NOT ACCEPTED; all 30 assets remain **CANDIDATE**, draft PR #113 unmerged/undeployed, no shared engine/CI/worldgen/other pack changes, v0.11 LOCKED.
+
+
+## M6 continuation — source-backed cross-section selection/collision browser proof
+
+The dedicated Pack 1 Node gate remains **93/93 genuine Node PASS** from 21 exact GitHub-blob-verified files; unchanged candidate code means no redundant V8 or Node re-test is necessary. Main is `ac263720b60641c65b02330348dd76d0ef9cb75e`, incorporation checkpoint 008; Issues #109/#117 remain OPEN.
+
+**Independently verified Pack 1 acceptance defect:** `tests/block-packs/pack-1/galleries-browser.mjs` previously asserted fixture count and visual card state but **never clicked the actual cross-section selection/collision UI**. A gallery with broken slice-to-fixture coordinate mapping could therefore pass its purported visual/interaction gate. Within the Pack 1-only runner, three galleries now each test a real positive and negative grid-cell probe using Playwright's click-on-canvas position:
+
+| First candidate | Section height | Expected hit x,z | Expected empty x,z | Expected solid/passable |
+|---|---:|---|---|---|
+| Garden ridged farmland, ID 21 | .76 | 0,6 | 2,6 | Solid occupied / empty unoccupied |
+| Foliage hedge, ID 24 | .55 | 5,6 | 11,0 | Collidable selected / unselected noncollidable |
+| Floral skybell, ID 32 | .51 | 5,5 | 0,0 | Targetable but passable / empty passable |
+
+**Native reference check actually executed:** genuine Node v22.16.0 imported the exact previously GitHub-verified candidate fixture modules and placed all three IDs at [0,3,0] canonical rotation 0. For each case, `fixture.probe` agreed with independently chosen occupancy and collision expectations for the two named grid points: **all 3 cases PASS**. This is native fixture evidence only, **not actual browser interaction**.
+
+The Playwright source now clicks these points through `#grid canvas.slice` on all three landscape viewports, checks the actual textual targeting/collision feedback and fixture count, and records results in the screenshot evidence JSON. This adds **18 real browser probes** across 9 garden/foliage/floral views to the 45 placement/save/clear cycles, so the Pack 1-only `run-acceptance.mjs` acceptance gate now requires **63 observed browser interactions** plus 15 actual views and 30 authentic PNG screenshots. The exact updated JS sources parse without error. **Browser execution of these assertions remains NOT VERIFIED.**
+
+Chromium launches locally but data:, file: and local HTTP navigation continue to be blocked by `ERR_BLOCKED_BY_ADMINISTRATOR`; no prohibited policy bypass was attempted and **0/15 candidate browser views / 0/30 genuine screenshots** were captured. The latest PR-head root Actions check is separate baseline CI and does not include Pack 1 galleries. Creator visual review, live WebGL2 integration, schema-1 orientation persistence and physical-iPhone approval remain outstanding.
+
+**Final state unchanged:** 21 authored families, 30 distinct IDs 9–38 all CANDIDATE, draft/unmerged/undeployed; M6 native Node PASS, M6 Chromium/production/creator gates OPEN, Gate A OPEN and v0.11 LOCKED. No main/shared CI/worldgen/other-pack/save changes.
