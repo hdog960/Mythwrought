@@ -34,39 +34,166 @@ void main(){
   if(vMat==1){ // Grass: sun-dappled meadow with petite golden leaf flecks.
     vec2 p=floor(vUv*vec2(19.0,15.0));
     float leaf=step(.89,hashCell(p+vec2(2.0,7.0)));
+    // Broad moss islands and scattered tiny butter-yellow pollen break up flat lawns.
+    float moss=smoothstep(.48,.72,.5+.5*sin(vUv.x*9.0+sin(vUv.y*7.0)*1.7)*sin(vUv.y*8.0-vUv.x*2.0));
+    float pollen=step(.974,hashCell(p+vec2(8.0,29.0)));
     float golden=step(.962,hashCell(p+vec2(21.0,4.0)));
-    shade=.90+.13*tile+.075*leaf;
-    base=mix(base,vec3(.62,.78,.36),golden*.17*near);
-  }else if(vMat==2){ // Warm earthen loam, fine layered soil and pebbles.
-    vec2 p=floor(vUv*vec2(16.0,18.0));
-    float band=.5+.5*sin(vUv.y*42.0+hashCell(p)*.9);
-    float pebble=step(.91,hashCell(p+vec2(5.0,17.0)));
-    shade=.82+.18*tile+.09*band+.08*pebble;
-    base=mix(base,vec3(.68,.45,.30),.10*near);
-  }else if(vMat==3){ // Natural storybook stone: wavy strata, mica + weathered creases.
-    // The source rock is geological, not a wall of tiny rectangular bricks.
-    // Variation is intentionally low contrast at phone scale and fades with near.
+    // Winding fallen-leaf clusters: broad ochre silhouettes, no extra geometry.
+    vec2 litterUv=fract(vUv*vec2(5.0,4.0))-vec2(.5);
+    vec2 litterCell=floor(vUv*vec2(5.0,4.0));
+    float litterSeed=hashCell(litterCell+vec2(37.0,11.0));
+    float litterAngle=litterSeed*6.28318;
+    vec2 litterAxis=vec2(cos(litterAngle),sin(litterAngle));
+    vec2 litterRot=vec2(dot(litterUv,litterAxis),dot(litterUv,vec2(-litterAxis.y,litterAxis.x)));
+    float litterShape=1.0-smoothstep(.07,.14,length(litterRot*vec2(.75,1.7)));
+    float fallenLeaf=step(.68,litterSeed)*litterShape;
+    // Small blue-green dew pockets and ochre fern-litter streaks lend damp
+    // woodland turf a readable morning sheen without a transparency pass.
+    float dewField=.5+.5*sin(vUv.x*12.0+sin(vUv.y*8.0))*sin(vUv.y*13.0);
+    float dew=smoothstep(.88,.97,dewField);
+    float fernLitter=1.0-smoothstep(.025,.09,abs(sin(vUv.x*11.0-vUv.y*4.0+sin(vUv.y*6.0))));
+    shade=.87+.12*tile+.075*leaf+.09*moss;
+    base=mix(base,vec3(.42,.73,.69),.13*dew*near);
+    base=mix(base,vec3(.57,.43,.25),.08*fernLitter*near);
+    base=mix(base,vec3(.33,.52,.28),.23*moss*near);
+    base=mix(base,vec3(.93,.76,.31),(.20*golden+.14*pollen)*near);
+    base=mix(base,vec3(.77,.49,.21),.28*fallenLeaf*near);
+  }else if(vMat==2){ // Natural loam: ochre sediment shelves, embedded pebbles, root fibers.
+    vec2 p=floor(vUv*vec2(18.0,17.0));
+    float shelf=.5+.5*sin(vUv.y*27.0+2.0*sin(vUv.x*5.0));
+    float silt=smoothstep(.48,.68,shelf);
+    float pebble=step(.94,hashCell(p+vec2(5.0,17.0)));
+    float root=1.0-smoothstep(.015,.06,abs(sin(vUv.x*9.0+vUv.y*3.0)));
+    // Irregular pale clay lenses make exposed soil banks visibly different from rock.
+    float clay=smoothstep(.72,.9,.5+.5*sin(vUv.x*6.0+sin(vUv.y*5.0))*sin(vUv.y*9.0));
+    // Eroded ochre sediment fans: broad connected bands, with dark damp pockets.
+    float fan=.5+.5*sin(vUv.y*15.0+2.3*sin(vUv.x*4.0+vUv.y*2.0));
+    float fanEdge=1.0-smoothstep(.025,.12,abs(fan-.5));
+    float damp=smoothstep(.75,.94,.5+.5*sin(vUv.x*4.0-vUv.y*3.0)*sin(vUv.y*5.0));
+    // Exposed roots branch through sediment rather than repeating a masonry grid.
+    float rootTrunk=1.0-smoothstep(.025,.075,abs(sin(vUv.x*5.0+vUv.y*2.5)));
+    float rootBranch=1.0-smoothstep(.018,.06,abs(sin(vUv.x*9.0-vUv.y*7.0+sin(vUv.x*4.0))));
+    float rootNetwork=max(rootTrunk*.65,rootBranch*.45)*smoothstep(.20,.65,vUv.y);
+    shade=.79+.12*tile+.11*silt+.10*pebble-.065*root+.045*clay+.08*fanEdge-.08*damp;
+    base=mix(base,vec3(.72,.48,.31),(.12*silt+.07*pebble)*near);
+    base=mix(base,vec3(.77,.65,.47),.20*clay*near);
+    base=mix(base,vec3(.85,.53,.28),.20*fan*near);
+    base=mix(base,vec3(.35,.28,.24),.19*damp*near);
+    base=mix(base,vec3(.33,.24,.17),.24*rootNetwork*near);
+    // Rounded river-worn pebbles nest in exposed loam; sparse, face-local,
+    // stable across frames and faded before they become pixel noise.
+    vec2 gravelCell=floor(vUv*vec2(9.0,8.0));
+    vec2 gravelUv=fract(vUv*vec2(9.0,8.0))-.5;
+    float gravelSeed=hashCell(gravelCell+vec2(71.0,23.0));
+    float gravelRadius=length(gravelUv*vec2(1.0,1.25));
+    float gravelPebble=step(.81,gravelSeed)*(1.0-smoothstep(.17,.28,gravelRadius));
+    float gravelRim=step(.81,gravelSeed)*(1.0-smoothstep(.25,.32,gravelRadius))*(1.0-smoothstep(.12,.21,gravelRadius));
+    base=mix(base,vec3(.61,.65,.62),.24*gravelPebble*near);
+    base=mix(base,vec3(.28,.31,.29),.12*gravelRim*near);
+  }else if(vMat==3){ // Bedrock: three interleaved natural strata, fracture seams and mica.
     vec2 p=floor(vUv*vec2(11.0,13.0));
     float strata=.5+.5*sin(vUv.y*34.0+2.0*sin(vUv.x*6.5+tile));
     float crease=1.0-smoothstep(.045,.19,abs(sin(vUv.y*7.0+vUv.x*2.2)));
     float mica=step(.94,hashCell(p+vec2(11.0,5.0)));
-    shade=.82+.15*tile+.11*strata-.09*crease+.12*mica;
-    base=mix(base,vec3(.68,.68,.61),.14*near);
+    // Long diagonal slate veins and warmer limestone pockets break uniform cliffs.
+    float slate=.5+.5*sin(vUv.x*8.0-vUv.y*15.0+2.0*tile);
+    float limestone=step(.82,hashCell(floor(vUv*vec2(4.0,5.0))+vec2(19.0,3.0)));
+    // Jagged pale quartz seams track natural bedding rather than brick joints.
+    float quartz=1.0-smoothstep(.025,.10,abs(sin(vUv.x*4.0+vUv.y*13.0+sin(vUv.x*7.0))));
+    // Frost-quartz ridges collect on high stone strata without changing terrain IDs.
+    float frostRidge=1.0-smoothstep(.035,.13,abs(sin(vUv.y*18.0+sin(vUv.x*5.0)*1.6)));
+    float coldPocket=smoothstep(.76,.93,.5+.5*sin(vUv.x*5.0+vUv.y*3.0)*sin(vUv.y*7.0));
+    // A broad natural erosion scar crosses exposed cliff faces, never a brick grid.
+    float erosion=.5+.5*sin(vUv.y*9.0+2.2*sin(vUv.x*3.0));
+    float scar=1.0-smoothstep(.055,.19,abs(erosion-.5));
+    shade=.79+.13*tile+.10*strata-.085*crease+.11*mica+.065*slate+.06*frostRidge-.085*scar;
+    base=mix(base,vec3(.41,.53,.61),.16*slate*near);
+    base=mix(base,vec3(.76,.69,.54),.14*limestone*near);
+    base=mix(base,vec3(.84,.85,.77),.15*quartz*near);
+    base=mix(base,vec3(.68,.82,.91),(.12*frostRidge+.09*coldPocket)*near);
+    base=mix(base,vec3(.39,.35,.32),.17*scar*near);
+    // Long sweeping pale calcite seams distinguish exposed limestone shelves.
+    // Coordinates are face-local and deterministic; no terrain or save changes.
+    float calciteFlow=vUv.y*6.0+1.4*sin(vUv.x*3.5)+.35*sin(vUv.x*10.0);
+    float calcite=1.0-smoothstep(.055,.17,abs(sin(calciteFlow*3.14159)));
+    float shaleShelf=smoothstep(.63,.82,.5+.5*sin(calciteFlow*.75+vUv.x*1.3));
+    base=mix(base,vec3(.91,.86,.71),.21*calcite*near);
+    base=mix(base,vec3(.34,.42,.47),.12*shaleShelf*(1.0-calcite)*near);
+    // Broad weathered ironstone lenses add warm mineral contrast to cliff faces.
+    float ironLens=smoothstep(.70,.91,.5+.5*sin(vUv.x*3.7+sin(vUv.y*4.1))*sin(vUv.y*5.6-vUv.x*1.3));
+    float rim=1.0-smoothstep(.025,.10,abs(sin(vUv.x*3.7+sin(vUv.y*4.1))*sin(vUv.y*5.6-vUv.x*1.3)));
+    base=mix(base,vec3(.64,.38,.27),.20*ironLens*near);
+    base=mix(base,vec3(.86,.72,.53),.07*rim*near);
   }else if(vMat==4){ // Honey-colored timber, distinct planks and warm grain.
     float plank=blockLine(vec2(vUv.x*3.0,vUv.y*1.0),.035);
     float grain=.5+.5*sin(vUv.x*23.0+2.0*sin(vUv.y*7.0));
     float knots=step(.92,hashCell(floor(vUv*vec2(12.0,7.0))+4.0));
     shade=.80+.19*grain+.11*tile-.16*plank+.08*knots;
     base=mix(base,vec3(.83,.54,.31),.13*near);
-  }else if(vMat==5){ // Faceted turquoise crystal, cool/lilac glints.
+  }else if(vMat==5){ // Raw crystal: angled amethyst and turquoise growth planes.
     float facet=step(.5,fract(vUv.x*2.5+vUv.y*1.75));
+    float cleavage=1.0-smoothstep(.02,.09,abs(fract(vUv.x*3.0-vUv.y*2.0)-.5));
     float glint=step(.935,hashCell(floor(vUv*vec2(10.0,10.0))+7.0));
-    shade=.89+.17*facet+.13*glint;
-    base=mix(base,vec3(.74,.59,1.0),(.24*facet+.12*glint)*near);
-  }else if(vMat==6){ // Warm brass-gold specks in dark mineral seams.
-    float trace=step(.72,hashCell(floor(vUv*vec2(12.0,15.0))+17.0));
-    shade=.79+.15*tile+.24*trace;
-    base=mix(base,vec3(1.0,.72,.30),.23*trace*near);
+    // Twin chevron growth faces suggest clustered natural crystal prisms.
+    float prism=1.0-smoothstep(.025,.10,abs(fract(vUv.x*4.0+abs(vUv.y-.5)*3.0)-.5));
+    shade=.82+.17*facet+.13*glint+.09*cleavage+.13*prism;
+    base=mix(base,vec3(.74,.59,1.0),(.25*facet+.11*glint)*near);
+    base=mix(base,vec3(.37,.93,.83),(.12*cleavage+.16*prism)*near);
+    // Sparse frost-white inclusions and deep indigo cores distinguish natural geodes.
+    float inclusion=step(.955,hashCell(floor(vUv*vec2(7.0,9.0))+vec2(31.0,12.0)));
+    float core=smoothstep(.68,.91,.5+.5*sin(vUv.x*6.0+vUv.y*4.0)*sin(vUv.y*8.0-vUv.x*3.0));
+    base=mix(base,vec3(.22,.24,.54),.19*core*near);
+    base=mix(base,vec3(.87,.94,1.0),.24*inclusion*near);
+    // Agate-like nested mineral bands follow warped crystal growth planes.
+    // All pigment is opaque and near-faded, with no new mesh or sampler.
+    float bandPhase=length((vUv-vec2(.52,.48))*vec2(1.15,.85))*22.0
+      +2.2*sin(vUv.x*9.0+vUv.y*4.0);
+    float agateBand=1.0-smoothstep(.07,.22,abs(sin(bandPhase)));
+    float agateCore=smoothstep(.72,.93,.5+.5*cos(bandPhase*.42));
+    base=mix(base,vec3(.92,.69,.84),.16*agateBand*near);
+    base=mix(base,vec3(.31,.43,.71),.11*agateCore*near);
+    // Fine glacial cleavage gives some crystal faces a blue-white icy rim.
+    float iceRim=1.0-smoothstep(.025,.11,abs(sin(vUv.x*7.0-vUv.y*9.0+sin(vUv.y*4.0))));
+    float blueFacet=step(.79,hashCell(floor(vUv*vec2(5.0,6.0))+vec2(42.0,3.0)));
+    base=mix(base,vec3(.64,.88,.98),(.11*iceRim+.08*blueFacet)*near);
+    // Sparse six-ray frost stars make individual raw geode faces legible at arm's length.
+    // Cell-local placement is stable across frames and uses no new block or texture.
+    vec2 frostCell=floor(vUv*vec2(6.0,6.0));
+    vec2 frostUv=fract(vUv*vec2(6.0,6.0))-.5;
+    float frostSeed=hashCell(frostCell+vec2(61.0,17.0));
+    float frostRayA=1.0-smoothstep(.025,.07,abs(frostUv.x));
+    float frostRayB=1.0-smoothstep(.025,.07,abs(.5*frostUv.x+.866*frostUv.y));
+    float frostRayC=1.0-smoothstep(.025,.07,abs(.5*frostUv.x-.866*frostUv.y));
+    float frostStar=step(.92,frostSeed)*max(frostRayA,max(frostRayB,frostRayC))
+      *(1.0-smoothstep(.13,.34,length(frostUv)));
+    base=mix(base,vec3(.92,.97,1.0),.25*frostStar*near);
+  }else if(vMat==6){ // Raw ore: continuous amber mineral seams in weathered host rock.
+    vec2 p=floor(vUv*vec2(12.0,15.0));
+    float trace=step(.72,hashCell(p+17.0));
+    float vein=1.0-smoothstep(.06,.18,abs(sin(vUv.x*11.0+vUv.y*7.0+tile)));
+    // Small branching mineral seams read as embedded ore, not painted confetti.
+    float branch=1.0-smoothstep(.03,.13,abs(sin(vUv.x*18.0-vUv.y*5.0+sin(vUv.y*12.0))));
+    float gold=clamp(.48*trace+.42*vein+.24*branch,0.0,1.0);
+    shade=.77+.15*tile+.19*gold;
+    base=mix(base,vec3(.96,.69,.28),.28*gold*near);
+    // Hematite-red host-rock plates and thin pale mineral boundaries.
+    float hematite=.5+.5*sin(vUv.x*5.0+1.4*sin(vUv.y*6.0))*sin(vUv.y*7.0-vUv.x*2.0);
+    float plate=smoothstep(.67,.84,hematite);
+    float plateEdge=1.0-smoothstep(.035,.11,abs(hematite-.67));
+    base=mix(base,vec3(.51,.27,.29),.18*plate*(1.0-gold)*near);
+    base=mix(base,vec3(.82,.75,.62),.09*plateEdge*(1.0-gold)*near);
+    // Broad malachite-like copper halos and sparse dark host-rock fractures.
+    // These are surface pigment only: no new ore block or world-generation edits.
+    float copperField=.5+.5*sin(vUv.x*4.7+1.2*sin(vUv.y*5.3))*sin(vUv.y*6.1-vUv.x*2.0);
+    float copperHalo=smoothstep(.64,.83,copperField)*(1.0-gold);
+    float copperEdge=1.0-smoothstep(.025,.09,abs(copperField-.64));
+    float hostFracture=1.0-smoothstep(.018,.07,abs(sin(vUv.x*8.0+vUv.y*11.0+sin(vUv.y*5.0))));
+    base=mix(base,vec3(.22,.59,.46),.19*copperHalo*near);
+    base=mix(base,vec3(.58,.78,.63),.10*copperEdge*(1.0-gold)*near);
+    base=mix(base,vec3(.24,.25,.28),.12*hostFracture*(1.0-gold)*near);
+    // Oxidized teal seams frame the precious ore without transparency or glow passes.
+    float oxidation=smoothstep(.67,.87,.5+.5*sin(vUv.x*8.0-vUv.y*6.0+sin(vUv.y*11.0)));
+    base=mix(base,vec3(.19,.43,.39),.17*oxidation*(1.0-gold)*near);
   }else if(vMat==7){ // Solid polygon grass accents (opaque, no overdraw).
     shade=.92+.10*step(.5,tile);
   }else if(vMat==8||vMat==9){ // Flower petals and golden centers.
@@ -97,5 +224,18 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   fogStartDistance:29,
   fogEndDistance:68,
   newDrawCalls:0,
-  newTextures:0
+  newTextures:0,
+  naturalDetailFamilies:Object.freeze(['sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins']),
+  secondaryNaturalAccents:Object.freeze(['grass-moss-pollen','soil-clay-lenses','stone-quartz-seams','crystal-chevron-prisms','ore-branch-veins']),
+  mineralInclusions:Object.freeze(['crystal-indigo-core','crystal-frost-inclusions','ore-oxidized-seams']),
+  coldGeologyAccents:Object.freeze(['stone-frost-quartz-ridges','stone-cold-pockets','crystal-glacial-cleavage']),
+  weatheredStrataAccents:Object.freeze(['soil-ochre-sediment-fans','soil-damp-pockets','stone-erosion-scars']),
+  limestoneShelfAccents:Object.freeze(['stone-sweeping-calcite','stone-blue-shale-shelves']),
+  ironstoneAccents:Object.freeze(['stone-ironstone-lenses','stone-pale-mineral-rims']),
+  agateHematiteAccents:Object.freeze(['crystal-nested-agate-bands','crystal-indigo-growth-core','ore-hematite-host-plates','ore-pale-plate-boundaries']),
+  forestFloorMaterialAccents:Object.freeze(['grass-fallen-leaf-clusters','soil-branching-exposed-roots']),
+  woodlandDewAccents:Object.freeze(['grass-morning-dew','grass-fern-litter-streaks']),
+  crystalFrostStarAccents:Object.freeze(['crystal-six-ray-frost-stars']),
+  riverPebbleAccents:Object.freeze(['soil-rounded-river-pebbles','soil-dark-pebble-rims']),
+  copperOreAccents:Object.freeze(['ore-malachite-halos','ore-copper-boundaries','ore-host-rock-fractures'])
 });

@@ -75,3 +75,218 @@ test('material artwork does not change deterministic worlds, edits or original s
    assert.equal(copy.set(3,14,3,8),false,'Visual IDs must remain uneditable');
  }
 });
+
+test('natural geology has four original bounded shader detail families without new block IDs',()=>{
+ assert.deepEqual(RULES.naturalDetailFamilies,[
+   'sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins'
+ ]);
+ for(const [id,next,terms] of [
+   [2,3,['shelf','silt','pebble','root']],
+   [3,4,['strata','crease','mica','slate','limestone']],
+   [5,6,['facet','cleavage','glint']],
+   [6,7,['trace','vein','gold']]
+ ]){
+   const start=FS.indexOf('}else if(vMat=='+id+')');
+   const end=FS.indexOf('}else if(vMat=='+next+')',start);
+   assert.ok(start>=0&&end>start,'dedicated natural material '+id);
+   const shader=FS.slice(start,end);
+   for(const term of terms)assert.match(shader,new RegExp('float '+term+'='));
+   assert.doesNotMatch(shader,/sampler2D|discard;|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
+
+test('natural surface accents use bounded opaque shader details and stable existing material IDs',()=>{
+ assert.deepEqual(RULES.secondaryNaturalAccents,[
+  'grass-moss-pollen','soil-clay-lenses','stone-quartz-seams','crystal-chevron-prisms','ore-branch-veins'
+ ]);
+ const cases=[[1,2,['moss','pollen']],[2,3,['clay']],[3,4,['quartz']],[5,6,['prism']],[6,7,['branch']]];
+ for(const [id,next,terms] of cases){
+  const start=FS.indexOf(id===1?'if(vMat==1)':'else if(vMat=='+id+')');
+  const end=FS.indexOf('else if(vMat=='+next+')',start);
+  assert.ok(start>=0&&end>start,'material face '+id);
+  const part=FS.slice(start,end);
+  for(const term of terms){
+   assert.match(part,new RegExp('float '+term+'='));
+   assert.match(part,/near/);
+  }
+  assert.doesNotMatch(part,/discard;|sampler2D|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+ assert.ok(FS.indexOf('return;')<FS.indexOf('float moss='));
+});
+
+test('mineral geodes and oxidized ore remain opaque, distance-faded and use existing IDs',()=>{
+ assert.deepEqual(RULES.mineralInclusions,['crystal-indigo-core','crystal-frost-inclusions','ore-oxidized-seams']);
+ for(const [id,next,terms] of [[5,6,['inclusion','core']],[6,7,['oxidation']]]){
+  const start=FS.indexOf('}else if(vMat=='+id+')');
+  const end=FS.indexOf('}else if(vMat=='+next+')',start);
+  assert.ok(start>=0&&end>start);
+  const part=FS.slice(start,end);
+  for(const term of terms)assert.match(part,new RegExp('float '+term+'='));
+  assert.match(part,/near/);
+  assert.doesNotMatch(part,/discard;|sampler2D|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+});
+
+
+test('cold natural geology accents remain opaque, near-faded, and save-neutral',()=>{
+ assert.deepEqual(RULES.coldGeologyAccents,['stone-frost-quartz-ridges','stone-cold-pockets','crystal-glacial-cleavage']);
+ for(const [id,next,terms] of [[3,4,['frostRidge','coldPocket']],[5,6,['iceRim','blueFacet']]]){
+  const start=FS.indexOf('}else if(vMat=='+id+')');
+  const end=FS.indexOf('}else if(vMat=='+next+')',start);
+  assert.ok(start>=0&&end>start);
+  const part=FS.slice(start,end);
+  for(const term of terms)assert.match(part,new RegExp('float '+term+'='));
+  assert.match(part,/\*near/);
+  assert.doesNotMatch(part,/sampler2D|discard;|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
+
+test('weathered sediment fans and exposed erosion scars are distance-faded opaque natural faces',()=>{
+ assert.deepEqual(RULES.weatheredStrataAccents,[
+  'soil-ochre-sediment-fans','soil-damp-pockets','stone-erosion-scars'
+ ]);
+ for(const [id,next,terms] of [[2,3,['fan','fanEdge','damp']],[3,4,['erosion','scar']]]){
+  const start=FS.indexOf('}else if(vMat=='+id+')');
+  const end=FS.indexOf('}else if(vMat=='+next+')',start);
+  assert.ok(start>=0&&end>start);
+  const part=FS.slice(start,end);
+  for(const term of terms)assert.match(part,new RegExp('float '+term+'='));
+  assert.match(part,/\*near/);
+  assert.doesNotMatch(part,/discard;|sampler2D|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
+
+test('fragment shader contains no escaped source newlines and retains valid bounded mineral lenses',()=>{
+ assert.doesNotMatch(FS,/\\n/,'literal escaped newlines break GLSL compilation');
+ assert.deepEqual(RULES.ironstoneAccents,['stone-ironstone-lenses','stone-pale-mineral-rims']);
+ const stone=FS.slice(FS.indexOf('}else if(vMat==3)'),FS.indexOf('}else if(vMat==4)'));
+ for(const term of ['ironLens','rim'])assert.match(stone,new RegExp('float '+term+'='));
+ assert.match(stone,/vec3\(\.64,\.38,\.27\),\.20\*ironLens\*near/);
+ assert.match(stone,/vec3\(\.86,\.72,\.53\),\.07\*rim\*near/);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+});
+
+test('agate crystal and hematite ore retain bounded opaque near-faded natural pigment',()=>{
+ assert.deepEqual(RULES.agateHematiteAccents,[
+  'crystal-nested-agate-bands','crystal-indigo-growth-core',
+  'ore-hematite-host-plates','ore-pale-plate-boundaries'
+ ]);
+ for(const [id,next,names] of [[5,6,['bandPhase','agateBand','agateCore']],[6,7,['hematite','plate','plateEdge']]]){
+  const start=FS.indexOf('}else if(vMat=='+id+')');
+  const end=FS.indexOf('}else if(vMat=='+next+')',start);
+  assert.ok(start>=0&&end>start);
+  const material=FS.slice(start,end);
+  for(const name of names)assert.match(material,new RegExp('float '+name+'='));
+  assert.match(material,/\*near/);
+  assert.doesNotMatch(material,/sampler2D|discard;|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.doesNotMatch(FS,/\\\\n/);
+});
+
+test('calcite limestone shelves retain deterministic opaque mobile-friendly shading',()=>{
+ assert.deepEqual(RULES.limestoneShelfAccents,['stone-sweeping-calcite','stone-blue-shale-shelves']);
+ const stone=FS.slice(FS.indexOf('}else if(vMat==3)'),FS.indexOf('}else if(vMat==4)'));
+ for(const term of ['calciteFlow','calcite','shaleShelf'])
+   assert.match(stone,new RegExp('float '+term+'='));
+ assert.match(stone,/vec3\(\.91,\.86,\.71\),\.21\*calcite\*near/);
+ assert.match(stone,/vec3\(\.34,\.42,\.47\),\.12\*shaleShelf\*\(1\.0-calcite\)\*near/);
+ assert.doesNotMatch(stone,/sampler2D|discard;|texture\(|uTime/);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+});
+
+test('forest floor has deterministic leaf silhouettes and exposed branching roots without new IDs',()=>{
+ assert.deepEqual(RULES.forestFloorMaterialAccents,[
+  'grass-fallen-leaf-clusters','soil-branching-exposed-roots'
+ ]);
+ const grass=FS.slice(FS.indexOf('if(vMat==1)'),FS.indexOf('}else if(vMat==2)'));
+ const soil=FS.slice(FS.indexOf('}else if(vMat==2)'),FS.indexOf('}else if(vMat==3)'));
+ for(const name of ['litterUv','litterSeed','litterRot','fallenLeaf'])
+  assert.match(grass,new RegExp('float '+name+'=|vec2 '+name+'='));
+ for(const name of ['rootTrunk','rootBranch','rootNetwork'])
+  assert.match(soil,new RegExp('float '+name+'='));
+ assert.match(grass,/\.28\*fallenLeaf\*near/);
+ assert.match(soil,/\.24\*rootNetwork\*near/);
+ for(const material of [grass,soil])assert.doesNotMatch(material,/sampler2D|discard;|texture\(/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.doesNotMatch(FS,/uniform float uTime/);
+});
+
+
+test('raw ore copper halos are near-faded, opaque and do not allocate block IDs',()=>{
+ assert.deepEqual(RULES.copperOreAccents,[
+  'ore-malachite-halos','ore-copper-boundaries','ore-host-rock-fractures'
+ ]);
+ const ore=FS.slice(FS.indexOf('}else if(vMat==6)'),FS.indexOf('}else if(vMat==7)'));
+ for(const name of ['copperField','copperHalo','copperEdge','hostFracture'])
+  assert.match(ore,new RegExp('float '+name+'='));
+ for(const name of ['copperHalo','copperEdge','hostFracture'])
+  assert.match(ore,new RegExp(name+'[^;]*\\*near'));
+ assert.match(ore,/\(1\.0-gold\)/);
+ assert.doesNotMatch(ore,/sampler2D|discard;|texture\(|uTime/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
+
+test('woodland dew and fern litter remain opaque near-faded details on existing grass ID',()=>{
+ assert.deepEqual(RULES.woodlandDewAccents,['grass-morning-dew','grass-fern-litter-streaks']);
+ const grass=FS.slice(FS.indexOf('if(vMat==1)'),FS.indexOf('}else if(vMat==2)'));
+ for(const term of ['dewField','dew','fernLitter'])assert.match(grass,new RegExp('float '+term+'='));
+ assert.match(grass,/vec3\\(\\.42,\\.73,\\.69\\),\\.13\\*dew\\*near/);
+ assert.match(grass,/vec3\\(\\.57,\\.43,\\.25\\),\\.08\\*fernLitter\\*near/);
+ assert.doesNotMatch(grass,/sampler2D|discard;|texture\\(/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
+
+test('raw crystal frost stars use deterministic cell-local opaque pigment with no added IDs',()=>{
+ assert.deepEqual(RULES.crystalFrostStarAccents,['crystal-six-ray-frost-stars']);
+ const crystal=FS.slice(FS.indexOf('}else if(vMat==5)'),FS.indexOf('}else if(vMat==6)'));
+ for(const name of ['frostCell','frostUv','frostSeed','frostRayA','frostRayB','frostRayC','frostStar'])
+   assert.match(crystal,new RegExp('(float|vec2) '+name+'='));
+ assert.match(crystal,/\.25\*frostStar\*near/);
+ assert.match(crystal,/step\(\.92,frostSeed\)/);
+ assert.doesNotMatch(crystal,/sampler2D|discard;|texture\(|uTime/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+});
+
+
+test('rounded river pebbles are sparse, opaque and distance-faded in existing loam',()=>{
+ assert.deepEqual(RULES.riverPebbleAccents,['soil-rounded-river-pebbles','soil-dark-pebble-rims']);
+ const soil=FS.slice(FS.indexOf('}else if(vMat==2)'),FS.indexOf('}else if(vMat==3)'));
+ for(const term of ['gravelCell','gravelUv','gravelSeed','gravelRadius','gravelPebble','gravelRim'])
+  assert.match(soil,new RegExp('(float|vec2) '+term+'='));
+ assert.match(soil,/step\(\.81,gravelSeed\)/);
+ assert.match(soil,/\.24\*gravelPebble\*near/);
+ assert.match(soil,/\.12\*gravelRim\*near/);
+ assert.doesNotMatch(soil,/sampler2D|discard;|texture\(|uTime/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+});
