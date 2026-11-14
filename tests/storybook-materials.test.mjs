@@ -201,3 +201,16 @@ test('agate crystal and hematite ore retain bounded opaque near-faded natural pi
  assert.equal(RULES.newDrawCalls,0);
  assert.doesNotMatch(FS,/\\\\n/);
 });
+
+test('calcite limestone shelves retain deterministic opaque mobile-friendly shading',()=>{
+ assert.deepEqual(RULES.limestoneShelfAccents,['stone-sweeping-calcite','stone-blue-shale-shelves']);
+ const stone=FS.slice(FS.indexOf('}else if(vMat==3)'),FS.indexOf('}else if(vMat==4)'));
+ for(const term of ['calciteFlow','calcite','shaleShelf'])
+   assert.match(stone,new RegExp('float '+term+'='));
+ assert.match(stone,/vec3\(\.91,\.86,\.71\),\.21\*calcite\*near/);
+ assert.match(stone,/vec3\(\.34,\.42,\.47\),\.12\*shaleShelf\*\(1\.0-calcite\)\*near/);
+ assert.doesNotMatch(stone,/sampler2D|discard;|texture\(|uTime/);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+});
