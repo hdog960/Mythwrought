@@ -1,6 +1,7 @@
 // MYTHWROUGHT v0.08 — predictable, reversible basic block interactions.
 // This prototype adds no new inventory or automated mining powers.
-import {BLOCK,WORLD_MIN_Y,WORLD_MAX_Y,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
+import {BLOCK,WORLD_MAX_Y,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
+import {WORLD_MIN_Y} from './depth.mjs';
 
 export const INTERACTION_REACH=6;
 export const BUILD_MATERIALS=Object.freeze([BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE]);
