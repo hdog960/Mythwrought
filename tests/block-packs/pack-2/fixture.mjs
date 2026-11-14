@@ -1,21 +1,27 @@
 // Isolated test/preview fixture; NEVER reads/writes Mythwrought's live VoxelWorld.
 // Legacy fixture cells (ID 59–62) retain their original 5-column snapshot rows.
 // Joinery cells use [x,y,z,id,rotation,variant,open]; ground cells (69–72)
-// use the original five-column rows [x,y,z,id,rotation].
+// use the original five-column rows [x,y,z,id,rotation]. Infrastructure
+// cells (73–75) have six columns [x,y,z,id,rotation,variant].
 import {PACK_2_IDS,pack2Asset,pack2Cell,pack2Shape,parsePack2Cell}
   from '../../../src/block-packs/pack-2/definitions.mjs';
 import {PACK_2_JOINERY_IDS,joineryAsset,joineryCell,joineryShape,
   parseJoineryCell,nextJoineryState} from '../../../src/block-packs/pack-2/joinery.mjs';
 import {PACK_2_GROUND_IDS,groundAsset,groundCell,groundShape,parseGroundCell}
   from '../../../src/block-packs/pack-2/ground.mjs';
+import {PACK_2_INFRASTRUCTURE_IDS,infrastructureAsset,infrastructureCell,
+  infrastructureShape,parseInfrastructureCell}
+  from '../../../src/block-packs/pack-2/infrastructure.mjs';
 
-export const PACK_2_FIXTURE_IDS=Object.freeze([...PACK_2_IDS,...PACK_2_JOINERY_IDS,...PACK_2_GROUND_IDS]);
+export const PACK_2_FIXTURE_IDS=Object.freeze([...PACK_2_IDS,...PACK_2_JOINERY_IDS,...PACK_2_GROUND_IDS,...PACK_2_INFRASTRUCTURE_IDS]);
 const key=c=>c.join(',');
 const cellCheck=c=>Array.isArray(c)&&c.length===3&&c.every(Number.isSafeInteger)&&c[1]>=-3&&c[1]<=19;
 const EPS=1e-9;
-const shapeOf=c=>groundAsset(c.id)?groundShape(c.id,c.rotation):
+const shapeOf=c=>infrastructureAsset(c.id)?infrastructureShape(c.id,c):
+  groundAsset(c.id)?groundShape(c.id,c.rotation):
   joineryAsset(c.id)?joineryShape(c.id,c):pack2Shape(c.id,c.rotation);
-const cloneCell=c=>groundAsset(c.id)?groundCell(c.id,c.rotation):
+const cloneCell=c=>infrastructureAsset(c.id)?infrastructureCell(c.id,c):
+  groundAsset(c.id)?groundCell(c.id,c.rotation):
   joineryAsset(c.id)?joineryCell(c.id,c):pack2Cell(c.id,c.rotation);
 function hitBox(origin,dir,b,cell,reach){
   let enter=-Infinity,exit=Infinity,normal=[0,0,0];
@@ -36,19 +42,20 @@ export class Pack2Fixture{
   select(id){
     if(!PACK_2_FIXTURE_IDS.includes(id))throw new RangeError('Unknown Pack 2 asset');
     this.selected=id;this.rotation=0;
-    this.variant=joineryAsset(id)?.defaultState.variant??null;
+    this.variant=joineryAsset(id)?.defaultState.variant??infrastructureAsset(id)?.variants[0]??null;
     this.open=false;
     return this.selection();
   }
   turn(){
-    const ground=groundAsset(this.selected);
+    const infra=infrastructureAsset(this.selected),ground=groundAsset(this.selected);
     const spec=joineryAsset(this.selected)??pack2Asset(this.selected);
-    this.rotation=ground?(this.rotation+1)%ground.orientation.turns:
+    this.rotation=infra?(this.rotation+1)%infra.rotations:
+      ground?(this.rotation+1)%ground.orientation.turns:
       spec.rotatable?(this.rotation+1)%4:0;
     return this.selection();
   }
   cycleVariant(){
-    const spec=joineryAsset(this.selected);
+    const spec=joineryAsset(this.selected)??infrastructureAsset(this.selected);
     if(!spec)return this.selection();
     this.variant=spec.variants[(spec.variants.indexOf(this.variant)+1)%spec.variants.length];
     return this.selection();
@@ -59,7 +66,9 @@ export class Pack2Fixture{
     return this.selection();
   }
   selection(){
-    return groundAsset(this.selected)?groundCell(this.selected,this.rotation):
+    return infrastructureAsset(this.selected)
+      ?infrastructureCell(this.selected,{rotation:this.rotation,variant:this.variant}):
+      groundAsset(this.selected)?groundCell(this.selected,this.rotation):
       joineryAsset(this.selected)
         ?joineryCell(this.selected,{rotation:this.rotation,variant:this.variant,open:this.open})
         :pack2Cell(this.selected,this.rotation);
@@ -97,7 +106,8 @@ export class Pack2Fixture{
         const hit=hitBox(origin,dir,b,cell,reach);
         if(hit&&(!best||hit.distance<best.distance-EPS)){
           best={cell,id:candidate.id,rotation:candidate.rotation,
-            ...(joineryAsset(candidate.id)?{variant:candidate.variant,open:candidate.open}:{}),
+            ...(joineryAsset(candidate.id)?{variant:candidate.variant,open:candidate.open}:
+              infrastructureAsset(candidate.id)?{variant:candidate.variant}:{}),
             normal:hit.normal,distance:hit.distance};
         }
       }
@@ -114,7 +124,8 @@ export class Pack2Fixture{
       selection:this.selection(),
       cells:[...this.cells.entries()].map(([k,c])=>
         [...k.split(',').map(Number),c.id,c.rotation,
-          ...(joineryAsset(c.id)?[c.variant,c.open]:[])])
+          ...(joineryAsset(c.id)?[c.variant,c.open]:
+            infrastructureAsset(c.id)?[c.variant]:[])])
         .sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2])};
   }
   static restore(data){
@@ -122,16 +133,19 @@ export class Pack2Fixture{
        !Array.isArray(data.cells)||data.cells.length>64)throw new TypeError('Unsupported fixture');
     const out=new Pack2Fixture();
     const raw=data.selection;
-    const sel=groundAsset(raw?.id)?parseGroundCell(raw):
+    const sel=infrastructureAsset(raw?.id)?parseInfrastructureCell(raw):
+      groundAsset(raw?.id)?parseGroundCell(raw):
       joineryAsset(raw?.id)?parseJoineryCell(raw):parsePack2Cell(raw);
     out.select(sel.id);
     out.rotation=sel.rotation;
     if(joineryAsset(sel.id)){out.variant=sel.variant;out.open=sel.open;}
+    else if(infrastructureAsset(sel.id)){out.variant=sel.variant;}
     for(const row of data.cells){
-      if(!Array.isArray(row)||(row.length!==5&&row.length!==7)||
+      if(!Array.isArray(row)||(row.length!==5&&row.length!==6&&row.length!==7)||
           !cellCheck(row.slice(0,3)))throw new TypeError('Bad saved fixture cell');
       const [x,y,z,id,rotation,variant,open]=row;
-      const c=groundAsset(id)?(row.length===5?groundCell(id,rotation):null):
+      const c=infrastructureAsset(id)?(row.length===6?infrastructureCell(id,{rotation,variant}):null):
+        groundAsset(id)?(row.length===5?groundCell(id,rotation):null):
         joineryAsset(id)?(row.length===7?joineryCell(id,{rotation,variant,open}):null):
         (row.length===5?pack2Cell(id,rotation):null);
       if(!c)throw new TypeError('Candidate record width mismatch');
