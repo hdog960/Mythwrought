@@ -11,7 +11,7 @@ current on-device UI are altered.
 
 Verified base: `main f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`
 and integration checkpoint 006. Main at that cutoff has persistent IDs 0–8,
-not these candidates. IDs 159–168 are PROVISIONAL, exclusive to Pack 4.
+not these candidates. IDs 159–181 are PROVISIONAL, exclusive to Pack 4.
 
 ## Source surface
 `windows.mjs` exports `PACK4_WINDOW_ASSETS`, `PACK4_WINDOW_IDS`,
@@ -207,3 +207,73 @@ integration testing.
 **Never merge, push to main, deploy Pages, construct a building,
 spawn a well/fountain or place Pack 4 assets into world generation.**
 Gate A remains open; v0.11 remains locked.
+
+## M4 — Six independent hearth & civic component families (ID 176–181)
+
+All are **ONE physical cell each** and have their own immutable
+unit-cell collision, selection and material sub-box union. `hearth-civic.mjs`
+exposes `PACK4_CIVIC_IDS`, `PACK4_CIVIC_ASSETS`, `civicAsset`,
+`civicShape`, `civicMountOffset`, `civicSaveState`,
+`restoreCivicSaveState`, and `civicPreviewMesh`.
+
+| ID / Roster | Single reusable element | Geometry and support |
+|---|---|---|
+| **176 / 63** | Ashenwatch hollow chimney throat | Four independent masonry sides; open vertical flue, cap band and soot details; **floor** support |
+| **177 / 64** | Hearthstone fireplace insert | Open front (-Z), 2 jambs, stone hearth slab/mantle, separate iron grate; **rotated wall** support |
+| **178 / 65** | Wellside rim quadrant | Genuine **L-shaped** stone rim course with open central quadrant; **floor** support |
+| **179 / 66** | Wellhouse rope-hooked eave bracket | One short wood corbel & roof covering with metal rope hook, not a Pack 3 generic roofing tile; **rotated wall** support |
+| **180 / 67** | Old brass pulley bracket | Physical open-spaced 12-stud wheel and axle, wall plate and visual rope tail; **rotated wall** support |
+| **181 / 68** | Dry Dawnward fountain basin segment | Low carved hollow basin piece with separate spout, empty dry cavity; **floor** support |
+
+**No completed chimney, fireplace installation, well, well roof, fountain,
+house, stall, village or city was created.** These are independent component
+cells. IDs 176–181 are not registered in main. Current Pack 4
+ID **159–181** reservations cover all 22 families/23 material/shape variants;
+**182–208 remain unallocated**. ID 255 remains reserved, main IDs 0–8 are
+protected. Packs 1–3 and :12's Issue #117 catalog are untouched.
+
+`civicShape` returns non-full-cell render parts, positive selection and
+collision boxes and local Y-axis rotation 0–3. `civicMountOffset`
+returns `[0,-1,0]` for floor components or the appropriate rotated
+neighbor for wall components. `fixture.mjs` was updated to opt-in
+place/remove, partial collision, ray targeting and fully atomic local
+save/replay across **all 23 IDs 159–181**. Test snapshot persistence is
+NOT a change to production schema-1 saves.
+
+Each M4 asset declares `engines.fire = false`, `smoke = false`,
+`water = false`, `lighting = false`, and
+`animation = false`. Decorative soot, coal, rope and fountain spout
+must never be presented as working fire, fluid or pulley gameplay.
+The live engine owner must independently design light budgeting,
+fluid/smoke/heat effects (if ever approved) and real registry/save
+integration. **There are no simulated effects in Pack 4.**
+
+### M5 acceptance status (2026-11-14)
+- **M0–M4 source implemented**: all 22 families, 23 provisional IDs.
+- **7 Pack 4 source/test suites**: 138/138 exact authored Node-style
+  test bodies **passed in a V8 compatibility harness**, PLUS 4/4
+  read-only source/manifest checks = **142/142 V8 checks**.
+  This is NOT native Node `node --test` execution.
+- **Earlier exact PR HEAD** `c674b94dedd4b274c97114dbb8dbce46f45553d4`
+  passed its standard GitHub Node and Chromium *game baseline*
+  [Action #43632520917](https://github.com/hdog960/Mythwrought/actions/runs/43632520917),
+  **before M4**. It does not test the new nested M4 candidates.
+- **Current M4 exact PR HEAD CI** requires separately verifying the
+  full exact SHA once it is committed. The existing GitHub CI
+  root test glob excludes nested Pack 4 suites.
+- **Native Node suite and genuine gallery** remain blocked:
+  repository clone/raw fetch fails DNS from the container;
+  Chromium rejects local file and 127.0.0.1 browser URLs with
+  `ERR_BLOCKED_BY_ADMINISTRATOR`. No successful real candidate
+  screenshot, real physical-iPhone test, mobile controls/art approval,
+  or live schema-1 save integration is claimed.
+- The isolated `gallery-browser.mjs` script expects 23
+  independent cards, one shared WebGL2 preview canvas, 4-way rotation,
+  and true screenshots at 667×375, 844×390 and 932×430. Execute it
+  where browser navigation is permitted. Screenshots must retain
+  **UNMERGED CANDIDATE — NOT IN LIVE GAME** warnings.
+
+**M5 is NOT approved.** Creator alone may authorize manual
+incorporation after exact-head checks, collision/selection integration,
+transparent depth correctness, schema-1 compatibility, physical-iPhone
+controls review and art approval. Never merge or deploy autonomously.
