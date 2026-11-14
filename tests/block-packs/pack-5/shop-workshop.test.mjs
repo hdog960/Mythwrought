@@ -92,9 +92,9 @@ test('all fixtures have two candidate variants with no duplication of Pack4 benc
  assert.ok(!/from\s+['"]\.\.\/\.\.\//.test(textSource));
  assert.equal(SHOP_FIXTURES.some(d=>['Beds','Chairs & Stools','Bookshelves','Cabinets & Wardrobes'].includes(d.name)),false);
 });
-test('manifest reserves exactly 86 and 87 as symbolic M3 candidates while 88–90 stay unstarted',()=>{
+test('manifest preserves original 86 and 87 while 88–90 become independent M3 candidates',()=>{
  for(const roster of [86,87]){const e=manifest.entries.find(x=>x.roster===roster);
   assert.equal(e.status,'CANDIDATE');assert.equal(e.persistentNumericId,null);assert.equal(e.milestone,3);
  }
- for(const roster of [88,89,90])assert.equal(manifest.entries.find(x=>x.roster===roster).status,'NOT STARTED');
+ for(const roster of [88,89,90])assert.equal(manifest.entries.find(x=>x.roster===roster).status,'CANDIDATE');
 });
