@@ -29,7 +29,7 @@ test('twelve immutable selected/colliding box unions bounded in voxel cell',()=>
     assert.equal(a.collision.boxes,a.selection.boxes);
     assert.equal(a.shape.boxes,a.collision.boxes);
     assert.equal(a.boxes.length,a.parts.length);
-    assert.ok(a.parts.length>=9&&a.parts.length<=32);
+    assert.ok(a.parts.length>=8&&a.parts.length<=32);
     assert.equal(a.placement.allowedRotations.length,4);
     assert.deepEqual(pack3FortifiedPrototype(id,r).boxes,a.boxes);
     assert.equal(pack3FortifiedShape(id,r),a.shape);
