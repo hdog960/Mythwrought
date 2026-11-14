@@ -88,10 +88,13 @@ function emitBlueprint(type,biome,size){
   const roofAsset=SYMBOLS.roof;
   const wallAsset=SYMBOLS[biome];
   for(const [x,z] of footprint){
-    // Every level gets an independent load-free authored structural floor.
-    for(let l=0;l<storeys;l++)set(x,l*4,z,'floor',l===0?'base:stone':type==='castle-palace'?'base:stone':'base:wood');
-    // A complete top roof deck under shape-pitched roof caps. Courtyard aperture is intentional.
+    // Desert courts must remain sky-open through all upper floors, not merely the roof.
+    // Ground level remains supported and walkable; galleries circulate around the void.
     const aperture=bi===1&&court>0&&Math.abs(x-mid)<=court&&Math.abs(z-dz)<=court;
+    for(let l=0;l<storeys;l++){
+      if(aperture&&l>0)continue;
+      set(x,l*4,z,'floor',l===0?'base:stone':type==='castle-palace'?'base:stone':'base:wood');
+    }
     if(!aperture)set(x,roofY,z,'roof',roofAsset);
     for(let l=0;l<storeys;l++)for(let y=l*4+1;y<=l*4+3;y++){
       if(interior(x,z))continue;
