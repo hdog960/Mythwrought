@@ -214,3 +214,22 @@ test('calcite limestone shelves retain deterministic opaque mobile-friendly shad
  assert.equal(RULES.newDrawCalls,0);
  assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
 });
+
+test('forest floor has deterministic leaf silhouettes and exposed branching roots without new IDs',()=>{
+ assert.deepEqual(RULES.forestFloorMaterialAccents,[
+  'grass-fallen-leaf-clusters','soil-branching-exposed-roots'
+ ]);
+ const grass=FS.slice(FS.indexOf('if(vMat==1)'),FS.indexOf('}else if(vMat==2)'));
+ const soil=FS.slice(FS.indexOf('}else if(vMat==2)'),FS.indexOf('}else if(vMat==3)'));
+ for(const name of ['litterUv','litterSeed','litterRot','fallenLeaf'])
+  assert.match(grass,new RegExp('float '+name+'=|vec2 '+name+'='));
+ for(const name of ['rootTrunk','rootBranch','rootNetwork'])
+  assert.match(soil,new RegExp('float '+name+'='));
+ assert.match(grass,/\.28\*fallenLeaf\*near/);
+ assert.match(soil,/\.24\*rootNetwork\*near/);
+ for(const material of [grass,soil])assert.doesNotMatch(material,/sampler2D|discard;|texture\(/);
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newTextures,0);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.doesNotMatch(FS,/uniform float uTime/);
+});
