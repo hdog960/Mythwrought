@@ -1,6 +1,6 @@
 # MYTHWROUGHT — Pack 5 / Milestone 1 candidate acceptance dossier
 
-**Decision: M1 remains OPEN. Three original physical candidate families, six variants. No playable integration, no final creator artwork approval, no true WebGL2 certification.**
+**Decision: M1 remains OPEN for creator artwork approval, HTTP-served preview and production integration. Six original variants passed 44/44 native Node and native ES-module WebGL2 offline checks. No playable registration or physical-iPhone certification.**
 
 ## Reverification — 2026-11-14
 
@@ -97,3 +97,9 @@ All under the isolated 64-box / 768-triangle / 1536-vertex preview contract. The
 
 ## Final M1 status when M2 candidate work reached 68 native tests
 - M1 original **44/44** isolated native Node tests remain passing; current combined M0/M1/M2 Pack 5 suite **68/68** passes (24 independent M2 cases). Native ES module WebGL2 tests for M1 and M2 passed; HTTP-served gallery and creator art/live gameplay acceptance remain separate and open.
+
+## 2026-11-14 final independent recheck against Pack 5 M2 art refinement
+- Latest main remains `ac263720b60641c65b02330348dd76d0ef9cb75e`, checkpoint **008**; manual Pack 5 excluded and source ownership preserved.
+- **M1 6/6 authentic native ES-module Chromium WebGL2 captures** renewed at 667×375, 844×390 and 932×430 in rotations 0 and 1; all six isolated M1 variants rendered with unique GPU readback fingerprints.
+- Full local native Node Pack 5 suite now **69/69 PASS** (original M0/M1 44; M2 25), 0 skip/fail; M1 source and tests unchanged from prior committed hashes.
+- The original real HTTP-served page was independently retried via local Python HTTP server on 127.0.0.1 and Chromium under Xvfb; browser raised **`net::ERR_BLOCKED_BY_ADMINISTRATOR`**. Data-URL native ES module imports and real WebGL2 therefore **do not certify served HTTP**. Creator artwork and physical-iPhone control approval remain OPEN; no M1 integration authorized.
