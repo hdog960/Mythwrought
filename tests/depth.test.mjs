@@ -6,7 +6,7 @@ import {caveRoute} from '../src/experimental-cave-route.mjs';
 import {
   WORLD_MIN_Y,LEGACY_WORLD_MIN_Y,LEGACY_WORLD_HEIGHT,WORLD_DEPTH_MULTIPLIER,
   DEPTH_SECTION_HEIGHT,LOWEST_SECTION,MAX_ACTIVE_SECTIONS,
-  sectionForY,sectionBounds,sectionWindow,sectionChunkRadius,verticalEditSections,depthMeshKey
+  sectionForY,sectionBounds,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey
 } from '../src/depth.mjs';
 
 test('tenfold depth keeps exact original Y coordinates intact',()=>{
@@ -42,8 +42,10 @@ test('vertical sections partition the full range without gaps or double cells',(
 test('GPU section selection is bounded and original surface window preserved',()=>{
   assert.deepEqual(sectionWindow(10),[0]);
   assert.deepEqual(sectionWindow(3),[0]);
-  assert.deepEqual(sectionWindow(2),[0,-1],'show deep rock when a player excavates below surface feet');
-  assert.deepEqual(sectionWindow(-1),[0,-1]);
+  assert.deepEqual(sectionWindow(2),[0],'legacy caves without a floor breach remain 25 chunks');
+  assert.deepEqual(sectionWindow(2,true),[0,-1],'preload first deep section near player excavation');
+  assert.deepEqual(sectionWindow(-1),[0],'legacy authored caves preserve original streaming');
+  assert.deepEqual(sectionWindow(-1,true),[0,-1]);
   assert.deepEqual(sectionWindow(-6),[-1,0,-2]);
   assert.deepEqual(sectionWindow(-210),[LOWEST_SECTION,LOWEST_SECTION+1]);
   for(let y=WORLD_MIN_Y;y<=WORLD_MAX_Y;y++)
@@ -161,7 +163,7 @@ test('deep streaming reads never instantiate a surface district or landmark',()=
 
 test('GPU streaming near the legacy floor cannot grow to 43 chunk buffers',()=>{
   // Legacy surface 5x5 + first underground 3x3 => 34 total near a shaft.
-  const surface=sectionWindow(2);
+  const surface=sectionWindow(2,true);
   assert.deepEqual(surface,[0,-1]);
   assert.deepEqual(surface.map(s=>sectionChunkRadius(s,surface[0])),[2,1]);
   assert.equal(surface.reduce((n,s)=>{
@@ -185,4 +187,26 @@ test('GPU streaming near the legacy floor cannot grow to 43 chunk buffers',()=>{
   },0),25);
   assert.throws(()=>sectionChunkRadius(1,0));
   assert.throws(()=>sectionChunkRadius(0,-999));
+});
+
+test('unmodified natural cave must remain 25 chunks; only an actual shaft opens deep streaming',()=>{
+  const w=new VoxelWorld(179);
+  // All original cave floors are at or above -3 and never implicitly open
+  // the -3-to--4 boundary. No new graphics should load just because y<3.
+  assert.equal(surfaceOpeningNearby(w,.5,.5),false);
+  assert.deepEqual(sectionWindow(-1,surfaceOpeningNearby(w,.5,.5)),[0]);
+  assert.equal(w.set(2,-3,1,BLOCK.AIR),true);
+  assert.equal(surfaceOpeningNearby(w,.5,.5),true);
+  assert.deepEqual(sectionWindow(-1,surfaceOpeningNearby(w,.5,.5)),[0,-1]);
+  assert.equal(surfaceOpeningNearby(w,-12,-12),false);
+  assert.equal(surfaceOpeningNearby(w,5.5,.5),false);
+  const restored=VoxelWorld.restore(w.save());
+  assert.equal(surfaceOpeningNearby(restored,.5,.5),true,
+    'deep preload should survive schema-one reload of a mined surface shaft');
+  assert.equal(w.set(2,-3,1,BLOCK.STONE),true);
+  assert.equal(surfaceOpeningNearby(w,.5,.5),false,
+    'restoring solid seeded floor removes GPU preload');
+  assert.deepEqual(sectionWindow(1),[0]);
+  assert.throws(()=>sectionWindow(0,'true'));
+  assert.throws(()=>surfaceOpeningNearby(w,0,0,3));
 });
