@@ -4,14 +4,10 @@ import {storybookGroveVertices} from './grove.mjs';
 import {woodlandCanopyVertices} from './canopy.mjs';
 import {grottoAccentVertices} from './grotto.mjs';
 import {caveRuneVertices} from './cave-runes.mjs';
-import {waystoneVertices} from './waystones.mjs';
 import {caveThresholdVertices} from './cave-thresholds.mjs';
+import {voxelLandmarksForChunk,VOXEL_LANDMARK_CACHE_LIMIT} from './voxel-landmarks.mjs';
 import {moonbellVertices} from './moonbells.mjs';
 import {ridgeStrataVertices} from './ridge-strata.mjs';
-import {ruinWatchtowerVertices} from './ruin-watchtower.mjs';
-import {roadsideShrineVertices} from './roadside-shrine.mjs';
-import {pilgrimArchVertices} from './pilgrim-arch.mjs';
-import {ruinedCausewayVertices} from './ruined-causeway.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
 export const WORLD_MIN_Y = -3;
@@ -78,15 +74,36 @@ export class VoxelWorld{
   constructor(seed=179){
     this.seed=seed|0;
     this.edits=new Map();
+    // Limited per-world cache: streaming an endless world cannot retain every
+    // visited district forever. Geometry is recreated from the original seed.
+    this.landmarkCache=new Map();
+  }
+  naturalAndLandmarkBlock(x,y,z){
+    const natural=baseBlock(x,y,z,this.seed);
+    if(natural!==BLOCK.AIR||y<=0||y>WORLD_MAX_Y||
+       ![x,y,z].every(Number.isInteger))return natural;
+    const cx=chunkCoord(x),cz=chunkCoord(z),chunk= cx+','+cz;
+    let blocks=this.landmarkCache.get(chunk);
+    if(!blocks){
+      blocks=voxelLandmarksForChunk(cx,cz,this.seed,{
+        heightAt:terrainHeight,baseAt:baseBlock,maxY:WORLD_MAX_Y,
+        grass:BLOCK.GRASS,air:BLOCK.AIR,stone:BLOCK.STONE,
+        wood:BLOCK.WOOD,crystal:BLOCK.CRYSTAL,ore:BLOCK.ORE
+      }).blocks;
+      this.landmarkCache.set(chunk,blocks);
+      if(this.landmarkCache.size>VOXEL_LANDMARK_CACHE_LIMIT)
+        this.landmarkCache.delete(this.landmarkCache.keys().next().value);
+    }
+    return blocks.get(worldKey(x,y,z))??natural;
   }
   get(x,y,z){
     const key=worldKey(x,y,z);
-    return this.edits.has(key)?this.edits.get(key):baseBlock(x,y,z,this.seed);
+    return this.edits.has(key)?this.edits.get(key):this.naturalAndLandmarkBlock(x,y,z);
   }
   set(x,y,z,id){
     if(![x,y,z,id].every(Number.isInteger)||y<WORLD_MIN_Y||y>WORLD_MAX_Y||id<0||id>6)return false;
     const key=worldKey(x,y,z);
-    if(baseBlock(x,y,z,this.seed)===id)this.edits.delete(key);
+    if(this.naturalAndLandmarkBlock(x,y,z)===id)this.edits.delete(key);
     else this.edits.set(key,id);
     return true;
   }
@@ -192,19 +209,15 @@ export function meshChunk(world,cx,cz){
     heightAt:terrainHeight,baseAt:baseBlock,
     air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
-  const waystones=waystoneVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const caveThresholds=caveThresholdVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,air:BLOCK.AIR,stoneId:BLOCK.STONE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y});
-  // All new world scenery remains render-only in the original chunk buffer.
+  // Waystones, towers, shrines, arches and causeways are now real voxels from
+  // VoxelWorld.get(). Do NOT append the old non-collidable meshes as duplicates.
   const moonbells=moonbellVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const ridgeStrata=ridgeStrataVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,stone:BLOCK.STONE,air:BLOCK.AIR});
-  const watchtowers=ruinWatchtowerVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
-  const shrines=roadsideShrineVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
-  const arches=pilgrimArchVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
-  const causeways=ruinedCausewayVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   // Ruined bridge prototype remains staged but disabled: terrain must first
   // establish a REAL natural crossing; never paint an invented river.
   const solid=solidBuffer.slice(0,solidLength);
-  const ornaments=[canopy,grove,meadow,runes,grotto,moonbells,ridgeStrata,watchtowers,shrines,arches,causeways,waystones,caveThresholds];
+  const ornaments=[canopy,grove,meadow,runes,grotto,moonbells,ridgeStrata,caveThresholds];
   let total=solid.length;
   for(const part of ornaments)total+=part.length;
   if(total===solid.length)return solid;
