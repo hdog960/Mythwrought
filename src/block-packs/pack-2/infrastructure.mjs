@@ -17,7 +17,7 @@ export const PACK_2_INFRASTRUCTURE=freeze([
   freeze({id:74,roster:44,key:'coping-stone-protective-parapet',family:'stone-parapet',
     name:'Limestone parapet with broad coping',
     profile:'thick full stone protective ledge under overhanging moulded cap',
-    rotations:4,variants:freeze(['solid','drain-slot']),
+    rotations:2,variants:freeze(['solid','drain-slot']),
     palette:freeze({stone:freeze([.58,.62,.61]),shadow:freeze([.33,.39,.41]),
       cap:freeze([.75,.74,.68]),carving:freeze([.46,.51,.53]),
       grain:freeze([.40,.45,.46])}),
