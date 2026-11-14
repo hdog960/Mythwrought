@@ -42,3 +42,14 @@
 - Reproducible: `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/gallery-webgl-browser.py <output-dir>`.
 - **Not a source-served test**: local HTTP navigation is blocked by administrator; exact Pack 5 JS modules are concatenated for an offline about:blank genuine WebGL2 run. **Not iPhone hardware** or production renderer/game acceptance.
 - M1 final acceptance still OPEN for actual source-served browser module loading, creator visual review and future central registry/shape/save integration. M2 NOT STARTED; 3 CANDIDATE, 15 NOT STARTED, 0 INTEGRATED. PR remains draft and unmerged.
+
+## Follow-on technical QA and conditional Milestone 2 candidate work — November 14, 2026
+
+- Newest main `ac263720b60641c65b02330348dd76d0ef9cb75e` / checkpoint **008**. Checkpoint 008 includes **automation-only live visibility** and explicitly excludes all manual Pack 5 assets and independent building roadmaps.
+- M1 isolated technical gates rerun: original **44/44 native Node PASS**, **6/6 authentic Chromium WebGL2 screenshot views PASS**, plus native ES module parsing/execution via offline `data:` imports. Localhost HTTP-served page still blocked; creator artwork and production integration acceptance still OPEN.
+- Creator conditional authorization permitted **M2 isolated source-only candidates**. Four authored physical families 82–85 (eight geometric variants), see `residential-furnishings.mjs`, `M2_ACCEPTANCE.md`, and `residential-gallery.html`.
+- Fixed genuine test-only multi-cell bed support defect (foot cell must have solid floor backing) and visually weak bookshelf/cabinet reverse/side silhouettes (physically modeled joinery).
+- **66/66 native Node tests PASS** across 4 dedicated Pack 5 suites (44 M0/M1 + 22 M2); all source/test blobs compared to GitHub. `node --test tests/block-packs/pack-5/*.test.mjs`.
+- **12/12 authentic Chromium WebGL2 PNGs** inspected across M1 (6 assets) and M2 (8 assets), 3 landscape sizes × 2 rotations each; native ES module source-runner `tests/block-packs/pack-5/esm-webgl-browser.py m1|m2 <output-dir>`. Unique panel GPU pixel hashes and nonblank coverage pass. NOT production renderer, localhost-served page or physical iPhone test.
+- Manifest now: **7 CANDIDATE / 11 NOT STARTED / 0 INTEGRATED**; persistent numeric IDs **none**. All 16+ changes remain exclusive to Pack 5 files in draft PR #119.
+- M2 next: creator artwork review and more geometry/support/mobile-budget QA; M3 Shop & Workshop candidates 86–90 **NOT STARTED**. Do not merge, deploy, update shared modules, or unlock v0.11.
