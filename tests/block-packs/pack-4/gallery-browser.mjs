@@ -17,7 +17,8 @@ const allowed=new Set([
  '/src/block-packs/pack-4/windows.mjs',
  '/src/block-packs/pack-4/lighting.mjs',
  '/src/block-packs/pack-4/furnishings.mjs',
- '/src/block-packs/pack-4/hearth-civic.mjs'
+ '/src/block-packs/pack-4/hearth-civic.mjs',
+ '/src/block-packs/pack-4/preview-utils.mjs'
 ]);
 const mime={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8'};
 const server=createServer(async (req,res)=>{
@@ -51,9 +52,40 @@ try{
      report.allIds.join(',')!==Array.from({length:23},(_,i)=>159+i).join(','))
     throw Error('Pack4 WebGL2 source rendering failed: '+JSON.stringify(report));
   if(errors.length)throw Error('Pack4 browser page errors: '+errors.join(' | '));
+  // Read authentic rendered canvas pixels, not arbitrary DOM/text uniqueness.
+  const fingerprints=await page.locator('#gallery canvas').evaluateAll(canvases=>
+    canvases.map(canvas=>{
+      const bytes=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+      let hash=2166136261,changed=0;
+      for(let i=0;i<bytes.length;i+=4){
+        hash=Math.imul(hash ^ bytes[i],16777619)>>>0;
+        hash=Math.imul(hash ^ bytes[i+1],16777619)>>>0;
+        hash=Math.imul(hash ^ bytes[i+2],16777619)>>>0;
+        if(bytes[i]!==0||bytes[i+1]!==0||bytes[i+2]!==0)changed++;
+      }
+      return {hash,changed};
+    })
+  );
+  if(fingerprints.length!==23||new Set(fingerprints.map(x=>x.hash)).size!==23||
+     fingerprints.some(x=>x.changed<1000))
+    throw Error('Blank/duplicate rendered asset candidate image detected: '+
+      JSON.stringify(fingerprints));
   const selector=page.locator('select').last();
+  const lastBefore=fingerprints.at(-1).hash;
   await selector.selectOption('3');
   await page.waitForTimeout(80);
+  const rotatedHash=await page.locator('#gallery canvas').last().evaluate(canvas=>{
+    const data=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+    let h=2166136261;
+    for(let i=0;i<data.length;i+=4){
+      h=Math.imul(h^data[i],16777619)>>>0;
+      h=Math.imul(h^data[i+1],16777619)>>>0;
+      h=Math.imul(h^data[i+2],16777619)>>>0;
+    }
+    return h;
+  });
+  if(rotatedHash===lastBefore)
+    throw Error('Rotating asymmetric fountain candidate produced unchanged pixels');
   const allCanvases=await page.locator('#gallery canvas').count();
   if(allCanvases!==23)throw Error('Expected 23 reviewable candidate cards');
   const warning=await page.locator('.warning').innerText();
