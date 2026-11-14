@@ -36,7 +36,7 @@ export function pack4ShapeHandoff(id,rotation=0,purpose='collision'){
 export function pack4SidecarHandoff(cell,id,rotation=0){
   validateIdRotation(id,rotation);
   if(!Array.isArray(cell)||cell.length!==3||
-     !cell.every(n=>Number.isSafeInteger(n)&&Math.abs(n)<=65536))
+     !cell.every(Number.isSafeInteger))
     throw new TypeError('Invalid Pack 4 candidate cell for sidecar');
   return Object.freeze({
     cell:Object.freeze([...cell]),blockId:id,turns:rotation
