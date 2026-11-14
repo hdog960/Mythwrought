@@ -69,3 +69,15 @@ test('crafted timber has deterministic planed relief and sparse carved ornaments
   assert.equal(RULES.extraTextures,0);
   assert.equal(RULES.saveSchemaChanged,false);
 });
+
+test('crafted structural braces and mortises remain opaque face-local art',()=>{
+  assert.equal(RULES.sparseDiagonalJoinery,true);
+  assert.equal(RULES.pairedMortises,true);
+  for(const token of ['braceCell=step(.90','braceSlope=','braceBand=','braceHighlight=','mortiseX=','mortiseY=','mortise='])
+    assert.ok(TIMBER.includes(token),token);
+  assert.match(TIMBER,/braceBand=.*bevel\*braceCell/);
+  assert.match(TIMBER,/mortiseX\*mortiseY\*\(1\.0-seam\)/);
+  assert.doesNotMatch(TIMBER,/texture\(|sampler2D|discard;|gl_FragDepth/);
+  assert.equal(RULES.extraDrawCalls,0);
+  assert.equal(RULES.saveSchemaChanged,false);
+});
