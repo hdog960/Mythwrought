@@ -112,6 +112,15 @@
 - [ ] Exact-head GitHub standard Node/Chromium must be verified for the current PR commit. This root workflow does not include nested Pack 2 suites.
 - [ ] Central engine registry, shape collision, water alpha/flow/neighbor updates, per-cell schema-1 sidecar, offline iPhone control/art approval remain blocked. No merge/deploy/world placement.
 
+## Session 8 — Milestone 6 technical acceptance follow-up — 2026-11-14
+
+- **Verified exact prior PR HEAD** `8da5931d5e82b0fbcb2f557d897382846aa3a969`: standard GitHub Actions [#43639594993](https://github.com/hdog960/Mythwrought/actions/runs/43639594993) **SUCCESS** (root Node tests and real Chromium landscape WebGL2 baseline). This workflow's `npm test` glob `tests/*.test.mjs` excludes every nested Pack 2 test file, and its browser smoke does not visit Pack 2 preview. Do **not** infer candidate acceptance.
+- Reconfirmed main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, incorporation checkpoint 006, Issues #109 and #117, competing manual pack ownership, and draft PR #114. No ID range overlaps; source files owned solely by Pack 2.
+- Local exact-checkout attempt remains **BLOCKED**: Node 22.16.0, Chromium 144 and the Python Playwright package are present, but GitHub DNS/network access prevents obtaining the full exact PR files; no complete checkout was available. Node Playwright is not installed locally. Accordingly, neither `node --test tests/block-packs/pack-2/*.test.mjs` nor the dedicated browser inspector was executed.
+- **Expanded the committed optional Chromium test**: all 18 candidate meshes must render with **distinct geometry-only pixel hashes** and nonempty painted regions at 667×375, 844×390 and 932×430. When screenshots are enabled, it now writes **54 individual asset gallery canvases** (18 × 3) plus original water, open-gate, drain-slot and full-page views. The script's JavaScript syntax was checked; **no actual screenshots were captured**.
+- The last isolated, source-level results remain **88/88 checked-in test bodies passed under V8**, including 121 full-state mesh/normal configurations (25,742 triangles, zero inverted or degenerate after Pack 2-only winding fix) and 900 water surface-ray comparison samples. Those checks are **not native Node or browser evidence**.
+- Exact new commit root CI must be checked independently once reported; source candidate review is complete, but full native/visual/production acceptance and creator Gate A approval remain **OPEN**.
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
@@ -122,6 +131,6 @@
 6. Water ID 76 has exact fluid-volume selection but deliberately non-solid collision. Its transparent renderer and source/level updates are engine responsibilities, not validated by fixture screenshots.
 7. No world generation placement, roads, bridges, houses, settlements, inventories, mobs, harvesting, crafting or paid services.
 
-## Session 3 / next incomplete milestone
+## Next acceptance requirements
 
 **Milestone 6 — source review complete, acceptance gates remain open.** All 18 physical candidate families have authoring/geometry/fixtures, and the cross-state triangle winding defect is repaired and regression-tested. The native Node nested suites, authentic local Chromium candidate screenshots, production integration save/renderer/interaction and physical iPhone Gate A approval are **still unverified**. See `M6_ACCEPTANCE.md`. The next authorized session should run the exact-head real native tests from a valid checkout if available and fix any Pack 2-only acceptance defects. Do not merge/deploy/modify main without the separate creator incorporation and Gate A decision.
