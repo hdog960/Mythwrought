@@ -103,6 +103,25 @@ try{
       'pack4-UNMERGED-'+width+'x'+height+'-r'+rotation+'.png'),
       fullPage:true});
   }
+  // Replay the zero-degree view after 69 later draws (23 models × 3 rotations).
+  // Catches GPU-state leaks, stale WebGL buffers and non-deterministic snapshots
+  // that a single initial screenshot would miss.
+  await page.locator('#gallery select').evaluateAll(selectors=>{
+    for(const selector of selectors){
+      selector.value='0';
+      selector.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  });
+  const replayFingerprints=await scan();
+  const baseline=rotationHashes[0];
+  if(replayFingerprints.length!==23||
+     replayFingerprints.some((x,i)=>x.hash!==baseline[i]||x.foreground<700))
+    throw Error('Pack4 WebGL2 orientation-reset replay differs from original '+
+      width+'x'+height+' zero-degree render: '+JSON.stringify(replayFingerprints));
+  const replayErrors=await page.locator('#gallery article p').allTextContents();
+  if(replayErrors.some(x=>/^\\s*(Error|TypeError|RangeError):/.test(x)))
+    throw Error('Pack4 reset render failed: '+replayErrors.filter(x=>
+      /^\\s*(Error|TypeError|RangeError):/.test(x)).join(' | '));
   for(const id of [177,181]){
     if(new Set(rotationHashes.map(row=>row[id-159])).size<2)
       throw Error('Asymmetric candidate '+id+' has no visible rotation');
