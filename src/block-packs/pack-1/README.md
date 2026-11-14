@@ -224,3 +224,10 @@ Two NEW pack-owned opt-in acceptance tools:
 The exact previous-head default GitHub Actions run **43635324085** succeeded (genuine baseline Node/browser, not nested candidate tests). Using the exact unmerged :00 validator and :12 prototype mesher, all **120/120** Pack 1 ID×rotation source cases passed a V8 audit with 12–532 prototype triangles. These checks do not certify real-world physics, WebGL GPU performance, browser screenshots or iPhone visual/control approval.
 
 Neither local network-restricted Node/Chromium nor the standard GitHub workflow could run the **exact nested Pack 1 test suite** against the repository branch during this session. Do not upgrade candidate status, merge, deploy, edit production ID/geometry/save logic or start v0.11. A future explicitly requested continuation should finish these missing real tests, genuine screenshot review and creator-directed central integration checks before claiming Milestone 6 acceptance.
+
+
+## Milestone 6 continuation — independent ray regression
+
+Added `tests/block-packs/pack-1/raycast-regression.test.mjs` as the **seventh** optional Pack 1-only Node test module. It runs independent analytic AABB ray references against 22,932 candidate fixture rays plus 8,232 shaped-stone occupancy points and empty-fixture rejection. Six added test bodies pass the exact GitHub source under V8 compatibility shims; the current **81/81** authored body total remains **NOT a genuine Node execution**. A further 29,988 ray comparison against the unmerged :00 generic source found zero discrepancies in V8. See `M6_ACCEPTANCE.md` for exact reproducible commands and honest certification blockers.
+
+The prior GitHub head `aa639a1306abea596333c0921a024f6f3ea93d50` completed its configured baseline Node/Chromium Actions run [#43638833572](https://github.com/hdog960/Mythwrought/actions/runs/43638833572) successfully; those tests exclude Pack 1 nested suites. No real candidate gallery Chromium run, screenshot or physical iPhone test has been performed. This PR remains draft, unmerged and undeployed; no production engine or save files have been edited.
