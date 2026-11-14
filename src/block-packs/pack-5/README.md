@@ -76,3 +76,15 @@ The runner changes relative imports to absolute `data:` module URLs for offline 
 `shop-gallery.html` renders all 4 candidates as actual WebGL2 source meshes. Reproduce six browser views through `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/esm-webgl-browser.py m3 <output-directory>`. Native Node `node --test tests/block-packs/pack-5/*.test.mjs` currently **83/83 PASS**. All source/test blobs were compared with the exact remote draft PR version. See `M3_ACCEPTANCE.md`.
 
 **Status:** nine of eighteen physical families are authored **CANDIDATES**, nine remain **NOT STARTED**, zero are integrated. Families 88–90 still require source authoring. Milestones 1/2 creator artwork and production acceptance stay OPEN; preview screenshots are not deployed gameplay and no physical iPhone device was tested. Latest inspected main checkpoint **008**; v0.11 locked.
+
+## Milestone 3 workshop fixture source candidates (88–90)
+
+`workshop-fixtures.mjs` contains six further physically authored independent voxel shape variants: 88 Blackiron Horn / Moonsteel Stake anvils; 89 hollow Iron Tripod Cauldron / Alchemist's Spiral Stand; 90 Ashstone Bake Oven / Copper Range Top. They use exact box-union collisions, floor backing, real ray target/removal and isolated snapshot roundtrips, with **NO heat, liquid, potion, forging, cooking, storage or crafting logic**.
+
+Reproduce genuine native ES-module Chromium WebGL2 for the six new workshop variants at all three mobile landscape viewport sizes and both rotations:
+
+`LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/esm-webgl-browser.py m3b <output-dir>`
+
+Original M3 86–87 commercial fixtures remain in separate `m3` gallery mode. Native source-exact tests: `node --test tests/block-packs/pack-5/*.test.mjs` (**102/102 PASS**). Source mesher upper bound 276 unculled triangles for each new model, not real device GPU timing. Both local data-URL ES modules and actual WebGL2 rendering are verified, NOT HTTP-served app module loading or playable-world integration.
+
+**Candidate roster: 12 authored, 6 unstarted (M4/M5), 0 integrated.** All IDs are symbolic. M1, M2 and M3 creator visual, physical-iPhone and integration approvals are still separately OPEN. See `M3_ACCEPTANCE.md` for the actual source/test Git blob evidence and remaining art deficiencies.
