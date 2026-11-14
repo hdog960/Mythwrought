@@ -50,6 +50,7 @@ jobs:
           node tests/canopy-browser.mjs
           node tests/storybook-browser.mjs
           node tests/grotto-browser.mjs
+          node tests/voxel-landmarks-browser.mjs
           node tests/context-restore-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
