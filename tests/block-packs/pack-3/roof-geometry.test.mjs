@@ -104,7 +104,7 @@ test('orientation-preview sidecar round-trips deterministically; never masquerad
   assert.equal(f.place([10,2,1],115,1),true);
   assert.equal(f.place([4,1,-20],114,2),true);
   const before=f.snapshot();
-  assert.equal(before.schema,1);
+  assert.equal(Object.hasOwn(before,'schema'),false);
   assert.equal(before.format,'mythwrought-pack3-oriented-preview-v1');
   assert.equal(before.edits.length,3);
   assert.equal(before.orientations.length,3);
@@ -118,6 +118,7 @@ test('candidate restore rejects invalid IDs, orientation edits, duplicates and m
   const src=f.snapshot();
   const make=()=>JSON.parse(JSON.stringify(src));
   let invalid=make();invalid.format='schema-1-game';assert.throws(()=>restorePack3RoofGeometryFixture(invalid),TypeError);
+  invalid=make();invalid.schema=1;assert.throws(()=>restorePack3RoofGeometryFixture(invalid),TypeError);
   invalid=make();invalid.orientations[0][3]=4;assert.throws(()=>restorePack3RoofGeometryFixture(invalid),TypeError);
   invalid=make();invalid.orientations[0][0]=9;assert.throws(()=>restorePack3RoofGeometryFixture(invalid),TypeError);
   invalid=make();invalid.edits[0][3]=255;assert.throws(()=>restorePack3RoofGeometryFixture(invalid),TypeError);
