@@ -7,7 +7,7 @@ import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
 test('roofing is a reserved render-only tag, never a saved block',()=>{
   assert.equal(STORYBOOK_ROOF_RENDER_TAG,16);
   assert.equal(STORYBOOK_ROOF_RULES.placeableBlockId,null);
-  assert.deepEqual(STORYBOOK_ART_RULES.renderOnlyArchitecturalMaterials,[15,16]);
+  assert.deepEqual(STORYBOOK_ART_RULES.renderOnlyArchitecturalMaterials,[15,16,17]);
   assert.equal(STORYBOOK_ROOF_RULES.extraTextures,0);
   assert.equal(STORYBOOK_ROOF_RULES.extraDrawCalls,0);
   assert.equal(STORYBOOK_ROOF_RULES.saveSchemaChanged,false);
