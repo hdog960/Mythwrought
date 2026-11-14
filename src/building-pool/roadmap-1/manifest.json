@@ -2,10 +2,10 @@
   "schema": "mythwrought.building-pool.roadmap-1.manifest.v1",
   "title": "Homes & Regional Life",
   "gate": "v0.10 Gate A OPEN; v0.11 LOCKED",
-  "milestone": "M0",
-  "status": "SCHEMA_CANDIDATE_NOT_INTEGRATED",
+  "milestone": "M1 — representative homes/taverns/empty stables",
+  "status": "45_COORDINATE_AUTHORING_CANDIDATES_UNMERGED_UNDEPLOYED",
   "target": 885,
-  "authoredBlueprintCount": 0,
+  "authoredBlueprintCount": 45,
   "biomes": [
     "temperate",
     "desert",
@@ -31,8 +31,8 @@
     "lighthouse": 4
   },
   "sourceOfTruth": {
-    "main": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
-    "checkpoint": "006",
+    "main": "caf47776b723a36684edc1a72749e49268ccc688",
+    "checkpoint": "007",
     "issues": [
       109,
       117
@@ -44,7 +44,15 @@
       115,
       119
     ],
-    "automatedCatalogPR": 118
+    "automatedCatalogPR": 118,
+    "checkedManualCandidatePRs": {
+      "pack1": "113",
+      "pack2": "114",
+      "pack3": "112",
+      "pack4": "115",
+      "pack5": "119"
+    },
+    "auto130": "12 candidate families now in main as opt-in symbolic library, not runtime registered"
   },
   "assetRefPolicy": "live:name | pack1..5:three-digit-family-roster | biome130:three-digit-ordinal; never assign numeric persistent IDs",
   "outputPaths": [
@@ -56,5 +64,41 @@
   "worldPlacement": false,
   "certifiedNode": false,
   "certifiedChromium": false,
-  "certifiedPhysicalIPhone": false
+  "certifiedPhysicalIPhone": false,
+  "candidateBlueprintCount": 45,
+  "creatorAcceptedBlueprintCount": 0,
+  "authoredVoxelPlacements": 46299,
+  "remainingDesigns": 840,
+  "representativesByType": {
+    "house": 15,
+    "tavern": 15,
+    "stable": 15
+  },
+  "testEvidence": {
+    "nativeNode": {
+      "run": "local isolated source",
+      "cases": "28/28 passed",
+      "scope": "16 M0 + 12 M1",
+      "exactPRHead": "await rerun; committed files differ only by safe string style; final CI still pending"
+    },
+    "chromium": {
+      "renderer": "Canvas2D fallback (WebGL2 unavailable)",
+      "screenshots": 36,
+      "viewports": [
+        "667x375",
+        "844x390",
+        "932x430"
+      ],
+      "samples": "6 candidate IDs, exterior and cutaway",
+      "authentic": true
+    },
+    "physicalIPhone": false
+  },
+  "pending": [
+    "Exact PR-head nested Node test reproduction",
+    "WebGL2 candidate geometry/mounting acceptance",
+    "45 creator architectural distinction reviews",
+    "Actual Pack 1–5 replacement footprint/collision/orientation acceptance",
+    "Additional 840 distinct coordinates"
+  ]
 }
