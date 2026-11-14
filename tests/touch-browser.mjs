@@ -222,29 +222,19 @@ try{
   await page.waitForFunction(()=>!document.querySelector('#precision').classList.contains('held'),null,{timeout:2500});
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.precision==='false',null,{timeout:2500});
   assert.equal((await v()).precision,'false','Precision button stuck after release');
-  await page.evaluate(()=>{
-    window.__aimTrace=[];
-    for(const name of ['pointerdown','pointerup','pointercancel','lostpointercapture','touchstart','touchend','touchcancel']){
-      window.addEventListener(name,e=>{
-        window.__aimTrace.push({type:name,pid:e.pointerId,target:e.target?.id,
-          touches:e.touches?Array.from(e.touches,t=>t.identifier):null,
-          changed:e.changedTouches?Array.from(e.changedTouches,t=>t.identifier):null});
-      },true);
-    }
-  });
-  // Genuine two-finger touch on the same AIM button: the second finger
-  // must not take ownership or keep precision engaged after the first lifts.
+  // First touch owns AIM. Lifting a second, unrelated finger must NOT
+  // clear AIM; lifting the original owning finger must then clear it.
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[touch(41,precision.x,precision.y)]});
   await page.waitForFunction(()=>document.querySelector('#precision').classList.contains('held'));
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[
     touch(41,precision.x,precision.y),touch(42,precision.x+5,precision.y+5)
   ]});
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[touch(42,precision.x+5,precision.y+5)]});
-  console.log('AIM_TRACE',JSON.stringify(await page.evaluate(()=>window.__aimTrace)));
-
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[touch(41,precision.x,precision.y)]});
+  assert.equal(await page.locator('#precision').evaluate(e=>e.classList.contains('held')),true,
+    'Lifting unrelated second finger cleared owning AIM');
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   await page.waitForFunction(()=>!document.querySelector('#precision').classList.contains('held'),null,{timeout:2500});
   await page.waitForFunction(()=>document.querySelector('#scene').dataset.precision==='false',null,{timeout:2500});
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   // AIM must follow the owning finger even if Safari releases outside the
   // button after a second action finger interrupts pointer capture.
   const escapedAim=await page.evaluate(()=>{
