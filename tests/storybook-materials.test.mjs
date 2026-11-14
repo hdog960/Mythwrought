@@ -97,3 +97,25 @@ test('natural geology has four original bounded shader detail families without n
  assert.equal(RULES.newDrawCalls,0);
  assert.equal(RULES.newTextures,0);
 });
+
+test('natural surface accents use bounded opaque shader details and stable existing material IDs',()=>{
+ assert.deepEqual(RULES.secondaryNaturalAccents,[
+  'grass-moss-pollen','soil-clay-lenses','stone-quartz-seams','crystal-chevron-prisms','ore-branch-veins'
+ ]);
+ const cases=[[1,2,['moss','pollen']],[2,3,['clay']],[3,4,['quartz']],[5,6,['prism']],[6,7,['branch']]];
+ for(const [id,next,terms] of cases){
+  const start=FS.indexOf(id===1?'if(vMat==1)':'else if(vMat=='+id+')');
+  const end=FS.indexOf('else if(vMat=='+next+')',start);
+  assert.ok(start>=0&&end>start,'material face '+id);
+  const part=FS.slice(start,end);
+  for(const term of terms){
+   assert.match(part,new RegExp('float '+term+'='));
+   assert.match(part,/near/);
+  }
+  assert.doesNotMatch(part,/discard;|sampler2D|texture\(/);
+ }
+ assert.deepEqual(RULES.existingSolidMaterials,[1,2,3,4,5,6]);
+ assert.equal(RULES.newDrawCalls,0);
+ assert.equal(RULES.newTextures,0);
+ assert.ok(FS.indexOf('return;')<FS.indexOf('float moss='));
+});
