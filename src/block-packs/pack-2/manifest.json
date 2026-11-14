@@ -4,7 +4,7 @@
   "role": "CREATOR-LED MANUAL ASSET CANDIDATES",
   "status": "UNMERGED — NOT PLAYABLE",
   "auditBaseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
-  "integrationCheckpoint": "006",
+  "integrationCheckpoint": "007",
   "coordinationIssue": 109,
   "provisionalIdRange": [
     59,
@@ -359,11 +359,11 @@
       ]
     }
   ],
-  "currentMilestone": 5,
+  "currentMilestone": 6,
   "completedFamilies": 18,
   "unallocatedFamilies": 0,
-  "lastVerifiedMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
-  "progress": "Milestones 0–5 candidate source complete: 18 independently defined physical voxel families, including fluid volume ID 76; milestone 6 final acceptance still BLOCKED by native nested tests and central engine integration.",
+  "lastVerifiedMain": "caf47776b723a36684edc1a72749e49268ccc688",
+  "progress": "M0–M5: 18 physical source candidates authored; M6 source review and 85/85 checkpoint-007 opt-in shape compatibility checked in isolated V8. Native nested Node + authentic candidate Chromium screenshots and production Gate A integration remain OPEN. Candidate-only, no merge/deploy.",
   "pendingEngineAPIs": [
     "generic non-cube raycast/collision",
     "material registry expansion for candidate IDs 59–68",
@@ -373,6 +373,7 @@
     "shape-aware lower path tile support/mesh occlusion and collision integration",
     "bridge guard/parapet/boardwalk opt-in shape renderer, local collision and save metadata; no structures",
     "transparent render pass, fluid boundary culling, fluid source/level/flow updates, buoyancy/swimming, schema-1 fluid metadata",
-    "exact fluid triangle selection (not generic solid AABBs) and non-blocking liquid occupancy"
+    "exact fluid triangle selection (not generic solid AABBs) and non-blocking liquid occupancy",
+    "Checkpoint 007 opt-in shape APIs exist on main but are not wired into live VoxelWorld registry; water needs independent fluid-volume selection adapter"
   ]
 }
