@@ -57,3 +57,22 @@ test('edited natural corridor surface cannot masquerade as valid grass',()=>{
  assert.equal(placeVoxelPilgrimCourt(w,plan),false);
  assert.deepEqual(w.save(),before);
 });
+
+test('blocked outer entrance refuses the entire court without touching saved edits',()=>{
+ const found=find(179);assert.ok(found);
+ const {w,plan}=found;
+ const [x,h,z]=plan.origin;
+ assert.equal(w.set(x,h+2,z-11,BLOCK.WOOD),true);
+ const before=w.save();
+ assert.equal(planVoxelPilgrimCourt(w,x,z),null);
+ assert.equal(placeVoxelPilgrimCourt(w,plan),false);
+ assert.deepEqual(w.save(),before);
+});
+test('both approaches remain player-body clear after physical construction',()=>{
+ const found=find(179);assert.ok(found);
+ const {w,plan}=found;
+ assert.equal(placeVoxelPilgrimCourt(w,plan),true);
+ const [x,h,z]=plan.origin;
+ for(let dz=-11;dz<=11;dz++)
+   assert.equal(collides(w,x+.5,h+1,z+dz+.5),false,'walkable corridor z offset '+dz);
+});
