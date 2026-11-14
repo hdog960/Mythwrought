@@ -108,3 +108,9 @@ All under the isolated 64-box / 768-triangle / 1536-vertex preview contract. The
 
 - Six genuine native ES-module Chromium WebGL2 views of the unchanged M1 six variants passed again at all three required mobile landscape sizes with two rotations. The original M1 **44** Node acceptance cases remain a passing subset of the **83/83** current full Pack 5 native suite.
 - This does **NOT** change the M1 creator artwork, HTTP-served load, physical-iPhone or live integration gates. Its three physical families remain unmerged **CANDIDATE** assets.
+
+## Cross-pack milestone rerun when M3 five-family source roster completed
+
+- M1 six original architectural variant sources have not been modified in this workshop extension. The original 44 focused M0/M1 Node cases still PASS as a subset of the full **102/102** Pack 5 native run.
+- Six M1 native ES-module Chromium/WebGL2 screenshot records remain valid, while M3 now additionally owns six real workshop-asset views. All are offline source previews, **not HTTP-served gallery or production gameplay**.
+- M1 creator artwork sign-off and physical-iPhone approval remain OPEN; its three symbolic families are still CANDIDATE, never registered in main.
