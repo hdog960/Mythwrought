@@ -307,6 +307,6 @@
     109,
     117
   ],
-  "lastV8FocusedChecks": 100,
-  "currentAcceptanceStatus": "UNMERGED CANDIDATE — exact Pack 4 nested Node / genuine Chromium gallery acceptance not yet verified"
+  "lastV8FocusedChecks": 104,
+  "currentAcceptanceStatus": "UNMERGED CANDIDATE — 104/104 V8 harness assertions pass; native Node and successful Chromium gallery unverified"
 }
