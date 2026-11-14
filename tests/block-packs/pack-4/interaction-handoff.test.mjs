@@ -61,6 +61,17 @@ test('sidecar handoff matches shared staged {cell,blockId,turns} without modifyi
   {cell:[9,2,0],blockId:169,turns:2}]);
  assert.ok(Object.isFrozen(a));
 });
+test('distant safe-integer world cells survive Pack 4 orientation sidecar handoff',()=>{
+  const far=pack4SidecarHandoff([1000000,-1000000,65537],176,3);
+  assert.deepEqual(far,{cell:[1000000,-1000000,65537],blockId:176,turns:3});
+  const max=pack4SidecarHandoff([Number.MAX_SAFE_INTEGER,0,0],181,1);
+  assert.deepEqual(max.cell,[Number.MAX_SAFE_INTEGER,0,0]);
+  const replay=pack4ReviewSidecar([
+    {cell:[65537,0,0],id:169,rotation:2},
+    {cell:[-65538,1,0],id:170,rotation:1}
+  ]);
+  assert.deepEqual(replay.map(x=>x.cell),[[-65538,1,0],[65537,0,0]]);
+});
 test('invalid rotations, unassigned IDs, collision aliases and duplicate sidecars are rejected',()=>{
  for(const id of [0,5,158,182,208,255,-1])
   assert.throws(()=>pack4ShapeHandoff(id));
@@ -68,7 +79,7 @@ test('invalid rotations, unassigned IDs, collision aliases and duplicate sidecar
   assert.throws(()=>pack4ShapeHandoff(170,r));
  for(const purpose of ['visual','',null])
   assert.throws(()=>pack4ShapeHandoff(170,0,purpose));
- for(const cell of [[],[1,2],[1,2,3.2],[Infinity,0,0],[65537,0,0]])
+ for(const cell of [[],[1,2],[1,2,3.2],[Infinity,0,0],[Number.MAX_SAFE_INTEGER+1,0,0]])
   assert.throws(()=>pack4SidecarHandoff(cell,169,1));
  assert.throws(()=>pack4ReviewSidecar([
   {cell:[0,0,0],id:169,rotation:0},
