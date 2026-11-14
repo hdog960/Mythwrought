@@ -192,3 +192,22 @@ test('rolling one-step slopes gain broad deterministic contour ribbons without t
  assert.equal(ridgeStrataVertices(world,-1,0,{heightAt:()=>7}).length,0);
  assert.ok(a.length<16*16*4*30*27,'mobile geometry remains bounded');
 });
+
+
+test('highland shoulder fields are seed-stable, bounded and edit-aware',()=>{
+ const heights=(x,z)=>x<0?17:10,edits=new Map();
+ const world={seed:179,get(x,y,z){
+   const key=[x,y,z].join(',');if(edits.has(key))return edits.get(key);
+   const h=heights(x,z);return y>h?0:y===h?1:y>=h-3?2:3;
+ }};
+ const before=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(before.length>0,'highland shoulder must be visible');
+ assert.deepEqual(before,ridgeStrataVertices(world,-1,0,{heightAt:heights}));
+ assert.ok(before.length<16*16*4*40*27,'mobile vertex count bounded');
+ for(let x=-16;x<0;x++)for(let z=0;z<16;z++)edits.set([x,18,z].join(','),3);
+ const covered=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(covered.length<before.length,'player-built roof hides highland overlay');
+ assert.equal(edits.size,256,'saved edits remain unchanged');
+ const flat=ridgeStrataVertices(world,-1,0,{heightAt:()=>17});
+ assert.equal(flat.length,0,'no highland shoulder effect on flat plateau');
+});
