@@ -87,3 +87,25 @@ test('crest fractures appear only on tall exposed stone and respect exterior edi
  assert.deepEqual(ridgeStrataVertices(world,-1,0,{heightAt:tall}),after);
  assert.equal(edits.size,16,'saved world edits are never mutated');
 });
+
+test('valley contour seams follow real exposed dirt and disappear after edits',()=>{
+ const heights=(x,z)=>x<0?8:6;
+ const edits=new Map();
+ const world={seed:179,get(x,y,z){
+   const key=[x,y,z].join(',');
+   if(edits.has(key))return edits.get(key);
+   const h=heights(x,z);
+   return y>h?0:y===h?1:y>=h-3?2:3;
+ }};
+ const before=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.ok(before.length>0,'exposed valley-facing slope must have visible contours');
+ assert.equal(before.length%9,0);
+ assert.ok(before.length<=16*16*4*12*27,'bounded mobile geometry');
+ assert.deepEqual(before,ridgeStrataVertices(world,-1,0,{heightAt:heights}));
+ for(let z=0;z<16;z++)edits.set('0,7,'+z,3);
+ const blocked=ridgeStrataVertices(world,-1,0,{heightAt:heights});
+ assert.equal(blocked.length,0,'placed blocks cover contour seams');
+ assert.equal(edits.size,16,'rendering never rewrites edits');
+ const flat=ridgeStrataVertices(world,-1,0,{heightAt:()=>8});
+ assert.equal(flat.length,0,'flat ground has no valley contour');
+});
