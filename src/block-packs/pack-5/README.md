@@ -2,7 +2,7 @@
 
 **Draft-only isolated pack.** No production registration or world placement; no numeric ID assigned.
 The creator reserved 18 roster entries `pack5:079`–`pack5:096`. These are **symbolic**, not game block IDs.
-Latest checked main: `caf47776b723a36684edc1a72749e49268ccc688`, checkpoint 007 (branch historically based on checkpoint 006). Read Issues
+Latest checked main: `ac263720b60641c65b02330348dd76d0ef9cb75e`, checkpoint 008 (branch historically based on checkpoint 006). Read Issues
 #109 and #117 every session. Never touch the four other manual packs or biome130 catalog.
 
 ## Milestone 1 — physical architectural surfaces (CANDIDATE)
@@ -66,3 +66,5 @@ This Pack 5-only Python Playwright runner verifies six *genuine* WebGL2 draws at
 The runner changes relative imports to absolute `data:` module URLs for offline about:blank because the environment prevents localhost HTTP navigation; it **does not certify source-served module loading**, real iPhone GPU performance, live registry/collision/save state, or creator visual approval. Review `M2_ACCEPTANCE.md` and `M1_ACCEPTANCE.md`. Latest checked `main` is checkpoint **008**; Pack 5 is still unmerged/development-only.
 
 **Latest candidate-only QA:** 68/68 native Node cases pass (44 M0/M1 + 24 M2), including precise authored body-part collision unions for beds, seats and shelves. Eight M2 variants were rendered via genuine WebGL2 native ES-module data-URL loader at three iPhone landscape resolutions and both preview rotations. No persistent IDs, production saves, live placement or actual iPhone controls were tested.
+
+**Current isolated M2 refinement QA:** 69/69 native Node cases PASS, including a new assertion that both physical bookshelf variants show at least twelve modeled book/scroll spines past their wooden shelf lips. Genuine Chromium native ES-module WebGL2 review passed at all three mobile landscape sizes and both orientations. Browser-admin localhost HTTP navigation is STILL blocked; no source-served gallery, real mobile GPU or creator visual signoff. All 7 developed families stay symbolic CANDIDATES.
