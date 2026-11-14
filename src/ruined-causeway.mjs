@@ -50,6 +50,26 @@ export function ruinedCausewayVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt
  // Shattered roadside rails deliberately stop short of the open approaches.
  for(const [dx,dz,len] of [[-2.08,-.98,1.11],[1.72,-.76,.90],[-2.08,.65,.81],[1.72,.84,.67]])
   prism(o,x+dx,y+.25,z+dz,.38,.38,len,slate);
+ // A broken elevated waymarker, with an intentional wide gap between its
+ // surviving halves. Its irregular stepped crown reads at distance without
+ // blocking the road or requiring collision/terrain edits.
+ for(const [dx,dz,w,h,depth] of [
+  [-2.26,2.04,.54,.82,.66],[-2.12,2.04,.62,.44,.66],
+  [1.62,2.04,.57,.71,.66],[1.46,2.04,.66,.37,.66]
+ ]){
+  const ground=roadY(x+dx+.3,z+dz+.3);
+  prism(o,x+dx,ground+2.5,z+dz,w,h,depth,pale);
+ }
+ // Broken crest blocks point inward but leave the center sky visible.
+ prism(o,x-1.77,y+3.47,z+2.10,.64,.24,.49,slate);
+ prism(o,x+.95,y+3.36,z+2.10,.54,.21,.49,pale);
+ // Low weathered milestone pairs at the ends of the route. Each is
+ // individually grounded to avoid hovering on one-block grass terraces.
+ for(const [dx,dz,top] of [[-2.32,-3.48,.65],[1.88,-3.45,.83],[-2.35,3.36,.54],[1.90,3.34,.72]]){
+  const ground=roadY(x+dx+.18,z+dz+.2);
+  prism(o,x+dx,ground,z+dz,.38,top,.42,slate);
+  prism(o,x+dx-.055,ground+top,z+dz-.055,.49,.13,.53,pale);
+ }
  // Distinct gold and jade keystones: decorative existing material channels.
  tri(o,[x-.55,y+3.07,z+2.18],[x-.06,y+3.07,z+2.18],[x-.31,y+3.42,z+2.18],[.90,.71,.37],6);
  tri(o,[x+.62,y+3.06,z+2.175],[x+1.10,y+3.06,z+2.175],[x+.86,y+3.40,z+2.175],[.34,.79,.72],5);
