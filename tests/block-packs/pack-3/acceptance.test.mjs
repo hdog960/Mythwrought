@@ -241,7 +241,6 @@ test('direct asset providers reject coercible nonnumeric ID aliases', async()=>{
   }
 });
 
-
 // Paired clay hip and straight-slope cells must share the same structural
 // elevation at BOTH hip edges. Decorations may vary, but a mismatched load-
 // bearing roof course creates a visible, unjoinable slit or sudden ledge.
