@@ -2,6 +2,8 @@
 
 **UNMERGED CANDIDATE — NOT IN LIVE GAME.** v0.10 Gate A only. No map generation, structure assembly, central registry changes, shared engine edits, saves migration, crafting, NPCs, or deployment.
 
+**LATEST STATUS (Milestone 6):** [Read the dedicated 17-family candidate acceptance and integration handoff](./ACCEPTANCE.md). All 17 families are authored as candidates, and the six committed nested Pack 3 suites (53 original + 9 acceptance checks) passed **62/62 in genuine Node.js v22.16.0** against GitHub-blob-matched files. Chromium 144 isolated gallery: 17 cards, 13 functioning rotations at 667×375 / 844×390 / 932×430, zero JS exceptions. The prior Milestone 5 testing notes below are historical; its 14 committed Node tests have **now been executed directly**. Creator approval, live integration, actual WebGL2 and physical iPhone certification are STILL PENDING.
+
 ## Source-of-truth audit (2026-11-14)
 
 - GitHub main: `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84` (integration checkpoint **006**).
@@ -139,3 +141,14 @@ The statue's initial 17-sub-box art produced 5,140 triangles in the opt-in :12 s
 **Genuine Chromium gallery:** Local headless Chromium via Playwright rendered 17 total candidate cards with **13 working rotation controls** at **667×375**, **844×390**, and **932×430** CSS px, with **zero JS page errors**. Genuine full-page PNGs captured and visually inspected. The browser used source-derived candidate physical box/palette data and inlined earlier exact source modules because network/localhost navigation is blocked; it does **not** test HTTP module loading, production WebGL2 frame times, PWA, or physical iPhone Safari.
 
 **Acceptance boundary:** Full Milestone 6 acceptance is **not** approved or complete merely because 17/17 candidates have been authored. Their IDs must not enter actual saves before centrally approved integration, and actual player interaction/rendering/rotation/collision, save regressions and hardware controls require separate checks. The user retains manual integration approval.
+
+
+## Milestone 6 acceptance — reviewable draft PR handoff
+
+- **Candidate tech QA:** 17/17 distinct authored shapes and dedicated regression tests pass, but creator approval and all production integration gates remain OPEN; see [ACCEPTANCE.md](./ACCEPTANCE.md).
+- **New exclusive files:** `catalog.mjs` (readonly, opt-in unified candidate resolver), `tests/block-packs/pack-3/acceptance.test.mjs` (9 all-family regression tests), and this `ACCEPTANCE.md`. No shared paths changed.
+- **Real Node v22.16.0:** exact-source committed suite `node --test tests/block-packs/pack-3/{roofing,roof-geometry,fortified-pieces,ornamental-pieces,monumental-pieces,acceptance}.test.mjs`: **62 PASS / 0 FAIL**. All 17 families 109–125 enumerated, all candidate IDs guarded, all 56 supported orientation descriptors have identical collision/selection/mesh boxes, no accidental full-cube replacement, and candidate preview formats separated from production saves.
+- **Unmerged :00/:12 source contract:** 68 rotation shapes checked, no mesher bounds or Uint16 overflow; max 2,464 prototype triangles for the standalone stone guardian. **Actual mobile GPU/FPS not certified.**
+- **Chromium:** genuine browser gallery inlined from Git-blob-matched exact source because sandbox blocks HTTP and file URLs. Three landscape sizes, 17 canvases with painted unique pixels, 13 rotation buttons exercised twice each, zero page exceptions. It cannot certify deployed WebGL, Safari or offline.
+- **Production:** current main `VoxelWorld.set/restore` still only handles IDs 0–8, with sentinel 255 and schema-1 saves preserved. No live registry, placement, render, upgrade, water flow, light source or NPC features were enabled.
+- **No merge, deploy or default-world placement** in this candidate review. The next step, only after explicit creator direction, is separate authorized integration planning against all four manual packs, :00 shape/save and :12 rendering dependencies; v0.11 stays LOCKED.
