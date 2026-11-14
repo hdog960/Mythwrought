@@ -1,5 +1,5 @@
 # MYTHWROUGHT — Pack 3 Milestone 6 independent acceptance handoff
-**2026-11-14 · CANDIDATE ACCEPTED FOR CREATOR REVIEW ONLY. NEVER MERGED/DEPLOYED.**
+**2026-11-14 · FINAL CANDIDATE ACCEPTANCE REFINEMENT: READY FOR CREATOR REVIEW ONLY. NEVER MERGED/DEPLOYED.**
 
 This document is a review checklist and integration request, not live player-game certification or creator Gate A approval.
 
@@ -20,18 +20,20 @@ This document is a review checklist and integration request, not live player-gam
 | Item | Result | What it DOES NOT certify |
 |---|---|---|
 | All 5 original Pack 3 nested Node suites (7 + 9 + 11 + 12 + 14) | **53 PASS, 0 FAIL** in real Node.js v22.16.0, with exact GitHub blob source/test files | No live gameplay or schema migration |
-| New direct Pack 3 `acceptance.test.mjs` (9 cases) | **9 PASS**, so **62/62 total** with `node --test tests/block-packs/pack-3/{roofing,roof-geometry,fortified-pieces,ornamental-pieces,monumental-pieces,acceptance}.test.mjs` | Root `npm test` does NOT auto-include the nested path |
+| Direct Pack 3 `acceptance.test.mjs` (11 cases) | **11 PASS**, so **64/64 total** with `node --test tests/block-packs/pack-3/{roofing,roof-geometry,fortified-pieces,ornamental-pieces,monumental-pieces,acceptance}.test.mjs` | Root `npm test` does NOT auto-include the nested path |
 | Latest unmerged :00 `validateShape/rotateShape/canPlaceShape` and :12 `prototypeSurfaceMesh` source contracts | **68/68 asset × four-turn descriptors** valid/bounded, no Uint16 overflow. Only 56 ID/turn combinations are offered by the adapter: 4 roofs locked at 0 + 13 shaped families ×4 | These are *pending engine APIs*, not a proven production integration |
 | Original isolated target/collision regression fixtures | Tested sparse occupancy (arrow slit, crenel, arch, aqueduct, statue legs), positive/negative hit rays, candidate place/remove/rotate/restore, unsupported IDs and duplicate edits | Does not exercise actual player body collision or production selection |
 | Genuine Chromium 144 (Playwright) opt-in gallery | 667×375, 844×390 and 932×430 CSS px; **17 actual model cards, 13 functioning rotation buttons**, zero JS page exceptions; screenshots visually inspected | Environment blocks direct file/HTTP navigation. Original module source and gallery script were inlined. NOT production WebGL2, FPS, Safari, offline or hardware iPhone |
 
 Actual source/test files were reconstructed in the independent test container and compared by `git hash-object` against the corresponding PR branch file blobs before the Node run. The latest acceptance suite's own module/test files are likewise source-identical.
 
+**Additional technical acceptance hardening:** checked all five independent candidate fixture formats are mutually distinct, each contains no production `schema:1` field, malformed production-stamped candidate snapshots are rejected, and 90° rotation preserves actual physical occupancy across eight interior samples per axis for 13 orientation-aware families. Two existing preview-only fixture implementations and three owned regression files were corrected; no shared save codec or registry was changed. **Genuine local Node tests: 64 PASS / 0 FAIL**. The original 62-case suite passed before this refinement.
+
 **Prototype triangle budget (one piece each, surface-only mesh):** 17,140 triangles total across the 17 archetypes; maximum **2,464 triangles / 4,928 vertices** on the guardian statue at any of its four rotations. No out-of-cell vertices, 32-box-limit violations, or unsigned 16-bit index overflow seen. These are synthetic prototype counts, **not measured production mobile GPU utilization**. Do not mass-place pieces without benchmark and performance acceptance.
 
 ## Production engine boundaries; NOT authorized changes
 - Current `src/voxel.mjs` on main defines **BLOCK IDs 0–8 only**. `VoxelWorld.set` and `VoxelWorld.restore` reject candidate IDs 109–125. Current chunk cache uses 255 as the unvisited sentinel. Nothing in this PR changes it.
-- The live `schema:1` save record only persists `[x,y,z,id]`; it has no per-cell yaw or candidate wider-ID registry. New candidate fixtures save to explicitly separate preview-only formats. **Exception:** the initial roof-material fixture intentionally mimics a schema-1-shaped record containing IDs 109–112 for test purposes; production restore rejects these IDs. NEVER pass a candidate fixture snapshot into player saves.
+- The live `schema:1` save record only persists `[x,y,z,id]`; it has no per-cell yaw or candidate wider-ID registry. **Milestone 6 correction:** the two legacy Pack 3 roof-material/roof-geometry fixtures **no longer emit `schema:1`**; all five Pack 3 preview fixture formats now have distinct marker strings and **no `schema` field at all**. Both repaired decoders reject any payload with a `schema` field. Candidate IDs 109–125 and their preview snapshots must NEVER be written to production player saves.
 - Integration will require centrally approved safe ID mapping, compatible rendering/mesh generation, shape-aware raycast and collision, body/placement checks, backward-safe orientation save codec, old save-reload regressions, offline PWA verification, and actual physical iPhone two-thumb/visual/performance approval.
 - Aqueduct **has no water** (flow/levels unsupported), spire **emits no game light**, statue **is not an NPC**; no generated villages/towns/cities/monuments are present. Static shape data must never be marketed as these gameplay systems.
 
