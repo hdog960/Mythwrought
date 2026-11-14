@@ -158,6 +158,28 @@ test('the water narrow phase selects a real shallow plane, not its broad-phase p
   assert.equal(waterRaycast(state,[.85,.9,-1],[0,0,1]),null);
   assert.equal(waterShape(state).solidCollision,false);
 });
+test('all 36 water states match analytic top-height ray intersection on a 25-point sample grid',()=>{
+  const samples=[.05,.25,.5,.75,.95];
+  let rays=0;
+  for(let level=0;level<8;level++){
+    const flows=level===0?['still']:WATER_FLOW_DIRECTIONS;
+    for(const flow of flows){
+      const state=waterCell({level,flow});
+      for(const x of samples)for(const z of samples){
+        const y=waterSurfaceHeight(state,x,z);
+        const hit=waterRaycast(state,[x,2,z],[0,-1,0],[0,0,0],6);
+        assert.ok(hit,'missing top hit '+level+'/'+flow+' '+x+','+z);
+        assert.equal(hit.face,'surface');
+        assert.ok(Math.abs(hit.distance-(2-y))<1e-6,
+          'water triangle/analytic level mismatch '+level+'/'+flow);
+        const volume=waterShape(state);
+        assert.equal(volume.solidCollision,false);
+        rays++;
+      }
+    }
+  }
+  assert.equal(rays,900);
+});
 test('no animation, fluid propagation, world generation or production save integration can be implied',()=>{
   assert.equal(WATER_ASSET.fluidSimulationImplemented,false);
   assert.equal(WATER_ASSET.worldGenerationEnabled,false);
