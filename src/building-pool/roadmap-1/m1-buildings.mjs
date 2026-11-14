@@ -68,9 +68,13 @@ function compile(category,biome,size,index,row){
     // Four real empty stall bays: fence/partition rails along both aisle edges;
     // each bay keeps its own one-cell-wide open entrance, not a virtual room label.
     // Use physical Pack 5 stall partitions as unresolved occupancy candidates.
+    // Pack5:096 is not yet physically authored (latest independent Pack5 manifest).
+    // Use LIVE wooden blocks at each open bay's immediate flanks, preserving
+    // four symbolic Pack5 furnishing anchors for future stable specialization.
+    const bayFlanks=new Set([2,4,penZ+1,penZ+3]);
     for(const x of [midX-2,midX+2])for(let z=2;z<tackZ;z++){
       if(z===3||z===penZ+2||!free(x,1,z))continue;
-      place(x,1,z,'partition','pack5:096','north');
+      place(x,1,z,'partition',bayFlanks.has(z)?'live:wood':'pack5:096','north');
     }
     link('outside','aisle',entry,1);link('aisle','tack-room',midX,tackZ);
     for(const [name,x,z] of [['west-front',midX-2,3],['east-front',midX+2,3],['west-rear',midX-2,penZ+2],['east-rear',midX+2,penZ+2]])link('aisle',name,x,z);

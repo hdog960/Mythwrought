@@ -15,7 +15,7 @@ test('all 45 M1 structures have genuine reachable interior clearance, physical w
 });
 test('all 15 empty stables use real aisle-edge fence/partition placements on both sides',()=>{
  const stables=buildings.filter(b=>b.category==='stable');assert.equal(stables.length,15);
- for(const b of stables){assert.deepEqual(b.animals,[]);assert.ok(b.placements.filter(p=>p.role==='partition'&&p.asset==='pack5:096').length>=4);}
+ for(const b of stables){assert.deepEqual(b.animals,[]);assert.ok(b.placements.filter(p=>p.role==='partition'&&p.asset==='live:wood').length>=8);assert.equal(b.placements.filter(p=>p.role==='furnishing'&&p.asset==='pack5:096').length,4);}
 });
 test('rooms have category-specific actual furnishings and the taverns contain bar-service counters',()=>{
  for(const b of buildings.filter(b=>b.category==='tavern')){
@@ -71,7 +71,7 @@ test('a stable bay must have actual partition rails on both edges',()=>{
  const b=structuredClone(buildings.find(b=>b.category==='stable'));
  const gate=b.portals.find(p=>p.opening==='open-stall-bay');
  b.placements=b.placements.filter(p=>!(p.at[0]===gate.at[0]&&p.at[1]===1&&p.at[2]===gate.at[2]-1));
- assert.throws(()=>auditM1Building(b),/rails flanking open stall bay/);
+ assert.throws(()=>auditM1Building(b),/lacks LIVE wooden boundary/);
 });
 test('every candidate roof has physically authored frame sections and an unresolved strength/safe-span gate',()=>{
  for(const b of buildings){

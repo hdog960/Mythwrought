@@ -34,3 +34,14 @@ test('reject decoration masquerading as structural exterior wall',()=>{
  const b=structuredClone(pool[0]),p=b.placements.find(p=>p.role==='wall');p.role='decoration';
  assert.throws(()=>auditExteriorEnvelope(b),/nonstructural facade element/);
 });
+test('all 60 stable open-bay portals have actual live wooden flank geometry; unbuilt Pack5 partitions remain symbolic',()=>{
+ const stable=pool.filter(b=>b.category==='stable');assert.equal(stable.length,15);
+ for(const b of stable){
+  const map=new Map(b.placements.map(p=>[p.at.join(','),p]));
+  const gates=b.portals.filter(p=>p.opening==='open-stall-bay');assert.equal(gates.length,4);
+  for(const g of gates){for(const dz of [-1,1]){
+   const p=map.get([g.at[0],1,g.at[2]+dz].join(','));
+   assert.equal(p?.asset,'live:wood',b.id+' depends on unbuilt Pack5 rail for actual gate collision');
+  }}
+ }
+});

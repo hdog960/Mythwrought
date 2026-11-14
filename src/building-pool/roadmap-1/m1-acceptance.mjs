@@ -57,7 +57,7 @@ export function auditM1Building(b){
    const x=p.at[0],z=p.at[2];
    for(const dz of [-1,1]){
     const q=occupied.get(key([x,1,z+dz]));
-    assert(q&&q.role==='partition'&&(q.asset==='pack5:096'||q.asset==='live:wood'),b.id+': missing physical rails flanking open stall bay');
+    assert(q&&q.role==='partition'&&q.asset==='live:wood',b.id+': open stall bay lacks LIVE wooden boundary; unbuilt Pack5:096 cannot certify collisions');
    }
   }else throw new Error(b.id+': doorway must specify hinged-leaf or open-stall-bay');
  }
@@ -134,9 +134,11 @@ export function auditM1Building(b){
   assert(Array.isArray(b.animals)&&b.animals.length===0,b.id+': animals are forbidden');
   assert(['west-front','east-front','west-rear','east-rear'].every(id=>rooms.has(id)),b.id+': missing stall bay');
   const candidateRails=b.placements.filter(p=>p.role==='partition'&&p.asset==='pack5:096');
-  assert(candidateRails.length>=4,b.id+': no physical stable-stall edge rails');
+  const verifiedRails=b.placements.filter(p=>p.role==='partition'&&p.asset==='live:wood');
+  assert(verifiedRails.length>=8,b.id+': not enough live stall-edge partitions');
   const axes=[b.architecturalIdentity.localEntrance[0]-2,b.architecturalIdentity.localEntrance[0]+2];
-  assert(axes.every(x=>candidateRails.some(p=>p.at[0]===x)),b.id+': left/right aisles not partitioned into physical bays');
+  assert(axes.every(x=>verifiedRails.some(p=>p.at[0]===x)),b.id+': left/right aisles lack live physical boundaries');
+  assert(b.placements.filter(p=>p.role==='furnishing'&&p.asset==='pack5:096').length===4,b.id+': future Pack5 stall family symbolic anchors missing');
  }
  return {id:b.id,rooms:b.rooms.length,portals:b.portals.length,reachableCells:flood.size,unresolvedAssetFamilies:b.dependencies.length,physicalProfileCells:regional.physicalProfileCells,roofFrameCells:frame.length,roofSpanUnresolved:true};
 }
