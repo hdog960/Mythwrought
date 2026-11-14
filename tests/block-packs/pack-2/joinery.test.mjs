@@ -14,7 +14,7 @@ test('six distinct new physical IDs use 63–68 without duplicating the legacy o
   assert.equal(new Set(PACK_2_JOINERY.map(x=>x.surface.pattern)).size,6);
   assert.equal(new Set([...PACK_2_IDS,...PACK_2_JOINERY_IDS]).size,10);
   assert.deepEqual(PACK_2_FIXTURE_IDS.slice(0,10),[59,60,61,62,63,64,65,66,67,68]);
-  assert.equal(PACK_2_FIXTURE_IDS.length,17);
+  assert.equal(PACK_2_FIXTURE_IDS.length,18);
   assert.deepEqual(Object.values(BLOCK).sort((a,b)=>a-b),[0,1,2,3,4,5,6,7,8]);
 });
 test('every joinery variant has bounded physical target/collision boxes and finite preview',()=>{
