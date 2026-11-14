@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "MILESTONE 1 — SOURCE/CHROMIUM CANVAS REVIEW UPDATED; WEBGL2/CREATOR FINAL ACCEPTANCE OPEN",
+  "status": "MILESTONE 1 — NATIVE NODE + GENUINE INLINE WEBGL2 TECHNICAL CHECKS PASS; SOURCE-SERVED/CREATOR APPROVAL OPEN",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -34,7 +34,7 @@
         "chalk-lime",
         "hand-troweled"
       ],
-      "verification": "44/44 native Node source-level suite PASS; distinct genuine Chromium Canvas2D screenshots inspected; WebGL2/creator visual and production integration pending",
+      "verification": "44/44 native Node source-exact PASS; source-inline genuine WebGL2 screenshot/pixel verification at three mobile landscape sizes x two rotations PASS; source-served/creator and production integration OPEN",
       "preview": "tests/block-packs/pack-5/canvas-gallery.html"
     },
     {
@@ -51,7 +51,7 @@
         "hearth-running-bond",
         "kiln-soldier-course"
       ],
-      "verification": "44/44 native Node source-level suite PASS; distinct genuine Chromium Canvas2D screenshots inspected; WebGL2/creator visual and production integration pending",
+      "verification": "44/44 native Node source-exact PASS; source-inline genuine WebGL2 screenshot/pixel verification at three mobile landscape sizes x two rotations PASS; source-served/creator and production integration OPEN",
       "preview": "tests/block-packs/pack-5/canvas-gallery.html"
     },
     {
@@ -68,7 +68,7 @@
         "sunburst-encaustic",
         "moonwoven-glaze"
       ],
-      "verification": "44/44 native Node source-level suite PASS; distinct genuine Chromium Canvas2D screenshots inspected; WebGL2/creator visual and production integration pending",
+      "verification": "44/44 native Node source-exact PASS; source-inline genuine WebGL2 screenshot/pixel verification at three mobile landscape sizes x two rotations PASS; source-served/creator and production integration OPEN",
       "preview": "tests/block-packs/pack-5/canvas-gallery.html"
     },
     {
@@ -239,13 +239,15 @@
   ],
   "candidateFamilies": 3,
   "testEvidence": {
-    "nativeNode": "44/44 genuine Node 22.16.0 focused tests pass against exact committed Pack 5 source/test blobs (16 fixture + 19 surface + 9 acceptance)",
+    "nativeNode": "44/44 actual native Node 22.16.0 focused tests PASS, exact committed candidate source and test Git blobs matched",
     "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
     "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
-    "webgl2": "BLOCKED: browser WebGL2 getContext returned null including software rendering; locally served gallery previously ERR_BLOCKED_BY_ADMINISTRATOR; NOT a WebGL2 pass",
-    "screenshots": "Six revised authentic screenshots generated and inspected locally; not committed to GitHub, no in-game render or physical iPhone certification",
-    "production": "NOT INTEGRATED; no production schema-1 candidate save tests, shared numeric ID registry, world placement, live raycast/collision or creator art approval",
-    "acceptanceDossier": "src/block-packs/pack-5/M1_ACCEPTANCE.md"
+    "webgl2": "GENUINE Chromium WebGL2 (OpenGL ES 3.0) Xvfb/software OpenGL: six physical source meshes rendered, 3 landscape viewports (667x375,844x390,932x430) x 2 rotations, all GPU readback hashes distinguish six visible panels. Offline about:blank inline source bundle (NOT served gallery; localhost blocked).",
+    "screenshots": "Six new genuine Chromium WebGL2 PNGs inspected; separate working artifacts, not checked into PR. Earlier six genuine Chromium Canvas2D captures remain fallback evidence only.",
+    "production": "NOT INTEGRATED; no source-served ES module gallery verification, user art approval, physical iPhone GPU validation, central numeric IDs or production schema-1 variant save verification",
+    "acceptanceDossier": "src/block-packs/pack-5/M1_ACCEPTANCE.md",
+    "browserRunner": "tests/block-packs/pack-5/gallery-webgl-browser.py — genuine WebGL2 six-screenshot runner, exact source with import/export boundary assembly; not game or device testing",
+    "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only"
   },
   "preview": {
     "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
