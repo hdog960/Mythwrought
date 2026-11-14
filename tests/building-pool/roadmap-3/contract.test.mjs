@@ -72,6 +72,8 @@ test('palette swaps and renames alone cannot count as new architecture',()=>{
  b.spaces[0].kind='storage';b.navigation.nodes[1].kind='storage';b.openings[0].facing='north';
  assert.equal(geometryFingerprint(a),geometryFingerprint(b));
  assert.throws(()=>validatePool([a,b],ASSET_CATALOG),/repeated architectural geometry/);
+ const padOnly=blueprint(2);padOnly.envelope.width=99;
+ assert.equal(geometryFingerprint(a),geometryFingerprint(padOnly));
  const c=blueprint(2,1);
  assert.notEqual(geometryFingerprint(a),geometryFingerprint(c));
  assert.equal(validatePool([a,c],ASSET_CATALOG).authored,2);
