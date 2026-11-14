@@ -1,6 +1,6 @@
 // Seed-stable, render-only moonbell flowers: no new blocks, collisions or saves.
 // Low opaque petal geometry shares the existing terrain mesh and draw call.
-const STRIDE=9, MAX_FLOWERS=7, VERTICES_PER_FLOWER=96;
+const STRIDE=9, MAX_FLOWERS=7, VERTICES_PER_FLOWER=144;
 function hash(x,z,seed,salt){
  let n=Math.imul((x|0)^seed^salt,0x9e3779b1)^Math.imul((z|0)+salt,0x85ebca6b);
  n^=n>>>16;n=Math.imul(n,0x7feb352d);n^=n>>>15;return (n>>>0)/4294967296;
@@ -134,6 +134,26 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
     tri(out,crown,[sx+dx*.115-dz*.045,ground+sh-.07,sz+dz*.115+dx*.045],
       [sx+dx*.115+dz*.045,ground+sh-.07,sz+dz*.115-dx*.045],
       k%2?[.91,.91,.76]:[.98,.96,.85],7);
+   }
+  }
+  // Stone-edge fan moss grows only beside real exposed solid terrain, not at
+  // imaginary cave entrances. It is render-only and follows grass edits.
+  const edgeDirs=[[1,0],[-1,0],[0,1],[0,-1]];
+  const rockEdges=edgeDirs.filter(([dx,dz])=>{
+   const b=world.get(x+dx,y+1,z+dz);
+   return b!==air&&b!==grass;
+  });
+  if(rockEdges.length&&hash(x,z,world.seed,733)>.42){
+   const [dx,dz]=rockEdges[Math.floor(hash(x,z,world.seed,739)*rockEdges.length)];
+   const ox=px+dx*.23,oz=pz+dz*.23;
+   const fanTurn=Math.atan2(dz,dx)+Math.PI;
+   for(let j=0;j<5;j++){
+    const a=fanTurn+(j-2)*.32,reach=.18+(2-Math.abs(j-2))*.045;
+    const vx=Math.cos(a),vz=Math.sin(a);
+    tri(out,[ox,ground+.045,oz],
+      [ox+vx*reach-vz*.065,ground+.13+reach*.4,oz+vz*reach+vx*.065],
+      [ox+vx*reach+vz*.065,ground+.13+reach*.4,oz+vz*reach-vx*.065],
+      j%2?[.40,.65,.43]:[.56,.73,.49],7);
    }
   }
   flowers++;
