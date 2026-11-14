@@ -24,7 +24,7 @@ test('mined anchors and player roof edits remove flowers without touching saves'
  let selected;
  for(let cx=-5;cx<=5&&!selected;cx++)for(let cz=-5;cz<=5&&!selected;cz++){
   const v=moonbellVertices(world(),cx,cz,opts);
-  if(v.length)selected={cx,cz,x:Math.floor(v[0]),z:Math.floor(v[2])};
+  if(v.length)selected={cx,cz,x:Math.floor(v[18]),z:Math.floor(v[20])};
  }
  assert.ok(selected);
  const {cx,cz,x,z}=selected;
