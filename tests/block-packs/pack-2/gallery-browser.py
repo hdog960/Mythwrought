@@ -15,6 +15,7 @@ import base64
 import json
 import os
 import shutil
+import subprocess
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -195,13 +196,39 @@ def verify(root: Path, screenshots: Path | None = None) -> list[dict]:
     return results
 
 
+def checkout_head(root: Path, expected: str | None) -> str | None:
+    """Verify that a requested exact GitHub commit is actually checked out."""
+    command = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        capture_output=True, text=True, check=False
+    )
+    actual = command.stdout.strip() if command.returncode == 0 else None
+    if expected is not None:
+        if actual is None:
+            raise AssertionError("Exact head requested but git checkout metadata is absent")
+        if actual != expected:
+            raise AssertionError(f"Wrong checkout: expected {expected}, got {actual}")
+        changes = subprocess.run(
+            ["git", "-C", str(root), "status", "--porcelain", "--",
+             "src/block-packs/pack-2/", "tests/block-packs/pack-2/"],
+            capture_output=True, text=True, check=True
+        )
+        if changes.stdout.strip():
+            raise AssertionError("Uncommitted Pack 2 source/test changes invalidate exact-head QA")
+    return actual
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--screenshots", type=Path)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[3])
+    parser.add_argument("--expected-head", help="Require this exact Git HEAD and clean Pack 2 source")
     args = parser.parse_args()
+    head = checkout_head(args.root, args.expected_head)
     result = verify(args.root, args.screenshots)
-    print(json.dumps({"status": "PASS", "results": result}, indent=2))
+    print(json.dumps({"status": "PASS", "git_head": head,
+                      "exact_head_verified": bool(args.expected_head),
+                      "results": result}, indent=2))
 
 
 if __name__ == "__main__":
