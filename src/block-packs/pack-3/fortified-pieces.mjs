@@ -79,6 +79,8 @@ const BY_KEY=new Map(DATA.flatMap(d=>[0,1,2,3].map(rotation=>[
 export const PACK3_FORTIFIED_IDS=Object.freeze(DATA.map(d=>d.id));
 export const PACK3_FORTIFIED_ASSETS=Object.freeze(DATA.map(d=>BY_KEY.get(d.id+':0')));
 export function pack3FortifiedById(id,rotation=0){
+  // ID ownership is numeric; never coerce string, BigInt or object aliases.
+  if(!Number.isInteger(id))return null;
   if(!Number.isInteger(rotation)||rotation<0||rotation>3)
     throw new RangeError('Fortified part rotation must be 0..3');
   return BY_KEY.get(id+':'+rotation)??null;
