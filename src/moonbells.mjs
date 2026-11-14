@@ -173,6 +173,22 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
     }
    }
   }
+  // Amber shelf fungi cling to genuine exposed stone facing the grass.
+  // Three layered opaque caps create a broad horizontal silhouette, with no
+  // lighting, particles, collisions or additional world blocks.
+  if(rockEdges.length&&hash(x,z,world.seed,769)>.79){
+   const [dx,dz]=rockEdges[Math.floor(hash(x,z,world.seed,773)*rockEdges.length)];
+   const sideX=-dz,sideZ=dx;
+   const rootX=px+dx*.40,rootZ=pz+dz*.40;
+   for(let tier=0;tier<3;tier++){
+    const level=ground+.15+tier*.12;
+    const spread=.16-tier*.025,reach=.13-tier*.02;
+    const tint=tier%2?[.86,.58,.31]:[.95,.72,.43];
+    tri(out,[rootX,level,rootZ],
+      [rootX-dx*reach+sideX*spread,level-.035,rootZ-dz*reach+sideZ*spread],
+      [rootX-dx*reach-sideX*spread,level-.035,rootZ-dz*reach-sideZ*spread],tint,7);
+   }
+  }
   flowers++;
  }
  if(out.length/STRIDE>MAX_FLOWERS*VERTICES_PER_FLOWER)throw Error('Moonbell vertex budget');
