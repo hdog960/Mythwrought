@@ -16,10 +16,10 @@ own SHA inside itself. New commits require updating PR handoff and re-testing.
 | 32 | Wooden window frames | 162 | Open carved oak sash | Candidate built, tests authored |
 | 33 | Wooden shutters | 163 | Closed double-leaf oak | Candidate built, tests authored |
 | 34 | Iron bars | 164 | Four-rod wrought grille | Candidate built, tests authored |
-| 35 | Lantern blocks | — | — | Planned, M2 |
-| 36 | Wall-mounted lanterns | — | — | Planned, M2 |
-| 37 | Crystal lanterns | — | — | Planned, M2 |
-| 38 | Torch blocks | — | — | Planned, M2 |
+| 35 | Lantern blocks | 165 | Hearthbound iron/copper floor lantern | Candidate built, tests authored |
+| 36 | Wall-mounted lanterns | 166 | Hawthorn wall sconce | Candidate built, tests authored |
+| 37 | Crystal lanterns | 167 | Aetherglass caged blue crystal | Candidate built, tests authored |
+| 38 | Torch blocks | 168 | Wayfarer bracket wall torch | Candidate built, tests authored |
 | 56 | Barrels | — | — | Planned, M3 |
 | 57 | Wooden crates | — | — | Planned, M3 |
 | 58 | Wooden benches | — | — | Planned, M3 |
@@ -44,28 +44,26 @@ own SHA inside itself. New commits require updating PR handoff and re-testing.
   partial selection/collision boxes, four-way Y rotations, transparent
   material separation and strict state serialization. **Candidate only,
   awaiting Node + browser and integration acceptance.**
-- **M2** four lighting families (35–38) not started.
+- **M2 Lighting:** Four physically independent candidate families (35–38) authored in `lighting.mjs`, with distinct iron/copper/wood/crystal/fire material silhouettes, floor or wall mounting requirements, four-way orientation, partial collision/selection and strict candidate state. Light color/intensity/radius metadata is recorded, but engine emission is explicitly `engineEnabled:false`. **Candidate source implemented; live integration and visual acceptance pending.**
+- **Isolated interactions:** `fixture.mjs` adds isolated place/remove, sub-box raycast, partial collision and fail-closed atomic schema-1-style fixture snapshot replay. This is NOT a production save format or a generated-world change.
 - **M3** seven furniture/market families (56–62) not started.
 - **M4** six hearth/civic families (63–68) not started.
 - **M5** full 22-family review and manual handoff pending.
 
-### Verification status
-- Source parser and 24 asset/rotation pairs: **PASS** in connector's
-  JavaScript V8 check (not a Node or browser run).
-- Exact authored 29 test bodies evaluated in the same V8 compatibility
-  harness: **29/29 PASS** after fixing malformed shutter panel and
-  incomplete serialized orientation handling.
-- **Node test runner:** NOT YET EXECUTED in this candidate checkout.
-- **Genuine Chromium WebGL2 gallery:** authored, NOT YET RUN/SCREENSHOT-REVIEWED.
-- **Real iPhone:** NOT TESTED. **Merged/deployed:** NO.
+### Verification status — current candidate source
+- Base/current main checked: `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, checkpoint 006. Physical main block registry remains 0–8. Issue #109 still reserves Pack 4 IDs 159–208; Issue #117 gives auto :12 a **different** symbolic namespace; no cross-pack duplicates.
+- Candidate IDs **159–168**, ten distinct persistent variants spanning **nine out of 22** authored roster families. IDs 169–208 available for subsequent Pack 4 entries, 255 reserved.
+- **V8 compatibility harness (not Node): 59/59 exact Pack 4 test bodies passed**, across windows (29), lighting (19), isolated place/raycast/save fixture (11). Regression-detected test fixture support errors were corrected; no game engine files edited.
+- **Local Node 22, 33/33 PASS on a source-derived, 0.0001-unit-quantized geometry snapshot** of the ten GitHub candidate assets. This check tests mesh-coordinate validity and material/silhouette distinctions, NOT the full GitHub checkout or native Node import of the nested Pack 4 tests.
+- **Prior exact PR HEAD** `3a09f18e4338bbf61674f72dffaf7abc93c2d245`: existing GitHub Actions baseline Node and configured Chromium regression suites **SUCCESS**, run [43628322485](https://github.com/hdog960/Mythwrought/actions/runs/43628322485), before M2 was added. Must reverify new exact PR HEAD separately.
+- **Pack 4 nested Node** `node --test tests/block-packs/pack-4/*.test.mjs`: NOT YET run on an actual checkout; existing root CI glob excludes nested files and shared workflow changes are prohibited.
+- **Standalone Pack 4 gallery** now includes all ten original source candidates and four-way rotation selector. A source-derived local Chromium WebGL2 attempt failed/hung due EGL/SwiftShader initialization on the available headless host; **no authentic successful browser screenshot or real iPhone certification**. This is not a game defect verdict.
+- **No merge/deploy/world placement.** No dynamic light simulation, open/close animation, particle fire, generation, shared registry, game save schema or controller code changed.
 
-Dependencies: unmerged generic shapes [#108](https://github.com/hdog960/Mythwrought/pull/108),
-targeting [#106](https://github.com/hdog960/Mythwrought/pull/106),
-central persistent registry, transparent sorted-depth pass and schema-1
-optional orientation adapter. Current main only IDs 0–8. No new lighting
-or open/close behavior is claimed. Gallery is *not* an in-world screenshot.
+### Integration dependencies
+- Generic shape meshes/rotated sub-boxes [#108](https://github.com/hdog960/Mythwrought/pull/108), targeting/placement/collision [#106](https://github.com/hdog960/Mythwrought/pull/106), both unmerged and separately owned.
+- Central registry for candidate physical IDs, schema-1 sidecar for rotations, transparent depth ordering and renderer material contract.
+- Wall/floor support validation, bounded dynamic point light engine (metadata only), original PWA/mobility/seed/save compatibility and user iPhone art approval.
+- Automated :12's **130-family separate catalog** in [Issue #117](https://github.com/hdog960/Mythwrought/issues/117) is not part of Pack 4. None of its symbolic variants are reused here.
 
-**Next task:** run exact branch Node/Chromium and inspect transparency/depth
-and rotations; resolve defects within Pack 4 only. Then implement M2 lanterns,
-wall lanterns, crystal lanterns, and torches with actual shapes/support and
-explicit light metadata; leave lighting engine to central integration.
+**Next task (Milestone 3):** Before allocating IDs 169+, recheck current main, Issues #109/#117, other pack manifests/PRs and exact PR #115 head. Run nested Pack 4 Node and genuine Chromium where workable, then develop the independent physical barrel, crate, bench, table, sign, banner, and canopy component families 56–62. Update this ledger and draft PR; never merge or place assembled structures.
