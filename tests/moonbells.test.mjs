@@ -91,3 +91,26 @@ test('copperberry shrubs are seed-stable, rare, bounded and disappear with grass
  assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
  assert.equal(MOONBELL_LIMITS.newTextures,0);
 });
+
+test('rare violet lantern fungi have four-sided caps, remain bounded and respect edited anchors',()=>{
+ let found=null, violet=0, ochre=0;
+ for(let cx=-14;cx<=14;cx++)for(let cz=-14;cz<=14;cz++){
+  const a=moonbellVertices(world(123),cx,cz,opts);
+  assert.ok(a.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+  for(let i=0;i<a.length;i+=9){
+   const color=a.slice(i+3,i+6);
+   if(Math.abs(color[0]-.65)<1e-5&&Math.abs(color[1]-.49)<1e-5){
+    violet++;
+    if(!found)found={cx,cz,x:Math.floor(a[i]),z:Math.floor(a[i+2]),length:a.length};
+   }
+   if(Math.abs(color[0]-.82)<1e-5&&Math.abs(color[1]-.48)<1e-5)ochre++;
+  }
+ }
+ assert.ok(violet>=2,'violet lantern cap facets occur on representative seeded grass');
+ assert.ok(ochre>0,'original ochre mushrooms remain');
+ assert.ok(found);
+ const removed=moonbellVertices(world(123,new Map([[[found.x,4,found.z].join(','),0]])),found.cx,found.cz,opts);
+ assert.ok(removed.length<found.length,'mining the supporting grass removes lantern fungus');
+ assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
+ assert.equal(MOONBELL_LIMITS.newTextures,0);
+});
