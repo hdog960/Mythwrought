@@ -1,5 +1,6 @@
 // An isolated WebGL2 visual inspection harness; NEVER imported by production main.
 import {PACK4_WINDOW_ASSETS,windowPreviewMesh} from '../../../src/block-packs/pack-4/windows.mjs';
+import {PACK4_LIGHT_ASSETS,lightingPreviewMesh} from '../../../src/block-packs/pack-4/lighting.mjs';
 const VS = `#version 300 es
 precision highp float;
 layout(location=0) in vec3 aPosition;
@@ -37,10 +38,11 @@ function buildProgram(gl){
     throw Error(gl.getProgramInfoLog(prog)||'Link failed');
   return prog;
 }
-function drawOne(canvas,id){
+function drawOne(canvas,id,rotation){
   const gl=canvas.getContext('webgl2',{alpha:false,preserveDrawingBuffer:true,antialias:true});
   if(!gl)throw Error('WebGL2 unavailable; cannot validate real candidate preview');
-  const mesh=windowPreviewMesh(id,0),prog=buildProgram(gl);
+  const mesh=id>=165?lightingPreviewMesh(id,rotation):windowPreviewMesh(id,rotation);
+  const prog=buildProgram(gl);
   gl.viewport(0,0,canvas.width,canvas.height);
   gl.clearColor(.12,.18,.21,1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
@@ -69,7 +71,8 @@ function drawOne(canvas,id){
 }
 const grid=document.querySelector('#gallery');
 const outcomes=[];
-for(const a of PACK4_WINDOW_ASSETS){
+const allAssets=[...PACK4_WINDOW_ASSETS,...PACK4_LIGHT_ASSETS];
+for(const a of allAssets){
   const card=document.createElement('article');
   card.className='item';
   const canvas=document.createElement('canvas');
@@ -78,12 +81,25 @@ for(const a of PACK4_WINDOW_ASSETS){
   const heading=document.createElement('h2');
   heading.textContent=a.name+' · ID '+a.id;
   const description=document.createElement('p');
-  description.textContent=a.profile+' • '+a.parts.length+' physical/decorative pieces';
-  card.append(canvas,heading,description);grid.append(card);
-  try{outcomes.push({id:a.id,ok:true,...drawOne(canvas,a.id)});}
+  const light=a.light;
+  description.textContent=(a.profile||a.description)+' • '+a.parts.length+' source sub-parts'+
+    (light?' • LIGHT METADATA ONLY':'');
+  const select=document.createElement('select');
+  select.setAttribute('aria-label','Rotate '+a.name);
+  for(let r=0;r<4;r++){
+    const option=document.createElement('option');
+    option.value=String(r);option.textContent='Rotation '+r*90+'°';select.append(option);
+  }
+  card.append(canvas,heading,description,select);grid.append(card);
+  const render=()=>drawOne(canvas,a.id,Number(select.value));
+  select.addEventListener('change',()=>{
+    try{render();}catch(error){description.textContent=String(error);}
+  });
+  try{outcomes.push({id:a.id,ok:true,...render()});}
   catch(e){outcomes.push({id:a.id,ok:false,error:String(e)});description.textContent=String(e);}
 }
 const success=outcomes.filter(x=>x.ok).length;
 document.querySelector('#status').textContent=
   success+'/'+outcomes.length+' candidate models rendered in isolated WebGL2. Not deployed.';
-window.__PACK4_GALLERY_RESULT=Object.freeze({ready:true,success,results:outcomes});
+window.__PACK4_GALLERY_RESULT=Object.freeze({ready:true,success,results:outcomes,
+  allIds:allAssets.map(a=>a.id), unmerged:true});
