@@ -38,6 +38,20 @@ export async function runPack2BrowserVerification(){
       assert.equal(response.status(),200);
       await page.waitForFunction(()=>document.querySelectorAll('#asset option').length===18);
       assert.equal(await page.locator('#asset option').count(),18);
+      const allIds=await page.locator('#asset option').evaluateAll(options=>
+        options.map(option=>Number(option.value)));
+      assert.deepEqual([...allIds].sort((a,b)=>a-b),
+        Array.from({length:18},(_,i)=>i+59));
+      // Select and render EVERY candidate before testing specific state controls.
+      // A browser-side error in just one module/asset must fail the session.
+      for(const id of allIds){
+        await page.selectOption('#asset',String(id));
+        const displayed=await page.evaluate(()=>
+          ({id:window.pack2Fixture.selection().id,
+            status:document.querySelector('#status').textContent}));
+        assert.equal(displayed.id,id);
+        assert.ok(displayed.status.startsWith('ID '+id+'  |  '));
+      }
       for(const id of [73,74,75]){
         await page.selectOption('#asset',String(id));
         assert.equal(await page.evaluate(()=>window.pack2Fixture.selection().id),id);
@@ -88,12 +102,36 @@ export async function runPack2BrowserVerification(){
       assert.equal(mesh.fluidSolid,false);
       assert.ok(mesh.fluidTop>0&&mesh.fluidTop<1);
       assert.deepEqual(errors,[],'No browser module/runtime errors');
+      const canvasRect=await page.locator('#preview').boundingBox();
+      assert.ok(canvasRect.width>250&&canvasRect.height>100,
+        'Candidate canvas must be laid out at all three mobile landscape widths');
+      const scrolled=await page.evaluate(()=>{
+        const canvas=document.querySelector('#preview');
+        const style=getComputedStyle(canvas);
+        return {canvasWidth:canvas.getBoundingClientRect().width,
+          responsive:style.width,scrollWidth:document.documentElement.scrollWidth};
+      });
+      assert.ok(scrolled.scrollWidth<=width+4,'Unexpected horizontal page overflow');
       if(process.env.MYTHWROUGHT_PACK2_SCREENSHOTS){
         const dir=resolve(process.env.MYTHWROUGHT_PACK2_SCREENSHOTS);
         await mkdir(dir,{recursive:true});
-        await page.screenshot({path:resolve(dir,'pack2-infrastructure-water-'+width+'x'+height+'.png')});
+        await page.screenshot({path:resolve(dir,'pack2-water-fullpage-'+width+'x'+height+'.png'),
+          fullPage:true});
+        await page.locator('#preview').screenshot({
+          path:resolve(dir,'pack2-water-canvas-'+width+'x'+height+'.png')});
+        await page.selectOption('#asset','66');
+        await page.click('#hinge');
+        await page.locator('#preview').screenshot({
+          path:resolve(dir,'pack2-open-gate-canvas-'+width+'x'+height+'.png')});
+        await page.selectOption('#asset','74');
+        await page.click('#variant');
+        await page.locator('#preview').screenshot({
+          path:resolve(dir,'pack2-parapet-drain-canvas-'+width+'x'+height+'.png')});
       }
-      results.push({viewport:width+'x'+height,ids:[73,74,75,76],triangleCounts:mesh.triangles,waterState});
+      results.push({viewport:width+'x'+height,candidates:allIds.length,
+        ids:[73,74,75,76],triangleCounts:mesh.triangles,
+        waterState,visiblePixelCount:mesh.visible,translucentPixelCount:mesh.translucent,
+        canvasWidth:canvasRect.width});
       await page.close();
     }
     return results;
