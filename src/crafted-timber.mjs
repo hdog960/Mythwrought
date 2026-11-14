@@ -45,7 +45,16 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
     float etchedDiamond=1.0-smoothstep(.018,.042,abs(diamond-.27));
     float ornamentCell=step(.79,hashCell(boardCell+vec2(59.0,23.0)));
     float ornament=etchedDiamond*ornamentCell*near;
-    sideShade += .095*bevel-.035*innerBorder-.07*ornament;
+    // Sparse diagonal joinery creates readable framed timber panels.
+    float braceCell=step(.90,hashCell(boardCell+vec2(83.0,41.0)));
+    float braceSlope=abs(boardLocal.y-(.17+.66*boardLocal.x));
+    float braceBand=(1.0-smoothstep(.055,.085,braceSlope))*bevel*braceCell;
+    float braceHighlight=(1.0-smoothstep(.090,.135,braceSlope))*bevel*braceCell;
+    float mortiseX=1.0-smoothstep(.025,.065,abs(boardLocal.x-.18));
+    float mortiseY=1.0-smoothstep(.045,.095,abs(boardLocal.y-.72));
+    float mortise=mortiseX*mortiseY*(1.0-seam);
+    sideShade += .095*bevel-.035*innerBorder-.07*ornament
+      -.11*braceBand+.045*braceHighlight-.065*mortise;
     // End-grain also has a softly planed perimeter.
     float topEdge=min(min(vUv.x,1.0-vUv.x),min(vUv.y,1.0-vUv.y));
     float topBevel=smoothstep(.015,.13,topEdge);
@@ -55,5 +64,5 @@ export const CRAFTED_TIMBER_GLSL=String.raw`
 `;
 export const CRAFTED_TIMBER_RULES=Object.freeze({
   existingBlockId:4, boardsAcross:3, boardsHigh:2,
-  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
+  endGrainOnTop:true, perBoardTint:true, pairedJoineryPegs:true, handPlanedBevel:true, rareEngravedDiamond:true, sparseDiagonalJoinery:true, pairedMortises:true, extraTextures:0, extraDrawCalls:0, saveSchemaChanged:false
 });
