@@ -30,7 +30,7 @@ export function createPack3MonumentalFixture(seed=179){
   });
 }
 export function restorePack3MonumentalFixture(payload){
-  if(!payload||payload.format!==MONUMENTAL_FIXTURE_FORMAT||
+  if(!payload||Object.hasOwn(payload,'schema')||payload.format!==MONUMENTAL_FIXTURE_FORMAT||
     !Number.isInteger(payload.seed)||payload.seed!==(payload.seed|0)||
     !Array.isArray(payload.parts)||payload.parts.length>300000)
     throw new TypeError('Unsupported Pack 3 preview snapshot');
