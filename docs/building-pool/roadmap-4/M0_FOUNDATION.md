@@ -30,3 +30,13 @@
 
 ## Commands and test honesty
 Run `node --test tests/building-pool/roadmap-4/*.test.mjs` from exact committed branch sources. Existing root `npm test` does **not** traverse these nested suites. Run genuine Chromium/WebGL2 only after an isolated Roadmap 4 preview is authored (none in M0). Record screenshots if actually captured; there are none from this Roadmap 4 at M0. Next session first re-fetch main, checkpoint, Issues 109/117, other Pack 1–5/biome manifests, PRs and exact-head CI.
+
+## Post-M0 branch refresh — same development session, after PR creation
+
+- New live `main` observed at `caf47776b723a36684edc1a72749e49268ccc688`, checkpoint **007** (the original M0 branch remains honestly based on checkpoint 006 / `f27a887b`). The [#120 automation-only incorporation](https://github.com/hdog960/Mythwrought/pull/120) was completed independently; no Roadmap 4 changes, merge, rebase or incorporation were performed.
+- The latest checkpoint 007 says 12/130 `biome130` desert *candidate source assets* entered main as unregistered opt-in code. They are NOT 12 active new persistent IDs, and still depend on a wider-ID registry before runtime use. `src/voxel.mjs` on latest main still explicitly enumerates registered IDs 0–8 and world range -3..19.
+- Independent Building Roadmap 1 [#121](https://github.com/hdog960/Mythwrought/pull/121) and Roadmap 3 [#122](https://github.com/hdog960/Mythwrought/pull/122) are isolated draft PRs. Roadmap 4 [#123](https://github.com/hdog960/Mythwrought/pull/123) has **exactly 5 changed files**, all owned Roadmap 4 paths; zero edits to other branches or their files.
+- Exact committed head `548ddb311fe22e4b78de0af9cdfce9435ec83db1`: **11/11 authored test bodies PASS in V8 compatibility harness against fetched branch files**, including room-wide clearance and linear-neighbor path flood fill. This is not native Node nor WebGL2 and does not close M0 acceptance. Root CI workflow `.github/workflows/ci.yml` uses `npm test` with top-level `tests/*.test.mjs`, so a passing PR CI does not prove this nested suite ran.
+- Genuine native Node execution command remains `node --test tests/building-pool/roadmap-4/schema.test.mjs` after an authorized exact-source checkout is available. Creator physical-iPhone review and 3-view mobile screenshots remain open.
+
+**Next session:** verify latest main/checkpoint/Issues #109/#117 and PR head anew; obtain exact-source Node run without editing shared CI; then mark M0 technically accepted only if all gates pass. Otherwise keep M0 open. M1 begins only after that.
