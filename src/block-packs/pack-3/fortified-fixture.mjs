@@ -31,7 +31,7 @@ export function createPack3FortifiedFixture(seed=179){
   });
 }
 export function restorePack3FortifiedFixture(payload){
-  if(!payload||payload.format!==FORTIFIED_FIXTURE_FORMAT||
+  if(!payload||Object.hasOwn(payload,'schema')||payload.format!==FORTIFIED_FIXTURE_FORMAT||
     !Number.isInteger(payload.seed)||payload.seed!==(payload.seed|0)||
     !Array.isArray(payload.parts)||payload.parts.length>300000)
     throw new TypeError('Invalid fortified preview');
