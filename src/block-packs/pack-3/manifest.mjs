@@ -3,6 +3,7 @@
 import {PACK3_ROOFING_ASSETS} from './roofing-materials.mjs';
 import {PACK3_ROOF_GEOMETRY} from './roof-geometry.mjs';
 import {PACK3_FORTIFIED_ASSETS} from './fortified-pieces.mjs';
+import {PACK3_ORNAMENTAL_ASSETS} from './ornamental-pieces.mjs';
 export const PACK3_COORDINATION=Object.freeze({
   issue:'https://github.com/hdog960/Mythwrought/issues/109',
   auditedMain:'f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84',
@@ -20,8 +21,8 @@ const roofing=Object.freeze([
 ]);
 const monumental=Object.freeze([
   [69,'Castle wall blocks',116],[70,'Battlement blocks',117],[71,'Stone buttresses',118],
-  [72,'Ornamental columns'],[73,'Decorative cornices'],
-  [74,'Large arched window blocks'],[75,'Decorative stone reliefs'],
+  [72,'Ornamental columns',119],[73,'Decorative cornices',120],
+  [74,'Large arched window blocks',121],[75,'Decorative stone reliefs',122],
   [76,'Aqueduct channel blocks'],[77,'Crystal-topped spire blocks'],
   [78,'Carved statue blocks']
 ]);
@@ -31,7 +32,7 @@ export const PACK3_ROSTER=Object.freeze([...roofing,...monumental].map(([roster,
     implementation:id===null?'not-started':'physical-candidate',
     duplicateAudit:id===null?'pending-new-main-review':'new-vs-main-006',
     dependency:roster>=27&&roster<=29?'generic :12 shapes and :00 stateful rotation':
-      roster>=69&&roster<=71?'generic :00 targeting/collision and safe rotation save integration':
+      roster>=69&&roster<=75?'generic :00 targeting/collision and safe rotation save integration':
       roster===76?'future water containment, no fluid engine':
       'generic :00 interaction/selection/save registration',
     tests:id===null?'not-run':'isolated-node-regression',
@@ -43,11 +44,11 @@ export function validatePack3Manifest(){
   if(new Set(ids).size!==ids.length)throw new Error('Pack 3 duplicate persistent ID');
   for(const id of ids)if(!Number.isInteger(id)||id<109||id>158||id===255)
     throw new RangeError('Pack 3 ID outside reserved range');
-  const assets=[...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY,...PACK3_FORTIFIED_ASSETS];
+  const assets=[...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY,...PACK3_FORTIFIED_ASSETS,...PACK3_ORNAMENTAL_ASSETS];
   if(ids.length!==assets.length||assets.some(a=>
     !PACK3_ROSTER.some(row=>row.roster===a.roster&&row.id===a.id)))
     throw new Error('Ledger and physical Pack 3 asset definitions disagree');
-  for(const a of [...PACK3_ROOF_GEOMETRY,...PACK3_FORTIFIED_ASSETS]){
+  for(const a of [...PACK3_ROOF_GEOMETRY,...PACK3_FORTIFIED_ASSETS,...PACK3_ORNAMENTAL_ASSETS]){
     if(a.boxes.length>32||a.collision.boxes!==a.selection.boxes||a.integrated)
       throw new Error('Invalid isolated Pack 3 roof geometry contract');
   }
