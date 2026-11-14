@@ -49,9 +49,15 @@ void main(){
     float root=1.0-smoothstep(.015,.06,abs(sin(vUv.x*9.0+vUv.y*3.0)));
     // Irregular pale clay lenses make exposed soil banks visibly different from rock.
     float clay=smoothstep(.72,.9,.5+.5*sin(vUv.x*6.0+sin(vUv.y*5.0))*sin(vUv.y*9.0));
-    // Eroded ochre sediment fans: broad connected bands, with dark damp pockets.\n    float fan=.5+.5*sin(vUv.y*15.0+2.3*sin(vUv.x*4.0+vUv.y*2.0));\n    float fanEdge=1.0-smoothstep(.025,.12,abs(fan-.5));\n    float damp=smoothstep(.75,.94,.5+.5*sin(vUv.x*4.0-vUv.y*3.0)*sin(vUv.y*5.0));\n    shade=.79+.12*tile+.11*silt+.10*pebble-.065*root+.045*clay+.08*fanEdge-.08*damp;
+    // Eroded ochre sediment fans: broad connected bands, with dark damp pockets.
+    float fan=.5+.5*sin(vUv.y*15.0+2.3*sin(vUv.x*4.0+vUv.y*2.0));
+    float fanEdge=1.0-smoothstep(.025,.12,abs(fan-.5));
+    float damp=smoothstep(.75,.94,.5+.5*sin(vUv.x*4.0-vUv.y*3.0)*sin(vUv.y*5.0));
+    shade=.79+.12*tile+.11*silt+.10*pebble-.065*root+.045*clay+.08*fanEdge-.08*damp;
     base=mix(base,vec3(.72,.48,.31),(.12*silt+.07*pebble)*near);
-    base=mix(base,vec3(.77,.65,.47),.20*clay*near);\n    base=mix(base,vec3(.85,.53,.28),.20*fan*near);\n    base=mix(base,vec3(.35,.28,.24),.19*damp*near);
+    base=mix(base,vec3(.77,.65,.47),.20*clay*near);
+    base=mix(base,vec3(.85,.53,.28),.20*fan*near);
+    base=mix(base,vec3(.35,.28,.24),.19*damp*near);
   }else if(vMat==3){ // Bedrock: three interleaved natural strata, fracture seams and mica.
     vec2 p=floor(vUv*vec2(11.0,13.0));
     float strata=.5+.5*sin(vUv.y*34.0+2.0*sin(vUv.x*6.5+tile));
@@ -65,11 +71,20 @@ void main(){
     // Frost-quartz ridges collect on high stone strata without changing terrain IDs.
     float frostRidge=1.0-smoothstep(.035,.13,abs(sin(vUv.y*18.0+sin(vUv.x*5.0)*1.6)));
     float coldPocket=smoothstep(.76,.93,.5+.5*sin(vUv.x*5.0+vUv.y*3.0)*sin(vUv.y*7.0));
-    // A broad natural erosion scar crosses exposed cliff faces, never a brick grid.\n    float erosion=.5+.5*sin(vUv.y*9.0+2.2*sin(vUv.x*3.0));\n    float scar=1.0-smoothstep(.055,.19,abs(erosion-.5));\n    shade=.79+.13*tile+.10*strata-.085*crease+.11*mica+.065*slate+.06*frostRidge-.085*scar;
+    // A broad natural erosion scar crosses exposed cliff faces, never a brick grid.
+    float erosion=.5+.5*sin(vUv.y*9.0+2.2*sin(vUv.x*3.0));
+    float scar=1.0-smoothstep(.055,.19,abs(erosion-.5));
+    shade=.79+.13*tile+.10*strata-.085*crease+.11*mica+.065*slate+.06*frostRidge-.085*scar;
     base=mix(base,vec3(.41,.53,.61),.16*slate*near);
     base=mix(base,vec3(.76,.69,.54),.14*limestone*near);
     base=mix(base,vec3(.84,.85,.77),.15*quartz*near);
-    base=mix(base,vec3(.68,.82,.91),(.12*frostRidge+.09*coldPocket)*near);\n    base=mix(base,vec3(.39,.35,.32),.17*scar*near);
+    base=mix(base,vec3(.68,.82,.91),(.12*frostRidge+.09*coldPocket)*near);
+    base=mix(base,vec3(.39,.35,.32),.17*scar*near);
+    // Broad weathered ironstone lenses add warm mineral contrast to cliff faces.
+    float ironLens=smoothstep(.70,.91,.5+.5*sin(vUv.x*3.7+sin(vUv.y*4.1))*sin(vUv.y*5.6-vUv.x*1.3));
+    float rim=1.0-smoothstep(.025,.10,abs(sin(vUv.x*3.7+sin(vUv.y*4.1))*sin(vUv.y*5.6-vUv.x*1.3)));
+    base=mix(base,vec3(.64,.38,.27),.20*ironLens*near);
+    base=mix(base,vec3(.86,.72,.53),.07*rim*near);
   }else if(vMat==4){ // Honey-colored timber, distinct planks and warm grain.
     float plank=blockLine(vec2(vUv.x*3.0,vUv.y*1.0),.035);
     float grain=.5+.5*sin(vUv.x*23.0+2.0*sin(vUv.y*7.0));
@@ -140,5 +155,7 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   naturalDetailFamilies:Object.freeze(['sediment-shelves','slate-limestone-strata','raw-crystal-cleavage','gold-bearing-veins']),
   secondaryNaturalAccents:Object.freeze(['grass-moss-pollen','soil-clay-lenses','stone-quartz-seams','crystal-chevron-prisms','ore-branch-veins']),
   mineralInclusions:Object.freeze(['crystal-indigo-core','crystal-frost-inclusions','ore-oxidized-seams']),
-  coldGeologyAccents:Object.freeze(['stone-frost-quartz-ridges','stone-cold-pockets','crystal-glacial-cleavage']),\n  weatheredStrataAccents:Object.freeze(['soil-ochre-sediment-fans','soil-damp-pockets','stone-erosion-scars'])
+  coldGeologyAccents:Object.freeze(['stone-frost-quartz-ridges','stone-cold-pockets','crystal-glacial-cleavage']),
+  weatheredStrataAccents:Object.freeze(['soil-ochre-sediment-fans','soil-damp-pockets','stone-erosion-scars']),
+  ironstoneAccents:Object.freeze(['stone-ironstone-lenses','stone-pale-mineral-rims'])
 });
