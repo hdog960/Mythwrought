@@ -38,9 +38,19 @@ void main(){
     float moss=smoothstep(.48,.72,.5+.5*sin(vUv.x*9.0+sin(vUv.y*7.0)*1.7)*sin(vUv.y*8.0-vUv.x*2.0));
     float pollen=step(.974,hashCell(p+vec2(8.0,29.0)));
     float golden=step(.962,hashCell(p+vec2(21.0,4.0)));
+    // Winding fallen-leaf clusters: broad ochre silhouettes, no extra geometry.
+    vec2 litterUv=fract(vUv*vec2(5.0,4.0))-vec2(.5);
+    vec2 litterCell=floor(vUv*vec2(5.0,4.0));
+    float litterSeed=hashCell(litterCell+vec2(37.0,11.0));
+    float litterAngle=litterSeed*6.28318;
+    vec2 litterAxis=vec2(cos(litterAngle),sin(litterAngle));
+    vec2 litterRot=vec2(dot(litterUv,litterAxis),dot(litterUv,vec2(-litterAxis.y,litterAxis.x)));
+    float litterShape=1.0-smoothstep(.07,.14,length(litterRot*vec2(.75,1.7)));
+    float fallenLeaf=step(.68,litterSeed)*litterShape;
     shade=.87+.12*tile+.075*leaf+.09*moss;
     base=mix(base,vec3(.33,.52,.28),.23*moss*near);
     base=mix(base,vec3(.93,.76,.31),(.20*golden+.14*pollen)*near);
+    base=mix(base,vec3(.77,.49,.21),.28*fallenLeaf*near);
   }else if(vMat==2){ // Natural loam: ochre sediment shelves, embedded pebbles, root fibers.
     vec2 p=floor(vUv*vec2(18.0,17.0));
     float shelf=.5+.5*sin(vUv.y*27.0+2.0*sin(vUv.x*5.0));
@@ -53,11 +63,16 @@ void main(){
     float fan=.5+.5*sin(vUv.y*15.0+2.3*sin(vUv.x*4.0+vUv.y*2.0));
     float fanEdge=1.0-smoothstep(.025,.12,abs(fan-.5));
     float damp=smoothstep(.75,.94,.5+.5*sin(vUv.x*4.0-vUv.y*3.0)*sin(vUv.y*5.0));
+    // Exposed roots branch through sediment rather than repeating a masonry grid.
+    float rootTrunk=1.0-smoothstep(.025,.075,abs(sin(vUv.x*5.0+vUv.y*2.5)));
+    float rootBranch=1.0-smoothstep(.018,.06,abs(sin(vUv.x*9.0-vUv.y*7.0+sin(vUv.x*4.0))));
+    float rootNetwork=max(rootTrunk*.65,rootBranch*.45)*smoothstep(.20,.65,vUv.y);
     shade=.79+.12*tile+.11*silt+.10*pebble-.065*root+.045*clay+.08*fanEdge-.08*damp;
     base=mix(base,vec3(.72,.48,.31),(.12*silt+.07*pebble)*near);
     base=mix(base,vec3(.77,.65,.47),.20*clay*near);
     base=mix(base,vec3(.85,.53,.28),.20*fan*near);
     base=mix(base,vec3(.35,.28,.24),.19*damp*near);
+    base=mix(base,vec3(.33,.24,.17),.24*rootNetwork*near);
   }else if(vMat==3){ // Bedrock: three interleaved natural strata, fracture seams and mica.
     vec2 p=floor(vUv*vec2(11.0,13.0));
     float strata=.5+.5*sin(vUv.y*34.0+2.0*sin(vUv.x*6.5+tile));
@@ -180,5 +195,6 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   weatheredStrataAccents:Object.freeze(['soil-ochre-sediment-fans','soil-damp-pockets','stone-erosion-scars']),
   limestoneShelfAccents:Object.freeze(['stone-sweeping-calcite','stone-blue-shale-shelves']),
   ironstoneAccents:Object.freeze(['stone-ironstone-lenses','stone-pale-mineral-rims']),
-  agateHematiteAccents:Object.freeze(['crystal-nested-agate-bands','crystal-indigo-growth-core','ore-hematite-host-plates','ore-pale-plate-boundaries'])
+  agateHematiteAccents:Object.freeze(['crystal-nested-agate-bands','crystal-indigo-growth-core','ore-hematite-host-plates','ore-pale-plate-boundaries']),
+  forestFloorMaterialAccents:Object.freeze(['grass-fallen-leaf-clusters','soil-branching-exposed-roots'])
 });
