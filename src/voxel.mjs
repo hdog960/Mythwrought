@@ -7,6 +7,7 @@ import {caveRuneVertices} from './cave-runes.mjs';
 import {waystoneVertices} from './waystones.mjs';
 import {ruinWatchtowerVertices} from './ruin-watchtower.mjs';
 import {roadsideShrineVertices} from './roadside-shrine.mjs';
+import {pilgrimArchVertices} from './pilgrim-arch.mjs';
 import {caveThresholdVertices} from './cave-thresholds.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
@@ -178,10 +179,11 @@ export function meshChunk(world,cx,cz){
   const waystones=waystoneVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const watchtowers=ruinWatchtowerVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const shrines=roadsideShrineVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
+  const arches=pilgrimArchVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
   const caveThresholds=caveThresholdVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,air:BLOCK.AIR,stoneId:BLOCK.STONE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y});
   const solid=new Float32Array(vertices);
-  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length&&!watchtowers.length&&!shrines.length&&!caveThresholds.length)return solid;
-  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length+watchtowers.length+shrines.length+caveThresholds.length);
+  if(!canopy.length&&!grove.length&&!meadow.length&&!grotto.length&&!runes.length&&!waystones.length&&!watchtowers.length&&!shrines.length&&!arches.length&&!caveThresholds.length)return solid;
+  const combined=new Float32Array(solid.length+canopy.length+grove.length+meadow.length+runes.length+grotto.length+waystones.length+watchtowers.length+shrines.length+arches.length+caveThresholds.length);
   combined.set(solid);combined.set(canopy,solid.length);
   combined.set(grove,solid.length+canopy.length);
   combined.set(meadow,solid.length+canopy.length+grove.length);
