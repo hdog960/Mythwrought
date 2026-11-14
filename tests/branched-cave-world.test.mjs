@@ -72,6 +72,9 @@ for(const seed of [179,1,2026,-77]){
     assert.equal(route.samples.length,CAVE_CANDIDATE.length-14+11);
     assert.equal(route.walkable,true,JSON.stringify(route.failures));
     assert.deepEqual(route.failures,[]);
+    assert.equal(route.transitions.length,route.samples.length-1);
+    assert.deepEqual(route.blockedTransitions,[]);
+    assert.ok(route.transitions.every(p=>p.clear));
     assert.ok(route.samples.every(p=>p.supported&&p.clear&&p.stepValid));
     for(let i=1;i<route.samples.length;i++){
       const a=route.samples[i-1],b=route.samples[i];
