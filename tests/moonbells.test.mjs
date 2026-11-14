@@ -202,3 +202,25 @@ test('pale lichen requires real natural stone and never marks decorative constru
  assert.ok(natural>0,'natural exposed rock receives pale hanging lichen');
  assert.equal(constructed,0,'constructed block faces never receive cave-edge lichen');
 });
+
+// Amber shelves require real stone at the side of an editable grass anchor.
+test('amber shelf fungi are deterministic and never appear without natural stone',()=>{
+ const stone=(seed=123)=>({seed,get(x,y,z){
+  if(y===5 && x%4===0)return 3;
+  return baseAt(x,y,z);
+ }});
+ let amber=0;
+ for(let cx=-6;cx<=6;cx++)for(let cz=-6;cz<=6;cz++){
+  const plain=moonbellVertices(world(123),cx,cz,opts);
+  const a=moonbellVertices(stone(),cx,cz,opts);
+  assert.deepEqual(a,moonbellVertices(stone(),cx,cz,opts));
+  assert.ok(a.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+  for(let i=0;i<a.length;i+=9){
+   if(Math.abs(a[i+3]-.95)<1e-5&&Math.abs(a[i+4]-.72)<1e-5&&Math.abs(a[i+5]-.43)<1e-5)amber++;
+  }
+  for(let i=0;i<plain.length;i+=9){
+   assert.ok(!(Math.abs(plain[i+3]-.95)<1e-5&&Math.abs(plain[i+4]-.72)<1e-5&&Math.abs(plain[i+5]-.43)<1e-5));
+  }
+ }
+ assert.ok(amber>0,'amber shelves decorate actual exposed natural stone');
+});
