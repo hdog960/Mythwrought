@@ -24,15 +24,15 @@
 | 69 | 116 | Glimmerwatch Fortress Wall | Isolated physical candidate | 4 rotations, 11 physical box volumes, through-arrow slit | :00 shape targeting/stateful save integration |
 | 70 | 117 | Sunward Crenel Battlement | Isolated physical candidate | 4 rotations, 10 volumes, two merlons with opening | :00 shape targeting/stateful save integration |
 | 71 | 118 | Moonward Stone Buttress | Isolated physical candidate | 4 rotations, 8 tapered box volumes | :00 shape targeting/stateful save integration |
-| 72 | — | Ornamental columns | Not started | — | not Pack 1 pillar |
-| 73 | — | Decorative cornices | Not started | — | protruding separate trim |
-| 74 | — | Large arched windows | Not started | — | surround only; Pack 4 glazing |
-| 75 | — | Carved stone reliefs | Not started | — | face-mounted physical panel |
+| 72 | 119 | Stargrove Ornamental Column | Isolated physical candidate | 4 rotations, 11 volumes, fluted shaft and gilded capital | :00 targeting/rotation save, :12 mesh |
+| 73 | 120 | Twilight Dentil Cornice | Isolated physical candidate | 4 rotations, 13 volumes, projecting crown and three brackets | :00 targeting/rotation save, :12 mesh |
+| 74 | 121 | Dawnward Arch Window Surround | Isolated physical candidate | 4 rotations, 13 volumes, hollow arch and keystone, NO glazing | :00 targeting/rotation save; Pack 4 owns glass |
+| 75 | 122 | Sunleaf Carved Relief | Isolated physical candidate | 4 rotations, 12 volumes, raised front-facing relief | :00 targeting/rotation save, :12 mesh |
 | 76 | — | Aqueduct channels | Not started | — | physical containment only, no fluid engine |
 | 77 | — | Crystal spires | Not started | — | separate from CRYSTAL 5 |
 | 78 | — | Carved statues | Not started | — | selection/removal per piece |
 
-**Seven remaining families (72–78) have no assigned IDs.** No unassigned ID is promised or counted as completed. Each roofing family has multiple genuine raised/layered box parts; its collision and selection boxes are *the exact same occupied volumes* as preview geometry. Box count remains below the :00 32-box contract. Color palettes are candidate material metadata only, not installed shader code.
+**Three remaining families (76–78) have no assigned IDs.** No unassigned ID is promised or counted as completed. Each roofing family has multiple genuine raised/layered box parts; its collision and selection boxes are *the exact same occupied volumes* as preview geometry. Box count remains below the :00 32-box contract. Color palettes are candidate material metadata only, not installed shader code.
 
 ## Opt-in preview and test fixture
 
@@ -43,13 +43,16 @@
 - `roof-geometry-fixture.mjs`: independent placement/removal/shape-target callback and candidate **orientation-sidecar** snapshot/restore. NOT a game save, NOT live runtime wiring.
 - `fortified-pieces.mjs`: physical 116 fortress slit wall, 117 merlon battlement and 118 tapered buttress definitions with 4 rotations each.
 - `fortified-fixture.mjs`: separate candidate-only per-cell placement/rotation, selection-shape callback, removal, and state round-trip; **not** the live save codec.
+- `ornamental-pieces.mjs`: four sculpted geometry/material families 119–122 with four Y rotations, raised depth and true arch void.
+- `ornamental-fixture.mjs`: isolated candidate-only place/rotate/target/remove/snapshot; intentionally not schema-1.
+- `tests/block-packs/pack-3/ornamental-pieces.test.mjs`: 12 independently authored geometry, ray/occupancy, rotation, and candidate restore regressions.
 - `tests/block-packs/pack-3/fortified-pieces.test.mjs`: 11 physical profile, rotation, ID, placement/removal and fail-closed candidate restore regressions.
 - New test suite: `node --test tests/block-packs/pack-3/roof-geometry.test.mjs` (nested; not in current default CI glob).
-- `preview.html`: optional **ten-asset** gallery depicting real part geometry, with rotation for pitch/hip/ridge and fortification components (not a screenshot of live WebGL).
+- `preview.html`: optional **14-asset** gallery of actual physical box unions, with 10 rotating roof/fortified/ornamental variants (not the live game).
 - Reproducible isolated regression: `node --test tests/block-packs/pack-3/roofing.test.mjs`.
 - The existing `npm test` script only globs `tests/*.test.mjs`; this nested suite needs an explicit invocation. Do not claim CI exercised it without evidence.
 
-**Honest integration boundary:** the fixture writes `{schema:1,seed,edits}`-shaped candidate samples, but the live `VoxelWorld.restore` currently **rejects candidate IDs 109–118**. Rotation is locked at 0 for the first four surface candidates. The three shaped profiles support four rotations only inside a separate opt-in preview fixture, **not** in the current game's schema-1 save system. For non-cube roof stairs/corners/ridges, require merged :12 meshing and :00 selection/collision/save handling plus a creator-approved backward-compatible rotation persistence contract before promising live rotation persistence. Do not use these fixture snapshots as player saves. Integration must preserve existing player data and fail closed for unsupported states.
+**Honest integration boundary:** the fixture writes `{schema:1,seed,edits}`-shaped candidate samples, but the live `VoxelWorld.restore` currently **rejects candidate IDs 109–122**. Rotation is locked at 0 for the first four surface candidates. The three shaped profiles support four rotations only inside a separate opt-in preview fixture, **not** in the current game's schema-1 save system. For non-cube roof stairs/corners/ridges, require merged :12 meshing and :00 selection/collision/save handling plus a creator-approved backward-compatible rotation persistence contract before promising live rotation persistence. Do not use these fixture snapshots as player saves. Integration must preserve existing player data and fail closed for unsupported states.
 
 ## Session handoff
 
@@ -89,3 +92,22 @@ An initial trim-heavy buttress candidate generated 1968 triangles and was reduce
 **Save compatibility boundary:** `fortified-fixture.mjs` serializes only `mythwrought-pack3-fortified-candidate-v1` with `parts:[{cell,id,rotation}]`. There is **no production `schema:1` save signature**; this candidate snapshot is never fed to the existing player world. Live `VoxelWorld.restore` still rejects IDs 109–118. Future central integration alone must authorize/validate the ID codec and backward-safe rotation persistence.
 
 **Status:** Milestones 0–3 have authored isolated candidates, NOT creator acceptance or live installation. Milestones 4–6 are open. The next milestone is four individual ornament pieces (72–75): columns, cornices, arch surrounds (Pack 4 owns glazing), and relief panels. No generation/assembly/merge/deploy occurred.
+
+## Milestone 4 — ornamental architecture work (2026-11-14)
+
+**Audit:** main remains `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, checkpoint 006, live persistent IDs 0–8, 255 sentinel. Both [Issue #109](https://github.com/hdog960/Mythwrought/issues/109) and [Issue #117](https://github.com/hdog960/Mythwrought/issues/117) preserve the manual Pack 3 ownership of 72–75; existing stone pillars, carved cube shaders, and Pack 4 window frames/glazing are **not** these physical definitions.
+
+| Roster | Candidate ID | Physical geometry and distinctive art | Shape boxes | 4-rotation boundary-mesh triangles |
+|---|---:|---|---:|---:|
+| 72 | 119 | Stargrove gilded-flute column, shaft, plinth, projecting capital volutes | 11 | 1896 |
+| 73 | 120 | Twilight three-bracket cantilevered dentil cornice, deep raised front crown | 13 | 1276 |
+| 74 | 121 | Dawnward tall masonry arch surround, two jambs, clear through-opening, raised keystone, **no glass** | 13 | 1204 |
+| 75 | 122 | Sunleaf relief face-mounted shallow plaque, physical raised central sun/rays, NOT a cube | 12 | 1740 |
+
+The initial column/relief geometric complexity was reduced by removing redundant raised detail while preserving meaningful 3D silhouette. **Actual :00/:12 interface compatibility**: all 16 rotating shapes validate with pending `validateShape`, `rotateShape`, `canPlaceShape`, `prototypeSurfaceMesh`; **9** positive/negative `raycastShapes` probes include the unobstructed arch void and protruding relief. All meshes remain under 2,000 boundary-only triangles at the current prototype implementation; these counts are not iPhone GPU measurements.
+
+**Isolated regression suite:** `tests/block-packs/pack-3/ornamental-pieces.test.mjs` covers 12 regression cases, all 12 evaluated successfully using exact committed source in an isolated JavaScript V8 assertion harness (not a substitute for a genuine Node process). Earlier Pack 3 27-case suite has already passed local Node v22.16.0 before this change. **Root `npm test` excludes the nested Pack 3 tests**; do not claim the CI runner validates these new tests automatically. Further actual Node and Chromium evidence should be attached only when executed.
+
+**Saves:** `ornamental-fixture.mjs` writes only `mythwrought-pack3-ornamental-preview-v1` format with explicit per-cell rotation and no `schema:1` field, NOT a production save. Live `VoxelWorld.set/restore` rejects IDs 119–122. Dynamic live orientation persistence is still a :00/central-integration dependency.
+
+**Status:** Milestone 4 physical source candidates authored; creator approval and live integration pending. **Three** final monumental families 76–78 remain to be developed under Milestone 5. Nothing added to world generation, no completed structures, no shared engine edits, merge, or deployment.
