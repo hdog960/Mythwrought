@@ -69,3 +69,25 @@ test('rare golden starblooms have distinct six-petal silhouettes within the shar
  assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
  assert.equal(MOONBELL_LIMITS.newTextures,0);
 });
+
+test('copperberry shrubs are seed-stable, rare, bounded and disappear with grass edits',()=>{
+ let found=null,shrubs=0;
+ for(let cx=-14;cx<=14;cx++)for(let cz=-14;cz<=14;cz++){
+  const a=moonbellVertices(world(123),cx,cz,opts);
+  assert.deepEqual(a,moonbellVertices(world(123),cx,cz,opts));
+  assert.ok(a.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+  for(let i=0;i<a.length;i+=9){
+   if(Math.abs(a[i+3]-.78)<1e-5&&Math.abs(a[i+4]-.34)<1e-5&&Math.abs(a[i+5]-.23)<1e-5){
+    shrubs++;
+    if(!found)found={cx,cz,x:Math.floor(a[i]),z:Math.floor(a[i+2]),original:a.length};
+   }
+  }
+ }
+ assert.ok(shrubs>0,'rare copperberry shrub accents occur in seeded meadows');
+ assert.ok(found);
+ const {cx,cz,x,z,original}=found;
+ const removed=moonbellVertices(world(123,new Map([[[x,4,z].join(','),0]])),cx,cz,opts);
+ assert.ok(removed.length<original,'edited anchor suppresses the shrub');
+ assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
+ assert.equal(MOONBELL_LIMITS.newTextures,0);
+});
