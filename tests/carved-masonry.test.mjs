@@ -10,7 +10,7 @@ test('architectural ashlar is a render tag, not a new editable block ID',()=>{
   assert.equal(CARVED_MASONRY_RULES.extraTextures,0);
   assert.equal(CARVED_MASONRY_RULES.extraDrawCalls,0);
   assert.equal(CARVED_MASONRY_RULES.saveSchemaChanged,false);
-  assert.deepEqual(STORYBOOK_ART_RULES.renderOnlyArchitecturalMaterials,[15]);
+  assert.deepEqual(STORYBOOK_ART_RULES.renderOnlyArchitecturalMaterials,[15,16]);
   const world=new VoxelWorld(179);
   assert.equal(world.set(2,10,2,15),false);
   assert.equal(world.set(2,10,2,BLOCK.WOOD),true);
