@@ -147,6 +147,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     const world=getWorld(),player=getPlayer();
     paintExploration(mini,map,world,player);
     mini.dataset.discovered=String(map.seen.size);
+    mini.dataset.seed=String(map.seed);
     if(!overlay.hidden){
       paintExploration(large,map,world,player,{expanded:true,panX,panZ,zoom});
       coordinates.textContent='X '+Math.floor(player.x)+' · Z '+Math.floor(player.z)+' · Seed '+world.seed;
