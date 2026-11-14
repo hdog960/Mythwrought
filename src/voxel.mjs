@@ -110,7 +110,11 @@ export class VoxelWorld{
     // Construct only inside the valid voxel height. This overlay is a pure
     // deterministic view; it never writes to this.edits or schema-1 storage.
     const ordinary=this.legacyBlockAt(x,y,z);
-    if(![x,y,z].every(Number.isInteger)||y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y)return ordinary;
+    // Deep substrate is an engine-only layer, not a new :24/:36/:48
+    // generation envelope. Avoid creating expensive surface districts for
+    // every buried rock queried by the 16-block vertical mesh slices.
+    if(![x,y,z].every(Number.isInteger)||y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y||
+       y<LEGACY_WORLD_MIN_Y)return ordinary;
     const dx=Math.floor(x/LIVE_DISTRICT_SIZE),dz=Math.floor(z/LIVE_DISTRICT_SIZE);
     const districtKey=dx+','+dz;
     let district=this.liveDistrictCache.get(districtKey);
