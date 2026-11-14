@@ -40,15 +40,22 @@ HASHES = r"""() => [...document.querySelectorAll('main article')].map(card => {
   const c=card.querySelector('canvas');
   const data=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
   let h=2166136261,paint=0,colors=new Set();
+  let minX=c.width,minY=c.height,maxX=-1,maxY=-1;
   for(let i=0;i<data.length;i+=4){
     h=Math.imul(h^data[i],16777619);
     h=Math.imul(h^data[i+1],16777619);
     h=Math.imul(h^data[i+2],16777619);
     colors.add((data[i]<<16)|(data[i+1]<<8)|data[i+2]);
-    if(Math.abs(data[i]-21)+Math.abs(data[i+1]-33)+Math.abs(data[i+2]-42)>25)paint++;
+    if(Math.abs(data[i]-21)+Math.abs(data[i+1]-33)+Math.abs(data[i+2]-42)>25){
+      paint++;
+      const px=(i/4)%c.width, py=Math.floor((i/4)/c.width);
+      minX=Math.min(minX,px);minY=Math.min(minY,py);
+      maxX=Math.max(maxX,px);maxY=Math.max(maxY,py);
+    }
   }
   return {id:Number(card.querySelector('small').textContent.match(/ID (\d+)/)[1]),
-    hash:(h>>>0).toString(16),colors:colors.size,paint};
+    hash:(h>>>0).toString(16),colors:colors.size,paint,
+    bounds:[minX,minY,maxX,maxY]};
 })"""
 
 async def verify():
@@ -74,6 +81,9 @@ async def verify():
             assert len({a["hash"] for a in initial})==17, "Duplicate asset pixels"
             assert min(a["colors"] for a in initial)>15
             assert min(a["paint"] for a in initial)>250
+            assert all(x["bounds"][0]>=10 and x["bounds"][1]>=10 and
+                x["bounds"][2]<=309 and x["bounds"][3]<=189 for x in initial), \
+                "Candidate silhouette clipped: " + str(initial)
             variations={}
             for index,id in enumerate(range(113,126),start=4):
                 button=page.locator("main article").nth(index).locator("button")
@@ -94,6 +104,7 @@ async def verify():
             print(json.dumps({"viewport":f"{w}x{h}","uniqueImageHashes":17,
                 "rotationControls":13,"fourTurnReset":True,"directionalShapesChanged":7,
                 "minPaintedPixels":min(a["paint"] for a in initial),
+                "allSilhouettesFramed":True,
                 "errors":len(errors)}))
             await page.close()
         await browser.close()
