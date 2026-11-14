@@ -52,58 +52,67 @@ try{
      report.allIds.join(',')!==Array.from({length:23},(_,i)=>159+i).join(','))
     throw Error('Pack4 WebGL2 source rendering failed: '+JSON.stringify(report));
   if(errors.length)throw Error('Pack4 browser page errors: '+errors.join(' | '));
-  // Read authentic rendered canvas pixels, not arbitrary DOM/text uniqueness.
-  const fingerprints=await page.locator('#gallery canvas').evaluateAll(canvases=>
+  // All 23 actual WebGL2 card snapshots are required at four orientations.
+  const scan=()=>page.locator('#gallery canvas').evaluateAll(canvases=>
     canvases.map(canvas=>{
-      const bytes=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
-      // A painted GL clear background is non-black; compare actual silhouettes
-      // against the card corner rather than mistakenly counting all pixels.
-      const background=[bytes[0],bytes[1],bytes[2]];
+      const data=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+      const background=[data[0],data[1],data[2]];
       let hash=2166136261,foreground=0;
-      for(let i=0;i<bytes.length;i+=4){
-        hash=Math.imul(hash ^ bytes[i],16777619)>>>0;
-        hash=Math.imul(hash ^ bytes[i+1],16777619)>>>0;
-        hash=Math.imul(hash ^ bytes[i+2],16777619)>>>0;
-        const colorDistance=Math.abs(bytes[i]-background[0])+
-          Math.abs(bytes[i+1]-background[1])+
-          Math.abs(bytes[i+2]-background[2]);
-        if(colorDistance>=24)foreground++;
+      for(let i=0;i<data.length;i+=4){
+        hash=Math.imul(hash ^ data[i],16777619)>>>0;
+        hash=Math.imul(hash ^ data[i+1],16777619)>>>0;
+        hash=Math.imul(hash ^ data[i+2],16777619)>>>0;
+        if(Math.abs(data[i]-background[0])+
+           Math.abs(data[i+1]-background[1])+
+           Math.abs(data[i+2]-background[2])>=24)foreground++;
       }
       return {hash,foreground};
     })
   );
-  if(fingerprints.length!==23||new Set(fingerprints.map(x=>x.hash)).size!==23||
-     fingerprints.some(x=>x.foreground<700))
-    throw Error('Blank/duplicate/nonforeground rendered asset image: '+
-      JSON.stringify(fingerprints));
-  const selector=page.locator('select').last();
-  const lastBefore=fingerprints.at(-1).hash;
-  await selector.selectOption('3');
-  await page.waitForTimeout(80);
-  const rotatedHash=await page.locator('#gallery canvas').last().evaluate(canvas=>{
-    const data=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
-    let h=2166136261;
-    for(let i=0;i<data.length;i+=4){
-      h=Math.imul(h^data[i],16777619)>>>0;
-      h=Math.imul(h^data[i+1],16777619)>>>0;
-      h=Math.imul(h^data[i+2],16777619)>>>0;
-    }
-    return h;
-  });
-  if(rotatedHash===lastBefore)
-    throw Error('Rotating asymmetric fountain candidate produced unchanged pixels');
-  const allCanvases=await page.locator('#gallery canvas').count();
-  if(allCanvases!==23)throw Error('Expected 23 reviewable candidate cards');
-  const warning=await page.locator('.warning').innerText();
-  if(!warning.includes('UNMERGED CANDIDATE'))throw Error('Missing mandatory candidate watermark');
+  const rotationHashes=[];
   const directory=resolve(root,'artifacts/pack-4');
   await mkdir(directory,{recursive:true});
-  await page.screenshot({path:resolve(directory,'pack4-UNMERGED-'+width+'x'+height+'.png'),fullPage:true});
+  if(await page.locator('#gallery canvas').count()!==23||
+     await page.locator('#gallery select').count()!==23)
+    throw Error('Expected 23 independent canvases and rotation selectors');
+  const warning=await page.locator('.warning').innerText();
+  if(!warning.includes('UNMERGED CANDIDATE'))
+    throw Error('Missing mandatory unmerged review watermark');
+  for(let rotation=0;rotation<4;rotation++){
+    if(rotation>0){
+      await page.locator('#gallery select').evaluateAll((selectors,r)=>{
+        for(const selector of selectors){
+          selector.value=String(r);
+          selector.dispatchEvent(new Event('change',{bubbles:true}));
+        }
+      },rotation);
+    }
+    const fingerprints=await scan();
+    if(fingerprints.length!==23||
+       fingerprints.some(x=>x.foreground<700))
+      throw Error('Blank or low-contrast candidate at rotation '+rotation+': '+
+        JSON.stringify(fingerprints));
+    if(rotation===0&&new Set(fingerprints.map(x=>x.hash)).size!==23)
+      throw Error('Initial 23 candidate images are not visually distinct');
+    const descriptions=await page.locator('#gallery article p').allTextContents();
+    if(descriptions.some(x=>/^\s*(Error|TypeError|RangeError):/.test(x)))
+      throw Error('Candidate rotation error '+rotation+': '+
+        descriptions.filter(x=>/^\s*(Error|TypeError|RangeError):/.test(x)).join(' | '));
+    rotationHashes.push(fingerprints.map(x=>x.hash));
+    await page.screenshot({path:resolve(directory,
+      'pack4-UNMERGED-'+width+'x'+height+'-r'+rotation+'.png'),
+      fullPage:true});
+  }
+  for(const id of [177,181]){
+    if(new Set(rotationHashes.map(row=>row[id-159])).size<2)
+      throw Error('Asymmetric candidate '+id+' has no visible rotation');
+  }
+  if(errors.length)throw Error('Pack4 browser page errors: '+errors.join(' | '));
   passed++;
   await page.close();
  }
- console.log(JSON.stringify({result:'PASS',browser:'Chromium/WebGL2',landscapeSizes:passed,
-  candidateIDs:'159–181',screenshots:'artifacts/pack-4/pack4-UNMERGED-*.png',
+ console.log(JSON.stringify({result:'PASS',browser:'Chromium/WebGL2',landscapeSizes:passed,assets:23,rotationsPerAsset:4,
+  candidateIDs:'159–181',screenshots:'artifacts/pack-4/pack4-UNMERGED-*-r0..r3.png',
   warning:'Isolated gallery ONLY, no live world or physical iPhone validation'}));
 }finally{
  await browser?.close();
