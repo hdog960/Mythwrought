@@ -2,6 +2,7 @@
 import {PACK4_WINDOW_ASSETS,windowPreviewMesh} from '../../../src/block-packs/pack-4/windows.mjs';
 import {PACK4_LIGHT_ASSETS,lightingPreviewMesh} from '../../../src/block-packs/pack-4/lighting.mjs';
 import {PACK4_FURNISHING_ASSETS,furnishingPreviewMesh} from '../../../src/block-packs/pack-4/furnishings.mjs';
+import {PACK4_CIVIC_ASSETS,civicPreviewMesh} from '../../../src/block-packs/pack-4/hearth-civic.mjs';
 const VS = `#version 300 es
 precision highp float;
 layout(location=0) in vec3 aPosition;
@@ -42,7 +43,8 @@ function buildProgram(gl){
 function drawOne(canvas,id,rotation){
   const gl=canvas.getContext('webgl2',{alpha:false,preserveDrawingBuffer:true,antialias:true});
   if(!gl)throw Error('WebGL2 unavailable; cannot validate real candidate preview');
-  const mesh=id>=169?furnishingPreviewMesh(id,rotation):
+  const mesh=id>=176?civicPreviewMesh(id,rotation):
+    id>=169?furnishingPreviewMesh(id,rotation):
     id>=165?lightingPreviewMesh(id,rotation):windowPreviewMesh(id,rotation);
   const prog=buildProgram(gl);
   gl.viewport(0,0,canvas.width,canvas.height);
@@ -73,8 +75,8 @@ function drawOne(canvas,id,rotation){
 }
 const grid=document.querySelector('#gallery');
 const outcomes=[];
-const allAssets=[...PACK4_WINDOW_ASSETS,...PACK4_LIGHT_ASSETS,...PACK4_FURNISHING_ASSETS];
-// One WebGL2 drawing surface, not 17 simultaneous GPU contexts on mobile.
+const allAssets=[...PACK4_WINDOW_ASSETS,...PACK4_LIGHT_ASSETS,...PACK4_FURNISHING_ASSETS,...PACK4_CIVIC_ASSETS];
+// One WebGL2 drawing surface, never 23 simultaneous GPU contexts on mobile.
 const sharedCanvas=document.createElement('canvas');
 sharedCanvas.width=340;sharedCanvas.height=296;
 for(const a of allAssets){
@@ -87,7 +89,7 @@ for(const a of allAssets){
   heading.textContent=a.name+' · ID '+a.id;
   const description=document.createElement('p');
   const light=a.light;
-  description.textContent=(a.profile||a.description)+' • '+a.parts.length+' source sub-parts'+
+  description.textContent=(a.profile||a.description||a.detail||a.name)+' • '+a.parts.length+' source sub-parts'+
     (light?' • LIGHT METADATA ONLY':'');
   const select=document.createElement('select');
   select.setAttribute('aria-label','Rotate '+a.name);
