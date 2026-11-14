@@ -86,3 +86,36 @@ Run (in an authorized Node environment) from the repo root:
 - Central manual integration must establish safe persistent orientation encoding, full material registration, shape-aware mesh/targeting/collision, legacy save fixtures and iPhone performance checks without changing the existing production systems prematurely.
 
 **Ownership preserved:** no edits to :00/:12/:24/:36/:48, world generation, source registry, controls, other pack files or CI. **Milestone 3 garden components remain NOT STARTED.**
+
+## Milestone 3 — garden physical components (candidate IDs 21–23)
+
+**Developed net-new standalone physical voxel assets, no crops or game gardening systems:**
+
+| Candidate ID | Roster | Physical piece | Appearance / occupancy |
+|---|---:|---|---|
+| 21 | 47 | Tilled farmland soil | Rich umber dirt occupies 0–0.67 of a full cell; four independently raised earthen ridges to y=0.84, with true empty planting grooves at the higher level. The underlying earth and ridge-top art now differ after a detected texture alias was corrected. No watering, planting or growth. |
+| 22 | 48 | Cedar garden planter box | Actual wooden base and four walls; four raised top rims surround a small solid bed of unplanted soil at y=0.42. Above the inner soil is an open, ray-passable cavity; all parts together are one independently selectable/removable piece. |
+| 23 | 49 | Terracotta flower pot | Compact stand-alone square-profile ceramic vessel, with physical base, tapered walls and four glazed rim segments; genuine open air above its internal floor. No flowers, planting or separate inventory object. |
+
+Source: garden-components.mjs, garden-fixture.mjs. The descriptors expose immutable local-space `boxes` as the authoritative generic :00 targeting / :12 meshing interface; additional `parts:[{role,box}]` identifies submaterials for later renderer work. gardenTexture(id,face,size,role) returns original deterministic opaque RGB(A) pixel artwork for earth/ridges, wood/loam/rim and ceramic/glaze.
+
+**Gallery:** garden-gallery.html + garden-gallery.mjs (isolated, not used by live game). The 2D isometric preview and click-probe cross-section are both derived directly from box definitions, illustrating true solid ridges, cavities, and individual piece placement/removal. It is a source-authored preview, **not an authentic browser screenshot**.
+
+### Tests and evidence
+
+Run these focused tests from the repository root:
+
+    node --test tests/block-packs/pack-1/core-masonry.test.mjs tests/block-packs/pack-1/stone-shapes.test.mjs tests/block-packs/pack-1/garden-components.test.mjs
+
+- **14/14 authored garden Node-test bodies passed** via a V8 compatibility harness using exact fetched branch source with compatible assertion shims. One distinct-material texture test initially failed (tilled earth and ridge top-face aliases) and was corrected; then all 14 passed. This **is not an actual Node execution**.
+- **17/17 cross-team compatibility checks passed** in V8 against exact unmerged :00 raycast and :12 prototype mesher candidate source: 3 shapes x 4 rotations, with 108–468 triangles in the opt-in surface mesh, plus five physically grounded targeting / occupancy checks. Triangle counts are descriptive prototype outputs, NOT game rendering performance measurements.
+- **Focused real Node: NOT RUN. Gallery Chromium: NOT RUN. Screenshots: NOT CAPTURED. Physical iPhone: NOT RUN.** Existing GitHub workflow is for the baseline project tests and cannot discover these nested Pack 1 files through the current npm test glob; do not advertise its green status as passing the garden-specific suite.
+- Pure fixture save/restore preserves the legacy `{schema:1,seed,edits:[[x,y,z,id],...]}` shape for canonical orientation only. Nonzero rotations reject saves, rather than silently corrupt state. This does **not** establish compatibility with the live VoxelWorld, which still rejects IDs above 8.
+
+For a future local browser proof (not performed yet), run the free local static server from the repository root:
+
+    python3 -m http.server 4173
+
+Then visit http://localhost:4173/src/block-packs/pack-1/garden-gallery.html in real Chromium at mobile landscape widths. Capture actual screenshot evidence and verify the visible slice, role texture previews, buttons and no console errors. Do not substitute concept art.
+
+**Milestone 3 source candidates are complete, but integration and genuine device/browser acceptance are pending.** The next source category is Milestone 4's physical hedge, bush, climbing vine and colored decorative leaf variants. Before developing, recheck main, checkpoint and Issues #109/#117 to avoid duplicate integrated or automated-biome equivalents. Keep PR #113 draft/unmerged, v0.10 Gate A open, and all other pack/automation ownership unchanged.
