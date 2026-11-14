@@ -238,3 +238,25 @@ test('dew fronds occur only against real stone and stay within the existing mesh
  }
  assert.ok(seen>0,'stone-facing dew fronds appear in seeded rock edges');
 });
+
+test('frostglass rosettes require natural rock, repeat by seed and obey the mesh budget',()=>{
+ const scene=(rock)=>({seed:123,get(x,y,z){
+  if(y===5&&x%4===0)return rock;
+  return baseAt(x,y,z);
+ }});
+ let frost=0,constructed=0;
+ for(let cx=-9;cx<=9;cx++)for(let cz=-9;cz<=9;cz++){
+  const natural=moonbellVertices(scene(3),cx,cz,opts);
+  const built=moonbellVertices(scene(4),cx,cz,opts);
+  assert.deepEqual(natural,moonbellVertices(scene(3),cx,cz,opts));
+  assert.ok(natural.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+  for(let i=0;i<natural.length;i+=9)
+   if(Math.abs(natural[i+3]-.54)<1e-5&&Math.abs(natural[i+4]-.83)<1e-5&&Math.abs(natural[i+5]-.79)<1e-5)frost++;
+  for(let i=0;i<built.length;i+=9)
+   if(Math.abs(built[i+3]-.54)<1e-5&&Math.abs(built[i+4]-.83)<1e-5&&Math.abs(built[i+5]-.79)<1e-5)constructed++;
+ }
+ assert.ok(frost>0,'rare turquoise rosettes appear beside exposed natural stone');
+ assert.equal(constructed,0,'manufactured blocks do not grow frostglass rosettes');
+ assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
+ assert.equal(MOONBELL_LIMITS.newTextures,0);
+});
