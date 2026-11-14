@@ -136,3 +136,23 @@ test('silverleaf spires are seed-stable, tall, mesh-bounded and suppressed by ed
  assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
  assert.equal(MOONBELL_LIMITS.newTextures,0);
 });
+
+test('ivory seedheads are rare, deterministic, edit-sensitive and bounded',()=>{
+ let sample=null,facets=0;
+ for(let cx=-15;cx<=15;cx++)for(let cz=-15;cz<=15;cz++){
+  const a=moonbellVertices(world(123),cx,cz,opts);
+  assert.deepEqual(a,moonbellVertices(world(123),cx,cz,opts));
+  assert.ok(a.length/9<=MOONBELL_LIMITS.maxFlowersPerChunk*MOONBELL_LIMITS.maxVerticesPerFlower);
+  for(let i=0;i<a.length;i+=9){
+   if(Math.abs(a[i+3]-.98)<1e-5&&Math.abs(a[i+4]-.96)<1e-5&&Math.abs(a[i+5]-.85)<1e-5){
+    facets++;
+    if(!sample)sample={cx,cz,x:Math.floor(a[i]),z:Math.floor(a[i+2]),length:a.length};
+   }
+  }
+ }
+ assert.ok(facets>0,'ivory seedhead crowns appear on representative grass');
+ const removed=moonbellVertices(world(123,new Map([[[sample.x,4,sample.z].join(','),0]])),sample.cx,sample.cz,opts);
+ assert.ok(removed.length<sample.length,'edited grass suppresses ivory seedheads');
+ assert.equal(MOONBELL_LIMITS.newDrawCalls,0);
+ assert.equal(MOONBELL_LIMITS.newTextures,0);
+});
