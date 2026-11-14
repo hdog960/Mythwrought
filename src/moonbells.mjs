@@ -61,7 +61,22 @@ export function moonbellVertices(world,cx,cz,{chunkSize=16,heightAt,baseAt,grass
   }
   // A few shaded meadow edges grow a fern beside the flower. Each frond is
   // opaque, double-facing in silhouette, and shares this anchor's edit rules.
-  if(hash(x,z,world.seed,667)>.48){
+  if(hash(x,z,world.seed,667)>.82){
+   // Rare copperberry understory shrubs form a broad, tiered silhouette.
+   // Eight opaque leaf/berry facets fit the same per-anchor mesh budget as ferns.
+   const sx=px-.23,sz=pz+.18,sh=.30+hash(x,z,world.seed,677)*.14;
+   const dark=[.25,.43,.28],light=[.39,.58,.33],berry=[.78,.34,.23];
+   for(let tier=0;tier<2;tier++){
+    const y0=ground+sh*(tier?.52:.18),wide=tier?.13:.23;
+    for(let side=0;side<4;side++){
+     const a=side*Math.PI/2+turn,dx=Math.cos(a),dz=Math.sin(a);
+     const tint=tier===1&&side===0?berry:(side%2?light:dark);
+     tri(out,[sx,y0+sh*.37,sz],
+       [sx+dx*wide-dz*.07,y0,sz+dz*wide+dx*.07],
+       [sx+dx*wide+dz*.07,y0,sz+dz*wide-dx*.07],tint,7);
+    }
+   }
+  }else if(hash(x,z,world.seed,667)>.48){
    const fx=px-.23,fz=pz+.18,fh=.42+hash(x,z,world.seed,669)*.16;
    const stem=[fx,ground+fh,fz];
    tri(out,[fx-.024,ground,fz],[fx+.024,ground,fz],stem,[.27,.47,.29],7);
