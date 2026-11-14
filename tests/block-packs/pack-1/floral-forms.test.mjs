@@ -100,7 +100,7 @@ test('violet shelf has three separate elevated cap levels, not a static sphere',
   const caps=d.parts.filter(p=>p.role==='cap');
   assert.equal(caps.length,3);
   assert.equal(new Set(caps.map(p=>p.box[1])).size,3);
-  assert.equal(s(37,.5,.99,.5),false,'space above cap');
+  assert.equal(s(37,.5,1,.5),false,'space at top outer voxel boundary');
 });
 test('pearl gill appears pale but has no simulated light gameplay',()=>{
   assert.equal(floralDefinition(38).lightEmission,0);
@@ -180,7 +180,7 @@ test('real box selection ray passes through empty space and hits stem and cap',(
   assert.equal(stem.id,36);
   const cap=w.raycast([2.5,5,.5],[0,-1,0]);
   assert.equal(cap.id,36);
-  assert.ok(cap.distance>1&&cap.distance<1.5);
+  assert.equal(cap.distance,1,'top cap reaches voxel top after eighth-cell quantization');
   assert.equal(w.raycast([10,3.3,-2],[0,0,1]),null);
   assert.throws(()=>w.raycast([0,0,0],[0,0,0]),RangeError);
 });
