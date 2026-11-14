@@ -1,6 +1,10 @@
 // Pack 4 only. Genuine Chromium opt-in inspection; not part of root CI's
 // current test glob. Run with installed Playwright and Chromium, from repo root:
 // node tests/block-packs/pack-4/gallery-browser.mjs
+// On Linux hosts where headless software GL is disabled, opt into real
+// headed Chromium with: xvfb-run -a env PACK4_CHROMIUM_HEADFUL=1
+// PACK4_CHROMIUM_PATH=/usr/bin/chromium node tests/block-packs/pack-4/gallery-browser.mjs
+// This still requires a genuine WebGL2 context; it never falls back to mocks.
 // Never opens/changes the live world or GitHub Pages.
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
@@ -36,9 +40,32 @@ try{
  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve)});
  const url='http://127.0.0.1:'+server.address().port+
   '/tests/block-packs/pack-4/gallery.html';
- browser=await chromium.launch({headless:true,args:[
-  '--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
-  '--enable-unsafe-swiftshader','--no-sandbox']});
+ // A real virtual-display Chromium session may expose SwiftShader/WebGL2
+ // even where headless Chromium cannot. This is an opt-in execution mode,
+ // not a reduced visual acceptance criterion.
+ const headed=process.env.PACK4_CHROMIUM_HEADFUL==='1';
+ const executablePath=process.env.PACK4_CHROMIUM_PATH?.trim();
+ browser=await chromium.launch({
+  headless:!headed,
+  ...(executablePath?{executablePath}:{}),
+  args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
+   '--enable-unsafe-swiftshader','--no-sandbox']
+ });
+ const probe=await browser.newPage();
+ try{
+  await probe.setContent('<!doctype html><title>Pack4 WebGL2 readiness</title>');
+  const webgl2=await probe.evaluate(()=>{
+   const canvas=document.createElement('canvas');
+   const gl=canvas.getContext('webgl2');
+   if(!gl)return null;
+   return {version:gl.getParameter(gl.VERSION),
+    drawingBufferWidth:gl.drawingBufferWidth};
+  });
+  if(!webgl2)throw Error('Genuine WebGL2 context unavailable; on Linux retry with '+
+   'xvfb-run -a env PACK4_CHROMIUM_HEADFUL=1 PACK4_CHROMIUM_PATH=/usr/bin/chromium '+
+   'node tests/block-packs/pack-4/gallery-browser.mjs');
+  console.log('PACK4_WEBGL2_READY '+JSON.stringify(webgl2));
+ }finally{await probe.close();}
  for(const [width,height] of sizes){
   const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1,
    isMobile:true,hasTouch:true});
