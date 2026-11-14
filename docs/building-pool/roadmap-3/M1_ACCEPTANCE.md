@@ -29,7 +29,7 @@ Each biome has **one unique small, medium and large blacksmith** and **one uniqu
 
 ## Verification evidence
 
-- **Native Node 22.16.0:** `node --test tests/building-pool/roadmap-3/*.test.mjs` — **31/31 PASS** locally on source matching the committed GitHub file blob hashes for the six M0 files and exact M1 source/test/manifest modules; includes three additional manifest/JSON-roundtrip cases. No surrogate browser or V8-shim tests counted.
+- **Native Node 22.16.0:** `node --test tests/building-pool/roadmap-3/*.test.mjs` — **33/33 PASS** locally on source matching the committed GitHub file blob hashes for the six M0 files and exact M1 source/test/manifest modules; includes three additional manifest/JSON-roundtrip cases. No surrogate browser or V8-shim tests counted.
 - Independent voxel-grid flood traversal: checks two-wide unobstructed, floor-supported paths from entrance to blacksmith work/storage nodes and through stair steps to watchtower observation deck on all 30 structural proposals. This is theoretical cell-occupancy QA, **not production player collision verification**.
 - Reversible serialization / uniqueness: stable canonical generator output; 30 distinct design identities and geometry fingerprints; duplicate occupancy, unknown family references, malformed clearances, invalid type/size and missing routes rejected by tests.
 - Authored snapshot is reproducible from `createM1Pool()` and was independently materialized as local `M1_SNAPSHOT.json` (30 enumerated layouts, previously 1,846,816 bytes; regenerate after M1 roof/support revision). Snapshot is a local transfer/verification artifact, **not committed** to keep the draft PR source-driven and lightweight.
@@ -51,8 +51,20 @@ A dedicated structural audit found that original blacksmith roof profiles contai
 - Updated 30-design manifest: **70,921 actual structural cell-coordinate records** (down from 76,376). Still **30 designs**, with unchanged IDs, no production block IDs or gameplay activation.
 - New isolated source-backed exposed-face 3D diagnostic mesh; **all 30** have valid exterior and cutaway triangles, finite bounds, hidden-face rejection and less than 25,000 diagnostic triangles per view. These render **cube envelopes of symbolic future block families**, not their finished meshes. No real-asset dimension assumptions.
 - Added `tests/building-pool/roadmap-3/preview.html`, `preview.mjs`, `preview-mesh.mjs`, `preview-mesh.test.mjs` and explicit `preview-browser.mjs`. The runner is written to capture **180 authentic** WebGL2 image files (30 distinct buildings × exterior/cutaway × landscape 667×375, 844×390, 932×430), but it has **not executed** in this environment.
-- Local native Node 22.16.0 on Git blob-exact candidate source: **31/31 PASS**. Native Node and full-bundle source verification are separate from queued generic GitHub CI.
+- Local native Node 22.16.0 on Git blob-exact candidate source: **33/33 PASS**. Native Node and full-bundle source verification are separate from queued generic GitHub CI.
 
 A standard local Python Playwright Chromium navigation to even `data:text/html` failed with `net::ERR_BLOCKED_BY_ADMINISTRATOR`; screenshot images were **not** fabricated. Internal Python/Pillow orthographic coordinate projections were inspected for a medium snow blacksmith and desert watchtower as **nonbrowser geometric diagnostics only**. Their silhouettes remain structural placeholders rather than approved premium game art. A real Chromium/WebGL2 render and future candidate-shape collision tests remain blockers before creator approval.
 
 Current main later advanced through checkpoint **008**, which concerns automation-world visibility; it did not incorporate Roadmap 3. Never merge, deploy, activate or register these designs without separate creator instruction.
+
+## M1 genuine browser acceptance and face-winding audit (follow-up)
+
+During source-exact diagnostic mesh review, all six preview cube-face templates were discovered to be **inward-wound**, previously concealed by disabled back-face culling. Only the **Roadmap 3 isolated diagnostic preview** was corrected: two vertex indices are exchanged in each generated triangle and the WebGL2 diagnostic page now enables CCW front faces with back-face culling. **No production game engine mesher or manual block pack was modified.**
+
+- New exact-source native Node tests in `tests/building-pool/roadmap-3/preview-winding.test.mjs`: verify **outward normals and genuinely empty neighbor voxels** for all 30 exterior meshes; validate nondegenerate cutaway normals for all 30.
+- **Native Node 22.16.0: 33/33 PASS**, zero skips, after correction, with all owned source files committed. Dedicated nested suites do not run from default `npm test` in current project CI.
+- Isolated optional `preview-browser.mjs` checks **all 30 × exterior/cutaway × 3 landscape viewports = 180 expected authentic PNGs**. It now refuses success on page exceptions, missing WebGL2 context, wrong building identity, wrong view mode, GPU errors, or an essentially blank read-back framebuffer. Source-only; not executed successfully.
+- Actual local Python Playwright Chromium attempt on a trivial `data:text/html` page failed with **`net::ERR_BLOCKED_BY_ADMINISTRATOR`** again. **0 authentic candidate Chromium/WebGL2 screenshots generated or reviewed.** Winding and projected geometry diagnostics are not substitutes for visual acceptance.
+- Earlier generic GitHub CI run [#43648465110](https://github.com/hdog960/Mythwrought/actions/runs/43648465110) remained **queued** at the last status check. New exact-head [#43649109500](https://github.com/hdog960/Mythwrought/actions/runs/43649109500) was also **queued**; do not mark CI or M1 browser gate passed without examining final result and actual images.
+
+**M1 remains technically authored but not visually accepted.** Preserve all 30 source blueprints, their 70,921 coordinate cells and source-owned test evidence. No merge, deployment, engine wiring, block-ID registration, world placement or Gate A/v0.11 change.
