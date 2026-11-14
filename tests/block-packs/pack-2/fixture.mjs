@@ -2,7 +2,8 @@
 // Legacy fixture cells (ID 59–62) retain their original 5-column snapshot rows.
 // Joinery cells use [x,y,z,id,rotation,variant,open]; ground cells (69–72)
 // use the original five-column rows [x,y,z,id,rotation]. Infrastructure
-// cells (73–75) have six columns [x,y,z,id,rotation,variant].
+// cells (73–75) have six columns [x,y,z,id,rotation,variant]. Water ID 76
+// has seven [x,y,z,id,level,flow,source] fields, never a live save row.
 import {PACK_2_IDS,pack2Asset,pack2Cell,pack2Shape,parsePack2Cell}
   from '../../../src/block-packs/pack-2/definitions.mjs';
 import {PACK_2_JOINERY_IDS,joineryAsset,joineryCell,joineryShape,
@@ -12,15 +13,19 @@ import {PACK_2_GROUND_IDS,groundAsset,groundCell,groundShape,parseGroundCell}
 import {PACK_2_INFRASTRUCTURE_IDS,infrastructureAsset,infrastructureCell,
   infrastructureShape,parseInfrastructureCell}
   from '../../../src/block-packs/pack-2/infrastructure.mjs';
+import {WATER_CANDIDATE_ID,waterCell,parseWaterCell,waterRaycast,waterShape}
+  from '../../../src/block-packs/pack-2/water.mjs';
 
-export const PACK_2_FIXTURE_IDS=Object.freeze([...PACK_2_IDS,...PACK_2_JOINERY_IDS,...PACK_2_GROUND_IDS,...PACK_2_INFRASTRUCTURE_IDS]);
+export const PACK_2_FIXTURE_IDS=Object.freeze([...PACK_2_IDS,...PACK_2_JOINERY_IDS,...PACK_2_GROUND_IDS,...PACK_2_INFRASTRUCTURE_IDS,WATER_CANDIDATE_ID]);
 const key=c=>c.join(',');
 const cellCheck=c=>Array.isArray(c)&&c.length===3&&c.every(Number.isSafeInteger)&&c[1]>=-3&&c[1]<=19;
 const EPS=1e-9;
-const shapeOf=c=>infrastructureAsset(c.id)?infrastructureShape(c.id,c):
+const shapeOf=c=>c.id===WATER_CANDIDATE_ID?waterShape(c):
+  infrastructureAsset(c.id)?infrastructureShape(c.id,c):
   groundAsset(c.id)?groundShape(c.id,c.rotation):
   joineryAsset(c.id)?joineryShape(c.id,c):pack2Shape(c.id,c.rotation);
-const cloneCell=c=>infrastructureAsset(c.id)?infrastructureCell(c.id,c):
+const cloneCell=c=>c.id===WATER_CANDIDATE_ID?waterCell(c):
+  infrastructureAsset(c.id)?infrastructureCell(c.id,c):
   groundAsset(c.id)?groundCell(c.id,c.rotation):
   joineryAsset(c.id)?joineryCell(c.id,c):pack2Cell(c.id,c.rotation);
 function hitBox(origin,dir,b,cell,reach){
@@ -38,15 +43,17 @@ function hitBox(origin,dir,b,cell,reach){
   return {distance:Math.max(0,enter),normal:enter<0?[0,0,0]:normal};
 }
 export class Pack2Fixture{
-  constructor(){this.cells=new Map();this.selected=59;this.rotation=0;this.variant=null;this.open=false;}
+  constructor(){this.cells=new Map();this.selected=59;this.rotation=0;this.variant=null;this.open=false;
+    this.waterState=waterCell();}
   select(id){
     if(!PACK_2_FIXTURE_IDS.includes(id))throw new RangeError('Unknown Pack 2 asset');
     this.selected=id;this.rotation=0;
     this.variant=joineryAsset(id)?.defaultState.variant??infrastructureAsset(id)?.variants[0]??null;
-    this.open=false;
+    this.open=false;this.waterState=waterCell();
     return this.selection();
   }
   turn(){
+    if(this.selected===WATER_CANDIDATE_ID)return this.selection();
     const infra=infrastructureAsset(this.selected),ground=groundAsset(this.selected);
     const spec=joineryAsset(this.selected)??pack2Asset(this.selected);
     this.rotation=infra?(this.rotation+1)%infra.rotations:
@@ -66,12 +73,26 @@ export class Pack2Fixture{
     return this.selection();
   }
   selection(){
-    return infrastructureAsset(this.selected)
+    return this.selected===WATER_CANDIDATE_ID?this.waterState:
+      infrastructureAsset(this.selected)
       ?infrastructureCell(this.selected,{rotation:this.rotation,variant:this.variant}):
       groundAsset(this.selected)?groundCell(this.selected,this.rotation):
       joineryAsset(this.selected)
         ?joineryCell(this.selected,{rotation:this.rotation,variant:this.variant,open:this.open})
         :pack2Cell(this.selected,this.rotation);
+  }
+  // Explicit fixture editing only: no fluid ticks, propagation or gameplay input.
+  setWaterSelection(state){
+    if(this.selected!==WATER_CANDIDATE_ID)throw new RangeError('Select water first');
+    this.waterState=waterCell(state);
+    return this.selection();
+  }
+  setWaterCell(cell,state){
+    const prior=this.read(cell);
+    if(prior?.id!==WATER_CANDIDATE_ID)throw new RangeError('No water candidate at location');
+    const next=waterCell(state);
+    this.cells.set(key(cell),next);
+    return next;
   }
   read(cell){
     if(!cellCheck(cell))throw new RangeError('Invalid fixture coordinate');
@@ -102,6 +123,15 @@ export class Pack2Fixture{
     let best=null;
     for(const [k,candidate] of this.cells){
       const cell=k.split(',').map(Number);
+      if(candidate.id===WATER_CANDIDATE_ID){
+        const hit=waterRaycast(candidate,origin,dir,cell,reach);
+        if(hit&&(!best||hit.distance<best.distance-EPS)){
+          best={cell,id:WATER_CANDIDATE_ID,level:candidate.level,
+            flow:candidate.flow,source:candidate.source,
+            normal:hit.normal,face:hit.face,distance:hit.distance,fluid:true};
+        }
+        continue;
+      }
       for(const b of shapeOf(candidate).boxes){
         const hit=hitBox(origin,dir,b,cell,reach);
         if(hit&&(!best||hit.distance<best.distance-EPS)){
@@ -123,9 +153,11 @@ export class Pack2Fixture{
     return {kind:'mythwrought-pack-2-fixture',version:1,
       selection:this.selection(),
       cells:[...this.cells.entries()].map(([k,c])=>
-        [...k.split(',').map(Number),c.id,c.rotation,
-          ...(joineryAsset(c.id)?[c.variant,c.open]:
-            infrastructureAsset(c.id)?[c.variant]:[])])
+        c.id===WATER_CANDIDATE_ID
+          ?[...k.split(',').map(Number),c.id,c.level,c.flow,c.source]
+          :[...k.split(',').map(Number),c.id,c.rotation,
+            ...(joineryAsset(c.id)?[c.variant,c.open]:
+              infrastructureAsset(c.id)?[c.variant]:[])])
         .sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2])};
   }
   static restore(data){
@@ -133,18 +165,21 @@ export class Pack2Fixture{
        !Array.isArray(data.cells)||data.cells.length>64)throw new TypeError('Unsupported fixture');
     const out=new Pack2Fixture();
     const raw=data.selection;
-    const sel=infrastructureAsset(raw?.id)?parseInfrastructureCell(raw):
+    const sel=raw?.id===WATER_CANDIDATE_ID?parseWaterCell(raw):
+      infrastructureAsset(raw?.id)?parseInfrastructureCell(raw):
       groundAsset(raw?.id)?parseGroundCell(raw):
       joineryAsset(raw?.id)?parseJoineryCell(raw):parsePack2Cell(raw);
     out.select(sel.id);
-    out.rotation=sel.rotation;
+    out.rotation=sel.rotation??0;
+    if(sel.id===WATER_CANDIDATE_ID)out.waterState=sel;
     if(joineryAsset(sel.id)){out.variant=sel.variant;out.open=sel.open;}
     else if(infrastructureAsset(sel.id)){out.variant=sel.variant;}
     for(const row of data.cells){
       if(!Array.isArray(row)||(row.length!==5&&row.length!==6&&row.length!==7)||
           !cellCheck(row.slice(0,3)))throw new TypeError('Bad saved fixture cell');
       const [x,y,z,id,rotation,variant,open]=row;
-      const c=infrastructureAsset(id)?(row.length===6?infrastructureCell(id,{rotation,variant}):null):
+      const c=id===WATER_CANDIDATE_ID?(row.length===7?waterCell({level:rotation,flow:variant,source:open}):null):
+        infrastructureAsset(id)?(row.length===6?infrastructureCell(id,{rotation,variant}):null):
         groundAsset(id)?(row.length===5?groundCell(id,rotation):null):
         joineryAsset(id)?(row.length===7?joineryCell(id,{rotation,variant,open}):null):
         (row.length===5?pack2Cell(id,rotation):null);
