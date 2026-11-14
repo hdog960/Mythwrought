@@ -322,3 +322,10 @@ The Pack 1-only `tests/block-packs/pack-1/galleries-browser.mjs` now additionall
 Actual local Chromium launch works, but even simple `data:`, `file:` or `http://127.0.0.1` pages immediately fail with administrator navigation denial. Thus **none of the 15 required landscape gallery views or 30 authentic candidate screenshots** has been run/captured. No workaround of browser administrator policy or generated replacement imagery was used. The next source-acceptance requirement is genuine screenshots from an allowed environment, followed by separate creator approval and production integration. The `M6_ACCEPTANCE.md` evidence ledger has exact details.
 
 Main remains checkpoint 008 and does **not** include manual Pack 1. All **21 families/30 candidate IDs 9–38** remain draft, unmerged, undeployed, unregistered. v0.10 Gate A OPEN and v0.11 LOCKED.
+
+
+### M6 actual cross-section probe acceptance (2026-11-14)
+
+The Pack 1-only gallery browser runner now covers the actual click-to-probe cross-sections in **garden, foliage and floral** galleries, not just visual card selection and fixture counts. Source-backed grid points for ID 21 ridged farmland, ID 24 hedge, and ID 32 skybell verify occupied vs empty selection and solid vs passable collision behavior. **All three canonical probe-reference cases were executed successfully in genuine Node 22.16.0** against previously GitHub-verified fixture modules.
+
+The real Playwright runner now expects **18 additional cutaway clicks** across three landscape sizes, bringing the end-to-end Chromium requirement to **63 interaction checks, 15 gallery views, 30 authentic PNGs**. Both changed Pack 1 test scripts parse; actual Chromium navigation remains blocked by administrator rules, so these browser interactions have not run and there are no screenshots to inspect. The separate **93/93 native Node candidate-suite PASS** remains established. All **30 IDs 9–38** are CANDIDATE, with no integration, merge, deployment, shared CI change or creator/iPhone approval.
