@@ -59,10 +59,11 @@ test('upper desert gallery doors avoid open-air columns and remain supported',()
 test('every multilevel flight has four raised tread coordinates and landing connection',()=>{
   for(const b of models){
     const cells=index(b),nav=navIndex(b),[w,,stories]=b.architecturalNotes.structuralSignature;
-    const entranceZ=b.openings.find(x=>x.kind==='entrance').at[2],mx=Math.floor(w/2),flightZ=entranceZ+3;
+    const entranceZ=b.openings.find(x=>x.kind==='entrance').at[2],mx=Math.floor(w/2);
     const stairCount=b.cells.filter(c=>c.role==='stair').length;
     assert.equal(stairCount,(stories-1)*4,b.id);
     for(let l=0;l<stories-1;l++){
+      const flightZ=entranceZ+3+(l%2)*3;
       for(let step=0;step<4;step++){
         const x=mx-2+step,y=l*4+step,z=flightZ;
         assert.equal(cells.get(k(x,y,z))?.role,'stair',b.id+' missing step '+step);
@@ -152,4 +153,48 @@ test('every authored interior room occupies one cardinally connected floor area'
       assert.ok(room.footprint.some(([x,z])=>x===room.access[0]&&z===room.access[2]),b.id+'/'+room.id+' access outside room');
     }
   }
+});
+
+test('all raised stair treads and landings have continuous occupied load paths to base floor',()=>{
+  let checked=0,upperFlights=0;
+  for(const b of models){
+    const cells=index(b),floor=b.architecturalNotes.storyCount;
+    for(const c of b.cells.filter(x=>x.role==='stair'||x.role==='landing')){
+      const [x,y,z]=c.at;
+      for(let iy=y-1;iy>=0;iy--){
+        assert.ok(cells.has(k(x,iy,z)),b.id+' floating staircase at '+[x,y,z]+' missing support y='+iy);
+      }
+      checked++;
+    }
+    if(floor>=3){
+      const zset=new Set(b.cells.filter(c=>c.role==='stair').map(c=>c.at[2]));
+      assert.equal(zset.size,2,b.id+' upper stair flight overlaps lower support shaft');upperFlights++;
+    }
+  }
+  assert.ok(checked>=140);assert.equal(upperFlights,10);
+});
+
+test('every roof joist stays above head clearance, has roof cover and joins a load-bearing wall or partition on both sides',()=>{
+  const structural=new Set(['wall','column','parapet','partition']);
+  let joists=0;
+  for(const b of models){
+    const occupancy=index(b),roofLevel=b.architecturalNotes.storyCount*4;
+    for(const beam of b.cells.filter(c=>c.role==='beam')){
+      const [x,y,z]=beam.at;
+      assert.equal(y,roofLevel-1,b.id+' joist too low for safe upper-floor headroom');
+      assert.equal(occupancy.get(k(x,y+1,z))?.role,'roof',b.id+' joist has no roof to support');
+      for(const step of [-1,1]){
+        let attached=false;
+        for(let xx=x+step;xx>=0&&xx<b.bounds[0];xx+=step){
+          const neighbor=occupancy.get(k(xx,y,z));
+          if(!neighbor)break;
+          if(structural.has(neighbor.role)){attached=true;break;}
+          if(neighbor.role!=='beam')break;
+        }
+        assert.ok(attached,b.id+' unsupported horizontal roof span at '+[x,y,z]);
+      }
+      joists++;
+    }
+  }
+  assert.ok(joists>4000,'all-30 blueprints must carry real overhead roof framing');
 });
