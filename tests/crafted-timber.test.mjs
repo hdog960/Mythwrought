@@ -93,3 +93,15 @@ test('framed timber panels use deterministic inset joinery without extra mesh or
   assert.equal(RULES.extraDrawCalls,0);
   assert.equal(RULES.saveSchemaChanged,false);
 });
+
+test('rare carpenter arches stay inside framed boards and fade at distance',()=>{
+  assert.equal(RULES.archedLatticePanels,true);
+  for(const token of ['latticeCell=step(.87','archRadius=','archBand=','archPillar=','latticeCell*panel*near','latticeEdge=','-.15*lattice'])
+    assert.ok(TIMBER.includes(token),token);
+  assert.match(TIMBER,/hashCell\(boardCell\+vec2\(121\.0,67\.0\)\)/);
+  assert.doesNotMatch(TIMBER,/sampler2D|texture\(|discard;|gl_FragDepth/);
+  assert.equal(RULES.existingBlockId,BLOCK.WOOD);
+  assert.equal(RULES.extraTextures,0);
+  assert.equal(RULES.extraDrawCalls,0);
+  assert.equal(RULES.saveSchemaChanged,false);
+});
