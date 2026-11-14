@@ -140,6 +140,23 @@ test('flames and inner crystals have decorative non-colliding parts',()=>{
  assert.ok(flame.collision.every(b=>b[4]<=.8));
  assert.ok(flame.visible.some(p=>!p.collision&&p.bounds[4]===1));
  assert.ok(lightingShape(167).visible.some(p=>p.material==='crystalCore'&&!p.collision));
+ // The four crystal lantern cage posts previously began at y=.23, above
+ // the base ending at y=.14. They must now join the SAME physical body
+ // under each rotation, not remain four disconnected visual columns.
+ const touching=(a,b)=>[0,1,2].every(axis=>
+  a[axis]<=b[axis+3]+1e-8&&b[axis]<=a[axis+3]+1e-8);
+ for(let r=0;r<4;r++){
+  const boxes=lightingShape(167,r).collision;
+  const seen=new Set([0]),pending=[0];
+  while(pending.length){
+   const index=pending.pop();
+   for(let j=0;j<boxes.length;j++)if(!seen.has(j)&&touching(boxes[index],boxes[j])){
+    seen.add(j);pending.push(j);
+   }
+  }
+  assert.equal(seen.size,boxes.length,
+   'physical crystal cage must be one connected structure at turn '+r);
+ }
 });
 test('invalid and truncated persisted states fail closed',()=>{
  for(const id of [0,5,158,164,169,209,255,-1,NaN,1.3]){
