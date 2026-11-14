@@ -152,10 +152,11 @@
       "real WebGL2 triangle memory/frame budget",
       "actual iPhone testing",
       "out-of-main-vertical-range placement and wide ID registry implementation"
-    ]
+    ],
+    "mainCheckpointAudit": "Checkpoint 008 independently verified: live automation groves/caves/pilgrim courts activated using IDs 0-8; no manual pack or building roadmap incorporation; Roadmap 4 isolated"
   },
-  "lastVerifiedMain": "caf47776b723a36684edc1a72749e49268ccc688",
-  "lastVerifiedCheckpoint": "007",
+  "lastVerifiedMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+  "lastVerifiedCheckpoint": "008",
   "m1CandidateStats": {
     "uniqueBlueprints": 30,
     "occupiedCells": 125192,
