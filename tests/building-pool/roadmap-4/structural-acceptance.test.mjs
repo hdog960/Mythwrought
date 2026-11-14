@@ -133,3 +133,23 @@ test('biome roof references are appropriate physical families, and specialty rib
     }
   }
 });
+
+test('every authored interior room occupies one cardinally connected floor area',()=>{
+  for(const b of models){
+    for(const room of b.spaces){
+      const footprints=new Set(room.footprint.map(p=>p.join(',')));
+      const root=room.footprint[0],pending=[root],visited=new Set([root.join(',')]);
+      while(pending.length){
+        const [x,z]=pending.pop();
+        for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+          const cell=[x+dx,z+dz],key=cell.join(',');
+          if(footprints.has(key)&&!visited.has(key)){
+            visited.add(key);pending.push(cell);
+          }
+        }
+      }
+      assert.equal(visited.size,room.footprint.length,b.id+'/'+room.id+' has disconnected floor islands');
+      assert.ok(room.footprint.some(([x,z])=>x===room.access[0]&&z===room.access[2]),b.id+'/'+room.id+' access outside room');
+    }
+  }
+});
