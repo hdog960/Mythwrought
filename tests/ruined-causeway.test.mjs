@@ -69,3 +69,22 @@ test('raised terrace edits suppress a causeway and restore without save migratio
  assert.deepEqual(world.save(),baseline);
  assert.ok(ruinedCausewayVertices(world,cx,cz,options).length>0);
 });
+
+test('broken crown preserves a wide open center and grounded approach markers',()=>{
+ const {world,cx,cz,vertices}=find();
+ const x=cx*16+8,z=cz*16+8,h=terrainHeight(x,z,world.seed);
+ // Each vertex has position/color/UV/material; no crown or marker may
+ // bridge the central walking corridor at head height.
+ let crown=0,markers=0;
+ for(let i=0;i<vertices.length;i+=9){
+  const px=vertices[i],py=vertices[i+1],pz=vertices[i+2];
+  if(pz>z+2&&pz<z+3&&py>h+4.45){
+   crown++;
+   assert.ok(px<x-.1||px>x+.9,'broken crown must retain a visible central gap');
+  }
+  if((pz<z-3||pz>z+3)&&py>h+1&&py<h+3)markers++;
+ }
+ assert.ok(crown>0,'fractured crown is present');
+ assert.ok(markers>0,'approach milestones are present');
+ assert.ok(vertices.length/9<=CAUSEWAY_LIMITS.maxVerticesPerChunk);
+});
