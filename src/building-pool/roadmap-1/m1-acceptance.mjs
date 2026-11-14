@@ -48,6 +48,17 @@ export function auditM1Building(b){
   assert(roles.every(id=>boundsDist(p.at,rooms.get(id))<=1),b.id+': '+p.from+' → '+p.to+' mislabeled / not adjacent to real rooms');
   assert(!occupied.has(key(p.at))&&!occupied.has(key([p.at[0],p.at[1]+1,p.at[2]])),b.id+': blocked door portal head/body');
   assert(neighbors(p.at).some(v=>open.has(key(v))),b.id+': no open neighbor through portal');
+  const door=b.placements.find(q=>q.role==='door'&&q.mount?.[0]===p.at[0]&&q.mount?.[1]===p.at[2]);
+  if(p.opening==='hinged-leaf'){
+   assert(door&&door.asset==='pack2:020'&&door.doorState==='open-stowed',b.id+': declared hinged opening has no authored stowed leaf');
+  }else if(p.opening==='open-stall-bay'){
+   assert(b.category==='stable'&&!door,b.id+': open stall bay is mislabeled or incorrectly hinged');
+   const x=p.at[0],z=p.at[2];
+   for(const dz of [-1,1]){
+    const q=occupied.get(key([x,1,z+dz]));
+    assert(q&&q.role==='partition'&&(q.asset==='pack5:096'||q.asset==='live:wood'),b.id+': missing physical rails flanking open stall bay');
+   }
+  }else throw new Error(b.id+': doorway must specify hinged-leaf or open-stall-bay');
  }
  for(const cell of b.walkable){
   const [x,y,z]=cell;
@@ -65,6 +76,29 @@ export function auditM1Building(b){
  assert(typeof regional.regionalDetail==='string' && regional.physicalProfileCells>=4,b.id+': unsupported generic silhouette, regional outside-detail absent');
  const facade=b.placements.filter(p=>p.role==='support'&&p.at[1]>0&&(p.at[0]===0||p.at[0]===b.footprint.width-1||p.at[2]===0));
  assert(facade.length>=regional.physicalProfileCells,b.id+': regional physical profile missing from geometry');
+ // An actual roof-frame beam layout is authored, but material load bearing is
+ // deliberately NOT certified until Pack 2 shapes, anchors and long-span rules
+ // can be tested in the live engine.
+ const frame=b.placements.filter(p=>p.roofFrame);
+ assert(regional.roofFrame?.spanApproval==='unresolved',b.id+': future timber strength must not be falsely certified');
+ assert(regional.roofFrame.asset==='pack2:015'&&regional.roofFrame.cellCount===frame.length,
+        b.id+': roof frame metadata does not match actual physical voxel count');
+ assert(regional.roofFrame.sections>=2&&frame.length>=b.footprint.width-4,b.id+': roof lacks complete crossbeam spans');
+ const beamZs=new Set(frame.filter(p=>p.roofFrame==='crossbeam').map(p=>p.at[2]));
+ assert(beamZs.size===regional.roofFrame.sections,b.id+': roof structural section count not backed by actual crossbeams');
+ for(const z of beamZs){
+  for(let x=2;x<b.footprint.width-2;x++){
+   const beam=frame.find(p=>p.roofFrame==='crossbeam'&&p.at[0]===x&&p.at[2]===z);
+   assert(beam,b.id+': roof frame contains an unsupported empty span at '+x+','+z);
+  }
+  const y=frame.find(p=>p.roofFrame==='crossbeam'&&p.at[2]===z).at[1];
+  assert(occupied.has(key([1,y,z]))&&occupied.has(key([b.footprint.width-2,y,z])),
+         b.id+': timber crossbeam is not anchored into both external side walls');
+ }
+ for(const p of frame.filter(p=>p.roofFrame==='tie-post')){
+  const [x,y,z]=p.at;
+  assert(occupied.has(key([x,y+1,z])),b.id+': floating roof tie-post without immediate roof/beam contact');
+ }
  const intended=regional.roomFurniture;
  for(const room of b.rooms){
   const actual=b.placements.filter(p=>p.role==='furnishing'&&p.room===room.id);
@@ -86,7 +120,7 @@ export function auditM1Building(b){
   const axes=[b.architecturalIdentity.localEntrance[0]-2,b.architecturalIdentity.localEntrance[0]+2];
   assert(axes.every(x=>candidateRails.some(p=>p.at[0]===x)),b.id+': left/right aisles not partitioned into physical bays');
  }
- return {id:b.id,rooms:b.rooms.length,portals:b.portals.length,reachableCells:flood.size,unresolvedAssetFamilies:b.dependencies.length,physicalProfileCells:regional.physicalProfileCells};
+ return {id:b.id,rooms:b.rooms.length,portals:b.portals.length,reachableCells:flood.size,unresolvedAssetFamilies:b.dependencies.length,physicalProfileCells:regional.physicalProfileCells,roofFrameCells:frame.length,roofSpanUnresolved:true};
 }
 
 export function auditM1Set(blueprints){

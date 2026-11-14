@@ -40,10 +40,20 @@ function compile(category,biome,size,index,row){
   }
   const rooms=[],portals=[];
   const room=(id,min,max)=>rooms.push({id,min:[min[0],1,min[1]],max:[max[0],wallTop,max[1]]});
-  const link=(from,to,x,z)=>portals.push({from,to,at:[x,1,z],passable:true});
+  const link=(from,to,x,z)=>portals.push({
+    from,to,at:[x,1,z],passable:true,
+    // Stable bay entries are genuinely open slots between physical stall rails,
+    // not false claims that a stowed hinged leaf exists at every bay.
+    opening:category==='stable'&&['west-front','east-front','west-rear','east-rear'].includes(to)
+      ?'open-stall-bay':'hinged-leaf'
+  });
   const label={house:['hearth','sleeping','pantry','study'],tavern:['taproom','kitchen','storeroom','alcove']};
   if(plan==='stable'){
-    const tackZ=d-5,penZ=midZ-2;
+    // Regional functional zoning is structural: snow retains a warm rear tack
+    // room, desert shifts the tack partition forward to widen its shaded rear
+    // service area, and mountain shortens the rear zone for cliff-side storage.
+    const tackZ=d-5-(biome==='desert'?1:biome==='mountain'?2:0);
+    const penZ=midZ-2+(biome==='mountain'?-1:biome==='snow'?1:0);
     // True physical stall fences/partitions on either side of the accessible longitudinal aisle.
     for(let y=1;y<=2;y++)for(let x=2;x<w-2;x++)if(x!==midX)wall(x,y,tackZ,'partition');
     gap(midX,tackZ);
@@ -127,6 +137,27 @@ function compile(category,biome,size,index,row){
     if(roof==='terrace'&&(x===0||x===w-1||z===0||z===d-1))place(x,y+1,z,'roof','pack3:070');
     place(x,y,z,'roof',theme.roof);
   }
+  // Authored physical roof frame: longitudinal beams every fourth interior z
+  // section, with occasional upward tie posts immediately under taller roof
+  // profiles. This is a *theoretical* timber structural frame, not proof that
+  // unresolved future roof assets can safely span the gaps or carry loads.
+  let frameCells=0,frameSections=0;
+  for(let z=3;z<d-3;z+=4){
+    frameSections++;
+    for(let x=2;x<w-2;x++){
+      if(free(x,wallTop,z)){
+        place(x,wallTop,z,'support','pack2:015','east',{roofFrame:'crossbeam'});
+        frameCells++;
+      }
+      if(x%3!==0)continue;
+      const roofBottom=roofY(x,z)-1;
+      for(let y=wallTop+1;y<=roofBottom;y++)if(free(x,y,z)){
+        place(x,y,z,'support','pack2:015','up',{roofFrame:'tie-post'});
+        frameCells++;
+      }
+    }
+  }
+  if(frameCells===0)throw new Error(name+': no actual roof frame voxels');
   if(feature==='porch'||feature==='arcade'){
     for(const x of feature==='porch'?[entry-2,entry+2]:[3,entry,w-4])for(let y=1;y<=wallTop;y++)if(x!==entry&&free(x,y,0))place(x,y,0,'support','pack2:022');
   }else if(feature==='buttress'){
@@ -208,7 +239,7 @@ function compile(category,biome,size,index,row){
   // Walkable portal thresholds must remain empty at standing/head level.
   for(const portal of portals){const [x,y,z]=portal.at;if(!free(x,y,z)||!free(x,y+1,z))throw new Error(name+': portal blocked '+at(x,y,z));}
   const deps=[...new Set([...occupied.values()].map(p=>p.asset).filter(a=>!a.startsWith('live:')))].sort().map(asset=>({asset,status:'unresolved',requires:['exact physical dimensions and orientation','support/mount and selection/collision bounds','schema-1 safe asset substitution and load-time dependency resolution']}));
-  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
+  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roofFrame:{cellCount:frameCells,sections:frameSections,asset:'pack2:015',spanApproval:'unresolved'},roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
   validateBlueprint(b);return b;
 }
 export function getM1Blueprints(){

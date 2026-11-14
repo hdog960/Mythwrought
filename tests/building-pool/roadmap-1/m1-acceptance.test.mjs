@@ -46,3 +46,45 @@ test('a tavern cannot be cosmetically relabeled without an authored actual bar c
  b.placements=b.placements.filter(p=>p.asset!=='pack5:086');
  assert.throws(()=>auditM1Building(b),/furnishing mismatch|lacks dedicated/);
 });
+test('45 candidates distinguish mounted hinged doorways from 60 intentionally open empty-stall gates',()=>{
+ const hinged=buildings.flatMap(b=>b.portals.filter(p=>p.opening==='hinged-leaf'));
+ const stall=buildings.flatMap(b=>b.portals.filter(p=>p.opening==='open-stall-bay'));
+ assert.equal(stall.length,60);assert.ok(hinged.length>=60);
+ for(const b of buildings){
+  const doors=b.placements.filter(x=>x.role==='door');
+  assert.equal(doors.length,b.portals.filter(x=>x.opening==='hinged-leaf').length,b.id);
+ }
+});
+test('a claimed hinged portal without an authored adjacent stowed door is rejected',()=>{
+ const b=sample(b=>{b.placements=b.placements.filter(p=>p.role!=='door');});
+ assert.throws(()=>auditM1Building(b),/hinged opening has no authored stowed leaf/);
+});
+test('a stable bay cannot masquerade as a hinged door',()=>{
+ const b=structuredClone(buildings.find(b=>b.category==='stable'));
+ b.portals.find(p=>p.opening==='open-stall-bay').opening='hinged-leaf';
+ assert.throws(()=>auditM1Building(b),/hinged opening has no authored stowed leaf/);
+});
+test('a stable bay must have actual partition rails on both edges',()=>{
+ const b=structuredClone(buildings.find(b=>b.category==='stable'));
+ const gate=b.portals.find(p=>p.opening==='open-stall-bay');
+ b.placements=b.placements.filter(p=>!(p.at[0]===gate.at[0]&&p.at[1]===1&&p.at[2]===gate.at[2]-1));
+ assert.throws(()=>auditM1Building(b),/rails flanking open stall bay/);
+});
+test('every candidate roof has physically authored frame sections and an unresolved strength/safe-span gate',()=>{
+ for(const b of buildings){
+  const {roofFrame}=b.architecturalIdentity;
+  assert.equal(roofFrame.asset,'pack2:015');
+  assert.equal(roofFrame.spanApproval,'unresolved');
+  assert.ok(roofFrame.sections>=2);
+  assert.ok(roofFrame.cellCount>=b.footprint.width-4);
+  assert.equal(b.placements.filter(p=>p.roofFrame).length,roofFrame.cellCount);
+ }
+});
+test('missing actual roof crossbeam voxel is rejected',()=>{
+ const b=sample(b=>{b.placements.splice(b.placements.findIndex(p=>p.roofFrame==='crossbeam'),1);});
+ assert.throws(()=>auditM1Building(b),/roof frame metadata does not match actual physical voxel count/);
+});
+test('roof span approval cannot be invented before physical Pack 2 beam and roof assets are integrated',()=>{
+ const b=sample(b=>{b.architecturalIdentity.roofFrame.spanApproval='approved';});
+ assert.throws(()=>auditM1Building(b),/future timber strength must not be falsely certified/);
+});

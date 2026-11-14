@@ -17,10 +17,10 @@ export const DESIGN_MATRIX = Object.freeze({
     'enchanted-forest': [
       ['Glowroot Cottage',11,13,'side','dome','tower',-1],
       ['Whisperleaf Canopy Home',17,16,'split','butterfly','skylight',2],
-      ['Elderbough Gathering House',22,20,'cross','monitor','arcade',1]],
+      ['Elderbough Gathering House',22,20,'cross','dome','arcade',1]],
     mountain: [
       ['Switchback Stone Hut',12,12,'rear','shed','buttress',-1],
-      ['Cliffbraced Terrace Home',17,15,'side','terrace','arcade',2],
+      ['Cliffbraced Terrace Home',17,15,'side','shed','buttress',2],
       ['Highridge Buttressed Hall',24,20,'cross','hip','tower',-2]]
   }),
   tavern: Object.freeze({
@@ -42,8 +42,8 @@ export const DESIGN_MATRIX = Object.freeze({
       ['Starlit Revel Court',23,21,'cross','monitor','tower',2]],
     mountain: [
       ['Quarry Cup Tavern',13,13,'rear','shed','buttress',2],
-      ['Stonebridge Ale Gallery',18,17,'split','terrace','porch',-1],
-      ['Cragspire Banquet House',24,22,'cross','hip','arcade',-2]]
+      ['Stonebridge Ale Gallery',18,17,'split','shed','buttress',-1],
+      ['Cragspire Banquet House',24,22,'cross','steep','buttress',-2]]
   }),
   stable: Object.freeze({
     temperate: [
@@ -57,7 +57,7 @@ export const DESIGN_MATRIX = Object.freeze({
     snow: [
       ['Driftside Shelter Stalls',14,14,'stable','steep','chimney',0],
       ['Icepath Insulated Barn',19,18,'stable','gable','buttress',0],
-      ['Whitepine Winter Stable',25,23,'stable','monitor','tower',0]],
+      ['Whitepine Winter Stable',25,23,'stable','steep','tower',0]],
     'enchanted-forest': [
       ['Mossbridge Empty Pens',13,15,'stable','dome','skylight',0],
       ['Rootlantern Shelter',19,18,'stable','butterfly','arcade',0],
@@ -65,6 +65,6 @@ export const DESIGN_MATRIX = Object.freeze({
     mountain: [
       ['Talus Road Stable',14,15,'stable','shed','buttress',0],
       ['Highpass Shelter Barn',19,19,'stable','hip','chimney',0],
-      ['Cliffwatch Pack Stable',26,22,'stable','terrace','arcade',0]]
+      ['Cliffwatch Pack Stable',26,22,'stable','steep','buttress',0]]
   })
 });
