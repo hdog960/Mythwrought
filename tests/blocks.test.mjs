@@ -12,7 +12,9 @@ function stage(){
 }
 test('basic interaction materials and finite range are explicit',()=>{
   assert.equal(INTERACTION_REACH,6);
-  assert.deepEqual(BUILD_MATERIALS,[BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL]);
+  assert.deepEqual(BUILD_MATERIALS,[BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE]);
+  assert.equal(BLOCK_NAMES[BLOCK.LEAVES],'leaf canopy');
+  assert.equal(BLOCK_NAMES[BLOCK.DEEPSTONE],'deepstone');
   assert.equal(BLOCK_NAMES[BLOCK.GRASS],'grass');
 });
 test('first visible block is mined, never the invisible block behind it',()=>{

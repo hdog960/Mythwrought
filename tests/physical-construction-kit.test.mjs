@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {BLOCK,VoxelWorld,WORLD_MAX_Y} from '../src/voxel.mjs';
+import {BLOCK,VoxelWorld,WORLD_MAX_Y,terrainHeight} from '../src/voxel.mjs';
 import {stoneColumn,stoneGateway,timberFrame,planUneditedConstruction,ruinedWall,stoneSteps,CONSTRUCTION_IDS,CONSTRUCTION_CONTRACT} from '../src/physical-construction-kit.mjs';
 
 test('physical palette reuses stable saved block IDs and cube collision',()=>{
@@ -34,7 +34,9 @@ test('timber frames are physical posts and lintels, no duplicate cells',()=>{
 });
 test('construction planning never overwrites saved edits or existing terrain',()=>{
   const w=new VoxelWorld(179);
-  const cells=stoneGateway([40,13,40],{height:4,span:3,depth:1});
+  // Use a naturally solid ground cell: setting AIR above a grassy world
+  // would be a no-op, not an explicit saved excavation to protect.
+  const cells=stoneGateway([40,terrainHeight(40,40,w.seed),40],{height:4,span:3,depth:1});
   const [x,y,z]=cells[0];
   assert.equal(w.set(x,y,z,BLOCK.AIR),true);
   // Explicit AIR edits are protected even when empty.

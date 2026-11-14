@@ -65,12 +65,15 @@ export function placeVoxelWatchtower(world,plan){
  // Re-plan against CURRENT world state, including untouched interior clearance.
  // A stale plan must not enclose later player edits or span a newly excavated cave.
  const fresh=planVoxelWatchtower(world,ox,oz);
- if(!fresh||fresh.cells.length!==plan.cells.length)return false;
- const expected=new Map(fresh.cells.map(c=>[key(c[0],c[1],c[2]),c[3]]));
- for(const cell of plan.cells){
-  if(!Array.isArray(cell)||cell.length!==4||!cell.every(Number.isInteger)||
-     expected.get(key(cell[0],cell[1],cell[2]))!==cell[3])return false;
+ if(!fresh||!plan.optIn||fresh.cells.length!==plan.cells.length||
+    plan.blockCount!==fresh.blockCount)return false;
+ // Require EXACT ordered canonical shape; validating only membership allowed
+ // an altered cell to duplicate a valid one and omit another with equal count.
+ for(let i=0;i<fresh.cells.length;i++){
+  const expected=fresh.cells[i],actual=plan.cells[i];
+  if(!Array.isArray(actual)||actual.length!==4||
+     actual.some((v,j)=>v!==expected[j]))return false;
  }
- for(const [x,y,z,id] of plan.cells)if(!world.set(x,y,z,id))return false;
+ for(const [x,y,z,id] of fresh.cells)if(!world.set(x,y,z,id))return false;
  return true;
 }

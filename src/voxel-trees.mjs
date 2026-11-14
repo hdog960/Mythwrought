@@ -3,7 +3,7 @@
 // Each occupied cell is a real world voxel, not a decorative mesh triangle.
 import {BLOCK,terrainHeight,baseBlock,WORLD_MAX_Y} from './voxel.mjs';
 export const TREE_VARIANTS=Object.freeze(['roundwood','spire','windswept']);
-const key=(x,y,z)=>x+','+y+','+z';
+const key=(x,y,z)=>x+','+y+','+z;
 export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES??BLOCK.GRASS}={}){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
     !Number.isInteger(x)||!Number.isInteger(z)||!TREE_VARIANTS.includes(variant)||

@@ -63,7 +63,7 @@ test('mining a flower anchor removes that decoration without changing other plan
   assert.equal(w.set(x,y+1,z,BLOCK.STONE),true);
   assert.ok(accents(w,0,0).length<all.length,'Flower clipped through added construction');
 });
-test('meadow mesh uses existing chunk buffer with no new physical block IDs',()=>{
+test('meadow mesh remains render-only alongside independently registered physical leaf/deepstone',()=>{
   const w=new VoxelWorld(179),before=JSON.stringify(w.save());
   const mesh=meshChunk(w,-1,0),flora=accents(w,-1,0);
   assert.equal(mesh.length%9,0);
@@ -71,8 +71,10 @@ test('meadow mesh uses existing chunk buffer with no new physical block IDs',()=
   assert.ok(packedIndex(mesh,flora)>=0,
     'Visual accents must remain an exact contiguous section of the editable chunk mesh');
   assert.equal(JSON.stringify(w.save()),before,'Rendering changed original schema-1 bytes');
-  assert.equal(w.set(0,15,0,7),false,'Visual-only ID accidentally became storable');
+  assert.equal(w.set(0,15,0,9),false,'Unregistered decorative shader tag must not be a block');
   assert.equal(w.edits.size,0,'Decorations must not create edits');
+  assert.equal(w.set(0,15,0,BLOCK.DEEPSTONE),true,'New real block must remain editable');
+  assert.equal(VoxelWorld.restore(w.save()).get(0,15,0),BLOCK.DEEPSTONE);
 });
 test('flowers do not grow through ceiling blocks, and density stays finite at seams',()=>{
  const w=new VoxelWorld(-31);
