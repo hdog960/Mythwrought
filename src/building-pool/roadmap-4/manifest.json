@@ -114,7 +114,7 @@
   },
   "milestoneState": {
     "M0": "TECHNICAL COMPLETE: exact source native Node 11/11 and PR CI",
-    "M1": "30/30 authored; 0 accepted. Native Node 26/26; 180 authentic Chromium Canvas2D captures; real WebGL2 and in-game physical asset acceptance BLOCKED",
+    "M1": "30/30 authored theoretical; 0 accepted. 31/31 native Node; 180 Chromium Canvas2D captures; WebGL2/real physics/creator approval BLOCKED",
     "M2": "NOT STARTED",
     "M3": "NOT STARTED",
     "M4": "NOT STARTED",
@@ -137,7 +137,7 @@
   ],
   "qa": {
     "m0NativeNode": "11/11 PASS, exact schema/test Git blobs",
-    "m1PlusM0NativeNode": "26/26 PASS with 8 new M1 structural acceptance tests and 7 M1 suites",
+    "m1PlusM0NativeNode": "31/31 PASS: original 26 plus 1 contiguous-room regression and 4 dedicated room/geometry/dependency readiness tests, Node 22.16.0, local Git object parity",
     "m1ExactSourceBlob": "4d8e6f7e10c477a790aa41a7f5794be7d65281a3",
     "coreSchemaBlob": "e3db140109b8537a201377f27724e0b1fb53d643",
     "uniqueGeometrySignatures": 30,
@@ -153,7 +153,17 @@
       "actual iPhone testing",
       "out-of-main-vertical-range placement and wide ID registry implementation"
     ],
-    "mainCheckpointAudit": "Checkpoint 008 independently verified: live automation groves/caves/pilgrim courts activated using IDs 0-8; no manual pack or building roadmap incorporation; Roadmap 4 isolated"
+    "mainCheckpointAudit": "Checkpoint 008 independently verified: live automation groves/caves/pilgrim courts activated using IDs 0-8; no manual pack or building roadmap incorporation; Roadmap 4 isolated",
+    "routeReadiness": "All 95 functional room accesses reached from authored exterior entrances; upper-level route contains symbolic stairs; not real player AABB",
+    "geometryCensus": {
+      "exposedCubeFaces": 192868,
+      "previewTriangleEquivalent": 385736,
+      "largestPerBuildingPreviewVertexBufferBytes": 2484576,
+      "actualGpuFrameTime": null,
+      "webgl2Measured": false
+    },
+    "newAuditSourceBlob": "97303802d73960a8c7f2cdfb7020e395f95e7c77",
+    "newAuditTestBlob": "dc0128892ceab1d380a51adf312bcd9be7d7d3d7"
   },
   "lastVerifiedMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
   "lastVerifiedCheckpoint": "008",
