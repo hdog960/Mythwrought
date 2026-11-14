@@ -5,11 +5,11 @@
 > live-game certification. v0.10 Gate A open; v0.11 locked.
 
 ## Current state
-- Project: \`hdog960/Mythwrought\`, GitHub Pages game unchanged.
+- Project: `hdog960/Mythwrought`, GitHub Pages game unchanged.
 - Exclusive draft: [PR #115](https://github.com/hdog960/Mythwrought/pull/115).
 - Authoritative exact HEAD: **use PR #115 head SHA**, not a cached release
   checkpoint; final HEAD changes as the acceptance dossier is committed.
-- Base integrated main \`f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84\`
+- Base integrated main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`
   and last creator integration checkpoint **006**.
 - Issue [#109](https://github.com/hdog960/Mythwrought/issues/109)
   manual exclusive ID band 159–208 and Issue
@@ -19,8 +19,8 @@
 - 22 authored physical candidate families, 23 persistent candidate IDs
   **159–181**, remaining Pack 4 IDs **182–208 unassigned**.
   Live IDs 0–8 / sentinel 255 remain protected.
-- All changed files are within \`src/block-packs/pack-4/\` and
-  \`tests/block-packs/pack-4/\`; nothing was merged into main or placed.
+- All changed files are within `src/block-packs/pack-4/` and
+  `tests/block-packs/pack-4/`; nothing was merged into main or placed.
 
 ## Family acceptance matrix
 
@@ -58,16 +58,16 @@
    transparent triangle ordering and cross-family differences.
    This is **NOT the Node built-in test runner**.
 2. **5/5 native Node 22 tests passed** for the isolated
-   \`preview-utils.mjs\` translucent sort utility. The exact local
-   source blob SHA \`dbb9a47a6474fbc3461e006530d6dbaffbea42b2\`
+   `preview-utils.mjs` translucent sort utility. The exact local
+   source blob SHA `dbb9a47a6474fbc3461e006530d6dbaffbea42b2`
    and exact test blob SHA
-   \`a469b2f1a1648b1f18b51291b3ab0103701321b7\`
+   `a469b2f1a1648b1f18b51291b3ab0103701321b7`
    matched the GitHub blobs before native execution.
 3. Prior pre-M5 candidate GitHub Actions baseline [run
    #43634712543](https://github.com/hdog960/Mythwrought/actions/runs/43634712543)
    must be checked separately. It covers the unchanged game's
    standard Node/Chromium suite but **does not run Pack 4's nested
-   \`tests/block-packs/pack-4/*.test.mjs\`**.
+   `tests/block-packs/pack-4/*.test.mjs`**.
 4. Candidate reviewer gallery now uses a single reused WebGL2
    context, deletes temporary GPU buffers/programs/VAOs, sorts
    translucent triangles back-to-front for the fixed preview
@@ -80,13 +80,13 @@
 ## Mandatory unpassed final acceptance gates
 - [ ] Checkout exact review HEAD and run **real native Node** across
   the full suite:
-  \`node --test tests/block-packs/pack-4/*.test.mjs\`.
+  `node --test tests/block-packs/pack-4/*.test.mjs`.
   Local runner cannot obtain the remote checkout due blocked GitHub DNS.
   The native subset above does not certify the whole pack.
-- [ ] Run \`node tests/block-packs/pack-4/gallery-browser.mjs\`
-  with free \`playwright\` and genuine Chromium on a host that permits
+- [ ] Run `node tests/block-packs/pack-4/gallery-browser.mjs`
+  with free `playwright` and genuine Chromium on a host that permits
   local HTTP navigation. Chromium here returned
-  \`net::ERR_BLOCKED_BY_ADMINISTRATOR\` even for simple data URLs.
+  `net::ERR_BLOCKED_BY_ADMINISTRATOR` even for simple data URLs.
 - [ ] Inspect authentic **UNMERGED CANDIDATE — NOT IN LIVE GAME**
   screenshot results for all 23 IDs, rotated variants, physically
   empty pane/frame/well/flue spaces, alpha layering and original art
@@ -110,14 +110,14 @@
 
 From an authorized checkout at the exact PR HEAD:
 
-\`\`\`sh
+```sh
 node --test tests/block-packs/pack-4/*.test.mjs
 npm install --no-save --no-audit --no-fund playwright@1.58.2
 npx playwright install chromium
 node tests/block-packs/pack-4/gallery-browser.mjs
-\`\`\`
+```
 
-The installed root CI currently runs \`node --test tests/*.test.mjs\`
+The installed root CI currently runs `node --test tests/*.test.mjs`
 and does not include the nested Pack 4 tests. Do **not** edit shared
 workflows from the Pack 4 lane; report this to the integration owner.
 
