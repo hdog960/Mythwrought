@@ -43,8 +43,10 @@ if(args.length>1||args.some(arg=>arg!=='--node-only')){
    'preview-utils.test.mjs','windows.test.mjs'
   ];
   const missing=expectedNames.filter(x=>!tests.includes(x));
-  if(missing.length){
-   console.error('M5 FAIL: Missing candidate-specific native Node suites: '+missing.join(', '));
+  const unexpected=tests.filter(x=>!expectedNames.includes(x));
+  if(missing.length||unexpected.length){
+   console.error('M5 FAIL: Dedicated native suite inventory mismatch: missing='+
+    missing.join(', ')+' unexpected='+unexpected.join(', '));
    process.exitCode=1;
   }else{
    const run=spawnSync(process.execPath,['--test','--test-reporter=tap',
