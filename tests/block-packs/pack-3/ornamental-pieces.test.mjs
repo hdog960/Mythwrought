@@ -9,14 +9,14 @@ import {createPack3OrnamentalFixture,restorePack3OrnamentalFixture,
 const hit=(shape,x,y,z)=>shape.boxes.some(b=>x>=b[0]&&x<b[3]&&
   y>=b[1]&&y<b[4]&&z>=b[2]&&z<b[5]);
 const turn=b=>[1-b[5],b[1],b[0],1-b[2],b[4],b[3]];
-test('manifest allocates unique 119–122 only in Pack 3 band with seven roofing and three fortress IDs',()=>{
+test('manifest allocates 119–122 alongside all seventeen Pack 3 candidate IDs',()=>{
   assert.equal(validatePack3Manifest(),true);
   assert.deepEqual(PACK3_ORNAMENTAL_IDS,[119,120,121,122]);
   assert.deepEqual(PACK3_ROSTER.map(x=>x.roster),
     [23,24,25,26,27,28,29,69,70,71,72,73,74,75,76,77,78]);
   assert.deepEqual(PACK3_ROSTER.filter(x=>x.id!==null).map(x=>x.id),
-    [109,110,111,112,113,114,115,116,117,118,119,120,121,122]);
-  assert.equal(PACK3_ROSTER.filter(x=>x.id===null).length,3);
+    [109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125]);
+  assert.equal(PACK3_ROSTER.filter(x=>x.id===null).length,0);
   assert.ok(PACK3_ROSTER.every(x=>x.id===null||(x.id>=109&&x.id<=158&&x.id!==255)));
 });
 test('four materially and physically distinct original sculptural silhouettes',()=>{
