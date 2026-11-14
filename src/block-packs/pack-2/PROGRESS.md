@@ -130,6 +130,16 @@
 - [ ] Exact checkout is unavailable in the restricted local runtime (GitHub DNS/direct HTTPS failure), so all six native Node suites and both candidate Chromium runners remain unexecuted. Source-level 88/88 V8 tests, 121-state winding audit, and 900 water rays do **not** substitute for them.
 - [ ] Check the new exact PR HEAD GitHub Actions result; keep Gate A open, v0.11 locked, no merge/deployment/shared code or world placement.
 
+## Session 10 — exact-head native/browser QA tooling readiness (2026-11-14)
+
+- [x] Latest main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84` / checkpoint **006** and Issues #109/#117 rechecked, plus competing Pack 1/3/4/5 draft heads. 18 physical candidates remain ID-unique within 59–76.
+- [x] Found the local default Python Playwright browser executable missing. **Actually launched system Chromium** and imported a stand-alone inline `data:text/javascript` module successfully. This is a **tooling smoke test only**, NOT a candidate screenshot test.
+- [x] Updated Python gallery runner to select free installed Chromium if Playwright's downloaded browser is absent; added `--expected-head` plus clean-worktree refusal for source-exact screenshot evidence.
+- [x] Added `run-acceptance.sh` under Pack 2 tests. It performs exact Git HEAD/worktree verification, **all six native Node test suites**, and 667×375 / 844×390 / 932×430 **authentic browser screenshot production** using the Python runner *when a checkout is available*. It never modifies shared CI.
+- [x] Re-executed all six checked-in suites' **88 test bodies in an isolated V8 compatibility harness**, **88/88 passed** on current source. Native Node not run; V8 test execution must not be represented as such.
+- [ ] No complete verified local checkout: container cannot resolve/reach GitHub, and Github-connector-returned source has not been mounted here. Accordingly **actual native Node, candidate Chromium PNGs and screenshot inspection remain UNRUN**.
+- [ ] Full production WebGL2, real iPhone, saved player schema 1, fluid simulation/transparent alpha handling and Gate A art/control approval still not certified. No merge/deploy/world placement/v0.11 unlock.
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
