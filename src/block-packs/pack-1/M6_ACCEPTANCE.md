@@ -18,6 +18,7 @@ STATUS: SOURCE CANDIDATE ONLY. Final acceptance NOT APPROVED; creator integratio
 | All 30 IDs 9–38 unique | VERIFIED in exact-source V8 audit |
 | Existing 5 authored suites | 65/65 Node-style test bodies pass exact-source V8 shim; NOT real Node |
 | New unified 30-ID acceptance suite | 10/10 Node-style test bodies pass exact-source V8 shim; NOT real Node |
+| Independent ray/stone occupancy regression | 6/6 extra authored test bodies pass V8; 22,932 independent rays + 8,232 stone-pick checks; NOT real Node |
 | Generic :00 targeting + :12 surface meshing | 120/120 combinations (30 candidate IDs × 4 rotations) pass exact unmerged source V8 audit |
 | Opt-in surface-mesh prototype budget | 12–532 triangles per candidate/rotation; NOT measured WebGL GPU workload |
 | Previous PR exact-head baseline CI | SUCCESS, run 43635324085 on head 462f4c6c1e5bcb683515c93efad3301d3591f610, genuine baseline Node and Chromium smoke |
@@ -35,9 +36,9 @@ CI detail: the project's root npm test command covers tests/*.test.mjs, not nest
 
 After checking out the exact PR branch, run from repository root:
 
-    node --test tests/block-packs/pack-1/core-masonry.test.mjs tests/block-packs/pack-1/stone-shapes.test.mjs tests/block-packs/pack-1/garden-components.test.mjs tests/block-packs/pack-1/physical-foliage.test.mjs tests/block-packs/pack-1/floral-forms.test.mjs tests/block-packs/pack-1/all-families.test.mjs
+    node --test tests/block-packs/pack-1/core-masonry.test.mjs tests/block-packs/pack-1/stone-shapes.test.mjs tests/block-packs/pack-1/garden-components.test.mjs tests/block-packs/pack-1/physical-foliage.test.mjs tests/block-packs/pack-1/floral-forms.test.mjs tests/block-packs/pack-1/all-families.test.mjs tests/block-packs/pack-1/raycast-regression.test.mjs
 
-Six test modules containing 75 authored groups, including the new unified 30-ID audit. A passed V8 assertion shim is never enough to mark this real Node requirement passed. Capture actual process exit status and standard output before recording verified acceptance.
+Seven test modules containing 81 authored groups, including the new unified 30-ID audit. A passed V8 assertion shim is never enough to mark this real Node requirement passed. Capture actual process exit status and standard output before recording verified acceptance.
 
 ## Authentic Chromium gallery and screenshot runner, not yet executed
 
@@ -62,3 +63,12 @@ Source-authored gallery code does NOT establish a successful run or screenshot. 
 Twenty-one families authored; thirty distinct candidate IDs allocated; all stay CANDIDATE. Milestone 6 NOT ACCEPTED until genuine focused Node/Chromium, authentic screenshots, cross-engine registration/shape/save compatibility and physical iPhone creator approvals. Do not merge, deploy, generate world placements or unlock v0.11.
 
 Future Continue Development should recheck main, checkpoint, Issues 109/117, PR 113 and its exact-head CI, then run real tests on an available checkout, repair only Pack 1, and refresh the evidence matrix.
+
+
+## Independent Milestone 6 targeting fuzz audit (new)
+
+The dedicated optional file `tests/block-packs/pack-1/raycast-regression.test.mjs` now adds **six authored Node test groups**. All six bodies pass on exact GitHub source in V8-compatible assertion/test shims, but they have NOT run under genuine Node. They compare an independent slab-ray intersection implementation to Pack 1's actual isolated fixture raycasting over **22,932** face-oriented rays across masonry, garden, foliage and floral/mushroom candidates at the available quarter-turn rotations. Stone fixtures correctly expose local occupancy `pick` instead of claiming engine-level ray support, so **8,232** direct 3D AABB occupancy probes compare that picker against independent geometric inclusion. Empty-cell phantom-hit rejection is covered.
+
+Separately, **29,988** face-oriented rays were evaluated via V8 using exact Pack 1 source and the unmerged :00 generic raycast for the six stone shapes, with **zero** analytic expected-distance mismatches. These are valuable source audits, NOT true Node, real production collision, iPhone or browser testing.
+
+The seven dedicated nested test files now contain **81 authored groups** (65 initial + 10 unified + 6 new). Current root GitHub Actions test wildcard does not include them. The previously verified PR exact-head default workflow [#43638833572](https://github.com/hdog960/Mythwrought/actions/runs/43638833572) succeeded; any subsequent changed branch head must be verified independently before stating its CI conclusion. Final Milestone 6 acceptance remains **OPEN**.
