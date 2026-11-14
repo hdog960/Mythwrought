@@ -90,15 +90,15 @@ function bookshelf(variant){
     if(star){
       for(let i=0;i<4;i++){
         const x=.18+i*.155;
-        art.push(b(x,y+.09,.26,x+.10,y+.23,.74,i%2?'bookGold':'bookBlue'));
-        art.push(b(x+.03,y+.12,.23,x+.075,y+.17,.27,'bronze'));
+        art.push(b(x,y+.09,.24,x+.10,y+.23,.942,i%2?'bookGold':'bookBlue'));
+        art.push(b(x+.03,y+.12,.942,x+.075,y+.17,.966,'bronze'));
       }
     }else{
       for(let i=0;i<6;i++){
         const x=.16+i*.11;
-        art.push(b(x,y+.075,.15,x+.072,y+.235+(i%3)*.008,.76,
+        art.push(b(x,y+.075,.15,x+.072,y+.235+(i%3)*.008,.944,
           ['bookBlue','bookRed','bookGreen','bookGold'][i%4]));
-        art.push(b(x+.012,y+.19,.76,x+.06,y+.204,.782,'bronze'));
+        art.push(b(x+.012,y+.19,.944,x+.06,y+.204,.965,'bronze'));
       }
     }
   }
