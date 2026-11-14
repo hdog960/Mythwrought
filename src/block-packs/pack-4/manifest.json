@@ -39,15 +39,21 @@
     172,
     173,
     174,
-    175
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181
   ],
   "unassignedBand": [
-    176,
+    182,
     208
   ],
-  "candidateVariants": 17,
+  "candidateVariants": 23,
   "completeFamilies": 0,
-  "implementedCandidateFamilies": 16,
+  "implementedCandidateFamilies": 22,
   "statusGlossary": {
     "candidate": "Implemented in isolated PR only; engine integration and live compatibility not certified",
     "planned": "Not yet implemented"
@@ -218,56 +224,69 @@
       "roster": 63,
       "name": "Chimney blocks",
       "category": "hearth-civic",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Chimney component, not built fireplace"
+      "status": "candidate",
+      "blockIds": [
+        176
+      ],
+      "note": "Hollow Ashenwatch chimney course: real open flue and corner quoin masonry; smoke metadata disabled"
     },
     {
       "roster": 64,
       "name": "Fireplace blocks",
       "category": "hearth-civic",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Hearth fixture, decorative heat metadata only"
+      "status": "candidate",
+      "blockIds": [
+        177
+      ],
+      "note": "Open Hearthstone fireplace insert: open mouth, grate and mantle; no fire/smoke/light simulation"
     },
     {
       "roster": 65,
       "name": "Well rim blocks",
       "category": "hearth-civic",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Standalone rim segment; no built well"
+      "status": "candidate",
+      "blockIds": [
+        178
+      ],
+      "note": "L-shaped Wellside quarter-rim: empty inside corner, reusable one-cell quadrant only"
     },
     {
       "roster": 66,
       "name": "Well roof blocks",
       "category": "hearth-civic",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Well-specific cap; not generic roof"
+      "status": "candidate",
+      "blockIds": [
+        179
+      ],
+      "note": "Wall-mounted Wellhouse corbel/eave: rope hook and slats, unlike Pack 3 generic roofing"
     },
     {
       "roster": 67,
       "name": "Well pulley blocks",
       "category": "hearth-civic",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Separate bracket/wheel and attachment"
+      "status": "candidate",
+      "blockIds": [
+        180
+      ],
+      "note": "Wall-mounted old brass pulley: physical open wheel ring, axle and rope; static, no animated mechanism"
     },
     {
       "roster": 68,
       "name": "Fountain blocks",
       "category": "hearth-civic",
-      "status": "planned",
-      "blockIds": [],
-      "note": "Basin segment distinct from water/aqueduct"
+      "status": "candidate",
+      "blockIds": [
+        181
+      ],
+      "note": "Dry Dawnward fountain basin segment: carved empty trough and ornamental spout; no fluid"
     }
   ],
   "sourceFiles": [
     "src/block-packs/pack-4/windows.mjs",
     "src/block-packs/pack-4/lighting.mjs",
     "src/block-packs/pack-4/fixture.mjs",
-    "src/block-packs/pack-4/furnishings.mjs"
+    "src/block-packs/pack-4/furnishings.mjs",
+    "src/block-packs/pack-4/hearth-civic.mjs"
   ],
   "testFiles": [
     "tests/block-packs/pack-4/windows.test.mjs",
@@ -278,7 +297,9 @@
     "tests/block-packs/pack-4/furnishings.test.mjs",
     "tests/block-packs/pack-4/furnishings-fixture.test.mjs",
     "tests/block-packs/pack-4/gallery-browser.mjs",
-    "tests/block-packs/pack-4/manifest.test.mjs"
+    "tests/block-packs/pack-4/manifest.test.mjs",
+    "tests/block-packs/pack-4/hearth-civic.test.mjs",
+    "tests/block-packs/pack-4/hearth-civic-fixture.test.mjs"
   ],
   "dependencies": [
     "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
@@ -287,7 +308,9 @@
     "Transparency sorting, depth-writing and multi-material faces in the shared renderer",
     "Working dynamic lighting, alpha/depth order, wall/floor support and light source budgets are central engine dependencies, NOT implemented here",
     "Fabric billow, text-editable signs and usable sit/interact behaviors are not implemented; individual physical pieces and attachment metadata only.",
-    "Wall-mounted canopy requires a verified adjacent fixed support; ceiling banner needs fixed support overhead."
+    "Wall-mounted canopy requires a verified adjacent fixed support; ceiling banner needs fixed support overhead.",
+    "M4 fire/heat/smoke, water level/fountain and pulley mechanics are NOT implemented: only physical geometry and explicit engines-disabled metadata",
+    "Future manual integration must honor open flues, hearth mouths, hollow well quadrants, dry fountain basins and mounted brackets; do not use a full-cube fallback"
   ],
   "restrictions": {
     "noMainEdits": true,
@@ -307,6 +330,6 @@
     109,
     117
   ],
-  "lastV8FocusedChecks": 104,
-  "currentAcceptanceStatus": "UNMERGED CANDIDATE — 104/104 V8 harness assertions pass; native Node and successful Chromium gallery unverified"
+  "lastV8FocusedChecks": 142,
+  "currentAcceptanceStatus": "M0–M4 source authored, unmerged; M5 ACCEPTANCE OPEN pending exact-head native Node/Chromium, source screenshots and creator review."
 }
