@@ -17,7 +17,7 @@ test('three physically occupied, distinct tree silhouettes, repeatable over seed
    assert.deepEqual(p,q);
    assert.ok(p.blockCount>=15);
    assert.ok(p.cells.some(c=>c[3]===BLOCK.WOOD));
-   assert.ok(p.cells.some(c=>c[3]===BLOCK.GRASS));
+   assert.ok(p.cells.some(c=>c[3]===BLOCK.LEAVES),'Physical foliage must use registered leaf blocks');
    counts.push(p.blockCount);
   }
   assert.equal(new Set(counts).size,3);
