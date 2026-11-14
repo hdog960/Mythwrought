@@ -53,3 +53,8 @@
 - **12/12 authentic Chromium WebGL2 PNGs** inspected across M1 (6 assets) and M2 (8 assets), 3 landscape sizes × 2 rotations each; native ES module source-runner `tests/block-packs/pack-5/esm-webgl-browser.py m1|m2 <output-dir>`. Unique panel GPU pixel hashes and nonblank coverage pass. NOT production renderer, localhost-served page or physical iPhone test.
 - Manifest now: **7 CANDIDATE / 11 NOT STARTED / 0 INTEGRATED**; persistent numeric IDs **none**. All 16+ changes remain exclusive to Pack 5 files in draft PR #119.
 - M2 next: creator artwork review and more geometry/support/mobile-budget QA; M3 Shop & Workshop candidates 86–90 **NOT STARTED**. Do not merge, deploy, update shared modules, or unlock v0.11.
+
+## M2 final collision-quality rerun
+- Fixed actual source-defined collision overstatement: M2 beds, chairs/stools and bookshelves now collide with their precise authored physical piece unions instead of coarse box approximations. Verified actual collision of tall bed posts/headboard and correct empty space between components.
+- **68/68 native Node 22.16.0 PASS** (44 M0/M1 + 24 M2). Six fresh real Chromium native ES-module/WebGL2 M2 screenshots pass again after the fix; no mobile hardware timing inferred.
+- Pack 5 remains **7 candidate / 11 not started / 0 integrated**, M1 creator final approval open, M2 candidate acceptance open; next scope M2 art/refinement and later M3 only on new explicit Continue Development.
