@@ -49,3 +49,35 @@ export function prototypeMesh(descriptor){
   return {positions:new Float32Array(positions),normals:new Float32Array(normals),indices:new Uint16Array(indices),
     boxes:descriptor.boxes.length,triangles:indices.length/3};
 }
+
+// Boundary-only mesh for unions of axis-aligned occupancy boxes.
+// Partitions at every box boundary, emitting only faces adjacent to empty space.
+// Opt-in: existing prototypeMesh remains unchanged for compatibility.
+export function prototypeSurfaceMesh(descriptor){
+  if(!descriptor?.prototypeOnly||!Array.isArray(descriptor.boxes))throw new TypeError('Expected shape descriptor');
+  const boxes=descriptor.boxes;
+  const axes=[0,1,2].map(axis=>[...new Set(boxes.flatMap(b=>[b[axis],b[axis+3]]))].sort((a,b)=>a-b));
+  const [xs,ys,zs]=axes;
+  const occupied=(x,y,z)=>boxes.some(b=>x>=b[0]&&x<b[3]&&y>=b[1]&&y<b[4]&&z>=b[2]&&z<b[5]);
+  const positions=[],normals=[],indices=[];
+  const emit=(corners,n)=>{
+    const start=positions.length/3;
+    for(const p of corners){positions.push(...p);normals.push(...n);}
+    indices.push(start,start+1,start+2,start,start+2,start+3);
+  };
+  for(let i=0;i<xs.length-1;i++)for(let j=0;j<ys.length-1;j++)for(let k=0;k<zs.length-1;k++){
+    const x=xs[i],X=xs[i+1],y=ys[j],Y=ys[j+1],z=zs[k],Z=zs[k+1];
+    if(!occupied((x+X)/2,(y+Y)/2,(z+Z)/2))continue;
+    const empty=(a,b,c)=>!occupied(a,b,c);
+    const eps=1e-7;
+    if(empty(x-eps,(y+Y)/2,(z+Z)/2))emit([[x,y,z],[x,y,Z],[x,Y,Z],[x,Y,z]],[-1,0,0]);
+    if(empty(X+eps,(y+Y)/2,(z+Z)/2))emit([[X,y,Z],[X,y,z],[X,Y,z],[X,Y,Z]],[1,0,0]);
+    if(empty((x+X)/2,y-eps,(z+Z)/2))emit([[x,y,Z],[x,y,z],[X,y,z],[X,y,Z]],[0,-1,0]);
+    if(empty((x+X)/2,Y+eps,(z+Z)/2))emit([[x,Y,z],[x,Y,Z],[X,Y,Z],[X,Y,z]],[0,1,0]);
+    if(empty((x+X)/2,(y+Y)/2,z-eps))emit([[X,y,z],[x,y,z],[x,Y,z],[X,Y,z]],[0,0,-1]);
+    if(empty((x+X)/2,(y+Y)/2,Z+eps))emit([[x,y,Z],[X,y,Z],[X,Y,Z],[x,Y,Z]],[0,0,1]);
+  }
+  return {positions:new Float32Array(positions),normals:new Float32Array(normals),
+    indices:new Uint16Array(indices),boxes:boxes.length,triangles:indices.length/3,
+    surfaceOnly:true};
+}
