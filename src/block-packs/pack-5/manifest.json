@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "M1–M3 authored source candidates and M4 91–93 initial authored candidates; creator art/live acceptance OPEN",
+  "status": "M1–M3 source candidates 79–90 and M4 candidate designs 91–93 authored; all creator/served/runtime approval gates OPEN",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -293,7 +293,7 @@
         "moonstone-lectern"
       ],
       "preview": "tests/block-packs/pack-5/civic-gallery.html",
-      "verification": "Source-only physical candidate; native Node regression/WebGL2 awaiting independent recheck; no live IDs/saves/world placement",
+      "verification": "15 new M4 source-native Node cases PASS, six Chromium WebGL2 native ES-module 3-viewport x 2-rotation images PASS; physical per-box collision, 2-cell rug support, selection/removal, variants and fixture snapshot verified. Creator/production acceptance OPEN.",
       "integrationDependencies": [
         "central registered numeric ID policy",
         "shape-aware partial collision/raycast",
@@ -316,7 +316,7 @@
         "starlace-sigil-rug"
       ],
       "preview": "tests/block-packs/pack-5/civic-gallery.html",
-      "verification": "Source-only physical candidate; native Node regression/WebGL2 awaiting independent recheck; no live IDs/saves/world placement",
+      "verification": "15 new M4 source-native Node cases PASS, six Chromium WebGL2 native ES-module 3-viewport x 2-rotation images PASS; physical per-box collision, 2-cell rug support, selection/removal, variants and fixture snapshot verified. Creator/production acceptance OPEN.",
       "integrationDependencies": [
         "central registered numeric ID policy",
         "shape-aware partial collision/raycast",
@@ -339,7 +339,7 @@
         "sunspire-reliquary-plinth"
       ],
       "preview": "tests/block-packs/pack-5/civic-gallery.html",
-      "verification": "Source-only physical candidate; native Node regression/WebGL2 awaiting independent recheck; no live IDs/saves/world placement",
+      "verification": "15 new M4 source-native Node cases PASS, six Chromium WebGL2 native ES-module 3-viewport x 2-rotation images PASS; physical per-box collision, 2-cell rug support, selection/removal, variants and fixture snapshot verified. Creator/production acceptance OPEN.",
       "integrationDependencies": [
         "central registered numeric ID policy",
         "shape-aware partial collision/raycast",
@@ -383,21 +383,21 @@
   ],
   "candidateFamilies": 15,
   "testEvidence": {
-    "nativeNode": "Provisional: M0–M3 105/105 Node PASS, new M4 focused suite pending runtime check",
+    "nativeNode": "120/120 actual native Node 22.16.0 focused Pack 5 tests PASS (0 skipped/failed): 105 prior M0–M3 including 3 M3 physical refinements, plus 15 M4 source/fixture cases; executed local sources byte matched to committed JS/test blobs",
     "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
     "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
     "webgl2": "M1 six variants AND M2 eight variants rendered in real Chromium WebGL2 with native data-URL ES modules; each 667x375,844x390,932x430 x 0/1 rotations: 12 real WebGL2 screenshots total, panel hashes/readback verified; localhost served HTTP still blocked by administrator",
     "screenshots": "Six new genuine Chromium WebGL2 PNGs inspected; separate working artifacts, not checked into PR. Earlier six genuine Chromium Canvas2D captures remain fallback evidence only.",
-    "production": "No persistent IDs, live registered assets, world placements, production schema-1 save/target, physical iPhone controls, art approval or merge. HTTP-served gallery still administrator-blocked; creator Gate A and v0.11 remain unchanged.",
+    "production": "No approved creator artwork, physical iPhone, production runtime registration, persistent numeric IDs, schema-1 save changes, world placement, merge or deploy. HTTP-served browser blocked by administrator.",
     "acceptanceDossier": "src/block-packs/pack-5/M1_ACCEPTANCE.md",
-    "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py modes m1/m2/m3/m3b; genuine Chromium native data URL ES modules and WebGL2 under software OpenGL/Xvfb; 6 screenshots per gallery at 667x375, 844x390, 932x430 and rotations 0,1, not HTTP-served production gallery",
+    "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py modes m1,m2,m3,m3b,m4, genuine Chromium native data-URL ES modules/WebGL2 at 667x375,844x390,932x430 rot 0/1; never equivalent to served HTTP or production",
     "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only",
     "m2": "8 original physical residential variants; genuine 2-cell beds with per-part support, accurate collider union, modeled book spines now visible beyond shelves, no storage/sleeping gameplay. 6 fresh genuine Chromium native ES module WebGL2 captures across 667x375,844x390,932x430 and rotations 0/1, panel hashes pass",
     "visualCorrection": "Physical bookshelf and scrollcase spines project beyond shelf lips; 844x390 WebGL2 review changed only the 2 bookshelf panels (2821 and 2444 pixels), other 6 panels identical; real material geometry, not recoloring",
     "servedGallery": "Localhost real HTTP-served module page explicitly reattempted using Xvfb/Chromium and was blocked by ERR_BLOCKED_BY_ADMINISTRATOR; native offline data URL ES modules and genuine WebGL2 passed, but served page remains unverified",
-    "m3": "Five M3 source families 86–90: 86/87 shop counters/open display shelves, 88 two forged physical anvils, 89 hollow iron cauldron and alchemy stand, 90 masonry open-mouth bake oven and copper range. 10 original variants. No heat, fluid, crafting, trading or inventory. All collision/selection/snapshot test-fixture only.",
+    "m3": "M3 candidate families 86–90, 10 variants, source-only physical art; refined 088 anvil long steel taper + 089 stepped octagonal physically hollow cauldron with body/handle collision and downward ray to basin bottom; no heat, liquid, crafting, trade, NPC or inventory",
     "m3bPreview": "6 original physical workshop variants source-authored and drawn in 6/6 genuine native ES-module Chromium WebGL2 landscape views, with unique nonblank GPU pixel fingerprints and rotation changes; per-cell 18–23 boxes and 216–276 unculled source triangles, not real iPhone GPU timings",
-    "m4": "Initial isolated physical M4 candidates: 91 desks and lecterns, 92 floor rugs (including two-cell runner), 93 altars and pedestals, two geometry variants per family; no gameplay"
+    "m4": "6 original source-authored physical M4 variants across 091 Desks & Lecterns, 092 Carpets & Rugs (a genuine atomic 2-cell runner with per-cell floor support), 093 Altars & Pedestals; 15 native Node tests and real native ES-module Chromium WebGL2 six-view screenshot acceptance pass; source-only; not live"
   },
   "preview": {
     "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
