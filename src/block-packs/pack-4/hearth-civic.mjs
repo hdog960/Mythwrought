@@ -40,10 +40,10 @@ function asset({id,roster,key,name,mount,description,parts,engines}){
 // outer stone corner quoining, top projecting cap band. The center is AIR,
 // not a solid cube or a full-height stack. No operational smoke emissions.
 const chimney=[
-  part([.13,.12,.13,.29,.91,.87],'basalt'),
-  part([.71,.12,.13,.87,.91,.87],'basalt'),
-  part([.29,.12,.13,.71,.91,.29],'basalt'),
-  part([.29,.12,.71,.71,.91,.87],'basalt'),
+  part([.13,0,.13,.29,.91,.87],'basalt'),
+  part([.71,0,.13,.87,.91,.87],'basalt'),
+  part([.29,0,.13,.71,.91,.29],'basalt'),
+  part([.29,0,.71,.71,.91,.87],'basalt'),
   part([.10,.86,.10,.30,.96,.90],'limestone'),
   part([.70,.86,.10,.90,.96,.90],'limestone'),
   part([.30,.86,.10,.70,.96,.30],'limestone'),
@@ -65,7 +65,7 @@ for(const y of [.34,.59]){
 // thick side jambs, mantle, iron grate rods and decorative dry coals.
 const fireplace=[
   part([.08,.08,.12,.92,.19,.91],'basalt'),
-  part([.10,.19,.81,.90,.80,.94],'ash'),
+  part([.10,.19,.81,.90,.80,1],'ash'),
   part([.09,.19,.18,.26,.84,.85],'carved'),
   part([.74,.19,.18,.91,.84,.85],'carved'),
   part([.08,.76,.13,.92,.88,.93],'limestone'),
@@ -86,8 +86,8 @@ for(const x of [.10,.75])for(const y of [.28,.56]){
 // 178 — ONE reusable 90-degree rim QUADRANT with an L-shaped stone edge,
 // leaving the well's inside corner genuinely empty. Not a full ring.
 const rim=[
-  part([.06,.10,.06,.31,.47,.94],'carved'),
-  part([.31,.10,.06,.94,.47,.31],'carved'),
+  part([.06,0,.06,.31,.47,.94],'carved'),
+  part([.31,0,.06,.94,.47,.31],'carved'),
   part([.045,.44,.045,.34,.53,.96],'limestone'),
   part([.34,.44,.045,.96,.53,.34],'limestone'),
   part([.09,.53,.08,.28,.56,.92],'chalk'),
@@ -108,7 +108,7 @@ for(const z of [.40,.61,.81]){
 // a low ridge hook for future hanging rope, and two dropped finials.
 // It never creates a full roof, and does not duplicate Pack 3 roof shingles.
 const roof=[
-  part([.08,.66,.82,.92,.78,.96],'oakShade'),
+  part([.08,.66,.82,.92,.78,1],'oakShade'),
   part([.11,.68,.12,.21,.82,.90],'oak'),
   part([.79,.68,.12,.89,.82,.90],'oak'),
   part([.13,.81,.17,.87,.87,.87],'oakTrim'),
@@ -131,7 +131,7 @@ for(const x of [.11,.79]){
 // 180 — standalone WALL pulley wheel segment, physical octagonal spoke ring
 // with empty gaps, axle and mounting plate, no working mechanical rope.
 const pulley=[
- part([.42,.35,.88,.58,.80,.96],'oakShade'),
+ part([.42,.35,.88,.58,.80,1],'oakShade'),
  part([.46,.62,.31,.54,.70,.90],'iron'),
  part([.39,.59,.27,.61,.73,.34],'brass'),
  part([.475,.63,.21,.525,.69,.27],'iron'),
@@ -157,7 +157,7 @@ for(let i=0;i<4;i++){
 // 181 — ONE DRY basin fixture corner/spout, not an assembled fountain,
 // aqueduct, fluid/water block or operational fluid emitter.
 const fountain=[
- part([.08,.09,.08,.92,.18,.92],'basalt'),
+ part([.08,0,.08,.92,.18,.92],'basalt'),
  part([.08,.18,.08,.24,.54,.92],'carved'),
  part([.76,.18,.08,.92,.54,.92],'carved'),
  part([.24,.18,.76,.76,.54,.92],'carved'),
