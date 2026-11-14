@@ -336,14 +336,14 @@
     "https://github.com/hdog960/Mythwrought/issues/117"
   ],
   "familyCount": 22,
-  "lastVerifiedMain": "f416a2b26c4c00b5944f3bd37e9360030a247cc9",
-  "lastVerifiedCheckpoint": "007 is last documented INTEGRATION_CHECKPOINTS.md heading; latest f416a2b2 source labels live-world addition as checkpoint 008 but ledger not yet updated; Pack4 explicitly excluded",
+  "lastVerifiedMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+  "lastVerifiedCheckpoint": "008 — 2026-11-14 documented in docs/INTEGRATION_CHECKPOINTS.md; live visibility for automation-007 assets, explicitly excludes manual Pack4",
   "lastComparedIssues": [
     109,
     117
   ],
   "lastV8FocusedChecks": 142,
-  "currentAcceptanceStatus": "M5 NOT ACCEPTED: 22 physical candidate families, 23 IDs 159–181 source-authored; 177/177 source-backed current-main V8 checks PASS; 7/7 native preview/loader subset PASS; exact native strict acceptance runner fail-closed confirmed but full 179-test Node and genuine Chromium/WebGL2 3-size gallery NOT VERIFIED. Creator Gate A open; v0.11 locked.",
+  "currentAcceptanceStatus": "M5 NOT ACCEPTED: 22 physical candidate families / 23 unique IDs 159–181, 177/177 exact source-backed V8 checks PASS; 7/7 actual Node alpha/loader subset PASS; strict runner syntax+fail-closed verified; complete combined-checkout 179 native cases and true 23-card Chromium/WebGL2 screenshots NOT VERIFIED. Latest main checkpoint 008 automation-only; creator Gate A pending; v0.11 locked.",
   "latestAcceptanceV8": 177,
   "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
   "galleryEvidence": "Browser QA caught and fixed nonblack-background false positive in preview pixel check; now requires real foreground contrast plus 23 unique image hashes and asymmetric rotation; still blocked on local Chromium/WebGL2.",
@@ -390,6 +390,6 @@
   },
   "checkpoint007TestContext": "Nine current-main-dependent acceptance tests run on checkpoint007+PR combined source; they SKIP with explicit status on raw pre-007 Pack4 HEAD, and import failures when modules are present are not hidden.",
   "strictAcceptanceRunner": "node tests/block-packs/pack-4/verify-final.mjs (combined latest-main + Pack4 sources/tests): exactly 16 enumerated dedicated suites, 179 native cases, zero unexpected suites, zero skips, 23 genuine WebGL2 candidate cards at three landscape sizes. --node-only checks only Node.",
-  "latestNonPack4MainChange": "f416a2b2 added src/live-voxel-world.mjs and live-world browser/Node regression; no Pack4 directories touched, no manual Pack4 ID registration",
+  "latestNonPack4MainChange": "Checkpoint 008: f416a2b introduced live automation-only voxel districts and root baseline CI; ac263720 records checkpoint008 and release ledger. Neither registers manual Pack4 IDs 159–181, nor edits Pack4-owned paths.",
   "nativeRunnerEnvironmentEvidence": "Verified exact Git blob 1162fa6501ae07218721a7a1e180675d65c9539b with Node 22 syntax check and fail-closed native smoke: aborts on incomplete checkout instead of false pass; full combined acceptance blocked by GitHub DNS and Chromium local navigation."
 }
