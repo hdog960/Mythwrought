@@ -232,12 +232,16 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
     const y=sectionBounds(section),selected=[],startX=cx*CHUNK_SIZE,startZ=cz*CHUNK_SIZE;
     // Dense settlements must not scan every placed block to build one
     // nearby section. The index follows the same world cell and depth key.
-    const candidates=byChunk.get(cx+','+cz+','+section);
+    const bucket=byChunk.get(cx+','+cz+','+section);
+    // A serialized overlay restores entries in canonical cell order. GPU
+    // emission must be equally canonical regardless of builder insertion
+    // order, so save/reload cannot silently reshuffle the same geometry.
+    const candidates=bucket?[...bucket.values()].sort(compare):[];
     let count=0;
     // Two bounded passes: calculate exact required output before allocating.
     // The former per-vertex src.slice() created thousands of small arrays and
     // an additional untyped JS array for every edited construction chunk.
-    for(const e of candidates?.values()??[]){
+    for(const e of candidates){
       const [x,atY,z]=e.at;
       if(x<startX||x>=startX+CHUNK_SIZE||z<startZ||z>=startZ+CHUNK_SIZE||
           atY<y.minY||atY>y.maxY)continue;
