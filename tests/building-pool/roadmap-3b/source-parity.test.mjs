@@ -20,6 +20,8 @@ const witness=Object.freeze({
  watchtowerGitBlob:'febd8388f51bb42e1a9b4ef0aa5914facc2dc336'
 });
 const text=readFileSync(new URL('../../../src/building-pool/roadmap-3b/legacy-watchtowers.mjs',import.meta.url),'utf8');
+const fixture=JSON.parse(readFileSync(new URL('../../../docs/building-pool/roadmap-3b/M1_GEOMETRY_WITNESSES.json',import.meta.url),'utf8'));
+
 const gitBlobHash=(s)=>createHash('sha1').update(`blob ${Buffer.byteLength(s,'utf8')}\0`,'utf8').update(s,'utf8').digest('hex');
 test('M1 original PR 122 helper and full watchtower geometry implementations remain byte-exact',()=>{
  const a=text.indexOf('const PROFILES=');
@@ -55,6 +57,16 @@ test('M1 per-blueprint source-exact canonical geometry SHA-256 witnesses can be 
  }));
  assert.equal(new Set(rows.map(r=>r.fingerprint)).size,15);
  assert.ok(rows.every(r=>r.occupied>1000));
+ assert.equal(fixture.sourceHead,witness.sourceHead);
+ assert.equal(fixture.originalCombinedSourceBlob,witness.sourceBlob);
+ assert.equal(fixture.generatorFragments.helpers.gitBlobSha,witness.helperGitBlob);
+ assert.equal(fixture.generatorFragments.watchtower.gitBlobSha,witness.watchtowerGitBlob);
+ assert.equal(fixture.importedCount,15);
+ assert.equal(fixture.importedOccupiedCoordinates,rows.reduce((n,r)=>n+r.occupied,0));
+ assert.deepEqual(fixture.designs.map(x=>({
+  id:x.originalId,fingerprint:x.geometryFingerprintSha256,
+  serialized:x.canonicalBlueprintSha256,occupied:x.occupiedCoordinates
+ })),rows,'physical coordinate output changed from exact-head native witness');
  // Measurable source-derived witness in Actions logs. Do not call this physical-family
  // rendering or a comparison against a separately executed original PR binary.
  console.log('MYTHWROUGHT_3B_M1_WITNESSES='+JSON.stringify(rows));

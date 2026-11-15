@@ -48,6 +48,23 @@ flooded supported two-wide routes, 3-tier stair supports, snow canopy ties,
 real typed family ABI review, unique geometry, and 360/15/345 accounting.
 After this commit, recheck exact HEAD GitHub Actions, not local-only execution.
 
+## Source-anchored diagnostic WebGL2 preview harness
+The watchtower-only preview (under 3B-owned `tests/` files) now adapts the
+original PR #122 generic mesh/camera QA, without copying blacksmith blueprint
+generation or changing original #122. It consumes **real authored 3B watchtower
+coordinates** but renders unit-cube *envelopes*, NOT the integrated physical
+manual/biome shape AABBs. Native mesh/camera tests exercise all 15 × 2
+exterior/cutaway × 3 phone landscape viewport combinations (90).
+Optional `preview-browser.mjs` saves **90 genuine Chromium WebGL2 screenshots**
+only when deliberately executed with a permitted browser and local HTTP server.
+Do not claim such images are captured merely because the harness is committed.
+
+15 SHA-256 fingerprints and 15 canonical coordinate Blueprint SHA-256 hashes
+were actually emitted by native GitHub Actions #43768554260 and pinned under
+`M1_GEOMETRY_WITNESSES.json`. The nested tests now verify them on subsequent
+PR heads; they originate from byte-preserved inherited code, but separate direct
+legacy PR #122 binary execution remains a distinct optional proof gate.
+
 ## Unresolved review gates
 1. Capture **actual 3B coordinate source** in Chromium WebGL2 at 667×375,
    844×390, 932×430, exterior and cutaway, and inspect readability.

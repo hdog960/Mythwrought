@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {reviewM1PhysicalDependencies} from '../../../src/building-pool/roadmap-3b/physical-review.mjs';
 const review=reviewM1PhysicalDependencies();
 const status=symbol=>review.assets.find(a=>a.symbol===symbol);
+console.log('MYTHWROUGHT_3B_M1_ABI='+JSON.stringify(review.assets.map(({symbol,uses,status,numericIds,numericId,error})=>({symbol,uses,status,numericIds,numericId,error}))));
 test('M1 reports exactly 15 original watchtowers using current real 96-family/106-variant bridge without world writes',()=>{
  assert.equal(review.authored,15);
  assert.equal(review.occupancy,42642);
