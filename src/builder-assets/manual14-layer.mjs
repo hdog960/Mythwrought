@@ -118,6 +118,10 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
   return boxes.length?{boxes}:null;
  }
  function target(eye,dir,reach=6){return raycastShapes(eye,dir,(x,y,z)=>readShape(x,y,z),reach);}
+ function supportsLegacyCell(at){
+  if(!bounded(at))throw TypeError('Invalid backing query');
+  return [...placed.values()].some(e=>e.supports.some(cell=>key(cell)===key(at)));
+ }
  function collision(body){
   if(!isBody(body))throw TypeError('Invalid manual 1/4 body bounds');
   return !inspectBodyFit(body,(x,y,z)=>readShape(x,y,z,'collision')).fits;
@@ -139,7 +143,8 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
   verifyEntries(rebuilt);placed=rebuilt;return rebuilt.size;
  }
  return Object.freeze({world,placeMany,remove,get,target,collision,readShape,
-   snapshot,restore,size:()=>placed.size,entries:()=>Object.freeze([...placed.values()])});
+   snapshot,restore,supportsLegacyCell,size:()=>placed.size,
+   entries:()=>Object.freeze([...placed.values()])});
 }
 
 // Stronger than an unverified localStorage write: stale-tab detection,
@@ -156,7 +161,7 @@ export function createManual14SavedBridge(world,storage,opts={}){
    layer.restore(JSON.parse(lastRaw));
   }
  }catch(err){readOnly='Protected manual 1/4 sidecar: '+String(err?.message||err);}
- function change(action){
+ function change(action,cells=[]){
   if(readOnly)return {ok:false,reason:readOnly};
   const before=layer.snapshot(),oldRaw=lastRaw;
   // Failing a stale-tab check must NEVER "roll back" somebody else's data:
@@ -188,6 +193,10 @@ export function createManual14SavedBridge(world,storage,opts={}){
    primaryWriteAttempted=true;
    storage.setItem(id,next);
    if(storage.getItem(id)!==next)throw Error('Manual 1/4 sidecar readback failed');
+   // The live renderer must accept the exact new vertex budgets before this
+   // edit can be reported as committed. Roll back both world view and bytes
+   // if GPU staging or source geometry validation rejects the placement.
+   if(typeof opts.rebuild==='function')opts.rebuild(cells);
    lastRaw=next;
    return {ok:true,count:layer.size(),seed:world.seed};
   }catch(err){
@@ -202,6 +211,8 @@ export function createManual14SavedBridge(world,storage,opts={}){
      }else if(current!==oldRaw)
       throw Error('Unexpected external/uncertain primary during rollback');
      if(storage.getItem(id)!==oldRaw)throw Error('Rollback readback mismatch');
+     // Restore the prior GPU mesh after reversing a staged placement.
+     if(typeof opts.rebuild==='function')opts.rebuild(cells);
     }else if(storage.getItem(id)!==oldRaw)
      throw Error('External primary changed during failed preflight');
    }catch(rollback){
@@ -210,8 +221,11 @@ export function createManual14SavedBridge(world,storage,opts={}){
    return {ok:false,reason:readOnly??String(err?.message||err)};
   }
  }
- return Object.freeze({layer,key:id,placeMany:(a,o)=>change(()=>layer.placeMany(a,o)),
-   remove:at=>change(()=>layer.remove(at)),get blocked(){return readOnly;},
+ return Object.freeze({layer,key:id,
+   placeMany:(a,o)=>change(()=>layer.placeMany(a,o),a.map(row=>row.at)),
+   remove:at=>change(()=>layer.remove(at),[at]),get blocked(){return readOnly;},
    get lastRaw(){return lastRaw;},
-   snapshot:()=>layer.snapshot(),target:(...a)=>layer.target(...a),collision:b=>layer.collision(b)});
+   snapshot:()=>layer.snapshot(),target:(...a)=>layer.target(...a),
+   supportsLegacyCell:at=>layer.supportsLegacyCell(at),
+   collision:b=>layer.collision(b)});
 }
