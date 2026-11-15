@@ -46,3 +46,28 @@ A read-only inspection of newer main at `c512fcb9e6e82697cff0c5d26f073e503d51e4a
 The Pack 5-only `placement-preflight.mjs` now labels occupied IDs beyond 8 as `registered-world-occupied`, rather than throwing on them; non-legacy support remains `unverified-registered-support` until the future combined registry supplies explicit `verifiedStructuralSupports`. `construction-layer.mjs` now allows new registered supports **only** when the supplied host exposes a positive `pack5StructuralSupport(cell,id)` proof. Default Pack 5 worlds remain backward compatible with schema-1 IDs 0–8. Combined collision with newer registered shapes is still the host's responsibility; Pack 5 must not claim to have resolved it.
 
 The newer main also changed `src/main.mjs` to use a rotation-aware `inspectBlockTarget(..., selectedRotation)` and `applyBlockAction(...,{rotation:selectedRotation})`, while Pack 5 has an independent shaped-building editing path. The final five-pack integration must preserve **both** interaction paths when reconciling shared main/voxel files. This producer PR will not edit biome130, other Block Packs, or the active `main`.
+
+## Pack 5 source-exact cross-pack collision preflight
+
+Physical collision cannot be fully cleared by numeric occupied-cell lists
+alone: a shaped item belonging to an adjacent cell may extend into another
+item's footprint. The Pack 5-owned preflight now accepts independent,
+world-space foreignCollisionBoxes and existingPack5CollisionBoxes. It
+uses bounded spatial indexing and actual source-authored Pack 5 collider AABBs,
+and reports foreign-shape-overlap or existing-pack5-shape-overlap without
+editing the source blueprint, world, saves, or other packs.
+
+collectPack5PlacedCollisionBoxes(layer) returns read-only true Pack 5 collider
+boxes from its existing sidecar. Every OTHER pack must supply its own
+source-verified collider geometry through the eventual coordinated integrator.
+The additional shapeAwareDryRunClear flag remains false unless both occupancy
+registries and both physical collider registries are supplied and no detected
+issue remains. Even when true, crossPackPhysicalAcceptance and integrationReady
+remain false until the combined runtime, support semantics and all acceptance
+gates are verified.
+
+AIR-cell future support claims must also be present in the other-pack
+occupied-cell registry; merely listing a support as certified is insufficient.
+The preflight remains bounded and explicitly refuses untrusted oversized
+collision extents. Physical-iPhone and completed settlement evidence remain
+outstanding.

@@ -165,3 +165,79 @@ test('registered decorative shapes do not turn into invented full-cube collision
   assert.equal(layer.collidesPack5([2.1,4.1,.1,2.9,4.9,.9]),false);
   assert.equal(layer.count(),0);
 });
+
+test('overhanging external source geometry is detected independently of coarse cell occupancy',()=>{
+  const p=plan(),w=makeWorld(),rec=p.placements[0];
+  for(const s of rec.physical.requiredSupports)w.put(s);
+  const b=rec.physical.collision[0];
+  assert.ok(b,'Pack 5 physical fixture has a real collision box');
+  const foreign=[[b[0]+.01,b[1]+.01,b[2]+.01,
+    Math.min(b[3],b[0]+.08),Math.min(b[4],b[1]+.08),Math.min(b[5],b[2]+.08)]];
+  const at=rec.physical.occupiedCells[0];
+  const otherCell=[at[0]+3,at[1],at[2]];
+  const coarse=preflightPack5BuilderPlan(p,{
+    world:w.world,foreignOccupiedCells:[otherCell],existingPack5Cells:[]});
+  assert.equal(coarse.pack5OnlyDryRunClear,true);
+  assert.equal(coarse.shapeAwareDryRunClear,false);
+  const exact=preflightPack5BuilderPlan(p,{
+    world:w.world,foreignOccupiedCells:[otherCell],existingPack5Cells:[],
+    foreignCollisionBoxes:foreign,existingPack5CollisionBoxes:[]});
+  assert.ok(exact.issues.some(i=>i.kind==='foreign-shape-overlap'));
+  assert.equal(exact.shapeAwareDryRunClear,false);
+  assert.equal(exact.integrationReady,false);
+});
+test('placed Pack 5 objects can supply exact read-only existing collider boxes',async()=>{
+  const {createPack5ConstructionLayer}=await import('../src/pack5-integration/construction-layer.mjs');
+  const {collectPack5PlacedCollisionBoxes}=await import('../src/pack5-integration/placement-preflight.mjs');
+  const p=plan(),w=makeWorld(),rec=p.placements[0];
+  for(const at of rec.physical.requiredSupports)w.put(at);
+  const layer=createPack5ConstructionLayer(w.world);
+  assert.equal(layer.place(rec.asset,rec.anchor,rec.rotation,rec.variant).ok,true);
+  const boxes=collectPack5PlacedCollisionBoxes(layer);
+  assert.ok(boxes.length>0&&Object.isFrozen(boxes)&&boxes.every(Object.isFrozen));
+  const result=preflightPack5BuilderPlan(p,{
+    world:w.world,foreignOccupiedCells:[],existingPack5Cells:[],
+    foreignCollisionBoxes:[],existingPack5CollisionBoxes:boxes});
+  assert.ok(result.issues.some(i=>i.kind==='existing-pack5-shape-overlap'));
+  assert.equal(result.shapeAwareDryRunClear,false);
+  assert.equal(layer.count(),1);
+});
+test('shape-aware clearance fails closed when either independent collider registry is omitted',()=>{
+  const p=plan(),w=makeWorld();
+  for(const s of p.placements[0].physical.requiredSupports)w.put(s);
+  const coarse=preflightPack5BuilderPlan(p,{world:w.world,
+    foreignOccupiedCells:[],existingPack5Cells:[]});
+  assert.equal(coarse.pack5OnlyDryRunClear,true);
+  assert.equal(coarse.shapeAwareDryRunClear,false);
+  const partial=preflightPack5BuilderPlan(p,{world:w.world,
+    foreignOccupiedCells:[],existingPack5Cells:[],foreignCollisionBoxes:[]});
+  assert.equal(partial.shapeAwareDryRunClear,false);
+  const complete=preflightPack5BuilderPlan(p,{world:w.world,
+    foreignOccupiedCells:[],existingPack5Cells:[],foreignCollisionBoxes:[],
+    existingPack5CollisionBoxes:[]});
+  assert.equal(complete.shapeAwareDryRunClear,true);
+  assert.equal(complete.integrationReady,false);
+  assert.equal(complete.crossPackPhysicalAcceptance,false);
+});
+test('malformed or excessive external boxes fail closed before shape planning',()=>{
+  const p=plan(),w=makeWorld();
+  assert.throws(()=>preflightPack5BuilderPlan(p,{world:w.world,
+    foreignCollisionBoxes:[[0,0,0,5000,2,2]]}),/bounded spatial proof/);
+  assert.throws(()=>preflightPack5BuilderPlan(p,{world:w.world,
+    foreignCollisionBoxes:[[0,0,0,NaN,1,1]]}),/Invalid source-external/);
+});
+test('declared future supports without corresponding foreign occupied cells cannot pass',()=>{
+  const p=plan(),w=makeWorld(),supports=p.placements[0].physical.requiredSupports;
+  const missing=preflightPack5BuilderPlan(p,{world:w.world,
+    foreignOccupiedCells:[],existingPack5Cells:[],verifiedStructuralSupports:supports,
+    foreignCollisionBoxes:[],existingPack5CollisionBoxes:[]});
+  assert.ok(missing.issues.some(i=>i.kind==='certified-support-not-occupied'));
+  assert.equal(missing.shapeAwareDryRunClear,false);
+  const supplied=preflightPack5BuilderPlan(p,{world:w.world,
+    foreignOccupiedCells:supports,existingPack5Cells:[],
+    verifiedStructuralSupports:supports,foreignCollisionBoxes:[],
+    existingPack5CollisionBoxes:[]});
+  assert.equal(supplied.issues.length,0);
+  assert.equal(supplied.shapeAwareDryRunClear,true);
+  assert.equal(supplied.integrationReady,false);
+});
