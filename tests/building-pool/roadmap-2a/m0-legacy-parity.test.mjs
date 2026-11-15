@@ -66,7 +66,7 @@ test('negative geometry tests catch missing, duplicated and wrong-material windo
   assert.throws(()=>validateBlueprint({...bp,openings:bp.openings.filter(o=>o!==w)}),/unregistered physical window cells/);
   assert.throws(()=>validateBlueprint({...bp,openings:bp.openings.map(o=>o===w?{...o,material:'pack1:001'}:o)}),/window material mismatch/);
   assert.throws(()=>validateBlueprint({...bp,openings:[...bp.openings,{...w}]}),/duplicate window opening metadata/);
-  assert.throws(()=>validateBlueprint({...bp,voxels:[...bp.voxels,{x:entry.x,y:entry.y,z:entry.z,kind:'wall',material:'pack1:001'}]}),/blocked entrance/);
+  assert.throws(()=>validateBlueprint({...bp,voxels:[...bp.voxels,{x:entry.x,y:entry.y,z:entry.z,kind:'wall',material:bp.voxels[0].material}]}),/blocked entrance/);
   assert.throws(()=>validateBlueprint({...bp,voxels:[...bp.voxels,bp.voxels[0]]}),/overlapping voxel/);
   const missing=bp.voxels[0].material;
   assert.throws(()=>validateBlueprint({...bp,unresolvedDependencies:bp.unresolvedDependencies.filter(d=>d.ref!==missing)}),/missing symbolic material dependency/);
