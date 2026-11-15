@@ -46,3 +46,28 @@ mantle ends at local Y=.94, leaving a .06-cell seam under the first
 chimney course. The sidecar emits \`chimneySubBoxContactReview:true\`
 rather than claiming that voxel adjacency alone certifies finished
 masonry contact. Do not waive physical-iPhone or creator visual approval.
+
+
+## Final physical masonry assembly profile: source-exact geometry
+
+The builder-owned file \`pack4-hearth-junction.mjs\` now generates an
+**open-throat fireplace-and-flue assembly** without modifying Pack4's original
+standalone block models or numeric IDs. It replaces only two full-width mantle
+slabs with four source-material strips each, leaving a true [.34,.66]
+centered aperture along X and Z. Original ornament, grate, jambs and
+collision/selection remain physically authored. A four-strip .06-high
+transition collar joins the fireplace mantle (Y=.94) to the chimney course
+(Y=1), and four source-material corner/rim strips finish the .04-high
+gap between consecutive hollow chimney courses.
+
+Every new piece uses the exact originating Pack4 material's original
+per-face GPU triangle stream, affinely remeshed to the new true AABB.
+There is no fake full-cube proxy. Additional collision and selection
+bounds are independently derived from visible source parts, and the center
+air duct remains clear. Builder-only view returns
+\`hearthPhysicalContactCertified:true\` after explicit AABB contact and
+air-shaft validations. The source theoretical blueprint remains immutable,
+and the production renderer is NOT automatically modified.
+
+The assembly is not a persistent game block ID and must undergo dedicated
+live-engine integration later. No simulated fire/smoke or approved artwork.

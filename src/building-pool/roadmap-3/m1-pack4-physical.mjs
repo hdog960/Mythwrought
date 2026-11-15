@@ -2,6 +2,7 @@
 // Canonical voxel candidates live only in Pack 4 PR #115; dependency injected.
 // No clone/copy of Pack 4 sources, no shared engine or world mutations.
 import {createM1Pool} from './m1.mjs';
+import {assemblePhysicalHearths,verifyHearthAssemblyContact} from './pack4-hearth-junction.mjs';
 export const PACK4_CONSTRUCTION_SOURCE=Object.freeze({
   repository:'hdog960/Mythwrought',pr:115,
   exactHead:'65cbddc4721f9d7278d58f8659562982266f7b41',
@@ -82,7 +83,9 @@ export function getM1Pack4Construction(pack4,{blueprints=null}={}){
   const out=[];
   for(const draft of drafts){
     const physicalDraft=supportedPhysicalDraft(draft);
-    const plan=pack4.resolvePack4BuilderBlueprint(physicalDraft);
+    const initialPlan=pack4.resolvePack4BuilderBlueprint(physicalDraft);
+    const plan=draft.type==='blacksmith'?assemblePhysicalHearths(initialPlan):initialPlan;
+    if(draft.type==='blacksmith')verifyHearthAssemblyContact(plan);
     if(!plan||!Array.isArray(plan.placements)||plan.resolvedCount!==plan.placements.length)
       throw Error('Pack 4 resolver returned invalid physical plan '+draft?.id);
     for(const p of plan.placements){
@@ -99,7 +102,8 @@ export function getM1Pack4Construction(pack4,{blueprints=null}={}){
       blueprintId:draft.id,source:draft,physicalSource:physicalDraft,physicalPlan:plan,
       hearthBackingsAdded:physicalDraft.addedHearthBackings?.length??0,
       hollowFlueCoursesAdded:physicalDraft.addedHollowFlueCourses?.length??0,
-      chimneySubBoxContactReview:physicalDraft.chimneySubBoxContactReview??false,
+      chimneySubBoxContactReview:plan.subBoxContactReview??false,
+      hearthPhysicalContactCertified:plan.physicalAssemblyOnly===true,
       pack4Cells:plan.resolvedCount,
       orientationReviewCount:plan.orientationReviewCount??0,
       mountingSupportReviewCount:plan.placements.filter(p=>!p.supportVerified).length,
