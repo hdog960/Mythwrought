@@ -76,13 +76,13 @@ async function launchChrome(){
   });
   return {send,close:()=>{ws.close();child.kill();rmSync(dir,{recursive:true,force:true});},binary};
 }
-async function waitPreview(cmd,where){
+async function waitPreview(cmd,where,expected){
   let last;
   for(let i=0;i<100;i++){
     const a=await cmd('Runtime.evaluate',{expression:'JSON.stringify(window.__m1Preview || null)',returnByValue:true});
     const str=a?.result?.value;
     if(str&&str!=='null'){
-      const v=JSON.parse(str);if(v.ready)return v;
+      const v=JSON.parse(str);if(v.ready&&v.sourceId===expected.id&&v.view===expected.view&&v.width===expected.width&&v.height===expected.height)return v;
     }
     if(a?.exceptionDetails)last=a.exceptionDetails.text;
     await sleep(100);
@@ -112,7 +112,7 @@ test('five 4B-owned blueprints × exterior/section × three real Chromium landsc
           const url=site.url+'/tests/building-pool/roadmap-4b/m1-preview.html?index='+i+'&view='+view;
           const navigation=await cmd('Page.navigate',{url});
           assert.ok(!navigation.errorText,JSON.stringify(navigation));
-          const evidence=await waitPreview(cmd,b.id+' '+view+' '+width+'x'+height);
+          const evidence=await waitPreview(cmd,b.id+' '+view+' '+width+'x'+height,{id:b.id,view,width,height});
           assert.deepEqual([evidence.width,evidence.height],[width,height]);
           assert.equal(evidence.sourceId,b.id);
           assert.equal(evidence.renderer,'genuine-webgl2-cube-proxy');
