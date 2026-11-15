@@ -10,7 +10,7 @@ Before this patch, each PR's same `node-and-browser` job runs `npm test` and 20 
 
 - `main` pushes, manual dispatch, any shared/unknown file changes, CI changes, missing Git history or failed scope resolution retain the **complete original root + 20-script browser gate**.
 - A pull request with a diff entirely inside one or more exclusive `src|tests/block-packs/pack-1..5/**` and `src|tests|docs/building-pool/roadmap-1..4/**` directories gets root tests, **all recursively discovered native `*.test.mjs` tests for each affected lane**, and genuine Chromium production smoke + landscape layout checks. Missing native suites fail rather than silently passing. If both independently owned lanes change, both execute.
-- New PR commits cancel only superseded runs of their **own** PR. Different roadmaps have independent concurrency groups; main runs cannot be cancelled.
+- No GitHub Actions concurrency cancellation is configured. Every queued or running check remains eligible to finish. Focused-lane selection reduces future test work without canceling existing or superseded jobs.
 - Retains exact `Mythwrought verification / node-and-browser` check name for existing branch protections. The browser installation and artifact publication remain in place.
 - Browser smoke proves limited production smoke/layout behavior only. It is **not** source-derived gallery capture or production registration/shape/old-save/offline/physical-iPhone acceptance. Each roadmap retains its separate creator review and Gate A gates.
 
