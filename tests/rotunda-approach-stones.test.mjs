@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,worldKey} from '../src/voxel.mjs';
 import {planStoneRotunda} from '../src/stone-rotunda.mjs';
-import {planRotundaApproachStones,placeRotundaApproachStones} from '../src/rotunda-approach-stones.mjs';
+import {planRotundaApproachStones,placeRotundaApproachStones,inspectRotundaApproachStones} from '../src/rotunda-approach-stones.mjs';
 
 function site(world){
   for(let z=-160;z<=160;z+=4)for(let x=-160;x<=160;x+=4){
@@ -50,4 +50,25 @@ test('partial rejected writes restore schema-1 edits exactly',()=>{
   world.set=(...args)=>++count===6?false:set(...args);
   assert.equal(placeRotundaApproachStones(world,found.rotunda,found.approach),false);
   assert.deepEqual(world.save(),before);
+});
+
+test('physical approach inspector reads all marker voxels and rejects obstructed walk lanes',()=>{
+  const h=5,x=0,z=0,markerCells=[];
+  for(const [dx,dz] of [[-2,-6],[2,-6],[-2,6],[2,6],[-6,-2],[-6,2],[6,-2],[6,2]])
+    for(const dy of [1,2])markerCells.push([x+dx,h+dy,z+dz,BLOCK.STONE]);
+  const occupied=new Map(markerCells.map(([a,b,c,id])=>[worldKey(a,b,c),id]));
+  const world={get(a,b,c){
+    return occupied.get(worldKey(a,b,c))??(b===h?BLOCK.GRASS:BLOCK.AIR);
+  }};
+  const rotunda={kind:'stone-rotunda',origin:[x,h,z]};
+  const plan={kind:'rotunda-approach-stones',origin:[x,h,z],cells:markerCells,optIn:true};
+  const clear=inspectRotundaApproachStones(world,rotunda,plan);
+  assert.equal(clear.markerCount,16);
+  assert.equal(clear.routes.length,4);
+  assert.ok(clear.routes.every(route=>route.length===3));
+  occupied.set(worldKey(0,h+1,-5),BLOCK.STONE);
+  assert.equal(inspectRotundaApproachStones(world,rotunda,plan),null);
+  occupied.delete(worldKey(0,h+1,-5));
+  occupied.delete(worldKey(-2,h+2,-6));
+  assert.equal(inspectRotundaApproachStones(world,rotunda,plan),null);
 });
