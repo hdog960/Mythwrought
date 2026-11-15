@@ -97,7 +97,7 @@ jobs:
       - name: Checkout source-exact Roadmap 3 PR for physical builder consumption
         uses: actions/checkout@v4
         with:
-          ref: e4b1ecf475e6b787fa877286ab41b4caae94ddcd
+          ref: f9547d8288480b12b521abdaf727b2c56b0b3990
           path: consumers/r3
           persist-credentials: false
       - name: Checkout source-exact Roadmap 4 PR for physical builder consumption
@@ -129,6 +129,12 @@ jobs:
         run: |
           set -euo pipefail
           node tests/block-packs/pack-4/builder/support-audit.mjs 2>&1 | tee artifacts/pack-4/builder-support-audit.log
+      - name: Certify true Pack4 fireplace and hollow chimney sub-box contact
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/block-packs/pack-4/builder/roadmap3-contact.mjs 2>&1 | tee artifacts/pack-4/roadmap3-contact.log
       - name: Install free Playwright and Chromium
         working-directory: combined
         shell: bash
