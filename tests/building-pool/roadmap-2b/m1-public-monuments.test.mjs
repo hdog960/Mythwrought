@@ -14,7 +14,7 @@ const all=[...LEGACY_TEMPLES,MARKET_SQUARE_TEMPERATE_SMALL,
  ...TRADE_CULTURE_M1_EXEMPLARS,...M1_REGIONAL_EXEMPLARS,...M1_PUBLIC_MONUMENTS];
 const index=new Map(M1_PUBLIC_MONUMENTS.map(m=>[m.id,m]));
 const m=(category,biome,size,variant=1)=>index.get(
- \`r2:\${category}:\${biome}:\${size}:\${String(variant).padStart(2,'0')}\`);
+ 'r2:'+category+':'+biome+':'+size+':'+String(variant).padStart(2,'0'));
 const cell=(x,y,z)=>x+','+y+','+z;
 function voxels(bp){return new Map(bp.voxels.map(v=>[cell(v.x,v.y,v.z),v]));}
 function accessible(bp,blocked=[]){
