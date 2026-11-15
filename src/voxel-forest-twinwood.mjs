@@ -36,8 +36,9 @@ export function planTwinwood(world,x,z,{axis='x'}={}){
   if(baseBlock(a,b,c,world.seed)!==BLOCK.AIR||world.get(a,b,c)!==BLOCK.AIR)return null;
  }
  for(let dx=-3;dx<=3;dx++)for(let dz=-2;dz<=2;dz++){
-  const h=terrainHeight(x+dx,z+dz,world.seed);
-  if(Math.abs(h-ground)>1||world.get(x+dx,h,z+dz)!==baseBlock(x+dx,h,z+dz,world.seed))return null;
+  const a=x+(axis==='x'?dx:dz),c=z+(axis==='x'?dz:dx);
+  const h=terrainHeight(a,c,world.seed);
+  if(Math.abs(h-ground)>1||world.get(a,h,c)!==baseBlock(a,h,c,world.seed))return null;
  }
  return {seed:world.seed,origin:[x,ground,z],kind:'twinwood',axis,optIn:true,cells:occupied};
 }
@@ -60,11 +61,13 @@ export function placeTwinwood(world,plan){
    written.push([a,b,c]);
   }
  }catch{
+  let rollbackFailed=false;
   for(let i=written.length-1;i>=0;i--){
    const [a,b,c]=written[i];
-   if(!world.set(a,b,c,BLOCK.AIR))
-    throw Error('twinwood rollback failed; inspect saved edits');
+   try{if(!world.set(a,b,c,BLOCK.AIR))rollbackFailed=true;}
+   catch{rollbackFailed=true;}
   }
+  if(rollbackFailed)throw Error('twinwood rollback failed; inspect saved edits');
   return false;
  }
  return true;
