@@ -55,9 +55,10 @@ export function descentCells(origin=DESCENT_ORIGIN){
                      anchor.z+outward[1]*out+tangent[1]*turn]);
       }
       const [cx,cz]=points.at(-1);
-      for(const [x,z] of points)for(let across=-2;across<=2;across++){
-        const px=x+(outward[1]||tangent[1])*across;
-        const pz=z+(outward[0]||tangent[0])*across;
+      for(const [i,[x,z]] of points.entries())for(let across=-2;across<=2;across++){
+        const cross=branch===1&&i>12?outward:tangent;
+        const px=x+cross[0]*across;
+        const pz=z+cross[1]*across;
         set(px,depth,pz,BLOCK.DEEPSTONE);
         for(let h=1;h<=5;h++)set(px,depth+h,pz,BLOCK.AIR);
       }
