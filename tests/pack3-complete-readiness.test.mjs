@@ -158,3 +158,28 @@ test('atomic multi-placement cap and foreign-world orientation snapshots still r
  assert.equal(put(b,110,cell,0).ok,false,'No duplicate physical cells');
  assert.equal(b.runtime.size(),1);
 });
+
+test('single-allocation physical chunk mesh preserves exact pre-optimization vertex order and tones',()=>{
+ const w=air(211),bridge=createPack3LiveBridge(w,disk());
+ const positions=[
+  {id:109,at:[16,10,16],yaw:0},
+  {id:115,at:[17,11,16],yaw:2},
+  {id:124,at:[18,12,16],yaw:1}
+ ];
+ for(const item of positions)assert.equal(put(bridge,item.id,item.at,item.yaw).ok,true);
+ const oldFormat=[];
+ for(const {id,at,yaw} of positions){
+  const symbol=PACK3_BUILDER_SYMBOLS[id-109];
+  const mesh=meshPack3PhysicalAsset(symbol,yaw);
+  for(let i=0;i<mesh.vertices.length;i+=9){
+   const source=mesh.vertices;
+   oldFormat.push(source[i]+at[0],source[i+1]+at[1],source[i+2]+at[2],
+     source[i+3],source[i+4],source[i+5],source[i+6],source[i+7],source[i+8]);
+  }
+ }
+ const expected=new Float32Array(oldFormat);
+ const optimized=bridge.runtime.chunkMesh(1,1,0);
+ assert.deepEqual(optimized,expected,'Exactly one array and pixel-identical 9-float geometry');
+ const extra=combinePack3ChunkMesh(new Float32Array(),bridge.runtime,1,1);
+ assert.deepEqual(extra,expected);
+});

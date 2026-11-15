@@ -176,17 +176,30 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
   function chunkMesh(cx,cz,section=0,{maxVertices=100000}={}){
     if(![cx,cz,section].every(Number.isInteger)||section>0||
         !Number.isSafeInteger(maxVertices)||maxVertices<1)throw new TypeError('Invalid chunk request');
-    const y=sectionBounds(section),all=[],startX=cx*CHUNK_SIZE,startZ=cz*CHUNK_SIZE;
+    const y=sectionBounds(section),selected=[],startX=cx*CHUNK_SIZE,startZ=cz*CHUNK_SIZE;
+    let count=0;
+    // Two bounded passes: calculate exact required output before allocating.
+    // The former per-vertex src.slice() created thousands of small arrays and
+    // an additional untyped JS array for every edited construction chunk.
     for(const e of overlays.values()){
       const [x,atY,z]=e.at;
       if(x<startX||x>=startX+CHUNK_SIZE||z<startZ||z>=startZ+CHUNK_SIZE||
           atY<y.minY||atY>y.maxY)continue;
-      const model=meshPack3PhysicalAsset(e.asset,e.yaw),src=model.vertices;
-      if(all.length/9+model.vertexCount>maxVertices)throw new RangeError('Pack 3 chunk triangle budget exceeded');
-      for(let i=0;i<src.length;i+=9)
-        all.push(src[i]+x,src[i+1]+atY,src[i+2]+z,...src.slice(i+3,i+9));
+      const model=meshPack3PhysicalAsset(e.asset,e.yaw);
+      count+=model.vertexCount;
+      if(count>maxVertices)throw new RangeError('Pack 3 chunk triangle budget exceeded');
+      selected.push({model,x,y:atY,z});
     }
-    return new Float32Array(all);
+    const out=new Float32Array(count*9);
+    let cursor=0;
+    for(const {model,x,y,z} of selected){
+      const src=model.vertices;
+      for(let i=0;i<src.length;i+=9){
+        out[cursor++]=src[i]+x;out[cursor++]=src[i+1]+y;out[cursor++]=src[i+2]+z;
+        for(let j=3;j<9;j++)out[cursor++]=src[i+j];
+      }
+    }
+    return out;
   }
   function serialize(){
     const doc={format:PACK3_RUNTIME_FORMAT,seed:world.seed,worldId,

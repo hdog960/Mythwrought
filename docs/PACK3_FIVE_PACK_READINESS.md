@@ -32,8 +32,18 @@ other four manual Block Packs.
 - The browser uses original iPhone two-thumb controls; Pack 3 materials live
   inside settings rather than adding controls over the 3D world.
 - Chunk addition cap is 12,000 physical vertices per 16×16×section GPU buffer;
-  4,096 total physically placed cells per world. Do not infer phone FPS from
-  software Chromium times or CPU tests.
+  4,096 total physically placed cells per world. Construction chunk meshing
+  now precomputes exact vertex length, allocates one Float32Array and writes
+  source tones directly, avoiding per-vertex temporary typed-array slices.
+  Exact pre/post vertex parity is independently asserted by a native test.
+  Do not infer phone FPS from software Chromium times or CPU tests.
+- Source-exact all-17 live-game browser PASS from #43719949693:
+  all 17 physical IDs placed, rendered, reloaded and removed at 667×375,
+  844×390 and 932×430, 8,028 added vertices, no 25-chunk budget increase,
+  unchanged schema-1 bytes, genuine screenshots artifact #14164455730.
+  The old software-Chromium p95 edit costs were 223.7/333.0/287.5ms;
+  these are not physical iPhone frame-time metrics and do not satisfy the
+  hardware signoff requirement.
 
 ## Existing tested evidence (before this acceptance expansion)
 - PR #153 head `6195628d`: dedicated live-game Chromium/WebGL2 run
