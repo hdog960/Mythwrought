@@ -39,8 +39,7 @@ test('every exposed quad follows the actual union of authored AABBs, not a cosme
  for(const id of PACK1_GPU_IDS)for(let rotation=0;rotation<4;rotation++){
   const parts=candidateParts(id,rotation).parts,mesh=candidateSurface(id,rotation);
   for(const q of mesh.quads){
-   const a=q.positions[0],c=q.positions[2];
-   const mid=a.map((v,i)=>(v+c[i])/2);
+   const mid=[0,1,2].map(axis=>q.positions.reduce((sum,p)=>sum+p[axis],0)/6);
    const inward=mid.map((v,i)=>v-q.normal[i]*1e-5);
    const outward=mid.map((v,i)=>v+q.normal[i]*1e-5);
    assert.ok(inside(parts,inward),'missing interior '+id+'/'+rotation+'/'+q.face);
