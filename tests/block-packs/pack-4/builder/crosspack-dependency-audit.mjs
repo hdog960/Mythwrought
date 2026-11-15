@@ -56,9 +56,9 @@ function faceContact(p,q){
 }
 const totals={pack4ContactVerified:0,pack4NoContact:0,
  otherPackCatalogResolved:0,otherPackUnknown:0,
- otherPackFaceContactUnverified:0,legacySupport:0,unclassified:0,
+ otherPackFaceContactUnverified:0,biome130Deferred:0,legacySupport:0,unclassified:0,
  missingSupport:0,notRequired:0};
-const byPack={},missing=[],notContact=[],unknown=[],unclassifiedExamples=[],referenced=new Set();
+const byPack={},missing=[],notContact=[],unknown=[],deferred=[],unclassifiedExamples=[],referenced=new Set();
 for(let n=1;n<=4;n++){
  const views=builders[n-1].getM1Pack4Construction(pack4);
  for(const view of views){
@@ -78,6 +78,11 @@ for(let n=1;n<=4;n++){
     if(catalogs.get(fam).has(s.asset)){
      totals.otherPackCatalogResolved++;totals.otherPackFaceContactUnverified++;
      byPack[fam]=(byPack[fam]??0)+1;
+    }else if(fam==='biome130'&&/^biome130:(?:0(?:6[1-9]|[7-9]\\d)|1[0-2]\\d|130)$/.test(s.asset)){
+     // Families 061..130 remain planned symbolic biome library assets; do not
+     // mislabel them as physically registered or invent substitute blocks.
+     totals.biome130Deferred++;
+     if(deferred.length<30)deferred.push({roadmap:n,blueprint:view.blueprintId,ref:s.asset,at:p.supportAt});
     }else{
      totals.otherPackUnknown++;
      if(unknown.length<25)unknown.push({roadmap:n,blueprint:view.blueprintId,ref:s.asset,at:p.supportAt});
@@ -92,11 +97,12 @@ const report={status:'READ_ONLY_SOURCE_EXACT',provenance,
  pack4SourceHead:process.env.GITHUB_SHA??null,
  totals,otherPackRefs:[...referenced].sort(),otherPackKnownByPack:byPack,
  missingExamples:missing,pack4NoContactExamples:notContact,unknownExamples:unknown,
- unclassifiedExamples,
+ unclassifiedExamples,deferredBiomeExamples:deferred,
  guarantees:{
   pack4ContactVerified:'Exact collision AABB subbox overlap on common neighboring face',
   otherPackCatalogResolved:'Reference exists in source-pinned original catalog ONLY',
   otherPackFaceContactUnverified:'NOT certified as load-bearing or physically touching',
+  biome130Deferred:'Planned biome130 family 061..130; NOT in currently registered 001..060',
   noProductionRegistry:true,noWorldOrSaveMutation:true,
   noOtherPackModifications:true
  }};
