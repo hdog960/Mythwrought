@@ -31,7 +31,8 @@ export function westGalleryWorld(world, origin=CAVE_CANDIDATE) {
       // overlaps the vault at d=-14 and reaches the room at d=-17.
       const northSpur=t>=21&&t<=23&&d>=-17&&d<=-13;
       const lanternRoom=t>=19&&t<=26&&d>=-22&&d<=-17;
-      if(!throat&&!chamber&&!eastLink&&!eastHall&&!returnPassage&&!northAlcove&&!northSpur&&!lanternRoom)return previous.get(x,y,z);
+      const crossGallery=t>=12&&t<=21&&d>=-17&&d<=-15;
+      if(!throat&&!chamber&&!eastLink&&!eastHall&&!returnPassage&&!northAlcove&&!northSpur&&!lanternRoom&&!crossGallery)return previous.get(x,y,z);
       const floor=floorAt(t);
       if(y===floor)return BLOCK.STONE;
       if(y>floor&&y<=floor+(eastHall||lanternRoom?6:northAlcove?5:4))return BLOCK.AIR;
@@ -126,5 +127,25 @@ export function northSpurTraversal(world,origin=CAVE_CANDIDATE) {
     });
   }
   const failures=samples.filter(p=>!p.supported||!p.headClear||!p.bodyClear);
+  return {samples,failures,walkable:failures.length===0,bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
+}
+
+/** West-to-east northern gallery: a second navigable loop between two vaulted rooms.
+ * Coordinates are local to the opt-in cave origin; no live generation changes.
+ */
+export function northernCrossGalleryTraversal(world,origin=CAVE_CANDIDATE) {
+  const reader=westGalleryWorld(world,origin),floorAt=caveRoute(world.seed,origin).floorAt;
+  const samples=[];
+  const path=[];
+  for(let t=12;t<=21;t++)path.push([t,-16]);
+  for(let d=-17;d>=-19;d--)path.push([21,d]);
+  for(const [t,d] of path){
+    const x=origin.x+t,z=origin.z+d,floor=floorAt(t),feet=floor+1;
+    samples.push({x,y:feet,z,
+      supported:reader.get(x,floor,z)!==BLOCK.AIR,
+      headClear:reader.get(x,feet,z)===BLOCK.AIR&&reader.get(x,feet+1,z)===BLOCK.AIR,
+      bodyClear:!collides(reader,x+.5,feet,z+.5)});
+  }
+  const failures=samples.filter(s=>!s.supported||!s.headClear||!s.bodyClear);
   return {samples,failures,walkable:failures.length===0,bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
 }
