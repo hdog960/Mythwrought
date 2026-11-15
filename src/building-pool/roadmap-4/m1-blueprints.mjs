@@ -143,6 +143,10 @@ function emitBlueprint(type,biome,size){
   }
   // Each locale's pitched roof is genuinely physical, not a shader-only tint.
   // Raise original asymmetrical skyline while keeping an entire protective top roof deck.
+  // Calculate *surface heights* first, without solid-filling the attic.
+  // Longitudinal timber purlins carry stepped roof tiles. Each level strip
+  // has timber riser piers at its ends and at most four cells apart.
+  const raised=new Map(),strips=new Map(),roofSupportRows=new Set();
   for(let z=entranceZ;z<d-2;z++){
     const widthAtRow=footprint.filter(([x,zz])=>zz===z).map(([x])=>x).sort((a,b)=>a-b);
     if(!widthAtRow.length)continue;
@@ -151,13 +155,57 @@ function emitBlueprint(type,biome,size){
       if(!has(x,z)||!occupied.has(pos(x,roofY,z)))continue;
       let rise=0;
       if(bi===0)rise=Math.max(0,pitch-Math.floor(Math.abs(x-mid)/(si+2)));
-      if(bi===1)rise=(x===lo||x===hi||z===entranceZ||z===d-3)?pitch:0; // parapeted flat court
-      if(bi===2)rise=Math.max(0,pitch-Math.floor(Math.abs(x-mid)/(si+1))); // snow-shedding steep gable
-      if(bi===3)rise=Math.max(0,pitch-Math.floor(Math.abs((x-mid)+(z%5-2))/(si+2))); // organic offset roof
-      if(bi===4)rise= z>d-8?pitch:(z<entranceZ+5?Math.ceil(pitch/2):1); // stepped cliffward vault
-      for(let y=roofY+1;y<=roofY+rise;y++){
-        const role=y===roofY+rise?'roof':'column';
-        set(x,y,z,role,y===roofY+rise?roofAsset:'base:stone');
+      if(bi===1)rise=(x===lo||x===hi||z===entranceZ||z===d-3)?pitch:0;
+      if(bi===2)rise=Math.max(0,pitch-Math.floor(Math.abs(x-mid)/(si+1)));
+      if(bi===3)rise=Math.max(0,pitch-Math.floor(Math.abs((x-mid)+(Math.floor((z-entranceZ)/5)%3-1))/(si+2)));
+      if(bi===4)rise=z>d-8?pitch:(z<entranceZ+5?Math.ceil(pitch/2):1);
+      if(!rise)continue;
+      raised.set(pos(x,z),rise);
+      if(!strips.has(x))strips.set(x,[]);
+      strips.get(x).push([z,rise]);
+    }
+  }
+  const supports=new Set();
+  for(const [x,entries] of strips){
+    entries.sort((a,b)=>a[0]-b[0]);
+    let start=0;
+    while(start<entries.length){
+      let end=start+1;
+      while(end<entries.length&&entries[end][0]===entries[end-1][0]+1&&entries[end][1]===entries[start][1])end++;
+      for(let i=start;i<end;i++){
+        if(i===start||i===end-1||(i-start)%4===0){
+          const z=entries[i][0];supports.add(pos(x,z));roofSupportRows.add(z);
+        }
+      }
+      start=end;
+    }
+  }
+  for(const [key,rise] of raised){
+    const [x,z]=key.split(',').map(Number),top=roofY+rise;
+    if(supports.has(key)){
+      del(x,roofY,z);set(x,roofY,z,'column','base:wood');
+    }else if(rise===1){
+      // A thin candidate roof tile must not carry another roof tile; the
+      // lower single-rise layer is a structural, longitudinal purlin.
+      del(x,roofY,z);set(x,roofY,z,'beam','base:wood','north');
+    }
+    for(let y=roofY+1;y<top;y++){
+      if(supports.has(key))set(x,y,z,'column','base:wood');
+      else if(y===top-1)set(x,y,z,'beam','base:wood','north');
+    }
+    set(x,top,z,'roof',roofAsset);
+  }
+  // Vertical seam/fascia cells close the exposed height difference between
+  // adjacent sloped roof strips. Interior attic sections stay hollow rather
+  // than being a solid stone mountain; no cells enter the open courtyard.
+  for(const [key,rise] of raised){
+    const [x,z]=key.split(',').map(Number),top=roofY+rise;
+    for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const nx=x+dx,nz=z+dz;
+      const neighborTop=roofY+(raised.get(pos(nx,nz))||0);
+      if(neighborTop>=top-1)continue;
+      for(let y=neighborTop+1;y<top;y++){
+        if(!occupied.has(pos(x,y,z)))set(x,y,z,'wall',wallAsset);
       }
     }
   }
@@ -267,7 +315,9 @@ function emitBlueprint(type,biome,size){
   // A joist has full height clearance above the last usable 2-block room envelope;
   // it is only placed across spans anchored by walls at BOTH ends of its run.
   // Desert courts retain an open central sky; no beam crosses a courtyard aperture.
-  for(let z=front;z<=d-3;z+=3){
+  const joistRows=new Set(roofSupportRows);
+  for(let z=front;z<=d-3;z+=3)joistRows.add(z);
+  for(const z of [...joistRows].sort((a,b)=>a-b)){
     const row=footprint.filter(([x,zz])=>zz===z&&occupied.has(pos(x,roofY,z))).map(([x])=>x).sort((a,b)=>a-b);
     const spans=[];
     let group=[];
