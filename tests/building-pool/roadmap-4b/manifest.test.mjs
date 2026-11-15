@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {PROGRAM,PLANNED_TOTAL,expectedIds} from '../../src/building-pool/roadmap-4b/schema.mjs';
+import {PROGRAM,PLANNED_TOTAL,expectedIds} from '../../../src/building-pool/roadmap-4b/schema.mjs';
 const load=path=>JSON.parse(readFileSync(new URL(path,import.meta.url),'utf8'));
 const manifest=load('../../../src/building-pool/roadmap-4b/manifest.json');
 const legacy=load('../../../src/building-pool/roadmap-4b/legacy-source.json');
