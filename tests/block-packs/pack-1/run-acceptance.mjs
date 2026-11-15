@@ -3,7 +3,7 @@
 // Run in a complete GitHub checkout with free Node 22 + Playwright/Chromium:
 //   PACK1_EXPECTED_HEAD=<40-hex-commit> node tests/block-packs/pack-1/run-acceptance.mjs
 //
-// A successful exit is possible ONLY after 10 nested native Node test modules
+// A successful exit is possible ONLY after 11 nested native Node test modules
 // and 15 real Chromium page views/30 authentic screenshots actually succeed.
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
@@ -23,7 +23,8 @@ const groups=[
   'raycast-regression.test.mjs',
   'gallery-count.test.mjs',
   'png-proof.test.mjs',
-  'builder-handoff.test.mjs'
+  'builder-handoff.test.mjs',
+  'construction-stress.test.mjs'
 ];
 const views=[
   'masonry','stone-shapes','garden','foliage','floral'
@@ -71,7 +72,7 @@ async function main(){
   const files=groups.map(x=>own+x);
   const nodeResult=run(process.execPath,['--test',...files]);
   // A zero exit alone can hide a suite that skipped everything. Require an
-  // authentic Node TAP summary with at least 101 tests (93 established source/gallery + 8 builder-handoff).
+  // authentic Node TAP summary with at least 109 tests (93 established source/gallery + 8 builder-handoff + 8 stress/save).
   const metric=(key)=>{
     const match=nodeResult.match(new RegExp('^# '+key+'\\s+(\\d+)\\s*$','m'));
     assert.ok(match,'Native Node TAP summary missing '+key);
@@ -79,7 +80,7 @@ async function main(){
   };
   const tests=metric('tests'),passed=metric('pass'),failed=metric('fail');
   const skipped=metric('skipped'),todo=metric('todo');
-  assert.ok(tests>=101,'Too few native Pack 1 tests executed: '+tests);
+  assert.ok(tests>=109,'Too few native Pack 1 tests executed: '+tests);
   assert.equal(passed,tests,'Native Pack 1 tests were not all passing');
   assert.equal(failed,0,'Native Pack 1 tests failed');
   assert.equal(skipped,0,'Native Pack 1 tests were skipped');
