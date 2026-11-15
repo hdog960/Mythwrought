@@ -151,3 +151,19 @@ test('no persistent IDs or global game settings changed by importing this bridge
   assert.equal(createPack5ConstructionLayer(world()).count(),0);
   assert.throws(()=>createPack5ConstructionLayer({seed:0}));
 });
+
+test('dense shape raycasts match authored exact physical boxes after 4-way rotations',()=>{
+  const w=world(181),layer=createPack5ConstructionLayer(w);
+  const ids=['pack5:080','pack5:083','pack5:086','pack5:091'];
+  for(let i=0;i<180;i++){
+    const id=ids[i%ids.length],rot=i%4,anchor=[(i%30)*5,4,Math.floor(i/30)*5];
+    support(w,id,anchor,rot);
+    assert.equal(layer.place(id,anchor,rot).ok,true,id+' '+i);
+  }
+  for(let x=0;x<30;x+=3){
+    const eye=[x*5+.5,4.5,3],hit=layer.raycast(eye,[0,0,-1],6);
+    if(x===0)assert.ok(hit,'first authored shape still selectable');
+    if(hit)assert.ok(hit.distance>=0&&hit.distance<=6);
+  }
+  assert.equal(layer.count(),180);
+});

@@ -145,3 +145,31 @@ test('explicit Pack 5 import rejects cross-seed and conflict without consent, pr
   assert.equal(s.getItem(key+'.backup'),old);
   assert.equal(loadPack5SidecarSafe(s,createPack5ConstructionLayer(w)).count,1);
 });
+
+test('2048 placed physical objects retain bounded draw budgets and shape selection',()=>{
+  const w=plainWorld(7),layer=createPack5ConstructionLayer(w);
+  const total=2048;
+  for(let i=0;i<total;i++){
+    const at=[(i%64)*3,4,Math.floor(i/64)*3];
+    assert.equal(layer.place('pack5:080',at,i%4).ok,true,'position '+i);
+  }
+  assert.equal(layer.count(),total);
+  const snapshot=layer.snapshot();
+  assert.equal(snapshot.entries.length,total);
+  const restored=createPack5ConstructionLayer(w);
+  assert.equal(restored.restore(snapshot),true);
+  assert.equal(restored.count(),total);
+  const ray=restored.raycast([.5,4.5,2],[0,0,-4],6);
+  assert.equal(ray?.symbolicId,'pack5:080');
+  assert.ok(ray.distance>=1&&ray.distance<=2);
+  assert.equal(restored.collidesPack5([.45,4.4,.45,.55,4.6,.55]),true);
+  assert.equal(restored.collidesPack5([500,4,500,500.2,4.2,500.2]),false);
+  const gl=mockGl(),stream=createPack5GpuStream(gl,restored);
+  assert.equal(stream.refresh([.5,4.5,2]),true);
+  assert.ok(stream.stats().instances>0&&stream.stats().instances<=16);
+  assert.ok(stream.stats().bytes<=2*1024*1024);
+  assert.equal(gl.uploads.length,1);
+  assert.ok(stream.draw({atPos:0,atColor:1,atUv:2,atMat:3})>0);
+  stream.dispose();
+  assert.equal(gl.deleted.length,1);
+});

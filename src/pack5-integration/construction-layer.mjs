@@ -18,6 +18,23 @@ const offset=(a,b)=>a.map((n,i)=>n+b[i]);
 const within=(cell)=>validCell(cell)&&cell[1]>=WORLD_MIN_Y&&cell[1]<=WORLD_MAX_Y;
 const overlap=(a,b)=>a[0]<b[3]&&a[3]>b[0]&&a[1]<b[4]&&a[4]>b[1]&&a[2]<b[5]&&a[5]>b[2];
 const worldBox=(box,cell)=>box.map((v,i)=>v+cell[i%3]);
+// Exact ray/AABB math matches the canonical Pack 5 fixture; only discovery
+// changes, from scanning ALL furnishings to probing nearby occupied cells.
+function hitBox(origin,unit,box){
+  let lo=-Infinity,hi=Infinity;
+  for(let i=0;i<3;i++){
+    const d=unit[i];
+    if(Math.abs(d)<1e-12){
+      if(origin[i]<box[i]||origin[i]>box[i+3])return null;
+      continue;
+    }
+    const a=(box[i]-origin[i])/d,b=(box[i+3]-origin[i])/d;
+    lo=Math.max(lo,Math.min(a,b));
+    hi=Math.min(hi,Math.max(a,b));
+    if(hi<lo)return null;
+  }
+  return hi<0?null:Math.max(0,lo);
+}
 function checkBox(box){
   if(!Array.isArray(box)||box.length!==6||!box.every(Number.isFinite)||
      box.slice(0,3).some((x,i)=>x>=box[i+3]))throw Error('Invalid physical bounds');
@@ -75,7 +92,46 @@ export function createPack5ConstructionLayer(world){
     remove(cell){return fixture.remove(cell);},
     /** Shape-exact hit, with legacy solid-world occlusion checked first. */
     raycast(origin,direction,maxDistance=6){
-      const hit=fixture.raycast(origin,direction,maxDistance);
+      // For low density, retain the source-exact reference behavior.
+      let hit;
+      if(fixture.count()<=64||maxDistance>8){
+        hit=fixture.raycast(origin,direction,maxDistance);
+      }else{
+        // Legacy ray semantics and validation remain unchanged.
+        if(!Array.isArray(origin)||!Array.isArray(direction)||
+          origin.length!==3||direction.length!==3||
+          ![...origin,...direction,maxDistance].every(Number.isFinite)||
+          maxDistance<0||direction.every(v=>v===0))
+          throw Error('Invalid Pack 5 ray');
+        const length=Math.hypot(...direction);
+        if(!Number.isFinite(length)||length===0)throw Error('Invalid Pack 5 ray length');
+        const unit=direction.map(v=>v/length);
+        const end=origin.map((n,i)=>n+unit[i]*maxDistance);
+        const min=origin.map((n,i)=>Math.floor(Math.min(n,end[i])-1e-8));
+        const max=origin.map((n,i)=>Math.floor(Math.max(n,end[i])+1e-8));
+        if([...min,...max].some(n=>!Number.isSafeInteger(n)))
+          hit=fixture.raycast(origin,direction,maxDistance);
+        else{
+          hit=null;
+          for(let x=min[0];x<=max[0];x++)
+            for(let y=min[1];y<=max[1];y++)
+              for(let z=min[2];z<=max[2];z++){
+                const cell=[x,y,z],record=fixture.cell(cell);
+                if(!record)continue;
+                const {descriptor}=resolvePack5BuilderAsset(record.symbolicId,record.variant);
+                for(const p of orientedParts(descriptor,record.rotation)){
+                  const at=offset(record.anchor,p.cell);
+                  if(at[0]!==x||at[1]!==y||at[2]!==z)continue;
+                  for(const b of p.boxes){
+                    const t=hitBox(origin,unit,worldBox(b,cell));
+                    if(t!==null&&t<=maxDistance&&(!hit||t<hit.distance))
+                      hit={symbolicId:record.symbolicId,anchor:[...record.anchor],
+                        cell:[...cell],distance:t};
+                  }
+                }
+              }
+        }
+      }
       if(!hit)return null;
       const obstruction=raycastLegacy(world,origin,direction,maxDistance);
       return obstruction&&obstruction.distance<=hit.distance+1e-8?null:hit;
