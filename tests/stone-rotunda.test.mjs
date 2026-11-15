@@ -80,3 +80,24 @@ test('explicit player edit equal to natural terrain still reserves construction 
   assert.equal(placeStoneRotunda(world,plan),false);
   assert.equal(world.edits.get(key),natural);
 });
+
+
+test('weathered buttresses and asymmetric crown are real editable voxels without closing gateways',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected a buildable site');
+  const [x,h,z]=plan.origin;
+  const cells=new Set(plan.cells.map(([px,py,pz])=>[px,py,pz].join(',')));
+  for(const [sx,sz] of [[-1,-1],[-1,1],[1,-1],[1,1]]){
+    for(const [dx,dz] of [[sx*4,sz*3],[sx*3,sz*4]]){
+      assert.ok(cells.has([x+dx,h+1,z+dz].join(',')),'buttress must be physical stone');
+    }
+  }
+  for(const [dx,dz] of [[-3,-2],[-3,-1],[-2,-3],[3,1],[3,2],[2,3]])
+    assert.ok(cells.has([x+dx,h+6,z+dz].join(',')),'broken crown must be physical stone');
+  for(const [px,py,pz] of [...plan.entrances,plan.center])
+    for(let dy=0;dy<3;dy++)assert.equal(cells.has([px,py+dy,pz].join(',')),false);
+  assert.equal(placeStoneRotunda(world,plan),true);
+  assert.equal(world.get(x-4,h+1,z-3),BLOCK.STONE);
+  assert.equal(world.set(x-4,h+1,z-3,BLOCK.AIR),true);
+  assert.equal(world.get(x-4,h+1,z-3),BLOCK.AIR);
+});
