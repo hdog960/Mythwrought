@@ -22,7 +22,9 @@ export function getM1Pack4Construction(pack4,{blueprints=null}={}){
     // This is an isolated physical sidecar; original blueprint stays unchanged.
     const physicalDraft=Array.isArray(draft.placements)?{...draft,placements:draft.placements.map(p=>
       p.asset==='pack4:064'&&p.role==='furnishing'&&p.orientation==='north'
-        ?{...p,orientation:'east',orientationProvenance:'supported-wall-sidecar'}:p)}:draft;
+        ?{...p,orientation:'east',orientationProvenance:'supported-wall-sidecar'}:
+       p.asset==='pack4:063'&&['none','unresolved',undefined].includes(p.orientation)
+        ?{...p,orientation:'north',orientationProvenance:'fourfold-symmetric-hollow-flue'}:p)}:draft;
     const fixedSupportCells=(draft.placements??[]).filter(p=>
       p.asset.startsWith('live:')&&['foundation','floor','wall','partition','support'].includes(p.role)
     ).map(p=>p.at);

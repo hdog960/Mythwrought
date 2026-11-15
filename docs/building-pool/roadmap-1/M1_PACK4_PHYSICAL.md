@@ -26,3 +26,12 @@ full-cube model, modify any other block pack, or approve Gate A/v0.11.
 Reproduction: GitHub-hosted temporary source-exact overlay of this PR plus
 Pack 4 draft PR #115, followed by native builder tests and original
 Chromium WebGL2 preview. No PC, paid service, merge, or deployment required.
+
+## Final chimney rotation handoff
+
+Twenty-one Pack4:063 hollow four-wall chimney courses had no authored
+orientation in the theoretical plans. Pack4:063 is four-way geometrically
+symmetric. Its builder-only physical construction view now specifies north
+for these cells with provenance \`fourfold-symmetric-hollow-flue\`.
+The original source blueprints are preserved. This is not evidence
+of actual fire/smoke behavior or player-approved appearance.

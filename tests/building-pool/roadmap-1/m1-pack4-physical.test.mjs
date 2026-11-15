@@ -46,3 +46,19 @@ test('fifteen fireplaces turn toward their exact existing west wall instead of m
  getM1Pack4Construction(adapter);
  assert.equal(corrected,15);
 });
+
+test('all twenty-one four-sided hollow chimneys receive real symmetry-aware construction yaw',()=>{
+ let chimney=0;
+ const resolver={resolvePack4BuilderBlueprint(draft){
+  for(const p of draft.placements??[]){
+   if(p.asset==='pack4:063'){
+    chimney++;
+    assert.equal(p.orientation,'north');
+    assert.equal(p.orientationProvenance,'fourfold-symmetric-hollow-flue');
+   }
+  }
+  return {resolvedCount:0,placements:[],orientationReviewCount:0};
+ }};
+ getM1Pack4Construction(resolver);
+ assert.equal(chimney,21);
+});
