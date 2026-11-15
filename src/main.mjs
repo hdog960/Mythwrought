@@ -1165,6 +1165,23 @@ function start(){
         try{refreshEditedMeshes(x,z,y);}catch(err){world.set(x,y,z,old);throw err;}
         save();
       },
+      // Localhost-only real-game GPU fixture, unavailable on deployed Pages.
+      // Used by Chromium to verify the actual terrain shader + Pack 5 buffer.
+      placePack5TestFixture(x,y,z){
+        if(!pack5Builder||![x,y,z].every(Number.isSafeInteger))
+          throw Error('Pack 5 test mode not initialized');
+        const cell=[x,y,z];
+        const result=pack5Builder.layer.place('pack5:080',cell,0);
+        if(result.ok){
+          try{pack5Builder.save();}
+          catch(error){pack5Builder.layer.remove(cell);throw error;}
+          pack5Gpu.refresh(eye());
+          const dx=x+.5-player.x,dy=y+.5-(player.feet+1.55),dz=z+.5-player.z;
+          player.yaw=Math.atan2(dx,dz);
+          player.pitch=Math.atan2(dy,Math.hypot(dx,dz));
+        }
+        return {...result,scene:pack5Gpu.stats(),worldSchema:world.save().schema};
+      },
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
         frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats(),

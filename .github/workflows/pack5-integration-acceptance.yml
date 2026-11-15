@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: '22.16.0'
       - name: Pack 5 canonical builder native tests
-        run: node --test tests/pack5-integration.test.mjs
+        run: node --test tests/pack5-*.test.mjs
       - name: Install free Chromium test runner
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2
@@ -30,6 +30,11 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: '1'
           EGL_PLATFORM: 'x11'
         run: node tests/pack5-integration-browser.mjs artifacts/pack5-integration
+      - name: Actual Mythwrought live shader with Pack 5 opt-in at three landscape sizes
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: 'x11'
+        run: node tests/pack5-game-browser.mjs artifacts/pack5-integration/game
       - uses: actions/upload-artifact@v4
         if: always()
         with:

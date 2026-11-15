@@ -40,3 +40,27 @@ const savedSidecar=layer.snapshot(); // NEVER feed this to VoxelWorld.restore()
 5. Explicit green integration PR review and distinct creator-authorized **merge/deploy**. Do not claim any draft adapter is installed in the playable game.
 
 **Gate A remains OPEN; v0.11 remains LOCKED.** No other packs, automation output, builder-roadmap source, game controls or save schema changed by this isolated PR.
+
+
+## M2 integration candidate — actual gameplay hook, NOT deployed
+- This draft now adds a **default-off** Pack 5 toggle in the existing scrollable
+  settings panel. It reuses the original two-thumb movement/look and MINE/PLACE
+  actions; the old ID 0–8 material palette is not widened or renumbered.
+- When enabled, the game dynamically imports the 18-family physical catalog,
+  verifies the seed-specific checksummed sidecar, renders original authored
+  triangle colors through the **actual nine-float terrain shader** with existing
+  depth/fog, and stages at most 16 nearby instances in one extra GPU draw.
+- Player AABB collisions use occupied-cell spatial queries and original per-part
+  boxes, not phantom full-cube hits. A new guard prevents mining legacy backing
+  under placed floor/wall/ceiling Pack 5 objects; legacy edits cannot overwrite
+  the same occupied cell or select through a nearer shaped object.
+- Pack 5 edits persist synchronously in a separate journaled/backup sidecar,
+  never the schema-1 terrain record. Corrupt sidecars fail closed. When changing
+  or importing worlds the active Pack 5 adapter is cleared; enabling again
+  loads only the currently selected seed.
+- Root native regression and dedicated true **actual-game** WebGL2 Chromium
+  screenshots are required as separate acceptance, not assumed green.
+- Known remaining gates: verify all exact-head CI, screenshot and mobile
+  performance; multi-thousand-place streaming and external sidecar
+  export/import/backup consistency; actual iPhone controls and visuals;
+  creator-authorized PR merge/deployment. No Gate A or v0.11 change.

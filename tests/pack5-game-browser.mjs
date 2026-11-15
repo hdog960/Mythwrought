@@ -1,0 +1,77 @@
+/**
+ * Genuine HTTP-served Chromium acceptance of the ACTUAL Mythwrought main
+ * renderer with its opt-in Pack 5 sidecar, not only an isolated object gallery.
+ * Does NOT replace physical iPhone/Safari testing or authorize deployment.
+ */
+import {spawn} from 'node:child_process';
+import {mkdir} from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const output=path.resolve(process.argv[2]||'artifacts/pack5-integration/game');
+await mkdir(output,{recursive:true});
+const server=spawn('python3',['-m','http.server','4181','--bind','127.0.0.1','--directory',root],{
+  cwd:root,stdio:'ignore'
+});
+let browser;
+try{
+  browser=await chromium.launch({headless:true,args:[
+    '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
+    '--enable-webgl','--ignore-gpu-blocklist'
+  ]});
+  for(const [width,height] of [[667,375],[844,390],[932,430]]){
+    const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
+    let opened=false;
+    for(let i=0;i<35&&!opened;i++){
+      try{
+        await page.goto('http://127.0.0.1:4181/',{waitUntil:'load',timeout:7000});
+        opened=true;
+      }catch(err){
+        if(i===34)throw err;
+        await new Promise(resolve=>setTimeout(resolve,100));
+      }
+    }
+    await page.waitForFunction(()=>Number(document.getElementById('scene')?.dataset.renderedFrames)>2,
+      {timeout:30000});
+    await page.locator('#menu').click();
+    await page.evaluate(()=>{
+      const checkbox=document.getElementById('pack5Enabled');
+      checkbox.checked=true;checkbox.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+    await page.waitForFunction(()=>
+      document.getElementById('pack5Status')?.textContent.includes('Pack 5 ON'),
+      {timeout:30000});
+    assert.equal(await page.locator('#pack5Family option').count(),18);
+    await page.locator('#closeHelp').click();
+    const placement=await page.evaluate(()=>{
+      const api=window.__mythwroughtTest;
+      const canvas=document.getElementById('scene');
+      const x=Math.floor(Number(canvas.dataset.playerX))+3;
+      const z=Math.floor(Number(canvas.dataset.playerZ));
+      const feet=Number(canvas.dataset.playerFeet);
+      const y=Math.min(18,Math.floor(feet)+2);
+      return api.placePack5TestFixture(x,y,z);
+    });
+    assert.equal(placement.ok,true,'Real game Pack 5 test shape placement');
+    assert.equal(placement.worldSchema,1,'Legacy world schema preserved');
+    await page.waitForFunction(()=>Number(document.getElementById('scene').dataset.pack5MeshVertices)>0,
+      {timeout:30000});
+    const evidence=await page.evaluate(()=>{
+      const c=document.getElementById('scene');
+      return {vertices:Number(c.dataset.pack5MeshVertices),
+        instances:Number(c.dataset.pack5VisibleInstances),
+        frames:Number(c.dataset.renderedFrames),rendered:c.dataset.skyDrawn==='true',
+        sidecar:Object.keys(localStorage).some(k=>k.startsWith('mythwrought.pack5.builder.seed.'))};
+    });
+    assert.ok(evidence.vertices>0&&evidence.instances===1&&evidence.rendered);
+    assert.equal(evidence.sidecar,true);
+    await page.screenshot({path:path.join(output,'pack5-live-game-'+width+'x'+height+'.png')});
+    console.log('PASS actual Mythwrought game Pack5 WebGL2',width,height,evidence);
+    await page.close();
+  }
+}finally{
+  if(browser)await browser.close();
+  server.kill('SIGTERM');
+}
