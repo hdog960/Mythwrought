@@ -15,6 +15,10 @@ const WALL=Object.freeze([
   part('face',.625,.21875,.125,1,.90625,.875),
   part('ash',0,.90625,.09375,1,1,.90625),
   part('ash',.03125,.25,.03125,.28125,.859375,.125),
+  // Small upper-wall masonry catches make a neighboring dentil cornice
+  // physically attach at both piers. They avoid the carved runes and slit.
+  part('ash',.25,.5625,0,.3125,.75,.0625),
+  part('ash',.6875,.5625,0,.75,.75,.0625),
   part('ash',.71875,.25,.03125,.96875,.859375,.125),
   part('trim',0,.21875,.0625,.375,.28125,.9375),
   part('trim',.625,.21875,.0625,1,.28125,.9375),

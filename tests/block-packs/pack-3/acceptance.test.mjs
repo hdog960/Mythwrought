@@ -399,3 +399,43 @@ test('Hearthclay hip corner edge and crest trims remain continuous at both rotat
   assert.ok(pack3GeometryById(114).boxes.length<=32,
     'Coping detail must remain within the merged shape descriptor 32-box budget');
 });
+
+
+// A face-mounted ornamental cornice is a real neighboring voxel, not a
+// floating painted mesh. The fortress front wall must support it at its
+// own rear face while retaining its arrow slit and existing load-bearing
+// buttress/battlement interfaces at every quarter-turn.
+test('fortress masonry supports neighboring dentil cornice at all four rotations',()=>{
+  const rotateOffset=([x,y,z])=>[-z,y,x];
+  const worldBoxes=(id,yaw,cell)=>pack3CandidateById(id,yaw).boxes.map(b=>
+    b.map((v,i)=>v+cell[i%3]));
+  const contact=(wall,cornice,axis,frontFace)=> {
+    const other=[0,1,2].filter(i=>i!==axis);
+    let area=0;
+    for(const a of wall)for(const b of cornice){
+      if(frontFace===0
+        ? Math.abs(a[axis]-b[axis+3])>1e-10
+        : Math.abs(a[axis+3]-b[axis])>1e-10)continue;
+      const u=Math.max(0,Math.min(a[other[0]+3],b[other[0]+3])-
+        Math.max(a[other[0]],b[other[0]]));
+      const v=Math.max(0,Math.min(a[other[1]+3],b[other[1]+3])-
+        Math.max(a[other[1]],b[other[1]]));
+      area+=u*v;
+    }
+    return area;
+  };
+  for(let yaw=0;yaw<4;yaw++){
+    const wall=pack3CandidateById(116,yaw),cornice=pack3CandidateById(120,yaw);
+    let offset=[0,0,-1];
+    for(let i=0;i<yaw;i++)offset=rotateOffset(offset);
+    const axis=offset[0]!==0?0:2;
+    const facing=offset[axis]<0?0:1;
+    const area=contact(worldBoxes(116,yaw,[0,0,0]),
+      worldBoxes(120,yaw,offset),axis,facing);
+    assert.equal(area,.0234375,`Unattached cornice at yaw ${yaw}, face area ${area}`);
+    assert.equal(wall.boxes.length,13);
+    assert.equal(wall.parts.filter(p=>p.tone==='rune').length,2);
+    assert.equal(filled(wall.shape,.5,.65,.5),false,'Arrow slit must remain open');
+    assert.equal(filled(cornice.shape,.5,.85,.45),true,'Cornice crown still physical');
+  }
+});
