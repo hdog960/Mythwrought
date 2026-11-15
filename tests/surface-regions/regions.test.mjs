@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {surfaceBiomeAt,surfaceBiomeHeight,surfaceBiomeBlock,SURFACE_BIOME_REGIONS,surfaceBiomeOverlay} from '../../src/surface-regions/regions.mjs';
+import {surfaceBiomeAt,surfaceBiomeHeight,surfaceBiomeBlock,SURFACE_BIOME_REGIONS,surfaceBiomeOverlay,surfaceBiomeElevationPlan} from '../../src/surface-regions/regions.mjs';
 import {terrainHeight} from '../../src/voxel.mjs';
 import {WORLD_MAX_Y} from '../../src/depth.mjs';
 test('four physically registered regions occupy multiple chunks on fixed seeds',()=>{
@@ -87,5 +87,32 @@ test('biome veneer fades deterministically at region shoulders without spawn edi
   }
   assert.ok(untouched>0,'transition should preserve original cells');
   assert.ok(converted>0,'transition should include biome material');
+ }
+});
+
+test('fresh-world elevation plans are atomic, bounded and never implicitly enabled',()=>{
+ for(const seed of [179,7,2201]){
+  let raisedMountains=0;
+  for(const r of SURFACE_BIOME_REGIONS){
+   for(let dx=-32;dx<=32;dx+=8)for(let dz=-32;dz<=32;dz+=8){
+    const x=r.x+dx,z=r.z+dz;
+    const opts={enabled:true,profileIsFresh:true,columnClear:true};
+    assert.equal(surfaceBiomeElevationPlan(x,z,seed),null);
+    assert.equal(surfaceBiomeElevationPlan(x,z,seed,{...opts,columnClear:false}),null);
+    assert.equal(surfaceBiomeElevationPlan(x,z,seed,{...opts,profileIsFresh:false}),null);
+    const plan=surfaceBiomeElevationPlan(x,z,seed,opts);
+    if(!plan)continue;
+    assert.equal(plan.name,r.name);
+    assert.ok(plan.top<=WORLD_MAX_Y-3);
+    assert.ok(plan.oldTop<plan.top);
+    assert.equal(plan.layers.length,plan.top-plan.oldTop);
+    assert.deepEqual(plan.layers.map(v=>v.y),
+      Array.from({length:plan.top-plan.oldTop},(_,i)=>plan.oldTop+1+i));
+    assert.equal(plan.layers.at(-1).id,r.surface);
+    assert.deepEqual(plan,surfaceBiomeElevationPlan(x,z,seed,opts));
+    if(r.name==='mountain')raisedMountains++;
+   }
+  }
+  assert.ok(raisedMountains>0,'mountain ridge should have physical raised columns');
  }
 });
