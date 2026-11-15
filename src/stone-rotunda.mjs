@@ -136,6 +136,13 @@ export function inspectStoneRotundaTraversal(world,plan){
     Array.isArray(cell)&&cell.length===4&&
     cell.every(Number.isSafeInteger)&&cell[3]===BLOCK.STONE&&
     world.get(cell[0],cell[1],cell[2])===BLOCK.STONE))return null;
+  // A later player excavation can undermine a previously safe foundation.
+  // Inspect both load-bearing layers across the complete footprint, not just
+  // the visible entrance paths. This never repairs or overwrites player edits.
+  for(let dx=-4;dx<=4;dx++)for(let dz=-4;dz<=4;dz++){
+    for(const dy of [-1,-2])
+      if(world.get(x+dx,h+dy,z+dz)===BLOCK.AIR)return null;
+  }
   const routes=[];
   for(const [dx,dz] of [[0,-1],[0,1],[-1,0],[1,0]]){
     const cells=[];
