@@ -20,14 +20,20 @@ function make(type) {
  if(!q)throw RangeError('M1 only contains four distinct workshop exemplars');
  const {w,d,h}=q,x0=Math.floor(w/2)-1;
  const modules=new Map(),occupied=new Map();
- function put(role,x,y,z,asset){
+ function put(role,x,y,z,asset,placement=null){
   if(!Number.isSafeInteger(x)||!Number.isSafeInteger(y)||!Number.isSafeInteger(z)||
      x<0||y<0||z<0||x>=w||y>=h||z>=d)throw RangeError('building placement out of envelope');
   const key=[x,y,z].join(',');
   if(occupied.has(key))throw Error('Duplicate physical placement '+key);
   occupied.set(key,asset);
   if(!modules.has(role))modules.set(role,[]);
-  modules.get(role).push([x,y,z,asset]);
+  const cell=[x,y,z,asset];
+  if(placement!==null){
+   if(!placement||typeof placement!=='object'||!['north','east','south','west'].includes(placement.orientation))
+    throw Error('Explicit source physical placement requires cardinal orientation');
+   cell.push(Object.freeze({...placement}));
+  }
+  modules.get(role).push(cell);
  }
  function open(x,y,z){
   // A two-cell-wide, three-high actual south doorway. Side windows are open air.
@@ -77,7 +83,10 @@ function make(type) {
  // Independent, physically authored category-specific structures and stations.
  const stations=[],features=[];
  function station(name,x,z,asset,unresolvedDependency){
-  put('fixture',x,2,z,asset);
+  const placement=asset===C.anvil?
+   {orientation:'north',variant:'blackiron-horn',state:{}}:
+   asset===C.crate?{orientation:'north',state:{}}:null;
+  put('fixture',x,2,z,asset,placement);
   stations.push({name,position:[x,2,z],assetRef:asset,
     unresolvedDependency:unresolvedDependency??null,active:false});
  }
