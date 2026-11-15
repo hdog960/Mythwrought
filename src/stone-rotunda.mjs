@@ -78,7 +78,11 @@ export function placeStoneRotunda(world,plan){
   if(!fresh||fresh.origin[1]!==h||fresh.cells.length!==plan.cells.length||
      !plan.cells.every((cell,i)=>Array.isArray(cell)&&cell.length===4&&
        cell.every((v,j)=>v===fresh.cells[i][j])))return false;
+  // A failed multi-voxel write must restore all schema-1 edit metadata, not
+  // only the block map. VoxelWorld.set also changes rotation and family counts.
   const original=new Map(world.edits);
+  const originalRotations=world.rotations instanceof Map?new Map(world.rotations):null;
+  const originalBiomeCount=world.biomeCellCount;
   try{
     for(const [px,py,pz,id] of fresh.cells)
       if(world.set(px,py,pz,id)!==true)throw new Error('Rejected voxel write');
@@ -86,6 +90,11 @@ export function placeStoneRotunda(world,plan){
   }catch{
     world.edits.clear();
     for(const [key,id] of original)world.edits.set(key,id);
+    if(originalRotations){
+      world.rotations.clear();
+      for(const [key,turns] of originalRotations)world.rotations.set(key,turns);
+    }
+    if(typeof originalBiomeCount==='number')world.biomeCellCount=originalBiomeCount;
     return false;
   }
 }
