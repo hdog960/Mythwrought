@@ -19,7 +19,7 @@ const TYPES=['civic-hall','castle-palace'];
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
 function gitBlob(bytes){
- return createHash('sha1').update(Buffer.from('blob '+bytes.length+'\\0')).update(bytes).digest('hex');
+ return createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
 }
 function bundle(){
  const schema=readFileSync(join(SOURCE,'schema.mjs'),'utf8');
@@ -36,13 +36,13 @@ function bundle(){
    if(!part.includes(needle))throw Error('Gallery source import not exact PR-head owned module: '+needle);
  }
  const code=[
-  schema.replace(/\\bexport (const|function) /g,'$1 '),
+  schema.replace(/\bexport (const|function) /g,'$1 '),
   blueprint.toString().replace(importBlueprint,'').replace(/export function /g,'function '),
   shapes.replace(/export function /g,'function '),
-  render.replace(/^import .*?;\\n/gm,'').replace('new URLSearchParams(location.search)',
+  render.replace(/^import .*?;\n/gm,'').replace('new URLSearchParams(location.search)',
         'new URLSearchParams(window.__roadmap4aQuery)')
- ].join('\\n');
- if(/(^|\\n)\\s*(?:import|export)\\s/m.test(code))throw Error('Browser source bundle contains unhandled module syntax');
+ ].join('\n');
+ if(/(^|\n)\s*(?:import|export)\s/m.test(code))throw Error('Browser source bundle contains unhandled module syntax');
  const scriptTag='<script type="module" src="./webgl2-preview.mjs"></script>';
  if(!html.includes(scriptTag))throw Error('Preview HTML no longer matches source');
  html=html.replace(scriptTag,'');
@@ -124,7 +124,7 @@ async function runWithBrowser(){
   for(let i=0;i<200;i++){
    if(chrome.exitCode!==null)throw Error('Chromium exited before remote debugging started');
    const active=join(profile,'DevToolsActivePort');
-   if(existsSync(active)){port=Number(readFileSync(active,'utf8').split('\\n')[0]);break;}
+   if(existsSync(active)){port=Number(readFileSync(active,'utf8').split('\n')[0]);break;}
    await pause(80);
   }
   if(!port)throw Error('Chromium CDP port unavailable');
@@ -140,7 +140,7 @@ async function runWithBrowser(){
     const setup='document.open();document.write('+JSON.stringify(html)+');document.close();window.__roadmap4aQuery='+JSON.stringify(query)+';';
     const reset=await cdp.send('Runtime.evaluate',{expression:setup,returnByValue:true,awaitPromise:true});
     if(reset.exceptionDetails)throw Error('Document creation: '+reset.exceptionDetails.text);
-    const expr='(()=>{\\n'+code+'\\nreturn window.__roadmap4aWebgl2;\\n})()';
+    const expr='(()=>{\n'+code+'\nreturn window.__roadmap4aWebgl2;\n})()';
     const run=await cdp.send('Runtime.evaluate',{expression:expr,returnByValue:true,awaitPromise:true},90000);
     if(run.exceptionDetails)throw Error('Candidate source JavaScript: '+run.exceptionDetails.text+' '+JSON.stringify(run.exceptionDetails.exception||{}));
     const data=run.result?.value;
@@ -181,7 +181,7 @@ async function runWithBrowser(){
     viewports:VIEWPORTS,allGLChecksPassed:true,glFinishUsed:true,zeroLostContexts:true,
     productionPhysicalFamilyRenderer:false,realIphoneTested:false,creatorArtApproved:false,
     integratedIntoGame:false,schema1SaveCompatibilityVerified:false,results:shots};
-  writeFileSync(join(OUT,'results-all.json'),JSON.stringify(evidence,null,2)+'\\n');
+  writeFileSync(join(OUT,'results-all.json'),JSON.stringify(evidence,null,2)+'\n');
   if(shots.length!==180||distinctScreens<120)
    throw Error('Incomplete/visually duplicated gallery: '+shots.length+' captures, '+distinctScreens+' distinct PNGs');
   return evidence;
