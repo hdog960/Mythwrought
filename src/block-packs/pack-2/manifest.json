@@ -363,7 +363,7 @@
   "completedFamilies": 18,
   "unallocatedFamilies": 0,
   "lastVerifiedMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
-  "progress": "M0–M5: all 18 unique physical source candidates authored (IDs 59–76). M6 isolated acceptance: six original byte-verified Pack2 native Node v22 suites 89/89 PASS (legacy VoxelWorld boundary supplied by local TEST-ONLY facade; not production integration); original Chromium+Python Playwright inspector all 18 IDs x 3 landscapes PASS, 66 authentic images, 18 unique image hashes per viewport, fixture saves and water alpha PASS. Full Git repo with actual VoxelWorld, live WebGL2/fluids/schema-1/offline/real-iPhone/Gate A approvals remain OPEN. Candidate-only, never merge/deploy/world-place.",
+  "progress": "M0–M5: 18/18 independently physical candidate families authored (provisional IDs 59–76). M6 isolated 6 original native Node suites PASS 89/89 against blob-verified Pack 2 source with disclosed local legacy VoxelWorld facade; authentic 18×3 Chromium preview PASS with 66 screenshots. NEW separate real-VoxelWorld production-boundary suite (6 tests) authored, enforces genuine production exports/schema-1 and rejects facade in actual Node negative control. Full real-world dependency graph/production boundary suite NOT YET EXECUTED (local GitHub DNS blocked). Existing live VoxelWorld still rejects IDs 59–76; shared renderer/water/physics/save/offline/real iPhone/Gate A remain unapproved; no merge/deploy/world placement.",
   "pendingEngineAPIs": [
     "generic non-cube raycast/collision",
     "material registry expansion for candidate IDs 59–68",
