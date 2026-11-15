@@ -175,3 +175,19 @@ test('real voxel routes connect all four exterior approaches to the open center'
   assert.equal(inspectStoneRotundaTraversal(world,plan),null,
     'a player-built obstruction must invalidate actual traversal');
 });
+
+test('traversal inspection rejects a mined physical pillar or broken elevated ring',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected an eligible site');
+  assert.equal(placeStoneRotunda(world,plan),true);
+  assert.ok(inspectStoneRotundaTraversal(world,plan));
+  const [x,h,z]=plan.origin;
+  assert.equal(world.set(x-3,h+4,z-3,BLOCK.AIR),true);
+  assert.equal(inspectStoneRotundaTraversal(world,plan),null,
+    'an absent physical pillar must not count as an intact landmark');
+  assert.equal(world.set(x-3,h+4,z-3,BLOCK.STONE),true);
+  assert.ok(inspectStoneRotundaTraversal(world,plan));
+  assert.equal(world.set(x,h+5,z-3,BLOCK.AIR),true);
+  assert.equal(inspectStoneRotundaTraversal(world,plan),null,
+    'an absent overhead stone ring must invalidate landmark inspection');
+});
