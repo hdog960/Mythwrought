@@ -124,6 +124,65 @@ def verify_pack1_gallery(folder,sha,shots,report):
             'renderer':'genuine Chromium Canvas2D candidate gallery',
             'productionWebGL2Approved':False}
 
+
+def verify_pack1_source_gpu(folder,sha,report):
+    """Review unmodified candidate WebGL2 GPU manifest and 90 original PNGs."""
+    manifest=folder/'webgl2-acceptance-PASS.json'
+    data=json.loads(manifest.read_text())
+    assert data['status']=='CANDIDATE_WEBGL2_PREVIEW_PASS'
+    assert data['type']=='pack1-source-candidate-webgl2-not-production'
+    assert data['gitHead']==sha
+    assert data['productionRegistration'] is False
+    assert data['physicalIPhone'] is False and data['creatorSignoff'] is False
+    assert data['expectedCandidates']==30 and data['expectedOrientations']==4
+    assert {tuple(v) for v in data['viewports']}==SIZES
+    assert data['renderCount']==360 and len(data['views'])==360
+    assert len(data['screenshots'])==90
+    assert not data['consoleErrors'] and not data['requestErrors']
+    ids=set(range(9,39))
+    expected={(id,rotation,w,h) for id in ids for rotation in range(4) for w,h in SIZES}
+    actual=set()
+    for frame in data['views']:
+        id=frame['candidateId'];rotation=frame['rotation'];w,h=frame['viewport']
+        key=(id,rotation,w,h)
+        assert key in expected and key not in actual, f'Duplicate or invalid GPU frame {key}'
+        actual.add(key)
+        assert frame['webgl2'] is True and frame['productionIntegrated'] is False
+        assert re.search(r'WebGL 2',frame['gpuVersion'],re.I), f'Not actual WebGL2: {key}'
+        assert frame['glError']==0 and frame['contextLost'] is False
+        assert frame['triangles']>0 and frame['vertices']==3*frame['triangles']
+        assert frame['sourcePartCount']>0 and frame['sourceMaterialFaces']>0
+        assert frame['readbackColoredSamples']>=100 and frame['readbackUniqueColors']>=12
+        assert frame['canvas'][0]==w and frame['canvas'][1]>=h
+    assert actual==expected, 'Missing WebGL2 source candidate ID/rotation/size'
+    expected_shots={(id,w,h) for id in ids for w,h in SIZES}
+    shot_keys=set()
+    paths={p.name:p for p in folder.glob('*.png')}
+    assert len(paths)==90, f'Expected 90 genuine PNGs, found {len(paths)}'
+    gpu_dir=report/'webgl2-screenshots';gpu_dir.mkdir(parents=True,exist_ok=True)
+    hashes=[]
+    for item in data['screenshots']:
+        id=item['id'];w,h=item['viewport'];key=(id,w,h)
+        assert key in expected_shots and key not in shot_keys, f'Unexpected GPU screenshot {key}'
+        shot_keys.add(key)
+        name=f'pack1-real-webgl2-id{id:02d}-{w}x{h}.png'
+        assert item['filename']==name and name in paths
+        path=paths[name]
+        with Image.open(path) as im:im.verify()
+        with Image.open(path) as im:
+            assert im.width==w and im.height>=h, f'Wrong screenshot viewport for {name}'
+            assert len(set(im.convert('RGB').resize((64,36)).getdata()))>=6, f'Blank screenshot {name}'
+        sha256=hashlib.sha256(path.read_bytes()).hexdigest()
+        assert sha256==item['sha256'], f'Original PNG sha256 mismatch {name}'
+        hashes.append(sha256)
+        shutil.copy2(path,gpu_dir/name)
+    assert shot_keys==expected_shots and len(set(hashes))==90
+    shutil.copy2(manifest,report/'pack1-source-webgl2-acceptance-manifest.json')
+    return {'status':'PASS','sourceHead':sha,'renderer':'candidate-only genuine Chromium WebGL2',
+            'candidateBlocks':30,'rotationsEach':4,'landscapeSizes':3,'gpuRenders':360,
+            'authenticScreenshots':90,'hashesVerified':True,
+            'productionWebGL2Integrated':False,'creatorApproved':False}
+
 def main():
     lane,checkout,sha,report_root,tooling=sys.argv[1:6]
     checkout=Path(checkout).resolve()
@@ -172,6 +231,7 @@ def main():
             'PACK4_CHROMIUM_PATH':'/usr/bin/chromium','PACK4_CHROMIUM_HEADFUL':'1',
             'PACK4_INJECT_SOURCE':'1','MYTHWROUGHT_PACK2_CHROMIUM':'/usr/bin/chromium',
             'PACK1_ARTIFACT_DIR':str(checkout/'artifacts/pack-1'),
+            'PACK1_GPU_ARTIFACT_DIR':str(checkout/'artifacts/pack-1-webgl2'),
             'MYTHWROUGHT_PACK2_SCREENSHOTS':str(checkout/'artifacts/roadmap-ci/pack-2'),
             'PACK3_SCREENSHOT_DIR':str(checkout/'artifacts/roadmap-ci/pack-3'),
             'PACK3_MATRIX_DIR':str(checkout/'artifacts/roadmap-ci/pack-3-matrix'),
@@ -247,6 +307,19 @@ def main():
             evidence['canvas2dAcceptance']=verify_pack1_gallery(folder,sha,shots,report)
             evidence['productionWebGL2Verified']=False
             evidence['status']='CANDIDATE_CANVAS2D_PASS'
+            if os.environ.get('MYTHWROUGHT_PACK1_SOURCE_WEBGL2')=='1':
+                gpu_runner=checkout/'tests/block-packs/pack-1/webgl2-browser.mjs'
+                gpu_test=checkout/'tests/block-packs/pack-1/webgl2-candidates.test.mjs'
+                gpu_source=checkout/'src/block-packs/pack-1/webgl2-candidates.mjs'
+                assert all(x.is_file() for x in (gpu_runner,gpu_test,gpu_source)), 'Pack1 source GPU runner missing from exact draft head'
+                gpu_native_log=report/'webgl2-native.log'
+                command(['node','--test',str(gpu_test.relative_to(checkout))],checkout,env,gpu_native_log)
+                evidence['webgl2SourceGeometryTests']=verify_native(gpu_native_log,5,None)
+                gpu_browser_log=report/'webgl2-browser.log'
+                command(['xvfb-run','-a','node',str(gpu_runner.relative_to(checkout))],checkout,env,gpu_browser_log)
+                evidence['sourceWebGL2Acceptance']=verify_pack1_source_gpu(
+                    checkout/'artifacts/pack-1-webgl2',sha,report)
+                evidence['status']='CANDIDATE_CANVAS2D_AND_SOURCE_WEBGL2_PASS'
         elif renderer=='canvas2d':
             raise RuntimeError('Canvas2D candidate preview passed, but candidate-specific WebGL2 has NOT run. Transport WebGL2 probe cannot satisfy asset acceptance.')
         else:
@@ -262,8 +335,19 @@ def main():
         evidence['status']='BLOCKED';evidence['blocker']=str(e)
         print('CANDIDATE_ACCEPTANCE_BLOCKED',lane,str(e),file=sys.stderr,flush=True)
     finally:
+        # Keep genuine partial WebGL2 runner evidence if acceptance blocked.
+        if lane=='pack-1' and os.environ.get('MYTHWROUGHT_PACK1_SOURCE_WEBGL2')=='1':
+            gpu_folder=checkout/'artifacts/pack-1-webgl2'
+            if gpu_folder.exists():
+                gpu_dest=report/'webgl2-screenshots'
+                gpu_dest.mkdir(parents=True,exist_ok=True)
+                for png in gpu_folder.glob('*.png'):
+                    shutil.copy2(png,gpu_dest/png.name)
+                for label in ('webgl2-acceptance-PASS.json','webgl2-acceptance-BLOCKED.json'):
+                    item=gpu_folder/label
+                    if item.exists():shutil.copy2(item,report/('source-'+label))
         (report/'evidence.json').write_text(json.dumps(evidence,indent=2,sort_keys=True)+'\n')
-    return evidence['status'] in ('CANDIDATE_TECHNICAL_PASS','ISOLATED_DIAGNOSTIC_PASS','CANDIDATE_CANVAS2D_PASS')
+    return evidence['status'] in ('CANDIDATE_TECHNICAL_PASS','ISOLATED_DIAGNOSTIC_PASS','CANDIDATE_CANVAS2D_PASS','CANDIDATE_CANVAS2D_AND_SOURCE_WEBGL2_PASS')
 
 if __name__=='__main__':
     try:success=main()
