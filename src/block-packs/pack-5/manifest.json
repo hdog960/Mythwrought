@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "All 18 physical families authored as isolated CANDIDATES; M1–M5 creator visual, production ID/save and integration approval OPEN",
+  "status": "All 18 symbolic Pack 5 families have isolated physically modeled source CANDIDATES (M1–M5); no creator art, in-game, served HTTP, real-iPhone or production schema-1 acceptance",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -362,13 +362,14 @@
         "citadel-ironbound-leaves",
         "falling-portcullis-grille"
       ],
-      "verification": "24 genuine M5 native Node source/collision/mesh regressions PASS; six original physically modeled variants genuine Chromium native ES module/WebGL2 mobile view screenshots passed; final creator art/integration OPEN",
+      "verification": "12 new dedicated source-native M5 tests on true 2-cell gate and stable partition, ceiling chandelier, actual collider gaps, partial trough, quarter-turn mesh face planarity and fixture-only saves, plus 6 genuine Chromium native ES-module WebGL2 landscape captures; creator and integration approval OPEN",
       "integrationDependencies": [
-        "central registered numeric ID policy",
-        "production shape-aware partial collision/selection",
-        "atomic multi-cell and ceiling attachment persistence",
-        "schema-1 safe variant and rotation state",
-        "creator artwork/physical iPhone approval"
+        "central asset registry and assigned persistent numeric IDs",
+        "shape-aware collision/raycast and rotation",
+        "atomic multi-cell support/selection/saves",
+        "ceiling attachment in real engine",
+        "safe production schema-1 variant state",
+        "creator art and physical iPhone controls signoff"
       ]
     },
     {
@@ -386,13 +387,14 @@
         "suncrown-eightarm",
         "prismatic-starrack"
       ],
-      "verification": "24 genuine M5 native Node source/collision/mesh regressions PASS; six original physically modeled variants genuine Chromium native ES module/WebGL2 mobile view screenshots passed; final creator art/integration OPEN",
+      "verification": "12 new dedicated source-native M5 tests on true 2-cell gate and stable partition, ceiling chandelier, actual collider gaps, partial trough, quarter-turn mesh face planarity and fixture-only saves, plus 6 genuine Chromium native ES-module WebGL2 landscape captures; creator and integration approval OPEN",
       "integrationDependencies": [
-        "central registered numeric ID policy",
-        "production shape-aware partial collision/selection",
-        "atomic multi-cell and ceiling attachment persistence",
-        "schema-1 safe variant and rotation state",
-        "creator artwork/physical iPhone approval"
+        "central asset registry and assigned persistent numeric IDs",
+        "shape-aware collision/raycast and rotation",
+        "atomic multi-cell support/selection/saves",
+        "ceiling attachment in real engine",
+        "safe production schema-1 variant state",
+        "creator art and physical iPhone controls signoff"
       ]
     },
     {
@@ -410,24 +412,25 @@
         "oak-stall-divider",
         "stone-feed-trough"
       ],
-      "verification": "24 genuine M5 native Node source/collision/mesh regressions PASS; six original physically modeled variants genuine Chromium native ES module/WebGL2 mobile view screenshots passed; final creator art/integration OPEN",
+      "verification": "12 new dedicated source-native M5 tests on true 2-cell gate and stable partition, ceiling chandelier, actual collider gaps, partial trough, quarter-turn mesh face planarity and fixture-only saves, plus 6 genuine Chromium native ES-module WebGL2 landscape captures; creator and integration approval OPEN",
       "integrationDependencies": [
-        "central registered numeric ID policy",
-        "production shape-aware partial collision/selection",
-        "atomic multi-cell and ceiling attachment persistence",
-        "schema-1 safe variant and rotation state",
-        "creator artwork/physical iPhone approval"
+        "central asset registry and assigned persistent numeric IDs",
+        "shape-aware collision/raycast and rotation",
+        "atomic multi-cell support/selection/saves",
+        "ceiling attachment in real engine",
+        "safe production schema-1 variant state",
+        "creator art and physical iPhone controls signoff"
       ]
     }
   ],
   "candidateFamilies": 18,
   "testEvidence": {
-    "nativeNode": "144/144 native Node 22.16.0 focused Pack 5 tests PASS, 0 skipped/failed, including 24 new M5 physical shape/collision/support/raycast/snapshot/mesh winding cases; source-exact local run",
+    "nativeNode": "120 unchanged prior native Node v22.16.0 tests PASS; 12 additional committed M5 tests appended to Pack 5 fixture suite pending exact remote-head replay; independently 144/144 local tests passed with 24 M5 in-depth cases. Do not confuse local-only extra cases with branch tests.",
     "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
     "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
     "webgl2": "M1 six variants AND M2 eight variants rendered in real Chromium WebGL2 with native data-URL ES modules; each 667x375,844x390,932x430 x 0/1 rotations: 12 real WebGL2 screenshots total, panel hashes/readback verified; localhost served HTTP still blocked by administrator",
     "screenshots": "Six new genuine Chromium WebGL2 PNGs inspected; separate working artifacts, not checked into PR. Earlier six genuine Chromium Canvas2D captures remain fallback evidence only.",
-    "production": "No persistent IDs, no runtime registration, no schema-1 changes, no world placement, no creator artwork/iPhone controls approval, no merge/deploy",
+    "production": "0 integrated, zero persistent ID allocation, no main/worldgen, production schema-1, physical iPhone, creator artwork, HTTP-served gallery, app lighting/opening/liquid functionality or merge/deploy",
     "acceptanceDossier": "src/block-packs/pack-5/M1_ACCEPTANCE.md",
     "browserRunner": "Offline Chromium native ES modules + genuine WebGL2 under Xvfb, modes m1,m2,m3,m3b,m4,m5, 3 landscape sizes x 2 rotations each; m5 6/6 PASS, localhost HTTP administrator blocked",
     "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only",
@@ -437,7 +440,8 @@
     "m3": "M3 candidate families 86–90, 10 variants, source-only physical art; refined 088 anvil long steel taper + 089 stepped octagonal physically hollow cauldron with body/handle collision and downward ray to basin bottom; no heat, liquid, crafting, trade, NPC or inventory",
     "m3bPreview": "6 original physical workshop variants source-authored and drawn in 6/6 genuine native ES-module Chromium WebGL2 landscape views, with unique nonblank GPU pixel fingerprints and rotation changes; per-cell 18–23 boxes and 216–276 unculled source triangles, not real iPhone GPU timings",
     "m4": "6 original source-authored physical M4 variants across 091 Desks & Lecterns, 092 Carpets & Rugs (a genuine atomic 2-cell runner with per-cell floor support), 093 Altars & Pedestals; 15 native Node tests and real native ES-module Chromium WebGL2 six-view screenshot acceptance pass; source-only; not live",
-    "m5": "6 original physically modeled variants across 94 heavy two-cell gate/portcullis, 95 ceiling chandeliers, 96 two-cell stable divider/dry trough; genuine source bounds and fixture-only selection/collision/rotations/snapshots; NOT GAMEPLAY"
+    "m5": "94 heavy two-cell ironbound leaves/open-spaced portcullis; 95 two genuine ceiling-hung unlit chandeliers; 96 physically braced 2-cell lower-board stable partition and hollow dry exterior-trimmed trough; six original geometry variants with precise box colliders and symbolic IDs",
+    "m5Preview": "Genuine native data URL ES-module Chromium WebGL2 under Xvfb/software GL, six responsive screenshots at 667x375, 844x390, 932x430 and rotations 0/1; unique nonblank GPU fingerprints, real 3D source; 552/528/300/228/528/408 unculled source triangles per variant (not mobile GPU timing)."
   },
   "preview": {
     "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
