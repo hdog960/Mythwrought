@@ -50,12 +50,12 @@
   ],
   "quota": 285,
   "inherited": 0,
-  "authored": 5,
-  "remaining": 280,
+  "authored": 21,
+  "remaining": 264,
   "creatorAccepted": 0,
   "integrated": 0,
   "worldPlaced": false,
-  "status": "M1 five original coordinate-authored candidates; exact-head native and source-specific Chromium cube-proxy technical checks PASS; physical-family/creator/iPhone gates remain open",
+  "status": "M2 16 new source-authored healing/library candidates (21/285 total); exact-head nested native and 96 real Chromium cube-proxy screenshots pending",
   "ownedPaths": [
     "src/building-pool/roadmap-4b/",
     "tests/building-pool/roadmap-4b/",
@@ -76,47 +76,47 @@
     "creatorArtApproval": false,
     "physicalIphoneApproval": false
   },
-  "nextMilestone": "M2 healing and public knowledge: author 74 more distinct healers' houses and 59 additional libraries; hold independent variants across 15 biome-size cells, test actual coordinates and symbolic physical dependencies, no merge or deployment.",
+  "nextMilestone": "Continue M2 from 9/75 healers and 9/60 libraries (66 healer + 51 library remaining); preserve M1 first-five and 16 newly authored designs, inspect exact-head web views then author further independent rooms/biomes and variants",
   "milestones": {
     "M0": "TECHNICALLY ACCEPTED on PR #185 exact head 199af339dea3c708e5f92b21aa91ce47b7d99763, Actions #43767122199 SUCCESS (native Builder 4B suite + focused Chromium smoke/layout)",
     "M1": "M1 FIRST FIVE TECHNICAL REVIEW PASS: PR #185 at 242e189a96037f8bb1a76005f1a0964276f62925 GitHub Actions #43771739057 SUCCESS; 40/40 Builder 4B native Node tests (includes 30/30 real Chromium WebGL2 cube-proxy captures across 3 landscape sizes); source-level geometry and connectivity pass. FINAL physical-family/creator/iPhone approval NOT GIVEN.",
-    "M2": "NOT STARTED",
+    "M2": "IN PROGRESS: 9/75 healer houses, 9/60 libraries, 16/133 M2-new models; source-exact native and 96 Chromium WebGL2 cube-proxy screenshot acceptance pending this PR HEAD",
     "M3": "NOT STARTED",
     "M4": "NOT STARTED",
     "M5": "NOT STARTED",
     "M6": "NOT STARTED"
   },
   "byCategoryAuthorCount": {
-    "healers-house": 1,
-    "library": 1,
+    "healers-house": 9,
+    "library": 9,
     "schoolhouse": 1,
     "magical-research-institute": 1,
     "arcane-academy": 1
   },
   "byBiomeSizeAuthorCount": {
     "temperate": {
-      "small": 1,
-      "medium": 0,
-      "large": 0
+      "small": 2,
+      "medium": 2,
+      "large": 2
     },
     "desert": {
-      "small": 1,
-      "medium": 0,
-      "large": 0
+      "small": 2,
+      "medium": 2,
+      "large": 1
     },
     "snow": {
-      "small": 0,
-      "medium": 1,
+      "small": 2,
+      "medium": 2,
       "large": 0
     },
     "enchanted-forest": {
-      "small": 0,
+      "small": 1,
       "medium": 1,
-      "large": 0
+      "large": 1
     },
     "mountain": {
       "small": 0,
-      "medium": 0,
+      "medium": 2,
       "large": 1
     }
   },
@@ -125,7 +125,23 @@
     "r4:library:snow:medium:01",
     "r4:schoolhouse:desert:small:01",
     "r4:magical-research-institute:enchanted-forest:medium:01",
-    "r4:arcane-academy:mountain:large:01"
+    "r4:arcane-academy:mountain:large:01",
+    "r4:healers-house:temperate:medium:01",
+    "r4:healers-house:temperate:large:01",
+    "r4:healers-house:desert:medium:01",
+    "r4:healers-house:desert:large:01",
+    "r4:healers-house:snow:small:01",
+    "r4:healers-house:snow:medium:01",
+    "r4:healers-house:enchanted-forest:small:01",
+    "r4:healers-house:mountain:medium:01",
+    "r4:library:temperate:small:01",
+    "r4:library:temperate:medium:01",
+    "r4:library:temperate:large:01",
+    "r4:library:desert:small:01",
+    "r4:library:desert:medium:01",
+    "r4:library:snow:small:01",
+    "r4:library:enchanted-forest:large:01",
+    "r4:library:mountain:medium:01"
   ],
   "m1Technical": {
     "sourceHead": "242e189a96037f8bb1a76005f1a0964276f62925",
@@ -143,5 +159,18 @@
     "creatorArtApproved": false,
     "screenshotArtifactId": 14184861292,
     "exteriorAndSectionInspected": true
+  },
+  "m2Candidate": {
+    "newModels": 16,
+    "authoredTotal": 21,
+    "originalDesignsNotInherited": 21,
+    "m2Healers": 9,
+    "m2Libraries": 9,
+    "technicalAccepted": false,
+    "physicalFamilyMeshAccepted": false,
+    "creatorApproved": 0,
+    "integrated": 0,
+    "expectedNewSourceSpecificWebGL2Captures": 96,
+    "actualCapturesClaimed": 0
   }
 }
