@@ -42,7 +42,7 @@ if(cutaway){let i=0;const colors=[[.91,.68,.41],[.51,.79,.88],[.57,.77,.57],[.77
  for(const room of b.spaces.filter(room=>room.level===floorIndex*4+1)){
   for(const [x,z] of room.footprint)roomPaint.set([x,room.level-1,z].join(','),colors[i%colors.length]);i++;
  }}
-const paint=c=>roomPaint.get(c.at.join(','))||(c.role==='roof'?R[biome]:c.role==='window'?[.32,.8,.9]:c.role==='stair'?[.93,.77,.44]:c.role==='landing'?[.8,.71,.56]:c.role==='partition'?[.68,.52,.33]:c.asset==='base:wood'?[.66,.41,.26]:P[biome]);
+const sourcePaletteFor=c=>roomPaint.get(c.at.join(','))||(c.role==='roof'?R[biome]:c.role==='window'?[.32,.8,.9]:c.role==='stair'?[.93,.77,.44]:c.role==='landing'?[.8,.71,.56]:c.role==='partition'?[.68,.52,.33]:c.asset==='base:wood'?[.66,.41,.26]:P[biome]);
 const fullBox=box=>box.length===6&&box[0]===0&&box[1]===0&&box[2]===0&&box[3]===1&&box[4]===1&&box[5]===1;
 const shapeFor=c=>candidatePreviewShape(c);
 const triangles=[0,1,2,0,2,3];
@@ -62,7 +62,7 @@ for(const c of cells){
  const shape=shapeFor(c);
  if(shape.fidelity==='unresolved-full-cell-proxy')proxyCells++;
  if(shape.boxes.length===1&&fullBox(shape.boxes[0])){
-  const [x,y,z]=c.at,color=paint(c);
+  const [x,y,z]=c.at,color=sourcePaletteFor(c);
   for(let face=0;face<6;face++){
    const d=FACES[face][0],neighbor=cellSet.get([x+d[0],y+d[1],z+d[2]].join(','));
    if(neighbor){const other=shapeFor(neighbor);
@@ -72,7 +72,7 @@ for(const c of cells){
   }
  }else{
   const groupKey=c.asset+':'+c.facing;
-  if(!groups.has(groupKey))groups.set(groupKey,{boxes:shape.boxes,color:paint(c),offsets:[]});
+  if(!groups.has(groupKey))groups.set(groupKey,{boxes:shape.boxes,color:sourcePaletteFor(c),offsets:[]});
   groups.get(groupKey).offsets.push(...c.at);
  }
 }
