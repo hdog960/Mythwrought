@@ -1,6 +1,8 @@
 # Mythwrought — Manual Block Pack 1: Stone & Nature
 
 **STATUS: CANDIDATE — NOT MERGED / NOT DEPLOYED.**
+**New Pack 1-only builder ABI (pending exact-head CI):** Source `structure-handoff.mjs` offers builder-compatible world-space physical blueprints and a dry-run schema-1/save-preserving bridge for the 21 symbolic families / 30 candidate blocks. Seven focused tests are added; the native acceptance threshold is now 118. No live registry, save schema or other-pack code changes; see [INTEGRATION_READINESS.md](INTEGRATION_READINESS.md).
+
 **Latest verified source head (2026-11-15):** `81369a0c` passed **111/111 genuine native Node tests**, 360/360 source-specific WebGL2 renders and 90/90 authentic screenshot hashes in [CI #43724597209](https://github.com/hdog960/Mythwrought/actions/runs/43724597209). Pack 1's isolated builder/save adapter now preserves existing main's biome130 IDs 256–315 and optional rotated-biome schema-1 records. See [INTEGRATION_READINESS.md](INTEGRATION_READINESS.md). All Pack 1 blocks remain **unregistered**; live integration and physical iPhone QA are unproven.
 
 **Latest source-level acceptance (2026-11-15):** Pack 1 candidate head `590c3c14` passed **109/109 native tests**, including the 25-chunk/6400-cell stress and metadata-loss guards, plus **360/360 genuine candidate GPU renders** and 90 authenticated screenshots in [run #43723553203](https://github.com/hdog960/Mythwrought/actions/runs/43723553203). See [DENSE_CONSTRUCTION_GATE.md](DENSE_CONSTRUCTION_GATE.md) and [INTEGRATION_READINESS.md](INTEGRATION_READINESS.md). This does not certify live-game buildability or physical iPhone performance; coordinated five-pack production integration remains separate.
