@@ -78,7 +78,7 @@ for(let n=1;n<=4;n++){
     if(catalogs.get(fam).has(s.asset)){
      totals.otherPackCatalogResolved++;totals.otherPackFaceContactUnverified++;
      byPack[fam]=(byPack[fam]??0)+1;
-    }else if(fam==='biome130'&&/^biome130:(?:0(?:6[1-9]|[7-9]\\d)|1[0-2]\\d|130)$/.test(s.asset)){
+    }else if(fam==='biome130'&&/^biome130:(?:0(?:6[1-9]|[7-9][0-9])|1[0-2][0-9]|130)$/.test(s.asset)){
      // Families 061..130 remain planned symbolic biome library assets; do not
      // mislabel them as physically registered or invent substitute blocks.
      totals.biome130Deferred++;
@@ -87,7 +87,7 @@ for(let n=1;n<=4;n++){
      totals.otherPackUnknown++;
      if(unknown.length<25)unknown.push({roadmap:n,blueprint:view.blueprintId,ref:s.asset,at:p.supportAt});
     }
-   }else if(fam==='live')totals.legacySupport++;
+   }else if(fam==='live'||s.asset==='builtin:stone')totals.legacySupport++;
    else {totals.unclassified++;if(unclassifiedExamples.length<25)
     unclassifiedExamples.push({roadmap:n,blueprint:view.blueprintId,asset:s.asset,at:p.supportAt});}
   }
