@@ -153,7 +153,9 @@ def verify_pack1_source_gpu(folder,sha,report):
         assert frame['triangles']>0 and frame['vertices']==3*frame['triangles']
         assert frame['sourcePartCount']>0 and frame['sourceMaterialFaces']>0
         assert frame['readbackColoredSamples']>=100 and frame['readbackUniqueColors']>=12
-        assert frame['canvas'][0]==w and frame['canvas'][1]>=h
+        # The GPU canvas is a source-authentic sub-viewport beneath the header;
+        # only the full-page PNG must match the entire mobile viewport height.
+        assert frame['canvas'][0]==w and 100<=frame['canvas'][1]<=h
     assert actual==expected, 'Missing WebGL2 source candidate ID/rotation/size'
     expected_shots={(id,w,h) for id in ids for w,h in SIZES}
     shot_keys=set()
