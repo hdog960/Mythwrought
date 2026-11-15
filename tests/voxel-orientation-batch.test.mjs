@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeOrientationSidecar} from '../src/voxel-orientation-sidecar.mjs';
-import {applyOrientedVoxelBatch,undoOrientedVoxelBatch} from '../src/voxel-orientation-batch.mjs';
+import {applyOrientedVoxelBatch,undoOrientedVoxelBatch,resumeOrientedVoxelUndo} from '../src/voxel-orientation-batch.mjs';
 
 function fixture() {
   const world=new Map([['0,0,0',4],['1,0,0',4],['2,0,0',4]]);
@@ -62,4 +62,38 @@ test('undo partial failure reports verified rollback and stops',()=>{
   assert.equal(undone.ok,false);assert.equal(undone.reason,'partial-undo');
   assert.equal(undone.receipt.length,1);
   assert.equal(f.readBlock(1,0,0),4);assert.equal(f.readBlock(0,0,0),6);
+});
+
+test('recovery completes partial undo without replaying restored cells',()=>{
+  const f=fixture();const initial=applyOrientedVoxelBatch({...f,edits});let n=0;
+  const partial=undoOrientedVoxelBatch({...f,receipt:initial.receipt,writeBlock:(...args)=>{
+    if(++n===2)return false;return f.writeBlock(...args);
+  }});
+  assert.equal(partial.reason,'partial-undo');
+  const calls=[];
+  const recovered=resumeOrientedVoxelUndo({...f,receipt:initial.receipt,writeBlock:(...args)=>{
+    calls.push(args.slice(0,3));return f.writeBlock(...args);
+  }});
+  assert.equal(recovered.ok,true);assert.deepEqual(calls,[[0,0,0]]);
+  assert.equal(f.readBlock(0,0,0),4);assert.equal(f.readBlock(1,0,0),4);
+  assert.equal(f.orientation.get([0,0,0],4),0);
+});
+test('recovery rejects third-party edits before writing any cell',()=>{
+  const f=fixture();const initial=applyOrientedVoxelBatch({...f,edits});
+  f.world.set('1,0,0',3);let writes=0;
+  const result=resumeOrientedVoxelUndo({...f,receipt:initial.receipt,writeBlock:()=>{writes++;return true;}});
+  assert.equal(result.reason,'conflict');assert.equal(writes,0);
+  assert.equal(f.readBlock(0,0,0),6);
+});
+test('recovery is idempotent after successful undo',()=>{
+  const f=fixture();const initial=applyOrientedVoxelBatch({...f,edits});
+  undoOrientedVoxelBatch({...f,receipt:initial.receipt});
+  const result=resumeOrientedVoxelUndo({...f,receipt:initial.receipt,writeBlock:()=>{throw Error('unexpected write')}});
+  assert.deepEqual(result,{ok:true,receipt:[]});
+});
+test('recovery rejects malformed and duplicate receipts without writing',()=>{
+  const f=fixture();let writes=0;const writeBlock=()=>{writes++;return true;};
+  assert.throws(()=>resumeOrientedVoxelUndo({...f,receipt:[{cell:[0,0,0],before:4,after:5},{cell:[0,0,0],before:4,after:5}],writeBlock}),/Duplicate/);
+  assert.throws(()=>resumeOrientedVoxelUndo({...f,receipt:[{cell:[0,0,0],before:4,after:255}],writeBlock}),/Invalid/);
+  assert.equal(writes,0);
 });
