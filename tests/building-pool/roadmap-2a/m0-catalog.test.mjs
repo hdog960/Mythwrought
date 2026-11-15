@@ -8,7 +8,8 @@ const slots=plannedSlots();
 test("M0 has exactly 420 unique reserved IDs, not fake authored blueprints",()=>{
  assert.equal(slots.length,420);
  assert.equal(new Set(slots.map(x=>x.id)).size,420);
- assert.ok(slots.every(x=>x.status==="reserved-not-authored"&&x.authoredHere===false));
+ assert.equal(slots.filter(x=>x.status==="authored-candidate"&&x.authoredHere).length,15);
+ assert.equal(slots.filter(x=>x.status==="reserved-not-authored"&&!x.authoredHere).length,405);
  assert.deepEqual(inventory().byCategory,{"general-store":75,"pet-shop":75,"magic-shop":75,"potion-shop":75,"bakery":75,"bank":45});
 });
 test("every category has its exact biome/size distribution",()=>{
@@ -21,7 +22,7 @@ test("every category has its exact biome/size distribution",()=>{
 test("15 original store identities carried as a read-only migration queue, no temples",()=>{
  assert.equal(manifest.legacyCandidates.length,15);
  assert.deepEqual(new Set(manifest.legacyCandidates.map(x=>x.id)),new Set(slots.filter(x=>x.legacySourceCandidate).map(x=>x.id)));
- assert.ok(manifest.legacyCandidates.every(x=>x.id===blueprintId("general-store",x.biome,x.size,1)&&x.migrationState==="pending-exact-geometry-parity"&&x.geometryFingerprint===null));
+ assert.ok(manifest.legacyCandidates.every(x=>x.id===blueprintId("general-store",x.biome,x.size,1)&&x.migrationState==="source-exact-parity-verified"&&/^[0-9a-f]{64}$/.test(x.geometryFingerprint)&&/^[0-9a-f]{64}$/.test(x.fullBlueprintSHA256)));
  assert.ok(slots.every(x=>!x.id.includes(":temple:")));
 });
 test("legacy exact source HEAD, blob provenance and safe destination prefixes are pinned",()=>{
@@ -34,12 +35,15 @@ test("legacy exact source HEAD, blob provenance and safe destination prefixes ar
 });
 test("no inherited design silently marked migrated, accepted or integrated",()=>{
  assert.equal(manifest.legacySourceCandidates,15);
- assert.equal(manifest.locallyMigratedAndParityVerified,0);
+ assert.equal(manifest.locallyMigratedAndParityVerified,15);
+ assert.equal(manifest.authoredCandidateTotal,15);
  assert.equal(manifest.newlyAuthored,0);
  assert.equal(manifest.creatorApproved,0);
  assert.equal(manifest.integratedIntoGame,0);
  assert.equal(manifest.unwrittenNewCandidates,405);
  assert.equal(inventory().legacySourceCandidates,15);
+ assert.equal(inventory().locallyMigrated,15);
+ assert.equal(inventory().authoredCandidateTotal,15);
 });
 test("all eight builders have exclusive categories and correct shared roster totals",()=>{
  assert.equal(roster.lanes.length,8);

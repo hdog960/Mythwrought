@@ -1,18 +1,17 @@
-# Mythwrought — Roadmap 2A M0 candidate preservation (in progress)
+# Mythwrought Builder 2A — M0 source-exact migration acceptance
 
-- Source: creator-provided `2A.md`, 2026-11-15 infrastructure revision A. **No release, merge or production behavior.**
-- Baseline `main`: `e6bd7c173a4531ba7efc153e5f2eb89870c3b9db` (merged infrastructure PR #178; exact PR-head full 20-script CI successful; merged-main CI successful).
-- Integration ledger: main `docs/INTEGRATION_CHECKPOINTS.md`, latest written checkpoint 009; manual five packs were later integrated via PR #174. Do not alter this shared ledger.
-- Original draft PR #124 at **exact HEAD `07c45d27bd36f4f3aa3197bba0e4f49ce2a58c68`**, remains **open/draft/read-only**. Its 15 `r2:general-store:<biome>:<size>:01` theoretical candidates are externally authored, **not yet locally imported or geometry-parity verified**. All 15 original IDs and exact blob provenance appear in `manifest.json`. The 15 temple candidates in PR #124 belong exclusively to 2B and are deliberately excluded.
-- This isolated M0 commit reserves exactly **420 theoretical IDs**: 75 general stores, 75 pet shops, 75 magic shops, 75 potion shops, 75 bakeries and 45 banks; five biomes × three sizes. 15 legacy source candidates; 405 new designs still needed. **0 locally migrated; 0 newly authored; 0 creator accepted; 0 placed/integrated.** A reserved ID is not counted as a blueprint.
-- Owner paths: `src/building-pool/roadmap-2a/`, `tests/building-pool/roadmap-2a/`, `docs/building-pool/roadmap-2a/` ONLY. Zero production ID, save, runtime, worldgen, CI, main, original PR or other lane edits.
-- Source-exact extraction is **M0's remaining task / M1 entry gate**: selectively rehome the 15 complete general stores (including M0 Temperate Small Store with 685 physical coordinate voxels), preserving openings, 16 original window-kind cells, window registry, room/connectivity/support, geometry and IDs. Compute genuine per-blueprint structural fingerprints and independent native Node/browser checks on the new lane. Do not claim completion from source-blob SHA alone, repeat shared original implementation wholesale, or copy the temple half.
-- Physical manual builder catalog: 96 integrated family symbols / 106 physical variants; future biome130 dependencies must be checked individually, otherwise stay symbolic. Geometry source documents retain pre-integration ABI concerns; actual live placements, windows/facing/collisions, creator art and physical-iPhone review are separate gates.
+**Draft only.** Original PR #124 remains open, unmodified and read-only. Owner paths are exclusively `src/building-pool/roadmap-2a/`, `tests/building-pool/roadmap-2a/`, and `docs/building-pool/roadmap-2a/`.
 
-## Repeatable native M0 check
+## Exact provenance and parity
 
-```sh
-node --test tests/building-pool/roadmap-2a/*.test.mjs
-```
+- Baseline main `e6bd7c173a4531ba7efc153e5f2eb89870c3b9db` and merged infrastructure PR #178. Previous exact-head CI #43766782321 PASS at M0 branch commit `4b0d05631d7beeb55c60fe5876436dc241618006`. New head must be independently retested.
+- Original PR #124 read at exact head `07c45d27bd36f4f3aa3197bba0e4f49ce2a58c68`, 15 General Stores preserved and 15 Temples excluded for Builder 2B. Input Git blobs: original hand-store `7211223b2cc51290b89f5f886c1cbb59cc495747`, generator `4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc`, schema `253ad26a8fb3537a1cb6776d6b86dd89909d69f1`, catalog `f52488952aa9dd805847de1b65f7b207627f16ad`.
+- `temperate-store.mjs` and `schema.mjs` are owner-local copies byte-identical to the original files; `m1-general-stores.mjs` selectively extracts only the 14 generated stores and removes the original Temple-generation branch. Original stable `r2:general-store:<biome>:<size>:01` identities and source schema preserved.
+- Authoring check evaluated both actual original and migrated JS: **15/15 complete JSON blueprint representations identical** (including voxel order/coordinates/materials/roofs, physical windows and openings, rooms, accessible circulation, named features and unresolved refs). Independently **15/15 original shape fingerprints identical**, and **15/15 structurally distinct**. SHA-256 goldens captured from the independent original computation are pinned per ID in `manifest.json` and checked by native Node tests against the new owner modules. These are content checks, not physical asset ABI certification.
+- Original **184/184 storefront window-kind voxels** retained and source-exact material-specific opening registrations. Original Temperate Small Store retains **685 coordinate voxels**, **16 window cells**, two rooms. Other 14 are deterministic generated from the unchanged original spatial rules after excluding Temple-specific logic.
 
-Not an art/geometry acceptance or true WebGL2 test. Gate A v0.10 OPEN, v0.11 LOCKED. No merge or deployment authorized.
+## Counts and safety
+
+**420 planned / 15 genuine migrated coordinate-authored candidates / 405 new ones still to author / 0 newly authored / 0 creator-approved / 0 in game.** Exactly 6 categories × 5 biomes × 3 sizes and their quota. Remaining symbolic biome130 and real orientation/collision/support/window shape/appearance decisions are not silently certified by integrated manual 96-family/106-variant assets. No new production ID, save/schema-1, PWA, controls, shared runtime, CI, automation, other builder or world placement edits.
+
+Run `node --test tests/building-pool/roadmap-2a/*.test.mjs` from the repository root. Expected source-exact native tests include quota+ownership, 15 original SHA256 payloads, original window+room checks, 3-high aisle reachability and invalid-metadata negatives. PR-head GitHub CI and real browser evidence must be independently checked before M0 is declared technically complete. Current tests do NOT prove creator art acceptance or physical iPhone gameplay. Gate A remains OPEN, v0.11 LOCKED.

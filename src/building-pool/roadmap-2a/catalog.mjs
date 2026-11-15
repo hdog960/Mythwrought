@@ -13,11 +13,14 @@ export function plannedSlots(){
   const items=[];
   for(const [category,quota] of Object.entries(CATEGORY_QUOTAS)) for(const biome of BIOMES) for(const size of SIZES) for(let variation=1;variation<=quota;variation++){
     const id=blueprintId(category,biome,size,variation);
-    items.push(Object.freeze({id,category,biome,size,variation,legacySourceCandidate:category===LEGACY_CATEGORY&&variation===1,authoredHere:false,status:"reserved-not-authored"}));
+    items.push(Object.freeze({id,category,biome,size,variation,legacySourceCandidate:category===LEGACY_CATEGORY&&variation===1,authoredHere:category===LEGACY_CATEGORY&&variation===1,status:category===LEGACY_CATEGORY&&variation===1?"authored-candidate":"reserved-not-authored"}));
   }
   return items;
 }
 export function inventory(){
   const slots=plannedSlots();
-  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:0,newlyAuthored:0,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:405,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
+  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:15,authoredCandidateTotal:15,newlyAuthored:0,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:405,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
 }
+
+// Builder 2A owned physical-space requirements. Symbols are NOT persistent block IDs.
+export const CATEGORIES=Object.freeze(Object.entries(CATEGORY_QUOTAS).map(([key,variants])=>Object.freeze({key,variants,requirements:Object.freeze({"general-store":["sales-floor","service-counter","display-shelves","storage"],"pet-shop":["sales-floor","service-counter","empty-animal-display","storage"],"magic-shop":["sales-floor","service-counter","arcane-display","storage"],"potion-shop":["sales-floor","service-counter","alchemy-workspace","storage"],"bakery":["sales-floor","service-counter","oven","food-preparation","storage"],"bank":["public-hall","administrative-office","vault"]}[key])})));
