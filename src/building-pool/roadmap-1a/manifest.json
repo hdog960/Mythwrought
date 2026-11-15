@@ -1,0 +1,40 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
+  "lane": "roadmap-1a",
+  "title": "Homes & Hospitality",
+  "milestone": "M0-safe-isolated-scaffold",
+  "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "checkpoint": "009",
+  "infrastructurePR": 178,
+  "infrastructureExactHeadCI": {"head":"7f7431f97a137c89d900735758b3cd2d183ea47b","run":43762245025,"conclusion":"success"},
+  "sourcePR": {"number":121,"head":"88a9e410a0eda7cf961cb6b624241666eb3a48a1","draft":true,"merged":false},
+  "sourceBlobs": {
+    "generator":"7187753ae344217d7fa81da296b9122b68f3ca97",
+    "designMatrix":"f9d45b0b17cbc217fd24cba5f684eb54aa572cd5",
+    "legacySchema":"ea1cb53b48dd7f4c51c8da69bf59531d1226aad2"
+  },
+  "biomes":["temperate","desert","snow","enchanted-forest","mountain"],
+  "sizes":["small","medium","large"],
+  "quotaPerBiomeSize":{"house":20,"tavern":5,"inn":5},
+  "target":450,
+  "originalCandidatesIdentified":30,
+  "originalGeometryMigrated":0,
+  "additionalDesignsRequired":420,
+  "newDesignsAuthored":0,
+  "totalLaneGeometryAuthored":0,
+  "creatorAccepted":0,
+  "integrated":0,
+  "runtimeWorldPlaced":false,
+  "geometryParityCertified":false,
+  "physicalRendererCertified":false,
+  "realIPhoneCertified":false,
+  "assetPolicy":"Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
+  "pending":[
+    "Extract exactly 30 existing house/tavern coordinate-authored designs from PR #121 into this lane, preserving geometry and original r1 IDs",
+    "Calculate per-blueprint source fingerprints and prove byte/geometry parity without copying 1B stables",
+    "Replay genuine native Node 1A source tests; source PR #121 reports are not 1A evidence",
+    "Use source-exact integrated manual block variant, collision, support and orientation contracts",
+    "Complete 420 additional unique coordinate-authored designs and perform real browser visual review"
+  ],
+  "gates":{"v010":"Gate A OPEN","v011":"LOCKED","merge":false,"deployment":false}
+}
