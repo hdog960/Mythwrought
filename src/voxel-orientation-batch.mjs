@@ -59,3 +59,29 @@ export function undoOrientedVoxelBatch({receipt,readBlock,writeBlock,orientation
   const result=applyOrientedVoxelBatch({edits:reversed,readBlock,writeBlock,orientation,maxEdits});
   return result.ok?{ok:true,receipt:result.receipt}:{...result,reason:'partial-undo'};
 }
+
+/**
+ * Recover an interrupted undo without overwriting later edits.
+ * Cells already restored to their before-ID are skipped; cells still at
+ * their after-ID are eligible. Any third value aborts before writing.
+ * The returned receipt describes only verified writes in this attempt.
+ * Callers must retain the original receipt until recovery is complete.
+ */
+export function resumeOrientedVoxelUndo({receipt,readBlock,writeBlock,orientation,maxEdits=256}) {
+  if(!Array.isArray(receipt)||!Number.isSafeInteger(maxEdits)||maxEdits<1||
+     receipt.length>maxEdits||typeof readBlock!=='function'||typeof writeBlock!=='function'||
+     !orientation||typeof orientation.clear!=='function') throw new TypeError('Invalid undo recovery');
+  const seen=new Set(),pending=[];
+  for(const entry of receipt) {
+    if(!entry||!validId(entry.before)||!validId(entry.after)) throw new TypeError('Invalid receipt');
+    const key=cellKey(entry.cell);
+    if(seen.has(key)) throw new TypeError('Duplicate receipt cell');
+    seen.add(key);
+    const current=readBlock(...entry.cell);
+    if(current!==entry.before&&current!==entry.after) return {ok:false,reason:'conflict',receipt:[]};
+    if(current===entry.after&&entry.before!==entry.after) pending.push({cell:[...entry.cell],nextBlockId:entry.before});
+  }
+  // Reverse ordering matches ordinary undo; no writes before full preflight.
+  const result=applyOrientedVoxelBatch({edits:pending.reverse(),readBlock,writeBlock,orientation,maxEdits});
+  return result.ok?{ok:true,receipt:result.receipt}:{...result,reason:'partial-undo'};
+}
