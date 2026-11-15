@@ -189,3 +189,21 @@ test('archwood canopy bridge keeps a continuous two-cell standing aisle',()=>{
    assert.equal(w.get(x+dx,y+dy,z),BLOCK.AIR);
  }
 });
+
+test('archwood rejects blocked approach corridors without modifying prior edits',()=>{
+ for(const seed of [179,917,-184]){
+  const w=new VoxelWorld(seed),p=site(w,'archwood');
+  const [x,y,z]=p.origin;
+  for(const dx of [-2,-1,7,8]){
+   const cell=[x+dx,y+1,z];
+   assert.equal(w.get(...cell),BLOCK.AIR,'fixture must have a clear approach');
+   assert.equal(w.set(...cell,BLOCK.STONE),true);
+   const before=w.save();
+   assert.equal(planVoxelTree(w,x,z,{variant:'archwood'}),null);
+   assert.equal(placeVoxelTree(w,p),false,'stale plan must not bypass approach check');
+   assert.deepEqual(w.save(),before,'rejection must preserve edits exactly');
+   assert.equal(w.set(...cell,BLOCK.AIR),true);
+  }
+  assert.ok(planVoxelTree(w,x,z,{variant:'archwood'}));
+ }
+});
