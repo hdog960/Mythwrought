@@ -124,7 +124,8 @@ function compile(p){
   spaces.push({id:kind+'-'+i,kind,level:2,footprint:tiles,access:[cx,2,cz]});
  }
  const candidates=list.filter(([x,z])=>!edge(x,z)&&!taken.has(k2(x,z))&&!cells.has(key(x,2,z))&&!cells.has(key(x,3,z))&&
-   Math.abs(x-ex)+Math.abs(z-ez)>4);
+   Math.abs(x-ex)+Math.abs(z-ez)>4&&
+   !openings.some(o=>o.kind!=='window'&&Math.abs(o.at[0]-x)+Math.abs(o.at[2]-z)<=1));
  if(candidates.length<12)throw Error('not enough fixture space '+p.title);
  for(let i=0;i<2;i++){
   const [x,z]=candidates[i===0?Math.floor(candidates.length/3):Math.floor(candidates.length*2/3)];
