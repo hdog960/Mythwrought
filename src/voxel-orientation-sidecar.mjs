@@ -83,8 +83,18 @@ export function restoreOrientationSidecar(serialized,readBlock,options) {
   // not a malformed save or an implicit migration of the original payload.
   if(serialized===undefined || serialized===null) return makeOrientationSidecar([],options);
   if(!Array.isArray(serialized)) throw new TypeError('Invalid serialized sidecar');
+  // Optional metadata is untrusted. Ambiguous duplicate coordinates must not
+  // cause legacy world recovery to fail or allow an arbitrary turn to win.
+  // Drop *all* records for a duplicated cell, even when one record is stale.
+  const counts=new Map();
+  for(const e of serialized) {
+    if(e&&Array.isArray(e.cell)&&e.cell.length===3&&e.cell.every(Number.isSafeInteger)) {
+      const key=cellKey(e.cell);
+      counts.set(key,(counts.get(key)||0)+1);
+    }
+  }
   const valid=serialized.filter(e=>e&&Array.isArray(e.cell)&&e.cell.length===3&&e.cell.every(Number.isSafeInteger)&&
-    Number.isSafeInteger(e.blockId)&&e.blockId>0&&e.blockId<255&&Number.isInteger(e.turns)&&e.turns>=0&&e.turns<=3&&
-    readBlock(...e.cell)===e.blockId);
+    counts.get(cellKey(e.cell))===1&&Number.isSafeInteger(e.blockId)&&e.blockId>0&&e.blockId<255&&
+    Number.isInteger(e.turns)&&e.turns>=0&&e.turns<=3&&readBlock(...e.cell)===e.blockId);
   return makeOrientationSidecar(valid,options);
 }
