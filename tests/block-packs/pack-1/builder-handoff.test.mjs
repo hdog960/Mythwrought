@@ -43,14 +43,25 @@ test('flowers are selectable but passable; mushrooms keep stem-only collisions',
   }
 });
 test('canonical schema-1 plans are reversible four-item edits; no implicit save of rotation',()=>{
-  for(const {id} of PACK1_BUILDER_CATALOG){
-    const p=pack1BuilderPlacementPlan(id,{cell:[-17,4,23],wallMounted:true});
+  for(const {id,support} of PACK1_BUILDER_CATALOG){
+    const p=pack1BuilderPlacementPlan(id,{
+      cell:[-17,4,23],wallMounted:support==='vertical-face'
+    });
     assert.equal(p.ok,true);
-    assert.deepEqual(pack1CanonicalSchema1Edit(p),[-17,4,23,id]);
-    assert.equal(p.canonicalSchema1Only,true);
+    if(support==='vertical-face'){
+      assert.equal(p.canonicalSchema1Only,false);
+      assert.equal(p.requiredMountState.blockId,id);
+      assert.throws(()=>pack1CanonicalSchema1Edit(p),/orientation\/variant\/mount/);
+    }else{
+      assert.deepEqual(pack1CanonicalSchema1Edit(p),[-17,4,23,id]);
+      assert.equal(p.canonicalSchema1Only,true);
+      assert.equal(p.requiredMountState,null);
+    }
   }
   for(const id of [15,16,17,21,24,27,32,38]){
-    const p=pack1BuilderPlacementPlan(id,{cell:[0,5,0],rotation:3,wallMounted:true});
+    const p=pack1BuilderPlacementPlan(id,{
+      cell:[0,5,0],rotation:3,wallMounted:id===27||id===28
+    });
     assert.equal(p.requiredOrientationSidecar.turns,3);
     assert.equal(p.canonicalSchema1Only,false);
     assert.throws(()=>pack1CanonicalSchema1Edit(p),/orientation\/variant/);
@@ -140,4 +151,33 @@ test('nonpassable masonry and stem-only mushrooms retain real collision geometry
   assert.ok(stem.collisionShape.boxes.length<stem.targetShape.boxes.length);
   const upper=pack1InteractionReaderShapes(16,{rotation:2,variant:'upper'});
   assert.ok(upper.collisionShape.boxes.length>0);
+});
+
+test('mount direction cannot be silently erased by a four-value schema-1 edit',()=>{
+  for(const id of [27,28]){
+    const plan=pack1BuilderPlacementPlan(id,{cell:[14,3,9],wallMounted:true});
+    assert.equal(plan.ok,true);
+    assert.equal(plan.requiredOrientationSidecar,null);
+    assert.equal(plan.requiredVariantState,null);
+    assert.equal(plan.canonicalSchema1Only,false);
+    assert.equal(plan.requiredMountState.requiresFace,true);
+    assert.deepEqual(plan.requiredMountState.cell,[14,3,9]);
+    assert.throws(()=>pack1CanonicalSchema1Edit(plan),/orientation\/variant\/mount/);
+    assert.throws(()=>pack1CanonicalSchema1Edit({...plan,canonicalSchema1Only:true,
+      requiredMountState:null}),/orientation\/variant\/mount/);
+  }
+});
+test('non-wall blocks cannot pass the source mount preflight, even without rotation',()=>{
+  for(const id of [9,15,24,33,37]){
+    const p=pack1BuilderPlacementPlan(id,{cell:[1,4,5],wallMounted:true});
+    assert.equal(p.ok,false);
+    assert.equal(p.reason,'wall-mount-not-supported');
+  }
+  for(const id of [27,28]){
+    const p=pack1BuilderPlacementPlan(id,{cell:[1,4,5],wallMounted:false});
+    assert.equal(p.ok,false);
+    assert.equal(p.reason,'supporting-vertical-face-required');
+  }
+  assert.throws(()=>pack1BuilderPlacementPlan(27,{cell:[1,4,5],wallMounted:'west'}),
+    /wallMounted must be a boolean/);
 });

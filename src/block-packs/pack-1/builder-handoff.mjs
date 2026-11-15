@@ -108,28 +108,39 @@ export function pack1BuilderPlacementPlan(id,{cell,rotation=0,variant='lower',wa
   if(!shape)throw new RangeError('Unknown Pack 1 candidate block ID');
   if(!Array.isArray(cell)||cell.length!==3||!cell.every(Number.isSafeInteger))
     throw new TypeError('Builder cell must be three safe integers');
+  if(typeof wallMounted!=='boolean')
+    throw new TypeError('wallMounted must be a boolean');
   if(shape.support==='vertical-face'&&!wallMounted)
     return Object.freeze({ok:false,id,reason:'supporting-vertical-face-required'});
+  if(shape.support!=='vertical-face'&&wallMounted)
+    return Object.freeze({ok:false,id,reason:'wall-mount-not-supported'});
   const orientation=shape.requiresOrientationSidecar
     ?Object.freeze({cell:Object.freeze([...cell]),blockId:id,turns:rotation}):null;
   const variantState=shape.requiresVariantPersistence
     ?Object.freeze({cell:Object.freeze([...cell]),blockId:id,variant}):null;
+  // This boolean preflight does not know which face supports the vine.
+  // Its actual direction must be persisted in the source-only mounts sidecar.
+  const mountState=shape.support==='vertical-face'
+    ?Object.freeze({cell:Object.freeze([...cell]),blockId:id,requiresFace:true}):null;
   return Object.freeze({
     ok:true,id,cell:Object.freeze([...cell]),
     legacyEditRow:Object.freeze([...cell,id]),
     // Requirements are NOT written to the production save by this pure planner.
     requiredOrientationSidecar:orientation,
     requiredVariantState:variantState,
-    supportMustBeRevalidated:shape.support==='vertical-face',
-    canonicalSchema1Only:orientation===null&&variantState===null,
+    requiredMountState:mountState,
+    supportMustBeRevalidated:mountState!==null,
+    canonicalSchema1Only:orientation===null&&variantState===null&&mountState===null,
     shape
   });
 }
 export function pack1CanonicalSchema1Edit(plan){
   if(!plan||plan.ok!==true||!Array.isArray(plan.legacyEditRow)||plan.legacyEditRow.length!==4)
     throw new TypeError('Invalid Pack 1 construction plan');
-  if(!plan.canonicalSchema1Only||plan.requiredOrientationSidecar||plan.requiredVariantState)
-    throw new Error('Noncanonical Pack 1 construction needs engine-persisted orientation/variant metadata');
+  if(!plan.canonicalSchema1Only||plan.requiredOrientationSidecar||
+     plan.requiredVariantState||plan.requiredMountState||
+     plan.supportMustBeRevalidated||byId.get(plan.id)?.support==='vertical-face')
+    throw new Error('Noncanonical Pack 1 construction needs engine-persisted orientation/variant/mount metadata');
   return [...plan.legacyEditRow];
 }
 export function pack1BuilderFaceTexture(id,role,face,size=24){
