@@ -75,3 +75,11 @@ art approval, cross-owner atomic settlement transactions, large settlement GPU
 budget and actual release/deployment approval remain separate, open gates.
 
 **PR #174 stays draft/unmerged/undeployed; v0.11 stays locked.**
+
+
+## Mixed-pack performance / source-owned save validation (2026-11-15)
+- Verified Pack 1/4 *unloaded* chunk GPU vertex preflight is enforced before save/import; rejects an oversized 128-object single section before altering the original schema-1 save, and accepts 512 appropriately distributed objects with readback/reload. Packed 53 variants continue to use original source geometry; no biome130 ownership changed.
+- Pack 2's lower-level physical setter now checks Pack 1/4, Pack 3 and Pack 5 source-owned sidecars, so a caller bypassing the higher-level builder facade cannot directly overwrite an occupied physical cell.
+- Added real five-owner 584-object native acceptance: 512 Pack 1/4 + 24 Pack 2 + 24 Pack 3 + 24 Pack 5 across independent save owners, including overlap rejection and exact reloading. This was included in successful depth native acceptance #43751998025; dedicated Pack 1/4 acceptance #43751997999 also passed. Neither constitutes a physical-iPhone performance measurement.
+- Follow-up *real in-game* Chromium WebGL2 acceptance now exercises a 512-piece Pack 1/4 batch at 956×440, GPU-resident source meshes and reload. Do **not** claim this particular browser pass or latest-head acceptance until its own workflow is green.
+- Combined builder API remains deliberately **per-asset** across all five owners; only Pack 1/4 same-sidecar batches are atomic. Cross-owner all-or-none settlement transactions and creator-owned hardware/art/release acceptance are outstanding. No merging or deployment.

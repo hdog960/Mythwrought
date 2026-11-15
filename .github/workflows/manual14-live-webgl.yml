@@ -40,6 +40,7 @@ jobs:
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-manual14.log 2>&1 &
           node tests/manual14-live-webgl-browser.mjs
+          node tests/manual14-dense-webgl-browser.mjs
       - name: Preserve screenshots, including failures
         if: always()
         uses: actions/upload-artifact@v4
