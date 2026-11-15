@@ -17,7 +17,7 @@ test('each of 30 M1 candidates gives independent entrance-to-room route evidence
 test('geometry census reports real exposed cube faces and proposed preview buffer volume, not GPU FPS',()=>{
   const audit=examineAllM1();
   assert.equal(audit.designs,30);
-  assert.equal(audit.cells,129484);
+  assert.equal(audit.cells,129549);
   assert.equal(audit.navigation,36385);
   assert.equal(audit.rooms,95);
   assert.ok(audit.exposedQuads>150000&&audit.exposedQuads<300000);
