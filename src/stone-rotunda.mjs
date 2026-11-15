@@ -25,6 +25,16 @@ export function planStoneRotunda(world,x,z){
       if(dy>0&&baseline!==BLOCK.AIR)return null;
     }
   }
+  // All four approach lanes must remain traversable beyond the protected footprint.
+  // A beautiful but inaccessible rotunda is not a valid exploration landmark.
+  for(const [dx,dz] of [[0,-5],[0,5],[-5,0],[5,0]]){
+    const px=x+dx,pz=z+dz;
+    if(terrainHeight(px,pz,world.seed)!==h ||
+       baseBlock(px,h,pz,world.seed)===BLOCK.AIR ||
+       baseBlock(px,h+1,pz,world.seed)!==BLOCK.AIR ||
+       baseBlock(px,h+2,pz,world.seed)!==BLOCK.AIR ||
+       (world.edits instanceof Map && [h,h+1,h+2].some(py=>world.edits.has(worldKey(px,py,pz)))))return null;
+  }
   const cells=[],used=new Set();
   function put(dx,dy,dz){
     const px=x+dx,py=h+dy,pz=z+dz,key=px+','+py+','+pz;
