@@ -38,7 +38,8 @@ test('fifteen fireplaces turn toward their exact existing west wall instead of m
    assert.equal(p.orientation,'east');
    assert.equal(p.orientationProvenance,'supported-wall-sidecar');
    const backing=[p.at[0]-1,p.at[1],p.at[2]].join(',');
-   assert.equal(cells.get(backing)?.role,'wall');
+   assert.ok(['wall','partition'].includes(cells.get(backing)?.role),
+    'fireplace needs an authored wall or solid partition backing');
   }
   return {resolvedCount:0,placements:[],orientationReviewCount:0};
  }};

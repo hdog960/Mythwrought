@@ -20,9 +20,9 @@ export function getM1Pack4Construction(pack4,{blueprints=null}={}){
     // at x=1. Its generic "none" facing incorrectly mounted it behind +Z,
     // where no support exists. Face east, with the plate on the west wall.
     // This is an isolated physical sidecar; original blueprint stays unchanged.
-    const physicalDraft={...draft,placements:draft.placements.map(p=>
+    const physicalDraft=Array.isArray(draft.placements)?{...draft,placements:draft.placements.map(p=>
       p.asset==='pack4:064'&&p.role==='furnishing'&&p.orientation==='north'
-        ?{...p,orientation:'east',orientationProvenance:'supported-wall-sidecar'}:p)};
+        ?{...p,orientation:'east',orientationProvenance:'supported-wall-sidecar'}:p)}:draft;
     const fixedSupportCells=draft.placements.filter(p=>
       p.asset.startsWith('live:')&&['foundation','floor','wall','partition','support'].includes(p.role)
     ).map(p=>p.at);
