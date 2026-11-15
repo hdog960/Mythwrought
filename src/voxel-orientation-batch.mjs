@@ -85,3 +85,57 @@ export function resumeOrientedVoxelUndo({receipt,readBlock,writeBlock,orientatio
   const result=applyOrientedVoxelBatch({edits:pending.reverse(),readBlock,writeBlock,orientation,maxEdits});
   return result.ok?{ok:true,receipt:result.receipt}:{...result,reason:'partial-undo'};
 }
+
+
+/**
+ * Guarded redo of an original batch receipt, after a completed undo.
+ * Every cell must still hold its before-ID; any conflict aborts all writes.
+ * This does not resurrect historical orientation: host orientation remains
+ * cleared after writes. As with undo, a failed writer may partially commit.
+ * For partial redo recovery retain the ORIGINAL receipt and use
+ * resumeOrientedVoxelRedo after resolving any uncertain failed write.
+ */
+export function redoOrientedVoxelBatch({receipt,readBlock,writeBlock,orientation,maxEdits=256}) {
+  const entries=validateRedoReceipt(receipt,readBlock,writeBlock,orientation,maxEdits);
+  for(const entry of entries) {
+    if(readBlock(...entry.cell)!==entry.before) return {ok:false,reason:'conflict',receipt:[]};
+  }
+  const result=applyOrientedVoxelBatch({
+    edits:entries.map(e=>({cell:e.cell,nextBlockId:e.after})),
+    readBlock,writeBlock,orientation,maxEdits
+  });
+  return result.ok?{ok:true,receipt:result.receipt}:{...result,reason:'partial-redo'};
+}
+
+/**
+ * Resume a partially committed redo. Already redone cells are skipped;
+ * unexpected IDs abort the whole operation before any write.
+ * Same-ID replacements cannot be detected by ID alone; hosts must supply
+ * explicit invalidation/epoch guards for that stronger guarantee.
+ */
+export function resumeOrientedVoxelRedo({receipt,readBlock,writeBlock,orientation,maxEdits=256}) {
+  const entries=validateRedoReceipt(receipt,readBlock,writeBlock,orientation,maxEdits);
+  const pending=[];
+  for(const entry of entries) {
+    const current=readBlock(...entry.cell);
+    if(current!==entry.before&&current!==entry.after) return {ok:false,reason:'conflict',receipt:[]};
+    if(current===entry.before&&entry.before!==entry.after)
+      pending.push({cell:entry.cell,nextBlockId:entry.after});
+  }
+  const result=applyOrientedVoxelBatch({edits:pending,readBlock,writeBlock,orientation,maxEdits});
+  return result.ok?{ok:true,receipt:result.receipt}:{...result,reason:'partial-redo'};
+}
+
+function validateRedoReceipt(receipt,readBlock,writeBlock,orientation,maxEdits) {
+  if(!Array.isArray(receipt)||!Number.isSafeInteger(maxEdits)||maxEdits<1||
+     receipt.length>maxEdits||typeof readBlock!=='function'||typeof writeBlock!=='function'||
+     !orientation||typeof orientation.clear!=='function') throw new TypeError('Invalid redo');
+  const seen=new Set();
+  return receipt.map(entry=>{
+    if(!entry||!validId(entry.before)||!validId(entry.after)) throw new TypeError('Invalid receipt');
+    const key=cellKey(entry.cell);
+    if(seen.has(key)) throw new TypeError('Duplicate receipt cell');
+    seen.add(key);
+    return {cell:[...entry.cell],before:entry.before,after:entry.after};
+  });
+}
