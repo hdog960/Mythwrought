@@ -169,13 +169,13 @@ function construct(p){
   for(const k of floor){
     const [x,,z]=k.split(',').map(Number);
     if(!isEdge(x,z)&&(z%4===0)&&!cells.has(key(x,5,z)))
-      add(x,5,z,'beam',secondary,'transverse-roof-purlin');
+      add(x,5,z,'beam',secondary,'north','transverse-roof-purlin');
   }
   for(const stripe of p.roofRidges){
     for(let v=stripe.from;v<=stripe.to;v++){
       const x=stripe.axis==='x'?v:stripe.fixed, z=stripe.axis==='z'?v:stripe.fixed;
       if(isFloor(x,z)&&!cells.has(key(x,7,z)))
-        add(x,7,z,'roof',primary,'raised-weather-ridge');
+        add(x,7,z,'roof',primary,'north','raised-weather-ridge');
     }
   }
   // Physical fixture placements are marked not yet mounted/registered. These
