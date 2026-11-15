@@ -11,7 +11,7 @@
     <div class="rail-foot">INPUT PREVIEW</div>
   </aside>
   <section class="screen" aria-label="Standalone Creative Mode viewport concept">
-    <header class="chrome"><strong>MYTHWROUGHT</strong><span>CREATIVE · ROADMAP 9</span><small>FLIGHT LAB · M2</small></header>
+    <header class="chrome"><strong>MYTHWROUGHT</strong><span>CREATIVE · ROADMAP 9</span><small>CREATIVE LAB · M3</small></header>
     <div class="world" id="world" data-mode="explore" data-drawer="closed">
       <div class="landscape" aria-hidden="true"><div class="mountain far"></div><div class="mountain near"></div><div class="ground"></div><div class="path"></div></div>
       <div class="world-label"><span>STANDALONE FLIGHT LAB</span><small>Fixture motion only · not connected to the game</small></div><div class="flight-ghost" id="flightGhost" aria-hidden="true">✦</div>
@@ -33,11 +33,15 @@
         <button type="button" id="inventoryButton" class="inventory-button" disabled aria-label="Open sample inventory">INVENTORY</button>
       </div>
       <section class="inventory-panel" id="inventoryPanel" role="dialog" aria-modal="true" aria-label="Sample inventory, not connected to live placeables" hidden>
-        <div class="inventory-header"><div><b>CREATIVE INVENTORY</b><small>UX samples · not registered or placeable</small></div><button type="button" id="closeInventory" aria-label="Close inventory">✕</button></div>
+        <div class="inventory-header"><div><b>CREATIVE INVENTORY</b><small id="inventoryOrigin">UX samples · not registered or placeable</small></div><button type="button" id="closeInventory" aria-label="Close inventory">✕</button></div>
+        <nav class="inventory-sources" aria-label="Inventory data mode"><button type="button" id="sampleSource" aria-pressed="true">UX SAMPLES</button><button type="button" id="registryFixtureSource" aria-pressed="false">REGISTRY LAB</button></nav>
         <label class="search-label" for="inventorySearch">Search sample tiles</label>
         <input id="inventorySearch" type="search" autocomplete="off" placeholder="Find a sample…" maxlength="80">
         <nav class="categories" id="categories" aria-label="Sample item categories"><button type="button" data-category="all" aria-pressed="true">All</button><button type="button" data-category="blocks" aria-pressed="false">Blocks</button><button type="button" data-category="objects" aria-pressed="false">Objects</button></nav>
+        <nav class="catalog-categories" id="catalogCategories" aria-label="Simulated placeable categories" hidden></nav>
         <div class="item-grid" id="sampleItems" aria-label="UX-only sample tile selection"></div>
+        <div class="catalog-scroller" id="catalogScroller" role="list" aria-label="Virtualized synthetic contract-placeables inventory" hidden><div class="catalog-spacer" id="catalogSpacer"><div class="catalog-viewport" id="catalogViewport"></div></div></div>
+        <output id="catalogStats" class="catalog-stats" hidden aria-live="polite"></output>
         <div class="inventory-footer"><span>Assign to selected hotbar slot · never places blocks</span><button type="button" id="clearHotbar">CLEAR SLOT</button></div>
       </section>
     </div>

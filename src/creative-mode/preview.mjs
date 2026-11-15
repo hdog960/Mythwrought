@@ -1,8 +1,62 @@
 // Roadmap 9 M1 detached preview; never imported by the production application.
 import {UX_SAMPLE_ITEMS,UX_CATEGORIES,UX_SLOT_COUNT,initialCreativeUxState,updateCreativeUx,visiblePreviewItems} from './ux-state.mjs';
 import {createFlightState,enterFlight,planFlightStep,returnToGround,setFlightProfile,FLIGHT_PROFILE_NAMES} from './flight-model.mjs';
+import {createInventoryState,replaceInventorySnapshot,filterInventory,inventoryCategories,updateInventoryState,stablePlaceableKey,virtualInventoryWindow} from './inventory-model.mjs';
+import {makeInventoryContractFixture} from './inventory-fixture.mjs';
 const byId=id=>document.getElementById(id);
 let state=initialCreativeUxState();
+// M3 detached contract fixture: never live-registered and cannot place or save.
+let catalog=createInventoryState(),catalogActive=false,catalogLoaded=false,catalogFiltered=[];
+let catalogKeyMap=new Map();
+function loadFixtureOnce(){
+ if(catalogLoaded)return;
+ catalog=replaceInventorySnapshot(catalog,makeInventoryContractFixture(1632));
+ catalogKeyMap=new Map(catalog.items.map(item=>[stablePlaceableKey(item.id),item]));
+ catalogFiltered=filterInventory(catalog);catalogLoaded=true;
+}
+function renderVirtualCatalog(){
+ if(!catalogActive||!state.inventoryOpen)return;
+ const scroller=byId('catalogScroller'),spacer=byId('catalogSpacer'),container=byId('catalogViewport');
+ const win=virtualInventoryWindow(catalogFiltered.length,scroller.scrollTop,scroller.clientHeight);
+ spacer.style.height=win.height+'px';container.style.transform='translateY('+win.top+'px)';
+ const nodes=[];
+ for(let i=win.start;i<win.end;i++){
+  const item=catalogFiltered[i],key=stablePlaceableKey(item.id),button=document.createElement('button');
+  button.type='button';button.className='catalog-tile';button.dataset.placeableKey=key;
+  button.setAttribute('aria-label','Assign synthetic '+item.name+' to hotbar slot '+(state.selectedSlot+1)+'. Not live or placeable.');
+  button.setAttribute('role','listitem');
+  const symbol=document.createElement('span');symbol.className='catalog-symbol';symbol.textContent=item.kind==='object'?'✦':'▦';
+  const label=document.createElement('span'),name=document.createElement('b'),caption=document.createElement('small');
+  name.textContent=item.name;caption.textContent=item.category+' · MOCK ONLY';label.append(name,caption);button.append(symbol,label);nodes.push(button);
+ }
+ container.replaceChildren(...nodes);
+ scroller.dataset.totalItems=String(catalog.items.length);scroller.dataset.matches=String(catalogFiltered.length);
+ scroller.dataset.rendered=String(nodes.length);
+ byId('catalogStats').textContent=catalogFiltered.length+' / '+catalog.items.length+' validated synthetic records · '+nodes.length+' DOM tiles · NOT LIVE';
+}
+function renderCatalogSource(){
+ byId('inventoryPanel').dataset.source=catalogActive?'registry-fixture':'sample';
+ byId('sampleSource').setAttribute('aria-pressed',String(!catalogActive));
+ byId('registryFixtureSource').setAttribute('aria-pressed',String(catalogActive));
+ byId('inventoryOrigin').textContent=catalogActive?'SYNTHETIC contract fixtures · NOT LIVE / NOT PLACEABLE':'UX samples · not registered or placeable';
+ byId('inventorySearch').placeholder=catalogActive?'Search synthetic contract records…':'Find a sample…';
+ const desired=catalogActive?catalog.query:state.search;
+ if(byId('inventorySearch').value!==desired)byId('inventorySearch').value=desired;
+ byId('categories').hidden=catalogActive;byId('sampleItems').hidden=catalogActive;
+ byId('catalogCategories').hidden=!catalogActive;byId('catalogScroller').hidden=!catalogActive;
+ byId('catalogStats').hidden=!catalogActive;
+ byId('inventoryPanel').querySelector('.inventory-footer span').textContent=catalogActive?'Synthetic IDs only · no game edits':'Assign to selected hotbar slot · never places blocks';
+ if(catalogActive){
+  const nav=byId('catalogCategories');const options=inventoryCategories(catalog);
+  nav.replaceChildren(...options.map(category=>{
+   const button=document.createElement('button');button.type='button';button.dataset.catalogCategory=category;
+   button.textContent=category==='all'?'ALL':category.toUpperCase();
+   button.setAttribute('aria-pressed',String(catalog.category===category));return button;
+  }));
+  renderVirtualCatalog();
+ }
+}
+
 // Readiness and landing below are deliberately bounded DEMO fixtures. No real chunks
 // are ever loaded, prefetched, edited or serialized from this preview.
 const fixtureReady=p=>p.x>=-10&&p.x<=10&&p.z>=-10&&p.z<=10&&p.y>=4&&p.y<=30;
@@ -41,12 +95,12 @@ function render(){
   byId('inventoryButton').disabled=!creative;byId('inventoryPanel').hidden=!state.inventoryOpen;
   byId('announcement').textContent=state.announcement;
   for(let i=0;i<slots.length;i++){
-    const slot=slots[i],item=previewByUid.get(state.hotbar[i]);
+    const slot=slots[i],item=catalogActive?catalogKeyMap.get(catalog.hotbar[i]):previewByUid.get(state.hotbar[i]);
     slot.disabled=!creative;slot.setAttribute('aria-pressed',String(state.selectedSlot===i));
-    slot.setAttribute('aria-label',`Preview hotbar slot ${i+1}${item?', '+item.name:''}`);
-    slot.querySelector('.slot-glyph').textContent=item?.glyph||'·';
+    slot.setAttribute('aria-label','Preview hotbar slot '+(i+1)+(item?', '+item.name+(catalogActive?' (synthetic fixture)':''):''));
+    slot.querySelector('.slot-glyph').textContent=catalogActive?(item?.kind==='object'?'✦':item?'▦':'·'):(item?.glyph||'·');
   }
-  if(byId('inventorySearch').value!==state.search)byId('inventorySearch').value=state.search;
+  if(!catalogActive&&byId('inventorySearch').value!==state.search)byId('inventorySearch').value=state.search;
   for(const button of byId('categories').querySelectorAll('button'))button.setAttribute('aria-pressed',String(button.dataset.category===state.category));
   const grid=byId('sampleItems');grid.replaceChildren();
   const items=visiblePreviewItems(state);
@@ -59,16 +113,46 @@ function render(){
     const label=document.createElement('span');const name=document.createElement('strong');name.textContent=item.name;
     const note=document.createElement('small');note.textContent='SAMPLE · NOT PLACEABLE';label.append(name,note);button.append(icon,label);grid.append(button);
   }
+  renderCatalogSource();
 }
 byId('exploreMode').addEventListener('click',()=>dispatch({type:'MODE',mode:'explore'}));
 byId('creativeMode').addEventListener('click',()=>dispatch({type:'MODE',mode:'creative'}));
 byId('inventoryButton').addEventListener('click',()=>dispatch({type:'OPEN_INVENTORY'}));
 byId('closeInventory').addEventListener('click',()=>dispatch({type:'CLOSE_INVENTORY'}));
-byId('inventorySearch').addEventListener('input',event=>dispatch({type:'SEARCH',value:event.target.value}));
+byId('inventorySearch').addEventListener('input',event=>{
+ if(!catalogActive){dispatch({type:'SEARCH',value:event.target.value});return;}
+ catalog=updateInventoryState(catalog,{type:'SEARCH',query:event.target.value});
+ catalogFiltered=filterInventory(catalog);byId('catalogScroller').scrollTop=0;renderCatalogSource();
+});
 byId('categories').addEventListener('click',event=>{const button=event.target.closest('button[data-category]');if(button)dispatch({type:'CATEGORY',category:button.dataset.category});});
 byId('sampleItems').addEventListener('click',event=>{const button=event.target.closest('button[data-uid]');if(button)dispatch({type:'ASSIGN_SAMPLE',uid:button.dataset.uid});});
-byId('hotbar').addEventListener('click',event=>{const button=event.target.closest('button[data-slot]');if(button)dispatch({type:'SELECT_SLOT',slot:Number(button.dataset.slot)});});
-byId('clearHotbar').addEventListener('click',()=>dispatch({type:'CLEAR_SLOT'}));
+byId('hotbar').addEventListener('click',event=>{
+ const button=event.target.closest('button[data-slot]');if(!button)return;
+ catalog=updateInventoryState(catalog,{type:'SELECT_SLOT',slot:Number(button.dataset.slot)});
+ dispatch({type:'SELECT_SLOT',slot:Number(button.dataset.slot)});
+});
+byId('clearHotbar').addEventListener('click',()=>{
+ if(!catalogActive){dispatch({type:'CLEAR_SLOT'});return;}
+ catalog=updateInventoryState(catalog,{type:'CLEAR_SLOT'});render();
+ byId('announcement').textContent='Synthetic hotbar slot '+(state.selectedSlot+1)+' cleared. No live game edit.';
+});
+byId('sampleSource').addEventListener('click',()=>{catalogActive=false;render();});
+byId('registryFixtureSource').addEventListener('click',()=>{
+ loadFixtureOnce();catalogActive=true;
+ catalog=updateInventoryState(catalog,{type:'SELECT_SLOT',slot:state.selectedSlot});render();
+});
+byId('catalogCategories').addEventListener('click',event=>{
+ const button=event.target.closest('button[data-catalog-category]');if(!button||!catalogActive)return;
+ catalog=updateInventoryState(catalog,{type:'CATEGORY',category:button.dataset.catalogCategory});
+ catalogFiltered=filterInventory(catalog);byId('catalogScroller').scrollTop=0;renderCatalogSource();
+});
+byId('catalogViewport').addEventListener('click',event=>{
+ const button=event.target.closest('button[data-placeable-key]');if(!button||!catalogActive||state.mode!=='creative'||!state.inventoryOpen)return;
+ const item=catalogKeyMap.get(button.dataset.placeableKey);if(!item)return;
+ catalog=updateInventoryState(catalog,{type:'ASSIGN',id:item.id});render();
+ byId('announcement').textContent=item.name+' assigned to synthetic hotbar slot '+(state.selectedSlot+1)+'. NOT LIVE / NOT PLACEABLE.';
+});
+byId('catalogScroller').addEventListener('scroll',()=>{if(catalogActive)renderVirtualCatalog();},{passive:true});
 document.addEventListener('keydown',event=>{
   if(event.key==='Escape'&&state.inventoryOpen){event.preventDefault();dispatch({type:'CLOSE_INVENTORY'});return;}
   if(state.inventoryOpen)return;
