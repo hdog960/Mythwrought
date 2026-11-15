@@ -46,7 +46,22 @@ export function createPack5ConstructionLayer(world){
     throw Error('Builder layer requires a seeded, readable voxel world');
   const seed=world.seed;
   let fixture=makePack5Fixture(PACK5_BUILDER_FAMILIES);
-  const solid=cell=>within(cell)&&Number.isInteger(world.get(...cell))&&world.get(...cell)!==BLOCK.AIR;
+  // Newer main hosts registered biome or physical asset IDs beyond legacy
+  // 0–8, some of them non-solid. Do not treat *every* nonzero ID as support.
+  // Only a future cross-pack registry can certify non-legacy supports.
+  const supportSolid=cell=>{
+    if(!within(cell))return false;
+    const id=world.get(...cell);
+    if(!Number.isSafeInteger(id)||id<=BLOCK.AIR)return false;
+    if(id<=BLOCK.DEEPSTONE)return true;
+    return typeof world.pack5StructuralSupport==='function'&&
+      world.pack5StructuralSupport([...cell],id)===true;
+  };
+  // Collision against other registered shapes is the combined host's job.
+  // Never accidentally turn a decorative registered plant into a full cube.
+  const legacySolid=cell=>within(cell)&&
+    Number.isSafeInteger(world.get(...cell))&&
+    world.get(...cell)>BLOCK.AIR&&world.get(...cell)<=BLOCK.DEEPSTONE;
   const supportsFor=(into,descriptor,anchor,rotation,parts)=>{
     const need=[];
     if(descriptor.attachment==='floor')
@@ -54,8 +69,8 @@ export function createPack5ConstructionLayer(world){
     if(descriptor.attachment==='ceiling')need.push(offset(anchor,[0,1,0]));
     if(descriptor.attachment==='wall')
       need.push(offset(anchor,rotateCellOffset([0,0,-1],rotation)));
-    for(const cell of need)into.setSupport(cell,solid(cell));
-    return need.every(solid);
+    for(const cell of need)into.setSupport(cell,supportSolid(cell));
+    return need.every(supportSolid);
   };
   const attempt=(into,id,anchor,rotation=0,variant=null,playerBox=null)=>{
     if(!validCell(anchor)||!Number.isInteger(rotation)||rotation<0||rotation>3)
@@ -171,7 +186,7 @@ export function createPack5ConstructionLayer(world){
       for(let x=Math.floor(box[0]+eps);x<=Math.floor(box[3]-eps);x++)
         for(let y=Math.floor(box[1]+eps);y<=Math.floor(box[4]-eps);y++)
           for(let z=Math.floor(box[2]+eps);z<=Math.floor(box[5]-eps);z++)
-            if(solid([x,y,z]))return true;
+            if(legacySolid([x,y,z]))return true;
       return false;
     },
     /** Upload-ready authored triangle buffers for exactly one placed instance. */

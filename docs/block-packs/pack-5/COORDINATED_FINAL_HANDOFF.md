@@ -38,3 +38,11 @@
 An external occupied cell does **not** by itself verify that a future cross-pack structure can support a wall, floor, or ceiling fixture. Missing legacy supports are marked `unverified-support` for the combined integrator. Even a preflight with zero issues explicitly returns `integrationReady:false` and `crossPackPhysicalAcceptance:false`; final five-pack support semantics and production registration must still be approved and tested.
 
 The dedicated regression exercises authentic 36-variant mixed geometry plus conflict/forgery/boundary cases. These are developer-level acceptance aids, **not** proof of physical-iPhone rendering or settlement completion.
+
+## Current-main registered materials — Pack 5 compatibility boundary
+
+A read-only inspection of newer main at `c512fcb9e6e82697cff0c5d26f073e503d51e4a5` found registered biome materials using IDs 256–312, including non-full-cube / non-solid shapes. Pack 5 **must never** assume that every nonzero ID is a full cube or a structurally load-bearing attachment.
+
+The Pack 5-only `placement-preflight.mjs` now labels occupied IDs beyond 8 as `registered-world-occupied`, rather than throwing on them; non-legacy support remains `unverified-registered-support` until the future combined registry supplies explicit `verifiedStructuralSupports`. `construction-layer.mjs` now allows new registered supports **only** when the supplied host exposes a positive `pack5StructuralSupport(cell,id)` proof. Default Pack 5 worlds remain backward compatible with schema-1 IDs 0–8. Combined collision with newer registered shapes is still the host's responsibility; Pack 5 must not claim to have resolved it.
+
+The newer main also changed `src/main.mjs` to use a rotation-aware `inspectBlockTarget(..., selectedRotation)` and `applyBlockAction(...,{rotation:selectedRotation})`, while Pack 5 has an independent shaped-building editing path. The final five-pack integration must preserve **both** interaction paths when reconciling shared main/voxel files. This producer PR will not edit biome130, other Block Packs, or the active `main`.

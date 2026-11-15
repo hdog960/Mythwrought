@@ -110,3 +110,47 @@ test('omitted external occupancy indexes never become an implied cross-pack clea
   assert.equal(both.pack5OnlyDryRunClear,true);
   assert.equal(both.integrationReady,false);
 });
+
+test('registered biome blocks in occupied cells are reported, not misread as invalid legacy IDs',()=>{
+  const p=plan(),w=makeWorld();
+  for(const s of p.placements[0].physical.requiredSupports)w.put(s);
+  const target=p.placements[0].physical.occupiedCells[0];
+  w.put(target,256);
+  const r=preflightPack5BuilderPlan(p,{world:w.world,
+    foreignOccupiedCells:[],existingPack5Cells:[]});
+  assert.ok(r.issues.some(i=>i.kind==='registered-world-occupied'));
+  assert.equal(r.pack5OnlyDryRunClear,false);
+});
+test('registered decorative IDs require separately certified support, never generic occupancy',()=>{
+  const p=plan(),w=makeWorld();
+  const backing=p.placements[0].physical.requiredSupports;
+  for(const cell of backing)w.put(cell,312);
+  const r=preflightPack5BuilderPlan(p,{
+    world:w.world,foreignOccupiedCells:backing,existingPack5Cells:[]});
+  assert.ok(r.issues.some(i=>i.kind==='unverified-registered-support'));
+  assert.equal(r.pack5OnlyDryRunClear,false);
+  const certified=preflightPack5BuilderPlan(p,{
+    world:w.world,foreignOccupiedCells:backing,existingPack5Cells:[],
+    verifiedStructuralSupports:backing});
+  assert.equal(certified.issues.length,0);
+  assert.equal(certified.pack5OnlyDryRunClear,true);
+  assert.equal(certified.integrationReady,false);
+});
+test('physical placement refuses unknown registered support until host certifies it',async()=>{
+  const {createPack5ConstructionLayer}=await import('../src/pack5-integration/construction-layer.mjs');
+  const p=plan(),w=makeWorld(),required=p.placements[0].physical.requiredSupports;
+  const keyOf=v=>v.join(','),valid=new Set(required.map(keyOf));
+  for(const cell of required)w.put(cell,256);
+  let layer=createPack5ConstructionLayer(w.world);
+  const opts=[family.symbolicId,[3,5,4],1,family.variants[0]];
+  const rejected=layer.place(...opts);
+  assert.equal(rejected.ok,false);
+  assert.equal(rejected.reason,'Missing world attachment');
+  assert.equal(layer.count(),0);
+  w.world.pack5StructuralSupport=(cell,id)=>id===256&&valid.has(keyOf(cell));
+  layer=createPack5ConstructionLayer(w.world);
+  const accepted=layer.place(...opts);
+  assert.equal(accepted.ok,true);
+  assert.equal(layer.count(),1);
+  assert.equal(w.world.get(...required[0]),256);
+});
