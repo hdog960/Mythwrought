@@ -1,0 +1,86 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';
+import {readFile,mkdir,mkdtemp,rm} from 'node:fs/promises';
+import {execFileSync,execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {tmpdir} from 'node:os';
+import {join,resolve,extname,sep} from 'node:path';
+const invoke=promisify(execFile);
+const root=process.cwd();
+function findBrowser(){
+ for(const name of ['chromium','google-chrome','google-chrome-stable']){
+  try{return execFileSync('which',[name],{encoding:'utf8'}).trim();}catch{}
+ }
+ return null;
+}
+async function server(){
+ const http=createServer(async(req,res)=>{
+  const pathname=decodeURIComponent((req.url||'').split('?')[0]);
+  const source=resolve(root,'.'+pathname);
+  if(!source.startsWith(root+sep)){res.writeHead(403).end();return;}
+  try{
+   const bytes=await readFile(source);
+   res.setHeader('Content-Type',extname(source)==='.html'?'text/html; charset=utf-8':
+    extname(source)==='.mjs'||extname(source)==='.js'?'text/javascript; charset=utf-8':'application/octet-stream');
+   res.end(bytes);
+  }catch{res.writeHead(404).end('missing source');}
+ });
+ await new Promise((ok,fail)=>{http.once('error',fail);http.listen(0,'127.0.0.1',ok);});
+ return http;
+}
+test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authored M1 source at three phone-landscape dimensions', {timeout:210000},async(t)=>{
+ const browser=findBrowser();
+ if(!browser){t.skip('Chromium/Chrome binary not installed: candidate WebGL2 capture unverified');return;}
+ const http=await server(), temp=await mkdtemp(join(tmpdir(),'mythwrought-2b-webgl-'));
+ const out=resolve('artifacts/roadmap-2b');
+ await mkdir(out,{recursive:true});
+ const address=http.address(), base='http://127.0.0.1:'+address.port+'/tests/building-pool/roadmap-2b/candidate-preview.html';
+ // Six genuine browser captures; this is a software proxy review, not a
+ // production-family WebGL2, glass ABI, collision, or actual iPhone claim.
+ const cases=[
+  ['market-square',667,375,'exterior'],['market-square',667,375,'cutaway'],
+  ['tailor',844,390,'exterior'],['tailor',844,390,'cutaway'],
+  ['theater',932,430,'exterior'],['theater',932,430,'cutaway']
+ ];
+ try{
+  for(let i=0;i<cases.length;i++){
+   const [category,width,height,view]=cases[i];
+   const id='r2:'+category+':temperate:small:01';
+   const params=new URLSearchParams({id,view});
+   const url=base+'?'+params.toString();
+   const file=join(out,category+'-'+view+'-'+width+'x'+height+'.png');
+   const profile=join(temp,'profile-'+i);
+   const args=[
+    '--headless=new','--no-sandbox','--disable-dev-shm-usage','--no-first-run',
+    '--disable-background-networking','--enable-webgl','--ignore-gpu-blocklist',
+    '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
+    '--hide-scrollbars','--user-data-dir='+profile,
+    '--window-size='+width+','+height,'--virtual-time-budget=4500',
+    '--timeout=10000','--dump-dom','--screenshot='+file,url
+   ];
+   let stdout='';
+   try{
+    const result=await invoke(browser,args,{timeout:22000,maxBuffer:4*1024*1024});
+    stdout=result.stdout;
+   }catch(e){
+    throw Error(category+' '+view+' '+width+'x'+height+
+      ': Chromium capture failed: '+String(e.message).slice(0,450));
+   }
+   assert.match(stdout,/data-ready="yes"/,category+' browser did not load source-authentic blueprint');
+   assert.match(stdout,/data-webgl="WebGL2"/,category+' no real WebGL2 context');
+   assert(stdout.includes('data-blueprint="'+id+'"'),category+' rendered the wrong authored model');
+   assert(stdout.includes('data-view="'+view+'"'),category+' rendered the wrong cutaway option');
+   const png=await readFile(file);
+   assert(png.length>3500,category+' screenshot appears empty or truncated');
+   assert.equal(png.subarray(0,8).toString('hex'),'89504e470d0a1a0a','invalid Chromium PNG');
+   assert.equal(png.readUInt32BE(16),width,'unexpected Chrome captured width');
+   assert.equal(png.readUInt32BE(20),height,'unexpected Chrome captured height');
+   console.log('Builder 2B REAL Chromium/WebGL2 software-cube proxy capture:',
+     id,view,width+'x'+height,'PNG bytes',png.length);
+  }
+ }finally{
+  await new Promise(ok=>http.close(ok));
+  await rm(temp,{recursive:true,force:true});
+ }
+});
