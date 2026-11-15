@@ -48,3 +48,60 @@ jobs:
           path: artifacts/pack5-producer/
           if-no-files-found: warn
           retention-days: 14
+
+  pack5-candidate-full-game-depth:
+    # Run the exact producer branch source independently from the conflicted
+    # GitHub PR merge ref. This DOES NOT claim reconciliation against main.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Full candidate syntax, CI selector and native regressions
+        run: |
+          node --check src/main.mjs
+          node --check src/voxel.mjs
+          node --check src/depth.mjs
+          node --check src/depth-mesh.mjs
+          node --check src/gpu-recovery.mjs
+          node --check src/gpu-pipeline.mjs
+          node --test tests/ci/*.test.mjs
+          npm test
+      - name: Install free browser acceptance tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Original production full-game landscape regression
+        run: |
+          python3 -m http.server 4173 > /tmp/pack5-producer-web.log 2>&1 &
+          node tests/browser-smoke.mjs
+          node tests/exploration-map-browser.mjs
+          node tests/touch-browser.mjs
+          node tests/layout-browser.mjs
+          node tests/seam-browser.mjs
+          node tests/movement-browser.mjs
+          node tests/blocks-browser.mjs
+          node tests/persistence-browser.mjs
+          node tests/preflight-browser.mjs
+          node tests/vault-browser.mjs
+          node tests/mirror-browser.mjs
+          node tests/foreground-browser.mjs
+          node tests/meadow-browser.mjs
+          node tests/grove-browser.mjs
+          node tests/canopy-browser.mjs
+          node tests/storybook-browser.mjs
+          node tests/grotto-browser.mjs
+          node tests/voxel-landmarks-browser.mjs
+          node tests/live-world-browser.mjs
+          node tests/context-restore-browser.mjs
+      - name: Deep-world source-exact Chromium WebGL2 and schema-1 reload
+        run: node tests/depth-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pack5-producer-exact-head-full-game-depth-evidence
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
