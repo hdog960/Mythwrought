@@ -1,3 +1,5 @@
+> **Newer authoritative M1 census:** See [M1_REGIONAL_ACCEPTANCE.md](./M1_REGIONAL_ACCEPTANCE.md) for the 31/345 coordinate-authored candidate status, 72 additional source-exact WebGL2 views (186 total across sessions), 79,226 total conceptual voxel coordinates and explicitly unresolved 30 physical support positions. The original 19/345 statistics below are a preserved historical checkpoint, not the current total.
+
 # Mythwrought Builder 3A — M1 source-only acceptance and physical-ABI audit
 **Scope:** all paths are exclusive to Builder 3A. This document does NOT authorize merge, deployment, persistent IDs, runtime placement, physical-iPhone testing or creator art acceptance.
 
