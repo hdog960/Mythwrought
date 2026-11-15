@@ -9,6 +9,8 @@ import {createManualFivePackLiveBuilder} from '../src/builder-assets/manual-five
 import {MANUAL_FIVE_PACK_CATALOG} from '../src/builder-assets/manual-five-pack.mjs';
 import {PACK5_BUILDER_CATALOG} from '../src/pack5-integration/catalog.mjs';
 const row=id=>MANUAL_FIVE_PACK_CATALOG.find(x=>x.numericId===id);
+const pack5_080=MANUAL_FIVE_PACK_CATALOG.find(x=>x.symbol==='pack5:080');
+assert.equal(pack5_080?.numericId,210,'Pack 5 roster 079 maps to reserved numeric ID 209; 080 must map to 210');
 function memory(){const m=new Map();return {getItem:k=>m.get(k)??null,
  setItem:(k,v)=>m.set(k,String(v)),removeItem:k=>m.delete(k),
  keys:()=>[...m.keys()]};}
@@ -40,7 +42,7 @@ test('one Builder AI interface places real source geometry from all five indepen
   {asset:row(159).symbol,numericId:159,at:[510,19,500]},
   {asset:row(59).symbol,numericId:59,at:[520,19,500]},
   {asset:row(116).symbol,numericId:116,at:[530,19,500]},
-  {asset:'pack5:080',numericId:209,at:[540,19,500],variant:v}];
+  {asset:'pack5:080',numericId:210,at:[540,19,500],variant:v}];
  for(const item of rows){
   const result=await builder.place(item);
   assert.equal(result.ok,true,'Five-pack builder rejected '+item.asset+': '+result.reason);
@@ -65,7 +67,7 @@ test('the same builder refuses cross-pack overlapping cells without any source s
  const raw=storage.getItem('mythwrought.manual14.seed.179');
  const p3=await builder.place({asset:row(116).symbol,numericId:116,at:[500,19,500]});
  assert.equal(p3.ok,false);
- const pack5=await builder.place({asset:'pack5:080',numericId:209,at:[500,19,500],
+ const pack5=await builder.place({asset:'pack5:080',numericId:210,at:[500,19,500],
   variant:PACK5_BUILDER_CATALOG.find(x=>x.symbolicId==='pack5:080').variants[0]});
  assert.equal(pack5.ok,false);
  assert.equal(storage.getItem('mythwrought.manual14.seed.179'),raw);
