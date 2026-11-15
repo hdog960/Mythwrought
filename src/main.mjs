@@ -93,6 +93,7 @@ function start(){
     pack5Builder=null;pack5Mode=false;
     const toggle=document.getElementById('pack5Enabled');
     if(toggle)toggle.checked=false;
+    queueMicrotask(()=>{void restoreSavedPack5Scene();});
     const hint=document.getElementById('pack5Status');
     if(hint)hint.textContent='Off after world change. Enable again for this seed’s separate sidecar.';
   }
@@ -694,43 +695,72 @@ function start(){
     }
   }
   pack5Family.addEventListener('change',refreshPack5Variants);
+  let pack5LoadPromise=null,pack5LoadWorld=null;
+  async function ensurePack5Loaded(){
+    if(pack5Builder)return true;
+    if(pack5LoadPromise&&pack5LoadWorld===world)return pack5LoadPromise;
+    const requestedWorld=world;
+    const current=(async()=>{
+      const [{createPack5LiveAdapter},{createPack5GpuStream}]=await Promise.all([
+        import('./pack5-integration/live-adapter.mjs'),
+        import('./pack5-integration/terrain-buffer.mjs')
+      ]);
+      if(world!==requestedWorld)return false;
+      const candidate=createPack5LiveAdapter(world,{storage:localStorage});
+      const box=[player.x-.28,player.feet,player.z-.28,
+        player.x+.28,player.feet+1.78,player.z+.28];
+      if(candidate.layer.collidesPack5(box))
+        throw Error('Stored furnishing overlaps player. Move clear before loading.');
+      const renderer=createPack5GpuStream(gl,candidate.layer);
+      if(world!==requestedWorld){renderer.dispose();return false;}
+      pack5Builder=candidate;pack5Gpu=renderer;
+      world.pack5Collision=box=>candidate.collision(box);
+      pack5Family.replaceChildren();
+      for(const f of candidate.layer.catalog){
+        const option=document.createElement('option');
+        option.value=f.symbolicId;option.textContent=f.symbolicId+' · '+f.name;
+        pack5Family.append(option);
+      }
+      refreshPack5Variants();
+      renderer.refresh(eye());
+      return true;
+    })();
+    pack5LoadWorld=requestedWorld;pack5LoadPromise=current;
+    try{return await current;}
+    finally{
+      if(pack5LoadPromise===current){pack5LoadPromise=null;pack5LoadWorld=null;}
+    }
+  }
+  async function restoreSavedPack5Scene(){
+    if(storageReadOnly||pack5Builder)return;
+    const key='mythwrought.pack5.builder.seed.'+world.seed;
+    try{
+      if([key,key+'.journal',key+'.backup'].every(k=>localStorage.getItem(k)===null))
+        return;
+      if(await ensurePack5Loaded()&&!pack5Mode)
+        pack5Status.textContent='Saved Pack 5 furniture restored and physically solid · editing OFF.';
+    }catch(error){
+      // Corrupt/unsupported independent sidecars remain untouched for export.
+      pack5Status.textContent='Pack 5 stored data protected and not loaded: '+
+        String(error.message||error);
+    }
+  }
   pack5Enabled.addEventListener('change',async()=>{
     if(!pack5Enabled.checked){
       pack5Mode=false;
       pack5Status.textContent='Editing off. Placed Pack 5 pieces remain rendered and solid.';
       return;
     }
-    const requestedWorld=world;
     try{
-      if(!pack5Builder){
-        const [{createPack5LiveAdapter},{createPack5GpuStream}]=await Promise.all([
-          import('./pack5-integration/live-adapter.mjs'),
-          import('./pack5-integration/terrain-buffer.mjs')
-        ]);
-        if(world!==requestedWorld||!pack5Enabled.checked)return;
-        const candidate=createPack5LiveAdapter(world,{storage:localStorage});
-        const box=[player.x-.28,player.feet,player.z-.28,
-          player.x+.28,player.feet+1.78,player.z+.28];
-        if(candidate.layer.collidesPack5(box))
-          throw Error('Saved furnishing overlaps player. Move clear before enabling.');
-        const renderer=createPack5GpuStream(gl,candidate.layer);
-        pack5Builder=candidate;pack5Gpu=renderer;
-        world.pack5Collision=box=>candidate.collision(box);
-        pack5Family.replaceChildren();
-        for(const f of candidate.layer.catalog){
-          const option=document.createElement('option');
-          option.value=f.symbolicId;option.textContent=f.symbolicId+' · '+f.name;
-          pack5Family.append(option);
-        }
-        refreshPack5Variants();
-        renderer.refresh(eye());
-      }
+      const loaded=await ensurePack5Loaded();
+      if(!loaded||!pack5Enabled.checked)return;
       pack5Mode=true;
       pack5Status.textContent='Pack 5 ON · MINE/PLACE edit shaped furniture · '+
-        pack5Builder.layer.count()+' pieces in separate verified seed sidecar.';
+        pack5Builder.layer.count()+' pieces in verified separate seed sidecar.';
     }catch(error){
       pack5Mode=false;pack5Enabled.checked=false;
-      pack5Status.textContent='Pack 5 unavailable; original saves preserved: '+String(error.message||error);
+      pack5Status.textContent='Pack 5 unavailable; original saves preserved: '+
+        String(error.message||error);
     }
   });
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
@@ -889,7 +919,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=imported;resetPack5ForWorld();storageReadOnly=false;changed=false;
+    world=imported;storageReadOnly=false;changed=false;resetPack5ForWorld();
     clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
@@ -1023,7 +1053,7 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      world=candidate;resetPack5ForWorld();storageReadOnly=false;changed=false;respawnPrototype();
+      world=candidate;storageReadOnly=false;changed=false;resetPack5ForWorld();respawnPrototype();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';
@@ -1063,7 +1093,7 @@ function start(){
       }
       const outcome=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
       if(!outcome.ok)throw Error(outcome.reason);
-      world=imported;resetPack5ForWorld();storageReadOnly=false;changed=false;
+      world=imported;storageReadOnly=false;changed=false;resetPack5ForWorld();
       clearMirrorDownload();
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
@@ -1194,5 +1224,7 @@ function start(){
     'READ ONLY: damaged world data preserved; import or select another seed.':
     'Schema-1 saved edits; checksum journal and verified previous-world backup.';
   message(recoveryNote||'Move, look, mine and place · ☰ for help');
+  // Saved pieces auto-load without activating editing or a new block ID.
+  void restoreSavedPack5Scene();
   if(!document.hidden)frameDriver.resume();
 }
