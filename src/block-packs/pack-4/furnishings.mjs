@@ -67,8 +67,8 @@ for(let n=0;n<4;n++){
   const y=.22+n*.15;
   crate.push(piece([.12,y,.115,.88,y+.12,.19],n%2?'oak':'oakSun'));
   crate.push(piece([.12,y,.81,.88,y+.12,.885],n%2?'oakSun':'oak'));
-  crate.push(piece([.115,y,.20,.19,y+.12,.80],'oak'));
-  crate.push(piece([.81,y,.20,.885,y+.12,.80],'oakSun'));
+  crate.push(piece([.115,y,.19,.19,y+.12,.81],'oak'));
+  crate.push(piece([.81,y,.19,.885,y+.12,.81],'oakSun'));
 }
 for(const x of [.115,.81])for(const z of [.115,.81]){
  crate.push(piece([x,.11,z,x+.075,.84,z+.075],'iron'));
@@ -76,7 +76,7 @@ for(const x of [.115,.81])for(const z of [.115,.81]){
 }
 for(let n=0;n<5;n++){
  const x=.12+n*.152;
- crate.push(piece([x,.82,.12,x+.12,.87,.88],n%2?'oakSun':'walnut'));
+ crate.push(piece([x,.79,.12,x+.12,.87,.88],n%2?'oakSun':'walnut'));
 }
 for(let n=0;n<4;n++){
  const x=.17+n*.16;
