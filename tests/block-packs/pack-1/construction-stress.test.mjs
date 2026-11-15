@@ -164,3 +164,55 @@ test('biome rotation loss, stale rotation and unsupported schema-1 fields fail c
   assert.throws(()=>compilePack1Construction([],{existingEdits:[[0,0,0,255]]}),/Invalid schema-1/);
   assert.throws(()=>compilePack1Construction([],{existingEdits:[[0,0,0,65535]]}),/Invalid schema-1/);
 });
+
+test('incremental construction retains old Pack 1 structures and live biome save rotations',()=>{
+  const original=compilePack1Construction([
+    request(9,[0,3,0]),request(27,[1,3,0],{wallFace:'west'}),
+    request(16,[4,3,0],{rotation:3,variant:'upper'})
+  ],{existingSave:{schema:1,seed:179,
+    edits:[[8,3,0,256],[9,3,0,315],[10,3,0,8]],
+    rotations:[[8,3,0,1],[9,3,0,2]]}});
+  const frozen=JSON.stringify(original);
+  const next=compilePack1Construction([
+    request(15,[5,3,0],{rotation:2,variant:'upper'}),
+    request(33,[6,3,0])
+  ],{existingSave:original.world,existingPack1State:original.pack1State});
+  assert.equal(JSON.stringify(original),frozen);
+  const restored=inspectPack1Construction(JSON.parse(JSON.stringify(next)));
+  assert.equal(restored.pack1Count,5);assert.equal(restored.otherCount,3);
+  assert.equal(restored.placements.find(p=>p.id===16).rotation,3);
+  assert.equal(restored.placements.find(p=>p.id===15).variant,'upper');
+  assert.equal(restored.placements.find(p=>p.id===27).wallFace,'west');
+  assert.deepEqual(next.world.rotations,original.world.rotations);
+  assert.deepEqual(next.pack1State.mounts,original.pack1State.mounts);
+  assert.equal(next.pack1State.turns.length,2);
+  assert.equal(next.pack1State.variants.length,2);
+  assert.throws(()=>removePack1Construction(next,[0,3,0]),/Missing or stale wall support/);
+  const withoutFlower=removePack1Construction(next,[6,3,0]);
+  assert.equal(inspectPack1Construction(withoutFlower).pack1Count,4);
+});
+test('incremental construction rejects lost or stale state and occupied saved cells',()=>{
+  const first=compilePack1Construction([request(15,[1,2,1],{rotation:1,variant:'upper'})]);
+  assert.throws(()=>compilePack1Construction([request(33,[2,2,1])],
+    {existingSave:first.world}),/metadata-aware restoration/);
+  assert.throws(()=>compilePack1Construction([request(33,[2,2,1])],
+    {existingPack1State:first.pack1State}),/requires existingSave/);
+  assert.throws(()=>compilePack1Construction([request(33,[1,2,1])],
+    {existingSave:first.world,existingPack1State:first.pack1State}),/occupied cell/);
+  const damaged=JSON.parse(JSON.stringify(first.pack1State));
+  damaged.variants=[];
+  assert.throws(()=>compilePack1Construction([request(33,[2,2,1])],
+    {existingSave:first.world,existingPack1State:damaged}),/checksum/);
+  assert.equal(inspectPack1Construction(first).pack1Count,1);
+});
+test('current main vertical limits -210..19 accept deep edits but reject out-of-bounds saved world',()=>{
+  for(const y of [-210,-100,-3,0,19]){
+    const state=compilePack1Construction([request(9,[0,y,0])]);
+    assert.equal(inspectPack1Construction(state).pack1Count,1);
+  }
+  for(const y of [-211,20]){
+    assert.throws(()=>compilePack1Construction([request(9,[0,y,0])]),/vertical bounds/);
+    assert.throws(()=>compilePack1Construction([],
+      {existingSave:{schema:1,seed:179,edits:[[0,y,0,256]]}}),/Invalid schema-1 edit row/);
+  }
+});

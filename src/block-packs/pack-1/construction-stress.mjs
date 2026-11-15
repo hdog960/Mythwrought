@@ -4,6 +4,9 @@ import {PACK1_BUILDER_CATALOG,pack1BuilderPlacementPlan,
   resolvePack1BuilderFamily} from './builder-handoff.mjs';
 import {candidateSurface} from './webgl2-candidates.mjs';
 const CATALOG=new Map(PACK1_BUILDER_CATALOG.map(x=>[x.id,x]));
+// Source-only contract from current main: 23 legacy-height cells x depth multiplier 10.
+// Recheck these limits against the target main before production registration.
+export const PACK1_WORLD_BOUNDS=Object.freeze({minY:-210,maxY:19});
 const FACES=Object.freeze({north:[0,0,-1],south:[0,0,1],east:[1,0,0],west:[-1,0,0]});
 const byKey=c=>c.join(',');
 // Deterministic noncryptographic corruption guard. Production integrator may
@@ -24,6 +27,7 @@ function validateEdits(edits){
   const cells=new Map();
   for(const row of edits){
     if(!Array.isArray(row)||row.length!==4||!validCell(row.slice(0,3))||
+       row[1]<PACK1_WORLD_BOUNDS.minY||row[1]>PACK1_WORLD_BOUNDS.maxY||
        !Number.isSafeInteger(row[3])||row[3]<0||row[3]>=65535||row[3]===255)
       throw new TypeError('Invalid schema-1 edit row');
     const key=byKey(row.slice(0,3));
@@ -95,17 +99,31 @@ function boundedState(arr,name){
   }
   return m;
 }
-export function compilePack1Construction(placements,{seed=null,existingEdits=[],existingSave=null}={}){
+export function compilePack1Construction(placements,{
+  seed=null,existingEdits=[],existingSave=null,existingPack1State=null
+}={}){
   const baseline=validateExistingSave(existingSave,seed,existingEdits);
   validateSeed(baseline.seed);
   if(!Array.isArray(placements)||placements.length>10000)
     throw new TypeError('Invalid Pack 1 construction placements');
   const existing=validateEdits(baseline.edits);
-  if([...existing.values()].some(id=>CATALOG.has(id)))
-    throw new Error('Existing Pack 1 blocks require explicit metadata-aware restoration');
+  const priorCount=[...existing.values()].filter(id=>CATALOG.has(id)).length;
+  if(existingPack1State===null){
+    if(priorCount)
+      throw new Error('Existing Pack 1 blocks require explicit metadata-aware restoration');
+  }else{
+    if(existingSave===null)throw new Error('Pack 1 saved metadata requires existingSave');
+    const restored=inspectPack1Construction({
+      world:existingSave,pack1State:existingPack1State
+    });
+    if(restored.pack1Count!==priorCount)
+      throw new Error('Prior Pack 1 count inconsistent with saved world');
+  }
   const cells=new Map(existing),plans=[];
   for(const request of placements){
     if(!request||!validCell(request.cell))throw new TypeError('Invalid builder placement cell');
+    if(request.cell[1]<PACK1_WORLD_BOUNDS.minY||request.cell[1]>PACK1_WORLD_BOUNDS.maxY)
+      throw new RangeError('Pack 1 construction outside current world vertical bounds');
     const requested=resolvePack1BuilderFamily(request.symbolicRef,{
       candidateId:request.candidateId??null,
       rotation:request.rotation??0,variant:request.variant??'lower'
@@ -126,7 +144,11 @@ export function compilePack1Construction(placements,{seed=null,existingEdits=[],
     cells.set(key,requested.id);
     plans.push({plan,face});
   }
-  const turns=[],variants=[],mounts=[];
+  const cloneEntry=e=>({...e,cell:[...e.cell]});
+  // Incremental settlements retain existing authored Pack 1 metadata.
+  const turns=existingPack1State?.turns.map(cloneEntry)??[];
+  const variants=existingPack1State?.variants.map(cloneEntry)??[];
+  const mounts=existingPack1State?.mounts.map(cloneEntry)??[];
   for(const {plan,face} of plans){
     const cell=plan.cell,blockId=plan.id;
     if(face!==null){
@@ -149,7 +171,9 @@ export function compilePack1Construction(placements,{seed=null,existingEdits=[],
   if(baseline.hasRotations)world.rotations=baseline.rotations.map(row=>[...row]);
   const pack1State={version:1,turns,variants,mounts};
   pack1State.checksum=checksum(world,pack1State);
-  return {world,pack1State};
+  const result={world,pack1State};
+  inspectPack1Construction(result); // includes old and newly added mounting and state
+  return result;
 }
 export function inspectPack1Construction(bundle){
   if(!bundle||!bundle.world||bundle.world.schema!==1||

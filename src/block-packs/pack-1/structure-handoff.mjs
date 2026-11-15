@@ -2,7 +2,7 @@
 // Mirrors the source-authored builder blueprint fields but NEVER registers/places live blocks.
 import {PACK1_BUILDER_CATALOG,resolvePack1BuilderFamily,
   pack1BuilderPlacementPlan} from './builder-handoff.mjs';
-import {compilePack1Construction,inspectPack1Construction} from './construction-stress.mjs';
+import {PACK1_WORLD_BOUNDS,compilePack1Construction,inspectPack1Construction} from './construction-stress.mjs';
 const TURNS=Object.freeze({north:0,east:1,south:2,west:3,none:0});
 const FACES=Object.freeze(['north','east','south','west']);
 const BY_ID=new Map(PACK1_BUILDER_CATALOG.map(d=>[d.id,d]));
@@ -43,7 +43,9 @@ export function planPack1BuilderStructure(placements,{origin=[0,0,0],maxCells=40
   for(const p of placements){
     if(!p||!coordinates(p.at))throw new TypeError('Invalid Pack 1 builder local cell');
     const cell=p.at.map((v,i)=>v+origin[i]);
-    if(!coordinates(cell))throw new RangeError('Pack 1 builder cell outside supported bounds');
+    if(!coordinates(cell)||cell[1]<PACK1_WORLD_BOUNDS.minY||
+       cell[1]>PACK1_WORLD_BOUNDS.maxY)
+      throw new RangeError('Pack 1 builder cell outside current world vertical bounds');
     const key=cell.join(',');
     if(occupied.has(key))throw new Error('Duplicate Pack 1 blueprint cell');
     occupied.add(key);
@@ -82,7 +84,9 @@ export function planPack1BuilderStructure(placements,{origin=[0,0,0],maxCells=40
 }
 // Opt-in DRY-RUN bridge from authoring blueprint to the separately persisted
 // schema-1 compatibility simulation. Never write into the game's VoxelWorld.
-export function compilePack1BuilderSnapshot(blueprint,{existingSave=null,seed=null,existingEdits=[]}={}){
+export function compilePack1BuilderSnapshot(blueprint,{
+  existingSave=null,seed=null,existingEdits=[],existingPack1State=null
+}={}){
   if(!blueprint||blueprint.kind!=='physical-pack1-construction-blueprint'||
      !Array.isArray(blueprint.cells)||!blueprint.cells.length||
      blueprint.cells.length>4096)
@@ -99,9 +103,13 @@ export function compilePack1BuilderSnapshot(blueprint,{existingSave=null,seed=nu
       rotation:chosen.yaw,variant:chosen.variant,wallFace:row.wallFace
     });
   }
-  const snapshot=compilePack1Construction(placements,{existingSave,seed,existingEdits});
+  const previous=existingPack1State===null?0:
+    inspectPack1Construction({world:existingSave,pack1State:existingPack1State}).pack1Count;
+  const snapshot=compilePack1Construction(placements,{
+    existingSave,seed,existingEdits,existingPack1State
+  });
   const verified=inspectPack1Construction(snapshot);
-  if(verified.pack1Count!==blueprint.cells.length)
+  if(verified.pack1Count!==previous+blueprint.cells.length)
     throw new Error('Pack 1 blueprint count mismatch after restoring source geometry');
   return snapshot;
 }

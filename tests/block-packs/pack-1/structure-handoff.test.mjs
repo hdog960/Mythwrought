@@ -125,3 +125,37 @@ test('256-cell multi-room preview keeps exact geometry, occupancy and save state
   assert.equal(plan.saveWritten,false);
   assert.equal(plan.requiresSharedEngineRegistration,true);
 });
+
+test('sequential physical builder blueprints append to saved Pack 1 structures without metadata loss',()=>{
+  const first=planPack1BuilderStructure([
+    {asset:'pack1:001',at:[0,0,0]},
+    {asset:'pack1:008',at:[1,0,0],orientation:'west',variant:'upper'}
+  ],{origin:[40,3,40]});
+  const initial=compilePack1BuilderSnapshot(first,{seed:179});
+  const exact=JSON.stringify(initial);
+  const next=planPack1BuilderStructure([
+    {asset:'pack1:053',candidateId:35,at:[0,0,0]},
+    {asset:'pack1:009',at:[1,0,0],orientation:'east'}
+  ],{origin:[43,3,40]});
+  const union=compilePack1BuilderSnapshot(next,{
+    existingSave:initial.world,existingPack1State:initial.pack1State
+  });
+  assert.equal(JSON.stringify(initial),exact);
+  const restored=inspectPack1Construction(JSON.parse(JSON.stringify(union)));
+  assert.equal(restored.pack1Count,4);
+  assert.equal(restored.placements.find(p=>p.id===16).rotation,3);
+  assert.equal(union.pack1State.variants.length,1);
+  assert.equal(union.pack1State.turns.length,2);
+  assert.throws(()=>compilePack1BuilderSnapshot(next,{existingSave:initial.world}),/metadata-aware/);
+});
+test('construction blueprints enforce live main vertical world bounds at the source ABI',()=>{
+  for(const y of [-210,-3,19]){
+    const blueprint=planPack1BuilderStructure([{asset:'pack1:001',at:[0,0,0]}],
+      {origin:[0,y,0]});
+    assert.equal(blueprint.cells[0].at[1],y);
+  }
+  for(const y of [-211,20]){
+    assert.throws(()=>planPack1BuilderStructure([{asset:'pack1:001',at:[0,0,0]}],
+      {origin:[0,y,0]}),/vertical bounds/);
+  }
+});
