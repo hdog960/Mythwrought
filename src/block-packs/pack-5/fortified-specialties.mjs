@@ -79,7 +79,12 @@ function chandelier(variant){
       a.push(b(min,y,min+.055,min+.055,y+.055,max-.055,'bronze'));
       a.push(b(max-.055,y,min+.055,max,y+.055,max-.055,'bronze'));
     }
-    for(const x of [.205,.435,.735])for(const z of [.205,.735]){
+    // Eight individual unlit candle arms: four corners and four mid-side
+    // positions around the outer halo (a true eight-arm crown, not six).
+    const sockets=[[.205,.205],[.47,.205],[.735,.205],
+      [.205,.47],[.735,.47],
+      [.205,.735],[.47,.735],[.735,.735]];
+    for(const [x,z] of sockets){
       a.push(b(x,.36,z,x+.061,.43,z+.061,'gold'));
       a.push(b(x+.016,.43,z+.016,x+.046,.52,z+.046,'linen'));
     }
