@@ -1,0 +1,44 @@
+name: Mythwrought 10x depth acceptance
+on:
+  pull_request:
+    paths:
+      - src/depth.mjs
+      - src/depth-mesh.mjs
+      - src/voxel.mjs
+      - src/main.mjs
+      - src/blocks.mjs
+      - tests/depth.test.mjs
+      - tests/depth-browser.mjs
+      - .github/workflows/depth-acceptance.yml
+  workflow_dispatch:
+jobs:
+  depth-node-and-chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact candidate source and full native tests
+        run: |
+          node --check src/depth.mjs
+          node --check src/depth-mesh.mjs
+          node --check src/voxel.mjs
+          node --check src/main.mjs
+          node --check tests/depth-browser.mjs
+          npm test
+      - name: Install free Chromium test tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Real WebGL2 deep-world viewports
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-depth-site.log 2>&1 &
+          node tests/depth-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-10x-depth-screenshots
+          path: artifacts/mythwrought-depth-*.png
+          if-no-files-found: ignore
