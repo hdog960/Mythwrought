@@ -98,3 +98,21 @@ test('async same-ID edits invalidate only after successful commit',async()=>{
  await assert.rejects(s.applyEditAsync([1.5,0,0],async()=>true),TypeError);
  await assert.rejects(s.applyEditAsync(cell,null),TypeError);
 });
+
+test('late asynchronous edit cannot erase a newer orientation or undo state',async()=>{
+ const s=makeOrientationSidecar(),cell=[7,1,-3];
+ s.set(cell,4,1);
+ let finish;
+ const pending=s.applyEditAsync(cell,()=>new Promise(resolve=>{finish=resolve;}));
+ s.set(cell,4,3);
+ finish(true);
+ assert.equal(await pending,true);
+ assert.equal(s.get(cell,4),3,'late success must preserve a newer rotation');
+ let finishUndo;
+ const pendingUndo=s.applyEditAsync(cell,()=>new Promise(resolve=>{finishUndo=resolve;}));
+ s.invalidateEdit(cell);
+ s.set(cell,4,2);
+ finishUndo(true);
+ assert.equal(await pendingUndo,true);
+ assert.equal(s.get(cell,4),2,'late success must preserve post-undo replacement');
+});
