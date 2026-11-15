@@ -130,8 +130,12 @@ test('GPU replacement never transiently allocates past the resident byte budget'
   for(let i=0;i<30;i++)stream.refresh([12,5,12],1000+i*1000);
   const first=layer.list()[0];
   assert.equal(layer.remove(first.anchor),true);
-  assert.equal(layer.place(first.symbolicId,first.anchor,(first.rotation+1)%4,first.variant).ok,true);
-  for(let i=0;i<20;i++)stream.refresh([12,5,12],50000+i*1000);
+  // Rotating this furnishing might require backing that was never authored.
+  // Exercise a genuine page replacement by removing and then restoring the
+  // same supported source geometry, with a refresh between those changes.
+  for(let i=0;i<20;i++)stream.refresh([12,5,12],40000+i*1000);
+  assert.equal(layer.place(first.symbolicId,first.anchor,first.rotation,first.variant).ok,true);
+  for(let i=0;i<20;i++)stream.refresh([12,5,12],70000+i*1000);
   assert.ok(stream.stats().bytes<=PACK5_GPU_RESIDENT_BYTES);
   stream.dispose();
   assert.equal(live.size,0);
