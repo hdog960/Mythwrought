@@ -318,7 +318,6 @@ test('fortress wall footing joins neighboring buttress and supports battlement a
   }
 });
 
-
 // A pitched roof terminates at its highest step on either side of its ridge.
 // Compare the EXACT occupied structural and coping cross-sections, not sampled
 // pixels: a tall slope facing an undersized ridge leaves a visible vertical
