@@ -201,3 +201,24 @@ test('every authored M5 box face is planar and both triangles share outward norm
   }
  }
 });
+
+test('suncrown eight-arm variant has eight physical perimeter sockets and candle stems',()=>{
+  const p=d('pack5:095','suncrown-eightarm');
+  const sockets=p.art[0].details.filter(x=>x.material==='gold'&&Math.abs(x.box[1]-.36)<1e-9&&Math.abs(x.box[4]-.43)<1e-9);
+  const candles=p.art[0].details.filter(x=>x.material==='linen');
+  const coords=[[.205,.205],[.47,.205],[.735,.205],[.205,.47],[.735,.47],[.205,.735],[.47,.735],[.735,.735]];
+  assert.equal(sockets.length,8,'An eight-arm chandelier needs eight raised physical sockets');
+  assert.equal(candles.length,8,'Each socket needs its own unlit physical candle stem');
+  for(const [x,z] of coords){
+    assert.ok(sockets.some(s=>Math.abs(s.box[0]-x)<1e-9&&Math.abs(s.box[2]-z)<1e-9),'Missing socket at '+x+','+z);
+    assert.ok(candles.some(s=>Math.abs(s.box[0]-(x+.016))<1e-9&&Math.abs(s.box[2]-(z+.016))<1e-9),'Missing candle stem at '+x+','+z);
+  }
+  assert.equal(p.parts[0].boxes.length,29);
+  assert.deepEqual(p.parts[0].collisionBoxes,p.parts[0].boxes);
+  for(let rotation=0;rotation<4;rotation++){
+    const mesh=specialtyBoxMesh(p,{rotation});
+    assert.equal(mesh.triangles,29*12);
+    assert.ok(mesh.positions.every(Number.isFinite));
+  }
+  assert.equal(p.lighting,false,'Candles must remain decorative only');
+});
