@@ -100,7 +100,7 @@ test('byte/source-exact blacksmith extraction and 15 real old-vs-new geometry fi
    originalPRHead:ledger.sourcePRHead,compared:15,parity:true,
    classification:'Native Node 22 original PR generator vs selectively migrated builder generator',
    notBrowserEvidence:true,notPhysicalIPhoneEvidence:true,designs:evidence
-  },null,2)+'\\n');
+  },null,2)+'\n');
   console.log('Builder 3A source-exact parity: 15/15 complete model objects, 15/15 geometry fingerprints; 15 SHA-256 records emitted');
  }finally{rmSync(runtime.root,{force:true,recursive:true});}
 });
