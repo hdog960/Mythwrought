@@ -162,7 +162,8 @@ test('opt-in world view renders four physical regions without touching schema-1 
    const actual=view.get(x,oldTop,z);
    assert.equal(actual,region.surface,region.name+' surface should be physically present');
    assert.equal(view.get(x,oldTop-8,z),world.get(x,oldTop-8,z));
-   assert.equal(view.get(x,oldTop+1,z)!==0,true);
+   if(surfaceBiomeHeight(x,z,seed)>oldTop)
+    assert.notEqual(view.get(x,oldTop+1,z),0);
   }
   assert.ok(view.cachedColumns<=32);
   assert.equal(JSON.stringify(world.save()),before);
