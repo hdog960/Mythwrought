@@ -37,7 +37,8 @@ test('all rotations and upper slab/stair variants survive exact disjoint metadat
   assert.equal(snap.pack1State.turns.length,72);
   assert.equal(snap.pack1State.variants.length,8);
   assert.equal(snap.pack1State.mounts.length,8);
-  assert.equal(result.placements.filter(x=>x.rotation===3).length,30);
+  // Six full-cube masonry blocks are rotation-invariant; only 24 shaped IDs retain turn 3.
+  assert.equal(result.placements.filter(x=>x.rotation===3).length,24);
   assert.deepEqual(result.placements.filter(x=>x.variant==='upper').map(x=>x.id).sort((a,b)=>a-b),
     [15,15,15,15,16,16,16,16]);
 });
