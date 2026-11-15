@@ -1112,7 +1112,7 @@ const assemble=function assemble(p){
  const voxels=[...voxel.values()].sort((a,b)=>a.y-b.y||a.z-b.z||a.x-b.x);
  const fullOpenings=[...openings,...voxels.filter(v=>v.kind==='window').map(({x,y,z,material})=>({type:'window',x,y,z,material}))];
  const symbols=[...new Set([...voxels.map(v=>v.material),...openings.map(o=>o.doorSymbol).filter(Boolean)])];
- const bp={schema:SCHEMA,id:blueprintId(p.category,p.biome,p.size,1),category:p.category,biome:p.biome,size:p.size,variation:1,title:p.title,
+ const bp={schema:SCHEMA,id:blueprintId(p.category,p.biome,p.size,p.variation??1),category:p.category,biome:p.biome,size:p.size,variation:p.variation??1,title:p.title,
  status:'authored-candidate',isolated:true,worldPlaced:false,numericIdsAssigned:false,extents:{x:p.w,y:Math.max(...voxels.map(v=>v.y))+1,z:p.d},
  units:'conceptual occupied integer cells; variant multi-cell ABI not approved',architecturalSignature:p.signature,
  roof:{form:p.roofForm,biomeSpecific:true},rooms:p.rooms,features:['genuine category-specific material/fixture coordinates','no simulated shop gameplay or world placement'],

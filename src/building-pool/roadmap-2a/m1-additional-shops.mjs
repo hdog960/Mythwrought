@@ -3,6 +3,7 @@ import {assembleSpecialistProfile} from './m1-specialist-exemplars.mjs';
 export const M1_NEW_DESIGN_PROFILES=Object.freeze([
   {
     "category": "general-store",
+    "variation": 2,
     "biome": "desert",
     "size": "medium",
     "w": 18,

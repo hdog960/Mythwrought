@@ -6,7 +6,8 @@ export const SOURCE_PR=124;
 export const SOURCE_HEAD="07c45d27bd36f4f3aa3197bba0e4f49ce2a58c68";
 export const LEGACY_CATEGORY="general-store";
 export const M1_SPECIALIST_IDS=Object.freeze(["r2:pet-shop:temperate:small:01","r2:magic-shop:enchanted-forest:medium:01","r2:potion-shop:snow:medium:01","r2:bakery:desert:small:01","r2:bank:mountain:large:01"]);
-const M1_SPECIALIST_SET=new Set(M1_SPECIALIST_IDS);
+export const M1_ADDITIONAL_IDS=Object.freeze(["r2:general-store:desert:medium:02","r2:pet-shop:mountain:medium:01","r2:magic-shop:snow:large:01","r2:potion-shop:desert:small:01","r2:bakery:temperate:large:01","r2:bank:enchanted-forest:medium:01"]);
+const M1_SPECIALIST_SET=new Set([...M1_SPECIALIST_IDS,...M1_ADDITIONAL_IDS]);
 
 export function blueprintId(category,biome,size,variation){
   if(!Object.hasOwn(CATEGORY_QUOTAS,category)||!BIOMES.includes(biome)||!SIZES.includes(size)||!Number.isInteger(variation)||variation<1||variation>CATEGORY_QUOTAS[category]) throw new Error("unreserved roadmap-2a slot");
@@ -22,7 +23,7 @@ export function plannedSlots(){
 }
 export function inventory(){
   const slots=plannedSlots();
-  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:15,authoredCandidateTotal:20,newlyAuthored:5,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:400,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
+  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:15,authoredCandidateTotal:26,newlyAuthored:11,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:394,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
 }
 
 // Builder 2A owned physical-space requirements. Symbols are NOT persistent block IDs.
