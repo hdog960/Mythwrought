@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "All 18 physically authored Pack 5 families remain isolated CANDIDATES; 185/185 native Node M0–M6 source-only QA PASS and 36/36 original-source Chromium WebGL2 view captures PASS; creator/production/served HTTP/physical iPhone approvals OPEN.",
+  "status": "All 18 Pack 5 physical families remain isolated CANDIDATES; 186/186 genuinely native focused Node cases PASS and 36 previously verified WebGL2 captures, including six newly reexecuted M5 captures after the corrected eight-arm chandelier. Production/creator/HTTP/iPhone approvals remain OPEN.",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -425,10 +425,10 @@
   ],
   "candidateFamilies": 18,
   "testEvidence": {
-    "nativeNode": "185/185 PASS, 0 failed/skipped: 156 original M0–M5, 22 original M6 mixed-family, 4 post-M6 world-unit ray regressions and 3 verified snapshot rollback-after-support-loss regressions. Genuine native Node 22.16.0. Exact local physical fixture source Git blob b5f2b49285a010bee98c720462c4a324bf0f5057 and M6 test blob 9e8267b5bbc4607b1a43e1d4d5f766b426c321cc match committed PR source. Local staged manifest text metadata was older, but all 18 CANDIDATE/0 ID invariants verified against live manifest.",
+    "nativeNode": "186/186 PASS genuine native Node 22.16.0 focused tests, zero skipped/failed: original 185 baseline plus one new physical eight-arm chandelier regression, failing 6-vs-8 before correction and passing after. Committed/source-exact Suncrown mesh blob b84074b6ec4c3315fa02aee85d312474644259b1; specialty test blob efbdc96b368ac00b97a7ca04f6f1caf20f283a91. All 18 provisional roster/0 persistent ID invariants preserved.",
     "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
     "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
-    "webgl2": "36/36 PASS (m1,m2,m3,m3b,m4,m5; CSS viewport 667x375,844x390,932x430, rotations 0/1) genuine native ES-module Chromium software-WebGL2 with original Pack 5 source, after rollback fix. Nonblank distinct 3D candidate panels/readback; NOT source-served Pages or physical iPhone GPU certification.",
+    "webgl2": "Current Suncrown-specific after-fix genuine Chromium native ES-module/WebGL2 M5 six views PASS, at 667x375,844x390,932x430 and two rotations, six distinct visible models. Previous other five gallery modes 30/30 PASS on earlier unchanged source; full 36/36 baseline remains historical rather than claiming all 36 rerun after this isolated M5 fix. Native offline data URL browser, not served page/iPhone.",
     "screenshots": "36/36 genuine native ES-module Chromium/WebGL2 visual screenshots verified: 6 M5 show 6 distinct physical variant panels each and 30 prior galleries reexecuted on the same source. Nonblank panel readbacks, mobile viewport framing and rotation distinctions pass; no creator visual sign-off.",
     "production": "Creator art/actual physical iPhone/Gate A/serviced HTTP and production schema-1, numeric ID registry widening, actual placement/player raycast, GPU performance, merge/deployment remain OPEN; no live integrations or approvals.",
     "acceptanceDossier": "src/block-packs/pack-5/M6_ACCEPTANCE.md (M1–M5 dossiers also remain authoritative for each candidate milestone)",
@@ -440,7 +440,7 @@
     "m3": "M3 candidate families 86–90, 10 variants, source-only physical art; refined 088 anvil long steel taper + 089 stepped octagonal physically hollow cauldron with body/handle collision and downward ray to basin bottom; no heat, liquid, crafting, trade, NPC or inventory",
     "m3bPreview": "6 original physical workshop variants source-authored and drawn in 6/6 genuine native ES-module Chromium WebGL2 landscape views, with unique nonblank GPU pixel fingerprints and rotation changes; per-cell 18–23 boxes and 216–276 unculled source triangles, not real iPhone GPU timings",
     "m4": "6 original source-authored physical M4 variants across 091 Desks & Lecterns, 092 Carpets & Rugs (a genuine atomic 2-cell runner with per-cell floor support), 093 Altars & Pedestals; 15 native Node tests and real native ES-module Chromium WebGL2 six-view screenshot acceptance pass; source-only; not live",
-    "m5": "M5 94 heavy 2-cell gate/portcullis, 95 ceiling-supported chandeliers, 96 reinforced 2-cell stable divider/dry hollow feed trough: 6 unique physical variants, 24 source-native fixture regressions plus 12 additional M5 fixture cases, 6/6 native ES-module/WebGL2 rotated mobile-landscape preview screenshots PASS. No opening, lighting, animal, fluid, inventory mechanics or production placement.",
+    "m5": "M5 unchanged six variants across 094 heavy gates, 095 actual ceiling-supported chandeliers, 096 stable fixtures. Corrected suncrown-eightarm to model 8 distinct raised physical gold sockets and 8 linen candle stems (previously 6), distributed around all four sides of outer halo. 29 collision-backed boxes / 348 source triangles for Suncrown cell, still below 64/768 per-cell budget. All 6 genuine source-exact native ES-module Chromium WebGL2 M5 screenshots PASS at three landscape sizes and two rotations. No dynamic lighting or gameplay.",
     "m5Preview": "6/6 genuine Chromium native ES-module/WebGL2 screenshots 667x375,844x390,932x430 rotations 0/1, six separately rendered and distinct physical variants; no source-served HTTP/physical iPhone/production certification.",
     "m6": "Post-M6 true physical test-fixture corrections: (a) normalize ray direction to world-unit reach; (b) when invalid snapshot restore follows support withdrawal, roll back placed and occupied Maps atomically instead of attempting to re-place old entries against altered supports. Proved by 3 failing-before/passing-after regressions for counter, rotated 2-cell rug plus ceiling lamp, and independent ceiling chandelier. 185 dedicated native tests and 36 authentic Chromium WebGL2 captures pass. No production schema-1 engine/saves touched."
   },
@@ -451,5 +451,5 @@
   },
   "latestMainReviewed": "ac263720b60641c65b02330348dd76d0ef9cb75e",
   "latestCheckpointReviewed": "008",
-  "reviewNotes": "Pack 5 source-only post-M6 physical fixture QA PASS after two demonstrated safety defects repaired; all 18 symbolic candidates unintegrated; creator premium art, HTTP-served load, actual iPhone, production registry/shape contract/schema-1 and root exact-head CI remain independent OPEN gates. Main checkpoint 008."
+  "reviewNotes": "Actual post-M6 new defect proven: Suncrown Eight-Arm chandelier had six instead of eight physically modeled sockets/stems. Fixed Pack 5-owned geometry, added one failing-before/passing-after native case, latest 186/186 PASS, six current M5 WebGL2 captures PASS. Main now 971e32911984a3cdbb831e143b249ae5d780ed72 due to CI infrastructure-only changes; checkpoint remains 008. Gate A, schema-1 save, physical iPhone and v0.11 remain gated."
 }
