@@ -42,6 +42,87 @@ class Chrome{
   }
   close(){this.ws.close();}
 }
+
+// Localhost-only WebGL2 acceptance functions. Function.toString() sends their
+// actual JavaScript source into the existing real production Chromium page.
+async function preparePack2DenseLive(anchorCell){
+  const t=window.__mythwroughtTest;
+  const {PACK2_BUILDER_SYMBOLS,planPack2BuilderStructure}=
+    await import('./src/builder-assets/pack2.mjs');
+  let origin=null;
+  for(const y of [19,18,17,16,15,14]){
+    for(let shift=2;shift<=14;shift+=3){
+      const a=[anchorCell[0]+shift,y,anchorCell[2]+shift];
+      if(Array.from({length:64},(_,i)=>[a[0]+i%8,y,a[2]+Math.floor(i/8)])
+          .every(cell=>t.block(...cell)===0)){origin=a;break;}
+    }
+    if(origin)break;
+  }
+  if(!origin)throw Error('No safe 8x8 air footprint near player');
+  const placements=Array.from({length:64},(_,i)=>({
+    asset:PACK2_BUILDER_SYMBOLS[i%PACK2_BUILDER_SYMBOLS.length],
+    at:[i%8,0,Math.floor(i/8)]
+  }));
+  const plan=planPack2BuilderStructure(placements,{origin,maxCells:64});
+  if(plan.cells.length!==64||plan.fluidVolumes.length<2||
+     new Set(plan.cells.map(c=>c.blockId)).size!==18)
+    throw Error('Source-exact builder planner did not return all physical assets');
+  window.__pack2DenseFixture=plan.cells.map(c=>({
+    at:c.at,id:c.blockId,state:c.state,symbol:c.asset
+  }));
+  return {origin,cells:64,solidBoxes:plan.worldBoxes.length,
+    waterCells:plan.fluidVolumes.length,uniqueIds:18};
+}
+function placePack2DenseBatch(batch){
+  const t=window.__mythwroughtTest,fixtures=window.__pack2DenseFixture;
+  if(!fixtures||fixtures.length!==64)throw Error('Missing authored builder plan');
+  const before=t.snapshot(),start=performance.now();
+  for(const p of fixtures.slice(batch*8,(batch+1)*8)){
+    t.placeFixture(...p.at,p.id);
+    if(t.block(...p.at)!==p.id)throw Error('Live placement failed '+p.symbol);
+    if(!t.snapshot().lastEditMeshKeys.length)
+      throw Error('Live builder edit did not trigger a GPU mesh rebuild');
+  }
+  const after=t.snapshot();
+  return {durationMs:Math.round((performance.now()-start)*10)/10,
+    chunks:after.chunks.length,meshBatches:after.editMeshBatches-before.editMeshBatches,
+    gpuErrors:after.gpuRetry.failures,
+    frame:Number(document.querySelector('#scene').dataset.renderedFrames)};
+}
+function inspectPack2DenseCells(){
+  const cells=window.__pack2DenseFixture,t=window.__mythwroughtTest,
+    key=Object.keys(localStorage).find(x=>x.endsWith('-pack2-live-v1')),
+    rows=JSON.parse(localStorage.getItem(key)).cells;
+  const matched=cells.filter(p=>rows.some(r=>
+    r[0]===p.at[0]&&r[1]===p.at[1]&&r[2]===p.at[2]&&
+    r[3]===p.id&&JSON.stringify(r[4])===JSON.stringify(p.state))&&
+    t.block(...p.at)===p.id);
+  const snap=t.snapshot(),canvas=document.querySelector('#scene');
+  return {count:matched.length,totalSidecarRows:rows.length,
+    chunks:snap.chunks.length,gpuErrors:snap.gpuRetry.failures,
+    vertices:Number(canvas.dataset.renderedMeshVertices)};
+}
+function inspectPack2MobileLayout(){
+  const m=document.querySelector('#movePad').getBoundingClientRect(),
+    l=document.querySelector('#lookPad').getBoundingClientRect(),
+    c=document.querySelector('#scene').getBoundingClientRect();
+  return {width:innerWidth,height:innerHeight,
+    overflow:document.documentElement.scrollWidth-innerWidth,
+    separateThumbRails:m.right<l.left,
+    moveVisible:m.left>=0&&m.right<=innerWidth,
+    lookVisible:l.left>=0&&l.right<=innerWidth,
+    worldWidth:Math.round(c.width)};
+}
+function verifyPack2DenseAfterReload(expected){
+  const t=window.__mythwroughtTest,
+    key=Object.keys(localStorage).find(x=>x.endsWith('-pack2-live-v1')),
+    rows=JSON.parse(localStorage.getItem(key)).cells;
+  return {count:expected.filter(p=>t.block(...p.at)===p.id&&
+    rows.some(r=>r[0]===p.at[0]&&r[1]===p.at[1]&&r[2]===p.at[2]&&
+      r[3]===p.id&&JSON.stringify(r[4])===JSON.stringify(p.state))).length,
+    chunks:t.snapshot().chunks.length,gpuErrors:t.snapshot().gpuRetry.failures};
+}
+
 const app=createServer(async(req,res)=>{
   try{
     const route=decodeURIComponent(new URL(req.url,'http://local').pathname);
@@ -256,12 +337,77 @@ test('approved Pack 2 real WebGL2 gameplay mesh, legacy save isolation, reload, 
         maxEditMs:Math.max(...gallery.map(x=>x.editMs)),
         maxMeshMs:Math.max(...gallery.map(x=>x.meshSlowestMs)),
         maxChunks:Math.max(...gallery.map(x=>x.chunks)),restoredId:reloaded.id}));
+
+      // Real 64-cell live construction follows the already-passed 256-cell
+      // blueprint-source stress test; no duplicate authored-gallery testing.
+      const livePlan=await c.eval('('+preparePack2DenseLive.toString()+')('+
+        JSON.stringify(cell)+')');
+      assert.equal(livePlan.cells,64);
+      assert.equal(livePlan.uniqueIds,18);
+      const oldBytes=await c.eval("localStorage.getItem('mythwrought-v002-world-179')");
+      const denseMeasurements=[];
+      for(let batch=0;batch<8;batch++){
+        const result=await c.eval('('+placePack2DenseBatch.toString()+')('+batch+')');
+        assert.equal(result.chunks,25,'Dense building exceeded surface streaming budget');
+        assert.equal(result.meshBatches,8,'Each physical block must rebuild its loaded GPU chunk');
+        assert.equal(result.gpuErrors,0,'GPU upload retry failed during construction');
+        assert.ok(Number.isFinite(result.durationMs)&&result.durationMs>=0);
+        denseMeasurements.push(result);
+        await until(()=>c.eval("Number(document.querySelector('#scene').dataset.renderedFrames)>"+
+          result.frame),'live GPU redraw after dense batch '+batch);
+      }
+      const densePre=await c.eval('('+inspectPack2DenseCells.toString()+')()');
+      assert.equal(densePre.count,64,'Real GPU construction not persisted');
+      assert.equal(densePre.chunks,25);
+      assert.equal(densePre.gpuErrors,0);
+      assert.ok(densePre.vertices>0);
+      assert.equal(await c.eval("localStorage.getItem('mythwrought-v002-world-179')"),
+        oldBytes,'Builder edit modified existing schema-1 world');
+      const denseFull=await c.send('Page.captureScreenshot',
+        {format:'png',fromSurface:true,captureBeyondViewport:false});
+      await writeFile(join(out,'pack2-live-dense-932x430.png'),
+        Buffer.from(denseFull.data,'base64'));
+      const expected=await c.eval("window.__pack2DenseFixture.map(p=>({at:p.at,id:p.id,state:p.state}))");
+      await c.send('Emulation.setDeviceMetricsOverride',
+        {width:667,height:375,deviceScaleFactor:1,mobile:false});
+      const denseLayout=await c.eval('('+inspectPack2MobileLayout.toString()+')()');
+      assert.equal(denseLayout.width,667);
+      assert.equal(denseLayout.height,375);
+      assert.ok(denseLayout.overflow<=1&&denseLayout.worldWidth>=150);
+      assert.ok(denseLayout.separateThumbRails&&denseLayout.moveVisible&&denseLayout.lookVisible,
+        'Simulated iPhone landscape controls overlap or are clipped');
+      await until(()=>c.eval("Number(document.querySelector('#scene').dataset.loadedChunks)===25"),
+        'dense surface chunk stream at 667 CSS width');
+      const denseSmall=await c.send('Page.captureScreenshot',
+        {format:'png',fromSurface:true,captureBeyondViewport:false});
+      await writeFile(join(out,'pack2-live-dense-667x375.png'),
+        Buffer.from(denseSmall.data,'base64'));
+      await c.send('Page.reload');
+      await until(()=>c.eval("Boolean(window.__mythwroughtTest)&&Number(document.querySelector('#scene')?.dataset.loadedChunks)===25"),
+        'live dense construction reload');
+      const denseAfter=await c.eval('('+verifyPack2DenseAfterReload.toString()+')('+
+        JSON.stringify(expected)+')');
+      assert.equal(denseAfter.count,64,'64 source-authentic Pack 2 states not restored');
+      assert.equal(denseAfter.chunks,25);
+      assert.equal(denseAfter.gpuErrors,0);
+      assert.equal(await c.eval("localStorage.getItem('mythwrought-v002-world-179')"),
+        oldBytes,'Dense builder reload changed protected legacy save bytes');
+      const denseAcceptance={source:'actual production Mythwrought WebGL2 game',
+        sizes:['932x430','667x375'],physicalIPhone:false,
+        ...livePlan,layout:denseLayout,batches:denseMeasurements,
+        restoredStates:denseAfter.count,originalSchema1BytesPreserved:true,
+        screenshots:['pack2-live-dense-932x430.png','pack2-live-dense-667x375.png']};
+      console.log('PASS PACK2 64-CELL LIVE BUILDER WEBGL2 '+JSON.stringify({
+        cells:livePlan.cells,boxes:livePlan.solidBoxes,water:livePlan.waterCells,
+        restored:denseAfter.count,chunkMax:25,
+        maxBatchMs:Math.max(...denseMeasurements.map(x=>x.durationMs)),
+        phoneSizedLayoutPassed:true,physicalIPhone:false}));
       assert.deepEqual(c.errors,[],'browser JS exceptions');
       await writeFile(join(out,'manifest.json'),JSON.stringify({
         label:'Mythwrought real WebGL2 Pack 2, not Canvas2D or physical iPhone',
         CIHead:process.env?.GITHUB_SHA||'local',candidateIds:[59,63,66,73,76],
         viewports:screenshots,fullLiveGallery:gallery,
-        performanceComparison,
+        performanceComparison,denseAcceptance,
         originalSaveSchema:1,liveDeployment:false,physicalIPhone:false
       },null,2));
       console.log('PASS PACK2 LIVE WEBGL2 '+JSON.stringify(screenshots));
