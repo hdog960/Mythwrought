@@ -43,12 +43,18 @@ const HIP=Object.freeze([
 // Roster 29: a longitudinal ridge with wide shoulders, raised spine and
 // capped ends. Its x/z symmetry intentionally repeats after a half turn.
 const RIDGE=Object.freeze([
-  P('body',B(0,0,0,1,.125,1)),
-  P('body',B(.09375,.125,0,.90625,.296875,1)),
-  P('edge',B(.28125,.296875,0,.71875,.453125,1)),
-  P('crest',B(.40625,.453125,.09375,.59375,.625,.90625)),
-  P('crest',B(.34375,.40625,0,.65625,.5625,.109375)),
-  P('crest',B(.34375,.40625,.890625,.65625,.5625,1))
+  // Both bearing faces meet the tall final course of opposing pitched roofs.
+  // A raised bridge between the supports leaves usable recessed attic void
+  // beneath the crown rather than filling the entire ridge cell with stone.
+  P('body',B(0,0,0,.125,.75,1)),
+  P('body',B(.875,0,0,1,.75,1)),
+  P('body',B(.125,.59375,0,.875,.75,1)),
+  P('edge',B(0,.75,0,.125,.796875,1)),
+  P('edge',B(.875,.75,0,1,.796875,1)),
+  P('edge',B(.28125,.75,0,.71875,.875,1)),
+  P('crest',B(.40625,.875,.09375,.59375,.96875,.90625)),
+  P('crest',B(.34375,.84375,0,.65625,.9375,.109375)),
+  P('crest',B(.34375,.84375,.890625,.65625,.9375,1))
 ]);
 const DEFINITIONS=Object.freeze([
   Object.freeze({id:113,roster:27,slug:'clay-roof-slope',name:'Hearthclay Pitched Roof Stair',
