@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
-import {eastGalleryCaveWorld,eastGalleryTrace} from '../src/east-gallery-cave.mjs';
+import {eastGalleryCaveWorld,eastGalleryTrace,eastGalleryChamberTrace} from '../src/east-gallery-cave.mjs';
 import {CAVE_CANDIDATE} from '../src/experimental-cave-route.mjs';
 
 for(const seed of [179,17,918]){
@@ -39,6 +39,32 @@ test('saved obstruction in east chamber invalidates player-body route without er
   assert.equal(blocked.walkable,false);
   assert.ok(blocked.failures.some(p=>p.x===middle.x&&p.z===middle.z));
   assert.equal(eastGalleryCaveWorld(world).get(middle.x,middle.feet,middle.z),BLOCK.STONE);
+  assert.equal(world.save().schema,1);
+  assert.equal(world.save().edits.length,1);
+});
+
+for(const seed of [179,17,918]){
+  test('entire east chamber is body-traversable with 35 supported cells seed '+seed,()=>{
+    const world=new VoxelWorld(seed);
+    const result=eastGalleryChamberTrace(world);
+    assert.equal(result.cells.length,35);
+    assert.equal(result.reachableCount,35,JSON.stringify(result.unreachable));
+    assert.equal(result.walkable,true);
+    assert.ok(result.edges.every(edge=>edge.clear));
+    assert.deepEqual(eastGalleryChamberTrace(world),result);
+  });
+}
+test('side-pocket player edit is preserved and full chamber traversal reports obstruction',()=>{
+  const world=new VoxelWorld(179);
+  const before=eastGalleryChamberTrace(world);
+  assert.equal(before.walkable,true);
+  const side=before.cells.find(c=>c.d===6&&c.t===before.cells[0].t+3);
+  assert.ok(side);
+  world.set(side.x,side.y??before.entry.y,side.z,BLOCK.STONE);
+  const after=eastGalleryChamberTrace(world);
+  assert.equal(after.walkable,false);
+  assert.ok(after.unreachable.some(c=>c.x===side.x&&c.z===side.z));
+  assert.equal(eastGalleryCaveWorld(world).get(side.x,before.entry.y,side.z),BLOCK.STONE);
   assert.equal(world.save().schema,1);
   assert.equal(world.save().edits.length,1);
 });
