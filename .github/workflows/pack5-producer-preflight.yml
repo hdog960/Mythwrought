@@ -1,0 +1,29 @@
+name: Pack 5 draft producer native preflight
+
+# A producer PR can diverge from rapidly changing Mythwrought main while
+# waiting for the coordinated five-pack integration. GitHub does not execute
+# pull_request workflows on unmergeable PR heads. This branch-only fallback
+# verifies the exact Pack 5 source commit without rebasing, merging or deploying.
+on:
+  push:
+    branches:
+      - integration/pack5-builder-layer-20261114
+    paths:
+      - 'src/pack5-integration/**'
+      - 'tests/pack5-*.test.mjs'
+      - '.github/workflows/pack5-producer-preflight.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-pack5-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact-commit Pack 5 physical, save, builder and cross-pack preflight
+        run: node --test tests/pack5-*.test.mjs
