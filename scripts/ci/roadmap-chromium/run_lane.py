@@ -100,7 +100,25 @@ def main():
         assert actual==sha,f'Wrong candidate head {actual} vs {sha}'
         dirty=subprocess.check_output(['git','status','--porcelain','--','src','tests','docs'],
                                       cwd=checkout,text=True).strip()
-        assert not dirty,f'Candidate source modified before test: {dirty}'
+        if lane=='pack-4':
+            main_sha=os.environ.get('MYTHWROUGHT_COMPOSITE_MAIN_SHA','')
+            assert re.fullmatch(r'[0-9a-f]{40}',main_sha), 'Pack4 must have source-pinned main dependency overlay'
+            main_modules={'src/voxel-shape-interactions.mjs','src/voxel-shape-fit.mjs',
+                          'src/voxel-orientation-sidecar.mjs','src/shape-prototypes.mjs'}
+            changes={line[3:] for line in dirty.splitlines() if line}
+            assert changes==main_modules, f'Unexpected Pack4 source changes: {changes}'
+            overlay={}
+            for path in sorted(main_modules):
+                expected=subprocess.check_output(['git','rev-parse',f'{main_sha}:{path}'],
+                  cwd=checkout,text=True).strip()
+                actual_blob=subprocess.check_output(['git','hash-object',path],
+                  cwd=checkout,text=True).strip()
+                assert actual_blob==expected, f'Pack4 main source overlay blob mismatch: {path}'
+                overlay[path]=actual_blob
+            evidence['sourceOverlay']={'candidatePRHead':sha,'mainCommit':main_sha,
+                                       'strictVerifiedMainBlobs':overlay,'temporaryOnly':True}
+        else:
+            assert not dirty,f'Candidate source modified before test: {dirty}'
         env=dict(os.environ)
         # No bearer token is passed to code living in candidate branches.
         env.pop('GH_TOKEN',None);env.pop('GITHUB_TOKEN',None)
