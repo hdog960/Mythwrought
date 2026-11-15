@@ -76,6 +76,15 @@ export class Pack2LiveWorld{
     if(!within(x,y,z)||!Number.isInteger(id)||
        !Number.isInteger(rotation)||rotation<0||rotation>3)return false;
     const key=coord(x,y,z),previous=this.pack2Cells.get(key);
+    // The shared live game places manual Packs 1, 3, 4 and 5 as physical
+    // source-owned sidecars, not legacy full-cube IDs. Do not allow the
+    // lower-level Pack2 setter to bypass the verified Builder AI overlap gate.
+    // Existing Pack2 cells can still be mined/updated by their owner.
+    if(id!==BLOCK.AIR&&!previous){
+      const at=[x,y,z];
+      if(this.manual14Layer?.get?.(at)||this.pack3Runtime?.get?.(at)||
+         this.pack5Layer?.cell?.(at))return false;
+    }
     if(isPack2LiveId(id)){
       if(rotation!==0||this.base.get(x,y,z)!==BLOCK.AIR)return false;
       const requested=this.nextPack2State?.id===id?this.nextPack2State:null;
