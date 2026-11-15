@@ -29,8 +29,14 @@ function stagePhysicalLanternMounts(draft){
   !cells.has(key(v.x,v.y-1,v.z)));
  for(const v of lanterns){
   const origKey=key(v.x,v.y,v.z);
-  const at=[[v.x,v.y,v.z],[v.x-1,v.y,v.z],[v.x+1,v.y,v.z],
-    [v.x,v.y,v.z-1],[v.x,v.y,v.z+1]];
+  const at=[[v.x,v.y,v.z]];
+  // First try local mounting; only then a short wallward relocation. All
+  // alternatives require an actual authored structural backing cell.
+  // Source blueprint stays unchanged, and every move is flagged for art review.
+  for(let step=1;step<=3;step++)at.push(
+    [v.x-step,v.y,v.z],[v.x+step,v.y,v.z],
+    [v.x,v.y,v.z-step],[v.x,v.y,v.z+step]
+  );
   let proposed=null;
   for(const [x,y,z] of at){
    if(x<0||z<0||x>=draft.extents.x||z>=draft.extents.z)continue;
