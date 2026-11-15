@@ -84,3 +84,28 @@ test('stale plans and edited approach headroom cannot overwrite player edits',()
  assert.deepEqual(w.save(),edited);
  assert.notDeepEqual(w.save(),before);
 });
+
+// Phase 0: the old six-high filled stair columns were a conspicuous artificial
+// cube wall. A two-voxel diagonal spine preserves walkable step tops while
+// maintaining face-connected support and leaving the lower approach open.
+test('archwood approach has narrow face-connected stair spines, not filled cube walls',()=>{
+ const w=new VoxelWorld(179),p=site(w);
+ assert.ok(p,'fixed seed must offer a stair geometry fixture');
+ const [x,y,z]=p.origin;
+ assert.equal(p.cells.length,22,'two six-step spines use 11 cells each');
+ const key=(a,b,c)=>[a,b,c].join(',');
+ const occupied=new Set(p.cells.map(c=>key(...c.slice(0,3))));
+ assert.equal(occupied.size,p.cells.length,'no duplicate stair cells');
+ for(const side of [-1,1])for(let step=1;step<=6;step++){
+  const dx=side<0?-7+step:13-step,px=x+dx,py=y+step;
+  assert.ok(occupied.has(key(px,py,z)),'every tread is physical');
+  assert.equal(occupied.has(key(px,y+1,z)),step<=2,
+   'lower stair space is carved out rather than filled with columns');
+  if(step>1){
+   assert.ok(occupied.has(key(px,py-1,z)),'tread has lower face connector');
+   const previousX=x+(side<0?-7+step-1:13-(step-1));
+   assert.ok(occupied.has(key(previousX,py-1,z)),
+    'connector shares a face with previous tread');
+  }
+ }
+});
