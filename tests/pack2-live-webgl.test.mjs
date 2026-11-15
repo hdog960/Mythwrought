@@ -218,7 +218,7 @@ test('approved Pack 2 real WebGL2 gameplay mesh, legacy save isolation, reload, 
         assert.equal(comparison.pack2.id,packId);
         for(const result of [comparison.legacy,comparison.pack2]){
           assert.equal(result.chunks,25,'Benchmark left 25 chunk surface budget');
-          assert.equal(result.meshBatches,1,'Benchmark rebuild wasn't identical');
+          assert.equal(result.meshBatches,1,'Benchmark rebuild was not identical');
           assert.equal(result.gpuFaults,0,'A GPU failure invalidates performance comparison');
           assert.ok(Number.isFinite(result.durationMs)&&result.durationMs>=0);
         }
