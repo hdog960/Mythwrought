@@ -159,17 +159,33 @@ export function createManual14SavedBridge(world,storage,opts={}){
  function change(action){
   if(readOnly)return {ok:false,reason:readOnly};
   const before=layer.snapshot(),oldRaw=lastRaw;
+  // Failing a stale-tab check must NEVER "roll back" somebody else's data:
+  // this adapter has not written anything yet.
   try{
-   if(storage.getItem(id)!==oldRaw)throw Error('External tab edited manual 1/4 save; reload required');
+   if(storage.getItem(id)!==oldRaw){
+    readOnly='External tab edited manual 1/4 save; reload before editing';
+    return {ok:false,reason:readOnly};
+   }
+  }catch(err){
+   readOnly='Manual 1/4 storage cannot be read safely: '+String(err);
+   return {ok:false,reason:readOnly};
+  }
+  let primaryWriteAttempted=false,next=null;
+  try{
    const outcome=action();
    if(!outcome)return {ok:false,reason:'No physical change'};
-   const next=JSON.stringify(layer.snapshot());
+   next=JSON.stringify(layer.snapshot());
    if(next.length>500000)throw Error('Manual 1/4 save budget exceeded');
+   // Recheck after preflight: a concurrent tab might have written while the
+   // costly physical batch was being validated. Protect its exact bytes.
+   if(storage.getItem(id)!==oldRaw)
+    throw Error('External manual 1/4 save changed during preflight');
    if(oldRaw!==null){
     storage.setItem(id+':previous-good',oldRaw);
     if(storage.getItem(id+':previous-good')!==oldRaw)
      throw Error('Previous-good manual 1/4 save verification failed');
    }
+   primaryWriteAttempted=true;
    storage.setItem(id,next);
    if(storage.getItem(id)!==next)throw Error('Manual 1/4 sidecar readback failed');
    lastRaw=next;
@@ -177,10 +193,17 @@ export function createManual14SavedBridge(world,storage,opts={}){
   }catch(err){
    try{
     layer.restore(before);
-    if(storage.getItem(id)!==oldRaw){
-     if(oldRaw===null)storage.removeItem(id);else storage.setItem(id,oldRaw);
-    }
-    if(storage.getItem(id)!==oldRaw)throw Error('Rollback readback mismatch');
+    if(primaryWriteAttempted){
+     const current=storage.getItem(id);
+     // Only undo bytes this call actually wrote. An unexpected primary is
+     // an external update or uncertain disk write, not ours to delete.
+     if(current===next){
+      if(oldRaw===null)storage.removeItem(id);else storage.setItem(id,oldRaw);
+     }else if(current!==oldRaw)
+      throw Error('Unexpected external/uncertain primary during rollback');
+     if(storage.getItem(id)!==oldRaw)throw Error('Rollback readback mismatch');
+    }else if(storage.getItem(id)!==oldRaw)
+     throw Error('External primary changed during failed preflight');
    }catch(rollback){
     readOnly='Manual 1/4 rollback cannot be verified; editing disabled: '+String(rollback);
    }

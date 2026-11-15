@@ -13,12 +13,12 @@ function store(){const data=new Map();return {
 };}
 function fixture(){
  const world=new VoxelWorld(179),storage=store();
- const masonry=selected(1,9),barrel=selected(4,169),glass=selected(4,159);
+ const masonry=selected(1,9),barrel=selected(4,169),glass=selected(4,163);
  assert.ok(masonry&&barrel&&glass);
  for(const at of [[500,19,500],[502,19,500],[504,19,500]])
   assert.equal(world.get(...at),BLOCK.AIR);
  assert.equal(world.set(502,18,500,BLOCK.STONE),true);
- // Pack4 clear-glass window needs an authored wall face at the north back.
+ // Pack4 authored oak shutters are wall-face mounted and need a real north backing wall.
  assert.equal(world.set(504,19,501,BLOCK.STONE),true);
  return {world,storage,masonry,barrel,glass};
 }
@@ -41,11 +41,12 @@ test('mounted Pack4 requires true backing, and duplicate cells roll back whole b
  const layer=createManual14Layer(world);
  assert.equal(layer.placeMany([{asset:glass.symbol,numericId:glass.numericId,
   at:[504,19,500],orientation:0}]),1);
- assert.equal(layer.get([504,19,500]).supports.length,1);
+ assert.deepEqual(layer.get([504,19,500]).supports.map(p=>[...p]),[[504,19,501]]);
+ assert.equal(layer.get([504,19,500]).numericId,163);
  assert.throws(()=>layer.placeMany([{asset:masonry.symbol,numericId:9,at:[510,19,500]},
   {asset:masonry.symbol,numericId:9,at:[510,19,500]}]),/Overlapping/);
  assert.equal(layer.size(),1,'no partial batch writes');
- assert.throws(()=>layer.placeMany([{asset:glass.symbol,numericId:159,
+ assert.throws(()=>layer.placeMany([{asset:glass.symbol,numericId:163,
   at:[515,19,500]}]),/Missing certified/);
  assert.equal(layer.size(),1);
 });
