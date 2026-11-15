@@ -1,3 +1,4 @@
+import './auto-block-catalog/biome130/mountain-final-geology.test.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BIOME130_LIVE_COUNT,BIOME130_REGISTERED_IDS,BIOME130_REGISTERED_SYMBOLS,
@@ -45,7 +46,7 @@ test('legacy schema-1 saves remain byte-compatible; high-ID biome edits persist 
   }
   assert.equal(world.biomeCellCount,4);
   assert.equal(world.set(999,16,999,255),false);
-  assert.equal(world.set(999,16,999,313),false);
+  assert.equal(world.set(999,16,999,316),false);
   const snapshot=JSON.parse(JSON.stringify(world.save()));
   assert.equal(snapshot.schema,1);assert.equal(snapshot.rotations.length,3);
   const restored=VoxelWorld.restore(snapshot);
