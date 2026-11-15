@@ -237,7 +237,6 @@ test('M6 physically adjacent geometry does not overlap across occupied unit-cell
   }
 });
 
-
 // Post-M6 demonstrated defect: non-unit directions previously shrank reach limits.
 test('M6 physically measured ray reach is invariant to finite direction-vector scaling',()=>{
   const f=fixture(),counter=desc(86),anchor=[0,0,0];
