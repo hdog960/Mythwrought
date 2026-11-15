@@ -337,7 +337,10 @@ function theater({biome,size,W,D,title,signature}){
    p.put(x,y,stageZ+3,B.post,'wall',{role:'living-bough-tower'});
  }else{
   for(let z=2;z<D-2;z++)for(const x of [c-2,c+2])
-   p.put(x,8,z,B.snowRoof,'roof',{role:'double-insulated-truss'});
+   if(!p.get(x,8,z))
+    p.put(x,8,z,B.snowRoof,'roof',{role:'double-insulated-truss'});
+  // Do not place a duplicate truss where the separately authored stage canopy
+  // already owns the same roof cell; both regions share a single physical roof.
   for(const x of [1,W-2])for(let y=8;y<=9;y++)
    p.put(x,y,backZ+2,B.stone,'wall',{role:'snow-shed-buttress'});
  }
