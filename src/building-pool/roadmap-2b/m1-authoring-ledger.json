@@ -6,37 +6,37 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 6,
-  "authoredCandidates": 21,
-  "remainingUnauthored": 399,
+  "originalNewModels": 18,
+  "authoredCandidates": 33,
+  "remainingUnauthored": 387,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
-      "authored": 1,
+      "authored": 3,
       "target": 60,
-      "remaining": 59
+      "remaining": 57
     },
     "tailor": {
-      "authored": 1,
+      "authored": 3,
       "target": 60,
-      "remaining": 59
+      "remaining": 57
     },
     "butcher": {
-      "authored": 1,
+      "authored": 3,
       "target": 60,
-      "remaining": 59
+      "remaining": 57
     },
     "jeweler": {
-      "authored": 1,
+      "authored": 3,
       "target": 60,
-      "remaining": 59
+      "remaining": 57
     },
     "bookshop": {
-      "authored": 1,
+      "authored": 3,
       "target": 60,
-      "remaining": 59
+      "remaining": 57
     },
     "temple": {
       "authored": 15,
@@ -44,9 +44,9 @@
       "remaining": 60
     },
     "theater": {
-      "authored": 1,
+      "authored": 3,
       "target": 45,
-      "remaining": 44
+      "remaining": 42
     }
   },
   "originals": [
@@ -79,6 +79,66 @@
       "id": "r2:theater:temperate:small:01",
       "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:desert:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:snow:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:enchanted-forest:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:mountain:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:desert:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:desert:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:mountain:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:mountain:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:enchanted-forest:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:enchanted-forest:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:snow:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
@@ -89,26 +149,28 @@
     },
     "desert": {
       "small": 1,
-      "medium": 1,
-      "large": 1
+      "medium": 3,
+      "large": 2
     },
     "snow": {
       "small": 1,
-      "medium": 1,
-      "large": 1
+      "medium": 2,
+      "large": 3
     },
     "enchanted-forest": {
       "small": 1,
-      "medium": 1,
-      "large": 1
+      "medium": 3,
+      "large": 2
     },
     "mountain": {
       "small": 1,
-      "medium": 1,
-      "large": 1
+      "medium": 2,
+      "large": 3
     }
   },
   "productionRegistryUnchanged": true,
   "physicalShapeAbiCertified": false,
-  "screenshotClassification": "software WebGL2 cube proxies; neither physical-family WebGL2 nor live game"
+  "screenshotClassification": "software WebGL2 cube proxies; neither physical-family WebGL2 nor live game",
+  "lastMilestone": "M1 cross-biome medium/large authorship, technical acceptance pending exact-head CI",
+  "evidenceClassification": "Builder-source genuine Chromium/WebGL2 cube proxies, never physical-family or live gameplay"
 }
