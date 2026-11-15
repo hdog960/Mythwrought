@@ -13,8 +13,8 @@ test('manifest totals and original category IDs exactly match executable schema'
   assert.equal(expectedIds().length,285);
   assert.deepEqual(manifest.categories.map(x=>[x.type,x.perBiomeSize,x.total]),
     PROGRAM.map(x=>[x.type,x.perCombination,x.perCombination*15]));
-  assert.equal(manifest.inherited,0);assert.equal(manifest.authored,0);
-  assert.equal(manifest.remaining,285);assert.equal(manifest.creatorAccepted,0);
+  assert.equal(manifest.inherited,0);assert.equal(manifest.authored,5);
+  assert.equal(manifest.remaining,280);assert.equal(manifest.creatorAccepted,0);
   assert.equal(manifest.integrated,0);assert.equal(manifest.worldPlaced,false);
 });
 test('read-only legacy PR source is pinned and zero-migration is explicit',()=>{
@@ -26,6 +26,13 @@ test('read-only legacy PR source is pinned and zero-migration is explicit',()=>{
   assert.equal(legacy.importedCount,0);
   assert.equal(legacy.geometryCopied,false);
   assert.equal(legacy.originalPRModified,false);
+});
+test('manifest records five original M1 categories without phantom inherited designs',()=>{
+  assert.equal(manifest.authoredIds.length,5);
+  assert.equal(new Set(manifest.authoredIds).size,5);
+  assert.equal(Object.values(manifest.byCategoryAuthorCount).reduce((a,b)=>a+b,0),5);
+  assert.equal(Object.values(manifest.byBiomeSizeAuthorCount).flatMap(x=>Object.values(x)).reduce((a,b)=>a+b,0),5);
+  assert.equal(manifest.milestones.M2,'NOT STARTED');
 });
 test('eight-lane roster grants no sibling-owned categories to Builder 4B',()=>{
   assert.ok(lane);
