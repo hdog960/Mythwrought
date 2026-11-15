@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,CHUNK_SIZE,meshChunk} from '../src/voxel.mjs';
-import {westGalleryWorld,westGalleryTraversal,westVaultTraversal} from '../src/west-gallery-world.mjs';
+import {westGalleryWorld,westGalleryTraversal,westVaultTraversal,westLoopTraversal} from '../src/west-gallery-world.mjs';
 import {branchedCaveWorld} from '../src/branched-cave-world.mjs';
 import {CAVE_CANDIDATE} from '../src/experimental-cave-route.mjs';
 
@@ -52,4 +52,28 @@ test('saved placed block in east vault remains solid and blocks route',()=>{
   assert.equal(westGalleryWorld(world).get(last.x,last.y,last.z),BLOCK.WOOD);
   assert.ok(westVaultTraversal(world).failures.some(p=>p.x===last.x&&p.z===last.z));
   assert.equal(JSON.stringify(world.save()),before);
+});
+
+for(const seed of [179,1,2026,-77]) {
+  test('west vaulted hall has a physical return passage to primary cave for seed '+seed,()=>{
+    const world=new VoxelWorld(seed),saved=JSON.stringify(world.save());
+    const route=westLoopTraversal(world);
+    assert.equal(route.samples.length,14);
+    assert.deepEqual(route.failures,[]);
+    assert.equal(route.walkable,true);
+    const exit=route.samples.at(-1);
+    assert.equal(exit.x,CAVE_CANDIDATE.x+24);
+    assert.equal(exit.z,CAVE_CANDIDATE.z);
+    const returnCell=route.samples[10];
+    assert.equal(westGalleryWorld(world).get(returnCell.x,returnCell.y,returnCell.z),BLOCK.AIR);
+    assert.equal(JSON.stringify(world.save()),saved);
+  });
+}
+test('explicit saved block obstructs loop but never gets overwritten',()=>{
+  const world=new VoxelWorld(179),sample=westLoopTraversal(world).samples[10];
+  assert.equal(world.set(sample.x,sample.y,sample.z,BLOCK.WOOD),true);
+  const saved=JSON.stringify(world.save());
+  assert.equal(westGalleryWorld(world).get(sample.x,sample.y,sample.z),BLOCK.WOOD);
+  assert.ok(westLoopTraversal(world).failures.some(p=>p.x===sample.x&&p.z===sample.z));
+  assert.equal(JSON.stringify(world.save()),saved);
 });
