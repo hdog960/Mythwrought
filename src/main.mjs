@@ -10,6 +10,7 @@ import {chunkKey,editAffectedChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
+import {BIOME130_REGISTERED_IDS,biome130Block} from './biome130-registry.mjs';
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
@@ -79,7 +80,7 @@ function start(){
   catch(error){fatal('Voxel/sky shader failed to initialize: '+error.message);return;}
 
   let caveDiscovery={inside:false,last:-Infinity,discoveries:0};
-  let selected=BLOCK.STONE;
+  let selected=BLOCK.STONE,selectedRotation=0;
   let outlineKey='',outlineCount=0,editFeedback=[];
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
@@ -224,7 +225,7 @@ function start(){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player):null;
-    const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
+    const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;
@@ -630,10 +631,61 @@ function start(){
   bindGameplayAction('jump',jump);
   bindGameplayAction('dig',()=>edit('mine'));
   bindGameplayAction('place',()=>edit('place'));
+  // The full biome130 palette lives in the existing scrollable settings sheet,
+  // NOT in the independent two-thumb control rails or over the game viewport.
+  const physicalPalette=document.createElement('div');
+  physicalPalette.className='looksetting';
+  const physicalLabel=document.createElement('label');
+  physicalLabel.htmlFor='biome130Select';
+  physicalLabel.textContent='AUTOMATION BIOME BLOCKS · 57 PHYSICAL MATERIALS';
+  const biomeSelect=document.createElement('select');
+  biomeSelect.id='biome130Select';
+  biomeSelect.setAttribute('aria-label','Biome construction block');
+  const emptyChoice=document.createElement('option');
+  emptyChoice.value='';emptyChoice.textContent='Select a biome construction material';
+  biomeSelect.append(emptyChoice);
+  for(const [title,start,end] of [['Desert',1,15],['Snow',16,30],['Enchanted forest',31,45],['Mountains',46,57]]){
+    const group=document.createElement('optgroup');group.label=title;
+    for(const id of BIOME130_REGISTERED_IDS){
+      const ordinal=id-255;if(ordinal<start||ordinal>end)continue;
+      const opt=document.createElement('option');
+      opt.value=String(id);opt.textContent=String(ordinal).padStart(3,'0')+' · '+biome130Block(id).name;
+      group.append(opt);
+    }
+    biomeSelect.append(group);
+  }
+  const turnLabel=document.createElement('label');
+  turnLabel.htmlFor='biome130Rotation';
+  turnLabel.textContent='Block orientation';
+  const biomeRotation=document.createElement('select');
+  biomeRotation.id='biome130Rotation';biomeRotation.setAttribute('aria-label','Biome block rotation');
+  for(const [rotation,name] of ['North','East','South','West'].entries()){
+    const opt=document.createElement('option');opt.value=String(rotation);opt.textContent=name;
+    biomeRotation.append(opt);
+  }
+  physicalPalette.append(physicalLabel,biomeSelect,turnLabel,biomeRotation);
+  const moreBlockArea=help.querySelector('[data-block="8"]')?.closest('.looksetting');
+  if(moreBlockArea?.parentElement)moreBlockArea.insertAdjacentElement('afterend',physicalPalette);
+  else help.querySelector('.helpbody')?.append(physicalPalette);
+  biomeRotation.addEventListener('change',()=>{
+    selectedRotation=Number(biomeRotation.value);
+    if(BIOME130_REGISTERED_IDS.includes(selected))
+      message('Selected '+biome130Block(selected).name+' · '+biomeRotation.selectedOptions[0].textContent);
+  });
+  biomeSelect.addEventListener('change',()=>{
+    const chosen=Number(biomeSelect.value);
+    if(!BIOME130_REGISTERED_IDS.includes(chosen))return;
+    selected=chosen;selectedRotation=Number(biomeRotation.value);
+    document.querySelectorAll('[data-block]').forEach(q=>{
+      q.classList.remove('selected');q.setAttribute('aria-pressed','false');
+    });
+    message('Selected '+biome130Block(selected).name+' · PLACE to build, MINE to remove');
+  });
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
     selected=Number(b.dataset.block);
+    biomeSelect.value='';
     document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
-    message('Selected '+({3:'stone',4:'wood',5:'crystal',7:'leaf canopy',8:'deepstone'})[selected]);
+    message('Selected '+(BLOCK_NAMES[selected]||'material'));
   });
   document.getElementById('menu').onclick=()=>{cancelAllPointers();help.hidden=false;};
   document.getElementById('closeHelp').onclick=()=>{
