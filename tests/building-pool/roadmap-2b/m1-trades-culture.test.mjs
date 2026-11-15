@@ -106,7 +106,7 @@ test('theater has raised coordinate-authored 13x6 stage, two stair intents and c
  const stage=b.voxels.filter(v=>v.role==='raised-stage-platform');
  assert.equal(stage.length,13*6);
  for(let x=7;x<=19;x++)for(let z=13;z<=18;z++)
-   assert.equal(vox.get(x+',2,'+z')?.role,'raised-stage-platform');
+   assert.equal(vox.get(x+',2,'+z)?.role,'raised-stage-platform');
  assert.equal(b.voxels.filter(v=>v.role==='symbolic-stage-step').length,2);
  for(const x of [5,21]){
   assert(reach(b).has(x+',16'),'side promenade blocked');
