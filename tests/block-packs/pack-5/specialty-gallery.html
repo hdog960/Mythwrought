@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mythwrought Pack 5 M2 — Fortified Specialty Physical Voxel Candidate Gallery</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{display:flex;flex-direction:column;gap:4px;padding:7px;background:#14202b;color:#e8e8db;font:12px system-ui,sans-serif;overflow:hidden}
+h1{font-size:14px;margin:0;line-height:1.3}p{font-size:10px;margin:0 0 2px;color:#bfcad1;line-height:1.2}
+#stage{position:relative;flex:1;min-height:0;border:1px solid #5c787d;border-radius:6px;overflow:hidden}
+canvas{display:block;width:100%;height:100%}
+#labels{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));pointer-events:none}
+#labels span{min-width:0;padding:4px 3px;color:#fff6df;font-size:clamp(8px,1.08vw,12px);font-weight:600;line-height:1.15;background:linear-gradient(#0f1929e0,transparent 40%);overflow-wrap:anywhere}
+#result{min-height:12px;flex:none;font-size:10px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+</style>
+<h1>MYTHWROUGHT · Pack 5 · Fortified Specialties (M5)</h1>
+<p>6 physical source-authored variants / 3 symbolic families · isolated WebGL2 candidate gallery · NOT playable</p>
+<div id="stage"><canvas id="gl"></canvas><div id="labels"></div></div>
+<div id="result" data-status="pending">Starting physical candidate WebGL2 review</div>
+<script type="module" src="./specialty-gallery.mjs"></script>
+</html>
