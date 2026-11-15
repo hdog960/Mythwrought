@@ -2565,7 +2565,7 @@ const SPECS=Object.freeze([
     "category": "house",
     "biome": "mountain",
     "size": "large",
-    "index": 3,
+    "index": 4,
     "title": "Skycrest Atrium Ridgehouse",
     "w": 29,
     "d": 25,

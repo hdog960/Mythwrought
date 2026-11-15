@@ -122,7 +122,7 @@ test('156 actual source-authored 1A WebGL2 cuboid-proxy exteriors/cutaways acros
    }
   }
   assert.equal(captures.length,156);
-  assert.equal(new Set(captures.map(x=>x.filename)).size,66);
+  assert.equal(new Set(captures.map(x=>x.filename)).size,156);
   await writeFile(join(dest,'source-acceptance.json'),JSON.stringify({
    count:captures.length,source:'original coordinate-authored Builder 1A blueprints',
    sourceIds:wanted,renderer:'CHROMIUM_WEBGL2_AUTHORED_CELL_CUBE_DIAGNOSTIC',

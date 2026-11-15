@@ -10,7 +10,7 @@ Current pool **54/450**: 30 source-exact inherited + 24 new (1 earlier Inn, 8 ea
 ## Source-specific acceptance and limits
 The new 1A native tests independently load all 54 originals for exact ID and D4 mirror/rotation uniqueness, real 2-high portal/headroom, full access from the entrance, true multiblock bed reservations, continuous foundation and per-roof-cell backing, open-air courtyard shafts and strict unresolved dependency ledgers. Physical family dry-run uses current main's exact `resolveManualFivePackAsset` adapter including Pack 3 roof yaw, Pack 4 panes, Pack 5 2-cell beds, Pack 2 doors and material symbol IDs.
 
-This is physical **candidate** geometry, not approved world building, structural bearing, rain sealing or save-codec acceptance. Pack5:080 desert surface and all roof loads/door sweeps remain open physical fit dependencies.
+This is physical **candidate** geometry, not approved world building, structural bearing, rain sealing or save-codec acceptance. Pack5:080 is source-confirmed full-cell fired-brick masonry with solid authored collision; its load-bearing integration, roof interface, construction support, and all glass/door sweeps still require explicit acceptance.
 
 Chromium source cube WebGL2 visual test is expanded to **26 true source candidates × 2 views × 3 landscape sizes = 156** screenshot targets; no acceptance can be claimed until a new exact-head Actions run succeeds. The rendered cubes are **not** true Pack physical AABBs or live world art, nor physical iPhone captures.
 

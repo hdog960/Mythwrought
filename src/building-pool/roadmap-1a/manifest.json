@@ -55,7 +55,7 @@
   "pending": [
     "Exact-head native full-pool 54-body geometry/physical five-pack audit",
     "156 real Chromium WebGL2 authored cell-cube screenshots: 26 candidates x exterior/cutaway x 3 viewports",
-    "Pack5:080 desert surface vs true structural wall, Pack3 roof seam/loading, Pack2 door swept-space, Pack4 glazing, Pack5 bed shape, schema-1 save orientation",
+    "Pack5:080 full-cell fired-brick geometry vs unapproved structure load/roof interfaces, Pack3 roof seam/loading, Pack2 door swept-space, Pack4 glazing, Pack5 bed shape, schema-1 save orientation",
     "117 additional unique houses needed for M2 domestic 150-house milestone",
     "Full program 396 new blueprints remain (267 houses, 58 taverns, 71 inns); no creator or production approvals"
   ],
@@ -168,6 +168,7 @@
     "browserCaptureTarget": 156,
     "webgl2Mode": "source CELL cube proxy, NOT final Pack AABBs",
     "authoredHouses": 33,
-    "m2HouseTarget": 150
+    "m2HouseTarget": 150,
+    "legacyIdentityRepair": "New Mountain Large ordinal changed from 003 (original inherited house) to 004; original geometry/ID untouched"
   }
 }
