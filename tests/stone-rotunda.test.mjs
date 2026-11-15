@@ -222,3 +222,20 @@ test('traversal detects mined buttress, low step and weathered crown details',()
   }
   assert.ok(inspectStoneRotundaTraversal(world,plan));
 });
+
+test('physical foundation inspection detects undermining and accepts player repair',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected an eligible supported site');
+  assert.equal(placeStoneRotunda(world,plan),true);
+  assert.ok(inspectStoneRotundaTraversal(world,plan));
+  const [x,h,z]=plan.origin;
+  for(const dy of [-1,-2]){
+    const previous=world.get(x+4,h+dy,z+4);
+    assert.notEqual(previous,BLOCK.AIR);
+    assert.equal(world.set(x+4,h+dy,z+4,BLOCK.AIR),true);
+    assert.equal(inspectStoneRotundaTraversal(world,plan),null,
+      'an excavated support layer must invalidate physical stability');
+    assert.equal(world.set(x+4,h+dy,z+4,previous),true);
+    assert.ok(inspectStoneRotundaTraversal(world,plan));
+  }
+});
