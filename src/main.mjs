@@ -86,6 +86,16 @@ function start(){
   const chunks=new Map(),pending=new Map();
   const name=chunkKey;
   const player=newPlayer(world);
+  // Real Pack 5 geometry is opt-in; the production cube palette is unchanged.
+  let pack5Builder=null,pack5Gpu=null,pack5Mode=false;
+  function resetPack5ForWorld(){
+    if(pack5Gpu){pack5Gpu.dispose();pack5Gpu=null;}
+    pack5Builder=null;pack5Mode=false;
+    const toggle=document.getElementById('pack5Enabled');
+    if(toggle)toggle.checked=false;
+    const hint=document.getElementById('pack5Status');
+    if(hint)hint.textContent='Off after world change. Enable again for this seed’s separate sidecar.';
+  }
   // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
   const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
     onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost});
@@ -223,6 +233,34 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
+    if(pack5Mode&&pack5Builder){
+      if(storageReadOnly){message('Protected world read-only; Pack 5 edit blocked');return;}
+      const result=mode==='place'?
+        pack5Builder.placeFacing(eye(),facing(),
+          document.getElementById('pack5Family').value,
+          Number(document.getElementById('pack5Rotation').value),
+          document.getElementById('pack5Variant').value,player):
+        pack5Builder.removeFacing(eye(),facing());
+      if(result.ok){
+        pack5Gpu?.refresh(eye());
+        message(mode==='place'?'Pack 5 furnishing placed · separate save verified':
+          'Pack 5 furnishing removed · separate save verified');
+      }else message(result.reason||'Pack 5 construction rejected');
+      return;
+    }
+    if(pack5Builder){
+      const target=inspectBlockTarget(world,eye(),facing(),selected,player);
+      const shape=pack5Builder.layer.raycast(eye(),facing(),6);
+      if(shape&&(!target.hit||shape.distance<target.distance-1e-6)){
+        message('Shaped furnishing ahead; use Pack 5 mode to edit it');return;
+      }
+      if(mode==='mine'&&target.hit&&pack5Builder.supportsLegacyCell(target.hit)){
+        message('This block supports Pack 5 furniture. Remove furniture first.');return;
+      }
+      if(mode==='place'&&target.adjacent&&pack5Builder.layer.cell(target.adjacent)){
+        message('Building space occupied by Pack 5 furniture');return;
+      }
+    }
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
@@ -364,6 +402,17 @@ function start(){
         gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
         gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
+      }
+      // Pack 5 uses the EXISTING game terrain program and fog, exactly one
+      // optional shaped-triangle draw, with bounded GPU memory and streaming.
+      if(pack5Gpu){
+        if(frame%20===0||frame===1)pack5Gpu.refresh(eye());
+        canvas.dataset.pack5MeshVertices=String(
+          pack5Gpu.draw({atPos,atColor,atUv,atMat}));
+        canvas.dataset.pack5VisibleInstances=String(pack5Gpu.stats().instances);
+      }else{
+        canvas.dataset.pack5MeshVertices='0';
+        canvas.dataset.pack5VisibleInstances='0';
       }
       // A faint world-space targeted-block outline, never a HUD covering the scene.
       const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player):null;
@@ -630,6 +679,60 @@ function start(){
   bindGameplayAction('jump',jump);
   bindGameplayAction('dig',()=>edit('mine'));
   bindGameplayAction('place',()=>edit('place'));
+  const pack5Enabled=document.getElementById('pack5Enabled'),
+    pack5Family=document.getElementById('pack5Family'),
+    pack5Variant=document.getElementById('pack5Variant'),
+    pack5Status=document.getElementById('pack5Status');
+  function refreshPack5Variants(){
+    if(!pack5Builder)return;
+    const item=pack5Builder.layer.catalog.find(x=>x.symbolicId===pack5Family.value);
+    pack5Variant.replaceChildren();
+    for(const variant of (item?.variants||[])){
+      const option=document.createElement('option');
+      option.value=variant;option.textContent=variant.replaceAll('-',' ');
+      pack5Variant.append(option);
+    }
+  }
+  pack5Family.addEventListener('change',refreshPack5Variants);
+  pack5Enabled.addEventListener('change',async()=>{
+    if(!pack5Enabled.checked){
+      pack5Mode=false;
+      pack5Status.textContent='Editing off. Placed Pack 5 pieces remain rendered and solid.';
+      return;
+    }
+    const requestedWorld=world;
+    try{
+      if(!pack5Builder){
+        const [{createPack5LiveAdapter},{createPack5GpuStream}]=await Promise.all([
+          import('./pack5-integration/live-adapter.mjs'),
+          import('./pack5-integration/terrain-buffer.mjs')
+        ]);
+        if(world!==requestedWorld||!pack5Enabled.checked)return;
+        const candidate=createPack5LiveAdapter(world,{storage:localStorage});
+        const box=[player.x-.28,player.feet,player.z-.28,
+          player.x+.28,player.feet+1.78,player.z+.28];
+        if(candidate.layer.collidesPack5(box))
+          throw Error('Saved furnishing overlaps player. Move clear before enabling.');
+        const renderer=createPack5GpuStream(gl,candidate.layer);
+        pack5Builder=candidate;pack5Gpu=renderer;
+        world.pack5Collision=box=>candidate.collision(box);
+        pack5Family.replaceChildren();
+        for(const f of candidate.layer.catalog){
+          const option=document.createElement('option');
+          option.value=f.symbolicId;option.textContent=f.symbolicId+' · '+f.name;
+          pack5Family.append(option);
+        }
+        refreshPack5Variants();
+        renderer.refresh(eye());
+      }
+      pack5Mode=true;
+      pack5Status.textContent='Pack 5 ON · MINE/PLACE edit shaped furniture · '+
+        pack5Builder.layer.count()+' pieces in separate verified seed sidecar.';
+    }catch(error){
+      pack5Mode=false;pack5Enabled.checked=false;
+      pack5Status.textContent='Pack 5 unavailable; original saves preserved: '+String(error.message||error);
+    }
+  });
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
     selected=Number(b.dataset.block);
     document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
@@ -786,7 +889,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=imported;storageReadOnly=false;changed=false;
+    world=imported;resetPack5ForWorld();storageReadOnly=false;changed=false;
     clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
@@ -899,7 +1002,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=restored;changed=false;respawnPrototype();
+    world=restored;resetPack5ForWorld();changed=false;respawnPrototype();
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
     message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
@@ -920,7 +1023,7 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      world=candidate;storageReadOnly=false;changed=false;respawnPrototype();
+      world=candidate;resetPack5ForWorld();storageReadOnly=false;changed=false;respawnPrototype();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';
@@ -960,7 +1063,7 @@ function start(){
       }
       const outcome=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
       if(!outcome.ok)throw Error(outcome.reason);
-      world=imported;storageReadOnly=false;changed=false;
+      world=imported;resetPack5ForWorld();storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
@@ -981,6 +1084,7 @@ function start(){
     e.preventDefault();
     if(graphicsLost)return;
     graphicsLost=true;graphicsLossCount++;
+    pack5Gpu?.invalidate();
     frameDriver.pause();cancelAllPointers();
     frameHistory.frame(performance.now(),false);
     fatal('Graphics paused — attempting a safe WebGL recovery. Your saved world is untouched.');
@@ -993,6 +1097,7 @@ function start(){
       initializeGpuPipeline();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
       chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
+      pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
       outlineKey='';outlineCount=0;lastTargetText='';
       lastEditMeshKeys=[];lastFrame=performance.now();
