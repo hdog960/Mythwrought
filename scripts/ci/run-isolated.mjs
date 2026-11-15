@@ -9,6 +9,16 @@ if (!lanes.length || new Set(lanes).size !== lanes.length || lanes.some((lane) =
   process.exit(1);
 }
 
+function findTestFiles(directory) {
+  const files = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...findTestFiles(path));
+    else if (entry.isFile() && entry.name.endsWith('.test.mjs')) files.push(path);
+  }
+  return files.sort();
+}
+
 for (const lane of lanes) {
   const directory = lane.startsWith('pack-')
     ? `tests/block-packs/${lane}`
@@ -17,8 +27,7 @@ for (const lane of lanes) {
     console.error(`Missing expected ${lane} test directory: ${directory}`);
     process.exit(1);
   }
-  const files = readdirSync(directory).filter((name) => name.endsWith('.test.mjs')).sort()
-    .map((name) => join(directory, name));
+  const files = findTestFiles(directory);
   if (!files.length) {
     console.error(`Refusing to pass ${lane} with zero native Node test files.`);
     process.exit(1);
