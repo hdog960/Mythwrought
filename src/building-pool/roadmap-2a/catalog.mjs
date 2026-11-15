@@ -1,0 +1,23 @@
+// Isolated Roadmap 2A reservation ledger. These records are NOT authored geometry.
+export const BIOMES=Object.freeze(["temperate","desert","snow","enchanted-forest","mountain"]);
+export const SIZES=Object.freeze(["small","medium","large"]);
+export const CATEGORY_QUOTAS=Object.freeze({"general-store":5,"pet-shop":5,"magic-shop":5,"potion-shop":5,"bakery":5,"bank":3});
+export const SOURCE_PR=124;
+export const SOURCE_HEAD="07c45d27bd36f4f3aa3197bba0e4f49ce2a58c68";
+export const LEGACY_CATEGORY="general-store";
+export function blueprintId(category,biome,size,variation){
+  if(!Object.hasOwn(CATEGORY_QUOTAS,category)||!BIOMES.includes(biome)||!SIZES.includes(size)||!Number.isInteger(variation)||variation<1||variation>CATEGORY_QUOTAS[category]) throw new Error("unreserved roadmap-2a slot");
+  return `r2:${category}:${biome}:${size}:${String(variation).padStart(2,"0")}`;
+}
+export function plannedSlots(){
+  const items=[];
+  for(const [category,quota] of Object.entries(CATEGORY_QUOTAS)) for(const biome of BIOMES) for(const size of SIZES) for(let variation=1;variation<=quota;variation++){
+    const id=blueprintId(category,biome,size,variation);
+    items.push(Object.freeze({id,category,biome,size,variation,legacySourceCandidate:category===LEGACY_CATEGORY&&variation===1,authoredHere:false,status:"reserved-not-authored"}));
+  }
+  return items;
+}
+export function inventory(){
+  const slots=plannedSlots();
+  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:0,newlyAuthored:0,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:405,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
+}
