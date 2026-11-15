@@ -12,7 +12,7 @@ import {createM1CompletionPool,createM1CompletionWorkshop} from '../../../src/bu
 import {validateAuthoredPool,validateBlueprint} from '../../../src/building-pool/roadmap-3a/contract.mjs';
 import {geometryFingerprint} from '../../../src/building-pool/roadmap-3a/legacy-validation.mjs';
 import {resolveManualFivePackAsset} from '../../../src/builder-assets/manual-five-pack.mjs';
-import {createPreviewMesh} from './preview-mesh.mjs';
+import {createCoveragePreviewMesh} from './preview-coverage-mesh.mjs';
 import {fitPreviewCamera} from './preview-camera.mjs';
 const newer=createM1CompletionPool();
 const coord=c=>c.slice(0,3).join(',');
@@ -122,7 +122,7 @@ test('all 44 have actual registered manual-family symbols, typed fixture orienta
 test('264 genuine-source WebGL2 mesh/camera inputs for 44 models × 2 sections × 3 iPhone-like viewports',()=>{
  let count=0;
  for(const b of newer)for(const cutaway of [false,true]){
-  const mesh=createPreviewMesh(b,{cutaway});
+  const mesh=createCoveragePreviewMesh(b,{cutaway});
   assert.ok(mesh.vertices instanceof Float32Array);
   assert.ok(mesh.vertices.length>1000&&mesh.vertices.every(Number.isFinite));
   assert.equal(mesh.isDiagnosticEnvelope,true);
