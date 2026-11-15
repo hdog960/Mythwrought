@@ -71,4 +71,34 @@ assert.equal(placeCanopyWalkway(failure.world,plan),false);
 for(const [x,cy,z] of plan.cells)assert.equal(failure.world.get(x,cy,z),BLOCK.AIR,'rollback restores air');
 assert.equal(failure.world.get(a[0],y,a[1]),BLOCK.WOOD);
 assert.equal(failure.world.get(b[0],y,b[1]),BLOCK.WOOD);
+
+// Long-span regression: two tapered side branches must remain physically
+// supported, deterministic, and outside the two-block-high walkable aisle.
+// Search a fixed-seed natural-air site instead of fabricating empty terrain.
+let longSite=null;
+for(let x=-150;x<150&&!longSite;x+=3)for(let z=-150;z<150&&!longSite;z+=3){
+ const sample=fixture(),aa=[x,z],bb=[x+7,z];
+ sample.edits.set(sample.k(x,y,z),BLOCK.WOOD);
+ sample.edits.set(sample.k(x+7,y,z),BLOCK.WOOD);
+ const candidate=planCanopyWalkway(sample.world,aa,bb,y);
+ if(candidate)longSite={...sample,aa,bb,candidate};
+}
+assert.ok(longSite,'fixed-seed seven-cell span supports a tapered crown');
+const {candidate:longPlan}=longSite;
+const longOccupancy=new Map(longPlan.cells.map(([x,cy,z,id])=>[[x,cy,z].join(','),id]));
+const outerTips=longPlan.cells.filter(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&Math.abs(z-longSite.aa[1])===2);
+assert.equal(outerTips.length,2,'two separated taper tips rather than a continuous fence');
+for(const [x,cy,z] of outerTips){
+ assert.equal(longOccupancy.get([x,cy+1,z].join(',')),BLOCK.LEAVES,'tip foliage sits on timber');
+ const innerZ=z+Math.sign(longSite.aa[1]-z);
+ assert.equal(longOccupancy.get([x,cy,innerZ].join(',')),BLOCK.WOOD,'tip is joined to an inner branch');
+}
+for(let i=0;i<=7;i++)for(let h=1;h<=2;h++)
+ assert.equal(longOccupancy.has([longSite.aa[0]+i,y+h,longSite.aa[1]].join(',')),false,
+ 'walking aisle remains free of canopy voxels');
+assert.deepEqual(planCanopyWalkway(longSite.world,longSite.aa,longSite.bb,y)?.cells,longPlan.cells,
+ 'crown variant is stable for the same seed and anchors');
+assert.equal(placeCanopyWalkway(longSite.world,longPlan),true,'long crown can be placed');
+assert.equal(placeCanopyWalkway(longSite.world,longPlan),false,'long crown cannot duplicate edits');
+
 console.log('Canopy walkway: supported staggered crowns, corridor, edits, tampering, rollback PASS');
