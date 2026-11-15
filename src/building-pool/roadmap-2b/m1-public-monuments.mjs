@@ -309,6 +309,7 @@ function openTheater(desert){
  p.wallX(backZ,1,p.W-2,[5,p.W-6]);
  for(const x of [5,p.W-6])p.feature(x,backZ+2,S.crate,'backstage-costume-stock');
  p.feature(c,backZ+2,S.table,'costume-preparation-table');
+ p.feature(2,2,S.lantern,'entry-wayfinding-lamp','decor');
  for(const x of [c-half-1,c+half+1]){
   for(let y=2;y<=6;y++)p.put(x,y,stageZ-1,S.post,'wall',{role:'proscenium-post'});
   p.feature(x,stageZ+1,S.stair,'symbolic-stage-stair','fixture',
