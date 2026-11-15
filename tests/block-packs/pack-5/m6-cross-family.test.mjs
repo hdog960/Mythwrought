@@ -236,3 +236,47 @@ test('M6 physically adjacent geometry does not overlap across occupied unit-cell
     for(const x of aa)for(const y of bb)assert.equal(intersects(x,y),false);
   }
 });
+
+
+// Post-M6 demonstrated defect: non-unit directions previously shrank reach limits.
+test('M6 physically measured ray reach is invariant to finite direction-vector scaling',()=>{
+  const f=fixture(),counter=desc(86),anchor=[0,0,0];
+  supportFor(f,counter,anchor);
+  assert.equal(f.place(counter.symbolicId,anchor,0,'ledger-service').ok,true);
+  const origin=[.5,2,.5];
+  const unit=f.raycast(origin,[0,-1,0],4);
+  assert.equal(unit?.symbolicId,counter.symbolicId);
+  assert.ok(unit.distance>1,'Counter is over one actual world unit below the ray origin');
+  for(const dir of [[0,-3,0],[0,-.2,0],[0,-200,0]]){
+    assert.equal(f.raycast(origin,dir,1),null,'Scaled direction must not bypass a one-unit reach cap');
+    const scaled=f.raycast(origin,dir,4);
+    assert.equal(scaled?.symbolicId,counter.symbolicId);
+    assert.ok(Math.abs(scaled.distance-unit.distance)<1e-9,'Physical hit distance must not depend on direction length');
+  }
+});
+test('M6 removeRay cannot delete a distant neighboring asset via oversized direction',()=>{
+  const f=fixture(),counter=desc(86),anchor=[0,0,0];
+  supportFor(f,counter,anchor);assert.equal(f.place(counter.symbolicId,anchor,0,'ledger-service').ok,true);
+  const prior=f.snapshot();
+  assert.equal(f.removeRay([.5,2,.5],[0,-3,0],.5),false);
+  assert.deepEqual(f.snapshot(),prior);
+  assert.equal(f.removeRay([.5,2,.5],[0,-3,0],2),true);
+  assert.equal(f.count(),0);
+});
+test('M6 scaled mixed-stack rays select the nearest physical part in world units',()=>{
+  const f=fixture(),counter=desc(86),lamp=desc(95);
+  supportFor(f,counter,[0,0,0]);supportFor(f,lamp,[0,1,0]);
+  assert.equal(f.place(counter.symbolicId,[0,0,0],0,'ledger-service').ok,true);
+  assert.equal(f.place(lamp.symbolicId,[0,1,0],0,'suncrown-eightarm').ok,true);
+  const origin=[.5,3,.5];
+  for(const scale of [1,2,.25]){
+    assert.equal(f.raycast(origin,[0,-scale,0],4)?.symbolicId,lamp.symbolicId);
+    assert.equal(f.raycast(origin,[0,-scale,0],.8),null);
+  }
+  assert.equal(f.remove([0,1,0]),true);
+  assert.equal(f.raycast(origin,[0,-5,0],4)?.symbolicId,counter.symbolicId);
+});
+test('M6 rejects nonfinite direction norms despite finite individual vector components',()=>{
+  const f=fixture();
+  assert.throws(()=>f.raycast([0,0,0],[1.7e308,1.7e308,0],10),/Invalid ray direction length/);
+});
