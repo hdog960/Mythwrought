@@ -12,6 +12,19 @@ const make=(dx,dz)=>liveVoxelDistrict(world.seed,dx,dz,(x,y,z)=>world.legacyBloc
 const districts=[[0,0],[-1,0],[0,-1],[-1,-1]].map(([dx,dz])=>make(dx,dz));
 const tree=districts[0].trees[0],court=districts.find(d=>d.court)?.court;
 const cave=districts[0].caves[0];
+// 010: inspect actual seeded features, including adjacent districts if their
+// deterministic placement did not choose the four checkpoint-008 views.
+const activationScenes=[...districts];
+for(const [dx,dz] of [[1,0],[0,1],[1,1],[-1,1],[1,-1]]){
+  if(activationScenes.some(s=>s.rotunda)&&activationScenes.some(s=>s.twinwood)&&
+    activationScenes.some(s=>s.southGalleries.length))break;
+  activationScenes.push(make(dx,dz));
+}
+const rotunda=activationScenes.find(s=>s.rotunda)?.rotunda;
+const twinwood=activationScenes.find(s=>s.twinwood)?.twinwood;
+const gallery=activationScenes.find(s=>s.southGalleries.length)?.southGalleries[0];
+assert.ok(rotunda&&twinwood&&gallery,
+  'actual enabled :24 gallery, :36 rotunda and :48 twinwood must exist near spawn');
 assert.ok(tree&&court&&cave,'real live forest, courtyard and cave site required');
 const trunk=tree.cells.find(c=>c[3]===BLOCK.WOOD);
 const leaf=tree.cells.find(c=>c[3]===BLOCK.LEAVES);
@@ -79,7 +92,42 @@ try{
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
     [cave.x+14,floorAt(14)+1,cave.z-7]),BLOCK.AIR);
   await page.screenshot({path:'artifacts/live-008-underground-north-wing-932x430.png'});
-  // A generated object is a real editable voxel, with unchanged schema-one persistence.
+  // Genuine renderer evidence of the newly activated 010 physical scenery.
+  const [rx,rh,rz]=rotunda.origin;
+  await page.evaluate(p=>{
+    const d=window.__mythwroughtTest;
+    d.teleportCave(p.x,p.h+1,p.z-4);
+    d.aimAt(p.x+3,p.h+4,p.z+3);
+  },{x:rx,h:rh,z:rz});
+  await loaded();
+  assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
+    rotunda.cells.find(c=>c[1]===rh+3)?.slice(0,3)),BLOCK.STONE);
+  await page.screenshot({path:'artifacts/live-010-stone-rotunda-932x430.png'});
+
+  const [tx,th,tz]=twinwood.origin;
+  await page.evaluate(p=>{
+    const d=window.__mythwroughtTest;
+    d.teleportCave(p.x,p.h+1,p.z+1);
+    d.aimAt(p.x+2,p.h+7,p.z);
+  },{x:tx,h:th,z:tz});
+  await loaded();
+  assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
+    twinwood.cells.find(c=>c[3]===BLOCK.WOOD)?.slice(0,3)),BLOCK.WOOD);
+  await page.screenshot({path:'artifacts/live-010-twinwood-forest-932x430.png'});
+
+  const t=gallery.length-11, gx=gallery.x+t, gz=gallery.z+8;
+  const galleryFloor=caveRoute(179,gallery).floorAt(t);
+  await page.evaluate(p=>{
+    const d=window.__mythwroughtTest;
+    d.teleportCave(p.x,p.floor+1,p.z);
+    d.aimAt(p.x+2,p.floor+2,p.z-2);
+  },{x:gx,z:gz,floor:galleryFloor});
+  await loaded();
+  assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
+    [gx,galleryFloor+2,gz]),BLOCK.AIR);
+  await page.screenshot({path:'artifacts/live-010-south-gallery-cave-932x430.png'});
+
+    // A generated object is a real editable voxel, with unchanged schema-one persistence.
   await page.evaluate(p=>window.__mythwroughtTest.placeFixture(...p,0),trunk.slice(0,3));
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),trunk.slice(0,3)),BLOCK.AIR);
   await page.reload({waitUntil:'networkidle'});
@@ -89,5 +137,5 @@ try{
   assert.equal(saved.schema,1);
   assert.deepEqual(errors,[]);
   assert.deepEqual(failed,[]);
-  console.log('PASS checkpoint 008 real WebGL2 trees/court/cave; three device sizes; mine/reload schema-1 save');
+  console.log('PASS checkpoints 008+010 real WebGL2 trees/court/cave/rotunda/twinwood/south-gallery; three device sizes; mine/reload schema-1 save');
 }finally{await browser.close();}
