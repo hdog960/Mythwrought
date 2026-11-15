@@ -118,8 +118,9 @@ export function inspectStoneRotundaTraversal(world,plan){
   // this as a traversable rotunda. Player mining remains allowed; inspection
   // simply reports a damaged landmark rather than claiming intact access.
   for(const [dx,dz] of OFFSETS){
-    if(world.get(x+dx,h+1,z+dz)!==BLOCK.STONE ||
-       world.get(x+dx,h+4,z+dz)!==BLOCK.STONE)return null;
+    // Inspect every shaft voxel: a missing middle section is still a broken pillar.
+    for(let dy=1;dy<=4;dy++)
+      if(world.get(x+dx,h+dy,z+dz)!==BLOCK.STONE)return null;
   }
   for(let d=-3;d<=3;d++){
     if(world.get(x+d,h+5,z-3)!==BLOCK.STONE ||
