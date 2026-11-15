@@ -11,7 +11,7 @@ test('M2 original civic and guildhall source-authentic Chromium WebGL2 exteriors
  assert.deepEqual([...new Set(result.results.map(x=>x.id))],
   ['r4:civic-hall:temperate:small:02','r4:guildhall:temperate:small:01']);
  assert.ok(result.results.every(x=>x.drawCalls>0&&x.drawnTriangles>100&&x.pngSha256.length===64));
- assert.equal(result.authoredGeneratorGitBlob,'c56550f67cc6d525cd47808ae4c37a7f39190060');
+ assert.equal(result.authoredGeneratorGitBlob,'bb3a641ea75beaa1a01bb19def41eceda7b6b3e1');
  assert.equal(result.realIphoneTested,false);
  assert.equal(result.productionPhysicalFamilyRenderer,false);
  assert.equal(result.creatorArtApproved,false);

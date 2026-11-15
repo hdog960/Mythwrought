@@ -59,6 +59,13 @@ function author(type){
  for(let x=entryX-1;x<=entryX+1;x++)put(x,0,0,'floor','base:stone');
  for(const x of [porchL,porchR])for(const z of [1,3])
   for(let y=1;y<=3;y++)put(x,y,z,'column','base:wood');
+ // Actual continuous timber eave beam spans both portico corner columns.
+ for(const z of [1,3])for(let x=porchL+1;x<porchR;x++)
+  if(!cells.has(cellKey(x,3,z)))put(x,3,z,'beam','base:wood');
+ // The L-plan guild rear extension also bridges between structural walls at
+ // x=7 and x=14; do not leave two central roof cells without nearby bearing.
+ if(!civic)for(let x=8;x<=13;x++)
+  if(!cells.has(cellKey(x,3,19)))put(x,3,19,'beam','base:wood');
  // Explicit timber underpurlins clear the two-high headroom at y=1,2.
  for(const z of [8,12,16])for(let x=3;x<=24;x++)
   if(has(x,z)&&!cells.has(cellKey(x,3,z)))put(x,3,z,'beam','base:wood');

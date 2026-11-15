@@ -27,7 +27,7 @@ function bundle(){
  const shapes=readFileSync(join(SOURCE,'m1-preview-shapes.mjs'),'utf8');
  const render=readFileSync(join(TESTS,'m2-webgl2-preview.mjs'),'utf8');
  let html=readFileSync(join(TESTS,'m2-webgl2-preview.html'),'utf8');
- if(gitBlob(blueprint)!=='c56550f67cc6d525cd47808ae4c37a7f39190060')
+ if(gitBlob(blueprint)!=='bb3a641ea75beaa1a01bb19def41eceda7b6b3e1')
    throw Error('M2 authored source differs from exact original authored SHA');
  const importBlueprint="import {SCHEMA,validateBlueprint,validateCollection,geometrySignature} from './schema.mjs';";
  const importRender="import {buildM2Exemplar} from '../../../src/building-pool/roadmap-4a/m2-blueprints.mjs';";
