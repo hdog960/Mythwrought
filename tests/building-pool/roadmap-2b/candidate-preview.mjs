@@ -24,7 +24,7 @@ const vs=[
  'void main(){',
  ' vec3 p=aPosition-uMid;',
  ' vec2 screen=vec2((p.x-p.z)*0.87,(p.y*1.1-(p.x+p.z)*0.39));',
- ' gl_Position=vec4(2.0*screen*uScale/uViewport,clamp((p.x+p.z)*0.012-p.y*0.006,-0.95,0.95),1.0);',
+ ' gl_Position=vec4(2.0*screen*uScale/uViewport,clamp(-(p.x+p.z+p.y*1.4)*0.017,-0.95,0.95),1.0);',
  ' vColor=aColor;',
  '}'
 ].join('\n');
@@ -44,8 +44,7 @@ const faces=[
  {q:[[1,0,0],[0,0,0],[0,1,0],[1,1,0]],shade:0.56},
  {q:[[1,0,1],[1,0,0],[1,1,0],[1,1,1]],shade:0.72},
  {q:[[0,0,0],[0,0,1],[0,1,1],[0,1,0]],shade:0.92},
- {q:[[0,1,1],[1,1,1],[1,1,0],[0,1,0]],shade:1.14},
- {q:[[0,0,0],[1,0,0],[1,0,1],[0,0,1]],shade:0.38}
+ {q:[[0,1,1],[1,1,1],[1,1,0],[0,1,0]],shade:1.14}
 ];
 function rgb(v){
  if(v.kind==='window')return [0.37,0.82,0.87];
@@ -87,7 +86,7 @@ gl.uniform3f(gl.getUniformLocation(program,'uMid'),model.extents.x/2,
 gl.uniform2f(gl.getUniformLocation(program,'uViewport'),canvas.width,canvas.height);
 const width=model.extents.x+model.extents.z;
 const s=Math.min(canvas.width/(width*0.92),canvas.height/(model.extents.y*1.7+width*.35));
-gl.uniform1f(gl.getUniformLocation(program,'uScale'),s);
+gl.uniform1f(gl.getUniformLocation(program,'uScale'),s*1.23);
 gl.viewport(0,0,canvas.width,canvas.height);
 gl.clearColor(.061,.116,.167,1);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
