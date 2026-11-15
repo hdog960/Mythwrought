@@ -133,6 +133,8 @@ export function surfaceBiomeFreshColumn(x,z,seed=179,{
   if(!b||b.weight<.35)return null;
   const oldTop=terrainHeight(x,z,seed);
   const newTop=surfaceBiomeHeight(x,z,seed);
+  // A raised-only overlay must never silently lower a legacy surface.
+  if(newTop<oldTop)return null;
   const r=REGIONS.find(region=>region.name===b.name);
   const writes=[];
   // Entire changed envelope is checked before a single write is returned.
