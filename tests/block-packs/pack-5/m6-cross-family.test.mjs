@@ -279,3 +279,43 @@ test('M6 rejects nonfinite direction norms despite finite individual vector comp
   const f=fixture();
   assert.throws(()=>f.raycast([0,0,0],[1.7e308,1.7e308,0],10),/Invalid ray direction length/);
 });
+
+
+// Post-M6 proven defect: failed restore could erase existing models if support
+// changed after placement, because rollback tried to re-place via current supports.
+test('M6 failed restore preserves an existing counter after its foundation was removed',()=>{
+  const f=fixture(),counter=desc(86),anchor=[0,0,0];
+  supportFor(f,counter,anchor);
+  assert.equal(f.place(counter.symbolicId,anchor,0,'ledger-service').ok,true);
+  f.setSupport([0,-1,0],false);
+  const previous=f.snapshot();
+  assert.throws(()=>f.restore({format:PACK5_FIXTURE_FORMAT,entries:[[0,0,0,counter.symbolicId,0,'invalid-counter-variant']]}),/Unknown geometry variant/);
+  assert.deepEqual(f.snapshot(),previous,'Failed restore must not erase already placed counter');
+  assert.equal(f.count(),1);
+  assert.equal(f.cell(anchor)?.symbolicId,counter.symbolicId);
+});
+test('M6 failed mixed restore rolls back two-cell occupancy even after losing rotated floor support',()=>{
+  const f=fixture(),rug=desc(92),lamp=desc(95),anchor=[3,0,3],rotation=1;
+  supportFor(f,rug,anchor,rotation);supportFor(f,lamp,[8,0,3]);
+  assert.equal(f.place(rug.symbolicId,anchor,rotation,'hearthwoven-runner').ok,true);
+  assert.equal(f.place(lamp.symbolicId,[8,0,3],0,'suncrown-eightarm').ok,true);
+  const far=orientedParts(rug,rotation).map(p=>p.cell.map((x,i)=>x+anchor[i]))[1];
+  f.setSupport([far[0],far[1]-1,far[2]],false);
+  const previous=f.snapshot();
+  const invalid=structuredClone(previous);
+  invalid.entries.push([11,0,0,'pack5:094',0,'fake-gate']);
+  assert.throws(()=>f.restore(invalid));
+  assert.deepEqual(f.snapshot(),previous);
+  assert.deepEqual(f.cell(far)?.anchor,anchor);
+  assert.equal(f.count(),2);
+});
+test('M6 failed restore preserves existing ceiling chandelier with withdrawn support',()=>{
+  const f=fixture(),lamp=desc(95),anchor=[1,2,1];
+  supportFor(f,lamp,anchor);
+  assert.equal(f.place(lamp.symbolicId,anchor,0,'prismatic-starrack').ok,true);
+  f.setSupport([1,3,1],false);
+  const previous=f.snapshot();
+  assert.throws(()=>f.restore({format:PACK5_FIXTURE_FORMAT,entries:[[1,2,1,'pack5:095',0,'invalid-chandelier']]}));
+  assert.deepEqual(f.snapshot(),previous);
+  assert.equal(f.count(),1);
+});
