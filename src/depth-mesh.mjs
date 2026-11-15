@@ -1,6 +1,8 @@
 // Depth-owned, section-local solid voxel mesher. No biome, cave, landmark,
 // flora, or manual-block generation belongs here. Only world.get defines cells.
 import {BLOCK,CHUNK_SIZE} from './voxel.mjs';
+import {isBiome130BlockId,biome130Block,biome130Color} from './biome130-registry.mjs';
+import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {sectionBounds} from './depth.mjs';
 
 const FACES=[
@@ -12,6 +14,7 @@ const FACES=[
   {d:[0,0,-1],q:[[0,0,0],[0,1,0],[1,1,0],[1,0,0]],lit:.67}
 ];
 const UV=[[0,0],[0,1],[1,1],[1,0]];
+const shapeCache=new Map(); // At most 57 authored IDs x 4 rotations.
 const COLORS={
   1:[.35,.64,.32],2:[.48,.34,.24],3:[.48,.51,.55],
   4:[.60,.39,.23],5:[.36,.79,.92],6:[.70,.58,.33],
@@ -23,8 +26,8 @@ export function meshDepthSection(world,cx,cz,section){
   const bounds=sectionBounds(section);
   const side=CHUNK_SIZE+2,depth=bounds.maxY-bounds.minY+3;
   const minX=cx*CHUNK_SIZE-1,minZ=cz*CHUNK_SIZE-1,minY=bounds.minY-1;
-  const cells=new Uint8Array(side*side*depth);
-  cells.fill(255); // Unvisited marker: all physical voxel IDs are 0..254.
+  const cells=new Uint16Array(side*side*depth);
+  cells.fill(65535); // High-ID biome130 physical cells cannot wrap into 8-bit cache.
   const outside=new Map();
   const blockAt=(x,y,z)=>{
     if(x<minX||x>=minX+side||z<minZ||z>=minZ+side||y<minY||y>=minY+depth){
@@ -33,7 +36,7 @@ export function meshDepthSection(world,cx,cz,section){
       return outside.get(key);
     }
     const index=((x-minX)*side+(z-minZ))*depth+(y-minY);
-    if(cells[index]!==255)return cells[index];
+    if(cells[index]!==65535)return cells[index];
     return (cells[index]=world.get(x,y,z));
   };
   let vertices=new Float32Array(4096),length=0;
@@ -51,6 +54,38 @@ export function meshDepthSection(world,cx,cz,section){
       for(let y=bounds.minY;y<=bounds.maxY;y++){
         const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
+        if(isBiome130BlockId(id)){
+          const rotation=world.rotationAt?.(x,y,z)??0,key=id*4+rotation;
+          let mesh=shapeCache.get(key);
+          if(!mesh){
+            const asset=biome130Block(id,rotation);
+            mesh=prototypeSurfaceMesh({prototypeOnly:true,boxes:asset.boxes});
+            if(mesh.indices.length>12000)throw Error('Biome surface budget exceeded');
+            shapeCache.set(key,mesh);
+          }
+          for(let t=0;t<mesh.indices.length;t+=3){
+            const n=mesh.indices[t]*3,nx=mesh.normals[n],
+              ny=mesh.normals[n+1],nz=mesh.normals[n+2];
+            let boundary=true;
+            for(let k=t;k<t+3;k++){
+              const i=mesh.indices[k]*3;
+              if(nx&&Math.abs(mesh.positions[i]-(nx>0?1:0))>1e-6||
+                 ny&&Math.abs(mesh.positions[i+1]-(ny>0?1:0))>1e-6||
+                 nz&&Math.abs(mesh.positions[i+2]-(nz>0?1:0))>1e-6){
+                boundary=false;break;
+              }
+            }
+            if(boundary&&blockAt(x+nx,y+ny,z+nz)!==BLOCK.AIR &&
+               !isBiome130BlockId(blockAt(x+nx,y+ny,z+nz)))continue;
+            const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
+            const rgb=biome130Color(id,x,y,z,face),lit=[.77,.73,1,.48,.85,.67][face];
+            for(let k=t;k<t+3;k++){
+              const i=mesh.indices[k]*3,px=mesh.positions[i],py=mesh.positions[i+1],pz=mesh.positions[i+2];
+              emit(x+px,y+py,z+pz,rgb[0]*lit,rgb[1]*lit,rgb[2]*lit,nx?pz:px,ny?pz:py,0);
+            }
+          }
+          continue;
+        }
         const color=COLORS[id]||COLORS[3];
         for(const face of FACES){
           if(blockAt(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;

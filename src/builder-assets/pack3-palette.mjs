@@ -2,7 +2,7 @@
 // This never takes space from the two landscape touch rails.
 import {PACK3_BUILDER_SYMBOLS,resolvePack3BuilderAsset} from './pack3.mjs';
 
-export function installPack3Palette(help,onChoose){
+export function installPack3Palette(help,onChoose,{onExport=null,onImport=null}={}){
   if(!help?.querySelector||typeof onChoose!=='function')
     throw new TypeError('Invalid Pack 3 palette host');
   const panel=document.createElement('section');
@@ -34,6 +34,48 @@ export function installPack3Palette(help,onChoose){
   yaw.value='0';yaw.disabled=true;
   rotationLabel.append(yaw);
   panel.append(title,note,materialLabel,rotationLabel);
+  if(onExport||onImport){
+    if(typeof onExport!=='function'||typeof onImport!=='function')
+      throw new TypeError('Pack 3 portable actions must be paired');
+    const actions=document.createElement('div');actions.className='helpbuttons';
+    const exportButton=document.createElement('button');
+    exportButton.type='button';exportButton.id='pack3Export';
+    exportButton.textContent='EXPORT PACK 3';
+    const importButton=document.createElement('button');
+    importButton.type='button';importButton.id='pack3Import';
+    importButton.textContent='IMPORT PACK 3';
+    const file=document.createElement('input');
+    file.type='file';file.id='pack3ImportFile';file.hidden=true;
+    file.accept='.json,application/json';
+    const status=document.createElement('p');
+    status.className='controlhint';status.id='pack3BackupStatus';
+    status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+    status.textContent='Pack 3 uses a separate physical-construction save. EXPORT WORLD does not include these blocks.';
+    actions.append(exportButton,importButton);
+    panel.append(actions,file,status);
+    exportButton.addEventListener('click',()=>{
+      try{
+        const payload=onExport();
+        const blob=new Blob([payload.raw],{type:'application/json'});
+        const url=URL.createObjectURL(blob),anchor=document.createElement('a');
+        anchor.href=url;anchor.download='mythwrought-pack3-seed-'+payload.seed+'.json';
+        document.body.append(anchor);anchor.click();anchor.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),3000);
+        status.textContent='Physical construction backup prepared for seed '+payload.seed+'. Keep this file with your regular world export.';
+      }catch(error){status.textContent='Pack 3 backup not exported: '+String(error.message||error);}
+    });
+    importButton.addEventListener('click',()=>file.click());
+    file.addEventListener('change',async()=>{
+      const chosen=file.files?.[0];if(!chosen)return;
+      importButton.disabled=true;exportButton.disabled=true;
+      try{
+        if(chosen.size>450000)throw Error('Pack 3 backup file is too large');
+        const result=await onImport(await chosen.text());
+        status.textContent=result?.message||'Pack 3 restore completed. Reload required.';
+      }catch(error){status.textContent='Pack 3 restore rejected; data preserved: '+String(error.message||error);}
+      finally{file.value='';importButton.disabled=false;exportButton.disabled=false;}
+    });
+  }
   const host=help.querySelector('.helpbody');
   if(!host)throw Error('Missing Mythwrought settings host');
   host.insertBefore(panel,host.querySelector('.seedselect'));

@@ -10,6 +10,7 @@ import {chunkKey,editAffectedChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
+import {BIOME130_REGISTERED_IDS,biome130Block} from './biome130-registry.mjs';
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
@@ -21,9 +22,9 @@ import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup}
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
 import {installExplorationMap} from './exploration-map.mjs';
-import {PACK3_BUILDER_SYMBOLS,resolvePack3BuilderAsset} from './builder-assets/pack3.mjs';
 import {createPack3LiveBridge,combinePack3ChunkMesh,isPack3BlockId} from './builder-assets/pack3-live.mjs';
 import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
+import {exportPack3Portable,inspectPack3Portable,restorePack3Portable} from './builder-assets/pack3-portable.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -53,9 +54,6 @@ function start(){
     recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
   }
   let pack3=createPack3LiveBridge(world,localStorage);
-  const pack3Names=new Map(PACK3_BUILDER_SYMBOLS.map(symbol=>{
-    const a=resolvePack3BuilderAsset(symbol);return [a.blockId,a.name];
-  }));
   seedLabel.textContent='WORLD '+world.seed;
   const VS=[
     '#version 300 es','precision highp float;',
@@ -86,7 +84,7 @@ function start(){
   catch(error){fatal('Voxel/sky shader failed to initialize: '+error.message);return;}
 
   let caveDiscovery={inside:false,last:-Infinity,discoveries:0};
-  let selected=BLOCK.STONE,pack3Yaw=0;
+  let selected=BLOCK.STONE,selectedRotation=0,pack3Yaw=0;
   let outlineKey='',outlineCount=0,editFeedback=[];
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
@@ -196,8 +194,8 @@ function start(){
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
   function meshPlayableChunk(cx,cz,section){
-    const original=section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section);
-    return combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
+    const base=section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section);
+    return combinePack3ChunkMesh(base,pack3.runtime,cx,cz,section);
   }
   function refreshEditedMeshes(x,z,y=0){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
@@ -232,10 +230,11 @@ function start(){
   }
   function edit(mode){
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
-    const inspection=inspectBlockTarget(world,eye(),facing(),selected,player);
-    const pack3Target=inspection.hit&&pack3.runtime.get(inspection.hit);
+    const rotation=isPack3BlockId(selected)?pack3Yaw:selectedRotation;
+    const inspection=inspectBlockTarget(world,eye(),facing(),selected,player,rotation);
+    const physicalTarget=inspection.hit&&pack3.runtime.get(inspection.hit);
     const physical=(mode==='place'&&isPack3BlockId(selected))||
-      (mode==='mine'&&Boolean(pack3Target));
+      (mode==='mine'&&Boolean(physicalTarget));
     let result;
     if(physical){
       if(storageReadOnly)result={ok:false,reason:'Protected world is read-only'};
@@ -245,12 +244,13 @@ function start(){
       else result=pack3.mutate({mode,
         cell:mode==='place'?inspection.adjacent:inspection.hit,
         id:selected,orientation:pack3Yaw,player,rebuild:refreshEditedMeshes});
-    }else result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
+    }else result=applyBlockAction(world,eye(),facing(),mode,selected,player,
+      refreshEditedMeshes,{rotation:selectedRotation});
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),
       mode==='place'?inspection:null);
     if(!result.ok){message(result.reason);return;}
     const persisted=physical?true:(changed=true,save());
-    const label=pack3Names.get(result.block)||BLOCK_NAMES[result.block]||'block';
+    const label=BLOCK_NAMES[result.block]||'block';
     message((mode==='mine'?'Removed ':'Placed ')+label+
       (persisted?' · saved':' · save failed, export backup'));
   }
@@ -388,14 +388,14 @@ function start(){
         gl.drawArrays(gl.TRIANGLES,0,c.count);
       }
       // A faint world-space targeted-block outline, never a HUD covering the scene.
-      const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player):null;
+      const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
       const focusKey=focused?.hit?.join(',')||'';
       const placeKey=focused?.canPlace?focused.adjacent.join(','):'';
       canvas.dataset.targetBlock=focusKey;
       canvas.dataset.targetPlace=placeKey;
       canvas.dataset.canPlace=String(Boolean(placeKey));
       const display=focused?.hit?
-        (pack3Names.get(focused.block)||BLOCK_NAMES[focused.block]||'block').toUpperCase()+' · '+focused.distance.toFixed(1)+'m'+
+        (BLOCK_NAMES[focused.block]||'block').toUpperCase()+' · '+focused.distance.toFixed(1)+'m'+
         '\n'+(focused.canPlace?'GOLD = BUILD SPACE':'PLACE BLOCKED'):
         'LOOK AT A BLOCK';
       if(display!==lastTargetText){
@@ -652,17 +652,81 @@ function start(){
   bindGameplayAction('jump',jump);
   bindGameplayAction('dig',()=>edit('mine'));
   bindGameplayAction('place',()=>edit('place'));
-  const pack3Palette=installPack3Palette(help,(id,yaw)=>{
-    selected=id;pack3Yaw=yaw;
-    document.querySelectorAll('[data-block]').forEach(b=>{
-      b.classList.remove('selected');b.setAttribute('aria-pressed','false');
+  // The full biome130 palette lives in the existing scrollable settings sheet,
+  // NOT in the independent two-thumb control rails or over the game viewport.
+  const physicalPalette=document.createElement('div');
+  physicalPalette.className='looksetting';
+  const physicalLabel=document.createElement('label');
+  physicalLabel.htmlFor='biome130Select';
+  physicalLabel.textContent='AUTOMATION BIOME BLOCKS · 60 PHYSICAL MATERIALS';
+  const biomeSelect=document.createElement('select');
+  biomeSelect.id='biome130Select';
+  biomeSelect.setAttribute('aria-label','Biome construction block');
+  const emptyChoice=document.createElement('option');
+  emptyChoice.value='';emptyChoice.textContent='Select a biome construction material';
+  biomeSelect.append(emptyChoice);
+  for(const [title,start,end] of [['Desert',1,15],['Snow',16,30],['Enchanted forest',31,45],['Mountains',46,60]]){
+    const group=document.createElement('optgroup');group.label=title;
+    for(const id of BIOME130_REGISTERED_IDS){
+      const ordinal=id-255;if(ordinal<start||ordinal>end)continue;
+      const opt=document.createElement('option');
+      opt.value=String(id);opt.textContent=String(ordinal).padStart(3,'0')+' · '+biome130Block(id).name;
+      group.append(opt);
+    }
+    biomeSelect.append(group);
+  }
+  const turnLabel=document.createElement('label');
+  turnLabel.htmlFor='biome130Rotation';
+  turnLabel.textContent='Block orientation';
+  const biomeRotation=document.createElement('select');
+  biomeRotation.id='biome130Rotation';biomeRotation.setAttribute('aria-label','Biome block rotation');
+  for(const [rotation,name] of ['North','East','South','West'].entries()){
+    const opt=document.createElement('option');opt.value=String(rotation);opt.textContent=name;
+    biomeRotation.append(opt);
+  }
+  physicalPalette.append(physicalLabel,biomeSelect,turnLabel,biomeRotation);
+  const moreBlockArea=help.querySelector('[data-block="8"]')?.closest('.looksetting');
+  if(moreBlockArea?.parentElement)moreBlockArea.insertAdjacentElement('afterend',physicalPalette);
+  else help.querySelector('.helpbody')?.append(physicalPalette);
+  biomeRotation.addEventListener('change',()=>{
+    selectedRotation=Number(biomeRotation.value);
+    if(BIOME130_REGISTERED_IDS.includes(selected))
+      message('Selected '+biome130Block(selected).name+' · '+biomeRotation.selectedOptions[0].textContent);
+  });
+  biomeSelect.addEventListener('change',()=>{
+    const chosen=Number(biomeSelect.value);
+    if(!BIOME130_REGISTERED_IDS.includes(chosen))return;
+    selected=chosen;selectedRotation=Number(biomeRotation.value);pack3Palette.clear();
+    document.querySelectorAll('[data-block]').forEach(q=>{
+      q.classList.remove('selected');q.setAttribute('aria-pressed','false');
     });
-    message('Selected '+pack3Names.get(id)+' · facing '+yaw*90+'°');
+    message('Selected '+biome130Block(selected).name+' · PLACE to build, MINE to remove');
+  });
+  const pack3Palette=installPack3Palette(help,(id,yaw)=>{
+    selected=id;pack3Yaw=yaw;biomeSelect.value='';
+    document.querySelectorAll('[data-block]').forEach(q=>{
+      q.classList.remove('selected');q.setAttribute('aria-pressed','false');
+    });
+    message('Selected '+BLOCK_NAMES[id]+' · facing '+yaw*90+'°');
+  },{
+    onExport:()=>({raw:exportPack3Portable(pack3,world,localStorage),seed:world.seed}),
+    onImport:async raw=>{
+      if(storageReadOnly||changed)throw Error('Save the current world safely before importing physical construction');
+      if(help.hidden||document.hidden||graphicsLost)throw Error('Pack 3 import requires active settings');
+      const examined=inspectPack3Portable(raw,world);
+      if(!window.confirm('Restore '+examined.count+' verified physical Pack 3 blocks in seed '+
+        examined.seed+'? Current Pack 3 storage is backed up first. Cancel leaves everything unchanged.'))
+        return {message:'Pack 3 restore cancelled; original construction unchanged'};
+      const result=restorePack3Portable(raw,pack3,world,localStorage,{approved:true});
+      if(result.requiresReload)location.reload();
+      return {message:result.requiresReload?'Pack 3 restored and reloading':'Pack 3 record already current'};
+    }
   });
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
-    selected=Number(b.dataset.block);pack3Palette.clear();
+    selected=Number(b.dataset.block);
+    biomeSelect.value='';pack3Palette.clear();
     document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
-    message('Selected '+({3:'stone',4:'wood',5:'crystal',7:'leaf canopy',8:'deepstone'})[selected]);
+    message('Selected '+(BLOCK_NAMES[selected]||'material'));
   });
   document.getElementById('menu').onclick=()=>{cancelAllPointers();help.hidden=false;};
   document.getElementById('closeHelp').onclick=()=>{

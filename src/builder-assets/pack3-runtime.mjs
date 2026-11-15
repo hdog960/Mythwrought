@@ -4,6 +4,7 @@ import {resolvePack3BuilderAsset,PACK3_BUILDER_SYMBOLS} from './pack3.mjs';
 import {FULL_CUBE,raycastShapes} from '../voxel-shape-interactions.mjs';
 import {inspectBodyFit} from '../voxel-shape-fit.mjs';
 import {CHUNK_SIZE,BLOCK} from '../voxel.mjs';
+import {biome130Block,isBiome130BlockId} from '../biome130-registry.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionBounds,sectionForY} from '../depth.mjs';
 
 export const PACK3_RUNTIME_FORMAT='mythwrought.pack3-construction-overlay.v1';
@@ -163,7 +164,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
     if(playerBody){
       const proposed=(x,y,z)=>{
         const k=[x,y,z].join(','),e=planned.get(k);
-        return e?resolvePack3BuilderAsset(e.asset,e.yaw).shape:readShape(x,y,z);
+        return e?resolvePack3BuilderAsset(e.asset,e.yaw).shape:readCollisionShape(x,y,z);
       };
       if(!inspectBodyFit(playerBody,proposed).fits)
         throw new Error('Physical construction intersects player');
@@ -180,8 +181,20 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
     if(e)return resolvePack3BuilderAsset(e.asset,e.yaw).shape;
     const id=world.get(x,y,z);
     if(id===BLOCK.AIR)return null;
+    if(isBiome130BlockId(id)){
+      const source=biome130Block(id,world.rotationAt?.(x,y,z)??0);
+      return {boxes:source.boxes};
+    }
     if(Number.isInteger(id)&&id>0&&id<=BLOCK.DEEPSTONE)return FULL_CUBE;
     throw new Error('Unknown live block identity; cannot synthesize geometry');
+  }
+  function readCollisionShape(x,y,z){
+    // Biome130 intentionally includes nonsolid plants. The Pack 3 combined
+    // collision path must keep those passable, exactly as the live engine does.
+    const id=world.get(x,y,z);
+    if(isBiome130BlockId(id)&&!biome130Block(id,world.rotationAt?.(x,y,z)??0).solid)
+      return null;
+    return readShape(x,y,z);
   }
   function remove(at){return unregister(at);}
   function get(at){return overlays.get(key(at))??null;}
@@ -189,7 +202,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
   function target(origin,direction,reach=6){
     return raycastShapes(origin,direction,readShape,reach);
   }
-  function playerFits(bounds){return inspectBodyFit(bounds,readShape);}
+  function playerFits(bounds){return inspectBodyFit(bounds,readCollisionShape);}
   function chunkMesh(cx,cz,section=0,{maxVertices=100000}={}){
     if(![cx,cz,section].every(Number.isInteger)||section>0||
         !Number.isSafeInteger(maxVertices)||maxVertices<1)throw new TypeError('Invalid chunk request');

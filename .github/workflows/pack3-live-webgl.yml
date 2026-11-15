@@ -11,6 +11,9 @@ on:
       - 'tests/pack3-live*.mjs'
       - 'tests/pack3-runtime-stage.test.mjs'
       - 'tests/pack3-complete-readiness.test.mjs'
+      - 'tests/pack3-portable.test.mjs'
+      - 'tests/pack3-biome130-compat.test.mjs'
+      - 'tests/pack3-portable-browser.mjs'
 
 permissions:
   contents: read
@@ -35,7 +38,9 @@ jobs:
           node --check src/builder-assets/pack3-live.mjs
           node --check tests/pack3-live-webgl-browser.mjs
           node --check tests/pack3-live-all17-browser.mjs
-          node --test tests/pack3-runtime-stage.test.mjs tests/pack3-live.test.mjs tests/pack3-complete-readiness.test.mjs
+          node --check tests/pack3-portable-browser.mjs
+          node --check src/builder-assets/pack3-portable.mjs
+          node --test tests/pack3-runtime-stage.test.mjs tests/pack3-live.test.mjs tests/pack3-complete-readiness.test.mjs tests/pack3-portable.test.mjs tests/pack3-biome130-compat.test.mjs
       - name: Install Chromium (free GitHub-hosted runner)
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
@@ -45,6 +50,7 @@ jobs:
           python3 -m http.server 4173 >/tmp/mythwrought-pack3-live.log 2>&1 &
           node tests/pack3-live-webgl-browser.mjs
           node tests/pack3-live-all17-browser.mjs
+          node tests/pack3-portable-browser.mjs
       - name: Upload authentic complete or partial browser evidence
         if: always()
         uses: actions/upload-artifact@v4

@@ -46,9 +46,10 @@ export function createPack3LiveBridge(world,storage,{worldId='seed-'+world?.seed
   const runtime=createPack3RuntimeStage(world,{worldId,maxCells:PACK3_RUNTIME_LIMIT});
   const key=pack3OverlayKey(world.seed);
   const backupKey=key+PACK3_OVERLAY_PREVIOUS_GOOD_SUFFIX;
-  let blocked=null;
+  let blocked=null,lastSeenRaw=null;
   try{
     const raw=storage.getItem(key);
+    lastSeenRaw=raw;
     if(raw!==null && raw!=='')runtime.restore(raw);
     else if(raw==='')throw new TypeError('Empty, unverified Pack 3 overlay');
   }catch(err){
@@ -93,6 +94,7 @@ export function createPack3LiveBridge(world,storage,{worldId='seed-'+world?.seed
       storage.setItem(key,next);
       if(storage.getItem(key)!==next)throw Error('Physical block save readback mismatch');
       rebuild(cell[0],cell[2],cell[1]);
+      lastSeenRaw=next;
       return {ok:true,mode,cell:[...cell],previous:prior?.id??0,
         next:mode==='place'?id:0,block:mode==='place'?id:prior.id};
     }catch(error){
@@ -103,6 +105,7 @@ export function createPack3LiveBridge(world,storage,{worldId='seed-'+world?.seed
           if(oldRaw===null)storage.removeItem(key);
           else storage.setItem(key,oldRaw);
           if(storage.getItem(key)!==oldRaw)throw Error('Rollback readback mismatch');
+          lastSeenRaw=oldRaw;
         }catch(rollbackError){
           blocked='Pack 3 storage rollback not verified; editing disabled: '+String(rollbackError);
         }
@@ -113,6 +116,7 @@ export function createPack3LiveBridge(world,storage,{worldId='seed-'+world?.seed
   return Object.freeze({
     runtime,key,backupKey,mutate,
     get blocked(){return blocked;},
+    get lastSeenRaw(){return lastSeenRaw;},
     getAt:(x,y,z)=>runtime.get([x,y,z]),
     getId:(x,y,z)=>runtime.get([x,y,z])?.id??world.get(x,y,z),
     physicalShape:(x,y,z)=>runtime.readShape(x,y,z),

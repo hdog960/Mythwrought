@@ -10,6 +10,13 @@ other four manual Block Packs.
   `pack3:023–029` and `pack3:069–078`.
 - 56 certified orientation combinations: IDs 109–112 north-only; IDs 113–125
   support north, east, south, west. Undefined yaws must fail closed.
+- Current main now registers automation-owned biome130 IDs 256–315 using
+  their existing physical geometry, shape targeting and schema-1 rotation
+  extension. Pack 3 retains IDs 109–125 and a separate seed-bound overlay.
+  Pack 3's mixed-world adapter preserves biome130 solids, nonsolid flora,
+  rotations, targeting, and world save payload without modifying the
+  automation registry. Exact-head cross-registry Node and full-game browser
+  tests are required on the reconciled source branch.
 - Original geometry and palette are byte-identical to the Pack 3 source merge
   PR #149 at `44926349`; runtime development must not redefine assets or borrow
   IDs, symbolic namespaces, save data or builder ownership from Packs 1, 2, 4, 5.
@@ -25,6 +32,16 @@ other four manual Block Packs.
   Physical construction is saved under its own per-seed key
   `mythwrought-pack3-construction-v1:<seed>`; this is an explicit dependency
   for the final coordinated five-pack save/restore design.
+- Standalone Pack 3 JSON **EXPORT/IMPORT** buttons are now available in the
+  settings panel and operate independently from the existing schema-1 world
+  export/import (which otherwise omits physical blocks). Restore is explicit,
+  verifies approved IDs/rotations/cells and matching seed before writing,
+  saves original raw bytes in `:pre-import`, refuses concurrent-tab changes,
+  rolls back on storage failure, and reloads to rebuild live collision/meshes.
+  No automatic migration or silent overwrite. This backup must accompany
+  the ordinary world export until the five-pack integrator supplies a combined
+  archival bundle. Native tests and a real Chromium download/import workflow
+  are required acceptance gates, not yet presumed successful.
 - The candidate now verifies a source-compatible `:previous-good` copy before
   overwriting an existing verified physical sidecar. If a second tab changes the
   saved construction, the old session refuses to overwrite it. Invalid sidecars
@@ -74,8 +91,10 @@ other four manual Block Packs.
 4. Verify symbolic blueprint compatibility: future settlement builders consume
    Pack 3's `pack3:NNN` symbols and exact AABB occupancy, not provisional
    overlapping numeric IDs, and do not place unfinished settlements.
-5. Coordinate cross-pack production registration and sidecar export/import
-   ownership during the **single final five-pack integration**. Any outstanding
+5. Coordinate cross-pack production registration and integration of the
+   **separate** Pack 3 portable archive with the all-pack save/export/import
+   process during the single final five-pack integration. The Pack 3-specific
+   archive is available now but an automatic combined archive is not. Any outstanding
    device-level iPhone frame pacing/physical-controls approval is a blocker, not
    evidence to infer or claim.
 6. Keep this PR **DRAFT, UNMERGED, UNDEPLOYED** until the user explicitly
