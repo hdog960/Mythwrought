@@ -262,7 +262,7 @@ function marketMoonroot(){
   [11,27,'north-lanterns'],[21,27,'north-charms']
  ];
  const stalls=locations.map(([x,z,id])=>booth(p,x,z,id,S.livingRoof));
- for(const x of [c-7,c+7])for(const z of [12,20])p.post(x,z);
+ for(const x of [c-7,c+7])for(const z of [12,20])p.post(x,z,5);
  for(let x=c-7;x<=c+7;x++)for(const z of [12,20])
   p.put(x,6,z,S.livingRoof,'roof',{role:'ring-arcade-crossbeam'});
  for(let z=12;z<=20;z++)for(const x of [c-7,c+7])
