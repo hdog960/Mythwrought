@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Opt-in Pack3 source geometry assembly review. Canvas2D only, not live WebGL2.
+"""Opt-in ridge plus two pitch roof assembly review. Canvas2D only, not live WebGL2.
 
 PACK3_RIDGE_ASSEMBLY_DIR=/tmp/ridge-scenes python tests/block-packs/pack-3/ridge-assembly-browser.py
 Uses local source gallery and Playwright/Chromium; does not touch saves or world.
@@ -16,10 +16,9 @@ RENDER_JS=r'''(yaw)=>{
  const a=pack3GeometryById(115,yaw),
        s1=pack3GeometryById(113,(yaw+3)%4),
        s2=pack3GeometryById(113,(yaw+1)%4);
- const xDirs=[[1,0],[0,1],[-1,0],[0,-1]],
-       zDirs=[[0,1],[-1,0],[0,-1],[1,0]];
- const locations=[[0,0,0],[xDirs[yaw][0],0,xDirs[yaw][1]],
-                  [zDirs[yaw][0],0,zDirs[yaw][1]]];
+ const sideA=[[-1,0,0],[0,0,-1],[1,0,0],[0,0,1]][yaw];
+ const sideB=sideA.map(v=>-v);
+ const locations=[[0,0,0],sideA,sideB];
  const parts=[a,s1,s2].flatMap((asset,i)=>asset.parts.map(p=>({
   box:p.box.map((v,j)=>v+locations[i][j%3]),
   color:asset.colors[p.tone],id:asset.id
