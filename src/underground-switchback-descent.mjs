@@ -10,7 +10,7 @@ export function descentRoute(origin=DESCENT_ORIGIN){
     const t=i%PERIMETER;
     const x=t<SIDE?t:t<2*SIDE?SIDE:t<3*SIDE?3*SIDE-t:0;
     const z=t<SIDE?0:t<2*SIDE?t-SIDE:t<3*SIDE?SIDE:4*SIDE-t;
-    const floor=LEGACY_WORLD_MIN_Y-2-Math.floor(i/4);
+    // Begin below the protected legacy -3 layer: the first four-cell-high\n    // passage must not rely on carving legacy terrain for headroom.\n    const floor=LEGACY_WORLD_MIN_Y-4-Math.floor(i/4);
     out.push({x:origin.x+x,z:origin.z+z,floor,feet:floor+1});
   }
   return out;
