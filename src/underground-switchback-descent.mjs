@@ -37,7 +37,12 @@ export function descentCells(origin=DESCENT_ORIGIN){
       set(p.x+dx,depth,p.z+dz,BLOCK.DEEPSTONE);
     }
   }
-  // Restore centerline support after overlapping segments, including alcoves.
+  // Alcove floors can intersect the sloping approach at a different height.
+  // Recarve the entire ordered player corridor AFTER the chambers, then
+  // restore its support. Otherwise chamber floors seal three or more steps.
+  // Two passes prevent a later step's support from being mistaken for air
+  // while keeping all authored floor voxels solid.
+  for(const p of route)for(let h=1;h<=4;h++)set(p.x,p.floor+h,p.z,BLOCK.AIR);
   for(const p of route)set(p.x,p.floor,p.z,BLOCK.DEEPSTONE);
   return cells;
 }
