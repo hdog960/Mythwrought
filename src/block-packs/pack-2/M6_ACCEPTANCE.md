@@ -181,6 +181,14 @@ Executed the **original committed** `tests/block-packs/pack-2/gallery-browser.py
 
 **Next clean checkout command:** `bash tests/block-packs/pack-2/run-acceptance.sh` with the expected actual PR HEAD and clean Pack 2-owned paths. The runner is now **fail-closed** if the real production `VoxelWorld` graph is unavailable.
 
+## Session 16 — exact Git sources evaluated with real checkpoint-008 VoxelWorld (2026-11-14)
+
+- Audited integrated `main` `ac263720b60641c65b02330348dd76d0ef9cb75e` (checkpoint **008**), coordination Issues #109/#117, draft PR #114 at `b43e079e7c0fcfd7168f8eb9dfd8a2ce42f87f3e`, all manual Pack 1/3/4/5 heads, the separate biome130 candidate and four building-roadmap draft heads. The 18 Pack 2 candidate IDs 59–76 remain unregistered and disjoint; 21 PR paths remain Pack 2-owned.
+- Retrieved the **actual production `src/voxel.mjs` and its complete 16 additional transitive production modules**, pinned to checkpoint-008 `main`. Retrieved the committed Pack 2 JavaScript modules and all seven original test sources from the draft PR. Independently reconstructed and matched **14/14 Pack 2 `.mjs` file SHA-1 Git blob hashes** to the exact branch Git tree. No production `VoxelWorld` substitute/facade was used for this evaluation.
+- Executed **all 95 checked-in test callbacks** in a V8 in-memory module/test harness against those real source definitions: **89/89 original six-suite candidate tests PASS**, **6/6 newly authored production-boundary tests PASS**, 0 callback failures. The checks include rejecting IDs 59–76, legacy schema-1 edit round-trips, malformed save and preview-envelope rejection, and candidate geometry/fixture regressions. The original six test file bodies were not edited.
+- **Evidence classification:** genuine real-source **V8 evaluation only** with a compatibility test/assertion harness — **NOT native Node `node --test`**, **NOT a full Git checkout**, and **NOT production WebGL2, schema migration, actual fluid propagation, offline PWA, physical iPhone or creator Gate A acceptance**. The previous separate **89/89 genuine Node tests** remain explicitly qualified by their local legacy `VoxelWorld` facade; the previous **66 real Chromium Canvas 2D candidate screenshots** remain preserved, not recertified as WebGL2.
+- The opt-in `run-acceptance.sh` already includes the real-production seventh suite. The remaining next step is to obtain a permitted **full real source checkout** and execute all seven tests in native Node plus the authentic Chromium gallery; standard root CI still excludes Pack 2's nested suites. No registration, merge, deployment, save alteration, shared system or v0.11 work is authorized.
+
 ## Required real test gates — NOT certified by the source-level checks
 
 | Gate | Evidence required | Current status |

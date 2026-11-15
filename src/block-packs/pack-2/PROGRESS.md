@@ -188,6 +188,13 @@
 - [ ] **Real production dependency graph native run remains OPEN** because container GitHub clone/DNS is blocked and all production module imports have not been mounted. Existing **66 authentic Chromium candidate preview screenshots** are preserved but do not establish production WebGL2 or physical iPhone approval.
 - [ ] Gate A, production integration, old-save/offline migration, transparent water behavior and v0.11 remain locked. Preserve all 18 candidate IDs 59–76 and PR draft status.
 
+## Session 16 — production source import-graph regression, not native certification (2026-11-14)
+
+- [x] Actual checkpoint-008 production `VoxelWorld` and **all 16 transitive production source modules** loaded via pinned GitHub source; **14/14 original Pack 2 JavaScript file Git blob SHA-1 hashes matched** the draft tree at `b43e079e7c0fcfd7168f8eb9dfd8a2ce42f87f3e`.
+- [x] **95/95 source-exact V8 callback assertions PASS** across all six original Pack 2 test bodies (89) plus the new separate **real-production-boundary body (6)**, with **no local VoxelWorld facade**. This is **in-memory V8 with a test/assertion shim**, not genuine native Node `node:test` or a full production checkout. The real Node 89/89 from prior session still used its disclosed legacy facade.
+- [x] Current main remains checkpoint 008; competing draft packs, biome130, building roadmaps and candidate IDs isolated. No change to source assets, persistent IDs, game saves, shared files or deployment.
+- [ ] Still required: **all seven original committed suites in native Node against full actual VoxelWorld import graph**, authorized Chromium production acceptance, creator art/control review and central incorporation. PR draft/unmerged, Gate A open, v0.11 locked.
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
