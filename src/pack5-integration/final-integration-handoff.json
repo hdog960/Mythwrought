@@ -1,0 +1,166 @@
+{
+  "format": "mythwrought.manual-pack-5.final-integration-handoff.v1",
+  "packNumber": 5,
+  "ownership": "manual Block Pack 5 — Interiors & Specialty Architecture",
+  "lifecycle": "isolated-candidate-not-registered",
+  "combinedIntegration": "deferred-until-all-five-packs-technically-ready",
+  "idNamespace": "pack5",
+  "symbolicRange": [
+    "pack5:079",
+    "pack5:096"
+  ],
+  "families": 18,
+  "authoredVariantsPerFamily": 2,
+  "rotations": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "symbols": [
+    {
+      "symbolicId": "pack5:079",
+      "familyIndex": 79,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:080",
+      "familyIndex": 80,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:081",
+      "familyIndex": 81,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:082",
+      "familyIndex": 82,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:083",
+      "familyIndex": 83,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:084",
+      "familyIndex": 84,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:085",
+      "familyIndex": 85,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:086",
+      "familyIndex": 86,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:087",
+      "familyIndex": 87,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:088",
+      "familyIndex": 88,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:089",
+      "familyIndex": 89,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:090",
+      "familyIndex": 90,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:091",
+      "familyIndex": 91,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:092",
+      "familyIndex": 92,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:093",
+      "familyIndex": 93,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:094",
+      "familyIndex": 94,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:095",
+      "familyIndex": 95,
+      "numericId": null
+    },
+    {
+      "symbolicId": "pack5:096",
+      "familyIndex": 96,
+      "numericId": null
+    }
+  ],
+  "physicalGeometrySource": "src/block-packs/pack-5/",
+  "physicalCatalog": "src/pack5-integration/catalog.mjs",
+  "productionBuilderResolver": "src/pack5-integration/blueprint-handoff.mjs",
+  "productionGeometryPipeline": "src/pack5-integration/terrain-buffer.mjs",
+  "liveRuntimeAdapter": "src/pack5-integration/live-adapter.mjs",
+  "saveSidecarFormat": "mythwrought.pack5.builder-layer.v1",
+  "saveSidecarKey": "mythwrought.pack5.builder.seed.<seed>",
+  "legacyWorldSchema": 1,
+  "legacyNumericBlockIdsPreserved": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "numericBlockIdPolicy": "NO IDS ASSIGNED BY PACK 5; allocate or register only under coordinated five-pack integration",
+  "builderContract": {
+    "placementInput": [
+      "asset",
+      "at",
+      "orientation",
+      "variant"
+    ],
+    "requiredOutput": [
+      "physical.occupiedCells",
+      "physical.visible",
+      "physical.selection",
+      "physical.collision",
+      "physical.requiredSupports"
+    ],
+    "orientationOrder": [
+      "north",
+      "east",
+      "south",
+      "west"
+    ],
+    "supportVerification": "must use live world's registered structural supports before settlement placement",
+    "productionPlacement": false,
+    "registeredInMain": false
+  },
+  "performanceContract": {
+    "residentGpuBytes": 2097152,
+    "pageUploadBytes": 393216,
+    "maximumDrawCalls": 8,
+    "maximumNearbyCandidates": 256,
+    "defaultMaxConstructionInstances": 4096,
+    "budgetExclusionsMustBeReported": true,
+    "physicalIphoneHardwareAcceptance": "PENDING"
+  },
+  "deployment": "NEVER MERGE OR DEPLOY FROM THIS PR WITHOUT EXPLICIT USER AUTHORIZATION"
+}
