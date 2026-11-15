@@ -1,9 +1,9 @@
 // :24 candidate surface composition. Pure, opt-in baseline sampler; no save writes.
 // Integration seam: consult surfaceBiomeBlock before legacy baseline generation
 // only for explicitly new-world-enabled regions. Do NOT alter existing saves.
-import {biome130Block,isBiome130BlockId} from './biome130-registry.mjs';
-import {terrainHeight} from './voxel.mjs';
-import {WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
+import {biome130Block,isBiome130BlockId} from '../biome130-registry.mjs';
+import {terrainHeight} from '../voxel.mjs';
+import {WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from '../depth.mjs';
 const REGIONS=Object.freeze([
   {name:'desert',x:512,z:0,surface:256,subsoil:258,rock:261,salt:259},
   {name:'snow',x:0,z:512,surface:271,subsoil:272,rock:274,salt:275},
@@ -53,10 +53,10 @@ export function surfaceBiomeBlock(x,y,z,seed=179,{enabled=false}={}){
  if(!b||b.weight<.35)return null;
  const r=REGIONS.find(r=>r.name===b.name);
  const top=surfaceBiomeHeight(x,z,seed);
- if(y>top)return 0;
+ if(y>top)return null; // Never erase existing legacy terrain or cave entrances.
  // Preserve original stone foundation, caves and deep substrate: caller must
  // apply only to unedited, previously solid topsoil and never to cave AIR.
- const id=y===top?r.surface:y>=top-2?r.subsoil:r.rock;
+ // Only offer a bounded surface veneer; never replace the cave-bearing foundation.\n if(y<top-2)return null;\n const id=y===top?r.surface:r.subsoil;
  if(!isBiome130BlockId(id)||!biome130Block(id).solid)
    throw Error('Unregistered or non-solid surface material '+id);
  return id;
