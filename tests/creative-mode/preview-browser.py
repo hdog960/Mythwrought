@@ -11,7 +11,10 @@ ROOT=Path(__file__).resolve().parents[2]/"src"/"creative-mode"
 HTML=(ROOT/"preview.html").read_text().replace('<link rel="stylesheet" href="./preview.css">','').replace('<script type="module" src="./preview.mjs"></script>','')
 CSS=(ROOT/"preview.css").read_text()
 STATE_URL="data:text/javascript;base64,"+base64.b64encode((ROOT/"ux-state.mjs").read_bytes()).decode()
-JS=(ROOT/"preview.mjs").read_text().replace("from './ux-state.mjs'",f"from '{STATE_URL}'")
+FLIGHT_URL="data:text/javascript;base64,"+base64.b64encode((ROOT/"flight-model.mjs").read_bytes()).decode()
+JS=((ROOT/"preview.mjs").read_text()
+    .replace("from './ux-state.mjs'",f"from '{STATE_URL}'")
+    .replace("from './flight-model.mjs'",f"from '{FLIGHT_URL}'"))
 def load_preview(page):
     page.set_content(HTML,wait_until="domcontentloaded")
     page.add_style_tag(content=CSS)

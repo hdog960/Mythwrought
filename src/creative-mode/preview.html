@@ -11,10 +11,10 @@
     <div class="rail-foot">INPUT PREVIEW</div>
   </aside>
   <section class="screen" aria-label="Standalone Creative Mode viewport concept">
-    <header class="chrome"><strong>MYTHWROUGHT</strong><span>CREATIVE · ROADMAP 9</span><small>UX TEST · M1</small></header>
+    <header class="chrome"><strong>MYTHWROUGHT</strong><span>CREATIVE · ROADMAP 9</span><small>FLIGHT LAB · M2</small></header>
     <div class="world" id="world" data-mode="explore" data-drawer="closed">
       <div class="landscape" aria-hidden="true"><div class="mountain far"></div><div class="mountain near"></div><div class="ground"></div><div class="path"></div></div>
-      <div class="world-label"><span>STANDALONE UI PREVIEW</span><small>No world, flight or placement connection</small></div>
+      <div class="world-label"><span>STANDALONE FLIGHT LAB</span><small>Fixture motion only · not connected to the game</small></div><div class="flight-ghost" id="flightGhost" aria-hidden="true">✦</div>
       <nav class="mode-switch" aria-label="Interface mode">
         <button type="button" id="exploreMode" data-mode="explore" aria-pressed="true">Explore</button>
         <button type="button" id="creativeMode" data-mode="creative" aria-pressed="false">Creative</button>
@@ -22,6 +22,12 @@
       <div class="map-reservation" id="miniMapReservation" role="img" aria-label="Reserved upper-right in-game minimap area; no live map data"><span class="map-glyph" aria-hidden="true">◇</span><span>MAP SPACE</span></div>
       <div class="center-mark" aria-hidden="true">+</div>
       <div class="mode-note" id="modeNote">EXPLORE PREVIEW</div>
+      <div class="flight-dashboard" id="flightDashboard" hidden>
+        <output id="flightTelemetry" aria-label="Preview flight coordinates and safety status">Flight off</output>
+        <nav class="speed-switch" id="flightProfiles" aria-label="Creative flight speed profiles">
+          <button type="button" data-speed="precision">PRECISION</button><button type="button" data-speed="normal">NORMAL</button><button type="button" data-speed="fast">FAST</button><button type="button" data-speed="travel">TRAVEL</button>
+        </nav>
+      </div>
       <div class="bottom-tools" id="bottomTools">
         <div class="slot-list" id="hotbar" role="group" aria-label="Preview hotbar with six slots"></div>
         <button type="button" id="inventoryButton" class="inventory-button" disabled aria-label="Open sample inventory">INVENTORY</button>
@@ -42,7 +48,11 @@
     <div class="rail-hint">RIGHT THUMB</div>
     <div class="thumb-pad" id="lookPad" role="group" aria-label="Preview camera pad, drag to test input" tabindex="0"><span class="pad-ring"></span><span class="pad-knob">◇</span></div>
     <div class="rail-caption" id="lookReadout">IDLE</div>
-    <div class="action-ghosts" aria-label="Future Creative actions"><span>PLACE · M4</span><span>FLY · M2</span></div>
+    <div class="flight-rail" aria-label="Standalone Creative flight controls">
+      <div class="vertical-controls"><button type="button" id="ascend" aria-label="Hold to ascend in flight preview">UP ↑</button><button type="button" id="descend" aria-label="Hold to descend in flight preview">DOWN ↓</button></div>
+      <button type="button" id="flightToggle" aria-pressed="false">FLY OFF</button>
+      <button type="button" id="landButton">LAND</button>
+    </div>
     <div class="rail-foot">NO GAME ACTIONS</div>
   </aside>
 </main>
