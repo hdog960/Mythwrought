@@ -109,8 +109,9 @@ export function pack2BodyIntersects(id,state,cell,player){
 export function pack2CycleState(id,state,action){
   const current=pack2NormalizeState(id,state),spec=pack2Spec(id);
   if(action==='rotate'){
+    const specRotatable=(joineryAsset(id)||pack2Asset(id))?.rotatable;
     const steps=infrastructureAsset(id)?.rotations??groundAsset(id)?.orientation.turns??
-      (joineryAsset(id)||pack2Asset(id))?.rotatable===false?1:4;
+      (specRotatable===false?1:4);
     if(steps<=1)return current;
     return pack2NormalizeState(id,{...current,rotation:(current.rotation+1)%steps});
   }
