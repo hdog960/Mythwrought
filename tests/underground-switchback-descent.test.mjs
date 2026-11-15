@@ -58,3 +58,17 @@ test('first descending step has full headroom below untouched legacy floor',()=>
   assert.equal(reader.get(first.x,-3,first.z),world.get(first.x,-3,first.z));
   assert.equal(descentConnectivity(world).connected,true);
 });
+
+// A broad chamber's floor must never plug the descending approach corridor.
+test('all four chamber approaches remain traversable after floor composition',()=>{
+  const world=new VoxelWorld(179),reader=descentWorld(world),route=descentRoute();
+  for(const floor of [-30,-80,-130,-180]){
+    const approach=route.filter(p=>Math.abs(p.floor-floor)<=2);
+    assert.ok(approach.length>=12,'expected multiple descent steps near '+floor);
+    for(const p of approach){
+      assert.notEqual(reader.get(p.x,p.floor,p.z),BLOCK.AIR,'missing floor at '+p.floor);
+      for(let h=1;h<=2;h++)assert.equal(reader.get(p.x,p.floor+h,p.z),BLOCK.AIR,
+        'chamber blocked route at '+p.floor+' head offset '+h);
+    }
+  }
+});
