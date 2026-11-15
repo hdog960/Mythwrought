@@ -28,6 +28,15 @@ export function planCanopyWalkway(world,a,b,y){
     const rx=x+side*sideX,rz=z+side*sideZ;
     cells.push([rx,y,rz,BLOCK.WOOD]);
     cells.push([rx,y+1,rz,BLOCK.LEAVES]);
+    // Rare longer, tapered branch tips interrupt the repeated one-cell
+    // fence-tooth silhouette. Tips remain joined to the inner limb and
+    // their leaf caps are supported by real timber, not floating cubes.
+    // Keep the opposite bank clear at the central fork.
+    if(distance>=7&&(i===2||i===distance-2)&&sides.length===1){
+     const tx=rx+side*sideX,tz=rz+side*sideZ;
+     cells.push([tx,y,tz,BLOCK.WOOD]);
+     cells.push([tx,y+1,tz,BLOCK.LEAVES]);
+    }
    }
   }
  }
