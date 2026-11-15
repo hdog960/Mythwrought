@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {surfaceBiomeAt,surfaceBiomeHeight,surfaceBiomeBlock,SURFACE_BIOME_REGIONS,surfaceBiomeOverlay,surfaceBiomeElevationPlan,surfaceBiomeFreshColumn} from '../../src/surface-regions/regions.mjs';
-import {terrainHeight} from '../../src/voxel.mjs';
+import {surfaceBiomeAt,surfaceBiomeHeight,surfaceBiomeBlock,SURFACE_BIOME_REGIONS,surfaceBiomeOverlay,surfaceBiomeElevationPlan,surfaceBiomeFreshColumn,createSurfaceBiomeWorldView} from '../../src/surface-regions/regions.mjs';
+import {terrainHeight,VoxelWorld,meshChunk,chunkCoord} from '../../src/voxel.mjs';
 import {WORLD_MAX_Y} from '../../src/depth.mjs';
 test('four physically registered regions occupy multiple chunks on fixed seeds',()=>{
  for(const seed of [179,7,2201]){
@@ -145,4 +145,44 @@ test('atomic fresh columns produce real elevation with protected headroom',()=>{
   }
   assert.ok(elevated>0);
  }
+});
+
+test('opt-in world view renders four physical regions without touching schema-1 saves',()=>{
+ for(const seed of [179,7,2201]){
+  const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  assert.equal(createSurfaceBiomeWorldView(world),null);
+  assert.equal(createSurfaceBiomeWorldView(world,{enabled:true,profileIsFresh:true}),null);
+  const view=createSurfaceBiomeWorldView(world,{
+   enabled:true,profileIsFresh:true,isProtected:()=>false,maxCachedColumns:32
+  });
+  assert.ok(view);
+  assert.equal(typeof view.set,'undefined');
+  for(const region of SURFACE_BIOME_REGIONS){
+   const x=region.x,z=region.z,oldTop=terrainHeight(x,z,seed);
+   const actual=view.get(x,oldTop,z);
+   assert.equal(actual,region.surface,region.name+' surface should be physically present');
+   assert.equal(view.get(x,oldTop-8,z),world.get(x,oldTop-8,z));
+   assert.equal(view.get(x,oldTop+1,z)!==0,true);
+  }
+  assert.ok(view.cachedColumns<=32);
+  assert.equal(JSON.stringify(world.save()),before);
+  const restored=VoxelWorld.restore(world.save());
+  assert.equal(JSON.stringify(restored.save()),before);
+  world.set(0,terrainHeight(0,0,seed)+1,0,4);
+  assert.equal(createSurfaceBiomeWorldView(world,{
+   enabled:true,profileIsFresh:true,isProtected:()=>false
+  }),null,'edited world cannot be silently treated as a fresh profile');
+ }
+});
+
+test('real chunk mesher consumes opted-in physical biome view',()=>{
+ const world=new VoxelWorld(179);
+ const view=createSurfaceBiomeWorldView(world,{
+  enabled:true,profileIsFresh:true,isProtected:()=>false,maxCachedColumns:512
+ });
+ const cx=chunkCoord(512),cz=chunkCoord(0);
+ const mesh=meshChunk(view,cx,cz);
+ assert.ok(mesh,'chunk meshing must accept the biome view');
+ assert.ok(view.cachedColumns<=512);
+ assert.equal(world.edits.size,0);
 });
