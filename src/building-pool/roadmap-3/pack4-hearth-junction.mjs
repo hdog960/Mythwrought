@@ -140,10 +140,13 @@ export function assemblePhysicalHearths(plan){
   edited.push(Object.freeze({...placement,physical:shape,
    builderContactCertified:true,previewOnly:true}));
  }
+ if(plan.resolvedCount>0&&hearthCount!==1)
+  throw Error('Construction blueprint lacks the expected real source fireplace');
+ const actuallyCertified=hearthCount===1;
  const output=Object.freeze({...plan,placements:Object.freeze(edited),
   masonryHearths:hearthCount,fireplaceSeamBonds,hollowCourseBonds,
-  verticalFlueOpen:true,subBoxContactReview:false,
-  physicalAssemblyOnly:true,liveGameRegistered:false});
+  verticalFlueOpen:actuallyCertified,subBoxContactReview:!actuallyCertified,
+  physicalAssemblyOnly:actuallyCertified,liveGameRegistered:false});
  return output;
 }
 export function verifyHearthAssemblyContact(plan){
