@@ -37,21 +37,29 @@ export function descentCells(origin=DESCENT_ORIGIN){
       set(p.x+dx,depth,p.z+dz,BLOCK.DEEPSTONE);
     }
   }
-  // Eight broad side grottoes, two at each depth, extend the descent beyond
-  // a single repeated staircase. Each level gallery has an actual stone floor
-  // and six-cell headroom; the main route is restored afterwards.
+  // Two outward galleries per depth. Both begin on the OUTSIDE of the
+  // switchback perimeter, so the descending route cannot subsequently place
+  // a higher step's supporting stone inside either gallery. The second turns
+  // tangentially after leaving the route, giving each grotto its own chamber.
   for(const depth of [-30,-80,-130,-180]){
     const anchor=route.find(p=>p.floor===depth);
     if(!anchor)continue;
-    for(const [sx,sz] of [[1,0],[0,1]]){
-      const cx=anchor.x+sx*15,cz=anchor.z+sz*15;
-      for(let along=0;along<=15;along++){
-        const x=anchor.x+sx*along,z=anchor.z+sz*along;
-        for(let across=-2;across<=2;across++){
-          const px=x+(sz?across:0),pz=z+(sx?across:0);
-          set(px,depth,pz,BLOCK.DEEPSTONE);
-          for(let h=1;h<=5;h++)set(px,depth+h,pz,BLOCK.AIR);
-        }
+    const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+    const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+    const tangent=[outward[1],-outward[0]];
+    for(let branch=0;branch<2;branch++){
+      const points=[];
+      for(let along=0;along<=22;along++){
+        const out=Math.min(along,12),turn=branch===1?Math.max(0,along-12):0;
+        points.push([anchor.x+outward[0]*out+tangent[0]*turn,
+                     anchor.z+outward[1]*out+tangent[1]*turn]);
+      }
+      const [cx,cz]=points.at(-1);
+      for(const [x,z] of points)for(let across=-2;across<=2;across++){
+        const px=x+(outward[1]||tangent[1])*across;
+        const pz=z+(outward[0]||tangent[0])*across;
+        set(px,depth,pz,BLOCK.DEEPSTONE);
+        for(let h=1;h<=5;h++)set(px,depth+h,pz,BLOCK.AIR);
       }
       for(let dx=-7;dx<=7;dx++)for(let dz=-7;dz<=7;dz++){
         if(dx*dx+dz*dz>49)continue;
