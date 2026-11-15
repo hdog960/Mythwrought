@@ -2,6 +2,7 @@
 from __future__ import annotations
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -45,6 +46,14 @@ def choose_for_run(paths,incoming,origin,pack1_mode):
         raise RuntimeError('Pack1-only mode requires a real infrastructure change')
     return ['pack-1']
 
+def require_pack1_exact_head(actual,required):
+    """Fail closed unless the creator-approved Pack 1 source SHA is exact."""
+    if not isinstance(required,str) or not re.fullmatch(r'[a-f0-9]{40}',required):
+        raise RuntimeError('Missing or invalid required Pack 1 source SHA')
+    if actual!=required:
+        raise RuntimeError(f'Pack 1 draft head changed: expected {required}, actual {actual}')
+    return True
+
 def main():
     report=Path(os.environ['MYTHWROUGHT_REPORT_ROOT']);report.mkdir(parents=True,exist_ok=True)
     repo=os.environ['MYTHWROUGHT_REPO'];incoming=int(os.environ['MYTHWROUGHT_PR'])
@@ -74,6 +83,8 @@ def main():
             assert info['head']['repo']['full_name']==repo, 'No external fork code permitted'
             sha=info['head']['sha']
             assert len(sha)==40 and all(c in '0123456789abcdef' for c in sha)
+            if pack1_mode and lane=='pack-1':
+                require_pack1_exact_head(sha,os.environ.get('MYTHWROUGHT_PACK1_REQUIRED_HEAD'))
             # Fetch PR head, not GitHub's synthetic merge ref. Never push or rebase.
             cmd(['git','fetch','--no-tags','--depth=1','origin',f'refs/pull/{pr}/head'])
             actual=cmd(['git','rev-parse','FETCH_HEAD'])
@@ -102,6 +113,7 @@ def main():
                 latest=gh_json(f'repos/{repo}/pulls/{pr}')
                 if latest['head']['sha']!=sha:
                     raise RuntimeError('Pack1 draft head advanced during acceptance; reject stale evidence')
+                require_pack1_exact_head(latest['head']['sha'],os.environ.get('MYTHWROUGHT_PACK1_REQUIRED_HEAD'))
             if result.returncode: failures.append({'lane':lane,'pr':pr,'sha':sha,'reason':'lane acceptance blocked; see evidence.json'})
         except Exception as exc:
             failures.append({'lane':lane,'pr':pr,'reason':str(exc)})

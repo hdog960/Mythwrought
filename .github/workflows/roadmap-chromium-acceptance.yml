@@ -64,6 +64,9 @@ jobs:
           MYTHWROUGHT_REPO: ${{ github.repository }}
           MYTHWROUGHT_PACK1_CANVAS2D_ONLY: '1'
           MYTHWROUGHT_PACK1_SOURCE_WEBGL2: '1'
+          # One-shot, exact candidate head for the creator-authorized corrected-frame recheck.
+          # Reject stale or unexpectedly advanced source instead of silently certifying it.
+          MYTHWROUGHT_PACK1_REQUIRED_HEAD: '7c019432cf73cd9ebc0ab8a8485486845a948c6d'
           MYTHWROUGHT_REPORT_ROOT: ${{ runner.temp }}/mythwrought-roadmap-evidence
           LIBGL_ALWAYS_SOFTWARE: '1'
           EGL_PLATFORM: x11

@@ -1,6 +1,6 @@
 """Pure selector contract tests. No repository writes, network, or browser."""
 import unittest
-from orchestrate import LANES,choose,choose_for_run
+from orchestrate import LANES,choose,choose_for_run,require_pack1_exact_head
 
 class ScopeTests(unittest.TestCase):
     def test_all_nine_for_new_infrastructure(self):
@@ -27,5 +27,14 @@ class ScopeTests(unittest.TestCase):
             choose_for_run(changed,113,origin,True)
         with self.assertRaises(RuntimeError):
             choose_for_run(['src/block-packs/pack-2/index.mjs'],136,origin,True)
+
+    def test_pack1_recheck_requires_exact_approved_head(self):
+        approved='7c019432cf73cd9ebc0ab8a8485486845a948c6d'
+        self.assertTrue(require_pack1_exact_head(approved,approved))
+        for invalid in ('',None,'bad-sha','0'*40,'7C019432'+approved[8:]):
+            with self.assertRaises(RuntimeError):
+                require_pack1_exact_head(approved,invalid)
+        with self.assertRaises(RuntimeError):
+            require_pack1_exact_head('0'*40,approved)
 
 if __name__=='__main__':unittest.main()
