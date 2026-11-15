@@ -20,3 +20,6 @@ The new nested native `m1-parity.test.mjs` fetches **unaltered original source**
 - Weather seals, roof structural spans, actual physical support, glass orientation/collision and all production substitutions remain unresolved. Next milestones need additional genuine distinct coordinate-authored exemplars and full 5-biome × 3-size category quotas.
 
 **Only Builder 1B source/test/docs paths changed.** PR #184 remains draft; original #121 unaffected; no world, engine, save, CI, Block Pack, biome130, sibling, Gate A, v0.11, merge or deployment changes.
+
+## Native connectivity preflight correction (before M1 acceptance)
+A conceptual 2D reachability model of all standing cells found the initial design disconnected: the interior door was blocked at `(7,1,2)`, the main basin access at `(7,1,10)` was isolated by a partition, and both basin-side walkways were sealed at `z=11`. The Builder 1B-only correction opens **(7,2), (7,10), (2,11), (12,11)** as physical two-high clear passages; the original public entry and 5-space plan remain unchanged. Added explicit regression checks for those coordinates. An independent grid BFS with occupancy fixtures modeled now visits **98/98 standing cells**; this is a model preflight, not a native-source or PR-head CI pass. Dedicated native Node `validateBlueprint()` checks must independently confirm.

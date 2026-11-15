@@ -32,12 +32,12 @@ export function createTemperateSmallBathhouse(){
   remove(x,2,z);add(x,2,z,'window','pack4:030',face,{glazingApproved:false});
  }
  // Doors in REAL three-cell-high wall partitions, not fictional text-only room labels.
- const gap1=new Set(['4,6','9,6','7,11']);
+ const gap1=new Set(['4,6','9,6','2,11','7,11','12,11']);
  for(let y=1;y<=3;y++)for(const z of [6,11])for(let x=2;x<=12;x++)
   if(!gap1.has(x+','+z))add(x,y,z,'partition','live:wood');
  for(let y=1;y<=3;y++){
-  for(let z=2;z<=5;z++)if(z!==3)add(7,y,z,'partition','live:wood');
-  for(let z=7;z<=10;z++)if(z!==8)add(7,y,z,'partition','live:stone');
+  for(let z=2;z<=5;z++)if(![2,3].includes(z))add(7,y,z,'partition','live:wood');
+  for(let z=7;z<=10;z++)if(![8,10].includes(z))add(7,y,z,'partition','live:stone');
  }
  // Ridge-supported flat ceramic/wood terrace with beam grid rather than floating roof.
  // Future rain drainage, load/span and glazing weather seal require separate approval.
