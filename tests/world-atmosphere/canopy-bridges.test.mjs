@@ -44,7 +44,7 @@ test('reproducible in both axes and across a chunk seam without changing origina
  assert.deepEqual(planCanopyBridge(fixture(),a,b),p);
  const start=[14,13,20],end=[22,13,20];
  // The stock fixture's x=20 anchor would obstruct this new x=14..22 bridge deck.
- const seam=fixture();seam.occupied.delete(a.join(','));seam.occupied.set(start.join(','),BLOCK.WOOD);
+ const seam=fixture();seam.occupied.delete(a.join(','));seam.occupied.set(start.join(','),BLOCK.WOOD);seam.occupied.set(end.join(','),BLOCK.WOOD);
  assert.ok(planCanopyBridge(seam,start,end));
  const north=[32,13,14],south=[32,13,22];
  const vertical=fixture();
