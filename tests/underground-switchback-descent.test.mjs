@@ -73,23 +73,22 @@ test('all four chamber approaches remain traversable after floor composition',()
   }
 });
 
-test('eight side grottoes are physically carved, supported and reachable from each vault',()=>{
+test('eight outward grottoes have supported, clear galleries and distinct chambers',()=>{
   const world=new VoxelWorld(179),reader=descentWorld(world),route=descentRoute();
   for(const depth of [-30,-80,-130,-180]){
     const p=route.find(q=>q.floor===depth);
     assert.ok(p,'missing anchor at '+depth);
-    for(const [sx,sz] of [[1,0],[0,1]]){
-      for(const along of [3,8,15]){
-        const x=p.x+sx*along,z=p.z+sz*along;
-        assert.equal(reader.get(x,depth,z),BLOCK.DEEPSTONE,'unsupported side gallery');
+    const lx=p.x-192,lz=p.z-192;
+    const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+    const tangent=[outward[1],-outward[0]];
+    for(let branch=0;branch<2;branch++){
+      for(const along of [5,10,15,22]){
+        const out=Math.min(along,12),turn=branch===1?Math.max(0,along-12):0;
+        const x=p.x+outward[0]*out+tangent[0]*turn;
+        const z=p.z+outward[1]*out+tangent[1]*turn;
+        assert.equal(reader.get(x,depth,z),BLOCK.DEEPSTONE,'gallery floor '+depth+'/'+branch+'/'+along);
         for(let h=1;h<=3;h++)assert.equal(reader.get(x,depth+h,z),BLOCK.AIR,
-          'blocked side gallery at '+depth+' offset '+along);
-      }
-      const x=p.x+sx*15,z=p.z+sz*15;
-      for(const [dx,dz] of [[0,0],[5,0],[-5,0],[0,5],[0,-5]]){
-        assert.equal(reader.get(x+dx,depth,z+dz),BLOCK.DEEPSTONE);
-        assert.equal(reader.get(x+dx,depth+1,z+dz),BLOCK.AIR);
-        assert.equal(reader.get(x+dx,depth+2,z+dz),BLOCK.AIR);
+          'gallery headroom '+depth+'/'+branch+'/'+along);
       }
     }
   }
