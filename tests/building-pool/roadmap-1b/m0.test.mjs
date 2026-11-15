@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {DESIGN_MATRIX} from '../../../src/building-pool/roadmap-1b/legacy-stable-designs.mjs';
 import {getInheritedStables} from '../../../src/building-pool/roadmap-1b/legacy-import.mjs';
 import {BIOMES,SIZES,QUOTAS,TARGET,blueprintId,validateAllocation} from '../../../src/building-pool/roadmap-1b/schema.mjs';
 import {validateBlueprint,stableBlueprintJSON,structuralFingerprint} from '../../../src/building-pool/roadmap-1b/legacy-stable-schema.mjs';
@@ -33,4 +35,25 @@ test('identity preservation / strict no-overlap with Builder 1A',()=>{
    const id=blueprintId('stable',biome,size,SIZES.indexOf(size)+1);assert.ok(a.some(b=>b.id===id));
  }
  assert.throws(()=>blueprintId('house','temperate','small',1));assert.throws(()=>blueprintId('stable','temperate','small',6));
+});
+
+const blobSha=text=>createHash('sha1').update('blob '+Buffer.byteLength(text)+'\0').update(text).digest('hex');
+test('stable-only extraction reconstructs exact original PR #121 generator Git blob',()=>{
+ const file=readFileSync(new URL('../../../src/building-pool/roadmap-1b/legacy-stable-buildings.mjs',import.meta.url),'utf8');
+ const restored=file.replace('./legacy-stable-schema.mjs','./schema.mjs')
+  .replace('./legacy-stable-designs.mjs','./m1-designs.mjs')
+  .replace('./legacy-stable-footprints.mjs','./m1-candidate-footprints.mjs')
+  .replace("['stable']","['house','tavern','stable']");
+ assert.equal(blobSha(restored),ledger.originalSourceBlobs['m1-buildings.mjs']);
+ for(const [newPath,legacyName] of [['legacy-stable-schema.mjs','schema.mjs'],['legacy-stable-footprints.mjs','m1-candidate-footprints.mjs']]){
+  const content=readFileSync(new URL('../../../src/building-pool/roadmap-1b/'+newPath,import.meta.url),'utf8');
+  assert.equal(blobSha(content),ledger.originalSourceBlobs[legacyName]);
+ }
+});
+test('all 15 inherited stable brief arrays exactly match original source rows',()=>{
+ for(const row of ledger.entries){
+  const b=DESIGN_MATRIX.stable[row.legacyId.split(':')[2]][SIZES.indexOf(row.legacyId.split(':')[3])];
+  assert.deepEqual(b,row.originalRow,'source row changed: '+row.legacyId);
+ }
+ assert.deepEqual(Object.keys(DESIGN_MATRIX),['stable']);
 });
