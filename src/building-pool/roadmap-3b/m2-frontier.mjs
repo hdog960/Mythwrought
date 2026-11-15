@@ -64,6 +64,11 @@ function studio(type,biome,size,width,depth,height){
    architecture:{...architecture,occupiedCoordinates:occupied.size,authoring:'six individually drawn frontier M2 plans',
     creatorApproved:false,worldPlaced:false,numericVariantSelected:false,perCellYawSelected:false},
    dependencies,implementation:'THEORETICAL_ONLY; no mechanical interactions, variant fitting, physical AABB or saving'};
+  // Fail with the precise 3B-owned coordinate if an authored fixture blocks a reserved aisle.
+  for(const clearance of clearances)for(let x=clearance.x;x<clearance.x+clearance.width;x++)
+   for(let y=clearance.y;y<clearance.y+clearance.height;y++)
+    for(let z=clearance.z;z<clearance.z+clearance.depth;z++)
+     if(has(x,y,z))throw Error(id+' authored obstacle in declared two-wide clearance '+[x,y,z].join(','));
   validateBlueprint(result,ASSET_CATALOG);return result;
  }
  return {id,width,depth,height,put,safe,has,base,perimeter,pillars,canopy,block,finish};
@@ -83,7 +88,7 @@ function snowSmallLumberyard(){
  for(let x=3;x<=8;x++)for(let z=4;z<=6;z++)for(let y=2;y<=3;y++)safe('frozen-log-racks',x,y,z,'builtin:wood');
  block('winter-crate-pallets',18,22,2,3,5,6,'pack4:057');
  for(let x=18;x<=23;x++)for(let z=17;z<=18;z++)safe('sled-loading-pad',x,2,z,'pack1:007');
- for(const x of [18,24])for(let z=19;z<=22;z++)safe('sled-guides',x,2,z,'pack2:015');
+ for(const x of [18,24])for(let z=19;z<=22;z++)if(x!==18||(z!==20&&z!==21))safe('sled-guides',x,2,z,'pack2:015');
  const branchZ=15,eastZ=20;
  return finish({aisle,centerZ:10,branchZ,westX:9,eastX:19,eastZ,openName:'double-winter-yard-gate',
   rooms:[zone('west-shed','insulated-timber-rack',rect(2,2,2,11,5,14),'west'),
