@@ -23,7 +23,7 @@ const VS=[
 'float span=max(uBounds.x,uBounds.z)*1.38+uBounds.y*.55;',
 'vec2 screen=vec2(screenX,p.y*.90-screenZ)*2.0/span;',
 'screen.x/=max(1.0,uAspect/1.65);',
-'float depth=(screenZ*.44+p.y*.22)/span;',
+'float depth=(-screenZ*.44-p.y*.22)/span;',
 'gl_Position=vec4(screen,depth,1.0);',
 'int k=int(aInstance.w+.5);',
 'vec3 color=k==0?vec3(.43,.45,.44):k==1?vec3(.63,.51,.39):k==2?vec3(.65,.61,.54):',
@@ -56,7 +56,7 @@ const colorIds={foundation:0,floor:1,wall:2,roof:3,window:4,fixture:5,decor:6};
 function draw(){
  const b=byId.get(select.value);if(!b)throw Error('Invalid blueprint source ID');
  const cut=mode.value==='cutaway';
- const shown=b.voxels.filter(v=>!cut||(v.kind!=='roof'&&!(v.kind==='wall'&&(v.z===0||v.x===b.extents.x-1))&&!(v.kind==='window'&&(v.z===0||v.x===b.extents.x-1))));
+ const shown=b.voxels.filter(v=>!cut||(v.kind!=='roof'&&!(v.kind==='wall'&&(v.z===b.extents.z-1||v.x===b.extents.x-1))&&!(v.kind==='window'&&(v.z===b.extents.z-1||v.x===b.extents.x-1))));
  const data=new Float32Array(shown.length*4);for(let i=0;i<shown.length;i++){const v=shown[i];data.set([v.x,v.y,v.z,colorIds[v.kind]??6],i*4);}
  gl.bindBuffer(gl.ARRAY_BUFFER,instances);gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
  const dpr=Math.min(window.devicePixelRatio||1,2),w=Math.round(canvas.clientWidth*dpr),h=Math.round(canvas.clientHeight*dpr);

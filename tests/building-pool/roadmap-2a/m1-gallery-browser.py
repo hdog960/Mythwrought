@@ -14,7 +14,7 @@ try:
   except Exception:time.sleep(.2)
  else:raise RuntimeError('Missing HTTP listener')
  with sync_playwright() as p:
-  opt={'headless':True,'args':['--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--no-sandbox','--disable-dev-shm-usage']}
+  opt={'headless':True,'args':['--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--enable-unsafe-swiftshader','--ignore-gpu-blocklist','--no-sandbox','--disable-dev-shm-usage']}
   if os.getenv('CHROMIUM_EXECUTABLE'):opt['executable_path']=os.environ['CHROMIUM_EXECUTABLE']
   br=p.chromium.launch(**opt)
   for w,h in [(667,375),(844,390),(932,430)]:

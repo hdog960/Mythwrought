@@ -13,6 +13,8 @@ test('authentic 2A WebGL2 diagnostic is source-bound, syntax valid, and cannot c
  assert.match(src,/M1_SPECIALIST_EXEMPLARS/);
  assert.match(src,/M1_NEW_MERCHANTS/);
  assert.match(src,/productionPhysicalFamilyGeometry:false/);
+ assert(src.includes('float depth=(-screenZ*.44-p.y*.22)/span;'),'the camera must put upper/near source cells in front');
+ assert(src.includes('v.z===b.extents.z-1'),'cutaway must remove the near z facade, not the far wall');
  const syntax=spawnSync(process.execPath,['--check',new URL('m1-gallery.mjs',here).pathname],{encoding:'utf8'});
  assert.equal(syntax.status,0,syntax.stderr);
 });
