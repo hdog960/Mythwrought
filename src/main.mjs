@@ -872,6 +872,11 @@ function start(){
     const activeSeed=world.seed;
     const snapshot=await inspectVaultBackup(chosenVaultId());
     const imported=importWorldData(snapshot.raw);
+    // Legacy vault snapshots retain schema-1 bytes. Restore the independently
+    // verified Pack 2 overlay for this seed, or abort before touching saves.
+    const candidate=JSON.parse(snapshot.raw).pack2?
+      pack2ImportBundle(JSON.parse(snapshot.raw),imported):
+      loadPack2LiveWorld(localStorage,imported).world;
     // Always require approval, including when restoring a different seed.
     if(!window.confirm('RESTORE device backup for seed '+snapshot.seed+' with '+snapshot.edits+
       ' edits? The current saved world will be preserved in the previous-good slot where possible. Cancel changes nothing.')) {
@@ -883,11 +888,13 @@ function start(){
     try{loadWorldSafe(localStorage,imported.seed);}catch(_){damaged=true;}
     const result=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
     if(!result.ok)throw Error('Restore failed without replacing the active game: '+result.detail);
+    const overlay=savePack2LiveWorld(localStorage,candidate);
+    if(!overlay.ok)throw Error('Pack 2 verified overlay not updated; export backups before retry: '+overlay.reason);
     for(const c of chunks.values())deleteChunkBuffers(c);
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=imported;storageReadOnly=false;changed=false;
+    world=candidate;world.nextPack2State=pack2Selection;storageReadOnly=false;changed=false;
     clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
@@ -988,6 +995,9 @@ function start(){
     const seed=world.seed,which=mirrorSlot.value;
     const snap=await getMirrorCopy(seed,which);
     const restored=importWorldData(snap.raw);
+    const candidate=JSON.parse(snap.raw).pack2?
+      pack2ImportBundle(JSON.parse(snap.raw),restored):
+      loadPack2LiveWorld(localStorage,restored).world;
     if(restored.seed!==seed)throw Error('Mirror seed does not match the active world');
     if(!window.confirm('RESTORE the '+which+' verified mirror of seed '+seed+
       ' with '+snap.edits+' edits? The current primary will be kept in the previous-good local backup. Cancel changes nothing.')){
@@ -996,11 +1006,13 @@ function start(){
     if(world.seed!==seed||changed)throw Error('World changed or contains unsaved edits; export or SAVE before restoring');
     const out=saveWorldSafe(localStorage,restored);
     if(!out.ok)throw Error('Canonical world restore failed; '+out.detail);
+    const overlay=savePack2LiveWorld(localStorage,candidate);
+    if(!overlay.ok)throw Error('Cannot verify Pack 2 state after restore: '+overlay.reason);
     for(const c of chunks.values())deleteChunkBuffers(c);
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=restored;changed=false;respawnPrototype();
+    world=candidate;world.nextPack2State=pack2Selection;changed=false;respawnPrototype();
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
     message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
@@ -1021,7 +1033,8 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      world=candidate;storageReadOnly=false;changed=false;respawnPrototype();
+      world=candidate;world.nextPack2State=pack2Selection;
+      storageReadOnly=false;changed=false;respawnPrototype();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';
@@ -1051,15 +1064,24 @@ function start(){
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
       const rawImport=await f.text();
       const imported=importWorldData(rawImport); // Validate original schema-1 first.
-      const candidate=pack2ImportBundle(JSON.parse(rawImport),imported); // Fail closed on sidecar.
+      const incoming=JSON.parse(rawImport);
+      const previousOverlay=loadPack2LiveWorld(localStorage,imported).world;
+      // Legacy-only imports must NOT delete placed Pack 2 objects. Preserve
+      // the matching per-seed sidecar, or refuse incompatible old-world bytes.
+      const candidate=Object.hasOwn(incoming,'pack2')?
+        pack2ImportBundle(incoming,imported):previousOverlay;
+      const pack2Conflict=JSON.stringify(candidate.pack2Snapshot())!==
+        JSON.stringify(previousOverlay.pack2Snapshot());
       if(!storageReadOnly&&!save())throw Error('Current world could not be verified saved; export first.');
       let existing=null,damaged=false;
       try{existing=loadWorldSafe(localStorage,imported.seed).world;}
       catch(_){damaged=true;}
       const conflict=existing&&JSON.stringify(existing.save())!==JSON.stringify(imported.save())&&
         (existing.edits.size>0||imported.seed===world.seed);
-      if((damaged||conflict)&&!window.confirm(
-        'Replace saved edits for seed '+imported.seed+'? The previous data will be preserved in the local backup slot. Cancel leaves the current world unchanged.'
+      if((damaged||conflict||pack2Conflict)&&!window.confirm(
+        'Replace saved edits for seed '+imported.seed+
+        (pack2Conflict?' AND its Pack 2 constructions?':'?')+
+        ' Prior versions will be preserved in local backup slots where available. Cancel leaves the current world unchanged.'
       )){
         message('Import cancelled; existing world unchanged');return;
       }
