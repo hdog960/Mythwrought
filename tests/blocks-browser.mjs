@@ -100,6 +100,37 @@ try{
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
   assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),5,'Crystal seam edit vanished on reload');
+
+  // Real WebGL2/browser acceptance for the automation biome130 block registry:
+  // choose a physical non-cube from the settings sheet, rotate it, place it,
+  // save it, render it, then reload and target it again on the actual canvas.
+  await page.locator('#menu').click();
+  assert.ok(await page.locator('#biome130Select').isVisible(),'57+ new materials missing from iPhone settings');
+  await page.locator('#biome130Select').selectOption('315'); // 060 geothermal mountain rock
+  await page.locator('#biome130Rotation').selectOption('1'); // East
+  await page.locator('#closeHelp').click();
+  await page.evaluate(()=>window.__mythwroughtTest.aimAt(16,18,0));
+  await waitHit('16,18,0');
+  await page.locator('#dig').click();
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),0);
+  await page.evaluate(()=>window.__mythwroughtTest.aimAt(17,18,0));
+  await waitHit('17,18,0');
+  await page.locator('#place').click();
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),315,
+    'Biome130 block not physically placed through the regular iPhone action');
+  const biomeSaved=await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v002-world-179')));
+  assert.ok(biomeSaved.edits.some(e=>e.join(',')==='16,18,0,315'),'High-ID voxel not persisted');
+  assert.ok(biomeSaved.rotations?.some(e=>e.join(',')==='16,18,0,1'),'Rotation not persisted');
+  await page.evaluate(()=>window.__mythwroughtTest.aimAt(16,18,0));
+  await waitHit('16,18,0');
+  await page.waitForTimeout(300);
+  await page.screenshot({path:'artifacts/mythwrought-biome130-geothermal-physical-in-game.png'});
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),315,
+    'Biome130 block disappeared from world across browser reload');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v002-world-179')).rotations
+    .find(e=>e[0]===16&&e[1]===18&&e[2]===0)?.[3]),1,'Rotated voxel orientation lost on reload');
   assert.deepEqual(errors,[],'Browser exceptions during block interaction');
   assert.deepEqual(missing,[],'Missing game resources');
   console.log('PASS v0.08 material selection, mine/place, no-target/player-body rejects, grip hint and save/reload');
