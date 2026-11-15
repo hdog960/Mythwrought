@@ -98,9 +98,9 @@ Physical M3 source repair: `workshop-fixtures.mjs` now has longer visibly tapere
 To reproduce honest native Chromium ES-module/WebGL2 M4 screenshots with virtual X software GL:
 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/esm-webgl-browser.py m4 <output-dir>`
 
-For earlier groups use `m1`, `m2`, `m3`, or `m3b`. Latest native full `node --test tests/block-packs/pack-5/*.test.mjs` **120/120 PASS**. Direct localhost HTTP remains blocked; these genuine WebGL2 renders use offline native `data:` ES-module imports and cannot certify production pages, Safari or iPhone GPU. See `M4_ACCEPTANCE.md`.
+For earlier groups use `m1`, `m2`, `m3`, or `m3b`. Historical M4 focused run `node --test tests/block-packs/pack-5/*.test.mjs` **120/120 PASS**; the latest full M5 run below now covers 156 tests. Direct localhost HTTP remains blocked; these genuine WebGL2 renders use offline native `data:` ES-module imports and cannot certify production pages, Safari or iPhone GPU. See `M4_ACCEPTANCE.md`.
 
-**15 symbolic candidate families / 3 not started / 0 integrated**. M5 94–96 is NOT STARTED. No persistent numeric IDs assigned, no Gate A/v0.11 approval; draft PR only.
+**Historical M4 snapshot:** 15 symbolic candidates / 3 not started / 0 integrated. M5 94–96 are now also source-authored CANDIDATES; current roster 18/18 candidates, 0 integrated. No persistent numeric IDs assigned, no Gate A/v0.11 approval; draft PR only.
 
 ## Milestone 5 original physical fortified / stable specialties (candidate source only)
 
@@ -110,6 +110,8 @@ The new candidate gallery `tests/block-packs/pack-5/specialty-gallery.html` is a
 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/esm-webgl-browser.py m5 <output-dir>`.
 The browser runs native JS ES-module semantics through offline `data:` imports because real localhost HTTP navigation is blocked; **not** published app or Safari performance.
 
-Full committed-branch-equivalent focused native tests: `node --test tests/block-packs/pack-5/*.test.mjs` **132/132 PASS**, zero skips/failures (prior 120 + 12 M5 regressions). Separate extended local tests 144/144 included additional unpublished M5 deep checks, not a claim about committed CI. Six WebGL2 M5 captures plus thirty previous M1–M4 views passed: **36/36 genuine native ES-module Chromium screenshots** across all six modes and three mobile landscape sizes/two rotations. Source/QA and outstanding approval details: `M5_ACCEPTANCE.md`.
+**Final current-branch source-exact focused test rerun:** `node --test tests/block-packs/pack-5/*.test.mjs` **156/156 genuine native Node 22.16.0 PASS**, 0 skips/failures (original 120 M0–M4 + 12 M5 fixture + 24 separately committed deep M5 tests). Earlier 132 and 144 test counts are superseded; the 24 dedicated deep M5 cases are now committed at Git blob `1eb17969764c5672bc4567da252d5d1509e384b2`. All focused source/test files were Git blob matched. The staged manifest metadata was behind the current PR manifest, but 18 CANDIDATE / 0 integrated / 0 persistent numeric ID invariants matched. Reexecuted **36/36 genuine native ES-module Chromium WebGL2 screenshots** in the latest session across all six modes `m1,m2,m3,m3b,m4,m5`, each at 667×375 / 844×390 / 932×430 CSS landscape and two rotations. This is Xvfb/software-GL offline `data:` module rendering, not HTTP-served Pages or physical iPhone performance. Source/QA and outstanding approval details: `M5_ACCEPTANCE.md`.
 
 **Full 18-family Pack 5 roster authored as CANDIDATES; 0 INTEGRATED, zero persistent numeric IDs.** M6 next is only a technical/creator **readiness audit**, not permission to merge or unlock v0.11. Final creator art and physical iPhone acceptance remain open, as do schema-1 and centralized registered-asset integration approvals.
+
+**Latest Milestone 5 acceptance:** see `M5_ACCEPTANCE.md` for exact verified 156 focused cases, 36 screenshot captures, source-only geometry and remaining creator/served-HTTP/real-iPhone/integration gates. All 18 symbolic physical candidates exist in the isolated draft branch; M6 is a separately authorized acceptance/readiness stage, not permission to merge or register assets.
