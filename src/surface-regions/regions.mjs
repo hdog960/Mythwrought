@@ -67,15 +67,27 @@ export function surfaceBiomeBlock(x,y,z,seed=179,{enabled=false}={}){
 // Safe opt-in adapter for a future new-world terrain reader. Null means
 // defer to the unchanged existing world; never manufacture AIR or erase edits.
 // Caller supplies the exact pre-overlay natural/landmark voxel and edit status.
+// Candidate-only, non-destructive veneer for *natural* legacy ground.
+// Baseline AIR, ore, wood, landmarks, user edits, deepstone and stone are
+// never converted. The integrator must additionally prove a cell is natural
+// (not a structure) before invoking this function in a new-world reader.
 export function surfaceBiomeOverlay(x,y,z,seed=179,{
-  enabled=false,baseline,hasEdit=false
+  enabled=false,baseline,hasEdit=false,isNaturalGround=false
 }={}){
-  if(!enabled||hasEdit||!Number.isInteger(baseline)||baseline===0)return null;
-  const candidate=surfaceBiomeBlock(x,y,z,seed,{enabled:true});
-  if(candidate===null)return null;
-  // Only recolor already-solid legacy topsoil. New raised geometry requires
-  // a separately version-gated terrain reader with collision/save acceptance.
+  if(!enabled||hasEdit||!isNaturalGround||
+     ![x,y,z].every(Number.isInteger)||!Number.isInteger(seed)||
+     (baseline!==1&&baseline!==2))return null;
+  const b=surfaceBiomeAt(x,z,seed);
+  if(!b||b.weight<.35)return null;
   const legacyTop=terrainHeight(x,z,seed);
   if(y>legacyTop||y<legacyTop-2)return null;
-  return candidate;
+  // Deterministic feathering across the biome boundary. This does not
+  // introduce geometry, destroy legacy caves or alter terrain elevation.
+  const coverage=clamp((b.weight-.35)/.4,0,1);
+  if(hash(x,z,seed+907)>coverage)return null;
+  const r=REGIONS.find(region=>region.name===b.name);
+  const id=y===legacyTop?r.surface:r.subsoil;
+  if(!isBiome130BlockId(id)||!biome130Block(id).solid)
+    throw Error('Unregistered or non-solid surface material '+id);
+  return id;
 }
