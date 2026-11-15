@@ -280,7 +280,6 @@ test('M6 rejects nonfinite direction norms despite finite individual vector comp
   assert.throws(()=>f.raycast([0,0,0],[1.7e308,1.7e308,0],10),/Invalid ray direction length/);
 });
 
-
 // Post-M6 proven defect: failed restore could erase existing models if support
 // changed after placement, because rollback tried to re-place via current supports.
 test('M6 failed restore preserves an existing counter after its foundation was removed',()=>{
