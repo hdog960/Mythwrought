@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   SCHEMA, BIOMES, SIZES, PROGRAM, PLANNED_TOTAL, expectedIds,
   validateBlueprint, geometrySignature, validateCollection
-} from '../../src/building-pool/roadmap-4b/schema.mjs';
+} from '../../../src/building-pool/roadmap-4b/schema.mjs';
 
 function exemplar(type='healers-house',variant=1){
   const bounds=[10,6,8],cells=[],navigation=[],rooms=[],openings=[{kind:'entrance',at:[4,2,0],facing:'north'}];
