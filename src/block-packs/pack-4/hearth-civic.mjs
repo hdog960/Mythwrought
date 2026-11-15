@@ -144,7 +144,9 @@ for(let i=0;i<12;i++){
  const angle=2*Math.PI*i/12;
  const x=.50+Math.cos(angle)*.235;
  const y=.66+Math.sin(angle)*.235;
- const dx=.037,dy=.037;
+ // Ring teeth slightly overlap their neighbors and the four radial spokes.
+ // The former .037 half-width stranded nine collidable teeth in midair.
+ const dx=.062,dy=.062;
  pulley.push(part([x-dx,y-dy,.235,x+dx,y+dy,.315],
    i%3?'oak':'brass'));
 }
