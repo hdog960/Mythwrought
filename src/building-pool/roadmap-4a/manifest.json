@@ -12,11 +12,12 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 0,
-    "totalAuthored": 30,
-    "remaining": 285,
+    "newlyAuthored": 2,
+    "totalAuthored": 32,
+    "remaining": 283,
     "creatorAccepted": 0,
-    "integratedBuildings": 0
+    "integratedBuildings": 0,
+    "m2Original": 2
   },
   "biomes": [
     "temperate",
@@ -36,7 +37,7 @@
       "perBiomeSize": 5,
       "total": 75,
       "inherited": 15,
-      "remaining": 60,
+      "remaining": 59,
       "milestone": 2
     },
     {
@@ -44,7 +45,7 @@
       "perBiomeSize": 4,
       "total": 60,
       "inherited": 0,
-      "remaining": 60,
+      "remaining": 59,
       "milestone": 2
     },
     {
@@ -90,8 +91,8 @@
   "biome130": "unregistered and non-verified symbols remain symbolic; do not allocate persistent IDs",
   "gates": {
     "M0": "candidate migration committed; native exact-head focused CI pending",
-    "M1": "independent physical/visual source review pending",
-    "M2": "not started",
+    "M1": "technical candidate M1 accepted from exact-head Actions #43770848853 (60/60 native, 180/180 genuine source-driven WebGL2 candidate proxy screenshots; physical/creator gates open)",
+    "M2": "STARTED: new original civic-hall Temperate Small #02 and guildhall Temperate Small #01; exact-head native/browser CI pending",
     "M3": "not started",
     "M4": "not started",
     "M5": "not started",
