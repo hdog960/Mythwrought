@@ -2,14 +2,14 @@
 // No default biome placement or changes to existing seed-derived trees.
 import {BLOCK,terrainHeight,baseBlock,WORLD_MAX_Y} from './voxel.mjs';
 const key=(x,y,z)=>x+','+y+','+z;
-export function planTwinwood(world,x,z){
+export function planTwinwood(world,x,z,{axis='x'}={}){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
-    !Number.isSafeInteger(x)||!Number.isSafeInteger(z))return null;
+    !Number.isSafeInteger(x)||!Number.isSafeInteger(z)||!['x','z'].includes(axis))return null;
  const ground=terrainHeight(x,z,world.seed);
  if(ground+11>WORLD_MAX_Y||world.get(x,ground,z)!==BLOCK.GRASS)return null;
  const cells=new Map();
  const put=(dx,dy,dz,id)=>{
-  const a=x+dx,b=ground+dy,c=z+dz;
+  const a=x+(axis==='x'?dx:dz),b=ground+dy,c=z+(axis==='x'?dz:dx);
   const k=key(a,b,c),old=cells.get(k);
   if(!old||id===BLOCK.WOOD)cells.set(k,[a,b,c,id]);
  };
@@ -39,14 +39,14 @@ export function planTwinwood(world,x,z){
   const h=terrainHeight(x+dx,z+dz,world.seed);
   if(Math.abs(h-ground)>1||world.get(x+dx,h,z+dz)!==baseBlock(x+dx,h,z+dz,world.seed))return null;
  }
- return {seed:world.seed,origin:[x,ground,z],kind:'twinwood',optIn:true,cells:occupied};
+ return {seed:world.seed,origin:[x,ground,z],kind:'twinwood',axis,optIn:true,cells:occupied};
 }
 export function placeTwinwood(world,plan){
  if(!world||typeof world.set!=='function'||typeof world.get!=='function'||
     !plan?.optIn||plan.kind!=='twinwood'||plan.seed!==world.seed||
-    !Array.isArray(plan.origin)||plan.origin.length!==3)return false;
+    !Array.isArray(plan.origin)||plan.origin.length!==3||!['x','z'].includes(plan.axis))return false;
  const [x,y,z]=plan.origin;
- const fresh=planTwinwood(world,x,z);
+ const fresh=planTwinwood(world,x,z,{axis:plan.axis});
  if(!fresh||fresh.origin[1]!==y||!Array.isArray(plan.cells)||
     plan.cells.length!==fresh.cells.length)return false;
  for(let i=0;i<fresh.cells.length;i++){
