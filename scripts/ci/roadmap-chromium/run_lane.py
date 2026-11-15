@@ -125,6 +125,7 @@ def main():
         env.update({
             'PACK1_EXPECTED_HEAD':sha,'MYTHWROUGHT_PACK2_EXPECT_HEAD':sha,
             'PACK3_CHROMIUM':'/usr/bin/chromium','CHROMIUM_PATH':'/usr/bin/chromium',
+            'CHROMIUM_EXECUTABLE':'/usr/bin/chromium',
             'CHROMIUM_BIN':'/usr/bin/chromium','R4_CHROMIUM':'/usr/bin/chromium',
             'PACK4_CHROMIUM_PATH':'/usr/bin/chromium','PACK4_CHROMIUM_HEADFUL':'1',
             'PACK4_INJECT_SOURCE':'1','MYTHWROUGHT_PACK2_CHROMIUM':'/usr/bin/chromium',
