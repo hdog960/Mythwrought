@@ -33,7 +33,9 @@ test('builder facade places rotated physical block, picks its surface and keeps 
   assert.equal(runtime.get([1,12,1]).id,116);
   assert.equal(runtime.get([1,12,1]).yaw,1);
   assert.ok(runtime.readShape(1,12,1).boxes.length>1);
-  assert.ok(runtime.target([1.1,12.5,-2],[0,0,1],6));
+  // Aim through the rotated wall's *solid base* (not its open arrow slit).
+  const hit=runtime.target([1.5,12.1,-2],[0,0,1],6);
+  assert.deepEqual(hit?.cell,[1,12,1]);
   assert.equal(runtime.size(),1);
   assert.equal(runtime.liveGameRegistered,false);
   assert.equal(PACK3_RUNTIME_LIVE,false);
