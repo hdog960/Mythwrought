@@ -135,9 +135,7 @@ def main():
             'R1_ARTIFACT_DIR':str(checkout/'artifacts/roadmap-ci/roadmap-1'),
             'MYTHWROUGHT_R2_M1_SHOTS':str(checkout/'artifacts/roadmap-ci/roadmap-2')
         })
-        # Genuine WebGL2 context + GPU readback (transport only, not candidate).
-        command(['xvfb-run','-a','python',str(tooling/'probe_webgl2.py'),str(report/'preflight')],
-                checkout,env,report/'transport.log',timeout=180)
+        # Install once before native tests; browser availability cannot mask a Node result.
         command(['npm','install','--no-save','--no-audit','--no-fund','playwright@1.58.2','pngjs@7.0.0'],
                 checkout,env,report/'dependencies.log',timeout=300)
         native=report/'native.log';browserlog=report/'browser.log'
@@ -154,6 +152,9 @@ def main():
         else:
             command(['node','--test',*[str(p.relative_to(checkout)) for p in tests]],checkout,env,native)
         evidence['nativeNode']=verify_native(native,min_tests,lane)
+        # This is REAL WebGL2, but transport-only and never candidate asset acceptance.
+        command(['xvfb-run','-a','python',str(tooling/'probe_webgl2.py'),str(report/'preflight')],
+                checkout,env,report/'transport.log',timeout=180)
         b=base+lane+'/'
         if lane=='pack-3':
             command(['xvfb-run','-a','python',b+'gallery-browser.py'],checkout,env,browserlog)
@@ -203,6 +204,11 @@ def main():
         evidence['remainingGates']='Live engine/asset integration, physical iPhone and creator artwork/controls remain OPEN'
         print(evidence['status'],lane,sha,flush=True)
     except Exception as e:
+        # Preserve a real native Node pass even if the subsequent Chromium stage
+        # fails. Never mark the complete candidate acceptance green from it.
+        if 'native' in locals() and native.exists() and 'nativeNode' not in evidence:
+            try:evidence['nativeNodePartial']=verify_native(native,min_tests,None)
+            except Exception:pass
         evidence['status']='BLOCKED';evidence['blocker']=str(e)
         print('CANDIDATE_ACCEPTANCE_BLOCKED',lane,str(e),file=sys.stderr,flush=True)
     finally:
