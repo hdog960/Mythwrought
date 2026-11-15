@@ -5,11 +5,8 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Different manual roadmaps remain independent; only superseded runs of
-# the SAME PR are cancelled. Main pushes are never cancelled.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# No workflow cancellation or concurrency groups: every scheduled run
+# remains eligible to execute. Isolated-lane test scope reduces future work.
 
 permissions:
   contents: read
