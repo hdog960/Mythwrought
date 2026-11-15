@@ -228,6 +228,24 @@ function start(){
     lastEditMeshKeys=ready.map(item=>item.key);
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
+  function refreshPhysicalChunk(x,z,y){
+    // The Pack 3 overlay lives in its own world cells, never in world.get.
+    // No legacy or biome130 neighbor face changes when one physical shape is
+    // placed/removed; rebuilding nine adjacent chunk meshes is unnecessary.
+    const section=sectionForY(y);
+    if(section===null)throw Error('Pack 3 physical placement outside playable section');
+    const cx=chunkCoord(x),cz=chunkCoord(z),key=depthMeshKey(cx,cz,section);
+    if(!chunks.has(key))return; // Unloaded section rebuilds when streamed.
+    const vertices=meshPlayableChunk(cx,cz,section);
+    // GPU upload is staged before the old buffer is deleted. A failed upload
+    // preserves the prior visible mesh; pack3.mutate rolls back disk and data.
+    const buffer=uploadChunkBuffer(gl,vertices);
+    const old=chunks.get(key);
+    chunks.set(key,{x:cx,z:cz,section,buffer,count:vertices.length/9});
+    if(old)gl.deleteBuffer(old.buffer);
+    editMeshBatches++;
+    lastEditMeshKeys=[key];
+  }
   function edit(mode){
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
     const rotation=isPack3BlockId(selected)?pack3Yaw:selectedRotation;
@@ -243,7 +261,7 @@ function start(){
       else if(mode==='mine'&&!inspection.canMine)result={ok:false,reason:'Cannot mine here'};
       else result=pack3.mutate({mode,
         cell:mode==='place'?inspection.adjacent:inspection.hit,
-        id:selected,orientation:pack3Yaw,player,rebuild:refreshEditedMeshes});
+        id:selected,orientation:pack3Yaw,player,rebuild:refreshPhysicalChunk});
     }else result=applyBlockAction(world,eye(),facing(),mode,selected,player,
       refreshEditedMeshes,{rotation:selectedRotation});
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),
@@ -1146,12 +1164,12 @@ function start(){
       pack3Block(x,y,z){return pack3.getAt(x,y,z);},
       placePack3Fixture(x,y,z,id,yaw=0){
         const result=pack3.mutate({mode:'place',cell:[x,y,z],id,orientation:yaw,
-          player:{x:1e6,feet:19,z:1e6},rebuild:refreshEditedMeshes});
+          player:{x:1e6,feet:19,z:1e6},rebuild:refreshPhysicalChunk});
         if(!result.ok)throw Error(result.reason);
         return result;
       },
       removePack3Fixture(x,y,z){
-        const result=pack3.mutate({mode:'mine',cell:[x,y,z],rebuild:refreshEditedMeshes});
+        const result=pack3.mutate({mode:'mine',cell:[x,y,z],rebuild:refreshPhysicalChunk});
         if(!result.ok)throw Error(result.reason);
         return result;
       },

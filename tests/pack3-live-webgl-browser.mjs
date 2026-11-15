@@ -66,6 +66,8 @@ try {
       assert.equal(now.entry.id,116);
       assert.equal(now.entry.yaw,1);
       assert.equal(now.count,1);
+      const changedChunks=await page.evaluate(()=>window.__mythwroughtTest.snapshot().lastEditMeshKeys);
+      assert.ok(changedChunks.length<=1,'Pack3 physical edit rebuilt unrelated GPU chunks');
       assert.ok(now.vertices>verticesBefore,'Physical WebGL2 chunk vertices not uploaded');
       assert.equal(now.saved,legacyBefore,'Physical placement rewrote schema-1 save');
       assert.ok(JSON.parse(now.sidecar).entries.some(e=>e.asset==='pack3:069'&&e.orientation===1));

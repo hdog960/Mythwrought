@@ -42,6 +42,8 @@ try{
      const id=109+i,orientation=id<=112?0:i%4;
      const start=performance.now();
      t.placePack3Fixture(x,y,z,id,orientation);
+     const edited=t.snapshot().lastEditMeshKeys;
+     if(edited.length>1)throw Error('Physical overlay rebuilt unrelated chunks: '+edited.join(';'));
      durations.push(performance.now()-start);
      const entry=t.pack3Block(x,y,z);
      if(!entry||entry.id!==id||entry.yaw!==orientation)

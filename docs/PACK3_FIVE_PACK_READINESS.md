@@ -57,6 +57,10 @@ other four manual Block Packs.
   index limits each mesh rebuild to placements in the selected GPU buffer;
   negative chunk coordinates and deep-section boundaries receive explicit
   build/remove/reload regression tests. The 4,096-cell global cap remains.
+  A dedicated physical-only GPU refresh now recompiles **one affected section
+  chunk**, rather than the legacy nine-neighbor edit fanout; source-time
+  browser assertions reject unrelated physical mesh rebuilds. Existing
+  legacy/biome130 edit refresh logic is unchanged.
   Do not infer phone FPS from software Chromium times or CPU tests.
 - Source-exact all-17 live-game browser PASS from #43719949693:
   all 17 physical IDs placed, rendered, reloaded and removed at 667×375,
