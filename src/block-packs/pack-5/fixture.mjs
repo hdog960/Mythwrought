@@ -127,12 +127,17 @@ export function makePack5Fixture(descriptors=[]){
     restore(snapshot){
       if(!snapshot||snapshot.format!==PACK5_FIXTURE_FORMAT||!Array.isArray(snapshot.entries)||snapshot.entries.length>4096||
         snapshot.schema!==undefined)throw Error('Not a Pack 5 fixture snapshot');
-      const backup=fixture.snapshot(),positions=[...supports];
+      // An invalid incoming snapshot must not destroy already-authored geometry.
+      // Preserve the exact occupied graph rather than re-placing backup entries:
+      // attachment supports may have changed since the original placement.
+      const backupPlaced=new Map(placed),backupOccupied=new Map(occupied);
       placed.clear();occupied.clear();
       try{for(const row of snapshot.entries){if(!Array.isArray(row)||(row.length!==5&&row.length!==6)||
           !fixture.place(row[3],row.slice(0,3),row[4],row[5]??null).ok)throw Error('Invalid snapshot entry');}}
-      catch(err){placed.clear();occupied.clear();supports.clear();for(const k of positions)supports.add(k);
-        for(const row of backup.entries)fixture.place(row[3],row.slice(0,3),row[4],row[5]??null);throw err;}
+      catch(err){placed.clear();occupied.clear();
+        for(const [k,v] of backupPlaced)placed.set(k,v);
+        for(const [k,v] of backupOccupied)occupied.set(k,v);
+        throw err;}
       return true;
     },
     count(){return placed.size;}
