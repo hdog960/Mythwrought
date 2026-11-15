@@ -1,4 +1,10 @@
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
+import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
+// Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
+// Keep that public contract at -3; the expanded editable engine range is
+// separately exported by depth.mjs so old cave floors do not shift.
+export const WORLD_MIN_Y=LEGACY_WORLD_MIN_Y;
+export {WORLD_MAX_Y} from './depth.mjs';
 import {meadowAccentVertices} from './meadow.mjs';
 import {storybookGroveVertices} from './grove.mjs';
 import {woodlandCanopyVertices} from './canopy.mjs';
@@ -8,10 +14,9 @@ import {caveThresholdVertices} from './cave-thresholds.mjs';
 import {voxelLandmarksForChunk,VOXEL_LANDMARK_CACHE_LIMIT} from './voxel-landmarks.mjs';
 import {moonbellVertices} from './moonbells.mjs';
 import {ridgeStrataVertices} from './ridge-strata.mjs';
+import {liveVoxelDistrict,LIVE_DISTRICT_SIZE,LIVE_DISTRICT_CACHE_LIMIT} from './live-voxel-world.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
-export const WORLD_MIN_Y = -3;
-export const WORLD_MAX_Y = 19;
 export const BLOCK = Object.freeze({ AIR:0, GRASS:1, DIRT:2, STONE:3, WOOD:4, CRYSTAL:5, ORE:6, LEAVES:7, DEEPSTONE:8 });
 const COLORS = {
   1:[0.35,0.64,0.32], 2:[0.48,0.34,0.24], 3:[0.48,0.51,0.55],
@@ -61,10 +66,13 @@ function cave(x,y,z,seed){
 }
 export function baseBlock(x,y,z,seed=179){
   if(!Number.isInteger(x)||!Number.isInteger(y)||!Number.isInteger(z))return BLOCK.AIR;
-  if(y<WORLD_MIN_Y||y>WORLD_MAX_Y)return BLOCK.AIR;
+  if(y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y)return BLOCK.AIR;
+  // New geology begins strictly BELOW the unmodified original [-3,19] world.
+  // :24 retains exclusive ownership of all future deep-cave generation.
+  if(y<LEGACY_WORLD_MIN_Y)return y<-32?BLOCK.DEEPSTONE:BLOCK.STONE;
   const h=terrainHeight(x,z,seed);
   if(y>h)return BLOCK.AIR;
-  if(y<=WORLD_MIN_Y+1)return BLOCK.STONE;
+  if(y<=LEGACY_WORLD_MIN_Y+1)return BLOCK.STONE;
   if(y<h-2 && cave(x,y,z,seed))return BLOCK.AIR;
   if(y===h)return BLOCK.GRASS;
   if(y>=h-3)return BLOCK.DIRT;
@@ -78,8 +86,9 @@ export class VoxelWorld{
     // Limited per-world cache: streaming an endless world cannot retain every
     // visited district forever. Geometry is recreated from the original seed.
     this.landmarkCache=new Map();
+    this.liveDistrictCache=new Map();
   }
-  naturalAndLandmarkBlock(x,y,z){
+  legacyBlockAt(x,y,z){
     const natural=baseBlock(x,y,z,this.seed);
     if(natural!==BLOCK.AIR||y<=0||y>WORLD_MAX_Y||
        ![x,y,z].every(Number.isInteger))return natural;
@@ -97,12 +106,33 @@ export class VoxelWorld{
     }
     return blocks.get(worldKey(x,y,z))??natural;
   }
+  naturalAndLandmarkBlock(x,y,z){
+    // Construct only inside the valid voxel height. This overlay is a pure
+    // deterministic view; it never writes to this.edits or schema-1 storage.
+    const ordinary=this.legacyBlockAt(x,y,z);
+    // Deep substrate is an engine-only layer, not a new :24/:36/:48
+    // generation envelope. Avoid creating expensive surface districts for
+    // every buried rock queried by the 16-block vertical mesh slices.
+    if(![x,y,z].every(Number.isInteger)||y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y||
+       y<LEGACY_WORLD_MIN_Y)return ordinary;
+    const dx=Math.floor(x/LIVE_DISTRICT_SIZE),dz=Math.floor(z/LIVE_DISTRICT_SIZE);
+    const districtKey=dx+','+dz;
+    let district=this.liveDistrictCache.get(districtKey);
+    if(!district){
+      district=liveVoxelDistrict(this.seed,dx,dz,(px,py,pz)=>this.legacyBlockAt(px,py,pz));
+      this.liveDistrictCache.set(districtKey,district);
+      if(this.liveDistrictCache.size>LIVE_DISTRICT_CACHE_LIMIT)
+        this.liveDistrictCache.delete(this.liveDistrictCache.keys().next().value);
+    }
+    return district.get(x,y,z,ordinary);
+  }
+
   get(x,y,z){
     const key=worldKey(x,y,z);
     return this.edits.has(key)?this.edits.get(key):this.naturalAndLandmarkBlock(x,y,z);
   }
   set(x,y,z,id){
-    if(![x,y,z,id].every(Number.isInteger)||y<WORLD_MIN_Y||y>WORLD_MAX_Y||id<0||id>8)return false;
+    if(![x,y,z,id].every(Number.isInteger)||y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y||id<0||id>8)return false;
     const key=worldKey(x,y,z);
     if(this.naturalAndLandmarkBlock(x,y,z)===id)this.edits.delete(key);
     else this.edits.set(key,id);
@@ -127,8 +157,8 @@ export function meshChunk(world,cx,cz){
   // times). Cache only cells actually queried by this synchronous rebuild.
   // The one-block halo includes chunk boundaries and the vertical limits;
   // reads still go through world.get so schema-1 edits override seeded caves.
-  const side=CHUNK_SIZE+2, depth=WORLD_MAX_Y-WORLD_MIN_Y+3;
-  const minX=cx*CHUNK_SIZE-1,minZ=cz*CHUNK_SIZE-1,minY=WORLD_MIN_Y-1;
+  const side=CHUNK_SIZE+2, depth=WORLD_MAX_Y-LEGACY_WORLD_MIN_Y+3;
+  const minX=cx*CHUNK_SIZE-1,minZ=cz*CHUNK_SIZE-1,minY=LEGACY_WORLD_MIN_Y-1;
   const cells=new Uint8Array(side*side*depth);
   cells.fill(255); // AIR is 0; 255 is the sole unvisited sentinel.
   const extra=new Map();
@@ -162,7 +192,7 @@ export function meshChunk(world,cx,cz){
   };
   for(let x=cx*CHUNK_SIZE;x<(cx+1)*CHUNK_SIZE;x++)
     for(let z=cz*CHUNK_SIZE;z<(cz+1)*CHUNK_SIZE;z++)
-      for(let y=WORLD_MIN_Y;y<=WORLD_MAX_Y;y++){
+      for(let y=LEGACY_WORLD_MIN_Y;y<=WORLD_MAX_Y;y++){
         const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
         const color=COLORS[id]||COLORS[3];
@@ -201,16 +231,16 @@ export function meshChunk(world,cx,cz){
   // Underground mushrooms and crystal tips reuse this SAME chunk mesh and
   // existing edit invalidation; no physics, lighting pass or persisted blocks.
   const grotto=grottoAccentVertices(readWorld,cx,cz,{
-    chunkSize:CHUNK_SIZE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y,
+    chunkSize:CHUNK_SIZE,minY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y,
     heightAt:terrainHeight,baseAt:baseBlock,
     air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
   const runes=caveRuneVertices(readWorld,cx,cz,{
-    chunkSize:CHUNK_SIZE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y,
+    chunkSize:CHUNK_SIZE,minY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y,
     heightAt:terrainHeight,baseAt:baseBlock,
     air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
-  const caveThresholds=caveThresholdVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,air:BLOCK.AIR,stoneId:BLOCK.STONE,minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y});
+  const caveThresholds=caveThresholdVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,air:BLOCK.AIR,stoneId:BLOCK.STONE,minY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y});
   // Waystones, towers, shrines, arches and causeways are now real voxels from
   // VoxelWorld.get(). Do NOT append the old non-collidable meshes as duplicates.
   const moonbells=moonbellVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});

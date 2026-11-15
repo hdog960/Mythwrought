@@ -1,6 +1,7 @@
 // MYTHWROUGHT v0.08 — predictable, reversible basic block interactions.
 // This prototype adds no new inventory or automated mining powers.
-import {BLOCK,WORLD_MIN_Y,WORLD_MAX_Y,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
+import {BLOCK,WORLD_MAX_Y,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
+import {WORLD_MIN_Y} from './depth.mjs';
 
 export const INTERACTION_REACH=6;
 export const BUILD_MATERIALS=Object.freeze([BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE]);
@@ -47,7 +48,7 @@ export function applyBlockAction(world,eye,direction,mode,selected,player,rebuil
   if(previous===next)return {ok:false,reason:'Block is already in that state'};
   if(!world.set(...cell,next))return {ok:false,reason:'Outside editable height'};
   try{
-    if(typeof rebuild==='function')rebuild(cell[0],cell[2]);
+    if(typeof rebuild==='function')rebuild(cell[0],cell[2],cell[1]);
   }catch(error){
     world.set(...cell,previous);
     return {ok:false,reason:'Block update failed; nothing changed',error:String(error)};

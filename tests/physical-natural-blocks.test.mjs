@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,VoxelWorld,meshChunk,WORLD_MIN_Y,WORLD_MAX_Y,baseBlock,raycast,collides} from '../src/voxel.mjs';
 import {BUILD_MATERIALS,BLOCK_NAMES,applyBlockAction} from '../src/blocks.mjs';
+import {WORLD_MIN_Y as EDITABLE_WORLD_MIN_Y,LEGACY_WORLD_MIN_Y} from '../src/depth.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER as FS,STORYBOOK_ART_RULES as ART} from '../src/storybook-materials.mjs';
 
 test('stable natural block allocation keeps legacy IDs and independent render-only tags',()=>{
@@ -31,7 +32,11 @@ test('new natural voxels are actual solid editable raycastable and save-restorab
   assert.equal(restored.set(35,16,33,BLOCK.AIR),true);
   assert.equal(restored.get(35,16,33),BLOCK.AIR);
   assert.equal(world.set(35,WORLD_MAX_Y+1,33,BLOCK.LEAVES),false);
-  assert.equal(world.set(35,WORLD_MIN_Y-1,33,BLOCK.DEEPSTONE),false);
+  // The preserved cave-generation floor is -3, but engine-owned edits now
+  // extend to -210; reject exactly below the NEW editable floor, not -4.
+  assert.equal(WORLD_MIN_Y,LEGACY_WORLD_MIN_Y);
+  assert.equal(world.set(35,EDITABLE_WORLD_MIN_Y,33,BLOCK.DEEPSTONE),true);
+  assert.equal(world.set(35,EDITABLE_WORLD_MIN_Y-1,33,BLOCK.DEEPSTONE),false);
  }
 });
 test('physical leaf and deepstone faces are meshed using distinct shader tags',()=>{
