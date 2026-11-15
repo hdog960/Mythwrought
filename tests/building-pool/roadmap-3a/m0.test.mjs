@@ -20,15 +20,15 @@ test('15 blacksmith IDs remain byte-for-byte the legacy identity namespace, not 
  assert.equal(all.filter(s=>s.id.startsWith('r3:')&&!s.legacy).length,0);
  assert.ok(all.filter(s=>!s.legacy).every(s=>s.id.startsWith('r3a:')));
 });
-test('PR 122 provenance is pinned and geometry import is explicitly not claimed',()=>{
+test('PR 122 provenance is pinned and all fifteen original coordinate models have been selectively staged',()=>{
  assert.equal(legacy.sourcePR,122);assert.match(legacy.sourcePRHead,/^[0-9a-f]{40}$/);
  assert.match(legacy.sourceM1Blob,/^[0-9a-f]{40}$/);
  assert.match(legacy.sourceManifestBlob,/^[0-9a-f]{40}$/);
  assert.equal(legacy.candidates.length,15);
  assert.equal(legacy.creatorAccepted,0);assert.equal(legacy.integrated,0);
  for(const c of legacy.candidates){
-  assert.equal(c.newId,c.originalId);assert.equal(c.geometryCopied,false);
-  assert.equal(c.fingerprintVerified,false);assert.ok(c.occupiedCoordinates>1000);
+  assert.equal(c.newId,c.originalId);assert.equal(c.geometryCopied,true);
+  assert.equal(c.fingerprintVerified,true);assert.ok(c.occupiedCoordinates>1000);
   assert.ok(c.envelope.width>0&&c.envelope.height>0&&c.envelope.depth>0);
  }
 });
