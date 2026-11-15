@@ -5,6 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,VoxelWorld,WORLD_MIN_Y,WORLD_MAX_Y} from '../../../src/voxel.mjs';
+import {WORLD_MIN_Y as ENGINE_WORLD_MIN_Y} from '../../../src/depth.mjs';
 import {PACK_2_FIXTURE_IDS,Pack2Fixture} from './fixture.mjs';
 
 test('real production VoxelWorld implementation is loaded, not a test-only ID facade',()=>{
@@ -14,6 +15,8 @@ test('real production VoxelWorld implementation is loaded, not a test-only ID fa
   assert.equal(typeof VoxelWorld.prototype.save,'function');
   assert.equal(typeof VoxelWorld.restore,'function');
   assert.equal(WORLD_MIN_Y,-3);
+  assert.ok(ENGINE_WORLD_MIN_Y<WORLD_MIN_Y,
+    'production editable depth extends below the unchanged legacy world floor');
   assert.ok(WORLD_MAX_Y>=19);
   assert.deepEqual(Object.values(BLOCK).sort((a,b)=>a-b),
     Array.from({length:9},(_,i)=>i));
@@ -68,7 +71,8 @@ test('live invalid coordinate and non-integer IDs cannot create legacy edits',()
   const world=new VoxelWorld(179);
   for(const [x,y,z,id] of [
     [1,WORLD_MAX_Y+1,1,BLOCK.WOOD],
-    [1,WORLD_MIN_Y-1,1,BLOCK.STONE],
+    [1,ENGINE_WORLD_MIN_Y-1,1,BLOCK.STONE],
+    [1,WORLD_MIN_Y-1,1,76], // Deep edit height is valid; provisional ID still is not.
     [1,1,1,76],[1,1,1,255],[1,1,1,-1],[1,1,1,2.5],
     [1.5,1,1,BLOCK.WOOD]
   ])assert.equal(world.set(x,y,z,id),false);
