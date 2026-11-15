@@ -9,7 +9,7 @@ export const BIOME130_BUILDER_SYMBOLS=BIOME130_REGISTERED_SYMBOLS;
 export const BIOME130_BUILDER_AVAILABILITY=Object.freeze({
   physicalGeometry:true,liveGameRegistry:true,playerPlacement:true,
   schema1BlockIdsExtended:true,builderUsable:true,
-  source:'automated-biome130',families:60
+  source:'automated-biome130',families:70
 });
 export function resolveBiome130BuilderAsset(symbol,orientation='north'){
   const yaw=yawOf(orientation);

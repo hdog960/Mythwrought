@@ -131,6 +131,30 @@ try{
     'Biome130 block disappeared from world across browser reload');
   assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v002-world-179')).rotations
     .find(e=>e[0]===16&&e[1]===18&&e[2]===0)?.[3]),1,'Rotated voxel orientation lost on reload');
+
+  // 013: new ancient-ruin fragment selected through the real settings palette,
+  // physically placed and restored after browser reload with its orientation.
+  await page.locator('#menu').click();
+  await page.locator('#biome130Select').selectOption('325');
+  await page.locator('#biome130Rotation').selectOption('2');
+  await page.locator('#closeHelp').click();
+  await page.evaluate(()=>{const dev=window.__mythwroughtTest;dev.teleport(14.5,.5);dev.aimAt(16,18,0);});
+  await waitHit('16,18,0');
+  await page.locator('#dig').click();
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),0);
+  await page.evaluate(()=>window.__mythwroughtTest.aimAt(17,18,0));
+  await waitHit('17,18,0');
+  await page.locator('#place').click();
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),325,
+    'Ancient ruin block not physically placed through real UI');
+  const ruinSaved=await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v002-world-179')));
+  assert.ok(ruinSaved.edits.some(e=>e.join(',')==='16,18,0,325'));
+  assert.ok(ruinSaved.rotations.some(e=>e.join(',')==='16,18,0,2'));
+  await page.screenshot({path:'artifacts/mythwrought-013-ancient-ruin-physical.png'});
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),325);
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.snapshot().loadedChunks),25);
   assert.deepEqual(errors,[],'Browser exceptions during block interaction');
   assert.deepEqual(missing,[],'Missing game resources');
   console.log('PASS v0.08 material selection, mine/place, no-target/player-body rejects, grip hint and save/reload');
