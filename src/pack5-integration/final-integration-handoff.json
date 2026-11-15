@@ -151,7 +151,36 @@
     ],
     "supportVerification": "must use live world's registered structural supports before settlement placement",
     "productionPlacement": false,
-    "registeredInMain": false
+    "registeredInMain": false,
+    "shapeAwarePreflight": {
+      "module": "src/pack5-integration/placement-preflight.mjs",
+      "api": "preflightPack5BuilderPlan",
+      "existingPack5SourceApi": "collectPack5PlacedCollisionBoxes",
+      "role": "read-only producer-owned dry-run; never production-clearance",
+      "expectedInputs": [
+        "world",
+        "foreignOccupiedCells",
+        "existingPack5Cells",
+        "foreignCollisionBoxes",
+        "existingPack5CollisionBoxes"
+      ],
+      "optionalCertifiedStructuralInput": "verifiedStructuralSupports",
+      "semantics": [
+        "all shapes must originate from each source pack actual physical geometry",
+        "both foreign and existing Pack5 occupancy and collision registries are required for shapeAwareDryRunClear",
+        "registered nonlegacy material is structural only with separate positive structural-support proof",
+        "AIR future support must have both structural proof and foreign occupancy",
+        "a dry-run clearance never registers a numeric block ID or authorizes world placement"
+      ],
+      "outcome": "shapeAwareDryRunClear",
+      "remainsFalse": [
+        "crossPackPhysicalAcceptance",
+        "integrationReady",
+        "globalNumericIdsAssigned",
+        "worldPlaced",
+        "saveWritten"
+      ]
+    }
   },
   "performanceContract": {
     "residentGpuBytes": 2097152,

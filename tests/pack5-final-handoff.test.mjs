@@ -112,3 +112,17 @@ test('mixed-furnishing GPU pages remain byte and draw bounded with zero duplicat
   stream.dispose();
   assert.equal(stream.stats().bytes,0);
 });
+
+test('handoff manifest exposes source-owned fail-closed cross-pack physical preflight ABI',()=>{
+  const abi=manifest.builderContract.shapeAwarePreflight;
+  assert.equal(abi.api,'preflightPack5BuilderPlan');
+  assert.equal(abi.existingPack5SourceApi,'collectPack5PlacedCollisionBoxes');
+  assert.deepEqual(abi.expectedInputs,[
+    'world','foreignOccupiedCells','existingPack5Cells',
+    'foreignCollisionBoxes','existingPack5CollisionBoxes']);
+  assert.equal(abi.optionalCertifiedStructuralInput,'verifiedStructuralSupports');
+  assert.equal(abi.outcome,'shapeAwareDryRunClear');
+  assert.ok(abi.remainsFalse.includes('integrationReady'));
+  assert.ok(abi.remainsFalse.includes('crossPackPhysicalAcceptance'));
+  assert.equal(manifest.numericBlockIdPolicy.startsWith('NO IDS'),true);
+});
