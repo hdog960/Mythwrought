@@ -1,5 +1,8 @@
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
 import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
+import {biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
+import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
+import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
 // Keep that public contract at -3; the expanded editable engine range is
 // separately exported by depth.mjs so old cave floors do not shift.
@@ -83,6 +86,8 @@ export class VoxelWorld{
   constructor(seed=179){
     this.seed=seed|0;
     this.edits=new Map();
+    this.rotations=new Map();
+    this.biomeCellCount=0;
     // Limited per-world cache: streaming an endless world cannot retain every
     // visited district forever. Geometry is recreated from the original seed.
     this.landmarkCache=new Map();
@@ -131,23 +136,51 @@ export class VoxelWorld{
     const key=worldKey(x,y,z);
     return this.edits.has(key)?this.edits.get(key):this.naturalAndLandmarkBlock(x,y,z);
   }
-  set(x,y,z,id){
-    if(![x,y,z,id].every(Number.isInteger)||y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y||id<0||id>8)return false;
-    const key=worldKey(x,y,z);
+  rotationAt(x,y,z){return this.rotations.get(worldKey(x,y,z))??0;}
+  set(x,y,z,id,rotation=0){
+    if(![x,y,z,id,rotation].every(Number.isInteger)||
+       y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y||
+       !(id>=0&&id<=8||isBiome130BlockId(id))||
+       rotation<0||rotation>3||rotation!==0&&!isBiome130BlockId(id))return false;
+    const key=worldKey(x,y,z),previous=this.edits.get(key);
+    if(isBiome130BlockId(previous))this.biomeCellCount--;
     if(this.naturalAndLandmarkBlock(x,y,z)===id)this.edits.delete(key);
     else this.edits.set(key,id);
+    if(isBiome130BlockId(id)){
+      this.biomeCellCount++;
+      if(rotation)this.rotations.set(key,rotation);
+      else this.rotations.delete(key);
+    }else this.rotations.delete(key);
     return true;
   }
   save(){
     const edits=[...this.edits.entries()].map(([k,id])=>[...k.split(',').map(Number),id]);
     edits.sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]);
-    return {schema:1,seed:this.seed,edits};
+    const payload={schema:1,seed:this.seed,edits};
+    // Compatible extension: existing schema-1 byte shape is unchanged when no
+    // rotated biome material was placed. Old worlds load without migration.
+    if(this.rotations.size)payload.rotations=[...this.rotations.entries()]
+      .filter(([k])=>isBiome130BlockId(this.edits.get(k)))
+      .map(([k,turns])=>[...k.split(',').map(Number),turns])
+      .sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]);
+    return payload;
   }
   static restore(payload){
     if(!payload||payload.schema!==1||!Number.isInteger(payload.seed)||payload.seed!==(payload.seed|0)||!Array.isArray(payload.edits)||payload.edits.length>300000)throw Error('Unsupported or invalid Mythwrought save');
     const world=new VoxelWorld(payload.seed);
     for(const row of payload.edits){
       if(!Array.isArray(row)||row.length!==4||!world.set(...row))throw Error('Save contains invalid voxel edit');
+    }
+    if(payload.rotations!==undefined){
+      if(!Array.isArray(payload.rotations)||payload.rotations.length>300000)throw Error('Invalid rotated block state');
+      const seen=new Set();
+      for(const row of payload.rotations){
+        if(!Array.isArray(row)||row.length!==4||!row.every(Number.isInteger)||
+          row[3]<1||row[3]>3)throw Error('Invalid rotated voxel');
+        const k=worldKey(...row.slice(0,3));
+        if(seen.has(k)||!isBiome130BlockId(world.edits.get(k)))throw Error('Stale/duplicate rotated block');
+        seen.add(k);world.rotations.set(k,row[3]);
+      }
     }
     return world;
   }
@@ -159,8 +192,8 @@ export function meshChunk(world,cx,cz){
   // reads still go through world.get so schema-1 edits override seeded caves.
   const side=CHUNK_SIZE+2, depth=WORLD_MAX_Y-LEGACY_WORLD_MIN_Y+3;
   const minX=cx*CHUNK_SIZE-1,minZ=cz*CHUNK_SIZE-1,minY=LEGACY_WORLD_MIN_Y-1;
-  const cells=new Uint8Array(side*side*depth);
-  cells.fill(255); // AIR is 0; 255 is the sole unvisited sentinel.
+  const cells=new Uint16Array(side*side*depth);
+  cells.fill(65535); // 16-bit sentinel: old 255 remains reserved; biome130 uses 256..312.
   const extra=new Map();
   const blockAt=(x,y,z)=>{
     if(x<minX||x>=minX+side||z<minZ||z>=minZ+side||y<minY||y>=minY+depth){
@@ -170,12 +203,25 @@ export function meshChunk(world,cx,cz){
     }
     const index=((x-minX)*side+(z-minZ))*depth+(y-minY);
     const cached=cells[index];
-    if(cached!==255)return cached;
+    if(cached!==65535)return cached;
     const id=world.get(x,y,z);
     cells[index]=id;
     return id;
   };
   const readWorld={seed:world.seed,get:blockAt};
+  // Each authored multi-box shape is surface-unioned only once per rotation.
+  // No false full-cube fallback for these physical automation materials.
+  const getBiomeGeometry=(id,rotation)=>{
+    const cacheKey=id*4+rotation;
+    let mesh=biomeSurfaceCache.get(cacheKey);
+    if(!mesh){
+      const block=biome130Block(id,rotation);
+      mesh=prototypeSurfaceMesh({prototypeOnly:true,boxes:block.boxes});
+      if(mesh.indices.length>12000)throw Error('Biome voxel surface budget exceeded');
+      biomeSurfaceCache.set(cacheKey,mesh);
+    }
+    return mesh;
+  };
   // Typed solid-mesh staging: conserve allocations while preserving exactly
   // the original 9-float vertex layout and existing seed/save semantics.
   let solidBuffer=new Float32Array(16384),solidLength=0;
@@ -195,6 +241,36 @@ export function meshChunk(world,cx,cz){
       for(let y=LEGACY_WORLD_MIN_Y;y<=WORLD_MAX_Y;y++){
         const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
+        if(isBiome130BlockId(id)){
+          const surface=getBiomeGeometry(id,world.rotationAt?.(x,y,z)??0);
+          // Source-accurate union surface geometry; full neighboring legacy
+          // solids hide only true boundary faces, preserving internal shapes.
+          for(let t=0;t<surface.indices.length;t+=3){
+            const vi=surface.indices[t],ni=vi*3;
+            const nx=surface.normals[ni],ny=surface.normals[ni+1],nz=surface.normals[ni+2];
+            const neighbor=blockAt(x+nx,y+ny,z+nz);
+            let boundary=true;
+            for(let u=t;u<t+3;u++){
+              const i=surface.indices[u]*3;
+              if(nx&&Math.abs(surface.positions[i]-(nx>0?1:0))>1e-6||
+                 ny&&Math.abs(surface.positions[i+1]-(ny>0?1:0))>1e-6||
+                 nz&&Math.abs(surface.positions[i+2]-(nz>0?1:0))>1e-6){
+                boundary=false;break;
+              }
+            }
+            if(boundary&&neighbor!==BLOCK.AIR&&!isBiome130BlockId(neighbor))continue;
+            const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
+            const lit=[.77,.73,1,.48,.85,.67][face];
+            const color=biome130Color(id,x,y,z,face);
+            for(let u=t;u<t+3;u++){
+              const i=surface.indices[u]*3,px=surface.positions[i],
+                    py=surface.positions[i+1],pz=surface.positions[i+2];
+              appendVertex(x+px,y+py,z+pz,color[0]*lit,color[1]*lit,color[2]*lit,
+                nx?pz:px,ny?pz:py,0);
+            }
+          }
+          continue;
+        }
         const color=COLORS[id]||COLORS[3];
         // Most underground voxels are fully enclosed. Defer the two noise
         // samples and tint calculation until the FIRST exposed face; otherwise
@@ -258,6 +334,7 @@ export function meshChunk(world,cx,cz){
   for(const part of ornaments){combined.set(part,offset);offset+=part.length;}
   return combined;
 }
+const biomeSurfaceCache=new Map(); // 57 assets x 4 rotations, bounded by registry.
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.
 // Start at the eye point, traverse each crossed cell, and preserve the adjacent empty cell
 // so placement and removal share the same pixel-accurate targeting rule.
@@ -266,6 +343,16 @@ export function raycast(world,eye,direction,maxDistance=7){
      ![...eye,...direction,maxDistance].every(Number.isFinite)||maxDistance<0)return null;
   const len=Math.hypot(...direction);
   if(len<1e-9)return null;
+  if(world?.biomeCellCount>0){
+    const hit=raycastShapes(eye,direction,(x,y,z)=>{
+      const id=world.get(x,y,z);
+      return id===BLOCK.AIR?null:isBiome130BlockId(id)?
+        {boxes:biome130Block(id,world.rotationAt?.(x,y,z)??0).boxes}:FULL_CUBE;
+    },maxDistance);
+    if(!hit)return null;
+    return {hit:hit.cell,adjacent:hit.normal.some(Boolean)?
+      hit.cell.map((v,i)=>v+hit.normal[i]):null,distance:hit.distance};
+  }
   const dir=direction.map(v=>v/len),cell=eye.map(Math.floor);
   const step=dir.map(v=>Math.sign(v));
   const tDelta=dir.map(v=>v===0?Infinity:Math.abs(1/v));
@@ -319,6 +406,17 @@ export function collides(world,x,feet,z){
   for(let bx=Math.floor(x-BODY_RADIUS+e);bx<=Math.floor(x+BODY_RADIUS-e);bx++)
     for(let bz=Math.floor(z-BODY_RADIUS+e);bz<=Math.floor(z+BODY_RADIUS-e);bz++)
       for(let by=Math.floor(feet+e);by<=Math.floor(feet+BODY_HEIGHT-e);by++)
-        if(world.get(bx,by,bz)!==BLOCK.AIR)return true;
+        {
+          const id=world.get(bx,by,bz);
+          if(id===BLOCK.AIR)continue;
+          if(!isBiome130BlockId(id))return true;
+          const asset=biome130Block(id,world.rotationAt?.(bx,by,bz)??0);
+          if(!asset.solid)continue;
+          for(const box of asset.boxes){
+            if(x+BODY_RADIUS>bx+box[0]+e&&x-BODY_RADIUS<bx+box[3]-e&&
+               feet+BODY_HEIGHT>by+box[1]+e&&feet<by+box[4]-e&&
+               z+BODY_RADIUS>bz+box[2]+e&&z-BODY_RADIUS<bz+box[5]-e)return true;
+          }
+        }
   return false;
 }
