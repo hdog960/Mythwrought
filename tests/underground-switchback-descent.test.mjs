@@ -72,3 +72,26 @@ test('all four chamber approaches remain traversable after floor composition',()
     }
   }
 });
+
+test('eight side grottoes are physically carved, supported and reachable from each vault',()=>{
+  const world=new VoxelWorld(179),reader=descentWorld(world),route=descentRoute();
+  for(const depth of [-30,-80,-130,-180]){
+    const p=route.find(q=>q.floor===depth);
+    assert.ok(p,'missing anchor at '+depth);
+    for(const [sx,sz] of [[1,0],[0,1]]){
+      for(const along of [3,8,15]){
+        const x=p.x+sx*along,z=p.z+sz*along;
+        assert.equal(reader.get(x,depth,z),BLOCK.DEEPSTONE,'unsupported side gallery');
+        for(let h=1;h<=3;h++)assert.equal(reader.get(x,depth+h,z),BLOCK.AIR,
+          'blocked side gallery at '+depth+' offset '+along);
+      }
+      const x=p.x+sx*15,z=p.z+sz*15;
+      for(const [dx,dz] of [[0,0],[5,0],[-5,0],[0,5],[0,-5]]){
+        assert.equal(reader.get(x+dx,depth,z+dz),BLOCK.DEEPSTONE);
+        assert.equal(reader.get(x+dx,depth+1,z+dz),BLOCK.AIR);
+        assert.equal(reader.get(x+dx,depth+2,z+dz),BLOCK.AIR);
+      }
+    }
+  }
+  assert.equal(descentConnectivity(world).connected,true);
+});
