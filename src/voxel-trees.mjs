@@ -76,6 +76,16 @@ export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES
     if(Math.abs(dz)+Math.abs(dy-height)+(dx===4?1:0)<=2 &&
        !cells.has(key(x+dx,ground+dy,z+dz)))put(dx,dy,dz,leafId);
  }
+ // A crown bridge is not a traversable destination when its entrances are
+ // obstructed. Check a two-block-high, three-wide approach at both ends,
+ // including player edits and already integrated district/landmark voxels.
+ // This is an opt-in planning guard; no terrain or saved blocks are changed.
+ if(variant==='archwood')for(const dx of [-2,-1,7,8])
+  for(let dz=-1;dz<=1;dz++)for(let dy=1;dy<=2;dy++){
+   const px=x+dx,py=ground+dy,pz=z+dz;
+   if(baseBlock(px,py,pz,world.seed)!==BLOCK.AIR||
+      world.get(px,py,pz)!==BLOCK.AIR)return null;
+  }
  const occupied=[...cells.values()];
  // Never touch player edits, another structure, terrain or a cave opening.
  // Require original grass below the trunk and naturally empty air everywhere above.
