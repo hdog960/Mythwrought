@@ -12,7 +12,8 @@ import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,pack2ExportBundle,pack2ImportBundle} from './pack2-world.mjs';
 import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
-  pack2NormalizeState,pack2CycleState,pack2WaterSectionVertices} from './pack2-integration.mjs';
+  pack2NormalizeState,pack2CycleState,pack2WaterSectionVertices,
+  pack2BodyIntersects} from './pack2-integration.mjs';
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
@@ -268,6 +269,10 @@ function start(){
       const existing=targeted?world.getPack2State?.(...targeted):null;
       if(existing?.id===selected){
         const next=pack2CycleState(selected,existing,'toggle');
+        if(!next.open&&pack2BodyIntersects(selected,next,targeted,
+          {x:player.x,z:player.z,feet:player.feet,radius:.28,height:1.78})){
+          message('Cannot close a door or gate through the player');return;
+        }
         world.updatePack2State(...targeted,next);
         try{refreshEditedMeshes(targeted[0],targeted[2],targeted[1]);}
         catch(error){world.updatePack2State(...targeted,existing);
@@ -425,7 +430,12 @@ function start(){
       if([...chunks.values()].some(c=>c.waterBuffer)){
         gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
         gl.depthMask(false);
-        for(const chunk of chunks.values())if(chunk.waterBuffer){
+        const waterChunks=[...chunks.values()].filter(c=>c.waterBuffer).sort((a,b)=>{
+          const distance=c=>((c.x*16+8-player.x)**2+(c.z*16+8-player.z)**2+
+            (c.section*16-player.feet)**2);
+          return distance(b)-distance(a);
+        });
+        for(const chunk of waterChunks){
           gl.bindBuffer(gl.ARRAY_BUFFER,chunk.waterBuffer);
           gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
           gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
@@ -850,12 +860,17 @@ function start(){
   document.getElementById('vaultBackup').onclick=()=>useVault(async()=>{
     if(storageReadOnly)throw Error('Current world is in protected read-only mode; select a healthy seed or import a backup');
     const capturedSeed=world.seed;
-    const raw=JSON.stringify(world.save());
+    // Legacy vault parser accepts the original schema-1 envelope while the
+    // additional Pack 2 sidecar is retained for a complete JSON restore.
+    const raw=JSON.stringify(world.pack2Cells.size?
+      pack2ExportBundle(world):world.save());
     const snapshot=await createVaultBackup(raw);
     if(capturedSeed!==snapshot.seed)throw Error('Snapshot seed mismatch');
     await refreshVault(snapshot.id);
     vaultStatus.textContent='Verified device backup for seed '+snapshot.seed+
-      ' ('+snapshot.edits+' edits). This does NOT replace a downloadable JSON backup.';
+      ' ('+snapshot.edits+' legacy edits'+
+      (world.pack2Cells.size?', '+world.pack2Cells.size+' Pack 2 placements':'')+
+      '). Download JSON for an independent off-device copy.';
   });
   document.getElementById('vaultPrepare').onclick=()=>useVault(async()=>{
     clearVaultLink();
