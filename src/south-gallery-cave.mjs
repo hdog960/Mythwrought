@@ -25,14 +25,15 @@ export function southGalleryCaveWorld(world,origin=CAVE_CANDIDATE){
   };
 }
 
-// A deterministic collision-reader-compatible path from the existing grotto
-// through the new throat to the chamber; not a controller simulation.
+// A deterministic collision-reader-compatible path from the primary eastbound
+// cave corridor, through the south grotto and throat, into the chamber.
+// This checks the junction too, not just an isolated gallery interior.
 export function southGalleryTrace(world,origin=CAVE_CANDIDATE){
   const reader=southGalleryCaveWorld(world,origin);
   const {floorAt}=caveRoute(world.seed,origin);
   const t=origin.length-11,x=origin.x+t;
   const samples=[];
-  for(let d=3;d<=10;d++){
+  for(let d=0;d<=10;d++){
     const z=origin.z+d,floor=floorAt(t);
     samples.push({x,z,feet:floor+1,
       supported:reader.get(x,floor,z)!==BLOCK.AIR,
