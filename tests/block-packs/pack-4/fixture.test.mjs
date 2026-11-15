@@ -94,6 +94,7 @@ test('bad save state never partially destroys already placed cells',()=>{
   {fixture:'mythwrought.pack4.fixture',schemaVersion:2,cells:[]},
   {fixture:'mythwrought.pack4.fixture',schemaVersion:1,cells:[{cell:[1,1,1],id:255,rotation:0}]},
   {fixture:'mythwrought.pack4.fixture',schemaVersion:1,cells:[{cell:[1,1,1],id:159}]},
+  {fixture:'mythwrought.pack4.fixture',schemaVersion:1,cells:[{cell:[1,1,1],id:159,rotation:undefined}]},
   {fixture:'mythwrought.pack4.fixture',schemaVersion:1,cells:[
     {cell:[1,1,1],id:159,rotation:0},{cell:[1,1,1],id:160,rotation:2}]},
   {fixture:'mythwrought.pack4.fixture',schemaVersion:1,cells:[

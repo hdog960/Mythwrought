@@ -195,6 +195,6 @@ test('malformed saved states and unreserved candidate IDs fail closed',()=>{
  for(const r of [-1,4,.5,NaN,Infinity,'0',null])
   assert.throws(()=>civicShape(176,r));
  for(const s of [null,{},[],{id:176},{id:176,rotation:NaN},
-  {id:181,rotation:'0'},{id:255,rotation:1}])
+  {id:181,rotation:'0'},{id:176,rotation:undefined},{id:255,rotation:1}])
   assert.throws(()=>restoreCivicSaveState(s));
 });

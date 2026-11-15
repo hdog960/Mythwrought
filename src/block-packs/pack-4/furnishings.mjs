@@ -217,7 +217,8 @@ export function furnishingSaveState(id,rotation=0){
 }
 export function restoreFurnishingSaveState(s){
  if(!s||typeof s!=='object'||Array.isArray(s)||
-   !Object.hasOwn(s,'id')||!Object.hasOwn(s,'rotation'))
+   !Object.hasOwn(s,'id')||!Object.hasOwn(s,'rotation')||
+   s.rotation===undefined)
    throw TypeError('Truncated Pack 4 furniture save');
  return furnishingSaveState(s.id,s.rotation);
 }

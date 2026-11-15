@@ -157,7 +157,7 @@ test('invalid IDs and unsafe orientation/save states fail closed',()=>{
   for(const bad of [-1,4,.5,NaN,Infinity,'0',null]){
     assert.throws(()=>windowShape(159,bad));
   }
-  for(const bad of [null,[],{}, {id:159},{id:159,rotation:'0'},{id:255,rotation:0}]){
+  for(const bad of [null,[],{}, {id:159},{id:159,rotation:undefined},{id:159,rotation:'0'},{id:255,rotation:0}]){
     assert.throws(()=>restoreWindowSaveState(bad));
   }
 });

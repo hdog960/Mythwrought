@@ -237,7 +237,8 @@ export function civicSaveState(id,rotation=0){
 }
 export function restoreCivicSaveState(s){
  if(!s||typeof s!=='object'||Array.isArray(s)||
-   !Object.hasOwn(s,'id')||!Object.hasOwn(s,'rotation'))
+   !Object.hasOwn(s,'id')||!Object.hasOwn(s,'rotation')||
+   s.rotation===undefined)
   throw TypeError('Invalid Pack 4 civic cell state');
  return civicSaveState(s.id,s.rotation);
 }

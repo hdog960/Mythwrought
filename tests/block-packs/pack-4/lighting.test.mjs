@@ -165,6 +165,6 @@ test('invalid and truncated persisted states fail closed',()=>{
  }
  for(const r of [-1,4,2.5,NaN,Infinity,null,'1'])assert.throws(()=>lightingShape(165,r));
  for(const payload of [null,[],{}, {id:165},{id:166,rotation:NaN},
-   {id:167,rotation:'0'},{id:5,rotation:0}])
+   {id:167,rotation:'0'},{id:166,rotation:undefined},{id:5,rotation:0}])
   assert.throws(()=>restoreLightingSaveState(payload));
 });

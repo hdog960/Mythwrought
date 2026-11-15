@@ -129,6 +129,7 @@ test('sidecar-to-fixture conversion rejects invalid formats and duplicate cells 
  }));
  for(const invalid of [
   null,{},[null],[{cell:[0,0,0],blockId:169}],
+  [{cell:[0,0,0],blockId:169,turns:undefined}],
   [{cell:[0,0,0],blockId:169,turns:4}],
   [{cell:[0,0,0],blockId:255,turns:0}],
   [{cell:[0,0,0],blockId:169,turns:0},{cell:[0,0,0],blockId:170,turns:1}]

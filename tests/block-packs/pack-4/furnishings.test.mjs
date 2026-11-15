@@ -191,6 +191,6 @@ test('candidate save state rejects unknown/truncated IDs or orientations fail-cl
  for(const bad of [-1,4,1.5,NaN,Infinity,'1',null])
   assert.throws(()=>furnishingShape(169,bad));
  for(const state of [null,{},[],{id:169},{id:175,rotation:4},
-  {id:169,rotation:'0'},{id:255,rotation:1}])
+  {id:169,rotation:'0'},{id:169,rotation:undefined},{id:255,rotation:1}])
   assert.throws(()=>restoreFurnishingSaveState(state));
 });

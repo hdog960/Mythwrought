@@ -79,7 +79,7 @@ export function pack4SidecarToFixtureSnapshot(entries){
  for(const entry of entries){
   if(!entry||typeof entry!=='object'||Array.isArray(entry)||
      !Object.hasOwn(entry,'cell')||!Object.hasOwn(entry,'blockId')||
-     !Object.hasOwn(entry,'turns'))
+     !Object.hasOwn(entry,'turns')||entry.turns===undefined)
    throw TypeError('Malformed sidecar entry');
   const state=pack4SidecarHandoff(entry.cell,entry.blockId,entry.turns);
   const key=state.cell.join(',');

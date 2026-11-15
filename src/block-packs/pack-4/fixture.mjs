@@ -135,7 +135,8 @@ export function createPack4Fixture(initialSupports=[]){
   const occupied=new Set();
   for(const item of snapshot.cells){
    if(!item||!Object.hasOwn(item,'cell')||!Object.hasOwn(item,'id')||
-      !Object.hasOwn(item,'rotation'))throw TypeError('Truncated fixture cell');
+      !Object.hasOwn(item,'rotation')||item.rotation===undefined)
+    throw TypeError('Truncated fixture cell');
    const cell=validCell(item.cell),state=pack4State(item.id,item.rotation);
    const k=key(...cell);
    if(occupied.has(k)||supports.has(k))throw TypeError('Duplicated/blocked fixture cell');

@@ -148,7 +148,8 @@ export function lightingSaveState(id,rotation=0){
 }
 export function restoreLightingSaveState(payload){
   if(!payload||typeof payload!=='object'||Array.isArray(payload)||
-    !Object.hasOwn(payload,'id')||!Object.hasOwn(payload,'rotation'))
+    !Object.hasOwn(payload,'id')||!Object.hasOwn(payload,'rotation')||
+    payload.rotation===undefined)
     throw TypeError('Invalid Pack 4 lighting state');
   return lightingSaveState(payload.id,payload.rotation);
 }
