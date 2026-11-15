@@ -123,6 +123,23 @@ test('pulley has physical radial wheel, discrete empty gaps and independent wall
  assert.equal(filled(s.collision,.5,.50,.27),false,'wheel interior gaps remain empty');
  assert.equal(filled(s.collision,.5,.89,.27),true,'wheel upper rim physically occupied');
  assert.equal(a.engines.animation,false,'no fake working pulley');
+ // Earlier wheel teeth had nine isolated AABBs: thin rim pieces were
+ // separated from their neighbors and the actual radial spokes.
+ const touching=(a,b)=>[0,1,2].every(axis=>
+  a[axis]<=b[axis+3]+1e-8&&b[axis]<=a[axis+3]+1e-8);
+ for(let rotation=0;rotation<4;rotation++){
+  const boxes=civicShape(180,rotation).collision;
+  const seen=new Set([0]),queue=[0];
+  while(queue.length){
+   const i=queue.pop();
+   for(let j=0;j<boxes.length;j++)if(!seen.has(j)&&touching(boxes[i],boxes[j])){
+    seen.add(j);queue.push(j);
+   }
+  }
+  assert.equal(boxes.length,22);
+  assert.equal(seen.size,boxes.length,
+   'every tooth/spoke must belong to one physical wheel at turn '+rotation);
+ }
 });
 test('fountain is dry, carved basin segment with a real open cavity and NO fluid update',()=>{
  const s=civicShape(181),a=civicAsset(181);
