@@ -37,6 +37,22 @@ for(const [x,cy,z,id] of plan.cells){
 assert.ok(plan.cells.some(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&
  (z!==a[1]||x<a[0]||x>b[0])),'cross-axis outriggers are physical');
 assert.ok(plan.cells.every(c=>c[1]===y||c[1]===y+1));
+// The old twin continuous side rails read as a rigid box fence. Branch
+// occupancy must now be sparse, staggered and rooted to the central deck.
+const deckLength=Math.abs(b[0]-a[0])+Math.abs(b[1]-a[1]);
+const limbs=plan.cells.filter(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&
+ (a[0]===b[0]?x!==a[0]:z!==a[1]));
+assert.ok(limbs.length<2*(deckLength-3),'no continuous paired side fences');
+assert.ok(limbs.length>=deckLength-3,'at least one branch per interior step');
+const left=limbs.filter(([x,,z])=>a[0]===b[0]?x<a[0]:z<a[1]).length;
+const right=limbs.length-left;
+assert.ok(left>0&&right>0,'crown alternates between both sides');
+for(const [x,cy,z] of limbs){
+ assert.equal(occupancy.get([x,cy+1,z].join(',')),BLOCK.LEAVES,'each limb supports its crown');
+ assert.ok([[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dz])=>
+  occupancy.get([x+dx,cy,z+dz].join(','))===BLOCK.WOOD),
+ 'each limb is attached to deck timber');
+}
 assert.equal(planCanopyWalkway(world,a,[a[0]+3,a[1]+1],y),null,'diagonal forbidden');
 assert.equal(planCanopyWalkway(world,a,[a[0]+10,a[1]],y),null,'overspan forbidden');
 assert.equal(placeCanopyWalkway(world,{...plan,cells:plan.cells.slice(1)}),false,'tampering rejected');
