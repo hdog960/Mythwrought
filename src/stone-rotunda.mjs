@@ -128,6 +128,14 @@ export function inspectStoneRotundaTraversal(world,plan){
        world.get(x-3,h+5,z+d)!==BLOCK.STONE ||
        world.get(x+3,h+5,z+d)!==BLOCK.STONE)return null;
   }
+  // The landmark is only intact if every authored physical stone remains.
+  // This also catches removed buttresses, ground-level steps and crown fragments
+  // that are not part of the pillar/ring or the four walking corridors.
+  // Compare against the supplied plan's real cells, without writing or rebuilding.
+  if(!Array.isArray(plan.cells)||!plan.cells.every(cell=>
+    Array.isArray(cell)&&cell.length===4&&
+    cell.every(Number.isSafeInteger)&&cell[3]===BLOCK.STONE&&
+    world.get(cell[0],cell[1],cell[2])===BLOCK.STONE))return null;
   const routes=[];
   for(const [dx,dz] of [[0,-1],[0,1],[-1,0],[1,0]]){
     const cells=[];
