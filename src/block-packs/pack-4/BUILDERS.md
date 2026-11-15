@@ -61,3 +61,17 @@ The adapter is **not** the production renderer, block registration, live world
 placement, save migration, fire/smoke/water mechanics, or physical-iPhone
 approval. Candidate IDs remain reserved, not deployed. Settlement generation
 and full live-world rendering require a **separate explicit incorporation**.
+
+
+### Actual independent roadmap schemas (do not fake compatibility)
+- Roadmap 1 / PR #121: \`placements: [{at,asset,orientation,...}]\`.
+- Roadmap 2 / PR #124: \`voxels: [{x,y,z,material,kind}]\`.
+  Only perimeter window facing can be derived from bounds. Others default
+  to north **preview only** with \`orientationRequiresReview:true\`.
+- Roadmap 3 / PR #122: \`modules: [{role,cells:[[x,y,z,ref],...]}]\`.
+  Each absent facing becomes explicitly \`default-preview-only\`, requiring
+  designer orientation review before physical final signoff.
+- Roadmap 4 / PR #123: \`cells: [{at,asset,facing,...}]\`.
+The adapter always returns per-cell real geometry, while it separately
+reports \`orientationReviewCount\` and \`supportVerified\` so missing
+builder context is not mistaken for approved physical placement.

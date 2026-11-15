@@ -99,8 +99,29 @@ const cellKey=at=>at.join(',');
 export function resolvePack4BuilderBlueprint(blueprint,{
  variantByRef={},fixedSupportCells=[],requireSupport=false
 }={}){
- const rows=blueprint?.placements??blueprint?.cells;
- if(!Array.isArray(rows))throw TypeError('Expected blueprint placements or cells');
+ // Four independently owned theoretical building roadmaps encode cell slots
+ // differently. Normalize WITHOUT editing or claiming their schema is resolved.
+ let rows=blueprint?.placements??blueprint?.cells;
+ if(!Array.isArray(rows)&&Array.isArray(blueprint?.voxels)){
+  const maxX=blueprint.extents?.x, maxZ=blueprint.extents?.z;
+  rows=blueprint.voxels.map(v=>{
+   let orientation='north',orientationProvenance='default-preview-only';
+   if(v.kind==='window'){
+    if(v.x===0){orientation='west';orientationProvenance='facade-derived';}
+    else if(v.x===maxX-1){orientation='east';orientationProvenance='facade-derived';}
+    else if(v.z===maxZ-1){orientation='south';orientationProvenance='facade-derived';}
+    else if(v.z===0){orientation='north';orientationProvenance='facade-derived';}
+   }
+   return {at:[v.x,v.y,v.z],asset:v.material,orientation,orientationProvenance};
+  });
+ }
+ if(!Array.isArray(rows)&&Array.isArray(blueprint?.modules))
+  rows=blueprint.modules.flatMap(module=>(module.cells??[]).map(cell=>({
+   at:cell.slice(0,3),asset:cell[3],orientation:'north',
+   orientationProvenance:'default-preview-only'
+  })));
+ if(!Array.isArray(rows))
+  throw TypeError('Expected Roadmap 1 placements, Roadmap 2 voxels, Roadmap 3 modules, or Roadmap 4 cells');
  if(!variantByRef||typeof variantByRef!=='object'||Array.isArray(variantByRef))
   throw TypeError('Invalid Pack4 variant choices');
  const fixed=new Set(fixedSupportCells.map(at=>cellKey(safeAt(at))));
@@ -117,12 +138,18 @@ export function resolvePack4BuilderBlueprint(blueprint,{
     fixed.has(cellKey(placement.supportAt));
   if(requireSupport&&!supported)
    throw Error('Missing real fixed support for Pack4 '+placement.asset+' at '+key);
-  resolved.push(Object.freeze({...placement,supportVerified:supported}));
+  const provenance=row.orientationProvenance??
+   (row.orientation!==undefined||row.facing!==undefined?
+    'authored':'default-preview-only');
+  resolved.push(Object.freeze({...placement,supportVerified:supported,
+   orientationProvenance:provenance,
+   orientationRequiresReview:provenance==='default-preview-only'}));
  }
  return Object.freeze({
   blueprintId:blueprint.id??null,
   resolvedCount:resolved.length,placements:Object.freeze(resolved),
   allMountsSupported:resolved.every(x=>x.supportVerified),
+  orientationReviewCount:resolved.filter(x=>x.orientationRequiresReview).length,
   hasRealPhysicalGeometry:true,registeredInLiveGame:false,
   source:'Pack4 original geometry; zero symbolic-only substitutions'
  });
