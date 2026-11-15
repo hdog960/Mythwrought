@@ -1,6 +1,6 @@
 // :48 opt-in physical canopy bridges. No terrain, save, renderer or ID changes.
 // A bridge joins two existing tree crowns without replacing a single player edit.
-import {BLOCK,baseBlock,WORLD_MAX_Y} from './voxel.mjs';
+import {BLOCK,baseBlock,WORLD_MAX_Y} from '../voxel.mjs';
 const key=(x,y,z)=>`${x},${y},${z}`;
 export function planCanopyBridge(world,a,b,{height=0}={}){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
@@ -28,6 +28,8 @@ export function planCanopyBridge(world,a,b,{height=0}={}){
    }
  }
  const occupied=[...cells.values()];
+ // A bridge must be contiguous and may never overwrite its supporting crowns.
+ if(occupied.some(([x,y,z])=>(x===ax&&y===ay&&z===az)||(x===bx&&y===by&&z===bz)))return null;
  if(occupied.some(([x,y,z])=>baseBlock(x,y,z,world.seed)!==BLOCK.AIR||
     world.get(x,y,z)!==BLOCK.AIR))return null;
  return {seed:world.seed,anchors:[a.slice(),b.slice()],height,cells:occupied,
