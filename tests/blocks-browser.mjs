@@ -154,7 +154,8 @@ try{
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
   assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),325);
-  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.snapshot().loadedChunks),25);
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,null,{timeout:20000});
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.snapshot().chunks.length),25);
   assert.deepEqual(errors,[],'Browser exceptions during block interaction');
   assert.deepEqual(missing,[],'Missing game resources');
   console.log('PASS v0.08 material selection, mine/place, no-target/player-body rejects, grip hint and save/reload');
