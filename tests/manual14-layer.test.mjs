@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
 import {MANUAL_FIVE_PACK_CATALOG} from '../src/builder-assets/manual-five-pack.mjs';
+import {PACK1_BUILDER_CATALOG} from '../src/block-packs/pack-1/builder-handoff.mjs';
 import {createManual14Layer,createManual14SavedBridge,MANUAL14_FORMAT} from '../src/builder-assets/manual14-layer.mjs';
 
 const selected=(pack,id)=>MANUAL_FIVE_PACK_CATALOG.find(x=>x.pack===pack&&x.numericId===id);
@@ -50,9 +51,9 @@ test('mounted Pack4 requires true backing, and duplicate cells roll back whole b
 });
 test('source-authored Pack1 wall mount cannot be invented from an absent wall',()=>{
  const {world}=fixture();
- const catalog=MANUAL_FIVE_PACK_CATALOG.filter(x=>x.pack===1);
- const wall=catalog.find(e=>e.symbol==='pack1:052')??catalog.find(e=>e.symbol==='pack1:054');
- if(!wall)return; // Future catalog changes remain covered by catalog tests.
+ const candidate=PACK1_BUILDER_CATALOG.find(x=>x.support==='vertical-face');
+ if(!candidate)return; // Source-owned mounted family is optional in future catalogs.
+ const wall={symbol:candidate.symbolicRef,numericId:candidate.id};
  const layer=createManual14Layer(world);
  assert.throws(()=>layer.placeMany([{asset:wall.symbol,numericId:wall.numericId,
   at:[520,19,500]}]),/wall support|Missing certified/);
