@@ -126,3 +126,11 @@ The new `tests/block-packs/pack-5/m6-cross-family.test.mjs` adds 22 substantive 
 All six original-source browser galleries `m1,m2,m3,m3b,m4,m5` were rerun on Chromium native ES-module + real WebGL2 via offline `data:` imports: **36/36 captures PASS** at 667×375 / 844×390 / 932×430 × 0/1 rotations. The browser's localhost HTTP restriction remains unresolved; no physical iPhone hardware or creator art approval claim.
 
 See `M6_ACCEPTANCE.md` for exact ownership, tests and external dependency gates. **18/18 symbolic families authored as CANDIDATE, 0 INTEGRATED, 0 persistent numeric IDs.** Candidate-source M6 readiness PASS **does not grant** merge/deploy, live placement, schema-1 engine changes, integration approval, Gate A signoff or v0.11 unlock.
+
+## Post-M6 verified candidate fixture reach correction
+
+At the latest source-only post-M6 review, the original 178 tests uncovered a real selection/reach defect not covered by unit-direction rays. The isolated `fixture.mjs` now normalizes arbitrary finite nonzero targeting direction vectors, preserving a true world-unit `maxDistance` for both `raycast` and `removeRay`. Four additional focused regressions prove that scaled directions cannot reach/remove distant fixtures and that mixed stacked targets preserve nearest-hit ordering. These changes affect **only the Pack 5 candidate test fixture**, not the production game renderer, raycast or save schema.
+
+**Current source-exact native Node v22.16.0: 182/182 PASS** (0 fails/skips); `node --test tests/block-packs/pack-5/*.test.mjs`. Genuine Chromium native ES-module/WebGL2 gallery checks **36/36 PASS** across six gallery groups, 3 iPhone-landscape proxy sizes and two rotations, on the updated fixture. Source blob `cf7baf90555d81ddd4dcba496f2d3ea469b12a41`; test blob `de5ee4ae2ad0b17165a13245b874e407725aa6da`. Historical 178 count was pre-fix. Exact root GitHub Actions may remain queued and is not replaced by these locally executed focused tests.
+
+All **18/18 original physical families remain only CANDIDATE**, with **zero live numeric IDs/zero integrated**. Creator art and actual physical-iPhone approval, real HTTP Pages serving, gameplay/registry shape contract and schema-1 safe integration are still separate open gates. Nothing deployed/merged/world-placed. See `M6_ACCEPTANCE.md` for reproducible evidence and limits.
