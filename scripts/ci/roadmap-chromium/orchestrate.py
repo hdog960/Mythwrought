@@ -67,8 +67,24 @@ def main():
             assert sha==actual, f'Candidate moved mid-fetch {sha} -> {actual}'
             worktree=report.parent/f'mythwrought-exact-pr-{pr}'
             cmd(['git','worktree','add','--detach',str(worktree),sha])
+            candidate_env=dict(os.environ)
+            if lane=='pack-4':
+                # Pack 4's strict runner requires four real shape modules only
+                # available on main, not its older PR base. Use a local overlay:
+                # candidate HEAD stays unchanged; main and source blobs are pinned.
+                main_sha=gh_json(f'repos/{repo}/commits/main')['sha']
+                cmd(['git','fetch','--no-tags','--depth=1','origin','main'])
+                assert cmd(['git','rev-parse','FETCH_HEAD'])==main_sha, 'main changed during acquisition'
+                main_modules=['src/voxel-shape-interactions.mjs','src/voxel-shape-fit.mjs',
+                              'src/voxel-orientation-sidecar.mjs','src/shape-prototypes.mjs']
+                cmd(['git','restore',f'--source={main_sha}','--worktree','--',*main_modules],cwd=worktree)
+                for path in main_modules:
+                    expected=cmd(['git','rev-parse',f'{main_sha}:{path}'],cwd=worktree)
+                    actual_blob=cmd(['git','hash-object',path],cwd=worktree)
+                    assert actual_blob==expected, f'Non-source-exact main overlay: {path}'
+                candidate_env['MYTHWROUGHT_COMPOSITE_MAIN_SHA']=main_sha
             result=subprocess.run(['python',str(tooling/'run_lane.py'),lane,str(worktree),sha,str(report),str(tooling)],
-                                  cwd=Path.cwd())
+                                  cwd=Path.cwd(),env=candidate_env)
             if result.returncode: failures.append({'lane':lane,'pr':pr,'sha':sha,'reason':'lane acceptance blocked; see evidence.json'})
         except Exception as exc:
             failures.append({'lane':lane,'pr':pr,'reason':str(exc)})
