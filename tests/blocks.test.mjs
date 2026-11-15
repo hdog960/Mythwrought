@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,WORLD_MAX_Y} from '../src/voxel.mjs';
 import {INTERACTION_REACH,BUILD_MATERIALS,BLOCK_NAMES,inspectBlockTarget,applyBlockAction,intersectsPlayerBlock} from '../src/blocks.mjs';
+import {PACK2_LIVE_IDS} from '../src/pack2-integration.mjs';
 
 function stage(){
   const w=new VoxelWorld(179);
@@ -13,9 +14,12 @@ function stage(){
 test('basic interaction materials and finite range are explicit',()=>{
   assert.equal(INTERACTION_REACH,6);
   assert.deepEqual(BUILD_MATERIALS.slice(0,5),[BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE]);
-  assert.equal(BUILD_MATERIALS.length,65,'all five original materials plus 60 registered biome blocks');
-  assert.equal(new Set(BUILD_MATERIALS).size,65,'no duplicate construction IDs');
-  assert.deepEqual(BUILD_MATERIALS.slice(5),Array.from({length:60},(_,i)=>256+i));
+  assert.equal(BUILD_MATERIALS.length,65+PACK2_LIVE_IDS.length,
+    'five legacy, sixty biome and eighteen candidate Pack 2 materials');
+  assert.equal(new Set(BUILD_MATERIALS).size,BUILD_MATERIALS.length,
+    'no duplicate construction IDs across registered ranges');
+  assert.deepEqual(BUILD_MATERIALS.slice(5,65),Array.from({length:60},(_,i)=>256+i));
+  assert.deepEqual(BUILD_MATERIALS.slice(65),PACK2_LIVE_IDS);
   assert.equal(BLOCK_NAMES[BLOCK.LEAVES],'leaf canopy');
   assert.equal(BLOCK_NAMES[BLOCK.DEEPSTONE],'deepstone');
   assert.equal(BLOCK_NAMES[BLOCK.GRASS],'grass');
@@ -33,7 +37,9 @@ test('first visible block is mined, never the invisible block behind it',()=>{
   assert.equal(w.get(x,y,z-1),BLOCK.CRYSTAL);
 });
 test('place selected materials only in line-of-sight adjacent empty cell',()=>{
-  for(const selected of BUILD_MATERIALS){
+  // The ordinary VoxelWorld intentionally refuses 59–76: they belong to
+  // the separate Pack2LiveWorld sidecar, not the legacy schema-1 edit list.
+  for(const selected of BUILD_MATERIALS.filter(id=>!PACK2_LIVE_IDS.includes(id))){
     const {w,x,y,z,eye,dir,player}=stage();
     const result=applyBlockAction(w,eye,dir,'place',selected,player,()=>{});
     assert.equal(result.ok,true);
