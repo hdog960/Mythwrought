@@ -188,6 +188,20 @@
         "maxColliders": 32768,
         "maxQueryAxisSpan": 256,
         "maxSpatialIndexInsertions": 250000
+      },
+      "sourceOwnedPreflight": {
+        "api": "preflightPack5BuilderAgainstOwnedLayer",
+        "requiredInputs": [
+          "world",
+          "existingLayer"
+        ],
+        "externalInputs": [
+          "foreignOccupiedCells",
+          "foreignCollisionBoxes",
+          "verifiedStructuralSupports"
+        ],
+        "provenance": "derives existing Pack5 occupied cells, source-authored collider boxes and finite region directly from the actual seeded Pack5 sidecar",
+        "safety": "cross-seed rejects, >256 axis region fails closed; never mutates world or sidecar; shapeAwareDryRunClear does not authorize production placement"
       }
     }
   },

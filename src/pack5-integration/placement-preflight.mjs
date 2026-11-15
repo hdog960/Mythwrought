@@ -228,3 +228,70 @@ export function preflightPack5BuilderPlan(plan,{world,
     integrationReady:false
   });
 }
+
+/**
+ * Source-owned handoff convenience: build every existing-Pack5 occupancy and
+ * physical-collision input from the SAME real sidecar, in a region computed
+ * from ALL of the proposed Pack5 source-occupied cells and colliders.
+ * This prevents integrator mistakes in copied regional AABB/cell lists.
+ * Other packs must still provide their own authoritative foreign evidence.
+ */
+export function preflightPack5BuilderAgainstOwnedLayer(plan,{
+  world,existingLayer,foreignOccupiedCells=null,foreignCollisionBoxes=null,
+  verifiedStructuralSupports=null
+}={}){
+  if(!world||!Number.isSafeInteger(world.seed)||!existingLayer||
+     existingLayer.seed!==world.seed||typeof existingLayer.list!=='function'||
+     typeof existingLayer.count!=='function'||!plan||
+     !Array.isArray(plan.placements)||plan.placements.length<1||
+     plan.placements.length>4096)
+    throw Error('Invalid or cross-seed Pack 5 owned-layer preflight');
+  const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
+  const include=box=>{
+    if(!boxValid(box))throw Error('Invalid Pack 5 planned physical region');
+    for(let i=0;i<3;i++){
+      lo[i]=Math.min(lo[i],box[i]);
+      hi[i]=Math.max(hi[i],box[i+3]);
+    }
+  };
+  for(const row of plan.placements){
+    if(!row||!cellValid(row.anchor))throw Error('Invalid source plan anchor');
+    const exact=resolvePack5BlueprintPhysical({
+      asset:row.asset,at:row.anchor,
+      orientation:row.rotation,variant:row.variant
+    });
+    for(const cell of exact.physical.occupiedCells)
+      include([...cell,cell[0]+1,cell[1]+1,cell[2]+1]);
+    for(const box of exact.physical.collision)include(box);
+  }
+  const bounds=[...lo,...hi];
+  if(bounds.some(n=>!Number.isFinite(n))||
+     lo.some((v,i)=>hi[i]-v>256))
+    throw Error('Pack 5 owned-layer preflight region too large; split construction');
+  const existingPack5CollisionBoxes=collectPack5PlacedCollisionBoxes(
+    existingLayer,{bounds});
+  const existingCells=new Set(),rows=existingLayer.list();
+  if(!Array.isArray(rows)||rows.length!==existingLayer.count()||rows.length>4096)
+    throw Error('Invalid Pack 5 existing layer occupancy');
+  for(const row of rows){
+    const exact=resolvePack5BlueprintPhysical({
+      asset:row.symbolicId,at:row.anchor,
+      orientation:row.rotation,variant:row.variant
+    });
+    for(const cell of exact.physical.occupiedCells){
+      const box=[...cell,cell[0]+1,cell[1]+1,cell[2]+1];
+      if(boxesOverlap(bounds,box))existingCells.add(key(cell));
+    }
+  }
+  const existingPack5Cells=[...existingCells].sort().map(s=>s.split(',').map(Number));
+  const result=preflightPack5BuilderPlan(plan,{
+    world,foreignOccupiedCells,existingPack5Cells,verifiedStructuralSupports,
+    foreignCollisionBoxes,existingPack5CollisionBoxes
+  });
+  return Object.freeze({...result,
+    existingPack5SourceVerified:true,
+    checkedRegion:Object.freeze(bounds),
+    existingPack5CollisionBoxCount:existingPack5CollisionBoxes.length,
+    existingPack5OccupiedCellCount:existingPack5Cells.length
+  });
+}

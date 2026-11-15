@@ -241,3 +241,63 @@ test('declared future supports without corresponding foreign occupied cells cann
   assert.equal(supplied.shapeAwareDryRunClear,true);
   assert.equal(supplied.integrationReady,false);
 });
+
+test('owned-layer wrapper derives exact existing occupancy and collision inputs from the same sidecar',async()=>{
+  const {preflightPack5BuilderAgainstOwnedLayer}=await import('../src/pack5-integration/placement-preflight.mjs');
+  const {createPack5ConstructionLayer}=await import('../src/pack5-integration/construction-layer.mjs');
+  const w=makeWorld(),layer=createPack5ConstructionLayer(w.world),p=plan(),rec=p.placements[0];
+  for(const s of rec.physical.requiredSupports)w.put(s);
+  assert.equal(layer.place(rec.asset,rec.anchor,rec.rotation,rec.variant).ok,true);
+  const saved=JSON.stringify(layer.snapshot());
+  const result=preflightPack5BuilderAgainstOwnedLayer(p,{
+    world:w.world,existingLayer:layer,
+    foreignOccupiedCells:[],foreignCollisionBoxes:[]
+  });
+  assert.equal(result.existingPack5SourceVerified,true);
+  assert.ok(result.existingPack5CollisionBoxCount>0);
+  assert.ok(result.existingPack5OccupiedCellCount>0);
+  assert.ok(result.issues.some(i=>i.kind==='existing-pack5-occupied'));
+  assert.ok(result.issues.some(i=>i.kind==='existing-pack5-shape-overlap'));
+  assert.equal(result.shapeAwareDryRunClear,false);
+  assert.equal(result.integrationReady,false);
+  assert.equal(JSON.stringify(layer.snapshot()),saved,'Read-only preflight changed sidecar');
+});
+test('owned-layer wrapper clears a separate furnished room but keeps global release gates false',async()=>{
+  const {preflightPack5BuilderAgainstOwnedLayer}=await import('../src/pack5-integration/placement-preflight.mjs');
+  const {createPack5ConstructionLayer}=await import('../src/pack5-integration/construction-layer.mjs');
+  const w=makeWorld(),layer=createPack5ConstructionLayer(w.world);
+  const b=plan().placements[0];
+  for(const s of b.physical.requiredSupports)w.put(s);
+  assert.equal(layer.place(b.asset,b.anchor,b.rotation,b.variant).ok,true);
+  const {planPack5BuilderBlueprint}=await import('../src/pack5-integration/blueprint-handoff.mjs');
+  const candidate=planPack5BuilderBlueprint({placements:[{
+    asset:b.asset,at:[45,5,45],orientation:b.rotation,variant:b.variant
+  }]});
+  for(const s of candidate.placements[0].physical.requiredSupports)w.put(s);
+  const r=preflightPack5BuilderAgainstOwnedLayer(candidate,{
+    world:w.world,existingLayer:layer,foreignOccupiedCells:[],foreignCollisionBoxes:[]
+  });
+  assert.equal(r.shapeAwareDryRunClear,true);
+  assert.equal(r.existingPack5CollisionBoxCount,0);
+  assert.equal(r.integrationReady,false);
+  assert.equal(r.crossPackPhysicalAcceptance,false);
+});
+test('owned-layer preflight refuses cross-seed worlds and oversized multi-building regions',async()=>{
+  const {preflightPack5BuilderAgainstOwnedLayer}=await import('../src/pack5-integration/placement-preflight.mjs');
+  const {createPack5ConstructionLayer}=await import('../src/pack5-integration/construction-layer.mjs');
+  const {planPack5BuilderBlueprint}=await import('../src/pack5-integration/blueprint-handoff.mjs');
+  const w=makeWorld(),layer=createPack5ConstructionLayer(w.world),p=plan();
+  assert.throws(()=>preflightPack5BuilderAgainstOwnedLayer(p,{
+    world:{...w.world,seed:999},existingLayer:layer,foreignOccupiedCells:[],
+    foreignCollisionBoxes:[]
+  }),/cross-seed/);
+  const f=PACK5_BUILDER_CATALOG.find(x=>x.symbolicId==='pack5:080');
+  const spread=planPack5BuilderBlueprint({placements:[
+    {asset:f.symbolicId,at:[0,5,0],orientation:0,variant:f.variants[0]},
+    {asset:f.symbolicId,at:[300,5,0],orientation:0,variant:f.variants[1]}
+  ]});
+  assert.throws(()=>preflightPack5BuilderAgainstOwnedLayer(spread,{
+    world:w.world,existingLayer:layer,foreignOccupiedCells:[],
+    foreignCollisionBoxes:[]
+  }),/region too large/);
+});

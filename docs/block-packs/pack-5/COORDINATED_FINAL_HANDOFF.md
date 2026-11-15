@@ -99,3 +99,20 @@ and emits `existing-pack5-query-scope-incomplete` if the region is too
 small. A copied, unproven subset of boxes must not be represented as a
 complete export by the future combined integrator. The source-bound
 metadata is in the handoff manifest for discovery.
+
+## Final producer integration convenience — guaranteed owned-layer inputs
+
+`preflightPack5BuilderAgainstOwnedLayer(plan,{world,existingLayer,foreignOccupiedCells,
+foreignCollisionBoxes,verifiedStructuralSupports})` derives the complete scoped
+existing-Pack5 occupied-cell list and source-authored world-space collider AABBs
+**from the same seeded Pack5 sidecar**, rather than trusting manually copied
+arrays. Its scope is calculated from every proposed physical collider AND every
+reserved voxel cell, so partial scope cannot quietly clear a neighboring
+fixture. Oversized (>256-cell-axis) multi-building requests fail closed with
+an instruction to split the plan. Cross-seed worlds are rejected. Inputs and
+saved layers are not mutated. The source-owned result reports evidence counts,
+but `integrationReady` and `crossPackPhysicalAcceptance` remain false.
+
+Foreign packs must still supply their **own** authenticated source collider and
+support proofs, and the eventual five-pack integrator must reconcile global
+IDs, saves and merged gameplay. This helper does not register or deploy assets.
