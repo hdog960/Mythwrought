@@ -92,33 +92,6 @@ export function surfaceBiomeOverlay(x,y,z,seed=179,{
   return id;
 }
 
-// Explicit fresh-world column composer for a future guarded terrain-reader seam.
-// Unlike the veneer, this can construct real mountain ridges and dune relief.
-// The caller MUST gate this on a brand-new, unvisited world profile and check
-// edits/landmarks before invoking. No global generator or save changes here.
-export function surfaceBiomeNewWorldColumn(x,y,z,seed=179,{
-  enabled=false,baseline,hasEdit=false,hasLandmark=false,profileIsFresh=false
-}={}){
-  if(!enabled||!profileIsFresh||hasEdit||hasLandmark||
-     ![x,y,z].every(Number.isInteger)||!Number.isInteger(seed)||
-     y<LEGACY_WORLD_MIN_Y||y>WORLD_MAX_Y)return null;
-  const biome=surfaceBiomeAt(x,z,seed);
-  if(!biome||biome.weight<.35)return null;
-  const oldTop=terrainHeight(x,z,seed);
-  const target=surfaceBiomeHeight(x,z,seed);
-  // Never fill or erase a legacy cave/entrance or overwrite an authored cell.
-  // Only construct above the original natural ground, with a stone/soil base.
-  if(y>oldTop){
-    if(baseline!==0||y>target||y>WORLD_MAX_Y-3)return null;
-    // Raised terrain may bridge over an existing cave mouth. Require caller
-    // to certify that this column is free of legacy openings and structures.
-    return null;
-  }
-  return surfaceBiomeOverlay(x,y,z,seed,{
-    enabled:true,baseline,hasEdit:false,isNaturalGround:baseline===1||baseline===2
-  });
-}
-
 // Pure new-world elevation plan, deliberately separate from voxel placement.
 // A manual integrator must first prove entire-column safety, then apply
 // these bounded layers as a unit so no raised shelf floats over a cave.
