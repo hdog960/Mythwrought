@@ -26,3 +26,14 @@ full-cube model, modify any other block pack, or approve Gate A/v0.11.
 Reproduction: GitHub-hosted temporary source-exact overlay of this PR plus
 Pack 4 draft PR #115, followed by native builder tests and original
 Chromium WebGL2 preview. No PC, paid service, merge, or deployment required.
+
+## Builder-approved orientation intent (physical construction only)
+
+Crates (Pack4:057) face the nearest stockroom aisle, temple pews
+(Pack4:058) face the sanctuary at positive Z, and storefront
+waymark signs (Pack4:060) face the street at negative Z.
+These are explicit deterministic construction orientations in the
+isolated physical overlay, **not** retroactive approval of the original
+symbolic-only M1 blueprint, creator artwork, live registered geometry,
+or player interaction. Mounted wall sconces remain independently flagged
+as substitutions requiring creator art review.

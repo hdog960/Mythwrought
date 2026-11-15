@@ -75,6 +75,19 @@ function stagePhysicalLanternMounts(draft){
      z===draft.extents.z-1?'south':'north';
    provenance='facade-derived';
   }
+  // These are explicit BUILDER layout decisions, not a renderer default.
+  // Crates open toward the stockroom aisle; temple pews face the far altar;
+  // external waymark signs face the street at z=0.
+  if(!v.intendedFacing&&v.material==='pack4:057'){
+   facing=x<Math.floor(draft.extents.x/2)?'east':'west';
+   provenance='stockroom-aisle-facing';
+  }else if(!v.intendedFacing&&v.material==='pack4:058'){
+   facing='south';
+   provenance='sanctuary-facing-pew';
+  }else if(!v.intendedFacing&&v.material==='pack4:060'){
+   facing='north';
+   provenance='street-facing-waymark';
+  }
   return {at:[x,v.y,z],asset:v.material,role:v.kind,
    orientation:facing,orientationProvenance:provenance,
    physicalAlternative:v.physicalAlternative??null};

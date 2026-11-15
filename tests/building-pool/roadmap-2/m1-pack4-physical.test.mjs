@@ -53,3 +53,29 @@ test('unsupported elevated floor lanterns are never silently accepted; wall-back
  assert.ok(transformed>0,'builder geometry must repair at least one actual floating lantern');
  assert.equal(seen,transformed);
 });
+
+test('all 166 crate, pew and sign orientations follow authored architecture instead of unapproved previews',()=>{
+ let count=0;
+ const proxy={resolvePack4BuilderBlueprint(b){
+  for(const p of b.placements??[]){
+   const [x,,z]=p.at;
+   if(p.asset==='pack4:057'){
+    count++;
+    assert.equal(p.orientation,x<Math.floor((Math.max(...b.placements.map(c=>c.at[0]))+1)/2)?'east':'west');
+    assert.equal(p.orientationProvenance,'stockroom-aisle-facing');
+   }else if(p.asset==='pack4:058'){
+    count++;
+    assert.equal(p.orientation,'south');
+    assert.equal(p.orientationProvenance,'sanctuary-facing-pew');
+   }else if(p.asset==='pack4:060'){
+    count++;
+    assert.equal(p.orientation,'north');
+    assert.equal(p.orientationProvenance,'street-facing-waymark');
+    assert.equal(z,0);
+   }
+  }
+  return {resolvedCount:0,placements:[],orientationReviewCount:0};
+ }};
+ getM1Pack4Construction(proxy);
+ assert.equal(count,166);
+});
