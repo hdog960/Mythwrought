@@ -145,7 +145,13 @@ export function pack2WaterSectionVertices(world,cx,cz,section){
   if(![cx,cz,section].every(Number.isInteger)||section>0)
     throw new TypeError('Invalid water chunk location');
   const result=[];let length=0;
-  for(const [key,state] of world.pack2Cells){
+  // Production Pack2LiveWorld keeps a transient per-chunk fluid index.
+  // Preserve the original all-cells fallback for isolated fixture worlds.
+  // At large construction sizes this avoids rescanning every distant solid
+  // placement once per streamed chunk, including dry-only chunks.
+  const entries=typeof world.pack2WaterSectionEntries==='function'?
+    world.pack2WaterSectionEntries(cx,cz,section):world.pack2Cells;
+  for(const [key,state] of entries){
     if(state.id!==WATER_CANDIDATE_ID)continue;
     const [x,y,z]=key.split(',').map(Number);
     const actualSection=y>=-3?0:Math.floor((y+3)/16);

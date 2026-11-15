@@ -2,8 +2,8 @@
 // Legacy VoxelWorld and schema-1 saves remain byte-for-byte unchanged.
 // New candidate cells are written to a separate checksummed per-seed sidecar;
 // corrupted existing data is NEVER silently replaced, reset or migrated.
-import {VoxelWorld,BLOCK} from './voxel.mjs';
-import {WORLD_MIN_Y,WORLD_MAX_Y} from './depth.mjs';
+import {VoxelWorld,BLOCK,CHUNK_SIZE} from './voxel.mjs';
+import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY} from './depth.mjs';
 import {worldSlotKey} from './seeds.mjs';
 import {saveFingerprint} from './persistence.mjs';
 import {isPack2LiveId,pack2NormalizeState} from './pack2-integration.mjs';
@@ -11,6 +11,10 @@ import {isPack2LiveId,pack2NormalizeState} from './pack2-integration.mjs';
 export const PACK2_SIDECAR_SUFFIX='-pack2-live-v1';
 const JOURNAL='-journal',BACKUP='-backup',MAX_CELLS=50000;
 const coord=(x,y,z)=>x+','+y+','+z;
+// This index is transient: it is rebuilt from each validated sidecar and
+// never becomes part of the schema-1 or Pack 2 save representation.
+const waterBucket=(x,y,z)=>Math.floor(x/CHUNK_SIZE)+','+
+  Math.floor(z/CHUNK_SIZE)+','+sectionForY(y);
 const sortCells=(a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2];
 const within=(x,y,z)=>[x,y,z].every(Number.isSafeInteger)&&
   y>=WORLD_MIN_Y&&y<=WORLD_MAX_Y;
@@ -25,7 +29,8 @@ export class Pack2LiveWorld{
     if(!(base instanceof VoxelWorld))throw new TypeError('Expected actual production VoxelWorld');
     this.base=base;this.seed=base.seed;this.edits=base.edits;
     this.rotations=base.rotations;
-    this.pack2Cells=new Map();this.nextPack2State=null;
+    this.pack2Cells=new Map();this._pack2WaterBuckets=new Map();
+    this.nextPack2State=null;
     if(!Array.isArray(records)||records.length>MAX_CELLS)throw new TypeError('Invalid Pack 2 records');
     for(const row of records){
       if(!Array.isArray(row)||row.length!==5)throw new TypeError('Bad candidate row');
@@ -34,8 +39,31 @@ export class Pack2LiveWorld{
           base.get(x,y,z)!==BLOCK.AIR)throw new TypeError('Unsafe Pack 2 overlay');
       const key=coord(x,y,z);
       if(this.pack2Cells.has(key))throw new TypeError('Duplicate Pack 2 coordinates');
-      this.pack2Cells.set(key,Object.freeze({...state}));
+      const accepted=Object.freeze({...state});
+      this.pack2Cells.set(key,accepted);
+      this._updateWaterBucket(key,null,accepted);
     }
+  }
+  // Update only the small chunk/section bucket touched by an actual water
+  // placement. Replacing an existing water state preserves insertion order.
+  _updateWaterBucket(key,previous,next){
+    if(previous?.id!==76&&next?.id!==76)return;
+    const [x,y,z]=key.split(',').map(Number),bucket=waterBucket(x,y,z);
+    let entries=this._pack2WaterBuckets.get(bucket);
+    if(previous?.id===76&&next?.id!==76){
+      entries?.delete(key);
+      if(entries&&!entries.size)this._pack2WaterBuckets.delete(bucket);
+      return;
+    }
+    if(next?.id===76){
+      if(!entries){entries=new Map();this._pack2WaterBuckets.set(bucket,entries);}
+      entries.set(key,next);
+    }
+  }
+  pack2WaterSectionEntries(cx,cz,section){
+    if(![cx,cz,section].every(Number.isInteger)||section>0)
+      throw new TypeError('Invalid Pack 2 water chunk');
+    return this._pack2WaterBuckets.get(cx+','+cz+','+section)?.entries()??[];
   }
   get biomeCellCount(){return this.base.biomeCellCount;}
   rotationAt(x,y,z){return this.base.rotationAt(x,y,z);}
@@ -53,16 +81,22 @@ export class Pack2LiveWorld{
       const requested=this.nextPack2State?.id===id?this.nextPack2State:null;
       let state;try{state=pack2NormalizeState(id,requested??{})}catch{return false}
       if(!previous&&this.pack2Cells.size>=MAX_CELLS)return false;
-      this.pack2Cells.set(key,state);return true;
+      this.pack2Cells.set(key,state);
+      this._updateWaterBucket(key,previous,state);
+      return true;
     }
     // All non-Pack-2 block validation, high numeric biome IDs and rotation
     // ownership remain in the authoritative modern production VoxelWorld.
     if(previous){
       // Removing an overlay is NOT a terrain mutation; its underlying air
       // (including an explicit existing AIR edit) stays untouched.
-      if(id===BLOCK.AIR){this.pack2Cells.delete(key);return true;}
+      if(id===BLOCK.AIR){
+        this.pack2Cells.delete(key);this._updateWaterBucket(key,previous,null);
+        return true;
+      }
       if(!this.base.set(x,y,z,id,rotation))return false;
-      this.pack2Cells.delete(key);return true;
+      this.pack2Cells.delete(key);this._updateWaterBucket(key,previous,null);
+      return true;
     }
     return this.base.set(x,y,z,id,rotation);
   }
@@ -77,7 +111,9 @@ export class Pack2LiveWorld{
     const key=coord(x,y,z),prior=this.pack2Cells.get(key);
     if(!prior)return false;
     const normalized=pack2NormalizeState(prior.id,state);
-    this.pack2Cells.set(key,normalized);return true;
+    this.pack2Cells.set(key,normalized);
+    this._updateWaterBucket(key,prior,normalized);
+    return true;
   }
   // Dedicated sidecar ONLY. The old production save format is not widened.
   save(){return this.base.save();}
