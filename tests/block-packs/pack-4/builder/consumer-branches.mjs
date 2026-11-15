@@ -1,43 +1,46 @@
-// Run only from the Pack4 disposable combined checkout in GitHub Actions.
-// Read four independent builder PR snapshots without editing their branches.
+// Pack4's disposable CI verifies builder-OWNED physical adoption modules
+// in exact SHA-pinned independent building PRs, without modifying their branches.
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {writeFile,mkdir} from 'node:fs/promises';
-import {resolvePack4BuilderBlueprint} from '../../../../src/block-packs/pack-4/builder-handoff.mjs';
+import * as pack4 from '../../../../src/block-packs/pack-4/builder-handoff.mjs';
 
-const base=resolve(process.cwd(),'../consumers');
-const load=async(lane,path)=>import(pathToFileURL(resolve(base,lane,path)).href);
-const [r1,r2,r3,r4]=await Promise.all([
- load('r1','src/building-pool/roadmap-1/m1-buildings.mjs'),
- load('r2','src/building-pool/roadmap-2/m1-representatives.mjs'),
- load('r3','src/building-pool/roadmap-3/m1.mjs'),
- load('r4','src/building-pool/roadmap-4/m1-blueprints.mjs')
-]);
-const cohorts=[
- ['r1',r1.getM1Blueprints()],
- ['r2',r2.M1_REPRESENTATIVES],
- ['r3',r3.createM1Pool()],
- ['r4',r4.allM1()]
-];
+const root=resolve(process.cwd(),'../consumers');
+const names=['r1','r2','r3','r4'];
+const expected=[45,30,30,30];
+const imported=await Promise.all(names.map((lane,index)=>import(
+ pathToFileURL(resolve(root,lane,'src/building-pool/roadmap-'+(index+1)+'/m1-pack4-physical.mjs')).href
+)));
 const reports=[];
-for(const [lane,buildings] of cohorts){
+for(let i=0;i<names.length;i++){
+ const lane=names[i],src=imported[i];
+ if(src.PACK4_CONSTRUCTION_SOURCE?.pr!==115||
+    src.PACK4_CONSTRUCTION_SOURCE?.variantCount!==23)
+  throw Error(lane+' did not adopt expected Pack4 physical catalog API');
+ const designs=src.getM1Pack4Construction(pack4);
+ if(designs.length!==expected[i])throw Error(lane+' unexpected authored design count '+designs.length);
  let resolvedCount=0,mountReviewCount=0,orientationReviewCount=0,withPack4=0;
- for(const b of buildings){
-  const plan=resolvePack4BuilderBlueprint(b);
-  if(plan.resolvedCount)withPack4++;
-  resolvedCount+=plan.resolvedCount;
-  mountReviewCount+=plan.placements.filter(p=>!p.supportVerified).length;
-  orientationReviewCount+=plan.orientationReviewCount;
-  for(const p of plan.placements){
+ for(const design of designs){
+  if(design.pack4Cells!==design.physicalPlan.resolvedCount||
+     design.livePlaced!==false)
+   throw Error(lane+' has invalid builder physical-plan metadata');
+  if(design.pack4Cells)withPack4++;
+  resolvedCount+=design.pack4Cells;
+  mountReviewCount+=design.mountingSupportReviewCount;
+  orientationReviewCount+=design.orientationReviewCount;
+  for(const p of design.physicalPlan.placements){
    if(p.physical.visible.length<1||p.physical.collision.length<1||
-      p.physical.selection.length<1||!p.physical.previewMesh.opaque)
-    throw Error(lane+' yielded unreal Pack4 physical shape');
+      p.physical.selection.length<1||
+      !(p.physical.previewMesh.opaque instanceof Float32Array))
+    throw Error(lane+' yielded non-physical Pack4 building geometry');
   }
  }
- if(resolvedCount<1)throw Error(lane+' has no real Pack4 candidate placement: broken handoff');
- reports.push({lane,blueprints:buildings.length,blueprintsUsingPack4:withPack4,
+ if(resolvedCount<1)throw Error(lane+' unresolved physical Pack4 usage');
+ reports.push({lane,blueprints:designs.length,blueprintsUsingPack4:withPack4,
   resolvedPack4Cells:resolvedCount,mountReviewCount,orientationReviewCount,
-  source:'exact original candidate physical geometry',liveInstalled:false});
+  builderOwnedModule:true,realPhysicalGeometry:true,
+  source:'exact original Pack4 geometry injected into owned building PR adapter',
+  liveInstalled:false});
 }
 await mkdir('artifacts/pack-4',{recursive:true});
 await writeFile('artifacts/pack-4/builder-real-roadmaps.json',

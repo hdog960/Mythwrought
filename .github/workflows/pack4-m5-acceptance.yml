@@ -85,27 +85,38 @@ jobs:
       - name: Checkout source-exact Roadmap 1 PR for physical builder consumption
         uses: actions/checkout@v4
         with:
-          ref: cfc3c44c142903fc2aaea2ef819b1b37fd27c562
+          ref: 16489e4c85ef5500840f6d42b45d9928ae2dead0
           path: consumers/r1
           persist-credentials: false
       - name: Checkout source-exact Roadmap 2 PR for physical builder consumption
         uses: actions/checkout@v4
         with:
-          ref: c5d7e64634d7e9adfcd06a3fae872ff533b34fd0
+          ref: 23eed93cdd8121c7089ab8eb600aef9c001d77d2
           path: consumers/r2
           persist-credentials: false
       - name: Checkout source-exact Roadmap 3 PR for physical builder consumption
         uses: actions/checkout@v4
         with:
-          ref: acc5cb0efb8fa16012f97ade73aa15632eb3089e
+          ref: d2b4d5dbcf5bf30ab627a96916a5b3c6967c1092
           path: consumers/r3
           persist-credentials: false
       - name: Checkout source-exact Roadmap 4 PR for physical builder consumption
         uses: actions/checkout@v4
         with:
-          ref: 649bf9b21e2174cdac793cd918912adc88dff770
+          ref: 564330635f18e10215a3bf93901923fbf5af528d
           path: consumers/r4
           persist-credentials: false
+      - name: Run isolated building-roadmap-owned Pack4 adoption native tests
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test \
+            ../consumers/r1/tests/building-pool/roadmap-1/m1-pack4-physical.test.mjs \
+            ../consumers/r2/tests/building-pool/roadmap-2/m1-pack4-physical.test.mjs \
+            ../consumers/r3/tests/building-pool/roadmap-3/m1-pack4-physical.test.mjs \
+            ../consumers/r4/tests/building-pool/roadmap-4/m1-pack4-physical.test.mjs \
+            2>&1 | tee artifacts/pack-4/builder-roadmap-native.log
       - name: Verify all four real building pools resolve original Pack4 geometry
         working-directory: combined
         shell: bash
