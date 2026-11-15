@@ -28,6 +28,11 @@ function geometry(){
  for(const z of [0,10])for(let x=1;x<12;x++)for(let y=6;y<slope[x];y++)put(x,y,z,M.beam,"wall");
  return [...vox.values()].sort((a,b)=>a.y-b.y||a.z-b.z||a.x-b.x);
 }
+// Register the hand-authored storefront and side windows from the actual
+// immutable voxel source, not an incomplete list of two decorative examples.
+const STORE_VOXELS=geometry();
+const STORE_WINDOW_OPENINGS=STORE_VOXELS.filter(v=>v.kind==="window")
+ .map(({x,y,z,material})=>({type:"window",x,y,z,material}));
 export const TEMPERATE_SMALL_GENERAL_STORE=Object.freeze({
  schema:SCHEMA,id:"r2:general-store:temperate:small:01",category:"general-store",biome:"temperate",size:"small",variation:1,
  title:"Hearthlane Two-Room Provisioner",status:"authored-candidate",isolated:true,worldPlaced:false,numericIdsAssigned:false,
@@ -38,7 +43,7 @@ export const TEMPERATE_SMALL_GENERAL_STORE=Object.freeze({
  {name:"Stockroom",bounds:{x0:1,x1:11,z0:8,z1:9},uses:["storage"]}],
  features:["street-facing sign mount","hanging lanterns","real separating stockroom wall"],
  openings:[{type:"entrance",x:6,y:2,z:0,clearHeightCells:3,doorSymbol:"pack2:020",doorOpenState:"unknown"},
- {type:"window",x:2,y:3,z:0},{type:"window",x:9,y:3,z:0},
+ ...STORE_WINDOW_OPENINGS,
  {type:"internal-doorway",x:9,y:2,z:7,clearHeightCells:3}],
  circulation:[{from:"exterior",to:"sales-floor",via:"south x6 entrance"},
  {from:"sales-floor",to:"storage",via:"offset x9 opening in partition z7"}],
@@ -55,6 +60,6 @@ export const TEMPERATE_SMALL_GENERAL_STORE=Object.freeze({
  {ref:"pack5:086",issue:"counter dimensions and physical fit unverified"},
  {ref:"pack5:087",issue:"shelves dimensions and physical fit unverified"},
  {ref:"pack4:035",issue:"lantern mounting and actual emissive runtime unverified"}],
- voxels:geometry()
+ voxels:STORE_VOXELS
 });
 validateBlueprint(TEMPERATE_SMALL_GENERAL_STORE);

@@ -302,6 +302,12 @@ function build({biome,size,category}){
   }
   const voxels=[...cells.values()].sort((a,b)=>a.y-b.y||a.z-b.z||a.x-b.x);
   const extents={x:width,y:Math.max(...voxels.map(v=>v.y))+1,z:depth};
+  // Every actual window voxel (front, sides and high belfry glazing)
+  // requires its own material-specific window opening record for the later
+  // shape/glazing ABI. Two sample street metadata entries previously failed
+  // to describe 334 physically placed windows across the complete 30 models.
+  const windowOpenings=voxels.filter(v=>v.kind==='window')
+    .map(({x,y,z,material})=>({type:'window',x,y,z,material}));
   const entry={type:'entrance',x:center,y:2,z:0,clearHeightCells:3,doorSymbol:'pack2:020',doorOpenState:'unverified'};
   const rooms=isTemple?[
    {name:'Ceremonial nave',bounds:{x0:1,x1:width-2,z0:1,z1:partition-1},uses:['ceremonial-space','public-circulation']},
@@ -327,7 +333,7 @@ function build({biome,size,category}){
    architecturalSignature:`${roofNames[biome]}, ${category}, ${size}, x${width} z${depth}, partition ${partition}, distinct footprint`,
    roof:{form:roofNames[biome],biomeSpecific:true},
    rooms:[...rooms,...supplementalRooms],features:isTemple?['physically separated sanctuary','raised altar dais','paired symbolic stair approaches pending slope ABI','paired fully founded belfries','triple-wide processional entrance','roof lantern tower','structural columns','ceremonial rows']:['counter','display shelves','stockroom crates','real storeroom wall'],
-   openings:[entry,{type:'window',x:3,y:3,z:0},{type:'window',x:width-4,y:3,z:0},
+   openings:[entry,...windowOpenings,
     {type:'internal-doorway',x:openingX,y:2,z:partition,clearHeightCells:3},...supplementalOpenings],
    circulation:[...circulation,...supplementalCirculation],
    unresolvedDependencies:refs.map(ref=>({ref,issue:'The physical shape, orientation, collision, support, appearance and save integration of this symbolic roster asset require central ABI verification'})),

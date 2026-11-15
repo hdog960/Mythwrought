@@ -44,7 +44,8 @@ test("invalid geometry or identities are rejected",()=>{
  assert.throws(()=>validateBlueprint({...bp,rooms:[]}),/missing rooms/);
 });
 test("mirrors and recolors fail uniqueness",()=>{
- const recolor={...bp,voxels:bp.voxels.map(v=>({...v,material:"pack5:079"}))};
+ const recolor={...bp,voxels:bp.voxels.map(v=>({...v,material:"pack5:079"})),
+ openings:bp.openings.map(o=>o.type==="window"?{...o,material:"pack5:079"}:o)};
  const mirror={...bp,voxels:bp.voxels.map(v=>({...v,x:12-v.x}))};
  assert.equal(structuralFingerprint(recolor),structuralFingerprint(bp));
  assert.equal(structuralFingerprint(mirror),structuralFingerprint(bp));
@@ -64,7 +65,7 @@ test("public circulation is category-dependent: temples need no shop storage",()
 test("entrance clearance, window geometry and opening bounds are enforced",()=>{
  assert.throws(()=>validateBlueprint({...bp,voxels:[...bp.voxels,{x:6,y:3,z:0,kind:"wall",material:"pack1:001"}]}),/blocked entrance/);
  assert.throws(()=>validateBlueprint({...bp,openings:bp.openings.map(o=>o.type==="entrance"?{...o,x:100}:o)}),/opening out of bounds/);
- assert.throws(()=>validateBlueprint({...bp,voxels:bp.voxels.map(v=>v.kind==="window"?{...v,kind:"wall"}:v)}),/missing physical window/);
+ assert.throws(()=>validateBlueprint({...bp,voxels:bp.voxels.map(v=>v.kind==="window"?{...v,kind:"wall"}:v)}),/window metadata without actual window voxel/);
 });
 
 

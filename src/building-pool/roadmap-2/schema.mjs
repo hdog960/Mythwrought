@@ -20,7 +20,7 @@ export function validateBlueprint(bp){
  check(Array.isArray(bp.openings)&&bp.openings.some(o=>o.type==="entrance")&&bp.openings.some(o=>o.type==="window"),"missing entrance/windows");
  check(Array.isArray(bp.circulation)&&bp.circulation.length>0,"missing circulation");
  check(Array.isArray(bp.unresolvedDependencies)&&bp.unresolvedDependencies.length>0&&bp.unresolvedDependencies.every(d=>validateSymbol(d.ref)&&d.issue),"unresolved asset ABI must be explicit");
- const occupied=new Set(),kinds=new Set(),usedSymbols=new Set();
+ const occupied=new Set(),kinds=new Set(),usedSymbols=new Set(),windowVoxels=new Map();
  for(const v of bp.voxels){
    check(["x","y","z"].every(k=>Number.isInteger(v[k])&&v[k]>=0&&v[k]<bp.extents[k]),"out of bounds");
    check(validateSymbol(v.material),"unknown symbolic roster material");
@@ -28,6 +28,7 @@ export function validateBlueprint(bp){
    const coord=[v.x,v.y,v.z].join(",");
    check(!occupied.has(coord),"overlapping voxel");
    occupied.add(coord);kinds.add(v.kind);
+   if(v.kind==="window")windowVoxels.set(coord,v.material);
  }
  // A real M0 dependency-audit found five physically used but undeclared roster
  // families. Future designs must disclose EVERY used material and hinged-door
@@ -59,11 +60,19 @@ export function validateBlueprint(bp){
    for(const next of graph.get(at)||[])if(!reached.has(next)){reached.add(next);queue.push(next);}
  }
  check(bp.rooms.every(room=>room.uses.some(use=>reached.has(use))),"inaccessible room in circulation graph");
+ const windowRecords=new Set();
  for(const o of bp.openings){
    check(["x","y","z"].every(k=>Number.isInteger(o[k])&&o[k]>=0&&o[k]<bp.extents[k]),"opening out of bounds");
    // An opening in the metadata must correspond to actual three-high air,
    // including auxiliary doors: earlier graph-only room markers and a pew
    // concealed blocked or bypassable accesses in otherwise valid blueprints.
+   if(o.type==="window"){
+     const coord=[o.x,o.y,o.z].join(",");
+     check(windowVoxels.has(coord),"window metadata without actual window voxel");
+     check(!windowRecords.has(coord),"duplicate window opening metadata");
+     check(o.material===windowVoxels.get(coord),"window material mismatch");
+     windowRecords.add(coord);
+   }
    if(o.type==="entrance"||o.type==="internal-doorway"){
      const height=o.clearHeightCells;
      check(Number.isInteger(height)&&height>=3&&o.y+height<=bp.extents.y,
@@ -73,6 +82,7 @@ export function validateBlueprint(bp){
    }
  }
  check(kinds.has("window"),"missing physical window geometry");
+ check(windowRecords.size===windowVoxels.size,"unregistered physical window cells");
  return {valid:true,voxels:bp.voxels.length,uniqueCells:occupied.size,rooms:bp.rooms.length};
 }
 // Rotate and reflect an architecture; ignore materials, names, metadata and translations.
