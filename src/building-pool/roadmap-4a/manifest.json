@@ -12,12 +12,12 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 2,
-    "totalAuthored": 32,
-    "remaining": 283,
+    "newlyAuthored": 4,
+    "totalAuthored": 34,
+    "remaining": 281,
     "creatorAccepted": 0,
     "integratedBuildings": 0,
-    "m2Original": 2
+    "m2Original": 4
   },
   "biomes": [
     "temperate",
@@ -37,7 +37,7 @@
       "perBiomeSize": 5,
       "total": 75,
       "inherited": 15,
-      "remaining": 59,
+      "remaining": 58,
       "milestone": 2
     },
     {
@@ -45,7 +45,7 @@
       "perBiomeSize": 4,
       "total": 60,
       "inherited": 0,
-      "remaining": 59,
+      "remaining": 58,
       "milestone": 2
     },
     {
@@ -92,7 +92,7 @@
   "gates": {
     "M0": "candidate migration committed; native exact-head focused CI pending",
     "M1": "technical candidate M1 accepted from exact-head Actions #43770848853 (60/60 native, 180/180 genuine source-driven WebGL2 candidate proxy screenshots; physical/creator gates open)",
-    "M2": "STARTED: new original civic-hall Temperate Small #02 and guildhall Temperate Small #01; exact-head native/browser CI pending",
+    "M2": "M2 ACTIVE: source-authored 4 new civic/guild candidates (2 Temperate Small with 12/12 source WebGL2 captured, 1 Desert Medium civic with open court, 1 Mountain Small cruciform guild); last 2 require exact-head native and independent candidate render verification",
     "M3": "not started",
     "M4": "not started",
     "M5": "not started",
