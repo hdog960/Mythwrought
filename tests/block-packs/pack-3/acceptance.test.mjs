@@ -439,3 +439,42 @@ test('fortress masonry supports neighboring dentil cornice at all four rotations
     assert.equal(filled(cornice.shape,.5,.85,.45),true,'Cornice crown still physical');
   }
 });
+
+
+// The same two-cell wall+cornice assembly tested for face contact above must
+// also remain transparent through the wall's true arrow-slit at aiming height.
+// Before the center-recess repair, the cornice's continuous rear backing
+// covered this sightline even though the standalone fortress void stayed open.
+// This checks all FOUR yaws and BOTH cells, not merely the wall cell.
+test('neighboring dentil cornice leaves fortress arrow-slit centerline open through two cells',()=>{
+  const nextPoint=([x,y,z])=>[1-z,y,x];
+  const nextOffset=([x,y,z])=>[-z,y,x];
+  const hit=(boxes,[x,y,z])=>boxes.some(b=>
+    x>b[0]+1e-10&&x<b[3]-1e-10&&
+    y>b[1]+1e-10&&y<b[4]-1e-10&&
+    z>b[2]+1e-10&&z<b[5]-1e-10);
+  // z<0 traverses the front cornice cell; z>=0 traverses the wall.
+  const stations=[-.65,-.4,-.2,-.05,.05,.2,.5,.8,.95];
+  for(let yaw=0;yaw<4;yaw++){
+    const wall=pack3CandidateById(116,yaw);
+    const cornice=pack3CandidateById(120,yaw);
+    assert.equal(cornice.boxes.length,15,'Three dentils, split rear backing and crown');
+    let offset=[0,0,-1];
+    for(let i=0;i<yaw;i++)offset=nextOffset(offset);
+    const front=cornice.boxes.map(b=>b.map((v,i)=>v+offset[i%3]));
+    for(const station of stations){
+      let point=[.5,.65,station];
+      for(let i=0;i<yaw;i++)point=nextPoint(point);
+      assert.equal(hit(front,point)||hit(wall.boxes,point),false,
+        `Roof-cornice obstructed fortress firing slit at yaw ${yaw}, station ${station}`);
+    }
+    // Preserve the ornamental central LOWER bracket and the two side brackets.
+    let middle=[.5,.5,.8],left=[.14,.5,.8],right=[.84,.5,.8],gap=[.3,.5,.8];
+    for(let i=0;i<yaw;i++){
+      middle=nextPoint(middle);left=nextPoint(left);
+      right=nextPoint(right);gap=nextPoint(gap);
+    }
+    for(const point of [middle,left,right])assert.equal(hit(cornice.boxes,point),true);
+    assert.equal(hit(cornice.boxes,gap),false,'Separate dentil gaps remain open');
+  }
+});

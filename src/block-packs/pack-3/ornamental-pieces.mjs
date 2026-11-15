@@ -26,7 +26,12 @@ const COLUMN=Object.freeze([
 // Deep face-mounted overhang with physical dentils and supports, not a
 // color-only trim shader or a full ordinary wall cube.
 const CORNICE=Object.freeze([
-  part('stone',0,.546875,.78125,1,.71875,1),
+  // The backing has an upper central recess: with a neighboring fortress
+  // arrow-slit wall, the middle opening remains physically shoot-through.
+  // The original three lower dentil brackets and full raised crown remain.
+  part('stone',0,.546875,.78125,1,.625,1),
+  part('stone',0,.625,.78125,.375,.71875,1),
+  part('stone',.625,.625,.78125,1,.71875,1),
   part('shadow',.015625,.71875,.59375,.984375,.78125,1),
   part('light',0,.78125,.375,1,.90625,1),
   part('gold',0,.90625,.3125,1,.953125,1),
@@ -34,7 +39,7 @@ const CORNICE=Object.freeze([
   part('stone',.390625,.359375,.65625,.609375,.625,.96875),
   part('stone',.765625,.359375,.65625,.9375,.625,.96875),
   part('light',.0625,.609375,.53125,.234375,.71875,.875),
-  part('light',.390625,.609375,.53125,.609375,.71875,.875),
+  part('light',.390625,.609375,.53125,.609375,.625,.875),
   part('light',.765625,.609375,.53125,.9375,.71875,.875),
   part('gold',.125,.78125,.3125,.1875,.890625,.375),
   part('gold',.453125,.78125,.3125,.546875,.890625,.375),
