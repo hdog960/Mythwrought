@@ -212,3 +212,28 @@ test('no module adds complete structures, fluid, gameplay or world placement',()
   assert.equal(infrastructureShape(74).candidateOnly,true);
   assert.equal(infrastructureShape(73).candidateOnly,true);
 });
+
+test('adjacent bridge railings touch handrail cap end-to-end in all four orientations',()=>{
+  // A physical bridge guardrail is not continuous if its cap ends .02
+  // inside both cell faces: adjacent units leave a .04 voxel-wide gap.
+  const directions=[[1,0,0],[0,0,1],[-1,0,0],[0,0,-1]];
+  for(let rotation=0;rotation<4;rotation++)for(const variant of ['through','terminal']){
+    const state={rotation,variant},shape=infrastructureShape(73,state);
+    const cap=shape.parts.find(part=>part.role==='cap');
+    assert.ok(cap,'a guardrail needs a physical top handrail');
+    const movement=directions[rotation],axis=rotation%2===0?0:2;
+    const sign=movement[axis],side=axis===0?2:0;
+    const a=cap.box,b=a.map((value,index)=>value+movement[index%3]);
+    const facingA=a[axis+(sign===1?3:0)];
+    const facingB=b[axis+(sign===1?0:3)];
+    const label='guardrail rotation '+rotation+' variant '+variant;
+    assert.equal(facingA,sign===1?1:0,label+' cap must reach its cell face');
+    assert.equal(facingB,facingA,label+' neighboring cap must touch');
+    const heightOverlap=Math.max(0,Math.min(a[4],b[4])-Math.max(a[1],b[1]));
+    const widthOverlap=Math.max(0,
+      Math.min(a[side+3],b[side+3])-Math.max(a[side],b[side]));
+    assert.ok(heightOverlap*widthOverlap>=.089,label+' needs positive face contact');
+    assert.ok(infrastructurePreviewMesh(73,state).triangles<=740,
+      label+' must preserve existing small-mesh budget');
+  }
+});

@@ -41,7 +41,7 @@ export function infrastructureAsset(id){return catalog.get(id)??null;}
 const rail=variant=>{
   const p=[
     box(.05,0,.30,.20,1,.70,'oak'),box(.80,0,.30,.95,1,.70,'oak'),
-    box(.02,.82,.22,.98,.98,.78,'cap'),
+    box(0,.82,.22,1,.98,.78,'cap'),
     box(.07,.17,.32,.93,.28,.68,'oak'),
     box(.17,.49,.38,.83,.61,.62,'oak'),
     box(.21,.30,.39,.38,.47,.61,'iron'),
