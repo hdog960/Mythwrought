@@ -113,6 +113,20 @@ export function inspectStoneRotundaTraversal(world,plan){
      !Array.isArray(plan.origin)||plan.origin.length!==3||
      !plan.origin.every(Number.isSafeInteger))return null;
   const [x,h,z]=plan.origin;
+  // A route through bare terrain is not proof that the landmark still exists.
+  // Verify the actual physical pillars and elevated stone ring before reporting
+  // this as a traversable rotunda. Player mining remains allowed; inspection
+  // simply reports a damaged landmark rather than claiming intact access.
+  for(const [dx,dz] of OFFSETS){
+    if(world.get(x+dx,h+1,z+dz)!==BLOCK.STONE ||
+       world.get(x+dx,h+4,z+dz)!==BLOCK.STONE)return null;
+  }
+  for(let d=-3;d<=3;d++){
+    if(world.get(x+d,h+5,z-3)!==BLOCK.STONE ||
+       world.get(x+d,h+5,z+3)!==BLOCK.STONE ||
+       world.get(x-3,h+5,z+d)!==BLOCK.STONE ||
+       world.get(x+3,h+5,z+d)!==BLOCK.STONE)return null;
+  }
   const routes=[];
   for(const [dx,dz] of [[0,-1],[0,1],[-1,0],[1,0]]){
     const cells=[];
