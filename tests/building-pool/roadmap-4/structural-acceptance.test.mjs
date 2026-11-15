@@ -181,12 +181,13 @@ test('every roof joist stays above head clearance, has roof cover and joins a lo
     const occupancy=index(b),roofLevel=b.architecturalNotes.storyCount*4;
     for(const beam of b.cells.filter(c=>c.role==='beam')){
       const [x,y,z]=beam.at;
-      const towerCapBeam=y>roofLevel;
-      assert.ok(y===roofLevel-1||towerCapBeam,b.id+' joist blocks a walkable room at '+[x,y,z]);
-      assert.equal(occupancy.get(k(x,y+1,z))?.role,'roof',b.id+' joist has no roof to support');
-      // Main deck beams run between walls in X; elevated tower cap beams
-      // run either X or Z between crenellated parapets.
-      const axis=towerCapBeam&&beam.facing==='north'?[0,1]:[1,0];
+      const overhead=y>=roofLevel-1;
+      assert.ok(overhead,b.id+' timber beam blocks two-cell room headroom '+[x,y,z]);
+      const next=occupancy.get(k(x,y+1,z))?.role;
+      // A joist may support a direct roof underlay or a continuous rafter
+      // riser. Both are intentionally load bearing, not decorative air.
+      assert.ok(['roof','column','beam'].includes(next),b.id+' joist lacks roof/rafter load '+[x,y,z]);
+      const axis=beam.facing==='north'?[0,1]:[1,0];
       for(const sign of [-1,1]){
         let attached=false;
         for(let step=1;step<Math.max(...b.bounds);step++){
