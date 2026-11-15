@@ -56,7 +56,16 @@ function raiseWalls(b,top,wallRef,door,openWindow,frameRef){
   const jamb=z===d-1&&(x===door-1||x===door+2)&&y>=2&&y<=6;
   const lintel=z===d-1&&(x===door||x===door+1)&&y>=5&&y<=7;
   const framed=jamb||lintel;
-  put(framed?'entry-frame':'wall',x,y,z,framed?frameRef:wallRef);
+  // The pair of two-high side windows lacked any architectural surround,
+  // making their apertures disappear in genuine mobile-sized WebGL2 views.
+  // Reclassify existing adjacent wall voxels as regional trim: no extra solid
+  // cells, no invented materials, and no changes to the open window volume.
+  const sideWall=x===0||x===w-1;
+  const windowSurround=sideWall&&(
+   openWindow(x,y,z-1)||openWindow(x,y,z+1)||
+   openWindow(x,y-1,z)||openWindow(x,y+1,z));
+  const role=framed?'entry-frame':windowSurround?'window-trim':'wall';
+  put(role,x,y,z,framed||windowSurround?frameRef:wallRef);
  }
 }
 function buildBlacksmith(biome,size){
