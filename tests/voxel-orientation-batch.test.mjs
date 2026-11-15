@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeOrientationSidecar} from '../src/voxel-orientation-sidecar.mjs';
-import {applyOrientedVoxelBatch,undoOrientedVoxelBatch,resumeOrientedVoxelUndo} from '../src/voxel-orientation-batch.mjs';
+import {applyOrientedVoxelBatch,undoOrientedVoxelBatch,resumeOrientedVoxelUndo,redoOrientedVoxelBatch,resumeOrientedVoxelRedo} from '../src/voxel-orientation-batch.mjs';
 
 function fixture() {
   const world=new Map([['0,0,0',4],['1,0,0',4],['2,0,0',4]]);
@@ -96,4 +96,47 @@ test('recovery rejects malformed and duplicate receipts without writing',()=>{
   assert.throws(()=>resumeOrientedVoxelUndo({...f,receipt:[{cell:[0,0,0],before:4,after:5},{cell:[0,0,0],before:4,after:5}],writeBlock}),/Duplicate/);
   assert.throws(()=>resumeOrientedVoxelUndo({...f,receipt:[{cell:[0,0,0],before:4,after:255}],writeBlock}),/Invalid/);
   assert.equal(writes,0);
+});
+
+test('guarded redo restores edited IDs after undo without restoring yaw',()=>{
+  const f=fixture();const first=applyOrientedVoxelBatch({...f,edits});
+  assert.equal(undoOrientedVoxelBatch({...f,receipt:first.receipt}).ok,true);
+  const redo=redoOrientedVoxelBatch({...f,receipt:first.receipt});
+  assert.equal(redo.ok,true);assert.equal(f.readBlock(0,0,0),6);
+  assert.equal(f.readBlock(1,0,0),5);assert.equal(f.orientation.get([0,0,0],6),0);
+});
+test('redo rejects third-party conflict before any write',()=>{
+  const f=fixture();const first=applyOrientedVoxelBatch({...f,edits});
+  undoOrientedVoxelBatch({...f,receipt:first.receipt});
+  f.world.set('1,0,0',3);let writes=0;
+  const result=redoOrientedVoxelBatch({...f,receipt:first.receipt,writeBlock:()=>{writes++;return true;}});
+  assert.equal(result.reason,'conflict');assert.equal(writes,0);
+  assert.equal(f.readBlock(0,0,0),4);
+});
+test('partial redo can resume without replaying completed writes',()=>{
+  const f=fixture();const first=applyOrientedVoxelBatch({...f,edits});
+  undoOrientedVoxelBatch({...f,receipt:first.receipt});let n=0;
+  const partial=redoOrientedVoxelBatch({...f,receipt:first.receipt,writeBlock:(...args)=>{
+    if(++n===2)return false;return f.writeBlock(...args);
+  }});
+  assert.equal(partial.reason,'partial-redo');assert.equal(partial.receipt.length,1);
+  const calls=[];const resumed=resumeOrientedVoxelRedo({...f,receipt:first.receipt,writeBlock:(...args)=>{
+    calls.push(args.slice(0,3));return f.writeBlock(...args);
+  }});
+  assert.equal(resumed.ok,true);assert.deepEqual(calls,[[1,0,0]]);
+  assert.equal(f.readBlock(0,0,0),6);assert.equal(f.readBlock(1,0,0),5);
+});
+test('redo recovery is repeat-safe and rejects unexpected IDs',()=>{
+  const f=fixture();const first=applyOrientedVoxelBatch({...f,edits});
+  undoOrientedVoxelBatch({...f,receipt:first.receipt});
+  redoOrientedVoxelBatch({...f,receipt:first.receipt});
+  assert.deepEqual(resumeOrientedVoxelRedo({...f,receipt:first.receipt,writeBlock:()=>{throw Error('unexpected');}}),{ok:true,receipt:[]});
+  f.world.set('1,0,0',2);
+  assert.equal(resumeOrientedVoxelRedo({...f,receipt:first.receipt}).reason,'conflict');
+});
+test('redo rejects malformed duplicate receipts and preserves schema-1 fixture',()=>{
+  const f=fixture(),legacy='{"schema":1,"seed":42,"edits":[]}';
+  assert.throws(()=>redoOrientedVoxelBatch({...f,receipt:[{cell:[0,0,0],before:4,after:6},{cell:[0,0,0],before:4,after:6}]}),/Duplicate/);
+  assert.throws(()=>resumeOrientedVoxelRedo({...f,receipt:[{cell:[0,0,0],before:4,after:255}]}),/Invalid/);
+  assert.equal(legacy,'{"schema":1,"seed":42,"edits":[]}');
 });
