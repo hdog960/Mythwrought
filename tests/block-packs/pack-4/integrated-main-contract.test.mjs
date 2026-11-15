@@ -39,17 +39,36 @@ test('current integrated main shape system accepts all 23 Pack 4 IDs at all quar
 test('current main raycast selects each candidate within a six-block reach',async t=>{
  const shared=await loadCheckpoint007(t);
  if(!shared)return;
- const {validateShape,rotateShape,raycastShapes,canPlaceShape,
-   inspectBodyFit,makeOrientationSidecar,restoreOrientationSidecar}=shared;
+ const {raycastShapes}=shared;
+ const approaches=[
+  {origin:[-1,.5,.5],direction:[1,0,0]},
+  {origin:[2,.5,.5],direction:[-1,0,0]},
+  {origin:[.5,-1,.5],direction:[0,1,0]},
+  {origin:[.5,2,.5],direction:[0,-1,0]},
+  {origin:[.5,.5,-1],direction:[0,0,1]},
+  {origin:[.5,.5,2],direction:[0,0,-1]}
+ ];
+ let rays=0;
  for(const a of all)for(let r=0;r<4;r++){
-  const box=pack4ShapeHandoff(a.id,r,'selection').boxes[0];
-  const x=a.id+(box[0]+box[3])/2,y=2+(box[1]+box[4])/2;
   const shape=pack4ShapeHandoff(a.id,r,'selection');
-  const hit=raycastShapes([x,y,-2],[0,0,1],
-   (cx,cy,cz)=>cx===a.id&&cy===2&&cz===0?shape:null,6);
-  assert.ok(hit,'no selection hit '+a.id+' r='+r);
-  assert.deepEqual(hit.cell,[a.id,2,0]);
+  // Prior acceptance tested just its first sub-box from -Z. Different
+  // windows, wall fixtures and hollow furniture need all six approach
+  // directions and multiple true physical targeting sub-boxes.
+  for(const b of shape.boxes.slice(0,8)){
+   const center=b.slice(0,3).map((v,axis)=>(v+b[axis+3])/2);
+   for(const {origin,direction} of approaches){
+    const start=origin.map((v,axis)=>direction[axis]===0?
+      center[axis]+(axis===0?a.id:axis===1?2:0):
+      v+(axis===0?a.id:axis===1?2:0));
+    const hit=raycastShapes(start,direction,
+     (cx,cy,cz)=>cx===a.id&&cy===2&&cz===0?shape:null,4);
+    assert.ok(hit,'untargetable ID '+a.id+' r='+r+' direction='+direction);
+    assert.deepEqual(hit.cell,[a.id,2,0]);
+    rays++;
+   }
+  }
  }
+ assert.ok(rays>=4000,'insufficient full-orientation selection coverage: '+rays);
 });
 
 test('current main body-fit rejects actual partial solids but preserves genuine empty spaces',async t=>{
