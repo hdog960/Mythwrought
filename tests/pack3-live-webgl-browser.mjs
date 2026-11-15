@@ -38,11 +38,26 @@ try {
       await page.locator('#pack3Rotation').selectOption('1');
       await page.locator('#closeHelp').click();
       await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.canPlace==='true');
+      // The ray/face normal chooses the actual highlighted adjacent cell.
+      // It is not necessarily the western cell of our legacy stone anchor.
+      const targetPlace=await page.evaluate(()=>{
+        const c=document.querySelector('#scene');
+        return {key:c.dataset.targetPlace,selected:c.dataset.pack3SelectedId};
+      });
+      assert.equal(targetPlace.selected,'116');
+      const placedCell=targetPlace.key.split(',').map(Number);
+      assert.equal(placedCell.length,3);
+      assert.ok(placedCell.every(Number.isInteger));
+      await page.evaluate(cell=>{window.__pack3PlacedCell=cell;},placedCell);
       await page.locator('#place').click();
-      await page.waitForFunction(()=>window.__mythwroughtTest.pack3Block(15,18,0)?.id===116,
-        null,{timeout:15000});
+      await page.waitForFunction(cell=>
+        window.__mythwroughtTest.pack3Block(...cell)?.id===116 ||
+        document.querySelector('#status')?.textContent?.includes('rolled back'),
+        placedCell,{timeout:15000});
+      assert.equal(await page.evaluate(cell=>window.__mythwroughtTest.pack3Block(...cell)?.id,placedCell),
+        116,'Physical block was not placed at the actual highlighted cell');
       const now=await page.evaluate(()=>({
-        entry:window.__mythwroughtTest.pack3Block(15,18,0),
+        entry:window.__mythwroughtTest.pack3Block(...window.__pack3PlacedCell),
         count:Number(document.querySelector('#scene').dataset.pack3PhysicalCount),
         vertices:Number(document.querySelector('#scene').dataset.renderedMeshVertices),
         saved:localStorage.getItem('mythwrought-v002-world-179'),
@@ -66,18 +81,19 @@ try {
         }
       assert.ok(colors.size>=5,'Actual WebGL2 evidence appears blank');
       await page.reload({waitUntil:'networkidle'});
+      await page.evaluate(cell=>{window.__pack3PlacedCell=cell;},placedCell);
       await page.waitForFunction(()=>window.__mythwroughtTest&&
         Number(document.querySelector('#scene')?.dataset.loadedChunks)>0,null,{timeout:45000});
       const restored=await page.evaluate(()=>({
-        entry:window.__mythwroughtTest.pack3Block(15,18,0),
+        entry:window.__mythwroughtTest.pack3Block(...window.__pack3PlacedCell),
         saved:localStorage.getItem('mythwrought-v002-world-179')
       }));
       assert.equal(restored.entry.id,116);
       assert.equal(restored.entry.yaw,1,'Yaw state lost after reload');
       assert.equal(restored.saved,legacyBefore,'Original canonical save was changed on reload');
-      const removed=await page.evaluate(()=>window.__mythwroughtTest.removePack3Fixture(15,18,0));
+      const removed=await page.evaluate(()=>window.__mythwroughtTest.removePack3Fixture(...window.__pack3PlacedCell));
       assert.equal(removed.ok,true);
-      assert.equal(await page.evaluate(()=>window.__mythwroughtTest.pack3Block(15,18,0)),null);
+      assert.equal(await page.evaluate(()=>window.__mythwroughtTest.pack3Block(...window.__pack3PlacedCell)),null);
       assert.deepEqual(errors,[],'Browser JS faults');
       assert.deepEqual(missing,[],'Missing gameplay source');
       evidence.push({viewport:`${width}x${height}`,webgl2:gpu,
