@@ -195,3 +195,40 @@ test('adjoining split-rail fences physically connect both rails in all four rota
       'do not inflate the original split-fence triangle budget');
   }
 });
+
+test('closed fence gate meets adjacent split-rail fence at both ends in four rotations',()=>{
+  // All four orientations and both neighbor ends share the existing fence ID65
+  // rail face; closed-gate caps must be actual connected physical geometry.
+  const dirs=[[1,0,0],[0,0,1],[-1,0,0],[0,0,-1]];
+  for(let rotation=0;rotation<4;rotation++){
+    const axis=rotation%2===0?0:2;
+    const gate=joineryShape(66,{rotation,open:false});
+    const fence=joineryShape(65,{rotation});
+    const gateRails=gate.parts.filter(part=>part.role==='wood');
+    const fenceRails=fence.parts.filter(part=>part.role==='wood');
+    assert.equal(gateRails.length,2);
+    assert.equal(fenceRails.length,2);
+    for(const sign of [-1,1]){
+      const move=[0,0,0];move[axis]=sign;
+      const boundary=sign===1?1:0;
+      for(const rail of gateRails){
+        const a=rail.box;
+        assert.equal(a[axis+(sign===1?3:0)],boundary,
+          'closed gate rail reaches the outgoing cell boundary');
+        const joined=fenceRails.some(part=>{
+          const b=part.box.map((v,i)=>v+move[i%3]);
+          if(Math.abs(b[axis+(sign===1?0:3)]-boundary)>1e-9)return false;
+          const cross=[0,1,2].filter(i=>i!==axis);
+          const faceArea=cross.reduce((area,i)=>area*Math.max(0,
+            Math.min(a[i+3],b[i+3])-Math.max(a[i],b[i])),1);
+          return faceArea>=.015;
+        });
+        assert.ok(joined,'matching adjoining fence rail has positive end-face contact');
+      }
+    }
+    assert.equal(joineryOccupies(66,{rotation,open:true},[.5,.34,.5]),false,
+      'opening the hinged gate must preserve the clear center');
+    assert.ok(joineryPreviewMesh(66,{rotation,open:false}).triangles<=676,
+      'closed-gate join must not increase preview triangle budget');
+  }
+});
