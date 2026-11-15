@@ -26,3 +26,23 @@ full-cube model, modify any other block pack, or approve Gate A/v0.11.
 Reproduction: GitHub-hosted temporary source-exact overlay of this PR plus
 Pack 4 draft PR #115, followed by native builder tests and original
 Chromium WebGL2 preview. No PC, paid service, merge, or deployment required.
+
+## Actual Pack4-supported forge construction sidecar
+
+All fifteen original blacksmith blueprints remain unchanged, including
+their open vent-cell reservations, unique architecture fingerprints and
+navigable corridors. The builder-specific \`physicalSource\` now physically
+authors: a registered masonry backing cell where a fireplace has no
+structural neighbor, north/east facade-facing orientation based on the
+backing, and a stack of actual \`pack4:063\` hollow chimney units from
+inside the room up through the original upper courses.
+
+This resolves previously ABSENT adjacent support cells without inserting
+solid stone into the centered vertical smoke duct. No fire/smoke simulation
+or live-world placement is implied.
+
+**Sub-box contact is still pending:** the original fireplace's stone
+mantle ends at local Y=.94, leaving a .06-cell seam under the first
+chimney course. The sidecar emits \`chimneySubBoxContactReview:true\`
+rather than claiming that voxel adjacency alone certifies finished
+masonry contact. Do not waive physical-iPhone or creator visual approval.

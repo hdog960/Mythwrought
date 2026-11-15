@@ -29,24 +29,39 @@ test('rejects fake shape records that lack the actual collision, selection or re
  assert.throws(()=>getM1Pack4Construction(broken,{blueprints:[{id:'probe'}]}),/Physical Pack 4 candidate unavailable/);
 });
 
-test('only real authored west-wall backing allows a fireplace to rotate east',()=>{
- let anchored=0,unanchored=0;
- const proxy={resolvePack4BuilderBlueprint(b){
-  const cells=new Map(b.placements.map(p=>[p.at.join(','),p]));
-  for(const p of b.placements.filter(p=>p.asset==='pack4:064')){
-   if(p.orientationProvenance==='supported-wall-sidecar'){
-    anchored++;
-    assert.equal(p.orientation,'east');
-    assert.ok(['structure','wall','flue-support','support'].includes(
-     cells.get([p.at[0]-1,p.at[1],p.at[2]].join(','))?.role));
-   }else{
-    unanchored++;assert.equal(p.orientation,'north');
-    assert.equal(p.orientationProvenance,'default-preview-only');
-   }
+test('all 15 blacksmith fireplaces have real backs and hollow vent-stack support cells',()=>{
+ let hearths=0,backings=0,flueCourses=0;
+ const realSource={resolvePack4BuilderBlueprint(d){
+  if(!Array.isArray(d.placements))return {resolvedCount:0,placements:[],orientationReviewCount:0};
+  const cells=new Map(d.placements.map(x=>[x.at.join(','),x]));
+  for(const hearth of d.placements.filter(x=>x.asset==='pack4:064')){
+   hearths++;
+   const [x,y,z]=hearth.at;
+   const off=hearth.orientation==='east'?[-1,0,0]:[0,0,1];
+   const neighbor=[x+off[0],y+off[1],z+off[2]];
+   const backing=cells.get(neighbor.join(','));
+   assert.ok(backing,'no real backing for fireplace '+d.id);
+   assert.ok(['hearth-backwall','structure','wall','flue-support','support'].includes(backing.role));
+   assert.equal(hearth.orientationProvenance,'real-wall-backed-fireplace');
+  }
+  for(const flue of d.placements.filter(x=>x.asset==='pack4:063')){
+   const [x,y,z]=flue.at;
+   const under=cells.get([x,y-1,z].join(','));
+   assert.ok(under&&['pack4:063','pack4:064'].includes(under.asset),
+     d.id+' missing occupied lower flue support at '+flue.at);
+   assert.equal(flue.orientationProvenance,'fourfold-symmetric-hollow-flue');
   }
   return {resolvedCount:0,placements:[],orientationReviewCount:0};
  }};
- getM1Pack4Construction(proxy);
- assert.equal(anchored+unanchored,15);
- assert.ok(anchored>=1&&unanchored>=1);
+ const views=getM1Pack4Construction(realSource);
+ assert.equal(views.length,30);
+ assert.equal(hearths,15);
+ backings=views.reduce((n,v)=>n+v.hearthBackingsAdded,0);
+ flueCourses=views.reduce((n,v)=>n+v.hollowFlueCoursesAdded,0);
+ assert.ok(backings>0&&backings<=15);
+ assert.ok(flueCourses>=75);
+ assert.equal(views.filter(v=>v.chimneySubBoxContactReview).length,15);
+ assert.ok(views.every(v=>v.livePlaced===false));
+ // Unmodified canonical theory, so original uniqueness and player routes hold.
+ for(const view of views)assert.ok(view.source.modules.length>0);
 });
