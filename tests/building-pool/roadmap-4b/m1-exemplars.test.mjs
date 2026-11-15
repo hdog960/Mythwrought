@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {M1_EXEMPLARS,M1_REPORT,getM1Exemplar} from '../../src/building-pool/roadmap-4b/m1-exemplars.mjs';
+import {M1_EXEMPLARS,M1_REPORT,getM1Exemplar} from '../../../src/building-pool/roadmap-4b/m1-exemplars.mjs';
 import {validateBlueprint,validateCollection,geometrySignature,PLANNED_TOTAL,PROGRAM}
- from '../../src/building-pool/roadmap-4b/schema.mjs';
+ from '../../../src/building-pool/roadmap-4b/schema.mjs';
 
 const at=x=>x.join(',');
 const count=(b,r)=>b.cells.filter(c=>c.role===r).length;
