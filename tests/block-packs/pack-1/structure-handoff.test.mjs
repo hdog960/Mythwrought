@@ -5,7 +5,13 @@ import {inspectPack1Construction,removePack1Construction} from '../../../src/blo
 import {PACK1_BUILDER_SYMBOLS,PACK1_BUILDER_IDS,PACK1_BUILDER_AVAILABILITY,
   resolvePack1BuilderAsset,planPack1BuilderStructure,
   compilePack1BuilderSnapshot} from '../../../src/block-packs/pack-1/structure-handoff.mjs';
-import {validateShape} from '../../../src/voxel-shape-interactions.mjs';
+// The source-pinned candidate runner intentionally checks out Pack 1-owned files
+// only. Verify the shared, documented {boxes:[unit-cell AABB]} ABI by value;
+// true shared-runtime validation remains a separate coordinated integration gate.
+const validateShape=shape=>!!shape&&Array.isArray(shape.boxes)&&
+  shape.boxes.length>0&&shape.boxes.length<=32&&shape.boxes.every(b=>
+    Array.isArray(b)&&b.length===6&&b.every(Number.isFinite)&&
+    [0,1,2].every(i=>b[i]>=0&&b[i]<b[i+3]&&b[i+3]<=1));
 
 test('source-authoritative builder ABI maps 21 roster families to 30 unique physical IDs',()=>{
   assert.equal(PACK1_BUILDER_SYMBOLS.length,21);
