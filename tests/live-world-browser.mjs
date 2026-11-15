@@ -37,14 +37,27 @@ const page=await browser.newPage({viewport:{width:932,height:430},deviceScaleFac
 const errors=[],failed=[];
 page.on('pageerror',e=>errors.push(e.message));
 page.on('response',r=>{if(r.status()>=400)failed.push(r.status()+' '+r.url());});
-const loaded=()=>page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25 &&
-  Number(document.querySelector('#scene')?.dataset.pendingChunks)===0,null,{timeout:40000});
+// Wait for the NEW target chunk, not the old camera's count. Depth streaming
+// legitimately uses more than 25 sections in caves.
+const loaded=(target=null)=>page.waitForFunction(target=>{
+  const canvas=document.querySelector('#scene'),api=window.__mythwroughtTest;
+  if(!canvas||!api)return false;
+  const snap=api.snapshot();
+  if(snap.pending.length||snap.chunks.length===0||
+     Number(canvas.dataset.renderedMeshVertices)<=1000)return false;
+  if(!target)return Number(canvas.dataset.pendingChunks)===0;
+  const key=Math.floor(target.x/16)+','+Math.floor(target.z/16);
+  const center=canvas.dataset.chunkCenter||'';
+  return (center===key||center.startsWith(key+'|'))&&
+    snap.chunks.includes(key)&&Number(canvas.dataset.pendingChunks)===0;
+},target,{timeout:40000});
 const aim=async(x,z,tx,ty,tz)=>{
-  await page.evaluate(({x,z,tx,ty,tz})=>{
-    window.__mythwroughtTest.teleport(x,z);
+  const pos=await page.evaluate(({x,z,tx,ty,tz})=>{
+    const result=window.__mythwroughtTest.teleport(x,z);
     window.__mythwroughtTest.aimAt(tx,ty,tz);
+    return result;
   },{x,z,tx,ty,tz});
-  await loaded();
+  await loaded(pos);
   assert.equal(await page.evaluate(()=>!!document.querySelector('#scene')?.getContext('webgl2')),true);
   assert.ok(await page.evaluate(()=>Number(document.querySelector('#scene')?.dataset.renderedMeshVertices)>1000));
 };
@@ -97,6 +110,8 @@ try{
   // Stand outside the footprint: a close-up column is not acceptance
   // evidence for the four entrances or open central ring.
   await aim(rx-11,rz-13,rx,rh+4,rz);
+  await page.screenshot({path:'artifacts/live-010-rotunda-overview-932x430.png'});
+  await aim(rx-7,rz-7,rx,rh+4,rz);
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
     rotunda.cells.find(c=>c[1]===rh+3)?.slice(0,3)),BLOCK.STONE);
   await page.screenshot({path:'artifacts/live-010-stone-rotunda-932x430.png'});
@@ -113,17 +128,26 @@ try{
   const galleryFloor=caveRoute(179,gallery).floorAt(t);
   // Look down the carved southern throat from its junction, rather
   // than aiming out of the chamber into distant sky.
-  await page.evaluate(p=>{
+  const galleryView=await page.evaluate(p=>{
     const d=window.__mythwroughtTest;
-    d.teleportCave(p.x,p.floor+1,p.z-2);
+    const location=d.teleportCave(p.x,p.floor+1,p.z-2);
     d.aimAt(p.x,p.floor+1,p.z+4);
+    return location;
   },{x:gx,z:gz,floor:galleryFloor});
-  await loaded();
+  await loaded(galleryView);
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
     [gx,galleryFloor+2,gz]),BLOCK.AIR);
   await page.screenshot({path:'artifacts/live-010-south-gallery-cave-932x430.png'});
+  const chamberView=await page.evaluate(p=>{
+    const d=window.__mythwroughtTest;
+    const location=d.teleportCave(p.x,p.floor+1,p.z);
+    d.aimAt(p.x,p.floor+1,p.z-4);
+    return location;
+  },{x:gx,z:gz,floor:galleryFloor});
+  await loaded(chamberView);
+  await page.screenshot({path:'artifacts/live-010-south-gallery-chamber-932x430.png'});
 
-    // A generated object is a real editable voxel, with unchanged schema-one persistence.
+  // A generated object is a real editable voxel, with unchanged schema-one persistence.
   await page.evaluate(p=>window.__mythwroughtTest.placeFixture(...p,0),trunk.slice(0,3));
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),trunk.slice(0,3)),BLOCK.AIR);
   await page.reload({waitUntil:'networkidle'});
