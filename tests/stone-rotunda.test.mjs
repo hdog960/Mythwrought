@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,baseBlock,terrainHeight,worldKey} from '../src/voxel.mjs';
-import {planStoneRotunda,placeStoneRotunda} from '../src/stone-rotunda.mjs';
+import {planStoneRotunda,placeStoneRotunda,findStoneRotundaSite,inspectStoneRotundaTraversal} from '../src/stone-rotunda-v2.mjs';
 
 function findSite(world){
   // Deterministic bounded fixture scan; never edits the world.
@@ -79,4 +79,115 @@ test('explicit player edit equal to natural terrain still reserves construction 
   assert.equal(planStoneRotunda(world,x,z),null);
   assert.equal(placeStoneRotunda(world,plan),false);
   assert.equal(world.edits.get(key),natural);
+});
+
+
+test('weathered buttresses and asymmetric crown are real editable voxels without closing gateways',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected a buildable site');
+  const [x,h,z]=plan.origin;
+  const cells=new Set(plan.cells.map(([px,py,pz])=>[px,py,pz].join(',')));
+  for(const [sx,sz] of [[-1,-1],[-1,1],[1,-1],[1,1]]){
+    for(const [dx,dz] of [[sx*4,sz*3],[sx*3,sz*4]]){
+      assert.ok(cells.has([x+dx,h+1,z+dz].join(',')),'buttress must be physical stone');
+    }
+  }
+  for(const [dx,dz] of [[-3,-2],[-3,-1],[-2,-3],[3,1],[3,2],[2,3]])
+    assert.ok(cells.has([x+dx,h+6,z+dz].join(',')),'broken crown must be physical stone');
+  for(const [px,py,pz] of [...plan.entrances,plan.center])
+    for(let dy=0;dy<3;dy++)assert.equal(cells.has([px,py+dy,pz].join(',')),false);
+  assert.equal(placeStoneRotunda(world,plan),true);
+  assert.equal(world.get(x-4,h+1,z-3),BLOCK.STONE);
+  assert.equal(world.set(x-4,h+1,z-3,BLOCK.AIR),true);
+  assert.equal(world.get(x-4,h+1,z-3),BLOCK.AIR);
+});
+
+
+test('every supported footprint column has solid subfloor at both depths',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected a buildable site with two supporting layers');
+  const [x,h,z]=plan.origin;
+  for(let dx=-4;dx<=4;dx++)for(let dz=-4;dz<=4;dz++){
+    for(const dy of [-1,-2]){
+      assert.notEqual(baseBlock(x+dx,h+dy,z+dz,world.seed),BLOCK.AIR,
+        'a cave under the floor must invalidate the entire footprint');
+    }
+  }
+});
+
+test('all four exterior approaches are traversable and player-owned approach edits block construction',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'seed 179 needs an accessible four-way rotunda site');
+  const [x,h,z]=plan.origin;
+  for(const [dx,dz] of [[0,-5],[0,5],[-5,0],[5,0]]){
+    assert.equal(terrainHeight(x+dx,z+dz,world.seed),h);
+    assert.notEqual(baseBlock(x+dx,h,z+dz,world.seed),BLOCK.AIR);
+    for(const dy of [1,2])
+      assert.equal(world.get(x+dx,h+dy,z+dz),BLOCK.AIR);
+  }
+  const key=worldKey(x+5,h+1,z);
+  world.edits.set(key,BLOCK.AIR); // explicit edit matching baseline still belongs to player
+  assert.equal(planStoneRotunda(world,x,z),null);
+  assert.equal(placeStoneRotunda(world,plan),false);
+});
+
+test('bounded closest-first discovery is deterministic, read-only and validates arguments',()=>{
+  const world=new VoxelWorld(179),before=world.save();
+  const first=findStoneRotundaSite(world,0,0,{radius:128,step:4});
+  const second=findStoneRotundaSite(world,0,0,{radius:128,step:4});
+  assert.deepEqual(second,first);
+  assert.ok(first,'seed 179 must yield a reachable, supported site in bounded search');
+  assert.equal(first.optIn,true);
+  assert.deepEqual(world.save(),before);
+  assert.equal(findStoneRotundaSite(world,0,0,{radius:-1}),null);
+  assert.equal(findStoneRotundaSite(world,0,0,{step:0}),null);
+  assert.equal(findStoneRotundaSite(world,0.5,0),null);
+});
+
+test('exterior approach rejects untracked world modifications without changing saves',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected an eligible fixed-seed site');
+  const [x,h,z]=plan.origin,originalGet=world.get.bind(world);
+  world.get=(px,py,pz)=>px===x+5&&py===h+1&&pz===z?BLOCK.STONE:originalGet(px,py,pz);
+  assert.equal(planStoneRotunda(world,x,z),null);
+  assert.equal(placeStoneRotunda(world,plan),false);
+});
+
+
+test('real voxel routes connect all four exterior approaches to the open center',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'seed 179 requires an eligible site');
+  assert.equal(placeStoneRotunda(world,plan),true);
+  const inspection=inspectStoneRotundaTraversal(world,plan);
+  assert.ok(inspection,'all four physical routes must remain walkable after placement');
+  assert.equal(inspection.routes.length,4);
+  for(const route of inspection.routes){
+    assert.equal(route.length,6);
+    assert.deepEqual(route.at(-1),plan.center);
+    for(const [x,y,z] of route){
+      assert.notEqual(world.get(x,y-1,z),BLOCK.AIR);
+      assert.equal(world.get(x,y,z),BLOCK.AIR);
+      assert.equal(world.get(x,y+1,z),BLOCK.AIR);
+    }
+  }
+  const [x,y,z]=inspection.routes[0][2];
+  assert.equal(world.set(x,y,z,BLOCK.STONE),true);
+  assert.equal(inspectStoneRotundaTraversal(world,plan),null,
+    'a player-built obstruction must invalidate actual traversal');
+});
+
+test('traversal inspection rejects a mined physical pillar or broken elevated ring',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected an eligible site');
+  assert.equal(placeStoneRotunda(world,plan),true);
+  assert.ok(inspectStoneRotundaTraversal(world,plan));
+  const [x,h,z]=plan.origin;
+  assert.equal(world.set(x-3,h+4,z-3,BLOCK.AIR),true);
+  assert.equal(inspectStoneRotundaTraversal(world,plan),null,
+    'an absent physical pillar must not count as an intact landmark');
+  assert.equal(world.set(x-3,h+4,z-3,BLOCK.STONE),true);
+  assert.ok(inspectStoneRotundaTraversal(world,plan));
+  assert.equal(world.set(x,h+5,z-3,BLOCK.AIR),true);
+  assert.equal(inspectStoneRotundaTraversal(world,plan),null,
+    'an absent overhead stone ring must invalidate landmark inspection');
 });

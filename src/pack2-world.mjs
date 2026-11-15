@@ -24,6 +24,7 @@ export class Pack2LiveWorld{
   constructor(base,records=[]){
     if(!(base instanceof VoxelWorld))throw new TypeError('Expected actual production VoxelWorld');
     this.base=base;this.seed=base.seed;this.edits=base.edits;
+    this.rotations=base.rotations;
     this.pack2Cells=new Map();this.nextPack2State=null;
     if(!Array.isArray(records)||records.length>MAX_CELLS)throw new TypeError('Invalid Pack 2 records');
     for(const row of records){
@@ -36,30 +37,34 @@ export class Pack2LiveWorld{
       this.pack2Cells.set(key,Object.freeze({...state}));
     }
   }
+  get biomeCellCount(){return this.base.biomeCellCount;}
+  rotationAt(x,y,z){return this.base.rotationAt(x,y,z);}
   get(x,y,z){return this.pack2Cells.get(coord(x,y,z))?.id??this.base.get(x,y,z);}
   // Existing subsystems call these pure, production-authentic voxel helpers.
   legacyBlockAt(...args){return this.base.legacyBlockAt(...args);}
   naturalAndLandmarkBlock(...args){return this.base.naturalAndLandmarkBlock(...args);}
   getPack2State(x,y,z){return this.pack2Cells.get(coord(x,y,z))??null;}
-  set(x,y,z,id){
-    if(!within(x,y,z)||!Number.isInteger(id))return false;
+  set(x,y,z,id,rotation=0){
+    if(!within(x,y,z)||!Number.isInteger(id)||
+       !Number.isInteger(rotation)||rotation<0||rotation>3)return false;
     const key=coord(x,y,z),previous=this.pack2Cells.get(key);
     if(isPack2LiveId(id)){
-      if(this.base.get(x,y,z)!==BLOCK.AIR)return false;
+      if(rotation!==0||this.base.get(x,y,z)!==BLOCK.AIR)return false;
       const requested=this.nextPack2State?.id===id?this.nextPack2State:null;
       let state;try{state=pack2NormalizeState(id,requested??{})}catch{return false}
       if(!previous&&this.pack2Cells.size>=MAX_CELLS)return false;
       this.pack2Cells.set(key,state);return true;
     }
-    if(id<0||id>8)return false;
+    // All non-Pack-2 block validation, high numeric biome IDs and rotation
+    // ownership remain in the authoritative modern production VoxelWorld.
     if(previous){
       // Removing an overlay is NOT a terrain mutation; its underlying air
       // (including an explicit existing AIR edit) stays untouched.
       if(id===BLOCK.AIR){this.pack2Cells.delete(key);return true;}
-      if(!this.base.set(x,y,z,id))return false;
+      if(!this.base.set(x,y,z,id,rotation))return false;
       this.pack2Cells.delete(key);return true;
     }
-    return this.base.set(x,y,z,id);
+    return this.base.set(x,y,z,id,rotation);
   }
   placePack2(x,y,z,id,state){
     if(!isPack2LiveId(id)||!within(x,y,z)||this.base.get(x,y,z)!==BLOCK.AIR)return false;

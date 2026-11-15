@@ -11,6 +11,11 @@ import {southGalleryCaveWorld} from './south-gallery-cave.mjs';
 import {surveyPilgrimCourtSites} from './pilgrim-court-sites.mjs';
 import {planStoneRotunda} from './stone-rotunda.mjs';
 import {planTwinwood} from './voxel-forest-twinwood.mjs';
+import {westGalleryWorld} from './west-gallery-world.mjs';
+import {planCanopyGate} from './voxel-canopy-gate.mjs';
+import {planVoxelTree} from './voxel-trees.mjs';
+import {planFallenGiant} from './fallen-giant.mjs';
+import {planRotundaApproachStones} from './rotunda-approach-stones.mjs';
 
 export const LIVE_DISTRICT_SIZE=128;
 export const LIVE_DISTRICT_CACHE_LIMIT=16;
@@ -53,9 +58,14 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
                  {x:minX+80,z:minZ+80,length:28,width:3}];
   const caves=origins.map(origin=>({origin,world:branchedCaveWorld(baseWorld,origin)}));
   const southern=origins.map(origin=>southGalleryCaveWorld(baseWorld,origin));
+  const western=origins.map(origin=>westGalleryWorld(baseWorld,origin));
   // Filled only AFTER legacy courts and trees have been planned. An existing
   // seeded tree or court wins over any conflicting new gallery.
-  const enabledSouth=new Set();
+  const enabledSouth=new Set(),enabledWest=new Set();
+  const inWest=(x,z,o)=>{
+    const t=x-o.x,d=z-o.z;
+    return t>=9&&t<=25&&d>=-16&&d<=0;
+  };
   const caveGet=(x,y,z,baseline)=>{
     const original=baseline??legacyGet(x,y,z);
     // Pre-existing physical landmark cells retain priority over new caves.
@@ -64,6 +74,10 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
       const origin=caves[i].origin;
       if(enabledSouth.has(i)&&inSouthGallery(x,z,origin))
         return southern[i].get(x,y,z);
+      // The new three-chamber loop activates only after all previous seeded
+      // scenery is frozen, preventing old tree/court columns from being cut.
+      if(enabledWest.has(i)&&inWest(x,z,origin))
+        return western[i].get(x,y,z);
       if(inside(x,z,origin))return caves[i].world.get(x,y,z);
     }
     return original;
@@ -184,9 +198,93 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
       break;
     }
   }
+  // New automation landmark and safe approach details are added only after
+  // all original checkpoint-008/010 structures and trees are frozen.
+  // No speculative rebuild of legacy districts, and no schema-1 writes.
+  const getPrepared=(x,y,z)=>blocks.get(key(x,y,z))??caveGet(x,y,z);
+  const reserved={seed,get:getPrepared,edits:new Map()};
+  let rotundaApproach=null,canopyGate=null;
+  if(rotunda){
+    const approaching=planRotundaApproachStones(reserved,rotunda);
+    if(approaching&&approaching.cells.every(([x,y,z])=>
+      x>=minX&&x<minX+LIVE_DISTRICT_SIZE&&z>=minZ&&z<minZ+LIVE_DISTRICT_SIZE)){
+      rotundaApproach=approaching;
+      for(const [x,y,z,id] of approaching.cells)blocks.set(key(x,y,z),id);
+    }
+  }
+  // A rare authored high-canopy destination, never a placeholder prism. Keep
+  // away from spawn, caves and existing courts, and scan a bounded site list.
+  for(const {x,z,rank} of rankedSites(seed,minX,minZ,0xc4a9).slice(0,24)){
+    if(near(x,z,0,0,25,25)||
+       origins.some(o=>near(x,z,o.x+14,o.z,37,32))||
+       court&&near(x,z,court.origin[0],court.origin[2],22,26)||
+       rotunda&&near(x,z,rotunda.origin[0],rotunda.origin[2],14,14)||
+       twinwood&&near(x,z,twinwood.origin[0],twinwood.origin[2],14,14))continue;
+    const plan=planCanopyGate(reserved,x,z,{axis:(rank&1)?'x':'z'});
+    if(!plan||plan.cells.some(([a,b,c])=>a<minX||a>=minX+LIVE_DISTRICT_SIZE||
+       c<minZ||c>=minZ+LIVE_DISTRICT_SIZE))continue;
+    canopyGate=plan;
+    for(const [a,b,c,id] of plan.cells)blocks.set(key(a,b,c),id);
+    break;
+  }
+  // A separate, rare archwood bridge is installed only at an untouched
+  // world-aligned site after all original four-variant groves are frozen.
+  // This keeps the historical distribution and saves stable.
+  let archwood=null;
+  for(const {x,z} of rankedSites(seed,minX,minZ,0xa11c).slice(0,20)){
+    if(x<minX+10||x>minX+LIVE_DISTRICT_SIZE-13||
+       z<minZ+8||z>minZ+LIVE_DISTRICT_SIZE-8||
+       near(x,z,0,0,25,25)||
+       origins.some(o=>near(x,z,o.x+14,o.z,32,30))||
+       court&&near(x,z,court.origin[0],court.origin[2],18,24)||
+       rotunda&&near(x,z,rotunda.origin[0],rotunda.origin[2],16,16)||
+       twinwood&&near(x,z,twinwood.origin[0],twinwood.origin[2],16,16))continue;
+    const plan=planVoxelTree(reserved,x,z,{variant:'archwood'});
+    if(!plan||plan.cells.some(([a,b,c])=>a<minX||a>=minX+LIVE_DISTRICT_SIZE||
+       c<minZ||c>=minZ+LIVE_DISTRICT_SIZE))continue;
+    archwood=plan;
+    for(const [a,b,c,id] of plan.cells)blocks.set(key(a,b,c),id);
+    break;
+  }
+  // One rare fallen elderwood exploration discovery, actual WOOD/LEAVES
+  // physics voxels rather than scenery-only polygons. Original groves
+  // and saved edits always take priority; never place near spawn or caves.
+  let fallenGiant=null;
+  for(const {x,z,rank} of rankedSites(seed,minX,minZ,0xfa11).slice(0,24)){
+    if(x<minX+12||x>minX+LIVE_DISTRICT_SIZE-13||
+       z<minZ+12||z>minZ+LIVE_DISTRICT_SIZE-13||
+       near(x,z,0,0,26,26)||
+       origins.some(o=>near(x,z,o.x+14,o.z,36,31))||
+       court&&near(x,z,court.origin[0],court.origin[2],20,25)||
+       rotunda&&near(x,z,rotunda.origin[0],rotunda.origin[2],17,17)||
+       twinwood&&near(x,z,twinwood.origin[0],twinwood.origin[2],17,17))continue;
+    const plan=planFallenGiant(reserved,x,z,{axis:(rank&1)?'x':'z',length:9});
+    if(!plan||plan.cells.some(([a,b,c])=>a<minX||a>=minX+LIVE_DISTRICT_SIZE||
+       c<minZ||c>=minZ+LIVE_DISTRICT_SIZE))continue;
+    fallenGiant=plan;
+    for(const [a,b,c,id] of plan.cells)blocks.set(key(a,b,c),id);
+    break;
+  }
+  // West gallery activation follows original structure staging. A conflicting
+  // historical tree, court or newly staged structure disables ONLY that
+  // candidate gallery; the older traversable north/south wings remain intact.
+  const occupied=new Set([...blocks.keys()].map(k=>{
+    const [x,,z]=k.split(',');return x+','+z;
+  }));
+  for(let i=0;i<origins.length;i++){
+    const origin=origins[i];
+    let safe=true;
+    for(let x=origin.x+9;x<=origin.x+25&&safe;x++)
+      for(let z=origin.z-16;z<=origin.z;z++){
+        if(occupied.has(x+','+z)){safe=false;break;}
+      }
+    if(safe)enabledWest.add(i);
+  }
   return {
     seed,dx,dz,trees,court,courtSource,caves:origins,
-    southGalleries:[...enabledSouth].map(i=>origins[i]),rotunda,twinwood,
+    southGalleries:[...enabledSouth].map(i=>origins[i]),
+    westGalleries:[...enabledWest].map(i=>origins[i]),
+    rotunda,twinwood,rotundaApproach,canopyGate,archwood,fallenGiant,
     blockCount:blocks.size,
     get(x,y,z,baseline){return blocks.get(key(x,y,z))??caveGet(x,y,z,baseline);}
   };
