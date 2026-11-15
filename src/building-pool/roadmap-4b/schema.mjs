@@ -149,7 +149,8 @@ export function geometrySignature(b){
       ...b.openings.map(o=>[...turn([o.at[0],o.at[2]]),o.at[1],'opening',o.kind]),
       ...b.spaces.flatMap(s=>s.footprint.map(tile=>[...turn(tile),s.level,'room',s.kind]))
     ];
-    const x0=Math.min(...rows.map(r=>r[0])), z0=Math.min(...rows.map(r=>r[1]));
+    let x0=Infinity, z0=Infinity;
+    for(const row of rows){if(row[0]<x0)x0=row[0];if(row[1]<z0)z0=row[1];}
     forms.push(JSON.stringify(rows.map(([x,z,...rest])=>[x-x0,z-z0,...rest]).sort(compare)));
   }
   return forms.sort()[0];
