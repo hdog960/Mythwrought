@@ -364,8 +364,8 @@ function theater({biome,size,W,D,title,signature}){
   targets:[{name:'audience-center',x:c,z:5},
    {name:'western-side-promenade',x:3,z:stageZ+1},
    {name:'eastern-side-promenade',x:W-4,z:stageZ+1},
-   {name:'western-backstage',x:3,z:backZ+2},
-   {name:'eastern-backstage',x:W-4,z:backZ+2},...approaches],
+   {name:'western-backstage-access',x:3,z:backZ+1},
+   {name:'eastern-backstage-access',x:W-4,z:backZ+1},...approaches],
   intentionalVoid:biome==='enchanted-forest'?[{role:'open-air audience vault',x0:c-4,x1:c+4,z0:3,z1:11,y:7}]:[]
  });
 }
