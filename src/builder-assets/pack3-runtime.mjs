@@ -5,6 +5,7 @@ import {FULL_CUBE,raycastShapes} from '../voxel-shape-interactions.mjs';
 import {inspectBodyFit} from '../voxel-shape-fit.mjs';
 import {CHUNK_SIZE,BLOCK} from '../voxel.mjs';
 import {biome130Block,isBiome130BlockId} from '../biome130-registry.mjs';
+import {isPack2LiveId,pack2ShapeOf} from '../pack2-integration.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionBounds,sectionForY} from '../depth.mjs';
 
 export const PACK3_RUNTIME_FORMAT='mythwrought.pack3-construction-overlay.v1';
@@ -208,6 +209,13 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
       const source=biome130Block(id,world.rotationAt?.(x,y,z)??0);
       return {boxes:source.boxes};
     }
+    if(isPack2LiveId(id)){
+      const state=world.getPack2State?.(x,y,z);
+      if(!state)throw Error('Pack 2 overlay state missing from physical shape query');
+      // Pack 2 water is traced precisely by the existing fluid ray code.
+      if(id===76)return null;
+      return {boxes:pack2ShapeOf(id,state).boxes};
+    }
     if(Number.isInteger(id)&&id>0&&id<=BLOCK.DEEPSTONE)return FULL_CUBE;
     throw new Error('Unknown live block identity; cannot synthesize geometry');
   }
@@ -215,6 +223,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
     // Biome130 intentionally includes nonsolid plants. The Pack 3 combined
     // collision path must keep those passable, exactly as the live engine does.
     const id=world.get(x,y,z);
+    if(id===76)return null;
     if(isBiome130BlockId(id)&&!biome130Block(id,world.rotationAt?.(x,y,z)??0).solid)
       return null;
     return readShape(x,y,z);

@@ -357,6 +357,15 @@ export function raycast(world,eye,direction,maxDistance=7){
      ![...eye,...direction,maxDistance].every(Number.isFinite)||maxDistance<0)return null;
   const len=Math.hypot(...direction);
   if(len<1e-9)return null;
+  // Pack 3's additive physical sidecar never replaces the canonical ray; the
+  // already-authored Pack 2 sloped-water hit always competes at true distance.
+  const overlay=world?.pack3Runtime?.size?.()>0?
+    world.pack3Runtime.target(eye,direction,maxDistance):null;
+  const withPhysical=base=>{
+    if(!overlay||(base&&base.distance<=overlay.distance+1e-8))return base;
+    return {hit:overlay.cell,adjacent:overlay.normal.some(Boolean)?
+      overlay.cell.map((v,i)=>v+overlay.normal[i]):null,distance:overlay.distance};
+  };
   if(world?.biomeCellCount>0||world?.pack2Cells?.size>0){
     // Mixed physical catalogs: one box-accurate collision ray for all legacy,
     // manual solids and registered biome130 shapes. Static clear-rill water
@@ -398,8 +407,8 @@ export function raycast(world,eye,direction,maxDistance=7){
     }
     const solidResult=solid?{hit:solid.cell,adjacent:solid.normal.some(Boolean)?
       solid.cell.map((v,i)=>v+solid.normal[i]):null,distance:solid.distance}:null;
-    return nearestWater&&(!solidResult||nearestWater.distance<solidResult.distance)?
-      nearestWater:solidResult;
+    return withPhysical(nearestWater&&(!solidResult||nearestWater.distance<solidResult.distance)?
+      nearestWater:solidResult);
   }
   const dir=direction.map(v=>v/len),cell=eye.map(Math.floor);
   const step=dir.map(v=>Math.sign(v));
@@ -412,10 +421,10 @@ export function raycast(world,eye,direction,maxDistance=7){
   const epsilon=1e-9;
   for(let i=0;i<Math.ceil(maxDistance*3)+5;i++){
     if(world.get(cell[0],cell[1],cell[2])!==BLOCK.AIR){
-      return {hit:[...cell],adjacent:previous,distance};
+      return withPhysical({hit:[...cell],adjacent:previous,distance});
     }
     const next=Math.min(...tMax);
-    if(!Number.isFinite(next)||next>maxDistance+epsilon)return null;
+    if(!Number.isFinite(next)||next>maxDistance+epsilon)return withPhysical(null);
     previous=[...cell];distance=Math.max(0,next);
     // Traverse touching grid planes together so an edge hit cannot select a phantom cell.
     for(let axis=0;axis<3;axis++){
@@ -425,7 +434,7 @@ export function raycast(world,eye,direction,maxDistance=7){
       }
     }
   }
-  return null;
+  return withPhysical(null);
 }
 export function outlineVertices(cell,color=[.81,.91,.63]){
   if(!Array.isArray(cell)||cell.length!==3||!cell.every(Number.isInteger))return new Float32Array();
