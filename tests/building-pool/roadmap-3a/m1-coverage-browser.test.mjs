@@ -31,5 +31,9 @@ test('optional Chromium runner covers 44 exact IDs at 667×375, 844×390, 932×4
  assert.match(js,/createM1CompletionWorkshop\(type,biome,size\)/);
  assert.match(js,/createCoveragePreviewMesh/);
  assert.match(html,/Diagnostic cube envelopes/);
+ for(const biome of ['temperate','desert','snow','enchanted-forest','mountain'])
+  assert.ok(html.includes('value="'+biome+'"'),'missing selectable biome '+biome);
+ for(const size of ['small','medium','large'])
+  assert.ok(new RegExp('<option(?: selected)?>'+size+'</option>').test(html),'missing selectable size '+size);
  assert.doesNotMatch(html,/<option value="watchtower">/);
 });
