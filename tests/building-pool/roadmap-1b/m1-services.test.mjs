@@ -48,7 +48,7 @@ test('greenhouse has truly transparent roof, real noninteractive growing trays a
  assert.ok(x.placements.filter(p=>p.purpose==='raised-growing-tray').length>=30);
  assert.ok(x.placements.some(p=>p.purpose==='decorative-potting-soil'));
  assert.ok(x.walkable.some(w=>at(w)==='7,1,12'));
- assert.equal(x.architecturalIdentity.actualGrowing,undefined);
+ assert.equal(x.architecturalIdentity.actualGrowing,false);
  assert.equal(x.architecturalIdentity.actualGrowing===true,false);
 });
 test('fishing lodge dock is a real physical pier without inventing water physics',()=>{

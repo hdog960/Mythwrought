@@ -30,12 +30,12 @@ test('M1 physical two-high entrance, real portal clearance and empty basin gap',
  }
  assert.equal(b.footprintReservations.length,0);
 });
-test('M1 stable inheritance plus first original bathhouse is exactly 16/435',()=>{
+test('M1 first bathhouse remains correct in the expanded 21/435 candidate pool',()=>{
  const items=get1BCandidates(),counts=validateAllocation(items);
- assert.equal(items.length,16);assert.equal(counts.authored,16);assert.equal(counts.remaining,419);
+ assert.equal(items.length,21);assert.equal(counts.authored,21);assert.equal(counts.remaining,414);
  assert.equal(items.filter(x=>x.category==='stable').length,15);
  assert.equal(items.filter(x=>x.category==='bathhouse').length,1);
- assert.equal(new Set(items.map(x=>x.id)).size,16);
+ assert.equal(new Set(items.map(x=>x.id)).size,21);
  assert.deepEqual(counts.buckets['bathhouse/temperate/small'],1);
 });
 test('M1 bathhouse is deterministic across independent native source invocations',()=>{
