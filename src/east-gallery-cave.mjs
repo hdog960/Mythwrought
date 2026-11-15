@@ -86,3 +86,34 @@ export function eastGalleryChamberTrace(world,origin=CAVE_CANDIDATE){
     walkable:unreachable.length===0&&cells.length===35,
     entry:{x:origin.x+anchor+2,y:feet,z:origin.z+8}};
 }
+
+// Verify a continuous player-body route from the south gallery's central aisle
+// into the east chamber. This is still an opt-in collision reader, not live terrain.
+export function eastGalleryConnectionTrace(world,origin=CAVE_CANDIDATE){
+  const reader=eastGalleryCaveWorld(world,origin);
+  const {floorAt}=caveRoute(world.seed,origin);
+  const anchor=origin.length-9;
+  const route=[
+    ...Array.from({length:6},(_,i)=>({t:anchor-2,d:3+i})),
+    {t:anchor-1,d:8},
+    ...Array.from({length:9},(_,i)=>({t:anchor+i,d:8}))
+  ];
+  const samples=route.map(({t,d})=>{
+    const x=origin.x+t,z=origin.z+d,feet=floorAt(anchor)+1;
+    const floor=feet-1;
+    return {x,z,feet,
+      supported:reader.get(x,floor,z)!==BLOCK.AIR,
+      headroom:reader.get(x,feet,z)===BLOCK.AIR&&reader.get(x,feet+1,z)===BLOCK.AIR,
+      bodyClear:!collides(reader,x+.5,feet,z+.5)};
+  });
+  const transitions=[];
+  for(let i=1;i<samples.length;i++){
+    const a=samples[i-1],b=samples[i];
+    transitions.push({from:i-1,to:i,
+      cardinal:Math.abs(a.x-b.x)+Math.abs(a.z-b.z)===1,
+      clear:!collides(reader,(a.x+b.x)/2+.5,Math.max(a.feet,b.feet),(a.z+b.z)/2+.5)});
+  }
+  return {samples,transitions,
+    walkable:samples.every(s=>s.supported&&s.headroom&&s.bodyClear)&&
+      transitions.every(t=>t.cardinal&&t.clear)};
+}
