@@ -60,11 +60,23 @@ function derived(source,parts,tag){
     stride:STRIDE,note:'Source-exact Pack4 material shading; real remeshed masonry air shaft'}),
   builderAssemblyProfile:tag,registeredInLiveGame:false});
 }
+function rotateBox(bounds,rotation){
+ let [x0,y0,z0,x1,y1,z1]=bounds;
+ for(let k=0;k<rotation;k++)[x0,z0,x1,z1]=[1-z1,x0,1-z0,x1];
+ return [x0,y0,z0,x1,y1,z1].map(n=>Math.round(n*1e6)/1e6);
+}
 function fireplaceDetail(original){
- if(original.id!==177||original.rotation!==0)throw Error('Unsupported fireplace source/orientation');
+ if(original.id!==177||!Number.isInteger(original.rotation)||
+    original.rotation<0||original.rotation>3)
+  throw Error('Unsupported fireplace source/orientation');
+ // Recover the exact source north-facing masonry bounds to open the
+ // vertical throat, then restore the architect's true cardinal facing.
+ const yaw=original.rotation;
+ const local=original.visible.map(p=>clone(p,rotateBox(p.bounds,(4-yaw)%4),
+   p.constructionDetail??'original-masonry'));
  let split=0;
  const parts=[];
- for(const p of original.visible){
+ for(const p of local){
   // The two original full-width slabs span the flue and cannot be retained.
   const upperMantel=p.material==='chalk'&&Math.abs(p.bounds[4]-.94)<1e-6;
   const lintel=p.material==='limestone'&&Math.abs(p.bounds[4]-.88)<1e-6;
@@ -78,7 +90,8 @@ function fireplaceDetail(original){
   [.15,.94,.22,.34,1,.87],[.66,.94,.22,.85,1,.87],
   [.34,.94,.22,.66,1,.34],[.34,.94,.66,.66,1,.87]
  ])parts.push(clone(source,rect,'solid-masonry-transition-to-chimney'));
- return derived(original,parts,'open-hearth-contact-v1');
+ const oriented=parts.map(p=>clone(p,rotateBox(p.bounds,yaw),p.constructionDetail));
+ return derived(original,oriented,'open-hearth-contact-v1');
 }
 function chimneyDetail(original,hasNextCourse){
  if(original.id!==176||original.rotation!==0)throw Error('Unsupported chimney source/orientation');
