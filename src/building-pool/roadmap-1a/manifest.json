@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M1 first authored Inn, native/source geometry and physical catalog audit — exact-head CI pending",
+  "milestone": "M2 initial original architecture batch: 8 added candidates; full source/physical/browser acceptance in progress",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 419,
-  "newDesignsAuthored": 1,
-  "totalLaneGeometryAuthored": 31,
+  "additionalDesignsRequired": 411,
+  "newDesignsAuthored": 9,
+  "totalLaneGeometryAuthored": 39,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,11 +53,11 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Current exact-head nested native Node and physical-asset source audit CI (run not yet complete)",
-    "Source-authentic physical Pack2/3/4/5 candidate geometry is not production placement approval",
-    "Independent candidate physical-family WebGL2 viewer and true roof/door/glass/support acceptance",
-    "419 additional genuinely distinct 3D building blueprints (285 houses, 60 taverns, 74 inns)",
-    "Creator visual acceptance, physical iPhone controls, centralized integration and save codec review"
+    "Exact-head native Node M2 original blueprint, full-pool uniqueness, physical support and browser WebGL2 evidence",
+    "Physical Pack1–5 AABBs are builder-resolvable, but no production building placement or save acceptance",
+    "Final rooftop weather/strength, Pack4 pane transparency and Pack2 swung-door clearance",
+    "411 additional genuinely distinct building variants, including 282 houses, 58 taverns and 71 inns",
+    "Creator visual acceptance and physical iPhone review; current independent 1A draft remains unmerged"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -76,9 +76,9 @@
   },
   "innCount": 1,
   "categoriesAuthored": {
-    "house": 15,
-    "tavern": 15,
-    "inn": 1
+    "house": 18,
+    "tavern": 17,
+    "inn": 4
   },
   "firstInn": {
     "id": "r1:inn:temperate:small:001",
@@ -108,5 +108,55 @@
       "portals": "37725f71b44c4c6b"
     },
     "repoGallery": "tests/building-pool/roadmap-1a/m1-inn-canvas.html"
-  }
+  },
+  "m2AddedThisCycle": [
+    {
+      "category": "house",
+      "biome": "desert",
+      "size": "small",
+      "id": "r1:house:desert:small:002"
+    },
+    {
+      "category": "house",
+      "biome": "snow",
+      "size": "medium",
+      "id": "r1:house:snow:medium:002"
+    },
+    {
+      "category": "house",
+      "biome": "mountain",
+      "size": "large",
+      "id": "r1:house:mountain:large:002"
+    },
+    {
+      "category": "tavern",
+      "biome": "temperate",
+      "size": "small",
+      "id": "r1:tavern:temperate:small:002"
+    },
+    {
+      "category": "tavern",
+      "biome": "enchanted-forest",
+      "size": "medium",
+      "id": "r1:tavern:enchanted-forest:medium:002"
+    },
+    {
+      "category": "inn",
+      "biome": "desert",
+      "size": "medium",
+      "id": "r1:inn:desert:medium:001"
+    },
+    {
+      "category": "inn",
+      "biome": "snow",
+      "size": "small",
+      "id": "r1:inn:snow:small:001"
+    },
+    {
+      "category": "inn",
+      "biome": "mountain",
+      "size": "large",
+      "id": "r1:inn:mountain:large:001"
+    }
+  ]
 }
