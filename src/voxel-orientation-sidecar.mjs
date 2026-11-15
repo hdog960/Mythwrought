@@ -79,6 +79,9 @@ export function makeOrientationSidecar(entries=[],{maxEntries=4096}={}) {
 }
 export function restoreOrientationSidecar(serialized,readBlock,options) {
   if(typeof readBlock!=='function') throw new TypeError('Missing block reader');
+  // Legacy schema-1 saves never carried a sidecar. Absence means default turns,
+  // not a malformed save or an implicit migration of the original payload.
+  if(serialized===undefined || serialized===null) return makeOrientationSidecar([],options);
   if(!Array.isArray(serialized)) throw new TypeError('Invalid serialized sidecar');
   const valid=serialized.filter(e=>e&&Array.isArray(e.cell)&&e.cell.length===3&&e.cell.every(Number.isSafeInteger)&&
     Number.isSafeInteger(e.blockId)&&e.blockId>0&&e.blockId<255&&Number.isInteger(e.turns)&&e.turns>=0&&e.turns<=3&&
