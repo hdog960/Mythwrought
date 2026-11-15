@@ -316,7 +316,19 @@ def main():
                 command(['node','--test',str(gpu_test.relative_to(checkout))],checkout,env,gpu_native_log)
                 evidence['webgl2SourceGeometryTests']=verify_native(gpu_native_log,5,None)
                 gpu_browser_log=report/'webgl2-browser.log'
-                command(['xvfb-run','-a','node',str(gpu_runner.relative_to(checkout))],checkout,env,gpu_browser_log)
+                # Chromium may request the browser's optional /favicon.ico.
+                # Pack1's original safe source server refuses all paths outside
+                # its source directory, emitting a spurious 403 console error.
+                # In this runner process alone serve an empty favicon; every
+                # other URL still passes through Pack1's original security gate.
+                shim=tooling/'pack1-favicon-preload.cjs'
+                assert shim.is_file(), 'Missing infrastructure-only favicon preloader'
+                command(['node','--check',str(shim)],checkout,env,report/'favicon-check.log')
+                browser_env=dict(env)
+                browser_env['NODE_OPTIONS']=(env.get('NODE_OPTIONS','')+' --require='+str(shim)).strip()
+                evidence['browserMetadataException']='GET /favicon.ico -> 204 only (no other paths allowed)'
+                command(['xvfb-run','-a','node',str(gpu_runner.relative_to(checkout))],
+                        checkout,browser_env,gpu_browser_log)
                 evidence['sourceWebGL2Acceptance']=verify_pack1_source_gpu(
                     checkout/'artifacts/pack-1-webgl2',sha,report)
                 evidence['status']='CANDIDATE_CANVAS2D_AND_SOURCE_WEBGL2_PASS'
