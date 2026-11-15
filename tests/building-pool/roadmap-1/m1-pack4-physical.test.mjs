@@ -28,3 +28,20 @@ test('rejects fake shape records that lack the actual collision, selection or re
  }}};
  assert.throws(()=>getM1Pack4Construction(broken,{blueprints:[{id:'probe'}]}),/Physical Pack 4 candidate unavailable/);
 });
+
+test('fifteen fireplaces turn toward their exact existing west wall instead of missing +Z mounting',()=>{
+ let corrected=0;
+ const adapter={resolvePack4BuilderBlueprint(b){
+  const cells=new Map(b.placements.map(p=>[p.at.join(','),p]));
+  for(const p of b.placements.filter(p=>p.asset==='pack4:064')){
+   corrected++;
+   assert.equal(p.orientation,'east');
+   assert.equal(p.orientationProvenance,'supported-wall-sidecar');
+   const backing=[p.at[0]-1,p.at[1],p.at[2]].join(',');
+   assert.equal(cells.get(backing)?.role,'wall');
+  }
+  return {resolvedCount:0,placements:[],orientationReviewCount:0};
+ }};
+ getM1Pack4Construction(adapter);
+ assert.equal(corrected,15);
+});
