@@ -180,3 +180,31 @@ test('multi-story mixed rendering gives the local floor priority over horizontal
   assert.ok(Math.max(...ys)<12,'The nearest actual FLOOR must upload first');
   stream.dispose();
 });
+
+test('512 actual Pack 5 furnishings export physical collision boxes with bounded regional queries',async()=>{
+  const {collectPack5PlacedCollisionBoxes,preflightPack5BuilderPlan,
+    PACK5_PREFLIGHT_MAX_COLLIDER_BOXES}=await import('../src/pack5-integration/placement-preflight.mjs');
+  const {planPack5BuilderBlueprint}=await import('../src/pack5-integration/blueprint-handoff.mjs');
+  const {layer,world}=mixedSettlement();
+  const complete=collectPack5PlacedCollisionBoxes(layer);
+  assert.ok(complete.length>0&&complete.length<=PACK5_PREFLIGHT_MAX_COLLIDER_BOXES);
+  const region=[-1,4,-1,7,8,7];
+  const scoped=collectPack5PlacedCollisionBoxes(layer,{bounds:region});
+  assert.ok(scoped.length>0&&scoped.length<complete.length);
+  assert.ok(scoped.every(box=>box[0]<region[3]&&box[3]>region[0]&&
+    box[1]<region[4]&&box[4]>region[1]&&
+    box[2]<region[5]&&box[5]>region[2]));
+  const brick=PACK5_BUILDER_CATALOG.find(f=>f.symbolicId==='pack5:080');
+  const plan=planPack5BuilderBlueprint({placements:[{
+    asset:brick.symbolicId,at:[0,5,0],orientation:0,variant:brick.variants[0]
+  }]});
+  const report=preflightPack5BuilderPlan(plan,{world,
+    foreignOccupiedCells:[],existingPack5Cells:[],
+    foreignCollisionBoxes:[],existingPack5CollisionBoxes:scoped});
+  assert.ok(report.issues.some(i=>i.kind==='existing-pack5-shape-overlap'));
+  assert.equal(report.shapeAwareDryRunClear,false);
+  assert.equal(report.integrationReady,false);
+  assert.equal(layer.count(),512,'Collision extraction must never mutate sidecar');
+  assert.throws(()=>collectPack5PlacedCollisionBoxes(layer,{
+    bounds:[0,0,0,1000,20,1000]}),/finite and local/);
+});

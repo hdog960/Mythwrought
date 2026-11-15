@@ -71,3 +71,21 @@ occupied-cell registry; merely listing a support as certified is insufficient.
 The preflight remains bounded and explicitly refuses untrusted oversized
 collision extents. Physical-iPhone and completed settlement evidence remain
 outstanding.
+
+## M11: Dense-settlement collision extraction budget
+
+The original preflight capped third-party collision arrays at 8192 AABBs
+even though a valid saved 512-piece Pack 5 layout can contain far more
+individual source-authored physical collider boxes. The exact source now
+permits up to 32768 colliders per preflight, retains the separate 250000
+spatial-index insertion bound, and never truncates silently.
+
+collectPack5PlacedCollisionBoxes(layer,{bounds}) accepts an optional finite
+world-space AABB up to 256 units per dimension to return only existing
+Pack 5 colliders that intersect the region under construction. Its
+returned boxes remain frozen and source-exact. The five-pack integrator
+must derive that region from all real physical colliders in the proposed
+builder plan; it must never use a smaller arbitrary region as proof of
+clearance. If even a regional query exceeds the 32768-box cap, subdivide
+the plan and check each region or fail closed. Full settlement integration
+and authentic physical-iPhone performance remain separate gates.

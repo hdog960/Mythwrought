@@ -14,6 +14,7 @@ const cellValid=v=>Array.isArray(v)&&v.length===3&&v.every(Number.isSafeInteger)
 const boxValid=v=>Array.isArray(v)&&v.length===6&&v.every(Number.isFinite)&&
   v.slice(0,3).every((n,i)=>n<v[i+3]);
 const key=v=>v.join(',');
+export const PACK5_PREFLIGHT_MAX_COLLIDER_BOXES=32768;
 
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const boxesOverlap=(a,b)=>a[0]<b[3]&&a[3]>b[0]&&
@@ -31,7 +32,7 @@ const boxCells=box=>{
 };
 function colliderIndex(boxes,label){
   if(boxes===null)return null;
-  if(!Array.isArray(boxes)||boxes.length>8192)
+  if(!Array.isArray(boxes)||boxes.length>PACK5_PREFLIGHT_MAX_COLLIDER_BOXES)
     throw Error('Invalid '+label+' physical collision registry');
   const cells=new Map();let indexed=0;
   for(const box of boxes){
@@ -61,10 +62,20 @@ function collidesExternal(index,shape){
         }
   return false;
 }
-/** Exact Pack 5 collision boxes from a saved construction layer (read-only). */
-export function collectPack5PlacedCollisionBoxes(layer){
+/**
+ * Read-only exact Pack 5 collision geometry. For large settlements, supply a
+ * world-space query AABB that covers the target builder plan (with its real
+ * physical colliders), so a small house does not allocate the full world's
+ * collider array on an iPhone. Never truncate silently: oversize requests
+ * fail closed. A caller must attest that its query bounds cover the plan.
+ */
+export function collectPack5PlacedCollisionBoxes(layer,{bounds=null}={}){
   if(!layer||typeof layer.list!=='function'||typeof layer.count!=='function')
     throw Error('Invalid Pack 5 collision source');
+  if(bounds!==null&&(!boxValid(bounds)||
+    bounds.some(n=>Math.abs(n)>1e9)||
+    bounds.slice(0,3).some((n,i)=>bounds[i+3]-n>256)))
+    throw Error('Pack 5 collision extraction bounds must be finite and local');
   const rows=layer.list();
   if(!Array.isArray(rows)||rows.length!==layer.count()||rows.length>4096)
     throw Error('Invalid Pack 5 collision source count');
@@ -75,7 +86,10 @@ export function collectPack5PlacedCollisionBoxes(layer){
       orientation:row.rotation,variant:row.variant
     });
     for(const box of resolved.physical.collision){
+      if(bounds!==null&&!boxesOverlap(box,bounds))continue;
       boxCells(box);
+      if(boxes.length>=PACK5_PREFLIGHT_MAX_COLLIDER_BOXES)
+        throw Error('Pack 5 collision extraction budget exceeded; query smaller bounds');
       boxes.push(Object.freeze([...box]));
     }
   }
