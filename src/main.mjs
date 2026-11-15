@@ -29,6 +29,7 @@ import {installExplorationMap} from './exploration-map.mjs';
 import {MANUAL_FIVE_PACK_CATALOG,resolveManualFivePackAsset} from './builder-assets/manual-five-pack.mjs';
 import {createManual14SavedBridge} from './builder-assets/manual14-layer.mjs';
 import {meshManual14Chunk} from './builder-assets/manual14-mesh.mjs';
+import {createManualFivePackLiveBuilder} from './builder-assets/manual-five-pack-live.mjs';
 import {createPack3LiveBridge,combinePack3ChunkMesh,isPack3BlockId} from './builder-assets/pack3-live.mjs';
 import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
 import {exportPack3Portable,inspectPack3Portable,restorePack3Portable} from './builder-assets/pack3-portable.mjs';
@@ -125,6 +126,17 @@ function start(){
   resetManual14ForWorld();
   // Real Pack 5 geometry is opt-in; the production cube palette is unchanged.
   let pack5Builder=null,pack5Gpu=null,pack5Mode=false;
+  // The future settlement-builder source imports exactly this contract.
+  // All five owner-specific save sidecars remain authoritative and isolated.
+  const fivePackBuilder=createManualFivePackLiveBuilder({
+    getWorld:()=>world,getManual14:()=>manual14,getPack3:()=>pack3,
+    getPack5:()=>pack5Builder,loadPack5:ensurePack5Loaded,
+    getPlayer:()=>player,storage:localStorage,
+    canEdit:()=>!storageReadOnly&&!graphicsLost&&!document.hidden,
+    rebuildPack2:refreshEditedMeshes,rebuildPack3:refreshPhysicalChunk,
+    rebuildPack5:()=>{if(!pack5Gpu)throw Error('Pack 5 GPU layer not loaded');
+      pack5Gpu.refresh(eye());}
+  });
   function resetPack5ForWorld(){
     if(pack5Gpu){pack5Gpu.dispose();pack5Gpu=null;}
     pack5Builder=null;pack5Mode=false;
@@ -1702,6 +1714,11 @@ function start(){
       },
       block(x,y,z){return manual14.layer.get([x,y,z])?.numericId??pack3.getAt(x,y,z)?.id??world.get(x,y,z);},
       manual14Block(x,y,z){return manual14.layer.get([x,y,z])??null;},
+      // Localhost-only building-roadmap acceptance: the actual internal
+      // production builder contract, not a separate mock voxel world.
+      placeBuilderAsset(row){return fivePackBuilder.place(row);},
+      placeManualBuilderBatch(rows){return fivePackBuilder.placeManual14Batch(rows);},
+      builderInventory(){return fivePackBuilder.inventory;},
       placeManual14Fixture(x,y,z,id,yaw=0,variant='lower'){
         const item=manual14ById.get(id);
         if(!item)throw Error('Unknown Pack 1/4 ID');
