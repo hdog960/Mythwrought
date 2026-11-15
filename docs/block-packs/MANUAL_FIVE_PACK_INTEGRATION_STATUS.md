@@ -32,3 +32,46 @@ Focused exact-head Actions #43744421069 Pack 3 and #43744421173 Pack 5 both fail
 **Do not edit** `src/biome130-registry.mjs`, any `src/auto-block-catalog/biome130/**`, the automation-owned 130-family roadmap/manifests, or five automation definitions/branches. The biome130 70 currently registered IDs 256–325 remain entirely separate and live. No changes to eight theoretical building roadmaps. No v0.11 unlock.
 
 **Do not merge PR #174 or deploy from it until the above checks are actually green.**
+
+---
+
+## Coordinated integration continuation — source and acceptance evidence, 2026-11-15
+Previous unmerged intake remains protected. Source-only Pack 1/4 adapter and latest live gameplay
+are now staged **on draft PR #174**; the older six combined-test failures and two newer
+manual14 tests were corrected and a verified all-green baseline established at `556b0de`:
+full game #43748238064, depth #43748238134, Pack3 #43748238066 and Pack5 #43748238083.
+
+### Source-owned live runtime changes staged
+- Pack1 30 numeric variants (IDs 9–38) and Pack4 23 (159–181) use distinct
+  seed-bound `createManual14SavedBridge` storage; neither uses schema-1 voxel IDs.
+- `src/builder-assets/manual14-mesh.mjs` assembles source-authored partial geometry
+  into the existing nine-float WebGL2 terrain buffer; Pack1 original 24-pixel face
+  textures are color-sampled at bounded 4×4 subtriangle resolution (NOT a claim of
+  full-resolution sprite parity), and Pack4 authored alpha/opaque parts enter the
+  original source-alpha blend and opaque passes with an added vertex cap.
+- Live UI selection lives in the existing scrollable settings, not the iPhone thumb
+  rails. Live MINE/PLACE, collision/target rays, deep-section streaming, backup and
+  independent save restores use actual physical overlays.
+- `src/builder-assets/manual-five-pack-live.mjs` exposes the single future
+  Builder AI **per-asset live placement** contract for all five source owners.
+  `placeManual14Batch` is atomic for Packs 1/4; **cross-owner atomic building
+  batches are NOT available**, even though `dryRun` resolves all five catalogs.
+- Host-side explicit occupancy blocks Pack3/Pack5 from placing onto Pack1/4 cells.
+  Support requirements fail closed rather than silently inventing wall/floor backing.
+- Never touch automation-owned biome130 catalogs, IDs, branches or tasks.
+
+### Focused genuine browser evidence (not physical iPhone)
+Pack1/4 dedicated browser run #43750377319 PASS, 11/11 focused native tests,
+original-source 53 IDs × 4 rotations = 212 geometry acceptance combinations,
+real app Builder AI placement of Pack1 ID 9 and Pack4 ID 159, 756 resident authored
+mesh vertices, reload/readback, three landscape screenshots (956×440, 844×390,
+667×375), separate thumb rails and zero browser exceptions.
+
+### Exact-head release gate not claimed
+A later unified facade, cross-pack collision and latest UI changes need full
+exact-head full-game, depth, Pack3, Pack5 and Pack1/4 CI success. Check those
+run IDs before claiming the **latest PR head** green. Physical iPhone, creator
+art approval, cross-owner atomic settlement transactions, large settlement GPU
+budget and actual release/deployment approval remain separate, open gates.
+
+**PR #174 stays draft/unmerged/undeployed; v0.11 stays locked.**

@@ -70,7 +70,7 @@ export function applyBlockAction(world,eye,direction,mode,selected,player,rebuil
   if(mode==='place'&&!state.canPlace)return {ok:false,reason:state.reason};
   if(world?.pack3Runtime?.get?.(state.hit))
     return {ok:false,reason:'Physical Pack 3 objects require the verified overlay action'};
-  if(world?.manual14Layer?.get?.(state.hit)||manual14Ids.has(selected))
+  if(world?.manual14Layer?.get?.(state.hit)||(mode==='place'&&manual14Ids.has(selected)))
     return {ok:false,reason:'Physical manual 1/4 objects require the verified sidecar action'};
   if(mode==='place'&&manualPack3SymbolById.has(selected))
     return {ok:false,reason:'Physical Pack 3 placement requires a verified separate sidecar'};

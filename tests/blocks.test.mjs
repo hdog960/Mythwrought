@@ -54,6 +54,13 @@ test('bare legacy world refuses a manual Pack 2 ID without a verified physical s
   assert.equal(result.ok,false);
   assert.equal(JSON.stringify(w.save()),snapshot);
 });
+test('selecting a shaped Pack 1/4 material never blocks ordinary legacy MINE actions',()=>{
+  const {w,x,y,z,eye,dir,player}=stage();
+  const selectedManual=9;
+  const result=applyBlockAction(w,eye,dir,'mine',selectedManual,player,()=>{});
+  assert.equal(result.ok,true);
+  assert.equal(w.get(x,y,z),BLOCK.AIR);
+});
 test('no target, out of range and unsupported action do not mutate world',()=>{
   const {w,eye,player}=stage();
   const original=JSON.stringify(w.save());
