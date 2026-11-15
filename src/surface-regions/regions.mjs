@@ -115,3 +115,48 @@ export function surfaceBiomeElevationPlan(x,z,seed=179,{
   return Object.freeze({name:biome.name,x,z,oldTop,top,
     layers:Object.freeze(layers)});
 }
+
+
+// Prepare an all-or-nothing new-world column write set. The integrator may
+// commit these writes only after verifying that the chunk has never been
+// generated or persisted. A missing callback is fail-closed, not permission.
+// This deliberately leaves the underlying voxel reader and save format alone.
+export function surfaceBiomeFreshColumn(x,z,seed=179,{
+  enabled=false,profileIsFresh=false,readBaseline=null,hasEdit=null,
+  isProtected=null
+}={}){
+  if(!enabled||!profileIsFresh||typeof readBaseline!=='function'||
+     typeof hasEdit!=='function'||typeof isProtected!=='function'||
+     !Number.isInteger(x)||!Number.isInteger(z)||!Number.isInteger(seed))
+    return null;
+  const b=surfaceBiomeAt(x,z,seed);
+  if(!b||b.weight<.35)return null;
+  const oldTop=terrainHeight(x,z,seed);
+  const newTop=surfaceBiomeHeight(x,z,seed);
+  const r=REGIONS.find(region=>region.name===b.name);
+  const writes=[];
+  // Entire changed envelope is checked before a single write is returned.
+  // Protect a headroom cell above the new surface, including landmarks.
+  for(let y=oldTop-2;y<=newTop+1;y++){
+    const baseline=readBaseline(x,y,z);
+    if(!Number.isInteger(baseline)||hasEdit(x,y,z)||isProtected(x,y,z))
+      return null;
+    if(y>oldTop&&baseline!==0)return null;
+    if(y<=oldTop&&baseline!==1&&baseline!==2)return null;
+  }
+  const coverage=clamp((b.weight-.35)/.4,0,1);
+  for(let y=oldTop-2;y<=newTop;y++){
+    const baseline=readBaseline(x,y,z);
+    let id=null;
+    if(y>oldTop){
+      id=y===newTop?r.surface:y>=newTop-2?r.subsoil:r.rock;
+    }else if(hash(x,z,seed+907)<=coverage){
+      id=y===newTop?r.surface:y>=newTop-2?r.subsoil:r.rock;
+    }
+    if(id===null||id===baseline)continue;
+    if(!isBiome130BlockId(id)||!biome130Block(id).solid)return null;
+    writes.push(Object.freeze({x,y,z,from:baseline,to:id}));
+  }
+  return Object.freeze({name:b.name,x,z,oldTop,top:newTop,
+    writes:Object.freeze(writes)});
+}
