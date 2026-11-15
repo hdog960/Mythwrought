@@ -2,14 +2,14 @@
 // Real LEAVES (ID 7) provide physical foliage; never replace saved world edits.
 // Each occupied cell is a real world voxel, not a decorative mesh triangle.
 import {BLOCK,terrainHeight,baseBlock,WORLD_MAX_Y} from './voxel.mjs';
-export const TREE_VARIANTS=Object.freeze(['roundwood','spire','windswept','elderwood']);
+export const TREE_VARIANTS=Object.freeze(['roundwood','spire','windswept','elderwood','archwood']);
 const key=(x,y,z)=>x+','+y+','+z;
 export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES??BLOCK.GRASS}={}){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
     !Number.isInteger(x)||!Number.isInteger(z)||!TREE_VARIANTS.includes(variant)||
     ![BLOCK.GRASS,BLOCK.CRYSTAL,BLOCK.LEAVES].includes(leafId))return null;
  const ground=terrainHeight(x,z,world.seed);
- const height=variant==='elderwood'?8:variant==='spire'?7:variant==='windswept'?6:5;
+ const height=variant==='elderwood'?8:variant==='archwood'?7:variant==='spire'?7:variant==='windswept'?6:5;
  if(ground+height+2>WORLD_MAX_Y||world.get(x,ground,z)!==BLOCK.GRASS)return null;
  const cells=new Map();
  const put=(dx,dy,dz,id)=>{
@@ -34,6 +34,25 @@ export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES
     if(Math.abs(dx)+Math.abs(dz)<=radius+1&&!cells.has(key(x+dx,ground+dy,z+dz)))
      put(dx,dy,dz,leafId);
   }
+ }else if(variant==='archwood'){
+  // Twin rooted supports and a continuous, walkable wooden canopy span.
+  // The far root must stand on untouched grass at the same elevation.
+  if(terrainHeight(x+6,z,world.seed)!==ground||
+     world.get(x+6,ground,z)!==BLOCK.GRASS||
+     baseBlock(x+6,ground,z,world.seed)!==BLOCK.GRASS)return null;
+  for(let dy=1;dy<=height;dy++)put(6,dy,0,BLOCK.WOOD);
+  for(let dx=0;dx<=6;dx++){
+   put(dx,height,0,BLOCK.WOOD);
+   for(let dz=-1;dz<=1;dz++){
+    if(dz!==0)put(dx,height-1,dz,BLOCK.WOOD);
+    // Keep a two-voxel-high unobstructed center aisle above the deck.
+    // Leaves form raised side crowns instead of blocking traversal.
+    if(dz!==0)for(let dy=height+1;dy<=height+2;dy++)
+     put(dx,dy,dz,leafId);
+   }
+  }
+  for(const dx of [0,6])for(const dz of [-2,2])
+   for(let dy=height-1;dy<=height+1;dy++)put(dx,dy,dz,leafId);
  }else if(variant==='elderwood'){
   // A broad ancient crown with four heavy limbs and stepped aerial roots.
   // Every component is a real editable voxel; no render-only canopy.
@@ -64,7 +83,7 @@ export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES
   if(py>WORLD_MAX_Y||baseBlock(px,py,pz,world.seed)!==BLOCK.AIR||
      world.get(px,py,pz)!==BLOCK.AIR)return null;
  }
- for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){
+ for(let dx=-2;dx<=(variant==='archwood'?8:2);dx++)for(let dz=-2;dz<=2;dz++){
   const h=terrainHeight(x+dx,z+dz,world.seed);
   if(Math.abs(h-ground)>1||world.get(x+dx,h,z+dz)!==baseBlock(x+dx,h,z+dz,world.seed))return null;
  }

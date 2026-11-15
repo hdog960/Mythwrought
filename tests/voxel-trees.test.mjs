@@ -146,3 +146,46 @@ test('exceptions during tree installation also restore the original world',()=>{
  assert.equal(placeVoxelTree(guarded,p),false);
  assert.deepEqual(w.save(),before);
 });
+
+test('archwood forms a continuous editable canopy crossing without touching old terrain',()=>{
+ for(const seed of [179,917,-184]){
+  const w=new VoxelWorld(seed),p=site(w,'archwood');
+  const [x,y,z]=p.origin;
+  for(let dx=0;dx<=6;dx++)
+   assert.ok(p.cells.some(c=>c[0]===x+dx&&c[1]===y+7&&c[2]===z&&c[3]===BLOCK.WOOD),
+    'each bridge deck cell must be a physical wood voxel');
+  for(const dx of [0,6])
+   assert.ok(p.cells.some(c=>c[0]===x+dx&&c[1]===y+1&&c[2]===z&&c[3]===BLOCK.WOOD),
+    'both roots must reach ground');
+  assert.equal(w.save().edits.length,0);
+  assert.equal(placeVoxelTree(w,p),true);
+  assert.equal(VoxelWorld.restore(w.save()).get(x+3,y+7,z),BLOCK.WOOD);
+  assert.equal(w.set(x+3,y+7,z,BLOCK.AIR),true);
+  assert.equal(w.get(x+3,y+7,z),BLOCK.AIR);
+ }
+});
+test('archwood refuses modified distant footing and never overwrites its edit',()=>{
+ const w=new VoxelWorld(179),p=site(w,'archwood');
+ const [x,y,z]=p.origin;
+ w.set(x+6,y,z,BLOCK.STONE);
+ assert.equal(placeVoxelTree(w,p),false);
+ assert.equal(w.get(x+6,y,z),BLOCK.STONE);
+});
+
+test('archwood canopy bridge keeps a continuous two-cell standing aisle',()=>{
+ for(const seed of [179,917,-184]){
+  const w=new VoxelWorld(seed),p=site(w,'archwood');
+  const [x,y,z]=p.origin;
+  for(let dx=0;dx<=6;dx++){
+   for(const dy of [8,9]){
+    assert.equal(p.cells.some(c=>c[0]===x+dx&&c[1]===y+dy&&c[2]===z),false,
+     'deck center aisle must have full standing headroom');
+   }
+   assert.ok(p.cells.some(c=>c[0]===x+dx&&c[1]===y+8&&c[2]===z+1&&c[3]===BLOCK.LEAVES),
+    'side canopy remains physically voxel-built');
+  }
+  assert.equal(placeVoxelTree(w,p),true);
+  for(let dx=0;dx<=6;dx++)for(const dy of [8,9])
+   assert.equal(w.get(x+dx,y+dy,z),BLOCK.AIR);
+ }
+});
