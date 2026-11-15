@@ -36,20 +36,32 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
  const out=resolve('artifacts/roadmap-2b');
  await mkdir(out,{recursive:true});
  const address=http.address(), base='http://127.0.0.1:'+address.port+'/tests/building-pool/roadmap-2b/candidate-preview.html';
- // Six genuine browser captures; this is a software proxy review, not a
- // production-family WebGL2, glass ABI, collision, or actual iPhone claim.
+ // Eighteen genuine browser captures: 6 original + 12 newly authored,
+ // source-imported software cube diagnostics, NOT actual producer-family meshes.
  const cases=[
   ['market-square',667,375,'exterior'],['market-square',667,375,'cutaway'],
   ['tailor',844,390,'exterior'],['tailor',844,390,'cutaway'],
-  ['theater',932,430,'exterior'],['theater',932,430,'cutaway']
+  ['theater',932,430,'exterior'],['theater',932,430,'cutaway'],
+  ['market-square',667,375,'exterior','desert','medium'],
+  ['market-square',667,375,'cutaway','desert','medium'],
+  ['tailor',844,390,'exterior','enchanted-forest','medium'],
+  ['tailor',844,390,'cutaway','enchanted-forest','medium'],
+  ['theater',932,430,'exterior','snow','large'],
+  ['theater',932,430,'cutaway','snow','large'],
+  ['jeweler',932,430,'exterior','mountain','large'],
+  ['jeweler',932,430,'cutaway','mountain','large'],
+  ['bookshop',844,390,'exterior','mountain','medium'],
+  ['bookshop',844,390,'cutaway','mountain','medium'],
+  ['butcher',667,375,'exterior','desert','large'],
+  ['butcher',667,375,'cutaway','desert','large']
  ];
  try{
   for(let i=0;i<cases.length;i++){
-   const [category,width,height,view]=cases[i];
-   const id='r2:'+category+':temperate:small:01';
+   const [category,width,height,view,biome='temperate',size='small']=cases[i];
+   const id='r2:'+category+':'+biome+':'+size+':01';
    const params=new URLSearchParams({id,view});
    const url=base+'?'+params.toString();
-   const file=join(out,category+'-'+view+'-'+width+'x'+height+'.png');
+   const file=join(out,category+'-'+biome+'-'+size+'-'+view+'-'+width+'x'+height+'.png');
    const profile=join(temp,'profile-'+i);
    const args=[
     '--headless=new','--no-sandbox','--disable-dev-shm-usage','--no-first-run',
