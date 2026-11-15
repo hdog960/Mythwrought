@@ -101,3 +101,15 @@ To reproduce honest native Chromium ES-module/WebGL2 M4 screenshots with virtual
 For earlier groups use `m1`, `m2`, `m3`, or `m3b`. Latest native full `node --test tests/block-packs/pack-5/*.test.mjs` **120/120 PASS**. Direct localhost HTTP remains blocked; these genuine WebGL2 renders use offline native `data:` ES-module imports and cannot certify production pages, Safari or iPhone GPU. See `M4_ACCEPTANCE.md`.
 
 **15 symbolic candidate families / 3 not started / 0 integrated**. M5 94–96 is NOT STARTED. No persistent numeric IDs assigned, no Gate A/v0.11 approval; draft PR only.
+
+## Milestone 5 original physical fortified / stable specialties (candidate source only)
+
+`fortified-specialties.mjs` authors all six original candidate variants for symbolic `pack5:094`–`pack5:096`: two side-by-side physical gate panels (ironbound heavy planks vs. an open-slot portcullis), two actual ceiling-supported chandeliers (nonfunctional unlit candles/crystal arms), and two distinct stable fixtures (two-cell post/rail divider with physically opaque lower privacy kickboards vs. hollow dry feeding trough with real timber weatherboards). No opening animation, lighting engine changes, livestock/feeding, fluid simulation, world placement, persistent numeric block IDs or production schema-1 writes.
+
+The new candidate gallery `tests/block-packs/pack-5/specialty-gallery.html` is authentic original-source WebGL2 preview; reproduce with:
+`LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=x11 xvfb-run -a python tests/block-packs/pack-5/esm-webgl-browser.py m5 <output-dir>`.
+The browser runs native JS ES-module semantics through offline `data:` imports because real localhost HTTP navigation is blocked; **not** published app or Safari performance.
+
+Full committed-branch-equivalent focused native tests: `node --test tests/block-packs/pack-5/*.test.mjs` **132/132 PASS**, zero skips/failures (prior 120 + 12 M5 regressions). Separate extended local tests 144/144 included additional unpublished M5 deep checks, not a claim about committed CI. Six WebGL2 M5 captures plus thirty previous M1–M4 views passed: **36/36 genuine native ES-module Chromium screenshots** across all six modes and three mobile landscape sizes/two rotations. Source/QA and outstanding approval details: `M5_ACCEPTANCE.md`.
+
+**Full 18-family Pack 5 roster authored as CANDIDATES; 0 INTEGRATED, zero persistent numeric IDs.** M6 next is only a technical/creator **readiness audit**, not permission to merge or unlock v0.11. Final creator art and physical iPhone acceptance remain open, as do schema-1 and centralized registered-asset integration approvals.
