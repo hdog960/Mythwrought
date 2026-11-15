@@ -147,3 +147,13 @@ Any source model larger than the configured 384 KiB page is counted as
 Exact source tests examine all 18 families x 2 variants x 4 orientations,
 exercise a deliberately reduced upload cap, and instrument live GPU bytes
 during an in-place page edit. Physical iPhone acceptance is still pending.
+
+## M9: Three-dimensional page priority in multi-level buildings
+
+Nearby furnishing pages now sort by actual **3D camera distance**, not
+horizontal proximity with only a coarse vertical cutoff. This prevents
+far-upstairs or deep-cave furniture sharing the player's X/Z location from
+taking scarce resident pages ahead of closer furniture on the current floor.
+The selection remains deterministic and byte/draw/upload bounded, and a
+two-floor source-geometry regression verifies which true mesh is uploaded
+first. No scene placement, global ID assignment or save-schema change.

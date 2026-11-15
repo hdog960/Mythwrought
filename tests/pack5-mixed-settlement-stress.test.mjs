@@ -140,3 +140,43 @@ test('GPU replacement never transiently allocates past the resident byte budget'
   stream.dispose();
   assert.equal(live.size,0);
 });
+
+test('multi-story mixed rendering gives the local floor priority over horizontally closer upstairs objects',()=>{
+  const supports=new Set();
+  const world={seed:918,get(...c){return supports.has(key(c))?BLOCK.STONE:BLOCK.AIR;}};
+  const layer=createPack5ConstructionLayer(world);
+  // The upper-room model is horizontally closer, but twenty floors away.
+  const high=[0,25,0],low=[4,5,0];
+  // Use the same source family to compare selection alone, with real backing
+  // if this physical furnishing requires an attachment.
+  for(const cell of [high,low]){
+    const family=PACK5_BUILDER_CATALOG.find(v=>v.symbolicId==='pack5:080');
+    const {descriptor}=resolvePack5BuilderAsset(family.symbolicId,family.variants[0]);
+    if(descriptor.attachment==='floor')
+      for(const part of orientedParts(descriptor,0)){
+        const p=part.cell.map((v,j)=>v+cell[j]);
+        supports.add(key([p[0],p[1]-1,p[2]]));
+      }
+    if(descriptor.attachment==='wall')supports.add(key([cell[0],cell[1],cell[2]-1]));
+    if(descriptor.attachment==='ceiling')supports.add(key([cell[0],cell[1]+1,cell[2]]));
+    assert.equal(layer.place(family.symbolicId,cell,0,family.variants[0]).ok,true);
+  }
+  let captured=null;
+  const gl={
+    ARRAY_BUFFER:34962,STATIC_DRAW:35044,FLOAT:5126,TRIANGLES:4,NO_ERROR:0,
+    createBuffer(){return {};},deleteBuffer(){},getError(){return 0;},
+    bindBuffer(){},bufferData(_target,v){captured=v;},
+    vertexAttribPointer(){},drawArrays(){}
+  };
+  const stream=createPack5GpuStream(gl,layer,{maxPages:1,pageInstances:1});
+  stream.refresh([.5,5.5,.5],1000);
+  const s=stream.stats();
+  assert.equal(s.visibleCandidates,2);
+  assert.equal(s.instances,1);
+  assert.equal(s.budgetExcluded,1);
+  assert.ok(captured instanceof Float32Array);
+  const ys=[];
+  for(let i=1;i<captured.length;i+=9)ys.push(captured[i]);
+  assert.ok(Math.max(...ys)<12,'The nearest actual FLOOR must upload first');
+  stream.dispose();
+});

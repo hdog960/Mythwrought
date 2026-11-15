@@ -85,9 +85,14 @@ export function createPack5GpuStream(gl,layer,{
   function choose(eye){
     const max2=maxDistance*maxDistance;
     const nearby=layer.list().map(record=>{
-      const dx=record.anchor[0]+.5-eye[0],dz=record.anchor[2]+.5-eye[2];
-      return {record,d:dx*dx+dz*dz};
-    }).filter(o=>o.d<=max2&&Math.abs(o.record.anchor[1]-eye[1])<=32)
+      // Dense houses and caves have multiple vertical floors. Prioritize
+      // genuinely nearby *3D* furniture, not distant upstairs items sharing
+      // the same horizontal cell as the player.
+      const dx=record.anchor[0]+.5-eye[0],
+        dy=record.anchor[1]+.5-eye[1],
+        dz=record.anchor[2]+.5-eye[2];
+      return {record,d:dx*dx+dy*dy+dz*dz};
+    }).filter(o=>o.d<=max2)
       .sort((a,b)=>a.d-b.d||byCell(a.record,b.record));
     visibleCandidates=nearby.length;
     oversizedInstances=0;
