@@ -43,6 +43,16 @@ export function makeOrientationSidecar(entries=[],{maxEntries=4096}={}) {
       if(success===true) states.delete(key);
       return success;
     },
+    // Opt-in asynchronous world-edit adapter. Only a committed edit invalidates turns.
+    // A rejection leaves the sidecar untouched; callers must roll back their own world
+    // mutation if an edit rejects after partially changing the world.
+    async applyEditAsync(cell,edit) {
+      const key=cellKey(cell);
+      if(typeof edit!=='function') throw new TypeError('Missing edit callback');
+      const success=await edit();
+      if(success===true) states.delete(key);
+      return success;
+    },
     // Caller must pass current world block reader; stale records are never restored onto edits.
     snapshot(readBlock) {
       if(typeof readBlock!=='function') throw new TypeError('Missing block reader');
