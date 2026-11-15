@@ -10,7 +10,7 @@
 
 ## Focused evidence
 
-Node 22: node --test tests/creative-mode-m0.test.mjs tests/creative-mode-m1.test.mjs tests/creative-mode-m2.test.mjs tests/creative-mode-m3.test.mjs. Prior local M3 acceptance: 39/39 tests including a 5,600-row filter/virtualization performance sanity check. Chromium (feature-only page via Playwright + system Chromium, no live game): original M1 220 browser assertions, M2 160 assertions, M3 186 assertions across six landscape widths 568x320 to 1180x520. M3 includes actual touchscreen.tap interaction. These are independent local test results; **the new exact-head GitHub CI must be verified separately after commit**. Screenshots generated locally and not included in PR.
+Node 22: node --test tests/creative-mode-m0.test.mjs tests/creative-mode-m1.test.mjs tests/creative-mode-m2.test.mjs tests/creative-mode-m3.test.mjs. Prior local M3 acceptance: 39/39 tests including a 5,600-row filter/virtualization performance sanity check. Chromium (feature-only page via Playwright + system Chromium, no live game): original M1 220 browser assertions, M2 160 assertions, M3 198 assertions across six landscape widths 568x320 to 1180x520. M3 includes actual touchscreen.tap interaction. These are independent local test results; **the new exact-head GitHub CI must be verified separately after commit**. Screenshots generated locally and not included in PR.
 
 ## Restrictions and next gate
 

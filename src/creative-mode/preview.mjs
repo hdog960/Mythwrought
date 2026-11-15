@@ -85,7 +85,7 @@ function renderFlight(){
 }
 const previewByUid=new Map(UX_SAMPLE_ITEMS.map(x=>[x.uid,x]));
 let restoreFocus=null;
-function dispatch(action){const next=updateCreativeUx(state,action);if(next===state)return;const wasOpen=state.inventoryOpen;state=next;render();if(!wasOpen&&state.inventoryOpen){restoreFocus=document.activeElement;byId('inventorySearch').focus();}else if(wasOpen&&!state.inventoryOpen){if(restoreFocus?.isConnected)restoreFocus.focus();else byId('creativeMode').focus();restoreFocus=null;}}
+function dispatch(action){const next=updateCreativeUx(state,action);if(next===state)return;if(action.type==='SELECT_SLOT')catalog=updateInventoryState(catalog,{type:'SELECT_SLOT',slot:action.slot});const wasOpen=state.inventoryOpen;state=next;render();if(!wasOpen&&state.inventoryOpen){restoreFocus=document.activeElement;byId('inventorySearch').focus();}else if(wasOpen&&!state.inventoryOpen){if(restoreFocus?.isConnected)restoreFocus.focus();else byId('creativeMode').focus();restoreFocus=null;}}
 function createSlot(slot){const button=document.createElement('button');button.type='button';button.className='slot';button.dataset.slot=String(slot);button.setAttribute('aria-label',`Preview hotbar slot ${slot+1}`);const glyph=document.createElement('span');glyph.className='slot-glyph';button.append(glyph);const num=document.createElement('small');num.textContent=String(slot+1);button.append(num);return button;}
 const slots=Array.from({length:UX_SLOT_COUNT},(_,i)=>createSlot(i));byId('hotbar').append(...slots);
 function render(){
