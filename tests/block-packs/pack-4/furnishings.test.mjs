@@ -95,6 +95,25 @@ test('crate has reinforced timber slats and metal corners',()=>{
  assert.ok(a.parts.some(p=>p.material==='iron'));
  assert.ok(a.parts.some(p=>p.material==='oakSun'));
  assert.notDeepEqual(a.parts,furnishingAsset(169).parts);
+ // Earlier side slats stopped .01 cells short of corner posts and three
+ // inner lid slats floated above the final wall course. All 26 collision
+ // elements should now form one physically supported crate across rotations.
+ for(let rotation=0;rotation<4;rotation++){
+  const shape=furnishingShape(170,rotation),boxes=shape.collision;
+  assert.equal(shape.visible.length,34);
+  assert.equal(boxes.length,26);
+  const touches=(a,b)=>[0,1,2].every(k=>
+   a[k]<=b[k+3]+1e-8&&b[k]<=a[k+3]+1e-8);
+  const seen=new Set([0]),queue=[0];
+  while(queue.length){
+   const i=queue.pop();
+   for(let j=0;j<boxes.length;j++)if(!seen.has(j)&&touches(boxes[i],boxes[j])){
+    seen.add(j);queue.push(j);
+   }
+  }
+  assert.equal(seen.size,boxes.length,
+   'crate slats/lid must connect physically at turn '+rotation);
+ }
 });
 test('bench has open leg gaps and raised back, unlike broad table top',()=>{
  const bench=furnishingShape(171);
