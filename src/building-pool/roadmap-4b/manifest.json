@@ -55,7 +55,7 @@
   "creatorAccepted": 0,
   "integrated": 0,
   "worldPlaced": false,
-  "status": "M0 exact-head CI accepted; M1 5 original physical-coordinate candidate sources committed; M1 exact-head native/real candidate-browser acceptance open",
+  "status": "M1 five original coordinate-authored candidates; exact-head native and source-specific Chromium cube-proxy technical checks PASS; physical-family/creator/iPhone gates remain open",
   "ownedPaths": [
     "src/building-pool/roadmap-4b/",
     "tests/building-pool/roadmap-4b/",
@@ -76,10 +76,10 @@
     "creatorArtApproval": false,
     "physicalIphoneApproval": false
   },
-  "nextMilestone": "M1 complete exact PR-head native source tests, genuine Chromium cube-proxy exterior and cutaway capture audit, remediate proven prototype geometry defects; then advance authored category quotas in M2",
+  "nextMilestone": "M2 healing and public knowledge: author 74 more distinct healers' houses and 59 additional libraries; hold independent variants across 15 biome-size cells, test actual coordinates and symbolic physical dependencies, no merge or deployment.",
   "milestones": {
     "M0": "TECHNICALLY ACCEPTED on PR #185 exact head 199af339dea3c708e5f92b21aa91ce47b7d99763, Actions #43767122199 SUCCESS (native Builder 4B suite + focused Chromium smoke/layout)",
-    "M1": "FIVE SOURCE-AUTHORED EXEMPLARS; source-exact new native-suite verification pending latest PR HEAD; 30-shot true candidate WebGL2 cube-proxy harness authored but NOT EXECUTED",
+    "M1": "M1 FIRST FIVE TECHNICAL REVIEW PASS: PR #185 at 242e189a96037f8bb1a76005f1a0964276f62925 GitHub Actions #43771739057 SUCCESS; 40/40 Builder 4B native Node tests (includes 30/30 real Chromium WebGL2 cube-proxy captures across 3 landscape sizes); source-level geometry and connectivity pass. FINAL physical-family/creator/iPhone approval NOT GIVEN.",
     "M2": "NOT STARTED",
     "M3": "NOT STARTED",
     "M4": "NOT STARTED",
@@ -126,5 +126,22 @@
     "r4:schoolhouse:desert:small:01",
     "r4:magical-research-institute:enchanted-forest:medium:01",
     "r4:arcane-academy:mountain:large:01"
-  ]
+  ],
+  "m1Technical": {
+    "sourceHead": "242e189a96037f8bb1a76005f1a0964276f62925",
+    "githubActionsRun": 43771739057,
+    "nativeTestsPassed": 40,
+    "nativeTestsFailed": 0,
+    "candidateTechnicalAccepted": 5,
+    "realChromiumCubeProxyCaptures": 30,
+    "chromiumSourceSha256": "e5ee3c6cdc793bfc93854dd0171c765252b5263dcc4f0d8de611c95f00f85530",
+    "webgl2Errors": 0,
+    "contextLosses": 0,
+    "previewType": "genuine WebGL2 cube proxies only; not physical family meshes",
+    "physicalFamilyRenderingAccepted": false,
+    "physicalIphoneTested": false,
+    "creatorArtApproved": false,
+    "screenshotArtifactId": 14184861292,
+    "exteriorAndSectionInspected": true
+  }
 }
