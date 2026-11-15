@@ -134,3 +134,47 @@ export function pack2CycleState(id,state,action){
   }
   return current;
 }
+
+
+// Transparent fluid is streamed separately from the opaque authored meshes.
+// This keeps the established per-chunk opaque vertex format, chunk budgets,
+// and old-world byte output unchanged. At most one extra GPU buffer is uploaded
+// for each chunk that actually contains a placed water candidate.
+export function pack2WaterSectionVertices(world,cx,cz,section){
+  if(!world?.pack2Cells?.size)return new Float32Array();
+  if(![cx,cz,section].every(Number.isInteger)||section>0)
+    throw new TypeError('Invalid water chunk location');
+  const result=[];let length=0;
+  for(const [key,state] of world.pack2Cells){
+    if(state.id!==WATER_CANDIDATE_ID)continue;
+    const [x,y,z]=key.split(',').map(Number);
+    const actualSection=y>=-3?0:Math.floor((y+3)/16);
+    if(actualSection!==section||Math.floor(x/16)!==cx||Math.floor(z/16)!==cz)continue;
+    // Remove only *identical* internal fluid side triangles; differing level
+    // cells must retain their visible side faces and physical surface heights.
+    const mesh=waterPreviewMesh(state),water=pack2WorldVertices(76,state,[x,y,z]);
+    if(mesh.indices.length!==water.length/9)
+      throw Error('Pack 2 water authored vertex count mismatch');
+    const keep=[];
+    for(let tri=0;tri<mesh.indices.length/3;tri++){
+      let skip=false;
+      if(tri>=2&&tri<=9){
+        const indices=[mesh.indices[tri*3],mesh.indices[tri*3+1],mesh.indices[tri*3+2]];
+        for(const [axis,side,delta] of [[0,0,-1],[0,1,1],[2,0,-1],[2,1,1]]){
+          if(indices.every(i=>Math.abs(mesh.positions[i*3+axis]-side)<1e-6)){
+            const neighbor=axis===0?
+              world.getPack2State?.(x+delta,y,z):
+              world.getPack2State?.(x,y,z+delta);
+            if(neighbor?.id===76&&neighbor.level===state.level&&
+              neighbor.flow===state.flow&&neighbor.source===state.source)skip=true;
+          }
+        }
+      }
+      if(!skip)keep.push(...water.subarray(tri*27,tri*27+27));
+    }
+    if(keep.length){result.push(keep);length+=keep.length;}
+  }
+  const out=new Float32Array(length);let offset=0;
+  for(const arr of result){out.set(arr,offset);offset+=arr.length;}
+  return out;
+}
