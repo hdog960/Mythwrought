@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,baseBlock,terrainHeight,worldKey} from '../src/voxel.mjs';
-import {planStoneRotunda,placeStoneRotunda,findStoneRotundaSite} from '../src/stone-rotunda.mjs';
+import {planStoneRotunda,placeStoneRotunda,findStoneRotundaSite,inspectStoneRotundaTraversal} from '../src/stone-rotunda.mjs';
 
 function findSite(world){
   // Deterministic bounded fixture scan; never edits the world.
@@ -151,4 +151,27 @@ test('exterior approach rejects untracked world modifications without changing s
   world.get=(px,py,pz)=>px===x+5&&py===h+1&&pz===z?BLOCK.STONE:originalGet(px,py,pz);
   assert.equal(planStoneRotunda(world,x,z),null);
   assert.equal(placeStoneRotunda(world,plan),false);
+});
+
+
+test('real voxel routes connect all four exterior approaches to the open center',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'seed 179 requires an eligible site');
+  assert.equal(placeStoneRotunda(world,plan),true);
+  const inspection=inspectStoneRotundaTraversal(world,plan);
+  assert.ok(inspection,'all four physical routes must remain walkable after placement');
+  assert.equal(inspection.routes.length,4);
+  for(const route of inspection.routes){
+    assert.equal(route.length,6);
+    assert.deepEqual(route.at(-1),plan.center);
+    for(const [x,y,z] of route){
+      assert.notEqual(world.get(x,y-1,z),BLOCK.AIR);
+      assert.equal(world.get(x,y,z),BLOCK.AIR);
+      assert.equal(world.get(x,y+1,z),BLOCK.AIR);
+    }
+  }
+  const [x,y,z]=inspection.routes[0][2];
+  assert.equal(world.set(x,y,z,BLOCK.STONE),true);
+  assert.equal(inspectStoneRotundaTraversal(world,plan),null,
+    'a player-built obstruction must invalidate actual traversal');
 });
