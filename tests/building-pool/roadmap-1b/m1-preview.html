@@ -50,7 +50,7 @@ const vertex=[],faces=[
  {shade:.81,pts:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]]},
  {shade:.63,pts:[[0,0,1],[1,0,1],[1,1,1],[0,1,1]]}
 ];
-for(const p of proxy){const col=palette[p.role]??[.5,.58,.6],at=p.at;
+for(const p of proxy){const col=p.asset==='pack4:030'?[.28,.75,.87]:(palette[p.role]??[.5,.58,.6]),at=p.at;
  for(const f of faces){const c=col.map(n=>Math.min(1,n*f.shade));
   const corners=f.pts.map(d=>projected([at[0]+d[0],at[1]+d[1],at[2]+d[2]]));
   for(const idx of [0,1,2,0,2,3])vertex.push(...corners[idx],...c);

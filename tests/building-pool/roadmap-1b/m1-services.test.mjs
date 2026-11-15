@@ -84,3 +84,25 @@ test('complete seven-category source census is exactly 21/435 with 15 unmodified
  assert.deepEqual(all.filter(b=>b.category!=='stable').map(x=>x.category).sort(),
   ['bathhouse','farm-barn','greenhouse','fishing-lodge','harbor-office','lighthouse'].sort());
 });
+
+test('M1 genuine four distinct structural roof profiles show backed height progression',()=>{
+ const items=getM1ServiceExemplars(),expected=new Map([
+  ['farm-barn','two-slope-stepped-gable'],
+  ['greenhouse','glazed-double-pitched-roof'],
+  ['fishing-lodge','shore-lean-to'],
+  ['harbor-office','four-way-hip']
+ ]);
+ for(const b of items){
+  if(!expected.has(b.category))continue;
+  const roof=b.placements.filter(p=>p.role==='roof');
+  const levels=[...new Set(roof.map(p=>p.at[1]))].sort((x,y)=>x-y);
+  assert.ok(levels.length>=4,'Roof is a falsely flat capped box: '+b.category);
+  const profiles=new Set(roof.map(p=>p.roofProfile));
+  assert.deepEqual([...profiles],[expected.get(b.category)],'Wrong physical roof profile: '+b.category);
+  assert.ok(b.placements.some(p=>p.role==='support'&&(p.purlinBearingApproved===false||p.roofBearingApproved===false)),
+   'Missing physically placed under-roof bearing candidates: '+b.category);
+ }
+ const greenhouse=items.find(b=>b.category==='greenhouse');
+ assert.ok(greenhouse.placements.filter(p=>p.role==='roof'&&p.asset==='pack4:030').length>50);
+ assert.ok(greenhouse.placements.every(p=>p.asset!=='pack5:090'),'No oven/range can be a greenhouse planter');
+});

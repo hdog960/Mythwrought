@@ -60,7 +60,15 @@ export function createWheatfieldBarn(){
  partZ(8,2,14);for(const x of [7,11])hatch(x,8);
  partX(8,9,16);hatch(8,13);
  windows([[3,1,'north'],[13,1,'north'],[1,12,'west'],[15,12,'east'],[4,17,'south'],[12,17,'south']]);
- roof(6,17);for(let x=2;x<=14;x+=4)for(const z of [4,12,16])put(x,7,z,'roof','live:wood','east',{roofRib:true});
+ // Authored stepped gable: every real roof cell follows a load-indicated pitch.
+ for(let x=1;x<=15;x++)for(let z=1;z<=17;z++){
+  const rise=Math.floor((7-Math.abs(x-8))/2);
+  put(x,6+rise,z,'roof','live:wood','east',{roofProfile:'two-slope-stepped-gable',weatherSealApproved:false});
+ }
+ for(const x of [3,8,13])for(const z of [4,11,16]){
+  const rise=Math.floor((7-Math.abs(x-8))/2);
+  put(x,5+rise,z,'support','live:wood','east',{purlinBearingApproved:false});
+ }
  for(const [x,z,p] of [[3,4,'seed-crate'],[4,4,'seed-crate'],[3,11,'grain-stack'],[4,11,'grain-stack'],
   [12,12,'repair-rack'],[13,12,'repair-rack'],[12,15,'wagon-tackle']])furnish(x,z,p);
  room('wagon-unload',2,2,15,8,6);room('grain-and-hay',2,9,8,17,6);room('tools-and-repair',9,9,15,17,6);
@@ -79,9 +87,11 @@ export function createGlowglassConservatory(){
   [1,9,'west'],[13,9,'east'],[4,17,'south'],[10,17,'south']]);
  for(let x=1;x<=13;x++)for(let z=1;z<=17;z++){
   const rib=[1,4,10,13].includes(x)||z===1||z===17;
-  put(x,5,z,'roof',rib?'live:wood':'pack4:030','none',{weatherSealApproved:false});
+  const rise=Math.floor((6-Math.abs(x-7))/2);
+  put(x,5+rise,z,'roof',rib?'live:wood':'pack4:030','none',
+   {roofProfile:'glazed-double-pitched-roof',weatherSealApproved:false});
  }
- for(const [x,z] of [[4,5],[10,5],[4,12],[10,12]])put(x,6,z,'support','live:wood');
+ for(const [x,z] of [[4,5],[10,5],[4,12],[10,12]])put(x,5,z,'support','live:wood','none',{roofBearingApproved:false});
  for(let z=4;z<=12;z++){
   for(const x of [3,5,9,11])furnish(x,z,'raised-growing-tray');
   for(const x of [4,10])furnish(x,z,'decorative-potting-soil','live:dirt');
@@ -99,7 +109,15 @@ export function createReedhookPierLodge(){
  base(5,16);hatch(7,1);hatch(7,16);
  partZ(9,2,12);hatch(7,9);
  windows([[3,1,'north'],[11,1,'north'],[1,6,'west'],[13,6,'east'],[4,16,'south'],[10,16,'south']]);
- roof(6,16);for(let x=1;x<=13;x+=3)for(const z of [1,9,16])put(x,7,z,'roof','live:wood','north',{purlin:true});
+ // Shore-facing single shed pitch, structurally distinct from barn/office roofs.
+ for(let x=1;x<=13;x++)for(let z=1;z<=16;z++){
+  const rise=Math.floor((z-1)/5);
+  put(x,6+rise,z,'roof','live:wood','north',{roofProfile:'shore-lean-to',weatherSealApproved:false});
+ }
+ for(const x of [3,7,11])for(const z of [4,9,14]){
+  const rise=Math.floor((z-1)/5);
+  put(x,5+rise,z,'support','live:wood','north',{purlinBearingApproved:false});
+ }
  // z=17 already belongs to contiguous shore base, so dock starts at z=18.
  for(let z=18;z<=23;z++)for(let x=5;x<=9;x++)put(x,0,z,'floor','live:wood','north',{shorePierBearing:'unresolved'});
  for(let z=18;z<=23;z++)for(const x of [5,9])put(x,1,z,'support','live:wood','north',{purpose:'dock-side-rail'});
@@ -117,7 +135,15 @@ export function createEstuaryHarborOffice(){
  base(5);hatch(8,1);partZ(9,2,14);for(const x of [4,12])hatch(x,9);
  partX(8,10,14);hatch(8,12);
  windows([[3,1,'north'],[13,1,'north'],[1,5,'west'],[15,5,'east'],[3,15,'south'],[13,15,'south']]);
- roof(6,15);for(let z=1;z<=15;z+=3)put(8,7,z,'roof','live:wood','north',{ridgeMember:true});
+ // Four-sided stepped hipped roof protecting independent archive/chart rooms.
+ for(let x=1;x<=15;x++)for(let z=1;z<=15;z++){
+  const rise=Math.min(3,Math.floor(Math.min(x-1,15-x,z-1,15-z)/2));
+  put(x,6+rise,z,'roof','live:wood','none',{roofProfile:'four-way-hip',weatherSealApproved:false});
+ }
+ for(const x of [5,8,11])for(const z of [5,8,11]){
+  const rise=Math.min(3,Math.floor(Math.min(x-1,15-x,z-1,15-z)/2));
+  put(x,5+rise,z,'support','live:wood','north',{roofBearingApproved:false});
+ }
  for(const [x,z,p] of [[4,5,'public-counter'],[5,5,'public-counter'],[11,5,'customs-desk'],
   [4,12,'chart-table'],[4,13,'chart-table'],[12,12,'records-cabinet'],[12,13,'records-cabinet']])furnish(x,z,p);
  room('public-permit-lobby',2,2,15,9,6);
