@@ -6,17 +6,17 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 18,
-  "authoredCandidates": 33,
-  "remainingUnauthored": 387,
+  "originalNewModels": 24,
+  "authoredCandidates": 39,
+  "remainingUnauthored": 381,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
-      "authored": 3,
+      "authored": 5,
       "target": 60,
-      "remaining": 57
+      "remaining": 55
     },
     "tailor": {
       "authored": 3,
@@ -39,14 +39,14 @@
       "remaining": 57
     },
     "temple": {
-      "authored": 15,
+      "authored": 17,
       "target": 75,
-      "remaining": 60
+      "remaining": 58
     },
     "theater": {
-      "authored": 3,
+      "authored": 5,
       "target": 45,
-      "remaining": 42
+      "remaining": 40
     }
   },
   "originals": [
@@ -139,17 +139,47 @@
       "id": "r2:theater:snow:large:01",
       "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:temperate:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:desert:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:mountain:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:enchanted-forest:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:desert:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:mountain:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
-      "small": 7,
+      "small": 8,
       "medium": 1,
       "large": 1
     },
     "desert": {
       "small": 1,
-      "medium": 3,
+      "medium": 5,
       "large": 2
     },
     "snow": {
@@ -160,12 +190,12 @@
     "enchanted-forest": {
       "small": 1,
       "medium": 3,
-      "large": 2
+      "large": 3
     },
     "mountain": {
-      "small": 1,
+      "small": 2,
       "medium": 2,
-      "large": 3
+      "large": 4
     }
   },
   "productionRegistryUnchanged": true,
