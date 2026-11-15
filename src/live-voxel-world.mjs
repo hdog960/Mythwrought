@@ -14,6 +14,7 @@ import {planTwinwood} from './voxel-forest-twinwood.mjs';
 import {westGalleryWorld} from './west-gallery-world.mjs';
 import {planCanopyGate} from './voxel-canopy-gate.mjs';
 import {planVoxelTree} from './voxel-trees.mjs';
+import {planFallenGiant} from './fallen-giant.mjs';
 import {planRotundaApproachStones} from './rotunda-approach-stones.mjs';
 
 export const LIVE_DISTRICT_SIZE=128;
@@ -245,6 +246,25 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
     for(const [a,b,c,id] of plan.cells)blocks.set(key(a,b,c),id);
     break;
   }
+  // One rare fallen elderwood exploration discovery, actual WOOD/LEAVES
+  // physics voxels rather than scenery-only polygons. Original groves
+  // and saved edits always take priority; never place near spawn or caves.
+  let fallenGiant=null;
+  for(const {x,z,rank} of rankedSites(seed,minX,minZ,0xfa11).slice(0,24)){
+    if(x<minX+12||x>minX+LIVE_DISTRICT_SIZE-13||
+       z<minZ+12||z>minZ+LIVE_DISTRICT_SIZE-13||
+       near(x,z,0,0,26,26)||
+       origins.some(o=>near(x,z,o.x+14,o.z,36,31))||
+       court&&near(x,z,court.origin[0],court.origin[2],20,25)||
+       rotunda&&near(x,z,rotunda.origin[0],rotunda.origin[2],17,17)||
+       twinwood&&near(x,z,twinwood.origin[0],twinwood.origin[2],17,17))continue;
+    const plan=planFallenGiant(reserved,x,z,{axis:(rank&1)?'x':'z',length:9});
+    if(!plan||plan.cells.some(([a,b,c])=>a<minX||a>=minX+LIVE_DISTRICT_SIZE||
+       c<minZ||c>=minZ+LIVE_DISTRICT_SIZE))continue;
+    fallenGiant=plan;
+    for(const [a,b,c,id] of plan.cells)blocks.set(key(a,b,c),id);
+    break;
+  }
   // West gallery activation follows original structure staging. A conflicting
   // historical tree, court or newly staged structure disables ONLY that
   // candidate gallery; the older traversable north/south wings remain intact.
@@ -264,7 +284,7 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
     seed,dx,dz,trees,court,courtSource,caves:origins,
     southGalleries:[...enabledSouth].map(i=>origins[i]),
     westGalleries:[...enabledWest].map(i=>origins[i]),
-    rotunda,twinwood,rotundaApproach,canopyGate,archwood,
+    rotunda,twinwood,rotundaApproach,canopyGate,archwood,fallenGiant,
     blockCount:blocks.size,
     get(x,y,z,baseline){return blocks.get(key(x,y,z))??caveGet(x,y,z,baseline);}
   };
