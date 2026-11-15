@@ -136,3 +136,17 @@ test('exact Git blob at HEAD for new original candidate source, actual Node modu
  }
  assert.equal(examples.length,5);
 });
+
+test('current 21/420 ledger counts authored coordinates only and preserves 15 original temple IDs',()=>{
+ const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
+ assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,ledger.authoredCandidates,ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],
+  [420,15,6,21,399,0,0,0]);
+ const own=[market,...examples];
+ assert.equal(new Set([...LEGACY_TEMPLES,...own].map(x=>x.id)).size,21);
+ assert.deepEqual(ledger.originals.map(o=>o.id),own.map(x=>x.id));
+ assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.authored,0),21);
+ assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.remaining,0),399);
+ assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.target,0),420);
+ assert.equal(ledger.biomeSizeDistribution.temperate.small,7);
+ assert.equal(ledger.productionRegistryUnchanged,true);
+});
