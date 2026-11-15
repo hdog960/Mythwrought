@@ -98,6 +98,22 @@ test('fireplace exposes open front cavity, real side jambs, mantle and grate wit
  assert.ok(s.visible.some(p=>p.material==='iron'));
  assert.equal(civicAsset(177).engines.fire,false);
  assert.equal(civicAsset(177).engines.smoke,false);
+ // A raised iron grate and soot bed formerly began at y=.20 while the
+ // stone hearth base ended at y=.19, stranding five collidable components.
+ // The firebox remains hollow, but the grate must join the hearth physically.
+ const meets=(a,b)=>[0,1,2].every(k=>
+  a[k]<=b[k+3]+1e-8&&b[k]<=a[k+3]+1e-8);
+ for(let turn=0;turn<4;turn++){
+  const boxes=civicShape(177,turn).collision;
+  const seen=new Set([0]),queue=[0];
+  while(queue.length){
+   const n=queue.pop();
+   for(let j=0;j<boxes.length;j++)if(!seen.has(j)&&meets(boxes[n],boxes[j])){
+    seen.add(j);queue.push(j);
+   }
+  }
+  assert.equal(seen.size,boxes.length,'grate floats above hearth at turn '+turn);
+ }
 });
 test('well rim is a genuinely open quadrant, not a completed ring or square well',()=>{
  const s=civicShape(178);
