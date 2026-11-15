@@ -13,3 +13,18 @@
 - Origin: original PR #122 generic preview mesher/camera/browser concepts, copied
   only into Builder 3B-owned diagnostic paths and restricted to watchtowers.
   Original PR #122 and the sibling Builder 3A remain untouched.
+
+## Exact-head browser screenshot gate (isolated CI)
+The 3B-owned native suite now includes `chromium-diagnostic.test.mjs`, which
+launches actual system Chrome/Chromium via CDP, serves the authored preview as
+local ES modules, verifies WebGL2 and nonblank RGB pixel readback, and captures
+90 PNG exteriors/cutaways under
+`artifacts/building-roadmap-3b-m1/chromium-webgl2-diagnostic/`.
+It emits `acceptance.json` containing the renderer classification, viewport,
+design IDs, color/readback and zero GPU errors. It fails closed if Chrome, WebGL2,
+source geometry or screenshot capture is unavailable. The CI artifact upload
+remains the shared workflow's existing `artifacts/` collection; no workflow
+change is authorized.
+**Do not claim this gate ran or passed until exact-head Actions confirms it.**
+A real WebGL2 cube-envelope diagnostic does not prove manual/biome family AABB,
+live runtime placement, gameplay collision, artwork or physical iPhone.

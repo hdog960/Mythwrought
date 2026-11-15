@@ -1,7 +1,7 @@
 // Optional explicit browser acceptance runner. Never invoked automatically in main CI.
 // Example from repository root after installing free Playwright:
 //   python3 -m http.server 4173 &
-//   node tests/building-pool/roadmap-3/preview-browser.mjs
+//   node tests/building-pool/roadmap-3b/preview-browser.mjs
 // Must fail loudly on any unsupported/no-WebGL2 runtime, no fabricated screenshots.
 import {mkdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
@@ -21,7 +21,7 @@ if(chromium){
    try{
     await page.goto(url,{waitUntil:'networkidle',timeout:15000});
     for(const biome of ['temperate','desert','snow','enchanted-forest','mountain'])for(const size of ['small','medium','large']){
-     await page.selectOption('#type',type);await page.selectOption('#biome',biome);await page.selectOption('#size',size);
+     await page.selectOption('#biome',biome);await page.selectOption('#size',size);
      for(const view of ['exterior','cutaway']){
       await page.selectOption('#view',view);
       const evidence=await page.evaluate(()=>{
