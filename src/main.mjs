@@ -224,7 +224,7 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
-    const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player):null;
+    const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
@@ -367,7 +367,7 @@ function start(){
         gl.drawArrays(gl.TRIANGLES,0,c.count);
       }
       // A faint world-space targeted-block outline, never a HUD covering the scene.
-      const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player):null;
+      const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
       const focusKey=focused?.hit?.join(',')||'';
       const placeKey=focused?.canPlace?focused.adjacent.join(','):'';
       canvas.dataset.targetBlock=focusKey;
