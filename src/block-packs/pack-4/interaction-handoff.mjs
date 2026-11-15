@@ -48,7 +48,12 @@ export function pack4ReviewSidecar(entries){
     throw new TypeError('Invalid Pack 4 candidate sidecar entry list');
   const used=new Set(),out=[];
   for(const e of entries){
-    if(!e||typeof e!=='object')throw new TypeError('Invalid sidecar entry');
+    // A missing/undefined rotation must never silently become the default
+    // north-facing state during fixture-to-sidecar recovery.
+    if(!e||typeof e!=='object'||Array.isArray(e)||
+       !Object.hasOwn(e,'cell')||!Object.hasOwn(e,'id')||
+       !Object.hasOwn(e,'rotation')||e.rotation===undefined)
+      throw new TypeError('Incomplete Pack 4 candidate sidecar entry');
     const state=pack4SidecarHandoff(e.cell,e.id,e.rotation);
     const key=state.cell.join(',');
     if(used.has(key))throw new TypeError('Duplicate sidecar cell');
