@@ -1,5 +1,5 @@
 // The creator-authorized, production ID bridge for automation-owned biome130 blocks.
-// Only authored families 001..057 are registered; other 130-roster positions are not invented.
+// Only authored families 001..060 are registered; other 130-roster positions are not invented.
 // 0..8 legacy, creator-owned manual 9..208, and 255 sentinel remain untouched.
 import {validateShape,rotateShape} from './voxel-shape-interactions.mjs';
 import {DESERT_CANDIDATE_IDS,desertCandidate} from './auto-block-catalog/biome130/desert.mjs';
@@ -19,6 +19,7 @@ import {MOUNTAIN_FOUNDATIONS} from './auto-block-catalog/biome130/mountain-found
 import {MOUNTAIN_MATERIALS} from './auto-block-catalog/biome130/mountain-materials.mjs';
 import {MOUNTAIN_ORE_GEOLOGY} from './auto-block-catalog/biome130/mountain-ore-geology.mjs';
 import {MOUNTAIN_CLIFF_SURFACES} from './auto-block-catalog/biome130/mountain-cliff-surfaces.mjs';
+import {MOUNTAIN_FINAL_GEOLOGY} from './auto-block-catalog/biome130/mountain-final-geology.mjs';
 
 const families=[
   ...DESERT_CANDIDATE_IDS.map(id=>desertCandidate(id)),
@@ -31,7 +32,7 @@ const families=[
   ...SNOW_ORGANIC_CANDIDATES,...ENCHANTED_GROUND_CANDIDATES,
   ...ENCHANTED_ROOT_CANDIDATES,...ENCHANTED_GEOLOGY,...ENCHANTED_FLORA,
   ...ENCHANTED_WOOD,...MOUNTAIN_FOUNDATIONS,...MOUNTAIN_MATERIALS,
-  ...MOUNTAIN_ORE_GEOLOGY,...MOUNTAIN_CLIFF_SURFACES
+  ...MOUNTAIN_ORE_GEOLOGY,...MOUNTAIN_CLIFF_SURFACES,...MOUNTAIN_FINAL_GEOLOGY
 ];
 const parseHex=value=>{
   if(typeof value!=='string')throw Error('Invalid biome material color');
@@ -44,7 +45,7 @@ for(const original of families){
   const symbol=original.symbolicId??original.id;
   if(typeof symbol!=='string'||!/^biome130:\d{3}$/.test(symbol))throw Error('Invalid biome symbolic identity');
   const ordinal=Number(symbol.slice(-3)),blockId=255+ordinal;
-  if(ordinal<1||ordinal>57||blockId===255||registered.has(blockId)||symbols.has(symbol))
+  if(ordinal<1||ordinal>60||blockId===255||registered.has(blockId)||symbols.has(symbol))
     throw Error('Duplicate or unapproved biome block ID '+symbol);
   const boxes=original.shape?.boxes??original.boxes;
   if(!validateShape({boxes}))throw Error('Invalid physical biome boxes '+symbol);
@@ -63,7 +64,7 @@ for(const original of families){
   });
   registered.set(blockId,definition);symbols.set(symbol,definition);
 }
-for(let ordinal=1;ordinal<=57;ordinal++)
+for(let ordinal=1;ordinal<=60;ordinal++)
   if(!registered.has(255+ordinal))throw Error('Missing authored biome family '+ordinal);
 export const BIOME130_REGISTERED_IDS=Object.freeze([...registered.keys()].sort((a,b)=>a-b));
 export const BIOME130_REGISTERED_SYMBOLS=Object.freeze(BIOME130_REGISTERED_IDS.map(id=>registered.get(id).symbol));
