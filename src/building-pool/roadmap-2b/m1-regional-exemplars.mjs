@@ -319,8 +319,9 @@ function theater({biome,size,W,D,title,signature}){
    shapeRotationStatus:'unresolved-symbolic'
   });
   approaches.push({name:x<c?'west-stage-lower-landing':'east-stage-lower-landing',x,z:stageZ});
-  for(let y=2;y<=6;y++)
+  for(let y=2;y<=5;y++)
    p.put(x,y,stageZ-1,B.post,'wall',{role:'stage-proscenium'});
+  // A preexisting y6 roof tie connects the two pylons above 3-high headroom.
  }
  p.screenX(backZ,1,W-2,[3,W-4]);
  for(const x of [3,W-4])p.fixed(x,backZ+2,B.crate,'backstage-crew-storage');
