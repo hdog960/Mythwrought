@@ -1,0 +1,739 @@
+{
+  "pack": 1,
+  "title": "Stone & Nature",
+  "gate": "v0.10 Gate A",
+  "integration": "NOT MERGED / NOT DEPLOYED",
+  "basedOnMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "incorporationCheckpoint": "008",
+  "coordinationIssue": "https://github.com/hdog960/Mythwrought/issues/109",
+  "ownership": {
+    "source": "src/block-packs/pack-1/",
+    "tests": "tests/block-packs/pack-1/",
+    "candidateIdRange": [
+      9,
+      58
+    ],
+    "reservedExisting": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "forbiddenSentinel": 255
+  },
+  "evidence": {
+    "node": "REAL DEDICATED PACK 1 NODE NOT RUN",
+    "chromium": "REAL CANDIDATE GALLERY CHROMIUM NOT RUN; 15 view/30 screenshot runner authored but not executed",
+    "physicalIphone": "NOT RUN / NOT CERTIFIED",
+    "candidatePreview": "Two standalone HTML test-gallery source files committed; no authentic browser screenshot inspected yet",
+    "logic": "9/9 authored Node test bodies evaluated successfully in V8 compatibility harness against exact GitHub branch source; this is NOT Node execution",
+    "shapeLogic": "11/11 authored M2 test bodies passed with exact branch source in V8 compatibility harness. NOT a Node run.",
+    "oldCoreLogic": "9/9 authored M1 test bodies previously passed in V8; no production test claim.",
+    "shapeMesher": "24/24 orientation cases passed V8 cross-lane surface-mesh probe against exact unmerged :12 source; 12–324 triangles per piece, valid finite unit-cell geometry and indices. NOT actual Node/browser rendering.",
+    "gardenLogic": "14/14 authored garden test bodies pass V8 compatibility harness on exact committed branch source (not Node). One distinct-art texture assertion initially failed and was fixed before final validation.",
+    "gardenCrossLane": "17/17 V8 cross-lane checks pass against unmerged :00 raycast and :12 shape-meshing prototypes. 12 rotation/shape combinations; 108–468 triangles in prototype, not measured game GPU performance.",
+    "gardenPreview": "Isolated garden-gallery.html + garden-gallery.mjs with box-derived isometric art and clickable physical slices committed; genuine Chromium screenshot not captured.",
+    "foliageLogic": "16/16 authored M4 test bodies passed V8 harness on exact committed source after mobile-lattice adjustment; NOT genuine Node.",
+    "foliageCrossLane": "40/40 V8 probes passed against exact :00 and :12 opt-in sources: 32 shape/rotation meshes between 208 and 532 triangles, plus 8 targeting/collision contracts. NOT measured production GPU performance.",
+    "foliagePerformance": "Initial fine-detail box unions produced ~1480–4412 mesh triangles. Replaced with 1/8-voxel aligned physical parts and reverified 208–532. Visually inspect genuine Chromium later.",
+    "floralLogic": "15/15 authored Milestone 5 Node-style test bodies executed on exact GitHub branch source in a V8 assertion shim; NOT genuine Node.",
+    "floralCrossLane": "39/39 V8 opt-in targeting and surface mesher probes passed: 28 shapes × rotation; 204–376 triangles per unmerged prototype; ten nontrivial targeting/space/mount/light consistency probes; source gallery syntax parsed. NOT production WebGL2.",
+    "floralPreview": "Standalone HTML+JS gallery source committed with seven actual box-derived Canvas2D specimens, cross-section probes, rotate/place/remove and canonical fixture save/restore; authentic Chromium screenshots NOT CAPTURED.",
+    "allPackV8": "65/65 authored test bodies pass on exact PR branch in one V8 harness: M1 9/9; M2 11/11; M3 14/14; M4 16/16; M5 15/15. All 10 dependency modules loaded. NOT actual Node.",
+    "latestBaselineCI": "PR #113 previous exact head 462f4c6c1e5bcb683515c93efad3301d3591f610 Actions #43635324085 SUCCESS; genuine configured Node baseline and Chromium WebGL2 smoke steps passed, browser-smoke artifact 14130277108 (unchanged live game only). New head requires exact CI recheck.",
+    "localTestBlocker": "Local Node 22.16 and Chromium 144 available, but network-restricted container cannot resolve github.com/raw.githubusercontent.com to obtain exact PR branch checkout. Neither real dedicated Node nor authentic candidate gallery Chromium could execute. No surrogate screenshots counted.",
+    "m6AllSourceCrossLane": "120/120 shape/rotation cases (30 candidate IDs x 4 orientations) passed exact-source V8 checks with unmerged :00 validateShape and :12 prototypeSurfaceMesh. 12–532 triangles, bounded indices, valid coordinates. Not actual Node/renderer.",
+    "m6AllFamilyAudit": "10/10 new authored unified acceptance test bodies executed successfully on exact PR branch source in V8 test shim (30 IDs/21 rosters, 120 rotations, textures, collision/selection, reversible 30-item fixture save/restore, rotated-save rejection). NOT real Node.",
+    "m6AllPackAuthoredV8": "75/75 authored test bodies passed in V8 shims across six nested Pack 1 Node test modules (existing 65 + M6 new 10). Genuine Node execution still NOT performed.",
+    "m6BrowserSource": "New optional Pack 1-only Playwright runner tests gallery.html, stone-shape-gallery.html, garden-gallery.html, foliage-gallery.html, floral-gallery.html at 667x375,844x390,932x430. Source committed and V8 syntax parsed, but authentic screenshots NOT CAPTURED.",
+    "m6RayRegression": "6/6 new authored ray regression test bodies passed exact-source V8 shim; 22,932 independent analytic rays against isolated candidate fixtures + 8,232 shaped-stone occupancy probes; NOT genuine Node.",
+    "m6AllFixtureRayAudit": "29,988 face-oriented rays across 30 candidates and supported orientations had 0 expected/actual intersection mismatches, combining exact Pack 1 fixture or unmerged :00 generic source in V8. Not production runtime.",
+    "m6AuthoredTests": "81/81 authored tests (65 initial + 10 unified + 6 ray regression) pass exact-source V8 shim across seven nested Node modules; REAL NODE NOT RUN.",
+    "localNetworkAttempt": "Confirmed Node 22.16.0 and /usr/bin/chromium locally; neither GitHub DNS nor pinned GitHub IP connections are allowed. Python Playwright available; exact branch modules cannot be mounted from connected GitHub into container here, so genuine candidate gallery browser not run.",
+    "previousExactHeadCI": "Head aa639a1306abea596333c0921a024f6f3ea93d50 completed SUCCESS via GitHub Actions 43638833572 (baseline Node + Chromium only, nested Pack 1 tests not included).",
+    "m6NativeNodeRunnerUnit": "Genuine Node 22.16.0 5/5 PASS in local container for tests/block-packs/pack-1/gallery-count.test.mjs; executed fixture helper and test byte-for-byte identical to GitHub Blob SHAs 6e941cf73b310eb2400b274cb878e1d56d3214c9 + ab02c4712f525d9f964794ce0952ae581ad1b113. Only browser-runner parser, NOT seven asset-specific suites.",
+    "m6BrowserRunnerDefectsFixed": "Two misplaced double escapes in decimal-count regex produced false negatives even on healthy gallery placement. Replaced with dedicated native Node-tested count parser; additionally require explicit positive save confirmation, rejecting SAFE SAVE BLOCKER messages as success.",
+    "m6ChromiumLocalBlocker": "Chromium starts but even data:text/html and http://127.0.0.1 navigation return net::ERR_BLOCKED_BY_ADMINISTRATOR in local Python Playwright. No genuine Pack 1 gallery screenshots captured/reviewed; no environment restrictions bypassed.",
+    "m6PreviousExactHeadCI": "Baseline CI run 43639942311 on PR SHA 5e9c855268d7efff4cb6541b9803a304937d1f81 completed SUCCESS, including its configured baseline Node and Chromium steps only; nested Pack 1 suites excluded.",
+    "m6FullAssetSuite": "Seven candidate-specific Node test modules (81 authored groups) STILL NOT RUN under genuine native Node; 81/81 exact-source V8 shim remains latest honest coverage.",
+    "m6TotalTestsAuthored": "86 authored test groups across 8 Pack 1 test modules: 81 source-level V8 candidate assertions + 5 genuine native Node browser-runner helper assertions. Not all 86 native Node.",
+    "m6FreshAssetV8": "81/81 authored test bodies across seven exact current-branch asset modules PASS V8 compatibility shim, 30/30 unique IDs; NOT genuine Node.",
+    "m6RepeatedHelperNativeNode": "5/5 Node 22.16.0 TAP PASS, 0 failures, executed GitHub-identical gallery-count.mjs and gallery-count.test.mjs with Git blob SHAs 6e941cf73b310eb2400b274cb878e1d56d3214c9 and ab02c4712f525d9f964794ce0952ae581ad1b113.",
+    "m6GalleryPixelProofSource": "Pack1-only Chromium runner source now analyzes each card's primary artwork crop, detects missing/tiny/monochrome and duplicate previews, and writes provenance-tagged JSON report plus 30 genuine PNGs only after 15 real views pass. Source parsed in V8, browser NOT EXECUTED.",
+    "m6LocalBrowserPolicy": "Local Chromium launches; data:, file: and localhost navigation blocked with ERR_BLOCKED_BY_ADMINISTRATOR; screenshots NOT CAPTURED. No policy circumvention.",
+    "m6LocalCheckout": "git ls-remote and GitHub raw/API requests fail DNS/network; local workspace has only the native-tested small gallery parser files, no candidate source checkout. Seven native suites NOT RUN.",
+    "m6GreenPriorHead": "Previous exact PR head 467226cabcdd084ddc23401b668281d27c337398 GitHub Actions #43641340996 SUCCESS, root Node + baseline Chromium smoke only; current head must be checked separately.",
+    "m6RecoveredReadme": "Completed interrupted README source handoff on Pack 1 draft PR #113; main checkpoint 006 and Issues 109/117 independently reverified.",
+    "m6NativeOrchestrator": "Opt-in tests/block-packs/pack-1/run-acceptance.mjs is committed, code-syntax checked; requires externally verified exact Git SHA, clean Pack 1 paths, eight real Node suites, 15 real Chromium landscape views, 30 genuine PNGs with hashes, genuine gallery report. It has NOT been executed to successful completion.",
+    "m6NativeOrchestratorFailClosed": "Removes stale PASS evidence BEFORE Node testing; refuses wrong head/dirty candidate paths, failed test run or missing/mismatched screenshot artifacts. Does not alter root CI.",
+    "m6RecentNativeNodeHelper": "Local Node 22.16.0 re-executed 5/5 gallery-count.test.mjs PASS; both exact files verified against Git blobs ab02c4712f525d9f964794ce0952ae581ad1b113 and 6e941cf73b310eb2400b274cb878e1d56d3214c9.",
+    "m6NativeAssetBlocker": "Local GitHub clone/source fetching remains blocked by DNS; seven exact candidate-focused test suites NOT run under native Node. Prior 81/81 V8 shim evidence is not a native pass.",
+    "m6ChromiumBlocker": "Playwright Chrome navigation to local/data pages remains administrator-blocked; no authentic screenshot captures/review and no physical iPhone testing.",
+    "m6LatestIntegratedMain": "Fresh main caf47776b723a36684edc1a72749e49268ccc688 records automation-only checkpoint 007, PR #120. Manual Blocks 1–5 and building projects explicitly excluded. Original checkpoint 006 data is historical.",
+    "m6NewMainShapeAudit": "30 candidate IDs x 4 quarter rotations = 120/120 V8 source checks PASSED against latest checkpoint 007 main src/shape-prototypes.mjs and src/voxel-shape-interactions.mjs, 12–136 prototype triangles. Six full masonry cubes passed with opt-in prototypeOnly audit wrapper; no Pack 1 source change. NOT native Node/WebGL2.",
+    "m6LiveRegistryAt007": "src/voxel.mjs still supports IDs 0–8 only; Pack 1 IDs 9–38 remain entirely unregistered and cannot be placed into worldgen. No conflict with automated biome130 symbolic assets.",
+    "m6NativeOrchestratorRunStatus": "Pack 1-owned run-acceptance.mjs source committed and V8 syntax/fail-safe audit passed; NEVER completed genuine native all-eight Node+15-view Chromium execution. Missing results remain blockers.",
+    "m6NewestExactGitHubV8": "All seven candidate suite source files freshly read from latest draft PR head; 81/81 authored test bodies pass V8 test/assert compatibility, 30/30 unique IDs 9–38. NOT genuine native Node.",
+    "m6CurrentNativeSubset": "5/5 gallery-count helper tests re-executed under actual Node 22.16.0, 0 failures; only helper verified, not seven candidate modules.",
+    "m6FreshRunnerFixes": "galleries-browser.mjs standalone mode now clears only its 30 expected screenshot filenames plus its prior evidence report before any attempt; run-acceptance.mjs now requires Node TAP >=86 tests all passed, 0 failed/skipped/todo, stores actual counts.",
+    "m6RunnerCodeQuality": "A temporary source replacement error was caught by syntax check and repaired before handoff; current exact GitHub files both syntax-checked PASS and strict guards inspected.",
+    "m6StillBlocked": "git ls-remote/clone DNS unavailable from local Node/Chromium workspace; Chrome data/local navigation blocked by administrator. No exact full-branch native asset tests, no genuine gallery screenshots, no physical iPhone.",
+    "m6MainReference": "main caf47776b723a36684edc1a72749e49268ccc688 remains automation-only checkpoint 007, Pack1 excluded and live IDs 0–8 only.",
+    "m6NewPngNativeNode": "7/7 genuine Node 22.16.0 tests PASSED on tests/block-packs/pack-1/png-proof.test.mjs, 0 failed/skipped. Local executed png-proof.mjs SHA dfb955ae86be27438d85befe727c5b0f955cca28; test SHA 5b74fa756c384cf6354c453eb63afe25df3b3cf9, both match current GitHub.",
+    "m6TotalRealNodeSubset": "12/12 genuine Node tests PASS across only gallery-count.test.mjs (5) + png-proof.test.mjs (7); 4 local files matched GitHub blob hashes. THIS IS NOT REAL NATIVE EXECUTION OF 7 ASSET SUITES.",
+    "m6NineModuleGate": "Opt-in run-acceptance.mjs now invokes 9 Pack1-owned Node test modules and requires actual TAP >=93 tests, 0 fail/skip/TODO; all 30 Chromium PNGs receive zlib IDAT decompression, chunk CRC32, viewport width/min height, SHA256 verification. Source syntax PASS; NOT EXECUTED full run.",
+    "m6FullAssetVerification": "81/81 seven candidate-focused test groups passed exact GitHub source in V8 compatibility harness; native Node NOT RUN, Chromium capture NOT RUN due container GitHub DNS + Chromium ERR_BLOCKED_BY_ADMINISTRATOR.",
+    "m6CurrentMain": "main caf47776b723a36684edc1a72749e49268ccc688, incorporation checkpoint 007 automation-only, manual pack ownership excluded; Issues #109/#117 OPEN.",
+    "m6CurrentMain008": "Latest main f416a2b26c4c00b5944f3bd37e9360030a247cc9 = commit-level Gate A checkpoint 008 (voxel trees/caves/courts activated using IDs 0–8). Explicitly manual Pack1–5 and building projects excluded. docs/INTEGRATION_CHECKPOINTS.md still ends at 007 (docs lag).",
+    "m6Main008Registry": "Current main src/voxel.mjs BLOCK registry 0–8 only; Pack1 9–38 are all unregistered candidate source.",
+    "m6Main008CI": "Current main .github/workflows/ci.yml adds live-world browser smoke but still root npm test tests/*.test.mjs; 9 nested Pack1 native suites are not executed by root CI.",
+    "m6LatestNativeHelperEvidence": "Genuine Node 22.16.0 12/12 helper groups pass (5 gallery count +7 PNG integrity), all 4 local module/test Git blobs exactly match current GitHub files. Native Pack1 asset modules 81 authored bodies still NOT run.",
+    "m6CurrentAcceptanceOrchestrator": "Standalone Pack1-only run-acceptance.mjs requires nine Node modules >=93 tests no skips/todo and 15 genuine Chromium views / 30 fully decoded CRC-validated screenshot PNGs. Full run not executed.",
+    "m6LatestMainAfter008Documentation": "Main ac263720b60641c65b02330348dd76d0ef9cb75e is documentation-only follow-up recording checkpoint 008 into INTEGRATION_CHECKPOINTS.md and RELEASE_LEDGER.md; docs lag resolved. Prior runtime activation SHA f416a2b26c4c00b5944f3bd37e9360030a247cc9, manual Pack1 excluded, live registered IDs remain 0–8.",
+    "m6NativeNode93Latest": "SUPERSEDES prior V8-only/native-NOT-RUN entries: GENUINE Node 22.16.0 nine-module combined run, 93/93 PASS, fail 0 skipped 0 TODO 0 cancelled 0. Isolated exact Pack1 file mirror from source head 84001dbddd9fa9630ad9382c9f9d85c986590a9c; all 21 Git blobs independently verified against current PR branch. No shim.",
+    "m6NativeNodeProvenance": "src/block-packs/pack-1/M6_NATIVE_NODE_EVIDENCE.md contains nine suite counts, exact Node command and 21 Git blob identities; complete TAP log generated as a separate user-downloadable artifact.",
+    "m6RemainingBrowser": "Chromium started but file:/data: navigation ERR_BLOCKED_BY_ADMINISTRATOR; no genuine five-gallery × three-size runs nor 30 screenshots. Root baseline CI not candidate-gallery acceptance.",
+    "m6CurrentCheckpoints": "Latest main ac263720b60641c65b02330348dd76d0ef9cb75e checkpoint 008 automation-only; manual Pack 1 excluded; game registry BLOCK IDs 0–8 only.",
+    "m6VisualSelectionRunnerFix": "Pack1-only five-gallery Playwright runner now asserts visible selected/placed card-state counts at empty, place-all, offline canonical save/restore, and clear. Source selector classes verified against corresponding gallery modules; exact source JS parses. RUNNER NOT EXECUTED IN CHROMIUM.",
+    "m6ChromiumAdminPolicyRetested": "System Chromium can launch, but actual data:, file:, and 127.0.0.1 HTTP navigations return net::ERR_BLOCKED_BY_ADMINISTRATOR. Genuine 15 candidate views/30 screenshots cannot be captured in current environment, no bypass attempted.",
+    "m6NativeNodeUnchanged": "93/93 genuine Node 22.16.0 nested Pack1 tests PASS, zero fail/skip/TODO on 21 GitHub-blob-verified files (M6_NATIVE_NODE_EVIDENCE.md). No candidate code changed since these tests.",
+    "m6CurrentCommitReference": "Main ac263720b60641c65b02330348dd76d0ef9cb75e, integration checkpoint 008, Pack1 excluded; PR #113 remains draft/unmerged and candidate-only. GitHub Actions queued on prior head, and current exact-head CI must be rechecked.",
+    "m6NativePartialVoxelProbeReference": "3/3 genuine Node v22.16.0 canonical fixture probe cases PASS for ID21 garden solid/empty, ID24 foliage solid/empty, ID32 floral targetable-passable/empty, source previously exact GitHub blob-verified.",
+    "m6RealBrowserCutawayProbePending": "Pack1 Playwright gallery runner now adds 2 real canvas cutaway click checks in each of 3 partial-shape galleries x 3 viewports (18 pending genuine browser checks), matching source-authored selection/collision semantics. Modified run-acceptance.mjs requires 63 browser interactions instead of 45; both scripts parsed. This is NOT browser execution.",
+    "m6ChromiumNavigationBlocker": "Chromium launches, but data:/file:/localhost navigation returns ERR_BLOCKED_BY_ADMINISTRATOR. 0 of 15 real gallery views and 0 of 30 authentic PNGs. No bypass attempted.",
+    "m6NativeGatePreserved": "93/93 genuine Node PASS from nine modules and 21 GitHub-blob-verified sources; asset source unchanged and that evidence preserved in M6_NATIVE_NODE_EVIDENCE.md."
+  },
+  "integrationDependencies": [
+    "Production VoxelWorld.set() rejects IDs greater than 8. Manual integration must expand registry and rendering atomically without changing schema-1 layout.",
+    "Existing production mesh/collision is whole-cube only. Core masonry uses full cubes; future shaped pieces depend on :12 shape engine and :00 targeting/collision.",
+    "No world placement or live UI wiring is authorized.",
+    "Existing Stone 3 and Deepstone 8 remain untouched. Shader-only masonry treatments are not physical blocks."
+  ],
+  "assignments": [
+    {
+      "roster": 1,
+      "name": "Cobblestone",
+      "candidateId": 9,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
+    },
+    {
+      "roster": 2,
+      "name": "Stone bricks",
+      "candidateId": 10,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
+    },
+    {
+      "roster": 3,
+      "name": "Mossy stone bricks",
+      "candidateId": 11,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
+    },
+    {
+      "roster": 4,
+      "name": "Cracked stone bricks",
+      "candidateId": 12,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
+    },
+    {
+      "roster": 5,
+      "name": "Polished stone",
+      "candidateId": 13,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
+    },
+    {
+      "roster": 6,
+      "name": "Carved decorative stone",
+      "candidateId": 14,
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs main 006: independent style/material/purpose and ID; not a STONE 3 alias",
+      "testEvidence": "Core isolated geometry/pixel-art/selection/save test bodies: 9/9 passing in V8 shim; real Node + Chromium not run",
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee031776fa5d29c6654bc43911b8863fad7dfab4"
+    },
+    {
+      "roster": 7,
+      "name": "Stone slabs",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: physical unit-cell partial-volume independent shaped piece; not an assembled STONE 3 template or render-only art",
+      "testEvidence": "11/11 M2 authored test bodies V8 PASS; 8/8 :00 targeting V8 probes PASS; 24/24 :12 mesher V8 orientations PASS; genuine focused Node, real game, gallery Chromium NOT RUN",
+      "candidateId": 15,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "4a19e7c34ddf046c98889c440f753ccfe0befe51",
+      "dependencies": [
+        "Generic :12 surface mesher and :00 shape-targeting/collision",
+        "Orientation/upper variant persistence not available in production schema-1; fixture explicitly rejects noncanonical save",
+        "No live block registration"
+      ]
+    },
+    {
+      "roster": 8,
+      "name": "Stone stairs",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: physical unit-cell partial-volume independent shaped piece; not an assembled STONE 3 template or render-only art",
+      "testEvidence": "11/11 M2 authored test bodies V8 PASS; 8/8 :00 targeting V8 probes PASS; 24/24 :12 mesher V8 orientations PASS; genuine focused Node, real game, gallery Chromium NOT RUN",
+      "candidateId": 16,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "4a19e7c34ddf046c98889c440f753ccfe0befe51",
+      "dependencies": [
+        "Generic :12 surface mesher and :00 shape-targeting/collision",
+        "Orientation/upper variant persistence not available in production schema-1; fixture explicitly rejects noncanonical save",
+        "No live block registration"
+      ]
+    },
+    {
+      "roster": 9,
+      "name": "Stone walls",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: physical unit-cell partial-volume independent shaped piece; not an assembled STONE 3 template or render-only art",
+      "testEvidence": "11/11 M2 authored test bodies V8 PASS; 8/8 :00 targeting V8 probes PASS; 24/24 :12 mesher V8 orientations PASS; genuine focused Node, real game, gallery Chromium NOT RUN",
+      "candidateId": 17,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "4a19e7c34ddf046c98889c440f753ccfe0befe51",
+      "dependencies": [
+        "Generic :12 surface mesher and :00 shape-targeting/collision",
+        "Orientation/upper variant persistence not available in production schema-1; fixture explicitly rejects noncanonical save",
+        "No live block registration"
+      ]
+    },
+    {
+      "roster": 10,
+      "name": "Stone pillars",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: physical unit-cell partial-volume independent shaped piece; not an assembled STONE 3 template or render-only art",
+      "testEvidence": "11/11 M2 authored test bodies V8 PASS; 8/8 :00 targeting V8 probes PASS; 24/24 :12 mesher V8 orientations PASS; genuine focused Node, real game, gallery Chromium NOT RUN",
+      "candidateId": 18,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "4a19e7c34ddf046c98889c440f753ccfe0befe51",
+      "dependencies": [
+        "Generic :12 surface mesher and :00 shape-targeting/collision",
+        "Orientation/upper variant persistence not available in production schema-1; fixture explicitly rejects noncanonical save",
+        "No live block registration"
+      ]
+    },
+    {
+      "roster": 11,
+      "name": "Stone arches",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: physical unit-cell partial-volume independent shaped piece; not an assembled STONE 3 template or render-only art",
+      "testEvidence": "11/11 M2 authored test bodies V8 PASS; 8/8 :00 targeting V8 probes PASS; 24/24 :12 mesher V8 orientations PASS; genuine focused Node, real game, gallery Chromium NOT RUN",
+      "candidateId": 19,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "4a19e7c34ddf046c98889c440f753ccfe0befe51",
+      "dependencies": [
+        "Generic :12 surface mesher and :00 shape-targeting/collision",
+        "Orientation/upper variant persistence not available in production schema-1; fixture explicitly rejects noncanonical save",
+        "No live block registration"
+      ]
+    },
+    {
+      "roster": 12,
+      "name": "Stone railings",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: physical unit-cell partial-volume independent shaped piece; not an assembled STONE 3 template or render-only art",
+      "testEvidence": "11/11 M2 authored test bodies V8 PASS; 8/8 :00 targeting V8 probes PASS; 24/24 :12 mesher V8 orientations PASS; genuine focused Node, real game, gallery Chromium NOT RUN",
+      "candidateId": 20,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "4a19e7c34ddf046c98889c440f753ccfe0befe51",
+      "dependencies": [
+        "Generic :12 surface mesher and :00 shape-targeting/collision",
+        "Orientation/upper variant persistence not available in production schema-1; fixture explicitly rejects noncanonical save",
+        "No live block registration"
+      ]
+    },
+    {
+      "roster": 47,
+      "name": "Farmland soil",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: Tilled fertile loam with physical ridges/grooves; independent placeable/collidable/targetable unit-cell object, not legacy DIRT/WOOD or render-only decoration",
+      "testEvidence": "14/14 exact garden test bodies passed V8 compatibility harness after one original-art defect fixed; 17/17 cross-lane :00/:12 V8 interface checks passed; real Node/Chromium and production world integration NOT RUN",
+      "candidateId": 21,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee8f9bf0f10eef29040420fcd57bc9b9a727a6d6",
+      "dependencies": [
+        ":00 engine physical voxel ID registry and rotation/save-state support",
+        ":12 generic shape-aware surface mesh integration",
+        "Production save-schema-1 compatibility and ID >8 validation pending",
+        "No plant growth, harvesting, crafting, or world placement"
+      ]
+    },
+    {
+      "roster": 48,
+      "name": "Garden planter boxes",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: Independent cedar-rimmed planter with open cavity and internal soil, no crops; independent placeable/collidable/targetable unit-cell object, not legacy DIRT/WOOD or render-only decoration",
+      "testEvidence": "14/14 exact garden test bodies passed V8 compatibility harness after one original-art defect fixed; 17/17 cross-lane :00/:12 V8 interface checks passed; real Node/Chromium and production world integration NOT RUN",
+      "candidateId": 22,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee8f9bf0f10eef29040420fcd57bc9b9a727a6d6",
+      "dependencies": [
+        ":00 engine physical voxel ID registry and rotation/save-state support",
+        ":12 generic shape-aware surface mesh integration",
+        "Production save-schema-1 compatibility and ID >8 validation pending",
+        "No plant growth, harvesting, crafting, or world placement"
+      ]
+    },
+    {
+      "roster": 49,
+      "name": "Flower pots",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006: Standalone hollow terracotta vessel, physical walls/base/lip, no flowers; independent placeable/collidable/targetable unit-cell object, not legacy DIRT/WOOD or render-only decoration",
+      "testEvidence": "14/14 exact garden test bodies passed V8 compatibility harness after one original-art defect fixed; 17/17 cross-lane :00/:12 V8 interface checks passed; real Node/Chromium and production world integration NOT RUN",
+      "candidateId": 23,
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "ee8f9bf0f10eef29040420fcd57bc9b9a727a6d6",
+      "dependencies": [
+        ":00 engine physical voxel ID registry and rotation/save-state support",
+        ":12 generic shape-aware surface mesh integration",
+        "Production save-schema-1 compatibility and ID >8 validation pending",
+        "No plant growth, harvesting, crafting, or world placement"
+      ]
+    },
+    {
+      "roster": 50,
+      "name": "Hedge blocks",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs checkpoint 006: independent 1/8-lattice physical leaf/twig silhouette and targetable box union; not existing full-cube LEAVES 7, render-only plant accents, automated :12 bio130 natural leaf species, or another manual pack's component",
+      "testEvidence": "16/16 authored M4 test bodies passed exact source V8 harness; 40/40 compatibility checks with :00/:12 source passed (32 shape/rotation cases; 208–532 prototype triangles); exact-head Node, Chromium, authentic screenshots NOT RUN",
+      "candidateId": 24,
+      "variantIds": [
+        24
+      ],
+      "variants": [
+        {
+          "id": 24,
+          "name": "Clipped yew hedge",
+          "kind": "barrier"
+        }
+      ],
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "fbd737f95e34711eb0ccc0fb376ee0cfce517ad4",
+      "dependencies": [
+        "Current production VoxelWorld registry still only supports IDs 0–8; creator integration needed",
+        ":00 generic targeting/collision/save and :12 surface-mesh APIs not live-integrated",
+        "Rotation state cannot be persisted in existing schema-1 edit row; fixture rejects rotated saves",
+        "Vines require face attachment; supporting wall not placed in generated world",
+        "No harvesting, crafting, placement in existing world or gameplay",
+        "Transparent foliage needs appropriate integrated material culling and mobile GPU inspection"
+      ]
+    },
+    {
+      "roster": 51,
+      "name": "Bush blocks",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs checkpoint 006: independent 1/8-lattice physical leaf/twig silhouette and targetable box union; not existing full-cube LEAVES 7, render-only plant accents, automated :12 bio130 natural leaf species, or another manual pack's component",
+      "testEvidence": "16/16 authored M4 test bodies passed exact source V8 harness; 40/40 compatibility checks with :00/:12 source passed (32 shape/rotation cases; 208–532 prototype triangles); exact-head Node, Chromium, authentic screenshots NOT RUN",
+      "candidateId": 25,
+      "variantIds": [
+        25,
+        26
+      ],
+      "variants": [
+        {
+          "id": 25,
+          "name": "Briar thicket",
+          "kind": "soft-stem"
+        },
+        {
+          "id": 26,
+          "name": "Woodland fern bush",
+          "kind": "passable"
+        }
+      ],
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "fbd737f95e34711eb0ccc0fb376ee0cfce517ad4",
+      "dependencies": [
+        "Current production VoxelWorld registry still only supports IDs 0–8; creator integration needed",
+        ":00 generic targeting/collision/save and :12 surface-mesh APIs not live-integrated",
+        "Rotation state cannot be persisted in existing schema-1 edit row; fixture rejects rotated saves",
+        "Vines require face attachment; supporting wall not placed in generated world",
+        "No harvesting, crafting, placement in existing world or gameplay",
+        "Transparent foliage needs appropriate integrated material culling and mobile GPU inspection"
+      ]
+    },
+    {
+      "roster": 52,
+      "name": "Climbing vine blocks",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs checkpoint 006: independent 1/8-lattice physical leaf/twig silhouette and targetable box union; not existing full-cube LEAVES 7, render-only plant accents, automated :12 bio130 natural leaf species, or another manual pack's component",
+      "testEvidence": "16/16 authored M4 test bodies passed exact source V8 harness; 40/40 compatibility checks with :00/:12 source passed (32 shape/rotation cases; 208–532 prototype triangles); exact-head Node, Chromium, authentic screenshots NOT RUN",
+      "candidateId": 27,
+      "variantIds": [
+        27,
+        28
+      ],
+      "variants": [
+        {
+          "id": 27,
+          "name": "Climbing ivy",
+          "kind": "passable-face-mounted"
+        },
+        {
+          "id": 28,
+          "name": "Wisteria foliage vine",
+          "kind": "passable-face-mounted"
+        }
+      ],
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "fbd737f95e34711eb0ccc0fb376ee0cfce517ad4",
+      "dependencies": [
+        "Current production VoxelWorld registry still only supports IDs 0–8; creator integration needed",
+        ":00 generic targeting/collision/save and :12 surface-mesh APIs not live-integrated",
+        "Rotation state cannot be persisted in existing schema-1 edit row; fixture rejects rotated saves",
+        "Vines require face attachment; supporting wall not placed in generated world",
+        "No harvesting, crafting, placement in existing world or gameplay",
+        "Transparent foliage needs appropriate integrated material culling and mobile GPU inspection"
+      ]
+    },
+    {
+      "roster": 53,
+      "name": "Flower blocks (4+ species)",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006, manual packs #112/#114/#115, and Issue #117 130-family biome catalog: independent physical one-cell floral/mushroom identities, not integrated render-only flora/shader and not automated magic mycelium or naturally glowing resources",
+      "testEvidence": "15/15 authored M5 Node-test bodies pass exact source V8 shim; 39/39 cross-lane :00/:12 V8 probes pass (28 orientations with 204–376 surface triangles); genuine dedicated Node, genuine Chromium gallery and physical iPhone still pending",
+      "candidateId": 32,
+      "variantIds": [
+        32,
+        33,
+        34,
+        35
+      ],
+      "variants": [
+        {
+          "id": 32,
+          "name": "Skybell",
+          "kind": "soft drooping blue bells and leaves; solid stem targeting; passable petals"
+        },
+        {
+          "id": 33,
+          "name": "Ember lily",
+          "kind": "orange six-petal upward lily and raised central stamen; passable"
+        },
+        {
+          "id": 34,
+          "name": "Moonstar flower",
+          "kind": "ivory star-point bloom with separate leaf/stalk boxes; passable"
+        },
+        {
+          "id": 35,
+          "name": "Thornrose",
+          "kind": "layered crimson rose petals, branched woody stalk; passable"
+        }
+      ],
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "3af2f0a1636a24ee54fb94ca469099b4b90d746a",
+      "dependencies": [
+        "Existing engine block registry only permits IDs 0–8; central manual integration needed",
+        "Generic :00 shape-aware raycast/collision and :12 meshing opt-in, not live-wired",
+        "Canonical schema-1-shaped isolated save roundtrip only; rotation needs production orientation persistence",
+        "Part-role original textures require integrated atlas/renderer, transparency and mobile performance proof",
+        "No harvesting, crops, mushroom eating, lighting, spawning or generated-world placement permitted"
+      ]
+    },
+    {
+      "roster": 54,
+      "name": "Mushroom blocks (3+ species)",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs verified main checkpoint 006, manual packs #112/#114/#115, and Issue #117 130-family biome catalog: independent physical one-cell floral/mushroom identities, not integrated render-only flora/shader and not automated magic mycelium or naturally glowing resources",
+      "testEvidence": "15/15 authored M5 Node-test bodies pass exact source V8 shim; 39/39 cross-lane :00/:12 V8 probes pass (28 orientations with 204–376 surface triangles); genuine dedicated Node, genuine Chromium gallery and physical iPhone still pending",
+      "candidateId": 36,
+      "variantIds": [
+        36,
+        37,
+        38
+      ],
+      "variants": [
+        {
+          "id": 36,
+          "name": "Amber cap mushroom",
+          "kind": "one domed warm amber cap, visible underside and stem-only collision"
+        },
+        {
+          "id": 37,
+          "name": "Violet shelf mushroom",
+          "kind": "three independent tiered violet shelves and branch-stalk"
+        },
+        {
+          "id": 38,
+          "name": "Pearl gill mushroom",
+          "kind": "ivory fan cap, four gill ledges, stem-only collision, no emitted light"
+        }
+      ],
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "3af2f0a1636a24ee54fb94ca469099b4b90d746a",
+      "dependencies": [
+        "Existing engine block registry only permits IDs 0–8; central manual integration needed",
+        "Generic :00 shape-aware raycast/collision and :12 meshing opt-in, not live-wired",
+        "Canonical schema-1-shaped isolated save roundtrip only; rotation needs production orientation persistence",
+        "Part-role original textures require integrated atlas/renderer, transparency and mobile performance proof",
+        "No harvesting, crops, mushroom eating, lighting, spawning or generated-world placement permitted"
+      ]
+    },
+    {
+      "roster": 55,
+      "name": "Decorative leaf blocks (multiple variants)",
+      "status": "CANDIDATE",
+      "duplicateAudit": "NEW vs checkpoint 006: independent 1/8-lattice physical leaf/twig silhouette and targetable box union; not existing full-cube LEAVES 7, render-only plant accents, automated :12 bio130 natural leaf species, or another manual pack's component",
+      "testEvidence": "16/16 authored M4 test bodies passed exact source V8 harness; 40/40 compatibility checks with :00/:12 source passed (32 shape/rotation cases; 208–532 prototype triangles); exact-head Node, Chromium, authentic screenshots NOT RUN",
+      "candidateId": 29,
+      "variantIds": [
+        29,
+        30,
+        31
+      ],
+      "variants": [
+        {
+          "id": 29,
+          "name": "Golden ornamental fan leaves",
+          "kind": "passable"
+        },
+        {
+          "id": 30,
+          "name": "Ruby curled ornamental leaves",
+          "kind": "passable"
+        },
+        {
+          "id": 31,
+          "name": "Silver star ornamental leaves",
+          "kind": "passable"
+        }
+      ],
+      "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+      "sourceCommit": "fbd737f95e34711eb0ccc0fb376ee0cfce517ad4",
+      "dependencies": [
+        "Current production VoxelWorld registry still only supports IDs 0–8; creator integration needed",
+        ":00 generic targeting/collision/save and :12 surface-mesh APIs not live-integrated",
+        "Rotation state cannot be persisted in existing schema-1 edit row; fixture rejects rotated saves",
+        "Vines require face attachment; supporting wall not placed in generated world",
+        "No harvesting, crafting, placement in existing world or gameplay",
+        "Transparent foliage needs appropriate integrated material culling and mobile GPU inspection"
+      ]
+    }
+  ],
+  "pr": "https://github.com/hdog960/Mythwrought/pull/113",
+  "reviewState": "DRAFT PR, NOT MERGED / NOT DEPLOYED",
+  "nextMilestone": "In authorized Chromium runtime run 5 galleries at 667×375/844×390/932×430, including 18 source-grounded cutaway probes and 63 total interaction checks; inspect all 30 authentic PNGs and record any Pack1-only art/selection fixes. Do not repeat native or V8 suites without code change.",
+  "allocations": [
+    {
+      "range": [
+        9,
+        14
+      ],
+      "families": 6,
+      "kind": "core masonry, candidate"
+    },
+    {
+      "range": [
+        15,
+        20
+      ],
+      "families": 6,
+      "kind": "partial-volume stone shapes, candidate"
+    },
+    {
+      "range": [
+        21,
+        23
+      ],
+      "families": 3,
+      "kind": "Milestone 3 physical garden components, candidate"
+    },
+    {
+      "range": [
+        24,
+        31
+      ],
+      "families": 4,
+      "variants": 8,
+      "kind": "Milestone 4: physical hedge, bushes, face vines and ornamental leaves (not raw natural leaf species)"
+    },
+    {
+      "range": [
+        32,
+        38
+      ],
+      "families": 2,
+      "variants": 7,
+      "kind": "Milestone 5 four physical flowers + three physical mushrooms"
+    }
+  ],
+  "latestMilestone": "Pack1 physical assets + mounting/picking/collision/save/blueprint source interfaces pass exactly at 519a6640: 130/130 native Node, 360 WebGL2 candidate GPU renders, 90 hash-authenticated screenshots. Full five-pack production registration, real-game save and physical-iPhone verification NOT yet complete.",
+  "finalAcceptance": "SOURCE-ONLY CANDIDATE ACCEPTANCE PASS on Pack1 functional 519a6640798d127a1c2e4805c71729b505d3f150, GitHub Actions #43731574304: 130/130 real native Node, 5/5 GPU geometry tests, 15 Chromium gallery views / 63 interactions, 360/360 true candidate GPU renders, 90/90 independently SHA256-verified GPU PNGs. Wall-mounted vine ID 27/28 noncanonical storage guard PASS. No production registration, deployment, physical iPhone testing, or creator signoff.",
+  "acceptanceMatrix": {
+    "family_roster": "21_OF_21_ALL_CANDIDATE",
+    "candidate_ids": "30_UNIQUE_9_THROUGH_38_UNMERGED",
+    "native_pack1_node": "PASS_130_OF_130_GENUINE_NATIVE_NODE_22_AT_519a6640_ZERO_FAIL_SKIP_TODO",
+    "native_node_exact_blob_provenance": "21_COMMITTED_FILES_VERIFIED_GIT_BLOB_SHA",
+    "opted_in_generic_shape_v8": "PASSED_120_OF_120_NOT_PRODUCTION_GPU",
+    "genuine_chromium_candidate_galleries": "PASS_15_OF_15_REAL_CHROMIUM_VIEWS_63_INTERACTIONS_RUN_43720843639",
+    "authentic_candidate_screenshots": "PASS_30_CANVAS2D_PLUS_90_WEBGL2_HASHED_SCREENSHOTS",
+    "isolated_browser_offline_fixture": "PASS_STANDALONE_CANVAS2D_SAVE_RESTORE_CLEAR_63_INTERACTIONS_NOT_PRODUCTION_PWA",
+    "production_voxel_id_registration": "NOT_REGISTERED_GAME_EXISTING_IDS_0_THROUGH_8",
+    "production_partial_shape_mesh_target_save": "NOT_INTEGRATED_REQUIRES_SHARED_SHAPE_COLLISION_SAVE_SIDE_CARS",
+    "physical_iPhone_and_creator_art_controls": "NOT_TESTED_NOT_APPROVED",
+    "exact_head_root_CI": "RECHECK_CURRENT_SHA_SEPARATELY_NOT_EQUIVALENT_TO_NESTED_PACK1",
+    "merged": "NO",
+    "deployed": "NO",
+    "gate": "M6_STANDALONE_SOURCE_TECHNICAL_PASS_FIVE_PACK_PRODUCTION_READINESS_OPEN",
+    "v011": "LOCKED",
+    "visible_card_placement_save_clear_assertions": "PACK1_RUNNER_SOURCE_VERIFIED_FIVE_GALLERIES_NOT_CHROMIUM_RUN",
+    "chromium_admin_navigation": "ERR_BLOCKED_BY_ADMINISTRATOR_DATA_FILE_LOCAL_HTTP",
+    "candidate_15_real_views": "ZERO_COMPLETED",
+    "authentic_30_screenshots": "ZERO_CAPTURED",
+    "native_node_93_gate": "PASSED_GENUINE_NODE_EXACT_COMMITTED_SOURCE",
+    "pack1_candidate_registry": "30_RESERVED_UNMERGED_UNDEPLOYED",
+    "latest_main_checkpoint": "008",
+    "native_partial_shape_probe_cases": "THREE_OF_THREE_PASS_NODE_SOURCE_FIXTURE",
+    "real_chromium_cutaway_probe_cases": "18_ADDED_RUNNER_SOURCE_NOT_EXECUTED",
+    "browser_interaction_total": "63_REQUIRED_ZERO_RUN",
+    "candidate_source_exact_webgl2": "PASS_360_OF_360_REAL_SOURCE_GPU_AND_90_INDEPENDENT_SHA256_MATCHED_SCREENSHOTS_AT_519a6640",
+    "builder_symbol_resolution": "PASS_21_ROSTER_SYMBOLS_30_NUMERIC_IDS_8_BUILDER_PLUS_8_DENSE_NATIVE_TESTS",
+    "dense_source_construction": "PASS_6400_CELLS_25_CHUNKS_8_NATIVE_TESTS_NO_REAL_FPS_CLAIM",
+    "current_live_biome130_save_compatibility": "ISOLATED_SOURCE_PASS_PRESERVE_256_TO_315_AND_OPTIONAL_ROTATIONS_NODATA_LOSS_2_NEW_NATIVE_TESTS__NOT_REAL_GAME_SAVE_TEST",
+    "structure_builder_compatibility": "SOURCE_ONLY_21_FAMILY_30_CANDIDATE_ID_7_NATIVE_PHYSICAL_BLUEPRINT_ABI_TESTS_PASS__LIVE_GAME_NOT_TESTED",
+    "incremental_settlement_builder_save": "PASS_SOURCE_ONLY_PRESERVE_EXISTING_PACK1_TURNS_VARIANTS_MOUNTS_BIOME_ROTATIONS_DEPTH_MINUS_210_TO_19__NOT_LIVE_WORLD_TEST",
+    "passable_collision_target_reader": "PASS_SOURCE_ONLY_PASSABLE_IDS_26_TO_35_TARGETABLE_NO_COLLISION_READER_NULL",
+    "mount_metadata_safety": "PASS_ID_27_28_REJECT_CANONICAL_SCHEMA1_WITHOUT_PERSISTED_FACE_STATE_SOURCE_ONLY"
+  },
+  "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md",
+  "baselineAtCreation": {
+    "mainSha": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+    "checkpoint": "006"
+  },
+  "latestVerifiedMainSha": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+  "nativeNodeEvidenceFile": "src/block-packs/pack-1/M6_NATIVE_NODE_EVIDENCE.md",
+  "integrationReadiness": {
+    "strategy": "ONE_COORDINATED_FIVE_BLOCK_PACK_FINAL_INTEGRATION_NO_INDEPENDENT_MERGE_DEPLOY",
+    "status": "PACK1_130_SOURCE_TESTS_PASS_MOUNTING_GUARDS_PASS__FINAL_FIVEPACK_PRODUCTION_AND_DEVICE_GATES_OPEN",
+    "candidateSourceCommit": "bfa15c846b9b2b7227f78321b2b8657c7c311e20",
+    "sourceExactWorkflow": "https://github.com/hdog960/Mythwrought/actions/runs/43731574304",
+    "evidenceArtifact": "source-pinned-roadmap-chromium-evidence-43731574304 (GitHub artifact 14168252842)",
+    "candidateIDs": "9-38 (30 unique physical candidates, 21 roster families)",
+    "buildingSymbols": "pack1:001..012; pack1:047..055 (some families require explicit variant ID choice)",
+    "pureBuilderInterface": "src/block-packs/pack-1/builder-handoff.mjs",
+    "tests": "130/130 real Node22 tests including 2 wall-mount save safety regressions, 5/5 GPU geometry, 15 Chromium Canvas2D views/63 interactions/30 original PNGs, 360 source WebGL2 actual GPU renders and 90 SHA-256 authenticated original PNGs",
+    "packScopeComplete": true,
+    "noProductionRegistrationOrMerge": true,
+    "remainingGates": [
+      "Real registered-world shape-aware placement/removal/targeting/collision/building resolver and cross-pack numeric ID/alias audit by final integrator",
+      "Real schema-1-safe orientation metadata persistence and upper slab/stair variant state, save/import/rollback",
+      "Real high-density village/town/city building performance and chunk budget under shared engine",
+      "Physical iPhone controls/artwork and performance approval; creator Gate A remains open"
+    ],
+    "sourceExactFunctionalCommit": "519a6640798d127a1c2e4805c71729b505d3f150",
+    "denseStressSource": {
+      "sample": "25 horizontal 16x16 chunks, 80x80 cells, 6400 Pack 1 candidate placements",
+      "sourceTriangleBudget": "pass: conservative pre-neighbor-occlusion source triangle count below 10,000,000; no GPU frame time or FPS asserted",
+      "orientationPersistence": "isolation-only separate turns, upper variants and mounts with schema-1 edits unchanged, metadata checksum guards accidental omissions",
+      "notProductionPerformance": true,
+      "notPhysicalIphoneTest": true
+    },
+    "currentMainBiomeCompatibility": {
+      "auditedMainCommit": "c512fcb9e6e82697cff0c5d26f073e503d51e4a5",
+      "registeredIDs": "256-315",
+      "preservesOptionalSchema1Rotations": true,
+      "sourceOnly": true,
+      "liveEngineUnmodified": true
+    },
+    "structureBuilderABI": {
+      "source": "src/block-packs/pack-1/structure-handoff.mjs",
+      "exports": [
+        "PACK1_BUILDER_SYMBOLS",
+        "PACK1_BUILDER_IDS",
+        "PACK1_BUILDER_AVAILABILITY",
+        "resolvePack1BuilderAsset",
+        "planPack1BuilderStructure",
+        "compilePack1BuilderSnapshot"
+      ],
+      "sourceOnly": true,
+      "familySymbols": 21,
+      "physicalCandidateIds": 30,
+      "geometryWorldSpacePlanTested": true,
+      "schema1DryRunPreservesExistingBiomeRotations": true,
+      "nativeTests": 7,
+      "notLiveRegistered": true,
+      "notPhysicalIphoneTested": true
+    },
+    "incrementalBuilderSave": {
+      "status": "SOURCE_ONLY_TESTED_123_NATIVE_NO_LIVE_GAME_REGISTRATION",
+      "priorPack1StateRequiredForExistingPack1Cells": true,
+      "preservesExistingTurnsVariantsMounts": true,
+      "preservesCurrentBiome130Rotations": true,
+      "currentMainWorldBounds": {
+        "minY": -210,
+        "maxY": 19,
+        "mainAudited": "c512fcb9e6e82697cff0c5d26f073e503d51e4a5"
+      },
+      "doesNotProveRealGameSaveRollback": true,
+      "doesNotProvePhysicalIPhonePerformance": true
+    },
+    "collisionTargetingSourceABI": {
+      "code": "src/block-packs/pack-1/builder-handoff.mjs and structure-handoff.mjs",
+      "passableIds": "26-35",
+      "targetableWithoutCollision": true,
+      "absentCollisionReaderUsesNull": true,
+      "mushroomStemsRemainCollidable": true,
+      "currentMainShapeContractReviewed": true,
+      "functionalSourceCommit": "0a2096108feb12674caa7aab2739e0df857b17ad",
+      "notLiveRegistered": true
+    },
+    "crossPackIDSpotCheck": {
+      "heads": {
+        "pack2": "b2d99e3550b2fd2f55ed9b5a7f7cccfdedbe8183",
+        "pack3": "838f4c0df431c1028ded405326b5ceb41a2fc0d1",
+        "pack4": "8efb9c9b884ebda4ce991c54494c1595d64985f7",
+        "pack5": "8fdfce35e1165a9a5bc5b76eb58c56c3cd1a4306",
+        "main": "c512fcb9e6e82697cff0c5d26f073e503d51e4a5"
+      },
+      "assignedRanges": [
+        "pack1 9-38",
+        "pack2 59-76",
+        "pack3 109-125",
+        "pack4 159-181",
+        "biome130 256-315"
+      ],
+      "pack1AssignedCollisionFound": false,
+      "pack5NumericIdAssignmentStillNull": true,
+      "pack5FutureWideIdBandConflictsWithLiveBiomeIds": true,
+      "finalIntegrationAuditStillRequired": true
+    },
+    "mountSaveSourceABI": {
+      "mountableIds": [
+        27,
+        28
+      ],
+      "zeroTurnRequiresMountSidecar": true,
+      "canonicalSchema1MountEditRejected": true,
+      "missingDirectionCannotSilentlyPersist": true,
+      "nonWallBlocksRejectWallState": true,
+      "genuineNativeTestsAdded": 2,
+      "testedFunctionalHead": "519a6640798d127a1c2e4805c71729b505d3f150",
+      "liveRegistered": false,
+      "productionSaveNotModified": true
+    }
+  }
+}

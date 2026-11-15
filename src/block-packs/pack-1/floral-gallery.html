@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mythwrought / Physical Flowers and Mushrooms / Pack 1</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;background:#11242b;color:#f5eedf}
+*{box-sizing:border-box}body{max-width:1090px;margin:auto;padding:clamp(14px,3vw,30px)}
+h1,h2{font-family:Georgia,serif}h1{margin:12px 0}h2{font-size:1.1rem}
+.warning{background:#372e24;border:1px solid #c2a06a;border-radius:9px;padding:13px;color:#f8dda6;font-weight:700}
+p{color:#c4d2ce;line-height:1.5}.controls{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
+.item{border:1px solid #577a77;background:linear-gradient(155deg,#1d3940,#152b32);border-radius:12px;padding:12px;text-align:center}
+.item.active{border-color:#f1c888;outline:1px solid #f1c888}
+.preview{width:100%;max-width:230px;height:auto;image-rendering:pixelated;display:block;margin:auto}
+.slice{width:100%;max-width:144px;image-rendering:pixelated;border:1px solid #74928f;border-radius:7px;cursor:crosshair}
+.desc{font-size:.8rem;min-height:64px}.meta{font:11px/1.5 ui-monospace,monospace;color:#f0cc94}
+button{padding:8px 10px;border-radius:8px;border:1px solid #aec9b8;background:#395b5d;color:white;cursor:pointer;margin:3px}
+button:hover{background:#4a7675}button:focus-visible,.slice:focus-visible{outline:2px solid #ecc381}
+output{display:block;background:#11302e;border:1px solid #548477;border-radius:8px;padding:12px;white-space:pre-wrap;font:12px/1.6 ui-monospace,monospace}
+footer{font-size:.78rem;color:#aabeba;margin-top:15px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:620px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:380px){.grid{grid-template-columns:1fr}}
+</style></head><body>
+<h1>Stone & Nature: Flowers and Mushrooms</h1>
+<div class="warning">ISOLATED CANDIDATE GALLERY — NOT MERGED / NOT DEPLOYED. This is a Canvas2D preview of physical asset descriptors, not the live Mythwrought game.</div>
+<p>Four distinct flowers and three different mushrooms, each individually placeable, targetable and removable as one test voxel. All plant parts have real geometry; even passable petals and hollow spaces are represented accurately. The pearl mushroom has pale visual art, <strong>not functional light emission</strong>.</p>
+<div class="controls">
+<button id="all" type="button">Place all seven canonical specimens</button>
+<button id="clear" type="button">Remove all</button>
+<button id="save" type="button">Check isolated schema-1 save</button>
+</div>
+<div class="grid" id="grid"></div>
+<output id="status" role="status" aria-live="polite"></output>
+<footer>Cross-section at specimen-specific height: golden = solid targetable geometry; dark = true empty space. Each preview is derived from actual bounding boxes. Rotated fixtures deliberately cannot save until the central engine has safe orientation persistence.</footer>
+<script type="module" src="./floral-gallery.mjs"></script>
+</body></html>

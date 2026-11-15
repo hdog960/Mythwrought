@@ -1,0 +1,226 @@
+# Dedicated, temporary Pack 4 M5 CI. It only exists on draft PR #115's branch.
+# No dispatch, no merges, no deployments or production block registration.
+name: Mythwrought Pack 4 M5 isolated acceptance
+
+on:
+  push:
+    branches:
+      - pack-4-m0-m1-windows-openings-20261114
+    paths:
+      - '.github/workflows/pack4-m5-acceptance.yml'
+      - 'src/block-packs/pack-4/**'
+      - 'tests/block-packs/pack-4/**'
+
+permissions:
+  contents: read
+
+jobs:
+  native-and-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout latest main into disposable review directory
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: combined
+          persist-credentials: false
+      - name: Checkout exact Pack 4 PR commit separately
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: pack4-source
+          persist-credentials: false
+      - name: Assemble and SHA-verify isolated main plus Pack 4 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C pack4-source rev-parse HEAD)" = "$GITHUB_SHA"
+          for path in src/voxel-shape-interactions.mjs src/voxel-shape-fit.mjs src/voxel-orientation-sidecar.mjs src/shape-prototypes.mjs; do
+            git -C combined cat-file -e "HEAD:$path"
+          done
+          for dir in src/block-packs/pack-4 tests/block-packs/pack-4; do
+            test -d "pack4-source/$dir"
+            test ! -e "combined/$dir"
+            mkdir -p "combined/$(dirname "$dir")"
+            cp -a "pack4-source/$dir" "combined/$dir"
+          done
+          count=0
+          while IFS= read -r path; do
+            test -f "combined/$path"
+            expected="$(git -C pack4-source rev-parse "HEAD:$path")"
+            observed="$(git hash-object "combined/$path")"
+            if test "$expected" != "$observed"; then
+              echo "Git blob mismatch: $path" >&2
+              exit 1
+            fi
+            count=$((count+1))
+          done < <(git -C pack4-source ls-tree -r --name-only HEAD -- src/block-packs/pack-4 tests/block-packs/pack-4)
+          test "$count" -ge 34
+          mkdir -p combined/artifacts/pack-4
+          {
+            echo "repository=hdog960/Mythwrought"
+            echo "pr=115"
+            echo "main_sha=$(git -C combined rev-parse HEAD)"
+            echo "pack4_sha=$(git -C pack4-source rev-parse HEAD)"
+            echo "pack4_git_blobs_verified=$count"
+            echo "review_mode=isolated_overlay_no_merge_no_deploy"
+          } | tee combined/artifacts/pack-4/provenance.txt
+      - name: Configure Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict Pack 4 native Node M5 (181 cases, 16 suites, no skips)
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/block-packs/pack-4/verify-final.mjs --node-only 2>&1 | tee artifacts/pack-4/native.log
+      - name: Verify full physical Pack 4 building handoff (12 native cases)
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/block-packs/pack-4/builder/*.test.mjs 2>&1 | tee artifacts/pack-4/builder-handoff.log
+      - name: Checkout source-exact Roadmap 1 PR for physical builder consumption
+        uses: actions/checkout@v4
+        with:
+          ref: 88a9e410a0eda7cf961cb6b624241666eb3a48a1
+          path: consumers/r1
+          persist-credentials: false
+      - name: Checkout source-exact Roadmap 2 PR for physical builder consumption
+        uses: actions/checkout@v4
+        with:
+          ref: 07c45d27bd36f4f3aa3197bba0e4f49ce2a58c68
+          path: consumers/r2
+          persist-credentials: false
+      - name: Checkout source-exact Roadmap 3 PR for physical builder consumption
+        uses: actions/checkout@v4
+        with:
+          ref: e35b8eca644f6de06e76ab946103ce64a6b7fb91
+          path: consumers/r3
+          persist-credentials: false
+      - name: Checkout source-exact Roadmap 4 PR for physical builder consumption
+        uses: actions/checkout@v4
+        with:
+          ref: 564330635f18e10215a3bf93901923fbf5af528d
+          path: consumers/r4
+          persist-credentials: false
+      - name: Run isolated building-roadmap-owned Pack4 adoption native tests
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test \
+            ../consumers/r1/tests/building-pool/roadmap-1/m1-pack4-physical.test.mjs \
+            ../consumers/r2/tests/building-pool/roadmap-2/m1-pack4-physical.test.mjs \
+            ../consumers/r3/tests/building-pool/roadmap-3/m1-pack4-physical.test.mjs \
+            ../consumers/r4/tests/building-pool/roadmap-4/m1-pack4-physical.test.mjs \
+            2>&1 | tee artifacts/pack-4/builder-roadmap-native.log
+      - name: Verify all four real building pools resolve original Pack4 geometry
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/block-packs/pack-4/builder/consumer-branches.mjs 2>&1 | tee artifacts/pack-4/builder-real-roadmaps.log
+      - name: Read-only physical mounting audit of all authored builder cells
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/block-packs/pack-4/builder/support-audit.mjs 2>&1 | tee artifacts/pack-4/builder-support-audit.log
+      - name: Certify true Pack4 fireplace and hollow chimney sub-box contact
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/block-packs/pack-4/builder/roadmap3-contact.mjs 2>&1 | tee artifacts/pack-4/roadmap3-contact.log
+      - name: Checkout exact original Pack 1 candidate catalog, read only
+        uses: actions/checkout@v4
+        with:
+          ref: 253909839239133a642d33faa9e6a1004763518d
+          path: consumers/p1
+          persist-credentials: false
+      - name: Checkout exact original Pack 2 candidate catalog, read only
+        uses: actions/checkout@v4
+        with:
+          ref: 4367fd471b302339480cb8e17f6172ada19b1238
+          path: consumers/p2
+          persist-credentials: false
+      - name: Checkout exact original Pack 3 candidate catalog, read only
+        uses: actions/checkout@v4
+        with:
+          ref: 3854612a6bca6cf57e63dde095e41eaac0ddfb8d
+          path: consumers/p3
+          persist-credentials: false
+      - name: Audit true Pack4 contacts and source-exact sibling catalogs (no registry changes)
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/block-packs/pack-4/builder/crosspack-dependency-audit.mjs 2>&1 | tee artifacts/pack-4/crosspack-dependency-audit.log
+      - name: Audit exact real builder density under Pack4 proposed staging budgets
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/block-packs/pack-4/builder/dense-real-builders-audit.mjs 2>&1 | tee artifacts/pack-4/dense-real-builders-audit.log
+      - name: Install free Playwright and Chromium
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Genuine 23 asset x 4 rotations x 3 landscape Chromium WebGL2 gallery
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/block-packs/pack-4/gallery-browser.mjs 2>&1 | tee artifacts/pack-4/webgl2.log
+      - name: Generate genuine source-exact R2 lamp/sconce/floor choice WebGL2 comparisons
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/block-packs/pack-4/builder/lighting-visual-evidence.mjs 2>&1 | tee artifacts/pack-4/lighting-visual-evidence.log
+      - name: Validate all 12 authentic screenshot files and capture checksums
+        working-directory: combined
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json, os, struct
+          root = Path('artifacts/pack-4')
+          expected = [(w,h,r) for w,h in [(667,375),(844,390),(932,430)] for r in range(4)]
+          files = sorted(root.glob('pack4-UNMERGED-*.png'))
+          assert len(files)==12, f'Expected exactly 12 Pack4 screenshots; found {len(files)}'
+          manifest = []
+          for width,height,rotation in expected:
+              path = root/f'pack4-UNMERGED-{width}x{height}-r{rotation}.png'
+              data = path.read_bytes()
+              assert len(data)>10000, f'Screenshot too small: {path}'
+              assert data[:8]==b'\x89PNG\r\n\x1a\n', f'Not authentic PNG bytes: {path}'
+              actual_width,actual_height=struct.unpack('>II', data[16:24])
+              assert actual_width==width and actual_height>=height, f'Unexpected screenshot dimensions: {path}'
+              manifest.append({'file':path.name,'viewport':f'{width}x{height}',
+                               'rotation':rotation,'png_width':actual_width,
+                               'png_height':actual_height,'bytes':len(data),
+                               'sha256':hashlib.sha256(data).hexdigest()})
+          assert len(set(x['sha256'] for x in manifest))==12, 'Screenshots are not distinct'
+          report={'source':'original Pack4 WebGL2 Playwright gallery','head_sha':os.environ['GITHUB_SHA'],
+                  'screenshot_count':12,'asset_ids':'159-181','rotations':4,
+                  'landscape_viewports':3,'screenshots':manifest,
+                  'visual_creator_approval':False,'live_game_integration':False}
+          (root/'screenshots-manifest.json').write_text(json.dumps(report,indent=2)+'\n')
+          print('PACK4_SCREENSHOT_MANIFEST '+json.dumps(report,separators=(',',':')))
+          PY
+      - name: Preserve exact-head native, browser, PNG and source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-pack4-m5-evidence
+          path: combined/artifacts/pack-4/
+          if-no-files-found: warn
+          retention-days: 30

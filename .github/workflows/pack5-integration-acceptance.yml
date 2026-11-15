@@ -1,0 +1,46 @@
+name: Pack 5 isolated builder integration acceptance
+
+on:
+  pull_request:
+    paths:
+      - 'src/pack5-integration/**'
+      - 'tests/pack5-integration*'
+      - 'tests/pack5-game*'
+      - 'tests/pack5-blueprint*'
+      - '.github/workflows/pack5-integration-acceptance.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  pack5-builder-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Pack 5 canonical builder native tests
+        run: node --test tests/pack5-*.test.mjs
+      - name: Install free Chromium test runner
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: HTTP-served source-authentic WebGL2 at three landscape sizes
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: 'x11'
+        run: node tests/pack5-integration-browser.mjs artifacts/pack5-integration
+      - name: Actual Mythwrought live shader with Pack 5 opt-in at three landscape sizes
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: 'x11'
+        run: node tests/pack5-game-browser.mjs artifacts/pack5-integration/game
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pack5-builder-authentic-webgl2-screenshots
+          path: artifacts/pack5-integration/
+          if-no-files-found: warn
+          retention-days: 14

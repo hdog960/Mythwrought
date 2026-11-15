@@ -1,0 +1,69 @@
+name: Pack 3 actual gameplay WebGL2 acceptance (draft only)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/pack3-live-webgl.yml'
+      - 'src/main.mjs'
+      - 'src/blocks.mjs'
+      - 'src/voxel.mjs'
+      - 'src/builder-assets/pack3-*.mjs'
+      - 'tests/pack3-live*.mjs'
+      - 'tests/pack3-runtime-stage.test.mjs'
+      - 'tests/pack3-complete-readiness.test.mjs'
+      - 'tests/pack3-portable.test.mjs'
+      - 'tests/pack3-biome130-compat.test.mjs'
+      - 'tests/pack3-builder-contract.test.mjs'
+      - 'tests/pack3-dense-builder-budget.test.mjs'
+      - 'tests/pack3-dense-live-browser.mjs'
+      - 'tests/pack3-portable-browser.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  pack3-live-game:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-head physical runtime Node and syntax gate
+        run: |
+          node --check src/main.mjs
+          node --check src/blocks.mjs
+          node --check src/voxel.mjs
+          node --check src/builder-assets/pack3-live.mjs
+          node --check tests/pack3-live-webgl-browser.mjs
+          node --check tests/pack3-live-all17-browser.mjs
+          node --check tests/pack3-dense-live-browser.mjs
+          node --check tests/pack3-portable-browser.mjs
+          node --check src/builder-assets/pack3-portable.mjs
+          node --test tests/pack3-runtime-stage.test.mjs tests/pack3-live.test.mjs tests/pack3-complete-readiness.test.mjs tests/pack3-portable.test.mjs tests/pack3-biome130-compat.test.mjs tests/pack3-builder-contract.test.mjs tests/pack3-dense-builder-budget.test.mjs
+      - name: Install Chromium (free GitHub-hosted runner)
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Real in-game WebGL2 placed-shape, save, yaw and reload proof
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-pack3-live.log 2>&1 &
+          node tests/pack3-live-webgl-browser.mjs
+          node tests/pack3-live-all17-browser.mjs
+          node tests/pack3-portable-browser.mjs
+          node tests/pack3-dense-live-browser.mjs
+      - name: Upload authentic complete or partial browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pack3-live-webgl2-${{ github.run_id }}
+          path: |
+            artifacts/pack3-live/
+            artifacts/pack3-live-all17/
+            artifacts/pack3-dense-browser/
+          if-no-files-found: warn
+          retention-days: 30

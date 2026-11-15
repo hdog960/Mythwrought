@@ -1,0 +1,272 @@
+# Mythwrought — Pack 1 / Milestone 6 acceptance handoff
+
+STATUS: SOURCE CANDIDATE ONLY. Final acceptance NOT APPROVED; creator integration, art, and physical iPhone approvals remain outstanding. Gate A OPEN, v0.11 LOCKED.
+
+## Repository grounding and ownership
+
+- Main at Milestone 6 opening: f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84, manual incorporation checkpoint 006.
+- Issue 109: https://github.com/hdog960/Mythwrought/issues/109 ; automated 130-family exclusive coordination Issue 117: https://github.com/hdog960/Mythwrought/issues/117
+- Draft PR 113: https://github.com/hdog960/Mythwrought/pull/113
+- All 21 Stone & Nature roster families are source-authored with 30 unique persistent candidate IDs 9–38. Main BLOCK IDs 0–8 remain unchanged; ID 255 reserved.
+- All changed files owned strictly by src/block-packs/pack-1/ and tests/block-packs/pack-1/. Never update production registry, shaders, geometry engine, world generation, save fixtures, root CI, other manual packs or automations here.
+
+## Milestone 6 evidence matrix
+
+| Requirement | Evidence/status |
+|---|---|
+| All 21 roster families | SOURCE CANDIDATE, 21/21 |
+| All 30 IDs 9–38 unique | VERIFIED in exact-source V8 audit |
+| Existing 5 authored suites | 65/65 Node-style test bodies pass exact-source V8 shim; NOT real Node |
+| New unified 30-ID acceptance suite | 10/10 Node-style test bodies pass exact-source V8 shim; NOT real Node |
+| Independent ray/stone occupancy regression | 6/6 extra authored test bodies pass V8; 22,932 independent rays + 8,232 stone-pick checks; NOT real Node |
+| Generic :00 targeting + :12 surface meshing | 120/120 combinations (30 candidate IDs × 4 rotations) pass exact unmerged source V8 audit |
+| Opt-in surface-mesh prototype budget | 12–532 triangles per candidate/rotation; NOT measured WebGL GPU workload |
+| Previous PR exact-head baseline CI | SUCCESS, run 43635324085 on head 462f4c6c1e5bcb683515c93efad3301d3591f610, genuine baseline Node and Chromium smoke |
+| Pack-specific genuine Node on exact branch | NOT RUN |
+| Authentic Pack 1 gallery Chromium run | NOT RUN |
+| Authentic candidate gallery screenshots | NOT CAPTURED |
+| Offline gallery fixture interactions | NOT RUN; separate from production PWA offline reload |
+| Real production registration/mesh/target/save compatibility | BLOCKED BY SHARED ENGINE, outside Pack 1 ownership |
+| Physical iPhone and creator artwork/controls approval | NOT RUN / NOT GRANTED |
+| Merge / Pages deploy / world placement | NONE; forbidden in this milestone |
+
+CI detail: the project's root npm test command covers tests/*.test.mjs, not nested Pack 1 tests. The existing green GitHub job proves the baseline code and browser smoke, not any Pack 1 candidate shape. Its screenshots are unchanged playable-world captures, NOT asset gallery proof.
+
+## Real dedicated Node command, not yet executed
+
+After checking out the exact PR branch, run from repository root:
+
+    node --test tests/block-packs/pack-1/core-masonry.test.mjs tests/block-packs/pack-1/stone-shapes.test.mjs tests/block-packs/pack-1/garden-components.test.mjs tests/block-packs/pack-1/physical-foliage.test.mjs tests/block-packs/pack-1/floral-forms.test.mjs tests/block-packs/pack-1/all-families.test.mjs tests/block-packs/pack-1/raycast-regression.test.mjs tests/block-packs/pack-1/gallery-count.test.mjs
+
+Seven asset-focused modules contain 81 authored groups, plus an eighth browser-runner parser suite with five additional genuinely Node-tested groups. The seven asset suites have not been run under real Node. A passed V8 assertion shim is never enough to mark this real Node requirement passed. Capture actual process exit status and standard output before recording verified acceptance.
+
+## Authentic Chromium gallery and screenshot runner, not yet executed
+
+The pack-owned opt-in Playwright runner is located at tests/block-packs/pack-1/galleries-browser.mjs and uses the same free Playwright library as the existing Mythwrought browser-smoke tests. It launches a minimal local HTTP server, loads the five real pack gallery modules and captures actual browser output. Run from the genuine checked-out branch root:
+
+    node tests/block-packs/pack-1/galleries-browser.mjs
+
+If using the system Chromium binary, set CHROMIUM_EXECUTABLE=/usr/bin/chromium. The runner targets 667×375, 844×390, 932×430, providing 15 page-view inspections and up to 30 authentic screenshots in artifacts/pack-1/. It checks pixel-rich canvases, no horizontal overflow, real placement/removal and canonical fixture save under offline network conditions, clean console/resource loads and no user localStorage mutations.
+
+Source-authored gallery code does NOT establish a successful run or screenshot. Inspect real captured images for silhouette distinction, texture integrity, material readability, selection gaps and mobile composition. This browser runner does NOT verify physical iPhone, production WebGL2 block registration, or the live PWA's offline reload behavior.
+
+## Central production blockers (not editable in Pack 1)
+
+1. Live VoxelWorld.set rejects IDs above 8. Production atlas, physical block registry and renderer registration need separate creator-authorized integration.
+2. :00 shape-aware collision/targeting and :12 partial-volume surface mesher remain opt-in, not wired into the live game. Soft plants must remain ray-targetable even when passable.
+3. Schema-1 edits use four values [x,y,z,id]; rotation/upper variant state is not represented. Candidate fixtures explicitly reject rotated saves to avoid lossy persistence. Historical save migration and direct engine tests are required.
+4. Ivy/wisteria need actual wall attachment support and safe surface updates, rather than just a fixture wallMount boolean.
+5. Production cutout transparency, fragment workload, atlas texture alignment, actual iPhone landscape dual-grip performance and creator visual approval remain unresolved.
+
+## Exit decision
+
+Twenty-one families authored; thirty distinct candidate IDs allocated; all stay CANDIDATE. Milestone 6 NOT ACCEPTED until genuine focused Node/Chromium, authentic screenshots, cross-engine registration/shape/save compatibility and physical iPhone creator approvals. Do not merge, deploy, generate world placements or unlock v0.11.
+
+Future Continue Development should recheck main, checkpoint, Issues 109/117, PR 113 and its exact-head CI, then run real tests on an available checkout, repair only Pack 1, and refresh the evidence matrix.
+
+
+## Independent Milestone 6 targeting fuzz audit (new)
+
+The dedicated optional file `tests/block-packs/pack-1/raycast-regression.test.mjs` now adds **six authored Node test groups**. All six bodies pass on exact GitHub source in V8-compatible assertion/test shims, but they have NOT run under genuine Node. They compare an independent slab-ray intersection implementation to Pack 1's actual isolated fixture raycasting over **22,932** face-oriented rays across masonry, garden, foliage and floral/mushroom candidates at the available quarter-turn rotations. Stone fixtures correctly expose local occupancy `pick` instead of claiming engine-level ray support, so **8,232** direct 3D AABB occupancy probes compare that picker against independent geometric inclusion. Empty-cell phantom-hit rejection is covered.
+
+Separately, **29,988** face-oriented rays were evaluated via V8 using exact Pack 1 source and the unmerged :00 generic raycast for the six stone shapes, with **zero** analytic expected-distance mismatches. These are valuable source audits, NOT true Node, real production collision, iPhone or browser testing.
+
+The seven dedicated nested test files now contain **81 authored groups** (65 initial + 10 unified + 6 new). Current root GitHub Actions test wildcard does not include them. The previously verified PR exact-head default workflow [#43638833572](https://github.com/hdog960/Mythwrought/actions/runs/43638833572) succeeded; any subsequent changed branch head must be verified independently before stating its CI conclusion. Final Milestone 6 acceptance remains **OPEN**.
+
+
+## Additional M6 continuation — browser acceptance harness repair and exact native Node subset
+
+**New verified defect:** the original isolated Playwright gallery runner had two incorrect regex literals, `/^\\d+/`, with double-escaped backslashes. They matched a literal backslash and letter d, rather than decimal fixture counts, so a healthy 0->N place-all operation would always fail its acceptance gate. This was a **real bug in the Pack 1-owned acceptance runner**, not a defect in the live game or source asset geometry.
+
+**Fixes made strictly within Pack 1 test ownership:**
+
+1. Extracted strict `parseFixtureCount(status,label)` into `tests/block-packs/pack-1/gallery-count.mjs`; the actual browser runner now imports this tested helper and asserts the exact fixture size synchronously after the place-all click, instead of matching unrelated numerical IDs or schema version lines.
+2. Added `saveWasVerified(status,successMarker)` and declared the explicit positive save marker for each of the five galleries. A “SAFE SAVE BLOCKER”, “EXPECTED BLOCKER”, or missing success marker is **now a test failure**, never counted as a successful offline fixture roundtrip.
+3. Added `tests/block-packs/pack-1/gallery-count.test.mjs` with **five tests** covering five real gallery status formats, empty/placed transitions, false positives from unrelated digits, malformed inputs, and positive-save-versus-blocker behavior.
+
+**Genuine native Node evidence:** the new parser suite ran in Node **22.16.0** in the local test environment with TAP output **5 passed / 0 failed**. Both executed files were compared byte-for-byte using Git blob hashes: helper `6e941cf73b310eb2400b274cb878e1d56d3214c9` and test `ab02c4712f525d9f964794ce0952ae581ad1b113`; these match the actual committed GitHub file blobs. This is valid genuine Node evidence **for only these five small browser-harness tests**; it is **NOT execution of the seven asset-focused test suites**.
+
+**Chromium environment blocker independently reproduced:** the local system has Chromium installed and Python Playwright can start it, but navigating even a minimal `data:` document or a local `http://127.0.0.1` HTTP server fails with `net::ERR_BLOCKED_BY_ADMINISTRATOR`. This means the real gallery screenshots at 667×375, 844×390 and 932×430 could not be captured, and no authentic screenshot has been reviewed or fabricated. Network/DNS restrictions also prevent cloning the complete exact GitHub branch into this container. No override of sandbox browser restrictions is attempted.
+
+**CI evidence:** the previous exact PR head `5e9c855268d7efff4cb6541b9803a304937d1f81`, GitHub Actions [#43639942311](https://github.com/hdog960/Mythwrought/actions/runs/43639942311), has completed **SUCCESS** for the configured baseline Node and Chromium smoke. These baseline tests do not include Pack 1's nested suites or candidate-gallery screenshots. Any new head after this documentation and test repair requires its own exact-head CI result.
+
+**Milestone 6 remains OPEN** with 21 of 21 source candidate families and 30 distinct candidate IDs 9–38. There are now **eight** owned Node test modules: seven asset-focused modules with 81 test groups (exact-source V8 shim only) and one browser-runner helper module with five genuine native Node tests. No candidate is certified, live-integrated, merged, deployed or placed into worldgen. Physical iPhone art/control acceptance and backwards-compatible rotation/state-save verification remain blocked on separately authorized integration.
+
+
+## M6 continuation — visual-proof runner strengthened, 2026-11-14
+
+Main remains `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84` at incorporation **checkpoint 006**. Issues [#109](https://github.com/hdog960/Mythwrought/issues/109) and [#117](https://github.com/hdog960/Mythwrought/issues/117) are OPEN. [Draft PR #113](https://github.com/hdog960/Mythwrought/pull/113) is unmerged and entirely confined to Pack 1 source/test paths. The previous exact-head PR commit `467226cabcdd084ddc23401b668281d27c337398` completed configured GitHub Actions [#43641340996](https://github.com/hdog960/Mythwrought/actions/runs/43641340996) **SUCCESS**. Its Node/Chromium results are **baseline-only**; the configured workflow excludes nested Pack 1 tests. Any newer head requires a separate exact-head check; do not extrapolate a previous green result.
+
+**Genuine native Node verification repeated:** `node --test tests/block-packs/pack-1/gallery-count.test.mjs` returned 5/5 PASS and 0 FAIL on locally staged GitHub-identical files with `git hash-object` IDs `6e941cf73b310eb2400b274cb878e1d56d3214c9` and `ab02c4712f525d9f964794ce0952ae581ad1b113`. This validates **only** the browser acceptance helper; it does not count as any of the seven candidate suites. Fresh exact-source V8 compatibility execution of those seven candidate modules passed **81/81** authored bodies (9+11+14+16+15+10+6). This is still **NOT native Node execution** for the 30 candidate assets.
+
+**Concrete visual-proof acceptance improvements confined to `tests/block-packs/pack-1/galleries-browser.mjs`:**
+
+- The previous heuristic counted any `#grid canvas`, including accessory occupancy cross-sections. It could therefore accept a broken/blank primary specimen preview. The runner now inspects the **first primary artwork canvas within each of the 30 specimen cards**. Its sample crop excludes the decorative ID text/header and checks actual colored visible pixels, substantial coverage and unique artwork hashes for every specimen per gallery.
+- The runner writes `artifacts/pack-1/acceptance-report.json` **only after ALL five galleries × three mobile-landscape sizes pass**, recording the actual checked-out Git commit when available, per-specimen preview hashes, the 15 inspected viewports and names of the 30 genuine candidate/placed screenshots. No JSON or PNG is counted as evidence unless the runner actually executes and the files exist.
+- An optional `PACK1_EXPECTED_HEAD` environment guard rejects a checkout that does not match a known exact commit. Early head-mismatch and artifact-directory errors now close the locally started HTTP server instead of leaking it.
+- Existing strict placement-count and positive canonical save-confirmation checks remain in force, including rejection of safe-save-blocker messages. Localstorage writes, module load failures, horizontal overflow and runtime errors are also checked.
+
+**Important visual limitation:** this runner checks the *isolated original Canvas2D asset galleries* and their physical-box-derived art; it does **not** substitute for actual production WebGL2 block placement/meshing, integrated iPhone controller-rail UI, real device frame times, or offline PWA reload.
+
+**Local execution blockers confirmed again:** GitHub DNS/network is unavailable for `git ls-remote`, clone and raw/API HTTP, so no full exact Pack 1 asset checkout could be populated for native Node. Python Playwright launches Chromium but navigation to `data:` or `file:` pages returns `ERR_BLOCKED_BY_ADMINISTRATOR`; local HTTP navigation was independently blocked as well. No browser policy bypass was attempted. Therefore **the seven native asset suites, the candidate Chromium gallery runs at 667×375 / 844×390 / 932×430, their screenshots and review remain UNVERIFIED**. Do not reclassify any of the 30 assets as accepted or integrated.
+
+**Exit state unchanged:** all 21 manual roster families and 30 unique IDs 9–38 stay **CANDIDATE / UNMERGED / UNDEPLOYED**; M6 OPEN, v0.11 LOCKED. Future work must first obtain an authorized full branch checkout in an environment allowing genuine Node and Chromium navigation. Recheck the newer PR exact-head workflow, run all eight nested Node suites and the gallery runner, inspect all screenshot artifacts, then request creator approval before any central-engine integration.
+
+
+## Interrupted-session recovery and exact-checkout acceptance handoff — 2026-11-14
+
+This continuation independently confirmed unchanged integrated main `f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84`, incorporation **checkpoint 006**, Issues #109/#117 OPEN, and draft PR #113 with **only Pack 1 paths**. The missing README handoff is now committed. All **21 roadmap families, 30 unique candidate IDs 9–38** retain status CANDIDATE; there is no production ID registration or deployment.
+
+A new opt-in, Pack 1-owned `tests/block-packs/pack-1/run-acceptance.mjs` provides a single reproducible, **strict exact-commit** local acceptance procedure. Run from a clean checkout after reading the fresh PR head from GitHub:
+
+```bash
+PACK1_EXPECTED_HEAD=<independently_verified_40_hex_PR_head> node tests/block-packs/pack-1/run-acceptance.mjs
+```
+
+The script requires the checked-out 40-hex commit to match the supplied head and the Pack 1 source/test paths to be clean; it executes all **eight** nested native Node test modules, then invokes `galleries-browser.mjs` for five actual asset galleries × 667×375, 844×390, 932×430. Only after 15 genuine views pass, the gallery evidence contains 30 authentic PNGs, and the checkout SHA matches does it write a PASS report including PNG signatures, sizes and SHA-256 checksums. Stale PASS markers are cleared **before Node testing**, so a failure cannot reuse a prior success. This script is **SOURCE-READY, NOT A COMPLETED RUN**; no shared CI modification.
+
+**Current real execution evidence:** Local native Node 22.16.0 repeated `gallery-count.test.mjs`: **5 PASS / 0 FAIL**. Both on-disk test/helper files matched GitHub Git-blob hashes `ab02c4712f525d9f964794ce0952ae581ad1b113` and `6e941cf73b310eb2400b274cb878e1d56d3214c9`. These five tests validate the acceptance-runner count/save logic only. **Seven candidate-specific suites containing 81 authored bodies remain V8-shim-tested, NOT genuine native-Node-tested**. The local machine still fails GitHub DNS resolution and does not have the full source checkout. Its Chromium browser navigation is blocked by administrator restrictions, so no candidate-gallery screenshot has been captured/reviewed; no bypass was attempted.
+
+**Gate decision remains OPEN / NOT ACCEPTED.** Source candidates 9–38 must not be merged, deployed, placed in generated terrain, or registered without separate creator authorization. Production schema-1 save/rotation, generic mesh targeting, iPhone side-grip controls and art approval remain independent blockers. Recheck latest exact-head GitHub Actions run (baseline-only root workflow), and require real native Node + 15 gallery views + 30 screenshot review before upgrading any candidate evidence.
+
+
+## Main advanced to automation-only checkpoint 007 during this Pack 1 session
+
+**Fresh main checked after the initial checkpoint-006 audit:** `caf47776b723a36684edc1a72749e49268ccc688` records **incorporation checkpoint 007**, automation-only [PR #120](https://github.com/hdog960/Mythwrought/pull/120). This incorporation explicitly **excluded** manual Block Packs 1–5 and all building-pool projects. The live `src/voxel.mjs` BLOCK registry still recognizes only **0–8**; Pack 1 IDs **9–38** remain unregistered, and this draft PR remains separate. Earlier checkpoint-006 statements in this document are time-stamped historical observations, **not the latest main checkpoint**.
+
+**Compatibility re-audit of exact checkpoint-007 integrated source:** Using current main `src/shape-prototypes.mjs` (Git blob `868bbb9372b09e321f8db38b54c4ca52fabb7bc6`) and `src/voxel-shape-interactions.mjs` (Git blob `01be82e6c308e47a35fa6588cc6ed1ebeafca307`), all **30 Pack 1 candidate IDs × 4 rotations = 120/120** unit-cell prototype mesh/shape-validation cases passed V8 execution against the exact GitHub source. The original six core masonry candidate descriptors are ordinary full cubes and were adapted with the opt-in `prototypeOnly:true` flag **only in the audit**, without changing candidate source. The other 24 shaped candidate IDs worked unchanged. Mesh output is now **12–136 prototype triangles per shape** (masonry 12, stone shapes 12–76, garden 60, foliage 36–136, flowers/mushrooms 64–96). Original candidate material and exact IDs were unchanged. This is **not genuine Node or production WebGL2 evidence**, and no screenshots were captured.
+
+Checkpoint 007 includes opt-in :00 targeting and :12 generic shape source but **does not automatically register any of Pack 1's 30 materials**, add atlas entries, wire actual block placement or migrate schema-1 rotation saves. Maintain the existing strict M6 blockers. Any next continuation must use latest main 007 or newer and re-evaluate any subsequent automation-only checkpoint before claiming compatibility.
+
+
+## M6 follow-on — exact test-count gate and stale-artifact protection (2026-11-14)
+
+**Coordination reaffirmed:** integrated main remains `caf47776b723a36684edc1a72749e49268ccc688` (automation-only checkpoint **007**); Issues #109/#117 are OPEN. Manual Pack 1 draft PR #113 remains exclusive to `src/block-packs/pack-1/` and `tests/block-packs/pack-1/`. All **21 roster families** and **30 unique IDs 9–38** remain CANDIDATE, **0 registered in the live game**.
+
+**Pack 1-only defects resolved in this continuation:**
+
+1. Standalone `galleries-browser.mjs` now deletes only its known stale `acceptance-report.json` and thirty named gallery screenshot PNGs **before** starting a new test run. Without this, a failed standalone attempt could leave a previous valid-looking PASS report or image files. The parent `run-acceptance.mjs` already cleared stale reports, but a standalone gallery invocation needed the same fail-closed protection. No unrelated artifacts or user files are deleted.
+2. `run-acceptance.mjs` used to rely on process exit success and a `fail 0` substring, which could miss an unexpectedly skipped/empty test suite. It now parses the real Node TAP footer and requires **at least 86 actually executed tests** (seven asset modules with 81 authored groups and the five-test gallery helper), **all passed, with zero failures, skips or TODOs**, before launching genuine Chromium. It records exact Node totals in the final provenance report. An intermediate source-edit escaping error was detected by syntax verification and repaired immediately by reconstructing from the last known good committed version; **the corrected committed script passes source syntax verification**.
+
+**Direct checks performed:**
+
+- Re-fetched the exact current Pack 1 candidate sources and authored test files from GitHub: **81/81 test bodies passed in V8 assertion/test shims** (M1 9, M2 11, M3 14, M4 16, M5 15, all-family 10, ray regression 6). Unique IDs confirmed 30/30, range 9–38. This is **NOT native Node**.
+- Re-executed the genuinely native local `gallery-count.test.mjs` under **Node 22.16.0**: 5/5 PASS, 0 failures. The helper and test sources retained their previously independently verified Git blob hashes. This is **only the small browser helper**.
+- The two updated GitHub acceptance runners were re-fetched and parsed with a V8 async-function syntax check (PASS). Their new explicit stale-evidence and 86-test fail-closed guards were inspected. Full-run and screenshot execution **NOT performed**.
+- Local `git ls-remote`/clone still fails DNS resolution for github.com. The isolated local filesystem lacks a complete authenticated branch checkout. Chromium starts but navigation to even a minimal `data:` page returns `ERR_BLOCKED_BY_ADMINISTRATOR`. **No genuine asset-gallery Chromium screenshots captured**, no physical iPhone testing, no administrative-policy bypass.
+
+**Exact-head CI:** a new root workflow run is associated with the acceptance-runner commit and should be checked by SHA before calling it green. The standard root workflow tests the current playable baseline, **not nested Pack 1 candidate suites**.
+
+**Remaining M6 exit blockers are unchanged:** execute all eight native Node modules and 15 gallery Chromium views on an allowed clean checkout, capture and inspect **30 genuine PNGs** with the provenance manifest, and separately verify live registry/texture/partial-collision/rotation/schema-1 compatibility and creator physical-iPhone artwork/control approval. Gate A OPEN, v0.11 LOCKED. Do not merge/deploy or place these assets in worldgen without explicit authorization.
+
+
+## M6 continuation — genuine Node screenshot integrity verification (2026-11-14)
+
+**Main and ownership:** Verified main `caf47776b723a36684edc1a72749e49268ccc688` at automation-only checkpoint 007, Issues #109/#117 OPEN, and draft PR #113 unmerged. All 21 Pack 1 families and 30 unique IDs 9–38 remain CANDIDATE, no live production registration or world placements. All modified source/test files remain exclusively in Pack 1-owned directories.
+
+**New genuine native Node progress:** Added `tests/block-packs/pack-1/png-proof.mjs` and `png-proof.test.mjs`, an isolated no-external-dependency screenshot-proof module with **7/7 genuine Node 22.16.0 tests PASS** (TAP, zero failures). It checks valid PNG signature, chunk boundaries, correct IHDR/CRC32 for every chunk, real DEFLATE-compressed IDAT payload, valid pixel filter values, RGB/RGBA noninterlaced pixel format, exact viewport-width and minimum viewport-height constraints, IEND/trailing data and SHA-256 checksums. Corruption, truncated PNGs, mismatched widths and fake IDAT are rejected. Both executed files match exact GitHub Git blob hashes: `png-proof.mjs` **dfb955ae86be27438d85befe727c5b0f955cca28**, `png-proof.test.mjs` **5b74fa756c384cf6354c453eb63afe25df3b3cf9**. The prior `gallery-count` native tests also re-ran **5/5 PASS**. Combined **12/12 genuine native Node helper tests PASS**, and all four exact GitHub file blob hashes matched local originals.
+
+**Acceptance runner integration:** `tests/block-packs/pack-1/run-acceptance.mjs` now imports this verified `verifyScreenshotPng` and validates all **30** actual browser screenshot files by full PNG parse, image decompression, CRC, pixel format and width/height; filenames and superficial signature alone no longer establish screenshot integrity. The runner now requires **NINE** nested Node test modules and **at least 93 actually executed tests** (81 candidate suites + 5 gallery counter + 7 PNG verifier), with zero failed/skipped/TODO and a matching independently verified exact Git commit. It records native TAP totals and 30 PNG SHA-256 hashes only after real Chromium gallery acceptance succeeds. The changed runner passed GitHub-source syntax verification; **it has not passed a full run**.
+
+**Still blocked:** The **seven asset-focused modules, 81 authored test groups** continue to pass only exact GitHub source V8 shims, **NOT real Node** because the complete branch cannot be downloaded into the local test filesystem (GitHub DNS and direct HTTPS denied). Local Chromium launches but navigation to `data:` and local HTTP routes returns `net::ERR_BLOCKED_BY_ADMINISTRATOR`. **ZERO real Pack 1 gallery screenshots** were captured or inspected; no actual production WebGL2/iPhone/saved-edit compatibility certification occurred. No browser policy bypass, external paid tool or shared CI changes were attempted.
+
+**Current success criteria for this Pack 1 source gallery gate:**
+1. A clean checked-out exact PR #113 SHA; genuine `node --test` on all **nine** owned nested modules with at least 93 passing tests, no skips/TODO.
+2. Real Chromium Playwright on the **five** Pack 1 candidate galleries at **667×375, 844×390, 932×430**; 15 passing views and 30 genuine fully decoded, CRC-verified PNG screenshots; inspect real images for material distinction, geometry silhouette, emptiness, legibility.
+3. Independently review live engine registration and schema-1 rotation persistence, WebGL2 cutout/meshing, iPhone two-grip controls and creator art approval before any integration; those live tests are outside this draft's authority.
+
+**Disposition: M6 final acceptance OPEN / NOT ACCEPTED.** All 30 source assets remain unmerged, undeployed, unregistered and absent from worldgen; v0.11 LOCKED.
+
+## M6 late-main reconciliation: integration checkpoint 008 (2026-11-14)
+
+**Newest main commit:** `f416a2b26c4c00b5944f3bd37e9360030a247cc9`, commit message **“Gate A checkpoint 008: make automation voxel trees, caves and courts playable.”** This explicitly excludes manual Block Packs 1–5 and building projects, and uses only the **existing persistent block IDs 0–8**. The latest `docs/INTEGRATION_CHECKPOINTS.md` file still ends at checkpoint 007; treat this as documentation lag, **not evidence that 008 failed or that Pack 1 was incorporated**. Checkpoint 008 also updates root CI and live-world rendering code, but does not change the Pack 1 draft branch or register any of IDs 9–38. Issues #109/#117 remain OPEN.
+
+**Post-008 ownership and API implications:** the live `src/voxel.mjs` block registry still enumerates `AIR:0` through `DEEPSTONE:8`; 30 Pack 1 physical candidates remain an independent, unmerged opt-in catalog. Checkpoint 008's root workflow adds a live-world browser smoke script but continues to execute `npm test` with top-level `tests/*.test.mjs`; it **does not run** the nine nested Pack 1 acceptance files. The prior 120/120 prototype-shape V8 compatibility checks apply to unchanged opt-in `src/shape-prototypes.mjs` and `src/voxel-shape-interactions.mjs`; actual production WebGL2 and native Pack 1 tests remain pending.
+
+**Current additional real native Node evidence:** 12/12 tests across the isolated `gallery-count` (5) and `png-proof` (7) test modules passed genuine Node 22.16.0 against files matching GitHub blob hashes. The other seven candidate suites (81 authored test bodies) remain source-V8-tested only. Full Pack 1 gallery screenshots and physical iPhone review are still **not available** in this restricted local browser; no merge, deploy, worldgen placement or v0.11 unlock authorized.
+
+### Checkpoint 008 ledger synchronization (final recheck, 2026-11-14)
+
+After the activation commit, main advanced again to `ac263720b60641c65b02330348dd76d0ef9cb75e`, **documentation-only**, adding checkpoint 008 to `docs/INTEGRATION_CHECKPOINTS.md` and the release ledger. This resolves the temporary documentation lag described earlier; it **does not** change runtime block IDs, Pack 1 files or ownership. The live registry still supports 0–8. All 30 Pack 1 candidate IDs 9–38 remain isolated, unmerged and unregistered. Native candidate tests and authentic candidate screenshots remain pending.
+
+
+## Milestone 6 — NATIVE NODE GATE VERIFIED, superseding earlier V8-only statements (2026-11-14)
+
+**IMPORTANT STATUS UPDATE:** Earlier parts of this chronological dossier correctly described the seven asset test modules as "V8 shim only / native Node NOT RUN" at the time. That limitation has now been **resolved**. This section supersedes those older native-Node status fields. Do not continue reporting the Pack 1 Node requirement as blocked.
+
+**Actual native Node v22.16.0 full-suite execution: 93 of 93 PASS**, with **0 fail, 0 skipped, 0 TODO, 0 cancelled**. The nine nested committed Pack 1 test modules were run **together in one real Node process** against 21 staged code/test files whose **git-blob SHA-1 hashes exactly matched GitHub PR #113's source at `84001dbddd9fa9630ad9382c9f9d85c986590a9c`**. The source modules have not been modified since the transfer; subsequent commits in this PR modify only Pack 1 acceptance documentation. The physical files were reconstructed in an isolated local Pack 1 mirror, not a complete root Git checkout. No V8 test shim was used for this native result. Test counts: masonry 9; stone shapes 11; garden 14; foliage 16; floral 15; unified all-family 10; ray/collision regression 6; gallery-count 5; PNG-proof 7.
+
+The complete Git blob list, exact `node --test` command, qualification, and new evidence references are in [M6_NATIVE_NODE_EVIDENCE.md](M6_NATIVE_NODE_EVIDENCE.md), contained entirely within Pack 1-owned source paths. A complete genuine TAP log and a hash report were also generated as separate user-accessible test artifacts during the same session.
+
+**What this really clears:** M6's dedicated native Pack 1 Node asset/unit/fixture/geometry/selection/save-safety verification gate, previously repeatedly blocked, is now **PASSED** with exact GitHub bytes. The standalone `run-acceptance.mjs` orchestration has **NOT** itself completed successfully because its required browser half cannot navigate in this environment; do not label overall M6 as passed.
+
+**Browser acceptance remains blocked:** System Chromium launches but both minimal `file://` and `data:` navigation return `net::ERR_BLOCKED_BY_ADMINISTRATOR`, and earlier local HTTP was also blocked. Five candidate Canvas2D galleries × three landscape viewports (**667×375, 844×390, 932×430**), their thirty genuine PNG screenshots, actual screenshot inspections and offline browser fixtures were **NOT RUN / NOT CAPTURED**. No illustrated substitutes or proxy screenshots counted. Current baseline root GitHub Actions CI does not execute these nested Pack 1 candidate galleries; exact-head CI must be checked independently.
+
+**Current integrated main:** `ac263720b60641c65b02330348dd76d0ef9cb75e`, checkpoint **008**, explicitly automation-owned and excluding all five manual Block Packs. Production BLOCK IDs still only **0–8**. Candidate IDs **9–38** all remain exclusive and CANDIDATE. Real live-game material/atlas registration, partial occupancy meshing and targeting, schema-1 rotated save compatibility, WebGL2/iPhone performance and creator art/control approval still require a separately authorized integration gate.
+
+**M6 exit state: NODE VERIFIED; CHROMIUM/PRODUCTION/CREATOR OPEN. Draft PR #113 remains unmerged/undeployed; v0.10 Gate A OPEN, v0.11 LOCKED.**
+
+
+## M6 browser visual-state acceptance hardening — 2026-11-14
+
+**Current verified repository baseline:** integrated main `ac263720b60641c65b02330348dd76d0ef9cb75e`, documented **checkpoint 008**; Issues #109/#117 OPEN; draft PR #113 unmerged and exclusive to Pack 1 paths. **21 families / 30 IDs 9–38 remain CANDIDATE**. Exact GitHub Actions workflow [#43649027647](https://github.com/hdog960/Mythwrought/actions/runs/43649027647) for prior head `745886a95037d4bdce9555536b2e4149995de15f` is still QUEUED, not green; check the newer head separately. Root CI never runs the nested Pack 1 browser gallery.
+
+**Native source test gate remains conclusively PASSED:** **93/93 genuine Node 22.16.0 tests, 0 fail, 0 skipped, 0 TODO**, over nine nested modules and 21 byte-for-byte GitHub blob-verified source/test files. See `M6_NATIVE_NODE_EVIDENCE.md`. No new candidate source module changed in this cycle and this established native result need not be reinterpreted as a V8 shim or re-executed just for reporting.
+
+**Pack 1-exclusive browser acceptance fix:** While analyzing the exact committed five gallery implementations, found a blind spot in `tests/block-packs/pack-1/galleries-browser.mjs`: it tested the fixture edit count but did **not** verify that the visible selected/placed states of every gallery card agreed with that count. A broken `refresh()` implementation could have passed all save/fixture counters while the preview UI incorrectly showed blocks as unplaced. The source runner now enforces **four visible card-state checks for every gallery/viewport**:
+1. Initial: **0** visibly selected cards and empty fixture;
+2. After place-all: exactly **6/6 masonry**, **6/6 stone**, **3/3 garden**, **8/8 foliage**, or **7/7 floral** selected cards, matching the canonical fixture IDs;
+3. After offline canonical save/restore: selected card count remains the exact canonical count;
+4. After clear-all: selected card count returns to **0**.
+
+The implementation uses grounded actual CSS classes from each corresponding source module: masonry `#grid > .card.selected`, stone `#grid > .card.active`, garden `#grid > .card.placed`, foliage `#grid > .card.active`, floral `#grid > .item.active`. All five exact gallery modules explicitly set those classes in their `refresh` logic. Updated runner and all five gallery JS sources passed JavaScript syntax checks; **these are static/source checks, NOT Chromium browser execution**. The report includes the four visible state counts per gallery run. No source asset geometry, IDs or renderer was modified.
+
+**Genuine browser blocker independently reproduced again** using installed Chromium and Python Playwright: `data:`, `file:`, and `http://127.0.0.1` navigation each fail with `net::ERR_BLOCKED_BY_ADMINISTRATOR` despite successful browser launch. This blocks all **15 source-gallery Chromium views and 30 authentic PNG screenshots**. No attempt was made to bypass browser administrator rules and no synthetic/generated image is claimed as actual browser evidence.
+
+**Gate disposition:** Pack 1 native Node PASS, Chromium/visual review OPEN, live engine/partial-voxel integration and schema-1 orientation save approval OPEN, physical iPhone and creator art/control sign-off OPEN. M6 overall NOT ACCEPTED; all 30 assets remain **CANDIDATE**, draft PR #113 unmerged/undeployed, no shared engine/CI/worldgen/other pack changes, v0.11 LOCKED.
+
+
+## M6 continuation — source-backed cross-section selection/collision browser proof
+
+The dedicated Pack 1 Node gate remains **93/93 genuine Node PASS** from 21 exact GitHub-blob-verified files; unchanged candidate code means no redundant V8 or Node re-test is necessary. Main is `ac263720b60641c65b02330348dd76d0ef9cb75e`, incorporation checkpoint 008; Issues #109/#117 remain OPEN.
+
+**Independently verified Pack 1 acceptance defect:** `tests/block-packs/pack-1/galleries-browser.mjs` previously asserted fixture count and visual card state but **never clicked the actual cross-section selection/collision UI**. A gallery with broken slice-to-fixture coordinate mapping could therefore pass its purported visual/interaction gate. Within the Pack 1-only runner, three galleries now each test a real positive and negative grid-cell probe using Playwright's click-on-canvas position:
+
+| First candidate | Section height | Expected hit x,z | Expected empty x,z | Expected solid/passable |
+|---|---:|---|---|---|
+| Garden ridged farmland, ID 21 | .76 | 0,6 | 2,6 | Solid occupied / empty unoccupied |
+| Foliage hedge, ID 24 | .55 | 5,6 | 11,0 | Collidable selected / unselected noncollidable |
+| Floral skybell, ID 32 | .51 | 5,5 | 0,0 | Targetable but passable / empty passable |
+
+**Native reference check actually executed:** genuine Node v22.16.0 imported the exact previously GitHub-verified candidate fixture modules and placed all three IDs at [0,3,0] canonical rotation 0. For each case, `fixture.probe` agreed with independently chosen occupancy and collision expectations for the two named grid points: **all 3 cases PASS**. This is native fixture evidence only, **not actual browser interaction**.
+
+The Playwright source now clicks these points through `#grid canvas.slice` on all three landscape viewports, checks the actual textual targeting/collision feedback and fixture count, and records results in the screenshot evidence JSON. This adds **18 real browser probes** across 9 garden/foliage/floral views to the 45 placement/save/clear cycles, so the Pack 1-only `run-acceptance.mjs` acceptance gate now requires **63 observed browser interactions** plus 15 actual views and 30 authentic PNG screenshots. The exact updated JS sources parse without error. **Browser execution of these assertions remains NOT VERIFIED.**
+
+Chromium launches locally but data:, file: and local HTTP navigation continue to be blocked by `ERR_BLOCKED_BY_ADMINISTRATOR`; no prohibited policy bypass was attempted and **0/15 candidate browser views / 0/30 genuine screenshots** were captured. The latest PR-head root Actions check is separate baseline CI and does not include Pack 1 galleries. Creator visual review, live WebGL2 integration, schema-1 orientation persistence and physical-iPhone approval remain outstanding.
+
+**Final state unchanged:** 21 authored families, 30 distinct IDs 9–38 all CANDIDATE, draft/unmerged/undeployed; M6 native Node PASS, M6 Chromium/production/creator gates OPEN, Gate A OPEN and v0.11 LOCKED. No main/shared CI/worldgen/other-pack/save changes.
+
+
+## Milestone 6 — Standalone candidate technical acceptance VERIFIED (2026-11-15)
+
+**Authoritative latest evidence; this section supersedes earlier historical M6 entries that said native Node or Chromium were not run.** Exact tested **candidate source head**: `7c019432cf73cd9ebc0ab8a8485486845a948c6d` (draft [Pack 1 PR #113](https://github.com/hdog960/Mythwrought/pull/113)). Exact supplemental **infrastructure head**: `d4690f4f4ba6891c9b1e2bfe358d20ba7b2eb8d4` (draft [PR #136](https://github.com/hdog960/Mythwrought/pull/136)). Naturally triggered [GitHub Actions acceptance run #43717407382](https://github.com/hdog960/Mythwrought/actions/runs/43717407382) **completed SUCCESS**; job `verify-candidates` passed. Artifact: `source-pinned-roadmap-chromium-evidence-43717407382`, artifact ID `14163535099` (13,705,572 bytes in GitHub's artifact listing).
+
+| Standalone candidate acceptance requirement | Verified result at source head 7c019432 |
+| --- | --- |
+| 21 stone/nature families / candidate IDs 9–38 | **21 families, 30 unique IDs**, unregistered |
+| Native candidate Node test suite | **93/93 PASS**, nine modules, zero failures/skips/TODO |
+| Source-derived GPU geometry Node tests | **5/5 PASS**, zero failures/skips/TODO |
+| Actual Chromium Canvas2D gallery interactions | **5 galleries × 3 sizes = 15 views; 63 actual interaction checks** |
+| Canvas2D candidate screenshot evidence | **30 authenticated PNGs**, exact tested head |
+| **Actual source-specific WebGL2 candidate GPU rendering** | **30 IDs × 4 rotations × 3 landscape sizes = 360/360 PASS** |
+| WebGL2 GPU screenshot evidence | **90/90 authentic PNGs**, exactly 30 per size; SHA-256 verified against uploaded manifest |
+| Landscape viewports | **667×375, 844×390, 932×430**, each passed |
+| Previous 667×375 stone arch / railing diagnostic status-panel overlap | **Corrected on 7c019432; inspected authentic corrected-head IDs 18/19/20 screenshots at all three sizes; no occlusion remains** |
+| WebGL2 console/network/GPU failures or context loss | **None reported in successful candidate suite** |
+| Exact candidate source commit's baseline root CI | [#43677313329](https://github.com/hdog960/Mythwrought/actions/runs/43677313329): **SUCCESS**; this baseline is separate from source-candidate GPU evidence |
+
+**Acceptance verdict:** **Pack 1 M6 standalone candidate technical and browser visual QA gate = PASS (complete)** on the exact tested **source** `7c019432cf73cd9ebc0ab8a8485486845a948c6d`. The dedicated WebGL2 GPU renderer used the original Pack 1 authored per-part AABB geometry and authored face material artwork. This is stronger than generic WebGL2 transport smoke, but remains an **isolated candidate preview**, not the production game's registered renderer. Review of authentic corrected-head pillar/arch/railing images found the status-panel overlap fixed. Future creator aesthetic approval has **not** been granted.
+
+**Unchanged and separately gated:** All 30 physical candidate IDs 9–38 remain **unregistered, unmerged and undeployed**. No live-game building palette, actual world placement, chunk meshing, ray picking, collision, schema-1 orientation persistence/rollback, offline production PWA compatibility, mobile performance or physical iPhone Safari acceptance is asserted. Integration and any real-game validation require separate explicit authorization, and must preserve existing IDs 0–8, saves, controls, budgets and other packs. Creator artwork and physical controls sign-off remain **OPEN**; v0.10 Gate A remains open, **v0.11 LOCKED**.
+
+**Documentation-only follow-up:** This addendum changes neither candidate geometry nor tests. Its future documentation commit will have a different Git SHA; **do not transfer this exact-head runtime certification to a modified source tree**. The evidence stays pinned to the source blobs in `7c019432`, and any later functional source change requires appropriately fresh acceptance. Do not merge PR #113, deploy, register these assets or treat M6 candidate proof as creator or production approval.
