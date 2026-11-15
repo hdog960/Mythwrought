@@ -96,13 +96,18 @@ test('Snow Medium lighthouse physically bears two intermediate decks and retains
  assert.ok(b.placements.filter(p=>p.purpose==='lower-landing-load-post').length>=30);
  assert.ok(b.placements.filter(p=>p.purpose==='upper-landing-load-post').length>=30);
  assert.ok(b.placements.some(p=>p.purpose==='unlit frost beacon support'));
+ const occupied=new Map(b.placements.map(p=>[key(p.at),p]));
+ for(const y of [13,15,18,20,22])for(const z of [6,9,12]){
+  assert.equal(occupied.get('4,'+y+','+z)?.role,'wall','roof not continuously supported by tall tapering shell at y='+y);
+ }
+
  for(let y=1;y<=22;y++)assert.ok(walk.has('9,'+y+',9'),'shaft cut off at y='+y);
  assert.ok(walk.has('8,10,9')&&walk.has('8,20,9'),'upper landing disconnected');
  assert.ok(b.portals.filter(p=>p.opening.includes('unapproved')).length===2);
 });
 test('five biomes and all three physical sizes now represented by truly authored 1B candidates',()=>{
  const all=get1BCandidates(),sizes=new Set(all.map(b=>b.size)),biomes=new Set(all.map(b=>b.biome));
- assert.deepEqual([...sizes].sort(),['small','medium','large']);
+ assert.deepEqual([...sizes].sort(),['large','medium','small']);
  assert.deepEqual([...biomes].sort(),['desert','enchanted-forest','mountain','snow','temperate']);
  for(const [cat,quota] of Object.entries(QUOTAS)){
    const count=all.filter(b=>b.category===cat).length;

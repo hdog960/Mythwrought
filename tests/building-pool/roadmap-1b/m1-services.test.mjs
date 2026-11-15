@@ -79,10 +79,10 @@ test('complete seven-category source census is exactly 28/435 with 15 unmodified
  const original=getInheritedStables(),all=get1BCandidates(),counts=validateAllocation(all);
  assert.equal(original.length,15);assert.equal(all.length,28);
  assert.equal(counts.authored,28);assert.equal(counts.remaining,407);
- assert.equal(new Set(all.map(x=>x.id)).size,21);
+ assert.equal(new Set(all.map(x=>x.id)).size,28);
  for(const b of original){const next=all.find(x=>x.id===b.id);assert.ok(next);assert.equal(stableBlueprintJSON(next),stableBlueprintJSON(b));}
  assert.deepEqual(all.filter(b=>b.category!=='stable').map(x=>x.category).sort(),
-  ['bathhouse','farm-barn','greenhouse','fishing-lodge','harbor-office','lighthouse'].sort());
+  ['bathhouse','bathhouse','farm-barn','farm-barn','greenhouse','greenhouse','fishing-lodge','fishing-lodge','harbor-office','harbor-office','lighthouse','lighthouse'].sort());
 });
 
 test('M1 genuine four distinct structural roof profiles show backed height progression',()=>{

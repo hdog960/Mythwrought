@@ -279,7 +279,7 @@ export function createEnchantedHarborOffice(){
 export function createSnowLighthouse(){
  const a=architect('lighthouse','snow','medium',1,'Rimeglass Northwatch Light',19,29,19);
  const {put,open,bed,foundation,rim,namedRoom,portal,finalize,occupied}=a;
- foundation();rim(2,2,16,16,10,'live:stone');rim(4,4,14,14,12,'live:stone');open(9,2);open(9,4);
+ foundation();rim(2,2,16,16,10,'live:stone');rim(4,4,14,14,22,'live:stone');open(9,2);open(9,4);
  // Four anchored interior column stacks bear both independent floors, with actual
  // support at the base and a contiguous load path through the first loft.
  for(const [x,z] of [[6,7],[12,7],[6,11],[12,11]]){
