@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pack 5 physical source-derived Canvas2D review (not WebGL2)</title>
+<style>html,body{margin:0;background:#15222c;color:#f5e9d3;font:12px system-ui,sans-serif;}
+h1{margin:4px 8px;font-size:15px}p{margin:4px 8px}canvas{display:block;width:100%;height:calc(100dvh - 62px);}
+#status{position:fixed;bottom:0;left:0;background:#24313ad9;padding:4px 8px;font-weight:600;}</style>
+<h1>Pack 5 — physical candidate preview, NOT installed in game</h1>
+<p>Canvas2D source-derived visual reference, NOT WebGL2 or physical iPhone certification.</p>
+<canvas id="surface" width="930" height="540"></canvas><div id="status">Loading</div>
+<script type="module">
+import {drawPack5CanvasGallery} from './canvas-gallery.mjs';
+try{const rotation=Number(new URLSearchParams(location.search).get('rotation')||0);
+ const result=drawPack5CanvasGallery(document.querySelector('canvas'),{rotation});
+ document.getElementById('status').textContent=`Canvas2D preview ${result.length}/6 variants, rotation ${rotation} — NOT WebGL2`;
+ document.getElementById('status').dataset.status='canvas-pass';
+}catch(e){document.getElementById('status').textContent='FAIL: '+String(e);document.getElementById('status').dataset.status='fail';}
+</script></html>

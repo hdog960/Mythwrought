@@ -1,0 +1,455 @@
+{
+  "schema": "mythwrought.pack5.manifest.v1",
+  "title": "Interiors & Specialty Architecture",
+  "pack": 5,
+  "gate": "v0.10 Gate A",
+  "integration": "NOT INTEGRATED",
+  "status": "All 18 Pack 5 physical families remain isolated CANDIDATES; 186/186 genuinely native focused Node cases PASS and 36 previously verified WebGL2 captures, including six newly reexecuted M5 captures after the corrected eight-arm chandelier. Production/creator/HTTP/iPhone approvals remain OPEN.",
+  "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "checkpoint": "006",
+  "coordinationIssues": [
+    109,
+    117
+  ],
+  "ownPaths": [
+    "src/block-packs/pack-5/",
+    "tests/block-packs/pack-5/"
+  ],
+  "numericIdAllocation": null,
+  "idPolicy": "Symbolic only; 209–254 unassigned, 255 sentinel; 256–385 future wide-ID reservation only; centrally coordinate before assigning",
+  "integrated": false,
+  "completedFamilies": 0,
+  "entries": [
+    {
+      "roster": 79,
+      "symbolicId": "pack5:079",
+      "name": "Plaster & Stucco",
+      "milestone": 1,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/architectural-surfaces.mjs",
+      "distinction": "Smooth and textured wall finish; distinct from desert adobe",
+      "integrated": false,
+      "variants": [
+        "chalk-lime",
+        "hand-troweled"
+      ],
+      "verification": "44/44 native Node source-exact PASS; source-inline genuine WebGL2 screenshot/pixel verification at three mobile landscape sizes x two rotations PASS; source-served/creator and production integration OPEN",
+      "preview": "tests/block-packs/pack-5/canvas-gallery.html"
+    },
+    {
+      "roster": 80,
+      "symbolicId": "pack5:080",
+      "name": "Fired Brick Masonry",
+      "milestone": 1,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/architectural-surfaces.mjs",
+      "distinction": "Manufactured fired brick courses, not stone brick or clay roofing",
+      "integrated": false,
+      "variants": [
+        "hearth-running-bond",
+        "kiln-soldier-course"
+      ],
+      "verification": "44/44 native Node source-exact PASS; source-inline genuine WebGL2 screenshot/pixel verification at three mobile landscape sizes x two rotations PASS; source-served/creator and production integration OPEN",
+      "preview": "tests/block-packs/pack-5/canvas-gallery.html"
+    },
+    {
+      "roster": 81,
+      "symbolicId": "pack5:081",
+      "name": "Ceramic Interior Floor Tiles",
+      "milestone": 1,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/architectural-surfaces.mjs",
+      "distinction": "Purpose-made interior decorative floor panels, not outdoor paving or calcite mosaics",
+      "integrated": false,
+      "variants": [
+        "sunburst-encaustic",
+        "moonwoven-glaze"
+      ],
+      "verification": "44/44 native Node source-exact PASS; source-inline genuine WebGL2 screenshot/pixel verification at three mobile landscape sizes x two rotations PASS; source-served/creator and production integration OPEN",
+      "preview": "tests/block-packs/pack-5/canvas-gallery.html"
+    },
+    {
+      "roster": 82,
+      "symbolicId": "pack5:082",
+      "name": "Beds",
+      "milestone": 2,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/residential-furnishings.mjs",
+      "distinction": "Head/foot identifiable multi-cell residential bedding; no sleeping",
+      "integrated": false,
+      "variants": [
+        "wanderer-quilt",
+        "moonwatch-canopy"
+      ],
+      "preview": "tests/block-packs/pack-5/residential-gallery.html",
+      "verification": "25/25 M2 native Node regression cases PASS, native ES-module Chromium WebGL2 at 3 landscape viewports × 2 rotations, creator visual/served HTTP/live integration OPEN",
+      "integrationDependencies": [
+        "central numeric block registry/atlas",
+        "engine shape-aware collision/raycast",
+        "safe orientation+variant state and schema-1 save compatibility",
+        "per-cell multi-part support"
+      ]
+    },
+    {
+      "roster": 83,
+      "symbolicId": "pack5:083",
+      "name": "Chairs & Stools",
+      "milestone": 2,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/residential-furnishings.mjs",
+      "distinction": "Separate one-seat chair and backless stool silhouettes, not benches",
+      "integrated": false,
+      "variants": [
+        "hearthside-highback",
+        "riveted-round-stool"
+      ],
+      "preview": "tests/block-packs/pack-5/residential-gallery.html",
+      "verification": "25/25 M2 native Node regression cases PASS, native ES-module Chromium WebGL2 at 3 landscape viewports × 2 rotations, creator visual/served HTTP/live integration OPEN",
+      "integrationDependencies": [
+        "central numeric block registry/atlas",
+        "engine shape-aware collision/raycast",
+        "safe orientation+variant state and schema-1 save compatibility",
+        "per-cell multi-part support"
+      ]
+    },
+    {
+      "roster": 84,
+      "symbolicId": "pack5:084",
+      "name": "Bookshelves",
+      "milestone": 2,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/residential-furnishings.mjs",
+      "distinction": "Modeled book spines, not merchandise displays",
+      "integrated": false,
+      "variants": [
+        "scholar-oak-stack",
+        "starbound-scrollcase"
+      ],
+      "preview": "tests/block-packs/pack-5/residential-gallery.html",
+      "verification": "25/25 M2 native Node regression cases PASS, native ES-module Chromium WebGL2 at 3 landscape viewports × 2 rotations, creator visual/served HTTP/live integration OPEN; physically exposed book/scroll spines inspected",
+      "integrationDependencies": [
+        "central numeric block registry/atlas",
+        "engine shape-aware collision/raycast",
+        "safe orientation+variant state and schema-1 save compatibility",
+        "per-cell multi-part support"
+      ]
+    },
+    {
+      "roster": 85,
+      "symbolicId": "pack5:085",
+      "name": "Cabinets & Wardrobes",
+      "milestone": 2,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/residential-furnishings.mjs",
+      "distinction": "Enclosed furniture, not inventory containers",
+      "integrated": false,
+      "variants": [
+        "pantry-cupboard",
+        "heritage-wardrobe"
+      ],
+      "preview": "tests/block-packs/pack-5/residential-gallery.html",
+      "verification": "25/25 M2 native Node regression cases PASS, native ES-module Chromium WebGL2 at 3 landscape viewports × 2 rotations, creator visual/served HTTP/live integration OPEN",
+      "integrationDependencies": [
+        "central numeric block registry/atlas",
+        "engine shape-aware collision/raycast",
+        "safe orientation+variant state and schema-1 save compatibility",
+        "per-cell multi-part support"
+      ]
+    },
+    {
+      "roster": 86,
+      "symbolicId": "pack5:086",
+      "name": "Shop Counters",
+      "milestone": 3,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/shop-workshop.mjs",
+      "distinction": "Customer-facing fascia, not dining tables",
+      "integrated": false,
+      "variants": [
+        "ledger-service",
+        "festival-fascia"
+      ],
+      "preview": "tests/block-packs/pack-5/shop-gallery.html",
+      "verification": "14 M3 native Node tests and 6 real native ES module WebGL2 captures pass on original physical fixtures; source-served, creator visual, production integration OPEN",
+      "integrationDependencies": [
+        "central physical registry and persistent numeric IDs",
+        "shape-aware raycast/collision and rotation serialization",
+        "schema-1 safe saves",
+        "physical iPhone GPU/art acceptance"
+      ]
+    },
+    {
+      "roster": 87,
+      "symbolicId": "pack5:087",
+      "name": "Display Shelves",
+      "milestone": 3,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/shop-workshop.mjs",
+      "distinction": "Open commercial tiered product fixtures, not bookshelves",
+      "integrated": false,
+      "variants": [
+        "stepped-market-tray",
+        "curio-arcade"
+      ],
+      "preview": "tests/block-packs/pack-5/shop-gallery.html",
+      "verification": "14 M3 native Node tests and 6 real native ES module WebGL2 captures pass on original physical fixtures; source-served, creator visual, production integration OPEN",
+      "integrationDependencies": [
+        "central physical registry and persistent numeric IDs",
+        "shape-aware raycast/collision and rotation serialization",
+        "schema-1 safe saves",
+        "physical iPhone GPU/art acceptance"
+      ]
+    },
+    {
+      "roster": 88,
+      "symbolicId": "pack5:088",
+      "name": "Anvils & Forge Fixtures",
+      "milestone": 3,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/workshop-fixtures.mjs",
+      "distinction": "Smithy tools without functional forging, not fireplace",
+      "integrated": false,
+      "preview": "tests/block-packs/pack-5/workshop-gallery.html",
+      "variants": [
+        "blackiron-horn",
+        "moonsteel-stake"
+      ],
+      "verification": "19 new M3 workshop native Node tests including hollow/empty space, 24 meshes and outward winding, support, physical collision, ray select/remove, variant snapshot/atomic rollback; real native ES-module WebGL2 six images; creator/production gates OPEN",
+      "integrationDependencies": [
+        "central registered numeric ID policy",
+        "engine shape-aware collision/raycast",
+        "schema-1 safe orientation/variant state",
+        "physical iPhone GPU and creator artwork approval"
+      ]
+    },
+    {
+      "roster": 89,
+      "symbolicId": "pack5:089",
+      "name": "Cauldrons & Alchemy Stations",
+      "milestone": 3,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/workshop-fixtures.mjs",
+      "distinction": "Alchemy apparatus without brewing or fluid simulation",
+      "integrated": false,
+      "preview": "tests/block-packs/pack-5/workshop-gallery.html",
+      "variants": [
+        "iron-tripod-cauldron",
+        "alchemists-spiral-stand"
+      ],
+      "verification": "19 new M3 workshop native Node tests including hollow/empty space, 24 meshes and outward winding, support, physical collision, ray select/remove, variant snapshot/atomic rollback; real native ES-module WebGL2 six images; creator/production gates OPEN",
+      "integrationDependencies": [
+        "central registered numeric ID policy",
+        "engine shape-aware collision/raycast",
+        "schema-1 safe orientation/variant state",
+        "physical iPhone GPU and creator artwork approval"
+      ]
+    },
+    {
+      "roster": 90,
+      "symbolicId": "pack5:090",
+      "name": "Ovens & Cooking Ranges",
+      "milestone": 3,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/workshop-fixtures.mjs",
+      "distinction": "Cooking chambers and ranges, not fireplaces or crafting",
+      "integrated": false,
+      "preview": "tests/block-packs/pack-5/workshop-gallery.html",
+      "variants": [
+        "ashstone-bake-oven",
+        "copper-range-top"
+      ],
+      "verification": "19 new M3 workshop native Node tests including hollow/empty space, 24 meshes and outward winding, support, physical collision, ray select/remove, variant snapshot/atomic rollback; real native ES-module WebGL2 six images; creator/production gates OPEN",
+      "integrationDependencies": [
+        "central registered numeric ID policy",
+        "engine shape-aware collision/raycast",
+        "schema-1 safe orientation/variant state",
+        "physical iPhone GPU and creator artwork approval"
+      ]
+    },
+    {
+      "roster": 91,
+      "symbolicId": "pack5:091",
+      "name": "Desks & Lecterns",
+      "milestone": 4,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/civic-interiors.mjs",
+      "distinction": "Writing/presentation furniture, not tables/counters",
+      "integrated": false,
+      "variants": [
+        "cartographers-oak-desk",
+        "moonstone-lectern"
+      ],
+      "preview": "tests/block-packs/pack-5/civic-gallery.html",
+      "verification": "15 new M4 source-native Node cases PASS, six Chromium WebGL2 native ES-module 3-viewport x 2-rotation images PASS; physical per-box collision, 2-cell rug support, selection/removal, variants and fixture snapshot verified. Creator/production acceptance OPEN.",
+      "integrationDependencies": [
+        "central registered numeric ID policy",
+        "shape-aware partial collision/raycast",
+        "schema-1 safe variant and multi-cell rotation",
+        "creator artwork/physical iPhone approval"
+      ]
+    },
+    {
+      "roster": 92,
+      "symbolicId": "pack5:092",
+      "name": "Carpets & Rugs",
+      "milestone": 4,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/civic-interiors.mjs",
+      "distinction": "Thin independently selectable nonblocking floor coverings",
+      "integrated": false,
+      "variants": [
+        "hearthwoven-runner",
+        "starlace-sigil-rug"
+      ],
+      "preview": "tests/block-packs/pack-5/civic-gallery.html",
+      "verification": "15 new M4 source-native Node cases PASS, six Chromium WebGL2 native ES-module 3-viewport x 2-rotation images PASS; physical per-box collision, 2-cell rug support, selection/removal, variants and fixture snapshot verified. Creator/production acceptance OPEN.",
+      "integrationDependencies": [
+        "central registered numeric ID policy",
+        "shape-aware partial collision/raycast",
+        "schema-1 safe variant and multi-cell rotation",
+        "creator artwork/physical iPhone approval"
+      ]
+    },
+    {
+      "roster": 93,
+      "symbolicId": "pack5:093",
+      "name": "Altars & Pedestals",
+      "milestone": 4,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/civic-interiors.mjs",
+      "distinction": "Ceremonial furniture not statues/relief/ruin plinth",
+      "integrated": false,
+      "variants": [
+        "runesworn-stone-altar",
+        "sunspire-reliquary-plinth"
+      ],
+      "preview": "tests/block-packs/pack-5/civic-gallery.html",
+      "verification": "15 new M4 source-native Node cases PASS, six Chromium WebGL2 native ES-module 3-viewport x 2-rotation images PASS; physical per-box collision, 2-cell rug support, selection/removal, variants and fixture snapshot verified. Creator/production acceptance OPEN.",
+      "integrationDependencies": [
+        "central registered numeric ID policy",
+        "shape-aware partial collision/raycast",
+        "schema-1 safe variant and multi-cell rotation",
+        "creator artwork/physical iPhone approval"
+      ]
+    },
+    {
+      "roster": 94,
+      "symbolicId": "pack5:094",
+      "name": "Heavy Gates & Portcullis Panels",
+      "milestone": 5,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/fortified-specialties.mjs",
+      "distinction": "Defensive leaves/lattice, not fence gates or dungeon guides/teeth",
+      "integrated": false,
+      "preview": "tests/block-packs/pack-5/specialty-gallery.html",
+      "variants": [
+        "citadel-ironbound-leaves",
+        "falling-portcullis-grille"
+      ],
+      "verification": "12 new dedicated source-native M5 tests on true 2-cell gate and stable partition, ceiling chandelier, actual collider gaps, partial trough, quarter-turn mesh face planarity and fixture-only saves, plus 6 genuine Chromium native ES-module WebGL2 landscape captures; creator and integration approval OPEN",
+      "integrationDependencies": [
+        "central asset registry and assigned persistent numeric IDs",
+        "shape-aware collision/raycast and rotation",
+        "atomic multi-cell support/selection/saves",
+        "ceiling attachment in real engine",
+        "safe production schema-1 variant state",
+        "creator art and physical iPhone controls signoff"
+      ]
+    },
+    {
+      "roster": 95,
+      "symbolicId": "pack5:095",
+      "name": "Chandeliers",
+      "milestone": 5,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/fortified-specialties.mjs",
+      "distinction": "Ceiling-attached multiple-arm hanging fixture; light metadata only",
+      "integrated": false,
+      "preview": "tests/block-packs/pack-5/specialty-gallery.html",
+      "variants": [
+        "suncrown-eightarm",
+        "prismatic-starrack"
+      ],
+      "verification": "12 new dedicated source-native M5 tests on true 2-cell gate and stable partition, ceiling chandelier, actual collider gaps, partial trough, quarter-turn mesh face planarity and fixture-only saves, plus 6 genuine Chromium native ES-module WebGL2 landscape captures; creator and integration approval OPEN",
+      "integrationDependencies": [
+        "central asset registry and assigned persistent numeric IDs",
+        "shape-aware collision/raycast and rotation",
+        "atomic multi-cell support/selection/saves",
+        "ceiling attachment in real engine",
+        "safe production schema-1 variant state",
+        "creator art and physical iPhone controls signoff"
+      ]
+    },
+    {
+      "roster": 96,
+      "symbolicId": "pack5:096",
+      "name": "Stable Stall Partitions & Troughs",
+      "milestone": 5,
+      "status": "CANDIDATE",
+      "persistentNumericId": null,
+      "source": "src/block-packs/pack-5/fortified-specialties.mjs",
+      "distinction": "Physical stall division and feed/water basins, not fences/wells",
+      "integrated": false,
+      "preview": "tests/block-packs/pack-5/specialty-gallery.html",
+      "variants": [
+        "oak-stall-divider",
+        "stone-feed-trough"
+      ],
+      "verification": "12 new dedicated source-native M5 tests on true 2-cell gate and stable partition, ceiling chandelier, actual collider gaps, partial trough, quarter-turn mesh face planarity and fixture-only saves, plus 6 genuine Chromium native ES-module WebGL2 landscape captures; creator and integration approval OPEN",
+      "integrationDependencies": [
+        "central asset registry and assigned persistent numeric IDs",
+        "shape-aware collision/raycast and rotation",
+        "atomic multi-cell support/selection/saves",
+        "ceiling attachment in real engine",
+        "safe production schema-1 variant state",
+        "creator art and physical iPhone controls signoff"
+      ]
+    }
+  ],
+  "candidateFamilies": 18,
+  "testEvidence": {
+    "nativeNode": "186/186 PASS genuine native Node 22.16.0 focused tests, zero skipped/failed: original 185 baseline plus one new physical eight-arm chandelier regression, failing 6-vs-8 before correction and passing after. Committed/source-exact Suncrown mesh blob b84074b6ec4c3315fa02aee85d312474644259b1; specialty test blob efbdc96b368ac00b97a7ca04f6f1caf20f283a91. All 18 provisional roster/0 persistent ID invariants preserved.",
+    "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
+    "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
+    "webgl2": "Current Suncrown-specific after-fix genuine Chromium native ES-module/WebGL2 M5 six views PASS, at 667x375,844x390,932x430 and two rotations, six distinct visible models. Previous other five gallery modes 30/30 PASS on earlier unchanged source; full 36/36 baseline remains historical rather than claiming all 36 rerun after this isolated M5 fix. Native offline data URL browser, not served page/iPhone.",
+    "screenshots": "36/36 genuine native ES-module Chromium/WebGL2 visual screenshots verified: 6 M5 show 6 distinct physical variant panels each and 30 prior galleries reexecuted on the same source. Nonblank panel readbacks, mobile viewport framing and rotation distinctions pass; no creator visual sign-off.",
+    "production": "Creator art/actual physical iPhone/Gate A/serviced HTTP and production schema-1, numeric ID registry widening, actual placement/player raycast, GPU performance, merge/deployment remain OPEN; no live integrations or approvals.",
+    "acceptanceDossier": "src/block-packs/pack-5/M6_ACCEPTANCE.md (M1–M5 dossiers also remain authoritative for each candidate milestone)",
+    "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py modes m1,m2,m3,m3b,m4,m5. 36/36 genuine Chromium WebGL2 view captures across all 6 original source-preview galleries this session; native offline data URL ES modules only, HTTP-served localhost blocked.",
+    "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only",
+    "m2": "8 original physical residential variants; genuine 2-cell beds with per-part support, accurate collider union, modeled book spines now visible beyond shelves, no storage/sleeping gameplay. 6 fresh genuine Chromium native ES module WebGL2 captures across 667x375,844x390,932x430 and rotations 0/1, panel hashes pass",
+    "visualCorrection": "Physical bookshelf and scrollcase spines project beyond shelf lips; 844x390 WebGL2 review changed only the 2 bookshelf panels (2821 and 2444 pixels), other 6 panels identical; real material geometry, not recoloring",
+    "servedGallery": "Localhost real HTTP-served module page explicitly reattempted using Xvfb/Chromium and was blocked by ERR_BLOCKED_BY_ADMINISTRATOR; native offline data URL ES modules and genuine WebGL2 passed, but served page remains unverified",
+    "m3": "M3 candidate families 86–90, 10 variants, source-only physical art; refined 088 anvil long steel taper + 089 stepped octagonal physically hollow cauldron with body/handle collision and downward ray to basin bottom; no heat, liquid, crafting, trade, NPC or inventory",
+    "m3bPreview": "6 original physical workshop variants source-authored and drawn in 6/6 genuine native ES-module Chromium WebGL2 landscape views, with unique nonblank GPU pixel fingerprints and rotation changes; per-cell 18–23 boxes and 216–276 unculled source triangles, not real iPhone GPU timings",
+    "m4": "6 original source-authored physical M4 variants across 091 Desks & Lecterns, 092 Carpets & Rugs (a genuine atomic 2-cell runner with per-cell floor support), 093 Altars & Pedestals; 15 native Node tests and real native ES-module Chromium WebGL2 six-view screenshot acceptance pass; source-only; not live",
+    "m5": "M5 unchanged six variants across 094 heavy gates, 095 actual ceiling-supported chandeliers, 096 stable fixtures. Corrected suncrown-eightarm to model 8 distinct raised physical gold sockets and 8 linen candle stems (previously 6), distributed around all four sides of outer halo. 29 collision-backed boxes / 348 source triangles for Suncrown cell, still below 64/768 per-cell budget. All 6 genuine source-exact native ES-module Chromium WebGL2 M5 screenshots PASS at three landscape sizes and two rotations. No dynamic lighting or gameplay.",
+    "m5Preview": "6/6 genuine Chromium native ES-module/WebGL2 screenshots 667x375,844x390,932x430 rotations 0/1, six separately rendered and distinct physical variants; no source-served HTTP/physical iPhone/production certification.",
+    "m6": "Post-M6 true physical test-fixture corrections: (a) normalize ray direction to world-unit reach; (b) when invalid snapshot restore follows support withdrawal, roll back placed and occupied Maps atomically instead of attempting to re-place old entries against altered supports. Proved by 3 failing-before/passing-after regressions for counter, rotated 2-cell rug plus ceiling lamp, and independent ceiling chandelier. 185 dedicated native tests and 36 authentic Chromium WebGL2 captures pass. No production schema-1 engine/saves touched."
+  },
+  "preview": {
+    "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
+    "canvas2D": "tests/block-packs/pack-5/canvas-gallery.html",
+    "reproScript": "tests/block-packs/pack-5/capture-canvas.py"
+  },
+  "latestMainReviewed": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+  "latestCheckpointReviewed": "008",
+  "reviewNotes": "Actual post-M6 new defect proven: Suncrown Eight-Arm chandelier had six instead of eight physically modeled sockets/stems. Fixed Pack 5-owned geometry, added one failing-before/passing-after native case, latest 186/186 PASS, six current M5 WebGL2 captures PASS. Main now 971e32911984a3cdbb831e143b249ae5d780ed72 due to CI infrastructure-only changes; checkpoint remains 008. Gate A, schema-1 save, physical iPhone and v0.11 remain gated."
+}
