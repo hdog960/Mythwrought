@@ -581,12 +581,12 @@
       "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "Pack 1 M1-M6 source assets, builder blueprint ABI, incremental saved-structure additions and -210..19 world bounds all tested on functional source 41453ce9. 123/123 genuine Node and 360/360 WebGL2 GPU renders PASS; five-pack live integration and iPhone hardware acceptance still OPEN.",
-  "finalAcceptance": "Standalone Pack1 candidate technical QA PASS at functional source 41453ce92f9a100c5f071421cfe95282e1a20d87: CI #43728784943 123/123 authentic native Node, 5/5 GPU geometry, 15 Canvas2D views/63 interactions, 360/360 genuine candidate GPU renders, 90 independently SHA256-verified GPU screenshots. Sequential saved Pack1 construction with legacy/biome130 and depth -210..19 PASS in source-only simulator. NOT LIVE REGISTERED; final five-pack/iPhone/creator approval OPEN.",
+  "latestMilestone": "Pack1 source 0a209610: M1-M6 + builder/save + nullable selection/collision ABI accepted in 128 native tests and 360 source-specific WebGL2 renders, 90 authenticated PNGs. Full five-pack runtime integration/hardware status remains unapproved.",
+  "finalAcceptance": "CANDIDATE SOURCE TESTED ONLY: Pack 1 exact source 0a2096108feb12674caa7aab2739e0df857b17ad, GH Actions #43730666232 PASS 128/128 native Node, 5/5 GPU geometry Node, 15 Canvas2D views / 63 interactions, 360/360 true candidate WebGL2 renders and 90/90 independently SHA256 verified screenshot PNGs. Passable targetable plants have nullable collision reader ABI; no real game registration/save/collision/hardware proof.",
   "acceptanceMatrix": {
     "family_roster": "21_OF_21_ALL_CANDIDATE",
     "candidate_ids": "30_UNIQUE_9_THROUGH_38_UNMERGED",
-    "native_pack1_node": "PASS_123_OF_123_GENUINE_NODE_22_AT_41453ce9_ZERO_FAIL_SKIP_TODO",
+    "native_pack1_node": "PASS_128_OF_128_GENUINE_NATIVE_NODE_22_AT_0a209610_NO_FAIL_SKIP_TODO",
     "native_node_exact_blob_provenance": "21_COMMITTED_FILES_VERIFIED_GIT_BLOB_SHA",
     "opted_in_generic_shape_v8": "PASSED_120_OF_120_NOT_PRODUCTION_GPU",
     "genuine_chromium_candidate_galleries": "PASS_15_OF_15_REAL_CHROMIUM_VIEWS_63_INTERACTIONS_RUN_43720843639",
@@ -610,12 +610,13 @@
     "native_partial_shape_probe_cases": "THREE_OF_THREE_PASS_NODE_SOURCE_FIXTURE",
     "real_chromium_cutaway_probe_cases": "18_ADDED_RUNNER_SOURCE_NOT_EXECUTED",
     "browser_interaction_total": "63_REQUIRED_ZERO_RUN",
-    "candidate_source_exact_webgl2": "PASS_360_OF_360_TRUE_GPU_RENDER_90_SHA256_MATCHED_AUTHENTIC_PNG_AT_41453ce9",
+    "candidate_source_exact_webgl2": "PASS_360_OF_360_TRUE_SOURCE_GPU_RENDER_90_SHA256_VERIFIED_AUTHENTIC_PNGS_AT_0a209610",
     "builder_symbol_resolution": "PASS_21_ROSTER_SYMBOLS_30_NUMERIC_IDS_8_BUILDER_PLUS_8_DENSE_NATIVE_TESTS",
     "dense_source_construction": "PASS_6400_CELLS_25_CHUNKS_8_NATIVE_TESTS_NO_REAL_FPS_CLAIM",
     "current_live_biome130_save_compatibility": "ISOLATED_SOURCE_PASS_PRESERVE_256_TO_315_AND_OPTIONAL_ROTATIONS_NODATA_LOSS_2_NEW_NATIVE_TESTS__NOT_REAL_GAME_SAVE_TEST",
     "structure_builder_compatibility": "SOURCE_ONLY_21_FAMILY_30_CANDIDATE_ID_7_NATIVE_PHYSICAL_BLUEPRINT_ABI_TESTS_PASS__LIVE_GAME_NOT_TESTED",
-    "incremental_settlement_builder_save": "PASS_SOURCE_ONLY_PRESERVE_EXISTING_PACK1_TURNS_VARIANTS_MOUNTS_BIOME_ROTATIONS_DEPTH_MINUS_210_TO_19__NOT_LIVE_WORLD_TEST"
+    "incremental_settlement_builder_save": "PASS_SOURCE_ONLY_PRESERVE_EXISTING_PACK1_TURNS_VARIANTS_MOUNTS_BIOME_ROTATIONS_DEPTH_MINUS_210_TO_19__NOT_LIVE_WORLD_TEST",
+    "passable_collision_target_reader": "PASS_SOURCE_ONLY_PASSABLE_IDS_26_TO_35_TARGETABLE_NO_COLLISION_READER_NULL"
   },
   "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md",
   "baselineAtCreation": {
@@ -626,14 +627,14 @@
   "nativeNodeEvidenceFile": "src/block-packs/pack-1/M6_NATIVE_NODE_EVIDENCE.md",
   "integrationReadiness": {
     "strategy": "ONE_COORDINATED_FIVE_BLOCK_PACK_FINAL_INTEGRATION_NO_INDEPENDENT_MERGE_DEPLOY",
-    "status": "PACK1_CANDIDATE_AND_INCREMENTAL_BUILDER_SOURCE_ACCEPTANCE_PASSED__FINAL_PRODUCTION_INTEGRATION_READINESS_NOT_CERTIFIED",
+    "status": "PACK1_SOURCE_SELECTION_COLLISION_SAVE_BUILDERS_TESTED__FIVE_PACK_FINAL_RUNTIME_AND_IPHONE_NOT_CERTIFIED",
     "candidateSourceCommit": "bfa15c846b9b2b7227f78321b2b8657c7c311e20",
-    "sourceExactWorkflow": "https://github.com/hdog960/Mythwrought/actions/runs/43728784943",
-    "evidenceArtifact": "source-pinned-roadmap-chromium-evidence-43728784943 (GitHub 14167940673)",
+    "sourceExactWorkflow": "https://github.com/hdog960/Mythwrought/actions/runs/43730666232",
+    "evidenceArtifact": "source-pinned-roadmap-chromium-evidence-43730666232 (GitHub artifact 14168591203)",
     "candidateIDs": "9-38 (30 unique physical candidates, 21 roster families)",
     "buildingSymbols": "pack1:001..012; pack1:047..055 (some families require explicit variant ID choice)",
     "pureBuilderInterface": "src/block-packs/pack-1/builder-handoff.mjs",
-    "tests": "123/123 actual native Node (5 sequential-save and live-Y-bound regressions), 5 GPU geometry, 15 source Canvas2D views / 63 interactions / 30 PNGs, 360 genuine source GPU renders, 90 independently hash-checked PNGs, 6400 cells / 25 chunks source-only",
+    "tests": "128/128 genuine native Node incl. 5 new selection/collision reader ABI tests; 5 GPU geometry; 15 Canvas2D gallery views / 63 interactions / 30 PNGs; 360 candidate source WebGL2 GPU renders and 90 independently SHA256-checked PNGs",
     "packScopeComplete": true,
     "noProductionRegistrationOrMerge": true,
     "remainingGates": [
@@ -642,7 +643,7 @@
       "Real high-density village/town/city building performance and chunk budget under shared engine",
       "Physical iPhone controls/artwork and performance approval; creator Gate A remains open"
     ],
-    "sourceExactFunctionalCommit": "41453ce92f9a100c5f071421cfe95282e1a20d87",
+    "sourceExactFunctionalCommit": "0a2096108feb12674caa7aab2739e0df857b17ad",
     "denseStressSource": {
       "sample": "25 horizontal 16x16 chunks, 80x80 cells, 6400 Pack 1 candidate placements",
       "sourceTriangleBudget": "pass: conservative pre-neighbor-occlusion source triangle count below 10,000,000; no GPU frame time or FPS asserted",
@@ -688,6 +689,36 @@
       },
       "doesNotProveRealGameSaveRollback": true,
       "doesNotProvePhysicalIPhonePerformance": true
+    },
+    "collisionTargetingSourceABI": {
+      "code": "src/block-packs/pack-1/builder-handoff.mjs and structure-handoff.mjs",
+      "passableIds": "26-35",
+      "targetableWithoutCollision": true,
+      "absentCollisionReaderUsesNull": true,
+      "mushroomStemsRemainCollidable": true,
+      "currentMainShapeContractReviewed": true,
+      "functionalSourceCommit": "0a2096108feb12674caa7aab2739e0df857b17ad",
+      "notLiveRegistered": true
+    },
+    "crossPackIDSpotCheck": {
+      "heads": {
+        "pack2": "b2d99e3550b2fd2f55ed9b5a7f7cccfdedbe8183",
+        "pack3": "838f4c0df431c1028ded405326b5ceb41a2fc0d1",
+        "pack4": "8efb9c9b884ebda4ce991c54494c1595d64985f7",
+        "pack5": "8fdfce35e1165a9a5bc5b76eb58c56c3cd1a4306",
+        "main": "c512fcb9e6e82697cff0c5d26f073e503d51e4a5"
+      },
+      "assignedRanges": [
+        "pack1 9-38",
+        "pack2 59-76",
+        "pack3 109-125",
+        "pack4 159-181",
+        "biome130 256-315"
+      ],
+      "pack1AssignedCollisionFound": false,
+      "pack5NumericIdAssignmentStillNull": true,
+      "pack5FutureWideIdBandConflictsWithLiveBiomeIds": true,
+      "finalIntegrationAuditStillRequired": true
     }
   }
 }
