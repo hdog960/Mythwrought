@@ -245,3 +245,28 @@ The Playwright source now clicks these points through `#grid canvas.slice` on al
 Chromium launches locally but data:, file: and local HTTP navigation continue to be blocked by `ERR_BLOCKED_BY_ADMINISTRATOR`; no prohibited policy bypass was attempted and **0/15 candidate browser views / 0/30 genuine screenshots** were captured. The latest PR-head root Actions check is separate baseline CI and does not include Pack 1 galleries. Creator visual review, live WebGL2 integration, schema-1 orientation persistence and physical-iPhone approval remain outstanding.
 
 **Final state unchanged:** 21 authored families, 30 distinct IDs 9–38 all CANDIDATE, draft/unmerged/undeployed; M6 native Node PASS, M6 Chromium/production/creator gates OPEN, Gate A OPEN and v0.11 LOCKED. No main/shared CI/worldgen/other-pack/save changes.
+
+
+## Milestone 6 — Standalone candidate technical acceptance VERIFIED (2026-11-15)
+
+**Authoritative latest evidence; this section supersedes earlier historical M6 entries that said native Node or Chromium were not run.** Exact tested **candidate source head**: `7c019432cf73cd9ebc0ab8a8485486845a948c6d` (draft [Pack 1 PR #113](https://github.com/hdog960/Mythwrought/pull/113)). Exact supplemental **infrastructure head**: `d4690f4f4ba6891c9b1e2bfe358d20ba7b2eb8d4` (draft [PR #136](https://github.com/hdog960/Mythwrought/pull/136)). Naturally triggered [GitHub Actions acceptance run #43717407382](https://github.com/hdog960/Mythwrought/actions/runs/43717407382) **completed SUCCESS**; job `verify-candidates` passed. Artifact: `source-pinned-roadmap-chromium-evidence-43717407382`, artifact ID `14163535099` (13,705,572 bytes in GitHub's artifact listing).
+
+| Standalone candidate acceptance requirement | Verified result at source head 7c019432 |
+| --- | --- |
+| 21 stone/nature families / candidate IDs 9–38 | **21 families, 30 unique IDs**, unregistered |
+| Native candidate Node test suite | **93/93 PASS**, nine modules, zero failures/skips/TODO |
+| Source-derived GPU geometry Node tests | **5/5 PASS**, zero failures/skips/TODO |
+| Actual Chromium Canvas2D gallery interactions | **5 galleries × 3 sizes = 15 views; 63 actual interaction checks** |
+| Canvas2D candidate screenshot evidence | **30 authenticated PNGs**, exact tested head |
+| **Actual source-specific WebGL2 candidate GPU rendering** | **30 IDs × 4 rotations × 3 landscape sizes = 360/360 PASS** |
+| WebGL2 GPU screenshot evidence | **90/90 authentic PNGs**, exactly 30 per size; SHA-256 verified against uploaded manifest |
+| Landscape viewports | **667×375, 844×390, 932×430**, each passed |
+| Previous 667×375 stone arch / railing diagnostic status-panel overlap | **Corrected on 7c019432; inspected authentic corrected-head IDs 18/19/20 screenshots at all three sizes; no occlusion remains** |
+| WebGL2 console/network/GPU failures or context loss | **None reported in successful candidate suite** |
+| Exact candidate source commit's baseline root CI | [#43677313329](https://github.com/hdog960/Mythwrought/actions/runs/43677313329): **SUCCESS**; this baseline is separate from source-candidate GPU evidence |
+
+**Acceptance verdict:** **Pack 1 M6 standalone candidate technical and browser visual QA gate = PASS (complete)** on the exact tested **source** `7c019432cf73cd9ebc0ab8a8485486845a948c6d`. The dedicated WebGL2 GPU renderer used the original Pack 1 authored per-part AABB geometry and authored face material artwork. This is stronger than generic WebGL2 transport smoke, but remains an **isolated candidate preview**, not the production game's registered renderer. Review of authentic corrected-head pillar/arch/railing images found the status-panel overlap fixed. Future creator aesthetic approval has **not** been granted.
+
+**Unchanged and separately gated:** All 30 physical candidate IDs 9–38 remain **unregistered, unmerged and undeployed**. No live-game building palette, actual world placement, chunk meshing, ray picking, collision, schema-1 orientation persistence/rollback, offline production PWA compatibility, mobile performance or physical iPhone Safari acceptance is asserted. Integration and any real-game validation require separate explicit authorization, and must preserve existing IDs 0–8, saves, controls, budgets and other packs. Creator artwork and physical controls sign-off remain **OPEN**; v0.10 Gate A remains open, **v0.11 LOCKED**.
+
+**Documentation-only follow-up:** This addendum changes neither candidate geometry nor tests. Its future documentation commit will have a different Git SHA; **do not transfer this exact-head runtime certification to a modified source tree**. The evidence stays pinned to the source blobs in `7c019432`, and any later functional source change requires appropriately fresh acceptance. Do not merge PR #113, deploy, register these assets or treat M6 candidate proof as creator or production approval.

@@ -1,6 +1,8 @@
 # Mythwrought — Manual Block Pack 1: Stone & Nature
 
 **STATUS: CANDIDATE — NOT MERGED / NOT DEPLOYED.**
+**Current acceptance status (2026-11-15):** M1–M5 authored; **M6 standalone candidate technical QA PASSED** on source commit `7c019432` — 93/93 native tests, 5/5 WebGL2 geometry tests, 15 Canvas2D views / 63 interactions / 30 PNGs, and 360/360 genuine WebGL2 GPU renders / 90 authenticated PNGs. Corrected 667×375 arch/railing preview framing verified. See [M6_ACCEPTANCE.md](M6_ACCEPTANCE.md#milestone-6--standalone-candidate-technical-acceptance-verified-2026-11-15). This is **candidate-only**; no registration, game integration, merge, deployment, real-iPhone or creator approval. Earlier milestone snapshots below are historical. Gate A OPEN; v0.11 LOCKED.
+
 **Gate:** v0.10 Gate A; v0.11 locked.
 **Ownership:** src/block-packs/pack-1/ and tests/block-packs/pack-1/ only.
 **Coordination:** https://github.com/hdog960/Mythwrought/issues/109
