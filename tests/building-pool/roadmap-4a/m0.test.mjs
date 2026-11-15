@@ -16,8 +16,9 @@ test('4A owns exactly 315 allocated designs, never sibling 4B slots',()=>{
   assert.equal(PLANNED_TOTAL,315);
   assert.equal(expectedIds().length,315);
   assert.equal(new Set(expectedIds()).size,315);
-  assert.equal(manifest.counts.totalAuthored,30);
-  assert.equal(manifest.counts.remaining,285);
+  assert.equal(manifest.counts.legacyAuthored,30);
+  assert.equal(manifest.counts.totalAuthored,manifest.counts.legacyAuthored+manifest.counts.newlyAuthored);
+  assert.equal(manifest.counts.remaining,PLANNED_TOTAL-manifest.counts.totalAuthored);
   assert.equal(manifest.counts.creatorAccepted,0);
   assert.equal(manifest.counts.integratedBuildings,0);
   assert.equal(manifest.categories.reduce((n,c)=>n+c.total,0),315);
