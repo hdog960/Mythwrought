@@ -28,3 +28,25 @@ test('rejects fake shape records that lack the actual collision, selection or re
  }}};
  assert.throws(()=>getM1Pack4Construction(broken,{blueprints:[{id:'probe'}]}),/Physical Pack 4 candidate unavailable/);
 });
+
+test('only real authored west-wall backing allows a fireplace to rotate east',()=>{
+ let anchored=0,unanchored=0;
+ const proxy={resolvePack4BuilderBlueprint(b){
+  const cells=new Map(b.placements.map(p=>[p.at.join(','),p]));
+  for(const p of b.placements.filter(p=>p.asset==='pack4:064')){
+   if(p.orientationProvenance==='supported-wall-sidecar'){
+    anchored++;
+    assert.equal(p.orientation,'east');
+    assert.ok(['structure','wall','flue-support','support'].includes(
+     cells.get([p.at[0]-1,p.at[1],p.at[2]].join(','))?.role));
+   }else{
+    unanchored++;assert.equal(p.orientation,'north');
+    assert.equal(p.orientationProvenance,'default-preview-only');
+   }
+  }
+  return {resolvedCount:0,placements:[],orientationReviewCount:0};
+ }};
+ getM1Pack4Construction(proxy);
+ assert.equal(anchored+unanchored,15);
+ assert.ok(anchored>=1&&unanchored>=1);
+});

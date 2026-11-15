@@ -9,6 +9,24 @@ export const PACK4_CONSTRUCTION_SOURCE=Object.freeze({
   requiresIsolatedCombinedCheckout:true,productionRegistry:false
 });
 const sourceBlueprints=()=>createM1Pool();
+// Only adopt a fireplace orientation when an ORIGINAL authored structural
+// neighbor proves the Pack4 wall bracket has backing. No wall/shaft invented.
+// Other facings remain explicit candidate-preview defaults requiring review.
+function supportedPhysicalDraft(draft){
+ if(!Array.isArray(draft.modules))return draft;
+ const slots=draft.modules.flatMap(m=>m.cells.map(c=>
+  ({at:c.slice(0,3),asset:c[3],role:m.role})));
+ const map=new Map(slots.map(s=>[s.at.join(','),s]));
+ return {id:draft.id,placements:slots.map(s=>{
+  const [x,y,z]=s.at;
+  const west=map.get([x-1,y,z].join(','));
+  const anchored=s.asset==='pack4:064'&&west&&
+   ['structure','wall','flue-support','support'].includes(west.role);
+  return {...s,orientation:anchored?'east':'north',
+   orientationProvenance:anchored?'supported-wall-sidecar':'default-preview-only'};
+ })};
+}
+
 export function getM1Pack4Construction(pack4,{blueprints=null}={}){
   if(typeof pack4?.resolvePack4BuilderBlueprint!=='function')
     throw new TypeError('Pack 4 physical geometry resolver required; symbolic-only fallback forbidden');
@@ -16,7 +34,8 @@ export function getM1Pack4Construction(pack4,{blueprints=null}={}){
   if(!Array.isArray(drafts))throw TypeError('Expected source building blueprint array');
   const out=[];
   for(const draft of drafts){
-    const plan=pack4.resolvePack4BuilderBlueprint(draft);
+    const physicalDraft=supportedPhysicalDraft(draft);
+    const plan=pack4.resolvePack4BuilderBlueprint(physicalDraft);
     if(!plan||!Array.isArray(plan.placements)||plan.resolvedCount!==plan.placements.length)
       throw Error('Pack 4 resolver returned invalid physical plan '+draft?.id);
     for(const p of plan.placements){
@@ -30,7 +49,7 @@ export function getM1Pack4Construction(pack4,{blueprints=null}={}){
         throw Error('Physical Pack 4 candidate unavailable at '+draft?.id);
     }
     out.push(Object.freeze({
-      blueprintId:draft.id,source:draft,physicalPlan:plan,
+      blueprintId:draft.id,source:draft,physicalSource:physicalDraft,physicalPlan:plan,
       pack4Cells:plan.resolvedCount,
       orientationReviewCount:plan.orientationReviewCount??0,
       mountingSupportReviewCount:plan.placements.filter(p=>!p.supportVerified).length,
