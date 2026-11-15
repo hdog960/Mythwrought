@@ -32,7 +32,7 @@ const PLANS=[
 {t:L,b:'desert',s:'large',title:'Sun Court Double Cloister',dim:[38,14,35],
  r:[[3,33,3,30],[15,21,1,4]],holes:[[18,17,6,5]],e:[18,1],
  rooms:[['catalogue',18,7],['collections',8,8],['reading-room',29,8],['archive',8,26],['scriptorium',29,26],['scribe-reading',18,27]],
- div:[['z',11,5,31,18]],peak:[[6,6],[30,6],[6,28],[30,28]],roof:'open-court-parapet'},
+ div:[['z',11,5,31,10]],peak:[[6,6],[30,6],[6,28],[30,28]],roof:'open-court-parapet'},
 {t:L,b:'snow',s:'large',title:'Hearthline Twin-Shaft Library',dim:[36,14,31],
  r:[[2,11,2,27],[23,32,2,27],[10,24,12,17]],e:[6,2],
  rooms:[['collections',7,6],['reading-room',27,6],['lending-atrium',17,14],['archive',7,23],['manuscript-vault',27,23]],
