@@ -45,6 +45,18 @@ try{
     await page.screenshot({path:path.join(output,`pack5-builder-${width}x${height}.png`)});
     console.log('PASS authentic HTTP-served Pack5 WebGL2',width,height,
       '18 models',evidence.results.reduce((sum,r)=>sum+r.triangles,0),'triangles');
+    await page.goto('http://127.0.0.1:4179/tests/pack5-mixed-gallery.html',{
+      waitUntil:'load',timeout:15000});
+    await page.waitForFunction(()=>document.body.dataset.completed!==undefined,
+      null,{timeout:30000});
+    const mixed=await page.evaluate(()=>window.PACK5_BUILDER_PREVIEW);
+    assert.equal(mixed?.webgl2,true);
+    assert.equal(mixed.cards,36);
+    assert.equal(mixed.complete,true,JSON.stringify(mixed.results.filter(r=>r.foreground<=40)));
+    assert.equal(new Set(mixed.results.map(r=>r.id+'/'+r.variant)).size,36);
+    await page.screenshot({path:path.join(output,`pack5-36-variants-${width}x${height}.png`)});
+    console.log('PASS authentic HTTP-served Pack5 36-variant mixed WebGL2',width,height,
+      mixed.results.reduce((sum,r)=>sum+r.triangles,0),'triangles');
     await page.close();
   }
 }finally{

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mythwrought Pack 5 builder — source-authentic WebGL2 acceptance</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#202837;color:#e4e7ed;font:13px system-ui,sans-serif;overflow:hidden}
+  header{height:27px;padding:5px 10px}canvas{width:100vw;height:calc(100dvh - 27px);display:block}
+  #names{position:absolute;inset:27px 0 0;display:grid;grid-template-columns:repeat(6,1fr);
+  grid-template-rows:repeat(6,1fr);pointer-events:none}
+  .name{padding:6px 4px 0;text-align:center;font-size:clamp(8px,1.15vw,11px);
+  text-shadow:0 1px 3px #000;white-space:nowrap;overflow:hidden}
+</style>
+<header>MYTHWROUGHT — Pack 5 builder asset integration • 36 physical variants • WebGL2</header>
+<canvas id="gallery" aria-label="Real Pack 5 authored voxel triangles"></canvas>
+<div id="names"></div>
+<script type="module" src="./pack5-mixed-gallery.mjs"></script>
+</html>
