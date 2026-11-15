@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
-import {MANUAL_FIVE_PACK_CATALOG} from '../src/builder-assets/manual-five-pack.mjs';
+import {MANUAL_FIVE_PACK_CATALOG,resolveManualFivePackAsset} from '../src/builder-assets/manual-five-pack.mjs';
 import {createManual14Layer} from '../src/builder-assets/manual14-layer.mjs';
 import {meshManual14Chunk,MANUAL14_VERTICES_PER_CHUNK} from '../src/builder-assets/manual14-mesh.mjs';
 import {candidateSurface,candidateFaceTexture} from '../src/block-packs/pack-1/webgl2-candidates.mjs';
@@ -74,4 +74,30 @@ test('all rotating authored manual parts are isolated to their seed, depth and 1
  assert.deepEqual(a.opaque,b.opaque,'Identical physical cells produce deterministic typed GPU bytes');
  assert.deepEqual(a.transparent,b.transparent);
  assert.equal(meshManual14Chunk(layer,31,31,-1).vertices,0);
+});
+
+// Cover every source-owned Pack 1 / Pack 4 numeric variant in four rotations.
+// Each candidate is rendered independently to avoid inventing physical mounts
+// or falsely failing the intentional 12k total chunk vertex cap.
+test('all 53 authored manual numeric variants produce source-shaped GPU vertices in all quarter turns',()=>{
+ const src=MANUAL_FIVE_PACK_CATALOG.filter(row=>row.pack===1||row.pack===4);
+ assert.equal(src.length,53);
+ let cases=0,alphaCases=0;
+ for(const row of src)for(let yaw=0;yaw<4;yaw++){
+  const physical=resolveManualFivePackAsset(row.symbol,{
+   numericId:row.numericId,orientation:yaw,variant:row.pack===1?'lower':null
+  });
+  const item={...physical,asset:row.symbol,at:[500,19,500],numericId:row.numericId,
+   sourcePack:row.pack,orientation:yaw};
+  const layer={entries:()=>[item]};
+  const mesh=meshManual14Chunk(layer,31,31,0);
+  assert.equal(mesh.instances,1,row.symbol+' rotation '+yaw);
+  assert.ok(mesh.vertices>0,row.symbol+' rotation '+yaw);
+  assert.ok(mesh.vertices<=MANUAL14_VERTICES_PER_CHUNK,row.symbol+' rotation '+yaw);
+  assert.ok(mesh.opaque.length>0||mesh.transparent.length>0);
+  if(mesh.transparent.length)alphaCases++;
+  cases++;
+ }
+ assert.equal(cases,212);
+ assert.ok(alphaCases>=4,'Original Pack 4 glass must retain a blended glass pass');
 });

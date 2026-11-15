@@ -45,26 +45,32 @@ try{
   });
   assert.equal(scene.schema,1);
   assert.equal(scene.after,2);
-  await page.waitForTimeout(700);
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.manual14MeshVertices)>0,
+    null,{timeout:60000});
   const canvas=await page.$('#scene');
   const status=await page.evaluate(()=>{
    const c=document.querySelector('#scene'),m=document.querySelector('#movePad').getBoundingClientRect(),
      r=document.querySelector('#lookPad').getBoundingClientRect();
    return {count:Number(c.dataset.manual14PhysicalCount),
     vertices:Number(c.dataset.renderedMeshVertices),
+    manual14MeshVertices:Number(c.dataset.manual14MeshVertices),
+    manual14VisibleInstances:Number(c.dataset.manual14VisibleInstances),
     width:innerWidth,height:innerHeight,separateRails:m.right<r.left,
     selectedLabel:document.querySelector('#manual14Select')?.options?.length??0};
   });
   assert.equal(status.count,2);
   assert.ok(status.vertices>0,'No genuine WebGL2 terrain/chunk vertices');
+  assert.ok(status.manual14MeshVertices>0,'No physical Pack 1/4 triangles resident in rendered GPU chunks');
+  assert.ok(status.manual14VisibleInstances>=2,'Pack 1/4 source assets not both resident in streamed chunks');
   assert.ok(status.separateRails,'Touch rails overlap at '+width+'×'+height);
   assert.ok(status.selectedLabel>=54,'Missing 53 source-owned numeric candidates');
   await canvas.screenshot({path:out+'/pack1-pack4-'+width+'x'+height+'.png'});
   // Reload the actual served game: persisted sidecar and real GPU meshes must
   // restore without fabricating IDs in the schema-1 VoxelWorld serialization.
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.__mythwroughtTest?.snapshot?.().manual14PhysicalBlocks===2,
-    {timeout:45000});
+  await page.waitForFunction(()=>window.__mythwroughtTest?.snapshot?.().manual14PhysicalBlocks===2&&
+    Number(document.querySelector('#scene')?.dataset.manual14MeshVertices)>0,
+    null,{timeout:60000});
   const reloaded=await page.evaluate(([p1,p4])=>({
    ids:[window.__mythwroughtTest.block(...p1),window.__mythwroughtTest.block(...p4)],
    sidecar:JSON.parse(localStorage.getItem('mythwrought.manual14.seed.179')),

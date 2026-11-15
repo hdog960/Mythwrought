@@ -150,7 +150,9 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
   }
   function available(entry,temporary){
     const k=key(entry.at);
-    if((overlays.has(k)&&!temporary?.has(k))||world.edits.has(k)||world.get(...entry.at)!==BLOCK.AIR)
+    if((overlays.has(k)&&!temporary?.has(k))||world.edits.has(k)||
+       world.manual14Layer?.get?.(entry.at)||world.pack5Layer?.cell?.(entry.at)||
+       world.get(...entry.at)!==BLOCK.AIR)
       throw new Error('Occupied or player-edited voxel cannot be replaced');
   }
   function placeMany(records,{playerBody=null}={}){

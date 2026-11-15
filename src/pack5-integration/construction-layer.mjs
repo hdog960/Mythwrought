@@ -80,8 +80,9 @@ export function createPack5ConstructionLayer(world){
     const parts=orientedParts(asset.descriptor,rotation).map(p=>({
       ...p,cell:offset(anchor,p.cell)
     }));
-    if(parts.some(p=>!within(p.cell)||world.get(...p.cell)!==BLOCK.AIR))
-      return {ok:false,reason:'Legacy world cell occupied or outside editable bounds'};
+    if(parts.some(p=>!within(p.cell)||world.get(...p.cell)!==BLOCK.AIR||
+      world.manual14Layer?.get?.(p.cell)||world.pack3Runtime?.get?.(p.cell)))
+      return {ok:false,reason:'Legacy or cross-pack physical cell occupied or outside editable bounds'};
     if(playerBox&&parts.some(p=>p.collisionBoxes.some(b=>overlap(worldBox(b,p.cell),playerBox))))
       return {ok:false,reason:'Player collision'};
     if(!supportsFor(into,asset.descriptor,anchor,rotation,parts))
