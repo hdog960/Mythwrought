@@ -581,12 +581,12 @@
       "kind": "Milestone 5 four physical flowers + three physical mushrooms"
     }
   ],
-  "latestMilestone": "M1-M6 standalone candidate source/browser acceptance COMPLETE; new Pack 1 builder handoff, 21 symbolic family refs -> 30 physical IDs, rotation/variant fail-closed save plans and 101 native tests verified at bfa15c84. Final five-pack production integration readiness remains NOT CERTIFIED.",
-  "finalAcceptance": "109/109 EXACT-SOURCE NATIVE TESTS PASS + 5/5 GPU GEOMETRY + 360/360 SOURCE-WEBGL2 + 90 HASHED GPU PNGS at Pack1 source 590c3c14, GitHub Actions 43723553203. 25-chunk 6400-cell SOURCE-only construction/metadata stress PASS. Production five-pack integration, live save/controls/performance and physical iPhone review NOT VERIFIED.",
+  "latestMilestone": "M1–M6 Pack 1 candidate assets and builder source + live-biome-schema-1 compatibility simulation passed exact-source 111 native tests/360 WebGL2 render acceptance. Coordinated five-pack production integration remains separate and unapproved.",
+  "finalAcceptance": "SOURCE-LEVEL PACK1 CANDIDATE QA PASS at 81369a0c, supplemental GitHub Actions #43724597209: 111/111 genuine native Node, 5/5 GPU geometry, 15 Chromium gallery views and 63 interactions, 360/360 source-specific GPU renders, 90/90 independently authenticated GPU screenshots. Current-main biome130 256..315 schema-1 optional rotations preserved in isolated construction adapter. NOT LIVE REGISTERED / NOT DEVICE-VERIFIED / NOT READY FOR COORDINATED FINAL INTEGRATION.",
   "acceptanceMatrix": {
     "family_roster": "21_OF_21_ALL_CANDIDATE",
     "candidate_ids": "30_UNIQUE_9_THROUGH_38_UNMERGED",
-    "native_pack1_node": "PASSED_109_OF_109_GENUINE_NODE_22_AT_590c3c14_NO_FAIL_SKIP_TODO",
+    "native_pack1_node": "PASSED_111_OF_111_SOURCE_EXACT_GENUINE_NATIVE_NODE_AT_81369a0c_NO_SKIP_FAIL_TODO",
     "native_node_exact_blob_provenance": "21_COMMITTED_FILES_VERIFIED_GIT_BLOB_SHA",
     "opted_in_generic_shape_v8": "PASSED_120_OF_120_NOT_PRODUCTION_GPU",
     "genuine_chromium_candidate_galleries": "PASS_15_OF_15_REAL_CHROMIUM_VIEWS_63_INTERACTIONS_RUN_43720843639",
@@ -610,9 +610,10 @@
     "native_partial_shape_probe_cases": "THREE_OF_THREE_PASS_NODE_SOURCE_FIXTURE",
     "real_chromium_cutaway_probe_cases": "18_ADDED_RUNNER_SOURCE_NOT_EXECUTED",
     "browser_interaction_total": "63_REQUIRED_ZERO_RUN",
-    "candidate_source_exact_webgl2": "PASS_360_OF_360_GPUSOURCE_WEBGL2_90_AUTHENTIC_HASHED_PNGS_667x375_844x390_932x430_HEAD_590c3c14",
+    "candidate_source_exact_webgl2": "PASS_360_OF_360_REAL_GPUSOURCE_WEBGL2_AND_90_SHA256_VERIFIED_PNGS_HEAD_81369a0c",
     "builder_symbol_resolution": "PASS_21_ROSTER_SYMBOLS_30_NUMERIC_IDS_8_BUILDER_PLUS_8_DENSE_NATIVE_TESTS",
-    "dense_source_construction": "PASS_6400_CELLS_25_CHUNKS_8_NATIVE_TESTS_NO_REAL_FPS_CLAIM"
+    "dense_source_construction": "PASS_6400_CELLS_25_CHUNKS_8_NATIVE_TESTS_NO_REAL_FPS_CLAIM",
+    "current_live_biome130_save_compatibility": "ISOLATED_SOURCE_PASS_PRESERVE_256_TO_315_AND_OPTIONAL_ROTATIONS_NODATA_LOSS_2_NEW_NATIVE_TESTS__NOT_REAL_GAME_SAVE_TEST"
   },
   "acceptanceHandoff": "src/block-packs/pack-1/M6_ACCEPTANCE.md",
   "baselineAtCreation": {
@@ -623,14 +624,14 @@
   "nativeNodeEvidenceFile": "src/block-packs/pack-1/M6_NATIVE_NODE_EVIDENCE.md",
   "integrationReadiness": {
     "strategy": "ONE_COORDINATED_FIVE_BLOCK_PACK_FINAL_INTEGRATION_NO_INDEPENDENT_MERGE_DEPLOY",
-    "status": "PACK1_SOURCE_CANDIDATE_AND_SOURCE_BUILDER_TESTS_PASS__FINAL_PRODUCTION_INTEGRATION_READINESS_OPEN",
+    "status": "PACK1_SOURCE_ASSETS_AND_BIOME_SAVE_COMPATIBILITY_SIMULATOR_TESTED__REAL_MULTI_PACK_PRODUCTION_INTEGRATION_NOT_CERTIFIED",
     "candidateSourceCommit": "bfa15c846b9b2b7227f78321b2b8657c7c311e20",
-    "sourceExactWorkflow": "https://github.com/hdog960/Mythwrought/actions/runs/43723553203",
-    "evidenceArtifact": "source-pinned-roadmap-chromium-evidence-43723553203 (14165646949)",
+    "sourceExactWorkflow": "https://github.com/hdog960/Mythwrought/actions/runs/43724597209",
+    "evidenceArtifact": "source-pinned-roadmap-chromium-evidence-43724597209 (ID 14165928208, 13,707,888 bytes)",
     "candidateIDs": "9-38 (30 unique physical candidates, 21 roster families)",
     "buildingSymbols": "pack1:001..012; pack1:047..055 (some families require explicit variant ID choice)",
     "pureBuilderInterface": "src/block-packs/pack-1/builder-handoff.mjs",
-    "tests": "109/109 genuine native Node incl. 8 dense-source-construction/metadata regressions, 5 GPU geometry, 15 Canvas2D gallery views/63 interactions/30 Canvas2D PNGs; 360 actual GPU renders and 90 authenticated WebGL2 PNGs across 3 iPhone landscape CSS sizes",
+    "tests": "111 genuine native Node (2 new biome save safety tests), 5 GPU geometry, 15 Canvas2D Chromium galleries/63 interactions/30 PNGs, 360 genuine source WebGL2 renders and 90 SHA256-authenticated GPU PNGs; 6400-cell/25-chunk source stress",
     "packScopeComplete": true,
     "noProductionRegistrationOrMerge": true,
     "remainingGates": [
@@ -639,13 +640,20 @@
       "Real high-density village/town/city building performance and chunk budget under shared engine",
       "Physical iPhone controls/artwork and performance approval; creator Gate A remains open"
     ],
-    "sourceExactFunctionalCommit": "590c3c140ffd09161569cde0cc40d97a991a8155",
+    "sourceExactFunctionalCommit": "81369a0c910e1b95e719814be98d2210218dec74",
     "denseStressSource": {
       "sample": "25 horizontal 16x16 chunks, 80x80 cells, 6400 Pack 1 candidate placements",
       "sourceTriangleBudget": "pass: conservative pre-neighbor-occlusion source triangle count below 10,000,000; no GPU frame time or FPS asserted",
       "orientationPersistence": "isolation-only separate turns, upper variants and mounts with schema-1 edits unchanged, metadata checksum guards accidental omissions",
       "notProductionPerformance": true,
       "notPhysicalIphoneTest": true
+    },
+    "currentMainBiomeCompatibility": {
+      "auditedMainCommit": "c512fcb9e6e82697cff0c5d26f073e503d51e4a5",
+      "registeredIDs": "256-315",
+      "preservesOptionalSchema1Rotations": true,
+      "sourceOnly": true,
+      "liveEngineUnmodified": true
     }
   }
 }
