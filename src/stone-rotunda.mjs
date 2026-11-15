@@ -19,7 +19,9 @@ export function planStoneRotunda(world,x,z){
       if(world.edits instanceof Map && world.edits.has(worldKey(px,py,pz)))return null;
       if(world.get(px,py,pz)!==baseline)return null;
       if(dy===0&&baseline!==BLOCK.GRASS)return null;
-      // The entire walking platform needs two intact supporting layers.\n      // A hidden cave directly beneath a flat-looking lawn is not a safe site.\n      if((dy===-2||dy===-1)&&baseline===BLOCK.AIR)return null;
+      // The entire walking platform needs two intact supporting layers.
+      // A hidden cave directly beneath a flat-looking lawn is not a safe site.
+      if((dy===-2||dy===-1)&&baseline===BLOCK.AIR)return null;
       if(dy>0&&baseline!==BLOCK.AIR)return null;
     }
   }
