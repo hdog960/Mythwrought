@@ -191,3 +191,17 @@ test('traversal inspection rejects a mined physical pillar or broken elevated ri
   assert.equal(inspectStoneRotundaTraversal(world,plan),null,
     'an absent overhead stone ring must invalidate landmark inspection');
 });
+
+
+test('traversal rejects a missing middle shaft voxel and accepts a physical repair',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected a supported four-approach site');
+  assert.equal(placeStoneRotunda(world,plan),true);
+  const [x,h,z]=plan.origin;
+  assert.ok(inspectStoneRotundaTraversal(world,plan));
+  assert.equal(world.set(x+3,h+2,z+3,BLOCK.AIR),true);
+  assert.equal(inspectStoneRotundaTraversal(world,plan),null,
+    'a missing middle voxel must not be concealed by intact shaft endpoints');
+  assert.equal(world.set(x+3,h+2,z+3,BLOCK.STONE),true);
+  assert.ok(inspectStoneRotundaTraversal(world,plan));
+});
