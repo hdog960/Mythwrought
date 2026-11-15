@@ -3,7 +3,7 @@
 // Pack 1 uses original source face pixels (bounded 4x4 texel bake); Pack 4
 // preserves its original opaque and translucent source material triangles.
 import {CHUNK_SIZE} from '../voxel.mjs';
-import {sectionBounds} from '../depth.mjs';
+import {sectionBounds,sectionForY} from '../depth.mjs';
 import {candidateSurface,candidateFaceTexture} from '../block-packs/pack-1/webgl2-candidates.mjs';
 import {pack4BuilderAsset} from '../block-packs/pack-4/builder-handoff.mjs';
 
@@ -135,4 +135,35 @@ export function meshManual14Chunk(layer,cx,cz,section=0,{maxVertices=MANUAL14_VE
  }
  return Object.freeze({opaque:new Float32Array(opaque),transparent:new Float32Array(transparent),
    instances:included,vertices:vertexCount,authoringSource:'original-Pack1-pixels-and-Pack4-material-meshes'});
+}
+
+// Fail-closed PRE-SAVE validation of all manual14 objects, including shapes in
+// chunks not currently loaded on the GPU. No GPU allocations or world writes.
+// Because the actual source geometry cache is shared with the mesh builder,
+// counts exactly match the authored triangle cost used by WebGL2 streaming.
+export function validateManual14ChunkBudgets(entries,{
+ maxVertices=MANUAL14_VERTICES_PER_CHUNK
+}={}){
+ if(!Array.isArray(entries)||entries.length>2048||
+    !Number.isInteger(maxVertices)||maxVertices<1||maxVertices>MANUAL14_VERTICES_PER_CHUNK)
+  throw TypeError('Invalid manual1/4 preflight entries or mobile budget');
+ const buckets=new Map();
+ let busiest=0;
+ for(const entry of entries){
+  if(!entry||!Array.isArray(entry.at)||entry.at.length!==3||
+     !entry.at.every(Number.isSafeInteger))throw TypeError('Invalid physical preflight coordinate');
+  const section=sectionForY(entry.at[1]);
+  if(section===null)throw RangeError('Manual1/4 object is outside playable vertical sections');
+  const name=[Math.floor(entry.at[0]/CHUNK_SIZE),
+    Math.floor(entry.at[2]/CHUNK_SIZE),section].join(',');
+  const shape=geometry(entry);
+  const vertices=(shape.opaque.length+shape.transparent.length)/9;
+  const current=(buckets.get(name)??0)+vertices;
+  if(current>maxVertices)
+   throw RangeError('Manual 1/4 pre-save GPU chunk vertex budget exceeded: '+name);
+  buckets.set(name,current);
+  busiest=Math.max(busiest,current);
+ }
+ return Object.freeze({instances:entries.length,chunkSections:buckets.size,
+  busiestVertices:busiest,maxVertices,allSectionsWithinBudget:true});
 }

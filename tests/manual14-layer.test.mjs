@@ -88,3 +88,33 @@ test('external-tab and damaged manual14 sidecars fail closed without overwriting
  assert.match(damaged.blocked,/Protected/);
  assert.equal(damaged.placeMany([{asset:masonry.symbol,numericId:9,at:[500,19,500]}]).ok,false);
 });
+
+test('unloaded 128-piece dense construction fails before any source overlay or schema-1 save changes',()=>{
+ const world=new VoxelWorld(179),layer=createManual14Layer(world),asset=selected(1,9);
+ const dense=Array.from({length:128},(_,i)=>({
+  asset:asset.symbol,numericId:asset.numericId,at:[512+i%8,19,512+Math.floor(i/8)]
+ }));
+ assert.ok(dense.every(row=>world.get(...row.at)===BLOCK.AIR));
+ const prior=JSON.stringify(world.save());
+ assert.throws(()=>layer.placeMany(dense),/pre-save GPU chunk vertex budget exceeded/);
+ assert.equal(layer.size(),0,'Oversized unloaded physical chunk cannot become world state');
+ assert.equal(JSON.stringify(world.save()),prior,'Legacy schema-1 save must not change');
+});
+test('512 properly distributed Pack1/4 objects pass source-owned chunk budget, save and reload deterministically',()=>{
+ const world=new VoxelWorld(179),storage=store(),bridge=createManual14SavedBridge(world,storage);
+ const assets=[selected(1,9),selected(4,159)];
+ const rows=Array.from({length:512},(_,i)=>{
+  const a=assets[i%2];return {asset:a.symbol,numericId:a.numericId,
+   at:[500+5*(i%32),19,500+5*Math.floor(i/32)],orientation:i%4};
+ });
+ assert.ok(rows.every(row=>world.get(...row.at)===BLOCK.AIR));
+ const before=JSON.stringify(world.save());
+ const result=bridge.placeMany(rows);
+ assert.equal(result.ok,true,result.reason);
+ assert.equal(bridge.layer.size(),512);
+ const restored=createManual14SavedBridge(world,storage);
+ assert.equal(restored.blocked,null);
+ assert.equal(restored.layer.size(),512);
+ assert.equal(JSON.stringify(restored.snapshot()),JSON.stringify(bridge.snapshot()));
+ assert.equal(JSON.stringify(world.save()),before);
+});

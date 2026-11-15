@@ -9,6 +9,7 @@ import {raycastShapes} from '../voxel-shape-interactions.mjs';
 import {inspectBodyFit} from '../voxel-shape-fit.mjs';
 import {saveFingerprint} from '../persistence.mjs';
 import {MANUAL_FIVE_PACK_CATALOG,resolveManualFivePackAsset} from './manual-five-pack.mjs';
+import {validateManual14ChunkBudgets} from './manual14-mesh.mjs';
 
 export const MANUAL14_FORMAT='mythwrought.manual-block-packs-1-and-4.v1';
 export const MANUAL14_MAX_CELLS=2048;
@@ -100,6 +101,7 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
    future.set(k,entry);
   }
   verifyEntries(future,options); // fail closed before any mutation
+  validateManual14ChunkBudgets([...future.values()]); // even UNLOADED deep/GPU chunks
   placed=future;
   return records.length;
  }
@@ -140,7 +142,9 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
    if(rebuilt.has(k))throw Error('Duplicate saved physical cell');
    rebuilt.set(k,item);
   }
-  verifyEntries(rebuilt);placed=rebuilt;return rebuilt.size;
+  verifyEntries(rebuilt);
+  validateManual14ChunkBudgets([...rebuilt.values()]); // corrupt/dense saved scenes stay protected
+  placed=rebuilt;return rebuilt.size;
  }
  return Object.freeze({world,placeMany,remove,get,target,collision,readShape,
    snapshot,restore,supportsLegacyCell,size:()=>placed.size,
