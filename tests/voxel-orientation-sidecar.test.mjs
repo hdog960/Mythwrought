@@ -26,3 +26,32 @@ test('rejects malformed, duplicate, unbounded, and sentinel records',()=>{
  assert.throws(()=>s.set([0,0,0],1,4));
  assert.throws(()=>restoreOrientationSidecar('bad',()=>1));
 });
+
+test('successful same-ID replacements, removals and undo invalidate orientation',()=>{
+ const world=new Map([['2,0,-1',6]]);
+ const read=(x,y,z)=>world.get([x,y,z].join(','))??0;
+ const s=makeOrientationSidecar();
+ const cell=[2,0,-1];
+ s.set(cell,6,3);
+ assert.equal(s.applyEdit(cell,()=>{world.set('2,0,-1',6);return true;}),true);
+ assert.equal(s.get(cell,6),0,'same-ID replacement must not inherit old turns');
+ s.set(cell,6,1);
+ assert.equal(s.applyEdit(cell,()=>{world.delete('2,0,-1');return true;}),true);
+ assert.equal(s.get(cell,6),0,'removal clears orientation');
+ s.set(cell,6,2);
+ assert.equal(s.invalidateEdit(cell),true,'undo must explicitly invalidate');
+ assert.equal(s.invalidateEdit(cell),false,'invalidation is idempotent');
+ assert.deepEqual(s.snapshot(read),[]);
+});
+test('failed and throwing edits preserve state, invalid edits cannot execute',()=>{
+ const s=makeOrientationSidecar();
+ const cell=[-4,2,9];
+ s.set(cell,5,3);
+ assert.equal(s.applyEdit(cell,()=>false),false);
+ assert.equal(s.get(cell,5),3);
+ assert.throws(()=>s.applyEdit(cell,()=>{throw new Error('world rejected edit');}),/world rejected edit/);
+ assert.equal(s.get(cell,5),3);
+ assert.throws(()=>s.applyEdit([0.5,0,0],()=>true),TypeError);
+ assert.throws(()=>s.applyEdit(cell,null),TypeError);
+ assert.equal(s.get(cell,5),3);
+});
