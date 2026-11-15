@@ -133,7 +133,7 @@ test('M2 captures 12 actual 3B source WebGL2 cube-diagnostic lumberyard/mill ext
    }
   }
   assert.equal(reports.length,12,'12 distinct Chromium M2 industry source views required');
-  assert.equal(new Set(reports.map(r=>r.filename)).size,90);
+  assert.equal(new Set(reports.map(r=>r.filename)).size,12);
   const summary={source:'Builder 3B authored lumberyard and mill coordinates',renderer:'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES',
    physicalFamilyShapesRendered:false,creatorArtApproved:false,physicalIPhoneTested:false,
    count:reports.length,reports};
