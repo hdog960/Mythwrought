@@ -38,22 +38,21 @@ export function placeArchwoodAccess(world,plan){
      !Array.isArray(plan.origin)||plan.seed!==world.seed)return false;
   const fresh=planArchwoodAccess(world,plan.origin[0],plan.origin[2]);
   if(!fresh||!same(plan,fresh))return false;
-  // Install bridge and stairs together only when all target cells are clear.
-  // A failure before the bridge installation leaves the world unchanged.
-  // This is a staged interface: callers must opt in and accept that a failed
-  // second-stage write requires explicit rollback of the first-stage writes.
+  // The tree planner checks clear approaches, so install its real voxels first.
+  // If any stair write fails, reverse both sets of edits in reverse order.
+  if(!placeVoxelTree(world,fresh.tree))return false;
   const written=[];
   try{
     for(const [x,y,z,id] of fresh.cells){
       if(!world.set(x,y,z,id))throw Error('stair write rejected');
       written.push([x,y,z]);
     }
-    if(!placeVoxelTree(world,fresh.tree))throw Error('bridge write rejected');
     return true;
   }catch{
-    for(let i=written.length-1;i>=0;i--){
-      const [x,y,z]=written[i];
-      if(!world.set(x,y,z,BLOCK.AIR))throw Error('archwood stair rollback failed');
+    const undo=[...written,...fresh.tree.cells];
+    for(let i=undo.length-1;i>=0;i--){
+      const [x,y,z]=undo[i];
+      if(!world.set(x,y,z,BLOCK.AIR))throw Error('archwood access rollback failed');
     }
     return false;
   }
