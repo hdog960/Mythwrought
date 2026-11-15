@@ -105,6 +105,22 @@ test('bench has open leg gaps and raised back, unlike broad table top',()=>{
  assert.ok(along(table,.5,.77,.5));
  assert.equal(along(table,.5,.55,.5),false);
  assert.ok(table.visible.some(p=>p.bounds[4]>.8));
+ // Under-table braces previously stopped .01 cells before both pairs of
+ // legs; their physical collision boxes formed isolated components.
+ for(let turn=0;turn<4;turn++){
+  const boxes=furnishingShape(172,turn).collision;
+  const connected=(a,b)=>[0,1,2].every(axis=>
+   a[axis]<=b[axis+3]+1e-8&&b[axis]<=a[axis+3]+1e-8);
+  const seen=new Set([0]),pending=[0];
+  while(pending.length){
+   const i=pending.pop();
+   for(let j=0;j<boxes.length;j++)if(!seen.has(j)&&connected(boxes[i],boxes[j])){
+    seen.add(j);pending.push(j);
+   }
+  }
+  assert.equal(seen.size,boxes.length,
+   'table beams must physically connect into all four legs at turn '+turn);
+ }
 });
 test('standing sign has a narrow post and full physical sign panel',()=>{
  const a=furnishingShape(173);
