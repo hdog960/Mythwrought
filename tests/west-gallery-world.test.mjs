@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,CHUNK_SIZE,meshChunk} from '../src/voxel.mjs';
-import {westGalleryWorld,westGalleryTraversal} from '../src/west-gallery-world.mjs';
+import {westGalleryWorld,westGalleryTraversal,westVaultTraversal} from '../src/west-gallery-world.mjs';
 import {branchedCaveWorld} from '../src/branched-cave-world.mjs';
 import {CAVE_CANDIDATE} from '../src/experimental-cave-route.mjs';
 
@@ -28,4 +28,28 @@ test('existing placed blocks win and obstruct physical traversal',()=>{
   assert.equal(route.walkable,false);
   assert.ok(route.failures.some(p=>p.z===sample.z));
   assert.equal(JSON.stringify(world.save()),saved);
+});
+
+for(const seed of [179,1,2026,-77]) {
+  test('second vaulted hall has connected player-sized route for seed '+seed,()=>{
+    const world=new VoxelWorld(seed),saved=JSON.stringify(world.save());
+    const route=westVaultTraversal(world);
+    assert.equal(route.samples.length,22);
+    assert.deepEqual(route.failures,[]);
+    assert.equal(route.walkable,true);
+    const last=route.samples.at(-1);
+    assert.equal(last.x,CAVE_CANDIDATE.x+22);
+    assert.equal(last.z,CAVE_CANDIDATE.z-13);
+    const reader=westGalleryWorld(world);
+    assert.equal(reader.get(last.x,last.y+4,last.z),BLOCK.AIR);
+    assert.equal(JSON.stringify(world.save()),saved);
+  });
+}
+test('saved placed block in east vault remains solid and blocks route',()=>{
+  const world=new VoxelWorld(179),last=westVaultTraversal(world).samples.at(-1);
+  assert.equal(world.set(last.x,last.y,last.z,BLOCK.WOOD),true);
+  const before=JSON.stringify(world.save());
+  assert.equal(westGalleryWorld(world).get(last.x,last.y,last.z),BLOCK.WOOD);
+  assert.ok(westVaultTraversal(world).failures.some(p=>p.x===last.x&&p.z===last.z));
+  assert.equal(JSON.stringify(world.save()),before);
 });
