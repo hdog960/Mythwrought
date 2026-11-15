@@ -1122,3 +1122,6 @@ const assemble=function assemble(p){
 };
 export const M1_SPECIALIST_EXEMPLARS=Object.freeze(PROFILES.map(assemble));
 export const M1_SPECIALIST_COUNTS=Object.freeze(Object.fromEntries(M1_SPECIALIST_EXEMPLARS.map(b=>[b.category,1])));
+
+// M1-authored extension point; no alteration to the preserved five exemplars.
+export const assembleSpecialistProfile=assemble;
