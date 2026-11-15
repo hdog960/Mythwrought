@@ -1,0 +1,157 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-2b.m0.v1",
+  "lane": "roadmap-2b",
+  "target": 420,
+  "authored": 15,
+  "newlyAuthored": 0,
+  "unbuilt": 405,
+  "creatorAccepted": 0,
+  "integrated": 0,
+  "productionRegistered": false,
+  "sourcePR": 124,
+  "sourceHead": "07c45d27bd36f4f3aa3197bba0e4f49ce2a58c68",
+  "sourceFile": "src/building-pool/roadmap-2/m1-representatives.mjs",
+  "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+  "candidateModule": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+  "materialBridge": "src/builder-assets/manual-five-pack.mjs",
+  "physicalFamilySymbols": 96,
+  "physicalVariants": 106,
+  "biome130": "independent; unresolved families symbolic only",
+  "inherited": [
+    {
+      "originalId": "r2:temple:temperate:small:01",
+      "newId": "r2:temple:temperate:small:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:temperate:medium:01",
+      "newId": "r2:temple:temperate:medium:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:temperate:large:01",
+      "newId": "r2:temple:temperate:large:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:desert:small:01",
+      "newId": "r2:temple:desert:small:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:desert:medium:01",
+      "newId": "r2:temple:desert:medium:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:desert:large:01",
+      "newId": "r2:temple:desert:large:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:snow:small:01",
+      "newId": "r2:temple:snow:small:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:snow:medium:01",
+      "newId": "r2:temple:snow:medium:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:snow:large:01",
+      "newId": "r2:temple:snow:large:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:enchanted-forest:small:01",
+      "newId": "r2:temple:enchanted-forest:small:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:enchanted-forest:medium:01",
+      "newId": "r2:temple:enchanted-forest:medium:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:enchanted-forest:large:01",
+      "newId": "r2:temple:enchanted-forest:large:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:mountain:small:01",
+      "newId": "r2:temple:mountain:small:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:mountain:medium:01",
+      "newId": "r2:temple:mountain:medium:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    },
+    {
+      "originalId": "r2:temple:mountain:large:01",
+      "newId": "r2:temple:mountain:large:01",
+      "module": "src/building-pool/roadmap-2b/legacy-temples.mjs",
+      "originalSourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "status": "authored-candidate",
+      "approved": false,
+      "integrated": false
+    }
+  ]
+}
