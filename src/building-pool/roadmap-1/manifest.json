@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1.manifest.v1",
   "title": "Homes & Regional Life",
   "gate": "v0.10 Gate A OPEN; v0.11 LOCKED",
-  "milestone": "M1 — 210 formerly unsealed roof-post step cells backed with registered solid wood; shape/strength acceptance remains open",
+  "milestone": "M1 roof lantern daylight aperture and physical candidate review, creator/engine approval OPEN",
   "status": "45_UNMERGED_CANDIDATES_82_NATIVE_EXACT_SOURCE_ZERO_RISER_GAPS_CREATOR_ACCEPTANCE_OPEN",
   "target": 885,
   "authoredBlueprintCount": 45,
@@ -54,11 +54,11 @@
     },
     "auto130": "12 candidate families now in main as opt-in symbolic library, not runtime registered",
     "manualPackHeads": {
-      "pack1": "c9630ac6bad5e06a645f74bd319beebea736e9ce",
-      "pack2": "8fb1a189c20b22144d2e501fde76500385ee44ba",
-      "pack3": "3ec737bd6251b52ee5dfb1303c7900ed0d8558f0",
-      "pack4": "8b968ca9b6bc283adb5fb172219e6765191eb495",
-      "pack5": "ae1b4849707ae25c99f69aa04587add966fd4362"
+      "pack1": "54d06cc53aa5dbb76b30452243cbd93c4cb48618",
+      "pack2": "b43e079e7c0fcfd7168f8eb9dfd8a2ce42f87f3e",
+      "pack3": "6e4adfbb9c76fc2a409a0807eb87499a333367d3",
+      "pack4": "4734af9e514b5e4ce28110b9c0042b10434923b9",
+      "pack5": "545bc7e68885a601dd8d5f78231d6e2f1c4a1938"
     },
     "checkpoint008": {
       "status": "main automatic-world physical voxels now active; only pre-existing automation-owned tree/cave/court structures; 12 biome130 candidates unregistered",
@@ -79,7 +79,7 @@
   "certifiedPhysicalIPhone": false,
   "candidateBlueprintCount": 45,
   "creatorAcceptedBlueprintCount": 0,
-  "authoredVoxelPlacements": 52652,
+  "authoredVoxelPlacements": 52648,
   "remainingDesigns": 840,
   "representativesByType": {
     "house": 15,
@@ -88,36 +88,35 @@
   },
   "testEvidence": {
     "nativeNode": {
-      "run": "Native Node v22.16.0 on isolated exact-source Roadmap 1 local checkout; all five modified module/test files Git blob SHA matched to draft PR #121 commit b643665aae8ec37704ee1e0f3787623d18645844",
-      "cases": "82/82 pass, 0 fail, 0 skip, 0 todo; 80 prior plus 2 negative/positive physical post substitution cases",
-      "exactPRHead": "YES isolated Roadmap 1 original source/test SHA; NO combined latest-main+PR integration certification, central Actions excludes nested tests"
+      "run": "Node v22.16.0 on clean isolated Roadmap 1 exact candidate source, Git blob SHA-matched 4 changed JS/test modules",
+      "cases": "85/85 PASS; 0 fail, 0 skip, 0 todo (82 baseline + 3 physically clear daylight shaft checks)",
+      "exactPRHead": "YES isolated changed code/test files blob parity on draft PR #121 at 5782b97c; NO combined main+PR integration certification"
     },
     "chromium": {
-      "renderer": "Genuine Chromium Canvas2D schematic; no WebGL2 context available across ANGLE/SwiftShader/default",
-      "screenshots": 54,
+      "renderer": "Genuine Chromium Canvas2D source-derived schematic; WebGL2 context unavailable on all tested software backends",
+      "screenshots": 18,
       "viewports": [
         "667x375",
         "844x390",
         "932x430"
       ],
-      "samples": "9 candidate IDs × exterior and interior cutaway × 3 mobile viewport sizes",
+      "samples": "3 independently authored Enchanted Forest roof lantern candidates × exterior/cutaway × three sizes; earlier 54 other candidate captures retained as previous evidence",
       "authentic": true,
-      "source": "local generated diagnostic PNGs, not attached to draft PR, not physical block meshes"
+      "source": "locally generated on exact tested source; not committed or physical game/WebGL2 proof"
     },
     "physicalIPhone": false,
     "ci": {
-      "exactNewRoadmap1Head": "await fresh GitHub exact-head Actions check; no green status seen before final update",
-      "coverageNote": "Root CI runs tests/*.test.mjs and does not execute nested Roadmap 1 80-case suite; separate source-exact Node run performed locally"
+      "exactNewRoadmap1Head": "queued at content commit 5782b97c; final status pending recheck",
+      "coverageNote": "Root Actions only runs root tests/*.test.mjs, does not run Roadmap 1 nested 85-case native tests; isolated native replay separately verified"
     }
   },
   "pending": [
-    "Native combined main+PR acceptance and exact-head central workflow conclusion (root CI excludes nested 82-test suite)",
-    "Pack 2 original slender support posts replaced at 210 roof risers with full live timber; verify actual future timber beam spans and safe load transfer",
-    "Pack 3 thin tile neighboring seam/underlay waterproofing and real shape-aware collision still unapproved despite 2,519 solid riser cells",
-    "Pack 4 glazing transparency, glass mount/weather seal, raised roof lantern daylight path and safe schema-1 orientation sidecar unapproved",
-    "Pack 2 hinged door sweep/2-high mounting, Pack 5 2-cell bed physical collision and other unstarted specialty fixtures",
-    "Genuine native source-served WebGL2 and creator architectural near-duplicate review; local WebGL2 context creation failed",
-    "840 new original blueprint designs in later milestones; no world placement, merge, deployment or v0.11 unlock"
+    "Actual Pack 2/3/4 translucent window cap and 3 roof lantern side/waterproof seals; daylight shafts are now physically open but final light/rain/collision unapproved",
+    "Real load/span and roof-edge seams at post substitutions (210 live-wood risers); final physical structural integration not approved",
+    "Pack4 glass transparency and per-window orientation live schema-1 sidecar not registered",
+    "True source-served Chromium WebGL2 physical candidate meshing, only genuine Canvas2D source previews local",
+    "Clean full latest-main+draft-PR integration and user creator/iPhone controls visual acceptance",
+    "Remaining 840 unique blueprints; no production world placement"
   ],
   "mirroredAndRotatedGeometryCheck": {
     "result": "45/45 distinct under 4 rotations and mirrored counterparts, material-independent",
@@ -237,11 +236,15 @@
     "unsupportedHorizontalUpPanes": 0,
     "actualPaneSealApproved": false,
     "roofDaylightApproved": false,
-    "liveWindowIntegrated": false
+    "liveWindowIntegrated": false,
+    "actualDaylightApertures": 3,
+    "solidRoofsBlockingLanterns": 0,
+    "roofLanternWeatherSealApproved": false,
+    "daylightShaftsClearToInterior": true
   },
   "roofStepFeasibility": {
-    "exposedHeightStepTargets": 2519,
-    "liveFilledBackingCells": 2519,
+    "exposedHeightStepTargets": 2518,
+    "liveFilledBackingCells": 2518,
     "previousLiveFilledBackingCells": 2309,
     "previousUnresolvedBeamPostIntersections": 210,
     "remainingUnresolvedRiserCells": 0,
@@ -250,7 +253,7 @@
     "candidateOriginal": "pack2:022 slim support post",
     "substitutionLedger": "per-blueprint architecturalIdentity.roofStepAudit.solidPostSubstitutions",
     "retainFrameSupportPositions": true,
-    "preservation": "open courtyards remain open",
+    "preservation": "courtyards remain open, 3 authored roof lantern apertures cut through actual roof tiles",
     "pack3RoofUnderlayHeight": 0.125,
     "waterproofingApproved": false,
     "structuralSpanApproved": false,

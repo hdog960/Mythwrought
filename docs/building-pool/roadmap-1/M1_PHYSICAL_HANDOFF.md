@@ -80,3 +80,11 @@ The actual coordinate-authored Roadmap1 placements now **substitute each conflic
 **Not approved:** actual Pack2 beam-span safety, loads, physical joints/collar clearance, Pack3 roof tile-to-tile seams and contact, Pak4 [sic: Pack4] roof lantern/daylight sealing, collision/raycast, live engine installation and schema-1 rotation sidecars. This is a candidate cell-envelope repair, NOT a promise that the roof is waterproof or structurally engineered in the live game.
 
 **Evidence:** 82 native Node exact-source focused tests passed, no skipped cases, 54 genuine Chromium Canvas2D 9-design exterior/cutaway screenshots at 667×375/844×390/932×430, WebGL2 unavailable in tested local browser. No changes to other developer paths or runtime world.
+
+## M1 3 × operational daylight shaft geometry repair — candidate, not integrated
+
+Three existing decorative skylight lanterns (Enchanted Forest medium House / small Tavern / small Stable) previously had a **full roof tile still inside the intended light shaft**, and the original centerlines were not demonstrably partition/beam free. The corrected blueprint generator chooses the first shortest-distance XY roof location with no floor-to-underside obstruction or support beam row, removes the underlying roofing cell, and retains the 2 lateral `pack2:022` posts, front vertical Pack4 clear-glass candidate and Pack3 cap. The full 3D cell column down to y=1 is **genuinely empty**. New metadata stores `daylightOpening.cell` per lantern and forces `daylightApproved=false`, `weatherSealApproved=false`.
+
+- Exact geometry changes: 3 removed roof tiles and one no-longer-needed backing step: **52,652 → 52,648** authored placement anchors.
+- Remaining roof riser coverage **2,518/2,518 filled** with live solids, 210 former Pack2 posts substituted and still unapproved for load safety. All open courtyard voids remain empty.
+- Native 85/85 dedicated Node source-exact tests, including obstruction mutation tests; 18 actual Chromium Canvas2D preview screenshots (three candidates × interior/exterior × three mobile landscape viewport sizes). **Never call this final waterproof flashing, lighting simulation, actual Pack4 glass transparency or production WebGL2**. Source candidate IDs remain symbolic.
