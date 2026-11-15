@@ -19,22 +19,9 @@ export function planStoneRotunda(world,x,z){
       if(world.edits instanceof Map && world.edits.has(worldKey(px,py,pz)))return null;
       if(world.get(px,py,pz)!==baseline)return null;
       if(dy===0&&baseline!==BLOCK.GRASS)return null;
-      // The entire walking platform needs two intact supporting layers.
-      // A hidden cave directly beneath a flat-looking lawn is not a safe site.
-      if((dy===-2||dy===-1)&&baseline===BLOCK.AIR)return null;
+      if(dy===-2&&baseline===BLOCK.AIR)return null;
       if(dy>0&&baseline!==BLOCK.AIR)return null;
     }
-  }
-  // All four approach lanes must remain traversable beyond the protected footprint.
-  // A beautiful but inaccessible rotunda is not a valid exploration landmark.
-  for(const [dx,dz] of [[0,-5],[0,5],[-5,0],[5,0]]){
-    const px=x+dx,pz=z+dz;
-    if(terrainHeight(px,pz,world.seed)!==h ||
-       baseBlock(px,h,pz,world.seed)===BLOCK.AIR ||
-       baseBlock(px,h+1,pz,world.seed)!==BLOCK.AIR ||
-       baseBlock(px,h+2,pz,world.seed)!==BLOCK.AIR ||
-       [h,h+1,h+2].some(py=>world.get(px,py,pz)!==baseBlock(px,py,pz,world.seed)) ||
-       (world.edits instanceof Map && [h,h+1,h+2].some(py=>world.edits.has(worldKey(px,py,pz)))))return null;
   }
   const cells=[],used=new Set();
   function put(dx,dy,dz){
@@ -55,14 +42,6 @@ export function planStoneRotunda(world,x,z){
   for(const [dx,dz] of [[-3,-3],[3,-3],[-3,3],[3,3]]){
     put(dx,6,dz);
   }
-  // Stepped corner buttresses make the silhouette visibly weathered and grounded.
-  // All blocks stay inside the protected 9x9 survey volume.
-  for(const [sx,sz] of [[-1,-1],[-1,1],[1,-1],[1,1]]){
-    put(sx*4,0,sz*3);put(sx*3,0,sz*4);
-    put(sx*4,1,sz*3);put(sx*3,1,sz*4);
-  }
-  // Asymmetric crown fragments preserve four fully open entrances and skylight.
-  for(const [dx,dz] of [[-3,-2],[-3,-1],[-2,-3],[3,1],[3,2],[2,3]])put(dx,6,dz);
   // Four low steps point toward the empty ceremonial center without blocking entries.
   for(const [dx,dz] of [[-2,0],[2,0],[0,-2],[0,2]])put(dx,0,dz);
   return Object.freeze({kind:'stone-rotunda',origin:[x,h,z],cells,
@@ -88,56 +67,4 @@ export function placeStoneRotunda(world,plan){
     for(const [key,id] of original)world.edits.set(key,id);
     return false;
   }
-}
-
-// Explicit, bounded discovery only: never mutates terrain or activates a landmark.
-// Closest-first square rings make a reproducible exploration candidate for a seed.
-export function findStoneRotundaSite(world,centerX=0,centerZ=0,{radius=128,step=4}={}){
-  if(!Number.isSafeInteger(centerX)||!Number.isSafeInteger(centerZ)||
-     !Number.isSafeInteger(radius)||radius<0||radius>256||
-     !Number.isSafeInteger(step)||step<1||step>32)return null;
-  for(let ring=0;ring<=radius;ring+=step){
-    for(let dz=-ring;dz<=ring;dz+=step)for(let dx=-ring;dx<=ring;dx+=step){
-      if(Math.max(Math.abs(dx),Math.abs(dz))!==ring)continue;
-      const plan=planStoneRotunda(world,centerX+dx,centerZ+dz);
-      if(plan)return plan;
-    }
-  }
-  return null;
-}
-
-// Inspect the actual placed voxel grid, not merely a decorative template claim.
-// Each cardinal route must have supporting ground and two blocks of headroom.
-export function inspectStoneRotundaTraversal(world,plan){
-  if(!world||typeof world.get!=='function'||!plan||plan.kind!=='stone-rotunda'||
-     !Array.isArray(plan.origin)||plan.origin.length!==3||
-     !plan.origin.every(Number.isSafeInteger))return null;
-  const [x,h,z]=plan.origin;
-  // A route through bare terrain is not proof that the landmark still exists.
-  // Verify the actual physical pillars and elevated stone ring before reporting
-  // this as a traversable rotunda. Player mining remains allowed; inspection
-  // simply reports a damaged landmark rather than claiming intact access.
-  for(const [dx,dz] of OFFSETS){
-    if(world.get(x+dx,h+1,z+dz)!==BLOCK.STONE ||
-       world.get(x+dx,h+4,z+dz)!==BLOCK.STONE)return null;
-  }
-  for(let d=-3;d<=3;d++){
-    if(world.get(x+d,h+5,z-3)!==BLOCK.STONE ||
-       world.get(x+d,h+5,z+3)!==BLOCK.STONE ||
-       world.get(x-3,h+5,z+d)!==BLOCK.STONE ||
-       world.get(x+3,h+5,z+d)!==BLOCK.STONE)return null;
-  }
-  const routes=[];
-  for(const [dx,dz] of [[0,-1],[0,1],[-1,0],[1,0]]){
-    const cells=[];
-    for(let distance=5;distance>=0;distance--){
-      const px=x+dx*distance,pz=z+dz*distance;
-      if(world.get(px,h,pz)===BLOCK.AIR||
-         world.get(px,h+1,pz)!==BLOCK.AIR||
-         world.get(px,h+2,pz)!==BLOCK.AIR)return null;
-      cells.push([px,h+1,pz]);
-    }
-    routes.push(cells);
-  }
-  return Object.freeze({center:[x,h+1,z],routes});
 }

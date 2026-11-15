@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,baseBlock,terrainHeight,worldKey} from '../src/voxel.mjs';
-import {planStoneRotunda,placeStoneRotunda,findStoneRotundaSite,inspectStoneRotundaTraversal} from '../src/stone-rotunda.mjs';
+import {planStoneRotunda,placeStoneRotunda,findStoneRotundaSite,inspectStoneRotundaTraversal} from '../src/stone-rotunda-v2.mjs';
 
 function findSite(world){
   // Deterministic bounded fixture scan; never edits the world.

@@ -2,11 +2,13 @@
 // Real LEAVES (ID 7) provide physical foliage; never replace saved world edits.
 // Each occupied cell is a real world voxel, not a decorative mesh triangle.
 import {BLOCK,terrainHeight,baseBlock,WORLD_MAX_Y} from './voxel.mjs';
-export const TREE_VARIANTS=Object.freeze(['roundwood','spire','windswept','elderwood','archwood']);
+// Keep this seeded four-variant pool frozen: changing its length reshuffles all existing grove placements.
+// archwood is available explicitly to builders but never selected by default-world generation.
+export const TREE_VARIANTS=Object.freeze(['roundwood','spire','windswept','elderwood']);
 const key=(x,y,z)=>x+','+y+','+z;
 export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES??BLOCK.GRASS}={}){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
-    !Number.isInteger(x)||!Number.isInteger(z)||!TREE_VARIANTS.includes(variant)||
+    !Number.isInteger(x)||!Number.isInteger(z)||!(TREE_VARIANTS.includes(variant)||variant==='archwood')||
     ![BLOCK.GRASS,BLOCK.CRYSTAL,BLOCK.LEAVES].includes(leafId))return null;
  const ground=terrainHeight(x,z,world.seed);
  const height=variant==='elderwood'?8:variant==='archwood'?7:variant==='spire'?7:variant==='windswept'?6:5;
@@ -93,7 +95,7 @@ export function placeVoxelTree(world,plan){
  if(!world||typeof world.set!=='function'||typeof world.get!=='function'||
     !plan?.optIn||!Array.isArray(plan.origin)||plan.origin.length!==3||
     !Number.isInteger(plan.seed)||plan.seed!==world.seed||
-    !TREE_VARIANTS.includes(plan.variant)||!Number.isInteger(plan.leafId))return false;
+    !(TREE_VARIANTS.includes(plan.variant)||plan.variant==='archwood')||!Number.isInteger(plan.leafId))return false;
  // Replan from the actual seed and unedited surroundings. A caller cannot
  // truncate the canopy, inject arbitrary voxels, or replay onto another seed.
  const fresh=planVoxelTree(world,plan.origin[0],plan.origin[2],
