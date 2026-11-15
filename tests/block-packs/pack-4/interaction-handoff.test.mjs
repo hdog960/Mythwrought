@@ -87,6 +87,19 @@ test('invalid rotations, unassigned IDs, collision aliases and duplicate sidecar
   {cell:[0,0,0],id:170,rotation:2}
  ]));
  assert.throws(()=>pack4ReviewSidecar([null]));
+ // Regression: an omitted rotation previously defaulted to 0 silently,
+ // changing the authored facing of truncated builder fixture saves.
+ for(const incomplete of [
+  {cell:[4,2,1],id:169},
+  {cell:[4,2,1],id:169,rotation:undefined},
+  {cell:[4,2,1],rotation:1},
+  {id:169,rotation:1}
+ ]){
+  assert.throws(()=>pack4ReviewSidecar([incomplete]));
+  assert.throws(()=>pack4FixtureToSidecarSnapshot({
+   fixture:'mythwrought.pack4.fixture',schemaVersion:1,cells:[incomplete]
+  }));
+ }
 });
 
 test('all 23 mounted candidates roundtrip from isolated fixture to staged sidecar and back',()=>{
