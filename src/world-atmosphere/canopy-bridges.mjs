@@ -22,6 +22,13 @@ export function planCanopyBridge(world,a,b,{height=0}={}){
    put(x,ay,z,BLOCK.WOOD);
    // Two clear blocks above every walkable deck voxel, including crown endpoints.
    clearance.add(key(x,ay+1,z));clearance.add(key(x,ay+2,z));
+   // Solid voxel leaf parapets flank the deck without occupying the walking lane.
+   // They stop short of both crown anchors to keep entrances unobstructed.
+   if(i>=2&&i<=span-2){
+     const px=Math.abs(sz),pz=Math.abs(sx);
+     put(x+px,ay+1,z+pz,BLOCK.LEAVES);
+     put(x-px,ay+1,z-pz,BLOCK.LEAVES);
+   }
    // Crown at third block overhead; not a head-height obstruction.
    if(i>1&&i<span-1){
      put(x,ay+3,z,BLOCK.LEAVES);
