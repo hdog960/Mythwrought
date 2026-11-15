@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {
   PACK1_BUILDER_CATALOG,PACK1_BUILDER_FAMILY_REFS,
   pack1BuilderFamilyCandidates,resolvePack1BuilderFamily,
-  pack1BuilderShape,pack1BuilderPlacementPlan,
+  pack1BuilderShape,pack1InteractionReaderShapes,pack1BuilderPlacementPlan,
   pack1CanonicalSchema1Edit,pack1BuilderFaceTexture
 } from '../../../src/block-packs/pack-1/builder-handoff.mjs';
 import {candidateSurface} from '../../../src/block-packs/pack-1/webgl2-candidates.mjs';
@@ -103,4 +103,41 @@ test('all 21 building-roadmap family symbols resolve explicitly to 30 distinct I
   assert.throws(()=>resolvePack1BuilderFamily('pack1:051',{candidateId:35}),/not part/);
   assert.throws(()=>resolvePack1BuilderFamily('pack1:039'),/Unknown/);
   assert.deepEqual(pack1BuilderFamilyCandidates('pack2:001'),[]);
+});
+
+test('ray selection remains authored while soft plant collision uses null reader shape',()=>{
+  for(const id of [26,27,28,29,30,31,32,33,34,35]){
+    for(const rotation of [0,1,2,3]){
+      const r=pack1InteractionReaderShapes(id,{rotation});
+      assert.equal(r.isPassable,true);
+      assert.equal(r.collisionShape,null);
+      assert.ok(r.targetShape.boxes.length>0);
+      assert.ok(r.targetShape.boxes.every(b=>b.length===6));
+    }
+  }
+  assert.equal(pack1InteractionReaderShapes(8),null);
+});
+test('all Pack 1 collision and target reader shapes match nonempty shared AABB input contract',()=>{
+  const valid=s=>s&&Array.isArray(s.boxes)&&s.boxes.length>=1&&
+    s.boxes.length<=32&&s.boxes.every(b=>Array.isArray(b)&&b.length===6&&
+      b.every(Number.isFinite)&&[0,1,2].every(i=>b[i]>=0&&b[i]<b[i+3]&&b[i+3]<=1));
+  for(const {id} of PACK1_BUILDER_CATALOG){
+    for(const rotation of [0,1,2,3]){
+      const r=pack1InteractionReaderShapes(id,{rotation});
+      assert.ok(valid(r.targetShape),id+'/'+rotation+' target');
+      assert.ok(r.collisionShape===null||valid(r.collisionShape),id+'/'+rotation+' body');
+      assert.equal(r.isPassable,r.collisionShape===null);
+    }
+  }
+});
+test('nonpassable masonry and stem-only mushrooms retain real collision geometry',()=>{
+  for(const id of [9,10,11,12,13,14,36,37,38]){
+    const r=pack1InteractionReaderShapes(id,{rotation:3});
+    assert.equal(r.isPassable,false);
+    assert.ok(r.collisionShape.boxes.length>0);
+  }
+  const stem=pack1InteractionReaderShapes(36);
+  assert.ok(stem.collisionShape.boxes.length<stem.targetShape.boxes.length);
+  const upper=pack1InteractionReaderShapes(16,{rotation:2,variant:'upper'});
+  assert.ok(upper.collisionShape.boxes.length>0);
 });

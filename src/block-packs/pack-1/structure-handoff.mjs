@@ -1,7 +1,7 @@
 // Pack 1-owned, opt-in physical builder ABI for coordinated five-pack integration.
 // Mirrors the source-authored builder blueprint fields but NEVER registers/places live blocks.
 import {PACK1_BUILDER_CATALOG,resolvePack1BuilderFamily,
-  pack1BuilderPlacementPlan} from './builder-handoff.mjs';
+  pack1BuilderPlacementPlan,pack1InteractionReaderShapes} from './builder-handoff.mjs';
 import {PACK1_WORLD_BOUNDS,compilePack1Construction,inspectPack1Construction} from './construction-stress.mjs';
 const TURNS=Object.freeze({north:0,east:1,south:2,west:3,none:0});
 const FACES=Object.freeze(['north','east','south','west']);
@@ -24,6 +24,7 @@ function yawOf(orientation){
 export function resolvePack1BuilderAsset(symbol,orientation='north',{candidateId=null,variant='lower'}={}){
   const yaw=yawOf(orientation);
   const s=resolvePack1BuilderFamily(symbol,{candidateId,rotation:yaw,variant});
+  const readers=pack1InteractionReaderShapes(s.id,{rotation:yaw,variant});
   return Object.freeze({
     symbol,blockId:s.id,roster:s.roster,name:s.name,yaw,variant:s.variant,
     sourcePack:1,physical:true,worldRegistered:false,livePlaceable:false,
@@ -31,7 +32,9 @@ export function resolvePack1BuilderAsset(symbol,orientation='north',{candidateId
     attachment:s.support,
     requiresOrientationSidecar:s.requiresOrientationSidecar,
     requiresVariantPersistence:s.requiresVariantPersistence,
-    shape:s.shape,selection:s.selection,collision:s.collision,parts:s.parts
+    shape:s.shape,selection:s.selection,collision:s.collision,parts:s.parts,
+    targetShape:readers.targetShape,collisionShape:readers.collisionShape,
+    isPassable:readers.isPassable
   });
 }
 export function planPack1BuilderStructure(placements,{origin=[0,0,0],maxCells=4096}={}){
@@ -63,6 +66,8 @@ export function planPack1BuilderStructure(placements,{origin=[0,0,0],maxCells=40
     cells.push(Object.freeze({
       at:Object.freeze(cell),asset:asset.symbol,blockId:asset.blockId,
       yaw:asset.yaw,variant:asset.variant,wallFace:face,shape:asset.shape,
+      targetShape:asset.targetShape,collisionShape:asset.collisionShape,
+      isPassable:asset.isPassable,
       requiresOrientationSidecar:asset.requiresOrientationSidecar,
       requiresVariantPersistence:asset.requiresVariantPersistence,
       requiresSupportValidation:face!==null

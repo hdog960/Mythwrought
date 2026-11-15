@@ -159,3 +159,29 @@ test('construction blueprints enforce live main vertical world bounds at the sou
       {origin:[0,y,0]}),/vertical bounds/);
   }
 });
+
+test('Pack 1 builder ABI exports separate targeting and body collision reader shapes',()=>{
+  const flower=resolvePack1BuilderAsset('pack1:053','east',{candidateId:33});
+  assert.equal(flower.isPassable,true);
+  assert.equal(flower.collisionShape,null);
+  assert.ok(flower.targetShape.boxes.length>0);
+  const mushroom=resolvePack1BuilderAsset('pack1:054','south',{candidateId:37});
+  assert.equal(mushroom.isPassable,false);
+  assert.ok(mushroom.collisionShape.boxes.length>0);
+  assert.ok(mushroom.collisionShape.boxes.length<mushroom.targetShape.boxes.length);
+});
+test('physical blueprint preserves actual passable plant selection without inventing solid blocks',()=>{
+  const blueprint=planPack1BuilderStructure([
+    {asset:'pack1:001',at:[0,0,0]},
+    {asset:'pack1:053',candidateId:33,at:[1,0,0]},
+    {asset:'pack1:054',candidateId:37,at:[2,0,0]}
+  ],{origin:[14,6,8]});
+  assert.equal(blueprint.cells[0].isPassable,false);
+  assert.equal(blueprint.cells[1].isPassable,true);
+  assert.equal(blueprint.cells[1].collisionShape,null);
+  assert.ok(blueprint.cells[1].targetShape.boxes.length>0);
+  assert.equal(blueprint.cells[2].isPassable,false);
+  assert.ok(blueprint.cells[2].collisionShape.boxes.length>0);
+  assert.equal(blueprint.livePlaced,false);
+  assert.equal(blueprint.saveWritten,false);
+});

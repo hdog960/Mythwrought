@@ -91,6 +91,18 @@ export function pack1BuilderShape(id,{rotation=0,variant='lower'}={}){
     legacyEditFormat:'[x,y,z,id]'
   });
 }
+// Match current main's raycastShapes/inspectBodyFit reader ABI. The latter
+// expects NULL for passable blocks; {boxes:[]} fails its validateShape() gate.
+// Keep ray target geometry even when physical collision is intentionally empty.
+export function pack1InteractionReaderShapes(id,{rotation=0,variant='lower'}={}){
+  const authored=pack1BuilderShape(id,{rotation,variant});
+  if(!authored)return null;
+  return Object.freeze({
+    targetShape:authored.selection,
+    collisionShape:authored.collision.boxes.length?authored.collision:null,
+    isPassable:authored.collision.boxes.length===0
+  });
+}
 export function pack1BuilderPlacementPlan(id,{cell,rotation=0,variant='lower',wallMounted=false}={}){
   const shape=pack1BuilderShape(id,{rotation,variant});
   if(!shape)throw new RangeError('Unknown Pack 1 candidate block ID');
