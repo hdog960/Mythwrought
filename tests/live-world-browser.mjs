@@ -12,6 +12,19 @@ const make=(dx,dz)=>liveVoxelDistrict(world.seed,dx,dz,(x,y,z)=>world.legacyBloc
 const districts=[[0,0],[-1,0],[0,-1],[-1,-1]].map(([dx,dz])=>make(dx,dz));
 const tree=districts[0].trees[0],court=districts.find(d=>d.court)?.court;
 const cave=districts[0].caves[0];
+// 010: inspect actual seeded features, including adjacent districts if their
+// deterministic placement did not choose the four checkpoint-008 views.
+const activationScenes=[...districts];
+for(const [dx,dz] of [[1,0],[0,1],[1,1],[-1,1],[1,-1]]){
+  if(activationScenes.some(s=>s.rotunda)&&activationScenes.some(s=>s.twinwood)&&
+    activationScenes.some(s=>s.southGalleries.length))break;
+  activationScenes.push(make(dx,dz));
+}
+const rotunda=activationScenes.find(s=>s.rotunda)?.rotunda;
+const twinwood=activationScenes.find(s=>s.twinwood)?.twinwood;
+const gallery=activationScenes.find(s=>s.southGalleries.length)?.southGalleries[0];
+assert.ok(rotunda&&twinwood&&gallery,
+  'actual enabled :24 gallery, :36 rotunda and :48 twinwood must exist near spawn');
 assert.ok(tree&&court&&cave,'real live forest, courtyard and cave site required');
 const trunk=tree.cells.find(c=>c[3]===BLOCK.WOOD);
 const leaf=tree.cells.find(c=>c[3]===BLOCK.LEAVES);
@@ -24,14 +37,27 @@ const page=await browser.newPage({viewport:{width:932,height:430},deviceScaleFac
 const errors=[],failed=[];
 page.on('pageerror',e=>errors.push(e.message));
 page.on('response',r=>{if(r.status()>=400)failed.push(r.status()+' '+r.url());});
-const loaded=()=>page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25 &&
-  Number(document.querySelector('#scene')?.dataset.pendingChunks)===0,null,{timeout:40000});
+// Wait for the NEW target chunk, not the old camera's count. Depth streaming
+// legitimately uses more than 25 sections in caves.
+const loaded=(target=null)=>page.waitForFunction(target=>{
+  const canvas=document.querySelector('#scene'),api=window.__mythwroughtTest;
+  if(!canvas||!api)return false;
+  const snap=api.snapshot();
+  if(snap.pending.length||snap.chunks.length===0||
+     Number(canvas.dataset.renderedMeshVertices)<=1000)return false;
+  if(!target)return Number(canvas.dataset.pendingChunks)===0;
+  const key=Math.floor(target.x/16)+','+Math.floor(target.z/16);
+  const center=canvas.dataset.chunkCenter||'';
+  return (center===key||center.startsWith(key+'|'))&&
+    snap.chunks.includes(key)&&Number(canvas.dataset.pendingChunks)===0;
+},target,{timeout:40000});
 const aim=async(x,z,tx,ty,tz)=>{
-  await page.evaluate(({x,z,tx,ty,tz})=>{
-    window.__mythwroughtTest.teleport(x,z);
+  const pos=await page.evaluate(({x,z,tx,ty,tz})=>{
+    const result=window.__mythwroughtTest.teleport(x,z);
     window.__mythwroughtTest.aimAt(tx,ty,tz);
+    return result;
   },{x,z,tx,ty,tz});
-  await loaded();
+  await loaded(pos);
   assert.equal(await page.evaluate(()=>!!document.querySelector('#scene')?.getContext('webgl2')),true);
   assert.ok(await page.evaluate(()=>Number(document.querySelector('#scene')?.dataset.renderedMeshVertices)>1000));
 };
@@ -79,6 +105,48 @@ try{
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
     [cave.x+14,floorAt(14)+1,cave.z-7]),BLOCK.AIR);
   await page.screenshot({path:'artifacts/live-008-underground-north-wing-932x430.png'});
+  // Genuine renderer evidence of the newly activated 010 physical scenery.
+  const [rx,rh,rz]=rotunda.origin;
+  // Stand outside the footprint: a close-up column is not acceptance
+  // evidence for the four entrances or open central ring.
+  await aim(rx-11,rz-13,rx,rh+4,rz);
+  await page.screenshot({path:'artifacts/live-010-rotunda-overview-932x430.png'});
+  await aim(rx-7,rz-7,rx,rh+4,rz);
+  assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
+    rotunda.cells.find(c=>c[1]===rh+3)?.slice(0,3)),BLOCK.STONE);
+  await page.screenshot({path:'artifacts/live-010-stone-rotunda-932x430.png'});
+
+  const [tx,th,tz]=twinwood.origin;
+  // A full exterior view shows both rooted stems, the walking gap,
+  // and the joining crown rather than one trunk from point-blank range.
+  await aim(tx-11,tz+12,tx,th+7,tz);
+  assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
+    twinwood.cells.find(c=>c[3]===BLOCK.WOOD)?.slice(0,3)),BLOCK.WOOD);
+  await page.screenshot({path:'artifacts/live-010-twinwood-forest-932x430.png'});
+
+  const t=gallery.length-11, gx=gallery.x+t, gz=gallery.z+8;
+  const galleryFloor=caveRoute(179,gallery).floorAt(t);
+  // Look down the carved southern throat from its junction, rather
+  // than aiming out of the chamber into distant sky.
+  const galleryView=await page.evaluate(p=>{
+    const d=window.__mythwroughtTest;
+    const location=d.teleportCave(p.x,p.floor+1,p.z-2);
+    d.aimAt(p.x,p.floor+1,p.z+4);
+    return location;
+  },{x:gx,z:gz,floor:galleryFloor});
+  await loaded(galleryView);
+  assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
+    [gx,galleryFloor+2,gz]),BLOCK.AIR);
+  await page.screenshot({path:'artifacts/live-010-south-gallery-cave-932x430.png'});
+  const chamberView=await page.evaluate(p=>{
+    const d=window.__mythwroughtTest;
+    const location=d.teleportCave(p.x,p.floor+1,p.z);
+    d.aimAt(p.x,p.floor+1,p.z-4);
+    return location;
+  },{x:gx,z:gz,floor:galleryFloor});
+  await loaded(chamberView);
+  await page.screenshot({path:'artifacts/live-010-south-gallery-chamber-932x430.png'});
+
   // A generated object is a real editable voxel, with unchanged schema-one persistence.
   await page.evaluate(p=>window.__mythwroughtTest.placeFixture(...p,0),trunk.slice(0,3));
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),trunk.slice(0,3)),BLOCK.AIR);
@@ -89,5 +157,5 @@ try{
   assert.equal(saved.schema,1);
   assert.deepEqual(errors,[]);
   assert.deepEqual(failed,[]);
-  console.log('PASS checkpoint 008 real WebGL2 trees/court/cave; three device sizes; mine/reload schema-1 save');
+  console.log('PASS checkpoints 008+010 real WebGL2 trees/court/cave/rotunda/twinwood/south-gallery; three device sizes; mine/reload schema-1 save');
 }finally{await browser.close();}
