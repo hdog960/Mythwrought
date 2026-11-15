@@ -42,7 +42,7 @@ export function planStoneRotunda(world,x,z){
   for(const [dx,dz] of [[-3,-3],[3,-3],[-3,3],[3,3]]){
     put(dx,6,dz);
   }
-  // Four low steps point toward the empty ceremonial center without blocking entries.
+  // Stepped corner buttresses make the silhouette visibly weathered and grounded.\n  // All blocks stay inside the protected 9x9 survey volume.\n  for(const [sx,sz] of [[-1,-1],[-1,1],[1,-1],[1,1]]){\n    put(sx*4,0,sz*3);put(sx*3,0,sz*4);\n    put(sx*4,1,sz*3);put(sx*3,1,sz*4);\n  }\n  // Asymmetric crown fragments preserve four fully open entrances and skylight.\n  for(const [dx,dz] of [[-3,-2],[-3,-1],[-2,-3],[3,1],[3,2],[2,3]])put(dx,6,dz);\n  // Four low steps point toward the empty ceremonial center without blocking entries.
   for(const [dx,dz] of [[-2,0],[2,0],[0,-2],[0,2]])put(dx,0,dz);
   return Object.freeze({kind:'stone-rotunda',origin:[x,h,z],cells,
     entrances:[[x,h+1,z-4],[x,h+1,z+4],[x-4,h+1,z],[x+4,h+1,z]],
