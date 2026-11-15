@@ -1,12 +1,13 @@
 import {TRADE_CULTURE_M1_EXEMPLARS} from '../../../src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs';
 import {MARKET_SQUARE_TEMPERATE_SMALL} from '../../../src/building-pool/roadmap-2b/market-square-temperate-small.mjs';
 import {M1_REGIONAL_EXEMPLARS} from '../../../src/building-pool/roadmap-2b/m1-regional-exemplars.mjs';
+import {M1_PUBLIC_MONUMENTS} from '../../../src/building-pool/roadmap-2b/m1-public-monuments.mjs';
 
 // Browser source loads the REAL candidate blueprint modules from this draft PR.
 // Draws only software-WebGL2 full-cube proxies, never producer-family AABBs,
 // rotations, glass transparency, final artwork, or playable runtime placement.
 const params=new URLSearchParams(location.search), models=[
- MARKET_SQUARE_TEMPERATE_SMALL,...TRADE_CULTURE_M1_EXEMPLARS,...M1_REGIONAL_EXEMPLARS
+ MARKET_SQUARE_TEMPERATE_SMALL,...TRADE_CULTURE_M1_EXEMPLARS,...M1_REGIONAL_EXEMPLARS,...M1_PUBLIC_MONUMENTS
 ];
 const modelId=params.get('id')||'r2:tailor:temperate:small:01';
 const view=params.get('view')==='cutaway'?'cutaway':'exterior';
