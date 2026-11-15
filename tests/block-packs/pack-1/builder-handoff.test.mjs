@@ -2,7 +2,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PACK1_BUILDER_CATALOG,pack1BuilderShape,pack1BuilderPlacementPlan,
+  PACK1_BUILDER_CATALOG,PACK1_BUILDER_FAMILY_REFS,
+  pack1BuilderFamilyCandidates,resolvePack1BuilderFamily,
+  pack1BuilderShape,pack1BuilderPlacementPlan,
   pack1CanonicalSchema1Edit,pack1BuilderFaceTexture
 } from '../../../src/block-packs/pack-1/builder-handoff.mjs';
 import {candidateSurface} from '../../../src/block-packs/pack-1/webgl2-candidates.mjs';
@@ -81,4 +83,24 @@ test('original role textures are available to builders without inventing new ass
   const t=pack1BuilderFaceTexture(22,'cedar','north',24);
   assert.equal(t.pixels.length,24*24*4);
   assert.throws(()=>pack1BuilderFaceTexture(8,'stone','north'),/Unknown/);
+});
+
+test('all 21 building-roadmap family symbols resolve explicitly to 30 distinct ID variants',()=>{
+  const families=[
+    ...Array.from({length:12},(_,i)=>'pack1:'+String(i+1).padStart(3,'0')),
+    ...Array.from({length:9},(_,i)=>'pack1:'+String(i+47).padStart(3,'0'))
+  ].sort();
+  assert.deepEqual(PACK1_BUILDER_FAMILY_REFS,families);
+  assert.equal(PACK1_BUILDER_CATALOG.filter(x=>x.symbolicRef==='pack1:053').length,4);
+  assert.deepEqual(pack1BuilderFamilyCandidates('pack1:051').map(x=>x.id),[25,26]);
+  assert.deepEqual(pack1BuilderFamilyCandidates('pack1:052').map(x=>x.id),[27,28]);
+  assert.deepEqual(pack1BuilderFamilyCandidates('pack1:053').map(x=>x.id),[32,33,34,35]);
+  assert.deepEqual(pack1BuilderFamilyCandidates('pack1:054').map(x=>x.id),[36,37,38]);
+  assert.deepEqual(pack1BuilderFamilyCandidates('pack1:055').map(x=>x.id),[29,30,31]);
+  assert.equal(resolvePack1BuilderFamily('pack1:001').id,9);
+  assert.equal(resolvePack1BuilderFamily('pack1:053',{candidateId:35}).id,35);
+  assert.throws(()=>resolvePack1BuilderFamily('pack1:053'),/Ambiguous/);
+  assert.throws(()=>resolvePack1BuilderFamily('pack1:051',{candidateId:35}),/not part/);
+  assert.throws(()=>resolvePack1BuilderFamily('pack1:039'),/Unknown/);
+  assert.deepEqual(pack1BuilderFamilyCandidates('pack2:001'),[]);
 });

@@ -31,3 +31,9 @@
 ## Builder-handoff acceptance wiring
 
 Pack 1's opt-in `tests/block-packs/pack-1/run-acceptance.mjs` explicitly includes `builder-handoff.test.mjs` among its ten native Node modules. Its fail-closed TAP threshold is now **at least 100 real passing tests**, incorporating seven additional builder-handoff checks on the original 93. The existing 15-gallery-view / 30-screenshot native browser evidence and the separate 360/90 source-WebGL2 acceptance are still required; unchanged prior artwork cannot waive new builder test execution. Root CI may not automatically run nested Pack 1 tests when its full shared browser gate is selected; treat a green root gate as **baseline only** until an exact-head, explicitly evidenced Pack 1 runner executes. This wiring alone is **NOT evidence that the new tests have passed**.
+
+## Building-roster symbolic reference compatibility
+
+Read-only checks of the existing building schemas in draft PRs #121 and #124 confirm that building materials use **roster symbols** such as `pack1:001` and `pack1:053`, not Pack 1's final numeric block IDs. The owned `builder-handoff.mjs` now maps 30 physical assets to **21 exact roster namespace references** (001–012 and 047–055), exposes `pack1BuilderFamilyCandidates(ref)`, and makes `resolvePack1BuilderFamily(ref,{candidateId})` fail closed for ambiguous references. For example, `pack1:053` identifies the flower family and requires choosing among IDs 32–35; there is no arbitrary first-flower replacement. The mapping does not modify any building blueprint and requires central dependency resolution before real-world construction.
+
+The opt-in standalone native runner now requires **at least 101 actual passing tests** (the original 93 plus eight builder-handoff tests). No new pass is claimed until this exact new source is executed under native Node and the required browser/source-GPU gates are separately verified.

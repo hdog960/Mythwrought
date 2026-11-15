@@ -15,12 +15,37 @@ const groups=Object.freeze([
 export const PACK1_BUILDER_CATALOG=Object.freeze(groups.flatMap(([family,definitions])=>
   definitions.map(({id,roster,slug,name,attachment})=>Object.freeze({
     id,roster,slug,name,family,
+    // Building plans use roster symbols, NOT numeric voxel IDs.
+    symbolicRef:'pack1:'+String(roster).padStart(3,'0'),
     support:attachment==='vertical-face'?'vertical-face':'none',
     candidateOnly:true,productionRegistered:false
   }))).sort((a,b)=>a.id-b.id));
 const byId=new Map(PACK1_BUILDER_CATALOG.map(item=>[item.id,item]));
-if(byId.size!==30||PACK1_BUILDER_CATALOG.some((e,i)=>e.id!==i+9))
-  throw new Error('Pack 1 builder catalog must contain exactly the unique IDs 9..38');
+const bySymbol=new Map();
+for(const item of PACK1_BUILDER_CATALOG){
+  const list=bySymbol.get(item.symbolicRef)??[];
+  list.push(item);bySymbol.set(item.symbolicRef,list);
+}
+for(const [symbol,list] of bySymbol)bySymbol.set(symbol,Object.freeze(list));
+export const PACK1_BUILDER_FAMILY_REFS=Object.freeze([...bySymbol.keys()].sort());
+const EMPTY=Object.freeze([]);
+export function pack1BuilderFamilyCandidates(ref){
+  return typeof ref==='string'&&/^pack1:\d{3}$/.test(ref)
+    ?bySymbol.get(ref)??EMPTY:EMPTY;
+}
+// Fail closed on family-level ambiguity: a builder must explicitly select
+// which distinct candidate variant it needs, never silently pick the first.
+export function resolvePack1BuilderFamily(ref,{candidateId=null,rotation=0,variant='lower'}={}){
+  const options=pack1BuilderFamilyCandidates(ref);
+  if(!options.length)throw new RangeError('Unknown Pack 1 symbolic family');
+  if(candidateId===null&&options.length!==1)
+    throw new Error('Ambiguous Pack 1 family requires explicit candidateId: '+ref);
+  const asset=candidateId===null?options[0]:options.find(x=>x.id===candidateId);
+  if(!asset)throw new RangeError('Candidate ID is not part of symbolic Pack 1 family '+ref);
+  return pack1BuilderShape(asset.id,{rotation,variant});
+}
+if(byId.size!==30||PACK1_BUILDER_CATALOG.some((e,i)=>e.id!==i+9)||bySymbol.size!==21)
+  throw new Error('Pack 1 builder catalog requires 30 IDs and 21 roster family symbols');
 
 const cloneBoxes=(boxes,{empty=false}={})=>{
   if(!Array.isArray(boxes)||(!empty&&!boxes.length)||boxes.length>32)

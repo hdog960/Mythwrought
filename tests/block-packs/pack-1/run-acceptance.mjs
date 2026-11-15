@@ -71,7 +71,7 @@ async function main(){
   const files=groups.map(x=>own+x);
   const nodeResult=run(process.execPath,['--test',...files]);
   // A zero exit alone can hide a suite that skipped everything. Require an
-  // authentic Node TAP summary with at least 100 tests (93 established source/gallery + 7 builder-handoff).
+  // authentic Node TAP summary with at least 101 tests (93 established source/gallery + 8 builder-handoff).
   const metric=(key)=>{
     const match=nodeResult.match(new RegExp('^# '+key+'\\s+(\\d+)\\s*$','m'));
     assert.ok(match,'Native Node TAP summary missing '+key);
@@ -79,7 +79,7 @@ async function main(){
   };
   const tests=metric('tests'),passed=metric('pass'),failed=metric('fail');
   const skipped=metric('skipped'),todo=metric('todo');
-  assert.ok(tests>=100,'Too few native Pack 1 tests executed: '+tests);
+  assert.ok(tests>=101,'Too few native Pack 1 tests executed: '+tests);
   assert.equal(passed,tests,'Native Pack 1 tests were not all passing');
   assert.equal(failed,0,'Native Pack 1 tests failed');
   assert.equal(skipped,0,'Native Pack 1 tests were skipped');
