@@ -1,0 +1,110 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-4a.manifest.v1",
+  "title": "Government & State Knowledge",
+  "authority": "theoretical design; no world writer",
+  "baseMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "legacyPR": 123,
+  "legacyHead": "564330635f18e10215a3bf93901923fbf5af528d",
+  "infraPR": 178,
+  "infraMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "sourceSchema": "mythwrought.building-pool.roadmap-4.v1",
+  "stableIdPrefix": "r4:",
+  "counts": {
+    "planned": 315,
+    "legacyAuthored": 30,
+    "newlyAuthored": 0,
+    "totalAuthored": 30,
+    "remaining": 285,
+    "creatorAccepted": 0,
+    "integratedBuildings": 0
+  },
+  "biomes": [
+    "temperate",
+    "desert",
+    "snow",
+    "enchanted-forest",
+    "mountain"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "categories": [
+    {
+      "type": "civic-hall",
+      "perBiomeSize": 5,
+      "total": 75,
+      "inherited": 15,
+      "remaining": 60,
+      "milestone": 2
+    },
+    {
+      "type": "guildhall",
+      "perBiomeSize": 4,
+      "total": 60,
+      "inherited": 0,
+      "remaining": 60,
+      "milestone": 2
+    },
+    {
+      "type": "embassy",
+      "perBiomeSize": 3,
+      "total": 45,
+      "inherited": 0,
+      "remaining": 45,
+      "milestone": 3
+    },
+    {
+      "type": "castle-palace",
+      "perBiomeSize": 3,
+      "total": 45,
+      "inherited": 15,
+      "remaining": 30,
+      "milestone": 3
+    },
+    {
+      "type": "grand-archive",
+      "perBiomeSize": 3,
+      "total": 45,
+      "inherited": 0,
+      "remaining": 45,
+      "milestone": 3
+    },
+    {
+      "type": "observatory",
+      "perBiomeSize": 3,
+      "total": 45,
+      "inherited": 0,
+      "remaining": 45,
+      "milestone": 4
+    }
+  ],
+  "paths": [
+    "src/building-pool/roadmap-4a/",
+    "tests/building-pool/roadmap-4a/",
+    "docs/building-pool/roadmap-4a/"
+  ],
+  "sourceProvenance": "provenance.json",
+  "manualPacks": "96 manual families / 106 physical variants incorporated into main via PR #174; resolve runtime shapes via exact integrated catalog; imported blueprint dependency metadata is a preserved historic candidate snapshot",
+  "biome130": "unregistered and non-verified symbols remain symbolic; do not allocate persistent IDs",
+  "gates": {
+    "M0": "candidate migration committed; native exact-head focused CI pending",
+    "M1": "independent physical/visual source review pending",
+    "M2": "not started",
+    "M3": "not started",
+    "M4": "not started",
+    "M5": "not started",
+    "M6": "creator gate open"
+  },
+  "integration": false,
+  "worldPlacement": false,
+  "creatorVisualApproval": false,
+  "physicalIphoneAcceptance": false,
+  "preservation": [
+    "no source edits outside roadmap-4a",
+    "legacy PR #123 unchanged",
+    "schema-1 saves unchanged",
+    "Gate A v0.10 open; v0.11 locked"
+  ]
+}
