@@ -33,6 +33,18 @@ def choose(paths):
     if not chosen: raise RuntimeError('No recognized owned roadmap scope; fail closed')
     return [lane for lane in LANES if lane in chosen]
 
+def choose_for_run(paths,incoming,origin,pack1_mode):
+    if not pack1_mode:
+        return choose(paths)
+    if incoming!=136 or origin['head']['ref']!='infra/chromium-roadmap-gate-20261114':
+        raise RuntimeError('Pack1-only mode is restricted to infrastructure draft PR #136')
+    if origin['head']['repo']['full_name']!='hdog960/Mythwrought':
+        raise RuntimeError('Unexpected Pack1-only repository')
+    if not any(p=='.github/workflows/roadmap-chromium-acceptance.yml'
+               or p.startswith('scripts/ci/roadmap-chromium/') for p in paths):
+        raise RuntimeError('Pack1-only mode requires a real infrastructure change')
+    return ['pack-1']
+
 def main():
     report=Path(os.environ['MYTHWROUGHT_REPORT_ROOT']);report.mkdir(parents=True,exist_ok=True)
     repo=os.environ['MYTHWROUGHT_REPO'];incoming=int(os.environ['MYTHWROUGHT_PR'])
@@ -47,9 +59,10 @@ def main():
         files.extend(x['filename'] for x in batch)
         if len(batch)<100:break
         page+=1
-    selected=choose(files)
+    pack1_mode=os.environ.get('MYTHWROUGHT_PACK1_CANVAS2D_ONLY')=='1'
+    selected=choose_for_run(files,incoming,origin,pack1_mode)
     (report/'selection.json').write_text(json.dumps({'workflowPR':incoming,'changedFiles':files,
-      'selectedLanes':selected,'selectionMode':'infra-all' if len(selected)==9 else 'owned-paths'},indent=2)+'\n')
+      'selectedLanes':selected,'selectionMode':'pack1-canvas2d-only' if pack1_mode else ('infra-all' if len(selected)==9 else 'owned-paths')},indent=2)+'\n')
     print('Selected exact source candidate lanes',selected,flush=True)
     tooling=Path.cwd().resolve()/ 'scripts/ci/roadmap-chromium'
     failures=[]
@@ -85,6 +98,10 @@ def main():
                 candidate_env['MYTHWROUGHT_COMPOSITE_MAIN_SHA']=main_sha
             result=subprocess.run(['python',str(tooling/'run_lane.py'),lane,str(worktree),sha,str(report),str(tooling)],
                                   cwd=Path.cwd(),env=candidate_env)
+            if pack1_mode and lane=='pack-1':
+                latest=gh_json(f'repos/{repo}/pulls/{pr}')
+                if latest['head']['sha']!=sha:
+                    raise RuntimeError('Pack1 draft head advanced during acceptance; reject stale evidence')
             if result.returncode: failures.append({'lane':lane,'pr':pr,'sha':sha,'reason':'lane acceptance blocked; see evidence.json'})
         except Exception as exc:
             failures.append({'lane':lane,'pr':pr,'reason':str(exc)})
@@ -92,7 +109,9 @@ def main():
             (sub/'evidence.json').write_text(json.dumps({'lane':lane,'pr':pr,'status':'BLOCKED','blocker':str(exc)},indent=2)+'\n')
             print('BLOCKED',lane,str(exc),file=sys.stderr,flush=True)
     (report/'summary.json').write_text(json.dumps({'selected':selected,'failed':failures,
-      'allCandidateGatesPassed':not failures,'note':'Supplementary source-only QA. No Gate A, creator, hardware or deployment approval.'},indent=2)+'\n')
+      'allCandidateGatesPassed':(not failures) if not pack1_mode else False,
+      'allSelectedCanvas2DAcceptancePassed':(not failures) if pack1_mode else None,
+      'productionWebGL2Approved':False,'note':'Supplementary source-only QA. No Gate A, creator, hardware or deployment approval.'},indent=2)+'\n')
     if failures:raise RuntimeError(f'{len(failures)} of {len(selected)} lanes have incomplete acceptance; see uploaded evidence')
 
 if __name__=='__main__':

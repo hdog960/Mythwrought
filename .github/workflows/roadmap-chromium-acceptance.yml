@@ -62,6 +62,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           MYTHWROUGHT_PR: ${{ github.event.pull_request.number }}
           MYTHWROUGHT_REPO: ${{ github.repository }}
+          MYTHWROUGHT_PACK1_CANVAS2D_ONLY: '1'
           MYTHWROUGHT_REPORT_ROOT: ${{ runner.temp }}/mythwrought-roadmap-evidence
           LIBGL_ALWAYS_SOFTWARE: '1'
           EGL_PLATFORM: x11

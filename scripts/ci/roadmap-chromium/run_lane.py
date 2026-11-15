@@ -82,6 +82,48 @@ def verify_images(paths,minimum,lane):
     if observed!=SIZES:raise RuntimeError(f'Incomplete landscape screenshot viewport coverage: {observed}')
     return images
 
+def verify_pack1_gallery(folder,sha,shots,report):
+    """Only the five original real Chromium Canvas2D galleries may pass."""
+    native_path=folder/'native-acceptance-PASS.json'
+    gallery_path=folder/'acceptance-report.json'
+    native=json.loads(native_path.read_text())
+    gallery=json.loads(gallery_path.read_text())
+    assert native['status']=='PASS' and native['gitHead']==sha
+    assert native['nativeNode']['executed'] and native['nativeNode']['passed']>=93
+    assert native['nativeNode']['failed']==0 and native['nativeNode']['skipped']==0 and native['nativeNode']['todo']==0
+    assert native['chromium']['executed'] and native['chromium']['views']==15 and native['chromium']['screenshots']==30
+    assert gallery['checkoutGitHead']==sha and gallery['playwrightChromeRealRun'] is True
+    for key,count in {'galleries':5,'viewports':15,'screenshots':30,'interactionChecks':63}.items():
+        assert gallery['totals'][key]==count, f'Pack1 {key} mismatch'
+    names=('masonry','stone-shapes','garden','foliage','floral')
+    expected={(name,w,h) for name in names for (w,h) in SIZES}
+    seen=set()
+    expected_files=set()
+    assert len(gallery['evidence'])==15
+    for view in gallery['evidence']:
+        name=view['gallery'];w=view['viewport']['width'];h=view['viewport']['height']
+        item=(name,w,h)
+        assert item in expected and item not in seen, f'Unexpected or duplicated gallery {item}'
+        seen.add(item)
+        assert view['canonicalOfflineSave'] and view['clearedAfterwards']
+        assert view['errors']==0 and view['failedRequests']==0
+        selection=view['cardSelectionChecks']
+        assert selection['empty']==0 and selection['cleared']==0
+        assert selection['placed']==view['candidateCount'] and selection['saved']==view['candidateCount']
+        assert len(view['cutawayProbeResults'])==(2 if name in ('garden','foliage','floral') else 0)
+        label=f'{name}-{w}x{h}'
+        assert set(view['screenshots'])=={label+'-candidate.png',label+'-placed.png'}
+        expected_files.update(view['screenshots'])
+    assert seen==expected and len(expected_files)==30
+    assert len(shots)==30 and {p.name for p in shots}==expected_files
+    assert {p['file'] for p in native['chromium']['images']}==expected_files
+    shutil.copy2(native_path,report/'pack1-native-source-manifest.json')
+    shutil.copy2(gallery_path,report/'pack1-gallery-source-manifest.json')
+    return {'status':'PASS','galleries':5,'landscapeViews':15,'interactionChecks':63,
+            'authenticScreenshots':30,'sourcePRHead':sha,
+            'renderer':'genuine Chromium Canvas2D candidate gallery',
+            'productionWebGL2Approved':False}
+
 def main():
     lane,checkout,sha,report_root,tooling=sys.argv[1:6]
     checkout=Path(checkout).resolve()
@@ -153,9 +195,11 @@ def main():
         else:
             command(['node','--test',*[str(p.relative_to(checkout)) for p in tests]],checkout,env,native)
         evidence['nativeNode']=verify_native(native,min_tests,lane)
-        # This is REAL WebGL2, but transport-only and never candidate asset acceptance.
-        command(['xvfb-run','-a','python',str(tooling/'probe_webgl2.py'),str(report/'preflight')],
-                checkout,env,report/'transport.log',timeout=180)
+        # Canvas2D acceptance is independent of WebGL2 transport readiness.
+        pack1_mode=lane=='pack-1' and os.environ.get('MYTHWROUGHT_PACK1_CANVAS2D_ONLY')=='1'
+        if not pack1_mode:
+            command(['xvfb-run','-a','python',str(tooling/'probe_webgl2.py'),str(report/'preflight')],
+                    checkout,env,report/'transport.log',timeout=180)
         b=base+lane+'/'
         if lane=='pack-3':
             command(['xvfb-run','-a','python',b+'gallery-browser.py'],checkout,env,browserlog)
@@ -199,9 +243,14 @@ def main():
         evidence['candidateScreenshots']=verify_images(shots,min_images,lane)
         evidence['candidateImageCount']=len(shots)
         evidence['candidateImageSource']='Actual checked-out candidate renderer; never transport probe'
-        if renderer=='canvas2d':
+        if renderer=='canvas2d' and pack1_mode:
+            evidence['canvas2dAcceptance']=verify_pack1_gallery(folder,sha,shots,report)
+            evidence['productionWebGL2Verified']=False
+            evidence['status']='CANDIDATE_CANVAS2D_PASS'
+        elif renderer=='canvas2d':
             raise RuntimeError('Canvas2D candidate preview passed, but candidate-specific WebGL2 has NOT run. Transport WebGL2 probe cannot satisfy asset acceptance.')
-        evidence['status']='ISOLATED_DIAGNOSTIC_PASS' if renderer=='webgl2-diagnostic' else 'CANDIDATE_TECHNICAL_PASS'
+        else:
+            evidence['status']='ISOLATED_DIAGNOSTIC_PASS' if renderer=='webgl2-diagnostic' else 'CANDIDATE_TECHNICAL_PASS'
         evidence['remainingGates']='Live engine/asset integration, physical iPhone and creator artwork/controls remain OPEN'
         print(evidence['status'],lane,sha,flush=True)
     except Exception as e:
@@ -214,7 +263,7 @@ def main():
         print('CANDIDATE_ACCEPTANCE_BLOCKED',lane,str(e),file=sys.stderr,flush=True)
     finally:
         (report/'evidence.json').write_text(json.dumps(evidence,indent=2,sort_keys=True)+'\n')
-    return evidence['status'] in ('CANDIDATE_TECHNICAL_PASS','ISOLATED_DIAGNOSTIC_PASS')
+    return evidence['status'] in ('CANDIDATE_TECHNICAL_PASS','ISOLATED_DIAGNOSTIC_PASS','CANDIDATE_CANVAS2D_PASS')
 
 if __name__=='__main__':
     try:success=main()

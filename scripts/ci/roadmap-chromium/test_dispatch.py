@@ -1,6 +1,6 @@
 """Pure selector contract tests. No repository writes, network, or browser."""
 import unittest
-from orchestrate import LANES,choose
+from orchestrate import LANES,choose,choose_for_run
 
 class ScopeTests(unittest.TestCase):
     def test_all_nine_for_new_infrastructure(self):
@@ -16,5 +16,16 @@ class ScopeTests(unittest.TestCase):
     def test_unrecognized_scope_fails_closed(self):
         for paths in [[],['src/main.mjs'],['tests/block-packs/pack-6/x.test.mjs']]:
             with self.assertRaises(RuntimeError):choose(paths)
+
+    def test_pack1_authorized_infrastructure_mode(self):
+        origin={'head':{'ref':'infra/chromium-roadmap-gate-20261114',
+                        'repo':{'full_name':'hdog960/Mythwrought'}}}
+        changed=['.github/workflows/roadmap-chromium-acceptance.yml']
+        self.assertEqual(choose_for_run(changed,136,origin,True),['pack-1'])
+        self.assertEqual(choose_for_run(changed,136,origin,False),list(LANES))
+        with self.assertRaises(RuntimeError):
+            choose_for_run(changed,113,origin,True)
+        with self.assertRaises(RuntimeError):
+            choose_for_run(['src/block-packs/pack-2/index.mjs'],136,origin,True)
 
 if __name__=='__main__':unittest.main()
