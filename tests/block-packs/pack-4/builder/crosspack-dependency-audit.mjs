@@ -5,6 +5,7 @@ import {pathToFileURL} from 'node:url';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import * as pack4 from '../../../../src/block-packs/pack-4/builder-handoff.mjs';
+import {BIOME130_REGISTERED_SYMBOLS} from '../../../../src/biome130-registry.mjs';
 const root=process.cwd(),consumers=resolve(root,'../consumers');
 const importAt=async path=>import(pathToFileURL(path).href);
 const sourceAt=(lane,suffix)=>resolve(consumers,lane,suffix);
@@ -20,7 +21,8 @@ const catalogs=new Map([
  ['pack1',new Set(p1.PACK1_BUILDER_FAMILY_REFS)],
  ['pack2',new Set(manifest2.assetRecords.map(a=>ref(2,a.roster)))],
  ['pack3',new Set(p3.PACK3_ROSTER.map(a=>ref(3,a.roster)))],
- ['pack5',new Set(manifest5.entries.map(e=>e.symbolicId))]
+ ['pack5',new Set(manifest5.entries.map(e=>e.symbolicId))],
+ ['biome130',new Set(BIOME130_REGISTERED_SYMBOLS)]
 ]);
 if([...catalogs.values()].some(s=>s.size===0))
  throw Error('Incomplete independent source catalog');
@@ -56,7 +58,7 @@ const totals={pack4ContactVerified:0,pack4NoContact:0,
  otherPackCatalogResolved:0,otherPackUnknown:0,
  otherPackFaceContactUnverified:0,legacySupport:0,unclassified:0,
  missingSupport:0,notRequired:0};
-const byPack={},missing=[],notContact=[],unknown=[],referenced=new Set();
+const byPack={},missing=[],notContact=[],unknown=[],unclassifiedExamples=[],referenced=new Set();
 for(let n=1;n<=4;n++){
  const views=builders[n-1].getM1Pack4Construction(pack4);
  for(const view of views){
@@ -81,7 +83,8 @@ for(let n=1;n<=4;n++){
      if(unknown.length<25)unknown.push({roadmap:n,blueprint:view.blueprintId,ref:s.asset,at:p.supportAt});
     }
    }else if(fam==='live')totals.legacySupport++;
-   else totals.unclassified++;
+   else {totals.unclassified++;if(unclassifiedExamples.length<25)
+    unclassifiedExamples.push({roadmap:n,blueprint:view.blueprintId,asset:s.asset,at:p.supportAt});}
   }
  }
 }
@@ -89,6 +92,7 @@ const report={status:'READ_ONLY_SOURCE_EXACT',provenance,
  pack4SourceHead:process.env.GITHUB_SHA??null,
  totals,otherPackRefs:[...referenced].sort(),otherPackKnownByPack:byPack,
  missingExamples:missing,pack4NoContactExamples:notContact,unknownExamples:unknown,
+ unclassifiedExamples,
  guarantees:{
   pack4ContactVerified:'Exact collision AABB subbox overlap on common neighboring face',
   otherPackCatalogResolved:'Reference exists in source-pinned original catalog ONLY',
