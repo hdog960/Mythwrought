@@ -1,44 +1,51 @@
-// :48 opt-in physical canopy bridges. No terrain, save, renderer or ID changes.
-// A bridge joins two existing tree crowns without replacing a single player edit.
+// :48 opt-in physical canopy bridge between existing WOOD crown anchors.
+// Pure planner: no terrain writes, save migration, renderer changes or block ID allocation.
 import {BLOCK,baseBlock,WORLD_MAX_Y} from '../voxel.mjs';
 const key=(x,y,z)=>`${x},${y},${z}`;
+const empty=(world,x,y,z)=>baseBlock(x,y,z,world.seed)===BLOCK.AIR&&world.get(x,y,z)===BLOCK.AIR;
 export function planCanopyBridge(world,a,b,{height=0}={}){
- if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
+ if(!world||!Number.isSafeInteger(world.seed)||typeof world.get!=='function'||
    !Array.isArray(a)||!Array.isArray(b)||a.length!==3||b.length!==3||
    ![...a,...b,height].every(Number.isSafeInteger))return null;
  const [ax,ay,az]=a,[bx,by,bz]=b;
- if(ay!==by||height<0||height>2||ay+height+2>WORLD_MAX_Y)return null;
- const dx=bx-ax,dz=bz-az,span=Math.max(Math.abs(dx),Math.abs(dz));
- if(span<5||span>12||Math.min(Math.abs(dx),Math.abs(dz))>2)return null;
+ const dx=bx-ax,dz=bz-az,span=Math.abs(dx||dz);
+ // No diagonal gaps: a physical single-width walking surface must be face-connected.
+ if(ay!==by||height!==0||ay+3>WORLD_MAX_Y||
+   !((dx===0&&Math.abs(dz)>=5&&Math.abs(dz)<=12)||
+     (dz===0&&Math.abs(dx)>=5&&Math.abs(dx)<=12)))return null;
  if(world.get(ax,ay,az)!==BLOCK.WOOD||world.get(bx,by,bz)!==BLOCK.WOOD)return null;
- const cells=new Map();
+ const cells=new Map(),clearance=new Set();
  const put=(x,y,z,id)=>cells.set(key(x,y,z),[x,y,z,id]);
+ const sx=Math.sign(dx),sz=Math.sign(dz);
  for(let i=1;i<span;i++){
-   const x=Math.round(ax+dx*i/span),z=Math.round(az+dz*i/span);
-   const y=ay+height;
-   put(x,y,z,BLOCK.WOOD);
-   // The leafy arch is a true editable voxel canopy, not a decorative mesh.
+   const x=ax+sx*i,z=az+sz*i;
+   put(x,ay,z,BLOCK.WOOD);
+   // Two clear blocks above every walkable deck voxel, including crown endpoints.
+   clearance.add(key(x,ay+1,z));clearance.add(key(x,ay+2,z));
+   // Crown at third block overhead; not a head-height obstruction.
    if(i>1&&i<span-1){
-     put(x,y+1,z,BLOCK.LEAVES);
+     put(x,ay+3,z,BLOCK.LEAVES);
      if(i%3===0){
-       const side=Math.abs(dx)>=Math.abs(dz)?[0,1]:[1,0];
-       put(x+side[0],y+1,z+side[1],BLOCK.LEAVES);
-       put(x-side[0],y+1,z-side[1],BLOCK.LEAVES);
+       const px=sz,pz=sx;
+       put(x+px,ay+3,z+pz,BLOCK.LEAVES);
+       put(x-px,ay+3,z-pz,BLOCK.LEAVES);
      }
    }
  }
+ for(const [x,y,z] of [a,b])for(let h=1;h<=2;h++)clearance.add(key(x,y+h,z));
  const occupied=[...cells.values()];
- // A bridge must be contiguous and may never overwrite its supporting crowns.
- if(occupied.some(([x,y,z])=>(x===ax&&y===ay&&z===az)||(x===bx&&y===by&&z===bz)))return null;
- if(occupied.some(([x,y,z])=>baseBlock(x,y,z,world.seed)!==BLOCK.AIR||
-    world.get(x,y,z)!==BLOCK.AIR))return null;
+ if(occupied.some(([x,y,z])=>!empty(world,x,y,z)))return null;
+ for(const k of clearance){
+   if(cells.has(k))return null;
+   const [x,y,z]=k.split(',').map(Number);
+   if(!empty(world,x,y,z))return null;
+ }
  return {seed:world.seed,anchors:[a.slice(),b.slice()],height,cells:occupied,
-   blockCount:occupied.length,optIn:true};
+   blockCount:occupied.length,optIn:true,clearance:[...clearance]};
 }
 export function validateCanopyBridge(world,plan){
  if(!plan?.optIn||plan.seed!==world?.seed||!Array.isArray(plan.anchors)||
    plan.anchors.length!==2)return false;
  const fresh=planCanopyBridge(world,...plan.anchors,{height:plan.height});
- return !!fresh&&fresh.blockCount===plan.blockCount&&
-   JSON.stringify(fresh.cells)===JSON.stringify(plan.cells);
+ return !!fresh&&JSON.stringify(fresh)===JSON.stringify(plan);
 }
