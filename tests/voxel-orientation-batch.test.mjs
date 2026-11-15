@@ -140,3 +140,21 @@ test('redo rejects malformed duplicate receipts and preserves schema-1 fixture',
   assert.throws(()=>resumeOrientedVoxelRedo({...f,receipt:[{cell:[0,0,0],before:4,after:255}]}),/Invalid/);
   assert.equal(legacy,'{"schema":1,"seed":42,"edits":[]}');
 });
+
+test('rejected write stops batch before later cells and retains verified receipt',()=>{
+  const f=fixture(), attempted=[];
+  const result=applyOrientedVoxelBatch({...f,edits:[
+    ...edits,{cell:[2,0,0],nextBlockId:6}
+  ],writeBlock:(x,y,z,id)=>{
+    attempted.push(x);
+    if(x===1)return false;
+    return f.writeBlock(x,y,z,id);
+  }});
+  assert.equal(result.ok,false);
+  assert.equal(result.failedIndex,1);
+  assert.equal(result.reason,'write-rejected');
+  assert.equal(result.receipt.length,1);
+  assert.deepEqual(attempted,[0,1]);
+  assert.equal(f.readBlock(2,0,0),4);
+  assert.equal(f.orientation.get([1,0,0],4),3);
+});
