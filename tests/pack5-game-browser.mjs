@@ -82,6 +82,32 @@ try{
     assert.match(recovered.status,/restored and physically solid/);
     console.log('PASS independent Pack5 sidecar reload with editing OFF',width,height);
     console.log('PASS actual Mythwrought game Pack5 WebGL2',width,height,evidence);
+    // A production-rendered dense test scene, not a gallery impostor.
+    // Software Chromium measurements are diagnostics, NOT iPhone FPS.
+    if(width===844){
+      const dense=await page.evaluate(()=>
+        window.__mythwroughtTest.placePack5DenseTestFixture(64));
+      assert.equal(dense.ok,true);
+      assert.equal(dense.schema,1);
+      await page.waitForFunction(()=>{
+        const canvas=document.getElementById('scene');
+        return Number(canvas.dataset.pack5VisibleInstances)>16&&
+          Number(canvas.dataset.pack5PendingPages)===0;
+      },null,{timeout:30000});
+      const diagnostics=await page.evaluate(()=>{
+        const canvas=document.getElementById('scene');
+        return {instances:+canvas.dataset.pack5VisibleInstances,
+          bytes:+canvas.dataset.pack5GpuBytes,
+          drawCalls:+canvas.dataset.pack5DrawCalls,
+          pending:+canvas.dataset.pack5PendingPages,
+          excluded:+canvas.dataset.pack5BudgetExcluded};
+      });
+      assert.ok(diagnostics.instances>16);
+      assert.ok(diagnostics.bytes<=2*1024*1024);
+      assert.ok(diagnostics.drawCalls<=8);
+      await page.screenshot({path:path.join(output,'pack5-real-game-dense-room-844x390.png')});
+      console.log('PASS real-game dense Pack5 bounded GPU streaming (not iPhone FPS)',diagnostics);
+    }
     await page.close();
   }
   // Browser touch emulation is a useful regression, not physical iPhone proof.

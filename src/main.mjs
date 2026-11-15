@@ -407,13 +407,26 @@ function start(){
       // Pack 5 uses the EXISTING game terrain program and fog, exactly one
       // optional shaped-triangle draw, with bounded GPU memory and streaming.
       if(pack5Gpu){
-        if(frame%20===0||frame===1)pack5Gpu.refresh(eye());
+        // At most one <=384 KiB page upload per refresh. Progress pending
+        // rooms every third frame; fully resident scenes retain 20-frame scans.
+        if(frame%20===0||frame===1||
+           (pack5Gpu.stats().pendingPages>0&&frame%3===0))
+          pack5Gpu.refresh(eye());
         canvas.dataset.pack5MeshVertices=String(
           pack5Gpu.draw({atPos,atColor,atUv,atMat}));
-        canvas.dataset.pack5VisibleInstances=String(pack5Gpu.stats().instances);
+        const pack5Stats=pack5Gpu.stats();
+        canvas.dataset.pack5VisibleInstances=String(pack5Stats.instances);
+        canvas.dataset.pack5GpuBytes=String(pack5Stats.bytes);
+        canvas.dataset.pack5DrawCalls=String(pack5Stats.drawCalls);
+        canvas.dataset.pack5PendingPages=String(pack5Stats.pendingPages);
+        canvas.dataset.pack5BudgetExcluded=String(pack5Stats.budgetExcluded);
       }else{
         canvas.dataset.pack5MeshVertices='0';
         canvas.dataset.pack5VisibleInstances='0';
+        canvas.dataset.pack5GpuBytes='0';
+        canvas.dataset.pack5DrawCalls='0';
+        canvas.dataset.pack5PendingPages='0';
+        canvas.dataset.pack5BudgetExcluded='0';
       }
       // A faint world-space targeted-block outline, never a HUD covering the scene.
       const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player):null;
@@ -1248,6 +1261,29 @@ function start(){
       },
       // Localhost-only real-game GPU fixture, unavailable on deployed Pages.
       // Used by Chromium to verify the actual terrain shader + Pack 5 buffer.
+      placePack5DenseTestFixture(count=64){
+        if(!pack5Builder||!Number.isInteger(count)||count<1||count>96)
+          throw Error('Invalid local-only Pack 5 dense fixture request');
+        const old=pack5Builder.snapshot();
+        const x=Math.floor(player.x)+4,z=Math.floor(player.z)+4;
+        const y=Math.min(18,Math.floor(player.feet)+2);
+        let added=0;
+        try{
+          for(let i=0;i<count;i++){
+            const at=[x+i%10*2,y,z+Math.floor(i/10)*2];
+            const result=pack5Builder.layer.place('pack5:080',at,i%4);
+            if(!result.ok)throw Error('Dense test placement rejected: '+result.reason);
+            added++;
+          }
+          pack5Builder.save();
+        }catch(error){
+          pack5Builder.layer.restore(old);
+          throw error;
+        }
+        pack5Gpu.refresh(eye());
+        return {ok:true,added,total:pack5Builder.layer.count(),
+          resident:pack5Gpu.stats(),schema:world.save().schema};
+      },
       placePack5TestFixture(x,y,z){
         if(!pack5Builder||![x,y,z].every(Number.isSafeInteger))
           throw Error('Pack 5 test mode not initialized');

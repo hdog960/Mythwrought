@@ -112,3 +112,25 @@ recovery blocker and must not be represented as a successful rollback.
   furnishing. Small scenes retain canonical fixture behavior.
 - Browser CI also includes an **emulated touch-enabled Chromium landscape**
   smoke. This is not evidence of a physical-iPhone GPU or Safari acceptance.
+
+
+## M6 — Paged furnishings: removing the hard 16-instance ceiling
+- The actual game renderer now stages **spatially grouped authored furniture** in
+  independently cached buffers, up to 256 nearby candidates and eight pages/draws.
+  There is NO hard cap of 16 visible pieces; actual residency depends on genuine
+  geometry size and an enforced **2 MiB total GPU resident budget**. Every buffer
+  comes from the original Pack 5 indexed meshes, not a proxy cube.
+- GPU uploads are incremental: at most one page per refresh (normally <=384 KiB),
+  with retries/backoff and stale-geometry suppression on failure. The game
+  drains pending pages every third frame; scenes with no pending pages return
+  to a 20-frame refresh cadence. Unselected pages are evicted.
+- The 4096-instance sidecar and physical collisions are unchanged. Pieces beyond
+  the visible byte/page budget remain safely stored and collidable; a diagnostic
+  budgetExcluded count makes those clipped assets explicit.
+- A dense 64-piece actual-game Chromium fixture asserts **more than 16** rendered
+  with <=2 MiB resident GPU data and <=8 added draws. The 2048-placement Node
+  regression and context recovery checks remain in place. Software-Chromium
+  timing is NOT physical iPhone hardware evidence or a 60 FPS guarantee.
+- Replacing a live buffer may temporarily require the old and new buffer to
+  coexist until upload succeeds (bounded transient peak: resident budget plus
+  one page). Never infer on-device performance from software WebGL alone.

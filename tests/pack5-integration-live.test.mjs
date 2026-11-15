@@ -173,3 +173,51 @@ test('2048 placed physical objects retain bounded draw budgets and shape selecti
   stream.dispose();
   assert.equal(gl.deleted.length,1);
 });
+
+test('dense room renders substantially more than 16 authentic furnishings without exceeding GPU or draw budgets',()=>{
+  const gl=mockGl(),layer=createPack5ConstructionLayer(plainWorld());
+  for(let x=0;x<8;x++)for(let z=0;z<8;z++)
+    assert.equal(layer.place('pack5:080',[x,4,z],(x+z)%4).ok,true);
+  const stream=createPack5GpuStream(gl,layer);
+  for(let i=0;i<24&&stream.stats().pendingPages>0||i===0;i++)
+    stream.refresh([4,4,4],Date.now()+i*1000);
+  const stats=stream.stats();
+  assert.ok(stats.instances>16,'16-instance cutoff must be removed');
+  assert.ok(stats.instances<=64&&stats.pages<=8&&stats.drawCalls<=8);
+  assert.ok(stats.bytes<=2*1024*1024,'resident GPU budget');
+  assert.ok(stats.maxUploadedPageBytes<=384*1024,'incremental upload budget');
+  assert.ok(gl.uploads.every(a=>a.byteLength<=384*1024));
+  const before=gl.uploads.length;
+  stream.refresh([4.1,4,4.1],Date.now()+25000);
+  assert.equal(gl.uploads.length,before,'stable spatial pages must not reupload on small moves');
+  const n=stream.draw({atPos:0,atColor:1,atUv:2,atMat:3});
+  assert.ok(n>0);
+  assert.ok(stream.stats().drawCalls<=8);
+  stream.refresh([500,4,500],Date.now()+26000);
+  assert.equal(stream.stats().bytes,0,'far pages evicted');
+  assert.equal(stream.stats().instances,0);
+  stream.dispose();
+});
+test('stale pages are suppressed after a failed GPU upload; recovery never leaks old buffer',()=>{
+  const gl=mockGl(),layer=createPack5ConstructionLayer(plainWorld());
+  layer.place('pack5:080',[0,4,0]);
+  const stream=createPack5GpuStream(gl,layer),at=[.5,4,2],now=1000;
+  stream.refresh(at,now);
+  assert.equal(stream.stats().instances,1);
+  layer.place('pack5:080',[2,4,0]);
+  const normal=gl.bufferData;let errorCode=0;
+  gl.bufferData=(...args)=>{normal(...args);errorCode=1285;};
+  gl.getError=()=>{const code=errorCode;errorCode=0;return code;};
+  stream.refresh(at,now+100);
+  assert.equal(stream.stats().instances,0,'outdated geometry may not masquerade as current');
+  assert.equal(stream.draw({atPos:0,atColor:1,atUv:2,atMat:3}),0);
+  assert.equal(stream.stats().uploadFailures,1);
+  assert.ok(gl.deleted.length>=1,'failed staged GPU buffer freed');
+  gl.bufferData=normal;
+  stream.refresh(at,now+1100);
+  assert.equal(stream.stats().instances,2);
+  assert.equal(stream.stats().uploadFailures,1);
+  assert.ok(stream.draw({atPos:0,atColor:1,atUv:2,atMat:3})>0);
+  stream.dispose();
+  assert.equal(stream.stats().bytes,0);
+});
