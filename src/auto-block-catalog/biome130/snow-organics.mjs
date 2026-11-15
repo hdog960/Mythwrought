@@ -43,7 +43,7 @@ export function candidateMesh(candidate,rotation=0){
   const offset=vertices.length/3;
   for(const quad of faces){
    for(const v of quad)vertices.push(b[0]+v[0]*(b[3]-b[0]),b[1]+v[1]*(b[4]-b[1]),b[2]+v[2]*(b[5]-b[2]));
-   const q=offset+indices.length/6*4;
+   const q=vertices.length/3-4;
    indices.push(q,q+1,q+2,q,q+2,q+3);
   }
  }
