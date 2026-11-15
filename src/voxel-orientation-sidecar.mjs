@@ -49,8 +49,11 @@ export function makeOrientationSidecar(entries=[],{maxEntries=4096}={}) {
     async applyEditAsync(cell,edit) {
       const key=cellKey(cell);
       if(typeof edit!=='function') throw new TypeError('Missing edit callback');
+      const original=states.get(key);
       const success=await edit();
-      if(success===true) states.delete(key);
+      // A newer orientation/undo may have been recorded while this edit awaited.
+      // Never erase that newer state on a late completion.
+      if(success===true && states.get(key)===original) states.delete(key);
       return success;
     },
     // Caller must pass current world block reader; stale records are never restored onto edits.
