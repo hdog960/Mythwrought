@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,WORLD_MAX_Y} from '../src/voxel.mjs';
+import {PACK2_LIVE_IDS} from '../src/pack2-integration.mjs';
+import {BIOME130_REGISTERED_IDS} from '../src/biome130-registry.mjs';
 import {INTERACTION_REACH,BUILD_MATERIALS,BLOCK_NAMES,inspectBlockTarget,applyBlockAction,intersectsPlayerBlock} from '../src/blocks.mjs';
 
 function stage(){
@@ -13,9 +15,11 @@ function stage(){
 test('basic interaction materials and finite range are explicit',()=>{
   assert.equal(INTERACTION_REACH,6);
   assert.deepEqual(BUILD_MATERIALS.slice(0,5),[BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE]);
-  assert.equal(BUILD_MATERIALS.length,75,'all five original materials plus 70 registered biome blocks');
-  assert.equal(new Set(BUILD_MATERIALS).size,75,'no duplicate construction IDs');
-  assert.deepEqual(BUILD_MATERIALS.slice(5),Array.from({length:70},(_,i)=>256+i));
+  const baseline=[BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE,...BIOME130_REGISTERED_IDS];
+  assert.deepEqual(BUILD_MATERIALS.slice(0,baseline.length),baseline,'legacy+automated material prefix must remain stable');
+  assert.deepEqual(BUILD_MATERIALS.slice(baseline.length),PACK2_LIVE_IDS,'Pack 2 stays a separate physical overlay');
+  assert.equal(BUILD_MATERIALS.length,baseline.length+PACK2_LIVE_IDS.length);
+  assert.equal(new Set(BUILD_MATERIALS).size,BUILD_MATERIALS.length,'no duplicate construction IDs');
   assert.equal(BLOCK_NAMES[BLOCK.LEAVES],'leaf canopy');
   assert.equal(BLOCK_NAMES[BLOCK.DEEPSTONE],'deepstone');
   assert.equal(BLOCK_NAMES[BLOCK.GRASS],'grass');
@@ -33,7 +37,9 @@ test('first visible block is mined, never the invisible block behind it',()=>{
   assert.equal(w.get(x,y,z-1),BLOCK.CRYSTAL);
 });
 test('place selected materials only in line-of-sight adjacent empty cell',()=>{
-  for(const selected of BUILD_MATERIALS){
+  // Bare schema-1 VoxelWorld only accepts legacy + registered biome130 IDs.
+  // Pack 2's physical IDs are deliberately written by Pack2LiveWorld instead.
+  for(const selected of BUILD_MATERIALS.filter(id=>!PACK2_LIVE_IDS.includes(id))){
     const {w,x,y,z,eye,dir,player}=stage();
     const result=applyBlockAction(w,eye,dir,'place',selected,player,()=>{});
     assert.equal(result.ok,true);
@@ -41,6 +47,19 @@ test('place selected materials only in line-of-sight adjacent empty cell',()=>{
     assert.equal(w.get(x,y,z+1),selected);
     assert.equal(w.get(x,y,z),BLOCK.STONE);
   }
+});
+test('bare legacy world refuses a manual Pack 2 ID without a verified physical sidecar',()=>{
+  const {w,eye,dir,player}=stage(),snapshot=JSON.stringify(w.save());
+  const result=applyBlockAction(w,eye,dir,'place',PACK2_LIVE_IDS[0],player,()=>{});
+  assert.equal(result.ok,false);
+  assert.equal(JSON.stringify(w.save()),snapshot);
+});
+test('selecting a shaped Pack 1/4 material never blocks ordinary legacy MINE actions',()=>{
+  const {w,x,y,z,eye,dir,player}=stage();
+  const selectedManual=9;
+  const result=applyBlockAction(w,eye,dir,'mine',selectedManual,player,()=>{});
+  assert.equal(result.ok,true);
+  assert.equal(w.get(x,y,z),BLOCK.AIR);
 });
 test('no target, out of range and unsupported action do not mutate world',()=>{
   const {w,eye,player}=stage();

@@ -1,5 +1,7 @@
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
 import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
+import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
+  pack2BodyIntersects} from './pack2-integration.mjs';
 import {biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
@@ -241,6 +243,16 @@ export function meshChunk(world,cx,cz){
       for(let y=LEGACY_WORLD_MIN_Y;y<=WORLD_MAX_Y;y++){
         const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
+        if(isPack2LiveId(id)){
+          if(id!==76){
+            const state=world.getPack2State?.(x,y,z);
+            if(!state)throw Error('Pack 2 physical mesh missing actual cell state');
+            const physical=pack2WorldVertices(id,state,[x,y,z]);
+            for(let j=0;j<physical.length;j+=9)
+              appendVertex(...physical.subarray(j,j+9));
+          }
+          continue;
+        }
         if(isBiome130BlockId(id)){
           const surface=getBiomeGeometry(id,world.rotationAt?.(x,y,z)??0);
           // Source-accurate union surface geometry; full neighboring legacy
@@ -258,7 +270,8 @@ export function meshChunk(world,cx,cz){
                 boundary=false;break;
               }
             }
-            if(boundary&&neighbor!==BLOCK.AIR&&!isBiome130BlockId(neighbor))continue;
+            if(boundary&&neighbor!==BLOCK.AIR&&
+                !isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))continue;
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const lit=[.77,.73,1,.48,.85,.67][face];
             const color=biome130Color(id,x,y,z,face);
@@ -278,7 +291,8 @@ export function meshChunk(world,cx,cz){
         // Keep world-space inputs and face order identical for save/seed parity.
         let variance;
         for(const face of FACE){
-          if(blockAt(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
+          const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
+          if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor))continue;
           if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
             hash(x+y*5,z-y*3,world.seed+91)*.08;
           const r=clamp(color[0]*variance*face.lit,0,1);
@@ -343,15 +357,63 @@ export function raycast(world,eye,direction,maxDistance=7){
      ![...eye,...direction,maxDistance].every(Number.isFinite)||maxDistance<0)return null;
   const len=Math.hypot(...direction);
   if(len<1e-9)return null;
-  if(world?.biomeCellCount>0){
-    const hit=raycastShapes(eye,direction,(x,y,z)=>{
+  // Pack 3's additive physical sidecar never replaces the canonical ray; the
+  // already-authored Pack 2 sloped-water hit always competes at true distance.
+  const pack3Target=world?.pack3Runtime?.size?.()>0?
+    world.pack3Runtime.target(eye,direction,maxDistance):null;
+  const manual14Target=world?.manual14Layer?.size?.()>0?
+    world.manual14Layer.target(eye,direction,maxDistance):null;
+  const overlay=!pack3Target?manual14Target:
+    !manual14Target?pack3Target:
+    pack3Target.distance<=manual14Target.distance?pack3Target:manual14Target;
+  const withPhysical=base=>{
+    if(!overlay||(base&&base.distance<=overlay.distance+1e-8))return base;
+    return {hit:overlay.cell,adjacent:overlay.normal.some(Boolean)?
+      overlay.cell.map((v,i)=>v+overlay.normal[i]):null,distance:overlay.distance};
+  };
+  if(world?.biomeCellCount>0||world?.pack2Cells?.size>0){
+    // Mixed physical catalogs: one box-accurate collision ray for all legacy,
+    // manual solids and registered biome130 shapes. Static clear-rill water
+    // has a sloped surface and is ray-tested separately by exact triangles.
+    const solid=raycastShapes(eye,direction,(x,y,z)=>{
       const id=world.get(x,y,z);
-      return id===BLOCK.AIR?null:isBiome130BlockId(id)?
-        {boxes:biome130Block(id,world.rotationAt?.(x,y,z)??0).boxes}:FULL_CUBE;
+      if(id===BLOCK.AIR||id===76)return null;
+      if(isPack2LiveId(id))
+        return {boxes:pack2ShapeOf(id,world.getPack2State(x,y,z)).boxes};
+      if(isBiome130BlockId(id))
+        return {boxes:biome130Block(id,world.rotationAt?.(x,y,z)??0).boxes};
+      return FULL_CUBE;
     },maxDistance);
-    if(!hit)return null;
-    return {hit:hit.cell,adjacent:hit.normal.some(Boolean)?
-      hit.cell.map((v,i)=>v+hit.normal[i]):null,distance:hit.distance};
+    let nearestWater=null;
+    if(world?.pack2Cells?.size){
+      const unit=direction.map(v=>v/len),cell=eye.map(Math.floor);
+      const step=unit.map(Math.sign);
+      const tDelta=unit.map(v=>v===0?Infinity:Math.abs(1/v));
+      const tMax=unit.map((v,i)=>v===0?Infinity:
+        ((v>0?cell[i]+1:cell[i])-eye[i])/v);
+      for(let i=0;i<Math.ceil(maxDistance*3)+6;i++){
+        if(world.get(...cell)===76){
+          const hit=pack2RayHit(76,world.getPack2State(...cell),eye,unit,cell,maxDistance);
+          if(hit&&(!nearestWater||hit.distance<nearestWater.distance)){
+            const normal=hit.normal||[0,0,0],axis=normal.reduce(
+              (best,v,j)=>Math.abs(v)>Math.abs(normal[best])?j:best,0);
+            const offset=[0,0,0];
+            if(Math.abs(normal[axis])>1e-7)offset[axis]=Math.sign(normal[axis]);
+            nearestWater={hit:[...cell],adjacent:offset.some(Boolean)?
+              cell.map((v,j)=>v+offset[j]):null,distance:hit.distance};
+          }
+        }
+        const next=Math.min(...tMax);
+        if(!Number.isFinite(next)||next>maxDistance+1e-9)break;
+        for(let axis=0;axis<3;axis++)if(tMax[axis]<=next+1e-9){
+          cell[axis]+=step[axis];tMax[axis]+=tDelta[axis];
+        }
+      }
+    }
+    const solidResult=solid?{hit:solid.cell,adjacent:solid.normal.some(Boolean)?
+      solid.cell.map((v,i)=>v+solid.normal[i]):null,distance:solid.distance}:null;
+    return withPhysical(nearestWater&&(!solidResult||nearestWater.distance<solidResult.distance)?
+      nearestWater:solidResult);
   }
   const dir=direction.map(v=>v/len),cell=eye.map(Math.floor);
   const step=dir.map(v=>Math.sign(v));
@@ -364,10 +426,10 @@ export function raycast(world,eye,direction,maxDistance=7){
   const epsilon=1e-9;
   for(let i=0;i<Math.ceil(maxDistance*3)+5;i++){
     if(world.get(cell[0],cell[1],cell[2])!==BLOCK.AIR){
-      return {hit:[...cell],adjacent:previous,distance};
+      return withPhysical({hit:[...cell],adjacent:previous,distance});
     }
     const next=Math.min(...tMax);
-    if(!Number.isFinite(next)||next>maxDistance+epsilon)return null;
+    if(!Number.isFinite(next)||next>maxDistance+epsilon)return withPhysical(null);
     previous=[...cell];distance=Math.max(0,next);
     // Traverse touching grid planes together so an edge hit cannot select a phantom cell.
     for(let axis=0;axis<3;axis++){
@@ -377,7 +439,7 @@ export function raycast(world,eye,direction,maxDistance=7){
       }
     }
   }
-  return null;
+  return withPhysical(null);
 }
 export function outlineVertices(cell,color=[.81,.91,.63]){
   if(!Array.isArray(cell)||cell.length!==3||!cell.every(Number.isInteger))return new Float32Array();
@@ -409,6 +471,13 @@ export function collides(world,x,feet,z){
         {
           const id=world.get(bx,by,bz);
           if(id===BLOCK.AIR)continue;
+          if(isPack2LiveId(id)){
+            const state=world.getPack2State?.(bx,by,bz);
+            if(!state)throw Error('Pack 2 collision lacks real state');
+            if(pack2BodyIntersects(id,state,[bx,by,bz],
+              {x,z,feet,radius:BODY_RADIUS,height:BODY_HEIGHT}))return true;
+            continue;
+          }
           if(!isBiome130BlockId(id))return true;
           const asset=biome130Block(id,world.rotationAt?.(bx,by,bz)??0);
           if(!asset.solid)continue;
@@ -418,5 +487,11 @@ export function collides(world,x,feet,z){
                z+BODY_RADIUS>bz+box[2]+e&&z-BODY_RADIUS<bz+box[5]-e)return true;
           }
         }
+  // Additional source-owned, seed-bound physical overlays are additive; never
+  // treat passable biome130 plants or Pack 2 water as solid full cubes.
+  const body=[x-BODY_RADIUS,feet,z-BODY_RADIUS,x+BODY_RADIUS,feet+BODY_HEIGHT,z+BODY_RADIUS];
+  if(world?.pack3Runtime?.size?.()>0 && !world.pack3Runtime.playerFits(body).fits)return true;
+  if(typeof world?.manual14Collision==='function'&&world.manual14Collision(body))return true;
+  if(typeof world?.pack5Collision==='function'&&world.pack5Collision(body))return true;
   return false;
 }

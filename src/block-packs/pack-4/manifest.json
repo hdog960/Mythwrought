@@ -1,0 +1,402 @@
+{
+  "schema": "mythwrought.pack4.candidate-manifest.v1",
+  "title": "Pack 4 — Windows & Furnishings",
+  "productionState": "UNMERGED CANDIDATE — NOT IN LIVE GAME",
+  "repository": "hdog960/Mythwrought",
+  "branch": "pack-4-m0-m1-windows-openings-20261114",
+  "mainAtStart": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "integrationCheckpoint": "006",
+  "reservedIdBand": [
+    159,
+    208
+  ],
+  "protectedIds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    255
+  ],
+  "assignedIds": [
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181
+  ],
+  "unassignedBand": [
+    182,
+    208
+  ],
+  "candidateVariants": 23,
+  "completeFamilies": 0,
+  "implementedCandidateFamilies": 22,
+  "statusGlossary": {
+    "candidate": "Implemented in isolated PR only; engine integration and live compatibility not certified",
+    "planned": "Not yet implemented"
+  },
+  "entries": [
+    {
+      "roster": 30,
+      "name": "Clear glass",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        159
+      ],
+      "note": "Thin pale transparent glaze"
+    },
+    {
+      "roster": 31,
+      "name": "Stained glass",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        160,
+        161
+      ],
+      "note": "Sunfire and Moonveil tracery variants"
+    },
+    {
+      "roster": 32,
+      "name": "Wooden window frames",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        162
+      ],
+      "note": "Open oak sash and cross mullions"
+    },
+    {
+      "roster": 33,
+      "name": "Wooden shutters",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        163
+      ],
+      "note": "Two closed slatted hinged leaves; open state deferred"
+    },
+    {
+      "roster": 34,
+      "name": "Iron bars",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        164
+      ],
+      "note": "Four wrought iron rods and two braces"
+    },
+    {
+      "roster": 35,
+      "name": "Lantern blocks",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        165
+      ],
+      "note": "Hearthbound freestanding copper/glass lantern; floor-support fixture, metadata-only amber light"
+    },
+    {
+      "roster": 36,
+      "name": "Wall-mounted lanterns",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        166
+      ],
+      "note": "Hawthorn wall sconce with solid mounting plate and forward lantern body; warm light metadata only"
+    },
+    {
+      "roster": 37,
+      "name": "Crystal lanterns",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        167
+      ],
+      "note": "Aetherglass blue-cyan crystal lantern inside physical rune cage; not CRYSTAL 5"
+    },
+    {
+      "roster": 38,
+      "name": "Torch blocks",
+      "category": "windows-lighting",
+      "status": "candidate",
+      "blockIds": [
+        168
+      ],
+      "note": "Wayfarer wall torch with timber handle, iron bracket and decorative non-colliding flame"
+    },
+    {
+      "roster": 56,
+      "name": "Barrels",
+      "category": "furnishings",
+      "status": "candidate",
+      "blockIds": [
+        169
+      ],
+      "note": "Copperhoop coopered barrel: eight stepped staves, iron hoops, lid and bung"
+    },
+    {
+      "roster": 57,
+      "name": "Wooden crates",
+      "category": "furnishings",
+      "status": "candidate",
+      "blockIds": [
+        170
+      ],
+      "note": "Ironbound crate: separate interlocking side slats, metal corner ferrules and battens"
+    },
+    {
+      "roster": 58,
+      "name": "Wooden benches",
+      "category": "furnishings",
+      "status": "candidate",
+      "blockIds": [
+        171
+      ],
+      "note": "Hearthwood bench: raised seat, four legs and physical backrest, open underside"
+    },
+    {
+      "roster": 59,
+      "name": "Wooden tables",
+      "category": "furnishings",
+      "status": "candidate",
+      "blockIds": [
+        172
+      ],
+      "note": "Wayfarer tavern table: elevated top and trim, four narrow legs, open underside"
+    },
+    {
+      "roster": 60,
+      "name": "Wooden signs",
+      "category": "furnishings",
+      "status": "candidate",
+      "blockIds": [
+        173
+      ],
+      "note": "Village waymark sign: narrow floor post and framed blank panel, no text/UI"
+    },
+    {
+      "roster": 61,
+      "name": "Hanging banners",
+      "category": "furnishings",
+      "status": "candidate",
+      "blockIds": [
+        174
+      ],
+      "note": "Burgundy hearth banner: ceiling supported physical cloth with swallowtail split"
+    },
+    {
+      "roster": 62,
+      "name": "Market canopy blocks",
+      "category": "furnishings",
+      "status": "candidate",
+      "blockIds": [
+        175
+      ],
+      "note": "Seaglass festival canopy: one wall-mounted fabric panel and braces, no market stall"
+    },
+    {
+      "roster": 63,
+      "name": "Chimney blocks",
+      "category": "hearth-civic",
+      "status": "candidate",
+      "blockIds": [
+        176
+      ],
+      "note": "Hollow Ashenwatch chimney course: real open flue and corner quoin masonry; smoke metadata disabled"
+    },
+    {
+      "roster": 64,
+      "name": "Fireplace blocks",
+      "category": "hearth-civic",
+      "status": "candidate",
+      "blockIds": [
+        177
+      ],
+      "note": "Open Hearthstone fireplace insert: open mouth, grate and mantle; no fire/smoke/light simulation"
+    },
+    {
+      "roster": 65,
+      "name": "Well rim blocks",
+      "category": "hearth-civic",
+      "status": "candidate",
+      "blockIds": [
+        178
+      ],
+      "note": "L-shaped Wellside quarter-rim: empty inside corner, reusable one-cell quadrant only"
+    },
+    {
+      "roster": 66,
+      "name": "Well roof blocks",
+      "category": "hearth-civic",
+      "status": "candidate",
+      "blockIds": [
+        179
+      ],
+      "note": "Wall-mounted Wellhouse corbel/eave: rope hook and slats, unlike Pack 3 generic roofing"
+    },
+    {
+      "roster": 67,
+      "name": "Well pulley blocks",
+      "category": "hearth-civic",
+      "status": "candidate",
+      "blockIds": [
+        180
+      ],
+      "note": "Wall-mounted old brass pulley: physical open wheel ring, axle and rope; static, no animated mechanism"
+    },
+    {
+      "roster": 68,
+      "name": "Fountain blocks",
+      "category": "hearth-civic",
+      "status": "candidate",
+      "blockIds": [
+        181
+      ],
+      "note": "Dry Dawnward fountain basin segment: carved empty trough and ornamental spout; no fluid"
+    }
+  ],
+  "sourceFiles": [
+    "src/block-packs/pack-4/windows.mjs",
+    "src/block-packs/pack-4/lighting.mjs",
+    "src/block-packs/pack-4/fixture.mjs",
+    "src/block-packs/pack-4/furnishings.mjs",
+    "src/block-packs/pack-4/hearth-civic.mjs",
+    "src/block-packs/pack-4/preview-utils.mjs",
+    "src/block-packs/pack-4/interaction-handoff.mjs"
+  ],
+  "testFiles": [
+    "tests/block-packs/pack-4/windows.test.mjs",
+    "tests/block-packs/pack-4/lighting.test.mjs",
+    "tests/block-packs/pack-4/fixture.test.mjs",
+    "tests/block-packs/pack-4/gallery.html",
+    "tests/block-packs/pack-4/gallery.mjs",
+    "tests/block-packs/pack-4/furnishings.test.mjs",
+    "tests/block-packs/pack-4/furnishings-fixture.test.mjs",
+    "tests/block-packs/pack-4/gallery-browser.mjs",
+    "tests/block-packs/pack-4/manifest.test.mjs",
+    "tests/block-packs/pack-4/hearth-civic.test.mjs",
+    "tests/block-packs/pack-4/hearth-civic-fixture.test.mjs",
+    "tests/block-packs/pack-4/preview-utils.test.mjs",
+    "tests/block-packs/pack-4/acceptance.test.mjs",
+    "tests/block-packs/pack-4/mesh-budget.test.mjs",
+    "tests/block-packs/pack-4/interaction-handoff.test.mjs",
+    "tests/block-packs/pack-4/mesh-winding.test.mjs",
+    "tests/block-packs/pack-4/integrated-main-contract.test.mjs",
+    "tests/block-packs/pack-4/integrated-main-surface.test.mjs",
+    "tests/block-packs/pack-4/current-main-loader.mjs",
+    "tests/block-packs/pack-4/current-main-loader.test.mjs",
+    "tests/block-packs/pack-4/verify-final.mjs"
+  ],
+  "dependencies": [
+    "Generic :12 rotated shape/meshing descriptors (PR #108 — unmerged at checkpoint 006)",
+    "Generic :00 shape-aware selection/collision/placement (PR #106 — unmerged at checkpoint 006)",
+    "Creator-authorized centralized registration of candidate IDs, with nonbreaking schema-1 orientation state",
+    "Transparency sorting, depth-writing and multi-material faces in the shared renderer",
+    "Working dynamic lighting, alpha/depth order, wall/floor support and light source budgets are central engine dependencies, NOT implemented here",
+    "Fabric billow, text-editable signs and usable sit/interact behaviors are not implemented; individual physical pieces and attachment metadata only.",
+    "Wall-mounted canopy requires a verified adjacent fixed support; ceiling banner needs fixed support overhead.",
+    "M4 fire/heat/smoke, water level/fountain and pulley mechanics are NOT implemented: only physical geometry and explicit engines-disabled metadata",
+    "Future manual integration must honor open flues, hearth mouths, hollow well quadrants, dry fountain basins and mounted brackets; do not use a full-cube fallback"
+  ],
+  "restrictions": {
+    "noMainEdits": true,
+    "noWorldPlacement": true,
+    "noAutoMerge": true,
+    "noPwaChanges": true,
+    "noSharedFiles": true
+  },
+  "verifiedCoordination": [
+    "https://github.com/hdog960/Mythwrought/issues/109",
+    "https://github.com/hdog960/Mythwrought/issues/117"
+  ],
+  "familyCount": 22,
+  "lastVerifiedMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+  "lastVerifiedCheckpoint": "008 — 2026-11-14 documented in docs/INTEGRATION_CHECKPOINTS.md; live visibility for automation-007 assets, explicitly excludes manual Pack4",
+  "lastComparedIssues": [
+    109,
+    117
+  ],
+  "lastV8FocusedChecks": 142,
+  "currentAcceptanceStatus": "M5 OPEN / NOT ACCEPTED. All 22 families / 23 IDs 159–181 authored; prior 177/177 source-backed V8 checks; 9/9 byte-verified genuine native Node subset passes; full 181-case combined-checkout Node suite and authentic 12 WebGL2 gallery PNGs remain NOT VERIFIED; Gate A/iPhone creator sign-off pending.",
+  "latestAcceptanceV8": 177,
+  "nativeNodeEvidence": "Five native Node 22 preview-utils tests passed with local source/test files verified against exact Git blob SHAs; full 23-ID checkout test suite is not yet verified",
+  "galleryEvidence": "Actual WebGL2 review is still blocked locally. Authored script now renders 23 candidate canvas images across four 90-degree orientations at 667×375, 844×390 and 932×430, asserting foreground contrast, initial 23 distinct images and asymmetric rotations, and creates 12 screenshots.",
+  "reviewDocuments": [
+    "src/block-packs/pack-4/PROGRESS.md",
+    "src/block-packs/pack-4/INTEGRATION.md",
+    "src/block-packs/pack-4/M5_ACCEPTANCE.md"
+  ],
+  "nativeNodeVerifiedTests": 9,
+  "nativeNodeScope": "Nine exact-Git-blob-native Node 22 passes: preview-utils.test.mjs 7/7 (including GPU depth/blend/partial allocation cleanup) plus current-main-loader.test.mjs 2/2. Full 181-case native suite still not verified.",
+  "galleryScope": "23 original geometry candidate cards; browser script authored for three iPhone landscape widths, no genuine screenshots verified",
+  "nextMilestone": "M5 final acceptance blocked on full native Node suite, genuine Chromium gallery, shared contract integration and explicit creator review",
+  "reviewedSharedContracts": {
+    "shapeAndTargetingPR": 106,
+    "sharedHead": "2054e00ead30736726d53d5aed8a1f9dc4e080a0",
+    "shapePrototypePR": 108,
+    "shapeHead": "31be6f32adcfbb461b7a57e7db2e1567f8c1891a",
+    "sharedMaxBoxes": 32,
+    "actualCrossContractProbes": "92 candidates × rotation × 7 assertions = 644 source-to-source V8 checks; native Node not claimed",
+    "orientationCoordinates": "Use safe-integer x/y/z per :00 shared sidecar, without Pack4's former arbitrary ±65,536 coordinate cutoff."
+  },
+  "reviewedSelectionCaps": {
+    "barrelID170": {
+      "visibleParts": 34,
+      "selectableBoxes": 26,
+      "collisionBoxes": 26
+    },
+    "maxAabbForAllPack4Handoffs": 32
+  },
+  "meshIntegrationRisk": "Prior PR108 prototype snapshot was higher-cost, but current incorporated main has optimized greedy face merging. New main opt-in prototype mesh fits <=836 vertices for all Pack4 collision AABB unions across four turns. Real iPhone rendering still unverified.",
+  "meshValidation": "19,248 nondegenerate outward-facing preview triangles across IDs 159–181 × 4 orientations; 0 inverted / 0 degenerate; individual meshes retain max 1,224 preview vertices and 14,436 cumulative (V8 exact-source checks, not native WebGL2).",
+  "sharedSidecarSourceProbe": "23/23 physical IDs roundtrip through exact unmerged PR #106 makeOrientationSidecar, snapshot/readBlock, restoreOrientationSidecar and isolated Pack 4 fixture state in V8 source-to-source test; stale block identity is filtered.",
+  "fixtureSafeIntegerCoordinates": "Pack 4 candidate fixture now accepts any Number.isSafeInteger cell coordinates, with guarded floor/wall/ceiling support offset overflow; does not affect real schema-1 saves.",
+  "browserAcceptance": "Chromium executable available but minimal headless data URL hangs; no genuine WebGL2 gallery/screenshots or iPhone art acceptance.",
+  "currentMainInteractionInterfaces": "Shapes/sidecar sources from former shared PR #106 now opt-in in main at b62728e; Pack4 23 IDs remain unregistered.",
+  "currentMainSourceProbe": "552/552 V8 direct current-main opt-in interaction/sidecar checks across 23 IDs×4 orientations×6 contracts; 23/23 staged sidecar replay, no real engine/world activation.",
+  "currentMainMesherProbe": "Current-main checkpoint007 greedy opt-in prototypeSurfaceMesh: 92/92 Pack4 rotated collision-union meshes produced within preview 1500 vertex cap, maximum 836 vertices (crate ID170 at 90/270 degrees). V8 source-only, not GPU or real WebGL2.",
+  "acceptanceEvidence": {
+    "currentMainShapeContract": "six checks in integrated-main-contract.test.mjs pass exact current-main APIs, source-backed V8 only",
+    "currentMainSurfaceMesher": "92/92 Pack4 candidate orientations pass real checkpoint 007 boundary-surface mesher (max 836 vertices) and three authored geometry tests, source-backed V8 only",
+    "fullNativeNode": "PENDING — genuine checkout inaccessible from local sandbox, no root CI discovery for nested tests",
+    "authenticChromium": "PENDING — local Chromium fails ANGLE/EGL initialization; no genuine 23-card iPhone landscape screenshots",
+    "creatorGateA": "OPEN — no physical-iPhone approval"
+  },
+  "checkpoint007TestContext": "Nine current-main-dependent acceptance tests run on checkpoint007+PR combined source; they SKIP with explicit status on raw pre-007 Pack4 HEAD, and import failures when modules are present are not hidden.",
+  "strictAcceptanceRunner": "node tests/block-packs/pack-4/verify-final.mjs on combined current-main + Pack4 checkout: exactly 16 native suites, 181 test cases, zero skips, genuine 23 candidates × 4 rotations × 3 iPhone landscape sizes in WebGL2, 12 authentic PNG files. --node-only verifies native suites only.",
+  "latestNonPack4MainChange": "Checkpoint 008: f416a2b introduced live automation-only voxel districts and root baseline CI; ac263720 records checkpoint008 and release ledger. Neither registers manual Pack4 IDs 159–181, nor edits Pack4-owned paths.",
+  "nativeRunnerEnvironmentEvidence": "Verified exact Git blob 1162fa6501ae07218721a7a1e180675d65c9539b with Node 22 syntax check and fail-closed native smoke: aborts on incomplete checkout instead of false pass; full combined acceptance blocked by GitHub DNS and Chromium local navigation.",
+  "nativeNodeVerifiedBlobShas": {
+    "previewUtility": "723f1e4c87d87e97aede6fea1272a4201b87e336",
+    "previewUtilityTests": "7b4b2e597e2fdf92f580e161b2844770e8f04211",
+    "mainLoader": "2ce3374326e91376cd93dd022a1ddd9e97e6cf59",
+    "mainLoaderTests": "5d6b62385379c7992ae979b06090746eeb061eba"
+  },
+  "previewResourceFix": "Isolated gallery shader/error handling, GPU allocation lifecycle, depth-mask/blending reset across failed translucent draws; 2 native Node GPU resource teardown checks added. No production renderer touched."
+}

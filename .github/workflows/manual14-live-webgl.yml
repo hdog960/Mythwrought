@@ -1,0 +1,51 @@
+name: Manual five-pack physical live-game acceptance (draft only)
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/manual14-live-webgl.yml'
+      - 'src/builder-assets/manual14-*.mjs'
+      - 'src/builder-assets/manual-five-pack.mjs'
+      - 'src/main.mjs'
+      - 'src/blocks.mjs'
+      - 'src/voxel.mjs'
+      - 'tests/manual14-*.mjs'
+permissions:
+  contents: read
+jobs:
+  manual14-game:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fail-closed authentic Pack 1/4 mesh and sidecar native acceptance
+        run: |
+          node --check src/builder-assets/manual14-layer.mjs
+          node --check src/builder-assets/manual14-mesh.mjs
+          node --check src/main.mjs
+          node --test tests/manual14-layer.test.mjs tests/manual14-mesh.test.mjs
+      - name: Install free Chromium for actual WebGL2 acceptance
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Localhost real game render, sidecar reload, and three iPhone landscapes
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: 'x11'
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-manual14.log 2>&1 &
+          node tests/manual14-live-webgl-browser.mjs
+          node tests/manual14-dense-webgl-browser.mjs
+      - name: Preserve screenshots, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manual14-physical-live-game-${{ github.run_id }}
+          path: artifacts/manual14-live/
+          if-no-files-found: warn
+          retention-days: 30
