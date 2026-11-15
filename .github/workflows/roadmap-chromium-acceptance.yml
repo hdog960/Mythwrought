@@ -66,7 +66,7 @@ jobs:
           MYTHWROUGHT_PACK1_SOURCE_WEBGL2: '1'
           # One-shot, exact candidate head for the creator-authorized corrected-frame recheck.
           # Reject stale or unexpectedly advanced source instead of silently certifying it.
-          MYTHWROUGHT_PACK1_REQUIRED_HEAD: 'bfa15c846b9b2b7227f78321b2b8657c7c311e20'
+          MYTHWROUGHT_PACK1_REQUIRED_HEAD: 'dba8417a052cda36702530c333834c4e5dfe463d'
           MYTHWROUGHT_REPORT_ROOT: ${{ runner.temp }}/mythwrought-roadmap-evidence
           LIBGL_ALWAYS_SOFTWARE: '1'
           EGL_PLATFORM: x11
