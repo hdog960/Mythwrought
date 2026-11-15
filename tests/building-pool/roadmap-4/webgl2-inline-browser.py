@@ -52,6 +52,7 @@ async def run():
     views=[(w,h,t,b,s,cut) for w,h in VIEWPORTS
       if not selected_width or str(w)==selected_width
       for t,b,s in SAMPLES for cut in (False,True)]
+    views=views[int(os.getenv('R4_SKIP_VIEWS','0')):]
     views=views[:int(os.getenv('R4_MAX_VIEWS',len(views)))]
     results=[]
     failures=[]
