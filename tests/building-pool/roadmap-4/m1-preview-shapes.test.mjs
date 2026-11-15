@@ -17,7 +17,7 @@ test('source-referenced physical candidate box geometry is finite and inside uni
     }
     checked++;
   }
-  assert.equal(checked,129484);
+  assert.equal(checked,129549);
 });
 
 test('every Pack 3 regional roof uses its exact source-like ceramic/slate/thatch local boxes',()=>{
@@ -60,7 +60,7 @@ test('all raised steps and landings have source-referenced partial stair/slab bo
 
 test('preview census explicitly labels unresolved future materials as approximation, not certified live collision',()=>{
   const result=b.map(candidatePreviewShapeCensus);
-  assert.equal(result.reduce((x,s)=>x+s.cells,0),129484);
+  assert.equal(result.reduce((x,s)=>x+s.cells,0),129549);
   assert.ok(result.every(s=>s.boxes>=s.cells));
   assert.ok(result.every(s=>!s.liveCollisionCertified&&!s.actualWebGL2PerfMeasured));
   assert.ok(result.some(s=>s.counts['unresolved-full-cell-proxy']>0));
