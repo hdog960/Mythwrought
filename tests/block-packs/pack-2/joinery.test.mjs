@@ -166,3 +166,32 @@ test('all original material candidates preserve stable IDs and old fixture targe
   assert.equal(f.target([.5,.5,-1],[0,0,1]).id,62);
   assert.equal(f.mineRay([.5,.5,-1],[0,0,1]).removed,true);
 });
+
+test('adjoining split-rail fences physically connect both rails in all four rotations',()=>{
+  // The original .10..90 rail spans left .20-cell holes between adjoining
+  // fence tiles. Structural rails must meet at each cell boundary, while
+  // the open air between lower and upper rails remains targetably empty.
+  const moves=[[1,0,0],[0,0,1],[-1,0,0],[0,0,-1]];
+  for(let rotation=0;rotation<4;rotation++){
+    const state={rotation},shape=joineryShape(65,state),movement=moves[rotation];
+    const railParts=shape.parts.filter(part=>part.role==='wood');
+    assert.equal(railParts.length,2,'two physical split rails');
+    const axis=rotation%2===0?0:2,sign=movement[axis];
+    for(const rail of railParts){
+      const a=rail.box,b=a.map((v,i)=>v+movement[i%3]);
+      const boundary=sign===1?1:0;
+      assert.equal(a[axis+(sign===1?3:0)],boundary,
+        'rail must reach outgoing voxel face');
+      assert.equal(b[axis+(sign===1?0:3)],boundary,
+        'matching rail in neighboring voxel must touch');
+      const axes=[0,1,2].filter(i=>i!==axis);
+      const faceArea=axes.reduce((area,i)=>area*Math.max(0,
+        Math.min(a[i+3],b[i+3])-Math.max(a[i],b[i])),1);
+      assert.ok(faceArea>=.021,'physical end-face overlap expected');
+    }
+    assert.equal(joineryOccupies(65,state,[.5,.54,.5]),false,
+      'middle fence opening must stay physically open');
+    assert.ok(joineryPreviewMesh(65,state).triangles<=336,
+      'do not inflate the original split-fence triangle budget');
+  }
+});
