@@ -20,12 +20,12 @@ test('30 selectively identified house/tavern IDs come from exact legacy source (
   assert.equal(LEGACY_ORIGIN.head,manifest.sourcePR.head);
   assert.equal(LEGACY_ORIGIN.generatorBlob,manifest.sourceBlobs.generator);
 });
-test('M0 records are not misrepresented as migrated or approved 3D geometry',()=>{
+test('historical M0 identity snapshot stays separate from current M1 migration',()=>{
   const result=verifyM0Roster();
   assert.equal(result.legacyMigrated,0);assert.equal(result.creatorApproved,0);
   assert.equal(manifest.originalCandidatesIdentified,30);
-  assert.equal(manifest.originalGeometryMigrated,0);
-  assert.equal(manifest.totalLaneGeometryAuthored,0);
+  assert.equal(manifest.originalGeometryMigrated,30);
+  assert.equal(manifest.totalLaneGeometryAuthored,30);
   assert.equal(manifest.newDesignsAuthored,0);
   assert.equal(manifest.additionalDesignsRequired,420);
   assert.equal(manifest.creatorAccepted,0);
