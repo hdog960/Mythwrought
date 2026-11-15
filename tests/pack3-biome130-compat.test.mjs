@@ -28,7 +28,9 @@ test('IDs, symbolic names and materials remain disjoint after automations added 
  assert.ok(BIOME130_REGISTERED_IDS.every(id=>id>255&&!PACK3_BUILDER_IDS.includes(id)));
  assert.ok(BIOME130_REGISTERED_SYMBOLS.every(x=>x.startsWith('biome130:')));
  assert.ok(PACK3_BUILDER_SYMBOLS.every(x=>x.startsWith('pack3:')));
- assert.ok(PACK3_BUILDER_IDS.every(id=>BUILD_MATERIALS.includes(id)&&BLOCK_NAMES[id]?.length>0));
+ assert.equal(BUILD_MATERIALS.length,65,'Preserve generic biome130 + legacy list for VoxelWorld.set');
+ assert.ok(PACK3_BUILDER_IDS.every(id=>!BUILD_MATERIALS.includes(id)&&BLOCK_NAMES[id]?.length>0),
+  'Physical Pack 3 assets register only through the separate placement bridge');
  assert.ok(BIOME130_REGISTERED_IDS.every(id=>BUILD_MATERIALS.includes(id)&&BLOCK_NAMES[id]?.length>0));
 });
 test('shape ray targeting preserves biome130 solids and their physical rotation in a Pack 3 world',()=>{

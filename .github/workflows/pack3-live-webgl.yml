@@ -13,6 +13,7 @@ on:
       - 'tests/pack3-complete-readiness.test.mjs'
       - 'tests/pack3-portable.test.mjs'
       - 'tests/pack3-biome130-compat.test.mjs'
+      - 'tests/pack3-builder-contract.test.mjs'
       - 'tests/pack3-portable-browser.mjs'
 
 permissions:
@@ -40,7 +41,7 @@ jobs:
           node --check tests/pack3-live-all17-browser.mjs
           node --check tests/pack3-portable-browser.mjs
           node --check src/builder-assets/pack3-portable.mjs
-          node --test tests/pack3-runtime-stage.test.mjs tests/pack3-live.test.mjs tests/pack3-complete-readiness.test.mjs tests/pack3-portable.test.mjs tests/pack3-biome130-compat.test.mjs
+          node --test tests/pack3-runtime-stage.test.mjs tests/pack3-live.test.mjs tests/pack3-complete-readiness.test.mjs tests/pack3-portable.test.mjs tests/pack3-biome130-compat.test.mjs tests/pack3-builder-contract.test.mjs
       - name: Install Chromium (free GitHub-hosted runner)
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0

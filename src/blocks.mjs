@@ -14,7 +14,9 @@ function physicalBoxes(id,yaw){
 }
 
 export const INTERACTION_REACH=6;
-export const BUILD_MATERIALS=Object.freeze([BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE,...BIOME130_REGISTERED_IDS,...PACK3_BUILDER_IDS]);
+// Keep the original generic 65-material public contract. Pack 3's 17 assets
+// use a separate physical-overlay selector and must NOT be passed to VoxelWorld.set.
+export const BUILD_MATERIALS=Object.freeze([BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE,...BIOME130_REGISTERED_IDS]);
 export const BLOCK_NAMES=Object.freeze({
   [BLOCK.AIR]:'air',[BLOCK.GRASS]:'grass',[BLOCK.DIRT]:'earth',
   [BLOCK.STONE]:'stone',[BLOCK.WOOD]:'timber',[BLOCK.CRYSTAL]:'crystal',
@@ -44,7 +46,7 @@ export function inspectBlockTarget(world,eye,direction,selected,player,rotation=
   let reason='';
   if(!adjacent)reason='No free space for placement';
   else if(adjacent[1]<WORLD_MIN_Y||adjacent[1]>WORLD_MAX_Y)reason='Outside editable height';
-  else if(!BUILD_MATERIALS.includes(selected))reason='Choose a building material';
+  else if(!BUILD_MATERIALS.includes(selected)&&!pack3SymbolsById.has(selected))reason='Choose a building material';
   else if(world.get(...adjacent)!==BLOCK.AIR||world?.pack3Runtime?.get(adjacent))reason='Placement space occupied';
   else if(intersectsPlayerBlock(player,adjacent,selected,rotation))reason='Cannot place inside the player';
   const canPlace=reason==='';
