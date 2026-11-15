@@ -113,8 +113,8 @@ for(const x of [.15,.77])for(const z of [.15,.77]){
  table.push(piece([x,0,z,x+.08,.72,z+.08],'oakShadow'));
  table.push(piece([x-.015,.09,z-.015,x+.095,.155,z+.095],'brass'));
 }
-table.push(piece([.24,.46,.20,.76,.51,.28],'walnut'));
-table.push(piece([.24,.46,.72,.76,.51,.80],'walnut'));
+table.push(piece([.23,.46,.20,.77,.51,.28],'walnut'));
+table.push(piece([.23,.46,.72,.77,.51,.80],'walnut'));
 table.push(piece([.47,.74,.46,.53,.835,.54],'brass',{collision:false}));
 // Floor-mounted writable-sign *blank*: no actual text editing or NPC UI.
 const sign=[
