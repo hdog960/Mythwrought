@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "M1–M5: 18/18 physically authored CANDIDATE families; M6 22 genuine cross-family checks PASS; full isolated native Node 178/178 PASS and native ESM Chromium WebGL2 36/36 PASS. Production IDs/saves/HTTP/mobile/creator art/merge/deploy remain OPEN.",
+  "status": "M1–M5 18 physical source families CANDIDATE; post-M6 genuine source-only QA 182/182 native Node PASS and 36/36 authentic Chromium native ES-module WebGL2 captures PASS; production/creator/served HTTP/physical-iPhone approvals OPEN.",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -425,12 +425,12 @@
   ],
   "candidateFamilies": 18,
   "testEvidence": {
-    "nativeNode": "178/178 native Node 22.16.0 source-only Pack 5 cases PASS, 0 failed/skipped: 156 original M0–M5 and 22 M6 cross-family cases. All 7 original candidate physical source modules and M0–M5 test files Git blob checked; M6 file Git blob 5395171b45d86dc28c56c0c40b534526d4b2eb57 matches locally executed file. Local manifest metadata was older but 18-candidate/no-ID policy matches.",
+    "nativeNode": "182/182 genuine native Node v22.16.0 Pack 5 focused cases PASS, 0 skipped/fail: 156 M0–M5 + 22 cross-family M6 + 4 post-M6 ray reach regressions. Executed local source/test Git blob-exact to draft PR: fixture cf7baf90555d81ddd4dcba496f2d3ea469b12a41; cross-family tests de5ee4ae2ad0b17165a13245b874e407725aa6da. Local manifest text metadata was stale; candidate/ID invariants verified against live remote manifest.",
     "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
     "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
-    "webgl2": "36/36 genuine Chromium native data-URL ES-module WebGL2 captures PASS on exact source gallery modules: six modes m1,m2,m3,m3b,m4,m5 at 667x375,844x390,932x430 rotations 0/1. No HTTP-served/physical iPhone/device GPU certification.",
+    "webgl2": "36/36 PASS on latest Pack 5 fixture: true native ES-module/Chromium software-OpenGL WebGL2 for six source galleries m1,m2,m3,m3b,m4,m5, 667x375,844x390,932x430 CSS landscape, orientations 0/1; all real source model panels nonblank. Not a hosted HTTP page or physical iPhone GPU/controls.",
     "screenshots": "36/36 genuine native ES-module Chromium/WebGL2 visual screenshots verified: 6 M5 show 6 distinct physical variant panels each and 30 prior galleries reexecuted on the same source. Nonblank panel readbacks, mobile viewport framing and rotation distinctions pass; no creator visual sign-off.",
-    "production": "M6 isolated cross-family readiness PASS only. Production central ID registry and widening, schema-1 saves, real game renderer/physics/player placement, HTTP-served gallery, physical iPhone performance, creator art approval, Gate A and v0.11 all NOT approved; never merge/deploy or alter other pack/automation/shared systems without separate explicit authorization.",
+    "production": "Creator art/actual physical iPhone/Gate A/serviced HTTP and production schema-1, numeric ID registry widening, actual placement/player raycast, GPU performance, merge/deployment remain OPEN; no live integrations or approvals.",
     "acceptanceDossier": "src/block-packs/pack-5/M6_ACCEPTANCE.md (M1–M5 dossiers also remain authoritative for each candidate milestone)",
     "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py modes m1,m2,m3,m3b,m4,m5. 36/36 genuine Chromium WebGL2 view captures across all 6 original source-preview galleries this session; native offline data URL ES modules only, HTTP-served localhost blocked.",
     "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only",
@@ -442,7 +442,7 @@
     "m4": "6 original source-authored physical M4 variants across 091 Desks & Lecterns, 092 Carpets & Rugs (a genuine atomic 2-cell runner with per-cell floor support), 093 Altars & Pedestals; 15 native Node tests and real native ES-module Chromium WebGL2 six-view screenshot acceptance pass; source-only; not live",
     "m5": "M5 94 heavy 2-cell gate/portcullis, 95 ceiling-supported chandeliers, 96 reinforced 2-cell stable divider/dry hollow feed trough: 6 unique physical variants, 24 source-native fixture regressions plus 12 additional M5 fixture cases, 6/6 native ES-module/WebGL2 rotated mobile-landscape preview screenshots PASS. No opening, lighting, animal, fluid, inventory mechanics or production placement.",
     "m5Preview": "6/6 genuine Chromium native ES-module/WebGL2 screenshots 667x375,844x390,932x430 rotations 0/1, six separately rendered and distinct physical variants; no source-served HTTP/physical iPhone/production certification.",
-    "m6": "M6 cross-family: 22/22 original native Node PASS; all 18 family registry variants, 36 distinct authored variants, mixed adjacency, multi-cell atomic conflicts/removal, ceiling vs floor support, wall rotation support, physical partial collisions, mixed ray targeting, fixture-only snapshots and rollback, per-occupied-cell source mesh budget and disjoint neighboring physical shape extents. NOT production integration."
+    "m6": "M6 cross-family isolated readiness PASS after demonstrated fixture selection reach defect repair: raycast/removeRay now normalize finite nonzero direction vectors so maxDistance and hit.distance are true world units, 4 new regressions for nonunit reach, safe removal, mixed-stack nearest targeting and overflow norm rejection. No shared production renderer/raycast/save change. 18 unique provisional symbolic physical families and all integration dependencies remain OPEN."
   },
   "preview": {
     "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
@@ -451,5 +451,5 @@
   },
   "latestMainReviewed": "ac263720b60641c65b02330348dd76d0ef9cb75e",
   "latestCheckpointReviewed": "008",
-  "reviewNotes": "Live main checkpoint 008 includes automation-only world activation, explicitly excluding manual Packs 1–5; pack source remains isolated in draft PR #119."
+  "reviewNotes": "Main checkpoint 008 automation-only, manual Pack 5 still 100% isolated draft, user approval gates open. Latest post-M6 technical fix is candidate fixture ray reach normalization, not a production engine or iPhone claim."
 }
