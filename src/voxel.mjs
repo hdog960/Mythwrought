@@ -343,6 +343,14 @@ export function raycast(world,eye,direction,maxDistance=7){
      ![...eye,...direction,maxDistance].every(Number.isFinite)||maxDistance<0)return null;
   const len=Math.hypot(...direction);
   if(len<1e-9)return null;
+  if(world?.pack3Runtime?.size?.()>0){
+    // The source-exact Pack 3 ray traces its own AABBs, legacy voxels,
+    // and all active Biome130 shapes through one coherent target path.
+    const physical=world.pack3Runtime.target(eye,direction,maxDistance);
+    if(!physical)return null;
+    return {hit:physical.cell,adjacent:physical.normal.some(Boolean)?
+      physical.cell.map((v,i)=>v+physical.normal[i]):null,distance:physical.distance};
+  }
   if(world?.biomeCellCount>0){
     const hit=raycastShapes(eye,direction,(x,y,z)=>{
       const id=world.get(x,y,z);
@@ -402,6 +410,11 @@ export const BODY_RADIUS=.28;
 export const BODY_HEIGHT=1.78;
 export function collides(world,x,feet,z){
   if(![x,feet,z].every(Number.isFinite))return true;
+  if(world?.pack3Runtime?.size?.()>0){
+    const body=[x-BODY_RADIUS,feet,z-BODY_RADIUS,
+      x+BODY_RADIUS,feet+BODY_HEIGHT,z+BODY_RADIUS];
+    return !world.pack3Runtime.playerFits(body).fits;
+  }
   const e=1e-5;
   for(let bx=Math.floor(x-BODY_RADIUS+e);bx<=Math.floor(x+BODY_RADIUS-e);bx++)
     for(let bz=Math.floor(z-BODY_RADIUS+e);bz<=Math.floor(z+BODY_RADIUS-e);bz++)
