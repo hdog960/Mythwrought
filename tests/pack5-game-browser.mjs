@@ -68,6 +68,19 @@ try{
     assert.ok(evidence.vertices>0&&evidence.instances===1&&evidence.rendered);
     assert.equal(evidence.sidecar,true);
     await page.screenshot({path:path.join(output,'pack5-live-game-'+width+'x'+height+'.png')});
+    // A saved physical structure must reload visibly even though editing starts OFF.
+    await page.reload({waitUntil:'load'});
+    await page.waitForFunction(()=>
+      Number(document.getElementById('scene')?.dataset.pack5MeshVertices)>0,
+      null,{timeout:30000});
+    assert.equal(await page.locator('#pack5Enabled').isChecked(),false);
+    const recovered=await page.evaluate(()=>({
+      instances:Number(document.getElementById('scene').dataset.pack5VisibleInstances),
+      status:document.getElementById('pack5Status').textContent
+    }));
+    assert.equal(recovered.instances,1);
+    assert.match(recovered.status,/restored and physically solid/);
+    console.log('PASS independent Pack5 sidecar reload with editing OFF',width,height);
     console.log('PASS actual Mythwrought game Pack5 WebGL2',width,height,evidence);
     await page.close();
   }

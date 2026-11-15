@@ -64,3 +64,16 @@ const savedSidecar=layer.snapshot(); // NEVER feed this to VoxelWorld.restore()
   performance; multi-thousand-place streaming and external sidecar
   export/import/backup consistency; actual iPhone controls and visuals;
   creator-authorized PR merge/deployment. No Gate A or v0.11 change.
+
+
+## M3 — Automatic world-sidecar scene restoration (draft)
+Saved Pack 5 furnishings now load automatically when a valid separate per-seed sidecar
+already exists, even though the editor toggle defaults OFF. The authored shapes
+are rendered and physically solid; importing or switching worlds clears the old
+GPU/physics adapter and loads only the new seed's sidecar. A corrupt sidecar is
+neither repaired nor overwritten automatically. Duplicate concurrent setup is
+guarded by a shared, seed-checked initialization promise.
+
+The real-game Chromium acceptance now verifies a page reload retains shaped GPU
+geometry with the editor OFF. Full-world export remains schema-1 only; **off-device
+Pack 5 export/import and coordinated backup are still separate open tasks**.
