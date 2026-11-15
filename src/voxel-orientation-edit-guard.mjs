@@ -33,7 +33,7 @@ export function makeOrientationEditGuard({readBlock,writeBlock,sidecar}) {
         const result=writeBlock(...cell,nextId);
         if(result!==true) return Object.freeze({applied:false,reason:'rejected'});
         // Fail closed if the host did not actually write the requested block.
-        if(read(cell)!==nextId) throw new Error('Writer acknowledged an inconsistent block');
+        if(read(cell)!==nextId) {sidecar.clear(cell);throw new Error('Writer acknowledged an inconsistent block');}
         sidecar.clear(cell);
         return Object.freeze({applied:true,previousId:before,nextId});
       } finally {writing=false;}
