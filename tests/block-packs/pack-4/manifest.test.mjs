@@ -8,10 +8,12 @@ import {BLOCK} from '../../../src/voxel.mjs';
 import {PACK4_WINDOW_ASSETS} from '../../../src/block-packs/pack-4/windows.mjs';
 import {PACK4_LIGHT_ASSETS} from '../../../src/block-packs/pack-4/lighting.mjs';
 import {PACK4_FURNISHING_ASSETS} from '../../../src/block-packs/pack-4/furnishings.mjs';
+import {PACK4_CIVIC_ASSETS} from '../../../src/block-packs/pack-4/hearth-civic.mjs';
 
 const manifest=JSON.parse(readFileSync(new URL(
  '../../../src/block-packs/pack-4/manifest.json',import.meta.url),'utf8'));
-const authored=[...PACK4_WINDOW_ASSETS,...PACK4_LIGHT_ASSETS,...PACK4_FURNISHING_ASSETS];
+const authored=[...PACK4_WINDOW_ASSETS,...PACK4_LIGHT_ASSETS,
+ ...PACK4_FURNISHING_ASSETS,...PACK4_CIVIC_ASSETS];
 test('all manifest families are reserved exactly once and in Pack 4 ranges',()=>{
  assert.equal(manifest.entries.length,22);
  assert.equal(new Set(manifest.entries.map(x=>x.roster)).size,22);
