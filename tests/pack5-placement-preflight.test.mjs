@@ -154,3 +154,14 @@ test('physical placement refuses unknown registered support until host certifies
   assert.equal(layer.count(),1);
   assert.equal(w.world.get(...required[0]),256);
 });
+
+test('registered decorative shapes do not turn into invented full-cube collisions',async()=>{
+  const {createPack5ConstructionLayer}=await import('../src/pack5-integration/construction-layer.mjs');
+  const w=makeWorld();
+  w.put([2,4,0],312);
+  w.world.pack5StructuralSupport=()=>true;
+  const layer=createPack5ConstructionLayer(w.world);
+  assert.equal(layer.collides([2.1,4.1,.1,2.9,4.9,.9]),false);
+  assert.equal(layer.collidesPack5([2.1,4.1,.1,2.9,4.9,.9]),false);
+  assert.equal(layer.count(),0);
+});

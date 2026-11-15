@@ -27,3 +27,24 @@ jobs:
           node-version: '22.16.0'
       - name: Exact-commit Pack 5 physical, save, builder and cross-pack preflight
         run: node --test tests/pack5-*.test.mjs
+      - name: Install free Chromium browser test runner
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Pack 5 source-authentic geometry WebGL2 at three landscape sizes
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: 'x11'
+        run: node tests/pack5-integration-browser.mjs artifacts/pack5-producer
+      - name: Actual Mythwrought renderer with Pack 5 and save/reload
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: 'x11'
+        run: node tests/pack5-game-browser.mjs artifacts/pack5-producer/game
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pack5-producer-exact-head-browser-evidence
+          path: artifacts/pack5-producer/
+          if-no-files-found: warn
+          retention-days: 14
