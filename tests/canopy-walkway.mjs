@@ -26,6 +26,16 @@ assert.ok(found,'find a natural-air corridor for real voxel walkway');
 const {world,edits,k,a,b,plan}=found;
 assert.ok(plan.cells.some(c=>c[3]===BLOCK.LEAVES));
 assert.ok(plan.cells.some(c=>c[3]===BLOCK.WOOD));
+const occupancy=new Map(plan.cells.map(([x,cy,z,id])=>[[x,cy,z].join(','),id]));
+for(const [x,cy,z,id] of plan.cells){
+ if(id!==BLOCK.LEAVES)continue;
+ assert.equal(occupancy.get([x,cy-1,z].join(',')),BLOCK.WOOD,'every raised leaf has physical timber support');
+ assert.ok([[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dz])=>
+   occupancy.get([x+dx,cy-1,z+dz].join(','))===BLOCK.WOOD),
+ 'foliage support is attached to another timber cell');
+}
+assert.ok(plan.cells.some(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&
+ (z!==a[1]||x<a[0]||x>b[0])),'cross-axis outriggers are physical');
 assert.ok(plan.cells.every(c=>c[1]===y||c[1]===y+1));
 assert.equal(planCanopyWalkway(world,a,[a[0]+3,a[1]+1],y),null,'diagonal forbidden');
 assert.equal(planCanopyWalkway(world,a,[a[0]+10,a[1]],y),null,'overspan forbidden');
@@ -45,4 +55,4 @@ assert.equal(placeCanopyWalkway(failure.world,plan),false);
 for(const [x,cy,z] of plan.cells)assert.equal(failure.world.get(x,cy,z),BLOCK.AIR,'rollback restores air');
 assert.equal(failure.world.get(a[0],y,a[1]),BLOCK.WOOD);
 assert.equal(failure.world.get(b[0],y,b[1]),BLOCK.WOOD);
-console.log('Canopy walkway: physical deck/rails, corridor, edits, tampering, rollback PASS');
+console.log('Canopy walkway: supported staggered crowns, corridor, edits, tampering, rollback PASS');
