@@ -8,12 +8,14 @@ for(const seed of [179,1,2026,-77]){
   test('south gallery has real floors, headroom, and deterministic route: '+seed,()=>{
     const world=new VoxelWorld(seed),saved=JSON.stringify(world.save());
     const gallery=southGalleryCaveWorld(world),trace=southGalleryTrace(world);
-    assert.equal(trace.samples.length,8);
+    assert.equal(trace.samples.length,11);
     assert.equal(trace.walkable,true,JSON.stringify(trace.failures));
     assert.deepEqual(trace.failures,[]);
     assert.deepEqual(trace.blockedTransitions,[]);
-    assert.equal(trace.transitions.length,7);
+    assert.equal(trace.transitions.length,10);
     assert.ok(trace.bodyHeight>1&&trace.bodyRadius>0);
+    assert.equal(trace.samples[0].z,CAVE_CANDIDATE.z); // begins in the main corridor
+    assert.equal(trace.samples.at(-1).z,CAVE_CANDIDATE.z+10); // ends in south chamber
     for(const point of trace.samples){
       assert.equal(point.bodyClear,true);
       assert.equal(collides(gallery,point.x+.5,point.feet,point.z+.5),false);
@@ -49,4 +51,15 @@ test('a saved wall at the throat blocks physical traversal without modifying edi
   assert.equal(trace.walkable,false);
   assert.ok(trace.failures.some(p=>p.z===point.z&&!p.bodyClear));
   assert.equal(JSON.stringify(world.save()),saved);
+});
+
+test('saved obstruction at the primary-to-south junction invalidates the complete route',()=>{
+  const world=new VoxelWorld(179);
+  const first=southGalleryTrace(world).samples[0];
+  assert.equal(world.set(first.x,first.feet,first.z,BLOCK.STONE),true);
+  const before=JSON.stringify(world.save());
+  const trace=southGalleryTrace(world);
+  assert.equal(trace.walkable,false);
+  assert.ok(trace.failures.some(p=>p.z===CAVE_CANDIDATE.z));
+  assert.equal(JSON.stringify(world.save()),before);
 });
