@@ -1,6 +1,6 @@
 // :24 opt-in cave extension: an additional physical south gallery and chamber.
 // No default-world hookup, vertical-engine changes, IDs, or saved-edit writes.
-import {BLOCK, WORLD_MIN_Y, WORLD_MAX_Y, worldKey} from './voxel.mjs';
+import {BLOCK, WORLD_MIN_Y, WORLD_MAX_Y, worldKey, collides, BODY_HEIGHT, BODY_RADIUS} from './voxel.mjs';
 import {CAVE_CANDIDATE,caveRoute} from './experimental-cave-route.mjs';
 import {branchedCaveWorld} from './branched-cave-world.mjs';
 
@@ -38,5 +38,19 @@ export function southGalleryTrace(world,origin=CAVE_CANDIDATE){
       supported:reader.get(x,floor,z)!==BLOCK.AIR,
       clear:reader.get(x,floor+1,z)===BLOCK.AIR&&reader.get(x,floor+2,z)===BLOCK.AIR});
   }
-  return {samples,walkable:samples.every(p=>p.supported&&p.clear)};
+  // Validate the full player body, including the space between route samples.
+  for(const point of samples)
+    point.bodyClear=!collides(reader,point.x+.5,point.feet,point.z+.5);
+  const transitions=[];
+  for(let i=1;i<samples.length;i++){
+    const a=samples[i-1],b=samples[i];
+    transitions.push({from:i-1,to:i,
+      clear:!collides(reader,(a.x+b.x)/2+.5,Math.max(a.feet,b.feet),(a.z+b.z)/2+.5),
+      stepValid:Math.abs(a.feet-b.feet)<=1});
+  }
+  const failures=samples.filter(p=>!p.supported||!p.clear||!p.bodyClear);
+  const blockedTransitions=transitions.filter(p=>!p.clear||!p.stepValid);
+  return {samples,transitions,failures,blockedTransitions,
+    walkable:failures.length===0&&blockedTransitions.length===0,
+    bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
 }
