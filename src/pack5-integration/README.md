@@ -77,3 +77,10 @@ guarded by a shared, seed-checked initialization promise.
 The real-game Chromium acceptance now verifies a page reload retains shaped GPU
 geometry with the editor OFF. Full-world export remains schema-1 only; **off-device
 Pack 5 export/import and coordinated backup are still separate open tasks**.
+
+
+## Optional separate JSON export (M3)
+A user-initiated settings button exports the exact current Pack 5 symbolic/variant
+sidecar as a stand-alone JSON download. The normal world EXPORT remains a
+schema-1 terrain file and does **not** include furnishings. An import/restore
+UI for this separate file has not yet passed acceptance and is not advertised.

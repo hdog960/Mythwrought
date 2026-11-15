@@ -763,6 +763,23 @@ function start(){
         String(error.message||error);
     }
   });
+  document.getElementById('pack5Export').addEventListener('click',()=>{
+    if(!pack5Builder){
+      pack5Status.textContent='No loaded Pack 5 construction to export.';
+      return;
+    }
+    try{
+      const raw=JSON.stringify(pack5Builder.snapshot(),null,2);
+      const href=URL.createObjectURL(new Blob([raw],{type:'application/json'}));
+      const link=document.createElement('a');
+      link.href=href;link.download='mythwrought-pack5-seed-'+world.seed+'.json';
+      document.body.append(link);link.click();link.remove();
+      setTimeout(()=>URL.revokeObjectURL(href),1500);
+      pack5Status.textContent='Separate Pack 5 JSON export prepared; schema-1 world untouched.';
+    }catch(error){
+      pack5Status.textContent='Pack 5 export unavailable; original sidecar preserved: '+String(error);
+    }
+  });
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
     selected=Number(b.dataset.block);
     document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
