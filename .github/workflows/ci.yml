@@ -5,12 +5,13 @@ on:
   pull_request:
   workflow_dispatch:
 
-# No workflow cancellation or concurrency groups: every scheduled run
-# remains eligible to execute. Isolated-lane test scope reduces future work.
-
+# Only cancel older attempts for the SAME PR. Main is not canceled.
+concurrency:
+  group: mythwrought-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 permissions:
   contents: read
-
+  actions: read
 jobs:
   node-and-browser:
     runs-on: ubuntu-24.04
@@ -28,7 +29,9 @@ jobs:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node scripts/ci/select-scope.mjs >> "$GITHUB_OUTPUT"
-      - name: Syntax, selector and production model tests
+      - name: Fast syntax and CI contract tests
+        env:
+          MODE: ${{ steps.scope.outputs.mode }}
         run: |
           node --check src/main.mjs
           node --check src/voxel.mjs
@@ -42,23 +45,31 @@ jobs:
           node --check src/cave-runes.mjs
           node --check src/sky.mjs
           node --test tests/ci/*.test.mjs
-          npm test
-      - name: Native source tests for changed independent roadmaps
+          if [ "$MODE" != 'docs-only' ]; then npm test; fi
+      - name: Focused native tests for changed independent lanes
         if: steps.scope.outputs.mode == 'isolated'
         env:
           CI_LANES: ${{ steps.scope.outputs.lanes }}
         run: node scripts/ci/run-isolated.mjs "$CI_LANES"
-      - name: Install free browser test tools
+      - uses: actions/cache@v4
+        if: steps.scope.outputs.mode != 'docs-only'
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/ms-playwright
+          key: mythwrought-ubuntu-node22-playwright1.58.2-pngjs7-v1
+      - name: Install pinned browser test tools
+        if: steps.scope.outputs.mode != 'docs-only'
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-      - name: Landscape browser smoke (isolated regression baseline)
+      - name: Focused landscape WebGL2 smoke and layout
         if: steps.scope.outputs.mode == 'isolated'
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-site.log 2>&1 &
           node tests/browser-smoke.mjs
           node tests/layout-browser.mjs
-      - name: Landscape WebGL2 browser smoke (full shared/integration gate)
+      - name: Full 20-script WebGL2 gate (shared, integration and main)
         if: steps.scope.outputs.mode == 'full'
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-site.log 2>&1 &
@@ -82,6 +93,11 @@ jobs:
           node tests/voxel-landmarks-browser.mjs
           node tests/live-world-browser.mjs
           node tests/context-restore-browser.mjs
+      - name: Advisory queue health snapshot
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/ci/queue-health.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

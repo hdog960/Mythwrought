@@ -51,5 +51,5 @@ test('missing change lists and suspicious names fail closed', () => {
   assert.equal(classifyPaths(null).mode, 'full');
   assert.equal(classifyPaths(['src/block-packs/pack-1/a\nb.mjs']).mode, 'full');
   assert.equal(classifyPaths(['src\\block-packs\\pack-1\\a.mjs']).mode, 'full');
-  assert.equal(LANES.length, 9);
+  assert.equal(LANES.length, 17);
 });
