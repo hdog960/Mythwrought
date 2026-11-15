@@ -239,3 +239,27 @@ test('physical foundation inspection detects undermining and accepts player repa
     assert.ok(inspectStoneRotundaTraversal(world,plan));
   }
 });
+
+
+test('failed placement restores rotations and family counters as well as schema-1 edits',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected eligible supported site');
+  // A stale rotation entry at an otherwise unedited construction cell is
+  // cleared by VoxelWorld.set. Rollback must restore it on a later failure.
+  const [x,y,z]=plan.cells[0],key=worldKey(x,y,z);
+  world.rotations.set(key,2);
+  world.biomeCellCount=7;
+  const originalEdits=new Map(world.edits);
+  const originalRotations=new Map(world.rotations);
+  const originalCount=world.biomeCellCount;
+  const originalSet=world.set.bind(world);
+  let writes=0;
+  world.set=(...args)=>{
+    if(++writes===12)throw new Error('simulated interrupted construction');
+    return originalSet(...args);
+  };
+  assert.equal(placeStoneRotunda(world,plan),false);
+  assert.deepEqual(world.edits,originalEdits);
+  assert.deepEqual(world.rotations,originalRotations);
+  assert.equal(world.biomeCellCount,originalCount);
+});
