@@ -63,7 +63,8 @@ async def main():
                 result=await page.evaluate(RENDER_JS,yaw)
                 png=base64.b64decode(result['png'].split(',')[1])
                 assert png.startswith(b'\x89PNG\r\n\x1a\n')
-                assert result['ids']==[116,117,118] and result['parts']==29
+                # Exact Pack 3 physical parts: 13 wall + 10 battlement + 8 buttress.
+                assert result['ids']==[116,117,118] and result['parts']==31
                 filename=out/f'pack3-fortification-{w}x{h}-yaw{yaw*90}.png'
                 filename.write_bytes(png)
                 records.append({'viewport':f'{w}x{h}','yaw':yaw,'hash':hashlib.sha256(png).hexdigest(),
