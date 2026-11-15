@@ -148,3 +148,25 @@ test('legacy recovery validates optional metadata against restored world and pre
  assert.equal(JSON.stringify(legacy),original);
  assert.throws(()=>restoreOrientationSidecar({},()=>4),TypeError);
 });
+
+test('ambiguous optional orientation metadata fails closed without blocking schema-1 load',()=>{
+ const legacy={schema:1,seed:17,edits:[[1,2,3,4]]};
+ const original=JSON.stringify(legacy);
+ const records=[
+  {cell:[1,2,3],blockId:4,turns:1},
+  {cell:[1,2,3],blockId:4,turns:3},
+  {cell:[5,0,0],blockId:7,turns:2},
+  {cell:[9,0,0],blockId:255,turns:1}
+ ];
+ const snapshot=JSON.stringify(records);
+ const calls=[];
+ const recovered=restoreOrientationSidecar(records,(x,y,z)=>{
+  calls.push([x,y,z].join(','));
+  return x===5?7:4;
+ });
+ assert.equal(recovered.get([1,2,3],4),0,'duplicate cell must never choose an arbitrary orientation');
+ assert.equal(recovered.get([5,0,0],7),2,'independent valid metadata survives');
+ assert.deepEqual(calls,['5,0,0'],'ambiguous and malformed records never query world chunks');
+ assert.equal(JSON.stringify(records),snapshot,'optional metadata is not mutated');
+ assert.equal(JSON.stringify(legacy),original,'schema-1 save remains byte-identical');
+});
