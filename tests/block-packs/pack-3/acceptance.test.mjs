@@ -357,3 +357,45 @@ test('Hearthclay Crown Ridge mates to both opposing pitched roofs for all quarte
     assert.equal(center,false,'Ridge should retain its recessed open underside');
   }
 });
+
+
+// Architectural paint and coping are physical strips, not a texture decal.
+// A structurally joined hip can still have broken color/solid rail courses:
+// inspect exact per-tone cross-sections at both adjoining roof sides.
+test('Hearthclay hip corner edge and crest trims remain continuous at both rotated roof joins', async()=>{
+  const {pack3GeometryById}=await import('../../../src/block-packs/pack-3/roof-geometry.mjs');
+  const sides=[[[0,1],[2,1],[0,-1],[2,-1]],[[2,1],[0,-1],[2,-1],[0,1]]];
+  const areaMismatch=(a,b,axis,face,otherFace,tone)=>{
+    const dims=[0,1,2].filter(d=>d!==axis);
+    const relevant=[...a.parts,...b.parts].filter(p=>p.tone===tone);
+    const grids=dims.map(d=>[...new Set([0,1,...relevant.flatMap(p=>[p.box[d],p.box[d+3]])])]
+      .sort((x,y)=>x-y));
+    const painted=(asset,plane,u,v)=>asset.parts.some(part=>{
+      if(part.tone!==tone)return false;
+      const b=part.box;
+      return b[axis]<=plane&&b[axis+3]>=plane&&
+        u>=b[dims[0]]&&u<b[dims[0]+3]&&
+        v>=b[dims[1]]&&v<b[dims[1]+3];
+    });
+    let mismatch=0;
+    for(let i=1;i<grids[0].length;i++)for(let j=1;j<grids[1].length;j++){
+      const u=(grids[0][i-1]+grids[0][i])/2;
+      const v=(grids[1][j-1]+grids[1][j])/2;
+      if(painted(a,face,u,v)!==painted(b,otherFace,u,v))
+        mismatch+=(grids[0][i]-grids[0][i-1])*(grids[1][j]-grids[1][j-1]);
+    }
+    return mismatch;
+  };
+  for(let yaw=0;yaw<4;yaw++)for(let arm=0;arm<2;arm++){
+    const [axis,dir]=sides[arm][yaw],face=dir>0?1:0;
+    const hip=pack3GeometryById(114,yaw);
+    const stair=pack3GeometryById(113,(yaw+(arm?3:0))%4);
+    for(const tone of ['edge','crest']){
+      const mismatch=areaMismatch(hip,stair,axis,face,1-face,tone);
+      assert.equal(mismatch,0,
+        `Hip-to-stair ${tone} trim mismatches at yaw ${yaw}, arm ${arm}: ${mismatch} cell-unit²`);
+    }
+  }
+  assert.ok(pack3GeometryById(114).boxes.length<=32,
+    'Coping detail must remain within the merged shape descriptor 32-box budget');
+});
