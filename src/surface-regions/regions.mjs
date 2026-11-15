@@ -160,3 +160,47 @@ export function surfaceBiomeFreshColumn(x,z,seed=179,{
   return Object.freeze({name:b.name,x,z,oldTop,top:newTop,
     writes:Object.freeze(writes)});
 }
+
+
+// A renderable VoxelWorld-compatible view for a *new, explicitly opted-in*
+// world profile. The underlying world, its edits and schema-1 save remain
+// untouched. The manual integrator can pass this view to meshChunk and the
+// collision/raycast readers only after selecting a fresh-world profile.
+// Never infer freshness from an empty edits map: an explored save can be empty.
+export function createSurfaceBiomeWorldView(world,{
+  enabled=false,profileIsFresh=false,isProtected=null,maxCachedColumns=1024
+}={}){
+  if(!enabled||!profileIsFresh||!world||
+     typeof world.naturalAndLandmarkBlock!=='function'||
+     typeof world.get!=='function'||typeof isProtected!=='function'||
+     !Number.isInteger(maxCachedColumns)||maxCachedColumns<1||
+     maxCachedColumns>4096||!Number.isInteger(world.seed)||
+     !(world.edits instanceof Map)||world.edits.size!==0)return null;
+  const cache=new Map();
+  const planAt=(x,z)=>{
+    const key=x+','+z;
+    if(cache.has(key))return cache.get(key);
+    const plan=surfaceBiomeFreshColumn(x,z,world.seed,{
+      enabled:true,profileIsFresh:true,
+      readBaseline:(cx,y,cz)=>world.naturalAndLandmarkBlock(cx,y,cz),
+      hasEdit:(cx,y,cz)=>world.edits.has(cx+','+y+','+cz),
+      isProtected
+    });
+    const byY=plan?new Map(plan.writes.map(w=>[w.y,w.to])):null;
+    cache.set(key,byY);
+    if(cache.size>maxCachedColumns)cache.delete(cache.keys().next().value);
+    return byY;
+  };
+  return Object.freeze({
+    seed:world.seed,
+    get(x,y,z){
+      const original=world.get(x,y,z);
+      if(![x,y,z].every(Number.isInteger)||world.edits.has(x+','+y+','+z))
+        return original;
+      return planAt(x,z)?.get(y)??original;
+    },
+    rotationAt(x,y,z){return world.rotationAt?.(x,y,z)??0;},
+    // No set/save/restore methods: the view is deliberately read-only.
+    get cachedColumns(){return cache.size;}
+  });
+}
