@@ -47,3 +47,42 @@ export function eastGalleryTrace(world,origin=CAVE_CANDIDATE){
     anchor:{x:origin.x+anchor,y:floor+1,z:origin.z+8},
     chamber:{x:origin.x+anchor+8,y:floor+1,z:origin.z+8}};
 }
+
+// Check the *whole* chamber, not merely its centerline. A valid center route
+// can conceal a sealed side pocket or a saved-edit obstruction near a wall.
+// Samples are voxel centers; swept midpoint checks use the production body
+// collider and never mutate the base seeded world.
+export function eastGalleryChamberTrace(world,origin=CAVE_CANDIDATE){
+  const reader=eastGalleryCaveWorld(world,origin);
+  const {floorAt}=caveRoute(world.seed,origin);
+  const anchor=origin.length-9, floor=floorAt(anchor), feet=floor+1;
+  const cells=[],edges=[];
+  for(let t=anchor+2;t<=anchor+8;t++){
+    for(let d=6;d<=10;d++){
+      const x=origin.x+t,z=origin.z+d;
+      const supported=reader.get(x,floor,z)!==BLOCK.AIR;
+      const headroom=reader.get(x,feet,z)===BLOCK.AIR&&reader.get(x,feet+1,z)===BLOCK.AIR;
+      const bodyClear=!collides(reader,x+.5,feet,z+.5);
+      cells.push({t,d,x,z,supported,headroom,bodyClear,passable:supported&&headroom&&bodyClear});
+    }
+  }
+  const byKey=new Map(cells.map(c=>[c.t+','+c.d,c]));
+  const start=byKey.get((anchor+2)+',8');
+  const visited=new Set(),queue=start?.passable?[start]:[];
+  if(queue.length)visited.add(start.t+','+start.d);
+  for(let i=0;i<queue.length;i++){
+    const a=queue[i];
+    for(const [dt,dd] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const b=byKey.get((a.t+dt)+','+(a.d+dd));
+      if(!b?.passable)continue;
+      const key=b.t+','+b.d;
+      const clear=!collides(reader,(a.x+b.x)/2+.5,feet,(a.z+b.z)/2+.5);
+      edges.push({from:[a.t,a.d],to:[b.t,b.d],clear});
+      if(clear&&!visited.has(key)){visited.add(key);queue.push(b);}
+    }
+  }
+  const unreachable=cells.filter(c=>!visited.has(c.t+','+c.d));
+  return {cells,edges,unreachable,reachableCount:visited.size,
+    walkable:unreachable.length===0&&cells.length===35,
+    entry:{x:origin.x+anchor+2,y:feet,z:origin.z+8}};
+}
