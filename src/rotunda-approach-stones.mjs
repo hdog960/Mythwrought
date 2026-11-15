@@ -42,3 +42,28 @@ export function placeRotundaApproachStones(world,rotunda,plan){
     return false;
   }
 }
+
+// Read actual world voxels, not a render-only preview. The four approach
+// centerlines must remain physically walkable after the cairns are placed.
+export function inspectRotundaApproachStones(world,rotunda,plan){
+  if(!plan?.optIn||plan.kind!=='rotunda-approach-stones'||
+     !Array.isArray(plan.origin)||!Array.isArray(plan.cells)||
+     typeof world?.get!=='function'||!rotunda?.origin||
+     JSON.stringify(plan.origin)!==JSON.stringify(rotunda.origin))return null;
+  const [x,h,z]=plan.origin;
+  for(const [px,py,pz,id] of plan.cells)
+    if(world.get(px,py,pz)!==id)return null;
+  const routes=[];
+  for(const [dx,dz] of [[0,-1],[0,1],[-1,0],[1,0]]){
+    const cells=[];
+    for(let distance=4;distance<=6;distance++){
+      const px=x+dx*distance,pz=z+dz*distance;
+      if(world.get(px,h,pz)===BLOCK.AIR||
+         world.get(px,h+1,pz)!==BLOCK.AIR||
+         world.get(px,h+2,pz)!==BLOCK.AIR)return null;
+      cells.push([px,h+1,pz]);
+    }
+    routes.push(cells);
+  }
+  return {kind:'rotunda-approach-traversal',routes,markerCount:plan.cells.length};
+}
