@@ -27,11 +27,11 @@ function cells(origin){
     const key=worldKey(x,y,z);
     // AIR wins over another segment's floor at a crossing; segments are
     // separated vertically by 40+ blocks except neighboring ramp steps.
-    if(id===BLOCK.AIR||!map.has(key))map.set(key,id);
+    if(id===BLOCK.AIR||id===BLOCK.DEEPSTONE||!map.has(key))map.set(key,id);
   };
   for(const p of route){
     for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){
-      put(p.x+dx,p.floor,p.z+dz,BLOCK.DEEPSTONE);
+      // Retain native stone at the floor until all air carving is complete.
       for(let dy=1;dy<=4;dy++)put(p.x+dx,p.floor+dy,p.z+dz,BLOCK.AIR);
     }
   }
@@ -46,6 +46,9 @@ function cells(origin){
       for(let dy=1;dy<=6;dy++)put(p.x+dx,target+dy,p.z+dz,BLOCK.AIR);
     }
   }
+  // Restore the precise centerline's support after overlapping corridor cuts.
+  // This avoids a lower ramp step accidentally erasing the higher step's floor.
+  for(const p of route)put(p.x,p.floor,p.z,BLOCK.DEEPSTONE);
   return map;
 }
 const cache=new Map();
