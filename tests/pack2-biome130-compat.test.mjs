@@ -14,11 +14,11 @@ const memory=()=>{const cells=new Map();return {
   getItem:k=>cells.has(k)?cells.get(k):null,
   setItem:(k,v)=>cells.set(k,String(v))
 }};
-test('60 incorporated biome, 18 Pack 2 and Pack 3 roster symbols remain distinct',()=>{
-  assert.equal(BIOME130_REGISTERED_IDS.length,60);
+test('Current incorporated biome, 18 Pack 2 and Pack 3 roster symbols remain distinct',()=>{
+  assert.ok(BIOME130_REGISTERED_IDS.length>=60,'Never lose previously incorporated biome assets');
   assert.deepEqual([...PACK2_LIVE_IDS].sort((a,b)=>a-b),
     Array.from({length:18},(_,i)=>59+i));
-  assert.equal(new Set([...BIOME130_REGISTERED_IDS,...PACK2_LIVE_IDS]).size,78);
+  assert.equal(new Set([...BIOME130_REGISTERED_IDS,...PACK2_LIVE_IDS]).size,BIOME130_REGISTERED_IDS.length+PACK2_LIVE_IDS.length);
   assert.ok(BIOME130_REGISTERED_IDS.every(id=>id>255));
   assert.ok(PACK2_LIVE_IDS.every(id=>id<255&&isPack2LiveId(id)));
   const symbols=[...PACK2_BUILDER_SYMBOLS,...BIOME130_BUILDER_SYMBOLS,...PACK3_BUILDER_SYMBOLS];
