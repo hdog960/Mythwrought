@@ -1,0 +1,28 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {makeOrientationSidecar,restoreOrientationSidecar} from '../src/voxel-orientation-sidecar.mjs';
+test('round trip rotates without modifying legacy save',()=>{
+ const legacy={schema:1,edits:[[1,2,3,4]]};const before=JSON.stringify(legacy);
+ const world=new Map([['1,2,3',4]]);
+ const s=makeOrientationSidecar();s.set([1,2,3],4,3);
+ const data=s.snapshot((x,y,z)=>world.get([x,y,z].join(',')));
+ assert.deepEqual(data,[{cell:[1,2,3],blockId:4,turns:3}]);
+ const restored=restoreOrientationSidecar(data,(x,y,z)=>world.get([x,y,z].join(',')));
+ assert.equal(restored.get([1,2,3],4),3);
+ assert.equal(restored.get([1,2,3],5),0);
+ assert.equal(JSON.stringify(legacy),before);
+});
+test('stale edited blocks cannot inherit orientation',()=>{
+ const s=makeOrientationSidecar([{cell:[-1,0,2],blockId:3,turns:2}]);
+ assert.deepEqual(s.snapshot(()=>0),[]);
+ assert.equal(restoreOrientationSidecar(s.snapshot(()=>3),()=>4).size(),0);
+ s.clear([-1,0,2]);assert.equal(s.size(),0);
+});
+test('rejects malformed, duplicate, unbounded, and sentinel records',()=>{
+ assert.throws(()=>makeOrientationSidecar([{cell:[0,0,0],blockId:255,turns:1}]));
+ assert.throws(()=>makeOrientationSidecar([{cell:[0,0,0],blockId:1,turns:0},{cell:[0,0,0],blockId:1,turns:1}]));
+ const s=makeOrientationSidecar([],{maxEntries:1});s.set([0,0,0],1,0);
+ assert.throws(()=>s.set([1,0,0],1,0),RangeError);
+ assert.throws(()=>s.set([0,0,0],1,4));
+ assert.throws(()=>restoreOrientationSidecar('bad',()=>1));
+});
