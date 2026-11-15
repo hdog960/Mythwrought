@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M1 legacy geometry copied 30/30; independent exact-head native CI pending",
+  "milestone": "M1 first authored Inn, native/source geometry and physical catalog audit — exact-head CI pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 420,
-  "newDesignsAuthored": 0,
-  "totalLaneGeometryAuthored": 30,
+  "additionalDesignsRequired": 419,
+  "newDesignsAuthored": 1,
+  "totalLaneGeometryAuthored": 31,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,10 +53,11 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Pass exact-head native Node 30-source-record parity fixture and creator-visible WebGL2 building previews",
-    "Replay genuine native Node 1A source tests; source PR #121 reports are not 1A evidence",
-    "Use source-exact integrated manual block variant, collision, support and orientation contracts",
-    "Complete 420 additional unique coordinate-authored designs and perform real browser visual review"
+    "Current exact-head nested native Node and physical-asset source audit CI (run not yet complete)",
+    "Source-authentic physical Pack2/3/4/5 candidate geometry is not production placement approval",
+    "Independent candidate physical-family WebGL2 viewer and true roof/door/glass/support acceptance",
+    "419 additional genuinely distinct 3D building blueprints (285 houses, 60 taverns, 74 inns)",
+    "Creator visual acceptance, physical iPhone controls, centralized integration and save codec review"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -69,8 +70,43 @@
     "head": "88a9e410a0eda7cf961cb6b624241666eb3a48a1",
     "originalCandidateObjectsMatched": 30,
     "placementAnchors": 33555,
-    "independentRuntimeComparison": "30/30 JSON-identical in JavaScript isolate before commit; native Node exact-head CI pending",
+    "independentRuntimeComparison": "30/30 legacy source JSON parity; 30 per-building native geometry SHA fixtures PASS in Actions #43768982035",
     "referenceFile": "src/building-pool/roadmap-1a/legacy-reference.json",
     "hash": "FNV-1a-64 on original PR-generated objects"
+  },
+  "innCount": 1,
+  "categoriesAuthored": {
+    "house": 15,
+    "tavern": 15,
+    "inn": 1
+  },
+  "firstInn": {
+    "id": "r1:inn:temperate:small:001",
+    "title": "Wayfarer's Lantern Inn",
+    "placementCount": 1493,
+    "rooms": 5,
+    "portals": 5,
+    "bedReservations": 2,
+    "assetFamilies": 10,
+    "creatorApproved": false,
+    "worldPlaced": false
+  },
+  "gallery": {
+    "renderer": "real Chromium Canvas2D with source-authored coordinate proxy cuboids; NOT physical-family WebGL2",
+    "viewportEvidence": [
+      "667x375",
+      "844x390",
+      "932x430"
+    ],
+    "captures": 6,
+    "webgl2CandidateCertified": false,
+    "physicalIPhoneCertified": false,
+    "sourceCoordinateFNV64": {
+      "placements": "097896c4e4ddeb7c",
+      "walkable": "cbb7d9a5d191b77c",
+      "rooms": "010bf2ffaf0892f8",
+      "portals": "37725f71b44c4c6b"
+    },
+    "repoGallery": "tests/building-pool/roadmap-1a/m1-inn-canvas.html"
   }
 }
