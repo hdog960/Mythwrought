@@ -37,6 +37,29 @@ export function descentCells(origin=DESCENT_ORIGIN){
       set(p.x+dx,depth,p.z+dz,BLOCK.DEEPSTONE);
     }
   }
+  // Eight broad side grottoes, two at each depth, extend the descent beyond
+  // a single repeated staircase. Each level gallery has an actual stone floor
+  // and six-cell headroom; the main route is restored afterwards.
+  for(const depth of [-30,-80,-130,-180]){
+    const anchor=route.find(p=>p.floor===depth);
+    if(!anchor)continue;
+    for(const [sx,sz] of [[1,0],[0,1]]){
+      const cx=anchor.x+sx*15,cz=anchor.z+sz*15;
+      for(let along=0;along<=15;along++){
+        const x=anchor.x+sx*along,z=anchor.z+sz*along;
+        for(let across=-2;across<=2;across++){
+          const px=x+(sz?across:0),pz=z+(sx?across:0);
+          set(px,depth,pz,BLOCK.DEEPSTONE);
+          for(let h=1;h<=5;h++)set(px,depth+h,pz,BLOCK.AIR);
+        }
+      }
+      for(let dx=-7;dx<=7;dx++)for(let dz=-7;dz<=7;dz++){
+        if(dx*dx+dz*dz>49)continue;
+        set(cx+dx,depth,cz+dz,BLOCK.DEEPSTONE);
+        for(let h=1;h<=6;h++)set(cx+dx,depth+h,cz+dz,BLOCK.AIR);
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
