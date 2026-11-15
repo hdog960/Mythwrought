@@ -13,6 +13,7 @@ import {planStoneRotunda} from './stone-rotunda.mjs';
 import {planTwinwood} from './voxel-forest-twinwood.mjs';
 import {westGalleryWorld} from './west-gallery-world.mjs';
 import {planCanopyGate} from './voxel-canopy-gate.mjs';
+import {planVoxelTree} from './voxel-trees.mjs';
 import {planRotundaApproachStones} from './rotunda-approach-stones.mjs';
 
 export const LIVE_DISTRICT_SIZE=128;
@@ -225,6 +226,25 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
     for(const [a,b,c,id] of plan.cells)blocks.set(key(a,b,c),id);
     break;
   }
+  // A separate, rare archwood bridge is installed only at an untouched
+  // world-aligned site after all original four-variant groves are frozen.
+  // This keeps the historical distribution and saves stable.
+  let archwood=null;
+  for(const {x,z} of rankedSites(seed,minX,minZ,0xa11c).slice(0,20)){
+    if(x<minX+10||x>minX+LIVE_DISTRICT_SIZE-13||
+       z<minZ+8||z>minZ+LIVE_DISTRICT_SIZE-8||
+       near(x,z,0,0,25,25)||
+       origins.some(o=>near(x,z,o.x+14,o.z,32,30))||
+       court&&near(x,z,court.origin[0],court.origin[2],18,24)||
+       rotunda&&near(x,z,rotunda.origin[0],rotunda.origin[2],16,16)||
+       twinwood&&near(x,z,twinwood.origin[0],twinwood.origin[2],16,16))continue;
+    const plan=planVoxelTree(reserved,x,z,{variant:'archwood'});
+    if(!plan||plan.cells.some(([a,b,c])=>a<minX||a>=minX+LIVE_DISTRICT_SIZE||
+       c<minZ||c>=minZ+LIVE_DISTRICT_SIZE))continue;
+    archwood=plan;
+    for(const [a,b,c,id] of plan.cells)blocks.set(key(a,b,c),id);
+    break;
+  }
   // West gallery activation follows original structure staging. A conflicting
   // historical tree, court or newly staged structure disables ONLY that
   // candidate gallery; the older traversable north/south wings remain intact.
@@ -244,7 +264,7 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
     seed,dx,dz,trees,court,courtSource,caves:origins,
     southGalleries:[...enabledSouth].map(i=>origins[i]),
     westGalleries:[...enabledWest].map(i=>origins[i]),
-    rotunda,twinwood,rotundaApproach,canopyGate,
+    rotunda,twinwood,rotundaApproach,canopyGate,archwood,
     blockCount:blocks.size,
     get(x,y,z,baseline){return blocks.get(key(x,y,z))??caveGet(x,y,z,baseline);}
   };
