@@ -177,6 +177,17 @@
 - [x] The repaired timber/joinery winding remains protected by exhaustive 121-shape/25,742-triangle test suite, and water 76 retains exact non-solid fluid volume targeting. **No production WebGL2 render, fluid propagation, schema-1 save migration or physical iPhone check was performed.**
 - [ ] **Still open:** rerun all six suites in a full exact Git checkout with real `VoxelWorld`, manually authorized integration to live renderer/physics/save/UI/offline PWA and physical iPhone Gate A creator art/control approval. v0.11 remains locked; no merge, deploy or world placement.
 
+## Session 15 — production-boundary regression: prevent legacy-facade false positives (2026-11-14)
+
+- [x] Main `ac263720b60641c65b02330348dd76d0ef9cb75e`, checkpoint **008**, Issues #109/#117, other manual packs, draft PR #114 ownership and previous exact-head standard CI reverified. No merge/rebase/deploy/registration/other-pack edits.
+- [x] Real `src/voxel.mjs` source and its production world-generation import graph inspected. Candidate numeric IDs 59–76 remain rejected by production `set`; schema-1 `restore` remains strict. This is an **expected integration boundary**, not a playable block implementation.
+- [x] Authored **six** focused `production-boundary.test.mjs` checks that insist on the **real** production `VoxelWorld` (not a temporary facade): protected ID range, no mutation on rejected candidates, legitimate legacy save roundtrip, corrupt-save/fixture rejection, and coordinate/type validation.
+- [x] Updated `run-acceptance.sh` to require successful production-boundary Node execution **after** six candidate suites and **before** chromium candidate gallery. The new seventh suite refuses fake production evidence.
+- [x] **Genuine local native Node negative-control check failed intentionally** against the old temporary test facade at import time (missing `WORLD_MAX_Y`), demonstrating the new guard catches it. Exact new test blob SHA verified; `node --check` PASS.
+- [x] Original six candidate suites re-run in actual Node v22.16.0 **89/89 PASS** on the isolated test tree (legacy facade *still in use*); exact production class source-only V8 check **5/5 PASS** on dependency-free boundaries. Neither constitutes native full-graph production acceptance.
+- [ ] **Real production dependency graph native run remains OPEN** because container GitHub clone/DNS is blocked and all production module imports have not been mounted. Existing **66 authentic Chromium candidate preview screenshots** are preserved but do not establish production WebGL2 or physical iPhone approval.
+- [ ] Gate A, production integration, old-save/offline migration, transparent water behavior and v0.11 remain locked. Preserve all 18 candidate IDs 59–76 and PR draft status.
+
 ## Outstanding engine integration (manual incorporation only)
 
 1. Live VoxelWorld ID limit still 0–8; extend only when centrally authorized and save-compatible.
