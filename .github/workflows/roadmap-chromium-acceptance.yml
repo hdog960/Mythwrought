@@ -1,0 +1,78 @@
+name: Draft nine-roadmap candidate Chromium evidence (supplemental)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/roadmap-chromium-acceptance.yml'
+      - 'scripts/ci/roadmap-chromium/**'
+      - 'docs/ci/ROADMAP_CHROMIUM_GATE.md'
+      - 'src/block-packs/pack-*/**'
+      - 'tests/block-packs/pack-*/**'
+      - 'src/building-pool/roadmap-*/**'
+      - 'tests/building-pool/roadmap-*/**'
+      - 'docs/building-pool/roadmap-*/**'
+
+# Supplemental: existing shared full CI remains independently required.
+# No workflow_dispatch, deployment, or repository writes.
+concurrency:
+  group: roadmap-chromium-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  verify-candidates:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout supplementary verifier
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify fail-closed lane selection contracts
+        run: python -m unittest discover -s scripts/ci/roadmap-chromium -p "test_*.py" -v
+      - name: Install authorized Chromium, virtual display and dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libegl1 libgbm1 libnss3 libasound2t64
+          python -m venv "$RUNNER_TEMP/mythwrought-qa-venv"
+          "$RUNNER_TEMP/mythwrought-qa-venv/bin/pip" install 'playwright==1.58.0' Pillow
+          "$RUNNER_TEMP/mythwrought-qa-venv/bin/python" -m playwright install chromium
+          browser_bin="$("$RUNNER_TEMP/mythwrought-qa-venv/bin/python" -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
+          test -x "$browser_bin"
+          # Alias for older candidate runners, not a sandbox-policy workaround.
+          if ! test -x /usr/bin/chromium; then sudo ln -s "$browser_bin" /usr/bin/chromium; fi
+          test -x /usr/bin/chromium
+          echo "$RUNNER_TEMP/mythwrought-qa-venv/bin" >> "$GITHUB_PATH"
+      - name: Run exactly scoped, source-pinned candidate acceptance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MYTHWROUGHT_PR: ${{ github.event.pull_request.number }}
+          MYTHWROUGHT_REPO: ${{ github.repository }}
+          MYTHWROUGHT_REPORT_ROOT: ${{ runner.temp }}/mythwrought-roadmap-evidence
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: x11
+        run: |
+          set -euo pipefail
+          python scripts/ci/roadmap-chromium/orchestrate.py
+      - name: Upload complete and partial evidence (never synthetic or stale)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-pinned-roadmap-chromium-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/mythwrought-roadmap-evidence/
+          if-no-files-found: warn
+          retention-days: 30
