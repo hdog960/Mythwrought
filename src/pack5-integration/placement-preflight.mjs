@@ -99,7 +99,10 @@ export function preflightPack5BuilderPlan(plan,{world,
     verifiedForeignOccupancy:foreign!==null,
     verifiedExistingPack5Occupancy:existing!==null,
     issues:Object.freeze(issues),
-    pack5OnlyDryRunClear:issues.length===0,
+    // A dry run cannot be pronounced clear while any externally owned
+    // occupied-cell registry was omitted. This prevents Pack 5 from
+    // prematurely approving a layout that overlaps a future Pack 1–4 shape.
+    pack5OnlyDryRunClear:issues.length===0&&foreign!==null&&existing!==null,
     crossPackPhysicalAcceptance:false,
     globalNumericIdsAssigned:false,
     worldPlaced:false,saveWritten:false,

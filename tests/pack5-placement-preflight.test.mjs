@@ -94,3 +94,19 @@ test('up to 36 mixed authored variants can be preflighted without cross-pack own
   assert.equal(r.crossPackPhysicalAcceptance,false);
   assert.equal(r.integrationReady,false);
 });
+
+test('omitted external occupancy indexes never become an implied cross-pack clearance',()=>{
+  const p=plan(),w=makeWorld();
+  for(const s of p.placements[0].physical.requiredSupports)w.put(s);
+  const noRegistry=preflightPack5BuilderPlan(p,{world:w.world});
+  assert.equal(noRegistry.issues.length,0);
+  assert.equal(noRegistry.verifiedForeignOccupancy,false);
+  assert.equal(noRegistry.verifiedExistingPack5Occupancy,false);
+  assert.equal(noRegistry.pack5OnlyDryRunClear,false);
+  const oneRegistry=preflightPack5BuilderPlan(p,{world:w.world,foreignOccupiedCells:[]});
+  assert.equal(oneRegistry.pack5OnlyDryRunClear,false);
+  const both=preflightPack5BuilderPlan(p,{
+    world:w.world,foreignOccupiedCells:[],existingPack5Cells:[]});
+  assert.equal(both.pack5OnlyDryRunClear,true);
+  assert.equal(both.integrationReady,false);
+});
