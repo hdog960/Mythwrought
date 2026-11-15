@@ -6,7 +6,7 @@
   "sourceManifestBlob": "deab2505c5be9ad752ab9f01c0f6cc776b19fc66",
   "sourceFile": "src/building-pool/roadmap-3/m1.mjs",
   "sourceManifest": "docs/building-pool/roadmap-3/M1_MANIFEST.json",
-  "importStatus": "SOURCE_EXTRACTED__EXACT_ORIGINAL_PARITY_TEST_PENDING",
+  "importStatus": "15_SOURCE_EXACT_BLUEPRINTS_IMPORTED__PREVIOUS_INDEPENDENT_PARITY_SUITE_PASS__NEW_HEAD_CI_PENDING",
   "candidateCount": 15,
   "creatorAccepted": 0,
   "integrated": 0,
@@ -29,7 +29,7 @@
       "roofStyle": "gabled",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -50,7 +50,7 @@
       "roofStyle": "gabled",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -71,7 +71,7 @@
       "roofStyle": "gabled",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -92,7 +92,7 @@
       "roofStyle": "flat-shaded",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -113,7 +113,7 @@
       "roofStyle": "flat-shaded",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -134,7 +134,7 @@
       "roofStyle": "flat-shaded",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -155,7 +155,7 @@
       "roofStyle": "steep-snow",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -176,7 +176,7 @@
       "roofStyle": "steep-snow",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -197,7 +197,7 @@
       "roofStyle": "steep-snow",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -218,7 +218,7 @@
       "roofStyle": "asymmetric-canopy",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -239,7 +239,7 @@
       "roofStyle": "asymmetric-canopy",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -260,7 +260,7 @@
       "roofStyle": "asymmetric-canopy",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -281,7 +281,7 @@
       "roofStyle": "terraced",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -302,7 +302,7 @@
       "roofStyle": "terraced",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     },
     {
@@ -323,11 +323,22 @@
       "roofStyle": "terraced",
       "originalSourceM1Blob": "189ac4deb11042534743045b5087a7a7525e3bf1",
       "geometryCopied": true,
-      "fingerprintVerified": false,
+      "fingerprintVerified": true,
       "newOwnedModule": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs"
     }
   ],
   "migrationSource": "src/building-pool/roadmap-3a/legacy-blacksmiths.mjs",
   "validatorSourceBlob": "d87c47896f53e6ae7e7efd0b7503236607669caf",
-  "assetSourceBlob": "a61597a9c5209edd1c78fe10567711107f9a0b5a"
+  "assetSourceBlob": "a61597a9c5209edd1c78fe10567711107f9a0b5a",
+  "parityVerification": {
+    "runId": 43768474174,
+    "commit": "650c11ef2d872f10d4a61345fb5c14a84045af13",
+    "realOldVsNewModelsCompared": 15,
+    "sourceBytesCompared": true,
+    "geometryFingerprintsMatched": 15,
+    "completeBlueprintDeepEquality": 15,
+    "parityTestsPassed": 2,
+    "priorRunConclusion": "failure (obsolete M0 geometryCopied assertion)",
+    "requiresNewExactHeadGreen": true
+  }
 }
