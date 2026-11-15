@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Opt-in ridge plus two pitch roof assembly review. Canvas2D only, not live WebGL2.
+"""Opt-in Pack3 source geometry assembly review. Canvas2D only, not live WebGL2.
 
 PACK3_RIDGE_ASSEMBLY_DIR=/tmp/ridge-scenes python tests/block-packs/pack-3/ridge-assembly-browser.py
 Uses local source gallery and Playwright/Chromium; does not touch saves or world.
