@@ -62,8 +62,10 @@ test('roof stair, double-axis hip corner, and ridge have three truly distinct ph
   assert.equal(occupied(hip.shape,.10,.70,.90),false,'hip not a straight stair');
   assert.equal(occupied(hip.shape,.90,.70,.10),false,'hip rises on both horizontal axes');
   assert.equal(occupied(ridge.shape,.5,.60,.5),true,'raised central spine is solid');
-  assert.equal(occupied(ridge.shape,.05,.60,.5),false,'ridge edge remains low');
-  assert.equal(occupied(ridge.shape,.95,.60,.5),false);
+  assert.equal(occupied(ridge.shape,.05,.60,.5),true,'ridge bearing wall supports adjacent high-pitch roof');
+  assert.equal(occupied(ridge.shape,.95,.60,.5),true,'opposite ridge bearing wall supports roof');
+  assert.equal(occupied(ridge.shape,.5,.40,.5),false,'ridge preserves open recessed center beneath the crown');
+  assert.equal(occupied(ridge.shape,.5,.94,.5),true,'elevated crown remains visible above roof');
   assert.equal(occupied(slope.shape,.5,.96,.5),false,'unfilled headroom exists');
 });
 test('longitudinal ridge repeats after half-turn, while hip corners remain directional',()=>{
