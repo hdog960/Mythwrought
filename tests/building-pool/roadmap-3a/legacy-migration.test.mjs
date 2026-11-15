@@ -75,6 +75,7 @@ test('byte/source-exact blacksmith extraction and 15 real old-vs-new geometry fi
   const oldPool=BIOMES.flatMap(biome=>SIZES.map(size=>old.createM1Blueprint('blacksmith',biome,size)));
   const oldFingerprint=(await import(pathToFileURL(join(runtime.root,'contract.mjs')).href)).geometryFingerprint;
   assert.equal(oldPool.length,15);
+  const evidence=[];
   for(let i=0;i<15;i++){
    const original=oldPool[i],copied=newPool[i];
    assert.equal(copied.id,slotId('blacksmith',copied.biome,copied.size,1));
@@ -82,7 +83,25 @@ test('byte/source-exact blacksmith extraction and 15 real old-vs-new geometry fi
    assert.equal(newFingerprint(copied),oldFingerprint(original),'geometry '+original.id);
    assert.deepEqual(copied,original,'full exact-source generated coordinate blueprint '+original.id);
    assert.equal(newSerialize(copied),JSON.stringify(stable(original)),'canonical full model '+original.id);
+   evidence.push({id:original.id,oldPR:122,oldPRHead:ledger.sourcePRHead,
+     originalSourceBlob:ledger.sourceM1Blob,
+     newOwnedModule:ledger.migrationSource,
+     sourceExact:true,
+     originalGeometryFingerprintSha256:createHash('sha256').update(oldFingerprint(original)).digest('hex'),
+     migratedGeometryFingerprintSha256:createHash('sha256').update(newFingerprint(copied)).digest('hex'),
+     fullBlueprintSHA256:createHash('sha256').update(newSerialize(copied)).digest('hex'),
+     physicalCoordinateSlots:copied.modules.reduce((n,m)=>n+m.cells.length,0),
+     creatorApproved:false,worldPlaced:false});
   }
+  const evidenceDir=join(repository,'artifacts','building-roadmap-3a-m0');
+  mkdirSync(evidenceDir,{recursive:true});
+  writeFileSync(join(evidenceDir,'source-exact-parity.json'),JSON.stringify({
+   schema:'mythwrought.builder3a.source-exact-parity.v1',runHead:process.env.GITHUB_SHA??null,
+   originalPRHead:ledger.sourcePRHead,compared:15,parity:true,
+   classification:'Native Node 22 original PR generator vs selectively migrated builder generator',
+   notBrowserEvidence:true,notPhysicalIPhoneEvidence:true,designs:evidence
+  },null,2)+'\\n');
+  console.log('Builder 3A source-exact parity: 15/15 complete model objects, 15/15 geometry fingerprints; 15 SHA-256 records emitted');
  }finally{rmSync(runtime.root,{force:true,recursive:true});}
 });
 function stable(obj){
