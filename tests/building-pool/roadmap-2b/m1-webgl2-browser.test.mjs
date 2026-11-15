@@ -53,15 +53,27 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
   ['bookshop',844,390,'exterior','mountain','medium'],
   ['bookshop',844,390,'cutaway','mountain','medium'],
   ['butcher',667,375,'exterior','desert','large'],
-  ['butcher',667,375,'cutaway','desert','large']
+  ['butcher',667,375,'cutaway','desert','large'],
+  ['temple',667,375,'exterior','temperate','small',2],
+  ['temple',667,375,'cutaway','temperate','small',2],
+  ['temple',844,390,'exterior','desert','medium',2],
+  ['temple',844,390,'cutaway','desert','medium',2],
+  ['market-square',667,375,'exterior','mountain','small'],
+  ['market-square',667,375,'cutaway','mountain','small'],
+  ['market-square',932,430,'exterior','enchanted-forest','large'],
+  ['market-square',932,430,'cutaway','enchanted-forest','large'],
+  ['theater',844,390,'exterior','desert','medium'],
+  ['theater',844,390,'cutaway','desert','medium'],
+  ['theater',932,430,'exterior','mountain','large'],
+  ['theater',932,430,'cutaway','mountain','large']
  ];
  try{
   for(let i=0;i<cases.length;i++){
-   const [category,width,height,view,biome='temperate',size='small']=cases[i];
-   const id='r2:'+category+':'+biome+':'+size+':01';
+   const [category,width,height,view,biome='temperate',size='small',variation=1]=cases[i];
+   const id='r2:'+category+':'+biome+':'+size+':'+String(variation).padStart(2,'0');
    const params=new URLSearchParams({id,view});
    const url=base+'?'+params.toString();
-   const file=join(out,category+'-'+biome+'-'+size+'-'+view+'-'+width+'x'+height+'.png');
+   const file=join(out,category+'-'+biome+'-'+size+'-'+(variation>1?'v'+String(variation).padStart(2,'0')+'-':'')+view+'-'+width+'x'+height+'.png');
    const profile=join(temp,'profile-'+i);
    const args=[
     '--headless=new','--no-sandbox','--disable-dev-shm-usage','--no-first-run',
