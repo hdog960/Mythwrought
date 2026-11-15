@@ -85,7 +85,7 @@ jobs:
       - name: Checkout source-exact Roadmap 1 PR for physical builder consumption
         uses: actions/checkout@v4
         with:
-          ref: e12461fc8d6d513fb3396b27d3620292cf41557d
+          ref: a966fce0c0d3360e1bfee8979d8bd2b4d412b8fa
           path: consumers/r1
           persist-credentials: false
       - name: Checkout source-exact Roadmap 2 PR for physical builder consumption
