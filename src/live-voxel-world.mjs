@@ -88,28 +88,6 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
     for(const [px,py,pz,id] of plan.cells)blocks.set(key(px,py,pz),id);
     break courtSearch;
   }
-  // Only if the prior bounded court search failed, use the seeded :36 survey.
-  // Its planner is confined to this district, legacy cave buffers and spawn.
-  // Never relocate an already-present checkpoint 008 court.
-  if(!court){
-    const surveyed=surveyPilgrimCourtSites(caveWorld,minX+64,minZ+64,{
-      minDistance:48,maxDistance:88,step:4,maxCandidates:128,maxResults:1,
-      planner:(world,x,z)=>{
-        if(x<minX+16||x>minX+112||z<minZ+16||z>minZ+112||
-          near(x,z,0,0,18,24)||origins.some(o=>inCaveBuffer(x,z,o)))return null;
-        const h=terrainHeight(x,z,seed);
-        if(h<3||h>11)return null;
-        for(const dz of [-11,0,11])for(const dx of [-1,0,1])
-          if(terrainHeight(x+dx,z+dz,seed)!==h)return null;
-        return planVoxelPilgrimCourt(world,x,z);
-      }
-    })[0];
-    if(surveyed){
-      court=surveyed;courtSource='survey-010';
-      for(const [x,y,z,id] of surveyed.cells)blocks.set(key(x,y,z),id);
-    }
-  }
-
   const prepared={seed,get:(x,y,z)=>blocks.get(key(x,y,z))??caveGet(x,y,z)};
   const paths=court?[[[court.origin[0],court.origin[2]-11],
                        [court.origin[0],court.origin[2]+11]]]:[];
@@ -127,6 +105,30 @@ export function liveVoxelDistrict(seed,dx,dz,legacyGet){
     trees.push(plan);
     for(const [x,y,z,id] of plan.cells)blocks.set(key(x,y,z),id);
   }
+  // After all checkpoint-008 groves are frozen, find a surveyed court only
+  // in an originally empty district. A new structure must fit around old
+  // trees instead of reselecting or relocating them.
+  // Its planner is confined to this district, legacy cave buffers and spawn.
+  // Never relocate an already-present checkpoint 008 court.
+  if(!court){
+    const surveyed=surveyPilgrimCourtSites(prepared,minX+64,minZ+64,{
+      minDistance:48,maxDistance:88,step:4,maxCandidates:128,maxResults:1,
+      planner:(world,x,z)=>{
+        if(x<minX+16||x>minX+112||z<minZ+16||z>minZ+112||
+          near(x,z,0,0,18,24)||origins.some(o=>inCaveBuffer(x,z,o)))return null;
+        const h=terrainHeight(x,z,seed);
+        if(h<3||h>11)return null;
+        for(const dz of [-11,0,11])for(const dx of [-1,0,1])
+          if(terrainHeight(x+dx,z+dz,seed)!==h)return null;
+        return planVoxelPilgrimCourt(world,x,z);
+      }
+    })[0];
+    if(surveyed){
+      court=surveyed;courtSource='survey-010';
+      for(const [x,y,z,id] of surveyed.cells)blocks.set(key(x,y,z),id);
+    }
+  }
+
   // :24 south galleries are activated only where the previous court/grove
   // baseline has NO occupied column in the new chamber or connecting throat.
   // This prevents silent replacement of pre-existing seeded world content.
