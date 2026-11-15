@@ -158,6 +158,26 @@ function compile(category,biome,size,index,row){
     if(roof==='terrace'&&(x===0||x===w-1||z===0||z===d-1))place(x,y+1,z,'roof','pack3:070');
     place(x,y,z,'roof',theme.roof);
   }
+  // Pick a genuine unobstructed roof daylight shaft BEFORE beams, risers and
+  // roofing joins are authored. The previous raised lantern had an unbroken
+  // roof tile directly underneath its pane: no daylight could enter.
+  let daylightOpening=null;
+  if(feature==='skylight'){
+    const candidates=[];
+    for(let x=3;x<w-3;x++)for(let z=3;z<d-3;z++){
+      // Frame beam rows are at z=3+4n. Do not cut a load-bearing member.
+      if((z-3)%4===0)continue;
+      const y=roofY(x,z),tile=occupied.get(at(x,y,z));
+      if(tile?.role!=='roof'||y+2>=h)continue;
+      if(!free(x-1,y+1,z)||!free(x+1,y+1,z)||!free(x,y+1,z)||!free(x,y+2,z))continue;
+      if(Array.from({length:y-1},(_,i)=>i+1).some(level=>!free(x,level,z)))continue;
+      candidates.push({x,y,z,distance:Math.abs(x-midX)+Math.abs(z-midZ)});
+    }
+    candidates.sort((a,b)=>a.distance-b.distance||a.z-b.z||a.x-b.x);
+    if(!candidates.length)throw Error(name+': no physically clear roof daylight aperture');
+    daylightOpening=candidates[0];
+    remove(daylightOpening.x,daylightOpening.y,daylightOpening.z);
+  }
   // Authored physical roof frame: longitudinal beams every fourth interior z
   // section, with occasional upward tie posts immediately under taller roof
   // profiles. This is a *theoretical* timber structural frame, not proof that
@@ -238,9 +258,10 @@ function compile(category,biome,size,index,row){
     // Future roof daylight feature: Pack4 windows rotate only around Y (0..3).
     // Do NOT put a vertical glass pane horizontally in a roof with 'up'.
     // Instead author a three-cell-wide *raised vertical-glass dormer*.
-    // The roof below it stays closed: actual daylight/weather sealing remains
-    // pending Pack3+Pack4 physical integration and creator review.
-    const x=midX,z=midZ,y=roofY(x,z)+1;
+    // Its one-cell roof aperture now reaches the room; pane sealing and all
+    // candidate glazing/roof junctions remain explicitly unapproved.
+    if(!daylightOpening)throw Error(name+': missing real daylight opening');
+    const {x,z}=daylightOpening,y=daylightOpening.y+1;
     if(y+1>=h)throw Error(name+': raised roof lantern exceeds footprint');
     for(const px of [x-1,x+1]){
       if(!free(px,y,z))throw Error(name+': raised roof lantern support blocked');
@@ -325,7 +346,7 @@ function compile(category,biome,size,index,row){
   // Walkable portal thresholds must remain empty at standing/head level.
   for(const portal of portals){const [x,y,z]=portal.at;if(!free(x,y,z)||!free(x,y+1,z))throw new Error(name+': portal blocked '+at(x,y,z));}
   const deps=[...new Set([...occupied.values()].map(p=>p.asset).filter(a=>!a.startsWith('live:')))].sort().map(asset=>({asset,status:'unresolved',requires:['exact physical dimensions and orientation','support/mount and selection/collision bounds','schema-1 safe asset substitution and load-time dependency resolution']}));
-  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roofFrame:{cellCount:frameCells,sections:frameSections,asset:'pack2:015',postAsset:'pack2:022',spanApproval:'unresolved'},roofStepAudit,roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],footprintReservations,rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
+  const b={schema:SCHEMA,id:blueprintId(category,biome,size,index),index,category,biome,size,status:'candidate',title:name,architecturalIdentity:{plan,roof,feature,regionalDetail:regionalDetail.label,physicalProfileCells:profileCount,roofFrame:{cellCount:frameCells,sections:frameSections,asset:'pack2:015',postAsset:'pack2:022',spanApproval:'unresolved'},roofStepAudit,daylightOpening:daylightOpening?{cell:[daylightOpening.x,daylightOpening.y,daylightOpening.z],daylightApproved:false,weatherSealApproved:false}:null,roomFurniture:placedByRoom,localEntrance:[entry,1,1]},frame:'local-x-east-y-up-z-south',footprint:{width:w,height:h,depth:d},worldPlacement:false,liveIntegration:false,placements:[...occupied.values()],footprintReservations,rooms,walkable,portals,dependencies:deps,animals:category==='stable'?[]:undefined};
   validateBlueprint(b);return b;
 }
 export function getM1Blueprints(){

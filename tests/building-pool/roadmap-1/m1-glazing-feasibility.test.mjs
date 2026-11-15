@@ -38,3 +38,28 @@ test('a raised lantern without supported side-post frame or cap is not accepted'
  const i=b.placements.findIndex(p=>p.roofLantern==='side-post');b.placements.splice(i,1);
  assert.throws(()=>auditCandidateGlazing(b),/lacks physical vertical posts/);
 });
+
+test('all three roof lanterns have truly open uninterrupted daylight shafts to an occupiable interior',()=>{
+ const lanterns=buildings.filter(b=>b.architecturalIdentity.feature==='skylight');
+ assert.equal(lanterns.length,3);
+ for(const b of lanterns){
+  const opening=b.architecturalIdentity.daylightOpening;
+  assert.ok(opening&&!opening.daylightApproved&&!opening.weatherSealApproved,b.id);
+  const [x,y,z]=opening.cell;
+  const occ=new Set(b.placements.map(p=>p.at.join(',')));
+  for(let level=1;level<=y;level++)assert.ok(!occ.has([x,level,z].join(',')),b.id+': non-open skylight at '+level);
+  assert.ok(b.placements.some(p=>p.roofLantern==='vertical-glazing'&&p.at[0]===x&&p.at[1]===y+1&&p.at[2]===z));
+  assert.equal(auditCandidateGlazing(b).roofLantern,1);
+ }
+});
+test('a fake sunlight aperture with its original roofing reinserted is rejected',()=>{
+ const b=clone(buildings.find(b=>b.architecturalIdentity.feature==='skylight'));
+ b.placements.push({at:[...b.architecturalIdentity.daylightOpening.cell],role:'roof',asset:'pack3:023',orientation:'none',occupancy:{kind:'unresolved',bounds:null,reason:'candidate'}});
+ assert.throws(()=>auditCandidateGlazing(b),/false skylight has a solid roof tile blocking daylight/);
+});
+test('a beam inserted across a daylight shaft is detected even if the upper glazed pane is unchanged',()=>{
+ const b=clone(buildings.find(b=>b.architecturalIdentity.feature==='skylight'));
+ const [x,y,z]=b.architecturalIdentity.daylightOpening.cell;
+ b.placements.push({at:[x,Math.max(2,y-2),z],role:'support',asset:'live:wood',orientation:'none',occupancy:{kind:'full-cell',bounds:[0,0,0,1,1,1]}});
+ assert.throws(()=>auditCandidateGlazing(b),/roof shaft blocked by a beam or support/);
+});

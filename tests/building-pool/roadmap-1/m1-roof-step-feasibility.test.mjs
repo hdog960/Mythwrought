@@ -6,8 +6,8 @@ const all=getM1Blueprints();
 test('45 roof profiles receive real registered step-backing where unfinished Pack3 tiles leave riser gaps',()=>{
  const reports=all.map(auditRoofStepFeasibility);
  assert.equal(reports.length,45);
- assert.equal(reports.reduce((n,r)=>n+r.needed,0),2519);
- assert.equal(reports.reduce((n,r)=>n+r.filled,0),2519);
+ assert.equal(reports.reduce((n,r)=>n+r.needed,0),2518);
+ assert.equal(reports.reduce((n,r)=>n+r.filled,0),2518);
  assert.equal(reports.reduce((n,r)=>n+r.unresolved,0),0);
  assert.equal(reports.reduce((n,r)=>n+r.solidPostSubstitutions,0),210);
  assert.ok(reports.every(r=>!r.weatherSealApproved));

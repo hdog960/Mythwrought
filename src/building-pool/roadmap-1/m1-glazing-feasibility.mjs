@@ -34,7 +34,10 @@ export function auditCandidateGlazing(b){
   const side=[x-1,x+1].map(px=>cells.get(at(px,y,z)));
   assert(side.every(s=>s?.role==='support'&&s.roofLantern==='side-post'&&s.asset==='pack2:022'),b.id+': raised glass lacks physical vertical posts');
   assert(cells.get(at(x,y+1,z))?.roofLantern==='cap',b.id+': roof lantern has no overhead cap');
-  assert(cells.get(at(x,y-1,z))?.role==='roof',b.id+': roof lantern missing underlying roofing');
+  assert(!cells.has(at(x,y-1,z)),b.id+': false skylight has a solid roof tile blocking daylight');
+  assert(b.architecturalIdentity.daylightOpening?.cell.every((v,i)=>v===[x,y-1,z][i])&&b.architecturalIdentity.daylightOpening.daylightApproved===false,b.id+': daylight aperture missing or prematurely certified');
+  const wallTop=4+['small','medium','large'].indexOf(b.size);
+  for(let level=1;level<y;level++)assert(!cells.has(at(x,level,z)),b.id+': roof shaft blocked by a beam or support');
   assert(p.glazingApproved===false,b.id+': candidate lantern prematurely approved');
  }else assert(panes.length===0,b.id+': unnecessary roof lantern');
  assert(b.placements.every(p=>p.role!=='window'||Object.hasOwn(CANDIDATE_YAW,p.orientation)),b.id+': illegal horizontal-glass orientation');
