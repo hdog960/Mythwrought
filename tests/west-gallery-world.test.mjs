@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,CHUNK_SIZE,meshChunk} from '../src/voxel.mjs';
-import {westGalleryWorld,westGalleryTraversal,westVaultTraversal,westLoopTraversal} from '../src/west-gallery-world.mjs';
+import {westGalleryWorld,westGalleryTraversal,westVaultTraversal,westLoopTraversal,northAlcoveTraversal} from '../src/west-gallery-world.mjs';
 import {branchedCaveWorld} from '../src/branched-cave-world.mjs';
 import {CAVE_CANDIDATE} from '../src/experimental-cave-route.mjs';
 
@@ -75,5 +75,28 @@ test('explicit saved block obstructs loop but never gets overwritten',()=>{
   const saved=JSON.stringify(world.save());
   assert.equal(westGalleryWorld(world).get(sample.x,sample.y,sample.z),BLOCK.WOOD);
   assert.ok(westLoopTraversal(world).failures.some(p=>p.x===sample.x&&p.z===sample.z));
+  assert.equal(JSON.stringify(world.save()),saved);
+});
+
+for(const seed of [179,1,2026,-77]) {
+  test('third north alcove is a supported physical chamber for seed '+seed,()=>{
+    const world=new VoxelWorld(seed),saved=JSON.stringify(world.save());
+    const route=northAlcoveTraversal(world);
+    assert.equal(route.samples.length,7);
+    assert.deepEqual(route.failures,[]);
+    assert.equal(route.walkable,true);
+    const far=route.samples.at(-1),reader=westGalleryWorld(world);
+    assert.equal(far.x,CAVE_CANDIDATE.x+11);
+    assert.equal(far.z,CAVE_CANDIDATE.z-15);
+    assert.equal(reader.get(far.x,far.y+3,far.z),BLOCK.AIR);
+    assert.equal(JSON.stringify(world.save()),saved);
+  });
+}
+test('third cavern honors saved edits and reports obstructed traversal',()=>{
+  const world=new VoxelWorld(179),sample=northAlcoveTraversal(world).samples.at(-1);
+  assert.equal(world.set(sample.x,sample.y,sample.z,BLOCK.WOOD),true);
+  const saved=JSON.stringify(world.save());
+  assert.equal(westGalleryWorld(world).get(sample.x,sample.y,sample.z),BLOCK.WOOD);
+  assert.equal(northAlcoveTraversal(world).walkable,false);
   assert.equal(JSON.stringify(world.save()),saved);
 });
