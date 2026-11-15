@@ -114,3 +114,19 @@ test('every supported footprint column has solid subfloor at both depths',()=>{
     }
   }
 });
+
+test('all four exterior approaches are traversable and player-owned approach edits block construction',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'seed 179 needs an accessible four-way rotunda site');
+  const [x,h,z]=plan.origin;
+  for(const [dx,dz] of [[0,-5],[0,5],[-5,0],[5,0]]){
+    assert.equal(terrainHeight(x+dx,z+dz,world.seed),h);
+    assert.notEqual(baseBlock(x+dx,h,z+dz,world.seed),BLOCK.AIR);
+    for(const dy of [1,2])
+      assert.equal(world.get(x+dx,h+dy,z+dz),BLOCK.AIR);
+  }
+  const key=worldKey(x+5,h+1,z);
+  world.edits.set(key,BLOCK.AIR); // explicit edit matching baseline still belongs to player
+  assert.equal(planStoneRotunda(world,x,z),null);
+  assert.equal(placeStoneRotunda(world,plan),false);
+});
