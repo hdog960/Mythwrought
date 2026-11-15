@@ -10,7 +10,7 @@ import {resolveBiome130BuilderAsset,planBiome130BuilderStructure,
 test('all 60 authored symbolic families have distinct real high IDs and valid physical shapes',()=>{
   assert.equal(BIOME130_LIVE_COUNT,60);
   assert.equal(new Set(BIOME130_REGISTERED_IDS).size,60);
-  assert.equal(new Set(BIOME130_REGISTERED_SYMBOLS).size,57);
+  assert.equal(new Set(BIOME130_REGISTERED_SYMBOLS).size,60);
   for(let i=1;i<=60;i++){
     const id=255+i,symbol='biome130:'+String(i).padStart(3,'0');
     assert.equal(isBiome130BlockId(id),true);
