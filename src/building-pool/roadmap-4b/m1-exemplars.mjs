@@ -40,7 +40,7 @@ const F = Object.freeze({
     bounds:[24,10,20],roof:'transverse-schoolhouse',palette:['live:stone','live:wood'],
     bands:[[1,9,1,22],[10,18,5,18]],
     entrance:[11,2,1],windows:[[4,1],[19,1],[1,6],[22,6],[7,18],[16,18]],
-    passages:[{axis:'x',fixed:11,from:3,to:8,gaps:[6]},{axis:'z',fixed:9,from:5,to:18,gaps:[11]}],
+    passages:[{axis:'x',fixed:11,from:3,to:8,gaps:[6]},{axis:'z',fixed:9,from:5,to:18,gaps:[10]}],
     rooms:[
       {id:'first-class',kind:'classroom',box:[2,10,3,8]},
       {id:'second-class',kind:'teacher-area',box:[13,21,3,8]},
@@ -55,7 +55,7 @@ const F = Object.freeze({
     bounds:[24,12,23],roof:'cruciform-laboratory',palette:['live:deepstone','live:crystal'],
     bands:[[1,7,7,16],[8,15,1,22],[16,21,7,16]],
     entrance:[11,2,1],windows:[[9,1],[14,1],[1,11],[22,11],[9,21],[14,21]],
-    passages:[{axis:'x',fixed:11,from:8,to:14,gaps:[11]},{axis:'z',fixed:15,from:7,to:16,gaps:[11]}],
+    passages:[{axis:'x',fixed:11,from:8,to:14,gaps:[11]},{axis:'z',fixed:15,from:7,to:16,gaps:[12]}],
     rooms:[
       {id:'western-workroom',kind:'research-hall',box:[2,10,9,14]},
       {id:'sealed-east-cell',kind:'secure-repository',box:[14,21,9,14]},
