@@ -15,9 +15,10 @@ footer{position:absolute;bottom:6px;right:8px;font-size:10px;color:#b5cdd5;backg
 import {createTemperateSmallBathhouse} from '../../../src/building-pool/roadmap-1b/m1-bathhouse-temperate-small.mjs';
 import {getM1ServiceExemplars} from '../../../src/building-pool/roadmap-1b/m1-regional-services.mjs';
 import {getCrossBiome1BPlans} from '../../../src/building-pool/roadmap-1b/m1-cross-biome-plans.mjs';
+import {getM2Community1BPlans} from '../../../src/building-pool/roadmap-1b/m2-community-structures.mjs';
 import {getInheritedStables} from '../../../src/building-pool/roadmap-1b/legacy-import.mjs';
 const params=new URLSearchParams(location.search),mode=params.get('view')==='cutaway'?'cutaway':'exterior';
-const all=[getInheritedStables()[0],createTemperateSmallBathhouse(),...getM1ServiceExemplars(),...getCrossBiome1BPlans()];
+const all=[getInheritedStables()[0],createTemperateSmallBathhouse(),...getM1ServiceExemplars(),...getCrossBiome1BPlans(),...getM2Community1BPlans()];
 const chosen=all.find(b=>b.id===params.get('candidate'))??all[1];
 const canvas=document.querySelector('#model');canvas.width=innerWidth;canvas.height=innerHeight;
 const gl=canvas.getContext('webgl2',{preserveDrawingBuffer:true,antialias:true,alpha:false});

@@ -75,14 +75,14 @@ test('lighthouse has genuine circular tower, supported upper landings and vertic
  assert.equal(x.architecturalIdentity.climbMechanicApproved,false);
  assert.ok(x.placements.some(p=>p.purpose==='landing-underframe'));
 });
-test('complete seven-category source census is exactly 28/435 with 15 unmodified inherited stables',()=>{
+test('M1 seven-category exemplars remain exact in expanding Builder 1B catalog',()=>{
  const original=getInheritedStables(),all=get1BCandidates(),counts=validateAllocation(all);
- assert.equal(original.length,15);assert.equal(all.length,28);
- assert.equal(counts.authored,28);assert.equal(counts.remaining,407);
- assert.equal(new Set(all.map(x=>x.id)).size,28);
+ assert.equal(original.length,15);assert.ok(all.length>=28);
+ assert.equal(counts.authored,all.length);assert.equal(counts.remaining,435-all.length);
+ assert.equal(new Set(all.map(x=>x.id)).size,all.length);
  for(const b of original){const next=all.find(x=>x.id===b.id);assert.ok(next);assert.equal(stableBlueprintJSON(next),stableBlueprintJSON(b));}
- assert.deepEqual(all.filter(b=>b.category!=='stable').map(x=>x.category).sort(),
-  ['bathhouse','bathhouse','farm-barn','farm-barn','greenhouse','greenhouse','fishing-lodge','fishing-lodge','harbor-office','harbor-office','lighthouse','lighthouse'].sort());
+ const exemplars=getM1ServiceExemplars();assert.equal(exemplars.length,5);
+ for(const b of exemplars){const next=all.find(x=>x.id===b.id);assert.ok(next);assert.equal(stableBlueprintJSON(next),stableBlueprintJSON(b));}
 });
 
 test('M1 genuine four distinct structural roof profiles show backed height progression',()=>{

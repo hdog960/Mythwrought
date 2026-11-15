@@ -11,10 +11,10 @@ const family=(b,asset)=>b.placements.filter(p=>p.asset===asset);
 const byCategory=Object.fromEntries(getCrossBiome1BPlans().map(b=>[b.category,b]));
 test('seven original cross-biome source-authored building candidates have unique IDs, 3D massing and valid connected rooms',()=>{
  const newPlans=getCrossBiome1BPlans(),old=get1BCandidates();
- assert.equal(newPlans.length,7);assert.equal(old.length,28);
+ assert.equal(newPlans.length,7);assert.ok(old.length>=28);
  assert.equal(new Set(newPlans.map(b=>b.id)).size,7);
- assert.equal(new Set(old.map(b=>b.id)).size,28);
- assert.equal(new Set(old.map(b=>structuralFingerprint(b))).size,28,'duplicate physical shape independent of materials');
+ assert.equal(new Set(old.map(b=>b.id)).size,old.length);
+ assert.equal(new Set(old.map(b=>structuralFingerprint(b))).size,old.length,'duplicate physical shape independent of materials');
  for(const b of newPlans){
   assert.equal(validateBlueprint(b),true);
   assert.equal(b.status,'candidate');assert.equal(b.worldPlacement,false);assert.equal(b.liveIntegration,false);
@@ -36,7 +36,7 @@ test('seven original cross-biome source-authored building candidates have unique
   assert.equal(stableBlueprintJSON(b),stableBlueprintJSON(getCrossBiome1BPlans().find(other=>other.id===b.id)),
    'non-deterministic generated cells '+b.id);
  }
- assert.deepEqual(validateAllocation(old).authored,28);assert.equal(validateAllocation(old).remaining,407);
+ assert.deepEqual(validateAllocation(old).authored,old.length);assert.equal(validateAllocation(old).remaining,435-old.length);
 });
 test('Desert Medium bathhouse has physical separate hot/cold basins, four reachable zones, and an open cooling court',()=>{
  const b=byCategory.bathhouse;
@@ -113,5 +113,5 @@ test('five biomes and all three physical sizes now represented by truly authored
    const count=all.filter(b=>b.category===cat).length;
    assert.ok(count>0&&count<=quota*15);
  }
- assert.equal(all.filter(b=>b.category==='stable').length,16);
+ assert.ok(all.filter(b=>b.category==='stable').length>=16);
 });
