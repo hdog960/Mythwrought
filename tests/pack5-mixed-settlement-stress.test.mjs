@@ -81,3 +81,58 @@ test('moving camera through 512 mixed furnishings keeps page uploads, residency,
   assert.equal(gl.live.size,0,'Renderer disposal leaked a physical mesh buffer');
   assert.equal(stream.stats().bytes,0);
 });
+
+// Every approved variant at every rotation must fit a single page.
+test('all 144 authored variants and rotations fit the mobile GPU page limit',async()=>{
+  const {pack5TerrainVertices}=await import('../src/pack5-integration/terrain-buffer.mjs');
+  let maximum=0;
+  for(const family of PACK5_BUILDER_CATALOG)for(const variant of family.variants)
+    for(let rot=0;rot<4;rot++){
+      const asset=resolvePack5BuilderAsset(family.symbolicId,variant);
+      const bytes=pack5TerrainVertices(asset.mesh(asset.descriptor,{rotation:rot})).byteLength;
+      maximum=Math.max(maximum,bytes);
+      assert.ok(bytes>0&&bytes<=PACK5_GPU_PAGE_BYTES,
+        family.symbolicId+'/'+variant+'/'+rot+' requires '+bytes+' bytes');
+    }
+  assert.ok(maximum>0);
+});
+test('oversize under reduced page budget is accounted without exceeding upload limit',()=>{
+  const {layer}=mixedSettlement(1),gl=fakeGl();
+  const stream=createPack5GpuStream(gl,layer,{pageBytes:1024});
+  stream.refresh([.5,5,.5],1000);
+  const s=stream.stats();
+  assert.equal(s.instances,0);
+  assert.equal(s.oversizedInstances,1);
+  assert.equal(s.visibleCandidates,1);
+  assert.equal(s.budgetExcluded,1);
+  assert.equal(s.bytes,0);
+  assert.equal(s.pendingPages,0);
+  assert.equal(gl.uploads.length,0);
+  assert.equal(layer.count(),1);
+  stream.dispose();
+});
+test('GPU replacement never transiently allocates past the resident byte budget',()=>{
+  const {layer}=mixedSettlement(64);
+  const live=new Map(),bound={current:null},gl={
+    ARRAY_BUFFER:34962,STATIC_DRAW:35044,FLOAT:5126,TRIANGLES:4,NO_ERROR:0,
+    createBuffer(){const ref={};live.set(ref,0);return ref;},
+    deleteBuffer(ref){assert.ok(live.delete(ref));},
+    getError(){return 0;},
+    bindBuffer(_target,ref){bound.current=ref;},
+    bufferData(_target,data){
+      live.set(bound.current,data.byteLength);
+      const occupied=[...live.values()].reduce((a,b)=>a+b,0);
+      assert.ok(occupied<=PACK5_GPU_RESIDENT_BYTES,'Peak live GPU bytes exceeded cap: '+occupied);
+    },
+    vertexAttribPointer(){},drawArrays(){}
+  };
+  const stream=createPack5GpuStream(gl,layer);
+  for(let i=0;i<30;i++)stream.refresh([12,5,12],1000+i*1000);
+  const first=layer.list()[0];
+  assert.equal(layer.remove(first.anchor),true);
+  assert.equal(layer.place(first.symbolicId,first.anchor,(first.rotation+1)%4,first.variant).ok,true);
+  for(let i=0;i<20;i++)stream.refresh([12,5,12],50000+i*1000);
+  assert.ok(stream.stats().bytes<=PACK5_GPU_RESIDENT_BYTES);
+  stream.dispose();
+  assert.equal(live.size,0);
+});

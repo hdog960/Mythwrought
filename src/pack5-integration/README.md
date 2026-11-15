@@ -134,3 +134,16 @@ recovery blocker and must not be represented as a successful rollback.
 - Replacing a live buffer may temporarily require the old and new buffer to
   coexist until upload succeeds (bounded transient peak: resident budget plus
   one page). Never infer on-device performance from software WebGL alone.
+
+## M9: Transient GPU replacement safety
+
+A stale page is now deleted before its replacement upload. The selected
+resident 2 MiB budget is therefore enforced at the actual live-buffer peak,
+not merely after replacement finishes. A failed upload can temporarily hide
+that page but never removes its saved/pickable/collidable furnishing.
+
+Any source model larger than the configured 384 KiB page is counted as
+`oversizedInstances` and `budgetExcluded`, never uploaded past the cap.
+Exact source tests examine all 18 families x 2 variants x 4 orientations,
+exercise a deliberately reduced upload cap, and instrument live GPU bytes
+during an in-place page edit. Physical iPhone acceptance is still pending.

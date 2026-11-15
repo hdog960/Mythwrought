@@ -80,7 +80,7 @@ export function createPack5GpuStream(gl,layer,{
     throw Error('Invalid Pack 5 paged GPU budget');
   const sizes=new Map(),retry=new GpuUploadRetry();
   let resident=new Map(),desired=[],pendingPages=0,visibleCandidates=0,
-    budgetExcluded=0,uploadCount=0,uploadFailures=0,lastError='',
+    budgetExcluded=0,oversizedInstances=0,uploadCount=0,uploadFailures=0,lastError='',
     lastDrawCalls=0,totalUploadedBytes=0,maxUploadedPageBytes=0;
   function choose(eye){
     const max2=maxDistance*maxDistance;
@@ -90,6 +90,7 @@ export function createPack5GpuStream(gl,layer,{
     }).filter(o=>o.d<=max2&&Math.abs(o.record.anchor[1]-eye[1])<=32)
       .sort((a,b)=>a.d-b.d||byCell(a.record,b.record));
     visibleCandidates=nearby.length;
+    oversizedInstances=0;
     const buckets=new Map();
     for(const {record,d} of nearby.slice(0,maxInstances)){
       const tile=[Math.floor(record.anchor[0]/12),
@@ -109,7 +110,9 @@ export function createPack5GpuStream(gl,layer,{
       };
       for(const {record,d} of rows){
         const cost=rowSize(record,sizes);
-        if(cost>maxBytes)throw Error('Pack 5 authored object exceeds resident GPU budget');
+        // A single large authored mesh must never bypass the page upload
+        // cap; its stored physical collision and picking remain unchanged.
+        if(cost>pageBytes){oversizedInstances++;continue;}
         if(items.length&&(items.length>=pageInstances||bytes+cost>pageBytes))
           flush();
         // A single unusually complex source model is its own bounded page.
@@ -139,17 +142,22 @@ export function createPack5GpuStream(gl,layer,{
       }
       return {vertices,instances,bytes,hasBuffer:readyPages>0,
         pages:readyPages,drawCalls:lastDrawCalls,pendingPages,visibleCandidates,
-        budgetExcluded,maxResidentBytes:maxBytes,maxPages,uploads:uploadCount,
+        budgetExcluded,oversizedInstances,maxResidentBytes:maxBytes,maxPages,uploads:uploadCount,
         uploadFailures,totalUploadedBytes,maxUploadedPageBytes,lastError};
     },
     refresh(eye,now=Date.now()){
       if(!Array.isArray(eye)||eye.length!==3||!eye.every(finite)||
         !finite(now))throw Error('Invalid Pack 5 view position/time');
-      const next=choose(eye),active=new Set(next.map(p=>p.key));
+      const next=choose(eye),wanted=new Map(next.map(p=>[p.key,p.signature]));
       let changed=false;
       for(const [key,entry] of resident){
-        if(!active.has(key)){
-          gl.deleteBuffer(entry.buffer);resident.delete(key);retry.success(key);changed=true;
+        if(wanted.get(key)!==entry.signature){
+          // The old page is never drawable once its signature changes.
+          // Evict BEFORE uploading to enforce the actual resident cap even
+          // at the transient replacement peak, not only in the final stats.
+          gl.deleteBuffer(entry.buffer);resident.delete(key);
+          if(!wanted.has(key))retry.success(key);
+          changed=true;
         }
       }
       desired=next;
@@ -162,14 +170,13 @@ export function createPack5GpuStream(gl,layer,{
         try{
           const blocks=page.items.map(row=>pack5TerrainVertices(layer.meshAt(row.anchor)));
           const total=blocks.reduce((sum,b)=>sum+b.length,0);
-          if(total*4!==page.bytes||total*4>maxBytes)
-            throw Error('Pack 5 source geometry size changed unexpectedly');
+          if(total*4!==page.bytes||total*4>pageBytes)
+            throw Error('Pack 5 source geometry exceeds single-page upload budget');
           const vertices=new Float32Array(total);
           let at=0;for(const block of blocks){vertices.set(block,at);at+=block.length;}
           const buffer=uploadChunkBuffer(gl,vertices);
           resident.set(page.key,{buffer,count:total/9,bytes:vertices.byteLength,
             instances:page.items.length,signature:page.signature});
-          if(existing)gl.deleteBuffer(existing.buffer);
           uploadCount++;totalUploadedBytes+=vertices.byteLength;
           maxUploadedPageBytes=Math.max(maxUploadedPageBytes,vertices.byteLength);
           retry.success(page.key);lastError='';changed=true;uploaded++;
