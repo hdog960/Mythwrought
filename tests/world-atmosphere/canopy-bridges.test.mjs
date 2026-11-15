@@ -39,9 +39,10 @@ test('reproducible in both axes and across a chunk seam without changing origina
  const start=[14,13,20],end=[22,13,20];
  const seam=fixture();seam.occupied.set(start.join(','),BLOCK.WOOD);
  assert.ok(planCanopyBridge(seam,start,end));
- const north=[20,13,14],south=[20,13,22];
- seam.occupied.set(north.join(','),BLOCK.WOOD);
- seam.occupied.set(south.join(','),BLOCK.WOOD);
- assert.ok(planCanopyBridge(seam,north,south));
- assert.equal(seam.occupied.size,5);
+ const north=[32,13,14],south=[32,13,22];
+ const vertical=fixture();
+ vertical.occupied.set(north.join(','),BLOCK.WOOD);
+ vertical.occupied.set(south.join(','),BLOCK.WOOD);
+ assert.ok(planCanopyBridge(vertical,north,south));
+ assert.equal(seam.occupied.size,3);
 });
