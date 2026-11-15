@@ -1266,13 +1266,19 @@ function start(){
           throw Error('Invalid local-only Pack 5 dense fixture request');
         const old=pack5Builder.snapshot();
         const x=Math.floor(player.x)+4,z=Math.floor(player.z)+4;
-        const y=Math.min(18,Math.floor(player.feet)+2);
         let added=0;
         try{
           for(let i=0;i<count;i++){
-            const at=[x+i%10*2,y,z+Math.floor(i/10)*2];
-            const result=pack5Builder.layer.place('pack5:080',at,i%4);
-            if(!result.ok)throw Error('Dense test placement rejected: '+result.reason);
+            const px=x+i%10*2,pz=z+Math.floor(i/10)*2;
+            // Do not mine or replace live terrain for a stress fixture.
+            // Original seed-landmarks can occupy the 18-high plane.
+            let accepted=false;
+            for(let y=19;y>=14;y--){
+              if(world.get(px,y,pz)!==0)continue;
+              const result=pack5Builder.layer.place('pack5:080',[px,y,pz],i%4);
+              if(result.ok){accepted=true;break;}
+            }
+            if(!accepted)throw Error('No empty test cell inside world envelope');
             added++;
           }
           pack5Builder.save();
