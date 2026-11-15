@@ -637,14 +637,14 @@ function start(){
   physicalPalette.className='looksetting';
   const physicalLabel=document.createElement('label');
   physicalLabel.htmlFor='biome130Select';
-  physicalLabel.textContent='AUTOMATION BIOME BLOCKS · 57 PHYSICAL MATERIALS';
+  physicalLabel.textContent='AUTOMATION BIOME BLOCKS · 60 PHYSICAL MATERIALS';
   const biomeSelect=document.createElement('select');
   biomeSelect.id='biome130Select';
   biomeSelect.setAttribute('aria-label','Biome construction block');
   const emptyChoice=document.createElement('option');
   emptyChoice.value='';emptyChoice.textContent='Select a biome construction material';
   biomeSelect.append(emptyChoice);
-  for(const [title,start,end] of [['Desert',1,15],['Snow',16,30],['Enchanted forest',31,45],['Mountains',46,57]]){
+  for(const [title,start,end] of [['Desert',1,15],['Snow',16,30],['Enchanted forest',31,45],['Mountains',46,60]]){
     const group=document.createElement('optgroup');group.label=title;
     for(const id of BIOME130_REGISTERED_IDS){
       const ordinal=id-255;if(ordinal<start||ordinal>end)continue;
