@@ -59,3 +59,39 @@ export function descentEvidence(world,origin=DESCENT_ORIGIN){
     return {high,low,count:steps.length,invalid:invalid.length};
   });
 }
+
+/**
+ * Physical, ordered descent audit. A valid chamber alone is insufficient:
+ * every consecutive foot position must be a walkable, one-voxel step with
+ * two clear body cells and a solid supporting voxel. Edits take precedence.
+ * This deliberately does NOT certify a surface entrance or browser runtime.
+ */
+export function descentConnectivity(world,origin=DESCENT_ORIGIN){
+  const reader=descentWorld(world,origin),route=descentRoute(origin);
+  const failures=[],bands=[0,0,0,0];
+  let highest=null,lowest=null;
+  for(let i=0;i<route.length;i++){
+    const p=route[i],prev=route[i-1];
+    const band=p.floor>=-45?0:p.floor>=-100?1:p.floor>=-155?2:3;
+    bands[band]++;
+    if(highest===null)highest=p.floor;
+    lowest=p.floor;
+    if(reader.get(p.x,p.floor,p.z)===BLOCK.AIR||
+       reader.get(p.x,p.feet,p.z)!==BLOCK.AIR||
+       reader.get(p.x,p.feet+1,p.z)!==BLOCK.AIR)
+      failures.push({step:i,reason:'blocked-or-unsupported'});
+    if(prev){
+      const horizontal=Math.abs(p.x-prev.x)+Math.abs(p.z-prev.z);
+      const vertical=Math.abs(p.feet-prev.feet);
+      if(horizontal!==1||vertical>1)
+        failures.push({step:i,reason:'disconnected-step'});
+      // A player stepping downward must also have an unobstructed head path
+      // at the shared boundary; checking only destination feet misses this.
+      if(reader.get(p.x,Math.max(p.feet,prev.feet)+1,p.z)!==BLOCK.AIR)
+        failures.push({step:i,reason:'step-head-obstruction'});
+    }
+  }
+  return {connected:failures.length===0&&bands.every(n=>n>0),
+    failures,bands,highest,lowest,steps:route.length,
+    surfaceConnected:false,reason:'surface throat requires :24 coordination and runtime proof'};
+}
