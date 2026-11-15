@@ -4,16 +4,34 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+
+# Different manual roadmaps remain independent; only superseded runs of
+# the SAME PR are cancelled. Main pushes are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
 jobs:
   node-and-browser:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax and model tests
+      - name: Determine verification scope (fail closed)
+        id: scope
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/ci/select-scope.mjs >> "$GITHUB_OUTPUT"
+      - name: Syntax, selector and production model tests
         run: |
           node --check src/main.mjs
           node --check src/voxel.mjs
@@ -26,12 +44,25 @@ jobs:
           node --check src/gpu-pipeline.mjs
           node --check src/cave-runes.mjs
           node --check src/sky.mjs
+          node --test tests/ci/*.test.mjs
           npm test
+      - name: Native source tests for changed independent roadmaps
+        if: steps.scope.outputs.mode == 'isolated'
+        env:
+          CI_LANES: ${{ steps.scope.outputs.lanes }}
+        run: node scripts/ci/run-isolated.mjs "$CI_LANES"
       - name: Install free browser test tools
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-      - name: Landscape WebGL2 browser smoke
+      - name: Landscape browser smoke (isolated regression baseline)
+        if: steps.scope.outputs.mode == 'isolated'
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-site.log 2>&1 &
+          node tests/browser-smoke.mjs
+          node tests/layout-browser.mjs
+      - name: Landscape WebGL2 browser smoke (full shared/integration gate)
+        if: steps.scope.outputs.mode == 'full'
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-site.log 2>&1 &
           node tests/browser-smoke.mjs
