@@ -50,7 +50,7 @@ export function makeOrientationSidecar(entries=[],{maxEntries=4096}={}) {
         .sort((a,b)=>a.cell[0]-b.cell[0]||a.cell[1]-b.cell[1]||a.cell[2]-b.cell[2])
         .map(e=>({cell:[...e.cell],blockId:e.blockId,turns:e.turns}));
     },
-    size() {return states.size;}
+    // Reconcile after loading legacy edits or any out-of-band world modification.\n    // Only records matching the actual world survive; no schema-1 payload is changed.\n    reconcile(readBlock) {\n      if(typeof readBlock!=='function') throw new TypeError('Missing block reader');\n      const stale=[];\n      for(const [key,entry] of states) {\n        if(readBlock(...entry.cell)!==entry.blockId) stale.push(key);\n      }\n      for(const key of stale) states.delete(key);\n      return stale.length;\n    },\n    size() {return states.size;}
   };
 }
 export function restoreOrientationSidecar(serialized,readBlock,options) {
