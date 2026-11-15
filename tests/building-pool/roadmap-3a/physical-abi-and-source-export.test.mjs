@@ -78,6 +78,7 @@ test('emit byte-identical M1 candidate source bundle for independent real local 
   'src/building-pool/roadmap-3a/legacy-validation.mjs',
   'src/building-pool/roadmap-3a/contract.mjs',
   'src/building-pool/roadmap-3a/m1-workshop-exemplars.mjs',
+  'src/building-pool/roadmap-3a/legacy-physical-support-audit.mjs',
   'tests/building-pool/roadmap-3a/preview.html',
   'tests/building-pool/roadmap-3a/preview.mjs',
   'tests/building-pool/roadmap-3a/preview-mesh.mjs',
@@ -104,6 +105,6 @@ test('emit byte-identical M1 candidate source bundle for independent real local 
    caveat:'Files are candidate diagnostic sources, not deployed world or physical iPhone evidence'};
  mkdirSync(base,{recursive:true});
  writeFileSync(join(base,'MANIFEST.json'),JSON.stringify(out,null,2)+'\n');
- assert.equal(manifest.length,14);
+ assert.equal(manifest.length,15);
  assert.equal(assets.length,originalRefs.length);
 });
