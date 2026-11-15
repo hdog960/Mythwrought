@@ -68,8 +68,13 @@ try{
   // Reload the actual served game: persisted sidecar and real GPU meshes must
   // restore without fabricating IDs in the schema-1 VoxelWorld serialization.
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.__mythwroughtTest?.snapshot?.().manual14PhysicalBlocks===2&&
-    Number(document.querySelector('#scene')?.dataset.manual14MeshVertices)>0,
+  await page.waitForFunction(()=>window.__mythwroughtTest?.snapshot?.().manual14PhysicalBlocks===2,
+    null,{timeout:45000});
+  // Saved construction is world-spanning; on reload the player respawns near
+  // the canonical seed origin. Move the LOCALHOST-ONLY test camera back to the
+  // authored fixtures before asserting GPU residency of that remote chunk.
+  await page.evaluate(()=>window.__mythwroughtTest.teleport(501,500));
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.manual14MeshVertices)>0,
     null,{timeout:60000});
   const reloaded=await page.evaluate(([p1,p4])=>({
    ids:[window.__mythwroughtTest.block(...p1),window.__mythwroughtTest.block(...p4)],
