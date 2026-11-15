@@ -55,3 +55,28 @@ test('failed and throwing edits preserve state, invalid edits cannot execute',()
  assert.throws(()=>s.applyEdit(cell,null),TypeError);
  assert.equal(s.get(cell,5),3);
 });
+
+test('reconcile prunes stale orientations after legacy schema-1 recovery without changing saves',()=>{
+ const legacy={schema:1,edits:[[1,2,3,4],[-1,0,2,0]]};
+ const original=JSON.stringify(legacy);
+ const world=new Map([['1,2,3',4],['5,0,0',7]]);
+ const read=(x,y,z)=>world.get([x,y,z].join(','))??0;
+ const s=makeOrientationSidecar([
+  {cell:[1,2,3],blockId:4,turns:1},
+  {cell:[-1,0,2],blockId:3,turns:3},
+  {cell:[5,0,0],blockId:7,turns:2}
+ ]);
+ assert.equal(s.reconcile(read),1);
+ assert.equal(s.size(),2);
+ assert.equal(s.get([-1,0,2],3),0);
+ assert.equal(s.get([1,2,3],4),1);
+ assert.equal(s.get([5,0,0],7),2);
+ assert.equal(s.reconcile(read),0,'recovery is idempotent');
+ assert.equal(JSON.stringify(legacy),original,'legacy save remains byte-identical');
+});
+test('reconcile validates world reader and leaves state untouched on reader error',()=>{
+ const s=makeOrientationSidecar([{cell:[0,0,0],blockId:2,turns:1}]);
+ assert.throws(()=>s.reconcile(null),TypeError);
+ assert.throws(()=>s.reconcile(()=>{throw new Error('unloaded chunk');}),/unloaded chunk/);
+ assert.equal(s.get([0,0,0],2),1);
+});
