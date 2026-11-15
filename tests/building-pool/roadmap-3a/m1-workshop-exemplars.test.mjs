@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
+import {resolveManualFivePackAsset} from '../../../src/builder-assets/manual-five-pack.mjs';
 import {createM1OriginalWorkshopPool,M1_ORIGINAL_TYPES} from '../../../src/building-pool/roadmap-3a/m1-workshop-exemplars.mjs';
 import {validateBlueprint,validateAuthoredPool} from '../../../src/building-pool/roadmap-3a/contract.mjs';
 import {BIOMES,SIZES,slotId} from '../../../src/building-pool/roadmap-3a/roster.mjs';
@@ -50,5 +51,24 @@ test('no duplicate physical occupancy or category palette-swap geometry',()=>{
   signatures.add(signature);
   assert.equal(b.modules.find(m=>m.role==='fixture').cells.length,2);
   assert.ok(b.architecture.structuralLoadApproved===false);
+ }
+});
+
+test('new Pack 5 anvil and Pack 4 crate have source-authored variant, yaw and certified floor supports',()=>{
+ const armorer=examples.find(b=>b.type==='armorer');
+ const mining=examples.find(b=>b.type==='mining-workshop');
+ for(const [b,symbol,variant] of [[armorer,'pack5:088','blackiron-horn'],[mining,'pack4:057',null]]){
+  const cell=b.modules.flatMap(m=>m.cells).find(c=>c[3]===symbol);
+  assert.ok(cell&&cell.length===5,'an installed physical variant needs explicit placement');
+  assert.equal(cell[4].orientation,'north');
+  if(variant!==null)assert.equal(cell[4].variant,variant);
+  const a=resolveManualFivePackAsset(symbol,variant===null?{orientation:cell[4].orientation}:
+    {orientation:cell[4].orientation,variant});
+  assert.equal(a.builderResolvable,true);assert.equal(a.livePlaceable,false);
+  const positions=occupy(b);
+  assert.ok(a.occupiedOffsets.every(([dx,dy,dz])=>!positions.has([cell[0]+dx,cell[1]+dy,cell[2]+dz].join(','))||dx===0&&dy===0&&dz===0));
+  for(const [dx,dy,dz] of a.supportOffsets)
+   assert.ok(positions.has([cell[0]+dx,cell[1]+dy,cell[2]+dz].join(',')),
+    'M1 fixture physical mounting requires an authored supporting block');
  }
 });
