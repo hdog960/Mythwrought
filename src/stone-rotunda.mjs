@@ -33,6 +33,7 @@ export function planStoneRotunda(world,x,z){
        baseBlock(px,h,pz,world.seed)===BLOCK.AIR ||
        baseBlock(px,h+1,pz,world.seed)!==BLOCK.AIR ||
        baseBlock(px,h+2,pz,world.seed)!==BLOCK.AIR ||
+       [h,h+1,h+2].some(py=>world.get(px,py,pz)!==baseBlock(px,py,pz,world.seed)) ||
        (world.edits instanceof Map && [h,h+1,h+2].some(py=>world.edits.has(worldKey(px,py,pz)))))return null;
   }
   const cells=[],used=new Set();
@@ -87,4 +88,20 @@ export function placeStoneRotunda(world,plan){
     for(const [key,id] of original)world.edits.set(key,id);
     return false;
   }
+}
+
+// Explicit, bounded discovery only: never mutates terrain or activates a landmark.
+// Closest-first square rings make a reproducible exploration candidate for a seed.
+export function findStoneRotundaSite(world,centerX=0,centerZ=0,{radius=128,step=4}={}){
+  if(!Number.isSafeInteger(centerX)||!Number.isSafeInteger(centerZ)||
+     !Number.isSafeInteger(radius)||radius<0||radius>256||
+     !Number.isSafeInteger(step)||step<1||step>32)return null;
+  for(let ring=0;ring<=radius;ring+=step){
+    for(let dz=-ring;dz<=ring;dz+=step)for(let dx=-ring;dx<=ring;dx+=step){
+      if(Math.max(Math.abs(dx),Math.abs(dz))!==ring)continue;
+      const plan=planStoneRotunda(world,centerX+dx,centerZ+dz);
+      if(plan)return plan;
+    }
+  }
+  return null;
 }
