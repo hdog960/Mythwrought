@@ -67,17 +67,17 @@ for(const cell of selected){
 let uMin=Infinity,uMax=-Infinity,vMin=Infinity,vMax=-Infinity,dMin=Infinity,dMax=-Infinity;
 const project=([x,y,z])=>{
  const xx=x-b.bounds[0]/2,zz=z-b.bounds[2]/2;
- return [(xx-zz)*.85,(xx+zz)*.35-y*1.32,(xx+zz-y*.33)];
+ return [(xx-zz)*.85,(xx+zz)*.35-y*1.32,(xx+zz+y*.55)];
 };
 for(const p of all){const [u,v,d]=project(p);uMin=Math.min(uMin,u);uMax=Math.max(uMax,u);
  vMin=Math.min(vMin,v);vMax=Math.max(vMax,v);dMin=Math.min(dMin,d);dMax=Math.max(dMax,d);}
 const rx=Math.max(.1,uMax-uMin),ry=Math.max(.1,vMax-vMin),rd=Math.max(.1,dMax-dMin);
-const s=Math.min(1.75/rx,1.75*canvas.width/canvas.height/ry);
+const s=Math.min(1.56/rx,1.56*canvas.width/canvas.height/ry);
 const data=[];
 for(const {p,color} of world){
  const [u,v,d]=project(p);
  const cx=(u-(uMax+uMin)/2)*s,cy=-(v-(vMax+vMin)/2)*s*canvas.width/canvas.height;
- const cz=(d-dMin)/rd*1.7-.85;
+ const cz=(dMax-d)/rd*1.7-.85;
  data.push(cx,cy,cz,...color);
 }
 const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);
@@ -98,6 +98,7 @@ document.querySelector('#metrics').textContent=selected.length+' coordinate cell
 window.__m1Preview={ready:true,renderer:'genuine-webgl2-cube-proxy',type:b.type,
  view,drawCalls:1,triangles:world.length/3,cells:selected.length,
  roomCount:b.spaces.length,width:canvas.width,height:canvas.height,glError:error,
- contextLost:gl.isContextLost(),sourceId:b.id,notPhysical:true};
+ contextLost:gl.isContextLost(),sourceId:b.id,notPhysical:true,
+ cameraDepthConvention:'elevated-camera-near-is-max'};
 </script>
 </body></html>
