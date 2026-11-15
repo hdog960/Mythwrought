@@ -14,7 +14,7 @@ const F = Object.freeze({
       {id:'treatment-bay',kind:'treatment',box:[2,7,3,8]},
       {id:'patient-recovery',kind:'recovery',box:[11,16,3,9]},
       {id:'front-waiting',kind:'waiting',box:[7,12,2,3]},
-      {id:'apothecary-annex',kind:'herb-storage',box:[6,12,13,16]}
+      {id:'apothecary-annex',kind:'herb-storage',box:[6,12,13,15]}
     ],
     fixtures:[{at:[3,2,10],asset:'pack4:058',name:'waiting-bench'},
       {at:[14,2,10],asset:'pack4:059',name:'mixing-table'}],
@@ -31,7 +31,7 @@ const F = Object.freeze({
       {id:'west-stacks',kind:'collections',box:[2,9,4,10]},
       {id:'catalogue-room',kind:'catalogue',box:[3,9,13,17]}
     ],
-    fixtures:[{at:[18,2,9],asset:'pack4:059',name:'reading-table'},
+    fixtures:[{at:[18,2,2],asset:'pack4:059',name:'reading-table'},
       {at:[2,2,11],asset:'pack4:058',name:'reading-bench'}],
     roofRidges:[{axis:'z',fixed:7,from:3,to:17},{axis:'x',fixed:6,from:11,to:18}]
   },
@@ -46,8 +46,8 @@ const F = Object.freeze({
       {id:'second-class',kind:'teacher-area',box:[13,21,3,8]},
       {id:'rear-study',kind:'shared-study',box:[7,17,11,17]}
     ],
-    fixtures:[{at:[2,2,9],asset:'pack4:058',name:'student-bench'},
-      {at:[21,2,9],asset:'pack4:059',name:'teacher-table'}],
+    fixtures:[{at:[2,2,2],asset:'pack4:058',name:'student-bench'},
+      {at:[21,2,2],asset:'pack4:059',name:'teacher-table'}],
     roofRidges:[{axis:'x',fixed:5,from:3,to:20},{axis:'z',fixed:11,from:11,to:17}]
   },
   institute: {
@@ -61,8 +61,8 @@ const F = Object.freeze({
       {id:'sealed-east-cell',kind:'secure-repository',box:[14,21,9,14]},
       {id:'northern-observation',kind:'instrument-bay',box:[9,15,17,20]}
     ],
-    fixtures:[{at:[4,2,8],asset:'pack4:037',name:'unpowered-crystal-lamp'},
-      {at:[20,2,8],asset:'pack4:059',name:'lab-workbench'}],
+    fixtures:[{at:[12,2,8],asset:'pack4:037',name:'unpowered-crystal-lamp'},
+      {at:[13,2,8],asset:'pack4:059',name:'lab-workbench'}],
     roofRidges:[{axis:'z',fixed:11,from:2,to:20},{axis:'x',fixed:10,from:3,to:20}]
   },
   academy: {
@@ -74,7 +74,7 @@ const F = Object.freeze({
       {axis:'x',fixed:17,from:2,to:6,gaps:[4]},
       {axis:'z',fixed:20,from:3,to:24,gaps:[7,13,20]}],
     rooms:[
-      {id:'front-lecture',kind:'lecture-hall',box:[11,17,2,6]},
+      {id:'front-lecture',kind:'lecture-hall',box:[11,16,2,6]},
       {id:'west-study',kind:'study-chamber',box:[3,9,9,16]},
       {id:'east-practice',kind:'practice-gallery',box:[18,24,9,16]},
       {id:'rear-archive',kind:'records-reading',box:[11,17,21,23]}
