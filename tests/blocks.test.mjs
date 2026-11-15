@@ -12,7 +12,10 @@ function stage(){
 }
 test('basic interaction materials and finite range are explicit',()=>{
   assert.equal(INTERACTION_REACH,6);
-  assert.deepEqual(BUILD_MATERIALS,[BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE]);
+  assert.deepEqual(BUILD_MATERIALS.slice(0,5),[BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE]);
+  assert.equal(BUILD_MATERIALS.length,62,'all five original materials plus 57 registered biome blocks');
+  assert.equal(new Set(BUILD_MATERIALS).size,62,'no duplicate construction IDs');
+  assert.deepEqual(BUILD_MATERIALS.slice(5),Array.from({length:57},(_,i)=>256+i));
   assert.equal(BLOCK_NAMES[BLOCK.LEAVES],'leaf canopy');
   assert.equal(BLOCK_NAMES[BLOCK.DEEPSTONE],'deepstone');
   assert.equal(BLOCK_NAMES[BLOCK.GRASS],'grass');
