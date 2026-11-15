@@ -2,6 +2,7 @@
 // flora, or manual-block generation belongs here. Only world.get defines cells.
 import {BLOCK,CHUNK_SIZE} from './voxel.mjs';
 import {sectionBounds} from './depth.mjs';
+import {isPack2LiveId,pack2WorldVertices} from './pack2-integration.mjs';
 
 const FACES=[
   {d:[1,0,0],q:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],lit:.77},
@@ -51,9 +52,19 @@ export function meshDepthSection(world,cx,cz,section){
       for(let y=bounds.minY;y<=bounds.maxY;y++){
         const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
+        if(isPack2LiveId(id)){
+          if(id!==76){
+            const state=world.getPack2State?.(x,y,z);
+            if(!state)throw Error('Deep Pack 2 mesh missing physical state');
+            const vertices=pack2WorldVertices(id,state,[x,y,z]);
+            for(let k=0;k<vertices.length;k+=9)emit(...vertices.subarray(k,k+9));
+          }
+          continue;
+        }
         const color=COLORS[id]||COLORS[3];
         for(const face of FACES){
-          if(blockAt(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
+          const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
+          if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor))continue;
           const shade=.91+((Math.abs(x*13+y*7+z*17)%17)/17)*.12;
           const [r,g,b]=color.map(c=>Math.min(1,c*shade*face.lit));
           for(const k of [0,1,2,0,2,3]){

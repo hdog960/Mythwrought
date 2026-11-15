@@ -2,19 +2,23 @@
 // This prototype adds no new inventory or automated mining powers.
 import {BLOCK,WORLD_MAX_Y,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
 import {WORLD_MIN_Y} from './depth.mjs';
+import {isPack2LiveId,pack2BodyIntersects,PACK2_LIVE_NAMES} from './pack2-integration.mjs';
 
 export const INTERACTION_REACH=6;
 export const BUILD_MATERIALS=Object.freeze([BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL,BLOCK.LEAVES,BLOCK.DEEPSTONE]);
 export const BLOCK_NAMES=Object.freeze({
   [BLOCK.AIR]:'air',[BLOCK.GRASS]:'grass',[BLOCK.DIRT]:'earth',
   [BLOCK.STONE]:'stone',[BLOCK.WOOD]:'timber',[BLOCK.CRYSTAL]:'crystal',
-  [BLOCK.ORE]:'ore',[BLOCK.LEAVES]:'leaf canopy',[BLOCK.DEEPSTONE]:'deepstone'
+  [BLOCK.ORE]:'ore',[BLOCK.LEAVES]:'leaf canopy',[BLOCK.DEEPSTONE]:'deepstone',
+  ...PACK2_LIVE_NAMES
 });
 
-export function intersectsPlayerBlock(player,cell){
+export function intersectsPlayerBlock(player,cell,id=BLOCK.STONE,state=null){
   if(!player||!Array.isArray(cell)||cell.length!==3||
     ![player.x,player.feet,player.z,...cell].every(Number.isFinite))return true;
   const [x,y,z]=cell,e=1e-5;
+  if(isPack2LiveId(id))return pack2BodyIntersects(id,state??{},cell,
+    {x:player.x,z:player.z,feet:player.feet,radius:BODY_RADIUS,height:BODY_HEIGHT});
   return player.x+BODY_RADIUS>x+e && player.x-BODY_RADIUS<x+1-e &&
     player.feet+BODY_HEIGHT>y+e && player.feet<y+1-e &&
     player.z+BODY_RADIUS>z+e && player.z-BODY_RADIUS<z+1-e;
@@ -30,9 +34,10 @@ export function inspectBlockTarget(world,eye,direction,selected,player){
   let reason='';
   if(!adjacent)reason='No free space for placement';
   else if(adjacent[1]<WORLD_MIN_Y||adjacent[1]>WORLD_MAX_Y)reason='Outside editable height';
-  else if(!BUILD_MATERIALS.includes(selected))reason='Choose a building material';
+  else if(!BUILD_MATERIALS.includes(selected)&&!isPack2LiveId(selected))reason='Choose a building material';
   else if(world.get(...adjacent)!==BLOCK.AIR)reason='Placement space occupied';
-  else if(intersectsPlayerBlock(player,adjacent))reason='Cannot place inside the player';
+  else if(intersectsPlayerBlock(player,adjacent,selected,
+    world.nextPack2State?.id===selected?world.nextPack2State:null))reason='Cannot place inside the player';
   const canPlace=reason==='';
   return {hit,adjacent,canMine,canPlace,distance:target.distance,block,reason};
 }
@@ -44,13 +49,16 @@ export function applyBlockAction(world,eye,direction,mode,selected,player,rebuil
   if(mode==='mine'&&!state.canMine)return {ok:false,reason:'Cannot mine here'};
   if(mode==='place'&&!state.canPlace)return {ok:false,reason:state.reason};
   const cell=mode==='mine'?state.hit:state.adjacent;
-  const previous=world.get(...cell),next=mode==='mine'?BLOCK.AIR:selected;
+  const previous=world.get(...cell),previousPack2=world.getPack2State?.(...cell)||null;
+  const next=mode==='mine'?BLOCK.AIR:selected;
   if(previous===next)return {ok:false,reason:'Block is already in that state'};
   if(!world.set(...cell,next))return {ok:false,reason:'Outside editable height'};
   try{
     if(typeof rebuild==='function')rebuild(cell[0],cell[2],cell[1]);
   }catch(error){
-    world.set(...cell,previous);
+    if(previousPack2&&typeof world.placePack2==='function')
+      world.placePack2(...cell,previous,previousPack2);
+    else world.set(...cell,previous);
     return {ok:false,reason:'Block update failed; nothing changed',error:String(error)};
   }
   return {ok:true,mode,cell,previous,next,block:mode==='mine'?previous:next};

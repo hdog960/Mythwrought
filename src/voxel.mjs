@@ -1,5 +1,6 @@
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
 import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
+import {isPack2LiveId,pack2WorldVertices,pack2RayHit,pack2BodyIntersects} from './pack2-integration.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
 // Keep that public contract at -3; the expanded editable engine range is
 // separately exported by depth.mjs so old cave floors do not shift.
@@ -195,6 +196,17 @@ export function meshChunk(world,cx,cz){
       for(let y=LEGACY_WORLD_MIN_Y;y<=WORLD_MAX_Y;y++){
         const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
+        // Approved authored candidate meshes, not full-cube placeholders.
+        if(isPack2LiveId(id)){
+          if(id!==76){
+            const state=world.getPack2State?.(x,y,z);
+            if(!state)throw Error('Pack 2 world lacks its physical cell state');
+            const authored=pack2WorldVertices(id,state,[x,y,z]);
+            for(let j=0;j<authored.length;j+=9)
+              appendVertex(...authored.subarray(j,j+9));
+          }
+          continue;
+        }
         const color=COLORS[id]||COLORS[3];
         // Most underground voxels are fully enclosed. Defer the two noise
         // samples and tint calculation until the FIRST exposed face; otherwise
@@ -202,7 +214,8 @@ export function meshChunk(world,cx,cz){
         // Keep world-space inputs and face order identical for save/seed parity.
         let variance;
         for(const face of FACE){
-          if(blockAt(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
+          const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
+          if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor))continue;
           if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
             hash(x+y*5,z-y*3,world.seed+91)*.08;
           const r=clamp(color[0]*variance*face.lit,0,1);
@@ -276,10 +289,16 @@ export function raycast(world,eye,direction,maxDistance=7){
   let previous=null,distance=0;
   const epsilon=1e-9;
   for(let i=0;i<Math.ceil(maxDistance*3)+5;i++){
-    if(world.get(cell[0],cell[1],cell[2])!==BLOCK.AIR){
-      return {hit:[...cell],adjacent:previous,distance};
+    const next=Math.min(...tMax),id=world.get(cell[0],cell[1],cell[2]);
+    if(id!==BLOCK.AIR){
+      if(!isPack2LiveId(id))return {hit:[...cell],adjacent:previous,distance};
+      const state=world.getPack2State?.(...cell);
+      if(!state)throw Error('Pack 2 target missing persisted physical state');
+      const hit=pack2RayHit(id,state,eye,dir,cell,maxDistance);
+      if(hit&&hit.distance>=distance-epsilon&&hit.distance<=next+epsilon){
+        return {hit:[...cell],adjacent:previous,distance:hit.distance};
+      }
     }
-    const next=Math.min(...tMax);
     if(!Number.isFinite(next)||next>maxDistance+epsilon)return null;
     previous=[...cell];distance=Math.max(0,next);
     // Traverse touching grid planes together so an edge hit cannot select a phantom cell.
@@ -318,7 +337,14 @@ export function collides(world,x,feet,z){
   const e=1e-5;
   for(let bx=Math.floor(x-BODY_RADIUS+e);bx<=Math.floor(x+BODY_RADIUS-e);bx++)
     for(let bz=Math.floor(z-BODY_RADIUS+e);bz<=Math.floor(z+BODY_RADIUS-e);bz++)
-      for(let by=Math.floor(feet+e);by<=Math.floor(feet+BODY_HEIGHT-e);by++)
-        if(world.get(bx,by,bz)!==BLOCK.AIR)return true;
+      for(let by=Math.floor(feet+e);by<=Math.floor(feet+BODY_HEIGHT-e);by++){
+        const id=world.get(bx,by,bz);
+        if(isPack2LiveId(id)){
+          const state=world.getPack2State?.(bx,by,bz);
+          if(!state)throw Error('Pack 2 collision missing physical state');
+          if(pack2BodyIntersects(id,state,[bx,by,bz],
+              {x,z,feet,radius:BODY_RADIUS,height:BODY_HEIGHT}))return true;
+        }else if(id!==BLOCK.AIR)return true;
+      }
   return false;
 }
