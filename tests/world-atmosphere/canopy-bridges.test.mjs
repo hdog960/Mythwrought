@@ -43,14 +43,16 @@ test('reproducible in both axes and across a chunk seam without changing origina
  const w=fixture(),p=planCanopyBridge(w,a,b);
  assert.deepEqual(planCanopyBridge(fixture(),a,b),p);
  const start=[14,13,20],end=[22,13,20];
- const seam=fixture();seam.occupied.set(start.join(','),BLOCK.WOOD);
+ const seam=fixture();seam.occupied.clear();seam.occupied.set(start.join(','),BLOCK.WOOD);
  assert.ok(planCanopyBridge(seam,start,end));
  const north=[32,13,14],south=[32,13,22];
- const vertical=fixture();
+ const vertical=fixture();vertical.occupied.clear();
  vertical.occupied.set(north.join(','),BLOCK.WOOD);
  vertical.occupied.set(south.join(','),BLOCK.WOOD);
  assert.ok(planCanopyBridge(vertical,north,south));
- assert.equal(seam.occupied.size,3);
+ assert.equal(seam.occupied.size,2,'planning must not alter the only two new anchors');
+ const blocked=fixture();blocked.occupied.set(start.join(','),BLOCK.WOOD);blocked.occupied.set(end.join(','),BLOCK.WOOD);
+ assert.equal(planCanopyBridge(blocked,start,end),null,'existing occupied third-party span must be rejected');
 });
 
 test('physical leaf parapets respect edited side cells and preserve open entrance',()=>{
