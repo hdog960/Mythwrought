@@ -50,12 +50,12 @@
   ],
   "quota": 285,
   "inherited": 0,
-  "authored": 0,
-  "remaining": 285,
+  "authored": 5,
+  "remaining": 280,
   "creatorAccepted": 0,
   "integrated": 0,
   "worldPlaced": false,
-  "status": "M0 initial isolated contract; no M1 candidate geometry authored",
+  "status": "M0 exact-head CI accepted; M1 5 original physical-coordinate candidate sources committed; M1 exact-head native/real candidate-browser acceptance open",
   "ownedPaths": [
     "src/building-pool/roadmap-4b/",
     "tests/building-pool/roadmap-4b/",
@@ -76,5 +76,55 @@
     "creatorArtApproval": false,
     "physicalIphoneApproval": false
   },
-  "nextMilestone": "M1 first independently authored functional physical-coordinate exemplar and geometry review"
+  "nextMilestone": "M1 complete exact PR-head native source tests, genuine Chromium cube-proxy exterior and cutaway capture audit, remediate proven prototype geometry defects; then advance authored category quotas in M2",
+  "milestones": {
+    "M0": "TECHNICALLY ACCEPTED on PR #185 exact head 199af339dea3c708e5f92b21aa91ce47b7d99763, Actions #43767122199 SUCCESS (native Builder 4B suite + focused Chromium smoke/layout)",
+    "M1": "FIVE SOURCE-AUTHORED EXEMPLARS; source-exact new native-suite verification pending latest PR HEAD; 30-shot true candidate WebGL2 cube-proxy harness authored but NOT EXECUTED",
+    "M2": "NOT STARTED",
+    "M3": "NOT STARTED",
+    "M4": "NOT STARTED",
+    "M5": "NOT STARTED",
+    "M6": "NOT STARTED"
+  },
+  "byCategoryAuthorCount": {
+    "healers-house": 1,
+    "library": 1,
+    "schoolhouse": 1,
+    "magical-research-institute": 1,
+    "arcane-academy": 1
+  },
+  "byBiomeSizeAuthorCount": {
+    "temperate": {
+      "small": 1,
+      "medium": 0,
+      "large": 0
+    },
+    "desert": {
+      "small": 1,
+      "medium": 0,
+      "large": 0
+    },
+    "snow": {
+      "small": 0,
+      "medium": 1,
+      "large": 0
+    },
+    "enchanted-forest": {
+      "small": 0,
+      "medium": 1,
+      "large": 0
+    },
+    "mountain": {
+      "small": 0,
+      "medium": 0,
+      "large": 1
+    }
+  },
+  "authoredIds": [
+    "r4:healers-house:temperate:small:01",
+    "r4:library:snow:medium:01",
+    "r4:schoolhouse:desert:small:01",
+    "r4:magical-research-institute:enchanted-forest:medium:01",
+    "r4:arcane-academy:mountain:large:01"
+  ]
 }
