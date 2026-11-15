@@ -38,18 +38,38 @@ function resolveAxis(world,p,axis,delta){
   const z=axis==='z'?destination:p.z;
   if(!collides(world,x,p.feet,z)){p[axis]=destination;return {blocked:false,stepped:false};}
   if(p.onGround && p.vY<=0){
-    // Only a single real voxel step with head clearance and support may be climbed.
-    // A taller wall or low ceiling rejects the ascent instead of clipping.
-    const rise=STEP_HEIGHT;
-    let clear=true;
-    for(let h=.20;h<=rise+.001;h+=.2){
-      const at=Math.min(h,rise);
-      if(collides(world,p.x,p.feet+at,p.z)){clear=false;break;}
+    // Authored stairs, paving, slabs and gravel have REAL partial-height
+    // collision boxes. A fixed +1 voxel "step" can leave the ground probe
+    // above their surface, making the player jump over otherwise walkable art.
+    // Find the first collision-free elevation, not an invented full-block top.
+    // Search only on an actual horizontal obstruction; this is not a per-frame
+    // terrain-height scan and never changes any asset's collision geometry.
+    const probes=8,refinements=8;
+    let lower=0,upper=null,clear=true;
+    for(let n=1;n<=probes;n++){
+      const rise=STEP_HEIGHT*n/probes;
+      // The body must be able to rise at its CURRENT position: no clipping
+      // through ceilings, overhangs or shaped furniture while stepping.
+      if(collides(world,p.x,p.feet+rise,p.z)){clear=false;break;}
+      if(!collides(world,x,p.feet+rise,z)){upper=rise;break;}
+      lower=rise;
     }
-    if(clear && !collides(world,x,p.feet+rise,z) &&
-       collides(world,x,p.feet+rise-GROUND_PROBE,z)){
-      p.feet+=rise;p[axis]=destination;p.onGround=false;p.vY=0;
-      return {blocked:false,stepped:true};
+    if(clear && upper!==null){
+      // Binary refinement puts feet just ABOVE the true surface (including
+      // uneven gravel). The certified ground probe then reaches that surface.
+      // A fixed 1.01 rise only reliably contacted full-height blocks.
+      for(let n=0;n<refinements;n++){
+        const mid=(lower+upper)*.5;
+        if(collides(world,p.x,p.feet+mid,p.z)){clear=false;break;}
+        if(collides(world,x,p.feet+mid,z))lower=mid;else upper=mid;
+      }
+      const rise=Math.min(STEP_HEIGHT,upper+.0005);
+      if(clear && !collides(world,p.x,p.feet+rise,p.z) &&
+         !collides(world,x,p.feet+rise,z) &&
+         collides(world,x,p.feet+rise-GROUND_PROBE,z)){
+        p.feet+=rise;p[axis]=destination;p.onGround=true;p.vY=0;
+        return {blocked:false,stepped:true};
+      }
     }
   }
   // Sweep to the last clear fraction instead of moving through or jittering at a wall.
