@@ -8,7 +8,7 @@ const PLANS=[
 {t:H,b:'desert',s:'small',title:'Sunwell Crescent Clinic',dim:[21,12,22],
  r:[[2,7,3,18],[12,17,3,18],[7,12,3,7],[7,12,14,18]],e:[9,3],
  rooms:[['treatment',4,10],['recovery',15,10],['waiting',9,5],['herb-storage',9,16]],
- div:[['x',7,8,13,10]],peak:[[4,9],[15,9]],roof:'crescent-sawtooth'},
+ div:[['x',9,4,7,5]],peak:[[4,9],[15,9]],roof:'crescent-sawtooth'},
 {t:H,b:'snow',s:'large',title:'Crosswind Field Hospital',dim:[33,13,31],
  r:[[13,19,2,28],[2,14,8,17],[18,30,11,23],[11,22,2,8],[10,23,22,28]],e:[16,2],
  rooms:[['treatment',7,12],['recovery',26,16],['waiting',16,5],['isolation-ward',16,25],['supply-room',26,21]],
