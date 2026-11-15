@@ -26,6 +26,23 @@ export function makeOrientationSidecar(entries=[],{maxEntries=4096}={}) {
       states.set(key,{cell:[...cell],blockId,turns});
     },
     clear(cell) {states.delete(cellKey(cell));},
+    // Explicit world-edit hook: invalidate even when the replacement uses the same ID.
+    // The host must call this for every successful edit, including removals and undo.
+    invalidateEdit(cell) {
+      const key=cellKey(cell);
+      const existed=states.has(key);
+      states.delete(key);
+      return existed;
+    },
+    // Optional atomic edit adapter. Failed edits preserve orientation; successful edits
+    // always invalidate before a new orientation may be assigned by the host.
+    applyEdit(cell,edit) {
+      const key=cellKey(cell);
+      if(typeof edit!=='function') throw new TypeError('Missing edit callback');
+      const success=edit();
+      if(success===true) states.delete(key);
+      return success;
+    },
     // Caller must pass current world block reader; stale records are never restored onto edits.
     snapshot(readBlock) {
       if(typeof readBlock!=='function') throw new TypeError('Missing block reader');
