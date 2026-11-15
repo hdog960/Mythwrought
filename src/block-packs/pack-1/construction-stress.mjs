@@ -10,7 +10,7 @@ const byKey=c=>c.join(',');
 // use a stronger transport digest; this DOES NOT authorize live save changes.
 function checksum(world,state){
   const payload=JSON.stringify([world.schema,world.seed,world.edits,
-    state.turns,state.variants,state.mounts]);
+    world.rotations??null,state.turns,state.variants,state.mounts]);
   let h=2166136261;
   for(let i=0;i<payload.length;i++)h=Math.imul(h^payload.charCodeAt(i),16777619)>>>0;
   return h.toString(16).padStart(8,'0');
@@ -19,11 +19,12 @@ const sorted=(a,b)=>a.cell[0]-b.cell[0]||a.cell[1]-b.cell[1]||a.cell[2]-b.cell[2
 const validCell=c=>Array.isArray(c)&&c.length===3&&c.every(Number.isSafeInteger)&&
   c.every(v=>Math.abs(v)<=1000000);
 function validateEdits(edits){
-  if(!Array.isArray(edits)||edits.length>50000)throw new TypeError('Invalid legacy edits');
+  // Keep current production's 300,000-row schema-1 ceiling; 255 and 65535 are sentinels.
+  if(!Array.isArray(edits)||edits.length>300000)throw new TypeError('Invalid legacy edits');
   const cells=new Map();
   for(const row of edits){
     if(!Array.isArray(row)||row.length!==4||!validCell(row.slice(0,3))||
-       !Number.isInteger(row[3])||row[3]<0||row[3]>254)
+       !Number.isSafeInteger(row[3])||row[3]<0||row[3]>=65535||row[3]===255)
       throw new TypeError('Invalid schema-1 edit row');
     const key=byKey(row.slice(0,3));
     if(cells.has(key))throw new Error('Duplicate save cell: '+key);
@@ -34,6 +35,43 @@ function validateEdits(edits){
 function validateSeed(seed){
   if(!Number.isSafeInteger(seed)||seed< -2147483648||seed>2147483647)
     throw new TypeError('Invalid schema-1 seed');
+}
+// Current main's auto biome130 registration occupies 256..315; its optional
+// 'rotations' field is already production schema-1, unrelated to Pack 1 turns.
+// Fail closed on stale/duplicate/malformed records rather than stripping them.
+function validateLiveRotations(rows,cells){
+  if(rows===undefined)return null;
+  if(!Array.isArray(rows)||rows.length>300000)throw new TypeError('Invalid existing biome rotations');
+  const seen=new Set(),copy=[];
+  for(const row of rows){
+    if(!Array.isArray(row)||row.length!==4||!validCell(row.slice(0,3))||
+      !Number.isInteger(row[3])||row[3]<1||row[3]>3)
+      throw new TypeError('Invalid existing biome rotation row');
+    const key=byKey(row.slice(0,3)),id=cells.get(key);
+    if(seen.has(key))throw new Error('Duplicate existing biome rotation');
+    if(!Number.isInteger(id)||id<256||id>315)
+      throw new Error('Existing rotation does not reference current registered biome ID');
+    seen.add(key);copy.push([...row]);
+  }
+  return copy;
+}
+function validateExistingSave(save,requestedSeed,existingEdits){
+  if(save===null)return {seed:requestedSeed??179,edits:existingEdits,rotations:null,
+    hasRotations:false};
+  if(!save||typeof save!=='object'||Array.isArray(save)||
+     save.schema!==1||!Array.isArray(save.edits))
+    throw new TypeError('Invalid existing schema-1 save');
+  if(!Array.isArray(existingEdits)||existingEdits.length)
+    throw new Error('Use existingSave OR existingEdits, never both');
+  const allowed=new Set(['schema','seed','edits','rotations']);
+  if(Object.keys(save).some(k=>!allowed.has(k)))
+    throw new Error('Unsupported existing save extension; refusing to discard data');
+  if(requestedSeed!==null&&requestedSeed!==save.seed)
+    throw new Error('Existing save seed mismatch');
+  const cells=validateEdits(save.edits);
+  const rotations=validateLiveRotations(save.rotations,cells);
+  return {seed:save.seed,edits:save.edits,rotations,
+    hasRotations:Object.hasOwn(save,'rotations')};
 }
 function supportedAt(cells,cell,face){
   if(!Object.hasOwn(FACES,face))return false;
@@ -57,11 +95,12 @@ function boundedState(arr,name){
   }
   return m;
 }
-export function compilePack1Construction(placements,{seed=179,existingEdits=[]}={}){
-  validateSeed(seed);
+export function compilePack1Construction(placements,{seed=null,existingEdits=[],existingSave=null}={}){
+  const baseline=validateExistingSave(existingSave,seed,existingEdits);
+  validateSeed(baseline.seed);
   if(!Array.isArray(placements)||placements.length>10000)
     throw new TypeError('Invalid Pack 1 construction placements');
-  const existing=validateEdits(existingEdits);
+  const existing=validateEdits(baseline.edits);
   if([...existing.values()].some(id=>CATALOG.has(id)))
     throw new Error('Existing Pack 1 blocks require explicit metadata-aware restoration');
   const cells=new Map(existing),plans=[];
@@ -106,7 +145,9 @@ export function compilePack1Construction(placements,{seed=179,existingEdits=[]}=
   edits.sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]);
   turns.sort(sorted);variants.sort(sorted);mounts.sort(sorted);
   // Save schema stays exactly {schema,seed,edits}; supplemental state is disjoint.
-  const world={schema:1,seed,edits},pack1State={version:1,turns,variants,mounts};
+  const world={schema:1,seed:baseline.seed,edits};
+  if(baseline.hasRotations)world.rotations=baseline.rotations.map(row=>[...row]);
+  const pack1State={version:1,turns,variants,mounts};
   pack1State.checksum=checksum(world,pack1State);
   return {world,pack1State};
 }
@@ -119,6 +160,7 @@ export function inspectPack1Construction(bundle){
     bundle.pack1State.checksum!==checksum(bundle.world,bundle.pack1State))
     throw new Error('Pack 1 state checksum mismatch or missing; refuse silent metadata loss');
   const cells=validateEdits(bundle.world.edits);
+  validateLiveRotations(bundle.world.rotations,cells);
   const state=bundle.pack1State;
   const turns=boundedState(state.turns,'orientation');
   const variants=boundedState(state.variants,'variant');
@@ -163,6 +205,8 @@ export function removePack1Construction(bundle,cell){
       ['turns','variants','mounts'].map(k=>[k,bundle.pack1State[k]
         .filter(e=>byKey(e.cell)!==key).map(e=>({...e,cell:[...e.cell]}))]))}
   };
+  if(Object.hasOwn(bundle.world,'rotations'))
+    next.world.rotations=bundle.world.rotations.map(row=>[...row]);
   next.pack1State.checksum=checksum(next.world,next.pack1State);
   inspectPack1Construction(next); // reject support removal; original remains untouched
   return next;

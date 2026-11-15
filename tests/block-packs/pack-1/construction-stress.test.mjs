@@ -121,3 +121,46 @@ test('omitting any rotation/variant/mount sidecar record fails integrity before 
   delete tampered.pack1State.checksum;
   assert.throws(()=>inspectPack1Construction(tampered),/checksum/);
 });
+
+test('current production biome130 256–315 edits and rotated schema-1 records are preserved byte-for-byte',()=>{
+  const existingSave={
+    schema:1,seed:417,
+    edits:[[0,2,0,256],[1,2,0,315],[2,2,0,8],[3,2,0,109]],
+    rotations:[[0,2,0,1],[1,2,0,3]]
+  };
+  const untouched=JSON.stringify(existingSave);
+  const snapshot=compilePack1Construction([
+    request(15,[5,2,0],{variant:'upper',rotation:2}),request(32,[6,2,0])
+  ],{existingSave});
+  assert.equal(JSON.stringify(existingSave),untouched);
+  assert.equal(snapshot.world.seed,417);
+  assert.deepEqual(snapshot.world.rotations,existingSave.rotations);
+  assert.equal(inspectPack1Construction(JSON.parse(JSON.stringify(snapshot))).pack1Count,2);
+  assert.equal(inspectPack1Construction(snapshot).otherCount,4);
+  assert.deepEqual(snapshot.world.edits.filter(e=>e[0]<4),existingSave.edits);
+  const after=removePack1Construction(snapshot,[5,2,0]);
+  assert.deepEqual(after.world.rotations,existingSave.rotations);
+  assert.deepEqual(after.world.edits.filter(e=>e[0]<4),existingSave.edits);
+  assert.equal(inspectPack1Construction(after).pack1Count,1);
+  assert.equal(JSON.stringify(existingSave),untouched);
+});
+test('biome rotation loss, stale rotation and unsupported schema-1 fields fail closed',()=>{
+  const base={schema:1,seed:179,edits:[[0,0,0,256]],rotations:[[0,0,0,2]]};
+  const snapshot=compilePack1Construction([request(9,[3,0,0])],{existingSave:base});
+  const lost=JSON.parse(JSON.stringify(snapshot));
+  delete lost.world.rotations;
+  assert.throws(()=>inspectPack1Construction(lost),/checksum/);
+  const drift=JSON.parse(JSON.stringify(snapshot));
+  drift.world.rotations[0][3]=1;
+  assert.throws(()=>inspectPack1Construction(drift),/checksum/);
+  assert.throws(()=>compilePack1Construction([],{existingSave:{...base,edits:[[0,0,0,9]]}}),
+    /registered biome/);
+  assert.throws(()=>compilePack1Construction([],{existingSave:{...base,rotations:[[0,0,0,2],[0,0,0,1]]}}),
+    /Duplicate/);
+  assert.throws(()=>compilePack1Construction([],{existingSave:{...base,newFormat:1}}),
+    /Unsupported existing save extension/);
+  assert.throws(()=>compilePack1Construction([],{existingSave:base,seed:180}),/seed mismatch/);
+  assert.throws(()=>compilePack1Construction([],{existingSave:base,existingEdits:[[1,0,0,3]]}),/never both/);
+  assert.throws(()=>compilePack1Construction([],{existingEdits:[[0,0,0,255]]}),/Invalid schema-1/);
+  assert.throws(()=>compilePack1Construction([],{existingEdits:[[0,0,0,65535]]}),/Invalid schema-1/);
+});
