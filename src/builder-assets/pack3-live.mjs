@@ -5,6 +5,7 @@ import {createPack3RuntimeStage,PACK3_RUNTIME_LIMIT} from './pack3-runtime.mjs';
 import {resolvePack3BuilderAsset,PACK3_BUILDER_SYMBOLS,PACK3_BUILDER_IDS} from './pack3.mjs';
 
 export const PACK3_OVERLAY_STORAGE_PREFIX='mythwrought-pack3-construction-v1:';
+export const PACK3_OVERLAY_PREVIOUS_GOOD_SUFFIX=':previous-good';
 export const PACK3_MAX_ADDED_VERTICES_PER_CHUNK=12000;
 const allowed=new Map(PACK3_BUILDER_IDS.map((id,i)=>[id,PACK3_BUILDER_SYMBOLS[i]]));
 export function isPack3BlockId(id){return Number.isInteger(id)&&allowed.has(id);}
@@ -44,6 +45,7 @@ export function createPack3LiveBridge(world,storage,{worldId='seed-'+world?.seed
     throw new TypeError('Invalid Pack 3 live bridge inputs');
   const runtime=createPack3RuntimeStage(world,{worldId,maxCells:PACK3_RUNTIME_LIMIT});
   const key=pack3OverlayKey(world.seed);
+  const backupKey=key+PACK3_OVERLAY_PREVIOUS_GOOD_SUFFIX;
   let blocked=null;
   try{
     const raw=storage.getItem(key);
@@ -65,6 +67,19 @@ export function createPack3LiveBridge(world,storage,{worldId='seed-'+world?.seed
     let oldRaw,prior=null,changed=false;
     try{
       oldRaw=storage.getItem(key);
+      // Never clobber a newer tab's physical construction save. This check
+      // also rejects deletion of a previously verified primary record.
+      if(oldRaw!==null&&oldRaw!==runtime.serialize())
+        throw Error('Pack 3 construction changed outside this session; reload before editing');
+      if(oldRaw===null&&runtime.size()>0)
+        throw Error('Pack 3 construction save disappeared; reload before editing');
+      // Preserve one confirmed previous-good copy in its own scoped key.
+      // Failure to secure/read it back is a failed edit, not silent data loss.
+      if(oldRaw!==null){
+        storage.setItem(backupKey,oldRaw);
+        if(storage.getItem(backupKey)!==oldRaw)
+          throw Error('Pack 3 previous-good backup readback mismatch');
+      }
       if(mode==='place'){
         runtime.placeMany([{at:cell,asset:pack3SymbolForId(id),orientation}],
           {playerBody:playerBounds(player)});
@@ -96,7 +111,7 @@ export function createPack3LiveBridge(world,storage,{worldId='seed-'+world?.seed
     }
   }
   return Object.freeze({
-    runtime,key,mutate,
+    runtime,key,backupKey,mutate,
     get blocked(){return blocked;},
     getAt:(x,y,z)=>runtime.get([x,y,z]),
     getId:(x,y,z)=>runtime.get([x,y,z])?.id??world.get(x,y,z),
