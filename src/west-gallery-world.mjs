@@ -27,10 +27,14 @@ export function westGalleryWorld(world, origin=CAVE_CANDIDATE) {
       // A third, sheltered side cavern beyond the first chamber's north wall.
       // The overlap at d=-11 makes this an actual branch, not a detached void.
       const northAlcove=t>=9&&t<=13&&d>=-16&&d<=-11;
-      if(!throat&&!chamber&&!eastLink&&!eastHall&&!returnPassage&&!northAlcove)return previous.get(x,y,z);
+      // A fourth chamber branches north from the eastern vault. The corridor
+      // overlaps the vault at d=-14 and reaches the room at d=-17.
+      const northSpur=t>=21&&t<=23&&d>=-17&&d<=-13;
+      const lanternRoom=t>=19&&t<=26&&d>=-22&&d<=-17;
+      if(!throat&&!chamber&&!eastLink&&!eastHall&&!returnPassage&&!northAlcove&&!northSpur&&!lanternRoom)return previous.get(x,y,z);
       const floor=floorAt(t);
       if(y===floor)return BLOCK.STONE;
-      if(y>floor&&y<=floor+(eastHall?6:northAlcove?5:4))return BLOCK.AIR;
+      if(y>floor&&y<=floor+(eastHall||lanternRoom?6:northAlcove?5:4))return BLOCK.AIR;
       return previous.get(x,y,z);
     }
   };
@@ -101,6 +105,25 @@ export function northAlcoveTraversal(world,origin=CAVE_CANDIDATE) {
     const headClear=reader.get(x,feet,z)===BLOCK.AIR&&reader.get(x,feet+1,z)===BLOCK.AIR;
     const bodyClear=!collides(reader,x+.5,feet,z+.5);
     samples.push({x,y:feet,z,supported,headClear,bodyClear});
+  }
+  const failures=samples.filter(p=>!p.supported||!p.headClear||!p.bodyClear);
+  return {samples,failures,walkable:failures.length===0,bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
+}
+
+/** Full player-body route from the east vault into the fourth north chamber.
+ * This is an opt-in voxel reader, not a default seeded-world placement.
+ */
+export function northSpurTraversal(world,origin=CAVE_CANDIDATE) {
+  const reader=westGalleryWorld(world,origin),floorAt=caveRoute(world.seed,origin).floorAt;
+  const t=22,x=origin.x+t,samples=[];
+  for(let d=-12;d>=-21;d--){
+    const z=origin.z+d,floor=floorAt(t),feet=floor+1;
+    samples.push({
+      x,y:feet,z,
+      supported:reader.get(x,floor,z)!==BLOCK.AIR,
+      headClear:reader.get(x,feet,z)===BLOCK.AIR&&reader.get(x,feet+1,z)===BLOCK.AIR,
+      bodyClear:!collides(reader,x+.5,feet,z+.5)
+    });
   }
   const failures=samples.filter(p=>!p.supported||!p.headClear||!p.bodyClear);
   return {samples,failures,walkable:failures.length===0,bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
