@@ -307,7 +307,8 @@ function openTheater(desert){
  // Side entrances are three-high and the rear wall seals the backstage;
  // neither stage walkability nor physical slope is falsely certified.
  p.wallX(backZ,1,p.W-2,[5,p.W-6]);
- for(const x of [5,p.W-6])p.feature(x,backZ+2,S.crate,'backstage-costume-stock');
+ // Keep backstage door landing cells and their immediate onward aisle clear.
+ for(const x of [3,p.W-4])p.feature(x,backZ+2,S.crate,'backstage-costume-stock');
  p.feature(c,backZ+2,S.table,'costume-preparation-table');
  p.feature(2,2,S.lantern,'entry-wayfinding-lamp','decor');
  for(const x of [c-half-1,c+half+1]){
