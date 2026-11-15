@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {surfaceBiomeAt,surfaceBiomeHeight,surfaceBiomeBlock,SURFACE_BIOME_REGIONS,surfaceBiomeOverlay,surfaceBiomeElevationPlan} from '../../src/surface-regions/regions.mjs';
+import {surfaceBiomeAt,surfaceBiomeHeight,surfaceBiomeBlock,SURFACE_BIOME_REGIONS,surfaceBiomeOverlay,surfaceBiomeElevationPlan,surfaceBiomeFreshColumn} from '../../src/surface-regions/regions.mjs';
 import {terrainHeight} from '../../src/voxel.mjs';
 import {WORLD_MAX_Y} from '../../src/depth.mjs';
 test('four physically registered regions occupy multiple chunks on fixed seeds',()=>{
@@ -114,5 +114,35 @@ test('fresh-world elevation plans are atomic, bounded and never implicitly enabl
    }
   }
   assert.ok(raisedMountains>0,'mountain ridge should have physical raised columns');
+ }
+});
+
+test('atomic fresh columns produce real elevation with protected headroom',()=>{
+ for(const seed of [179,7,2201]){
+  let elevated=0;
+  for(const r of SURFACE_BIOME_REGIONS){
+   for(let dx=-24;dx<=24;dx+=12)for(let dz=-24;dz<=24;dz+=12){
+    const x=r.x+dx,z=r.z+dz,oldTop=terrainHeight(x,z,seed);
+    const baseline=(cx,y,cz)=>y>terrainHeight(cx,cz,seed)?0:y===terrainHeight(cx,cz,seed)?1:2;
+    const opts={enabled:true,profileIsFresh:true,readBaseline:baseline,
+      hasEdit:()=>false,isProtected:()=>false};
+    const plan=surfaceBiomeFreshColumn(x,z,seed,opts);
+    assert.ok(plan);
+    assert.equal(plan.name,r.name);
+    assert.deepEqual(plan,surfaceBiomeFreshColumn(x,z,seed,opts));
+    assert.ok(plan.writes.every(w=>w.from===baseline(w.x,w.y,w.z)));
+    assert.ok(plan.writes.every(w=>w.y>=oldTop-2&&w.y<=WORLD_MAX_Y-3));
+    assert.equal(surfaceBiomeFreshColumn(x,z,seed,{...opts,profileIsFresh:false}),null);
+    assert.equal(surfaceBiomeFreshColumn(x,z,seed,{...opts,hasEdit:()=>true}),null);
+    assert.equal(surfaceBiomeFreshColumn(x,z,seed,{...opts,isProtected:()=>true}),null);
+    assert.equal(surfaceBiomeFreshColumn(x,z,seed,{...opts,
+      readBaseline:(cx,y,cz)=>y===oldTop+1?3:baseline(cx,y,cz)}),null);
+    if(r.name==='mountain'&&plan.top>oldTop){
+      assert.ok(plan.writes.some(w=>w.y>oldTop));
+      elevated++;
+    }
+   }
+  }
+  assert.ok(elevated>0);
  }
 });
