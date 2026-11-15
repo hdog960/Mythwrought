@@ -15,7 +15,9 @@ export function planStoneRotunda(world,x,z){
     if(terrainHeight(px,pz,world.seed)!==h)return null;
     for(let dy=-2;dy<=7;dy++){
       const py=h+dy,baseline=baseBlock(px,py,pz,world.seed);
-      // An explicit edit is player-owned even when it equals natural terrain.\n      if(world.edits instanceof Map && world.edits.has(worldKey(px,py,pz)))return null;\n      if(world.get(px,py,pz)!==baseline)return null;
+      // An explicit edit is player-owned even when it equals natural terrain.
+      if(world.edits instanceof Map && world.edits.has(worldKey(px,py,pz)))return null;
+      if(world.get(px,py,pz)!==baseline)return null;
       if(dy===0&&baseline!==BLOCK.GRASS)return null;
       if(dy===-2&&baseline===BLOCK.AIR)return null;
       if(dy>0&&baseline!==BLOCK.AIR)return null;
