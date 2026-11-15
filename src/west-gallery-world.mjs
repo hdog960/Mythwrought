@@ -17,10 +17,14 @@ export function westGalleryWorld(world, origin=CAVE_CANDIDATE) {
       // A wider terminal chamber has a genuinely connected 3-block-wide approach.
       const throat=t>=12&&t<=14&&d>=-7&&d<=-4;
       const chamber=t>=9&&t<=17&&d>=-11&&d<=-7;
-      if(!throat&&!chamber)return previous.get(x,y,z);
+      // A second vaulted room turns east from the first, with an overlapping
+      // four-wide connector: a genuine explorable destination, not a sealed void.
+      const eastLink=t>=16&&t<=20&&d>=-10&&d<=-8;
+      const eastHall=t>=19&&t<=25&&d>=-14&&d<=-7;
+      if(!throat&&!chamber&&!eastLink&&!eastHall)return previous.get(x,y,z);
       const floor=floorAt(t);
       if(y===floor)return BLOCK.STONE;
-      if(y>floor&&y<=floor+4)return BLOCK.AIR;
+      if(y>floor&&y<=floor+(eastHall?6:4))return BLOCK.AIR;
       return previous.get(x,y,z);
     }
   };
@@ -38,5 +42,25 @@ export function westGalleryTraversal(world,origin=CAVE_CANDIDATE) {
     samples.push({x,y:feet,z,supported,headClear,bodyClear});
   }
   const failures=samples.filter(s=>!s.supported||!s.headClear||!s.bodyClear);
+  return {samples,failures,walkable:failures.length===0,bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
+}
+
+/** Player-body route from the west gallery into the second vaulted room.
+ * Samples every voxel step along the actual connecting centerline.
+ */
+export function westVaultTraversal(world,origin=CAVE_CANDIDATE) {
+  const reader=westGalleryWorld(world,origin),floorAt=caveRoute(world.seed,origin).floorAt;
+  const path=[];
+  for(let d=0;d>=-9;d--)path.push([13,d]);
+  for(let t=14;t<=22;t++)path.push([t,-9]);
+  for(let d=-10;d>=-13;d--)path.push([22,d]);
+  const samples=path.map(([t,d])=>{
+    const x=origin.x+t,z=origin.z+d, floor=floorAt(t),feet=floor+1;
+    const supported=reader.get(x,floor,z)!==BLOCK.AIR;
+    const headClear=reader.get(x,feet,z)===BLOCK.AIR&&reader.get(x,feet+1,z)===BLOCK.AIR;
+    const bodyClear=!collides(reader,x+.5,feet,z+.5);
+    return {x,y:feet,z,supported,headClear,bodyClear};
+  });
+  const failures=samples.filter(p=>!p.supported||!p.headClear||!p.bodyClear);
   return {samples,failures,walkable:failures.length===0,bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
 }
