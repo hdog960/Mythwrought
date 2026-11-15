@@ -105,3 +105,25 @@ export function findStoneRotundaSite(world,centerX=0,centerZ=0,{radius=128,step=
   }
   return null;
 }
+
+// Inspect the actual placed voxel grid, not merely a decorative template claim.
+// Each cardinal route must have supporting ground and two blocks of headroom.
+export function inspectStoneRotundaTraversal(world,plan){
+  if(!world||typeof world.get!=='function'||!plan||plan.kind!=='stone-rotunda'||
+     !Array.isArray(plan.origin)||plan.origin.length!==3||
+     !plan.origin.every(Number.isSafeInteger))return null;
+  const [x,h,z]=plan.origin;
+  const routes=[];
+  for(const [dx,dz] of [[0,-1],[0,1],[-1,0],[1,0]]){
+    const cells=[];
+    for(let distance=5;distance>=0;distance--){
+      const px=x+dx*distance,pz=z+dz*distance;
+      if(world.get(px,h,pz)===BLOCK.AIR||
+         world.get(px,h+1,pz)!==BLOCK.AIR||
+         world.get(px,h+2,pz)!==BLOCK.AIR)return null;
+      cells.push([px,h+1,pz]);
+    }
+    routes.push(cells);
+  }
+  return Object.freeze({center:[x,h+1,z],routes});
+}
