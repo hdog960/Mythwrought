@@ -202,3 +202,6 @@ function create(d){
 export function getM2Originals(){return DESIGNS.map(create);}
 export function getM2Original(id){return getM2Originals().find(b=>b.id===id)??null;}
 export const M2_ORIGINAL_DESIGN_IDS=Object.freeze(DESIGNS.map(d=>blueprintId(d.category,d.biome,d.size,d.index)));
+
+// External 1A-owned explicit coordinate tables may reuse this unchanged audited constructor.
+export function compileM2ArchitecturalSpec(spec){return create(spec);}
