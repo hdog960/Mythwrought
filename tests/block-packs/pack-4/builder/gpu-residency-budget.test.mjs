@@ -59,6 +59,11 @@ test('dense GPU preview budget fails closed on malformed mounts, ID aliases and 
  assert.throws(()=>planPack4StagingBudget([entry],()=>({
   ...realSource(176,2),id:160
  })),/mismatched physical ID/);
+ const corrupt=new Float32Array(10);corrupt[0]=NaN;
+ assert.throws(()=>planPack4StagingBudget([entry],()=>({
+  id:176,rotation:2,
+  previewMesh:{stride:10,opaque:corrupt,translucent:new Float32Array(0)}
+ })),/Non-finite original/);
  assert.throws(()=>planPack4StagingBudget([entry],realSource,{
   limits:{maxResidentBytes:2*1024*1024+1}
  }));
