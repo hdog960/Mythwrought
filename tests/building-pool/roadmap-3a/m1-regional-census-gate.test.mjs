@@ -5,10 +5,17 @@ import {createM1OriginalWorkshopPool} from '../../../src/building-pool/roadmap-3
 import {createM1RegionalPool} from '../../../src/building-pool/roadmap-3a/m1-regional-workshops.mjs';
 import {planLegacyMountRepairOptions} from '../../../src/building-pool/roadmap-3a/legacy-mount-repair-options.mjs';
 import {validateAuthoredPool} from '../../../src/building-pool/roadmap-3a/contract.mjs';
+import {validatePool as validateLegacyPool} from '../../../src/building-pool/roadmap-3a/legacy-validation.mjs';
+import {ASSET_CATALOG as LEGACY_ASSETS} from '../../../src/building-pool/roadmap-3a/legacy-assets.mjs';
 test('M1 census is 31 source-coordinate architectures / 79,226 cells, no approval or placement',()=>{
- const pool=[...createLegacyBlacksmithPool(),...createM1OriginalWorkshopPool(),...createM1RegionalPool()];
+ const legacy=createLegacyBlacksmithPool();
+ const newer=[...createM1OriginalWorkshopPool(),...createM1RegionalPool()];
+ const pool=[...legacy,...newer];
+ assert.equal(legacy.length,15);
+ assert.equal(validateLegacyPool(legacy,LEGACY_ASSETS).authored,15);
+ assert.equal(validateAuthoredPool(newer).authored,16);
  assert.equal(pool.length,31);
- assert.equal(validateAuthoredPool(pool).authored,31);
+ assert.equal(new Set(pool.map(b=>b.id)).size,31);
  assert.equal(pool.reduce((sum,b)=>sum+b.modules.reduce((n,m)=>n+m.cells.length,0),0),79226);
  const expected={'blacksmith':15,'armorer':4,'carpenter':4,'stonemason':4,'mining-workshop':4};
  assert.deepEqual(Object.fromEntries(Object.keys(expected).map(k=>[k,pool.filter(b=>b.type===k).length])),expected);
