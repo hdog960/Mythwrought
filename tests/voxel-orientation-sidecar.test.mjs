@@ -116,3 +116,35 @@ test('late asynchronous edit cannot erase a newer orientation or undo state',asy
  assert.equal(await pendingUndo,true);
  assert.equal(s.get(cell,4),2,'late success must preserve post-undo replacement');
 });
+
+test('legacy schema-1 restore without orientation metadata defaults safely and never mutates save',()=>{
+ const legacy={schema:1,seed:73,edits:[[1,2,3,4],[-1,0,2,0]]};
+ const before=JSON.stringify(legacy);
+ let reads=0;
+ const read=()=>{reads++;return 4;};
+ for(const absent of [undefined,null]){
+   const restored=restoreOrientationSidecar(absent,read);
+   assert.equal(restored.size(),0);
+   assert.equal(restored.get([1,2,3],4),0);
+ }
+ assert.equal(reads,0,'absent metadata must not require loaded world chunks');
+ assert.equal(JSON.stringify(legacy),before,'original schema-1 save stays byte-identical');
+});
+
+test('legacy recovery validates optional metadata against restored world and preserves input',()=>{
+ const legacy={schema:1,edits:[[1,2,3,4]]};
+ const original=JSON.stringify(legacy);
+ const records=[
+  {cell:[1,2,3],blockId:4,turns:3},
+  {cell:[4,2,3],blockId:4,turns:2},
+  {cell:[9,2,3],blockId:255,turns:1}
+ ];
+ const snapshot=JSON.stringify(records);
+ const restored=restoreOrientationSidecar(records,(x,y,z)=>x===1?4:0);
+ assert.equal(restored.get([1,2,3],4),3);
+ assert.equal(restored.get([4,2,3],4),0);
+ assert.equal(restored.size(),1);
+ assert.equal(JSON.stringify(records),snapshot);
+ assert.equal(JSON.stringify(legacy),original);
+ assert.throws(()=>restoreOrientationSidecar({},()=>4),TypeError);
+});
