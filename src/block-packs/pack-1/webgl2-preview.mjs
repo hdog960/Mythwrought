@@ -17,7 +17,8 @@ const VERT=[
  'float ca=cos(0.72),sa=sin(0.72),cp=cos(0.42),sp=sin(0.42);',
  'float xx=ca*p.x-sa*p.z,zz=sa*p.x+ca*p.z;',
  'float yy=cp*p.y-sp*zz,depth=sp*p.y+cp*zz;',
- 'gl_Position=vec4(xx*1.85/uAspect,yy*1.65,-depth*0.65,1.0);',
+ // Keep the full source model clear of the lower status overlay on 667x375 iPhone landscape.
+ 'gl_Position=vec4(xx*1.43/uAspect,yy*1.28,-depth*0.65,1.0);',
  'vUV=aUV;vLight=aLight;','}'
 ].join('\n');
 const FRAG=[
