@@ -359,8 +359,13 @@ export function raycast(world,eye,direction,maxDistance=7){
   if(len<1e-9)return null;
   // Pack 3's additive physical sidecar never replaces the canonical ray; the
   // already-authored Pack 2 sloped-water hit always competes at true distance.
-  const overlay=world?.pack3Runtime?.size?.()>0?
+  const pack3Target=world?.pack3Runtime?.size?.()>0?
     world.pack3Runtime.target(eye,direction,maxDistance):null;
+  const manual14Target=world?.manual14Layer?.size?.()>0?
+    world.manual14Layer.target(eye,direction,maxDistance):null;
+  const overlay=!pack3Target?manual14Target:
+    !manual14Target?pack3Target:
+    pack3Target.distance<=manual14Target.distance?pack3Target:manual14Target;
   const withPhysical=base=>{
     if(!overlay||(base&&base.distance<=overlay.distance+1e-8))return base;
     return {hit:overlay.cell,adjacent:overlay.normal.some(Boolean)?
@@ -486,6 +491,7 @@ export function collides(world,x,feet,z){
   // treat passable biome130 plants or Pack 2 water as solid full cubes.
   const body=[x-BODY_RADIUS,feet,z-BODY_RADIUS,x+BODY_RADIUS,feet+BODY_HEIGHT,z+BODY_RADIUS];
   if(world?.pack3Runtime?.size?.()>0 && !world.pack3Runtime.playerFits(body).fits)return true;
-  if(typeof world?.pack5Collision==='function' && world.pack5Collision(body))return true;
+  if(typeof world?.manual14Collision==='function'&&world.manual14Collision(body))return true;
+  if(typeof world?.pack5Collision==='function'&&world.pack5Collision(body))return true;
   return false;
 }

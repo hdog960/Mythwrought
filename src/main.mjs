@@ -26,6 +26,9 @@ import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup}
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
 import {installExplorationMap} from './exploration-map.mjs';
+import {MANUAL_FIVE_PACK_CATALOG,resolveManualFivePackAsset} from './builder-assets/manual-five-pack.mjs';
+import {createManual14SavedBridge} from './builder-assets/manual14-layer.mjs';
+import {meshManual14Chunk} from './builder-assets/manual14-mesh.mjs';
 import {createPack3LiveBridge,combinePack3ChunkMesh,isPack3BlockId} from './builder-assets/pack3-live.mjs';
 import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
 import {exportPack3Portable,inspectPack3Portable,restorePack3Portable} from './builder-assets/pack3-portable.mjs';
@@ -103,6 +106,23 @@ function start(){
   const chunks=new Map(),pending=new Map();
   const name=chunkKey;
   const player=newPlayer(world);
+  const manual14Ids=new Set(MANUAL_FIVE_PACK_CATALOG.filter(x=>x.pack===1||x.pack===4).map(x=>x.numericId));
+  const manual14ById=new Map(MANUAL_FIVE_PACK_CATALOG.filter(x=>manual14Ids.has(x.numericId))
+    .map(x=>[x.numericId,x]));
+  const manual14MeshCache=new Map();
+  let manual14=null,manual14Yaw=0,manual14Variant='lower';
+  function resetManual14ForWorld(){
+    // No mutation of legacy world ID storage: all authored manual 1/4 pieces
+    // reside in their own checked, seed-scoped construction sidecar.
+    manual14MeshCache.clear();
+    manual14=createManual14SavedBridge(world,localStorage,{rebuild:refreshManual14Cells});
+    world.manual14Layer=manual14.layer;
+    world.manual14Collision=box=>manual14.collision(box);
+    const stat=document.getElementById('manual14Status');
+    if(stat)stat.textContent=manual14.blocked??('Ready · '+manual14.layer.size()+
+      ' saved shaped Pack 1/4 pieces for seed '+world.seed);
+  }
+  resetManual14ForWorld();
   // Real Pack 5 geometry is opt-in; the production cube palette is unchanged.
   let pack5Builder=null,pack5Gpu=null,pack5Mode=false;
   function resetPack5ForWorld(){
@@ -241,9 +261,28 @@ function start(){
   }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
+  function manual14AtChunk(cx,cz,section){
+    const key=depthMeshKey(cx,cz,section);
+    if(manual14MeshCache.has(key))return manual14MeshCache.get(key);
+    const meshes=meshManual14Chunk(manual14.layer,cx,cz,section);
+    if(manual14MeshCache.size>=30)manual14MeshCache.delete(manual14MeshCache.keys().next().value);
+    manual14MeshCache.set(key,meshes);
+    return meshes;
+  }
+  function combineVertices(base,extra){
+    if(!extra.length)return base;
+    const combined=new Float32Array(base.length+extra.length);
+    combined.set(base);combined.set(extra,base.length);
+    return combined;
+  }
   function meshPlayableChunk(cx,cz,section){
     const original=section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section);
-    return combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
+    const pack3Mesh=combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
+    return combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
+  }
+  function meshPlayableWater(cx,cz,section){
+    return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
+      manual14AtChunk(cx,cz,section).transparent);
   }
   function refreshEditedMeshes(x,z,y=0){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
@@ -254,7 +293,7 @@ function start(){
         const key=depthMeshKey(cx,cz,section);
         if(!chunks.has(key))continue;
         const vertices=meshPlayableChunk(cx,cz,section);
-        const water=pack2WaterSectionVertices(world,cx,cz,section);
+        const water=meshPlayableWater(cx,cz,section);
         batch.push({key,cx,cz,section,vertices,water});
       }
     const ready=[];
@@ -283,13 +322,50 @@ function start(){
     const cx=chunkCoord(x),cz=chunkCoord(z),key=depthMeshKey(cx,cz,section);
     if(!chunks.has(key))return;
     const vertices=meshPlayableChunk(cx,cz,section);
-    const water=pack2WaterSectionVertices(world,cx,cz,section);
+    const water=meshPlayableWater(cx,cz,section);
     const buffers=uploadPack2Chunk(vertices,water);
     const old=chunks.get(key);
     chunks.set(key,{x:cx,z:cz,section,...buffers});
     deleteChunkBuffers(old);
     editMeshBatches++;
     lastEditMeshKeys=[key];
+  }
+  function refreshManual14Cells(cells){
+    if(!Array.isArray(cells)||cells.some(c=>!Array.isArray(c)||c.length!==3))
+      throw Error('Invalid mounted construction update batch');
+    // Stage all affected loaded sections first; partial GPU uploads are
+    // deleted before publication, and the saved layer rolls back if staging
+    // fails. Unloaded sections reconstruct from their verified seed sidecar.
+    manual14MeshCache.clear();
+    const unique=new Map();
+    for(const [x,y,z] of cells){
+      const section=sectionForY(y);
+      if(section===null)throw Error('Manual shaped piece outside playable depth');
+      const cx=chunkCoord(x),cz=chunkCoord(z),key=depthMeshKey(cx,cz,section);
+      if(chunks.has(key))unique.set(key,{key,cx,cz,section});
+    }
+    const ready=[];
+    try{
+      for(const item of unique.values()){
+        const vertices=meshPlayableChunk(item.cx,item.cz,item.section);
+        const water=meshPlayableWater(item.cx,item.cz,item.section);
+        ready.push({...item,...uploadPack2Chunk(vertices,water)});
+      }
+    }catch(error){
+      for(const item of ready)deleteChunkBuffers(item);
+      throw error;
+    }
+    for(const item of ready){
+      const old=chunks.get(item.key);
+      chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
+        buffer:item.buffer,count:item.count,
+        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+      deleteChunkBuffers(old);
+    }
+    if(ready.length){
+      editMeshBatches++;
+      lastEditMeshKeys=ready.map(x=>x.key);
+    }
   }
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
@@ -312,6 +388,42 @@ function start(){
     const physicalState=inspectBlockTarget(world,eye(),facing(),selected,player,
       isPack3BlockId(selected)?pack3Yaw:selectedRotation);
     const existingPack3=physicalState.hit?pack3.getAt(...physicalState.hit):null;
+    const existingManual14=physicalState.hit?manual14.layer.get(physicalState.hit):null;
+    if((mode==='place'&&manual14Ids.has(selected))||(mode==='mine'&&existingManual14)){
+      let result;
+      if(storageReadOnly)result={ok:false,reason:'Protected world read-only'};
+      else if(manual14.blocked)result={ok:false,reason:manual14.blocked};
+      else if(!physicalState.hit)result={ok:false,reason:physicalState.reason};
+      else if(mode==='place'&&!physicalState.canPlace)result={ok:false,reason:physicalState.reason};
+      else if(mode==='mine'&&!physicalState.canMine)result={ok:false,reason:'Cannot remove here'};
+      else if(mode==='mine'&&manual14.supportsLegacyCell(physicalState.hit))
+        result={ok:false,reason:'Remove attached pieces before removing their support'};
+      else if(mode==='mine')result=manual14.remove(physicalState.hit);
+      else {
+        const asset=manual14ById.get(selected);
+        const state=resolveManualFivePackAsset(asset.symbol,{
+          numericId:selected,orientation:manual14Yaw,
+          variant:asset.pack===1?manual14Variant:null
+        });
+        const placement={asset:asset.symbol,numericId:selected,
+          at:physicalState.adjacent,orientation:manual14Yaw,
+          ...(asset.pack===1?{variant:manual14Variant}:{})};
+        if(state.supportPolicy==='vertical-face')placement.supportAt=physicalState.hit;
+        result=manual14.placeMany([placement],{
+          playerBody:[player.x-.28,player.feet,player.z-.28,
+            player.x+.28,player.feet+1.78,player.z+.28]});
+      }
+      if(!result.ok){message(result.reason);return;}
+      message((mode==='mine'?'Removed ':'Placed ')+
+        (BLOCK_NAMES[existingManual14?.numericId??selected]||'shaped block')+
+        ' · physical save readback verified');
+      const stat=document.getElementById('manual14Status');
+      if(stat)stat.textContent=manual14.layer.size()+' physical blocks · verified separate save';
+      return;
+    }
+    if(mode==='mine'&&physicalState.hit&&manual14.supportsLegacyCell(physicalState.hit)){
+      message('This cell supports mounted Pack 1/4 objects. Remove attachments first.');return;
+    }
     if((mode==='place'&&isPack3BlockId(selected))||(mode==='mine'&&existingPack3)){
       let result;
       if(storageReadOnly)result={ok:false,reason:'Protected world read-only'};
@@ -415,7 +527,7 @@ function start(){
       const begin=performance.now();
       try{
         const data=meshPlayableChunk(x,z,section);
-        const water=pack2WaterSectionVertices(world,x,z,section);
+        const water=meshPlayableWater(x,z,section);
         const buffers=uploadPack2Chunk(data,water);
         pending.delete(k);gpuRetry.success(k);
         const old=chunks.get(k);
@@ -499,6 +611,8 @@ function start(){
       canvas.dataset.renderedMeshVertices=String([...chunks.values()].reduce((sum,c)=>sum+c.count,0));
       canvas.dataset.pack3PhysicalCount=String(pack3.runtime.size());
       canvas.dataset.pack3SelectedId=String(isPack3BlockId(selected)?selected:0);
+      canvas.dataset.manual14PhysicalCount=String(manual14.layer.size());
+      canvas.dataset.manual14SelectedId=String(manual14Ids.has(selected)?selected:0);
       for(const c of chunks.values()){
         gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);
         gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
@@ -850,6 +964,7 @@ function start(){
       if(world!==requestedWorld){renderer.dispose();return false;}
       pack5Builder=candidate;pack5Gpu=renderer;
       world.pack5Collision=box=>candidate.collision(box);
+      world.pack5Layer=candidate.layer;
       pack5Family.replaceChildren();
       for(const f of candidate.layer.catalog){
         const option=document.createElement('option');
@@ -1012,15 +1127,82 @@ function start(){
     const chosen=Number(biomeSelect.value);
     if(!BIOME130_REGISTERED_IDS.includes(chosen))return;
     selected=chosen;selectedRotation=Number(biomeRotation.value);
-    pack3Palette.clear();pack2Selection=null;world.nextPack2State=null;
+    manual14Select.value='';pack3Palette.clear();pack2Selection=null;world.nextPack2State=null;
     document.getElementById('pack2StateText').textContent='Select a Pack 2 block to adjust its state.';
     document.querySelectorAll('[data-block]').forEach(q=>{
       q.classList.remove('selected');q.setAttribute('aria-pressed','false');
     });
     message('Selected '+biome130Block(selected).name+' · PLACE to build, MINE to remove');
   });
+  const manual14Panel=document.createElement('div');
+  manual14Panel.className='looksetting';
+  manual14Panel.setAttribute('aria-label','Manual Block Packs 1 and 4');
+  const manual14Heading=document.createElement('h2');
+  manual14Heading.className='audit-title';
+  manual14Heading.textContent='MANUAL BLOCK PACKS 1 & 4 · 53 PHYSICAL VARIANTS';
+  const manual14Label=document.createElement('label');
+  manual14Label.htmlFor='manual14Select';manual14Label.textContent='Shaped construction material';
+  const manual14Select=document.createElement('select');
+  manual14Select.id='manual14Select';
+  const empty14=document.createElement('option');empty14.value='';
+  empty14.textContent='Select a physical Block Pack 1/4 asset';
+  manual14Select.append(empty14);
+  for(const pack of [1,4]){
+    const group=document.createElement('optgroup');
+    group.label=pack===1?'Pack 1 · masonry, stone, flora':'Pack 4 · windows, lights, furnishings';
+    for(const asset of MANUAL_FIVE_PACK_CATALOG.filter(x=>x.pack===pack)){
+      const option=document.createElement('option');
+      option.value=String(asset.numericId);
+      option.textContent=asset.numericId+' · '+(asset.name||asset.symbol);
+      group.append(option);
+    }
+    manual14Select.append(group);
+  }
+  const manual14RotateLabel=document.createElement('label');
+  manual14RotateLabel.htmlFor='manual14Rotate';
+  manual14RotateLabel.textContent='Shaped material orientation';
+  const manual14Rotate=document.createElement('select');
+  manual14Rotate.id='manual14Rotate';
+  for(const [i,name] of ['North','East','South','West'].entries()){
+    const option=document.createElement('option');option.value=String(i);option.textContent=name;
+    manual14Rotate.append(option);
+  }
+  const manual14UpperLabel=document.createElement('label');
+  manual14UpperLabel.htmlFor='manual14Upper';
+  const manual14Upper=document.createElement('input');
+  manual14Upper.type='checkbox';manual14Upper.id='manual14Upper';
+  manual14UpperLabel.append(manual14Upper,document.createTextNode(' Upper slab/stair variant (IDs 15/16)'));
+  const manual14Status=document.createElement('p');
+  manual14Status.id='manual14Status';manual14Status.className='controlhint';
+  manual14Status.setAttribute('role','status');
+  manual14Status.textContent='Shaped objects save separately by seed; original world save stays schema-1.';
+  manual14Panel.append(manual14Heading,manual14Label,manual14Select,
+    manual14RotateLabel,manual14Rotate,manual14UpperLabel,manual14Status);
+  const pack2Section=document.getElementById('pack2Materials')?.closest('.looksetting');
+  if(pack2Section?.parentElement)pack2Section.insertAdjacentElement('beforebegin',manual14Panel);
+  else help.querySelector('.helpbody')?.append(manual14Panel);
+  manual14Select.addEventListener('change',()=>{
+    const id=Number(manual14Select.value);
+    if(!manual14Ids.has(id))return;
+    selected=id;manual14Yaw=Number(manual14Rotate.value);
+    manual14Variant=manual14Upper.checked?'upper':'lower';
+    if(manual14Variant==='upper'&&id!==15&&id!==16){
+      manual14Upper.checked=false;manual14Variant='lower';
+    }
+    pack2Selection=null;updatePack2SelectionUI();biomeSelect.value='';
+    document.querySelectorAll('[data-block]').forEach(q=>{
+      q.classList.remove('selected');q.setAttribute('aria-pressed','false');
+    });
+    pack3Palette.clear();
+    manual14Status.textContent=manual14.blocked??('Selected '+BLOCK_NAMES[id]+
+      ' · '+manual14Yaw*90+'° · Return then use PLACE/MINE');
+  });
+  manual14Rotate.addEventListener('change',()=>{manual14Yaw=Number(manual14Rotate.value);});
+  manual14Upper.addEventListener('change',()=>{
+    manual14Variant=(manual14Upper.checked&&[15,16].includes(selected))?'upper':'lower';
+  });
   const pack3Palette=installPack3Palette(help,(id,yaw)=>{
-    selected=id;pack3Yaw=yaw;biomeSelect.value='';
+    selected=id;pack3Yaw=yaw;biomeSelect.value='';manual14Select.value='';
     pack2Selection=null;updatePack2SelectionUI();
     document.querySelectorAll('[data-block]').forEach(q=>{
       q.classList.remove('selected');q.setAttribute('aria-pressed','false');
@@ -1041,7 +1223,7 @@ function start(){
   });
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
     selected=Number(b.dataset.block);
-    biomeSelect.value='';pack3Palette.clear();
+    biomeSelect.value='';manual14Select.value='';pack3Palette.clear();
     pack2Selection=isPack2LiveId(selected)?pack2NormalizeState(selected):null;
     selectedRotation=0;
     document.querySelectorAll('[data-block]').forEach(q=>{
@@ -1222,7 +1404,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetPack5ForWorld();storageReadOnly=false;changed=false;
+    world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
     clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
@@ -1340,7 +1522,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetPack5ForWorld();changed=false;respawnPrototype();
+    world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();changed=false;respawnPrototype();
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
     message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
@@ -1361,7 +1543,7 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetPack5ForWorld();
+      world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();
       storageReadOnly=false;changed=false;respawnPrototype();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
@@ -1417,7 +1599,7 @@ function start(){
       if(!outcome.ok)throw Error(outcome.reason);
       const overlay=savePack2LiveWorld(localStorage,candidate);
       if(!overlay.ok)throw Error('Pack 2 sidecar not written; previous verified data retained: '+overlay.reason);
-      world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetPack5ForWorld();storageReadOnly=false;changed=false;
+      world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
@@ -1508,7 +1690,22 @@ function start(){
         player.yaw=Math.atan2(dx,dz);
         player.pitch=Math.atan2(dy,Math.hypot(dx,dz));
       },
-      block(x,y,z){return pack3.getAt(x,y,z)?.id??world.get(x,y,z);},
+      block(x,y,z){return manual14.layer.get([x,y,z])?.numericId??pack3.getAt(x,y,z)?.id??world.get(x,y,z);},
+      manual14Block(x,y,z){return manual14.layer.get([x,y,z])??null;},
+      placeManual14Fixture(x,y,z,id,yaw=0,variant='lower'){
+        const item=manual14ById.get(id);
+        if(!item)throw Error('Unknown Pack 1/4 ID');
+        const entry={asset:item.symbol,numericId:id,at:[x,y,z],orientation:yaw,
+          ...(item.pack===1?{variant}:{})};
+        const result=manual14.placeMany([entry]);
+        if(!result.ok)throw Error(result.reason);
+        return {ok:true,id,at:[x,y,z],worldSchema:world.save().schema};
+      },
+      removeManual14Fixture(x,y,z){
+        const result=manual14.remove([x,y,z]);
+        if(!result.ok)throw Error(result.reason);
+        return result;
+      },
       pack3Block(x,y,z){return pack3.getAt(x,y,z);},
       placePack3Fixture(x,y,z,id,yaw=0){
         const result=pack3.mutate({mode:'place',cell:[x,y,z],id,orientation:yaw,
@@ -1588,6 +1785,7 @@ function start(){
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
         frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats(),
         gpuRetry:gpuRetry.stats(),pack3PhysicalBlocks:pack3.runtime.size(),
+        manual14PhysicalBlocks:manual14.layer.size(),
         graphics:{lost:graphicsLost,lossCount:graphicsLossCount,
           restoredCount:graphicsRestoreCount,shaderReady:Boolean(program&&skyProgram)}};}
     });

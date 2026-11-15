@@ -6,6 +6,8 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,
   pack2BodyIntersects,pack2NormalizeState} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,isBiome130BlockId} from './biome130-registry.mjs';
 import {PACK3_BUILDER_IDS,PACK3_BUILDER_SYMBOLS,resolvePack3BuilderAsset} from './builder-assets/pack3.mjs';
+import {MANUAL_FIVE_PACK_CATALOG} from './builder-assets/manual-five-pack.mjs';
+const manual14Ids=new Set(MANUAL_FIVE_PACK_CATALOG.filter(x=>x.pack===1||x.pack===4).map(x=>x.numericId));
 const manualPack3SymbolById=new Map(PACK3_BUILDER_IDS.map((id,i)=>[id,PACK3_BUILDER_SYMBOLS[i]]));
 const manualPack3Shape=(id,rotation)=>resolvePack3BuilderAsset(manualPack3SymbolById.get(id),rotation).shape.boxes;
 
@@ -17,7 +19,9 @@ export const BLOCK_NAMES=Object.freeze({
   [BLOCK.ORE]:'ore',[BLOCK.LEAVES]:'leaf canopy',[BLOCK.DEEPSTONE]:'deepstone',
   ...Object.fromEntries(BIOME130_REGISTERED_IDS.map(id=>[id,biome130Block(id).name])),
   ...PACK2_LIVE_NAMES,
-  ...Object.fromEntries(PACK3_BUILDER_IDS.map((id,i)=>[id,resolvePack3BuilderAsset(PACK3_BUILDER_SYMBOLS[i]).name]))
+  ...Object.fromEntries(PACK3_BUILDER_IDS.map((id,i)=>[id,resolvePack3BuilderAsset(PACK3_BUILDER_SYMBOLS[i]).name])),
+  ...Object.fromEntries(MANUAL_FIVE_PACK_CATALOG.filter(x=>manual14Ids.has(x.numericId))
+    .map(x=>[x.numericId,x.name??x.symbol]))
 });
 
 export function intersectsPlayerBlock(player,cell,selected=BLOCK.STONE,rotation=0,pack2State=null){
@@ -40,14 +44,17 @@ export function inspectBlockTarget(world,eye,direction,selected,player,rotation=
     distance:null,block:BLOCK.AIR,reason:'Look at a nearby block'};
   const hit=target.hit,adjacent=target.adjacent;
   const physicalPack3=world?.pack3Runtime?.get?.(hit);
-  const block=physicalPack3?.id??world.get(...hit);
+  const physicalManual14=world?.manual14Layer?.get?.(hit);
+  const block=physicalManual14?.numericId??physicalPack3?.id??world.get(...hit);
   const canMine=block!==BLOCK.AIR&&hit[1]>=WORLD_MIN_Y&&hit[1]<=WORLD_MAX_Y;
   let reason='';
   if(!adjacent)reason='No free space for placement';
   else if(adjacent[1]<WORLD_MIN_Y||adjacent[1]>WORLD_MAX_Y)reason='Outside editable height';
   else if(!BUILD_MATERIALS.includes(selected)&&
-    !(world?.pack3Runtime&&manualPack3SymbolById.has(selected)))reason='Choose a building material';
-  else if(world.get(...adjacent)!==BLOCK.AIR||world?.pack3Runtime?.get?.(adjacent))
+    !(world?.pack3Runtime&&manualPack3SymbolById.has(selected))&&
+    !(world?.manual14Layer&&manual14Ids.has(selected)))reason='Choose a building material';
+  else if(world.get(...adjacent)!==BLOCK.AIR||world?.pack3Runtime?.get?.(adjacent)||
+    world?.manual14Layer?.get?.(adjacent)||world?.pack5Layer?.cell?.(adjacent))
     reason='Placement space occupied';
   else if(intersectsPlayerBlock(player,adjacent,selected,rotation,
     world.nextPack2State?.id===selected?world.nextPack2State:null))reason='Cannot place inside the player';
@@ -63,6 +70,8 @@ export function applyBlockAction(world,eye,direction,mode,selected,player,rebuil
   if(mode==='place'&&!state.canPlace)return {ok:false,reason:state.reason};
   if(world?.pack3Runtime?.get?.(state.hit))
     return {ok:false,reason:'Physical Pack 3 objects require the verified overlay action'};
+  if(world?.manual14Layer?.get?.(state.hit)||manual14Ids.has(selected))
+    return {ok:false,reason:'Physical manual 1/4 objects require the verified sidecar action'};
   if(mode==='place'&&manualPack3SymbolById.has(selected))
     return {ok:false,reason:'Physical Pack 3 placement requires a verified separate sidecar'};
   const cell=mode==='mine'?state.hit:state.adjacent;
