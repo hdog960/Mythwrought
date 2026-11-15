@@ -33,7 +33,17 @@ export function eastGalleryTrace(world,origin=CAVE_CANDIDATE){
       headroom:reader.get(x,feet,z)===BLOCK.AIR&&reader.get(x,feet+1,z)===BLOCK.AIR,
       bodyClear:!collides(reader,x+.5,feet,z+.5)});
   }
-  return {samples,walkable:samples.every(p=>p.supported&&p.headroom&&p.bodyClear),
+  const transitions=[];
+  for(let i=1;i<samples.length;i++){
+    const a=samples[i-1],b=samples[i];
+    transitions.push({from:i-1,to:i,
+      stepValid:Math.abs(a.feet-b.feet)<=1,
+      bodyClear:!collides(reader,(a.x+b.x)/2+.5,Math.max(a.feet,b.feet),(a.z+b.z)/2+.5)});
+  }
+  const failures=samples.filter(p=>!p.supported||!p.headroom||!p.bodyClear);
+  const blockedTransitions=transitions.filter(p=>!p.stepValid||!p.bodyClear);
+  return {samples,transitions,failures,blockedTransitions,
+    walkable:failures.length===0&&blockedTransitions.length===0,
     anchor:{x:origin.x+anchor,y:floor+1,z:origin.z+8},
     chamber:{x:origin.x+anchor+8,y:floor+1,z:origin.z+8}};
 }
