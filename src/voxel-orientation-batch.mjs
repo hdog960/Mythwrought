@@ -26,6 +26,11 @@ export function applyOrientedVoxelBatch({edits,readBlock,writeBlock,orientation,
     try {
       const result=applyOrientedVoxelEdit({...edit,readBlock,writeBlock,orientation});
       if(result.changed) receipt.push({cell:[...edit.cell],before:result.before,after:result.after});
+      else if(result.before!==edit.nextBlockId) {
+        // A rejected write is a stopped batch, never a successful no-op.
+        // Earlier verified changes remain in the receipt for guarded recovery.
+        return {ok:false,failedIndex:index,receipt,reason:'write-rejected'};
+      }
     } catch(cause) {
       // Earlier verified writes remain committed. Never pretend this was atomic.
       return {ok:false,failedIndex:index,receipt,cause};
