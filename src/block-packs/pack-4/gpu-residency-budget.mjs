@@ -38,6 +38,8 @@ function bytesFor(asset){
      !(mesh.translucent instanceof Float32Array)||
      mesh.opaque.length%10||mesh.translucent.length%10)
     throw new TypeError('Pack 4 GPU budget requires original 10-float mesh streams');
+  if(!mesh.opaque.every(Number.isFinite)||!mesh.translucent.every(Number.isFinite))
+    throw new TypeError('Non-finite original Pack 4 GPU mesh data');
   const bytes=mesh.opaque.byteLength+mesh.translucent.byteLength;
   if(!Number.isSafeInteger(bytes)||bytes<=0)
     throw new TypeError('Invalid Pack 4 original GPU mesh byte size');
