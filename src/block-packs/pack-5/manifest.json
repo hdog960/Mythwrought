@@ -4,7 +4,7 @@
   "pack": 5,
   "gate": "v0.10 Gate A",
   "integration": "NOT INTEGRATED",
-  "status": "M1–M5: all 18 original physical families authored as isolated CANDIDATES; source-exact focused native Node 156/156 PASS and genuine Chromium native ES module WebGL2 previews 36/36 PASS; creator art/physical-iPhone, source-served HTTP, runtime ID/save/shape and merge/deploy approvals OPEN.",
+  "status": "M1–M5: 18/18 physically authored CANDIDATE families; M6 22 genuine cross-family checks PASS; full isolated native Node 178/178 PASS and native ESM Chromium WebGL2 36/36 PASS. Production IDs/saves/HTTP/mobile/creator art/merge/deploy remain OPEN.",
   "baseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
   "checkpoint": "006",
   "coordinationIssues": [
@@ -425,13 +425,13 @@
   ],
   "candidateFamilies": 18,
   "testEvidence": {
-    "nativeNode": "156/156 PASS, 0 skipped/fail, genuine native Node 22.16.0 against remote Git blob-matched M0–M5 source modules and all focused native test files, including 24 standalone M5 special-fixture cases and 12 additional M5 fixture tests; candidate-only manifest statuses checked. The local manifest metadata was older than this committed manifest; its 18 candidate/0 ID invariants matched.",
+    "nativeNode": "178/178 native Node 22.16.0 source-only Pack 5 cases PASS, 0 failed/skipped: 156 original M0–M5 and 22 M6 cross-family cases. All 7 original candidate physical source modules and M0–M5 test files Git blob checked; M6 file Git blob 5395171b45d86dc28c56c0c40b534526d4b2eb57 matches locally executed file. Local manifest metadata was older but 18-candidate/no-ID policy matches.",
     "pixelPreview": "6 genuine Chromium 144 Canvas2D screenshots, 667x375/844x390/932x430, rotations 0/1; six unique per-asset panel pixel hashes per screenshot and rotation hash changes; not WebGL2",
     "geometryRepair": "Fired-brick masonry courses now physically cover all four lateral faces; 42/53 physical-box parts, 504/636 preview triangles, 1008/1272 preview vertices",
-    "webgl2": "36/36 PASS authentic Chromium native ES-module WebGL2 preview captures on source-exact gallery modules, all six modes m1,m2,m3,m3b,m4,m5 across 667x375,844x390,932x430 and rotations 0/1. Software OpenGL/Xvfb is not a real iPhone GPU or production renderer.",
+    "webgl2": "36/36 genuine Chromium native data-URL ES-module WebGL2 captures PASS on exact source gallery modules: six modes m1,m2,m3,m3b,m4,m5 at 667x375,844x390,932x430 rotations 0/1. No HTTP-served/physical iPhone/device GPU certification.",
     "screenshots": "36/36 genuine native ES-module Chromium/WebGL2 visual screenshots verified: 6 M5 show 6 distinct physical variant panels each and 30 prior galleries reexecuted on the same source. Nonblank panel readbacks, mobile viewport framing and rotation distinctions pass; no creator visual sign-off.",
-    "production": "No persistent numeric IDs, no live central registration, no production schema-1 writes, no shared engine/CI/other pack changes, no world placement/merge/deploy or creator art/real iPhone Gate A approval. Actual localhost source-served gallery previously rejected by browser ERR_BLOCKED_BY_ADMINISTRATOR.",
-    "acceptanceDossier": "src/block-packs/pack-5/M5_ACCEPTANCE.md",
+    "production": "M6 isolated cross-family readiness PASS only. Production central ID registry and widening, schema-1 saves, real game renderer/physics/player placement, HTTP-served gallery, physical iPhone performance, creator art approval, Gate A and v0.11 all NOT approved; never merge/deploy or alter other pack/automation/shared systems without separate explicit authorization.",
+    "acceptanceDossier": "src/block-packs/pack-5/M6_ACCEPTANCE.md (M1–M5 dossiers also remain authoritative for each candidate milestone)",
     "browserRunner": "tests/block-packs/pack-5/esm-webgl-browser.py modes m1,m2,m3,m3b,m4,m5. 36/36 genuine Chromium WebGL2 view captures across all 6 original source-preview galleries this session; native offline data URL ES modules only, HTTP-served localhost blocked.",
     "browserGalleryDefect": "Fixed clipped/oversized WebGL2 canvas and edge-on wall preview in Pack 5-owned gallery CSS and shader only",
     "m2": "8 original physical residential variants; genuine 2-cell beds with per-part support, accurate collider union, modeled book spines now visible beyond shelves, no storage/sleeping gameplay. 6 fresh genuine Chromium native ES module WebGL2 captures across 667x375,844x390,932x430 and rotations 0/1, panel hashes pass",
@@ -441,7 +441,8 @@
     "m3bPreview": "6 original physical workshop variants source-authored and drawn in 6/6 genuine native ES-module Chromium WebGL2 landscape views, with unique nonblank GPU pixel fingerprints and rotation changes; per-cell 18–23 boxes and 216–276 unculled source triangles, not real iPhone GPU timings",
     "m4": "6 original source-authored physical M4 variants across 091 Desks & Lecterns, 092 Carpets & Rugs (a genuine atomic 2-cell runner with per-cell floor support), 093 Altars & Pedestals; 15 native Node tests and real native ES-module Chromium WebGL2 six-view screenshot acceptance pass; source-only; not live",
     "m5": "M5 94 heavy 2-cell gate/portcullis, 95 ceiling-supported chandeliers, 96 reinforced 2-cell stable divider/dry hollow feed trough: 6 unique physical variants, 24 source-native fixture regressions plus 12 additional M5 fixture cases, 6/6 native ES-module/WebGL2 rotated mobile-landscape preview screenshots PASS. No opening, lighting, animal, fluid, inventory mechanics or production placement.",
-    "m5Preview": "6/6 genuine Chromium native ES-module/WebGL2 screenshots 667x375,844x390,932x430 rotations 0/1, six separately rendered and distinct physical variants; no source-served HTTP/physical iPhone/production certification."
+    "m5Preview": "6/6 genuine Chromium native ES-module/WebGL2 screenshots 667x375,844x390,932x430 rotations 0/1, six separately rendered and distinct physical variants; no source-served HTTP/physical iPhone/production certification.",
+    "m6": "M6 cross-family: 22/22 original native Node PASS; all 18 family registry variants, 36 distinct authored variants, mixed adjacency, multi-cell atomic conflicts/removal, ceiling vs floor support, wall rotation support, physical partial collisions, mixed ray targeting, fixture-only snapshots and rollback, per-occupied-cell source mesh budget and disjoint neighboring physical shape extents. NOT production integration."
   },
   "preview": {
     "webgl": "tests/block-packs/pack-5/architectural-gallery.html",
