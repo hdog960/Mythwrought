@@ -56,8 +56,26 @@ export function surfaceBiomeBlock(x,y,z,seed=179,{enabled=false}={}){
  if(y>top)return null; // Never erase existing legacy terrain or cave entrances.
  // Preserve original stone foundation, caves and deep substrate: caller must
  // apply only to unedited, previously solid topsoil and never to cave AIR.
- // Only offer a bounded surface veneer; never replace the cave-bearing foundation.\n if(y<top-2)return null;\n const id=y===top?r.surface:r.subsoil;
+ // Only offer a bounded surface veneer; never replace the cave-bearing foundation.
+ if(y<top-2)return null;
+ const id=y===top?r.surface:r.subsoil;
  if(!isBiome130BlockId(id)||!biome130Block(id).solid)
    throw Error('Unregistered or non-solid surface material '+id);
  return id;
+}
+
+// Safe opt-in adapter for a future new-world terrain reader. Null means
+// defer to the unchanged existing world; never manufacture AIR or erase edits.
+// Caller supplies the exact pre-overlay natural/landmark voxel and edit status.
+export function surfaceBiomeOverlay(x,y,z,seed=179,{
+  enabled=false,baseline,hasEdit=false
+}={}){
+  if(!enabled||hasEdit||!Number.isInteger(baseline)||baseline===0)return null;
+  const candidate=surfaceBiomeBlock(x,y,z,seed,{enabled:true});
+  if(candidate===null)return null;
+  // Only recolor already-solid legacy topsoil. New raised geometry requires
+  // a separately version-gated terrain reader with collision/save acceptance.
+  const legacyTop=terrainHeight(x,z,seed);
+  if(y>legacyTop||y<legacyTop-2)return null;
+  return candidate;
 }
