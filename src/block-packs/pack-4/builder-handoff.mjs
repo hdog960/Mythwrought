@@ -128,7 +128,14 @@ export function resolvePack4BuilderBlueprint(blueprint,{
  const used=new Set(),resolved=[];
  for(const row of rows){
   if(typeof row?.asset!=='string'||!row.asset.startsWith('pack4:'))continue;
-  const placement=pack4BuilderPlacement(row,{
+  // Older theoretical roadmaps explicitly use "none"/"unresolved" when
+  // the physical shape did not exist. Supply geometry in preview orientation
+  // zero, but flag this as unapproved for final mounted construction.
+  const facing=row.orientation??row.facing;
+  const unspecified=facing===undefined||facing===null||
+    ['none','unresolved','up','down'].includes(facing);
+  const previewRow=unspecified?{...row,orientation:'north'}:row;
+  const placement=pack4BuilderPlacement(previewRow,{
    candidateId:row.candidateId??variantByRef[row.asset]??null
   });
   const key=cellKey(placement.at);
@@ -138,9 +145,8 @@ export function resolvePack4BuilderBlueprint(blueprint,{
     fixed.has(cellKey(placement.supportAt));
   if(requireSupport&&!supported)
    throw Error('Missing real fixed support for Pack4 '+placement.asset+' at '+key);
-  const provenance=row.orientationProvenance??
-   (row.orientation!==undefined||row.facing!==undefined?
-    'authored':'default-preview-only');
+  const provenance=unspecified?'default-preview-only':
+   row.orientationProvenance??'authored';
   resolved.push(Object.freeze({...placement,supportVerified:supported,
    orientationProvenance:provenance,
    orientationRequiresReview:provenance==='default-preview-only'}));

@@ -76,7 +76,7 @@ jobs:
         run: |
           set -euo pipefail
           node tests/block-packs/pack-4/verify-final.mjs --node-only 2>&1 | tee artifacts/pack-4/native.log
-      - name: Verify full physical Pack 4 building handoff (11 native cases)
+      - name: Verify full physical Pack 4 building handoff (12 native cases)
         working-directory: combined
         shell: bash
         run: |

@@ -26,6 +26,16 @@ test('Roadmap 3 nested [x,y,z,ref] modules resolve hollow chimney and mounted fi
  assert.equal(p.orientationReviewCount,3);
  assert.ok(p.placements.every(x=>x.physical.collision.length>0));
 });
+test('pre-existing none/unresolved builder orientation remains visibly unapproved, not an error or fake physical approval',()=>{
+ const resolved=resolvePack4BuilderBlueprint({placements:[
+  {at:[2,7,3],asset:'pack4:063',orientation:'none'},
+  {at:[2,2,3],asset:'pack4:064',orientation:'unresolved'}
+ ]});
+ assert.equal(resolved.resolvedCount,2);
+ assert.equal(resolved.orientationReviewCount,2);
+ assert.deepEqual(resolved.placements.map(x=>x.rotation),[0,0]);
+ assert.ok(resolved.placements.every(x=>x.orientationRequiresReview));
+});
 test('Roadmap 4 authored facing and Roadmap 1 authored orientation remain exact',()=>{
  const p=resolvePack4BuilderBlueprint({cells:[
   {at:[0,2,3],asset:'pack4:030',facing:'west'}
