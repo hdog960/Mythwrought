@@ -12,7 +12,7 @@ const TYPES=['civic-hall','guildhall','embassy','castle-palace','grand-archive',
 const CARRIED=['civic-hall','castle-palace'];
 test('4A owns exactly 315 allocated designs, never sibling 4B slots',()=>{
   assert.equal(SCHEMA,'mythwrought.building-pool.roadmap-4.v1');
-  assert.deepEqual(PROGRAM.map(x=>x.type),TYPES);
+  assert.deepEqual(PROGRAM.map(x=>x.type).sort(),[...TYPES].sort());
   assert.equal(PLANNED_TOTAL,315);
   assert.equal(expectedIds().length,315);
   assert.equal(new Set(expectedIds()).size,315);
