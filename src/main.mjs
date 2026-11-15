@@ -1266,22 +1266,29 @@ function start(){
           throw Error('Invalid local-only Pack 5 dense fixture request');
         const old=pack5Builder.snapshot();
         const x=Math.floor(player.x)+4,z=Math.floor(player.z)+4;
-        let added=0;
+        let added=0,heightTotal=0;
         try{
           for(let i=0;i<count;i++){
             const px=x+i%10*2,pz=z+Math.floor(i/10)*2;
-            // Do not mine or replace live terrain for a stress fixture.
-            // Original seed-landmarks can occupy the 18-high plane.
+            // Highest genuine solid-to-air transition: bricks sit on the
+            // untouched seed terrain rather than floating above the camera.
             let accepted=false;
-            for(let y=19;y>=14;y--){
-              if(world.get(px,y,pz)!==0)continue;
+            for(let y=19;y>=1;y--){
+              if(world.get(px,y,pz)!==0||world.get(px,y-1,pz)===0)continue;
               const result=pack5Builder.layer.place('pack5:080',[px,y,pz],i%4);
-              if(result.ok){accepted=true;break;}
+              if(result.ok){accepted=true;heightTotal+=y;break;}
             }
-            if(!accepted)throw Error('No empty test cell inside world envelope');
+            if(!accepted)throw Error('No supported, empty test cell');
             added++;
           }
           pack5Builder.save();
+          // Local-only test camera, aimed at actual authored rendered bricks.
+          // No player position, terrain edits or touch controls are changed.
+          const tx=x+9.5,tz=z+6.5,ty=heightTotal/count+.6;
+          const dx=tx-player.x,dz=tz-player.z,dy=ty-(player.feet+1.55);
+          player.yaw=Math.atan2(dx,dz);
+          player.pitch=Math.max(-MAX_PITCH,
+            Math.min(MAX_PITCH,Math.atan2(dy,Math.hypot(dx,dz))));
         }catch(error){
           pack5Builder.layer.restore(old);
           throw error;
