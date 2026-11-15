@@ -473,5 +473,10 @@ export function collides(world,x,feet,z){
                z+BODY_RADIUS>bz+box[2]+e&&z-BODY_RADIUS<bz+box[5]-e)return true;
           }
         }
+  // Additional source-owned, seed-bound physical overlays are additive; never
+  // treat passable biome130 plants or Pack 2 water as solid full cubes.
+  const body=[x-BODY_RADIUS,feet,z-BODY_RADIUS,x+BODY_RADIUS,feet+BODY_HEIGHT,z+BODY_RADIUS];
+  if(world?.pack3Runtime?.size?.()>0 && !world.pack3Runtime.playerFits(body).fits)return true;
+  if(typeof world?.pack5Collision==='function' && world.pack5Collision(body))return true;
   return false;
 }

@@ -4,7 +4,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,VoxelWorld,raycast,collides} from '../src/voxel.mjs';
 import {BIOME130_REGISTERED_IDS,BIOME130_REGISTERED_SYMBOLS,biome130Block} from '../src/biome130-registry.mjs';
-import {PACK3_BUILDER_SYMBOLS,PACK3_BUILDER_IDS} from '../src/builder-assets/pack3.mjs';
+import {PACK3_BUILDER_SYMBOLS,PACK3_BUILDER_IDS,resolvePack3BuilderAsset} from '../src/builder-assets/pack3.mjs';
+import {PACK2_LIVE_IDS} from '../src/pack2-integration.mjs';
 import {createPack3LiveBridge} from '../src/builder-assets/pack3-live.mjs';
 import {intersectsPlayerBlock,inspectBlockTarget,BUILD_MATERIALS,BLOCK_NAMES} from '../src/blocks.mjs';
 const storage=()=>{const m=new Map();return {
@@ -28,9 +29,12 @@ test('IDs, symbolic names and materials remain disjoint after automations added 
  assert.ok(BIOME130_REGISTERED_IDS.every(id=>id>255&&!PACK3_BUILDER_IDS.includes(id)));
  assert.ok(BIOME130_REGISTERED_SYMBOLS.every(x=>x.startsWith('biome130:')));
  assert.ok(PACK3_BUILDER_SYMBOLS.every(x=>x.startsWith('pack3:')));
- assert.equal(BUILD_MATERIALS.length,65,'Preserve generic biome130 + legacy list for VoxelWorld.set');
- assert.ok(PACK3_BUILDER_IDS.every(id=>!BUILD_MATERIALS.includes(id)&&BLOCK_NAMES[id]?.length>0),
-  'Physical Pack 3 assets register only through the separate placement bridge');
+ assert.equal(BUILD_MATERIALS.length,5+BIOME130_REGISTERED_IDS.length+PACK2_LIVE_IDS.length,
+  'Preserve legacy and automation materials while Pack 2 physical assets remain separately supported');
+ assert.ok(PACK3_BUILDER_IDS.every(id=>!BUILD_MATERIALS.includes(id)),
+  'Physical Pack 3 assets must not be passed to bare VoxelWorld.set');
+ assert.ok(PACK3_BUILDER_SYMBOLS.every(symbol=>resolvePack3BuilderAsset(symbol).name.length>0),
+  'Pack 3 authoring names resolve from the separate builder source');
  assert.ok(BIOME130_REGISTERED_IDS.every(id=>BUILD_MATERIALS.includes(id)&&BLOCK_NAMES[id]?.length>0));
 });
 test('shape ray targeting preserves biome130 solids and their physical rotation in a Pack 3 world',()=>{
