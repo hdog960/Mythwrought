@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
 import {WORLD_MIN_Y} from '../src/depth.mjs';
-import {descentWorld,descentRoute,descentEvidence} from '../src/underground-switchback-descent.mjs';
+import {descentWorld,descentRoute,descentEvidence,descentConnectivity} from '../src/underground-switchback-descent.mjs';
 for(const seed of [179,1,2026,-77])test('four depth bands have solid floors and two-block air: '+seed,()=>{
   const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
   const bands=descentEvidence(world);
@@ -24,4 +24,27 @@ test('legacy terrain and unopened surface floor are untouched',()=>{
   const world=new VoxelWorld(179),reader=descentWorld(world);
   for(const [x,y,z] of [[192,-3,192],[192,0,192],[208,8,208],[220,12,220]])
     assert.equal(reader.get(x,y,z),world.get(x,y,z));
+});
+
+for(const seed of [179,1,2026,-77])test('ordered four-band descent connectivity '+seed,()=>{
+  const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  const audit=descentConnectivity(world);
+  assert.equal(audit.connected,true,JSON.stringify(audit.failures.slice(0,5)));
+  assert.equal(audit.bands.length,4);
+  assert.ok(audit.bands.every(n=>n>30));
+  assert.equal(audit.surfaceConnected,false);
+  assert.equal(JSON.stringify(world.save()),before);
+});
+test('player-edited obstruction makes full-depth route fail',()=>{
+  const world=new VoxelWorld(179),p=descentRoute()[350];
+  assert.equal(world.set(p.x,p.feet,p.z,BLOCK.WOOD),true);
+  const audit=descentConnectivity(world);
+  assert.equal(audit.connected,false);
+  assert.ok(audit.failures.some(f=>f.reason==='blocked-or-unsupported'));
+});
+test('edited missing floor makes full-depth route fail',()=>{
+  const world=new VoxelWorld(179),p=descentRoute()[550];
+  assert.equal(world.set(p.x,p.floor,p.z,BLOCK.AIR),true);
+  const audit=descentConnectivity(world);
+  assert.equal(audit.connected,false);
 });
