@@ -16,7 +16,7 @@ function selectScope() {
     const changed = execFileSync('git',
       ['diff', '--no-renames', '--name-only', '-z', `${base}...HEAD`],
       { maxBuffer: 16 * 1024 * 1024 });
-    const paths = changed.toString('utf8').split('\\0').filter(Boolean);
+    const paths = changed.toString('utf8').split('\0').filter(Boolean);
     return classifyPaths(paths);
   } catch {
     // Never silently skip production verification on missing history/errors.
@@ -25,4 +25,4 @@ function selectScope() {
 }
 
 const scope = selectScope();
-process.stdout.write(`mode=${scope.mode}\\nlanes=${scope.lanes.join(',')}\\nreason=${scope.reason}\\n`);
+process.stdout.write(`mode=${scope.mode}\nlanes=${scope.lanes.join(',')}\nreason=${scope.reason}\n`);
