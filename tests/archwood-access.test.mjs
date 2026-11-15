@@ -49,3 +49,38 @@ test('rejected stair write restores all bridge and stair edits',()=>{
  assert.equal(placeArchwoodAccess(guarded,p),false);
  assert.deepEqual(w.save(),before);
 });
+
+test('cross-chunk archwood approach cells remain unique and save-stable',()=>{
+ const w=new VoxelWorld(179);
+ let p=null;
+ // Scan only chunk-boundary sites; fail loudly if the feature cannot be placed.
+ for(let x=-96;x<=96&&!p;x++)for(let z=-96;z<=96;z++){
+  if(x%CHUNK_SIZE!==0 && (x+6)%CHUNK_SIZE!==0)continue;
+  p=planArchwoodAccess(w,x,z);
+  if(p)break;
+ }
+ assert.ok(p,'no chunk-boundary archwood access candidate exists');
+ const all=[...p.tree.cells,...p.cells],keys=all.map(c=>c.slice(0,3).join(','));
+ assert.equal(new Set(keys).size,keys.length,'bridge and access must never overlap');
+ const touchedChunks=new Set(all.map(([x,,z])=>Math.floor(x/CHUNK_SIZE)+','+Math.floor(z/CHUNK_SIZE)));
+ assert.ok(touchedChunks.size>=2,'fixture must cross a real chunk boundary');
+ const before=w.save();
+ assert.equal(placeArchwoodAccess(w,p),true);
+ const restored=VoxelWorld.restore(w.save());
+ for(const [x,y,z,id] of all)assert.equal(restored.get(x,y,z),id);
+ assert.equal(restored.save().schema,before.schema,'preserve save schema');
+});
+
+test('stale plans and edited approach headroom cannot overwrite player edits',()=>{
+ const w=new VoxelWorld(179),p=site(w);
+ assert.ok(p,'fixed seed must provide a valid archwood approach');
+ const [x,y,z]=p.cells[0];
+ const changed={...p,cells:p.cells.slice(1)};
+ assert.equal(placeArchwoodAccess(w,changed),false,'truncated stair plans rejected');
+ const before=w.save();
+ w.set(x,y+1,z,BLOCK.CRYSTAL);
+ const edited=w.save();
+ assert.equal(placeArchwoodAccess(w,p),false);
+ assert.deepEqual(w.save(),edited);
+ assert.notDeepEqual(w.save(),before);
+});
