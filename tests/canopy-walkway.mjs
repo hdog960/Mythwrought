@@ -88,6 +88,19 @@ const {candidate:longPlan}=longSite;
 const longOccupancy=new Map(longPlan.cells.map(([x,cy,z,id])=>[[x,cy,z].join(','),id]));
 const outerTips=longPlan.cells.filter(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&Math.abs(z-longSite.aa[1])===2);
 assert.equal(outerTips.length,2,'two separated taper tips rather than a continuous fence');
+// A visible daylight gap on both banks is mandatory: the previous per-step
+// crownlets still read as a picket fence despite having physical supports.
+const occupiedStations=new Set(longPlan.cells.filter(([x,cy,z,id])=>
+ cy===y&&id===BLOCK.WOOD&&z!==longSite.aa[1]).map(([x])=>x-longSite.aa[0]));
+assert.deepEqual([...occupiedStations].sort((a,b)=>a-b),[2,5],
+ 'seven-cell span has only two rooted crown stations, separated by daylight');
+for(let i=3;i<=4;i++)for(let side=-2;side<=2;side++){
+ if(side===0)continue;
+ assert.equal(longOccupancy.has([longSite.aa[0]+i,y,longSite.aa[1]+side].join(',')),false,
+  'middle span remains free of artificial continuous side rails');
+ assert.equal(longOccupancy.has([longSite.aa[0]+i,y+1,longSite.aa[1]+side].join(',')),false,
+  'middle span has no hovering leaf fence');
+}
 for(const [x,cy,z] of outerTips){
  assert.equal(longOccupancy.get([x,cy+1,z].join(',')),BLOCK.LEAVES,'tip foliage sits on timber');
  const innerZ=z+Math.sign(longSite.aa[1]-z);
