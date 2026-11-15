@@ -15,11 +15,10 @@ export function planCanopyWalkway(world,a,b,y){
  const cells=[];
  for(let i=1;i<distance;i++){
   const x=a[0]+sx*i,z=a[1]+sz*i;
-  // Walkable solid timber deck, open two-block headroom and foliage side rails.
+  // Continuous timber deck. Each foliage cluster rests on a timber outrigger\n  // directly joined to the deck: no unsupported floating leaf bars.
   cells.push([x,y,z,BLOCK.WOOD]);
   if(i>1&&i<distance-1){
-   cells.push([x+sideX,y+1,z+sideZ,BLOCK.LEAVES]);
-   cells.push([x-sideX,y+1,z-sideZ,BLOCK.LEAVES]);
+   for(const side of [-1,1]){\n    const rx=x+side*sideX,rz=z+side*sideZ;\n    cells.push([rx,y,rz,BLOCK.WOOD]);\n    // Alternating crownlets break up the rigid parallel-bar silhouette.\n    if((i+side+distance)%2===0)cells.push([rx,y+1,rz,BLOCK.LEAVES]);\n   }
   }
  }
  const seen=new Set();
