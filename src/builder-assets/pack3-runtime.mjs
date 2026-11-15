@@ -4,7 +4,7 @@ import {resolvePack3BuilderAsset,PACK3_BUILDER_SYMBOLS} from './pack3.mjs';
 import {FULL_CUBE,raycastShapes} from '../voxel-shape-interactions.mjs';
 import {inspectBodyFit} from '../voxel-shape-fit.mjs';
 import {CHUNK_SIZE,BLOCK} from '../voxel.mjs';
-import {WORLD_MIN_Y,WORLD_MAX_Y,sectionBounds} from '../depth.mjs';
+import {WORLD_MIN_Y,WORLD_MAX_Y,sectionBounds,sectionForY} from '../depth.mjs';
 
 export const PACK3_RUNTIME_FORMAT='mythwrought.pack3-construction-overlay.v1';
 export const PACK3_RUNTIME_LIMIT=4096;
@@ -119,7 +119,24 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
   validWorld(world);worldIdentity(worldId);
   if(!Number.isSafeInteger(maxCells)||maxCells<1||maxCells>PACK3_RUNTIME_LIMIT)
     throw new RangeError('Invalid construction overlay budget');
-  const overlays=new Map();
+  const overlays=new Map(),byChunk=new Map();
+  const bucketKey=at=>Math.floor(at[0]/CHUNK_SIZE)+','+
+    Math.floor(at[2]/CHUNK_SIZE)+','+sectionForY(at[1]);
+  function register(entry){
+    const k=key(entry.at),bucket=bucketKey(entry.at);
+    let cells=byChunk.get(bucket);
+    if(!cells){cells=new Map();byChunk.set(bucket,cells);}
+    overlays.set(k,entry);cells.set(k,entry);
+  }
+  function unregister(at){
+    const k=key(at),entry=overlays.get(k);
+    if(!entry)return false;
+    const bucket=bucketKey(entry.at),cells=byChunk.get(bucket);
+    if(!cells||!cells.delete(k))throw new Error('Pack 3 chunk index desynchronized');
+    if(!cells.size)byChunk.delete(bucket);
+    overlays.delete(k);
+    return true;
+  }
   function normalize(record){
     if(!record||typeof record!=='object')throw new TypeError('Invalid physical placement');
     const at=[...coord(record.at)],symbol=record.asset;
@@ -151,7 +168,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
       if(!inspectBodyFit(playerBody,proposed).fits)
         throw new Error('Physical construction intersects player');
     }
-    for(const [k,e] of planned)overlays.set(k,e);
+    for(const e of planned.values())register(e);
     return records.length;
   }
   function readShape(x,y,z){
@@ -166,7 +183,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
     if(Number.isInteger(id)&&id>0&&id<=BLOCK.DEEPSTONE)return FULL_CUBE;
     throw new Error('Unknown live block identity; cannot synthesize geometry');
   }
-  function remove(at){return overlays.delete(key(at));}
+  function remove(at){return unregister(at);}
   function get(at){return overlays.get(key(at))??null;}
   function entries(){return Object.freeze([...overlays.values()].sort(compare));}
   function target(origin,direction,reach=6){
@@ -177,11 +194,14 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
     if(![cx,cz,section].every(Number.isInteger)||section>0||
         !Number.isSafeInteger(maxVertices)||maxVertices<1)throw new TypeError('Invalid chunk request');
     const y=sectionBounds(section),selected=[],startX=cx*CHUNK_SIZE,startZ=cz*CHUNK_SIZE;
+    // Dense settlements must not scan every placed block to build one
+    // nearby section. The index follows the same world cell and depth key.
+    const candidates=byChunk.get(cx+','+cz+','+section);
     let count=0;
     // Two bounded passes: calculate exact required output before allocating.
     // The former per-vertex src.slice() created thousands of small arrays and
     // an additional untyped JS array for every edited construction chunk.
-    for(const e of overlays.values()){
+    for(const e of candidates?.values()??[]){
       const [x,atY,z]=e.at;
       if(x<startX||x>=startX+CHUNK_SIZE||z<startZ||z>=startZ+CHUNK_SIZE||
           atY<y.minY||atY>y.maxY)continue;

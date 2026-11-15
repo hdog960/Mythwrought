@@ -183,3 +183,34 @@ test('single-allocation physical chunk mesh preserves exact pre-optimization ver
  const extra=combinePack3ChunkMesh(new Float32Array(),bridge.runtime,1,1);
  assert.deepEqual(extra,expected);
 });
+
+test('physical chunk index isolates negative-world cells, vertical sections, removals and reload',()=>{
+ const store=disk(),bridge=createPack3LiveBridge(air(317),store);
+ const entries=[
+  {at:[-17,10,-1],id:116,yaw:1,cx:-2,cz:-1,section:0},
+  {at:[-16,10,-1],id:117,yaw:2,cx:-1,cz:-1,section:0},
+  {at:[-1,-4,-1],id:118,yaw:3,cx:-1,cz:-1,section:-1},
+  {at:[0,-3,0],id:119,yaw:0,cx:0,cz:0,section:0},
+  {at:[15,10,0],id:120,yaw:1,cx:0,cz:0,section:0},
+  {at:[16,10,16],id:121,yaw:2,cx:1,cz:1,section:0}
+ ];
+ for(const e of entries)assert.equal(put(bridge,e.id,e.at,e.yaw).ok,true);
+ for(const e of entries){
+  const mesh=bridge.runtime.chunkMesh(e.cx,e.cz,e.section);
+  assert.ok(mesh.length>0,'Missing physical geometry in indexed section '+e.id);
+ }
+ assert.equal(bridge.runtime.chunkMesh(1,1,-1).length,0);
+ assert.equal(bridge.runtime.chunkMesh(-2,-1,-1).length,0);
+ const negative=bridge.runtime.chunkMesh(-2,-1,0);
+ assert.ok(negative.some((x,i)=>i%9===0&&x<0));
+ const removed=bridge.mutate({mode:'mine',cell:entries[0].at,rebuild:()=>{}});
+ assert.equal(removed.ok,true);
+ assert.equal(bridge.runtime.chunkMesh(-2,-1,0).length,0,
+  'Deleted cell must disappear from its old chunk index');
+ const reload=createPack3LiveBridge(air(317),store);
+ assert.equal(reload.runtime.chunkMesh(-2,-1,0).length,0);
+ for(const e of entries.slice(1)){
+  assert.equal(reload.getAt(...e.at).yaw,e.yaw);
+  assert.ok(reload.runtime.chunkMesh(e.cx,e.cz,e.section).length>0);
+ }
+});

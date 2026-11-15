@@ -36,6 +36,10 @@ other four manual Block Packs.
   now precomputes exact vertex length, allocates one Float32Array and writes
   source tones directly, avoiding per-vertex temporary typed-array slices.
   Exact pre/post vertex parity is independently asserted by a native test.
+  For dense future settlements, an additional X/Z chunk and vertical section
+  index limits each mesh rebuild to placements in the selected GPU buffer;
+  negative chunk coordinates and deep-section boundaries receive explicit
+  build/remove/reload regression tests. The 4,096-cell global cap remains.
   Do not infer phone FPS from software Chromium times or CPU tests.
 - Source-exact all-17 live-game browser PASS from #43719949693:
   all 17 physical IDs placed, rendered, reloaded and removed at 667×375,
