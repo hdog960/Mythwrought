@@ -17,7 +17,7 @@ function rotateBox(b,r){const a=rotate([b[0],b[1],b[2]],r),c=rotate([b[3],b[4],b
 function texture(id){const ordinal=Number(id.slice(-3));return Object.freeze(Array.from({length:6},(_,face)=>
  Object.freeze(Array.from({length:16},(_,p)=>{const u=p%4,v=p>>2;const rib=(ordinal===13&&u%2===0);
  const thorn=(ordinal===15&&(u===v||u+v===3));const h=(Math.imul(ordinal*31+face*17+u*7+v*13,2654435761)>>>0);
- return rib?1:thorn?3:(h%11===0?2:0);})))));}
+ return rib?1:thorn?3:(h%11===0?2:0);}))))}
 export const DESERT_ORGANIC_IDS=Object.freeze(Object.keys(definitions));
 export function desertOrganic(id,rotation=0){
  const d=definitions[id];if(!d)throw new RangeError('Unknown desert organic candidate');

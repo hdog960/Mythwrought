@@ -2,7 +2,9 @@
 // No implicit generation, block registration, save migration, or depth-engine edits.
 import {BLOCK,baseBlock,terrainHeight,worldKey,WORLD_MIN_Y,WORLD_MAX_Y} from './voxel.mjs';
 
-const OFFSETS=[[-3,-3],[0,-3],[3,-3],[-3,0],[3,0],[-3,3],[0,3],[3,3]];
+// The four cardinal approaches must remain open at ground/player height.
+// Eight actual stone columns flank rather than block those corridors.
+const OFFSETS=[[-3,-3],[-3,-2],[-3,2],[-3,3],[3,-3],[3,-2],[3,2],[3,3]];
 export function planStoneRotunda(world,x,z){
   if(!world||!Number.isSafeInteger(world.seed)||typeof world.get!=='function'||
      !Number.isSafeInteger(x)||!Number.isSafeInteger(z)||
