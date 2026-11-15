@@ -80,3 +80,21 @@ test('reconcile validates world reader and leaves state untouched on reader erro
  assert.throws(()=>s.reconcile(()=>{throw new Error('unloaded chunk');}),/unloaded chunk/);
  assert.equal(s.get([0,0,0],2),1);
 });
+
+test('async same-ID edits invalidate only after successful commit',async()=>{
+ const s=makeOrientationSidecar();
+ const cell=[3,-2,5];s.set(cell,4,2);
+ let commit;
+ const pending=s.applyEditAsync(cell,()=>new Promise(resolve=>{commit=resolve;}));
+ assert.equal(s.get(cell,4),2,'in-flight edit must not clear state');
+ commit(true);
+ assert.equal(await pending,true);
+ assert.equal(s.get(cell,4),0,'committed replacement invalidates even same ID');
+ s.set(cell,4,3);
+ assert.equal(await s.applyEditAsync(cell,async()=>false),false);
+ assert.equal(s.get(cell,4),3,'rejected world edit keeps rotation');
+ await assert.rejects(s.applyEditAsync(cell,async()=>{throw new Error('write failed');}),/write failed/);
+ assert.equal(s.get(cell,4),3,'throwing edit keeps rotation');
+ await assert.rejects(s.applyEditAsync([1.5,0,0],async()=>true),TypeError);
+ await assert.rejects(s.applyEditAsync(cell,null),TypeError);
+});
