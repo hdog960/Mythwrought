@@ -10,14 +10,17 @@ function fixture(){
 test('physical bridge has contiguous deck, overhead leaf crown and two-block walking clearance',()=>{
  const w=fixture(),p=planCanopyBridge(w,a,b);
  assert.ok(p);assert.ok(p.blockCount>8);
- const deck=p.cells.filter(c=>c[3]===BLOCK.WOOD);
+ const deck=p.cells.filter(c=>c[3]===BLOCK.WOOD&&c[2]===20);
  assert.deepEqual(deck.map(c=>c[0]),[21,22,23,24,25,26,27]);
  assert.ok(p.cells.some(c=>c[3]===BLOCK.LEAVES));
- assert.ok(p.cells.filter(c=>c[3]===BLOCK.LEAVES).every(c=>c[1]===16));
+ assert.ok(p.cells.filter(c=>c[3]===BLOCK.LEAVES).every(c=>c[1]===14||c[1]===16));
  for(const c of deck)for(let h=1;h<=2;h++)
    assert.ok(p.clearance.includes([c[0],c[1]+h,c[2]].join(',')));
  const rails=p.cells.filter(c=>c[3]===BLOCK.LEAVES&&c[1]===14);
  assert.equal(rails.length,10);
+ const supports=p.cells.filter(c=>c[3]===BLOCK.WOOD&&c[1]===13&&Math.abs(c[2]-20)===1);
+ assert.equal(supports.length,10);
+ for(const [x,y,z] of rails)assert.ok(supports.some(c=>c[0]===x&&c[1]===y-1&&c[2]===z));
  assert.ok(rails.every(c=>Math.abs(c[2]-20)===1));
  assert.equal(validateCanopyBridge(w,p),true);
 });
@@ -59,4 +62,15 @@ test('physical leaf parapets respect edited side cells and preserve open entranc
  assert.equal(validateCanopyBridge(w,p),false);
  w.occupied.delete(rail.slice(0,3).join(','));
  assert.equal(validateCanopyBridge(w,p),true);
+});
+
+test('rejects an existing edit under a parapet and retains all world cells unchanged',()=>{
+ const w=fixture(),before=[...w.occupied.entries()],p=planCanopyBridge(w,a,b);
+ assert.ok(p);
+ const support=p.cells.find(c=>c[3]===BLOCK.WOOD&&c[2]===21);
+ assert.ok(support);
+ w.occupied.set(support.slice(0,3).join(','),BLOCK.STONE);
+ assert.equal(planCanopyBridge(w,a,b),null);
+ w.occupied.delete(support.slice(0,3).join(','));
+ assert.deepEqual([...w.occupied.entries()],before);
 });
