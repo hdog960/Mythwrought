@@ -21,17 +21,23 @@ export function intersectsPlayerBlock(player,cell){
 }
 
 export function inspectBlockTarget(world,eye,direction,selected,player){
-  const target=raycast(world,eye,direction,INTERACTION_REACH);
+  const shaped=world?.pack3Runtime?.size?.()>0;
+  const physicalHit=shaped?world.pack3Runtime.target(eye,direction,INTERACTION_REACH):null;
+  const target=shaped?(physicalHit?{
+    hit:physicalHit.cell,
+    adjacent:physicalHit.normal.some(Boolean)?physicalHit.cell.map((v,i)=>v+physicalHit.normal[i]):null,
+    distance:physicalHit.distance
+  }:null):raycast(world,eye,direction,INTERACTION_REACH);
   if(!target)return {hit:null,adjacent:null,canMine:false,canPlace:false,
     distance:null,block:BLOCK.AIR,reason:'Look at a nearby block'};
   const hit=target.hit,adjacent=target.adjacent;
-  const block=world.get(...hit);
+  const block=world?.pack3Runtime?.get(hit)?.id??world.get(...hit);
   const canMine=block!==BLOCK.AIR&&hit[1]>=WORLD_MIN_Y&&hit[1]<=WORLD_MAX_Y;
   let reason='';
   if(!adjacent)reason='No free space for placement';
   else if(adjacent[1]<WORLD_MIN_Y||adjacent[1]>WORLD_MAX_Y)reason='Outside editable height';
-  else if(!BUILD_MATERIALS.includes(selected))reason='Choose a building material';
-  else if(world.get(...adjacent)!==BLOCK.AIR)reason='Placement space occupied';
+  else if(!BUILD_MATERIALS.includes(selected)&&!(Number.isInteger(selected)&&selected>=109&&selected<=125))reason='Choose a building material';
+  else if(world.get(...adjacent)!==BLOCK.AIR||world?.pack3Runtime?.get(adjacent))reason='Placement space occupied';
   else if(intersectsPlayerBlock(player,adjacent))reason='Cannot place inside the player';
   const canPlace=reason==='';
   return {hit,adjacent,canMine,canPlace,distance:target.distance,block,reason};

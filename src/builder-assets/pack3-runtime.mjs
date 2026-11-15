@@ -155,6 +155,10 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
     return records.length;
   }
   function readShape(x,y,z){
+    // Player eyes and targeting rays may legitimately be above the highest
+    // voxel or below the minimum depth. Treat those empty cells as air.
+    if(![x,y,z].every(Number.isSafeInteger))throw new TypeError('Invalid shape cell');
+    if(y<WORLD_MIN_Y||y>WORLD_MAX_Y)return null;
     const k=key([x,y,z]),e=overlays.get(k);
     if(e)return resolvePack3BuilderAsset(e.asset,e.yaw).shape;
     const id=world.get(x,y,z);

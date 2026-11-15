@@ -21,6 +21,9 @@ import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup}
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
 import {installExplorationMap} from './exploration-map.mjs';
+import {PACK3_BUILDER_SYMBOLS,resolvePack3BuilderAsset} from './builder-assets/pack3.mjs';
+import {createPack3LiveBridge,combinePack3ChunkMesh,isPack3BlockId} from './builder-assets/pack3-live.mjs';
+import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
 
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
@@ -49,6 +52,10 @@ function start(){
     storageReadOnly=true;world=new VoxelWorld(DEFAULT_WORLD_SEED);
     recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
   }
+  let pack3=createPack3LiveBridge(world,localStorage);
+  const pack3Names=new Map(PACK3_BUILDER_SYMBOLS.map(symbol=>{
+    const a=resolvePack3BuilderAsset(symbol);return [a.blockId,a.name];
+  }));
   seedLabel.textContent='WORLD '+world.seed;
   const VS=[
     '#version 300 es','precision highp float;',
@@ -79,7 +86,7 @@ function start(){
   catch(error){fatal('Voxel/sky shader failed to initialize: '+error.message);return;}
 
   let caveDiscovery={inside:false,last:-Infinity,discoveries:0};
-  let selected=BLOCK.STONE;
+  let selected=BLOCK.STONE,pack3Yaw=0;
   let outlineKey='',outlineCount=0,editFeedback=[];
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
@@ -188,6 +195,10 @@ function start(){
   }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
+  function meshPlayableChunk(cx,cz,section){
+    const original=section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section);
+    return combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
+  }
   function refreshEditedMeshes(x,z,y=0){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
@@ -196,8 +207,7 @@ function start(){
       for(const {cx,cz} of editAffectedChunks(x,z)){
         const key=depthMeshKey(cx,cz,section);
         if(!chunks.has(key))continue;
-        const vertices=section===0?meshChunk(world,cx,cz):
-          meshDepthSection(world,cx,cz,section);
+        const vertices=meshPlayableChunk(cx,cz,section);
         batch.push({key,cx,cz,section,vertices});
       }
     const ready=[];
@@ -221,17 +231,28 @@ function start(){
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
   function edit(mode){
-    // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
-    const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player):null;
-    const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
-    editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
+    const inspection=inspectBlockTarget(world,eye(),facing(),selected,player);
+    const pack3Target=inspection.hit&&pack3.runtime.get(inspection.hit);
+    const physical=(mode==='place'&&isPack3BlockId(selected))||
+      (mode==='mine'&&Boolean(pack3Target));
+    let result;
+    if(physical){
+      if(storageReadOnly)result={ok:false,reason:'Protected world is read-only'};
+      else if(!inspection.hit)result={ok:false,reason:inspection.reason};
+      else if(mode==='place'&&!inspection.canPlace)result={ok:false,reason:inspection.reason};
+      else if(mode==='mine'&&!inspection.canMine)result={ok:false,reason:'Cannot mine here'};
+      else result=pack3.mutate({mode,
+        cell:mode==='place'?inspection.adjacent:inspection.hit,
+        id:selected,orientation:pack3Yaw,player,rebuild:refreshEditedMeshes});
+    }else result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
+    editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),
+      mode==='place'?inspection:null);
     if(!result.ok){message(result.reason);return;}
-    changed=true;
-    const persisted=save();
-    const label=BLOCK_NAMES[result.block]||'block';
-    const action=mode==='mine'?'Removed':'Placed';
-    message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
+    const persisted=physical?true:(changed=true,save());
+    const label=pack3Names.get(result.block)||BLOCK_NAMES[result.block]||'block';
+    message((mode==='mine'?'Removed ':'Placed ')+label+
+      (persisted?' · saved':' · save failed, export backup'));
   }
   let lastStreamingCenter='';
   let wanted=new Set();
@@ -274,8 +295,7 @@ function start(){
       const [k,[x,z,section]]=next;
       const begin=performance.now();
       try{
-        const data=section===0?meshChunk(world,x,z):
-          meshDepthSection(world,x,z,section);
+        const data=meshPlayableChunk(x,z,section);
         const buffer=uploadChunkBuffer(gl,data);
         pending.delete(k);gpuRetry.success(k);
         const old=chunks.get(k);
@@ -357,6 +377,8 @@ function start(){
       canvas.dataset.meshEditBatches=String(editMeshBatches);
       canvas.dataset.lastEditedChunks=lastEditMeshKeys.join(';');
       canvas.dataset.renderedMeshVertices=String([...chunks.values()].reduce((sum,c)=>sum+c.count,0));
+      canvas.dataset.pack3PhysicalCount=String(pack3.runtime.size());
+      canvas.dataset.pack3SelectedId=String(isPack3BlockId(selected)?selected:0);
       for(const c of chunks.values()){
         gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);
         gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
@@ -373,7 +395,7 @@ function start(){
       canvas.dataset.targetPlace=placeKey;
       canvas.dataset.canPlace=String(Boolean(placeKey));
       const display=focused?.hit?
-        (BLOCK_NAMES[focused.block]||'block').toUpperCase()+' · '+focused.distance.toFixed(1)+'m'+
+        (pack3Names.get(focused.block)||BLOCK_NAMES[focused.block]||'block').toUpperCase()+' · '+focused.distance.toFixed(1)+'m'+
         '\n'+(focused.canPlace?'GOLD = BUILD SPACE':'PLACE BLOCKED'):
         'LOOK AT A BLOCK';
       if(display!==lastTargetText){
@@ -630,8 +652,15 @@ function start(){
   bindGameplayAction('jump',jump);
   bindGameplayAction('dig',()=>edit('mine'));
   bindGameplayAction('place',()=>edit('place'));
+  const pack3Palette=installPack3Palette(help,(id,yaw)=>{
+    selected=id;pack3Yaw=yaw;
+    document.querySelectorAll('[data-block]').forEach(b=>{
+      b.classList.remove('selected');b.setAttribute('aria-pressed','false');
+    });
+    message('Selected '+pack3Names.get(id)+' · facing '+yaw*90+'°');
+  });
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
-    selected=Number(b.dataset.block);
+    selected=Number(b.dataset.block);pack3Palette.clear();
     document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
     message('Selected '+({3:'stone',4:'wood',5:'crystal',7:'leaf canopy',8:'deepstone'})[selected]);
   });
@@ -786,7 +815,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=imported;storageReadOnly=false;changed=false;
+    world=imported;pack3=createPack3LiveBridge(world,localStorage);storageReadOnly=false;changed=false;
     clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
@@ -899,7 +928,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=restored;changed=false;respawnPrototype();
+    world=restored;pack3=createPack3LiveBridge(world,localStorage);changed=false;respawnPrototype();
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
     message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
@@ -920,7 +949,7 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      world=candidate;storageReadOnly=false;changed=false;respawnPrototype();
+      world=candidate;pack3=createPack3LiveBridge(world,localStorage);storageReadOnly=false;changed=false;respawnPrototype();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';
@@ -960,7 +989,7 @@ function start(){
       }
       const outcome=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
       if(!outcome.ok)throw Error(outcome.reason);
-      world=imported;storageReadOnly=false;changed=false;
+      world=imported;pack3=createPack3LiveBridge(world,localStorage);storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())gl.deleteBuffer(c.buffer);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
@@ -1049,7 +1078,19 @@ function start(){
         player.yaw=Math.atan2(dx,dz);
         player.pitch=Math.atan2(dy,Math.hypot(dx,dz));
       },
-      block(x,y,z){return world.get(x,y,z);},
+      block(x,y,z){return pack3.getAt(x,y,z)?.id??world.get(x,y,z);},
+      pack3Block(x,y,z){return pack3.getAt(x,y,z);},
+      placePack3Fixture(x,y,z,id,yaw=0){
+        const result=pack3.mutate({mode:'place',cell:[x,y,z],id,orientation:yaw,
+          player:{x:1e6,feet:19,z:1e6},rebuild:refreshEditedMeshes});
+        if(!result.ok)throw Error(result.reason);
+        return result;
+      },
+      removePack3Fixture(x,y,z){
+        const result=pack3.mutate({mode:'mine',cell:[x,y,z],rebuild:refreshEditedMeshes});
+        if(!result.ok)throw Error(result.reason);
+        return result;
+      },
       setOrientation(yaw,pitch){
         if(![yaw,pitch].every(Number.isFinite))throw Error('Invalid debug camera orientation');
         player.yaw=yaw;player.pitch=Math.max(-MAX_PITCH,Math.min(MAX_PITCH,pitch));
@@ -1063,7 +1104,7 @@ function start(){
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
         frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats(),
-        gpuRetry:gpuRetry.stats(),
+        gpuRetry:gpuRetry.stats(),pack3PhysicalBlocks:pack3.runtime.size(),
         graphics:{lost:graphicsLost,lossCount:graphicsLossCount,
           restoredCount:graphicsRestoreCount,shaderReady:Boolean(program&&skyProgram)}};}
     });

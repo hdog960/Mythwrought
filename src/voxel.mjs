@@ -315,6 +315,13 @@ export const BODY_RADIUS=.28;
 export const BODY_HEIGHT=1.78;
 export function collides(world,x,feet,z){
   if(![x,feet,z].every(Number.isFinite))return true;
+  // Activated only for worlds with verified Pack 3 placements. Existing
+  // 0–8 worlds retain the identical constant-time legacy collision path.
+  if(world?.pack3Runtime?.size?.()>0){
+    const body=[x-BODY_RADIUS,feet,z-BODY_RADIUS,
+      x+BODY_RADIUS,feet+BODY_HEIGHT,z+BODY_RADIUS];
+    return !world.pack3Runtime.playerFits(body).fits;
+  }
   const e=1e-5;
   for(let bx=Math.floor(x-BODY_RADIUS+e);bx<=Math.floor(x+BODY_RADIUS-e);bx++)
     for(let bz=Math.floor(z-BODY_RADIUS+e);bz<=Math.floor(z+BODY_RADIUS-e);bz++)
