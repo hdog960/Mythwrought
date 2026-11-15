@@ -8,11 +8,11 @@ import {meshDepthSection} from '../src/depth-mesh.mjs';
 import {resolveBiome130BuilderAsset,planBiome130BuilderStructure,
   placeBiome130BuilderStructure} from '../src/builder-assets/biome130.mjs';
 
-test('all 60 authored symbolic families have distinct real high IDs and valid physical shapes',()=>{
-  assert.equal(BIOME130_LIVE_COUNT,60);
-  assert.equal(new Set(BIOME130_REGISTERED_IDS).size,60);
-  assert.equal(new Set(BIOME130_REGISTERED_SYMBOLS).size,60);
-  for(let i=1;i<=60;i++){
+test('all 70 authored symbolic families have distinct real high IDs and valid physical shapes',()=>{
+  assert.equal(BIOME130_LIVE_COUNT,70);
+  assert.equal(new Set(BIOME130_REGISTERED_IDS).size,70);
+  assert.equal(new Set(BIOME130_REGISTERED_SYMBOLS).size,70);
+  for(let i=1;i<=70;i++){
     const id=255+i,symbol='biome130:'+String(i).padStart(3,'0');
     assert.equal(isBiome130BlockId(id),true);
     const asset=biome130Block(symbol),builder=resolveBiome130BuilderAsset(symbol);
@@ -29,7 +29,7 @@ test('all 60 authored symbolic families have distinct real high IDs and valid ph
       assert.ok(shaped.boxes.every(b=>b.every(v=>v>=0&&v<=1)));
     }
   }
-  for(const id of [0,7,9,125,208,255,316,385]){
+  for(const id of [0,7,9,125,208,255,326,385]){
     assert.equal(isBiome130BlockId(id),false);
     assert.throws(()=>biome130Block(id),RangeError);
   }
@@ -46,7 +46,7 @@ test('legacy schema-1 saves remain byte-compatible; high-ID biome edits persist 
   }
   assert.equal(world.biomeCellCount,4);
   assert.equal(world.set(999,16,999,255),false);
-  assert.equal(world.set(999,16,999,316),false);
+  assert.equal(world.set(999,16,999,326),false);
   const snapshot=JSON.parse(JSON.stringify(world.save()));
   assert.equal(snapshot.schema,1);assert.equal(snapshot.rotations.length,3);
   const restored=VoxelWorld.restore(snapshot);
@@ -86,4 +86,30 @@ test('deep vertical mesh uses high IDs without 8-bit truncation',()=>{
   assert.equal(w.set(900,-60,900,312,2),true);
   const surface=meshDepthSection(w,56,56,-4);
   assert.ok(surface.length>0);assert.ok(surface.every(Number.isFinite));
+});
+
+test('013 ancient ruin physical families are usable in actual world and builder with schema-1 recovery',()=>{
+  const w=new VoxelWorld(179);
+  const planned=planBiome130BuilderStructure([
+    {at:[0,0,0],asset:'biome130:061',orientation:'north'},
+    {at:[1,0,0],asset:'biome130:064',orientation:'east'},
+    {at:[2,0,0],asset:'biome130:067',orientation:'south'},
+    {at:[3,0,0],asset:'biome130:070',orientation:'west'}
+  ],{origin:[900,16,900]});
+  assert.equal(planned.cells.length,4);
+  assert.ok(planned.worldBoxes.length>12);
+  assert.equal(placeBiome130BuilderStructure(w,planned),true);
+  for(let i=0;i<4;i++){
+    assert.equal(w.get(900+i,16,900),[316,319,322,325][i]);
+    assert.equal(w.rotationAt(900+i,16,900),i);
+  }
+  assert.ok(meshChunk(w,56,56).length>0);
+  const saved=JSON.parse(JSON.stringify(w.save()));
+  assert.equal(saved.schema,1);
+  const restored=VoxelWorld.restore(saved);
+  assert.deepEqual(restored.save(),saved);
+  assert.equal(restored.set(903,16,900,BLOCK.AIR),true);
+  assert.equal(restored.rotationAt(903,16,900),0);
+  assert.equal(restored.set(903,16,900,325,2),true);
+  assert.equal(VoxelWorld.restore(restored.save()).rotationAt(903,16,900),2);
 });
