@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,baseBlock,terrainHeight,worldKey} from '../src/voxel.mjs';
-import {planStoneRotunda,placeStoneRotunda} from '../src/stone-rotunda.mjs';
+import {planStoneRotunda,placeStoneRotunda,findStoneRotundaSite} from '../src/stone-rotunda.mjs';
 
 function findSite(world){
   // Deterministic bounded fixture scan; never edits the world.
@@ -127,6 +127,28 @@ test('all four exterior approaches are traversable and player-owned approach edi
   }
   const key=worldKey(x+5,h+1,z);
   world.edits.set(key,BLOCK.AIR); // explicit edit matching baseline still belongs to player
+  assert.equal(planStoneRotunda(world,x,z),null);
+  assert.equal(placeStoneRotunda(world,plan),false);
+});
+
+test('bounded closest-first discovery is deterministic, read-only and validates arguments',()=>{
+  const world=new VoxelWorld(179),before=world.save();
+  const first=findStoneRotundaSite(world,0,0,{radius:128,step:4});
+  const second=findStoneRotundaSite(world,0,0,{radius:128,step:4});
+  assert.deepEqual(second,first);
+  assert.ok(first,'seed 179 must yield a reachable, supported site in bounded search');
+  assert.equal(first.optIn,true);
+  assert.deepEqual(world.save(),before);
+  assert.equal(findStoneRotundaSite(world,0,0,{radius:-1}),null);
+  assert.equal(findStoneRotundaSite(world,0,0,{step:0}),null);
+  assert.equal(findStoneRotundaSite(world,0.5,0),null);
+});
+
+test('exterior approach rejects untracked world modifications without changing saves',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected an eligible fixed-seed site');
+  const [x,h,z]=plan.origin,originalGet=world.get.bind(world);
+  world.get=(px,py,pz)=>px===x+5&&py===h+1&&pz===z?BLOCK.STONE:originalGet(px,py,pz);
   assert.equal(planStoneRotunda(world,x,z),null);
   assert.equal(placeStoneRotunda(world,plan),false);
 });
