@@ -19,11 +19,15 @@ export function planCanopyWalkway(world,a,b,y){
   // directly joined to the deck: no unsupported floating leaf bars.
   cells.push([x,y,z,BLOCK.WOOD]);
   if(i>1&&i<distance-1){
-   for(const side of [-1,1]){
+   // Offset the living crown to one bank at a time rather than building
+   // two identical fence rails. Every leaf remains rooted to a timber limb.
+   // The second limb at the midpoint gives the bridge an irregular crown.
+   const sides=(i===Math.floor(distance/2)&&distance>=6)
+    ? [-1,1] : [((i+distance+world.seed)&1)===0?-1:1];
+   for(const side of sides){
     const rx=x+side*sideX,rz=z+side*sideZ;
     cells.push([rx,y,rz,BLOCK.WOOD]);
-    // Alternating crownlets break up the rigid parallel-bar silhouette.
-    if((i+side+distance)%2===0)cells.push([rx,y+1,rz,BLOCK.LEAVES]);
+    cells.push([rx,y+1,rz,BLOCK.LEAVES]);
    }
   }
  }
