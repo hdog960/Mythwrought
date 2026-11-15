@@ -106,8 +106,8 @@ test('candidate-only snapshot and corrupt-variant rollback preserve 91–93 rota
  assert.throws(()=>f.restore({format:before.format,entries:[[0,0,0,'pack5:091',0,'fake-lectern']]}));
  assert.deepEqual(f.snapshot(),before);
 });
-test('91–93 M4 symbols are candidates without IDs, 94–96 are untouched future work',()=>{
- const e=manifest.entries;assert.equal(manifest.candidateFamilies,15);assert.equal(e.filter(x=>x.status==='CANDIDATE').length,15);
+test('91–93 M4 symbols are candidates while 94–96 are independent M5 candidates',()=>{
+ const e=manifest.entries;assert.equal(manifest.candidateFamilies,18);assert.equal(e.filter(x=>x.status==='CANDIDATE').length,18);
  for(const id of [91,92,93]){const x=e.find(x=>x.roster===id);assert.equal(x.milestone,4);assert.equal(x.status,'CANDIDATE');assert.equal(x.persistentNumericId,null);}
- for(const id of [94,95,96]){const x=e.find(x=>x.roster===id);assert.equal(x.status,'NOT STARTED');assert.equal(x.persistentNumericId,null);}
+ for(const id of [94,95,96]){const x=e.find(x=>x.roster===id);assert.equal(x.status,'CANDIDATE');assert.equal(x.persistentNumericId,null);}
 });
