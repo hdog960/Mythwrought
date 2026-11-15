@@ -317,3 +317,44 @@ test('fortress wall footing joins neighboring buttress and supports battlement a
       `Footing repair unexpectedly blocked central crenel at turn ${turn}`);
   }
 });
+
+
+// A pitched roof terminates at its highest step on either side of its ridge.
+// Compare the EXACT occupied structural and coping cross-sections, not sampled
+// pixels: a tall slope facing an undersized ridge leaves a visible vertical
+// ledge and a bad collision/selection seam even if both touch at the bottom.
+test('Hearthclay Crown Ridge mates to both opposing pitched roofs for all quarter turns', async()=>{
+  const {pack3GeometryById}=await import('../../../src/block-packs/pack-3/roof-geometry.mjs');
+  const mismatch=(a,b,axis,faceA,faceB,tone)=>{
+    const other=[0,1,2].filter(i=>i!==axis);
+    const parts=[...a.parts,...b.parts].filter(p=>p.tone===tone);
+    const coord=other.map(i=>[...new Set([0,1,...parts.flatMap(p=>[p.box[i],p.box[i+3]])])].sort((x,y)=>x-y));
+    const filled=(asset,face,u,v)=>asset.parts.some(({box,tone:kind})=>
+      kind===tone&&box[axis]<=face&&box[axis+3]>=face&&
+      u>=box[other[0]]&&u<box[other[0]+3]&&
+      v>=box[other[1]]&&v<box[other[1]+3]);
+    let area=0;
+    for(let i=1;i<coord[0].length;i++)for(let j=1;j<coord[1].length;j++){
+      const u=(coord[0][i-1]+coord[0][i])/2,v=(coord[1][j-1]+coord[1][j])/2;
+      if(filled(a,faceA,u,v)!==filled(b,faceB,u,v))
+        area+=(coord[0][i]-coord[0][i-1])*(coord[1][j]-coord[1][j-1]);
+    }
+    return area;
+  };
+  for(let yaw=0;yaw<4;yaw++){
+    const ridge=pack3GeometryById(115,yaw),axis=yaw%2===0?0:2;
+    const firstFace=yaw<2?0:1;
+    for(const [arm,face,partnerYaw] of [
+      [0,firstFace,(yaw+3)%4], [1,1-firstFace,(yaw+1)%4]
+    ]){
+      const slope=pack3GeometryById(113,partnerYaw);
+      for(const tone of ['body','edge']){
+        const area=mismatch(ridge,slope,axis,face,1-face,tone);
+        assert.equal(area,0,
+          `Ridge seam mismatch for ${tone}: yaw ${yaw}, arm ${arm}, area ${area}`);
+      }
+    }
+    const center=ridge.shape.boxes.some(b=>.5>b[0]&&.5<b[3]&&.4>b[1]&&.4<b[4]&&.5>b[2]&&.5<b[5]);
+    assert.equal(center,false,'Ridge should retain its recessed open underside');
+  }
+});
