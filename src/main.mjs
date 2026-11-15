@@ -11,6 +11,10 @@ import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block} from './biome130-registry.mjs';
+import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,pack2ExportBundle,pack2ImportBundle} from './pack2-world.mjs';
+import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
+  pack2NormalizeState,pack2CycleState,pack2WaterSectionVertices,
+  pack2BodyIntersects} from './pack2-integration.mjs';
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
@@ -40,14 +44,16 @@ function start(){
   function loadWorld(seed){
     const result=loadWorldSafe(localStorage,seed);
     if(result.recovered)recoveryNote=result.warning;
-    return result.world;
+    const p2=loadPack2LiveWorld(localStorage,result.world);
+    if(p2.recovered||p2.warning)recoveryNote=p2.warning||recoveryNote;
+    return p2.world;
   }
   try{
     const choice=localStorage.getItem(SELECTED_SEED_KEY);
     world=loadWorld(choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice));
   }catch(err){
     // A damaged seed is NEVER replaced by auto-saving a fresh starter world.
-    storageReadOnly=true;world=new VoxelWorld(DEFAULT_WORLD_SEED);
+    storageReadOnly=true;world=new Pack2LiveWorld(new VoxelWorld(DEFAULT_WORLD_SEED));
     recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
   }
   seedLabel.textContent='WORLD '+world.seed;
@@ -56,13 +62,18 @@ function start(){
     'in vec3 aPos; in vec3 aColor; in vec2 aUv; in float aMat;',
     'uniform vec3 uEye,uForward,uRight,uUp;',
     'uniform float uAspect,uTan;',
-    'out vec3 vColor; out float vDistance; out vec2 vUv; flat out int vMat;',
+    'out vec3 vColor; out float vDistance; out vec2 vUv; flat out int vMat; out float vPack2Alpha;',
     'void main(){ vec3 d=aPos-uEye;',
     'float x=dot(d,uRight); float y=dot(d,uUp); float z=dot(d,uForward);',
     'gl_Position=vec4(x/(uAspect*uTan),y/uTan,1.0015*z-0.1501,z);',
-    'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(aMat+.5); }'
+    'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(floor(aMat+.001)); vPack2Alpha=fract(aMat); }'
   ].join('\n');
-  const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER;
+  // Reserved transparent-water material 20; legacy materials stay unchanged.
+  const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER
+    .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
+    .replace('void main(){',
+      'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
+      'outColor=vec4(mix(vColor,uFog,f),vPack2Alpha); return; }');
   let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
   function initializeGpuPipeline(){
     const resources=buildGpuPipeline(gl,{
@@ -81,6 +92,7 @@ function start(){
 
   let caveDiscovery={inside:false,last:-Infinity,discoveries:0};
   let selected=BLOCK.STONE,selectedRotation=0;
+  let pack2Selection=null;
   let outlineKey='',outlineCount=0,editFeedback=[];
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
@@ -175,6 +187,12 @@ function start(){
       saveHealth.textContent='READ ONLY: original damaged save preserved. Import a verified backup or choose another seed.';
       return false;
     }
+    const overlay=savePack2LiveWorld(localStorage,world);
+    if(!overlay.ok){
+      message('Pack 2 blocks not saved; original world untouched');
+      saveHealth.textContent='PACK 2 SAVE PROTECTION: '+overlay.reason;
+      return false;
+    }
     const result=saveWorldSafe(localStorage,world);
     if(!result.ok){
       message(result.reason+' — EXPORT your world');
@@ -183,9 +201,28 @@ function start(){
     }
     changed=false;
     scheduleMirrorForWorld();
-    saveHealth.textContent=result.warning||'Verified save: schema-1 deltas, checksum journal and previous-good backup.';
+    saveHealth.textContent=result.warning||
+      'Verified legacy schema-1 world and independent checksummed Pack 2 sidecar.';
     if(result.warning)message(result.warning);
     return true;
+  }
+  function deleteChunkBuffers(chunk){
+    if(!chunk)return;
+    gl.deleteBuffer(chunk.buffer);
+    if(chunk.waterBuffer)gl.deleteBuffer(chunk.waterBuffer);
+  }
+  // Both buffers stage before publishing; on failure neither can leak.
+  function uploadPack2Chunk(vertices,water){
+    let buffer=null,waterBuffer=null;
+    try{
+      buffer=uploadChunkBuffer(gl,vertices);
+      if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
+      return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
+    }catch(error){
+      if(buffer)gl.deleteBuffer(buffer);
+      if(waterBuffer)gl.deleteBuffer(waterBuffer);
+      throw error;
+    }
   }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
@@ -199,23 +236,24 @@ function start(){
         if(!chunks.has(key))continue;
         const vertices=section===0?meshChunk(world,cx,cz):
           meshDepthSection(world,cx,cz,section);
-        batch.push({key,cx,cz,section,vertices});
+        const water=pack2WaterSectionVertices(world,cx,cz,section);
+        batch.push({key,cx,cz,section,vertices,water});
       }
     const ready=[];
     try{
       for(const item of batch){
-        const buffer=uploadChunkBuffer(gl,item.vertices);
-        ready.push({...item,buffer,count:item.vertices.length/9});
+        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
       }
     }catch(err){
-      for(const item of ready)gl.deleteBuffer(item.buffer);
+      for(const item of ready)deleteChunkBuffers(item);
       throw err;
     }
     for(const item of ready){
       const old=chunks.get(item.key);
       chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
-        buffer:item.buffer,count:item.count});
-      if(old)gl.deleteBuffer(old.buffer);
+        buffer:item.buffer,count:item.count,
+        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+      deleteChunkBuffers(old);
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
@@ -224,6 +262,28 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
+    // Contextual hinged interaction uses the existing PLACE thumb button.
+    // Selecting a matching gate, door or hatch makes the action intuitive
+    // without crowding the iPhone two-thumb control rails.
+    if(mode==='place'&&pack2IsHinged(selected)){
+      const targeted=raycast(world,eye(),facing(),6)?.hit;
+      const existing=targeted?world.getPack2State?.(...targeted):null;
+      if(existing?.id===selected){
+        const next=pack2CycleState(selected,existing,'toggle');
+        if(!next.open&&pack2BodyIntersects(selected,next,targeted,
+          {x:player.x,z:player.z,feet:player.feet,radius:.28,height:1.78})){
+          message('Cannot close a door or gate through the player');return;
+        }
+        world.updatePack2State(...targeted,next);
+        try{refreshEditedMeshes(targeted[0],targeted[2],targeted[1]);}
+        catch(error){world.updatePack2State(...targeted,existing);
+          message('Gate update failed; original shape retained: '+error.message);return;}
+        changed=true;const persisted=save();
+        message((next.open?'Opened ':'Closed ')+BLOCK_NAMES[selected]+
+          (persisted?' · saved':' · save not verified'));
+        return;
+      }
+    }
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
@@ -253,7 +313,7 @@ function start(){
       // Keep only the immediate bounded vertical section neighborhood.
       // At normal surface height this remains the original 25 GPU chunks.
       for(const [k,c] of chunks){
-        if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
+        if(!wanted.has(k)){deleteChunkBuffers(c);chunks.delete(k);}
       }
       for(const c of desired){
         const k=depthMeshKey(c.cx,c.cz,c.section);
@@ -277,11 +337,12 @@ function start(){
       try{
         const data=section===0?meshChunk(world,x,z):
           meshDepthSection(world,x,z,section);
-        const buffer=uploadChunkBuffer(gl,data);
+        const water=pack2WaterSectionVertices(world,x,z,section);
+        const buffers=uploadPack2Chunk(data,water);
         pending.delete(k);gpuRetry.success(k);
         const old=chunks.get(k);
-        chunks.set(k,{x,z,section,buffer,count:data.length/9});
-        if(old)gl.deleteBuffer(old.buffer);
+        chunks.set(k,{x,z,section,...buffers});
+        deleteChunkBuffers(old);
       }catch(error){
         const state=gpuRetry.fail(k,performance.now(),error.message);
         if(state.attempt===1)message('Chunk GPU upload deferred safely; retry scheduled');
@@ -290,7 +351,7 @@ function start(){
       }
     }
     if(frame%45===0)for(const [k,c] of chunks){
-      if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
+      if(!wanted.has(k)){deleteChunkBuffers(c);chunks.delete(k);}
     }
   }
   function respawnPrototype(){
@@ -365,6 +426,25 @@ function start(){
         gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
         gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
+      }
+      // Genuine transparent-water pass, only for chunks with water candidates.
+      if([...chunks.values()].some(c=>c.waterBuffer)){
+        gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+        gl.depthMask(false);
+        const waterChunks=[...chunks.values()].filter(c=>c.waterBuffer).sort((a,b)=>{
+          const distance=c=>((c.x*16+8-player.x)**2+(c.z*16+8-player.z)**2+
+            (c.section*16-player.feet)**2);
+          return distance(b)-distance(a);
+        });
+        for(const chunk of waterChunks){
+          gl.bindBuffer(gl.ARRAY_BUFFER,chunk.waterBuffer);
+          gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
+          gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
+          gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
+          gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
+          gl.drawArrays(gl.TRIANGLES,0,chunk.waterCount);
+        }
+        gl.depthMask(true);gl.disable(gl.BLEND);
       }
       // A faint world-space targeted-block outline, never a HUD covering the scene.
       const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
@@ -631,6 +711,24 @@ function start(){
   bindGameplayAction('jump',jump);
   bindGameplayAction('dig',()=>edit('mine'));
   bindGameplayAction('place',()=>edit('place'));
+  const pack2List=document.getElementById('pack2Materials');
+  for(const id of PACK2_LIVE_IDS){
+    const b=document.createElement('button');
+    b.type='button';b.dataset.block=String(id);b.textContent=id+' · '+PACK2_LIVE_NAMES[id];
+    b.setAttribute('aria-pressed','false');pack2List.append(b);
+  }
+  const pack2StateText=document.getElementById('pack2StateText');
+  function updatePack2SelectionUI(){
+    world.nextPack2State=pack2Selection;
+    const s=pack2Selection;
+    pack2StateText.textContent=s?
+      PACK2_LIVE_NAMES[s.id]+' · '+
+      (s.rotation===undefined?'':('rotation '+s.rotation*90+'° · '))+
+      (s.variant===undefined?'':(s.variant+' · '))+
+      (s.open===undefined?'':(s.open?'open · ':'closed · '))+
+      (s.level===undefined?'':('water level '+s.level+' · '+s.flow)):
+      'Select a Pack 2 material to adjust its physical placement state.';
+  }
   // The full biome130 palette lives in the existing scrollable settings sheet,
   // NOT in the independent two-thumb control rails or over the game viewport.
   const physicalPalette=document.createElement('div');
@@ -676,6 +774,8 @@ function start(){
     const chosen=Number(biomeSelect.value);
     if(!BIOME130_REGISTERED_IDS.includes(chosen))return;
     selected=chosen;selectedRotation=Number(biomeRotation.value);
+    pack2Selection=null;world.nextPack2State=null;
+    document.getElementById('pack2StateText').textContent='Select a Pack 2 block to adjust its state.';
     document.querySelectorAll('[data-block]').forEach(q=>{
       q.classList.remove('selected');q.setAttribute('aria-pressed','false');
     });
@@ -684,9 +784,23 @@ function start(){
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
     selected=Number(b.dataset.block);
     biomeSelect.value='';
-    document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
+    pack2Selection=isPack2LiveId(selected)?pack2NormalizeState(selected):null;
+    selectedRotation=0;
+    document.querySelectorAll('[data-block]').forEach(q=>{
+      q.classList.toggle('selected',q===b);
+      q.setAttribute('aria-pressed',String(q===b));
+    });
+    updatePack2SelectionUI();
     message('Selected '+(BLOCK_NAMES[selected]||'material'));
   });
+  for(const [button,action] of [['pack2Rotate','rotate'],['pack2Variant','variant'],
+    ['pack2WaterLevel','water-level'],['pack2WaterFlow','water-flow']]){
+    document.getElementById(button).onclick=()=>{
+      if(!pack2Selection){message('Select a Pack 2 material first');return;}
+      pack2Selection=pack2CycleState(selected,pack2Selection,action);
+      updatePack2SelectionUI();
+    };
+  }
   document.getElementById('menu').onclick=()=>{cancelAllPointers();help.hidden=false;};
   document.getElementById('closeHelp').onclick=()=>{
     cancelAllPointers();help.hidden=true;
@@ -801,12 +915,17 @@ function start(){
   document.getElementById('vaultBackup').onclick=()=>useVault(async()=>{
     if(storageReadOnly)throw Error('Current world is in protected read-only mode; select a healthy seed or import a backup');
     const capturedSeed=world.seed;
-    const raw=JSON.stringify(world.save());
+    // Legacy vault parser accepts the original schema-1 envelope while the
+    // additional Pack 2 sidecar is retained for a complete JSON restore.
+    const raw=JSON.stringify(world.pack2Cells.size?
+      pack2ExportBundle(world):world.save());
     const snapshot=await createVaultBackup(raw);
     if(capturedSeed!==snapshot.seed)throw Error('Snapshot seed mismatch');
     await refreshVault(snapshot.id);
     vaultStatus.textContent='Verified device backup for seed '+snapshot.seed+
-      ' ('+snapshot.edits+' edits). This does NOT replace a downloadable JSON backup.';
+      ' ('+snapshot.edits+' legacy edits'+
+      (world.pack2Cells.size?', '+world.pack2Cells.size+' Pack 2 placements':'')+
+      '). Download JSON for an independent off-device copy.';
   });
   document.getElementById('vaultPrepare').onclick=()=>useVault(async()=>{
     clearVaultLink();
@@ -823,6 +942,11 @@ function start(){
     const activeSeed=world.seed;
     const snapshot=await inspectVaultBackup(chosenVaultId());
     const imported=importWorldData(snapshot.raw);
+    // Legacy vault snapshots retain schema-1 bytes. Restore the independently
+    // verified Pack 2 overlay for this seed, or abort before touching saves.
+    const candidate=JSON.parse(snapshot.raw).pack2?
+      pack2ImportBundle(JSON.parse(snapshot.raw),imported):
+      loadPack2LiveWorld(localStorage,imported).world;
     // Always require approval, including when restoring a different seed.
     if(!window.confirm('RESTORE device backup for seed '+snapshot.seed+' with '+snapshot.edits+
       ' edits? The current saved world will be preserved in the previous-good slot where possible. Cancel changes nothing.')) {
@@ -834,11 +958,13 @@ function start(){
     try{loadWorldSafe(localStorage,imported.seed);}catch(_){damaged=true;}
     const result=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
     if(!result.ok)throw Error('Restore failed without replacing the active game: '+result.detail);
-    for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+    const overlay=savePack2LiveWorld(localStorage,candidate);
+    if(!overlay.ok)throw Error('Pack 2 verified overlay not updated; export backups before retry: '+overlay.reason);
+    for(const c of chunks.values())deleteChunkBuffers(c);
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=imported;storageReadOnly=false;changed=false;
+    world=candidate;world.nextPack2State=pack2Selection;storageReadOnly=false;changed=false;
     clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
@@ -939,6 +1065,9 @@ function start(){
     const seed=world.seed,which=mirrorSlot.value;
     const snap=await getMirrorCopy(seed,which);
     const restored=importWorldData(snap.raw);
+    const candidate=JSON.parse(snap.raw).pack2?
+      pack2ImportBundle(JSON.parse(snap.raw),restored):
+      loadPack2LiveWorld(localStorage,restored).world;
     if(restored.seed!==seed)throw Error('Mirror seed does not match the active world');
     if(!window.confirm('RESTORE the '+which+' verified mirror of seed '+seed+
       ' with '+snap.edits+' edits? The current primary will be kept in the previous-good local backup. Cancel changes nothing.')){
@@ -947,11 +1076,13 @@ function start(){
     if(world.seed!==seed||changed)throw Error('World changed or contains unsaved edits; export or SAVE before restoring');
     const out=saveWorldSafe(localStorage,restored);
     if(!out.ok)throw Error('Canonical world restore failed; '+out.detail);
-    for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+    const overlay=savePack2LiveWorld(localStorage,candidate);
+    if(!overlay.ok)throw Error('Cannot verify Pack 2 state after restore: '+overlay.reason);
+    for(const c of chunks.values())deleteChunkBuffers(c);
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=restored;changed=false;respawnPrototype();
+    world=candidate;world.nextPack2State=pack2Selection;changed=false;respawnPrototype();
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
     message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
@@ -968,11 +1099,12 @@ function start(){
       const candidate=loadWorld(next);
       const result=saveWorldSafe(localStorage,candidate);
       if(!result.ok)throw Error(result.reason);
-      for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+      for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      world=candidate;storageReadOnly=false;changed=false;respawnPrototype();
+      world=candidate;world.nextPack2State=pack2Selection;
+      storageReadOnly=false;changed=false;respawnPrototype();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';
@@ -983,8 +1115,10 @@ function start(){
   };
   document.getElementById('export').onclick=()=>{
     try{
-      const data=JSON.stringify(world.save(),null,2);
-      importWorldData(data); // Ensure the export is a valid original schema-1 file.
+      const exported=world.pack2Cells.size?pack2ExportBundle(world):world.save();
+      const data=JSON.stringify(exported,null,2);
+      importWorldData(data); // Legacy schema-1 fields remain valid and unchanged.
+      if(exported.pack2)pack2ImportBundle(exported,world.base); // Verify extended records.
       const blob=new Blob([data],{type:'application/json'});
       const url=URL.createObjectURL(blob),a=document.createElement('a');
       a.href=url;a.download='mythwrought-seed-'+world.seed+'-prototype.json';
@@ -998,23 +1132,36 @@ function start(){
     const f=e.target.files?.[0];if(!f)return;
     try{
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
-      const imported=importWorldData(await f.text()); // Validate before mutation.
+      const rawImport=await f.text();
+      const imported=importWorldData(rawImport); // Validate original schema-1 first.
+      const incoming=JSON.parse(rawImport);
+      const previousOverlay=loadPack2LiveWorld(localStorage,imported).world;
+      // Legacy-only imports must NOT delete placed Pack 2 objects. Preserve
+      // the matching per-seed sidecar, or refuse incompatible old-world bytes.
+      const candidate=Object.hasOwn(incoming,'pack2')?
+        pack2ImportBundle(incoming,imported):previousOverlay;
+      const pack2Conflict=JSON.stringify(candidate.pack2Snapshot())!==
+        JSON.stringify(previousOverlay.pack2Snapshot());
       if(!storageReadOnly&&!save())throw Error('Current world could not be verified saved; export first.');
       let existing=null,damaged=false;
       try{existing=loadWorldSafe(localStorage,imported.seed).world;}
       catch(_){damaged=true;}
       const conflict=existing&&JSON.stringify(existing.save())!==JSON.stringify(imported.save())&&
         (existing.edits.size>0||imported.seed===world.seed);
-      if((damaged||conflict)&&!window.confirm(
-        'Replace saved edits for seed '+imported.seed+'? The previous data will be preserved in the local backup slot. Cancel leaves the current world unchanged.'
+      if((damaged||conflict||pack2Conflict)&&!window.confirm(
+        'Replace saved edits for seed '+imported.seed+
+        (pack2Conflict?' AND its Pack 2 constructions?':'?')+
+        ' Prior versions will be preserved in local backup slots where available. Cancel leaves the current world unchanged.'
       )){
         message('Import cancelled; existing world unchanged');return;
       }
       const outcome=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
       if(!outcome.ok)throw Error(outcome.reason);
-      world=imported;storageReadOnly=false;changed=false;
+      const overlay=savePack2LiveWorld(localStorage,candidate);
+      if(!overlay.ok)throw Error('Pack 2 sidecar not written; previous verified data retained: '+overlay.reason);
+      world=candidate;world.nextPack2State=pack2Selection;storageReadOnly=false;changed=false;
       clearMirrorDownload();
-      for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+      for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
