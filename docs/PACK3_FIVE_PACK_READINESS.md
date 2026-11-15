@@ -57,6 +57,14 @@ other four manual Block Packs.
   index limits each mesh rebuild to placements in the selected GPU buffer;
   negative chunk coordinates and deep-section boundaries receive explicit
   build/remove/reload regression tests. The 4,096-cell global cap remains.
+  Bulk builder placement now preflights **the same 12,000-vertex limit** in
+  every touched chunk/vertical-section, including already placed physical
+  blocks, BEFORE mutating the in-memory world or serializing an offscreen
+  building. No future settlement may silently write a valid-looking but
+  unrenderable physical blueprint. Four new exact-source Node tests cover
+  256 shaped construction cells over 64 chunks, 17-family mixed material
+  meshes, reload parity, over-budget atomic rejection and underground
+  section isolation; counts and outcomes require exact-head CI confirmation.
   A dedicated physical-only GPU refresh now recompiles **one affected section
   chunk**, rather than the legacy nine-neighbor edit fanout; source-time
   browser assertions reject unrelated physical mesh rebuilds. Existing
@@ -69,6 +77,18 @@ other four manual Block Packs.
   The old software-Chromium p95 edit costs were 223.7/333.0/287.5ms;
   these are not physical iPhone frame-time metrics and do not satisfy the
   hardware signoff requirement.
+
+## Latest exact-head evidence before dense-budget preflight
+- PR #153 `90b2db9d` CI: **#43724727400** dedicated gameplay
+  **37/37 Node** plus actual WebGL2 667×375, 844×390 and 932×430 PASS;
+  17/17 physical placements, saves/reloads, removals and separate archive
+  browser download/foreign-seed rejection/approved import passed. Screenshots:
+  artifact #14165788855. Depth **#43724727382** PASS.
+  Root full-game **#43724727352** completed SUCCESS including shared WebGL2.
+  All are source-exact to `90b2db9d`.
+- Remaining device gate: exact physical-iPhone FPS, input ergonomics and
+  memory/power under dense builds have NOT been measured here. Do not
+  equate SwiftShader desktop browser latencies with physical iPhone proof.
 
 ## Existing tested evidence (before this acceptance expansion)
 - PR #153 head `6195628d`: dedicated live-game Chromium/WebGL2 run

@@ -1,12 +1,12 @@
 // Pack 3 live-game construction overlay. The canonical VoxelWorld schema-1
 // format is NEVER extended: shaped IDs 109–125 are held in a verified, seed-bound
 // independent sidecar. No terrain or legacy block edits are synthesized.
-import {createPack3RuntimeStage,PACK3_RUNTIME_LIMIT} from './pack3-runtime.mjs';
+import {createPack3RuntimeStage,PACK3_RUNTIME_LIMIT,PACK3_RUNTIME_CHUNK_VERTEX_LIMIT} from './pack3-runtime.mjs';
 import {resolvePack3BuilderAsset,PACK3_BUILDER_SYMBOLS,PACK3_BUILDER_IDS} from './pack3.mjs';
 
 export const PACK3_OVERLAY_STORAGE_PREFIX='mythwrought-pack3-construction-v1:';
 export const PACK3_OVERLAY_PREVIOUS_GOOD_SUFFIX=':previous-good';
-export const PACK3_MAX_ADDED_VERTICES_PER_CHUNK=12000;
+export const PACK3_MAX_ADDED_VERTICES_PER_CHUNK=PACK3_RUNTIME_CHUNK_VERTEX_LIMIT;
 const allowed=new Map(PACK3_BUILDER_IDS.map((id,i)=>[id,PACK3_BUILDER_SYMBOLS[i]]));
 export function isPack3BlockId(id){return Number.isInteger(id)&&allowed.has(id);}
 export function pack3SymbolForId(id){return allowed.get(id)??null;}

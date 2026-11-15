@@ -9,6 +9,8 @@ import {WORLD_MIN_Y,WORLD_MAX_Y,sectionBounds,sectionForY} from '../depth.mjs';
 
 export const PACK3_RUNTIME_FORMAT='mythwrought.pack3-construction-overlay.v1';
 export const PACK3_RUNTIME_LIMIT=4096;
+// Equal to the Pack 3 live chunk GPU vertex budget; checked before any write.
+export const PACK3_RUNTIME_CHUNK_VERTEX_LIMIT=12000;
 export const PACK3_RUNTIME_LIVE=false; // Explicitly NOT wired into production world/renderer.
 const KEY=/^-?(0|[1-9]\d*),-?(0|[1-9]\d*),-?(0|[1-9]\d*)$/;
 const LIGHTS=[[.73,.77],[.48,1],[.67,.85]];
@@ -160,6 +162,27 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
       if(planned.has(k))throw new Error('Duplicate construction cell');
       available(e,planned);
       planned.set(k,e);
+    }
+    // A future settlement assembler may place a full blueprint into a chunk
+    // that is not streamed yet. Reject oversized shapes BEFORE the in-memory
+    // overlay changes, rather than leaving an unrenderable, saved settlement.
+    // Count only touched (chunk, vertical section) buckets and include any
+    // already committed physical blocks in each bucket.
+    const additionalByBucket=new Map();
+    for(const entry of planned.values()){
+      const bucket=bucketKey(entry.at);
+      const vertices=meshPack3PhysicalAsset(entry.asset,entry.yaw).vertexCount;
+      additionalByBucket.set(bucket,(additionalByBucket.get(bucket)??0)+vertices);
+    }
+    for(const [bucket,additional] of additionalByBucket){
+      let count=additional;
+      if(count>PACK3_RUNTIME_CHUNK_VERTEX_LIMIT)
+        throw new RangeError('Pack 3 physical chunk GPU budget exceeded');
+      for(const entry of byChunk.get(bucket)?.values()??[]){
+        count+=meshPack3PhysicalAsset(entry.asset,entry.yaw).vertexCount;
+        if(count>PACK3_RUNTIME_CHUNK_VERTEX_LIMIT)
+          throw new RangeError('Pack 3 physical chunk GPU budget exceeded');
+      }
     }
     if(playerBody){
       const proposed=(x,y,z)=>{
