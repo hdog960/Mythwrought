@@ -27,3 +27,7 @@
 6. Preserve and compare this Pack 1 source catalog/geometry with the final integration version; any functional source changes require fresh source-specific acceptance. No Pack 1 documentation or integration test changes alone can replace the pinned WebGL2 evidence.
 
 **Readiness verdict as of this handoff:** **NOT READY FOR FINAL INTEGRATION DECLARATION** pending the new builder-handoff tests, latest production dependency reconciliation, and proof of compatibility for rotations/variants/save/performance that the pack cannot establish by editing only its own source. The completed original M1–M6 acceptance remains preserved.
+
+## Builder-handoff acceptance wiring
+
+Pack 1's opt-in `tests/block-packs/pack-1/run-acceptance.mjs` explicitly includes `builder-handoff.test.mjs` among its ten native Node modules. Its fail-closed TAP threshold is now **at least 100 real passing tests**, incorporating seven additional builder-handoff checks on the original 93. The existing 15-gallery-view / 30-screenshot native browser evidence and the separate 360/90 source-WebGL2 acceptance are still required; unchanged prior artwork cannot waive new builder test execution. Root CI may not automatically run nested Pack 1 tests when its full shared browser gate is selected; treat a green root gate as **baseline only** until an exact-head, explicitly evidenced Pack 1 runner executes. This wiring alone is **NOT evidence that the new tests have passed**.
