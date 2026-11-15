@@ -114,7 +114,7 @@ export function auditM1Building(b){
  }
  for(const p of frame.filter(p=>p.roofFrame==='tie-post')){
   const [x,y,z]=p.at;
-  assert(p.asset==='pack2:022'&&p.orientation==='none',b.id+': vertical roof tie-post must use Pack 2 support post, never horizontal beam');
+  assert((p.asset==='pack2:022'||p.asset==='live:wood'&&p.roofRiser==='live-solid-step-backing'&&p.postSubstitution?.from==='pack2:022')&&p.orientation==='none',b.id+': vertical roof tie-post must use Pack 2 support post or audited full-solid live riser, never horizontal beam');
   assert(occupied.has(key([x,y+1,z])),b.id+': floating roof tie-post without immediate roof/beam contact');
  }
  const intended=regional.roomFurniture;

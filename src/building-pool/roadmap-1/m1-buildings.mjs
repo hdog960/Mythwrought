@@ -199,7 +199,7 @@ function compile(category,biome,size,index,row){
     }
   }
   let roofStepFilled=0;
-  const roofStepPending=[];
+  const roofStepPending=[],roofStepSolidPostSubstitutions=[];
   for(const k of [...riserTargets].sort()){
     const [x,y,z]=k.split(',').map(Number);
     if(free(x,y,z)){
@@ -207,10 +207,23 @@ function compile(category,biome,size,index,row){
       roofStepFilled++;
     }else{
       const occupant=occupied.get(k);
-      if(!occupant?.asset.startsWith('live:'))roofStepPending.push({cell:[x,y,z],asset:occupant?.asset??'untracked'});
+      // Pack2 022 is a slender POST, not a sealed vertical wall/riser. At a
+      // raised roof step, retain an actual supporting tie-post position but
+      // substitute currently live SOLID timber, sealing the whole voxel cell.
+      // Future decorative posts can be reviewed separately; no claim that
+      // candidate Pack2 timber span or roof waterproofing is certified.
+      if(occupant?.roofFrame==='tie-post'&&occupant.asset==='pack2:022'){
+        occupied.set(k,{...occupant,asset:'live:wood',orientation:'none',occupancy:FULL,
+          roofRiser:'live-solid-step-backing',postSubstitution:{from:'pack2:022',strengthApproval:'unresolved'}});
+        roofStepFilled++;
+        roofStepSolidPostSubstitutions.push([x,y,z]);
+      }else if(!occupant?.asset.startsWith('live:')){
+        roofStepPending.push({cell:[x,y,z],asset:occupant?.asset??'untracked'});
+      }
     }
   }
-  const roofStepAudit={needed:riserTargets.size,filled:roofStepFilled,unresolved:roofStepPending,weatherSealApproved:false};
+  const roofStepAudit={needed:riserTargets.size,filled:roofStepFilled,unresolved:roofStepPending,
+    solidPostSubstitutions:roofStepSolidPostSubstitutions,weatherSealApproved:false};
   if(feature==='porch'||feature==='arcade'){
     for(const x of feature==='porch'?[entry-2,entry+2]:[3,entry,w-4])for(let y=1;y<=wallTop;y++)if(x!==entry&&free(x,y,0))place(x,y,0,'support','pack2:022');
   }else if(feature==='buttress'){

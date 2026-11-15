@@ -26,7 +26,9 @@ export function auditRoofStepFeasibility(b){
  assert(audit&&audit.weatherSealApproved===false,b.id+': cannot certify unmerged Pack3 tile weather sealing');
  assert(audit.needed===targets.size,b.id+': roof step count differs from actual geometry');
  const unresolved=new Map((audit.unresolved??[]).map(r=>[k(r.cell),r.asset]));
+ const substitutions=new Set((audit.solidPostSubstitutions??[]).map(k));
  assert(unresolved.size===audit.unresolved.length,b.id+': duplicate unresolved step cell');
+ assert(substitutions.size===(audit.solidPostSubstitutions??[]).length,b.id+': duplicate full-solid roof-post substitution');
  let repaired=0;
  for(const cell of targets){
   const p=occ.get(cell);
@@ -34,6 +36,10 @@ export function auditRoofStepFeasibility(b){
   if(p.asset.startsWith('live:')){
    assert(p.roofRiser==='live-solid-step-backing'&&['live:stone','live:wood'].includes(p.asset),b.id+': fake solid step riser at '+cell);
    assert(!unresolved.has(cell),b.id+': live-filled riser still claimed as unresolved');
+   if(p.postSubstitution){
+    assert(p.postSubstitution.from==='pack2:022'&&p.postSubstitution.strengthApproval==='unresolved'&&p.roofFrame==='tie-post'&&p.asset==='live:wood',b.id+': incorrectly audited vertical post substitution');
+    assert(substitutions.has(cell),b.id+': solid post substitution omitted from audit ledger');
+   }else assert(!substitutions.has(cell),b.id+': ghost roof-post substitution record');
    repaired++;
   }else{
    assert(unresolved.get(cell)===p.asset,b.id+': pending partial-beam collision not tracked at '+cell);
@@ -43,6 +49,10 @@ export function auditRoofStepFeasibility(b){
  assert(repaired===audit.filled,b.id+': filled roof riser metadata not backed by physical cells');
  assert(audit.filled+audit.unresolved.length===audit.needed,b.id+': incomplete roof-step accounting');
  for(const [cell] of unresolved)assert(targets.has(cell),b.id+': ghost roof-step exception');
+ for(const cell of substitutions){
+   const p=occ.get(cell);
+   assert(targets.has(cell)&&p?.asset==='live:wood'&&p.roofRiser==='live-solid-step-backing'&&p.postSubstitution?.from==='pack2:022',b.id+': undocumented/forged post substitution');
+ }
  // True open courtyards are not accidentally sealed by these repairs.
  if(b.architecturalIdentity.roof==='courtyard'){
   const midX=Math.floor(b.footprint.width/2),midZ=Math.floor(b.footprint.depth/2);
@@ -51,5 +61,5 @@ export function auditRoofStepFeasibility(b){
    assert(!b.placements.some(p=>p.roofRiser&&p.at[0]===x&&p.at[2]===z),b.id+': courtyard blocked by step backing');
   }
  }
- return {id:b.id,needed:targets.size,filled:repaired,unresolved:unresolved.size,weatherSealApproved:false};
+ return {id:b.id,needed:targets.size,filled:repaired,unresolved:unresolved.size,solidPostSubstitutions:substitutions.size,weatherSealApproved:false};
 }
