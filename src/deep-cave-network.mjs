@@ -69,7 +69,7 @@ export function deepCaveWorld(world,origin=DEEP_CAVE_ORIGIN){
 export function deepCaveEvidence(world,origin=DEEP_CAVE_ORIGIN){
   const reader=deepCaveWorld(world,origin),route=deepCaveRoute(origin);
   const bands=DEEP_CAVE_BANDS.map(([top,bottom])=>{
-    const samples=route.filter(p=>p.floor<=top&&p.floor>=bottom);
+    const samples=route.filter(p=>p.floor<=top&&p.floor>=bottom&&p.floor<=LEGACY_WORLD_MIN_Y-3);
     const failures=samples.filter(p=>reader.get(p.x,p.floor,p.z)===BLOCK.AIR||
       reader.get(p.x,p.feet,p.z)!==BLOCK.AIR||
       reader.get(p.x,p.feet+1,p.z)!==BLOCK.AIR||
