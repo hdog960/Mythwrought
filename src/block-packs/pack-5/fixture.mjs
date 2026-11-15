@@ -111,8 +111,13 @@ export function makePack5Fixture(descriptors=[]){
       return false;},
     raycast(origin,direction,maxDistance=6){if(!Array.isArray(origin)||!Array.isArray(direction)||origin.length!==3||direction.length!==3||
       ![...origin,...direction,maxDistance].every(Number.isFinite)||maxDistance<0||direction.every(v=>v===0))throw Error('Invalid ray');
+      // Normalize before intersecting: maxDistance and reported hit distances are
+      // world-space units, even for arbitrary finite aiming-vector lengths.
+      const length=Math.hypot(...direction);
+      if(!Number.isFinite(length)||length===0)throw Error('Invalid ray direction length');
+      const unit=direction.map(v=>v/length);
       let hit=null;for(const p of placed.values())for(const part of p.parts)for(const b of part.boxes){
-        const t=rayBox(origin,direction,asAabb(b,part.cell));
+        const t=rayBox(origin,unit,asAabb(b,part.cell));
         if(t!==null&&t<=maxDistance&&(!hit||t<hit.distance))hit={symbolicId:p.id,anchor:[...p.anchor],cell:[...part.cell],distance:t};
       }return hit;},
     removeRay(origin,direction,maxDistance=6){const hit=fixture.raycast(origin,direction,maxDistance);return hit?fixture.remove(hit.cell):false;},
