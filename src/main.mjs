@@ -1057,8 +1057,13 @@ function start(){
       placeFixture(x,y,z,id){
         const old=world.get(x,y,z);
         if(!world.set(x,y,z,id))throw Error('Invalid test block');
+        const meshStart=performance.now();
         try{refreshEditedMeshes(x,z,y);}catch(err){world.set(x,y,z,old);throw err;}
-        save();
+        const savedAt=performance.now();
+        const saved=save();
+        // Localhost-only regression hook: source-authentic edit/mesh/save timings.
+        // Existing callers ignore the return value; no production behavior changes.
+        return {meshMs:savedAt-meshStart,saveMs:performance.now()-savedAt,saved};
       },
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
