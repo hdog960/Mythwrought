@@ -37,7 +37,7 @@ function update(){
   if(e instanceof RangeError){details.textContent='Choose one of the 44 authored missing representative models';return;}
   throw e;
  }
- const geometry=createRegionalPreviewMesh(b,{cutaway:selections.view.value==='cutaway'});
+ const geometry=createCoveragePreviewMesh(b,{cutaway:selections.view.value==='cutaway'});
  gl.bufferData(gl.ARRAY_BUFFER,geometry.vertices,gl.STATIC_DRAW);
  current={b,geometry};
  details.textContent=`${b.id} · ${geometry.sourceCells.toLocaleString()} displayed envelope voxels · ${geometry.triangleCount.toLocaleString()} visible triangles · WebGL2 active · ${selections.view.value}`;
