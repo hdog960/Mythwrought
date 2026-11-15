@@ -8,9 +8,17 @@ const REFS=Object.freeze({
   temperate:{foundation:'pack1:001',floor:'pack2:013',wall:'pack2:013',roof:'pack3:023',trim:'pack2:015'},
   desert:{foundation:'biome130:006',floor:'pack5:081',wall:'pack5:079',roof:'pack5:080',trim:'biome130:091'},
   snow:{foundation:'pack1:004',floor:'pack2:013',wall:'biome130:094',roof:'pack3:025',trim:'pack2:015'},
-  'enchanted-forest':{foundation:'biome130:038',floor:'pack2:013',wall:'biome130:096',roof:'pack3:026',trim:'biome130:044'},
-  mountain:{foundation:'biome130:047',floor:'pack1:005',wall:'pack1:002',roof:'pack3:025',trim:'biome130:098'}
+  'enchanted-forest':{foundation:'biome130:038',floor:'pack2:013',wall:'biome130:096',roof:'pack3:026',trim:'pack2:015'},
+  mountain:{foundation:'biome130:047',floor:'pack1:005',wall:'pack1:002',roof:'pack3:025',trim:'pack1:005'}
 });
+// Issue #117's authoritative 130 roster calls biome130:044 *woven magical
+// branch lattices* and biome130:098 *mountain cliff-anchor fittings*. Neither
+// describes a full structural wall, roof beam, or load-bearing column. Earlier
+// plans wrongly used those shapes for thousands of full-cell supports.
+// Use manufactured Pack 2 timber beams and full Pack 1 polished masonry as
+// physical-support candidates; regional foundations, wall ribs and roof
+// families remain biome-specific. All producer shape/collision ABI remains
+// unresolved until separate integration/creator approval.
 // Verified symbolic roster positions from manual Pack 1–5 manifests. These are
 // future dependencies, NOT runtime numeric IDs, shape/rotation approval or saves.
 export const M1_FIXTURE_ROSTER=Object.freeze({store:'pack5:087',counter:'pack5:086',altar:'pack5:093',seat:'pack4:058',light:'pack4:037',glass:'pack4:030',frame:'pack4:032',crate:'pack4:057',banner:'pack4:061',column:'pack3:072',garden:'pack1:047'});

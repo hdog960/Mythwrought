@@ -30,7 +30,7 @@
   },
   "milestones": {
     "M0": "technical-accepted-at-71838311-exact-head-CI-and-real-chromium",
-    "M1": "30 authored candidates; 15 temples corrected to Pack5 altar family 093, original M0 store now declares all material dependencies; 43/43 genuine native Node and 90/90 genuine Chromium Canvas2D; creator/physical shape ABI approval OPEN; M2 not started",
+    "M1": "30 authored candidates; 4,958 incorrectly assigned roof/wall support symbols fixed across all 12 Mountain and Enchanted Forest concepts; 45/45 native Node and 90/90 authentic Chromium Canvas2D; creator approval and physical asset ABI remain OPEN",
     "M2": "not-started",
     "M3": "not-started",
     "M4": "not-started",
@@ -196,12 +196,12 @@
     "M0ExactHeadCI": "GitHub Actions #43644864326 PASS at 71838311c39a0cf4a2fdeeeac8e5d28c317f5aed",
     "M0Node": "9/9 genuine native Node v22.16.0",
     "M0Browser": "nine real Chromium Canvas2D screenshots at three landscape sizes, preview inspector-reviewed",
-    "M1LocalNode": "43/43 genuine native Node v22.16.0 PASS, 0 skips/failures/TODO, rebuilt against locally byte-matched final Git source and tests; current exact-head GitHub Actions separate.",
-    "M1Browser": "90/90 authentic Chromium Canvas2D viewport captures (30 candidate choices times 667x375,844x390,932x430); contact sheet manually inspected; not production-game WebGL2 or physical iPhone.",
+    "M1LocalNode": "45/45 genuine native Node v22.16.0 PASS, 0 skips/failures/TODO, source-exact committed files; 43 prior tests plus two manufactured-support-roster semantics and biome-preservation cases; current exact-head workflow separate.",
+    "M1Browser": "90/90 real Chromium Canvas2D captures across 30 authors at 667x375,844x390,932x430, screenshots inspected; presentation colors by kind, not symbol, so unchanged-looking previews do not verify actual new material shapes or colors.",
     "realIphone": "not tested",
     "M1VisualReview": "Earlier 30-design contact sheet showed similarly boxy stores and temples. Rebuilt all 15 temples with 2x2 roof-overriding paired belfries, triple-width ceremonial portal, raised two-row dais and higher visible roof lantern; creator aesthetic approval remains OPEN.",
     "M1StructuralFinding": "BEFORE: mountain temple left belfry 0/4 lower support cells, enchanted forest 2/4, desert 3/4. AFTER: 4/4 foundation and floor cells at both belfries across all 15 temples. Two symbolic pack1:008 stair candidate approaches added to raised dais; actual stair geometry ABI unverified.",
-    "M1Review": "M1 creator aesthetic approval, physical asset/stair/collision ABI, real in-game WebGL2 and actual iPhone approval all OPEN; 30 authored candidate blueprints, 0 accepted, 0 world placed; M2 remains locked.",
+    "M1Review": "M1 30 authored candidates; 0 creator-approved; 0 physically integrated/world placed. Current-head CI and true physical beam/masonry shapes, real game WebGL2, hardware iPhone, collision/rotation/stair save approval all OPEN. M2 not started.",
     "M1RoofStructure": "New high-level truss beams and roof-post ribs added above interior three-high walk clearance in 23 generated non-desert buildings (original M0 store unchanged). Desert courtyard skylight intentionally remains open. Actual physical sloped-mesh/rotation and collision interfaces remain unverified.",
     "M1StructuralConnectivity": "Before: floating structural islands in Mountain general store small (22), large (60), Mountain temple medium (17), Desert temple small (11), medium (11). After: all structural wall/window/roof/floor voxels six-neighbor connected to y0 foundations in all 30 authored M1 candidates.",
     "M1WeatherEnvelope": "A new comprehensive perimeter audit found 248 exposed upper-wall gaps across all 12 Enchanted Forest and Mountain generated models despite all structural voxels being foundation connected; new symbolic wall cells close them without modifying windows, doors or Desert courtyards.",
@@ -210,7 +210,8 @@
     "M1RoomGating": "Discovered 15/20 newly authored auxiliary room plans were accessible when intended doorway was blocked, due open-ended screens (10 medium offices/chapels and 5 large dual-temple chapel schemes). Added physical 3-high cross-cap walls at both ends, registered all 25 actual side access openings, and moved a pew blocking approach in 4 medium temples. 25/25 room-entry isolation checks now pass; large store bays remain fully isolated.",
     "M1DoorSchema": "Roadmap2-only validator now enforces actual empty 3-high cells for both exterior entrances and all internal door declarations, with negative blocked-door regressions; metadata-only access assertions no longer suffice.",
     "M1SymbolicRoster": "Verified against manual Pack 1–5 candidate manifests: Pack3 roster 075 is decorative stone relief, not altar. Corrected all 15 temple dais and 15 medium/large side-altar placements to Pack5 roster 093 Altars & Pedestals (UNMERGED candidate). Added test snapshot of verified fixture roles.",
-    "M1DependencyCompleteness": "Original M0 hand-authored Temperate Small Store had five placed symbols omitted from unresolvedDependencies: pack1:001, pack2:013, pack2:015, pack4:032, pack4:057. Added exact missing entries without changing a single store voxel. Roadmap2 schema now requires declared unresolved dependencies for every physical voxel material and symbolic entrance door."
+    "M1DependencyCompleteness": "Original M0 hand-authored Temperate Small Store had five placed symbols omitted from unresolvedDependencies: pack1:001, pack2:013, pack2:015, pack4:032, pack4:057. Added exact missing entries without changing a single store voxel. Roadmap2 schema now requires declared unresolved dependencies for every physical voxel material and symbolic entrance door.",
+    "M1BiomeSupportSymbols": "Authoritative Issue #117 defines biome130:044 woven magical branch lattices and biome130:098 Mountain cliff-anchor fittings. Previously misused as 2,764 Enchanted Forest roof/wall voxels and 2,194 Mountain roof/wall voxels (plus 60 fixtures across both); these specialized shapes are no longer used in supporting cells. Replaced with planned Pack2:015 timber beams and Pack1:005 polished masonry, preserving original full spatial geometry, regional roof/wall/foundation symbol identities, all 30 blueprint IDs, open passages and model ownership. Both new support families are still unmerged and unverified physically."
   },
   "status": "M0 TECHNICAL ACCEPTED; M1 30 AUTHOR-CANDIDATE CONCEPTS; DRAFT/UNMERGED/UNDEPLOYED",
   "integrationPR126": "Checkpoint 008 live automation-world activation; no building-pool or pack paths changed; not included in this draft."
