@@ -231,3 +231,6 @@ export const M1_REPORT=Object.freeze({
 validateCollection(M1_EXEMPLARS);
 if(M1_REPORT.distinctShapeFingerprints!==M1_REPORT.authored)throw Error('M1 architecture collision');
 export function getM1Exemplar(id){return M1_EXEMPLARS.find(x=>x.id===id)||null;}
+
+// Reuse only the proven coordinate-cell expansion, without changing any M1 plan or ID.
+export const buildAdditionalFourBPlan = construct;
