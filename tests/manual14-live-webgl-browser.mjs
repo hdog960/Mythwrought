@@ -21,19 +21,22 @@ try{
   await page.waitForFunction(()=>Boolean(window.__mythwroughtTest&&
     Number(document.querySelector('#scene')?.dataset?.renderedFrames)>0),
     {timeout:45000});
-  const scene=await page.evaluate(()=>{
+  const scene=await page.evaluate(async()=>{
    const t=window.__mythwroughtTest;
    if(!document.getElementById('manual14Select')||
       !document.getElementById('manual14Rotate')||
       !document.getElementById('manual14Upper'))
     throw Error('Pack 1/4 live construction controls are missing');
+   const {MANUAL_FIVE_PACK_CATALOG}=await import('./src/builder-assets/manual-five-pack.mjs');
+   const symbol=id=>MANUAL_FIVE_PACK_CATALOG.find(x=>x.numericId===id)?.symbol;
    t.teleport(501,500);
    const first=[500,19,500],second=[501,19,500];
    if(t.block(...first)!==0||t.block(...second)!==0)
     throw Error('Test terrain does not expose empty cells for authored fixtures');
    const before=t.snapshot();
-   const p1=t.placeManual14Fixture(...first,9,0,'lower');
-   const p4=t.placeManual14Fixture(...second,159,0,'lower');
+   const p1=await t.placeBuilderAsset({asset:symbol(9),numericId:9,at:first,orientation:0});
+   const p4=await t.placeBuilderAsset({asset:symbol(159),numericId:159,at:second,orientation:0});
+   if(!p1.ok||!p4.ok)throw Error('Unified Builder AI cannot place both packs: '+p1.reason+' / '+p4.reason);
    t.aimAt(...first);
    const after=t.snapshot();
    if(t.block(...first)!==9||t.block(...second)!==159)
