@@ -16,18 +16,15 @@ export function assertSlot(type,biome,size,variant){
   if(!row||!BIOMES.includes(biome)||!SIZES.includes(size)||
      !Number.isSafeInteger(variant)||variant<1||variant>row.perCombination)
     throw RangeError('Builder 3A category, biome, size or variation is not allocated');
-  return true;
+  // Original Roadmap 3 validation expected assertSlot to return its stable ID.
+  const prefix=type==='blacksmith'&&variant===1?'r3':'r3a';
+  return `${prefix}:${type}:${biome}:${size}:${variant}`;
 }
 export function isLegacySlot(type,biome,size,variant){
   assertSlot(type,biome,size,variant);
   return type==='blacksmith'&&variant===1;
 }
-export function slotId(type,biome,size,variant){
-  assertSlot(type,biome,size,variant);
-  // Original #122 identities are immutable. Never mint a duplicate 3A identity.
-  const prefix=isLegacySlot(type,biome,size,variant)?'r3':'r3a';
-  return `${prefix}:${type}:${biome}:${size}:${variant}`;
-}
+export function slotId(type,biome,size,variant){return assertSlot(type,biome,size,variant);}
 export function* slots(){
   for(const row of TYPES)for(const biome of BIOMES)for(const size of SIZES)
     for(let variant=1;variant<=row.perCombination;variant++)
