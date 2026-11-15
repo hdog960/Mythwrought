@@ -54,84 +54,48 @@ const PROFILES=[
         4,
         "pack5:096",
         "empty-display-rail",
-        "oak-stall-divider"
-      ],
-      [
-        3,
-        4,
-        "pack5:096",
-        "empty-display-rail",
-        "oak-stall-divider"
+        "oak-stall-divider",
+        "west"
       ],
       [
         4,
         4,
         "pack5:096",
         "empty-display-rail",
-        "oak-stall-divider"
-      ],
-      [
-        5,
-        4,
-        "pack5:096",
-        "empty-display-rail",
-        "oak-stall-divider"
+        "oak-stall-divider",
+        "west"
       ],
       [
         2,
         5,
         "pack5:096",
         "empty-display-rail",
-        "oak-stall-divider"
+        "oak-stall-divider",
+        "north"
       ],
       [
         5,
         5,
         "pack5:096",
         "empty-display-rail",
-        "oak-stall-divider"
-      ],
-      [
-        2,
-        6,
-        "pack5:096",
-        "empty-display-rail",
-        "oak-stall-divider"
-      ],
-      [
-        5,
-        6,
-        "pack5:096",
-        "empty-display-rail",
-        "oak-stall-divider"
+        "oak-stall-divider",
+        "north"
       ],
       [
         2,
         7,
         "pack5:096",
         "empty-display-rail",
-        "oak-stall-divider"
-      ],
-      [
-        3,
-        7,
-        "pack5:096",
-        "empty-display-rail",
-        "oak-stall-divider"
+        "oak-stall-divider",
+        "west"
       ],
       [
         4,
         7,
         "pack5:096",
         "empty-display-rail",
-        "oak-stall-divider"
-      ],
-      [
-        5,
-        7,
-        "pack5:096",
-        "empty-display-rail",
-        "oak-stall-divider"
+        "oak-stall-divider",
+        "west"
       ],
       [
         13,
@@ -1085,7 +1049,9 @@ const PROFILES=[
     ],
     "title": "Stonecrest Treasury and Records Hall",
     "roofForm": "massive stone parapet and rear vault tower",
-    "signature": "24-wide four-room treasury with own records office, four counter cells, right transit and left physically enclosed vault"
+    "signature": "24-wide four-room treasury with own records office, four counter cells, right transit and left physically enclosed vault",
+    "vaultDoorOrientation": "east",
+    "vaultDoorVariant": "citadel-ironbound-leaves"
   }
 ];
 const assemble=function assemble(p){
@@ -1097,18 +1063,18 @@ const assemble=function assemble(p){
   for(let y=2;y<=p.h;y++)put(x,y,z,p.wall,'wall');
  for(let y=2;y<=4;y++)remove(p.entry,y,0);
  openings.push({type:'entrance',x:p.entry,y:2,z:0,clearHeightCells:3,doorSymbol:'pack2:020',doorOpenState:'unverified'});
- for(const [z,doorX] of p.partZ){for(let x=1;x<p.w-1;x++)for(let y=2;y<=4;y++)if(x!==doorX)put(x,y,z,'pack2:015','wall');openings.push({type:'internal-doorway',x:doorX,y:2,z,clearHeightCells:3});}
- for(const [x,z0,z1,doorZ] of p.partX){for(let z=z0;z<=z1;z++)for(let y=2;y<=4;y++)if(z!==doorZ)put(x,y,z,'pack2:015','wall');openings.push({type:'internal-doorway',x,y:2,z:doorZ,clearHeightCells:3});}
+ for(const [z,doorX] of p.partZ){const wide=!!(p.vaultDoor&&p.vaultDoor[0]===doorX&&p.vaultDoor[1]===z);for(let x=1;x<p.w-1;x++)for(let y=2;y<=4;y++)if(x!==doorX&&!(wide&&x===doorX+1))put(x,y,z,'pack2:015','wall');openings.push({type:'internal-doorway',x:doorX,y:2,z,clearHeightCells:3});if(wide)openings.push({type:'internal-doorway',role:'vault-wide-secondary',x:doorX+1,y:2,z,clearHeightCells:3});}
+ for(const [x,z0,z1,doorZ] of p.partX){const wide=!!(p.vaultDoor&&p.vaultDoor[0]===x&&p.vaultDoor[1]===doorZ);for(let z=z0;z<=z1;z++)for(let y=2;y<=4;y++)if(z!==doorZ&&!(wide&&z===doorZ+1))put(x,y,z,'pack2:015','wall');openings.push({type:'internal-doorway',x,y:2,z:doorZ,clearHeightCells:3});if(wide)openings.push({type:'internal-doorway',role:'vault-wide-secondary',x,y:2,z:doorZ+1,clearHeightCells:3});}
  for(const [z,x0,x1] of p.caps)for(let x=x0;x<=x1;x++)for(let y=2;y<=4;y++)put(x,y,z,'pack2:015','wall');
  for(const [x,z] of p.windows)for(const [i,material] of ['pack4:030','pack4:032'].entries()){const y=3+i,key=k(x,y,z);if(voxel.get(key)?.kind!=='wall')throw Error('missing window wall '+key);voxel.set(key,{x,y,z,material,kind:'window'});}
- for(const [x,z,material,role,physicalVariant] of p.fixtures){if(!voxel.has(k(x,1,z))||voxel.has(k(x,2,z)))throw Error('invalid fixture floor '+k(x,2,z));put(x,2,z,material,'fixture',{role,physicalVariant,physicalFootprintStatus:'unresolved-until-families-preflight',supportIntent:'floor'});}
+ for(const [x,z,material,role,physicalVariant,intendedFacing] of p.fixtures){if(!voxel.has(k(x,1,z))||voxel.has(k(x,2,z)))throw Error('invalid fixture floor '+k(x,2,z));put(x,2,z,material,'fixture',{role,physicalVariant,...(intendedFacing?{intendedFacing}:{}),physicalFootprintStatus:'unresolved-until-families-preflight',supportIntent:'floor'});}
  // A physically backed roof plate and attached parapet; unsupported visual
  // towers are avoided by stacking their cells directly above a plate cell.
  for(let x=0;x<p.w;x++)for(let z=0;z<p.d;z++)put(x,p.h+1,z,p.roof,'roof');
  for(let x=0;x<p.w;x++)for(let z=0;z<p.d;z++)if(x===0||x===p.w-1||z===0||z===p.d-1)put(x,p.h+2,z,'pack2:015','roof');
  for(const [x,z,top] of p.towers)for(let extra=2;extra<=top;extra++)put(x,p.h+extra,z,'pack2:015','roof');
  const [lx,ly,lz]=p.lamp;put(lx,ly,lz,'pack4:035','decor',{role:'suspended-light-no-emission'});
- if(p.vaultDoor){const vault=openings.find(o=>o.type==='internal-doorway'&&o.x===p.vaultDoor[0]&&o.z===p.vaultDoor[1]);if(!vault)throw Error('missing planned vault door');vault.doorSymbol='pack5:094';vault.role='vault-threshold';vault.doorOpenState='symbolic-unverified';}
+ if(p.vaultDoor){const vault=openings.find(o=>o.type==='internal-doorway'&&o.x===p.vaultDoor[0]&&o.z===p.vaultDoor[1]);if(!vault)throw Error('missing planned vault door');vault.doorSymbol='pack5:094';vault.role='vault-threshold';vault.doorOpenState='symbolic-unverified';vault.physicalVariant=p.vaultDoorVariant;vault.intendedFacing=p.vaultDoorOrientation;if(!openings.some(o=>o.role==='vault-wide-secondary'))throw Error('two-cell gate requires distinct second portal');}
  const voxels=[...voxel.values()].sort((a,b)=>a.y-b.y||a.z-b.z||a.x-b.x);
  const fullOpenings=[...openings,...voxels.filter(v=>v.kind==='window').map(({x,y,z,material})=>({type:'window',x,y,z,material}))];
  const symbols=[...new Set([...voxels.map(v=>v.material),...openings.map(o=>o.doorSymbol).filter(Boolean)])];

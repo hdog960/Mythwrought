@@ -236,21 +236,24 @@ export const M1_NEW_DESIGN_PROFILES=Object.freeze([
         4,
         "pack5:096",
         "empty-pen",
-        "oak-stall-divider"
+        "oak-stall-divider",
+        "north"
       ],
       [
         3,
         4,
         "pack5:096",
         "empty-pen",
-        "oak-stall-divider"
+        "oak-stall-divider",
+        "north"
       ],
       [
-        2,
-        5,
+        4,
+        4,
         "pack5:096",
         "empty-pen",
-        "oak-stall-divider"
+        "oak-stall-divider",
+        "north"
       ],
       [
         5,
@@ -1091,7 +1094,9 @@ export const M1_NEW_DESIGN_PROFILES=Object.freeze([
     "vaultDoor": [
       13,
       12
-    ]
+    ],
+    "vaultDoorOrientation": "north",
+    "vaultDoorVariant": "citadel-ironbound-leaves"
   }
 ]);
 export const M1_NEW_MERCHANTS=Object.freeze(M1_NEW_DESIGN_PROFILES.map(assembleSpecialistProfile));

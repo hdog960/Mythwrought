@@ -27,3 +27,22 @@ test('real family geometry remains explicitly distinct from conceptual occupied 
  // The audit is intentionally not a production placement or runtime ABI pass.
  assert.equal(r.hasFinalPhysicalFamilyAcceptance,false);
 });
+
+test('real producer-resolved two-cell oak dividers preserve exact no-overlap pen footprints',()=>{
+ const r=inspect2APhysicalReadiness();
+ const pen=r.resolvedFixtureCandidates.filter(x=>x.id==='r2:pet-shop:temperate:small:01'&&x.symbol==='pack5:096'&&x.variant==='oak-stall-divider');
+ const mountain=r.resolvedFixtureCandidates.filter(x=>x.id==='r2:pet-shop:mountain:medium:01'&&x.symbol==='pack5:096'&&x.variant==='oak-stall-divider');
+ assert.equal(pen.length,6);assert.equal(mountain.length,3);
+ for(const x of [...pen,...mountain]){assert.equal(x.occupiedOffsets,2);assert.equal(x.orientationProvenance,'explicit-author-intent');assert.equal(x.overlappedConceptualCells.length,0);}
+ const unique=x=>new Set(x.flatMap(v=>v.physicalOccupiedCells.map(c=>c.join(','))));
+ assert.equal(unique(pen).size,12);assert.equal(unique(mountain).size,6);
+ assert.equal(r.physicalFootprintConflicts.length,0,JSON.stringify(r.physicalFootprintConflicts.slice(0,8)));
+});
+test('real producer Pack5 heavy gates occupy exactly two physically open 3-high cells in both 2A banks',()=>{
+ const r=inspect2APhysicalReadiness();
+ assert.equal(r.resolvedGateCandidates.length,2);
+ const ids=new Set(r.resolvedGateCandidates.map(x=>x.id));
+ assert(ids.has('r2:bank:mountain:large:01'));
+ assert(ids.has('r2:bank:enchanted-forest:medium:01'));
+ for(const gate of r.resolvedGateCandidates){assert.equal(gate.occupiedCells.length,2);assert(gate.hasTwoClearOpenings);assert.equal(gate.productionPlaced,false);}
+});
