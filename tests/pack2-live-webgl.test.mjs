@@ -178,6 +178,77 @@ test('approved Pack 2 real WebGL2 gameplay mesh, legacy save isolation, reload, 
         'Final approved candidate and old world were not recovered on reload');
       assert.equal(await c.eval("localStorage.getItem('mythwrought-v002-world-179')"),
         originalLegacy,'Original schema-1 bytes changed during browser reload');
+
+      // Like-for-like production performance comparison, not a new gallery:
+      // same real 3D cell/chunk, same uploaded GPU buffers and synchronous
+      // sidecar+legacy save hook in the same headless Chromium process.
+      // Alternate placement order by trial; clear to the actual original AIR
+      // between placements so legacy and Pack 2 compare identical context.
+      const pairs=[],ordinary=[3,4,5,6,7,8];
+      const percentile=(values,p)=>{
+        const sorted=[...values].sort((a,b)=>a-b);
+        return Math.round(sorted[Math.min(sorted.length-1,
+          Math.ceil(sorted.length*p)-1)]*10)/10;
+      };
+      const legacyBefore=await c.eval("localStorage.getItem('mythwrought-v002-world-179')");
+      for(let i=0;i<18;i++){
+        const oldId=ordinary[i%ordinary.length],packId=59+i;
+        const comparison=await c.eval("(() => {"+
+          "const t=window.__mythwroughtTest,cell="+JSON.stringify(cell)+";"+
+          "const original="+oldId+",candidate="+packId+",trial="+i+";"+
+          "const measure=(id)=>{"+
+          "if(t.block(...cell)!==0)throw Error('Benchmark source must be AIR');"+
+          "const before=t.snapshot(),start=performance.now();"+
+          "t.placeFixture(...cell,id);"+
+          "const durationMs=Math.round((performance.now()-start)*10)/10;"+
+          "const after=t.snapshot();"+
+          "if(t.block(...cell)!==id)throw Error('Benchmark block not installed');"+
+          "const value={id,durationMs,chunks:after.chunks.length,"+
+          "meshBatches:after.editMeshBatches-before.editMeshBatches,"+
+          "gpuFaults:after.gpuRetry.failures-before.gpuRetry.failures};"+
+          "t.placeFixture(...cell,0);"+
+          "if(t.block(...cell)!==0)throw Error('Benchmark cleanup must restore AIR');"+
+          "return value};"+
+          "if(t.block(...cell)!==0)t.placeFixture(...cell,0);"+
+          "const first=trial%2===0?original:candidate;"+
+          "const a=measure(first),b=measure(first===original?candidate:original);"+
+          "return {legacy:first===original?a:b,pack2:first===candidate?a:b,"+
+          "first:first===original?'legacy':'pack2'}})()");
+        assert.equal(comparison.legacy.id,oldId);
+        assert.equal(comparison.pack2.id,packId);
+        for(const result of [comparison.legacy,comparison.pack2]){
+          assert.equal(result.chunks,25,'Benchmark left 25 chunk surface budget');
+          assert.equal(result.meshBatches,1,'Benchmark rebuild wasn't identical');
+          assert.equal(result.gpuFaults,0,'A GPU failure invalidates performance comparison');
+          assert.ok(Number.isFinite(result.durationMs)&&result.durationMs>=0);
+        }
+        assert.equal(await c.eval("localStorage.getItem('mythwrought-v002-world-179')"),
+          legacyBefore,'Legacy baseline modified original schema-1 bytes');
+        pairs.push({trial:i,...comparison,
+          differenceMs:Math.round((comparison.pack2.durationMs-
+            comparison.legacy.durationMs)*10)/10});
+      }
+      assert.equal(await c.eval("window.__mythwroughtTest.block(..."+JSON.stringify(cell)+")"),0);
+      const legacyTimes=pairs.map(p=>p.legacy.durationMs);
+      const packTimes=pairs.map(p=>p.pack2.durationMs);
+      const differences=pairs.map(p=>p.differenceMs);
+      const performanceComparison={
+        source:'real production placeFixture + GPU remesh + save, same cell, SwiftShader',
+        originalIds:ordinary,approvedIds:allApproved,
+        legacy:{p50Ms:percentile(legacyTimes,.5),p95Ms:percentile(legacyTimes,.95),
+          maxMs:Math.max(...legacyTimes)},
+        pack2:{p50Ms:percentile(packTimes,.5),p95Ms:percentile(packTimes,.95),
+          maxMs:Math.max(...packTimes)},
+        paired:{medianDeltaMs:percentile(differences,.5),
+          p95DeltaMs:percentile(differences,.95),
+          packSlowerCount:differences.filter(d=>d>0).length,
+          legacySlowerCount:differences.filter(d=>d<0).length},
+        sampleCount:pairs.length,trialPairs:pairs,physicalIPhone:false};
+      console.log('PASS PACK2 PAIRED LIVE WEBGL2 PERF '+JSON.stringify({
+        n:performanceComparison.sampleCount,
+        legacy:performanceComparison.legacy,
+        pack2:performanceComparison.pack2,
+        paired:performanceComparison.paired}));
       console.log('PASS PACK2 18-ID ORIGINAL LIVE WEBGL2 EVIDENCE '+JSON.stringify({
         view:'932x430',images:gallery.length,ids:gallery.map(x=>x.id),
         maxEditMs:Math.max(...gallery.map(x=>x.editMs)),
@@ -188,6 +259,7 @@ test('approved Pack 2 real WebGL2 gameplay mesh, legacy save isolation, reload, 
         label:'Mythwrought real WebGL2 Pack 2, not Canvas2D or physical iPhone',
         CIHead:process.env?.GITHUB_SHA||'local',candidateIds:[59,63,66,73,76],
         viewports:screenshots,fullLiveGallery:gallery,
+        performanceComparison,
         originalSaveSchema:1,liveDeployment:false,physicalIPhone:false
       },null,2));
       console.log('PASS PACK2 LIVE WEBGL2 '+JSON.stringify(screenshots));
