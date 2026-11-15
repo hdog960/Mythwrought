@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M2 initial original architecture batch: 8 added candidates; full source/physical/browser acceptance in progress",
+  "milestone": "M2 batch: eight new original 3D buildings; legacy ordinal collisions repaired; exact-head 1A CI pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -120,7 +120,7 @@
       "category": "house",
       "biome": "snow",
       "size": "medium",
-      "id": "r1:house:snow:medium:002"
+      "id": "r1:house:snow:medium:004"
     },
     {
       "category": "house",
@@ -138,7 +138,7 @@
       "category": "tavern",
       "biome": "enchanted-forest",
       "size": "medium",
-      "id": "r1:tavern:enchanted-forest:medium:002"
+      "id": "r1:tavern:enchanted-forest:medium:004"
     },
     {
       "category": "inn",

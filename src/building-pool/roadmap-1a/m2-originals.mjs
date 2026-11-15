@@ -24,7 +24,7 @@ const DESIGNS=Object.freeze([
   posts:[3,12],detail:'shade-terrace-and-front-dune-posts'
  },
  {
-  category:'house',biome:'snow',size:'medium',index:2,title:'Frostpine Cross-Hall Residence',w:20,d:18,
+  category:'house',biome:'snow',size:'medium',index:4,title:'Frostpine Cross-Hall Residence',w:20,d:18,
   plan:'central-spine-with-opposed-sleeping-and-cooking-wings',roof:'steep',skin:'live:wood',roofAsset:'pack3:025',
   segments:[[7,2,7,15],[12,2,12,15],[8,10,11,10]],
   entry:[9,1,'spine'],doors:[door(7,5,'spine','sleeping'),door(12,6,'spine','kitchen'),door(10,10,'spine','library')],
@@ -54,7 +54,7 @@ const DESIGNS=Object.freeze([
   posts:[3,10],detail:'asymmetric-porch-and-hipped-alewing'
  },
  {
-  category:'tavern',biome:'enchanted-forest',size:'medium',index:2,title:'Silverleaf Lantern Gallery',w:21,d:20,
+  category:'tavern',biome:'enchanted-forest',size:'medium',index:4,title:'Silverleaf Lantern Gallery',w:21,d:20,
   plan:'parallel-gallery-with-four-cross-hall-serving-bays',roof:'butterfly',skin:'pack2:013',roofAsset:'pack3:023',
   segments:[[8,2,8,17],[13,2,13,17],[2,10,7,10],[14,10,18,10]],
   entry:[10,1,'gallery'],doors:[door(8,5,'gallery','taproom'),door(13,6,'gallery','seating'),door(8,14,'gallery','kitchen'),door(13,15,'gallery','store')],
