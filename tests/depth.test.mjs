@@ -241,3 +241,36 @@ test('incremental deep remesh is exactly equal to a fresh full remesh for rapid 
   const rolledBack=meshDepthSection(w,0,0,section,{x:1,z:1});
   assert.deepEqual(rolledBack,meshDepthSection(VoxelWorld.restore(w.save()),0,0,section));
 });
+
+
+test('solid deep sections use sparse faces but exactly match authoritative full geometry',()=>{
+  const w=new VoxelWorld(179);
+  const edits=[
+    [1,-78,1,BLOCK.AIR],
+    [0,-77,1,BLOCK.AIR],
+    [-1,-78,1,BLOCK.AIR],
+    [1,-83,1,BLOCK.AIR],
+    [1,-84,1,BLOCK.AIR],
+    [1,-32,1,BLOCK.AIR],
+    [1,-33,1,BLOCK.AIR],
+    [1,-210,1,BLOCK.AIR],
+  ];
+  for(const [x,y,z,id] of edits)assert.equal(w.set(x,y,z,id),true);
+  const fullReader={get:(x,y,z)=>w.get(x,y,z),seed:w.seed};
+  for(const [cx,cz,section] of [[0,0,-1],[0,0,-2],[0,0,-5],
+    [-1,0,-5],[0,-1,-5],[0,0,-13],[1,1,-7]]){
+    invalidateDepthMeshCache(w);
+    const sparse=meshDepthSection(w,cx,cz,section);
+    const full=meshDepthSection(fullReader,cx,cz,section);
+    assert.deepEqual(sparse,full,
+      'sparse current-world mesh disagrees with complete world.get mesh at '+[cx,cz,section]);
+  }
+  const untouched=new VoxelWorld(179);
+  assert.equal(meshDepthSection(untouched,3,3,-6).length,0,
+    'solid unedited deep rock has no visible faces');
+  // A custom source is never treated as all-solid even if it mimics the
+  // VoxelWorld methods: the complete reader remains authoritative.
+  const fake={seed:179,get:(x,y,z)=>x===48&&y===-78&&z===48?BLOCK.AIR:
+    untouched.get(x,y,z)};
+  assert.ok(meshDepthSection(fake,3,3,-5).length>0);
+});

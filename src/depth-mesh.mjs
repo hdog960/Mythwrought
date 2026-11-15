@@ -1,7 +1,7 @@
 // Depth-owned, section-local solid voxel mesher. No biome, cave, landmark,
 // flora, or manual-block generation belongs here. Only world.get defines cells.
-import {BLOCK,CHUNK_SIZE} from './voxel.mjs';
-import {sectionBounds} from './depth.mjs';
+import {BLOCK,CHUNK_SIZE,VoxelWorld} from './voxel.mjs';
+import {sectionBounds,WORLD_MIN_Y} from './depth.mjs';
 
 const FACES=[
   {d:[1,0,0],q:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],lit:.77},
@@ -23,6 +23,38 @@ const COLORS={
 // publishes one complete 9-float mesh, preserving all previous API/shader data.
 const MAX_CACHED_DEPTH_SECTIONS=36;
 const sectionColumnsByWorld=new WeakMap();
+const EMPTY_COLUMN=new Float32Array(0);
+// Current depth contract: below legacy Y=-3 the unedited world is solid
+// STONE/DEEPSTONE. Only explicit AIR deltas or the natural Y=-210 bottom
+// reveal faces. Skip entire unexposed 16x16x16 regions during streaming.
+// This optimization never applies to synthetic/custom world readers, the
+// bottom section, or very large edit sets; those use authoritative full scans.
+function sparseExposedColumns(world,cx,cz,bounds){
+  if(!(world instanceof VoxelWorld)||
+     world.get!==VoxelWorld.prototype.get||
+     world.naturalAndLandmarkBlock!==VoxelWorld.prototype.naturalAndLandmarkBlock||
+     !(world.edits instanceof Map)||world.edits.size>4096||
+     bounds.minY<=WORLD_MIN_Y)return null;
+  const minX=cx*CHUNK_SIZE,maxX=minX+CHUNK_SIZE-1;
+  const minZ=cz*CHUNK_SIZE,maxZ=minZ+CHUNK_SIZE-1;
+  const exposed=new Set();
+  for(const [key,id] of world.edits){
+    if(id!==BLOCK.AIR)continue;
+    const coords=key.split(',');
+    if(coords.length!==3)continue;
+    const [x,y,z]=coords.map(Number);
+    if(![x,y,z].every(Number.isInteger)||
+       y<bounds.minY-1||y>bounds.maxY+1||
+       x<minX-1||x>maxX+1||z<minZ-1||z>maxZ+1)continue;
+    for(const [dx,dz] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){
+      const px=x+dx,pz=z+dz;
+      if(px>=minX&&px<=maxX&&pz>=minZ&&pz<=maxZ)
+        exposed.add((px-minX)*CHUNK_SIZE+(pz-minZ));
+    }
+  }
+  return exposed;
+}
+
 export function invalidateDepthMeshCache(world){
   sectionColumnsByWorld.delete(world);
 }
@@ -42,6 +74,8 @@ export function meshDepthSection(world,cx,cz,section,dirty=null){
   // world.get: external fixtures, imports and missed unloaded edits cannot
   // create stale geometry. Only the synchronous edit caller uses dirty.
   const columns=cached?cached.columns.slice():new Array(CHUNK_SIZE*CHUNK_SIZE);
+  const sparse=cached?null:sparseExposedColumns(world,cx,cz,bounds);
+  if(sparse!==null)columns.fill(EMPTY_COLUMN);
   const cells=new Uint8Array(side*side*depth);
   cells.fill(255);
   const outside=new Map();
@@ -89,6 +123,7 @@ export function meshDepthSection(world,cx,cz,section,dirty=null){
       // A changed (x,z) cell affects its own column and the four face-adjacent
       // columns, including columns in neighboring loaded horizontal chunks.
       if(cached&&Math.abs(x-dirty.x)+Math.abs(z-dirty.z)>1)continue;
+      if(sparse!==null&&!sparse.has(lx*CHUNK_SIZE+lz))continue;
       columns[lx*CHUNK_SIZE+lz]=columnAt(x,z);
     }
   let floatCount=0;
