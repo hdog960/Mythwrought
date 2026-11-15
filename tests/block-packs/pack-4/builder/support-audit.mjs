@@ -24,7 +24,7 @@ for(let i=0;i<names.length;i++){
   live:0,otherPack:0,pack4:0,notRequired:0,other:0,
   missingExamples:[],missingById:{},pendingFacingById:{}};
  for(const design of designs){
-  const cells=cellsOf(design.source);
+  const cells=cellsOf(design.physicalSource??design.source);
   for(const p of design.physicalPlan.placements){
    report.pack4Cells++;
    if(p.orientationRequiresReview)
