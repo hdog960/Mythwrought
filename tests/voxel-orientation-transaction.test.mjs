@@ -63,3 +63,41 @@ test('invalid cell or callbacks cannot begin edit',async()=>{
   await assert.rejects(f.run(()=>true,{rollback:null}),TypeError);
   assert.equal(f.sidecar.get(f.cell,4),3);
 });
+
+test('same-cell concurrent edits reject before reading or writing world',async()=>{
+  const f=fixture();
+  let release, writes=0, reads=0;
+  const pending=new Promise(resolve=>{release=resolve;});
+  const first=f.run(async()=>{writes++;await pending;return true;},{
+    readIdentity:()=>{reads++;return f.readIdentity();}
+  });
+  await assert.rejects(f.run(()=>{writes++;return true;}),/Concurrent oriented edit/);
+  assert.equal(writes,1);
+  assert.equal(reads,1);
+  assert.equal(f.sidecar.get(f.cell,4),3);
+  release();
+  assert.equal(await first,true);
+  assert.equal(f.sidecar.get(f.cell,4),0);
+  assert.equal(await f.run(()=>true),true);
+});
+
+test('different cells can edit independently while first cell awaits',async()=>{
+  const f=fixture(), other=[2,2,-3];
+  f.sidecar.set(other,4,2);
+  let release;
+  const pending=new Promise(resolve=>{release=resolve;});
+  const first=f.run(async()=>{await pending;return true;});
+  assert.equal(await f.run(()=>true,{cell:other}),true);
+  assert.equal(f.sidecar.get(other,4),0);
+  assert.equal(f.sidecar.get(f.cell,4),3);
+  release();
+  assert.equal(await first,true);
+});
+
+test('failed edit releases cell lock for subsequent recovery',async()=>{
+  const f=fixture();
+  await assert.rejects(f.run(()=>{throw Error('disk failure');}),/disk failure/);
+  assert.equal(f.sidecar.get(f.cell,4),3);
+  assert.equal(await f.run(()=>true),true);
+  assert.equal(f.sidecar.get(f.cell,4),0);
+});
