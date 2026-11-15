@@ -7,11 +7,11 @@ import {meshDepthSection} from '../src/depth-mesh.mjs';
 import {resolveBiome130BuilderAsset,planBiome130BuilderStructure,
   placeBiome130BuilderStructure} from '../src/builder-assets/biome130.mjs';
 
-test('all 57 authored symbolic families have distinct real high IDs and valid physical shapes',()=>{
-  assert.equal(BIOME130_LIVE_COUNT,57);
-  assert.equal(new Set(BIOME130_REGISTERED_IDS).size,57);
+test('all 60 authored symbolic families have distinct real high IDs and valid physical shapes',()=>{
+  assert.equal(BIOME130_LIVE_COUNT,60);
+  assert.equal(new Set(BIOME130_REGISTERED_IDS).size,60);
   assert.equal(new Set(BIOME130_REGISTERED_SYMBOLS).size,57);
-  for(let i=1;i<=57;i++){
+  for(let i=1;i<=60;i++){
     const id=255+i,symbol='biome130:'+String(i).padStart(3,'0');
     assert.equal(isBiome130BlockId(id),true);
     const asset=biome130Block(symbol),builder=resolveBiome130BuilderAsset(symbol);
@@ -28,7 +28,7 @@ test('all 57 authored symbolic families have distinct real high IDs and valid ph
       assert.ok(shaped.boxes.every(b=>b.every(v=>v>=0&&v<=1)));
     }
   }
-  for(const id of [0,7,9,125,208,255,313,385]){
+  for(const id of [0,7,9,125,208,255,316,385]){
     assert.equal(isBiome130BlockId(id),false);
     assert.throws(()=>biome130Block(id),RangeError);
   }
