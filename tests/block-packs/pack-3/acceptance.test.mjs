@@ -322,7 +322,7 @@ test('fortress wall footing joins neighboring buttress and supports battlement a
 // Compare the EXACT occupied structural and coping cross-sections, not sampled
 // pixels: a tall slope facing an undersized ridge leaves a visible vertical
 // ledge and a bad collision/selection seam even if both touch at the bottom.
-test('Hearthclay Crown Ridge mates to both opposing pitched roofs for all quarter turns', async()=>{
+test('Hearthclay Crown Ridge matches body, edge and crest on both roof arms at all four yaws', async()=>{
   const {pack3GeometryById}=await import('../../../src/block-packs/pack-3/roof-geometry.mjs');
   const mismatch=(a,b,axis,faceA,faceB,tone)=>{
     const other=[0,1,2].filter(i=>i!==axis);
@@ -347,7 +347,7 @@ test('Hearthclay Crown Ridge mates to both opposing pitched roofs for all quarte
       [0,firstFace,(yaw+3)%4], [1,1-firstFace,(yaw+1)%4]
     ]){
       const slope=pack3GeometryById(113,partnerYaw);
-      for(const tone of ['body','edge']){
+      for(const tone of ['body','edge','crest']){
         const area=mismatch(ridge,slope,axis,face,1-face,tone);
         assert.equal(area,0,
           `Ridge seam mismatch for ${tone}: yaw ${yaw}, arm ${arm}, area ${area}`);

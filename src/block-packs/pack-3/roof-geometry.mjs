@@ -66,6 +66,12 @@ const RIDGE=Object.freeze([
   P('edge',B(0,.75,0,.125,.796875,1)),
   P('edge',B(.875,.75,0,1,.796875,1)),
   P('edge',B(.28125,.75,0,.71875,.875,1)),
+  // Both ends of each bearing wall match the two crest rails on a pitched roof.
+  // The caps sit on existing edge courses; no floating or full-cube geometry.
+  P('crest',B(0,.796875,0,.0625,.84375,.0625)),
+  P('crest',B(0,.796875,.9375,.0625,.84375,1)),
+  P('crest',B(.9375,.796875,0,1,.84375,.0625)),
+  P('crest',B(.9375,.796875,.9375,1,.84375,1)),
   P('crest',B(.40625,.875,.09375,.59375,.96875,.90625)),
   P('crest',B(.34375,.84375,0,.65625,.9375,.109375)),
   P('crest',B(.34375,.84375,.890625,.65625,.9375,1))
