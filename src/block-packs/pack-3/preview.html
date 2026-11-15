@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MYTHWROUGHT | Pack 3 Physical Roofing Candidate Gallery</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;background:#17212a;color:#f5e8cf}
+*{box-sizing:border-box}body{max-width:1060px;margin:0 auto;padding:24px}
+h1{font-size:clamp(1.5rem,4vw,2.2rem);margin:5px 0 12px}
+.warning{border:2px solid #e3a95c;border-radius:8px;background:#42301b;padding:12px;font-weight:700}
+p{line-height:1.5;color:#e2d7c1}
+main{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px}
+article{background:#26343e;border:1px solid #53636c;border-radius:12px;padding:12px}
+canvas{display:block;width:100%;aspect-ratio:8/5;background:radial-gradient(ellipse at 50% 35%,#455965,#1d2831);border-radius:8px}
+h2{margin:12px 0 4px;font-size:1.2rem}small{color:#ceb99b}
+button{border:1px solid #cba879;border-radius:8px;background:#394b59;color:#fbe1b7;padding:9px 12px;cursor:pointer;margin:7px 0;font-weight:600}button:focus-visible{outline:2px solid #ffd27a}
+</style>
+</head>
+<body>
+<div class="warning">UNMERGED CANDIDATE — NOT IN LIVE GAME — ISOLATED PHYSICAL BOX PREVIEW</div>
+<h1>Mythwrought · Roof, Fortress & Monumental Voxel Craft</h1>
+<p>Seventeen original standalone Pack 3 voxel candidates: four roofing materials, three roof profiles, three fortified pieces, four ornamental pieces, and three monumental pieces (dry aqueduct channel, crystal finial and carved guardian). Material-specific geometric occupancy comes directly from the Pack 3 definitions. All visible raised tile and fiber parts are genuine box volumes with the same selection/collision definitions. Dry channel contains no water simulation and crystal crown emits no engine light. This gallery does not place blocks, modify player saves, or depict shipped WebGL gameplay.</p>
+<main id="gallery"></main>
+<script type="module">
+import {PACK3_ROOFING_ASSETS} from './roofing-materials.mjs';
+import {PACK3_ROOF_GEOMETRY,pack3GeometryById} from './roof-geometry.mjs';
+import {PACK3_FORTIFIED_ASSETS,pack3FortifiedById} from './fortified-pieces.mjs';
+import {PACK3_ORNAMENTAL_ASSETS,pack3OrnamentalById} from './ornamental-pieces.mjs';
+import {PACK3_MONUMENTAL_ASSETS,pack3MonumentalById} from './monumental-pieces.mjs';
+const gallery=document.querySelector('#gallery');
+function shade(hex,factor){
+ const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
+ return '#'+rgb.map(n=>Math.max(0,Math.min(255,Math.round(n*factor))).toString(16).padStart(2,'0')).join('');
+}
+// Project the SAME occupied box geometry while fitting every tall part into
+// the candidate canvas. Previous fixed camera clipped upper arch/merlon tops.
+const rawPoint=(x,y,z)=>[(x-z)*98,(x+z)*40-y*140];
+function fitProjection(parts){
+ const xs=[],ys=[];
+ for(const {box:b} of parts)
+  for(const x of [b[0],b[3]])for(const y of [b[1],b[4]])for(const z of [b[2],b[5]]){
+   const [px,py]=rawPoint(x,y,z);xs.push(px);ys.push(py);
+  }
+ const left=Math.min(...xs),right=Math.max(...xs),top=Math.min(...ys),bottom=Math.max(...ys);
+ const scale=Math.min(1.18,288/(right-left),172/(bottom-top));
+ const midX=(left+right)/2,midY=(top+bottom)/2;
+ return (x,y,z)=>{
+  const [px,py]=rawPoint(x,y,z);
+  return [160+(px-midX)*scale,100+(py-midY)*scale];
+ };
+}
+function poly(ctx,pts,color){
+ ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+ ctx.closePath();ctx.fillStyle=color;ctx.fill();
+ ctx.strokeStyle='rgba(9,17,25,.29)';ctx.lineWidth=.7;ctx.stroke();
+}
+function paintBox(ctx,b,color,point){
+ const [x,y,z,X,Y,Z]=b;
+ poly(ctx,[point(X,y,z),point(X,y,Z),point(X,Y,Z),point(X,Y,z)],shade(color,.76));
+ poly(ctx,[point(x,y,Z),point(X,y,Z),point(X,Y,Z),point(x,Y,Z)],shade(color,.88));
+ poly(ctx,[point(x,Y,z),point(X,Y,z),point(X,Y,Z),point(x,Y,Z)],shade(color,1.12));
+}
+for(const initial of [...PACK3_ROOFING_ASSETS,...PACK3_ROOF_GEOMETRY,...PACK3_FORTIFIED_ASSETS,...PACK3_ORNAMENTAL_ASSETS,...PACK3_MONUMENTAL_ASSETS]){
+ let asset=initial;
+ const card=document.createElement('article');
+ const canvas=document.createElement('canvas');canvas.width=320;canvas.height=200;
+ canvas.setAttribute('role','img');canvas.setAttribute('aria-label',asset.name+' candidate physical box model');
+ card.append(canvas);
+ const title=document.createElement('h2');title.textContent=asset.name;card.append(title);
+ const sub=document.createElement('small');sub.textContent='Candidate voxel ID '+asset.id+
+  ' · roster '+asset.roster+' · '+asset.boxes.length+' collision/selection volumes';card.append(sub);
+ const detail=document.createElement('p');detail.textContent=asset.style??asset.profile;card.append(detail);
+ let turnButton=null;
+ if(asset.kind==='roof-geometry'||asset.kind==='fortified-component'||asset.kind==='ornamental-component'||asset.kind==='monumental-component'){
+  turnButton=document.createElement('button');
+  turnButton.type='button';turnButton.textContent='Rotate 90° · orientation 0';
+  card.append(turnButton);
+ }
+ gallery.append(card);
+ const ctx=canvas.getContext('2d');
+ const draw=()=>{
+  ctx.fillStyle='#15212a';ctx.fillRect(0,0,320,200);
+  // Draws EXACT source part.box volumes, not an artistic stand-in mesh.
+  const parts=[...asset.parts].sort((a,b)=>a.box[1]-b.box[1]||a.box[2]+a.box[0]-b.box[2]-b.box[0]);
+  const project=fitProjection(parts);
+  for(const part of parts)paintBox(ctx,part.box,asset.colors[part.tone],project);
+  canvas.setAttribute('aria-label',asset.name+' physical box preview, rotation '+(asset.rotation??0));
+ };
+ draw();
+ if(turnButton)turnButton.addEventListener('click',()=>{
+  const next=(asset.rotation+1)%4;
+  asset=asset.kind==='fortified-component'
+    ?pack3FortifiedById(initial.id,next)
+    :asset.kind==='ornamental-component'
+      ?pack3OrnamentalById(initial.id,next)
+      :asset.kind==='monumental-component'
+      ?pack3MonumentalById(initial.id,next)
+      :pack3GeometryById(initial.id,next);
+  turnButton.textContent='Rotate 90° · orientation '+next;
+  draw();
+ });
+}
+</script>
+</body></html>
