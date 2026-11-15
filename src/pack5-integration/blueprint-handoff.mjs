@@ -83,3 +83,62 @@ export function planPack5BuilderBlueprint(blueprint,{origin=[0,0,0],maxInstances
     resolvedCount:resolved.length,occupiedCount:occupied.size,
     placements:Object.freeze(resolved),worldPlaced:false,saveWritten:false});
 }
+
+/**
+ * Non-destructive adapter for building-roadmap blueprints that contain materials
+ * from other packs. Emits Pack 5 dependencies without claiming ownership of
+ * foreign symbols, assigning IDs, or inventing orientation/variant choices.
+ * Returns unresolved requirements rather than incorrectly "finishing" a build.
+ */
+export function inspectPack5InMixedBlueprint(blueprint,{origin=[0,0,0]}={}){
+  if(!blueprint||typeof blueprint!=='object'||!integerCell(origin))
+    throw Error('Invalid mixed blueprint request');
+  const source=Array.isArray(blueprint.placements)?blueprint.placements:
+    Array.isArray(blueprint.voxels)?blueprint.voxels:null;
+  if(!source)throw Error('Mixed blueprint must contain placements or voxels');
+  const pack5=[],pending=[],foreign=new Set(),foreignCount=new Map();
+  for(let i=0;i<source.length;i++){
+    const item=source[i];
+    if(!item||typeof item!=='object')throw Error('Invalid mixed blueprint placement');
+    const asset=item.asset??item.material;
+    if(typeof asset!=='string'||!asset.startsWith('pack5:')){
+      if(typeof asset==='string'){
+        foreign.add(asset);foreignCount.set(asset,(foreignCount.get(asset)||0)+1);
+      }
+      continue;
+    }
+    if(!/^pack5:0(?:7[9]|8\d|9[0-6])$/.test(asset))
+      throw Error('Pack 5 blueprint symbol outside assigned 079–096 ownership');
+    const at=Array.isArray(item.at)?item.at:[item.x,item.y,item.z];
+    if(!integerCell(at))throw Error('Invalid Pack 5 blueprint placement cell');
+    const orientation=item.orientation??item.intendedFacing??null;
+    const variant=item.variant??null;
+    const missing=[];
+    if(!(Number.isInteger(orientation)&&orientation>=0&&orientation<=3)&&
+       !['north','east','south','west'].includes(orientation))
+      missing.push('explicit-four-way-orientation');
+    const family=resolvePack5BuilderAsset(asset);
+    if(variant===null||!family.entry.variants.includes(variant))
+      missing.push('authored-variant');
+    if(missing.length){
+      pending.push(Object.freeze({placementIndex:i,asset,at:Object.freeze([...at]),
+        missing:Object.freeze(missing)}));
+      continue;
+    }
+    pack5.push({asset,at,orientation,variant});
+  }
+  const physicalPlan=pending.length===0&&pack5.length?
+    planPack5BuilderBlueprint({id:blueprint.id??null,placements:pack5},{origin}):null;
+  return Object.freeze({
+    blueprintId:blueprint.id??null,
+    pack5Total:pack5.length+pending.length,
+    resolvedPack5Count:physicalPlan?.resolvedCount??0,
+    unresolvedPack5:Object.freeze(pending),
+    externalDependencies:Object.freeze([...foreign].sort()),
+    externalDependencyCounts:Object.freeze(Object.fromEntries(
+      [...foreignCount].sort(([a],[b])=>a.localeCompare(b)))),
+    physicalPlan,worldPlaced:false,readyForCombinedPlacement:false,
+    requiresOtherPackResolvers:foreign.size>0,
+    requiresCrossPackCollisionAndSupportValidation:true
+  });
+}

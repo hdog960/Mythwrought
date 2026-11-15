@@ -25,3 +25,8 @@
 4. **Registry:** a single cross-pack production registration / serialization strategy must be approved before final merge; the Pack 5 manifest intentionally leaves `numericId` null.
 
 **Do not merge, deploy or mark READY while these checks remain open.** No edits to the other four manual packs or building-roadmap projects are authorized.
+
+## Mixed-pack blueprint ingestion (Pack 5-owned, non-destructive)
+- Use `inspectPack5InMixedBlueprint` from `src/pack5-integration/blueprint-handoff.mjs` for Roadmap 1 `placements` and Roadmap 2-style `voxels` objects. The helper extracts only Pack 5 dependencies and reports foreign symbols separately; it never edits their source or claims their geometry.
+- When any Pack 5 item lacks an explicit four-way orientation or an authored variant, it is returned as **unresolved**, with no physical plan created. This deliberately avoids silently defaulting an unfinished village interior to north-facing furniture.
+- Even an entirely physically resolved Pack 5 subset carries `readyForCombinedPlacement:false` until the final five-pack integrator validates cross-pack occupancy, structures, supports and overall construction performance. This helper does not merge, register or place anything in the game.
