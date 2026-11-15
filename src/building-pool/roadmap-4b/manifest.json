@@ -1,0 +1,80 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-4b.manifest.v1",
+  "title": "Healing, Education & Arcana",
+  "owner": "roadmap-4b",
+  "baseMainAtCreation": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "infrastructurePR": 178,
+  "infrastructureMergedAs": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "originalPR": 123,
+  "originalHeadAudited": "564330635f18e10215a3bf93901923fbf5af528d",
+  "sourceRecord": "src/building-pool/roadmap-4b/legacy-source.json",
+  "originalCategoryIdsPreserved": true,
+  "biomes": [
+    "temperate",
+    "desert",
+    "snow",
+    "enchanted-forest",
+    "mountain"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "categories": [
+    {
+      "type": "healers-house",
+      "perBiomeSize": 5,
+      "total": 75
+    },
+    {
+      "type": "library",
+      "perBiomeSize": 4,
+      "total": 60
+    },
+    {
+      "type": "schoolhouse",
+      "perBiomeSize": 4,
+      "total": 60
+    },
+    {
+      "type": "magical-research-institute",
+      "perBiomeSize": 3,
+      "total": 45
+    },
+    {
+      "type": "arcane-academy",
+      "perBiomeSize": 3,
+      "total": 45
+    }
+  ],
+  "quota": 285,
+  "inherited": 0,
+  "authored": 0,
+  "remaining": 285,
+  "creatorAccepted": 0,
+  "integrated": 0,
+  "worldPlaced": false,
+  "status": "M0 initial isolated contract; no M1 candidate geometry authored",
+  "ownedPaths": [
+    "src/building-pool/roadmap-4b/",
+    "tests/building-pool/roadmap-4b/",
+    "docs/building-pool/roadmap-4b/"
+  ],
+  "physicalAssets": {
+    "manualFamilySymbols": 96,
+    "manualPhysicalVariants": 106,
+    "source": "src/builder-assets/manual-five-pack.mjs",
+    "productionAssetReadiness": "per-symbol source verification at M1/integration",
+    "biome130": "not assumed registered"
+  },
+  "gates": {
+    "gateA": "open",
+    "v011": "locked",
+    "merge": false,
+    "deployment": false,
+    "creatorArtApproval": false,
+    "physicalIphoneApproval": false
+  },
+  "nextMilestone": "M1 first independently authored functional physical-coordinate exemplar and geometry review"
+}
