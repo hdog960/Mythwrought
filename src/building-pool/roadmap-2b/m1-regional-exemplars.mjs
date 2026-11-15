@@ -312,8 +312,13 @@ function theater({biome,size,W,D,title,signature}){
   p.fixed(x,z,B.wall,'raised-stage-platform');
  const approaches=[];
  for(const x of [c-half-1,c+half+1]){
-  p.fixed(x,stageZ+1,B.stair,'stage-stair-candidate','fixture');
-  approaches.push({name:x<c?'west-stage':'east-stage',x,z:stageZ+1});
+  p.put(x,2,stageZ+1,B.stair,'fixture',{
+   role:'stage-stair-candidate',intendedFacing:'stage',
+   lowerLanding:{x,y:1,z:stageZ},
+   upperLanding:{x:x<c?x+1:x-1,y:2,z:stageZ+1},
+   shapeRotationStatus:'unresolved-symbolic'
+  });
+  approaches.push({name:x<c?'west-stage-lower-landing':'east-stage-lower-landing',x,z:stageZ});
   for(let y=2;y<=6;y++)
    p.put(x,y,stageZ-1,B.post,'wall',{role:'stage-proscenium'});
  }
