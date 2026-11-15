@@ -84,7 +84,27 @@ export function createPack5ConstructionLayer(world){
       const hit=api.raycast(origin,direction,maxDistance);
       return hit?fixture.remove(hit.cell):false;
     },
-    collidesPack5(box){return fixture.collides(box);},
+    // Spatial shape collision: do not scan every distant decoration on each
+    // mobile physics substep. Inspect only occupied cells intersecting the box.
+    collidesPack5(box){
+      checkBox(box);
+      if(box.slice(0,3).some((v,i)=>box[i+3]-v>8))
+        throw Error('Pack 5 collision probe exceeds eight-cell budget');
+      const eps=1e-7;
+      for(let x=Math.floor(box[0]+eps);x<=Math.floor(box[3]-eps);x++)
+        for(let y=Math.floor(box[1]+eps);y<=Math.floor(box[4]-eps);y++)
+          for(let z=Math.floor(box[2]+eps);z<=Math.floor(box[5]-eps);z++){
+            const cell=[x,y,z],record=fixture.cell(cell);
+            if(!record)continue;
+            const asset=resolvePack5BuilderAsset(record.symbolicId,record.variant);
+            for(const part of orientedParts(asset.descriptor,record.rotation)){
+              const at=offset(record.anchor,part.cell);
+              if(at[0]!==x||at[1]!==y||at[2]!==z)continue;
+              if(part.collisionBoxes.some(b=>overlap(worldBox(b,cell),box)))return true;
+            }
+          }
+      return false;
+    },
     /** Collision against Pack 5 partial shapes AND legacy solid cubes. */
     collides(box){
       checkBox(box);

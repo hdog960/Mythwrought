@@ -320,5 +320,10 @@ export function collides(world,x,feet,z){
     for(let bz=Math.floor(z-BODY_RADIUS+e);bz<=Math.floor(z+BODY_RADIUS-e);bz++)
       for(let by=Math.floor(feet+e);by<=Math.floor(feet+BODY_HEIGHT-e);by++)
         if(world.get(bx,by,bz)!==BLOCK.AIR)return true;
+  // Only opted-in builder worlds add shape-accurate collisions. All default
+  // worlds retain the original 0–8 voxel semantics and schema-1 saves.
+  if(typeof world.pack5Collision==='function')
+    return Boolean(world.pack5Collision([x-BODY_RADIUS,feet,z-BODY_RADIUS,
+      x+BODY_RADIUS,feet+BODY_HEIGHT,z+BODY_RADIUS]));
   return false;
-}
+
