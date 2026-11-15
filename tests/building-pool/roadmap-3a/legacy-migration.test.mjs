@@ -14,7 +14,7 @@ const ledger=JSON.parse(readFileSync(new URL('../../../docs/building-pool/roadma
 const manifest=JSON.parse(readFileSync(new URL('../../../docs/building-pool/roadmap-3a/LEGACY_M1_SOURCE_MANIFEST.json',import.meta.url),'utf8'));
 const repository=process.cwd();
 const git=(...args)=>execFileSync('git',args,{cwd:repository,encoding:'utf8',maxBuffer:4e6,timeout:45000});
-const blobId=(s)=>createHash('sha1').update('blob '+Buffer.byteLength(s)+'\\0').update(s).digest('hex');
+const blobId=(s)=>createHash('sha1').update('blob '+Buffer.byteLength(s)+'\0').update(s).digest('hex');
 function originalFiles(){
   // actions/checkout uses fetch-depth: 0, but request exactly the pinned PR
   // commit if it was not among locally fetched remote refs.
