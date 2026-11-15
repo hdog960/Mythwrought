@@ -260,6 +260,24 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
+    // Contextual hinged interaction uses the existing PLACE thumb button.
+    // Selecting a matching gate, door or hatch makes the action intuitive
+    // without crowding the iPhone two-thumb control rails.
+    if(mode==='place'&&pack2IsHinged(selected)){
+      const targeted=raycast(world,eye(),facing(),6)?.hit;
+      const existing=targeted?world.getPack2State?.(...targeted):null;
+      if(existing?.id===selected){
+        const next=pack2CycleState(selected,existing,'toggle');
+        world.updatePack2State(...targeted,next);
+        try{refreshEditedMeshes(targeted[0],targeted[2],targeted[1]);}
+        catch(error){world.updatePack2State(...targeted,existing);
+          message('Gate update failed; original shape retained: '+error.message);return;}
+        changed=true;const persisted=save();
+        message((next.open?'Opened ':'Closed ')+BLOCK_NAMES[selected]+
+          (persisted?' · saved':' · save not verified'));
+        return;
+      }
+    }
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes);
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
@@ -682,11 +700,42 @@ function start(){
   bindGameplayAction('jump',jump);
   bindGameplayAction('dig',()=>edit('mine'));
   bindGameplayAction('place',()=>edit('place'));
+  const pack2List=document.getElementById('pack2Materials');
+  for(const id of PACK2_LIVE_IDS){
+    const b=document.createElement('button');
+    b.type='button';b.dataset.block=String(id);b.textContent=id+' · '+PACK2_LIVE_NAMES[id];
+    b.setAttribute('aria-pressed','false');pack2List.append(b);
+  }
+  const pack2StateText=document.getElementById('pack2StateText');
+  function updatePack2SelectionUI(){
+    world.nextPack2State=pack2Selection;
+    const s=pack2Selection;
+    pack2StateText.textContent=s?
+      PACK2_LIVE_NAMES[s.id]+' · '+
+      (s.rotation===undefined?'':('rotation '+s.rotation*90+'° · '))+
+      (s.variant===undefined?'':(s.variant+' · '))+
+      (s.open===undefined?'':(s.open?'open · ':'closed · '))+
+      (s.level===undefined?'':('water level '+s.level+' · '+s.flow)):
+      'Select a Pack 2 material to adjust its physical placement state.';
+  }
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
     selected=Number(b.dataset.block);
-    document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
-    message('Selected '+({3:'stone',4:'wood',5:'crystal',7:'leaf canopy',8:'deepstone'})[selected]);
+    pack2Selection=isPack2LiveId(selected)?pack2NormalizeState(selected):null;
+    document.querySelectorAll('[data-block]').forEach(q=>{
+      q.classList.toggle('selected',q===b);
+      q.setAttribute('aria-pressed',String(q===b));
+    });
+    updatePack2SelectionUI();
+    message('Selected '+(BLOCK_NAMES[selected]||'block'));
   });
+  for(const [button,action] of [['pack2Rotate','rotate'],['pack2Variant','variant'],
+    ['pack2WaterLevel','water-level'],['pack2WaterFlow','water-flow']]){
+    document.getElementById(button).onclick=()=>{
+      if(!pack2Selection){message('Select a Pack 2 material first');return;}
+      pack2Selection=pack2CycleState(selected,pack2Selection,action);
+      updatePack2SelectionUI();
+    };
+  }
   document.getElementById('menu').onclick=()=>{cancelAllPointers();help.hidden=false;};
   document.getElementById('closeHelp').onclick=()=>{
     cancelAllPointers();help.hidden=true;
@@ -983,8 +1032,10 @@ function start(){
   };
   document.getElementById('export').onclick=()=>{
     try{
-      const data=JSON.stringify(world.save(),null,2);
-      importWorldData(data); // Ensure the export is a valid original schema-1 file.
+      const exported=world.pack2Cells.size?pack2ExportBundle(world):world.save();
+      const data=JSON.stringify(exported,null,2);
+      importWorldData(data); // Legacy schema-1 fields remain valid and unchanged.
+      if(exported.pack2)pack2ImportBundle(exported,world.base); // Verify extended records.
       const blob=new Blob([data],{type:'application/json'});
       const url=URL.createObjectURL(blob),a=document.createElement('a');
       a.href=url;a.download='mythwrought-seed-'+world.seed+'-prototype.json';
@@ -998,7 +1049,9 @@ function start(){
     const f=e.target.files?.[0];if(!f)return;
     try{
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
-      const imported=importWorldData(await f.text()); // Validate before mutation.
+      const rawImport=await f.text();
+      const imported=importWorldData(rawImport); // Validate original schema-1 first.
+      const candidate=pack2ImportBundle(JSON.parse(rawImport),imported); // Fail closed on sidecar.
       if(!storageReadOnly&&!save())throw Error('Current world could not be verified saved; export first.');
       let existing=null,damaged=false;
       try{existing=loadWorldSafe(localStorage,imported.seed).world;}
@@ -1012,7 +1065,9 @@ function start(){
       }
       const outcome=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
       if(!outcome.ok)throw Error(outcome.reason);
-      world=imported;storageReadOnly=false;changed=false;
+      const overlay=savePack2LiveWorld(localStorage,candidate);
+      if(!overlay.ok)throw Error('Pack 2 sidecar not written; previous verified data retained: '+overlay.reason);
+      world=candidate;world.nextPack2State=pack2Selection;storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
