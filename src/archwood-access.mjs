@@ -9,7 +9,9 @@ export function planArchwoodAccess(world,x,z){
   const tree=planVoxelTree(world,x,z,{variant:'archwood'});
   if(!tree)return null;
   const y=tree.origin[1],cells=[];
-  // Each stair rises exactly one voxel; players can jump up the physical blocks.
+  // Narrow, face-connected diagonal stair spine rather than six tall solid cube stacks.
+  // Every tread has one lower joiner (except the grounded first tread), making
+  // each diagonal rise attach by a shared voxel face to the previous tread.
   // Landing at x=-1 / x=7 is one level below the bridge at x=0..6.
   for(const side of [-1,1])for(let step=1;step<=6;step++){
     const dx=side<0?-7+step:13-step;
@@ -28,7 +30,8 @@ export function planArchwoodAccess(world,x,z){
          world.get(px,cy,cz)!==BLOCK.AIR)return null;
     }
     // Filled steps are physical support, not floating isolated slabs.
-    for(let dy=1;dy<=level;dy++)cells.push([px,y+dy,z,BLOCK.WOOD]);
+    cells.push([px,py,z,BLOCK.WOOD]);
+    if(level>1)cells.push([px,py-1,z,BLOCK.WOOD]);
   }
   // The bridge's own approach guard must remain valid.
   return {origin:[x,y,z],seed:world.seed,tree,cells,optIn:true};
