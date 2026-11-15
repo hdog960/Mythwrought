@@ -32,7 +32,10 @@ async function localSite(){
  const missing=[];
  const server=createServer(async(req,res)=>{
   try{
-   const uri=new URL(req.url,'http://127.0.0.1'),path=resolve(root,'.'+decodeURIComponent(uri.pathname));
+   const uri=new URL(req.url,'http://127.0.0.1');
+   // Chrome's default icon probe is harmless UI metadata, not a missing source module.
+   if(uri.pathname==='/favicon.ico'){res.writeHead(204);res.end();return;}
+   const path=resolve(root,'.'+decodeURIComponent(uri.pathname));
    if(path!==root&&!path.startsWith(root+sep)){res.writeHead(403);res.end();return;}
    const data=await readFile(path);
    res.writeHead(200,{'Content-Type':mime[extname(path)]??'application/octet-stream','Cache-Control':'no-store'});
@@ -131,6 +134,7 @@ test('M1 7 genuine source-served WebGL2 candidates × 3 iPhone landscapes × ext
   for(const id of ids)for(const [width,height] of sizes){
    const pair=evidence.filter(e=>e.id===id&&e.viewport[0]===width&&e.viewport[1]===height);
    assert.equal(pair.length,2);
+   assert.ok(pair[0].proxyCells>pair[1].proxyCells,'No source geometry removed for cutaway: '+id);
    assert.notEqual(pair[0].sha256,pair[1].sha256,'Exterior/cutaway screenshot indistinguishable: '+id);
   }
   await writeFile(join(out,'M1_WEBGL2_CAPTURE_MANIFEST.json'),
