@@ -25,7 +25,7 @@ test('4A owns exactly 315 allocated designs, never sibling 4B slots',()=>{
 });
 test('preserved legacy generator is exact Git blob bytes from PR #123',()=>{
   const bytes=readFileSync(new URL('../../../src/building-pool/roadmap-4a/m1-blueprints.mjs',import.meta.url));
-  const blob=createHash('sha1').update(Buffer.from('blob '+bytes.length+'\\0')).update(bytes).digest('hex');
+  const blob=createHash('sha1').update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0])])).update(bytes).digest('hex');
   assert.equal(blob,'14ecb6fcfbe5cfeea97976670d14afb93bc6fe45');
   assert.equal(provenance.sourceBlobSha,blob);
   assert.equal(provenance.legacyHead,'564330635f18e10215a3bf93901923fbf5af528d');
