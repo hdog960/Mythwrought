@@ -48,3 +48,13 @@ test('edited missing floor makes full-depth route fail',()=>{
   const audit=descentConnectivity(world);
   assert.equal(audit.connected,false);
 });
+
+test('first descending step has full headroom below untouched legacy floor',()=>{
+  const world=new VoxelWorld(179),reader=descentWorld(world),route=descentRoute();
+  const first=route[0];
+  assert.ok(first.feet+3<-3,'four-cell tunnel must remain below legacy -3');
+  for(let h=1;h<=4;h++)assert.equal(reader.get(first.x,first.floor+h,first.z),BLOCK.AIR);
+  assert.notEqual(reader.get(first.x,first.floor,first.z),BLOCK.AIR);
+  assert.equal(reader.get(first.x,-3,first.z),world.get(first.x,-3,first.z));
+  assert.equal(descentConnectivity(world).connected,true);
+});
