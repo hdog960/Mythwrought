@@ -70,7 +70,8 @@ const fireplace=[
   part([.74,.19,.18,.91,.84,.85],'carved'),
   part([.08,.76,.13,.92,.88,.93],'limestone'),
   part([.15,.88,.22,.85,.94,.87],'chalk'),
-  part([.28,.20,.66,.72,.24,.76],'soot'),
+  // Physically bond the raised grate/soot bed to the hearth floor below.
+  part([.28,.19,.66,.72,.24,.76],'soot'),
   part([.29,.24,.67,.71,.29,.77],'charcoal',{collision:false}),
   part([.31,.24,.67,.39,.32,.77],'rustCopper',{collision:false}),
   part([.61,.24,.67,.69,.31,.77],'rustCopper',{collision:false}),
