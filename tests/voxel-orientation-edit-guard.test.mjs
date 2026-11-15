@@ -56,3 +56,33 @@ test('reentrant writer cannot recursively mutate a second cell',()=>{
  assert.equal(guard.edit([0,0,0],5).applied,true);
  assert.equal(sidecar.size(),0);
 });
+
+test('writer false after mutation fails closed and invalidates stale orientation',()=>{
+ const world=new Map([['0,0,0',8]]);
+ const sidecar=makeOrientationSidecar();sidecar.set([0,0,0],8,3);
+ const guard=makeOrientationEditGuard({sidecar,readBlock:(x,y,z)=>world.get([x,y,z].join(','))??0,
+  writeBlock(){world.set('0,0,0',7);return false;}});
+ assert.throws(()=>guard.edit([0,0,0],7),/rejected after mutating/);
+ assert.equal(world.get('0,0,0'),7);
+ assert.equal(sidecar.size(),0);
+});
+test('throwing writer preserves orientation on atomic rollback but clears after partial commit',()=>{
+ const world=new Map([['0,0,0',8]]);
+ const sidecar=makeOrientationSidecar();sidecar.set([0,0,0],8,2);
+ let mutate=false;
+ const guard=makeOrientationEditGuard({sidecar,readBlock:(x,y,z)=>world.get([x,y,z].join(','))??0,
+  writeBlock(){if(mutate)world.set('0,0,0',7);throw new Error('disk failure');}});
+ assert.throws(()=>guard.edit([0,0,0],7),/disk failure/);
+ assert.equal(sidecar.get([0,0,0],8),2);
+ mutate=true;
+ assert.throws(()=>guard.edit([0,0,0],7),/disk failure/);
+ assert.equal(sidecar.size(),0);
+});
+test('readback failure clears orientation conservatively',()=>{
+ const sidecar=makeOrientationSidecar();sidecar.set([0,0,0],8,1);
+ let reads=0;
+ const guard=makeOrientationEditGuard({sidecar,readBlock(){if(++reads>1)throw new Error('read failed');return 8;},
+  writeBlock(){return true;}});
+ assert.throws(()=>guard.edit([0,0,0],7),/read failed/);
+ assert.equal(sidecar.size(),0);
+});
