@@ -176,12 +176,20 @@ export function savePack2LiveWorld(storage,world){
        storage.getItem(key+JOURNAL)===null)return {ok:true,unchanged:true};
     const verify=readSnapshot(raw,world.base);
     if(!verify?.world)throw Error('New Pack 2 data failed validation');
-    const prior=storage.getItem(key),pending=readJournal(storage.getItem(key+JOURNAL),world.base);
+    const prior=storage.getItem(key),pendingRaw=storage.getItem(key+JOURNAL);
+    const pending=readJournal(pendingRaw,world.base);
+    // A damaged journal may be the last surviving evidence of construction.
+    // A routine save must never erase it, even when the primary is absent or
+    // otherwise valid. Explicit backup/restore is a separate user decision.
+    if(pending?.error)throw Error('Refusing overwrite of damaged Pack 2 journal');
     if(pending?.world&&pending.raw!==prior&&pending.raw!==raw)
       throw Error('A newer uncommitted Pack 2 journal must be recovered first');
     if(prior!==null&&prior!==raw){
       const old=readSnapshot(prior,world.base);
       if(!old?.world)throw Error('Refusing overwrite of damaged Pack 2 primary');
+      const backupRaw=storage.getItem(key+BACKUP);
+      if(backupRaw!==null&&!readSnapshot(backupRaw,world.base)?.world)
+        throw Error('Refusing overwrite of damaged Pack 2 previous-good backup');
       storage.setItem(key+BACKUP,prior);
       if(storage.getItem(key+BACKUP)!==prior)throw Error('Pack 2 backup verification failed');
     }
