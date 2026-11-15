@@ -99,6 +99,17 @@ function start(){
   const chunks=new Map(),pending=new Map();
   const name=chunkKey;
   const player=newPlayer(world);
+  // Real Pack 5 geometry is opt-in; the production cube palette is unchanged.
+  let pack5Builder=null,pack5Gpu=null,pack5Mode=false;
+  function resetPack5ForWorld(){
+    if(pack5Gpu){pack5Gpu.dispose();pack5Gpu=null;}
+    pack5Builder=null;pack5Mode=false;
+    const toggle=document.getElementById('pack5Enabled');
+    if(toggle)toggle.checked=false;
+    queueMicrotask(()=>{void restoreSavedPack5Scene();});
+    const hint=document.getElementById('pack5Status');
+    if(hint)hint.textContent='Off after world change. Enable again for this seed’s separate sidecar.';
+  }
   // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
   const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
     onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost});
@@ -262,6 +273,34 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
+    if(pack5Mode&&pack5Builder){
+      if(storageReadOnly){message('Protected world read-only; Pack 5 edit blocked');return;}
+      const result=mode==='place'?
+        pack5Builder.placeFacing(eye(),facing(),
+          document.getElementById('pack5Family').value,
+          Number(document.getElementById('pack5Rotation').value),
+          document.getElementById('pack5Variant').value,player):
+        pack5Builder.removeFacing(eye(),facing());
+      if(result.ok){
+        pack5Gpu?.refresh(eye());
+        message(mode==='place'?'Pack 5 furnishing placed · separate save verified':
+          'Pack 5 furnishing removed · separate save verified');
+      }else message(result.reason||'Pack 5 construction rejected');
+      return;
+    }
+    if(pack5Builder){
+      const target=inspectBlockTarget(world,eye(),facing(),selected,player);
+      const shape=pack5Builder.layer.raycast(eye(),facing(),6);
+      if(shape&&(!target.hit||shape.distance<target.distance-1e-6)){
+        message('Shaped furnishing ahead; use Pack 5 mode to edit it');return;
+      }
+      if(mode==='mine'&&target.hit&&pack5Builder.supportsLegacyCell(target.hit)){
+        message('This block supports Pack 5 furniture. Remove furniture first.');return;
+      }
+      if(mode==='place'&&target.adjacent&&pack5Builder.layer.cell(target.adjacent)){
+        message('Building space occupied by Pack 5 furniture');return;
+      }
+    }
     // Contextual hinged interaction uses the existing PLACE thumb button.
     // Selecting a matching gate, door or hatch makes the action intuitive
     // without crowding the iPhone two-thumb control rails.
@@ -426,6 +465,30 @@ function start(){
         gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
         gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
+      }
+      // Pack 5 uses the EXISTING game terrain program and fog, exactly one
+      // optional shaped-triangle draw, with bounded GPU memory and streaming.
+      if(pack5Gpu){
+        // At most one <=384 KiB page upload per refresh. Progress pending
+        // rooms every third frame; fully resident scenes retain 20-frame scans.
+        if(frame%20===0||frame===1||
+           (pack5Gpu.stats().pendingPages>0&&frame%3===0))
+          pack5Gpu.refresh(eye());
+        canvas.dataset.pack5MeshVertices=String(
+          pack5Gpu.draw({atPos,atColor,atUv,atMat}));
+        const pack5Stats=pack5Gpu.stats();
+        canvas.dataset.pack5VisibleInstances=String(pack5Stats.instances);
+        canvas.dataset.pack5GpuBytes=String(pack5Stats.bytes);
+        canvas.dataset.pack5DrawCalls=String(pack5Stats.drawCalls);
+        canvas.dataset.pack5PendingPages=String(pack5Stats.pendingPages);
+        canvas.dataset.pack5BudgetExcluded=String(pack5Stats.budgetExcluded);
+      }else{
+        canvas.dataset.pack5MeshVertices='0';
+        canvas.dataset.pack5VisibleInstances='0';
+        canvas.dataset.pack5GpuBytes='0';
+        canvas.dataset.pack5DrawCalls='0';
+        canvas.dataset.pack5PendingPages='0';
+        canvas.dataset.pack5BudgetExcluded='0';
       }
       // Genuine transparent-water pass, only for chunks with water candidates.
       if([...chunks.values()].some(c=>c.waterBuffer)){
@@ -711,6 +774,140 @@ function start(){
   bindGameplayAction('jump',jump);
   bindGameplayAction('dig',()=>edit('mine'));
   bindGameplayAction('place',()=>edit('place'));
+  const pack5Enabled=document.getElementById('pack5Enabled'),
+    pack5Family=document.getElementById('pack5Family'),
+    pack5Variant=document.getElementById('pack5Variant'),
+    pack5Status=document.getElementById('pack5Status');
+  function refreshPack5Variants(){
+    if(!pack5Builder)return;
+    const item=pack5Builder.layer.catalog.find(x=>x.symbolicId===pack5Family.value);
+    pack5Variant.replaceChildren();
+    for(const variant of (item?.variants||[])){
+      const option=document.createElement('option');
+      option.value=variant;option.textContent=variant.replaceAll('-',' ');
+      pack5Variant.append(option);
+    }
+  }
+  pack5Family.addEventListener('change',refreshPack5Variants);
+  let pack5LoadPromise=null,pack5LoadWorld=null;
+  async function ensurePack5Loaded(){
+    if(pack5Builder)return true;
+    if(pack5LoadPromise&&pack5LoadWorld===world)return pack5LoadPromise;
+    const requestedWorld=world;
+    const current=(async()=>{
+      const [{createPack5LiveAdapter},{createPack5GpuStream}]=await Promise.all([
+        import('./pack5-integration/live-adapter.mjs'),
+        import('./pack5-integration/terrain-buffer.mjs')
+      ]);
+      if(world!==requestedWorld)return false;
+      const candidate=createPack5LiveAdapter(world,{storage:localStorage});
+      const box=[player.x-.28,player.feet,player.z-.28,
+        player.x+.28,player.feet+1.78,player.z+.28];
+      if(candidate.layer.collidesPack5(box))
+        throw Error('Stored furnishing overlaps player. Move clear before loading.');
+      const renderer=createPack5GpuStream(gl,candidate.layer);
+      if(world!==requestedWorld){renderer.dispose();return false;}
+      pack5Builder=candidate;pack5Gpu=renderer;
+      world.pack5Collision=box=>candidate.collision(box);
+      pack5Family.replaceChildren();
+      for(const f of candidate.layer.catalog){
+        const option=document.createElement('option');
+        option.value=f.symbolicId;option.textContent=f.symbolicId+' · '+f.name;
+        pack5Family.append(option);
+      }
+      refreshPack5Variants();
+      renderer.refresh(eye());
+      return true;
+    })();
+    pack5LoadWorld=requestedWorld;pack5LoadPromise=current;
+    try{return await current;}
+    finally{
+      if(pack5LoadPromise===current){pack5LoadPromise=null;pack5LoadWorld=null;}
+    }
+  }
+  async function restoreSavedPack5Scene(){
+    if(storageReadOnly||pack5Builder)return;
+    const key='mythwrought.pack5.builder.seed.'+world.seed;
+    try{
+      if([key,key+'.journal',key+'.backup'].every(k=>localStorage.getItem(k)===null))
+        return;
+      if(await ensurePack5Loaded()&&!pack5Mode)
+        pack5Status.textContent='Saved Pack 5 furniture restored and physically solid · editing OFF.';
+    }catch(error){
+      // Corrupt/unsupported independent sidecars remain untouched for export.
+      pack5Status.textContent='Pack 5 stored data protected and not loaded: '+
+        String(error.message||error);
+    }
+  }
+  pack5Enabled.addEventListener('change',async()=>{
+    if(!pack5Enabled.checked){
+      pack5Mode=false;
+      pack5Status.textContent='Editing off. Placed Pack 5 pieces remain rendered and solid.';
+      return;
+    }
+    try{
+      const loaded=await ensurePack5Loaded();
+      if(!loaded||!pack5Enabled.checked)return;
+      pack5Mode=true;
+      pack5Status.textContent='Pack 5 ON · MINE/PLACE edit shaped furniture · '+
+        pack5Builder.layer.count()+' pieces in verified separate seed sidecar.';
+    }catch(error){
+      pack5Mode=false;pack5Enabled.checked=false;
+      pack5Status.textContent='Pack 5 unavailable; original saves preserved: '+
+        String(error.message||error);
+    }
+  });
+  document.getElementById('pack5Export').addEventListener('click',()=>{
+    if(!pack5Builder){
+      pack5Status.textContent='No loaded Pack 5 construction to export.';
+      return;
+    }
+    try{
+      const raw=JSON.stringify(pack5Builder.snapshot(),null,2);
+      const href=URL.createObjectURL(new Blob([raw],{type:'application/json'}));
+      const link=document.createElement('a');
+      link.href=href;link.download='mythwrought-pack5-seed-'+world.seed+'.json';
+      document.body.append(link);link.click();link.remove();
+      setTimeout(()=>URL.revokeObjectURL(href),1500);
+      pack5Status.textContent='Separate Pack 5 JSON export prepared; schema-1 world untouched.';
+    }catch(error){
+      pack5Status.textContent='Pack 5 export unavailable; original sidecar preserved: '+String(error);
+    }
+  });
+  const pack5ImportFile=document.getElementById('pack5ImportFile');
+  document.getElementById('pack5Import').addEventListener('click',()=>{
+    if(storageReadOnly){
+      pack5Status.textContent='Protected world read-only; Pack 5 import blocked';
+      return;
+    }
+    pack5ImportFile.click();
+  });
+  pack5ImportFile.addEventListener('change',async e=>{
+    const file=e.target.files?.[0];
+    try{
+      if(!file||storageReadOnly)return;
+      if(file.size>2*1024*1024)throw Error('Pack 5 JSON exceeds 2 MiB limit');
+      const raw=await file.text(),data=JSON.parse(raw),requestedWorld=world;
+      if(!data||data.format!=='mythwrought.pack5.builder-layer.v1'||
+          data.seed!==world.seed||!Array.isArray(data.entries))
+        throw Error('Not a Pack 5 sidecar for the current world seed');
+      if(!await ensurePack5Loaded()||world!==requestedWorld)
+        throw Error('World changed while preparing Pack 5 import');
+      if(!window.confirm('Replace Pack 5 furnishings for world '+world.seed+
+          ' with '+data.entries.length+' pieces? This does not edit terrain.'))
+        return;
+      if(world!==requestedWorld)throw Error('World changed before import');
+      const playerBox=[player.x-.28,player.feet,player.z-.28,
+        player.x+.28,player.feet+1.78,player.z+.28];
+      const result=pack5Builder.importJson(raw,{confirmReplace:true,playerBox});
+      pack5Gpu.refresh(eye());
+      pack5Status.textContent='Pack 5 import saved: '+result.count+
+        ' pieces. Prior primary preserved in sidecar backup.';
+    }catch(error){
+      pack5Status.textContent='Pack 5 import rejected; original saves retained: '+
+        String(error.message||error);
+    }finally{e.target.value='';}
+  });
   const pack2List=document.getElementById('pack2Materials');
   for(const id of PACK2_LIVE_IDS){
     const b=document.createElement('button');
@@ -964,7 +1161,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=candidate;world.nextPack2State=pack2Selection;storageReadOnly=false;changed=false;
+    world=candidate;world.nextPack2State=pack2Selection;resetPack5ForWorld();storageReadOnly=false;changed=false;
     clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
@@ -1082,7 +1279,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=candidate;world.nextPack2State=pack2Selection;changed=false;respawnPrototype();
+    world=candidate;world.nextPack2State=pack2Selection;resetPack5ForWorld();changed=false;respawnPrototype();
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
     message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
@@ -1103,7 +1300,7 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      world=candidate;world.nextPack2State=pack2Selection;
+      world=candidate;world.nextPack2State=pack2Selection;resetPack5ForWorld();
       storageReadOnly=false;changed=false;respawnPrototype();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
@@ -1157,9 +1354,10 @@ function start(){
       }
       const outcome=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
       if(!outcome.ok)throw Error(outcome.reason);
+      world=imported;storageReadOnly=false;changed=false;resetPack5ForWorld();
       const overlay=savePack2LiveWorld(localStorage,candidate);
       if(!overlay.ok)throw Error('Pack 2 sidecar not written; previous verified data retained: '+overlay.reason);
-      world=candidate;world.nextPack2State=pack2Selection;storageReadOnly=false;changed=false;
+      world=candidate;world.nextPack2State=pack2Selection;resetPack5ForWorld();storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
@@ -1180,6 +1378,7 @@ function start(){
     e.preventDefault();
     if(graphicsLost)return;
     graphicsLost=true;graphicsLossCount++;
+    pack5Gpu?.invalidate();
     frameDriver.pause();cancelAllPointers();
     frameHistory.frame(performance.now(),false);
     fatal('Graphics paused — attempting a safe WebGL recovery. Your saved world is untouched.');
@@ -1192,6 +1391,7 @@ function start(){
       initializeGpuPipeline();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
       chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
+      pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
       outlineKey='';outlineCount=0;lastTargetText='';
       lastEditMeshKeys=[];lastFrame=performance.now();
@@ -1258,6 +1458,59 @@ function start(){
         if(!world.set(x,y,z,id))throw Error('Invalid test block');
         try{refreshEditedMeshes(x,z,y);}catch(err){world.set(x,y,z,old);throw err;}
         save();
+      },
+      // Localhost-only real-game GPU fixture, unavailable on deployed Pages.
+      // Used by Chromium to verify the actual terrain shader + Pack 5 buffer.
+      placePack5DenseTestFixture(count=64){
+        if(!pack5Builder||!Number.isInteger(count)||count<1||count>96)
+          throw Error('Invalid local-only Pack 5 dense fixture request');
+        const old=pack5Builder.snapshot();
+        const x=Math.floor(player.x)+4,z=Math.floor(player.z)+4;
+        let added=0,heightTotal=0;
+        try{
+          for(let i=0;i<count;i++){
+            const px=x+i%10*2,pz=z+Math.floor(i/10)*2;
+            // Highest genuine solid-to-air transition: bricks sit on the
+            // untouched seed terrain rather than floating above the camera.
+            let accepted=false;
+            for(let y=19;y>=1;y--){
+              if(world.get(px,y,pz)!==0||world.get(px,y-1,pz)===0)continue;
+              const result=pack5Builder.layer.place('pack5:080',[px,y,pz],i%4);
+              if(result.ok){accepted=true;heightTotal+=y;break;}
+            }
+            if(!accepted)throw Error('No supported, empty test cell');
+            added++;
+          }
+          pack5Builder.save();
+          // Local-only test camera, aimed at actual authored rendered bricks.
+          // No player position, terrain edits or touch controls are changed.
+          const tx=x+9.5,tz=z+6.5,ty=heightTotal/count+.6;
+          const dx=tx-player.x,dz=tz-player.z,dy=ty-(player.feet+1.55);
+          player.yaw=Math.atan2(dx,dz);
+          player.pitch=Math.max(-MAX_PITCH,
+            Math.min(MAX_PITCH,Math.atan2(dy,Math.hypot(dx,dz))));
+        }catch(error){
+          pack5Builder.layer.restore(old);
+          throw error;
+        }
+        pack5Gpu.refresh(eye());
+        return {ok:true,added,total:pack5Builder.layer.count(),
+          resident:pack5Gpu.stats(),schema:world.save().schema};
+      },
+      placePack5TestFixture(x,y,z){
+        if(!pack5Builder||![x,y,z].every(Number.isSafeInteger))
+          throw Error('Pack 5 test mode not initialized');
+        const cell=[x,y,z];
+        const result=pack5Builder.layer.place('pack5:080',cell,0);
+        if(result.ok){
+          try{pack5Builder.save();}
+          catch(error){pack5Builder.layer.remove(cell);throw error;}
+          pack5Gpu.refresh(eye());
+          const dx=x+.5-player.x,dy=y+.5-(player.feet+1.55),dz=z+.5-player.z;
+          player.yaw=Math.atan2(dx,dz);
+          player.pitch=Math.atan2(dy,Math.hypot(dx,dz));
+        }
+        return {...result,scene:pack5Gpu.stats(),worldSchema:world.save().schema};
       },
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
