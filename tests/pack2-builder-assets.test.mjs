@@ -122,3 +122,40 @@ test('all 18 blueprints can place in an isolated Pack 2 overlay and survive veri
   assert.deepEqual(recovered.world.pack2Snapshot(),live.pack2Snapshot());
   assert.equal(JSON.stringify(recovered.world.save()),before);
 });
+
+test('256-cell village construction stress stays deterministic, shape-aware and schema-1 safe',()=>{
+  const placements=Array.from({length:256},(_,i)=>({
+    asset:PACK2_BUILDER_SYMBOLS[i%PACK2_BUILDER_SYMBOLS.length],
+    at:[i%16,0,Math.floor(i/16)]
+  }));
+  const t0=performance.now();
+  const plan=planPack2BuilderStructure(placements,{origin:[500,19,500],maxCells:256});
+  const compileMs=Math.round((performance.now()-t0)*10)/10;
+  assert.equal(plan.cells.length,256);
+  assert.equal(new Set(plan.cells.map(c=>c.at.join(','))).size,256);
+  assert.ok(plan.worldBoxes.length>256);
+  assert.ok(plan.fluidVolumes.length>=10);
+  assert.deepEqual(new Set(plan.cells.map(c=>c.blockId)),new Set(PACK2_LIVE_IDS));
+  assert.ok(plan.worldBoxes.every(p=>p.box.every(Number.isFinite)));
+  const base=new VoxelWorld(179),original=JSON.stringify(base.save());
+  const wrapped=new Pack2LiveWorld(base);
+  for(const cell of plan.cells)
+    assert.equal(wrapped.placePack2(...cell.at,cell.blockId,cell.state),true,
+      'Cannot stage source-exact builder voxel '+cell.asset);
+  assert.equal(wrapped.pack2Cells.size,256);
+  assert.equal(JSON.stringify(base.save()),original);
+  const raw=new Map(),storage={
+    getItem:k=>raw.has(k)?raw.get(k):null,
+    setItem:(k,v)=>raw.set(k,String(v))
+  };
+  assert.equal(savePack2LiveWorld(storage,wrapped).ok,true);
+  const restored=loadPack2LiveWorld(storage,new VoxelWorld(179));
+  assert.equal(restored.recovered,false);
+  assert.deepEqual(restored.world.pack2Snapshot(),wrapped.pack2Snapshot());
+  assert.equal(JSON.stringify(restored.world.save()),original);
+  assert.throws(()=>planPack2BuilderStructure(placements,{maxCells:255}),RangeError);
+  console.log('PASS PACK2 256-CELL PHYSICAL BUILDER STRESS '+
+    JSON.stringify({cells:plan.cells.length,solidBoxes:plan.worldBoxes.length,
+      fluids:plan.fluidVolumes.length,authoredIds:18,compileMs,
+      saveSchemaUnchanged:true,rollbackNotNeeded:true}));
+});
