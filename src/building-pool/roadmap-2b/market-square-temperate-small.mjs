@@ -82,7 +82,7 @@ function makeTemperateSmallMarket(){
   // A physical notice facade, not a walk-through wall or village assembly.
   for(let xx=10;xx<=12;xx++)for(let y=2;y<=4;y++)
     add(xx,y,21,P.wall,'wall');
-  for(const xx of [10,12])add(xx,5,21,P.sign,'decor');
+  for(const xx of [10,12])add(xx,7,21,P.sign,'decor');
   // Market furniture is kept off the 3-cell public spine.
   for(const [x,z] of [[1,10],[21,10],[1,18],[21,18]])
     add(x,2,z,P.planter,'decor',{role:'planter'});
