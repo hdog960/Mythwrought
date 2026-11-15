@@ -34,7 +34,7 @@ for(const seed of [179,1,2026,-77]) {
   test('second vaulted hall has connected player-sized route for seed '+seed,()=>{
     const world=new VoxelWorld(seed),saved=JSON.stringify(world.save());
     const route=westVaultTraversal(world);
-    assert.equal(route.samples.length,22);
+    assert.equal(route.samples.length,23);
     assert.deepEqual(route.failures,[]);
     assert.equal(route.walkable,true);
     const last=route.samples.at(-1);
