@@ -43,7 +43,7 @@ export function auditM1PhysicalSources(b){
   }
   if(p.role==='roof'){
    roofs++;const below=at.get(key([p.at[0],p.at[1]-1,p.at[2]]));
-   if(below&&['live:wood','pack2:013'].includes(below.asset))backed++;
+   if(below&&(below.role==='support'||below.role==='wall'||below.role==='partition'))backed++;
   }
   if(p.asset==='pack5:082')beds++;
   if(p.role==='window')windows++;
@@ -54,7 +54,7 @@ export function auditM1PhysicalSources(b){
   descriptors:Object.freeze([...resolved.keys()].sort()),
   errors:Object.freeze(errors),unresolved:Object.freeze(unresolved),
   provisionalSupports:Object.freeze(supports),
-  roofTiles:roofs,roofBackingCells:backed,bedHeads:beds,bedFeet:feet,windowCells:windows,doorCells:doors,
+  roofTiles:roofs,roofBackingCells:backed,roofBackingIsAuthoredCellsOnly:true,roofLoadCertified:false,bedHeads:beds,bedFeet:feet,windowCells:windows,doorCells:doors,
   productionReady:false,worldPlaced:false,physicalIPhoneTested:false,
   pending:Object.freeze([
    'roof tile seams and structural span/load',
