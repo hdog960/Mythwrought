@@ -50,12 +50,12 @@
   ],
   "quota": 285,
   "inherited": 0,
-  "authored": 21,
-  "remaining": 264,
+  "authored": 33,
+  "remaining": 252,
   "creatorAccepted": 0,
   "integrated": 0,
   "worldPlaced": false,
-  "status": "M2 16 new source-authored healing/library candidates (21/285 total); exact-head nested native and 96 real Chromium cube-proxy screenshots pending",
+  "status": "M2 source-authored 33/285; 15/75 healer and 15/60 library first variants across all 15 biome×size cells; new 72-view source-specific Chromium acceptance PENDING",
   "ownedPaths": [
     "src/building-pool/roadmap-4b/",
     "tests/building-pool/roadmap-4b/",
@@ -76,19 +76,19 @@
     "creatorArtApproval": false,
     "physicalIphoneApproval": false
   },
-  "nextMilestone": "Continue M2 from 9/75 healers and 9/60 libraries (66 healer + 51 library remaining); preserve M1 first-five and 16 newly authored designs, inspect exact-head web views then author further independent rooms/biomes and variants",
+  "nextMilestone": "Finish M2 by authoring 60 more healers and 45 more libraries, variants 02–05 per category/biome/size with independent room graphs and silhouettes; first inspect 72 cube-proxy views for source-specific defects",
   "milestones": {
     "M0": "TECHNICALLY ACCEPTED on PR #185 exact head 199af339dea3c708e5f92b21aa91ce47b7d99763, Actions #43767122199 SUCCESS (native Builder 4B suite + focused Chromium smoke/layout)",
     "M1": "M1 FIRST FIVE TECHNICAL REVIEW PASS: PR #185 at 242e189a96037f8bb1a76005f1a0964276f62925 GitHub Actions #43771739057 SUCCESS; 40/40 Builder 4B native Node tests (includes 30/30 real Chromium WebGL2 cube-proxy captures across 3 landscape sizes); source-level geometry and connectivity pass. FINAL physical-family/creator/iPhone approval NOT GIVEN.",
-    "M2": "IN PROGRESS: 9/75 healer houses, 9/60 libraries, 16/133 M2-new models; source-exact native and 96 Chromium WebGL2 cube-proxy screenshot acceptance pending this PR HEAD",
+    "M2": "IN PROGRESS: 15/75 healers and 15/60 libraries source-authored, 105 healer/library variants still not authored; 12 new expressive geometric plans pending exact-head native + 72 Chromium WebGL2 technical evidence; final creator/asset/iPhone approval all OPEN",
     "M3": "NOT STARTED",
     "M4": "NOT STARTED",
     "M5": "NOT STARTED",
     "M6": "NOT STARTED"
   },
   "byCategoryAuthorCount": {
-    "healers-house": 9,
-    "library": 9,
+    "healers-house": 15,
+    "library": 15,
     "schoolhouse": 1,
     "magical-research-institute": 1,
     "arcane-academy": 1
@@ -100,24 +100,24 @@
       "large": 2
     },
     "desert": {
-      "small": 2,
+      "small": 3,
       "medium": 2,
-      "large": 1
+      "large": 2
     },
     "snow": {
       "small": 2,
       "medium": 2,
-      "large": 0
+      "large": 2
     },
     "enchanted-forest": {
-      "small": 1,
-      "medium": 1,
-      "large": 1
+      "small": 2,
+      "medium": 3,
+      "large": 2
     },
     "mountain": {
-      "small": 0,
+      "small": 2,
       "medium": 2,
-      "large": 1
+      "large": 3
     }
   },
   "authoredIds": [
@@ -141,7 +141,19 @@
     "r4:library:desert:medium:01",
     "r4:library:snow:small:01",
     "r4:library:enchanted-forest:large:01",
-    "r4:library:mountain:medium:01"
+    "r4:library:mountain:medium:01",
+    "r4:healers-house:desert:small:01",
+    "r4:healers-house:snow:large:01",
+    "r4:healers-house:enchanted-forest:medium:01",
+    "r4:healers-house:enchanted-forest:large:01",
+    "r4:healers-house:mountain:small:01",
+    "r4:healers-house:mountain:large:01",
+    "r4:library:desert:large:01",
+    "r4:library:snow:large:01",
+    "r4:library:enchanted-forest:small:01",
+    "r4:library:enchanted-forest:medium:01",
+    "r4:library:mountain:small:01",
+    "r4:library:mountain:large:01"
   ],
   "m1Technical": {
     "sourceHead": "242e189a96037f8bb1a76005f1a0964276f62925",
@@ -161,16 +173,18 @@
     "exteriorAndSectionInspected": true
   },
   "m2Candidate": {
-    "newModels": 16,
-    "authoredTotal": 21,
-    "originalDesignsNotInherited": 21,
-    "m2Healers": 9,
-    "m2Libraries": 9,
+    "newModels": 28,
+    "newThisPass": 12,
+    "authoredTotal": 33,
+    "healers": 15,
+    "libraries": 15,
     "technicalAccepted": false,
-    "physicalFamilyMeshAccepted": false,
     "creatorApproved": 0,
     "integrated": 0,
-    "expectedNewSourceSpecificWebGL2Captures": 96,
-    "actualCapturesClaimed": 0
+    "priorBrowserCaptures": 96,
+    "targetDistinctiveBrowserCaptures": 72,
+    "distinctiveBrowserExecuted": false,
+    "physicalFamilyRenderingAccepted": false,
+    "physicalIphoneTested": false
   }
 }
