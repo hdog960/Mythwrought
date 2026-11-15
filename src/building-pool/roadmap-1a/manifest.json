@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M2 batch: eight new original 3D buildings; legacy ordinal collisions repaired; exact-head 1A CI pending",
+  "milestone": "M2 domestic cross-biome housing tranche; exact-head tests and new WebGL2 evidence pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 411,
-  "newDesignsAuthored": 9,
-  "totalLaneGeometryAuthored": 39,
+  "additionalDesignsRequired": 396,
+  "newDesignsAuthored": 24,
+  "totalLaneGeometryAuthored": 54,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,11 +53,11 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Exact-head native Node M2 original blueprint, full-pool uniqueness, physical support and browser WebGL2 evidence",
-    "Physical Pack1–5 AABBs are builder-resolvable, but no production building placement or save acceptance",
-    "Final rooftop weather/strength, Pack4 pane transparency and Pack2 swung-door clearance",
-    "411 additional genuinely distinct building variants, including 282 houses, 58 taverns and 71 inns",
-    "Creator visual acceptance and physical iPhone review; current independent 1A draft remains unmerged"
+    "Exact-head native full-pool 54-body geometry/physical five-pack audit",
+    "156 real Chromium WebGL2 authored cell-cube screenshots: 26 candidates x exterior/cutaway x 3 viewports",
+    "Pack5:080 desert surface vs true structural wall, Pack3 roof seam/loading, Pack2 door swept-space, Pack4 glazing, Pack5 bed shape, schema-1 save orientation",
+    "117 additional unique houses needed for M2 domestic 150-house milestone",
+    "Full program 396 new blueprints remain (267 houses, 58 taverns, 71 inns); no creator or production approvals"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -76,7 +76,7 @@
   },
   "innCount": 1,
   "categoriesAuthored": {
-    "house": 18,
+    "house": 33,
     "tavern": 17,
     "inn": 4
   },
@@ -158,5 +158,16 @@
       "size": "large",
       "id": "r1:inn:mountain:large:001"
     }
-  ]
+  ],
+  "m2CrossBiomeHousing": {
+    "newHouses": 15,
+    "source": "src/building-pool/roadmap-1a/m2-housing-tranche.mjs",
+    "authoredPlacementCount": 32859,
+    "coverage": "exactly one new house per biome x size",
+    "nativeCI": "pending",
+    "browserCaptureTarget": 156,
+    "webgl2Mode": "source CELL cube proxy, NOT final Pack AABBs",
+    "authoredHouses": 33,
+    "m2HouseTarget": 150
+  }
 }
