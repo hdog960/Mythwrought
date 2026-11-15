@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
-import {eastGalleryCaveWorld,eastGalleryTrace,eastGalleryChamberTrace} from '../src/east-gallery-cave.mjs';
+import {eastGalleryCaveWorld,eastGalleryTrace,eastGalleryChamberTrace,eastGalleryConnectionTrace} from '../src/east-gallery-cave.mjs';
 import {CAVE_CANDIDATE} from '../src/experimental-cave-route.mjs';
 
 for(const seed of [179,17,918]){
@@ -65,6 +65,31 @@ test('side-pocket player edit is preserved and full chamber traversal reports ob
   assert.equal(after.walkable,false);
   assert.ok(after.unreachable.some(c=>c.x===side.x&&c.z===side.z));
   assert.equal(eastGalleryCaveWorld(world).get(side.x,before.entry.y,side.z),BLOCK.STONE);
+  assert.equal(world.save().schema,1);
+  assert.equal(world.save().edits.length,1);
+});
+
+for(const seed of [179,17,918]){
+  test('south gallery aisle joins east chamber by swept cardinal player-body route seed '+seed,()=>{
+    const world=new VoxelWorld(seed);
+    const trace=eastGalleryConnectionTrace(world);
+    assert.equal(trace.samples.length,16);
+    assert.equal(trace.transitions.length,15);
+    assert.ok(trace.samples.every(s=>s.supported&&s.headroom&&s.bodyClear),JSON.stringify(trace.samples));
+    assert.ok(trace.transitions.every(t=>t.cardinal&&t.clear),JSON.stringify(trace.transitions));
+    assert.equal(trace.walkable,true);
+    assert.deepEqual(eastGalleryConnectionTrace(world),trace);
+  });
+}
+test('saved obstruction in the connecting throat blocks route but remains saved',()=>{
+  const world=new VoxelWorld(179);
+  const route=eastGalleryConnectionTrace(world);
+  assert.equal(route.walkable,true);
+  const throat=route.samples[6];
+  world.set(throat.x,throat.feet,throat.z,BLOCK.STONE);
+  const blocked=eastGalleryConnectionTrace(world);
+  assert.equal(blocked.walkable,false);
+  assert.equal(eastGalleryCaveWorld(world).get(throat.x,throat.feet,throat.z),BLOCK.STONE);
   assert.equal(world.save().schema,1);
   assert.equal(world.save().edits.length,1);
 });
