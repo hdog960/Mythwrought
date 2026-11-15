@@ -1,0 +1,114 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-2b.authoring-ledger.v1",
+  "lane": "roadmap-2b",
+  "legacySourcePR": 124,
+  "legacyPinnedHead": "07c45d27bd36f4f3aa3197bba0e4f49ce2a58c68",
+  "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "target": 420,
+  "sourceExactInheritedTemples": 15,
+  "originalNewModels": 6,
+  "authoredCandidates": 21,
+  "remainingUnauthored": 399,
+  "creatorAccepted": 0,
+  "integratedInGame": 0,
+  "placedInWorld": 0,
+  "byCategory": {
+    "market-square": {
+      "authored": 1,
+      "target": 60,
+      "remaining": 59
+    },
+    "tailor": {
+      "authored": 1,
+      "target": 60,
+      "remaining": 59
+    },
+    "butcher": {
+      "authored": 1,
+      "target": 60,
+      "remaining": 59
+    },
+    "jeweler": {
+      "authored": 1,
+      "target": 60,
+      "remaining": 59
+    },
+    "bookshop": {
+      "authored": 1,
+      "target": 60,
+      "remaining": 59
+    },
+    "temple": {
+      "authored": 15,
+      "target": 75,
+      "remaining": 60
+    },
+    "theater": {
+      "authored": 1,
+      "target": 45,
+      "remaining": 44
+    }
+  },
+  "originals": [
+    {
+      "id": "r2:market-square:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/market-square-temperate-small.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
+      "status": "authored-candidate"
+    }
+  ],
+  "biomeSizeDistribution": {
+    "temperate": {
+      "small": 7,
+      "medium": 1,
+      "large": 1
+    },
+    "desert": {
+      "small": 1,
+      "medium": 1,
+      "large": 1
+    },
+    "snow": {
+      "small": 1,
+      "medium": 1,
+      "large": 1
+    },
+    "enchanted-forest": {
+      "small": 1,
+      "medium": 1,
+      "large": 1
+    },
+    "mountain": {
+      "small": 1,
+      "medium": 1,
+      "large": 1
+    }
+  },
+  "productionRegistryUnchanged": true,
+  "physicalShapeAbiCertified": false,
+  "screenshotClassification": "software WebGL2 cube proxies; neither physical-family WebGL2 nor live game"
+}
