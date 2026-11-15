@@ -161,14 +161,32 @@ function emitBlueprint(type,biome,size){
       }
     }
   }
-  // Biome-specific physical buttresses, window sockets and court arcade columns.
+  // Window sockets must expose an ACTUAL exterior face and look through the
+  // full wall thickness. The old fixed x=3/w-4 pane often sat behind another
+  // wall cell, and a few panes faced a second internal masonry layer.
+  // Preserve the original sparse facade rhythm but find the true outer wall.
   for(let z=entranceZ+3;z<d-4;z+=bi===3?5:4){
-    for(const x of [3,w-4])if(has(x,z)&&!interior(x,z)){
-      const existing=occupied.get(pos(x,2,z));
-      if(existing?.role==='wall'){
-        del(x,2,z);set(x,2,z,'window',SYMBOLS.glass,x<mid?'west':'east');
-        openings.push({kind:'window',at:[x,2,z],facing:x<mid?'west':'east'});
+    for(const [sourceX,outward] of [[3,-1],[w-4,1]]){
+      if(!has(sourceX,z)||interior(sourceX,z))continue;
+      const source=occupied.get(pos(sourceX,2,z));
+      if(source?.role!=='wall')continue;
+      const behind=occupied.get(pos(sourceX+outward,2,z));
+      const faceX=behind?.role==='wall'?sourceX+outward:sourceX;
+      if(occupied.has(pos(faceX+outward,2,z)))continue; // outside must be sky
+      if(occupied.get(pos(faceX,1,z))?.role!=='wall'||
+         occupied.get(pos(faceX,3,z))?.role!=='wall')continue; // supported socket
+      const tunnel=[];let x=faceX-outward,valid=false;
+      for(let depth=0;depth<4;depth++,x-=outward){
+        const block=occupied.get(pos(x,2,z));
+        if(!block){valid=true;break;}
+        if(block.role!=='wall'||tunnel.length===2)break;
+        tunnel.push(x);
       }
+      if(!valid)continue; // never leave a pane with opaque masonry behind it
+      del(faceX,2,z);
+      for(const ix of tunnel)del(ix,2,z);
+      set(faceX,2,z,'window',SYMBOLS.glass,outward<0?'west':'east');
+      openings.push({kind:'window',at:[faceX,2,z],facing:outward<0?'west':'east'});
     }
   }
   if(bi===1&&court){
@@ -190,6 +208,28 @@ function emitBlueprint(type,biome,size){
         const k=pos(x,y,z);
         if(!occupied.has(k))set(x,y,z,y===top?'roof':'parapet',y===top?roofAsset:wallAsset);
       }
+    }
+    // Castle tower caps are thin candidate roof tiles, not full load-bearing
+    // cubes. A flat tower cap over an open shaft needs an actual crosswise
+    // beam that joins parapet walls on BOTH sides. Do not suspend roof pieces
+    // in space at jagged biome corners when no supported span exists.
+    const crownY=roofY+pitch+3+si;
+    const anchors=new Set(['parapet','wall','column','beam']);
+    const bearingDistance=(x,z,dx,dz)=>{
+      for(let n=1;n<=9;n++){
+        const nx=x+dx*n,nz=z+dz*n;
+        if(!occupied.has(pos(nx,crownY,nz)))return 0;
+        if(anchors.has(occupied.get(pos(nx,crownY-1,nz))?.role))return n;
+      }
+      return 0;
+    };
+    for(const cap of [...cells].filter(c=>c.role==='roof'&&c.at[1]===crownY)){
+      const [x,,z]=cap.at;
+      if(occupied.has(pos(x,crownY-1,z)))continue;
+      const spanX=bearingDistance(x,z,-1,0)>0&&bearingDistance(x,z,1,0)>0;
+      const spanZ=bearingDistance(x,z,0,-1)>0&&bearingDistance(x,z,0,1)>0;
+      if(!spanX&&!spanZ){del(x,crownY,z);continue;}
+      set(x,crownY-1,z,'beam','base:wood',spanX?'east':'north');
     }
   }
   // Deliberately reserved symbolic rotated partial stairs, directly alongside their rising tread path.
