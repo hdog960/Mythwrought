@@ -171,3 +171,21 @@ test('archwood refuses modified distant footing and never overwrites its edit',(
  assert.equal(placeVoxelTree(w,p),false);
  assert.equal(w.get(x+6,y,z),BLOCK.STONE);
 });
+
+test('archwood canopy bridge keeps a continuous two-cell standing aisle',()=>{
+ for(const seed of [179,917,-184]){
+  const w=new VoxelWorld(seed),p=site(w,'archwood');
+  const [x,y,z]=p.origin;
+  for(let dx=0;dx<=6;dx++){
+   for(const dy of [8,9]){
+    assert.equal(p.cells.some(c=>c[0]===x+dx&&c[1]===y+dy&&c[2]===z),false,
+     'deck center aisle must have full standing headroom');
+   }
+   assert.ok(p.cells.some(c=>c[0]===x+dx&&c[1]===y+8&&c[2]===z+1&&c[3]===BLOCK.LEAVES),
+    'side canopy remains physically voxel-built');
+  }
+  assert.equal(placeVoxelTree(w,p),true);
+  for(let dx=0;dx<=6;dx++)for(const dy of [8,9])
+   assert.equal(w.get(x+dx,y+dy,z),BLOCK.AIR);
+ }
+});
