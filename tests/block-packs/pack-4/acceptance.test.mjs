@@ -60,6 +60,28 @@ test('23 models × four rotations preserve finite sub-cell physical geometry and
   assert.equal(s.id,a.id);assert.equal(s.rotation,rotation);
   assert.equal(s.occludesWholeCell,false);
   assert.ok(s.selection.length>0&&s.collision.length>0);
+  // Source-backed physical graph continuity: beams, crate slats, crystal
+  // posts, wheel teeth and the hearth grate cannot float as disconnected
+  // colliders. Shutter ID 163 deliberately has two independent hinged
+  // leaves, each with real hinge contact to its adjacent wall.
+  const overlaps=(x,y)=>[0,1,2].every(axis=>
+   x[axis]<=y[axis+3]+1e-8&&y[axis]<=x[axis+3]+1e-8);
+  const visited=new Set();
+  let components=0;
+  for(let i=0;i<s.collision.length;i++){
+   if(visited.has(i))continue;
+   components++;
+   const pending=[i];visited.add(i);
+   while(pending.length){
+    const from=pending.pop();
+    for(let j=0;j<s.collision.length;j++)
+     if(!visited.has(j)&&overlaps(s.collision[from],s.collision[j])){
+      visited.add(j);pending.push(j);
+     }
+   }
+  }
+  assert.equal(components,a.id===163?2:1,
+   'disconnected physical collision body id '+a.id+' turn '+rotation);
   for(const b of [...s.selection,...s.collision])
    assert.ok(boundsGood(b),'invalid ID '+a.id+' rotation '+rotation);
   assert.ok(s.collision.every(b=>b.some((n,i)=>i<3&&b[i+3]-n<.97)),
