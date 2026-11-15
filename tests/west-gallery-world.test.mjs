@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,CHUNK_SIZE,meshChunk} from '../src/voxel.mjs';
-import {westGalleryWorld,westGalleryTraversal,westVaultTraversal,westLoopTraversal,northAlcoveTraversal,northSpurTraversal} from '../src/west-gallery-world.mjs';
+import {westGalleryWorld,westGalleryTraversal,westVaultTraversal,westLoopTraversal,northAlcoveTraversal,northSpurTraversal,northernCrossGalleryTraversal} from '../src/west-gallery-world.mjs';
 import {branchedCaveWorld} from '../src/branched-cave-world.mjs';
 import {CAVE_CANDIDATE} from '../src/experimental-cave-route.mjs';
 
@@ -121,5 +121,26 @@ test('fourth chamber preserves saved obstruction and reports blocked passage',()
   const before=JSON.stringify(world.save());
   assert.equal(westGalleryWorld(world).get(sample.x,sample.y,sample.z),BLOCK.WOOD);
   assert.ok(northSpurTraversal(world).failures.some(p=>p.z===sample.z));
+  assert.equal(JSON.stringify(world.save()),before);
+});
+
+for(const seed of [179,1,2026,-77]) {
+  test('northern cross-gallery links the two vaulted caverns for seed '+seed,()=>{
+    const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+    const route=northernCrossGalleryTraversal(world);
+    assert.equal(route.samples.length,13);
+    assert.deepEqual(route.failures,[]);
+    assert.equal(route.walkable,true);
+    assert.equal(route.samples[0].x,CAVE_CANDIDATE.x+12);
+    assert.equal(route.samples.at(-1).z,CAVE_CANDIDATE.z-19);
+    assert.equal(JSON.stringify(world.save()),before);
+  });
+}
+test('northern cross-gallery keeps saved blocks and reports obstruction',()=>{
+  const world=new VoxelWorld(179),cell=northernCrossGalleryTraversal(world).samples[6];
+  assert.equal(world.set(cell.x,cell.y,cell.z,BLOCK.WOOD),true);
+  const before=JSON.stringify(world.save());
+  assert.equal(westGalleryWorld(world).get(cell.x,cell.y,cell.z),BLOCK.WOOD);
+  assert.ok(northernCrossGalleryTraversal(world).failures.some(p=>p.x===cell.x&&p.z===cell.z));
   assert.equal(JSON.stringify(world.save()),before);
 });
