@@ -38,3 +38,8 @@
 - Pack4 transparent panes and usable Y-axis rotations were examined against its independent `windows.mjs`. Replaced 180 wrong/unglazed/misrotated window cells and three invalid horizontal roof panes with supported vertical-lantern candidates, keeping sealing/state unresolved.
 - Pack3 shallow physical roofing underlays were inspected. Repaired 2,309 exposed roof riser cells with current registered solids; another 210 beam/post intersections require later approval. **80/80 native local Node; 54 genuine Chromium Canvas2D mobile captures**; no final WebGL2 or iPhone certification.
 - 45 IDs, 15 bed-foot reservations, all independent developer ownership, original seed/schema-1 persistence, and v0.10 Gate A pending/v0.11 locked retained. No shared CI, merge, deploy, asset registration or world placement.
+
+## New M1 roof-post riser containment pass (2026-11-14)
+- Latest verified main remains **ac263720**, integration checkpoint **008**. Issues #109/#117 checked, all five manual block-pack current PR heads and competing building PR heads inspected; no ownership collisions or numeric ID registration changes.
+- Every one of **210** previously unresolved roof-step occupied cells is physically a Pack2 `022` vertical candidate post. Blueprint now substitutes full-cell existing registered wood only at required step positions, retains the tie-post designation, and marks structural safety unresolved.
+- **82/82** exact-source native Roadmap1 Node tests locally; **54** genuine Chromium Canvas2D screenshots; multiple WebGL2 probe backends yielded no context. Root CI's nested-suite omission and clean main+PR integration remain open. The other roadmaps, manual packs, automation-owned 130 catalog, main, shared CI, engine, save schema and world placement untouched.

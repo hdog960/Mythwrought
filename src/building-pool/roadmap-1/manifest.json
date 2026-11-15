@@ -2,8 +2,8 @@
   "schema": "mythwrought.building-pool.roadmap-1.manifest.v1",
   "title": "Homes & Regional Life",
   "gate": "v0.10 Gate A OPEN; v0.11 LOCKED",
-  "milestone": "M1 — window-plane compatibility and roof-step backing; physical candidate integration OPEN",
-  "status": "45_UNMERGED_CANDIDATES_80_NODE_SOURCE_EXACT_ROOF_AND_WINDOW_REPAIR",
+  "milestone": "M1 — 210 formerly unsealed roof-post step cells backed with registered solid wood; shape/strength acceptance remains open",
+  "status": "45_UNMERGED_CANDIDATES_82_NATIVE_EXACT_SOURCE_ZERO_RISER_GAPS_CREATOR_ACCEPTANCE_OPEN",
   "target": 885,
   "authoredBlueprintCount": 45,
   "biomes": [
@@ -56,9 +56,9 @@
     "manualPackHeads": {
       "pack1": "c9630ac6bad5e06a645f74bd319beebea736e9ce",
       "pack2": "8fb1a189c20b22144d2e501fde76500385ee44ba",
-      "pack3": "803391b0a60078d81e0d049f917a5e1eab6ec51f",
-      "pack4": "30def508e9d555a65a1b4190f27ecb9ca36f8e22",
-      "pack5": "3703699086a8c61a8e93057383682ebf8dda8ba3"
+      "pack3": "3ec737bd6251b52ee5dfb1303c7900ed0d8558f0",
+      "pack4": "8b968ca9b6bc283adb5fb172219e6765191eb495",
+      "pack5": "ae1b4849707ae25c99f69aa04587add966fd4362"
     },
     "checkpoint008": {
       "status": "main automatic-world physical voxels now active; only pre-existing automation-owned tree/cave/court structures; 12 biome130 candidates unregistered",
@@ -88,21 +88,21 @@
   },
   "testEvidence": {
     "nativeNode": {
-      "run": "Clean isolated Roadmap 1 local source checkout; Node v22.16.0, all module blob hashes match remote PR source/test Git objects",
-      "cases": "80/80 pass, 0 fail, 0 skips, 0 todo (68 previous + 6 glazing + 6 roof step)",
-      "exactPRHead": "YES for isolated Roadmap 1-owned code/test blobs SHA-matched to draft PR #121 head; combined latest-main + PR and central Actions NOT certified"
+      "run": "Native Node v22.16.0 on isolated exact-source Roadmap 1 local checkout; all five modified module/test files Git blob SHA matched to draft PR #121 commit b643665aae8ec37704ee1e0f3787623d18645844",
+      "cases": "82/82 pass, 0 fail, 0 skip, 0 todo; 80 prior plus 2 negative/positive physical post substitution cases",
+      "exactPRHead": "YES isolated Roadmap 1 original source/test SHA; NO combined latest-main+PR integration certification, central Actions excludes nested tests"
     },
     "chromium": {
-      "renderer": "Genuine headless Chromium Canvas2D, source-derived schematic, NOT WebGL2 asset mesher",
+      "renderer": "Genuine Chromium Canvas2D schematic; no WebGL2 context available across ANGLE/SwiftShader/default",
       "screenshots": 54,
       "viewports": [
         "667x375",
         "844x390",
         "932x430"
       ],
-      "samples": "9 designs × exterior and cutaway × 3 sizes after roof/window repairs",
+      "samples": "9 candidate IDs × exterior and interior cutaway × 3 mobile viewport sizes",
       "authentic": true,
-      "source": "local /mnt/data/mythwrought-roadmap1-r2-captures, not PR artifact or gameplay"
+      "source": "local generated diagnostic PNGs, not attached to draft PR, not physical block meshes"
     },
     "physicalIPhone": false,
     "ci": {
@@ -111,13 +111,13 @@
     }
   },
   "pending": [
-    "Combined latest-main+PR exact-head native/Chromium smoke remains unverified; central CI excludes 80 nested Roadmap 1 cases",
-    "True native source-served WebGL2 physical mesh preview at all 3 iPhone landscape sizes; local WebGL2 unavailable",
-    "210 thin-roof step intersections with candidate Pack2 beams/posts need physical fill/join without colliding",
-    "Pack3 thin roof tiles horizontal water/air seam, roof pitches, skylight lantern cap/vertical pane waterproofing and load strength unresolved",
-    "Pack4 pane orientation/transparent render ordering, glass-to-frame mount and schema-1 safe rotation sidecar not integrated",
-    "Pack2 hinged door sweep, safe wide/tall entrance clearance, Pack5 furniture and candidate cells, creator artistic review remain open",
-    "840 future unique authored blueprints; no runtime world placement or deployment"
+    "Native combined main+PR acceptance and exact-head central workflow conclusion (root CI excludes nested 82-test suite)",
+    "Pack 2 original slender support posts replaced at 210 roof risers with full live timber; verify actual future timber beam spans and safe load transfer",
+    "Pack 3 thin tile neighboring seam/underlay waterproofing and real shape-aware collision still unapproved despite 2,519 solid riser cells",
+    "Pack 4 glazing transparency, glass mount/weather seal, raised roof lantern daylight path and safe schema-1 orientation sidecar unapproved",
+    "Pack 2 hinged door sweep/2-high mounting, Pack 5 2-cell bed physical collision and other unstarted specialty fixtures",
+    "Genuine native source-served WebGL2 and creator architectural near-duplicate review; local WebGL2 context creation failed",
+    "840 new original blueprint designs in later milestones; no world placement, merge, deployment or v0.11 unlock"
   ],
   "mirroredAndRotatedGeometryCheck": {
     "result": "45/45 distinct under 4 rotations and mirrored counterparts, material-independent",
@@ -241,16 +241,20 @@
   },
   "roofStepFeasibility": {
     "exposedHeightStepTargets": 2519,
-    "liveFilledBackingCells": 2309,
-    "unresolvedBeamPostIntersections": 210,
+    "liveFilledBackingCells": 2519,
+    "previousLiveFilledBackingCells": 2309,
+    "previousUnresolvedBeamPostIntersections": 210,
+    "remainingUnresolvedRiserCells": 0,
+    "substitutedVerticalPostCells": 210,
+    "substitutionMaterial": "live:wood full-cell registered voxel",
+    "candidateOriginal": "pack2:022 slim support post",
+    "substitutionLedger": "per-blueprint architecturalIdentity.roofStepAudit.solidPostSubstitutions",
+    "retainFrameSupportPositions": true,
     "preservation": "open courtyards remain open",
     "pack3RoofUnderlayHeight": 0.125,
-    "livePlacedCells": [
-      "live:wood",
-      "live:stone"
-    ],
     "waterproofingApproved": false,
     "structuralSpanApproved": false,
-    "unresolvedCandidatePartCollisions": true
+    "glassRoofDaylightingApproved": false,
+    "engineIntegration": false
   }
 }
