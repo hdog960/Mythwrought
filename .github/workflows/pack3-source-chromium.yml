@@ -1,0 +1,106 @@
+name: Pack 3 source-exact Chromium visual evidence (supplemental)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/pack3-source-chromium.yml'
+      - 'scripts/ci/pack3-source-chromium/**'
+      - 'src/block-packs/pack-3/**'
+      - 'tests/block-packs/pack-3/**'
+
+# Only read existing PR #112 and produce ephemeral evidence.
+# No workflow_dispatch, deployment, PR mutation or branch writes.
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pack3-source-chromium-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  pack3-visual:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout independent verifier
+        uses: actions/checkout@v4
+        with:
+          path: verifier
+          persist-credentials: false
+      - name: Checkout actual Pack 3 PR #112 head (never merged)
+        uses: actions/checkout@v4
+        with:
+          path: candidate
+          ref: refs/pull/112/head
+          persist-credentials: false
+      - name: Verify exact source SHA and draft-only ownership
+        id: pin
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          metadata="$(gh api "repos/$GITHUB_REPOSITORY/pulls/112")"
+          test "$(jq -r .state <<< "$metadata")" = open
+          test "$(jq -r .draft <<< "$metadata")" = true
+          test "$(jq -r .head.repo.full_name <<< "$metadata")" = "$GITHUB_REPOSITORY"
+          test "$(jq -r .base.ref <<< "$metadata")" = main
+          sha="$(jq -r .head.sha <<< "$metadata")"
+          test "$sha" = "$(git -C candidate rev-parse HEAD)"
+          test "$(git -C candidate status --porcelain)" = ""
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          mkdir -p pack3-evidence
+          printf '%s\n' "$sha" > pack3-evidence/verified-candidate-head.txt
+          echo "Verified source-exact draft PR #112: $sha"
+      - name: Install Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install free Playwright Chromium and image validator
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'playwright==1.58.0' 'Pillow>=10,<13'
+          python -m playwright install --with-deps chromium
+          browser_bin="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
+          test -x "$browser_bin"
+          echo "PACK3_CHROMIUM=$browser_bin" >> "$GITHUB_ENV"
+      - name: Run six genuine source-exact Pack 3 Chromium reviewers
+        env:
+          PACK3_SCREENSHOT_DIR: ${{ github.workspace }}/pack3-evidence/gallery
+          PACK3_MATRIX_DIR: ${{ github.workspace }}/pack3-evidence/contact-sheets
+          PACK3_ASSEMBLY_DIR: ${{ github.workspace }}/pack3-evidence/roof
+          PACK3_RIDGE_ASSEMBLY_DIR: ${{ github.workspace }}/pack3-evidence/ridge
+          PACK3_FORT_ASSEMBLY_DIR: ${{ github.workspace }}/pack3-evidence/fortress
+          PACK3_AQUEDUCT_DIR: ${{ github.workspace }}/pack3-evidence/aqueduct
+        run: |
+          set -euo pipefail
+          cd candidate
+          (
+            python -u tests/block-packs/pack-3/gallery-browser.py
+            python -u tests/block-packs/pack-3/creator-review-matrix.py
+            python -u tests/block-packs/pack-3/roof-assembly-browser.py
+            python -u tests/block-packs/pack-3/ridge-assembly-browser.py
+            python -u tests/block-packs/pack-3/fortification-assembly-browser.py
+            python -u tests/block-packs/pack-3/aqueduct-assembly-browser.py
+          ) 2>&1 | tee ../pack3-evidence/reviewer.log
+          git diff --exit-code
+      - name: Validate actual PNGs, all IDs, all angles and exact source
+        run: |
+          set -euo pipefail
+          python verifier/scripts/ci/pack3-source-chromium/verify.py pack3-evidence "${{ steps.pin.outputs.sha }}"
+      - name: Reconfirm the exact candidate SHA did not change mid-review
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          current="$(gh api "repos/$GITHUB_REPOSITORY/pulls/112" --jq '.head.sha')"
+          test "$current" = "${{ steps.pin.outputs.sha }}"
+      - name: Upload authentic complete or partial screenshot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pack3-source-exact-chromium-${{ github.run_id }}
+          path: pack3-evidence/
+          if-no-files-found: warn
+          retention-days: 30
