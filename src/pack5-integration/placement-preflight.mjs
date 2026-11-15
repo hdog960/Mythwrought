@@ -14,7 +14,74 @@ const cellValid=v=>Array.isArray(v)&&v.length===3&&v.every(Number.isSafeInteger)
 const boxValid=v=>Array.isArray(v)&&v.length===6&&v.every(Number.isFinite)&&
   v.slice(0,3).every((n,i)=>n<v[i+3]);
 const key=v=>v.join(',');
+
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+const boxesOverlap=(a,b)=>a[0]<b[3]&&a[3]>b[0]&&
+  a[1]<b[4]&&a[4]>b[1]&&a[2]<b[5]&&a[5]>b[2];
+const boxCells=box=>{
+  if(!boxValid(box)||box.some(n=>Math.abs(n)>1e9))
+    throw Error('Invalid source-external physical collider');
+  const lo=box.slice(0,3).map(Math.floor),
+    hi=box.slice(3).map(n=>Math.ceil(n)-1);
+  if([...lo,...hi].some(n=>!Number.isSafeInteger(n))||
+     lo.some((n,i)=>hi[i]-n>31)||
+     (hi[0]-lo[0]+1)*(hi[1]-lo[1]+1)*(hi[2]-lo[2]+1)>4096)
+    throw Error('Foreign collider requires bounded spatial proof');
+  return {lo,hi};
+};
+function colliderIndex(boxes,label){
+  if(boxes===null)return null;
+  if(!Array.isArray(boxes)||boxes.length>8192)
+    throw Error('Invalid '+label+' physical collision registry');
+  const cells=new Map();let indexed=0;
+  for(const box of boxes){
+    const {lo,hi}=boxCells(box);
+    for(let x=lo[0];x<=hi[0];x++)
+      for(let y=lo[1];y<=hi[1];y++)
+        for(let z=lo[2];z<=hi[2];z++){
+          if(++indexed>250000)
+            throw Error('Pack 5 external collision index budget exceeded');
+          const k=key([x,y,z]);
+          if(!cells.has(k))cells.set(k,[]);
+          cells.get(k).push(box);
+        }
+  }
+  return cells;
+}
+function collidesExternal(index,shape){
+  if(index===null)return false;
+  const {lo,hi}=boxCells(shape),visited=new Set();
+  for(let x=lo[0];x<=hi[0];x++)
+    for(let y=lo[1];y<=hi[1];y++)
+      for(let z=lo[2];z<=hi[2];z++)
+        for(const external of index.get(key([x,y,z]))??[]){
+          if(visited.has(external))continue;
+          visited.add(external);
+          if(boxesOverlap(shape,external))return true;
+        }
+  return false;
+}
+/** Exact Pack 5 collision boxes from a saved construction layer (read-only). */
+export function collectPack5PlacedCollisionBoxes(layer){
+  if(!layer||typeof layer.list!=='function'||typeof layer.count!=='function')
+    throw Error('Invalid Pack 5 collision source');
+  const rows=layer.list();
+  if(!Array.isArray(rows)||rows.length!==layer.count()||rows.length>4096)
+    throw Error('Invalid Pack 5 collision source count');
+  const boxes=[];
+  for(const row of rows){
+    const resolved=resolvePack5BlueprintPhysical({
+      asset:row.symbolicId,at:row.anchor,
+      orientation:row.rotation,variant:row.variant
+    });
+    for(const box of resolved.physical.collision){
+      boxCells(box);
+      boxes.push(Object.freeze([...box]));
+    }
+  }
+  return Object.freeze(boxes);
+}
+
 function occupiedSet(cells,label){
   if(cells===null)return null;
   if(!Array.isArray(cells)||cells.length>100000)
@@ -28,7 +95,8 @@ function occupiedSet(cells,label){
 }
 export function preflightPack5BuilderPlan(plan,{world,
   foreignOccupiedCells=null,existingPack5Cells=null,
-  verifiedStructuralSupports=null}={}){
+  verifiedStructuralSupports=null,
+  foreignCollisionBoxes=null,existingPack5CollisionBoxes=null}={}){
   if(!plan||typeof plan!=='object'||!Array.isArray(plan.placements)||
     plan.placements.length<1||plan.placements.length>4096||
     plan.worldPlaced!==false||plan.saveWritten!==false||
@@ -37,6 +105,8 @@ export function preflightPack5BuilderPlan(plan,{world,
   const foreign=occupiedSet(foreignOccupiedCells,'foreign-pack');
   const existing=occupiedSet(existingPack5Cells,'existing-Pack5');
   const structural=occupiedSet(verifiedStructuralSupports,'certified-structural-support');
+  const foreignShapes=colliderIndex(foreignCollisionBoxes,'foreign-pack');
+  const existingShapes=colliderIndex(existingPack5CollisionBoxes,'existing-Pack5');
   const issues=[],seen=new Set();
   const add=(kind,asset,at)=>issues.push(Object.freeze({
     kind,asset,cell:Object.freeze([...at])
@@ -65,6 +135,10 @@ export function preflightPack5BuilderPlan(plan,{world,
         throw Error('Pack 5 physical handoff differs from source geometry: '+field);
     for(const box of placement.physical.collision)
       if(!boxValid(box))throw Error('Invalid Pack 5 source collider');
+    if(placement.physical.collision.some(box=>collidesExternal(foreignShapes,box)))
+      add('foreign-shape-overlap',placement.asset,placement.anchor);
+    if(placement.physical.collision.some(box=>collidesExternal(existingShapes,box)))
+      add('existing-pack5-shape-overlap',placement.asset,placement.anchor);
     for(const at of placement.physical.occupiedCells){
       const cellKey=key(at);checks++;
       if(seen.has(cellKey))add('pack5-plan-overlap',placement.asset,at);
@@ -93,8 +167,12 @@ export function preflightPack5BuilderPlan(plan,{world,
         throw Error('Invalid registered support block');
       if(legacy>BLOCK.DEEPSTONE&&!structural?.has(key(at)))
         add('unverified-registered-support',placement.asset,at);
-      if(legacy===BLOCK.AIR&&!structural?.has(key(at)))
-        add('unverified-support',placement.asset,at);
+      if(legacy===BLOCK.AIR){
+        if(!structural?.has(key(at)))
+          add('unverified-support',placement.asset,at);
+        else if(!foreign?.has(key(at)))
+          add('certified-support-not-occupied',placement.asset,at);
+      }
       // An explicit support proof may describe an incoming *structural*
       // cross-pack block not yet installed in this world's legacy grid.
       // Generic foreign occupancy is never treated as that proof.
@@ -106,11 +184,15 @@ export function preflightPack5BuilderPlan(plan,{world,
     verifiedForeignOccupancy:foreign!==null,
     verifiedExistingPack5Occupancy:existing!==null,
     verifiedStructuralSupportEvidence:structural!==null,
+    providedForeignCollisionBoxes:foreignShapes!==null,
+    providedExistingPack5CollisionBoxes:existingShapes!==null,
     issues:Object.freeze(issues),
     // A dry run cannot be pronounced clear while any externally owned
     // occupied-cell registry was omitted. This prevents Pack 5 from
     // prematurely approving a layout that overlaps a future Pack 1–4 shape.
     pack5OnlyDryRunClear:issues.length===0&&foreign!==null&&existing!==null,
+    shapeAwareDryRunClear:issues.length===0&&foreign!==null&&existing!==null&&
+      foreignShapes!==null&&existingShapes!==null,
     crossPackPhysicalAcceptance:false,
     globalNumericIdsAssigned:false,
     worldPlaced:false,saveWritten:false,
