@@ -1354,7 +1354,6 @@ function start(){
       }
       const outcome=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
       if(!outcome.ok)throw Error(outcome.reason);
-      world=imported;storageReadOnly=false;changed=false;resetPack5ForWorld();
       const overlay=savePack2LiveWorld(localStorage,candidate);
       if(!overlay.ok)throw Error('Pack 2 sidecar not written; previous verified data retained: '+overlay.reason);
       world=candidate;world.nextPack2State=pack2Selection;resetPack5ForWorld();storageReadOnly=false;changed=false;
@@ -1524,5 +1523,7 @@ function start(){
     'READ ONLY: damaged world data preserved; import or select another seed.':
     'Schema-1 saved edits; checksum journal and verified previous-world backup.';
   message(recoveryNote||'Move, look, mine and place · ☰ for help');
+  // Restore saved shaped pieces without enabling construction editing.
+  void restoreSavedPack5Scene();
   if(!document.hidden)frameDriver.resume();
 }
