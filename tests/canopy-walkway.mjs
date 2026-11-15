@@ -43,7 +43,7 @@ const deckLength=Math.abs(b[0]-a[0])+Math.abs(b[1]-a[1]);
 const limbs=plan.cells.filter(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&
  (a[0]===b[0]?x!==a[0]:z!==a[1]));
 assert.ok(limbs.length<2*(deckLength-3),'no continuous paired side fences');
-assert.ok(limbs.length>=deckLength-3,'at least one branch per interior step');
+assert.ok(limbs.length>=2,'at least two rooted crown branches');
 const left=limbs.filter(([x,,z])=>a[0]===b[0]?x<a[0]:z<a[1]).length;
 const right=limbs.length-left;
 assert.ok(left>0&&right>0,'crown alternates between both sides');
@@ -113,5 +113,39 @@ assert.deepEqual(planCanopyWalkway(longSite.world,longSite.aa,longSite.bb,y)?.ce
  'crown variant is stable for the same seed and anchors');
 assert.equal(placeCanopyWalkway(longSite.world,longPlan),true,'long crown can be placed');
 assert.equal(placeCanopyWalkway(longSite.world,longPlan),false,'long crown cannot duplicate edits');
+
+// Even-length spans used to place all crown forks on one bank because their
+// station coordinates have identical parity. Verify actual physical occupancy
+// for both orientations and all long supported spans, not only seven cells.
+for(const span of [8,9]){
+ let site=null;
+ for(let x=-150;x<150&&!site;x+=3)for(let z=-150;z<150&&!site;z+=3){
+  const f=fixture(),aa=[x,z],bb=[x+span,z];
+  f.edits.set(f.k(x,y,z),BLOCK.WOOD);
+  f.edits.set(f.k(x+span,y,z),BLOCK.WOOD);
+  const candidate=planCanopyWalkway(f.world,aa,bb,y);
+  if(candidate)site={...f,aa,bb,candidate};
+ }
+ assert.ok(site,`find natural-air ${span}-cell crown corridor`);
+ const occ=new Set(site.candidate.cells.map(([x,cy,z])=>[x,cy,z].join(',')));
+ const branches=site.candidate.cells.filter(([x,cy,z,id])=>
+  cy===y&&id===BLOCK.WOOD&&z!==site.aa[1]);
+ const banks=new Set(branches.map(([, ,z])=>Math.sign(z-site.aa[1])));
+ assert.deepEqual([...banks].sort((a,b)=>a-b),[-1,1],
+  `${span}-cell crown alternates physical timber between both banks`);
+ const stations=new Set(branches.map(([x])=>x-site.aa[0]));
+ assert.deepEqual([...stations].sort((a,b)=>a-b),
+  [2,Math.floor(span/2),span-2].sort((a,b)=>a-b),
+  'three separated crown stations, not a continuous fence');
+ for(const [x,cy,z,id] of site.candidate.cells){
+  if(id!==BLOCK.LEAVES)continue;
+  assert.ok(occ.has([x,cy-1,z].join(',')),'leaf sits on a real branch');
+ }
+ for(let i=0;i<=span;i++)for(let h=1;h<=2;h++)
+  assert.equal(occ.has([site.aa[0]+i,y+h,site.aa[1]].join(',')),false,
+   'two-high walkway clearance maintained');
+ assert.deepEqual(planCanopyWalkway(site.world,site.aa,site.bb,y)?.cells,
+  site.candidate.cells,'same-seed crown geometry is deterministic');
+}
 
 console.log('Canopy walkway: supported staggered crowns, corridor, edits, tampering, rollback PASS');
