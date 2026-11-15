@@ -90,6 +90,25 @@ other four manual Block Packs.
   memory/power under dense builds have NOT been measured here. Do not
   equate SwiftShader desktop browser latencies with physical iPhone proof.
 
+## Dense builder acceptance — real game vs. device
+- The existing 256-cell/64-chunk **Node** acceptance proves exact chunk
+  budgets, save/restore parity and atomic failure. The added Chromium
+  acceptance constructs a real 256-cell/16-loaded-chunk physical scene from
+  Pack 3's approved 116 wall geometry and its actual runtime save contract,
+  then reloads into the ordinary WebGL2 game. It checks that 25 surface
+  chunks stay within the streaming budget, all 256 rotations survive,
+  each added chunk remains within 12,000 physical vertices, original
+  schema-1 world bytes are unchanged, and authentic three-viewport
+  screenshots contain real pixels. It records idle vs. construction-heavy
+  frame gaps; these software-SwiftShader results are **not physical-iPhone
+  FPS or battery/thermal certification**.
+- This browser stress workflow is new and must pass exact-head CI before
+  its measurements are called evidence. For real-device acceptance, install
+  the coordinated build on an iPhone in landscape, use the built-in Gate A
+  report, measure p50/p95/worst frame intervals, test two-thumb controls and
+  reloaded dense shapes, repeat after 10 minutes and return from background,
+  with no Gate A approval assumed.
+
 ## Existing tested evidence (before this acceptance expansion)
 - PR #153 head `6195628d`: dedicated live-game Chromium/WebGL2 run
   #43680812878 PASS (three viewport sizes, ID116 with yaw1 place, save/reload,

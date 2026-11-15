@@ -15,6 +15,7 @@ on:
       - 'tests/pack3-biome130-compat.test.mjs'
       - 'tests/pack3-builder-contract.test.mjs'
       - 'tests/pack3-dense-builder-budget.test.mjs'
+      - 'tests/pack3-dense-live-browser.mjs'
       - 'tests/pack3-portable-browser.mjs'
 
 permissions:
@@ -40,6 +41,7 @@ jobs:
           node --check src/builder-assets/pack3-live.mjs
           node --check tests/pack3-live-webgl-browser.mjs
           node --check tests/pack3-live-all17-browser.mjs
+          node --check tests/pack3-dense-live-browser.mjs
           node --check tests/pack3-portable-browser.mjs
           node --check src/builder-assets/pack3-portable.mjs
           node --test tests/pack3-runtime-stage.test.mjs tests/pack3-live.test.mjs tests/pack3-complete-readiness.test.mjs tests/pack3-portable.test.mjs tests/pack3-biome130-compat.test.mjs tests/pack3-builder-contract.test.mjs tests/pack3-dense-builder-budget.test.mjs
@@ -53,6 +55,7 @@ jobs:
           node tests/pack3-live-webgl-browser.mjs
           node tests/pack3-live-all17-browser.mjs
           node tests/pack3-portable-browser.mjs
+          node tests/pack3-dense-live-browser.mjs
       - name: Upload authentic complete or partial browser evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -61,5 +64,6 @@ jobs:
           path: |
             artifacts/pack3-live/
             artifacts/pack3-live-all17/
+            artifacts/pack3-dense-browser/
           if-no-files-found: warn
           retention-days: 30
