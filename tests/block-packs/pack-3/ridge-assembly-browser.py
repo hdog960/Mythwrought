@@ -68,7 +68,7 @@ async def main():
             for yaw in range(4):
                 result=await page.evaluate(RENDER_JS,yaw)
                 png=base64.b64decode(result['png'].split(',')[1]);digest=hashlib.sha256(png).hexdigest()
-                out=dest/f'pack3-roof-assembly-{w}x{h}-yaw{yaw*90}.png';out.write_bytes(png)
+                out=dest/f'pack3-ridge-assembly-{w}x{h}-yaw{yaw*90}.png';out.write_bytes(png)
                 assert png[:8]==b'\x89PNG\r\n\x1a\n',out
                 assert result['parts']>20 and result['painted']>18000,result
                 assert result['ids']==[115,113,113]
