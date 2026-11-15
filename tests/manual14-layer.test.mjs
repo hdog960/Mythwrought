@@ -103,11 +103,17 @@ test('unloaded 128-piece dense construction fails before any source overlay or s
 test('512 properly distributed Pack1/4 objects pass source-owned chunk budget, save and reload deterministically',()=>{
  const world=new VoxelWorld(179),storage=store(),bridge=createManual14SavedBridge(world,storage);
  const assets=[selected(1,9),selected(4,159)];
- const rows=Array.from({length:512},(_,i)=>{
-  const a=assets[i%2];return {asset:a.symbol,numericId:a.numericId,
-   at:[500+5*(i%32),19,500+5*Math.floor(i/32)],orientation:i%4};
- });
- assert.ok(rows.every(row=>world.get(...row.at)===BLOCK.AIR));
+ const rows=[];
+ // Generated high terrain legitimately touches a few world-Y=19 cells.
+ // Select 512 verified empty, widely spaced cells instead of assuming an
+ // entire future settlement footprint is naturally vacant.
+ for(let i=0;i<4096&&rows.length<512;i++){
+  const at=[500+5*(i%64),19,500+5*Math.floor(i/64)];
+  if(world.get(...at)!==BLOCK.AIR)continue;
+  const a=assets[rows.length%2];
+  rows.push({asset:a.symbol,numericId:a.numericId,at,orientation:rows.length%4});
+ }
+ assert.equal(rows.length,512,'Need 512 genuinely empty spaced world cells');
  const before=JSON.stringify(world.save());
  const result=bridge.placeMany(rows);
  assert.equal(result.ok,true,result.reason);
