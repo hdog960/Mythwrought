@@ -1,0 +1,379 @@
+{
+  "pack": 2,
+  "title": "Timber & Infrastructure",
+  "role": "CREATOR-LED MANUAL ASSET CANDIDATES",
+  "status": "UNMERGED — NOT PLAYABLE",
+  "auditBaseMain": "f27a887b1b98fc5fd6e6f3a80856d1b92f6ebf84",
+  "integrationCheckpoint": "008",
+  "coordinationIssue": 109,
+  "provisionalIdRange": [
+    59,
+    108
+  ],
+  "protectedIds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    255
+  ],
+  "sourceOwnership": "src/block-packs/pack-2/",
+  "testOwnership": "tests/block-packs/pack-2/",
+  "engineRestrictions": "Do not edit shared engine, shaders, UI, CI, checkpoints, world generation, or main.",
+  "assetRecords": [
+    {
+      "roster": 13,
+      "name": "Wooden planks",
+      "candidateId": 59,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 1,
+      "distinction": "staggered oak plank courses",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "roster": 14,
+      "name": "Stripped logs",
+      "candidateId": 60,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "pale faceted ash trunk; directional end grain",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "roster": 15,
+      "name": "Timber beams",
+      "candidateId": 61,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "ironbound smoke-brown rectangular beam",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "roster": 16,
+      "name": "Wooden slabs",
+      "candidateId": 63,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 2,
+      "distinction": "planed half-height oak slab, upper/lower occupancy state",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage"
+      ]
+    },
+    {
+      "roster": 17,
+      "name": "Wooden stairs",
+      "candidateId": 64,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 8,
+      "distinction": "two-step tread and riser, four compass rotations plus upper/lower variant",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage"
+      ]
+    },
+    {
+      "roster": 18,
+      "name": "Wooden fences",
+      "candidateId": 65,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "split-rail open-air fence with twin uprights and two rails",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage"
+      ]
+    },
+    {
+      "roster": 19,
+      "name": "Wooden fence gates",
+      "candidateId": 66,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 8,
+      "distinction": "hinged lattice gate; actual AABB changes between open and closed",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage",
+        "central-engine state change event + safe open/close transition"
+      ]
+    },
+    {
+      "roster": 20,
+      "name": "Wooden doors",
+      "candidateId": 67,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 8,
+      "distinction": "carved single-cell hinged door leaf with actual swing profile",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage",
+        "central-engine state change event + safe open/close transition"
+      ]
+    },
+    {
+      "roster": 21,
+      "name": "Wooden trapdoors",
+      "candidateId": 68,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 16,
+      "distinction": "top/bottom horizontal hatch converts to vertical open panel",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware raycast/collision",
+        "candidate ID registry/palette",
+        "backward-compatible cell-state storage",
+        "central-engine state change event + safe open/close transition"
+      ]
+    },
+    {
+      "roster": 22,
+      "name": "Wooden support posts",
+      "candidateId": 62,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 1,
+      "distinction": "vertical flared base, square bearing cap",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "roster": 39,
+      "name": "Gravel",
+      "candidateId": 69,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 1,
+      "distinction": "loose shingle aggregate with 8 physically raised mixed-stone facets and separated foot-grain; engine gravity only",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware targeting/collision and selection",
+        "candidate ID registry/palette and exposed-face rendering",
+        "backwards-compatible orientation storage",
+        "engine-owned falling granular material policy; no local gravity behavior"
+      ]
+    },
+    {
+      "roster": 40,
+      "name": "Packed dirt paths",
+      "candidateId": 70,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "shallow compacted-umber path with visibly depressed double ruts and raised earthen shoulders",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware targeting/collision and selection",
+        "candidate ID registry/palette and exposed-face rendering",
+        "backwards-compatible orientation storage"
+      ]
+    },
+    {
+      "roster": 41,
+      "name": "Cobblestone paving",
+      "candidateId": 71,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "shallow limestone walking-cobble tray with 7 physical irregular flat stones and visible mortar channels",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware targeting/collision and selection",
+        "candidate ID registry/palette and exposed-face rendering",
+        "backwards-compatible orientation storage"
+      ]
+    },
+    {
+      "roster": 42,
+      "name": "Decorative paving stones",
+      "candidateId": 72,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "low sculpted ivory paving with 10 distinctly physical inlaid tile/rune stone profiles",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware targeting/collision and selection",
+        "candidate ID registry/palette and exposed-face rendering",
+        "backwards-compatible orientation storage"
+      ]
+    },
+    {
+      "roster": 43,
+      "name": "Bridge railing blocks",
+      "candidateId": 73,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 8,
+      "distinction": "riveted double-stanchion bridge-specific reinforced guard with broad cap, load-braces and terminal end plate variant",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware collision and per-box targeting",
+        "material + exposed-face renderer registration",
+        "rotation/variant metadata with backward-safe schema-1 saves",
+        "central obstruction and chunk mesh invalidation"
+      ]
+    },
+    {
+      "roster": 44,
+      "name": "Stone parapets",
+      "candidateId": 74,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "thick solid limestone protective parapet with overhanging coping and genuinely open optional drain channel",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware collision and per-box targeting",
+        "material + exposed-face renderer registration",
+        "rotation/variant metadata with backward-safe schema-1 saves",
+        "central obstruction and chunk mesh invalidation"
+      ]
+    },
+    {
+      "roster": 45,
+      "name": "Water blocks",
+      "candidateId": 76,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 36,
+      "distinction": "true selectable clear-rill transparent sloped fluid volume, one source plus 7 levels × 5 flow descriptors; non-solid physical water with exact-triangle targeting, no standalone liquid simulation",
+      "visualVariants": 8,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "sourceType": "level-0-still",
+      "engineReadiness": "BLOCKED_BY_SHARED_FLUID_RENDERING_SIMULATION_AND_SCHEMA1",
+      "collision": "passable-fluid-nonblocking",
+      "targeting": "exact-closed-prism-triangle-narrowphase",
+      "flowStates": [
+        "still",
+        "north",
+        "east",
+        "south",
+        "west"
+      ],
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "fluidSimulationImplemented": false,
+      "integrationDependencies": [
+        "engine-owned transparent geometry pass and depth sorting, surface lighting and refraction/fog",
+        "engine-owned fluid neighbor culling and water level seam matching",
+        "engine-owned source/flow propagation, water updates and edit protection",
+        "engine-owned passable fluid collision plus swimming/buoyancy rules",
+        "engine-owned save schema-1 backward-safe fluid state metadata",
+        "engine-owned material registry and target/placement APIs for candidate ID 76"
+      ]
+    },
+    {
+      "roster": 46,
+      "name": "Wooden boardwalk blocks",
+      "candidateId": 75,
+      "status": "candidate",
+      "physical": true,
+      "orientationVariants": 4,
+      "distinction": "raised larch open slat deck, structural underside joists, real slat gaps, optional edge trim",
+      "visualVariants": 1,
+      "worldPlaced": false,
+      "integrated": false,
+      "fixtureOnly": true,
+      "integrationDependencies": [
+        "shape-aware collision and per-box targeting",
+        "material + exposed-face renderer registration",
+        "rotation/variant metadata with backward-safe schema-1 saves",
+        "central obstruction and chunk mesh invalidation"
+      ]
+    }
+  ],
+  "currentMilestone": 6,
+  "completedFamilies": 18,
+  "unallocatedFamilies": 0,
+  "lastVerifiedMain": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+  "progress": "M0–M5: 18/18 independently physical candidate families authored (provisional IDs 59–76). M6 isolated 6 original native Node suites PASS 89/89 against blob-verified Pack 2 source with disclosed local legacy VoxelWorld facade; authentic 18×3 Chromium preview PASS with 66 screenshots. NEW separate real-VoxelWorld production-boundary suite (6 tests) authored, enforces genuine production exports/schema-1 and rejects facade in actual Node negative control. Full real-world dependency graph/production boundary suite NOT YET EXECUTED (local GitHub DNS blocked). Existing live VoxelWorld still rejects IDs 59–76; shared renderer/water/physics/save/offline/real iPhone/Gate A remain unapproved; no merge/deploy/world placement. Session 16: all 95 exact checked-in test callbacks evaluated against real checkpoint-008 VoxelWorld and 16 genuine dependencies in V8 (89 original + 6 production boundary PASS); 14/14 Pack 2 JS Git blob SHA-1 checks PASS. This is NOT native Node or full checkout, so production native acceptance remains open.",
+  "pendingEngineAPIs": [
+    "generic non-cube raycast/collision",
+    "material registry expansion for candidate IDs 59–68",
+    "orientation/variant/open metadata storage preserving schema 1",
+    "hinged state transition handling",
+    "gravel gravity policy owned by :00; no falling behavior in candidate",
+    "shape-aware lower path tile support/mesh occlusion and collision integration",
+    "bridge guard/parapet/boardwalk opt-in shape renderer, local collision and save metadata; no structures",
+    "transparent render pass, fluid boundary culling, fluid source/level/flow updates, buoyancy/swimming, schema-1 fluid metadata",
+    "exact fluid triangle selection (not generic solid AABBs) and non-blocking liquid occupancy",
+    "Checkpoint 007 opt-in shape APIs exist on main but are not wired into live VoxelWorld registry; water needs independent fluid-volume selection adapter"
+  ]
+}
