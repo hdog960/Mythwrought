@@ -19,6 +19,8 @@ export const PACK5_PREFLIGHT_MAX_COLLIDER_BOXES=32768;
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const boxesOverlap=(a,b)=>a[0]<b[3]&&a[3]>b[0]&&
   a[1]<b[4]&&a[4]>b[1]&&a[2]<b[5]&&a[5]>b[2];
+const containsBox=(outer,inner)=>outer.slice(0,3).every((n,i)=>
+  n<=inner[i]&&outer[i+3]>=inner[i+3]);
 const boxCells=box=>{
   if(!boxValid(box)||box.some(n=>Math.abs(n)>1e9))
     throw Error('Invalid source-external physical collider');
@@ -93,6 +95,12 @@ export function collectPack5PlacedCollisionBoxes(layer,{bounds=null}={}){
       boxes.push(Object.freeze([...box]));
     }
   }
+  // This is source-owned provenance for a region-scoped export, not a claim
+  // about foreign-pack collider completeness. Consumers must check coverage
+  // against the entire proposed plan before treating this export as clearance.
+  Object.defineProperty(boxes,'coverageBounds',{
+    value:bounds===null?null:Object.freeze([...bounds]),enumerable:false
+  });
   return Object.freeze(boxes);
 }
 
@@ -153,6 +161,13 @@ export function preflightPack5BuilderPlan(plan,{world,
       add('foreign-shape-overlap',placement.asset,placement.anchor);
     if(placement.physical.collision.some(box=>collidesExternal(existingShapes,box)))
       add('existing-pack5-shape-overlap',placement.asset,placement.anchor);
+    // Scope information cannot be lost when the producer's regional export
+    // is passed directly. A room only clears if every source-authored collider
+    // in the proposed plan is fully covered by that existing-object query.
+    const queryBounds=existingPack5CollisionBoxes?.coverageBounds;
+    if(queryBounds!==undefined&&queryBounds!==null&&
+       placement.physical.collision.some(box=>!containsBox(queryBounds,box)))
+      add('existing-pack5-query-scope-incomplete',placement.asset,placement.anchor);
     for(const at of placement.physical.occupiedCells){
       const cellKey=key(at);checks++;
       if(seen.has(cellKey))add('pack5-plan-overlap',placement.asset,at);

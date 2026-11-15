@@ -179,7 +179,16 @@
         "globalNumericIdsAssigned",
         "worldPlaced",
         "saveWritten"
-      ]
+      ],
+      "existingPack5ScopedExport": {
+        "sourceApi": "collectPack5PlacedCollisionBoxes(layer,{bounds})",
+        "proofProperty": "coverageBounds",
+        "validation": "every physical collider of each proposed Pack 5 placement must be contained within the source-export scope",
+        "failClosedIssue": "existing-pack5-query-scope-incomplete",
+        "maxColliders": 32768,
+        "maxQueryAxisSpan": 256,
+        "maxSpatialIndexInsertions": 250000
+      }
     }
   },
   "performanceContract": {

@@ -89,3 +89,13 @@ builder plan; it must never use a smaller arbitrary region as proof of
 clearance. If even a regional query exceeds the 32768-box cap, subdivide
 the plan and check each region or fail closed. Full settlement integration
 and authentic physical-iPhone performance remain separate gates.
+
+### Regional export coverage check
+
+Source-owned regional collider exports attach an immutable `coverageBounds`
+property (or null when the full layer was exported). The preflight verifies
+that this region **fully contains every proposed Pack 5 physical collider**,
+and emits `existing-pack5-query-scope-incomplete` if the region is too
+small. A copied, unproven subset of boxes must not be represented as a
+complete export by the future combined integrator. The source-bound
+metadata is in the handoff manifest for discovery.

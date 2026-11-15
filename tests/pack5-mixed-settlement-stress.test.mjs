@@ -208,3 +208,31 @@ test('512 actual Pack 5 furnishings export physical collision boxes with bounded
   assert.throws(()=>collectPack5PlacedCollisionBoxes(layer,{
     bounds:[0,0,0,1000,20,1000]}),/finite and local/);
 });
+
+test('region-scoped Pack 5 collider evidence fails closed outside its proven source coverage',async()=>{
+  const {collectPack5PlacedCollisionBoxes,preflightPack5BuilderPlan}=await import(
+    '../src/pack5-integration/placement-preflight.mjs');
+  const {planPack5BuilderBlueprint}=await import(
+    '../src/pack5-integration/blueprint-handoff.mjs');
+  const {layer,world}=mixedSettlement();
+  const region=[-1,4,-1,7,8,7];
+  const scoped=collectPack5PlacedCollisionBoxes(layer,{bounds:region});
+  assert.deepEqual(scoped.coverageBounds,region);
+  assert.ok(Object.isFrozen(scoped.coverageBounds));
+  const brick=PACK5_BUILDER_CATALOG.find(f=>f.symbolicId==='pack5:080');
+  const outside=planPack5BuilderBlueprint({placements:[{
+    asset:brick.symbolicId,at:[200,5,200],orientation:0,variant:brick.variants[1]
+  }]});
+  const wrong=preflightPack5BuilderPlan(outside,{world,
+    foreignOccupiedCells:[],existingPack5Cells:[],
+    foreignCollisionBoxes:[],existingPack5CollisionBoxes:scoped});
+  assert.ok(wrong.issues.some(i=>i.kind==='existing-pack5-query-scope-incomplete'));
+  assert.equal(wrong.shapeAwareDryRunClear,false);
+  const full=collectPack5PlacedCollisionBoxes(layer);
+  assert.equal(full.coverageBounds,null,'Full source export is explicitly unscoped');
+  const fullReport=preflightPack5BuilderPlan(outside,{world,
+    foreignOccupiedCells:[],existingPack5Cells:[],
+    foreignCollisionBoxes:[],existingPack5CollisionBoxes:full});
+  assert.equal(fullReport.shapeAwareDryRunClear,true);
+  assert.equal(fullReport.integrationReady,false);
+});
