@@ -63,7 +63,16 @@ function buildBlacksmith(biome,size){
  const si=sizeIndex(size),p=PROFILES[biome],w=[14,18,22][si]+p.deltaW,d=[15,19,23][si]+p.deltaD;
  const h=19;const b=blank('blacksmith',biome,size,w,d,h),{put,entryX:x}=b;
  // Integral full-cell foundation and walkable deck, physically present at every foot location.
- for(let a=0;a<w;a++)for(let z=0;z<d;z++){put('foundation',a,0,z,'builtin:stone');put('floor',a,1,z,p.deck);}
+ for(let a=0;a<w;a++)for(let z=0;z<d;z++){
+  put('foundation',a,0,z,'builtin:stone');
+  // Work zones are physically authored using the SAME symbolic deck family;
+  // distinct module roles make the forge and stock bays legible in M1 cutaways
+  // and integration handoff without inventing a material or changing collision.
+  const insideBay=a>=2&&a<w-1;
+  const role=insideBay&&z>=d-9&&z<d-2?'forge-deck':
+   insideBay&&z>=2&&z<d-9?'stock-deck':'floor';
+  put(role,a,1,z,p.deck);
+ }
  const window=(a,y,z)=>y>=4&&y<=5&&((a===0&&z===Math.floor(d/3))||(a===w-1&&z===d-5));
  raiseWalls(b,7,p.wall,x,window,p.trim);
  // Separate, non-overlapping floor-plan zones. The original full-depth
