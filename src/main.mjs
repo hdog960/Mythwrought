@@ -10,6 +10,9 @@ import {chunkKey,editAffectedChunks} from './chunks.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
+import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,pack2ExportBundle,pack2ImportBundle} from './pack2-world.mjs';
+import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
+  pack2NormalizeState,pack2CycleState,pack2WaterSectionVertices} from './pack2-integration.mjs';
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
@@ -39,14 +42,16 @@ function start(){
   function loadWorld(seed){
     const result=loadWorldSafe(localStorage,seed);
     if(result.recovered)recoveryNote=result.warning;
-    return result.world;
+    const p2=loadPack2LiveWorld(localStorage,result.world);
+    if(p2.recovered||p2.warning)recoveryNote=p2.warning||recoveryNote;
+    return p2.world;
   }
   try{
     const choice=localStorage.getItem(SELECTED_SEED_KEY);
     world=loadWorld(choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice));
   }catch(err){
     // A damaged seed is NEVER replaced by auto-saving a fresh starter world.
-    storageReadOnly=true;world=new VoxelWorld(DEFAULT_WORLD_SEED);
+    storageReadOnly=true;world=new Pack2LiveWorld(new VoxelWorld(DEFAULT_WORLD_SEED));
     recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
   }
   seedLabel.textContent='WORLD '+world.seed;
@@ -55,13 +60,18 @@ function start(){
     'in vec3 aPos; in vec3 aColor; in vec2 aUv; in float aMat;',
     'uniform vec3 uEye,uForward,uRight,uUp;',
     'uniform float uAspect,uTan;',
-    'out vec3 vColor; out float vDistance; out vec2 vUv; flat out int vMat;',
+    'out vec3 vColor; out float vDistance; out vec2 vUv; flat out int vMat; out float vPack2Alpha;',
     'void main(){ vec3 d=aPos-uEye;',
     'float x=dot(d,uRight); float y=dot(d,uUp); float z=dot(d,uForward);',
     'gl_Position=vec4(x/(uAspect*uTan),y/uTan,1.0015*z-0.1501,z);',
-    'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(aMat+.5); }'
+    'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(floor(aMat+.001)); vPack2Alpha=fract(aMat); }'
   ].join('\n');
-  const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER;
+  // Reserved transparent-water material 20; legacy materials stay unchanged.
+  const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER
+    .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
+    .replace('void main(){',
+      'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
+      'outColor=vec4(mix(vColor,uFog,f),vPack2Alpha); return; }');
   let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
   function initializeGpuPipeline(){
     const resources=buildGpuPipeline(gl,{
@@ -80,6 +90,7 @@ function start(){
 
   let caveDiscovery={inside:false,last:-Infinity,discoveries:0};
   let selected=BLOCK.STONE;
+  let pack2Selection=null;
   let outlineKey='',outlineCount=0,editFeedback=[];
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
@@ -174,6 +185,12 @@ function start(){
       saveHealth.textContent='READ ONLY: original damaged save preserved. Import a verified backup or choose another seed.';
       return false;
     }
+    const overlay=savePack2LiveWorld(localStorage,world);
+    if(!overlay.ok){
+      message('Pack 2 blocks not saved; original world untouched');
+      saveHealth.textContent='PACK 2 SAVE PROTECTION: '+overlay.reason;
+      return false;
+    }
     const result=saveWorldSafe(localStorage,world);
     if(!result.ok){
       message(result.reason+' — EXPORT your world');
@@ -182,9 +199,28 @@ function start(){
     }
     changed=false;
     scheduleMirrorForWorld();
-    saveHealth.textContent=result.warning||'Verified save: schema-1 deltas, checksum journal and previous-good backup.';
+    saveHealth.textContent=result.warning||
+      'Verified legacy schema-1 world and independent checksummed Pack 2 sidecar.';
     if(result.warning)message(result.warning);
     return true;
+  }
+  function deleteChunkBuffers(chunk){
+    if(!chunk)return;
+    gl.deleteBuffer(chunk.buffer);
+    if(chunk.waterBuffer)gl.deleteBuffer(chunk.waterBuffer);
+  }
+  // Both buffers stage before publishing; on failure neither can leak.
+  function uploadPack2Chunk(vertices,water){
+    let buffer=null,waterBuffer=null;
+    try{
+      buffer=uploadChunkBuffer(gl,vertices);
+      if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
+      return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
+    }catch(error){
+      if(buffer)gl.deleteBuffer(buffer);
+      if(waterBuffer)gl.deleteBuffer(waterBuffer);
+      throw error;
+    }
   }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
@@ -198,23 +234,24 @@ function start(){
         if(!chunks.has(key))continue;
         const vertices=section===0?meshChunk(world,cx,cz):
           meshDepthSection(world,cx,cz,section);
-        batch.push({key,cx,cz,section,vertices});
+        const water=pack2WaterSectionVertices(world,cx,cz,section);
+        batch.push({key,cx,cz,section,vertices,water});
       }
     const ready=[];
     try{
       for(const item of batch){
-        const buffer=uploadChunkBuffer(gl,item.vertices);
-        ready.push({...item,buffer,count:item.vertices.length/9});
+        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
       }
     }catch(err){
-      for(const item of ready)gl.deleteBuffer(item.buffer);
+      for(const item of ready)deleteChunkBuffers(item);
       throw err;
     }
     for(const item of ready){
       const old=chunks.get(item.key);
       chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
-        buffer:item.buffer,count:item.count});
-      if(old)gl.deleteBuffer(old.buffer);
+        buffer:item.buffer,count:item.count,
+        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+      deleteChunkBuffers(old);
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
@@ -252,7 +289,7 @@ function start(){
       // Keep only the immediate bounded vertical section neighborhood.
       // At normal surface height this remains the original 25 GPU chunks.
       for(const [k,c] of chunks){
-        if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
+        if(!wanted.has(k)){deleteChunkBuffers(c);chunks.delete(k);}
       }
       for(const c of desired){
         const k=depthMeshKey(c.cx,c.cz,c.section);
@@ -276,11 +313,12 @@ function start(){
       try{
         const data=section===0?meshChunk(world,x,z):
           meshDepthSection(world,x,z,section);
-        const buffer=uploadChunkBuffer(gl,data);
+        const water=pack2WaterSectionVertices(world,x,z,section);
+        const buffers=uploadPack2Chunk(data,water);
         pending.delete(k);gpuRetry.success(k);
         const old=chunks.get(k);
-        chunks.set(k,{x,z,section,buffer,count:data.length/9});
-        if(old)gl.deleteBuffer(old.buffer);
+        chunks.set(k,{x,z,section,...buffers});
+        deleteChunkBuffers(old);
       }catch(error){
         const state=gpuRetry.fail(k,performance.now(),error.message);
         if(state.attempt===1)message('Chunk GPU upload deferred safely; retry scheduled');
@@ -289,7 +327,7 @@ function start(){
       }
     }
     if(frame%45===0)for(const [k,c] of chunks){
-      if(!wanted.has(k)){gl.deleteBuffer(c.buffer);chunks.delete(k);}
+      if(!wanted.has(k)){deleteChunkBuffers(c);chunks.delete(k);}
     }
   }
   function respawnPrototype(){
@@ -364,6 +402,20 @@ function start(){
         gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
         gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
+      }
+      // Genuine transparent-water pass, only for chunks with water candidates.
+      if([...chunks.values()].some(c=>c.waterBuffer)){
+        gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+        gl.depthMask(false);
+        for(const chunk of chunks.values())if(chunk.waterBuffer){
+          gl.bindBuffer(gl.ARRAY_BUFFER,chunk.waterBuffer);
+          gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
+          gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
+          gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
+          gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
+          gl.drawArrays(gl.TRIANGLES,0,chunk.waterCount);
+        }
+        gl.depthMask(true);gl.disable(gl.BLEND);
       }
       // A faint world-space targeted-block outline, never a HUD covering the scene.
       const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player):null;
@@ -782,7 +834,7 @@ function start(){
     try{loadWorldSafe(localStorage,imported.seed);}catch(_){damaged=true;}
     const result=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
     if(!result.ok)throw Error('Restore failed without replacing the active game: '+result.detail);
-    for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+    for(const c of chunks.values())deleteChunkBuffers(c);
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
@@ -895,7 +947,7 @@ function start(){
     if(world.seed!==seed||changed)throw Error('World changed or contains unsaved edits; export or SAVE before restoring');
     const out=saveWorldSafe(localStorage,restored);
     if(!out.ok)throw Error('Canonical world restore failed; '+out.detail);
-    for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+    for(const c of chunks.values())deleteChunkBuffers(c);
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
@@ -916,7 +968,7 @@ function start(){
       const candidate=loadWorld(next);
       const result=saveWorldSafe(localStorage,candidate);
       if(!result.ok)throw Error(result.reason);
-      for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+      for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
@@ -962,7 +1014,7 @@ function start(){
       if(!outcome.ok)throw Error(outcome.reason);
       world=imported;storageReadOnly=false;changed=false;
       clearMirrorDownload();
-      for(const c of chunks.values())gl.deleteBuffer(c.buffer);
+      for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
