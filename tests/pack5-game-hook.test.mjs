@@ -22,4 +22,7 @@ test('game builder mode is explicit, never silently extends legacy block buttons
   assert.match(source,/pack5Mode&&pack5Builder/);
   assert.match(source,/pack5Gpu\.draw/);
   assert.match(source,/resetPack5ForWorld\(\)/);
+  assert.match(source,/pack5Builder\.importJson/);
+  assert.match(page,/id="pack5Import"/);
+  assert.match(page,/id="pack5ImportFile"/);
 });

@@ -84,3 +84,16 @@ A user-initiated settings button exports the exact current Pack 5 symbolic/varia
 sidecar as a stand-alone JSON download. The normal world EXPORT remains a
 schema-1 terrain file and does **not** include furnishings. An import/restore
 UI for this separate file has not yet passed acceptance and is not advertised.
+
+
+## M4 — Explicit separate JSON import and interrupted-write protection
+The Pack 5 editor now accepts an explicit user-selected independent Pack 5
+JSON file under settings. It validates the seed, physical fixture and support,
+rejects player overlap and malformed data, and asks for confirmation before
+replacing furnishings. Accepted imports use the existing per-seed journal and
+previous-good sidecar backup; schema-1 terrain files and all other pack IDs
+remain untouched. Rejected imports preserve the current scene. A failed
+canonical write now attempts to restore and independently verify the previous
+journal, primary and backup bytes before reporting an in-memory rollback.
+A failure that cannot be compensated is identified as an interrupted-write
+recovery blocker and must not be represented as a successful rollback.

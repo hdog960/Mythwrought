@@ -780,6 +780,40 @@ function start(){
       pack5Status.textContent='Pack 5 export unavailable; original sidecar preserved: '+String(error);
     }
   });
+  const pack5ImportFile=document.getElementById('pack5ImportFile');
+  document.getElementById('pack5Import').addEventListener('click',()=>{
+    if(storageReadOnly){
+      pack5Status.textContent='Protected world read-only; Pack 5 import blocked';
+      return;
+    }
+    pack5ImportFile.click();
+  });
+  pack5ImportFile.addEventListener('change',async e=>{
+    const file=e.target.files?.[0];
+    try{
+      if(!file||storageReadOnly)return;
+      if(file.size>2*1024*1024)throw Error('Pack 5 JSON exceeds 2 MiB limit');
+      const raw=await file.text(),data=JSON.parse(raw),requestedWorld=world;
+      if(!data||data.format!=='mythwrought.pack5.builder-layer.v1'||
+          data.seed!==world.seed||!Array.isArray(data.entries))
+        throw Error('Not a Pack 5 sidecar for the current world seed');
+      if(!await ensurePack5Loaded()||world!==requestedWorld)
+        throw Error('World changed while preparing Pack 5 import');
+      if(!window.confirm('Replace Pack 5 furnishings for world '+world.seed+
+          ' with '+data.entries.length+' pieces? This does not edit terrain.'))
+        return;
+      if(world!==requestedWorld)throw Error('World changed before import');
+      const playerBox=[player.x-.28,player.feet,player.z-.28,
+        player.x+.28,player.feet+1.78,player.z+.28];
+      const result=pack5Builder.importJson(raw,{confirmReplace:true,playerBox});
+      pack5Gpu.refresh(eye());
+      pack5Status.textContent='Pack 5 import saved: '+result.count+
+        ' pieces. Prior primary preserved in sidecar backup.';
+    }catch(error){
+      pack5Status.textContent='Pack 5 import rejected; original saves retained: '+
+        String(error.message||error);
+    }finally{e.target.value='';}
+  });
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
     selected=Number(b.dataset.block);
     document.querySelectorAll('[data-block]').forEach(q=>{q.classList.toggle('selected',q===b);q.setAttribute('aria-pressed',String(q===b));});
