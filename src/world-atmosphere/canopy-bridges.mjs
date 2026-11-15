@@ -26,6 +26,8 @@ export function planCanopyBridge(world,a,b,{height=0}={}){
    // They stop short of both crown anchors to keep entrances unobstructed.
    if(i>=2&&i<=span-2){
      const px=Math.abs(sz),pz=Math.abs(sx);
+     put(x+px,ay,z+pz,BLOCK.WOOD);
+     put(x-px,ay,z-pz,BLOCK.WOOD);
      put(x+px,ay+1,z+pz,BLOCK.LEAVES);
      put(x-px,ay+1,z-pz,BLOCK.LEAVES);
    }
