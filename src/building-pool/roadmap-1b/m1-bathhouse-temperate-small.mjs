@@ -50,9 +50,9 @@ export function createTemperateSmallBathhouse(){
  // Separate furniture and baths by program; keep the central pedestrian channel clear.
  for(const [x,z,role,asset,purpose] of [
   [3,3,'furnishing','live:wood','changing bench'],[4,3,'furnishing','live:wood','changing bench'],
-  [11,3,'furnishing','pack5:090','towel counter placeholder'],
+  [11,3,'furnishing','live:wood','dry towel counter (physical full-cell wood)'],
   [3,8,'furnishing','live:stone','dry room heater mass - not operating'],
-  [4,9,'furnishing','live:wood','sauna dry bench'],[10,8,'furnishing','pack5:090','wash supply cabinet placeholder'],
+  [4,9,'furnishing','live:wood','sauna dry bench'],[10,8,'furnishing','live:wood','dry wash supply counter (physical full-cell wood)'],
   [11,9,'furnishing','live:stone','wash tap plinth - no running plumbing']
  ])add(x,1,z,role,asset,'north',{purpose,operational:false});
  // Deliberate in-ground rectangular STONE BASIN rim; gap permits a real route inside.
