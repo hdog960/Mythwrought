@@ -111,11 +111,84 @@ test('approved Pack 2 real WebGL2 gameplay mesh, legacy save isolation, reload, 
         await writeFile(join(out,name),png);
         screenshots.push({width,height,bytes:png.length,vertices:result.vertices});
       }
+
+      // Authored mesh evidence from the REAL playable WebGL2 renderer,
+      // not candidate Canvas2D or generated stand-in geometry. Use only the
+      // existing localhost-only in-game fixture API.
+      const gallery=[];
+      const cell=await c.eval("(() => {const key=Object.keys(localStorage).find(k=>k.endsWith('-pack2-live-v1'));const p=JSON.parse(localStorage.getItem(key));const a=p.cells.find(row=>row[3]===59);if(!a)throw Error('Missing real candidate fixture');return a.slice(0,3)})()");
+      assert.equal(cell.length,3);
+      const originalLegacy=await c.eval("localStorage.getItem('mythwrought-v002-world-179')");
+      const allApproved=Array.from({length:18},(_,i)=>59+i);
+      assert.equal(await c.eval("document.querySelectorAll('#pack2Materials [data-block]').length"),18);
+      for(const id of allApproved){
+        const placed=await c.eval("(() => {"+
+          "const t=window.__mythwroughtTest,cell="+JSON.stringify(cell)+";"+
+          "const canvas=document.querySelector('#scene');"+
+          "const previousFrame=Number(canvas.dataset.renderedFrames);"+
+          "const before=t.snapshot(),start=performance.now();"+
+          "t.placeFixture(...cell,"+id+");t.aimAt(...cell);"+
+          "const elapsed=performance.now()-start;"+
+          "const after=t.snapshot();"+
+          "const key=Object.keys(localStorage).find(k=>k.endsWith('-pack2-live-v1'));"+
+          "const row=JSON.parse(localStorage.getItem(key)).cells.find(p=>"+
+          "p[0]===cell[0]&&p[1]===cell[1]&&p[2]===cell[2]);"+
+          "return {id:t.block(...cell),savedId:row?.[3],previousFrame,"+
+          "editMs:Math.round(elapsed*10)/10,"+
+          "meshRebuilds:after.editMeshBatches-before.editMeshBatches,"+
+          "chunks:after.chunks.length,failures:after.gpuRetry.failures,"+
+          "meshSlowestMs:after.meshCadence.slowestMs}})()");
+        assert.equal(placed.id,id,'Production world did not render candidate ID '+id);
+        assert.equal(placed.savedId,id,'Separate Pack 2 save did not persist ID '+id);
+        assert.equal(placed.meshRebuilds,1,'Expected one physical GPU mesh rebuild for '+id);
+        assert.ok(placed.chunks>0&&placed.chunks<=25,'Surface streaming budget grew');
+        assert.equal(placed.failures,0,'Production GPU upload failure for '+id);
+        assert.ok(Number.isFinite(placed.editMs)&&placed.editMs>=0);
+        await until(()=>c.eval("Number(document.querySelector('#scene').dataset.renderedFrames)>"+(placed.previousFrame+1)),
+          'fresh live WebGL2 frames for approved ID '+id);
+        const view=await c.eval("(() => {const e=document.querySelector('#scene'),t=window.__mythwroughtTest;return {frames:Number(e.dataset.renderedFrames),chunks:Number(e.dataset.loadedChunks),vertices:Number(e.dataset.renderedMeshVertices),gpu:!!e.getContext('webgl2'),fatal:!document.querySelector('#notice').hidden,retries:t.snapshot().gpuRetry.failures,target:e.dataset.targetBlock}})()");
+        assert.ok(view.gpu&&!view.fatal&&view.vertices>0);
+        assert.equal(view.chunks,25,'Excess loaded chunks after live ID '+id);
+        assert.equal(view.retries,0,'GPU retry faults for live ID '+id);
+        const bytes=Buffer.from((await c.send('Page.captureScreenshot',
+          {format:'png',fromSurface:true,captureBeyondViewport:false})).data,'base64');
+        assert.ok(bytes.length>9000,'Missing genuine game screenshot for ID '+id);
+        const name='pack2-live-original-id-'+id+'-932x430.png';
+        await writeFile(join(out,name),bytes);
+        gallery.push({id,name,pngBytes:bytes.length,editMs:placed.editMs,
+          meshSlowestMs:placed.meshSlowestMs,vertices:view.vertices,
+          chunks:view.chunks,frame:view.frames,centerRayTarget:view.target});
+      }
+      assert.deepEqual(gallery.map(x=>x.id),allApproved);
+      assert.equal(await c.eval("localStorage.getItem('mythwrought-v002-world-179')"),
+        originalLegacy,'Original schema-1 bytes changed during candidate gallery placement');
+      await c.send('Page.reload');
+      await until(()=>c.eval("Boolean(window.__mythwroughtTest)&&Number(document.querySelector('#scene')?.dataset.loadedChunks)===25"),
+        'Pack 2 exact sidecar persistence after full page reload');
+      const reloaded=await c.eval("(() => {"+
+        "const t=window.__mythwroughtTest,cell="+JSON.stringify(cell)+";"+
+        "const key=Object.keys(localStorage).find(k=>k.endsWith('-pack2-live-v1'));"+
+        "const rows=JSON.parse(localStorage.getItem(key)).cells;"+
+        "t.aimAt(...cell);"+
+        "return {id:t.block(...cell),saved:rows.find(p=>"+
+        "p[0]===cell[0]&&p[1]===cell[1]&&p[2]===cell[2])?.[3],"+
+        "chunks:t.snapshot().chunks.length,"+
+        "schema:JSON.parse(localStorage.getItem('mythwrought-v002-world-179')).schema}})()");
+      assert.deepEqual(reloaded,{id:76,saved:76,chunks:25,schema:1},
+        'Final approved candidate and old world were not recovered on reload');
+      assert.equal(await c.eval("localStorage.getItem('mythwrought-v002-world-179')"),
+        originalLegacy,'Original schema-1 bytes changed during browser reload');
+      console.log('PASS PACK2 18-ID ORIGINAL LIVE WEBGL2 EVIDENCE '+JSON.stringify({
+        view:'932x430',images:gallery.length,ids:gallery.map(x=>x.id),
+        maxEditMs:Math.max(...gallery.map(x=>x.editMs)),
+        maxMeshMs:Math.max(...gallery.map(x=>x.meshSlowestMs)),
+        maxChunks:Math.max(...gallery.map(x=>x.chunks)),restoredId:reloaded.id}));
       assert.deepEqual(c.errors,[],'browser JS exceptions');
       await writeFile(join(out,'manifest.json'),JSON.stringify({
         label:'Mythwrought real WebGL2 Pack 2, not Canvas2D or physical iPhone',
         CIHead:process.env?.GITHUB_SHA||'local',candidateIds:[59,63,66,73,76],
-        viewports:screenshots,originalSaveSchema:1,liveDeployment:false
+        viewports:screenshots,fullLiveGallery:gallery,
+        originalSaveSchema:1,liveDeployment:false,physicalIPhone:false
       },null,2));
       console.log('PASS PACK2 LIVE WEBGL2 '+JSON.stringify(screenshots));
     }finally{
