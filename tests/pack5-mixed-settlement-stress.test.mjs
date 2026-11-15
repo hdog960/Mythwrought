@@ -146,7 +146,7 @@ test('multi-story mixed rendering gives the local floor priority over horizontal
   const world={seed:918,get(...c){return supports.has(key(c))?BLOCK.STONE:BLOCK.AIR;}};
   const layer=createPack5ConstructionLayer(world);
   // The upper-room model is horizontally closer, but twenty floors away.
-  const high=[0,25,0],low=[4,5,0];
+  const high=[0,16,0],low=[4,5,0]; // Both within world ceiling Y=19
   // Use the same source family to compare selection alone, with real backing
   // if this physical furnishing requires an attachment.
   for(const cell of [high,low]){
