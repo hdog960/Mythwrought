@@ -13,7 +13,7 @@ const F = Object.freeze({
     rooms:[
       {id:'treatment-bay',kind:'treatment',box:[2,7,3,8]},
       {id:'patient-recovery',kind:'recovery',box:[11,16,3,9]},
-      {id:'front-waiting',kind:'waiting',box:[7,12,2,3]},
+      {id:'front-waiting',kind:'waiting',box:[8,10,2,3]},
       {id:'apothecary-annex',kind:'herb-storage',box:[6,12,13,15]}
     ],
     fixtures:[{at:[3,2,10],asset:'pack4:058',name:'waiting-bench'},
@@ -32,7 +32,7 @@ const F = Object.freeze({
       {id:'catalogue-room',kind:'catalogue',box:[3,9,13,17]}
     ],
     fixtures:[{at:[18,2,2],asset:'pack4:059',name:'reading-table'},
-      {at:[2,2,11],asset:'pack4:058',name:'reading-bench'}],
+      {at:[2,2,12],asset:'pack4:058',name:'reading-bench'}],
     roofRidges:[{axis:'z',fixed:7,from:3,to:17},{axis:'x',fixed:6,from:11,to:18}]
   },
   school: {
