@@ -35,3 +35,25 @@ test('twinwood rejects tampering and rolls back interrupted placement',()=>{
  w.set=original;
  assert.equal(placeTwinwood(w,p),true);
 });
+
+test('twinwood arches can face either woodland axis without overlapping protected ground',()=>{
+ const w=new VoxelWorld(179);
+ let site=null;
+ for(let x=-48;x<=48&&!site;x+=2)for(let z=-48;z<=48;z+=2){
+  const east=planTwinwood(w,x,z,{axis:'x'});
+  const north=planTwinwood(w,x,z,{axis:'z'});
+  if(east&&north){site=[east,north];break;}
+ }
+ assert.ok(site,'expected a valid site for both orientations');
+ const [east,north]=site;
+ assert.notDeepEqual(east.cells,north.cells);
+ assert.equal(east.axis,'x');assert.equal(north.axis,'z');
+ const before=w.save();
+ const altered=structuredClone(north);altered.axis='x';
+ assert.equal(placeTwinwood(w,altered),false);
+ assert.deepEqual(w.save(),before);
+ assert.equal(placeTwinwood(w,north),true);
+ const restored=VoxelWorld.restore(w.save());
+ for(const [x,y,z,id] of north.cells)assert.equal(restored.get(x,y,z),id);
+ assert.equal(planTwinwood(new VoxelWorld(179),north.origin[0],north.origin[2],{axis:'diagonal'}),null);
+});
