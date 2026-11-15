@@ -179,76 +179,78 @@ test('approved Pack 2 real WebGL2 gameplay mesh, legacy save isolation, reload, 
       assert.equal(await c.eval("localStorage.getItem('mythwrought-v002-world-179')"),
         originalLegacy,'Original schema-1 bytes changed during browser reload');
 
-      // Like-for-like production performance comparison, not a new gallery:
-      // same real 3D cell/chunk, same uploaded GPU buffers and synchronous
-      // sidecar+legacy save hook in the same headless Chromium process.
-      // Alternate placement order by trial; clear to the actual original AIR
-      // between placements so legacy and Pack 2 compare identical context.
-      const pairs=[],ordinary=[3,4,5,6,7,8];
+      // The earlier same-CDP-evaluation benchmark had a first-in-pair GPU
+      // synchronization artifact. Time each placement in an independent CDP
+      // call, separated by three ACTUAL game rendering frames on each side of
+      // each cleanup. Alternate legacy/Pack 2 order. No new screenshots.
+      const pairs=[],ordinary=[3,4,5,6,7,8],settleFrames=3;
       const percentile=(values,p)=>{
-        const sorted=[...values].sort((a,b)=>a-b);
-        return Math.round(sorted[Math.min(sorted.length-1,
-          Math.ceil(sorted.length*p)-1)]*10)/10;
+        const a=[...values].sort((x,y)=>x-y);
+        return Math.round(a[Math.min(a.length-1,Math.ceil(a.length*p)-1)]*10)/10;
       };
       const legacyBefore=await c.eval("localStorage.getItem('mythwrought-v002-world-179')");
-      for(let i=0;i<18;i++){
-        const oldId=ordinary[i%ordinary.length],packId=59+i;
-        const comparison=await c.eval("(() => {"+
+      const settle=async(frame,label)=>await until(()=>
+        c.eval("Number(document.querySelector('#scene').dataset.renderedFrames)").then(n=>n>=frame+settleFrames),
+        label+' actual WebGL2 redraw');
+      const trial=async id=>{
+        const prepared=await c.eval("(() => {"+
           "const t=window.__mythwroughtTest,cell="+JSON.stringify(cell)+";"+
-          "const original="+oldId+",candidate="+packId+",trial="+i+";"+
-          "const measure=(id)=>{"+
-          "if(t.block(...cell)!==0)throw Error('Benchmark source must be AIR');"+
+          "if(t.block(...cell)!==0)t.placeFixture(...cell,0);"+
+          "if(t.block(...cell)!==0)throw Error('Expected AIR before measuring');"+
+          "return Number(document.querySelector('#scene').dataset.renderedFrames)})()");
+        await settle(prepared,'before block '+id);
+        const measured=await c.eval("(() => {"+
+          "const t=window.__mythwroughtTest,cell="+JSON.stringify(cell)+";"+
           "const before=t.snapshot(),start=performance.now();"+
-          "t.placeFixture(...cell,id);"+
+          "t.placeFixture(...cell,"+id+");"+
           "const durationMs=Math.round((performance.now()-start)*10)/10;"+
           "const after=t.snapshot();"+
-          "if(t.block(...cell)!==id)throw Error('Benchmark block not installed');"+
-          "const value={id,durationMs,chunks:after.chunks.length,"+
+          "return {id:t.block(...cell),durationMs,chunks:after.chunks.length,"+
           "meshBatches:after.editMeshBatches-before.editMeshBatches,"+
-          "gpuFaults:after.gpuRetry.failures-before.gpuRetry.failures};"+
+          "gpuFaults:after.gpuRetry.failures-before.gpuRetry.failures,"+
+          "frame:Number(document.querySelector('#scene').dataset.renderedFrames)}})()");
+        assert.equal(measured.id,id,'Production placement was not retained');
+        assert.equal(measured.chunks,25,'Surface chunk budget exceeded');
+        assert.equal(measured.meshBatches,1,'GPU edit mesh rebuild mismatch');
+        assert.equal(measured.gpuFaults,0,'GPU retry invalidates benchmark');
+        assert.ok(Number.isFinite(measured.durationMs)&&measured.durationMs>=0);
+        await settle(measured.frame,'after placing block '+id);
+        const removed=await c.eval("(() => {"+
+          "const t=window.__mythwroughtTest,cell="+JSON.stringify(cell)+";"+
           "t.placeFixture(...cell,0);"+
-          "if(t.block(...cell)!==0)throw Error('Benchmark cleanup must restore AIR');"+
-          "return value};"+
-          "if(t.block(...cell)!==0)t.placeFixture(...cell,0);"+
-          "const first=trial%2===0?original:candidate;"+
-          "const a=measure(first),b=measure(first===original?candidate:original);"+
-          "return {legacy:first===original?a:b,pack2:first===candidate?a:b,"+
-          "first:first===original?'legacy':'pack2'}})()");
-        assert.equal(comparison.legacy.id,oldId);
-        assert.equal(comparison.pack2.id,packId);
-        for(const result of [comparison.legacy,comparison.pack2]){
-          assert.equal(result.chunks,25,'Benchmark left 25 chunk surface budget');
-          assert.equal(result.meshBatches,1,'Benchmark rebuild was not identical');
-          assert.equal(result.gpuFaults,0,'A GPU failure invalidates performance comparison');
-          assert.ok(Number.isFinite(result.durationMs)&&result.durationMs>=0);
-        }
+          "if(t.block(...cell)!==0)throw Error('Cleanup failed');"+
+          "return Number(document.querySelector('#scene').dataset.renderedFrames)})()");
+        await settle(removed,'after removing block '+id);
         assert.equal(await c.eval("localStorage.getItem('mythwrought-v002-world-179')"),
-          legacyBefore,'Legacy baseline modified original schema-1 bytes');
-        pairs.push({trial:i,...comparison,
-          differenceMs:Math.round((comparison.pack2.durationMs-
-            comparison.legacy.durationMs)*10)/10});
+          legacyBefore,'Original schema-1 save bytes changed');
+        return measured;
+      };
+      for(let i=0;i<18;i++){
+        const oldId=ordinary[i%ordinary.length],packId=59+i;
+        const first=i%2===0?'legacy':'pack2';
+        const a=await trial(first==='legacy'?oldId:packId);
+        const b=await trial(first==='legacy'?packId:oldId);
+        const legacy=first==='legacy'?a:b,pack2=first==='pack2'?a:b;
+        pairs.push({trial:i,first,legacy,pack2,
+          differenceMs:Math.round((pack2.durationMs-legacy.durationMs)*10)/10});
       }
-      assert.equal(await c.eval("window.__mythwroughtTest.block(..."+JSON.stringify(cell)+")"),0);
-      const legacyTimes=pairs.map(p=>p.legacy.durationMs);
-      const packTimes=pairs.map(p=>p.pack2.durationMs);
-      const differences=pairs.map(p=>p.differenceMs);
+      const legacyTimes=pairs.map(p=>p.legacy.durationMs),packTimes=pairs.map(p=>p.pack2.durationMs);
+      const diffs=pairs.map(p=>p.differenceMs);
       const performanceComparison={
-        source:'real production placeFixture + GPU remesh + save, same cell, SwiftShader',
-        originalIds:ordinary,approvedIds:allApproved,
-        legacy:{p50Ms:percentile(legacyTimes,.5),p95Ms:percentile(legacyTimes,.95),
-          maxMs:Math.max(...legacyTimes)},
-        pack2:{p50Ms:percentile(packTimes,.5),p95Ms:percentile(packTimes,.95),
-          maxMs:Math.max(...packTimes)},
-        paired:{medianDeltaMs:percentile(differences,.5),
-          p95DeltaMs:percentile(differences,.95),
-          packSlowerCount:differences.filter(d=>d>0).length,
-          legacySlowerCount:differences.filter(d=>d<0).length},
-        sampleCount:pairs.length,trialPairs:pairs,physicalIPhone:false};
-      console.log('PASS PACK2 PAIRED LIVE WEBGL2 PERF '+JSON.stringify({
-        n:performanceComparison.sampleCount,
-        legacy:performanceComparison.legacy,
-        pack2:performanceComparison.pack2,
-        paired:performanceComparison.paired}));
+        source:'real production WebGL2 placeFixture+GPU rebuild+save; same cell and SwiftShader',
+        methodology:'separate CDP calls and 3 actual rendered frames between each placement/cleanup; alternating order',
+        originalIds:ordinary,approvedIds:allApproved,settleFrames,
+        legacy:{p50Ms:percentile(legacyTimes,.5),p95Ms:percentile(legacyTimes,.95),maxMs:Math.max(...legacyTimes)},
+        pack2:{p50Ms:percentile(packTimes,.5),p95Ms:percentile(packTimes,.95),maxMs:Math.max(...packTimes)},
+        paired:{medianDeltaMs:percentile(diffs,.5),p95DeltaMs:percentile(diffs,.95),
+          packSlowerCount:diffs.filter(x=>x>0).length,legacySlowerCount:diffs.filter(x=>x<0).length,
+          firstLegacyMedianDeltaMs:percentile(pairs.filter(p=>p.first==='legacy').map(p=>p.differenceMs),.5),
+          firstPack2MedianDeltaMs:percentile(pairs.filter(p=>p.first==='pack2').map(p=>p.differenceMs),.5)},
+        sampleCount:pairs.length,trialPairs:pairs,physicalIPhone:false
+      };
+      console.log('PASS PACK2 FRAME-SETTLED PAIRED WEBGL2 PERF '+JSON.stringify({
+        n:pairs.length,legacy:performanceComparison.legacy,
+        pack2:performanceComparison.pack2,paired:performanceComparison.paired}));
       console.log('PASS PACK2 18-ID ORIGINAL LIVE WEBGL2 EVIDENCE '+JSON.stringify({
         view:'932x430',images:gallery.length,ids:gallery.map(x=>x.id),
         maxEditMs:Math.max(...gallery.map(x=>x.editMs)),
