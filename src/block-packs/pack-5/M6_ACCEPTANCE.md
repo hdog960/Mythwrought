@@ -35,8 +35,32 @@ Reexecuted `tests/block-packs/pack-5/esm-webgl-browser.py` in each of **six mode
 
 ## Acceptance disposition / still-open gates
 
-**M6 candidate-source cross-family readiness = PASS.** No proven Pack 5 source defect was identified, so no speculative geometry/engine changes were made in this phase.
+**M6 baseline candidate-source cross-family readiness = PASS (178/178).** No proven shape defect was identified in that initial phase; subsequent post-M6 verification demonstrated and repaired a candidate fixture ray-reach defect, documented below.
 
 **NOT ACCEPTED / still separate:** creator premium art sign-off for M1–M5, an authorized actual HTTP-served gallery, physical-iPhone device performance and two-thumb control acceptance, production registry allocation and 8-bit/256+ widening, schema-1 save compatibility, production renderer/raycast/placement integration, actual mixed-building placement, merge/deployment and v0.11 unlock. Latest exact-head root GitHub Actions status must be checked separately; queued is never green certification. Root workflow does not discover nested Pack 5 test files.
 
 This dossier is a *handoff for eventual authorized integration*. Keep PR #119 draft/unmerged/undeployed; **do not** assign persistent IDs, edit other packs/automations/shared systems, modify production schema-1 saves, approve Gate A or unlock v0.11 without explicit creator authorization.
+
+## Post-M6 focused final readiness — demonstrated ray reach repair (2026-11-14)
+
+### Demonstrated source-only bug and actual patch
+
+Reproduced on genuine authored `pack5:086` Ledger Service Shop Counter in the *isolated* Pack 5 fixture: a ray originating at `[0.5,2,0.5]` with a 0.5-world-unit reach cap incorrectly selected **and removed** the counter when passed direction `[0,-3,0]`, despite the physical upper surface being farther away. With unit direction `[0,-1,0]`, the same cap correctly returned no hit. The bug was that the original slab-ray solver treated non-normalized ray parameters as world-distance units, allowing overreach.
+
+Fixed **only** `src/block-packs/pack-5/fixture.mjs`: finite, nonzero ray direction is normalized once before shape AABB intersections, keeping `maxDistance` and reported `hit.distance` in actual world units. Explicitly reject directions whose Euclidean norm overflows; preserve existing unit-vector behavior, subcell physical hitboxes, nearest-hit ordering, and atomic fixture removal. This is **not** a change to the production game raycast or controls.
+
+Four new source-native M6 regressions in `tests/block-packs/pack-5/m6-cross-family.test.mjs` check scaled directions at small/large magnitudes, removal limited by genuine distance, stacked chandelier-and-counter nearest targets, and invalid finite-component but nonfinite-length direction vectors. These are **demonstrated test-fixture corrections**, not simulated mobile-user tests.
+
+**Exact committed Git blob parity** with locally executed source and regressions:
+
+- `src/block-packs/pack-5/fixture.mjs`: `cf7baf90555d81ddd4dcba496f2d3ea469b12a41`
+- `tests/block-packs/pack-5/m6-cross-family.test.mjs`: `de5ee4ae2ad0b17165a13245b874e407725aa6da`
+
+### Reproducible result after the patch
+
+- `node --test tests/block-packs/pack-5/*.test.mjs` under **native Node v22.16.0: 182/182 PASS, zero failed/skipped**, comprising the original 156 M0–M5, the original 22 M6 cross-family tests, and four new ray-reach regressions. All preexisting candidate geometry and original tests continue to pass.
+- Reexecuted **36/36 genuine Chromium native ES-module/WebGL2 source-preview captures PASS**, six galleries `m1,m2,m3,m3b,m4,m5` × 667×375, 844×390, 932×430 CSS landscape × 0/1 rotations. Each gallery displays its true physical candidate geometry, with nonblank per-card GPU framebuffer readback. No blank/clipped new panel was identified in the M5 844×390 review. Source is offline native `data:` ES-module imported under virtual X/software GL; **HTTP-served Pages/real iPhone GPU/production controls still not proven**.
+- Latest rechecked main `ac263720b60641c65b02330348dd76d0ef9cb75e` / checkpoint **008**, Issues #109/#117, current manual Packs 1–4 draft PR heads and biome130 ownership. No other lane files changed. All 18 unique provisional symbolic family entries remain CANDIDATE, **zero integrated, zero persistent numeric block IDs**.
+- GitHub exact-head root workflow may remain queued; its result is independent of the separately executed 182 dedicated source-native tests. Never label queued CI as successful.
+
+**Final isolated readiness disposition: source-only post-M6 technical QA PASS after one proven fixture defect repair.** All creator aesthetic approvals, real iPhone control/GPU checks, actual served Pages, safe schema-1 save/ID widening and live shape/registry integration remain OPEN. PR #119 must stay DRAFT, unmerged/undeployed; no Gate A approval or v0.11 unlock.
