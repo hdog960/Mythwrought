@@ -94,33 +94,29 @@ try{
   await page.screenshot({path:'artifacts/live-008-underground-north-wing-932x430.png'});
   // Genuine renderer evidence of the newly activated 010 physical scenery.
   const [rx,rh,rz]=rotunda.origin;
-  await page.evaluate(p=>{
-    const d=window.__mythwroughtTest;
-    d.teleportCave(p.x,p.h+1,p.z-4);
-    d.aimAt(p.x+3,p.h+4,p.z+3);
-  },{x:rx,h:rh,z:rz});
-  await loaded();
+  // Stand outside the footprint: a close-up column is not acceptance
+  // evidence for the four entrances or open central ring.
+  await aim(rx-11,rz-13,rx,rh+4,rz);
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
     rotunda.cells.find(c=>c[1]===rh+3)?.slice(0,3)),BLOCK.STONE);
   await page.screenshot({path:'artifacts/live-010-stone-rotunda-932x430.png'});
 
   const [tx,th,tz]=twinwood.origin;
-  await page.evaluate(p=>{
-    const d=window.__mythwroughtTest;
-    d.teleportCave(p.x,p.h+1,p.z+1);
-    d.aimAt(p.x+2,p.h+7,p.z);
-  },{x:tx,h:th,z:tz});
-  await loaded();
+  // A full exterior view shows both rooted stems, the walking gap,
+  // and the joining crown rather than one trunk from point-blank range.
+  await aim(tx-11,tz+12,tx,th+7,tz);
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
     twinwood.cells.find(c=>c[3]===BLOCK.WOOD)?.slice(0,3)),BLOCK.WOOD);
   await page.screenshot({path:'artifacts/live-010-twinwood-forest-932x430.png'});
 
   const t=gallery.length-11, gx=gallery.x+t, gz=gallery.z+8;
   const galleryFloor=caveRoute(179,gallery).floorAt(t);
+  // Look down the carved southern throat from its junction, rather
+  // than aiming out of the chamber into distant sky.
   await page.evaluate(p=>{
     const d=window.__mythwroughtTest;
-    d.teleportCave(p.x,p.floor+1,p.z);
-    d.aimAt(p.x+2,p.floor+2,p.z-2);
+    d.teleportCave(p.x,p.floor+1,p.z-2);
+    d.aimAt(p.x,p.floor+1,p.z+4);
   },{x:gx,z:gz,floor:galleryFloor});
   await loaded();
   assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),
