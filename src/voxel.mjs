@@ -326,4 +326,4 @@ export function collides(world,x,feet,z){
     return Boolean(world.pack5Collision([x-BODY_RADIUS,feet,z-BODY_RADIUS,
       x+BODY_RADIUS,feet+BODY_HEIGHT,z+BODY_RADIUS]));
   return false;
-
+}
