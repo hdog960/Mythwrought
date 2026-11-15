@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
+import {VoxelWorld,BLOCK,terrainHeight as heightAt} from '../src/voxel.mjs';
 import {planTwinwood,placeTwinwood} from '../src/voxel-forest-twinwood.mjs';
 const find=(w)=>{
  for(let x=-48;x<=48;x+=2)for(let z=-48;z<=48;z+=2){
@@ -56,4 +56,21 @@ test('twinwood arches can face either woodland axis without overlapping protecte
  const restored=VoxelWorld.restore(w.save());
  for(const [x,y,z,id] of north.cells)assert.equal(restored.get(x,y,z),id);
  assert.equal(planTwinwood(new VoxelWorld(179),north.origin[0],north.origin[2],{axis:'diagonal'}),null);
+});
+
+
+test('north-south arch protects its rotated ground footprint, including off-axis player edits',()=>{
+ const w=new VoxelWorld(179);
+ let p=null;
+ for(let x=-48;x<=48&&!p;x+=2)for(let z=-48;z<=48;z+=2){
+  const candidate=planTwinwood(w,x,z,{axis:'z'});
+  if(candidate){p=candidate;break;}
+ }
+ assert.ok(p);
+ const [x,,z]=p.origin;
+ // Local (dx=3,dz=2) rotates to world (x+2,z+3), outside the X-axis footprint.
+ const a=x+2,c=z+3;
+ const h=heightAt(a,c,w.seed);
+ assert.equal(w.set(a,h,c,BLOCK.STONE),true);
+ assert.equal(planTwinwood(w,x,z,{axis:'z'}),null);
 });
