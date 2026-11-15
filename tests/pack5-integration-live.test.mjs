@@ -107,3 +107,41 @@ test('save failure rolls back Pack 5 placement without editing base world bytes'
   assert.equal(w.get(0,3,0),BLOCK.STONE);
   assert.equal(s.getItem(pack5SidecarKey(7)),'CORRUPT');
 });
+
+test('failed canonical write is compensated so next reload cannot resurrect rejected furniture',()=>{
+  const s=store(),w=plainWorld(),layer=createPack5ConstructionLayer(w);
+  s.removeItem=k=>s.m.delete(k);
+  layer.place('pack5:080',[0,4,0]);
+  savePack5SidecarSafe(s,layer);
+  const key=pack5SidecarKey(7),old=JSON.stringify(layer.snapshot()),oldJournal=s.getItem(key+'.journal');
+  layer.place('pack5:080',[4,4,0]);
+  const originalSet=s.setItem;let fail=true;
+  s.setItem=(k,v)=>{
+    if(k===key&&fail){fail=false;throw Error('Injected primary write failure');}
+    return originalSet(k,v);
+  };
+  assert.throws(()=>savePack5SidecarSafe(s,layer),/previous sidecar and journal verified intact/);
+  assert.equal(s.getItem(key),old);
+  assert.equal(s.getItem(key+'.journal'),oldJournal);
+  const restored=createPack5ConstructionLayer(w);
+  assert.equal(loadPack5SidecarSafe(s,restored).count,1);
+  assert.equal(JSON.stringify(restored.snapshot()),old);
+});
+test('explicit Pack 5 import rejects cross-seed and conflict without consent, preserves backup',()=>{
+  const s=store(),w=plainWorld(),a=createPack5LiveAdapter(w,{storage:s});
+  a.layer.place('pack5:080',[0,4,0]);
+  a.save();
+  const old=JSON.stringify(a.snapshot()),key=pack5SidecarKey(7);
+  const fixture=createPack5ConstructionLayer(w);
+  fixture.place('pack5:080',[4,4,0],2);
+  const raw=JSON.stringify(fixture.snapshot());
+  assert.throws(()=>a.importJson(raw),/confirmation/);
+  assert.throws(()=>a.importJson(JSON.stringify({...fixture.snapshot(),seed:8}),{confirmReplace:true}),/sidecar/);
+  assert.throws(()=>a.importJson(raw,{confirmReplace:true,playerBox:[4,4,0,5,6,1]}),/overlaps/);
+  assert.equal(JSON.stringify(a.snapshot()),old);
+  const accepted=a.importJson(raw,{confirmReplace:true});
+  assert.equal(accepted.count,1);
+  assert.deepEqual(a.snapshot(),fixture.snapshot());
+  assert.equal(s.getItem(key+'.backup'),old);
+  assert.equal(loadPack5SidecarSafe(s,createPack5ConstructionLayer(w)).count,1);
+});

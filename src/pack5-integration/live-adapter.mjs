@@ -7,7 +7,7 @@ import {BLOCK,BODY_RADIUS,BODY_HEIGHT,raycast as legacyRaycast} from '../voxel.m
 import {createPack5ConstructionLayer} from './construction-layer.mjs';
 import {resolvePack5BuilderAsset} from './catalog.mjs';
 import {orientedParts,rotateCellOffset} from '../block-packs/pack-5/fixture.mjs';
-import {loadPack5SidecarSafe,savePack5SidecarSafe} from './sidecar-storage.mjs';
+import {loadPack5SidecarSafe,savePack5SidecarSafe,importPack5SidecarSafe} from './sidecar-storage.mjs';
 export const PACK5_REACH=6;
 const validVec3=v=>Array.isArray(v)&&v.length===3&&v.every(Number.isFinite);
 const playerBounds=p=>{
@@ -24,8 +24,11 @@ export function createPack5LiveAdapter(world,{storage=null}={}){
       try{savePack5SidecarSafe(storage,layer);}
       catch(error){
         // Rejected storage must not produce a silently unsaved game edit.
-        layer.restore(old);
-        return {ok:false,reason:'Pack 5 save failed; placement rolled back',detail:String(error)};
+        if(error.rollbackVerified!==false){
+          layer.restore(old);
+          return {ok:false,reason:'Pack 5 save failed; placement rolled back',detail:String(error)};
+        }
+        return {ok:false,reason:'Pack 5 journal recovery uncertain; export before leaving',detail:String(error)};
       }
     }
     return result;
@@ -78,6 +81,10 @@ export function createPack5LiveAdapter(world,{storage=null}={}){
     },
     save(){if(!storage)throw Error('No Pack 5 sidecar storage supplied');
       return savePack5SidecarSafe(storage,layer);},
+    importJson(raw,{confirmReplace=false,playerBox=null}={}){
+      if(!storage)throw Error('No Pack 5 sidecar storage supplied');
+      return importPack5SidecarSafe(storage,layer,raw,{confirmReplace,playerBox});
+    },
     snapshot(){return layer.snapshot();}
   };
   return Object.freeze(api);

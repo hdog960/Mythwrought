@@ -47,25 +47,71 @@ export function loadPack5SidecarSafe(storage,layer){
   }
   throw Error('Stored Pack 5 construction is damaged or unsupported; no saved bytes changed: '+errors.join('; ').slice(0,200));
 }
+/**
+ * Explicit sidecar import. Does not modify schema-1 saves or another pack.
+ * Input is validated against the physical fixture before touching storage.
+ */
+export function importPack5SidecarSafe(storage,layer,raw,{confirmReplace=false,playerBox=null}={}){
+  if(confirmReplace!==true)throw Error('Explicit Pack 5 import confirmation required');
+  if(!layer||!Number.isSafeInteger(layer.seed))throw Error('Invalid Pack 5 import layer');
+  const incoming=parseRaw(raw,layer.seed);
+  const previous=layer.snapshot();
+  try{
+    layer.restore(incoming);
+    if(playerBox!==null&&layer.collidesPack5(playerBox))
+      throw Error('Imported Pack 5 layout overlaps the player');
+    const result=savePack5SidecarSafe(storage,layer);
+    return {...result,imported:true};
+  }catch(error){
+    if(error.rollbackVerified!==false)layer.restore(previous);
+    throw error;
+  }
+}
 export function savePack5SidecarSafe(storage,layer){
   if(!storage||typeof storage.getItem!=='function'||typeof storage.setItem!=='function'||
      !layer||!Number.isSafeInteger(layer.seed))throw Error('Invalid Pack 5 sidecar saver');
   const key=pack5SidecarKey(layer.seed),raw=JSON.stringify(layer.snapshot());
   parseRaw(raw,layer.seed);
-  const old=storage.getItem(key),priorJournal=storage.getItem(key+'.journal');
-  if(old!==null)parseRaw(old,layer.seed); // fail closed on damaged original
-  if(priorJournal!==null){
-    const pending=readJournal(priorJournal,layer.seed);
+  const journalKey=key+'.journal',backupKey=key+'.backup',
+    old=storage.getItem(key),previousJournal=storage.getItem(journalKey),
+    previousBackup=storage.getItem(backupKey);
+  if(old!==null)parseRaw(old,layer.seed);
+  if(previousJournal!==null){
+    const pending=readJournal(previousJournal,layer.seed);
     if(pending!==old&&pending!==raw)throw Error('Unreconciled Pack 5 sidecar journal: export before replacing');
   }
-  if(old!==null&&old!==raw){
-    storage.setItem(key+'.backup',old);
-    if(storage.getItem(key+'.backup')!==old)throw Error('Pack 5 backup verification failed');
+  const before=new Map([[key,old],[journalKey,previousJournal],[backupKey,previousBackup]]);
+  const touched=[];
+  function write(item,value){
+    touched.push(item);
+    storage.setItem(item,value);
+    if(storage.getItem(item)!==value)throw Error('Pack 5 storage readback failed');
   }
-  const record=JSON.stringify({version:1,seed:layer.seed,checksum:saveFingerprint(raw),raw});
-  storage.setItem(key+'.journal',record);
-  if(storage.getItem(key+'.journal')!==record)throw Error('Pack 5 journal verification failed');
-  storage.setItem(key,raw);
-  if(storage.getItem(key)!==raw)throw Error('Pack 5 sidecar verification failed');
-  return {ok:true,seed:layer.seed,count:layer.count(),bytes:raw.length};
+  try{
+    if(old!==null&&old!==raw)write(backupKey,old);
+    const record=JSON.stringify({version:1,seed:layer.seed,checksum:saveFingerprint(raw),raw});
+    write(journalKey,record);
+    write(key,raw);
+    return {ok:true,seed:layer.seed,count:layer.count(),bytes:raw.length};
+  }catch(cause){
+    // Without compensation, a successful journal followed by a failed primary
+    // silently reappears after reload despite the game reporting a rollback.
+    let rollbackVerified=true;
+    for(const item of [...new Set(touched)].reverse()){
+      try{
+        const value=before.get(item);
+        if(value===null){
+          if(typeof storage.removeItem!=='function')throw Error('No removal support');
+          storage.removeItem(item);
+        }else storage.setItem(item,value);
+        if(storage.getItem(item)!==value)throw Error('Rollback readback mismatch');
+      }catch(_){rollbackVerified=false;}
+    }
+    const error=new Error(rollbackVerified?
+      'Pack 5 save failed; previous sidecar and journal verified intact':
+      'Pack 5 save interrupted; journal recovery uncertain. Export current session.');
+    error.rollbackVerified=rollbackVerified;
+    error.cause=cause;
+    throw error;
+  }
 }
