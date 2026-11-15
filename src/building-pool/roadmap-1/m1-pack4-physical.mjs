@@ -17,13 +17,13 @@ export function getM1Pack4Construction(pack4,{blueprints=null}={}){
   const out=[];
   for(const draft of drafts){
     // The original M1 fireplace is at x=2 against the authored west wall
-    // at x=1. Its generic "none" facing incorrectly mounted it behind +Z,
+    // at x=1. Its generic "north" facing incorrectly mounted it behind +Z,
     // where no support exists. Face east, with the plate on the west wall.
     // This is an isolated physical sidecar; original blueprint stays unchanged.
     const physicalDraft=Array.isArray(draft.placements)?{...draft,placements:draft.placements.map(p=>
       p.asset==='pack4:064'&&p.role==='furnishing'&&p.orientation==='north'
         ?{...p,orientation:'east',orientationProvenance:'supported-wall-sidecar'}:p)}:draft;
-    const fixedSupportCells=draft.placements.filter(p=>
+    const fixedSupportCells=(draft.placements??[]).filter(p=>
       p.asset.startsWith('live:')&&['foundation','floor','wall','partition','support'].includes(p.role)
     ).map(p=>p.at);
     const plan=pack4.resolvePack4BuilderBlueprint(physicalDraft,{fixedSupportCells});
