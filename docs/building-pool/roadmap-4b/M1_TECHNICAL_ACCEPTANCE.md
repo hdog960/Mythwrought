@@ -21,7 +21,7 @@
 | schoolhouse:desert:small:01 | Desert Small | 1,413 | 231 | 3 (classroom, teaching, shared-study) |
 | magical-research-institute:enchanted-forest:medium:01 | Enchanted Medium | 1,367 | 212 | 3 (research-hall, repository, instrument bay) |
 | arcane-academy:mountain:large:01 | Mountain Large | 2,234 | 353 | 4 (lecture, study, practice, archive) |
-| **Five originals** | **Five distinct biome-size cells** | **7,307** | **1,760** | **17** |
+| **Five originals** | **Five distinct biome-size cells** | **7,307** | **1,157** | **17** |
 
 No category-matching legacy PR #123 candidates were imported. All five original IDs retain the `r4:` family prefix; none duplicates 4A. Quota **5 source-authored / 280 unauthored / 0 creator-approved / 0 live integrated**. Five *candidate-native technically validated* is not five creator-accepted buildings.
 
