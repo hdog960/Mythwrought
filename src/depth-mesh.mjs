@@ -1,6 +1,7 @@
 // Depth-owned, section-local solid voxel mesher. No biome, cave, landmark,
 // flora, or manual-block generation belongs here. Only world.get defines cells.
 import {BLOCK,CHUNK_SIZE} from './voxel.mjs';
+import {isPack2LiveId,pack2WorldVertices} from './pack2-integration.mjs';
 import {isBiome130BlockId,biome130Block,biome130Color} from './biome130-registry.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {sectionBounds} from './depth.mjs';
@@ -54,6 +55,15 @@ export function meshDepthSection(world,cx,cz,section){
       for(let y=bounds.minY;y<=bounds.maxY;y++){
         const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
+        if(isPack2LiveId(id)){
+          if(id!==76){
+            const state=world.getPack2State?.(x,y,z);
+            if(!state)throw Error('Deep Pack 2 mesh missing physical state');
+            const mesh=pack2WorldVertices(id,state,[x,y,z]);
+            for(let k=0;k<mesh.length;k+=9)emit(...mesh.subarray(k,k+9));
+          }
+          continue;
+        }
         if(isBiome130BlockId(id)){
           const rotation=world.rotationAt?.(x,y,z)??0,key=id*4+rotation;
           let mesh=shapeCache.get(key);
@@ -76,7 +86,8 @@ export function meshDepthSection(world,cx,cz,section){
               }
             }
             if(boundary&&blockAt(x+nx,y+ny,z+nz)!==BLOCK.AIR &&
-               !isBiome130BlockId(blockAt(x+nx,y+ny,z+nz)))continue;
+               !isBiome130BlockId(blockAt(x+nx,y+ny,z+nz))&&
+               !isPack2LiveId(blockAt(x+nx,y+ny,z+nz)))continue;
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const rgb=biome130Color(id,x,y,z,face),lit=[.77,.73,1,.48,.85,.67][face];
             for(let k=t;k<t+3;k++){
@@ -88,7 +99,8 @@ export function meshDepthSection(world,cx,cz,section){
         }
         const color=COLORS[id]||COLORS[3];
         for(const face of FACES){
-          if(blockAt(x+face.d[0],y+face.d[1],z+face.d[2])!==BLOCK.AIR)continue;
+          const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
+          if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor))continue;
           const shade=.91+((Math.abs(x*13+y*7+z*17)%17)/17)*.12;
           const [r,g,b]=color.map(c=>Math.min(1,c*shade*face.lit));
           for(const k of [0,1,2,0,2,3]){
