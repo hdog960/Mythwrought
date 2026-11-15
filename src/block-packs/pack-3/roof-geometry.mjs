@@ -28,17 +28,31 @@ const SLOPE=Object.freeze([
 // Roster 28: a genuine hip-corner profile, stepping upward along BOTH axes.
 // It cannot be substituted by a generic straight roof stair.
 const HIP=Object.freeze([
-  // Matching four-course eave heights and offsets to the pitched roof stair
-  // along the two perpendicular exposed edges: quarter-cell course spacing.
-  P('body',B(0,0,0,1,.1875,1)),
-  P('body',B(.25,.1875,.25,1,.375,1)),
-  P('body',B(.5,.375,.5,1,.5625,1)),
-  P('body',B(.75,.5625,.75,1,.75,1)),
-  P('edge',B(.25,.375,.25,1,.421875,1)),
-  P('edge',B(.5,.5625,.5,1,.609375,1)),
-  P('crest',B(.75,.75,.75,1,.796875,1)),
-  P('crest',B(.25,.421875,.25,.3125,.46875,.3125)),
-  P('crest',B(.5,.609375,.5,.5625,.65625,.5625))
+  // Four stepped load-bearing hip courses; trim joins the opposing roof
+  // slopes at BOTH exposed faces at the exact height of each clay course.
+  P('body',B(0,0,0,1,0.1875,1)),
+  P('body',B(0.25,0.1875,0.25,1,0.375,1)),
+  P('body',B(0.5,0.375,0.5,1,0.5625,1)),
+  P('body',B(0.75,0.5625,0.75,1,0.75,1)),
+  P('edge',B(.9375,0.1875,0,1,0.234375,0.25)),
+  P('edge',B(0,0.1875,.9375,0.25,0.234375,1)),
+  P('edge',B(.9375,0.375,0.25,1,0.421875,0.5)),
+  P('edge',B(0.25,0.375,.9375,0.5,0.421875,1)),
+  P('edge',B(.9375,0.5625,0.5,1,0.609375,0.75)),
+  P('edge',B(0.5,0.5625,.9375,0.75,0.609375,1)),
+  P('edge',B(.9375,0.75,0.75,1,0.796875,1)),
+  P('edge',B(0.75,0.75,.9375,1,0.796875,1)),
+  P('crest',B(.9375,0.234375,0,1,0.28125,0.25)),
+  P('crest',B(0,0.234375,.9375,0.25,0.28125,1)),
+  P('crest',B(.9375,0.421875,0.25,1,0.46875,0.5)),
+  P('crest',B(0.25,0.421875,.9375,0.5,0.46875,1)),
+  P('crest',B(.9375,0.609375,0.5,1,0.65625,0.75)),
+  P('crest',B(0.5,0.609375,.9375,0.75,0.65625,1)),
+  P('crest',B(.9375,0.796875,0.75,1,0.84375,1)),
+  P('crest',B(0.75,0.796875,.9375,1,0.84375,1)),
+  // Small diagonal finials preserve an individual hip silhouette.
+  P('crest',B(.25,.375,.25,.3125,.46875,.3125)),
+  P('crest',B(.5,.5625,.5,.5625,.65625,.5625))
 ]);
 // Roster 29: a longitudinal ridge with wide shoulders, raised spine and
 // capped ends. Its x/z symmetry intentionally repeats after a half turn.
