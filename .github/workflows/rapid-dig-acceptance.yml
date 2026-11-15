@@ -1,0 +1,39 @@
+name: Mythwrought rapid vertical digging acceptance
+on:
+  pull_request:
+    paths:
+      - src/main.mjs
+      - src/depth-mesh.mjs
+      - tests/rapid-vertical-dig-browser.mjs
+      - .github/workflows/rapid-dig-acceptance.yml
+permissions:
+  contents: read
+jobs:
+  rapid-dig-node-chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-source syntax and native regression
+        run: |
+          node --check src/main.mjs
+          node --check src/depth-mesh.mjs
+          node --check tests/rapid-vertical-dig-browser.mjs
+          npm test
+      - name: Install free Chromium test tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Real Chromium rapid vertical digging and measured frame costs
+        run: |
+          python3 -m http.server 4173 >/tmp/rapid-dig-site.log 2>&1 &
+          node tests/rapid-vertical-dig-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-rapid-vertical-dig-evidence
+          path: artifacts/rapid-dig-*
+          if-no-files-found: ignore

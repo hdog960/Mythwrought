@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,baseBlock,VoxelWorld,meshChunk,WORLD_MAX_Y,WORLD_MIN_Y as LEGACY_PUBLIC_MIN_Y} from '../src/voxel.mjs';
-import {meshDepthSection} from '../src/depth-mesh.mjs';
+import {meshDepthSection,invalidateDepthMeshCache} from '../src/depth-mesh.mjs';
 import {caveRoute} from '../src/experimental-cave-route.mjs';
 import {
   WORLD_MIN_Y,LEGACY_WORLD_MIN_Y,LEGACY_WORLD_HEIGHT,WORLD_DEPTH_MULTIPLIER,
@@ -209,4 +209,68 @@ test('unmodified natural cave must remain 25 chunks; only an actual shaft opens 
   assert.deepEqual(sectionWindow(1),[0]);
   assert.throws(()=>sectionWindow(0,'true'));
   assert.throws(()=>surfaceOpeningNearby(w,0,0,3));
+});
+
+
+test('incremental deep remesh is exactly equal to a fresh full remesh for rapid vertical and side/seam edits',()=>{
+  const w=new VoxelWorld(179);
+  const section=-5;
+  // Prime all three affected chunk caches from an unedited genuine world.
+  for(const [cx,cz] of [[0,0],[-1,0],[0,-1]])
+    meshDepthSection(w,cx,cz,section);
+  const digs=[
+    [1,-77,1],[1,-78,1],[1,-79,1],[1,-80,1],
+    [0,-79,0],[0,-78,0],[1,-79,0],[0,-79,1],
+    [2,-80,2],[1,-79,1]
+  ];
+  for(const [x,y,z] of digs){
+    const previous=w.get(x,y,z),next=previous===BLOCK.AIR?BLOCK.DEEPSTONE:BLOCK.AIR;
+    assert.equal(w.set(x,y,z,next),true);
+    for(const [cx,cz] of [[0,0],[-1,0],[0,-1]]){
+      const incremental=meshDepthSection(w,cx,cz,section,{x,z});
+      const fresh=meshDepthSection(VoxelWorld.restore(w.save()),cx,cz,section);
+      assert.deepEqual(incremental,fresh,
+        'column-cache geometry disagrees with authoritative world at '+[x,y,z,cx,cz]);
+    }
+  }
+  // A failed GPU stage must discard columns generated from the rejected edit.
+  w.set(1,-77,1,BLOCK.AIR);
+  meshDepthSection(w,0,0,section,{x:1,z:1});
+  w.set(1,-77,1,BLOCK.DEEPSTONE);
+  invalidateDepthMeshCache(w);
+  const rolledBack=meshDepthSection(w,0,0,section,{x:1,z:1});
+  assert.deepEqual(rolledBack,meshDepthSection(VoxelWorld.restore(w.save()),0,0,section));
+});
+
+
+test('solid deep sections use sparse faces but exactly match authoritative full geometry',()=>{
+  const w=new VoxelWorld(179);
+  const edits=[
+    [1,-78,1,BLOCK.AIR],
+    [0,-77,1,BLOCK.AIR],
+    [-1,-78,1,BLOCK.AIR],
+    [1,-83,1,BLOCK.AIR],
+    [1,-84,1,BLOCK.AIR],
+    [1,-32,1,BLOCK.AIR],
+    [1,-33,1,BLOCK.AIR],
+    [1,-210,1,BLOCK.AIR],
+  ];
+  for(const [x,y,z,id] of edits)assert.equal(w.set(x,y,z,id),true);
+  const fullReader={get:(x,y,z)=>w.get(x,y,z),seed:w.seed};
+  for(const [cx,cz,section] of [[0,0,-1],[0,0,-2],[0,0,-5],
+    [-1,0,-5],[0,-1,-5],[0,0,-13],[1,1,-7]]){
+    invalidateDepthMeshCache(w);
+    const sparse=meshDepthSection(w,cx,cz,section);
+    const full=meshDepthSection(fullReader,cx,cz,section);
+    assert.deepEqual(sparse,full,
+      'sparse current-world mesh disagrees with complete world.get mesh at '+[cx,cz,section]);
+  }
+  const untouched=new VoxelWorld(179);
+  assert.equal(meshDepthSection(untouched,3,3,-6).length,0,
+    'solid unedited deep rock has no visible faces');
+  // A custom source is never treated as all-solid even if it mimics the
+  // VoxelWorld methods: the complete reader remains authoritative.
+  const fake={seed:179,get:(x,y,z)=>x===48&&y===-78&&z===48?BLOCK.AIR:
+    untouched.get(x,y,z)};
+  assert.ok(meshDepthSection(fake,3,3,-5).length>0);
 });

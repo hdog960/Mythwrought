@@ -1,6 +1,6 @@
 import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
-import {meshDepthSection} from './depth-mesh.mjs';
+import {meshDepthSection,invalidateDepthMeshCache} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
@@ -196,8 +196,10 @@ function start(){
       for(const {cx,cz} of editAffectedChunks(x,z)){
         const key=depthMeshKey(cx,cz,section);
         if(!chunks.has(key))continue;
-        const vertices=section===0?meshChunk(world,cx,cz):
-          meshDepthSection(world,cx,cz,section);
+        let vertices;
+        try{vertices=section===0?meshChunk(world,cx,cz):
+          meshDepthSection(world,cx,cz,section,{x,z});}
+        catch(error){invalidateDepthMeshCache(world);throw error;}
         batch.push({key,cx,cz,section,vertices});
       }
     const ready=[];
@@ -208,6 +210,9 @@ function start(){
       }
     }catch(err){
       for(const item of ready)gl.deleteBuffer(item.buffer);
+      // A failed GPU stage rolls the voxel back in applyBlockAction. Never
+      // retain columns built from its transient attempted edit.
+      invalidateDepthMeshCache(world);
       throw err;
     }
     for(const item of ready){
@@ -1057,8 +1062,13 @@ function start(){
       placeFixture(x,y,z,id){
         const old=world.get(x,y,z);
         if(!world.set(x,y,z,id))throw Error('Invalid test block');
+        const meshStart=performance.now();
         try{refreshEditedMeshes(x,z,y);}catch(err){world.set(x,y,z,old);throw err;}
-        save();
+        const savedAt=performance.now();
+        const saved=save();
+        // Localhost-only regression hook: source-authentic edit/mesh/save timings.
+        // Existing callers ignore the return value; no production behavior changes.
+        return {meshMs:savedAt-meshStart,saveMs:performance.now()-savedAt,saved};
       },
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
