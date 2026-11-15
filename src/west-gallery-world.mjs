@@ -24,10 +24,13 @@ export function westGalleryWorld(world, origin=CAVE_CANDIDATE) {
       // Return passage joins the primary eastbound corridor near its chamber.
       // This makes the west vault a traversable loop, not a dead-end room.
       const returnPassage=t>=23&&t<=25&&d>=-7&&d<=0;
-      if(!throat&&!chamber&&!eastLink&&!eastHall&&!returnPassage)return previous.get(x,y,z);
+      // A third, sheltered side cavern beyond the first chamber's north wall.
+      // The overlap at d=-11 makes this an actual branch, not a detached void.
+      const northAlcove=t>=9&&t<=13&&d>=-16&&d<=-11;
+      if(!throat&&!chamber&&!eastLink&&!eastHall&&!returnPassage&&!northAlcove)return previous.get(x,y,z);
       const floor=floorAt(t);
       if(y===floor)return BLOCK.STONE;
-      if(y>floor&&y<=floor+(eastHall?6:4))return BLOCK.AIR;
+      if(y>floor&&y<=floor+(eastHall?6:northAlcove?5:4))return BLOCK.AIR;
       return previous.get(x,y,z);
     }
   };
@@ -84,6 +87,21 @@ export function westVaultTraversal(world,origin=CAVE_CANDIDATE) {
     const bodyClear=!collides(reader,x+.5,feet,z+.5);
     return {x,y:feet,z,supported,headClear,bodyClear};
   });
+  const failures=samples.filter(p=>!p.supported||!p.headClear||!p.bodyClear);
+  return {samples,failures,walkable:failures.length===0,bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
+}
+
+/** Fixed-seed player-body trace into the third, north alcove cavern. */
+export function northAlcoveTraversal(world,origin=CAVE_CANDIDATE) {
+  const reader=westGalleryWorld(world,origin),floorAt=caveRoute(world.seed,origin).floorAt;
+  const t=11,x=origin.x+t,samples=[];
+  for(let d=-9;d>=-15;d--){
+    const z=origin.z+d,floor=floorAt(t),feet=floor+1;
+    const supported=reader.get(x,floor,z)!==BLOCK.AIR;
+    const headClear=reader.get(x,feet,z)===BLOCK.AIR&&reader.get(x,feet+1,z)===BLOCK.AIR;
+    const bodyClear=!collides(reader,x+.5,feet,z+.5);
+    samples.push({x,y:feet,z,supported,headClear,bodyClear});
+  }
   const failures=samples.filter(p=>!p.supported||!p.headClear||!p.bodyClear);
   return {samples,failures,walkable:failures.length===0,bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
 }
