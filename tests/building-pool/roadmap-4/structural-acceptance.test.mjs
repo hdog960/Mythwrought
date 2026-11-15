@@ -181,17 +181,23 @@ test('every roof joist stays above head clearance, has roof cover and joins a lo
     const occupancy=index(b),roofLevel=b.architecturalNotes.storyCount*4;
     for(const beam of b.cells.filter(c=>c.role==='beam')){
       const [x,y,z]=beam.at;
-      assert.equal(y,roofLevel-1,b.id+' joist too low for safe upper-floor headroom');
+      const towerCapBeam=y>roofLevel;
+      assert.ok(y===roofLevel-1||towerCapBeam,b.id+' joist blocks a walkable room at '+[x,y,z]);
       assert.equal(occupancy.get(k(x,y+1,z))?.role,'roof',b.id+' joist has no roof to support');
-      for(const step of [-1,1]){
+      // Main deck beams run between walls in X; elevated tower cap beams
+      // run either X or Z between crenellated parapets.
+      const axis=towerCapBeam&&beam.facing==='north'?[0,1]:[1,0];
+      for(const sign of [-1,1]){
         let attached=false;
-        for(let xx=x+step;xx>=0&&xx<b.bounds[0];xx+=step){
-          const neighbor=occupancy.get(k(xx,y,z));
+        for(let step=1;step<Math.max(...b.bounds);step++){
+          const xx=x+sign*step*axis[0],zz=z+sign*step*axis[1];
+          if(xx<0||zz<0||xx>=b.bounds[0]||zz>=b.bounds[2])break;
+          const neighbor=occupancy.get(k(xx,y,zz));
           if(!neighbor)break;
           if(structural.has(neighbor.role)){attached=true;break;}
           if(neighbor.role!=='beam')break;
         }
-        assert.ok(attached,b.id+' unsupported horizontal roof span at '+[x,y,z]);
+        assert.ok(attached,b.id+' roof beam not anchored on BOTH ends at '+[x,y,z]);
       }
       joists++;
     }
