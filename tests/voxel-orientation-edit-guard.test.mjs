@@ -56,3 +56,40 @@ test('legacy schema-1 payload remains byte-identical',()=>{
   applyOrientedVoxelEdit({...f,nextBlockId:5});
   assert.equal(legacy,'{"schema":1,"edits":[[-2,3,5,4]],"seed":42}');
 });
+
+test('writer mutates then returns false: clear stale yaw and report partial failure',()=>{
+  const f=fixture();
+  assert.throws(()=>applyOrientedVoxelEdit({...f,nextBlockId:6,writeBlock:(x,y,z,id)=>{
+    f.world.set([x,y,z].join(','),id); return false;
+  }}),/changed despite failed edit/);
+  assert.equal(f.readBlock(...f.cell),6);
+  assert.equal(f.orientation.size(),0);
+});
+test('writer mutates then throws: preserve original error but clear stale yaw',()=>{
+  const f=fixture();
+  const failure=new Error('save unavailable');
+  assert.throws(()=>applyOrientedVoxelEdit({...f,nextBlockId:6,writeBlock:(x,y,z,id)=>{
+    f.world.set([x,y,z].join(','),id); throw failure;
+  }}),e=>e===failure);
+  assert.equal(f.orientation.size(),0);
+});
+test('readback failure after attempted write invalidates untrusted yaw',()=>{
+  const f=fixture(); let reads=0;
+  assert.throws(()=>applyOrientedVoxelEdit({...f,nextBlockId:6,
+    readBlock:(...args)=>{ if(++reads===2) throw Error('readback failed'); return f.readBlock(...args); }
+  }),/Cannot verify world state/);
+  assert.equal(f.orientation.size(),0);
+});
+test('writer returning success but mutating to wrong ID invalidates old yaw',()=>{
+  const f=fixture();
+  assert.throws(()=>applyOrientedVoxelEdit({...f,nextBlockId:6,writeBlock:(x,y,z)=>{
+    f.world.set([x,y,z].join(','),5);return true;
+  }}),/without committing/);
+  assert.equal(f.orientation.size(),0);
+});
+test('false writer without mutation retains yaw and avoids phantom edit',()=>{
+  const f=fixture();
+  assert.deepEqual(applyOrientedVoxelEdit({...f,nextBlockId:6,writeBlock:()=>false}),
+    {changed:false,before:4,after:4});
+  assert.equal(f.orientation.get(f.cell,4),3);
+});
