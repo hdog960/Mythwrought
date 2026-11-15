@@ -5,6 +5,8 @@ on:
     paths:
       - 'src/pack5-integration/**'
       - 'tests/pack5-integration*'
+      - 'tests/pack5-game*'
+      - 'tests/pack5-blueprint*'
       - '.github/workflows/pack5-integration-acceptance.yml'
 
 permissions:

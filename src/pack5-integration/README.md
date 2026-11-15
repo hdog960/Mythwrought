@@ -97,3 +97,18 @@ canonical write now attempts to restore and independently verify the previous
 journal, primary and backup bytes before reporting an in-memory rollback.
 A failure that cannot be compensated is identified as an interrupted-write
 recovery blocker and must not be represented as a successful rollback.
+
+
+## M5 — Shape-exact construction handoff and bounded stress testing
+- `blueprint-handoff.mjs` resolves original Pack 5 symbolic dependencies to
+  world-coordinate occupied cells, visual/selection/collision boxes, exact
+  rotations, variants and required support cells without assigning a numeric
+  block ID or writing a structure to the game. It is an independent handoff:
+  Packs 1–4 and biome130 remain unresolved within this Pack 5 resolver.
+- Tests cover 18 families x 2 variants x 4 turns, multi-cell footprints,
+  duplicate rejection, foreign namespace rejection, 2048 placed physical
+  objects, bounded 16-instance single-draw streaming and saved scene restore.
+- Dense-world picking queries only nearby occupied cells, not every distant
+  furnishing. Small scenes retain canonical fixture behavior.
+- Browser CI also includes an **emulated touch-enabled Chromium landscape**
+  smoke. This is not evidence of a physical-iPhone GPU or Safari acceptance.

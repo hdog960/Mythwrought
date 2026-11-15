@@ -84,6 +84,30 @@ try{
     console.log('PASS actual Mythwrought game Pack5 WebGL2',width,height,evidence);
     await page.close();
   }
+  // Browser touch emulation is a useful regression, not physical iPhone proof.
+  // Keep the real game's original two-thumb rails visible in landscape.
+  const mobile=await browser.newPage({viewport:{width:844,height:390},
+    deviceScaleFactor:3,hasTouch:true,isMobile:true});
+  await mobile.goto('http://127.0.0.1:4181/',{waitUntil:'load'});
+  await mobile.waitForFunction(()=>Number(document.getElementById('scene')?.dataset.renderedFrames)>2);
+  const layout=await mobile.evaluate(()=>{
+    const left=document.querySelector('.left').getBoundingClientRect(),
+      right=document.querySelector('.right').getBoundingClientRect(),
+      canvas=document.querySelector('#scene').getBoundingClientRect();
+    return {leftClear:left.right<=canvas.left+2,rightClear:right.left>=canvas.right-2,
+      viewport:[innerWidth,innerHeight],loaded:Number(document.getElementById('scene').dataset.loadedChunks)};
+  });
+  assert.equal(layout.leftClear,true,'Left touch grip overlaps world');
+  assert.equal(layout.rightClear,true,'Right touch grip overlaps world');
+  await mobile.locator('#menu').tap();
+  await mobile.locator('#pack5Enabled').check();
+  await mobile.waitForFunction(()=>
+    document.getElementById('pack5Status').textContent.includes('Pack 5 ON'));
+  await mobile.locator('#closeHelp').tap();
+  assert.equal(await mobile.locator('#scene').isVisible(),true);
+  await mobile.screenshot({path:path.join(output,'pack5-touch-emulated-844x390.png')});
+  console.log('PASS Chromium iPhone-style touch emulation (NOT physical iPhone)',layout);
+  await mobile.close();
 }finally{
   if(browser)await browser.close();
   server.kill('SIGTERM');
