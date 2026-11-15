@@ -205,3 +205,20 @@ test('traversal rejects a missing middle shaft voxel and accepts a physical repa
   assert.equal(world.set(x+3,h+2,z+3,BLOCK.STONE),true);
   assert.ok(inspectStoneRotundaTraversal(world,plan));
 });
+
+
+test('traversal detects mined buttress, low step and weathered crown details',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected an eligible site');
+  assert.equal(placeStoneRotunda(world,plan),true);
+  const [x,h,z]=plan.origin;
+  for(const [dx,dy,dz] of [[-4,1,-3],[-2,0,0],[-3,6,-2]]){
+    assert.ok(inspectStoneRotundaTraversal(world,plan),'intact rotunda should be traversable');
+    assert.equal(world.get(x+dx,h+dy,z+dz),BLOCK.STONE);
+    assert.equal(world.set(x+dx,h+dy,z+dz,BLOCK.AIR),true);
+    assert.equal(inspectStoneRotundaTraversal(world,plan),null,
+      'missing authored stone detail must invalidate physical landmark integrity');
+    assert.equal(world.set(x+dx,h+dy,z+dz,BLOCK.STONE),true);
+  }
+  assert.ok(inspectStoneRotundaTraversal(world,plan));
+});
