@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {VoxelWorld,BLOCK,baseBlock,terrainHeight} from '../src/voxel.mjs';
+import {VoxelWorld,BLOCK,baseBlock,terrainHeight,worldKey} from '../src/voxel.mjs';
 import {planStoneRotunda,placeStoneRotunda} from '../src/stone-rotunda.mjs';
 
 function findSite(world){
@@ -63,4 +63,20 @@ test('placement creates real selectable and removable stone voxels',()=>{
   assert.equal(world.get(x,y,z),BLOCK.STONE);
   assert.equal(world.set(x,y,z,BLOCK.AIR),true);
   assert.equal(world.get(x,y,z),BLOCK.AIR);
+});
+
+
+test('explicit player edit equal to natural terrain still reserves construction volume',()=>{
+  const world=new VoxelWorld(179);
+  const plan=findSite(world);
+  assert.ok(plan,'expected an eligible fixed-seed site');
+  const [x,h,z]=plan.origin;
+  const key=worldKey(x,h+1,z);
+  const natural=baseBlock(x,h+1,z,world.seed);
+  assert.equal(natural,BLOCK.AIR);
+  world.edits.set(key,natural);
+  assert.equal(world.get(x,h+1,z),natural);
+  assert.equal(planStoneRotunda(world,x,z),null);
+  assert.equal(placeStoneRotunda(world,plan),false);
+  assert.equal(world.edits.get(key),natural);
 });
