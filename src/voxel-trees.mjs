@@ -45,8 +45,10 @@ export function planVoxelTree(world,x,z,{variant='roundwood',leafId=BLOCK.LEAVES
    put(dx,height,0,BLOCK.WOOD);
    for(let dz=-1;dz<=1;dz++){
     if(dz!==0)put(dx,height-1,dz,BLOCK.WOOD);
-    for(let dy=height+1;dy<=height+2;dy++)
-     if(Math.abs(dz)<=1&&(dx!==3||dy===height+1))put(dx,dy,dz,leafId);
+    // Keep a two-voxel-high unobstructed center aisle above the deck.
+    // Leaves form raised side crowns instead of blocking traversal.
+    if(dz!==0)for(let dy=height+1;dy<=height+2;dy++)
+     put(dx,dy,dz,leafId);
    }
   }
   for(const dx of [0,6])for(const dz of [-2,2])
