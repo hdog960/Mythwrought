@@ -31,11 +31,25 @@ export function makeOrientationEditGuard({readBlock,writeBlock,sidecar}) {
       writing=true;
       try {
         const result=writeBlock(...cell,nextId);
-        if(result!==true) return Object.freeze({applied:false,reason:'rejected'});
+        if(result!==true) {
+          // A false acknowledgement is only safe if the world was untouched.
+          // A broken writer must not leave a stale rotation attached to a new block.
+          if(read(cell)!==before) {
+            sidecar.clear(cell);
+            throw new Error('Writer rejected after mutating a block');
+          }
+          return Object.freeze({applied:false,reason:'rejected'});
+        }
         // Fail closed if the host did not actually write the requested block.
         if(read(cell)!==nextId) {sidecar.clear(cell);throw new Error('Writer acknowledged an inconsistent block');}
         sidecar.clear(cell);
         return Object.freeze({applied:true,previousId:before,nextId});
+      } catch(error) {
+        // A throwing writer may have committed before reporting failure.
+        // Preserve state only when the original block identity remains intact.
+        try {if(read(cell)!==before) sidecar.clear(cell);}
+        catch {sidecar.clear(cell);}
+        throw error;
       } finally {writing=false;}
     },
     // For host-owned edits performed elsewhere: drop a stale rotation without
