@@ -166,6 +166,21 @@ Executed the **original committed** `tests/block-packs/pack-2/gallery-browser.py
 - [ ] Physical iPhone controls and creator visual/art Gate A approval remain OPEN; v0.11 LOCKED.
 - [ ] No merge, Pages deployment, world-placement, other-manual-pack edits, or shared CI/code changes are authorized by this acceptance proof.
 
+## Session 15 — strict real-VoxelWorld boundary gate (2026-11-14)
+
+**Goal:** Prevent previously accepted *candidate-only* results from being incorrectly reported as genuine production-world integration. Prior 18/18 authored families, 89/89 real native candidate suites (with disclosed local legacy facade), and 66 authentic original Chromium preview PNGs remain preserved.
+
+- [x] Reverified exact integrated `main` `ac263720b60641c65b02330348dd76d0ef9cb75e`, **checkpoint 008**, Issues #109/#117, draft Pack PRs 1/3/4/5 and Pack 2 draft #114. All changed PR paths remain exclusively Pack 2. Prior head `8fb1a189c20b22144d2e501fde76500385ee44ba` standard GitHub [Actions #43652373432](https://github.com/hdog960/Mythwrought/actions/runs/43652373432) **SUCCESS** for root baseline Node/Chromium, which excludes nested Pack 2 suites.
+- [x] Inspected real checkpoint-008 `src/voxel.mjs` **Git blob `5f11cec27b907cf446dda556905a1a386717c07e`** and traced its actual `VoxelWorld` import closure through terrain, cave, landmark, grove, and district modules. Actual production source exports `WORLD_MIN_Y=-3`, `WORLD_MAX_Y=19`, and IDs 0–8 only; its `set` rejects candidates 59–76 and its schema-1 `restore` validates entries.
+- [x] New **Pack 2-exclusive** `tests/block-packs/pack-2/production-boundary.test.mjs` adds **six strict opt-in real-production Node cases**: detect genuine `VoxelWorld` class/methods/constants rather than a facade, reject all 18 provisional IDs without modifying legacy saves, round-trip a legitimate schema-1 edit, reject malformed/candidate-containing saves, reject fixture-only metadata envelopes, and reject invalid coordinates/types. No shared code is changed. `run-acceptance.sh` now executes the original six suites **then this seventh real-production boundary suite**, refusing to proceed to gallery output if it fails.
+- [x] The exact new test file (`git hash-object` matched its GitHub blob `44112edcfd83bb924ec4591c7429dee2705e48cd`) passed native Node syntax checking. A **genuine Node negative control** against the known temporary local test-only `src/voxel.mjs` facade **failed immediately as designed**, because the facade does not export `WORLD_MAX_Y`. This **is not a production pass**; it demonstrates the new gate cannot be green through the previous facade.
+- [x] Direct **standalone V8 source-level execution** of the exact live `VoxelWorld` class with import declarations omitted checked **5/5 safe legacy boundaries** (actual exported ID set/height constants, all 18 ID rejections without save mutation, malformed schema-1 restoration rejection, invalid coordinate/type rejection, empty valid schema-1 save round-trip). Only dependency-free paths were invoked. This is **not native Node execution or the complete dependency graph** and must not be counted in the original 89/89.
+- [x] Re-ran the previous original six suites on the verified isolated source staging with its **explicit local legacy facade** using actual Node v22.16.0: **89/89 PASS; 0 skips**. This preserves earlier candidate evidence; it does **not** resolve production-world certification.
+- [ ] **New seventh production-boundary suite is UNVERIFIED against real imports.** This runtime still cannot clone GitHub because DNS/network is blocked; the complete set of real world generation dependencies is not present in the local Node checkout. Do not substitute a facade or remove the import to manufacture a green result.
+- [ ] Production voxel registration, complete WebGL2 alpha/fluids, schema-1 metadata sidecar/offline save rollback, actual physical iPhone art/controls and creator Gate A approval remain **not authorized/not certified**. v0.11 stays LOCKED.
+
+**Next clean checkout command:** `bash tests/block-packs/pack-2/run-acceptance.sh` with the expected actual PR HEAD and clean Pack 2-owned paths. The runner is now **fail-closed** if the real production `VoxelWorld` graph is unavailable.
+
 ## Required real test gates — NOT certified by the source-level checks
 
 | Gate | Evidence required | Current status |
