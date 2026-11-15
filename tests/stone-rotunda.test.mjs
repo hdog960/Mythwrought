@@ -101,3 +101,16 @@ test('weathered buttresses and asymmetric crown are real editable voxels without
   assert.equal(world.set(x-4,h+1,z-3,BLOCK.AIR),true);
   assert.equal(world.get(x-4,h+1,z-3),BLOCK.AIR);
 });
+
+
+test('every supported footprint column has solid subfloor at both depths',()=>{
+  const world=new VoxelWorld(179),plan=findSite(world);
+  assert.ok(plan,'expected a buildable site with two supporting layers');
+  const [x,h,z]=plan.origin;
+  for(let dx=-4;dx<=4;dx++)for(let dz=-4;dz<=4;dz++){
+    for(const dy of [-1,-2]){
+      assert.notEqual(baseBlock(x+dx,h+dy,z+dz,world.seed),BLOCK.AIR,
+        'a cave under the floor must invalidate the entire footprint');
+    }
+  }
+});
