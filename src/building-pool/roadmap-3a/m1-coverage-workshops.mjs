@@ -148,7 +148,7 @@ function build(q){
  // Non-operating real placed fixtures; mounting variants resolved by physical ABI.
  const stations=[
   {x:6,z:zonePositions[0],name:'primary '+q.type+' preparation bench'},
-  {x:w-7,z:zonePositions[n-1],name:q.design+' stock marker'}
+  {x:w-9,z:zonePositions[n-1],name:q.design+' stock marker'}
  ];
  for(let i=0;i<stations.length;i++){
   const s=stations[i];
