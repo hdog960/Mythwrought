@@ -16,6 +16,9 @@ test('physical bridge has contiguous deck, overhead leaf crown and two-block wal
  assert.ok(p.cells.filter(c=>c[3]===BLOCK.LEAVES).every(c=>c[1]===16));
  for(const c of deck)for(let h=1;h<=2;h++)
    assert.ok(p.clearance.includes([c[0],c[1]+h,c[2]].join(',')));
+ const rails=p.cells.filter(c=>c[3]===BLOCK.LEAVES&&c[1]===14);
+ assert.equal(rails.length,10);
+ assert.ok(rails.every(c=>Math.abs(c[2]-20)===1));
  assert.equal(validateCanopyBridge(w,p),true);
 });
 test('rejects player edits on deck and headroom, altered plans, seeds and unsupported diagonals',()=>{
@@ -45,4 +48,15 @@ test('reproducible in both axes and across a chunk seam without changing origina
  vertical.occupied.set(south.join(','),BLOCK.WOOD);
  assert.ok(planCanopyBridge(vertical,north,south));
  assert.equal(seam.occupied.size,3);
+});
+
+test('physical leaf parapets respect edited side cells and preserve open entrance',()=>{
+ const w=fixture(),p=planCanopyBridge(w,a,b);assert.ok(p);
+ const rails=p.cells.filter(c=>c[3]===BLOCK.LEAVES&&c[1]===14);
+ assert.ok(rails.every(c=>c[0]>21&&c[0]<27));
+ const rail=rails[0];w.occupied.set(rail.slice(0,3).join(','),BLOCK.STONE);
+ assert.equal(planCanopyBridge(w,a,b),null);
+ assert.equal(validateCanopyBridge(w,p),false);
+ w.occupied.delete(rail.slice(0,3).join(','));
+ assert.equal(validateCanopyBridge(w,p),true);
 });
