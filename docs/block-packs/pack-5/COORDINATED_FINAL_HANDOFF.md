@@ -30,3 +30,11 @@
 - Use `inspectPack5InMixedBlueprint` from `src/pack5-integration/blueprint-handoff.mjs` for Roadmap 1 `placements` and Roadmap 2-style `voxels` objects. The helper extracts only Pack 5 dependencies and reports foreign symbols separately; it never edits their source or claims their geometry.
 - When any Pack 5 item lacks an explicit four-way orientation or an authored variant, it is returned as **unresolved**, with no physical plan created. This deliberately avoids silently defaulting an unfinished village interior to north-facing furniture.
 - Even an entirely physically resolved Pack 5 subset carries `readyForCombinedPlacement:false` until the final five-pack integrator validates cross-pack occupancy, structures, supports and overall construction performance. This helper does not merge, register or place anything in the game.
+
+## Read-only placement preflight for the five-pack integrator
+
+`preflightPack5BuilderPlan` in `src/pack5-integration/placement-preflight.mjs` accepts a Pack 5 physical plan and a seeded, read-only legacy world, with optional arrays of occupied cells from other packs and already placed Pack 5 objects. It reconstructs the source-authored geometry rather than trusting copied blueprint shapes. It reports occupied cells, legacy/foreign overlap, attachment supports, and height-bound violations without mutating any world, save, numeric ID, or other roadmap.
+
+An external occupied cell does **not** by itself verify that a future cross-pack structure can support a wall, floor, or ceiling fixture. Missing legacy supports are marked `unverified-support` for the combined integrator. Even a preflight with zero issues explicitly returns `integrationReady:false` and `crossPackPhysicalAcceptance:false`; final five-pack support semantics and production registration must still be approved and tested.
+
+The dedicated regression exercises authentic 36-variant mixed geometry plus conflict/forgery/boundary cases. These are developer-level acceptance aids, **not** proof of physical-iPhone rendering or settlement completion.
