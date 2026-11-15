@@ -115,3 +115,14 @@ The browser runs native JS ES-module semantics through offline `data:` imports b
 **Full 18-family Pack 5 roster authored as CANDIDATES; 0 INTEGRATED, zero persistent numeric IDs.** M6 next is only a technical/creator **readiness audit**, not permission to merge or unlock v0.11. Final creator art and physical iPhone acceptance remain open, as do schema-1 and centralized registered-asset integration approvals.
 
 **Latest Milestone 5 acceptance:** see `M5_ACCEPTANCE.md` for exact verified 156 focused cases, 36 screenshot captures, source-only geometry and remaining creator/served-HTTP/real-iPhone/integration gates. All 18 symbolic physical candidates exist in the isolated draft branch; M6 is a separately authorized acceptance/readiness stage, not permission to merge or register assets.
+
+
+## M6 — mixed-family source-only acceptance (not integration)
+
+The new `tests/block-packs/pack-5/m6-cross-family.test.mjs` adds 22 substantive *native Node* cases that combine the authored 18 symbolic physical families (36 variants) in the same isolated candidate fixture. Assertions check cell-boundary adjacency, overlapping two-cell footprint rejection without residual occupancy, wall/ceiling/floor support, physically shaped subcell collision, targeting/removal isolation, deterministic mixed-variant snapshots and corrupted-restore rollback, and original source preview budgets.
+
+**Latest Pack 5 dedicated suite: `node --test tests/block-packs/pack-5/*.test.mjs` — genuine Node 22.16.0 178/178 PASS, zero skipped/failed.** The M6 source test file's exact Git blob is `5395171b45d86dc28c56c0c40b534526d4b2eb57`, matching executed local bytes. This is *not* root Actions, real production renderer/collision, or schema-1 save proof.
+
+All six original-source browser galleries `m1,m2,m3,m3b,m4,m5` were rerun on Chromium native ES-module + real WebGL2 via offline `data:` imports: **36/36 captures PASS** at 667×375 / 844×390 / 932×430 × 0/1 rotations. The browser's localhost HTTP restriction remains unresolved; no physical iPhone hardware or creator art approval claim.
+
+See `M6_ACCEPTANCE.md` for exact ownership, tests and external dependency gates. **18/18 symbolic families authored as CANDIDATE, 0 INTEGRATED, 0 persistent numeric IDs.** Candidate-source M6 readiness PASS **does not grant** merge/deploy, live placement, schema-1 engine changes, integration approval, Gate A signoff or v0.11 unlock.
