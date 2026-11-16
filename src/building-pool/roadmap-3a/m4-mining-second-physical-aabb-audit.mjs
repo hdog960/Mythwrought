@@ -1,6 +1,6 @@
 /**
- * Builder 3A M3: true merged Pack physical-family collider check for
- * second-variant H-plan carpentry/stonemasonry. Native AABB collision and support evidence,
+ * Builder 3A M4: real source-backed manual Pack physical-family collider check for
+ * second-variant non-operative mining pithead headhouses. Native AABB collision and support evidence,
  * NOT production placement, heat certification or structural approval.
  */
 import {createM4MiningSecondPool} from './m4-mining-second-variants.mjs';
@@ -57,7 +57,7 @@ export function auditM4MiningSecondPhysicalFit(){
   // Geometry-support witness only. Never assert engineering load capacity from
   // a purlin's proximity. Count unanswered roof positions, not "safety passes".
   const supports=[...(roles.get('roof-purlin')??[]),...(roles.get('bearing-pier')??[]),
-    ...(roles.get('wall')??[]),...(roles.get('bearing-pier')??[])];
+    ...(roles.get('wall')??[])];
   const sampled=roles.get('roof')??[];
   const structuralIndex=new Set(supports.map(s=>k(...s.slice(0,3))));
   let unknown=0,n=0;
