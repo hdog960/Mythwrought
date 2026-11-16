@@ -82,6 +82,12 @@ const PLANS=[
         28,
         40,
         39
+      ],
+      [
+        51,
+        34,
+        62,
+        48
       ]
     ],
     "notches": [
@@ -134,6 +140,11 @@ const PLANS=[
         25,
         13,
         "west"
+      ],
+      [
+        62,
+        42,
+        "east"
       ]
     ],
     "fixtures": [
@@ -156,6 +167,10 @@ const PLANS=[
       [
         44,
         36
+      ],
+      [
+        57,
+        43
       ]
     ],
     "ridges": [],
@@ -210,6 +225,16 @@ const PLANS=[
           28,
           40
         ]
+      },
+      {
+        "id": "eastern-levee-arbitration",
+        "kind": "public-hearing",
+        "rect": [
+          54,
+          40,
+          60,
+          47
+        ]
       }
     ],
     "roofBands": [
@@ -255,6 +280,18 @@ const PLANS=[
           44,
           45,
           49
+        ],
+        "profile": "hip",
+        "axis": "x",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          54,
+          40,
+          60,
+          47
         ],
         "profile": "hip",
         "axis": "x",
@@ -1081,6 +1118,12 @@ const PLANS=[
         29,
         46,
         39
+      ],
+      [
+        3,
+        31,
+        13,
+        44
       ]
     ],
     "notches": [
@@ -1133,6 +1176,11 @@ const PLANS=[
         46,
         35,
         "east"
+      ],
+      [
+        3,
+        39,
+        "west"
       ]
     ],
     "fixtures": [
@@ -1155,6 +1203,10 @@ const PLANS=[
       [
         42,
         35
+      ],
+      [
+        8,
+        39
       ]
     ],
     "ridges": [],
@@ -1209,6 +1261,16 @@ const PLANS=[
           45,
           38
         ]
+      },
+      {
+        "id": "west-levee-fish-trap-maker",
+        "kind": "workshop",
+        "rect": [
+          5,
+          37,
+          12,
+          42
+        ]
       }
     ],
     "roofBands": [
@@ -1256,6 +1318,18 @@ const PLANS=[
           42
         ],
         "profile": "hip",
+        "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          5,
+          37,
+          12,
+          42
+        ],
+        "profile": "gable",
         "axis": "z",
         "high": 9,
         "period": 4
@@ -1334,6 +1408,18 @@ const PLANS=[
         40,
         22,
         56
+      ],
+      [
+        68,
+        34,
+        76,
+        54
+      ],
+      [
+        3,
+        42,
+        12,
+        60
       ]
     ],
     "notches": [
@@ -1383,8 +1469,18 @@ const PLANS=[
         "south"
       ],
       [
-        9,
+        3,
         48,
+        "west"
+      ],
+      [
+        76,
+        47,
+        "east"
+      ],
+      [
+        3,
+        53,
         "west"
       ]
     ],
@@ -1412,6 +1508,14 @@ const PLANS=[
       [
         49,
         37
+      ],
+      [
+        73,
+        47
+      ],
+      [
+        7,
+        54
       ]
     ],
     "ridges": [],
@@ -1465,6 +1569,26 @@ const PLANS=[
           44,
           19,
           54
+        ]
+      },
+      {
+        "id": "outer-east-ceramic-kilns",
+        "kind": "kiln-annex",
+        "rect": [
+          70,
+          43,
+          75,
+          53
+        ]
+      },
+      {
+        "id": "western-sandglass-shaping",
+        "kind": "artisan-study",
+        "rect": [
+          5,
+          49,
+          10,
+          58
         ]
       }
     ],
@@ -1526,6 +1650,30 @@ const PLANS=[
         ],
         "profile": "gable",
         "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          70,
+          43,
+          75,
+          52
+        ],
+        "profile": "saw",
+        "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          5,
+          49,
+          10,
+          58
+        ],
+        "profile": "hip",
+        "axis": "x",
         "high": 9,
         "period": 4
       }
