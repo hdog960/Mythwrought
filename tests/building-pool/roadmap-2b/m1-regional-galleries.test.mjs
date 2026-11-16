@@ -162,6 +162,27 @@ test('true roof openings, closed private wings, grounded four-bell garden towers
   }
  }
 });
+test('six exterior-shape corrections are real multilevel occupied roofs, not metadata or hovering cap blocks',()=>{
+ const specs=[
+  ['r2:tailor:enchanted-forest:medium:02','separate-fitted-wing-roof',266,8,'high-private-wing-ridge',34,9],
+  ['r2:butcher:temperate:medium:01','triple-sawtooth-work-bay-roof',465,8,'specialist-roof-ridge',36,9],
+  ['r2:jeweler:snow:medium:01','separate-protected-snow-wing',468,8,'flanking-high-snow-ridge',42,9],
+  ['r2:bookshop:enchanted-forest:medium:01','enclosed-reading-wing-roof',280,8,'high-cloister-wing-ridge',32,9],
+  ['r2:temple:temperate:large:02','side-prayer-cloister-roof',342,8,'ceremonial-high-side-gable',30,9],
+  ['r2:theater:desert:large:01','upper-desert-proscenium',36,10,'desert-spotlight-crest',2,11]
+ ];
+ for(const [id,lowerRole,lowCount,lowY,upperRole,highCount,highY] of specs){
+  const b=byId.get(id),m=cells(b);
+  const low=b.voxels.filter(v=>v.role===lowerRole),
+   high=b.voxels.filter(v=>v.role===upperRole);
+  assert.equal(low.length,lowCount,id+' missing architectural low roof');
+  assert.equal(high.length,highCount,id+' missing upper silhouette');
+  assert(low.every(v=>v.y===lowY&&v.kind==='roof'),id+' claimed low roof is not occupied');
+  assert(high.every(v=>v.y===highY&&v.kind==='roof'),id+' claimed high roof is not occupied');
+  for(const v of high)
+   assert(m.has(pos(v.x,v.y-1,v.z)),id+' roof floats at '+pos(v.x,v.y,v.z));
+ }
+});
 test('near-duplicate review: forest medium tailors have different whole-source D4 shape and real distinct circulation/roof program',()=>{
  const first=all.find(x=>x.id==='r2:tailor:enchanted-forest:medium:01'),
   second=byId.get('r2:tailor:enchanted-forest:medium:02');
