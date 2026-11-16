@@ -617,7 +617,7 @@ const PLANS=[
         "axis": "x",
         "fixed": 19,
         "from": 18,
-        "to": 28,
+        "to": 27,
         "door": 23,
         "facing": "west"
       },
