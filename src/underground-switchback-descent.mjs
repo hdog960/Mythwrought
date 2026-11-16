@@ -116,6 +116,30 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // Deepest-band crescent refuge: an outward approach opens into a broad,
+  // asymmetrical cavern with a second smaller pocket. This is real voxel
+  // topology at Y=-195, safely above the bedrock margin. No new IDs.
+  {
+    const depth=-195,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,r,height)=>{
+        for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){
+          if(a*a+b*b>r*r)continue;
+          const x=anchor.x+outward[0]*(d+a)+tangent[0]*(t+b);
+          const z=anchor.z+outward[1]*(d+a)+tangent[1]*(t+b);
+          set(x,depth,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
+        }
+      };
+      for(let d=0;d<=30;d++)carve(d,0,2,5);
+      carve(31,0,11,10);
+      carve(40,10,7,7);
+      for(let t=0;t<=10;t++)carve(39,t,2,5);
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
