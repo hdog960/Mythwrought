@@ -74,7 +74,7 @@ test('M2g every source model genuinely 3D, nonrectangular, roof-bearing and dete
     b.id+' occupied 2-high doorway '+p.to);
   }
  }
- assert.equal(placements,25603);
+ assert.equal(placements,25454);
 });
 test('M2g 51 roof post heads each connect a physical source foundation to an occupied source roof',()=>{
  let total=0;
@@ -162,12 +162,38 @@ test('Temperate small Brookwatch has a broad faceted stage, narrow lantern crown
 test('Mountain large Highcairn upper column forks into two disjoint physically capped unequal-height horns',()=>{
  const b=select('lighthouse','mountain','large'),occ=map(b);
  for(const y of [9,21,30])assert.equal(occ.get(key([9,y,10]))?.role,'roof','missing main tower cap '+y);
- assert.equal(occ.get('7,36,10')?.role,'roof');
- assert.equal(occ.get('13,38,10')?.role,'roof');
- assert.ok(!occ.has('10,35,10'),'fork gap must remain real sky');
- assert.equal(occ.get('7,39,10')?.role,'decoration');
- assert.equal(occ.get('13,41,10')?.role,'decoration');
+ assert.equal(occ.get('6,36,13')?.role,'roof');
+ assert.equal(occ.get('12,38,7')?.role,'roof');
+ assert.ok(!occ.has('9,35,10'),'fork gap must remain real sky');
+ assert.equal(occ.get('6,39,13')?.role,'decoration');
+ assert.equal(occ.get('12,41,7')?.role,'decoration');
  assert.ok(b.placements.filter(p=>p.towerProfile==='highcairn-west-forked-stone-pylon').length>40);
  assert.ok(b.placements.filter(p=>p.towerProfile==='highcairn-east-taller-wind-pylon').length>40);
  assert.equal(b.architecturalIdentity.lightsOperational,false);
+});
+
+test('M2h Highcairn horn screen silhouettes have positive sky gap at all three exact iPhone CSS viewports',()=>{
+ const b=select('lighthouse','mountain','large'),occ=map(b);
+ const west=b.placements.filter(p=>p.towerProfile==='highcairn-west-forked-stone-pylon');
+ const east=b.placements.filter(p=>p.towerProfile==='highcairn-east-taller-wind-pylon');
+ assert.ok(west.length>40&&east.length>40,'both must be genuine multi-height source walls');
+ // Include every rendered unit-cube corner: x+1 extends the western edge and
+ // z+1 moves the eastern minimum LEFT in the actual (x-z) isometric projection.
+ const westMax=Math.max(...west.map(p=>p.at[0]+1-p.at[2]));
+ const eastMin=Math.min(...east.map(p=>p.at[0]-(p.at[2]+1)));
+ assert.ok(eastMin>westMax,'source cubes cannot overlap in horizontal projection');
+ const {width:W,depth:D,height:H}=b.footprint;
+ for(const [w,h] of [[667,375],[844,390],[932,430]]){
+  const scale=Math.min(w*.86/((W+D)*.7071068),h*.72/((W+D)*.4082483+H*.9));
+  const px=(eastMin-westMax)*.7071068*scale;
+  assert.ok(px>=9.5,'Highcairn visible sky gap too small at '+w+'x'+h+': '+px+'px');
+ }
+ // Both horn footprints must bear on source-authored platform voxels y=30.
+ const foot=(parts)=>new Set(parts.filter(p=>p.at[1]===31).map(p=>p.at[0]+','+p.at[2]));
+ for(const [name,parts] of [['west',west],['east',east]])
+  for(const point of foot(parts)){
+   const [x,z]=point.split(',').map(Number);
+   assert.equal(occ.get(key([x,30,z]))?.role,'roof',name+' upper wall unsupported at '+point);
+  }
+ assert.equal(b.architecturalIdentity.hornRoofBearingCertified,false);
 });

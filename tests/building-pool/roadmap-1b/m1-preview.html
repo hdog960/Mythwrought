@@ -75,7 +75,23 @@ const errors=gl.getError();const name=chosen.title+' — '+mode.toUpperCase();
 document.querySelector('#name').textContent=name;
 document.querySelector('#stats').textContent=chosen.id+' · '+chosen.placements.length+' authored physical cells · '+
 proxy.length+' proxies visible · '+canvas.width+'×'+canvas.height+' pixels';
-window.__M1_PREVIEW={ready:true,webgl2:true,id:chosen.id,view:mode,
+// Readability evidence uses EXACTLY the same projected() function and authored
+// source-cell cubes as the WebGL2 draw, including every horn cube's outer edges.
+// This measures separate physical silhouettes, never a camera/UI-only edit.
+let hornGapPx=null;
+if(chosen.id==='r1:lighthouse:mountain:large:001'){
+ const range=profile=>{
+  const cells=proxy.filter(p=>p.towerProfile===profile);
+  if(!cells.length)throw Error('Missing physical Highcairn horn '+profile);
+  const pixels=cells.flatMap(p=>[[0,0],[0,1],[1,0],[1,1]].map(([dx,dz])=>
+   (projected([p.at[0]+dx,p.at[1],p.at[2]+dz])[0]+1)*canvas.width/2));
+  return [Math.min(...pixels),Math.max(...pixels)];
+ };
+ const west=range('highcairn-west-forked-stone-pylon');
+ const east=range('highcairn-east-taller-wind-pylon');
+ hornGapPx=east[0]-west[1];
+}
+window.__M1_PREVIEW={ready:true,webgl2:true,id:chosen.id,view:mode,hornGapPx,
  screenshotSource:'actual imported authored JS modules (WebGL2 cube proxy, no final family AABB)',
  sourceCells:chosen.placements.length,proxyCells:proxy.length,triangles:proxy.length*6,
  viewport:[canvas.width,canvas.height],glError:errors,centerPixel:Array.from(sample),renderer:gl.getParameter(gl.RENDERER)};

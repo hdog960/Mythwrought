@@ -187,6 +187,10 @@ test('M1/M2 77 genuine source-served WebGL2 candidates × 3 iPhone landscapes ×
    assert.deepEqual(state.viewport,[width,height]);
    assert.equal(state.glError,0);
    assert.ok(state.sourceCells>300&&state.proxyCells>100&&state.triangles>500,'Candidate geometry missing');
+   if(id==='r1:lighthouse:mountain:large:001'){
+    assert.ok(Number.isFinite(state.hornGapPx)&&state.hornGapPx>=9.5,
+     'Highcairn genuine projected horn silhouette overlap at '+width+'x'+height+' '+view+': '+state.hornGapPx+'px');
+   }
    const shot=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false},session);
    const png=Buffer.from(shot.data,'base64');
    assert.equal(png.subarray(0,8).toString('hex'),'89504e470d0a1a0a','Not an authentic Chrome PNG');

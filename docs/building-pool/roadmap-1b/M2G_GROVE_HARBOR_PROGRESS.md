@@ -22,7 +22,7 @@ Each is fixed 3D integer cell authored using independent original polygon-mask d
 
 Two new lighthouse profiles are physically distinct from the earlier Miraj three-stage desert octagon and Rimewatch two separated snow towers. Brookwatch has a compact multi-tier roseglass crown; Highcairn has a single wide shaft **forking into two independent upper spikes**, rather than two separate remote buildings.
 
-New-source measured placement census after courtyard improvement: 3,382 + 1,938 + 1,441 + 3,000 + 1,468 + 3,549 + 4,041 + 1,954 + 4,830 = **25,603 physical XYZ occupied cell placements**. 9/9 strict `validateBlueprint` source candidates. **51 grounded roof-post heads physically touch authored roof cells**, non-abstract room portals, transparent-source symbolic dependency `pack4:030` and explicit unapproved mounting, pane collision/AABB, roof loads, weather sealing, vertical traversal and beacon mechanics.
+**Historical M2g snapshot (before M2h horn geometry correction):** New-source measured placement census after courtyard improvement: 3,382 + 1,938 + 1,441 + 3,000 + 1,468 + 3,549 + 4,041 + 1,954 + 4,830 = **25,603 physical XYZ occupied cell placements**. 9/9 strict `validateBlueprint` source candidates. **51 grounded roof-post heads physically touch authored roof cells**, non-abstract room portals, transparent-source symbolic dependency `pack4:030` and explicit unapproved mounting, pane collision/AABB, roof loads, weather sealing, vertical traversal and beacon mechanics.
 
 ## Draft census and exact-head acceptance
 - **91/435 coordinate-authored source candidates**, **344 unauthored**; 15 original inherited and 76 original 1B proposals. **Zero creator-approved, zero integrated, zero world placement or deployment**.

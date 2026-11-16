@@ -270,16 +270,19 @@ export function highcairnForkedSpire(){
  band(b,middle,22,29,'highcairn-raised-crystalline-watch-chamber','live:wood');
  slit(b,9,25,4,'north');
  plate(b,middle,30,'highcairn-overlook-bifurcation-platform','live:stone');
- // Two genuinely separated pointed high crowns fork from the same supported
- // upper platform. A real void at x10 separates their shaft volumes.
- const left=faceted(5,9,7,13,0),right=faceted(11,15,7,13,0);
+ // M2h: the two freestanding horns are intentionally offset in BOTH X and Z.
+ // The prior parallel 5x7 shafts overlapped in the 844x390 source WebGL view.
+ // Both narrower, unequal-height 3D horns stand entirely on the existing y30
+ // octagonal source cap; their full projected cube bounds leave visible sky.
+ // The stagger is real geometry, not camera, palette or screenshot masking.
+ const left=faceted(5,8,12,14,0),right=faceted(10,14,6,8,0);
  band(b,left,31,35,'highcairn-west-forked-stone-pylon','live:stone');
  band(b,right,31,37,'highcairn-east-taller-wind-pylon','live:wood');
  plate(b,left,36,'highcairn-short-west-slate-horn','live:crystal');
  plate(b,right,38,'highcairn-taller-east-sunstone-horn','live:crystal');
- for(let y=37;y<=39;y++)b.put(7,y,10,'decoration','live:stone','none',
+ for(let y=37;y<=39;y++)b.put(6,y,13,'decoration','live:stone','none',
   {purpose:'highcairn-short-stone-peak',beaconOperational:false});
- for(let y=39;y<=41;y++)b.put(13,y,10,'decoration','live:crystal','none',
+ for(let y=39;y<=41;y++)b.put(12,y,7,'decoration','live:crystal','none',
   {purpose:'highcairn-taller-crystal-peak',beaconOperational:false});
  roof([19,12,37,27],10,'highcairn-stepped-gorge-keeper-hall','gable-x','live:stone');
  roof([27,28,40,43],9,'highcairn-crosswind-lodge-and-archive','reverse-z','live:wood');
@@ -293,7 +296,7 @@ export function highcairnForkedSpire(){
  portal('highcairn-faceted-stone-ground-tower','gorge-watch-keeper-crosshall',18,15);
  portal('outside','gorge-watch-keeper-crosshall',27,12);
  portal('gorge-watch-keeper-crosshall','eastern-rear-archive-pavilion',32,27);
- return finish('physically source-built mountain lighthouse crowned by two adjacent unequally tall horns atop ONE wide cantilever-uncertified octagonal stepped shaft, asymmetrical stone keeper crosshall and wooded deep rear archive',
+ return finish('physically source-built mountain lighthouse crowned by two diagonally staggered, visibly separated unequal-height horns on ONE wide cantilever-uncertified octagonal stepped shaft, asymmetrical stone keeper crosshall and wooded deep rear archive',
  {lightsOperational:false,mountainClimbing:false,hornRoofBearingCertified:false});
 }
 export function getM2GroveHarbor1BPlans(){
