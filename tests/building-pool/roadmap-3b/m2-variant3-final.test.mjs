@@ -174,8 +174,14 @@ test('actual integrated five-pack and biome130 read-only source physical ABI, wi
  for(const x of ['perCellNumericVariantSelected','perCellYawSelected','realSelectionAndCollisionCertified','realMountAndSupportCertified','multiVoxelReservationCertified'])
   assert.equal(report[x],false,x);
  for(const a of report.assets){assert.ok(a.used>0);assert.notEqual(a.status,'not-live-registered');assert.equal(a.physicalFinalApproved,false);}
- for(const x of ['biome130:094','biome130:096','biome130:098']){
-  const a=report.symbolicDependencies.find(x=>x.symbol===x);
+ for(const symbol of ['biome130:094','biome130:096','biome130:098']){
+  const item=report.symbolicDependencies.find(s=>s.symbol===symbol);
+  assert.ok(item,symbol+' must be explicitly tracked');
+  assert.equal(item.registeredNow,false,symbol+' must not be misreported as live');
+  assert.equal(item.placedAsBuiltVoxel,false,symbol+' must not be occupied as a built cell');
+ }
+ for(const pack of ['pack1:','pack2:','pack3:','pack4:','pack5:']){
+  assert.ok(report.assets.some(a=>a.symbol.startsWith(pack)),pack+' must have real authored source-cell use');
  }
  console.log('MYTHWROUGHT_3B_M2_VARIANT3_FINAL_COUNTS='+JSON.stringify(next.map(b=>({id:b.id,cells:b.architecture.occupiedCoordinates,footprint:b.architecture.footprintCells}))));
 });

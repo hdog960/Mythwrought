@@ -494,6 +494,18 @@ const plans=[
      13
     ],
     "pack1:010"
+   ],
+   [
+    "plastered oasis wind-stopper",
+    [
+     6,
+     6,
+     2,
+     6,
+     20,
+     23
+    ],
+    "pack5:079"
    ]
   ],
   "details": [
@@ -647,6 +659,18 @@ const plans=[
      25
     ],
     "pack1:007"
+   ],
+   [
+    "fireglaze cold-protection drying strip",
+    [
+     3,
+     6,
+     2,
+     2,
+     18,
+     21
+    ],
+    "pack5:081"
    ]
   ],
   "partitions": [
@@ -1043,6 +1067,18 @@ const plans=[
      35
     ],
     "pack1:007"
+   ],
+   [
+    "fired brick timber-kiln breastwork",
+    [
+     32,
+     34,
+     2,
+     3,
+     25,
+     29
+    ],
+    "pack5:080"
    ]
   ],
   "partitions": [
@@ -1241,6 +1277,18 @@ const plans=[
      43
     ],
     "pack4:056"
+   ],
+   [
+    "ceramic-washed quern dust apron",
+    [
+     41,
+     46,
+     2,
+     2,
+     6,
+     11
+    ],
+    "pack5:081"
    ]
   ],
   "partitions": [
@@ -1465,6 +1513,18 @@ const plans=[
      40
     ],
     "pack1:010"
+   ],
+   [
+    "fired brick windquern hearth wall",
+    [
+     49,
+     49,
+     2,
+     6,
+     34,
+     39
+    ],
+    "pack5:080"
    ]
   ],
   "details": [
@@ -1849,6 +1909,18 @@ const plans=[
      13
     ],
     "pack2:022"
+   ],
+   [
+    "spore-sealed plaster process baffle",
+    [
+     6,
+     6,
+     2,
+     5,
+     21,
+     25
+    ],
+    "pack5:079"
    ]
   ],
   "details": [
