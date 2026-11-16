@@ -19,7 +19,8 @@ test('all 18 modern recessed front porticoes remain unapproved physical-spandrel
 });
 test('negative support mutation increases unsupported roof cells instead of silently treating a floating plate as held',()=>{
  const b=SPAN_CANDIDATES.find(x=>x.id==='r2:bank:temperate:medium:01');assert(b);
- const lower=b.voxels.find(v=>v.kind==='wall'&&v.y===b.extents.y-3&&v.x===0&&v.z>1&&v.z<b.extents.z-2);
+ const lowestRoofY=Math.min(...b.voxels.filter(v=>v.kind==='roof').map(v=>v.y));
+ const lower=b.voxels.find(v=>v.kind==='wall'&&v.y===lowestRoofY-1&&v.x===0&&v.z>1&&v.z<b.extents.z-2);
  assert(lower);
  const baseline=inspect2AConceptualRoofSpans([b]);
  const broken={...b,voxels:b.voxels.filter(v=>v!==lower)};
