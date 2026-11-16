@@ -11,7 +11,7 @@ test('180 genuine fourth-variant carpenter and stonemason Chromium/WebGL2 review
  for(const spec of M3_CRAFT_FOURTH_SPECS)
   assert.ok(runner.includes('["'+spec.type+'","'+spec.biome+'","'+spec.size+'"]'),'missing review source '+spec.name);
  assert.match(runner,/completed!==180/);
- assert.match(runner,/r3a:\$\{type\}:\$\{biome\}:\$\{size\}:3/);
+ assert.match(runner,/r3a:\$\{type\}:\$\{biome\}:\$\{size\}:4/);
  assert.match(js,/createM3CraftFourthVariant\(type,biome,size\)/);
  assert.match(js,/const geometry=createM3CraftFourthPreviewMesh\(b,/);
  assert.doesNotMatch(js,/createM3CraftSecondPreviewMesh\(b,/);
