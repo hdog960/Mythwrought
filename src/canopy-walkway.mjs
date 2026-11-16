@@ -26,7 +26,10 @@ export function planCanopyWalkway(world,a,b,y){
   if(crownStation){
    // Alternate banks deterministically. Branches remain attached to the
    // solid deck; no free-floating foliage or solid railing is introduced.
-   // Station ordinal, not coordinate parity: even spans otherwise put every\n   // crown on the same bank (e.g. stations 2,4,6 on an eight-cell bridge).\n   const stationIndex=i===2?0:i===distance-2?(distance>=8?2:1):1;\n   const sides=[((stationIndex+world.seed)&1)===0?-1:1];
+   // Station ordinal, not coordinate parity: even spans otherwise put every
+   // crown on the same bank (e.g. stations 2,4,6 on an eight-cell bridge).
+   const stationIndex=i===2?0:i===distance-2?(distance>=8?2:1):1;
+   const sides=[((stationIndex+world.seed)&1)===0?-1:1];
    for(const side of sides){
     const rx=x+side*sideX,rz=z+side*sideZ;
     cells.push([rx,y,rz,BLOCK.WOOD]);
