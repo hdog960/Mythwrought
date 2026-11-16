@@ -68,7 +68,7 @@ test('M4 fourth: 15 independently briefed four-chevron radial mining headhouses,
  assert.equal(validateAuthoredPool(mined).authored,15);
  for(const biome of BIOMES)for(const size of SIZES){
   const b=createM4MiningFourthVariant(biome,size);
-  assert.equal(b.id,slotId('mining-workshop',biome,size,3));
+  assert.equal(b.id,slotId('mining-workshop',biome,size,4));
   assert.equal(b.type,'mining-workshop');assert.equal(b.variant,4);
   assert.equal(b.status,'theoretical');assert.equal(b.worldPlaced,false);
   assert.equal(b.productionRegistered,false);
