@@ -59,11 +59,17 @@ export function auditM2FourthPhysicalFit(){
   const supports=[...(roles.get('roof-purlin')??[]),...(roles.get('support-pier')??[]),
     ...(roles.get('wall')??[]),...(roles.get('cold-flue-masonry')??[])];
   const sampled=roles.get('roof')??[];
+  const structuralIndex=new Set(supports.map(s=>k(...s.slice(0,3))));
   let unknown=0,n=0;
   for(let i=0;i<sampled.length;i+=5){
    const c=sampled[i];n++;
-   const isNearby=supports.some(s=>Math.abs(s[0]-c[0])+Math.abs(s[2]-c[2])<=3&&
-     c[1]>=s[1]&&c[1]-s[1]<=2);
+   let isNearby=false;
+   for(let dx=-3;dx<=3&&!isNearby;dx++)for(let dz=-3;dz<=3&&!isNearby;dz++){
+    if(Math.abs(dx)+Math.abs(dz)>3)continue;
+    for(let dy=0;dy<=2;dy++)if(structuralIndex.has(k(c[0]+dx,c[1]-dy,c[2]+dz))){
+     isNearby=true;break;
+    }
+   }
    if(!isNearby)unknown++;
   }
   roofBearingWitnessAbsent+=unknown;roofBearingSamples+=n;
@@ -72,7 +78,10 @@ export function auditM2FourthPhysicalFit(){
   const entry=b.navigation.nodes[0],roofClearance=[];
   for(let z=2;z<b.envelope.depth;z+=3)for(let x=entry.x;x<entry.x+2;x++)for(let y=2;y<=4;y++){
    const cube=[x,y,z,x+1,y+1,z+1];
-   const nearby=cellList.filter(c=>Math.abs(c[0]-x)<=1&&Math.abs(c[1]-y)<=1&&Math.abs(c[2]-z)<=1);
+   const nearby=[];
+   for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(let dz=-1;dz<=1;dz++){
+    const c=filled.get(k(x+dx,y+dy,z+dz));if(c)nearby.push(c);
+   }
    for(const neighbor of nearby){
     const box=resolve(neighbor).collisionBoxes;
     if(box.some(a=>intersects(cube,worldBox(a,neighbor)))){
