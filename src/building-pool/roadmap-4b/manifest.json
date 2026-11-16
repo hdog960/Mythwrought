@@ -50,12 +50,12 @@
   ],
   "quota": 285,
   "inherited": 0,
-  "authored": 73,
-  "remaining": 212,
+  "authored": 83,
+  "remaining": 202,
   "creatorAccepted": 0,
   "integrated": 0,
   "worldPlaced": false,
-  "status": "M2: 73/285 original source-authored, 63 prior technically accepted via Actions #43801560822, 10 new original variant03 designs pending exact-head Node and 60 genuine Chromium software-WebGL2 captures",
+  "status": "M2: 83/285 original source-authored, 63 prior technically accepted; 20 variant-03 candidates (120 authentic Chromium WebGL2 captures) pending exact-HEAD acceptance",
   "ownedPaths": [
     "src/building-pool/roadmap-4b/",
     "tests/building-pool/roadmap-4b/",
@@ -76,48 +76,48 @@
     "creatorArtApproval": false,
     "physicalIphoneApproval": false
   },
-  "nextMilestone": "Inspect native, GL/context and 60 genuine WebGL2 captures for variant03 first10, then independently author additional 03-designs for remaining five biome/size slots per healing/library category; preserve all earlier accepted source designs and draft isolation.",
+  "nextMilestone": "Require clean exact-HEAD CI, 83 original D4 signatures and new-vs-prior floor IoU, 120 genuine variant03 source-linked WebGL2 PNGs and verified Pack1–5 symbolic-physical readiness; then fill remaining 55 healing/library slots.",
   "milestones": {
     "M0": "TECHNICALLY ACCEPTED on PR #185 exact head 199af339dea3c708e5f92b21aa91ce47b7d99763, Actions #43767122199 SUCCESS (native Builder 4B suite + focused Chromium smoke/layout)",
     "M1": "M1 FIRST FIVE TECHNICAL REVIEW PASS: PR #185 at 242e189a96037f8bb1a76005f1a0964276f62925 GitHub Actions #43771739057 SUCCESS; 40/40 Builder 4B native Node tests (includes 30/30 real Chromium WebGL2 cube-proxy captures across 3 landscape sizes); source-level geometry and connectivity pass. FINAL physical-family/creator/iPhone approval NOT GIVEN.",
-    "M2": "IN PROGRESS: 35/75 healer houses and 35/60 libraries source-authored; 70/135 M2 categories, 65 M2 designs remaining. 63 original designs technically accepted exact head c648448 Actions #43801560822 (116 native, 378 authentic WebGL2 cube-proxy captures). Variant03 new 10 pending technical and visual acceptance.",
+    "M2": "IN PROGRESS: 40/75 healer houses and 40/60 libraries authored; 80/135 M2 types, 55 remaining; 63 prior green, 20 variant03 candidates pending acceptance.",
     "M3": "NOT STARTED",
     "M4": "NOT STARTED",
     "M5": "NOT STARTED",
     "M6": "NOT STARTED"
   },
   "byCategoryAuthorCount": {
-    "healers-house": 35,
-    "library": 35,
+    "healers-house": 40,
+    "library": 40,
     "schoolhouse": 1,
     "magical-research-institute": 1,
     "arcane-academy": 1
   },
   "byBiomeSizeAuthorCount": {
     "temperate": {
-      "small": 5,
-      "medium": 4,
+      "small": 6,
+      "medium": 5,
       "large": 5
     },
     "desert": {
-      "small": 5,
+      "small": 6,
       "medium": 5,
-      "large": 5
+      "large": 6
     },
     "snow": {
       "small": 5,
-      "medium": 5,
-      "large": 4
+      "medium": 6,
+      "large": 5
     },
     "enchanted-forest": {
-      "small": 5,
-      "medium": 5,
+      "small": 6,
+      "medium": 6,
       "large": 5
     },
     "mountain": {
-      "small": 4,
+      "small": 5,
       "medium": 5,
-      "large": 6
+      "large": 7
     }
   },
   "authoredIds": [
@@ -193,7 +193,17 @@
     "r4:library:desert:large:03",
     "r4:library:snow:medium:03",
     "r4:library:enchanted-forest:small:03",
-    "r4:library:mountain:large:03"
+    "r4:library:mountain:large:03",
+    "r4:healers-house:temperate:small:03",
+    "r4:healers-house:desert:large:03",
+    "r4:healers-house:snow:medium:03",
+    "r4:healers-house:enchanted-forest:small:03",
+    "r4:healers-house:mountain:large:03",
+    "r4:library:temperate:medium:03",
+    "r4:library:desert:small:03",
+    "r4:library:snow:large:03",
+    "r4:library:enchanted-forest:medium:03",
+    "r4:library:mountain:small:03"
   ],
   "m1Technical": {
     "sourceHead": "242e189a96037f8bb1a76005f1a0964276f62925",
@@ -213,11 +223,11 @@
     "exteriorAndSectionInspected": true
   },
   "m2Candidate": {
-    "newModels": 68,
+    "newModels": 78,
     "newThisPass": 10,
-    "authoredTotal": 73,
-    "healers": 35,
-    "libraries": 35,
+    "authoredTotal": 83,
+    "healers": 40,
+    "libraries": 40,
     "technicalAccepted": false,
     "creatorApproved": 0,
     "integrated": 0,
@@ -246,7 +256,7 @@
     "prior63ExactHead": "c64844814e91e8e4d8cb99b716488ad0dd708992",
     "prior63Actions": 43801560822,
     "prior63VerifiedGenuineChromiumCaptures": 378,
-    "targetVariant03BrowserCaptures": 60,
+    "targetVariant03BrowserCaptures": 120,
     "variant03BrowserExecuted": false
   }
 }
