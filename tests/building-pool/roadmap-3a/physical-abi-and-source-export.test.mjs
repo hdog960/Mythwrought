@@ -13,6 +13,7 @@ import {createM2MetalworkPool} from '../../../src/building-pool/roadmap-3a/m2-me
 import {createM2ThirdVariantPool} from '../../../src/building-pool/roadmap-3a/m2-metalwork-third-variants.mjs';
 import {createM2FourthVariantPool} from '../../../src/building-pool/roadmap-3a/m2-metalwork-fourth-variants.mjs';
 import {createM2FifthVariantPool} from '../../../src/building-pool/roadmap-3a/m2-metalwork-fifth-variants.mjs';
+import {createM3CraftSecondPool} from '../../../src/building-pool/roadmap-3a/m3-craft-second-variants.mjs';
 import {
  MANUAL_FIVE_PACK_COUNTS,MANUAL_FIVE_PACK_FAMILY_SYMBOLS,
  manualFivePackVariants,resolveManualFivePackAsset
@@ -22,7 +23,7 @@ import {BIOME130_REGISTERED_SYMBOLS,biome130Block} from '../../../src/biome130-r
 
 const root=process.cwd(),base=join(root,'artifacts/building-roadmap-3a-source-review');
 const generated=[];
-const originalRefs=[...new Set([...createLegacyBlacksmithPool(),...createM1OriginalWorkshopPool(),...createM1RegionalPool(),...createM1CompletionPool(),...createM2MetalworkPool(),...createM2ThirdVariantPool(),...createM2FourthVariantPool(),...createM2FifthVariantPool()].flatMap(b=>
+const originalRefs=[...new Set([...createLegacyBlacksmithPool(),...createM1OriginalWorkshopPool(),...createM1RegionalPool(),...createM1CompletionPool(),...createM2MetalworkPool(),...createM2ThirdVariantPool(),...createM2FourthVariantPool(),...createM2FifthVariantPool(),...createM3CraftSecondPool()].flatMap(b=>
  b.modules.flatMap(m=>m.cells.map(c=>c[3]))))].sort();
 function uniqueRefs() {return originalRefs;}
 function physicalSummary(ref){
@@ -91,6 +92,8 @@ test('emit byte-identical M1 candidate source bundle for independent real local 
   'src/building-pool/roadmap-3a/m2-metalwork-third-variants.mjs',
   'src/building-pool/roadmap-3a/m2-metalwork-fourth-variants.mjs',
   'src/building-pool/roadmap-3a/m2-metalwork-fifth-variants.mjs',
+  'src/building-pool/roadmap-3a/m3-craft-second-variants.mjs',
+  'src/building-pool/roadmap-3a/m3-craft-second-physical-aabb-audit.mjs',
   'src/building-pool/roadmap-3a/m2-fifth-physical-aabb-audit.mjs',
   'src/building-pool/roadmap-3a/m2-fourth-physical-aabb-audit.mjs',
   'src/building-pool/roadmap-3a/m2-third-physical-aabb-audit.mjs',
@@ -128,7 +131,11 @@ test('emit byte-identical M1 candidate source bundle for independent real local 
   'tests/building-pool/roadmap-3a/preview-m2-fifth.html',
   'tests/building-pool/roadmap-3a/preview-m2-fifth.mjs',
   'tests/building-pool/roadmap-3a/preview-m2-fifth-mesh.mjs',
-  'tests/building-pool/roadmap-3a/preview-m2-fifth-browser.mjs'
+  'tests/building-pool/roadmap-3a/preview-m2-fifth-browser.mjs',
+  'tests/building-pool/roadmap-3a/preview-m3-second.html',
+  'tests/building-pool/roadmap-3a/preview-m3-second.mjs',
+  'tests/building-pool/roadmap-3a/preview-m3-second-mesh.mjs',
+  'tests/building-pool/roadmap-3a/preview-m3-second-browser.mjs'
  ];
  const manifest=[];
  for(const p of paths){
@@ -147,6 +154,6 @@ test('emit byte-identical M1 candidate source bundle for independent real local 
    caveat:'Files are candidate diagnostic sources, not deployed world or physical iPhone evidence'};
  mkdirSync(base,{recursive:true});
  writeFileSync(join(base,'MANIFEST.json'),JSON.stringify(out,null,2)+'\n');
- assert.equal(manifest.length,51);
+ assert.equal(manifest.length,57);
  assert.equal(assets.length,originalRefs.length);
 });
