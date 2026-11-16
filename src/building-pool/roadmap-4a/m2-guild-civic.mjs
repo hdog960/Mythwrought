@@ -136,7 +136,24 @@ const PLANS=[
       6
     ],
     "octagons": [],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 17,
+        "from": 20,
+        "to": 24,
+        "door": 22,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 30,
+        "from": 19,
+        "to": 25,
+        "door": 22,
+        "facing": "east"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "rooms": [
@@ -291,6 +308,12 @@ const PLANS=[
         27,
         43,
         44
+      ],
+      [
+        53,
+        34,
+        59,
+        48
       ]
     ],
     "notches": [
@@ -331,6 +354,11 @@ const PLANS=[
         23,
         12,
         "west"
+      ],
+      [
+        59,
+        42,
+        "east"
       ]
     ],
     "fixtures": [
@@ -353,6 +381,10 @@ const PLANS=[
       [
         24,
         35
+      ],
+      [
+        57,
+        42
       ]
     ],
     "profile": "desert-oasis-basin-municipal-cloister",
@@ -371,7 +403,24 @@ const PLANS=[
       6
     ],
     "octagons": [],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 21,
+        "from": 24,
+        "to": 28,
+        "door": 25,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 39,
+        "from": 19,
+        "to": 27,
+        "door": 23,
+        "facing": "east"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "rooms": [
@@ -424,6 +473,16 @@ const PLANS=[
           26,
           39
         ]
+      },
+      {
+        "id": "east-sun-ordinance-terrace",
+        "kind": "ordinance-office",
+        "rect": [
+          55,
+          39,
+          58,
+          46
+        ]
       }
     ],
     "roofBands": [
@@ -471,6 +530,18 @@ const PLANS=[
           48
         ],
         "profile": "hip",
+        "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          55,
+          39,
+          58,
+          46
+        ],
+        "profile": "shed",
         "axis": "z",
         "high": 9,
         "period": 4
@@ -530,6 +601,12 @@ const PLANS=[
         28,
         27,
         35
+      ],
+      [
+        3,
+        31,
+        12,
+        42
       ]
     ],
     "notches": [
@@ -570,6 +647,11 @@ const PLANS=[
         16,
         12,
         "west"
+      ],
+      [
+        3,
+        37,
+        "west"
       ]
     ],
     "fixtures": [
@@ -587,6 +669,10 @@ const PLANS=[
       ],
       [
         24,
+        37
+      ],
+      [
+        8,
         37
       ]
     ],
@@ -606,7 +692,24 @@ const PLANS=[
       6
     ],
     "octagons": [],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 16,
+        "from": 22,
+        "to": 27,
+        "door": 24,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 28,
+        "from": 20,
+        "to": 27,
+        "door": 23,
+        "facing": "east"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "rooms": [
@@ -648,6 +751,16 @@ const PLANS=[
           35,
           35,
           39
+        ]
+      },
+      {
+        "id": "west-ice-relief-outpost",
+        "kind": "relief-outpost",
+        "rect": [
+          5,
+          35,
+          10,
+          40
         ]
       }
     ],
@@ -699,6 +812,18 @@ const PLANS=[
         "axis": "z",
         "high": 9,
         "period": 5
+      },
+      {
+        "rect": [
+          5,
+          35,
+          11,
+          40
+        ],
+        "profile": "shed",
+        "axis": "z",
+        "high": 8,
+        "period": 4
       }
     ],
     "signature": [
@@ -856,7 +981,24 @@ const PLANS=[
       6
     ],
     "octagons": [],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 29,
+        "from": 23,
+        "to": 29,
+        "door": 25,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 50,
+        "from": 22,
+        "to": 29,
+        "door": 25,
+        "facing": "east"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "rooms": [
@@ -1129,7 +1271,24 @@ const PLANS=[
       6
     ],
     "octagons": [],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 27,
+        "from": 24,
+        "to": 30,
+        "door": 26,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 45,
+        "from": 24,
+        "to": 30,
+        "door": 27,
+        "facing": "east"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "rooms": [
@@ -1391,7 +1550,24 @@ const PLANS=[
       6
     ],
     "octagons": [],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 24,
+        "from": 22,
+        "to": 28,
+        "door": 25,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 41,
+        "from": 23,
+        "to": 27,
+        "door": 25,
+        "facing": "east"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "rooms": [
@@ -1644,7 +1820,24 @@ const PLANS=[
       6
     ],
     "octagons": [],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 18,
+        "from": 21,
+        "to": 26,
+        "door": 23,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 30,
+        "from": 23,
+        "to": 28,
+        "door": 25,
+        "facing": "east"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "rooms": [
@@ -1894,7 +2087,24 @@ const PLANS=[
       6
     ],
     "octagons": [],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 31,
+        "from": 23,
+        "to": 28,
+        "door": 25,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 49,
+        "from": 23,
+        "to": 29,
+        "door": 25,
+        "facing": "east"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "rooms": [
