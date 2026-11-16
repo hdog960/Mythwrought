@@ -43,3 +43,30 @@ test('overlapping batch rejects while first is pending, then releases lock',asyn
  release();await pending;
  assert.equal(await f.run(()=>true),true);
 });
+
+test('same-ID shape rollback mismatch invalidates only the corrupted orientation',async()=>{
+ const f=fixture(),shapes=new Map(f.cells.map(c=>[c.join(','),'north']));
+ const readState=c=>shapes.get(c.join(','));
+ await assert.rejects(f.run((c,i)=>{
+  shapes.set(c.join(','),'east');return i!==1;
+ },{
+  readState,
+  rollback:(c,i)=>{if(i!==1)shapes.set(c.join(','),'north');return true;}
+ }),error=>error instanceof AggregateError && error.errors.some(e=>/Rollback shape state mismatch/.test(e.message)));
+ assert.equal(f.sidecar.get(f.cells[0],4),2);
+ assert.equal(f.sidecar.get(f.cells[1],4),0);
+ assert.equal(f.sidecar.get(f.cells[2],4),2);
+});
+test('unreadable committed shape state triggers reverse rollback and retains old rotations',async()=>{
+ const f=fixture(),shapes=new Map(f.cells.map(c=>[c.join(','),'north']));
+ await assert.rejects(f.run(c=>{shapes.set(c.join(','),{bad:true});return true;},{
+  readState:c=>shapes.get(c.join(',')),
+  rollback:c=>{shapes.set(c.join(','),'north');return true;}
+ }),/Invalid committed shape state/);
+ for(const c of f.cells)assert.equal(f.sidecar.get(c,4),2);
+});
+test('invalid initial shape fingerprint preflights without world mutation',async()=>{
+ const f=fixture();let writes=0;
+ await assert.rejects(f.run(()=>{writes++;return true;},{readState:()=>NaN}),/Invalid initial shape state/);
+ assert.equal(writes,0);
+});
