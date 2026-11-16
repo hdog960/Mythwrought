@@ -9,7 +9,8 @@ import {M1_REGIONAL_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-region
 import {M1_BIOME_EXPANSION} from '../../../src/building-pool/roadmap-2a/m1-biome-expansion.mjs';
 import {M1_CATEGORY_ARCADES} from '../../../src/building-pool/roadmap-2a/m1-category-arcades.mjs';
 import {M1_MARKET_FRONTS} from '../../../src/building-pool/roadmap-2a/m1-market-fronts.mjs';
-const designs=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS];
+import {M1_COURTYARD_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-courtyard-shops.mjs';
+const designs=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS];
 const KINDS=Object.freeze({foundation:'0',floor:'1',wall:'2',roof:'3',window:'4',fixture:'5',decor:'6'});
 const alphabet=/^[0-9a-z]{5}$/;
 function encode(source){
@@ -29,19 +30,19 @@ function encode(source){
   categories:source.category,biome:source.biome,size:source.size,
   runs:tokens.join('')};
 }
-test('all 50 source-exact blueprint geometry previews are exported only as ephemeral, fully lossless CI artifact data',()=>{
- assert.equal(designs.length,50);
+test('all 56 source-exact blueprint geometry previews are exported only as ephemeral, fully lossless CI artifact data',()=>{
+ assert.equal(designs.length,56);
  assert.equal(new Set(designs.map(b=>b.id)).size,50);
  const records=designs.map(encode);
  const destination=join(process.cwd(),'artifacts','roadmap-2a-source-coordinates');
  mkdirSync(destination,{recursive:true});
- const file=join(destination,'all50-blueprint-cube-proxies.json');
+ const file=join(destination,'all56-blueprint-cube-proxies.json');
  writeFileSync(file,JSON.stringify({format:'mythwrought-roadmap-2a-authored-integer-cell-rle-v1',
   renderedWith:'real WebGL2 cube proxies; NOT real Pack mesh, mounted windows or final roof art',
   explicitSourceOnly:true,physicalFamilyRenderingApproved:false,creatorApproved:false,
   sourceCheckoutSha:process.env.GITHUB_SHA??null,designs:records},null,2)+'\n');
  const actual=JSON.parse(readFileSync(file,'utf8'));
- assert.equal(actual.designs.length,50);
+ assert.equal(actual.designs.length,56);
  assert.equal(new Set(actual.designs.map(x=>x.id)).size,50);
  assert(actual.designs.every(x=>x.runs.length%5===0&&x.cells>200&&x.windowCells>=0));
  assert.equal(actual.physicalFamilyRenderingApproved,false);
