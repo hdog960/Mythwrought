@@ -144,6 +144,13 @@ function gladeTailor(){
  p.furniture(29,31,B.crate,'silk-stock','decor');
  for(let x=12;x<=20;x++)for(const z of [6,17])
   p.elevated(x,8,z,B.leaves,'sunlit-leaf-arch');
+ // Different-height roof wings make the opposed private fitting suites
+ // legible in exterior views instead of one broad rectangular roof slab.
+ for(const [left,right,peak] of [[1,7,4],[25,31,28]]){
+  for(let x=left;x<=right;x++)for(let z=7;z<=25;z++)
+   p.elevated(x,8,z,B.leaves,'separate-fitted-wing-roof');
+  for(let z=8;z<=24;z++)p.elevated(peak,9,z,B.leaves,'high-private-wing-ridge');
+ }
  return p.end({title:'Twinstitch Glade Atelier',variation:2,
  signature:'opposed west/east private fitting wings around a tall open retail garden, independent rear embroidery room and two upper crosswise leaf roofs',
  roofForm:'large rectangular sky-lit forest showroom with east-west leaf lintels and private side roofs',
@@ -172,7 +179,13 @@ function orchardButcher(){
  for(const [x,z] of [[16,17],[19,24]])p.furniture(x,z,B.table,'butcher-clean-workbench');
  for(const [x,z] of [[27,17],[29,25]])p.furniture(x,z,B.table,'herb-curing-workbench');
  p.furniture(32,26,B.light,'hygienic-lamp','decor');
- for(let z=16;z<=27;z++)p.elevated(28,8,z,B.tile,'raised-temperate-curing-ridge');
+ // Three visible, independently supported sawtooth roof bays identify the
+ // cold cellar, sanitary cutting room and herb curing workshop.
+ for(const [left,right,peak] of [[1,11,6],[13,22,17],[24,33,28]]){
+  for(let x=left;x<=right;x++)for(let z=15;z<=29;z++)
+   p.elevated(x,8,z,B.tile,'triple-sawtooth-work-bay-roof');
+  for(let z=16;z<=27;z++)p.elevated(peak,9,z,B.tile,'specialist-roof-ridge');
+ }
  return p.end({title:'Orchard Three-Chamber Provisions',
  signature:'front lightwell public market and three independent rear workroom bays linked by two cross-transfer doors and an asymmetric raised eastern curing roof',
  roofForm:'central customer lightwell with a long one-sided smoking ridge',
@@ -203,6 +216,12 @@ function jewelerSnow(){
  for(let z=5;z<=29;z++)for(let x=c-2;x<=c+2;x++)
   p.elevated(x,8,z,B.snow,'wide-butterfly-winter-roof');
  for(let z=7;z<=27;z++)p.elevated(c,9,z,B.snow,'high-winter-ridge');
+ for(const [left,right,ridge] of [[3,11,7],[21,29,25]]){
+  for(let x=left;x<=right;x++)for(let z=5;z<=30;z++)
+   p.elevated(x,8,z,B.snow,'separate-protected-snow-wing');
+  for(let z=8;z<=28;z++)p.elevated(ridge,9,z,B.snow,'flanking-high-snow-ridge');
+ }
+ for(let z=10;z<=25;z++)p.elevated(c,10,z,B.snow,'upper-snow-peak');
  return p.end({title:'Frostcut Double-Secure Gemhouse',
  signature:'insulated double-gate public gem showroom, one controlled craft workshop and sequentially secured eastern inner vault under broad raised twin snow ridges',
  roofForm:'five-cell wide winter double ridgeline and high center snow cap',
@@ -232,6 +251,16 @@ function forestBooks(){
  p.furniture(28,32,B.light,'scribe-lamp','decor');
  for(let x=13;x<=21;x++)for(const z of [8,21])
   p.elevated(x,8,z,B.leaves,'cloister-arch-top');
+ // Separate roofed reading cloisters, each with its own height profile,
+ // plus a raised rear archive porch, preserve the open central sky court.
+ for(const [left,right,ridge] of [[2,8,5],[26,32,29]]){
+  for(let x=left;x<=right;x++)for(let z=7;z<=26;z++)
+   p.elevated(x,8,z,B.leaves,'enclosed-reading-wing-roof');
+  for(let z=9;z<=24;z++)p.elevated(ridge,9,z,B.leaves,'high-cloister-wing-ridge');
+ }
+ for(let x=12;x<=22;x++)for(let z=30;z<=35;z++)
+  p.elevated(x,8,z,B.tile,'rear-stock-archive-roof');
+ for(let z=31;z<=34;z++)p.elevated(c,9,z,B.tile,'archive-gable-crest');
  return p.end({title:'Mossbound Twin Cloister Library',
  signature:'two opposite single-door book reading galleries at different offsets from a large open sky paper atrium, bounded rear manuscript archive and raised leaf cloister arches',
  roofForm:'large forest atrium open sky with raised paired cross roofs, enclosed side and rear stocks',
@@ -269,6 +298,11 @@ function templeGarden(){
  }
  for(let z=12;z<=28;z++)for(const x of [14,30])
   p.elevated(x,8,z,B.tile,'raised-side-cloister-roof');
+ for(const [left,right,peak] of [[2,10,6],[34,42,38]]){
+  for(let x=left;x<=right;x++)for(let z=10;z<=28;z++)
+   p.elevated(x,8,z,B.tile,'side-prayer-cloister-roof');
+  for(let z=12;z<=26;z++)p.elevated(peak,9,z,B.tile,'ceremonial-high-side-gable');
+ }
  return p.end({title:'Four-Bell Garden Cloister',variation:2,
  signature:'central thirteen-wide open-air prayer garden between individually closed side chapels, triple-entry rear altar and four ground-to-belfry corner towers with separate side roofs',
  roofForm:'wide open central garden flanked by raised side colonnades and four belfry towers',
@@ -308,6 +342,7 @@ function sunAmphitheater(){
   p.elevated(x,9,z,B.tile,'stage-crescent-canopy');
  for(let x=18;x<=26;x++)for(let z=26;z<=29;z++)
   p.elevated(x,10,z,B.tile,'upper-desert-proscenium');
+ for(let z=27;z<=28;z++)p.elevated(c,11,z,B.tile,'desert-spotlight-crest');
  p.across(34,1,43,[8,36]);
  for(const [x,z] of [[4,37],[40,37]])p.furniture(x,z,B.crate,'backstage-props','decor');
  p.furniture(c,37,B.table,'rear-costume-work');
