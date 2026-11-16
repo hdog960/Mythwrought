@@ -43,7 +43,11 @@ export async function commitOrientedEdit({cell, sidecar, readIdentity, edit, rol
     // Rollback is mandatory, including when readback or the edit itself throws.
     // Never pretend rollback succeeded when the host fails to restore identity.
     try {
-      await rollback(...key);
+      const rollbackResult = await rollback(...key);
+      // A host may explicitly report an incomplete undo even if its block-ID
+      // reader still sees the old ID (e.g. same-ID shape/state replacement).
+      // Identity alone cannot prove that such a rollback restored geometry.
+      if (rollbackResult === false) throw new Error('Rollback explicitly rejected');
       const restored = await readIdentity(...key);
       if (restored !== before) throw new Error('Rollback did not restore world identity');
     } catch (rollbackError) {
