@@ -6,47 +6,47 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 24,
-  "authoredCandidates": 39,
-  "remainingUnauthored": 381,
+  "originalNewModels": 32,
+  "authoredCandidates": 47,
+  "remainingUnauthored": 373,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
-      "authored": 5,
+      "authored": 6,
       "target": 60,
-      "remaining": 55
+      "remaining": 54
     },
     "tailor": {
-      "authored": 3,
+      "authored": 4,
       "target": 60,
-      "remaining": 57
+      "remaining": 56
     },
     "butcher": {
-      "authored": 3,
+      "authored": 4,
       "target": 60,
-      "remaining": 57
+      "remaining": 56
     },
     "jeweler": {
-      "authored": 3,
+      "authored": 4,
       "target": 60,
-      "remaining": 57
+      "remaining": 56
     },
     "bookshop": {
-      "authored": 3,
+      "authored": 4,
       "target": 60,
-      "remaining": 57
+      "remaining": 56
     },
     "temple": {
-      "authored": 17,
+      "authored": 18,
       "target": 75,
-      "remaining": 58
+      "remaining": 57
     },
     "theater": {
-      "authored": 5,
+      "authored": 7,
       "target": 45,
-      "remaining": 40
+      "remaining": 38
     }
   },
   "originals": [
@@ -169,26 +169,66 @@
       "id": "r2:theater:mountain:large:01",
       "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:snow:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:desert:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:enchanted-forest:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:desert:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:snow:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:temperate:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:enchanted-forest:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
       "small": 8,
-      "medium": 1,
+      "medium": 2,
       "large": 1
     },
     "desert": {
-      "small": 1,
+      "small": 3,
       "medium": 5,
       "large": 2
     },
     "snow": {
-      "small": 1,
-      "medium": 2,
+      "small": 3,
+      "medium": 3,
       "large": 3
     },
     "enchanted-forest": {
-      "small": 1,
+      "small": 3,
       "medium": 3,
       "large": 3
     },
@@ -201,6 +241,6 @@
   "productionRegistryUnchanged": true,
   "physicalShapeAbiCertified": false,
   "screenshotClassification": "software WebGL2 cube proxies; neither physical-family WebGL2 nor live game",
-  "lastMilestone": "M1 cross-biome medium/large authorship, technical acceptance pending exact-head CI",
+  "lastMilestone": "M1 — eight new climate-specific candidate spaces, exact-head checks pending",
   "evidenceClassification": "Builder-source genuine Chromium/WebGL2 cube proxies, never physical-family or live gameplay"
 }
