@@ -190,7 +190,7 @@ test('all eight source-authentic manual physical ABI descriptors exist, but no a
  }
  assert(pack5>18);
 });
-test('authoritative ledger is current 55/420, inherited original source stays 15, all new IDs occur once and this is actual PR HEAD source',()=>{
+test('authoritative ledger is current 63/420, inherited original source stays 15, all new IDs occur once and this is actual PR HEAD source',()=>{
  const file='src/building-pool/roadmap-2b/m1-new-region-architectures.mjs';
  const committed=execFileSync('git',['rev-parse','HEAD:'+file],{encoding:'utf8'}).trim();
  const worktree=execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim();
@@ -198,13 +198,13 @@ test('authoritative ledger is current 55/420, inherited original source stays 15
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,
   ledger.authoredCandidates,ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],
-  [420,15,40,55,365,0,0,0]);
- assert.equal(ledger.originals.length,40);
+  [420,15,48,63,357,0,0,0]);
+ assert.equal(ledger.originals.length,48);
  const current=new Set(ledger.originals.map(x=>x.id));
  for(const bp of all.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(current.has(bp.id),'lost earlier authored candidate '+bp.id);
- assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.authored,0),55);
- assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.remaining,0),365);
+ assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.authored,0),63);
+ assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.remaining,0),357);
  assert.deepEqual([ledger.byCategory['market-square'].authored,ledger.byCategory.theater.authored,
-  ledger.byCategory.temple.authored],[7,8,19]);
+  ledger.byCategory.temple.authored],[9,9,20]);
 });
