@@ -8,7 +8,7 @@ const MAX = Number.MAX_SAFE_INTEGER;
 const cell = (x,y,z,blockId=1) => ({x,y,z,blockId});
 test('surface ordering stays exact at safe integer extremes and ties', () => {
   const source = [cell(MAX,0,0),cell(MIN,0,0),cell(0,MAX,0),cell(0,MIN,0),cell(0,0,MAX),cell(0,0,MIN)];
-  const expected = [source[1],source[5],source[3],source[2],source[4],source[0]];
+  const expected = [source[1],source[3],source[5],source[4],source[2],source[0]];
   assert.deepEqual(normalizeSurfaceFeatures(source,{registeredIds:[1]}),expected);
   assert.deepEqual(normalizeSurfaceFeatures([...source].reverse(),{registeredIds:[1]}),expected);
 });
@@ -21,7 +21,7 @@ test('preflight resolved cell ordering is independent of producer input order at
   assert.equal(forward.ok,true);
   assert.deepEqual(forward,reverse);
   assert.deepEqual(forward.cells.map(c=>[c.x,c.y,c.z]),[
-    [MIN,0,0],[0,0,MIN],[0,MIN,0],[0,MAX,0],[0,0,MAX],[MAX,0,0]]);
+    [MIN,0,0],[0,MIN,0],[0,0,MIN],[0,0,MAX],[0,MAX,0],[MAX,0,0]]);
 });
 test('extreme coordinates remain distinct under overlay and explicit restoration', () => {
   const naturalCells=[cell(MIN,0,0),cell(MAX,0,0)];
