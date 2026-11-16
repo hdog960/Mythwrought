@@ -224,3 +224,28 @@ test('failed rollback after invalid committed shape invalidates stale rotation',
     error.errors[1].message==='Rollback did not restore shape state');
   assert.equal(f.sidecar.get(f.cell,4),0);
 });
+
+test('post-commit shape reader exception forces rollback and never acknowledges success',async()=>{
+  const f=fixture();
+  let shape='north',reads=0,undos=0;
+  await assert.rejects(f.run(()=>{shape='east';return true;},{
+    readState:()=>{if(++reads===2)throw Error('shape chunk unloaded');return shape;},
+    rollback:()=>{undos++;shape='north';}
+  }),/shape chunk unloaded/);
+  assert.equal(undos,1);
+  assert.equal(shape,'north');
+  assert.equal(f.sidecar.get(f.cell,4),3);
+});
+
+test('unreadable rollback fingerprint fails closed even when original block ID survives',async()=>{
+  const f=fixture();
+  let shape='north',reads=0;
+  await assert.rejects(f.run(()=>{shape='east';throw Error('partial write');},{
+    readState:()=>{if(++reads===2)throw Error('shape read unavailable');return shape;},
+    rollback:()=>{shape='north';}
+  }),error=>error instanceof AggregateError &&
+    error.errors[0].message==='partial write' &&
+    error.errors[1].message==='shape read unavailable');
+  assert.equal(f.readIdentity(),4);
+  assert.equal(f.sidecar.get(f.cell,4),0);
+});
