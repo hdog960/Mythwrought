@@ -189,7 +189,7 @@ export function createSurfaceBiomeWorldView(world,{
     const plan=surfaceBiomeFreshColumn(x,z,world.seed,{
       enabled:true,profileIsFresh:true,
       readBaseline:(cx,y,cz)=>world.naturalAndLandmarkBlock(cx,y,cz),
-      hasEdit:(cx,y,cz)=>world.edits.has(cx+','+y+','+cz),
+      // The baseline is immutable for a fresh profile. Post-creation edits\n      // are masked per-cell by get(), not used to invalidate a column.\n      hasEdit:()=>false,
       isProtected
     });
     const byY=plan?new Map(plan.writes.map(w=>[w.y,w.to])):null;
