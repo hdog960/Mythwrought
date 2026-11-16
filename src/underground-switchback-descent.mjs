@@ -199,6 +199,36 @@ export function descentCells(origin=DESCENT_ORIGIN){
         carve(d,t,Math.max(0,Math.floor(spec.width*(1-nd*nd-nt*nt)/4)),spec.height);
       }
   }
+  // Lower-band bifurcated mineral gallery at -120: a broad outer
+  // vestibule splits into two curving arms and rejoins in a quiet chamber.
+  // All passages are supported voxel floors with physical body clearance.
+  // No new block IDs, saved edits or global terrain changes.
+  {
+    const depth=-120,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,r=2,height=5)=>{
+        for(let across=-r;across<=r;across++){
+          const x=anchor.x+outward[0]*d+tangent[0]*(t+across);
+          const z=anchor.z+outward[1]*d+tangent[1]*(t+across);
+          set(x,depth,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
+        }
+      };
+      for(let d=0;d<=12;d++)carve(d,0);
+      for(let d=12;d<=36;d++){
+        const arc=Math.round(7*Math.sin(Math.PI*(d-12)/24));
+        carve(d,arc,2,6);
+        carve(d,-arc,2,6);
+      }
+      for(let d=33;d<=43;d++)for(let t=-8;t<=8;t++){
+        if((d-38)*(d-38)+(t*t)/3>30)continue;
+        carve(d,t,1,8);
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
