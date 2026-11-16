@@ -43,7 +43,15 @@ export async function commitOrientedEdit({cell, sidecar, readIdentity, edit, rol
     const after = await readIdentity(...key);
     if (!Number.isSafeInteger(after) || after < 0 || after >= 255)
       throw new Error('Committed edit has invalid world identity');
-    // Reject unreadable or non-finite post-edit fingerprints before committing.\n    // A malformed shape state must never be acknowledged as a valid edit.\n    if (readState) {\n      const committedState = await readState(...key);\n      if (!['string','number','boolean','bigint'].includes(typeof committedState) ||\n          (typeof committedState === 'number' && !Number.isFinite(committedState)))\n        throw new Error('Committed edit has invalid shape state');\n    }\n    // A committed edit must invalidate the prior rotation, even if ID is unchanged.
+    // Reject unreadable or non-finite post-edit fingerprints before committing.
+    // A malformed shape state must never be acknowledged as a valid edit.
+    if (readState) {
+      const committedState = await readState(...key);
+      if (!['string','number','boolean','bigint'].includes(typeof committedState) ||
+          (typeof committedState === 'number' && !Number.isFinite(committedState)))
+        throw new Error('Committed edit has invalid shape state');
+    }
+    // A committed edit must invalidate the prior rotation, even if ID is unchanged.
     // This adapter requires exclusive per-cell edit ownership while awaiting.
     sidecar.invalidateEdit(key);
     return true;
