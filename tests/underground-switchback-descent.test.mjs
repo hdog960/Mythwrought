@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
 import {WORLD_MIN_Y} from '../src/depth.mjs';
-import {descentWorld,descentRoute,descentEvidence,descentConnectivity,descentVolumeEvidence,descentLoopConnectivity} from '../src/underground-switchback-descent.mjs';
+import {descentWorld,descentRoute,descentEvidence,descentConnectivity,descentVolumeEvidence,descentLoopConnectivity,descentEntranceApproach,descentEntranceHandoff} from '../src/underground-switchback-descent.mjs';
 for(const seed of [179,1,2026,-77])test('four depth bands have solid floors and two-block air: '+seed,()=>{
   const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
   const bands=descentEvidence(world);
@@ -218,4 +218,35 @@ test('an edited obstruction invalidates its physical return loop',()=>{
   const audit=descentLoopConnectivity(restored);
   assert.equal(audit.connected,false);
   assert.ok(audit.levels.find(l=>l.depth===-80).failures.some(f=>f.part==='outer-return'));
+});
+
+for(const seed of [179,1,2026,-77])test('protected surface handoff has a four-step physical descent '+seed,()=>{
+  const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  const reader=descentWorld(world),steps=descentEntranceApproach();
+  const handoff=descentEntranceHandoff();
+  assert.equal(steps.length,5);
+  assert.equal(handoff.requiresSurfaceOwner,true);
+  assert.deepEqual(handoff.opening,{x:192,y:-3,z:188});
+  assert.deepEqual(steps.at(-1),{x:192,z:192,floor:-8,feet:-7});
+  assert.deepEqual(steps.at(-1),descentRoute()[0]);
+  for(let i=0;i<steps.length;i++){
+    const p=steps[i];
+    assert.equal(reader.get(p.x,p.floor,p.z),BLOCK.DEEPSTONE,'step floor '+i);
+    for(let y=p.feet;y<=Math.min(-4,p.feet+3);y++)
+      assert.equal(reader.get(p.x,y,p.z),BLOCK.AIR,'below-legacy approach air '+i+'/'+y);
+    if(i){
+      assert.equal(p.z-steps[i-1].z,1);
+      assert.equal(p.floor-steps[i-1].floor,-1);
+    }
+    for(let y=-3;y<=0;y++)
+      assert.equal(reader.get(p.x,y,p.z),world.get(p.x,y,p.z),'legacy modified '+i+'/'+y);
+  }
+  assert.equal(JSON.stringify(world.save()),before);
+});
+test('surface breach remains unclaimed and player edits override candidate entrance',()=>{
+  const world=new VoxelWorld(179),p=descentEntranceApproach()[2];
+  assert.equal(world.set(p.x,p.feet,p.z,BLOCK.WOOD),true);
+  const restored=VoxelWorld.restore(world.save());
+  assert.equal(descentWorld(restored).get(p.x,p.feet,p.z),BLOCK.WOOD);
+  assert.equal(descentEntranceHandoff().requiresSurfaceOwner,true);
 });
