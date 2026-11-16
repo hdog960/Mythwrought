@@ -8,6 +8,7 @@ import {createServer} from 'node:http';
 import {access, mkdtemp, readFile, mkdir, writeFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve,sep,extname} from 'node:path';
+import {acquire3BChromiumPermit} from './chromium-resource-lock.mjs';
 
 const root=resolve('.');
 const viewports=[[667,375],[844,390],[932,430]];
@@ -89,6 +90,7 @@ function expressionFor(type,view){
 test('M2 captures 12 actual 3B source WebGL2 cube-diagnostic lumberyard/mill exteriors/cutaways', {timeout:240000}, async()=>{
  let chrome,cdp,site,temp;
  const reports=[];
+ const releaseChromium=await acquire3BChromiumPermit();
  try{
   const executable=await findChrome();
   site=server();await new Promise(resolve=>site.listen(0,'127.0.0.1',resolve));
@@ -140,9 +142,11 @@ test('M2 captures 12 actual 3B source WebGL2 cube-diagnostic lumberyard/mill ext
   await writeFile(join(output,'acceptance.json'),JSON.stringify(summary,null,2)+'\n');
   console.log('MYTHWROUGHT_3B_M2_CHROMIUM_DIAGNOSTIC=12/12 ('+viewports.map(v=>v.join('x')).join(', ')+')');
  }finally{
+  try{
   if(cdp)cdp.close();
   if(chrome){chrome.kill('SIGTERM');await Promise.race([new Promise(r=>chrome.once('close',r)),delay(2500)]);}
   if(site)await new Promise(resolve=>site.close(resolve));
   if(temp)await rm(temp,{recursive:true,force:true,maxRetries:5,retryDelay:200});
+  }finally{await releaseChromium();}
  }
 });
