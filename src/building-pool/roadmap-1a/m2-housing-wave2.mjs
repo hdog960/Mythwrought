@@ -1845,82 +1845,110 @@ const SPECS=Object.freeze([
     "title": "Glimmerfern Inner-Bower Home",
     "w": 24,
     "d": 22,
-    "plan": "side-reception-aisle-to-separate-front-kitchen-and-rear-bower",
+    "plan": "front-festival-hall-distributing-to-three-asymmetric-rear-art-and-guest-wings",
     "roof": "butterfly",
     "skin": "pack2:013",
     "roofAsset": "pack3:023",
     "segments": [
       [
-        9,
         2,
         9,
+        21,
+        9
+      ],
+      [
+        8,
+        10,
+        8,
         19
       ],
       [
+        15,
         10,
-        10,
-        21,
-        10
+        15,
+        19
       ]
     ],
     "entry": [
-      5,
+      11,
       1,
-      "reception"
+      "front"
     ],
     "doors": [
       {
         "at": [
-          9,
+          5,
           1,
-          6
+          9
         ],
-        "from": "reception",
-        "to": "kitchen"
+        "from": "front",
+        "to": "sleep"
       },
       {
         "at": [
-          17,
+          12,
           1,
-          10
+          9
         ],
-        "from": "kitchen",
-        "to": "sleeping"
+        "from": "front",
+        "to": "bower"
+      },
+      {
+        "at": [
+          19,
+          1,
+          9
+        ],
+        "from": "front",
+        "to": "work"
       }
     ],
     "rooms": [
       {
-        "id": "reception",
+        "id": "front",
         "min": [
           2,
           1,
           2
         ],
         "max": [
-          9,
+          22,
+          4,
+          9
+        ]
+      },
+      {
+        "id": "sleep",
+        "min": [
+          2,
+          1,
+          10
+        ],
+        "max": [
+          8,
           4,
           20
         ]
       },
       {
-        "id": "kitchen",
+        "id": "bower",
         "min": [
-          10,
+          9,
           1,
-          2
+          10
         ],
         "max": [
-          22,
+          15,
           4,
-          10
+          20
         ]
       },
       {
-        "id": "sleeping",
+        "id": "work",
         "min": [
-          10,
+          16,
           1,
-          11
+          10
         ],
         "max": [
           22,
@@ -1947,7 +1975,7 @@ const SPECS=Object.freeze([
       ],
       [
         22,
-        8,
+        12,
         "east"
       ],
       [
@@ -1958,36 +1986,42 @@ const SPECS=Object.freeze([
     ],
     "fixtures": [
       {
-        "x": 5,
-        "z": 4,
-        "room": "reception",
+        "x": 11,
+        "z": 5,
+        "room": "front",
         "asset": "pack4:064"
       },
       {
-        "x": 16,
-        "z": 6,
-        "room": "kitchen",
-        "asset": "pack4:057"
-      },
-      {
-        "x": 12,
-        "z": 14,
-        "room": "sleeping",
+        "x": 4,
+        "z": 13,
+        "room": "sleep",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
       },
       {
-        "x": 4,
-        "z": 16,
-        "room": "reception",
+        "x": 9,
+        "z": 12,
+        "room": "bower",
         "asset": "pack5:084"
+      },
+      {
+        "x": 19,
+        "z": 15,
+        "room": "work",
+        "asset": "pack4:057"
       }
     ],
     "posts": [
-      4,
+      5,
       20
     ],
-    "detail": "fern-traced-butterfly-aisle-and-private-far-bower"
+    "detail": "tri-wing-festival-hall-with-open-greenhouse-court-and-butterfly-canopy",
+    "courtyard": [
+      11,
+      13,
+      13,
+      16
+    ]
   },
   {
     "category": "house",
@@ -2402,82 +2436,110 @@ const SPECS=Object.freeze([
     "title": "Cairnwick Valley Gallery House",
     "w": 24,
     "d": 22,
-    "plan": "left-long-entrance-gallery-to-paired-rear-cook-and-sleep-chambers",
+    "plan": "front-stone-hearth-rear-triple-branch-pantry-bed-and-atelier",
     "roof": "hip",
     "skin": "pack1:006",
     "roofAsset": "pack3:025",
     "segments": [
       [
-        9,
         2,
         9,
+        21,
+        9
+      ],
+      [
+        8,
+        10,
+        8,
         19
       ],
       [
+        16,
         10,
-        12,
-        21,
-        12
+        16,
+        19
       ]
     ],
     "entry": [
-      5,
+      12,
       1,
-      "gallery"
+      "hearth"
     ],
     "doors": [
       {
         "at": [
-          9,
+          5,
           1,
-          5
+          9
         ],
-        "from": "gallery",
-        "to": "cook"
+        "from": "hearth",
+        "to": "pantry"
       },
       {
         "at": [
-          17,
+          12,
           1,
-          12
+          9
         ],
-        "from": "cook",
+        "from": "hearth",
         "to": "sleep"
+      },
+      {
+        "at": [
+          19,
+          1,
+          9
+        ],
+        "from": "hearth",
+        "to": "atelier"
       }
     ],
     "rooms": [
       {
-        "id": "gallery",
+        "id": "hearth",
         "min": [
           2,
           1,
           2
         ],
         "max": [
-          9,
+          22,
+          4,
+          9
+        ]
+      },
+      {
+        "id": "pantry",
+        "min": [
+          2,
+          1,
+          10
+        ],
+        "max": [
+          8,
           4,
           20
         ]
       },
       {
-        "id": "cook",
+        "id": "sleep",
         "min": [
-          10,
+          9,
           1,
-          2
+          10
         ],
         "max": [
-          22,
+          16,
           4,
-          12
+          20
         ]
       },
       {
-        "id": "sleep",
+        "id": "atelier",
         "min": [
-          10,
+          17,
           1,
-          13
+          10
         ],
         "max": [
           22,
@@ -2499,52 +2561,52 @@ const SPECS=Object.freeze([
       ],
       [
         1,
-        9,
+        10,
         "west"
       ],
       [
         22,
-        7,
+        11,
         "east"
       ],
       [
-        15,
+        17,
         20,
         "south"
       ]
     ],
     "fixtures": [
       {
-        "x": 5,
-        "z": 5,
-        "room": "gallery",
+        "x": 12,
+        "z": 4,
+        "room": "hearth",
         "asset": "pack4:064"
       },
       {
-        "x": 17,
-        "z": 6,
-        "room": "cook",
+        "x": 4,
+        "z": 14,
+        "room": "pantry",
         "asset": "pack4:057"
       },
       {
-        "x": 12,
-        "z": 15,
+        "x": 11,
+        "z": 13,
         "room": "sleep",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
       },
       {
-        "x": 5,
-        "z": 17,
-        "room": "gallery",
+        "x": 19,
+        "z": 15,
+        "room": "atelier",
         "asset": "pack5:084"
       }
     ],
     "posts": [
-      4,
-      20
+      5,
+      18
     ],
-    "detail": "cairnface-full-length-gallery-with-deep-back-sleep"
+    "detail": "stone-crest-hearth-with-three-rear-service-wings-and-gallery-overhang"
   },
   {
     "category": "house",
@@ -2806,5 +2868,6 @@ const SPECS=Object.freeze([
     ]
   }
 ]);
+
 export const M2_HOUSING_WAVE2_IDS=Object.freeze(SPECS.map(x=>'r1:house:'+x.biome+':'+x.size+':'+String(x.index).padStart(3,'0')));
 export function getM2HousingWave2(){return SPECS.map(compileM2ArchitecturalSpec);}
