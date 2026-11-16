@@ -332,3 +332,32 @@ export function descentLoopConnectivity(world,origin=DESCENT_ORIGIN){
   }
   return {connected:levels.every(level=>level.connected),levels};
 }
+
+/** Audit the candidate's five-step entrance independently of the protected
+ * surface breach. Never label the world surface-connected until the surface
+ * owner has supplied and verified the opening.
+ */
+export function descentEntranceConnectivity(world,origin=DESCENT_ORIGIN){
+  const reader=descentWorld(world,origin),steps=descentEntranceApproach(origin);
+  const failures=[];
+  for(let i=0;i<steps.length;i++){
+    const p=steps[i],prev=steps[i-1];
+    if(reader.get(p.x,p.floor,p.z)===BLOCK.AIR ||
+       reader.get(p.x,p.feet,p.z)!==BLOCK.AIR ||
+       reader.get(p.x,p.feet+1,p.z)!==BLOCK.AIR)
+      failures.push({step:i,reason:'blocked-or-unsupported'});
+    if(prev){
+      if(Math.abs(p.x-prev.x)+Math.abs(p.z-prev.z)!==1 ||
+         Math.abs(p.feet-prev.feet)>1)
+        failures.push({step:i,reason:'disconnected-step'});
+      if(reader.get(p.x,Math.max(p.feet,prev.feet)+1,p.z)!==BLOCK.AIR)
+        failures.push({step:i,reason:'step-head-obstruction'});
+    }
+  }
+  const first=descentRoute(origin)[0],last=steps.at(-1);
+  if(!first||first.x!==last.x||first.z!==last.z||first.floor!==last.floor)
+    failures.push({reason:'descent-join-mismatch'});
+  return {approachConnected:failures.length===0,failures,
+    surfaceConnected:false,requiresSurfaceOwner:true,
+    opening:descentEntranceHandoff(origin).opening};
+}
