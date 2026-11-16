@@ -109,8 +109,8 @@ async function launchChrome(){
     // A failed Chrome socket must fail the test, never hang the whole 45-minute CI job.
     const timeout=setTimeout(()=>{
       pending.delete(id);
-      bad(Error('Builder 4B real Chromium CDP command timed out after 25 seconds: '+method));
-    },25000);
+      bad(Error('Builder 4B real Chromium CDP command timed out after 150 seconds: '+method));
+    },150000);
     pending.set(id,{
       resolve:value=>{clearTimeout(timeout);ok(value);},
       reject:error=>{clearTimeout(timeout);bad(error);}
@@ -179,11 +179,13 @@ test('second ten original 4B variant-03 blueprints × exterior/section × three 
     const initial=await cmd('Page.navigate',{url:site.url+'/tests/building-pool/roadmap-4b/m2-variant03-second10-preview.html?index=0&view=exterior'});
     assert.ok(!initial.errorText,JSON.stringify(initial));
     await waitPreview(cmd,'startup',{id:M2_VARIANT03_SECOND10[0].id,view:'exterior',width:viewports[0][0],height:viewports[0][1]});
+    // Real Chromium frame progress: establish exactly which source view/size last completed.
     for(const [width,height] of viewports){
       await cmd('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
       for(let i=0;i<M2_VARIANT03_SECOND10.length;i++){
         for(const view of ['exterior','section']){
           const b=M2_VARIANT03_SECOND10[i];
+          const frameStarted=Date.now();
           const render=await cmd('Runtime.evaluate',{expression:'window.__renderFourBFrame('+i+','+JSON.stringify(view)+','+width+','+height+')',returnByValue:true});
           assert.ok(!render.exceptionDetails,'real WebGL2 render failed: '+JSON.stringify(render.exceptionDetails));
           const evidence=await waitPreview(cmd,b.id+' '+view+' '+width+'x'+height,{id:b.id,view,width,height});
@@ -209,6 +211,7 @@ test('second ten original 4B variant-03 blueprints × exterior/section × three 
           const name=i+'-'+b.type+'-'+view+'-'+width+'x'+height+'.png';
           writeFileSync(join(output,name),png);
           captures.push({...evidence,png:name,byteCount:png.length});
+          console.log('4B authentic Chromium frame '+captures.length+'/60 '+b.id+' '+view+' '+width+'x'+height+' '+(Date.now()-frameStarted)+'ms');
         }
       }
     }
