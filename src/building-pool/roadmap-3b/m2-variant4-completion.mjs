@@ -3042,9 +3042,9 @@ const plans=[
    ],
    [
     0,
-    19,
+    16,
     12,
-    30
+    29
    ],
    [
     1,
@@ -3076,9 +3076,9 @@ const plans=[
     "name": "west workshop",
     "r": [
      1,
-     18,
+     15,
      13,
-     29
+     28
     ],
     "top": 19,
     "shape": "cross",
