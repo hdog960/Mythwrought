@@ -13,7 +13,7 @@ Baseline: incorporation 015 `1f67efc9805e83866549515ffdad4dc7e225b234`, all 130 
 - Transparency is still sorted *by chunk*, not by transparent face, and overlapping ice/water within a chunk may show ordering artifacts.
 - Foliage now uses tapered broadleaf/pinneedle/pendant leaf-shape cutouts and small procedural veins in the existing shader, replacing the original square-perforation mask. UV silhouettes are still procedural and thin stems can inherit cutout; they are not final hand-authored leaf textures. Physical-iPhone art/performance approval is **not** claimed.
 - All eight builder PRs, all five manual Block Packs, control rails, world generation, saves/schema 1, and v0.11 lock are unchanged.
-- A dedicated isolated workflow runs source-native tests and genuine Chromium WebGL2 viewport captures (667x375, 844x390, 932x430), including nine individually labeled foliage captures **per** viewport with off-target, outline-free pixel A/B checks against the same camera/empty voxel. The suite checks save/reload, retains 25 surface GPU chunks, and uploads screenshots. Preserve draft PR; do not merge without verification/authorization.
+- A dedicated isolated workflow runs source-native tests and genuine Chromium WebGL2 viewport captures (667x375, 844x390, 932x430), including nine individually labeled foliage captures **per** viewport with off-target, outline-free pixel A/B checks against the same camera/empty voxel. The suite checks save/reload, verifies a maximum of 25 surface GPU chunks during progressive streaming (and an initial fully-loaded 25-chunk baseline), and uploads screenshots. Preserve draft PR; do not merge without verification/authorization.
 
 ## Deliberately outstanding alpha families
 
