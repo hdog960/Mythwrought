@@ -25,7 +25,7 @@ try:
     page.goto('http://127.0.0.1:4173/tests/building-pool/roadmap-2a/m1-gallery.html?view='+view)
     page.wait_for_function('window.__MW2A_GALLERY?.ready === true',timeout=45000)
     ids=page.locator('#building option').evaluate_all('(nodes)=>nodes.map(n=>n.value)')
-    if len(ids)!=74 or len(set(ids))!=74:raise AssertionError('Invalid actual source ID count')
+    if len(ids)!=80 or len(set(ids))!=74:raise AssertionError('Invalid actual source ID count')
     for idx,bid in enumerate(ids):
      page.select_option('#building',bid)
      data=page.evaluate('''() => {
@@ -41,7 +41,7 @@ try:
       }
       return {...d,inkSamples:ink,canvasPixels:[w,h],visibleBounds:[xmin,ymin,xmax,ymax],readbackError:gl.getError()};
      }''')
-     if not(data['webgl2'] and data['glError']==0 and data['readbackError']==0 and data['id']==bid and data['view']==view and data['designCount']==74 and
+     if not(data['webgl2'] and data['glError']==0 and data['readbackError']==0 and data['id']==bid and data['view']==view and data['designCount']==80 and
        data['viewport']==[w,h] and data['total']>100 and data['drawn']>0 and data['inkSamples']>24 and
        data['canvasPixels'][0]>100 and data['canvasPixels'][1]>100 and not data['productionPhysicalFamilyGeometry'] and not data['realIphone']):
       raise AssertionError({'id':bid,'diagnostic':data})
@@ -59,14 +59,14 @@ try:
    page.close()
   br.close()
  if errors:raise AssertionError('Browser page errors: '+repr(errors[:10]))
- if len(records)!=444 or len({x['file'] for x in records})!=444 or len({x['id'] for x in records})!=74:
-  raise AssertionError('Missing 444 authentic source captures')
- report={'commit':os.environ.get('GITHUB_SHA'),'designs':74,'screenshots':444,'groups':groups,
+ if len(records)!=480 or len({x['file'] for x in records})!=480 or len({x['id'] for x in records})!=74:
+  raise AssertionError('Missing 480 authentic source captures')
+ report={'commit':os.environ.get('GITHUB_SHA'),'designs':80,'screenshots':480,'groups':groups,
   'realChromiumWebGL2':True,'actualAuthoredCells':True,'cubeProxiesOnly':True,'realPackFamilyMeshes':False,
   'roofSpanCertified':False,'windowMountCertified':False,'physicalIPhone':False,
   'creatorApproved':False,'integrated':False,'records':records}
- (out/'M1_444_WEBGL2_EVIDENCE.json').write_text(json.dumps(report,indent=2)+'\n')
- print('BUILDER_2A_GALLERY_PASS 444/444 genuine WebGL2 source-driven exterior/cutaway screenshots',flush=True)
+ (out/'M1_480_WEBGL2_EVIDENCE.json').write_text(json.dumps(report,indent=2)+'\n')
+ print('BUILDER_2A_GALLERY_PASS 480/480 genuine WebGL2 source-driven exterior/cutaway screenshots',flush=True)
 finally:
  srv.terminate()
  try:srv.wait(timeout=3)

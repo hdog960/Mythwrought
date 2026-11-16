@@ -14,9 +14,9 @@ import {inventory,plannedSlots} from '../../../src/building-pool/roadmap-2a/cata
 import {validateBlueprint,structuralFingerprint} from '../../../src/building-pool/roadmap-2a/schema.mjs';
 import {inspect2AUFootprints} from '../../../src/building-pool/roadmap-2a/m1-u-court-preflight.mjs';
 const coord=(x,y,z)=>[x,y,z].join(',');
-test('six new U-shaped original 2A buildings represent 68/420 genuine authored candidate IDs, 352 unauthored',()=>{
- assert.equal(M1_U_COURT_SHOPS.length,6);assert.equal(inventory().authoredCandidateTotal,74);assert.equal(inventory().newlyAuthored,59);
- assert.equal(inventory().unwrittenNewCandidates,346);assert.equal(plannedSlots().filter(x=>x.authoredHere).length,74);
+test('six new U-shaped original 2A buildings represent 68/420 genuine authored candidate IDs, 340 unauthored',()=>{
+ assert.equal(M1_U_COURT_SHOPS.length,6);assert.equal(inventory().authoredCandidateTotal,80);assert.equal(inventory().newlyAuthored,65);
+ assert.equal(inventory().unwrittenNewCandidates,340);assert.equal(plannedSlots().filter(x=>x.authoredHere).length,80);
  assert.equal(new Set(M1_U_COURT_SHOPS.map(x=>x.id)).size,6);assert.equal(new Set(M1_U_COURT_SHOPS.map(structuralFingerprint)).size,6);
  for(const b of M1_U_COURT_SHOPS){assert(validateBlueprint(b).valid);assert.equal(b.rooms.length,4);assert(b.voxels.length>2000);assert.equal(b.worldPlaced,false);}
 });

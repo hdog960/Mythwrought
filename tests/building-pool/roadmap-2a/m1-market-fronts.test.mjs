@@ -25,8 +25,8 @@ function roomWalk(b){
 test('six source-authored distinct regional shop and bank models bring true 2A registry to 50 of 420',()=>{
  assert.equal(M1_MARKET_FRONTS.length,6);assert.equal(all.length,50);
  assert.equal(new Set(all.map(b=>b.id)).size,50);assert.equal(new Set(all.map(structuralFingerprint)).size,50);
- assert.equal(plannedSlots().filter(s=>s.authoredHere).length,74);assert.equal(inventory().authoredCandidateTotal,74);
- assert.equal(inventory().newlyAuthored,59);assert.equal(inventory().unwrittenNewCandidates,346);
+ assert.equal(plannedSlots().filter(s=>s.authoredHere).length,80);assert.equal(inventory().authoredCandidateTotal,80);
+ assert.equal(inventory().newlyAuthored,65);assert.equal(inventory().unwrittenNewCandidates,340);
  assert.equal(inventory().creatorApproved,0);assert.equal(inventory().integratedIntoGame,0);
  for(const b of M1_MARKET_FRONTS){assert(validateBlueprint(b).valid);assert(b.voxels.length>1200&&b.rooms.length===3);assert(!b.worldPlaced&&!b.numericIdsAssigned);}
 });

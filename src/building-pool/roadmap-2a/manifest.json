@@ -32,10 +32,10 @@
   "target": 420,
   "legacySourceCandidates": 15,
   "locallyMigratedAndParityVerified": 15,
-  "newlyAuthored": 59,
+  "newlyAuthored": 65,
   "creatorApproved": 0,
   "integratedIntoGame": 0,
-  "unwrittenNewCandidates": 346,
+  "unwrittenNewCandidates": 340,
   "legacyCandidates": [
     {
       "id": "r2:general-store:temperate:small:01",
@@ -330,7 +330,7 @@
   ],
   "sourcePolicy": "Original PR #124 is read-only. IDs are preserved, not geometries yet. A candidate only counts as locally migrated after exact geometry/metadata parity and native tests.",
   "assetPolicy": "Manual 96 families/106 physical variants are integrated; biome130 entries remain symbolic when unverified. No numeric runtime IDs or production placement.",
-  "authoredCandidateTotal": 74,
+  "authoredCandidateTotal": 80,
   "handAuthoredStoreBlob": "7211223b2cc51290b89f5f886c1cbb59cc495747",
   "sourceModuleBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
   "originalValidatedStores": 15,
@@ -887,6 +887,68 @@
       "source": "src/building-pool/roadmap-2a/m1-lateral-markets.mjs",
       "status": "authored-candidate",
       "realOpenCourtyards": 3,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    }
+  ],
+  "M1TwinSideTerraces": [
+    {
+      "id": "r2:general-store:desert:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:pet-shop:temperate:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:magic-shop:snow:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:potion-shop:mountain:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bakery:enchanted-forest:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bank:temperate:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
       "creatorApproved": false,
       "integrated": false,
       "physicalMeshApproved": false,

@@ -29,8 +29,8 @@ const iou=(a,b)=>{let n=0;for(const k of a)if(b.has(k))n++;return n/(a.size+b.si
 
 test('six original stepped-court architectural sources increase 62 protected designs to 68/420 while remaining detached',()=>{
  assert.equal(old.length,62);assert.equal(M1_STEPPED_COURT_SHOPS.length,6);assert.equal(designs.length,68);
- assert.equal(inventory().authoredCandidateTotal,74);assert.equal(inventory().newlyAuthored,59);
- assert.equal(inventory().unwrittenNewCandidates,346);assert.equal(plannedSlots().filter(x=>x.authoredHere).length,74);
+ assert.equal(inventory().authoredCandidateTotal,80);assert.equal(inventory().newlyAuthored,65);
+ assert.equal(inventory().unwrittenNewCandidates,340);assert.equal(plannedSlots().filter(x=>x.authoredHere).length,80);
  assert.equal(assertDistinctArchitecture(designs).distinctArchitectures,68);
  for(const bp of M1_STEPPED_COURT_SHOPS){assert(validateBlueprint(bp).valid);assert.equal(bp.worldPlaced,false);assert.equal(bp.rooms.length,4);}
 });
