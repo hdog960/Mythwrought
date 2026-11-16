@@ -31,7 +31,9 @@ export function inspect2AUFootprints(books=M1_U_COURT_SHOPS,profiles=M1_U_COURT_
   for(const v of b.voxels.filter(v=>v.physicalVariant==='oak-stall-divider')){
    const shape=resolveManualFivePackAsset(v.material,{variant:v.physicalVariant,orientation:v.intendedFacing});
    if(shape.occupiedOffsets.length!==2)throw Error('producer oak divider not two-cell');
-   for(const [dx,dy,dz] of shape.occupiedOffsets){const loc=key(v.x+dx,v.y+dy,v.z+dz);if(used.has(loc))throw Error('two-cell physical stall collision '+loc);used.add(loc);blocked.add((v.x+dx)+','+(v.z+dz));physicalPenOccupiedCells++;}
+   for(const [dx,dy,dz] of shape.occupiedOffsets){const loc=key(v.x+dx,v.y+dy,v.z+dz);if(used.has(loc))throw Error('two-cell physical stall collision '+loc);
+    if(cells.get(loc)?.kind==='wall')throw Error('real oak pen second cell intersects source wall '+loc);
+    used.add(loc);blocked.add((v.x+dx)+','+(v.z+dz));physicalPenOccupiedCells++;}
   }
   for(const gate of b.openings.filter(v=>v.role==='vault-threshold')){
    const shape=resolveManualFivePackAsset(gate.doorSymbol,{variant:gate.physicalVariant,orientation:gate.intendedFacing});

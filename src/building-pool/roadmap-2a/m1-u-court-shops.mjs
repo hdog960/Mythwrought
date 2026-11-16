@@ -185,7 +185,7 @@ export const M1_U_COURT_SPECS=Object.freeze([
       ],
       [
         2,
-        11,
+        10,
         "pack5:096",
         "empty-display-stall",
         "oak-stall-divider",

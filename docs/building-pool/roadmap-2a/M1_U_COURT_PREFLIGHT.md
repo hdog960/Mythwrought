@@ -5,3 +5,5 @@ Six U-courtyard merchant buildings are true multi-wing occupied voxel structures
 The 15 inherited General Stores remain untouched, including their 197 unresolved fixture variants and the one known disconnected three-cell roof patch. Real physical family WebGL2 mesh rendering, Pack mounting/glazing, structural engineering and iPhone art approval remain separate gates; do not interpret this as approval.
 
 A separate exact-ground-floor D4 overlap test compares each new U-court footprint with all 61 other current 2A designs under all eight rotations/reflections, fail-closing at normalized planar Jaccard IoU 0.89. This is source-geometry similarity screening, not creator artistic approval.
+
+**Regression 2A U-court physical fixture:** A producer-resolved two-cell oak stall initially overlapped the new Desert Pet Shop's [2,2,12] partition wall. The fixture anchor was independently shifted from z=11 to z=10, preserving all other source geometry. The preflight now explicitly checks every producer-occupied cell against real source wall cells and includes a negative regression restoring the bad position to prove it fails closed.

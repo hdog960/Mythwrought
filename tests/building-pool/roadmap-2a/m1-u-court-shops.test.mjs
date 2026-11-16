@@ -27,6 +27,13 @@ test('physical producer-backed two-cell pens and vault plus true U roof absence 
  assert.equal(p.accessibleRooms,24);assert.equal(p.physicalFamilyMeshRendered,false);assert.equal(p.windowMountApproved,false);
  assert.equal(p.roofLoadCertified,false);assert.equal(p.creatorApproved,false);assert.equal(p.integrated,false);
 });
+test('true producer two-cell stall catches the originally evidenced source-partition collision rather than assuming a one-cell fixture',()=>{
+ const pet=M1_U_COURT_SHOPS.find(x=>x.category==='pet-shop'),profile=M1_U_COURT_PROFILES.find(x=>x.category==='pet-shop');
+ const original=pet.voxels.find(v=>v.kind==='fixture'&&v.material==='pack5:096'&&v.x===2&&v.z===10);
+ assert(original,'missing corrected source pen at [2,2,10]');
+ const damaged={...pet,voxels:pet.voxels.map(v=>v===original?{...v,z:11}:v)};
+ assert.throws(()=>inspect2AUFootprints([damaged],[profile]),/real oak pen second cell intersects source wall/);
+});
 test('negative weather tests fail closed when U court is roof-covered, missing inner wall or front step is filled',()=>{
  const p=M1_U_COURT_PROFILES[0],b=M1_U_COURT_SHOPS[0],c=p.openRearCourt,z=p.d-c.depth;
  const bogusRoof={x:c.x0,y:p.h+1,z,kind:'roof',material:p.roof};
