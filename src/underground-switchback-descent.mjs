@@ -229,6 +229,32 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // The -170 fault cathedral is a two-lobed, naturally pinched cavern.
+  // Its lateral fault line bends away from the spiral, with a broad central
+  // floor and an elevated roof profile; all cells remain below legacy Y.
+  {
+    const depth=-170,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,height)=>{
+        const x=anchor.x+outward[0]*d+tangent[0]*t;
+        const z=anchor.z+outward[1]*d+tangent[1]*t;
+        set(x,depth,z,BLOCK.DEEPSTONE);
+        for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
+      };
+      for(let d=0;d<=28;d++)for(let t=-1;t<=1;t++)carve(d,t,5);
+      for(const lobe of [{d:29,t:-9,rx:13,rz:9},{d:36,t:11,rx:10,rz:12}]){
+        for(let dd=-lobe.rx;dd<=lobe.rx;dd++)for(let tt=-lobe.rz;tt<=lobe.rz;tt++){
+          const radial=(dd/lobe.rx)**2+(tt/lobe.rz)**2;
+          if(radial>1)continue;
+          carve(lobe.d+dd,lobe.t+tt,4+Math.floor(9*(1-radial)));
+        }
+      }
+      for(let t=-9;t<=11;t++)for(let d=27;d<=29;d++)carve(d,t,5);
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
