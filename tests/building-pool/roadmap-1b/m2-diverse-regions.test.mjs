@@ -27,7 +27,7 @@ test('M2c: exact 118/435 inventory, 15 source-identical original stables and cat
  assert.equal(new Set(all.map(b=>b.id)).size,118);
  assert.equal(new Set(all.map(b=>structuralFingerprint(b))).size,118);
  assert.equal(new Set(fresh.map(b=>b.architecturalIdentity.program)).size,9);
- const expected={'bathhouse':14,stable:28,'farm-barn':15,greenhouse:15,'fishing-lodge':15,'harbor-office':15,lighthouse:15};
+ const expected={'bathhouse':15,stable:28,'farm-barn':15,greenhouse:15,'fishing-lodge':15,'harbor-office':15,lighthouse:15};
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(b=>b.category===k).length])),expected);
  for(const biome of BIOMES)for(const size of SIZES)for(const [category,max] of Object.entries(QUOTAS))
   assert.ok(all.filter(b=>b.category===category&&b.biome===biome&&b.size===size).length<=max);
