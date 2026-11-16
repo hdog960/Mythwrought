@@ -320,3 +320,41 @@ test('surface seam probes candidate carving below legacy and rejects saved deep 
   assert.deepEqual(restored.save(),saved);
   assert.equal(blocked.runtimeVerified,false);
 });
+
+for(const seed of [179,1,2026,-77])test('lower mineral gallery forks and rejoins with physical support '+seed,()=>{
+  const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  const reader=descentWorld(world),anchor=descentRoute().find(p=>p.floor===-120);
+  assert.ok(anchor,'missing lower-band route anchor');
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const at=(d,t,y)=>reader.get(anchor.x+outward[0]*d+tangent[0]*t,y,
+                              anchor.z+outward[1]*d+tangent[1]*t);
+  for(let d=0;d<=12;d++){
+    assert.equal(at(d,0,-120),BLOCK.DEEPSTONE,'vestibule support '+d);
+    assert.equal(at(d,0,-119),BLOCK.AIR,'vestibule headroom '+d);
+  }
+  for(let d=12;d<=36;d++){
+    const arc=Math.round(7*Math.sin(Math.PI*(d-12)/24));
+    for(const t of [arc,-arc]){
+      assert.equal(at(d,t,-120),BLOCK.DEEPSTONE,'arm support '+d+'/'+t);
+      assert.equal(at(d,t,-119),BLOCK.AIR,'arm headroom '+d+'/'+t);
+      assert.equal(at(d,t,-118),BLOCK.AIR,'arm body clearance '+d+'/'+t);
+    }
+  }
+  assert.equal(at(38,0,-120),BLOCK.DEEPSTONE);
+  assert.equal(at(38,0,-119),BLOCK.AIR);
+  assert.equal(descentConnectivity(world).connected,true);
+  assert.equal(JSON.stringify(world.save()),before);
+});
+test('saved player obstruction remains authoritative in lower mineral gallery',()=>{
+  const world=new VoxelWorld(179),anchor=descentRoute().find(p=>p.floor===-120);
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const x=anchor.x+outward[0]*24+tangent[0]*7;
+  const z=anchor.z+outward[1]*24+tangent[1]*7;
+  assert.equal(world.set(x,-119,z,BLOCK.WOOD),true);
+  const restored=VoxelWorld.restore(world.save());
+  assert.equal(descentWorld(restored).get(x,-119,z),BLOCK.WOOD);
+});
