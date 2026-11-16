@@ -145,7 +145,17 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
   ['market-square',844,390,'exterior','enchanted-forest','medium'],
   ['market-square',844,390,'cutaway','enchanted-forest','medium'],
   ['theater',932,430,'exterior','snow','medium'],
-  ['theater',932,430,'cutaway','snow','medium']
+  ['theater',932,430,'cutaway','snow','medium'],
+  ['tailor',844,390,'exterior','temperate','medium'],
+  ['tailor',844,390,'cutaway','temperate','medium'],
+  ['butcher',844,390,'exterior','desert','medium'],
+  ['butcher',844,390,'cutaway','desert','medium'],
+  ['jeweler',844,390,'exterior','mountain','medium'],
+  ['jeweler',844,390,'cutaway','mountain','medium'],
+  ['bookshop',844,390,'exterior','snow','medium'],
+  ['bookshop',844,390,'cutaway','snow','medium'],
+  ['theater',932,430,'exterior','enchanted-forest','large'],
+  ['theater',932,430,'cutaway','enchanted-forest','large']
  ];
  try{
   for(let i=0;i<cases.length;i++){
