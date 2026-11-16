@@ -32,7 +32,7 @@ function encode(source){
 }
 test('all 56 source-exact blueprint geometry previews are exported only as ephemeral, fully lossless CI artifact data',()=>{
  assert.equal(designs.length,56);
- assert.equal(new Set(designs.map(b=>b.id)).size,50);
+ assert.equal(new Set(designs.map(b=>b.id)).size,56);
  const records=designs.map(encode);
  const destination=join(process.cwd(),'artifacts','roadmap-2a-source-coordinates');
  mkdirSync(destination,{recursive:true});
@@ -43,7 +43,7 @@ test('all 56 source-exact blueprint geometry previews are exported only as ephem
   sourceCheckoutSha:process.env.GITHUB_SHA??null,designs:records},null,2)+'\n');
  const actual=JSON.parse(readFileSync(file,'utf8'));
  assert.equal(actual.designs.length,56);
- assert.equal(new Set(actual.designs.map(x=>x.id)).size,50);
+ assert.equal(new Set(actual.designs.map(x=>x.id)).size,56);
  assert(actual.designs.every(x=>x.runs.length%5===0&&x.cells>200&&x.windowCells>=0));
  assert.equal(actual.physicalFamilyRenderingApproved,false);
 });
