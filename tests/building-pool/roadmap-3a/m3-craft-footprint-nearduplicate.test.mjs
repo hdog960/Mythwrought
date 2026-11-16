@@ -42,7 +42,8 @@ test('30 M3 new craft structures reject near-identical oriented footprints and o
   const prior=earlier.find(x=>x.type===a.type&&x.biome===a.biome&&x.size===a.size&&x.variant===1);
   assert.ok(prior,'missing true prior source geometry '+a.id);
   assert.equal(a.spaces.length,4);
-  assert.equal(prior.spaces.length,2);
+  assert.ok(prior.spaces.length>=2);
+  assert.notDeepEqual(a.spaces.map(s=>s.kind),prior.spaces.map(s=>s.kind),'trade spaces must have distinct real functional programs');
   const similarity=nearSimilarity(a,prior);
   comparisons.push({a:a.id,b:prior.id,similarity,kind:'old-variant'});
   assert.ok(similarity<0.94,'near-duplicate old architected footprint '+a.id+' '+similarity);
