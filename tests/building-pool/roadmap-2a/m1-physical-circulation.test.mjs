@@ -14,6 +14,9 @@ function walk(b){
  // Real producer-owned Pack5 multi-cell footprints: conceptual 1-cell anchors
  // are NOT sufficient for determining a physically walkable route.
  for(const v of b.voxels.filter(v=>v.kind==='fixture'&&v.material.startsWith('pack5:'))){
+  // Original PR #124 has 197 Pack5 fixture occurrences without authored
+  // variant metadata. Do not guess or pretend those physical AABBs are resolved.
+  if(!v.physicalVariant||v.physicalVariant==='unresolved')continue;
   const shape=resolveManualFivePackAsset(v.material,{variant:v.physicalVariant,orientation:v.intendedFacing??'north'});
   if(shape.collisionBoxes.length===0)continue;
   for(const [dx,dy,dz] of shape.occupiedOffsets)if(dy===0)blocked.add(key(v.x+dx,v.z+dz));
