@@ -327,6 +327,39 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // Lower-band split-fault grotto at -135: an offset entry, broad oval
+  // chamber and sheltered rear pocket, all carved from physical voxel cells.
+  // A dogleg prevents the chamber from becoming another straight gray tube.
+  {
+    const depth=-135,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,r=2,height=5)=>{
+        for(let across=-r;across<=r;across++){
+          const x=anchor.x+outward[0]*d+tangent[0]*(t+across);
+          const z=anchor.z+outward[1]*d+tangent[1]*(t+across);
+          set(x,depth,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
+        }
+      };
+      for(let d=0;d<=38;d++){
+        const bend=d<12?0:d<25?Math.floor((d-12)/3):4;
+        carve(d,bend,2,6);
+      }
+      for(let d=26;d<=49;d++)for(let t=-7;t<=17;t++){
+        const ellipse=((d-37)/12)**2+((t-4)/13)**2;
+        if(ellipse>1)continue;
+        carve(d,t,0,5+Math.floor(7*(1-ellipse)));
+      }
+      for(let d=45;d<=58;d++)carve(d,10,2,5);
+      for(let d=53;d<=65;d++)for(let t=5;t<=17;t++){
+        if(((d-59)/7)**2+((t-11)/7)**2>1)continue;
+        carve(d,t,0,7);
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
