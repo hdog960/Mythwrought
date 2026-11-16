@@ -22,7 +22,10 @@ export function resolveBiome130BuilderAsset(symbol,orientation='north'){
     // The source opacity and leaf cutouts now have a dedicated game render path.
     alphaIntent:asset.alphaMode,transparentIntent:asset.transparent,
     rendererFidelity:asset.blockId===350?'alpha-blended':
-      (asset.blockId>=377&&asset.blockId<=385?'alpha-cutout':'opaque'),
+      (asset.blockId>=377&&asset.blockId<=385?'alpha-cutout':
+      ((asset.transparent||asset.opacity<1||
+        asset.opacity==='translucent'||asset.opacity==='cutout')?
+        'opaque-fallback':'opaque')),
     shape:Object.freeze({boxes:asset.boxes}),colors:asset.palette,
     builderUsable:true
   });

@@ -13,3 +13,7 @@ Baseline: incorporation 015 `1f67efc9805e83866549515ffdad4dc7e225b234`, all 130 
 - Leaf silhouettes are procedural cutout patterns, not final hand-authored leaf textures; thin stems are also cut out. Physical-iPhone art/performance approval is **not** claimed.
 - All eight builder PRs, all five manual Block Packs, control rails, world generation, saves/schema 1, and v0.11 lock are unchanged.
 - A dedicated isolated workflow runs source-native tests and three genuine Chromium WebGL2 viewport captures (667x375, 844x390, 932x430), checks save/reload and uploads actual screenshots. Preserve draft PR; do not merge without verification/authorization.
+
+## Deliberately outstanding alpha families
+
+Other pre-existing translucent ice and enchanted materials (for example 020, 021, 025) remain opaque-fallback and are **not** marked renderer-approved or misrepresented to the builders. Follow-up art/renderer work must assess them separately against the existing Pack 2 material ID 21, performance, and saved-world contracts.

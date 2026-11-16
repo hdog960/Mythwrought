@@ -21,6 +21,11 @@ test('only source-backed ice 095 and foliage 122–130 change render materials',
   }
   assert.equal(resolveBiome130BuilderAsset('biome130:095').rendererFidelity,'alpha-blended');
   assert.equal(resolveBiome130BuilderAsset('biome130:094').rendererFidelity,'opaque');
+  // Other authentic ice/enchanted alpha modes are still unmodified by this
+  // scoped renderer step; never misreport those families as alpha-approved.
+  assert.equal(resolveBiome130BuilderAsset('biome130:020').rendererFidelity,'opaque-fallback');
+  assert.equal(resolveBiome130BuilderAsset('biome130:021').rendererFidelity,'opaque-fallback');
+  assert.equal(resolveBiome130BuilderAsset('biome130:025').rendererFidelity,'opaque-fallback');
 });
 
 test('transparent router preserves all original 9-float vertices and stable ordering',()=>{
