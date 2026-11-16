@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M2 3rd cross-biome 15-house wave, 84/450 candidate geometry authored, independent exact-head CI pending",
+  "milestone": "M2 wave4: 15 distinctly structured houses and 37 roof wing regions; 99/450 authored, exact-head acceptance pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 366,
-  "newDesignsAuthored": 54,
-  "totalLaneGeometryAuthored": 84,
+  "additionalDesignsRequired": 351,
+  "newDesignsAuthored": 69,
+  "totalLaneGeometryAuthored": 99,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,11 +53,11 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Refresh native 84 full-pool and floorplan-near-duplicate CI on new wave3 layout corrections",
-    "Current exact-head additional 60 real source Pack1–5 visible AABB WebGL2 exterior/cutaway screenshots; diagnostic colors, provisional door save/collision state",
-    "87 more genuinely new houses before M2 150-house authoring milestone",
-    "366 unauthored across all 1A: 237 houses, 58 taverns, 71 inns",
-    "Roof load/weather, Pack2 stowed door hinge sweep and save sidecars, Pack4 transparency, Pack5 exact bed variant/collision, creator art/physical iPhone and controlled combined integration"
+    "Fresh exact-head native 99 pool tests, 84 original-object regression digest and 60-house normalized floorplan checks",
+    "Genuine Chromium WebGL2 426 authored cell-cube + 150 Pack producer visibleBox AABB views, all three phone landscape sizes",
+    "Actual world load, roof weather and structure, Pack2 door hinge sweeps, Pack4 pane transparency, Pack5 bed collision/save orientation remain UNAPPROVED",
+    "72 distinct houses until M2 150-house milestone; full 351 new building blueprints still unauthored",
+    "0 creator-final-approved/0 integrated, siblings/manual packs/automation/world runtime/CI/saves/v0.11 unchanged"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -76,7 +76,7 @@
   },
   "innCount": 1,
   "categoriesAuthored": {
-    "house": 63,
+    "house": 78,
     "tavern": 17,
     "inn": 4
   },
@@ -196,7 +196,7 @@
     "placements": 43330,
     "biomeSizeCoverage": "one source-authored house in each of 5 x 3 cells",
     "sourceInitial": "PASS 84 canonical validated unique IDs, D4 rotations/mirrors none, real route/support/bed preflight",
-    "nativeExactHead": "pending",
+    "nativeExactHead": "PASS Actions #43782346948 at 7e7d5eb124e4aaaa4aca0e77b00ac9da5b9a6e44: 735 root / 130 lane tests / 336 cube / 60 source AABB captures",
     "original69SourceGeometryPreserved": true,
     "webgl2SourceCellTarget": 336,
     "webgl2SourcePackAABBTarget": 60,
@@ -207,5 +207,20 @@
       "snow medium changed to grand hall and offset double-service rooms",
       "enchanted large changed to longitudinal axis and rear-open moonwell"
     ]
+  },
+  "m2Wave4": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave4.mjs",
+    "authored": 15,
+    "newPlacements": 56658,
+    "roofWingRegions": 37,
+    "baselineHead": "7e7d5eb124e4aaaa4aca0e77b00ac9da5b9a6e44",
+    "fullPriorGeometryPreserved": 84,
+    "maxCrossWavePlanIoU": 0.833,
+    "nativeCI": "PENDING",
+    "sourceCellBrowserTarget": 426,
+    "physicalVisibleBoxBrowserTarget": 150,
+    "creatorApproved": 0,
+    "integrated": 0,
+    "worldPlaced": false
   }
 }
