@@ -249,3 +249,27 @@ test('unreadable rollback fingerprint fails closed even when original block ID s
   assert.equal(f.readIdentity(),4);
   assert.equal(f.sidecar.get(f.cell,4),0);
 });
+
+
+test('ambiguous edit acknowledgements roll back partial writes rather than silently succeeding',async()=>{
+  for (const acknowledgement of [undefined, null, 1, 'ok']) {
+    const f=fixture();
+    let undos=0;
+    await assert.rejects(f.run(()=>{f.setId(6);return acknowledgement;},{
+      rollback:()=>{undos++;f.setId(4);}
+    }),/Invalid edit acknowledgement/);
+    assert.equal(undos,1);
+    assert.equal(f.readIdentity(),4);
+    assert.equal(f.sidecar.get(f.cell,4),3);
+  }
+});
+
+test('ambiguous acknowledgement with failed rollback invalidates orientation',async()=>{
+  const f=fixture();
+  await assert.rejects(f.run(()=>{f.setId(6);return undefined;},{
+    rollback:()=>false
+  }),error=>error instanceof AggregateError &&
+    error.errors[0].message==='Invalid edit acknowledgement' &&
+    error.errors[1].message==='Rollback explicitly rejected');
+  assert.equal(f.sidecar.get(f.cell,4),0);
+});
