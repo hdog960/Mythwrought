@@ -25,7 +25,7 @@ for(const seed of SEEDS){
       assert.ok(volumes[band].solid>30,'missing solid footing in band '+band);
       for(const p of positions){
         assert.notEqual(reader.get(p.x,p.floor,p.z),BLOCK.AIR,'unsupported '+p.floor);
-        for(let h=1;h<=2;h++)
+        for(let h=1;h<=4;h++)
           assert.equal(reader.get(p.x,p.floor+h,p.z),BLOCK.AIR,'blocked player body at '+p.floor);
       }
     }
@@ -46,6 +46,26 @@ for(const seed of SEEDS){
       assert.equal(audit.connected,false,'obstruction must fail full-depth readiness');
       assert.ok(audit.failures.some(f=>f.reason==='blocked-or-unsupported'));
       assert.deepEqual(restored.save(),saved,'candidate audit modified saved edits');
+    });
+  }
+}
+
+for(const seed of SEEDS){
+  for(let band=0;band<4;band++){
+    test('saved overhead edit rejects four-cell route envelope, band '+band+' seed '+seed,()=>{
+      const world=new VoxelWorld(seed);
+      const [high,low]=BANDS[band];
+      const positions=descentRoute().filter(p=>p.floor<=high&&p.floor>=low);
+      const p=positions[Math.floor(positions.length/2)];
+      assert.ok(p);
+      assert.equal(world.set(p.x,p.feet+3,p.z,BLOCK.WOOD),true);
+      const saved=world.save();
+      const restored=VoxelWorld.restore(saved);
+      assert.equal(descentWorld(restored).get(p.x,p.feet+3,p.z),BLOCK.WOOD);
+      const report=descentConnectivity(restored);
+      assert.equal(report.connected,false,'overhead obstruction must reject readiness');
+      assert.ok(report.failures.some(f=>f.reason==='blocked-or-unsupported'&&f.height===3));
+      assert.deepEqual(restored.save(),saved,'validation must not mutate player edits');
     });
   }
 }
