@@ -19,6 +19,10 @@ export function resolveBiome130BuilderAsset(symbol,orientation='north'){
     symbol:asset.symbol,blockId:asset.blockId,name:asset.name,
     yaw,source:'auto:12-biome130',worldRegistered:true,livePlaceable:true,
     physical:true,solid:asset.solid,opacity:asset.opacity,
+    // Source intent is preserved for downstream art review. The current
+    // single-pass terrain renderer has no alpha blending/cutout pass.
+    alphaIntent:asset.alphaMode,transparentIntent:asset.transparent,
+    rendererFidelity:(asset.transparent||asset.opacity<1)?'opaque-fallback':'opaque',
     shape:Object.freeze({boxes:asset.boxes}),colors:asset.palette,
     builderUsable:true
   });
