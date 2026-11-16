@@ -145,8 +145,8 @@ function build(q){
  // Actual producer referenced but nonfunctional crates / dry stone measuring slab.
  function fixture(ref,name,side){
   const a=side==='west'?western[1]:eastern[1];
-  for(let z=a.z+2;z<a.end-1;z++)for(let x=side==='west'?a.edge+3:mid+8;
-      x<=(side==='west'?mid-6:a.edge-3);x++){
+  for(let z=a.z+2;z<a.end-1;z++)for(let x=side==='west'?a.edge+3:mid+6;
+      x<=(side==='west'?mid-6:a.edge-2);x++){
    if(!foot(x,z)||yard(x,z)||aisle(x,z)||!has(x,1,z)||has(x,2,z))continue;
    if(![[-1,0],[1,0],[0,-1],[0,1]].every(([dx,dz])=>foot(x+dx,z+dz)))continue;
    put('fixture',x,2,z,ref,{orientation:'north',state:{}});
