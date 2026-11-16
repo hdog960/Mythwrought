@@ -33,7 +33,7 @@ const SOURCE=[
 'carpenter|enchanted-forest|large|heartroot-wood-cantilever-yard|52|54|13|12|10|10|12|27|23|8|tree-terrace',
 'carpenter|mountain|small|cragpass-stave-and-cart-court|38|40|10|11|8|8|10|19|15|5|cliff-shed',
 'carpenter|mountain|medium|stonepass-bridgewrights-square|45|47|12|11|9|10|11|23|20|7|ridge-terrace',
-'carpenter|mountain|large|skybridge-joinery-fortified-yard|53|55|13|13|10|11|13|27|22|8|high-saw',
+'carpenter|mountain|large|skybridge-joinery-fortified-yard|53|55|10|15|11|8|16|24|19|8|high-saw',
 'stonemason|temperate|small|creek-ashlar-curved-yard|35|38|10|9|8|8|9|17|14|5|round-vault',
 'stonemason|temperate|medium|guild-quarter-archcutters-court|42|45|11|10|9|9|11|22|18|6|column-hip',
 'stonemason|temperate|large|bridgegate-master-keystone-forum|50|53|12|12|10|10|12|25|21|8|stepped-vault',
