@@ -3,11 +3,12 @@ import {M1_SPECIALIST_EXEMPLARS} from '../../../src/building-pool/roadmap-2a/m1-
 import {M1_NEW_MERCHANTS} from '../../../src/building-pool/roadmap-2a/m1-additional-shops.mjs';
 import {M1_REGIONAL_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-regional-shops.mjs';
 import {M1_BIOME_EXPANSION} from '../../../src/building-pool/roadmap-2a/m1-biome-expansion.mjs';
+import {M1_CATEGORY_ARCADES} from '../../../src/building-pool/roadmap-2a/m1-category-arcades.mjs';
 // WebGL2 renders the ACTUAL source-authored integer cells as simple opaque
 // cube proxies. This is not final physical Pack family geometry/collision.
-const designs=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION];
+const designs=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES];
 const byId=new Map(designs.map(x=>[x.id,x]));
-if(designs.length!==38||byId.size!==38)throw Error('Unexpected authored building count');
+if(designs.length!==44||byId.size!==44)throw Error('Unexpected authored building count');
 const select=document.getElementById('building'),mode=document.getElementById('view');
 for(const b of designs){const el=document.createElement('option');el.value=b.id;el.textContent=b.title+' · '+b.biome+'/'+b.size;select.append(el);}
 const params=new URLSearchParams(location.search);

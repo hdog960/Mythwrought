@@ -5,8 +5,9 @@ import {M1_SPECIALIST_EXEMPLARS} from '../../../src/building-pool/roadmap-2a/m1-
 import {M1_NEW_MERCHANTS} from '../../../src/building-pool/roadmap-2a/m1-additional-shops.mjs';
 import {M1_REGIONAL_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-regional-shops.mjs';
 import {M1_BIOME_EXPANSION} from '../../../src/building-pool/roadmap-2a/m1-biome-expansion.mjs';
+import {M1_CATEGORY_ARCADES} from '../../../src/building-pool/roadmap-2a/m1-category-arcades.mjs';
 import {resolveManualFivePackAsset} from '../../../src/builder-assets/manual-five-pack.mjs';
-const buildings=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION];
+const buildings=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES];
 const key=(x,z)=>x+','+z;
 function walk(b){
  const source=new Map(b.voxels.map(v=>[[v.x,v.y,v.z].join(','),v]));
@@ -33,8 +34,8 @@ function walk(b){
  }
  return {reached,blocked};
 }
-test('real producer-based multi-cell fixture footprints leave all 38 authored 2A room entrances reachable',()=>{
- assert.equal(buildings.length,38);
+test('real producer-based multi-cell fixture footprints leave all 44 authored 2A room entrances reachable',()=>{
+ assert.equal(buildings.length,44);
  let verified=0;
  for(const b of buildings){
   const walkable=walk(b);

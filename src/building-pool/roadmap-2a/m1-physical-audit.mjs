@@ -5,11 +5,12 @@ import {M1_SPECIALIST_EXEMPLARS} from './m1-specialist-exemplars.mjs';
 import {M1_NEW_MERCHANTS} from './m1-additional-shops.mjs';
 import {M1_REGIONAL_SHOPS} from './m1-regional-shops.mjs';
 import {M1_BIOME_EXPANSION} from './m1-biome-expansion.mjs';
+import {M1_CATEGORY_ARCADES} from './m1-category-arcades.mjs';
 import {
  MANUAL_FIVE_PACK_COUNTS,MANUAL_FIVE_PACK_FAMILY_SYMBOLS,
  manualFivePackVariants,resolveManualFivePackAsset
 } from '../../builder-assets/manual-five-pack.mjs';
-const buildings=Object.freeze([...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION]);
+const buildings=Object.freeze([...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES]);
 const known=new Set(MANUAL_FIVE_PACK_FAMILY_SYMBOLS);
 const faces=(v,b)=>{
  if(v.z===0)return 'north';
