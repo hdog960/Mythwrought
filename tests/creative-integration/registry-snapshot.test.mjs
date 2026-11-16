@@ -18,11 +18,19 @@ test('G1 reads the real installed BUILD_MATERIALS, not draft manual builder cata
   assert.deepEqual(s.excluded.map(x=>x.id),[76]);
   assert.match(s.excluded[0].reason,/not-certified/);
 });
-test('G1 includes current authored biome registry but no unmerged 071..130 candidates',()=>{
+test('G1 includes installed biome130 001..080 without exposing unregistered 081..130',()=>{
  const s=snapshot(), ids=new Set(s.records.map(x=>x.id));
- assert.equal(BIOME130_REGISTERED_IDS.length,70);
+ // Updated against integrated main 440ab01a (live registration of 071..080).
+ assert.equal(BIOME130_REGISTERED_IDS.length,80);
  assert.ok(BIOME130_REGISTERED_IDS.every(id=>ids.has(id)));
- assert.ok(!ids.has(326) && !ids.has(385));
+ for(let ordinal=1;ordinal<=80;ordinal++){
+  const id=255+ordinal;
+  assert.ok(BIOME130_REGISTERED_IDS.includes(id),'Missing registered biome130:'+ordinal);
+  assert.ok(ids.has(id),'Live biome family withheld: '+ordinal);
+ }
+ for(let ordinal=81;ordinal<=130;ordinal++)
+  assert.ok(!ids.has(255+ordinal),'Unregistered biome candidate leaked: '+ordinal);
+ assert.equal(s.records.length,102);
 });
 test('G1 includes only independently verified Pack2 solid selections',()=>{
  const s=snapshot(), ids=new Set(s.records.map(x=>x.id));

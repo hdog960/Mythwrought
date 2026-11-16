@@ -1,13 +1,14 @@
 # Mythwrought — G1 Read-Only Runtime Inventory Acceptance
 
-**Status:** G1 candidate on an isolated DRAFT integration branch; no live-world integration or activation. Exact-head GitHub CI must complete and be reverified before technical acceptance.
+**Status:** G1 source is independently CI-verified at its prior exact head, but the amended candidate requires a new exact-head GitHub CI run against the reconciled latest main before technical acceptance. Isolated DRAFT integration branch; no live-world integration or activation.
 
 ## Scope and exact source provenance
 
 - Runtime allowlist is imported from production `src/blocks.mjs` `BUILD_MATERIALS`. Core definitions come from `src/voxel.mjs`, authored biome definitions from `src/biome130-registry.mjs`, and live Pack2 definitions from `src/pack2-integration.mjs`.
 - Builder dependency catalogs are not runtime registration: the 96-family/106-variant manual five-pack handoff and eight building PRs are expressly excluded. No IDs are synthesized.
 - Numeric ID `76` (authored water) is registered in the live Pack2 source but its fluid geometry uses a non-box triangle-level selector. G1 explicitly lists it as `excluded:[{id:76,reason:'fluid-selection-adapter-not-certified'}]`; never generate a cube stand-in.
-- Other registered ordinary materials, 70 installed biome130 definitions, and 17 supported nonfluid Pack2 definitions are validated at source, with conservative neutral rotation for stateful Pack2. Expected current merge baseline: **92 read-only records and one explained exclusion**, subject to exact-head CI and source execution.
+- Other registered ordinary materials, **80 installed biome130 definitions (001–080)**, and 17 supported nonfluid Pack2 definitions are validated at source, with conservative neutral rotation for stateful Pack2. Expected current merged-main baseline: **102 read-only records and one explained exclusion**, subject to updated exact-head CI and source execution. Biome130 families **081–130 remain unregistered candidates** and must not leak into the catalog.
+- Reconciliation source: `main` at `440ab01a942bb3378d6ac2ff07945f4a9fb9861d` incorporated 071–080. G1 dynamically reads the live `BIOME130_REGISTERED_IDS` list; only the earlier fixed-70 native test and documentation were stale. Current release-baseline tests additionally verify all 001–080 are included and 081–130 excluded. G1 has no new producer source modifications.
 - Any future registry additions need explicit G1 validator support; unknown producer IDs fail closed. The output's source label is informational, not an authentication signature.
 
 ## Source interfaces
@@ -23,7 +24,7 @@ node --test tests/creative-integration-g1.test.mjs
 npm test
 ```
 
-The 21 dedicated native tests exercise the compiled production imports in GitHub CI: provenance and ID exclusion, missing physical metadata, draft rejection, duplicates, typed IDs, rotation and anchor checks, deterministic snapshot revisions, read-only port surface and deep freeze. Local development used an **explicitly disposable stub for the imported production API**, so local passing tests alone do not prove live sources. CI must run the exact head against real repo modules and the full 20-script WebGL2 gate; record success/failure and exact SHA without inventing the outcome.
+The 21 dedicated native tests exercise the compiled production imports in GitHub CI (the revised source-specific registry test remains one test): provenance and ID exclusion, missing physical metadata, draft rejection, duplicates, typed IDs, rotation and anchor checks, deterministic snapshot revisions, read-only port surface and deep freeze. Local development used an **explicitly disposable stub for the imported production API**, so local passing tests alone do not prove live sources. CI must run the exact head against real repo modules and the full 20-script WebGL2 gate; record success/failure and exact SHA without inventing the outcome.
 
 No G1 visual UI is attached; do not describe detached inventory screenshots or ordinary CI WebGL2 gates as physical-iPhone Creative Mode testing. There are no G1 save writes to test.
 
