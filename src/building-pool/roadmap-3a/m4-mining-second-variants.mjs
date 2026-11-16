@@ -137,7 +137,10 @@ function build(q){
   }
  }
  for(const a of eastern){
-  const x=a.edge-3;
+  // Dune-crush's first assay finger has an intentionally larger uncovered
+  // courtyard. Keep its hand-sample plinth on the sheltered inside lip,
+  // rather than deleting the actual trade fixture or weakening its test.
+  const x=(a.id===1&&q.biome==='desert'&&q.size==='small')?rightInner+2:a.edge-3;
   for(let z=a.z+2;z<a.end-1;z+=5)
    if(foot(x,z)&&!aisle(x,z)&&!yard(x,z)&&!has(x,2,z))
     put(a.id===1?'hand-sample-grading-plinth':'mineral-weighing-stand',x,2,z,P.slab);
