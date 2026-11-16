@@ -84,6 +84,22 @@ test('M4 fourth: 15 independently briefed four-chevron radial mining headhouses,
      assert.ok(filled.has(at(x,0,z)),b.id+' large southeast annex missing grounded masonry at '+x+','+z);
      assert.ok(filled.has(at(x,1,z)),b.id+' large southeast annex missing real stone deck at '+x+','+z);
     }
+   // Real camera projection has screen-right at high X and LOW Z, hence
+   // northeast -- the former pointed wing, not the southeast bay above.
+   // Require an actual rectangular source foundation, accessible stone
+   // deck, roof closure and perimeter masonry at EVERY original north-wing
+   // Z, rather than trusting a programme flag or rendered screenshot.
+   const sourceEastReach=Math.max(16,s.eastReach+1-(s.northeastLen%3));
+   const facadeX=xCenter+6+sourceEastReach;
+   const roofs=new Set(b.modules.find(m=>m.role==='roof').cells.map(c=>c[0]+','+c[2]));
+   for(let z=s.northeastZ;z<s.northeastZ+s.northeastLen;z++){
+    for(let x=xCenter+10;x<=facadeX;x++){
+     assert.ok(filled.has(at(x,0,z)),b.id+' far-right camera-facing NE wing floats at '+x+','+z);
+     assert.ok(filled.has(at(x,1,z)),b.id+' far-right NE annex has no source deck at '+x+','+z);
+     assert.ok(roofs.has(x+','+z),b.id+' roofless far-right NE trading hall '+x+','+z);
+    }
+    assert.ok(filled.has(at(facadeX,2,z)),b.id+' missing grounded perimeter masonry facade at '+facadeX+','+z);
+   }
   }
 
   assert.equal(b.spaces.length,7);assert.equal(b.navigation.nodes.length,8);
