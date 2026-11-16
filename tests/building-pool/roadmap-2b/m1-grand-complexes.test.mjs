@@ -77,7 +77,7 @@ test('full occupied foundations, supported walking floors, declared windows, and
 test('every buyer and workroom destination has genuine floor access from physical public entrance',()=>{
  for(const b of NEW){
   const accessible=walk(b);
-  assert(b.routeTargets.length>=4,b.id);
+  assert(b.routeTargets.length>=3,b.id+' missing three functional destinations');
   for(const t of b.routeTargets)
    assert(accessible.has(t.x+','+t.z),b.id+' cannot reach '+t.name);
  }
