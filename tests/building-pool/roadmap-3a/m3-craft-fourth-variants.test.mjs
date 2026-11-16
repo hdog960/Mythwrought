@@ -128,7 +128,7 @@ test('true perimeter U-court footprints have genuinely empty sky courtyards, sup
   assert.ok(empty>50,b.id+' courtyard is not genuinely excavated');
   assert.ok(openPath>10,b.id+' courtyard crossing not open to the sky');
   // A locally witnessed roof support is NOT an engineering load certificate.
-  const supports=new Set([...byRole.get('roof-purlin'),...byRole.get('bearing-pier'),...byRole.get('wall')]
+  const supports=new Set([...byRole.get('roof-purlin'),...byRole.get('bearing-pier'),...byRole.get('wall'),...(byRole.get('roof-return-knee')??[])]
    .map(c=>key(...c.slice(0,3))));
   let witnesses=0,samples=0;
   for(let i=0;i<byRole.get('roof').length;i+=7){
