@@ -6,47 +6,47 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 32,
-  "authoredCandidates": 47,
-  "remainingUnauthored": 373,
+  "originalNewModels": 40,
+  "authoredCandidates": 55,
+  "remainingUnauthored": 365,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
+      "authored": 7,
+      "target": 60,
+      "remaining": 53
+    },
+    "tailor": {
+      "authored": 5,
+      "target": 60,
+      "remaining": 55
+    },
+    "butcher": {
+      "authored": 5,
+      "target": 60,
+      "remaining": 55
+    },
+    "jeweler": {
+      "authored": 5,
+      "target": 60,
+      "remaining": 55
+    },
+    "bookshop": {
       "authored": 6,
       "target": 60,
       "remaining": 54
     },
-    "tailor": {
-      "authored": 4,
-      "target": 60,
-      "remaining": 56
-    },
-    "butcher": {
-      "authored": 4,
-      "target": 60,
-      "remaining": 56
-    },
-    "jeweler": {
-      "authored": 4,
-      "target": 60,
-      "remaining": 56
-    },
-    "bookshop": {
-      "authored": 4,
-      "target": 60,
-      "remaining": 56
-    },
     "temple": {
-      "authored": 18,
+      "authored": 19,
       "target": 75,
-      "remaining": 57
+      "remaining": 56
     },
     "theater": {
-      "authored": 7,
+      "authored": 8,
       "target": 45,
-      "remaining": 38
+      "remaining": 37
     }
   },
   "originals": [
@@ -209,38 +209,78 @@
       "id": "r2:theater:enchanted-forest:small:01",
       "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:temperate:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:snow:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:enchanted-forest:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:desert:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:snow:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:mountain:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:snow:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:temperate:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
       "small": 8,
-      "medium": 2,
+      "medium": 4,
       "large": 1
     },
     "desert": {
-      "small": 3,
+      "small": 4,
       "medium": 5,
       "large": 2
     },
     "snow": {
-      "small": 3,
-      "medium": 3,
+      "small": 5,
+      "medium": 4,
       "large": 3
     },
     "enchanted-forest": {
-      "small": 3,
+      "small": 4,
       "medium": 3,
       "large": 3
     },
     "mountain": {
       "small": 2,
-      "medium": 2,
+      "medium": 3,
       "large": 4
     }
   },
   "productionRegistryUnchanged": true,
   "physicalShapeAbiCertified": false,
   "screenshotClassification": "software WebGL2 cube proxies; neither physical-family WebGL2 nor live game",
-  "lastMilestone": "M1 — eight new climate-specific candidate spaces, exact-head checks pending",
-  "evidenceClassification": "Builder-source genuine Chromium/WebGL2 cube proxies, never physical-family or live gameplay"
+  "lastMilestone": "M1 — 55 real source-authored candidates, exact-head CI pending",
+  "evidenceClassification": "native source/test, genuine Chromium software-WebGL2 cube proxies only; physical-family/webgame/iPhone unapproved"
 }
