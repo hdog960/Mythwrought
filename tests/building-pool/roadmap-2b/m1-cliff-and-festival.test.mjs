@@ -118,6 +118,13 @@ test('four mountain vendor roofs and six woodland festival roofs have actual sep
   }
  }
 });
+test('woodland high festival arch has two continuous foundation-connected bearing posts',()=>{
+ const b=byId.get('r2:market-square:enchanted-forest:medium:01'),m=voxels(b);
+ for(const x of [14,22])for(let y=0;y<=8;y++)
+  assert(m.has(key(x,y,27)),b.id+' unsupported upper festival arch '+x+','+y+',27');
+ for(let x=14;x<=22;x++)
+  assert.equal(m.get(key(x,8,27))?.role,'high-festival-bough');
+});
 test('true skylights and tiered roofs have physical empty sky/ground-to-height support at the documented sections',()=>{
  for(const id of ['r2:tailor:mountain:small:01','r2:butcher:mountain:small:01',
   'r2:jeweler:mountain:small:01','r2:theater:mountain:small:01']){
