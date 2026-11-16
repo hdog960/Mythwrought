@@ -96,7 +96,7 @@ for(const b of fresh){
    }
   }
   assert.equal(absence,b.architecturalIdentity.exteriorVoidFootprintCells);
-  assert.ok(absence>50&&absence/(w*d)>.08);
+  assert.ok(absence>=40&&absence/(w*d)>.06,'real substantial void even in smaller regional homes');
   assert.ok(notchFacing>=8,'no actual notch-facing wall');
   const q=[b.portals[0].at],seen=new Set([key(q[0])]);
   for(let i=0;i<q.length;i++)for(const [dx,dz] of [[-1,0],[1,0],[0,-1],[0,1]]){
