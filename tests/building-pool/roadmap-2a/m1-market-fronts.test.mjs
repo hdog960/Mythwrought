@@ -37,7 +37,8 @@ test('new source-authored shops each have three reachable rooms, window-specific
   for(const o of b.openings.filter(o=>o.type==='entrance'||o.type==='internal-doorway'))
    for(let d=0;d<3;d++)assert(!c.has(coord(o.x,o.y+d,o.z)),b.id+' obstructed opening');
   for(const w of b.openings.filter(o=>o.type==='window'))assert.equal(c.get(coord(w.x,w.y,w.z))?.material,w.material);
-  assert.equal(b.openings.filter(o=>o.role?.includes('-portico-')).length,3);
+  const porticoOpenings=b.openings.filter(o=>o.role&&['-outer-secondary','-inner-primary','-inner-secondary'].some(suffix=>o.role.endsWith(suffix)));
+  assert.equal(porticoOpenings.length,3,b.id+' missing source-authored two-wide portico portal');
   assert(b.voxels.filter(v=>v.portico).length>=6);
  }
 });
