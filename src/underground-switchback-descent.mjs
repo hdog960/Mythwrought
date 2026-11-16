@@ -258,3 +258,43 @@ export function descentVolumeEvidence(world,origin=DESCENT_ORIGIN){
   }
   return counts;
 }
+
+
+/**
+ * Audit the four return loops as real walkable voxels, not merely carved
+ * coordinates. A player edit blocking a gallery must invalidate that loop.
+ * This is candidate geometry evidence, not a live-game entrance certificate.
+ */
+export function descentLoopConnectivity(world,origin=DESCENT_ORIGIN){
+  const reader=descentWorld(world,origin),route=descentRoute(origin);
+  const levels=[];
+  for(const depth of [-30,-80,-130,-180]){
+    const anchor=route.find(p=>p.floor===depth);
+    if(!anchor){levels.push({depth,connected:false,failures:['missing-anchor']});continue;}
+    const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+    const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+    const tangent=[outward[1],-outward[0]];
+    const failures=[];
+    const check=(d,t,part)=>{
+      const x=anchor.x+outward[0]*d+tangent[0]*t;
+      const z=anchor.z+outward[1]*d+tangent[1]*t;
+      if(reader.get(x,depth,z)===BLOCK.AIR||
+         reader.get(x,depth+1,z)!==BLOCK.AIR||
+         reader.get(x,depth+2,z)!==BLOCK.AIR)
+        failures.push({part,d,t,x,z});
+    };
+    // Both branches and their common outer cross-gallery form a closed loop.
+    for(let d=0;d<=12;d++){check(d,0,'first-branch');check(d,0,'second-branch');}
+    for(let t=0;t<=10;t++){
+      check(12,t,'turning-branch');
+      check(19,t,'outer-return');
+    }
+    // The chamber disks connect d=12 to d=19 at each end.
+    for(let d=12;d<=19;d++){
+      check(d,0,'first-chamber');
+      check(d,10,'second-chamber');
+    }
+    levels.push({depth,connected:failures.length===0,failures});
+  }
+  return {connected:levels.every(level=>level.connected),levels};
+}
