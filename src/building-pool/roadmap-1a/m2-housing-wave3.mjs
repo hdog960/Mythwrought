@@ -11,59 +11,72 @@ const SPECS=Object.freeze([
     "title": "Willowbridge Side-Gallery Home",
     "w": 20,
     "d": 18,
-    "plan": "west-east-gallery-with-private-cooking-and-sleeping-two-bay-wing",
+    "plan": "broad-parlor-to-rear-west-sleeping-room-and-east-cooking-niche",
     "roof": "hip",
     "skin": "live:wood",
     "roofAsset": "pack3:023",
     "segments": [
       [
-        9,
         2,
-        9,
-        15
+        8,
+        17,
+        8
       ],
       [
         10,
         9,
-        17,
-        9
+        10,
+        15
       ]
     ],
     "entry": [
-      5,
+      7,
       1,
-      "gallery"
+      "family"
     ],
     "doors": [
       {
         "at": [
-          9,
+          5,
           1,
-          5
+          8
         ],
-        "from": "gallery",
-        "to": "cook"
+        "from": "family",
+        "to": "sleep"
       },
       {
         "at": [
-          13,
+          10,
           1,
-          9
+          12
         ],
-        "from": "cook",
-        "to": "sleep"
+        "from": "sleep",
+        "to": "cook"
       }
     ],
     "rooms": [
       {
-        "id": "gallery",
+        "id": "family",
         "min": [
           2,
           1,
           2
         ],
         "max": [
-          9,
+          18,
+          4,
+          8
+        ]
+      },
+      {
+        "id": "sleep",
+        "min": [
+          2,
+          1,
+          9
+        ],
+        "max": [
+          10,
           4,
           16
         ]
@@ -71,22 +84,9 @@ const SPECS=Object.freeze([
       {
         "id": "cook",
         "min": [
-          10,
+          11,
           1,
-          2
-        ],
-        "max": [
-          18,
-          4,
           9
-        ]
-      },
-      {
-        "id": "sleep",
-        "min": [
-          10,
-          1,
-          10
         ],
         "max": [
           18,
@@ -124,28 +124,28 @@ const SPECS=Object.freeze([
     ],
     "fixtures": [
       {
-        "x": 5,
+        "x": 7,
         "z": 4,
-        "room": "gallery",
+        "room": "family",
         "asset": "pack4:064"
       },
       {
-        "x": 14,
-        "z": 5,
-        "room": "cook",
-        "asset": "pack4:057"
-      },
-      {
-        "x": 11,
-        "z": 11,
+        "x": 3,
+        "z": 10,
         "room": "sleep",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
       },
       {
-        "x": 4,
-        "z": 13,
-        "room": "gallery",
+        "x": 14,
+        "z": 12,
+        "room": "cook",
+        "asset": "pack4:057"
+      },
+      {
+        "x": 13,
+        "z": 5,
+        "room": "family",
         "asset": "pack4:059"
       }
     ],
@@ -153,7 +153,7 @@ const SPECS=Object.freeze([
       3,
       16
     ],
-    "detail": "riverfront-gallery-and-deep-staggered-bedroom"
+    "detail": "transverse-parlor-and-offset-west-sleeping-fireplace-bay"
   },
   {
     "category": "house",
@@ -1354,53 +1354,44 @@ const SPECS=Object.freeze([
     "title": "Pinefrost Central-Bastion House",
     "w": 25,
     "d": 23,
-    "plan": "center-hearth-leading-to-two-wide-side-wings-and-rear-workshop",
+    "plan": "winter-grand-hall-to-left-deep-bed-wing-and-right-double-service-niches",
     "roof": "sawtooth",
     "skin": "live:wood",
     "roofAsset": "pack3:025",
     "segments": [
       [
-        10,
         2,
         10,
-        20
+        22,
+        10
       ],
       [
-        15,
-        2,
-        15,
-        20
-      ],
-      [
+        12,
         11,
+        12,
+        20
+      ],
+      [
         13,
-        14,
-        13
+        16,
+        22,
+        16
       ]
     ],
     "entry": [
-      12,
+      10,
       1,
-      "hearth"
+      "hall"
     ],
     "doors": [
       {
         "at": [
-          10,
+          5,
           1,
-          6
+          10
         ],
-        "from": "hearth",
+        "from": "hall",
         "to": "sleep"
-      },
-      {
-        "at": [
-          15,
-          1,
-          7
-        ],
-        "from": "hearth",
-        "to": "kitchen"
       },
       {
         "at": [
@@ -1408,22 +1399,31 @@ const SPECS=Object.freeze([
           1,
           13
         ],
-        "from": "hearth",
-        "to": "work"
+        "from": "sleep",
+        "to": "kitchen"
+      },
+      {
+        "at": [
+          18,
+          1,
+          16
+        ],
+        "from": "kitchen",
+        "to": "study"
       }
     ],
     "rooms": [
       {
-        "id": "hearth",
+        "id": "hall",
         "min": [
-          11,
+          2,
           1,
           2
         ],
         "max": [
-          15,
+          23,
           4,
-          13
+          10
         ]
       },
       {
@@ -1431,10 +1431,10 @@ const SPECS=Object.freeze([
         "min": [
           2,
           1,
-          2
+          11
         ],
         "max": [
-          10,
+          12,
           4,
           21
         ]
@@ -1442,25 +1442,25 @@ const SPECS=Object.freeze([
       {
         "id": "kitchen",
         "min": [
-          16,
+          13,
           1,
-          2
+          11
         ],
         "max": [
           23,
           4,
-          21
+          16
         ]
       },
       {
-        "id": "work",
+        "id": "study",
         "min": [
-          11,
+          13,
           1,
-          14
+          17
         ],
         "max": [
-          15,
+          23,
           4,
           21
         ]
@@ -1495,28 +1495,28 @@ const SPECS=Object.freeze([
     ],
     "fixtures": [
       {
-        "x": 12,
-        "z": 4,
-        "room": "hearth",
+        "x": 10,
+        "z": 5,
+        "room": "hall",
         "asset": "pack4:064"
       },
       {
-        "x": 3,
-        "z": 11,
+        "x": 4,
+        "z": 13,
         "room": "sleep",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
       },
       {
-        "x": 19,
-        "z": 12,
+        "x": 18,
+        "z": 13,
         "room": "kitchen",
         "asset": "pack4:057"
       },
       {
-        "x": 12,
-        "z": 16,
-        "room": "work",
+        "x": 19,
+        "z": 18,
+        "room": "study",
         "asset": "pack5:084"
       }
     ],
@@ -1524,7 +1524,7 @@ const SPECS=Object.freeze([
       5,
       20
     ],
-    "detail": "central-bastion-with-side-thermal-service-wings"
+    "detail": "deep-winter-hall-with-asymmetrical-nesting-privacy-and-cookery"
   },
   {
     "category": "house",
@@ -1788,47 +1788,47 @@ const SPECS=Object.freeze([
     "title": "Thistleglow Side-Bower Cottage",
     "w": 20,
     "d": 19,
-    "plan": "front-forest-bower-leading-to-split-cooking-and-nursery-wing",
+    "plan": "front-fairy-bower-with-back-split-nursery-and-cooking-wings",
     "roof": "butterfly",
     "skin": "pack2:013",
     "roofAsset": "pack3:023",
     "segments": [
       [
-        8,
         2,
         8,
-        16
+        17,
+        8
       ],
       [
+        12,
         9,
-        10,
-        17,
-        10
+        12,
+        16
       ]
     ],
     "entry": [
-      5,
+      9,
       1,
       "bower"
     ],
     "doors": [
       {
         "at": [
-          8,
+          5,
           1,
-          5
+          8
         ],
         "from": "bower",
-        "to": "kitchen"
+        "to": "sleep"
       },
       {
         "at": [
-          13,
+          12,
           1,
-          10
+          12
         ],
-        "from": "kitchen",
-        "to": "nursery"
+        "from": "sleep",
+        "to": "kitchen"
       }
     ],
     "rooms": [
@@ -1840,7 +1840,20 @@ const SPECS=Object.freeze([
           2
         ],
         "max": [
-          8,
+          18,
+          4,
+          8
+        ]
+      },
+      {
+        "id": "sleep",
+        "min": [
+          2,
+          1,
+          9
+        ],
+        "max": [
+          12,
           4,
           17
         ]
@@ -1848,22 +1861,9 @@ const SPECS=Object.freeze([
       {
         "id": "kitchen",
         "min": [
-          9,
+          13,
           1,
-          2
-        ],
-        "max": [
-          18,
-          4,
-          10
-        ]
-      },
-      {
-        "id": "nursery",
-        "min": [
-          9,
-          1,
-          11
+          9
         ],
         "max": [
           18,
@@ -1901,27 +1901,27 @@ const SPECS=Object.freeze([
     ],
     "fixtures": [
       {
-        "x": 5,
+        "x": 9,
         "z": 4,
         "room": "bower",
         "asset": "pack4:064"
       },
       {
-        "x": 13,
-        "z": 6,
-        "room": "kitchen",
-        "asset": "pack4:057"
-      },
-      {
-        "x": 11,
-        "z": 12,
-        "room": "nursery",
+        "x": 4,
+        "z": 11,
+        "room": "sleep",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
       },
       {
-        "x": 4,
-        "z": 14,
+        "x": 15,
+        "z": 13,
+        "room": "kitchen",
+        "asset": "pack4:057"
+      },
+      {
+        "x": 6,
+        "z": 6,
         "room": "bower",
         "asset": "pack5:084"
       }
@@ -1930,7 +1930,7 @@ const SPECS=Object.freeze([
       4,
       16
     ],
-    "detail": "arcane-bower-with-offset-nursery-and-lantern-lintel"
+    "detail": "moonshade-bower-with-independent-back-nursery-and-kitchen-wings"
   },
   {
     "category": "house",
@@ -2132,80 +2132,80 @@ const SPECS=Object.freeze([
     "title": "Starmoss Family Cloister",
     "w": 30,
     "d": 28,
-    "plan": "open-moonwell-cloister-between-family-music-kitchen-and-library",
+    "plan": "long-central-forest-gallery-with-side-family-quarters-and-open-rear-moonwell",
     "roof": "courtyard",
     "skin": "pack2:013",
     "roofAsset": "pack3:023",
     "segments": [
       [
+        12,
         2,
-        9,
-        27,
-        9
-      ],
-      [
-        10,
-        10,
-        10,
+        12,
         25
       ],
       [
         20,
-        10,
+        2,
         20,
         25
       ],
       [
+        13,
+        15,
+        19,
+        15
+      ],
+      [
         2,
-        18,
-        9,
-        18
+        19,
+        11,
+        19
       ],
       [
         21,
-        18,
+        19,
         27,
-        18
+        19
       ]
     ],
     "entry": [
-      14,
+      16,
       1,
-      "hall"
+      "atrium"
     ],
     "doors": [
       {
         "at": [
-          14,
+          12,
           1,
-          9
+          7
         ],
-        "from": "hall",
-        "to": "courtyard"
-      },
-      {
-        "at": [
-          10,
-          1,
-          14
-        ],
-        "from": "courtyard",
+        "from": "atrium",
         "to": "sleep"
       },
       {
         "at": [
           20,
           1,
-          14
+          7
         ],
-        "from": "courtyard",
+        "from": "atrium",
         "to": "kitchen"
+      },
+      {
+        "at": [
+          16,
+          1,
+          15
+        ],
+        "from": "atrium",
+        "to": "court"
       },
       {
         "at": [
           6,
           1,
-          18
+          19
         ],
         "from": "sleep",
         "to": "library"
@@ -2214,7 +2214,7 @@ const SPECS=Object.freeze([
         "at": [
           24,
           1,
-          18
+          19
         ],
         "from": "kitchen",
         "to": "music"
@@ -2222,24 +2222,24 @@ const SPECS=Object.freeze([
     ],
     "rooms": [
       {
-        "id": "hall",
+        "id": "atrium",
         "min": [
-          2,
+          13,
           1,
           2
         ],
         "max": [
-          28,
+          20,
           4,
-          9
+          15
         ]
       },
       {
-        "id": "courtyard",
+        "id": "court",
         "min": [
-          11,
+          13,
           1,
-          10
+          16
         ],
         "max": [
           20,
@@ -2252,12 +2252,12 @@ const SPECS=Object.freeze([
         "min": [
           2,
           1,
-          10
+          2
         ],
         "max": [
-          10,
+          12,
           4,
-          18
+          19
         ]
       },
       {
@@ -2265,12 +2265,12 @@ const SPECS=Object.freeze([
         "min": [
           21,
           1,
-          10
+          2
         ],
         "max": [
           28,
           4,
-          18
+          19
         ]
       },
       {
@@ -2278,10 +2278,10 @@ const SPECS=Object.freeze([
         "min": [
           2,
           1,
-          19
+          20
         ],
         "max": [
-          10,
+          12,
           4,
           26
         ]
@@ -2291,7 +2291,7 @@ const SPECS=Object.freeze([
         "min": [
           21,
           1,
-          19
+          20
         ],
         "max": [
           28,
@@ -2334,9 +2334,9 @@ const SPECS=Object.freeze([
     ],
     "fixtures": [
       {
-        "x": 14,
+        "x": 16,
         "z": 5,
-        "room": "hall",
+        "room": "atrium",
         "asset": "pack4:064"
       },
       {
@@ -2348,14 +2348,14 @@ const SPECS=Object.freeze([
       },
       {
         "x": 24,
-        "z": 13,
+        "z": 12,
         "room": "kitchen",
         "asset": "pack4:057"
       },
       {
-        "x": 14,
-        "z": 22,
-        "room": "courtyard",
+        "x": 16,
+        "z": 23,
+        "room": "court",
         "asset": "pack4:059"
       },
       {
@@ -2375,12 +2375,12 @@ const SPECS=Object.freeze([
       6,
       25
     ],
-    "detail": "six-room-cloister-under-open-moonwell-ribbed-roof",
+    "detail": "forest-cloister-central-axis-to-open-moonwell-and-private-lateral-library-wings",
     "courtyard": [
-      13,
-      13,
+      14,
       17,
-      18
+      18,
+      22
     ],
     "courtRoofMassing": "lantern-ribs"
   },

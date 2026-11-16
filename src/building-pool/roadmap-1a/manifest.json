@@ -53,7 +53,7 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Current exact-head node, 84-pool D4 near-duplicate and 336 authored source-cell WebGL2 screenshots",
+    "Refresh native 84 full-pool and floorplan-near-duplicate CI on new wave3 layout corrections",
     "Current exact-head additional 60 real source Pack1–5 visible AABB WebGL2 exterior/cutaway screenshots; diagnostic colors, provisional door save/collision state",
     "87 more genuinely new houses before M2 150-house authoring milestone",
     "366 unauthored across all 1A: 237 houses, 58 taverns, 71 inns",
@@ -193,13 +193,19 @@
   "m2Wave3": {
     "source": "src/building-pool/roadmap-1a/m2-housing-wave3.mjs",
     "newHouses": 15,
-    "placements": 43333,
+    "placements": 43330,
     "biomeSizeCoverage": "one source-authored house in each of 5 x 3 cells",
     "sourceInitial": "PASS 84 canonical validated unique IDs, D4 rotations/mirrors none, real route/support/bed preflight",
-    "nativeExactHead": "PENDING",
+    "nativeExactHead": "pending",
     "original69SourceGeometryPreserved": true,
     "webgl2SourceCellTarget": 336,
     "webgl2SourcePackAABBTarget": 60,
-    "finalProductionApproved": false
+    "finalProductionApproved": false,
+    "floorplanRepairs": [
+      "temperate small changed to full-width transverse parlor",
+      "enchanted small changed to independent back-wing rooms",
+      "snow medium changed to grand hall and offset double-service rooms",
+      "enchanted large changed to longitudinal axis and rear-open moonwell"
+    ]
   }
 }
