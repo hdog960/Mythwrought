@@ -250,3 +250,26 @@ test('surface breach remains unclaimed and player edits override candidate entra
   assert.equal(descentWorld(restored).get(p.x,p.feet,p.z),BLOCK.WOOD);
   assert.equal(descentEntranceHandoff().requiresSurfaceOwner,true);
 });
+
+test('entrance audit distinguishes candidate approach from unopened surface',async()=>{
+  const {descentEntranceConnectivity}=await import('../src/underground-switchback-descent.mjs');
+  for(const seed of [179,1,2026,-77]){
+    const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+    const audit=descentEntranceConnectivity(world);
+    assert.equal(audit.approachConnected,true,JSON.stringify(audit.failures));
+    assert.equal(audit.surfaceConnected,false);
+    assert.equal(audit.requiresSurfaceOwner,true);
+    assert.deepEqual(audit.opening,{x:192,y:-3,z:188});
+    assert.equal(JSON.stringify(world.save()),before);
+  }
+});
+test('entrance audit rejects a saved obstruction and missing support',async()=>{
+  const {descentEntranceConnectivity}=await import('../src/underground-switchback-descent.mjs');
+  const p=descentEntranceApproach()[2];
+  const blocked=new VoxelWorld(179);
+  assert.equal(blocked.set(p.x,p.feet,p.z,BLOCK.WOOD),true);
+  assert.equal(descentEntranceConnectivity(VoxelWorld.restore(blocked.save())).approachConnected,false);
+  const unsupported=new VoxelWorld(179);
+  assert.equal(unsupported.set(p.x,p.floor,p.z,BLOCK.AIR),true);
+  assert.equal(descentEntranceConnectivity(VoxelWorld.restore(unsupported.save())).approachConnected,false);
+});
