@@ -17,12 +17,39 @@ export function descentRoute(origin=DESCENT_ORIGIN){
   }
   return out;
 }
+/** Candidate-owned below-legacy entrance stairs. :24/manual integration must
+ * explicitly open the legacy -3 floor and clear surface headroom; this lane
+ * never changes those cells or player edits. From z-4 at floor -4 the four
+ * supported one-voxel steps descend to the main route at floor -8.
+ */
+export function descentEntranceApproach(origin=DESCENT_ORIGIN){
+  return Object.freeze(Array.from({length:5},(_,i)=>Object.freeze({
+    x:origin.x,z:origin.z-4+i,floor:LEGACY_WORLD_MIN_Y-1-i,
+    feet:LEGACY_WORLD_MIN_Y-i
+  })));
+}
+export function descentEntranceHandoff(origin=DESCENT_ORIGIN){
+  const steps=descentEntranceApproach(origin);
+  return Object.freeze({
+    opening:Object.freeze({x:origin.x,y:LEGACY_WORLD_MIN_Y,z:origin.z-4}),
+    approach:steps,requiresSurfaceOwner:true,
+    note:'Surface owner must open the legacy floor and supply headroom; do not auto-carve saved terrain'
+  });
+}
 export function descentCells(origin=DESCENT_ORIGIN){
   const cells=new Map(),route=descentRoute(origin);
   const set=(x,y,z,id)=>{
     if(y>=LEGACY_WORLD_MIN_Y||y<WORLD_MIN_Y+1)return;
     cells.set(worldKey(x,y,z),id);
   };
+  // Only below -3: support the entrance's descending stairs while leaving
+  // legacy surface blocks untouched for explicit :24/manual coordination.
+  for(const p of descentEntranceApproach(origin)){
+    for(let dx=-1;dx<=1;dx++){
+      set(p.x+dx,p.floor,p.z,BLOCK.DEEPSTONE);
+      for(let h=1;h<=4;h++)set(p.x+dx,p.floor+h,p.z,BLOCK.AIR);
+    }
+  }
   // Continuous 3-wide walk with four blocks of clearance. The 1:4 descent
   // is navigable as a series of one-voxel steps rather than a sheer shaft.
   for(const p of route)for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)
