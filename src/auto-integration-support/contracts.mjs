@@ -27,11 +27,15 @@ export function composeSurfaceCell({naturalId, overlayId = null, hasPlayerEdit =
   }
   return Object.freeze({id:overlayId ?? naturalId,source:overlayId === null ? 'natural' : 'overlay'});
 }
-export function validateCaveHandshake({surfaceY,entranceY,depthMinY,depthMaxY,path}) {
+export function validateCaveHandshake({surfaceY,entranceY,depthMinY,depthMaxY,path,entrance = null,exit = null,requireSimplePath = false}) {
   if (![surfaceY,entranceY,depthMinY,depthMaxY].every(integer) || depthMinY > depthMaxY ||
       entranceY > surfaceY || entranceY < depthMinY || entranceY > depthMaxY)
     return Object.freeze({ok:false,reason:'invalid-bounds'});
   if (!Array.isArray(path) || path.length === 0) return Object.freeze({ok:false,reason:'missing-path'});
+  if (entrance !== null && (!entrance || !['x','y','z'].every(k=>integer(entrance[k])) || entrance.y!==entranceY))
+    return Object.freeze({ok:false,reason:'invalid-entrance-anchor'});
+  if (exit !== null && (!exit || !['x','y','z'].every(k=>integer(exit[k]))))
+    return Object.freeze({ok:false,reason:'invalid-exit-anchor'});
   const seen=new Set();
   for (let i=0;i<path.length;i++) {
     const p=path[i];
@@ -39,9 +43,15 @@ export function validateCaveHandshake({surfaceY,entranceY,depthMinY,depthMaxY,pa
       return Object.freeze({ok:false,reason:'invalid-path-cell'});
     if (i && Math.abs(p.x-path[i-1].x)+Math.abs(p.y-path[i-1].y)+Math.abs(p.z-path[i-1].z)!==1)
       return Object.freeze({ok:false,reason:'disconnected-path'});
-    seen.add(key(p.x,p.y,p.z));
+    const cell=key(p.x,p.y,p.z);
+    if (requireSimplePath && seen.has(cell)) return Object.freeze({ok:false,reason:'revisited-path-cell'});
+    seen.add(cell);
   }
-  if (path[0].y!==entranceY) return Object.freeze({ok:false,reason:'entrance-mismatch'});
+  if (path[0].y!==entranceY || (entrance && key(path[0].x,path[0].y,path[0].z)!==key(entrance.x,entrance.y,entrance.z)))
+    return Object.freeze({ok:false,reason:'entrance-mismatch'});
+  const last=path[path.length-1];
+  if (exit && key(last.x,last.y,last.z)!==key(exit.x,exit.y,exit.z))
+    return Object.freeze({ok:false,reason:'exit-mismatch'});
   return Object.freeze({ok:true,visitedCells:seen.size});
 }
 export function validateObjectAnchors(objects,{occupiedCells=[],maxTriangles=12000}={}) {
