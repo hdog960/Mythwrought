@@ -8,8 +8,9 @@ import {M1_BIOME_EXPANSION} from '../../../src/building-pool/roadmap-2a/m1-biome
 import {M1_CATEGORY_ARCADES} from '../../../src/building-pool/roadmap-2a/m1-category-arcades.mjs';
 import {M1_MARKET_FRONTS} from '../../../src/building-pool/roadmap-2a/m1-market-fronts.mjs';
 import {M1_COURTYARD_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-courtyard-shops.mjs';
+import {M1_U_COURT_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-u-court-shops.mjs';
 import {resolveManualFivePackAsset} from '../../../src/builder-assets/manual-five-pack.mjs';
-const buildings=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS];
+const buildings=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS,...M1_U_COURT_SHOPS];
 const key=(x,z)=>x+','+z;
 function walk(b){
  const source=new Map(b.voxels.map(v=>[[v.x,v.y,v.z].join(','),v]));
@@ -37,7 +38,7 @@ function walk(b){
  return {reached,blocked};
 }
 test('real producer-based multi-cell fixture footprints leave all 50 authored 2A room entrances reachable',()=>{
- assert.equal(buildings.length,56);
+ assert.equal(buildings.length,62);
  let verified=0;
  for(const b of buildings){
   const walkable=walk(b);
