@@ -208,7 +208,7 @@ async function runWithBrowser(){
       submittedBufferBytes:data.submittedBufferBytes,
       proxyCells:data.unresolvedFullCellProxyCount,
       pngSha256:createHash('sha256').update(png).digest('hex')});
-    if(shots.length%6===0)console.log('4A M2 regional Chromium WebGL2 candidate captures',shots.length,'/ 36');
+    if(shots.length%6===0)console.log('4A M2 expansion Chromium WebGL2 candidate captures',shots.length,'/ 36');
    }
   }
   const distinctScreens=new Set(shots.map(x=>x.pngSha256)).size;
@@ -230,7 +230,7 @@ async function runWithBrowser(){
 }
 export async function runGallery(){
  const evidence=await runWithBrowser();
- console.log('4A M2 regional source-driven 36/36 WebGL2 gallery PASSED',
+ console.log('4A M2 expansion source-driven 36/36 WebGL2 gallery PASSED',
   JSON.stringify({sha256:evidence.sourceBundleSha256,screens:evidence.actualViews,
    distinct:evidence.distinctScreenHashes,renderer:evidence.results[0]?.renderer,
    maxDrawCalls:Math.max(...evidence.results.map(x=>x.drawCalls)),
