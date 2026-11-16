@@ -498,3 +498,38 @@ test('lower split-fault grotto respects saved player obstruction',()=>{
   const restored=VoxelWorld.restore(world.save());
   assert.equal(descentWorld(restored).get(x,-134,z),BLOCK.WOOD);
 });
+
+for(const seed of [179,1,2026,-77])test('deep fault bypass offers two supported alternate paths '+seed,()=>{
+  const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  const reader=descentWorld(world),anchor=descentRoute().find(p=>p.floor===-185);
+  assert.ok(anchor,'missing deep fault anchor');
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const at=(d,t,y)=>reader.get(anchor.x+outward[0]*d+tangent[0]*t,y,
+    anchor.z+outward[1]*d+tangent[1]*t);
+  for(let d=12;d<=48;d++){
+    const offset=Math.round(11*Math.sin(Math.PI*(d-12)/36));
+    for(const t of [-offset,offset]){
+      assert.equal(at(d,t,-185),BLOCK.DEEPSTONE,'missing bypass footing '+d+'/'+t);
+      for(let h=1;h<=2;h++)
+        assert.equal(at(d,t,-185+h),BLOCK.AIR,'blocked bypass '+d+'/'+t+'/'+h);
+    }
+  }
+  assert.equal(at(50,0,-185),BLOCK.DEEPSTONE);
+  assert.equal(at(50,0,-184),BLOCK.AIR);
+  assert.equal(descentConnectivity(world).connected,true);
+  assert.equal(JSON.stringify(world.save()),before);
+});
+test('saved player edits obstruct deep fault bypass without being overwritten',()=>{
+  const world=new VoxelWorld(179),anchor=descentRoute().find(p=>p.floor===-185);
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const x=anchor.x+outward[0]*30+tangent[0]*11;
+  const z=anchor.z+outward[1]*30+tangent[1]*11;
+  assert.equal(world.set(x,-184,z,BLOCK.WOOD),true);
+  const snapshot=world.save(),restored=VoxelWorld.restore(snapshot);
+  assert.equal(descentWorld(restored).get(x,-184,z),BLOCK.WOOD);
+  assert.deepEqual(restored.save(),snapshot);
+});
