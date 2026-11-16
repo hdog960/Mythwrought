@@ -26,7 +26,7 @@ function layoutConnected(b){
  for(let i=0;i<q.length;i++){
   const [x,y,z]=q[i];
   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
-   const dest=[x+dx,y,z],id=k(dest);
+   const dest=[x+dx,y,z+dz],id=k(dest);
    if(nodes.has(id)&&!seen.has(id)){seen.add(id);q.push(dest);}
   }
  }
