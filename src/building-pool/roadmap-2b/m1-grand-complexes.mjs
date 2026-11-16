@@ -160,6 +160,7 @@ function iceThreeHallButcher(){
  for(const [x,z] of [[16,17],[19,20],[16,27]])p.f(x,z,M.table,'hygienic-prep-counter');
  for(const [x,z] of [[28,17],[32,20]])p.f(x,z,M.table,'curing-workbench');
  p.f(33,28,M.box,'smoked-stock','decor');
+ p.post(32,25,6); // Grounded industrial extraction stack.
  for(let y=8;y<=12;y++)p.upper(32,y,25,M.stone,'full-height-smoke-flue',y===12?'roof':'wall');
  for(let z=4;z<=29;z++)p.upper(c,8,z,M.snow,'snow-shelter-ridge');
  return p.finish({title:'Icevault Three-Hall Butchery',
@@ -190,6 +191,7 @@ function everwoodGemVault(){
  p.f(33,31,M.box,'locked-gem-cache','decor');
  p.f(3,30,M.lamp,'craft-work-lantern','decor');
  for(const x of [24,35])for(const z of [17,31]){
+  p.post(x,z,6); // Four physical ground-to-roof root supports.
   p.upper(x,8,z,M.post,'upper-vault-wood-bearing','wall');
   p.upper(x,9,z,M.post,'upper-vault-wood-bearing','wall');
  }
@@ -221,6 +223,7 @@ function mountainGrandBooks(){
  for(const [x,z] of [[4,29],[8,31],[15,31],[30,31]])p.f(x,z,M.box,'sealed-parchment-cache');
  p.f(35,31,M.lamp,'archive-lamp','decor');
  for(const x of [4,34])for(const z of [3,30]){
+  p.post(x,z,6); // Integral library towers transfer into foundation.
   p.upper(x,8,z,M.stone,'integral-tower');
   p.upper(x,9,z,M.stone,'integral-tower');
   p.upper(x,10,z,M.roof,'tower-cap');
@@ -254,6 +257,7 @@ function sunGrandTemple(){
  for(const x of [c-5,c+5])p.f(x,31,M.stair,'symbolic-altar-step','fixture',
   {shapeRotationStatus:'unresolved-symbolic'});
  for(const [x,z] of [[3,3],[37,3],[3,32],[37,32]]){
+  p.post(x,z,6); // Tower mass is anchored to actual floor foundations.
   p.upper(x,8,z,M.stone,'tall-sun-tower','wall');
   p.upper(x,9,z,M.stone,'tall-sun-tower','wall');
   p.upper(x,10,z,M.roof,'sun-tower-cap');
