@@ -135,7 +135,7 @@ function compile(p){
  }
  const navigation=list.filter(([x,z])=>!cells.has(key(x,2,z))&&!cells.has(key(x,3,z)))
   .map(([x,z])=>({at:[x,2,z],mode:'walk'}));
- const b={schema:SCHEMA,id:'r4:'+p.t+':'+p.b+':'+p.s+':01',type:p.t,biome:p.b,size:p.s,variant:1,bounds:p.dim,
+ const b={schema:SCHEMA,id:'r4:'+p.t+':'+p.b+':'+p.s+':'+String(p.variant||1).padStart(2,'0'),type:p.t,biome:p.b,size:p.s,variant:p.variant||1,bounds:p.dim,
   provenance:{lane:'roadmap-4b',milestone:'M2',originalPlan:p.title,roofProfile:p.roof,
    method:'separately authored corridor, wing and round-pavilion physical voxel design',
    source:'M2 distinctive by region',originalFromLegacyPR123:false,liveIntegration:false},
@@ -155,3 +155,6 @@ validateCollection(M2_33_ALL);
 if(M2_33_CENSUS.authored!==33||M2_33_CENSUS.healer!==15||M2_33_CENSUS.library!==15||
  M2_33_CENSUS.fingerprints!==33)throw Error('M2 architectural census/unique slots broken');
 export const M2_DISTINCTIVE_NAMES=Object.freeze(PLANS.map(p=>p.title));
+
+// Exact same expansion for explicitly authored new slot variants; old 01 outputs are unchanged.
+export const buildDistinctive4B = compile;
