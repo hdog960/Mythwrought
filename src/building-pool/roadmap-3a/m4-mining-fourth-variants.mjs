@@ -77,8 +77,16 @@ function build(s){
   // NOT narrow triangular decorative cones: hold the far perimeter at least
   // fourteen cells from the axial corridor at both ends of the chevron.
   // The interior zigzag changes with the site's authored original brief.
-  const supported=wing.id==='southeast'&&s.size==='large'
-   ?Math.max(14,extended):extended;
+  // Camera-facing FAR-RIGHT is the NORTH-EAST (lower z) wing, not the
+  // south-east bay. Preserve a level full-width masonry loading hall along
+  // its entire original source interval: a taper there rendered as a
+  // visually unsupported inverted-cone outline in genuine WebGL2 images.
+  // Width stays biome-author-specific, and the other three original
+  // chevrons retain their separately authored irregular outlines.
+  const supported=wing.id==='northeast'&&s.size==='large'
+   ?Math.max(16,s.eastReach+1-(s.northeastLen%3))
+   :wing.id==='southeast'&&s.size==='large'
+    ?Math.max(14,extended):extended;
   return wing.side==='west'?mid-5-supported:mid+6+supported;
  }
  function wingAt(x,z){
