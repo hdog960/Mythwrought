@@ -22,9 +22,9 @@ function reachable(b){
 test('six new source-authored regional structures make 38 genuine, unique, bounded 2A plans',()=>{
  assert.equal(M1_BIOME_EXPANSION.length,6);assert.equal(all.length,38);
  assert.equal(new Set(all.map(b=>b.id)).size,38);assert.equal(new Set(all.map(structuralFingerprint)).size,38);
- assert.equal(plannedSlots().filter(x=>x.authoredHere).length,68);
- assert.equal(inventory().target,420);assert.equal(inventory().authoredCandidateTotal,68);
- assert.equal(inventory().unwrittenNewCandidates,352);
+ assert.equal(plannedSlots().filter(x=>x.authoredHere).length,74);
+ assert.equal(inventory().target,420);assert.equal(inventory().authoredCandidateTotal,74);
+ assert.equal(inventory().unwrittenNewCandidates,346);
  assert(all.some(b=>b.id==='r2:general-store:mountain:large:01'));
  assert(all.some(b=>b.id==='r2:general-store:mountain:large:02'));
  for(const b of M1_BIOME_EXPANSION){assert(validateBlueprint(b).valid);assert(plannedSlots().some(x=>x.id===b.id&&x.authoredHere));assert(b.voxels.length>=1500&&b.rooms.length>=3);assert(!b.worldPlaced&&!b.numericIdsAssigned);}

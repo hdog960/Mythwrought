@@ -26,9 +26,9 @@ test('six distinctly authored categories increase real 2A to 44/420 with 376 una
  assert.equal(M1_CATEGORY_ARCADES.length,6);assert.equal(models.length,44);
  assert.equal(new Set(models.map(x=>x.id)).size,44);
  assert.equal(new Set(models.map(structuralFingerprint)).size,44);
- assert.equal(plannedSlots().filter(x=>x.authoredHere).length,68);
- assert.equal(inventory().target,420);assert.equal(inventory().authoredCandidateTotal,68);
- assert.equal(inventory().unwrittenNewCandidates,352);assert.equal(inventory().newlyAuthored,53);
+ assert.equal(plannedSlots().filter(x=>x.authoredHere).length,74);
+ assert.equal(inventory().target,420);assert.equal(inventory().authoredCandidateTotal,74);
+ assert.equal(inventory().unwrittenNewCandidates,346);assert.equal(inventory().newlyAuthored,59);
  assert.equal(inventory().creatorApproved,0);assert.equal(inventory().integratedIntoGame,0);
  assert.deepEqual(M1_CATEGORY_ARCADES.map(x=>x.category),
   ['general-store','pet-shop','magic-shop','potion-shop','bakery','bank']);
