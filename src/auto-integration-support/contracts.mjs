@@ -15,7 +15,7 @@ export function normalizeSurfaceFeatures(features, {registeredIds = []} = {}) {
     if (seen.has(cell)) throw new Error('duplicate surface feature cell');
     seen.add(cell);
     return Object.freeze({x:f.x,y:f.y,z:f.z,blockId:f.blockId});
-  }).sort((a,b)=>a.x-b.x || a.y-b.y || a.z-b.z);
+  }).sort((a,b)=>(a.x < b.x ? -1 : a.x > b.x ? 1 : a.y < b.y ? -1 : a.y > b.y ? 1 : a.z < b.z ? -1 : a.z > b.z ? 1));
 }
 // An explicit edit must mask procedural overlay even when its value equals natural terrain.
 // Absence of an edit is different from a recorded edit restoring the natural block.
