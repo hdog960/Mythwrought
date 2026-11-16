@@ -23,3 +23,7 @@ The new silhouettes are **not** a generic recolor: floor/foundation absence, occ
 **Ledger after authoring:** 108/420 theoretical candidates = 15 inherited exact temples + 93 independent original designs; 312 still unauthored; zero creator-final-approved, integrated, world-placed. PR stays isolated.
 
 **Required verification:** expected 735 root repository tests, >=147 dedicated native Builder 2B, 12 contracts; 168 source-imported genuine Chromium SwiftShader/WebGL2 full-cube exterior/cutaway PNGs across 667×375, 844×390, 932×430; inspect exact-head screenshot artifact. Browser full-cube proxy is not final Pack mesh, iPhone device test, or approved premium artwork. Do not mark passed until exact-head CI reports its result.
+
+## Exact-head verification follow-up (2026-11-16)
+
+PR #187's recorded main base was explicitly refreshed to `1f67efc9805e83866549515ffdad4dc7e225b234` without changing the 108 candidate source definitions, merge history, unrelated branches, or shared CI. The prior Actions #43897226543 selected FULL and therefore skipped the focused Builder 2B tests and 168 genuine source-specific images; its passing full-game checks alone did not certify this M1 tranche. This Builder 2B-owned documentation checkpoint triggers new exact-head PR verification after the base metadata refresh. **Do not mark focused geometry or browser captures accepted until the new exact-head run actually executes them and passes.**
