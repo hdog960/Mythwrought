@@ -361,3 +361,31 @@ export function descentEntranceConnectivity(world,origin=DESCENT_ORIGIN){
     surfaceConnected:false,requiresSurfaceOwner:true,
     opening:descentEntranceHandoff(origin).opening};
 }
+
+/**
+ * Read-only surface seam probe for :24 and the manual incorporator.
+ * No implicit surface excavation: every required air cell is checked against
+ * the real world, including saved edits. A green seam is geometry evidence,
+ * NOT proof the candidate is registered in the running WebGL2 world.
+ */
+export function descentSurfaceSeam(world,origin=DESCENT_ORIGIN){
+  const steps=descentEntranceApproach(origin);
+  const opening=descentEntranceHandoff(origin).opening;
+  const failures=[];
+  // The surface owner must clear the upper stair's protected legacy headroom.
+  // Include a 2-block player column through the threshold and every stair.
+  for(const p of steps){
+    for(let y=p.feet;y<=p.feet+1;y++){
+      if(world.get(p.x,y,p.z)!==BLOCK.AIR)
+        failures.push({x:p.x,y,z:p.z,reason:'surface-headroom'});
+    }
+  }
+  // An open shaft without a supported stair is not a safe cave entrance.
+  const reader=descentWorld(world,origin);
+  for(const p of steps){
+    if(reader.get(p.x,p.floor,p.z)===BLOCK.AIR)
+      failures.push({x:p.x,y:p.floor,z:p.z,reason:'missing-support'});
+  }
+  return Object.freeze({opening,clear:failures.length===0,failures,
+    runtimeVerified:false,requiresSurfaceOwner:true});
+}
