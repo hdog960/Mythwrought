@@ -228,8 +228,9 @@ test('cached terrain remains stable after edits while edited cells take preceden
   });
   assert.ok(view);
   const r=SURFACE_BIOME_REGIONS[2],h=terrainHeight(r.x,r.z,seed);
+  const top=Math.max(h,surfaceBiomeHeight(r.x,r.z,seed));
   assert.equal(view.active,true);
-  assert.equal(view.get(r.x,h,r.z),r.surface);
+  assert.equal(view.get(r.x,top,r.z),r.surface);
   const raised=view.get(r.x,h+1,r.z);
   const cached=view.cachedColumns;
   assert.ok(cached>0);
@@ -237,7 +238,7 @@ test('cached terrain remains stable after edits while edited cells take preceden
   const editY=terrainHeight(0,0,seed)+1;
   assert.equal(world.set(0,editY,0,4),true);
   assert.equal(view.active,true);
-  assert.equal(view.get(r.x,h,r.z),r.surface);
+  assert.equal(view.get(r.x,top,r.z),r.surface);
   assert.equal(view.get(r.x,h+1,r.z),raised);
   assert.equal(view.get(0,editY,0),4);
   // An edit inside a generated column is authoritative at its exact cell.
