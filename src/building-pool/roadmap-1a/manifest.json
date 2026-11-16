@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M2 wave7: 15 fresh coordinate-authored L/U/T houses with distinct source silhouettes; 144/450, current exact-head CI pending",
+  "milestone": "M2 wave8: five additional original physically concave regional homes; 149/450 total and 128/150 houses; exact-head CI pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 306,
-  "newDesignsAuthored": 114,
-  "totalLaneGeometryAuthored": 144,
+  "additionalDesignsRequired": 301,
+  "newDesignsAuthored": 119,
+  "totalLaneGeometryAuthored": 149,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,10 +53,10 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Exact-head CI acceptance for complete 144 pool and 129 historical source candidates plus Pack1–5 physical source audits",
-    "696 source-cell cube Chromium software-WebGL2 exterior/cutaway screenshots and 420 producer Pack visibleBox AABB screenshots at 667×375,844×390,932×430",
-    "27 more genuinely distinct houses to reach 150-house domestic milestone; 306 total 1A designs unauthored",
-    "Roofs weather/load, Pack2 doors sweep/save, Pack4 panes optical state, Pack5 bed collision+schema1 saves, hardware iPhone, creator acceptance and runtime integration blocked"
+    "Exact-head native and genuine Chromium WebGL2 149-pool source certification, original 144 preservation and independent wave7 + wave8 physical ABI audits",
+    "726 source-cell cube and 450 producer Pack1-5 AABB Chromium WebGL2 screenshots at 667x375, 844x390, 932x430",
+    "22 more genuinely distinct houses to reach the first 150-house milestone; 301 total 1A designs unauthored",
+    "Roof strength/weather, Pack2 hinged door sweep/codec, Pack4 panes, Pack5 bed occupancy and schema1 saves, hardware iPhone, creator approval and central integration remain blocked"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -75,7 +75,7 @@
   },
   "innCount": 1,
   "categoriesAuthored": {
-    "house": 123,
+    "house": 128,
     "tavern": 17,
     "inn": 4
   },
@@ -275,5 +275,32 @@
     "creatorAccepted": 0,
     "integrated": 0,
     "worldPlaced": false
+  },
+  "m2Wave8": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave8.mjs",
+    "authoredHouses": 5,
+    "biomes": [
+      "temperate",
+      "desert",
+      "snow",
+      "enchanted-forest",
+      "mountain"
+    ],
+    "sizesByBiome": [
+      "small",
+      "medium",
+      "large",
+      "small",
+      "medium"
+    ],
+    "index": 12,
+    "physicalCandidate": true,
+    "sourceCoordinates": true,
+    "genuineConcaveFootprints": true,
+    "exactHeadNode": "pending",
+    "webgl2CubeCaptureTarget": 726,
+    "webgl2SourcePackAABBCaptureTarget": 450,
+    "creatorApproved": 0,
+    "liveWorldPlaced": 0
   }
 }
