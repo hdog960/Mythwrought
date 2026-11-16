@@ -14,9 +14,9 @@ import {inventory,plannedSlots} from '../../../src/building-pool/roadmap-2a/cata
 import {validateBlueprint,structuralFingerprint} from '../../../src/building-pool/roadmap-2a/schema.mjs';
 import {inspect2AUFootprints} from '../../../src/building-pool/roadmap-2a/m1-u-court-preflight.mjs';
 const coord=(x,y,z)=>[x,y,z].join(',');
-test('six new U-shaped original 2A buildings represent 62/420 genuine authored candidate IDs, 358 unauthored',()=>{
- assert.equal(M1_U_COURT_SHOPS.length,6);assert.equal(inventory().authoredCandidateTotal,62);assert.equal(inventory().newlyAuthored,47);
- assert.equal(inventory().unwrittenNewCandidates,358);assert.equal(plannedSlots().filter(x=>x.authoredHere).length,62);
+test('six new U-shaped original 2A buildings represent 68/420 genuine authored candidate IDs, 352 unauthored',()=>{
+ assert.equal(M1_U_COURT_SHOPS.length,6);assert.equal(inventory().authoredCandidateTotal,68);assert.equal(inventory().newlyAuthored,53);
+ assert.equal(inventory().unwrittenNewCandidates,352);assert.equal(plannedSlots().filter(x=>x.authoredHere).length,68);
  assert.equal(new Set(M1_U_COURT_SHOPS.map(x=>x.id)).size,6);assert.equal(new Set(M1_U_COURT_SHOPS.map(structuralFingerprint)).size,6);
  for(const b of M1_U_COURT_SHOPS){assert(validateBlueprint(b).valid);assert.equal(b.rooms.length,4);assert(b.voxels.length>2000);assert.equal(b.worldPlaced,false);}
 });
@@ -60,7 +60,7 @@ function symmetryVersions(points){
  return variants;
 }
 function jaccard(a,b){let both=0;for(const value of a)if(b.has(value))both++;return both/(a.size+b.size-both);}
-test('all six authored U buildings reject any 2D floor near-duplicate across all 62 candidate designs under all eight D4 symmetries',()=>{
+test('all six authored U buildings reject any 2D floor near-duplicate against the protected 62-design cohort under all eight D4 symmetries',()=>{
  const all=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS,...M1_U_COURT_SHOPS];
  assert.equal(all.length,62);
  const sources=all.map(b=>({id:b.id,floor:new Set(floorCells(b).map(v=>v.join(',')))}));
