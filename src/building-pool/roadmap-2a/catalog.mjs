@@ -12,7 +12,8 @@ export const M1_BIOME_EXPANSION_IDS=Object.freeze(["r2:general-store:mountain:la
 export const M1_CATEGORY_ARCADE_IDS=Object.freeze(["r2:general-store:desert:large:02","r2:pet-shop:mountain:small:01","r2:magic-shop:desert:medium:01","r2:potion-shop:mountain:large:01","r2:bakery:snow:large:01","r2:bank:temperate:medium:01"]);
 export const M1_MARKET_FRONT_IDS=Object.freeze(["r2:general-store:snow:medium:02","r2:pet-shop:temperate:medium:01","r2:magic-shop:enchanted-forest:small:01","r2:potion-shop:desert:large:01","r2:bakery:mountain:medium:01","r2:bank:enchanted-forest:large:01"]);
 export const M1_COURTYARD_IDS=Object.freeze(["r2:general-store:enchanted-forest:small:02","r2:pet-shop:snow:large:01","r2:magic-shop:snow:medium:01","r2:potion-shop:temperate:medium:01","r2:bakery:desert:medium:01","r2:bank:mountain:small:01"]);
-const M1_SPECIALIST_SET=new Set([...M1_SPECIALIST_IDS,...M1_ADDITIONAL_IDS,...M1_REGIONAL_IDS,...M1_BIOME_EXPANSION_IDS,...M1_CATEGORY_ARCADE_IDS,...M1_MARKET_FRONT_IDS,...M1_COURTYARD_IDS]);
+export const M1_U_COURT_IDS=Object.freeze(["r2:general-store:mountain:medium:03","r2:pet-shop:desert:large:02","r2:magic-shop:enchanted-forest:large:02","r2:potion-shop:snow:large:02","r2:bakery:temperate:large:02","r2:bank:desert:large:02"]);
+const M1_SPECIALIST_SET=new Set([...M1_SPECIALIST_IDS,...M1_ADDITIONAL_IDS,...M1_REGIONAL_IDS,...M1_BIOME_EXPANSION_IDS,...M1_CATEGORY_ARCADE_IDS,...M1_MARKET_FRONT_IDS,...M1_COURTYARD_IDS,...M1_U_COURT_IDS]);
 
 export function blueprintId(category,biome,size,variation){
   if(!Object.hasOwn(CATEGORY_QUOTAS,category)||!BIOMES.includes(biome)||!SIZES.includes(size)||!Number.isInteger(variation)||variation<1||variation>CATEGORY_QUOTAS[category]) throw new Error("unreserved roadmap-2a slot");
@@ -28,7 +29,7 @@ export function plannedSlots(){
 }
 export function inventory(){
   const slots=plannedSlots();
-  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:15,authoredCandidateTotal:56,newlyAuthored:41,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:364,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
+  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:15,authoredCandidateTotal:62,newlyAuthored:47,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:358,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
 }
 
 // Builder 2A owned physical-space requirements. Symbols are NOT persistent block IDs.

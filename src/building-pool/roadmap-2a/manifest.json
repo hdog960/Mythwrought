@@ -32,10 +32,10 @@
   "target": 420,
   "legacySourceCandidates": 15,
   "locallyMigratedAndParityVerified": 15,
-  "newlyAuthored": 41,
+  "newlyAuthored": 47,
   "creatorApproved": 0,
   "integratedIntoGame": 0,
-  "unwrittenNewCandidates": 364,
+  "unwrittenNewCandidates": 358,
   "legacyCandidates": [
     {
       "id": "r2:general-store:temperate:small:01",
@@ -330,14 +330,14 @@
   ],
   "sourcePolicy": "Original PR #124 is read-only. IDs are preserved, not geometries yet. A candidate only counts as locally migrated after exact geometry/metadata parity and native tests.",
   "assetPolicy": "Manual 96 families/106 physical variants are integrated; biome130 entries remain symbolic when unverified. No numeric runtime IDs or production placement.",
-  "authoredCandidateTotal": 56,
+  "authoredCandidateTotal": 62,
   "handAuthoredStoreBlob": "7211223b2cc51290b89f5f886c1cbb59cc495747",
   "sourceModuleBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
   "originalValidatedStores": 15,
   "sourceExactComparison": "15/15 exact JSON serialized and mirror/rotation invariant physical fingerprint equality against PR124 pinned legacy source at original head",
   "milestones": {
     "M0": "technically accepted at 9a20de8265d1e282c5e746dad1fdc08ee6c76674, exact-head Actions #43769798408 PASS",
-    "M1": "15 inherited SHA256-parity stores and 41 new source-authored candidate structures, 56/420, 364 unauthored, zero approved/integrated"
+    "M1": "15 protected source-exact inherited stores and 47 original coordinate-authored 2A buildings, 62/420 candidates, zero creator-approved or integrated"
   },
   "M1SpecialistExemplars": [
     {
@@ -705,6 +705,68 @@
       "worldPlaced": false,
       "nonrectangularCourtyard": true,
       "physicalSupportApproved": false
+    }
+  ],
+  "M1UCourts": [
+    {
+      "id": "r2:general-store:mountain:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:pet-shop:desert:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:magic-shop:enchanted-forest:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:potion-shop:snow:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:bakery:temperate:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:bank:desert:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
     }
   ]
 }
