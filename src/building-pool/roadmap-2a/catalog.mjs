@@ -8,7 +8,8 @@ export const LEGACY_CATEGORY="general-store";
 export const M1_SPECIALIST_IDS=Object.freeze(["r2:pet-shop:temperate:small:01","r2:magic-shop:enchanted-forest:medium:01","r2:potion-shop:snow:medium:01","r2:bakery:desert:small:01","r2:bank:mountain:large:01"]);
 export const M1_ADDITIONAL_IDS=Object.freeze(["r2:general-store:desert:medium:02","r2:pet-shop:mountain:medium:01","r2:magic-shop:snow:large:01","r2:potion-shop:desert:small:01","r2:bakery:temperate:large:01","r2:bank:enchanted-forest:medium:01"]);
 export const M1_REGIONAL_IDS=Object.freeze(["r2:general-store:temperate:medium:02","r2:pet-shop:desert:medium:01","r2:magic-shop:mountain:medium:01","r2:potion-shop:enchanted-forest:large:01","r2:bakery:snow:medium:01","r2:bank:desert:large:01"]);
-const M1_SPECIALIST_SET=new Set([...M1_SPECIALIST_IDS,...M1_ADDITIONAL_IDS,...M1_REGIONAL_IDS]);
+export const M1_BIOME_EXPANSION_IDS=Object.freeze(["r2:general-store:mountain:large:02","r2:pet-shop:enchanted-forest:large:01","r2:magic-shop:temperate:large:01","r2:potion-shop:snow:small:01","r2:bakery:enchanted-forest:medium:01","r2:bank:snow:medium:01"]);
+const M1_SPECIALIST_SET=new Set([...M1_SPECIALIST_IDS,...M1_ADDITIONAL_IDS,...M1_REGIONAL_IDS,...M1_BIOME_EXPANSION_IDS]);
 
 export function blueprintId(category,biome,size,variation){
   if(!Object.hasOwn(CATEGORY_QUOTAS,category)||!BIOMES.includes(biome)||!SIZES.includes(size)||!Number.isInteger(variation)||variation<1||variation>CATEGORY_QUOTAS[category]) throw new Error("unreserved roadmap-2a slot");
@@ -24,7 +25,7 @@ export function plannedSlots(){
 }
 export function inventory(){
   const slots=plannedSlots();
-  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:15,authoredCandidateTotal:32,newlyAuthored:17,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:388,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
+  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:15,authoredCandidateTotal:38,newlyAuthored:23,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:382,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
 }
 
 // Builder 2A owned physical-space requirements. Symbols are NOT persistent block IDs.
