@@ -161,6 +161,11 @@ function author(p){
   // Load-bearing corner columns meet each roof surface directly.
   const corners=[[x0,z0],[x1,z0],[x0,z1],[x1,z1]];
   for(const [x,z] of corners)for(let y=2;y<ry(x,z);y++)safe('roof-pier-'+i,x,y,z,roof.post);
+  // Full-span millhouse roofs cannot rely on perimeter walls as their only load
+  // path: four original interior piers run from the real foundation up to roof skin.
+  if(t==='mill' && x0===0 && x1===w-1)
+   for(const [cx,cz] of [[x0+3,z0+3],[x1-3,z0+3],[x0+3,z1-3],[x1-3,z1-3]])
+    for(let y=2;y<ry(cx,cz);y++)safe('roof-pier-interior-'+i,cx,y,cz,roof.post);
  }
  for(const cargo of p.cargo)solid(cargo.role,cargo.v,cargo.ref);
  const clearanceChecks=()=>{for(const c of corridors)for(let x=c.x;x<c.x+c.width;x++)

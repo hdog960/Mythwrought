@@ -13,17 +13,17 @@ biome130, five hourly automations, main, runtime, saved worlds, CI or Pages.
 | r3:lumberyard:snow:large:1 | 5,534 | 44×39×30 | Avalanche-baffled heavy winter sled court with sheltered log vault and terraced freight shed |
 | r3:lumberyard:enchanted-forest:small:1 | 1,818 | 26×25×21 | Compact twin trellis and asymmetric grove herbwood-drying yard |
 | r3:lumberyard:mountain:medium:1 | 3,971 | 36×34×27 | Retaining rock face and cantilevered shelf roof, separate quarry-freight ledge |
-| r3:mill:desert:large:1 | 9,133 | 48×42×32 | Fully roofed broad grain/millstone/wind-axle facility, with actual cross-partitions |
-| r3:mill:snow:large:1 | 8,904 | 46×43×33 | Snowproof broad-gabled hall with separate grain vault and frost-drive room |
+| r3:mill:desert:large:1 | 9,173 | 48×42×32 | Fully roofed broad grain/millstone/wind-axle facility, with actual cross-partitions |
+| r3:mill:snow:large:1 | 8,948 | 46×43×33 | Snowproof broad-gabled hall with separate grain vault and frost-drive room |
 | r3:mill:enchanted-forest:small:1 | 3,404 | 28×27×25 | Narrow two-roof fae grain and moonwater mill; intentionally open center roof seam |
-| r3:mill:mountain:medium:1 | 6,058 | 38×36×30 | Thick rock millhouse and stepped roof, distinct granary / stone-grind / cliffshaft vaults |
-| **Eight new source candidates** | **44,305** | | |
+| r3:mill:mountain:medium:1 | 6,110 | 38×36×30 | Thick rock millhouse and stepped roof, distinct granary / stone-grind / cliffshaft vaults |
+| **Eight new source candidates** | **44,441** | | |
 
 These are *full deterministic voxel-cell lists built from independently
 authored coordinate envelopes and feature programs*, not names, colored boxes,
 random seeds, palette swaps or merely flipped copies.
 
-All eight share only reusable physical-construction primitives that explicitly
+The three broad-roofed desert, snow and mountain mills have independent interior roof piers (40, 44 and 52 actual additional supported positions). All eight share only reusable physical-construction primitives that explicitly
 expand foundations, floors, full perimeter walls, roof joints and load-bearing
 posts. Each has its own authored roof spans/profile(s), partitions, load-bearing
 pier footprints, pallets, stoneworks, room identities and work cargo positions.
@@ -40,7 +40,7 @@ face-connected through occupied cells back to actual foundation coordinates.
 
 ## Verification gates
 - m2-hinterland.test.mjs: full 35-design 3B pool, names and unique
-  palette-agnostic fingerprints, 44,305 source-authored occupied cells,
+  palette-agnostic fingerprints, 44,441 source-authored occupied cells,
   identical canonical serializations, real supported two-wide ground-level
   entrance-to-room flood, 6-face structural connectivity, 48 viewport ×
   source-cube-mesh camera combinations.

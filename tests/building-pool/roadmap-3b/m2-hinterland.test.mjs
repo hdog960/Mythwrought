@@ -79,8 +79,8 @@ test('M2 adds eight genuine, specifically authored desert/snow/enchanted/mountai
 });
 test('eight authored spatial programs have real original voxel coordinates, rooms, roofs, entrance and feature fixtures',()=>{
  assert.equal(new Set(additions.map(b=>b.architecture.kind)).size,8);
- assert.deepEqual(additions.map(b=>b.architecture.occupiedCoordinates),[5483,5534,1818,3971,9133,8904,3404,6058]);
- assert.equal(additions.reduce((n,b)=>n+b.architecture.occupiedCoordinates,0),44305);
+ assert.deepEqual(additions.map(b=>b.architecture.occupiedCoordinates),[5483,5534,1818,3971,9173,8948,3404,6110]);
+ assert.equal(additions.reduce((n,b)=>n+b.architecture.occupiedCoordinates,0),44441);
  for(const b of additions){
   const stats=validateBlueprint(b,ASSET_CATALOG),cells=ownedCells(b);
   assert.equal(stats.cellCount,cells.size,b.id);
@@ -90,6 +90,10 @@ test('eight authored spatial programs have real original voxel coordinates, room
   assert.equal(b.architecture.worldPlaced,false);
   for(const role of ['foundation','floor','wall','roof'])assert.ok(b.modules.some(m=>m.role===role),b.id+' missing '+role);
   assert.ok(b.modules.some(m=>m.role.startsWith('roof-pier-')),b.id+' no load-bearing pillars');
+  if(b.type==='mill' && b.size!=='small'){
+   const p=b.modules.filter(m=>m.role.startsWith('roof-pier-interior-'));
+   assert.ok(p.reduce((n,m)=>n+m.cells.length,0)>=40,b.id+' inadequate independent internal piers');
+  }
   assert.equal(b.openings.length,1);
   assert.equal(b.spaces.length,3);
   assert.ok(b.features.length>=5);
@@ -131,7 +135,7 @@ test('48 native source-driven proxy mesh/camera checks over the eight new genuin
 test('physical bridge audit keeps all manual/biome shapes diagnostic, and future assets symbolic',()=>{
  const review=reviewHinterlandPhysicalDependencies();
  assert.equal(review.authored,8);
- assert.equal(review.occupiedConceptualPositions,44305);
+ assert.equal(review.occupiedConceptualPositions,44441);
  assert.equal(review.families.families,96);
  assert.equal(review.families.numericVariants,106);
  assert.equal(review.productionReady,false);
