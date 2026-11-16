@@ -1328,8 +1328,8 @@ const DESIGNS=[
    ],
    [
     "north independent appraisal",
-    23,
-    36
+    25,
+    37
    ],
    [
     "northwest rare ores",
@@ -1338,7 +1338,7 @@ const DESIGNS=[
    ],
    [
     "right rear astral light",
-    40,
+    41,
     40
    ]
   ],
