@@ -195,11 +195,11 @@ test('current exact PR source Git blob, 79/420 ledger and all original 64 source
   execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim());
  const j=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([j.target,j.sourceExactInheritedTemples,j.originalNewModels,j.authoredCandidates,
-  j.remainingUnauthored,j.creatorAccepted,j.integratedInGame,j.placedInWorld],[420,15,86,101,319,0,0,0]);
- assert.equal(j.originals.length,86);
+  j.remainingUnauthored,j.creatorAccepted,j.integratedInGame,j.placedInWorld],[420,15,93,108,312,0,0,0]);
+ assert.equal(j.originals.length,93);
  const current=new Set(j.originals.map(v=>v.id));
  for(const b of all.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(current.has(b.id),'lost inherited authoring '+b.id);
- assert.equal(Object.values(j.byCategory).reduce((n,v)=>n+v.authored,0),101);
- assert.equal(Object.values(j.byCategory).reduce((n,v)=>n+v.remaining,0),319);
+ assert.equal(Object.values(j.byCategory).reduce((n,v)=>n+v.authored,0),108);
+ assert.equal(Object.values(j.byCategory).reduce((n,v)=>n+v.remaining,0),312);
 });
