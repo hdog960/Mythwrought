@@ -6,47 +6,47 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 48,
-  "authoredCandidates": 63,
-  "remainingUnauthored": 357,
+  "originalNewModels": 56,
+  "authoredCandidates": 71,
+  "remainingUnauthored": 349,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
-      "authored": 9,
+      "authored": 11,
       "target": 60,
-      "remaining": 51
+      "remaining": 49
     },
     "tailor": {
-      "authored": 6,
-      "target": 60,
-      "remaining": 54
-    },
-    "butcher": {
-      "authored": 6,
-      "target": 60,
-      "remaining": 54
-    },
-    "jeweler": {
-      "authored": 6,
-      "target": 60,
-      "remaining": 54
-    },
-    "bookshop": {
       "authored": 7,
       "target": 60,
       "remaining": 53
     },
+    "butcher": {
+      "authored": 7,
+      "target": 60,
+      "remaining": 53
+    },
+    "jeweler": {
+      "authored": 7,
+      "target": 60,
+      "remaining": 53
+    },
+    "bookshop": {
+      "authored": 8,
+      "target": 60,
+      "remaining": 52
+    },
     "temple": {
-      "authored": 20,
+      "authored": 21,
       "target": 75,
-      "remaining": 55
+      "remaining": 54
     },
     "theater": {
-      "authored": 9,
+      "authored": 10,
       "target": 45,
-      "remaining": 36
+      "remaining": 35
     }
   },
   "originals": [
@@ -289,38 +289,78 @@
       "id": "r2:theater:temperate:large:01",
       "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:mountain:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:snow:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:enchanted-forest:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:temperate:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:snow:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:enchanted-forest:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:desert:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
       "small": 8,
-      "medium": 4,
-      "large": 3
+      "medium": 5,
+      "large": 4
     },
     "desert": {
       "small": 4,
       "medium": 5,
-      "large": 5
+      "large": 6
     },
     "snow": {
       "small": 5,
-      "medium": 4,
+      "medium": 6,
       "large": 4
     },
     "enchanted-forest": {
       "small": 4,
-      "medium": 3,
+      "medium": 5,
       "large": 4
     },
     "mountain": {
       "small": 2,
-      "medium": 3,
+      "medium": 4,
       "large": 5
     }
   },
   "productionRegistryUnchanged": true,
   "physicalShapeAbiCertified": false,
   "screenshotClassification": "software WebGL2 cube proxies; neither physical-family WebGL2 nor live game",
-  "lastMilestone": "M1 — eight grand unique source-authored public and specialty large architectures; new CI pending",
+  "lastMilestone": "M1 — eight new independently authored regional architecture candidates; exact-head CI pending",
   "evidenceClassification": "native source/test, genuine Chromium software-WebGL2 cube proxies only; physical-family/webgame/iPhone unapproved"
 }
