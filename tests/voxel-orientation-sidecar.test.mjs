@@ -182,3 +182,22 @@ test('oversized optional sidecar fails closed while old schema-1 world survives'
  assert.equal(JSON.stringify(legacy),original,'schema-1 payload stays untouched');
  assert.equal(JSON.stringify(records),JSON.stringify(Array.from({length:5},(_,i)=>({cell:[i,0,0],blockId:4,turns:1}))));
 });
+
+
+test('oversized metadata never iterates entries or reads world during schema-1 recovery',()=>{
+ const legacy={schema:1,seed:99,edits:[[0,0,0,4]]};
+ const before=JSON.stringify(legacy);
+ let touched=0,worldReads=0;
+ const records=new Proxy(Array(10000),{
+   get(target,key,receiver){
+     if(key==='length') return target.length;
+     touched++;
+     throw new Error('oversized optional metadata was inspected');
+   }
+ });
+ const sidecar=restoreOrientationSidecar(records,()=>{worldReads++;return 4;},{maxEntries:16});
+ assert.equal(sidecar.size(),0);
+ assert.equal(touched,0,'no element or iterator access for rejected metadata');
+ assert.equal(worldReads,0);
+ assert.equal(JSON.stringify(legacy),before);
+});
