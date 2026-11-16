@@ -243,3 +243,27 @@ test('cached terrain remains stable after edits while edited cells take preceden
   }),null);
  }
 });
+
+test('edits before first biome-column read and after cache eviction preserve terrain',()=>{
+ for(const seed of [179,7,2201]){
+  const world=new VoxelWorld(seed);
+  const view=createSurfaceBiomeWorldView(world,{
+   enabled:true,profileIsFresh:true,isProtected:()=>false,maxCachedColumns:1
+  });
+  assert.ok(view);
+  const r=SURFACE_BIOME_REGIONS[2],h=terrainHeight(r.x,r.z,seed);
+  // A player may build in a region before its column is ever meshed.
+  assert.equal(world.set(r.x,h,r.z,4),true);
+  assert.equal(view.get(r.x,h,r.z),4);
+  const neighborX=r.x+1,neighborH=terrainHeight(neighborX,r.z,seed);
+  assert.equal(view.get(neighborX,neighborH,r.z),r.surface);
+  // Evict the first column, then revisit it: edits still win and
+  // surrounding untouched raised layers must regenerate identically.
+  const raised=view.get(r.x,h+1,r.z);
+  view.get(neighborX,neighborH,r.z);
+  assert.equal(view.cachedColumns,1);
+  assert.equal(view.get(r.x,h,r.z),4);
+  assert.equal(view.get(r.x,h+1,r.z),raised);
+  assert.equal(view.cachedColumns,1);
+ }
+});
