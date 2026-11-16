@@ -29,7 +29,9 @@ async function server(){
  await new Promise((ok,fail)=>{http.once('error',fail);http.listen(0,'127.0.0.1',ok);});
  return http;
 }
-test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authored M1 source at three phone-landscape dimensions', {timeout:210000},async(t)=>{
+// 132 real cold-start Chromium captures take longer than the prior 120-view run;
+// do not truncate genuine browser work at the historic 210s test deadline.
+test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authored M1 source at three phone-landscape dimensions', {timeout:420000},async(t)=>{
  const browser=findBrowser();
  if(!browser){t.skip('Chromium/Chrome binary not installed: candidate WebGL2 capture unverified');return;}
  const http=await server(), temp=await mkdtemp(join(tmpdir(),'mythwrought-2b-webgl-'));
