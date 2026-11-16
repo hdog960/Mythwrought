@@ -53,6 +53,15 @@ for(const [x,cy,z] of limbs){
   occupancy.get([x+dx,cy,z+dz].join(','))===BLOCK.WOOD),
  'each limb is attached to deck timber');
 }
+// Both directions describe one physical span, not two distinct structures.
+// Canonical endpoints also protect against reverse-order duplicate placement.
+const reversed=planCanopyWalkway(world,b,a,y);
+assert.deepEqual(reversed,plan,'reversed anchors produce identical physical crown');
+assert.equal(placeCanopyWalkway(world,reversed),true,'canonical reversed plan places');
+assert.equal(placeCanopyWalkway(world,plan),false,'forward duplicate rejected after reverse placement');
+// Reset only the fixture's candidate cells to preserve the later rollback and
+// player-edit assertions without modifying the natural terrain baseline.
+for(const [x,cy,z] of plan.cells)edits.delete(k(x,cy,z));
 assert.equal(planCanopyWalkway(world,a,[a[0]+3,a[1]+1],y),null,'diagonal forbidden');
 assert.equal(planCanopyWalkway(world,a,[a[0]+10,a[1]],y),null,'overspan forbidden');
 assert.equal(placeCanopyWalkway(world,{...plan,cells:plan.cells.slice(1)}),false,'tampering rejected');
