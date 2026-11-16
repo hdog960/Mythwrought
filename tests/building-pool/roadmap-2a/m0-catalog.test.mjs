@@ -8,8 +8,8 @@ const slots=plannedSlots();
 test("M0 has exactly 420 unique reserved IDs, not fake authored blueprints",()=>{
  assert.equal(slots.length,420);
  assert.equal(new Set(slots.map(x=>x.id)).size,420);
- assert.equal(slots.filter(x=>x.status==="authored-candidate"&&x.authoredHere).length,44);
- assert.equal(slots.filter(x=>x.status==="reserved-not-authored"&&!x.authoredHere).length,376);
+ assert.equal(slots.filter(x=>x.status==="authored-candidate"&&x.authoredHere).length,50);
+ assert.equal(slots.filter(x=>x.status==="reserved-not-authored"&&!x.authoredHere).length,370);
  assert.deepEqual(inventory().byCategory,{"general-store":75,"pet-shop":75,"magic-shop":75,"potion-shop":75,"bakery":75,"bank":45});
 });
 test("every category has its exact biome/size distribution",()=>{
@@ -36,14 +36,14 @@ test("legacy exact source HEAD, blob provenance and safe destination prefixes ar
 test("no inherited design silently marked migrated, accepted or integrated",()=>{
  assert.equal(manifest.legacySourceCandidates,15);
  assert.equal(manifest.locallyMigratedAndParityVerified,15);
- assert.equal(manifest.authoredCandidateTotal,44);
- assert.equal(manifest.newlyAuthored,29);
+ assert.equal(manifest.authoredCandidateTotal,50);
+ assert.equal(manifest.newlyAuthored,35);
  assert.equal(manifest.creatorApproved,0);
  assert.equal(manifest.integratedIntoGame,0);
- assert.equal(manifest.unwrittenNewCandidates,376);
+ assert.equal(manifest.unwrittenNewCandidates,370);
  assert.equal(inventory().legacySourceCandidates,15);
  assert.equal(inventory().locallyMigrated,15);
- assert.equal(inventory().authoredCandidateTotal,44);
+ assert.equal(inventory().authoredCandidateTotal,50);
 });
 test("all eight builders have exclusive categories and correct shared roster totals",()=>{
  assert.equal(roster.lanes.length,8);
