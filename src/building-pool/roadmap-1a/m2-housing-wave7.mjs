@@ -18,13 +18,13 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        15,
-        7,
+        19,
+        10,
         24
       ],
       [
-        20,
-        12,
+        22,
+        10,
         26,
         24
       ]
@@ -231,8 +231,8 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         13,
-        14,
-        19,
+        10,
+        16,
         28
       ]
     ],
@@ -518,7 +518,7 @@ const SPECS=Object.freeze([
       [
         0,
         16,
-        16,
+        13,
         34
       ]
     ],
@@ -803,8 +803,8 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         9,
-        13,
-        13,
+        17,
+        16,
         22
       ]
     ],
@@ -1021,13 +1021,13 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        13,
-        8,
+        11,
+        5,
         27
       ],
       [
-        24,
-        19,
+        20,
+        21,
         30,
         27
       ]
@@ -1267,8 +1267,8 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:024",
     "exteriorNotches": [
       [
-        17,
-        15,
+        20,
+        11,
         25,
         34
       ]
@@ -1553,8 +1553,8 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:025",
     "exteriorNotches": [
       [
-        17,
-        14,
+        21,
+        12,
         25,
         23
       ]
@@ -1760,8 +1760,8 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:025",
     "exteriorNotches": [
       [
-        13,
-        16,
+        14,
+        20,
         20,
         28
       ]
@@ -2048,13 +2048,13 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        16,
-        14,
+        12,
+        11,
         36
       ],
       [
-        31,
-        20,
+        34,
+        17,
         42,
         36
       ]
@@ -2329,9 +2329,9 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:023",
     "exteriorNotches": [
       [
-        10,
+        14,
         13,
-        15,
+        17,
         26
       ]
     ],
@@ -2548,8 +2548,8 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        15,
-        13,
+        18,
+        10,
         29
       ]
     ],
@@ -2800,8 +2800,8 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         17,
-        16,
-        27,
+        12,
+        25,
         37
       ]
     ],
@@ -3113,7 +3113,7 @@ const SPECS=Object.freeze([
     "title": "Cindercrag Anvil-Bower Home",
     "w": 27,
     "d": 25,
-    "plan": "crag-side-anvil-forge-front-with-narrow-private-central-bed-aisle",
+    "plan": "mountain-new-wide-left-cliff-cutout-and-rear-displaced-private-walkway",
     "roof": "sawtooth",
     "skin": "pack1:006",
     "roofAsset": "pack3:025",
@@ -3121,12 +3121,12 @@ const SPECS=Object.freeze([
       [
         0,
         14,
-        9,
+        12,
         24
       ],
       [
         21,
-        17,
+        10,
         26,
         24
       ]
@@ -3145,7 +3145,7 @@ const SPECS=Object.freeze([
         13
       ],
       [
-        10,
+        14,
         19,
         20,
         19
@@ -3186,7 +3186,7 @@ const SPECS=Object.freeze([
       {
         "id": "stonework",
         "min": [
-          10,
+          14,
           1,
           14
         ],
@@ -3199,7 +3199,7 @@ const SPECS=Object.freeze([
       {
         "id": "sleep",
         "min": [
-          10,
+          14,
           1,
           20
         ],
@@ -3316,7 +3316,7 @@ const SPECS=Object.freeze([
       4,
       22
     ],
-    "detail": "crag-side-anvil-forge-front-with-narrow-private-central-bed-aisle"
+    "detail": "mountain-new-wide-left-cliff-cutout-and-rear-displaced-private-walkway"
   },
   {
     "category": "house",
@@ -3332,8 +3332,8 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:025",
     "exteriorNotches": [
       [
-        24,
-        14,
+        26,
+        10,
         34,
         30
       ]
@@ -3585,8 +3585,8 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         17,
-        17,
-        26,
+        21,
+        25,
         38
       ]
     ],
