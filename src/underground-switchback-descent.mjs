@@ -538,10 +538,12 @@ export function descentLoopConnectivity(world,origin=DESCENT_ORIGIN){
     const check=(d,t,part)=>{
       const x=anchor.x+outward[0]*d+tangent[0]*t;
       const z=anchor.z+outward[1]*d+tangent[1]*t;
-      if(reader.get(x,depth,z)===BLOCK.AIR||
-         reader.get(x,depth+1,z)!==BLOCK.AIR||
-         reader.get(x,depth+2,z)!==BLOCK.AIR)
-        failures.push({part,d,t,x,z});
+      const footing=reader.get(x,depth,z);
+      if(footing!==BLOCK.DEEPSTONE&&footing!==BLOCK.STONE)
+        failures.push({part,d,t,x,z,reason:'unsupported-floor'});
+      for(let h=1;h<=4;h++)
+        if(reader.get(x,depth+h,z)!==BLOCK.AIR)
+          failures.push({part,d,t,x,z,height:h,reason:'blocked-headroom'});
     };
     // Both branches and their common outer cross-gallery form a closed loop.
     for(let d=0;d<=12;d++){check(d,0,'first-branch');check(d,0,'second-branch');}
@@ -568,10 +570,12 @@ export function descentEntranceConnectivity(world,origin=DESCENT_ORIGIN){
   const failures=[];
   for(let i=0;i<steps.length;i++){
     const p=steps[i],prev=steps[i-1];
-    if(reader.get(p.x,p.floor,p.z)===BLOCK.AIR ||
-       reader.get(p.x,p.feet,p.z)!==BLOCK.AIR ||
-       reader.get(p.x,p.feet+1,p.z)!==BLOCK.AIR)
-      failures.push({step:i,reason:'blocked-or-unsupported'});
+    const footing=reader.get(p.x,p.floor,p.z);
+    if(footing!==BLOCK.DEEPSTONE&&footing!==BLOCK.STONE)
+      failures.push({step:i,reason:'unsupported-floor'});
+    for(let h=0;h<4;h++)
+      if(reader.get(p.x,p.feet+h,p.z)!==BLOCK.AIR)
+        failures.push({step:i,reason:'blocked-headroom',height:h});
     if(prev){
       if(Math.abs(p.x-prev.x)+Math.abs(p.z-prev.z)!==1 ||
          Math.abs(p.feet-prev.feet)>1)
