@@ -54,6 +54,20 @@ test('eight truly authored formerly vacant slots and full 79/79 source D4 archit
  }
  assert.deepEqual(assertDistinctArchitecture(all),{authored:79,distinctArchitectures:79});
 });
+test('all 24 actual functional interior spaces have unique names and supported nonempty coordinate bounds',()=>{
+ for(const bp of NEW){
+  const names=new Set();
+  for(const room of bp.rooms){
+   assert(typeof room.name==='string'&&room.name.length>=12,bp.id+' unnamed room');
+   assert(!names.has(room.name),bp.id+' repeated room name');
+   names.add(room.name);
+   const b=room.bounds;
+   assert(b&&Number.isInteger(b.x0)&&Number.isInteger(b.x1)&&Number.isInteger(b.z0)&&Number.isInteger(b.z1),bp.id+' unbounded room');
+   assert(b.x0>=0&&b.x1<bp.extents.x&&b.x0<b.x1&&b.z0>=0&&b.z1<bp.extents.z&&b.z0<b.z1,bp.id+' invalid actual room extents');
+  }
+ }
+ assert.equal(NEW.reduce((n,b)=>n+b.rooms.length,0),24);
+});
 test('full source physical foundations/floors, windows, weather roof, fixtures, décor and actual 3-high air doors',()=>{
  for(const b of NEW){
   const m=voxels(b);assert.equal(m.size,b.voxels.length);
