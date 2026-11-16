@@ -96,7 +96,9 @@ export const M1_U_COURT_SPECS=Object.freeze([
         "caravan-supply",
         null
       ]
-    ]
+    ],
+    "stepWidth": 3,
+    "stepDepth": 4
   },
   {
     "category": "pet-shop",
@@ -107,9 +109,9 @@ export const M1_U_COURT_SPECS=Object.freeze([
     "d": 24,
     "h": 9,
     "entry": 13,
-    "left": 9,
-    "right": 18,
-    "depth": 9,
+    "left": 11,
+    "right": 20,
+    "depth": 11,
     "frontSide": "east",
     "wall": "pack5:079",
     "floor": "pack5:081",
@@ -190,13 +192,15 @@ export const M1_U_COURT_SPECS=Object.freeze([
         "north"
       ],
       [
-        21,
+        24,
         21,
         "pack4:057",
         "dry-feed",
         null
       ]
-    ]
+    ],
+    "stepWidth": 4,
+    "stepDepth": 6
   },
   {
     "category": "magic-shop",
@@ -207,9 +211,9 @@ export const M1_U_COURT_SPECS=Object.freeze([
     "d": 25,
     "h": 10,
     "entry": 12,
-    "left": 8,
-    "right": 17,
-    "depth": 9,
+    "left": 7,
+    "right": 19,
+    "depth": 11,
     "frontSide": "west",
     "wall": "pack5:079",
     "floor": "pack2:013",
@@ -273,7 +277,7 @@ export const M1_U_COURT_SPECS=Object.freeze([
       ],
       [
         19,
-        13,
+        11,
         "pack5:093",
         "inert-relic",
         "sunspire-reliquary-plinth"
@@ -286,13 +290,15 @@ export const M1_U_COURT_SPECS=Object.freeze([
         "cartographers-oak-desk"
       ],
       [
-        20,
+        23,
         22,
         "pack4:057",
         "sealed-curios",
         null
       ]
-    ]
+    ],
+    "stepWidth": 4,
+    "stepDepth": 7
   },
   {
     "category": "potion-shop",
@@ -303,9 +309,9 @@ export const M1_U_COURT_SPECS=Object.freeze([
     "d": 23,
     "h": 9,
     "entry": 12,
-    "left": 8,
+    "left": 7,
     "right": 16,
-    "depth": 8,
+    "depth": 9,
     "frontSide": "east",
     "wall": "pack1:004",
     "floor": "pack2:013",
@@ -382,7 +388,9 @@ export const M1_U_COURT_SPECS=Object.freeze([
         "winter-herbs",
         null
       ]
-    ]
+    ],
+    "stepWidth": 4,
+    "stepDepth": 5
   },
   {
     "category": "bakery",
@@ -393,9 +401,9 @@ export const M1_U_COURT_SPECS=Object.freeze([
     "d": 25,
     "h": 10,
     "entry": 14,
-    "left": 9,
-    "right": 18,
-    "depth": 9,
+    "left": 5,
+    "right": 17,
+    "depth": 12,
     "frontSide": "west",
     "wall": "pack2:013",
     "floor": "pack2:013",
@@ -478,7 +486,9 @@ export const M1_U_COURT_SPECS=Object.freeze([
         "dry-flour",
         null
       ]
-    ]
+    ],
+    "stepWidth": 4,
+    "stepDepth": 7
   },
   {
     "category": "bank",
@@ -489,9 +499,9 @@ export const M1_U_COURT_SPECS=Object.freeze([
     "d": 25,
     "h": 10,
     "entry": 13,
-    "left": 9,
-    "right": 17,
-    "depth": 8,
+    "left": 6,
+    "right": 15,
+    "depth": 12,
     "frontSide": "east",
     "wall": "pack1:005",
     "floor": "pack5:081",
@@ -568,13 +578,15 @@ export const M1_U_COURT_SPECS=Object.freeze([
         "sunspire-reliquary-plinth"
       ],
       [
-        6,
+        4,
         22,
         "pack4:057",
         "bonded-crate",
         null
       ]
-    ]
+    ],
+    "stepWidth": 4,
+    "stepDepth": 7
   }
 ]);
 const R=(name,[x0,x1,z0,z1],uses,access)=>({name,bounds:{x0,x1,z0,z1},uses,access});
@@ -590,7 +602,7 @@ export function author2AUProfile(o){
   routes:[['exterior',main,'double-wide covered front approach'],[main,privateUse[0],'private west door'],[main,backUse[0],'rear right archive threshold']],
   lamp:[o.entry,o.h,3],towers:[[o.w-4,14,4],[4,13,4]],roofMassing:o.masses,facadeGables:o.gables,frontPorticoes:[[o.entry-4,o.entry+4,3,o.category+'-deep-front-loggia']],
   title:o.name,roofForm:'two genuine rear wings and asymmetric regional stepped roof',signature:'independent U-shaped roof and exterior courtyards with new west access and stepped front',
-  openRearCourt:{x0:o.left,x1:o.right,depth:o.depth,role:o.category+'-U-open-court'},frontWingSetback:{side:o.frontSide,width:3,depth:4,role:o.category+'-stepped-front-wing'},
+  openRearCourt:{x0:o.left,x1:o.right,depth:o.depth,role:o.category+'-U-open-court'},frontWingSetback:{side:o.frontSide,width:o.stepWidth??3,depth:o.stepDepth??4,role:o.category+'-stepped-front-wing'},
   rearAnnexUse:o.annex,
   ...(o.category==='bank'?{vaultDoor:[door,split],vaultDoorOrientation:'north',vaultDoorVariant:'citadel-ironbound-leaves'}:{})
  };
