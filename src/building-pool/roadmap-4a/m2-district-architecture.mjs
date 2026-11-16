@@ -484,9 +484,9 @@ const PLANS=[
         "kind": "hearing-room",
         "rect": [
           23,
-          36,
+          37,
           31,
-          40
+          38
         ]
       }
     ],
