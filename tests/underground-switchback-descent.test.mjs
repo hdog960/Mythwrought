@@ -277,3 +277,27 @@ test('entrance audit rejects a saved obstruction and missing support',async()=>{
   assert.equal(unsupported.set(p.x,p.floor,p.z,BLOCK.AIR),true);
   assert.equal(descentEntranceConnectivity(VoxelWorld.restore(unsupported.save())).approachConnected,false);
 });
+
+test('surface seam fails closed on unopened legacy terrain and does not mutate saves',async()=>{
+  const {descentSurfaceSeam}=await import('../src/underground-switchback-descent.mjs');
+  for(const seed of [179,1,2026,-77]){
+    const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+    const seam=descentSurfaceSeam(world);
+    assert.deepEqual(seam.opening,{x:192,y:-3,z:188});
+    assert.equal(seam.runtimeVerified,false);
+    assert.equal(seam.requiresSurfaceOwner,true);
+    assert.equal(seam.clear,false,'legacy terrain must not masquerade as a surface opening');
+    assert.ok(seam.failures.some(f=>f.reason==='surface-headroom'));
+    assert.equal(JSON.stringify(world.save()),before);
+  }
+});
+test('surface seam reports a saved player obstruction without overwriting it',async()=>{
+  const {descentSurfaceSeam}=await import('../src/underground-switchback-descent.mjs');
+  const world=new VoxelWorld(179),p=descentEntranceApproach()[0];
+  assert.equal(world.set(p.x,p.feet,p.z,BLOCK.WOOD),true);
+  const saved=world.save(),restored=VoxelWorld.restore(saved);
+  const seam=descentSurfaceSeam(restored);
+  assert.equal(seam.clear,false);
+  assert.ok(seam.failures.some(f=>f.x===p.x&&f.y===p.feet&&f.z===p.z));
+  assert.deepEqual(restored.save(),saved);
+});
