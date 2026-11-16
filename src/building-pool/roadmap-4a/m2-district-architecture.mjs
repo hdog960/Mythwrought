@@ -296,144 +296,144 @@ const PLANS=[
     ],
     "wings": [
       [
-        24,
+        27,
         7,
-        39,
-        27
+        42,
+        25
       ],
       [
-        4,
-        17,
-        25,
-        37
-      ],
-      [
-        39,
+        7,
         14,
-        62,
-        35
-      ],
-      [
-        15,
-        35,
-        52,
-        50
-      ],
-      [
-        22,
-        29,
-        44,
+        25,
         40
+      ],
+      [
+        41,
+        21,
+        63,
+        31
+      ],
+      [
+        18,
+        37,
+        51,
+        51
+      ],
+      [
+        21,
+        28,
+        39,
+        41
       ]
     ],
     "octagons": [
       [
-        32,
-        26,
-        12,
-        18
+        31,
+        27,
+        10,
+        15
       ]
     ],
     "notches": [
       [
-        26,
         28,
-        37,
-        36
+        29,
+        36,
+        35
       ]
     ],
     "entry": [
-      31,
+      34,
       7
     ],
     "porch": [
-      28,
+      31,
       3,
-      34,
+      37,
       6
     ],
     "partitions": [
       {
         "axis": "x",
-        "fixed": 24,
-        "from": 19,
-        "to": 29,
+        "fixed": 25,
+        "from": 17,
+        "to": 30,
         "door": 24,
         "facing": "west"
       },
       {
         "axis": "x",
-        "fixed": 39,
-        "from": 17,
+        "fixed": 41,
+        "from": 21,
         "to": 31,
-        "door": 24,
+        "door": 25,
         "facing": "east"
       },
       {
         "axis": "z",
         "fixed": 39,
-        "from": 24,
-        "to": 42,
-        "door": 31,
+        "from": 23,
+        "to": 40,
+        "door": 32,
         "facing": "north"
       }
     ],
     "windows": [
       [
-        4,
+        7,
         24,
         "west"
       ],
       [
-        62,
-        24,
+        63,
+        25,
         "east"
       ],
       [
-        33,
-        50,
+        32,
+        51,
         "north"
       ],
       [
-        28,
+        29,
         7,
         "south"
       ],
       [
-        37,
+        40,
         7,
         "south"
       ],
       [
-        24,
-        12,
+        27,
+        15,
         "west"
       ]
     ],
     "fixtures": [
       [
-        31,
+        34,
         15
       ],
       [
-        11,
-        24
+        12,
+        22
       ],
       [
-        54,
-        23
+        55,
+        26
       ],
       [
         33,
-        45
+        47
       ],
       [
-        19,
-        41
+        20,
+        37
       ],
       [
-        48,
-        42
+        45,
+        28
       ]
     ],
     "ridges": [],
@@ -443,59 +443,59 @@ const PLANS=[
         "id": "desert-lawgiver-court",
         "kind": "meeting",
         "rect": [
-          26,
+          29,
           11,
-          39,
-          24
+          40,
+          23
         ]
       },
       {
         "id": "west-water-ration-docket",
         "kind": "administration",
         "rect": [
-          6,
-          19,
+          9,
+          16,
           23,
-          35
+          36
         ]
       },
       {
         "id": "east-caravan-duty-records",
         "kind": "tax-records",
         "rect": [
-          42,
-          16,
-          60,
-          33
+          44,
+          23,
+          62,
+          30
         ]
       },
       {
         "id": "north-oral-contract-archive",
         "kind": "archive",
         "rect": [
-          17,
-          39,
+          21,
+          42,
           50,
-          48
+          50
         ]
       },
       {
         "id": "dune-appeals-cloister",
         "kind": "hearing-room",
         "rect": [
-          21,
+          23,
           36,
-          29,
-          38
+          31,
+          40
         ]
       }
     ],
     "roofBands": [
       {
         "rect": [
-          25,
+          29,
           8,
-          38,
+          41,
           24
         ],
         "profile": "gable",
@@ -505,10 +505,10 @@ const PLANS=[
       },
       {
         "rect": [
-          5,
-          18,
-          23,
-          35
+          8,
+          15,
+          24,
+          38
         ],
         "profile": "shed",
         "axis": "z",
@@ -517,10 +517,10 @@ const PLANS=[
       },
       {
         "rect": [
-          42,
-          15,
-          61,
-          33
+          43,
+          22,
+          62,
+          30
         ],
         "profile": "saw",
         "axis": "x",
@@ -529,10 +529,10 @@ const PLANS=[
       },
       {
         "rect": [
-          18,
-          40,
+          20,
+          42,
           50,
-          49
+          50
         ],
         "profile": "hip",
         "axis": "x",
@@ -541,14 +541,14 @@ const PLANS=[
       }
     ],
     "signature": [
-      "desert-radial-arcaded-civic-ring",
+      "desert-crescent-asymmetric-water-court",
       66,
       57,
-      "western-water-duty",
-      "east-caravan-levies",
-      "protected-oral-archives"
+      "western-elongated-water-wing",
+      "east-low-tax-arm",
+      "northern-contract-library"
     ],
-    "profile": "desert-radial-arcaded-civic-ring"
+    "profile": "desert-crescent-asymmetric-water-court"
   },
   {
     "id": "r4:civic-hall:snow:medium:04",
@@ -1780,208 +1780,194 @@ const PLANS=[
     "profile": "snow-three-wing-runner-guild"
   },
   {
-    "id": "r4:guildhall:mountain:large:03",
+    "id": "r4:guildhall:mountain:small:03",
     "type": "guildhall",
     "biome": "mountain",
-    "size": "large",
+    "size": "small",
     "variant": 3,
     "bounds": [
-      69,
+      43,
       12,
-      60
+      46
     ],
     "wings": [
       [
-        24,
+        13,
         7,
-        46,
-        32
+        27,
+        24
       ],
       [
-        5,
-        17,
-        24,
-        40
+        4,
+        18,
+        13,
+        34
       ],
       [
-        46,
-        14,
-        64,
-        39
-      ],
-      [
-        16,
+        26,
+        13,
         39,
-        55,
-        54
+        24
       ],
       [
-        20,
-        32,
-        50,
+        21,
+        26,
+        36,
         42
+      ],
+      [
+        13,
+        22,
+        27,
+        28
       ]
     ],
     "octagons": [
       [
-        35,
         25,
-        12,
-        17
+        24,
+        8,
+        12
       ]
     ],
     "notches": [
       [
-        28,
-        28,
-        39,
-        37
+        15,
+        25,
+        19,
+        30
       ]
     ],
     "entry": [
-      34,
+      20,
       7
     ],
     "porch": [
-      31,
+      17,
       3,
-      37,
+      23,
       6
     ],
     "partitions": [
       {
         "axis": "x",
-        "fixed": 24,
-        "from": 20,
-        "to": 33,
-        "door": 28,
+        "fixed": 13,
+        "from": 18,
+        "to": 25,
+        "door": 22,
         "facing": "west"
       },
       {
         "axis": "x",
-        "fixed": 46,
-        "from": 18,
-        "to": 34,
-        "door": 25,
+        "fixed": 26,
+        "from": 14,
+        "to": 24,
+        "door": 19,
         "facing": "east"
       },
       {
         "axis": "z",
-        "fixed": 41,
-        "from": 26,
-        "to": 48,
-        "door": 35,
+        "fixed": 28,
+        "from": 23,
+        "to": 35,
+        "door": 27,
         "facing": "north"
       }
     ],
     "windows": [
       [
-        5,
-        25,
+        4,
+        24,
         "west"
       ],
       [
-        64,
-        25,
+        39,
+        19,
         "east"
       ],
       [
-        36,
-        54,
+        27,
+        42,
         "north"
       ],
       [
-        31,
+        17,
         7,
         "south"
       ],
       [
-        38,
+        23,
         7,
         "south"
       ],
       [
-        24,
+        13,
         12,
         "west"
       ]
     ],
     "fixtures": [
       [
-        35,
-        15
+        19,
+        14
       ],
       [
-        12,
-        25
+        8,
+        26
       ],
       [
-        56,
-        24
+        34,
+        19
       ],
       [
-        35,
-        51
+        28,
+        38
       ],
       [
         22,
-        45
-      ],
-      [
-        50,
-        43
+        32
       ]
     ],
     "ridges": [],
     "skyline": [],
     "rooms": [
       {
-        "id": "quarry-kings-guild-senate",
+        "id": "quarry-kings-small-guild",
         "kind": "gathering-hall",
         "rect": [
-          27,
+          15,
           11,
-          43,
-          24
+          26,
+          22
         ]
       },
       {
         "id": "west-dolomite-measure-shop",
         "kind": "shared-facility",
         "rect": [
-          7,
-          19,
-          22,
-          37
+          6,
+          20,
+          12,
+          32
         ]
       },
       {
         "id": "east-ore-separation-labor",
         "kind": "workshop",
         "rect": [
-          49,
-          16,
-          62,
-          37
+          28,
+          15,
+          38,
+          23
         ]
       },
       {
         "id": "north-survey-ledger-hall",
         "kind": "guild-ledger",
         "rect": [
-          19,
-          43,
-          53,
-          53
-        ]
-      },
-      {
-        "id": "eastern-craft-tribunal",
-        "kind": "artisan-office",
-        "rect": [
-          40,
-          38,
-          48,
+          24,
+          30,
+          35,
           41
         ]
       }
@@ -1989,22 +1975,22 @@ const PLANS=[
     "roofBands": [
       {
         "rect": [
-          25,
+          14,
           8,
-          45,
-          24
+          26,
+          21
         ],
         "profile": "hip",
         "axis": "x",
-        "high": 10,
-        "period": 5
+        "high": 9,
+        "period": 4
       },
       {
         "rect": [
-          6,
-          18,
-          23,
-          39
+          5,
+          19,
+          12,
+          32
         ],
         "profile": "saw",
         "axis": "z",
@@ -2013,10 +1999,10 @@ const PLANS=[
       },
       {
         "rect": [
-          48,
-          16,
-          63,
-          37
+          28,
+          14,
+          38,
+          23
         ],
         "profile": "gable",
         "axis": "x",
@@ -2025,10 +2011,10 @@ const PLANS=[
       },
       {
         "rect": [
-          18,
-          43,
-          54,
-          53
+          23,
+          30,
+          35,
+          41
         ],
         "profile": "shed",
         "axis": "x",
@@ -2037,14 +2023,14 @@ const PLANS=[
       }
     ],
     "signature": [
-      "mountain-quarry-crescent-citadel",
-      69,
-      60,
-      "west-dolomite-veranda",
-      "east-crushing-works",
-      "high-north-charter"
+      "mountain-hook-hall-low-terrace",
+      43,
+      46,
+      "north-east-survey-hook",
+      "western-dolomite-longwing",
+      "east-stone-grinding-loft"
     ],
-    "profile": "mountain-quarry-crescent-citadel"
+    "profile": "mountain-hook-hall-low-terrace"
   }
 ];
 const VALID_IDS=new Set(PLANS.map(p=>p.id));
