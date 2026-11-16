@@ -596,10 +596,10 @@ const PLANS=[
     "octagons": [],
     "notches": [
       [
-        22,
-        30,
+        18,
         29,
-        35
+        31,
+        36
       ]
     ],
     "entry": [
