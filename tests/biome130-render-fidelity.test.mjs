@@ -95,6 +95,11 @@ test('real shader preserves water 20, opaque Pack 2 21, ice 49.x, both quality s
   assert.match(shader,/vMat==49/);
   assert.match(shader,/outColor=vec4\(mix\(glacial,uFog,f\),vPack2Alpha\)/);
   assert.match(shader,/vMat>=40&&vMat<=48/);
+  assert.match(shader,/bool needles=vMat==42\|\|vMat==43\|\|vMat==46/);
+  assert.match(shader,/bool hanging=vMat==44\|\|vMat==48/);
+  assert.match(shader,/lengthRatio>1\.0\|\|abs\(leaf\.x\)>edge\)discard/);
+  assert.match(shader,/sqrt\(max\(0\.0,1\.0-lengthRatio\*lengthRatio\)\)/);
+  assert.doesNotMatch(shader,/vUv\*12\.0/, 'Reject old checker-perforation shader');
   assert.doesNotMatch(shader,/vMat==21(?:[^0-9]|$)/);
   assert.ok(shader.indexOf('discard;')<shader.indexOf('if(uArtQuality<.5)'));
   assert.equal(shader.split('void main(){').length,2);

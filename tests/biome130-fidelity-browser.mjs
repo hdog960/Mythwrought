@@ -58,32 +58,40 @@ try{
           colors.add([png.data[i]>>4,png.data[i+1]>>4,png.data[i+2]>>4].join(','));
         }
       assert.ok(colors.size>=6,'Physical scene render appears blank');
-      // Temporarily remove the foreground ice for an unobstructed leaf view.
-      // Restore the source ice after recording genuine framebuffer evidence.
+      // Unobstructed real-game foliage gallery: test all nine authored species,
+      // not merely an oak/ice combo. Keep camera fixed for real pixel A/B.
       await page.evaluate(y=>{
         const t=window.__mythwroughtTest;
-        t.placeFixture(16,y,0,0);t.aimAt(17,y,0);
+        t.placeFixture(16,y,0,0);t.placeFixture(17,y,0,0);
+        t.aimAt(17,y,0);
       },fixtureY);
-      await page.waitForTimeout(250);
-      const foliageShot=PNG.sync.read(await page.screenshot({
-        path:`artifacts/biome130-fidelity/biome130-foliage-${width}x${height}.png`}));
-      assert.equal(foliageShot.width,width);
-      assert.equal(foliageShot.height,height);
-      await page.evaluate(y=>window.__mythwroughtTest.placeFixture(17,y,0,0),fixtureY);
-      await page.waitForTimeout(220);
+      await page.waitForTimeout(200);
       const empty=PNG.sync.read(await page.screenshot({
         path:'artifacts/biome130-fidelity/biome130-leaf-empty-'+width+'x'+height+'.png'}));
-      let changed=0,unchanged=0;
-      for(let py=Math.floor(height*.22);py<Math.floor(height*.73);py++)
-        for(let px=Math.floor(width*.22);px<Math.floor(width*.78);px++){
-          const i=(py*width+px)*4;
-          const delta=Math.abs(foliageShot.data[i]-empty.data[i])+
-            Math.abs(foliageShot.data[i+1]-empty.data[i+1])+
-            Math.abs(foliageShot.data[i+2]-empty.data[i+2]);
-          if(delta>=28)changed++;else unchanged++;
-        }
-      assert.ok(changed>45,'Source foliage did not visibly affect the real framebuffer');
-      assert.ok(unchanged>100,'Source foliage completely occluded the scene');
+      const speciesPixels={};
+      for(let id=377;id<=385;id++){
+        await page.evaluate(({y,id})=>
+          window.__mythwroughtTest.placeFixture(17,y,0,id),{y:fixtureY,id});
+        await page.waitForTimeout(140);
+        const leaf=PNG.sync.read(await page.screenshot({
+          path:`artifacts/biome130-fidelity/leaf-${id}-${width}x${height}.png`}));
+        assert.equal(leaf.width,width);assert.equal(leaf.height,height);
+        let changed=0,unchanged=0;
+        for(let py=Math.floor(height*.22);py<Math.floor(height*.73);py++)
+          for(let px=Math.floor(width*.22);px<Math.floor(width*.78);px++){
+            const i=(py*width+px)*4;
+            const delta=Math.abs(leaf.data[i]-empty.data[i])+
+              Math.abs(leaf.data[i+1]-empty.data[i+1])+
+              Math.abs(leaf.data[i+2]-empty.data[i+2]);
+            if(delta>=28)changed++;else unchanged++;
+          }
+        assert.ok(changed>45,'Foliage '+id+' invisible on real WebGL2 canvas');
+        assert.ok(unchanged>100,'Foliage '+id+' obscured the complete gameplay scene');
+        speciesPixels[id]=changed;
+      }
+      await page.evaluate(y=>window.__mythwroughtTest.placeFixture(17,y,0,377),fixtureY);
+      await page.waitForTimeout(120);
+      await page.screenshot({path:`artifacts/biome130-fidelity/biome130-foliage-${width}x${height}.png`});
       await page.evaluate(y=>{
         const t=window.__mythwroughtTest;
         t.placeFixture(17,y,0,377);t.placeFixture(16,y,0,350);
@@ -100,10 +108,14 @@ try{
       assert.deepEqual(await page.evaluate(y=>[275,276,277,280,281,282].map((id,i)=>
         window.__mythwroughtTest.block(16+i,y,3)),fixtureY),[275,276,277,280,281,282],
         'Additional source ice blocks missing after browser save/reload');
+      assert.equal(Number(await page.locator('#scene').getAttribute('data-loaded-chunks')),25,
+        'Landscape streaming escaped its expected 25-chunk budget');
       assert.deepEqual(errors,[],'Runtime JS errors');assert.deepEqual(missing,[],'404 resources');
       evidence.push({viewport:`${width}x${height}`,webgl2:true,fixtureY,iceVertices:state.iceVertices,
         iceIds:[275,276,277,280,281,282,350],foliageIds:[377,385],
-        reloaded:true,colors:colors.size,visibleFoliagePixels:changed,
+        reloaded:true,colors:colors.size,visibleFoliagePixels:speciesPixels[377],
+        allNineFoliagePixels:speciesPixels,
+        loadedChunks:Number(await page.locator('#scene').getAttribute('data-loaded-chunks')),
         physicalIPhoneTested:false});
       console.log('PASS biome130 live WebGL2',JSON.stringify(evidence.at(-1)));
     }finally{await ctx.close();}

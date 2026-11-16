@@ -31,6 +31,7 @@ export function splitBiome130Translucent(vertices){
   return {opaque,translucent};
 }
 // Tags 40–48 and 49.x never overlap Pack 2 material 21.
+// Sub-box source faces receive whole-leaf, tapered silhouettes rather than checker perforations.
 // Foliage UV cutouts work in both graphics presets; ice retains exact source alpha.
 export function biome130TerrainFragmentShader(source){
   if(typeof source!=='string'||!source.includes('in float vDistance;')||
@@ -51,14 +52,24 @@ export function biome130TerrainFragmentShader(source){
     '    float density=vMat==40?.78:vMat==41?.48:vMat==42?.92:',
     '      vMat==43?.86:vMat==44?.58:vMat==45?.65:vMat==46?.90:',
     '      vMat==47?.74:.57;',
-    '    vec2 p=vUv*12.0;',
-    '    vec2 cell=floor(p);',
-    '    vec2 tip=fract(p)-vec2(.5);',
     '    bool needles=vMat==42||vMat==43||vMat==46;',
-    '    float contour=needles?max(abs(tip.x)*1.5,abs(tip.y)*.78):',
-    '      length(tip*vec2(.86,1.22));',
-    '    if(hashCell(cell+vec2(float(vMat)*13.0,7.0))>density||',
-    '      contour>.48)discard;',
+    '    bool hanging=vMat==44||vMat==48;',
+    '    vec2 p=vUv*(needles?9.0:7.0);',
+    '    vec2 cell=floor(p);',
+    '    float seed=hashCell(cell+vec2(float(vMat)*13.0,7.0));',
+    '    if(seed>density)discard;',
+    '    vec2 leaf=fract(p)-vec2(.5);',
+    '    float lean=(hashCell(cell+vec2(4.0,19.0))-.5)*.66;',
+    '    leaf.x+=lean*leaf.y;',
+    '    float lengthRatio=abs(leaf.y)/(hanging?.49:.47);',
+    '    float width=needles?.13:(hanging?.24:(vMat==41?.29:vMat==47?.28:.40));',
+    '    float edge=width*sqrt(max(0.0,1.0-lengthRatio*lengthRatio));',
+    '    if(lengthRatio>1.0||abs(leaf.x)>edge)discard;',
+    '    float vein=1.0-smoothstep(.015,.085,abs(leaf.x+leaf.y*.09));',
+    '    float detail=uArtQuality>.5?vein*.08:0.0;',
+    '    vec3 pigment=vColor*(.91+.12*seed+detail);',
+    '    float fog=smoothstep(29.0,68.0,vDistance);',
+    '    outColor=vec4(mix(pigment,uFog,fog),1.0);return;',
     '  }'
   ].join('\n');
   return source.replace('in float vDistance;',
