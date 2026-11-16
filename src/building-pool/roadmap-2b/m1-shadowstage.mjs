@@ -69,11 +69,27 @@ const DESIGNS=[
    [
     "x",
     10,
-    17,
-    22,
+    16,
+    25,
     [
      20
     ]
+   ],
+   [
+    "z",
+    16,
+    5,
+    9,
+    [
+     7
+    ]
+   ],
+   [
+    "z",
+    23,
+    5,
+    9,
+    []
    ]
   ],
   "furnishing": [
@@ -120,8 +136,8 @@ const DESIGNS=[
     "costume-repair"
    ],
    [
-    8,
-    23,
+    7,
+    21,
     "lamp",
     "west-gallery-light",
     "decor"
@@ -327,7 +343,7 @@ const DESIGNS=[
   ],
   "stairs": [
    [
-    10,
+    9,
     25
    ],
    [
