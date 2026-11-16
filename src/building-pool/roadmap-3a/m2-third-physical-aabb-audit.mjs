@@ -61,8 +61,7 @@ export function auditM2ThirdPhysicalFamilyFit(){
      mountHeatCertified:false,productionCollisionCertified:false}));
   }
   const roof=b.modules.find(m=>m.role==='roof')?.cells??[];
-  const loadBearing=cells.filter(c=>['wall','support-pier','roof-purlin','cold-flue-masonry'].includes(
-    b.modules.find(m=>m.cells.includes(c))?.role));
+  const loadBearing=b.modules.filter(m=>['wall','support-pier','roof-purlin','cold-flue-masonry'].includes(m.role)).flatMap(m=>m.cells);
   // Coarse roof support span diagnostics: a roof tile is *not* certified by
   // merely having piers elsewhere. Sampling every sixth tile avoids claiming
   // an unmeasured structural pass for the entire theoretical footprint.
