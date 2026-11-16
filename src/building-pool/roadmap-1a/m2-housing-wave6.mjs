@@ -931,7 +931,7 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         17,
-        11,
+        15,
         28,
         24
       ]
@@ -1171,9 +1171,9 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:024",
     "exteriorNotches": [
       [
-        15,
-        13,
-        22,
+        16,
+        12,
+        21,
         33
       ]
     ],
@@ -1458,8 +1458,8 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:025",
     "exteriorNotches": [
       [
-        14,
-        12,
+        13,
+        13,
         23,
         22
       ]
@@ -2699,9 +2699,9 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:023",
     "exteriorNotches": [
       [
-        15,
-        13,
-        24,
+        16,
+        12,
+        25,
         34
       ]
     ],
@@ -3056,7 +3056,7 @@ const SPECS=Object.freeze([
       [
         0,
         12,
-        10,
+        8,
         23
       ]
     ],
