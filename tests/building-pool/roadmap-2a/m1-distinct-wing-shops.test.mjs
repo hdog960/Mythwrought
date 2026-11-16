@@ -48,12 +48,12 @@ const iou=(a,b)=>{let shared=0;for(const v of a)if(b.has(v))shared++;return shar
 test('86 protected source designs plus 6 independently authored asymmetric wing structures = 92/420',()=>{
  assert.equal(M1_DISTINCT_WING_SHOPS.length,6);
  assert.equal(M1_DISTINCT_WING_SPECS.length,6);
- assert.equal(M1_D4_AUDIT_ALL.length,92);
+ assert.equal(M1_D4_AUDIT_ALL.length,98);
  assert.equal(inventory().authoredCandidateTotal,92);
  assert.equal(inventory().newlyAuthored,77);
  assert.equal(inventory().unwrittenNewCandidates,328);
  assert.equal(plannedSlots().filter(x=>x.authoredHere).length,92);
- assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,92);
+ assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,98);
  for(const b of M1_DISTINCT_WING_SHOPS){
   assert(validateBlueprint(b).valid);
   assert.equal(b.worldPlaced,false);assert.equal(b.numericIdsAssigned,false);

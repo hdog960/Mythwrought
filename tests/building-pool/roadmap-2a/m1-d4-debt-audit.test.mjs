@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {inspect2AD4FloorDebt,M1_D4_AUDIT_ALL} from '../../../src/building-pool/roadmap-2a/m1-d4-debt-audit.mjs';
-test('source exact 92 building D4 ledger holds 269 inherited problematic pairs, 30 exact floorplates, zero new high overlaps',()=>{
- assert.equal(M1_D4_AUDIT_ALL.length,92);
+test('source exact 98 building D4 ledger holds 269 inherited problematic pairs, 30 exact floorplates, zero new high overlaps',()=>{
+ assert.equal(M1_D4_AUDIT_ALL.length,98);
  const actual=inspect2AD4FloorDebt();
- assert.equal(actual.sources,92);assert.equal(actual.protectedOriginals,74);
+ assert.equal(actual.sources,98);assert.equal(actual.protectedOriginals,74);
  assert.equal(actual.grandfatheredHighOverlapPairs,269);
  assert.equal(actual.exactMatchingFloorPairs,30);
  assert.equal(actual.affectedBuildings,55);
@@ -16,7 +16,7 @@ test('source exact 92 building D4 ledger holds 269 inherited problematic pairs, 
  assert.equal(actual.productionIntegrated,false);
  const dir=join(process.cwd(),'artifacts','roadmap-2a-d4-source-debt');
  mkdirSync(dir,{recursive:true});
- writeFileSync(join(dir,'all92-full-D4-source-floor-IoU.json'),JSON.stringify({
+ writeFileSync(join(dir,'all98-full-D4-source-floor-IoU.json'),JSON.stringify({
   commit:process.env.GITHUB_SHA??null,sourceOnly:true,allDesigns:actual.sources,
   inheritedOriginalSource15Unchanged:true,preExistingHighOverlapPairs:actual.grandfatheredHighOverlapPairs,
   preExistingExactFloorMatches:30,newViolationPairs:0,

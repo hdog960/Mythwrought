@@ -32,10 +32,10 @@
   "target": 420,
   "legacySourceCandidates": 15,
   "locallyMigratedAndParityVerified": 15,
-  "newlyAuthored": 77,
+  "newlyAuthored": 83,
   "creatorApproved": 0,
   "integratedIntoGame": 0,
-  "unwrittenNewCandidates": 328,
+  "unwrittenNewCandidates": 322,
   "legacyCandidates": [
     {
       "id": "r2:general-store:temperate:small:01",
@@ -330,7 +330,7 @@
   ],
   "sourcePolicy": "Original PR #124 is read-only. IDs are preserved, not geometries yet. A candidate only counts as locally migrated after exact geometry/metadata parity and native tests.",
   "assetPolicy": "Manual 96 families/106 physical variants are integrated; biome130 entries remain symbolic when unverified. No numeric runtime IDs or production placement.",
-  "authoredCandidateTotal": 92,
+  "authoredCandidateTotal": 98,
   "handAuthoredStoreBlob": "7211223b2cc51290b89f5f886c1cbb59cc495747",
   "sourceModuleBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
   "originalValidatedStores": 15,
@@ -1085,6 +1085,104 @@
       "genuineConnectedWings": 4,
       "openCourts": 2,
       "raisedRoofSections": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    }
+  ],
+  "M1LandmarkShops": [
+    {
+      "id": "r2:general-store:enchanted-forest:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:pet-shop:desert:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:magic-shop:mountain:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:potion-shop:snow:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bakery:enchanted-forest:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bank:desert:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
       "creatorApproved": false,
       "integrated": false,
       "physicalMeshApproved": false,

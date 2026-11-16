@@ -18,7 +18,8 @@ export const M1_LATERAL_MARKET_IDS=Object.freeze(["r2:general-store:temperate:la
 export const M1_TWIN_SIDE_TERRACE_IDS=Object.freeze(["r2:general-store:desert:large:03","r2:pet-shop:temperate:medium:02","r2:magic-shop:snow:small:01","r2:potion-shop:mountain:small:01","r2:bakery:enchanted-forest:small:01","r2:bank:temperate:large:03"]);
 export const M1_FIVE_COURT_IDS=Object.freeze(["r2:general-store:snow:large:04","r2:pet-shop:mountain:large:01","r2:magic-shop:temperate:small:01","r2:potion-shop:desert:medium:01","r2:bakery:mountain:large:01","r2:bank:snow:small:01"]);
 export const M1_DISTINCT_WING_IDS=Object.freeze(["r2:general-store:temperate:medium:04","r2:pet-shop:snow:large:03","r2:magic-shop:desert:large:03","r2:potion-shop:enchanted-forest:large:03","r2:bakery:temperate:medium:03","r2:bank:mountain:large:03"]);
-const M1_SPECIALIST_SET=new Set([...M1_SPECIALIST_IDS,...M1_ADDITIONAL_IDS,...M1_REGIONAL_IDS,...M1_BIOME_EXPANSION_IDS,...M1_CATEGORY_ARCADE_IDS,...M1_MARKET_FRONT_IDS,...M1_COURTYARD_IDS,...M1_U_COURT_IDS,...M1_STEPPED_COURT_IDS,...M1_LATERAL_MARKET_IDS,...M1_TWIN_SIDE_TERRACE_IDS,...M1_FIVE_COURT_IDS,...M1_DISTINCT_WING_IDS]);
+export const M1_LANDMARK_IDS=Object.freeze(["r2:general-store:enchanted-forest:large:03","r2:pet-shop:desert:large:03","r2:magic-shop:mountain:large:03","r2:potion-shop:snow:large:03","r2:bakery:enchanted-forest:large:03","r2:bank:desert:large:03"]);
+const M1_SPECIALIST_SET=new Set([...M1_SPECIALIST_IDS,...M1_ADDITIONAL_IDS,...M1_REGIONAL_IDS,...M1_BIOME_EXPANSION_IDS,...M1_CATEGORY_ARCADE_IDS,...M1_MARKET_FRONT_IDS,...M1_COURTYARD_IDS,...M1_U_COURT_IDS,...M1_STEPPED_COURT_IDS,...M1_LATERAL_MARKET_IDS,...M1_TWIN_SIDE_TERRACE_IDS,...M1_FIVE_COURT_IDS,...M1_DISTINCT_WING_IDS,...M1_LANDMARK_IDS]);
 
 export function blueprintId(category,biome,size,variation){
   if(!Object.hasOwn(CATEGORY_QUOTAS,category)||!BIOMES.includes(biome)||!SIZES.includes(size)||!Number.isInteger(variation)||variation<1||variation>CATEGORY_QUOTAS[category]) throw new Error("unreserved roadmap-2a slot");
@@ -34,7 +35,7 @@ export function plannedSlots(){
 }
 export function inventory(){
   const slots=plannedSlots();
-  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:15,authoredCandidateTotal:92,newlyAuthored:77,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:328,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
+  return Object.freeze({target:slots.length,legacySourceCandidates:slots.filter(x=>x.legacySourceCandidate).length,locallyMigrated:15,authoredCandidateTotal:98,newlyAuthored:83,creatorApproved:0,integratedIntoGame:0,unwrittenNewCandidates:322,byCategory:Object.freeze(Object.fromEntries(Object.keys(CATEGORY_QUOTAS).map(key=>[key,slots.filter(x=>x.category===key).length])))});
 }
 
 // Builder 2A owned physical-space requirements. Symbols are NOT persistent block IDs.
