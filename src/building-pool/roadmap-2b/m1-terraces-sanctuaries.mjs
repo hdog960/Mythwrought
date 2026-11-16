@@ -427,8 +427,8 @@ const DESIGNS=[
    ],
    [
     "private backstage",
-    19,
-    30
+    21,
+    31
    ],
    [
     "western prop vault",
@@ -936,12 +936,12 @@ const DESIGNS=[
    ],
    [
     "costume prop vault",
-    7,
-    42
+    8,
+    43
    ],
    [
     "right score vault",
-    41,
+    42,
     44
    ]
   ],
@@ -1331,13 +1331,13 @@ const DESIGNS=[
    ],
    [
     "north altar",
-    17,
+    18,
     29
    ],
    [
     "west votive vault",
-    5,
-    30
+    6,
+    29
    ]
   ],
   "features": [
@@ -1793,13 +1793,13 @@ const DESIGNS=[
    ],
    [
     "west rarebook vault",
-    7,
-    40
+    8,
+    41
    ],
    [
     "east vellum",
-    43,
-    42
+    45,
+    43
    ]
   ],
   "features": [
