@@ -599,7 +599,10 @@ export function descentSurfaceSeam(world,origin=DESCENT_ORIGIN){
   // unmodified DEEPSTONE below -3 produces a false blocked-entrance result.
   // descentWorld still gives saved player edits priority over candidate air.
   for(const p of steps){
-    for(let y=p.feet;y<=p.feet+1;y++){
+    // A two-cell probe can certify a tunnel with a low ceiling even though
+    // the authored route requires four clear body/head cells. Check the
+    // entire standing envelope, including protected legacy roof voxels.
+    for(let y=p.feet;y<=p.feet+3;y++){
       const id=y>=LEGACY_WORLD_MIN_Y?world.get(p.x,y,p.z):reader.get(p.x,y,p.z);
       if(id!==BLOCK.AIR)
         failures.push({x:p.x,y,z:p.z,reason:y>=LEGACY_WORLD_MIN_Y?'surface-headroom':'candidate-headroom'});
