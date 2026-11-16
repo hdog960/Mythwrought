@@ -1208,7 +1208,7 @@ const millPlans=[
   "eastX": 33,
   "eastZ": 29,
   "midZ": 20,
-  "title": "broad west dune-souk quern cloister with a monumental full-depth arcade, opposite southeast wind shaft and sun-court",
+  "title": "Recessed desert quern courtyard with narrow asymmetric western covered grain-souk, detached north stall and south export port",
   "west": "spice dategrain drying aisles",
   "east": "stone windscoop quern and packing house",
   "yard": "open-air caravan flour-switch court",
@@ -1251,15 +1251,15 @@ const millPlans=[
    ],
    [
     0,
-    15,
+    12,
     24,
     38
    ],
    [
     0,
-    14,
+    7,
     0,
-    27
+    12
    ]
   ],
   "roofs": [

@@ -126,9 +126,9 @@ test('twenty distinct authored variation-3 slots exist, plus all 60 first/second
  }
 });
 test('third-variation source objects have exact voxel-count signatures, nonrectangular truly authored footprints and roof-bay supports',()=>{
- const expected=[5042,3252,10406,9217,4603,3880,6947,7864,11316,13088];
+ const expected=[5042,3252,10406,9217,4603,3880,6792,7864,11316,13088];
  assert.deepEqual(next.map(b=>b.architecture.occupiedCoordinates),expected);
- assert.equal(expected.reduce((a,b)=>a+b,0),75615);
+ assert.equal(expected.reduce((a,b)=>a+b,0),75460);
  assert.equal(new Set(next.map(b=>b.architecture.kind)).size,10);
  for(const b of next){
   const stat=validateBlueprint(b,ASSET_CATALOG),map=voxelMap(b);
@@ -200,7 +200,7 @@ test('60 native source geometry, exterior/cutaway voxel mesh and phone-landscape
 test('read-only physical ABI handoff uses the actual integrated manual five-pack and biome registry but certifies no building placement',()=>{
  const report=reviewVariant3SecondPhysicalDependencies();
  assert.equal(report.authored,10);
- assert.equal(report.occupiedConceptualPositions,75615);
+ assert.equal(report.occupiedConceptualPositions,75460);
  assert.equal(report.families.families,96);
  assert.equal(report.families.numericVariants,106);
  assert.equal(report.readOnly,true);
