@@ -22,3 +22,7 @@ Run `node --test tests/building-pool/roadmap-4a/*.test.mjs` on exact committed h
 
 ## M2 civic works addendum (2026-11-16)
 Eight isolated original geometry plans introduced in `m2-civic-works.mjs`; see `docs/building-pool/roadmap-4a/M2_CIVIC_WORKS_ACCEPTANCE.md`. These raise the authored candidate count from 92 to **100** (70 new M2, 30 source-exact inherited); **215** remain. All world and creator gates remain closed. The original M0 counts above document the initial handoff, not today's tranche.
+
+
+## M2 public works addendum (2026-11-16)
+Eight new original coordinate designs in `m2-public-works.mjs` raise totals to **108/315** (30 inherited, 78 new, 207 remaining). See `docs/building-pool/roadmap-4a/M2_PUBLIC_WORKS_ACCEPTANCE.md`. All historical M0 counts above are a frozen handoff snapshot. No world placement or creator acceptance.
