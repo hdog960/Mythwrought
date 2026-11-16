@@ -17,8 +17,10 @@ test('seven original ice opacities and nine foliage species have isolated tags',
     assert.equal(biome130Block(id).opacity,expectedAlpha[i]);
     assert.equal(Math.floor(material),49);
     assert.ok(Math.abs(material-49-expectedAlpha[i])<1e-7);
-    assert.equal(resolveBiome130BuilderAsset(biome130Block(id).symbol).rendererFidelity,
-      'alpha-blended');
+    const builder=resolveBiome130BuilderAsset(biome130Block(id).symbol);
+    assert.equal(builder.rendererFidelity,'alpha-blended');
+    assert.equal(builder.alphaIntent,'blend');
+    assert.equal(builder.transparentIntent,true);
   }
   assert.equal(biome130MaterialTag(349),0);
   assert.equal(biome130MaterialTag(351),0);
@@ -27,10 +29,15 @@ test('seven original ice opacities and nine foliage species have isolated tags',
     assert.equal(biome130MaterialTag(id),40+id-377);
     const asset=resolveBiome130BuilderAsset(biome130Block(id).symbol);
     assert.equal(asset.rendererFidelity,'alpha-cutout');
+    assert.equal(asset.alphaIntent,'cutout');
+    assert.equal(asset.transparentIntent,true);
     assert.equal(asset.solid,false);
   }
   assert.equal(resolveBiome130BuilderAsset('biome130:094').rendererFidelity,'opaque');
-  assert.equal(resolveBiome130BuilderAsset('biome130:040').rendererFidelity,'opaque-fallback');
+  const fallback=resolveBiome130BuilderAsset('biome130:040');
+  assert.equal(fallback.rendererFidelity,'opaque-fallback');
+  assert.equal(fallback.alphaIntent,'blend');
+  assert.equal(fallback.transparentIntent,true);
 });
 
 test('transparent split retains exact vertex ABI, source alpha and opaque order',()=>{

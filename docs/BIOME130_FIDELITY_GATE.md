@@ -5,6 +5,7 @@ Baseline: incorporation 015 `1f67efc9805e83866549515ffdad4dc7e225b234`, all 130 
 ## Source-backed renderer change
 - Natural leaf families 122–130, IDs 377–385, retain their non-solid source union geometry and gain nine procedural alpha cutout material tags 40–48. The fragment discard is active in balanced **and** economy graphics presets; no extra textures or GPU draw calls.
 - Seven ice families 020, 021, 022, 025, 026, 027, 095 (IDs 275, 276, 277, 280, 281, 282, 350) use their registered source opacities 0.46, 0.78, 0.90, 0.72, 0.82, 0.68, 0.72. Existing material 49.x encodes precise alpha in the current nine-float GPU ABI, routes all ice to the existing transparent-water buffer and draws after solids with blending enabled/depth writes disabled.
+- Builder-facing alpha intent and transparency flags reflect the actual authored ice opacity or foliage cutout, while unfinished enchanted alpha effects remain explicitly marked opaque-fallback.
 - Water material 20 and existing Pack 2 state remain unchanged. No new buffer/upload in chunks without ice. Renderer and builder use the same actual family IDs. `#scene.dataset.biome130IceVertices` exposes live GPU ice geometry.
 - The CPU route preserves the original nine-float shader/GPU vertex ABI and stable triangle order.
 

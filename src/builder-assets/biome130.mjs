@@ -16,17 +16,21 @@ export function resolveBiome130BuilderAsset(symbol,orientation='north'){
   const yaw=yawOf(orientation);
   if(yaw===null)throw new RangeError('Invalid builder orientation');
   const asset=biome130Block(symbol,yaw);
+  const blended=BIOME130_ICE_BLOCK_IDS.includes(asset.blockId);
+  const wantsAlpha=asset.transparent||asset.alphaMode==='cutout'||
+    (typeof asset.opacity==='number'&&asset.opacity<1)||
+    asset.opacity==='cutout'||asset.opacity==='translucent';
+  const sourceAlphaIntent=(asset.alphaMode==='cutout'||asset.opacity==='cutout')?
+    'cutout':wantsAlpha?'blend':'opaque';
   return Object.freeze({
     symbol:asset.symbol,blockId:asset.blockId,name:asset.name,
     yaw,source:'auto:12-biome130',worldRegistered:true,livePlaceable:true,
     physical:true,solid:asset.solid,opacity:asset.opacity,
     // The source opacity and leaf cutouts now have a dedicated game render path.
-    alphaIntent:asset.alphaMode,transparentIntent:asset.transparent,
-    rendererFidelity:BIOME130_ICE_BLOCK_IDS.includes(asset.blockId)?'alpha-blended':
+    alphaIntent:sourceAlphaIntent,transparentIntent:wantsAlpha,
+    rendererFidelity:blended?'alpha-blended':
       (asset.blockId>=377&&asset.blockId<=385?'alpha-cutout':
-      ((asset.transparent||asset.opacity<1||
-        asset.opacity==='translucent'||asset.opacity==='cutout')?
-        'opaque-fallback':'opaque')),
+        (wantsAlpha?'opaque-fallback':'opaque')),
     shape:Object.freeze({boxes:asset.boxes}),colors:asset.palette,
     builderUsable:true
   });
