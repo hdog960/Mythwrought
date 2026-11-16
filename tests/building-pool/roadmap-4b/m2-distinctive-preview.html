@@ -45,23 +45,30 @@ const colors={
   railing:[.58,.47,.31],parapet:[.51,.5,.46]
 };
 const faces=[
-  {idx:[0,1,2,0,2,3],shade:1},
-  {idx:[4,7,6,4,6,5],shade:.62},
-  {idx:[0,4,5,0,5,1],shade:.78},
-  {idx:[3,2,6,3,6,7],shade:.9},
-  {idx:[0,3,7,0,7,4],shade:.73},
-  {idx:[1,5,6,1,6,2],shade:.82}
+  {idx:[0,1,2,0,2,3],shade:1,neighbor:[0,-1,0]},
+  {idx:[4,7,6,4,6,5],shade:.62,neighbor:[0,1,0]},
+  {idx:[0,4,5,0,5,1],shade:.78,neighbor:[0,0,-1]},
+  {idx:[3,2,6,3,6,7],shade:.9,neighbor:[0,0,1]},
+  {idx:[0,3,7,0,7,4],shade:.73,neighbor:[-1,0,0]},
+  {idx:[1,5,6,1,6,2],shade:.82,neighbor:[1,0,0]}
 ];
 const cube=(x,y,z)=>[
  [x,y,z],[x+1,y,z],[x+1,y,z+1],[x,y,z+1],
  [x,y+1,z],[x+1,y+1,z],[x+1,y+1,z+1],[x,y+1,z+1]];
 const selected=b.cells.filter(c=>view==='exterior'||c.at[1]<=3&&c.role!=='roof');
+// Source-authentic exterior/section: omit only faces shared by two present voxels.
+// This preserves geometry while reducing Chromium/SwiftShader GPU uploads.
+const occupancy=new Set(selected.map(c=>c.at.join(',')));
 const world=[],all=[];
 for(const cell of selected){
  const [x,y,z]=cell.at,points=cube(x,y,z),base=colors[cell.role]||[.8,.2,.2];
- for(const face of faces)for(const j of face.idx){
+ for(const face of faces){
+  const [dx,dy,dz]=face.neighbor;
+  if(occupancy.has([x+dx,y+dy,z+dz].join(',')))continue;
+  for(const j of face.idx){
    const p=points[j];all.push(p);
    world.push({p,color:base.map(t=>Math.min(1,t*face.shade))});
+  }
  }
 }
 let uMin=Infinity,uMax=-Infinity,vMin=Infinity,vMax=-Infinity,dMin=Infinity,dMax=-Infinity;
