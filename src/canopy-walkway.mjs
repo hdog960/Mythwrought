@@ -6,6 +6,11 @@ export function planCanopyWalkway(world,a,b,y){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
     !Array.isArray(a)||!Array.isArray(b)||a.length!==2||b.length!==2||
     ![...a,...b,y].every(Number.isInteger)||y<2||y+2>WORLD_MAX_Y)return null;
+ // Canonicalize the physical endpoints so requesting the same span from the
+ // opposite bank cannot generate a different crown or duplicate an edit.
+ // This is local opt-in geometry only; it does not change world generation.
+ const [start,end]=a[0]<b[0]||(a[0]===b[0]&&a[1]<=b[1])?[a,b]:[b,a];
+ a=start;b=end;
  const dx=b[0]-a[0],dz=b[1]-a[1],distance=Math.abs(dx)+Math.abs(dz);
  if((dx!==0&&dz!==0)||distance<3||distance>9)return null;
  const sx=Math.sign(dx),sz=Math.sign(dz),sideX=sz,sideZ=-sx;
