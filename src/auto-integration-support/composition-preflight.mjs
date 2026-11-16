@@ -43,6 +43,6 @@ export function preflightWorldComposition({
   const occupied=resolved.filter(c=>c.id!==0).map(({x,y,z})=>({x,y,z}));
   const obj=validateObjectAnchors(objects,{occupiedCells:occupied,maxTriangles});
   if (!obj.ok) return Object.freeze({ok:false,reason:`object-${obj.reason}`});
-  resolved.sort((a,b)=>a.x-b.x||a.y-b.y||a.z-b.z);
+  resolved.sort((a,b)=>(a.x < b.x ? -1 : a.x > b.x ? 1 : a.y < b.y ? -1 : a.y > b.y ? 1 : a.z < b.z ? -1 : a.z > b.z ? 1));
   return Object.freeze({ok:true,cells:Object.freeze(resolved),caves:caveRoutes.length,objects:obj.objectCount,triangles:obj.triangles});
 }
