@@ -45,14 +45,14 @@ function d4(points){
  }return out;
 }
 const iou=(a,b)=>{let shared=0;for(const v of a)if(b.has(v))shared++;return shared/(a.size+b.size-shared)};
-test('86 protected source designs plus 6 independently authored asymmetric wing structures = 92/420',()=>{
+test('preserve 86 older sources and six distinct-wing blueprints as an unchanged 92-design cohort inside 98/420',()=>{
  assert.equal(M1_DISTINCT_WING_SHOPS.length,6);
  assert.equal(M1_DISTINCT_WING_SPECS.length,6);
  assert.equal(M1_D4_AUDIT_ALL.length,98);
- assert.equal(inventory().authoredCandidateTotal,92);
- assert.equal(inventory().newlyAuthored,77);
- assert.equal(inventory().unwrittenNewCandidates,328);
- assert.equal(plannedSlots().filter(x=>x.authoredHere).length,92);
+ assert.equal(inventory().authoredCandidateTotal,98);
+ assert.equal(inventory().newlyAuthored,83);
+ assert.equal(inventory().unwrittenNewCandidates,322);
+ assert.equal(plannedSlots().filter(x=>x.authoredHere).length,98);
  assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,98);
  for(const b of M1_DISTINCT_WING_SHOPS){
   assert(validateBlueprint(b).valid);
@@ -111,7 +111,7 @@ test('every one of 24 new room access points truly walkable, with actual Pack5 o
   }
  }
 });
-test('new six floorplates stay below strict 0.89 D4 near-duplicate IoU versus every 92 actual source building',()=>{
+test('new six floorplates stay below strict 0.89 D4 near-duplicate IoU versus every 98 actual source building',()=>{
  const all=M1_D4_AUDIT_ALL;
  const forms=all.map(bp=>({id:bp.id,pts:new Set(bp.voxels.filter(v=>v.kind==='floor'&&v.y===1).map(v=>v.x+','+v.z))}));
  for(const bp of M1_DISTINCT_WING_SHOPS){
@@ -124,7 +124,7 @@ test('new six floorplates stay below strict 0.89 D4 near-duplicate IoU versus ev
   assert(max<.89,bp.id+' too close to '+closest+' floor IoU '+max);
  }
  const d=inspect2AD4FloorDebt();
- assert.equal(d.sources,92);assert.equal(d.grandfatheredHighOverlapPairs,269);
+ assert.equal(d.sources,98);assert.equal(d.grandfatheredHighOverlapPairs,269);
  assert.equal(d.newHighOverlapPairs,0,'introduced floorplan overlap without baseline exception');
 });
 test('negative source mutations reject blocked door, duplicate occupied source, and altered physical dependency',()=>{
