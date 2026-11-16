@@ -9,7 +9,8 @@ import {M1_CATEGORY_ARCADES} from './m1-category-arcades.mjs';
 import {M1_MARKET_FRONTS} from './m1-market-fronts.mjs';
 import {M1_COURTYARD_SHOPS} from './m1-courtyard-shops.mjs';
 import {M1_U_COURT_SHOPS} from './m1-u-court-shops.mjs';
-export const SPAN_CANDIDATES=Object.freeze([...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS,...M1_U_COURT_SHOPS]);
+import {M1_STEPPED_COURT_SHOPS} from './m1-stepped-court-shops.mjs';
+export const SPAN_CANDIDATES=Object.freeze([...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS,...M1_U_COURT_SHOPS,...M1_STEPPED_COURT_SHOPS]);
 const key=(x,y,z)=>[x,y,z].join(',');
 const bearing=v=>v&&['wall','floor','foundation','roof'].includes(v.kind);
 export function inspect2AConceptualRoofSpans(books=SPAN_CANDIDATES){
