@@ -180,6 +180,10 @@ test('actual integrated five-pack and biome130 read-only source physical ABI, wi
   assert.equal(item.registeredNow,false,symbol+' must not be misreported as live');
   assert.equal(item.placedAsBuiltVoxel,false,symbol+' must not be occupied as a built cell');
  }
+ const pack5Areas=["r3:lumberyard:desert:medium:3","r3:lumberyard:snow:small:3","r3:lumberyard:mountain:medium:3","r3:mill:temperate:large:3","r3:mill:desert:large:3","r3:mill:enchanted-forest:small:3"];
+ for(const id of pack5Areas){
+  assert.ok(report.assets.some(a=>a.symbol.startsWith('pack5:')&&a.usedBy.includes(id)),id+' has no real Pack5 occupied source cell');
+ }
  for(const pack of ['pack1:','pack2:','pack3:','pack4:','pack5:']){
   assert.ok(report.assets.some(a=>a.symbol.startsWith(pack)),pack+' must have real authored source-cell use');
  }

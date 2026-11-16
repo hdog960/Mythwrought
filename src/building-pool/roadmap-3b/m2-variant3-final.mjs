@@ -663,12 +663,12 @@ const plans=[
    [
     "fireglaze cold-protection drying strip",
     [
-     3,
-     6,
+     8,
+     9,
      2,
      2,
-     18,
-     21
+     26,
+     28
     ],
     "pack5:081"
    ]
