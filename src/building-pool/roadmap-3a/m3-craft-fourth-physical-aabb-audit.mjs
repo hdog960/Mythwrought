@@ -57,7 +57,7 @@ export function auditM3CraftFourthPhysicalFit(){
   // Geometry-support witness only. Never assert engineering load capacity from
   // a purlin's proximity. Count unanswered roof positions, not "safety passes".
   const supports=[...(roles.get('roof-purlin')??[]),...(roles.get('bearing-pier')??[]),
-    ...(roles.get('wall')??[]),...(roles.get('bearing-pier')??[])];
+    ...(roles.get('wall')??[]),...(roles.get('roof-return-knee')??[])];
   const sampled=roles.get('roof')??[];
   const structuralIndex=new Set(supports.map(s=>k(...s.slice(0,3))));
   let unknown=0,n=0;
