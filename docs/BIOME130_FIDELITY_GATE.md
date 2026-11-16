@@ -3,8 +3,8 @@
 Baseline: incorporation 015 `1f67efc9805e83866549515ffdad4dc7e225b234`, all 130 registered IDs 256–385.
 
 ## Source-backed renderer change
-- Natural leaf families 122–130, IDs 377–385, retain their non-solid source union geometry and gain nine procedural alpha cutout material tags 21–29. The fragment discard is active in balanced **and** economy graphics presets; no extra textures or GPU draw calls.
-- Ice structural strut 095, ID 350, keeps its source-authored physical geometry and opacity 0.72. Material 31 is separated at upload to the established transparent-water buffer and drawn after solids with blending enabled and depth writes disabled.
+- Natural leaf families 122–130, IDs 377–385, retain their non-solid source union geometry and gain nine procedural alpha cutout material tags 40–48. The fragment discard is active in balanced **and** economy graphics presets; no extra textures or GPU draw calls.
+- Ice structural strut 095, ID 350, keeps its source-authored physical geometry and opacity 0.72. Material 49 is separated at upload to the established transparent-water buffer and drawn after solids with blending enabled and depth writes disabled.
 - Water material 20 and existing Pack 2 state remain unchanged. No new buffer/upload in chunks without ice. Renderer and builder use the same actual family IDs. `#scene.dataset.biome130IceVertices` exposes live GPU ice geometry.
 - The CPU route preserves the original nine-float shader/GPU vertex ABI and stable triangle order.
 
