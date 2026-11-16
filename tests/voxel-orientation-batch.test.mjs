@@ -130,3 +130,38 @@ test('foreign same-ID geometry change clears stale rotation but preserves foreig
  assert.equal(f.sidecar.get(f.cells[0],4),0);
  assert.equal(f.sidecar.get(f.cells[1],4),2);
 });
+
+test('rollback preserves foreign replacement of an earlier committed cell',async()=>{
+ const f=fixture();let undos=0;
+ await assert.rejects(f.run((c,i)=>{
+  f.ids.set(c.join(','),5);
+  if(i===1){f.ids.set(f.cells[0].join(','),6);return false;}
+  return true;
+ },{
+  rollback:(c)=>{undos++;f.ids.set(c.join(','),4);return true;}
+ }),error=>error instanceof AggregateError &&
+    error.errors.some(e=>/Foreign edit during batch rollback/.test(e.message)));
+ assert.equal(f.readIdentity(f.cells[0]),6);
+ assert.equal(f.readIdentity(f.cells[1]),4);
+ assert.equal(undos,1);
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+ assert.equal(f.sidecar.get(f.cells[1],4),2);
+});
+test('rollback preserves foreign same-ID shape change of an earlier committed cell',async()=>{
+ const f=fixture(),shapes=new Map(f.cells.map(c=>[c.join(','),'north']));
+ let undos=0;
+ await assert.rejects(f.run((c,i)=>{
+  shapes.set(c.join(','),'east');
+  if(i===1){shapes.set(f.cells[0].join(','),'west');return false;}
+  return true;
+ },{
+  readState:c=>shapes.get(c.join(',')),
+  rollback:c=>{undos++;shapes.set(c.join(','),'north');return true;}
+ }),error=>error instanceof AggregateError &&
+    error.errors.some(e=>/Foreign edit during batch rollback/.test(e.message)));
+ assert.equal(shapes.get(f.cells[0].join(',')),'west');
+ assert.equal(shapes.get(f.cells[1].join(',')),'north');
+ assert.equal(undos,1);
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+ assert.equal(f.sidecar.get(f.cells[1],4),2);
+});
