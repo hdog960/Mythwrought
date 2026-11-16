@@ -465,3 +465,36 @@ test('saved obstruction remains authoritative in upper/middle labyrinth',()=>{
   assert.equal(descentWorld(restored).get(x,-44,z),BLOCK.WOOD);
   assert.deepEqual(restored.save(),saved);
 });
+
+for(const seed of [179,1,2026,-77])test('lower split-fault grotto has a supported dogleg and rear pocket '+seed,()=>{
+  const world=new VoxelWorld(seed),snapshot=JSON.stringify(world.save());
+  const reader=descentWorld(world),anchor=descentRoute().find(p=>p.floor===-135);
+  assert.ok(anchor,'missing -135 descent anchor');
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const at=(d,t,y)=>reader.get(anchor.x+outward[0]*d+tangent[0]*t,y,
+                              anchor.z+outward[1]*d+tangent[1]*t);
+  for(let d=0;d<=38;d++){
+    const bend=d<12?0:d<25?Math.floor((d-12)/3):4;
+    assert.equal(at(d,bend,-135),BLOCK.DEEPSTONE,'dogleg floor '+d);
+    for(let h=1;h<=3;h++)assert.equal(at(d,bend,-135+h),BLOCK.AIR,'dogleg headroom '+d+'/'+h);
+  }
+  for(const [d,t] of [[37,4],[49,10],[59,11]]){
+    assert.equal(at(d,t,-135),BLOCK.DEEPSTONE,'pocket floor '+d+'/'+t);
+    for(let h=1;h<=3;h++)assert.equal(at(d,t,-135+h),BLOCK.AIR,'pocket headroom '+d+'/'+t);
+  }
+  assert.equal(descentConnectivity(world).connected,true);
+  assert.equal(JSON.stringify(world.save()),snapshot);
+});
+test('lower split-fault grotto respects saved player obstruction',()=>{
+  const world=new VoxelWorld(179),anchor=descentRoute().find(p=>p.floor===-135);
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const x=anchor.x+outward[0]*59+tangent[0]*11;
+  const z=anchor.z+outward[1]*59+tangent[1]*11;
+  assert.equal(world.set(x,-134,z,BLOCK.WOOD),true);
+  const restored=VoxelWorld.restore(world.save());
+  assert.equal(descentWorld(restored).get(x,-134,z),BLOCK.WOOD);
+});
