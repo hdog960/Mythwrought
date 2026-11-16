@@ -210,3 +210,24 @@ test('revision guard accepts acknowledged edits and monotonic rollback',async()=
   assert.equal(f.sidecar.get(c,4),2);
  }
 });
+
+test('async committed identity drift refuses rollback over a foreign block',async()=>{
+ const f=fixture();let first=true,undos=0;
+ await assert.rejects(f.run(c=>{f.ids.set(c.join(','),5);return true;},{
+  readIdentity:c=>{
+   const key=c.join(',');
+   if(key===f.cells[0].join(',') && f.ids.get(key)===5 && first){
+    first=false;return 5;
+   }
+   if(key===f.cells[0].join(',') && !first && f.ids.get(key)===5){
+    f.ids.set(key,6);return 6;
+   }
+   return f.ids.get(key);
+  },
+  rollback:c=>{undos++;f.ids.set(c.join(','),4);return true;}
+ }),error=>error instanceof AggregateError &&
+    error.errors.some(e=>/Foreign edit during unverified commit/.test(e.message)));
+ assert.equal(f.readIdentity(f.cells[0]),6);
+ assert.equal(undos,0);
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+});
