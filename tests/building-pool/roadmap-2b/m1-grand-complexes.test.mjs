@@ -161,6 +161,27 @@ test('all four large tower/trade families have source-authored continuous founda
   }
  }
 });
+test('six different grand-building exterior rooflines are actually authored at distinct occupied elevations',()=>{
+ const specs=[
+  ['r2:tailor:desert:large:01','loom-workshop-sawtooth-vault',8,147,'loom-workshop-ridge',9,21],
+  ['r2:butcher:snow:large:01','winter-multi-bay-snow-buttress',8,182,'raised-peak-snow-roof',9,72],
+  ['r2:bookshop:mountain:large:01','cliff-bookvault-side-arch',8,322,'high-cliff-bookvault-gable',9,38],
+  ['r2:jeweler:enchanted-forest:large:01','stepped-root-canopy',11,72,'gem-vault-living-ridge',12,14],
+  ['r2:temple:desert:large:02','ceremonial-side-roof',8,84,'ceremonial-apse-crest',9,18],
+  ['r2:theater:temperate:large:01','stepped-flytower-shoulder',11,45,'high-grand-flytower-peak',12,3]
+ ];
+ for(const [id,lowerRole,lowerY,lowerN,upperRole,upperY,upperN] of specs){
+  const b=byId.get(id);
+  const low=b.voxels.filter(v=>v.role===lowerRole),high=b.voxels.filter(v=>v.role===upperRole);
+  assert.equal(low.length,lowerN,id+' missing actual shaped roof geometry');
+  assert.equal(high.length,upperN,id+' missing upper architectural roof shape');
+  assert(low.every(v=>v.y===lowerY&&v.kind==='roof'),id+' lower roof not actual occupied cell');
+  assert(high.every(v=>v.y===upperY&&v.kind==='roof'),id+' upper roof not actual occupied cell');
+  const map=cells(b);
+  for(const v of high)
+   assert(map.has(k(v.x,v.y-1,v.z)),id+' roof ridge floats without a directly occupied lower course');
+ }
+});
 test('desert sacred court has genuinely open lightwell, attached four towers, actual aisle and only symbolic altar steps',()=>{
  const b=byId.get('r2:temple:desert:large:02'),v=cells(b);
  for(const o of b.intentionallyOpenRoof)for(let x=o.x0;x<=o.x1;x++)
