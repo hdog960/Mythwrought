@@ -242,6 +242,14 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
         22,
         "stone-caravan-bay"
       ]
+    ],
+    "frontPorticoes": [
+      [
+        9,
+        16,
+        2,
+        "mountain-general-store-portico"
+      ]
     ]
   },
   {
@@ -482,6 +490,14 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
         21,
         "tack-and-feed-bay"
       ]
+    ],
+    "frontPorticoes": [
+      [
+        10,
+        15,
+        2,
+        "enchanted-forest-pet-shop-portico"
+      ]
     ]
   },
   {
@@ -711,6 +727,14 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
         22,
         "appraisal-inset"
       ]
+    ],
+    "frontPorticoes": [
+      [
+        8,
+        15,
+        3,
+        "temperate-magic-shop-portico"
+      ]
     ]
   },
   {
@@ -925,6 +949,14 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
         14,
         16,
         "tincture-counter-alcove"
+      ]
+    ],
+    "frontPorticoes": [
+      [
+        6,
+        13,
+        2,
+        "snow-potion-shop-portico"
       ]
     ]
   },
@@ -1160,6 +1192,14 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
         19,
         "ovenhouse-collection-bay"
       ]
+    ],
+    "frontPorticoes": [
+      [
+        7,
+        14,
+        2,
+        "enchanted-forest-bakery-portico"
+      ]
     ]
   },
   {
@@ -1393,6 +1433,14 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
         18,
         19,
         "treasury-window-bay"
+      ]
+    ],
+    "frontPorticoes": [
+      [
+        7,
+        14,
+        3,
+        "snow-bank-portico"
       ]
     ]
   }

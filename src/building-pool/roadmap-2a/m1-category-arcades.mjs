@@ -232,7 +232,15 @@ export const M1_CATEGORY_ARCADES_PROFILES=Object.freeze([
     "title": "Dunewatch Caravan Merchants",
     "roofForm": "large twin caravan court masonry arcades, rear load portico and stepped sun shelter",
     "signature": "desert large general store with wide front sales, west enclosed customs and two independent recessed rear supply court bays",
-    "variation": 2
+    "variation": 2,
+    "frontPorticoes": [
+      [
+        9,
+        16,
+        2,
+        "desert-general-store-portico"
+      ]
+    ]
   },
   {
     "category": "pet-shop",
@@ -446,7 +454,15 @@ export const M1_CATEGORY_ARCADES_PROFILES=Object.freeze([
     ],
     "title": "Cragsong Empty-Pen Outfitters",
     "roofForm": "narrow mountain stall canopy on high western flank and stone feed loft",
-    "signature": "small mountain supplier with distinct west empty pens, east service and rear granary"
+    "signature": "small mountain supplier with distinct west empty pens, east service and rear granary",
+    "frontPorticoes": [
+      [
+        6,
+        11,
+        2,
+        "mountain-pet-shop-portico"
+      ]
+    ]
   },
   {
     "category": "magic-shop",
@@ -658,7 +674,15 @@ export const M1_CATEGORY_ARCADES_PROFILES=Object.freeze([
     ],
     "title": "Sunscar Unpowered Relic Arcade",
     "roofForm": "desert parapet bazaar with tall unpowered relic tower and inset arched display bays",
-    "signature": "medium desert curio hall with independent rear lockup, private west sealroom and high arched relief"
+    "signature": "medium desert curio hall with independent rear lockup, private west sealroom and high arched relief",
+    "frontPorticoes": [
+      [
+        7,
+        14,
+        3,
+        "desert-magic-shop-portico"
+      ]
+    ]
   },
   {
     "category": "potion-shop",
@@ -887,7 +911,15 @@ export const M1_CATEGORY_ARCADES_PROFILES=Object.freeze([
     ],
     "title": "Ironpine Alpine Apothecary",
     "roofForm": "high eastern alpine shop and separate high vented west study under steep gabled source roof",
-    "signature": "large mountain apothecary with independent cold cauldron study, two long herbal galleries and deep mineral store"
+    "signature": "large mountain apothecary with independent cold cauldron study, two long herbal galleries and deep mineral store",
+    "frontPorticoes": [
+      [
+        9,
+        16,
+        2,
+        "mountain-potion-shop-portico"
+      ]
+    ]
   },
   {
     "category": "bakery",
@@ -1115,7 +1147,15 @@ export const M1_CATEGORY_ARCADES_PROFILES=Object.freeze([
     ],
     "title": "Frostmarch Hearth Kitchens",
     "roofForm": "snowy double-pitched broad bread hall, landmark chimney and protected bread collection porches",
-    "signature": "large snow bakery with east separated unlit bakehouse, broad retail warmlooking floor and rear dedicated flour gallery"
+    "signature": "large snow bakery with east separated unlit bakehouse, broad retail warmlooking floor and rear dedicated flour gallery",
+    "frontPorticoes": [
+      [
+        8,
+        15,
+        2,
+        "snow-bakery-portico"
+      ]
+    ]
   },
   {
     "category": "bank",
@@ -1337,7 +1377,15 @@ export const M1_CATEGORY_ARCADES_PROFILES=Object.freeze([
       13
     ],
     "vaultDoorOrientation": "north",
-    "vaultDoorVariant": "citadel-ironbound-leaves"
+    "vaultDoorVariant": "citadel-ironbound-leaves",
+    "frontPorticoes": [
+      [
+        8,
+        15,
+        3,
+        "temperate-bank-portico"
+      ]
+    ]
   }
 ]);
 export const M1_CATEGORY_ARCADES=Object.freeze(M1_CATEGORY_ARCADES_PROFILES.map(assembleSpecialistProfile));

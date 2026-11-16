@@ -1066,6 +1066,33 @@ const assemble=function assemble(p){
  for(const [z,doorX] of p.partZ){const wide=!!(p.vaultDoor&&p.vaultDoor[0]===doorX&&p.vaultDoor[1]===z);for(let x=1;x<p.w-1;x++)for(let y=2;y<=4;y++)if(x!==doorX&&!(wide&&x===doorX+1))put(x,y,z,'pack2:015','wall');openings.push({type:'internal-doorway',x:doorX,y:2,z,clearHeightCells:3});if(wide)openings.push({type:'internal-doorway',role:'vault-wide-secondary',x:doorX+1,y:2,z,clearHeightCells:3});}
  for(const [x,z0,z1,doorZ] of p.partX){const wide=!!(p.vaultDoor&&p.vaultDoor[0]===x&&p.vaultDoor[1]===doorZ);for(let z=z0;z<=z1;z++)for(let y=2;y<=4;y++)if(z!==doorZ&&!(wide&&z===doorZ+1))put(x,y,z,'pack2:015','wall');openings.push({type:'internal-doorway',x,y:2,z:doorZ,clearHeightCells:3});if(wide)openings.push({type:'internal-doorway',role:'vault-wide-secondary',x,y:2,z:doorZ+1,clearHeightCells:3});}
  for(const [z,x0,x1] of p.caps)for(let x=x0;x<=x1;x++)for(let y=2;y<=4;y++)put(x,y,z,'pack2:015','wall');
+ // Source-voxel recessed two-wide merchant portico, without changing old 26.
+ for(const [left,right,depth,role] of p.frontPorticoes??[]){
+  if(![left,right,depth].every(Number.isSafeInteger)||left<2||right>=p.w-2||right-left<4||right-left>8||depth<2||depth>3||p.entry<=left||p.entry+1>=right||!role)
+   throw Error('invalid authored portico bounds');
+  for(let x=left+1;x<right;x++)for(let y=2;y<=4;y++){
+   const existing=voxel.get(k(x,y,0));
+   if(existing?.kind!=='wall'&&!(x===p.entry&&!existing))throw Error('portico exterior collision '+k(x,y,0));
+   remove(x,y,0);
+   if(x!==p.entry&&x!==p.entry+1){
+    if(voxel.has(k(x,y,depth)))throw Error('portico inner-wall collision '+k(x,y,depth));
+    put(x,y,depth,p.wall,'wall',{architecturalRole:role+'-deep-inset',facadeDepth:depth,portico:role});
+   }
+  }
+  for(const x of [left,right])for(let y=2;y<=4;y++){
+   const v=voxel.get(k(x,y,0));if(v?.kind!=='wall')throw Error('missing portico bearing pier');
+   v.architecturalRole=role+'-bearing-pier';
+  }
+  for(let x=left;x<=right;x++){
+   const v=voxel.get(k(x,5,0));if(v?.kind!=='wall')throw Error('missing portico spanning wall course');
+   v.architecturalRole=role+'-spandrel';v.structuralSpanUnverified=true;
+  }
+  for(const z of [0,depth])for(const x of [p.entry,p.entry+1])for(let y=2;y<=4;y++)
+   if(voxel.has(k(x,y,z)))throw Error('portico two-wide three-high opening obstructed');
+  openings.push({type:'entrance',role:role+'-outer-secondary',x:p.entry+1,y:2,z:0,clearHeightCells:3});
+  openings.push({type:'internal-doorway',role:role+'-inner-primary',x:p.entry,y:2,z:depth,clearHeightCells:3});
+  openings.push({type:'internal-doorway',role:role+'-inner-secondary',x:p.entry+1,y:2,z:depth,clearHeightCells:3});
+ }
  // Optional hand-authored rear-facing bays: real ONE-CELL DEEP inset
  // walls with intact side-bearing piers, not fake through-doors.
  for(const [x0,x1,z,role] of p.facadeRecesses??[]){

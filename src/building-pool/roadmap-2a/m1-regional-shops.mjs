@@ -225,6 +225,14 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         17,
         "ledger-pickup-bay"
       ]
+    ],
+    "frontPorticoes": [
+      [
+        6,
+        13,
+        2,
+        "temperate-general-store-portico"
+      ]
     ]
   },
   {
@@ -438,6 +446,14 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         15,
         17,
         "market-feed-alcove"
+      ]
+    ],
+    "frontPorticoes": [
+      [
+        7,
+        12,
+        2,
+        "desert-pet-shop-portico"
       ]
     ]
   },
@@ -655,6 +671,14 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         13,
         18,
         "cliff-curio-inset"
+      ]
+    ],
+    "frontPorticoes": [
+      [
+        7,
+        14,
+        3,
+        "mountain-magic-shop-portico"
       ]
     ]
   },
@@ -891,6 +915,14 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         21,
         "contained-formula-alcove"
       ]
+    ],
+    "frontPorticoes": [
+      [
+        9,
+        16,
+        2,
+        "enchanted-forest-potion-shop-portico"
+      ]
     ]
   },
   {
@@ -1118,6 +1150,14 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         16,
         17,
         "insulated-oven-side-bay"
+      ]
+    ],
+    "frontPorticoes": [
+      [
+        6,
+        13,
+        2,
+        "snow-bakery-portico"
       ]
     ]
   },
@@ -1364,6 +1404,14 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         20,
         21,
         "masonry-guard-alcove"
+      ]
+    ],
+    "frontPorticoes": [
+      [
+        8,
+        15,
+        3,
+        "desert-bank-portico"
       ]
     ]
   }
