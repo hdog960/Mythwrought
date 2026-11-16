@@ -6,11 +6,12 @@ import {M1_BIOME_EXPANSION} from '../../../src/building-pool/roadmap-2a/m1-biome
 import {M1_CATEGORY_ARCADES} from '../../../src/building-pool/roadmap-2a/m1-category-arcades.mjs';
 import {M1_MARKET_FRONTS} from '../../../src/building-pool/roadmap-2a/m1-market-fronts.mjs';
 import {M1_COURTYARD_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-courtyard-shops.mjs';
+import {M1_U_COURT_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-u-court-shops.mjs';
 // WebGL2 renders the ACTUAL source-authored integer cells as simple opaque
 // cube proxies. This is not final physical Pack family geometry/collision.
-const designs=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS];
+const designs=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS,...M1_U_COURT_SHOPS];
 const byId=new Map(designs.map(x=>[x.id,x]));
-if(designs.length!==56||byId.size!==56)throw Error('Unexpected authored building count');
+if(designs.length!==62||byId.size!==62)throw Error('Unexpected authored building count');
 const select=document.getElementById('building'),mode=document.getElementById('view');
 for(const b of designs){const el=document.createElement('option');el.value=b.id;el.textContent=b.title+' · '+b.biome+'/'+b.size;select.append(el);}
 const params=new URLSearchParams(location.search);
