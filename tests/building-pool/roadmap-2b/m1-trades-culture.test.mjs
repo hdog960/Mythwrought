@@ -148,10 +148,10 @@ test('earlier six original candidates remain source-exact within the cumulative 
  assert.equal(ledger.sourceExactInheritedTemples,15);
  assert.deepEqual([ledger.target,ledger.originalNewModels,ledger.authoredCandidates,
   ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],
-  [420,64,79,341,0,0,0]);
- assert.equal(ledger.originals.length,64);
- assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.authored,0),79);
- assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.remaining,0),341);
+  [420,69,84,336,0,0,0]);
+ assert.equal(ledger.originals.length,69);
+ assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.authored,0),84);
+ assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.remaining,0),336);
  assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.target,0),420);
  assert(ledger.biomeSizeDistribution.temperate.small>=7);
  assert.equal(ledger.productionRegistryUnchanged,true);
