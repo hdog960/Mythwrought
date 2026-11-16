@@ -114,7 +114,7 @@ test('M2 original new watchtower source captures 30 genuine Chromium WebGL2 exte
    await awaitUI(cdp);
    for(const design of designs)for(const view of views){
     const [type,biome,size]=design.split(':');
-    const expectedId='r3:'+type+':'+biome+'':'+size+':2';
+    const expectedId='r3:'+type+':'+biome+':'+size+':2';
     const data=await evaluate(cdp,expressionFor(design,view));
     assert.ok(data.webgl2,'Browser WebGL2 unavailable '+expectedId);
     assert.ok(data.details.includes(expectedId),expectedId+' wrong source blueprint');
