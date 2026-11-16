@@ -79,7 +79,7 @@ function build(q){
  function roofHeight(x,z){
   const a=Math.min(x,w-1-x),p=Math.min(z,d-1-z);
   const wing=x<6?'west':x>=w-6?'east':'center';
-  const wingRise=wing==='west'?2:wing==='east'?0:3;
+  const wingRise=wing==='west'?2:wing==='east'?1:3; // all roof cells at least y=10, above perimeter wall y=9
   switch(q.roofPlan){
    case 'split-gables':return 9+wingRise+Math.min(4,Math.floor(a/4));
    case 'crossing-ridges':return 10+wingRise+Math.min(3,Math.floor(p/5))+Math.floor(z/15);
