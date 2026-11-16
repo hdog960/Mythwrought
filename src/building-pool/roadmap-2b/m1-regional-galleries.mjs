@@ -134,7 +134,7 @@ function gladeTailor(){
  p.roof((x,z)=>x>=12&&x<=20&&z>=7&&z<=16,B.leaves);
  p.along(8,6,25,[13]);p.along(24,6,25,[19]);
  for(const z of [5,26]){p.across(z,1,7);p.across(z,25,31);}
- p.across(27,9,23,[c]);
+ p.across(27,1,31,[c]);
  for(const [x,z] of [[12,4],[21,4],[13,19],[20,20]])
   p.furniture(x,z,B.display,'glade-trade-display');
  p.furniture(17,24,B.counter,'tailoring-counter');
@@ -221,7 +221,7 @@ function forestBooks(){
  p.roof((x,z)=>x>=13&&x<=21&&z>=9&&z<=20,B.leaves);
  p.along(9,6,26,[13]);p.along(25,6,26,[19]);
  for(const z of [5,27]){p.across(z,1,8);p.across(z,26,33);}
- p.across(29,10,24,[c]);
+ p.across(29,1,33,[c]);
  for(const [x,z] of [[12,5],[20,5],[13,15],[20,16],[15,23]])
   p.furniture(x,z,B.display,'public-bookshelf');
  p.furniture(18,26,B.counter,'bookseller-desk');
@@ -254,7 +254,7 @@ function templeGarden(){
  p.roof((x,z)=>x>=16&&x<=28&&z>=10&&z<=25,B.tile);
  p.along(11,8,29,[17]);p.along(33,8,29,[21]);
  for(const z of [7,30]){p.across(z,1,10);p.across(z,34,43);}
- p.across(33,12,32,[c-1,c,c+1]);
+ p.across(33,1,43,[c-1,c,c+1]);
  for(const [x,z] of [[3,12],[6,23],[38,12],[41,23]])
   p.furniture(x,z,B.bench,'quiet-prayer-seat');
  p.furniture(4,27,B.light,'west-votive','decor');
