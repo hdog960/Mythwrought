@@ -12,12 +12,12 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 46,
-    "totalAuthored": 76,
-    "remaining": 239,
+    "newlyAuthored": 54,
+    "totalAuthored": 84,
+    "remaining": 231,
     "creatorAccepted": 0,
     "integratedBuildings": 0,
-    "m2Original": 46
+    "m2Original": 54
   },
   "biomes": [
     "temperate",
@@ -37,7 +37,7 @@
       "perBiomeSize": 5,
       "total": 75,
       "inherited": 15,
-      "remaining": 37,
+      "remaining": 33,
       "milestone": 2
     },
     {
@@ -45,7 +45,7 @@
       "perBiomeSize": 4,
       "total": 60,
       "inherited": 0,
-      "remaining": 37,
+      "remaining": 33,
       "milestone": 2
     },
     {
@@ -92,7 +92,7 @@
   "gates": {
     "M0": "Accepted: exact-head Actions #43767981937 passed after fixing owned M0 count/list tests; 30 inherited source-exact designs preserved",
     "M1": "Technical candidate acceptance: exact-head Actions #43770848853 passed, 180 source-driven Chromium WebGL2 exterior/cutaway proxy captures; physical/creator gates open",
-    "M2": "76/315 theoretical blueprints, 239 remaining; eight new shaped courtyard/octagonal civic-guild candidates with genuine gable/hip/shed/saw roof regions. New exact-head 48-view Chromium and native near-duplicate check PENDING. Zero creator-approved or integrated.",
+    "M2": "84/315 exact source-authored theoretical buildings; newly authored 8 independent courtyard/faceted civic-guild plans (new browser 48-view and native exact-head gates PENDING), 231 unauthored. Creator-approved 0, integrated 0. Physical five-pack ABI and live validation remain unresolved.",
     "M3": "not started",
     "M4": "not started",
     "M5": "not started",
