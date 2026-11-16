@@ -144,14 +144,14 @@ test('no new 2B test-source facade: exact checked out Git blob parity and curren
  const worktree=execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim();
  assert.equal(committed,worktree);
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
- assert.equal(ledger.authoredCandidates,90);
- assert.equal(ledger.remainingUnauthored,330);
+ assert.equal(ledger.authoredCandidates,95);
+ assert.equal(ledger.remainingUnauthored,325);
  assert.equal(ledger.creatorAccepted,0);
  assert.equal(ledger.integratedInGame,0);
  assert.equal(new Set(all.map(b=>b.id)).size,39);
  const inheritedFromPriorM1=all.filter(x=>x.category!=='temple'||x.variation!==1).map(x=>x.id);
  assert.equal(inheritedFromPriorM1.length,24,'historical public M1 candidate set changed');
  const currentIds=new Set(ledger.originals.map(x=>x.id));
- assert.equal(ledger.originals.length,75,'cumulative original count includes forty post-public-M1 additions');
+ assert.equal(ledger.originals.length,80,'cumulative original count includes forty post-public-M1 additions');
  for(const id of inheritedFromPriorM1)assert(currentIds.has(id),'lost earlier 2B candidate '+id);
 });
