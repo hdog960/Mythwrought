@@ -9,6 +9,7 @@ import {tmpdir} from 'node:os';
 import {resolve,join,sep,extname} from 'node:path';
 import {getM2Originals} from '../../../src/building-pool/roadmap-1a/m2-originals.mjs';
 import {getM2HousingTranche} from '../../../src/building-pool/roadmap-1a/m2-housing-tranche.mjs';
+import {getM2HousingWave2} from '../../../src/building-pool/roadmap-1a/m2-housing-wave2.mjs';
 import {getM1InnExemplars} from '../../../src/building-pool/roadmap-1a/m1-inn-exemplars.mjs';
 
 const root=resolve('.');
@@ -17,7 +18,8 @@ const wanted=[
  'r1:tavern:enchanted-forest:small:001',
  getM1InnExemplars()[0].id,
  ...getM2Originals().map(b=>b.id),
- ...getM2HousingTranche().map(b=>b.id)
+ ...getM2HousingTranche().map(b=>b.id),
+ ...getM2HousingWave2().map(b=>b.id)
 ];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const dest=resolve('artifacts/building-roadmap-1a-m2/chromium-webgl2-cube');
@@ -77,7 +79,7 @@ function chooseExpression(id,view){
  +'viewport:[innerWidth,innerHeight],canvas:[canvas.width,canvas.height],'
  +'foreground,gpuError:gl.getError(),options:b.options.length};})()';
 }
-test('156 actual source-authored 1A WebGL2 cuboid-proxy exteriors/cutaways across three phone-landscape sizes',
+test('246 actual source-authored 1A WebGL2 cuboid-proxy exteriors/cutaways across three phone-landscape sizes',
  {timeout:360000},async()=>{
  let child,cdp,site,temp;const captures=[];
  try{
@@ -96,7 +98,7 @@ test('156 actual source-authored 1A WebGL2 cuboid-proxy exteriors/cutaways acros
   await cdp.send('Page.enable');await cdp.send('Runtime.enable');
   await mkdir(dest,{recursive:true});
   const url='http://127.0.0.1:'+site.address().port+'/tests/building-pool/roadmap-1a/m2-preview.html';
-  assert.equal(wanted.length,26);
+  assert.equal(wanted.length,41);
   for(const [width,height] of sizes){
    await cdp.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
    await cdp.send('Page.navigate',{url});await awaitReady(cdp);
@@ -105,7 +107,7 @@ test('156 actual source-authored 1A WebGL2 cuboid-proxy exteriors/cutaways acros
     assert.equal(result.webgl2,true,id+' WebGL2 missing');
     assert.ok(result.details.includes(id),id+' wrong source');
     assert.ok(result.details.includes('WebGL2 active · '+view),id+' wrong renderer');
-    assert.equal(result.options,26,'wrong source gallery list');
+    assert.equal(result.options,41,'wrong source gallery list');
     assert.deepEqual(result.viewport,[width,height]);
     assert.ok(result.canvas[0]>100&&result.canvas[1]>100,'zero-sized canvas');
     assert.equal(result.gpuError,0,'WebGL2 GPU reported error');
@@ -121,14 +123,14 @@ test('156 actual source-authored 1A WebGL2 cuboid-proxy exteriors/cutaways acros
      renderer:'CHROMIUM_WEBGL2_AUTHORED_CELL_CUBE_DIAGNOSTIC',physicalPackGeometry:false});
    }
   }
-  assert.equal(captures.length,156);
-  assert.equal(new Set(captures.map(x=>x.filename)).size,156);
+  assert.equal(captures.length,246);
+  assert.equal(new Set(captures.map(x=>x.filename)).size,246);
   await writeFile(join(dest,'source-acceptance.json'),JSON.stringify({
    count:captures.length,source:'original coordinate-authored Builder 1A blueprints',
    sourceIds:wanted,renderer:'CHROMIUM_WEBGL2_AUTHORED_CELL_CUBE_DIAGNOSTIC',
    familyPhysicalAABBsRendered:false,liveGameRendered:false,creatorAccepted:false,physicalIPhoneTested:false,
    captures},null,2)+'\n');
-  console.log('MYTHWROUGHT_1A_M2_SOURCE_WEBGL2_CUBE_DIAGNOSTICS='+captures.length+'/156');
+  console.log('MYTHWROUGHT_1A_M2_SOURCE_WEBGL2_CUBE_DIAGNOSTICS='+captures.length+'/246');
  }finally{
   if(cdp)cdp.close();
   if(child){child.kill('SIGTERM');await Promise.race([new Promise(ok=>child.once('close',ok)),sleep(2500)])}

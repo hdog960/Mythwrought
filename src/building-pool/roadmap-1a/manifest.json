@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M2 domestic cross-biome housing tranche; exact-head tests and new WebGL2 evidence pending",
+  "milestone": "M2 second 15-house wave authored, 69/450; exact-head Node and 246 WebGL2 candidate views pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 396,
-  "newDesignsAuthored": 24,
-  "totalLaneGeometryAuthored": 54,
+  "additionalDesignsRequired": 381,
+  "newDesignsAuthored": 39,
+  "totalLaneGeometryAuthored": 69,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,11 +53,11 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Exact-head native full-pool 54-body geometry/physical five-pack audit",
-    "156 real Chromium WebGL2 authored cell-cube screenshots: 26 candidates x exterior/cutaway x 3 viewports",
-    "Pack5:080 full-cell fired-brick geometry vs unapproved structure load/roof interfaces, Pack3 roof seam/loading, Pack2 door swept-space, Pack4 glazing, Pack5 bed shape, schema-1 save orientation",
-    "117 additional unique houses needed for M2 domestic 150-house milestone",
-    "Full program 396 new blueprints remain (267 houses, 58 taverns, 71 inns); no creator or production approvals"
+    "Exact-head 69-pool native source acceptance and 246 Chromium WebGL2 source CELL-cube diagnostic captures",
+    "True source Pack1-5 physical visibleBoxes mesh exterior/cutaway evidence; collision/load/weather/hinge and save sidecars remain unapproved",
+    "102 more genuine houses required to reach 150 M2 housing milestone",
+    "Full 381 additional blueprints remain: 252 houses, 58 taverns, 71 inns",
+    "Original 30 source-identity parity, seven sibling branch isolation, no deployment or production integration"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -76,7 +76,7 @@
   },
   "innCount": 1,
   "categoriesAuthored": {
-    "house": 33,
+    "house": 48,
     "tavern": 17,
     "inn": 4
   },
@@ -164,11 +164,23 @@
     "source": "src/building-pool/roadmap-1a/m2-housing-tranche.mjs",
     "authoredPlacementCount": 32859,
     "coverage": "exactly one new house per biome x size",
-    "nativeCI": "pending",
+    "nativeCI": "PASS 88/88 1A, 735/735 root, 156/156 cube WebGL2 at exact HEAD 60509268f0a1cf49c547443410351d14e72484f3 Actions #43776708423",
     "browserCaptureTarget": 156,
     "webgl2Mode": "source CELL cube proxy, NOT final Pack AABBs",
     "authoredHouses": 33,
     "m2HouseTarget": 150,
     "legacyIdentityRepair": "New Mountain Large ordinal changed from 003 (original inherited house) to 004; original geometry/ID untouched"
+  },
+  "m2Wave2": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave2.mjs",
+    "houseCount": 15,
+    "voxelPlacements": 33908,
+    "coverage": "15 unique new houses; one each of five biomes x three sizes",
+    "originalSourceGeometryPreserved": 30,
+    "exactHeadNode": "pending",
+    "webgl2Mode": "candidate source-cell-cube diagnostic NOT physical-family AABB",
+    "cubeCaptureTarget": 246,
+    "physicalCaptureTarget": 0,
+    "creatorApproved": 0
   }
 }

@@ -1,3 +1,4 @@
+<!-- Historic first M2 housing wave handoff: 54/450 at commit 60509268, superseded in latest counts by M2_HOUSING_WAVE2.md. -->
 # Builder 1A M2 — Fifteen genuine cross-biome house blueprints
 
 **Scope:** Only Builder 1A owned source/test/docs in draft PR #180. Main and checkpoint 009 unchanged; legacy original PR #121 remains unmodified; seven sibling builders, five manual packs, independent biome130 and automations isolated. Gate A open, v0.11 locked; no merge, deploy, live build or creator-approved art.
