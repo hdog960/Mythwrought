@@ -109,7 +109,32 @@ const PLANS=[
       35,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 25,
+        "from": 21,
+        "to": 27,
+        "door": 23,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 41,
+        "from": 22,
+        "to": 27,
+        "door": 24,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 43,
+        "from": 21,
+        "to": 28,
+        "door": 24,
+        "facing": "north"
+      }
+    ],
     "windows": [
       [
         6,
@@ -393,7 +418,24 @@ const PLANS=[
       39,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 28,
+        "from": 21,
+        "to": 27,
+        "door": 24,
+        "facing": "west"
+      },
+      {
+        "axis": "z",
+        "fixed": 46,
+        "from": 22,
+        "to": 30,
+        "door": 25,
+        "facing": "north"
+      }
+    ],
     "windows": [
       [
         5,
@@ -656,7 +698,32 @@ const PLANS=[
       34,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 24,
+        "from": 23,
+        "to": 27,
+        "door": 25,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 40,
+        "from": 22,
+        "to": 27,
+        "door": 24,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 41,
+        "from": 21,
+        "to": 29,
+        "door": 25,
+        "facing": "north"
+      }
+    ],
     "windows": [
       [
         4,
@@ -902,7 +969,32 @@ const PLANS=[
       27,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 18,
+        "from": 21,
+        "to": 26,
+        "door": 23,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 31,
+        "from": 21,
+        "to": 27,
+        "door": 24,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 34,
+        "from": 21,
+        "to": 27,
+        "door": 24,
+        "facing": "north"
+      }
+    ],
     "windows": [
       [
         5,
@@ -1145,7 +1237,32 @@ const PLANS=[
       27,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 17,
+        "from": 21,
+        "to": 27,
+        "door": 24,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 30,
+        "from": 21,
+        "to": 27,
+        "door": 24,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 36,
+        "from": 21,
+        "to": 26,
+        "door": 23,
+        "facing": "north"
+      }
+    ],
     "windows": [
       [
         5,
@@ -1441,7 +1558,32 @@ const PLANS=[
       41,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 29,
+        "from": 22,
+        "to": 28,
+        "door": 24,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 47,
+        "from": 22,
+        "to": 28,
+        "door": 25,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 47,
+        "from": 23,
+        "to": 30,
+        "door": 25,
+        "facing": "north"
+      }
+    ],
     "windows": [
       [
         6,
@@ -1766,7 +1908,24 @@ const PLANS=[
       28,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 19,
+        "from": 22,
+        "to": 27,
+        "door": 24,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 32,
+        "from": 20,
+        "to": 28,
+        "door": 24,
+        "facing": "east"
+      }
+    ],
     "windows": [
       [
         4,
@@ -2031,7 +2190,32 @@ const PLANS=[
       36,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 26,
+        "from": 20,
+        "to": 27,
+        "door": 23,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 40,
+        "from": 22,
+        "to": 27,
+        "door": 24,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 43,
+        "from": 20,
+        "to": 27,
+        "door": 24,
+        "facing": "north"
+      }
+    ],
     "windows": [
       [
         6,
