@@ -144,7 +144,7 @@ function gladeTailor(){
  p.furniture(29,31,B.crate,'silk-stock','decor');
  for(let x=12;x<=20;x++)for(const z of [6,17])
   p.elevated(x,8,z,B.leaves,'sunlit-leaf-arch');
- return p.end({title:'Twinstitch Glade Atelier',
+ return p.end({title:'Twinstitch Glade Atelier',variation:2,
  signature:'opposed west/east private fitting wings around a tall open retail garden, independent rear embroidery room and two upper crosswise leaf roofs',
  roofForm:'large rectangular sky-lit forest showroom with east-west leaf lintels and private side roofs',
  rooms:[{name:'Central garment showroom',uses:['sales-floor','service-counter','garment-display']},
