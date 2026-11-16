@@ -170,3 +170,15 @@ test('ambiguous optional orientation metadata fails closed without blocking sche
  assert.equal(JSON.stringify(records),snapshot,'optional metadata is not mutated');
  assert.equal(JSON.stringify(legacy),original,'schema-1 save remains byte-identical');
 });
+
+test('oversized optional sidecar fails closed while old schema-1 world survives',()=>{
+ const legacy={schema:1,seed:41,edits:[[2,0,1,4]]};
+ const original=JSON.stringify(legacy);
+ const records=Array.from({length:5},(_,i)=>({cell:[i,0,0],blockId:4,turns:1}));
+ let reads=0;
+ const recovered=restoreOrientationSidecar(records,()=>{reads++;return 4;},{maxEntries:4});
+ assert.equal(recovered.size(),0,'untrusted oversized metadata must be discarded');
+ assert.equal(reads,0,'oversized metadata must not probe any world chunks');
+ assert.equal(JSON.stringify(legacy),original,'schema-1 payload stays untouched');
+ assert.equal(JSON.stringify(records),JSON.stringify(Array.from({length:5},(_,i)=>({cell:[i,0,0],blockId:4,turns:1}))));
+});
