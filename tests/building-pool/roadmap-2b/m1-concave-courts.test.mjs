@@ -82,6 +82,28 @@ test('all 5 buildings have genuinely absent nonrectangular footprint cells, not 
   }
  }
 });
+test('all concave exterior perimeter edges are real weather-boundary walls or explicit public doorway, not exposed accidental openings',()=>{
+ for(const b of NEW){
+  const m=cubes(b),entrance=b.openings.find(v=>v.type==='entrance');
+  const hasFloor=(x,z)=>m.get(k(x,1,z))?.kind==='floor';
+  let perimeterCount=0,innerFacingWalls=0;
+  for(let x=0;x<b.extents.x;x++)for(let z=0;z<b.extents.z;z++){
+   if(!hasFloor(x,z))continue;
+   const neighbors=[[1,0],[-1,0],[0,1],[0,-1]];
+   const outside=neighbors.filter(([dx,dz])=>!hasFloor(x+dx,z+dz));
+   if(!outside.length)continue;
+   perimeterCount++;
+   if(x>0&&z>0&&x<b.extents.x-1&&z<b.extents.z-1)innerFacingWalls++;
+   for(const y of [2,5,6]){
+    if(x===entrance.x&&z===entrance.z&&y===2)
+     assert(!m.has(k(x,y,z)),b.id+' physically blocked exterior entrance');
+    else assert.equal(m.get(k(x,y,z))?.kind,'wall',b.id+' missing exterior envelope '+k(x,y,z));
+   }
+  }
+  assert(perimeterCount>100,b.id+' incorrectly simple perimeter');
+  assert(innerFacingWalls>15,b.id+' has no real courtyard-facing exterior');
+ }
+});
 test('named room programs have actual inside-building min/max bounds and distinct usage roles',()=>{
  for(const b of NEW){
   assert(b.rooms.length>=3);
