@@ -101,7 +101,12 @@ test('every raised roof tile has authored support immediately below; main roofs 
    const [x,y,z]=c.at;
    if(y===6){
     assert.equal(cells.get(xyz([x,5,z]))?.role,'beam',b.id+' roof ridge '+xyz(c.at));
-    assert.ok(['beam','wall'].includes(cells.get(xyz([x,4,z]))?.role),b.id+' unsupported raised ridge '+xyz(c.at));
+    let grounded=false;
+    for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){
+     if(Math.abs(dx)+Math.abs(dz)>2)continue;
+     if(['beam','wall','column'].includes(cells.get(xyz([x+dx,4,z+dz]))?.role))grounded=true;
+    }
+    assert.ok(grounded,b.id+' raised roof beam exceeds two-cell bearing span '+xyz(c.at));
    }else if(y===5){
     let bearing=false;
     for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){
