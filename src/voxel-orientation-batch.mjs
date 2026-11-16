@@ -54,15 +54,21 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
         // Include the currently executing cell in rollback even when edit throws.
         written.push(i);
         if (await edit(cells[i],i)!==true) throw new Error('Batch edit not acknowledged');
-        if (!validId(await readIdentity(cells[i])))
-          throw new Error('Invalid committed identity');
+        const committedId=await readIdentity(cells[i]);
+        if (!validId(committedId)) throw new Error('Invalid committed identity');
         const committedState=readState ? await readState(cells[i]) : undefined;
         if (readState && !validState(committedState))
           throw new Error('Invalid committed shape state');
-        const committedId=await readIdentity(cells[i]);
         const committedRevision=readRevision ? await readRevision(cells[i]) : undefined;
         if (readRevision && (!validRevision(committedRevision) || committedRevision<=revisions[i]))
           throw new Error('Invalid committed revision');
+        // Async readers can yield: a later foreign write must not be mistaken
+        // for the edit we just acknowledged. Fail closed before committing a
+        // rollback receipt for an inconsistent snapshot.
+        if (await readIdentity(cells[i])!==committedId ||
+            (readState && await readState(cells[i])!==committedState) ||
+            (readRevision && await readRevision(cells[i])!==committedRevision))
+          throw new Error('Unstable committed snapshot');
         postWrites.set(i,{id:committedId,state:committedState,revision:committedRevision});
       }
     } catch (error) {
