@@ -55,9 +55,9 @@ test('only 4B-owned paths and unapproved Gate A are declared',()=>{
 test('manifest exactly matches independently authored committed M1 plus M2 source IDs and per-cell quotas',()=>{
  assert.deepEqual(manifest.authoredIds,M2_33_ALL.map(x=>x.id));
  for(const category of manifest.categories)
-  assert.equal(manifest.byCategoryAuthorCount[category.type],M2_ALL_AUTHORED.filter(b=>b.type===category.type).length);
+  assert.equal(manifest.byCategoryAuthorCount[category.type],M2_33_ALL.filter(b=>b.type===category.type).length);
  for(const biome of manifest.biomes)for(const size of manifest.sizes)
-  assert.equal(manifest.byBiomeSizeAuthorCount[biome][size],M2_ALL_AUTHORED.filter(b=>b.biome===biome&&b.size===size).length);
+  assert.equal(manifest.byBiomeSizeAuthorCount[biome][size],M2_33_ALL.filter(b=>b.biome===biome&&b.size===size).length);
  assert.equal(manifest.m2Candidate.newModels,28);
  assert.equal(manifest.m2Candidate.technicalAccepted,false);
  assert.equal(manifest.m2Candidate.newThisPass,12);
