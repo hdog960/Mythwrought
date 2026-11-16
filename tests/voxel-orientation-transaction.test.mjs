@@ -151,3 +151,44 @@ test('undefined rollback acknowledgement retains backwards-compatible successful
   await assert.rejects(f.run(()=>{f.setId(5);throw Error('write failed');}),/write failed/);
   assert.equal(f.sidecar.get(f.cell,4),3);
 });
+
+test('optional state fingerprint detects rejected same-ID shape mutation and restores it',async()=>{
+  const f=fixture();
+  let shape='north', undos=0;
+  await assert.rejects(f.run(()=>{shape='east';return false;},{
+    readState:()=>shape,
+    rollback:()=>{undos++;shape='north';}
+  }),/Rejected edit mutated shape state/);
+  assert.equal(undos,1);
+  assert.equal(shape,'north');
+  assert.equal(f.sidecar.get(f.cell,4),3);
+});
+
+test('incomplete same-ID shape rollback invalidates orientation even if identity matches',async()=>{
+  const f=fixture();
+  let shape='north';
+  await assert.rejects(f.run(()=>{shape='east';throw Error('partial edit');},{
+    readState:()=>shape,
+    rollback:()=>{ /* host forgot to undo the shape */ }
+  }),error=>error instanceof AggregateError &&
+    error.errors[0].message==='partial edit' &&
+    error.errors[1].message==='Rollback did not restore shape state');
+  assert.equal(f.readIdentity(),4);
+  assert.equal(f.sidecar.get(f.cell,4),0);
+});
+
+test('invalid state fingerprint fails before edit without mutating rotation',async()=>{
+  const f=fixture();
+  let edits=0;
+  await assert.rejects(f.run(()=>{edits++;return true;},{readState:()=>({mutable:true})}),/Invalid initial state fingerprint/);
+  assert.equal(edits,0);
+  assert.equal(f.sidecar.get(f.cell,4),3);
+});
+
+test('optional state reader preserves old callback contract for successful same-ID edit',async()=>{
+  const f=fixture();
+  let shape='north';
+  assert.equal(await f.run(()=>{shape='east';return true;},{readState:()=>shape}),true);
+  assert.equal(shape,'east');
+  assert.equal(f.sidecar.get(f.cell,4),0);
+});
