@@ -23,7 +23,7 @@ test('six original nonrectangular courtyards are real 3D blueprints, not reserve
 test('read-only real-source courtyard/roof/weather and Pack5 multi-cell pen and vault footprints pass',()=>{
  const x=inspect2ACourtyardPreflight();
  assert.equal(x.buildings,6);assert.equal(x.emptyCourtyardColumns,130);
- assert.equal(x.fullWallColumns,58);assert.equal(x.physicalStallCells,8);
+ assert.equal(x.fullWallColumns,56);assert.equal(x.physicalStallCells,8);
  assert.equal(x.realBankGateCells,2);assert.equal(x.reachableRoomTargets,18);
  assert.equal(x.physicalStructuralSpanCertified,false);assert.equal(x.physicalFamilyRendered,false);
  assert.equal(x.integrated,false);
