@@ -5,6 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {existsSync,readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync,statSync} from 'node:fs';
 import {createServer} from 'node:http';
+import {rm as rmAsync} from 'node:fs/promises';
 import {join,resolve,extname} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawn} from 'node:child_process';
@@ -68,7 +69,7 @@ async function launchChrome(){
     '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
     '--enable-webgl','--ignore-gpu-blocklist','--remote-allow-origins=*',
     '--remote-debugging-port=0','--user-data-dir='+dir,'about:blank'
-  ],{stdio:'ignore'});
+  ],{stdio:'ignore',detached:true});
   let port;
   for(let i=0;i<140;i++){
     if(existsSync(join(dir,'DevToolsActivePort'))){
@@ -119,15 +120,29 @@ async function launchChrome(){
   });
   const close=async()=>{
     try{ws.close();}catch{}
+    // Chromium creates helper processes which can continue touching Default/
+    // *after the parent exits*. Kill the complete browser process group.
+    const killGroup=signal=>{
+      try{process.kill(-child.pid,signal);}catch(e){
+        if(e.code!=='ESRCH')throw e;
+      }
+    };
+    killGroup('SIGTERM');
     if(child.exitCode===null&&child.signalCode===null){
-      child.kill('SIGTERM');
-      await Promise.race([new Promise(done=>child.once('exit',done)),sleep(2000)]);
+      await Promise.race([new Promise(done=>child.once('exit',done)),sleep(1500)]);
     }
+    killGroup('SIGKILL');
     if(child.exitCode===null&&child.signalCode===null){
-      child.kill('SIGKILL');
-      await Promise.race([new Promise(done=>child.once('exit',done)),sleep(2000)]);
+      await Promise.race([new Promise(done=>child.once('exit',done)),sleep(1500)]);
     }
-    rmSync(dir,{recursive:true,force:true,maxRetries:50,retryDelay:100});
+    // Filesystem cleanup of browser cache is separate from the WebGL2 assertions.
+    // Warn on a surviving transient helper/AV lock, but never pretend a render failed.
+    try{
+      await rmAsync(dir,{recursive:true,force:true,maxRetries:35,retryDelay:150});
+    }catch(e){
+      if(!['ENOTEMPTY','EBUSY','EPERM','EACCES'].includes(e.code))throw e;
+      console.warn('Builder 4B Chromium profile cleanup warning (authentic captures remain checked):',e.code,dir);
+    }
   };
   return {send,close,binary};
 }
