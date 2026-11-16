@@ -18,3 +18,7 @@ All five **manual** block packs have been integrated through PR #174; `src/build
 
 ## Verification
 Run `node --test tests/building-pool/roadmap-4a/*.test.mjs` on exact committed head, and inspect its PR Actions focused CI plus mobile landscape Chromium smoke. This M0 handoff **does not claim** independent inherited WebGL2 gallery reproduction, hardware-iPhone testing, creator visual approval, or production readiness. M1 will inspect material ABI and produce new source-exact visual evidence.
+
+
+## M2 civic works addendum (2026-11-16)
+Eight isolated original geometry plans introduced in `m2-civic-works.mjs`; see `docs/building-pool/roadmap-4a/M2_CIVIC_WORKS_ACCEPTANCE.md`. These raise the authored candidate count from 92 to **100** (70 new M2, 30 source-exact inherited); **215** remain. All world and creator gates remain closed. The original M0 counts above document the initial handoff, not today's tranche.

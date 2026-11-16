@@ -12,12 +12,12 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 62,
-    "totalAuthored": 92,
-    "remaining": 223,
+    "newlyAuthored": 70,
+    "totalAuthored": 100,
+    "remaining": 215,
     "creatorAccepted": 0,
     "integratedBuildings": 0,
-    "m2Original": 62
+    "m2Original": 70
   },
   "biomes": [
     "temperate",
@@ -37,7 +37,7 @@
       "perBiomeSize": 5,
       "total": 75,
       "inherited": 15,
-      "remaining": 29,
+      "remaining": 25,
       "milestone": 2
     },
     {
@@ -45,7 +45,7 @@
       "perBiomeSize": 4,
       "total": 60,
       "inherited": 0,
-      "remaining": 29,
+      "remaining": 25,
       "milestone": 2
     },
     {
@@ -92,7 +92,7 @@
   "gates": {
     "M0": "Accepted: exact-head Actions #43767981937 passed after fixing owned M0 count/list tests; 30 inherited source-exact designs preserved",
     "M1": "Technical candidate acceptance: exact-head Actions #43770848853 passed, 180 source-driven Chromium WebGL2 exterior/cutaway proxy captures; physical/creator gates open",
-    "M2": "92/315 source-authored theoretical buildings, 223 unauthored; eight new district civic/guild source designs await exact-head Node and genuine 48-view WebGL2 acceptance. Creator-approved/integrated remain 0; physical ABI integration blocked.",
+    "M2": "100/315 full-cell theoretical buildings (30 legacy+70 M2 original), 215 unauthored; eight new architectural civic-works plans and new 48-view source-driven WebGL2 gallery require exact-head CI acceptance; 0 creator-approved/integrated. Pack1-5 live placement/physical iPhone gated.",
     "M3": "not started",
     "M4": "not started",
     "M5": "not started",
