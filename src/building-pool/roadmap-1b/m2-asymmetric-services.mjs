@@ -6,7 +6,7 @@ import {sourcePlan} from './m2-community-structures.mjs';
 // Each footprint below is an authored union of explicit orthogonal rooms and
 // voids. Unlike a bounding-box wallRing, wall and foundation cells trace the
 // *actual* L/T/U/C exterior perimeter and concave courtyards at every Y level.
-function irregular(category,biome,size,title,w,h,d,rectangles,voids=[],wallTop=5){
+export function irregular(category,biome,size,title,w,h,d,rectangles,voids=[],wallTop=5){
  const b=sourcePlan(category,biome,size,1,title,w,h,d),mask=new Set(),K=(x,z)=>x+','+z,roofMap=new Map();
  for(const [x0,z0,x1,z1] of rectangles)
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){

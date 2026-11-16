@@ -8,10 +8,11 @@ import {getM2Expansion1BPlans} from './m2-community-expansion.mjs';
 import {getM2Diverse1BPlans} from './m2-diverse-regions.mjs';
 import {getM2NextRegion1BPlans} from './m2-next-regions.mjs';
 import {getM2Asymmetric1BPlans} from './m2-asymmetric-services.mjs';
+import {getM2Beacon1BPlans} from './m2-beacon-regions.mjs';
 import {validateAllocation} from './schema.mjs';
 export function get1BCandidates(){
- const result=[...getInheritedStables(),createTemperateSmallBathhouse(),...getM1ServiceExemplars(),...getCrossBiome1BPlans(),...getM2Community1BPlans(),...getM2Expansion1BPlans(),...getM2Diverse1BPlans(),...getM2NextRegion1BPlans(),...getM2Asymmetric1BPlans()];
+ const result=[...getInheritedStables(),createTemperateSmallBathhouse(),...getM1ServiceExemplars(),...getCrossBiome1BPlans(),...getM2Community1BPlans(),...getM2Expansion1BPlans(),...getM2Diverse1BPlans(),...getM2NextRegion1BPlans(),...getM2Asymmetric1BPlans(),...getM2Beacon1BPlans()];
  const allocation=validateAllocation(result);
- if(allocation.authored!==73||allocation.remaining!==362)throw Error('Builder 1B M2 census drift');
+ if(allocation.authored!==82||allocation.remaining!==353)throw Error('Builder 1B M2 census drift');
  return result;
 }
