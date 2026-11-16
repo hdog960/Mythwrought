@@ -160,6 +160,25 @@ function create(d){
   if(!occupied.has(key(x,4,z)))place(x,4,z,'support','live:wood','north',{weatherBacking:true});
  }
  function roofY(x,z){
+  // An opt-in, explicitly authored roof-wing layout: actual supported voxels,
+  // not a palette transformation. Prior candidates omit this field and retain
+  // their byte-for-byte identical historic geometry.
+  if(d.roofWings){
+    for(const wing of d.roofWings){
+      if(!wing||!Array.isArray(wing.rect)||wing.rect.length!==4||
+         !Number.isInteger(wing.raise)||wing.raise<0||wing.raise>2)
+        throw Error(d.title+': invalid authored roof wing');
+      const [x0,z0,x1,z1]=wing.rect;
+      if(x<x0||x>x1||z<z0||z>z1)continue;
+      const ex=Math.min(x-x0,x1-x),ez=Math.min(z-z0,z1-z);
+      const pitch=wing.style==='long-gable'?Math.min(2,Math.floor(ex/3)):
+       wing.style==='double-hill'?Math.min(2,Math.floor(Math.min(ex,ez)/3)):
+       wing.style==='edge-rise'?Math.min(2,Math.floor(ez/3)):
+       wing.style==='step-front'?Math.min(2,Math.floor((z-z0)/5)):null;
+      if(pitch===null)throw Error(d.title+': unsupported roof-wing profile '+wing.style);
+      return 5+wing.raise+pitch;
+    }
+  }
   const edgeX=Math.min(x,d.w-1-x),edgeZ=Math.min(z,d.d-1-z);
   switch(d.roof){
    case 'terrace':return 5;
@@ -205,6 +224,7 @@ function create(d){
   architecturalIdentity:{plan:d.plan,roof:d.roof,regionalDetail:d.detail,
    roofWeatherSealApproved:false,roofStrengthApproved:false,
    ...(d.courtRoofMassing?{roofMassing:d.courtRoofMassing}:{}),
+   ...(d.roofWings?{roofWings:d.roofWings}:{}),
    outdoorCourtyard:d.courtyard??null,levels:1,stairsRequired:false,
    materialAcceptance:'symbolic-plus-exact-candidate-AABB-not-production-approved'},
   placements:[...occupied.values()],rooms:d.rooms,portals:allDoors.map(p=>({from:p.from,to:p.to,at:p.at,passable:true,opening:'hinged-leaf'})),
