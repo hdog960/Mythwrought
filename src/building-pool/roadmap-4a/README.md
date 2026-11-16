@@ -30,3 +30,7 @@ Eight new original coordinate designs in `m2-public-works.mjs` raise totals to *
 
 ## M2 Guild & Civic tranche (2026-11-16)
 Eight more coordinate-authored candidate designs in `m2-guild-civic.mjs` bring the catalog to **116/315** theoretical (30 inherited, 86 newly authored), 199 remaining. Four civic halls and four guildhalls, each distinct by biome/size profile with natural roof mass and connected internal routes. See `docs/building-pool/roadmap-4a/M2_GUILD_CIVIC_ACCEPTANCE.md`. The earlier M0 and M2 counts above are historical checkpoints, not current totals. No live integration, developer asset registration or creator acceptance.
+
+
+## M2 regional courts (2026-11-16)
+Eight newly source-authored biome/size buildings in `m2-regional-courts.mjs`, bringing the candidate inventory to **124/315** (30 inherited, 94 newly authored), **191** remaining. Supported roofs, connected working rooms, physical-source dependency manifests, D4/Jaccard strict near-duplicate rejection. See `docs/building-pool/roadmap-4a/M2_REGIONAL_COURTS_ACCEPTANCE.md`. Historical counts above remain original checkpoint documentation. No deployment, approval or game registration.
