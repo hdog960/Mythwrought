@@ -2,6 +2,8 @@
 // All coordinates are integer world cells; caller supplies registered IDs.
 const integer = (n) => Number.isSafeInteger(n);
 const key = (x,y,z) => `${x},${y},${z}`;
+// Exact lattice distance: subtraction of two individually safe integers can exceed 2^53.
+const absBig = (a,b) => { const d=BigInt(a)-BigInt(b); return d<0n?-d:d; };
 export function normalizeSurfaceFeatures(features, {registeredIds = []} = {}) {
   const allowed = new Set(registeredIds);
   if (!Array.isArray(features)) throw new TypeError('features must be an array');
@@ -41,7 +43,7 @@ export function validateCaveHandshake({surfaceY,entranceY,depthMinY,depthMaxY,pa
     const p=path[i];
     if (!p || !['x','y','z'].every(k=>integer(p[k])) || p.y<depthMinY || p.y>depthMaxY)
       return Object.freeze({ok:false,reason:'invalid-path-cell'});
-    if (i && Math.abs(p.x-path[i-1].x)+Math.abs(p.y-path[i-1].y)+Math.abs(p.z-path[i-1].z)!==1)
+    if (i && (absBig(p.x,path[i-1].x)+absBig(p.y,path[i-1].y)+absBig(p.z,path[i-1].z))!==1n)
       return Object.freeze({ok:false,reason:'disconnected-path'});
     const cell=key(p.x,p.y,p.z);
     if (requireSimplePath && seen.has(cell)) return Object.freeze({ok:false,reason:'revisited-path-cell'});
