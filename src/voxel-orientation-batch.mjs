@@ -2,9 +2,10 @@
 // Host edit/rollback callbacks receive (cell, index); rollback must be reversible.
 const locks = new WeakMap();
 const validId = id => Number.isSafeInteger(id) && id >= 0 && id < 255;
+const validRevision = value => Number.isSafeInteger(value) && value >= 0;
 const validState = value => ['string','boolean','bigint'].includes(typeof value) ||
   (typeof value === 'number' && Number.isFinite(value));
-export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollback,readState}) {
+export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollback,readState,readRevision}) {
   if (!Array.isArray(cells) || !cells.length || cells.length > 256 ||
       cells.some(c=>!Array.isArray(c)||c.length!==3||!c.every(Number.isSafeInteger)))
     throw new TypeError('Invalid batch cells');
@@ -13,13 +14,14 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
   if ([readIdentity,edit,rollback].some(f=>typeof f!=='function'))
     throw new TypeError('Invalid callbacks');
   if (readState !== undefined && typeof readState !== 'function') throw new TypeError('Invalid state reader');
+  if (readRevision !== undefined && typeof readRevision !== 'function') throw new TypeError('Invalid revision reader');
   const keys=cells.map(c=>c.join(','));
   if (new Set(keys).size!==keys.length) throw new TypeError('Duplicate batch cell');
   let held=locks.get(sidecar);
   if (!held) {held=new Set();locks.set(sidecar,held);}
   if (keys.some(k=>held.has(k))) throw new Error('Overlapping batch edit');
   keys.forEach(k=>held.add(k));
-  const originals=[],states=[],written=[],postWrites=new Map();
+  const originals=[],states=[],revisions=[],written=[],postWrites=new Map();
   try {
     // Preflight every identity before touching any cell.
     for (const c of cells) {
@@ -31,13 +33,19 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
         if (!validState(state)) throw new TypeError('Invalid initial shape state');
         states.push(state);
       }
+      if (readRevision) {
+        const revision=await readRevision(c);
+        if (!validRevision(revision)) throw new TypeError('Invalid initial revision');
+        revisions.push(revision);
+      }
     }
     try {
       for (let i=0;i<cells.length;i++) {
         // An awaited preflight may yield to external world edits. Never overwrite
         // a cell whose identity or partial-shape fingerprint changed meanwhile.
         if (await readIdentity(cells[i]) !== originals[i] ||
-            (readState && await readState(cells[i]) !== states[i])) {
+            (readState && await readState(cells[i]) !== states[i]) ||
+            (readRevision && await readRevision(cells[i]) !== revisions[i])) {
           // Another editor owns the new content. Never roll it back, but the
           // orientation associated with the original content is now stale.
           sidecar.invalidateEdit(cells[i]);
@@ -51,7 +59,11 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
         const committedState=readState ? await readState(cells[i]) : undefined;
         if (readState && !validState(committedState))
           throw new Error('Invalid committed shape state');
-        postWrites.set(i,{id:await readIdentity(cells[i]),state:committedState});
+        const committedId=await readIdentity(cells[i]);
+        const committedRevision=readRevision ? await readRevision(cells[i]) : undefined;
+        if (readRevision && (!validRevision(committedRevision) || committedRevision<=revisions[i]))
+          throw new Error('Invalid committed revision');
+        postWrites.set(i,{id:committedId,state:committedState,revision:committedRevision});
       }
     } catch (error) {
       const failures=[];
@@ -61,11 +73,16 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
           // a later async edit was pending. Never undo that foreign change.
           const post=postWrites.get(i);
           if (post && (await readIdentity(cells[i])!==post.id ||
-              (readState && await readState(cells[i])!==post.state)))
+              (readState && await readState(cells[i])!==post.state) ||
+              (readRevision && await readRevision(cells[i])!==post.revision)))
             throw new Error('Foreign edit during batch rollback');
           if (await rollback(cells[i],i)===false) throw new Error('Rollback rejected');
           if (await readIdentity(cells[i])!==originals[i]) throw new Error('Rollback identity mismatch');
           if (readState && await readState(cells[i])!==states[i]) throw new Error('Rollback shape state mismatch');
+          // Revision counters are monotonic: rollback must advance them, never rewind.
+          if (readRevision && (!validRevision(await readRevision(cells[i])) ||
+              await readRevision(cells[i]) <= (postWrites.get(i)?.revision ?? revisions[i])))
+            throw new Error('Rollback revision mismatch');
         } catch (failure) {
           failures.push(failure);
           sidecar.invalidateEdit(cells[i]);
