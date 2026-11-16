@@ -287,6 +287,8 @@ function kingfisherGrandTheater(){
  // Four supported flytower corners are attached to the y7 roof. No doubled
  // roof-beam cells: perimeter y9 spans omit their previously placed corners.
  for(const x of [13,29])for(const z of [23,29]){
+  // A continuous load-bearing post runs from walking floor through y7 roof.
+  p.post(x,z,6);
   p.upper(x,8,z,M.post,'flytower-bearing','wall');
   p.upper(x,9,z,M.post,'flytower-bearing','wall');
  }
