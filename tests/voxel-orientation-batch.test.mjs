@@ -165,3 +165,48 @@ test('rollback preserves foreign same-ID shape change of an earlier committed ce
  assert.equal(f.sidecar.get(f.cells[0],4),0);
  assert.equal(f.sidecar.get(f.cells[1],4),2);
 });
+
+test('revision guard rejects same-ID ABA replacement before first write',async()=>{
+ const f=fixture(),versions=new Map(f.cells.map(c=>[c.join(','),0]));
+ let reads=0,writes=0;
+ await assert.rejects(f.run(()=>{writes++;return true;},{
+  readRevision:c=>{
+   if(++reads===4)versions.set(f.cells[0].join(','),2);
+   return versions.get(c.join(','));
+  }
+ }),/Stale batch preflight/);
+ assert.equal(writes,0);
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+ assert.equal(f.sidecar.get(f.cells[1],4),2);
+});
+test('revision guard preserves foreign same-ID ABA edit during rollback',async()=>{
+ const f=fixture(),versions=new Map(f.cells.map(c=>[c.join(','),0]));
+ const bump=c=>versions.set(c.join(','),versions.get(c.join(','))+1);
+ await assert.rejects(f.run((c,i)=>{
+  f.ids.set(c.join(','),5);bump(c);
+  if(i===1){f.ids.set(f.cells[0].join(','),4);bump(f.cells[0]);return false;}
+  return true;
+ },{
+  readRevision:c=>versions.get(c.join(',')),
+  rollback:c=>{f.ids.set(c.join(','),4);bump(c);return true;}
+ }),error=>error instanceof AggregateError &&
+   error.errors.some(e=>/Foreign edit during batch rollback/.test(e.message)));
+ assert.equal(f.readIdentity(f.cells[0]),4);
+ assert.equal(versions.get(f.cells[0].join(',')),2);
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+ assert.equal(f.sidecar.get(f.cells[1],4),2);
+});
+test('revision guard accepts acknowledged edits and monotonic rollback',async()=>{
+ const f=fixture(),versions=new Map(f.cells.map(c=>[c.join(','),0]));
+ const bump=c=>versions.set(c.join(','),versions.get(c.join(','))+1);
+ await assert.rejects(f.run((c,i)=>{
+  f.ids.set(c.join(','),5);bump(c);return i!==2;
+ },{
+  readRevision:c=>versions.get(c.join(',')),
+  rollback:c=>{f.ids.set(c.join(','),4);bump(c);return true;}
+ }),/not acknowledged/);
+ for(const c of f.cells){
+  assert.equal(f.readIdentity(c),4);
+  assert.equal(f.sidecar.get(c,4),2);
+ }
+});
