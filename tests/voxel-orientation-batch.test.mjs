@@ -70,3 +70,30 @@ test('invalid initial shape fingerprint preflights without world mutation',async
  await assert.rejects(f.run(()=>{writes++;return true;},{readState:()=>NaN}),/Invalid initial shape state/);
  assert.equal(writes,0);
 });
+
+test('asynchronous preflight cannot overwrite externally replaced block',async()=>{
+ const f=fixture();let reads=0,writes=0;
+ await assert.rejects(f.run(()=>{writes++;return true;},{
+  readIdentity:c=>{
+   reads++;
+   if(reads===4)f.ids.set(f.cells[0].join(','),6);
+   return f.readIdentity(c);
+  }
+ }),/Stale batch preflight/);
+ assert.equal(writes,0);
+ assert.equal(f.readIdentity(f.cells[0]),6);
+ assert.equal(f.sidecar.get(f.cells[0],4),2);
+});
+test('shape fingerprint changes between preflight and edit reject without undoing foreign changes',async()=>{
+ const f=fixture(),shapes=new Map(f.cells.map(c=>[c.join(','),'north']));
+ let reads=0,writes=0;
+ await assert.rejects(f.run(()=>{writes++;return true;},{
+  readState:c=>{
+   reads++;
+   if(reads===4)shapes.set(f.cells[0].join(','),'west');
+   return shapes.get(c.join(','));
+  }
+ }),/Stale batch preflight/);
+ assert.equal(writes,0);
+ assert.equal(shapes.get(f.cells[0].join(',')),'west');
+});
