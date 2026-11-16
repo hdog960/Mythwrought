@@ -301,3 +301,22 @@ test('surface seam reports a saved player obstruction without overwriting it',as
   assert.ok(seam.failures.some(f=>f.x===p.x&&f.y===p.feet&&f.z===p.z));
   assert.deepEqual(restored.save(),saved);
 });
+
+test('surface seam probes candidate carving below legacy and rejects saved deep edits',async()=>{
+  const {descentSurfaceSeam,descentWorld}=await import('../src/underground-switchback-descent.mjs');
+  const world=new VoxelWorld(179);
+  const steps=descentEntranceApproach();
+  const deep=steps.at(-1);
+  const reader=descentWorld(world);
+  assert.equal(reader.get(deep.x,deep.feet,deep.z),BLOCK.AIR,
+    'candidate descent must carve the lower stair headroom');
+  const baseline=descentSurfaceSeam(world);
+  assert.ok(!baseline.failures.some(f=>f.x===deep.x&&f.y===deep.feet),
+    'unmodified solid world must not hide the candidate-carved lower stair');
+  assert.equal(world.set(deep.x,deep.feet,deep.z,BLOCK.WOOD),true);
+  const saved=world.save(),restored=VoxelWorld.restore(saved);
+  const blocked=descentSurfaceSeam(restored);
+  assert.ok(blocked.failures.some(f=>f.x===deep.x&&f.y===deep.feet&&f.reason==='candidate-headroom'));
+  assert.deepEqual(restored.save(),saved);
+  assert.equal(blocked.runtimeVerified,false);
+});
