@@ -390,3 +390,40 @@ test('saved edits obstruct the fault cathedral without mutation',()=>{
   assert.equal(descentWorld(restored).get(x,-169,z),BLOCK.WOOD);
   assert.deepEqual(restored.save(),snapshot);
 });
+
+for(const seed of [179,1,2026,-77])test('middle rift terraces have supported step-down route and side chambers '+seed,()=>{
+  const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  const reader=descentWorld(world),anchor=descentRoute().find(p=>p.floor===-90);
+  assert.ok(anchor);
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const at=(d,t,y)=>reader.get(anchor.x+outward[0]*d+tangent[0]*t,y,
+                              anchor.z+outward[1]*d+tangent[1]*t);
+  for(let d=0;d<=38;d++){
+    const floor=-90-(d>=24?2:d>=12?1:0);
+    assert.equal(at(d,0,floor),BLOCK.DEEPSTONE,'terrace support '+d);
+    for(let h=1;h<=2;h++)assert.equal(at(d,0,floor+h),BLOCK.AIR,'terrace headroom '+d+'/'+h);
+    if(d>0){
+      const prev=-90-(d-1>=24?2:d-1>=12?1:0);
+      assert.ok(Math.abs(floor-prev)<=1,'unsafe vertical discontinuity '+d);
+    }
+  }
+  for(const [d,t,floor] of [[20,-9,-91],[33,10,-92]]){
+    assert.equal(at(d,t,floor),BLOCK.DEEPSTONE,'side chamber support');
+    assert.equal(at(d,t,floor+1),BLOCK.AIR,'side chamber clearance');
+    assert.equal(at(d,t,floor+2),BLOCK.AIR,'side chamber headroom');
+  }
+  assert.equal(descentConnectivity(world).connected,true);
+  assert.equal(JSON.stringify(world.save()),before);
+});
+test('saved edit blocks middle rift terrace without mutating player data',()=>{
+  const world=new VoxelWorld(179),anchor=descentRoute().find(p=>p.floor===-90);
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const x=anchor.x+outward[0]*18,z=anchor.z+outward[1]*18;
+  assert.equal(world.set(x,-90,z,BLOCK.WOOD),true);
+  const snapshot=world.save(),restored=VoxelWorld.restore(snapshot);
+  assert.equal(descentWorld(restored).get(x,-90,z),BLOCK.WOOD);
+  assert.deepEqual(restored.save(),snapshot);
+});
