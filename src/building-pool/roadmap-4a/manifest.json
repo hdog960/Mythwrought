@@ -12,12 +12,12 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 30,
-    "totalAuthored": 60,
-    "remaining": 255,
+    "newlyAuthored": 38,
+    "totalAuthored": 68,
+    "remaining": 247,
     "creatorAccepted": 0,
     "integratedBuildings": 0,
-    "m2Original": 30
+    "m2Original": 38
   },
   "biomes": [
     "temperate",
@@ -37,7 +37,7 @@
       "perBiomeSize": 5,
       "total": 75,
       "inherited": 15,
-      "remaining": 45,
+      "remaining": 41,
       "milestone": 2
     },
     {
@@ -45,7 +45,7 @@
       "perBiomeSize": 4,
       "total": 60,
       "inherited": 0,
-      "remaining": 45,
+      "remaining": 41,
       "milestone": 2
     },
     {
@@ -92,7 +92,7 @@
   "gates": {
     "M0": "Accepted: exact-head Actions #43767981937 passed after fixing owned M0 count/list tests; 30 inherited source-exact designs preserved",
     "M1": "Technical candidate acceptance: exact-head Actions #43770848853 passed, 180 source-driven Chromium WebGL2 exterior/cutaway proxy captures; physical/creator gates open",
-    "M2": "Eight new M2 regional civic/guild blueprints proposed: 60/315 total, 255 remaining; exact-head native acceptance and 48 source-linked Chromium WebGL2 views PENDING. Prior 52-design exact-head green Actions #43782528500. Do not assert creator/physical-family acceptance.",
+    "M2": "68/315 theoretical blueprint designs (8 added tall-source roof variants), 247 remaining, full exact-head Node and 48-view WebGL2 verification pending; no creator approval or world integration.",
     "M3": "not started",
     "M4": "not started",
     "M5": "not started",
