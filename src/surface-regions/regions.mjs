@@ -172,11 +172,12 @@ export function surfaceBiomeFreshColumn(x,z,seed=179,{
 // collision/raycast readers only after selecting a fresh-world profile.
 // Never infer freshness from an empty edits map: an explored save can be empty.
 export function createSurfaceBiomeWorldView(world,{
-  enabled=false,profileIsFresh=false,isProtected=null,maxCachedColumns=1024
+  enabled=false,profileIsFresh=false,isProtected=null,hasDurableEditIntent=null,maxCachedColumns=1024
 }={}){
   if(!enabled||!profileIsFresh||!world||
      typeof world.naturalAndLandmarkBlock!=='function'||
      typeof world.get!=='function'||typeof isProtected!=='function'||
+     typeof hasDurableEditIntent!=='function'||
      !Number.isInteger(maxCachedColumns)||maxCachedColumns<1||
      maxCachedColumns>4096||!Number.isInteger(world.seed)||
      !(world.edits instanceof Map)||world.edits.size!==0||
@@ -186,6 +187,10 @@ export function createSurfaceBiomeWorldView(world,{
   // constructed. Later edits must not remove already visible natural terrain.
   // Individual edited cells always defer to the authoritative world reader.
   // Persistence of the opt-in profile flag remains a manual integrator gate.
+  // hasDurableEditIntent MUST be backed by persistent touched-cell history,
+  // including edits later reverted to their legacy natural value. An empty
+  // current edits map cannot prove a cell was never modified. Missing durable
+  // history fails closed; this view must not silently resurrect biome blocks.
   const planAt=(x,z)=>{
     const key=x+','+z;
     if(cache.has(key))return cache.get(key);
@@ -206,7 +211,8 @@ export function createSurfaceBiomeWorldView(world,{
     seed:world.seed,
     get(x,y,z){
       const original=world.get(x,y,z);
-      if(![x,y,z].every(Number.isInteger)||world.edits.has(x+','+y+','+z)||world.rotations.has(x+','+y+','+z))
+      if(![x,y,z].every(Number.isInteger)||hasDurableEditIntent(x,y,z)||
+         world.edits.has(x+','+y+','+z)||world.rotations.has(x+','+y+','+z))
         return original;
       return planAt(x,z)?.get(y)??original;
     },
