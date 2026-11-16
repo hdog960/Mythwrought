@@ -142,3 +142,26 @@ test('middle-depth echo hall has a continuous stepped entrance and broad lower t
     assert.equal(JSON.stringify(world.save()),before);
   }
 });
+
+test('deepest crescent refuge has supported cavern, pocket and connected approach across seeds',()=>{
+  for(const seed of [179,1,2026,-77]){
+    const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+    const reader=descentWorld(world),anchor=descentRoute().find(p=>p.floor===-195);
+    assert.ok(anchor,'missing deepest refuge anchor');
+    const lx=anchor.x-192,lz=anchor.z-192;
+    const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+    const tangent=[outward[1],-outward[0]];
+    const at=(d,t,y)=>reader.get(anchor.x+outward[0]*d+tangent[0]*t,y,
+                                anchor.z+outward[1]*d+tangent[1]*t);
+    for(let d=0;d<=30;d++){
+      assert.equal(at(d,0,-195),BLOCK.DEEPSTONE,'approach floor '+d);
+      for(let h=1;h<=2;h++)assert.equal(at(d,0,-195+h),BLOCK.AIR,'approach clearance '+d);
+    }
+    for(const [d,t] of [[31,0],[40,10],[39,5]]){
+      assert.equal(at(d,t,-195),BLOCK.DEEPSTONE,'cavern support');
+      for(let h=1;h<=5;h++)assert.equal(at(d,t,-195+h),BLOCK.AIR,'cavern headroom');
+    }
+    assert.equal(descentConnectivity(world).connected,true);
+    assert.equal(JSON.stringify(world.save()),before);
+  }
+});
