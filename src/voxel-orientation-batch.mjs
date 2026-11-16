@@ -37,8 +37,12 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
         // An awaited preflight may yield to external world edits. Never overwrite
         // a cell whose identity or partial-shape fingerprint changed meanwhile.
         if (await readIdentity(cells[i]) !== originals[i] ||
-            (readState && await readState(cells[i]) !== states[i]))
+            (readState && await readState(cells[i]) !== states[i])) {
+          // Another editor owns the new content. Never roll it back, but the
+          // orientation associated with the original content is now stale.
+          sidecar.invalidateEdit(cells[i]);
           throw new Error('Stale batch preflight');
+        }
         // Include the currently executing cell in rollback even when edit throws.
         written.push(i);
         if (await edit(cells[i],i)!==true) throw new Error('Batch edit not acknowledged');
