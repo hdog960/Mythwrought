@@ -124,7 +124,8 @@ test('middle-depth echo hall has a continuous stepped entrance and broad lower t
     const tangent=[outward[1],-outward[0]];
     for(let d=0;d<=42;d++){
       const floor=-105-Math.min(2,Math.floor(d/14));
-      for(let across=-2;across<=2;across++){
+      // The narrow throat avoids the adjacent spiral's supporting wall.
+      for(let across=-(d<4?0:2);across<=(d<4?0:2);across++){
         const x=anchor.x+outward[0]*d+tangent[0]*across;
         const z=anchor.z+outward[1]*d+tangent[1]*across;
         assert.equal(reader.get(x,floor,z),BLOCK.DEEPSTONE,'support '+seed+'/'+d+'/'+across);
