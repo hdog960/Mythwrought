@@ -97,3 +97,33 @@ test('shape fingerprint changes between preflight and edit reject without undoin
  assert.equal(writes,0);
  assert.equal(shapes.get(f.cells[0].join(',')),'west');
 });
+
+test('foreign block replacement invalidates only its stale orientation, without rollback',async()=>{
+ const f=fixture();let reads=0,undo=0;
+ await assert.rejects(f.run(()=>true,{
+  readIdentity:c=>{
+   if(++reads===4)f.ids.set(f.cells[0].join(','),6);
+   return f.readIdentity(c);
+  },
+  rollback:()=>{undo++;return true;}
+ }),/Stale batch preflight/);
+ assert.equal(undo,0);
+ assert.equal(f.readIdentity(f.cells[0]),6);
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+ assert.equal(f.sidecar.get(f.cells[1],4),2);
+});
+test('foreign same-ID geometry change clears stale rotation but preserves foreign shape',async()=>{
+ const f=fixture(),shapes=new Map(f.cells.map(c=>[c.join(','),'north']));
+ let reads=0,undo=0;
+ await assert.rejects(f.run(()=>true,{
+  readState:c=>{
+   if(++reads===4)shapes.set(f.cells[0].join(','),'west');
+   return shapes.get(c.join(','));
+  },
+  rollback:()=>{undo++;return true;}
+ }),/Stale batch preflight/);
+ assert.equal(undo,0);
+ assert.equal(shapes.get(f.cells[0].join(',')),'west');
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+ assert.equal(f.sidecar.get(f.cells[1],4),2);
+});
