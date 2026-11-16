@@ -70,7 +70,10 @@ export function validateObjectAnchors(objects,{occupiedCells=[],maxTriangles=120
     for (const offset of o.footprint) {
       if (!offset || !['x','y','z'].every(k=>integer(offset[k])))
         return Object.freeze({ok:false,reason:'invalid-footprint'});
-      const cell=key(o.anchor.x+offset.x,o.anchor.y+offset.y,o.anchor.z+offset.z);
+      const x=o.anchor.x+offset.x, y=o.anchor.y+offset.y, z=o.anchor.z+offset.z;
+      // Reject coordinate overflow rather than silently aliasing distinct world cells.
+      if (![x,y,z].every(integer)) return Object.freeze({ok:false,reason:'footprint-coordinate-overflow'});
+      const cell=key(x,y,z);
       if (blocked.has(cell)) return Object.freeze({ok:false,reason:'occupied-footprint'});
       blocked.add(cell);
     }
