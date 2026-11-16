@@ -488,30 +488,30 @@ const plans=[
   "eastX": 27,
   "eastZ": 25,
   "midZ": 17,
-  "title": "Oasis cypress salvage and camelwood depot",
+  "title": "Oasis cypress salvage dock with offset northeast cargo wing, open western shade court and southern camelwood depot",
   "mask": [
    [
-    12,
-    20,
+    13,
+    21,
     0,
     33
    ],
    [
     1,
-    12,
-    3,
-    16
+    10,
+    4,
+    13
    ],
    [
     0,
-    9,
-    22,
-    32
+    8,
+    23,
+    33
    ],
    [
-    22,
-    30,
-    17,
+    23,
+    31,
+    18,
     32
    ],
    [
@@ -523,8 +523,8 @@ const plans=[
    [
     8,
     16,
-    15,
-    25
+    14,
+    24
    ]
   ],
   "roofs": [
@@ -532,12 +532,12 @@ const plans=[
     "name": "west workshop",
     "r": [
      2,
-     11,
-     4,
-     15
+     9,
+     5,
+     12
     ],
     "top": 19,
-    "shape": "terrace",
+    "shape": "cross",
     "cover": "pack3:025",
     "post": "pack1:010"
    },
@@ -576,7 +576,7 @@ const plans=[
      31
     ],
     "top": 11,
-    "shape": "gable",
+    "shape": "terrace",
     "cover": "pack3:025",
     "post": "pack1:010"
    }
@@ -638,13 +638,13 @@ const plans=[
     3,
     2,
     6,
-    "west custom brace"
+    "western cypress shade joist"
    ],
    [
     28,
     2,
     29,
-    "east custom brace"
+    "southeast caravanwood upright"
    ]
   ],
   "floor": "pack1:007",
