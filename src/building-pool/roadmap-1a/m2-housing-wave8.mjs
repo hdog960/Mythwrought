@@ -7,7 +7,7 @@ const SPECS=Object.freeze([
   category:'house',biome:'temperate',size:'small',index:12,title:'Hazelbrook Split-Gable Croft',
   w:27,d:24,plan:'twin-open-rear-gardens-with-offset-west-and-east-private-bays',
   roof:'courtyard',skin:'live:wood',roofAsset:'pack3:023',
-  exteriorNotches:[[10,12,17,23]],
+  exteriorNotches:[[11,12,17,23]],
   segments:[[2,11,9,11],[18,11,25,11],[2,17,9,17],[18,18,25,18]],
   entry:[13,1,'hall'],
   rooms:[
@@ -42,7 +42,7 @@ const SPECS=Object.freeze([
   category:'house',biome:'desert',size:'medium',index:12,title:'Kharim Saffron Steps House',
   w:33,d:27,plan:'wide-saffron-trading-front-and-deep-right-privacy-step-behind-open-west-sand-court',
   roof:'hip',skin:'pack5:080',roofAsset:'pack3:024',
-  exteriorNotches:[[0,14,11,26]],
+  exteriorNotches:[[0,14,11,26],[25,21,32,26]],
   segments:[[16,2,16,12],[12,13,31,13],[13,20,30,20]],
   entry:[24,1,'merchant-hall'],
   rooms:[
@@ -107,7 +107,7 @@ const SPECS=Object.freeze([
   category:'house',biome:'enchanted-forest',size:'small',index:12,title:'Mossveil Starfold Hut',
   w:26,d:25,plan:'left-rear-moonlit-bower-with-right-front-atelier-and-open-eastern-fern-clearing',
   roof:'sawtooth',skin:'live:wood',roofAsset:'pack3:023',
-  exteriorNotches:[[17,12,25,24]],
+  exteriorNotches:[[16,11,25,24]],
   segments:[[14,2,14,10],[2,11,15,11],[2,18,15,18]],
   entry:[8,1,'bower-hall'],
   rooms:[
@@ -138,7 +138,7 @@ const SPECS=Object.freeze([
   category:'house',biome:'mountain',size:'medium',index:12,title:'Slatewalk Three-Bay Terrace House',
   w:32,d:31,plan:'two-armed-mountain-rear-courtyard-with-orthogonal-front-workshop-and-asymmetric-service-wing',
   roof:'courtyard',skin:'pack1:006',roofAsset:'pack3:025',
-  exteriorNotches:[[13,15,19,30]],
+  exteriorNotches:[[13,15,19,30],[0,24,4,30]],
   segments:[[10,2,10,13],[2,14,12,14],[20,14,29,14],[2,22,12,22]],
   entry:[17,1,'commons'],
   rooms:[
@@ -159,7 +159,7 @@ const SPECS=Object.freeze([
    {x:4,z:5,room:'atelier',asset:'pack5:084'},
    {x:17,z:5,room:'commons',asset:'pack4:064'},
    {x:5,z:17,room:'ore-room',asset:'pack4:058'},
-   {x:4,z:25,room:'stone-rest',asset:'pack5:082',variant:'wanderer-quilt'},
+   {x:7,z:25,room:'stone-rest',asset:'pack5:082',variant:'wanderer-quilt'},
    {x:23,z:18,room:'ledge-study',asset:'pack4:059'}
   ],
   roofWings:[
