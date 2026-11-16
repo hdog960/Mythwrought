@@ -30,7 +30,7 @@ export function auditM3CraftSecondPhysicalFit(){
  for(const b of models){
   const cellList=b.modules.flatMap(m=>m.cells);
   const filled=new Map(cellList.map(c=>[at(c),c])),fixtures=[],roles=new Map(b.modules.map(m=>[m.role,m.cells]));
-  const physicalPieces=cellList.filter(c=>['pack4:064','pack4:057','pack5:088'].includes(c[3]));
+  const physicalPieces=roles.get('fixture')??[]; // inspect every source fixture, including real Pack2 joinery benches and Pack1 stone carving blocks
   for(const c of physicalPieces){
    const shape=resolve(c),p=c.slice(0,3);
    const reservations=shape.occupiedOffsets.filter(o=>o.some(v=>v!==0))
