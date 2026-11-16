@@ -82,7 +82,8 @@ test('asynchronous preflight cannot overwrite externally replaced block',async()
  }),/Stale batch preflight/);
  assert.equal(writes,0);
  assert.equal(f.readIdentity(f.cells[0]),6);
- assert.equal(f.sidecar.get(f.cells[0],4),2);
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+ assert.equal(f.sidecar.get(f.cells[1],4),2);
 });
 test('shape fingerprint changes between preflight and edit reject without undoing foreign changes',async()=>{
  const f=fixture(),shapes=new Map(f.cells.map(c=>[c.join(','),'north']));
@@ -96,6 +97,8 @@ test('shape fingerprint changes between preflight and edit reject without undoin
  }),/Stale batch preflight/);
  assert.equal(writes,0);
  assert.equal(shapes.get(f.cells[0].join(',')),'west');
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+ assert.equal(f.sidecar.get(f.cells[1],4),2);
 });
 
 test('foreign block replacement invalidates only its stale orientation, without rollback',async()=>{
