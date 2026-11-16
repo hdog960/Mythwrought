@@ -6,37 +6,37 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 86,
-  "authoredCandidates": 101,
-  "remainingUnauthored": 319,
+  "originalNewModels": 93,
+  "authoredCandidates": 108,
+  "remainingUnauthored": 312,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
+      "authored": 16,
+      "target": 60,
+      "remaining": 44
+    },
+    "tailor": {
+      "authored": 13,
+      "target": 60,
+      "remaining": 47
+    },
+    "butcher": {
+      "authored": 13,
+      "target": 60,
+      "remaining": 47
+    },
+    "jeweler": {
+      "authored": 13,
+      "target": 60,
+      "remaining": 47
+    },
+    "bookshop": {
       "authored": 14,
       "target": 60,
       "remaining": 46
-    },
-    "tailor": {
-      "authored": 12,
-      "target": 60,
-      "remaining": 48
-    },
-    "butcher": {
-      "authored": 12,
-      "target": 60,
-      "remaining": 48
-    },
-    "jeweler": {
-      "authored": 12,
-      "target": 60,
-      "remaining": 48
-    },
-    "bookshop": {
-      "authored": 12,
-      "target": 60,
-      "remaining": 48
     },
     "temple": {
       "authored": 23,
@@ -479,32 +479,67 @@
       "id": "r2:theater:desert:small:02",
       "file": "src/building-pool/roadmap-2b/m1-shadowstage.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:snow:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:mountain:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:desert:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-guildwings.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-guildwings.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-guildwings.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
       "small": 8,
       "medium": 7,
-      "large": 6
+      "large": 7
     },
     "desert": {
-      "small": 5,
+      "small": 6,
       "medium": 8,
       "large": 8
     },
     "snow": {
-      "small": 6,
-      "medium": 9,
+      "small": 8,
+      "medium": 10,
       "large": 5
     },
     "enchanted-forest": {
-      "small": 4,
+      "small": 5,
       "medium": 6,
       "large": 8
     },
     "mountain": {
       "small": 8,
-      "medium": 7,
+      "medium": 8,
       "large": 6
     }
   },
