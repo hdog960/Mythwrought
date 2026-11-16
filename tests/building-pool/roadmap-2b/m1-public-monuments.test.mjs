@@ -149,5 +149,9 @@ test('no new 2B test-source facade: exact checked out Git blob parity and curren
  assert.equal(ledger.creatorAccepted,0);
  assert.equal(ledger.integratedInGame,0);
  assert.equal(new Set(all.map(b=>b.id)).size,39);
- assert.deepEqual(ledger.originals.map(x=>x.id).sort(),all.filter(x=>x.category!=='temple'||x.variation!==1).map(x=>x.id).sort());
+ const inheritedFromPriorM1=all.filter(x=>x.category!=='temple'||x.variation!==1).map(x=>x.id);
+ assert.equal(inheritedFromPriorM1.length,24,'historical public M1 candidate set changed');
+ const currentIds=new Set(ledger.originals.map(x=>x.id));
+ assert.equal(ledger.originals.length,32,'cumulative original count must include eight new designs');
+ for(const id of inheritedFromPriorM1)assert(currentIds.has(id),'lost earlier 2B candidate '+id);
 });
