@@ -17,9 +17,15 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:023",
     "exteriorNotches": [
       [
-        9,
-        12,
+        7,
+        13,
         17,
+        24
+      ],
+      [
+        21,
+        17,
+        25,
         24
       ]
     ],
@@ -239,6 +245,12 @@ const SPECS=Object.freeze([
         14,
         11,
         30
+      ],
+      [
+        28,
+        24,
+        32,
+        30
       ]
     ],
     "segments": [
@@ -256,9 +268,9 @@ const SPECS=Object.freeze([
       ],
       [
         13,
-        23,
+        21,
         30,
-        23
+        21
       ]
     ],
     "entry": [
@@ -303,7 +315,7 @@ const SPECS=Object.freeze([
         "max": [
           31,
           4,
-          23
+          21
         ]
       },
       {
@@ -311,7 +323,7 @@ const SPECS=Object.freeze([
         "min": [
           13,
           1,
-          24
+          22
         ],
         "max": [
           31,
@@ -343,7 +355,7 @@ const SPECS=Object.freeze([
         "at": [
           28,
           1,
-          23
+          21
         ],
         "from": "rear-gallery",
         "to": "sleeping-suite"
@@ -392,7 +404,7 @@ const SPECS=Object.freeze([
       },
       {
         "x": 16,
-        "z": 25,
+        "z": 23,
         "room": "sleeping-suite",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
@@ -443,15 +455,21 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        17,
-        13,
+        18,
+        11,
         38
       ],
       [
         30,
-        17,
+        18,
         42,
         38
+      ],
+      [
+        0,
+        9,
+        6,
+        16
       ]
     ],
     "segments": [
@@ -475,9 +493,9 @@ const SPECS=Object.freeze([
       ],
       [
         15,
-        29,
+        31,
         28,
-        29
+        31
       ]
     ],
     "entry": [
@@ -535,7 +553,7 @@ const SPECS=Object.freeze([
         "max": [
           29,
           4,
-          29
+          31
         ]
       },
       {
@@ -543,7 +561,7 @@ const SPECS=Object.freeze([
         "min": [
           15,
           1,
-          30
+          32
         ],
         "max": [
           29,
@@ -584,7 +602,7 @@ const SPECS=Object.freeze([
         "at": [
           21,
           1,
-          29
+          31
         ],
         "from": "spine-gallery",
         "to": "private-rest"
@@ -639,7 +657,7 @@ const SPECS=Object.freeze([
       },
       {
         "x": 20,
-        "z": 31,
+        "z": 33,
         "room": "private-rest",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
@@ -700,9 +718,15 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:024",
     "exteriorNotches": [
       [
-        17,
-        13,
+        19,
+        15,
         26,
+        25
+      ],
+      [
+        0,
+        21,
+        6,
         25
       ]
     ],
@@ -856,7 +880,7 @@ const SPECS=Object.freeze([
         "asset": "pack4:059"
       },
       {
-        "x": 5,
+        "x": 8,
         "z": 22,
         "room": "bedchamber",
         "asset": "pack5:082",
@@ -910,6 +934,12 @@ const SPECS=Object.freeze([
         12,
         14,
         22,
+        29
+      ],
+      [
+        0,
+        21,
+        8,
         29
       ]
     ],
@@ -1127,7 +1157,13 @@ const SPECS=Object.freeze([
       [
         0,
         16,
-        14,
+        13,
+        38
+      ],
+      [
+        35,
+        29,
+        41,
         38
       ]
     ],
@@ -1333,8 +1369,14 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        13,
-        8,
+        14,
+        6,
+        25
+      ],
+      [
+        17,
+        21,
+        25,
         25
       ]
     ],
@@ -1540,15 +1582,21 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        14,
+        16,
         9,
         31
       ],
       [
-        26,
-        14,
+        28,
+        16,
         35,
         31
+      ],
+      [
+        30,
+        9,
+        35,
+        13
       ]
     ],
     "segments": [
@@ -1801,6 +1849,12 @@ const SPECS=Object.freeze([
         19,
         28,
         39
+      ],
+      [
+        40,
+        24,
+        44,
+        39
       ]
     ],
     "segments": [
@@ -2016,16 +2070,22 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         10,
-        13,
-        18,
+        15,
+        20,
+        26
+      ],
+      [
+        0,
+        20,
+        6,
         26
       ]
     ],
     "segments": [
       [
-        14,
+        12,
         2,
-        14,
+        12,
         11
       ],
       [
@@ -2042,7 +2102,7 @@ const SPECS=Object.freeze([
       ]
     ],
     "entry": [
-      18,
+      16,
       1,
       "hearth-hall"
     ],
@@ -2055,7 +2115,7 @@ const SPECS=Object.freeze([
           2
         ],
         "max": [
-          14,
+          12,
           4,
           12
         ]
@@ -2063,7 +2123,7 @@ const SPECS=Object.freeze([
       {
         "id": "hearth-hall",
         "min": [
-          15,
+          13,
           1,
           2
         ],
@@ -2103,7 +2163,7 @@ const SPECS=Object.freeze([
     "doors": [
       {
         "at": [
-          14,
+          12,
           1,
           5
         ],
@@ -2159,7 +2219,7 @@ const SPECS=Object.freeze([
         "asset": "pack5:084"
       },
       {
-        "x": 18,
+        "x": 16,
         "z": 5,
         "room": "hearth-hall",
         "asset": "pack4:064"
@@ -2233,9 +2293,15 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:023",
     "exteriorNotches": [
       [
-        23,
-        15,
+        25,
+        17,
         33,
+        32
+      ],
+      [
+        0,
+        25,
+        6,
         32
       ]
     ],
@@ -2389,7 +2455,7 @@ const SPECS=Object.freeze([
         "asset": "pack4:059"
       },
       {
-        "x": 5,
+        "x": 8,
         "z": 26,
         "room": "bedchamber",
         "asset": "pack5:082",
@@ -2441,15 +2507,21 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        18,
+        20,
         14,
         40
       ],
       [
-        31,
-        18,
+        33,
+        20,
         43,
         40
+      ],
+      [
+        0,
+        9,
+        6,
+        17
       ]
     ],
     "segments": [
@@ -2473,9 +2545,9 @@ const SPECS=Object.freeze([
       ],
       [
         16,
-        31,
+        28,
         29,
-        31
+        28
       ]
     ],
     "entry": [
@@ -2533,7 +2605,7 @@ const SPECS=Object.freeze([
         "max": [
           30,
           4,
-          31
+          28
         ]
       },
       {
@@ -2541,7 +2613,7 @@ const SPECS=Object.freeze([
         "min": [
           16,
           1,
-          32
+          29
         ],
         "max": [
           30,
@@ -2582,7 +2654,7 @@ const SPECS=Object.freeze([
         "at": [
           22,
           1,
-          31
+          28
         ],
         "from": "spine-gallery",
         "to": "private-rest"
@@ -2637,7 +2709,7 @@ const SPECS=Object.freeze([
       },
       {
         "x": 21,
-        "z": 33,
+        "z": 30,
         "room": "private-rest",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
@@ -2702,6 +2774,12 @@ const SPECS=Object.freeze([
         12,
         25,
         25
+      ],
+      [
+        0,
+        21,
+        6,
+        25
       ]
     ],
     "segments": [
@@ -2719,9 +2797,9 @@ const SPECS=Object.freeze([
       ],
       [
         2,
-        20,
+        18,
         15,
-        20
+        18
       ]
     ],
     "entry": [
@@ -2766,7 +2844,7 @@ const SPECS=Object.freeze([
         "max": [
           16,
           4,
-          20
+          18
         ]
       },
       {
@@ -2774,7 +2852,7 @@ const SPECS=Object.freeze([
         "min": [
           2,
           1,
-          21
+          19
         ],
         "max": [
           16,
@@ -2806,7 +2884,7 @@ const SPECS=Object.freeze([
         "at": [
           5,
           1,
-          20
+          18
         ],
         "from": "left-shelter",
         "to": "bedchamber"
@@ -2854,8 +2932,8 @@ const SPECS=Object.freeze([
         "asset": "pack4:059"
       },
       {
-        "x": 5,
-        "z": 22,
+        "x": 8,
+        "z": 20,
         "room": "bedchamber",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
@@ -2906,8 +2984,14 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        15,
-        12,
+        16,
+        10,
+        31
+      ],
+      [
+        26,
+        27,
+        34,
         31
       ]
     ],
@@ -3113,15 +3197,21 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        18,
-        14,
+        19,
+        12,
         38
       ],
       [
         31,
-        18,
+        19,
         44,
         38
+      ],
+      [
+        40,
+        9,
+        44,
+        17
       ]
     ],
     "segments": [
@@ -3145,9 +3235,9 @@ const SPECS=Object.freeze([
       ],
       [
         16,
-        30,
+        32,
         29,
-        30
+        32
       ]
     ],
     "entry": [
@@ -3205,7 +3295,7 @@ const SPECS=Object.freeze([
         "max": [
           30,
           4,
-          30
+          32
         ]
       },
       {
@@ -3213,7 +3303,7 @@ const SPECS=Object.freeze([
         "min": [
           16,
           1,
-          31
+          33
         ],
         "max": [
           30,
@@ -3254,7 +3344,7 @@ const SPECS=Object.freeze([
         "at": [
           22,
           1,
-          30
+          32
         ],
         "from": "spine-gallery",
         "to": "private-rest"
@@ -3309,7 +3399,7 @@ const SPECS=Object.freeze([
       },
       {
         "x": 21,
-        "z": 32,
+        "z": 34,
         "room": "private-rest",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
@@ -3370,9 +3460,15 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:023",
     "exteriorNotches": [
       [
-        20,
-        13,
+        22,
+        15,
         27,
+        26
+      ],
+      [
+        0,
+        22,
+        6,
         26
       ]
     ],
@@ -3526,7 +3622,7 @@ const SPECS=Object.freeze([
         "asset": "pack4:059"
       },
       {
-        "x": 5,
+        "x": 8,
         "z": 23,
         "room": "bedchamber",
         "asset": "pack5:082",
@@ -3579,11 +3675,11 @@ const SPECS=Object.freeze([
       [
         0,
         16,
-        12,
+        11,
         39
       ],
       [
-        31,
+        32,
         16,
         43,
         39
@@ -3610,9 +3706,9 @@ const SPECS=Object.freeze([
       ],
       [
         14,
-        27,
         29,
-        27
+        29,
+        29
       ]
     ],
     "entry": [
@@ -3670,7 +3766,7 @@ const SPECS=Object.freeze([
         "max": [
           30,
           4,
-          27
+          29
         ]
       },
       {
@@ -3678,7 +3774,7 @@ const SPECS=Object.freeze([
         "min": [
           14,
           1,
-          28
+          30
         ],
         "max": [
           30,
@@ -3719,7 +3815,7 @@ const SPECS=Object.freeze([
         "at": [
           21,
           1,
-          27
+          29
         ],
         "from": "spine-gallery",
         "to": "private-rest"
@@ -3774,7 +3870,7 @@ const SPECS=Object.freeze([
       },
       {
         "x": 20,
-        "z": 29,
+        "z": 31,
         "room": "private-rest",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
@@ -3835,9 +3931,15 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:025",
     "exteriorNotches": [
       [
-        8,
+        7,
         13,
-        19,
+        20,
+        26
+      ],
+      [
+        0,
+        18,
+        3,
         26
       ]
     ],
@@ -4054,8 +4156,14 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         12,
-        17,
-        23,
+        19,
+        25,
+        33
+      ],
+      [
+        29,
+        22,
+        34,
         33
       ]
     ],
@@ -4271,9 +4379,15 @@ const SPECS=Object.freeze([
     "roofAsset": "pack3:025",
     "exteriorNotches": [
       [
-        9,
+        11,
         12,
-        19,
+        18,
+        25
+      ],
+      [
+        22,
+        17,
+        28,
         25
       ]
     ],
@@ -4490,8 +4604,8 @@ const SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        17,
-        14,
+        18,
+        15,
         39
       ]
     ],
@@ -4510,9 +4624,9 @@ const SPECS=Object.freeze([
       ],
       [
         16,
-        29,
+        27,
         41,
-        29
+        27
       ]
     ],
     "entry": [
@@ -4557,7 +4671,7 @@ const SPECS=Object.freeze([
         "max": [
           42,
           4,
-          29
+          27
         ]
       },
       {
@@ -4565,7 +4679,7 @@ const SPECS=Object.freeze([
         "min": [
           16,
           1,
-          30
+          28
         ],
         "max": [
           42,
@@ -4597,7 +4711,7 @@ const SPECS=Object.freeze([
         "at": [
           39,
           1,
-          29
+          27
         ],
         "from": "rear-gallery",
         "to": "sleeping-suite"
@@ -4646,7 +4760,7 @@ const SPECS=Object.freeze([
       },
       {
         "x": 19,
-        "z": 31,
+        "z": 29,
         "room": "sleeping-suite",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
@@ -4700,13 +4814,19 @@ const SPECS=Object.freeze([
         20,
         32,
         41
+      ],
+      [
+        0,
+        27,
+        4,
+        41
       ]
     ],
     "segments": [
       [
-        23,
+        20,
         2,
-        23,
+        20,
         18
       ],
       [
@@ -4723,7 +4843,7 @@ const SPECS=Object.freeze([
       ]
     ],
     "entry": [
-      27,
+      24,
       1,
       "hearth-hall"
     ],
@@ -4736,7 +4856,7 @@ const SPECS=Object.freeze([
           2
         ],
         "max": [
-          23,
+          20,
           4,
           19
         ]
@@ -4744,7 +4864,7 @@ const SPECS=Object.freeze([
       {
         "id": "hearth-hall",
         "min": [
-          24,
+          21,
           1,
           2
         ],
@@ -4784,7 +4904,7 @@ const SPECS=Object.freeze([
     "doors": [
       {
         "at": [
-          23,
+          20,
           1,
           5
         ],
@@ -4840,7 +4960,7 @@ const SPECS=Object.freeze([
         "asset": "pack5:084"
       },
       {
-        "x": 27,
+        "x": 24,
         "z": 5,
         "room": "hearth-hall",
         "asset": "pack4:064"
