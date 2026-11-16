@@ -162,10 +162,20 @@ test('all eight source-authentic manual physical ABI descriptors exist, but no a
    if(!physical.has(ref)){
     const variants=manualFivePackVariants(ref);
     assert(variants.length>0,ref+' missing variant');
-    const selected=resolveManualFivePackAsset(ref,{numericId:variants[0].numericId,orientation:'north'});
-    assert(selected.visibleBoxes.length>0&&selected.selectionBoxes.length>0&&selected.occupiedOffsets.length>0);
-    assert.equal(selected.livePlaceable,false);
-    assert.equal(selected.saveWritten,false);
+    if(ref.startsWith('pack5:')){
+     // Genuine Pack 5 producer intentionally fails closed without an AUTHORED
+     // variant. Do not synthesize one simply to make tests green.
+     assert.throws(()=>resolveManualFivePackAsset(ref,{
+      numericId:variants[0].numericId,orientation:'north'
+     }),/explicit authored variant/);
+    }else{
+     const selected=resolveManualFivePackAsset(ref,{
+      numericId:variants[0].numericId,orientation:'north'
+     });
+     assert(selected.visibleBoxes.length>0&&selected.selectionBoxes.length>0&&selected.occupiedOffsets.length>0);
+     assert.equal(selected.livePlaceable,false);
+     assert.equal(selected.saveWritten,false);
+    }
     physical.set(ref,true);
    }
   }
