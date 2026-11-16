@@ -162,6 +162,26 @@ function build(s){
     put('bearing-pier',x,y,z,wood?M.beam:M.column);
   }
  }
+ // Ten independently located fourth-variant perimeter-roof weak returns.
+ // Each knee is a source-coordinate 3-cell rising brace, tying the edge
+ // roof underside into nearby cross-purlins at y-3. Not a span/load approval.
+ // These are design-specific defects discovered by real physical AABB sampling,
+ // not a relaxation of the bearing-witness rule or an unrelated global patch.
+ const ROOF_RETURN_KNEES={
+  'carpenter|temperate|large':[[38,15,37]],
+  'carpenter|snow|medium':[[40,15,20]],
+  'carpenter|enchanted-forest|small':[[25,15,29]],
+  'carpenter|mountain|small':[[35,15,17],[35,15,28]],
+  'stonemason|snow|small':[[26,15,29],[34,15,28]],
+  'stonemason|snow|medium':[[32,16,34]],
+  'stonemason|snow|large':[[37,15,40],[38,15,40]]
+ };
+ for(const [x,roofY,z] of ROOF_RETURN_KNEES[s.type+'|'+s.biome+'|'+s.size]||[]){
+  if(!roofed(x,z)||!has(x,roofY,z)||has(x,roofY-1,z))
+   throw Error(s.name+' invalid local roof-return bearing at '+key(x,roofY,z));
+  for(let dy=3;dy>=1;dy--)if(!has(x,roofY-dy,z))
+   put('roof-return-knee',x,roofY-dy,z,wood?M.beam:M.column);
+ }
  // Source working stock is physically present and outside all clearance bands.
  for(let z=northEnd+4;z<d-8;z+=s.stride){
   const x=5;
