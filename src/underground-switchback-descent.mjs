@@ -372,16 +372,19 @@ export function descentSurfaceSeam(world,origin=DESCENT_ORIGIN){
   const steps=descentEntranceApproach(origin);
   const opening=descentEntranceHandoff(origin).opening;
   const failures=[];
-  // The surface owner must clear the upper stair's protected legacy headroom.
-  // Include a 2-block player column through the threshold and every stair.
+  const reader=descentWorld(world,origin);
+  // Probe protected legacy cells against the untouched surface world, but
+  // probe deeper cells against the candidate's physical carving. Otherwise
+  // unmodified DEEPSTONE below -3 produces a false blocked-entrance result.
+  // descentWorld still gives saved player edits priority over candidate air.
   for(const p of steps){
     for(let y=p.feet;y<=p.feet+1;y++){
-      if(world.get(p.x,y,p.z)!==BLOCK.AIR)
-        failures.push({x:p.x,y,z:p.z,reason:'surface-headroom'});
+      const id=y>=LEGACY_WORLD_MIN_Y?world.get(p.x,y,p.z):reader.get(p.x,y,p.z);
+      if(id!==BLOCK.AIR)
+        failures.push({x:p.x,y,z:p.z,reason:y>=LEGACY_WORLD_MIN_Y?'surface-headroom':'candidate-headroom'});
     }
   }
   // An open shaft without a supported stair is not a safe cave entrance.
-  const reader=descentWorld(world,origin);
   for(const p of steps){
     if(reader.get(p.x,p.floor,p.z)===BLOCK.AIR)
       failures.push({x:p.x,y:p.floor,z:p.z,reason:'missing-support'});
