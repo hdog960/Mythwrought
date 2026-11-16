@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M2 first housing design milestone: 150/150 source-authored houses (171/450 1A buildings); Wave9 22 candidate houses, exact-head native and WebGL2 CI pending",
+  "milestone": "M3 hospitality wave1: ten taverns + ten inns source authored, 191/450 total 1A; M2 150/150 original house milestone preserved; exact-head CI pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 279,
-  "newDesignsAuthored": 141,
-  "totalLaneGeometryAuthored": 171,
+  "additionalDesignsRequired": 259,
+  "newDesignsAuthored": 161,
+  "totalLaneGeometryAuthored": 191,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,10 +53,10 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Exact-head 171-pool native regression, original 149 complete source JSON conservation, D4 and normalized 16x16 plan/silhouette acceptance; candidate-only until green",
-    "858 genuine Chromium WebGL2 143-source-ID cell-cube views and 582 genuine producer physical Pack1–5 visibleBox AABB views at 667x375,844x390,932x430",
-    "Remaining long-run 1A quotas: 150 additional houses to total 300 houses, 58 taverns to total 75, and 71 inns to total 75; first M2 150-house milestone source-authored but not creator-approved",
-    "Pack2 hinged door sweep/codec, Pack3 roof weather/load, Pack4 optical glazing, Pack5 saved occupancy and collision, physical iPhone and final art/creator approval not certified"
+    "Exact-head 191 complete source blueprint native CI, immutable 171-object inherited parity, strict D4 and <0.88 partition/<0.975 exterior IoU, reachable rooms and physical producer AABBs",
+    "978 genuine Chromium source-cell WebGL2 exterior/cutaway captures and 702 physical Pack1–5 source visibleBox AABB captures at 667x375,844x390,932x430",
+    "Builder 1A remaining eventual quota: 150 houses, 48 taverns and 61 inns; source M2 housing 150/150 technically green, not yet creator-approved or placed",
+    "Pack2 door swing/codec, Pack3 roof load/weather, Pack4 optical panes, Pack5 bed collisions/schema1 persistence, final art, hardware iPhone, central registration and world integration not certified"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -76,8 +76,8 @@
   "innCount": 1,
   "categoriesAuthored": {
     "house": 150,
-    "tavern": 17,
-    "inn": 4
+    "tavern": 27,
+    "inn": 14
   },
   "firstInn": {
     "id": "r1:inn:temperate:small:001",
@@ -336,5 +336,40 @@
       ]
     ],
     "productionApproved": false
+  },
+  "m3HospitalityWave1": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave1.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave1.test.mjs",
+    "protected171Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline171.json",
+    "newTaverns": 10,
+    "newInns": 10,
+    "newVoxelPlacements": 144733,
+    "trueRemovedOutdoorColumns": 10849,
+    "walkableRooms": 105,
+    "pack5TwoCellBedReservations": 43,
+    "strictNoD4": true,
+    "normalizedPlanThreshold": 0.88,
+    "normalizedExteriorThreshold": 0.975,
+    "sourceGalleryCandidates": 163,
+    "sourceCubeScreenshotTarget": 978,
+    "packVisibleAABBCandidateCount": 117,
+    "packAABBScreenshotTarget": 702,
+    "viewportSizes": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": "PENDING",
+    "creatorApproved": 0,
+    "worldIntegrated": 0
   }
 }
