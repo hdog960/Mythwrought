@@ -177,3 +177,23 @@ for(const seed of [179,1,2026,-77])test('physical authored cave volume has air A
   }
   assert.equal(JSON.stringify(world.save()),before);
 });
+
+test('two intermediate vaults remain connected to the four-band physical descent',()=>{
+  for(const seed of [179,1,2026,-77]){
+    const world=new VoxelWorld(seed),reader=descentWorld(world),route=descentRoute();
+    for(const spec of [{depth:-60,reach:30},{depth:-150,reach:35}]){
+      const p=route.find(q=>q.floor===spec.depth);
+      assert.ok(p,'missing intermediate anchor '+spec.depth);
+      const lx=p.x-192,lz=p.z-192;
+      const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+      for(let d=0;d<=spec.reach;d++){
+        const x=p.x+outward[0]*d,z=p.z+outward[1]*d;
+        assert.equal(reader.get(x,spec.depth,z),BLOCK.DEEPSTONE,
+          'missing connected vault floor '+spec.depth+'/'+d);
+        for(let h=1;h<=3;h++)assert.equal(reader.get(x,spec.depth+h,z),BLOCK.AIR,
+          'blocked connected vault throat '+spec.depth+'/'+d+'/'+h);
+      }
+    }
+    assert.equal(descentConnectivity(world).connected,true);
+  }
+});
