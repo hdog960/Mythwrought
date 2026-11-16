@@ -28,14 +28,14 @@ function connected(b){
  }
  return visited.size===walk.size;
 }
-test('M2i 109 original blueprint IDs, 15 byte-exact inherited stable sources and exact quota inventory',()=>{
+test('M2i 118 original blueprint IDs, 15 byte-exact inherited stable sources and exact quota inventory',()=>{
  const all=get1BCandidates(),old=getInheritedStables(),fresh=batch(),count=validateAllocation(all);
  assert.equal(old.length,15);assert.equal(fresh.length,9);
- assert.equal(all.length,109);assert.equal(count.authored,109);assert.equal(count.remaining,326);
- assert.equal(new Set(all.map(p=>p.id)).size,109);
- assert.equal(new Set(all.map(structuralFingerprint)).size,109);
+ assert.equal(all.length,118);assert.equal(count.authored,118);assert.equal(count.remaining,317);
+ assert.equal(new Set(all.map(p=>p.id)).size,118);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,118);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(c=>[c,all.filter(p=>p.category===c).length])),
- {'bathhouse':14,stable:28,'farm-barn':14,greenhouse:15,'fishing-lodge':12,'harbor-office':13,lighthouse:13});
+ {'bathhouse':14,stable:28,'farm-barn':15,greenhouse:15,'fishing-lodge':15,'harbor-office':15,lighthouse:15});
  for(const b of old)assert.equal(stableBlueprintJSON(all.find(p=>p.id===b.id)),stableBlueprintJSON(b));
  for(const c of Object.keys(QUOTAS))for(const biome of BIOMES)for(const size of SIZES)
   assert.ok(all.filter(b=>b.category===c&&b.biome===biome&&b.size===size).length<=QUOTAS[c]);
