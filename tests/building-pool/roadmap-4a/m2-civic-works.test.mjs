@@ -63,9 +63,9 @@ test('all 100 whole-volume source fingerprints are unique under 90-degree rotati
 });
 test('new region-specific civic halls and guild workshops are occupied 3D rooms with two-cell head clearance and navigable public circulation',()=>{
  const all=fresh();
- assert.equal(all.reduce((n,b)=>n+b.cells.length,0),51075);
- assert.equal(all.reduce((n,b)=>n+b.navigation.length,0),10777);
- assert.equal(all.reduce((n,b)=>n+b.spaces.length,0),38);
+ assert.equal(all.reduce((n,b)=>n+b.cells.length,0),51708);
+ assert.equal(all.reduce((n,b)=>n+b.navigation.length,0),10947);
+ assert.equal(all.reduce((n,b)=>n+b.spaces.length,0),40);
  for(const b of all){
   const v=validateBlueprint(b),cells=map(b);
   assert.equal(v.theoreticalOnly,true);
