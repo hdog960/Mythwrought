@@ -153,7 +153,7 @@ test('opt-in world view renders four physical regions without touching schema-1 
   assert.equal(createSurfaceBiomeWorldView(world),null);
   assert.equal(createSurfaceBiomeWorldView(world,{enabled:true,profileIsFresh:true}),null);
   const view=createSurfaceBiomeWorldView(world,{
-   enabled:true,profileIsFresh:true,isProtected:()=>false,maxCachedColumns:32
+   enabled:true,profileIsFresh:true,isProtected:()=>false,hasDurableEditIntent:()=>false,maxCachedColumns:32
   });
   assert.ok(view);
   assert.equal(typeof view.set,'undefined');
@@ -178,7 +178,7 @@ test('opt-in world view renders four physical regions without touching schema-1 
   assert.equal(JSON.stringify(restored.save()),before);
   world.set(0,terrainHeight(0,0,seed)+1,0,4);
   assert.equal(createSurfaceBiomeWorldView(world,{
-   enabled:true,profileIsFresh:true,isProtected:()=>false
+   enabled:true,profileIsFresh:true,isProtected:()=>false,hasDurableEditIntent:()=>false
   }),null,'edited world cannot be silently treated as a fresh profile');
  }
 });
@@ -186,7 +186,7 @@ test('opt-in world view renders four physical regions without touching schema-1 
 test('real chunk mesher consumes opted-in physical biome view',()=>{
  const world=new VoxelWorld(179);
  const view=createSurfaceBiomeWorldView(world,{
-  enabled:true,profileIsFresh:true,isProtected:()=>false,maxCachedColumns:512
+  enabled:true,profileIsFresh:true,isProtected:()=>false,hasDurableEditIntent:()=>false,maxCachedColumns:512
  });
  const cx=chunkCoord(512),cz=chunkCoord(0);
  const mesh=meshChunk(view,cx,cz);
@@ -224,7 +224,7 @@ test('cached terrain remains stable after edits while edited cells take preceden
  for(const seed of [179,7,2201]){
   const world=new VoxelWorld(seed);
   const view=createSurfaceBiomeWorldView(world,{
-   enabled:true,profileIsFresh:true,isProtected:()=>false,maxCachedColumns:32
+   enabled:true,profileIsFresh:true,isProtected:()=>false,hasDurableEditIntent:()=>false,maxCachedColumns:32
   });
   assert.ok(view);
   const r=SURFACE_BIOME_REGIONS[2],h=terrainHeight(r.x,r.z,seed);
@@ -247,7 +247,7 @@ test('cached terrain remains stable after edits while edited cells take preceden
   assert.equal(view.get(r.x,h+1,r.z),raised);
   // Creating a fresh view after any edit remains prohibited.
   assert.equal(createSurfaceBiomeWorldView(world,{
-   enabled:true,profileIsFresh:true,isProtected:()=>false
+   enabled:true,profileIsFresh:true,isProtected:()=>false,hasDurableEditIntent:()=>false
   }),null);
  }
 });
@@ -256,7 +256,7 @@ test('edits before first biome-column read and after cache eviction preserve ter
  for(const seed of [179,7,2201]){
   const world=new VoxelWorld(seed);
   const view=createSurfaceBiomeWorldView(world,{
-   enabled:true,profileIsFresh:true,isProtected:()=>false,maxCachedColumns:1
+   enabled:true,profileIsFresh:true,isProtected:()=>false,hasDurableEditIntent:()=>false,maxCachedColumns:1
   });
   assert.ok(view);
   const r=SURFACE_BIOME_REGIONS[2],h=terrainHeight(r.x,r.z,seed);
@@ -275,4 +275,25 @@ test('edits before first biome-column read and after cache eviction preserve ter
   assert.equal(view.get(r.x,h+1,r.z),raised);
   assert.equal(view.cachedColumns,1);
  }
+});
+
+
+test('durable edit intent prevents restored legacy blocks revealing biome overlay',()=>{
+ const world=new VoxelWorld(179),touched=new Set();
+ const r=SURFACE_BIOME_REGIONS[2],x=r.x,z=r.z,y=terrainHeight(x,z,179);
+ const opts={enabled:true,profileIsFresh:true,isProtected:()=>false,
+   hasDurableEditIntent:(cx,cy,cz)=>touched.has(cx+','+cy+','+cz)};
+ assert.equal(createSurfaceBiomeWorldView(world,{enabled:true,profileIsFresh:true,isProtected:()=>false}),null,
+   'missing durable history must fail closed');
+ const view=createSurfaceBiomeWorldView(world,opts);
+ assert.ok(view);
+ const original=world.get(x,y,z),biome=view.get(x,y,z);
+ assert.notEqual(biome,original);
+ touched.add(x+','+y+','+z);
+ assert.equal(world.set(x,y,z,4),true);
+ assert.equal(view.get(x,y,z),4);
+ assert.equal(world.set(x,y,z,original),true);
+ assert.equal(world.edits.has(x+','+y+','+z),false);
+ assert.equal(view.get(x,y,z),original,'reverted edit must remain authoritative');
+ assert.equal(view.get(x+1,y,z),view.get(x+1,y,z),'untouched neighboring terrain remains deterministic');
 });
