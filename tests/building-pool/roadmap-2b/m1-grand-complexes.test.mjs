@@ -145,6 +145,22 @@ test('grand performance stage and raised flytower have real supported positions,
   assert.equal(v.get(k(s.x,2,s.z))?.material,'pack1:008');
  }
 });
+test('all four large tower/trade families have source-authored continuous foundation-to-tall-roof bearing, not hovering props',()=>{
+ const supports=[
+  ['r2:jeweler:enchanted-forest:large:01',[[24,17],[24,31],[35,17],[35,31]],10],
+  ['r2:bookshop:mountain:large:01',[[4,3],[4,30],[34,3],[34,30]],10],
+  ['r2:temple:desert:large:02',[[3,3],[3,32],[37,3],[37,32]],10],
+  ['r2:butcher:snow:large:01',[[32,25]],12]
+ ];
+ for(const [id,points,top] of supports){
+  const b=byId.get(id),v=cells(b);
+  for(const [x,z] of points){
+   for(let y=0;y<=top;y++)
+    assert(v.has(k(x,y,z)),id+' hovering high-roof structure at '+k(x,y,z));
+   assert.equal(v.get(k(x,0,z))?.kind,'foundation',id+' lacks tower foundation');
+  }
+ }
+});
 test('desert sacred court has genuinely open lightwell, attached four towers, actual aisle and only symbolic altar steps',()=>{
  const b=byId.get('r2:temple:desert:large:02'),v=cells(b);
  for(const o of b.intentionallyOpenRoof)for(let x=o.x0;x<=o.x1;x++)
