@@ -231,3 +231,23 @@ test('async committed identity drift refuses rollback over a foreign block',asyn
  assert.equal(undos,0);
  assert.equal(f.sidecar.get(f.cells[0],4),0);
 });
+
+test('rollback reads revision exactly once per restored cell',async()=>{
+ const f=fixture(),versions=new Map(f.cells.map(c=>[c.join(','),0]));
+ const counts=new Map();
+ const bump=c=>versions.set(c.join(','),versions.get(c.join(','))+1);
+ await assert.rejects(f.run((c,i)=>{
+   f.ids.set(c.join(','),5);bump(c);return i!==0;
+ },{
+   readRevision:c=>{
+     const key=c.join(',');
+     counts.set(key,(counts.get(key)||0)+1);
+     return versions.get(key);
+   },
+   rollback:c=>{f.ids.set(c.join(','),4);bump(c);return true;}
+ }),/not acknowledged/);
+ // One preflight read, one pre-edit read, one rollback read.
+ assert.equal(counts.get(f.cells[0].join(',')),3);
+ assert.equal(f.readIdentity(f.cells[0]),4);
+ assert.equal(f.sidecar.get(f.cells[0],4),2);
+});
