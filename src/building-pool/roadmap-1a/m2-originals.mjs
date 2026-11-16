@@ -98,6 +98,10 @@ const DESIGNS=Object.freeze([
 function create(d){
  const wallTop=4,height=12,occupied=new Map(),reserved=new Set(),reservations=[];
  function place(x,y,z,role,asset,orientation='north',extra={}){
+  // Fail closed for literal concave exterior holes. An authored 1A notch is
+  // absent foundation, walls, partitions, furniture AND roof at every level.
+  if(d.exteriorNotches?.some(c=>x>=c[0]&&x<=c[2]&&z>=c[1]&&z<=c[3]))
+   throw Error(d.title+': authored source voxel inside physically absent concave void '+key(x,y,z)+' ('+role+')');
   const at=[x,y,z],k=key(x,y,z);
   if(x<0||x>=d.w||y<0||y>=height||z<0||z>=d.d||occupied.has(k)||reserved.has(k))
    throw Error(d.title+': overlapping/out-of-bounds coordinate '+k+' ('+role+')');

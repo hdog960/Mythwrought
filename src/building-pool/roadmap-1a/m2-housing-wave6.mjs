@@ -1480,7 +1480,7 @@ const SPECS=Object.freeze([
       [
         2,
         16,
-        13,
+        12,
         16
       ]
     ],
@@ -2719,7 +2719,7 @@ const SPECS=Object.freeze([
         12
       ],
       [
-        25,
+        26,
         12,
         36,
         12
@@ -2737,13 +2737,13 @@ const SPECS=Object.freeze([
         27
       ],
       [
-        25,
+        26,
         19,
         36,
         19
       ],
       [
-        25,
+        26,
         28,
         36,
         28

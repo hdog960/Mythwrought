@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M2 wave6: 15 new source-authored true L/U/twin-notch T houses; 129/450 candidates, exact-head CI pending",
+  "milestone": "M2 wave6 129 authored; 12 source ghost partition voxels repaired, latest exact-head CI pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -242,7 +242,7 @@
   "m2Wave6": {
     "source": "src/building-pool/roadmap-1a/m2-housing-wave6.mjs",
     "newHouses": 15,
-    "genuinePlacementCells": 54251,
+    "genuinePlacementCells": 54239,
     "genuineRemovedExteriorCells": 3069,
     "biomeSizeCoverage": "15/15 slots",
     "shapes": "L-left, L-right, U rear-open, two-notch T",
@@ -250,11 +250,12 @@
     "sourceBaselineHead": "bdad24c32a4fc8e3f13fd72da24db4869816c2e9",
     "maxNormalizedFloorplanIoU": 0.6,
     "maxNormalizedSilhouetteIoU": 0.968944099378882,
-    "exactHeadNode": "PENDING",
+    "exactHeadNode": "PENDING recheck after evidence-backed 12-voxel notch ghost repair",
     "cubeWebGL2Target": 606,
     "producerAABBWebGL2Target": 330,
     "approved": 0,
     "integrated": 0,
-    "placed": 0
+    "placed": 0,
+    "defectCorrections": "Snow Small rear partition x13 and Enchanted Forest Large three rear-east partitions x25 removed from authored physical VOID (12 source voxels)"
   }
 }

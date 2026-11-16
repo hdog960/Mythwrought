@@ -33,7 +33,7 @@ test('all protected 114 complete objects have original source-exact JSON includi
 });
 test('15 independent new original houses cover all biome × size slots with exact 54,251 placements and 3,069 absent external cells',()=>{
  assert.equal(fresh.length,15);assert.deepEqual(fresh.map(b=>b.id),M2_HOUSING_WAVE6_IDS);
- assert.equal(fresh.reduce((n,b)=>n+b.placements.length,0),54251);
+ assert.equal(fresh.reduce((n,b)=>n+b.placements.length,0),54239);
  assert.equal(fresh.reduce((n,b)=>n+b.architecturalIdentity.exteriorVoidFootprintCells,0),3069);
  assert.equal(new Set(fresh.map(b=>b.architecturalIdentity.plan)).size,15);
  for(const biome of ['temperate','desert','snow','enchanted-forest','mountain'])for(const size of ['small','medium','large'])
