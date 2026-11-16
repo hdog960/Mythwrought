@@ -46,8 +46,8 @@ test('six new genuine regional authoring slots, 44 source-validated identities a
  assert.equal(manifest.counts.remaining,263);
  assert.equal(manifest.counts.creatorAccepted,0);
  assert.equal(manifest.counts.integratedBuildings,0);
- assert.equal(manifest.categories.find(x=>x.type==='civic-hall').remaining,53);
- assert.equal(manifest.categories.find(x=>x.type==='guildhall').remaining,53);
+ assert.equal(manifest.categories.find(x=>x.type==='civic-hall').remaining,49);
+ assert.equal(manifest.categories.find(x=>x.type==='guildhall').remaining,49);
 });
 test('all 44 original architectural signatures remain distinct under full D4 reflections, rotations and translation',()=>{
  const designs=[...old(),...fresh()];
