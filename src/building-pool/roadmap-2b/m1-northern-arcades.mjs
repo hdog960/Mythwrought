@@ -349,8 +349,8 @@ const DESIGNS=[
    ],
    [
     "secured accounts",
-    18,
-    33
+    20,
+    32
    ]
   ],
   "features": [
@@ -682,8 +682,8 @@ const DESIGNS=[
    ],
    [
     "rear ledger",
-    14,
-    27
+    15,
+    28
    ]
   ],
   "features": [
@@ -1139,7 +1139,7 @@ const DESIGNS=[
    [
     "x",
     20,
-    21,
+    22,
     26,
     [
      24
@@ -1362,8 +1362,8 @@ const DESIGNS=[
    ],
    [
     "west archive",
-    5,
-    20
+    6,
+    19
    ],
    [
     "rear bookbinding",
@@ -1372,8 +1372,8 @@ const DESIGNS=[
    ],
    [
     "east winter reader",
-    24,
-    21
+    25,
+    22
    ]
   ],
   "features": [
