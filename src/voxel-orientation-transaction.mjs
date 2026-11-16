@@ -25,7 +25,7 @@ export async function commitOrientedEdit({cell, sidecar, readIdentity, edit, rol
   // Optional opaque host revision/fingerprint detects same-ID geometry changes.
   // The reader must return a stable primitive; no shape registry is assumed.
   const initialState = readState ? await readState(...key) : undefined;
-  if (readState && !['string','number','boolean','bigint'].includes(typeof initialState))
+  if (readState && (!['string','number','boolean','bigint'].includes(typeof initialState) || (typeof initialState === 'number' && !Number.isFinite(initialState))))
     throw new TypeError('Invalid initial state fingerprint');
   let result;
   try {
@@ -43,7 +43,7 @@ export async function commitOrientedEdit({cell, sidecar, readIdentity, edit, rol
     const after = await readIdentity(...key);
     if (!Number.isSafeInteger(after) || after < 0 || after >= 255)
       throw new Error('Committed edit has invalid world identity');
-    // A committed edit must invalidate the prior rotation, even if ID is unchanged.
+    // Reject unreadable or non-finite post-edit fingerprints before committing.\n    // A malformed shape state must never be acknowledged as a valid edit.\n    if (readState) {\n      const committedState = await readState(...key);\n      if (!['string','number','boolean','bigint'].includes(typeof committedState) ||\n          (typeof committedState === 'number' && !Number.isFinite(committedState)))\n        throw new Error('Committed edit has invalid shape state');\n    }\n    // A committed edit must invalidate the prior rotation, even if ID is unchanged.
     // This adapter requires exclusive per-cell edit ownership while awaiting.
     sidecar.invalidateEdit(key);
     return true;
