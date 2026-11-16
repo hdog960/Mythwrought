@@ -6,7 +6,7 @@ import {auditM4MiningSecondPhysicalFit} from '../../../src/building-pool/roadmap
 import {createLegacyBlacksmithPool} from '../../../src/building-pool/roadmap-3a/legacy-blacksmiths.mjs';
 import {geometryFingerprint} from '../../../src/building-pool/roadmap-3a/legacy-validation.mjs';
 
-test('all 15 M4 second-variant five-zone carpentry workshops use real Pack AABBs and typed support, reservation, crossing/collision diagnostics',()=>{
+test('all 15 M4 original second-variant five-zone mining pitheads use real Pack AABBs and typed support, reservation, crossing/collision diagnostics',()=>{
  const before=createLegacyBlacksmithPool().map(b=>[b.id,geometryFingerprint(b)]);
  const r=auditM4MiningSecondPhysicalFit();
  assert.equal(r.sampledModels,15);
@@ -41,10 +41,10 @@ test('all 15 M4 second-variant five-zone carpentry workshops use real Pack AABBs
   }
  }
  assert.deepEqual(createLegacyBlacksmithPool().map(b=>[b.id,geometryFingerprint(b)]),before);
- const out=join(process.cwd(),'artifacts/building-roadmap-3a-m3-second');
+ const out=join(process.cwd(),'artifacts/building-roadmap-3a-m4-second');
  mkdirSync(out,{recursive:true});
- writeFileSync(join(out,'M4_CARPENTER_FIFTH_PHYSICAL_AABB_REPORT.json'),JSON.stringify(r,null,2)+'\n');
- console.log('Builder 3A M4 second craft producer physical AABB report: '+r.sampledModels+
+ writeFileSync(join(out,'M4_MINING_SECOND_PHYSICAL_AABB_REPORT.json'),JSON.stringify(r,null,2)+'\n');
+ console.log('Builder 3A M4 mining second producer physical AABB report: '+r.sampledModels+
   ' source buildings, roof samples '+r.roofBearingSamples+
   ', lacking source bearing witnesses '+r.roofBearingWitnessAbsent+
   ', true fixture collisions '+r.physicalFixtureAABBIntersections+
