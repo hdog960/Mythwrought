@@ -63,7 +63,9 @@ try{
       await page.evaluate(y=>{
         const t=window.__mythwroughtTest;
         t.placeFixture(16,y,0,0);t.placeFixture(17,y,0,0);
-        t.aimAt(17,y,0);
+        // Look past the adjacent empty cell: leaf stays on screen but the
+        // gold target outline cannot contaminate the source-versus-empty A/B.
+        t.aimAt(17,y,1);
       },fixtureY);
       await page.waitForTimeout(200);
       const empty=PNG.sync.read(await page.screenshot({
