@@ -264,7 +264,8 @@ test('edits before first biome-column read and after cache eviction preserve ter
   assert.equal(world.set(r.x,h,r.z,4),true);
   assert.equal(view.get(r.x,h,r.z),4);
   const neighborX=r.x+1,neighborH=terrainHeight(neighborX,r.z,seed);
-  assert.equal(view.get(neighborX,neighborH,r.z),r.surface);
+  const neighborTop=Math.max(neighborH,surfaceBiomeHeight(neighborX,r.z,seed));
+  assert.equal(view.get(neighborX,neighborTop,r.z),r.surface);
   // Evict the first column, then revisit it: edits still win and
   // surrounding untouched raised layers must regenerate identically.
   const raised=view.get(r.x,h+1,r.z);
