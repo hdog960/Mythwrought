@@ -100,9 +100,9 @@ test('eight genuinely distinct original M2 variant-2 source plans preserve all 5
  assert.ok(next.every(b=>b.variant===2&&!b.activated&&b.status==='theoretical'));
 });
 test('variant-2 objects have exact voxel-count signatures, nonrectangular truly authored footprints and roof-bay supports',()=>{
- const expected=[3501,1808,3479,6363,2387,4633,7349,7726];
+ const expected=[4237,1808,3885,6593,2387,4633,8367,8735];
  assert.deepEqual(next.map(b=>b.architecture.occupiedCoordinates),expected);
- assert.equal(expected.reduce((a,b)=>a+b,0),37246);
+ assert.equal(expected.reduce((a,b)=>a+b,0),40645);
  assert.equal(new Set(next.map(b=>b.architecture.kind)).size,8);
  for(const b of next){
   const stat=validateBlueprint(b,ASSET_CATALOG),map=voxelMap(b);
@@ -174,7 +174,7 @@ test('48 native source geometry, exterior/cutaway voxel mesh and phone-landscape
 test('read-only physical ABI handoff uses the actual integrated manual five-pack and biome registry but certifies no building placement',()=>{
  const report=reviewVariant2ExpansionPhysicalDependencies();
  assert.equal(report.authored,8);
- assert.equal(report.occupiedConceptualPositions,37246);
+ assert.equal(report.occupiedConceptualPositions,40645);
  assert.equal(report.families.families,96);
  assert.equal(report.families.numericVariants,106);
  assert.equal(report.readOnly,true);

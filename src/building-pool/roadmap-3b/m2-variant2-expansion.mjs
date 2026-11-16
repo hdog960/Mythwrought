@@ -11,109 +11,1348 @@ const room=(id,kind,bounds,accessNode)=>({id,kind,bounds,accessNode});
 const item=(name,x,y,z,assetRef,unresolvedDependency=null)=>({name,position:[x,y,z],assetRef,unresolvedDependency});
 const key=(x,y,z)=>x+','+y+','+z,flat=(x,z)=>x+','+z;
 const plans=[
-{
- type:'lumberyard',biome:'temperate',size:'medium',w:37,d:35,h:30,
- aisle:17,westX:11,westZ:16,eastX:28,eastZ:26,midZ:13,
- title:'riverbend boatwright timber depot with western long gable, two separated asymmetric dock cranes and sheltered unloading arcade',
- yard:'riverbend twin-dock turntable',west:'long riverboat timber loft',east:'cross-channel exported beam arcade',
- mask:[[15,21,0,34],[2,15,5,22],[23,34,3,16],[24,34,24,33],[10,30,31,34]],
- roofs:[{name:'boatwright-deep-gable',r:[3,13,6,20],top:15,shape:'gable',cover:'pack3:023',post:'pack2:022'},
-  {name:'north-wharf-terrace',r:[24,33,4,15],top:12,shape:'terrace',cover:'pack3:025',post:'pack1:010'},
-  {name:'sloping-dry-freight',r:[25,33,25,32],top:11,shape:'slope',cover:'pack3:023',post:'pack2:022'}],
- cargo:[['keel-lumber-racks',[5,10,2,4,8,11],'builtin:wood'],['port-authority-crates',[26,31,2,3,6,9],'pack4:057'],['river-cargo-pad',[26,32,2,2,28,30],'pack1:007']],
- details:[[4,2,7,'timber-drying-bay'],[32,2,30,'quay-head-bollard']],
- floor:'pack2:013',wall:'pack2:015',roofWallHeight:7,
- dependency:'No boats, navigable river, working cranes or harvestable logs; orientation and physical family multi-voxel fit pending'
-},{
- type:'lumberyard',biome:'desert',size:'small',w:27,d:26,h:26,
- aisle:12,westX:8,westZ:12,eastX:21,eastZ:20,midZ:10,
- title:'small adobe sun-log kiln with open U-court reed portico and independent caravan camel-feed vault',
- yard:'reed-shaded caravan log-airdry court',west:'sandstone board-rack alcove',east:'camel-cart export annex',
- mask:[[10,16,0,25],[1,10,3,15],[19,25,8,21],[7,22,22,25]],
- roofs:[{name:'earth-arched-log-alcove',r:[2,9,4,14],top:13,shape:'flat',cover:'pack1:007',post:'pack1:010'},
-  {name:'reed-timber-eave',r:[20,24,9,20],top:11,shape:'saw',cover:'pack3:025',post:'pack1:010'}],
- cargo:[['sun-bleached-plank-bundles',[3,6,2,3,5,8],'builtin:wood'],['caravan-woven-crates',[21,23,2,4,11,14],'pack4:057'],['sandstone-loading-ramp',[18,22,2,2,23,24],'pack1:007']],
- details:[[3,2,12,'sunshade-column'],[24,2,18,'camel-bollard']],
- floor:'pack1:007',wall:'pack1:002',roofWallHeight:6,
- dependency:'biome130:006 building materials still lack approved per-cell shape/rotation; camel carts and timber drying are nonfunctional'
-},{
- type:'lumberyard',biome:'enchanted-forest',size:'medium',w:39,d:37,h:35,
- aisle:18,westX:12,westZ:17,eastX:29,eastZ:28,midZ:12,
- title:'bioluminescent grove saw-court with unequal trellis tunnel and twin detached root-preservation sheds',
- yard:'moon-root timber sorting spine',west:'luminous arboreal timber vault',east:'twin mycelium board depositories',
- mask:[[16,23,0,36],[2,16,3,25],[26,36,5,17],[27,36,25,34],[10,32,32,36]],
- roofs:[{name:'livingwood-long-vault',r:[3,14,4,22],top:16,shape:'cross',cover:'pack3:023',post:'pack2:022'},
-  {name:'north-trellis',r:[27,35,6,15],top:13,shape:'saw',cover:'pack3:023',post:'pack2:022'},
-  {name:'southern-sporewood-mews',r:[28,35,26,33],top:15,shape:'gable',cover:'pack3:025',post:'pack1:010'}],
- cargo:[['wood-hearts-in-crates',[5,10,2,4,7,11],'pack4:057'],['small-luminous-logs',[29,33,2,3,7,10],'builtin:wood'],['mycelium-drying-plinth',[29,34,2,2,28,31],'pack2:013']],
- details:[[4,2,18,'grove-support-column'],[34,2,31,'moonshade-fastener']],
- floor:'pack2:013',wall:'pack2:015',roofWallHeight:5,
- dependency:'biome130:096 livingwood rib unregistered; no growth simulation, magic saw, harvestable trees or approved structural mounting'
-},{
- type:'lumberyard',biome:'mountain',size:'large',w:49,d:44,h:38,
- aisle:24,westX:16,westZ:20,eastX:38,eastZ:36,midZ:17,
- title:'split moraine-terrace log port with high retaining wall, three tier cliff-shelf sheds and load-bearing stone switching deck',
- yard:'freight cliff-switching groove',west:'granite-protected export larder',east:'three-tier cliffside log platforms',
- mask:[[20,28,0,43],[2,20,4,31],[31,46,5,19],[33,46,29,41],[12,38,39,43]],
- roofs:[{name:'retaining-deep-gallery',r:[3,17,5,28],top:19,shape:'terrace',cover:'pack3:025',post:'pack1:010'},
-  {name:'high-cliff-rail-cover',r:[32,45,6,18],top:15,shape:'slope',cover:'pack3:025',post:'pack1:010'},
-  {name:'low-log-crane-shed',r:[34,45,31,39],top:13,shape:'saw',cover:'pack3:025',post:'pack1:010'}],
- cargo:[['covered-ironwood-racks',[4,12,2,4,8,12],'builtin:wood'],['stone-quarry-export-crates',[34,42,2,3,8,12],'pack4:057'],['ridge-transfer-pad',[35,42,2,2,34,37],'pack1:007']],
- details:[[4,2,20,'quarry-cliff-anchor'],[44,2,34,'stone-rail-buttress']],
- floor:'pack1:007',wall:'pack1:002',roofWallHeight:10,
- dependency:'biome130:098 mountain cliff anchors unregistered; crane mechanics, cliff-terrain attachment and load proof not implemented'
-},{
- type:'mill',biome:'temperate',size:'small',w:31,d:29,h:29,
- aisle:14,westX:9,westZ:13,eastX:24,eastZ:23,midZ:11,
- title:'separated one-stone seasonal watergrain mill with low river sluice lane and sloped wheelhouse cart annex',
- yard:'sluice-fed stone courtyard',west:'compact dry-grain vault',east:'separate river-side headrace cellar',
- mask:[[12,18,0,28],[2,12,4,15],[21,28,9,25],[7,24,25,28]],
- roofs:[{name:'grain-archive-gable',r:[3,11,5,14],top:14,shape:'gable',cover:'pack3:023',post:'pack2:022'},
-  {name:'wheel-cistern-lean',r:[22,27,10,24],top:12,shape:'slope',cover:'pack3:025',post:'pack1:010'}],
- cargo:[['millstones-and-bins',[4,8,2,4,6,9],'pack4:057'],['headrace-stone-coupler',[23,26,2,3,12,15],'pack1:010'],['dry-flour-packing-floor',[21,25,2,2,25,26],'pack1:007']],
- details:[[3,2,12,'grindstone-side-pier'],[27,2,20,'sluice-conduit-stand']],
- floor:'pack2:013',wall:'pack2:015',roofWallHeight:8,
- dependency:'No actual water current, grain processing or wheel rotation; no physical multi-cell family collision approved'
-},{
- type:'mill',biome:'snow',size:'medium',w:40,d:38,h:34,
- aisle:19,westX:12,westZ:16,eastX:31,eastZ:29,midZ:15,
- title:'triple-vault glacial grain mill with snowbank baffle, central thermal millstone route and frost shaft tower',
- yard:'protected icegrain milling spine',west:'heated-by-concept grain stores',east:'enclosed frost-wind drive and cold-safe quern',
- mask:[[16,24,0,37],[2,16,4,25],[27,37,2,15],[28,37,23,35],[10,31,34,37]],
- roofs:[{name:'snow-granary-crosscover',r:[3,14,5,23],top:17,shape:'cross',cover:'pack3:025',post:'pack1:010'},
-  {name:'frostshaft-high-gable',r:[28,36,3,14],top:16,shape:'gable',cover:'pack3:025',post:'pack2:022'},
-  {name:'thermal-millstone-terrace',r:[29,36,24,34],top:14,shape:'terrace',cover:'pack3:025',post:'pack1:010'}],
- cargo:[['winter-grain-storage',[4,11,2,4,7,10],'pack4:057'],['insulated-axle-stone',[30,34,2,5,5,9],'pack1:010'],['snow-grinding-dais',[30,34,2,2,26,29],'pack1:007']],
- details:[[3,2,12,'snowbaffle-outcrop'],[35,2,29,'frost-bearing-clamp']],
- floor:'pack1:007',wall:'pack1:002',roofWallHeight:9,
- dependency:'biome130:094 insulated cores unregistered; thermal simulations and active grinding/water flow not installed'
-},{
- type:'mill',biome:'enchanted-forest',size:'large',w:52,d:47,h:43,
- aisle:24,westX:17,westZ:20,eastX:40,eastZ:36,midZ:22,
- title:'moonwater mill amphitheater with deep grain nave, raised rune channel workhouse and distinct low axle cloister',
- yard:'moonwater central transfer meadow',west:'towering mythgrain mill nave',east:'independent axis and rune-drive cloisters',
- mask:[[20,29,0,46],[3,20,3,32],[33,49,5,22],[34,49,31,43],[12,41,42,46]],
- roofs:[{name:'deep-luminous-granary',r:[4,18,4,29],top:19,shape:'gable',cover:'pack3:023',post:'pack2:022'},
-  {name:'north-rune-gallery',r:[34,48,6,21],top:21,shape:'cross',cover:'pack3:025',post:'pack1:010'},
-  {name:'southern-moonstone-cistern',r:[35,48,32,42],top:16,shape:'saw',cover:'pack3:023',post:'pack2:022'}],
- cargo:[['moonseed-grain-lockers',[6,14,2,4,7,13],'pack4:057'],['upper-rune-bearings',[36,43,2,5,8,14],'pack1:010'],['lit-stone-grind-dais',[36,42,2,2,35,40],'pack1:007']],
- details:[[5,2,21,'mystic-woodstone-crossrib'],[46,2,39,'runic-wheel-base']],
- floor:'pack2:013',wall:'pack2:015',roofWallHeight:10,
- dependency:'biome130:096 unregistered livingwood cores; lunar mills, water current and rune power are future-only'
-},{
- type:'mill',biome:'mountain',size:'large',w:54,d:47,h:44,
- aisle:25,westX:16,westZ:18,eastX:42,eastZ:37,midZ:19,
- title:'great cliff-headwater grain foundry with deep left milling nave and two individually covered isolated turbine chambers',
- yard:'triple-terrain mountain switchback',west:'terraced highland grain abbey',east:'double high-headrace machinery rooms',
- mask:[[22,30,0,46],[3,22,6,28],[35,51,3,19],[35,51,30,44],[12,45,42,46]],
- roofs:[{name:'mountain-grain-cloister',r:[4,20,7,25],top:21,shape:'terrace',cover:'pack3:025',post:'pack1:010'},
-  {name:'high-headrace-stone-roof',r:[36,50,4,18],top:19,shape:'slope',cover:'pack3:025',post:'pack1:010'},
-  {name:'lower-cascade-mill-vault',r:[36,50,31,43],top:18,shape:'gable',cover:'pack3:025',post:'pack1:010'}],
- cargo:[['highland-grain-vaults',[6,13,2,5,9,14],'pack4:057'],['stoneheadrace-axle-base',[38,45,2,5,7,11],'pack1:010'],['south-quern-stonework',[38,45,2,3,34,38],'pack1:007']],
- details:[[4,2,13,'cliff-face-anchor'],[48,2,37,'highland-grinder-stanchion']],
- floor:'pack1:007',wall:'pack1:002',roofWallHeight:12,
- dependency:'biome130:098 mountain anchoring not registered; physical cliff support, headrace and wheel rotation not available'
-}
+ {
+  "type": "lumberyard",
+  "biome": "temperate",
+  "size": "medium",
+  "w": 37,
+  "d": 35,
+  "h": 30,
+  "aisle": 17,
+  "westX": 11,
+  "westZ": 16,
+  "eastX": 28,
+  "eastZ": 26,
+  "midZ": 13,
+  "title": "boatyard with western transverse vaulted slipway, northwest service store, two distinct wharf docks",
+  "yard": "riverbend twin-dock turntable",
+  "west": "long riverboat timber loft",
+  "east": "cross-channel exported beam arcade",
+  "mask": [
+   [
+    15,
+    21,
+    0,
+    34
+   ],
+   [
+    2,
+    15,
+    5,
+    22
+   ],
+   [
+    23,
+    34,
+    3,
+    16
+   ],
+   [
+    24,
+    34,
+    24,
+    33
+   ],
+   [
+    10,
+    30,
+    31,
+    34
+   ],
+   [
+    0,
+    9,
+    20,
+    32
+   ],
+   [
+    0,
+    5,
+    3,
+    18
+   ]
+  ],
+  "roofs": [
+   {
+    "name": "boatwright-deep-gable",
+    "r": [
+     3,
+     13,
+     6,
+     20
+    ],
+    "top": 15,
+    "shape": "gable",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   },
+   {
+    "name": "north-wharf-terrace",
+    "r": [
+     24,
+     33,
+     4,
+     15
+    ],
+    "top": 12,
+    "shape": "terrace",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   },
+   {
+    "name": "sloping-dry-freight",
+    "r": [
+     25,
+     33,
+     25,
+     32
+    ],
+    "top": 11,
+    "shape": "slope",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   },
+   {
+    "name": "west-slipway-portico",
+    "r": [
+     1,
+     8,
+     23,
+     30
+    ],
+    "top": 11,
+    "shape": "lean",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   },
+   {
+    "name": "northwest-boat-frame-shelter",
+    "r": [
+     1,
+     4,
+     8,
+     16
+    ],
+    "top": 12,
+    "shape": "slope",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   }
+  ],
+  "cargo": [
+   [
+    "keel-lumber-racks",
+    [
+     5,
+     10,
+     2,
+     4,
+     8,
+     11
+    ],
+    "builtin:wood"
+   ],
+   [
+    "port-authority-crates",
+    [
+     26,
+     31,
+     2,
+     3,
+     6,
+     9
+    ],
+    "pack4:057"
+   ],
+   [
+    "river-cargo-pad",
+    [
+     26,
+     32,
+     2,
+     2,
+     28,
+     30
+    ],
+    "pack1:007"
+   ],
+   [
+    "boat-pier-side-loading",
+    [
+     2,
+     6,
+     2,
+     3,
+     25,
+     28
+    ],
+    "pack4:057"
+   ],
+   [
+    "northwest-hull-framing",
+    [
+     2,
+     4,
+     2,
+     3,
+     9,
+     12
+    ],
+    "builtin:wood"
+   ]
+  ],
+  "details": [
+   [
+    4,
+    2,
+    7,
+    "timber-drying-bay"
+   ],
+   [
+    32,
+    2,
+    30,
+    "quay-head-bollard"
+   ]
+  ],
+  "floor": "pack2:013",
+  "wall": "pack2:015",
+  "roofWallHeight": 7,
+  "dependency": "No boats, navigable river, working cranes or harvestable logs; orientation and physical family multi-voxel fit pending"
+ },
+ {
+  "type": "lumberyard",
+  "biome": "desert",
+  "size": "small",
+  "w": 27,
+  "d": 26,
+  "h": 26,
+  "aisle": 12,
+  "westX": 8,
+  "westZ": 12,
+  "eastX": 21,
+  "eastZ": 20,
+  "midZ": 10,
+  "title": "small adobe sun-log kiln with open U-court reed portico and independent caravan camel-feed vault",
+  "yard": "reed-shaded caravan log-airdry court",
+  "west": "sandstone board-rack alcove",
+  "east": "camel-cart export annex",
+  "mask": [
+   [
+    10,
+    16,
+    0,
+    25
+   ],
+   [
+    1,
+    10,
+    3,
+    15
+   ],
+   [
+    19,
+    25,
+    8,
+    21
+   ],
+   [
+    7,
+    22,
+    22,
+    25
+   ]
+  ],
+  "roofs": [
+   {
+    "name": "earth-arched-log-alcove",
+    "r": [
+     2,
+     9,
+     4,
+     14
+    ],
+    "top": 13,
+    "shape": "flat",
+    "cover": "pack1:007",
+    "post": "pack1:010"
+   },
+   {
+    "name": "reed-timber-eave",
+    "r": [
+     20,
+     24,
+     9,
+     20
+    ],
+    "top": 11,
+    "shape": "saw",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   }
+  ],
+  "cargo": [
+   [
+    "sun-bleached-plank-bundles",
+    [
+     3,
+     6,
+     2,
+     3,
+     5,
+     8
+    ],
+    "builtin:wood"
+   ],
+   [
+    "caravan-woven-crates",
+    [
+     21,
+     23,
+     2,
+     4,
+     11,
+     14
+    ],
+    "pack4:057"
+   ],
+   [
+    "sandstone-loading-ramp",
+    [
+     18,
+     22,
+     2,
+     2,
+     23,
+     24
+    ],
+    "pack1:007"
+   ]
+  ],
+  "details": [
+   [
+    3,
+    2,
+    12,
+    "sunshade-column"
+   ],
+   [
+    24,
+    2,
+    18,
+    "camel-bollard"
+   ]
+  ],
+  "floor": "pack1:007",
+  "wall": "pack1:002",
+  "roofWallHeight": 6,
+  "dependency": "biome130:006 building materials still lack approved per-cell shape/rotation; camel carts and timber drying are nonfunctional"
+ },
+ {
+  "type": "lumberyard",
+  "biome": "enchanted-forest",
+  "size": "medium",
+  "w": 39,
+  "d": 37,
+  "h": 35,
+  "aisle": 18,
+  "westX": 12,
+  "westZ": 17,
+  "eastX": 29,
+  "eastZ": 28,
+  "midZ": 12,
+  "title": "irregular sporewood crescent landing and split trellis court with west fungal orchard",
+  "yard": "moon-root timber sorting spine",
+  "west": "luminous arboreal timber vault",
+  "east": "twin mycelium board depositories",
+  "mask": [
+   [
+    16,
+    23,
+    0,
+    36
+   ],
+   [
+    2,
+    16,
+    3,
+    25
+   ],
+   [
+    26,
+    36,
+    5,
+    17
+   ],
+   [
+    27,
+    36,
+    25,
+    34
+   ],
+   [
+    10,
+    32,
+    32,
+    36
+   ],
+   [
+    0,
+    9,
+    24,
+    34
+   ]
+  ],
+  "roofs": [
+   {
+    "name": "livingwood-long-vault",
+    "r": [
+     3,
+     14,
+     4,
+     22
+    ],
+    "top": 16,
+    "shape": "cross",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   },
+   {
+    "name": "north-trellis",
+    "r": [
+     27,
+     35,
+     6,
+     15
+    ],
+    "top": 13,
+    "shape": "saw",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   },
+   {
+    "name": "southern-sporewood-mews",
+    "r": [
+     28,
+     35,
+     26,
+     33
+    ],
+    "top": 15,
+    "shape": "gable",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   },
+   {
+    "name": "mycelium-west-crescent",
+    "r": [
+     1,
+     8,
+     26,
+     32
+    ],
+    "top": 11,
+    "shape": "saw",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   }
+  ],
+  "cargo": [
+   [
+    "wood-hearts-in-crates",
+    [
+     5,
+     10,
+     2,
+     4,
+     7,
+     11
+    ],
+    "pack4:057"
+   ],
+   [
+    "small-luminous-logs",
+    [
+     29,
+     33,
+     2,
+     3,
+     7,
+     10
+    ],
+    "builtin:wood"
+   ],
+   [
+    "mycelium-drying-plinth",
+    [
+     29,
+     34,
+     2,
+     2,
+     28,
+     31
+    ],
+    "pack2:013"
+   ],
+   [
+    "west-root-pallets",
+    [
+     3,
+     7,
+     2,
+     3,
+     28,
+     30
+    ],
+    "pack4:057"
+   ]
+  ],
+  "details": [
+   [
+    4,
+    2,
+    18,
+    "grove-support-column"
+   ],
+   [
+    34,
+    2,
+    31,
+    "moonshade-fastener"
+   ]
+  ],
+  "floor": "pack2:013",
+  "wall": "pack2:015",
+  "roofWallHeight": 5,
+  "dependency": "biome130:096 livingwood rib unregistered; no growth simulation, magic saw, harvestable trees or approved structural mounting"
+ },
+ {
+  "type": "lumberyard",
+  "biome": "mountain",
+  "size": "large",
+  "w": 49,
+  "d": 44,
+  "h": 38,
+  "aisle": 24,
+  "westX": 16,
+  "westZ": 20,
+  "eastX": 38,
+  "eastZ": 36,
+  "midZ": 17,
+  "title": "broken-northwest-terrace cliff quarry and tapered southeast cargo port with two independent saw wings",
+  "yard": "freight cliff-switching groove",
+  "west": "granite-protected export larder",
+  "east": "three-tier cliffside log platforms",
+  "mask": [
+   [
+    20,
+    28,
+    0,
+    43
+   ],
+   [
+    2,
+    20,
+    4,
+    31
+   ],
+   [
+    31,
+    46,
+    5,
+    19
+   ],
+   [
+    34,
+    46,
+    31,
+    41
+   ],
+   [
+    12,
+    38,
+    39,
+    43
+   ],
+   [
+    0,
+    19,
+    0,
+    4
+   ],
+   [
+    0,
+    4,
+    4,
+    20
+   ]
+  ],
+  "roofs": [
+   {
+    "name": "retaining-deep-gallery",
+    "r": [
+     3,
+     17,
+     5,
+     28
+    ],
+    "top": 19,
+    "shape": "terrace",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   },
+   {
+    "name": "high-cliff-rail-cover",
+    "r": [
+     32,
+     45,
+     6,
+     18
+    ],
+    "top": 15,
+    "shape": "slope",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   },
+   {
+    "name": "low-log-crane-shed",
+    "r": [
+     34,
+     45,
+     33,
+     39
+    ],
+    "top": 13,
+    "shape": "saw",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   },
+   {
+    "name": "northwest-rock-switch",
+    "r": [
+     1,
+     7,
+     1,
+     3
+    ],
+    "top": 12,
+    "shape": "flat",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   }
+  ],
+  "cargo": [
+   [
+    "covered-ironwood-racks",
+    [
+     4,
+     12,
+     2,
+     4,
+     8,
+     12
+    ],
+    "builtin:wood"
+   ],
+   [
+    "stone-quarry-export-crates",
+    [
+     34,
+     42,
+     2,
+     3,
+     8,
+     12
+    ],
+    "pack4:057"
+   ],
+   [
+    "ridge-transfer-pad",
+    [
+     35,
+     42,
+     2,
+     2,
+     34,
+     37
+    ],
+    "pack1:007"
+   ],
+   [
+    "quarry-ridge-log-rack",
+    [
+     2,
+     7,
+     2,
+     3,
+     1,
+     3
+    ],
+    "builtin:wood"
+   ]
+  ],
+  "details": [
+   [
+    4,
+    2,
+    20,
+    "quarry-cliff-anchor"
+   ],
+   [
+    44,
+    2,
+    34,
+    "stone-rail-buttress"
+   ]
+  ],
+  "floor": "pack1:007",
+  "wall": "pack1:002",
+  "roofWallHeight": 10,
+  "dependency": "biome130:098 mountain cliff anchors unregistered; crane mechanics, cliff-terrain attachment and load proof not implemented"
+ },
+ {
+  "type": "mill",
+  "biome": "temperate",
+  "size": "small",
+  "w": 31,
+  "d": 29,
+  "h": 29,
+  "aisle": 14,
+  "westX": 9,
+  "westZ": 13,
+  "eastX": 24,
+  "eastZ": 23,
+  "midZ": 11,
+  "title": "separated one-stone seasonal watergrain mill with low river sluice lane and sloped wheelhouse cart annex",
+  "yard": "sluice-fed stone courtyard",
+  "west": "compact dry-grain vault",
+  "east": "separate river-side headrace cellar",
+  "mask": [
+   [
+    12,
+    18,
+    0,
+    28
+   ],
+   [
+    2,
+    12,
+    4,
+    15
+   ],
+   [
+    21,
+    28,
+    9,
+    25
+   ],
+   [
+    7,
+    24,
+    25,
+    28
+   ]
+  ],
+  "roofs": [
+   {
+    "name": "grain-archive-gable",
+    "r": [
+     3,
+     11,
+     5,
+     14
+    ],
+    "top": 14,
+    "shape": "gable",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   },
+   {
+    "name": "wheel-cistern-lean",
+    "r": [
+     22,
+     27,
+     10,
+     24
+    ],
+    "top": 12,
+    "shape": "slope",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   }
+  ],
+  "cargo": [
+   [
+    "millstones-and-bins",
+    [
+     4,
+     8,
+     2,
+     4,
+     6,
+     9
+    ],
+    "pack4:057"
+   ],
+   [
+    "headrace-stone-coupler",
+    [
+     23,
+     26,
+     2,
+     3,
+     12,
+     15
+    ],
+    "pack1:010"
+   ],
+   [
+    "dry-flour-packing-floor",
+    [
+     21,
+     25,
+     2,
+     2,
+     25,
+     26
+    ],
+    "pack1:007"
+   ]
+  ],
+  "details": [
+   [
+    3,
+    2,
+    12,
+    "grindstone-side-pier"
+   ],
+   [
+    27,
+    2,
+    20,
+    "sluice-conduit-stand"
+   ]
+  ],
+  "floor": "pack2:013",
+  "wall": "pack2:015",
+  "roofWallHeight": 8,
+  "dependency": "No actual water current, grain processing or wheel rotation; no physical multi-cell family collision approved"
+ },
+ {
+  "type": "mill",
+  "biome": "snow",
+  "size": "medium",
+  "w": 40,
+  "d": 38,
+  "h": 34,
+  "aisle": 19,
+  "westX": 12,
+  "westZ": 16,
+  "eastX": 31,
+  "eastZ": 29,
+  "midZ": 15,
+  "title": "triple-vault glacial grain mill with snowbank baffle, central thermal millstone route and frost shaft tower",
+  "yard": "protected icegrain milling spine",
+  "west": "heated-by-concept grain stores",
+  "east": "enclosed frost-wind drive and cold-safe quern",
+  "mask": [
+   [
+    16,
+    24,
+    0,
+    37
+   ],
+   [
+    2,
+    16,
+    4,
+    25
+   ],
+   [
+    27,
+    37,
+    2,
+    15
+   ],
+   [
+    28,
+    37,
+    23,
+    35
+   ],
+   [
+    10,
+    31,
+    34,
+    37
+   ]
+  ],
+  "roofs": [
+   {
+    "name": "snow-granary-crosscover",
+    "r": [
+     3,
+     14,
+     5,
+     23
+    ],
+    "top": 17,
+    "shape": "cross",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   },
+   {
+    "name": "frostshaft-high-gable",
+    "r": [
+     28,
+     36,
+     3,
+     14
+    ],
+    "top": 16,
+    "shape": "gable",
+    "cover": "pack3:025",
+    "post": "pack2:022"
+   },
+   {
+    "name": "thermal-millstone-terrace",
+    "r": [
+     29,
+     36,
+     24,
+     34
+    ],
+    "top": 14,
+    "shape": "terrace",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   }
+  ],
+  "cargo": [
+   [
+    "winter-grain-storage",
+    [
+     4,
+     11,
+     2,
+     4,
+     7,
+     10
+    ],
+    "pack4:057"
+   ],
+   [
+    "insulated-axle-stone",
+    [
+     30,
+     34,
+     2,
+     5,
+     5,
+     9
+    ],
+    "pack1:010"
+   ],
+   [
+    "snow-grinding-dais",
+    [
+     30,
+     34,
+     2,
+     2,
+     26,
+     29
+    ],
+    "pack1:007"
+   ]
+  ],
+  "details": [
+   [
+    3,
+    2,
+    12,
+    "snowbaffle-outcrop"
+   ],
+   [
+    35,
+    2,
+    29,
+    "frost-bearing-clamp"
+   ]
+  ],
+  "floor": "pack1:007",
+  "wall": "pack1:002",
+  "roofWallHeight": 9,
+  "dependency": "biome130:094 insulated cores unregistered; thermal simulations and active grinding/water flow not installed"
+ },
+ {
+  "type": "mill",
+  "biome": "enchanted-forest",
+  "size": "large",
+  "w": 52,
+  "d": 47,
+  "h": 43,
+  "aisle": 24,
+  "westX": 17,
+  "westZ": 20,
+  "eastX": 40,
+  "eastZ": 36,
+  "midZ": 22,
+  "title": "great luminous arc-cloister with independent crescent grotto, open stage and moonwater high vault",
+  "yard": "moonwater central transfer meadow",
+  "west": "towering mythgrain mill nave",
+  "east": "independent axis and rune-drive cloisters",
+  "mask": [
+   [
+    20,
+    29,
+    0,
+    46
+   ],
+   [
+    3,
+    20,
+    3,
+    32
+   ],
+   [
+    33,
+    49,
+    5,
+    22
+   ],
+   [
+    34,
+    49,
+    31,
+    43
+   ],
+   [
+    12,
+    41,
+    42,
+    46
+   ],
+   [
+    0,
+    11,
+    28,
+    44
+   ],
+   [
+    49,
+    51,
+    20,
+    42
+   ]
+  ],
+  "roofs": [
+   {
+    "name": "deep-luminous-granary",
+    "r": [
+     4,
+     18,
+     4,
+     29
+    ],
+    "top": 19,
+    "shape": "gable",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   },
+   {
+    "name": "north-rune-gallery",
+    "r": [
+     34,
+     48,
+     6,
+     21
+    ],
+    "top": 21,
+    "shape": "cross",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   },
+   {
+    "name": "southern-moonstone-cistern",
+    "r": [
+     35,
+     48,
+     32,
+     42
+    ],
+    "top": 16,
+    "shape": "saw",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   },
+   {
+    "name": "southern-root-cloister",
+    "r": [
+     1,
+     10,
+     34,
+     41
+    ],
+    "top": 13,
+    "shape": "slope",
+    "cover": "pack3:023",
+    "post": "pack2:022"
+   }
+  ],
+  "cargo": [
+   [
+    "moonseed-grain-lockers",
+    [
+     6,
+     14,
+     2,
+     4,
+     7,
+     13
+    ],
+    "pack4:057"
+   ],
+   [
+    "upper-rune-bearings",
+    [
+     36,
+     43,
+     2,
+     5,
+     8,
+     14
+    ],
+    "pack1:010"
+   ],
+   [
+    "lit-stone-grind-dais",
+    [
+     36,
+     42,
+     2,
+     2,
+     35,
+     40
+    ],
+    "pack1:007"
+   ],
+   [
+    "moonwater-cloister-spice",
+    [
+     3,
+     8,
+     2,
+     3,
+     36,
+     39
+    ],
+    "pack4:057"
+   ]
+  ],
+  "details": [
+   [
+    5,
+    2,
+    21,
+    "mystic-woodstone-crossrib"
+   ],
+   [
+    46,
+    2,
+    39,
+    "runic-wheel-base"
+   ]
+  ],
+  "floor": "pack2:013",
+  "wall": "pack2:015",
+  "roofWallHeight": 10,
+  "dependency": "biome130:096 unregistered livingwood cores; lunar mills, water current and rune power are future-only"
+ },
+ {
+  "type": "mill",
+  "biome": "mountain",
+  "size": "large",
+  "w": 54,
+  "d": 47,
+  "h": 44,
+  "aisle": 25,
+  "westX": 16,
+  "westZ": 18,
+  "eastX": 42,
+  "eastZ": 37,
+  "midZ": 19,
+  "title": "headwater great cliff foundry with northeast overflow bastion and two isolated inner vaults",
+  "yard": "triple-terrain mountain switchback",
+  "west": "terraced highland grain abbey",
+  "east": "double high-headrace machinery rooms",
+  "mask": [
+   [
+    22,
+    30,
+    0,
+    46
+   ],
+   [
+    3,
+    22,
+    6,
+    28
+   ],
+   [
+    35,
+    51,
+    3,
+    19
+   ],
+   [
+    35,
+    51,
+    30,
+    44
+   ],
+   [
+    12,
+    45,
+    42,
+    46
+   ],
+   [
+    31,
+    53,
+    0,
+    10
+   ],
+   [
+    32,
+    53,
+    19,
+    26
+   ]
+  ],
+  "roofs": [
+   {
+    "name": "mountain-grain-cloister",
+    "r": [
+     4,
+     20,
+     7,
+     25
+    ],
+    "top": 21,
+    "shape": "terrace",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   },
+   {
+    "name": "high-headrace-stone-roof",
+    "r": [
+     36,
+     50,
+     4,
+     18
+    ],
+    "top": 19,
+    "shape": "slope",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   },
+   {
+    "name": "lower-cascade-mill-vault",
+    "r": [
+     36,
+     50,
+     31,
+     43
+    ],
+    "top": 18,
+    "shape": "gable",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   },
+   {
+    "name": "northeastern-headrace-bastion",
+    "r": [
+     42,
+     52,
+     1,
+     9
+    ],
+    "top": 14,
+    "shape": "saw",
+    "cover": "pack3:025",
+    "post": "pack1:010"
+   }
+  ],
+  "cargo": [
+   [
+    "highland-grain-vaults",
+    [
+     6,
+     13,
+     2,
+     5,
+     9,
+     14
+    ],
+    "pack4:057"
+   ],
+   [
+    "stoneheadrace-axle-base",
+    [
+     38,
+     45,
+     2,
+     5,
+     7,
+     11
+    ],
+    "pack1:010"
+   ],
+   [
+    "south-quern-stonework",
+    [
+     38,
+     45,
+     2,
+     3,
+     34,
+     38
+    ],
+    "pack1:007"
+   ],
+   [
+    "upper-rock-grind-bearings",
+    [
+     44,
+     50,
+     2,
+     3,
+     3,
+     6
+    ],
+    "pack1:010"
+   ]
+  ],
+  "details": [
+   [
+    4,
+    2,
+    13,
+    "cliff-face-anchor"
+   ],
+   [
+    48,
+    2,
+    37,
+    "highland-grinder-stanchion"
+   ]
+  ],
+  "floor": "pack1:007",
+  "wall": "pack1:002",
+  "roofWallHeight": 12,
+  "dependency": "biome130:098 mountain anchoring not registered; physical cliff support, headrace and wheel rotation not available"
+ }
 ];
 function create(p){
  const {w,d,h,aisle,westX,westZ,eastX,eastZ,midZ}=p;
