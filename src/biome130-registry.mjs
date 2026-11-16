@@ -1,5 +1,5 @@
 // The creator-authorized, production ID bridge for automation-owned biome130 blocks.
-// Only authored families 001..070 are registered; other 130-roster positions are not invented.
+// Only authored families 001..080 are registered; other 130-roster positions are not invented.
 // 0..8 legacy, creator-owned manual 9..208, and 255 sentinel remain untouched.
 import {validateShape,rotateShape} from './voxel-shape-interactions.mjs';
 import {DESERT_CANDIDATE_IDS,desertCandidate} from './auto-block-catalog/biome130/desert.mjs';
@@ -23,6 +23,9 @@ import {MOUNTAIN_FINAL_GEOLOGY} from './auto-block-catalog/biome130/mountain-fin
 import {ANCIENT_RUIN_FOUNDATIONS} from './auto-block-catalog/biome130/ancient-ruin-foundations.mjs';
 import {ANCIENT_RUIN_DETAILS} from './auto-block-catalog/biome130/ancient-ruin-details.mjs';
 import {ANCIENT_RUIN_FRAGMENTS} from './auto-block-catalog/biome130/ancient-ruin-fragments.mjs';
+import {UNDERGROUND_CIVILIZATION_FOUNDATIONS} from './auto-block-catalog/biome130/underground-civilization-foundations.mjs';
+import {UNDERGROUND_CIVILIZATION_DETAILS} from './auto-block-catalog/biome130/underground-civilization-details.mjs';
+import {UNDERGROUND_CIVILIZATION_COMPLETION} from './auto-block-catalog/biome130/underground-civilization-completion.mjs';
 
 const families=[
   ...DESERT_CANDIDATE_IDS.map(id=>desertCandidate(id)),
@@ -36,7 +39,9 @@ const families=[
   ...ENCHANTED_ROOT_CANDIDATES,...ENCHANTED_GEOLOGY,...ENCHANTED_FLORA,
   ...ENCHANTED_WOOD,...MOUNTAIN_FOUNDATIONS,...MOUNTAIN_MATERIALS,
   ...MOUNTAIN_ORE_GEOLOGY,...MOUNTAIN_CLIFF_SURFACES,...MOUNTAIN_FINAL_GEOLOGY,
-  ...ANCIENT_RUIN_FOUNDATIONS,...ANCIENT_RUIN_DETAILS,...ANCIENT_RUIN_FRAGMENTS
+  ...ANCIENT_RUIN_FOUNDATIONS,...ANCIENT_RUIN_DETAILS,...ANCIENT_RUIN_FRAGMENTS,
+  ...UNDERGROUND_CIVILIZATION_FOUNDATIONS,...UNDERGROUND_CIVILIZATION_DETAILS,
+  ...UNDERGROUND_CIVILIZATION_COMPLETION
 ];
 const parseHex=value=>{
   if(typeof value!=='string')throw Error('Invalid biome material color');
@@ -49,7 +54,7 @@ for(const original of families){
   const symbol=original.symbolicId??original.id;
   if(typeof symbol!=='string'||!/^biome130:\d{3}$/.test(symbol))throw Error('Invalid biome symbolic identity');
   const ordinal=Number(symbol.slice(-3)),blockId=255+ordinal;
-  if(ordinal<1||ordinal>70||blockId===255||registered.has(blockId)||symbols.has(symbol))
+  if(ordinal<1||ordinal>80||blockId===255||registered.has(blockId)||symbols.has(symbol))
     throw Error('Duplicate or unapproved biome block ID '+symbol);
   const boxes=original.shape?.boxes??original.boxes;
   if(!validateShape({boxes}))throw Error('Invalid physical biome boxes '+symbol);
@@ -62,13 +67,13 @@ for(const original of families){
     symbol,blockId,ordinal,name:original.name,
     boxes:Object.freeze(boxes.map(b=>Object.freeze([...b]))),
     palette:p,solid:Boolean(solid),
-    opacity:original.material?.opacity??(original.opacity===undefined?1:original.opacity),
+    opacity:original.material?.opacity??(original.opacity===undefined||original.opacity==='opaque'?1:original.opacity),
     attachment:original.physical?.attachment??original.attachment??'any',
     source:'auto:12-biome130',rotationCount:4
   });
   registered.set(blockId,definition);symbols.set(symbol,definition);
 }
-for(let ordinal=1;ordinal<=70;ordinal++)
+for(let ordinal=1;ordinal<=80;ordinal++)
   if(!registered.has(255+ordinal))throw Error('Missing authored biome family '+ordinal);
 export const BIOME130_REGISTERED_IDS=Object.freeze([...registered.keys()].sort((a,b)=>a-b));
 export const BIOME130_REGISTERED_SYMBOLS=Object.freeze(BIOME130_REGISTERED_IDS.map(id=>registered.get(id).symbol));
