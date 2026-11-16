@@ -5,7 +5,7 @@ const html=readFileSync(new URL('./m2-preview.html',import.meta.url),'utf8');
 const js=readFileSync(new URL('./m2-preview.mjs',import.meta.url),'utf8');
 const shader=readFileSync(new URL('./m2-preview-mesh.mjs',import.meta.url),'utf8');
 test('M2 preview reads genuine 1A authored modules and unambiguously labels proxy WebGL2',()=>{
- for(const name of ['legacy-buildings.mjs','m1-inn-exemplars.mjs','m2-originals.mjs','m2-housing-tranche.mjs','m2-housing-wave2.mjs','m2-housing-wave3.mjs','m2-housing-wave4.mjs','m2-housing-wave5.mjs','m2-housing-wave6.mjs','m2-housing-wave7.mjs','m2-housing-wave8.mjs','m2-housing-wave9.mjs'])
+ for(const name of ['legacy-buildings.mjs','m1-inn-exemplars.mjs','m2-originals.mjs','m2-housing-tranche.mjs','m2-housing-wave2.mjs','m2-housing-wave3.mjs','m2-housing-wave4.mjs','m2-housing-wave5.mjs','m2-housing-wave6.mjs','m2-housing-wave7.mjs','m2-housing-wave8.mjs','m2-housing-wave9.mjs','m3-hospitality-wave1.mjs'])
   assert.ok(js.includes(name),name);
  assert.match(js,/getContext\('webgl2'/);
  assert.match(html,/source physical AABB mode/);
