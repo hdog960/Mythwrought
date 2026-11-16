@@ -6,7 +6,8 @@ import {M1_NEW_MERCHANTS} from './m1-additional-shops.mjs';
 import {M1_REGIONAL_SHOPS} from './m1-regional-shops.mjs';
 import {M1_BIOME_EXPANSION} from './m1-biome-expansion.mjs';
 import {M1_CATEGORY_ARCADES} from './m1-category-arcades.mjs';
-export const SPAN_CANDIDATES=Object.freeze([...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES]);
+import {M1_MARKET_FRONTS} from './m1-market-fronts.mjs';
+export const SPAN_CANDIDATES=Object.freeze([...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS]);
 const key=(x,y,z)=>[x,y,z].join(',');
 const bearing=v=>v&&['wall','floor','foundation','roof'].includes(v.kind);
 export function inspect2AConceptualRoofSpans(books=SPAN_CANDIDATES){
