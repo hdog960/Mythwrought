@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
 import {WORLD_MIN_Y} from '../src/depth.mjs';
-import {descentWorld,descentRoute,descentEvidence,descentConnectivity,descentVolumeEvidence} from '../src/underground-switchback-descent.mjs';
+import {descentWorld,descentRoute,descentEvidence,descentConnectivity,descentVolumeEvidence,descentLoopConnectivity} from '../src/underground-switchback-descent.mjs';
 for(const seed of [179,1,2026,-77])test('four depth bands have solid floors and two-block air: '+seed,()=>{
   const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
   const bands=descentEvidence(world);
@@ -196,4 +196,26 @@ test('two intermediate vaults remain connected to the four-band physical descent
     }
     assert.equal(descentConnectivity(world).connected,true);
   }
+});
+
+for(const seed of [179,1,2026,-77])test('four physical side loops remain traversable '+seed,()=>{
+  const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  const audit=descentLoopConnectivity(world);
+  assert.equal(audit.levels.length,4);
+  assert.equal(audit.connected,true,JSON.stringify(audit.levels.map(l=>({depth:l.depth,failures:l.failures.slice(0,3)}))));
+  assert.equal(JSON.stringify(world.save()),before);
+});
+test('an edited obstruction invalidates its physical return loop',()=>{
+  const world=new VoxelWorld(179);
+  const anchor=descentRoute().find(p=>p.floor===-80);
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const x=anchor.x+outward[0]*19+tangent[0]*5;
+  const z=anchor.z+outward[1]*19+tangent[1]*5;
+  assert.equal(world.set(x,-79,z,BLOCK.WOOD),true);
+  const restored=VoxelWorld.restore(world.save());
+  const audit=descentLoopConnectivity(restored);
+  assert.equal(audit.connected,false);
+  assert.ok(audit.levels.find(l=>l.depth===-80).failures.some(f=>f.part==='outer-return'));
 });
