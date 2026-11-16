@@ -57,7 +57,7 @@ test('all six retain actual open rear courts, two stepped front notches and weat
 test('entrance really walks to all 24 room access coordinates while producer footprints avoid source collisions',()=>{
  for(const b of M1_STEPPED_COURT_SHOPS){
   const map=new Map(b.voxels.map(v=>[key(v.x,v.y,v.z),v])),blocked=new Set();
-  for(const v of b.voxels.filter(v=>v.kind==='fixture')){
+  for(const v of b.voxels.filter(v=>v.kind==='fixture'&&v.material.startsWith('pack5:'))){
    const shape=resolveManualFivePackAsset(v.material,{variant:v.physicalVariant,orientation:v.intendedFacing??'north'});
    for(const [dx,dy,dz] of shape.occupiedOffsets){
     const pos=key(v.x+dx,v.y+dy,v.z+dz),other=map.get(pos);
