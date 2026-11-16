@@ -6,47 +6,47 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 40,
-  "authoredCandidates": 55,
-  "remainingUnauthored": 365,
+  "originalNewModels": 48,
+  "authoredCandidates": 63,
+  "remainingUnauthored": 357,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
-      "authored": 7,
+      "authored": 9,
       "target": 60,
-      "remaining": 53
+      "remaining": 51
     },
     "tailor": {
-      "authored": 5,
-      "target": 60,
-      "remaining": 55
-    },
-    "butcher": {
-      "authored": 5,
-      "target": 60,
-      "remaining": 55
-    },
-    "jeweler": {
-      "authored": 5,
-      "target": 60,
-      "remaining": 55
-    },
-    "bookshop": {
       "authored": 6,
       "target": 60,
       "remaining": 54
     },
+    "butcher": {
+      "authored": 6,
+      "target": 60,
+      "remaining": 54
+    },
+    "jeweler": {
+      "authored": 6,
+      "target": 60,
+      "remaining": 54
+    },
+    "bookshop": {
+      "authored": 7,
+      "target": 60,
+      "remaining": 53
+    },
     "temple": {
-      "authored": 19,
+      "authored": 20,
       "target": 75,
-      "remaining": 56
+      "remaining": 55
     },
     "theater": {
-      "authored": 8,
+      "authored": 9,
       "target": 45,
-      "remaining": 37
+      "remaining": 36
     }
   },
   "originals": [
@@ -249,38 +249,78 @@
       "id": "r2:bookshop:temperate:medium:01",
       "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:temperate:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:desert:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:desert:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:enchanted-forest:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:mountain:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:desert:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:temperate:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
       "small": 8,
       "medium": 4,
-      "large": 1
+      "large": 3
     },
     "desert": {
       "small": 4,
       "medium": 5,
-      "large": 2
+      "large": 5
     },
     "snow": {
       "small": 5,
       "medium": 4,
-      "large": 3
+      "large": 4
     },
     "enchanted-forest": {
       "small": 4,
       "medium": 3,
-      "large": 3
+      "large": 4
     },
     "mountain": {
       "small": 2,
       "medium": 3,
-      "large": 4
+      "large": 5
     }
   },
   "productionRegistryUnchanged": true,
   "physicalShapeAbiCertified": false,
   "screenshotClassification": "software WebGL2 cube proxies; neither physical-family WebGL2 nor live game",
-  "lastMilestone": "M1 — 55 real source-authored candidates, exact-head CI pending",
+  "lastMilestone": "M1 — eight grand unique source-authored public and specialty large architectures; new CI pending",
   "evidenceClassification": "native source/test, genuine Chromium software-WebGL2 cube proxies only; physical-family/webgame/iPhone unapproved"
 }
