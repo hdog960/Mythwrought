@@ -69,6 +69,12 @@ function create(q){
  const westShedX=4,westShedZ=q.westStart+9;
  function region(x,z){
   if(x<0||x>=w||z<0||z>=d)return null;
+  // Trade-specific return-wing loading niches alter ACTUAL floor, walls,
+  // roof and load-bearing supports rather than merely renaming/recoloring.
+  if(q.stockWing==='west'&&x>=1&&x<=4&&
+     z>=q.westStart+q.joineryBays+4&&z<=q.westStart+q.joineryBays+9)return null;
+  if(q.stockWing==='east'&&x>=w-4&&x<=w-2&&
+     z>=q.eastStart+7&&z<=q.eastStart+12)return null;
   if(x>=spineWest&&x<=spineEast)return 'main-nave';
   if(x>=1&&x<spineWest&&z>=q.westStart&&z<=q.westEnd)return 'west-atelier';
   if(x>spineEast&&x<w-1&&z>=q.eastStart&&z<=q.eastEnd)return 'east-stock-court';
