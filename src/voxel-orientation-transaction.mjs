@@ -30,7 +30,10 @@ export async function commitOrientedEdit({cell, sidecar, readIdentity, edit, rol
   let result;
   try {
     result = await edit(...key);
-    if (result !== true) {
+    // Only explicit booleans are valid acknowledgements. An undefined or
+    // truthy non-boolean result can hide a partially applied host write.
+    if (typeof result !== 'boolean') throw new TypeError('Invalid edit acknowledgement');
+    if (result === false) {
       const after = await readIdentity(...key);
       if (after !== before) throw new Error('Rejected edit mutated world');
       if (readState && await readState(...key) !== initialState)
