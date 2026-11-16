@@ -154,6 +154,37 @@ try{
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
   assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),325);
+  // 014: freshly registered underground-civilization M6 #080 from the real
+  // automation palette must be a shape-accurate visible, editable, saved
+  // and reloadable high-ID physical block; never a dormant source descriptor.
+  await page.locator('#menu').click();
+  await page.locator('#biome130Select').selectOption('335');
+  await page.locator('#biome130Rotation').selectOption('3');
+  await page.locator('#closeHelp').click();
+  await page.evaluate(()=>{const dev=window.__mythwroughtTest;dev.teleport(14.5,.5);dev.aimAt(16,18,0);});
+  await waitHit('16,18,0');
+  await page.locator('#dig').click();
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),0);
+  await page.evaluate(()=>window.__mythwroughtTest.aimAt(17,18,0));
+  await waitHit('17,18,0');
+  await page.locator('#place').click();
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),335,
+    'Underground M6 block #080 is not actually placeable through player controls');
+  const undergroundSaved=await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v002-world-179')));
+  assert.ok(undergroundSaved.edits.some(e=>e.join(',')==='16,18,0,335'),
+    'Underground block did not persist under its actual registered 16-bit ID');
+  assert.ok(undergroundSaved.rotations?.some(e=>e.join(',')==='16,18,0,3'),
+    'Underground block orientation was not saved');
+  await page.evaluate(()=>window.__mythwroughtTest.aimAt(16,18,0));
+  await waitHit('16,18,0');
+  await page.screenshot({path:'artifacts/mythwrought-014-underground-physical-in-game.png'});
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),335,
+    'Underground M6 block disappeared after genuine game reload');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v002-world-179')).rotations
+    .find(e=>e[0]===16&&e[1]===18&&e[2]===0)?.[3]),3);
+
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,null,{timeout:20000});
   assert.equal(await page.evaluate(()=>window.__mythwroughtTest.snapshot().chunks.length),25);
   assert.deepEqual(errors,[],'Browser exceptions during block interaction');
