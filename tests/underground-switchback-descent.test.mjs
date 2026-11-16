@@ -256,7 +256,11 @@ test('entrance audit distinguishes candidate approach from unopened surface',asy
   for(const seed of [179,1,2026,-77]){
     const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
     const audit=descentEntranceConnectivity(world);
-    assert.equal(audit.approachConnected,true,JSON.stringify(audit.failures));
+    // The legacy surface has not been opened by :24. Do not misreport
+    // a candidate stair geometry as accessible from the playable surface.
+    assert.equal(audit.approachConnected,false);
+    assert.ok(audit.failures.some(f=>f.reason==='blocked-or-unsupported' || f.reason==='step-head-obstruction'),
+      'unopened legacy throat must fail physical traversal');
     assert.equal(audit.surfaceConnected,false);
     assert.equal(audit.requiresSurfaceOwner,true);
     assert.deepEqual(audit.opening,{x:192,y:-3,z:188});
