@@ -315,8 +315,8 @@ const DESIGNS=[
    ],
    [
     "rear dry provisions",
-    4,
-    28
+    5,
+    27
    ]
   ],
   "features": [
@@ -1088,7 +1088,7 @@ const DESIGNS=[
    ],
    [
     "rear silver reserves",
-    4,
+    6,
     29
    ]
   ],
