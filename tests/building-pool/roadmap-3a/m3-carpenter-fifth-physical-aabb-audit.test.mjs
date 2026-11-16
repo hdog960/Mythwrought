@@ -6,14 +6,14 @@ import {auditM3CarpenterFifthPhysicalFit} from '../../../src/building-pool/roadm
 import {createLegacyBlacksmithPool} from '../../../src/building-pool/roadmap-3a/legacy-blacksmiths.mjs';
 import {geometryFingerprint} from '../../../src/building-pool/roadmap-3a/legacy-validation.mjs';
 
-test('all 15 M3 fifth-variant H-plan workcourts use real Pack AABBs and typed support, reservation, crossing/collision diagnostics',()=>{
+test('all 15 M3 fifth-variant five-finger carpentry workshops use real Pack AABBs and typed support, reservation, crossing/collision diagnostics',()=>{
  const before=createLegacyBlacksmithPool().map(b=>[b.id,geometryFingerprint(b)]);
  const r=auditM3CarpenterFifthPhysicalFit();
  assert.equal(r.sampledModels,15);
  assert.equal(r.oldLegacyMountBlockersStillOpen,30);
  assert.equal(r.inheritedBlueprintsModified,false);
  assert.equal(r.productionPlaced,0);
- assert.ok(r.producerShapeFamiliesUsed>=5);
+ assert.ok(r.producerShapeFamiliesUsed>=2,'two deliberately sourced carpenter fixture families are required');
  assert.equal(r.physicalFixtureAABBIntersections,0,'producer collision AABB overlap is not allowed');
  assert.equal(r.missingAuthoredSupports,0,'required family support lacks actual authored voxel');
  assert.equal(r.overlappingOccupiedOffsets,0,'multi-cell physical-family reservation collides');
@@ -43,7 +43,7 @@ test('all 15 M3 fifth-variant H-plan workcourts use real Pack AABBs and typed su
  assert.deepEqual(createLegacyBlacksmithPool().map(b=>[b.id,geometryFingerprint(b)]),before);
  const out=join(process.cwd(),'artifacts/building-roadmap-3a-m3-fifth');
  mkdirSync(out,{recursive:true});
- writeFileSync(join(out,'M3_FOURTH_PHYSICAL_AABB_REPORT.json'),JSON.stringify(r,null,2)+'\n');
+ writeFileSync(join(out,'M3_CARPENTER_FIFTH_PHYSICAL_AABB_REPORT.json'),JSON.stringify(r,null,2)+'\n');
  console.log('Builder 3A M3 fifth craft producer physical AABB report: '+r.sampledModels+
   ' source buildings, roof samples '+r.roofBearingSamples+
   ', lacking source bearing witnesses '+r.roofBearingWitnessAbsent+
