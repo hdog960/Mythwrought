@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M2 wave4: 15 distinctly structured houses and 37 roof wing regions; 99/450 authored, exact-head acceptance pending",
+  "milestone": "M2 fifth housing tranche: 15 genuine carved concave L/U structures; 114/450 authored, exact-head CI pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 351,
-  "newDesignsAuthored": 69,
-  "totalLaneGeometryAuthored": 99,
+  "additionalDesignsRequired": 336,
+  "newDesignsAuthored": 84,
+  "totalLaneGeometryAuthored": 114,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,11 +53,11 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Fresh exact-head native 99 pool tests, 84 original-object regression digest and 60-house normalized floorplan checks",
-    "Genuine Chromium WebGL2 426 authored cell-cube + 150 Pack producer visibleBox AABB views, all three phone landscape sizes",
-    "Actual world load, roof weather and structure, Pack2 door hinge sweeps, Pack4 pane transparency, Pack5 bed collision/save orientation remain UNAPPROVED",
-    "72 distinct houses until M2 150-house milestone; full 351 new building blueprints still unauthored",
-    "0 creator-final-approved/0 integrated, siblings/manual packs/automation/world runtime/CI/saves/v0.11 unchanged"
+    "New exact-head 114-pool native and historic 99 full-object parity fixtures",
+    "516 genuinely authored cell cube plus 240 Pack producer visible AABB Chromium/WebGL2 exterior/cutaway screenshots, 3 landscape viewports each",
+    "Source-authentic Pack1–5 support and envelope ABI: final door hinge/save, glass transparency, roof waterproofing/load, Pack5 bed collision and variants still require central acceptance",
+    "57 genuinely distinct houses remain until M2 150-house domestic milestone; 336 1A designs remain overall",
+    "No creator acceptance, production integration, live world placement, deployment or v0.11 unlock"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -76,7 +76,7 @@
   },
   "innCount": 1,
   "categoriesAuthored": {
-    "house": 78,
+    "house": 93,
     "tavern": 17,
     "inn": 4
   },
@@ -216,11 +216,28 @@
     "baselineHead": "7e7d5eb124e4aaaa4aca0e77b00ac9da5b9a6e44",
     "fullPriorGeometryPreserved": 84,
     "maxCrossWavePlanIoU": 0.833,
-    "nativeCI": "PENDING",
+    "nativeCI": "Exact-head Actions #43785560459 SUCCESS at d502c5c41eeeeb942f04ba349f43f5005ecdf83f: 735/735 root, 150/150 Builder 1A, 426/426 cell cube, 150/150 physical AABB WebGL2",
     "sourceCellBrowserTarget": 426,
     "physicalVisibleBoxBrowserTarget": 150,
     "creatorApproved": 0,
     "integrated": 0,
     "worldPlaced": false
+  },
+  "m2Wave5": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave5.mjs",
+    "newHouseCount": 15,
+    "placementCells": 52722,
+    "removedExteriorFootprintCells": 2455,
+    "regionCoverage": "each biome × each size",
+    "shapes": "L-left, L-right, U rear-open",
+    "newPhysicalPerimeter": true,
+    "allOld99Unchanged": true,
+    "maxNewWaveFloorplanIoU": 0.654,
+    "webgl2CellCubeTarget": 516,
+    "webgl2ProducerVisibleAABBTarget": 240,
+    "nativeExactHead": "PENDING",
+    "creatorApproved": 0,
+    "integrated": 0,
+    "finalPhysicalApproval": false
   }
 }
