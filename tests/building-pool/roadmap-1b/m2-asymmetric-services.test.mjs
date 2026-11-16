@@ -21,15 +21,15 @@ function sourceConnected(b){
  }
  return visited.size===cells.size;
 }
-test('M2e 118/435 original authored IDs and physical fingerprints; 15 exact inherited stables untouched',()=>{
+test('M2e 127/435 original authored IDs and physical fingerprints; 15 exact inherited stables untouched',()=>{
  const all=get1BCandidates(),old=getInheritedStables(),fresh=models(),c=validateAllocation(all);
- assert.equal(all.length,118);assert.equal(c.authored,118);assert.equal(c.remaining,317);
+ assert.equal(all.length,127);assert.equal(c.authored,127);assert.equal(c.remaining,308);
  assert.equal(old.length,15);assert.equal(fresh.length,9);
- assert.equal(new Set(all.map(p=>p.id)).size,118);
- assert.equal(new Set(all.map(p=>structuralFingerprint(p))).size,118);
+ assert.equal(new Set(all.map(p=>p.id)).size,127);
+ assert.equal(new Set(all.map(p=>structuralFingerprint(p))).size,127);
  assert.equal(new Set(fresh.map(p=>p.architecturalIdentity.program)).size,9);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(p=>p.category===k).length])),
-  {'bathhouse':15,stable:28,'farm-barn':15,greenhouse:15,'fishing-lodge':15,'harbor-office':15,lighthouse:15});
+  {'bathhouse':17,stable:28,'farm-barn':17,greenhouse:17,'fishing-lodge':16,'harbor-office':16,lighthouse:16});
  for(const b of old){const carried=all.find(p=>p.id===b.id);assert.ok(carried);
   assert.equal(stableBlueprintJSON(carried),stableBlueprintJSON(b),'legacy stable source modified '+b.id);
  }

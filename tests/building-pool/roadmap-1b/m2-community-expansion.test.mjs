@@ -12,13 +12,13 @@ const pick=(category,biome,size)=>plans().find(b=>b.category===category&&b.biome
 const purpose=(b,name)=>b.placements.filter(p=>p.purpose===name);
 const roof=(b)=>b.placements.filter(p=>p.role==='roof');
 const physical=(b)=>new Map(b.placements.map(p=>[K(p.at),p]));
-test('M2b nine new original plans maintain 118/435 census, 15 inherited source-exact stables and 317 outstanding',()=>{
+test('M2b nine new original plans maintain 127/435 census, 15 inherited source-exact stables and 308 outstanding',()=>{
  const before=getM2Community1BPlans(),next=plans(),legacy=getInheritedStables(),all=get1BCandidates();
  const census=validateAllocation(all);
  assert.equal(before.length,9);assert.equal(next.length,9);assert.equal(legacy.length,15);
- assert.equal(all.length,118);assert.equal(census.authored,118);assert.equal(census.remaining,317);
- assert.equal(new Set(all.map(b=>b.id)).size,118);
- assert.equal(new Set(all.map(b=>structuralFingerprint(b))).size,118,'geometry reused by original or new candidates');
+ assert.equal(all.length,127);assert.equal(census.authored,127);assert.equal(census.remaining,308);
+ assert.equal(new Set(all.map(b=>b.id)).size,127);
+ assert.equal(new Set(all.map(b=>structuralFingerprint(b))).size,127,'geometry reused by original or new candidates');
  for(const original of legacy){
   const actual=all.find(b=>b.id===original.id);
   assert.ok(actual);
@@ -26,7 +26,7 @@ test('M2b nine new original plans maintain 118/435 census, 15 inherited source-e
  }
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(category=>[
   category,all.filter(b=>b.category===category).length
- ])),{'bathhouse':15,stable:28,'farm-barn':15,greenhouse:15,'fishing-lodge':15,'harbor-office':15,lighthouse:15});
+ ])),{'bathhouse':17,stable:28,'farm-barn':17,greenhouse:17,'fishing-lodge':16,'harbor-office':16,lighthouse:16});
  for(const category of Object.keys(QUOTAS))for(const biome of BIOMES)for(const size of SIZES){
   assert.ok(all.filter(b=>b.category===category&&b.biome===biome&&b.size===size).length<=QUOTAS[category]);
  }
