@@ -94,3 +94,22 @@ test('eight outward grottoes have supported, clear galleries and distinct chambe
   }
   assert.equal(descentConnectivity(world).connected,true);
 });
+
+test('four underground levels have a physically clear outer return loop',()=>{
+  const world=new VoxelWorld(179),reader=descentWorld(world),route=descentRoute();
+  for(const depth of [-30,-80,-130,-180]){
+    const anchor=route.find(p=>p.floor===depth);
+    assert.ok(anchor,'missing depth anchor '+depth);
+    const lx=anchor.x-192,lz=anchor.z-192;
+    const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+    const tangent=[outward[1],-outward[0]];
+    for(let t=0;t<=10;t++){
+      const x=anchor.x+outward[0]*19+tangent[0]*t;
+      const z=anchor.z+outward[1]*19+tangent[1]*t;
+      assert.equal(reader.get(x,depth,z),BLOCK.DEEPSTONE,'loop floor '+depth+'/'+t);
+      for(let h=1;h<=3;h++)
+        assert.equal(reader.get(x,depth+h,z),BLOCK.AIR,'loop headroom '+depth+'/'+t+'/'+h);
+    }
+  }
+  assert.equal(descentConnectivity(world).connected,true);
+});
