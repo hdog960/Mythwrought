@@ -6,9 +6,9 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 80,
-  "authoredCandidates": 95,
-  "remainingUnauthored": 325,
+  "originalNewModels": 86,
+  "authoredCandidates": 101,
+  "remainingUnauthored": 319,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
@@ -19,19 +19,19 @@
       "remaining": 46
     },
     "tailor": {
-      "authored": 11,
+      "authored": 12,
       "target": 60,
-      "remaining": 49
+      "remaining": 48
     },
     "butcher": {
-      "authored": 11,
+      "authored": 12,
       "target": 60,
-      "remaining": 49
+      "remaining": 48
     },
     "jeweler": {
-      "authored": 10,
+      "authored": 12,
       "target": 60,
-      "remaining": 50
+      "remaining": 48
     },
     "bookshop": {
       "authored": 12,
@@ -39,14 +39,14 @@
       "remaining": 48
     },
     "temple": {
-      "authored": 22,
+      "authored": 23,
       "target": 75,
-      "remaining": 53
+      "remaining": 52
     },
     "theater": {
-      "authored": 15,
+      "authored": 16,
       "target": 45,
-      "remaining": 30
+      "remaining": 29
     }
   },
   "originals": [
@@ -449,33 +449,63 @@
       "id": "r2:theater:temperate:large:02",
       "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:temperate:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-bespoke-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:enchanted-forest:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-bespoke-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:mountain:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-bespoke-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:desert:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-ritual-trades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:enchanted-forest:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-ritual-trades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:desert:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-shadowstage.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
       "small": 8,
-      "medium": 6,
-      "large": 5
+      "medium": 7,
+      "large": 6
     },
     "desert": {
-      "small": 4,
-      "medium": 6,
-      "large": 7
+      "small": 5,
+      "medium": 8,
+      "large": 8
     },
     "snow": {
       "small": 6,
-      "medium": 8,
+      "medium": 9,
       "large": 5
     },
     "enchanted-forest": {
       "small": 4,
       "medium": 6,
-      "large": 6
+      "large": 8
     },
     "mountain": {
       "small": 8,
-      "medium": 6,
-      "large": 5
+      "medium": 7,
+      "large": 6
     }
   },
   "productionRegistryUnchanged": true,
