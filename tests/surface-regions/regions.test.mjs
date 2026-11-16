@@ -212,3 +212,27 @@ test('real legacy stone substrate is eligible only in untouched fresh columns',(
    'saved edits block the entire atomic column');
  }
 });
+
+test('cached surface plans fail closed after any later world edit or rotation',()=>{
+ for(const seed of [179,7,2201]){
+  const world=new VoxelWorld(seed);
+  const view=createSurfaceBiomeWorldView(world,{
+   enabled:true,profileIsFresh:true,isProtected:()=>false,maxCachedColumns:32
+  });
+  assert.ok(view);
+  const r=SURFACE_BIOME_REGIONS[2],h=terrainHeight(r.x,r.z,seed);
+  assert.equal(view.active,true);
+  assert.equal(view.get(r.x,h,r.z),r.surface);
+  assert.ok(view.cachedColumns>0);
+  // Even a distant edit invalidates cached generated terrain: the source
+  // world is no longer a fresh profile, regardless of the edited location.
+  assert.equal(world.set(0,terrainHeight(0,0,seed)+1,0,4),true);
+  assert.equal(view.active,false);
+  assert.equal(view.get(r.x,h,r.z),world.get(r.x,h,r.z));
+  assert.equal(view.get(r.x,h+1,r.z),world.get(r.x,h+1,r.z));
+  assert.equal(view.get(0,terrainHeight(0,0,seed)+1,0),4);
+  assert.equal(createSurfaceBiomeWorldView(world,{
+   enabled:true,profileIsFresh:true,isProtected:()=>false
+  }),null);
+ }
+});
