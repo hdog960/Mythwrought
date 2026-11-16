@@ -41,7 +41,7 @@ test('M2g real 100/435 authored census; 15 byte-exact inherited stables; categor
  assert.equal(new Set(all.map(p=>structuralFingerprint(p))).size,100);
  assert.equal(new Set(new9.map(p=>p.architecturalIdentity.program)).size,9);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(p=>p.category===k).length])),
-  {'bathhouse':14,stable:28,'farm-barn':14,greenhouse:11,'fishing-lodge':8,'harbor-office':8,lighthouse:8});
+  {'bathhouse':14,stable:28,'farm-barn':14,greenhouse:14,'fishing-lodge':10,'harbor-office':10,lighthouse:10});
  for(const inherited of old)
   assert.equal(stableBlueprintJSON(all.find(p=>p.id===inherited.id)),stableBlueprintJSON(inherited),
    'inherited source cells changed '+inherited.id);

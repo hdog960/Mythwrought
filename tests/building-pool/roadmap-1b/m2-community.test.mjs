@@ -40,7 +40,7 @@ test('M2 all nine source-authored designs are independent, 100/435 census and 15
   assert.equal(stableBlueprintJSON(carried),stableBlueprintJSON(legacy),'source-exact stable moved '+legacy.id);
  }
  const counts=Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(b=>b.category===k).length]));
- assert.deepEqual(counts,{'bathhouse':14,stable:28,'farm-barn':14,greenhouse:11,'fishing-lodge':8,'harbor-office':8,lighthouse:8});
+ assert.deepEqual(counts,{'bathhouse':14,stable:28,'farm-barn':14,greenhouse:14,'fishing-lodge':10,'harbor-office':10,lighthouse:10});
  for(const biome of BIOMES)for(const size of SIZES)for(const [category,n] of Object.entries(QUOTAS)){
   assert.ok(all.filter(x=>x.category===category&&x.biome===biome&&x.size===size).length<=n);
  }

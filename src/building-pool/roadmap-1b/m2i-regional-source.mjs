@@ -157,6 +157,10 @@ export function cragchainCustomsBureau(){return authored({
 export function frostmarkTQuayRegistry(){return authored({
  c:'harbor-office',b:'snow',s:'small',title:'Frostmark Offset Ice-Quay Registry',slug:'frostmark',dim:[25,17,29],
  parts:[[1,1,23,9],[1,10,9,25],[15,10,23,27],[9,20,15,24]],
+ // Genuine source cells removed from the western and eastern late wings.
+ // The new stepped sides expose independent snow courts; no support/post,
+ // accessible threshold, room identity, or accepted M2h geometry changes.
+ voids:[[1,18,3,25],[21,19,23,26]],
  open:[[12,1],[5,9],[19,9],[9,22],[15,22]],
  windows:[[4,1,'north'],[20,1,'north'],[1,15,'west'],[23,16,'east'],[4,25,'south'],[20,27,'south']],
  roofs:[[[1,1,23,9],8,'frostmark-front-winter-customs-gable','gable-x','pack3:025'],

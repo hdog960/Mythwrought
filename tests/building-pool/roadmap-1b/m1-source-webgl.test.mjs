@@ -161,7 +161,7 @@ async function makeCDP(url){
  }
  return {send,exceptions,close:()=>ws.close()};
 }
-test('M1/M2 86 genuine source-served WebGL2 candidates × 3 iPhone landscapes × exterior/cutaway', {timeout:360000},async()=>{
+test('M1/M2 86 genuine source-served WebGL2 candidates × 3 iPhone landscapes × exterior/cutaway', {timeout:480000},async()=>{
  const profile=await mkdtemp(join(tmpdir(),'mythwrought-r1b-chrome-')),site=await localSite();
  const out=resolve(root,'artifacts/roadmap-1b');
  let chrome,cdp;

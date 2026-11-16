@@ -30,7 +30,7 @@ test('M2d 100/435 unique literal candidate sources preserve all 15 exact inherit
  assert.equal(new Set(new9.map(b=>b.architecturalIdentity.program)).size,9);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(category=>
   [category,all.filter(b=>b.category===category).length])),
- {'bathhouse':14,stable:28,'farm-barn':14,greenhouse:11,'fishing-lodge':8,'harbor-office':8,lighthouse:8});
+ {'bathhouse':14,stable:28,'farm-barn':14,greenhouse:14,'fishing-lodge':10,'harbor-office':10,lighthouse:10});
  for(const original of old){
   const carried=all.find(x=>x.id===original.id);
   assert.ok(carried);
