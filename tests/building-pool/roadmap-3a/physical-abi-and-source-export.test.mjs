@@ -11,6 +11,7 @@ import {createM1RegionalPool} from '../../../src/building-pool/roadmap-3a/m1-reg
 import {createM1CompletionPool} from '../../../src/building-pool/roadmap-3a/m1-coverage-workshops.mjs';
 import {createM2MetalworkPool} from '../../../src/building-pool/roadmap-3a/m2-metalwork-second-variants.mjs';
 import {createM2ThirdVariantPool} from '../../../src/building-pool/roadmap-3a/m2-metalwork-third-variants.mjs';
+import {createM2FourthVariantPool} from '../../../src/building-pool/roadmap-3a/m2-metalwork-fourth-variants.mjs';
 import {
  MANUAL_FIVE_PACK_COUNTS,MANUAL_FIVE_PACK_FAMILY_SYMBOLS,
  manualFivePackVariants,resolveManualFivePackAsset
@@ -20,7 +21,7 @@ import {BIOME130_REGISTERED_SYMBOLS,biome130Block} from '../../../src/biome130-r
 
 const root=process.cwd(),base=join(root,'artifacts/building-roadmap-3a-source-review');
 const generated=[];
-const originalRefs=[...new Set([...createLegacyBlacksmithPool(),...createM1OriginalWorkshopPool(),...createM1RegionalPool(),...createM1CompletionPool(),...createM2MetalworkPool(),...createM2ThirdVariantPool()].flatMap(b=>
+const originalRefs=[...new Set([...createLegacyBlacksmithPool(),...createM1OriginalWorkshopPool(),...createM1RegionalPool(),...createM1CompletionPool(),...createM2MetalworkPool(),...createM2ThirdVariantPool(),...createM2FourthVariantPool()].flatMap(b=>
  b.modules.flatMap(m=>m.cells.map(c=>c[3]))))].sort();
 function uniqueRefs() {return originalRefs;}
 function physicalSummary(ref){
@@ -87,6 +88,8 @@ test('emit byte-identical M1 candidate source bundle for independent real local 
   'src/building-pool/roadmap-3a/m1-coverage-workshops.mjs',
   'src/building-pool/roadmap-3a/m2-metalwork-second-variants.mjs',
   'src/building-pool/roadmap-3a/m2-metalwork-third-variants.mjs',
+  'src/building-pool/roadmap-3a/m2-metalwork-fourth-variants.mjs',
+  'src/building-pool/roadmap-3a/m2-fourth-physical-aabb-audit.mjs',
   'src/building-pool/roadmap-3a/m2-third-physical-aabb-audit.mjs',
   'src/building-pool/roadmap-3a/m2-physical-fit-audit.mjs',
   'src/building-pool/roadmap-3a/legacy-mount-repair-options.mjs',
@@ -114,7 +117,11 @@ test('emit byte-identical M1 candidate source bundle for independent real local 
   'tests/building-pool/roadmap-3a/preview-m2-third.html',
   'tests/building-pool/roadmap-3a/preview-m2-third.mjs',
   'tests/building-pool/roadmap-3a/preview-m2-third-mesh.mjs',
-  'tests/building-pool/roadmap-3a/preview-m2-third-browser.mjs'
+  'tests/building-pool/roadmap-3a/preview-m2-third-browser.mjs',
+  'tests/building-pool/roadmap-3a/preview-m2-fourth.html',
+  'tests/building-pool/roadmap-3a/preview-m2-fourth.mjs',
+  'tests/building-pool/roadmap-3a/preview-m2-fourth-mesh.mjs',
+  'tests/building-pool/roadmap-3a/preview-m2-fourth-browser.mjs'
  ];
  const manifest=[];
  for(const p of paths){
@@ -133,6 +140,6 @@ test('emit byte-identical M1 candidate source bundle for independent real local 
    caveat:'Files are candidate diagnostic sources, not deployed world or physical iPhone evidence'};
  mkdirSync(base,{recursive:true});
  writeFileSync(join(base,'MANIFEST.json'),JSON.stringify(out,null,2)+'\n');
- assert.equal(manifest.length,39);
+ assert.equal(manifest.length,45);
  assert.equal(assets.length,originalRefs.length);
 });
