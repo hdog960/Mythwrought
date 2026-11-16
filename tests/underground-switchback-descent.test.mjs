@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
 import {WORLD_MIN_Y} from '../src/depth.mjs';
-import {descentWorld,descentRoute,descentEvidence,descentConnectivity} from '../src/underground-switchback-descent.mjs';
+import {descentWorld,descentRoute,descentEvidence,descentConnectivity,descentVolumeEvidence} from '../src/underground-switchback-descent.mjs';
 for(const seed of [179,1,2026,-77])test('four depth bands have solid floors and two-block air: '+seed,()=>{
   const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
   const bands=descentEvidence(world);
@@ -164,4 +164,15 @@ test('deepest crescent refuge has supported cavern, pocket and connected approac
     assert.equal(descentConnectivity(world).connected,true);
     assert.equal(JSON.stringify(world.save()),before);
   }
+});
+
+for(const seed of [179,1,2026,-77])test('physical authored cave volume has air AND stone in every band '+seed,()=>{
+  const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  const volumes=descentVolumeEvidence(world);
+  assert.equal(volumes.length,4);
+  for(const band of volumes){
+    assert.ok(band.air>100,'entirely solid or missing cave air: '+JSON.stringify(band));
+    assert.ok(band.solid>30,'missing physical supporting stone: '+JSON.stringify(band));
+  }
+  assert.equal(JSON.stringify(world.save()),before);
 });
