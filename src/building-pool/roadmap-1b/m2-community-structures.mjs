@@ -4,7 +4,7 @@ import {SCHEMA,validateBlueprint} from './legacy-stable-schema.mjs';
 import {blueprintId,validateAllocation} from './schema.mjs';
 const FULL=Object.freeze({kind:'full-cell',bounds:[0,0,0,1,1,1]});
 const K=(x,y,z)=>x+','+y+','+z;
-function sourcePlan(category,biome,size,index,title,w,h,d) {
+export function sourcePlan(category,biome,size,index,title,w,h,d) {
  const vox=new Map(),rooms=[],portals=[];
  function put(x,y,z,role,asset='live:wood',orientation='none',extra={}) {
   if(![x,y,z].every(Number.isInteger)||x<0||y<0||z<0||x>=w||y>=h||z>=d)

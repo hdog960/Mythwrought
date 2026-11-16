@@ -34,7 +34,16 @@ const ids=[
  'r1:stable:enchanted-forest:small:004',
  'r1:farm-barn:desert:large:001',
  'r1:farm-barn:snow:small:001',
- 'r1:farm-barn:enchanted-forest:medium:001'
+ 'r1:farm-barn:enchanted-forest:medium:001',
+ 'r1:bathhouse:temperate:medium:001',
+ 'r1:bathhouse:desert:small:001',
+ 'r1:bathhouse:snow:medium:001',
+ 'r1:stable:temperate:large:004',
+ 'r1:stable:desert:large:004',
+ 'r1:stable:snow:small:004',
+ 'r1:farm-barn:temperate:medium:001',
+ 'r1:farm-barn:mountain:small:001',
+ 'r1:farm-barn:enchanted-forest:large:001'
 ];
 const sizes=[[667,375],[844,390],[932,430]];
 const mime={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript','.json':'application/json'};
@@ -98,7 +107,7 @@ async function makeCDP(url){
  }
  return {send,exceptions,close:()=>ws.close()};
 }
-test('M1/M2 23 genuine source-served WebGL2 candidates × 3 iPhone landscapes × exterior/cutaway', {timeout:240000},async()=>{
+test('M1/M2 32 genuine source-served WebGL2 candidates × 3 iPhone landscapes × exterior/cutaway', {timeout:240000},async()=>{
  const profile=await mkdtemp(join(tmpdir(),'mythwrought-r1b-chrome-')),site=await localSite();
  const out=resolve(root,'artifacts/roadmap-1b');
  let chrome,cdp;
@@ -144,7 +153,7 @@ test('M1/M2 23 genuine source-served WebGL2 candidates × 3 iPhone landscapes ×
    evidence.push({...state,file,sha256:createHash('sha256').update(png).digest('hex'),
     rendererCategory:'source-authored-full-cell-proxy',physicalIPhone:false,physicalFamilyMeshes:false});
   }
-  assert.equal(evidence.length,138);
+  assert.equal(evidence.length,192);
   assert.equal(site.missing.length,0,'Missing module responses: '+site.missing.join(';'));
   assert.deepEqual(cdp.exceptions,[],'Unexpected Chromium errors');
   for(const id of ids)for(const [width,height] of sizes){
@@ -159,7 +168,7 @@ test('M1/M2 23 genuine source-served WebGL2 candidates × 3 iPhone landscapes ×
     physicalIPhone:false,physicalFamilyMeshes:false,source:'real 1B ES module coordinates in Chromium WebGL2',
     notes:'Proxy cube faces; cannot certify real Pack 4/5 parts, gameplay movement, or creator art.',
     evidence},null,2));
-  console.log('BUILDER 1B genuine source WebGL2 exterior+cutaway 138/138 PASS',
+  console.log('BUILDER 1B genuine source WebGL2 exterior+cutaway 192/192 PASS',
    JSON.stringify({candidates:ids.length,viewports:sizes,captures:evidence.length}));
  }finally{
   try{cdp?.close();}catch{}
