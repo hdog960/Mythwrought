@@ -1249,6 +1249,12 @@ const PLANS=[
         32,
         64,
         49
+      ],
+      [
+        3,
+        34,
+        14,
+        50
       ]
     ],
     "octagons": [],
@@ -1301,6 +1307,11 @@ const PLANS=[
         64,
         40,
         "east"
+      ],
+      [
+        3,
+        45,
+        "west"
       ]
     ],
     "fixtures": [
@@ -1327,6 +1338,10 @@ const PLANS=[
       [
         25,
         35
+      ],
+      [
+        9,
+        46
       ]
     ],
     "ridges": [],
@@ -1380,6 +1395,16 @@ const PLANS=[
           36,
           62,
           47
+        ]
+      },
+      {
+        "id": "west-lock-waterclock-calibration",
+        "kind": "artisan-study",
+        "rect": [
+          5,
+          42,
+          12,
+          48
         ]
       }
     ],
@@ -1441,6 +1466,18 @@ const PLANS=[
         ],
         "profile": "gable",
         "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          5,
+          42,
+          12,
+          48
+        ],
+        "profile": "hip",
+        "axis": "x",
         "high": 9,
         "period": 4
       }
@@ -1518,6 +1555,12 @@ const PLANS=[
         36,
         16,
         51
+      ],
+      [
+        56,
+        35,
+        65,
+        54
       ]
     ],
     "octagons": [],
@@ -1570,6 +1613,11 @@ const PLANS=[
         3,
         44,
         "west"
+      ],
+      [
+        65,
+        46,
+        "east"
       ]
     ],
     "fixtures": [
@@ -1596,6 +1644,10 @@ const PLANS=[
       [
         46,
         36
+      ],
+      [
+        62,
+        48
       ]
     ],
     "ridges": [],
@@ -1649,6 +1701,16 @@ const PLANS=[
           41,
           14,
           49
+        ]
+      },
+      {
+        "id": "outer-east-iceglass-polishing",
+        "kind": "artisan-study",
+        "rect": [
+          59,
+          43,
+          64,
+          52
         ]
       }
     ],
@@ -1709,6 +1771,18 @@ const PLANS=[
           49
         ],
         "profile": "hip",
+        "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          59,
+          43,
+          64,
+          52
+        ],
+        "profile": "gable",
         "axis": "z",
         "high": 9,
         "period": 4
@@ -2087,6 +2161,12 @@ const PLANS=[
         33,
         13,
         46
+      ],
+      [
+        43,
+        31,
+        50,
+        46
       ]
     ],
     "octagons": [],
@@ -2139,6 +2219,11 @@ const PLANS=[
         3,
         40,
         "west"
+      ],
+      [
+        50,
+        40,
+        "east"
       ]
     ],
     "fixtures": [
@@ -2160,6 +2245,10 @@ const PLANS=[
       ],
       [
         9,
+        40
+      ],
+      [
+        47,
         40
       ]
     ],
@@ -2213,6 +2302,16 @@ const PLANS=[
           5,
           37,
           12,
+          44
+        ]
+      },
+      {
+        "id": "outer-east-spirit-ink-press",
+        "kind": "workshop",
+        "rect": [
+          45,
+          37,
+          49,
           44
         ]
       }
@@ -2276,6 +2375,18 @@ const PLANS=[
         "profile": "hip",
         "axis": "z",
         "high": 8,
+        "period": 4
+      },
+      {
+        "rect": [
+          45,
+          37,
+          49,
+          44
+        ],
+        "profile": "saw",
+        "axis": "z",
+        "high": 9,
         "period": 4
       }
     ],
