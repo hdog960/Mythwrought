@@ -335,7 +335,7 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
         "pack5:096",
         "empty-display-stall",
         "oak-stall-divider",
-        "west"
+        "north"
       ],
       [
         5,

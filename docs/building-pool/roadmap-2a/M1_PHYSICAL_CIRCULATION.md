@@ -1,0 +1,4 @@
+# M1 true multi-cell walking-clearance correction
+A source-specific physical-footprint review discovered that a two-cell Pack 5 oak-stall divider in `r2:pet-shop:enchanted-forest:large:01` blocked the otherwise conceptually open coordinate `[3,9]` approaching the empty-stall room. The divider's explicit orientation was rotated **west → north** without changing its family, its one anchor coordinate, or any legacy General Store. This preserves the four distinct two-cell occupied stalls and frees the actual doorway approach.
+
+Dedicated native tests load the **real integrated `resolveManualFivePackAsset` producer** to reserve every physical Pack 5 fixture occupied offset, then perform a floor/three-high walking BFS into all named room access coordinates across all 38 authored 2A buildings. This is meaningful producer-backed collision-clearance screening, still NOT live game pathfinding, collision ABI integration, NPC behavior or physical iPhone approval.
