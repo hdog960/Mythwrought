@@ -1434,7 +1434,7 @@ const PLANS=[
         "axis": "x",
         "fixed": 16,
         "from": 22,
-        "to": 27,
+        "to": 26,
         "door": 24,
         "facing": "west"
       },
@@ -2063,7 +2063,7 @@ const PLANS=[
           40,
           19,
           49,
-          39
+          38
         ]
       },
       {
