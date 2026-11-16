@@ -20,7 +20,7 @@ function chromeBinary(){
 }
 function source(path,before,after){
  const input=readFileSync(join(ROOT,path),'utf8');
- const js=input.replace(/^import\s+.*?;\s*$/gm,'').replace(/\bexport\s+(?=const |function |class |let )/g,'');
+ const js=input.replace(/^import\s+.*?;\s*$/gm,'').replace(/\bexport\s+(?=const\b|function\b|class\b|let\b)/g,'');
  return {sha:hash(input),script:'(()=>{'+before+'\n'+js+'\n'+after+'\n})()'};
 }
 function bundle(){
