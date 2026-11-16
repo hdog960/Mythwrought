@@ -176,7 +176,7 @@ async function runWithBrowser(){
       submittedBufferBytes:data.submittedBufferBytes,
       proxyCells:data.unresolvedFullCellProxyCount,
       pngSha256:createHash('sha256').update(png).digest('hex')});
-    if(shots.length%6===0)console.log('4A M2 regional Chromium WebGL2 candidate captures',shots.length,'/ 12');
+    if(shots.length%6===0)console.log('4A M2 regional Chromium WebGL2 candidate captures',shots.length,'/ 24');
    }
   }
   const distinctScreens=new Set(shots.map(x=>x.pngSha256)).size;

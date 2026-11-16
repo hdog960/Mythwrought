@@ -12,12 +12,12 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 8,
-    "totalAuthored": 38,
-    "remaining": 277,
+    "newlyAuthored": 14,
+    "totalAuthored": 44,
+    "remaining": 271,
     "creatorAccepted": 0,
     "integratedBuildings": 0,
-    "m2Original": 8
+    "m2Original": 14
   },
   "biomes": [
     "temperate",
@@ -37,7 +37,7 @@
       "perBiomeSize": 5,
       "total": 75,
       "inherited": 15,
-      "remaining": 56,
+      "remaining": 53,
       "milestone": 2
     },
     {
@@ -45,7 +45,7 @@
       "perBiomeSize": 4,
       "total": 60,
       "inherited": 0,
-      "remaining": 56,
+      "remaining": 53,
       "milestone": 2
     },
     {
@@ -90,9 +90,9 @@
   "manualPacks": "96 manual families / 106 physical variants incorporated into main via PR #174; resolve runtime shapes via exact integrated catalog; imported blueprint dependency metadata is a preserved historic candidate snapshot",
   "biome130": "unregistered and non-verified symbols remain symbolic; do not allocate persistent IDs",
   "gates": {
-    "M0": "candidate migration committed; native exact-head focused CI pending",
-    "M1": "technical candidate M1 accepted from exact-head Actions #43770848853 (60/60 native, 180/180 genuine source-driven WebGL2 candidate proxy screenshots; physical/creator gates open)",
-    "M2": "REGIONAL EXPANSION CANDIDATES: 8 new designs total, four new snow/forest/desert/mountain plans; exact-head source-native and Chromium gallery pending",
+    "M0": "Accepted: exact-head Actions #43767981937 passed after fixing owned M0 count/list tests; 30 inherited source-exact designs preserved",
+    "M1": "Technical candidate acceptance: exact-head Actions #43770848853 passed, 180 source-driven Chromium WebGL2 exterior/cutaway proxy captures; physical/creator gates open",
+    "M2": "Expansion awaiting exact-head CI: 14 independently coordinate-authored M2 designs, 6 new temperate/snow/forest/mountain plans, new 36-view genuine Chromium WebGL2 gallery",
     "M3": "not started",
     "M4": "not started",
     "M5": "not started",
