@@ -238,6 +238,10 @@ function faeMarket(){
  for(const x of [11,25])for(const z of [13,21])p.post(x,z);
  r(p,11,11,13,21,6,B.leaves,'west-pergola');
  r(p,25,25,13,26,6,B.leaves,'long-east-pergola');
+ for(const x of [14,22]){
+  p.post(x,27,6); // Grounded independent ends of nine-cell canopy beam.
+  p.elevated(x,7,27,B.wood,'foundation-to-arch-bearing','wall');
+ }
  r(p,14,22,27,27,8,B.leaves,'high-festival-bough');
  p.furniture(18,16,B.light,'woodland-gathering-lamp','decor');
  return p.end({title:'Six-Lantern Woodland Festival',
