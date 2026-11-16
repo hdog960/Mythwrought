@@ -4,13 +4,14 @@
 // One in-flight edit per cell/sidecar. A rejected overlapping edit must not
 // touch world state or orientation; different cells remain independent.
 const activeEdits = new WeakMap();
-export async function commitOrientedEdit({cell, sidecar, readIdentity, edit, rollback}) {
+export async function commitOrientedEdit({cell, sidecar, readIdentity, edit, rollback, readState}) {
   if (!Array.isArray(cell) || cell.length !== 3 || !cell.every(Number.isSafeInteger))
     throw new TypeError('Invalid cell');
   if (!sidecar || typeof sidecar.get !== 'function' || typeof sidecar.invalidateEdit !== 'function')
     throw new TypeError('Invalid orientation sidecar');
   if ([readIdentity, edit, rollback].some(fn => typeof fn !== 'function'))
     throw new TypeError('Missing transaction callback');
+  if (readState !== undefined && typeof readState !== 'function') throw new TypeError('Invalid state reader');
   const key = [...cell];
   const address = key.join(',');
   let active = activeEdits.get(sidecar);
@@ -21,12 +22,19 @@ export async function commitOrientedEdit({cell, sidecar, readIdentity, edit, rol
   const before = await readIdentity(...key);
   if (!Number.isSafeInteger(before) || before < 0 || before >= 255)
     throw new TypeError('Invalid initial world identity');
+  // Optional opaque host revision/fingerprint detects same-ID geometry changes.
+  // The reader must return a stable primitive; no shape registry is assumed.
+  const initialState = readState ? await readState(...key) : undefined;
+  if (readState && !['string','number','boolean','bigint'].includes(typeof initialState))
+    throw new TypeError('Invalid initial state fingerprint');
   let result;
   try {
     result = await edit(...key);
     if (result !== true) {
       const after = await readIdentity(...key);
       if (after !== before) throw new Error('Rejected edit mutated world');
+      if (readState && await readState(...key) !== initialState)
+        throw new Error('Rejected edit mutated shape state');
       return result;
     }
     // A success acknowledgement is not enough: the world may have become
@@ -50,6 +58,8 @@ export async function commitOrientedEdit({cell, sidecar, readIdentity, edit, rol
       if (rollbackResult === false) throw new Error('Rollback explicitly rejected');
       const restored = await readIdentity(...key);
       if (restored !== before) throw new Error('Rollback did not restore world identity');
+      if (readState && await readState(...key) !== initialState)
+        throw new Error('Rollback did not restore shape state');
     } catch (rollbackError) {
       sidecar.invalidateEdit(key); // Fail closed: never keep a stale rotation.
       throw new AggregateError([error, rollbackError], 'World edit and rollback failed');
