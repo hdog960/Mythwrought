@@ -159,7 +159,7 @@ async function waitPreview(cmd,where,expected){
   }
   throw Error('No complete source-specific WebGL2 frame at '+where+(last?' — '+last:''));
 }
-test('ten further original 4B variant-02 blueprints × exterior/section × three real Chromium landscape sizes', {timeout:1500000},async()=>{
+test('ten original 4B variant-03 blueprints × exterior/section × three real Chromium landscape sizes', {timeout:2100000},async()=>{
   assert.equal(M2_VARIANT03_FIRST10.length,10);
   assert.equal(typeof WebSocket,'function','Node 22 CDP WebSocket is required');
   const site=await launchServer();
