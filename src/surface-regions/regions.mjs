@@ -179,11 +179,10 @@ export function createSurfaceBiomeWorldView(world,{
      !(world.edits instanceof Map)||world.edits.size!==0||
      !(world.rotations instanceof Map)||world.rotations.size!==0)return null;
   const cache=new Map();
-  // A profile that gains even one edit is no longer a fresh-world candidate.
-  // Disable ALL generated overlays immediately, including cached neighbor
-  // columns. Otherwise a later user edit could leave a raised ridge beside
-  // an edited column after the initial plan was cached.
-  const stillFresh=()=>world.edits.size===0&&world.rotations.size===0;
+  // The fresh-profile eligibility gate is checked only when the view is
+  // constructed. Later edits must not remove already visible natural terrain.
+  // Individual edited cells always defer to the authoritative world reader.
+  // Persistence of the opt-in profile flag remains a manual integrator gate.
   const planAt=(x,z)=>{
     const key=x+','+z;
     if(cache.has(key))return cache.get(key);
@@ -202,13 +201,13 @@ export function createSurfaceBiomeWorldView(world,{
     seed:world.seed,
     get(x,y,z){
       const original=world.get(x,y,z);
-      if(!stillFresh()||![x,y,z].every(Number.isInteger)||world.edits.has(x+','+y+','+z))
+      if(![x,y,z].every(Number.isInteger)||world.edits.has(x+','+y+','+z)||world.rotations.has(x+','+y+','+z))
         return original;
       return planAt(x,z)?.get(y)??original;
     },
     rotationAt(x,y,z){return world.rotationAt?.(x,y,z)??0;},
     // No set/save/restore methods: the view is deliberately read-only.
     get cachedColumns(){return cache.size;},
-    get active(){return stillFresh();}
+    get active(){return true;}
   });
 }
