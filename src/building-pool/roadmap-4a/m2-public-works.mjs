@@ -260,7 +260,32 @@ const PLANS=[
       41,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 29,
+        "from": 24,
+        "to": 26,
+        "door": 25,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 49,
+        "from": 24,
+        "to": 28,
+        "door": 26,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 45,
+        "from": 25,
+        "to": 35,
+        "door": 30,
+        "facing": "north"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "signature": [
@@ -487,7 +512,32 @@ const PLANS=[
       26,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 16,
+        "from": 23,
+        "to": 28,
+        "door": 25,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 29,
+        "from": 23,
+        "to": 27,
+        "door": 25,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 34,
+        "from": 23,
+        "to": 29,
+        "door": 26,
+        "facing": "north"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "signature": [
@@ -728,7 +778,32 @@ const PLANS=[
       33,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 22,
+        "from": 25,
+        "to": 28,
+        "door": 26,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 39,
+        "from": 20,
+        "to": 25,
+        "door": 22,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 42,
+        "from": 20,
+        "to": 25,
+        "door": 23,
+        "facing": "north"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "signature": [
@@ -981,7 +1056,32 @@ const PLANS=[
       35,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 24,
+        "from": 22,
+        "to": 28,
+        "door": 24,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 41,
+        "from": 21,
+        "to": 27,
+        "door": 24,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 44,
+        "from": 23,
+        "to": 30,
+        "door": 27,
+        "facing": "north"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "signature": [
@@ -1202,7 +1302,24 @@ const PLANS=[
       27,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 17,
+        "from": 23,
+        "to": 27,
+        "door": 25,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 31,
+        "from": 23,
+        "to": 26,
+        "door": 24,
+        "facing": "east"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "signature": [
@@ -1449,7 +1566,32 @@ const PLANS=[
       32,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 22,
+        "from": 21,
+        "to": 28,
+        "door": 23,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 35,
+        "from": 21,
+        "to": 27,
+        "door": 24,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 39,
+        "from": 22,
+        "to": 28,
+        "door": 25,
+        "facing": "north"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "signature": [
@@ -1700,7 +1842,32 @@ const PLANS=[
       38,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 26,
+        "from": 23,
+        "to": 28,
+        "door": 25,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 43,
+        "from": 24,
+        "to": 29,
+        "door": 26,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 46,
+        "from": 23,
+        "to": 30,
+        "door": 27,
+        "facing": "north"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "signature": [
@@ -1957,7 +2124,32 @@ const PLANS=[
       42,
       6
     ],
-    "partitions": [],
+    "partitions": [
+      {
+        "axis": "x",
+        "fixed": 30,
+        "from": 23,
+        "to": 29,
+        "door": 25,
+        "facing": "west"
+      },
+      {
+        "axis": "x",
+        "fixed": 48,
+        "from": 22,
+        "to": 28,
+        "door": 25,
+        "facing": "east"
+      },
+      {
+        "axis": "z",
+        "fixed": 48,
+        "from": 25,
+        "to": 35,
+        "door": 29,
+        "facing": "north"
+      }
+    ],
     "ridges": [],
     "skyline": [],
     "signature": [
