@@ -22,22 +22,26 @@ try{
         Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
         null,{timeout:60000});
       assert.equal(await page.evaluate(()=>!!document.querySelector('#scene').getContext('webgl2')),true);
-      await page.evaluate(()=>{
+      // Spawn-relative eye-level fixtures: close enough to visually inspect.
+      const fixtureY=await page.evaluate(()=>{
         const t=window.__mythwroughtTest;
-        t.placeFixture(16,18,0,350);
-        t.placeFixture(17,18,0,377);
-        t.placeFixture(18,18,0,385);
-        t.teleport(14.5,.5);t.aimAt(16,18,0);
+        const spawn=t.teleport(14.5,.5);
+        const y=Math.min(19,Math.floor(spawn.feet)+1);
+        t.placeFixture(16,y,0,350);
+        t.placeFixture(17,y,0,377);
+        t.placeFixture(18,y,0,385);
+        t.aimAt(16,y,0);
+        return y;
       });
       await page.waitForFunction(()=>
         Number(document.querySelector('#scene')?.dataset.biome130IceVertices)>0,
         null,{timeout:12000});
-      const state=await page.evaluate(()=>({
+      const state=await page.evaluate(y=>({
         iceVertices:Number(document.querySelector('#scene').dataset.biome130IceVertices),
-        ice:window.__mythwroughtTest.block(16,18,0),
-        oak:window.__mythwroughtTest.block(17,18,0),
-        moonwillow:window.__mythwroughtTest.block(18,18,0)
-      }));
+        ice:window.__mythwroughtTest.block(16,y,0),
+        oak:window.__mythwroughtTest.block(17,y,0),
+        moonwillow:window.__mythwroughtTest.block(18,y,0)
+      }),fixtureY);
       assert.equal(state.ice,350);assert.equal(state.oak,377);assert.equal(state.moonwillow,385);
       assert.ok(state.iceVertices>0);
       await page.waitForTimeout(250);
@@ -51,17 +55,25 @@ try{
           colors.add([png.data[i]>>4,png.data[i+1]>>4,png.data[i+2]>>4].join(','));
         }
       assert.ok(colors.size>=6,'Physical scene render appears blank');
+      // Second close-range view isolates the foliage rather than the ice
+      // target outline. Both PNGs are produced by the actual live renderer.
+      await page.evaluate(y=>window.__mythwroughtTest.aimAt(17,y,0),fixtureY);
+      await page.waitForTimeout(250);
+      const foliageShot=PNG.sync.read(await page.screenshot({
+        path:`artifacts/biome130-fidelity/biome130-foliage-${width}x${height}.png`}));
+      assert.equal(foliageShot.width,width);
+      assert.equal(foliageShot.height,height);
       await page.reload({waitUntil:'networkidle'});
       await page.waitForFunction(()=>window.__mythwroughtTest&&
         Number(document.querySelector('#scene')?.dataset.biome130IceVertices)>0,
         null,{timeout:60000});
-      assert.deepEqual(await page.evaluate(()=>[
-        window.__mythwroughtTest.block(16,18,0),
-        window.__mythwroughtTest.block(17,18,0),
-        window.__mythwroughtTest.block(18,18,0)
-      ]),[350,377,385],'Source blocks were not saved/restored');
+      assert.deepEqual(await page.evaluate(y=>[
+        window.__mythwroughtTest.block(16,y,0),
+        window.__mythwroughtTest.block(17,y,0),
+        window.__mythwroughtTest.block(18,y,0)
+      ],fixtureY),[350,377,385],'Source blocks were not saved/restored');
       assert.deepEqual(errors,[],'Runtime JS errors');assert.deepEqual(missing,[],'404 resources');
-      evidence.push({viewport:`${width}x${height}`,webgl2:true,iceVertices:state.iceVertices,
+      evidence.push({viewport:`${width}x${height}`,webgl2:true,fixtureY,iceVertices:state.iceVertices,
         iceId:350,foliageIds:[377,385],reloaded:true,colors:colors.size,
         physicalIPhoneTested:false});
       console.log('PASS biome130 live WebGL2',JSON.stringify(evidence.at(-1)));
