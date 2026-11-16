@@ -142,6 +142,36 @@ export function descentCells(origin=DESCENT_ORIGIN){
       for(let t=0;t<=10;t++)carve(39,t,2,5);
     }
   }
+  // Two differently proportioned natural vaults in the gaps between the
+  // established grotto levels. These are physically connected, outward-facing
+  // passages with floors and overhead AIR, not independent isolated fixtures.
+  // Their offset footprints create a winding erosion vault at -60 and a
+  // long transverse gallery at -150 without touching protected shallow cells.
+  for(const spec of [
+    {depth:-60,reach:30,width:8,length:14,offset:5,height:8},
+    {depth:-150,reach:35,width:5,length:23,offset:-7,height:10},
+  ]){
+    const anchor=route.find(p=>p.floor===spec.depth);
+    if(!anchor)continue;
+    const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+    const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+    const tangent=[outward[1],-outward[0]];
+    const carve=(d,t,halfWidth,headroom)=>{
+      for(let cross=-halfWidth;cross<=halfWidth;cross++){
+        const x=anchor.x+outward[0]*d+tangent[0]*(t+cross);
+        const z=anchor.z+outward[1]*d+tangent[1]*(t+cross);
+        set(x,spec.depth,z,BLOCK.DEEPSTONE);
+        for(let h=1;h<=headroom;h++)set(x,spec.depth+h,z,BLOCK.AIR);
+      }
+    };
+    for(let d=0;d<=spec.reach;d++)carve(d,0,2,5);
+    for(let d=spec.reach-5;d<=spec.reach+5;d++)
+      for(let t=spec.offset-spec.length;t<=spec.offset+spec.length;t++){
+        const nd=(d-spec.reach)/5,nt=(t-spec.offset)/spec.length;
+        if(nd*nd+nt*nt>1)continue;
+        carve(d,t,Math.max(0,Math.floor(spec.width*(1-nd*nd-nt*nt)/4)),spec.height);
+      }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
