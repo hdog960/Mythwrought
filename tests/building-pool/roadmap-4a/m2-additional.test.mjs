@@ -19,9 +19,9 @@ test('two new independently authored plans fill genuine additional biome/size qu
  assert.equal(all.length,34);
  assert.equal(validateCollection(all).verified,34);
  assert.equal(new Set(all.map(geometrySignature)).size,34);
- assert.equal(manifest.counts.totalAuthored,68);
- assert.equal(manifest.counts.newlyAuthored,38);
- assert.equal(manifest.counts.remaining,247);
+ assert.equal(manifest.counts.totalAuthored,76);
+ assert.equal(manifest.counts.newlyAuthored,46);
+ assert.equal(manifest.counts.remaining,239);
  assert.equal(manifest.counts.creatorAccepted,0);
  assert.equal(manifest.counts.integratedBuildings,0);
 });

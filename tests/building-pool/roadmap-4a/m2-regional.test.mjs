@@ -24,9 +24,9 @@ test('four original new regional designs fill unused explicit biome/size/variant
  assert.equal(new Set(combined.map(geometrySignature)).size,38);
  assert.equal(manifest.counts.planned,315);
  assert.equal(manifest.counts.legacyAuthored,30);
- assert.equal(manifest.counts.newlyAuthored,38);
- assert.equal(manifest.counts.totalAuthored,68);
- assert.equal(manifest.counts.remaining,247);
+ assert.equal(manifest.counts.newlyAuthored,46);
+ assert.equal(manifest.counts.totalAuthored,76);
+ assert.equal(manifest.counts.remaining,239);
  assert.equal(manifest.counts.creatorAccepted,0);
  assert.equal(manifest.counts.integratedBuildings,0);
 });
