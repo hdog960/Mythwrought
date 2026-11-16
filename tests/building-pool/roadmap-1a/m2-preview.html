@@ -12,7 +12,8 @@ footer{font-size:11px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-
 </style></head><body>
 <header><strong>Mythwrought · Builder 1A source QA</strong>
 <label>Blueprint <select id="blueprint" aria-label="Source-authored building"></select></label>
+<label>Geometry <select id="geometry"><option value="cube">Authored cell cubes</option><option value="physical">Source Pack visibleBoxes (provisional)</option></select></label>
 <label>View <select id="view"><option value="exterior">Exterior</option><option value="cutaway">Cutaway</option></select></label>
 </header><div id="frame"><canvas id="render" aria-label="Real WebGL2 voxel diagnostic, cube proxies only"></canvas></div>
-<footer><span id="details">Initializing source WebGL2…</span><span id="notice">Voxel cube envelopes only · NOT Pack physical AABB meshes, live-game art, or iPhone approval</span></footer>
+<footer><span id="details">Initializing source WebGL2…</span><span id="notice">Cell cube mode or source physical AABB mode · no final textures/load/weather/saves, live game or iPhone approval</span></footer>
 <script type="module" src="./m2-preview.mjs"></script></body></html>

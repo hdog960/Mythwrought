@@ -4,13 +4,14 @@ import {getM2Originals} from '../../../src/building-pool/roadmap-1a/m2-originals
 import {getM2HousingTranche} from '../../../src/building-pool/roadmap-1a/m2-housing-tranche.mjs';
 import {getM2HousingWave2} from '../../../src/building-pool/roadmap-1a/m2-housing-wave2.mjs';
 import {makeM2DiagnosticMesh} from './m2-preview-mesh.mjs';
+import {makeM2SourceAABBMesh} from './m2-source-aabb-mesh.mjs';
 import {fitM2Camera} from './m2-preview-camera.mjs';
 const inherited=getM1Blueprints().filter(b=>[
  'r1:house:enchanted-forest:medium:002','r1:tavern:enchanted-forest:small:001'].includes(b.id));
 const buildings=[...inherited,...getM1InnExemplars(),...getM2Originals(),...getM2HousingTranche(),...getM2HousingWave2()];
 const unique=new Map(buildings.map(b=>[b.id,b]));
 if(unique.size!==41)throw Error('Expected 41 distinct source-authored QA candidates');
-const input=document.getElementById('blueprint'),view=document.getElementById('view');
+const input=document.getElementById('blueprint'),view=document.getElementById('view'),mode=document.getElementById('geometry');
 const canvas=document.getElementById('render'),details=document.getElementById('details');
 for(const b of buildings){const o=document.createElement('option');o.value=b.id;o.textContent=b.title+' ('+b.biome+', '+b.size+')';input.add(o);}
 const gl=canvas.getContext('webgl2',{preserveDrawingBuffer:true,antialias:true,alpha:false});
@@ -48,14 +49,17 @@ function draw(){
 }
 function update(){
  const b=unique.get(input.value);if(!b)throw Error('Unknown authored blueprint '+input.value);
- const geometry=makeM2DiagnosticMesh(b,{cutaway:view.value==='cutaway'});
+ const isPhysical=mode.value==='physical';
+ const geometry=isPhysical?makeM2SourceAABBMesh(b,{cutaway:view.value==='cutaway'}):makeM2DiagnosticMesh(b,{cutaway:view.value==='cutaway'});
  gl.bufferData(gl.ARRAY_BUFFER,geometry.vertices,gl.STATIC_DRAW);
  current={building:b,geometry};
- details.textContent=b.id+' · '+geometry.displayedCells+'/'+geometry.sourceCells+
-  ' authored cells · '+geometry.triangles+' cube triangles · '+b.rooms.length+' rooms · '+b.portals.length+' portals · WebGL2 active · '+view.value;
+ details.textContent=b.id+' · '+geometry.displayedCells+'/'+geometry.sourceCells+' authored cells · '+
+  geometry.triangles+(isPhysical?' Pack visibleBox-derived AABB triangles (provisional state, diagnostic colors)':' cube triangles')+
+  ' · '+b.rooms.length+' rooms · '+b.portals.length+' portals · '+
+  (isPhysical?'Pack source AABBs WebGL2 active · ':'WebGL2 active · ')+view.value;
  draw();
 }
-input.addEventListener('change',update);view.addEventListener('change',update);
+input.addEventListener('change',update);view.addEventListener('change',update);mode.addEventListener('change',update);
 window.addEventListener('resize',draw);
 window.addEventListener('webglcontextlost',e=>{e.preventDefault();details.textContent='WebGL2 lost — screenshot invalid';});
 update();

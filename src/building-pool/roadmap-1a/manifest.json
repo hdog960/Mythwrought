@@ -54,7 +54,7 @@
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
     "Exact-head 69-pool native source acceptance and 246 Chromium WebGL2 source CELL-cube diagnostic captures",
-    "True source Pack1-5 physical visibleBoxes mesh exterior/cutaway evidence; collision/load/weather/hinge and save sidecars remain unapproved",
+    "30 source Pack1–5 visibleBoxes physical AABB browser candidate captures (new exact-head CI pending); collision/load/weather/hinge and save sidecars remain unapproved",
     "102 more genuine houses required to reach 150 M2 housing milestone",
     "Full 381 additional blueprints remain: 252 houses, 58 taverns, 71 inns",
     "Original 30 source-identity parity, seven sibling branch isolation, no deployment or production integration"
@@ -180,7 +180,8 @@
     "exactHeadNode": "pending",
     "webgl2Mode": "candidate source-cell-cube diagnostic NOT physical-family AABB",
     "cubeCaptureTarget": 246,
-    "physicalCaptureTarget": 0,
-    "creatorApproved": 0
+    "physicalCaptureTarget": 30,
+    "creatorApproved": 0,
+    "physicalRenderer": "true original Pack1–5 source visibleBoxes AABB geometry; provisional candidate state/colors, no production final visual/art or ABI approval"
   }
 }
