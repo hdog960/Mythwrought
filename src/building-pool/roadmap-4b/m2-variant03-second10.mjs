@@ -890,8 +890,8 @@ const PLANS=Object.freeze([
         "x",
         20,
         17,
-        24,
-        21
+        20,
+        19
       ]
     ],
     "peak": [

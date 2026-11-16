@@ -91,3 +91,24 @@ test('independent silhouettes reject floor near-duplicates across all previous a
  assert.ok(greatest<0.89);
  assert.equal(new Set(M2_83_ALL.map(geometrySignature)).size,83);
 });
+
+test('Iridescent Three-Lens lorehouse preserves a sealed but fully connected gallery',()=>{
+ const b=M2_VARIANT03_SECOND10.find(p=>p.provenance.originalPlan==='Iridescent Three-Lens Lorehouse');
+ assert.ok(b,'missing actual authored source blueprint');
+ const entry=b.openings.find(o=>o.kind==='entrance');
+ const internal=b.openings.filter(o=>o.kind==='door');
+ assert.deepEqual(internal.map(o=>o.at),[[20,2,19]],'gallery portal must remain at intended source coordinate');
+ assert.equal(b.spaces.length,5);
+ const walkable=new Set(b.navigation.map(n=>k(n.at)));
+ const seen=new Set([k(entry.at)]),todo=[entry.at];
+ for(let i=0;i<todo.length;i++){
+  const [x,y,z]=todo[i];
+  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+   const next=[x+dx,y,z+dz],key=k(next);
+   if(walkable.has(key)&&!seen.has(key)){seen.add(key);todo.push(next);}
+  }
+ }
+ assert.equal(seen.size,walkable.size,'stranded walk nodes on eastern lens must fail closed');
+ for(const room of b.spaces)assert.ok(seen.has(k(room.access)),'unreachable gallery room '+room.kind);
+ assert.equal(validateBlueprint(b).rooms,5);
+});
