@@ -338,7 +338,9 @@ function temperateTheater(){
  stage(p,8,20,14,18);
  for(const x of [6,22])for(let y=2;y<=6;y++)
   p.put(x,y,13,P.post,'wall',{role:'side-proscenium'});
- for(let x=8;x<=20;x++)for(let z=14;z<=18;z++)
+ // Four independently grounded eave-bearing posts support the raised stage roof.
+ for(const x of [7,21])for(const z of [14,18])p.post(x,z,7,P.post);
+ for(let x=7;x<=21;x++)for(let z=14;z<=18;z++)
   p.high(x,8,z,P.roof,'taller-covered-stage');
  p.screenX(20,1,27,[5,23]);
  for(const [x,z] of [[3,24],[25,24]])p.fixture(x,z,P.crate,'backstage-stage-scenery');
@@ -379,7 +381,7 @@ function forestTheater(){
  for(const x of [9,12,15])p.fixture(x,6,P.bench,'north-arc-seating');
  for(const x of [5,19])for(const z of [11,14])p.fixture(x,z,P.bench,'side-arc-seating');
  stage(p,9,15,10,16);
- for(const x of [8,16])for(const z of [9,17])p.post(x,z,6);
+ for(const x of [8,16])for(const z of [9,17])p.post(x,z,7);
  for(let x=8;x<=16;x++)for(let z=9;z<=17;z++)
   p.high(x,8,z,P.living,'raised-ring-stage-canopy');
  p.screenX(20,1,23,[4,20]);
@@ -410,7 +412,8 @@ function forestTheater(){
    {name:'east-ring',x:20,z:13},{name:'west-backstage',x:4,z:22},{name:'east-backstage',x:20,z:22}],
   stairIntents:[{x:8,y:2,z:13,shapeRotationStatus:'unresolved-symbolic'},
    {x:16,y:2,z:13,shapeRotationStatus:'unresolved-symbolic'}],
-  voids:[{x0:4,x1:20,z0:4,z1:19}]
+  voids:[{x0:4,x1:20,z0:4,z1:8},{x0:4,x1:20,z0:18,z1:19},
+   {x0:4,x1:7,z0:9,z1:17},{x0:17,x1:20,z0:9,z1:17}]
  });
 }
 export const M1_NEW_REGION_ARCHITECTURES=Object.freeze([
