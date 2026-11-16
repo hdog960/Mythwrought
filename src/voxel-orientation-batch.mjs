@@ -19,7 +19,7 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
   if (!held) {held=new Set();locks.set(sidecar,held);}
   if (keys.some(k=>held.has(k))) throw new Error('Overlapping batch edit');
   keys.forEach(k=>held.add(k));
-  const originals=[],states=[],written=[];
+  const originals=[],states=[],written=[],postWrites=new Map();
   try {
     // Preflight every identity before touching any cell.
     for (const c of cells) {
@@ -48,13 +48,21 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
         if (await edit(cells[i],i)!==true) throw new Error('Batch edit not acknowledged');
         if (!validId(await readIdentity(cells[i])))
           throw new Error('Invalid committed identity');
-        if (readState && !validState(await readState(cells[i])))
+        const committedState=readState ? await readState(cells[i]) : undefined;
+        if (readState && !validState(committedState))
           throw new Error('Invalid committed shape state');
+        postWrites.set(i,{id:await readIdentity(cells[i]),state:committedState});
       }
     } catch (error) {
       const failures=[];
       for (const i of [...written].reverse()) {
         try {
+          // A different editor may have changed an already-written cell while
+          // a later async edit was pending. Never undo that foreign change.
+          const post=postWrites.get(i);
+          if (post && (await readIdentity(cells[i])!==post.id ||
+              (readState && await readState(cells[i])!==post.state)))
+            throw new Error('Foreign edit during batch rollback');
           if (await rollback(cells[i],i)===false) throw new Error('Rollback rejected');
           if (await readIdentity(cells[i])!==originals[i]) throw new Error('Rollback identity mismatch');
           if (readState && await readState(cells[i])!==states[i]) throw new Error('Rollback shape state mismatch');
