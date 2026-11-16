@@ -1656,6 +1656,18 @@ const PLANS=[
         28,
         43,
         42
+      ],
+      [
+        60,
+        31,
+        69,
+        52
+      ],
+      [
+        2,
+        34,
+        12,
+        48
       ]
     ],
     "notches": [
@@ -1726,6 +1738,10 @@ const PLANS=[
       [
         43,
         39
+      ],
+      [
+        65,
+        44
       ]
     ],
     "rooms": [
@@ -1778,6 +1794,16 @@ const PLANS=[
           29,
           42
         ]
+      },
+      {
+        "id": "eastern-moonwood-weave-garden",
+        "kind": "artisan-terrace",
+        "rect": [
+          62,
+          40,
+          68,
+          50
+        ]
       }
     ],
     "roofBands": [
@@ -1825,6 +1851,18 @@ const PLANS=[
           54
         ],
         "profile": "shed",
+        "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          61,
+          39,
+          68,
+          51
+        ],
+        "profile": "saw",
         "axis": "z",
         "high": 9,
         "period": 4
