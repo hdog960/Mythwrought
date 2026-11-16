@@ -213,7 +213,7 @@ test('real legacy stone substrate is eligible only in untouched fresh columns',(
  }
 });
 
-test('cached surface plans fail closed after any later world edit or rotation',()=>{
+test('cached terrain remains stable after edits while edited cells take precedence',()=>{
  for(const seed of [179,7,2201]){
   const world=new VoxelWorld(seed);
   const view=createSurfaceBiomeWorldView(world,{
@@ -223,14 +223,21 @@ test('cached surface plans fail closed after any later world edit or rotation',(
   const r=SURFACE_BIOME_REGIONS[2],h=terrainHeight(r.x,r.z,seed);
   assert.equal(view.active,true);
   assert.equal(view.get(r.x,h,r.z),r.surface);
-  assert.ok(view.cachedColumns>0);
-  // Even a distant edit invalidates cached generated terrain: the source
-  // world is no longer a fresh profile, regardless of the edited location.
-  assert.equal(world.set(0,terrainHeight(0,0,seed)+1,0,4),true);
-  assert.equal(view.active,false);
-  assert.equal(view.get(r.x,h,r.z),world.get(r.x,h,r.z));
-  assert.equal(view.get(r.x,h+1,r.z),world.get(r.x,h+1,r.z));
-  assert.equal(view.get(0,terrainHeight(0,0,seed)+1,0),4);
+  const raised=view.get(r.x,h+1,r.z);
+  const cached=view.cachedColumns;
+  assert.ok(cached>0);
+  // A distant player build must not erase generated mountains.
+  const editY=terrainHeight(0,0,seed)+1;
+  assert.equal(world.set(0,editY,0,4),true);
+  assert.equal(view.active,true);
+  assert.equal(view.get(r.x,h,r.z),r.surface);
+  assert.equal(view.get(r.x,h+1,r.z),raised);
+  assert.equal(view.get(0,editY,0),4);
+  // An edit inside a generated column is authoritative at its exact cell.
+  assert.equal(world.set(r.x,h,r.z,4),true);
+  assert.equal(view.get(r.x,h,r.z),4);
+  assert.equal(view.get(r.x,h+1,r.z),raised);
+  // Creating a fresh view after any edit remains prohibited.
   assert.equal(createSurfaceBiomeWorldView(world,{
    enabled:true,profileIsFresh:true,isProtected:()=>false
   }),null);
