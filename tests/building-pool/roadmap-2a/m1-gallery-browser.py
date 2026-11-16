@@ -25,7 +25,7 @@ try:
     page.goto('http://127.0.0.1:4173/tests/building-pool/roadmap-2a/m1-gallery.html?view='+view)
     page.wait_for_function('window.__MW2A_GALLERY?.ready === true',timeout=45000)
     ids=page.locator('#building option').evaluate_all('(nodes)=>nodes.map(n=>n.value)')
-    if len(ids)!=80 or len(set(ids))!=74:raise AssertionError('Invalid actual source ID count')
+    if len(ids)!=80 or len(set(ids))!=80:raise AssertionError('Invalid actual source ID count')
     for idx,bid in enumerate(ids):
      page.select_option('#building',bid)
      data=page.evaluate('''() => {
@@ -59,7 +59,7 @@ try:
    page.close()
   br.close()
  if errors:raise AssertionError('Browser page errors: '+repr(errors[:10]))
- if len(records)!=480 or len({x['file'] for x in records})!=480 or len({x['id'] for x in records})!=74:
+ if len(records)!=480 or len({x['file'] for x in records})!=480 or len({x['id'] for x in records})!=80:
   raise AssertionError('Missing 480 authentic source captures')
  report={'commit':os.environ.get('GITHUB_SHA'),'designs':80,'screenshots':480,'groups':groups,
   'realChromiumWebGL2':True,'actualAuthoredCells':True,'cubeProxiesOnly':True,'realPackFamilyMeshes':False,

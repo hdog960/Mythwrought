@@ -287,8 +287,8 @@ export const M1_TWIN_SIDE_TERRACE_SPECS=Object.freeze([
         "cartographers-oak-desk"
       ],
       [
-        19,
-        28,
+        20,
+        27,
         "pack4:057",
         "sealed-trunk",
         null
@@ -384,8 +384,8 @@ export const M1_TWIN_SIDE_TERRACE_SPECS=Object.freeze([
         "cartographers-oak-desk"
       ],
       [
-        24,
-        28,
+        25,
+        27,
         "pack4:057",
         "dry-roots",
         null
@@ -481,8 +481,8 @@ export const M1_TWIN_SIDE_TERRACE_SPECS=Object.freeze([
         "cartographers-oak-desk"
       ],
       [
-        18,
-        29,
+        19,
+        28,
         "pack4:057",
         "dry-flour",
         null
