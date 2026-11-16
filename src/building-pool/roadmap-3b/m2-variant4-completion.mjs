@@ -2120,7 +2120,7 @@ const plans=[
   "eastX": 48,
   "eastZ": 12,
   "midZ": 27,
-  "title": "Estuary three-gate watermill and flood quern",
+  "title": "Watercourse stonewheel cathedral with narrow west quern cloister and off-axis eastern twin turbine bays",
   "mask": [
    [
     19,
@@ -2130,27 +2130,27 @@ const plans=[
    ],
    [
     1,
-    18,
-    18,
-    51
+    15,
+    20,
+    49
    ],
    [
-    3,
-    17,
+    4,
+    14,
     1,
     13
    ],
    [
-    30,
+    37,
     58,
-    3,
-    28
+    6,
+    24
    ],
    [
     32,
-    56,
-    33,
-    54
+    49,
+    34,
+    53
    ],
    [
     26,
@@ -2170,9 +2170,9 @@ const plans=[
     "name": "west workshop",
     "r": [
      2,
-     17,
-     19,
-     50
+     14,
+     21,
+     48
     ],
     "top": 26,
     "shape": "slope",
@@ -2182,10 +2182,10 @@ const plans=[
    {
     "name": "east offset machinery",
     "r": [
-     31,
+     38,
      57,
-     4,
-     27
+     7,
+     23
     ],
     "top": 23,
     "shape": "saw",
@@ -2196,9 +2196,9 @@ const plans=[
     "name": "side freight canopy",
     "r": [
      33,
-     55,
-     34,
-     53
+     48,
+     35,
+     52
     ],
     "top": 20,
     "shape": "cross",
@@ -2208,8 +2208,8 @@ const plans=[
    {
     "name": "outboard processing annex",
     "r": [
-     4,
-     16,
+     5,
+     13,
      2,
      12
     ],
@@ -2227,20 +2227,20 @@ const plans=[
      5,
      2,
      4,
-     20,
-     22
+     22,
+     24
     ],
     "pack4:057"
    ],
    [
     "source machinery cargo",
     [
-     32,
-     34,
+     39,
+     41,
      2,
      4,
-     5,
-     7
+     8,
+     10
     ],
     "pack4:056"
    ],
@@ -2251,8 +2251,8 @@ const plans=[
      36,
      2,
      4,
-     35,
-     37
+     36,
+     38
     ],
     "pack5:079"
    ]
@@ -2265,8 +2265,8 @@ const plans=[
      3,
      2,
      6,
-     23,
-     24
+     25,
+     26
     ],
     "pack2:015"
    ]
@@ -2275,14 +2275,14 @@ const plans=[
    [
     3,
     2,
-    21,
-    "west custom brace"
+    23,
+    "rivergrain buttress foot"
    ],
    [
-    56,
+    55,
     2,
-    25,
-    "east custom brace"
+    20,
+    "headwater gear post"
    ]
   ],
   "floor": "pack2:013",
@@ -3398,7 +3398,7 @@ const plans=[
   "eastX": 39,
   "eastZ": 11,
   "midZ": 21,
-  "title": "Cliffgrain Z-turn and north granite axle mill",
+  "title": "Rockspur two-courtyard quern complex with low west ledge and tall offset east grinding tower",
   "mask": [
    [
     17,
@@ -3407,28 +3407,28 @@ const plans=[
     42
    ],
    [
-    1,
-    16,
-    14,
-    38
+    2,
+    11,
+    17,
+    37
    ],
    [
-    4,
-    15,
     0,
-    11
+    13,
+    0,
+    9
    ],
    [
-    28,
+    32,
     45,
     2,
-    19
+    17
    ],
    [
+    29,
+    43,
     27,
-    44,
-    25,
-    41
+    39
    ],
    [
     15,
@@ -3447,10 +3447,10 @@ const plans=[
    {
     "name": "west workshop",
     "r": [
-     2,
-     15,
-     15,
-     37
+     3,
+     10,
+     18,
+     36
     ],
     "top": 23,
     "shape": "cross",
@@ -3460,10 +3460,10 @@ const plans=[
    {
     "name": "east offset machinery",
     "r": [
-     29,
+     33,
      44,
      3,
-     18
+     16
     ],
     "top": 20,
     "shape": "saw",
@@ -3473,10 +3473,10 @@ const plans=[
    {
     "name": "side freight canopy",
     "r": [
+     30,
+     42,
      28,
-     43,
-     26,
-     40
+     38
     ],
     "top": 17,
     "shape": "terrace",
@@ -3486,10 +3486,10 @@ const plans=[
    {
     "name": "outboard processing annex",
     "r": [
-     5,
-     14,
      1,
-     10
+     12,
+     1,
+     8
     ],
     "top": 15,
     "shape": "gable",
@@ -3501,20 +3501,20 @@ const plans=[
    [
     "source grain or timber sorting",
     [
-     3,
-     5,
+     4,
+     6,
      2,
      4,
-     16,
-     18
+     19,
+     21
     ],
     "pack4:057"
    ],
    [
     "source machinery cargo",
     [
-     30,
-     32,
+     34,
+     36,
      2,
      4,
      4,
@@ -3525,12 +3525,12 @@ const plans=[
    [
     "source finished stock reserve",
     [
-     29,
      31,
+     33,
      2,
      4,
-     27,
-     29
+     29,
+     31
     ],
     "pack5:079"
    ]
@@ -3539,28 +3539,28 @@ const plans=[
    [
     "interior load-bearing cross brace",
     [
-     3,
-     3,
+     4,
+     4,
      2,
      6,
-     19,
-     20
+     23,
+     24
     ],
     "pack2:015"
    ]
   ],
   "details": [
    [
-    3,
+    4,
     2,
-    17,
-    "west custom brace"
+    20,
+    "granite east-west grain stay"
    ],
    [
     43,
     2,
-    16,
-    "east custom brace"
+    14,
+    "cliff quern bearing foot"
    ]
   ],
   "floor": "pack1:007",
