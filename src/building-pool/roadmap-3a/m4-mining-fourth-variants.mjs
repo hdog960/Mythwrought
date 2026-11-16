@@ -73,7 +73,13 @@ function build(s){
   // long chevron ramps and different exterior footprints. Not a fixed box.
   const extended=6+Math.floor(taper*wing.reach/(wing.len-1))+
    Math.floor(Math.min(t,wing.len-1)/s.foldStride)+(wing.slope%2);
-  return wing.side==='west'?mid-5-extended:mid+6+extended;
+  // Large southeast loading annexes are actual grounded stone trading bays,
+  // NOT narrow triangular decorative cones: hold the far perimeter at least
+  // fourteen cells from the axial corridor at both ends of the chevron.
+  // The interior zigzag changes with the site's authored original brief.
+  const supported=wing.id==='southeast'&&s.size==='large'
+   ?Math.max(14,extended):extended;
+  return wing.side==='west'?mid-5-supported:mid+6+supported;
  }
  function wingAt(x,z){
   for(const a of wings){
