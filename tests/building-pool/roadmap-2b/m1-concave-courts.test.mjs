@@ -221,10 +221,10 @@ test('exact committed PR HEAD source blob and 84/420 cumulative original registr
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,ledger.authoredCandidates,
   ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],
-  [420,15,69,84,336,0,0,0]);
- assert.equal(ledger.originals.length,69);
+  [420,15,75,90,330,0,0,0]);
+ assert.equal(ledger.originals.length,75);
  assert.deepEqual(new Set(ledger.originals.map(x=>x.id)),
   new Set(all.filter(x=>x.category!=='temple'||x.variation!==1).map(x=>x.id)));
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),84);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),336);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),90);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),330);
 });
