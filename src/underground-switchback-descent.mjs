@@ -87,6 +87,35 @@ export function descentCells(origin=DESCENT_ORIGIN){
       for(let h=1;h<=5;h++)set(x,depth+h,z,BLOCK.AIR);
     }
   }
+  // A broad stepped echo hall between the middle and lower grotto bands.
+  // Its outer placement avoids the main spiral. Two terraces descend by one
+  // voxel each, with a continuous five-wide, five-high walking approach.
+  // This is authored AIR and DEEPSTONE, not a render-only decoration.
+  {
+    const depth=-105,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      for(let d=0;d<=42;d++){
+        const floor=depth-Math.min(2,Math.floor(d/14));
+        for(let across=-2;across<=2;across++){
+          const x=anchor.x+outward[0]*d+tangent[0]*across;
+          const z=anchor.z+outward[1]*d+tangent[1]*across;
+          set(x,floor,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=6;h++)set(x,floor+h,z,BLOCK.AIR);
+        }
+      }
+      for(let d=28;d<=44;d++)for(let across=-10;across<=10;across++){
+        if((d-36)*(d-36)+across*across>100)continue;
+        const floor=depth-2;
+        const x=anchor.x+outward[0]*d+tangent[0]*across;
+        const z=anchor.z+outward[1]*d+tangent[1]*across;
+        set(x,floor,z,BLOCK.DEEPSTONE);
+        for(let h=1;h<=9;h++)set(x,floor+h,z,BLOCK.AIR);
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
