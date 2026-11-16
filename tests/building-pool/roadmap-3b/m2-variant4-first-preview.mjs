@@ -31,7 +31,7 @@ function draw(){
 }
 function update(){
  const [type,biome,size]=selections.design.value.split(':');
- const b=createVariant4FirstBlueprint(type,biome,size,3),geometry=createPreviewMesh(b,{cutaway:selections.view.value==='cutaway'});
+ const b=createVariant4FirstBlueprint(type,biome,size,4),geometry=createPreviewMesh(b,{cutaway:selections.view.value==='cutaway'});
  gl.bufferData(gl.ARRAY_BUFFER,geometry.vertices,gl.STATIC_DRAW);
  current={b,geometry};
  details.textContent=`${b.id} · ${geometry.sourceCells.toLocaleString()} displayed envelope voxels · ${geometry.triangleCount.toLocaleString()} visible triangles · WebGL2 active · ${selections.view.value}`;
