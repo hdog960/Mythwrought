@@ -58,7 +58,7 @@ export function buildAmberstepBasin(){
  shed(1,4,1,17,5,7,'desert-west-arcade','live:stone');
  shed(12,15,1,17,5,7,'desert-east-arcade','live:stone');
  shed(5,11,13,17,5,4,'desert-ablution-gallery','live:wood');
- for(const [x,z] of [[3,4],[13,4],[3,10],[13,10]])support(x,z,4,'live:stone','desert-court-pillar');
+ for(const [x,z] of [[3,4],[13,4],[3,10],[13,10]])support(x,z,z===10?5:4,'live:stone','desert-court-pillar');
  rim(4,7,14,16,5,'live:stone','left-empty-ablution');
  rim(10,13,14,16,11,'live:stone','right-empty-ablution');
  for(const [x,z,p] of [[4,3,'travel-cloak-bench'],[12,3,'linen-stack'],
@@ -94,8 +94,8 @@ export function buildGlacierEmberBath(){
  for(let z=10;z<=19;z++)for(const x of [1,2,3,4,19,20,21,22,23])
    put(x,8+Math.floor((z-10)/5),z,'roof','live:wood','north',
    {roofProfile:'snow-side-wing-sheds',bearingApproved:false});
- for(const [x,z] of [[5,5],[19,5],[5,15],[21,15],[9,23],[16,23]])
-  support(x,z,7,'live:stone','insulated-buttress');
+ for(const [x,z] of [[5,5],[19,5],[3,15],[21,15],[9,23],[16,23]])
+  support(x,z,z===23?9:8,'live:stone','insulated-buttress');
  rim(3,8,22,24,5,'live:stone','covered-ice-basin-rim');
  rim(17,21,22,24,19,'live:stone','sun-melt-basin-rim');
  for(const [x,z,p] of [[4,4,'dry-clothing-rack'],[19,4,'glove-drying-bench'],
@@ -138,7 +138,7 @@ export function buildClovermeadowStable(){
   put(x,8+Math.floor((12-x)/5),z,'roof','live:wood','east',{roofProfile:'west-stall-lean-roof'});
  for(let x=18;x<=29;x++)for(let z=9;z<=23;z++)
   put(x,8+Math.floor((x-18)/5),z,'roof','live:wood','east',{roofProfile:'east-stall-lean-roof'});
- for(const x of [5,25])for(const z of [5,12,21,28])support(x,z,7,'live:wood','equine-yard-structural-pier');
+ for(const x of [5,25])for(const z of [5,12,21,28])support(x,z,8,'live:wood','equine-yard-structural-pier');
  for(const x of [5,8,22,25])for(const z of [11,19])fitting(x,z,'empty-hay-feeder');
  for(const [x,z,p] of [[5,4,'unloaded-hay-cart'],[25,4,'saddle-rack'],
   [7,28,'bedding-store'],[23,28,'repair-equipment-shelf']])fitting(x,z,p);
@@ -180,7 +180,7 @@ export function buildCopperduneCaravanStable(){
   put(x,7+Math.floor((x-17)/6),z,'roof','live:stone','east',{roofProfile:'desert-east-canopy'});
  shed(12,16,1,7,7,5,'caravan-entry-bridge','live:wood');
  hip(1,27,24,29,7,4,'south-repair-hip','live:wood');
- for(const x of [5,23])for(const z of [5,11,17,25])support(x,z,6,'live:stone','arcade-standing-column');
+ for(const x of [5,23])for(const z of [5,11,17,25])support(x,z,z===25?6:7,'live:stone','arcade-standing-column');
  for(const x of [4,8,20,24])for(const z of [4,10,16,21])fitting(x,z,'empty-stall-waterless-manger');
  for(const [x,z,p] of [[4,26,'saddle-strap-frame'],[24,26,'caravan-supply-cabinet'],
   [14,26,'animal-free-grooming-rack']])fitting(x,z,p);
@@ -217,7 +217,7 @@ export function buildIcetrailStable(){
  for(const [x,z,f] of [[3,1,'north'],[15,1,'north'],[1,6,'west'],[17,6,'east'],[4,21,'south'],[14,21,'south']])pane(x,z,f);
  gable(1,21,1,17,7,2,'live:wood','icetrail-steep-crosswind-roof');
  for(const [x,z] of [[4,5],[14,5],[4,13],[14,13],[4,19],[14,19]])
-  support(x,z,6,'live:stone','windward-wall-support');
+  support(x,z,7,'live:stone','windward-wall-support');
  for(const [x,z,p] of [[4,4,'grain-crate-empty'],[14,4,'grain-crate-empty'],
   [4,12,'empty-hay-trough'],[14,12,'empty-hay-trough'],
   [5,19,'ice-scraper-rack'],[13,19,'gear-cabinet']])fitting(x,z,p);
@@ -284,7 +284,7 @@ export function buildTalusStepBarn(){
   [1,15,'west'],[17,15,'east'],[4,21,'south'],[14,21,'south']])pane(x,z,f);
  shed(1,17,1,21,8,3,'rising-mountain-retaining-roof','live:stone');
  for(const [x,z] of [[4,4],[14,4],[4,12],[14,12],[4,20],[14,20]])
-  support(x,z,7,'live:stone','tapered-slope-bearing-pier');
+  support(x,z,7+Math.floor((z-1)/3),'live:stone','tapered-slope-bearing-pier');
  for(const [x,z,p] of [[5,4,'miner-empty-load-box'],[13,4,'mountain-flour-crate'],
   [4,13,'dry-grain-shelf'],[14,13,'tool-sharpening-stand-nonfunctional'],
   [5,20,'rock-hammer-cabinet'],[13,20,'stored-forest-grain']])fitting(x,z,p);
@@ -320,7 +320,7 @@ export function buildBriarhallCuringBarn(){
  for(let x=19;x<=29;x++)for(let z=10;z<=23;z++)
   put(x,8+Math.floor((x-19)/4),z,'roof','live:wood','east',{roofProfile:'eastern-herb-drying-shed'});
  for(const [x,z] of [[4,5],[26,5],[4,14],[26,14],[4,22],[26,22],[4,29],[26,29]])
-  support(x,z,7,'live:wood','living-timber-loaded-post');
+  support(x,z,[14,22].includes(z)?8:7,'live:wood','living-timber-loaded-post');
  for(const [x,z,p] of [[5,5,'drying-bundle-lattice'],[25,5,'empty-basket-crate'],
   [5,13,'moss-rack-no-harvest'],[25,13,'seedling-propagation-frame'],
   [5,20,'fungus-curing-shelf-no-harvest'],[25,20,'loom-material-bin'],

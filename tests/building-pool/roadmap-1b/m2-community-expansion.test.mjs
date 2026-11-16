@@ -137,3 +137,22 @@ test('Enchanted large Briarhall curing barn keeps the center uncovered between f
  assert.ok(purpose(b,'living-timber-loaded-post').length>=48);
  assert.equal(b.architecturalIdentity.harvesting,false);
 });
+
+test('M2b all 55 actual pillar heads contact physical source roof cells without floating gaps',()=>{
+ const plans=getM2Expansion1BPlans();
+ let bearingPosts=0;
+ for(const b of plans){
+  const occ=physical(b);
+  const heads=b.placements.filter(p=>p.role==='support'&&
+   occ.get(K([p.at[0],p.at[1]+1,p.at[2]]))?.role!=='support');
+  assert.ok(heads.length>=4,'roof lacks original post heads: '+b.id);
+  for(const p of heads){
+   const foot=occ.get(K([p.at[0],0,p.at[2]]));
+   const cap=occ.get(K([p.at[0],p.at[1]+1,p.at[2]]));
+   assert.equal(foot?.role,'foundation','pillar missing structural ground cell '+b.id+' '+K(p.at));
+   assert.equal(cap?.role,'roof','roof physically detached from support '+b.id+' '+K(p.at));
+  }
+  bearingPosts+=heads.length;
+ }
+ assert.equal(bearingPosts,60,'pillar tally drift: inspect actual roof-to-post paths');
+});
