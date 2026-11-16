@@ -26,3 +26,7 @@ Eight isolated original geometry plans introduced in `m2-civic-works.mjs`; see `
 
 ## M2 public works addendum (2026-11-16)
 Eight new original coordinate designs in `m2-public-works.mjs` raise totals to **108/315** (30 inherited, 78 new, 207 remaining). See `docs/building-pool/roadmap-4a/M2_PUBLIC_WORKS_ACCEPTANCE.md`. All historical M0 counts above are a frozen handoff snapshot. No world placement or creator acceptance.
+
+
+## M2 Guild & Civic tranche (2026-11-16)
+Eight more coordinate-authored candidate designs in `m2-guild-civic.mjs` bring the catalog to **116/315** theoretical (30 inherited, 86 newly authored), 199 remaining. Four civic halls and four guildhalls, each distinct by biome/size profile with natural roof mass and connected internal routes. See `docs/building-pool/roadmap-4a/M2_GUILD_CIVIC_ACCEPTANCE.md`. The earlier M0 and M2 counts above are historical checkpoints, not current totals. No live integration, developer asset registration or creator acceptance.
