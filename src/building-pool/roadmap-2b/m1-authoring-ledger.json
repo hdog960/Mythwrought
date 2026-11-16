@@ -6,9 +6,9 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 93,
-  "authoredCandidates": 108,
-  "remainingUnauthored": 312,
+  "originalNewModels": 100,
+  "authoredCandidates": 115,
+  "remainingUnauthored": 305,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
@@ -19,34 +19,34 @@
       "remaining": 44
     },
     "tailor": {
-      "authored": 13,
-      "target": 60,
-      "remaining": 47
-    },
-    "butcher": {
-      "authored": 13,
-      "target": 60,
-      "remaining": 47
-    },
-    "jeweler": {
-      "authored": 13,
-      "target": 60,
-      "remaining": 47
-    },
-    "bookshop": {
       "authored": 14,
       "target": 60,
       "remaining": 46
     },
+    "butcher": {
+      "authored": 14,
+      "target": 60,
+      "remaining": 46
+    },
+    "jeweler": {
+      "authored": 14,
+      "target": 60,
+      "remaining": 46
+    },
+    "bookshop": {
+      "authored": 15,
+      "target": 60,
+      "remaining": 45
+    },
     "temple": {
-      "authored": 23,
+      "authored": 24,
       "target": 75,
-      "remaining": 52
+      "remaining": 51
     },
     "theater": {
-      "authored": 16,
+      "authored": 18,
       "target": 45,
-      "remaining": 29
+      "remaining": 27
     }
   },
   "originals": [
@@ -514,6 +514,41 @@
       "id": "r2:jeweler:snow:small:02",
       "file": "src/building-pool/roadmap-2b/m1-regional-guildwings.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:mountain:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:snow:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:desert:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:enchanted-forest:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:snow:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-windfold-guilds.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:enchanted-forest:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-windfold-guilds.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:desert:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-windfold-guilds.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
@@ -523,23 +558,23 @@
       "large": 7
     },
     "desert": {
-      "small": 6,
+      "small": 7,
       "medium": 8,
-      "large": 8
+      "large": 9
     },
     "snow": {
       "small": 8,
-      "medium": 10,
-      "large": 5
+      "medium": 11,
+      "large": 6
     },
     "enchanted-forest": {
       "small": 5,
       "medium": 6,
-      "large": 8
+      "large": 10
     },
     "mountain": {
       "small": 8,
-      "medium": 8,
+      "medium": 9,
       "large": 6
     }
   },
