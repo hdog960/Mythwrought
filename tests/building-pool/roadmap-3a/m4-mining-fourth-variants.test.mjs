@@ -73,6 +73,18 @@ test('M4 fourth: 15 independently briefed four-chevron radial mining headhouses,
   assert.equal(b.status,'theoretical');assert.equal(b.worldPlaced,false);
   assert.equal(b.productionRegistered,false);
   assert.equal(b.architecture.wingCount,4);
+  if(b.size==='large'){
+   // Regress the demonstrated large southeast visual wedge defect using
+   // physical authored foundation, not a mock preview image or plan label.
+   const s=M4_MINING_FOURTH_SPECS.find(v=>v.biome===b.biome&&v.size===b.size);
+   const xCenter=Math.floor(b.envelope.width/2)-1;
+   for(const z of [s.southeastZ+1,s.southeastZ+s.southeastLen-2])
+    for(let x=xCenter+6;x<=xCenter+20;x++){
+     assert.ok(filled.has(at(x,0,z)),b.id+' large southeast annex missing grounded masonry at '+x+','+z);
+     assert.ok(filled.has(at(x,1,z)),b.id+' large southeast annex missing real stone deck at '+x+','+z);
+    }
+  }
+
   assert.equal(b.spaces.length,7);assert.equal(b.navigation.nodes.length,8);
   assert.equal(b.features.length,2);
   assert.ok(cells(b).length>7500,'Not original full 3D source architecture '+b.id);
