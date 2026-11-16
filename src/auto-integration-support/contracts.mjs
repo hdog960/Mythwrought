@@ -59,6 +59,10 @@ export function validateCaveHandshake({surfaceY,entranceY,depthMinY,depthMaxY,pa
 export function validateObjectAnchors(objects,{occupiedCells=[],maxTriangles=12000}={}) {
   if (!Array.isArray(objects) || !Array.isArray(occupiedCells) || !integer(maxTriangles) || maxTriangles<0)
     throw new TypeError('invalid object budget or anchors');
+  // Producer-provided occupancy must be an exact world-cell lattice, never a coerced key.
+  // Otherwise malformed or rounded coordinates can hide a footprint collision.
+  if (!occupiedCells.every(p=>p && ['x','y','z'].every(k=>integer(p[k]))))
+    return Object.freeze({ok:false,reason:'invalid-occupied-cell'});
   const blocked=new Set(occupiedCells.map(p=>key(p.x,p.y,p.z)));
   const identities=new Set(); let triangles=0;
   for (const o of objects) {
@@ -68,7 +72,11 @@ export function validateObjectAnchors(objects,{occupiedCells=[],maxTriangles=120
         !integer(o.triangles) || o.triangles<0 || !['opaque','cutout','blend'].includes(o.alphaMode))
       return Object.freeze({ok:false,reason:'invalid-object'});
     if (identities.has(o.id)) return Object.freeze({ok:false,reason:'duplicate-object-id'});
-    identities.add(o.id); triangles+=o.triangles;
+    identities.add(o.id);
+    // Fail before adding beyond the budget; avoids precision loss in large producer batches.
+    if (o.triangles>maxTriangles-triangles)
+      return Object.freeze({ok:false,reason:'triangle-budget'});
+    triangles+=o.triangles;
     for (const offset of o.footprint) {
       if (!offset || !['x','y','z'].every(k=>integer(offset[k])))
         return Object.freeze({ok:false,reason:'invalid-footprint'});
