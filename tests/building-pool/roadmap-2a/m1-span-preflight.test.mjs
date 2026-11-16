@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {SPAN_CANDIDATES,inspect2AConceptualRoofSpans} from '../../../src/building-pool/roadmap-2a/m1-span-preflight.mjs';
 
 test('all 44 source roof plates report actual lateral reach from bearing wall, not a fictitious supported flag',()=>{
- const r=inspect2AConceptualRoofSpans();assert.equal(r.buildings,50);
- assert.equal(r.spans.length,50);assert(r.directlySupportedRoofCells>0);assert(r.roofCellsWithoutDirectBearing>10000);
+ const r=inspect2AConceptualRoofSpans();assert.equal(r.buildings,56);
+ assert.equal(r.spans.length,56);assert(r.directlySupportedRoofCells>0);assert(r.roofCellsWithoutDirectBearing>10000);
  assert(r.maximumLateralCellsToNearestBearing>=5);
  assert(r.unapprovedSpandrelCells>100);
  assert.equal(r.unrootedElevations,0,'authored elevated roof geometry must have a connected source root');
