@@ -128,7 +128,7 @@ export async function captureMiningSecond(){
    nonBlank:true,zeroGLErrors:true,webgl2:true,diagnosticCubesNotPackShapes:true,
    productionIntegrated:false,physicalIPhoneTested:false,count:records.length,records};
   writeFileSync(join(output,'CAPTURE_MANIFEST.json'),JSON.stringify(manifest,null,2)+'\n');
-  console.log('REAL SOURCE CHROMIUM FOURTH 90/90 nonblank/WebGL2/zero GL errors; source hashes recorded');
+  console.log('REAL SOURCE CHROMIUM M4 MINING SECOND 90/90 nonblank/WebGL2/zero GL errors; source hashes recorded');
   return manifest;
  }finally{await browser.close()}
 }
