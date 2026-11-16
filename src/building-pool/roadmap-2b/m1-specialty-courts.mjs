@@ -289,7 +289,10 @@ function snowStage(){
  p.furniture(2,5,B.light,'public-wayfinding','decor');
  for(const x of [7,19])p.furniture(x,18,B.stair,'symbolic-stage-ramp','fixture',
   {shapeRotationStatus:'unresolved-symbolic'});
- for(let z=4;z<=26;z++)p.elevated(c,9,z,B.snow,'high-snow-auditorium-ridge');
+ for(let z=4;z<=26;z++){
+  if(z<17||z>21)p.elevated(c,8,z,B.snow,'ridge-bearing-course');
+  p.elevated(c,9,z,B.snow,'high-snow-auditorium-ridge');
+ }
  return p.end({title:'Snowveil Insulated Playhouse',
   signature:'two-threshold winter audience hall, separated seat banks, eleven-by-five raised stage under independently supported roof, sealed two-door dressing room',
   roofForm:'full snow roof, higher raised insulated stage cover and reinforced long center ridge',
