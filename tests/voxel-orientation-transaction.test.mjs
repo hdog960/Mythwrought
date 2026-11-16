@@ -101,3 +101,31 @@ test('failed edit releases cell lock for subsequent recovery',async()=>{
   assert.equal(await f.run(()=>true),true);
   assert.equal(f.sidecar.get(f.cell,4),0);
 });
+
+test('successful edit with invalid readback rolls back and retains orientation',async()=>{
+  const f=fixture();
+  let reads=0;
+  await assert.rejects(f.run(()=>{f.setId(255);return true;},{
+    readIdentity:()=>{reads++;return f.readIdentity();}
+  }),/invalid world identity/);
+  assert.equal(reads,3);
+  assert.equal(f.readIdentity(),4);
+  assert.equal(f.sidecar.get(f.cell,4),3);
+});
+
+test('successful edit with unavailable readback rolls back before returning',async()=>{
+  const f=fixture();
+  let reads=0;
+  await assert.rejects(f.run(()=>{f.setId(5);return true;},{
+    readIdentity:()=>{if(++reads===2)throw Error('readback unavailable');return f.readIdentity();}
+  }),/readback unavailable/);
+  assert.equal(f.readIdentity(),4);
+  assert.equal(f.sidecar.get(f.cell,4),3);
+});
+
+test('successful valid edit invalidates old orientation after commit readback',async()=>{
+  const f=fixture();
+  assert.equal(await f.run(()=>{f.setId(5);return true;}),true);
+  assert.equal(f.readIdentity(),5);
+  assert.equal(f.sidecar.get(f.cell,4),0);
+});
