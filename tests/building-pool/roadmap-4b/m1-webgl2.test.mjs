@@ -3,7 +3,7 @@
 // committed M1 source. Never interprets cube proxies as final physical-family meshes.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {existsSync,readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync} from 'node:fs';
+import {existsSync,readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync,statSync} from 'node:fs';
 import {createServer} from 'node:http';
 import {join,resolve,extname} from 'node:path';
 import {tmpdir} from 'node:os';
@@ -16,6 +16,30 @@ import {M1_EXEMPLARS} from '../../../src/building-pool/roadmap-4b/m1-exemplars.m
 const root=resolve(fileURLToPath(new URL('../../../',import.meta.url)));
 const viewports=[[667,375],[844,390],[932,430]];
 const output=resolve(root,'artifacts/building-pool/roadmap-4b/m1-webgl2-cube-proxy');
+
+// Bound concurrent Chrome memory/GPU pressure among independent 4B Node test workers.
+// The underlying real Chromium captures remain mandatory, never mocked or skipped.
+const captureLock=resolve(root,'artifacts/building-pool/roadmap-4b/.chromium-exclusive-lock');
+async function claimCaptureLock(){
+  mkdirSync(resolve(root,'artifacts/building-pool/roadmap-4b'),{recursive:true});
+  const began=Date.now();
+  for(;;){
+    try {
+      mkdirSync(captureLock);
+      return ()=>rmSync(captureLock,{recursive:true,force:true});
+    } catch(e){
+      if(e.code!=='EEXIST')throw e;
+      // Only consider stale when a previous worker exceeded the *entire* suite budget.
+      if(Date.now()-statSync(captureLock).mtimeMs>12*60000){
+        rmSync(captureLock,{recursive:true,force:true});
+        continue;
+      }
+      if(Date.now()-began>8*60000)throw Error('Builder 4B timed out waiting for exclusive authentic Chromium/GPU access');
+      await sleep(150);
+    }
+  }
+}
+
 const MIME={'.mjs':'text/javascript; charset=utf-8','.js':'text/javascript; charset=utf-8',
   '.html':'text/html; charset=utf-8','.json':'application/json; charset=utf-8'};
 function launchServer(){
@@ -57,10 +81,18 @@ async function launchChrome(){
     throw Error('Chromium did not expose a DevTools port (no simulated browser fallback)');}
   const version=await (await fetch('http://127.0.0.1:'+port+'/json/version')).json();
   const ws=new WebSocket(version.webSocketDebuggerUrl);
-  await new Promise((ok,bad)=>{
-    ws.addEventListener('open',ok,{once:true});
-    ws.addEventListener('error',bad,{once:true});
-  });
+  try {
+    await Promise.race([
+      new Promise((ok,bad)=>{
+        ws.addEventListener('open',ok,{once:true});
+        ws.addEventListener('error',bad,{once:true});
+      }),
+      sleep(15000).then(()=>{throw Error('Builder 4B real Chromium CDP WebSocket handshake exceeded 15 seconds');})
+    ]);
+  } catch(e){
+    ws.close();child.kill();rmSync(dir,{recursive:true,force:true});
+    throw e;
+  }
   let next=0;
   const pending=new Map();
   ws.addEventListener('message',event=>{
@@ -71,8 +103,18 @@ async function launchChrome(){
     msg.error?p.reject(Error(JSON.stringify(msg.error))):p.resolve(msg.result);
   });
   const send=(method,params={},sessionId)=>new Promise((ok,bad)=>{
-    const id=++next;pending.set(id,{resolve:ok,reject:bad});
-    ws.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));
+    const id=++next;
+    // A failed Chrome socket must fail the test, never hang the whole 45-minute CI job.
+    const timeout=setTimeout(()=>{
+      pending.delete(id);
+      bad(Error('Builder 4B real Chromium CDP command timed out after 25 seconds: '+method));
+    },25000);
+    pending.set(id,{
+      resolve:value=>{clearTimeout(timeout);ok(value);},
+      reject:error=>{clearTimeout(timeout);bad(error);}
+    });
+    try {ws.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));}
+    catch(e){clearTimeout(timeout);pending.delete(id);bad(e);}
   });
   return {send,close:()=>{ws.close();child.kill();rmSync(dir,{recursive:true,force:true});},binary};
 }
@@ -89,16 +131,17 @@ async function waitPreview(cmd,where,expected){
   }
   throw Error('No complete source-specific WebGL2 frame at '+where+(last?' — '+last:''));
 }
-test('five 4B-owned blueprints × exterior/section × three real Chromium landscape sizes', {timeout:240000},async()=>{
+test('five 4B-owned blueprints × exterior/section × three real Chromium landscape sizes', {timeout:900000},async()=>{
   assert.equal(M1_EXEMPLARS.length,5);
   assert.equal(typeof WebSocket,'function','Node 22 CDP WebSocket is required');
   const site=await launchServer();
-  let browser;
+  let browser,releaseLock=null;
   const captures=[];
   const source=readFileSync(resolve(root,'src/building-pool/roadmap-4b/m1-exemplars.mjs'));
   const sourceSha256=createHash('sha256').update(source).digest('hex');
   mkdirSync(output,{recursive:true});
   try{
+    releaseLock=await claimCaptureLock();
     browser=await launchChrome();
     const {targetId}=await browser.send('Target.createTarget',{url:'about:blank'});
     const {sessionId}=await browser.send('Target.attachToTarget',{targetId,flatten:true});
@@ -138,6 +181,7 @@ test('five 4B-owned blueprints × exterior/section × three real Chromium landsc
     await browser.send('Target.closeTarget',{targetId});
   }finally{
     if(browser)browser.close();
+    if(releaseLock)releaseLock();
     await new Promise(done=>site.server.close(done));
   }
   assert.equal(captures.length,30);
