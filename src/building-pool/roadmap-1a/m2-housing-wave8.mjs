@@ -74,7 +74,7 @@ const SPECS=Object.freeze([
   w:40,d:35,plan:'unequal-shouldered-t-bastion-with-three-front-chambers-and-rear-watch-spine',
   roof:'steep',skin:'live:wood',roofAsset:'pack3:025',
   exteriorNotches:[[0,16,12,34],[29,16,39,34]],
-  segments:[[13,2,13,14],[27,2,27,14],[14,15,27,15],[14,25,27,25]],
+  segments:[[13,2,13,15],[27,2,27,14],[14,15,27,15],[14,25,27,25]],
   entry:[20,1,'lantern-hall'],
   rooms:[
    {id:'map-wing',min:[2,1,2],max:[13,4,15]},
