@@ -187,3 +187,28 @@ test('real chunk mesher consumes opted-in physical biome view',()=>{
  assert.ok(view.cachedColumns<=512);
  assert.equal(world.edits.size,0);
 });
+
+
+test('real legacy stone substrate is eligible only in untouched fresh columns',()=>{
+ for(const seed of [179,7,2201])for(const r of SURFACE_BIOME_REGIONS){
+  const x=r.x,z=r.z,oldTop=terrainHeight(x,z,seed);
+  const natural=(cx,y,cz)=>{
+   const top=terrainHeight(cx,cz,seed);
+   return y>top?0:y===top?1:y>=top-3?2:3;
+  };
+  const opts={enabled:true,profileIsFresh:true,readBaseline:natural,
+   hasEdit:()=>false,isProtected:()=>false};
+  const plan=surfaceBiomeFreshColumn(x,z,seed,opts);
+  assert.ok(plan,r.name+' should accept natural stone below the topsoil');
+  assert.ok(plan.writes.length>0);
+  assert.equal(surfaceBiomeFreshColumn(x,z,seed,{...opts,
+   readBaseline:(cx,y,cz)=>y===oldTop-2?0:natural(cx,y,cz)}),null,
+   'existing cave air must never be filled');
+  assert.equal(surfaceBiomeFreshColumn(x,z,seed,{...opts,
+   readBaseline:(cx,y,cz)=>y===oldTop-2?4:natural(cx,y,cz)}),null,
+   'existing timber/landmarks must never be overwritten');
+  assert.equal(surfaceBiomeFreshColumn(x,z,seed,{...opts,
+   hasEdit:(cx,y,cz)=>y===oldTop-2}),null,
+   'saved edits block the entire atomic column');
+ }
+});
