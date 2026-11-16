@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M3 hospitality wave1: ten taverns + ten inns source authored, 191/450 total 1A; M2 150/150 original house milestone preserved; exact-head CI pending",
+  "milestone": "M3 hospitality wave2: 205/450 source-authored candidates, 150 houses / 34 taverns / 21 inns; previous 191 immutable, exact-head CI pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 259,
-  "newDesignsAuthored": 161,
-  "totalLaneGeometryAuthored": 191,
+  "additionalDesignsRequired": 245,
+  "newDesignsAuthored": 175,
+  "totalLaneGeometryAuthored": 205,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,10 +53,10 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Exact-head 191 complete source blueprint native CI, immutable 171-object inherited parity, strict D4 and <0.88 partition/<0.975 exterior IoU, reachable rooms and physical producer AABBs",
-    "978 genuine Chromium source-cell WebGL2 exterior/cutaway captures and 702 physical Pack1–5 source visibleBox AABB captures at 667x375,844x390,932x430",
-    "Builder 1A remaining eventual quota: 150 houses, 48 taverns and 61 inns; source M2 housing 150/150 technically green, not yet creator-approved or placed",
-    "Pack2 door swing/codec, Pack3 roof load/weather, Pack4 optical panes, Pack5 bed collisions/schema1 persistence, final art, hardware iPhone, central registration and world integration not certified"
+    "Obtain isolated exact-head focused 1A native and Chromium WebGL2 source-cell 1062 + Pack producer AABB 786 evidence, including exact 191-source immutable fingerprints",
+    "Finish remaining 245 source candidates: 150 houses, 41 taverns, 54 inns",
+    "Physical producer ABI still unresolved: Pack2 hinged doors/schema1, Pack3 roofs/load/weather, Pack4 glass/weather, Pack5 bed collision/occupancy restore",
+    "Creator artwork approval, real iPhone playtest, central registration/integration and GitHub Pages deployment remain separate explicit authority"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -76,8 +76,8 @@
   "innCount": 1,
   "categoriesAuthored": {
     "house": 150,
-    "tavern": 27,
-    "inn": 14
+    "tavern": 34,
+    "inn": 21
   },
   "firstInn": {
     "id": "r1:inn:temperate:small:001",
@@ -355,6 +355,50 @@
     "packVisibleAABBCandidateCount": 117,
     "packAABBScreenshotTarget": 702,
     "viewportSizes": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": {
+      "head": "2b3a25fda43ecb51791e66365d7833c3b3c814b6",
+      "run": 43914059052,
+      "conclusion": "success",
+      "ciContract": "12/12",
+      "rootNative": "837/837",
+      "builderNative": "266/266",
+      "chromiumSourceCube": "978/978",
+      "chromiumSourcePhysical": "702/702",
+      "artifact": 14249796483
+    },
+    "creatorApproved": 0,
+    "worldIntegrated": 0
+  },
+  "m3HospitalityWave2": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave2.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave2.test.mjs",
+    "immutable191Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline191.json",
+    "newTaverns": 7,
+    "newInns": 7,
+    "newSourceVoxelPlacements": 107370,
+    "genuineAbsentExteriorFootprintColumns": 6998,
+    "walkableRooms": 72,
+    "pack5TwoCellBedReservations": 29,
+    "normalizedPlanStrictIoUBelow": 0.88,
+    "normalizedExteriorStrictIoUBelow": 0.975,
+    "sourceGalleryCandidates": 177,
+    "sourceCubeScreenshotTarget": 1062,
+    "packVisibleAABBCandidateCount": 131,
+    "packAABBScreenshotTarget": 786,
+    "viewports": [
       [
         667,
         375
