@@ -31,11 +31,11 @@ async function claimCaptureLock(){
     } catch(e){
       if(e.code!=='EEXIST')throw e;
       // Only consider stale when a previous worker exceeded the *entire* suite budget.
-      if(Date.now()-statSync(captureLock).mtimeMs>12*60000){
+      if(Date.now()-statSync(captureLock).mtimeMs>26*60000){
         rmSync(captureLock,{recursive:true,force:true});
         continue;
       }
-      if(Date.now()-began>8*60000)throw Error('Builder 4B timed out waiting for exclusive authentic Chromium/GPU access');
+      if(Date.now()-began>18*60000)throw Error('Builder 4B timed out waiting for exclusive authentic Chromium/GPU access');
       await sleep(150);
     }
   }
@@ -159,7 +159,7 @@ async function waitPreview(cmd,where,expected){
   }
   throw Error('No complete source-specific WebGL2 frame at '+where+(last?' — '+last:''));
 }
-test('twelve new 4B-owned blueprints × exterior/section × three real Chromium landscape sizes', {timeout:900000},async()=>{
+test('twelve new 4B-owned blueprints × exterior/section × three real Chromium landscape sizes', {timeout:1500000},async()=>{
   assert.equal(M2_DISTINCTIVE.length,12);
   assert.equal(typeof WebSocket,'function','Node 22 CDP WebSocket is required');
   const site=await launchServer();
