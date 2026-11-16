@@ -1066,6 +1066,29 @@ const assemble=function assemble(p){
  for(const [z,doorX] of p.partZ){const wide=!!(p.vaultDoor&&p.vaultDoor[0]===doorX&&p.vaultDoor[1]===z);for(let x=1;x<p.w-1;x++)for(let y=2;y<=4;y++)if(x!==doorX&&!(wide&&x===doorX+1))put(x,y,z,'pack2:015','wall');openings.push({type:'internal-doorway',x:doorX,y:2,z,clearHeightCells:3});if(wide)openings.push({type:'internal-doorway',role:'vault-wide-secondary',x:doorX+1,y:2,z,clearHeightCells:3});}
  for(const [x,z0,z1,doorZ] of p.partX){const wide=!!(p.vaultDoor&&p.vaultDoor[0]===x&&p.vaultDoor[1]===doorZ);for(let z=z0;z<=z1;z++)for(let y=2;y<=4;y++)if(z!==doorZ&&!(wide&&z===doorZ+1))put(x,y,z,'pack2:015','wall');openings.push({type:'internal-doorway',x,y:2,z:doorZ,clearHeightCells:3});if(wide)openings.push({type:'internal-doorway',role:'vault-wide-secondary',x,y:2,z:doorZ+1,clearHeightCells:3});}
  for(const [z,x0,x1] of p.caps)for(let x=x0;x<=x1;x++)for(let y=2;y<=4;y++)put(x,y,z,'pack2:015','wall');
+ // Optional hand-authored rear-facing bays: real ONE-CELL DEEP inset
+ // walls with intact side-bearing piers, not fake through-doors.
+ for(const [x0,x1,z,role] of p.facadeRecesses??[]){
+  if(![x0,x1,z].every(Number.isSafeInteger)||x0<2||x1>=p.w-2||x1-x0<3||x1-x0>6||z!==p.d-1||typeof role!=='string'||!role)
+   throw Error('invalid owner-authored rear-facade span');
+  for(const side of [x0,x1])for(let y=2;y<=4;y++){
+   const pier=voxel.get(k(side,y,z));if(pier?.kind!=='wall')throw Error('missing full-height facade bearing pier');
+   pier.architecturalRole=role+'-bearing-pier';
+  }
+  for(let x=x0+1;x<x1;x++)for(let y=2;y<=4;y++){
+   if(voxel.get(k(x,y,z))?.kind!=='wall'||voxel.has(k(x,y,z-1)))
+    throw Error('rear facade inset intersects another room, opening or fixture '+k(x,y,z));
+   remove(x,y,z);
+   put(x,y,z-1,p.wall,'wall',{architecturalRole:role+'-inset-panel',facadeDepth:1});
+  }
+  // Narrow masonry spandrel bridges two unbroken side piers; its full
+  // physical-family bending/load proof is explicitly deferred.
+  for(let x=x0;x<=x1;x++){
+   const band=voxel.get(k(x,5,z));if(band?.kind!=='wall')throw Error('missing facade spandrel');
+   band.architecturalRole=role+'-spandrel';
+   band.structuralSpanUnverified=true;
+  }
+ }
  for(const [x,z] of p.windows)for(const [i,material] of ['pack4:030','pack4:032'].entries()){const y=3+i,key=k(x,y,z);if(voxel.get(key)?.kind!=='wall')throw Error('missing window wall '+key);voxel.set(key,{x,y,z,material,kind:'window'});}
  for(const [x,z,material,role,physicalVariant,intendedFacing] of p.fixtures){if(!voxel.has(k(x,1,z))||voxel.has(k(x,2,z)))throw Error('invalid fixture floor '+k(x,2,z));put(x,2,z,material,'fixture',{role,physicalVariant,...(intendedFacing?{intendedFacing}:{}),physicalFootprintStatus:'unresolved-until-families-preflight',supportIntent:'floor'});}
  // A physically backed roof plate and attached parapet; unsupported visual

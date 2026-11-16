@@ -228,6 +228,20 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
       12,
       9,
       3
+    ],
+    "facadeRecesses": [
+      [
+        5,
+        9,
+        22,
+        "highland-freight-recess"
+      ],
+      [
+        16,
+        20,
+        22,
+        "stone-caravan-bay"
+      ]
     ]
   },
   {
@@ -454,6 +468,20 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
       12,
       9,
       3
+    ],
+    "facadeRecesses": [
+      [
+        3,
+        7,
+        21,
+        "empty-forest-stall-porch"
+      ],
+      [
+        14,
+        18,
+        21,
+        "tack-and-feed-bay"
+      ]
     ]
   },
   {
@@ -669,6 +697,20 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
       11,
       9,
       3
+    ],
+    "facadeRecesses": [
+      [
+        8,
+        12,
+        22,
+        "city-curio-window-bay"
+      ],
+      [
+        16,
+        19,
+        22,
+        "appraisal-inset"
+      ]
     ]
   },
   {
@@ -870,6 +912,20 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
       9,
       7,
       3
+    ],
+    "facadeRecesses": [
+      [
+        4,
+        7,
+        16,
+        "snow-remedy-recess"
+      ],
+      [
+        11,
+        14,
+        16,
+        "tincture-counter-alcove"
+      ]
     ]
   },
   {
@@ -1090,6 +1146,20 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
       10,
       8,
       3
+    ],
+    "facadeRecesses": [
+      [
+        4,
+        8,
+        19,
+        "enchanted-bread-gallery"
+      ],
+      [
+        14,
+        17,
+        19,
+        "ovenhouse-collection-bay"
+      ]
     ]
   },
   {
@@ -1310,6 +1380,20 @@ export const M1_BIOME_EXPANSION_PROFILES=Object.freeze([
       10,
       8,
       3
+    ],
+    "facadeRecesses": [
+      [
+        7,
+        10,
+        19,
+        "north-bank-ledger-inset"
+      ],
+      [
+        15,
+        18,
+        19,
+        "treasury-window-bay"
+      ]
     ]
   }
 ]);

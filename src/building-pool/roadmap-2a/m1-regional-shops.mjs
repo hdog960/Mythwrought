@@ -211,6 +211,20 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         13,
         4
       ]
+    ],
+    "facadeRecesses": [
+      [
+        5,
+        8,
+        17,
+        "riverfront-shipping-alcove"
+      ],
+      [
+        12,
+        15,
+        17,
+        "ledger-pickup-bay"
+      ]
     ]
   },
   {
@@ -410,6 +424,20 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         12,
         16,
         4
+      ]
+    ],
+    "facadeRecesses": [
+      [
+        3,
+        6,
+        17,
+        "shaded-stall-facing"
+      ],
+      [
+        11,
+        15,
+        17,
+        "market-feed-alcove"
       ]
     ]
   },
@@ -619,6 +647,14 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         8,
         15,
         5
+      ]
+    ],
+    "facadeRecesses": [
+      [
+        9,
+        13,
+        18,
+        "cliff-curio-inset"
       ]
     ]
   },
@@ -841,6 +877,20 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         20,
         4
       ]
+    ],
+    "facadeRecesses": [
+      [
+        4,
+        7,
+        21,
+        "herb-market-bay"
+      ],
+      [
+        15,
+        19,
+        21,
+        "contained-formula-alcove"
+      ]
     ]
   },
   {
@@ -1054,6 +1104,20 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         5,
         13,
         5
+      ]
+    ],
+    "facadeRecesses": [
+      [
+        4,
+        8,
+        17,
+        "winter-bread-recess"
+      ],
+      [
+        13,
+        16,
+        17,
+        "insulated-oven-side-bay"
       ]
     ]
   },
@@ -1286,6 +1350,20 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
         8,
         16,
         5
+      ]
+    ],
+    "facadeRecesses": [
+      [
+        7,
+        10,
+        21,
+        "recessed-ledgers-bay"
+      ],
+      [
+        16,
+        20,
+        21,
+        "masonry-guard-alcove"
       ]
     ]
   }
