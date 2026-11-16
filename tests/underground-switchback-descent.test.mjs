@@ -113,3 +113,32 @@ test('four underground levels have a physically clear outer return loop',()=>{
   }
   assert.equal(descentConnectivity(world).connected,true);
 });
+
+test('middle-depth echo hall has a continuous stepped entrance and broad lower terrace',()=>{
+  for(const seed of [179,1,2026,-77]){
+    const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+    const reader=descentWorld(world),anchor=descentRoute().find(p=>p.floor===-105);
+    assert.ok(anchor);
+    const lx=anchor.x-192,lz=anchor.z-192;
+    const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+    const tangent=[outward[1],-outward[0]];
+    for(let d=0;d<=42;d++){
+      const floor=-105-Math.min(2,Math.floor(d/14));
+      for(let across=-2;across<=2;across++){
+        const x=anchor.x+outward[0]*d+tangent[0]*across;
+        const z=anchor.z+outward[1]*d+tangent[1]*across;
+        assert.equal(reader.get(x,floor,z),BLOCK.DEEPSTONE,'support '+seed+'/'+d+'/'+across);
+        for(let h=1;h<=2;h++)
+          assert.equal(reader.get(x,floor+h,z),BLOCK.AIR,'clearance '+seed+'/'+d+'/'+across+'/'+h);
+      }
+    }
+    for(const across of [-8,0,8]){
+      const x=anchor.x+outward[0]*36+tangent[0]*across;
+      const z=anchor.z+outward[1]*36+tangent[1]*across;
+      assert.equal(reader.get(x,-107,z),BLOCK.DEEPSTONE);
+      assert.equal(reader.get(x,-106,z),BLOCK.AIR);
+    }
+    assert.equal(descentConnectivity(world).connected,true);
+    assert.equal(JSON.stringify(world.save()),before);
+  }
+});
