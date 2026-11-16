@@ -198,13 +198,13 @@ test('authoritative ledger is current 79/420, inherited original source stays 15
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,
   ledger.authoredCandidates,ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],
-  [420,15,75,90,330,0,0,0]);
- assert.equal(ledger.originals.length,75);
+  [420,15,80,95,325,0,0,0]);
+ assert.equal(ledger.originals.length,80);
  const current=new Set(ledger.originals.map(x=>x.id));
  for(const bp of all.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(current.has(bp.id),'lost earlier authored candidate '+bp.id);
- assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.authored,0),90);
- assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.remaining,0),330);
+ assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.authored,0),95);
+ assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.remaining,0),325);
  assert.deepEqual([ledger.byCategory['market-square'].authored,ledger.byCategory.theater.authored,
-  ledger.byCategory.temple.authored],[13,14,22]);
+  ledger.byCategory.temple.authored],[14,15,22]);
 });
