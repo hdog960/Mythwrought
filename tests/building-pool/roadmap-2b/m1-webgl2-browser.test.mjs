@@ -81,7 +81,23 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
   ['theater',932,430,'exterior','temperate','medium'],
   ['theater',932,430,'cutaway','temperate','medium'],
   ['theater',667,375,'exterior','enchanted-forest','small'],
-  ['theater',667,375,'cutaway','enchanted-forest','small']
+  ['theater',667,375,'cutaway','enchanted-forest','small'],
+  ['market-square',667,375,'exterior','temperate','medium'],
+  ['market-square',667,375,'cutaway','temperate','medium'],
+  ['tailor',844,390,'exterior','snow','medium'],
+  ['tailor',844,390,'cutaway','snow','medium'],
+  ['butcher',667,375,'exterior','enchanted-forest','small'],
+  ['butcher',667,375,'cutaway','enchanted-forest','small'],
+  ['jeweler',844,390,'exterior','desert','small'],
+  ['jeweler',844,390,'cutaway','desert','small'],
+  ['bookshop',667,375,'exterior','snow','small'],
+  ['bookshop',667,375,'cutaway','snow','small'],
+  ['temple',932,430,'exterior','mountain','medium',2],
+  ['temple',932,430,'cutaway','mountain','medium',2],
+  ['theater',932,430,'exterior','snow','small'],
+  ['theater',932,430,'cutaway','snow','small'],
+  ['bookshop',844,390,'exterior','temperate','medium'],
+  ['bookshop',844,390,'cutaway','temperate','medium']
  ];
  try{
   for(let i=0;i<cases.length;i++){
