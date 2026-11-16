@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {inspect2APhysicalReadiness} from '../../../src/building-pool/roadmap-2a/m1-physical-audit.mjs';
 test('source-owner physical ABI inspector reads actual merged 96 families and 106 variants without a write',()=>{
  const result=inspect2APhysicalReadiness();
- assert.equal(result.authoredBlueprints,86);
+ assert.equal(result.authoredBlueprints,92);
  assert.equal(result.manualFamilies,96);
  assert.equal(result.manualVariants,106);
  assert.equal(result.productionRegistered,false);
@@ -40,7 +40,7 @@ test('real producer-resolved two-cell oak dividers preserve exact no-overlap pen
 });
 test('real producer Pack5 heavy gates occupy exactly two physically open 3-high cells in both 2A banks',()=>{
  const r=inspect2APhysicalReadiness();
- assert.equal(r.resolvedGateCandidates.length,12);
+ assert.equal(r.resolvedGateCandidates.length,13);
  const ids=new Set(r.resolvedGateCandidates.map(x=>x.id));
  assert(ids.has('r2:bank:mountain:large:01'));
  assert(ids.has('r2:bank:enchanted-forest:medium:01'));
