@@ -1,28 +1,37 @@
 // Isolated biome130 visual fidelity, preserving the existing nine-float GPU ABI.
+import {biome130Block} from './biome130-registry.mjs';
 export const BIOME130_ICE_MATERIAL=49;
 export const BIOME130_ICE_BLOCK_ID=350; // authored family 095
+export const BIOME130_ICE_BLOCK_IDS=Object.freeze([275,276,277,280,281,282,350]);
+const iceAlpha=new Map(BIOME130_ICE_BLOCK_IDS.map(id=>{
+  const alpha=biome130Block(id).opacity;
+  if(typeof alpha!=='number'||!Number.isFinite(alpha)||alpha<=0||alpha>=1)
+    throw Error('Invalid source-authored ice opacity for biome block '+id);
+  return [id,alpha];
+}));
 export function biome130MaterialTag(id){
-  if(id===BIOME130_ICE_BLOCK_ID)return BIOME130_ICE_MATERIAL;
+  if(iceAlpha.has(id))return BIOME130_ICE_MATERIAL+iceAlpha.get(id);
   return Number.isInteger(id)&&id>=377&&id<=385?40+id-377:0;
 }
 // Chunk upload only: unchanged geometry and byte layout, no extra opaque passes.
 export function splitBiome130Translucent(vertices){
   if(!(vertices instanceof Float32Array)||vertices.length%9!==0)
     throw new TypeError('Expected nine-float terrain vertices');
+  const isIce=value=>value>=BIOME130_ICE_MATERIAL&&value<BIOME130_ICE_MATERIAL+1;
   let n=0;
-  for(let i=8;i<vertices.length;i+=9)if(vertices[i]===BIOME130_ICE_MATERIAL)n++;
+  for(let i=8;i<vertices.length;i+=9)if(isIce(vertices[i]))n++;
   if(!n)return {opaque:vertices,translucent:new Float32Array(0)};
   const opaque=new Float32Array(vertices.length-9*n);
   const translucent=new Float32Array(9*n);
   let a=0,b=0;
   for(let i=0;i<vertices.length;i+=9){
-    if(vertices[i+8]===BIOME130_ICE_MATERIAL){translucent.set(vertices.subarray(i,i+9),b);b+=9;}
+    if(isIce(vertices[i+8])){translucent.set(vertices.subarray(i,i+9),b);b+=9;}
     else{opaque.set(vertices.subarray(i,i+9),a);a+=9;}
   }
   return {opaque,translucent};
 }
-// Tags 40–48 and 49 never overlap reserved Pack 2 opaque material 21.\n// Procedural cutout faces are stable in object UVs in both art presets.
-// Ice is emitted into the existing water transparency pass (0.72 alpha).
+// Tags 40–48 and 49.x never overlap Pack 2 material 21.
+// Foliage UV cutouts work in both graphics presets; ice retains exact source alpha.
 export function biome130TerrainFragmentShader(source){
   if(typeof source!=='string'||!source.includes('in float vDistance;')||
      !source.includes('void main(){')||!source.includes('float hashCell(vec2 p)'))
@@ -36,7 +45,7 @@ export function biome130TerrainFragmentShader(source){
     '  if(vMat==49){',
     '    float f=smoothstep(29.0,68.0,vDistance);',
     '    vec3 glacial=mix(vColor,vec3(.77,.92,.98),.18);',
-    '    outColor=vec4(mix(glacial,uFog,f),.72);return;',
+    '    outColor=vec4(mix(glacial,uFog,f),vPack2Alpha);return;',
     '  }',
     '  if(vMat>=40&&vMat<=48){',
     '    float density=vMat==40?.78:vMat==41?.48:vMat==42?.92:',

@@ -1,6 +1,7 @@
 // Settlement builders consume the SAME registered physical voxel geometry as live play.
 // This adapter owns no manual Pack 1-5 source and places no settlement automatically.
 import {BIOME130_REGISTERED_SYMBOLS,biome130Block} from '../biome130-registry.mjs';
+import {BIOME130_ICE_BLOCK_IDS} from '../biome130-render.mjs';
 const TURNS=Object.freeze({north:0,east:1,south:2,west:3});
 const yawOf=value=>Number.isInteger(value)&&value>=0&&value<=3?value:
   (typeof value==='string'&&Object.hasOwn(TURNS,value)?TURNS[value]:null);
@@ -21,7 +22,7 @@ export function resolveBiome130BuilderAsset(symbol,orientation='north'){
     physical:true,solid:asset.solid,opacity:asset.opacity,
     // The source opacity and leaf cutouts now have a dedicated game render path.
     alphaIntent:asset.alphaMode,transparentIntent:asset.transparent,
-    rendererFidelity:asset.blockId===350?'alpha-blended':
+    rendererFidelity:BIOME130_ICE_BLOCK_IDS.includes(asset.blockId)?'alpha-blended':
       (asset.blockId>=377&&asset.blockId<=385?'alpha-cutout':
       ((asset.transparent||asset.opacity<1||
         asset.opacity==='translucent'||asset.opacity==='cutout')?
