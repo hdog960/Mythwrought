@@ -42,13 +42,13 @@ test('all eight source-specific new IDs occupy unused 4A quota slots; inherited 
  assert.equal(new Set(all.map(x=>x.id)).size,84);
  assert.equal(new Set(all.map(geometrySignature)).size,84);
  assert.equal(manifest.counts.legacyAuthored,30);
- assert.equal(manifest.counts.newlyAuthored,70);
- assert.equal(manifest.counts.totalAuthored,100);
- assert.equal(manifest.counts.remaining,215);
+ assert.equal(manifest.counts.newlyAuthored,78);
+ assert.equal(manifest.counts.totalAuthored,108);
+ assert.equal(manifest.counts.remaining,207);
  assert.equal(manifest.counts.creatorAccepted,0);
  assert.equal(manifest.counts.integratedBuildings,0);
- assert.equal(manifest.categories.find(c=>c.type==='civic-hall').remaining,25);
- assert.equal(manifest.categories.find(c=>c.type==='guildhall').remaining,25);
+ assert.equal(manifest.categories.find(c=>c.type==='civic-hall').remaining,21);
+ assert.equal(manifest.categories.find(c=>c.type==='guildhall').remaining,21);
 });
 test('all 84 whole-volume source fingerprints are unique under 90-degree rotation, reflection and translation',()=>{
  const signatures=new Map();
