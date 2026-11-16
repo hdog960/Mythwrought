@@ -6,12 +6,13 @@ import {M1_NEW_REGION_ARCHITECTURES} from '../../../src/building-pool/roadmap-2b
 import {M1_SPECIALTY_COURTS} from '../../../src/building-pool/roadmap-2b/m1-specialty-courts.mjs';
 import {M1_GRAND_COMPLEXES} from '../../../src/building-pool/roadmap-2b/m1-grand-complexes.mjs';
 import {M1_REGIONAL_GALLERIES} from '../../../src/building-pool/roadmap-2b/m1-regional-galleries.mjs';
+import {M1_CLIFF_AND_FESTIVAL} from '../../../src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs';
 
 // Browser source loads the REAL candidate blueprint modules from this draft PR.
 // Draws only software-WebGL2 full-cube proxies, never producer-family AABBs,
 // rotations, glass transparency, final artwork, or playable runtime placement.
 const params=new URLSearchParams(location.search), models=[
- MARKET_SQUARE_TEMPERATE_SMALL,...TRADE_CULTURE_M1_EXEMPLARS,...M1_REGIONAL_EXEMPLARS,...M1_PUBLIC_MONUMENTS,...M1_NEW_REGION_ARCHITECTURES,...M1_SPECIALTY_COURTS,...M1_GRAND_COMPLEXES,...M1_REGIONAL_GALLERIES
+ MARKET_SQUARE_TEMPERATE_SMALL,...TRADE_CULTURE_M1_EXEMPLARS,...M1_REGIONAL_EXEMPLARS,...M1_PUBLIC_MONUMENTS,...M1_NEW_REGION_ARCHITECTURES,...M1_SPECIALTY_COURTS,...M1_GRAND_COMPLEXES,...M1_REGIONAL_GALLERIES,...M1_CLIFF_AND_FESTIVAL
 ];
 const modelId=params.get('id')||'r2:tailor:temperate:small:01';
 const view=params.get('view')==='cutaway'?'cutaway':'exterior';
