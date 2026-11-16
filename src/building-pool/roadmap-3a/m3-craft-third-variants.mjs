@@ -195,7 +195,7 @@ function build(q){
   throw Error(q.name+' source stock crate obstructed '+key(boxX,2,boxZ));
  put('fixture',boxX,2,boxZ,P.crate,{orientation:'north',state:{}});
  features.push({name:wood?'dry timber stock chest':'cold rough-cut stone stock bin',position:[boxX,2,boxZ],assetRef:P.crate,active:false});
- const otherX=mid-4,otherZ=d-7;
+ const otherX=mid-3,otherZ=d-7; // avoid the authored mid-4 structural pier grid
  if(!foot(otherX,otherZ)||aisle(otherX,otherZ)||has(otherX,2,otherZ))
   throw Error(q.name+' grounded workbench blocked '+key(otherX,2,otherZ));
  put('fixture',otherX,2,otherZ,wood?P.plank:P.slab,{orientation:'north'});
