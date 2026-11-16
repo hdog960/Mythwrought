@@ -138,14 +138,14 @@ test('two new theaters have physically distinct stages, opposed real backstage d
   assert.equal(v.get(cell(ports[0].x,1,ports[0].z))?.kind,'floor');
  }
 });
-test('no new 2B test-source facade: exact checked out Git blob parity and 39-entry ledger',()=>{
+test('no new 2B test-source facade: exact checked out Git blob parity and current cumulative 47-entry ledger',()=>{
  const file='src/building-pool/roadmap-2b/m1-public-monuments.mjs';
  const committed=execFileSync('git',['rev-parse','HEAD:'+file],{encoding:'utf8'}).trim();
  const worktree=execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim();
  assert.equal(committed,worktree);
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
- assert.equal(ledger.authoredCandidates,39);
- assert.equal(ledger.remainingUnauthored,381);
+ assert.equal(ledger.authoredCandidates,47);
+ assert.equal(ledger.remainingUnauthored,373);
  assert.equal(ledger.creatorAccepted,0);
  assert.equal(ledger.integratedInGame,0);
  assert.equal(new Set(all.map(b=>b.id)).size,39);
