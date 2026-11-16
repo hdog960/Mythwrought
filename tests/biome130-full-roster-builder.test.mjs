@@ -103,6 +103,8 @@ test('physical builder can plan, persist, and restore dungeon, stone, raw log an
   const leafId=385,leafX=origin[0]+5;
   assert.equal(world.get(leafX,18,origin[2]),leafId);
   assert.equal(collides(world,leafX+.5,18,origin[2]+.5),false);
-  const hit=raycast(world,[leafX+.5,18.5,origin[2]-1],[0,0,1],4);
+  const first=biome130Block(leafId,world.rotationAt(leafX,18,origin[2])).boxes[0];
+  const hit=raycast(world,[leafX+(first[0]+first[3])/2,
+    18+(first[1]+first[4])/2,origin[2]-1],[0,0,1],4);
   assert.ok(hit,'Foliage must remain selectable even when non-solid');
 });
