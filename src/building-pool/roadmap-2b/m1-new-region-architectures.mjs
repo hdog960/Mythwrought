@@ -280,6 +280,11 @@ function snowTemple(){
  p.roof(()=>false,P.snowRoof);
  // Twin enclosed nave chambers, independent chapels, three-wide rear altar.
  p.screenZ(10,6,18,[12]);p.screenZ(18,6,18,[12]);
+ // Each chapel has its own capped front/rear walls and a single physical entrance.
+ for(const zz of [5,19]){
+  p.screenX(zz,1,9);
+  p.screenX(zz,19,27);
+ }
  p.screenX(20,1,27,[c-1,c,c+1]);
  for(const [x,z] of [[4,8],[6,11],[22,8],[24,11]])p.fixture(x,z,P.bench,'chapel-meditation-pew');
  for(const [x,z] of [[3,16],[25,16]])p.fixture(x,z,P.lantern,'sanctuary-winter-lamp','decor');
