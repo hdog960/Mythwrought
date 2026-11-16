@@ -97,7 +97,16 @@ const ids=[
  'r1:harbor-office:mountain:large:001',
  'r1:harbor-office:snow:small:001',
  'r1:lighthouse:desert:medium:001',
- 'r1:lighthouse:enchanted-forest:medium:001'
+ 'r1:lighthouse:enchanted-forest:medium:001',
+ 'r1:greenhouse:temperate:small:001',
+ 'r1:fishing-lodge:desert:small:001',
+ 'r1:fishing-lodge:mountain:large:001',
+ 'r1:harbor-office:snow:medium:001',
+ 'r1:harbor-office:enchanted-forest:small:001',
+ 'r1:harbor-office:desert:medium:001',
+ 'r1:lighthouse:snow:small:001',
+ 'r1:lighthouse:mountain:medium:001',
+ 'r1:lighthouse:temperate:large:001'
 ];
 const sizes=[[667,375],[844,390],[932,430]];
 const mime={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript','.json':'application/json'};
@@ -161,7 +170,7 @@ async function makeCDP(url){
  }
  return {send,exceptions,close:()=>ws.close()};
 }
-test('M1/M2 86 genuine source-served WebGL2 candidates × 3 iPhone landscapes × exterior/cutaway', {timeout:480000},async()=>{
+test('M1/M2 95 genuine source-served WebGL2 candidates × 3 iPhone landscapes × exterior/cutaway', {timeout:600000},async()=>{
  const profile=await mkdtemp(join(tmpdir(),'mythwrought-r1b-chrome-')),site=await localSite();
  const out=resolve(root,'artifacts/roadmap-1b');
  let chrome,cdp;
@@ -211,7 +220,7 @@ test('M1/M2 86 genuine source-served WebGL2 candidates × 3 iPhone landscapes ×
    evidence.push({...state,file,sha256:createHash('sha256').update(png).digest('hex'),
     rendererCategory:'source-authored-full-cell-proxy',physicalIPhone:false,physicalFamilyMeshes:false});
   }
-  assert.equal(evidence.length,516);
+  assert.equal(evidence.length,570);
   assert.equal(site.missing.length,0,'Missing module responses: '+site.missing.join(';'));
   assert.deepEqual(cdp.exceptions,[],'Unexpected Chromium errors');
   for(const id of ids)for(const [width,height] of sizes){
@@ -226,7 +235,7 @@ test('M1/M2 86 genuine source-served WebGL2 candidates × 3 iPhone landscapes ×
     physicalIPhone:false,physicalFamilyMeshes:false,source:'real 1B ES module coordinates in Chromium WebGL2',
     notes:'Proxy cube faces; cannot certify real Pack 4/5 parts, gameplay movement, or creator art.',
     evidence},null,2));
-  console.log('BUILDER 1B genuine source WebGL2 exterior+cutaway 516/516 PASS',
+  console.log('BUILDER 1B genuine source WebGL2 exterior+cutaway 570/570 PASS',
    JSON.stringify({candidates:ids.length,viewports:sizes,captures:evidence.length}));
  }finally{
   try{cdp?.close();}catch{}
