@@ -177,7 +177,7 @@ function create(q){
   put(wood?'dry-joinery-workbench':'stone-dressing-plinth',x,2,z,wood?F.plank:F.slab);
  }
  // Actual Pack4 movable stock bin (unpowered, not a save container).
- const stockX=w-5,stockZ=q.eastEnd-3;
+ const stockX=w-5,stockZ=(q.eastEnd-3)%q.bearingCadence===0?q.eastEnd-4:q.eastEnd-3; // keep moveable crate clear of authored pier rows
  if(!floor(stockX,stockZ)||walkway(stockX,stockZ)||has(stockX,2,stockZ))
   throw Error(q.name+' source crate intersects work bay/aisle');
  put('fixture',stockX,2,stockZ,F.crate,{orientation:'north',state:{}});
