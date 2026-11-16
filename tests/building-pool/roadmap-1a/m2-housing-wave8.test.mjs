@@ -73,7 +73,7 @@ for(const b of fresh){
    }
   }
   assert.equal(absent,b.architecturalIdentity.exteriorVoidFootprintCells);
-  assert.ok(absent>100&&notchWalls>8);
+  assert.ok(absent>=80&&absent/(w*d)>.10&&notchWalls>8,'missing significant physically exterior wing');
   const walkQueue=[b.portals[0].at],seen=new Set([key(walkQueue[0])]);
   for(let i=0;i<walkQueue.length;i++)for(const [dx,dz] of [[-1,0],[1,0],[0,-1],[0,1]]){
    const next=[walkQueue[i][0]+dx,1,walkQueue[i][2]+dz],k=key(next);
