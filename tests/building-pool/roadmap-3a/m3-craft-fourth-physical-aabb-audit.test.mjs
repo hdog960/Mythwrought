@@ -19,7 +19,7 @@ test('all 30 M3 fourth-variant H-plan workcourts use real Pack AABBs and typed s
  assert.equal(r.overlappingOccupiedOffsets,0,'multi-cell physical-family reservation collides');
  assert.equal(r.sampledPhysicalCorridorIntrusions,0,'partial family shape obstructs nominal clear corridor');
  assert.ok(r.roofBearingSamples>250);
- assert.ok(r.roofBearingWitnessAbsent>=0,'engineering audit must not fabricate a pass');
+ assert.equal(r.roofBearingWitnessAbsent,0,'all ten previously observed local roof-return witness gaps must be repaired');
  assert.equal(r.structuralCapacityCertified,false);
  assert.equal(r.roofWeatherCertified,false);
  assert.equal(r.fullBlockWorldMeshRendered,false);
