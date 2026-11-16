@@ -427,3 +427,41 @@ test('saved edit blocks middle rift terrace without mutating player data',()=>{
   assert.equal(descentWorld(restored).get(x,-90,z),BLOCK.WOOD);
   assert.deepEqual(restored.save(),snapshot);
 });
+
+for(const seed of [179,1,2026,-77])test('upper/middle erosion labyrinth has two supported arms and a connected return '+seed,()=>{
+  const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  const reader=descentWorld(world),anchor=descentRoute().find(p=>p.floor===-45);
+  assert.ok(anchor,'missing transition-band anchor');
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const at=(d,t,y)=>reader.get(anchor.x+outward[0]*d+tangent[0]*t,y,
+                              anchor.z+outward[1]*d+tangent[1]*t);
+  const walk=(d,t)=>{
+    assert.equal(at(d,t,-45),BLOCK.DEEPSTONE,'support '+d+'/'+t);
+    assert.equal(at(d,t,-44),BLOCK.AIR,'feet '+d+'/'+t);
+    assert.equal(at(d,t,-43),BLOCK.AIR,'head '+d+'/'+t);
+  };
+  for(let d=0;d<=15;d++)walk(d,0);
+  for(let d=15;d<=41;d++){
+    const p=(d-15)/26;
+    walk(d,-Math.round(9*p));
+    walk(d,Math.round(12*p));
+  }
+  for(let t=-9;t<=12;t++)walk(41,t);
+  for(const [d,t] of [[45,-9],[45,12],[41,-15],[41,18]])walk(d,t);
+  assert.equal(descentConnectivity(world).connected,true);
+  assert.equal(JSON.stringify(world.save()),before);
+});
+test('saved obstruction remains authoritative in upper/middle labyrinth',()=>{
+  const world=new VoxelWorld(179),anchor=descentRoute().find(p=>p.floor===-45);
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const x=anchor.x+outward[0]*41+tangent[0]*0;
+  const z=anchor.z+outward[1]*41+tangent[1]*0;
+  assert.equal(world.set(x,-44,z,BLOCK.WOOD),true);
+  const saved=world.save(),restored=VoxelWorld.restore(saved);
+  assert.equal(descentWorld(restored).get(x,-44,z),BLOCK.WOOD);
+  assert.deepEqual(restored.save(),saved);
+});
