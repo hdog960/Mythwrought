@@ -533,3 +533,45 @@ test('saved player edits obstruct deep fault bypass without being overwritten',(
   assert.equal(descentWorld(restored).get(x,-184,z),BLOCK.WOOD);
   assert.deepEqual(restored.save(),snapshot);
 });
+
+for(const seed of [179,1,2026,-77])test('braided mid-depth ravine has two supported routes and a rejoining vault '+seed,()=>{
+  const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  const reader=descentWorld(world),anchor=descentRoute().find(p=>p.floor===-70);
+  assert.ok(anchor,'missing middle-band anchor');
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const at=(d,t,y)=>reader.get(anchor.x+outward[0]*d+tangent[0]*t,y,
+    anchor.z+outward[1]*d+tangent[1]*t);
+  for(let d=0;d<=14;d++){
+    assert.equal(at(d,0,-70),BLOCK.DEEPSTONE,'approach support '+d);
+    assert.equal(at(d,0,-69),BLOCK.AIR,'approach headroom '+d);
+  }
+  for(let d=14;d<=52;d++){
+    const offset=Math.round(10*Math.sin(Math.PI*(d-14)/38));
+    for(const t of [-offset,offset]){
+      assert.equal(at(d,t,-70),BLOCK.DEEPSTONE,'branch support '+d+'/'+t);
+      for(let h=1;h<=2;h++)assert.equal(at(d,t,-70+h),BLOCK.AIR,
+        'branch headroom '+d+'/'+t+'/'+h);
+    }
+  }
+  for(const [d,t] of [[56,0],[52,-5],[52,5],[60,0]]){
+    assert.equal(at(d,t,-70),BLOCK.DEEPSTONE,'terminal support');
+    assert.equal(at(d,t,-69),BLOCK.AIR,'terminal clearance');
+    assert.equal(at(d,t,-68),BLOCK.AIR,'terminal headroom');
+  }
+  assert.equal(descentConnectivity(world).connected,true);
+  assert.equal(JSON.stringify(world.save()),before);
+});
+test('saved edit blocks braided ravine without changing backup data',()=>{
+  const world=new VoxelWorld(179),anchor=descentRoute().find(p=>p.floor===-70);
+  const lx=anchor.x-192,lz=anchor.z-192;
+  const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
+  const tangent=[outward[1],-outward[0]];
+  const x=anchor.x+outward[0]*33+tangent[0]*10;
+  const z=anchor.z+outward[1]*33+tangent[1]*10;
+  assert.equal(world.set(x,-69,z,BLOCK.WOOD),true);
+  const saved=world.save(),restored=VoxelWorld.restore(saved);
+  assert.equal(descentWorld(restored).get(x,-69,z),BLOCK.WOOD);
+  assert.deepEqual(restored.save(),saved);
+});
