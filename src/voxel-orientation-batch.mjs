@@ -89,9 +89,14 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
           if (await readIdentity(cells[i])!==originals[i]) throw new Error('Rollback identity mismatch');
           if (readState && await readState(cells[i])!==states[i]) throw new Error('Rollback shape state mismatch');
           // Revision counters are monotonic: rollback must advance them, never rewind.
-          if (readRevision && (!validRevision(await readRevision(cells[i])) ||
-              await readRevision(cells[i]) <= (postWrites.get(i)?.revision ?? revisions[i])))
-            throw new Error('Rollback revision mismatch');
+          if (readRevision) {
+            // One coherent revision observation: a second asynchronous read
+            // can see another editor's write and accidentally certify undo.
+            const restoredRevision=await readRevision(cells[i]);
+            if (!validRevision(restoredRevision) ||
+                restoredRevision <= (postWrites.get(i)?.revision ?? revisions[i]))
+              throw new Error('Rollback revision mismatch');
+          }
         } catch (failure) {
           failures.push(failure);
           sidecar.invalidateEdit(cells[i]);
