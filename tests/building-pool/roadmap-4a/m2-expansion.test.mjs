@@ -88,7 +88,11 @@ test('six actual window sockets face outward and supported 3-wide doorways remai
   for(const o of b.openings.filter(o=>o.kind==='window')){
    const [dx,dz]=offsets[o.facing];
    assert.equal(m.get(o.at.join(','))?.role,'window',b.id+' '+o.at);
-   assert.ok(!plan.has([o.at[0]+dx,o.at[2]+dz].join(',')),b.id+' window not on outward-facing wall '+o.at);
+   const beyond=m.get([o.at[0]+dx,2,o.at[2]+dz].join(','));
+   assert.ok(!beyond||!['wall','partition','window'].includes(beyond.role),
+     b.id+' pane looks directly into another enclosed wall '+o.at);
+   // A supported porch may have a walkable floor outside a public window;
+   // a floor tile alone is not proof that a pane is an interior wall.
   }
   for(const door of b.openings.filter(o=>['entrance','door'].includes(o.kind))){
    assert.equal(m.has(door.at.join(',')),false,b.id+' '+door.kind);
