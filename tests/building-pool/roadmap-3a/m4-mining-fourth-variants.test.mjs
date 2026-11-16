@@ -74,6 +74,7 @@ test('M4 fourth: 15 independently briefed four-chevron radial mining headhouses,
   assert.equal(b.productionRegistered,false);
   assert.equal(b.architecture.wingCount,4);
   if(b.size==='large'){
+   const filled=new Set(cells(b).map(c=>c.slice(0,3).join(',')));
    // Regress the demonstrated large southeast visual wedge defect using
    // physical authored foundation, not a mock preview image or plan label.
    const s=M4_MINING_FOURTH_SPECS.find(v=>v.biome===b.biome&&v.size===b.size);
