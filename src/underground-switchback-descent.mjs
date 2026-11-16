@@ -69,6 +69,24 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // An outer cross-gallery connects the two side grottoes into a real loop,
+  // so explorers can return by a different route rather than backtracking.
+  // Keep the loop outside the descending perimeter and on the same floor.
+  for(const depth of [-30,-80,-130,-180]){
+    const anchor=route.find(p=>p.floor===depth);
+    if(!anchor)continue;
+    const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+    const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+    const tangent=[outward[1],-outward[0]];
+    // Branch zero ends at outward=12, tangent=0. Branch one ends at
+    // outward=12, tangent=10. The outer passage joins their chamber edges.
+    for(let t=0;t<=10;t++)for(let across=-2;across<=2;across++){
+      const x=anchor.x+outward[0]*(19+across)+tangent[0]*t;
+      const z=anchor.z+outward[1]*(19+across)+tangent[1]*t;
+      set(x,depth,z,BLOCK.DEEPSTONE);
+      for(let h=1;h<=5;h++)set(x,depth+h,z,BLOCK.AIR);
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
