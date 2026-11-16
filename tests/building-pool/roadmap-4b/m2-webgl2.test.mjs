@@ -77,7 +77,7 @@ async function launchChrome(){
     if(child.exitCode!==null)break;
     await sleep(100);
   }
-  if(!port){child.kill();rmSync(dir,{recursive:true,force:true});
+  if(!port){child.kill();rmSync(dir,{recursive:true,force:true,maxRetries:30,retryDelay:100});
     throw Error('Chromium did not expose a DevTools port (no simulated browser fallback)');}
   const version=await (await fetch('http://127.0.0.1:'+port+'/json/version')).json();
   const ws=new WebSocket(version.webSocketDebuggerUrl);
@@ -90,7 +90,8 @@ async function launchChrome(){
       sleep(15000).then(()=>{throw Error('Builder 4B real Chromium CDP WebSocket handshake exceeded 15 seconds');})
     ]);
   } catch(e){
-    ws.close();child.kill();rmSync(dir,{recursive:true,force:true});
+    try{ws.close();}catch{} child.kill('SIGKILL');
+    rmSync(dir,{recursive:true,force:true,maxRetries:30,retryDelay:100});
     throw e;
   }
   let next=0;
@@ -116,7 +117,7 @@ async function launchChrome(){
     try {ws.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));}
     catch(e){clearTimeout(timeout);pending.delete(id);bad(e);}
   });
-  return {send,close:()=>{ws.close();child.kill();rmSync(dir,{recursive:true,force:true});},binary};
+  return {send,close:()=>{ws.close();child.kill();rmSync(dir,{recursive:true,force:true,maxRetries:30,retryDelay:100});},binary};
 }
 async function waitPreview(cmd,where,expected){
   let last;
