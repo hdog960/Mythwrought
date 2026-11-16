@@ -10,10 +10,11 @@ const modules=[
  'm2-hinterland-chromium.test.mjs',
  'm2-missing-sizes-chromium.test.mjs',
  'm2-variant2-chromium.test.mjs',
- 'm2-variant2-expansion-chromium.test.mjs'
+ 'm2-variant2-expansion-chromium.test.mjs',
+ 'm2-variant2-completion-chromium.test.mjs'
 ];
 
-test('all eight independent Builder 3B real-Chromium capture suites obtain and release the exclusive runner permit',()=>{
+test('all nine independent Builder 3B real-Chromium capture suites obtain and release the exclusive runner permit',()=>{
  for(const filename of modules){
   const s=readFileSync(new URL('./'+filename,import.meta.url),'utf8');
   assert.ok(s.includes("import {acquire3BChromiumPermit} from './chromium-resource-lock.mjs';"),filename+' lacks mutex');
