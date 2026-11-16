@@ -290,6 +290,43 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // Upper/middle threshold: a branching, supported erosion labyrinth at -45.
+  // A long outward nave divides into two asymmetric arms, each with a
+  // distinct pocket and a short cross-connection near the far end.
+  // The radial gallery stays outside the spiral; no legacy blocks are cut.
+  {
+    const depth=-45,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,r=2,height=5)=>{
+        for(let cross=-r;cross<=r;cross++){
+          const x=anchor.x+outward[0]*d+tangent[0]*(t+cross);
+          const z=anchor.z+outward[1]*d+tangent[1]*(t+cross);
+          set(x,depth,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
+        }
+      };
+      for(let d=0;d<=15;d++)carve(d,0);
+      for(let d=15;d<=41;d++){
+        const progress=(d-15)/26;
+        carve(d,-Math.round(9*progress),2,6);
+        carve(d,Math.round(12*progress),2,7);
+      }
+      // A transverse return passage connects the two outer pockets.
+      for(let t=-9;t<=12;t++)carve(41,t,2,6);
+      for(const pocket of [{d:41,t:-9,r:8},{d:41,t:12,r:10}]){
+        for(let dd=-pocket.r;dd<=pocket.r;dd++)
+          for(let tt=-pocket.r;tt<=pocket.r;tt++){
+            const radial=dd*dd+tt*tt;
+            if(radial>pocket.r*pocket.r)continue;
+            carve(pocket.d+dd,pocket.t+tt,0,
+              5+Math.floor(5*(1-radial/(pocket.r*pocket.r))));
+          }
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
