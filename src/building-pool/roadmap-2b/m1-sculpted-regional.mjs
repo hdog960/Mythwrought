@@ -70,7 +70,7 @@ const DESIGNS=[
 {category:'temple',biome:'snow',size:'small',variation:2,title:'Frostcross Pilgrim Reliquary',
  w:31,d:33,h:15,plan:[[11,19,0,32],[0,30,12,22],[8,22,26,32]],entry:[15,0],
  sky:[[13,17,5,9]],
- partitions:[['x',11,13,21,[17]],['x',19,13,21,[17]],['z',26,9,21,[15]]],
+ partitions:[['x',11,13,21,[17]],['x',19,13,21,[17]],['z',26,11,19,[15]]],
  furnishing:[[13,5,'seat','processional-pew'],[17,5,'seat','opposite-pew'],[4,16,'seat','west-transept-prayer'],[7,20,'lamp','winter-candle','decor'],[23,16,'seat','east-sacristy-pew'],[27,20,'lamp','snow-votive','decor'],[15,28,'stone','grounded-altar-plinth'],[15,30,'altar','sacred-rime-reliquary']],
  posts:[[13,3],[17,3],[4,17],[26,17]],
  mass:[[1,9,14,20,8,'snow','left-long-transept'],[4,6,16,18,9,'snow','west-high-transverse-gable'],[21,29,14,20,8,'snow','right-long-transept'],[24,26,16,18,9,'snow','right-transept-high-gable'],[10,20,27,31,8,'stone','rear-stone-apse'],[14,16,28,30,9,'snow','pilgrim-apse-winter-ridge'],[13,13,3,3,8,'stone','west-front-bell-column'],[13,13,3,3,9,'stone','west-belfry-tower'],[13,13,3,3,10,'stone','west-high-tower'],[17,17,3,3,8,'stone','east-front-bell-column'],[17,17,3,3,9,'stone','east-belfry-tower'],[17,17,3,3,10,'stone','east-high-tower']],
