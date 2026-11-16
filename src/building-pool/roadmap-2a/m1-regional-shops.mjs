@@ -177,9 +177,41 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
       3
     ],
     "title": "Brookmere Twin-Aisle Merchant Exchange",
-    "roofForm": "region-specific supported roofing with independently authored raised masonry",
+    "roofForm": "two stepped timber merchant gables over market aisle and rear loading monitor",
     "signature": "temperate twin-aisle merchant gallery with isolated west ledger and real rear cargo space",
-    "variation": 2
+    "variation": 2,
+    "roofMassing": [
+      [
+        6,
+        12,
+        5,
+        5,
+        4,
+        "merchant-double-gable-ridge"
+      ],
+      [
+        14,
+        16,
+        12,
+        14,
+        3,
+        "enclosed-stockroom-monitor"
+      ]
+    ],
+    "facadeGables": [
+      [
+        "rear",
+        6,
+        12,
+        5
+      ],
+      [
+        "front",
+        5,
+        13,
+        4
+      ]
+    ]
   },
   {
     "category": "pet-shop",
@@ -352,8 +384,34 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
       3
     ],
     "title": "Saltcrest Empty-Pen Trading House",
-    "roofForm": "region-specific supported roofing with independently authored raised masonry",
-    "signature": "desert medium pet supplies with four independent nonoverlapping directional two-cell stall modules"
+    "roofForm": "low twin desert sunshades with one raised south-court windward turret",
+    "signature": "desert medium pet supplies with four independent nonoverlapping directional two-cell stall modules",
+    "roofMassing": [
+      [
+        2,
+        6,
+        4,
+        6,
+        3,
+        "shade-terrace-over-pen-court"
+      ],
+      [
+        12,
+        16,
+        9,
+        12,
+        4,
+        "sandstone-crosswind-vent-stack"
+      ]
+    ],
+    "facadeGables": [
+      [
+        "rear",
+        12,
+        16,
+        4
+      ]
+    ]
   },
   {
     "category": "magic-shop",
@@ -535,8 +593,34 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
       3
     ],
     "title": "Stonewhisper Sealkeepers",
-    "roofForm": "region-specific supported roofing with independently authored raised masonry",
-    "signature": "mountain sigil dealer with physically enclosed west secure inspection chamber and deep rock repository"
+    "roofForm": "narrow tall mountain ridge crest with broken rear rockside appraisal gable",
+    "signature": "mountain sigil dealer with physically enclosed west secure inspection chamber and deep rock repository",
+    "roofMassing": [
+      [
+        8,
+        11,
+        4,
+        13,
+        5,
+        "high-cliff-ridge-observation"
+      ],
+      [
+        15,
+        17,
+        14,
+        16,
+        3,
+        "rock-cairn-back-archive"
+      ]
+    ],
+    "facadeGables": [
+      [
+        "rear",
+        8,
+        15,
+        5
+      ]
+    ]
   },
   {
     "category": "potion-shop",
@@ -724,8 +808,40 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
       3
     ],
     "title": "Moonmoss Sealed Alchemy Galleries",
-    "roofForm": "region-specific supported roofing with independently authored raised masonry",
-    "signature": "large enchanted apothecary with distinct west contained formula space and rear aromatic dry store"
+    "roofForm": "two offset elevated enclosed formula and herbal drying roofs under livingwood gable",
+    "signature": "large enchanted apothecary with distinct west contained formula space and rear aromatic dry store",
+    "roofMassing": [
+      [
+        2,
+        6,
+        5,
+        11,
+        4,
+        "contained-formula-vent-roof"
+      ],
+      [
+        14,
+        19,
+        17,
+        19,
+        3,
+        "herb-drying-roof-monitor"
+      ]
+    ],
+    "facadeGables": [
+      [
+        "rear",
+        3,
+        9,
+        5
+      ],
+      [
+        "front",
+        12,
+        20,
+        4
+      ]
+    ]
   },
   {
     "category": "bakery",
@@ -912,8 +1028,34 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
       3
     ],
     "title": "Snowcrust Hearth Hall",
-    "roofForm": "region-specific supported roofing with independently authored raised masonry",
-    "signature": "mid snowy bakery with genuinely enclosed insulated east oven and cold north flour inventory"
+    "roofForm": "tall unlit snow ovenhouse chimney beside stepped broad hearth ridge and rear gable",
+    "signature": "mid snowy bakery with genuinely enclosed insulated east oven and cold north flour inventory",
+    "roofMassing": [
+      [
+        14,
+        16,
+        6,
+        8,
+        6,
+        "unlit-ovenhouse-chimney-masonry"
+      ],
+      [
+        4,
+        10,
+        9,
+        10,
+        4,
+        "snow-shedding-main-bakery-ridge"
+      ]
+    ],
+    "facadeGables": [
+      [
+        "rear",
+        5,
+        13,
+        5
+      ]
+    ]
   },
   {
     "category": "bank",
@@ -1106,14 +1248,46 @@ export const M1_REGIONAL_PROFILES=Object.freeze([
       3
     ],
     "title": "Sandscript Treasury Archive",
-    "roofForm": "region-specific supported roofing with independently authored raised masonry",
+    "roofForm": "double parapet treasury with central clerestory and broad guarded rear crest",
     "signature": "large desert financial hall with three counters, west separate ledgers and full two-cell wide secure treasury doorway",
     "vaultDoor": [
       12,
       15
     ],
     "vaultDoorOrientation": "north",
-    "vaultDoorVariant": "citadel-ironbound-leaves"
+    "vaultDoorVariant": "citadel-ironbound-leaves",
+    "roofMassing": [
+      [
+        8,
+        14,
+        7,
+        11,
+        5,
+        "raised-secure-teller-clerestory"
+      ],
+      [
+        10,
+        16,
+        17,
+        19,
+        3,
+        "treasury-roofed-watch-gallery"
+      ]
+    ],
+    "facadeGables": [
+      [
+        "rear",
+        7,
+        18,
+        5
+      ],
+      [
+        "front",
+        8,
+        16,
+        5
+      ]
+    ]
   }
 ]);
 export const M1_REGIONAL_SHOPS=Object.freeze(M1_REGIONAL_PROFILES.map(assembleSpecialistProfile));

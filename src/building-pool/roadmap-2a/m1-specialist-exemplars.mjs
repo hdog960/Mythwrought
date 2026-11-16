@@ -1073,6 +1073,34 @@ const assemble=function assemble(p){
  for(let x=0;x<p.w;x++)for(let z=0;z<p.d;z++)put(x,p.h+1,z,p.roof,'roof');
  for(let x=0;x<p.w;x++)for(let z=0;z<p.d;z++)if(x===0||x===p.w-1||z===0||z===p.d-1)put(x,p.h+2,z,'pack2:015','roof');
  for(const [x,z,top] of p.towers)for(let extra=2;extra<=top;extra++)put(x,p.h+extra,z,'pack2:015','roof');
+ // Opt-in fully authored architectural massing. Each risen cell has a directly
+ // occupied roof cell below it, rooted in the original continuous roof plate.
+ // Legacy stores and earlier specialist candidates receive NO shape mutation.
+ const roofCell=(x,y,z,material,role)=>{
+  if(![x,y,z].every(Number.isSafeInteger)||x<0||x>=p.w||z<0||z>=p.d||y<=p.h+1||y>p.h+9)
+   throw Error('invalid regional roof mass cell '+k(x,y,z));
+  const prior=voxel.get(k(x,y,z));
+  if(prior){if(prior.kind!=='roof')throw Error('roof massing intersects occupied structure '+k(x,y,z));return;}
+  if(voxel.get(k(x,y-1,z))?.kind!=='roof')throw Error('unsupported regional roof cell '+k(x,y,z));
+  put(x,y,z,material,'roof',{architecturalRole:role,roofBearing:'continuous-voxel-roof-below-not-final-physical-ABI'});
+ };
+ for(const item of p.roofMassing??[]){
+  const [x0,x1,z0,z1,top,role]=item;
+  if(![x0,x1,z0,z1,top].every(Number.isSafeInteger)||x0<1||x1>=p.w-1||z0<1||z1>=p.d-1||x0>x1||z0>z1||top<3||top>8||typeof role!=='string'||!role)
+   throw Error('invalid authored roof massing bounds');
+  for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++)for(let level=2;level<=top;level++)roofCell(x,p.h+level,z,p.roof,role);
+ }
+ for(const item of p.facadeGables??[]){
+  const [side,x0,x1,peak]=item;
+  if(!['front','rear'].includes(side)||![x0,x1,peak].every(Number.isSafeInteger)||x0<1||x1>=p.w-1||x0>x1||peak<4||peak>8)
+   throw Error('invalid source-authored gable crest');
+  const z=side==='front'?0:p.d-1,mid=(x0+x1)/2;
+  for(let x=x0;x<=x1;x++){
+   const top=Math.max(2,peak-Math.ceil(Math.abs(x-mid)/2));
+   for(let level=3;level<=top;level++)roofCell(x,p.h+level,z,'pack2:015',side+'-masonry-gable');
+  }
+ }
+
  const [lx,ly,lz]=p.lamp;put(lx,ly,lz,'pack4:035','decor',{role:'suspended-light-no-emission'});
  if(p.vaultDoor){const vault=openings.find(o=>o.type==='internal-doorway'&&o.x===p.vaultDoor[0]&&o.z===p.vaultDoor[1]);if(!vault)throw Error('missing planned vault door');vault.doorSymbol='pack5:094';vault.role='vault-threshold';vault.doorOpenState='symbolic-unverified';vault.physicalVariant=p.vaultDoorVariant;vault.intendedFacing=p.vaultDoorOrientation;if(!openings.some(o=>o.role==='vault-wide-secondary'))throw Error('two-cell gate requires distinct second portal');}
  const voxels=[...voxel.values()].sort((a,b)=>a.y-b.y||a.z-b.z||a.x-b.x);
