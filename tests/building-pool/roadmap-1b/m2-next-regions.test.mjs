@@ -21,12 +21,12 @@ function connected(b){
  }
  return visited.size===allowed.size;
 }
-test('M2d 91/435 unique literal candidate sources preserve all 15 exact inherited stable designs and bucket quotas',()=>{
+test('M2d 100/435 unique literal candidate sources preserve all 15 exact inherited stable designs and bucket quotas',()=>{
  const old=getInheritedStables(),all=get1BCandidates(),new9=allNew(),stats=validateAllocation(all);
- assert.equal(all.length,91);assert.equal(stats.authored,91);assert.equal(stats.remaining,344);
+ assert.equal(all.length,100);assert.equal(stats.authored,100);assert.equal(stats.remaining,335);
  assert.equal(old.length,15);assert.equal(new9.length,9);
- assert.equal(new Set(all.map(b=>b.id)).size,91);
- assert.equal(new Set(all.map(structuralFingerprint)).size,91,'physical/source coordinate identity collision');
+ assert.equal(new Set(all.map(b=>b.id)).size,100);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,100,'physical/source coordinate identity collision');
  assert.equal(new Set(new9.map(b=>b.architecturalIdentity.program)).size,9);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(category=>
   [category,all.filter(b=>b.category===category).length])),

@@ -33,12 +33,12 @@ function shaped(b,flip,turn){
  }
  return cells;
 }
-test('M2g real 91/435 authored census; 15 byte-exact inherited stables; category and biome-size quotas',()=>{
+test('M2g real 100/435 authored census; 15 byte-exact inherited stables; category and biome-size quotas',()=>{
  const all=get1BCandidates(),old=getInheritedStables(),new9=group(),count=validateAllocation(all);
- assert.equal(all.length,91);assert.equal(count.authored,91);assert.equal(count.remaining,344);
+ assert.equal(all.length,100);assert.equal(count.authored,100);assert.equal(count.remaining,335);
  assert.equal(old.length,15);assert.equal(new9.length,9);
- assert.equal(new Set(all.map(p=>p.id)).size,91);
- assert.equal(new Set(all.map(p=>structuralFingerprint(p))).size,91);
+ assert.equal(new Set(all.map(p=>p.id)).size,100);
+ assert.equal(new Set(all.map(p=>structuralFingerprint(p))).size,100);
  assert.equal(new Set(new9.map(p=>p.architecturalIdentity.program)).size,9);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(p=>p.category===k).length])),
   {'bathhouse':14,stable:28,'farm-barn':14,greenhouse:11,'fishing-lodge':8,'harbor-office':8,lighthouse:8});

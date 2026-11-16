@@ -95,7 +95,16 @@ const ids=[
  'r1:harbor-office:desert:large:001',
  'r1:harbor-office:enchanted-forest:large:001',
  'r1:lighthouse:temperate:small:001',
- 'r1:lighthouse:mountain:large:001'
+ 'r1:lighthouse:mountain:large:001',
+ 'r1:greenhouse:snow:medium:001',
+ 'r1:greenhouse:enchanted-forest:medium:001',
+ 'r1:greenhouse:desert:small:001',
+ 'r1:fishing-lodge:snow:large:001',
+ 'r1:fishing-lodge:enchanted-forest:large:001',
+ 'r1:harbor-office:mountain:large:001',
+ 'r1:harbor-office:snow:small:001',
+ 'r1:lighthouse:desert:medium:001',
+ 'r1:lighthouse:enchanted-forest:medium:001'
 ],viewports=[[667,375],[844,390],[932,430]];
 try{
  await mkdir(out,{recursive:true});
@@ -119,7 +128,7 @@ try{
  await writeFile(resolve(out,'M1_WEBGL2_CAPTURE_MANIFEST.json'),
   JSON.stringify({kind:'actual-authored-source-WebGL2-proxy',physicalIPhone:false,physicalFamilyMeshes:false,
    screenshots:records.length,records},null,2));
- if(records.length!==462)throw Error('Expected 77 distinct source candidates × 2 views × 3 landscapes = 462 images');
+ if(records.length!==516)throw Error('Expected 86 distinct source candidates × 2 views × 3 landscapes = 516 images');
  console.log('BUILDER 1B genuine WebGL2 candidate captures PASS',JSON.stringify({images:records.length,
   ids:ids.length,viewports,output:out}));
 }finally{if(browser)await browser.close();await new Promise(resolve=>server.close(resolve));}
