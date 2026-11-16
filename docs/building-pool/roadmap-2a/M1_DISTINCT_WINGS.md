@@ -18,3 +18,14 @@ Each design contains four geographically distinct, physically traversable interi
 **Acceptance gate:** after the new candidates pass native geometry/Pack/circulation and distinctness tests, the existing real Chromium WebGL2 gallery must render 92 designs × 2 views × 3 sizes = **552 source-driven PNGs** at 667×375, 844×390, and 932×430. The cube-proxy gallery is not Pack-final rendered artwork or physical-iPhone validation. No merge, deployment, world placement, runtime registration, save editing, ownership crossing, or v0.11 unlocking.
 
 **Projected tally:** 92 authored/420 reserved (15 source-exact inherited, 77 independently authored); 328 unauthored; 0 creator approved; 0 integrated.
+
+
+## Independent geometry preflight (prior to exact-head CI)
+
+The six independently coordinate-specified footprint masks were evaluated against **all 86 previous losslessly exported ground-floor coordinates** and each other under 8 D4 symmetries. Maximum newly introduced floor IoU is **0.8588** (Duskbrook vs Frostfen), strictly below 0.89. This explicitly does **not** certify any of the 269 inherited high-overlap pairs.
+
+A separate stand-alone occupancy/floorpath preflight modeled exterior weather walls, internal bearing columns and an enclosed two-leaf east bank vault. Its six entrance-to-room-anchor checks each reached all four declared rooms. Modeled internal source-founded roof-bearing columns per design: 13, 13, 10, 10, 10, 15 respectively. These preliminary numbers are replaced by producer-specific Node tests once the exact committed source executes; the model does not substitute for real Pack mesh shapes or in-game iPhone testing.
+
+### Acceptance evidence discipline
+
+The exact-head Actions run **must** show the isolated \`roadmap-2a\` focused native-test step executing, not skipped. It must also print 6 genuine Chromium source-driven capture groups of **92** unique buildings and a final **552/552** gallery PASS, plus a saved evidence ZIP. A full shared-game WebGL smoke is not sufficient evidence for the building-specific gate. Do not imply approval until these logs and source-exact artifacts exist.
