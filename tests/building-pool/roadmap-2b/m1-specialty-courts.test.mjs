@@ -179,17 +179,17 @@ test('all eight material symbols exist in real integrated physical manual-five-p
  }
  assert(pack5Count>15);
 });
-test('truthful 71/420 ledger, all 56 new original identities preserved, and exact committed source file verified',()=>{
+test('truthful 79/420 ledger, all 64 new original identities preserved, and exact committed source file verified',()=>{
  const file='src/building-pool/roadmap-2b/m1-specialty-courts.mjs';
  assert.equal(execFileSync('git',['rev-parse','HEAD:'+file],{encoding:'utf8'}).trim(),
   execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim());
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,
   ledger.authoredCandidates,ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],
-  [420,15,56,71,349,0,0,0]);
- assert.equal(ledger.originals.length,56);
+  [420,15,64,79,341,0,0,0]);
+ assert.equal(ledger.originals.length,64);
  const actual=new Set(all.filter(b=>b.category!=='temple'||b.variation!==1).map(b=>b.id));
  for(const id of actual)assert(new Set(ledger.originals.map(x=>x.id)).has(id),'lost original '+id);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),71);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),349);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),79);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),341);
 });
