@@ -163,7 +163,7 @@ function build(q){
    add('room-divider',x,y,divZ,smith?P.stone:P.plank);
  // Orientation-aware fixtures in the two low side wings, off public aisles.
  const tools=[
-  {x:w-5,z:q.eastEnd-3,ref:P.anvil,variant:'blackiron-horn',label:smith?'cold hammer station':'plate shaping bench'},
+  {x:w-5,z:(q.eastEnd-3)%q.pierStride===0?q.eastEnd-4:q.eastEnd-3,ref:P.anvil,variant:'blackiron-horn',label:smith?'cold hammer station':'plate shaping bench'},
   {x:6,z:q.westEnd-3,ref:P.crate,variant:null,label:smith?'separate metalstock crate':'equipment crate'}
  ];
  for(const t of tools){
