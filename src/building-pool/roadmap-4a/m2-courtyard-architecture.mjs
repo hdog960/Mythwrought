@@ -1538,50 +1538,50 @@ const PLANS=[
     ],
     "wings": [
       [
-        23,
+        24,
         8,
         41,
-        43
+        27
       ],
       [
-        5,
-        16,
-        24,
+        4,
+        18,
+        25,
         35
       ],
       [
-        41,
-        14,
-        60,
-        37
-      ],
-      [
+        39,
         17,
-        41,
-        50,
-        51
+        60,
+        36
       ],
       [
-        18,
-        34,
-        48,
-        44
+        20,
+        31,
+        37,
+        49
+      ],
+      [
+        33,
+        36,
+        51,
+        47
       ]
     ],
     "octagons": [
       [
         33,
-        26,
-        14,
-        20
+        25,
+        11,
+        16
       ]
     ],
     "notches": [
       [
-        28,
-        25,
+        31,
+        27,
         36,
-        32
+        31
       ]
     ],
     "entry": [
@@ -1599,30 +1599,30 @@ const PLANS=[
         "axis": "x",
         "fixed": 24,
         "from": 19,
-        "to": 35,
+        "to": 34,
         "door": 27,
         "facing": "west"
       },
       {
         "axis": "x",
-        "fixed": 40,
-        "from": 18,
-        "to": 36,
-        "door": 28,
+        "fixed": 41,
+        "from": 19,
+        "to": 34,
+        "door": 27,
         "facing": "east"
       },
       {
         "axis": "z",
-        "fixed": 41,
-        "from": 24,
-        "to": 44,
-        "door": 32,
+        "fixed": 39,
+        "from": 23,
+        "to": 33,
+        "door": 28,
         "facing": "north"
       }
     ],
     "windows": [
       [
-        5,
+        4,
         22,
         "west"
       ],
@@ -1632,8 +1632,8 @@ const PLANS=[
         "east"
       ],
       [
-        34,
-        51,
+        30,
+        49,
         "north"
       ],
       [
@@ -1647,7 +1647,7 @@ const PLANS=[
         "south"
       ],
       [
-        23,
+        24,
         12,
         "west"
       ]
@@ -1666,16 +1666,16 @@ const PLANS=[
         24
       ],
       [
-        32,
-        48
+        29,
+        45
       ],
       [
-        20,
-        41
+        18,
+        39
       ],
       [
-        45,
-        44
+        44,
+        43
       ]
     ],
     "ridges": [],
@@ -1685,7 +1685,7 @@ const PLANS=[
         "id": "canopy-elders-alliance",
         "kind": "gathering-hall",
         "rect": [
-          25,
+          26,
           12,
           39,
           23
@@ -1706,19 +1706,19 @@ const PLANS=[
         "kind": "artisan-study",
         "rect": [
           43,
-          17,
+          18,
           58,
-          35
+          34
         ]
       },
       {
         "id": "north-glyph-ledger-arcade",
         "kind": "guild-ledger",
         "rect": [
-          19,
-          44,
-          48,
-          50
+          22,
+          38,
+          36,
+          48
         ]
       },
       {
@@ -1727,15 +1727,15 @@ const PLANS=[
         "rect": [
           41,
           38,
-          48,
-          42
+          49,
+          45
         ]
       }
     ],
     "roofBands": [
       {
         "rect": [
-          23,
+          25,
           9,
           40,
           22
@@ -1747,9 +1747,9 @@ const PLANS=[
       },
       {
         "rect": [
-          6,
-          17,
-          23,
+          5,
+          19,
+          24,
           34
         ],
         "profile": "gable",
@@ -1759,10 +1759,10 @@ const PLANS=[
       },
       {
         "rect": [
-          43,
-          16,
+          42,
+          19,
           59,
-          35
+          34
         ],
         "profile": "saw",
         "axis": "z",
@@ -1771,10 +1771,10 @@ const PLANS=[
       },
       {
         "rect": [
-          19,
-          43,
-          49,
-          50
+          22,
+          38,
+          36,
+          48
         ],
         "profile": "shed",
         "axis": "x",
@@ -1783,14 +1783,15 @@ const PLANS=[
       }
     ],
     "signature": [
-      "forest-radial-canopy-guild-open-star",
+      "forest-fan-trident-canopy-bridges",
       65,
       56,
-      "western-sap-arcade",
-      "eastern-bark-atelier",
-      "north-glyph-hall"
+      "west-raised-looms",
+      "east-bark-atelier",
+      "north-glyph-bridge",
+      "courtyard-forest-gap"
     ],
-    "profile": "forest-radial-canopy-guild-open-star"
+    "profile": "forest-fan-trident-canopy-bridges"
   },
   {
     "id": "r4:guildhall:mountain:medium:02",
