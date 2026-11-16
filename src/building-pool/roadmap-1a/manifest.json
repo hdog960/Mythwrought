@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M2 wave6 129 authored; 12 source ghost partition voxels repaired, latest exact-head CI pending",
+  "milestone": "M2 wave7: 15 fresh coordinate-authored L/U/T houses with distinct source silhouettes; 144/450, current exact-head CI pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 321,
-  "newDesignsAuthored": 99,
-  "totalLaneGeometryAuthored": 129,
+  "additionalDesignsRequired": 306,
+  "newDesignsAuthored": 114,
+  "totalLaneGeometryAuthored": 144,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,10 +53,10 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "129 pool exact-head source Node acceptance plus frozen 114 source-identity parity and shape near-duplicate gates",
-    "606 genuine Chromium authored source-cell cube exteriors/cutaways and 330 producer Pack1–5 source visibleBox AABB WebGL2 views at three landscape sizes",
-    "42 more distinct houses until 150-house milestone; 321 other 1A designs unauthored overall",
-    "Final structural/weather/swept-door/glass/bed/save ABI, creator art/physical iPhone and world integration unapproved"
+    "Exact-head CI acceptance for complete 144 pool and 129 historical source candidates plus Pack1–5 physical source audits",
+    "696 source-cell cube Chromium software-WebGL2 exterior/cutaway screenshots and 420 producer Pack visibleBox AABB screenshots at 667×375,844×390,932×430",
+    "27 more genuinely distinct houses to reach 150-house domestic milestone; 306 total 1A designs unauthored",
+    "Roofs weather/load, Pack2 doors sweep/save, Pack4 panes optical state, Pack5 bed collision+schema1 saves, hardware iPhone, creator acceptance and runtime integration blocked"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -75,7 +75,7 @@
   },
   "innCount": 1,
   "categoriesAuthored": {
-    "house": 108,
+    "house": 123,
     "tavern": 17,
     "inn": 4
   },
@@ -250,12 +250,30 @@
     "sourceBaselineHead": "bdad24c32a4fc8e3f13fd72da24db4869816c2e9",
     "maxNormalizedFloorplanIoU": 0.6,
     "maxNormalizedSilhouetteIoU": 0.968944099378882,
-    "exactHeadNode": "PENDING recheck after evidence-backed 12-voxel notch ghost repair",
+    "exactHeadNode": "SUCCESS: Actions #43802527086 at 5c1ddda225166083aee0671364fbb7683b551c89, 12/12 contracts, 735 root, 190 1A, 606 source cubes and 330 producer AABB WebGL2",
     "cubeWebGL2Target": 606,
     "producerAABBWebGL2Target": 330,
     "approved": 0,
     "integrated": 0,
     "placed": 0,
     "defectCorrections": "Snow Small rear partition x13 and Enchanted Forest Large three rear-east partitions x25 removed from authored physical VOID (12 source voxels)"
+  },
+  "m2Wave7": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave7.mjs",
+    "authoredOriginalHouses": 15,
+    "authoredVoxelPlacements": 71243,
+    "physicallyRemovedExteriorCells": 2463,
+    "biomeSizeCoverage": "5 biomes x 3 sizes",
+    "previousSourceCandidatesPreserved": 129,
+    "baselineHead": "5c1ddda225166083aee0671364fbb7683b551c89",
+    "maxNormalizedFloorplanIoU": 0.6538461538461539,
+    "maxNormalizedExteriorIoU": 0.948936170212766,
+    "sourcePreflight": "144/144 VALID, 144 independent source fingerprints, real connected walking paths, roof support and bed footprints; native exact-head pending",
+    "nativeExactHead": "PENDING",
+    "webgl2AuthoredCellCubeTarget": 696,
+    "webgl2PhysicalSourceAABBTarget": 420,
+    "creatorAccepted": 0,
+    "integrated": 0,
+    "worldPlaced": false
   }
 }
