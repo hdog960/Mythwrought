@@ -21,7 +21,7 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
   if (!held) {held=new Set();locks.set(sidecar,held);}
   if (keys.some(k=>held.has(k))) throw new Error('Overlapping batch edit');
   keys.forEach(k=>held.add(k));
-  const originals=[],states=[],revisions=[],written=[],postWrites=new Map();
+  const originals=[],states=[],revisions=[],written=[],postWrites=new Map(),ambiguous=new Set();
   try {
     // Preflight every identity before touching any cell.
     for (const c of cells) {
@@ -67,8 +67,10 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
         // rollback receipt for an inconsistent snapshot.
         if (await readIdentity(cells[i])!==committedId ||
             (readState && await readState(cells[i])!==committedState) ||
-            (readRevision && await readRevision(cells[i])!==committedRevision))
+            (readRevision && await readRevision(cells[i])!==committedRevision)) {
+          ambiguous.add(i);
           throw new Error('Unstable committed snapshot');
+        }
         postWrites.set(i,{id:committedId,state:committedState,revision:committedRevision});
       }
     } catch (error) {
@@ -77,6 +79,7 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
         try {
           // A different editor may have changed an already-written cell while
           // a later async edit was pending. Never undo that foreign change.
+          if (ambiguous.has(i)) throw new Error('Foreign edit during unverified commit');
           const post=postWrites.get(i);
           if (post && (await readIdentity(cells[i])!==post.id ||
               (readState && await readState(cells[i])!==post.state) ||
