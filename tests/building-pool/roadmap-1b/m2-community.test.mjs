@@ -27,12 +27,12 @@ function d4Canonical(b){
  }
  return digests.sort()[0];
 }
-test('M2 all nine source-authored designs are independent, 64/435 census and 15 inherited IDs remain unchanged',()=>{
+test('M2 all nine source-authored designs are independent, 73/435 census and 15 inherited IDs remain unchanged',()=>{
  const original=getInheritedStables(),m2=builds(),all=get1BCandidates(),c=validateAllocation(all);
  assert.equal(m2.length,9);assert.equal(original.length,15);
- assert.equal(all.length,64);assert.equal(c.authored,64);assert.equal(c.remaining,371);
- assert.equal(new Set(all.map(b=>b.id)).size,64);
- assert.equal(new Set(all.map(b=>structuralFingerprint(b))).size,64);
+ assert.equal(all.length,73);assert.equal(c.authored,73);assert.equal(c.remaining,362);
+ assert.equal(new Set(all.map(b=>b.id)).size,73);
+ assert.equal(new Set(all.map(b=>structuralFingerprint(b))).size,73);
  assert.equal(new Set(m2.map(b=>b.id)).size,9);
  for(const legacy of original){
   const carried=all.find(b=>b.id===legacy.id);
@@ -40,7 +40,7 @@ test('M2 all nine source-authored designs are independent, 64/435 census and 15 
   assert.equal(stableBlueprintJSON(carried),stableBlueprintJSON(legacy),'source-exact stable moved '+legacy.id);
  }
  const counts=Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(b=>b.category===k).length]));
- assert.deepEqual(counts,{'bathhouse':14,stable:28,'farm-barn':14,greenhouse:2,'fishing-lodge':2,'harbor-office':2,lighthouse:2});
+ assert.deepEqual(counts,{'bathhouse':14,stable:28,'farm-barn':14,greenhouse:5,'fishing-lodge':4,'harbor-office':4,lighthouse:4});
  for(const biome of BIOMES)for(const size of SIZES)for(const [category,n] of Object.entries(QUOTAS)){
   assert.ok(all.filter(x=>x.category===category&&x.biome===biome&&x.size===size).length<=n);
  }
@@ -72,14 +72,14 @@ test('M2 all nine designs are full authored 3D with actual connected standing cl
    'non-deterministic coordinate output '+b.id);
  }
 });
-test('D4 canonical 90°, 180°, 270° rotations and mirrors find no exact architectural copies among all 64',()=>{
+test('D4 canonical 90°, 180°, 270° rotations and mirrors find no exact architectural copies among all 73',()=>{
  const m=get1BCandidates(),sets=new Map();
  for(const b of m){
   const fp=d4Canonical(b);
   assert.ok(!sets.has(fp),'rotation/reflection duplicate '+b.id+' vs '+sets.get(fp));
   sets.set(fp,b.id);
  }
- assert.equal(sets.size,64);
+ assert.equal(sets.size,73);
 });
 test('Snow small baths contain two connected empty basins and a physically roofed warming hall',()=>{
  const b=find('bathhouse','snow','small'),walk=new Set(b.walkable.map(key));
