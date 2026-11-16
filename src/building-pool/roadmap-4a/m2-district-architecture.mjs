@@ -633,7 +633,7 @@ const PLANS=[
         "axis": "z",
         "fixed": 39,
         "from": 23,
-        "to": 42,
+        "to": 41,
         "door": 29,
         "facing": "north"
       }
@@ -885,9 +885,9 @@ const PLANS=[
       {
         "axis": "z",
         "fixed": 36,
-        "from": 23,
+        "from": 31,
         "to": 38,
-        "door": 29,
+        "door": 32,
         "facing": "north"
       }
     ],
