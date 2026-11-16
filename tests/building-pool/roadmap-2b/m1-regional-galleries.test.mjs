@@ -88,9 +88,11 @@ test('all separately enclosed fitting, cutting, cold, vault, book, sanctuary and
   ['r2:tailor:enchanted-forest:medium:02',[[8,13]],['west fitting']],
   ['r2:tailor:enchanted-forest:medium:02',[[24,19]],['east fitting']],
   ['r2:tailor:enchanted-forest:medium:02',[[16,27]],['rear embroidery']],
-  ['r2:butcher:temperate:medium:01',[[6,13]],['cold larder']],
-  ['r2:butcher:temperate:medium:01',[[17,13]],['prep floor']],
-  ['r2:butcher:temperate:medium:01',[[28,13]],['curing floor']],
+  // Crosswise doors x12/x23,z21 are intentional real hygiene/service
+  // transfers; a room seals only after ALL its physical entrance ports close.
+  ['r2:butcher:temperate:medium:01',[[6,13],[12,21]],['cold larder']],
+  ['r2:butcher:temperate:medium:01',[[17,13],[12,21],[23,21]],['prep floor']],
+  ['r2:butcher:temperate:medium:01',[[28,13],[23,21]],['curing floor']],
   ['r2:jeweler:snow:medium:01',[[21,24]],['vault']],
   ['r2:bookshop:enchanted-forest:medium:01',[[9,13]],['west reading']],
   ['r2:bookshop:enchanted-forest:medium:01',[[25,19]],['east reading']],
@@ -109,6 +111,15 @@ test('all separately enclosed fitting, cutting, cold, vault, book, sanctuary and
    assert(!closed.has(pos2),id+' has unadvertised unprotected bypass into '+name);
   }
  }
+});
+test('butcher service-transfer doors intentionally preserve circulation if only the public larder portal is closed',()=>{
+ const b=byId.get('r2:butcher:temperate:medium:01');
+ const cold=b.routeTargets.find(x=>x.name==='cold larder');
+ assert(cold);
+ assert(reachable(b,[[6,13]]).has(cold.x+','+cold.z),
+  'actual transfer door x12,z21 must still connect the room through the central work bay');
+ assert(!reachable(b,[[6,13],[12,21]]).has(cold.x+','+cold.z),
+  'both genuine cold-room ports closed must isolate cold storage');
 });
 test('five mountain stalls and four winter stalls have source-real independent 5×5 supported canopy roofs',()=>{
  for(const [id,count,other] of [
