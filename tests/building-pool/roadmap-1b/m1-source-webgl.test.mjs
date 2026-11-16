@@ -181,8 +181,18 @@ test('M1/M2 41 genuine source-served WebGL2 candidates × 3 iPhone landscapes ×
    JSON.stringify({candidates:ids.length,viewports:sizes,captures:evidence.length}));
  }finally{
   try{cdp?.close();}catch{}
-  try{chrome?.child.kill('SIGKILL');}catch{}
-  await new Promise(r=>site.server.close(r));
-  await rm(profile,{recursive:true,force:true});
+  // Chromium can still be writing its user profile after the final screenshot.
+  // Await the actual Chrome child exit BEFORE removing the profile; a bare
+  // SIGKILL followed by immediate rm races and intermittently throws ENOTEMPTY.
+  const child=chrome?.child;
+  if(child&&child.exitCode===null&&child.signalCode===null){
+   const exited=new Promise(resolve=>child.once('exit',resolve));
+   child.kill('SIGKILL');
+   await exited;
+  }
+  await new Promise(resolve=>site.server.close(resolve));
+  // Node's recursive fs.rm retries ENOTEMPTY/EBUSY from Chromium's short-lived
+  // helper processes. This is cleanup only; screenshot assertions still fail closed.
+  await rm(profile,{recursive:true,force:true,maxRetries:12,retryDelay:150});
  }
 });
