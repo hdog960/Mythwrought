@@ -29,7 +29,7 @@ async function server(){
  await new Promise((ok,fail)=>{http.once('error',fail);http.listen(0,'127.0.0.1',ok);});
  return http;
 }
-// 132 real cold-start Chromium captures take longer than the prior 120-view run;
+// 142 real cold-start Chromium captures take longer than the prior 120-view run;
 // do not truncate genuine browser work at the historic 210s test deadline.
 test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authored M1 source at three phone-landscape dimensions', {timeout:420000},async(t)=>{
  const browser=findBrowser();
@@ -169,7 +169,17 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
   ['theater',844,390,'exterior','mountain','medium'],
   ['theater',844,390,'cutaway','mountain','medium'],
   ['temple',667,375,'exterior','snow','small',2],
-  ['temple',667,375,'cutaway','snow','small',2]
+  ['temple',667,375,'cutaway','snow','small',2],
+  ['market-square',667,375,'exterior','desert','large',2],
+  ['market-square',667,375,'cutaway','desert','large',2],
+  ['tailor',844,390,'exterior','mountain','medium',2],
+  ['tailor',844,390,'cutaway','mountain','medium',2],
+  ['butcher',667,375,'exterior','snow','medium',2],
+  ['butcher',667,375,'cutaway','snow','medium',2],
+  ['bookshop',844,390,'exterior','desert','medium',2],
+  ['bookshop',844,390,'cutaway','desert','medium',2],
+  ['theater',932,430,'exterior','temperate','large',2],
+  ['theater',932,430,'cutaway','temperate','large',2]
  ];
  try{
   for(let i=0;i<cases.length;i++){

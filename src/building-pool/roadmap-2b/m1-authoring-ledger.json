@@ -6,27 +6,27 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 75,
-  "authoredCandidates": 90,
-  "remainingUnauthored": 330,
+  "originalNewModels": 80,
+  "authoredCandidates": 95,
+  "remainingUnauthored": 325,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
-      "authored": 13,
+      "authored": 14,
       "target": 60,
-      "remaining": 47
+      "remaining": 46
     },
     "tailor": {
-      "authored": 10,
+      "authored": 11,
       "target": 60,
-      "remaining": 50
+      "remaining": 49
     },
     "butcher": {
-      "authored": 10,
+      "authored": 11,
       "target": 60,
-      "remaining": 50
+      "remaining": 49
     },
     "jeweler": {
       "authored": 10,
@@ -34,9 +34,9 @@
       "remaining": 50
     },
     "bookshop": {
-      "authored": 11,
+      "authored": 12,
       "target": 60,
-      "remaining": 49
+      "remaining": 48
     },
     "temple": {
       "authored": 22,
@@ -44,9 +44,9 @@
       "remaining": 53
     },
     "theater": {
-      "authored": 14,
+      "authored": 15,
       "target": 45,
-      "remaining": 31
+      "remaining": 30
     }
   },
   "originals": [
@@ -423,6 +423,31 @@
     {
       "id": "r2:temple:snow:small:02",
       "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:desert:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:mountain:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:desert:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
       "status": "authored-candidate"
     }
   ],
