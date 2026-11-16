@@ -391,6 +391,35 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // Mid-depth braided ravine at -70. Two offset erosion channels diverge
+  // around a solid island, then reconnect at an expanded terminal vault.
+  // It remains outside the switchback and is carved from physical voxels.
+  {
+    const depth=-70,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,width=2,height=6)=>{
+        for(let across=-width;across<=width;across++){
+          const x=anchor.x+outward[0]*d+tangent[0]*(t+across);
+          const z=anchor.z+outward[1]*d+tangent[1]*(t+across);
+          set(x,depth,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
+        }
+      };
+      for(let d=0;d<=14;d++)carve(d,0);
+      for(let d=14;d<=52;d++){
+        const offset=Math.round(10*Math.sin(Math.PI*(d-14)/38));
+        carve(d,-offset,2,6);
+        carve(d,offset,2,7);
+      }
+      for(let d=48;d<=65;d++)for(let t=-12;t<=12;t++){
+        const radial=((d-56)/9)**2+(t/13)**2;
+        if(radial<=1)carve(d,t,0,5+Math.floor(7*(1-radial)));
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
