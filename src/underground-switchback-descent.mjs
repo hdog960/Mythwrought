@@ -473,10 +473,15 @@ export function descentConnectivity(world,origin=DESCENT_ORIGIN){
     bands[band]++;
     if(highest===null)highest=p.floor;
     lowest=p.floor;
-    if(reader.get(p.x,p.floor,p.z)===BLOCK.AIR||
-       reader.get(p.x,p.feet,p.z)!==BLOCK.AIR||
-       reader.get(p.x,p.feet+1,p.z)!==BLOCK.AIR)
+    // Match the authored four-cell player envelope, not just feet and head.
+    // Saved overhead edits must fail readiness even when the lower two cells
+    // remain clear. A floor must be solid, not merely non-air.
+    if(reader.get(p.x,p.floor,p.z)!==BLOCK.DEEPSTONE &&
+       reader.get(p.x,p.floor,p.z)!==BLOCK.STONE)
       failures.push({step:i,reason:'blocked-or-unsupported'});
+    for(let h=0;h<4;h++)
+      if(reader.get(p.x,p.feet+h,p.z)!==BLOCK.AIR)
+        failures.push({step:i,reason:'blocked-or-unsupported',height:h});
     if(prev){
       const horizontal=Math.abs(p.x-prev.x)+Math.abs(p.z-prev.z);
       const vertical=Math.abs(p.feet-prev.feet);
