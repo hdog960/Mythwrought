@@ -29,6 +29,12 @@ export async function commitOrientedEdit({cell, sidecar, readIdentity, edit, rol
       if (after !== before) throw new Error('Rejected edit mutated world');
       return result;
     }
+    // A success acknowledgement is not enough: the world may have become
+    // unreadable or returned an invalid persistent ID during an async write.
+    // Keep old rotation only when a failed write can be fully rolled back.
+    const after = await readIdentity(...key);
+    if (!Number.isSafeInteger(after) || after < 0 || after >= 255)
+      throw new Error('Committed edit has invalid world identity');
     // A committed edit must invalidate the prior rotation, even if ID is unchanged.
     // This adapter requires exclusive per-cell edit ownership while awaiting.
     sidecar.invalidateEdit(key);
