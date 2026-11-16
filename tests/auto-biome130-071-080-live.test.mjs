@@ -6,7 +6,7 @@ import {VoxelWorld,meshChunk,BLOCK} from '../src/voxel.mjs';
 import {resolveBiome130BuilderAsset,planBiome130BuilderStructure,
   placeBiome130BuilderStructure} from '../src/builder-assets/biome130.mjs';
 test('all ten underground families register distinct physical shapes and builder rotations',()=>{
- assert.equal(BIOME130_REGISTERED_IDS.length,80);
+ assert.equal(BIOME130_REGISTERED_IDS.length,130);
  for(let n=71;n<=80;n++){
   const id=255+n,symbol='biome130:'+String(n).padStart(3,'0');
   const asset=biome130Block(symbol),builder=resolveBiome130BuilderAsset(symbol,'east');
@@ -17,7 +17,7 @@ test('all ten underground families register distinct physical shapes and builder
   assert.ok(asset.boxes.every(b=>b.length===6&&b.every(Number.isFinite)));
   assert.deepEqual(biome130Block(id,1).boxes,builder.shape.boxes);
  }
- assert.equal(new Set(BIOME130_REGISTERED_IDS).size,80);
+ assert.equal(new Set(BIOME130_REGISTERED_IDS).size,130);
 });
 test('all underground family blocks persist through schema-1 saves and real chunk meshing',()=>{
  const world=new VoxelWorld(179),legacy=world.save();
@@ -36,7 +36,7 @@ test('all underground family blocks persist through schema-1 saves and real chun
  assert.equal(restored.rotationAt(901,16,850),0);
  assert.equal(restored.biomeCellCount,9);
  assert.equal(restored.set(999,16,999,255),false);
- assert.equal(restored.set(999,16,999,336),false);
+ assert.equal(restored.set(999,16,999,386),false);
  assert.deepEqual(VoxelWorld.restore(legacy).save(),legacy);
  meshChunk(world,56,53);
 });
