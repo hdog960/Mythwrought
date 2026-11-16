@@ -117,7 +117,19 @@ async function launchChrome(){
     try {ws.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));}
     catch(e){clearTimeout(timeout);pending.delete(id);bad(e);}
   });
-  return {send,close:()=>{ws.close();child.kill();rmSync(dir,{recursive:true,force:true,maxRetries:30,retryDelay:100});},binary};
+  const close=async()=>{
+    try{ws.close();}catch{}
+    if(child.exitCode===null&&child.signalCode===null){
+      child.kill('SIGTERM');
+      await Promise.race([new Promise(done=>child.once('exit',done)),sleep(2000)]);
+    }
+    if(child.exitCode===null&&child.signalCode===null){
+      child.kill('SIGKILL');
+      await Promise.race([new Promise(done=>child.once('exit',done)),sleep(2000)]);
+    }
+    rmSync(dir,{recursive:true,force:true,maxRetries:50,retryDelay:100});
+  };
+  return {send,close,binary};
 }
 async function waitPreview(cmd,where,expected){
   let last;
@@ -181,9 +193,17 @@ test('five 4B-owned blueprints × exterior/section × three real Chromium landsc
     }
     await browser.send('Target.closeTarget',{targetId});
   }finally{
-    if(browser)browser.close();
-    if(releaseLock)releaseLock();
-    await new Promise(done=>site.server.close(done));
+    // A Chromium filesystem/profile error must never strand the exclusive
+    // capture lock or leave the test HTTP server keeping Node alive.
+    try{
+      if(browser)await browser.close();
+    }finally{
+      try{if(releaseLock)releaseLock();}
+      finally{await new Promise(done=>{
+        site.server.close(done);
+        site.server.closeAllConnections();
+      });}
+    }
   }
   assert.equal(captures.length,96);
   writeFileSync(join(output,'results.json'),JSON.stringify({
