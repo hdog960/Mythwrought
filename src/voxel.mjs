@@ -3,6 +3,7 @@ import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
+import {biome130MaterialTag} from './biome130-render.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -279,7 +280,7 @@ export function meshChunk(world,cx,cz){
               const i=surface.indices[u]*3,px=surface.positions[i],
                     py=surface.positions[i+1],pz=surface.positions[i+2];
               appendVertex(x+px,y+py,z+pz,color[0]*lit,color[1]*lit,color[2]*lit,
-                nx?pz:px,ny?pz:py,0);
+                nx?pz:px,ny?pz:py,biome130MaterialTag(id));
             }
           }
           continue;

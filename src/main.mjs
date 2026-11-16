@@ -4,6 +4,7 @@ import {meshDepthSection} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
+import {biome130TerrainFragmentShader,splitBiome130Translucent} from './biome130-render.mjs';
 import {clampLook,forwardVector,compassDegrees,MAX_PITCH} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
 import {chunkKey,editAffectedChunks} from './chunks.mjs';
@@ -76,12 +77,8 @@ function start(){
     'gl_Position=vec4(x/(uAspect*uTan),y/uTan,1.0015*z-0.1501,z);',
     'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(floor(aMat+.001)); vPack2Alpha=fract(aMat); }'
   ].join('\n');
-  // Reserved transparent-water material 20; legacy materials stay unchanged.
-  const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER
-    .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
-    .replace('void main(){',
-      'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
-      'outColor=vec4(mix(vColor,uFog,f),vPack2Alpha); return; }');
+  // Material 20 water is unchanged; cutouts and blended ice share its shader.
+  const FS=biome130TerrainFragmentShader(STORYBOOK_MATERIAL_FRAGMENT_SHADER);
   let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
   function initializeGpuPipeline(){
     const resources=buildGpuPipeline(gl,{
@@ -258,13 +255,17 @@ function start(){
     gl.deleteBuffer(chunk.buffer);
     if(chunk.waterBuffer)gl.deleteBuffer(chunk.waterBuffer);
   }
-  // Both buffers stage before publishing; on failure neither can leak.
+  // Only chunks containing ice gain extra translucent vertices; those faces
+  // reuse the existing back-to-front blended water buffer, never the opaque pass.
   function uploadPack2Chunk(vertices,water){
+    const split=splitBiome130Translucent(vertices);
+    const transparent=combineVertices(water,split.translucent);
     let buffer=null,waterBuffer=null;
     try{
-      buffer=uploadChunkBuffer(gl,vertices);
-      if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
-      return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
+      buffer=uploadChunkBuffer(gl,split.opaque);
+      if(transparent.length)waterBuffer=uploadChunkBuffer(gl,transparent);
+      return {buffer,count:split.opaque.length/9,waterBuffer,
+        waterCount:transparent.length/9,biome130IceCount:split.translucent.length/9};
     }catch(error){
       if(buffer)gl.deleteBuffer(buffer);
       if(waterBuffer)gl.deleteBuffer(waterBuffer);
@@ -321,7 +322,8 @@ function start(){
       const old=chunks.get(item.key);
       chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
         buffer:item.buffer,count:item.count,
-        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+        waterBuffer:item.waterBuffer,waterCount:item.waterCount,
+        biome130IceCount:item.biome130IceCount});
       deleteChunkBuffers(old);
     }
     editMeshBatches++;
@@ -371,7 +373,8 @@ function start(){
       const old=chunks.get(item.key);
       chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
         buffer:item.buffer,count:item.count,
-        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+        waterBuffer:item.waterBuffer,waterCount:item.waterCount,
+        biome130IceCount:item.biome130IceCount});
       deleteChunkBuffers(old);
     }
     if(ready.length){
@@ -621,6 +624,7 @@ function start(){
       canvas.dataset.meshEditBatches=String(editMeshBatches);
       canvas.dataset.lastEditedChunks=lastEditMeshKeys.join(';');
       canvas.dataset.renderedMeshVertices=String([...chunks.values()].reduce((sum,c)=>sum+c.count,0));
+      canvas.dataset.biome130IceVertices=String([...chunks.values()].reduce((sum,c)=>sum+(c.biome130IceCount||0),0));
       canvas.dataset.pack3PhysicalCount=String(pack3.runtime.size());
       canvas.dataset.pack3SelectedId=String(isPack3BlockId(selected)?selected:0);
       canvas.dataset.manual14PhysicalCount=String(manual14.layer.size());
