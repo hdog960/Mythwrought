@@ -192,3 +192,35 @@ test('optional state reader preserves old callback contract for successful same-
   assert.equal(shape,'east');
   assert.equal(f.sidecar.get(f.cell,4),0);
 });
+
+test('successful write with unreadable shape fingerprint rolls back before acknowledgement',async()=>{
+  const f=fixture();
+  let shape='north', undos=0;
+  await assert.rejects(f.run(()=>{shape={corrupt:true};return true;},{
+    readState:()=>shape,
+    rollback:()=>{undos++;shape='north';}
+  }),/Committed edit has invalid shape state/);
+  assert.equal(undos,1);
+  assert.equal(shape,'north');
+  assert.equal(f.sidecar.get(f.cell,4),3);
+});
+
+test('non-finite initial shape fingerprint cannot start a world edit',async()=>{
+  const f=fixture();
+  let writes=0;
+  await assert.rejects(f.run(()=>{writes++;return true;},{readState:()=>NaN}),/Invalid initial state fingerprint/);
+  assert.equal(writes,0);
+  assert.equal(f.sidecar.get(f.cell,4),3);
+});
+
+test('failed rollback after invalid committed shape invalidates stale rotation',async()=>{
+  const f=fixture();
+  let shape='north';
+  await assert.rejects(f.run(()=>{shape=Infinity;return true;},{
+    readState:()=>shape,
+    rollback:()=>{ /* host cannot restore shape */ }
+  }),error=>error instanceof AggregateError &&
+    error.errors[0].message==='Committed edit has invalid shape state' &&
+    error.errors[1].message==='Rollback did not restore shape state');
+  assert.equal(f.sidecar.get(f.cell,4),0);
+});
