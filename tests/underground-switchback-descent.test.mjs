@@ -575,3 +575,20 @@ test('saved edit blocks braided ravine without changing backup data',()=>{
   assert.equal(descentWorld(restored).get(x,-69,z),BLOCK.WOOD);
   assert.deepEqual(restored.save(),saved);
 });
+
+test('surface seam checks full four-cell player envelope and preserves saved ceiling edits',async()=>{
+  const {descentSurfaceSeam}=await import('../src/underground-switchback-descent.mjs');
+  const world=new VoxelWorld(179),p=descentEntranceApproach()[0];
+  // A low ceiling at the fourth body cell must fail even when the two
+  // bottom cells are air. This is protected legacy terrain, not ours to cut.
+  assert.equal(world.set(p.x,p.feet,p.z,BLOCK.AIR),true);
+  assert.equal(world.set(p.x,p.feet+1,p.z,BLOCK.AIR),true);
+  assert.equal(world.set(p.x,p.feet+2,p.z,BLOCK.AIR),true);
+  assert.equal(world.set(p.x,p.feet+3,p.z,BLOCK.WOOD),true);
+  const saved=world.save(),restored=VoxelWorld.restore(saved);
+  const seam=descentSurfaceSeam(restored);
+  assert.equal(seam.clear,false);
+  assert.ok(seam.failures.some(f=>f.x===p.x&&f.y===p.feet+3&&f.z===p.z&&f.reason==='surface-headroom'));
+  assert.deepEqual(restored.save(),saved);
+  assert.equal(seam.runtimeVerified,false);
+});
