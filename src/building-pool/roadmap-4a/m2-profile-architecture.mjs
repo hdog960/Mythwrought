@@ -1751,9 +1751,9 @@ const PLANS=[
         "kind": "member-passage",
         "rect": [
           25,
-          35,
+          34,
           38,
-          39
+          37
         ]
       }
     ],
