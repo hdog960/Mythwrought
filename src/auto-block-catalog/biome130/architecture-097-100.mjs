@@ -24,7 +24,7 @@ export function physicalMesh(asset,rotation=0){
  for(const b of rotatedBoxes(asset,rotation)){
   const c=[[b[0],b[1],b[2]],[b[3],b[1],b[2]],[b[3],b[4],b[2]],[b[0],b[4],b[2]],[b[0],b[1],b[5]],[b[3],b[1],b[5]],[b[3],b[4],b[5]],[b[0],b[4],b[5]]];
   for(const f of [[0,3,2,1],[5,6,7,4],[4,7,3,0],[1,2,6,5],[3,7,6,2],[4,0,1,5]]){
-   const start=vertices.length/3;for(const i of f)vertices.push(...c[i]);indices.push(start,start+1,start+2,start,start+2,start+3];
+   const start=vertices.length/3;for(const i of f)vertices.push(...c[i]);indices.push(start,start+1,start+2,start,start+2,start+3);
   }
  }
  return {vertices,indices};
