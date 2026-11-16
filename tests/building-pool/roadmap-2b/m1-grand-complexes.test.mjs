@@ -224,7 +224,7 @@ test('manual integrated family source is real but producer shapes, Pack5 fixture
  }
  assert(pack5Total>20);
 });
-test('exact PR-head Git blob and cumulative 71/420 source inventory preserve 15 legacy and 48 original identities',()=>{
+test('exact PR-head Git blob and cumulative 79/420 source inventory preserve 15 legacy and 48 original identities',()=>{
  const file='src/building-pool/roadmap-2b/m1-grand-complexes.mjs';
  const original=execFileSync('git',['rev-parse','HEAD:'+file],{encoding:'utf8'}).trim();
  const disk=execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim();
@@ -232,11 +232,11 @@ test('exact PR-head Git blob and cumulative 71/420 source inventory preserve 15 
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,
   ledger.authoredCandidates,ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],
-  [420,15,56,71,349,0,0,0]);
- assert.equal(ledger.originals.length,56);
+  [420,15,64,79,341,0,0,0]);
+ assert.equal(ledger.originals.length,64);
  const current=new Set(ledger.originals.map(x=>x.id));
  for(const old of all.filter(x=>x.category!=='temple'||x.variation!==1))
   assert(current.has(old.id),'lost previous authored grand candidate '+old.id);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),71);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),349);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),79);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),341);
 });
