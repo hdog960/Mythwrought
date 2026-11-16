@@ -23,7 +23,7 @@ try:
     page.goto('http://127.0.0.1:4173/tests/building-pool/roadmap-2a/m1-gallery.html?view='+view)
     page.wait_for_function("window.__MW2A_GALLERY?.ready===true",timeout=30000)
     ids=page.locator('#building option').evaluate_all('(nodes)=>nodes.map(n=>n.value)')
-    if len(ids)!=68:raise AssertionError('Source building count')
+    if len(ids)!=74:raise AssertionError('Source building count')
     for idx,bid in enumerate(ids):
      page.select_option('#building',bid)
      data=page.evaluate('window.__MW2A_GALLERY')
