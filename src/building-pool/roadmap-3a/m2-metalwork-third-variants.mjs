@@ -95,6 +95,7 @@ function build(q){
   }
  }
  function openRoof(x,z){
+  if(smith&&Math.abs(x-8)<=1&&Math.abs(z-(d-10))<=1)return true; // chimney physically traverses the roof
   switch(q.daylightPlan){
    case 'west-lantern':return x>=2&&x<5&&z>q.westStart+2&&z<q.westEnd-2;
    case 'open-south':return x>=w-6&&z>=d-12&&z<d-7;
