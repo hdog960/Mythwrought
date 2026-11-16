@@ -97,9 +97,11 @@ export function descentCells(origin=DESCENT_ORIGIN){
       const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
       const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
       const tangent=[outward[1],-outward[0]];
+      // Keep the first four steps single-file until clear of the spiral's
+      // adjacent bearing wall; only then widen into the five-cell hall.
       for(let d=0;d<=42;d++){
         const floor=depth-Math.min(2,Math.floor(d/14));
-        for(let across=-2;across<=2;across++){
+        for(let across=-(d<4?0:2);across<=(d<4?0:2);across++){
           const x=anchor.x+outward[0]*d+tangent[0]*across;
           const z=anchor.z+outward[1]*d+tangent[1]*across;
           set(x,floor,z,BLOCK.DEEPSTONE);
