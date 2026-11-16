@@ -12,12 +12,12 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 22,
-    "totalAuthored": 52,
-    "remaining": 263,
+    "newlyAuthored": 30,
+    "totalAuthored": 60,
+    "remaining": 255,
     "creatorAccepted": 0,
     "integratedBuildings": 0,
-    "m2Original": 22
+    "m2Original": 30
   },
   "biomes": [
     "temperate",
@@ -37,7 +37,7 @@
       "perBiomeSize": 5,
       "total": 75,
       "inherited": 15,
-      "remaining": 49,
+      "remaining": 45,
       "milestone": 2
     },
     {
@@ -45,7 +45,7 @@
       "perBiomeSize": 4,
       "total": 60,
       "inherited": 0,
-      "remaining": 49,
+      "remaining": 45,
       "milestone": 2
     },
     {
@@ -92,7 +92,7 @@
   "gates": {
     "M0": "Accepted: exact-head Actions #43767981937 passed after fixing owned M0 count/list tests; 30 inherited source-exact designs preserved",
     "M1": "Technical candidate acceptance: exact-head Actions #43770848853 passed, 180 source-driven Chromium WebGL2 exterior/cutaway proxy captures; physical/creator gates open",
-    "M2": "22 independently coordinate-authored M2 drafts (8 new original coastal/desert/snow/forest/mountain large/medium plans): total 52/315; eight-design exact-head native and genuine 48-view WebGL2 acceptance PENDING; previous 44-design head CI success at #43779421458. No creator/world approval.",
+    "M2": "Eight new M2 regional civic/guild blueprints proposed: 60/315 total, 255 remaining; exact-head native acceptance and 48 source-linked Chromium WebGL2 views PENDING. Prior 52-design exact-head green Actions #43782528500. Do not assert creator/physical-family acceptance.",
     "M3": "not started",
     "M4": "not started",
     "M5": "not started",
