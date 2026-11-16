@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M2 second 15-house wave authored, 69/450; exact-head Node and 246 WebGL2 candidate views pending",
+  "milestone": "M2 3rd cross-biome 15-house wave, 84/450 candidate geometry authored, independent exact-head CI pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 381,
-  "newDesignsAuthored": 39,
-  "totalLaneGeometryAuthored": 69,
+  "additionalDesignsRequired": 366,
+  "newDesignsAuthored": 54,
+  "totalLaneGeometryAuthored": 84,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,11 +53,11 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Refresh exact-head CI after screenshot-driven 4-roof silhouette correction: 69-authored native and 246 cell-cube/30 source-AABB WebGL2 captures",
-    "30 source Pack1–5 visibleBoxes physical AABB browser candidate captures (new exact-head CI pending); collision/load/weather/hinge and save sidecars remain unapproved",
-    "102 more genuine houses required to reach 150 M2 housing milestone",
-    "Full 381 additional blueprints remain: 252 houses, 58 taverns, 71 inns",
-    "Original 30 source-identity parity, seven sibling branch isolation, no deployment or production integration"
+    "Current exact-head node, 84-pool D4 near-duplicate and 336 authored source-cell WebGL2 screenshots",
+    "Current exact-head additional 60 real source Pack1–5 visible AABB WebGL2 exterior/cutaway screenshots; diagnostic colors, provisional door save/collision state",
+    "87 more genuinely new houses before M2 150-house authoring milestone",
+    "366 unauthored across all 1A: 237 houses, 58 taverns, 71 inns",
+    "Roof load/weather, Pack2 stowed door hinge sweep and save sidecars, Pack4 transparency, Pack5 exact bed variant/collision, creator art/physical iPhone and controlled combined integration"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -76,7 +76,7 @@
   },
   "innCount": 1,
   "categoriesAuthored": {
-    "house": 48,
+    "house": 63,
     "tavern": 17,
     "inn": 4
   },
@@ -189,5 +189,17 @@
       "enchanted-forest": "lantern-ribs",
       "mountain": "ascending-terraces"
     }
+  },
+  "m2Wave3": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave3.mjs",
+    "newHouses": 15,
+    "placements": 43333,
+    "biomeSizeCoverage": "one source-authored house in each of 5 x 3 cells",
+    "sourceInitial": "PASS 84 canonical validated unique IDs, D4 rotations/mirrors none, real route/support/bed preflight",
+    "nativeExactHead": "PENDING",
+    "original69SourceGeometryPreserved": true,
+    "webgl2SourceCellTarget": 336,
+    "webgl2SourcePackAABBTarget": 60,
+    "finalProductionApproved": false
   }
 }

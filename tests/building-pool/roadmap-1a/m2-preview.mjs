@@ -3,14 +3,15 @@ import {getM1InnExemplars} from '../../../src/building-pool/roadmap-1a/m1-inn-ex
 import {getM2Originals} from '../../../src/building-pool/roadmap-1a/m2-originals.mjs';
 import {getM2HousingTranche} from '../../../src/building-pool/roadmap-1a/m2-housing-tranche.mjs';
 import {getM2HousingWave2} from '../../../src/building-pool/roadmap-1a/m2-housing-wave2.mjs';
+import {getM2HousingWave3} from '../../../src/building-pool/roadmap-1a/m2-housing-wave3.mjs';
 import {makeM2DiagnosticMesh} from './m2-preview-mesh.mjs';
 import {makeM2SourceAABBMesh} from './m2-source-aabb-mesh.mjs';
 import {fitM2Camera} from './m2-preview-camera.mjs';
 const inherited=getM1Blueprints().filter(b=>[
  'r1:house:enchanted-forest:medium:002','r1:tavern:enchanted-forest:small:001'].includes(b.id));
-const buildings=[...inherited,...getM1InnExemplars(),...getM2Originals(),...getM2HousingTranche(),...getM2HousingWave2()];
+const buildings=[...inherited,...getM1InnExemplars(),...getM2Originals(),...getM2HousingTranche(),...getM2HousingWave2(),...getM2HousingWave3()];
 const unique=new Map(buildings.map(b=>[b.id,b]));
-if(unique.size!==41)throw Error('Expected 41 distinct source-authored QA candidates');
+if(unique.size!==56)throw Error('Expected 56 distinct source-authored QA candidates');
 const input=document.getElementById('blueprint'),view=document.getElementById('view'),mode=document.getElementById('geometry');
 const canvas=document.getElementById('render'),details=document.getElementById('details');
 for(const b of buildings){const o=document.createElement('option');o.value=b.id;o.textContent=b.title+' ('+b.biome+', '+b.size+')';input.add(o);}
