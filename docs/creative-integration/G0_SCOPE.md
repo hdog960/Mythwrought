@@ -8,7 +8,8 @@
 - Separate branch: `integration/creative-registry-g1-20261116` with parent exactly the above `main` commit.
 - Detached Creative Mode reference PR [#186](https://github.com/hdog960/Mythwrought/pull/186) at `6222efa17acb0863fea42574be9748760dd877f0`, draft/unmerged, 65/65 Creative-owned. Its [M8 GitHub Actions #43802588966](https://github.com/hdog960/Mythwrought/actions/runs/43802588966) passed.
 - Baseline is v0.10 Gate A. The later v0.11 release remains locked.
-- **Authorized G1 source reconciliation:** `main` advanced to `440ab01a942bb3378d6ac2ff07945f4a9fb9861d` with creator-authorized biome130 071–080 registration. The feature branch may inherit this exact merged main through a normal non-force merge commit, changing only approved G1 tests/docs relative to its former head and retaining the exact seven G1 paths relative to main. Do not touch automation-owned files or the Creative prototype PR. New exact-head CI is mandatory.
+- **First authorized G1 source reconciliation:** `main` advanced to `440ab01a942bb3378d6ac2ff07945f4a9fb9861d` with creator-authorized biome130 071–080 registration. The feature branch inherited this main through a normal non-force merge commit, retaining the exact seven G1 paths relative to main.
+- **Second authorized G1 source reconciliation:** `main` advanced to `1f67efc9805e83866549515ffdad4dc7e225b234` with all biome130 001–130 registered. The branch may inherit this exact main via another normal non-force merge, changing only the G1 test and documentation within the same seven-file allowlist. Keep production registries and PR #186 untouched. Updated exact-head Node/WebGL2 CI is mandatory.
 
 ## Exactly seven authorized integration-PR files
 

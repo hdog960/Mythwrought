@@ -1,14 +1,14 @@
 # Mythwrought — G1 Read-Only Runtime Inventory Acceptance
 
-**Status:** G1 source is independently CI-verified at its prior exact head, but the amended candidate requires a new exact-head GitHub CI run against the reconciled latest main before technical acceptance. Isolated DRAFT integration branch; no live-world integration or activation.
+**Status:** G1 source was independently verified for the prior 80-family baseline; this 130-family acceptance update requires a new exact-head GitHub Node and full WebGL2 CI run against current merged `main` before final technical acceptance. Isolated DRAFT integration branch; no live-world integration or activation.
 
 ## Scope and exact source provenance
 
 - Runtime allowlist is imported from production `src/blocks.mjs` `BUILD_MATERIALS`. Core definitions come from `src/voxel.mjs`, authored biome definitions from `src/biome130-registry.mjs`, and live Pack2 definitions from `src/pack2-integration.mjs`.
 - Builder dependency catalogs are not runtime registration: the 96-family/106-variant manual five-pack handoff and eight building PRs are expressly excluded. No IDs are synthesized.
 - Numeric ID `76` (authored water) is registered in the live Pack2 source but its fluid geometry uses a non-box triangle-level selector. G1 explicitly lists it as `excluded:[{id:76,reason:'fluid-selection-adapter-not-certified'}]`; never generate a cube stand-in.
-- Other registered ordinary materials, **80 installed biome130 definitions (001–080)**, and 17 supported nonfluid Pack2 definitions are validated at source, with conservative neutral rotation for stateful Pack2. Expected current merged-main baseline: **102 read-only records and one explained exclusion**, subject to updated exact-head CI and source execution. Biome130 families **081–130 remain unregistered candidates** and must not leak into the catalog.
-- Reconciliation source: `main` at `440ab01a942bb3378d6ac2ff07945f4a9fb9861d` incorporated 071–080. G1 dynamically reads the live `BIOME130_REGISTERED_IDS` list; only the earlier fixed-70 native test and documentation were stale. Current release-baseline tests additionally verify all 001–080 are included and 081–130 excluded. G1 has no new producer source modifications.
+- Other registered ordinary materials, **130 installed biome130 definitions (001–130)**, and 17 supported nonfluid Pack2 definitions are validated at source, with conservative neutral rotation for stateful Pack2. Expected current merged-main baseline: **152 read-only records and one explained exclusion** (5 core + 130 biome + 17 nonfluid Pack2), subject to updated exact-head CI and source execution. No biome family **131+** may be synthesized from unregistered future source candidates.
+- Baseline history: `main` at `440ab01a942bb3378d6ac2ff07945f4a9fb9861d` registered biome130 071–080; subsequently `main` at `1f67efc9805e83866549515ffdad4dc7e225b234` registered the complete 001–130 physical roster. G1 continues to read live `BIOME130_REGISTERED_IDS` dynamically; only the prior exact-80 native assertion and documentation were stale. Updated source-specific acceptance verifies the full actual 130-ID registry, no synthesized 131+ IDs, type-stable uniqueness, and all 152 expected records. No producer code is edited by G1.
 - Any future registry additions need explicit G1 validator support; unknown producer IDs fail closed. The output's source label is informational, not an authentication signature.
 
 ## Source interfaces

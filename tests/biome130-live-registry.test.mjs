@@ -8,11 +8,11 @@ import {meshDepthSection} from '../src/depth-mesh.mjs';
 import {resolveBiome130BuilderAsset,planBiome130BuilderStructure,
   placeBiome130BuilderStructure} from '../src/builder-assets/biome130.mjs';
 
-test('all 80 authored symbolic families have distinct real high IDs and valid physical shapes',()=>{
-  assert.equal(BIOME130_LIVE_COUNT,80);
-  assert.equal(new Set(BIOME130_REGISTERED_IDS).size,80);
-  assert.equal(new Set(BIOME130_REGISTERED_SYMBOLS).size,80);
-  for(let i=1;i<=80;i++){
+test('all 130 authored symbolic families have distinct real high IDs and valid physical shapes',()=>{
+  assert.equal(BIOME130_LIVE_COUNT,130);
+  assert.equal(new Set(BIOME130_REGISTERED_IDS).size,130);
+  assert.equal(new Set(BIOME130_REGISTERED_SYMBOLS).size,130);
+  for(let i=1;i<=130;i++){
     const id=255+i,symbol='biome130:'+String(i).padStart(3,'0');
     assert.equal(isBiome130BlockId(id),true);
     const asset=biome130Block(symbol),builder=resolveBiome130BuilderAsset(symbol);
@@ -29,7 +29,7 @@ test('all 80 authored symbolic families have distinct real high IDs and valid ph
       assert.ok(shaped.boxes.every(b=>b.every(v=>v>=0&&v<=1)));
     }
   }
-  for(const id of [0,7,9,125,208,255,336,385]){
+  for(const id of [0,7,9,125,208,255,386,65535]){
     assert.equal(isBiome130BlockId(id),false);
     assert.throws(()=>biome130Block(id),RangeError);
   }
@@ -46,7 +46,7 @@ test('legacy schema-1 saves remain byte-compatible; high-ID biome edits persist 
   }
   assert.equal(world.biomeCellCount,4);
   assert.equal(world.set(999,16,999,255),false);
-  assert.equal(world.set(999,16,999,336),false);
+  assert.equal(world.set(999,16,999,386),false);
   const snapshot=JSON.parse(JSON.stringify(world.save()));
   assert.equal(snapshot.schema,1);assert.equal(snapshot.rotations.length,3);
   const restored=VoxelWorld.restore(snapshot);

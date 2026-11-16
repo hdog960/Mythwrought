@@ -18,19 +18,21 @@ test('G1 reads the real installed BUILD_MATERIALS, not draft manual builder cata
   assert.deepEqual(s.excluded.map(x=>x.id),[76]);
   assert.match(s.excluded[0].reason,/not-certified/);
 });
-test('G1 includes installed biome130 001..080 without exposing unregistered 081..130',()=>{
+test('G1 includes all 130 source-registered biome families, excludes unregistered IDs',()=>{
  const s=snapshot(), ids=new Set(s.records.map(x=>x.id));
- // Updated against integrated main 440ab01a (live registration of 071..080).
- assert.equal(BIOME130_REGISTERED_IDS.length,80);
- assert.ok(BIOME130_REGISTERED_IDS.every(id=>ids.has(id)));
- for(let ordinal=1;ordinal<=80;ordinal++){
-  const id=255+ordinal;
-  assert.ok(BIOME130_REGISTERED_IDS.includes(id),'Missing registered biome130:'+ordinal);
-  assert.ok(ids.has(id),'Live biome family withheld: '+ordinal);
- }
- for(let ordinal=81;ordinal<=130;ordinal++)
-  assert.ok(!ids.has(255+ordinal),'Unregistered biome candidate leaked: '+ordinal);
- assert.equal(s.records.length,102);
+ // Incorporation 015 on merged main registered source-authored families 001..130.
+ // The adapter uses dynamic BIOME130_REGISTERED_IDS; this test pins today's
+ // producer-approved extent and rejects any inferred 131+ candidate IDs.
+ assert.equal(BIOME130_REGISTERED_IDS.length,130);
+ const expected=Array.from({length:130},(_,i)=>256+i);
+ assert.deepEqual(BIOME130_REGISTERED_IDS,expected);
+ const fromSnapshot=s.records.filter(x=>x.source.producer==='biome130').map(x=>x.id).sort((a,b)=>a-b);
+ assert.deepEqual(fromSnapshot,BIOME130_REGISTERED_IDS);
+ assert.ok(expected.every(id=>ids.has(id)));
+ for(const id of [386,387,400,512])
+  assert.ok(!ids.has(id),'Unregistered future biome ID leaked: '+id);
+ assert.equal(s.records.length,5+BIOME130_REGISTERED_IDS.length+PACK2_LIVE_IDS.length-1);
+ assert.equal(s.records.length,152);
 });
 test('G1 includes only independently verified Pack2 solid selections',()=>{
  const s=snapshot(), ids=new Set(s.records.map(x=>x.id));
