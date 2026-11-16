@@ -206,6 +206,13 @@ export function descentCells(origin=DESCENT_ORIGIN){
   // while keeping all authored floor voxels solid.
   for(const p of route)for(let h=1;h<=4;h++)set(p.x,p.floor+h,p.z,BLOCK.AIR);
   for(const p of route)set(p.x,p.floor,p.z,BLOCK.DEEPSTONE);
+  // Reassert the short entry's centerline after the main corridor's broad
+  // side clearance. The entry meets the route at its first floor=-8 cell.
+  for(const p of descentEntranceApproach(origin)){
+    for(let y=p.feet;y<=Math.min(LEGACY_WORLD_MIN_Y-1,p.feet+3);y++)
+      set(p.x,y,p.z,BLOCK.AIR);
+    set(p.x,p.floor,p.z,BLOCK.DEEPSTONE);
+  }
   return cells;
 }
 export function descentWorld(world,origin=DESCENT_ORIGIN){
