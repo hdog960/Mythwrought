@@ -155,7 +155,19 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
   ['bookshop',844,390,'exterior','snow','medium'],
   ['bookshop',844,390,'cutaway','snow','medium'],
   ['theater',932,430,'exterior','enchanted-forest','large'],
-  ['theater',932,430,'cutaway','enchanted-forest','large']
+  ['theater',932,430,'cutaway','enchanted-forest','large'],
+  ['tailor',932,430,'exterior','snow','large'],
+  ['tailor',932,430,'cutaway','snow','large'],
+  ['butcher',932,430,'exterior','enchanted-forest','large'],
+  ['butcher',932,430,'cutaway','enchanted-forest','large'],
+  ['jeweler',932,430,'exterior','desert','large'],
+  ['jeweler',932,430,'cutaway','desert','large'],
+  ['bookshop',932,430,'exterior','temperate','large'],
+  ['bookshop',932,430,'cutaway','temperate','large'],
+  ['theater',844,390,'exterior','mountain','medium'],
+  ['theater',844,390,'cutaway','mountain','medium'],
+  ['temple',667,375,'exterior','snow','small',2],
+  ['temple',667,375,'cutaway','snow','small',2]
  ];
  try{
   for(let i=0;i<cases.length;i++){
