@@ -53,7 +53,7 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Exact-head 69-pool native source acceptance and 246 Chromium WebGL2 source CELL-cube diagnostic captures",
+    "Refresh exact-head CI after screenshot-driven 4-roof silhouette correction: 69-authored native and 246 cell-cube/30 source-AABB WebGL2 captures",
     "30 source Pack1–5 visibleBoxes physical AABB browser candidate captures (new exact-head CI pending); collision/load/weather/hinge and save sidecars remain unapproved",
     "102 more genuine houses required to reach 150 M2 housing milestone",
     "Full 381 additional blueprints remain: 252 houses, 58 taverns, 71 inns",
@@ -174,7 +174,7 @@
   "m2Wave2": {
     "source": "src/building-pool/roadmap-1a/m2-housing-wave2.mjs",
     "houseCount": 15,
-    "voxelPlacements": 33908,
+    "voxelPlacements": 37564,
     "coverage": "15 unique new houses; one each of five biomes x three sizes",
     "originalSourceGeometryPreserved": 30,
     "exactHeadNode": "pending",
@@ -182,6 +182,12 @@
     "cubeCaptureTarget": 246,
     "physicalCaptureTarget": 30,
     "creatorApproved": 0,
-    "physicalRenderer": "true original Pack1–5 source visibleBoxes AABB geometry; provisional candidate state/colors, no production final visual/art or ABI approval"
+    "physicalRenderer": "true original Pack1–5 source visibleBoxes AABB geometry; provisional candidate state/colors, no production final visual/art or ABI approval",
+    "screenshotBasedRoofCorrection": {
+      "temperate": "hip-ring",
+      "desert": "asymmetric-pavilions",
+      "enchanted-forest": "lantern-ribs",
+      "mountain": "ascending-terraces"
+    }
   }
 }

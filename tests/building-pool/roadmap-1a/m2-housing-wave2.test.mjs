@@ -21,7 +21,7 @@ test('15 different second-wave house plans, one per every biome x size',()=>{
  for(const biome of ['temperate','desert','snow','enchanted-forest','mountain'])
   for(const size of ['small','medium','large'])
    assert.equal(newHouses.filter(b=>b.biome===biome&&b.size===size&&b.category==='house').length,1,biome+'/'+size);
- assert.equal(newHouses.reduce((s,b)=>s+b.placements.length,0),33908);
+ assert.equal(newHouses.reduce((s,b)=>s+b.placements.length,0),37564);
 });
 test('full 69-building pool: source schema, IDs, D4 rotations and mirrors all unique',()=>{
  assert.equal(previous.length,54);assert.equal(all.length,69);
@@ -41,6 +41,16 @@ function normalizedPartition(b){
  }
  return out;
 }
+test('four screenshot-reviewed large courtyards now have distinct actual stepped roof silhouettes',()=>{
+ const candidates=newHouses.filter(x=>x.architecturalIdentity.roofMassing);
+ assert.equal(candidates.length,4);
+ assert.equal(new Set(candidates.map(x=>x.architecturalIdentity.roofMassing)).size,4);
+ for(const b of candidates){
+  const roof=b.placements.filter(p=>p.role==='roof');
+  assert.ok(new Set(roof.map(p=>p.at[1])).size>1,'flat silhouette '+b.id);
+  assert.equal(b.architecturalIdentity.roofWeatherSealApproved,false);
+ }
+});
 test('no trivial near-duplicate floorplans inside the 30 new house tranche',()=>{
  const designs=[...getM2HousingTranche(),...newHouses];
  const partitions=designs.map(normalizedPartition);

@@ -162,7 +162,19 @@ function create(d){
  function roofY(x,z){
   const edgeX=Math.min(x,d.w-1-x),edgeZ=Math.min(z,d.d-1-z);
   switch(d.roof){
-   case 'terrace':case 'courtyard':return 5;
+   case 'terrace':return 5;
+   case 'courtyard':{
+    // Explicit candidate-only massing: historic default leaves all previous
+    // authored blueprints exactly unchanged in source and geometry.
+    switch(d.courtRoofMassing??'historic-flat'){
+     case 'historic-flat':return 5;
+     case 'hip-ring':return 5+Math.min(3,Math.floor(Math.min(edgeX,edgeZ)/4));
+     case 'asymmetric-pavilions':return 5+(x<11?1:x>19?2:0);
+     case 'lantern-ribs':return 5+(x%7<3?2:1);
+     case 'ascending-terraces':return 5+Math.min(3,Math.floor(z/6));
+     default:throw Error(d.title+': unsupported court roof massing');
+    }
+   }
    case 'hip':return 5+Math.min(2,Math.floor(Math.min(edgeX,edgeZ)/3));
    case 'steep':return 5+Math.min(3,Math.floor(edgeX/3));
    case 'butterfly':return 5+Math.min(2,Math.floor(Math.abs(x-(d.w-1)/2)/4));
@@ -192,6 +204,7 @@ function create(d){
   title:d.title,status:'candidate',frame:'local-x-east-y-up-z-south',footprint:{width:d.w,height,depth:d.d},
   architecturalIdentity:{plan:d.plan,roof:d.roof,regionalDetail:d.detail,
    roofWeatherSealApproved:false,roofStrengthApproved:false,
+   ...(d.courtRoofMassing?{roofMassing:d.courtRoofMassing}:{}),
    outdoorCourtyard:d.courtyard??null,levels:1,stairsRequired:false,
    materialAcceptance:'symbolic-plus-exact-candidate-AABB-not-production-approved'},
   placements:[...occupied.values()],rooms:d.rooms,portals:allDoors.map(p=>({from:p.from,to:p.to,at:p.at,passable:true,opening:'hinged-leaf'})),

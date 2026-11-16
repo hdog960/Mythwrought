@@ -591,7 +591,8 @@ const SPECS=Object.freeze([
       12,
       16,
       15
-    ]
+    ],
+    "courtRoofMassing": "hip-ring"
   },
   {
     "category": "house",
@@ -1187,7 +1188,8 @@ const SPECS=Object.freeze([
       17,
       16,
       21
-    ]
+    ],
+    "courtRoofMassing": "asymmetric-pavilions"
   },
   {
     "category": "house",
@@ -2274,7 +2276,8 @@ const SPECS=Object.freeze([
       13,
       16,
       18
-    ]
+    ],
+    "courtRoofMassing": "lantern-ribs"
   },
   {
     "category": "house",
@@ -2865,7 +2868,8 @@ const SPECS=Object.freeze([
       9,
       18,
       13
-    ]
+    ],
+    "courtRoofMassing": "ascending-terraces"
   }
 ]);
 
