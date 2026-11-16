@@ -1928,6 +1928,18 @@ const PLANS=[
         27,
         35,
         39
+      ],
+      [
+        7,
+        32,
+        16,
+        46
+      ],
+      [
+        45,
+        39,
+        54,
+        48
       ]
     ],
     "octagons": [],
@@ -2031,6 +2043,14 @@ const PLANS=[
       [
         33,
         33
+      ],
+      [
+        12,
+        39
+      ],
+      [
+        51,
+        44
       ]
     ],
     "ridges": [],
@@ -2085,6 +2105,26 @@ const PLANS=[
           24,
           37
         ]
+      },
+      {
+        "id": "western-ore-hoist-terrace",
+        "kind": "ore-staging",
+        "rect": [
+          8,
+          35,
+          15,
+          43
+        ]
+      },
+      {
+        "id": "eastern-stone-grade-balcony",
+        "kind": "stone-grading",
+        "rect": [
+          48,
+          42,
+          53,
+          47
+        ]
       }
     ],
     "roofBands": [
@@ -2133,6 +2173,30 @@ const PLANS=[
         ],
         "profile": "shed",
         "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          8,
+          35,
+          15,
+          43
+        ],
+        "profile": "shed",
+        "axis": "z",
+        "high": 8,
+        "period": 4
+      },
+      {
+        "rect": [
+          48,
+          42,
+          53,
+          47
+        ],
+        "profile": "gable",
+        "axis": "x",
         "high": 9,
         "period": 4
       }
