@@ -93,6 +93,11 @@ export function restoreOrientationSidecar(serialized,readBlock,options) {
       counts.set(key,(counts.get(key)||0)+1);
     }
   }
+  // Optional metadata must never prevent an otherwise valid schema-1 world load.
+  // Bound both scanning and recovered records; an oversized sidecar fails closed.
+  const limit=options?.maxEntries??4096;
+  if(!Number.isSafeInteger(limit)||limit<1) throw new TypeError('Invalid sidecar capacity');
+  if(serialized.length>limit) return makeOrientationSidecar([],options);
   const valid=serialized.filter(e=>e&&Array.isArray(e.cell)&&e.cell.length===3&&e.cell.every(Number.isSafeInteger)&&
     counts.get(cellKey(e.cell))===1&&Number.isSafeInteger(e.blockId)&&e.blockId>0&&e.blockId<255&&
     Number.isInteger(e.turns)&&e.turns>=0&&e.turns<=3&&readBlock(...e.cell)===e.blockId);
