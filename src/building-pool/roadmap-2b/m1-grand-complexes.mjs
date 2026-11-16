@@ -133,6 +133,13 @@ function greatDuneTailor(){
  for(const [x,z] of [[4,29],[9,30],[14,31],[22,30],[29,29]])p.f(x,z,M.table,'linen-loom-station');
  p.f(31,32,M.box,'loom-fabric-crate','decor');
  for(const [x,z] of [[13,7],[23,7],[13,15],[23,15]])p.upper(x,8,z,M.stone,'sun-fin');
+ // Three separate masonry sawtooth roofs give the rear loom factory its own
+ // production silhouette rather than a monolithic full-cube roof.
+ for(const [left,right,ridge] of [[4,10,7],[14,20,17],[24,30,27]]){
+  for(let x=left;x<=right;x++)for(let z=27;z<=33;z++)
+   p.upper(x,8,z,M.stone,'loom-workshop-sawtooth-vault');
+  for(let z=27;z<=33;z++)p.upper(ridge,9,z,M.roof,'loom-workshop-ridge');
+ }
  return p.finish({title:'Duneweave Grand Atelier',
   signature:'two independently bounded west fitting salons, giant rear production loom room, front grand showroom and separate eight-cell open sun-finned cloth courtyard',
   roofForm:'desert weaving lightwell at front, sheltered extensive rear craft workshop',
@@ -162,7 +169,10 @@ function iceThreeHallButcher(){
  p.f(33,28,M.box,'smoked-stock','decor');
  p.post(32,25,6); // Grounded industrial extraction stack.
  for(let y=8;y<=12;y++)p.upper(32,y,25,M.stone,'full-height-smoke-flue',y===12?'roof':'wall');
- for(let z=4;z<=29;z++)p.upper(c,8,z,M.snow,'snow-shelter-ridge');
+ for(let z=4;z<=29;z++)for(let x=c-3;x<=c+3;x++)
+  p.upper(x,8,z,M.snow,'winter-multi-bay-snow-buttress');
+ for(let z=5;z<=28;z++)for(let x=c-1;x<=c+1;x++)
+  p.upper(x,9,z,M.snow,'raised-peak-snow-roof');
  return p.finish({title:'Icevault Three-Hall Butchery',
   signature:'double-vestibule public winter shop with three separate rear wings for ice preservation, hygienic prep and smoke curing, each with independent service entrance and tall smoke flue',
   roofForm:'snow-proof multi-bay roof with central long ridge and eastern full-height chimney',
@@ -197,6 +207,12 @@ function everwoodGemVault(){
  }
  for(let x=24;x<=35;x++)for(let z=17;z<=31;z++)
   p.upper(x,10,z,M.living,'sheltered-vault-bower');
+ // Layered woodland crown rests on an occupied y10 roof and its four
+ // continuous foundation posts; it is not a single hovering leaf slab.
+ for(let x=26;x<=33;x++)for(let z=20;z<=28;z++)
+  p.upper(x,11,z,M.living,'stepped-root-canopy');
+ for(let z=21;z<=27;z++)for(const x of [29,30])
+  p.upper(x,12,z,M.living,'gem-vault-living-ridge');
  return p.finish({title:'Evershade Grand Gem Archive',
   signature:'vast skylit public gem courtyard plus large west atelier, single sequential access to a separate eastern vault with four tall supported livingwood canopy posts',
   roofForm:'open northern light court, separately roofed raised right-side root-vault bower',
@@ -229,6 +245,11 @@ function mountainGrandBooks(){
   p.upper(x,10,z,M.roof,'tower-cap');
  }
  for(let z=4;z<=29;z++)p.upper(c,8,z,M.stone,'central-library-ridge');
+ for(const [left,right,ridge] of [[5,11,8],[27,33,30]]){
+  for(let x=left;x<=right;x++)for(let z=6;z<=28;z++)
+   p.upper(x,8,z,M.stone,'cliff-bookvault-side-arch');
+  for(let z=8;z<=26;z++)p.upper(ridge,9,z,M.stone,'high-cliff-bookvault-gable');
+ }
  return p.finish({title:'Cliffscript Great Bookvault',
   signature:'six-longitudinal-bay giant archive library, one-door full-length east view gallery, rear physically sealed parchment stockroom and four roof-integral mountain reading towers',
   roofForm:'strong mountain roof with four crowned bookvault towers and full-length central ridge',
@@ -261,6 +282,12 @@ function sunGrandTemple(){
   p.upper(x,8,z,M.stone,'tall-sun-tower','wall');
   p.upper(x,9,z,M.stone,'tall-sun-tower','wall');
   p.upper(x,10,z,M.roof,'sun-tower-cap');
+ }
+ // Roof-raised parallel ceremonial halls frame the truly open middle court.
+ for(const [left,right,peak] of [[12,14,13],[26,28,27]]){
+  for(let x=left;x<=right;x++)for(let z=9;z<=22;z++)
+   p.upper(x,8,z,M.stone,'ceremonial-side-roof');
+  for(let z=12;z<=20;z++)p.upper(peak,9,z,M.roof,'ceremonial-apse-crest');
  }
  return p.finish({title:'Four-Dunes Grand Sanctuary',variation:2,
   signature:'eleven-wide open sacred prayer court, two completely end-capped side pilgrim chantries, triple rear access to grand raised altar and four separated sun towers',
@@ -299,6 +326,10 @@ function kingfisherGrandTheater(){
  for(let x=14;x<=28;x++)for(const z of [23,29])p.upper(x,9,z,M.beam,'flytower-eave-beam');
  for(let z=24;z<=28;z++)for(const x of [13,29])p.upper(x,9,z,M.beam,'flytower-eave-beam');
  for(let x=13;x<=29;x++)for(let z=23;z<=29;z++)p.upper(x,10,z,M.roof,'upper-flytower-roof');
+ // Staged flytower is a rising roofline, not merely a thin elevated plate.
+ for(let x=17;x<=25;x++)for(let z=24;z<=28;z++)
+  p.upper(x,11,z,M.roof,'stepped-flytower-shoulder');
+ for(let z=25;z<=27;z++)p.upper(21,12,z,M.roof,'high-grand-flytower-peak');
  p.cross(32,1,41,[8,34]);
  for(const [x,z] of [[3,35],[39,35]])p.f(x,z,M.box,'stage-scenery-cache','decor');
  p.f(c,35,M.table,'costume-preparation-table');
