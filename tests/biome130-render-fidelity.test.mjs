@@ -1,76 +1,94 @@
+// Source-specific alpha-material validation for the actual Mythwrought engine.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,meshChunk} from '../src/voxel.mjs';
 import {meshDepthSection} from '../src/depth-mesh.mjs';
+import {biome130Block} from '../src/biome130-registry.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from '../src/storybook-materials.mjs';
 import {resolveBiome130BuilderAsset} from '../src/builder-assets/biome130.mjs';
-import {biome130MaterialTag,splitBiome130Translucent,
-  biome130TerrainFragmentShader} from '../src/biome130-render.mjs';
+import {BIOME130_ICE_BLOCK_IDS,biome130MaterialTag,
+  splitBiome130Translucent,biome130TerrainFragmentShader} from '../src/biome130-render.mjs';
 
-test('only source-backed ice 095 and foliage 122–130 change render materials',()=>{
-  assert.equal(biome130MaterialTag(350),49);
+test('seven original ice opacities and nine foliage species have isolated tags',()=>{
+  assert.deepEqual(BIOME130_ICE_BLOCK_IDS,[275,276,277,280,281,282,350]);
+  const expectedAlpha=[.46,.78,.9,.72,.82,.68,.72];
+  for(let i=0;i<BIOME130_ICE_BLOCK_IDS.length;i++){
+    const id=BIOME130_ICE_BLOCK_IDS[i],material=biome130MaterialTag(id);
+    assert.equal(biome130Block(id).opacity,expectedAlpha[i]);
+    assert.equal(Math.floor(material),49);
+    assert.ok(Math.abs(material-49-expectedAlpha[i])<1e-7);
+    assert.equal(resolveBiome130BuilderAsset(biome130Block(id).symbol).rendererFidelity,
+      'alpha-blended');
+  }
   assert.equal(biome130MaterialTag(349),0);
   assert.equal(biome130MaterialTag(351),0);
-  assert.equal(biome130MaterialTag(255),0);
-  assert.equal(biome130MaterialTag(21),0,'Pack 2 material 21 must not be claimed');
+  assert.equal(biome130MaterialTag(21),0,'Pack 2 material 21 must remain reserved');
   for(let id=377;id<=385;id++){
     assert.equal(biome130MaterialTag(id),40+id-377);
-    const asset=resolveBiome130BuilderAsset('biome130:'+String(id-255).padStart(3,'0'));
+    const asset=resolveBiome130BuilderAsset(biome130Block(id).symbol);
     assert.equal(asset.rendererFidelity,'alpha-cutout');
     assert.equal(asset.solid,false);
   }
-  assert.equal(resolveBiome130BuilderAsset('biome130:095').rendererFidelity,'alpha-blended');
   assert.equal(resolveBiome130BuilderAsset('biome130:094').rendererFidelity,'opaque');
-  // Other authentic ice/enchanted alpha modes are still unmodified by this
-  // scoped renderer step; never misreport those families as alpha-approved.
-  assert.equal(resolveBiome130BuilderAsset('biome130:020').rendererFidelity,'opaque-fallback');
-  assert.equal(resolveBiome130BuilderAsset('biome130:021').rendererFidelity,'opaque-fallback');
-  assert.equal(resolveBiome130BuilderAsset('biome130:025').rendererFidelity,'opaque-fallback');
+  assert.equal(resolveBiome130BuilderAsset('biome130:040').rendererFidelity,'opaque-fallback');
 });
 
-test('transparent router preserves all original 9-float vertices and stable ordering',()=>{
+test('transparent split retains exact vertex ABI, source alpha and opaque order',()=>{
   const input=new Float32Array([
     1,2,3,.5,.6,.7,0,1,40,
-    4,5,6,.7,.8,.9,1,0,49,
-    7,8,9,.1,.2,.3,.5,.5,0,
-    10,11,12,.3,.4,.5,0,0,49
+    4,5,6,.7,.8,.9,1,0,49.46,
+    7,8,9,.1,.2,.3,.5,.5,21,
+    10,11,12,.3,.4,.5,0,0,49.72
   ]);
   const {opaque,translucent}=splitBiome130Translucent(input);
   assert.deepEqual([...opaque],[...input.subarray(0,9),...input.subarray(18,27)]);
   assert.deepEqual([...translucent],[...input.subarray(9,18),...input.subarray(27,36)]);
-  const none=new Float32Array([0,0,0,1,1,1,0,0,40]);
-  assert.equal(splitBiome130Translucent(none).opaque,none,'No allocation of opaque copy without ice');
+  assert.equal(Math.floor(translucent[8]),49);
+  assert.equal(Math.floor(translucent[17]),49);
+  const iceFree=new Float32Array([0,0,0,1,1,1,0,0,21]);
+  assert.equal(splitBiome130Translucent(iceFree).opaque,iceFree,
+    'Avoid opaque copy or extra GPU buffer in ice-free chunks');
   assert.throws(()=>splitBiome130Translucent(new Float32Array(8)),TypeError);
 });
 
-test('surface and deep real voxel meshes emit separate ice and cutout leaf materials',()=>{
+test('every ice alpha survives actual surface and deep meshing and save/restore',()=>{
   const world=new VoxelWorld(179);
   for(const [y,section] of [[18,0],[-60,-4]]){
-    assert.equal(world.set(9000,y,9000,350,1),true);
-    assert.equal(world.set(9001,y,9001,377,2),true);
-    const vertices=section===0?meshChunk(world,562,562):meshDepthSection(world,562,562,section);
-    assert.equal(vertices.length%9,0);
-    assert.ok(vertices.every(Number.isFinite));
-    const tags=[];
-    for(let i=8;i<vertices.length;i+=9)tags.push(vertices[i]);
-    assert.ok(tags.includes(49),'Ice missing from physical section '+section);
-    assert.ok(tags.includes(40),'Oak cutout missing from physical section '+section);
-    const split=splitBiome130Translucent(vertices);
+    for(let i=0;i<BIOME130_ICE_BLOCK_IDS.length;i++){
+      assert.equal(world.set(9000+i,y,9000,BIOME130_ICE_BLOCK_IDS[i],i%4),true);
+    }
+    assert.equal(world.set(9007,y,9000,377,2),true);
+    const mesh=section===0?meshChunk(world,562,562):meshDepthSection(world,562,562,section);
+    assert.equal(mesh.length%9,0);
+    assert.ok(mesh.every(Number.isFinite));
+    const split=splitBiome130Translucent(mesh);
     assert.ok(split.translucent.length>0);
-    for(let i=8;i<split.translucent.length;i+=9)assert.equal(split.translucent[i],49);
-    for(let i=8;i<split.opaque.length;i+=9)assert.notEqual(split.opaque[i],49);
+    const alphaSeen=new Set(),tags=new Set();
+    for(let i=8;i<split.translucent.length;i+=9){
+      const tag=split.translucent[i];
+      assert.equal(Math.floor(tag),49);
+      alphaSeen.add(Math.round((tag-49)*100));
+    }
+    for(let i=8;i<split.opaque.length;i+=9){
+      assert.notEqual(Math.floor(split.opaque[i]),49);
+      tags.add(split.opaque[i]);
+    }
+    assert.deepEqual([...alphaSeen].sort((a,b)=>a-b),[46,68,72,78,82,90]);
+    assert.ok(tags.has(40),'Source foliage cutout lost on section '+section);
   }
+  const saved=world.save();
+  assert.equal(saved.schema,1);
+  assert.deepEqual(VoxelWorld.restore(saved).save(),saved);
 });
 
-test('fragment source keeps water material 20 and cutout before economy early return',()=>{
-  const fs=biome130TerrainFragmentShader(STORYBOOK_MATERIAL_FRAGMENT_SHADER);
-  assert.match(fs,/vMat==20/);
-  assert.match(fs,/vPack2Alpha/);
-  assert.match(fs,/vMat==49/);
-  assert.match(fs,/\.72\);return;/);
-  assert.match(fs,/vMat>=40&&vMat<=48/);
-  assert.doesNotMatch(fs,/vMat==21(?:[^0-9]|$)/,'Never override Pack 2 opaque material 21');
-  assert.match(fs,/discard;/);
-  assert.ok(fs.indexOf('discard;')<fs.indexOf('if(uArtQuality<.5)'));
-  assert.equal(fs.split('void main(){').length,2);
+test('real shader preserves water 20, opaque Pack 2 21, ice 49.x, both quality settings',()=>{
+  const shader=biome130TerrainFragmentShader(STORYBOOK_MATERIAL_FRAGMENT_SHADER);
+  assert.match(shader,/vMat==20/);
+  assert.match(shader,/outColor=vec4\(mix\(vColor,uFog,f\),vPack2Alpha\)/);
+  assert.match(shader,/vMat==49/);
+  assert.match(shader,/outColor=vec4\(mix\(glacial,uFog,f\),vPack2Alpha\)/);
+  assert.match(shader,/vMat>=40&&vMat<=48/);
+  assert.doesNotMatch(shader,/vMat==21(?:[^0-9]|$)/);
+  assert.ok(shader.indexOf('discard;')<shader.indexOf('if(uArtQuality<.5)'));
+  assert.equal(shader.split('void main(){').length,2);
 });

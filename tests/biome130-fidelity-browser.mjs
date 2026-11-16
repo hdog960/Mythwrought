@@ -30,6 +30,7 @@ try{
         t.placeFixture(16,y,0,350);
         t.placeFixture(17,y,0,377);
         t.placeFixture(18,y,0,385);
+        [275,276,277,280,281,282].forEach((id,i)=>t.placeFixture(16+i,y,3,id));
         t.aimAt(16,y,0);
         return y;
       });
@@ -44,6 +45,8 @@ try{
       }),fixtureY);
       assert.equal(state.ice,350);assert.equal(state.oak,377);assert.equal(state.moonwillow,385);
       assert.ok(state.iceVertices>0);
+      assert.deepEqual(await page.evaluate(y=>[275,276,277,280,281,282].map((id,i)=>
+        window.__mythwroughtTest.block(16+i,y,3)),fixtureY),[275,276,277,280,281,282]);
       await page.waitForTimeout(250);
       const png=PNG.sync.read(await page.screenshot({
         path:`artifacts/biome130-fidelity/biome130-${width}x${height}.png`}));
@@ -55,14 +58,36 @@ try{
           colors.add([png.data[i]>>4,png.data[i+1]>>4,png.data[i+2]>>4].join(','));
         }
       assert.ok(colors.size>=6,'Physical scene render appears blank');
-      // Second close-range view isolates the foliage rather than the ice
-      // target outline. Both PNGs are produced by the actual live renderer.
-      await page.evaluate(y=>window.__mythwroughtTest.aimAt(17,y,0),fixtureY);
+      // Temporarily remove the foreground ice for an unobstructed leaf view.
+      // Restore the source ice after recording genuine framebuffer evidence.
+      await page.evaluate(y=>{
+        const t=window.__mythwroughtTest;
+        t.placeFixture(16,y,0,0);t.aimAt(17,y,0);
+      },fixtureY);
       await page.waitForTimeout(250);
       const foliageShot=PNG.sync.read(await page.screenshot({
         path:`artifacts/biome130-fidelity/biome130-foliage-${width}x${height}.png`}));
       assert.equal(foliageShot.width,width);
       assert.equal(foliageShot.height,height);
+      await page.evaluate(y=>window.__mythwroughtTest.placeFixture(17,y,0,0),fixtureY);
+      await page.waitForTimeout(220);
+      const empty=PNG.sync.read(await page.screenshot({
+        path:'artifacts/biome130-fidelity/biome130-leaf-empty-'+width+'x'+height+'.png'}));
+      let changed=0,unchanged=0;
+      for(let py=Math.floor(height*.22);py<Math.floor(height*.73);py++)
+        for(let px=Math.floor(width*.22);px<Math.floor(width*.78);px++){
+          const i=(py*width+px)*4;
+          const delta=Math.abs(foliageShot.data[i]-empty.data[i])+
+            Math.abs(foliageShot.data[i+1]-empty.data[i+1])+
+            Math.abs(foliageShot.data[i+2]-empty.data[i+2]);
+          if(delta>=28)changed++;else unchanged++;
+        }
+      assert.ok(changed>45,'Source foliage did not visibly affect the real framebuffer');
+      assert.ok(unchanged>100,'Source foliage completely occluded the scene');
+      await page.evaluate(y=>{
+        const t=window.__mythwroughtTest;
+        t.placeFixture(17,y,0,377);t.placeFixture(16,y,0,350);
+      },fixtureY);
       await page.reload({waitUntil:'networkidle'});
       await page.waitForFunction(()=>window.__mythwroughtTest&&
         Number(document.querySelector('#scene')?.dataset.biome130IceVertices)>0,
@@ -72,9 +97,13 @@ try{
         window.__mythwroughtTest.block(17,y,0),
         window.__mythwroughtTest.block(18,y,0)
       ],fixtureY),[350,377,385],'Source blocks were not saved/restored');
+      assert.deepEqual(await page.evaluate(y=>[275,276,277,280,281,282].map((id,i)=>
+        window.__mythwroughtTest.block(16+i,y,3)),fixtureY),[275,276,277,280,281,282],
+        'Additional source ice blocks missing after browser save/reload');
       assert.deepEqual(errors,[],'Runtime JS errors');assert.deepEqual(missing,[],'404 resources');
       evidence.push({viewport:`${width}x${height}`,webgl2:true,fixtureY,iceVertices:state.iceVertices,
-        iceId:350,foliageIds:[377,385],reloaded:true,colors:colors.size,
+        iceIds:[275,276,277,280,281,282,350],foliageIds:[377,385],
+        reloaded:true,colors:colors.size,visibleFoliagePixels:changed,
         physicalIPhoneTested:false});
       console.log('PASS biome130 live WebGL2',JSON.stringify(evidence.at(-1)));
     }finally{await ctx.close();}
