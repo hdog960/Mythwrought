@@ -175,14 +175,17 @@ test('twelve new 4B-owned blueprints × exterior/section × three real Chromium 
     const {sessionId}=await browser.send('Target.attachToTarget',{targetId,flatten:true});
     const cmd=(method,params)=>browser.send(method,params,sessionId);
     await cmd('Page.enable');await cmd('Runtime.enable');
+    await cmd('Emulation.setDeviceMetricsOverride',{width:viewports[0][0],height:viewports[0][1],deviceScaleFactor:1,mobile:false});
+    const initial=await cmd('Page.navigate',{url:site.url+'/tests/building-pool/roadmap-4b/m2-distinctive-preview.html?index=0&view=exterior'});
+    assert.ok(!initial.errorText,JSON.stringify(initial));
+    await waitPreview(cmd,'startup',{id:M2_DISTINCTIVE[0].id,view:'exterior',width:viewports[0][0],height:viewports[0][1]});
     for(const [width,height] of viewports){
       await cmd('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
       for(let i=0;i<M2_DISTINCTIVE.length;i++){
         for(const view of ['exterior','section']){
           const b=M2_DISTINCTIVE[i];
-          const url=site.url+'/tests/building-pool/roadmap-4b/m2-distinctive-preview.html?index='+i+'&view='+view;
-          const navigation=await cmd('Page.navigate',{url});
-          assert.ok(!navigation.errorText,JSON.stringify(navigation));
+          const render=await cmd('Runtime.evaluate',{expression:'window.__renderFourBFrame('+i+','+JSON.stringify(view)+','+width+','+height+')',returnByValue:true});
+          assert.ok(!render.exceptionDetails,'real WebGL2 render failed: '+JSON.stringify(render.exceptionDetails));
           const evidence=await waitPreview(cmd,b.id+' '+view+' '+width+'x'+height,{id:b.id,view,width,height});
           assert.deepEqual([evidence.width,evidence.height],[width,height]);
           assert.equal(evidence.sourceId,b.id);
