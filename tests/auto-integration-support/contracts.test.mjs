@@ -24,3 +24,16 @@ test('non-block object anchors reject collisions, duplicate IDs and excessive ge
   assert.equal(validateObjectAnchors([obj,obj]).reason,'duplicate-object-id');
   assert.equal(validateObjectAnchors([obj],{maxTriangles:23}).reason,'triangle-budget');
 });
+
+test('cave producer handshake proves exact world anchors and optionally a simple path',()=>{
+  const entrance={x:4,y:9,z:-2}, exit={x:5,y:7,z:-2};
+  const path=[entrance,{x:4,y:8,z:-2},{x:4,y:7,z:-2},exit];
+  const base={surfaceY:10,entranceY:9,depthMinY:-50,depthMaxY:10,path,entrance,exit,requireSimplePath:true};
+  assert.deepEqual(validateCaveHandshake(base),{ok:true,visitedCells:4});
+  assert.equal(validateCaveHandshake({...base,entrance:{x:3,y:9,z:-2}}).reason,'entrance-mismatch');
+  assert.equal(validateCaveHandshake({...base,exit:{x:6,y:7,z:-2}}).reason,'exit-mismatch');
+  assert.equal(validateCaveHandshake({...base,entrance:{x:4,y:8,z:-2}}).reason,'invalid-entrance-anchor');
+  assert.equal(validateCaveHandshake({...base,path:[...path,{x:4,y:7,z:-2}]}).reason,'revisited-path-cell');
+  assert.equal(validateCaveHandshake({...base,path:[...path,{x:4,y:7,z:-2}],requireSimplePath:false}).reason,'exit-mismatch');
+  assert.equal(validateCaveHandshake({...base,path:[entrance,{x:4,y:8,z:-2},{x:4,y:9,z:-2}]}).reason,'revisited-path-cell');
+});
