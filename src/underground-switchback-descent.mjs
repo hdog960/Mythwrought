@@ -255,6 +255,41 @@ export function descentCells(origin=DESCENT_ORIGIN){
       for(let t=-9;t<=11;t++)for(let d=27;d<=29;d++)carve(d,t,5);
     }
   }
+  // Middle-band rift terraces at -90: a walkable split-level cavern with
+  // three broad landings. Each landing drops one block after a long run;
+  // all connections remain outward of the switchback bearing walls.
+  // Existing IDs only; the final corridor reassertion protects the descent.
+  {
+    const depth=-90,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,floor,height=6)=>{
+        const x=anchor.x+outward[0]*d+tangent[0]*t;
+        const z=anchor.z+outward[1]*d+tangent[1]*t;
+        set(x,floor,z,BLOCK.DEEPSTONE);
+        for(let h=1;h<=height;h++)set(x,floor+h,z,BLOCK.AIR);
+      };
+      // At d=12 and d=24 the next terrace descends one voxel.
+      // The transition itself is a supported, one-block step.
+      for(let d=0;d<=38;d++){
+        const floor=depth-(d>=24?2:d>=12?1:0);
+        const width=d<6?1:d<12?2:d<24?4:6;
+        for(let t=-width;t<=width;t++)carve(d,t,floor,6);
+      }
+      // Two offset chambers add genuine lateral exploration space.
+      for(const chamber of [{d:20,t:-9,r:7},{d:33,t:10,r:9}]){
+        const floor=depth-(chamber.d>=24?2:1);
+        for(let dd=-chamber.r;dd<=chamber.r;dd++)
+          for(let tt=-chamber.r;tt<=chamber.r;tt++){
+            const radial=dd*dd+tt*tt;
+            if(radial>chamber.r*chamber.r)continue;
+            carve(chamber.d+dd,chamber.t+tt,floor,4+Math.floor(5*(1-radial/(chamber.r*chamber.r))));
+          }
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
