@@ -129,3 +129,25 @@ test('successful valid edit invalidates old orientation after commit readback',a
   assert.equal(f.readIdentity(),5);
   assert.equal(f.sidecar.get(f.cell,4),0);
 });
+
+test('explicitly rejected rollback fails closed even when block ID appears restored',async()=>{
+  const f=fixture();
+  const original=JSON.stringify({schema:1,edits:[[1,2,-3,4]]});
+  let rollbackCalls=0;
+  await assert.rejects(f.run(()=>{f.setId(5);throw Error('partial shape write');},{
+    rollback:()=>{rollbackCalls++;f.setId(4);return false;}
+  }),error=>error instanceof AggregateError &&
+    error.errors[0].message==='partial shape write' &&
+    error.errors[1].message==='Rollback explicitly rejected');
+  assert.equal(rollbackCalls,1);
+  assert.equal(f.readIdentity(),4,'same block ID does not prove shape rollback');
+  assert.equal(f.sidecar.get(f.cell,4),0,'untrusted orientation must be invalidated');
+  assert.equal(JSON.stringify({schema:1,edits:[[1,2,-3,4]]}),original);
+  assert.equal(await f.run(()=>true),true,'lock is released after failed undo');
+});
+
+test('undefined rollback acknowledgement retains backwards-compatible successful undo',async()=>{
+  const f=fixture();
+  await assert.rejects(f.run(()=>{f.setId(5);throw Error('write failed');}),/write failed/);
+  assert.equal(f.sidecar.get(f.cell,4),3);
+});
