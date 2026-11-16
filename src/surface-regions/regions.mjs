@@ -136,14 +136,14 @@ export function surfaceBiomeFreshColumn(x,z,seed=179,{
   const newTop=Math.max(oldTop,surfaceBiomeHeight(x,z,seed));
   const r=REGIONS.find(region=>region.name===b.name);
   const writes=[];
-  // Entire changed envelope is checked before a single write is returned.
+  // Real legacy terrain includes STONE (3) beneath the dirt veneer.\n  // Its inclusion is safe only for fresh, unedited, unprotected columns;\n  // AIR and non-natural landmark materials remain hard blockers.\n  // Entire changed envelope is checked before a single write is returned.
   // Protect a headroom cell above the new surface, including landmarks.
   for(let y=oldTop-2;y<=newTop+1;y++){
     const baseline=readBaseline(x,y,z);
     if(!Number.isInteger(baseline)||hasEdit(x,y,z)||isProtected(x,y,z))
       return null;
     if(y>oldTop&&baseline!==0)return null;
-    if(y<=oldTop&&baseline!==1&&baseline!==2)return null;
+    if(y<=oldTop&&baseline!==1&&baseline!==2&&baseline!==3)return null;
   }
   const coverage=clamp((b.weight-.35)/.4,0,1);
   for(let y=oldTop-2;y<=newTop;y++){
