@@ -36,7 +36,12 @@ test('M1 first bathhouse remains correct as additional regions are authored',()=
  assert.ok(items.filter(x=>x.category==='stable').length>=16);
  assert.ok(items.filter(x=>x.category==='bathhouse').length>=2);
  assert.equal(new Set(items.map(x=>x.id)).size,items.length);
- assert.deepEqual(counts.buckets['bathhouse/temperate/small'],1);
+ assert.deepEqual(counts.buckets['bathhouse/temperate/small'],2);
+ const original=items.find(x=>x.id==='r1:bathhouse:temperate:small:001');
+ const second=items.find(x=>x.id==='r1:bathhouse:temperate:small:002');
+ assert.ok(original&&second,'both original and distinct second bathhouse sources must exist');
+ assert.deepEqual(original,createTemperateSmallBathhouse(),'original source-authored bathhouse must remain unchanged');
+ assert.notDeepEqual(original.placements,second.placements,'the second bathhouse must have distinct physical XYZ geometry');
 });
 test('M1 bathhouse is deterministic across independent native source invocations',()=>{
  const a=getBathhouseSourceSignature(),b=getBathhouseSourceSignature();

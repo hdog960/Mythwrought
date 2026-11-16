@@ -161,14 +161,14 @@ async function chromeStart(profile){
  child.stderr.on('data',b=>{stderr=(stderr+String(b)).slice(-3000);});
  const probe=join(profile,'DevToolsActivePort');
  let url;
- for(let i=0;i<200;i++){
+ for(let i=0;i<600;i++){
   if(child.exitCode!==null)throw Error('Chrome exited before CDP port: '+stderr);
   try{const [port,ws]=String(await readFile(probe,'utf8')).trim().split('\n');
    if(port&&ws){url='ws://127.0.0.1:'+port+ws;break;}
   }catch{}
   await wait(100);
  }
- if(!url){child.kill('SIGKILL');throw Error('No Chrome CDP port within 20s: '+stderr);}
+ if(!url){child.kill('SIGKILL');throw Error('No Chrome CDP port within 60s: '+stderr);}
  return {child,url};
 }
 async function makeCDP(url){
