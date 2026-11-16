@@ -205,3 +205,24 @@ export function descentConnectivity(world,origin=DESCENT_ORIGIN){
     failures,bands,highest,lowest,steps:route.length,
     surfaceConnected:false,reason:'surface throat requires :24 coordination and runtime proof'};
 }
+
+/** Fixed-seed physical voxel occupancy evidence, including authored side rooms.
+ * Count only candidate-owned cells in each depth band; do not mistake a
+ * populated route array for carved air or supporting stone. Player edits
+ * override the candidate and are reflected in these counts.
+ */
+export function descentVolumeEvidence(world,origin=DESCENT_ORIGIN){
+  const reader=descentWorld(world,origin),cells=descentCells(origin);
+  const bands=[[-4,-45],[-46,-100],[-101,-155],[-156,WORLD_MIN_Y+1]];
+  const counts=bands.map(([high,low])=>({high,low,air:0,solid:0,other:0}));
+  for(const key of cells.keys()){
+    const [x,y,z]=key.split(',').map(Number);
+    const band=counts.find(b=>y<=b.high&&y>=b.low);
+    if(!band)continue;
+    const id=reader.get(x,y,z);
+    if(id===BLOCK.AIR)band.air++;
+    else if(id===BLOCK.DEEPSTONE||id===BLOCK.STONE)band.solid++;
+    else band.other++;
+  }
+  return counts;
+}
