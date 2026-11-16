@@ -38,7 +38,7 @@ const PLANS=Object.freeze([
 {t:'library',b:'enchanted-forest',s:'large',variant:2,title:'Moonwell Open-Air Lore Library',dim:[40,15,40],
  discs:[[19,19,16,16]],holes:[[19,19,7,7]],r:[[16,22,1,6]],e:[19,1],
  rooms:[['catalogue',19,6],['collections',9,16],['reading-room',29,16],['archive',9,27],['scholars-study',29,27],['observatory',19,32]],
- div:[['z',12,12,26,19]],peak:[[9,16],[29,16],[9,27],[29,27]],roof:'moonwell-ring-four-stacks'},
+ div:[['x',12,10,15,12]],peak:[[9,16],[29,16],[9,27],[29,27]],roof:'moonwell-ring-four-stacks'},
 {t:'library',b:'mountain',s:'medium',variant:2,title:'Spur-Wing Codex Library',dim:[35,13,32],
  r:[[13,20,1,28],[2,14,10,16],[19,32,17,25]],e:[16,1],
  rooms:[['catalogue',16,5],['collections',7,13],['reading-room',26,21],['archive',16,24]],
