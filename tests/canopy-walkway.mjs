@@ -157,4 +157,48 @@ for(const span of [8,9]){
   site.candidate.cells,'same-seed crown geometry is deterministic');
 }
 
+
+
+// Perpendicular physical corridors must share the same support, clearance,
+// reversed-endpoint and protected-edit contracts as east-west crowns.
+for(const span of [5,7,8,9]){
+ let site=null;
+ for(let x=-150;x<150&&!site;x+=3)for(let z=-150;z<150&&!site;z+=3){
+  const f=fixture(),aa=[x,z],bb=[x,z+span];
+  f.edits.set(f.k(x,y,z),BLOCK.WOOD);
+  f.edits.set(f.k(x,y,z+span),BLOCK.WOOD);
+  const candidate=planCanopyWalkway(f.world,aa,bb,y);
+  if(candidate)site={...f,aa,bb,candidate};
+ }
+ assert.ok(site,`natural-air north-south ${span}-cell corridor`);
+ const {candidate,world:verticalWorld,aa,bb}=site;
+ const occ=new Map(candidate.cells.map(([cx,cy,cz,id])=>[[cx,cy,cz].join(','),id]));
+ const limbs=candidate.cells.filter(([cx,cy,cz,id])=>
+  cy===y&&id===BLOCK.WOOD&&cx!==aa[0]);
+ assert.ok(limbs.length>=2,'perpendicular crown has rooted side branches');
+ assert.deepEqual([...new Set(limbs.map(([cx])=>Math.sign(cx-aa[0])))].sort((a,b)=>a-b),
+  [-1,1],'perpendicular crown uses both banks');
+ for(const [cx,cy,cz,id] of candidate.cells){
+  if(id!==BLOCK.LEAVES)continue;
+  assert.equal(occ.get([cx,cy-1,cz].join(',')),BLOCK.WOOD,
+   'perpendicular foliage sits directly on timber');
+ }
+ for(let i=0;i<=span;i++)for(let h=1;h<=2;h++)
+  assert.equal(occ.has([aa[0],y+h,aa[1]+i].join(',')),false,
+   'perpendicular two-high central aisle stays empty');
+ assert.deepEqual(planCanopyWalkway(verticalWorld,bb,aa,y),candidate,
+  'perpendicular reversed endpoints preserve identical physical geometry');
+ const obstructed=fixture();
+ obstructed.edits.set(obstructed.k(aa[0],y,aa[1]),BLOCK.WOOD);
+ obstructed.edits.set(obstructed.k(bb[0],y,bb[1]),BLOCK.WOOD);
+ const [ox,oy,oz]=candidate.cells.find(([cx,cy])=>cy===y&&cx!==aa[0]);
+ obstructed.edits.set(obstructed.k(ox,oy,oz),BLOCK.CRYSTAL);
+ assert.equal(planCanopyWalkway(obstructed.world,aa,bb,y),null,
+  'existing player-built perpendicular side obstruction is never overwritten');
+ assert.equal(placeCanopyWalkway(verticalWorld,candidate),true,
+  'perpendicular candidate places through the same safe API');
+ assert.equal(placeCanopyWalkway(verticalWorld,candidate),false,
+  'perpendicular candidate cannot be duplicated');
+}
+
 console.log('Canopy walkway: supported staggered crowns, corridor, edits, tampering, rollback PASS');
