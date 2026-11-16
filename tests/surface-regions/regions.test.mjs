@@ -159,11 +159,18 @@ test('opt-in world view renders four physical regions without touching schema-1 
   assert.equal(typeof view.set,'undefined');
   for(const region of SURFACE_BIOME_REGIONS){
    const x=region.x,z=region.z,oldTop=terrainHeight(x,z,seed);
-   const actual=view.get(x,oldTop,z);
-   assert.equal(actual,region.surface,region.name+' surface should be physically present');
+   const newTop=Math.max(oldTop,surfaceBiomeHeight(x,z,seed));
+   assert.equal(view.get(x,newTop,z),region.surface,
+    region.name+' surface must occupy the generated top elevation');
+   assert.equal(view.get(x,newTop+1,z),world.get(x,newTop+1,z),
+    'headroom must remain untouched');
    assert.equal(view.get(x,oldTop-8,z),world.get(x,oldTop-8,z));
-   if(surfaceBiomeHeight(x,z,seed)>oldTop)
-    assert.notEqual(view.get(x,oldTop+1,z),0);
+   if(newTop>oldTop){
+    assert.notEqual(view.get(x,oldTop+1,z),0,
+     'raised columns must have solid supporting material');
+    assert.notEqual(view.get(x,oldTop,z),region.surface,
+     'the buried original top must not be mistaken for the new surface');
+   }
   }
   assert.ok(view.cachedColumns<=32);
   assert.equal(JSON.stringify(world.save()),before);
