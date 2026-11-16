@@ -223,17 +223,17 @@ test('read-only manual five-pack producer physical symbol audit never assumes co
  }
  assert(count>15);
 });
-test('ledger is 71/420, 15 inherited exact temples + 56 unique originals, no approved/integrated and genuine exact PR HEAD Git blob',()=>{
+test('ledger is 79/420, 15 inherited exact temples + 64 unique originals, no approved/integrated and genuine exact PR HEAD Git blob',()=>{
  const file='src/building-pool/roadmap-2b/m1-regional-galleries.mjs';
  assert.equal(execFileSync('git',['rev-parse','HEAD:'+file],{encoding:'utf8'}).trim(),
   execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim());
  const j=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([j.target,j.sourceExactInheritedTemples,j.originalNewModels,j.authoredCandidates,
   j.remainingUnauthored,j.creatorAccepted,j.integratedInGame,j.placedInWorld],
-  [420,15,56,71,349,0,0,0]);
- assert.equal(j.originals.length,56);
- assert.deepEqual(new Set(j.originals.map(x=>x.id)),
-  new Set(all.filter(b=>b.category!=='temple'||b.variation!==1).map(b=>b.id)));
- assert.equal(Object.values(j.byCategory).reduce((n,x)=>n+x.authored,0),71);
- assert.equal(Object.values(j.byCategory).reduce((n,x)=>n+x.remaining,0),349);
+  [420,15,64,79,341,0,0,0]);
+ assert.equal(j.originals.length,64);
+ const allCurrent=new Set(j.originals.map(x=>x.id));
+ for(const b of all.filter(b=>b.category!=='temple'||b.variation!==1))assert(allCurrent.has(b.id),'previous candidate identity lost');
+ assert.equal(Object.values(j.byCategory).reduce((n,x)=>n+x.authored,0),79);
+ assert.equal(Object.values(j.byCategory).reduce((n,x)=>n+x.remaining,0),341);
 });
