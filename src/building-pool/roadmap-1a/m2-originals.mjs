@@ -104,10 +104,38 @@ function create(d){
   occupied.set(k,{at,role,asset,orientation,occupancy:asset.startsWith('live:')?FULL:pending(asset),...extra});
  }
  const wall=(x,y,z,role)=>place(x,y,z,role,d.skin);
- for(let x=0;x<d.w;x++)for(let z=0;z<d.d;z++)place(x,0,z,'foundation',d.biome==='snow'?'live:wood':'live:stone');
- for(let y=1;y<=wallTop;y++){
-  for(let x=1;x<d.w-1;x++)for(const z of [1,d.d-2])wall(x,y,z,'wall');
-  for(let z=2;z<d.d-2;z++)for(const x of [1,d.w-2])wall(x,y,z,'wall');
+ // Only explicitly flagged NEW concave buildings use this true structural
+ // footprint mask; historical rectangular plans retain their exact old order.
+ const notches=d.exteriorNotches??null;
+ if(notches){
+  if(!Array.isArray(notches)||notches.length<1||notches.length>3)
+   throw Error(d.title+': exterior notches must be 1..3 authored rectangles');
+  for(const c of notches){
+   if(!Array.isArray(c)||c.length!==4||!c.every(Number.isInteger)||
+      c[0]<0||c[1]<0||c[2]>=d.w||c[3]>=d.d||c[0]>c[2]||c[1]>c[3]||
+      ![c[0]===0,c[1]===0,c[2]===d.w-1,c[3]===d.d-1].some(Boolean)||
+      (c[2]-c[0]+1)*(c[3]-c[1]+1)<20)
+    throw Error(d.title+': invalid or tiny/exterior-disconnected notch '+JSON.stringify(c));
+  }
+ }
+ const active=(x,z)=>x>=0&&z>=0&&x<d.w&&z<d.d&&
+  (!notches||!notches.some(c=>x>=c[0]&&x<=c[2]&&z>=c[1]&&z<=c[3]));
+ const inside=(x,z)=>x>=1&&z>=1&&x<d.w-1&&z<d.d-1&&active(x,z);
+ for(let x=0;x<d.w;x++)for(let z=0;z<d.d;z++)
+  if(active(x,z))place(x,0,z,'foundation',d.biome==='snow'?'live:wood':'live:stone');
+ if(!notches){
+  for(let y=1;y<=wallTop;y++){
+   for(let x=1;x<d.w-1;x++)for(const z of [1,d.d-2])wall(x,y,z,'wall');
+   for(let z=2;z<d.d-2;z++)for(const x of [1,d.w-2])wall(x,y,z,'wall');
+  }
+ }else{
+  // Notch edges are truly four-high, physically authored external walls.
+  for(let y=1;y<=wallTop;y++)
+   for(let x=1;x<d.w-1;x++)for(let z=1;z<d.d-1;z++){
+    if(!inside(x,z))continue;
+    if(!inside(x-1,z)||!inside(x+1,z)||!inside(x,z-1)||!inside(x,z+1))
+     wall(x,y,z,'wall');
+   }
  }
  for(const [x0,z0,x1,z1] of d.segments){
   if(x0!==x1&&z0!==z1)throw Error(d.title+': diagonal partitions forbidden');
@@ -115,7 +143,7 @@ function create(d){
   for(let i=0;i<=count;i++)for(let y=1;y<=3;y++){
    const x=x0+i*dx,z=z0+i*dz,k=key(x,y,z);
    if(!occupied.has(k))wall(x,y,z,'partition');
-   else if(occupied.get(k).role!=='partition')throw Error(d.title+': partition overlaps foreign role '+k);
+   else if(occupied.get(k).role!=='partition'&&!(notches&&occupied.get(k).role==='wall'))throw Error(d.title+': partition overlaps foreign role '+k);
   }
  }
  const entry=[d.entry[0],d.entry[1]],allDoors=[door(entry[0],entry[1],'outside',d.entry[2]),...d.doors];
@@ -156,7 +184,7 @@ function create(d){
  }
  const openCourt=(x,z)=>d.courtyard&&x>=d.courtyard[0]&&x<=d.courtyard[2]&&z>=d.courtyard[1]&&z<=d.courtyard[3];
  for(let x=0;x<d.w;x++)for(let z=0;z<d.d;z++){
-  if(openCourt(x,z))continue;
+  if(!active(x,z)||openCourt(x,z))continue;
   if(!occupied.has(key(x,4,z)))place(x,4,z,'support','live:wood','north',{weatherBacking:true});
  }
  function roofY(x,z){
@@ -202,7 +230,7 @@ function create(d){
   }
  }
  for(let x=0;x<d.w;x++)for(let z=0;z<d.d;z++){
-  if(openCourt(x,z))continue;
+  if(!active(x,z)||openCourt(x,z))continue;
   const y=roofY(x,z);
   for(let level=5;level<y;level++)if(!occupied.has(key(x,level,z)))
    place(x,level,z,'support','live:wood','north',{steppedRoofRiser:true});
@@ -211,7 +239,7 @@ function create(d){
  for(const x of d.posts)for(let y=1;y<=3;y++)place(x,y,0,'support','pack2:022','north',{roofPost:'front-support',strengthApproved:false});
  const walkable=[];
  for(let x=2;x<d.w-2;x++)for(let z=2;z<d.d-2;z++){
-  if(!occupied.has(key(x,1,z))&&!occupied.has(key(x,2,z))&&!reserved.has(key(x,1,z)))walkable.push([x,1,z]);
+  if(inside(x,z)&&!occupied.has(key(x,1,z))&&!occupied.has(key(x,2,z))&&!reserved.has(key(x,1,z)))walkable.push([x,1,z]);
  }
  for(const p of allDoors)if(!walkable.some(q=>key(...q)===key(...p.at)))walkable.push(p.at);
  walkable.push([entry[0],1,0]);
@@ -225,6 +253,7 @@ function create(d){
    roofWeatherSealApproved:false,roofStrengthApproved:false,
    ...(d.courtRoofMassing?{roofMassing:d.courtRoofMassing}:{}),
    ...(d.roofWings?{roofWings:d.roofWings}:{}),
+   ...(notches?{exteriorNotches:notches,exteriorOutline:'genuine-concave-perimeter',exteriorVoidFootprintCells:Array.from({length:d.w},(_,x)=>Array.from({length:d.d},(_,z)=>!active(x,z)?1:0).reduce((a,b)=>a+b,0)).reduce((a,b)=>a+b,0)}:{}),
    outdoorCourtyard:d.courtyard??null,levels:1,stairsRequired:false,
    materialAcceptance:'symbolic-plus-exact-candidate-AABB-not-production-approved'},
   placements:[...occupied.values()],rooms:d.rooms,portals:allDoors.map(p=>({from:p.from,to:p.to,at:p.at,passable:true,opening:'hinged-leaf'})),
