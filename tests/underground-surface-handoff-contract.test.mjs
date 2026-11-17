@@ -13,7 +13,7 @@ for(const seed of [179,1,2026,-77]){
     const closed=descentSurfaceSeam(world);
     assert.equal(closed.clear,false,'untouched surface must not be certified');
     assert.equal(closed.runtimeVerified,false);
-    assert.equal(descentEntranceConnectivity(world).approachConnected,true);
+    assert.equal(descentEntranceConnectivity(world).approachConnected,false,'protected legacy headroom blocks the complete approach');
     assert.equal(descentConnectivity(world).surfaceConnected,false);
     assert.deepEqual(world.edits,before,'probe must never write a save');
     const opened=new Set();
@@ -26,6 +26,7 @@ for(const seed of [179,1,2026,-77]){
     };
     const result=descentSurfaceSeam(ownerView);
     assert.equal(result.clear,true,JSON.stringify(result.failures));
+    assert.equal(descentEntranceConnectivity(ownerView).approachConnected,true,'surface-owner opening must restore full four-cell approach');
     assert.equal(result.runtimeVerified,false,'synthetic geometry is not WebGL2 proof');
     assert.deepEqual(world.edits,before,'owner mock must not alter original saves');
     const route=descentRoute();
