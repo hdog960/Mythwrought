@@ -1,0 +1,71 @@
+# Builder 3A M5 — Source Acceptance Readiness, Visual & Physical Audit
+
+**Status: 345/345 independently authored theoretical source blueprints, creator approval 0, live production registration 0, deployed/placed 0.** This report is about testable *source-authoring* readiness only. It is **NOT** premium-art approval, structural engineering approval, producer physical-mesh registration or authorization to use `incorporate now`.
+
+## Governance / immutable scope
+
+- Development PR **#183** and independent exact-branch CI-only PR **#203** remain **OPEN/DRAFT** and must not merge. CI-only PR targets the earlier historical base to avoid unrelated later-main CI-scope drift; main remains independently advanced. No rebases or shared workflow edits.
+- All Builder 3A edits must stay strictly within `src/building-pool/roadmap-3a/`, `tests/building-pool/roadmap-3a/`, `docs/building-pool/roadmap-3a/`. No changes to sibling builder branches, manual Packs 1–5, biome130 producers, automations, game runtime, controller rails, saves/schema1 or v0.11.
+- Preserve 345 original source-authored slots (75 blacksmith, 75 armorer, 75 carpenter, 60 stonemason, 60 mining-workshop). M5 modifies only the **five large mining-workshop variant-4 NE wings**; other **340 blueprints are untouched**.
+
+## M5 visual diagnosis and source-geometry correction
+
+Inspect [Actions #43918967239](https://github.com/hdog960/Mythwrought/actions/runs/43918967239) genuine Chromium/WebGL2 original fourth-variant captures: 15 buildings × exterior/cutaway × 667×375, 844×390 and 932×430, 90 records and SHA256 hashes for 7 checked-out source modules. The mountain-large and enchanted-forest-large **far-right camera-facing structures** looked like isolated inverted cones.
+
+**Root cause:** the source-preview camera is at elevated +X/+Z (southeast) and camera screen-right corresponds to high **X and LOW Z**. The far-right building is therefore the **NORTHEAST** diagonal orework, **not the southeast wing**. An earlier M4 adjustment widened the southeast base but did not alter the offending northeast taper. This is source geometry, not a browser screenshot or camera rendering bug.
+
+**M5 source fix:** for just the five large variant-4 original mining designs, set a **biome/source-brief-specific fixed-width northeast outer masonry/floor/roof bay across the entire original northeast Z span**, replacing the taper whose ungrounded *appearance* caused the wedge.
+
+**M5 second-stage real screenshot review / corrected attribution:** the first new 90-image archive proved the northeast source annexe had become a rectangular, grounded gallery, but a wedge remained further to the right. Tracing the actual projection of source cube centres showed the **visible extreme far-right V-shaped façade belongs to the NORTH-LABORATORY sorting hall at z≈2, not the northeast ore spoke**. Its source outer walls stopped at Y=12 while its higher roof sat near Y=20–24. The blocked projection of that partially open wall looked like a hanging inverted bucket. For five LARGE original variant-4 buildings only, the actual **north-hall perimeter masonry now extends upward to each locally calculated roof underside**, except for the intentional safe two-wide/three-high arcade aperture at z=3,4 (ground Ys 2–5); source-backed lintels remain over the passage. The new native regression requires each exterior stone cell under the roof at all other Z/Y rows and explicitly rejects closing the arcades. The other 340 source-author-authored candidates remain protected. **A new exact-head 90-image Chromium rerender and visual review is required** before marking this visual defect resolved. Keep west wings and southeast source chevrons original, hoist tower 2×2 sky aperture, 2-wide × 3-high clearance and other source commissions. New native regression checks **each x/z source-cell row** of the affected northeast wing at ground foundation Y=0, walk deck Y=1, genuine roof and the exact external wall façade Y=2. Do not substitute labels, native camera math or mock images for source geometry.
+
+**Updated independent source QA before GitHub CI:** 15 original fourth-variant candidates, **144,846 actual authored source voxel cells** (up from 139,073), **255** normalized D4 mining comparison pairs against variants 1–3 and fourth same-size peers, maximum floor IoU **0.9176262179 <0.94**, zero nominal two-wide/three-high circulation obstructions, and **0 of 5,341** sampled roof positions lacking local source bearing witnesses. Exact-head CI and new genuine PNG inspection remain mandatory and may change acceptance status.
+
+## Physical producer audit — evidence and limitation
+
+The archived **real producer Pack 1–5** shape resolver is applied by Builder 3A's physical AABB suites to fixtures, their support and occupied offsets, nearby source-authored neighbors and nominated clearance paths; this is **not** full Pack partial-mesh collision certification at settlement scale. The previous green M4 fourth report found: 15 models, zero fixture AABB collisions, zero absent fixture supports, zero occupied multi-cell conflicts, zero sampled corridor intrusions and 30 inherited legacy mount blockers. Rerun after the revised physical source.
+
+### Historical unresolved support warnings (do not silently clear)
+
+| Protected source family | Earlier archived sampled roof witnesses lacking nearby support |
+|---|---:|
+| M2 fourth metalworking | 33 / 6,008 |
+| M2 fifth metalworking | 118 / 7,123 |
+| M3 second artisans | 83 / 7,525 |
+| M3 third crafts | 40 / 7,232 |
+| **Total open historical sample gaps** | **274** |
+
+M3 fourth (0/6,400), M3 fifth carpenters (0/4,510), M4 second mining (0/3,983) and M4 third mining (0/7,258) are individually green in the previous exact source artifact. **Thirty original PR #122 blacksmith Pack4 fireplace/chimney mount blockers remain unresolved.** Do not edit inherited source geometries or claim legacy engineering pass. A roof-purlin *proximity witness* is **not proof of structurally supported load/span, wind/snow rating, waterproofness, water diversion or actual real-world safety**.
+
+### Still-open creator and integration gates
+
+- Aesthetic approval of true original premium block/roof art, all-biome silhouettes at physical iPhone scale and non-placeholder world placement. Diagnostic Chromium software-WebGL2 **unit-cube envelopes** are not final Pack textures, meshes, microvariants or full runtime lighting.
+- Actual cross-pack physical geometry: producer revision pinning, variant/yaw shape and collision AABB consistency, full mesh roof adjacency/stacking, clear door/portal circulation, construction asset palette and numeric persistent IDs; all undefined until creator-authorized implementation.
+- Performance, voxel streaming/chunk budgets, editor selection and placement, collision/physics, save-schema 1 compatibility and rollback. No changes to shared runtime or saves until separately approved.
+- Inherited 30 fireplace/chimney support blockers and 274 older sampled roof-witness gaps, independent engineering/physical fit, climate/drainage/fire engineering, working mining equipment and interactive harvesting/crafting. These are not authoring failures to quietly erase.
+- Distinguish source-authoring technical **M5 acceptance** from both **creator visual acceptance** and **live integration approval**. Source acceptance is conditional on exact same SHA CI, source-specific Chromium artifacts inspected and strict Builder 3A ownership.
+
+## Evidence / source anchors
+
+- Original green M4 checkpoint: [isolated GitHub Actions #43918967239](https://github.com/hdog960/Mythwrought/actions/runs/43918967239), 735/735 root Node, 135/135 dedicated Builder 3A tests, 90/90 fourth mining real Chromium PNGs.
+- Updated source: `src/building-pool/roadmap-3a/m4-mining-fourth-variants.mjs`.
+- Regression: `tests/building-pool/roadmap-3a/m4-mining-fourth-variants.test.mjs`.
+- Physical audit: `src/building-pool/roadmap-3a/m4-mining-fourth-physical-aabb-audit.mjs` and focused test.
+- Real browser: `tests/building-pool/roadmap-3a/m4-fourth-source-cdp.mjs`, `m4-fourth-cdp.test.mjs`; manifest includes temporary PR-merge `GITHUB_SHA`, distinguish from actual branch source HEAD.
+
+**Release authority: manual only; this roadmap does not approve any runtime integration, deployment, merge or unlocking of v0.11.**
+
+## M5 mountain-large source-grounded east retaining gallery — new isolated refinement
+
+The previous 90-image green snapshot at `b8682352b8db82a2f9cb9818fcc93ee49a09311a` still showed an inverted-V far-right mountain north hall. The southeast orthographic camera projects high +X/low Z to the right; the old north hall ended at x=mid+17 while its outer 20–24-high roof rose far above a narrow exposed end. A sound high wall alone did not solve the visual isolation: the hall had no low grounded eastern mass linking that face to the northeast ore spoke.
+
+**Mountain-large fourth mining only** now adds real foundation, continuous walkable stone flooring, perimeter bearing walls and a stepped lower roof to the east of the north grading hall (x=mid+18..20, z=2..north), extending back to the NE ore hall with a physical covered retaining-gallery neck (x=mid+10..20, z=north+1..northeastZ−1). The old high east boundary becomes a high/low masonry roof-step gable above clear connected door openings, supported by three ground-up spaced stone piers. The original 2-wide/3-high global circulation, full 2×2 hoist opening, all four wings, fixtures, original non-mountain versions and other 344 designs remain unchanged. Camera, mesh, preview and screenshot code are not edited. New regression source-checks continuous lower terrace foundation/floor/roof, its outer full-height wall, accessible door cells and the high/low load path.
+
+**Final evidence requirement:** validate exact new branch SHA, 345-way D4 uniqueness, 255 floor IoU values below 0.94, producer AABB and sampled bearing checks, and 90 actual Chromium WebGL2 exterior/cutaway PNGs. Inspect the mountain-large 6 images vs the archived `b868235` captures. No acceptance is implied until that evidence is green. Retain the 30 legacy Pack4 mounts and 274 inherited roof witness warnings; no creator art, structural or deployment authorization.
+
+### Mountain-only second-stage roof profile correction (source review)
+
+First isolated CI at `2a041b34dcac66d6169bb13643603d928803d6d3` succeeded. All 90 exact-source Chromium WebGL2 screenshots were inspected by binary source-file comparison: **84 unchanged** from `b868235`, **only six mountain-large exterior/cutaway images changed**. The new lower gallery removed the detached lower cone but left a narrow high wedge as the original high north/east sorting roof still projected at Y20–24 above its Y12–16 shoulder. That screenshot evidence prompted a second genuine source edit: the mountain-large north sorting roof east tier (x>=mid+10) now physically steps down to Y15–17, tied to both the low eastern retaining gallery and the retained tall western north-hall ridge by vertical masonry gables and spaced ground-to-roof piers. The original two-wide arcade remains clear at z3,4, and other biomes/sizes and their source signatures are untouched. Re-run exact-head CI and all 90 Chromium images on this new change before acceptance. No changed preview/camera/screenshot paths.
+
+### M5 final northern roof massing follow-up
+
+The second actual Chromium capture at `b02bcd9e8948fefcfc99e5846ddaa4a24409815a` validated grounding and a stepped eastern roof, but revealed a **remaining narrow tall western tooth** exposed beside it. Instead of hiding the artifact in a screenshot or changing the camera, the mountain-large source now spreads the whole 34-wide sorting hall under a physically lower and shallower supported ridge (Y15–18, with a 1-cell low/high roof step), while the central hoist tower remains the deliberately tall feature. The eastern ground-bearing retaining gallery and authentic roof-step piers remain, with original clear two-wide arcades and hoist aperture. Only mountain-large variant-4 is affected; no other 344 candidates, IDs, future integrations, Packs or preview sources are edited. Added native regression checks every cell of the 34 × north hall's source roof height and retained gables. Run new exact-head 735/136/90 verification, full source D4 + 255 floor IoUs, Pack AABB, roof witnesses and real before/after image inspection; visual approval remains withheld pending evidence.

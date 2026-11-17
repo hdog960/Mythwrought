@@ -22,7 +22,18 @@
   </aside>
 </main>
 <div id="explorationOverlay" hidden role="dialog" aria-modal="true" aria-label="Exploration map"><div class="exploration-panel"><header class="exploration-heading"><strong>✦ THE DISCOVERED WORLD</strong><button type="button" id="closeExploration" aria-label="Close exploration map">✕ CLOSE</button></header><p id="explorationCoordinates" class="map-coordinates">Your position</p><canvas id="expandedMap" width="320" height="320" aria-label="Map of visited locations, drag to pan"></canvas><p id="explorationSummary" class="map-summary" role="status">Unexplored regions remain hidden.</p><nav class="map-controls" aria-label="Map controls"><button type="button" id="mapZoomOut">− ZOOM</button><button type="button" id="mapRecenter">◎ RECENTER</button><button type="button" id="mapZoomIn">+ ZOOM</button></nav></div></div>
-<div id="help" hidden><div class="helpbody"><h1>MYTHWROUGHT</h1><p><b>Engineering prototype:</b> Move with the left pad, look with the right pad, and MINE/PLACE the block in the center of your view. JUMP from the right grip; hold AIM on the left grip for finer looking.</p><section class="looksetting" aria-label="Creator-approved Block Pack 2 materials">
+<div id="help" hidden><div class="helpbody"><h1>MYTHWROUGHT</h1><p><b>Engineering prototype:</b> Move with the left pad, look with the right pad, and MINE/PLACE the block in the center of your view. JUMP from the right grip; hold AIM on the left grip for finer looking.</p><section class="looksetting g2b-flight-settings" aria-label="Creative flight settings">
+<h2 class="audit-title">CREATIVE FLIGHT · G2B</h2>
+<p class="controlhint">Optional exploration flight, OFF by default. No inventory or building integration. Move and look with your thumb rails. In flight, hold UP or DOWN on the right, then LAND to return safely to Explore.</p>
+<label class="g2b-flight-toggle"><input type="checkbox" id="g2bFlightEnable" aria-label="Enable Creative flight for this session"> ENABLE FLIGHT FOR THIS SESSION</label>
+<label for="g2bFlightProfile">Flight speed profile</label>
+<select id="g2bFlightProfile" aria-label="Flight speed profile" disabled>
+<option value="precision">PRECISION · 1.4</option><option value="normal" selected>NORMAL · 4</option>
+<option value="fast">FAST · 8</option><option value="travel">TRAVEL · 15</option>
+</select>
+<p id="g2bFlightStatus" role="status" aria-live="polite">Flight OFF · Explore controls unchanged</p>
+</section>
+<section class="looksetting" aria-label="Creator-approved Block Pack 2 materials">
 <h2 class="audit-title">BLOCK PACK 2 · TIMBER, PATHS &amp; WATER</h2>
 <p class="controlhint">Select one of 18 approved physical blocks, then RETURN to the game and PLACE it. Rotation, variants, hinged open/closed states and water source levels are saved separately from your old world. Aim at a placed gate, door or trapdoor and tap PLACE with that material selected to open or close it.</p>
 <div id="pack2Materials" class="helpbuttons" role="group" aria-label="Approved Block Pack 2 materials"></div>

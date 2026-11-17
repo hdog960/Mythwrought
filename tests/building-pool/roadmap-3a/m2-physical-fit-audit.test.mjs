@@ -1,0 +1,26 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdirSync,writeFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {auditM2MetalworkPhysicalFits} from '../../../src/building-pool/roadmap-3a/m2-physical-fit-audit.mjs';
+import {geometryFingerprint} from '../../../src/building-pool/roadmap-3a/legacy-validation.mjs';
+import {createLegacyBlacksmithPool} from '../../../src/building-pool/roadmap-3a/legacy-blacksmiths.mjs';
+test('source-only physical fit ledger preserves all 30 old blockers without mutating any original geometry',()=>{
+ const before=createLegacyBlacksmithPool().map(b=>[b.id,geometryFingerprint(b)]);
+ const a=auditM2MetalworkPhysicalFits();
+ assert.equal(a.exactLegacyBlacksmiths,15);
+ assert.equal(a.legacyMountsStillMissing,30);
+ assert.equal(a.legacySupportRepairsApplied,0);
+ assert.equal(a.legacyFingerprintsAltered,false);
+ assert.deepEqual(createLegacyBlacksmithPool().map(b=>[b.id,geometryFingerprint(b)]),before);
+ assert.equal(a.M2Authored,30);
+ assert.equal(a.newColdSmithyFlues,15);
+ assert.equal(a.newCapSymbolsPending,15);
+ assert.equal(a.sourceFixtureSupportFailures,0);
+ assert.equal(a.fullShapeCertified,0);
+ assert.equal(a.productionPlacements,0);
+ assert.ok(a.records.filter(b=>b.hollowMasonryShaft).every(b=>b.flueVerticallyOpen===true));
+ assert.ok(a.records.every(b=>b.sourceFixtureMountsPresent&&b.weatherproofRoofApproved===false));
+ const out=join(process.cwd(),'artifacts','building-roadmap-3a-m2');mkdirSync(out,{recursive:true});
+ writeFileSync(join(out,'M2_PHYSICAL_FIT_BLOCKERS.json'),JSON.stringify(a,null,2)+'\n');
+});
