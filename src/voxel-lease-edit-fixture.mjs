@@ -32,6 +32,7 @@ export function createLeasedLegacyEditor(session, scope = session) {
         });
       });
       return withVoxelCellLease(scope, snapshot.map(r => r.cell), async () => {
+        if (signal?.aborted) throw new DOMException('Voxel edit aborted', 'AbortError');
         // Validate against authoritative state before expensive preparation. A
         // second preflight inside editMany still guards writes after suspension.
         // This early check must not mutate orientation or any legacy save data.
