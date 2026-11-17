@@ -616,6 +616,48 @@ export function descentCells(origin=DESCENT_ORIGIN){
       for(let d=58;d<=79;d++)passage(d,0);
     }
   }
+  // Upper-band broken-column grotto at -35. A broad winding entrance
+  // divides into two galleries around a retained central rock spine, then
+  // rejoins at an offset cavern. Narrow solid ribs in the vault create
+  // navigable high-fantasy geology from existing DEEPSTONE alone.
+  // The central route is reasserted below; legacy surface stays untouched.
+  {
+    const depth=-35,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const cell=(d,t,y,id)=>set(anchor.x+outward[0]*d+tangent[0]*t,y,
+                               anchor.z+outward[1]*d+tangent[1]*t,id);
+      const carve=(d,t,half=2,height=7)=>{
+        for(let a=-half;a<=half;a++){
+          cell(d,t+a,depth,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)cell(d,t+a,depth+h,BLOCK.AIR);
+        }
+      };
+      for(let d=0;d<=14;d++)carve(d,0);
+      for(let d=14;d<=50;d++){
+        const spread=Math.round(10*Math.sin(Math.PI*(d-14)/36));
+        carve(d,-spread,2,7);
+        carve(d,spread,2,8);
+      }
+      // Offset ellipse creates a large destination rather than a dead tube.
+      for(let d=45;d<=70;d++)for(let t=-16;t<=16;t++){
+        const radial=((d-57)/14)**2+((t-2)/17)**2;
+        if(radial>1)continue;
+        carve(d,t,0,5+Math.floor(8*(1-radial)));
+      }
+      // Preserve spaced, full-height bearing columns with walkable gaps.
+      for(const [d,t] of [[54,-7],[59,5],[65,-3]]){
+        for(let h=1;h<=9;h++)cell(d,t,depth+h,BLOCK.DEEPSTONE);
+      }
+      // A sheltered side pocket is accessible from the northern arm.
+      for(let d=30;d<=44;d++)for(let t=-19;t<=-8;t++){
+        const radial=((d-37)/8)**2+((t+13)/7)**2;
+        if(radial<=1)carve(d,t,0,5+Math.floor(4*(1-radial)));
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
