@@ -15,8 +15,8 @@ import {validateBlueprint,structuralFingerprint} from '../../../src/building-poo
 import {inspect2AUFootprints} from '../../../src/building-pool/roadmap-2a/m1-u-court-preflight.mjs';
 const coord=(x,y,z)=>[x,y,z].join(',');
 test('six new U-shaped original 2A buildings represent 68/420 genuine authored candidate IDs, 340 unauthored',()=>{
- assert.equal(M1_U_COURT_SHOPS.length,6);assert.equal(inventory().authoredCandidateTotal,104);assert.equal(inventory().newlyAuthored,89);
- assert.equal(inventory().unwrittenNewCandidates,316);assert.equal(plannedSlots().filter(x=>x.authoredHere).length,104);
+ assert.equal(M1_U_COURT_SHOPS.length,6);assert.equal(inventory().authoredCandidateTotal,110);assert.equal(inventory().newlyAuthored,95);
+ assert.equal(inventory().unwrittenNewCandidates,310);assert.equal(plannedSlots().filter(x=>x.authoredHere).length,110);
  assert.equal(new Set(M1_U_COURT_SHOPS.map(x=>x.id)).size,6);assert.equal(new Set(M1_U_COURT_SHOPS.map(structuralFingerprint)).size,6);
  for(const b of M1_U_COURT_SHOPS){assert(validateBlueprint(b).valid);assert.equal(b.rooms.length,4);assert(b.voxels.length>2000);assert.equal(b.worldPlaced,false);}
 });

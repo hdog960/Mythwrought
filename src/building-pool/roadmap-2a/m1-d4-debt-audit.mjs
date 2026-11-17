@@ -12,6 +12,7 @@ import {M1_U_COURT_SHOPS} from './m1-u-court-shops.mjs';
 import {M1_STEPPED_COURT_SHOPS} from './m1-stepped-court-shops.mjs';
 import {M1_LATERAL_MARKETS} from './m1-lateral-markets.mjs';
 import {M1_TWIN_SIDE_TERRACE_SHOPS} from './m1-twin-side-terraces.mjs';
+import {M1_SCULPTED_MARKETS} from './m1-sculpted-markets.mjs';
 import {M1_SIGNATURE_SKYLINE_SHOPS} from './m1-signature-skyline.mjs';
 import {M1_LANDMARK_SHOPS} from './m1-landmark-shops.mjs';
 import {M1_DISTINCT_WING_SHOPS} from './m1-distinct-wing-shops.mjs';
@@ -19,7 +20,7 @@ import {M1_FIVE_COURT_SHOPS} from './m1-five-court-shops.mjs';
 export const M1_D4_AUDIT_ALL=Object.freeze([...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,
  ...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,
  ...M1_COURTYARD_SHOPS,...M1_U_COURT_SHOPS,...M1_STEPPED_COURT_SHOPS,
- ...M1_LATERAL_MARKETS,...M1_TWIN_SIDE_TERRACE_SHOPS,...M1_FIVE_COURT_SHOPS,...M1_DISTINCT_WING_SHOPS,...M1_LANDMARK_SHOPS,...M1_SIGNATURE_SKYLINE_SHOPS]);
+ ...M1_LATERAL_MARKETS,...M1_TWIN_SIDE_TERRACE_SHOPS,...M1_FIVE_COURT_SHOPS,...M1_DISTINCT_WING_SHOPS,...M1_LANDMARK_SHOPS,...M1_SIGNATURE_SKYLINE_SHOPS,...M1_SCULPTED_MARKETS]);
 const normalize=p=>{
  const minx=Math.min(...p.map(v=>v[0])),minz=Math.min(...p.map(v=>v[1]));
  return new Set(p.map(([x,z])=>(x-minx)+','+(z-minz)));

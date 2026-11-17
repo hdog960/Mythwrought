@@ -32,10 +32,10 @@
   "target": 420,
   "legacySourceCandidates": 15,
   "locallyMigratedAndParityVerified": 15,
-  "newlyAuthored": 89,
+  "newlyAuthored": 95,
   "creatorApproved": 0,
   "integratedIntoGame": 0,
-  "unwrittenNewCandidates": 316,
+  "unwrittenNewCandidates": 310,
   "legacyCandidates": [
     {
       "id": "r2:general-store:temperate:small:01",
@@ -330,7 +330,7 @@
   ],
   "sourcePolicy": "Original PR #124 is read-only. IDs are preserved, not geometries yet. A candidate only counts as locally migrated after exact geometry/metadata parity and native tests.",
   "assetPolicy": "Manual 96 families/106 physical variants are integrated; biome130 entries remain symbolic when unverified. No numeric runtime IDs or production placement.",
-  "authoredCandidateTotal": 104,
+  "authoredCandidateTotal": 110,
   "handAuthoredStoreBlob": "7211223b2cc51290b89f5f886c1cbb59cc495747",
   "sourceModuleBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
   "originalValidatedStores": 15,
@@ -1252,6 +1252,68 @@
       "independentlyAuthored": true,
       "realSkyline": true,
       "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    }
+  ],
+  "M1SculptedMarkets": [
+    {
+      "id": "r2:general-store:desert:small:04",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:pet-shop:temperate:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:magic-shop:snow:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:potion-shop:enchanted-forest:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:bakery:mountain:small:03",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:bank:temperate:small:02",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
       "creatorApproved": false,
       "worldPlaced": false,
       "integrated": false

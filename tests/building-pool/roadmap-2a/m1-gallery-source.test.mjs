@@ -24,7 +24,8 @@ test('authentic 2A WebGL2 diagnostic is source-bound, syntax valid, and cannot c
  assert.match(src,/M1_DISTINCT_WING_SHOPS/);
  assert.match(src,/M1_LANDMARK_SHOPS/);
   assert.match(src,/M1_SIGNATURE_SKYLINE_SHOPS/);
- assert.match(src,/byId.size!==104/);
+ assert.match(src,/M1_SCULPTED_MARKETS/);
+ assert.match(src,/byId.size!==110/);
  assert.match(src,/productionPhysicalFamilyGeometry:false/);
  assert(src.includes('float depth=(-screenZ*.44-p.y*.22)/span;'),'the camera must put upper/near source cells in front');
  assert(src.includes('v.z===b.extents.z-1'),'cutaway must remove the near z facade, not the far wall');
