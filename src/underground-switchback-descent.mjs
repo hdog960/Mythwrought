@@ -533,6 +533,45 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // Three-level shattered shelf at -145: a supported zigzag descent into
+  // an offset vault, with a separate upper return shelf. No new block IDs.
+  // The entrance remains attached to the existing deep switchback.
+  {
+    const depth=-145,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,floor,width=2,height=6)=>{
+        for(let a=-width;a<=width;a++){
+          const x=anchor.x+outward[0]*d+tangent[0]*(t+a);
+          const z=anchor.z+outward[1]*d+tangent[1]*(t+a);
+          set(x,floor,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)set(x,floor+h,z,BLOCK.AIR);
+        }
+      };
+      // Two long shelves each step down one voxel. The bends are gradual,
+      // with no horizontal gap or vertical drop exceeding one block.
+      for(let d=0;d<=56;d++){
+        const floor=depth-(d>=38?2:d>=19?1:0);
+        const bend=d<18?0:d<37?Math.floor((d-18)/4):4-Math.floor((d-37)/5);
+        carve(d,bend,floor,d<5?1:2,7);
+      }
+      // A remote high vault and its smaller lateral refuge. Their floor
+      // heights match the final shelf, preserving four-cell headroom.
+      for(const room of [{d:59,t:0,rx:13,rz:11,h:11},
+                         {d:66,t:15,rx:8,rz:7,h:7}]){
+        for(let dd=-room.rx;dd<=room.rx;dd++)
+          for(let tt=-room.rz;tt<=room.rz;tt++){
+            const radial=(dd/room.rx)**2+(tt/room.rz)**2;
+            if(radial>1)continue;
+            carve(room.d+dd,room.t+tt,depth-2,0,
+              5+Math.floor((room.h-5)*(1-radial)));
+          }
+      }
+      for(let t=0;t<=15;t++)carve(66,t,depth-2,1,6);
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
