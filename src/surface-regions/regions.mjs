@@ -240,7 +240,8 @@ export function createSurfaceBiomeWorldView(world,{
       // perform a full protected-column scan on the mobile collision path.
       // This is a conservative bounds check: it never authorizes an overlay.
       const oldTop=terrainHeight(x,z,world.seed);
-      if(y<oldTop-2||y>WORLD_MAX_Y||!surfaceBiomeAt(x,z,world.seed))
+      if(y<oldTop-2||y>WORLD_MAX_Y||!surfaceBiomeAt(x,z,world.seed)||
+         y>Math.max(oldTop,surfaceBiomeHeight(x,z,world.seed)))
         return original;
       if(isProtected(x,y,z)||hasDurableEditIntent(x,y,z)||
          world.edits.has(x+','+y+','+z)||world.rotations.has(x+','+y+','+z))
