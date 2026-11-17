@@ -1,5 +1,5 @@
-import {VoxelWorld,BLOCK,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
-import {WORLD_MIN_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
+import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
+import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
@@ -26,6 +26,12 @@ import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup}
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
 import {installExplorationMap} from './exploration-map.mjs';
+import {createG2FlightState,armG2Flight,selectG2FlightProfile,planG2FlightStep,
+  holdG2Flight} from './creative-integration/g2-flight.mjs';
+import {createG2ControlState,enterG2ControlOwnership,dispatchG2Control,
+  clearG2Controls,resumeG2Controls,readG2ControlIntent,
+  releaseG2ControlOwnership} from './creative-integration/g2-control-state.mjs';
+import {inspectG2Landing,commitG2Landing} from './creative-integration/g2-landing.mjs';
 import {MANUAL_FIVE_PACK_CATALOG,resolveManualFivePackAsset} from './builder-assets/manual-five-pack.mjs';
 import {createManual14SavedBridge} from './builder-assets/manual14-layer.mjs';
 import {meshManual14Chunk} from './builder-assets/manual14-mesh.mjs';
@@ -146,6 +152,171 @@ function start(){
     const hint=document.getElementById('pack5Status');
     if(hint)hint.textContent='Off after world change. Enable again for this seed’s separate sidecar.';
   }
+  // G2B only: explicit-session feature, no persistent settings, edits or new GPU queue.
+  let g2Epoch=0,g2Flight=null,g2Controls=createG2ControlState();
+  const g2Toggle=document.getElementById('g2bFlightEnable');
+  const g2Profile=document.getElementById('g2bFlightProfile');
+  const g2Status=document.getElementById('g2bFlightStatus');
+  const g2Active=()=>g2Flight?.mode==='flight';
+  const g2Token=()=>world.seed+'#'+g2Epoch;
+  // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
+  const g2Section=y=>y>WORLD_MAX_Y&&y<=WORLD_MAX_Y+BODY_HEIGHT+1?0:sectionForY(y);
+  function g2MeshKey(key){
+    const parts=key.split(',').map(Number);
+    if(parts.length!==3||!parts.every(Number.isSafeInteger)||parts[2]>0)return null;
+    try{return depthMeshKey(...parts);}catch(_){return null;}
+  }
+  function g2Ready(p){
+    if(!p||!['x','y','z'].every(k=>Number.isFinite(p[k]))||
+       p.y<WORLD_MIN_Y||p.y>WORLD_MAX_Y+1||graphicsLost)return false;
+    const e=1e-5;
+    for(const y of [p.y+e,p.y+BODY_HEIGHT-e]){
+      const section=g2Section(y);
+      if(section===null)return false;
+      for(const x of [p.x-BODY_RADIUS+e,p.x+BODY_RADIUS-e])
+        for(const z of [p.z-BODY_RADIUS+e,p.z+BODY_RADIUS-e]){
+          const c=chunks.get(depthMeshKey(chunkCoord(x),chunkCoord(z),section));
+          if(!c||!c.buffer||c.section!==section)return false;
+        }
+    }
+    return true;
+  }
+  function g2Clear(p){
+    try{return p&&['x','y','z'].every(k=>Number.isFinite(p[k]))&&
+      !collides(world,p.x,p.y,p.z);}
+    catch(_){return false;}
+  }
+  const g2Host=()=>({worldToken:g2Token(),isRegionReady:g2Ready,
+    isBodyClear:g2Clear,sectionForY:g2Section});
+  function g2Sync(){
+    const on=g2Active();
+    document.body.classList.toggle('g2b-flight-active',on);
+    g2Toggle.checked=on;g2Profile.disabled=!on;
+    for(const [id,label,aria] of [
+      ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
+      ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
+      ['jump',on?'LAND':'JUMP',on?'Request safe landing':'Jump']]){
+      const el=document.getElementById(id);el.textContent=label;el.setAttribute('aria-label',aria);
+    }
+    g2Status.textContent=on?'FLIGHT · '+g2Flight.profile+' · '+g2Flight.reason:
+      'Flight OFF · normal Explore controls';
+    canvas.dataset.g2bFlight=String(on);
+    canvas.dataset.g2bProfile=on?g2Flight.profile:'off';
+  }
+  function g2Pause(reason){
+    if(!g2Active())return;
+    g2Controls=clearG2Controls(g2Controls,reason);
+    g2Flight=holdG2Flight(g2Flight,reason);
+    // A planner can never clear shared production GPU queues.
+  }
+  function g2NewWorld(){
+    // The original world-change code immediately installs a safe newPlayer.
+    g2Flight=null;g2Controls=createG2ControlState();g2Epoch++;g2Sync();
+  }
+  function g2Start(){
+    if(g2Active())return true;
+    const at={x:player.x,y:player.feet,z:player.z};
+    if(document.hidden||graphicsLost||exploration.isOpen()||
+       !g2Ready(at)||!g2Clear(at)){
+      g2Status.textContent='Flight unavailable: body/region not ready';return false;
+    }
+    try{
+      const initial=createG2FlightState({position:at,worldToken:g2Token(),
+        heightBounds:{minFeet:WORLD_MIN_Y,maxFeet:WORLD_MAX_Y+1}});
+      const active=armG2Flight(initial,{enabled:true,isRegionReady:g2Ready,isBodyClear:g2Clear});
+      if(active.mode!=='flight'){g2Status.textContent=active.reason;return false;}
+      g2Flight=selectG2FlightProfile(active,g2Profile.value);
+      g2Controls=enterG2ControlOwnership(createG2ControlState(),
+        {featureEnabled:true,flightReady:true});
+      player.vX=player.vY=player.vZ=0;player.onGround=false;player.coyote=0;
+      player.jumpBuffer=0;jumpQueued=false;g2Sync();return true;
+    }catch(e){g2Status.textContent='Flight refused: '+e.message;return false;}
+  }
+  function g2LandingHost(){
+    const host=g2Host();
+    const physicalSupport=p=>{
+      try{return g2Clear(p)&&collides(world,p.x,p.y-.065,p.z);}
+      catch(_){return false;}
+    };
+    return {...host,hasGroundSupport:physicalSupport,
+      isSafeDescent(from,to){
+        const dist=Math.hypot(from.x-to.x,from.y-to.y,from.z-to.z);
+        for(let i=1,n=Math.max(1,Math.ceil(dist/.25));i<=n;i++){
+          const t=i/n,p={x:from.x+(to.x-from.x)*t,
+            y:from.y+(to.y-from.y)*t,z:from.z+(to.z-from.z)*t};
+          if(!g2Ready(p)||!g2Clear(p))return false;
+        }return true;
+      },
+      findGroundCandidates(from){
+        const results=[];
+        for(const [dx,dz] of [[0,0],[1,0],[-1,0],[0,1],[0,-1],
+          [1,1],[-1,1],[1,-1],[-1,-1],[2,0],[-2,0],[0,2],[0,-2]]){
+          for(let y=Math.floor(from.y);y>=Math.max(WORLD_MIN_Y,from.y-32);y--){
+            const p={x:from.x+dx,y,z:from.z+dz};
+            if(g2Ready(p)&&g2Clear(p)&&physicalSupport(p)){results.push(p);break;}
+          }
+        }
+        return results; // max 13, below source G2A bound 64.
+      }};
+  }
+  function g2Land(){
+    if(!g2Active())return true;
+    try{
+      const host=g2LandingHost(),check=inspectG2Landing(g2Flight,host);
+      if(!check.canLand){g2Status.textContent=check.reason;message(check.reason);return false;}
+      const result=commitG2Landing(g2Flight,check,host);
+      if(!result.landed){g2Status.textContent=result.reason;return false;}
+      g2Controls=releaseG2ControlOwnership(g2Controls,{landed:true});
+      g2Flight=null;
+      Object.assign(player,{x:result.restorePlayer.position.x,
+        feet:result.restorePlayer.position.y,z:result.restorePlayer.position.z,
+        vX:0,vY:0,vZ:0,onGround:true,coyote:0,jumpBuffer:0});
+      g2Sync();message('Landed safely · Explore controls restored');return true;
+    }catch(e){g2Status.textContent='Landing blocked: '+e.message;return false;}
+  }
+  function g2Move(dt){
+    if(!g2Active())return;
+    if(g2Controls.paused){
+      const p={x:player.x,y:player.feet,z:player.z};
+      if(!g2Ready(p)||!g2Clear(p))return; // stay hovering until safe.
+      g2Controls=resumeG2Controls(g2Controls,{flightStillSafe:true});
+    }
+    const intent=readG2ControlIntent(g2Controls);
+    if(intent.landRequested){g2Land();return;}
+    try{
+      const result=planG2FlightStep(g2Flight,
+        {dt,strafe:intent.strafe,forward:intent.forward,
+          vertical:intent.vertical,yaw:player.yaw,pitch:player.pitch},g2Host());
+      g2Flight=result.state;
+      // Reuse ONLY the renderer-owned desired/pending chunk queue.
+      // Never expand the 25/34/27 resident budgets for flight prefetch.
+      for(const req of result.requests){
+        const key=g2MeshKey(req.key);
+        if(!key||!wanted.has(key)||chunks.has(key)||pending.has(key)||
+           pending.size>=34)continue;
+        const coords=req.key.split(',').map(Number);
+        pending.set(key,coords);
+      }
+      if(g2Ready(g2Flight.position)&&g2Clear(g2Flight.position)){
+        player.x=g2Flight.position.x;player.feet=g2Flight.position.y;
+        player.z=g2Flight.position.z;
+        player.vX=player.vY=player.vZ=0;player.onGround=false;
+      }else g2Pause('Flight halted at unsafe/unloaded boundary');
+      canvas.dataset.g2bBlocked=String(g2Flight.blocked);
+      canvas.dataset.g2bPending=String(g2Flight.prefetch.pending.length);
+      g2Status.textContent=g2Flight.reason;
+    }catch(e){g2Pause('Flight failed safely: '+e.message);}
+  }
+  g2Toggle.checked=false;g2Profile.value='normal';g2Sync();
+  g2Toggle.addEventListener('change',()=>{
+    if(g2Toggle.checked){g2Start();g2Sync();}
+    else if(!g2Land())g2Sync();
+  });
+  g2Profile.addEventListener('change',()=>{
+    if(!g2Active())return;
+    try{g2Flight=selectG2FlightProfile(g2Flight,g2Profile.value);g2Sync();}
+    catch(e){g2Status.textContent=e.message;}
+  });
   // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
   const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
     onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost});
@@ -381,7 +552,7 @@ function start(){
   }
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
-    if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
+    if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
     if(pack5Mode&&pack5Builder){
       if(storageReadOnly){message('Protected world read-only; Pack 5 edit blocked');return;}
       const result=mode==='place'?
@@ -561,13 +732,17 @@ function start(){
     jumpQueued=false;
     message('Returned to a safe surface near spawn (prototype void recovery)');
   }
-  function jump(){if(help.hidden&&!exploration.isOpen()&&!document.hidden&&!graphicsLost)jumpQueued=true;}
+  function jump(){if(!g2Active()&&help.hidden&&!exploration.isOpen()&&!document.hidden&&!graphicsLost)jumpQueued=true;}
   function move(dt){
     const strafe=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joystick.x;
     const forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)-joystick.y;
-    const result=stepPlayer(world,player,{strafe,forward,jump:jumpQueued},dt);
-    jumpQueued=false;
-    if(result.landed && !result.stepped)canvas.dataset.landings=String((Number(canvas.dataset.landings)||0)+1);
+    if(g2Active()){jumpQueued=false;g2Move(dt);}
+    else{
+      const result=stepPlayer(world,player,{strafe,forward,jump:jumpQueued},dt);
+      jumpQueued=false;
+      if(result.landed && !result.stepped)
+        canvas.dataset.landings=String((Number(canvas.dataset.landings)||0)+1);
+    }
     const arrowsX=(keys.has('ArrowRight')?1:0)-(keys.has('ArrowLeft')?1:0);
     const arrowsY=(keys.has('ArrowDown')?1:0)-(keys.has('ArrowUp')?1:0);
     if(arrowsX||arrowsY)look(arrowsX*dt*1.9,arrowsY*dt*1.6,1);
@@ -750,10 +925,11 @@ function start(){
     callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),draw
   );
   // Capture is per grip: moving and aiming simultaneously never compete for one pointer.
-  function pointerPad(el,update,release){
+  function pointerPad(el,update,release,g2Zone=null){
     let active=null,lastX=0,lastY=0;
     function stop(){
       if(active===null)return;
+      if(g2Active()&&g2Zone)g2Controls=dispatchG2Control(g2Controls,{type:'pointerup',id:active});
       heldPointers.delete(active);active=null;release();el.classList.remove('engaged');
     }
     el.addEventListener('pointerdown',e=>{
@@ -764,12 +940,22 @@ function start(){
       heldPointers.set(active,stop);
       try{el.setPointerCapture(active);}catch(_){}
       el.classList.add('engaged');update(e,0,0,true);
+      if(g2Active()&&g2Zone){
+        g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone:g2Zone});
+        if(g2Zone==='move')g2Controls=dispatchG2Control(g2Controls,
+          {type:'pointermove',id:active,x:joystick.x,y:joystick.y});
+      }
     });
     el.addEventListener('pointermove',e=>{
       if(active!==e.pointerId)return;
       e.preventDefault();
       const dx=e.clientX-lastX,dy=e.clientY-lastY;
       lastX=e.clientX;lastY=e.clientY;update(e,dx,dy,false);
+      if(g2Active()&&g2Zone){
+        g2Controls=dispatchG2Control(g2Controls,{type:'pointermove',
+          id:active,x:g2Zone==='move'?joystick.x:lookStick.x,
+          y:g2Zone==='move'?joystick.y:lookStick.y});
+      }
     });
     for(const event of ['pointerup','pointercancel']){
       el.addEventListener(event,e=>{if(active===e.pointerId)stop();});
@@ -817,7 +1003,7 @@ function start(){
     joystick.x=touchMovementX(next.x);joystick.y=next.y;
     const travel=Math.max(0,(movementPad.clientWidth-knob.offsetWidth)/2-7);
     knob.style.transform='translate('+Math.round(next.x*travel)+'px,'+Math.round(next.y*travel)+'px)';
-  },()=>{joystick.x=joystick.y=0;knob.style.transform='';});
+  },()=>{joystick.x=joystick.y=0;knob.style.transform='';},'move');
   pointerPad(cameraPad,(e,dx,dy,initial)=>{
     if(!help.hidden)return;
     if(lookMode==='stick'){
@@ -830,7 +1016,7 @@ function start(){
       const d=safePointerDelta(dx,dy);
       look(touchCameraX(d.x),d.y);
     }
-  },()=>{lookStick.x=lookStick.y=0;cameraKnob.style.transform='';});
+  },()=>{lookStick.x=lookStick.y=0;cameraKnob.style.transform='';},'look');
   const precisionButton=document.getElementById('precision');
   let precisionPointer=null,precisionTouchId=null;
   function releasePrecision(e){
@@ -871,6 +1057,7 @@ function start(){
     jumpQueued=false;drag=null;
     precisionButton.classList.remove('held');
     cameraKnob.style.transform='';knob.style.transform='';
+    g2Pause('Touch interrupted; hover safely');
   }
   let drag=null;
   canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&help.hidden&&!exploration.isOpen()&&!document.hidden){drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,button:e.button};canvas.setPointerCapture(e.pointerId);}});
@@ -881,7 +1068,7 @@ function start(){
     look(dx,dy,.006);
     drag.x=e.clientX;drag.y=e.clientY;
   });
-  canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!drag.moved&&help.hidden&&!exploration.isOpen()&&!document.hidden)edit(drag.button===2?'place':'mine');drag=null;}});
+  canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(!g2Active()&&!drag.moved&&help.hidden&&!exploration.isOpen()&&!document.hidden)edit(drag.button===2?'place':'mine');drag=null;}});
   // Interrupted mouse drags must not become delayed mine/place actions.
   canvas.addEventListener('pointercancel',e=>{if(drag?.id===e.pointerId)drag=null;});
   canvas.addEventListener('lostpointercapture',e=>{if(drag?.id===e.pointerId)drag=null;});
@@ -890,10 +1077,17 @@ function start(){
     // Do not steal arrows, space or WASD from accessibility controls and form fields.
     if(!isWorldControlTarget(e.target,e)||!help.hidden||exploration.isOpen()||document.hidden)return;
     if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
-    if(e.code==='Space'&&!e.repeat)jump();
+    if(g2Active()){
+      g2Controls=dispatchG2Control(g2Controls,{type:'key',code:e.code,pressed:true});
+      if(['KeyQ','KeyE','Space'].includes(e.code))e.preventDefault();
+    }else if(e.code==='Space'&&!e.repeat)jump();
     keys.add(e.code);
   });
-  document.addEventListener('keyup',e=>keys.delete(e.code));
+  document.addEventListener('keyup',e=>{
+    keys.delete(e.code);
+    if(g2Active())g2Controls=dispatchG2Control(g2Controls,
+      {type:'key',code:e.code,pressed:false});
+  });
   window.addEventListener('blur',cancelAllPointers);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){
@@ -935,7 +1129,7 @@ function start(){
       if(e.pointerType!=='touch')return;
       e.preventDefault();
       // A queued iOS touch must not edit the world behind settings or on app suspension.
-      if(!help.hidden||exploration.isOpen()||document.hidden||button.disabled)return;
+      if(!help.hidden||exploration.isOpen()||document.hidden||button.disabled||g2Active())return;
       lastTouchAt=performance.now();
       action();
     });
@@ -944,13 +1138,57 @@ function start(){
         e.preventDefault();
         return;
       }
-      if(!help.hidden||exploration.isOpen()||document.hidden||button.disabled){e.preventDefault();return;}
+      if(!help.hidden||exploration.isOpen()||document.hidden||button.disabled||g2Active()){e.preventDefault();return;}
       action();
     });
   }
   bindGameplayAction('jump',jump);
   bindGameplayAction('dig',()=>edit('mine'));
   bindGameplayAction('place',()=>edit('place'));
+  // Held flight actions are NEVER generic MINE/PLACE/JUMP actions.
+  // Pointerdown is necessary on iPhone while another thumb holds its pad.
+  function g2BindHold(id,zone){
+    const button=document.getElementById(id);
+    let active=null,lastTouch=-Infinity;
+    const release=e=>{
+      if(active===null||(e&&e.pointerId!==active))return;
+      if(g2Active())g2Controls=dispatchG2Control(g2Controls,{type:'pointerup',id:active});
+      active=null;
+    };
+    button.addEventListener('pointerdown',e=>{
+      if(!g2Active()||!help.hidden||exploration.isOpen()||document.hidden||
+         graphicsLost||button.disabled||active!==null)return;
+      e.preventDefault();active=e.pointerId;
+      lastTouch=performance.now();
+      g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
+      try{button.setPointerCapture(active);}catch(_){}
+      if(zone==='land')g2Land();
+    });
+    for(const type of ['pointerup','pointercancel']){
+      button.addEventListener(type,release);
+      window.addEventListener(type,release,true);
+    }
+    button.addEventListener('lostpointercapture',release);
+    button.addEventListener('click',e=>{
+      if(!g2Active())return;
+      e.preventDefault();
+      if(e.detail!==0&&performance.now()-lastTouch<750)return;
+      // Accessible keyboard activation: a single small UP/DOWN nudge;
+      // keyboard Q/E continue to supply sustained motion.
+      if(zone==='land'){g2Land();return;}
+      if(!g2Ready({x:player.x,y:player.feet,z:player.z}))return;
+      const action=zone==='up'?1:-1;
+      try{
+        const r=planG2FlightStep(g2Flight,{dt:.05,vertical:action,
+          yaw:player.yaw,pitch:player.pitch},g2Host());
+        if(!r.state.blocked&&g2Ready(r.state.position)&&g2Clear(r.state.position)){
+          g2Flight=r.state;player.feet=r.state.position.y;
+          player.onGround=false;player.vX=player.vY=player.vZ=0;
+        }
+      }catch(_){g2Pause('Keyboard flight nudge refused safely');}
+    });
+  }
+  g2BindHold('dig','down');g2BindHold('place','up');g2BindHold('jump','land');
   const pack5Enabled=document.getElementById('pack5Enabled'),
     pack5Family=document.getElementById('pack5Family'),
     pack5Variant=document.getElementById('pack5Variant'),
@@ -1426,7 +1664,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
+    g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
     clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
@@ -1544,7 +1782,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();changed=false;respawnPrototype();
+    g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();changed=false;respawnPrototype();
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
     message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
@@ -1565,7 +1803,7 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();
+      g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();
       storageReadOnly=false;changed=false;respawnPrototype();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
@@ -1621,7 +1859,7 @@ function start(){
       if(!outcome.ok)throw Error(outcome.reason);
       const overlay=savePack2LiveWorld(localStorage,candidate);
       if(!overlay.ok)throw Error('Pack 2 sidecar not written; previous verified data retained: '+overlay.reason);
-      world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
+      g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
@@ -1808,6 +2046,14 @@ function start(){
         }
         return {...result,scene:pack5Gpu.stats(),worldSchema:world.save().schema};
       },
+      flightInfo(){return {active:g2Active(),profile:g2Active()?g2Flight.profile:'off',
+        position:{x:player.x,y:player.feet,z:player.z},
+        blocked:Boolean(g2Flight?.blocked),reason:g2Flight?.reason||'off',
+        token:g2Token(),pendingPlans:g2Flight?.prefetch.pending.length||0,
+        minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y+1,
+        bodyClear:g2Clear({x:player.x,y:player.feet,z:player.z}),
+        resident:g2Ready({x:player.x,y:player.feet,z:player.z}),
+        residentChunks:chunks.size};},
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
         frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats(),
