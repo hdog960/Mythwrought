@@ -47,7 +47,7 @@ test('G2B the physical body is sampled at both height and horizontal chunk bound
  assert.ok(main.includes('p.y+BODY_HEIGHT-e'));
  assert.ok(main.includes('p.x-BODY_RADIUS+e'));
  assert.ok(main.includes('p.z+BODY_RADIUS-e'));
- assert.ok(main.includes('resident.section!==section'));
+ assert.ok(main.includes('c.section!==section'));
 });
 test('G2B flight refuses unknown physical data rather than assuming empty',()=>{
  assert.ok(main.includes('!collides(world,p.x,p.y,p.z)'));

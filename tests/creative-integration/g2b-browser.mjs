@@ -64,12 +64,22 @@ try{
    assert.equal(await page.locator('#place').textContent(),'UP');
    assert.equal(await page.locator('#jump').textContent(),'LAND');
    const before=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
-   await page.keyboard.down('w');await page.waitForTimeout(340);await page.keyboard.up('w');
-   await page.waitForTimeout(120);
-   const after=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
-   const moved=Math.hypot(after.position.x-before.position.x,
-     after.position.z-before.position.z);
-   assert.ok(moved>.025,'Source-driven flight did not move through resident world '+width);
+   // Focus the real world, then wait for actual simulated movement instead of
+   // assuming SwiftShader renders a deterministic number of frames in 340ms.
+   await page.locator('#scene').focus();
+   await page.keyboard.down('w');
+   let after=before,moved=0;
+   try{
+     for(let sample=0;sample<20;sample++){
+       await page.waitForTimeout(200);
+       after=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+       moved=Math.hypot(after.position.x-before.position.x,
+         after.position.z-before.position.z);
+       if(moved>.025)break;
+     }
+   }finally{await page.keyboard.up('w');}
+   assert.ok(moved>.025,'Source-driven flight did not move through resident world '+
+     width+' · '+JSON.stringify({before,after,moved}));
    assert.equal(after.bodyClear,true,'Flight entered a real physical collision');
    assert.equal(after.resident,true,'Flight outran GPU-resident chunks');
    // Genuine independent three-touch CDP input: MOVE + LOOK + UP held together.
