@@ -26,7 +26,7 @@ test('M2b nine new original plans maintain 164/435 census, 15 inherited source-e
  }
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(category=>[
   category,all.filter(b=>b.category===category).length
- ])),{'bathhouse':23,stable:28,'farm-barn':22,greenhouse:23,'fishing-lodge':21,'harbor-office':20,lighthouse:21});
+ ])),{bathhouse:24,stable:28,'farm-barn':23,greenhouse:24,'fishing-lodge':22,'harbor-office':21,lighthouse:22});
  for(const category of Object.keys(QUOTAS))for(const biome of BIOMES)for(const size of SIZES){
   assert.ok(all.filter(b=>b.category===category&&b.biome===biome&&b.size===size).length<=QUOTAS[category]);
  }
