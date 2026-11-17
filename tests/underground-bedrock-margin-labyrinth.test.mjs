@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {BLOCK,createWorld,worldKey} from '../src/voxel.mjs';
+import {BLOCK,VoxelWorld,worldKey} from '../src/voxel.mjs';
 import {descentRoute,descentWorld,descentCells,DESCENT_ORIGIN} from '../src/underground-switchback-descent.mjs';
 
 function point(d,t,anchor){
@@ -11,7 +11,7 @@ function point(d,t,anchor){
 }
 for(const seed of [179,1,2026,-77]){
   test('deepest margin labyrinth physical paths seed '+seed,()=>{
-    const world=createWorld(seed),reader=descentWorld(world);
+    const world=new VoxelWorld(seed),reader=descentWorld(world);
     const anchor=descentRoute().find(p=>p.floor===-200);
     assert.ok(anchor,'route must reach -200');
     for(const [d,t] of [[0,0],[8,0],[16,0],[25,8],[25,-8],
