@@ -32,6 +32,23 @@ export function createLeasedLegacyEditor(session, scope = session) {
         });
       });
       return withVoxelCellLease(scope, snapshot.map(r => r.cell), async () => {
+        // Validate against authoritative state before expensive preparation. A
+        // second preflight inside editMany still guards writes after suspension.
+        // This early check must not mutate orientation or any legacy save data.
+        const seen = new Set();
+        for (const r of snapshot) {
+          const key = r.cell.join(',');
+          if (seen.has(key)) throw new TypeError('Duplicate edit cell');
+          seen.add(key);
+          if (![r.expectedId, r.nextId].every(id =>
+              Number.isSafeInteger(id) && id >= 0 && id < 255) ||
+              !Number.isSafeInteger(r.expectedRevision) || r.expectedRevision < 0)
+            throw new TypeError('Invalid edit receipt');
+          const current = session.read(r.cell);
+          if (!current || current.id !== r.expectedId ||
+              current.revision !== r.expectedRevision ||
+              current.revision === Number.MAX_SAFE_INTEGER) return false;
+        }
         // Cancellation is checked both before and after asynchronous preparation.
         // A late callback resolution must never commit after cancellation.
         if (signal?.aborted) throw new DOMException('Voxel edit aborted', 'AbortError');
