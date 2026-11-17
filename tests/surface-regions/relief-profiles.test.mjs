@@ -45,3 +45,29 @@ test('region shoulders transition to unchanged legacy terrain without chunk-rela
   }
  }
 });
+
+test('enchanted glades form reproducible terrain relief without modifying legacy surroundings',()=>{
+ for(const seed of [179,7,2201]){
+  const region=SURFACE_BIOME_REGIONS.find(r=>r.name==='enchanted');
+  const heights=[];
+  for(let dz=-56;dz<=56;dz+=4)for(let dx=-56;dx<=56;dx+=4){
+   const x=region.x+dx,z=region.z+dz;
+   assert.equal(surfaceBiomeAt(x,z,seed)?.name,'enchanted');
+   const h=surfaceBiomeHeight(x,z,seed);
+   assert.ok(Number.isInteger(h)&&h>=2&&h<=WORLD_MAX_Y-3);
+   assert.equal(h,surfaceBiomeHeight(x,z,seed));
+   heights.push(h);
+  }
+  assert.ok(Math.max(...heights)-Math.min(...heights)>=2,
+   'enchanted glades must have physical relief, not just recolored ground');
+  let outside=0;
+  for(let dx=180;dx<=240;dx+=4){
+   const x=region.x+dx,z=region.z;
+   if(surfaceBiomeAt(x,z,seed)===null){
+    assert.equal(surfaceBiomeHeight(x,z,seed),terrainHeight(x,z,seed));
+    outside++;
+   }
+  }
+  assert.ok(outside>0,'glade terrain must end at unchanged legacy terrain');
+ }
+});
