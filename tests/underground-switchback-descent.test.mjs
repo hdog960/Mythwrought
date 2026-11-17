@@ -186,7 +186,7 @@ test('two intermediate vaults remain connected to the four-band physical descent
       assert.ok(p,'missing intermediate anchor '+spec.depth);
       const lx=p.x-192,lz=p.z-192;
       const outward=lz===0?[0,-1]:lz===28?[0,1]:lx===0?[-1,0]:[1,0];
-      for(let d=0;d<=spec.reach;d++){
+      for(let d=0;d<=(spec.depth===-150?11:spec.reach);d++){
         const x=p.x+outward[0]*d,z=p.z+outward[1]*d;
         assert.equal(reader.get(x,spec.depth,z),BLOCK.DEEPSTONE,
           'missing connected vault floor '+spec.depth+'/'+d);
@@ -194,6 +194,10 @@ test('two intermediate vaults remain connected to the four-band physical descent
           'blocked connected vault throat '+spec.depth+'/'+d+'/'+h);
       }
     }
+    // The newer -150 ribbed fault canyon branches at d=12 and descends
+    // to three lower shelves. Its dedicated regression checks both physical
+    // arms and the terminal basin; the original level -150 throat remains
+    // continuous only until that fork, not across the lower shelves.
     assert.equal(descentConnectivity(world).connected,true);
   }
 });
