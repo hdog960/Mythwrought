@@ -1,6 +1,12 @@
 // Opt-in host-scoped cell lease for independent orientation/edit adapters.
 // A host must use the SAME scope for every writer to these cells. This is not
 // a substitute for atomic compare-and-swap against uncooperative writers.
+export class VoxelCellLeaseConflictError extends Error {
+  constructor() {
+    super('Voxel cell lease conflict');
+    this.name = 'VoxelCellLeaseConflictError';
+  }
+}
 const scopes = new WeakMap();
 const keyOf = cell => {
   if (!Array.isArray(cell) || cell.length !== 3 || !cell.every(Number.isSafeInteger))
@@ -16,7 +22,7 @@ export async function withVoxelCellLease(scope, cells, work) {
   if (new Set(keys).size !== keys.length) throw new TypeError('Duplicate lease cell');
   let held = scopes.get(scope);
   if (!held) { held = new Set(); scopes.set(scope, held); }
-  if (keys.some(key => held.has(key))) throw new Error('Voxel cell lease conflict');
+  if (keys.some(key => held.has(key))) throw new VoxelCellLeaseConflictError();
   keys.forEach(key => held.add(key));
   try { return await work(); }
   finally {
