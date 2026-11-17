@@ -153,14 +153,17 @@ function start(){
     if(hint)hint.textContent='Off after world change. Enable again for this seed’s separate sidecar.';
   }
   // G2B only: explicit-session feature, no persistent settings, edits or new GPU queue.
-  let g2Epoch=0,g2Flight=null,g2Controls=createG2ControlState();
+  let g2Epoch=0,g2CreativeEnabled=false,g2Flight=null,g2Controls=createG2ControlState();
   const g2Toggle=document.getElementById('g2bFlightEnable');
   const g2Profile=document.getElementById('g2bFlightProfile');
   const g2Status=document.getElementById('g2bFlightStatus');
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
-  const g2Section=y=>y>WORLD_MAX_Y&&y<=WORLD_MAX_Y+BODY_HEIGHT+1?0:sectionForY(y);
+  // Air above the authored top voxel is still rendered by the existing
+  // surface section (0); no new blocks, meshes, sections, or save data.
+  const G2_FLIGHT_MAX_FEET=WORLD_MAX_Y+48;
+  const g2Section=y=>y>WORLD_MAX_Y&&y<=G2_FLIGHT_MAX_FEET+BODY_HEIGHT+1?0:sectionForY(y);
   function g2MeshKey(key){
     const parts=key.split(',').map(Number);
     if(parts.length!==3||!parts.every(Number.isSafeInteger)||parts[2]>0)return null;
@@ -168,7 +171,7 @@ function start(){
   }
   function g2Ready(p){
     if(!p||!['x','y','z'].every(k=>Number.isFinite(p[k]))||
-       p.y<WORLD_MIN_Y||p.y>WORLD_MAX_Y+1||graphicsLost)return false;
+       p.y<WORLD_MIN_Y||p.y>G2_FLIGHT_MAX_FEET||graphicsLost)return false;
     const e=1e-5;
     for(const y of [p.y+e,p.y+BODY_HEIGHT-e]){
       const section=g2Section(y);
@@ -191,15 +194,16 @@ function start(){
   function g2Sync(){
     const on=g2Active();
     document.body.classList.toggle('g2b-flight-active',on);
-    g2Toggle.checked=on;g2Profile.disabled=!on;
+    g2Toggle.checked=g2CreativeEnabled;g2Profile.disabled=!g2CreativeEnabled;
     for(const [id,label,aria] of [
       ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
       ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
-      ['jump',on?'LAND':'JUMP',on?'Request safe landing':'Jump']]){
+      ['jump',on?'LAND ×2':'JUMP',on?'Double-tap for safe landing':'Jump; double-tap to toggle Creative flight']]){
       const el=document.getElementById(id);el.textContent=label;el.setAttribute('aria-label',aria);
     }
-    g2Status.textContent=on?'FLIGHT · '+g2Flight.profile+' · '+g2Flight.reason:
-      'Flight OFF · normal Explore controls';
+    g2Status.textContent=on?'CREATIVE FLIGHT · '+g2Flight.profile+' · '+g2Flight.reason:
+      (g2CreativeEnabled?'CREATIVE ON · double-tap JUMP to fly · ground controls active':
+      'CREATIVE OFF · normal Explore controls');
     canvas.dataset.g2bFlight=String(on);
     canvas.dataset.g2bProfile=on?g2Flight.profile:'off';
   }
@@ -211,26 +215,28 @@ function start(){
   }
   function g2NewWorld(){
     // The original world-change code immediately installs a safe newPlayer.
-    g2Flight=null;g2Controls=createG2ControlState();g2Epoch++;g2Sync();
+    g2CreativeEnabled=false;g2Flight=null;g2Controls=createG2ControlState();g2Epoch++;g2Sync();
   }
   function g2Start(){
+    if(!g2CreativeEnabled)return false;
     if(g2Active())return true;
     const at={x:player.x,y:player.feet,z:player.z};
     if(document.hidden||graphicsLost||exploration.isOpen()||
        !g2Ready(at)||!g2Clear(at)){
-      g2Status.textContent='Flight unavailable: body/region not ready';return false;
+      g2Status.textContent='Flight unavailable: body/region not ready';
+      message('Flight unavailable: stand in a loaded, clear area and double-tap JUMP again');return false;
     }
     try{
       const initial=createG2FlightState({position:at,worldToken:g2Token(),
-        heightBounds:{minFeet:WORLD_MIN_Y,maxFeet:WORLD_MAX_Y+1}});
+        heightBounds:{minFeet:WORLD_MIN_Y,maxFeet:G2_FLIGHT_MAX_FEET}});
       const active=armG2Flight(initial,{enabled:true,isRegionReady:g2Ready,isBodyClear:g2Clear});
-      if(active.mode!=='flight'){g2Status.textContent=active.reason;return false;}
+      if(active.mode!=='flight'){g2Status.textContent=active.reason;message(active.reason);return false;}
       g2Flight=selectG2FlightProfile(active,g2Profile.value);
       g2Controls=enterG2ControlOwnership(createG2ControlState(),
         {featureEnabled:true,flightReady:true});
       player.vX=player.vY=player.vZ=0;player.onGround=false;player.coyote=0;
       player.jumpBuffer=0;jumpQueued=false;g2Sync();return true;
-    }catch(e){g2Status.textContent='Flight refused: '+e.message;return false;}
+    }catch(e){g2Status.textContent='Flight refused: '+e.message;message(g2Status.textContent);return false;}
   }
   function g2LandingHost(){
     const host=g2Host();
@@ -313,10 +319,17 @@ function start(){
       g2Status.textContent=g2Flight.reason;
     }catch(e){g2Pause('Flight failed safely: '+e.message);}
   }
-  g2Toggle.checked=false;g2Profile.value='normal';g2Sync();
+  g2CreativeEnabled=false;g2Toggle.checked=false;g2Profile.value='normal';g2Sync();
+  // Creative enablement is separate from flying: enabling never lifts the player.
+  // A failed physical landing cannot silently turn Creative off midair.
   g2Toggle.addEventListener('change',()=>{
-    if(g2Toggle.checked){g2Start();g2Sync();}
-    else if(!g2Land())g2Sync();
+    if(g2Toggle.checked)g2CreativeEnabled=true;
+    else if(g2Active()&&!g2Land()){
+      g2CreativeEnabled=true;
+      message('Creative remains enabled: land safely before switching off');
+    }else g2CreativeEnabled=false;
+    lastG2JumpReleaseAt=-Infinity;
+    g2Sync();
   });
   g2Profile.addEventListener('change',()=>{
     if(!g2Active())return;
@@ -1141,23 +1154,27 @@ function start(){
       e.preventDefault();
       // A flight-mode tap may switch to Explore before Safari emits click.
       if(g2Active()){
-        lastTouchAt=performance.now();
+        lastTouchAt=e.timeStamp;
         g2ConsumedClicks.set(id,lastTouchAt);
         return;
       }
       // A queued iOS touch must not edit the world behind settings or on app suspension.
       if(!help.hidden||exploration.isOpen()||document.hidden||button.disabled)return;
-      lastTouchAt=performance.now();
+      lastTouchAt=e.timeStamp;
       action();
     });
     button.addEventListener('click',e=>{
       const consumed=g2ConsumedClicks.get(id);
-      if(consumed!==undefined&&performance.now()-consumed<850){
+      if(consumed!==undefined&&(e.pointerType==='touch'||
+         e.sourceCapabilities?.firesTouchEvents===true||
+         (e.timeStamp-consumed>=0&&e.timeStamp-consumed<1500))){
         g2ConsumedClicks.delete(id);
         e.preventDefault();return;
       }
       g2ConsumedClicks.delete(id);
-      if(e.detail!==0&&performance.now()-lastTouchAt<750){
+      if(lastTouchAt!==-Infinity&&(e.pointerType==='touch'||
+         e.sourceCapabilities?.firesTouchEvents===true||
+         (e.timeStamp-lastTouchAt>=0&&e.timeStamp-lastTouchAt<1500))){
         e.preventDefault();
         return;
       }
@@ -1165,7 +1182,67 @@ function start(){
       action();
     });
   }
-  bindGameplayAction('jump',jump);
+  // Single tap preserves normal JUMP; double-tap toggles Creative Flight.
+  // iPhone touch uses pointerdown because another thumb may suppress click.
+  const G2_JUMP_DOUBLE_TAP_MS=650;
+  let lastG2JumpReleaseAt=-Infinity;
+  function g2JumpTap(now=performance.now()){
+    // Measure between the previous finger RELEASE and the new PRESS.
+    // Under a busy mobile GPU one touch can be held/processed for >500ms;
+    // press-to-press timing incorrectly treats a genuine double tap as two singles.
+    const gap=now-lastG2JumpReleaseAt;
+    if(g2CreativeEnabled&&gap>=0&&gap<=G2_JUMP_DOUBLE_TAP_MS){
+      lastG2JumpReleaseAt=-Infinity;
+      if(g2Active())g2Land();else g2Start();
+      return true;
+    }
+    if(!g2Active())jump();
+    return false;
+  }
+  function g2BindJumpToggle(){
+    const button=document.getElementById('jump');
+    let lastTouchAt=-Infinity,activeTouch=null,doubleForTouch=false;
+    button.addEventListener('pointerdown',e=>{
+      if(e.pointerType!=='touch')return;
+      e.preventDefault();
+      if(activeTouch!==null||!help.hidden||exploration.isOpen()||
+         document.hidden||graphicsLost||button.disabled)return;
+      activeTouch=e.pointerId;
+      lastTouchAt=e.timeStamp;
+      doubleForTouch=g2JumpTap(e.timeStamp);
+    });
+    const finishTouch=e=>{
+      if(activeTouch===null||e.pointerId!==activeTouch)return;
+      // A completed second tap is consumed: its release cannot become the
+      // first half of an accidental third toggle.
+      if(e.type==='pointerup'&&!doubleForTouch)
+        lastG2JumpReleaseAt=e.timeStamp;
+      if(e.type!=='pointerup')lastG2JumpReleaseAt=-Infinity;
+      activeTouch=null;doubleForTouch=false;
+    };
+    for(const kind of ['pointerup','pointercancel']){
+      button.addEventListener(kind,finishTouch);
+      window.addEventListener(kind,finishTouch,true);
+    }
+    window.addEventListener('blur',()=>{
+      activeTouch=null;doubleForTouch=false;lastG2JumpReleaseAt=-Infinity;
+    });
+    button.addEventListener('click',e=>{
+      // Touch click may arrive many frames late with detail=0; never count twice.
+      const since=e.timeStamp-lastTouchAt;
+      if(lastTouchAt!==-Infinity&&(e.pointerType==='touch'||
+          e.sourceCapabilities?.firesTouchEvents===true||(since>=0&&since<1500))){
+        e.preventDefault();return;
+      }
+      if(!help.hidden||exploration.isOpen()||document.hidden||
+         graphicsLost||button.disabled){e.preventDefault();return;}
+      const doubled=g2JumpTap(e.timeStamp);
+      // Non-touch clicks have no touch pointerup; their activation is the
+      // completed tap for mouse/keyboard accessibility.
+      if(!doubled)lastG2JumpReleaseAt=e.timeStamp;
+    });
+  }
+  g2BindJumpToggle();
   bindGameplayAction('dig',()=>edit('mine'));
   bindGameplayAction('place',()=>edit('place'));
   // Held flight actions are NEVER generic MINE/PLACE/JUMP actions.
@@ -1182,11 +1259,14 @@ function start(){
       if(!g2Active()||!help.hidden||exploration.isOpen()||document.hidden||
          graphicsLost||button.disabled||active!==null)return;
       e.preventDefault();active=e.pointerId;
-      lastTouch=performance.now();g2ConsumedClicks.set(id,lastTouch);
+      lastTouch=e.timeStamp;g2ConsumedClicks.set(id,lastTouch);
       g2ResumeControls();
       g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
       try{button.setPointerCapture(active);}catch(_){}
-      if(zone==='land')g2Land();
+      // A quick tap may start/end between frames. One immediate bounded,
+      // physically checked step guarantees an UP/DOWN response on iPhone.
+      // Keeping the pointer owned continues movement while held.
+      if(zone==='up'||zone==='down')g2Move(.05);
     });
     for(const type of ['pointerup','pointercancel']){
       button.addEventListener(type,release);
@@ -1196,10 +1276,11 @@ function start(){
     button.addEventListener('click',e=>{
       if(!g2Active())return;
       e.preventDefault();
-      if(e.detail!==0&&performance.now()-lastTouch<750)return;
+      if(lastTouch!==-Infinity&&(e.pointerType==='touch'||
+          e.sourceCapabilities?.firesTouchEvents===true||
+          (e.timeStamp-lastTouch>=0&&e.timeStamp-lastTouch<1500)))return;
       // Accessible keyboard activation: a single small UP/DOWN nudge;
       // keyboard Q/E continue to supply sustained motion.
-      if(zone==='land'){g2Land();return;}
       if(!g2Ready({x:player.x,y:player.feet,z:player.z}))return;
       const action=zone==='up'?1:-1;
       try{
@@ -1212,7 +1293,7 @@ function start(){
       }catch(_){g2Pause('Keyboard flight nudge refused safely');}
     });
   }
-  g2BindHold('dig','down');g2BindHold('place','up');g2BindHold('jump','land');
+  g2BindHold('dig','down');g2BindHold('place','up');
   const pack5Enabled=document.getElementById('pack5Enabled'),
     pack5Family=document.getElementById('pack5Family'),
     pack5Variant=document.getElementById('pack5Variant'),
@@ -2070,13 +2151,13 @@ function start(){
         }
         return {...result,scene:pack5Gpu.stats(),worldSchema:world.save().schema};
       },
-      flightInfo(){return {active:g2Active(),profile:g2Active()?g2Flight.profile:'off',
+      flightInfo(){return {creativeEnabled:g2CreativeEnabled,active:g2Active(),profile:g2Active()?g2Flight.profile:'off',
         position:{x:player.x,y:player.feet,z:player.z},
         blocked:Boolean(g2Flight?.blocked),reason:g2Flight?.reason||'off',
         controlsPaused:g2Controls.paused,
         heldKeys:[...g2Controls.controls.keys],
         token:g2Token(),pendingPlans:g2Flight?.prefetch.pending.length||0,
-        minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y+1,
+        minY:WORLD_MIN_Y,maxY:G2_FLIGHT_MAX_FEET,
         bodyClear:g2Clear({x:player.x,y:player.feet,z:player.z}),
         resident:g2Ready({x:player.x,y:player.feet,z:player.z}),
         residentChunks:chunks.size};},

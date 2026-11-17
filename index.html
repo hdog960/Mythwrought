@@ -23,9 +23,9 @@
 </main>
 <div id="explorationOverlay" hidden role="dialog" aria-modal="true" aria-label="Exploration map"><div class="exploration-panel"><header class="exploration-heading"><strong>✦ THE DISCOVERED WORLD</strong><button type="button" id="closeExploration" aria-label="Close exploration map">✕ CLOSE</button></header><p id="explorationCoordinates" class="map-coordinates">Your position</p><canvas id="expandedMap" width="320" height="320" aria-label="Map of visited locations, drag to pan"></canvas><p id="explorationSummary" class="map-summary" role="status">Unexplored regions remain hidden.</p><nav class="map-controls" aria-label="Map controls"><button type="button" id="mapZoomOut">− ZOOM</button><button type="button" id="mapRecenter">◎ RECENTER</button><button type="button" id="mapZoomIn">+ ZOOM</button></nav></div></div>
 <div id="help" hidden><div class="helpbody"><h1>MYTHWROUGHT</h1><p><b>Engineering prototype:</b> Move with the left pad, look with the right pad, and MINE/PLACE the block in the center of your view. JUMP from the right grip; hold AIM on the left grip for finer looking.</p><section class="looksetting g2b-flight-settings" aria-label="Creative flight settings">
-<h2 class="audit-title">CREATIVE FLIGHT · G2B</h2>
-<p class="controlhint">Optional exploration flight, OFF by default. No inventory or building integration. Move and look with your thumb rails. In flight, hold UP or DOWN on the right, then LAND to return safely to Explore.</p>
-<label class="g2b-flight-toggle"><input type="checkbox" id="g2bFlightEnable" aria-label="Enable Creative flight for this session"> ENABLE FLIGHT FOR THIS SESSION</label>
+<h2 class="audit-title">CREATIVE MODE · FLIGHT CONTROLS</h2>
+<p class="controlhint">Enable Creative Mode, then RETURN to the world. Double-tap JUMP to start flying. Tap or hold UP to rise and DOWN to descend; double-tap LAND to land safely. Creative stays enabled until you turn it off. Normal JUMP works before flight. Off each new session. Creative inventory and unlimited blocks are still in development.</p>
+<label class="g2b-flight-toggle"><input type="checkbox" id="g2bFlightEnable" aria-label="Enable Creative Mode flight controls for this session"> ENABLE CREATIVE MODE (FLIGHT CONTROLS)</label>
 <label for="g2bFlightProfile">Flight speed profile</label>
 <select id="g2bFlightProfile" aria-label="Flight speed profile" disabled>
 <option value="precision">PRECISION · 1.4</option><option value="normal" selected>NORMAL · 4</option>
