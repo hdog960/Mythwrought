@@ -230,10 +230,10 @@ test('ledger is 79/420, 15 inherited exact temples + 64 unique originals, no app
  const j=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([j.target,j.sourceExactInheritedTemples,j.originalNewModels,j.authoredCandidates,
   j.remainingUnauthored,j.creatorAccepted,j.integratedInGame,j.placedInWorld],
-  [420,15,100,115,305,0,0,0]);
- assert.equal(j.originals.length,100);
+  [420,15,106,121,299,0,0,0]);
+ assert.equal(j.originals.length,106);
  const allCurrent=new Set(j.originals.map(x=>x.id));
  for(const b of all.filter(b=>b.category!=='temple'||b.variation!==1))assert(allCurrent.has(b.id),'previous candidate identity lost');
- assert.equal(Object.values(j.byCategory).reduce((n,x)=>n+x.authored,0),115);
- assert.equal(Object.values(j.byCategory).reduce((n,x)=>n+x.remaining,0),305);
+ assert.equal(Object.values(j.byCategory).reduce((n,x)=>n+x.authored,0),121);
+ assert.equal(Object.values(j.byCategory).reduce((n,x)=>n+x.remaining,0),299);
 });
