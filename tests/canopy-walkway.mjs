@@ -97,8 +97,13 @@ const {candidate:longPlan}=longSite;
 const longOccupancy=new Map(longPlan.cells.map(([x,cy,z,id])=>[[x,cy,z].join(','),id]));
 const outerTips=longPlan.cells.filter(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&Math.abs(z-longSite.aa[1])===2);
 assert.equal(outerTips.length,1,'one asymmetric taper tip rather than mirrored prongs or a fence');
-const spanVariant=(aa,bb)=>(Math.imul(aa[0],73856093)^Math.imul(aa[1],19349663)^
- Math.imul(bb[0],83492791)^Math.imul(bb[1],1640531513)^seed)>>>0;
+const spanVariant=(aa,bb)=>{
+ let h=(Math.imul(aa[0],73856093)^Math.imul(aa[1],19349663)^
+  Math.imul(bb[0],83492791)^Math.imul(bb[1],1640531513)^seed)>>>0;
+ h^=h>>>16;h=Math.imul(h,0x7feb352d)>>>0;
+ h^=h>>>15;h=Math.imul(h,0x846ca68b)>>>0;
+ return (h^(h>>>16))>>>0;
+};
 assert.equal(outerTips[0][0]-longSite.aa[0],(spanVariant(longSite.aa,longSite.bb)&1)===0?2:5,
  'seed chooses which end has the longer branch');
 // Different physical sites in one world should not all inherit the same
