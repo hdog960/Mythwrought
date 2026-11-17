@@ -6,9 +6,9 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 106,
-  "authoredCandidates": 121,
-  "remainingUnauthored": 299,
+  "originalNewModels": 111,
+  "authoredCandidates": 126,
+  "remainingUnauthored": 294,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
@@ -19,19 +19,19 @@
       "remaining": 42
     },
     "tailor": {
-      "authored": 14,
+      "authored": 16,
       "target": 60,
-      "remaining": 46
+      "remaining": 44
     },
     "butcher": {
-      "authored": 15,
+      "authored": 17,
       "target": 60,
-      "remaining": 45
+      "remaining": 43
     },
     "jeweler": {
-      "authored": 15,
+      "authored": 16,
       "target": 60,
-      "remaining": 45
+      "remaining": 44
     },
     "bookshop": {
       "authored": 16,
@@ -579,6 +579,31 @@
       "id": "r2:theater:temperate:medium:02",
       "file": "src/building-pool/roadmap-2b/m1-rime-and-river.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:mountain:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-forms.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-forms.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:mountain:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-forms.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-crossbar-switchback.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:mountain:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-crossbar-switchback.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
@@ -598,14 +623,14 @@
       "large": 7
     },
     "enchanted-forest": {
-      "small": 6,
+      "small": 8,
       "medium": 7,
       "large": 10
     },
     "mountain": {
       "small": 8,
-      "medium": 9,
-      "large": 6
+      "medium": 10,
+      "large": 8
     }
   },
   "productionRegistryUnchanged": true,
