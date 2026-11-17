@@ -15,7 +15,7 @@ const read=(cells,d,t,y)=>cells.get(worldKey(...pos(d,t,y)));
 for(const seed of [179,1,2026,-77]){
   test('folded-fault amphitheater supports both routes and destination seed '+seed,()=>{
     const cells=descentCells(origin);
-    for(const [d,t] of [[8,0],[14,0],[24,-9],[24,9],[34,-13],[34,13],[54,0],[63,3],[70,3],[35,-17]]){
+    for(const [d,t] of [[8,0],[14,0],[24,-9],[24,9],[34,-13],[34,13],[54,0],[63,3],[70,3],[35,-32]]){
       assert.equal(read(cells,d,t,-190),BLOCK.DEEPSTONE,'floor at '+d+','+t);
       for(let h=1;h<=4;h++)
         assert.equal(read(cells,d,t,-190+h),BLOCK.AIR,'headroom '+d+','+t+','+h);
