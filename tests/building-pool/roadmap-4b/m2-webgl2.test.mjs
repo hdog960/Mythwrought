@@ -193,6 +193,9 @@ test('five 4B-owned blueprints × exterior/section × three real Chromium landsc
           assert.equal(evidence.glError,0);
           assert.equal(evidence.contextLost,false);
           assert.equal(evidence.notPhysical,true);
+          assert.equal(evidence.projectionWithinFrame,true,'actual source roof or wing cropped in Chromium WebGL2 viewport');
+          assert.ok(evidence.cameraFit.horizontalNdc>0&&evidence.cameraFit.horizontalNdc<0.86);
+          assert.ok(evidence.cameraFit.verticalNdc>0&&evidence.cameraFit.verticalNdc<0.86);
           assert.equal(evidence.drawCalls,1);
           assert.ok(evidence.triangles>300);
           assert.ok(evidence.cells>100);

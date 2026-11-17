@@ -88,3 +88,27 @@ test('1075 normalized eight-way floor comparisons reject all near-duplicate orig
  assert.equal(compared,1075);assert.ok(worst<0.89);
  assert.equal(new Set(M2_113_ALL.map(geometrySignature)).size,113);
 });
+
+test('six corrected original internal portals have physically adjacent partitions, two-high clear apertures and source-backed lintels',()=>{
+ const expected=new Map([
+  ['Willowcross Estuary Recovery House',[23,2,19]],
+  ['Red Sirocco Travellers Clinic',[17,2,17]],
+  ['Hoarfrost Compass Ward',[28,2,21]],
+  ['Iceshelf Zigzag Codex Hall',[22,2,19]],
+  ['Mossstar Three-Grove Hospice',[18,2,16]],
+  ['Glowring Hollow Reading Atrium',[16,2,9]]
+ ]);
+ for(const b of M2_VARIANT04_SECOND10){
+  if(!expected.has(b.provenance.originalPlan))continue;
+  const portal=b.openings.filter(o=>o.kind==='door');
+  assert.equal(portal.length,1,'only source-specific original internal doorway: '+b.id);
+  assert.deepEqual(portal[0].at,expected.get(b.provenance.originalPlan));
+  const [x,y,z]=portal[0].at,vox=new Map(b.cells.map(c=>[k(c.at),c]));
+  assert.ok(!vox.has(k([x,y,z]))&&!vox.has(k([x,y+1,z])));
+  assert.equal(vox.get(k([x,4,z]))?.role,'beam','physical lintel must carry room divider');
+  const walls=[[[x-1,y,z],[x+1,y,z]],[[x,y,z-1],[x,y,z+1]]];
+  assert.ok(walls.some(pair=>pair.every(at=>vox.get(k(at))?.role==='partition')),'internal door must be cut through actual two-sided original divider');
+  assert.ok(b.navigation.some(n=>k(n.at)===k([x,y,z])));
+ }
+ assert.equal(expected.size,6);
+});

@@ -92,7 +92,7 @@ const PLANS=Object.freeze([
         23,
         15,
         22,
-        25
+        19
       ]
     ],
     "peak": [
@@ -271,8 +271,8 @@ const PLANS=Object.freeze([
         "x",
         17,
         16,
-        17,
-        19
+        20,
+        17
       ]
     ],
     "peak": [
@@ -483,7 +483,7 @@ const PLANS=Object.freeze([
         28,
         18,
         24,
-        27
+        21
       ]
     ],
     "peak": [
@@ -588,7 +588,7 @@ const PLANS=Object.freeze([
         22,
         16,
         22,
-        25
+        19
       ]
     ],
     "peak": [
@@ -678,7 +678,7 @@ const PLANS=Object.freeze([
         18,
         15,
         17,
-        19
+        16
       ]
     ],
     "peak": [
@@ -760,11 +760,11 @@ const PLANS=Object.freeze([
     ],
     "div": [
       [
-        "x",
+        "z",
+        9,
         12,
-        13,
-        18,
-        21
+        20,
+        16
       ]
     ],
     "peak": [

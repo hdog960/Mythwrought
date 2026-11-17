@@ -85,7 +85,9 @@ const project=([x,y,z])=>{
 for(const p of all){const [u,v,d]=project(p);uMin=Math.min(uMin,u);uMax=Math.max(uMax,u);
  vMin=Math.min(vMin,v);vMax=Math.max(vMax,v);dMin=Math.min(dMin,d);dMax=Math.max(dMax,d);}
 const rx=Math.max(.1,uMax-uMin),ry=Math.max(.1,vMax-vMin),rd=Math.max(.1,dMax-dMin);
-const s=Math.min(1.56/rx,1.56*canvas.width/canvas.height/ry);
+const s=Math.min(1.56/rx,1.56*canvas.height/canvas.width/ry);
+// Both screen axes use original source geometry extents, fitted to the actual landscape aspect ratio.
+const cameraFit={horizontalNdc:rx*s/2,verticalNdc:ry*s*canvas.width/canvas.height/2};
 const data=[];
 for(const {p,color} of world){
  const [u,v,d]=project(p);
@@ -112,7 +114,8 @@ window.__m2Preview={ready:true,renderer:'genuine-webgl2-cube-proxy',type:b.type,
  view,drawCalls:1,triangles:world.length/3,cells:selected.length,
  roomCount:b.spaces.length,width:canvas.width,height:canvas.height,glError:error,
  contextLost:gl.isContextLost(),sourceId:b.id,notPhysical:true,
- cameraDepthConvention:'elevated-camera-near-is-max'};
+ cameraDepthConvention:'elevated-camera-near-is-max',cameraFit,
+ projectionWithinFrame:Math.max(cameraFit.horizontalNdc,cameraFit.verticalNdc)<0.86};
 };
 window.__renderFourBFrame(initialIndex,initialView);
 </script>
