@@ -45,21 +45,32 @@ try{
    assert.equal(await page.locator('#explorationOverlay').isVisible(),true);
    await page.locator('#closeExploration').click();
    assert.equal(await page.locator('#explorationOverlay').isVisible(),false);
-   // Physical iPhone-style touches, no settings checkbox or mouse-click shortcuts.
-   await page.locator('#jump').tap();
+   // Genuine CDP touchstart/touchend makes a precise double-tap even when
+   // software WebGL2 is slow; Playwright locator.tap() can insert long layout
+   // waits *between* taps that are not part of an actual user's double-tap.
+   const jumpTouchSession=await context.newCDPSession(page);
+   const jumpXY=center(await page.locator('#jump').boundingBox());
+   let jumpTouchId=501;
+   async function tapJumpTouch(){
+     const point=touch(jumpTouchId++,jumpXY.x,jumpXY.y);
+     await jumpTouchSession.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[point]});
+     await jumpTouchSession.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+   }
+   await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,false,
-     'One JUMP tap must not enable flight');
-   await page.locator('#jump').tap();
+     'One JUMP touch must not enable flight');
+   await page.waitForTimeout(700); // Reset single-tap window before the next pair.
+   await tapJumpTouch();await tapJumpTouch();
    let info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    assert.equal(info.active,true,'Double-tap JUMP did not enable flight: '+info.reason);
-   await page.locator('#jump').tap();
+   await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,true,
-     'One LAND tap must not end flight');
-   await page.locator('#jump').tap();
+     'One LAND touch must not end flight');
+   await page.waitForTimeout(700);
+   await tapJumpTouch();await tapJumpTouch();
    info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    assert.equal(info.active,false,'Double-tap LAND should restore Explore at spawn: '+info.reason);
-   await page.locator('#jump').tap();
-   await page.locator('#jump').tap();
+   await tapJumpTouch();await tapJumpTouch();
    info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    assert.equal(info.active,true,'Repeat double-tap JUMP did not re-enable flight: '+info.reason);
    await page.locator('#menu').click();
@@ -137,10 +148,11 @@ try{
    await page.waitForTimeout(100);
    assert.equal(await page.locator('#scene').getAttribute('data-g2b-flight'),'true');
    // Returning to Explore never occurs without verified ground and clear body.
-   await page.locator('#jump').tap();
+   await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,true,
      'One LAND tap must not toggle flight');
-   await page.locator('#jump').tap();
+   await page.waitForTimeout(700);
+   await tapJumpTouch();await tapJumpTouch();
    await page.waitForTimeout(160);
    const landed=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    if(!landed.active){

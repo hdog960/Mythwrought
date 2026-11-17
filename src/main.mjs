@@ -1171,7 +1171,7 @@ function start(){
   }
   // Single tap preserves normal JUMP; double-tap toggles Creative Flight.
   // iPhone touch uses pointerdown because another thumb may suppress click.
-  const G2_JUMP_DOUBLE_TAP_MS=500;
+  const G2_JUMP_DOUBLE_TAP_MS=650;
   let lastG2JumpTap=-Infinity;
   function g2JumpTap(){
     const now=performance.now(),delta=now-lastG2JumpTap;
