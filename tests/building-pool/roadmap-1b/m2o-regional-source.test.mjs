@@ -41,8 +41,7 @@ test('M2O census 164/435; six new variant 002 source blueprints, 15 inherited st
  assert.equal(new Set(all.map(x=>x.id)).size,164);
  assert.equal(new Set(all.map(structuralFingerprint)).size,164);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(c=>[c,all.filter(x=>x.category===c).length])),
-  {bathhouse:23,stable:28,'farm-barn':22,greenhouse:23,
-   'fishing-lodge':21,'harbor-office':20,lighthouse:21});
+  {bathhouse:24,stable:28,'farm-barn':23,greenhouse:24,'fishing-lodge':22,'harbor-office':21,lighthouse:22});
  for(const x of prev)assert.equal(stableBlueprintJSON(all.find(p=>p.id===x.id)),stableBlueprintJSON(x),
   x.id+' inherited source changed');
  for(const c of Object.keys(QUOTAS))for(const bio of BIOMES)for(const size of SIZES){
