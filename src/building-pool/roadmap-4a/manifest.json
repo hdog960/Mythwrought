@@ -12,13 +12,13 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 128,
-    "totalAuthored": 158,
-    "remaining": 157,
+    "newlyAuthored": 131,
+    "totalAuthored": 161,
+    "remaining": 154,
     "creatorAccepted": 0,
     "integratedBuildings": 0,
     "m2Original": 120,
-    "m3Original": 6,
+    "m3Original": 9,
     "m4EarlyOriginal": 2
   },
   "biomes": [
@@ -55,7 +55,7 @@
       "perBiomeSize": 3,
       "total": 45,
       "inherited": 0,
-      "remaining": 43,
+      "remaining": 42,
       "milestone": 3
     },
     {
@@ -63,7 +63,7 @@
       "perBiomeSize": 3,
       "total": 45,
       "inherited": 15,
-      "remaining": 28,
+      "remaining": 27,
       "milestone": 3
     },
     {
@@ -71,7 +71,7 @@
       "perBiomeSize": 3,
       "total": 45,
       "inherited": 0,
-      "remaining": 43,
+      "remaining": 42,
       "milestone": 3
     },
     {
@@ -95,7 +95,7 @@
     "M0": "Accepted: exact-head Actions #43767981937 passed after fixing owned M0 count/list tests; 30 inherited source-exact designs preserved",
     "M1": "Technical candidate acceptance: exact-head Actions #43770848853 passed, 180 source-driven Chromium WebGL2 exterior/cutaway proxy captures; physical/creator gates open",
     "M2": "Theoretical design complete: 75/75 civic halls and 60/60 guildhalls; source-specific 60/60 Chromium WebGL2 PNGs exact-head full/focused Actions #44017406628 and #44017445958 SUCCESS; final premium visual and full physical Pack1–5 acceptance still blocked.",
-    "M3": "8 new M3/M4 state-and-knowledge original source-coordinates authored: 2 castle-palaces, 2 embassies, 2 grand archives and 2 early M4 observatories. Current 158/315 theoretical, 157 remaining, 0 approved/integrated. The eight new 48-view genuine Chromium candidate gallery and native CI must pass before technical source acceptance. Pack1–5 actual selected variants, orientation, AABB/mounts and iPhone remain blocked.",
+    "M3": "11 M3/M4 authored state-and-knowledge plans (9 M3, 2 early M4). Cumulative 161/315 theoretical, 154 remaining, 0 approved/integrated. New 3 architecture and 66-image WebGL2 gallery require exact-head CI acceptance; physical variants and iPhone pending.",
     "M4": "2 standalone observatory candidates authored early under new M3/M4 isolated module; remaining 43/45. Source technical CI/gallery pending; physical and creator acceptance open.",
     "M5": "not started",
     "M6": "creator gate open"
