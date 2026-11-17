@@ -45,7 +45,8 @@ try{
  // page. This never changes the installed game, main branch or saved world.
  // The fixture is byte-exact source from main 104e57ff / blob 9fea51ed.
  const previousSource=await readFile(new URL('./fixtures/manual-m1-canopy-before.mjs',import.meta.url),'utf8');
- const baseline=await context.newPage();
+ const baselineContext=await browser.newContext({viewport:{width:932,height:430},deviceScaleFactor:1,hasTouch:true,isMobile:true,serviceWorkers:'block'});
+ const baseline=await baselineContext.newPage();
  const baselineErrors=[];
  baseline.on('pageerror',e=>baselineErrors.push(e.message));
  await baseline.route('**/src/canopy.mjs',async route=>route.fulfill({
@@ -75,7 +76,7 @@ try{
      await baseline.screenshot({path:`artifacts/manual-m1-woodland-before-${w}x${h}.png`});
    }
    assert.deepEqual(baselineErrors,[]);
- }finally{await baseline.close();}
+ }finally{await baselineContext.close();}
  await page.evaluate(p=>window.__mythwroughtTest.placeFixture(p.x,p.y,p.z,0),tree);await loaded();
  assert.notDeepEqual(await inspect(),tree,'mined tree should disappear');
  await page.reload({waitUntil:'networkidle'});await loaded();
