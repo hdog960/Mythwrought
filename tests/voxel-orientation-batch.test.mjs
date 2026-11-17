@@ -246,8 +246,40 @@ test('rollback reads revision exactly once per restored cell',async()=>{
    },
    rollback:c=>{f.ids.set(c.join(','),4);bump(c);return true;}
  }),/not acknowledged/);
- // One preflight read, one pre-edit read, one rollback read.
- assert.equal(counts.get(f.cells[0].join(',')),3);
+ // Preflight, pre-edit, unacknowledged receipt guard, restored revision.
+ assert.equal(counts.get(f.cells[0].join(',')),4);
  assert.equal(f.readIdentity(f.cells[0]),4);
  assert.equal(f.sidecar.get(f.cells[0],4),2);
+});
+
+test('unacknowledged edit with foreign ABA revision refuses destructive undo',async()=>{
+ const f=fixture(),versions=new Map(f.cells.map(c=>[c.join(','),0]));
+ let undos=0;
+ await assert.rejects(f.run((c,i)=>{
+   f.ids.set(c.join(','),5);
+   versions.set(c.join(','),1);
+   // A foreign editor overwrites the same cell before our rejected receipt.
+   f.ids.set(c.join(','),4);
+   versions.set(c.join(','),2);
+   return false;
+ },{
+   readRevision:c=>versions.get(c.join(',')),
+   rollback:c=>{undos++;f.ids.set(c.join(','),4);return true;}
+ }),error=>error instanceof AggregateError &&
+   error.errors.some(e=>/Unverified edit revision; rollback unsafe/.test(e.message)));
+ assert.equal(undos,0);
+ assert.equal(versions.get(f.cells[0].join(',')),2);
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+ assert.equal(f.sidecar.get(f.cells[1],4),2);
+});
+test('unacknowledged edit with no revision advance refuses speculative undo',async()=>{
+ const f=fixture(),versions=new Map(f.cells.map(c=>[c.join(','),0]));
+ let undos=0;
+ await assert.rejects(f.run(()=>false,{
+   readRevision:c=>versions.get(c.join(',')),
+   rollback:()=>{undos++;return true;}
+ }),error=>error instanceof AggregateError &&
+   error.errors.some(e=>/Unverified edit revision; rollback unsafe/.test(e.message)));
+ assert.equal(undos,0);
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
 });
