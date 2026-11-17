@@ -1,4 +1,4 @@
-// Builder 4A M3/M4 state knowledge — eight original castle, embassy, archive and observatory architectural plans.
+// Builder 4A M3/M4 state knowledge — fourteen original castle, embassy, archive and observatory architectural plans.
 // Separate authored coordinate envelopes; shared deterministic compilation is NOT a random
 // world generator. All source materials remain symbolic until physical family acceptance.
 import {SCHEMA,validateBlueprint} from './schema.mjs';
@@ -3305,6 +3305,781 @@ const PLANS=[
     65
   ],
   "profile": "snow-horseshoe-memory-vault-faceted-index-wing"
+}
+,
+{
+  "id": "r4:castle-palace:desert:small:01",
+  "type": "castle-palace",
+  "biome": "desert",
+  "size": "small",
+  "variant": 1,
+  "bounds": [
+    66,
+    12,
+    59
+  ],
+  "wings": [
+    [
+      24,
+      8,
+      41,
+      24
+    ],
+    [
+      6,
+      20,
+      24,
+      44
+    ],
+    [
+      42,
+      18,
+      60,
+      46
+    ],
+    [
+      19,
+      42,
+      49,
+      53
+    ],
+    [
+      21,
+      23,
+      46,
+      34
+    ],
+    [
+      21,
+      34,
+      31,
+      44
+    ],
+    [
+      40,
+      34,
+      50,
+      44
+    ]
+  ],
+  "notches": [
+    [
+      33,
+      37,
+      37,
+      40
+    ]
+  ],
+  "octagons": [
+    [
+      14,
+      40,
+      6,
+      9
+    ]
+  ],
+  "skyline": [
+    [
+      28,
+      12,
+      34,
+      17,
+      10
+    ],
+    [
+      50,
+      29,
+      54,
+      33,
+      9
+    ]
+  ],
+  "entry": [
+    32,
+    8
+  ],
+  "porch": [
+    29,
+    4,
+    35,
+    7
+  ],
+  "partitions": [
+    {
+      "axis": "x",
+      "fixed": 26,
+      "from": 26,
+      "to": 31,
+      "door": 29,
+      "facing": "east"
+    }
+  ],
+  "windows": [
+    [
+      28,
+      8,
+      "south"
+    ],
+    [
+      37,
+      8,
+      "south"
+    ],
+    [
+      6,
+      29,
+      "west"
+    ],
+    [
+      60,
+      29,
+      "east"
+    ],
+    [
+      30,
+      53,
+      "north"
+    ],
+    [
+      60,
+      39,
+      "east"
+    ]
+  ],
+  "fixtures": [
+    [
+      32,
+      18
+    ],
+    [
+      13,
+      32
+    ],
+    [
+      51,
+      28
+    ],
+    [
+      32,
+      48
+    ]
+  ],
+  "ridges": [],
+  "rooms": [
+    {
+      "id": "desert-sun-gate-vestibule",
+      "kind": "entrance-hall",
+      "rect": [
+        27,
+        11,
+        38,
+        21
+      ]
+    },
+    {
+      "id": "western-caravan-tower",
+      "kind": "tower-or-wing",
+      "rect": [
+        9,
+        25,
+        21,
+        37
+      ]
+    },
+    {
+      "id": "dune-court-of-judgment",
+      "kind": "grand-chamber",
+      "rect": [
+        46,
+        23,
+        56,
+        39
+      ]
+    },
+    {
+      "id": "water-rights-council",
+      "kind": "council",
+      "rect": [
+        24,
+        46,
+        44,
+        51
+      ]
+    }
+  ],
+  "roofBands": [
+    {
+      "rect": [
+        26,
+        10,
+        39,
+        22
+      ],
+      "profile": "hip",
+      "axis": "x",
+      "high": 10,
+      "period": 4
+    },
+    {
+      "rect": [
+        10,
+        25,
+        21,
+        37
+      ],
+      "profile": "saw",
+      "axis": "z",
+      "high": 9,
+      "period": 5
+    },
+    {
+      "rect": [
+        46,
+        23,
+        56,
+        39
+      ],
+      "profile": "shed",
+      "axis": "x",
+      "high": 9,
+      "period": 4
+    },
+    {
+      "rect": [
+        24,
+        45,
+        45,
+        51
+      ],
+      "profile": "gable",
+      "axis": "z",
+      "high": 10,
+      "period": 4
+    }
+  ],
+  "signature": [
+    "desert-watercourt-crosswind-palace-faceted-west-tower",
+    66,
+    12,
+    59
+  ],
+  "profile": "desert-watercourt-crosswind-palace-faceted-west-tower"
+},
+{
+  "id": "r4:embassy:snow:large:01",
+  "type": "embassy",
+  "biome": "snow",
+  "size": "large",
+  "variant": 1,
+  "bounds": [
+    88,
+    13,
+    74
+  ],
+  "wings": [
+    [
+      30,
+      9,
+      55,
+      27
+    ],
+    [
+      8,
+      24,
+      31,
+      53
+    ],
+    [
+      56,
+      24,
+      79,
+      52
+    ],
+    [
+      22,
+      51,
+      66,
+      66
+    ],
+    [
+      24,
+      26,
+      61,
+      39
+    ],
+    [
+      24,
+      38,
+      37,
+      53
+    ],
+    [
+      53,
+      37,
+      67,
+      53
+    ]
+  ],
+  "notches": [
+    [
+      40,
+      43,
+      46,
+      47
+    ]
+  ],
+  "octagons": [
+    [
+      71,
+      46,
+      6,
+      9
+    ]
+  ],
+  "skyline": [
+    [
+      36,
+      13,
+      43,
+      19,
+      11
+    ],
+    [
+      66,
+      31,
+      70,
+      35,
+      10
+    ]
+  ],
+  "entry": [
+    42,
+    9
+  ],
+  "porch": [
+    39,
+    4,
+    45,
+    8
+  ],
+  "partitions": [
+    {
+      "axis": "x",
+      "fixed": 29,
+      "from": 29,
+      "to": 34,
+      "door": 32,
+      "facing": "west"
+    }
+  ],
+  "windows": [
+    [
+      35,
+      9,
+      "south"
+    ],
+    [
+      50,
+      9,
+      "south"
+    ],
+    [
+      8,
+      35,
+      "west"
+    ],
+    [
+      79,
+      31,
+      "east"
+    ],
+    [
+      32,
+      66,
+      "north"
+    ],
+    [
+      79,
+      40,
+      "east"
+    ]
+  ],
+  "fixtures": [
+    [
+      42,
+      21
+    ],
+    [
+      16,
+      32
+    ],
+    [
+      68,
+      31
+    ],
+    [
+      44,
+      58
+    ]
+  ],
+  "ridges": [],
+  "rooms": [
+    {
+      "id": "snow-accord-diplomatic-salon",
+      "kind": "formal-chamber",
+      "rect": [
+        34,
+        12,
+        52,
+        24
+      ]
+    },
+    {
+      "id": "western-neutral-guest-lodge",
+      "kind": "guest-area",
+      "rect": [
+        11,
+        29,
+        26,
+        45
+      ]
+    },
+    {
+      "id": "winter-language-delegation",
+      "kind": "consular-office",
+      "rect": [
+        60,
+        29,
+        74,
+        44
+      ]
+    },
+    {
+      "id": "aurora-border-map-treaty-room",
+      "kind": "treaty-archive",
+      "rect": [
+        28,
+        55,
+        60,
+        63
+      ]
+    }
+  ],
+  "roofBands": [
+    {
+      "rect": [
+        34,
+        11,
+        53,
+        24
+      ],
+      "profile": "gable",
+      "axis": "x",
+      "high": 11,
+      "period": 5
+    },
+    {
+      "rect": [
+        11,
+        28,
+        26,
+        45
+      ],
+      "profile": "hip",
+      "axis": "z",
+      "high": 10,
+      "period": 5
+    },
+    {
+      "rect": [
+        60,
+        29,
+        74,
+        44
+      ],
+      "profile": "saw",
+      "axis": "z",
+      "high": 10,
+      "period": 4
+    },
+    {
+      "rect": [
+        28,
+        55,
+        60,
+        63
+      ],
+      "profile": "shed",
+      "axis": "x",
+      "high": 10,
+      "period": 4
+    }
+  ],
+  "signature": [
+    "aurora-pact-split-delegation-terrace",
+    88,
+    13,
+    74
+  ],
+  "profile": "aurora-pact-split-delegation-terrace"
+},
+{
+  "id": "r4:grand-archive:desert:large:01",
+  "type": "grand-archive",
+  "biome": "desert",
+  "size": "large",
+  "variant": 1,
+  "bounds": [
+    85,
+    14,
+    72
+  ],
+  "wings": [
+    [
+      27,
+      8,
+      51,
+      26
+    ],
+    [
+      7,
+      22,
+      27,
+      49
+    ],
+    [
+      51,
+      20,
+      76,
+      50
+    ],
+    [
+      21,
+      48,
+      62,
+      64
+    ],
+    [
+      23,
+      25,
+      56,
+      38
+    ],
+    [
+      22,
+      38,
+      34,
+      51
+    ],
+    [
+      52,
+      38,
+      65,
+      52
+    ]
+  ],
+  "notches": [
+    [
+      39,
+      43,
+      44,
+      46
+    ]
+  ],
+  "octagons": [
+    [
+      16,
+      43,
+      7,
+      10
+    ]
+  ],
+  "skyline": [
+    [
+      34,
+      12,
+      41,
+      18,
+      12
+    ],
+    [
+      66,
+      30,
+      70,
+      34,
+      10
+    ]
+  ],
+  "entry": [
+    38,
+    8
+  ],
+  "porch": [
+    35,
+    3,
+    41,
+    7
+  ],
+  "partitions": [
+    {
+      "axis": "x",
+      "fixed": 26,
+      "from": 28,
+      "to": 34,
+      "door": 31,
+      "facing": "east"
+    }
+  ],
+  "windows": [
+    [
+      32,
+      8,
+      "south"
+    ],
+    [
+      46,
+      8,
+      "south"
+    ],
+    [
+      7,
+      29,
+      "west"
+    ],
+    [
+      76,
+      29,
+      "east"
+    ],
+    [
+      33,
+      64,
+      "north"
+    ],
+    [
+      76,
+      40,
+      "east"
+    ]
+  ],
+  "fixtures": [
+    [
+      38,
+      19
+    ],
+    [
+      16,
+      33
+    ],
+    [
+      63,
+      32
+    ],
+    [
+      42,
+      57
+    ]
+  ],
+  "ridges": [],
+  "rooms": [
+    {
+      "id": "dune-astronomy-public-reading-room",
+      "kind": "consultation-room",
+      "rect": [
+        30,
+        11,
+        48,
+        23
+      ]
+    },
+    {
+      "id": "western-clay-scroll-sealed-vault",
+      "kind": "records-vault",
+      "rect": [
+        10,
+        28,
+        23,
+        42
+      ]
+    },
+    {
+      "id": "eastern-astral-celestial-chart-room",
+      "kind": "cartography",
+      "rect": [
+        56,
+        25,
+        72,
+        43
+      ]
+    },
+    {
+      "id": "rear-solar-copyist-scriptorium",
+      "kind": "great-archive",
+      "rect": [
+        26,
+        53,
+        57,
+        61
+      ]
+    }
+  ],
+  "roofBands": [
+    {
+      "rect": [
+        30,
+        11,
+        48,
+        23
+      ],
+      "profile": "saw",
+      "axis": "z",
+      "high": 11,
+      "period": 4
+    },
+    {
+      "rect": [
+        10,
+        27,
+        24,
+        42
+      ],
+      "profile": "hip",
+      "axis": "z",
+      "high": 10,
+      "period": 5
+    },
+    {
+      "rect": [
+        56,
+        25,
+        72,
+        43
+      ],
+      "profile": "gable",
+      "axis": "x",
+      "high": 11,
+      "period": 4
+    },
+    {
+      "rect": [
+        26,
+        53,
+        57,
+        61
+      ],
+      "profile": "shed",
+      "axis": "x",
+      "high": 10,
+      "period": 5
+    }
+  ],
+  "signature": [
+    "dune-solar-vault-asymmetric-astral-archive",
+    85,
+    14,
+    72
+  ],
+  "profile": "dune-solar-vault-asymmetric-astral-archive"
 }
 ];
 const VALID_IDS=new Set(PLANS.map(p=>p.id));
