@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {inspectSchema1OverlayHandoff} from '../../src/auto-integration-support/schema1-overlay-handoff.mjs';
+const natural=[{x:0,y:2,z:0,blockId:1},{x:1,y:2,z:0,blockId:1}];
+const overlay=[{x:0,y:2,z:0,blockId:2}];
+const ledger=[{x:0,y:2,z:0,blockId:1,intent:'player'}];
+const before={schema:1,seed:'fixed',cells:[{x:0,y:2,z:0,blockId:1}],restoredNaturalKeys:['0,2,0']};
+const fixture=()=>({before:structuredClone(before),after:structuredClone(before),ledger:structuredClone(ledger),seed:'fixed',initial:{seed:'fixed',natural:structuredClone(natural),overlay:structuredClone(overlay)},reloaded:{seed:'fixed',natural:structuredClone(natural),overlay:structuredClone(overlay)},registry:[1,2]});
+test('restored natural player intent wins over overlay across fixture reload',()=>{const r=inspectSchema1OverlayHandoff(fixture());assert.equal(r.ok,true);assert.equal(r.status,'CROSS_FIXTURE_MATCH_ONLY');assert.equal(r.saveSchemaVerified,false)});
+test('rejects missing restored intent',()=>{const f=fixture();f.ledger=[];assert.equal(inspectSchema1OverlayHandoff(f).ok,false)});
+test('rejects false restoration witness',()=>{const f=fixture();f.initial.natural[0].blockId=2;f.reloaded.natural[0].blockId=2;assert.equal(inspectSchema1OverlayHandoff(f).reason,'false-natural-restoration')});
+test('rejects different reloaded seeded terrain',()=>{const f=fixture();f.reloaded.natural[1].blockId=2;assert.equal(inspectSchema1OverlayHandoff(f).reason,'overlay:seeded-world-drift')});
+test('rejects missing natural anchor',()=>{const f=fixture();f.initial.natural=f.initial.natural.slice(1);f.reloaded.natural=f.reloaded.natural.slice(1);assert.equal(inspectSchema1OverlayHandoff(f).ok,false)});
+test('rejects decoded snapshot mismatch',()=>{const f=fixture();f.before.cells[0].blockId=2;f.after.cells[0].blockId=2;assert.equal(inspectSchema1OverlayHandoff(f).reason,'schema1:edit-not-replayed')});
+test('does not mutate inputs',()=>{const f=fixture(),copy=structuredClone(f);inspectSchema1OverlayHandoff(f);assert.deepEqual(f,copy)});
