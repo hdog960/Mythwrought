@@ -30,3 +30,21 @@ test('reject unregistered blocks, invalid cells and ambiguous edit order',()=>{
   assert.throws(()=>createEditIntentLedger([{...cell,blockId:1,sequence:1},{...cell,blockId:2,sequence:1}],options),/ambiguous/);
   assert.throws(()=>createEditIntentLedger([],options).resolve(cell,{naturalId:256}),/unregistered/);
 });
+
+test('exact lexicographic ordering of extreme safe world coordinates',()=>{
+  const max=Number.MAX_SAFE_INTEGER;
+  const edits=[
+    {x:max,y:0,z:0,blockId:1,sequence:1},
+    {x:-max,y:0,z:0,blockId:2,sequence:2},
+    {x:0,y:max,z:-max,blockId:3,sequence:3},
+    {x:0,y:-max,z:max,blockId:1,sequence:4},
+    {x:0,y:-max,z:-max,blockId:2,sequence:5}
+  ];
+  const expected=[[-max,0,0],[0,-max,-max],[0,-max,max],[0,max,-max],[max,0,0]];
+  for(const input of [edits,[...edits].reverse()]){
+    const ledger=createEditIntentLedger(input,options);
+    assert.deepEqual(ledger.exportFixture().map(({x,y,z})=>[x,y,z]),expected);
+    assert.equal(ledger.resolve({x:-max,y:0,z:0},{naturalId:2,overlayId:3}).source,'player-edit');
+    assert.deepEqual(createEditIntentLedger(ledger.exportFixture(),options).exportFixture(),ledger.exportFixture());
+  }
+});
