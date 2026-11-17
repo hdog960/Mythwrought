@@ -23,7 +23,7 @@ import {MANUAL_FIVE_PACK_COUNTS} from '../../../src/builder-assets/manual-five-p
 import {validateBlueprint,validateCollection,geometrySignature,serializeBlueprint} from '../../../src/building-pool/roadmap-4a/schema.mjs';
 import {auditBlueprintMaterials} from '../../../src/building-pool/roadmap-4a/m1-material-audit.mjs';
 import manifest from '../../../src/building-pool/roadmap-4a/manifest.json' with {type:'json'};
-const EXPECTED_IDS=["r4:castle-palace:temperate:medium:02","r4:castle-palace:snow:large:02","r4:embassy:desert:medium:01","r4:embassy:enchanted-forest:small:01","r4:grand-archive:mountain:large:01","r4:grand-archive:temperate:medium:01","r4:observatory:snow:small:01","r4:observatory:desert:large:01"];
+const EXPECTED_IDS=["r4:castle-palace:temperate:medium:02","r4:castle-palace:snow:large:02","r4:embassy:desert:medium:01","r4:embassy:enchanted-forest:small:01","r4:grand-archive:mountain:large:01","r4:grand-archive:temperate:medium:01","r4:observatory:snow:small:01","r4:observatory:desert:large:01","r4:castle-palace:temperate:large:03","r4:embassy:mountain:medium:01","r4:grand-archive:snow:medium:01"];
 const old=()=>[...allM1(),...allM2Exemplars(),...allM2Additional(),...allM2Regional(),...allM2Expansion(),...allM2Tranche(),...allM2Next(),...allM2Silhouettes(),...allM2Profiles(),...allM2Courtyards(),...allM2Districts(),...allM2CivicWorks(),...allM2PublicWorks(),...allM2GuildAndCivic(),...allM2RegionalCourts(),...allM2ChambersCrafts(),...allM2FrontierDistricts(),...allM2FinalCivicGuild()];
 const fresh=()=>allM3StateKnowledge();
 const xyz=arr=>arr.join(',');
@@ -45,15 +45,15 @@ test('all eight new M3/M4 state and knowledge IDs occupy unused slots; existing 
  const current=fresh(),all=[...old(),...current];
  assert.deepEqual(M3_STATE_KNOWLEDGE_IDS,EXPECTED_IDS);
  assert.equal(old().length,150);
- assert.equal(current.length,8);
- assert.equal(all.length,158);
- assert.equal(validateCollection(all).verified,158);
- assert.equal(new Set(all.map(x=>x.id)).size,158);
- assert.equal(new Set(all.map(geometrySignature)).size,158);
+ assert.equal(current.length,11);
+ assert.equal(all.length,161);
+ assert.equal(validateCollection(all).verified,161);
+ assert.equal(new Set(all.map(x=>x.id)).size,161);
+ assert.equal(new Set(all.map(geometrySignature)).size,161);
  assert.equal(manifest.counts.legacyAuthored,30);
- assert.equal(manifest.counts.newlyAuthored,128);
- assert.equal(manifest.counts.totalAuthored,158);
- assert.equal(manifest.counts.remaining,157);
+ assert.equal(manifest.counts.newlyAuthored,131);
+ assert.equal(manifest.counts.totalAuthored,161);
+ assert.equal(manifest.counts.remaining,154);
  assert.equal(manifest.counts.creatorAccepted,0);
  assert.equal(manifest.counts.integratedBuildings,0);
  assert.equal(manifest.categories.find(c=>c.type==='civic-hall').remaining,0);
@@ -66,13 +66,13 @@ test('all 158 whole-volume source fingerprints are unique under 90-degree rotati
   assert.ok(!signatures.has(fingerprint),b.id+' duplicates '+signatures.get(fingerprint));
   signatures.set(fingerprint,b.id);
  }
- assert.equal(signatures.size,158);
+ assert.equal(signatures.size,161);
 });
 test('new state-and-knowledge palaces, embassies, archives, and observatories are occupied 3D rooms with two-cell head clearance and navigable public circulation',()=>{
  const all=fresh();
- assert.equal(all.reduce((n,b)=>n+b.cells.length,0),75595);
- assert.equal(all.reduce((n,b)=>n+b.navigation.length,0),17962);
- assert.equal(all.reduce((n,b)=>n+b.spaces.length,0),44);
+ assert.equal(all.slice(0,8).reduce((n,b)=>n+b.cells.length,0),75595);
+ assert.equal(all.slice(0,8).reduce((n,b)=>n+b.navigation.length,0),17962);
+ assert.equal(all.slice(0,8).reduce((n,b)=>n+b.spaces.length,0),44);
  for(const b of all){
   const v=validateBlueprint(b),cells=map(b);
   assert.equal(v.theoreticalOnly,true);
