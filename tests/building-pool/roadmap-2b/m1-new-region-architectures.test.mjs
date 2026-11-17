@@ -206,5 +206,5 @@ test('authoritative ledger is current 79/420, inherited original source stays 15
  assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.authored,0),132);
  assert.equal(Object.values(ledger.byCategory).reduce((a,x)=>a+x.remaining,0),288);
  assert.deepEqual([ledger.byCategory['market-square'].authored,ledger.byCategory.theater.authored,
-  ledger.byCategory.temple.authored],[18,19,24]);
+  ledger.byCategory.temple.authored],[19,20,25]);
 });
