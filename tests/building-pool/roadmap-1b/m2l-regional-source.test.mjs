@@ -34,14 +34,14 @@ function shape(b,flip,rotation){
  }
  return out;
 }
-test('M2L 142/435 authored, 293 outstanding, unique 002 IDs, 15 untouched inherited originals',()=>{
+test('M2L 148/435 authored, 287 outstanding, unique 002 IDs, 15 untouched inherited originals',()=>{
  const all=get1BCandidates(),fresh=newOnes(),old=getInheritedStables(),v=validateAllocation(all);
- assert.equal(fresh.length,9);assert.equal(old.length,15);assert.equal(all.length,142);
- assert.equal(v.authored,142);assert.equal(v.remaining,293);
- assert.equal(new Set(all.map(b=>b.id)).size,142);
- assert.equal(new Set(all.map(structuralFingerprint)).size,142);
+ assert.equal(fresh.length,9);assert.equal(old.length,15);assert.equal(all.length,148);
+ assert.equal(v.authored,148);assert.equal(v.remaining,287);
+ assert.equal(new Set(all.map(b=>b.id)).size,148);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,148);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(c=>[c,all.filter(p=>p.category===c).length])),
-  {bathhouse:20,stable:28,'farm-barn':19,greenhouse:20,'fishing-lodge':19,'harbor-office':18,lighthouse:18});
+  {bathhouse:21,stable:28,'farm-barn':20,greenhouse:21,'fishing-lodge':20,'harbor-office':19,lighthouse:19});
  for(const b of old)assert.equal(stableBlueprintJSON(all.find(p=>p.id===b.id)),stableBlueprintJSON(b),'changed inherited stable '+b.id);
  for(const c of Object.keys(QUOTAS))for(const biome of BIOMES)for(const size of SIZES)
   assert.ok(all.filter(b=>b.category===c&&b.biome===biome&&b.size===size).length<=QUOTAS[c],c+'/'+biome+'/'+size+' quota exceeded');
@@ -83,7 +83,7 @@ test('M2L independent nine complete 3D structures: connected rooms, 2-high porta
  assert.ok(vox>30000,'insufficient distinct authored source-cell volume');
  assert.deepEqual([...physicalFamilies].filter(x=>/^pack[1-5]$/.test(x)).sort(),['pack1','pack2','pack3','pack4','pack5']);
 });
-test('M2L strict source-role XYZ D4 eight-way near-duplicate rejection vs all 142 candidates',()=>{
+test('M2L strict source-role XYZ D4 eight-way near-duplicate rejection vs all 148 candidates',()=>{
  const all=get1BCandidates();
  for(const b of newOnes()){
   const first=shape(b,false,0);

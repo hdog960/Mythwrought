@@ -139,7 +139,13 @@ const ids=[
  'r1:greenhouse:enchanted-forest:medium:002',
  'r1:fishing-lodge:mountain:large:002',
  'r1:harbor-office:snow:large:002',
- 'r1:lighthouse:desert:medium:002'
+ 'r1:lighthouse:desert:medium:002',
+ 'r1:bathhouse:snow:medium:002',
+ 'r1:farm-barn:desert:small:002',
+ 'r1:greenhouse:mountain:large:002',
+ 'r1:fishing-lodge:temperate:large:002',
+ 'r1:harbor-office:enchanted-forest:large:002',
+ 'r1:lighthouse:snow:large:002'
 ];
 const sizes=[[667,375],[844,390],[932,430]];
 const mime={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript','.json':'application/json'};
@@ -203,7 +209,7 @@ async function makeCDP(url){
  }
  return {send,exceptions,close:()=>ws.close()};
 }
-test('M1/M2 128 genuine source-served WebGL2 candidates × 3 iPhone landscapes × exterior/cutaway', {timeout:1260000},async()=>{
+test('M1/M2 134 genuine source-served WebGL2 candidates × 3 iPhone landscapes × exterior/cutaway', {timeout:1260000},async()=>{
  const profile=await mkdtemp(join(tmpdir(),'mythwrought-r1b-chrome-')),site=await localSite();
  const out=resolve(root,'artifacts/roadmap-1b');
  let chrome,cdp;
@@ -253,7 +259,7 @@ test('M1/M2 128 genuine source-served WebGL2 candidates × 3 iPhone landscapes �
    evidence.push({...state,file,sha256:createHash('sha256').update(png).digest('hex'),
     rendererCategory:'source-authored-full-cell-proxy',physicalIPhone:false,physicalFamilyMeshes:false});
   }
-  assert.equal(evidence.length,768);
+  assert.equal(evidence.length,804);
   assert.equal(site.missing.length,0,'Missing module responses: '+site.missing.join(';'));
   assert.deepEqual(cdp.exceptions,[],'Unexpected Chromium errors');
   for(const id of ids)for(const [width,height] of sizes){
@@ -268,7 +274,7 @@ test('M1/M2 128 genuine source-served WebGL2 candidates × 3 iPhone landscapes �
     physicalIPhone:false,physicalFamilyMeshes:false,source:'real 1B ES module coordinates in Chromium WebGL2',
     notes:'Proxy cube faces; cannot certify real Pack 4/5 parts, gameplay movement, or creator art.',
     evidence},null,2));
-  console.log('BUILDER 1B genuine source WebGL2 exterior+cutaway 768/768 PASS',
+  console.log('BUILDER 1B genuine source WebGL2 exterior+cutaway 804/804 PASS',
    JSON.stringify({candidates:ids.length,viewports:sizes,captures:evidence.length}));
  }finally{
   try{cdp?.close();}catch{}
