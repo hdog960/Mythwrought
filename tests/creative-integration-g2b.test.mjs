@@ -6,7 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn,spawnSync} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
-import {readFileSync} from 'node:fs';
+import {readFileSync,statSync} from 'node:fs';
 const exec=(cmd,args,{timeout=120000}={})=>{
  const r=spawnSync(cmd,args,{cwd:process.cwd(),encoding:'utf8',timeout,
   env:{...process.env,PLAYWRIGHT_BROWSERS_PATH:process.env.PLAYWRIGHT_BROWSERS_PATH||undefined}});
@@ -24,24 +24,40 @@ test('G2B six-size genuine WebGL2 and live-flight browser acceptance',{timeout:1
  // Allow a bounded 450-second arrival window for its head-pinned manifest.
  // Never treat elapsed time, a stale artifact, or a console log as PASS.
  const pack2WaitMs=450000,pollMs=500;
- let priorPack2Done=false,observedHead='none';
+ const startedAt=Date.now(),pack2Dir='artifacts/pack2-live-webgl';
+ const expectedViews=[[667,375],[844,390],[932,430]];
+ let priorPack2Done=false,observedHead='none',reason='no manifest yet';
  for(let elapsed=0;elapsed<pack2WaitMs;elapsed+=pollMs){
    try{
-     const evidence=JSON.parse(readFileSync('artifacts/pack2-live-webgl/manifest.json','utf8'));
+     const manifest=pack2Dir+'/manifest.json';
+     const evidence=JSON.parse(readFileSync(manifest,'utf8'));
      observedHead=String(evidence.CIHead||'missing');
-     if(evidence.CIHead===(process.env.GITHUB_SHA||'local')&&
-        evidence.originalSaveSchema===1&&
-        evidence.liveDeployment===false&&
-        Array.isArray(evidence.viewports)&&evidence.viewports.length===3){
+     // Producer Pack 2's test shadows the Node "process" variable with a
+     // spawned Chromium child, so its manifest intentionally/currently emits
+     // CIHead="local" even within Actions. Never misclassify that as stale.
+     // Fresh artifacts from THIS clean checkout, not the unreliable label,
+     // prove the same GitHub run completed the genuine Pack 2 browser work.
+     const recent=path=>statSync(path).mtimeMs>=startedAt-2000;
+     const labelOK=evidence.CIHead===(process.env.GITHUB_SHA||'local')||
+       evidence.CIHead==='local';
+     const screenshotsOK=expectedViews.every(([width,height])=>{
+       const view=evidence.viewports?.find(v=>v.width===width&&v.height===height);
+       return view&&view.bytes>9000&&view.vertices>0&&
+         recent(pack2Dir+'/pack2-live-'+width+'x'+height+'.png');
+     });
+     if(labelOK&&recent(manifest)&&evidence.originalSaveSchema===1&&
+        evidence.liveDeployment===false&&screenshotsOK){
        priorPack2Done=true;
        break;
      }
-   }catch(_){}
+     reason='manifest found but did not match fresh Pack 2 runtime/screenshots';
+   }catch(_){reason='manifest and screenshots not complete yet';}
    await delay(pollMs);
  }
- assert.ok(priorPack2Done,'Existing Pack 2 WebGL2 head-pinned manifest missing after '+
-   pack2WaitMs+'ms; expected '+(process.env.GITHUB_SHA||'local')+
-   ', saw '+observedHead+'; do not launch GPU-concurrent G2B browser');
+ assert.ok(priorPack2Done,'Existing Pack 2 REAL WebGL2 evidence missing after '+
+   pack2WaitMs+'ms: expected fresh current-run manifest and three real PNGs; '+
+   'producer head label='+observedHead+'; '+reason+
+   '; refusing GPU-concurrent G2B browser launch');
  // Root npm test runs before shared CI installs browser tools. This *test-owned*
  // bootstrap uses the same pinned free Playwright dependency as existing CI;
  // it changes no tracked package/CI file and is never a production import.
