@@ -162,7 +162,9 @@ function build(s){
  for(let x=2;x<w-2;x++)for(let z=2;z<d-2;z++)if(foot(x,z)){
   if([[-1,0],[1,0],[0,-1],[0,1]].every(([dx,dz])=>foot(x+dx,z+dz)))continue;
   const p=zone(x,z),wallTop=p==='central-elevated-hoist-gallery'?18:
-   p==='north-laboratory-hall'?12:9;
+   // Large north-hall source façade must genuinely meet the roof underside.
+   // Keep intentional 2×3 cross-aisle arcades open under load-bearing lintels.
+   p==='north-laboratory-hall'?(s.size==='large'?roofY(x,z)-1:12):9;
   // Arcaded ground-level structural edges along true two-wide workshop
   // corridors: no obstructed path disguised as a connectivity annotation.
   for(let y=2;y<=wallTop;y++)
