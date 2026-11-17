@@ -38,3 +38,33 @@ test('successful same-ID replacement always invalidates optional turns',async()=
  assert.equal(await applyLegacyVoxelEdit({...f.base,writeBlock:()=>true}),true);
  assert.equal(f.invalidations(),1);
 });
+
+test('stale revision between reads refuses writer and invalidates old turns',async()=>{
+ const f=fixture();let reads=0,writes=0;
+ const result=await applyLegacyVoxelEdit({...f.base,
+  readRevision:()=>{if(++reads===2)f.mutate();return reads===1?3:4;},
+  writeBlock:()=>{writes++;return true;}
+ });
+ assert.equal(result,false);
+ assert.equal(writes,0);
+ assert.equal(f.invalidations(),1);
+});
+test('unchanged cooperative preflight allows writer with expected revision',async()=>{
+ const f=fixture();let expected;
+ const result=await applyLegacyVoxelEdit({...f.base,
+  writeBlock:(_cell,_id,_before,revision)=>{expected=revision;return true;}
+ });
+ assert.equal(result,true);
+ assert.equal(expected,3);
+ assert.equal(f.invalidations(),1);
+});
+test('unreadable second preflight fails closed before invoking writer',async()=>{
+ const f=fixture();let reads=0,writes=0;
+ const result=await applyLegacyVoxelEdit({...f.base,
+  readRevision:()=>{if(++reads===2)throw Error('unavailable');return 3;},
+  writeBlock:()=>{writes++;return true;}
+ });
+ assert.equal(result,false);
+ assert.equal(writes,0);
+ assert.equal(f.invalidations(),1);
+});
