@@ -6,6 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn,spawnSync} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
+import {readFileSync} from 'node:fs';
 const exec=(cmd,args,{timeout=120000}={})=>{
  const r=spawnSync(cmd,args,{cwd:process.cwd(),encoding:'utf8',timeout,
   env:{...process.env,PLAYWRIGHT_BROWSERS_PATH:process.env.PLAYWRIGHT_BROWSERS_PATH||undefined}});
@@ -13,6 +14,21 @@ const exec=(cmd,args,{timeout=120000}={})=>{
  return r;
 };
 test('G2B six-size genuine WebGL2 and live-flight browser acceptance',{timeout:16*60*1000},async()=>{
+ // The root Node runner is parallel. Let the EXISTING real Pack 2 WebGL2 test
+ // finish first; launching another GPU-heavy Chromium simultaneously caused
+ // a 240-second Pack 2 timeout despite G2B itself passing all six viewports.
+ // Pack 2 writes this exact head-specific manifest ONLY after its real
+ // physical GPU and save-parity tests complete. No shared CI changes.
+ let priorPack2Done=false;
+ for(let n=0;n<500;n++){
+   try{
+     const evidence=JSON.parse(readFileSync('artifacts/pack2-live-webgl/manifest.json','utf8'));
+     if(evidence.CIHead===(process.env.GITHUB_SHA||'local')&&
+        evidence.originalSaveSchema===1){priorPack2Done=true;break;}
+   }catch(_){}
+   await delay(500);
+ }
+ assert.ok(priorPack2Done,'Existing Pack 2 genuine WebGL2 test did not complete its source-authored artifact; refusing GPU-concurrent G2B browser launch');
  // Root npm test runs before shared CI installs browser tools. This *test-owned*
  // bootstrap uses the same pinned free Playwright dependency as existing CI;
  // it changes no tracked package/CI file and is never a production import.
