@@ -592,7 +592,7 @@ const PLANS=[
       [
         69,
         61,
-        "north"
+        "east"
       ]
     ],
     "fixtures": [
@@ -3568,6 +3568,9 @@ function author(spec){
   const accepted=[];
   for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++){
    if(!has(x,z)||roofProfileTiles.has(tile(x,z)))continue;
+   // Skyline lanterns reserve their own beam-backed roof footprint; prevent
+   // lower roof profiles from being layered beneath elevated lantern caps.
+   if(spec.skyline.some(([sx0,sz0,sx1,sz1])=>x>=sx0&&x<=sx1&&z>=sz0&&z<=sz1))continue;
    roofProfileTiles.add(tile(x,z));
    const transverse=band.axis==='x' ? Math.min(z-z0,z1-z):Math.min(x-x0,x1-x);
    const breadth=Math.min(x-x0,x1-x,z-z0,z1-z);
