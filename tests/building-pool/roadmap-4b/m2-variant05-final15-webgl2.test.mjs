@@ -211,7 +211,7 @@ test('final ten original 4B variant-04 blueprints × exterior/section × three r
           const name=i+'-'+b.type+'-'+view+'-'+width+'x'+height+'.png';
           writeFileSync(join(output,name),png);
           captures.push({...evidence,png:name,byteCount:png.length});
-          console.log('4B authentic Chromium frame '+captures.length+'/60 '+b.id+' '+view+' '+width+'x'+height+' '+(Date.now()-frameStarted)+'ms');
+          console.log('4B authentic Chromium frame '+captures.length+'/90 '+b.id+' '+view+' '+width+'x'+height+' '+(Date.now()-frameStarted)+'ms');
         }
       }
     }

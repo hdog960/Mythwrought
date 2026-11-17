@@ -330,7 +330,7 @@
     "prior103ExactHead": "19dab19609f4b494a6a6b39cb38f3128f7267822",
     "prior103Actions": 43988856027,
     "prior103VerifiedGenuineChromiumCaptures": 618,
-    "variant04FinalBrowserExecuted": false,
+    "variant04FinalBrowserExecuted": true,
     "targetVariant04FinalBrowserCaptures": 60,
     "prior113TechnicallyAccepted": true,
     "prior113ExactHead": "6dd5ffbef5e0761e220eb0b7c4eba6374545c779",
