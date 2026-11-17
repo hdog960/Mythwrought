@@ -387,3 +387,33 @@ test('cave approach preservation is render-only and seed-stable',()=>{
   }
   assert.equal(JSON.stringify(world.save()),saved);
 });
+
+test('manual M2 scalloped crowns stay bounded, varied and save-inert in real seeded chunks',()=>{
+  const seed=179,world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  let sentinels=0,richBoughs=0,decoratedChunks=0;
+  for(let cx=-16;cx<=16;cx++)for(let cz=-16;cz<=16;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    decoratedChunks++;
+    assert.deepEqual(mesh,woodlandCanopyVertices(world,cx,cz,options),
+      'the same chunk retains an identical deterministic canopy mesh');
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.stride);
+    const leafHeights=new Set();
+    for(let v=0;v<mesh.length;v+=CANOPY_LIMITS.stride){
+      const x=mesh[v],y=mesh[v+1],z=mesh[v+2];
+      assert.ok(Number.isFinite(x)&&Number.isFinite(y)&&Number.isFinite(z));
+      assert.ok(x>=cx*16&&x<(cx+1)*16&&z>=cz*16&&z<(cz+1)*16,
+        'irregular boughs remain strictly chunk-local');
+      if(mesh[v+8]===7)leafHeights.add(Math.round(y*10000)/10000);
+    }
+    if(woodlandSentinelChunk(cx,cz,seed)){
+      sentinels++;
+      if(leafHeights.size>=40)richBoughs++;
+    }
+  }
+  assert.ok(decoratedChunks>25,'an authentic seed provides many in-world trees');
+  assert.ok(sentinels>0&&richBoughs>0,
+    'at least one live sentinel has dozens of separate bough heights, not four flat cone tiers');
+  assert.equal(JSON.stringify(world.save()),before,'visual repair never writes physical tree edits');
+  assert.equal(CANOPY_LIMITS.newDrawCalls,0);
+});
