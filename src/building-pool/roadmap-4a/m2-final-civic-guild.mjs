@@ -82,6 +82,12 @@ const PLANS=[
         32,
         51,
         45
+      ],
+      [
+        2,
+        9,
+        14,
+        22
       ]
     ],
     "notches": [
@@ -114,6 +120,13 @@ const PLANS=[
         41,
         44,
         10
+      ],
+      [
+        7,
+        12,
+        10,
+        16,
+        9
       ]
     ],
     "entry": [
@@ -157,6 +170,11 @@ const PLANS=[
         51,
         40,
         "east"
+      ],
+      [
+        2,
+        15,
+        "west"
       ]
     ],
     "fixtures": [
@@ -183,6 +201,10 @@ const PLANS=[
       [
         47,
         41
+      ],
+      [
+        8,
+        15
       ]
     ],
     "ridges": [],
@@ -245,6 +267,16 @@ const PLANS=[
           38,
           50,
           44
+        ]
+      },
+      {
+        "id": "sunward-fern-gateway-office",
+        "kind": "administration",
+        "rect": [
+          4,
+          11,
+          12,
+          19
         ]
       }
     ],
@@ -319,6 +351,18 @@ const PLANS=[
         "profile": "saw",
         "axis": "z",
         "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          4,
+          11,
+          12,
+          19
+        ],
+        "profile": "gable",
+        "axis": "x",
+        "high": 10,
         "period": 4
       }
     ],
