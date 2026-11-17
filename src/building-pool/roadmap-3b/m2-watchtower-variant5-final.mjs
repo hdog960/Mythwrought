@@ -153,6 +153,20 @@ const plans=[
    13,
    6,
    10
+  ],
+  "bridgePaths": [
+   [
+    20,
+    22,
+    25,
+    27
+   ],
+   [
+    20,
+    26,
+    3,
+    5
+   ]
   ]
  },
  {
@@ -300,6 +314,20 @@ const plans=[
    12,
    7,
    8
+  ],
+  "bridgePaths": [
+   [
+    22,
+    27,
+    7,
+    9
+   ],
+   [
+    22,
+    26,
+    33,
+    35
+   ]
   ]
  },
  {
@@ -447,6 +475,20 @@ const plans=[
    13,
    8,
    8
+  ],
+  "bridgePaths": [
+   [
+    19,
+    21,
+    33,
+    35
+   ],
+   [
+    19,
+    25,
+    5,
+    7
+   ]
   ]
  },
  {
@@ -594,6 +636,20 @@ const plans=[
    14,
    6,
    11
+  ],
+  "bridgePaths": [
+   [
+    22,
+    35,
+    15,
+    17
+   ],
+   [
+    22,
+    29,
+    38,
+    40
+   ]
   ]
  },
  {
@@ -741,6 +797,20 @@ const plans=[
    14,
    7,
    10
+  ],
+  "bridgePaths": [
+   [
+    19,
+    24,
+    18,
+    20
+   ],
+   [
+    19,
+    27,
+    33,
+    35
+   ]
   ]
  },
  {
@@ -888,6 +958,20 @@ const plans=[
    17,
    8,
    12
+  ],
+  "bridgePaths": [
+   [
+    23,
+    32,
+    16,
+    18
+   ],
+   [
+    23,
+    28,
+    49,
+    51
+   ]
   ]
  },
  {
@@ -1035,6 +1119,20 @@ const plans=[
    17,
    6,
    14
+  ],
+  "bridgePaths": [
+   [
+    23,
+    25,
+    18,
+    20
+   ],
+   [
+    23,
+    33,
+    34,
+    36
+   ]
   ]
  },
  {
@@ -1182,6 +1280,20 @@ const plans=[
    18,
    7,
    14
+  ],
+  "bridgePaths": [
+   [
+    26,
+    38,
+    36,
+    38
+   ],
+   [
+    26,
+    33,
+    12,
+    14
+   ]
   ]
  },
  {
@@ -1341,6 +1453,32 @@ const plans=[
    18,
    8,
    13
+  ],
+  "bridgePaths": [
+   [
+    23,
+    32,
+    26,
+    28
+   ],
+   [
+    23,
+    29,
+    42,
+    44
+   ],
+   [
+    23,
+    25,
+    18,
+    20
+   ],
+   [
+    23,
+    25,
+    49,
+    51
+   ]
   ]
  },
  {
@@ -1488,6 +1626,20 @@ const plans=[
    19,
    6,
    16
+  ],
+  "bridgePaths": [
+   [
+    26,
+    45,
+    7,
+    9
+   ],
+   [
+    26,
+    39,
+    58,
+    60
+   ]
   ]
  },
  {
@@ -1635,6 +1787,20 @@ const plans=[
    23,
    7,
    19
+  ],
+  "bridgePaths": [
+   [
+    29,
+    35,
+    27,
+    29
+   ],
+   [
+    29,
+    39,
+    50,
+    52
+   ]
   ]
  },
  {
@@ -1794,6 +1960,32 @@ const plans=[
    23,
    8,
    18
+  ],
+  "bridgePaths": [
+   [
+    27,
+    42,
+    9,
+    11
+   ],
+   [
+    27,
+    43,
+    58,
+    60
+   ],
+   [
+    27,
+    30,
+    24,
+    26
+   ],
+   [
+    27,
+    30,
+    57,
+    59
+   ]
   ]
  },
  {
@@ -1941,6 +2133,20 @@ const plans=[
    24,
    6,
    21
+  ],
+  "bridgePaths": [
+   [
+    31,
+    33,
+    46,
+    48
+   ],
+   [
+    31,
+    50,
+    10,
+    12
+   ]
   ]
  },
  {
@@ -2100,6 +2306,32 @@ const plans=[
    24,
    7,
    20
+  ],
+  "bridgePaths": [
+   [
+    29,
+    56,
+    20,
+    22
+   ],
+   [
+    29,
+    47,
+    69,
+    71
+   ],
+   [
+    29,
+    32,
+    21,
+    23
+   ],
+   [
+    29,
+    32,
+    67,
+    69
+   ]
   ]
  },
  {
@@ -2259,6 +2491,32 @@ const plans=[
    25,
    8,
    20
+  ],
+  "bridgePaths": [
+   [
+    30,
+    47,
+    24,
+    26
+   ],
+   [
+    30,
+    48,
+    53,
+    55
+   ],
+   [
+    30,
+    32,
+    24,
+    26
+   ],
+   [
+    30,
+    32,
+    66,
+    68
+   ]
   ]
  }
 ];
@@ -2375,6 +2633,22 @@ function create(p){
    write('stepped-upper-keep-roof',x,upper,z,p.roof);
   }
  }
+ // Physically supported visible elevated links. Previous v5 annexes were connected
+ // at ground level yet appeared as detached islands in true Chromium exterior shots.
+ // Enforce source-real continuous 3-cell roof/deck and regularly borne support piers.
+ for(const [x0,x1,z0,z1] of p.bridgePaths){
+  if(z1-z0<2||x1<x0+2)throw Error(id+' source bridge corridor has insufficient occupied span');
+  let delivered=0;
+  for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
+   if(!mask.has(flat(x,z)))throw Error(id+' skybridge hangs outside source footprint '+[x,z]);
+   if((x===x0||x===x1||(x-x0)%4===0)&&(z===z0||z===z1))
+    for(let y=1;y<=7;y++)write('skybridge-load-bearing-pier',x,y,z,p.post);
+   if(write('skybridge-elevated-deck',x,8,z,p.floor))delivered++;
+   if((z===z0||z===z1)&&(x-x0)%3===0)
+    write('skybridge-source-parapet',x,9,z,p.trim);
+  }
+  if(delivered<6)throw Error(id+' empty elevated skybridge despite named remote wing');
+ }
  // New M3 construction: two source-real, load-path-bearing staggered signal turrets.
  // The turret crowns are independent of the observation deck path and do not obstruct it.
  const towers=[{name:'upwind',z0:2,z1:8,rise:p.northHeight},{name:'downwind',z0:d-12,z1:d-6,rise:p.southHeight}];
@@ -2432,7 +2706,7 @@ function create(p){
    {name:'real cargo source',position:[p.cargo[0],2,p.cargo[1]],assetRef:'pack4:057',unresolvedDependency:null},
    {name:'unbuilt smoke warning',position:[aisle,deckY+1,3],assetRef:null,unresolvedDependency:'Signal and fire not implemented'}
   ],
-  architecture:{kind:p.title,sourceIrregularMaskedFoundation:true,structurallyTieredCentralWalls:true,centralKeepSpineCap:p.coreCap,centralWallBands:[...p.outerWallBands],actualKeepVoids:p.cuts.length,realRemovedKeepCells:removedKeepCells,authoredCutVolumes:p.cuts.map(c=>[...c]),independentSteppedLofts:p.lofts.length,footprintCells:mask.size,stairSteps:steps,
+  architecture:{kind:p.title,sourceIrregularMaskedFoundation:true,structurallyTieredCentralWalls:true,centralKeepSpineCap:p.coreCap,sourceSkybridgeCount:p.bridgePaths.length,centralWallBands:[...p.outerWallBands],actualKeepVoids:p.cuts.length,realRemovedKeepCells:removedKeepCells,authoredCutVolumes:p.cuts.map(c=>[...c]),independentSteppedLofts:p.lofts.length,footprintCells:mask.size,stairSteps:steps,
    observationAccess:true,observationY:deckY+1,roofProfile:p.roofType,
    realRoofBearingColumns:4,occupiedCoordinates:blocks.size,worldPlaced:false,creatorApproved:false,
    perCellVariantResolved:false,perCellYawResolved:false},

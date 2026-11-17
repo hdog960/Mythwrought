@@ -255,3 +255,16 @@ test('fifteen source-built fifth variation central spine is actually segmented i
   assert.equal(b.architecture.actualKeepVoids,3,b.id+' must actually remove three structural zones');
  }
 });
+
+test('remote fifth-variation wings have real elevated skybridges with direct vertical source piers and independent parapets',()=>{
+ for(const b of next){
+  const deck=b.modules.find(m=>m.role==='skybridge-elevated-deck');
+  const piers=b.modules.find(m=>m.role==='skybridge-load-bearing-pier');
+  const parapet=b.modules.find(m=>m.role==='skybridge-source-parapet');
+  assert.ok(b.architecture.sourceSkybridgeCount>=2,b.id+' no architected remote-wing links');
+  assert.ok(deck?.cells.length>=b.architecture.sourceSkybridgeCount*6,b.id+' no connected elevated source roofing');
+  assert.ok(piers?.cells.length>=b.architecture.sourceSkybridgeCount*2,b.id+' arch without ground-bearing piers');
+  assert.ok(parapet?.cells.length>=b.architecture.sourceSkybridgeCount,b.id+' no side-wall architectural distinction');
+  assert.equal(foundationSupport(b,voxelMap(b)),b.architecture.occupiedCoordinates);
+ }
+});
