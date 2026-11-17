@@ -203,6 +203,19 @@ export function createSurfaceBiomeWorldView(world,{
   // history fails closed; this view must not silently resurrect biome blocks.
   const planAt=(x,z)=>{
     const key=x+','+z;
+    // A cached column is never authoritative after a saved edit or protected
+    // landmark appears anywhere in its surface envelope. Re-check on reads:
+    // a previously cached ridge must not remain beside a newly built wall.
+    const oldTop=terrainHeight(x,z,world.seed);
+    const top=Math.max(oldTop,surfaceBiomeHeight(x,z,world.seed));
+    for(let y=oldTop-2;y<=WORLD_MAX_Y;y++){
+      const cell=x+','+y+','+z;
+      if(world.edits.has(cell)||world.rotations.has(cell)||
+         hasDurableEditIntent(x,y,z)||isProtected(x,y,z)){
+        cache.delete(key);
+        return null;
+      }
+    }
     if(cache.has(key))return cache.get(key);
     const plan=surfaceBiomeFreshColumn(x,z,world.seed,{
       enabled:true,profileIsFresh:true,
