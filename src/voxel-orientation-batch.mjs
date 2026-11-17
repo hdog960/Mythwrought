@@ -81,6 +81,15 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
           // a later async edit was pending. Never undo that foreign change.
           if (ambiguous.has(i)) throw new Error('Foreign edit during unverified commit');
           const post=postWrites.get(i);
+          // A rejected/throwing edit has no acknowledged receipt. If a revision
+          // reader exists, refuse to undo an ABA/foreign sequence after that
+          // attempted edit. A single increment is the only recoverable case.
+          if (!post && readRevision) {
+            const currentRevision=await readRevision(cells[i]);
+            if (!validRevision(currentRevision) ||
+                currentRevision!==revisions[i]+1)
+              throw new Error('Unverified edit revision; rollback unsafe');
+          }
           if (post && (await readIdentity(cells[i])!==post.id ||
               (readState && await readState(cells[i])!==post.state) ||
               (readRevision && await readRevision(cells[i])!==post.revision)))
