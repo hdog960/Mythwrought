@@ -51,10 +51,24 @@ try{
    const jumpTouchSession=await context.newCDPSession(page);
    const jumpXY=center(await page.locator('#jump').boundingBox());
    let jumpTouchId=501;
+   await page.evaluate(()=>{
+     window.__flightJumpTouchEvents=[];
+     const jump=document.getElementById('jump');
+     for(const type of ['pointerdown','pointerup','pointercancel','click'])
+       jump.addEventListener(type,e=>window.__flightJumpTouchEvents.push({
+         type,pointerType:e.pointerType||null,detail:e.detail,stamp:e.timeStamp
+       }),{passive:true});
+   });
+   const jumpTouchProof=()=>page.evaluate(()=>({
+     flight:window.__mythwroughtTest.flightInfo(),
+     status:document.getElementById('g2bFlightStatus').textContent,
+     touchEvents:window.__flightJumpTouchEvents
+   }));
    async function tapJumpTouch(){
      const point=touch(jumpTouchId++,jumpXY.x,jumpXY.y);
      await jumpTouchSession.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[point]});
      await jumpTouchSession.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+     await page.waitForTimeout(90); // Human finger release; never coalesce two taps.
    }
    await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,false,
@@ -62,7 +76,7 @@ try{
    await page.waitForTimeout(700); // Reset single-tap window before the next pair.
    await tapJumpTouch();await tapJumpTouch();
    let info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
-   assert.equal(info.active,true,'Double-tap JUMP did not enable flight: '+info.reason);
+   assert.equal(info.active,true,'Double-tap JUMP did not enable flight: '+JSON.stringify(await jumpTouchProof()));
    await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,true,
      'One LAND touch must not end flight');
