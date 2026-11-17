@@ -23,7 +23,7 @@ import {MANUAL_FIVE_PACK_COUNTS} from '../../../src/builder-assets/manual-five-p
 import {validateBlueprint,validateCollection,geometrySignature,serializeBlueprint} from '../../../src/building-pool/roadmap-4a/schema.mjs';
 import {auditBlueprintMaterials} from '../../../src/building-pool/roadmap-4a/m1-material-audit.mjs';
 import manifest from '../../../src/building-pool/roadmap-4a/manifest.json' with {type:'json'};
-const EXPECTED_IDS=["r4:castle-palace:temperate:medium:02","r4:castle-palace:snow:large:02","r4:embassy:desert:medium:01","r4:embassy:enchanted-forest:small:01","r4:grand-archive:mountain:large:01","r4:grand-archive:temperate:medium:01","r4:observatory:snow:small:01","r4:observatory:desert:large:01","r4:castle-palace:temperate:large:03","r4:embassy:mountain:medium:01","r4:grand-archive:snow:medium:01"];
+const EXPECTED_IDS=["r4:castle-palace:temperate:medium:02","r4:castle-palace:snow:large:02","r4:embassy:desert:medium:01","r4:embassy:enchanted-forest:small:01","r4:grand-archive:mountain:large:01","r4:grand-archive:temperate:medium:01","r4:observatory:snow:small:01","r4:observatory:desert:large:01","r4:castle-palace:temperate:large:03","r4:embassy:mountain:medium:01","r4:grand-archive:snow:medium:01","r4:castle-palace:desert:small:01","r4:embassy:snow:large:01","r4:grand-archive:desert:large:01"];
 const old=()=>[...allM1(),...allM2Exemplars(),...allM2Additional(),...allM2Regional(),...allM2Expansion(),...allM2Tranche(),...allM2Next(),...allM2Silhouettes(),...allM2Profiles(),...allM2Courtyards(),...allM2Districts(),...allM2CivicWorks(),...allM2PublicWorks(),...allM2GuildAndCivic(),...allM2RegionalCourts(),...allM2ChambersCrafts(),...allM2FrontierDistricts(),...allM2FinalCivicGuild()];
 const fresh=()=>allM3StateKnowledge();
 const xyz=arr=>arr.join(',');
@@ -41,32 +41,32 @@ function d4(b){
  }
  return choices.sort()[0];
 }
-test('all eight new M3/M4 state and knowledge IDs occupy unused slots; existing 150 designs remain intact',()=>{
+test('all fourteen M3/M4 state and knowledge IDs occupy unused slots; existing 150 designs remain intact',()=>{
  const current=fresh(),all=[...old(),...current];
  assert.deepEqual(M3_STATE_KNOWLEDGE_IDS,EXPECTED_IDS);
  assert.equal(old().length,150);
- assert.equal(current.length,11);
- assert.equal(all.length,161);
- assert.equal(validateCollection(all).verified,161);
- assert.equal(new Set(all.map(x=>x.id)).size,161);
- assert.equal(new Set(all.map(geometrySignature)).size,161);
+ assert.equal(current.length,14);
+ assert.equal(all.length,164);
+ assert.equal(validateCollection(all).verified,164);
+ assert.equal(new Set(all.map(x=>x.id)).size,164);
+ assert.equal(new Set(all.map(geometrySignature)).size,164);
  assert.equal(manifest.counts.legacyAuthored,30);
- assert.equal(manifest.counts.newlyAuthored,131);
- assert.equal(manifest.counts.totalAuthored,161);
- assert.equal(manifest.counts.remaining,154);
+ assert.equal(manifest.counts.newlyAuthored,134);
+ assert.equal(manifest.counts.totalAuthored,164);
+ assert.equal(manifest.counts.remaining,151);
  assert.equal(manifest.counts.creatorAccepted,0);
  assert.equal(manifest.counts.integratedBuildings,0);
  assert.equal(manifest.categories.find(c=>c.type==='civic-hall').remaining,0);
  assert.equal(manifest.categories.find(c=>c.type==='guildhall').remaining,0);
 });
-test('all 158 whole-volume source fingerprints are unique under 90-degree rotation, reflection and translation',()=>{
+test('all 164 whole-volume source fingerprints are unique under 90-degree rotation, reflection and translation',()=>{
  const signatures=new Map();
  for(const b of [...old(),...fresh()]){
   const fingerprint=d4(b);
   assert.ok(!signatures.has(fingerprint),b.id+' duplicates '+signatures.get(fingerprint));
   signatures.set(fingerprint,b.id);
  }
- assert.equal(signatures.size,161);
+ assert.equal(signatures.size,164);
 });
 test('new state-and-knowledge palaces, embassies, archives, and observatories are occupied 3D rooms with two-cell head clearance and navigable public circulation',()=>{
  const all=fresh();
@@ -169,7 +169,7 @@ function overlapIoU(a,b){
  }
  return maximum;
 }
-test('eight original floor programs avoid same-category historical near-duplicates under any D4 reflection or translation',()=>{
+test('fourteen original floor programs avoid same-category historical near-duplicates under any D4 reflection or translation',()=>{
  const previous=old().map(b=>({id:b.id,type:b.type,forms:normalizedPlanForms(b)}));
  for(const b of fresh()){
   const f=normalizedPlanForms(b);
