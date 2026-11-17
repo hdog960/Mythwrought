@@ -170,6 +170,16 @@ export const M1_ARCADED_FRONT_SPECS=Object.freeze([
       "herringbone-rafter",
       "three-bay-loggia",
       "rear-cantilever"
+    ],
+    "rearButtresses": [
+      [
+        14,
+        40
+      ],
+      [
+        33,
+        40
+      ]
     ]
   },
   {
@@ -341,6 +351,16 @@ export const M1_ARCADED_FRONT_SPECS=Object.freeze([
       "stone-flying-piers",
       "open-empty-stall",
       "split-roof"
+    ],
+    "rearButtresses": [
+      [
+        25,
+        43
+      ],
+      [
+        34,
+        43
+      ]
     ]
   },
   {
@@ -512,6 +532,16 @@ export const M1_ARCADED_FRONT_SPECS=Object.freeze([
       "high-oculus",
       "deep-loggia",
       "double-arch"
+    ],
+    "rearButtresses": [
+      [
+        18,
+        41
+      ],
+      [
+        33,
+        41
+      ]
     ]
   },
   {
@@ -689,6 +719,16 @@ export const M1_ARCADED_FRONT_SPECS=Object.freeze([
       "triple-atrium",
       "arched-terrace",
       "sloping-snow-gables"
+    ],
+    "rearButtresses": [
+      [
+        16,
+        44
+      ],
+      [
+        35,
+        44
+      ]
     ]
   },
   {
@@ -860,6 +900,16 @@ export const M1_ARCADED_FRONT_SPECS=Object.freeze([
       "twin-recessed-oven-arches",
       "brick-buttresses",
       "overhanging-eaves"
+    ],
+    "rearButtresses": [
+      [
+        14,
+        41
+      ],
+      [
+        31,
+        41
+      ]
     ]
   },
   {
@@ -1039,6 +1089,16 @@ export const M1_ARCADED_FRONT_SPECS=Object.freeze([
       34,
       27,
       28
+    ],
+    "rearButtresses": [
+      [
+        15,
+        44
+      ],
+      [
+        33,
+        44
+      ]
     ]
   }
 ]);

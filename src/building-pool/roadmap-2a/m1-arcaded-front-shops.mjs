@@ -79,8 +79,10 @@ export function author2AArcadedFront(spec){
   windows.push({type:'window',x,y,z,material});
  }
  // Real side and front pilasters are supported from the existing floor upwards.
+ if(!Array.isArray(s.rearButtresses)||s.rearButtresses.length!==2)
+  throw Error('two explicit regionally grounded rear buttress anchors required: '+s.name);
  for(const [x,z] of [[entry-11,1],[entry+11,1],[1,s.side[0]-2],[1,s.side[1]+4],
-  [s.w-2,16],[s.w-2,34],[entry+2,s.d-2],[entry+8,s.d-2]]){
+  [s.w-2,16],[s.w-2,34],...s.rearButtresses]){
   if(get(x,1,z)?.kind!=='floor')throw Error('pilaster has no actual foundation/floor support '+K(x,1,z));
   for(let y=2;y<=s.h;y++){
    const v=add({x,y,z,kind:'wall',material:s.wall,architecturalRole:'source-founded-recessed-facade-buttress'});

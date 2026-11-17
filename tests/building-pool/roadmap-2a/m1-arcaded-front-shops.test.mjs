@@ -92,6 +92,11 @@ test('sixteen real source upper Pack4 window cells include camera-facing east/re
    assert.equal(actual.get(k)?.kind,'window');
    assert.equal(actual.get(k)?.material,w.material);
   }
+  for(const [x,z] of s.rearButtresses){
+   assert.equal(oldMap.get(K(x,1,z))?.kind,'floor',b.id+' explicit rear buttress base missing');
+   assert.equal(oldMap.get(K(x,2,z)),undefined,b.id+' rear source coordinate already occupied by weather wall or pier');
+   assert.equal(actual.get(K(x,2,z))?.kind,'wall',b.id+' rear supported buttress not authored');
+  }
   const supports=b.voxels.filter(v=>v.architecturalRole==='source-founded-recessed-facade-buttress');
   assert(supports.length>=70,b.id+' missing physical facade and near-facing source-founded buttresses');
   for(const v of supports){
