@@ -1,0 +1,82 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readRegisteredSnapshot,getCatalogRevision,readOnlyRegistryPort}
+  from '../../src/creative-integration/registry-snapshot.mjs';
+import {REGISTRY_SNAPSHOT_ABI,typedPlaceableKey} from '../../src/creative-integration/registry-validation.mjs';
+import {BUILD_MATERIALS} from '../../src/blocks.mjs';
+import {BIOME130_REGISTERED_IDS} from '../../src/biome130-registry.mjs';
+import {PACK2_LIVE_IDS} from '../../src/pack2-integration.mjs';
+
+const snapshot=()=>readRegisteredSnapshot();
+test('G1 reads the real installed BUILD_MATERIALS, not draft manual builder catalogs',()=>{
+  const s=snapshot();
+  assert.equal(s.abi,REGISTRY_SNAPSHOT_ABI);assert.equal(s.readOnly,true);
+  assert.equal(s.origin,'merged-main-registered-materials');
+  assert.ok(Object.isFrozen(s));assert.ok(Object.isFrozen(s.records));
+  assert.equal(s.records.length,BUILD_MATERIALS.length-s.excluded.length);
+  assert.equal(s.excluded.length,1);
+  assert.deepEqual(s.excluded.map(x=>x.id),[76]);
+  assert.match(s.excluded[0].reason,/not-certified/);
+});
+test('G1 includes all 130 source-registered biome families, excludes unregistered IDs',()=>{
+ const s=snapshot(), ids=new Set(s.records.map(x=>x.id));
+ // Incorporation 015 on merged main registered source-authored families 001..130.
+ // The adapter uses dynamic BIOME130_REGISTERED_IDS; this test pins today's
+ // producer-approved extent and rejects any inferred 131+ candidate IDs.
+ assert.equal(BIOME130_REGISTERED_IDS.length,130);
+ const expected=Array.from({length:130},(_,i)=>256+i);
+ assert.deepEqual(BIOME130_REGISTERED_IDS,expected);
+ const fromSnapshot=s.records.filter(x=>x.source.producer==='biome130').map(x=>x.id).sort((a,b)=>a-b);
+ assert.deepEqual(fromSnapshot,BIOME130_REGISTERED_IDS);
+ assert.ok(expected.every(id=>ids.has(id)));
+ for(const id of [386,387,400,512])
+  assert.ok(!ids.has(id),'Unregistered future biome ID leaked: '+id);
+ assert.equal(s.records.length,5+BIOME130_REGISTERED_IDS.length+PACK2_LIVE_IDS.length-1);
+ assert.equal(s.records.length,152);
+});
+test('G1 includes only independently verified Pack2 solid selections',()=>{
+ const s=snapshot(), ids=new Set(s.records.map(x=>x.id));
+ assert.equal(PACK2_LIVE_IDS.length,18);
+ assert.ok(PACK2_LIVE_IDS.filter(id=>id!==76).every(id=>ids.has(id)));
+ assert.ok(!ids.has(76));
+});
+test('G1 excludes unregistered reserved Pack1,3,4,5 and unrelated legacy terrain',()=>{
+ const ids=new Set(snapshot().records.map(x=>x.id));
+ for(const id of [0,1,2,6,9,15,31,109,125,159,181,209,226,255])assert.ok(!ids.has(id),String(id));
+ for(const id of [3,4,5,7,8])assert.ok(ids.has(id),String(id));
+});
+test('G1 production source identity and physical details are present for every row',()=>{
+ for(const x of snapshot().records){
+  assert.ok(x.registered&&x.placeable&&!x.scenicOnly);
+  assert.equal(x.source.installedRegistry,'src/blocks.mjs:BUILD_MATERIALS');
+  assert.ok(['core','biome130','pack2'].includes(x.source.producer));
+  assert.ok(x.placementRules.selectionBoxes.length>=1);
+  assert.ok(x.placementRules.rotations.includes(0));
+  assert.equal(typeof x.placementRules.requiresSupport,'boolean');
+ }
+});
+test('G1 type-preserving stable IDs cannot alias or synthesize candidate aliases',()=>{
+ const rows=snapshot().records,keys=rows.map(x=>typedPlaceableKey(x.id));
+ assert.equal(keys.length,new Set(keys).size);
+ assert.notEqual(typedPlaceableKey(3),typedPlaceableKey('3'));
+ assert.ok(rows.every(x=>typeof x.id==='number'&&Number.isSafeInteger(x.id)));
+});
+test('G1 snapshots are deterministic and deep-frozen',()=>{
+ const a=snapshot(),b=snapshot();assert.deepEqual(a,b);
+ assert.equal(getCatalogRevision(),a.revision);
+ assert.ok(Object.isFrozen(a.records[0]));assert.ok(Object.isFrozen(a.records[0].placementRules));
+ assert.ok(Object.isFrozen(a.records[0].placementRules.selectionBoxes[0]));
+ assert.throws(()=>{a.records[0].name='mutated';},TypeError);
+});
+test('G1 does not add any unsafe game API methods or save write callbacks',()=>{
+ const port=readOnlyRegistryPort();
+ assert.deepEqual(Object.keys(port).sort(),['getCatalogRevision','listPlaceables','readRegisteredSnapshot']);
+ for(const name of ['tryPlace','applyEditBatch','saveCreativeEdits','set','mutate','enable'])
+  assert.equal(port[name],undefined);
+ assert.ok(Object.isFrozen(port));
+});
+test('G1 async read-only port only returns the same structurally verified entries',async()=>{
+ const p=readOnlyRegistryPort(),rows=await p.listPlaceables();
+ assert.deepEqual(rows,snapshot().records);assert.ok(Object.isFrozen(rows));
+ assert.equal(p.getCatalogRevision(),snapshot().revision);
+});
