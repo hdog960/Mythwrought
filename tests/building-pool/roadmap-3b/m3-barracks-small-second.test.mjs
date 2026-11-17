@@ -226,10 +226,11 @@ test('nonboxlike high-pitched roof silhouettes and two supported distinct raised
   const yvals=new Set(sp.cells.map(c=>c[1]));
   assert.ok(yvals.size>=5,b.id+' fake short roof tower');
   for(const [z,rise]of b.architecture.roofSpurs){
-   for(let x=b.navigation.entry?b.navigation.nodes.find(n=>n.id==='entry').x+3:0;x<=b.navigation.nodes.find(n=>n.id==='entry').x+4;x++){
-    assert.ok(m.has(k(x,7,z)),b.id+' missing true roof carrier');
-    assert.ok(m.has(k(x,8,z)),b.id+' floating roof-tower first cell');
-   }
+   for(let x=b.navigation.nodes.find(n=>n.id==='entry').x+3;x<=b.navigation.nodes.find(n=>n.id==='entry').x+4;x++)
+    for(const zz of [z,z+1]){
+     assert.ok(m.has(k(x,7,zz)),b.id+' missing full 2x2 true roof carrier '+[x,zz]);
+     assert.ok(m.has(k(x,8,zz)),b.id+' floating 2x2 roof-tower foot '+[x,zz]);
+    }
   }
   assert.ok(b.modules.find(x=>x.role==='source-bearing-roof-mass').cells.length>100,b.id+' missing layered roof profile');
  }
