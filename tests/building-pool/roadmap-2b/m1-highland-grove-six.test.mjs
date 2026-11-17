@@ -186,15 +186,15 @@ test('ledger records exact source ID identities, immutable historical 126-source
  execFileSync('git',['hash-object',path],{encoding:'utf8'}).trim(),path+' source not exact HEAD');
  const l=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([l.target,l.sourceExactInheritedTemples,l.originalNewModels,l.authoredCandidates,l.remainingUnauthored,
-  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,123,138,282,0,0,0]);
- assert.equal(l.originals.length,123);
+  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,129,144,276,0,0,0]);
+ assert.equal(l.originals.length,129);
  for(const prior of PRESERVED126.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(l.originals.some(row=>row.id===prior.id),'lost historical authored source identity '+prior.id);
  for(const prior of COMPLETE132.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(l.originals.some(r=>r.id===prior.id),'lost one of original 132 authored identities '+prior.id);
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),138);
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),282);
- assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),138);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),144);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),276);
+ assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),144);
  for(const b of ORIGINAL_SIX)
   assert.equal(l.originals.find(x=>x.id===b.id)?.file,path,b.id+' ledger wrong author source');
 });
