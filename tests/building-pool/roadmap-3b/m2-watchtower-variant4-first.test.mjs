@@ -230,3 +230,15 @@ test('fourth-variation structural voids truly remove source-foundation and roof 
   assert.ok(!titles.has(b.architecture.kind),b.id+' duplicate structure theme');titles.add(b.architecture.kind);
  }
 });
+
+test('each authored keep cut actually removes source foundation voxels and cannot be an ineffective visual label',()=>{
+ for(const b of next){
+  const fp=new Set(b.modules.find(m=>m.role==='foundation').cells.map(([x,y,z])=>x+','+z));
+  assert.equal(b.architecture.authoredCutVolumes.length,2);
+  assert.ok(b.architecture.realRemovedKeepCells>8,b.id+' source volume cut too small');
+  for(const[a,x1,c,z1]of b.architecture.authoredCutVolumes){
+   assert.ok(a>=0&&c>=0&&a<=x1&&c<=z1&&x1<b.envelope.width&&z1<b.envelope.depth,b.id+' invalid cut');
+   for(let x=a;x<=x1;x++)for(let z=c;z<=z1;z++)assert.ok(!fp.has(x+','+z),b.id+' fake roof-only notch '+[x,z]);
+  }
+ }
+});

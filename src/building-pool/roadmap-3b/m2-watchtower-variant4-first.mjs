@@ -237,16 +237,16 @@ const plans=[
    [
     15,
     19,
-    20,
-    25,
+    10,
+    15,
     6,
     "x"
    ],
    [
-    15,
-    20,
-    22,
-    26,
+    19,
+    21,
+    28,
+    32,
     8,
     "z"
    ]
@@ -1043,7 +1043,7 @@ const plans=[
     48
    ],
    [
-    -5,
+    3,
     5,
     40,
     52
@@ -1282,7 +1282,7 @@ const plans=[
   "cuts": [
    [
     28,
-    23,
+    31,
     40,
     49
    ],
@@ -1846,8 +1846,18 @@ function create(p){
  const mask=new Set();
  for(const [x0,x1,z0,z1] of p.mask)
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++)mask.add(flat(x,z));
- // Real structural voids erase source foundation, walls and roof over hand-authored keep recesses.
- for(const [a,b,c,d] of p.cuts)for(let x=a;x<=b;x++)for(let z=c;z<=d;z++)mask.delete(flat(x,z));
+ // Prove every literal structural keep cut actually excises ground, wall and roof source occupancy.
+ // Fail closed on inverted/out-of-envelope cuts or decorative-only no-op removals.
+ let removedKeepCells=0;
+ for(const [a,b,c,e] of p.cuts){
+  if(![a,b,c,e].every(Number.isSafeInteger)||a<0||c<0||a>b||c>e||b>=w||e>=d)
+   throw Error(id+' invalid authored keep-cut rectangle '+[a,b,c,e]);
+  let removed=0;
+  for(let x=a;x<=b;x++)for(let z=c;z<=e;z++)if(mask.delete(flat(x,z)))removed++;
+  if(removed<3)throw Error(id+' visually claimed but structurally empty keep cut '+[a,b,c,e]);
+  removedKeepCells+=removed;
+ }
+
  const core=p.mask[0],isCore=(x,z)=>mask.has(flat(x,z))&&x>=core[0]&&x<=core[1]&&z>=core[2]&&z<=core[3];
  const halls=[
   B(aisle,2,0,2,3,d),B(sx,2,4,aisle-sx+2,3,1),
@@ -1991,7 +2001,7 @@ function create(p){
    {name:'real cargo source',position:[p.cargo[0],2,p.cargo[1]],assetRef:'pack4:057',unresolvedDependency:null},
    {name:'unbuilt smoke warning',position:[aisle,deckY+1,3],assetRef:null,unresolvedDependency:'Signal and fire not implemented'}
   ],
-  architecture:{kind:p.title,sourceIrregularMaskedFoundation:true,actualKeepVoids:p.cuts.length,independentSteppedLofts:p.lofts.length,footprintCells:mask.size,stairSteps:steps,
+  architecture:{kind:p.title,sourceIrregularMaskedFoundation:true,actualKeepVoids:p.cuts.length,realRemovedKeepCells:removedKeepCells,authoredCutVolumes:p.cuts.map(c=>[...c]),independentSteppedLofts:p.lofts.length,footprintCells:mask.size,stairSteps:steps,
    observationAccess:true,observationY:deckY+1,roofProfile:p.roofType,
    realRoofBearingColumns:4,occupiedCoordinates:blocks.size,worldPlaced:false,creatorApproved:false,
    perCellVariantResolved:false,perCellYawResolved:false},
