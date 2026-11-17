@@ -3,6 +3,13 @@ import {biome130Block} from './biome130-registry.mjs';
 export const BIOME130_ICE_MATERIAL=49;
 export const BIOME130_ICE_BLOCK_ID=350; // authored family 095
 export const BIOME130_ICE_BLOCK_IDS=Object.freeze([275,276,277,280,281,282,350]);
+// One tint per leaf species, chosen from the M11 author's middle palette swatch.
+// The existing per-face source color remains primary; this only bridges large
+// mismatched single-color polygons without inventing a new art palette.
+export const BIOME130_LEAF_SOURCE_TINTS=Object.freeze(Array.from({length:9},(_,index)=>{
+  const colors=biome130Block(377+index).palette;
+  return Object.freeze([...colors[Math.floor(colors.length/2)]]);
+}));
 const iceAlpha=new Map(BIOME130_ICE_BLOCK_IDS.map(id=>{
   const alpha=biome130Block(id).opacity;
   if(typeof alpha!=='number'||!Number.isFinite(alpha)||alpha<=0||alpha>=1)
@@ -31,12 +38,17 @@ export function splitBiome130Translucent(vertices){
   return {opaque,translucent};
 }
 // Tags 40–48 and 49.x never overlap Pack 2 material 21.
+// Foliage masks read as tapered leaves; gentle source-palette midpoint tint
+// reconciles each per-face color with its species, without a new color lookup.
 // Sub-box source faces receive whole-leaf, tapered silhouettes rather than checker perforations.
 // Foliage UV cutouts work in both graphics presets; ice retains exact source alpha.
 export function biome130TerrainFragmentShader(source){
   if(typeof source!=='string'||!source.includes('in float vDistance;')||
      !source.includes('void main(){')||!source.includes('float hashCell(vec2 p)'))
     throw new Error('Incompatible terrain shader');
+  const sourceLeafTint=BIOME130_LEAF_SOURCE_TINTS.map((rgb,index)=>
+    'vMat=='+(index+40)+'?vec3('+rgb.map(v=>v.toFixed(5)).join(',')+')'
+  ).join(':')+':vColor';
   const prefix=[
     'void main(){',
     '  if(vMat==20){',
@@ -67,7 +79,8 @@ export function biome130TerrainFragmentShader(source){
     '    if(lengthRatio>1.0||abs(leaf.x)>edge)discard;',
     '    float vein=1.0-smoothstep(.015,.085,abs(leaf.x+leaf.y*.09));',
     '    float detail=uArtQuality>.5?vein*.08:0.0;',
-    '    vec3 pigment=vColor*(.91+.12*seed+detail);',
+    '    vec3 leafTint='+sourceLeafTint+';',
+    '    vec3 pigment=mix(vColor,leafTint,.42)*(.91+.12*seed+detail);',
     '    float fog=smoothstep(29.0,68.0,vDistance);',
     '    outColor=vec4(mix(pigment,uFog,fog),1.0);return;',
     '  }'

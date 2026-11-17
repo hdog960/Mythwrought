@@ -6,7 +6,7 @@ import {meshDepthSection} from '../src/depth-mesh.mjs';
 import {biome130Block} from '../src/biome130-registry.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from '../src/storybook-materials.mjs';
 import {resolveBiome130BuilderAsset} from '../src/builder-assets/biome130.mjs';
-import {BIOME130_ICE_BLOCK_IDS,biome130MaterialTag,
+import {BIOME130_ICE_BLOCK_IDS,BIOME130_LEAF_SOURCE_TINTS,biome130MaterialTag,
   splitBiome130Translucent,biome130TerrainFragmentShader} from '../src/biome130-render.mjs';
 
 test('seven original ice opacities and nine foliage species have isolated tags',()=>{
@@ -27,6 +27,10 @@ test('seven original ice opacities and nine foliage species have isolated tags',
   assert.equal(biome130MaterialTag(21),0,'Pack 2 material 21 must remain reserved');
   for(let id=377;id<=385;id++){
     assert.equal(biome130MaterialTag(id),40+id-377);
+    const swatches=biome130Block(id).palette;
+    assert.deepEqual(BIOME130_LEAF_SOURCE_TINTS[id-377],
+      swatches[Math.floor(swatches.length/2)],
+      'Foliage tint must come from the actual M11 authored species palette');
     const asset=resolveBiome130BuilderAsset(biome130Block(id).symbol);
     assert.equal(asset.rendererFidelity,'alpha-cutout');
     assert.equal(asset.alphaIntent,'cutout');
@@ -95,6 +99,12 @@ test('real shader preserves water 20, opaque Pack 2 21, ice 49.x, both quality s
   assert.match(shader,/vMat==49/);
   assert.match(shader,/outColor=vec4\(mix\(glacial,uFog,f\),vPack2Alpha\)/);
   assert.match(shader,/vMat>=40&&vMat<=48/);
+  assert.match(shader,/vec3 pigment=mix\(vColor,leafTint,\.42\)/);
+  for(let i=0;i<9;i++){
+    const c=BIOME130_LEAF_SOURCE_TINTS[i].map(v=>v.toFixed(5)).join(',');
+    assert.ok(shader.includes('vMat=='+(40+i)+'?vec3('+c+')'),
+      'Missing exact palette-based GLSL color for species '+i);
+  }
   assert.match(shader,/bool needles=vMat==42\|\|vMat==43\|\|vMat==46/);
   assert.match(shader,/bool hanging=vMat==44\|\|vMat==48/);
   assert.match(shader,/lengthRatio>1\.0\|\|abs\(leaf\.x\)>edge\)discard/);
