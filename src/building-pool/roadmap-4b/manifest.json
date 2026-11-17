@@ -50,12 +50,12 @@
   ],
   "quota": 285,
   "inherited": 0,
-  "authored": 138,
-  "remaining": 147,
+  "authored": 143,
+  "remaining": 142,
   "creatorAccepted": 0,
   "integrated": 0,
   "worldPlaced": false,
-  "status": "M2 all healer/library original source slots authored (75 healers, 60 libraries), 138/285 roadmap candidates. 123 older exact-head source and Chromium accepted at Actions #44138509135; 15 new fifth-variant healer candidates await 90 genuine WebGL2 captures, full 828-image audit and dedicated native CI.",
+  "status": "M2 source AND genuine Chromium WebGL2 technical acceptance complete: 135/135 healer/library designs, exact-head Actions #44197912371 with 221/221 focused 4B native and 828/828 authentic camera-fit certified screenshots. M3 five original schoolhouses now source-authored, candidate-only and pending exact-head 858-image verification. No world placement, physical pack approval, integration or creator signoff.",
   "ownedPaths": [
     "src/building-pool/roadmap-4b/",
     "tests/building-pool/roadmap-4b/",
@@ -76,12 +76,12 @@
     "creatorArtApproval": false,
     "physicalIphoneApproval": false
   },
-  "nextMilestone": "Source-authored M2 complete; exact-head accept 15 fifth-variant healers, verify 1950 D4 IoU checks <0.89, 828 genuine Chromium exterior/section PNGs across 667x375, 844x390, 932x430, physical producer read-only AABBs. M3 schoolhouses remains unstarted; no runtime integration.",
+  "nextMilestone": "Exact-head M3 acceptance for five original source-coordinate schools: 700 normalized eight-way D4 floor IoUs strictly below 0.89, per-school classroom and shared-study navigation/roof/door/producer checks, plus 858 genuine source-specific Chromium WebGL2 screenshots (30 additional new school views), then M3 authoring toward 60 schoolhouses.",
   "milestones": {
     "M0": "TECHNICALLY ACCEPTED on PR #185 exact head 199af339dea3c708e5f92b21aa91ce47b7d99763, Actions #43767122199 SUCCESS (native Builder 4B suite + focused Chromium smoke/layout)",
     "M1": "M1 FIRST FIVE TECHNICAL REVIEW PASS: PR #185 at 242e189a96037f8bb1a76005f1a0964276f62925 GitHub Actions #43771739057 SUCCESS; 40/40 Builder 4B native Node tests (includes 30/30 real Chromium WebGL2 cube-proxy captures across 3 landscape sizes); source-level geometry and connectivity pass. FINAL physical-family/creator/iPhone approval NOT GIVEN.",
-    "M2": "SOURCE-AUTHORED COMPLETE (PENDING TECHNICAL ACCEPTANCE): 75/75 healer houses, 60/60 libraries, 135/135 M2 designs; 123 older technically accepted, 15 fifth variants pending exact-head Chromium and read-only manual producer acceptance. Real iPhone/physical mesh/creator approval not given.",
-    "M3": "NOT STARTED",
+    "M2": "SOURCE/WEBGL2 TECHNICALLY ACCEPTED: 75/75 healer houses and 60/60 libraries, 135/135 M2 designs, Actions #44197912371 exact HEAD f799de3f877679bd3be89f228dd3eb048464fb6b; 828/828 genuine Chromium software-WebGL2 views with individual validated camera fit and zero GL errors. Physical Pack1–5 live-mounting, creator approval, gameplay/iPhone and integration remain NOT ACCEPTED.",
+    "M3": "IN PROGRESS: five additional original schoolhouse candidates source-authored; 6/60 schoolhouses including first M1 school, five new pending dedicated native/30 genuine Chromium screenshots. Total 143/285 original Builder 4B designs; no M3 creator/world placement approval.",
     "M4": "NOT STARTED",
     "M5": "NOT STARTED",
     "M6": "NOT STARTED"
@@ -89,34 +89,34 @@
   "byCategoryAuthorCount": {
     "healers-house": 75,
     "library": 60,
-    "schoolhouse": 1,
+    "schoolhouse": 6,
     "magical-research-institute": 1,
     "arcane-academy": 1
   },
   "byBiomeSizeAuthorCount": {
     "temperate": {
       "small": 9,
-      "medium": 9,
+      "medium": 10,
       "large": 9
     },
     "desert": {
       "small": 10,
       "medium": 9,
-      "large": 9
+      "large": 10
     },
     "snow": {
-      "small": 9,
+      "small": 10,
       "medium": 9,
       "large": 9
     },
     "enchanted-forest": {
       "small": 9,
       "medium": 10,
-      "large": 9
+      "large": 10
     },
     "mountain": {
       "small": 9,
-      "medium": 9,
+      "medium": 10,
       "large": 10
     }
   },
@@ -258,7 +258,12 @@
     "r4:healers-house:enchanted-forest:large:05",
     "r4:healers-house:mountain:small:05",
     "r4:healers-house:mountain:medium:05",
-    "r4:healers-house:mountain:large:05"
+    "r4:healers-house:mountain:large:05",
+    "r4:schoolhouse:temperate:medium:01",
+    "r4:schoolhouse:desert:large:01",
+    "r4:schoolhouse:snow:small:01",
+    "r4:schoolhouse:enchanted-forest:large:01",
+    "r4:schoolhouse:mountain:medium:01"
   ],
   "m1Technical": {
     "sourceHead": "242e189a96037f8bb1a76005f1a0964276f62925",
@@ -283,7 +288,7 @@
     "authoredTotal": 138,
     "healers": 75,
     "libraries": 60,
-    "technicalAccepted": false,
+    "technicalAccepted": true,
     "creatorApproved": 0,
     "integrated": 0,
     "priorBrowserCaptures": 96,
@@ -339,12 +344,40 @@
     "prior113CameraFitVerifiedCaptures": 678,
     "prior113ArtifactId": 14347791524,
     "targetVariant05BrowserCaptures": 90,
-    "variant05BrowserExecuted": false,
+    "variant05BrowserExecuted": true,
     "prior123TechnicallyAccepted": true,
     "prior123ExactHead": "59e347358134b07efe1b32e5a55eaaab19100a94",
     "prior123Actions": 44138509135,
     "prior123VerifiedGenuineChromiumCaptures": 738,
     "prior123CameraFitVerifiedCaptures": 738,
-    "prior123ArtifactId": 14355030879
+    "prior123ArtifactId": 14355030879,
+    "prior138TechnicallyAccepted": true,
+    "prior138ExactHead": "f799de3f877679bd3be89f228dd3eb048464fb6b",
+    "prior138Actions": 44197912371,
+    "prior138VerifiedGenuineChromiumCaptures": 828,
+    "prior138CameraFitVerifiedCaptures": 828,
+    "prior138ArtifactId": 14380927446,
+    "sourceAuthorshipComplete": true,
+    "sourceBuildings": 135
+  },
+  "m3Candidate": {
+    "newModels": 5,
+    "newThisPass": 5,
+    "totalSchoolhouses": 6,
+    "authoredTotal": 143,
+    "technicalAccepted": false,
+    "sourceOnly": true,
+    "creatorApproved": 0,
+    "integrated": 0,
+    "worldPlaced": 0,
+    "prior138ExactHead": "f799de3f877679bd3be89f228dd3eb048464fb6b",
+    "prior138Actions": 44197912371,
+    "prior138TechnicallyAccepted": true,
+    "prior138VerifiedGenuineChromiumCaptures": 828,
+    "prior138ArtifactId": 14380927446,
+    "targetNewBrowserCaptures": 30,
+    "targetTotalBrowserCaptures": 858,
+    "browserExecuted": false,
+    "manualFivePackSupport": "read-only candidate-only, physical acceptance not granted"
   }
 }

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {PROGRAM,PLANNED_TOTAL,expectedIds} from '../../../src/building-pool/roadmap-4b/schema.mjs';
-import {M2_138_ALL} from '../../../src/building-pool/roadmap-4b/m2-variant05-final15.mjs';
+import {M3_143_ALL} from '../../../src/building-pool/roadmap-4b/m3-schoolhouses-first5.mjs';
 const load=path=>JSON.parse(readFileSync(new URL(path,import.meta.url),'utf8'));
 const manifest=load('../../../src/building-pool/roadmap-4b/manifest.json');
 const legacy=load('../../../src/building-pool/roadmap-4b/legacy-source.json');
@@ -14,8 +14,8 @@ test('manifest totals and original category IDs exactly match executable schema'
   assert.equal(expectedIds().length,285);
   assert.deepEqual(manifest.categories.map(x=>[x.type,x.perBiomeSize,x.total]),
     PROGRAM.map(x=>[x.type,x.perCombination,x.perCombination*15]));
-  assert.equal(manifest.inherited,0);assert.equal(manifest.authored,138);
-  assert.equal(manifest.remaining,147);assert.equal(manifest.creatorAccepted,0);
+  assert.equal(manifest.inherited,0);assert.equal(manifest.authored,143);
+  assert.equal(manifest.remaining,142);assert.equal(manifest.creatorAccepted,0);
   assert.equal(manifest.integrated,0);assert.equal(manifest.worldPlaced,false);
 });
 test('read-only legacy PR source is pinned and zero-migration is explicit',()=>{
@@ -29,10 +29,10 @@ test('read-only legacy PR source is pinned and zero-migration is explicit',()=>{
   assert.equal(legacy.originalPRModified,false);
 });
 test('manifest records five original M1 categories without phantom inherited designs',()=>{
-  assert.equal(manifest.authoredIds.length,138);
-  assert.equal(new Set(manifest.authoredIds).size,138);
-  assert.equal(Object.values(manifest.byCategoryAuthorCount).reduce((a,b)=>a+b,0),138);
-  assert.equal(Object.values(manifest.byBiomeSizeAuthorCount).flatMap(x=>Object.values(x)).reduce((a,b)=>a+b,0),138);
+  assert.equal(manifest.authoredIds.length,143);
+  assert.equal(new Set(manifest.authoredIds).size,143);
+  assert.equal(Object.values(manifest.byCategoryAuthorCount).reduce((a,b)=>a+b,0),143);
+  assert.equal(Object.values(manifest.byBiomeSizeAuthorCount).flatMap(x=>Object.values(x)).reduce((a,b)=>a+b,0),143);
   assert.match(manifest.milestones.M2,/SOURCE-AUTHORED COMPLETE/);
 });
 test('eight-lane roster grants no sibling-owned categories to Builder 4B',()=>{
@@ -53,13 +53,13 @@ test('only 4B-owned paths and unapproved Gate A are declared',()=>{
 });
 
 test('manifest exactly matches independently authored committed M1 plus M2 source IDs and per-cell quotas',()=>{
- assert.deepEqual(manifest.authoredIds,M2_138_ALL.map(x=>x.id));
+ assert.deepEqual(manifest.authoredIds,M3_143_ALL.map(x=>x.id));
  for(const category of manifest.categories)
-  assert.equal(manifest.byCategoryAuthorCount[category.type],M2_138_ALL.filter(b=>b.type===category.type).length);
+  assert.equal(manifest.byCategoryAuthorCount[category.type],M3_143_ALL.filter(b=>b.type===category.type).length);
  for(const biome of manifest.biomes)for(const size of manifest.sizes)
-  assert.equal(manifest.byBiomeSizeAuthorCount[biome][size],M2_138_ALL.filter(b=>b.biome===biome&&b.size===size).length);
+  assert.equal(manifest.byBiomeSizeAuthorCount[biome][size],M3_143_ALL.filter(b=>b.biome===biome&&b.size===size).length);
  assert.equal(manifest.m2Candidate.newModels,133);
- assert.equal(manifest.m2Candidate.technicalAccepted,false);
+ assert.equal(manifest.m2Candidate.technicalAccepted,true);
  assert.equal(manifest.m2Candidate.newThisPass,15);
  assert.equal(manifest.m2Candidate.targetDistinctiveBrowserCaptures,72);
  assert.equal(manifest.m2Candidate.targetVariant02BrowserCaptures,60);
@@ -107,7 +107,21 @@ test('manifest exactly matches independently authored committed M1 plus M2 sourc
  assert.equal(manifest.m2Candidate.prior123VerifiedGenuineChromiumCaptures,738);
  assert.equal(manifest.m2Candidate.prior123CameraFitVerifiedCaptures,738);
  assert.equal(manifest.m2Candidate.prior123ArtifactId,14355030879);
- assert.equal(manifest.m2Candidate.variant05BrowserExecuted,false);
+ assert.equal(manifest.m2Candidate.variant05BrowserExecuted,true);
  assert.equal(manifest.m2Candidate.targetVariant05BrowserCaptures,90);
+ assert.equal(manifest.m2Candidate.prior138TechnicallyAccepted,true);
+ assert.equal(manifest.m2Candidate.prior138ExactHead,'f799de3f877679bd3be89f228dd3eb048464fb6b');
+ assert.equal(manifest.m2Candidate.prior138Actions,44197912371);
+ assert.equal(manifest.m2Candidate.prior138VerifiedGenuineChromiumCaptures,828);
+ assert.equal(manifest.m2Candidate.prior138CameraFitVerifiedCaptures,828);
+ assert.equal(manifest.m2Candidate.prior138ArtifactId,14380927446);
+ assert.equal(manifest.m2Candidate.sourceAuthorshipComplete,true);
+ assert.equal(manifest.m3Candidate.newModels,5);
+ assert.equal(manifest.m3Candidate.totalSchoolhouses,6);
+ assert.equal(manifest.m3Candidate.authoredTotal,143);
+ assert.equal(manifest.m3Candidate.technicalAccepted,false);
+ assert.equal(manifest.m3Candidate.targetNewBrowserCaptures,30);
+ assert.equal(manifest.m3Candidate.targetTotalBrowserCaptures,858);
+ assert.equal(manifest.m3Candidate.browserExecuted,false);
  assert.equal(manifest.m2Candidate.creatorApproved,0);
 });
