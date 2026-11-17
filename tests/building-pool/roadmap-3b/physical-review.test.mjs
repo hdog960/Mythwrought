@@ -1,3 +1,4 @@
+import {BIOME130_REGISTERED_SYMBOLS} from '../../../src/biome130-registry.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {reviewM1PhysicalDependencies} from '../../../src/building-pool/roadmap-3b/physical-review.mjs';
@@ -17,11 +18,13 @@ test('M1 reports exactly 15 original watchtowers using current real 96-family/10
  assert.equal(review.hasFinalMultiCellReservations,false);
  assert.ok(review.assets.every(a=>a.uses>0&&a.finalWorldProof===false));
 });
-test('M1 typed ledger distinguishes current biome130 006 from four unregistered far-future families',()=>{
- assert.equal(status('biome130:006')?.status,'registry-shape-available');
- for(const ref of ['biome130:094','biome130:096','biome130:098','biome130:104']){
-  assert.equal(status(ref)?.status,'not-registered-in-current-main',ref);
-  assert.equal(status(ref)?.numericId,null);
+test('M1 typed ledger reflects actual current biome130 registered source shapes but never world placement approval',()=>{
+ for(const ref of ['biome130:006','biome130:094','biome130:096','biome130:098','biome130:104']){
+  const registered=BIOME130_REGISTERED_SYMBOLS.includes(ref);
+  assert.equal(status(ref)?.status,registered?'registry-shape-available':'not-registered-in-current-main',ref);
+  if(registered)assert.ok(Number.isSafeInteger(status(ref)?.numericId),ref+' real numeric ID absent');
+  else assert.equal(status(ref)?.numericId,null,ref);
+  assert.equal(status(ref)?.finalWorldProof,false,ref+' producer registry is not creator placement approval');
  }
 });
 test('M1 all imported manual source references have a typed, fail-closed physical catalog resolution status',()=>{

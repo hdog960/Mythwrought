@@ -1,3 +1,4 @@
+import {BIOME130_REGISTERED_SYMBOLS} from '../../../src/biome130-registry.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createVariant3SecondBlueprint,createVariant3SecondPool} from '../../../src/building-pool/roadmap-3b/m2-variant3-second.mjs';
@@ -220,7 +221,7 @@ test('read-only physical ABI handoff uses the actual integrated manual five-pack
  for(const symbol of ['biome130:094','biome130:096','biome130:098']){
   const s=report.symbolicDependencies.find(x=>x.symbol===symbol);
   assert.ok(s,symbol);
-  assert.equal(s.registeredNow,false,symbol);
+  assert.equal(s.registeredNow,BIOME130_REGISTERED_SYMBOLS.includes(symbol),symbol);
   assert.equal(s.placedAsBuiltVoxel,false,symbol);
  }
  console.log('MYTHWROUGHT_3B_M2_VARIANT3_SECOND_COUNTS='+JSON.stringify(next.map(b=>({

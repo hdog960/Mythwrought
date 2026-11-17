@@ -1,3 +1,4 @@
+import {BIOME130_REGISTERED_SYMBOLS} from '../../../src/biome130-registry.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createVariant3SecondBlueprint,createVariant3SecondPool} from '../../../src/building-pool/roadmap-3b/m2-variant3-second.mjs';
@@ -177,7 +178,7 @@ test('actual integrated five-pack and biome130 read-only source physical ABI, wi
  for(const symbol of ['biome130:094','biome130:096','biome130:098']){
   const item=report.symbolicDependencies.find(s=>s.symbol===symbol);
   assert.ok(item,symbol+' must be explicitly tracked');
-  assert.equal(item.registeredNow,false,symbol+' must not be misreported as live');
+  assert.equal(item.registeredNow,BIOME130_REGISTERED_SYMBOLS.includes(symbol),symbol+' must not be misreported as live');
   assert.equal(item.placedAsBuiltVoxel,false,symbol+' must not be occupied as a built cell');
  }
  const pack5Areas=["r3:lumberyard:desert:medium:3","r3:lumberyard:snow:small:3","r3:lumberyard:mountain:medium:3","r3:mill:temperate:large:3","r3:mill:desert:large:3","r3:mill:enchanted-forest:small:3"];

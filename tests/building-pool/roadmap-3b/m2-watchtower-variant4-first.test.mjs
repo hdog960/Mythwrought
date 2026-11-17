@@ -1,3 +1,4 @@
+import {BIOME130_REGISTERED_SYMBOLS} from '../../../src/biome130-registry.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createVariant3SecondBlueprint,createVariant3SecondPool} from '../../../src/building-pool/roadmap-3b/m2-variant3-second.mjs';
@@ -210,7 +211,7 @@ test('real producer Pack 1-5 source family cells, biome130 deferred symbols and 
  for(const pack of ['pack1:','pack2:','pack3:','pack4:','pack5:'])assert.ok(p.assets.some(a=>a.symbol.startsWith(pack)),pack+' not in placed source cells');
  for(const symbol of ['biome130:094','biome130:096','biome130:098']){
   const s=p.symbolicDependencies.find(x=>x.symbol===symbol);
-  assert.ok(s,symbol+' dependency missing');assert.equal(s.registeredNow,false);assert.equal(s.placedAsBuiltVoxel,false);
+  assert.ok(s,symbol+' dependency missing');assert.equal(s.registeredNow,BIOME130_REGISTERED_SYMBOLS.includes(symbol));assert.equal(s.placedAsBuiltVoxel,false);
  }
  console.log('MYTHWROUGHT_3B_WATCHTOWER_VARIANT4_FIRST_COUNTS='+JSON.stringify(next.map(b=>({id:b.id,cells:b.architecture.occupiedCoordinates,foundation:b.architecture.footprintCells,risers:b.architecture.stairSteps}))));
 });

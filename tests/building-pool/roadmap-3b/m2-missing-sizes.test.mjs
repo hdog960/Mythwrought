@@ -1,3 +1,4 @@
+import {BIOME130_REGISTERED_SYMBOLS} from '../../../src/biome130-registry.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createMissingSlotIndustryBlueprint,createMissingSlotIndustryPool} from '../../../src/building-pool/roadmap-3b/m2-missing-sizes.mjs';
@@ -145,7 +146,7 @@ test('read-only actual 96-family/106-variant physical ABI review does not imply 
  assert.ok(report.assets.every(a=>a.status!=='not-live-registered'));
  for(const sym of ['biome130:094','biome130:096','biome130:098']){
   const a=report.symbolicDependencies.find(x=>x.symbol===sym);
-  assert.ok(a,sym);assert.equal(a.registeredNow,false);assert.equal(a.placedAsBuiltVoxel,false);
+  assert.ok(a,sym);assert.equal(a.registeredNow,BIOME130_REGISTERED_SYMBOLS.includes(sym));assert.equal(a.placedAsBuiltVoxel,false);
  }
  console.log('MYTHWROUGHT_3B_M2_FIRST_VARIANT_COMPLETION='+JSON.stringify(newest.map(b=>({
   id:b.id,cells:b.architecture.occupiedCoordinates,envelope:[b.envelope.width,b.envelope.height,b.envelope.depth],

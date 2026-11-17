@@ -1,3 +1,4 @@
+import {BIOME130_REGISTERED_SYMBOLS} from '../../../src/biome130-registry.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createFrontierIndustryBlueprint,createFrontierIndustryPool} from '../../../src/building-pool/roadmap-3b/m2-frontier.mjs';
@@ -149,7 +150,7 @@ test('frontier physical-family audit is accurate and fail-closed: 96/106 catalog
  for(const id of ['biome130:094','biome130:096','biome130:098']){
   const requirement=review.symbolicDependencies.find(x=>x.symbol===id);
   assert.ok(requirement,id);
-  assert.equal(requirement.registeredNow,false,id);
+  assert.equal(requirement.registeredNow,BIOME130_REGISTERED_SYMBOLS.includes(id),id);
   assert.equal(requirement.placedAsBuiltVoxel,false,id);
  }
  console.log('MYTHWROUGHT_3B_M2_FRONTIER_COUNTS='+JSON.stringify(additions.map(b=>({

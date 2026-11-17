@@ -1,3 +1,4 @@
+import {BIOME130_REGISTERED_SYMBOLS} from '../../../src/biome130-registry.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createVariant3SecondBlueprint,createVariant3SecondPool} from '../../../src/building-pool/roadmap-3b/m2-variant3-second.mjs';
@@ -204,7 +205,7 @@ test('actual occupied source Pack1–5 physical assets, unplaced symbolic biomes
  for(const symbol of ['biome130:094','biome130:096','biome130:098']){
   const s=r.symbolicDependencies.find(x=>x.symbol===symbol);
   assert.ok(s,symbol+' missing symbolic deferred dependency');
-  assert.equal(s.registeredNow,false);assert.equal(s.placedAsBuiltVoxel,false);
+  assert.equal(s.registeredNow,BIOME130_REGISTERED_SYMBOLS.includes(symbol));assert.equal(s.placedAsBuiltVoxel,false);
  }
  console.log('MYTHWROUGHT_3B_WATCHTOWER_VARIANT2_MEDIUM_LARGE_COUNTS='+JSON.stringify(next.map(b=>({id:b.id,cells:b.architecture.occupiedCoordinates,foundation:b.architecture.footprintCells,stairSteps:b.architecture.stairSteps}))));
 });

@@ -1,3 +1,4 @@
+import {BIOME130_REGISTERED_SYMBOLS} from '../../../src/biome130-registry.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createVariant3SecondBlueprint,createVariant3SecondPool} from '../../../src/building-pool/roadmap-3b/m2-variant3-second.mjs';
@@ -195,7 +196,7 @@ test('real Pack1-5 source cell ABI, typed symbolic biome130 and zero production 
   assert.ok(r.assets.some(v=>v.symbol.startsWith(pack)),pack+' no actual source-cell family');
  for(const sym of ['biome130:094','biome130:096','biome130:098']){
   const s=r.symbolicDependencies.find(x=>x.symbol===sym);
-  assert.ok(s,sym+' missing typed unresolved source');assert.equal(s.registeredNow,false);assert.equal(s.placedAsBuiltVoxel,false);
+  assert.ok(s,sym+' missing typed unresolved source');assert.equal(s.registeredNow,BIOME130_REGISTERED_SYMBOLS.includes(sym));assert.equal(s.placedAsBuiltVoxel,false);
  }
  console.log('MYTHWROUGHT_3B_WATCHTOWER_VARIANT2_FIRST_COUNTS='+JSON.stringify(next.map(b=>({id:b.id,cells:b.architecture.occupiedCoordinates,foundation:b.architecture.footprintCells,steps:b.architecture.stairSteps}))));
 });
