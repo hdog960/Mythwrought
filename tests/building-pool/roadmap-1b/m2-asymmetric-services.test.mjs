@@ -29,7 +29,7 @@ test('M2e 164/435 original authored IDs and physical fingerprints; 15 exact inhe
  assert.equal(new Set(all.map(p=>structuralFingerprint(p))).size,164);
  assert.equal(new Set(fresh.map(p=>p.architecturalIdentity.program)).size,9);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(p=>p.category===k).length])),
-  {'bathhouse':23,stable:28,'farm-barn':22,greenhouse:23,'fishing-lodge':21,'harbor-office':20,lighthouse:21});
+  {bathhouse:24,stable:28,'farm-barn':23,greenhouse:24,'fishing-lodge':22,'harbor-office':21,lighthouse:22});
  for(const b of old){const carried=all.find(p=>p.id===b.id);assert.ok(carried);
   assert.equal(stableBlueprintJSON(carried),stableBlueprintJSON(b),'legacy stable source modified '+b.id);
  }
