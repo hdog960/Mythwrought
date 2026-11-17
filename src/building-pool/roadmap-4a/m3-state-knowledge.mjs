@@ -2675,7 +2675,7 @@ const PLANS=[
   "rooms": [
     {
       "id": "marble-river-oath-hall",
-      "kind": "throne-hall",
+      "kind": "entrance-hall",
       "rect": [
         39,
         11,
@@ -2685,7 +2685,7 @@ const PLANS=[
     },
     {
       "id": "western-guard-court",
-      "kind": "guard-gallery",
+      "kind": "tower-or-wing",
       "rect": [
         12,
         29,
@@ -2695,7 +2695,7 @@ const PLANS=[
     },
     {
       "id": "eastern-treaty-chambers",
-      "kind": "council",
+      "kind": "grand-chamber",
       "rect": [
         65,
         25,
@@ -2947,7 +2947,7 @@ const PLANS=[
   "rooms": [
     {
       "id": "summit-safe-passage-chamber",
-      "kind": "formal-reception",
+      "kind": "formal-chamber",
       "rect": [
         30,
         10,
@@ -2957,7 +2957,7 @@ const PLANS=[
     },
     {
       "id": "western-mountain-guest-court",
-      "kind": "hospitality",
+      "kind": "guest-area",
       "rect": [
         11,
         25,
@@ -3209,7 +3209,7 @@ const PLANS=[
   "rooms": [
     {
       "id": "frostbound-public-index",
-      "kind": "reading-room",
+      "kind": "consultation-room",
       "rect": [
         29,
         10,
@@ -3219,7 +3219,7 @@ const PLANS=[
     },
     {
       "id": "west-sealed-scroll-vault",
-      "kind": "preservation-vault",
+      "kind": "records-vault",
       "rect": [
         9,
         23,
