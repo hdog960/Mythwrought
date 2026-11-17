@@ -136,3 +136,33 @@ test('interrupted stale receipt stays rejected after another edit and recovery',
   assert.deepEqual(restored.read([0,0,0]),{id:2,revision:0});
   assert.equal(restored.orientation([0,0,0]),null);
 });
+
+test('abort before queued preparation suppresses callback side effects', async () => {
+  const s=recoverLegacyVoxelSession([entry(0)]);
+  const editor=createLeasedLegacyEditor(s);
+  const controller=new AbortController();
+  let preparations=0;
+  const pending=editor.editMany([receipt(0)],()=>{preparations++;},controller.signal);
+  controller.abort();
+  await assert.rejects(pending,{name:'AbortError'});
+  assert.equal(preparations,0);
+  assert.deepEqual(s.read([0,0,0]),{id:1,revision:0});
+  assert.equal(await editor.editMany([receipt(0)]),true);
+});
+
+test('cancelled multi-cell preparation cannot invalidate either orientation', async () => {
+  const s=recoverLegacyVoxelSession([entry(0),entry(1)]);
+  const editor=createLeasedLegacyEditor(s), controller=new AbortController(), g=gate();
+  assert.equal(s.setOrientation([0,0,0],1,0,1),true);
+  assert.equal(s.setOrientation([1,0,0],1,0,3),true);
+  const pending=editor.editMany([receipt(0),receipt(1)],()=>g.pending,controller.signal);
+  controller.abort();
+  await assert.rejects(pending,{name:'AbortError'});
+  assert.deepEqual(s.exportLegacyCells(),[entry(0),entry(1)]);
+  assert.equal(editor.orientation([0,0,0]),1);
+  assert.equal(editor.orientation([1,0,0]),3);
+  assert.equal(await editor.editMany([receipt(1)]),true);
+  assert.equal(editor.orientation([0,0,0]),1);
+  assert.equal(editor.orientation([1,0,0]),null);
+  g.release();
+});
