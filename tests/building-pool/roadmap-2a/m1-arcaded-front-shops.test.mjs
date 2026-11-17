@@ -123,7 +123,13 @@ test('source-backed roof transitions form genuinely distinct front roof profiles
   const b=M1_ARCADED_FRONT_SHOPS[i],s=M1_ARCADED_FRONT_SPECS[i],
     vox=new Map(b.voxels.map(v=>[K(v.x,v.y,v.z),v]));
   const newly=b.voxels.filter(v=>v.architecturalRole?.startsWith('distinct-facade-')||
-    v.architecturalRole==='source-supported-split-rear-eaves');
+    v.architecturalRole==='source-supported-split-rear-eaves'||
+    v.architecturalRole?.startsWith('visible-near-east-eave-')||
+    v.architecturalRole?.startsWith('visible-near-rear-eave-'));
+  const nearFacing=newly.filter(v=>v.architecturalRole?.startsWith('visible-near-east-eave-')||
+    v.architecturalRole?.startsWith('visible-near-rear-eave-'));
+  assert.equal(nearFacing.length,b.facadeArticulation.visibleNearFacingRoofCells,
+    b.id+' must source-count all camera-facing roof voxels');
   assert.equal(newly.length,b.facadeArticulation.sourceRoofTransitionCells);
   assert(newly.length>=75,b.id+' new architecture has only nominal roof change');
   assert(b.facadeArticulation.rearTransitions>=8);
