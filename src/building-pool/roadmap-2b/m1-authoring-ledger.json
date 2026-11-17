@@ -6,17 +6,17 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 100,
-  "authoredCandidates": 115,
-  "remainingUnauthored": 305,
+  "originalNewModels": 106,
+  "authoredCandidates": 121,
+  "remainingUnauthored": 299,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
-      "authored": 16,
+      "authored": 18,
       "target": 60,
-      "remaining": 44
+      "remaining": 42
     },
     "tailor": {
       "authored": 14,
@@ -24,19 +24,19 @@
       "remaining": 46
     },
     "butcher": {
-      "authored": 14,
-      "target": 60,
-      "remaining": 46
-    },
-    "jeweler": {
-      "authored": 14,
-      "target": 60,
-      "remaining": 46
-    },
-    "bookshop": {
       "authored": 15,
       "target": 60,
       "remaining": 45
+    },
+    "jeweler": {
+      "authored": 15,
+      "target": 60,
+      "remaining": 45
+    },
+    "bookshop": {
+      "authored": 16,
+      "target": 60,
+      "remaining": 44
     },
     "temple": {
       "authored": 24,
@@ -44,9 +44,9 @@
       "remaining": 51
     },
     "theater": {
-      "authored": 18,
+      "authored": 19,
       "target": 45,
-      "remaining": 27
+      "remaining": 26
     }
   },
   "originals": [
@@ -549,27 +549,57 @@
       "id": "r2:jeweler:desert:large:02",
       "file": "src/building-pool/roadmap-2b/m1-windfold-guilds.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:enchanted-forest:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-crescent-merchants.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:desert:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-crescent-merchants.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:temperate:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-crescent-merchants.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-rime-and-river.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-rime-and-river.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:temperate:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-rime-and-river.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
       "small": 8,
-      "medium": 7,
+      "medium": 9,
       "large": 7
     },
     "desert": {
-      "small": 7,
+      "small": 8,
       "medium": 8,
       "large": 9
     },
     "snow": {
       "small": 8,
       "medium": 11,
-      "large": 6
+      "large": 7
     },
     "enchanted-forest": {
-      "small": 5,
-      "medium": 6,
+      "small": 6,
+      "medium": 7,
       "large": 10
     },
     "mountain": {
