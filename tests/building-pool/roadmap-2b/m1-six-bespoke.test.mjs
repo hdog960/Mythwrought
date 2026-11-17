@@ -171,7 +171,7 @@ test('all 101 actual source identities match exact committed PR-head Git blob an
  for(const id of ids)assert(new Set(l.originals.map(x=>x.id)).has(id),'lost historical six-bespoke candidate '+id);
  assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),132);
  assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),288);
- assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,b)=>n+b.small+b.medium+b.large,0),126);
+ assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,b)=>n+b.small+b.medium+b.large,0),132);
  assert(NEW.every(b=>l.originals.some(row=>row.id===b.id&&row.file==='src/building-pool/roadmap-2b/'+
   (b.category==='jeweler'||b.category==='butcher'?'m1-bespoke-courts.mjs':b.category==='theater'?'m1-shadowstage.mjs':'m1-ritual-trades.mjs'))));
 });
