@@ -12,12 +12,14 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 120,
-    "totalAuthored": 150,
-    "remaining": 165,
+    "newlyAuthored": 128,
+    "totalAuthored": 158,
+    "remaining": 157,
     "creatorAccepted": 0,
     "integratedBuildings": 0,
-    "m2Original": 120
+    "m2Original": 120,
+    "m3Original": 6,
+    "m4EarlyOriginal": 2
   },
   "biomes": [
     "temperate",
@@ -53,7 +55,7 @@
       "perBiomeSize": 3,
       "total": 45,
       "inherited": 0,
-      "remaining": 45,
+      "remaining": 43,
       "milestone": 3
     },
     {
@@ -61,7 +63,7 @@
       "perBiomeSize": 3,
       "total": 45,
       "inherited": 15,
-      "remaining": 30,
+      "remaining": 28,
       "milestone": 3
     },
     {
@@ -69,7 +71,7 @@
       "perBiomeSize": 3,
       "total": 45,
       "inherited": 0,
-      "remaining": 45,
+      "remaining": 43,
       "milestone": 3
     },
     {
@@ -77,7 +79,7 @@
       "perBiomeSize": 3,
       "total": 45,
       "inherited": 0,
-      "remaining": 45,
+      "remaining": 43,
       "milestone": 4
     }
   ],
@@ -92,9 +94,9 @@
   "gates": {
     "M0": "Accepted: exact-head Actions #43767981937 passed after fixing owned M0 count/list tests; 30 inherited source-exact designs preserved",
     "M1": "Technical candidate acceptance: exact-head Actions #43770848853 passed, 180 source-driven Chromium WebGL2 exterior/cutaway proxy captures; physical/creator gates open",
-    "M2": "THEORETICAL M2 AUTHORING COMPLETE: 75/75 civic halls, 60/60 guildhalls, plus 15 inherited castle-palaces, total 150/315 coordinate-authored blueprints (30 inherited, 120 independent new), 165 later-category designs unauthored. Final ten custom faceted civic/guild plans await exact-head focused Node + 60 genuine source-pinned Chromium WebGL2 candidate captures. Every Pack1–5 real producer collision/mount, saved yaw, physical iPhone and creator art acceptance remains blocked. No merging or live integration.",
-    "M3": "not started",
-    "M4": "not started",
+    "M2": "Theoretical design complete: 75/75 civic halls and 60/60 guildhalls; source-specific 60/60 Chromium WebGL2 PNGs exact-head full/focused Actions #44017406628 and #44017445958 SUCCESS; final premium visual and full physical Pack1–5 acceptance still blocked.",
+    "M3": "8 new M3/M4 state-and-knowledge original source-coordinates authored: 2 castle-palaces, 2 embassies, 2 grand archives and 2 early M4 observatories. Current 158/315 theoretical, 157 remaining, 0 approved/integrated. The eight new 48-view genuine Chromium candidate gallery and native CI must pass before technical source acceptance. Pack1–5 actual selected variants, orientation, AABB/mounts and iPhone remain blocked.",
+    "M4": "2 standalone observatory candidates authored early under new M3/M4 isolated module; remaining 43/45. Source technical CI/gallery pending; physical and creator acceptance open.",
     "M5": "not started",
     "M6": "creator gate open"
   },

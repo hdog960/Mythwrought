@@ -46,3 +46,7 @@ Eight source-coordinate original frontier assemblies and trade-craft candidate p
 
 ## M2 Final Civic & Guild (2026-11-16)
 All **75 civic halls and 60 guildhalls** are now coordinate-authored theoretical candidates. There are **150/315** theoretical buildings total (30 inherited, 120 new originals), with **165** later categories still unauthored. Final ten varied massings use actual faceted courts, asymmetric source wings and 23 skyline lantern volumes. Strict 150-way source-D4 uniqueness, normalized floor IoU <0.85, source roof bearing and physical symbol acceptance documented at `docs/building-pool/roadmap-4a/M2_FINAL_CIVIC_GUILD_ACCEPTANCE.md`. No real physical-pack registration or in-game deployment. All earlier counts are historical checkpoints, not the live cumulative total.
+
+
+## M3/M4 first state-and-knowledge tranche (2026-11-17)
+Eight separately source-authored original castle-palaces, embassies, grand archives and early observatories; 158/315 overall, 157 unauthored, all M2 civic/guild milestones preserved. Strict 158-volume D4 uniqueness, new same-category normalized floor IoU <0.85, 44 accessible room programs, supported roof lanterns and exact new 48-view source-specific Chromium acceptance. See `docs/building-pool/roadmap-4a/M3_STATE_KNOWLEDGE_ACCEPTANCE.md`. Candidate only: zero creator accepted, live integrated or world-placed.
