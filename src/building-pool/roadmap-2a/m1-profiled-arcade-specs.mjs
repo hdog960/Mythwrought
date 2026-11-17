@@ -291,8 +291,8 @@ export const M1_PROFILED_ARCADE_SPECS=Object.freeze([
         "empty-animal-hardware"
       ],
       [
-        14,
-        43,
+        16,
+        45,
         "pack4:057",
         null,
         "unoccupied-bedding-crate"
