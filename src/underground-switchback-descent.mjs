@@ -458,6 +458,46 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // Lower-band stepped confluence at -110: a three-landing erosion hall.
+  // The two outer arms flank an intact central rib, rejoining beyond it.
+  // Each 12-cell landing drops exactly one block, with continuous physical
+  // support and four-cell standing clearance. No new block IDs or legacy cuts.
+  {
+    const depth=-110,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,floor,width=1,height=7)=>{
+        for(let a=-width;a<=width;a++){
+          const x=anchor.x+outward[0]*d+tangent[0]*(t+a);
+          const z=anchor.z+outward[1]*d+tangent[1]*(t+a);
+          set(x,floor,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)set(x,floor+h,z,BLOCK.AIR);
+        }
+      };
+      for(let d=0;d<=14;d++)carve(d,0,depth,1);
+      for(let d=14;d<=54;d++){
+        const floor=depth-(d>=38?2:d>=26?1:0);
+        const spread=Math.round(9*Math.sin(Math.PI*(d-14)/40));
+        carve(d,-spread,floor,1,7);
+        carve(d,spread,floor,1,7);
+      }
+      // Rejoined terminal hall and two sheltered chambers.
+      for(let d=49;d<=70;d++)for(let t=-14;t<=14;t++){
+        const radial=((d-59)/12)**2+(t/15)**2;
+        if(radial<=1)carve(d,t,depth-2,0,5+Math.floor(8*(1-radial)));
+      }
+      for(const pocket of [{d:36,t:-15,r:6},{d:43,t:16,r:8}]){
+        const floor=depth-(pocket.d>=38?2:1);
+        for(let dd=-pocket.r;dd<=pocket.r;dd++)
+          for(let tt=-pocket.r;tt<=pocket.r;tt++){
+            const radial=(dd*dd+tt*tt)/(pocket.r*pocket.r);
+            if(radial<=1)carve(pocket.d+dd,pocket.t+tt,floor,0,5+Math.floor(4*(1-radial)));
+          }
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
