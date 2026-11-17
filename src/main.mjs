@@ -274,13 +274,19 @@ function start(){
       g2Sync();message('Landed safely · Explore controls restored');return true;
     }catch(e){g2Status.textContent='Landing blocked: '+e.message;return false;}
   }
+  function g2ResumeControls(){
+    // A first key/touch can arrive before the next frame after closing settings.
+    // Resume synchronously ONLY when body, GPU, overlay and foreground are safe.
+    if(!g2Active()||!g2Controls.paused||document.hidden||graphicsLost||
+       !help.hidden||exploration.isOpen())return false;
+    const p={x:player.x,y:player.feet,z:player.z};
+    if(!g2Ready(p)||!g2Clear(p))return false;
+    g2Controls=resumeG2Controls(g2Controls,{flightStillSafe:true});
+    return !g2Controls.paused;
+  }
   function g2Move(dt){
     if(!g2Active())return;
-    if(g2Controls.paused){
-      const p={x:player.x,y:player.feet,z:player.z};
-      if(!g2Ready(p)||!g2Clear(p))return; // stay hovering until safe.
-      g2Controls=resumeG2Controls(g2Controls,{flightStillSafe:true});
-    }
+    if(g2Controls.paused&&!g2ResumeControls())return;
     const intent=readG2ControlIntent(g2Controls);
     if(intent.landRequested){g2Land();return;}
     try{
@@ -941,6 +947,7 @@ function start(){
       try{el.setPointerCapture(active);}catch(_){}
       el.classList.add('engaged');update(e,0,0,true);
       if(g2Active()&&g2Zone){
+        g2ResumeControls();
         g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone:g2Zone});
         if(g2Zone==='move')g2Controls=dispatchG2Control(g2Controls,
           {type:'pointermove',id:active,x:joystick.x,y:joystick.y});
@@ -1078,6 +1085,7 @@ function start(){
     if(!isWorldControlTarget(e.target,e)||!help.hidden||exploration.isOpen()||document.hidden)return;
     if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
     if(g2Active()){
+      g2ResumeControls();
       g2Controls=dispatchG2Control(g2Controls,{type:'key',code:e.code,pressed:true});
       if(['KeyQ','KeyE','Space'].includes(e.code))e.preventDefault();
     }else if(e.code==='Space'&&!e.repeat)jump();
@@ -1175,6 +1183,7 @@ function start(){
          graphicsLost||button.disabled||active!==null)return;
       e.preventDefault();active=e.pointerId;
       lastTouch=performance.now();g2ConsumedClicks.set(id,lastTouch);
+      g2ResumeControls();
       g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
       try{button.setPointerCapture(active);}catch(_){}
       if(zone==='land')g2Land();
@@ -2064,6 +2073,8 @@ function start(){
       flightInfo(){return {active:g2Active(),profile:g2Active()?g2Flight.profile:'off',
         position:{x:player.x,y:player.feet,z:player.z},
         blocked:Boolean(g2Flight?.blocked),reason:g2Flight?.reason||'off',
+        controlsPaused:g2Controls.paused,
+        heldKeys:[...g2Controls.controls.keys],
         token:g2Token(),pendingPlans:g2Flight?.prefetch.pending.length||0,
         minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y+1,
         bodyClear:g2Clear({x:player.x,y:player.feet,z:player.z}),

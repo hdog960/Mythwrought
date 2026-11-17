@@ -46,6 +46,12 @@ test('G2B source clears flight input on blur, visibility, map, context loss',()=
  assert.ok(src.includes("canvas.addEventListener('webglcontextlost'"));
  assert.ok(src.includes('frameDriver.pause();cancelAllPointers()'));
 });
+test('G2B first resumed W or thumb input is safety-checked before capture',()=>{
+ assert.ok(src.includes('function g2ResumeControls()'));
+ assert.ok(src.includes('!g2Ready(p)||!g2Clear(p)'));
+ assert.ok(src.includes("g2ResumeControls();\n      g2Controls=dispatchG2Control(g2Controls,{type:'key'"));
+ assert.ok(src.includes("g2ResumeControls();\n        g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown'"));
+});
 test('G2B LAND tap cannot emit a delayed Explore JUMP or edit after mode flip',()=>{
  assert.ok(src.includes('const g2ConsumedClicks=new Map()'));
  assert.ok(src.includes('g2ConsumedClicks.set(id,lastTouch)'));
