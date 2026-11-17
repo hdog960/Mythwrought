@@ -572,6 +572,50 @@ export function descentCells(origin=DESCENT_ORIGIN){
       for(let t=0;t<=15;t++)carve(66,t,depth-2,1,6);
     }
   }
+  // Bedrock-margin labyrinth at -200: a meandering three-pronged chamber
+  // network, with two joined galleries and a blind lower refuge. Every
+  // path begins at the real descending corridor and remains above -209.
+  // This intentionally differs from the oval vaults at shallower depths.
+  {
+    const depth=-200,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,floor=depth,height=6)=>{
+        const x=anchor.x+outward[0]*d+tangent[0]*t;
+        const z=anchor.z+outward[1]*d+tangent[1]*t;
+        set(x,floor,z,BLOCK.DEEPSTONE);
+        for(let h=1;h<=height;h++)set(x,floor+h,z,BLOCK.AIR);
+      };
+      const passage=(d,t,floor=depth)=>{
+        for(let across=-2;across<=2;across++)carve(d,t+across,floor,7);
+      };
+      // Shared entry, diverging arms, and transverse return at the far end.
+      for(let d=0;d<=16;d++)passage(d,0);
+      for(let d=16;d<=58;d++){
+        const spread=Math.round(12*Math.sin(Math.PI*(d-16)/42));
+        passage(d,-spread);
+        passage(d,spread);
+      }
+      for(let t=-5;t<=5;t++)passage(58,t);
+      // Three irregular, genuinely navigable terminal pockets.
+      for(const pocket of [
+        {d:62,t:-12,rx:11,rz:8,h:10},
+        {d:67,t:12,rx:9,rz:12,h:8},
+        {d:79,t:0,rx:8,rz:7,h:9}
+      ]){
+        for(let dd=-pocket.rx;dd<=pocket.rx;dd++)
+          for(let tt=-pocket.rz;tt<=pocket.rz;tt++){
+            const radial=(dd/pocket.rx)**2+(tt/pocket.rz)**2;
+            if(radial<=1)carve(pocket.d+dd,pocket.t+tt,depth,
+              5+Math.floor((pocket.h-5)*(1-radial)));
+          }
+      }
+      // Central corridor reaches the far refuge; no teleport or shaft.
+      for(let d=58;d<=79;d++)passage(d,0);
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
