@@ -37,7 +37,9 @@ test('G2B source never creates independent mesh upload on flight',()=>{
 });
 test('G2B disabled default retains ordinary movement and action bindings',()=>{
  assert.ok(main.includes('else{\n      const result=stepPlayer'));
- assert.ok(main.includes("bindGameplayAction('jump',jump)"));
+ assert.ok(main.includes('g2BindJumpToggle()'));
+ assert.ok(main.includes('if(!g2Active())jump()'));
+ assert.ok(main.includes("else if(e.code==='Space'&&!e.repeat)jump()"));
  assert.ok(main.includes("bindGameplayAction('place',()=>edit('place'))"));
  assert.ok(main.includes('g2Active()'));
 });

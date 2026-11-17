@@ -18,7 +18,11 @@ test('G2B flight uses original physical button IDs with gated Explore actions',(
  assert.ok(src.includes("bindGameplayAction('dig',()=>edit('mine'))"));
  assert.ok(src.includes("g2BindHold('dig','down')"));
  assert.ok(src.includes("g2BindHold('place','up')"));
- assert.ok(src.includes("g2BindHold('jump','land')"));
+ assert.ok(src.includes('g2BindJumpToggle()'));
+ assert.ok(src.includes("if(zone==='up'||zone==='down')g2Move(.05)"));
+ assert.ok(src.includes('const G2_JUMP_DOUBLE_TAP_MS=500'));
+ assert.ok(src.includes('if(g2Active())g2Land();else g2Start();'));
+ assert.ok(!src.includes("g2BindHold('jump','land')"));
  assert.ok(src.includes('||button.disabled||g2Active()'));
 });
 test('G2B source uses separate independent pointer ownership and release',()=>{

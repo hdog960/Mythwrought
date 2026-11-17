@@ -195,7 +195,7 @@ function start(){
     for(const [id,label,aria] of [
       ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
       ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
-      ['jump',on?'LAND':'JUMP',on?'Request safe landing':'Jump']]){
+      ['jump',on?'LAND ×2':'JUMP',on?'Double-tap for safe landing':'Jump; double-tap to toggle Creative flight']]){
       const el=document.getElementById(id);el.textContent=label;el.setAttribute('aria-label',aria);
     }
     g2Status.textContent=on?'FLIGHT · '+g2Flight.profile+' · '+g2Flight.reason:
@@ -218,19 +218,20 @@ function start(){
     const at={x:player.x,y:player.feet,z:player.z};
     if(document.hidden||graphicsLost||exploration.isOpen()||
        !g2Ready(at)||!g2Clear(at)){
-      g2Status.textContent='Flight unavailable: body/region not ready';return false;
+      g2Status.textContent='Flight unavailable: body/region not ready';
+      message('Flight unavailable: stand in a loaded, clear area and double-tap JUMP again');return false;
     }
     try{
       const initial=createG2FlightState({position:at,worldToken:g2Token(),
         heightBounds:{minFeet:WORLD_MIN_Y,maxFeet:WORLD_MAX_Y+1}});
       const active=armG2Flight(initial,{enabled:true,isRegionReady:g2Ready,isBodyClear:g2Clear});
-      if(active.mode!=='flight'){g2Status.textContent=active.reason;return false;}
+      if(active.mode!=='flight'){g2Status.textContent=active.reason;message(active.reason);return false;}
       g2Flight=selectG2FlightProfile(active,g2Profile.value);
       g2Controls=enterG2ControlOwnership(createG2ControlState(),
         {featureEnabled:true,flightReady:true});
       player.vX=player.vY=player.vZ=0;player.onGround=false;player.coyote=0;
       player.jumpBuffer=0;jumpQueued=false;g2Sync();return true;
-    }catch(e){g2Status.textContent='Flight refused: '+e.message;return false;}
+    }catch(e){g2Status.textContent='Flight refused: '+e.message;message(g2Status.textContent);return false;}
   }
   function g2LandingHost(){
     const host=g2Host();
@@ -1165,7 +1166,42 @@ function start(){
       action();
     });
   }
-  bindGameplayAction('jump',jump);
+  // Single tap preserves normal JUMP; double-tap toggles Creative Flight.
+  // iPhone touch uses pointerdown because another thumb may suppress click.
+  const G2_JUMP_DOUBLE_TAP_MS=500;
+  let lastG2JumpTap=-Infinity;
+  function g2JumpTap(){
+    const now=performance.now(),delta=now-lastG2JumpTap;
+    if(delta>=0&&delta<=G2_JUMP_DOUBLE_TAP_MS){
+      lastG2JumpTap=-Infinity;
+      if(g2Active())g2Land();else g2Start();
+    }else{
+      lastG2JumpTap=now;
+      if(!g2Active())jump();
+    }
+  }
+  function g2BindJumpToggle(){
+    const button=document.getElementById('jump');
+    let lastTouchAt=-Infinity;
+    button.addEventListener('pointerdown',e=>{
+      if(e.pointerType!=='touch')return;
+      e.preventDefault();
+      if(!help.hidden||exploration.isOpen()||document.hidden||
+         graphicsLost||button.disabled)return;
+      lastTouchAt=performance.now();
+      g2JumpTap();
+    });
+    button.addEventListener('click',e=>{
+      // Never double-count the synthesized click after an iPhone pointerdown.
+      if(e.detail!==0&&performance.now()-lastTouchAt<850){
+        e.preventDefault();return;
+      }
+      if(!help.hidden||exploration.isOpen()||document.hidden||
+         graphicsLost||button.disabled){e.preventDefault();return;}
+      g2JumpTap();
+    });
+  }
+  g2BindJumpToggle();
   bindGameplayAction('dig',()=>edit('mine'));
   bindGameplayAction('place',()=>edit('place'));
   // Held flight actions are NEVER generic MINE/PLACE/JUMP actions.
@@ -1186,7 +1222,10 @@ function start(){
       g2ResumeControls();
       g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
       try{button.setPointerCapture(active);}catch(_){}
-      if(zone==='land')g2Land();
+      // A quick tap may start/end between frames. One immediate bounded,
+      // physically checked step guarantees an UP/DOWN response on iPhone.
+      // Keeping the pointer owned continues movement while held.
+      if(zone==='up'||zone==='down')g2Move(.05);
     });
     for(const type of ['pointerup','pointercancel']){
       button.addEventListener(type,release);
@@ -1199,7 +1238,6 @@ function start(){
       if(e.detail!==0&&performance.now()-lastTouch<750)return;
       // Accessible keyboard activation: a single small UP/DOWN nudge;
       // keyboard Q/E continue to supply sustained motion.
-      if(zone==='land'){g2Land();return;}
       if(!g2Ready({x:player.x,y:player.feet,z:player.z}))return;
       const action=zone==='up'?1:-1;
       try{
@@ -1212,7 +1250,7 @@ function start(){
       }catch(_){g2Pause('Keyboard flight nudge refused safely');}
     });
   }
-  g2BindHold('dig','down');g2BindHold('place','up');g2BindHold('jump','land');
+  g2BindHold('dig','down');g2BindHold('place','up');
   const pack5Enabled=document.getElementById('pack5Enabled'),
     pack5Family=document.getElementById('pack5Family'),
     pack5Variant=document.getElementById('pack5Variant'),

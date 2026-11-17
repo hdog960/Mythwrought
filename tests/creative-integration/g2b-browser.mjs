@@ -45,11 +45,25 @@ try{
    assert.equal(await page.locator('#explorationOverlay').isVisible(),true);
    await page.locator('#closeExploration').click();
    assert.equal(await page.locator('#explorationOverlay').isVisible(),false);
-   await page.locator('#menu').click();
-   assert.equal(await page.locator('#g2bFlightEnable').isChecked(),false);
-   await page.locator('#g2bFlightEnable').check();
+   // Physical iPhone-style touches, no settings checkbox or mouse-click shortcuts.
+   await page.locator('#jump').tap();
+   assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,false,
+     'One JUMP tap must not enable flight');
+   await page.locator('#jump').tap();
    let info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
-   assert.equal(info.active,true,'Flight failed to arm with real loaded body clearance: '+info.reason);
+   assert.equal(info.active,true,'Double-tap JUMP did not enable flight: '+info.reason);
+   await page.locator('#jump').tap();
+   assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,true,
+     'One LAND tap must not end flight');
+   await page.locator('#jump').tap();
+   info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.equal(info.active,false,'Double-tap LAND should restore Explore at spawn: '+info.reason);
+   await page.locator('#jump').tap();
+   await page.locator('#jump').tap();
+   info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.equal(info.active,true,'Repeat double-tap JUMP did not re-enable flight: '+info.reason);
+   await page.locator('#menu').click();
+   assert.equal(await page.locator('#g2bFlightEnable').isChecked(),true);
    assert.equal(info.bodyClear,true);
    assert.equal(info.resident,true);
    for(const profile of ['precision','normal','fast','travel']){
@@ -62,7 +76,7 @@ try{
    await page.waitForTimeout(250); // paused controls may resume only after the next safe GPU frame.
    assert.equal(await page.locator('#dig').textContent(),'DOWN');
    assert.equal(await page.locator('#place').textContent(),'UP');
-   assert.equal(await page.locator('#jump').textContent(),'LAND');
+   assert.equal(await page.locator('#jump').textContent(),'LAND ×2');
    const before=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    // Focus the real world, then wait for actual simulated movement instead of
    // assuming SwiftShader renders a deterministic number of frames in 340ms.
@@ -82,6 +96,19 @@ try{
      width+' · '+JSON.stringify({before,after,moved}));
    assert.equal(after.bodyClear,true,'Flight entered a real physical collision');
    assert.equal(after.resident,true,'Flight outran GPU-resident chunks');
+   // Regression: real brief touch taps must move vertically even when
+   // pointerdown and pointerup happen before the next render frame.
+   const preUp=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   await page.locator('#place').tap();
+   const postUp=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.ok(postUp.position.y>preUp.position.y+.035,
+     'UP tap failed to climb: '+JSON.stringify({preUp,postUp}));
+   await page.locator('#dig').tap();
+   const postDown=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.ok(postDown.position.y<postUp.position.y-.035,
+     'DOWN tap failed to descend: '+JSON.stringify({postUp,postDown}));
+   assert.equal(postDown.bodyClear,true);
+   assert.equal(postDown.resident,true);
    // Genuine independent three-touch CDP input: MOVE + LOOK + UP held together.
    const cdp=await context.newCDPSession(page);
    const left=center(await page.locator('#movePad').boundingBox());
@@ -109,7 +136,10 @@ try{
    await page.waitForTimeout(100);
    assert.equal(await page.locator('#scene').getAttribute('data-g2b-flight'),'true');
    // Returning to Explore never occurs without verified ground and clear body.
-   await page.locator('#jump').click();
+   await page.locator('#jump').tap();
+   assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,true,
+     'One LAND tap must not toggle flight');
+   await page.locator('#jump').tap();
    await page.waitForTimeout(160);
    const landed=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    if(!landed.active){
@@ -118,7 +148,7 @@ try{
      const vy=Number(await page.locator('#scene').getAttribute('data-player-velocity-y'));
      assert.ok(!Number.isFinite(vy)||vy<3,'Landing tap synthesized a second Explore jump');
    }else{
-     assert.equal(await page.locator('#jump').textContent(),'LAND');
+     assert.equal(await page.locator('#jump').textContent(),'LAND ×2');
      assert.match(landed.reason,/landing|safe|hover|ready|blocked/i);
    }
    await page.screenshot({path:'artifacts/mythwrought-g2b-'+width+'x'+height+'.png'});
