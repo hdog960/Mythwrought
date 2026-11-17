@@ -185,7 +185,8 @@ export function createSurfaceBiomeWorldView(world,{
   const cache=new Map();
   // The fresh-profile eligibility gate is checked only when the view is
   // constructed. Later edits must not remove already visible natural terrain.
-  // Individual edited cells always defer to the authoritative world reader.
+  // Individual edited or newly protected cells always defer to the authoritative
+  // world reader, even if their column was already cached.
   // Persistence of the opt-in profile flag remains a manual integrator gate.
   // hasDurableEditIntent MUST be backed by persistent touched-cell history,
   // including edits later reverted to their legacy natural value. An empty
@@ -211,7 +212,8 @@ export function createSurfaceBiomeWorldView(world,{
     seed:world.seed,
     get(x,y,z){
       const original=world.get(x,y,z);
-      if(![x,y,z].every(Number.isInteger)||hasDurableEditIntent(x,y,z)||
+      if(![x,y,z].every(Number.isInteger)||isProtected(x,y,z)||
+         hasDurableEditIntent(x,y,z)||
          world.edits.has(x+','+y+','+z)||world.rotations.has(x+','+y+','+z))
         return original;
       return planAt(x,z)?.get(y)??original;
