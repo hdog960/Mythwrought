@@ -20,10 +20,11 @@ const modules=[
  'm2-watchtower-variant2-first-chromium.test.mjs',
  'm2-watchtower-variant2-medium-large-chromium.test.mjs',
  'm2-watchtower-variant3-first-chromium.test.mjs',
- 'm2-watchtower-variant4-first-chromium.test.mjs'
+ 'm2-watchtower-variant4-first-chromium.test.mjs',
+ 'm2-watchtower-variant5-final-chromium.test.mjs'
 ];
 
-test('all eighteen independent Builder 3B real-Chromium capture suites obtain and release the exclusive runner permit',()=>{
+test('all nineteen independent Builder 3B real-Chromium capture suites obtain and release the exclusive runner permit',()=>{
  for(const filename of modules){
   const s=readFileSync(new URL('./'+filename,import.meta.url),'utf8');
   assert.ok(s.includes("import {acquire3BChromiumPermit} from './chromium-resource-lock.mjs';"),filename+' lacks mutex');
