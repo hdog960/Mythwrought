@@ -3,6 +3,14 @@
 const cellKey = (x,y,z) => `${x},${y},${z}`;
 const validCell = p => p && ['x','y','z'].every(k => Number.isSafeInteger(p[k]));
 const validId = n => Number.isSafeInteger(n) && n >= 0;
+// Avoid subtraction beyond the exact integer range when sorting valid world cells.
+const compareCell = (a,b) => {
+  for (const axis of ['x','y','z']) {
+    if (a[axis] < b[axis]) return -1;
+    if (a[axis] > b[axis]) return 1;
+  }
+  return 0;
+};
 export function createEditIntentLedger(edits, {registeredIds = []} = {}) {
   if (!Array.isArray(edits) || !Array.isArray(registeredIds) || !registeredIds.every(validId))
     throw new TypeError('invalid edits or registered IDs');
@@ -19,7 +27,7 @@ export function createEditIntentLedger(edits, {registeredIds = []} = {}) {
     if (!old || e.sequence>old.sequence)
       byCell.set(k,{x:e.x,y:e.y,z:e.z,blockId:e.blockId,sequence:e.sequence});
   }
-  const records=[...byCell.values()].sort((a,b)=>a.x-b.x||a.y-b.y||a.z-b.z)
+  const records=[...byCell.values()].sort(compareCell)
     .map(e=>Object.freeze(e));
   const lookup=new Map(records.map(e=>[cellKey(e.x,e.y,e.z),e]));
   return Object.freeze({
