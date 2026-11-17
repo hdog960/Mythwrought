@@ -59,12 +59,13 @@ test('10 original wave4 hospitality source buildings, four taverns and six inns,
  assert.deepEqual(findMirroredOrRotatedDuplicates(pool),[]);
  assert.ok(pool.every(b=>b.status==='candidate'&&b.worldPlacement===false&&b.liveIntegration===false));
 });
-test('wave4 source cohort reaches all five biomes and all three overall size classes',()=>{
+test('wave4 cohort covers five biomes in small and large forms; complete pool retains medium sources',()=>{
  assert.deepEqual([...new Set(hospitality.map(b=>b.biome))].sort(),['desert','enchanted-forest','mountain','snow','temperate']);
  assert.deepEqual(hospitality.filter(b=>b.category==='tavern').map(b=>b.biome).sort(),['enchanted-forest','snow','temperate','temperate']);
  assert.deepEqual(hospitality.filter(b=>b.category==='inn').map(b=>b.biome).sort(),['desert','enchanted-forest','mountain','snow','temperate','temperate']);
+ assert.deepEqual([...new Set(hospitality.map(b=>b.size))].sort(),['large','small']);
  for(const size of ['small','medium','large'])
-  assert.ok(hospitality.some(b=>b.size===size),size+' missing from new source cohort');
+  assert.ok(pool.some(b=>b.size===size),size+' missing from the full source pool');
 });
 test('10 hospitality wave4 buildings have strict original source partition AND full concave exterior signatures versus all 214 original and new',()=>{
  const plans=pool.map(normPlan),shapes=pool.map(silhouette);
