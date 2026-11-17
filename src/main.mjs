@@ -983,18 +983,18 @@ function start(){
   };
   // Capture is per grip: moving and aiming simultaneously never compete for one pointer.
   function pointerPad(el,update,release,g2Zone=null){
-    let active=null,activeTouch=null,lastX=0,lastY=0;
+    let active=null,activeTouch=null,activePointerType=null,pointerStartedAt=-Infinity,lastX=0,lastY=0;
     function stop(){
       if(active===null)return;
       if(g2Active()&&g2Zone)g2Controls=dispatchG2Control(g2Controls,{type:'pointerup',id:active});
-      heldPointers.delete(active);active=null;activeTouch=null;release();el.classList.remove('engaged');
+      heldPointers.delete(active);active=null;activeTouch=null;activePointerType=null;release();el.classList.remove('engaged');
     }
     el.addEventListener('pointerdown',e=>{
-      if(e.pointerType==='touch')return; // iPhone uses stable Touch Events below.
       // A second touch must never steal a held grip. Settings and background
       // transitions cannot create invisible held pointers behind the overlay.
       if(active!==null||!help.hidden||exploration.isOpen()||document.hidden)return;
-      e.preventDefault();active=e.pointerId;lastX=e.clientX;lastY=e.clientY;
+      e.preventDefault();active=e.pointerId;activePointerType=e.pointerType;pointerStartedAt=e.timeStamp;
+      lastX=e.clientX;lastY=e.clientY;
       heldPointers.set(active,stop);
       try{el.setPointerCapture(active);}catch(_){}
       el.classList.add('engaged');update(e,0,0,true);
@@ -1023,14 +1023,27 @@ function start(){
       // no longer receives its own pointerup; stop() is idempotent.
       window.addEventListener(event,e=>{if(active===e.pointerId)stop();},true);
     }
-    el.addEventListener('lostpointercapture',stop);
+    el.addEventListener('lostpointercapture',e=>{if(activeTouch===null&&active===e.pointerId)stop();});
     // Use native WebKit Touch Events for real two-thumb iPhone grips.
     // PointerEvents on iOS can be cancelled when a second finger is added.
     el.addEventListener('touchstart',e=>{
-      if(active!==null||!help.hidden||exploration.isOpen()||document.hidden)return;
-      const t=e.changedTouches[0],id=g2TouchPointerId(t);
+      if(!help.hidden||exploration.isOpen()||document.hidden)return;
+      const t=Array.from(e.changedTouches).find(x=>x.target&&el.contains(x.target))||
+        (e.changedTouches.length===1?e.changedTouches[0]:null);
+      const id=g2TouchPointerId(t);
       if(id===null)return;
-      e.preventDefault();active=id;activeTouch=t.identifier;
+      // When pointerdown precedes touchstart, promote only its first
+      // near-synchronous touch, never a later second finger or mouse/pen.
+      if(active!==null){
+        if(activeTouch!==null||activePointerType!=='touch'||
+           e.timeStamp-pointerStartedAt<0||e.timeStamp-pointerStartedAt>250)return;
+        const old=active;
+        if(g2Active()&&g2Zone)
+          g2Controls=dispatchG2Control(g2Controls,{type:'pointerup',id:old});
+        heldPointers.delete(old);active=null;activePointerType=null;
+        try{el.releasePointerCapture(old);}catch(_){}
+      }
+      e.preventDefault();active=id;activeTouch=t.identifier;activePointerType='touch';
       lastX=t.clientX;lastY=t.clientY;
       heldPointers.set(active,stop);el.classList.add('engaged');
       update(t,0,0,true);
@@ -1321,18 +1334,18 @@ function start(){
   // Pointerdown is necessary on iPhone while another thumb holds its pad.
   function g2BindHold(id,zone){
     const button=document.getElementById(id);
-    let active=null,activeTouch=null,lastTouch=-Infinity;
+    let active=null,activeTouch=null,activePointerType=null,pointerStartedAt=-Infinity,lastTouch=-Infinity;
     const release=e=>{
       if(active===null||(e&&e.pointerId!==active))return;
       if(g2Active())g2Controls=dispatchG2Control(g2Controls,{type:'pointerup',id:active});
       if(zone==='up'||zone==='down')g2TouchVertical[zone]=false;
-      active=null;activeTouch=null;
+      active=null;activeTouch=null;activePointerType=null;
     };
     button.addEventListener('pointerdown',e=>{
-      if(e.pointerType==='touch')return; // Native touchstart owns iPhone hold state.
       if(!g2Active()||!help.hidden||exploration.isOpen()||document.hidden||
          graphicsLost||button.disabled||active!==null)return;
-      e.preventDefault();active=e.pointerId;
+      e.preventDefault();active=e.pointerId;activePointerType=e.pointerType;
+      pointerStartedAt=e.timeStamp;
       lastTouch=e.timeStamp;g2ConsumedClicks.set(id,lastTouch);
       g2ResumeControls();
       g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
@@ -1347,10 +1360,18 @@ function start(){
     // stable native touch identifier for independent UP/DOWN hold tracking.
     button.addEventListener('touchstart',e=>{
       if(!g2Active()||!help.hidden||exploration.isOpen()||document.hidden||
-         graphicsLost||button.disabled||active!==null)return;
-      const t=e.changedTouches[0],id=g2TouchPointerId(t);
-      if(id===null)return;
-      e.preventDefault();active=id;activeTouch=t.identifier;
+         graphicsLost||button.disabled)return;
+      const t=Array.from(e.changedTouches).find(x=>x.target&&button.contains(x.target))||
+        (e.changedTouches.length===1?e.changedTouches[0]:null);
+      const touchId=g2TouchPointerId(t);
+      if(touchId===null)return;
+      if(active!==null){
+        if(activeTouch!==null||activePointerType!=='touch'||
+           e.timeStamp-pointerStartedAt<0||e.timeStamp-pointerStartedAt>250)return;
+        const old=active;release({pointerId:old});
+        try{button.releasePointerCapture(old);}catch(_){}
+      }
+      e.preventDefault();active=touchId;activeTouch=t.identifier;activePointerType='touch';
       lastTouch=e.timeStamp;g2ConsumedClicks.set(button.id,lastTouch);
       g2ResumeControls();
       g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
@@ -1365,7 +1386,7 @@ function start(){
       button.addEventListener(type,release);
       window.addEventListener(type,release,true);
     }
-    button.addEventListener('lostpointercapture',release);
+    button.addEventListener('lostpointercapture',e=>{if(activeTouch===null&&active===e.pointerId)release(e);});
     button.addEventListener('click',e=>{
       if(!g2Active())return;
       e.preventDefault();
