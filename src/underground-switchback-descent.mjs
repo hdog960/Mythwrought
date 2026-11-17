@@ -450,9 +450,11 @@ export function descentEvidence(world,origin=DESCENT_ORIGIN){
   const bands=[[-4,-45],[-46,-100],[-101,-155],[-156,WORLD_MIN_Y+1]];
   return bands.map(([high,low])=>{
     const steps=route.filter(p=>p.floor<=high&&p.floor>=low);
-    const invalid=steps.filter(p=>reader.get(p.x,p.floor,p.z)===BLOCK.AIR||
-      reader.get(p.x,p.feet,p.z)!==BLOCK.AIR||
-      reader.get(p.x,p.feet+1,p.z)!==BLOCK.AIR);
+    const invalid=steps.filter(p=>{
+      const footing=reader.get(p.x,p.floor,p.z);
+      return (footing!==BLOCK.STONE&&footing!==BLOCK.DEEPSTONE)||
+        [0,1,2,3].some(h=>reader.get(p.x,p.feet+h,p.z)!==BLOCK.AIR);
+    });
     return {high,low,count:steps.length,invalid:invalid.length};
   });
 }
