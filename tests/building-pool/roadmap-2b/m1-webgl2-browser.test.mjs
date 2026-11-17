@@ -29,9 +29,9 @@ async function server(){
  await new Promise((ok,fail)=>{http.once('error',fail);http.listen(0,'127.0.0.1',ok);});
  return http;
 }
-// 240 real cold-start Chromium captures take longer than the prior 120-view run;
+// 252 real cold-start Chromium captures take longer than the prior 120-view run;
 // do not truncate genuine browser work at the historic 210s test deadline.
-test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authored M1 source at three phone-landscape dimensions', {timeout:800000},async(t)=>{
+test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authored M1 source at three phone-landscape dimensions', {timeout:840000},async(t)=>{
  const browser=findBrowser();
  if(!browser){t.skip('Chromium/Chrome binary not installed: candidate WebGL2 capture unverified');return;}
  const http=await server(), temp=await mkdtemp(join(tmpdir(),'mythwrought-2b-webgl-'));
@@ -277,7 +277,19 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
   ['tailor',667,375,'exterior','temperate','small',2],
   ['tailor',667,375,'cutaway','temperate','small',2],
   ['market-square',844,390,'exterior','snow','small',2],
-  ['market-square',844,390,'cutaway','snow','small',2]
+  ['market-square',844,390,'cutaway','snow','small',2],
+  ['market-square',667,375,'exterior','temperate','small',2],
+  ['market-square',667,375,'cutaway','temperate','small',2],
+  ['market-square',844,390,'exterior','temperate','small',2],
+  ['market-square',844,390,'cutaway','temperate','small',2],
+  ['market-square',932,430,'exterior','temperate','small',2],
+  ['market-square',932,430,'cutaway','temperate','small',2],
+  ['theater',667,375,'exterior','desert','small',3],
+  ['theater',667,375,'cutaway','desert','small',3],
+  ['theater',844,390,'exterior','desert','small',3],
+  ['theater',844,390,'cutaway','desert','small',3],
+  ['theater',932,430,'exterior','desert','small',3],
+  ['theater',932,430,'cutaway','desert','small',3],
  ];
  try{
   for(let i=0;i<cases.length;i++){

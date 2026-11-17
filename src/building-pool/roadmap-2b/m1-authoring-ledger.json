@@ -6,17 +6,17 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 129,
-  "authoredCandidates": 144,
-  "remainingUnauthored": 276,
+  "originalNewModels": 131,
+  "authoredCandidates": 146,
+  "remainingUnauthored": 274,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
-      "authored": 20,
+      "authored": 21,
       "target": 60,
-      "remaining": 40
+      "remaining": 39
     },
     "tailor": {
       "authored": 19,
@@ -44,9 +44,9 @@
       "remaining": 49
     },
     "theater": {
-      "authored": 21,
+      "authored": 22,
       "target": 45,
-      "remaining": 24
+      "remaining": 23
     }
   },
   "originals": [
@@ -694,16 +694,26 @@
       "id": "r2:market-square:snow:small:02",
       "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:temperate:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-river-sundial.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:desert:small:03",
+      "file": "src/building-pool/roadmap-2b/m1-river-sundial.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
-      "small": 9,
+      "small": 10,
       "medium": 9,
       "large": 10
     },
     "desert": {
-      "small": 8,
+      "small": 9,
       "medium": 9,
       "large": 10
     },

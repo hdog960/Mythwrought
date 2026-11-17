@@ -1,3 +1,4 @@
+import {M1_RIVER_SUNDIAL} from '../../../src/building-pool/roadmap-2b/m1-river-sundial.mjs';
 import {TRADE_CULTURE_M1_EXEMPLARS} from '../../../src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs';
 import {MARKET_SQUARE_TEMPERATE_SMALL} from '../../../src/building-pool/roadmap-2b/market-square-temperate-small.mjs';
 import {M1_REGIONAL_EXEMPLARS} from '../../../src/building-pool/roadmap-2b/m1-regional-exemplars.mjs';
@@ -30,7 +31,7 @@ import {M1_ECHO_SIX} from '../../../src/building-pool/roadmap-2b/m1-echo-six.mjs
 // Draws only software-WebGL2 full-cube proxies, never producer-family AABBs,
 // rotations, glass transparency, final artwork, or playable runtime placement.
 const params=new URLSearchParams(location.search), models=[
- MARKET_SQUARE_TEMPERATE_SMALL,...TRADE_CULTURE_M1_EXEMPLARS,...M1_REGIONAL_EXEMPLARS,...M1_PUBLIC_MONUMENTS,...M1_NEW_REGION_ARCHITECTURES,...M1_SPECIALTY_COURTS,...M1_GRAND_COMPLEXES,...M1_REGIONAL_GALLERIES,...M1_CLIFF_AND_FESTIVAL,...M1_CONCAVE_COURTS,...M1_SCULPTED_REGIONAL,...M1_FIVE_COURTS,...M1_BESPOKE_COURTS,...M1_RITUAL_TRADES,...M1_SHADOWSTAGE,...M1_NORTHERN_ARCADES,...M1_REGIONAL_GUILDWINGS,...M1_TERRACES_SANCTUARIES,...M1_WINDFOLD_GUILDS,...M1_CRESCENT_MERCHANTS,...M1_RIME_AND_RIVER,...M1_REGIONAL_FORMS,...M1_CROSSBAR_SWITCHBACK,...M1_HIGHLAND_GROVE_SIX,...M1_WEAVE_GEM_TRIPTYCH,...M1_DIADEM_FOLIOS,...M1_ECHO_SIX
+ MARKET_SQUARE_TEMPERATE_SMALL,...TRADE_CULTURE_M1_EXEMPLARS,...M1_REGIONAL_EXEMPLARS,...M1_PUBLIC_MONUMENTS,...M1_NEW_REGION_ARCHITECTURES,...M1_SPECIALTY_COURTS,...M1_GRAND_COMPLEXES,...M1_REGIONAL_GALLERIES,...M1_CLIFF_AND_FESTIVAL,...M1_CONCAVE_COURTS,...M1_SCULPTED_REGIONAL,...M1_FIVE_COURTS,...M1_BESPOKE_COURTS,...M1_RITUAL_TRADES,...M1_SHADOWSTAGE,...M1_NORTHERN_ARCADES,...M1_REGIONAL_GUILDWINGS,...M1_TERRACES_SANCTUARIES,...M1_WINDFOLD_GUILDS,...M1_CRESCENT_MERCHANTS,...M1_RIME_AND_RIVER,...M1_REGIONAL_FORMS,...M1_CROSSBAR_SWITCHBACK,...M1_HIGHLAND_GROVE_SIX,...M1_WEAVE_GEM_TRIPTYCH,...M1_DIADEM_FOLIOS,...M1_ECHO_SIX,...M1_RIVER_SUNDIAL
 ];
 const modelId=params.get('id')||'r2:tailor:temperate:small:01';
 const view=params.get('view')==='cutaway'?'cutaway':'exterior';
