@@ -217,3 +217,22 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  .exploration-heading{font-size:11px}
  .map-controls button,#closeExploration{min-height:28px;padding:3px 6px;font-size:10px}
 }
+
+/* G2B session-only flight controls: preserves external thumb rails and map HUD. */
+.g2b-flight-settings{border:1px solid #bca577;border-radius:12px;
+  padding:10px 12px;background:#172d30;margin:12px 0}
+.g2b-flight-settings .g2b-flight-toggle{display:flex;align-items:center;
+  gap:9px;min-height:44px;font-weight:800;letter-spacing:.02em}
+.g2b-flight-settings input[type=checkbox]{width:22px;height:22px;flex:none;
+  accent-color:#b6d9a8;touch-action:manipulation}
+.g2b-flight-settings #g2bFlightProfile{width:100%;min-height:40px;
+  padding:7px;border-radius:8px;background:#142b30;color:#f2e4c1;
+  border:1px solid #baa474}
+.g2b-flight-settings #g2bFlightStatus{font-size:12px;line-height:1.5;
+  min-height:18px;color:#d5e8d8}
+.g2b-flight-active .grip.right .actions .action,
+.g2b-flight-active .grip.right #jump{border-color:#e1d39b;
+  background:linear-gradient(#587b65,#294c49)}
+@media(max-height:350px){
+ .g2b-flight-active .grip.right .actions .action{font-size:9px;min-height:31px}
+}
