@@ -214,6 +214,7 @@ try{
    const heldDown=await proveHold('#dig',-1);
    // Genuine independent three-touch CDP input: MOVE + LOOK + UP held together.
    const cdp=await context.newCDPSession(page);
+   const beforeThree=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    const left=center(await page.locator('#movePad').boundingBox());
    const right=center(await page.locator('#lookPad').boundingBox());
    const up=center(await page.locator('#place').boundingBox());
@@ -223,7 +224,17 @@ try{
      touchPoints:[touch(101,left.x,left.y),touch(102,right.x,right.y)]});
    await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[t1,t2]});
    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[t1,t2,t3]});
-   await page.waitForTimeout(160);
+   // Verify real altitude AND forward movement while all three touches
+   // remain held. The old test only checked non-collision after the gesture,
+   // which could pass even if every input was silently ignored.
+   await page.waitForTimeout(520);
+   const duringThree=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   const threeMoved=Math.hypot(duringThree.position.x-beforeThree.position.x,
+     duringThree.position.z-beforeThree.position.z);
+   assert.ok(threeMoved>.035,'Three-touch MOVE did not move the player: '+
+     JSON.stringify({beforeThree,duringThree,threeMoved}));
+   assert.ok(duringThree.position.y>beforeThree.position.y+.035,
+     'Three-touch UP did not climb: '+JSON.stringify({beforeThree,duringThree}));
    await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[t1,t2]});
    await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
    await page.waitForTimeout(100);

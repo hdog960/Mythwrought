@@ -36,6 +36,22 @@ test('G2B flight uses original physical button IDs with gated Explore actions',(
  assert.ok(!src.includes("g2BindHold('jump','land')"));
  assert.ok(src.includes('||button.disabled||g2Active()'));
 });
+test('iPhone native Touch Events own independent MOVE/LOOK/UP/DOWN fingers',()=>{
+ assert.ok(src.includes("const g2TouchPointerId=t=>"));
+ assert.ok(src.includes("el.addEventListener('touchstart',e=>"));
+ assert.ok(src.includes("window.addEventListener('touchmove',e=>"));
+ assert.ok(src.includes("button.addEventListener('touchstart',e=>"));
+ assert.ok(src.includes("for(const kind of ['touchend','touchcancel'])"));
+ assert.ok(src.includes("activePointerType=e.pointerType"));
+ assert.ok(src.includes("activePointerType!=='touch'"));
+ assert.ok(src.includes("e.timeStamp-pointerStartedAt>250"));
+ assert.ok(src.includes("if(activeTouch===null&&active===e.pointerId)stop()"));
+ assert.ok(src.includes("if(activeTouch===null&&active===e.pointerId)release(e)"));
+ assert.ok(src.includes("const fallbackSide=Math.max(-1,Math.min(1,"));
+ assert.ok(src.includes("const fallbackFront=Math.max(-1,Math.min(1,"));
+ assert.ok(src.includes("vertical:owned.vertical||(Number(g2TouchVertical.up)-Number(g2TouchVertical.down))"));
+ assert.ok(src.includes("g2ControlWarning(g2Flight.reason)"));
+});
 test('G2B source uses separate independent pointer ownership and release',()=>{
  assert.ok(src.includes("pointerPad(movementPad"));
  assert.ok(src.includes("},'move');"));

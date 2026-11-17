@@ -154,6 +154,12 @@ function start(){
   }
   // G2B only: explicit-session feature, no persistent settings, edits or new GPU queue.
   let g2Epoch=0,g2CreativeEnabled=false,g2Flight=null,g2Controls=createG2ControlState();
+  const g2TouchVertical={up:false,down:false};
+  let g2LastControlWarning=-Infinity;
+  function g2ControlWarning(reason){
+    const now=performance.now();
+    if(now-g2LastControlWarning>1800){g2LastControlWarning=now;message('FLIGHT · '+reason);}
+  }
   const g2Toggle=document.getElementById('g2bFlightEnable');
   const g2Profile=document.getElementById('g2bFlightProfile');
   const g2Status=document.getElementById('g2bFlightStatus');
@@ -210,12 +216,14 @@ function start(){
   function g2Pause(reason){
     if(!g2Active())return;
     g2Controls=clearG2Controls(g2Controls,reason);
+    g2TouchVertical.up=g2TouchVertical.down=false;
     g2Flight=holdG2Flight(g2Flight,reason);
     // A planner can never clear shared production GPU queues.
   }
   function g2NewWorld(){
     // The original world-change code immediately installs a safe newPlayer.
-    g2CreativeEnabled=false;g2Flight=null;g2Controls=createG2ControlState();g2Epoch++;g2Sync();
+    g2CreativeEnabled=false;g2Flight=null;g2Controls=createG2ControlState();
+    g2TouchVertical.up=g2TouchVertical.down=false;g2Epoch++;g2Sync();
   }
   function g2Start(){
     if(!g2CreativeEnabled)return false;
@@ -235,7 +243,8 @@ function start(){
       g2Controls=enterG2ControlOwnership(createG2ControlState(),
         {featureEnabled:true,flightReady:true});
       player.vX=player.vY=player.vZ=0;player.onGround=false;player.coyote=0;
-      player.jumpBuffer=0;jumpQueued=false;g2Sync();return true;
+      player.jumpBuffer=0;jumpQueued=false;g2Sync();
+      message('CREATIVE FLIGHT · MOVE/LOOK and hold UP or DOWN to fly');return true;
     }catch(e){g2Status.textContent='Flight refused: '+e.message;message(g2Status.textContent);return false;}
   }
   function g2LandingHost(){
@@ -292,8 +301,24 @@ function start(){
   }
   function g2Move(dt){
     if(!g2Active())return;
-    if(g2Controls.paused&&!g2ResumeControls())return;
-    const intent=readG2ControlIntent(g2Controls);
+    if(g2Controls.paused&&!g2ResumeControls()){
+      if(g2TouchVertical.up||g2TouchVertical.down||
+         Math.abs(joystick.x)+Math.abs(joystick.y)>.08)
+        g2ControlWarning('Input suspended: waiting for a loaded, clear position');
+      return;
+    }
+    const owned=readG2ControlIntent(g2Controls);
+    // Safari may lose a synthetic PointerEvent during multi-touch while the
+    // original Explore joystick remains valid. Read the real pad positions as
+    // a SECOND source, never bypassing the same swept collision/GPU checks.
+    const fallbackSide=Math.max(-1,Math.min(1,
+      joystick.x+Number(keys.has('KeyD'))-Number(keys.has('KeyA'))));
+    const fallbackFront=Math.max(-1,Math.min(1,
+      -joystick.y+Number(keys.has('KeyW'))-Number(keys.has('KeyS'))));
+    const intent={...owned,
+      strafe:Math.abs(owned.strafe)>.01?owned.strafe:fallbackSide,
+      forward:Math.abs(owned.forward)>.01?owned.forward:fallbackFront,
+      vertical:owned.vertical||(Number(g2TouchVertical.up)-Number(g2TouchVertical.down))};
     if(intent.landRequested){g2Land();return;}
     try{
       const result=planG2FlightStep(g2Flight,
@@ -316,6 +341,11 @@ function start(){
       }else g2Pause('Flight halted at unsafe/unloaded boundary');
       canvas.dataset.g2bBlocked=String(g2Flight.blocked);
       canvas.dataset.g2bPending=String(g2Flight.prefetch.pending.length);
+      canvas.dataset.g2bInput=String([intent.strafe,intent.forward,intent.vertical]
+        .map(v=>Math.round(v*100)/100).join(','));
+      canvas.dataset.g2bControlPaused=String(g2Controls.paused);
+      if(g2Flight.blocked&&Math.abs(intent.strafe)+Math.abs(intent.forward)+
+          Math.abs(intent.vertical)>.05)g2ControlWarning(g2Flight.reason);
       g2Status.textContent=g2Flight.reason;
     }catch(e){g2Pause('Flight failed safely: '+e.message);}
   }
@@ -943,19 +973,28 @@ function start(){
   const frameDriver=new ForegroundFrameDriver(
     callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),draw
   );
+  // iPhone Touch.identifier is stable across simultaneous fingers even if
+  // WebKit drops a synthetic PointerEvent/pointer capture during another tap.
+  // Keep a separate positive ID namespace for Touch Events.
+  const g2TouchPointerId=t=>{
+    const n=t?.identifier;
+    return Number.isSafeInteger(n)&&n>-100000000&&n<100000000?
+      1000000000+n:null;
+  };
   // Capture is per grip: moving and aiming simultaneously never compete for one pointer.
   function pointerPad(el,update,release,g2Zone=null){
-    let active=null,lastX=0,lastY=0;
+    let active=null,activeTouch=null,activePointerType=null,pointerStartedAt=-Infinity,lastX=0,lastY=0;
     function stop(){
       if(active===null)return;
       if(g2Active()&&g2Zone)g2Controls=dispatchG2Control(g2Controls,{type:'pointerup',id:active});
-      heldPointers.delete(active);active=null;release();el.classList.remove('engaged');
+      heldPointers.delete(active);active=null;activeTouch=null;activePointerType=null;release();el.classList.remove('engaged');
     }
     el.addEventListener('pointerdown',e=>{
       // A second touch must never steal a held grip. Settings and background
       // transitions cannot create invisible held pointers behind the overlay.
       if(active!==null||!help.hidden||exploration.isOpen()||document.hidden)return;
-      e.preventDefault();active=e.pointerId;lastX=e.clientX;lastY=e.clientY;
+      e.preventDefault();active=e.pointerId;activePointerType=e.pointerType;pointerStartedAt=e.timeStamp;
+      lastX=e.clientX;lastY=e.clientY;
       heldPointers.set(active,stop);
       try{el.setPointerCapture(active);}catch(_){}
       el.classList.add('engaged');update(e,0,0,true);
@@ -984,7 +1023,53 @@ function start(){
       // no longer receives its own pointerup; stop() is idempotent.
       window.addEventListener(event,e=>{if(active===e.pointerId)stop();},true);
     }
-    el.addEventListener('lostpointercapture',stop);
+    el.addEventListener('lostpointercapture',e=>{if(activeTouch===null&&active===e.pointerId)stop();});
+    // Use native WebKit Touch Events for real two-thumb iPhone grips.
+    // PointerEvents on iOS can be cancelled when a second finger is added.
+    el.addEventListener('touchstart',e=>{
+      if(!help.hidden||exploration.isOpen()||document.hidden)return;
+      const t=Array.from(e.changedTouches).find(x=>x.target&&el.contains(x.target))||
+        (e.changedTouches.length===1?e.changedTouches[0]:null);
+      const id=g2TouchPointerId(t);
+      if(id===null)return;
+      // When pointerdown precedes touchstart, promote only its first
+      // near-synchronous touch, never a later second finger or mouse/pen.
+      if(active!==null){
+        if(activeTouch!==null||activePointerType!=='touch'||
+           e.timeStamp-pointerStartedAt<0||e.timeStamp-pointerStartedAt>250)return;
+        const old=active;
+        if(g2Active()&&g2Zone)
+          g2Controls=dispatchG2Control(g2Controls,{type:'pointerup',id:old});
+        heldPointers.delete(old);active=null;activePointerType=null;
+        try{el.releasePointerCapture(old);}catch(_){}
+      }
+      e.preventDefault();active=id;activeTouch=t.identifier;activePointerType='touch';
+      lastX=t.clientX;lastY=t.clientY;
+      heldPointers.set(active,stop);el.classList.add('engaged');
+      update(t,0,0,true);
+      if(g2Active()&&g2Zone){
+        g2ResumeControls();
+        g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone:g2Zone});
+        if(g2Zone==='move')g2Controls=dispatchG2Control(g2Controls,
+          {type:'pointermove',id:active,x:joystick.x,y:joystick.y});
+      }
+    },{passive:false});
+    window.addEventListener('touchmove',e=>{
+      if(activeTouch===null)return;
+      const t=Array.from(e.touches).find(x=>x.identifier===activeTouch);
+      if(!t)return;
+      e.preventDefault();
+      const dx=t.clientX-lastX,dy=t.clientY-lastY;
+      lastX=t.clientX;lastY=t.clientY;update(t,dx,dy,false);
+      if(g2Active()&&g2Zone)
+        g2Controls=dispatchG2Control(g2Controls,{type:'pointermove',
+          id:active,x:g2Zone==='move'?joystick.x:lookStick.x,
+          y:g2Zone==='move'?joystick.y:lookStick.y});
+    },{passive:false});
+    for(const kind of ['touchend','touchcancel'])window.addEventListener(kind,e=>{
+      if(activeTouch!==null&&Array.from(e.changedTouches)
+        .some(t=>t.identifier===activeTouch))stop();
+    },true);
     return stop;
   }
   const movementPad=document.getElementById('movePad'),knob=document.getElementById('moveKnob');
@@ -1249,30 +1334,59 @@ function start(){
   // Pointerdown is necessary on iPhone while another thumb holds its pad.
   function g2BindHold(id,zone){
     const button=document.getElementById(id);
-    let active=null,lastTouch=-Infinity;
+    let active=null,activeTouch=null,activePointerType=null,pointerStartedAt=-Infinity,lastTouch=-Infinity;
     const release=e=>{
       if(active===null||(e&&e.pointerId!==active))return;
       if(g2Active())g2Controls=dispatchG2Control(g2Controls,{type:'pointerup',id:active});
-      active=null;
+      if(zone==='up'||zone==='down')g2TouchVertical[zone]=false;
+      active=null;activeTouch=null;activePointerType=null;
     };
     button.addEventListener('pointerdown',e=>{
       if(!g2Active()||!help.hidden||exploration.isOpen()||document.hidden||
          graphicsLost||button.disabled||active!==null)return;
-      e.preventDefault();active=e.pointerId;
+      e.preventDefault();active=e.pointerId;activePointerType=e.pointerType;
+      pointerStartedAt=e.timeStamp;
       lastTouch=e.timeStamp;g2ConsumedClicks.set(id,lastTouch);
       g2ResumeControls();
       g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
+      if(zone==='up'||zone==='down')g2TouchVertical[zone]=true;
       try{button.setPointerCapture(active);}catch(_){}
       // A quick tap may start/end between frames. One immediate bounded,
       // physically checked step guarantees an UP/DOWN response on iPhone.
       // Keeping the pointer owned continues movement while held.
       if(zone==='up'||zone==='down')g2Move(.05);
     });
+    // iPhone WebKit may suppress PointerEvents for another finger; use the
+    // stable native touch identifier for independent UP/DOWN hold tracking.
+    button.addEventListener('touchstart',e=>{
+      if(!g2Active()||!help.hidden||exploration.isOpen()||document.hidden||
+         graphicsLost||button.disabled)return;
+      const t=Array.from(e.changedTouches).find(x=>x.target&&button.contains(x.target))||
+        (e.changedTouches.length===1?e.changedTouches[0]:null);
+      const touchId=g2TouchPointerId(t);
+      if(touchId===null)return;
+      if(active!==null){
+        if(activeTouch!==null||activePointerType!=='touch'||
+           e.timeStamp-pointerStartedAt<0||e.timeStamp-pointerStartedAt>250)return;
+        const old=active;release({pointerId:old});
+        try{button.releasePointerCapture(old);}catch(_){}
+      }
+      e.preventDefault();active=touchId;activeTouch=t.identifier;activePointerType='touch';
+      lastTouch=e.timeStamp;g2ConsumedClicks.set(button.id,lastTouch);
+      g2ResumeControls();
+      g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
+      if(zone==='up'||zone==='down')g2TouchVertical[zone]=true;
+      if(zone==='up'||zone==='down')g2Move(.05);
+    },{passive:false});
+    for(const kind of ['touchend','touchcancel'])window.addEventListener(kind,e=>{
+      if(activeTouch!==null&&Array.from(e.changedTouches)
+        .some(t=>t.identifier===activeTouch))release();
+    },true);
     for(const type of ['pointerup','pointercancel']){
       button.addEventListener(type,release);
       window.addEventListener(type,release,true);
     }
-    button.addEventListener('lostpointercapture',release);
+    button.addEventListener('lostpointercapture',e=>{if(activeTouch===null&&active===e.pointerId)release(e);});
     button.addEventListener('click',e=>{
       if(!g2Active())return;
       e.preventDefault();
