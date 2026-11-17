@@ -5,7 +5,7 @@ import {verifyManifestCheckouts} from '../../src/auto-integration-support/manife
 const SHA='a'.repeat(40), DIGEST='b'.repeat(64);
 const manifest=()=>({producers:Object.fromEntries(['surface','caves','objects'].map((lane,i)=>[lane,{head:SHA,pr:100+i,files:[{path:'src/'+lane+'.mjs',sha256:DIGEST}]}]))});
 const checkouts={surface:'/tmp/surface',caves:'/tmp/caves',objects:'/tmp/objects'};
-const matching=async ({manifest:m})=>({results:Object.entries(m).map(([lane,p])=>({lane,status:'SOURCE_MATCH',commit:p.commit,path:p.path,sha256:p.sha256}))});
+const matching=async ({manifest:m})=>({status:'SOURCE_MATCH_ONLY',results:Object.entries(m).map(([lane,p])=>({lane,status:'SOURCE_MATCH',commit:p.commit,path:p.path,sha256:p.sha256}))});
 
 test('checks each producer and reports source-only, never integration evidence',async()=>{
  let calls=0;
@@ -56,4 +56,14 @@ test('rejects mismatched commit, digest, and verifier errors',async()=>{
  }});
  assert.equal(r.status,'NOT_VERIFIED');
  assert.equal(r.results.filter(x=>x.status==='NOT_VERIFIED').length,3);
+});
+
+test('rejects aggregate verifier failure even if an individual file claims SOURCE_MATCH',async()=>{
+ const r=await verifyManifestCheckouts({manifest:manifest(),checkouts,verify:async a=>{
+  const [lane,p]=Object.entries(a.manifest)[0];
+  return {status:lane==='caves'?'NOT_VERIFIED':'SOURCE_MATCH_ONLY',results:[{lane,status:'SOURCE_MATCH',commit:p.commit,path:p.path,sha256:p.sha256}]};
+ }});
+ assert.equal(r.status,'NOT_VERIFIED');
+ assert.equal(r.results.find(x=>x.lane==='caves').status,'NOT_VERIFIED');
+ assert.equal(r.integrationVerified,false);
 });
