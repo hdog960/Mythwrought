@@ -39,8 +39,8 @@ export function planCanopyWalkway(world,a,b,y){
   // Leave real daylight gaps between crown branches instead of repeating
   // a fence tooth at every step. Two end-biased forks frame the approach;
   // only the longest spans need a third, off-center crown station.
-  // Very short spans receive one fork, not two crowded adjacent fence teeth.
-  const crownStation=distance<=4?i===Math.floor(distance/2):
+  // Spans up to five cells receive one fork, not two adjacent fence teeth.
+  const crownStation=distance<=5?i===Math.floor(distance/2):
    (i===2||i===distance-2||(distance>=8&&i===Math.floor(distance/2)));
   if(crownStation){
    // Alternate banks deterministically. Branches remain attached to the
