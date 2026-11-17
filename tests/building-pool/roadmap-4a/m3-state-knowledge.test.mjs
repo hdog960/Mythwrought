@@ -176,7 +176,9 @@ test('eight original floor programs avoid same-category historical near-duplicat
   const matches=previous.filter(p=>p.type===b.type)
     .map(p=>({id:p.id,iou:overlapIoU(f,p.forms)}))
     .sort((a,z)=>z.iou-a.iou);
-  assert.ok(matches[0].iou<0.85,b.id+' near-duplicate of '+matches[0].id+
+  // New M3/M4 categories have no prior same-type candidates: uniqueness is
+  // independently checked across the new cohort, not fabricated from an empty list.
+  if(matches.length)assert.ok(matches[0].iou<0.85,b.id+' near-duplicate of '+matches[0].id+
     ': normalized D4 footprint IoU '+matches[0].iou.toFixed(4));
  }
 });
