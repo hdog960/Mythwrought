@@ -12,12 +12,12 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 110,
-    "totalAuthored": 140,
-    "remaining": 175,
+    "newlyAuthored": 120,
+    "totalAuthored": 150,
+    "remaining": 165,
     "creatorAccepted": 0,
     "integratedBuildings": 0,
-    "m2Original": 110
+    "m2Original": 120
   },
   "biomes": [
     "temperate",
@@ -37,7 +37,7 @@
       "perBiomeSize": 5,
       "total": 75,
       "inherited": 15,
-      "remaining": 5,
+      "remaining": 0,
       "milestone": 2
     },
     {
@@ -45,7 +45,7 @@
       "perBiomeSize": 4,
       "total": 60,
       "inherited": 0,
-      "remaining": 5,
+      "remaining": 0,
       "milestone": 2
     },
     {
@@ -92,7 +92,7 @@
   "gates": {
     "M0": "Accepted: exact-head Actions #43767981937 passed after fixing owned M0 count/list tests; 30 inherited source-exact designs preserved",
     "M1": "Technical candidate acceptance: exact-head Actions #43770848853 passed, 180 source-driven Chromium WebGL2 exterior/cutaway proxy captures; physical/creator gates open",
-    "M2": "140/315 source-coordinate theoretical candidates (30 source-exact inherited, 110 independent original), 175 unauthored. New eight frontier-districts remain gated on exact-head native and 48 source-specific genuine Chromium WebGL2 browser captures. Physical producer AABB/collision/mounts, save-rotation, physical iPhone and creator art gate remain open; do not claim integration.",
+    "M2": "THEORETICAL M2 AUTHORING COMPLETE: 75/75 civic halls, 60/60 guildhalls, plus 15 inherited castle-palaces, total 150/315 coordinate-authored blueprints (30 inherited, 120 independent new), 165 later-category designs unauthored. Final ten custom faceted civic/guild plans await exact-head focused Node + 60 genuine source-pinned Chromium WebGL2 candidate captures. Every Pack1–5 real producer collision/mount, saved yaw, physical iPhone and creator art acceptance remains blocked. No merging or live integration.",
     "M3": "not started",
     "M4": "not started",
     "M5": "not started",

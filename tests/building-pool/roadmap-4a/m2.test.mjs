@@ -17,9 +17,9 @@ test('new M2 first original civic hall and guildhall are distinct 3D real-coordi
  assert.equal(validateCollection(combined).verified,32);
  assert.equal(new Set(combined.map(geometrySignature)).size,32);
  assert.equal(auditM2Exemplars().distinctGeometry,2);
- assert.equal(manifest.counts.totalAuthored,140);
- assert.equal(manifest.counts.newlyAuthored,110);
- assert.equal(manifest.counts.remaining,175);
+ assert.equal(manifest.counts.totalAuthored,150);
+ assert.equal(manifest.counts.newlyAuthored,120);
+ assert.equal(manifest.counts.remaining,165);
  assert.equal(manifest.counts.creatorAccepted,0);
  assert.equal(manifest.counts.integratedBuildings,0);
 });

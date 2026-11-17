@@ -42,3 +42,7 @@ Eight original regional building sources in `m2-chambers-crafts.mjs`; 132/315 th
 
 ## M2 Frontier Districts (2026-11-16)
 Eight source-coordinate original frontier assemblies and trade-craft candidate plans are authored in `m2-frontier-districts.mjs`, taking the current catalog to **140/315 theoretical** (30 inherited, 110 original) with **175** remaining. The 140 D4 geometry and strict IoU <0.85, roof bearing, Pack1–5 symbolic source acceptance and 48-frame dedicated WebGL2 witness must pass. See `docs/building-pool/roadmap-4a/M2_FRONTIER_DISTRICTS_ACCEPTANCE.md`. All earlier numbered checkpoints in this README are historical, not authoritative. No creator approval, production registration, integration or deployment.
+
+
+## M2 Final Civic & Guild (2026-11-16)
+All **75 civic halls and 60 guildhalls** are now coordinate-authored theoretical candidates. There are **150/315** theoretical buildings total (30 inherited, 120 new originals), with **165** later categories still unauthored. Final ten varied massings use actual faceted courts, asymmetric source wings and 23 skyline lantern volumes. Strict 150-way source-D4 uniqueness, normalized floor IoU <0.85, source roof bearing and physical symbol acceptance documented at `docs/building-pool/roadmap-4a/M2_FINAL_CIVIC_GUILD_ACCEPTANCE.md`. No real physical-pack registration or in-game deployment. All earlier counts are historical checkpoints, not the live cumulative total.
