@@ -198,14 +198,15 @@ test('138-file source inventory, no creator acceptance, original 132 source prot
  }
  const l=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([l.target,l.sourceExactInheritedTemples,l.originalNewModels,l.authoredCandidates,l.remainingUnauthored,
-  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,123,138,282,0,0,0]);
- assert.equal(l.originals.length,123);
+  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,129,144,276,0,0,0]);
+ assert.equal(l.originals.length,129);
  for(const prev of OLD132.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(l.originals.some(row=>row.id===prev.id),'historical blueprint missing '+prev.id);
- assert.deepEqual(new Set(l.originals.map(x=>x.id)),new Set(ALL138.filter(b=>b.category!=='temple'||b.variation!==1).map(x=>x.id)));
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),138);
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),282);
- assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),138);
+ for(const previous of ALL138.filter(b=>b.category!=='temple'||b.variation!==1))
+  assert(l.originals.some(x=>x.id===previous.id),'one of previous 138 original source IDs lost '+previous.id);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),144);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),276);
+ assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),144);
  for(const b of NEW138){
   const path='src/building-pool/roadmap-2b/'+(NEW138.indexOf(b)<3?'m1-weave-gem-triptych.mjs':'m1-diadem-folios.mjs');
   assert.equal(l.originals.find(r=>r.id===b.id)?.file,path,b.id+' source provenance changed');
