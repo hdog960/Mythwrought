@@ -1,0 +1,15 @@
+// Issue #117 M11: standalone physical, selectable natural foliage cells. No tree placement.
+const raw=[
+ {ordinal:125,name:'Cedar needle fans',profile:'flattened layered cedar scale sprays',palette:['#234b3d','#386b50','#56866a','#8ca57c'],stem:[.46,.10,.44,.54,.82,.56],lobes:[[.08,.28,.39,.49,.39,.64],[.51,.4,.38,.94,.51,.62],[.2,.56,.12,.8,.68,.4],[.26,.68,.62,.77,.8,.91]],density:.86},
+ {ordinal:126,name:'Willow hanging foliage',profile:'slender drooping willow fronds with separated pendant tips',palette:['#315c36','#4f8345','#83ad60','#bad078'],stem:[.46,.62,.46,.54,.98,.54],lobes:[[.13,.2,.16,.27,.85,.31],[.31,.06,.6,.43,.84,.74],[.63,.13,.2,.76,.91,.35],[.77,.04,.57,.89,.77,.72],[.23,.52,.39,.79,.69,.55]],density:.58},
+ {ordinal:127,name:'Aspen leaf clusters',profile:'rounded fluttering aspen leaf discs in staggered sprays',palette:['#42713c','#6e9c49','#a3bb5d','#d6bc61'],stem:[.46,.12,.45,.54,.8,.55],lobes:[[.1,.45,.2,.4,.72,.49],[.55,.59,.14,.89,.87,.43],[.14,.28,.57,.44,.59,.88],[.57,.32,.58,.87,.62,.87],[.35,.72,.34,.66,.95,.65]],density:.65}
+];
+const boxes=a=>Object.freeze(a.map(b=>Object.freeze(b)));
+export const NATURAL_LEAVES_125_127=Object.freeze(raw.map(a=>Object.freeze({...a,symbolicId:'biome130:'+a.ordinal,futureOnlyId:255+a.ordinal,selectable:true,replaceable:true,solid:false,collision:'none',selection:'occupied-boxes',attachment:'wood-face',rotationCount:4,transparent:true,alpha:'cutout',stem:Object.freeze(a.stem),lobes:boxes(a.lobes),palette:Object.freeze(a.palette)})));
+function validate(a){if(!NATURAL_LEAVES_125_127.includes(a))throw new TypeError('unknown leaf family');}
+function rotate(b,r){let [x,y,z,X,Y,Z]=b;for(let i=0;i<r;i++)[x,z,X,Z]=[1-Z,x,1-z,X];return [x,y,z,X,Y,Z];}
+export function leafBoxes(a,r=0){validate(a);if(!Number.isInteger(r)||r<0||r>3)throw new RangeError('rotation must be 0..3');return [a.stem,...a.lobes].map(b=>rotate(b,r));}
+export function leafMaterial(a,x,y,z,face=0){validate(a);if(![x,y,z,face].every(Number.isInteger))throw new TypeError('integer sample required');const h=(Math.imul(x+a.ordinal,73856093)^Math.imul(y,19349663)^Math.imul(z,83492791)^Math.imul(face+17,2654435761))>>>0;return {color:a.palette[h%a.palette.length],visible:h%1000<Math.round(a.density*1000)};}
+export function leafMesh(a,r=0){const vertices=[],indices=[];for(const [x,y,z,X,Y,Z] of leafBoxes(a,r)){const p=[[x,y,z],[X,y,z],[X,Y,z],[x,Y,z],[x,y,Z],[X,y,Z],[X,Y,Z],[x,Y,Z]];for(const face of [[0,3,2,1],[5,6,7,4],[4,7,3,0],[1,2,6,5],[3,7,6,2],[4,0,1,5]]){const start=vertices.length/3;for(const i of face)vertices.push(...p[i]);indices.push(start,start+1,start+2,start,start+2,start+3);}}return {vertices,indices,alphaMode:a.alpha,collision:a.collision};}
+// Isolated opt-in symbolic fixture. Never writes to production VoxelWorld or schema-1 saves.
+export function leafEditFixture(a,r=0){leafBoxes(a,r);const cells=new Map([['2,3,4',{symbolicId:a.symbolicId,rotation:r}]]);const saved=JSON.stringify([...cells]);const restored=new Map(JSON.parse(saved));const selected=restored.get('2,3,4');restored.delete('2,3,4');return {saved,selected,removed:!restored.has('2,3,4')};}
