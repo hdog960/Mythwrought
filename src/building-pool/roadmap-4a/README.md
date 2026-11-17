@@ -38,3 +38,7 @@ Eight newly source-authored biome/size buildings in `m2-regional-courts.mjs`, br
 
 ## M2 chambers and crafts (2026-11-16)
 Eight original regional building sources in `m2-chambers-crafts.mjs`; 132/315 theoretical (30 inherited plus 102 new), 183 remaining. Four civic and four guild source-authored physical footprints with 47 connected rooms and 21 doors, strict D4 IoU <0.85, bearing-backed roofs. See `docs/building-pool/roadmap-4a/M2_CHAMBERS_CRAFTS_ACCEPTANCE.md`; historical counts above are earlier checkpoints. No game integration, creator approval or deployment.
+
+
+## M2 Frontier Districts (2026-11-16)
+Eight source-coordinate original frontier assemblies and trade-craft candidate plans are authored in `m2-frontier-districts.mjs`, taking the current catalog to **140/315 theoretical** (30 inherited, 110 original) with **175** remaining. The 140 D4 geometry and strict IoU <0.85, roof bearing, Pack1–5 symbolic source acceptance and 48-frame dedicated WebGL2 witness must pass. See `docs/building-pool/roadmap-4a/M2_FRONTIER_DISTRICTS_ACCEPTANCE.md`. All earlier numbered checkpoints in this README are historical, not authoritative. No creator approval, production registration, integration or deployment.
