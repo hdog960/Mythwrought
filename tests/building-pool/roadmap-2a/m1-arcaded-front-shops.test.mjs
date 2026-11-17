@@ -67,19 +67,25 @@ test('physical façade has three truly open front arches, a source-founded reces
    else assert.equal(v?.kind,'wall',b.id+' inner recessed physical screen missing '+K(x,y,3));
   }
   for(const z of [20,21,27,28])for(let y=2;y<=4;y++)assert(!vox.has(K(0,y,z)),b.id+' false west-side open arcade');
+  for(const z of [20,21,27,28])for(let y=2;y<=5;y++)
+   assert(!vox.has(K(s.w-1,y,z)),b.id+' camera-facing east arcade has uncarved wall '+K(s.w-1,y,z));
+  for(const x of [s.entry+9,s.entry+10])for(let y=2;y<=4;y++)
+   assert(!vox.has(K(x,y,s.d-1)),b.id+' camera-facing rear arcade has uncarved wall '+K(x,y,s.d-1));
   assert.equal(b.facadeArticulation.frontArcades,3);
   assert.equal(b.facadeArticulation.openWestArcades,2);
+  assert.equal(b.facadeArticulation.openEastArcades,2);
+  assert.equal(b.facadeArticulation.openRearArcade,1);
   assert(b.facadeArticulation.removedWeatherWallCells>=36);
   assert(b.facadeArticulation.insideRecessWallCells>=100);
  }
 });
-test('eight new actual upper Pack4 source windows correspond 1-to-1 to glazing openings, keep old source and real floor-rooted buttresses',()=>{
+test('sixteen real source upper Pack4 window cells include camera-facing east/rear glazing and preserve all old source outside documented art changes',()=>{
  for(let i=0;i<6;i++){
   const b=M1_ARCADED_FRONT_SHOPS[i],s=M1_ARCADED_FRONT_SPECS[i],
    old=author2ALandmark(s),oldMap=new Map(old.voxels.map(v=>[K(v.x,v.y,v.z),v])),
    actual=new Map(b.voxels.map(v=>[K(v.x,v.y,v.z),v]));
   const newWindows=b.openings.filter(o=>o.type==='window'&&!old.openings.some(p=>p.x===o.x&&p.y===o.y&&p.z===o.z));
-  assert.equal(newWindows.length,8,b.id+' eight real new glazing positions mandatory');
+  assert.equal(newWindows.length,16,b.id+' sixteen front, west, east and rear glazing source cells mandatory');
   for(const w of newWindows){
    const k=K(w.x,w.y,w.z);
    assert.equal(oldMap.get(k)?.kind,'wall',b.id+' glazing was not source-wall carve');
@@ -87,7 +93,7 @@ test('eight new actual upper Pack4 source windows correspond 1-to-1 to glazing o
    assert.equal(actual.get(k)?.material,w.material);
   }
   const supports=b.voxels.filter(v=>v.architecturalRole==='source-founded-recessed-facade-buttress');
-  assert(supports.length>=36,b.id+' missing physical façade articulation/support pilasters');
+  assert(supports.length>=70,b.id+' missing physical facade and near-facing source-founded buttresses');
   for(const v of supports){
    assert.equal(actual.get(K(v.x,1,v.z))?.kind,'floor',b.id+' ungrounded buttress '+K(v.x,v.y,v.z));
    if(v.y>2)assert.equal(actual.get(K(v.x,v.y-1,v.z))?.kind,'wall',b.id+' broken buttress source load path '+K(v.x,v.y,v.z));
@@ -97,7 +103,9 @@ test('eight new actual upper Pack4 source windows correspond 1-to-1 to glazing o
   for(const v of old.voxels){
    const p=K(v.x,v.y,v.z),now=actual.get(p);
    const expectedCarve=(v.z===0&&carvedFront.has(v.x)&&v.y>=2&&v.y<=5)||
-      (v.x===0&&[20,21,27,28].includes(v.z)&&v.y>=2&&v.y<=4);
+      (v.x===0&&[20,21,27,28].includes(v.z)&&v.y>=2&&v.y<=4)||
+      (v.x===s.w-1&&[20,21,27,28].includes(v.z)&&v.y>=2&&v.y<=5)||
+      (v.z===s.d-1&&[s.entry+9,s.entry+10].includes(v.x)&&v.y>=2&&v.y<=4);
    if(expectedCarve){assert(!now,b.id+' original wall uncarved '+p);continue;}
    if(newWindows.some(w=>K(w.x,w.y,w.z)===p)){assert.equal(now?.kind,'window');continue;}
    assert.deepEqual(now,v,b.id+' modified original source cell outside declared independent façade geometry '+p);
@@ -114,6 +122,7 @@ test('source-backed roof transitions form genuinely distinct front roof profiles
   assert.equal(newly.length,b.facadeArticulation.sourceRoofTransitionCells);
   assert(newly.length>=75,b.id+' new architecture has only nominal roof change');
   assert(b.facadeArticulation.rearTransitions>=8);
+  assert(b.facadeArticulation.visibleNearFacingRoofCells>=65,b.id+' camera-facing roof changed only on paper');
   profiles.add(b.category);
   for(const v of newly){
    assert.equal(v.kind,'roof');
