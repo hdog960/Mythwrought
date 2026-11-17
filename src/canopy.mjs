@@ -127,8 +127,9 @@ function evergreen(out,x,y,z,variation,beacon=false,profile='mixed'){
   // scalloped bough shells. A lower skirt, uneven shoulder and tapered upper
   // ring make each bough a solid faceted mass rather than a flat triangle
   // pointing to the same apex. Only the uppermost bough needs a closed cap.
-  // Three shells cost fewer vertices than the old cone/overlay arrangement,
-  // and fit the existing 450-vertex per-tree and 0-extra-draw-call budget.
+  // The connected shells add detail over the old flat cones, but stay
+  // below the existing 450-vertex per-tree, zero-extra-draw-call budget.
+  // Frame-time acceptance still requires real browser and iPhone evidence.
   for(let tier=0;tier<3;tier++){
     const base=y+(beacon?.68:.52)+tier*(beacon?1.62:height*.27);
     const rad=(beacon?1.43:profile==='grove'?1.39:profile==='open'?1.08:1.29)-tier*.15;
