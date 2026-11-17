@@ -9,7 +9,7 @@ export const BIOME130_BUILDER_SYMBOLS=BIOME130_REGISTERED_SYMBOLS;
 export const BIOME130_BUILDER_AVAILABILITY=Object.freeze({
   physicalGeometry:true,liveGameRegistry:true,playerPlacement:true,
   schema1BlockIdsExtended:true,builderUsable:true,
-  source:'automated-biome130',families:70
+  source:'automated-biome130',families:BIOME130_REGISTERED_SYMBOLS.length
 });
 export function resolveBiome130BuilderAsset(symbol,orientation='north'){
   const yaw=yawOf(orientation);
@@ -19,6 +19,10 @@ export function resolveBiome130BuilderAsset(symbol,orientation='north'){
     symbol:asset.symbol,blockId:asset.blockId,name:asset.name,
     yaw,source:'auto:12-biome130',worldRegistered:true,livePlaceable:true,
     physical:true,solid:asset.solid,opacity:asset.opacity,
+    // Source intent is preserved for downstream art review. The current
+    // single-pass terrain renderer has no alpha blending/cutout pass.
+    alphaIntent:asset.alphaMode,transparentIntent:asset.transparent,
+    rendererFidelity:(asset.transparent||asset.opacity<1)?'opaque-fallback':'opaque',
     shape:Object.freeze({boxes:asset.boxes}),colors:asset.palette,
     builderUsable:true
   });
