@@ -1401,12 +1401,14 @@
       "status": "authored-candidate",
       "physicallyCarvedFrontArches": 3,
       "realRecessedScreen": true,
-      "newUpperWindowCells": 8,
+      "newUpperWindowCells": 16,
       "sourceRoofTransition": true,
       "finalMountCertified": false,
       "creatorApproved": false,
       "integrated": false,
-      "worldPlaced": false
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
     },
     {
       "id": "r2:pet-shop:mountain:large:03",
@@ -1415,12 +1417,14 @@
       "status": "authored-candidate",
       "physicallyCarvedFrontArches": 3,
       "realRecessedScreen": true,
-      "newUpperWindowCells": 8,
+      "newUpperWindowCells": 16,
       "sourceRoofTransition": true,
       "finalMountCertified": false,
       "creatorApproved": false,
       "integrated": false,
-      "worldPlaced": false
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
     },
     {
       "id": "r2:magic-shop:desert:medium:03",
@@ -1429,12 +1433,14 @@
       "status": "authored-candidate",
       "physicallyCarvedFrontArches": 3,
       "realRecessedScreen": true,
-      "newUpperWindowCells": 8,
+      "newUpperWindowCells": 16,
       "sourceRoofTransition": true,
       "finalMountCertified": false,
       "creatorApproved": false,
       "integrated": false,
-      "worldPlaced": false
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
     },
     {
       "id": "r2:potion-shop:snow:large:04",
@@ -1443,12 +1449,14 @@
       "status": "authored-candidate",
       "physicallyCarvedFrontArches": 3,
       "realRecessedScreen": true,
-      "newUpperWindowCells": 8,
+      "newUpperWindowCells": 16,
       "sourceRoofTransition": true,
       "finalMountCertified": false,
       "creatorApproved": false,
       "integrated": false,
-      "worldPlaced": false
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
     },
     {
       "id": "r2:bakery:temperate:small:03",
@@ -1457,12 +1465,14 @@
       "status": "authored-candidate",
       "physicallyCarvedFrontArches": 3,
       "realRecessedScreen": true,
-      "newUpperWindowCells": 8,
+      "newUpperWindowCells": 16,
       "sourceRoofTransition": true,
       "finalMountCertified": false,
       "creatorApproved": false,
       "integrated": false,
-      "worldPlaced": false
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
     },
     {
       "id": "r2:bank:enchanted-forest:small:02",
@@ -1471,12 +1481,14 @@
       "status": "authored-candidate",
       "physicallyCarvedFrontArches": 3,
       "realRecessedScreen": true,
-      "newUpperWindowCells": 8,
+      "newUpperWindowCells": 16,
       "sourceRoofTransition": true,
       "finalMountCertified": false,
       "creatorApproved": false,
       "integrated": false,
-      "worldPlaced": false
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
     }
   ]
 }
