@@ -191,11 +191,11 @@ test('committed exact PR-head native source and authored ledger match the checke
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.authoredCandidates,ledger.sourceExactInheritedTemples,
   ledger.originalNewModels,ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame],
-  [420,121,15,106,299,0,0]);
+  [420,126,15,111,294,0,0]);
  const slotSet=new Set(authored.map(x=>x.id));
  assert([...prev,...REGIONAL].every(x=>ledger.originals.some(row=>row.id===x.id)),
   'previous 18 original design identities lost after six new public candidates');
- assert.equal(ledger.originals.length,106);
+ assert.equal(ledger.originals.length,111);
  assert([...prev,...REGIONAL].every(x=>slotSet.has(x.id)));
  assert.equal(ledger.placedInWorld,0);
 });
