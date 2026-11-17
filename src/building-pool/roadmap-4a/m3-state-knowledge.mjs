@@ -2486,6 +2486,826 @@ const PLANS=[
     ],
     "profile": "desert-solstice-two-faceted-sundial-observatory"
   }
+,
+{
+  "id": "r4:castle-palace:temperate:large:03",
+  "type": "castle-palace",
+  "biome": "temperate",
+  "size": "large",
+  "variant": 3,
+  "bounds": [
+    96,
+    14,
+    82
+  ],
+  "wings": [
+    [
+      36,
+      7,
+      59,
+      27
+    ],
+    [
+      8,
+      24,
+      35,
+      55
+    ],
+    [
+      60,
+      20,
+      86,
+      54
+    ],
+    [
+      27,
+      53,
+      72,
+      73
+    ],
+    [
+      25,
+      27,
+      74,
+      38
+    ],
+    [
+      25,
+      36,
+      38,
+      56
+    ],
+    [
+      60,
+      36,
+      74,
+      56
+    ],
+    [
+      37,
+      36,
+      62,
+      53
+    ]
+  ],
+  "notches": [
+    [
+      44,
+      42,
+      51,
+      47
+    ]
+  ],
+  "octagons": [
+    [
+      15,
+      49,
+      8,
+      11
+    ],
+    [
+      80,
+      46,
+      7,
+      10
+    ]
+  ],
+  "skyline": [
+    [
+      43,
+      12,
+      51,
+      19,
+      12
+    ],
+    [
+      12,
+      32,
+      18,
+      38,
+      11
+    ],
+    [
+      75,
+      28,
+      80,
+      34,
+      10
+    ]
+  ],
+  "entry": [
+    47,
+    7
+  ],
+  "porch": [
+    44,
+    3,
+    50,
+    6
+  ],
+  "partitions": [
+    {
+      "axis": "x",
+      "fixed": 30,
+      "from": 28,
+      "to": 34,
+      "door": 31,
+      "facing": "west"
+    }
+  ],
+  "windows": [
+    [
+      42,
+      7,
+      "south"
+    ],
+    [
+      54,
+      7,
+      "south"
+    ],
+    [
+      8,
+      33,
+      "west"
+    ],
+    [
+      86,
+      31,
+      "east"
+    ],
+    [
+      46,
+      73,
+      "north"
+    ],
+    [
+      8,
+      43,
+      "west"
+    ]
+  ],
+  "fixtures": [
+    [
+      47,
+      16
+    ],
+    [
+      17,
+      32
+    ],
+    [
+      74,
+      30
+    ],
+    [
+      46,
+      65
+    ],
+    [
+      32,
+      32
+    ],
+    [
+      66,
+      43
+    ]
+  ],
+  "ridges": [],
+  "rooms": [
+    {
+      "id": "marble-river-oath-hall",
+      "kind": "throne-hall",
+      "rect": [
+        39,
+        11,
+        56,
+        23
+      ]
+    },
+    {
+      "id": "western-guard-court",
+      "kind": "guard-gallery",
+      "rect": [
+        12,
+        29,
+        30,
+        45
+      ]
+    },
+    {
+      "id": "eastern-treaty-chambers",
+      "kind": "council",
+      "rect": [
+        65,
+        25,
+        81,
+        43
+      ]
+    },
+    {
+      "id": "rear-royal-chancery",
+      "kind": "state-archive",
+      "rect": [
+        32,
+        58,
+        67,
+        69
+      ]
+    },
+    {
+      "id": "middle-envoy-crossing",
+      "kind": "public-circulation",
+      "rect": [
+        41,
+        29,
+        56,
+        34
+      ]
+    }
+  ],
+  "roofBands": [
+    {
+      "rect": [
+        38,
+        9,
+        57,
+        25
+      ],
+      "profile": "gable",
+      "axis": "x",
+      "high": 11,
+      "period": 4
+    },
+    {
+      "rect": [
+        12,
+        28,
+        31,
+        45
+      ],
+      "profile": "saw",
+      "axis": "z",
+      "high": 10,
+      "period": 5
+    },
+    {
+      "rect": [
+        65,
+        24,
+        82,
+        43
+      ],
+      "profile": "hip",
+      "axis": "z",
+      "high": 11,
+      "period": 4
+    },
+    {
+      "rect": [
+        32,
+        57,
+        67,
+        70
+      ],
+      "profile": "shed",
+      "axis": "x",
+      "high": 10,
+      "period": 5
+    }
+  ],
+  "signature": [
+    "twin-faceted-outer-bastions-offset-river-palace",
+    96,
+    14,
+    82
+  ],
+  "profile": "twin-faceted-outer-bastions-offset-river-palace"
+},
+{
+  "id": "r4:embassy:mountain:medium:01",
+  "type": "embassy",
+  "biome": "mountain",
+  "size": "medium",
+  "variant": 1,
+  "bounds": [
+    71,
+    13,
+    60
+  ],
+  "wings": [
+    [
+      28,
+      7,
+      44,
+      23
+    ],
+    [
+      8,
+      21,
+      28,
+      43
+    ],
+    [
+      45,
+      23,
+      62,
+      47
+    ],
+    [
+      20,
+      43,
+      54,
+      55
+    ],
+    [
+      23,
+      23,
+      49,
+      33
+    ],
+    [
+      22,
+      32,
+      33,
+      45
+    ],
+    [
+      42,
+      32,
+      51,
+      46
+    ]
+  ],
+  "notches": [
+    [
+      35,
+      36,
+      39,
+      39
+    ]
+  ],
+  "octagons": [
+    [
+      58,
+      42,
+      6,
+      9
+    ]
+  ],
+  "skyline": [
+    [
+      33,
+      11,
+      39,
+      16,
+      11
+    ],
+    [
+      55,
+      31,
+      60,
+      35,
+      10
+    ]
+  ],
+  "entry": [
+    36,
+    7
+  ],
+  "porch": [
+    33,
+    3,
+    39,
+    6
+  ],
+  "partitions": [
+    {
+      "axis": "x",
+      "fixed": 27,
+      "from": 24,
+      "to": 29,
+      "door": 27,
+      "facing": "west"
+    }
+  ],
+  "windows": [
+    [
+      32,
+      7,
+      "south"
+    ],
+    [
+      41,
+      7,
+      "south"
+    ],
+    [
+      8,
+      30,
+      "west"
+    ],
+    [
+      62,
+      28,
+      "east"
+    ],
+    [
+      36,
+      55,
+      "north"
+    ],
+    [
+      8,
+      37,
+      "west"
+    ]
+  ],
+  "fixtures": [
+    [
+      36,
+      16
+    ],
+    [
+      13,
+      31
+    ],
+    [
+      53,
+      29
+    ],
+    [
+      35,
+      50
+    ],
+    [
+      47,
+      40
+    ]
+  ],
+  "ridges": [],
+  "rooms": [
+    {
+      "id": "summit-safe-passage-chamber",
+      "kind": "formal-reception",
+      "rect": [
+        30,
+        10,
+        42,
+        20
+      ]
+    },
+    {
+      "id": "western-mountain-guest-court",
+      "kind": "hospitality",
+      "rect": [
+        11,
+        25,
+        25,
+        39
+      ]
+    },
+    {
+      "id": "eastern-diplomatic-cartography",
+      "kind": "consular-office",
+      "rect": [
+        49,
+        27,
+        59,
+        38
+      ]
+    },
+    {
+      "id": "upper-treaty-terrace-library",
+      "kind": "treaty-archive",
+      "rect": [
+        25,
+        46,
+        49,
+        53
+      ]
+    }
+  ],
+  "roofBands": [
+    {
+      "rect": [
+        30,
+        9,
+        42,
+        21
+      ],
+      "profile": "gable",
+      "axis": "x",
+      "high": 11,
+      "period": 4
+    },
+    {
+      "rect": [
+        11,
+        25,
+        25,
+        39
+      ],
+      "profile": "saw",
+      "axis": "z",
+      "high": 10,
+      "period": 4
+    },
+    {
+      "rect": [
+        49,
+        27,
+        59,
+        40
+      ],
+      "profile": "hip",
+      "axis": "z",
+      "high": 10,
+      "period": 4
+    },
+    {
+      "rect": [
+        25,
+        46,
+        49,
+        53
+      ],
+      "profile": "shed",
+      "axis": "x",
+      "high": 9,
+      "period": 4
+    }
+  ],
+  "signature": [
+    "mountain-pass-switchback-consulate-butterfly-court",
+    71,
+    13,
+    60
+  ],
+  "profile": "mountain-pass-switchback-consulate-butterfly-court"
+},
+{
+  "id": "r4:grand-archive:snow:medium:01",
+  "type": "grand-archive",
+  "biome": "snow",
+  "size": "medium",
+  "variant": 1,
+  "bounds": [
+    78,
+    13,
+    65
+  ],
+  "wings": [
+    [
+      26,
+      7,
+      47,
+      23
+    ],
+    [
+      6,
+      18,
+      25,
+      45
+    ],
+    [
+      48,
+      21,
+      70,
+      46
+    ],
+    [
+      20,
+      44,
+      59,
+      59
+    ],
+    [
+      20,
+      21,
+      53,
+      34
+    ],
+    [
+      21,
+      33,
+      33,
+      47
+    ],
+    [
+      46,
+      33,
+      58,
+      48
+    ]
+  ],
+  "notches": [
+    [
+      37,
+      38,
+      42,
+      41
+    ]
+  ],
+  "octagons": [
+    [
+      13,
+      39,
+      6,
+      9
+    ]
+  ],
+  "skyline": [
+    [
+      32,
+      11,
+      39,
+      16,
+      11
+    ],
+    [
+      63,
+      29,
+      67,
+      33,
+      10
+    ]
+  ],
+  "entry": [
+    36,
+    7
+  ],
+  "porch": [
+    33,
+    3,
+    39,
+    6
+  ],
+  "partitions": [
+    {
+      "axis": "x",
+      "fixed": 24,
+      "from": 24,
+      "to": 30,
+      "door": 27,
+      "facing": "west"
+    }
+  ],
+  "windows": [
+    [
+      30,
+      7,
+      "south"
+    ],
+    [
+      43,
+      7,
+      "south"
+    ],
+    [
+      6,
+      28,
+      "west"
+    ],
+    [
+      70,
+      30,
+      "east"
+    ],
+    [
+      39,
+      59,
+      "north"
+    ],
+    [
+      6,
+      35,
+      "west"
+    ]
+  ],
+  "fixtures": [
+    [
+      36,
+      16
+    ],
+    [
+      14,
+      29
+    ],
+    [
+      61,
+      32
+    ],
+    [
+      36,
+      53
+    ],
+    [
+      49,
+      40
+    ]
+  ],
+  "ridges": [],
+  "rooms": [
+    {
+      "id": "frostbound-public-index",
+      "kind": "reading-room",
+      "rect": [
+        29,
+        10,
+        44,
+        21
+      ]
+    },
+    {
+      "id": "west-sealed-scroll-vault",
+      "kind": "preservation-vault",
+      "rect": [
+        9,
+        23,
+        23,
+        39
+      ]
+    },
+    {
+      "id": "east-northern-map-scriptorium",
+      "kind": "cartography",
+      "rect": [
+        52,
+        25,
+        66,
+        42
+      ]
+    },
+    {
+      "id": "rear-aurora-memory-hall",
+      "kind": "great-archive",
+      "rect": [
+        25,
+        49,
+        54,
+        56
+      ]
+    }
+  ],
+  "roofBands": [
+    {
+      "rect": [
+        29,
+        9,
+        44,
+        21
+      ],
+      "profile": "hip",
+      "axis": "x",
+      "high": 11,
+      "period": 4
+    },
+    {
+      "rect": [
+        9,
+        23,
+        23,
+        39
+      ],
+      "profile": "saw",
+      "axis": "z",
+      "high": 10,
+      "period": 5
+    },
+    {
+      "rect": [
+        52,
+        25,
+        66,
+        42
+      ],
+      "profile": "gable",
+      "axis": "z",
+      "high": 10,
+      "period": 4
+    },
+    {
+      "rect": [
+        25,
+        49,
+        54,
+        56
+      ],
+      "profile": "shed",
+      "axis": "x",
+      "high": 9,
+      "period": 5
+    }
+  ],
+  "signature": [
+    "snow-horseshoe-memory-vault-faceted-index-wing",
+    78,
+    13,
+    65
+  ],
+  "profile": "snow-horseshoe-memory-vault-faceted-index-wing"
+}
 ];
 const VALID_IDS=new Set(PLANS.map(p=>p.id));
 function author(spec){
