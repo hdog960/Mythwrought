@@ -11,8 +11,13 @@ for(const seed of [179,1,2026,-77]){
     const loops=descentLoopConnectivity(world);
     assert.equal(loops.connected,true,JSON.stringify(loops.levels.filter(x=>!x.connected).slice(0,1)));
     const entrance=descentEntranceConnectivity(world);
-    assert.equal(entrance.approachConnected,true,JSON.stringify(entrance.failures.slice(0,5)));
+    // The first approach step reaches the protected legacy Y=-3 envelope.
+    // Without a :24-approved surface breach, a fresh world MUST report it
+    // blocked rather than falsely certify a playable entrance.
+    assert.equal(entrance.approachConnected,false);
+    assert.ok(entrance.failures.some(f=>f.step===0&&f.reason==='blocked-headroom'));
     assert.equal(entrance.surfaceConnected,false);
+    assert.equal(entrance.requiresSurfaceOwner,true);
   });
   test('saved high obstruction invalidates secondary gallery, seed '+seed,()=>{
     const world=new VoxelWorld(seed);
