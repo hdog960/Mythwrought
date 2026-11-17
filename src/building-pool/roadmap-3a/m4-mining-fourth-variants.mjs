@@ -145,8 +145,13 @@ function build(s){
    // Mountain Skycut's exposed east sorting façade now has a true stepped
    // low ore-testing roof, not a 20+ high isolated roof tooth above the
    // retaining gallery. The high central/west sorting ridge stays original.
-   if(mountainShoulder&&x>=mid+10)
-    return 15+Math.floor((mid+17-x)/5)+(z>=7?1:0);
+   if(mountainShoulder){
+    // Broad, low snow-country grading-hall massing; the original high
+    // exposed west ridge projected as a second floating masonry tooth.
+    // Keep the central shaft tall instead of an unsupported north needle.
+    const ridgeSpan=Math.min(x-(mid-16),(mid+17)-x);
+    return 15+Math.min(2,Math.floor(ridgeSpan/8))+(z>=7?1:0);
+   }
    const ridge=Math.min(x-(mid-16),(mid+17)-x);
    switch(s.roofProfile){
     case 'switchback-saw':case 'sunshade-stagger':case 'high-clifffold':

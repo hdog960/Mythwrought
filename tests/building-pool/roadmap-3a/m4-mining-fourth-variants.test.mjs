@@ -161,12 +161,16 @@ test('mountain-large only: northeast high hall is grounded by a real accessible 
  // The old exposed east high-roof tooth must now be an actual low stepped
  // architecture tier, not merely surrounded by a new cosmetic base.
  for(let z=2;z<=s.north;z++){
+  for(let x=m-16;x<=m+17;x++){
+   const h=roofs.get(x+','+z);
+   assert.ok(h>=15&&h<=18,'north hall retained a dangerously tall exposed tooth '+x+','+z);
+  }
   const eastRoof=roofs.get((m+17)+','+z);
   const westRoof=roofs.get((m+9)+','+z);
   const eastTier=roofs.get((m+10)+','+z);
   assert.ok(eastRoof>=15&&eastRoof<=16,'high inverted-V tooth remains on east side '+z);
-  assert.ok(eastTier>=16&&eastTier<=17,'missing low east tier '+z);
-  assert.ok(westRoof>=20&&westRoof>eastTier,'missing source-supported western high sorting roof '+z);
+  assert.ok(eastTier>=15&&eastTier<=16,'missing low east tier '+z);
+  assert.ok(westRoof>=16&&westRoof<=17&&westRoof>eastTier,'unsupported mountain stepped sorting ridge '+z);
   for(let y=eastTier;y<westRoof;y++)
    assert.ok(filled.has(at(m+9,y,z)),'missing west high-low masonry ridge '+z+','+y);
   if(z>=5&&z%3===0)for(let y=2;y<eastTier;y++)
