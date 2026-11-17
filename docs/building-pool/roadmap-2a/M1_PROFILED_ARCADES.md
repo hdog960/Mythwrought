@@ -1,0 +1,22 @@
+# Builder 2A M1 — six independent split-profile merchants (source candidates 123–128)
+
+**Authoring is isolated: no production block placement, merge, deployment, save writes, numerical IDs, economic systems, pet spawning, emitted light, furnace gameplay or v0.11 unlock.**
+
+The prior 122 designs, including all 15 source-exact legacy General Stores and 107 original candidates, remain untouched. Each new building is based on its own source-authored irregular rectilinear perimeter, distinct open-air sky courts, four physical room anchors, 4 read-only symbolic/manual producer fixtures, and four independently authored source roof regions. This cohort specifically rejects cosmetic roof labels: two additional **camera-facing roof profiles** are individually shaped and fully occupied by genuine source-voxel columns, each rooted in a source roof plate with vertical roof-to-roof bearing.
+
+| Draft source ID | Original premium architecture | New skyline |
+|---|---|---|
+| `r2:general-store:desert:large:04` | Dunewatch Skybridge Mart, 1,976 occupied ground-floor columns, asymmetric crossroads with an eastern merchant causeway | east sawtooth roof, separate rear butterfly valley |
+| `r2:pet-shop:enchanted-forest:medium:03` | Fernspire Crescent Boarding, 1,797 ground columns with three sky-open animal enclosures (unoccupied) | curved/barrel gallery and distinct waving back ridge |
+| `r2:magic-shop:temperate:small:02` | Hollowstar Stepped Orrey, 1,769 ground columns, separated observatory terraces and two sky courts | eastern ogee clerestory and crenellated rear pavilions |
+| `r2:potion-shop:mountain:medium:03` | Stonethorn Cascading Herbarium, 1,694 occupied ground columns and asymmetrical stepped herb terraces | slanted roof ramp with separate stepped gables |
+| `r2:bakery:snow:small:02` | Frostkiln Double-Nave Patisserie, 1,703 occupied ground columns, genuinely separated cold oven and flour wings | zigzag cooling ridge and doubled rear gable |
+| `r2:bank:desert:small:02` | Sunvault Cascaded Bond Court, 1,806 ground columns with **real two-cell, three-high** producer-backed source gate to a 34–44 × 24–36 vault enclosure | mansard eastern bondhall and separated castellated rear |
+
+The new producer-backed acceptance tests verify actual wall removal for a 3-bay eastern outdoor arcade and a 2-wide, 3-high rear unloading portico; 12 original high front-facing Pack4 source window voxels with corresponding opening records; two genuinely floor-founded full-height side buttresses; 24 connected 3-high room anchors that remain reachable after actual Pack5 occupied-offset AABB clearance; a genuine bank twin-leaf vault, 12 differently shaped roof profiles and vertical roof support for every newly added roof cell. Rendered cells are **diagnostic software Chromium WebGL2 opaque cube proxies**, not final mounted Pack geometry, glass fidelity or actual iPhone hardware FPS.
+
+**Independent 128-design preflight:** all six source-floor masks connected; zero new normalized eight-way D4 IoU ≥0.89 against the accepted 122 and the other six. Highest prior overlap ~0.882287 (Frostkiln vs historic bank); highest inter-new overlap ~0.841995. The historical 269 high-overlap pairs including 30 exact matches **remain unresolved unchanged debt**. These preflight findings require exact-head native CI acceptance, not visual guesswork.
+
+**Required green evidence before acceptance:** **768** genuine source-linked Chromium WebGL2 exterior/cutaway PNGs at 667×375, 844×390 and 932×430 (128 × 2 × 3); independently inspect real screenshot counts, SHA256 hashes, dimensions and unique source IDs. Compare all **122** existing source-coordinate records byte-for-byte against accepted artifact `mythwrought-2a-122-visible-732-green.zip`. Keep the historical 732 screenshots unchanged and revalidate the 269-pair D4 ledger.
+
+**Proposed total**: 128/420 authored theoretical candidates = 15 protected legacy stores + 113 original independent buildings; 292 remain. **0 creator approved, 0 integrated.** Valid changed paths only `src/building-pool/roadmap-2a/**`, `tests/building-pool/roadmap-2a/**` and `docs/building-pool/roadmap-2a/**`. PR #179 remains draft/unmerged. Current production main may move independently; do not automatically merge main or touch unrelated builder/automation code, manual pack families, runtime or schema-1 saves. Final Pack mesh support, mounting, roof span, transparent windows, exterior creator sign-off and physical iPhone acceptance remain OPEN.
