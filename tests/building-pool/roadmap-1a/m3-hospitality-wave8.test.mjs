@@ -102,8 +102,8 @@ test('five new original buildings: 260 IDs, 260 physical signatures, 87,472 voxe
  assert.equal(wave.length,5);
  assert.equal(wave.filter(b=>b.category==='tavern').length,3);
  assert.equal(wave.filter(b=>b.category==='inn').length,2);
- assert.equal(wave.reduce((s,b)=>s+b.placements.length,0),87472);
- assert.equal(wave.reduce((s,b)=>s+b.architecturalIdentity.exteriorVoidFootprintCells,0),5107);
+ assert.equal(wave.reduce((s,b)=>s+b.placements.length,0),86269);
+ assert.equal(wave.reduce((s,b)=>s+b.architecturalIdentity.exteriorVoidFootprintCells,0),5299);
  assert.equal(wave.reduce((s,b)=>s+b.rooms.length,0),29);
  assert.equal(wave.reduce((s,b)=>s+b.footprintReservations.length,0),9);
  assert.deepEqual(pool.reduce((o,b)=>(o[b.category]=(o[b.category]||0)+1,o),{}),{house:150,tavern:61,inn:49});

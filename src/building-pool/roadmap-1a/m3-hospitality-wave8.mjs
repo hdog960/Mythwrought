@@ -7,7 +7,7 @@ const SPECS=Object.freeze([
     "category": "tavern",
     "biome": "snow",
     "size": "large",
-    "index": 3,
+    "index": 1,
     "title": "Snowglass Twin Court Feast House",
     "plan": "snowglass-double-court-h-crossed-snow-wing",
     "w": 75,
@@ -699,7 +699,7 @@ const SPECS=Object.freeze([
     "category": "tavern",
     "biome": "enchanted-forest",
     "size": "medium",
-    "index": 4,
+    "index": 1,
     "title": "Thornlumen Lantern Crosshouse",
     "plan": "thornlumen-mushroom-crosshall-t-loom",
     "w": 60,
@@ -1392,6 +1392,12 @@ const SPECS=Object.freeze([
         9,
         68,
         15
+      ],
+      [
+        0,
+        50,
+        11,
+        65
       ]
     ],
     "segments": [
@@ -1552,7 +1558,7 @@ const SPECS=Object.freeze([
         "east"
       ],
       [
-        3,
+        16,
         64,
         "south"
       ],
