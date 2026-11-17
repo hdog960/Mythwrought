@@ -20,8 +20,16 @@ export function planCanopyWalkway(world,a,b,y){
  // A per-span stable signature prevents every bridge in one seeded world from
  // repeating the same crown silhouette. Canonical endpoints make this invariant
  // under reversed calls; no global generator state or save fields are involved.
- const variant=(Math.imul(a[0],73856093)^Math.imul(a[1],19349663)^
+ // Mix high coordinate bits into low bits: the raw XOR's lowest bit is
+ // constant for equal-length spans (both endpoints contribute parity twice).
+ // Without avalanche, the alleged location-specific branch side never varies.
+ let variant=(Math.imul(a[0],73856093)^Math.imul(a[1],19349663)^
   Math.imul(b[0],83492791)^Math.imul(b[1],1640531513)^world.seed)>>>0;
+ variant^=variant>>>16;
+ variant=Math.imul(variant,0x7feb352d)>>>0;
+ variant^=variant>>>15;
+ variant=Math.imul(variant,0x846ca68b)>>>0;
+ variant^=variant>>>16;
  const cells=[];
  for(let i=1;i<distance;i++){
   const x=a[0]+sx*i,z=a[1]+sz*i;
