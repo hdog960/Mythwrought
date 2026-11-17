@@ -97,7 +97,9 @@ const {candidate:longPlan}=longSite;
 const longOccupancy=new Map(longPlan.cells.map(([x,cy,z,id])=>[[x,cy,z].join(','),id]));
 const outerTips=longPlan.cells.filter(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&Math.abs(z-longSite.aa[1])===2);
 assert.equal(outerTips.length,1,'one asymmetric taper tip rather than mirrored prongs or a fence');
-const spanVariant=(aa,bb)=>(Math.imul(aa[0],73856093)^Math.imul(aa[1],19349663)^\n Math.imul(bb[0],83492791)^Math.imul(bb[1],1640531513)^seed)>>>0;\nassert.equal(outerTips[0][0]-longSite.aa[0],(spanVariant(longSite.aa,longSite.bb)&1)===0?2:5,
+const spanVariant=(aa,bb)=>(Math.imul(aa[0],73856093)^Math.imul(aa[1],19349663)^
+ Math.imul(bb[0],83492791)^Math.imul(bb[1],1640531513)^seed)>>>0;
+assert.equal(outerTips[0][0]-longSite.aa[0],(spanVariant(longSite.aa,longSite.bb)&1)===0?2:5,
  'seed chooses which end has the longer branch');
 // Different physical sites in one world should not all inherit the same
 // mirrored crown shape merely because they share a global seed.
