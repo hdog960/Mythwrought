@@ -40,7 +40,12 @@ export function createLeasedLegacyEditor(session, scope = session) {
             const onAbort = () => reject(new DOMException('Voxel edit aborted', 'AbortError'));
             signal.addEventListener('abort', onAbort, {once:true});
             if (signal.aborted) onAbort();
-            else Promise.resolve().then(beforeCommit).then(resolve, reject);
+            else Promise.resolve().then(() => {
+              // An abort between listener registration and the queued callback
+              // must not start preparation after the caller has cancelled it.
+              if (signal.aborted) throw new DOMException('Voxel edit aborted', 'AbortError');
+              return beforeCommit();
+            }).then(resolve, reject);
           }).finally(() => signal.removeEventListener('abort', onAbort));
         } else await beforeCommit();
         if (signal?.aborted) throw new DOMException('Voxel edit aborted', 'AbortError');
