@@ -17,6 +17,11 @@ export function planCanopyWalkway(world,a,b,y){
  // Both ends must already be genuine physical timber crown supports.
  if(world.get(a[0],y,a[1])!==BLOCK.WOOD||
     world.get(b[0],y,b[1])!==BLOCK.WOOD)return null;
+ // A per-span stable signature prevents every bridge in one seeded world from
+ // repeating the same crown silhouette. Canonical endpoints make this invariant
+ // under reversed calls; no global generator state or save fields are involved.
+ const variant=(Math.imul(a[0],73856093)^Math.imul(a[1],19349663)^
+  Math.imul(b[0],83492791)^Math.imul(b[1],1640531513)^world.seed)>>>0;
  const cells=[];
  for(let i=1;i<distance;i++){
   const x=a[0]+sx*i,z=a[1]+sz*i;
@@ -34,7 +39,7 @@ export function planCanopyWalkway(world,a,b,y){
    // Station ordinal, not coordinate parity: even spans otherwise put every
    // crown on the same bank (e.g. stations 2,4,6 on an eight-cell bridge).
    const stationIndex=i===2?0:i===distance-2?(distance>=8?2:1):1;
-   const sides=[((stationIndex+world.seed)&1)===0?-1:1];
+   const sides=[((stationIndex+variant)&1)===0?-1:1];
    for(const side of sides){
     const rx=x+side*sideX,rz=z+side*sideZ;
     cells.push([rx,y,rz,BLOCK.WOOD]);
@@ -43,7 +48,7 @@ export function planCanopyWalkway(world,a,b,y){
     // This breaks the mirrored double-prong silhouette without introducing
     // floating tips, paired fences, or additional solid block families.
     // Keep the opposite bank clear at the central fork.
-    if(distance>=7&&i===( (world.seed&1)===0 ? 2 : distance-2 )&&sides.length===1){
+    if(distance>=7&&i===( (variant&1)===0 ? 2 : distance-2 )&&sides.length===1){
      const tx=rx+side*sideX,tz=rz+side*sideZ;
      cells.push([tx,y,tz,BLOCK.WOOD]);
      cells.push([tx,y+1,tz,BLOCK.LEAVES]);
