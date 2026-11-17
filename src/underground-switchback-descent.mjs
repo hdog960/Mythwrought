@@ -774,8 +774,8 @@ export function descentCells(origin=DESCENT_ORIGIN){
         if(radial<=1)carve(d,t,0,5+Math.floor(9*(1-radial)));
       }
       // An irregular side recess branches from the southern gallery.
-      for(let d=27;d<=43;d++)for(let t=-24;t<=-10;t++){
-        const radial=((d-35)/9)**2+((t+17)/8)**2;
+      for(let d=27;d<=43;d++)for(let t=-39;t<=-25;t++){
+        const radial=((d-35)/9)**2+((t+32)/8)**2;
         if(radial<=1)carve(d,t,0,5+Math.floor(4*(1-radial)));
       }
     }
