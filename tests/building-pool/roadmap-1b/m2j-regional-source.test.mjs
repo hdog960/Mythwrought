@@ -32,12 +32,12 @@ function layoutConnected(b){
  }
  return seen.size===nodes.size;
 }
-test('M2j exactly 158/435 source candidates, nine genuinely new slots and 15 inherited stables byte-identical',()=>{
+test('M2j exactly 164/435 source candidates, nine genuinely new slots and 15 inherited stables byte-identical',()=>{
  const all=get1BCandidates(),previous=getInheritedStables(),fresh=newOnes(),v=validateAllocation(all);
  assert.equal(previous.length,15);assert.equal(fresh.length,9);
- assert.equal(all.length,158);assert.equal(v.authored,158);assert.equal(v.remaining,277);
- assert.equal(new Set(all.map(x=>x.id)).size,158);
- assert.equal(new Set(all.map(structuralFingerprint)).size,158);
+ assert.equal(all.length,164);assert.equal(v.authored,164);assert.equal(v.remaining,271);
+ assert.equal(new Set(all.map(x=>x.id)).size,164);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,164);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(c=>[c,all.filter(x=>x.category===c).length])),
   {bathhouse:23,stable:28,'farm-barn':22,greenhouse:23,
    'fishing-lodge':21,'harbor-office':20,lighthouse:21});
