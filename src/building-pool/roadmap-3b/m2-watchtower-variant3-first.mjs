@@ -86,8 +86,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   6
+   8,
+   10
   ],
   "northHeight": 4,
   "southHeight": 3,
@@ -176,8 +176,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   6
+   8,
+   12
   ],
   "northHeight": 5,
   "southHeight": 2,
@@ -266,8 +266,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   5
+   8,
+   14
   ],
   "northHeight": 3,
   "southHeight": 4,
@@ -356,8 +356,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   7
+   8,
+   10
   ],
   "northHeight": 5,
   "southHeight": 5,
@@ -446,8 +446,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   4,
-   10
+   8,
+   12
   ],
   "northHeight": 6,
   "southHeight": 3,
@@ -536,8 +536,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   6
+   8,
+   14
   ],
   "northHeight": 4,
   "southHeight": 4,
@@ -626,8 +626,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   6
+   8,
+   10
   ],
   "northHeight": 6,
   "southHeight": 2,
@@ -716,8 +716,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   5
+   8,
+   12
   ],
   "northHeight": 4,
   "southHeight": 6,
@@ -806,8 +806,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   7
+   8,
+   14
   ],
   "northHeight": 7,
   "southHeight": 5,
@@ -896,7 +896,7 @@ const plans=[
    ]
   ],
   "cargo": [
-   4,
+   8,
    10
   ],
   "northHeight": 6,
@@ -986,8 +986,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   6
+   8,
+   12
   ],
   "northHeight": 8,
   "southHeight": 5,
@@ -1076,8 +1076,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   6
+   8,
+   14
   ],
   "northHeight": 7,
   "southHeight": 6,
@@ -1166,8 +1166,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   5
+   8,
+   10
   ],
   "northHeight": 9,
   "southHeight": 4,
@@ -1256,8 +1256,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   5,
-   7
+   8,
+   12
   ],
   "northHeight": 7,
   "southHeight": 8,
@@ -1346,8 +1346,8 @@ const plans=[
    ]
   ],
   "cargo": [
-   4,
-   10
+   8,
+   14
   ],
   "northHeight": 9,
   "southHeight": 7,
