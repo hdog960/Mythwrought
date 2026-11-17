@@ -70,13 +70,17 @@ test('integrated five-pack ABI has exact source catalog 96 families and 106 phys
  const pack5=assets.find(x=>x.ref==='pack5:088');
  assert.ok(pack5&&pack5.source==='manual-five-pack');
 });
-test('biome130 unresolved futures remain explicitly symbolic, not invented live IDs',()=>{
- const unresolved=assets.filter(a=>a.classification==='unregistered-symbolic-dependency');
- assert.ok(unresolved.length>0);
- assert.ok(unresolved.every(a=>a.blockId===null));
- const registered=assets.filter(a=>a.source==='automated-biome130'&&a.classification==='registered-definition');
- assert.ok(registered.length>0);
- assert.ok(registered.every(a=>a.blockId>255));
+test('biome130 builder dependencies resolve to the completed source-authored 130-family registry',()=>{
+ const biome=assets.filter(a=>a.source==='automated-biome130');
+ assert.ok(biome.length>0);
+ const unresolved=biome.filter(a=>a.classification==='unregistered-symbolic-dependency');
+ assert.deepEqual(unresolved,[], 'Every 3A biome dependency must now resolve to a real registered block');
+ const registered=biome.filter(a=>a.classification==='registered-definition');
+ assert.equal(registered.length,biome.length);
+ for(const asset of registered){
+   assert.equal(asset.blockId,255+Number(asset.ref.slice(-3)),asset.ref);
+   assert.ok(asset.boxCount>0,asset.ref+' needs real physical geometry');
+ }
 });
 test('emit byte-identical M1 candidate source bundle for independent real local Chromium review',()=>{
  const paths=[
