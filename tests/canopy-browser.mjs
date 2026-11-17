@@ -29,6 +29,17 @@ try{
  await page.screenshot({path:'artifacts/mythwrought-v010-woodland-canopy-landscape.png'});
  const gap=()=>page.evaluate(()=>{const c=document.querySelector('#scene').getBoundingClientRect(),l=document.querySelector('.left').getBoundingClientRect(),r=document.querySelector('.right').getBoundingClientRect();return [c.left-l.right,r.left-c.right]});
  assert.ok((await gap()).every(x=>x>=-2));
+ // M2: genuinely rendered current in-game source at all three supported
+ // iPhone-landscape sizes, same seed/camera/feature as historical 932x430.
+ // These PNGs are AFTER witnesses. Previous-main screenshots are retained
+ // separately in GitHub Actions; do not mislabel old captures as exact-head.
+ for(const [w,h] of [[667,375],[844,390],[932,430]]){
+   await page.setViewportSize({width:w,height:h});await page.waitForTimeout(250);await loaded();
+   assert.equal(await page.evaluate(()=>!!document.querySelector('#scene')?.getContext('webgl2')),true);
+   assert.ok((await gap()).every(x=>x>=-2),'iPhone grips remain off the view');
+   await page.screenshot({path:`artifacts/manual-m2-woodland-after-${w}x${h}.png`});
+ }
+ await page.setViewportSize({width:932,height:430});await loaded();
  await page.evaluate(p=>window.__mythwroughtTest.placeFixture(p.x,p.y,p.z,0),tree);await loaded();
  assert.notDeepEqual(await inspect(),tree,'mined tree should disappear');
  await page.reload({waitUntil:'networkidle'});await loaded();
