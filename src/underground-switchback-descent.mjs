@@ -742,6 +742,44 @@ export function descentCells(origin=DESCENT_ORIGIN){
       for(let t=-13;t<=13;t++)for(let d=43;d<=45;d++)carve(d,t,7);
     }
   }
+  // Deepest-band folded fault amphitheater at -190: a walkable fork around
+  // an intact rock wedge, two lateral galleries, and an offset oval vault.
+  // Both arms reconnect; all excavations use existing AIR/DEEPSTONE only.
+  {
+    const depth=-190,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,width=2,height=7)=>{
+        for(let a=-width;a<=width;a++){
+          const x=anchor.x+outward[0]*d+tangent[0]*(t+a);
+          const z=anchor.z+outward[1]*d+tangent[1]*(t+a);
+          set(x,depth,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
+        }
+      };
+      // A common throat divides gradually, with two broad, supported arms.
+      for(let d=0;d<=14;d++)carve(d,0);
+      for(let d=14;d<=54;d++){
+        const spread=Math.round(13*Math.sin(Math.PI*(d-14)/40));
+        carve(d,-spread,2,7);
+        carve(d,spread,2,8);
+      }
+      // Lateral gallery reconnects the arms without cutting their central
+      // stone wedge; a vaulted elliptical destination caps the circuit.
+      for(let t=-14;t<=14;t++)for(let d=52;d<=55;d++)carve(d,t,0,7);
+      for(let d=51;d<=76;d++)for(let t=-17;t<=17;t++){
+        const radial=((d-63)/14)**2+((t-3)/18)**2;
+        if(radial<=1)carve(d,t,0,5+Math.floor(9*(1-radial)));
+      }
+      // An irregular side recess branches from the southern gallery.
+      for(let d=27;d<=43;d++)for(let t=-24;t<=-10;t++){
+        const radial=((d-35)/9)**2+((t+17)/8)**2;
+        if(radial<=1)carve(d,t,0,5+Math.floor(4*(1-radial)));
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
