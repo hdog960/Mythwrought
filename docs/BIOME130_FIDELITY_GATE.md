@@ -22,10 +22,12 @@ Baseline: incorporation 015 `1f67efc9805e83866549515ffdad4dc7e225b234`, all 130 
 The isolated browser suite now captures both occlusion orders using genuine live
 Pack 2 water ID 76 and M11 structural ice ID 350 (source opacity 0.72),
 in adjacent cells of the **same chunk**, at each of the three landscape
-viewports. The camera is face-on; the game is rendered normally with the
-targeting overlay hidden only in this localhost diagnostic, and the scene
-must first have all 25 surface GPU chunks loaded to avoid background-stream
-differences contaminating A/B evidence. For each camera-stable order it saves
+viewports. The local-only test explicitly teleports the camera back beside the real
+fixtures **after** save/reload and asserts that it is within 4 world units
+of the near cell. The camera is face-on; the game is rendered normally
+with the targeting overlay hidden only for this localhost diagnostic, and
+the scene must first have all 25 surface GPU chunks loaded to avoid
+background-stream differences contaminating A/B evidence. For each camera-stable order it saves
 empty, near-only, far-only and combined screenshots, checks source block IDs
 and verifies that both materials contribute to real framebuffer pixels. JSON
 records source-specific A/B differences, positive GPU ice vertex residency

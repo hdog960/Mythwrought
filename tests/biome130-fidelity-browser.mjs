@@ -122,11 +122,17 @@ try{
       const overlap={};
       // Freeze gameplay movement and suppress only the UI target highlight:
       // actual renderer/WebGL2/terrain stay active, no simulated screenshots.
-      await page.evaluate(y=>{
+      const auditEye=await page.evaluate(y=>{
         const t=window.__mythwroughtTest,help=document.getElementById('help');
+        // Browser reload restores blocks but resets the player camera. Move
+        // back to the same actual game eye that created the original ice shot.
+        const pos=t.teleport(14.5,.5);
         help.hidden=false;help.style.display='none';
-        t.aimAt(16,y,0); // foreground ice fills the actual phone-size viewport
+        t.aimAt(16,y,0);
+        return {x:pos.x,z:pos.z,feet:pos.feet};
       },fixtureY);
+      assert.ok(Math.hypot(auditEye.x-16.5,auditEye.z-.5)<4,
+        'Transparency audit camera was too far from the real source fixture');
       const captureAudit=async label=>{
         await page.waitForTimeout(170);
         const shot=PNG.sync.read(await page.screenshot({path:
@@ -181,8 +187,8 @@ try{
           ],fixtureY),[nearId,farId],'Wrong live Pack2 water/ice IDs');
           const report={
             nearId,farId,sameChunk:true,renderPath:'actual-water-ice-blend',
-            auditCamera:'face-on; target overlay suppressed in localhost only',
-            initialFullSurfaceChunks:25,
+            auditCamera:'close face-on after browser reload; overlay suppressed in localhost only',
+            auditEye,initialFullSurfaceChunks:25,
             nearPixels:pixelChanges(empty,near),
             farPixels:pixelChanges(empty,far),
             combinedPixels:pixelChanges(empty,both),
