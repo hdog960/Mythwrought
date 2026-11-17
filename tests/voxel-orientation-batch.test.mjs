@@ -283,3 +283,22 @@ test('unacknowledged edit with no revision advance refuses speculative undo',asy
  assert.equal(undos,0);
  assert.equal(f.sidecar.get(f.cells[0],4),0);
 });
+
+test('rollback rejects foreign revision advance even when identity is restored',async()=>{
+ const f=fixture(),versions=new Map(f.cells.map(c=>[c.join(','),0]));
+ const bump=c=>versions.set(c.join(','),versions.get(c.join(','))+1);
+ await assert.rejects(f.run((c,i)=>{
+   f.ids.set(c.join(','),5);bump(c);return i!==1;
+ },{
+   readRevision:c=>versions.get(c.join(',')),
+   rollback:c=>{
+     f.ids.set(c.join(','),4);bump(c);
+     if(c.join(',')===f.cells[0].join(','))bump(c); // foreign ABA while rollback awaits
+     return true;
+   }
+ }),error=>error instanceof AggregateError &&
+   error.errors.some(e=>/Rollback revision mismatch/.test(e.message)));
+ assert.equal(f.sidecar.get(f.cells[0],4),0);
+ assert.equal(f.sidecar.get(f.cells[1],4),2);
+ assert.equal(versions.get(f.cells[0].join(',')),3);
+});
