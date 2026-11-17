@@ -55,9 +55,22 @@ export function author2AArcadedFront(spec){
  for(const z of [20,21,27,28])for(let y=2;y<=4;y++)
   removeWall(0,y,z,'open-west-courtyard-arcade');
  for(const z of [20,21,27,28])portals.push({type:'entrance',role:'open-west-arcade',x:0,y:2,z,clearHeightCells:3,doorOpenState:'open-weather-bay'});
- // Eight actually occupied Pack4 glazing cells with matching window-opening
+ // The acceptance camera looks onto the EAST and REAR outer weather walls.
+ // Carve genuine source air on these near-facing façades as well; otherwise
+ // the architected front arcade exists but is invisible to a phone-scale review.
+ for(const z of [20,21,27,28])for(let y=2;y<=5;y++)
+  removeWall(s.w-1,y,z,'visible-near-east-arcade');
+ for(const z of [20,21,27,28])portals.push({type:'entrance',role:'open-near-east-arcade',
+  x:s.w-1,y:2,z,clearHeightCells:3,doorOpenState:'source-open-weather-bay'});
+ for(const x of [entry+9,entry+10])for(let y=2;y<=4;y++)
+  removeWall(x,y,s.d-1,'visible-near-rear-arcade');
+ for(const x of [entry+9,entry+10])portals.push({type:'entrance',role:'open-near-rear-arcade',
+  x,y:2,z:s.d-1,clearHeightCells:3,doorOpenState:'source-open-weather-bay'});
+ // Sixteen actually occupied Pack4 glazing cells with matching window-opening
  // records. Physical glass mounting, yaw, transparency remain pending.
- const glazing=[[entry-9,0,7],[entry-9,0,8],[entry+9,0,7],[entry+9,0,8],[0,22,7],[0,22,8],[0,31,7],[0,31,8]];
+ const glazing=[[entry-9,0,7],[entry-9,0,8],[entry+9,0,7],[entry+9,0,8],[0,22,7],[0,22,8],[0,31,7],[0,31,8],
+  [s.w-1,30,7],[s.w-1,30,8],[s.w-1,32,7],[s.w-1,32,8],
+  [entry+4,s.d-1,7],[entry+4,s.d-1,8],[entry+7,s.d-1,7],[entry+7,s.d-1,8]];
  for(const [x,z,y] of glazing){
   const at=K(x,y,z),before=get(x,y,z);
   if(before?.kind!=='wall')throw Error('new upper window is not wall-mounted '+s.name+' '+at);
@@ -66,7 +79,8 @@ export function author2AArcadedFront(spec){
   windows.push({type:'window',x,y,z,material});
  }
  // Real side and front pilasters are supported from the existing floor upwards.
- for(const [x,z] of [[entry-11,1],[entry+11,1],[1,s.side[0]-2],[1,s.side[1]+4]]){
+ for(const [x,z] of [[entry-11,1],[entry+11,1],[1,s.side[0]-2],[1,s.side[1]+4],
+  [s.w-2,16],[s.w-2,34],[entry+2,s.d-2],[entry+8,s.d-2]]){
   if(get(x,1,z)?.kind!=='floor')throw Error('pilaster has no actual foundation/floor support '+K(x,1,z));
   for(let y=2;y<=s.h;y++){
    const v=add({x,y,z,kind:'wall',material:s.wall,architecturalRole:'source-founded-recessed-facade-buttress'});
@@ -93,8 +107,19 @@ export function author2AArcadedFront(spec){
   rearSections++;
   raise(x,z,s.h+1+(x%5===0?5:3),'source-supported-split-rear-eaves');
  }
- if(raisedRoof.length<75||rearSections<8||addedWalls.length<100||removed.length<30||
-   buttresses.length<32||windows.length!==8)
+ // The original front porch is on the far side of the diagnostic camera.
+ // Real near-facing eastern and rear eaves now visibly distinguish roof
+ // massing on iPhone-scale source captures, with the SAME vertical support gate.
+ const nearFacingBefore=raisedRoof.length;
+ for(let z=14;z<=34;z++)for(const x of [s.w-2,s.w-1])
+  raise(x,z,s.h+1+Math.max(3,Math.floor(roofProfile(s.category,z,0,25)*.75)),
+   'visible-near-east-eave-'+s.category);
+ for(let x=entry+2;x<=entry+10;x++)
+  raise(x,s.d-1,s.h+1+Math.max(3,8-Math.floor(Math.abs(x-(entry+6))/2)),
+   'visible-near-rear-eave-'+s.category);
+ const visibleNearFacingRoofCells=raisedRoof.length-nearFacingBefore;
+ if(raisedRoof.length<150||rearSections<8||addedWalls.length<100||removed.length<52||
+   buttresses.length<70||windows.length!==16||visibleNearFacingRoofCells<65)
   throw Error('nominal rather than substantial real recessed architecture '+s.name);
  openings.push(...portals,...windows);
  const source=[...vox.values()].sort((a,b)=>a.y-b.y||a.z-b.z||a.x-b.x);
@@ -103,7 +128,8 @@ export function author2AArcadedFront(spec){
   architecturalSignature:base.architecturalSignature+' / authentic arcaded front/recessed inner screen / '+s.features.join('/'),
   roof:{...base.roof,form:'original silhouette-dependent front pediment and stepped separate rear eaves'},
   facadeArticulation:Object.freeze({removedWeatherWallCells:removed.length,insideRecessWallCells:addedWalls.length,
-   frontArcades:3,openWestArcades:2,sourceNewUpperWindows:windows.length,
+   frontArcades:3,openWestArcades:2,openEastArcades:2,openRearArcade:1,
+   sourceNewUpperWindows:windows.length,visibleNearFacingRoofCells,
    rootedPilasterCells:buttresses.length,sourceRoofTransitionCells:raisedRoof.length,rearTransitions:rearSections,
    accessedUpperFloor:false,finalGlassMountApproved:false,finalLongSpanSupportApproved:false}),
   features:[...base.features,...s.features,'actual open-arch porch and recessed inner screen on real floor'],
