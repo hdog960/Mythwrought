@@ -45,7 +45,7 @@ export function recoverLegacyVoxelSession(cells) {
     editMany(receipts) {
       // Single-threaded fixture transaction: validate every receipt and expected
       // revision before changing any cell or clearing any orientation.
-      if (!Array.isArray(receipts) || receipts.length === 0)
+      if (!Array.isArray(receipts) || receipts.length === 0 || receipts.length > 256)
         throw new TypeError('Invalid edit batch');
       const seen = new Set();
       const prepared = receipts.map(receipt => {
