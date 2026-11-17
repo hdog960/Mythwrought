@@ -90,3 +90,49 @@ test('default lease scopes remain independent for distinct recovered worlds', as
   assert.deepEqual(worldA.read([0,0,0]),{id:2,revision:1});
   assert.deepEqual(worldB.read([0,0,0]),{id:2,revision:1});
 });
+
+test('abort releases pending lease and never commits after late preparation', async () => {
+  const s=recoverLegacyVoxelSession([entry(0)]);
+  const editor=createLeasedLegacyEditor(s);
+  assert.equal(s.setOrientation([0,0,0],1,0,2),true);
+  const controller=new AbortController(), g=gate();
+  const pending=editor.editMany([receipt(0)],()=>g.pending,controller.signal);
+  await assert.rejects(editor.editMany([receipt(0)]),VoxelCellLeaseConflictError);
+  controller.abort();
+  await assert.rejects(pending,{name:'AbortError'});
+  assert.deepEqual(s.read([0,0,0]),{id:1,revision:0});
+  assert.equal(s.orientation([0,0,0]),2);
+  g.release();
+  await Promise.resolve();
+  assert.deepEqual(s.read([0,0,0]),{id:1,revision:0});
+  assert.equal(await editor.editMany([receipt(0)]),true);
+  assert.equal(s.orientation([0,0,0]),null);
+});
+
+test('already-aborted edit cannot mutate or poison a lease', async () => {
+  const s=recoverLegacyVoxelSession([entry(0)]);
+  const editor=createLeasedLegacyEditor(s);
+  const controller=new AbortController();
+  controller.abort();
+  let called=false;
+  await assert.rejects(editor.editMany([receipt(0)],()=>{called=true;},controller.signal),{name:'AbortError'});
+  assert.equal(called,false);
+  assert.deepEqual(s.read([0,0,0]),{id:1,revision:0});
+  assert.equal(await editor.editMany([receipt(0)]),true);
+});
+
+test('interrupted stale receipt stays rejected after another edit and recovery', async () => {
+  const s=recoverLegacyVoxelSession([entry(0)]);
+  const editor=createLeasedLegacyEditor(s), g=gate(), controller=new AbortController();
+  const pending=editor.editMany([receipt(0)],()=>g.pending,controller.signal);
+  controller.abort();
+  await assert.rejects(pending,{name:'AbortError'});
+  assert.equal(await editor.editMany([receipt(0)]),true);
+  g.release();
+  await Promise.resolve();
+  assert.deepEqual(s.read([0,0,0]),{id:2,revision:1});
+  assert.equal(await editor.editMany([receipt(0)]),false);
+  const restored=recoverLegacyVoxelSession(s.exportLegacyCells());
+  assert.deepEqual(restored.read([0,0,0]),{id:2,revision:0});
+  assert.equal(restored.orientation([0,0,0]),null);
+});
