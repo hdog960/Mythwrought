@@ -73,7 +73,6 @@ function closest(a,b){
 const PRESERVED126=[...all,...M1_TERRACES_SANCTUARIES,...M1_WINDFOLD_GUILDS,...M1_CRESCENT_MERCHANTS,...M1_RIME_AND_RIVER,...M1_REGIONAL_FORMS,...M1_CROSSBAR_SWITCHBACK];
 const ORIGINAL_SIX=M1_HIGHLAND_GROVE_SIX;
 const COMPLETE132=[...PRESERVED126,...ORIGINAL_SIX];
-const IDS=["r2:market-square:mountain:large:02","r2:butcher:temperate:large:02","r2:jeweler:snow:medium:02","r2:bookshop:mountain:small:02","r2:theater:enchanted-forest:small:02","r2:temple:enchanted-forest:medium:02"];
 
 
 const OLD132=COMPLETE132;
