@@ -16,6 +16,24 @@ Baseline: incorporation 015 `1f67efc9805e83866549515ffdad4dc7e225b234`, all 130 
 - Focused source native tests now assert that **all nine species** keep real cutout leaves and visible opaque stem triangles through actual surface and deep section mesh generation, with schema-1 save/restore and unmodified nine-float vertex ABI.
 - A dedicated isolated workflow runs source-native tests and genuine Chromium WebGL2 viewport captures (667x375, 844x390, 932x430), including nine individually labeled foliage captures **per** viewport with off-target, outline-free pixel A/B checks against the same camera/empty voxel. The suite checks save/reload, verifies a maximum of 25 surface GPU chunks during progressive streaming (and an initial fully-loaded 25-chunk baseline), and uploads screenshots. Preserve draft PR; do not merge without verification/authorization.
 
+
+## Real WebGL2 water × ice overlap audit
+
+The isolated browser suite now captures both occlusion orders using genuine live
+Pack 2 water ID 76 and M11 ice ID 275, in adjacent cells of the **same chunk**,
+at each of the three landscape viewports. For each camera-stable order it saves
+empty, near-only, far-only and combined screenshots, checks source block IDs
+and verifies that both materials contribute to real framebuffer pixels. JSON
+records source-specific A/B differences, positive GPU ice vertex residency
+and the known chunk-sort limitation. It does **not** pretend that raw pixel
+differences mathematically prove correct compositing order.
+
+The focused native test additionally checks real water's four authored alpha
+values (.11/.25/.37/.58) and all six distinct authored ice alpha values
+(.46/.68/.72/.78/.82/.90, seven families), their nine-float vertex contract
+and the current water-before-ice concatenation. Changing the blending
+algorithm without mobile GPU evidence remains outside this acceptance.
+
 ## Deliberately outstanding alpha families
 
 Other enchanted foliage and glow intents (for example family 040) remain opaque-fallback. Only these seven source-backed ice materials and nine natural-leaf cutouts gain alpha fidelity. All 40-48 and 49.x material tags are separate from Pack 2 opaque material 21 and blended water material 20.

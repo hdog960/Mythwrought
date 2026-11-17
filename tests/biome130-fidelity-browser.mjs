@@ -113,11 +113,95 @@ try{
       const residentChunks=Number(await page.locator('#scene').getAttribute('data-loaded-chunks'));
       assert.ok(Number.isInteger(residentChunks)&&residentChunks>0&&residentChunks<=25,
         'Landscape streaming exceeded 25 surface GPU chunks');
+
+      // Source-specific same-chunk water/ice order audit on the actual game
+      // renderer. Pack 2 water ID 76 and biome130 ice ID 275 are placed
+      // alternately near/far; screenshots use one unchanged eye/camera pose.
+      // This records the documented chunk-level sorting limitation without
+      // claiming a per-face GPU sort or injecting diagnostic mock fragments.
+      const overlap={};
+      const auditPoints=[[16,fixtureY,0],[17,fixtureY,0]];
+      const captureAudit=async label=>{
+        await page.waitForTimeout(170);
+        const shot=PNG.sync.read(await page.screenshot({path:
+          `artifacts/biome130-fidelity/ice-water-${label}-${width}x${height}.png`}));
+        assert.equal(shot.width,width);assert.equal(shot.height,height);
+        return shot;
+      };
+      const pixelChanges=(a,b)=>{
+        let changed=0;
+        for(let py=Math.floor(height*.18);py<Math.floor(height*.82);py++)
+          for(let px=Math.floor(width*.14);px<Math.floor(width*.86);px++){
+            const k=(py*width+px)*4;
+            if(Math.abs(a.data[k]-b.data[k])+
+               Math.abs(a.data[k+1]-b.data[k+1])+
+               Math.abs(a.data[k+2]-b.data[k+2])>=28)changed++;
+          }
+        return changed;
+      };
+      try{
+        for(const [name,nearId,farId] of [
+          ['ice-front',275,76],['water-front',76,275]
+        ]){
+          await page.evaluate(({y})=>{
+            const t=window.__mythwroughtTest;
+            t.placeFixture(16,y,0,0);t.placeFixture(17,y,0,0);
+            // Off-axis ray avoids block-select outlines polluting A/B pixels.
+            t.aimAt(17,y,1);
+          },{y:fixtureY});
+          const empty=await captureAudit(name+'-empty');
+          await page.evaluate(({y,id})=>
+            window.__mythwroughtTest.placeFixture(16,y,0,id),
+            {y:fixtureY,id:nearId});
+          const near=await captureAudit(name+'-near');
+          await page.evaluate(({y})=>
+            window.__mythwroughtTest.placeFixture(16,y,0,0),
+            {y:fixtureY});
+          await page.evaluate(({y,id})=>
+            window.__mythwroughtTest.placeFixture(17,y,0,id),
+            {y:fixtureY,id:farId});
+          const far=await captureAudit(name+'-far');
+          await page.evaluate(({y,id})=>
+            window.__mythwroughtTest.placeFixture(16,y,0,id),
+            {y:fixtureY,id:nearId});
+          const both=await captureAudit(name+'-both');
+          assert.deepEqual(await page.evaluate(y=>[
+            window.__mythwroughtTest.block(16,y,0),
+            window.__mythwroughtTest.block(17,y,0)
+          ],fixtureY),[nearId,farId],'Wrong live Pack2 water/ice IDs');
+          const report={
+            nearId,farId,sameChunk:true,renderPath:'actual-water-ice-blend',
+            nearPixels:pixelChanges(empty,near),
+            farPixels:pixelChanges(empty,far),
+            combinedPixels:pixelChanges(empty,both),
+            combinedVsNearPixels:pixelChanges(near,both),
+            combinedVsFarPixels:pixelChanges(far,both),
+            gpuIceVertices:Number(await page.locator('#scene')
+              .getAttribute('data-biome130-ice-vertices')),
+          };
+          assert.ok(report.nearPixels>30&&report.farPixels>30,
+            'Actual water or ice not visible independently in '+name);
+          assert.ok(report.combinedPixels>30,
+            'Water/ice composite invisible in '+name);
+          assert.ok(report.gpuIceVertices>0,'Ice absent from live transparent GPU upload');
+          overlap[name]=report;
+        }
+      }finally{
+        // Preserve the accepted source ice and foliage fixtures and their save.
+        await page.evaluate(y=>{
+          const t=window.__mythwroughtTest;
+          t.placeFixture(16,y,0,350);t.placeFixture(17,y,0,377);
+          t.aimAt(16,y,0);
+        },fixtureY);
+      }
+      console.log('PASS biome130 authentic water/ice overlap audit',
+        JSON.stringify({viewport:`${width}x${height}`,overlap,
+          knownLimit:'chunk-sorted; no per-face translucent sorting'}));
       assert.deepEqual(errors,[],'Runtime JS errors');assert.deepEqual(missing,[],'404 resources');
       evidence.push({viewport:`${width}x${height}`,webgl2:true,fixtureY,iceVertices:state.iceVertices,
         iceIds:[275,276,277,280,281,282,350],foliageIds:[377,385],
         reloaded:true,colors:colors.size,visibleFoliagePixels:speciesPixels[377],
-        allNineFoliagePixels:speciesPixels,
+        allNineFoliagePixels:speciesPixels,waterIceOverlap:overlap,
         loadedChunks:residentChunks,surfaceChunkBudget:25,
         physicalIPhoneTested:false});
       console.log('PASS biome130 live WebGL2',JSON.stringify(evidence.at(-1)));

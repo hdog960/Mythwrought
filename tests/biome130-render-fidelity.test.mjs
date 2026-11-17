@@ -2,6 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,meshChunk} from '../src/voxel.mjs';
+import {pack2WorldVertices} from '../src/pack2-integration.mjs';
 import {meshDepthSection} from '../src/depth-mesh.mjs';
 import {biome130Block} from '../src/biome130-registry.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from '../src/storybook-materials.mjs';
@@ -153,6 +154,38 @@ test('every ice alpha survives actual surface and deep meshing and save/restore'
   const saved=world.save();
   assert.equal(saved.schema,1);
   assert.deepEqual(VoxelWorld.restore(saved).save(),saved);
+});
+
+
+test('source Pack 2 water and each ice opacity use separate real blended vertex paths',()=>{
+  const water=pack2WorldVertices(76,{level:0,flow:'still',source:true},[9008,18,9000]);
+  assert.equal(water.length%9,0);
+  assert.ok(water.length>0);
+  const actualWaterAlpha=new Set();
+  for(let k=8;k<water.length;k+=9){
+    assert.equal(Math.floor(water[k]),20,'Real Pack2 water tag drifted');
+    actualWaterAlpha.add(Math.round((water[k]-20)*100));
+  }
+  assert.deepEqual([...actualWaterAlpha].sort((a,b)=>a-b),[11,25,37,58]);
+  const world=new VoxelWorld(179);
+  for(let i=0;i<BIOME130_ICE_BLOCK_IDS.length;i++)
+    assert.equal(world.set(9000+i,18,9000,BIOME130_ICE_BLOCK_IDS[i]),true);
+  const sourceIce=splitBiome130Translucent(meshChunk(world,562,562)).translucent;
+  assert.ok(sourceIce.length>0);
+  const seenAlpha=new Set();
+  for(let k=8;k<sourceIce.length;k+=9){
+    assert.equal(Math.floor(sourceIce[k]),49);
+    seenAlpha.add(Math.round((sourceIce[k]-49)*100));
+  }
+  assert.deepEqual([...seenAlpha].sort((a,b)=>a-b),[46,68,72,78,82,90]);
+  // Existing live chunk upload concatenates water then ice. With all faces
+  // in one buffer, there is no viewer-relative ordering of individual faces.
+  // This is an explicit test/evidence boundary, not an assertion that
+  // order-independent transparency has been implemented.
+  const upload=new Float32Array(water.length+sourceIce.length);
+  upload.set(water);upload.set(sourceIce,water.length);
+  assert.equal(Math.floor(upload[8]),20);
+  assert.equal(Math.floor(upload[water.length+8]),49);
 });
 
 test('real shader preserves water 20, opaque Pack 2 21, ice 49.x, both quality settings',()=>{
