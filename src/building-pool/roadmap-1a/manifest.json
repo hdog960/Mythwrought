@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M3 hospitality wave2: 205/450 source-authored candidates, 150 houses / 34 taverns / 21 inns; previous 191 immutable, exact-head CI pending",
+  "milestone": "M3 hospitality wave3: 214/450 coordinate-authored candidates, 150 houses / 38 taverns / 26 inns; exact 205 prior source objects immutable; exact-head CI pending",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 245,
-  "newDesignsAuthored": 175,
-  "totalLaneGeometryAuthored": 205,
+  "additionalDesignsRequired": 236,
+  "newDesignsAuthored": 184,
+  "totalLaneGeometryAuthored": 214,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,10 +53,10 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Obtain isolated exact-head focused 1A native and Chromium WebGL2 source-cell 1062 + Pack producer AABB 786 evidence, including exact 191-source immutable fingerprints",
-    "Finish remaining 245 source candidates: 150 houses, 41 taverns, 54 inns",
-    "Physical producer ABI still unresolved: Pack2 hinged doors/schema1, Pack3 roofs/load/weather, Pack4 glass/weather, Pack5 bed collision/occupancy restore",
-    "Creator artwork approval, real iPhone playtest, central registration/integration and GitHub Pages deployment remain separate explicit authority"
+    "Exact head source-only M3 wave3 native tests, 1116 source-cell and 840 producer physical AABB genuine Chromium screenshots",
+    "236 remaining source authored candidates: 150 houses, 37 taverns, 49 inns",
+    "Production ABI gates pending: Pack2 door hinges/save, Pack3 roof/weather load, Pack4 glazing/weather, Pack5 two-cell bed occupancy/collision, creator art approval/physical iPhone, central integration",
+    "No merge, deployment or v0.11 unlock"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -76,8 +76,8 @@
   "innCount": 1,
   "categoriesAuthored": {
     "house": 150,
-    "tavern": 34,
-    "inn": 21
+    "tavern": 38,
+    "inn": 26
   },
   "firstInn": {
     "id": "r1:inn:temperate:small:001",
@@ -398,6 +398,51 @@
     "sourceCubeScreenshotTarget": 1062,
     "packVisibleAABBCandidateCount": 131,
     "packAABBScreenshotTarget": 786,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": {
+      "head": "032c4e91200fb605ca9f90e6711bf138d1a8e5e1",
+      "run": 43920970569,
+      "conclusion": "success",
+      "ciContract": "12/12",
+      "rootNative": "837/837",
+      "builderNative": "284/284",
+      "chromiumSourceCube": "1062/1062",
+      "chromiumSourcePhysical": "786/786",
+      "artifact": 14254303551
+    },
+    "creatorApproved": 0,
+    "worldIntegrated": 0
+  },
+  "m3HospitalityWave3": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave3.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave3.test.mjs",
+    "immutable205Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline205.json",
+    "newTaverns": 4,
+    "newInns": 5,
+    "newVoxelPlacements": 110037,
+    "trueExteriorEmptyColumns": 6126,
+    "distinctWalkableRooms": 46,
+    "pack5TwoCellBedReservations": 19,
+    "strictNoD4": true,
+    "normalizedFloorPlanIoUThreshold": 0.88,
+    "normalizedExteriorSilhouetteThreshold": 0.975,
+    "sourceGalleryBlueprints": 186,
+    "sourceCellWebGL2Screenshots": 1116,
+    "physicalPackSourceGalleryBlueprints": 140,
+    "packAABBWebGL2Screenshots": 840,
     "viewports": [
       [
         667,
