@@ -19,16 +19,29 @@ test('G2B six-size genuine WebGL2 and live-flight browser acceptance',{timeout:1
  // a 240-second Pack 2 timeout despite G2B itself passing all six viewports.
  // Pack 2 writes this exact head-specific manifest ONLY after its real
  // physical GPU and save-parity tests complete. No shared CI changes.
- let priorPack2Done=false;
- for(let n=0;n<500;n++){
+ // The existing Pack 2 test has a 240-second *per-test* browser timeout;
+ // in concurrent Node workers it can START after this test begins.
+ // Allow a bounded 450-second arrival window for its head-pinned manifest.
+ // Never treat elapsed time, a stale artifact, or a console log as PASS.
+ const pack2WaitMs=450000,pollMs=500;
+ let priorPack2Done=false,observedHead='none';
+ for(let elapsed=0;elapsed<pack2WaitMs;elapsed+=pollMs){
    try{
      const evidence=JSON.parse(readFileSync('artifacts/pack2-live-webgl/manifest.json','utf8'));
+     observedHead=String(evidence.CIHead||'missing');
      if(evidence.CIHead===(process.env.GITHUB_SHA||'local')&&
-        evidence.originalSaveSchema===1){priorPack2Done=true;break;}
+        evidence.originalSaveSchema===1&&
+        evidence.liveDeployment===false&&
+        Array.isArray(evidence.viewports)&&evidence.viewports.length===3){
+       priorPack2Done=true;
+       break;
+     }
    }catch(_){}
-   await delay(500);
+   await delay(pollMs);
  }
- assert.ok(priorPack2Done,'Existing Pack 2 genuine WebGL2 test did not complete its source-authored artifact; refusing GPU-concurrent G2B browser launch');
+ assert.ok(priorPack2Done,'Existing Pack 2 WebGL2 head-pinned manifest missing after '+
+   pack2WaitMs+'ms; expected '+(process.env.GITHUB_SHA||'local')+
+   ', saw '+observedHead+'; do not launch GPU-concurrent G2B browser');
  // Root npm test runs before shared CI installs browser tools. This *test-owned*
  // bootstrap uses the same pinned free Playwright dependency as existing CI;
  // it changes no tracked package/CI file and is never a production import.
