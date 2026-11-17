@@ -542,6 +542,13 @@ function create(p){
   modules.get(role).push([x,y,z,ref]);return true;
  }
  for(const [x,z] of ground){write('foundation',x,0,z,'builtin:stone');write('floor',x,1,z,p.floor);}
+ // Physical Pack4 supply cache occupies an intentional non-circulation corner,
+ // below the roofing and before wall placement, so it cannot be an unplaced label.
+ for(const r of roomData){
+  const [a,b,c,e]=r.rect;
+  if(!write('equipment-store',a,2,c,'pack4:057'))throw Error(id+' supply source fails physical placement '+r.name);
+  if(!write('equipment-store',a,3,c,p.trim))throw Error(id+' supplier trim source missing '+r.name);
+ }
  for(const [x,z] of ground){
   const edge=[[x+1,z],[x-1,z],[x,z+1],[x,z-1]].some(([a,b])=>!footprint.has(flat(a,b)));
   if(edge)for(let y=2;y<=6;y++)write('wall',x,y,z,p.wall);
@@ -563,9 +570,6 @@ function create(p){
    const rise=Math.min(peak,Math.floor(inset/3)+(ri%2));
    for(let y=8;y<=8+rise;y++)write('source-bearing-roof-mass',x,y,z,p.roof);
   }
-  const [fx,fz]=[a,c];
-  write('equipment-store',fx,2,fz,'pack4:057');
-  write('equipment-store',fx,3,fz,p.trim);
  }
  // Distinct true source-backed watch vents and sheltered eave piers.
  for(let ri=0;ri<p.mask.length;ri++){
