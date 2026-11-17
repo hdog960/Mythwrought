@@ -41,9 +41,9 @@ test('six new genuine regional authoring slots, 44 source-validated identities a
  assert.equal(new Set(all.map(x=>x.id)).size,44);
  assert.equal(new Set(all.map(geometrySignature)).size,44);
  assert.equal(manifest.counts.legacyAuthored,30);
- assert.equal(manifest.counts.newlyAuthored,120);
- assert.equal(manifest.counts.totalAuthored,150);
- assert.equal(manifest.counts.remaining,165);
+ assert.equal(manifest.counts.newlyAuthored,128);
+ assert.equal(manifest.counts.totalAuthored,158);
+ assert.equal(manifest.counts.remaining,157);
  assert.equal(manifest.counts.creatorAccepted,0);
  assert.equal(manifest.counts.integratedBuildings,0);
  assert.equal(manifest.categories.find(x=>x.type==='civic-hall').remaining,0);
