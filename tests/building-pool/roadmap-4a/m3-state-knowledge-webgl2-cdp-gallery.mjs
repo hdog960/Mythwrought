@@ -60,10 +60,28 @@ const DESIGNS=[
     "biome": "desert",
     "size": "large",
     "variant": 1
-  }
+  },
+{
+  "type": "castle-palace",
+  "biome": "temperate",
+  "size": "large",
+  "variant": 3
+},
+{
+  "type": "embassy",
+  "biome": "mountain",
+  "size": "medium",
+  "variant": 1
+},
+{
+  "type": "grand-archive",
+  "biome": "snow",
+  "size": "medium",
+  "variant": 1
+}
 ];
 const VIEWPORTS=[[667,375],[844,390],[932,430]];
-const EXPECTED_VIEWS=48;
+const EXPECTED_VIEWS=66;
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
 function gitBlob(bytes){
@@ -75,7 +93,7 @@ function bundle(){
  const shapes=readFileSync(join(SOURCE,'m1-preview-shapes.mjs'),'utf8');
  const render=readFileSync(join(TESTS,'m3-state-knowledge-webgl2-preview.mjs'),'utf8');
  let html=readFileSync(join(TESTS,'m3-state-knowledge-webgl2-preview.html'),'utf8');
- if(gitBlob(blueprint)!=='4e3695113566cd520a18908c7c96f8709ecc5c13')
+ if(gitBlob(blueprint)!=='6faad8c831ab4b3b18339b172376f6a48c343d5f')
    throw Error('M2 authored source differs from exact original authored SHA');
  const importBlueprint="import {SCHEMA,validateBlueprint} from './schema.mjs';";
  const importRender="import {buildM3StateKnowledge} from '../../../src/building-pool/roadmap-4a/m3-state-knowledge.mjs';";
