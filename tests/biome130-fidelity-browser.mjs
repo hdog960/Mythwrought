@@ -115,12 +115,18 @@ try{
         'Landscape streaming exceeded 25 surface GPU chunks');
 
       // Source-specific same-chunk water/ice order audit on the actual game
-      // renderer. Pack 2 water ID 76 and biome130 ice ID 275 are placed
+      // renderer. Pack 2 water ID 76 and structural ice ID 350 are placed
       // alternately near/far; screenshots use one unchanged eye/camera pose.
       // This records the documented chunk-level sorting limitation without
       // claiming a per-face GPU sort or injecting diagnostic mock fragments.
       const overlap={};
-      const auditPoints=[[16,fixtureY,0],[17,fixtureY,0]];
+      // Freeze gameplay movement and suppress only the UI target highlight:
+      // actual renderer/WebGL2/terrain stay active, no simulated screenshots.
+      await page.evaluate(y=>{
+        const t=window.__mythwroughtTest,help=document.getElementById('help');
+        help.hidden=false;help.style.display='none';
+        t.aimAt(16,y,0); // foreground ice fills the actual phone-size viewport
+      },fixtureY);
       const captureAudit=async label=>{
         await page.waitForTimeout(170);
         const shot=PNG.sync.read(await page.screenshot({path:
@@ -141,14 +147,18 @@ try{
       };
       try{
         for(const [name,nearId,farId] of [
-          ['ice-front',275,76],['water-front',76,275]
+          ['ice-front',350,76],['water-front',76,350]
         ]){
           await page.evaluate(({y})=>{
             const t=window.__mythwroughtTest;
             t.placeFixture(16,y,0,0);t.placeFixture(17,y,0,0);
-            // Off-axis ray avoids block-select outlines polluting A/B pixels.
-            t.aimAt(17,y,1);
+            t.aimAt(16,y,0);
           },{y:fixtureY});
+          // During the earlier exploratory run, a partially streamed scene
+          // caused off-target background deltas. Require the same fully
+          // resident 25-chunk surface before starting each A/B quartet.
+          await page.waitForFunction(()=>Number(document.querySelector('#scene')
+            ?.dataset.loadedChunks)===25,null,{timeout:60000});
           const empty=await captureAudit(name+'-empty');
           await page.evaluate(({y,id})=>
             window.__mythwroughtTest.placeFixture(16,y,0,id),
@@ -171,6 +181,8 @@ try{
           ],fixtureY),[nearId,farId],'Wrong live Pack2 water/ice IDs');
           const report={
             nearId,farId,sameChunk:true,renderPath:'actual-water-ice-blend',
+            auditCamera:'face-on; target overlay suppressed in localhost only',
+            initialFullSurfaceChunks:25,
             nearPixels:pixelChanges(empty,near),
             farPixels:pixelChanges(empty,far),
             combinedPixels:pixelChanges(empty,both),
@@ -191,6 +203,8 @@ try{
         await page.evaluate(y=>{
           const t=window.__mythwroughtTest;
           t.placeFixture(16,y,0,350);t.placeFixture(17,y,0,377);
+          const help=document.getElementById('help');
+          help.style.removeProperty('display');help.hidden=true;
           t.aimAt(16,y,0);
         },fixtureY);
       }
