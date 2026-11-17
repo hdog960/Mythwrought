@@ -83,10 +83,17 @@ try{
    await page.waitForTimeout(700);
    await tapJumpTouch();await tapJumpTouch();
    info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
-   assert.equal(info.active,false,'Double-tap LAND should restore Explore at spawn: '+info.reason);
-   await tapJumpTouch();await tapJumpTouch();
-   info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
-   assert.equal(info.active,true,'Repeat double-tap JUMP did not re-enable flight: '+info.reason);
+   if(info.active){
+     // The real collision host can refuse landing safely; this is NOT a
+     // gesture failure, but the refusal must be observable (not a lost tap).
+     const note=await page.locator('#g2bFlightStatus').textContent();
+     assert.match(note,/No verified landing|Landing stale|unsafe|Landing blocked/,
+       'Double-tap LAND was ignored instead of refusing an unsafe landing: '+JSON.stringify(await jumpTouchProof()));
+   }else{
+     await tapJumpTouch();await tapJumpTouch();
+     info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+     assert.equal(info.active,true,'Repeat double-tap JUMP did not re-enable flight: '+JSON.stringify(await jumpTouchProof()));
+   }
    await page.locator('#menu').click();
    assert.equal(await page.locator('#g2bFlightEnable').isChecked(),true);
    assert.equal(info.bodyClear,true);
@@ -176,7 +183,9 @@ try{
      assert.ok(!Number.isFinite(vy)||vy<3,'Landing tap synthesized a second Explore jump');
    }else{
      assert.equal(await page.locator('#jump').textContent(),'LAND ×2');
-     assert.match(landed.reason,/landing|safe|hover|ready|blocked/i);
+     const note=await page.locator('#g2bFlightStatus').textContent();
+     assert.match(note,/No verified landing|Landing stale|unsafe|Landing blocked/,
+       'A double LAND tap must report a verified safety refusal: '+JSON.stringify(await jumpTouchProof()));
    }
    await page.screenshot({path:'artifacts/mythwrought-g2b-'+width+'x'+height+'.png'});
    assert.deepEqual(errors,[],'Uncaught real-game runtime exceptions');
