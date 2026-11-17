@@ -124,7 +124,11 @@ test('every intended real doorway is three high, wall-flanked, physically ground
    assert.equal(d.clearHeightCells,3);
    assert.equal(m.get(key(d.x,1,d.z))?.kind,'floor');
    for(let y=2;y<=4;y++)assert(!m.has(key(d.x,y,d.z)),b.id+' doorway blocked');
-   if(d.type==='internal-doorway')assert.equal(m.get(key(d.x-1,3,d.z))?.kind,'wall',b.id+' missing physical left gate jamb');
+   if(d.type==='internal-doorway'){
+    const alongX=[-1,1].every(dx=>m.get(key(d.x+dx,3,d.z))?.kind==='wall');
+    const alongZ=[-1,1].every(dz=>m.get(key(d.x,3,d.z+dz))?.kind==='wall');
+    assert(alongX||alongZ,b.id+' missing both physically occupied partition jambs');
+   }
   }
   const open=walk(b),closed=walk(b,doors.filter(d=>d.type==='internal-doorway').map(d=>[d.x,d.z]));
   for(const t of b.routeTargets)assert(open.has(t.x+','+t.z),b.id+' inaccessible '+t.name);
