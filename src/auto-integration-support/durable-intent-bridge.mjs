@@ -2,6 +2,14 @@
 // Never infer untouched history from world.edits or block equality.
 const key = (x,y,z) => `${x},${y},${z}`;
 const safe = n => Number.isSafeInteger(n);
+// Compare coordinate tuples without subtraction (which can lose precision).
+const compareCells = (a,b) => {
+  for (let i=0;i<3;i++) {
+    if (a[i] < b[i]) return -1;
+    if (a[i] > b[i]) return 1;
+  }
+  return 0;
+};
 const valid = c => c && ['x','y','z'].every(a => safe(c[a]));
 /**
  * historyComplete must be an explicit, trusted persistence assertion for the
@@ -25,6 +33,6 @@ export function createDurableIntentWitness({historyComplete=false,touchedCells=[
       return !historyComplete || touched.has(key(x,y,z));
     },
     // Pure test fixture; NOT a persisted save-format representation.
-    touchedFixture() {return [...touched].sort().map(s=>s.split(',').map(Number));}
+    touchedFixture() {return [...touched].map(s=>s.split(',').map(Number)).sort(compareCells);}
   });
 }
