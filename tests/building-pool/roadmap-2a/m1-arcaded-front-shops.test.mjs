@@ -192,7 +192,7 @@ test('strict eight-way D4 occupied-floor IoU <0.89 for all new 6 versus all 122,
   assert(highest<.89,b.id+' too close to '+near+' D4 IoU '+highest);
  }
  const ledger=inspect2AD4FloorDebt();
- assert.equal(ledger.sources,122);
+ assert.equal(ledger.sources,128);
  assert.equal(ledger.protectedOriginals,74);
  assert.equal(ledger.grandfatheredHighOverlapPairs,269);
  assert.equal(ledger.exactMatchingFloorPairs,30);
