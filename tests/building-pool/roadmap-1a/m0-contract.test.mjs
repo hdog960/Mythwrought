@@ -25,9 +25,9 @@ test('historical M0 identity snapshot stays separate from current M1 migration',
   assert.equal(result.legacyMigrated,0);assert.equal(result.creatorApproved,0);
   assert.equal(manifest.originalCandidatesIdentified,30);
   assert.equal(manifest.originalGeometryMigrated,30);
-  assert.equal(manifest.totalLaneGeometryAuthored,214);
-  assert.equal(manifest.newDesignsAuthored,184);
-  assert.equal(manifest.additionalDesignsRequired,236);
+  assert.equal(manifest.totalLaneGeometryAuthored,224);
+  assert.equal(manifest.newDesignsAuthored,194);
+  assert.equal(manifest.additionalDesignsRequired,226);
   assert.equal(manifest.creatorAccepted,0);
   assert.equal(manifest.integrated,0);
   assert.equal(manifest.geometryParityCertified,false);
