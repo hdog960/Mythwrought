@@ -32,10 +32,10 @@
   "target": 420,
   "legacySourceCandidates": 15,
   "locallyMigratedAndParityVerified": 15,
-  "newlyAuthored": 83,
+  "newlyAuthored": 89,
   "creatorApproved": 0,
   "integratedIntoGame": 0,
-  "unwrittenNewCandidates": 322,
+  "unwrittenNewCandidates": 316,
   "legacyCandidates": [
     {
       "id": "r2:general-store:temperate:small:01",
@@ -330,7 +330,7 @@
   ],
   "sourcePolicy": "Original PR #124 is read-only. IDs are preserved, not geometries yet. A candidate only counts as locally migrated after exact geometry/metadata parity and native tests.",
   "assetPolicy": "Manual 96 families/106 physical variants are integrated; biome130 entries remain symbolic when unverified. No numeric runtime IDs or production placement.",
-  "authoredCandidateTotal": 98,
+  "authoredCandidateTotal": 104,
   "handAuthoredStoreBlob": "7211223b2cc51290b89f5f886c1cbb59cc495747",
   "sourceModuleBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
   "originalValidatedStores": 15,
@@ -1187,6 +1187,74 @@
       "integrated": false,
       "physicalMeshApproved": false,
       "worldPlaced": false
+    }
+  ],
+  "M1SignatureSkyline": [
+    {
+      "id": "r2:general-store:snow:small:03",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:pet-shop:enchanted-forest:small:03",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:magic-shop:temperate:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:potion-shop:mountain:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:bakery:desert:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:bank:enchanted-forest:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
     }
   ]
 }

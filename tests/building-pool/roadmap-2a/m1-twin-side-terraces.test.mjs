@@ -26,8 +26,8 @@ function d4(source){const out=[];for(let mirror=0;mirror<2;mirror++)for(let rot=
 function iou(a,b){let common=0;for(const p of a)if(b.has(p))common++;return common/(a.size+b.size-common);}
 test('preserve all 74 designs and add six distinct coordinate-authored detached candidates, 80 total',()=>{
  assert.equal(old.length,74);assert.equal(M1_TWIN_SIDE_TERRACE_SHOPS.length,6);assert.equal(all.length,80);
- assert.equal(inventory().authoredCandidateTotal,98);assert.equal(inventory().newlyAuthored,83);
- assert.equal(inventory().unwrittenNewCandidates,322);assert.equal(assertDistinctArchitecture(all).distinctArchitectures,80);
+ assert.equal(inventory().authoredCandidateTotal,104);assert.equal(inventory().newlyAuthored,89);
+ assert.equal(inventory().unwrittenNewCandidates,316);assert.equal(assertDistinctArchitecture(all).distinctArchitectures,80);
  for(const b of M1_TWIN_SIDE_TERRACE_SHOPS){assert(validateBlueprint(b).valid);assert.equal(b.rooms.length,4);assert.equal(b.courtyardGeometry.length,4);assert.equal(b.worldPlaced,false);}
 });
 test('each new building has four actual weather-separated open-air courtyards with intact support/caps',()=>{

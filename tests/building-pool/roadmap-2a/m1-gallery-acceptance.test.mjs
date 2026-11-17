@@ -7,7 +7,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const driver=fileURLToPath(new URL('./m1-gallery-browser.py',import.meta.url));
-test('all 588 actual-source Chromium WebGL2 exterior/cutaway views, three landscape viewports', {timeout:1200000},()=>{
+test('all 624 actual-source Chromium WebGL2 exterior/cutaway views, three landscape viewports', {timeout:1200000},()=>{
  const system=spawnSync('python3',['-c','import playwright.sync_api'],{encoding:'utf8'});
  const temp=mkdtempSync(join(tmpdir(),'mythwrought-2a-python-'));
  try{
@@ -26,6 +26,6 @@ test('all 588 actual-source Chromium WebGL2 exterior/cutaway views, three landsc
   const r=spawnSync('python3',[driver],{cwd:root,env,encoding:'utf8',timeout:1200000,maxBuffer:8*1024*1024});
   if(r.stdout)process.stdout.write(r.stdout);
   if(r.stderr)process.stderr.write(r.stderr);
-  assert.equal(r.status,0,'588-view genuine Chromium gallery failed: '+(r.error?.message||r.stderr||r.stdout||'').slice(-2000));
+  assert.equal(r.status,0,'624-view genuine Chromium gallery failed: '+(r.error?.message||r.stderr||r.stdout||'').slice(-2000));
  }finally{rmSync(temp,{recursive:true,force:true});}
 });
