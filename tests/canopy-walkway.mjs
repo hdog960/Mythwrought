@@ -182,6 +182,34 @@ for(const span of [8,9]){
 
 
 
+
+// Short three/four-cell spans must not grow two crowded neighboring fork
+// stations: these looked like a miniature block fence rather than a crown.
+for(const span of [3,4]){
+ let site=null;
+ for(let x=-150;x<150&&!site;x+=3)for(let z=-150;z<150&&!site;z+=3){
+  const f=fixture(),aa=[x,z],bb=[x+span,z];
+  f.edits.set(f.k(x,y,z),BLOCK.WOOD);
+  f.edits.set(f.k(x+span,y,z),BLOCK.WOOD);
+  const candidate=planCanopyWalkway(f.world,aa,bb,y);
+  if(candidate)site={...f,aa,bb,candidate};
+ }
+ assert.ok(site,`find natural-air short ${span}-cell corridor`);
+ const limbs=site.candidate.cells.filter(([cx,cy,cz,id])=>
+  cy===y&&id===BLOCK.WOOD&&cz!==site.aa[1]);
+ assert.equal(limbs.length,1,'short canopy has one rooted fork, not paired fence teeth');
+ const [lx,ly,lz]=limbs[0];
+ assert.ok(site.candidate.cells.some(([cx,cy,cz,id])=>
+  cx===lx&&cy===ly+1&&cz===lz&&id===BLOCK.LEAVES),
+  'single short-span crown is supported by timber');
+ assert.deepEqual(planCanopyWalkway(site.world,site.bb,site.aa,y),
+  site.candidate,'short-span reversed endpoints preserve deterministic geometry');
+ for(let i=0;i<=span;i++)for(let h=1;h<=2;h++)
+  assert.ok(!site.candidate.cells.some(([cx,cy,cz])=>
+   cx===site.aa[0]+i&&cy===y+h&&cz===site.aa[1]),
+   'short-span walking aisle stays two blocks high');
+}
+
 // Perpendicular physical corridors must share the same support, clearance,
 // reversed-endpoint and protected-edit contracts as east-west crowns.
 for(const span of [5,7,8,9]){
