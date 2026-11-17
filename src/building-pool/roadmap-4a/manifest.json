@@ -12,12 +12,12 @@
   "counts": {
     "planned": 315,
     "legacyAuthored": 30,
-    "newlyAuthored": 94,
-    "totalAuthored": 124,
-    "remaining": 191,
+    "newlyAuthored": 102,
+    "totalAuthored": 132,
+    "remaining": 183,
     "creatorAccepted": 0,
     "integratedBuildings": 0,
-    "m2Original": 94
+    "m2Original": 102
   },
   "biomes": [
     "temperate",
@@ -37,7 +37,7 @@
       "perBiomeSize": 5,
       "total": 75,
       "inherited": 15,
-      "remaining": 13,
+      "remaining": 9,
       "milestone": 2
     },
     {
@@ -45,7 +45,7 @@
       "perBiomeSize": 4,
       "total": 60,
       "inherited": 0,
-      "remaining": 13,
+      "remaining": 9,
       "milestone": 2
     },
     {
@@ -92,7 +92,7 @@
   "gates": {
     "M0": "Accepted: exact-head Actions #43767981937 passed after fixing owned M0 count/list tests; 30 inherited source-exact designs preserved",
     "M1": "Technical candidate acceptance: exact-head Actions #43770848853 passed, 180 source-driven Chromium WebGL2 exterior/cutaway proxy captures; physical/creator gates open",
-    "M2": "124/315 theoretical coordinate designs: 30 inherited +94 new original, 191 remaining. Eight regional-courts source designs + 48-view genuine Chromium WebGL2 require focused exact-head CI. Pack1–5 source-physical collisions and roof/pane mounts, save orientations, physical iPhone and creator acceptance remain closed.",
+    "M2": "132/315 theoretical coordinate designs: 30 inherited, 102 original, 183 remaining. Eight independent chambers-crafts plans and 48-view source-bound genuine Chromium WebGL2 candidate gallery require exact-head CI. Physical producer collision, mounting, glazing, saved rotations, physical iPhone and creator acceptance are blocked.",
     "M3": "not started",
     "M4": "not started",
     "M5": "not started",

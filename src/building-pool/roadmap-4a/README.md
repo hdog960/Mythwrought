@@ -34,3 +34,7 @@ Eight more coordinate-authored candidate designs in `m2-guild-civic.mjs` bring t
 
 ## M2 regional courts (2026-11-16)
 Eight newly source-authored biome/size buildings in `m2-regional-courts.mjs`, bringing the candidate inventory to **124/315** (30 inherited, 94 newly authored), **191** remaining. Supported roofs, connected working rooms, physical-source dependency manifests, D4/Jaccard strict near-duplicate rejection. See `docs/building-pool/roadmap-4a/M2_REGIONAL_COURTS_ACCEPTANCE.md`. Historical counts above remain original checkpoint documentation. No deployment, approval or game registration.
+
+
+## M2 chambers and crafts (2026-11-16)
+Eight original regional building sources in `m2-chambers-crafts.mjs`; 132/315 theoretical (30 inherited plus 102 new), 183 remaining. Four civic and four guild source-authored physical footprints with 47 connected rooms and 21 doors, strict D4 IoU <0.85, bearing-backed roofs. See `docs/building-pool/roadmap-4a/M2_CHAMBERS_CRAFTS_ACCEPTANCE.md`; historical counts above are earlier checkpoints. No game integration, creator approval or deployment.
