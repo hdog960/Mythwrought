@@ -76,6 +76,12 @@ const PLANS=[
         30,
         42,
         42
+      ],
+      [
+        43,
+        32,
+        51,
+        45
       ]
     ],
     "notches": [
@@ -148,8 +154,8 @@ const PLANS=[
         "south"
       ],
       [
-        42,
-        44,
+        51,
+        40,
         "east"
       ]
     ],
@@ -173,6 +179,10 @@ const PLANS=[
       [
         19,
         37
+      ],
+      [
+        47,
+        41
       ]
     ],
     "ridges": [],
@@ -225,6 +235,16 @@ const PLANS=[
           37,
           17,
           45
+        ]
+      },
+      {
+        "id": "outer-east-moonpetal-arbitration",
+        "kind": "public-hearing",
+        "rect": [
+          45,
+          38,
+          50,
+          44
         ]
       }
     ],
@@ -285,6 +305,18 @@ const PLANS=[
           45
         ],
         "profile": "hip",
+        "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          45,
+          38,
+          50,
+          44
+        ],
+        "profile": "saw",
         "axis": "z",
         "high": 9,
         "period": 4
@@ -2791,6 +2823,18 @@ const PLANS=[
         40,
         87,
         64
+      ],
+      [
+        69,
+        61,
+        89,
+        72
+      ],
+      [
+        2,
+        57,
+        13,
+        72
       ]
     ],
     "notches": [
@@ -2884,6 +2928,16 @@ const PLANS=[
         4,
         55,
         "west"
+      ],
+      [
+        89,
+        69,
+        "east"
+      ],
+      [
+        2,
+        67,
+        "west"
       ]
     ],
     "fixtures": [
@@ -2914,6 +2968,14 @@ const PLANS=[
       [
         34,
         41
+      ],
+      [
+        81,
+        68
+      ],
+      [
+        7,
+        67
       ]
     ],
     "ridges": [],
@@ -2987,6 +3049,26 @@ const PLANS=[
           52,
           50
         ]
+      },
+      {
+        "id": "far-northeast-sap-vault-study",
+        "kind": "artisan-study",
+        "rect": [
+          73,
+          66,
+          87,
+          71
+        ]
+      },
+      {
+        "id": "far-west-firefly-inkworks",
+        "kind": "artisan-study",
+        "rect": [
+          4,
+          65,
+          11,
+          71
+        ]
       }
     ],
     "roofBands": [
@@ -3058,6 +3140,30 @@ const PLANS=[
           61
         ],
         "profile": "gable",
+        "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          73,
+          66,
+          87,
+          71
+        ],
+        "profile": "hip",
+        "axis": "x",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          4,
+          65,
+          11,
+          71
+        ],
+        "profile": "saw",
         "axis": "z",
         "high": 9,
         "period": 4
