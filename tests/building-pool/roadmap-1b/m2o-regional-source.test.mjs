@@ -34,12 +34,12 @@ function d4(b,mirror,turn){
  }
  return set;
 }
-test('M2O census 158/435; six new variant 002 source blueprints, 15 inherited stables byte-exact',()=>{
+test('M2O census 164/435; six new variant 002 source blueprints, 15 inherited stables byte-exact',()=>{
  const all=get1BCandidates(),prev=getInheritedStables(),next=fresh(),a=validateAllocation(all);
- assert.equal(all.length,158);assert.equal(a.authored,158);assert.equal(a.remaining,277);
+ assert.equal(all.length,164);assert.equal(a.authored,164);assert.equal(a.remaining,271);
  assert.equal(prev.length,15);assert.equal(next.length,6);
- assert.equal(new Set(all.map(x=>x.id)).size,158);
- assert.equal(new Set(all.map(structuralFingerprint)).size,158);
+ assert.equal(new Set(all.map(x=>x.id)).size,164);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,164);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(c=>[c,all.filter(x=>x.category===c).length])),
   {bathhouse:23,stable:28,'farm-barn':22,greenhouse:23,
    'fishing-lodge':21,'harbor-office':20,lighthouse:21});
