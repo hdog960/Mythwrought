@@ -20,6 +20,31 @@ export function biome130MaterialTag(id){
   if(iceAlpha.has(id))return BIOME130_ICE_MATERIAL+iceAlpha.get(id);
   return Number.isInteger(id)&&id>=377&&id<=385?40+id-377:0;
 }
+// The M11 authored first box is a real twig, not a leaf lobe. Preserve
+// existing exposed stem triangles as opaque; keep exactly the same geometry.
+const foliageStemCache=new Map(); // 9 source IDs x 4 rotations maximum
+export function biome130TriangleMaterialTag(id,rotation,positions,indices,start){
+  const leafMaterial=biome130MaterialTag(id);
+  if(id<377||id>385)return leafMaterial;
+  if(!Number.isInteger(rotation)||rotation<0||rotation>3||
+     !positions||!indices||!Number.isInteger(start)||start<0||start+2>=indices.length)
+    throw new RangeError('Invalid foliage triangle');
+  const key=id*4+rotation;
+  let stem=foliageStemCache.get(key);
+  if(!stem){
+    stem=biome130Block(id,rotation).boxes[0];
+    foliageStemCache.set(key,stem);
+  }
+  const epsilon=1e-5;
+  for(let vertex=start;vertex<start+3;vertex++){
+    const i=indices[vertex]*3;
+    for(let axis=0;axis<3;axis++){
+      const v=positions[i+axis];
+      if(v<stem[axis]-epsilon||v>stem[axis+3]+epsilon)return leafMaterial;
+    }
+  }
+  return 0; // established opaque terrain material, no new shader/program
+}
 // Chunk upload only: unchanged geometry and byte layout, no extra opaque passes.
 export function splitBiome130Translucent(vertices){
   if(!(vertices instanceof Float32Array)||vertices.length%9!==0)
@@ -38,6 +63,7 @@ export function splitBiome130Translucent(vertices){
   return {opaque,translucent};
 }
 // Tags 40–48 and 49.x never overlap Pack 2 material 21.
+// Source twig triangles do not get perforated; leaf lobes keep the cutout.
 // Foliage masks read as tapered leaves; gentle source-palette midpoint tint
 // reconciles each per-face color with its species, without a new color lookup.
 // Sub-box source faces receive whole-leaf, tapered silhouettes rather than checker perforations.

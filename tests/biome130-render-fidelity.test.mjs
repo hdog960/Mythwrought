@@ -5,8 +5,10 @@ import {VoxelWorld,meshChunk} from '../src/voxel.mjs';
 import {meshDepthSection} from '../src/depth-mesh.mjs';
 import {biome130Block} from '../src/biome130-registry.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from '../src/storybook-materials.mjs';
+import {prototypeSurfaceMesh} from '../src/shape-prototypes.mjs';
 import {resolveBiome130BuilderAsset} from '../src/builder-assets/biome130.mjs';
 import {BIOME130_ICE_BLOCK_IDS,BIOME130_LEAF_SOURCE_TINTS,biome130MaterialTag,
+  biome130TriangleMaterialTag,
   splitBiome130Translucent,biome130TerrainFragmentShader} from '../src/biome130-render.mjs';
 
 test('seven original ice opacities and nine foliage species have isolated tags',()=>{
@@ -42,6 +44,28 @@ test('seven original ice opacities and nine foliage species have isolated tags',
   assert.equal(fallback.rendererFidelity,'opaque-fallback');
   assert.equal(fallback.alphaIntent,'blend');
   assert.equal(fallback.transparentIntent,true);
+});
+
+test('authored stems remain opaque but original leaf lobe surfaces use cutouts at four yaws',()=>{
+  let opaqueStems=0,cutoutLeaves=0;
+  for(let id=377;id<=385;id++)for(let yaw=0;yaw<4;yaw++){
+    const source=biome130Block(id,yaw);
+    const mesh=prototypeSurfaceMesh({prototypeOnly:true,boxes:source.boxes});
+    const originalTriangles=mesh.indices.length/3;
+    let stems=0,leaves=0;
+    for(let t=0;t<mesh.indices.length;t+=3){
+      const material=biome130TriangleMaterialTag(
+        id,yaw,mesh.positions,mesh.indices,t);
+      assert.ok(material===0||material===40+id-377);
+      if(material===0)stems++;else leaves++;
+    }
+    assert.equal(stems+leaves,originalTriangles,'Cannot add/cull M11 source triangles');
+    assert.ok(leaves>0,'Missing source foliage leaves '+id+' yaw '+yaw);
+    opaqueStems+=stems;cutoutLeaves+=leaves;
+  }
+  assert.ok(opaqueStems>0,'No original exposed twig faces survived');
+  assert.ok(cutoutLeaves>opaqueStems,'Leaf lobes still dominate the silhouette');
+  assert.equal(biome130TriangleMaterialTag(350,0,[],[],0),biome130MaterialTag(350));
 });
 
 test('transparent split retains exact vertex ABI, source alpha and opaque order',()=>{

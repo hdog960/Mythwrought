@@ -3,7 +3,7 @@
 import {BLOCK,CHUNK_SIZE} from './voxel.mjs';
 import {isPack2LiveId,pack2WorldVertices} from './pack2-integration.mjs';
 import {isBiome130BlockId,biome130Block,biome130Color} from './biome130-registry.mjs';
-import {biome130MaterialTag} from './biome130-render.mjs';
+import {biome130TriangleMaterialTag} from './biome130-render.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {sectionBounds} from './depth.mjs';
 
@@ -91,9 +91,11 @@ export function meshDepthSection(world,cx,cz,section){
                !isPack2LiveId(blockAt(x+nx,y+ny,z+nz)))continue;
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const rgb=biome130Color(id,x,y,z,face),lit=[.77,.73,1,.48,.85,.67][face];
+            const material=biome130TriangleMaterialTag(
+              id,rotation,mesh.positions,mesh.indices,t);
             for(let k=t;k<t+3;k++){
               const i=mesh.indices[k]*3,px=mesh.positions[i],py=mesh.positions[i+1],pz=mesh.positions[i+2];
-              emit(x+px,y+py,z+pz,rgb[0]*lit,rgb[1]*lit,rgb[2]*lit,nx?pz:px,ny?pz:py,biome130MaterialTag(id));
+              emit(x+px,y+py,z+pz,rgb[0]*lit,rgb[1]*lit,rgb[2]*lit,nx?pz:px,ny?pz:py,material);
             }
           }
           continue;
