@@ -4,7 +4,7 @@ This is **development-only** authoring. Earlier 161/315 designs are immutable so
 
 | Original ID | Distinctive architecture | Explicit envelope | Program |
 |---|---|---|---|
-| `r4:castle-palace:desert:small:01` | Crosswind desert watercourt palace, asymmetrical side wings and faceted west tower, notched central court, hip/saw/shed/gable roof bands, high lantern and separate guard parapet | 66×12×59 | Entrance hall, western caravan tower, judgment grand chamber, water-rights council |
+| `r4:castle-palace:desert:small:02` | Crosswind desert watercourt palace, asymmetrical side wings and faceted west tower, notched central court, hip/saw/shed/gable roof bands, high lantern and separate guard parapet | 66×12×59 | Entrance hall, western caravan tower, judgment grand chamber, water-rights council |
 | `r4:embassy:snow:large:01` | Aurora border-pact embassy, independent guest/delegation wings, faceted negotiation annex and long northern treaty terrace, four contrasting roof pitches | 88×13×74 | Formal diplomatic chamber, guest lodge, consular language office, aurora treaty archive |
 | `r4:grand-archive:desert:large:01` | Dune solar-vault archive, shifted preserved scroll wing, celestial chart scriptorium, long rear copyist hall and asymmetric roof lanterns | 85×14×72 | Consultation reading room, sealed records vault, celestial cartography, great archive |
 
