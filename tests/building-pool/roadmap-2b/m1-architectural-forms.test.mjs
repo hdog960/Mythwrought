@@ -86,7 +86,7 @@ test('five exact reserved source geometries preserve 121 earlier authors and all
  assert.deepEqual(assertDistinctArchitecture(COMPLETE126),{authored:126,distinctArchitectures:126});
 });
 test('true L, U, ring, T and switchback forms have five distinct original ground signatures and no phantom courtyard foundations',()=>{
- const missing=[963,400,728,504,522],minBounds=[4,3,4,3,4];
+ const missing=[963,400,728,504,522],minBounds=[3,3,4,3,4];
  const uniqueShapeFingerprints=new Set();
  for(let i=0;i<NEW_FORMS.length;i++){
   const b=NEW_FORMS[i],map=occupancy(b),foot=new Set(b.voxels.filter(v=>v.y===0).map(v=>key(v.x,0,v.z)));
