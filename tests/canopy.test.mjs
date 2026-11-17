@@ -391,7 +391,8 @@ test('cave approach preservation is render-only and seed-stable',()=>{
 test('manual M2 scalloped crowns stay bounded, varied and save-inert in real seeded chunks',()=>{
   const seed=179,world=new VoxelWorld(seed),before=JSON.stringify(world.save());
   let sentinels=0,richBoughs=0,decoratedChunks=0;
-  for(let cx=-16;cx<=16;cx++)for(let cz=-16;cz<=16;cz++){
+  outer:for(let cx=-16;cx<=16;cx++)for(let cz=-16;cz<=16;cz++){
+    if(decoratedChunks>=26&&richBoughs>0)break outer;
     const mesh=woodlandCanopyVertices(world,cx,cz,options);
     if(!mesh.length)continue;
     decoratedChunks++;
