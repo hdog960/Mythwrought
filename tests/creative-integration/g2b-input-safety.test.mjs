@@ -46,6 +46,13 @@ test('G2B source clears flight input on blur, visibility, map, context loss',()=
  assert.ok(src.includes("canvas.addEventListener('webglcontextlost'"));
  assert.ok(src.includes('frameDriver.pause();cancelAllPointers()'));
 });
+test('G2B LAND tap cannot emit a delayed Explore JUMP or edit after mode flip',()=>{
+ assert.ok(src.includes('const g2ConsumedClicks=new Map()'));
+ assert.ok(src.includes('g2ConsumedClicks.set(id,lastTouch)'));
+ assert.ok(src.includes('g2ConsumedClicks.get(id)'));
+ assert.ok(src.includes('g2ConsumedClicks.delete(id)'));
+ assert.ok(src.includes('if(consumed!==undefined&&performance.now()-consumed<850)'));
+});
 test('G2B no unsafe change to walking ownership during failed landing',()=>{
  let s=enterG2ControlOwnership(createG2ControlState(),{featureEnabled:true,flightReady:true});
  s=releaseG2ControlOwnership(s,{landed:false});

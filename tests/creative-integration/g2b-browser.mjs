@@ -105,6 +105,8 @@ try{
    if(!landed.active){
      assert.equal(landed.bodyClear,true);
      assert.equal(await page.locator('#jump').textContent(),'JUMP');
+     const vy=Number(await page.locator('#scene').getAttribute('data-player-velocity-y'));
+     assert.ok(!Number.isFinite(vy)||vy<3,'Landing tap synthesized a second Explore jump');
    }else{
      assert.equal(await page.locator('#jump').textContent(),'LAND');
      assert.match(landed.reason,/landing|safe|hover|ready|blocked/i);

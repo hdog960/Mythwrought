@@ -1119,6 +1119,9 @@ function start(){
     syncSensitivity();
     try{localStorage.setItem(CAMERA_PREF,String(Math.round(sensitivity*100)));}catch(_){}
   });
+  // A mode-changing LAND pointerdown must consume its own subsequent click.
+  // Otherwise a delayed click could activate ordinary Explore JUMP after landing.
+  const g2ConsumedClicks=new Map();
   // Safari can suppress a synthesized click on a second touch while the
   // movement pad holds pointer capture. Execute touch actions on pointerdown,
   // but preserve click for mouse, keyboard and accessibility activation.
@@ -1128,12 +1131,24 @@ function start(){
     button.addEventListener('pointerdown',e=>{
       if(e.pointerType!=='touch')return;
       e.preventDefault();
+      // A flight-mode tap may switch to Explore before Safari emits click.
+      if(g2Active()){
+        lastTouchAt=performance.now();
+        g2ConsumedClicks.set(id,lastTouchAt);
+        return;
+      }
       // A queued iOS touch must not edit the world behind settings or on app suspension.
-      if(!help.hidden||exploration.isOpen()||document.hidden||button.disabled||g2Active())return;
+      if(!help.hidden||exploration.isOpen()||document.hidden||button.disabled)return;
       lastTouchAt=performance.now();
       action();
     });
     button.addEventListener('click',e=>{
+      const consumed=g2ConsumedClicks.get(id);
+      if(consumed!==undefined&&performance.now()-consumed<850){
+        g2ConsumedClicks.delete(id);
+        e.preventDefault();return;
+      }
+      g2ConsumedClicks.delete(id);
       if(e.detail!==0&&performance.now()-lastTouchAt<750){
         e.preventDefault();
         return;
@@ -1159,7 +1174,7 @@ function start(){
       if(!g2Active()||!help.hidden||exploration.isOpen()||document.hidden||
          graphicsLost||button.disabled||active!==null)return;
       e.preventDefault();active=e.pointerId;
-      lastTouch=performance.now();
+      lastTouch=performance.now();g2ConsumedClicks.set(id,lastTouch);
       g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
       try{button.setPointerCapture(active);}catch(_){}
       if(zone==='land')g2Land();
