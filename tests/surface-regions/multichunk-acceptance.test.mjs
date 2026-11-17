@@ -84,3 +84,24 @@ test('region boundaries remain deterministic across chunk seams without changing
   assert.ok(view.cachedColumns<=64);
  }
 });
+
+
+test('newly protected landmarks mask already cached biome columns without altering saves',()=>{
+ const world=new VoxelWorld(179),protectedCells=new Set();
+ const view=createSurfaceBiomeWorldView(world,{
+  enabled:true,profileIsFresh:true,
+  isProtected:(x,y,z)=>protectedCells.has(x+','+y+','+z),
+  hasDurableEditIntent:()=>false,maxCachedColumns:8
+ });
+ assert.ok(view);
+ const region=SURFACE_BIOME_REGIONS[0],x=region.x,z=region.z;
+ const y=Math.max(terrainHeight(x,z,179),surfaceBiomeHeight(x,z,179));
+ const key=x+','+y+','+z;
+ const before=JSON.stringify(world.save());
+ assert.equal(view.get(x,y,z),region.surface,'warm the physical surface column');
+ protectedCells.add(key);
+ assert.equal(view.get(x,y,z),world.get(x,y,z),'new protection wins after cache warmup');
+ protectedCells.delete(key);
+ assert.equal(view.get(x,y,z),region.surface,'unprotected natural column remains deterministic');
+ assert.equal(JSON.stringify(world.save()),before,'protection never changes schema-1 save');
+});
