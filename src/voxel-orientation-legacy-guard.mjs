@@ -1,37 +1,42 @@
 // Opt-in legacy edit bridge. Never writes orientation into schema-1 saves.
-// Host must route every world edit through this bridge to keep sidecar coherent.
-export async function applyLegacyVoxelEdit({cell,sidecar,readBlock,writeBlock,nextId}) {
+// Host must serialize writes to each cell. Revision is optional but required
+// to detect same-ID writes when a writer rejects or throws after mutation.
+const validId = id => Number.isSafeInteger(id) && id >= 0 && id < 255;
+const validRevision = value => Number.isSafeInteger(value) && value >= 0;
+export async function applyLegacyVoxelEdit({cell,sidecar,readBlock,writeBlock,nextId,readRevision}) {
   if (!Array.isArray(cell)||cell.length!==3||!cell.every(Number.isSafeInteger))
     throw new TypeError('Invalid edit cell');
   if (!sidecar||typeof sidecar.invalidateEdit!=='function'||
-      typeof readBlock!=='function'||typeof writeBlock!=='function')
+      typeof readBlock!=='function'||typeof writeBlock!=='function'||
+      (readRevision!==undefined&&typeof readRevision!=='function'))
     throw new TypeError('Invalid legacy edit bridge');
-  if (!Number.isSafeInteger(nextId)||nextId<0||nextId>=255)
-    throw new TypeError('Invalid next block');
-  // The host writer MUST serialize edits to this cell and return true only
-  // after a committed write. This is not a substitute for host-atomic CAS.
+  if (!validId(nextId)) throw new TypeError('Invalid next block');
   const before=await readBlock(...cell);
-  if (!Number.isSafeInteger(before)||before<0||before>=255)
-    throw new TypeError('Invalid original block');
-  let receipt;
-  try {
-    receipt=await writeBlock([...cell],nextId,before);
-  } catch (error) {
-    // A throwing writer may have mutated the world before failing. Recheck
-    // identity; if ambiguous, discard optional turns rather than retain stale.
+  if (!validId(before)) throw new TypeError('Invalid original block');
+  const revision=readRevision?await readRevision(...cell):undefined;
+  if (readRevision&&!validRevision(revision)) throw new TypeError('Invalid revision');
+  const changed=async()=>{
     try {
-      if (await readBlock(...cell)!==before) sidecar.invalidateEdit(cell);
-    } catch {
-      sidecar.invalidateEdit(cell);
-    }
+      const id=await readBlock(...cell);
+      if (!validId(id)||id!==before) return true;
+      if (readRevision) {
+        const now=await readRevision(...cell);
+        return !validRevision(now)||now!==revision;
+      }
+      return false;
+    } catch { return true; } // Uncertain state: fail closed.
+  };
+  let receipt;
+  try { receipt=await writeBlock([...cell],nextId,before,revision); }
+  catch(error) {
+    if(await changed()) sidecar.invalidateEdit(cell);
     throw error;
   }
-  if (receipt!==true) {
-    // A failed writer may still have partially changed the authoritative cell.
-    if (await readBlock(...cell)!==before) sidecar.invalidateEdit(cell);
+  if(receipt!==true) {
+    if(await changed()) sidecar.invalidateEdit(cell);
     return false;
   }
-  // Same-ID replacement is still an edit: orientation must not survive.
+  // A true receipt is a committed edit, even for a same-ID replacement.
   sidecar.invalidateEdit(cell);
   return true;
 }
