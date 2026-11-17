@@ -34,14 +34,14 @@ function d4(b,mirror,turn){
  }
  return set;
 }
-test('M2O census 164/435; six new variant 002 source blueprints, 15 inherited stables byte-exact',()=>{
+test('M2O census 169/435; six new variant 002 source blueprints, 15 inherited stables byte-exact',()=>{
  const all=get1BCandidates(),prev=getInheritedStables(),next=fresh(),a=validateAllocation(all);
- assert.equal(all.length,164);assert.equal(a.authored,164);assert.equal(a.remaining,271);
+ assert.equal(all.length,169);assert.equal(a.authored,169);assert.equal(a.remaining,266);
  assert.equal(prev.length,15);assert.equal(next.length,6);
- assert.equal(new Set(all.map(x=>x.id)).size,164);
- assert.equal(new Set(all.map(structuralFingerprint)).size,164);
+ assert.equal(new Set(all.map(x=>x.id)).size,169);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,169);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(c=>[c,all.filter(x=>x.category===c).length])),
-  {bathhouse:24,stable:28,'farm-barn':23,greenhouse:24,'fishing-lodge':22,'harbor-office':21,lighthouse:22});
+  {bathhouse:24,stable:33,'farm-barn':23,greenhouse:24,'fishing-lodge':22,'harbor-office':21,lighthouse:22});
  for(const x of prev)assert.equal(stableBlueprintJSON(all.find(p=>p.id===x.id)),stableBlueprintJSON(x),
   x.id+' inherited source changed');
  for(const c of Object.keys(QUOTAS))for(const bio of BIOMES)for(const size of SIZES){

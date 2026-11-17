@@ -22,15 +22,15 @@ function d4(p,flip,turn){
  }
  return s;
 }
-test('M2R is 164/435 unique original authored candidates; 15 source-exact inherited stables are unchanged',()=>{
+test('M2R is 169/435 unique original authored candidates; 15 source-exact inherited stables are unchanged',()=>{
  const all=get1BCandidates(),fresh=newBatch(),old=getInheritedStables(),c=validateAllocation(all);
- assert.equal(all.length,164);assert.equal(c.authored,164);assert.equal(c.remaining,271);
+ assert.equal(all.length,169);assert.equal(c.authored,169);assert.equal(c.remaining,266);
  assert.equal(fresh.length,6);assert.equal(old.length,15);
- assert.equal(new Set(all.map(p=>p.id)).size,164);
- assert.equal(new Set(all.map(structuralFingerprint)).size,164);
+ assert.equal(new Set(all.map(p=>p.id)).size,169);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,169);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(category=>
   [category,all.filter(p=>p.category===category).length])),
-  {bathhouse:24,stable:28,'farm-barn':23,greenhouse:24,'fishing-lodge':22,'harbor-office':21,lighthouse:22});
+  {bathhouse:24,stable:33,'farm-barn':23,greenhouse:24,'fishing-lodge':22,'harbor-office':21,lighthouse:22});
  for(const item of old)
   assert.equal(stableBlueprintJSON(all.find(p=>p.id===item.id)),stableBlueprintJSON(item),item.id+' original source mutated');
  for(const category of Object.keys(QUOTAS))for(const biome of BIOMES)for(const size of SIZES)
