@@ -12,8 +12,11 @@ const cellKey = cell => cell.join(',');
  */
 export function recoverLegacyVoxelSession(cells) {
   if (!Array.isArray(cells)) throw new TypeError('Invalid legacy cells');
+  // Snapshot coordinates before validation. Never retain caller-owned arrays:
+  // mutating a decoded save after recovery must not redirect future exports.
   const initial = cells.map(entry => ({
-    cell: entry?.cell, id: entry?.id, revision: 0
+    cell: Array.isArray(entry?.cell) ? [...entry.cell] : entry?.cell,
+    id: entry?.id, revision: 0
   }));
   const host = createRevisionedVoxelFixture(initial);
   const orientations = new Map();
@@ -35,7 +38,6 @@ export function recoverLegacyVoxelSession(cells) {
       return true;
     },
     edit(cell, expectedId, expectedRevision, nextId) {
-      // Authoritative compare-and-write is synchronous: no read/write race.
       const ok = host.compareAndWrite({cell, expectedId, expectedRevision, nextId});
       if (ok) orientations.delete(cellKey(cell)); // even same-ID replacements
       return ok;
