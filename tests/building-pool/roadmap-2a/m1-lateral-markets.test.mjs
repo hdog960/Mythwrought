@@ -25,8 +25,8 @@ function d4(points){const output=[];for(let mirror=0;mirror<2;mirror++)for(let r
 function overlap(a,b){let common=0;for(const k of a)if(b.has(k))common++;return common/(a.size+b.size-common);}
 test('preserve every earlier 68 blueprint and add six source-authored L court originals, detached 74/420',()=>{
  assert.equal(previous.length,68);assert.equal(M1_LATERAL_MARKETS.length,6);assert.equal(all.length,74);
- assert.equal(inventory().authoredCandidateTotal,110);assert.equal(inventory().newlyAuthored,95);
- assert.equal(inventory().unwrittenNewCandidates,310);
+ assert.equal(inventory().authoredCandidateTotal,116);assert.equal(inventory().newlyAuthored,101);
+ assert.equal(inventory().unwrittenNewCandidates,304);
  assert.equal(assertDistinctArchitecture(all).distinctArchitectures,74);
  for(const b of M1_LATERAL_MARKETS){assert(validateBlueprint(b).valid);assert.equal(b.worldPlaced,false);assert.equal(b.rooms.length,4);assert.equal(b.courtyardGeometry.length,3);}
 });

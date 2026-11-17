@@ -16,8 +16,8 @@ const key=(x,y,z)=>[x,y,z].join(',');
 test('six original nonrectangular courtyards are real 3D blueprints, not reserved slots',()=>{
  assert.equal(M1_COURTYARD_SHOPS.length,6);assert.equal(all.length,56);
  assert.equal(new Set(all.map(x=>x.id)).size,56);assert.equal(new Set(all.map(structuralFingerprint)).size,56);
- assert.equal(plannedSlots().filter(x=>x.authoredHere).length,110);
- assert.equal(inventory().authoredCandidateTotal,110);assert.equal(inventory().newlyAuthored,95);assert.equal(inventory().unwrittenNewCandidates,310);
+ assert.equal(plannedSlots().filter(x=>x.authoredHere).length,116);
+ assert.equal(inventory().authoredCandidateTotal,116);assert.equal(inventory().newlyAuthored,101);assert.equal(inventory().unwrittenNewCandidates,304);
  for(const b of M1_COURTYARD_SHOPS){assert(validateBlueprint(b).valid);assert(b.voxels.length>1200&&b.rooms.length===3);assert(!b.worldPlaced&&!b.numericIdsAssigned);}
 });
 test('read-only real-source courtyard/roof/weather and Pack5 multi-cell pen and vault footprints pass',()=>{

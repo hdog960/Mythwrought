@@ -27,12 +27,12 @@ function sourceMask(s){
 test('preserve the full 98-design green source cohort; add six original individually silhouetted skylines, 104/420',()=>{
  assert.equal(M1_SIGNATURE_SKYLINE_SPECS.length,6);
  assert.equal(M1_SIGNATURE_SKYLINE_SHOPS.length,6);
- assert.equal(M1_D4_AUDIT_ALL.length,110);
- assert.equal(inventory().authoredCandidateTotal,110);
- assert.equal(inventory().newlyAuthored,95);
- assert.equal(inventory().unwrittenNewCandidates,310);
- assert.equal(plannedSlots().filter(x=>x.authoredHere).length,110);
- assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,110);
+ assert.equal(M1_D4_AUDIT_ALL.length,116);
+ assert.equal(inventory().authoredCandidateTotal,116);
+ assert.equal(inventory().newlyAuthored,101);
+ assert.equal(inventory().unwrittenNewCandidates,304);
+ assert.equal(plannedSlots().filter(x=>x.authoredHere).length,116);
+ assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,116);
  for(const b of M1_SIGNATURE_SKYLINE_SHOPS){
   assert(validateBlueprint(b).valid);
   assert.equal(b.status,'authored-candidate');
@@ -126,7 +126,7 @@ test('every new landmark strictly below 0.89 eight-way D4 floor IoU, zero new de
   assert(max<.89,b.id+' floor resembles '+other+' D4 IoU '+max);
  }
  const debt=inspect2AD4FloorDebt();
- assert.equal(debt.sources,110);
+ assert.equal(debt.sources,116);
  assert.equal(debt.grandfatheredHighOverlapPairs,269);
  assert.equal(debt.exactMatchingFloorPairs,30);
  assert.equal(debt.newHighOverlapPairs,0,'historic 269-pair debt must not be increased');
