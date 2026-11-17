@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {inspectSchema1EditIntent} from '../../src/auto-integration-support/schema1-edit-intent-contract.mjs';
+const snap={schema:1,seed:'fixed',cells:[{x:0,y:2,z:0,blockId:1}],restoredNaturalKeys:['0,2,0']};
+const edit={x:0,y:2,z:0,blockId:1,intent:'player'};
+const run=(over={})=>inspectSchema1EditIntent({before:snap,after:structuredClone(snap),ledger:[edit],seed:'fixed',...over});
+test('restored natural type retains explicit player provenance',()=>{const r=run();assert.equal(r.ok,true);assert.equal(r.saveSchemaVerified,false)});
+test('missing ledger fails closed',()=>assert.equal(run({ledger:[]}).reason,'restoration-intent-lost'));
+test('missing restored witness fails',()=>assert.equal(run({after:{...snap,restoredNaturalKeys:[]}}).reason,'restoration-intent-lost'));
+test('seed mismatch fails',()=>assert.equal(run({after:{...snap,seed:'other'}}).reason,'seed-mismatch'));
+test('changed block fails',()=>assert.equal(run({after:{...snap,cells:[{x:0,y:2,z:0,blockId:2}]}}).reason,'snapshot-drift'));
+test('duplicate edit fails',()=>assert.equal(run({ledger:[edit,edit]}).reason,'duplicate-edit'));
+test('schema mismatch fails',()=>assert.equal(run({after:{...snap,schema:2}}).reason,'schema-mismatch'));
+test('inputs unchanged',()=>{const before=structuredClone(snap),after=structuredClone(snap),ledger=[structuredClone(edit)];run({before,after,ledger});assert.deepEqual(before,snap);assert.deepEqual(after,snap);assert.deepEqual(ledger,[edit])});
