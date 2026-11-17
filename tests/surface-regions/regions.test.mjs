@@ -321,3 +321,32 @@ test('raised surface rejects elevated landmark occupancy beyond immediate headro
    isProtected:(cx,y,cz)=>y===highY}),null,
    'protected high landmarks must reject the whole column');
 });
+
+test('off-envelope cave and high-air reads avoid expensive protection scans',()=>{
+ for(const seed of [179,7,2201]){
+  const world=new VoxelWorld(seed);
+  let protectedCalls=0,durableCalls=0;
+  const view=createSurfaceBiomeWorldView(world,{
+   enabled:true,profileIsFresh:true,maxCachedColumns:8,
+   isProtected:()=>{protectedCalls++;return false;},
+   hasDurableEditIntent:()=>{durableCalls++;return false;}
+  });
+  assert.ok(view);
+  for(const r of SURFACE_BIOME_REGIONS){
+   const h=terrainHeight(r.x,r.z,seed);
+   for(let y=-180;y<h-2;y+=3)
+    assert.equal(view.get(r.x,y,r.z),world.get(r.x,y,r.z));
+   assert.equal(view.get(r.x,WORLD_MAX_Y+1,r.z),world.get(r.x,WORLD_MAX_Y+1,r.z));
+  }
+  for(let y=-180;y<=WORLD_MAX_Y;y+=4)
+   assert.equal(view.get(0,y,0),world.get(0,y,0));
+  assert.equal(protectedCalls,0,'off-envelope reads must not scan protected cells');
+  assert.equal(durableCalls,0,'off-envelope reads must not scan durable edit history');
+  assert.equal(view.cachedColumns,0,'off-envelope reads must not allocate column cache');
+  // On-envelope reads still perform full protection checks.
+  const r=SURFACE_BIOME_REGIONS[2],top=Math.max(
+   terrainHeight(r.x,r.z,seed),surfaceBiomeHeight(r.x,r.z,seed));
+  assert.equal(view.get(r.x,top,r.z),r.surface);
+  assert.ok(protectedCalls>0&&durableCalls>0);
+ }
+});
