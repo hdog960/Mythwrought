@@ -42,6 +42,35 @@ export function recoverLegacyVoxelSession(cells) {
       if (ok) orientations.delete(cellKey(cell)); // even same-ID replacements
       return ok;
     },
+    editMany(receipts) {
+      // Single-threaded fixture transaction: validate every receipt and expected
+      // revision before changing any cell or clearing any orientation.
+      if (!Array.isArray(receipts) || receipts.length === 0)
+        throw new TypeError('Invalid edit batch');
+      const seen = new Set();
+      const prepared = receipts.map(receipt => {
+        const {cell, expectedId, expectedRevision, nextId} = receipt ?? {};
+        // read validates coordinate shape; snapshot it against caller mutation.
+        const current = get(cell);
+        const k = cellKey(cell);
+        if (seen.has(k)) throw new TypeError('Duplicate edit cell');
+        seen.add(k);
+        if (![expectedId, nextId].every(id => Number.isSafeInteger(id) && id >= 0 && id < 255) ||
+            !Number.isSafeInteger(expectedRevision) || expectedRevision < 0)
+          throw new TypeError('Invalid edit receipt');
+        return {cell: [...cell], expectedId, expectedRevision, nextId, current, key: k};
+      });
+      if (prepared.some(({current, expectedId, expectedRevision}) =>
+        !current || current.id !== expectedId ||
+        current.revision !== expectedRevision ||
+        current.revision === Number.MAX_SAFE_INTEGER)) return false;
+      for (const {cell, expectedId, expectedRevision, nextId, key} of prepared) {
+        if (!host.compareAndWrite({cell, expectedId, expectedRevision, nextId}))
+          throw new Error('Unexpected synchronous transaction conflict');
+        orientations.delete(key);
+      }
+      return true;
+    },
     exportLegacyCells() {
       // Explicitly omit rotation/revision. Preserve input order and block IDs.
       return initial.map(({cell}) => {
