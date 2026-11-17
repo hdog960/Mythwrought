@@ -632,9 +632,23 @@ export function descentCells(origin=DESCENT_ORIGIN){
   }
   return cells;
 }
+// Candidate topology is seed-independent. Build it once per origin rather than
+// regenerating tens of thousands of cells for every collision/volume probe.
+// Keep the cached Map private: the exported descentCells() remains an isolated
+// mutable snapshot for callers, so their edits cannot corrupt the runtime read.
+const descentCellCache=new Map();
+function cachedDescentCells(origin){
+  const key=origin.x+','+origin.z;
+  let cells=descentCellCache.get(key);
+  if(!cells){
+    cells=descentCells(origin);
+    descentCellCache.set(key,cells);
+  }
+  return cells;
+}
 export function descentWorld(world,origin=DESCENT_ORIGIN){
   if(!world||typeof world.get!=='function'||!(world.edits instanceof Map))throw Error('Invalid world');
-  const cells=descentCells(origin);
+  const cells=cachedDescentCells(origin);
   return {seed:world.seed,edits:world.edits,get(x,y,z){
     const key=worldKey(x,y,z);
     if(world.edits.has(key))return world.get(x,y,z);
