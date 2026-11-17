@@ -21,12 +21,12 @@ function sourceConnected(b){
  }
  return visited.size===cells.size;
 }
-test('M2e 158/435 original authored IDs and physical fingerprints; 15 exact inherited stables untouched',()=>{
+test('M2e 164/435 original authored IDs and physical fingerprints; 15 exact inherited stables untouched',()=>{
  const all=get1BCandidates(),old=getInheritedStables(),fresh=models(),c=validateAllocation(all);
- assert.equal(all.length,158);assert.equal(c.authored,158);assert.equal(c.remaining,277);
+ assert.equal(all.length,164);assert.equal(c.authored,164);assert.equal(c.remaining,271);
  assert.equal(old.length,15);assert.equal(fresh.length,9);
- assert.equal(new Set(all.map(p=>p.id)).size,158);
- assert.equal(new Set(all.map(p=>structuralFingerprint(p))).size,158);
+ assert.equal(new Set(all.map(p=>p.id)).size,164);
+ assert.equal(new Set(all.map(p=>structuralFingerprint(p))).size,164);
  assert.equal(new Set(fresh.map(p=>p.architecturalIdentity.program)).size,9);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(p=>p.category===k).length])),
   {'bathhouse':23,stable:28,'farm-barn':22,greenhouse:23,'fishing-lodge':21,'harbor-office':20,lighthouse:21});
