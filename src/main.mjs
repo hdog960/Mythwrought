@@ -1145,23 +1145,27 @@ function start(){
       e.preventDefault();
       // A flight-mode tap may switch to Explore before Safari emits click.
       if(g2Active()){
-        lastTouchAt=performance.now();
+        lastTouchAt=e.timeStamp;
         g2ConsumedClicks.set(id,lastTouchAt);
         return;
       }
       // A queued iOS touch must not edit the world behind settings or on app suspension.
       if(!help.hidden||exploration.isOpen()||document.hidden||button.disabled)return;
-      lastTouchAt=performance.now();
+      lastTouchAt=e.timeStamp;
       action();
     });
     button.addEventListener('click',e=>{
       const consumed=g2ConsumedClicks.get(id);
-      if(consumed!==undefined&&performance.now()-consumed<850){
+      if(consumed!==undefined&&(e.pointerType==='touch'||
+         e.sourceCapabilities?.firesTouchEvents===true||
+         (e.timeStamp-consumed>=0&&e.timeStamp-consumed<1500))){
         g2ConsumedClicks.delete(id);
         e.preventDefault();return;
       }
       g2ConsumedClicks.delete(id);
-      if(e.detail!==0&&performance.now()-lastTouchAt<750){
+      if(lastTouchAt!==-Infinity&&(e.pointerType==='touch'||
+         e.sourceCapabilities?.firesTouchEvents===true||
+         (e.timeStamp-lastTouchAt>=0&&e.timeStamp-lastTouchAt<1500))){
         e.preventDefault();
         return;
       }
@@ -1173,8 +1177,9 @@ function start(){
   // iPhone touch uses pointerdown because another thumb may suppress click.
   const G2_JUMP_DOUBLE_TAP_MS=650;
   let lastG2JumpTap=-Infinity;
-  function g2JumpTap(){
-    const now=performance.now(),delta=now-lastG2JumpTap;
+  function g2JumpTap(now=performance.now()){
+    // Real event timestamps, not delayed handler time, define the double-tap gap.
+    const delta=now-lastG2JumpTap;
     if(delta>=0&&delta<=G2_JUMP_DOUBLE_TAP_MS){
       lastG2JumpTap=-Infinity;
       if(g2Active())g2Land();else g2Start();
@@ -1191,17 +1196,19 @@ function start(){
       e.preventDefault();
       if(!help.hidden||exploration.isOpen()||document.hidden||
          graphicsLost||button.disabled)return;
-      lastTouchAt=performance.now();
-      g2JumpTap();
+      lastTouchAt=e.timeStamp;
+      g2JumpTap(e.timeStamp);
     });
     button.addEventListener('click',e=>{
-      // Never double-count the synthesized click after an iPhone pointerdown.
-      if(performance.now()-lastTouchAt<850){
+      // Touch click may arrive many frames late with detail=0; never count twice.
+      const since=e.timeStamp-lastTouchAt;
+      if(lastTouchAt!==-Infinity&&(e.pointerType==='touch'||
+          e.sourceCapabilities?.firesTouchEvents===true||(since>=0&&since<1500))){
         e.preventDefault();return;
       }
       if(!help.hidden||exploration.isOpen()||document.hidden||
          graphicsLost||button.disabled){e.preventDefault();return;}
-      g2JumpTap();
+      g2JumpTap(e.timeStamp);
     });
   }
   g2BindJumpToggle();
@@ -1221,7 +1228,7 @@ function start(){
       if(!g2Active()||!help.hidden||exploration.isOpen()||document.hidden||
          graphicsLost||button.disabled||active!==null)return;
       e.preventDefault();active=e.pointerId;
-      lastTouch=performance.now();g2ConsumedClicks.set(id,lastTouch);
+      lastTouch=e.timeStamp;g2ConsumedClicks.set(id,lastTouch);
       g2ResumeControls();
       g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
       try{button.setPointerCapture(active);}catch(_){}
@@ -1238,7 +1245,9 @@ function start(){
     button.addEventListener('click',e=>{
       if(!g2Active())return;
       e.preventDefault();
-      if(performance.now()-lastTouch<750)return;
+      if(lastTouch!==-Infinity&&(e.pointerType==='touch'||
+          e.sourceCapabilities?.firesTouchEvents===true||
+          (e.timeStamp-lastTouch>=0&&e.timeStamp-lastTouch<1500)))return;
       // Accessible keyboard activation: a single small UP/DOWN nudge;
       // keyboard Q/E continue to supply sustained motion.
       if(!g2Ready({x:player.x,y:player.feet,z:player.z}))return;

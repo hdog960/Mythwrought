@@ -62,6 +62,7 @@ try{
    const jumpTouchProof=()=>page.evaluate(()=>({
      flight:window.__mythwroughtTest.flightInfo(),
      status:document.getElementById('g2bFlightStatus').textContent,
+     footer:document.getElementById('status').textContent,
      touchEvents:window.__flightJumpTouchEvents
    }));
    async function tapJumpTouch(){
@@ -86,7 +87,7 @@ try{
    if(info.active){
      // The real collision host can refuse landing safely; this is NOT a
      // gesture failure, but the refusal must be observable (not a lost tap).
-     const note=await page.locator('#g2bFlightStatus').textContent();
+     const note=await page.locator('#status').textContent();
      assert.match(note,/No verified landing|Landing stale|unsafe|Landing blocked/,
        'Double-tap LAND was ignored instead of refusing an unsafe landing: '+JSON.stringify(await jumpTouchProof()));
    }else{
@@ -183,7 +184,7 @@ try{
      assert.ok(!Number.isFinite(vy)||vy<3,'Landing tap synthesized a second Explore jump');
    }else{
      assert.equal(await page.locator('#jump').textContent(),'LAND ×2');
-     const note=await page.locator('#g2bFlightStatus').textContent();
+     const note=await page.locator('#status').textContent();
      assert.match(note,/No verified landing|Landing stale|unsafe|Landing blocked/,
        'A double LAND tap must report a verified safety refusal: '+JSON.stringify(await jumpTouchProof()));
    }

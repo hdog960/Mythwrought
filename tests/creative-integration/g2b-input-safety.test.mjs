@@ -21,8 +21,10 @@ test('G2B flight uses original physical button IDs with gated Explore actions',(
  assert.ok(src.includes('g2BindJumpToggle()'));
  assert.ok(src.includes("if(zone==='up'||zone==='down')g2Move(.05)"));
  assert.ok(src.includes('const G2_JUMP_DOUBLE_TAP_MS=650'));
- assert.ok(src.includes('if(performance.now()-lastTouchAt<850)'));
- assert.ok(src.includes('if(performance.now()-lastTouch<750)return'));
+ assert.ok(src.includes('g2JumpTap(e.timeStamp)'));
+ assert.ok(src.includes("e.pointerType==='touch'"));
+ assert.ok(src.includes('e.timeStamp-lastTouchAt<1500'));
+ assert.ok(src.includes('e.timeStamp-lastTouch<1500'));
  assert.ok(!src.includes('if(e.detail!==0&&performance.now()-lastTouchAt<850)'));
  assert.ok(src.includes('if(g2Active())g2Land();else g2Start();'));
  assert.ok(!src.includes("g2BindHold('jump','land')"));
@@ -64,7 +66,7 @@ test('G2B LAND tap cannot emit a delayed Explore JUMP or edit after mode flip',(
  assert.ok(src.includes('g2ConsumedClicks.set(id,lastTouch)'));
  assert.ok(src.includes('g2ConsumedClicks.get(id)'));
  assert.ok(src.includes('g2ConsumedClicks.delete(id)'));
- assert.ok(src.includes('if(consumed!==undefined&&performance.now()-consumed<850)'));
+ assert.ok(src.includes('if(consumed!==undefined&&'));
 });
 test('G2B no unsafe change to walking ownership during failed landing',()=>{
  let s=enterG2ControlOwnership(createG2ControlState(),{featureEnabled:true,flightReady:true});
