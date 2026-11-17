@@ -65,24 +65,46 @@ try{
      footer:document.getElementById('status').textContent,
      touchEvents:window.__flightJumpTouchEvents
    }));
-   async function tapJumpTouch(){
+   // Chromium's genuine CDP touch path records the physical event timestamp.
+   // SwiftShader may stall commands longer than the user's intended tap gap.
+   // No synthetic DOM PointerEvents, mocked game callbacks or fake movement.
+   async function tapJumpTouch(atSeconds=Date.now()/1000){
      const point=touch(jumpTouchId++,jumpXY.x,jumpXY.y);
-     await jumpTouchSession.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[point]});
-     await jumpTouchSession.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-     await page.waitForTimeout(90); // Human finger release; never coalesce two taps.
+     await jumpTouchSession.send('Input.dispatchTouchEvent',{type:'touchStart',
+       touchPoints:[point],timestamp:atSeconds});
+     await jumpTouchSession.send('Input.dispatchTouchEvent',{type:'touchEnd',
+       touchPoints:[],timestamp:atSeconds+.075});
+   }
+   async function doubleTapJumpTouch(){
+     const prior=await page.evaluate(()=>window.__flightJumpTouchEvents.length);
+     const start=Date.now()/1000;
+     await tapJumpTouch(start);
+     await tapJumpTouch(start+.30);
+     const received=await page.evaluate(offset=>window.__flightJumpTouchEvents.slice(offset),prior);
+     const downs=received.filter(x=>x.type==='pointerdown');
+     const ups=received.filter(x=>x.type==='pointerup');
+     assert.equal(downs.length,2,'Not two genuine touch pointerdowns: '+JSON.stringify(received));
+     assert.equal(ups.length,2,'Not two genuine touch pointerups: '+JSON.stringify(received));
+     assert.ok(downs.every(x=>x.pointerType==='touch')&&ups.every(x=>x.pointerType==='touch'),
+       'Test must use real browser touch events');
+     const gap=downs[1].stamp-ups[0].stamp;
+     assert.ok(gap>=50&&gap<=650,
+       'Touch interval was not a valid double-tap: '+JSON.stringify({gap,received}));
+     return gap;
    }
    await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,false,
      'One JUMP touch must not enable flight');
-   await page.waitForTimeout(700); // Reset single-tap window before the next pair.
-   await tapJumpTouch();await tapJumpTouch();
+   await page.waitForTimeout(900);
+   const firstDoubleGap=await doubleTapJumpTouch();
    let info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    assert.equal(info.active,true,'Double-tap JUMP did not enable flight: '+JSON.stringify(await jumpTouchProof()));
+   await page.waitForTimeout(900);
    await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,true,
      'One LAND touch must not end flight');
-   await page.waitForTimeout(700);
-   await tapJumpTouch();await tapJumpTouch();
+   await page.waitForTimeout(900);
+   await doubleTapJumpTouch();
    info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    if(info.active){
      // The real collision host can refuse landing safely; this is NOT a
@@ -91,7 +113,8 @@ try{
      assert.match(note,/No verified landing|Landing stale|unsafe|Landing blocked/,
        'Double-tap LAND was ignored instead of refusing an unsafe landing: '+JSON.stringify(await jumpTouchProof()));
    }else{
-     await tapJumpTouch();await tapJumpTouch();
+     await page.waitForTimeout(900);
+     await doubleTapJumpTouch();
      info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
      assert.equal(info.active,true,'Repeat double-tap JUMP did not re-enable flight: '+JSON.stringify(await jumpTouchProof()));
    }
@@ -143,6 +166,38 @@ try{
      'DOWN tap failed to descend: '+JSON.stringify({postUp,postDown}));
    assert.equal(postDown.bodyClear,true);
    assert.equal(postDown.resident,true);
+   // A held button must sustain altitude changes over real draw frames;
+   // passing its one-time pointerdown nudge is NOT enough.
+   const holdSession=await context.newCDPSession(page);
+   let holdId=800;
+   async function proveHold(selector,sign){
+     const rect=await page.locator(selector).boundingBox();
+     assert.ok(rect,'Missing vertical hold button '+selector);
+     const xy=center(rect),point=touch(holdId++,xy.x,xy.y);
+     const previous=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+     await holdSession.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[point]});
+     let immediate,held=previous,extra=0;
+     try{
+       immediate=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+       assert.ok(sign*(immediate.position.y-previous.position.y)>.035,
+         'Pointerdown failed initial altitude step: '+JSON.stringify({selector,previous,immediate}));
+       for(let sample=0;sample<24;sample++){
+         await page.waitForTimeout(140);
+         held=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+         extra=sign*(held.position.y-immediate.position.y);
+         if(extra>.05)break;
+       }
+     }finally{
+       await holdSession.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+     }
+     assert.ok(extra>.05,'Held button never moved after initial nudge: '+
+       JSON.stringify({selector,previous,immediate,held,extra}));
+     assert.equal(held.bodyClear,true,'Held vertical movement collided');
+     assert.equal(held.resident,true,'Held vertical movement lost GPU residency');
+     return extra;
+   }
+   const heldUp=await proveHold('#place',1);
+   const heldDown=await proveHold('#dig',-1);
    // Genuine independent three-touch CDP input: MOVE + LOOK + UP held together.
    const cdp=await context.newCDPSession(page);
    const left=center(await page.locator('#movePad').boundingBox());
@@ -173,8 +228,8 @@ try{
    await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,true,
      'One LAND tap must not toggle flight');
-   await page.waitForTimeout(700);
-   await tapJumpTouch();await tapJumpTouch();
+   await page.waitForTimeout(900);
+   await doubleTapJumpTouch();
    await page.waitForTimeout(160);
    const landed=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    if(!landed.active){
@@ -193,7 +248,9 @@ try{
    const still=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
    assert.equal(still,state.save,'Flight changed the existing canonical world save bytes');
    console.log('PASS G2B real Chromium WebGL2 flight and two-thumb safety '+width+'x'+height+
-     ' · moved '+moved.toFixed(3)+' · landing '+(landed.active?'safe refusal':'success'));
+     ' · moved '+moved.toFixed(3)+' · gap '+firstDoubleGap.toFixed(0)+'ms'+
+     ' · held up '+heldUp.toFixed(3)+' / down '+heldDown.toFixed(3)+
+     ' · landing '+(landed.active?'safe refusal':'success'));
   }finally{await context.close();}
  }
 }finally{await browser.close();}
