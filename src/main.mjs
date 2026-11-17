@@ -1193,7 +1193,7 @@ function start(){
     });
     button.addEventListener('click',e=>{
       // Never double-count the synthesized click after an iPhone pointerdown.
-      if(e.detail!==0&&performance.now()-lastTouchAt<850){
+      if(performance.now()-lastTouchAt<850){
         e.preventDefault();return;
       }
       if(!help.hidden||exploration.isOpen()||document.hidden||
@@ -1235,7 +1235,7 @@ function start(){
     button.addEventListener('click',e=>{
       if(!g2Active())return;
       e.preventDefault();
-      if(e.detail!==0&&performance.now()-lastTouch<750)return;
+      if(performance.now()-lastTouch<750)return;
       // Accessible keyboard activation: a single small UP/DOWN nudge;
       // keyboard Q/E continue to supply sustained motion.
       if(!g2Ready({x:player.x,y:player.feet,z:player.z}))return;
