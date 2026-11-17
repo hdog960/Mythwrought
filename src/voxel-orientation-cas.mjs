@@ -9,10 +9,23 @@ export async function commitOrientedCAS({cell, sidecar, readSnapshot, compareAnd
   if (!sidecar || typeof sidecar.invalidateEdit !== 'function' ||
       typeof readSnapshot !== 'function' || typeof compareAndSwap !== 'function' ||
       typeof next !== 'function') throw new TypeError('Invalid CAS adapter');
-  const before = await readSnapshot(cell);
-  if (!before || !validId(before.id) || !validRevision(before.revision) ||
-      !Number.isSafeInteger(before.orientation) || before.orientation < 0 || before.orientation > 3)
-    throw new TypeError('Invalid original snapshot');
+  // Old schema-1 worlds do not carry orientation. A host may explicitly
+  // identify a legacy full-cube cell; only that case receives orientation 0.
+  // Never silently normalize malformed modern oriented records.
+  let before;
+  try {
+    const raw = await readSnapshot(cell);
+    if (raw && raw.legacyFullCube === true && raw.orientation === undefined &&
+        validId(raw.id) && validRevision(raw.revision)) {
+      before = {...raw, orientation:0};
+    } else before = raw;
+    if (!before || !validId(before.id) || !validRevision(before.revision) ||
+        !Number.isSafeInteger(before.orientation) || before.orientation < 0 || before.orientation > 3)
+      throw new TypeError('Invalid original snapshot');
+  } catch (error) {
+    sidecar.invalidateEdit(cell);
+    throw error;
+  }
   const proposed = next(Object.freeze({...before}));
   if (!proposed || !validId(proposed.id) ||
       !Number.isSafeInteger(proposed.orientation) || proposed.orientation < 0 || proposed.orientation > 3)
