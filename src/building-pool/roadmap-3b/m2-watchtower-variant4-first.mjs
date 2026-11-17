@@ -1929,7 +1929,7 @@ function create(p){
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
    if(!isCore(x,z)||x<aisle+3)continue;
    const slope=axis==='x'?Math.floor((x-x0)/2):Math.floor((z-z0)/2);
-   const upper=deckY+2+Math.min(rise,slope+Math.abs(Math.floor((z-z0)/3)%3));
+   const upper=deckY+4+Math.min(rise,slope+Math.abs(Math.floor((z-z0)/3)%3));
    for(let y=deckY+1;y<upper;y++)write('stepped-upper-keep-bearing',x,y,z,p.wall);
    write('stepped-upper-keep-roof',x,upper,z,p.roof);
   }
