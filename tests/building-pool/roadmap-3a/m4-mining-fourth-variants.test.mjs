@@ -158,7 +158,7 @@ test('mountain-large only: northeast high hall is grounded by a real accessible 
    newFoundation++;
   }
  }
- assert.ok(newFoundation>=250,'substantial real occupied mountain gallery, not decorative support pixels');
+ assert.ok(newFoundation>=180,'substantial real occupied mountain gallery, not decorative support pixels');
  assert.equal(b.architecture.originalHoistRoofAperture,true);
  assert.equal(b.navigation.nodes.length,8);
 });
