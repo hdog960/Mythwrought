@@ -2742,8 +2742,8 @@ const DESIGNS=[
    ],
    [
     "rear customs",
-    19,
-    34
+    20,
+    33
    ]
   ],
   "features": [
