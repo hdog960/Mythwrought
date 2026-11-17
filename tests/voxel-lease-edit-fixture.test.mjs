@@ -1,0 +1,64 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {recoverLegacyVoxelSession} from '../src/voxel-legacy-recovery-fixture.mjs';
+import {createLeasedLegacyEditor} from '../src/voxel-lease-edit-fixture.mjs';
+import {VoxelCellLeaseConflictError} from '../src/voxel-cell-lease.mjs';
+
+const entry = (x,id=1) => ({cell:[x,0,0],id});
+const receipt = (x,id=1,rev=0,next=2) =>
+  ({cell:[x,0,0],expectedId:id,expectedRevision:rev,nextId:next});
+const gate = () => {
+  let release;
+  const pending = new Promise(resolve => { release=resolve; });
+  return {pending,release};
+};
+
+test('overlapping asynchronous edits fail closed; release restores progress', async () => {
+  const session=recoverLegacyVoxelSession([entry(0),entry(1)]);
+  const scope={};
+  const a=createLeasedLegacyEditor(session,scope);
+  const b=createLeasedLegacyEditor(session,scope);
+  assert.equal(session.setOrientation([0,0,0],1,0,3),true);
+  const g=gate();
+  const pending=a.editMany([receipt(0)],()=>g.pending);
+  await assert.rejects(b.editMany([receipt(0)]),VoxelCellLeaseConflictError);
+  assert.deepEqual(a.read([0,0,0]),{id:1,revision:0});
+  assert.equal(a.orientation([0,0,0]),3);
+  assert.equal(await b.editMany([receipt(1)]),true);
+  g.release();
+  assert.equal(await pending,true);
+  assert.equal(a.orientation([0,0,0]),null);
+  assert.equal(await b.editMany([receipt(0,2,1,3)]),true);
+});
+
+test('callback failure releases leases without editing cells or orientation', async () => {
+  const s=recoverLegacyVoxelSession([entry(0)]);
+  const a=createLeasedLegacyEditor(s);
+  s.setOrientation([0,0,0],1,0,2);
+  await assert.rejects(a.editMany([receipt(0)],async()=>{throw Error('interrupted');}),/interrupted/);
+  assert.deepEqual(s.read([0,0,0]),{id:1,revision:0});
+  assert.equal(s.orientation([0,0,0]),2);
+  assert.equal(await a.editMany([receipt(0)]),true);
+});
+
+test('caller mutation while awaiting cannot redirect or change edit receipt', async () => {
+  const s=recoverLegacyVoxelSession([entry(0),entry(1)]);
+  const a=createLeasedLegacyEditor(s);
+  const r=receipt(0), g=gate();
+  const pending=a.editMany([r],()=>g.pending);
+  r.cell[0]=1; r.nextId=9; r.expectedRevision=99;
+  g.release();
+  assert.equal(await pending,true);
+  assert.deepEqual(s.read([0,0,0]),{id:2,revision:1});
+  assert.deepEqual(s.read([1,0,0]),{id:1,revision:0});
+});
+
+test('stale batch never partially commits or invalidates orientation', async () => {
+  const s=recoverLegacyVoxelSession([entry(0),entry(1)]);
+  const a=createLeasedLegacyEditor(s);
+  s.setOrientation([0,0,0],1,0,1);
+  assert.equal(await a.editMany([receipt(0),receipt(1,1,7)]),false);
+  assert.equal(s.orientation([0,0,0]),1);
+  assert.deepEqual(s.exportLegacyCells(),[entry(0),entry(1)]);
+  assert.deepEqual(recoverLegacyVoxelSession(s.exportLegacyCells()).read([0,0,0]),{id:1,revision:0});
+});
