@@ -84,7 +84,7 @@ const DESIGNS=[
   "type": "castle-palace",
   "biome": "desert",
   "size": "small",
-  "variant": 1
+  "variant": 2
 },
 {
   "type": "embassy",
@@ -112,7 +112,7 @@ function bundle(){
  const shapes=readFileSync(join(SOURCE,'m1-preview-shapes.mjs'),'utf8');
  const render=readFileSync(join(TESTS,'m3-state-knowledge-webgl2-preview.mjs'),'utf8');
  let html=readFileSync(join(TESTS,'m3-state-knowledge-webgl2-preview.html'),'utf8');
- if(gitBlob(blueprint)!=='878d2242ba996bc8125057d6179a637db9422f6d')
+ if(gitBlob(blueprint)!=='a5fbccd0d5edf88d2b0eb074dd1f43a11b5f354f')
    throw Error('M2 authored source differs from exact original authored SHA');
  const importBlueprint="import {SCHEMA,validateBlueprint} from './schema.mjs';";
  const importRender="import {buildM3StateKnowledge} from '../../../src/building-pool/roadmap-4a/m3-state-knowledge.mjs';";
