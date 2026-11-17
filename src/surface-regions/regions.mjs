@@ -10,6 +10,17 @@ const REGIONS=Object.freeze([
   {name:'mountain',x:-512,z:0,surface:298,subsoil:299,rock:300,salt:301},
   {name:'enchanted',x:0,z:-512,surface:283,subsoil:284,rock:286,salt:287}
 ]);
+// Exposed geological bands are selected from already-registered biome130 solids.
+// This changes actual fresh-column voxels, never the global block catalog.
+function bandMaterial(region,x,z,y,top,seed){
+ const depth=top-y;
+ if(depth===0)return region.surface;
+ if(depth<=2)return region.subsoil;
+ // Warped horizontal strata form broad, discoverable stone/salt outcrops.
+ // Keep the cap and near-surface subsoil continuous for traversability.
+ const seam=Math.floor((y+(valueNoise(x/29,z/29,seed+1703)-.5)*5)/3);
+ return seam%5===0?region.salt:region.rock;
+}
 const smooth=t=>t*t*(3-2*t);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 function hash(x,z,seed){
@@ -172,9 +183,9 @@ export function surfaceBiomeFreshColumn(x,z,seed=179,{
     const baseline=readBaseline(x,y,z);
     let id=null;
     if(y>oldTop){
-      id=y===newTop?r.surface:y>=newTop-2?r.subsoil:r.rock;
+      id=bandMaterial(r,x,z,y,newTop,seed);
     }else if(hash(x,z,seed+907)<=coverage){
-      id=y===newTop?r.surface:y>=newTop-2?r.subsoil:r.rock;
+      id=bandMaterial(r,x,z,y,newTop,seed);
     }
     if(id===null||id===baseline)continue;
     if(!isBiome130BlockId(id)||!biome130Block(id).solid)return null;
