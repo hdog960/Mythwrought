@@ -6,9 +6,9 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 117,
-  "authoredCandidates": 132,
-  "remainingUnauthored": 288,
+  "originalNewModels": 123,
+  "authoredCandidates": 138,
+  "remainingUnauthored": 282,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
@@ -19,9 +19,9 @@
       "remaining": 41
     },
     "tailor": {
-      "authored": 16,
+      "authored": 18,
       "target": 60,
-      "remaining": 44
+      "remaining": 42
     },
     "butcher": {
       "authored": 18,
@@ -29,14 +29,14 @@
       "remaining": 42
     },
     "jeweler": {
-      "authored": 17,
+      "authored": 19,
       "target": 60,
-      "remaining": 43
+      "remaining": 41
     },
     "bookshop": {
-      "authored": 17,
+      "authored": 19,
       "target": 60,
-      "remaining": 43
+      "remaining": 41
     },
     "temple": {
       "authored": 25,
@@ -634,26 +634,56 @@
       "id": "r2:temple:enchanted-forest:medium:02",
       "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:desert:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-weave-gem-triptych.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-weave-gem-triptych.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-weave-gem-triptych.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:desert:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-diadem-folios.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:snow:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-diadem-folios.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-diadem-folios.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
       "small": 8,
       "medium": 9,
-      "large": 8
+      "large": 9
     },
     "desert": {
       "small": 8,
-      "medium": 8,
-      "large": 9
+      "medium": 9,
+      "large": 10
     },
     "snow": {
-      "small": 8,
+      "small": 9,
       "medium": 12,
-      "large": 7
+      "large": 8
     },
     "enchanted-forest": {
-      "small": 9,
+      "small": 10,
       "medium": 8,
       "large": 10
     },
