@@ -186,10 +186,10 @@ test('truthful 79/420 ledger, all 64 new original identities preserved, and exac
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,
   ledger.authoredCandidates,ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],
-  [420,15,100,115,305,0,0,0]);
- assert.equal(ledger.originals.length,100);
+  [420,15,106,121,299,0,0,0]);
+ assert.equal(ledger.originals.length,106);
  const actual=new Set(all.filter(b=>b.category!=='temple'||b.variation!==1).map(b=>b.id));
  for(const id of actual)assert(new Set(ledger.originals.map(x=>x.id)).has(id),'lost original '+id);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),115);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),305);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),121);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),299);
 });
