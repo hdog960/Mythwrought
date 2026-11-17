@@ -43,10 +43,10 @@ const deckLength=Math.abs(b[0]-a[0])+Math.abs(b[1]-a[1]);
 const limbs=plan.cells.filter(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&
  (a[0]===b[0]?x!==a[0]:z!==a[1]));
 assert.ok(limbs.length<2*(deckLength-3),'no continuous paired side fences');
-assert.ok(limbs.length>=2,'at least two rooted crown branches');
+assert.equal(limbs.length,1,'five-cell bridge has one fork, not adjacent fence teeth');
 const left=limbs.filter(([x,,z])=>a[0]===b[0]?x<a[0]:z<a[1]).length;
 const right=limbs.length-left;
-assert.ok(left>0&&right>0,'crown alternates between both sides');
+assert.equal(left+right,1,'short bridge keeps exactly one side branch');
 for(const [x,cy,z] of limbs){
  assert.equal(occupancy.get([x,cy+1,z].join(',')),BLOCK.LEAVES,'each limb supports its crown');
  assert.ok([[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dz])=>
@@ -190,7 +190,7 @@ for(const span of [8,9]){
 
 // Short three/four-cell spans must not grow two crowded neighboring fork
 // stations: these looked like a miniature block fence rather than a crown.
-for(const span of [3,4]){
+for(const span of [3,4,5]){
  let site=null;
  for(let x=-150;x<150&&!site;x+=3)for(let z=-150;z<150&&!site;z+=3){
   const f=fixture(),aa=[x,z],bb=[x+span,z];
@@ -203,6 +203,7 @@ for(const span of [3,4]){
  const limbs=site.candidate.cells.filter(([cx,cy,cz,id])=>
   cy===y&&id===BLOCK.WOOD&&cz!==site.aa[1]);
  assert.equal(limbs.length,1,'short canopy has one rooted fork, not paired fence teeth');
+ assert.equal(new Set(limbs.map(([cx])=>cx)).size,1,'one crown station on short span');
  const [lx,ly,lz]=limbs[0];
  assert.ok(site.candidate.cells.some(([cx,cy,cz,id])=>
   cx===lx&&cy===ly+1&&cz===lz&&id===BLOCK.LEAVES),
@@ -231,9 +232,10 @@ for(const span of [5,7,8,9]){
  const occ=new Map(candidate.cells.map(([cx,cy,cz,id])=>[[cx,cy,cz].join(','),id]));
  const limbs=candidate.cells.filter(([cx,cy,cz,id])=>
   cy===y&&id===BLOCK.WOOD&&cx!==aa[0]);
- assert.ok(limbs.length>=2,'perpendicular crown has rooted side branches');
+ assert.ok(limbs.length>=(span===5?1:2),'perpendicular crown has rooted side branches');
  assert.deepEqual([...new Set(limbs.map(([cx])=>Math.sign(cx-aa[0])))].sort((a,b)=>a-b),
-  [-1,1],'perpendicular crown uses both banks');
+  span===5?[Math.sign(limbs[0][0]-aa[0])]:[-1,1],
+  'short perpendicular crown has one fork; long spans alternate banks');
  for(const [cx,cy,cz,id] of candidate.cells){
   if(id!==BLOCK.LEAVES)continue;
   assert.equal(occ.get([cx,cy-1,cz].join(',')),BLOCK.WOOD,
