@@ -221,13 +221,13 @@ test('exact committed PR HEAD source blob and 84/420 cumulative original registr
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,ledger.authoredCandidates,
   ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],
-  [420,15,111,126,294,0,0,0]);
- assert.equal(ledger.originals.length,111);
+  [420,15,117,132,288,0,0,0]);
+ assert.equal(ledger.originals.length,117);
  // This is the historical 84-source test: verify every earlier identity remains
  // in the updated 95-source ledger, without falsely requiring the new six to be absent.
  const current=new Set(ledger.originals.map(x=>x.id));
  for(const earlier of all.filter(x=>x.category!=='temple'||x.variation!==1))
   assert(current.has(earlier.id),'lost original concave/historical source '+earlier.id);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),126);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),294);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),132);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),288);
 });
