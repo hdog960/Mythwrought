@@ -13,7 +13,7 @@ test('eleven independently source-authored castle/palace embassy archive observa
   ["r4:castle-palace:temperate:medium:02","r4:castle-palace:snow:large:02","r4:embassy:desert:medium:01","r4:embassy:enchanted-forest:small:01","r4:grand-archive:mountain:large:01","r4:grand-archive:temperate:medium:01","r4:observatory:snow:small:01","r4:observatory:desert:large:01","r4:castle-palace:temperate:large:03","r4:embassy:mountain:medium:01","r4:grand-archive:snow:medium:01"]);
  assert.deepEqual([...new Set(result.results.map(x=>x.viewport.join('x')))],['667x375','844x390','932x430']);
  assert.ok(result.results.every(x=>x.drawCalls>0&&x.drawnTriangles>100&&x.pngSha256.length===64));
- assert.equal(result.authoredGeneratorGitBlob,'6faad8c831ab4b3b18339b172376f6a48c343d5f');
+ assert.equal(result.authoredGeneratorGitBlob,'ce3ce3222e64eee85bc4060d2907440c2afc7d4c');
  assert.equal(result.realIphoneTested,false);
  assert.equal(result.productionPhysicalFamilyRenderer,false);
  assert.equal(result.creatorArtApproved,false);
