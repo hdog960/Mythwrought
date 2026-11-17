@@ -420,6 +420,44 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // Deep transition's forked basalt sanctuary at -160. A broad throat
+  // divides around an intact stone spine and rejoins in a high oval vault.
+  // The shorter eastern arm opens into a smaller blind alcove. This adds a
+  // physically connected destination at the lower/deepest boundary rather
+  // than another detached cave fixture; all work stays below legacy terrain.
+  {
+    const depth=-160,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,r=1,height=6)=>{
+        for(let a=-r;a<=r;a++){
+          const x=anchor.x+outward[0]*d+tangent[0]*(t+a);
+          const z=anchor.z+outward[1]*d+tangent[1]*(t+a);
+          set(x,depth,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
+        }
+      };
+      for(let d=0;d<=14;d++)carve(d,0,2,6);
+      for(let d=14;d<=46;d++){
+        const spread=Math.round(9*Math.sin(Math.PI*(d-14)/32));
+        carve(d,-spread,2,6);
+        carve(d,spread,2,7);
+      }
+      // Reconnected high-roof terminal vault with irregular silhouette.
+      for(let d=41;d<=62;d++)for(let t=-14;t<=14;t++){
+        const radial=((d-51)/12)**2+((t-2)/15)**2;
+        if(radial>1)continue;
+        carve(d,t,0,5+Math.floor(9*(1-radial)));
+      }
+      // A narrow offset side pocket branches from the eastern passage.
+      for(let d=25;d<=38;d++)for(let t=8;t<=18;t++){
+        const radial=((d-32)/8)**2+((t-13)/6)**2;
+        if(radial<=1)carve(d,t,0,5+Math.floor(3*(1-radial)));
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
