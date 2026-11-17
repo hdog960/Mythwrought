@@ -217,6 +217,28 @@ test('two literal open-air courtyards (three in mountain) are genuine absent sou
   }
  }
 });
+// Regression gate for the originally detached enchanted-forest roof watch spur.
+// This uses actual source blocks, not render-only camera props or cosmetic metadata.
+test('all five second-variation barracks keep both 2x2 rooftop watch spurs genuinely supported at every authored elevation',()=>{
+ for(const b of next){
+  const cells=voxelMap(b),entry=b.navigation.nodes.find(n=>n.id==='entry');
+  assert.ok(entry,b.id+' no grounded barracks entrance');
+  const spurs=b.architecture.roofSpurs;
+  assert.equal(spurs.length,2,b.id+' missing distinct watch spurs');
+  assert.ok(Math.abs(spurs[0][0]-spurs[1][0])>=3,b.id+' spurs overlap into one repeated central keep');
+  for(const [z,rise] of spurs){
+   assert.ok(rise>=3&&rise<=7,b.id+' unbounded or insignificant roof elevation');
+   for(const x of [entry.x+3,entry.x+4])for(const zz of [z,z+1]){
+    assert.equal(cells.get(k(x,0,zz))?.role,'foundation',b.id+' ungrounded watch footing '+[x,zz]);
+    assert.equal(cells.get(k(x,1,zz))?.role,'floor',b.id+' unsupported watch deck floor '+[x,zz]);
+    assert.equal(cells.get(k(x,7,zz))?.role,'roof',b.id+' absent true source-bearing roof '+[x,zz]);
+    for(let y=8;y<=8+rise;y++)
+     assert.ok(cells.has(k(x,y,zz)),b.id+' non-physical vertical rooftop spur gap '+[x,y,zz]);
+   }
+  }
+ }
+});
+
 test('nonboxlike high-pitched roof silhouettes and two supported distinct raised watch spurs exist as real 3D source voxels',()=>{
  for(const b of next){
   assert.equal(b.architecture.roofSpurs.length,2,b.id+' absent asymmetric spurs');
