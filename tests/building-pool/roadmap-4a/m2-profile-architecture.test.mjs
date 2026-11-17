@@ -40,9 +40,9 @@ test('all eight source-specific new IDs occupy unused 4A quota slots; inherited 
  assert.equal(new Set(all.map(x=>x.id)).size,76);
  assert.equal(new Set(all.map(geometrySignature)).size,76);
  assert.equal(manifest.counts.legacyAuthored,30);
- assert.equal(manifest.counts.newlyAuthored,131);
- assert.equal(manifest.counts.totalAuthored,161);
- assert.equal(manifest.counts.remaining,154);
+ assert.equal(manifest.counts.newlyAuthored,134);
+ assert.equal(manifest.counts.totalAuthored,164);
+ assert.equal(manifest.counts.remaining,151);
  assert.equal(manifest.counts.creatorAccepted,0);
  assert.equal(manifest.counts.integratedBuildings,0);
  assert.equal(manifest.categories.find(c=>c.type==='civic-hall').remaining,0);
