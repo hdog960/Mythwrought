@@ -659,6 +659,18 @@ const PLANS=[
         41,
         18,
         59
+      ],
+      [
+        73,
+        58,
+        78,
+        65
+      ],
+      [
+        68,
+        63,
+        82,
+        68
       ]
     ],
     "notches": [
@@ -716,6 +728,11 @@ const PLANS=[
         4,
         50,
         "west"
+      ],
+      [
+        82,
+        66,
+        "east"
       ]
     ],
     "fixtures": [
@@ -746,6 +763,10 @@ const PLANS=[
       [
         28,
         41
+      ],
+      [
+        75,
+        66
       ]
     ],
     "ridges": [],
@@ -809,6 +830,16 @@ const PLANS=[
           46,
           16,
           57
+        ]
+      },
+      {
+        "id": "upper-root-treaty-hearing",
+        "kind": "public-hearing",
+        "rect": [
+          70,
+          64,
+          80,
+          67
         ]
       }
     ],
@@ -882,6 +913,18 @@ const PLANS=[
         ],
         "profile": "gable",
         "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          70,
+          64,
+          81,
+          67
+        ],
+        "profile": "saw",
+        "axis": "x",
         "high": 9,
         "period": 4
       }
@@ -1271,6 +1314,18 @@ const PLANS=[
         43,
         18,
         60
+      ],
+      [
+        6,
+        59,
+        16,
+        64
+      ],
+      [
+        3,
+        62,
+        21,
+        68
       ]
     ],
     "notches": [
@@ -1328,6 +1383,11 @@ const PLANS=[
         4,
         51,
         "west"
+      ],
+      [
+        12,
+        68,
+        "north"
       ]
     ],
     "fixtures": [
@@ -1358,6 +1418,10 @@ const PLANS=[
       [
         28,
         39
+      ],
+      [
+        10,
+        65
       ]
     ],
     "ridges": [],
@@ -1421,6 +1485,16 @@ const PLANS=[
           48,
           16,
           58
+        ]
+      },
+      {
+        "id": "southern-canalside-oar-woodshop",
+        "kind": "workshop",
+        "rect": [
+          5,
+          64,
+          19,
+          67
         ]
       }
     ],
@@ -1494,6 +1568,18 @@ const PLANS=[
         ],
         "profile": "gable",
         "axis": "z",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          5,
+          64,
+          19,
+          67
+        ],
+        "profile": "gable",
+        "axis": "x",
         "high": 9,
         "period": 4
       }
@@ -1577,6 +1663,18 @@ const PLANS=[
         40,
         16,
         57
+      ],
+      [
+        61,
+        52,
+        65,
+        57
+      ],
+      [
+        53,
+        55,
+        68,
+        60
       ]
     ],
     "notches": [
@@ -1634,6 +1732,11 @@ const PLANS=[
         3,
         49,
         "west"
+      ],
+      [
+        68,
+        58,
+        "east"
       ]
     ],
     "fixtures": [
@@ -1664,6 +1767,10 @@ const PLANS=[
       [
         25,
         38
+      ],
+      [
+        62,
+        58
       ]
     ],
     "ridges": [],
@@ -1727,6 +1834,16 @@ const PLANS=[
           45,
           14,
           55
+        ]
+      },
+      {
+        "id": "southern-citron-dye-filter-shop",
+        "kind": "workshop",
+        "rect": [
+          56,
+          57,
+          66,
+          59
         ]
       }
     ],
@@ -1799,6 +1916,18 @@ const PLANS=[
           55
         ],
         "profile": "saw",
+        "axis": "x",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          56,
+          57,
+          66,
+          59
+        ],
+        "profile": "gable",
         "axis": "x",
         "high": 9,
         "period": 4
@@ -1883,6 +2012,18 @@ const PLANS=[
         44,
         19,
         62
+      ],
+      [
+        73,
+        55,
+        78,
+        62
+      ],
+      [
+        63,
+        60,
+        81,
+        66
       ]
     ],
     "notches": [
@@ -1940,6 +2081,11 @@ const PLANS=[
         5,
         53,
         "west"
+      ],
+      [
+        81,
+        64,
+        "east"
       ]
     ],
     "fixtures": [
@@ -1970,6 +2116,10 @@ const PLANS=[
       [
         27,
         40
+      ],
+      [
+        74,
+        63
       ]
     ],
     "ridges": [],
@@ -2033,6 +2183,16 @@ const PLANS=[
           49,
           17,
           60
+        ]
+      },
+      {
+        "id": "northeast-ice-bridge-iceforge",
+        "kind": "shared-facility",
+        "rect": [
+          66,
+          62,
+          79,
+          65
         ]
       }
     ],
@@ -2106,6 +2266,18 @@ const PLANS=[
         ],
         "profile": "hip",
         "axis": "x",
+        "high": 9,
+        "period": 4
+      },
+      {
+        "rect": [
+          66,
+          62,
+          79,
+          65
+        ],
+        "profile": "hip",
+        "axis": "z",
         "high": 9,
         "period": 4
       }
