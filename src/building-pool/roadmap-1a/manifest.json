@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M3 hospitality wave5 source: 232/450 candidates (150 houses, 47 taverns, 35 inns), prior 224 full source objects protected, exact-head CI pending",
+  "milestone": "M3 hospitality wave6 candidate: 245/450 original authored (150 houses / 53 taverns / 42 inns), prior 232 complete sources immutable, five differentiated roof sections per new plan; exact-head CI PENDING",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 218,
-  "newDesignsAuthored": 202,
-  "totalLaneGeometryAuthored": 232,
+  "additionalDesignsRequired": 205,
+  "newDesignsAuthored": 215,
+  "totalLaneGeometryAuthored": 245,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,10 +53,11 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Exact-head focused Wave5 native physical source conservation and Chromium 1224 source-cell / 948 producer Pack AABB screenshot acceptance",
-    "218 source candidates remaining: 150 houses, 28 taverns, 40 inns",
-    "Producer Pack2 door hinges/schema1, Pack3 roof load/weather, Pack4 optics/weather, Pack5 bed collision/persistence, creator visual approval, physical iPhone and central integration unresolved",
-    "No merge, main/runtime/deploy, shared workflow, sibling builder, or v0.11 modifications"
+    "Confirm exact-head focused 1A CI and real Chromium 1302 source and 1026 physical Pack AABB screenshots; inspect all artifacts.",
+    "205 candidates remaining overall: 150 houses, 22 taverns, 33 inns.",
+    "Current main advanced; mergeability to reverify independently, without rebase or unrelated source modifications.",
+    "Pack2 door hinges/save; Pack3 roofs/load/weather; Pack4 glass optics/weather; Pack5 actual bed collision/occupancy persistence; creator final art and physical iPhone acceptance remain unresolved.",
+    "Do not merge, integrate, deploy, alter save schema, or unlock v0.11"
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -76,8 +77,8 @@
   "innCount": 1,
   "categoriesAuthored": {
     "house": 150,
-    "tavern": 47,
-    "inn": 35
+    "tavern": 53,
+    "inn": 42
   },
   "firstInn": {
     "id": "r1:inn:temperate:small:001",
@@ -547,8 +548,60 @@
         430
       ]
     ],
-    "exactHeadCI": "PENDING",
+    "exactHeadCI": {
+      "head": "27cd009ff4aed7063fe4b8f80b9959af09233794",
+      "run": 44015759371,
+      "conclusion": "success",
+      "contracts": "12/12",
+      "rootNode": "837/837",
+      "builderNative": "323/323",
+      "chromiumSource": "1224/1224",
+      "physicalPackAABB": "948/948",
+      "artifact": 14299516326
+    },
     "creatorApproved": 0,
     "integrated": 0
+  },
+  "m3HospitalityWave6": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave6.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave6.test.mjs",
+    "immutable232Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline232.json",
+    "newTaverns": 6,
+    "newInns": 7,
+    "physicalVoxelCells": 162447,
+    "absentExteriorFootprintColumns": 8949,
+    "walkableRooms": 65,
+    "pack5TwoCellBedReservations": 27,
+    "roofWingsPerOriginal": 5,
+    "roofProfileStylesPerOriginalMinimum": 3,
+    "roofRaiseTiers": [
+      0,
+      1,
+      2
+    ],
+    "noD4": true,
+    "normalizedPartitionIoUThresholdExclusive": 0.88,
+    "normalizedExteriorIoUThresholdExclusive": 0.975,
+    "sourceGalleryIDs": 217,
+    "sourceCellWebGL2Target": 1302,
+    "packVisibleBoxesGalleryIDs": 171,
+    "physicalPackAABBWebGL2Target": 1026,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": "PENDING",
+    "productionRegistration": 0,
+    "creatorFinalApproved": 0
   }
 }
