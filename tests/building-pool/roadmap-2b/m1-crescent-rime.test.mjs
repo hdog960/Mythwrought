@@ -182,15 +182,15 @@ test('full 121-source identity ledger, exact Git blobs and 0 creator-approved or
  }
  const l=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([l.target,l.sourceExactInheritedTemples,l.originalNewModels,l.authoredCandidates,l.remainingUnauthored,
-  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,111,126,294,0,0,0]);
- assert.equal(l.originals.length,111);
+  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,117,132,288,0,0,0]);
+ assert.equal(l.originals.length,117);
  for(const previous of OLD115.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(l.originals.some(x=>x.id===previous.id),'lost one of previous 115 source-authored designs '+previous.id);
  for(const prev of ALL121.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(l.originals.some(row=>row.id===prev.id),'historical 121 source missing '+prev.id);
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),126);
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),294);
- assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),126);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),132);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),288);
+ assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),132);
  for(const b of NEW121){
   const target='src/building-pool/roadmap-2b/'+(b.category==='market-square'||b.category==='bookshop'?'m1-crescent-merchants.mjs':'m1-rime-and-river.mjs');
   assert.equal(l.originals.find(row=>row.id===b.id)?.file,target,b.id+' wrong original author location');
