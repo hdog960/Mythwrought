@@ -662,5 +662,25 @@
     "registered": 0,
     "integrated": 0,
     "deployed": 0
+  },
+  "m3HospitalityWave8": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave8.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave8.test.mjs",
+    "newTaverns": 3,
+    "newInns": 2,
+    "sourceVoxelPlacements": 87472,
+    "exteriorVoidColumns": 5107,
+    "rooms": 29,
+    "bedReservations": 9,
+    "protectedSources": 255,
+    "sourceGalleryCandidates": 232,
+    "physicalGalleryCandidates": 186,
+    "sourceWebGL2CaptureTarget": 1392,
+    "physicalPackAABBCaptureTarget": 1116,
+    "exactHeadCI": "PENDING",
+    "creatorApproved": 0,
+    "registered": 0,
+    "integrated": 0,
+    "deployed": 0
   }
 }
