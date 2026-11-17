@@ -636,14 +636,22 @@ export function descentCells(origin=DESCENT_ORIGIN){
 // regenerating tens of thousands of cells for every collision/volume probe.
 // Keep the cached Map private: the exported descentCells() remains an isolated
 // mutable snapshot for callers, so their edits cannot corrupt the runtime read.
+// A full-depth map is large. Limit retained origins so exploratory previews
+// cannot permanently pin an unbounded number of voxel maps in mobile memory.
+// Existing readers retain their own map reference safely after eviction.
+const MAX_CACHED_DESCENT_ORIGINS=2;
 const descentCellCache=new Map();
+export function descentTopologyCacheStats(){
+  return Object.freeze({origins:descentCellCache.size,limit:MAX_CACHED_DESCENT_ORIGINS});
+}
 function cachedDescentCells(origin){
   const key=origin.x+','+origin.z;
   let cells=descentCellCache.get(key);
-  if(!cells){
-    cells=descentCells(origin);
-    descentCellCache.set(key,cells);
-  }
+  if(cells)descentCellCache.delete(key); // refresh least-recently-used order
+  else cells=descentCells(origin);
+  descentCellCache.set(key,cells);
+  while(descentCellCache.size>MAX_CACHED_DESCENT_ORIGINS)
+    descentCellCache.delete(descentCellCache.keys().next().value);
   return cells;
 }
 export function descentWorld(world,origin=DESCENT_ORIGIN){
