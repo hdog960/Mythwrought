@@ -190,7 +190,7 @@ for(const span of [8,9]){
 
 // Short three/four-cell spans must not grow two crowded neighboring fork
 // stations: these looked like a miniature block fence rather than a crown.
-for(const span of [3,4,5]){
+for(const span of [3,4,5,6]){
  let site=null;
  for(let x=-150;x<150&&!site;x+=3)for(let z=-150;z<150&&!site;z+=3){
   const f=fixture(),aa=[x,z],bb=[x+span,z];
@@ -218,7 +218,7 @@ for(const span of [3,4,5]){
 
 // Perpendicular physical corridors must share the same support, clearance,
 // reversed-endpoint and protected-edit contracts as east-west crowns.
-for(const span of [5,7,8,9]){
+for(const span of [5,6,7,8,9]){
  let site=null;
  for(let x=-150;x<150&&!site;x+=3)for(let z=-150;z<150&&!site;z+=3){
   const f=fixture(),aa=[x,z],bb=[x,z+span];
@@ -232,9 +232,9 @@ for(const span of [5,7,8,9]){
  const occ=new Map(candidate.cells.map(([cx,cy,cz,id])=>[[cx,cy,cz].join(','),id]));
  const limbs=candidate.cells.filter(([cx,cy,cz,id])=>
   cy===y&&id===BLOCK.WOOD&&cx!==aa[0]);
- assert.ok(limbs.length>=(span===5?1:2),'perpendicular crown has rooted side branches');
+ assert.ok(limbs.length>=(span<=6?1:2),'perpendicular crown has rooted side branches');
  assert.deepEqual([...new Set(limbs.map(([cx])=>Math.sign(cx-aa[0])))].sort((a,b)=>a-b),
-  span===5?[Math.sign(limbs[0][0]-aa[0])]:[-1,1],
+  span<=6?[Math.sign(limbs[0][0]-aa[0])]:[-1,1],
   'short perpendicular crown has one fork; long spans alternate banks');
  for(const [cx,cy,cz,id] of candidate.cells){
   if(id!==BLOCK.LEAVES)continue;
