@@ -72,7 +72,7 @@ test('G2A landing fails closed on unloaded, unsupported, colliding or unsafe des
   assert.equal(inspectG2Landing(flight(),h).canLand,false,key);
  }
  const other={...landingHost,worldToken:'seed:other'};
- assert.throws(()=>inspectG2Landing(flight(),other),/real flight/);
+ assert.throws(()=>inspectG2Landing(flight(),other),/live flight state/);
 });
 test('G2A landing refuses distant, rising, out-of-height and overlarge searches',()=>{
  const source=flight();
@@ -98,5 +98,5 @@ test('G2A successful landing describes safe grounded restore without applying wo
 });
 test('G2A refuses stale world landing authority even if candidate coordinates match',()=>{
  const s=flight(),v=inspectG2Landing(s,landingHost);
- assert.throws(()=>commitG2Landing(s,v,{...landingHost,worldToken:'seed:180'}),/real flight/);
+ assert.throws(()=>commitG2Landing(s,v,{...landingHost,worldToken:'seed:180'}),/live flight state/);
 });

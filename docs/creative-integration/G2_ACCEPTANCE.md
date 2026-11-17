@@ -4,7 +4,7 @@
 
 ## Required proof
 
-1. Seven? NO: the approved G2A diff has EXACTLY ELEVEN owned paths, listed in G2_SCOPE.md. Any others fail closed.
+1. The approved G2A diff has exactly eleven owned paths, listed in G2_SCOPE.md. Any others fail closed.
 2. Native command: node --test tests/creative-integration-g2.test.mjs. The root bridge imports 37 pure source-backed cases: 13 flight; 11 input-owner lifecycle; 13 streaming/landing. Verify genuine Node execution, not just static syntax.
 3. Existing repository native and CI-contract tests must pass under npm test. The full 20-script real Chromium/WebGL2 production regression runs via existing .github/workflows/ci.yml without modifying shared CI or producer files.
 4. Optional standalone source-specific browser harness (not automatically part of the 20-script CI): start python3 -m http.server 4173 and run node tests/creative-integration/g2-real-browser.mjs after installing pinned Playwright. It imports the actual new detached modules in the browser, checks game feature-off, real WebGL2, existing grip layout and upper-right minimap across 568x320, 667x375, 844x390, 932x430, 956x440 and 1180x520. Record screenshots/actual run if executed; do not claim they ran merely because the source file exists.
