@@ -10,6 +10,7 @@ import {M1_MARKET_FRONTS} from './m1-market-fronts.mjs';
 import {M1_COURTYARD_SHOPS} from './m1-courtyard-shops.mjs';
 import {M1_U_COURT_SHOPS} from './m1-u-court-shops.mjs';
 import {M1_LATERAL_MARKETS} from './m1-lateral-markets.mjs';
+import {M1_PROFILED_ARCADE_SHOPS} from './m1-profiled-arcade-shops.mjs';
 import {M1_ARCADED_FRONT_SHOPS} from './m1-arcaded-front-shops.mjs';
 import {M1_TOWER_COURT_SHOPS} from './m1-tower-court-shops.mjs';
 import {M1_SCULPTED_MARKETS} from './m1-sculpted-markets.mjs';
@@ -23,7 +24,7 @@ import {
  MANUAL_FIVE_PACK_COUNTS,MANUAL_FIVE_PACK_FAMILY_SYMBOLS,
  manualFivePackVariants,resolveManualFivePackAsset
 } from '../../builder-assets/manual-five-pack.mjs';
-const buildings=Object.freeze([...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS,...M1_U_COURT_SHOPS,...M1_STEPPED_COURT_SHOPS,...M1_LATERAL_MARKETS,...M1_TWIN_SIDE_TERRACE_SHOPS,...M1_FIVE_COURT_SHOPS,...M1_DISTINCT_WING_SHOPS,...M1_LANDMARK_SHOPS,...M1_SIGNATURE_SKYLINE_SHOPS,...M1_SCULPTED_MARKETS,...M1_TOWER_COURT_SHOPS,...M1_ARCADED_FRONT_SHOPS]);
+const buildings=Object.freeze([...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS,...M1_U_COURT_SHOPS,...M1_STEPPED_COURT_SHOPS,...M1_LATERAL_MARKETS,...M1_TWIN_SIDE_TERRACE_SHOPS,...M1_FIVE_COURT_SHOPS,...M1_DISTINCT_WING_SHOPS,...M1_LANDMARK_SHOPS,...M1_SIGNATURE_SKYLINE_SHOPS,...M1_SCULPTED_MARKETS,...M1_TOWER_COURT_SHOPS,...M1_ARCADED_FRONT_SHOPS,...M1_PROFILED_ARCADE_SHOPS]);
 const known=new Set(MANUAL_FIVE_PACK_FAMILY_SYMBOLS);
 const faces=(v,b)=>{
  if(v.z===0)return 'north';

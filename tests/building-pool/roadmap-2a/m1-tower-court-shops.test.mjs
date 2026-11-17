@@ -28,12 +28,12 @@ const iou=(a,b)=>{let shared=0;for(const x of a)if(b.has(x))shared++;return shar
 const floor=b=>b.voxels.filter(v=>v.y===1&&v.kind==='floor').map(v=>[v.x,v.z]);
 test('preserve source-exact 110 existing designs and add six separate tower-court shops without accepting them into production',()=>{
  assert.equal(M1_TOWER_COURT_SHOPS.length,6);assert.equal(M1_TOWER_COURT_SPECS.length,6);
- assert.equal(M1_D4_AUDIT_ALL.length,122);
- assert.equal(inventory().authoredCandidateTotal,122);
- assert.equal(inventory().newlyAuthored,107);
- assert.equal(inventory().unwrittenNewCandidates,298);
- assert.equal(plannedSlots().filter(x=>x.authoredHere).length,122);
- assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,122);
+ assert.equal(M1_D4_AUDIT_ALL.length,128);
+ assert.equal(inventory().authoredCandidateTotal,128);
+ assert.equal(inventory().newlyAuthored,113);
+ assert.equal(inventory().unwrittenNewCandidates,292);
+ assert.equal(plannedSlots().filter(x=>x.authoredHere).length,128);
+ assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,128);
  for(const b of M1_TOWER_COURT_SHOPS){
   assert(validateBlueprint(b).valid);assert.equal(b.status,'authored-candidate');
   assert.equal(b.worldPlaced,false);assert.equal(b.numericIdsAssigned,false);
@@ -131,7 +131,7 @@ test('entire 116-source cohort: zero NEW eight-way D4 overlaps at or above 0.89,
   assert(largest<.89,b.id+' new near-clone of '+closest+' D4 IoU '+largest);
  }
  const debt=inspect2AD4FloorDebt();
- assert.equal(debt.sources,122);
+ assert.equal(debt.sources,128);
  assert.equal(debt.grandfatheredHighOverlapPairs,269);
  assert.equal(debt.exactMatchingFloorPairs,30);
  assert.equal(debt.newHighOverlapPairs,0,'existing 269-pair debt cannot increase');

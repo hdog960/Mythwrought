@@ -27,8 +27,8 @@ function d4(points){const out=[];for(let mirror=0;mirror<2;mirror++)for(let r=0;
 const iou=(a,b)=>{let n=0;for(const p of a)if(b.has(p))n++;return n/(a.size+b.size-n)};
 test('all original 80 source blueprints preserved; six independently specified five-court originals increase total to 86/420',()=>{
  assert.equal(old.length,80);assert.equal(M1_FIVE_COURT_SHOPS.length,6);assert.equal(all.length,86);
- assert.equal(inventory().authoredCandidateTotal,122);assert.equal(inventory().newlyAuthored,107);
- assert.equal(inventory().unwrittenNewCandidates,298);
+ assert.equal(inventory().authoredCandidateTotal,128);assert.equal(inventory().newlyAuthored,113);
+ assert.equal(inventory().unwrittenNewCandidates,292);
  assert.equal(assertDistinctArchitecture(all).distinctArchitectures,86);
  for(const b of M1_FIVE_COURT_SHOPS){assert(validateBlueprint(b).valid);assert.equal(b.rooms.length,4);assert.equal(b.courtyardGeometry.length,5);assert.equal(b.worldPlaced,false);}
 });

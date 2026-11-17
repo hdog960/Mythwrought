@@ -12,6 +12,7 @@ import {M1_MARKET_FRONTS} from '../../../src/building-pool/roadmap-2a/m1-market-
 import {M1_COURTYARD_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-courtyard-shops.mjs';
 import {M1_U_COURT_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-u-court-shops.mjs';
 import {M1_LATERAL_MARKETS} from '../../../src/building-pool/roadmap-2a/m1-lateral-markets.mjs';
+import {M1_PROFILED_ARCADE_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-profiled-arcade-shops.mjs';
 import {M1_ARCADED_FRONT_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs';
 import {M1_TOWER_COURT_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-tower-court-shops.mjs';
 import {M1_SCULPTED_MARKETS} from '../../../src/building-pool/roadmap-2a/m1-sculpted-markets.mjs';
@@ -21,7 +22,7 @@ import {M1_DISTINCT_WING_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-d
 import {M1_FIVE_COURT_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-five-court-shops.mjs';
 import {M1_TWIN_SIDE_TERRACE_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs';
 import {M1_STEPPED_COURT_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-stepped-court-shops.mjs';
-const designs=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS,...M1_U_COURT_SHOPS,...M1_STEPPED_COURT_SHOPS,...M1_LATERAL_MARKETS,...M1_TWIN_SIDE_TERRACE_SHOPS,...M1_FIVE_COURT_SHOPS,...M1_DISTINCT_WING_SHOPS,...M1_LANDMARK_SHOPS,...M1_SIGNATURE_SKYLINE_SHOPS,...M1_SCULPTED_MARKETS,...M1_TOWER_COURT_SHOPS,...M1_ARCADED_FRONT_SHOPS];
+const designs=[...M1_GENERAL_STORES,...M1_SPECIALIST_EXEMPLARS,...M1_NEW_MERCHANTS,...M1_REGIONAL_SHOPS,...M1_BIOME_EXPANSION,...M1_CATEGORY_ARCADES,...M1_MARKET_FRONTS,...M1_COURTYARD_SHOPS,...M1_U_COURT_SHOPS,...M1_STEPPED_COURT_SHOPS,...M1_LATERAL_MARKETS,...M1_TWIN_SIDE_TERRACE_SHOPS,...M1_FIVE_COURT_SHOPS,...M1_DISTINCT_WING_SHOPS,...M1_LANDMARK_SHOPS,...M1_SIGNATURE_SKYLINE_SHOPS,...M1_SCULPTED_MARKETS,...M1_TOWER_COURT_SHOPS,...M1_ARCADED_FRONT_SHOPS,...M1_PROFILED_ARCADE_SHOPS];
 const KINDS=Object.freeze({foundation:'0',floor:'1',wall:'2',roof:'3',window:'4',fixture:'5',decor:'6'});
 const alphabet=/^[0-9a-z]{9}$/;
 function encode(source){
@@ -41,20 +42,20 @@ function encode(source){
   categories:source.category,biome:source.biome,size:source.size,
   runs:tokens.join('')};
 }
-test('all 122 source-exact blueprint geometry previews are exported only as ephemeral, fully lossless CI artifact data',()=>{
- assert.equal(designs.length,122);
- assert.equal(new Set(designs.map(b=>b.id)).size,122);
+test('all 128 source-exact blueprint geometry previews are exported only as ephemeral, fully lossless CI artifact data',()=>{
+ assert.equal(designs.length,128);
+ assert.equal(new Set(designs.map(b=>b.id)).size,128);
  const records=designs.map(encode);
  const destination=join(process.cwd(),'artifacts','roadmap-2a-source-coordinates');
  mkdirSync(destination,{recursive:true});
- const file=join(destination,'all122-blueprint-cube-proxies.json');
+ const file=join(destination,'all128-blueprint-cube-proxies.json');
  writeFileSync(file,JSON.stringify({format:'mythwrought-roadmap-2a-authored-integer-cell-rle-v2',
   renderedWith:'real WebGL2 cube proxies; NOT real Pack mesh, mounted windows or final roof art',
   explicitSourceOnly:true,physicalFamilyRenderingApproved:false,creatorApproved:false,
   sourceCheckoutSha:process.env.GITHUB_SHA??null,designs:records},null,2)+'\n');
  const actual=JSON.parse(readFileSync(file,'utf8'));
- assert.equal(actual.designs.length,122);
- assert.equal(new Set(actual.designs.map(x=>x.id)).size,122);
+ assert.equal(actual.designs.length,128);
+ assert.equal(new Set(actual.designs.map(x=>x.id)).size,128);
  assert(actual.designs.every(x=>x.runs.length%9===0&&x.cells>200&&x.windowCells>=0));
  assert.equal(actual.physicalFamilyRenderingApproved,false);
 });

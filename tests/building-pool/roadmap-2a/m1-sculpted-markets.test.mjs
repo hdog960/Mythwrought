@@ -28,12 +28,12 @@ function shapeSource(s){
 test('six independently authored M1 sculpted-roof shops preserve exact 104-design candidate cohort and reach 110 of 420',()=>{
  assert.equal(M1_SCULPTED_MARKETS.length,6);
  assert.equal(M1_SCULPTED_MARKET_SPECS.length,6);
- assert.equal(M1_D4_AUDIT_ALL.length,122);
- assert.equal(inventory().authoredCandidateTotal,122);
- assert.equal(inventory().newlyAuthored,107);
- assert.equal(inventory().unwrittenNewCandidates,298);
- assert.equal(plannedSlots().filter(x=>x.authoredHere).length,122);
- assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,122);
+ assert.equal(M1_D4_AUDIT_ALL.length,128);
+ assert.equal(inventory().authoredCandidateTotal,128);
+ assert.equal(inventory().newlyAuthored,113);
+ assert.equal(inventory().unwrittenNewCandidates,292);
+ assert.equal(plannedSlots().filter(x=>x.authoredHere).length,128);
+ assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,128);
  for(const b of M1_SCULPTED_MARKETS){
   assert(validateBlueprint(b).valid);
   assert.equal(b.worldPlaced,false);assert.equal(b.numericIdsAssigned,false);
@@ -120,7 +120,7 @@ test('all six new occupied-floor architectures pass strict D4 IoU below 0.89 aga
   assert(best<.89,b.id+' too similar to '+other+' D4 '+best);
  }
  const d=inspect2AD4FloorDebt();
- assert.equal(d.sources,122);
+ assert.equal(d.sources,128);
  assert.equal(d.grandfatheredHighOverlapPairs,269);
  assert.equal(d.exactMatchingFloorPairs,30);
  assert.equal(d.newHighOverlapPairs,0,'new M1 source increased historic floorplate debt');

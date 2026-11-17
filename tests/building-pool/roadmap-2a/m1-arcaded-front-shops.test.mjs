@@ -30,12 +30,12 @@ const floor=b=>b.voxels.filter(v=>v.kind==='floor'&&v.y===1).map(v=>[v.x,v.z]);
 test('116 previously accepted source objects + six independently authored arcade/frontage buildings = 122 of 420',()=>{
  assert.equal(M1_ARCADED_FRONT_SPECS.length,6);
  assert.equal(M1_ARCADED_FRONT_SHOPS.length,6);
- assert.equal(M1_D4_AUDIT_ALL.length,122);
- assert.equal(inventory().authoredCandidateTotal,122);
- assert.equal(inventory().newlyAuthored,107);
- assert.equal(inventory().unwrittenNewCandidates,298);
- assert.equal(plannedSlots().filter(x=>x.authoredHere).length,122);
- assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,122);
+ assert.equal(M1_D4_AUDIT_ALL.length,128);
+ assert.equal(inventory().authoredCandidateTotal,128);
+ assert.equal(inventory().newlyAuthored,113);
+ assert.equal(inventory().unwrittenNewCandidates,292);
+ assert.equal(plannedSlots().filter(x=>x.authoredHere).length,128);
+ assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,128);
  for(const b of M1_ARCADED_FRONT_SHOPS){
   assert(validateBlueprint(b).valid);
   assert.equal(b.rooms.length,4);
