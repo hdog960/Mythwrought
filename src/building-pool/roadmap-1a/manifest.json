@@ -2,7 +2,7 @@
   "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
   "lane": "roadmap-1a",
   "title": "Homes & Hospitality",
-  "milestone": "M3 hospitality wave6 candidate: 245/450 original authored (150 houses / 53 taverns / 42 inns), prior 232 complete sources immutable, five differentiated roof sections per new plan; exact-head CI PENDING",
+  "milestone": "M3 hospitality wave7 source candidates: 255/450 originals (150 houses / 58 taverns / 47 inns), all 245 previous source objects immutable; three U/T/L roof layouts, exact-head CI PENDING",
   "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "checkpoint": "009",
   "infrastructurePR": 178,
@@ -42,9 +42,9 @@
   "target": 450,
   "originalCandidatesIdentified": 30,
   "originalGeometryMigrated": 30,
-  "additionalDesignsRequired": 205,
-  "newDesignsAuthored": 215,
-  "totalLaneGeometryAuthored": 245,
+  "additionalDesignsRequired": 195,
+  "newDesignsAuthored": 225,
+  "totalLaneGeometryAuthored": 255,
   "creatorAccepted": 0,
   "integrated": 0,
   "runtimeWorldPlaced": false,
@@ -53,11 +53,10 @@
   "realIPhoneCertified": false,
   "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
   "pending": [
-    "Confirm exact-head focused 1A CI and real Chromium 1302 source and 1026 physical Pack AABB screenshots; inspect all artifacts.",
-    "205 candidates remaining overall: 150 houses, 22 taverns, 33 inns.",
-    "Current main advanced; mergeability to reverify independently, without rebase or unrelated source modifications.",
-    "Pack2 door hinges/save; Pack3 roofs/load/weather; Pack4 glass optics/weather; Pack5 actual bed collision/occupancy persistence; creator final art and physical iPhone acceptance remain unresolved.",
-    "Do not merge, integrate, deploy, alter save schema, or unlock v0.11"
+    "Exact-head dedicated 1A native tests including full 245 immutable source fingerprints and 255 D4 uniqueness, plus genuine Chromium source-cell 1362 and physical Pack AABB 1086 screenshots.",
+    "195 source candidates remain: 150 houses, 17 taverns, 28 inns.",
+    "Real Pack2 hinged doors/schema1 saves, Pack3 structural/weather roofs, Pack4 optical/weather glass, Pack5 bed collision/occupancy persistence; premium visual art/physical iPhone acceptance and integration require separate creator approval.",
+    "No merges, deployments, shared CI, main, sibling builders, world registration, save changes or v0.11 unlock."
   ],
   "gates": {
     "v010": "Gate A OPEN",
@@ -77,8 +76,8 @@
   "innCount": 1,
   "categoriesAuthored": {
     "house": 150,
-    "tavern": 53,
-    "inn": 42
+    "tavern": 58,
+    "inn": 47
   },
   "firstInn": {
     "id": "r1:inn:temperate:small:001",
@@ -600,8 +599,68 @@
         430
       ]
     ],
-    "exactHeadCI": "PENDING",
+    "exactHeadCI": {
+      "head": "5af8624aa68d6c6148e52ee86920d33f8042bde5",
+      "run": 44125054552,
+      "conclusion": "success",
+      "contracts": "12/12",
+      "rootNode": "920/920",
+      "builderNative": "341/341",
+      "chromiumSource": "1302/1302",
+      "producerPhysical": "1026/1026",
+      "artifact": 14348785669
+    },
     "productionRegistration": 0,
     "creatorFinalApproved": 0
+  },
+  "m3HospitalityWave7": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave7.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave7.test.mjs",
+    "immutable245Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline245.json",
+    "newTaverns": 5,
+    "newInns": 5,
+    "newSourceVoxels": 134427,
+    "trueAbsentExteriorColumns": 9145,
+    "walkableRooms": 51,
+    "pack5ReservedTwoCellBeds": 20,
+    "roofPlanFamilies": {
+      "courtyardU": 1,
+      "crossGabledT": 3,
+      "offsetL": 6
+    },
+    "roofRegionsMin": 5,
+    "roofRegionsMax": 6,
+    "distinctRoofPitchStylesMin": 3,
+    "roofRaiseTiers": [
+      0,
+      1,
+      2
+    ],
+    "zeroD4Required": true,
+    "partitionIoUExclusive": 0.88,
+    "exteriorIoUExclusive": 0.975,
+    "sourceGalleryCandidates": 227,
+    "sourceWebGL2CaptureTarget": 1362,
+    "physicalGalleryCandidates": 181,
+    "packAABBWebGL2CaptureTarget": 1086,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": "PENDING",
+    "creatorApproved": 0,
+    "registered": 0,
+    "integrated": 0,
+    "deployed": 0
   }
 }
