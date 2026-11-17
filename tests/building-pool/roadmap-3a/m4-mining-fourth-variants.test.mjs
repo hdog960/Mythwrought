@@ -100,6 +100,24 @@ test('M4 fourth: 15 independently briefed four-chevron radial mining headhouses,
     }
     assert.ok(filled.has(at(facadeX,2,z)),b.id+' missing grounded perimeter masonry facade at '+facadeX+','+z);
    }
+   // The far-right screen wedge was actually the NORTH grading hall, not
+   // the northeast diagonal chevron. Its exposed outer wall must bear the
+   // actual roof across every authored north Z. Preserve the deliberate
+   // two-wide / three-high aisle aperture at z=3..4, under masonry lintels.
+   const northEdgeX=xCenter+17;
+   const heightByXZ=new Map(b.modules.find(m=>m.role==='roof').cells
+    .map(c=>[c[0]+','+c[2],c[1]]));
+   for(let z=2;z<=s.north;z++){
+    const roofHeight=heightByXZ.get(northEdgeX+','+z);
+    assert.ok(Number.isInteger(roofHeight)&&roofHeight>15,b.id+' north hall roof missing '+z);
+    for(let y=2;y<roofHeight;y++){
+     if((z===3||z===4)&&y<=5){
+      assert.ok(!filled.has(at(northEdgeX,y,z)),b.id+' arcade passage blocked by added masonry');
+     }else{
+      assert.ok(filled.has(at(northEdgeX,y,z)),b.id+' floating north roof: missing under-roof wall at '+northEdgeX+','+y+','+z);
+     }
+    }
+   }
   }
 
   assert.equal(b.spaces.length,7);assert.equal(b.navigation.nodes.length,8);
