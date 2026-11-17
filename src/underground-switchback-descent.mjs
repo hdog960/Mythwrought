@@ -846,3 +846,36 @@ export function descentSurfaceSeam(world,origin=DESCENT_ORIGIN){
   return Object.freeze({opening,clear:failures.length===0,failures,
     runtimeVerified:false,requiresSurfaceOwner:true});
 }
+
+
+/**
+ * Exact, non-mutating legacy-cell handoff for the :24 surface owner.
+ * This is a proposed AIR envelope, NOT permission to overwrite player edits.
+ * Every returned coordinate is at/above the protected legacy floor; the
+ * :36-owned below-legacy stair is handled by descentEntranceApproach().
+ * The incorporator must check compatibility with surface height and world
+ * generation, obtain creator approval, then wire/test the active runtime.
+ */
+export function descentProtectedOpeningPlan(world,origin=DESCENT_ORIGIN){
+  const required=new Map();
+  for(const step of descentEntranceApproach(origin)){
+    for(let y=step.feet;y<=step.feet+3;y++){
+      if(y<LEGACY_WORLD_MIN_Y)continue;
+      const key=worldKey(step.x,y,step.z);
+      required.set(key,Object.freeze({x:step.x,y,z:step.z,id:BLOCK.AIR}));
+    }
+  }
+  const cells=[...required.values()].sort((a,b)=>a.y-b.y||a.z-b.z||a.x-b.x);
+  const blocked=[],playerConflicts=[];
+  for(const cell of cells){
+    const key=worldKey(cell.x,cell.y,cell.z);
+    if(world.edits?.has(key))playerConflicts.push(cell);
+    if(world.get(cell.x,cell.y,cell.z)!==BLOCK.AIR)blocked.push(cell);
+  }
+  return Object.freeze({
+    opening:descentEntranceHandoff(origin).opening,
+    cells:Object.freeze(cells),blocked:Object.freeze(blocked),
+    playerConflicts:Object.freeze(playerConflicts),
+    safeToApply:false,requiresSurfaceOwner:true,runtimeVerified:false
+  });
+}
