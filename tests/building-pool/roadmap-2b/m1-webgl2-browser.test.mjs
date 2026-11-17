@@ -29,9 +29,9 @@ async function server(){
  await new Promise((ok,fail)=>{http.once('error',fail);http.listen(0,'127.0.0.1',ok);});
  return http;
 }
-// 228 real cold-start Chromium captures take longer than the prior 120-view run;
+// 240 real cold-start Chromium captures take longer than the prior 120-view run;
 // do not truncate genuine browser work at the historic 210s test deadline.
-test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authored M1 source at three phone-landscape dimensions', {timeout:760000},async(t)=>{
+test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authored M1 source at three phone-landscape dimensions', {timeout:800000},async(t)=>{
  const browser=findBrowser();
  if(!browser){t.skip('Chromium/Chrome binary not installed: candidate WebGL2 capture unverified');return;}
  const http=await server(), temp=await mkdtemp(join(tmpdir(),'mythwrought-2b-webgl-'));
@@ -265,7 +265,19 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
   ['bookshop',932,430,'exterior','snow','large',2],
   ['bookshop',932,430,'cutaway','snow','large',2],
   ['bookshop',667,375,'exterior','enchanted-forest','small',2],
-  ['bookshop',667,375,'cutaway','enchanted-forest','small',2]
+  ['bookshop',667,375,'cutaway','enchanted-forest','small',2],
+  ['butcher',667,375,'exterior','snow','small',2],
+  ['butcher',667,375,'cutaway','snow','small',2],
+  ['theater',932,430,'exterior','mountain','large',2],
+  ['theater',932,430,'cutaway','mountain','large',2],
+  ['temple',667,375,'exterior','mountain','small',2],
+  ['temple',667,375,'cutaway','mountain','small',2],
+  ['bookshop',932,430,'exterior','temperate','large',2],
+  ['bookshop',932,430,'cutaway','temperate','large',2],
+  ['tailor',667,375,'exterior','temperate','small',2],
+  ['tailor',667,375,'cutaway','temperate','small',2],
+  ['market-square',844,390,'exterior','snow','small',2],
+  ['market-square',844,390,'cutaway','snow','small',2]
  ];
  try{
   for(let i=0;i<cases.length;i++){
