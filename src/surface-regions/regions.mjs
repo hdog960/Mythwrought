@@ -38,10 +38,20 @@ export function surfaceBiomeHeight(x,z,seed=179){
  const old=terrainHeight(x,z,seed),b=surfaceBiomeAt(x,z,seed);
  if(!b)return old;
  const n=valueNoise(x/24,z/24,seed+811);
- const ridges=1-Math.abs(2*valueNoise(x/47,z/47,seed+431)-1);
- const relief=b.name==='mountain'?Math.floor(4+8*ridges+2*n):
-              b.name==='desert'?Math.floor(2+3*n):
-              b.name==='snow'?Math.floor(2+3*n):
+ // Region-specific *physical* relief, not merely a change of ground color.
+ // Mountain crests combine broad folded ridges and narrow eroded shoulders;
+ // dunes travel in long, wind-aligned waves; snow drifts stay low and broad.
+ // All frequencies use world coordinates so neighboring chunks share edges.
+ const ridgeNoise=valueNoise(x/47,z/47,seed+431);
+ const ridges=1-Math.abs(2*ridgeNoise-1);
+ const mountainFold=Math.pow(1-Math.abs(Math.sin((x*.052+z*.021)+
+   (valueNoise(x/83,z/83,seed+433)-.5)*3)),2);
+ const duneWave=Math.pow(.5+.5*Math.sin(x*.085+z*.031+
+   (valueNoise(x/68,z/68,seed+812)-.5)*2),2);
+ const snowDrift=valueNoise(x/61,z/61,seed+813);
+ const relief=b.name==='mountain'?Math.floor(3+6*ridges+8*mountainFold+2*n):
+              b.name==='desert'?Math.floor(1+5*duneWave+2*n):
+              b.name==='snow'?Math.floor(1+4*snowDrift+2*n):
               Math.floor(1+2*n);
  // Blend over a 72-block shoulder, keeping the protected spawn unchanged.
  return clamp(Math.round(old+(relief-old+3)*b.weight),2,WORLD_MAX_Y-3);
