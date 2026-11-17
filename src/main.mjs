@@ -1176,28 +1176,47 @@ function start(){
   // Single tap preserves normal JUMP; double-tap toggles Creative Flight.
   // iPhone touch uses pointerdown because another thumb may suppress click.
   const G2_JUMP_DOUBLE_TAP_MS=650;
-  let lastG2JumpTap=-Infinity;
+  let lastG2JumpReleaseAt=-Infinity;
   function g2JumpTap(now=performance.now()){
-    // Real event timestamps, not delayed handler time, define the double-tap gap.
-    const delta=now-lastG2JumpTap;
-    if(delta>=0&&delta<=G2_JUMP_DOUBLE_TAP_MS){
-      lastG2JumpTap=-Infinity;
+    // Measure between the previous finger RELEASE and the new PRESS.
+    // Under a busy mobile GPU one touch can be held/processed for >500ms;
+    // press-to-press timing incorrectly treats a genuine double tap as two singles.
+    const gap=now-lastG2JumpReleaseAt;
+    if(gap>=0&&gap<=G2_JUMP_DOUBLE_TAP_MS){
+      lastG2JumpReleaseAt=-Infinity;
       if(g2Active())g2Land();else g2Start();
-    }else{
-      lastG2JumpTap=now;
-      if(!g2Active())jump();
+      return true;
     }
+    if(!g2Active())jump();
+    return false;
   }
   function g2BindJumpToggle(){
     const button=document.getElementById('jump');
-    let lastTouchAt=-Infinity;
+    let lastTouchAt=-Infinity,activeTouch=null,doubleForTouch=false;
     button.addEventListener('pointerdown',e=>{
       if(e.pointerType!=='touch')return;
       e.preventDefault();
-      if(!help.hidden||exploration.isOpen()||document.hidden||
-         graphicsLost||button.disabled)return;
+      if(activeTouch!==null||!help.hidden||exploration.isOpen()||
+         document.hidden||graphicsLost||button.disabled)return;
+      activeTouch=e.pointerId;
       lastTouchAt=e.timeStamp;
-      g2JumpTap(e.timeStamp);
+      doubleForTouch=g2JumpTap(e.timeStamp);
+    });
+    const finishTouch=e=>{
+      if(activeTouch===null||e.pointerId!==activeTouch)return;
+      // A completed second tap is consumed: its release cannot become the
+      // first half of an accidental third toggle.
+      if(e.type==='pointerup'&&!doubleForTouch)
+        lastG2JumpReleaseAt=e.timeStamp;
+      if(e.type!=='pointerup')lastG2JumpReleaseAt=-Infinity;
+      activeTouch=null;doubleForTouch=false;
+    };
+    for(const kind of ['pointerup','pointercancel']){
+      button.addEventListener(kind,finishTouch);
+      window.addEventListener(kind,finishTouch,true);
+    }
+    window.addEventListener('blur',()=>{
+      activeTouch=null;doubleForTouch=false;lastG2JumpReleaseAt=-Infinity;
     });
     button.addEventListener('click',e=>{
       // Touch click may arrive many frames late with detail=0; never count twice.
@@ -1208,7 +1227,10 @@ function start(){
       }
       if(!help.hidden||exploration.isOpen()||document.hidden||
          graphicsLost||button.disabled){e.preventDefault();return;}
-      g2JumpTap(e.timeStamp);
+      const doubled=g2JumpTap(e.timeStamp);
+      // Non-touch clicks have no touch pointerup; their activation is the
+      // completed tap for mouse/keyboard accessibility.
+      if(!doubled)lastG2JumpReleaseAt=e.timeStamp;
     });
   }
   g2BindJumpToggle();

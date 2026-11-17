@@ -22,6 +22,10 @@ test('G2B flight uses original physical button IDs with gated Explore actions',(
  assert.ok(src.includes("if(zone==='up'||zone==='down')g2Move(.05)"));
  assert.ok(src.includes('const G2_JUMP_DOUBLE_TAP_MS=650'));
  assert.ok(src.includes('g2JumpTap(e.timeStamp)'));
+ assert.ok(src.includes('let lastG2JumpReleaseAt=-Infinity'));
+ assert.ok(src.includes('const gap=now-lastG2JumpReleaseAt'));
+ assert.ok(src.includes("if(e.type==='pointerup'&&!doubleForTouch)"));
+ assert.ok(src.includes("window.addEventListener(kind,finishTouch,true)"));
  assert.ok(src.includes("e.pointerType==='touch'"));
  assert.ok(src.includes('e.timeStamp-lastTouchAt<1500'));
  assert.ok(src.includes('e.timeStamp-lastTouch<1500'));
