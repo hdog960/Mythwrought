@@ -50,12 +50,12 @@
   ],
   "quota": 285,
   "inherited": 0,
-  "authored": 123,
-  "remaining": 162,
+  "authored": 138,
+  "remaining": 147,
   "creatorAccepted": 0,
   "integrated": 0,
   "worldPlaced": false,
-  "status": "M2: 123/285 original coordinate-authored; previous 113 technically accepted at exact-head Actions #44122763543 (678 genuine Chromium WebGL2 captures and all legacy camera-fit checks); final ten fourth-variant candidates pending new 60 authentic captures and exact-head native tests.",
+  "status": "M2 all healer/library original source slots authored (75 healers, 60 libraries), 138/285 roadmap candidates. 123 older exact-head source and Chromium accepted at Actions #44138509135; 15 new fifth-variant healer candidates await 90 genuine WebGL2 captures, full 828-image audit and dedicated native CI.",
   "ownedPaths": [
     "src/building-pool/roadmap-4b/",
     "tests/building-pool/roadmap-4b/",
@@ -76,18 +76,18 @@
     "creatorArtApproval": false,
     "physicalIphoneApproval": false
   },
-  "nextMilestone": "Prove 123 D4-unique building source signatures, 1175 new-vs-prior/new D4 occupied-floor IoU <0.89, 738 genuine source-specific WebGL2 exterior/section PNGs across 3 phone landscape sizes, read-only Manual Five Pack producer AABB checks, creator and real iPhone physical acceptance still separate.",
+  "nextMilestone": "Source-authored M2 complete; exact-head accept 15 fifth-variant healers, verify 1950 D4 IoU checks <0.89, 828 genuine Chromium exterior/section PNGs across 667x375, 844x390, 932x430, physical producer read-only AABBs. M3 schoolhouses remains unstarted; no runtime integration.",
   "milestones": {
     "M0": "TECHNICALLY ACCEPTED on PR #185 exact head 199af339dea3c708e5f92b21aa91ce47b7d99763, Actions #43767122199 SUCCESS (native Builder 4B suite + focused Chromium smoke/layout)",
     "M1": "M1 FIRST FIVE TECHNICAL REVIEW PASS: PR #185 at 242e189a96037f8bb1a76005f1a0964276f62925 GitHub Actions #43771739057 SUCCESS; 40/40 Builder 4B native Node tests (includes 30/30 real Chromium WebGL2 cube-proxy captures across 3 landscape sizes); source-level geometry and connectivity pass. FINAL physical-family/creator/iPhone approval NOT GIVEN.",
-    "M2": "IN PROGRESS: 60/75 healer houses, 60/60 libraries source-authored; 120/135 M2 designs, 15 final fifth-variant healer houses remain. Previous 113 exact-head green; ten new fourth variants pending native/Chromium acceptance.",
+    "M2": "SOURCE-AUTHORED COMPLETE (PENDING TECHNICAL ACCEPTANCE): 75/75 healer houses, 60/60 libraries, 135/135 M2 designs; 123 older technically accepted, 15 fifth variants pending exact-head Chromium and read-only manual producer acceptance. Real iPhone/physical mesh/creator approval not given.",
     "M3": "NOT STARTED",
     "M4": "NOT STARTED",
     "M5": "NOT STARTED",
     "M6": "NOT STARTED"
   },
   "byCategoryAuthorCount": {
-    "healers-house": 60,
+    "healers-house": 75,
     "library": 60,
     "schoolhouse": 1,
     "magical-research-institute": 1,
@@ -95,29 +95,29 @@
   },
   "byBiomeSizeAuthorCount": {
     "temperate": {
-      "small": 8,
-      "medium": 8,
-      "large": 8
+      "small": 9,
+      "medium": 9,
+      "large": 9
     },
     "desert": {
-      "small": 9,
-      "medium": 8,
-      "large": 8
+      "small": 10,
+      "medium": 9,
+      "large": 9
     },
     "snow": {
-      "small": 8,
-      "medium": 8,
-      "large": 8
+      "small": 9,
+      "medium": 9,
+      "large": 9
     },
     "enchanted-forest": {
-      "small": 8,
-      "medium": 9,
-      "large": 8
+      "small": 9,
+      "medium": 10,
+      "large": 9
     },
     "mountain": {
-      "small": 8,
-      "medium": 8,
-      "large": 9
+      "small": 9,
+      "medium": 9,
+      "large": 10
     }
   },
   "authoredIds": [
@@ -243,7 +243,22 @@
     "r4:healers-house:enchanted-forest:medium:04",
     "r4:library:enchanted-forest:large:04",
     "r4:healers-house:mountain:small:04",
-    "r4:library:mountain:medium:04"
+    "r4:library:mountain:medium:04",
+    "r4:healers-house:temperate:small:05",
+    "r4:healers-house:temperate:medium:05",
+    "r4:healers-house:temperate:large:05",
+    "r4:healers-house:desert:small:05",
+    "r4:healers-house:desert:medium:05",
+    "r4:healers-house:desert:large:05",
+    "r4:healers-house:snow:small:05",
+    "r4:healers-house:snow:medium:05",
+    "r4:healers-house:snow:large:05",
+    "r4:healers-house:enchanted-forest:small:05",
+    "r4:healers-house:enchanted-forest:medium:05",
+    "r4:healers-house:enchanted-forest:large:05",
+    "r4:healers-house:mountain:small:05",
+    "r4:healers-house:mountain:medium:05",
+    "r4:healers-house:mountain:large:05"
   ],
   "m1Technical": {
     "sourceHead": "242e189a96037f8bb1a76005f1a0964276f62925",
@@ -263,10 +278,10 @@
     "exteriorAndSectionInspected": true
   },
   "m2Candidate": {
-    "newModels": 118,
-    "newThisPass": 10,
-    "authoredTotal": 123,
-    "healers": 60,
+    "newModels": 133,
+    "newThisPass": 15,
+    "authoredTotal": 138,
+    "healers": 75,
     "libraries": 60,
     "technicalAccepted": false,
     "creatorApproved": 0,
@@ -304,7 +319,7 @@
     "prior83VerifiedGenuineChromiumCaptures": 498,
     "targetVariant04BrowserCaptures": 180,
     "variant04BrowserExecuted": true,
-    "targetTotalBrowserCaptures": 738,
+    "targetTotalBrowserCaptures": 828,
     "prior93TechnicallyAccepted": true,
     "prior93ExactHead": "1153d3ae333fbc5c7cd264d8e1516f857af352bf",
     "prior93Actions": 43983601156,
@@ -322,6 +337,14 @@
     "prior113Actions": 44122763543,
     "prior113VerifiedGenuineChromiumCaptures": 678,
     "prior113CameraFitVerifiedCaptures": 678,
-    "prior113ArtifactId": 14347791524
+    "prior113ArtifactId": 14347791524,
+    "targetVariant05BrowserCaptures": 90,
+    "variant05BrowserExecuted": false,
+    "prior123TechnicallyAccepted": true,
+    "prior123ExactHead": "59e347358134b07efe1b32e5a55eaaab19100a94",
+    "prior123Actions": 44138509135,
+    "prior123VerifiedGenuineChromiumCaptures": 738,
+    "prior123CameraFitVerifiedCaptures": 738,
+    "prior123ArtifactId": 14355030879
   }
 }
