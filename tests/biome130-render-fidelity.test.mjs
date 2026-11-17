@@ -68,6 +68,45 @@ test('authored stems remain opaque but original leaf lobe surfaces use cutouts a
   assert.equal(biome130TriangleMaterialTag(350,0,[],[],0),biome130MaterialTag(350));
 });
 
+test('all nine foliage source IDs keep real surface/deep stem and leaf material paths',()=>{
+  const world=new VoxelWorld(179);
+  for(const y of [18,-60]){
+    for(let i=0;i<9;i++){
+      const id=377+i,x=8994+i%5,z=8994+Math.floor(i/5)*2;
+      assert.equal(world.set(x,y,z,id,i%4),true);
+    }
+    const mesh=y>0?meshChunk(world,562,562):
+      meshDepthSection(world,562,562,-4);
+    assert.ok(mesh instanceof Float32Array);
+    assert.equal(mesh.length%9,0);
+    assert.ok(mesh.every(Number.isFinite));
+    const leafIds=new Set(),stemIds=new Set();
+    for(let v=0;v<mesh.length;v+=27){
+      const tag=mesh[v+8];
+      if(tag>=40&&tag<=48)leafIds.add(tag-40+377);
+      if(tag!==0)continue;
+      for(let k=0;k<9;k++){
+        const id=377+k,x=8994+k%5,z=8994+Math.floor(k/5)*2;
+        const stem=biome130Block(id,k%4).boxes[0];
+        let inside=true;
+        for(let t=0;t<3&&inside;t++){
+          const offset=v+t*9;
+          const point=[mesh[offset]-x,mesh[offset+1]-y,mesh[offset+2]-z];
+          for(let a=0;a<3;a++)
+            if(point[a]<stem[a]-1e-5||point[a]>stem[a+3]+1e-5){inside=false;break;}
+        }
+        if(inside)stemIds.add(id);
+      }
+    }
+    assert.deepEqual([...leafIds].sort((a,b)=>a-b),
+      Array.from({length:9},(_,i)=>377+i),'Every foliage leaf must render in '+y);
+    assert.ok(stemIds.size>0,'Source opaque stems missing in '+y+' section');
+  }
+  const saved=world.save();
+  assert.equal(saved.schema,1);
+  assert.deepEqual(VoxelWorld.restore(saved).save(),saved);
+});
+
 test('transparent split retains exact vertex ABI, source alpha and opaque order',()=>{
   const input=new Float32Array([
     1,2,3,.5,.6,.7,0,1,40,
@@ -131,6 +170,10 @@ test('real shader preserves water 20, opaque Pack 2 21, ice 49.x, both quality s
   }
   assert.match(shader,/bool needles=vMat==42\|\|vMat==43\|\|vMat==46/);
   assert.match(shader,/bool hanging=vMat==44\|\|vMat==48/);
+  assert.ok(shader.includes('vec2 p=vUv*(needles?6.0:7.0)'),
+    'Fewer, larger conifer needles at iPhone scale');
+  assert.ok(shader.includes('float width=needles?.18:'),
+    'Prevent subpixel-thin conifer needle cutouts');
   assert.match(shader,/lengthRatio>1\.0\|\|abs\(leaf\.x\)>edge\)discard/);
   assert.match(shader,/sqrt\(max\(0\.0,1\.0-lengthRatio\*lengthRatio\)\)/);
   assert.doesNotMatch(shader,/vUv\*12\.0/, 'Reject old checker-perforation shader');

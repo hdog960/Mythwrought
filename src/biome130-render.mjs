@@ -63,6 +63,8 @@ export function splitBiome130Translucent(vertices){
   return {opaque,translucent};
 }
 // Tags 40–48 and 49.x never overlap Pack 2 material 21.
+// Needle cutouts are larger and less frequent than before for phone-scale readability.
+// This is a fragment-only change: source mesh, vertex count and pass count unchanged.
 // Source twig triangles do not get perforated; leaf lobes keep the cutout.
 // Foliage masks read as tapered leaves; gentle source-palette midpoint tint
 // reconciles each per-face color with its species, without a new color lookup.
@@ -92,7 +94,7 @@ export function biome130TerrainFragmentShader(source){
     '      vMat==47?.74:.57;',
     '    bool needles=vMat==42||vMat==43||vMat==46;',
     '    bool hanging=vMat==44||vMat==48;',
-    '    vec2 p=vUv*(needles?9.0:7.0);',
+    '    vec2 p=vUv*(needles?6.0:7.0);',
     '    vec2 cell=floor(p);',
     '    float seed=hashCell(cell+vec2(float(vMat)*13.0,7.0));',
     '    if(seed>density)discard;',
@@ -100,7 +102,7 @@ export function biome130TerrainFragmentShader(source){
     '    float lean=(hashCell(cell+vec2(4.0,19.0))-.5)*.66;',
     '    leaf.x+=lean*leaf.y;',
     '    float lengthRatio=abs(leaf.y)/(hanging?.49:.47);',
-    '    float width=needles?.13:(hanging?.24:(vMat==41?.29:vMat==47?.28:.40));',
+    '    float width=needles?.18:(hanging?.24:(vMat==41?.29:vMat==47?.28:.40));',
     '    float edge=width*sqrt(max(0.0,1.0-lengthRatio*lengthRatio));',
     '    if(lengthRatio>1.0||abs(leaf.x)>edge)discard;',
     '    float vein=1.0-smoothstep(.015,.085,abs(leaf.x+leaf.y*.09));',
