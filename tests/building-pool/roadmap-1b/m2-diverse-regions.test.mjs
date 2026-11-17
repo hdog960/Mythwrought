@@ -20,12 +20,12 @@ function connectedWalk(b){
  }
  return seen.size===avail.size;
 }
-test('M2c: exact 158/435 inventory, 15 source-identical original stables and category quotas',()=>{
+test('M2c: exact 164/435 inventory, 15 source-identical original stables and category quotas',()=>{
  const all=get1BCandidates(),legacy=getInheritedStables(),fresh=nine(),c=validateAllocation(all);
- assert.equal(all.length,158);assert.equal(c.authored,158);assert.equal(c.remaining,277);
+ assert.equal(all.length,164);assert.equal(c.authored,164);assert.equal(c.remaining,271);
  assert.equal(fresh.length,9);assert.equal(legacy.length,15);
- assert.equal(new Set(all.map(b=>b.id)).size,158);
- assert.equal(new Set(all.map(b=>structuralFingerprint(b))).size,158);
+ assert.equal(new Set(all.map(b=>b.id)).size,164);
+ assert.equal(new Set(all.map(b=>structuralFingerprint(b))).size,164);
  assert.equal(new Set(fresh.map(b=>b.architecturalIdentity.program)).size,9);
  const expected={'bathhouse':23,stable:28,'farm-barn':22,greenhouse:23,'fishing-lodge':21,'harbor-office':20,lighthouse:21};
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(b=>b.category===k).length])),expected);
