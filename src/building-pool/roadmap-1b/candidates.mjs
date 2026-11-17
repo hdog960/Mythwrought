@@ -14,10 +14,11 @@ import {getM2IRegional1BPlans} from './m2i-regional-source.mjs';
 import {getM2JRegional1BPlans} from './m2j-regional-source.mjs';
 import {getM2KRegional1BPlans} from './m2k-regional-source.mjs';
 import {getM2LRegional1BPlans} from './m2l-regional-source.mjs';
+import {getM2MRegional1BPlans} from './m2m-regional-source.mjs';
 import {validateAllocation} from './schema.mjs';
 export function get1BCandidates(){
- const result=[...getInheritedStables(),createTemperateSmallBathhouse(),...getM1ServiceExemplars(),...getCrossBiome1BPlans(),...getM2Community1BPlans(),...getM2Expansion1BPlans(),...getM2Diverse1BPlans(),...getM2NextRegion1BPlans(),...getM2Asymmetric1BPlans(),...getM2Beacon1BPlans(),...getM2GroveHarbor1BPlans(),...getM2IRegional1BPlans(),...getM2JRegional1BPlans(),...getM2KRegional1BPlans(),...getM2LRegional1BPlans()];
+ const result=[...getInheritedStables(),createTemperateSmallBathhouse(),...getM1ServiceExemplars(),...getCrossBiome1BPlans(),...getM2Community1BPlans(),...getM2Expansion1BPlans(),...getM2Diverse1BPlans(),...getM2NextRegion1BPlans(),...getM2Asymmetric1BPlans(),...getM2Beacon1BPlans(),...getM2GroveHarbor1BPlans(),...getM2IRegional1BPlans(),...getM2JRegional1BPlans(),...getM2KRegional1BPlans(),...getM2LRegional1BPlans(),...getM2MRegional1BPlans()];
  const allocation=validateAllocation(result);
- if(allocation.authored!==127||allocation.remaining!==308)throw Error('Builder 1B M2 census drift');
+ if(allocation.authored!==136||allocation.remaining!==299)throw Error('Builder 1B M2 census drift');
  return result;
 }

@@ -20,14 +20,14 @@ function connectedWalk(b){
  }
  return seen.size===avail.size;
 }
-test('M2c: exact 127/435 inventory, 15 source-identical original stables and category quotas',()=>{
+test('M2c: exact 136/435 inventory, 15 source-identical original stables and category quotas',()=>{
  const all=get1BCandidates(),legacy=getInheritedStables(),fresh=nine(),c=validateAllocation(all);
- assert.equal(all.length,127);assert.equal(c.authored,127);assert.equal(c.remaining,308);
+ assert.equal(all.length,136);assert.equal(c.authored,136);assert.equal(c.remaining,299);
  assert.equal(fresh.length,9);assert.equal(legacy.length,15);
- assert.equal(new Set(all.map(b=>b.id)).size,127);
- assert.equal(new Set(all.map(b=>structuralFingerprint(b))).size,127);
+ assert.equal(new Set(all.map(b=>b.id)).size,136);
+ assert.equal(new Set(all.map(b=>structuralFingerprint(b))).size,136);
  assert.equal(new Set(fresh.map(b=>b.architecturalIdentity.program)).size,9);
- const expected={'bathhouse':17,stable:28,'farm-barn':17,greenhouse:17,'fishing-lodge':16,'harbor-office':16,lighthouse:16};
+ const expected={'bathhouse':19,stable:28,'farm-barn':18,greenhouse:19,'fishing-lodge':18,'harbor-office':17,lighthouse:17};
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(b=>b.category===k).length])),expected);
  for(const biome of BIOMES)for(const size of SIZES)for(const [category,max] of Object.entries(QUOTAS))
   assert.ok(all.filter(b=>b.category===category&&b.biome===biome&&b.size===size).length<=max);

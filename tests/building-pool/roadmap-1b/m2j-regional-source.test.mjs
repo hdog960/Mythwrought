@@ -32,15 +32,15 @@ function layoutConnected(b){
  }
  return seen.size===nodes.size;
 }
-test('M2j exactly 127/435 source candidates, nine genuinely new slots and 15 inherited stables byte-identical',()=>{
+test('M2j exactly 136/435 source candidates, nine genuinely new slots and 15 inherited stables byte-identical',()=>{
  const all=get1BCandidates(),previous=getInheritedStables(),fresh=newOnes(),v=validateAllocation(all);
  assert.equal(previous.length,15);assert.equal(fresh.length,9);
- assert.equal(all.length,127);assert.equal(v.authored,127);assert.equal(v.remaining,308);
- assert.equal(new Set(all.map(x=>x.id)).size,127);
- assert.equal(new Set(all.map(structuralFingerprint)).size,127);
+ assert.equal(all.length,136);assert.equal(v.authored,136);assert.equal(v.remaining,299);
+ assert.equal(new Set(all.map(x=>x.id)).size,136);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,136);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(c=>[c,all.filter(x=>x.category===c).length])),
-  {bathhouse:17,stable:28,'farm-barn':17,greenhouse:17,
-   'fishing-lodge':16,'harbor-office':16,lighthouse:16});
+  {bathhouse:19,stable:28,'farm-barn':18,greenhouse:19,
+   'fishing-lodge':18,'harbor-office':17,lighthouse:17});
  for(const b of previous)assert.equal(stableBlueprintJSON(all.find(x=>x.id===b.id)),stableBlueprintJSON(b),b.id+' prior PR #121 stable modified');
  for(const c of Object.keys(QUOTAS))for(const biome of BIOMES)for(const size of SIZES){
   const group=all.filter(b=>b.category===c&&b.biome===biome&&b.size===size);
