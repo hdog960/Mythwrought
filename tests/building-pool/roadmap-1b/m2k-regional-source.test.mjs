@@ -38,7 +38,7 @@ test('M2k 164/435 authored; 15 exact original inherited stables; nine new unoccu
  assert.equal(new Set(all.map(b=>b.id)).size,164);
  assert.equal(new Set(all.map(structuralFingerprint)).size,164);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(c=>[c,all.filter(b=>b.category===c).length])),
-  {bathhouse:23,stable:28,'farm-barn':22,greenhouse:23,'fishing-lodge':21,'harbor-office':20,lighthouse:21});
+  {bathhouse:24,stable:28,'farm-barn':23,greenhouse:24,'fishing-lodge':22,'harbor-office':21,lighthouse:22});
  for(const prior of old)assert.equal(stableBlueprintJSON(all.find(b=>b.id===prior.id)),stableBlueprintJSON(prior));
  for(const c of Object.keys(QUOTAS))for(const biome of BIOMES)for(const size of SIZES)
   assert.ok(all.filter(b=>b.category===c&&b.biome===biome&&b.size===size).length<=QUOTAS[c],c+'/'+biome+'/'+size);
