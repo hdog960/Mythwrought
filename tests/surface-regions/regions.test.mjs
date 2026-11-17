@@ -297,3 +297,27 @@ test('durable edit intent prevents restored legacy blocks revealing biome overla
  assert.equal(view.get(x,y,z),original,'reverted edit must remain authoritative');
  assert.equal(view.get(x+1,y,z),view.get(x+1,y,z),'untouched neighboring terrain remains deterministic');
 });
+
+
+test('raised surface rejects elevated landmark occupancy beyond immediate headroom',()=>{
+ const seed=179,region=SURFACE_BIOME_REGIONS.find(r=>r.name==='mountain');
+ const x=region.x,z=region.z,oldTop=terrainHeight(x,z,seed);
+ const raisedTop=Math.max(oldTop,surfaceBiomeHeight(x,z,seed));
+ assert.ok(raisedTop>oldTop,'mountain must have genuine elevation');
+ assert.ok(raisedTop+2<=WORLD_MAX_Y,'test needs elevated landmark headroom');
+ const baseline=(cx,y,cz)=>y>terrainHeight(cx,cz,seed)?0:
+   y===terrainHeight(cx,cz,seed)?1:y>=terrainHeight(cx,cz,seed)-3?2:3;
+ const opts={enabled:true,profileIsFresh:true,readBaseline:baseline,
+   hasEdit:()=>false,isProtected:()=>false};
+ assert.ok(surfaceBiomeFreshColumn(x,z,seed,opts));
+ const highY=raisedTop+2;
+ assert.equal(surfaceBiomeFreshColumn(x,z,seed,{...opts,
+   readBaseline:(cx,y,cz)=>y===highY?4:baseline(cx,y,cz)}),null,
+   'landmark trunk above headroom must reject the whole column');
+ assert.equal(surfaceBiomeFreshColumn(x,z,seed,{...opts,
+   hasEdit:(cx,y,cz)=>y===highY}),null,
+   'saved elevated construction must reject the whole column');
+ assert.equal(surfaceBiomeFreshColumn(x,z,seed,{...opts,
+   isProtected:(cx,y,cz)=>y===highY}),null,
+   'protected high landmarks must reject the whole column');
+});
