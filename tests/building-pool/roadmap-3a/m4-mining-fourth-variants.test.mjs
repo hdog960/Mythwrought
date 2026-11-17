@@ -110,8 +110,18 @@ test('M4 fourth: 15 independently briefed four-chevron radial mining headhouses,
    for(let z=2;z<=s.north;z++){
     const roofHeight=heightByXZ.get(northEdgeX+','+z);
     assert.ok(Number.isInteger(roofHeight)&&roofHeight>15,b.id+' north hall roof missing '+z);
+    const mountainShoulder=b.biome==='mountain'&&z>=3;
+    const lowRoof=mountainShoulder?heightByXZ.get((northEdgeX+1)+','+z):null;
+    if(mountainShoulder)assert.ok(lowRoof>=12&&lowRoof<roofHeight,b.id+' grounded roof step missing '+z);
     for(let y=2;y<roofHeight;y++){
-     if((z===3||z===4)&&y<=5){
+     // Mountain's old east boundary is now an internal bearing step above
+     // the lower attached gallery. Real periodic piers carry it to y=0/1.
+     // Keep its original two-wide ground arcade and the intervening doors.
+     if(mountainShoulder){
+      if(y>=lowRoof||(z>=5&&z%3===0))
+       assert.ok(filled.has(at(northEdgeX,y,z)),b.id+' unsupported mountain step '+northEdgeX+','+y+','+z);
+      else assert.ok(!filled.has(at(northEdgeX,y,z)),b.id+' mountain gallery entrance sealed '+northEdgeX+','+y+','+z);
+     }else if((z===3||z===4)&&y<=5){
       assert.ok(!filled.has(at(northEdgeX,y,z)),b.id+' arcade passage blocked by added masonry');
      }else{
       assert.ok(filled.has(at(northEdgeX,y,z)),b.id+' floating north roof: missing under-roof wall at '+northEdgeX+','+y+','+z);
@@ -126,6 +136,31 @@ test('M4 fourth: 15 independently briefed four-chevron radial mining headhouses,
  }
  assert.throws(()=>createM4MiningFourthVariant('lava','small'),RangeError);
  assert.throws(()=>createM4MiningFourthVariant('mountain','giant'),RangeError);
+});
+test('mountain-large only: northeast high hall is grounded by a real accessible lower stone gallery, not a projected cone',()=>{
+ const b=createM4MiningFourthVariant('mountain','large');
+ const m=Math.floor(b.envelope.width/2)-1;
+ const s=M4_MINING_FOURTH_SPECS.find(v=>v.biome==='mountain'&&v.size==='large');
+ const filled=new Set(cells(b).map(c=>at(...c.slice(0,3))));
+ const roofs=new Map(b.modules.find(q=>q.role==='roof').cells.map(c=>[c[0]+','+c[2],c[1]]));
+ let newFoundation=0;
+ for(let z=2;z<s.northeastZ;z++){
+  const start=z>s.north?m+10:m+18;
+  for(let x=start;x<=m+20;x++){
+   assert.ok(filled.has(at(x,0,z)),'real attached mountain foundation '+x+','+z);
+   assert.ok(filled.has(at(x,1,z)),'real attached mountain floor '+x+','+z);
+   const ry=roofs.get(x+','+z);
+   assert.ok(ry>=12&&ry<=16,'real lower mountain roof '+x+','+z);
+   for(let y=2;y<ry;y++)if(x===m+20)
+    assert.ok(filled.has(at(x,y,z)),'ground-bearing exterior mountain wall '+x+','+y+','+z);
+   if(z>=5&&z<=s.north&&x===m+18&&z%3!==0)
+    for(let y=2;y<=4;y++)assert.ok(!filled.has(at(x,y,z)),'two-wide walkable mountain lab/galleria doorway');
+   newFoundation++;
+  }
+ }
+ assert.ok(newFoundation>=250,'substantial real occupied mountain gallery, not decorative support pixels');
+ assert.equal(b.architecture.originalHoistRoofAperture,true);
+ assert.equal(b.navigation.nodes.length,8);
 });
 test('all four radial orework chevrons have source floors, hoist posts, mining work roles and genuinely clear 2x3 routes',()=>{
  let authored=0,wagonColumns=0;

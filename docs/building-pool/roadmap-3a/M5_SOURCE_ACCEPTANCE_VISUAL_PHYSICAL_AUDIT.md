@@ -53,3 +53,11 @@ M3 fourth (0/6,400), M3 fifth carpenters (0/4,510), M4 second mining (0/3,983) a
 - Real browser: `tests/building-pool/roadmap-3a/m4-fourth-source-cdp.mjs`, `m4-fourth-cdp.test.mjs`; manifest includes temporary PR-merge `GITHUB_SHA`, distinguish from actual branch source HEAD.
 
 **Release authority: manual only; this roadmap does not approve any runtime integration, deployment, merge or unlocking of v0.11.**
+
+## M5 mountain-large source-grounded east retaining gallery — new isolated refinement
+
+The previous 90-image green snapshot at `b8682352b8db82a2f9cb9818fcc93ee49a09311a` still showed an inverted-V far-right mountain north hall. The southeast orthographic camera projects high +X/low Z to the right; the old north hall ended at x=mid+17 while its outer 20–24-high roof rose far above a narrow exposed end. A sound high wall alone did not solve the visual isolation: the hall had no low grounded eastern mass linking that face to the northeast ore spoke.
+
+**Mountain-large fourth mining only** now adds real foundation, continuous walkable stone flooring, perimeter bearing walls and a stepped lower roof to the east of the north grading hall (x=mid+18..20, z=2..north), extending back to the NE ore hall with a physical covered retaining-gallery neck (x=mid+10..20, z=north+1..northeastZ−1). The old high east boundary becomes a high/low masonry roof-step gable above clear connected door openings, supported by three ground-up spaced stone piers. The original 2-wide/3-high global circulation, full 2×2 hoist opening, all four wings, fixtures, original non-mountain versions and other 344 designs remain unchanged. Camera, mesh, preview and screenshot code are not edited. New regression source-checks continuous lower terrace foundation/floor/roof, its outer full-height wall, accessible door cells and the high/low load path.
+
+**Final evidence requirement:** validate exact new branch SHA, 345-way D4 uniqueness, 255 floor IoU values below 0.94, producer AABB and sampled bearing checks, and 90 actual Chromium WebGL2 exterior/cutaway PNGs. Inspect the mountain-large 6 images vs the archived `b868235` captures. No acceptance is implied until that evidence is green. Retain the 30 legacy Pack4 mounts and 274 inherited roof witness warnings; no creator art, structural or deployment authorization.

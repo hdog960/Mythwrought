@@ -49,6 +49,10 @@ if(M4_MINING_FOURTH_SPECS.length!==15||
 
 function build(s){
  const w=s.width,d=s.depth,H=38,mid=Math.floor(w/2)-1,centerZ=Math.floor(d/2);
+ // Only Skycut mountain-large: a real grounded, lower eastern retaining
+ // gallery joins the high north sorting façade to the existing NE spoke.
+ // The south-east camera shows the old tall exposed end as an inverted V.
+ const mountainShoulder=s.biome==='mountain'&&s.size==='large';
  const wings=[
   {id:'northwest',side:'west',z:s.northwestZ,len:s.northwestLen,reach:s.westReach,slope:0},
   {id:'southwest',side:'west',z:s.southwestZ,len:s.southwestLen,reach:s.westReach+1,slope:1},
@@ -101,6 +105,13 @@ function build(s){
  function zone(x,z){
   if(x<2||x>w-3||z<2||z>d-3)return null;
   if(z<=s.north&&x>=mid-16&&x<=mid+17)return 'north-laboratory-hall';
+  // Masonry is occupied all the way down to bedrock (foundation y=0),
+  // not a camera-facing skirt. At z=2..north it adds a low east shoulder;
+  // at north+1..NE approach it forms a covered, connected bearing gallery.
+  if(mountainShoulder&&z>=2&&z<s.northeastZ&&
+   ((x>=mid+18&&x<=mid+20)||
+    (z>s.north&&x>=mid+10&&x<=mid+20)))
+   return 'mountain-northeast-grounded-retaining-gallery';
   if(z>=d-s.south&&x>=mid-17&&x<=mid+17)return 'south-freight-hall';
   // The taller central tower overrides the covered axial oreway *inside*
   // its real footprint. A genuine 2×2 roof aperture now sits over the shaft.
@@ -112,6 +123,9 @@ function build(s){
  }
  const foot=(x,z)=>zone(x,z)!==null;
  function aisle(x,z){
+  // Only the new outer mountain buttress edge is solid: the original
+  // north cross-arcade at z=3..4 and every recorded 2x3 route stay open.
+  if(mountainShoulder&&z>=3&&z<=4&&x>=mid+18)return false;
   if(x>=mid&&x<=mid+1)return true;
   if(z>=3&&z<=4)return true;
   for(const a of wings){
@@ -143,6 +157,8 @@ function build(s){
     default:throw Error('Missing original radial quarry roof '+s.roofProfile);
    }
   }
+  if(p==='mountain-northeast-grounded-retaining-gallery')
+   return 12+Math.floor((z-2)/8)+(x>=mid+18?1:0);
   if(p==='central-elevated-hoist-gallery')
    return 25+Math.floor(Math.min(Math.abs(x-mid+1),Math.abs(z-centerZ))/4)
     +(Math.floor(x/8)%2);
@@ -164,12 +180,26 @@ function build(s){
   const p=zone(x,z),wallTop=p==='central-elevated-hoist-gallery'?18:
    // Large north-hall source façade must genuinely meet the roof underside.
    // Keep intentional 2×3 cross-aisle arcades open under load-bearing lintels.
-   p==='north-laboratory-hall'?(s.size==='large'?roofY(x,z)-1:12):9;
+   p==='north-laboratory-hall'?(s.size==='large'?roofY(x,z)-1:12):
+   p==='mountain-northeast-grounded-retaining-gallery'?roofY(x,z)-1:9;
   // Arcaded ground-level structural edges along true two-wide workshop
   // corridors: no obstructed path disguised as a connectivity annotation.
   for(let y=2;y<=wallTop;y++)
    if(!opening(x,y,z)&&!(aisle(x,z)&&y<=5))
     put('wall',x,y,z,P.stone);
+ }
+ // A true load-path-visible roof step at the high/low junction. Retain
+ // two-cell walkable door gaps between periodic piers, not a solid divider.
+ // Fill the upper gable from the lower east roof to the existing high roof;
+ // three ground-bearing piers carry it at source-authored 3-cell intervals.
+ if(mountainShoulder)for(let z=3;z<=s.north;z++){
+  const highX=mid+17,lowX=mid+18;
+  const sill=roofY(lowX,z),crown=roofY(highX,z);
+  if(sill>=crown)throw Error(s.name+' invalid mountain roof step '+z);
+  for(let y=sill;y<crown;y++)if(!has(highX,y,z))
+   put('mountain-northeast-roof-step-masonry',highX,y,z,P.stone);
+  if(z>=5&&z%3===0)for(let y=2;y<sill;y++)if(!has(highX,y,z))
+   put('mountain-northeast-ground-bearing-pier',highX,y,z,P.stone);
  }
  for(let x=2;x<w-2;x++)for(let z=2;z<d-2;z++)if(foot(x,z)){
   const height=roofY(x,z);
