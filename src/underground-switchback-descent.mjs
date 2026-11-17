@@ -665,7 +665,7 @@ export function descentCells(origin=DESCENT_ORIGIN){
     const depth=-150,anchor=route.find(p=>p.floor===depth);
     if(anchor){
       const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
-      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0];
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
       const tangent=[outward[1],-outward[0]];
       const cell=(d,t,y,id)=>set(anchor.x+outward[0]*d+tangent[0]*t,y,
                                anchor.z+outward[1]*d+tangent[1]*t,id);
