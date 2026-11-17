@@ -234,8 +234,15 @@ export function createSurfaceBiomeWorldView(world,{
     seed:world.seed,
     get(x,y,z){
       const original=world.get(x,y,z);
-      if(![x,y,z].every(Number.isInteger)||isProtected(x,y,z)||
-         hasDurableEditIntent(x,y,z)||
+      if(![x,y,z].every(Number.isInteger))return original;
+      // Only the surface veneer and raised shelf can differ from the legacy
+      // world. Deep cave reads, high-air reads and distant regions must never
+      // perform a full protected-column scan on the mobile collision path.
+      // This is a conservative bounds check: it never authorizes an overlay.
+      const oldTop=terrainHeight(x,z,world.seed);
+      if(y<oldTop-2||y>WORLD_MAX_Y||!surfaceBiomeAt(x,z,world.seed))
+        return original;
+      if(isProtected(x,y,z)||hasDurableEditIntent(x,y,z)||
          world.edits.has(x+','+y+','+z)||world.rotations.has(x+','+y+','+z))
         return original;
       return planAt(x,z)?.get(y)??original;
