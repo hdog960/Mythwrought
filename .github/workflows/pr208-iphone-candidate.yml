@@ -1,0 +1,76 @@
+name: Mythwrought PR208 candidate artifact (NO DEPLOY)
+
+# New workflow_dispatch files cannot run until installed on default branch.
+# Run only when this isolated staging branch's workflow/scripts are pushed.
+on:
+  push:
+    branches:
+      - pr208-iphone-candidate-build
+    paths:
+      - '.github/workflows/pr208-iphone-candidate.yml'
+      - 'scripts/pr208-iphone-candidate/**'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: mythwrought-pr208-unpublished-candidate
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'hdog960/Mythwrought' && github.ref == 'refs/heads/pr208-iphone-candidate-build'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout isolated infrastructure (not PR208 renderer)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: infra
+          persist-credentials: false
+
+      - name: Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Check original PR SHA, nine-file scope, main ancestry and five successful workflows
+        env:
+          GITHUB_TOKEN_READONLY: ${{ github.token }}
+        run: node infra/scripts/pr208-iphone-candidate/check-upstream.mjs > verification.json
+
+      - name: Checkout EXACT approved source, never moving PR branch or main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: hdog960/Mythwrought
+          ref: 9ab03c3bbff5f449006a344e97e68c9d0141c228
+          path: source
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+
+      - name: Verify source commit identity
+        shell: bash
+        run: |
+          test "$(git -C source rev-parse HEAD)" = '9ab03c3bbff5f449006a344e97e68c9d0141c228' || {
+            echo '::error::Source commit drift'; exit 1;
+          }
+          test ! -e source/.gitmodules || { echo '::error::Unexpected source submodules'; exit 1; }
+
+      - name: Run original accepted source native regressions
+        working-directory: source
+        run: npm test
+
+      - name: Build byte-identical static source candidate
+        run: node infra/scripts/pr208-iphone-candidate/build-candidate.mjs source candidate verification.json
+
+      - name: Upload downloadable candidate ONLY, never Pages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: mythwrought-pr208-iphone-candidate-unpublished
+          path: candidate/
+          if-no-files-found: error
+          retention-days: 7
+
+# No deploy-pages action, no GitHub Pages environment, and no write permissions.
