@@ -16,10 +16,12 @@ test('post-cache player excavation wins over every biome overlay and survives sc
   const x=region.x,z=region.z;
   const top=Math.max(terrainHeight(x,z,seed),surfaceBiomeHeight(x,z,seed));
   assert.equal(view.get(x,top,z),region.surface,region.name+' initial surface');
-  const key=x+','+top+','+z;
-  assert.equal(world.set(x,top,z,0),true);
+  const legacyTop=terrainHeight(x,z,seed);
+  const key=x+','+legacyTop+','+z;
+  assert.equal(world.set(x,legacyTop,z,0),true);
   history.add(key);
-  assert.equal(view.get(x,top,z),0,region.name+' excavation is authoritative');
+  assert.equal(view.get(x,legacyTop,z),0,region.name+' excavation is authoritative');
+  assert.equal(view.get(x,top,z),world.get(x,top,z),region.name+' entire edited column falls back');
   assert.equal(view.get(x,top+1,z),world.get(x,top+1,z));
   assert.equal(view.get(x,top-1,z),world.get(x,top-1,z),
    region.name+' edited column does not retain stale cached shelf');
@@ -31,7 +33,7 @@ test('post-cache player excavation wins over every biome overlay and survives sc
  for(const region of SURFACE_BIOME_REGIONS){
   const x=region.x,z=region.z;
   const top=Math.max(terrainHeight(x,z,seed),surfaceBiomeHeight(x,z,seed));
-  assert.equal(restored.get(x,top,z),0,region.name+' excavation survives restore');
+  assert.equal(restored.get(x,terrainHeight(x,z,seed),z),0,region.name+' excavation survives restore');
  }
  assert.ok(view.cachedColumns<=64);
 });
