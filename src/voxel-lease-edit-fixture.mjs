@@ -11,9 +11,14 @@ export function createLeasedLegacyEditor(session, scope = session) {
   if ((typeof scope !== 'object' || scope === null) && typeof scope !== 'function')
     throw new TypeError('Invalid lease scope');
   return Object.freeze({
-    async editMany(receipts, beforeCommit = () => {}) {
+    async editMany(receipts, beforeCommit = () => {}, signal = null) {
       if (!Array.isArray(receipts) || receipts.length < 1 || receipts.length > 256 ||
           typeof beforeCommit !== 'function') throw new TypeError('Invalid transaction');
+      if (signal !== null && (typeof signal !== 'object' ||
+          typeof signal.addEventListener !== 'function' ||
+          typeof signal.removeEventListener !== 'function' ||
+          typeof signal.aborted !== 'boolean'))
+        throw new TypeError('Invalid abort signal');
       // Snapshot all untrusted receipt fields before yielding to an async callback.
       const snapshot = receipts.map(r => {
         if (!r || !Array.isArray(r.cell) || r.cell.length !== 3 ||
@@ -27,7 +32,18 @@ export function createLeasedLegacyEditor(session, scope = session) {
         });
       });
       return withVoxelCellLease(scope, snapshot.map(r => r.cell), async () => {
-        await beforeCommit();
+        // Cancellation is checked both before and after asynchronous preparation.
+        // A late callback resolution must never commit after cancellation.
+        if (signal?.aborted) throw new DOMException('Voxel edit aborted', 'AbortError');
+        if (signal) {
+          await new Promise((resolve, reject) => {
+            const onAbort = () => reject(new DOMException('Voxel edit aborted', 'AbortError'));
+            signal.addEventListener('abort', onAbort, {once:true});
+            if (signal.aborted) onAbort();
+            else Promise.resolve().then(beforeCommit).then(resolve, reject);
+          }).finally(() => signal.removeEventListener('abort', onAbort));
+        } else await beforeCommit();
+        if (signal?.aborted) throw new DOMException('Voxel edit aborted', 'AbortError');
         // editMany preflights all expected revisions and either commits every
         // cell or none. Orientation is invalidated only for successful writes.
         return session.editMany(snapshot);
