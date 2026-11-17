@@ -30,9 +30,10 @@ import {getM2MRegional1BPlans} from '../../../src/building-pool/roadmap-1b/m2m-r
 import {getM2NRegional1BPlans} from '../../../src/building-pool/roadmap-1b/m2n-regional-source.mjs';
 import {getM2ORegional1BPlans} from '../../../src/building-pool/roadmap-1b/m2o-regional-source.mjs';
 import {getM2PRegional1BPlans} from '../../../src/building-pool/roadmap-1b/m2p-regional-source.mjs';
+import {getM2QRegional1BPlans} from '../../../src/building-pool/roadmap-1b/m2q-regional-source.mjs';
 import {getInheritedStables} from '../../../src/building-pool/roadmap-1b/legacy-import.mjs';
 const params=new URLSearchParams(location.search),mode=params.get('view')==='cutaway'?'cutaway':'exterior';
-const all=[getInheritedStables()[0],createTemperateSmallBathhouse(),...getM1ServiceExemplars(),...getCrossBiome1BPlans(),...getM2Community1BPlans(),...getM2Expansion1BPlans(),...getM2Diverse1BPlans(),...getM2NextRegion1BPlans(),...getM2Asymmetric1BPlans(),...getM2Beacon1BPlans(),...getM2GroveHarbor1BPlans(),...getM2IRegional1BPlans(),...getM2JRegional1BPlans(),...getM2KRegional1BPlans(),...getM2LRegional1BPlans(),...getM2MRegional1BPlans(),...getM2NRegional1BPlans(),...getM2ORegional1BPlans(),...getM2PRegional1BPlans()];
+const all=[getInheritedStables()[0],createTemperateSmallBathhouse(),...getM1ServiceExemplars(),...getCrossBiome1BPlans(),...getM2Community1BPlans(),...getM2Expansion1BPlans(),...getM2Diverse1BPlans(),...getM2NextRegion1BPlans(),...getM2Asymmetric1BPlans(),...getM2Beacon1BPlans(),...getM2GroveHarbor1BPlans(),...getM2IRegional1BPlans(),...getM2JRegional1BPlans(),...getM2KRegional1BPlans(),...getM2LRegional1BPlans(),...getM2MRegional1BPlans(),...getM2NRegional1BPlans(),...getM2ORegional1BPlans(),...getM2PRegional1BPlans(),...getM2QRegional1BPlans()];
 const chosen=all.find(b=>b.id===params.get('candidate'))??all[1];
 const canvas=document.querySelector('#model');canvas.width=innerWidth;canvas.height=innerHeight;
 const gl=canvas.getContext('webgl2',{preserveDrawingBuffer:true,antialias:true,alpha:false});
