@@ -62,3 +62,31 @@ test('stale batch never partially commits or invalidates orientation', async () 
   assert.deepEqual(s.exportLegacyCells(),[entry(0),entry(1)]);
   assert.deepEqual(recoverLegacyVoxelSession(s.exportLegacyCells()).read([0,0,0]),{id:1,revision:0});
 });
+
+test('independent default editors on one session share leases and cannot overlap', async () => {
+  const session=recoverLegacyVoxelSession([entry(0),entry(1)]);
+  const first=createLeasedLegacyEditor(session);
+  const second=createLeasedLegacyEditor(session);
+  const g=gate();
+  const pending=first.editMany([receipt(0)],()=>g.pending);
+  await assert.rejects(second.editMany([receipt(0)]),VoxelCellLeaseConflictError);
+  assert.deepEqual(second.read([0,0,0]),{id:1,revision:0});
+  assert.equal(await second.editMany([receipt(1)]),true);
+  g.release();
+  assert.equal(await pending,true);
+  assert.equal(await second.editMany([receipt(0,2,1,3)]),true);
+});
+
+test('default lease scopes remain independent for distinct recovered worlds', async () => {
+  const worldA=recoverLegacyVoxelSession([entry(0)]);
+  const worldB=recoverLegacyVoxelSession([entry(0)]);
+  const first=createLeasedLegacyEditor(worldA);
+  const second=createLeasedLegacyEditor(worldB);
+  const g=gate();
+  const pending=first.editMany([receipt(0)],()=>g.pending);
+  assert.equal(await second.editMany([receipt(0)]),true);
+  g.release();
+  assert.equal(await pending,true);
+  assert.deepEqual(worldA.read([0,0,0]),{id:2,revision:1});
+  assert.deepEqual(worldB.read([0,0,0]),{id:2,revision:1});
+});
