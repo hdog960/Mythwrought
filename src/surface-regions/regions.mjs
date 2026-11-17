@@ -63,7 +63,12 @@ export function surfaceBiomeHeight(x,z,seed=179){
  const relief=b.name==='mountain'?Math.floor(3+6*ridges+8*mountainFold+2*n):
               b.name==='desert'?Math.floor(1+5*duneWave+2*n):
               b.name==='snow'?Math.floor(1+4*snowDrift+2*n):
-              Math.floor(1+2*n);
+              // Enchanted woodland: low glade basins interrupted by broad,
+              // root-like earthen rises. These are terrain only; :48 owns
+              // non-block vegetation and its placement conventions.
+              Math.floor(1+3*Math.pow(1-Math.abs(2*valueNoise(x/58,z/58,seed+919)-1),2)
+                +2*Math.pow(Math.abs(Math.sin(x*.043-z*.057+
+                  (valueNoise(x/91,z/91,seed+921)-.5)*2)),6)+n);
  // Blend over a 72-block shoulder, keeping the protected spawn unchanged.
  return clamp(Math.round(old+(relief-old+3)*b.weight),2,WORLD_MAX_Y-3);
 }
