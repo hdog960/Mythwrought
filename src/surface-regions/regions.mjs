@@ -70,7 +70,13 @@ export function surfaceBiomeHeight(x,z,seed=179){
                 +2*Math.pow(Math.abs(Math.sin(x*.043-z*.057+
                   (valueNoise(x/91,z/91,seed+921)-.5)*2)),6)+n);
  // Blend over a 72-block shoulder, keeping the protected spawn unchanged.
- return clamp(Math.round(old+(relief-old+3)*b.weight),2,WORLD_MAX_Y-3);
+ // The fresh-column writer activates at weight .35. Blend *physical height*
+// from zero at that same threshold, rather than creating a sudden raised
+// shelf at the first eligible column. Keep the unmodified legacy elevation
+// outside the writer's region and use world coordinates on both sides.
+const shoulder=smooth(clamp((b.weight-.35)/.65,0,1));
+if(shoulder===0)return old;
+return clamp(Math.round(old+(relief-old+3)*shoulder),2,WORLD_MAX_Y-3);
 }
 export function surfaceBiomeBlock(x,y,z,seed=179,{enabled=false}={}){
  if(!enabled||![x,y,z].every(Number.isInteger)||y<LEGACY_WORLD_MIN_Y||
