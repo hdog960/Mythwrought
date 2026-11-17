@@ -498,6 +498,41 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // Upper-band windcut antechamber at -20. Two curving arms skirt an
+  // uncarved stone island and rejoin at a broad asymmetric lookout hollow.
+  // The opening is entirely below the protected legacy envelope and the
+  // outbound throat is physically joined to the descending switchback.
+  {
+    const depth=-20,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,width=2,height=6)=>{
+        for(let across=-width;across<=width;across++){
+          const x=anchor.x+outward[0]*d+tangent[0]*(t+across);
+          const z=anchor.z+outward[1]*d+tangent[1]*(t+across);
+          set(x,depth,z,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
+        }
+      };
+      for(let d=0;d<=15;d++)carve(d,0);
+      for(let d=15;d<=45;d++){
+        const bend=Math.round(8*Math.sin(Math.PI*(d-15)/30));
+        carve(d,-bend,2,6);
+        carve(d,bend,2,7);
+      }
+      for(let d=40;d<=62;d++)for(let t=-14;t<=14;t++){
+        const radial=((d-51)/12)**2+((t+2)/15)**2;
+        if(radial<=1)carve(d,t,0,5+Math.floor(7*(1-radial)));
+      }
+      // A side niche opens off the north arm, not an isolated pocket.
+      for(let d=25;d<=39;d++)for(let t=-18;t<=-7;t++){
+        const radial=((d-32)/8)**2+((t+12)/7)**2;
+        if(radial<=1)carve(d,t,0,5+Math.floor(3*(1-radial)));
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
