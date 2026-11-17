@@ -109,7 +109,7 @@ test('M4 fourth: 15 independently briefed four-chevron radial mining headhouses,
     .map(c=>[c[0]+','+c[2],c[1]]));
    for(let z=2;z<=s.north;z++){
     const roofHeight=heightByXZ.get(northEdgeX+','+z);
-    assert.ok(Number.isInteger(roofHeight)&&roofHeight>15,b.id+' north hall roof missing '+z);
+    assert.ok(Number.isInteger(roofHeight)&&roofHeight>(b.biome==='mountain'?14:15),b.id+' north hall roof missing '+z);
     const mountainShoulder=b.biome==='mountain'&&z>=3;
     const lowRoof=mountainShoulder?heightByXZ.get((northEdgeX+1)+','+z):null;
     if(mountainShoulder)assert.ok(lowRoof>=12&&lowRoof<roofHeight,b.id+' grounded roof step missing '+z);
@@ -157,6 +157,20 @@ test('mountain-large only: northeast high hall is grounded by a real accessible 
     for(let y=2;y<=4;y++)assert.ok(!filled.has(at(x,y,z)),'two-wide walkable mountain lab/galleria doorway');
    newFoundation++;
   }
+ }
+ // The old exposed east high-roof tooth must now be an actual low stepped
+ // architecture tier, not merely surrounded by a new cosmetic base.
+ for(let z=2;z<=s.north;z++){
+  const eastRoof=roofs.get((m+17)+','+z);
+  const westRoof=roofs.get((m+9)+','+z);
+  const eastTier=roofs.get((m+10)+','+z);
+  assert.ok(eastRoof>=15&&eastRoof<=16,'high inverted-V tooth remains on east side '+z);
+  assert.ok(eastTier>=16&&eastTier<=17,'missing low east tier '+z);
+  assert.ok(westRoof>=20&&westRoof>eastTier,'missing source-supported western high sorting roof '+z);
+  for(let y=eastTier;y<westRoof;y++)
+   assert.ok(filled.has(at(m+9,y,z)),'missing west high-low masonry ridge '+z+','+y);
+  if(z>=5&&z%3===0)for(let y=2;y<eastTier;y++)
+   assert.ok(filled.has(at(m+9,y,z)),'missing grounded western ridge pier '+z+','+y);
  }
  assert.ok(newFoundation>=180,'substantial real occupied mountain gallery, not decorative support pixels');
  assert.equal(b.architecture.originalHoistRoofAperture,true);

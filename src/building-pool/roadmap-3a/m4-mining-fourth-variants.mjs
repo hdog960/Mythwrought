@@ -142,6 +142,11 @@ function build(s){
   const p=zone(x,z);
   if(p==='south-freight-hall')return 15+Math.floor((mid+17-x)/9);
   if(p==='north-laboratory-hall'){
+   // Mountain Skycut's exposed east sorting façade now has a true stepped
+   // low ore-testing roof, not a 20+ high isolated roof tooth above the
+   // retaining gallery. The high central/west sorting ridge stays original.
+   if(mountainShoulder&&x>=mid+10)
+    return 15+Math.floor((mid+17-x)/5)+(z>=7?1:0);
    const ridge=Math.min(x-(mid-16),(mid+17)-x);
    switch(s.roofProfile){
     case 'switchback-saw':case 'sunshade-stagger':case 'high-clifffold':
@@ -200,6 +205,15 @@ function build(s){
    put('mountain-northeast-roof-step-masonry',highX,y,z,P.stone);
   if(z>=5&&z%3===0)for(let y=2;y<sill;y++)if(!has(highX,y,z))
    put('mountain-northeast-ground-bearing-pier',highX,y,z,P.stone);
+  // The new lower east roof also meets the retained tall western sorting
+  // roof on a genuine high/low masonry gable with periodic ground piers.
+  const westX=mid+9,terraceX=mid+10;
+  const terrace=roofY(terraceX,z),western=roofY(westX,z);
+  if(terrace>=western)throw Error(s.name+' inverted western mountain roof tier '+z);
+  for(let y=terrace;y<western;y++)if(!has(westX,y,z))
+   put('mountain-west-sorting-roof-step-masonry',westX,y,z,P.stone);
+  if(z>=5&&z%3===0)for(let y=2;y<terrace;y++)if(!has(westX,y,z))
+   put('mountain-west-sorting-ground-pier',westX,y,z,P.stone);
  }
  for(let x=2;x<w-2;x++)for(let z=2;z<d-2;z++)if(foot(x,z)){
   const height=roofY(x,z);
