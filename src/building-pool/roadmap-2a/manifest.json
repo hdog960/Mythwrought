@@ -1,0 +1,1586 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-2a.m0.v1",
+  "lane": "roadmap-2a",
+  "title": "Shops & Banking",
+  "mainBaseline": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "infrastructurePr": 178,
+  "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "sourcePr": 124,
+  "sourceHead": "07c45d27bd36f4f3aa3197bba0e4f49ce2a58c68",
+  "sourceCatalogBlob": "f52488952aa9dd805847de1b65f7b207627f16ad",
+  "sourceSchemaBlob": "253ad26a8fb3537a1cb6776d6b86dd89909d69f1",
+  "quotas": {
+    "general-store": 5,
+    "pet-shop": 5,
+    "magic-shop": 5,
+    "potion-shop": 5,
+    "bakery": 5,
+    "bank": 3
+  },
+  "biomes": [
+    "temperate",
+    "desert",
+    "snow",
+    "enchanted-forest",
+    "mountain"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "target": 420,
+  "legacySourceCandidates": 15,
+  "locallyMigratedAndParityVerified": 15,
+  "newlyAuthored": 113,
+  "creatorApproved": 0,
+  "integratedIntoGame": 0,
+  "unwrittenNewCandidates": 292,
+  "legacyCandidates": [
+    {
+      "id": "r2:general-store:temperate:small:01",
+      "category": "general-store",
+      "biome": "temperate",
+      "size": "small",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/temperate-store.mjs",
+      "sourceBlob": "7211223b2cc51290b89f5f886c1cbb59cc495747",
+      "destination": "src/building-pool/roadmap-2a/temperate-store.mjs",
+      "geometryFingerprint": "37c88883da5263db872abbe766115bd5cf0310c2e515269584055dcef84e5315",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "e43bf5745d584cccf97221ee79e5e622b437ddd44d0e123ee41b8b33e851009e",
+      "windowRegistrySHA256": "c19115204824b8968cea6745752277d37e6c873f37ca195adea6e0606cba66ea",
+      "roomAndCirculationSHA256": "d20e3ff27838d07f09e5faef7299ea86a24a8eedfc6e1504879720d6fe014c75",
+      "voxelCount": 685,
+      "windowCount": 16,
+      "openingCount": 18,
+      "roomCount": 2
+    },
+    {
+      "id": "r2:general-store:temperate:medium:01",
+      "category": "general-store",
+      "biome": "temperate",
+      "size": "medium",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "73601911583764945a8265c0018bfc48ae3b37856f1faf88a13e0a24990f27d7",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "8f3a73669521cb3ceaafb3e5579ddc51896e0e1c8a788e6b3cb623c3c0e47caa",
+      "windowRegistrySHA256": "84203fb14e6986ab304e8d3b4bd682f99fc2d1f7722defc31dbb66da2ef49767",
+      "roomAndCirculationSHA256": "feacc8e93b4c7aee4887fb30f68843774488c2153592817edf3103434ab28f3e",
+      "voxelCount": 1417,
+      "windowCount": 12,
+      "openingCount": 15,
+      "roomCount": 3
+    },
+    {
+      "id": "r2:general-store:temperate:large:01",
+      "category": "general-store",
+      "biome": "temperate",
+      "size": "large",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "68bb32364c2ed3637c0f8dc96c2bca91806a22687d90718a1f06671f78ad703c",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "e57e6e0e0ecfdbecc5af6b46285fbfe1df24a4ecfb93741175dfad17d24a6a32",
+      "windowRegistrySHA256": "cbd2f13ee03c0095c025d07ce10f73216f79fca0333dbba6732f8fd0677ee191",
+      "roomAndCirculationSHA256": "b16a3ac064793c352454cdf9141699fc1ccff01bd9e25d0d9d81ccebbff954fd",
+      "voxelCount": 2485,
+      "windowCount": 12,
+      "openingCount": 15,
+      "roomCount": 3
+    },
+    {
+      "id": "r2:general-store:desert:small:01",
+      "category": "general-store",
+      "biome": "desert",
+      "size": "small",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "81e279c7f42da3acd20703b1539f93fee90c82b8a0ded04082fea7daad2f7645",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "7662f505a67824e74f2f6791c9ad0e51476e2b41388965496142e71817de49db",
+      "windowRegistrySHA256": "816bd1b84754493ad739012341e06cc207af62fb41084581ee63cb490ad9fec9",
+      "roomAndCirculationSHA256": "4bb03f7edd2c4932f1eeae17abc00950232d0fb5d5ab603d6b3697b0bd5e0786",
+      "voxelCount": 756,
+      "windowCount": 12,
+      "openingCount": 14,
+      "roomCount": 2
+    },
+    {
+      "id": "r2:general-store:desert:medium:01",
+      "category": "general-store",
+      "biome": "desert",
+      "size": "medium",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "be2235479695040f503442e567a54f7d7560bee3e32f307e1cc61b0a996bc99a",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "fa398b7338ae25bab13ea7652cac27ccbfd5b31acef2c982c6bcd3addf7a7239",
+      "windowRegistrySHA256": "84203fb14e6986ab304e8d3b4bd682f99fc2d1f7722defc31dbb66da2ef49767",
+      "roomAndCirculationSHA256": "47a0e1761ad6140562b3881dd6e2b26efd8f320f66e4d6a346d952eb5837e57b",
+      "voxelCount": 1330,
+      "windowCount": 12,
+      "openingCount": 15,
+      "roomCount": 3
+    },
+    {
+      "id": "r2:general-store:desert:large:01",
+      "category": "general-store",
+      "biome": "desert",
+      "size": "large",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "b2048f46eec8f28e19a32fa77025d9b0c554b33fae587a138b215d957c66913a",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "cafc7b74dcfae6f81f128cef37800ce15cb7a642c0f6aa5e16e781476fe3e97f",
+      "windowRegistrySHA256": "cbd2f13ee03c0095c025d07ce10f73216f79fca0333dbba6732f8fd0677ee191",
+      "roomAndCirculationSHA256": "1988dfa8724bd827350d57316f07b58ae5da6145117e1c8217f43bb8dc89e360",
+      "voxelCount": 2257,
+      "windowCount": 12,
+      "openingCount": 15,
+      "roomCount": 3
+    },
+    {
+      "id": "r2:general-store:snow:small:01",
+      "category": "general-store",
+      "biome": "snow",
+      "size": "small",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "7833bfec2ec5672cc18bba4ba381acf73ab4639e0ceb7cd0971710eaf6bd7de9",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "e7477882996804e4da4dedf4d372e6ef8567c109775f53176da84e68c4704a32",
+      "windowRegistrySHA256": "816bd1b84754493ad739012341e06cc207af62fb41084581ee63cb490ad9fec9",
+      "roomAndCirculationSHA256": "91c8656bb7782a6649c228c23095a308528c5c05a2b2698b16272ecf5d66d579",
+      "voxelCount": 799,
+      "windowCount": 12,
+      "openingCount": 14,
+      "roomCount": 2
+    },
+    {
+      "id": "r2:general-store:snow:medium:01",
+      "category": "general-store",
+      "biome": "snow",
+      "size": "medium",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "4278de660ffb4b983dff748e6c13bd956fa0da5903829c4ccb1cc3fad092e6a9",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "869de26dde744c40aa44342d9df815b0a21b05367c256d8f81cb03b0b0ca9061",
+      "windowRegistrySHA256": "84203fb14e6986ab304e8d3b4bd682f99fc2d1f7722defc31dbb66da2ef49767",
+      "roomAndCirculationSHA256": "feacc8e93b4c7aee4887fb30f68843774488c2153592817edf3103434ab28f3e",
+      "voxelCount": 1481,
+      "windowCount": 12,
+      "openingCount": 15,
+      "roomCount": 3
+    },
+    {
+      "id": "r2:general-store:snow:large:01",
+      "category": "general-store",
+      "biome": "snow",
+      "size": "large",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "d913c796c344077f46743bc855ac9c510754cd7e2ad9cdc5aa2c806fb712eee3",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "01684d9cb3adce2be913d6e39cdda82df8f4dfa087d35dd1ecab74df251f4c81",
+      "windowRegistrySHA256": "cbd2f13ee03c0095c025d07ce10f73216f79fca0333dbba6732f8fd0677ee191",
+      "roomAndCirculationSHA256": "b16a3ac064793c352454cdf9141699fc1ccff01bd9e25d0d9d81ccebbff954fd",
+      "voxelCount": 2636,
+      "windowCount": 12,
+      "openingCount": 15,
+      "roomCount": 3
+    },
+    {
+      "id": "r2:general-store:enchanted-forest:small:01",
+      "category": "general-store",
+      "biome": "enchanted-forest",
+      "size": "small",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "1d80373bf4956ea92fa9c02f145bb60f2e1243a3a5ef79714ccd08840a2abeea",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "4b19cf95016e2038edaef5eb3243f18e4b2a687767a6b8c520dbc1f66a5ae2e7",
+      "windowRegistrySHA256": "cf4a832a3971cdf13faaa5c07f359fd5372d8e180906ae2aa5e47bb2aea20ecc",
+      "roomAndCirculationSHA256": "2c46031d957c0f6db70622c356187bf19b624726f9cf1f88d93944a97b3b7ce2",
+      "voxelCount": 899,
+      "windowCount": 12,
+      "openingCount": 14,
+      "roomCount": 2
+    },
+    {
+      "id": "r2:general-store:enchanted-forest:medium:01",
+      "category": "general-store",
+      "biome": "enchanted-forest",
+      "size": "medium",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "de48a91f8cee52eea61a8556a2f8073573b5542bdeb062871297775139a18dee",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "1f6532304b6267d5a3d6db887b661a45464a595878f60136ea82b9e2a280eb4e",
+      "windowRegistrySHA256": "124587eaca109679aee1832ea3ce8073c1a7407497276421a3f25a19f5b9584c",
+      "roomAndCirculationSHA256": "9d1ac6cde0dac8b1934b107fe54665eddc5c90d50baf01a5dcdfe8821215d9a2",
+      "voxelCount": 1594,
+      "windowCount": 12,
+      "openingCount": 15,
+      "roomCount": 3
+    },
+    {
+      "id": "r2:general-store:enchanted-forest:large:01",
+      "category": "general-store",
+      "biome": "enchanted-forest",
+      "size": "large",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "d3816ac15198bbe6f8b5a3cab52d4442b0d387e35d5dc4c7af97eaa8e9d3c381",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "8a0df4b8945a994945cb924a30e339563d556c824bdd67e7b3d46541cdfc3f99",
+      "windowRegistrySHA256": "5244fa8251cf26db70dfe138a3d76302280dc15f75db084ed135a13f4a99f54b",
+      "roomAndCirculationSHA256": "e7bab4ec81d12ec76951a3b197f0797808e0aa8c27dcc863e0552b22bf36d8ad",
+      "voxelCount": 2742,
+      "windowCount": 12,
+      "openingCount": 15,
+      "roomCount": 3
+    },
+    {
+      "id": "r2:general-store:mountain:small:01",
+      "category": "general-store",
+      "biome": "mountain",
+      "size": "small",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "10fa1f6224ca79c53896ad813a9327918d7a5d17661c8d7845feafe83d69f1cc",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "a966f81a4a9aec8321808e464f85a021b2ee846e269b807858c6cb7a67584ceb",
+      "windowRegistrySHA256": "816bd1b84754493ad739012341e06cc207af62fb41084581ee63cb490ad9fec9",
+      "roomAndCirculationSHA256": "91c8656bb7782a6649c228c23095a308528c5c05a2b2698b16272ecf5d66d579",
+      "voxelCount": 711,
+      "windowCount": 12,
+      "openingCount": 14,
+      "roomCount": 2
+    },
+    {
+      "id": "r2:general-store:mountain:medium:01",
+      "category": "general-store",
+      "biome": "mountain",
+      "size": "medium",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "1600f05ac765441228d6eaa36c4232cfd83ec1a7f9efb9dabe5ef3382d240e38",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "a02fa1ca68c0dd2aec30d099233f5771fc4ec645f935eee3c45c38eb69ea72c3",
+      "windowRegistrySHA256": "84203fb14e6986ab304e8d3b4bd682f99fc2d1f7722defc31dbb66da2ef49767",
+      "roomAndCirculationSHA256": "feacc8e93b4c7aee4887fb30f68843774488c2153592817edf3103434ab28f3e",
+      "voxelCount": 1316,
+      "windowCount": 12,
+      "openingCount": 15,
+      "roomCount": 3
+    },
+    {
+      "id": "r2:general-store:mountain:large:01",
+      "category": "general-store",
+      "biome": "mountain",
+      "size": "large",
+      "variation": 1,
+      "sourcePath": "src/building-pool/roadmap-2/m1-representatives.mjs",
+      "sourceBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+      "destination": "src/building-pool/roadmap-2a/m1-general-stores.mjs",
+      "geometryFingerprint": "84ac713e4fd5fe86bca43c4792d3f2e2d1a94aa8b51058d9026215f58893f098",
+      "migrationState": "source-exact-parity-verified",
+      "fullBlueprintSHA256": "137c1cf2a4c46747c2edd695f6804eb9e3455720607780137c32deea8469c571",
+      "windowRegistrySHA256": "cbd2f13ee03c0095c025d07ce10f73216f79fca0333dbba6732f8fd0677ee191",
+      "roomAndCirculationSHA256": "b16a3ac064793c352454cdf9141699fc1ccff01bd9e25d0d9d81ccebbff954fd",
+      "voxelCount": 2340,
+      "windowCount": 12,
+      "openingCount": 15,
+      "roomCount": 3
+    }
+  ],
+  "ownerPaths": [
+    "src/building-pool/roadmap-2a/",
+    "tests/building-pool/roadmap-2a/",
+    "docs/building-pool/roadmap-2a/"
+  ],
+  "sourcePolicy": "Original PR #124 is read-only. IDs are preserved, not geometries yet. A candidate only counts as locally migrated after exact geometry/metadata parity and native tests.",
+  "assetPolicy": "Manual 96 families/106 physical variants are integrated; biome130 entries remain symbolic when unverified. No numeric runtime IDs or production placement.",
+  "authoredCandidateTotal": 128,
+  "handAuthoredStoreBlob": "7211223b2cc51290b89f5f886c1cbb59cc495747",
+  "sourceModuleBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
+  "originalValidatedStores": 15,
+  "sourceExactComparison": "15/15 exact JSON serialized and mirror/rotation invariant physical fingerprint equality against PR124 pinned legacy source at original head",
+  "milestones": {
+    "M0": "technically accepted at 9a20de8265d1e282c5e746dad1fdc08ee6c76674, exact-head Actions #43769798408 PASS",
+    "M1": "15 protected source-exact inherited stores and 53 original coordinate-authored 2A buildings, 68/420 candidates, zero creator-approved or integrated"
+  },
+  "M1SpecialistExemplars": [
+    {
+      "id": "r2:pet-shop:temperate:small:01",
+      "category": "pet-shop",
+      "biome": "temperate",
+      "size": "small",
+      "source": "src/building-pool/roadmap-2a/m1-specialist-exemplars.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "candidate-only",
+      "title": "Linden Hollow Pet Supply House"
+    },
+    {
+      "id": "r2:magic-shop:enchanted-forest:medium:01",
+      "category": "magic-shop",
+      "biome": "enchanted-forest",
+      "size": "medium",
+      "source": "src/building-pool/roadmap-2a/m1-specialist-exemplars.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "candidate-only",
+      "title": "Whisperwood Curios and Sealed Relics"
+    },
+    {
+      "id": "r2:potion-shop:snow:medium:01",
+      "category": "potion-shop",
+      "biome": "snow",
+      "size": "medium",
+      "source": "src/building-pool/roadmap-2a/m1-specialist-exemplars.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "candidate-only",
+      "title": "Frostglass Apothecary Hall"
+    },
+    {
+      "id": "r2:bakery:desert:small:01",
+      "category": "bakery",
+      "biome": "desert",
+      "size": "small",
+      "source": "src/building-pool/roadmap-2a/m1-specialist-exemplars.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "candidate-only",
+      "title": "Sirocco Oven Court Bakery"
+    },
+    {
+      "id": "r2:bank:mountain:large:01",
+      "category": "bank",
+      "biome": "mountain",
+      "size": "large",
+      "source": "src/building-pool/roadmap-2a/m1-specialist-exemplars.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "candidate-only",
+      "title": "Stonecrest Treasury and Records Hall"
+    }
+  ],
+  "M1AdditionalExemplars": [
+    {
+      "id": "r2:general-store:desert:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-additional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "not-reviewed"
+    },
+    {
+      "id": "r2:pet-shop:mountain:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-additional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "not-reviewed"
+    },
+    {
+      "id": "r2:magic-shop:snow:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-additional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "not-reviewed"
+    },
+    {
+      "id": "r2:potion-shop:desert:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-additional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "not-reviewed"
+    },
+    {
+      "id": "r2:bakery:temperate:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-additional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "not-reviewed"
+    },
+    {
+      "id": "r2:bank:enchanted-forest:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-additional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "not-reviewed"
+    }
+  ],
+  "M1RegionalExemplars": [
+    {
+      "id": "r2:general-store:temperate:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-regional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending true multi-cell and source-WebGL2 acceptance"
+    },
+    {
+      "id": "r2:pet-shop:desert:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-regional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending true multi-cell and source-WebGL2 acceptance"
+    },
+    {
+      "id": "r2:magic-shop:mountain:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-regional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending true multi-cell and source-WebGL2 acceptance"
+    },
+    {
+      "id": "r2:potion-shop:enchanted-forest:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-regional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending true multi-cell and source-WebGL2 acceptance"
+    },
+    {
+      "id": "r2:bakery:snow:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-regional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending true multi-cell and source-WebGL2 acceptance"
+    },
+    {
+      "id": "r2:bank:desert:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-regional-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending true multi-cell and source-WebGL2 acceptance"
+    }
+  ],
+  "M1BiomeExpansion": [
+    {
+      "id": "r2:general-store:mountain:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-biome-expansion.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "dependencyAcceptance": "producer shape/roof/retail-specified behavior pending"
+    },
+    {
+      "id": "r2:pet-shop:enchanted-forest:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-biome-expansion.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "dependencyAcceptance": "producer shape/roof/retail-specified behavior pending"
+    },
+    {
+      "id": "r2:magic-shop:temperate:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-biome-expansion.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "dependencyAcceptance": "producer shape/roof/retail-specified behavior pending"
+    },
+    {
+      "id": "r2:potion-shop:snow:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-biome-expansion.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "dependencyAcceptance": "producer shape/roof/retail-specified behavior pending"
+    },
+    {
+      "id": "r2:bakery:enchanted-forest:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-biome-expansion.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "dependencyAcceptance": "producer shape/roof/retail-specified behavior pending"
+    },
+    {
+      "id": "r2:bank:snow:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-biome-expansion.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "dependencyAcceptance": "producer shape/roof/retail-specified behavior pending"
+    }
+  ],
+  "M1CategoryArcades": [
+    {
+      "id": "r2:general-store:desert:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-category-arcades.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending"
+    },
+    {
+      "id": "r2:pet-shop:mountain:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-category-arcades.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending"
+    },
+    {
+      "id": "r2:magic-shop:desert:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-category-arcades.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending"
+    },
+    {
+      "id": "r2:potion-shop:mountain:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-category-arcades.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending"
+    },
+    {
+      "id": "r2:bakery:snow:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-category-arcades.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending"
+    },
+    {
+      "id": "r2:bank:temperate:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-category-arcades.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "pending"
+    }
+  ],
+  "M1MarketFronts": [
+    {
+      "id": "r2:general-store:snow:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-market-fronts.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "unverified"
+    },
+    {
+      "id": "r2:pet-shop:temperate:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-market-fronts.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "unverified"
+    },
+    {
+      "id": "r2:magic-shop:enchanted-forest:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-market-fronts.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "unverified"
+    },
+    {
+      "id": "r2:potion-shop:desert:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-market-fronts.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "unverified"
+    },
+    {
+      "id": "r2:bakery:mountain:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-market-fronts.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "unverified"
+    },
+    {
+      "id": "r2:bank:enchanted-forest:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-market-fronts.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "physicalABI": "unverified"
+    }
+  ],
+  "M1CornerCourtyards": [
+    {
+      "id": "r2:general-store:enchanted-forest:small:02",
+      "source": "src/building-pool/roadmap-2a/m1-courtyard-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "nonrectangularCourtyard": true,
+      "physicalSupportApproved": false
+    },
+    {
+      "id": "r2:pet-shop:snow:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-courtyard-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "nonrectangularCourtyard": true,
+      "physicalSupportApproved": false
+    },
+    {
+      "id": "r2:magic-shop:snow:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-courtyard-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "nonrectangularCourtyard": true,
+      "physicalSupportApproved": false
+    },
+    {
+      "id": "r2:potion-shop:temperate:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-courtyard-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "nonrectangularCourtyard": true,
+      "physicalSupportApproved": false
+    },
+    {
+      "id": "r2:bakery:desert:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-courtyard-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "nonrectangularCourtyard": true,
+      "physicalSupportApproved": false
+    },
+    {
+      "id": "r2:bank:mountain:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-courtyard-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "nonrectangularCourtyard": true,
+      "physicalSupportApproved": false
+    }
+  ],
+  "M1UCourts": [
+    {
+      "id": "r2:general-store:mountain:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:pet-shop:desert:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:magic-shop:enchanted-forest:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:potion-shop:snow:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:bakery:temperate:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:bank:desert:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-u-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyard": true,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    }
+  ],
+  "M1SteppedCourts": [
+    {
+      "id": "r2:general-store:snow:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-stepped-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyards": 3,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:pet-shop:enchanted-forest:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-stepped-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyards": 3,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:magic-shop:mountain:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-stepped-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyards": 3,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:potion-shop:temperate:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-stepped-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyards": 3,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:bakery:desert:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-stepped-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyards": 3,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    },
+    {
+      "id": "r2:bank:snow:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-stepped-court-shops.mjs",
+      "status": "authored-candidate",
+      "creatorApproved": false,
+      "integrated": false,
+      "realOpenCourtyards": 3,
+      "worldPlaced": false,
+      "physicalMeshApproved": false
+    }
+  ],
+  "M1LateralMarkets": [
+    {
+      "id": "r2:general-store:temperate:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-lateral-markets.mjs",
+      "status": "authored-candidate",
+      "realOpenCourtyards": 3,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:pet-shop:snow:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-lateral-markets.mjs",
+      "status": "authored-candidate",
+      "realOpenCourtyards": 3,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:magic-shop:desert:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-lateral-markets.mjs",
+      "status": "authored-candidate",
+      "realOpenCourtyards": 3,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:potion-shop:mountain:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-lateral-markets.mjs",
+      "status": "authored-candidate",
+      "realOpenCourtyards": 3,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bakery:enchanted-forest:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-lateral-markets.mjs",
+      "status": "authored-candidate",
+      "realOpenCourtyards": 3,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bank:temperate:large:02",
+      "source": "src/building-pool/roadmap-2a/m1-lateral-markets.mjs",
+      "status": "authored-candidate",
+      "realOpenCourtyards": 3,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    }
+  ],
+  "M1TwinSideTerraces": [
+    {
+      "id": "r2:general-store:desert:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:pet-shop:temperate:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:magic-shop:snow:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:potion-shop:mountain:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bakery:enchanted-forest:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bank:temperate:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-twin-side-terraces.mjs",
+      "status": "authored-candidate",
+      "courts": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    }
+  ],
+  "M1FiveCourts": [
+    {
+      "id": "r2:general-store:snow:large:04",
+      "source": "src/building-pool/roadmap-2a/m1-five-court-shops.mjs",
+      "status": "authored-candidate",
+      "courts": 5,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:pet-shop:mountain:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-five-court-shops.mjs",
+      "status": "authored-candidate",
+      "courts": 5,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:magic-shop:temperate:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-five-court-shops.mjs",
+      "status": "authored-candidate",
+      "courts": 5,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:potion-shop:desert:medium:01",
+      "source": "src/building-pool/roadmap-2a/m1-five-court-shops.mjs",
+      "status": "authored-candidate",
+      "courts": 5,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bakery:mountain:large:01",
+      "source": "src/building-pool/roadmap-2a/m1-five-court-shops.mjs",
+      "status": "authored-candidate",
+      "courts": 5,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bank:snow:small:01",
+      "source": "src/building-pool/roadmap-2a/m1-five-court-shops.mjs",
+      "status": "authored-candidate",
+      "courts": 5,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    }
+  ],
+  "M1DistinctWingArchitecture": [
+    {
+      "id": "r2:general-store:temperate:medium:04",
+      "source": "src/building-pool/roadmap-2a/m1-distinct-wing-shops.mjs",
+      "status": "authored-candidate",
+      "genuineConnectedWings": 4,
+      "openCourts": 2,
+      "raisedRoofSections": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:pet-shop:snow:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-distinct-wing-shops.mjs",
+      "status": "authored-candidate",
+      "genuineConnectedWings": 4,
+      "openCourts": 2,
+      "raisedRoofSections": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:magic-shop:desert:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-distinct-wing-shops.mjs",
+      "status": "authored-candidate",
+      "genuineConnectedWings": 4,
+      "openCourts": 2,
+      "raisedRoofSections": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:potion-shop:enchanted-forest:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-distinct-wing-shops.mjs",
+      "status": "authored-candidate",
+      "genuineConnectedWings": 4,
+      "openCourts": 2,
+      "raisedRoofSections": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bakery:temperate:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-distinct-wing-shops.mjs",
+      "status": "authored-candidate",
+      "genuineConnectedWings": 4,
+      "openCourts": 2,
+      "raisedRoofSections": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bank:mountain:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-distinct-wing-shops.mjs",
+      "status": "authored-candidate",
+      "genuineConnectedWings": 4,
+      "openCourts": 2,
+      "raisedRoofSections": 4,
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    }
+  ],
+  "M1LandmarkShops": [
+    {
+      "id": "r2:general-store:enchanted-forest:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:pet-shop:desert:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:magic-shop:mountain:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:potion-shop:snow:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bakery:enchanted-forest:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bank:desert:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-landmark-shops.mjs",
+      "status": "authored-candidate",
+      "m1Archetype": "bespoke-noncross-wing-gallery",
+      "roofProfiles": [
+        "gable",
+        "saw",
+        "tower",
+        "terrace"
+      ],
+      "creatorApproved": false,
+      "integrated": false,
+      "physicalMeshApproved": false,
+      "worldPlaced": false
+    }
+  ],
+  "M1SignatureSkyline": [
+    {
+      "id": "r2:general-store:snow:small:03",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:pet-shop:enchanted-forest:small:03",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:magic-shop:temperate:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:potion-shop:mountain:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:bakery:desert:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:bank:enchanted-forest:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-signature-skyline.mjs",
+      "status": "authored-candidate",
+      "independentlyAuthored": true,
+      "realSkyline": true,
+      "physicalRoofEngineeringApproved": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    }
+  ],
+  "M1SculptedMarkets": [
+    {
+      "id": "r2:general-store:desert:small:04",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:pet-shop:temperate:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:magic-shop:snow:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:potion-shop:enchanted-forest:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:bakery:mountain:small:03",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:bank:temperate:small:02",
+      "source": "src/building-pool/roadmap-2a/m1-sculpted-markets.mjs",
+      "status": "authored-candidate",
+      "sourceRoofProfiles": 2,
+      "producerCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    }
+  ],
+  "M1TowerCourts": [
+    {
+      "id": "r2:general-store:desert:medium:04",
+      "source": "src/building-pool/roadmap-2a/m1-tower-court-shops.mjs",
+      "sourceSpecs": "src/building-pool/roadmap-2a/m1-tower-court-specs.mjs",
+      "status": "authored-candidate",
+      "twoPhysicalTowerMasses": true,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "finalPackMeshCertified": false,
+      "upperFloorsWalkable": false
+    },
+    {
+      "id": "r2:pet-shop:snow:small:04",
+      "source": "src/building-pool/roadmap-2a/m1-tower-court-shops.mjs",
+      "sourceSpecs": "src/building-pool/roadmap-2a/m1-tower-court-specs.mjs",
+      "status": "authored-candidate",
+      "twoPhysicalTowerMasses": true,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "finalPackMeshCertified": false,
+      "upperFloorsWalkable": false
+    },
+    {
+      "id": "r2:magic-shop:mountain:small:03",
+      "source": "src/building-pool/roadmap-2a/m1-tower-court-shops.mjs",
+      "sourceSpecs": "src/building-pool/roadmap-2a/m1-tower-court-specs.mjs",
+      "status": "authored-candidate",
+      "twoPhysicalTowerMasses": true,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "finalPackMeshCertified": false,
+      "upperFloorsWalkable": false
+    },
+    {
+      "id": "r2:potion-shop:temperate:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-tower-court-shops.mjs",
+      "sourceSpecs": "src/building-pool/roadmap-2a/m1-tower-court-specs.mjs",
+      "status": "authored-candidate",
+      "twoPhysicalTowerMasses": true,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "finalPackMeshCertified": false,
+      "upperFloorsWalkable": false
+    },
+    {
+      "id": "r2:bakery:enchanted-forest:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-tower-court-shops.mjs",
+      "sourceSpecs": "src/building-pool/roadmap-2a/m1-tower-court-specs.mjs",
+      "status": "authored-candidate",
+      "twoPhysicalTowerMasses": true,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "finalPackMeshCertified": false,
+      "upperFloorsWalkable": false
+    },
+    {
+      "id": "r2:bank:mountain:medium:02",
+      "source": "src/building-pool/roadmap-2a/m1-tower-court-shops.mjs",
+      "sourceSpecs": "src/building-pool/roadmap-2a/m1-tower-court-specs.mjs",
+      "status": "authored-candidate",
+      "twoPhysicalTowerMasses": true,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "finalPackMeshCertified": false,
+      "upperFloorsWalkable": false
+    }
+  ],
+  "M1ArcadedFronts": [
+    {
+      "id": "r2:general-store:enchanted-forest:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 16,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
+    },
+    {
+      "id": "r2:pet-shop:mountain:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 16,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
+    },
+    {
+      "id": "r2:magic-shop:desert:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 16,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
+    },
+    {
+      "id": "r2:potion-shop:snow:large:04",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 16,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
+    },
+    {
+      "id": "r2:bakery:temperate:small:03",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 16,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
+    },
+    {
+      "id": "r2:bank:enchanted-forest:small:02",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 16,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false,
+      "sourceNearFacingArches": true,
+      "cameraFacingSourceRoofEaves": true
+    }
+  ],
+  "M1ProfiledArcades": [
+    {
+      "id": "r2:general-store:desert:large:04",
+      "source": "src/building-pool/roadmap-2a/m1-profiled-arcade-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-profiled-arcade-specs.mjs",
+      "status": "authored-candidate",
+      "authenticEastArchCells": 9,
+      "authenticRearPortalCells": 6,
+      "rootedButtressColumns": 2,
+      "highPack4WindowCells": 12,
+      "independentSourceRoofProfiles": 2,
+      "realProducerAABBCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:pet-shop:enchanted-forest:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-profiled-arcade-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-profiled-arcade-specs.mjs",
+      "status": "authored-candidate",
+      "authenticEastArchCells": 9,
+      "authenticRearPortalCells": 6,
+      "rootedButtressColumns": 2,
+      "highPack4WindowCells": 12,
+      "independentSourceRoofProfiles": 2,
+      "realProducerAABBCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:magic-shop:temperate:small:02",
+      "source": "src/building-pool/roadmap-2a/m1-profiled-arcade-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-profiled-arcade-specs.mjs",
+      "status": "authored-candidate",
+      "authenticEastArchCells": 9,
+      "authenticRearPortalCells": 6,
+      "rootedButtressColumns": 2,
+      "highPack4WindowCells": 12,
+      "independentSourceRoofProfiles": 2,
+      "realProducerAABBCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:potion-shop:mountain:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-profiled-arcade-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-profiled-arcade-specs.mjs",
+      "status": "authored-candidate",
+      "authenticEastArchCells": 9,
+      "authenticRearPortalCells": 6,
+      "rootedButtressColumns": 2,
+      "highPack4WindowCells": 12,
+      "independentSourceRoofProfiles": 2,
+      "realProducerAABBCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:bakery:snow:small:02",
+      "source": "src/building-pool/roadmap-2a/m1-profiled-arcade-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-profiled-arcade-specs.mjs",
+      "status": "authored-candidate",
+      "authenticEastArchCells": 9,
+      "authenticRearPortalCells": 6,
+      "rootedButtressColumns": 2,
+      "highPack4WindowCells": 12,
+      "independentSourceRoofProfiles": 2,
+      "realProducerAABBCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    },
+    {
+      "id": "r2:bank:desert:small:02",
+      "source": "src/building-pool/roadmap-2a/m1-profiled-arcade-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-profiled-arcade-specs.mjs",
+      "status": "authored-candidate",
+      "authenticEastArchCells": 9,
+      "authenticRearPortalCells": 6,
+      "rootedButtressColumns": 2,
+      "highPack4WindowCells": 12,
+      "independentSourceRoofProfiles": 2,
+      "realProducerAABBCertified": false,
+      "creatorApproved": false,
+      "worldPlaced": false,
+      "integrated": false
+    }
+  ]
+}
