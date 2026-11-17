@@ -250,11 +250,16 @@ test('M1/M2 150 genuine source-served WebGL2 candidates Ã— 3 iPhone landscapes Ã
     const raw=v.result?.value;
     if(raw&&raw!=='null'){
      state=JSON.parse(raw);
-     if(state.ready)break;
+     // A preceding navigation may still expose its old execution context.
+     // Never accept a ready flag until the requested source ID, view AND pixels match.
+     if(state.ready&&state.id===id&&state.view===view&&
+      state.viewport?.[0]===width&&state.viewport?.[1]===height)break;
     }
     await wait(80);
    }
-   assert.ok(state?.ready,'Missing executed candidate JS module: '+id+' '+view+' '+width+'x'+height);
+   assert.ok(state?.ready&&state.id===id&&state.view===view&&
+    state.viewport?.[0]===width&&state.viewport?.[1]===height,
+    'Missing EXACT executed candidate source module: '+id+' '+view+' '+width+'x'+height+'; observed '+JSON.stringify(state));
    assert.equal(state.webgl2,true,'Actual WebGL2 context missing');
    assert.equal(state.id,id);assert.equal(state.view,view);
    assert.deepEqual(state.viewport,[width,height]);
