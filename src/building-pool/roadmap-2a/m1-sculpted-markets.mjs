@@ -671,15 +671,15 @@ export const M1_SCULPTED_MARKET_SPECS=Object.freeze([
         "botanical-counter"
       ],
       [
-        7,
-        25,
+        9,
+        27,
         "pack5:091",
         "cartographers-oak-desk",
         "herbal-records"
       ],
       [
-        36,
-        28,
+        39,
+        29,
         "pack5:089",
         "alchemists-spiral-stand",
         "unlit-extractor"
@@ -868,15 +868,15 @@ export const M1_SCULPTED_MARKET_SPECS=Object.freeze([
         "flour-ledger"
       ],
       [
-        31,
-        24,
+        33,
+        27,
         "pack5:090",
         "ashstone-bake-oven",
         "unlit-double-oven"
       ],
       [
-        9,
-        36,
+        7,
+        37,
         "pack4:057",
         null,
         "stone-ground-flour"
