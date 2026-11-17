@@ -140,10 +140,10 @@ test('exact HEAD committed source and complete ledger: 95 / 420 candidates, 0 ap
  const source='src/building-pool/roadmap-2b/m1-five-courts.mjs';
  assert.equal(execFileSync('git',['rev-parse','HEAD:'+source],{encoding:'utf8'}).trim(),execFileSync('git',['hash-object',source],{encoding:'utf8'}).trim());
  const l=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
- assert.deepEqual([l.target,l.sourceExactInheritedTemples,l.originalNewModels,l.authoredCandidates,l.remainingUnauthored,l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,117,132,288,0,0,0]);
- assert.equal(l.originals.length,117);
+ assert.deepEqual([l.target,l.sourceExactInheritedTemples,l.originalNewModels,l.authoredCandidates,l.remainingUnauthored,l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,123,138,282,0,0,0]);
+ assert.equal(l.originals.length,123);
  const actual=new Set(all.filter(b=>b.category!=='temple'||b.variation!==1).map(b=>b.id));
  for(const id of actual)assert(new Set(l.originals.map(x=>x.id)).has(id),'historic six-courts source lost '+id);
  for(const b of NEW)assert.equal(l.originals.find(x=>x.id===b.id).file,source);
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),132);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),138);
 });
