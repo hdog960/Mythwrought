@@ -1,4 +1,4 @@
-import {createM3BarracksSmallFirstBlueprint} from '../../../src/building-pool/roadmap-3b/m2-m3-barracks-small-first.mjs';
+import {createM3BarracksSmallFirstBlueprint} from '../../../src/building-pool/roadmap-3b/m3-barracks-small-first.mjs';
 import {createPreviewMesh} from './preview-mesh.mjs';
 import {fitPreviewCamera} from './preview-camera.mjs';
 const canvas=document.getElementById('render'),details=document.getElementById('details');

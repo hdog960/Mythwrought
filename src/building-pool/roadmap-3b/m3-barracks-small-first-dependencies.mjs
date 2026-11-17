@@ -1,6 +1,6 @@
-// Builder 3B M2 original medium/large barracks source physical-family ABI dependency report.
+// Builder 3B M3 original five-biome small barracks source physical-family ABI dependency report.
 // This reads main's real merged builder interfaces; no world registration, saves or placement.
-import {createM3BarracksSmallFirstPool} from './m2-m3-barracks-small-first.mjs';
+import {createM3BarracksSmallFirstPool} from './m3-barracks-small-first.mjs';
 import {MANUAL_FIVE_PACK_COUNTS,manualFivePackVariants,resolveManualFivePackAsset}
  from '../../builder-assets/manual-five-pack.mjs';
 import {BIOME130_REGISTERED_SYMBOLS,biome130Block} from '../../biome130-registry.mjs';
@@ -51,7 +51,7 @@ export function reviewM3BarracksSmallFirstPhysicalDependencies(){
   placedAsBuiltVoxel:refs.has(symbol),
   status:refs.has(symbol)?'physically-referenced':'symbolic-only'}));
  return Object.freeze({
-  schema:'mythwrought.builder-3b.m2-m3-barracks-small-first-dependency-audit.v1',
+  schema:'mythwrought.builder-3b.m3-barracks-small-first-dependency-audit.v1',
   authored:pool.length,occupiedConceptualPositions:assets.reduce((n,a)=>n+a.used,0),
   families:Object.freeze({...MANUAL_FIVE_PACK_COUNTS}),
   assets:Object.freeze(assets),symbolicDependencies:Object.freeze(symbolicDependencies),

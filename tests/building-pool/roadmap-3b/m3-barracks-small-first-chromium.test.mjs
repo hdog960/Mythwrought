@@ -87,7 +87,7 @@ function expressionFor(design,view){
   +'innerWidth:innerWidth,innerHeight:innerHeight};})()';
 }
 
-test('M2 original fifth-variation new watchtower source captures 90 genuine Chromium WebGL2 exteriors and cutaways', {timeout:240000}, async()=>{
+test('M3 five original barracks capture 30 genuine Chromium WebGL2 exteriors and cutaways', {timeout:240000}, async()=>{
  let chrome,cdp,site,temp;
  const reports=[];
  const releaseChromium=await acquire3BChromiumPermit();
@@ -106,7 +106,7 @@ test('M2 original fifth-variation new watchtower source captures 90 genuine Chro
   assert.ok(debugPort,'Chromium CDP port missing');
   cdp=await createCDP(debugPort);
   await cdp.send('Page.enable');await cdp.send('Runtime.enable');
-  const pageUrl='http://127.0.0.1:'+site.address().port+'/tests/building-pool/roadmap-3b/m2-m3-barracks-small-first-preview.html';
+  const pageUrl='http://127.0.0.1:'+site.address().port+'/tests/building-pool/roadmap-3b/m3-barracks-small-first-preview.html';
   await mkdir(output,{recursive:true});
   for(const [width,height] of viewports){
    await cdp.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
@@ -141,7 +141,7 @@ test('M2 original fifth-variation new watchtower source captures 90 genuine Chro
    physicalFamilyShapesRendered:false,creatorArtApproved:false,physicalIPhoneTested:false,
    count:reports.length,reports};
   await writeFile(join(output,'acceptance.json'),JSON.stringify(summary,null,2)+'\n');
-  console.log('MYTHWROUGHT_3B_M2_BARRACKS_SMALL_FIRST_CHROMIUM_DIAGNOSTIC=30/30 ('+viewports.map(v=>v.join('x')).join(', ')+')');
+  console.log('MYTHWROUGHT_3B_M3_BARRACKS_SMALL_FIRST_CHROMIUM_DIAGNOSTIC=30/30 ('+viewports.map(v=>v.join('x')).join(', ')+')');
  }finally{
   try{
   if(cdp)cdp.close();
