@@ -166,3 +166,38 @@ test('cancelled multi-cell preparation cannot invalidate either orientation', as
   assert.equal(editor.orientation([1,0,0]),null);
   g.release();
 });
+
+test('stale receipt rejects before preparation and leaves orientation intact', async () => {
+  const s=recoverLegacyVoxelSession([entry(0),entry(1)]);
+  const editor=createLeasedLegacyEditor(s);
+  assert.equal(s.setOrientation([0,0,0],1,0,3),true);
+  let preparations=0;
+  assert.equal(await editor.editMany([receipt(0,1,7),receipt(1)],()=>{preparations++;}),false);
+  assert.equal(preparations,0);
+  assert.deepEqual(s.exportLegacyCells(),[entry(0),entry(1)]);
+  assert.equal(editor.orientation([0,0,0]),3);
+  assert.equal(await editor.editMany([receipt(0)]),true);
+});
+
+test('invalid and duplicate receipts never enter asynchronous preparation', async () => {
+  const s=recoverLegacyVoxelSession([entry(0)]);
+  const editor=createLeasedLegacyEditor(s);
+  let preparations=0;
+  const prepare=()=>{preparations++;};
+  await assert.rejects(editor.editMany([receipt(0),receipt(0)],prepare),/Duplicate/);
+  await assert.rejects(editor.editMany([{...receipt(0),nextId:255}],prepare),/Invalid edit receipt/);
+  assert.equal(preparations,0);
+  assert.deepEqual(s.read([0,0,0]),{id:1,revision:0});
+});
+
+test('external edit during async preparation fails final CAS without clearing new orientation', async () => {
+  const s=recoverLegacyVoxelSession([entry(0)]);
+  const editor=createLeasedLegacyEditor(s), g=gate();
+  const pending=editor.editMany([receipt(0)],()=>g.pending);
+  assert.equal(s.edit([0,0,0],1,0,3),true);
+  assert.equal(s.setOrientation([0,0,0],3,1,2),true);
+  g.release();
+  assert.equal(await pending,false);
+  assert.deepEqual(editor.read([0,0,0]),{id:3,revision:1});
+  assert.equal(editor.orientation([0,0,0]),2);
+});
