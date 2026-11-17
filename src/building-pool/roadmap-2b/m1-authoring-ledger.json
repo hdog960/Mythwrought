@@ -6,27 +6,27 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 123,
-  "authoredCandidates": 138,
-  "remainingUnauthored": 282,
+  "originalNewModels": 129,
+  "authoredCandidates": 144,
+  "remainingUnauthored": 276,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
+      "authored": 20,
+      "target": 60,
+      "remaining": 40
+    },
+    "tailor": {
       "authored": 19,
       "target": 60,
       "remaining": 41
     },
-    "tailor": {
-      "authored": 18,
-      "target": 60,
-      "remaining": 42
-    },
     "butcher": {
-      "authored": 18,
+      "authored": 19,
       "target": 60,
-      "remaining": 42
+      "remaining": 41
     },
     "jeweler": {
       "authored": 19,
@@ -34,19 +34,19 @@
       "remaining": 41
     },
     "bookshop": {
-      "authored": 19,
+      "authored": 20,
       "target": 60,
-      "remaining": 41
+      "remaining": 40
     },
     "temple": {
-      "authored": 25,
+      "authored": 26,
       "target": 75,
-      "remaining": 50
+      "remaining": 49
     },
     "theater": {
-      "authored": 20,
+      "authored": 21,
       "target": 45,
-      "remaining": 25
+      "remaining": 24
     }
   },
   "originals": [
@@ -664,13 +664,43 @@
       "id": "r2:bookshop:enchanted-forest:small:02",
       "file": "src/building-pool/roadmap-2b/m1-diadem-folios.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:mountain:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:mountain:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:temperate:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
-      "small": 8,
+      "small": 9,
       "medium": 9,
-      "large": 9
+      "large": 10
     },
     "desert": {
       "small": 8,
@@ -678,7 +708,7 @@
       "large": 10
     },
     "snow": {
-      "small": 9,
+      "small": 11,
       "medium": 12,
       "large": 8
     },
@@ -688,9 +718,9 @@
       "large": 10
     },
     "mountain": {
-      "small": 9,
+      "small": 10,
       "medium": 10,
-      "large": 9
+      "large": 10
     }
   },
   "productionRegistryUnchanged": true,
