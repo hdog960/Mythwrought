@@ -22,7 +22,7 @@ export async function verifyManifestCheckouts({manifest,checkouts,verify=verifyC
    try {
     const outcome=await verify({manifest:{[lane]:{commit:producer.head,sha256:file.sha256,checkout,path:file.path}}});
     const found=outcome?.results?.find(r=>r.lane===lane);
-    if(!found||found.status!=='SOURCE_MATCH'||found.commit!==producer.head||found.path!==file.path||found.sha256!==file.sha256) {
+    if(outcome?.status!=='SOURCE_MATCH_ONLY'||!found||found.status!=='SOURCE_MATCH'||found.commit!==producer.head||found.path!==file.path||found.sha256!==file.sha256) {
      files.push({path:file.path,status:'NOT_VERIFIED',reason:found?.reason??'source identity not verified'});
     } else files.push({path:file.path,status:'SOURCE_MATCH'});
    }catch(e) {
