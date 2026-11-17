@@ -148,6 +148,15 @@ export function surfaceBiomeFreshColumn(x,z,seed=179,{
     if(y>oldTop&&baseline!==0)return null;
     if(y<=oldTop&&baseline!==1&&baseline!==2&&baseline!==3)return null;
   }
+  // A raised shelf must not bury the trunk of a landmark whose canopy or
+  // other occupied cells sit above the one-block headroom check. Inspect the
+  // complete remaining surface envelope, not only the proposed write range.
+  // This is bounded by WORLD_MAX_Y and fails closed for any existing object,
+  // edit or protected cell; never truncate a naturally generated structure.
+  for(let y=newTop+2;y<=WORLD_MAX_Y;y++){
+    if(readBaseline(x,y,z)!==0||hasEdit(x,y,z)||isProtected(x,y,z))
+      return null;
+  }
   const coverage=clamp((b.weight-.35)/.4,0,1);
   for(let y=oldTop-2;y<=newTop;y++){
     const baseline=readBaseline(x,y,z);
