@@ -103,7 +103,7 @@ export async function commitOrientedBatch({cells,sidecar,readIdentity,edit,rollb
             // can see another editor's write and accidentally certify undo.
             const restoredRevision=await readRevision(cells[i]);
             if (!validRevision(restoredRevision) ||
-                restoredRevision <= (postWrites.get(i)?.revision ?? revisions[i]))
+                restoredRevision !== (postWrites.get(i)?.revision ?? revisions[i]+1)+1)
               throw new Error('Rollback revision mismatch');
           }
         } catch (failure) {
