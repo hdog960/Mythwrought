@@ -56,3 +56,31 @@ test('durable touched-cell history takes precedence after edits revert and cache
  assert.equal(view.get(x,y,z),original);
  assert.equal(view.cachedColumns,1);
 });
+
+test('region boundaries remain deterministic across chunk seams without changing legacy spawn',()=>{
+ for(const seed of [179,7,2201]){
+  const world=new VoxelWorld(seed);
+  const view=createSurfaceBiomeWorldView(world,{
+   enabled:true,profileIsFresh:true,isProtected:()=>false,
+   hasDurableEditIntent:()=>false,maxCachedColumns:64
+  });
+  assert.ok(view);
+  for(const [x,z] of [[0,0],[1,1],[15,15],[-16,0]]){
+   for(let y=terrainHeight(x,z,seed)-2;y<=terrainHeight(x,z,seed)+2;y++)
+    assert.equal(view.get(x,y,z),world.get(x,y,z),'legacy spawn unchanged');
+  }
+  for(const region of SURFACE_BIOME_REGIONS){
+   for(const [dx,dz] of [[15,0],[16,0],[0,15],[0,16],[-1,0],[0,-1]]){
+    const x=region.x+dx,z=region.z+dz;
+    const first=[];
+    for(let y=terrainHeight(x,z,seed)-2;y<=Math.min(19,terrainHeight(x,z,seed)+15);y++)
+     first.push(view.get(x,y,z));
+    // Evict cached columns and verify regenerated cells are identical.
+    for(let n=0;n<80;n++)view.get(x+1000+n,0,z+1000);
+    const second=first.map((_,i)=>view.get(x,terrainHeight(x,z,seed)-2+i,z));
+    assert.deepEqual(second,first,region.name+' seam reproducibility');
+   }
+  }
+  assert.ok(view.cachedColumns<=64);
+ }
+});
