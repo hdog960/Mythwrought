@@ -97,8 +97,27 @@ const {candidate:longPlan}=longSite;
 const longOccupancy=new Map(longPlan.cells.map(([x,cy,z,id])=>[[x,cy,z].join(','),id]));
 const outerTips=longPlan.cells.filter(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&Math.abs(z-longSite.aa[1])===2);
 assert.equal(outerTips.length,1,'one asymmetric taper tip rather than mirrored prongs or a fence');
-assert.equal(outerTips[0][0]-longSite.aa[0],(seed&1)===0?2:5,
+const spanVariant=(aa,bb)=>(Math.imul(aa[0],73856093)^Math.imul(aa[1],19349663)^\n Math.imul(bb[0],83492791)^Math.imul(bb[1],1640531513)^seed)>>>0;\nassert.equal(outerTips[0][0]-longSite.aa[0],(spanVariant(longSite.aa,longSite.bb)&1)===0?2:5,
  'seed chooses which end has the longer branch');
+// Different physical sites in one world should not all inherit the same
+// mirrored crown shape merely because they share a global seed.
+let otherVariant=null;
+for(let x=-150;x<150&&!otherVariant;x+=3)for(let z=-150;z<150&&!otherVariant;z+=3){
+ const f=fixture(),aa=[x,z],bb=[x+7,z];
+ if((spanVariant(aa,bb)&1)===(spanVariant(longSite.aa,longSite.bb)&1))continue;
+ f.edits.set(f.k(x,y,z),BLOCK.WOOD);
+ f.edits.set(f.k(x+7,y,z),BLOCK.WOOD);
+ const candidate=planCanopyWalkway(f.world,aa,bb,y);
+ if(candidate)otherVariant={aa,bb,candidate};
+}
+assert.ok(otherVariant,'find another real-air seven-cell span with opposite local crown variant');
+const otherTips=otherVariant.candidate.cells.filter(([x,cy,z,id])=>
+ cy===y&&id===BLOCK.WOOD&&Math.abs(z-otherVariant.aa[1])===2);
+assert.equal(otherTips.length,1,'second site retains one rooted taper tip');
+assert.notEqual(otherTips[0][0]-otherVariant.aa[0],outerTips[0][0]-longSite.aa[0],
+ 'two sites in the same world have different asymmetrical end silhouettes');
+assert.deepEqual(planCanopyWalkway({...fixture().world,seed},otherVariant.aa,otherVariant.bb,y),null,
+ 'unanchored candidate is never auto-spawned');
 // A visible daylight gap on both banks is mandatory: the previous per-step
 // crownlets still read as a picket fence despite having physical supports.
 const occupiedStations=new Set(longPlan.cells.filter(([x,cy,z,id])=>
