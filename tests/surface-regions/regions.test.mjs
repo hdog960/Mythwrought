@@ -350,3 +350,27 @@ test('off-envelope cave and high-air reads avoid expensive protection scans',()=
   assert.ok(protectedCalls>0&&durableCalls>0);
  }
 });
+
+test('air above generated ridges bypasses full-column protection scans',()=>{
+ for(const seed of [179,7,2201])for(const region of SURFACE_BIOME_REGIONS){
+  const world=new VoxelWorld(seed);
+  let protectedReads=0,durableReads=0;
+  const view=createSurfaceBiomeWorldView(world,{
+   enabled:true,profileIsFresh:true,
+   isProtected:()=>{protectedReads++;return false;},
+   hasDurableEditIntent:()=>{durableReads++;return false;},
+   maxCachedColumns:16
+  });
+  assert.ok(view);
+  const x=region.x,z=region.z;
+  const top=Math.max(terrainHeight(x,z,seed),surfaceBiomeHeight(x,z,seed));
+  const highY=top+1;
+  assert.ok(highY<=WORLD_MAX_Y);
+  assert.equal(view.get(x,highY,z),world.get(x,highY,z));
+  assert.equal(protectedReads,0,'high air must not scan protected surface envelope');
+  assert.equal(durableReads,0,'high air must not scan durable edit history');
+  assert.equal(view.cachedColumns,0,'high air must not materialize a column');
+  assert.equal(view.get(x,top,z),region.surface,'actual ridge surface still composes');
+  assert.ok(protectedReads>0&&durableReads>0,'surface retains fail-closed checks');
+ }
+});
