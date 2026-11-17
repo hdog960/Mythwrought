@@ -619,8 +619,9 @@ export function descentSurfaceSeam(world,origin=DESCENT_ORIGIN){
   }
   // An open shaft without a supported stair is not a safe cave entrance.
   for(const p of steps){
-    if(reader.get(p.x,p.floor,p.z)===BLOCK.AIR)
-      failures.push({x:p.x,y:p.floor,z:p.z,reason:'missing-support'});
+    const support=reader.get(p.x,p.floor,p.z);
+    if(support!==BLOCK.STONE&&support!==BLOCK.DEEPSTONE)
+      failures.push({x:p.x,y:p.floor,z:p.z,reason:'missing-solid-support'});
   }
   return Object.freeze({opening,clear:failures.length===0,failures,
     runtimeVerified:false,requiresSurfaceOwner:true});
