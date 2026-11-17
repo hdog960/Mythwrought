@@ -82,19 +82,26 @@ function branch(out,x,y,z,rise,angle,reach){
 }
 function crown(out,x,y,z,r,variation){
   const tint=[[.27,.55,.35],[.34,.65,.41],[.45,.72,.43],[.55,.76,.47]];
-  // Layered faceted crown, not crossed transparent billboards.
-  const rings=8, lower=[],middle=[],upper=[];
+  // The former three perfectly level octagons produced stacked tabletop
+  // edges when several crowns overlapped. Keep identical triangle/vertex
+  // counts, but scallop all three rings with deterministic, connected facets.
+  const rings=8,lower=[],middle=[],upper=[];
   for(let i=0;i<rings;i++){
     const a=i*Math.PI*2/rings+variation;
-    lower.push([x+Math.cos(a)*r*.68,y-.38,z+Math.sin(a)*r*.68]);
-    middle.push([x+Math.cos(a)*r,y+.18,z+Math.sin(a)*r]);
-    upper.push([x+Math.cos(a)*r*.48,y+.82,z+Math.sin(a)*r*.48]);
+    const ca=Math.cos(a),sa=Math.sin(a);
+    const l=.65+.065*Math.sin(a*3+variation*6);
+    const m=.90+.095*Math.cos(a*3-variation*4);
+    const u=.44+.06*Math.sin(a*5+variation*3);
+    lower.push([x+ca*r*l,y-.38+.095*Math.sin(a*2+variation),z+sa*r*l]);
+    middle.push([x+ca*r*m,y+.14+.155*Math.cos(a*2-variation),z+sa*r*m]);
+    upper.push([x+ca*r*u,y+.76+.13*Math.sin(a*3+variation),z+sa*r*u]);
   }
+  const apex=[x+Math.cos(variation*6)*r*.08,y+1.14,z+Math.sin(variation*6)*r*.08];
   for(let i=0;i<rings;i++){
     const j=(i+1)%rings,col=tint[(i+Math.floor(variation*7))%tint.length];
     quad(out,lower[i],lower[j],middle[j],middle[i],col,7);
     quad(out,middle[i],middle[j],upper[j],upper[i],tint[(i+1)%4],7);
-    tri(out,upper[i],upper[j],[x,y+1.14,z],tint[(i+2)%4],7);
+    tri(out,upper[i],upper[j],apex,tint[(i+2)%4],7);
   }
 }
 // Distinct upright evergreen silhouette: stacked, faceted needle tiers.
@@ -116,19 +123,39 @@ function evergreen(out,x,y,z,variation,beacon=false,profile='mixed'){
   const needles=beacon?
     [[.25,.48,.40],[.39,.62,.43],[.58,.70,.39],[.78,.77,.45]]:
     [[.19,.43,.38],[.26,.54,.43],[.34,.61,.46],[.40,.68,.48]];
-  for(let tier=0;tier<4;tier++){
-    const base=y+.65+tier*(beacon?1.26:profile==='grove'?.86:profile==='open'?.70:.77),rad=(beacon?1.48:profile==='grove'?1.49:profile==='open'?1.12:1.32)-tier*.19;
-    const top=base+(beacon?1.8:1.22);
+  // Replace four identical cone-stack tiers with three overlapping,
+  // scalloped bough shells. A lower skirt, uneven shoulder and tapered upper
+  // ring make each bough a solid faceted mass rather than a flat triangle
+  // pointing to the same apex. Only the uppermost bough needs a closed cap.
+  // Three shells cost fewer vertices than the old cone/overlay arrangement,
+  // and fit the existing 450-vertex per-tree and 0-extra-draw-call budget.
+  for(let tier=0;tier<3;tier++){
+    const base=y+(beacon?.68:.52)+tier*(beacon?1.62:height*.27);
+    const rad=(beacon?1.43:profile==='grove'?1.39:profile==='open'?1.08:1.29)-tier*.15;
+    const rise=beacon?2.12:1.50;
+    const skirt=[],shoulder=[],upper=[];
     for(let i=0;i<8;i++){
-      const a=(i+variation)*Math.PI/4,b=(i+1+variation)*Math.PI/4;
-      const col=beacon&&tier===3?[[.91,.79,.42],[.98,.87,.55]][i%2]:needles[(i+tier)%needles.length];
-      tri(out,[x+Math.cos(a)*rad,base,z+Math.sin(a)*rad],
-        [x+Math.cos(b)*rad,base,z+Math.sin(b)*rad],
-        [x,top,z],col,7);
-      // A small sun-facing facet makes layered needle tiers readable at phone scale.
-      if(i%2===0)tri(out,[x+Math.cos(a)*rad*.79,base+.10,z+Math.sin(a)*rad*.79],
-        [x+Math.cos(b)*rad*.79,base+.10,z+Math.sin(b)*rad*.79],
-        [x,top-.15,z],needles[(i+tier+1)%needles.length],7);
+      const a=(i+variation)*Math.PI/4;
+      const ca=Math.cos(a),sa=Math.sin(a);
+      const wave=Math.sin(i*2.4+variation*6+tier*1.7);
+      const foot=rad*(.68+.06*wave);
+      const wide=rad*(.95+.065*Math.cos(i*2.15+variation*5+tier));
+      const tip=rad*(.23+.045*Math.sin(i*1.9+variation*4+tier));
+      skirt.push([x+ca*foot,base+.035+.045*wave,z+sa*foot]);
+      shoulder.push([x+ca*wide,base+.30+.065*Math.sin(i*1.8+variation*3+tier),z+sa*wide]);
+      upper.push([x+ca*tip,base+rise*.81+.075*Math.cos(i*2.1+variation*2+tier),z+sa*tip]);
+    }
+    for(let i=0;i<8;i++){
+      const j=(i+1)%8;
+      const shade=beacon&&tier===2?[[.82,.79,.47],[.67,.83,.47]][i%2]:
+        needles[(i+tier)%needles.length];
+      quad(out,skirt[i],skirt[j],shoulder[j],shoulder[i],shade,7);
+      quad(out,shoulder[i],shoulder[j],upper[j],upper[i],
+        needles[(i+tier+1)%needles.length],7);
+      if(tier===2)tri(out,upper[i],upper[j],
+        [x+.035*Math.sin(variation*6),base+rise*.96,z+.035*Math.cos(variation*6)],
+        beacon?[[.91,.79,.42],[.98,.87,.55]][i%2]:
+          needles[(i+tier+2)%needles.length],7);
     }
   }
   if(beacon){
