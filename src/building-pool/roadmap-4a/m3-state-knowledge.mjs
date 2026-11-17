@@ -3308,11 +3308,11 @@ const PLANS=[
 }
 ,
 {
-  "id": "r4:castle-palace:desert:small:01",
+  "id": "r4:castle-palace:desert:small:02",
   "type": "castle-palace",
   "biome": "desert",
   "size": "small",
-  "variant": 1,
+  "variant": 2,
   "bounds": [
     66,
     12,
