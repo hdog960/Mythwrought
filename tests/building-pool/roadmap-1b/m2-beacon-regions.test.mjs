@@ -29,7 +29,7 @@ test('M2f 164/435 candidate census, exact 15 legacy stable parity and all catego
  assert.equal(new Set(all.map(structuralFingerprint)).size,164);
  assert.equal(new Set(next.map(p=>p.architecturalIdentity.program)).size,9);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(x=>x.category===k).length])),
-  {'bathhouse':23,stable:28,'farm-barn':22,greenhouse:23,'fishing-lodge':21,'harbor-office':20,lighthouse:21});
+  {bathhouse:24,stable:28,'farm-barn':23,greenhouse:24,'fishing-lodge':22,'harbor-office':21,lighthouse:22});
  for(const p of old){
   assert.equal(stableBlueprintJSON(all.find(q=>q.id===p.id)),stableBlueprintJSON(p),
     'inherited stable mutated '+p.id);
