@@ -71,3 +71,24 @@ test('enchanted glades form reproducible terrain relief without modifying legacy
   assert.ok(outside>0,'glade terrain must end at unchanged legacy terrain');
  }
 });
+
+test('fresh-column eligibility edge does not create a raised biome shelf',()=>{
+ for(const seed of [179,7,2201]){
+  for(const region of SURFACE_BIOME_REGIONS){
+   let checked=0;
+   // Sample world-space perimeter across chunk boundaries, including
+   // warped boundaries where the weight threshold crosses voxel centers.
+   for(let dz=-180;dz<=180;dz+=3){
+    for(let dx=-180;dx<=180;dx+=3){
+     const x=region.x+dx,z=region.z+dz;
+     const b=surfaceBiomeAt(x,z,seed);
+     if(!b||b.name!==region.name||b.weight>.37||b.weight<.35)continue;
+     assert.equal(surfaceBiomeHeight(x,z,seed),terrainHeight(x,z,seed),
+       'near the first eligible region column, elevation must match legacy');
+     checked++;
+    }
+   }
+   assert.ok(checked>0,region.name+' must have tested threshold columns');
+  }
+ }
+});
