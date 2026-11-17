@@ -225,7 +225,8 @@ async function runWithBrowser(){
     if(png.length<2400||png.subarray(0,8).toString('hex')!=='89504e470d0a1a0a'||
        png.readUInt32BE(16)!==width||png.readUInt32BE(20)!==height)
       throw Error('Bad/blank screenshot PNG '+JSON.stringify({query,length:png.length}));
-    const name=[type,biome,size,width+'x'+height,cutaway?'cutaway':'exterior'].join('-')+'.png';
+    const name=[type,biome,size,'v'+String(variant).padStart(2,'0'),width+'x'+height,cutaway?'cutaway':'exterior'].join('-')+'.png';
+     if(existsSync(join(OUT,name)))throw Error('Non-unique screenshot filename for distinct blueprint variant '+name);
     writeFileSync(join(OUT,name),png);
     shots.push({name,id,viewport:[width,height],cutaway,floor,renderer:proof.renderer,
       drawnTriangles:data.drawnTriangles,drawCalls:data.drawCalls,
@@ -235,9 +236,16 @@ async function runWithBrowser(){
     if(shots.length%6===0)console.log('4A M2 final-civic-guild Chromium WebGL2 candidate captures',shots.length,'/ 60');
    }
   }
-  const distinctScreens=new Set(shots.map(x=>x.pngSha256)).size;
+  // Fail closed on actual files, not merely 60 in-memory capture hashes.
+   const filenameCount=new Set(shots.map(x=>x.name)).size;
+   const mismatched=shots.filter(x=>!existsSync(join(OUT,x.name))||
+      createHash('sha256').update(readFileSync(join(OUT,x.name))).digest('hex')!==x.pngSha256);
+   if(filenameCount!==EXPECTED_VIEWS||mismatched.length)
+     throw Error('Gallery output file collision/corruption: '+filenameCount+'/'+EXPECTED_VIEWS+
+       ' distinct names, '+mismatched.length+' mismatched saved PNGs');
+   const distinctScreens=new Set(shots.map(x=>x.pngSha256)).size;
   const evidence={sourceBundleSha256,authoredGeneratorGitBlob,rendererClass:'genuine Chromium WebGL2 candidate/proxy geometry',
-    actualViews:shots.length,expectedViews:EXPECTED_VIEWS,distinctScreenHashes:distinctScreens,
+    actualViews:shots.length,expectedViews:EXPECTED_VIEWS,distinctScreenHashes:distinctScreens,distinctOutputNames:filenameCount,
     viewports:VIEWPORTS,allGLChecksPassed:true,glFinishUsed:true,zeroLostContexts:true,
     productionPhysicalFamilyRenderer:false,realIphoneTested:false,creatorArtApproved:false,
     integratedIntoGame:false,schema1SaveCompatibilityVerified:false,results:shots};
