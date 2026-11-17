@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
-import {descentRoute,descentWorld,descentConnectivity,descentVolumeEvidence} from '../src/underground-switchback-descent.mjs';
+import {descentRoute,descentWorld,descentConnectivity,descentEvidence,descentVolumeEvidence} from '../src/underground-switchback-descent.mjs';
 
 const SEEDS=[179,1,2026,-77];
 const BANDS=[[-4,-45],[-46,-100],[-101,-155],[-156,-209]];
@@ -66,6 +66,26 @@ for(const seed of SEEDS){
       assert.equal(report.connected,false,'overhead obstruction must reject readiness');
       assert.ok(report.failures.some(f=>f.reason==='blocked-or-unsupported'&&f.height===3));
       assert.deepEqual(restored.save(),saved,'validation must not mutate player edits');
+    });
+  }
+}
+
+for(const seed of SEEDS){
+  for(let band=0;band<4;band++){
+    test('band evidence rejects saved ceiling and non-geological footing: '+seed+' / '+band,()=>{
+      const [high,low]=BANDS[band];
+      const p=descentRoute().find(q=>q.floor<=high&&q.floor>=low);
+      assert.ok(p);
+      const ceiling=new VoxelWorld(seed);
+      assert.equal(ceiling.set(p.x,p.feet+3,p.z,BLOCK.WOOD),true);
+      const ceilingSave=ceiling.save();
+      assert.ok(descentEvidence(ceiling)[band].invalid>0,'fourth clearance cell must be checked');
+      assert.deepEqual(ceiling.save(),ceilingSave);
+      const floor=new VoxelWorld(seed);
+      assert.equal(floor.set(p.x,p.floor,p.z,BLOCK.WOOD),true);
+      const floorSave=floor.save();
+      assert.ok(descentEvidence(floor)[band].invalid>0,'wood cannot count as geological support');
+      assert.deepEqual(floor.save(),floorSave);
     });
   }
 }
