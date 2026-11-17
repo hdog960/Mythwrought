@@ -26,6 +26,23 @@ export async function applyLegacyVoxelEdit({cell,sidecar,readBlock,writeBlock,ne
       return false;
     } catch { return true; } // Uncertain state: fail closed.
   };
+  // Refuse a stale preflight before invoking a cooperative writer. A host
+  // must still atomically compare the supplied expected ID/revision at commit.
+  // If a concurrent mutation already occurred, the old turn is unsafe.
+  if (readRevision) {
+    let stale=false;
+    try {
+      const [currentId,currentRevision]=await Promise.all([
+        readBlock(...cell),readRevision(...cell)
+      ]);
+      stale=!validId(currentId)||!validRevision(currentRevision)||
+        currentId!==before||currentRevision!==revision;
+    } catch { stale=true; }
+    if (stale) {
+      sidecar.invalidateEdit(cell);
+      return false;
+    }
+  }
   let receipt;
   try { receipt=await writeBlock([...cell],nextId,before,revision); }
   catch(error) {
