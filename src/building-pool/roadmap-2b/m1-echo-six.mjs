@@ -1341,8 +1341,8 @@ const DESIGNS=[
    ],
    [
     "right sanctuary",
-    31,
-    21
+    30,
+    20
    ],
    [
     "north holy altar",
@@ -1832,8 +1832,8 @@ const DESIGNS=[
    ],
    [
     "central catalog",
-    25,
-    22
+    26,
+    23
    ],
    [
     "middle vault",
@@ -2535,7 +2535,7 @@ const DESIGNS=[
    ],
    [
     15,
-    28,
+    27,
     31,
     37,
     8,
