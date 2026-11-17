@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
-import {descentRoute,descentEntranceApproach,descentLoopConnectivity,descentEntranceConnectivity,descentWorld} from '../src/underground-switchback-descent.mjs';
+import {descentRoute,descentEntranceApproach,descentLoopConnectivity,descentEntranceConnectivity,descentWorld,descentSurfaceSeam} from '../src/underground-switchback-descent.mjs';
 
 for(const seed of [179,1,2026,-77]){
   test('secondary routes have physical four-cell clearance, seed '+seed,()=>{
@@ -40,6 +40,24 @@ for(const seed of [179,1,2026,-77]){
     assert.equal(entrance.approachConnected,false);
     assert.ok(entrance.failures.some(f=>f.reason==='blocked-headroom'&&f.height===3));
     assert.equal(descentWorld(restored).get(p.x,p.feet+3,p.z),BLOCK.WOOD);
+    assert.deepEqual(restored.save(),saved);
+  });
+}
+
+// The protected surface breach remains closed until :24/manual integration.
+// A player-built WOOD platform is non-air but must never count as geological
+// bearing support for a cave stair, even if every other voxel is untouched.
+for(const seed of [179,1,2026,-77]){
+  test('surface seam rejects saved non-stone stair footing without mutation, seed '+seed,()=>{
+    const world=new VoxelWorld(seed);
+    const p=descentEntranceApproach()[2];
+    assert.equal(world.set(p.x,p.floor,p.z,BLOCK.WOOD),true);
+    const saved=world.save(),restored=VoxelWorld.restore(saved);
+    const seam=descentSurfaceSeam(restored);
+    assert.equal(seam.clear,false);
+    assert.equal(seam.runtimeVerified,false);
+    assert.ok(seam.failures.some(f=>f.x===p.x&&f.y===p.floor&&f.z===p.z&&f.reason==='missing-solid-support'));
+    assert.equal(descentWorld(restored).get(p.x,p.floor,p.z),BLOCK.WOOD);
     assert.deepEqual(restored.save(),saved);
   });
 }
