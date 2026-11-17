@@ -81,7 +81,7 @@ for(const [x,cy,z] of plan.cells)assert.equal(failure.world.get(x,cy,z),BLOCK.AI
 assert.equal(failure.world.get(a[0],y,a[1]),BLOCK.WOOD);
 assert.equal(failure.world.get(b[0],y,b[1]),BLOCK.WOOD);
 
-// Long-span regression: two tapered side branches must remain physically
+// Long-span regression: one asymmetric tapered side branch must remain physically
 // supported, deterministic, and outside the two-block-high walkable aisle.
 // Search a fixed-seed natural-air site instead of fabricating empty terrain.
 let longSite=null;
@@ -96,7 +96,9 @@ assert.ok(longSite,'fixed-seed seven-cell span supports a tapered crown');
 const {candidate:longPlan}=longSite;
 const longOccupancy=new Map(longPlan.cells.map(([x,cy,z,id])=>[[x,cy,z].join(','),id]));
 const outerTips=longPlan.cells.filter(([x,cy,z,id])=>cy===y&&id===BLOCK.WOOD&&Math.abs(z-longSite.aa[1])===2);
-assert.equal(outerTips.length,2,'two separated taper tips rather than a continuous fence');
+assert.equal(outerTips.length,1,'one asymmetric taper tip rather than mirrored prongs or a fence');
+assert.equal(outerTips[0][0]-longSite.aa[0],(seed&1)===0?2:5,
+ 'seed chooses which end has the longer branch');
 // A visible daylight gap on both banks is mandatory: the previous per-step
 // crownlets still read as a picket fence despite having physical supports.
 const occupiedStations=new Set(longPlan.cells.filter(([x,cy,z,id])=>
