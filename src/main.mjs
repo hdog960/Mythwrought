@@ -1351,8 +1351,7 @@ function start(){
       const t=e.changedTouches[0],id=g2TouchPointerId(t);
       if(id===null)return;
       e.preventDefault();active=id;activeTouch=t.identifier;
-      lastTouch=e.timeStamp;g2ConsumedClicks.set(id,lastTouch);
-      g2ConsumedClicks.set(button.id,lastTouch);
+      lastTouch=e.timeStamp;g2ConsumedClicks.set(button.id,lastTouch);
       g2ResumeControls();
       g2Controls=dispatchG2Control(g2Controls,{type:'pointerdown',id:active,zone});
       if(zone==='up'||zone==='down')g2TouchVertical[zone]=true;
