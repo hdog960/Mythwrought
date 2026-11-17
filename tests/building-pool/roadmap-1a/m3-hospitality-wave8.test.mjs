@@ -42,6 +42,60 @@ test('immutable prior 245 complete full-source fingerprints and 10 Wave7 source 
  assert.equal(prior.length,255);assert.equal(fixture.count,245);
  assert.deepEqual(prior.slice(0,245).map(b=>{const s=JSON.stringify(b);return {id:b.id,chars:s.length,fnv:fnv(s)};}),fixture.records);
  assert.deepEqual(prior.slice(245).map(b=>b.id),getHospitalityWave7().map(b=>b.id));
+ const immutableWave7=[
+  {
+    "id": "r1:tavern:temperate:medium:001",
+    "chars": 2080231,
+    "fnv": "be942f3a"
+  },
+  {
+    "id": "r1:tavern:desert:medium:005",
+    "chars": 1825215,
+    "fnv": "b2d9def2"
+  },
+  {
+    "id": "r1:tavern:enchanted-forest:medium:003",
+    "chars": 2415826,
+    "fnv": "29618a6d"
+  },
+  {
+    "id": "r1:tavern:mountain:large:002",
+    "chars": 2701565,
+    "fnv": "37fed24d"
+  },
+  {
+    "id": "r1:tavern:mountain:small:004",
+    "chars": 1624906,
+    "fnv": "0a89ee30"
+  },
+  {
+    "id": "r1:inn:temperate:large:004",
+    "chars": 2422239,
+    "fnv": "9c0ac6a5"
+  },
+  {
+    "id": "r1:inn:desert:medium:005",
+    "chars": 2566833,
+    "fnv": "808ceab9"
+  },
+  {
+    "id": "r1:inn:snow:medium:004",
+    "chars": 2686897,
+    "fnv": "e213cc78"
+  },
+  {
+    "id": "r1:inn:enchanted-forest:large:004",
+    "chars": 3376232,
+    "fnv": "a9ea1512"
+  },
+  {
+    "id": "r1:inn:mountain:small:005",
+    "chars": 1786854,
+    "fnv": "ad2601a0"
+  }
+];
+ assert.deepEqual(prior.slice(245).map(b=>{const s=JSON.stringify(b);return {id:b.id,chars:s.length,fnv:fnv(s)};}),immutableWave7,
+  'all ten Wave7 prior complete source serializations must match accepted FNV/byte lengths');
 });
 test('five new original buildings: 260 IDs, 260 physical signatures, 87,472 voxels, D4 zero repeats',()=>{
  assert.deepEqual(wave.map(b=>b.id),HOSPITALITY_WAVE8_IDS);
