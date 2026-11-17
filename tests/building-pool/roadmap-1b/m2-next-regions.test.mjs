@@ -21,16 +21,16 @@ function connected(b){
  }
  return visited.size===allowed.size;
 }
-test('M2d 136/435 unique literal candidate sources preserve all 15 exact inherited stable designs and bucket quotas',()=>{
+test('M2d 142/435 unique literal candidate sources preserve all 15 exact inherited stable designs and bucket quotas',()=>{
  const old=getInheritedStables(),all=get1BCandidates(),new9=allNew(),stats=validateAllocation(all);
- assert.equal(all.length,136);assert.equal(stats.authored,136);assert.equal(stats.remaining,299);
+ assert.equal(all.length,142);assert.equal(stats.authored,142);assert.equal(stats.remaining,293);
  assert.equal(old.length,15);assert.equal(new9.length,9);
- assert.equal(new Set(all.map(b=>b.id)).size,136);
- assert.equal(new Set(all.map(structuralFingerprint)).size,136,'physical/source coordinate identity collision');
+ assert.equal(new Set(all.map(b=>b.id)).size,142);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,142,'physical/source coordinate identity collision');
  assert.equal(new Set(new9.map(b=>b.architecturalIdentity.program)).size,9);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(category=>
   [category,all.filter(b=>b.category===category).length])),
- {'bathhouse':19,stable:28,'farm-barn':18,greenhouse:19,'fishing-lodge':18,'harbor-office':17,lighthouse:17});
+ {'bathhouse':20,stable:28,'farm-barn':19,greenhouse:20,'fishing-lodge':19,'harbor-office':18,lighthouse:18});
  for(const original of old){
   const carried=all.find(x=>x.id===original.id);
   assert.ok(carried);

@@ -33,15 +33,15 @@ function shaped(b,flip,turn){
  }
  return cells;
 }
-test('M2g real 136/435 authored census; 15 byte-exact inherited stables; category and biome-size quotas',()=>{
+test('M2g real 142/435 authored census; 15 byte-exact inherited stables; category and biome-size quotas',()=>{
  const all=get1BCandidates(),old=getInheritedStables(),new9=group(),count=validateAllocation(all);
- assert.equal(all.length,136);assert.equal(count.authored,136);assert.equal(count.remaining,299);
+ assert.equal(all.length,142);assert.equal(count.authored,142);assert.equal(count.remaining,293);
  assert.equal(old.length,15);assert.equal(new9.length,9);
- assert.equal(new Set(all.map(p=>p.id)).size,136);
- assert.equal(new Set(all.map(p=>structuralFingerprint(p))).size,136);
+ assert.equal(new Set(all.map(p=>p.id)).size,142);
+ assert.equal(new Set(all.map(p=>structuralFingerprint(p))).size,142);
  assert.equal(new Set(new9.map(p=>p.architecturalIdentity.program)).size,9);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(k=>[k,all.filter(p=>p.category===k).length])),
-  {'bathhouse':19,stable:28,'farm-barn':18,greenhouse:19,'fishing-lodge':18,'harbor-office':17,lighthouse:17});
+  {'bathhouse':20,stable:28,'farm-barn':19,greenhouse:20,'fishing-lodge':19,'harbor-office':18,lighthouse:18});
  for(const inherited of old)
   assert.equal(stableBlueprintJSON(all.find(p=>p.id===inherited.id)),stableBlueprintJSON(inherited),
    'inherited source cells changed '+inherited.id);
