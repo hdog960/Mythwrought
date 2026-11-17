@@ -6,10 +6,10 @@ const point = p => p && ['x','y','z'].every(k=>safe(p[k]));
 const key = p => `${p.x},${p.y},${p.z}`;
 export function preflightWorldComposition({
   naturalCells, surfaceFeatures, playerEdits, caveRoutes, objects, registeredIds,
-  depthMinY, depthMaxY, maxTriangles = 12000
+  depthMinY, depthMaxY, maxTriangles = 12000, requireClearCavePath = false
 }) {
   if (![naturalCells,surfaceFeatures,playerEdits,caveRoutes,objects,registeredIds].every(Array.isArray) ||
-      !safe(depthMinY) || !safe(depthMaxY) || depthMinY>depthMaxY)
+      !safe(depthMinY) || !safe(depthMaxY) || depthMinY>depthMaxY || typeof requireClearCavePath !== 'boolean')
     throw new TypeError('invalid preflight inputs');
   const allowed=new Set([0,...registeredIds]);
   if (!registeredIds.every(id=>safe(id)&&id>0)) throw new TypeError('invalid registry');
@@ -32,6 +32,7 @@ export function preflightWorldComposition({
     return Object.freeze({ok:false,reason:'overlay-without-natural-cell',cell:key(f)});
   for (const edit of ledger.records) if (!natural.has(key(edit)))
     return Object.freeze({ok:false,reason:'edit-without-natural-cell',cell:key(edit)});
+  const resolvedByCell = new Map(resolved.map(c=>[key(c),c.id]));
   for (const route of caveRoutes) {
     if (!route || !point(route.entrance) || !natural.has(key(route.entrance)))
       return Object.freeze({ok:false,reason:'cave-entrance-without-surface'});
@@ -39,6 +40,16 @@ export function preflightWorldComposition({
     const check=validateCaveHandshake({...route,surfaceY,depthMinY,depthMaxY,entranceY:route.entrance.y,requireSimplePath:true});
     if (!check.ok) return Object.freeze({ok:false,reason:`cave-${check.reason}`});
     if (route.entrance.y>surfaceY) return Object.freeze({ok:false,reason:'cave-above-surface'});
+    // Opt-in only: producer path cells below the entrance must not be occupied
+    // by resolved solid terrain, including player-restored blocks. Unknown cells
+    // are NOT assumed empty: a sparse fixture cannot prove traversability.
+    if (requireClearCavePath) {
+      for (const p of route.path.slice(1)) {
+        const id=resolvedByCell.get(key(p));
+        if (id === undefined) return Object.freeze({ok:false,reason:'cave-path-cell-unverified',cell:key(p)});
+        if (id !== 0) return Object.freeze({ok:false,reason:'cave-path-obstructed',cell:key(p)});
+      }
+    }
   }
   const occupied=resolved.filter(c=>c.id!==0).map(({x,y,z})=>({x,y,z}));
   const obj=validateObjectAnchors(objects,{occupiedCells:occupied,maxTriangles});
