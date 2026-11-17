@@ -5,7 +5,7 @@ import {M1_REGIONAL_SHOPS} from '../../../src/building-pool/roadmap-2a/m1-region
 
 test('real Pack1-5 producer descriptors identify actual roofing boxes, orientations and unresolved Pack5 variants',()=>{
  const a=inspect2ARoofAndWindows();
- assert.equal(a.designs,116);assert(a.roofCells>5000);assert(a.totalWindows>0);
+ assert.equal(a.designs,122);assert(a.roofCells>5000);assert(a.totalWindows>0);
  assert(a.roofSourceDescriptors.some(x=>x.valid&&x.visibleBoxes>0&&x.selectionBoxes>0),'physical roof descriptors not inspected');
  assert(a.roofSourceDescriptors.some(x=>x.pending&&x.symbol.startsWith('pack5:')),'ambiguous Pack5 roof should remain unresolved');
  assert(a.facadePhysicalChecks.some(x=>x.producer.valid&&x.producer.visibleBoxes>0),'actual physical window geometry absent');

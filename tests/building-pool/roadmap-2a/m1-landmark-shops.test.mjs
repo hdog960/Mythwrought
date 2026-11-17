@@ -16,10 +16,10 @@ function d4(p){const out=[];for(let mirror=0;mirror<2;mirror++)for(let rot=0;rot
 const iou=(a,b)=>{let shared=0;for(const k of a)if(b.has(k))shared++;return shared/(a.size+b.size-shared);};
 test('six new standalone non-cross landmarks preserve 92 earlier 2A designs, 98-source preserved cohort within 104, including 15 exact inherited stores',()=>{
  assert.equal(M1_LANDMARK_SPECS.length,6);assert.equal(M1_LANDMARK_SHOPS.length,6);
- assert.equal(M1_D4_AUDIT_ALL.length,116);assert.equal(inventory().authoredCandidateTotal,116);
- assert.equal(inventory().newlyAuthored,101);assert.equal(inventory().unwrittenNewCandidates,304);
- assert.equal(plannedSlots().filter(s=>s.authoredHere).length,116);
- assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,116);
+ assert.equal(M1_D4_AUDIT_ALL.length,122);assert.equal(inventory().authoredCandidateTotal,122);
+ assert.equal(inventory().newlyAuthored,107);assert.equal(inventory().unwrittenNewCandidates,298);
+ assert.equal(plannedSlots().filter(s=>s.authoredHere).length,122);
+ assert.equal(assertDistinctArchitecture(M1_D4_AUDIT_ALL).distinctArchitectures,122);
  for(const b of M1_LANDMARK_SHOPS){assert(validateBlueprint(b).valid);assert.equal(b.rooms.length,4);
   assert.equal(b.numericIdsAssigned,false);assert.equal(b.worldPlaced,false);assert.equal(b.status,'authored-candidate');}
 });
@@ -95,7 +95,7 @@ test('strict whole-library D4 floor IoU <0.89 for each of the six new buildings;
   assert(max<.89,bp.id+' near-clone of '+closest+' score '+max);
  }
  const debt=inspect2AD4FloorDebt();
- assert.equal(debt.sources,116);assert.equal(debt.protectedOriginals,74);assert.equal(debt.grandfatheredHighOverlapPairs,269);
+ assert.equal(debt.sources,122);assert.equal(debt.protectedOriginals,74);assert.equal(debt.grandfatheredHighOverlapPairs,269);
  assert.equal(debt.exactMatchingFloorPairs,30);assert.equal(debt.newHighOverlapPairs,0);
 });
 test('reject detached no-source courtyard, blocked front entry and missing physical dependencies',()=>{

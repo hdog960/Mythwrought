@@ -32,10 +32,10 @@
   "target": 420,
   "legacySourceCandidates": 15,
   "locallyMigratedAndParityVerified": 15,
-  "newlyAuthored": 101,
+  "newlyAuthored": 107,
   "creatorApproved": 0,
   "integratedIntoGame": 0,
-  "unwrittenNewCandidates": 304,
+  "unwrittenNewCandidates": 298,
   "legacyCandidates": [
     {
       "id": "r2:general-store:temperate:small:01",
@@ -330,7 +330,7 @@
   ],
   "sourcePolicy": "Original PR #124 is read-only. IDs are preserved, not geometries yet. A candidate only counts as locally migrated after exact geometry/metadata parity and native tests.",
   "assetPolicy": "Manual 96 families/106 physical variants are integrated; biome130 entries remain symbolic when unverified. No numeric runtime IDs or production placement.",
-  "authoredCandidateTotal": 116,
+  "authoredCandidateTotal": 122,
   "handAuthoredStoreBlob": "7211223b2cc51290b89f5f886c1cbb59cc495747",
   "sourceModuleBlob": "4cc1ccc4cedfb927f510c6a85c8c4aa11290eccc",
   "originalValidatedStores": 15,
@@ -1391,6 +1391,92 @@
       "worldPlaced": false,
       "finalPackMeshCertified": false,
       "upperFloorsWalkable": false
+    }
+  ],
+  "M1ArcadedFronts": [
+    {
+      "id": "r2:general-store:enchanted-forest:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 8,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:pet-shop:mountain:large:03",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 8,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:magic-shop:desert:medium:03",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 8,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:potion-shop:snow:large:04",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 8,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bakery:temperate:small:03",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 8,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false
+    },
+    {
+      "id": "r2:bank:enchanted-forest:small:02",
+      "source": "src/building-pool/roadmap-2a/m1-arcaded-front-shops.mjs",
+      "specs": "src/building-pool/roadmap-2a/m1-arcaded-front-specs.mjs",
+      "status": "authored-candidate",
+      "physicallyCarvedFrontArches": 3,
+      "realRecessedScreen": true,
+      "newUpperWindowCells": 8,
+      "sourceRoofTransition": true,
+      "finalMountCertified": false,
+      "creatorApproved": false,
+      "integrated": false,
+      "worldPlaced": false
     }
   ]
 }
