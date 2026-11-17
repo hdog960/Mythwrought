@@ -165,13 +165,13 @@ test('all 101 actual source identities match exact committed PR-head Git blob an
  }
  const l=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([l.target,l.sourceExactInheritedTemples,l.originalNewModels,l.authoredCandidates,l.remainingUnauthored,
-  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,129,144,276,0,0,0]);
- assert.equal(l.originals.length,129);
+  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,131,146,274,0,0,0]);
+ assert.equal(l.originals.length,131);
  const ids=new Set(all.filter(b=>b.category!=='temple'||b.variation!==1).map(b=>b.id));
  for(const id of ids)assert(new Set(l.originals.map(x=>x.id)).has(id),'lost historical six-bespoke candidate '+id);
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),144);
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),276);
- assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,b)=>n+b.small+b.medium+b.large,0),144);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),146);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),274);
+ assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,b)=>n+b.small+b.medium+b.large,0),146);
  assert(NEW.every(b=>l.originals.some(row=>row.id===b.id&&row.file==='src/building-pool/roadmap-2b/'+
   (b.category==='jeweler'||b.category==='butcher'?'m1-bespoke-courts.mjs':b.category==='theater'?'m1-shadowstage.mjs':'m1-ritual-trades.mjs'))));
 });

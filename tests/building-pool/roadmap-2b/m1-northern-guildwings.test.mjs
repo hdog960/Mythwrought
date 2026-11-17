@@ -174,15 +174,15 @@ test('exact committed source parity, seven newly declared IDs and honest 108/420
  }
  const l=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([l.target,l.sourceExactInheritedTemples,l.originalNewModels,l.authoredCandidates,l.remainingUnauthored,
-  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,129,144,276,0,0,0]);
- assert.equal(l.originals.length,129);
+  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,131,146,274,0,0,0]);
+ assert.equal(l.originals.length,131);
  for(const prior of all.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(l.originals.some(row=>row.id===prior.id),'lost prior 108 unique author '+prior.id);
  for(const b of NEW){
   const path='src/building-pool/roadmap-2b/'+(b.category==='market-square'||b.category==='bookshop'?'m1-northern-arcades.mjs':'m1-regional-guildwings.mjs');
   assert.equal(l.originals.find(row=>row.id===b.id)?.file,path,b.id+' wrong actual file in ledger');
  }
- assert.equal(Object.values(l.byCategory).reduce((a,b)=>a+b.authored,0),144);
- assert.equal(Object.values(l.byCategory).reduce((a,b)=>a+b.remaining,0),276);
- assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,b)=>n+b.small+b.medium+b.large,0),144);
+ assert.equal(Object.values(l.byCategory).reduce((a,b)=>a+b.authored,0),146);
+ assert.equal(Object.values(l.byCategory).reduce((a,b)=>a+b.remaining,0),274);
+ assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,b)=>n+b.small+b.medium+b.large,0),146);
 });

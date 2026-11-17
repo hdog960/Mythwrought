@@ -183,14 +183,14 @@ test('ledger preserves 121 prior source-author records, exact Git source SHA, an
  }
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,ledger.authoredCandidates,ledger.remainingUnauthored,
- ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],[420,15,129,144,276,0,0,0]);
- assert.equal(ledger.originals.length,129);
+ ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],[420,15,131,146,274,0,0,0]);
+ assert.equal(ledger.originals.length,131);
  for(const b of PRIOR121.filter(x=>x.category!=='temple'||x.variation!==1))assert(ledger.originals.some(x=>x.id===b.id),'older authored source lost '+b.id);
  for(const prior of COMPLETE126.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(ledger.originals.some(row=>row.id===prior.id),'one of 126 protected earlier source models lost '+prior.id);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),144);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),276);
- assert.equal(Object.values(ledger.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),144);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),146);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),274);
+ assert.equal(Object.values(ledger.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),146);
  for(const b of NEW_FORMS){
   const file=b.id===IDS[0]||b.id===IDS[1]||b.id===IDS[2]?'m1-regional-forms.mjs':'m1-crossbar-switchback.mjs';
   assert.equal(ledger.originals.find(x=>x.id===b.id)?.file,'src/building-pool/roadmap-2b/'+file,b.id+' source mapping wrong');

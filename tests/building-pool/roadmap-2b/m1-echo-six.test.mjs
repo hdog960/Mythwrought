@@ -205,13 +205,13 @@ test('144-candidate exact-source Git blob provenance, all earlier 138 original I
  execFileSync('git',['hash-object',path],{encoding:'utf8'}).trim(),'new source differs from current tested Git blob');
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,ledger.authoredCandidates,ledger.remainingUnauthored,
- ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],[420,15,129,144,276,0,0,0]);
- assert.equal(ledger.originals.length,129);
+ ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],[420,15,131,146,274,0,0,0]);
+ assert.equal(ledger.originals.length,131);
  for(const previous of PRESERVED138.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(ledger.originals.some(r=>r.id===previous.id),'missing one of protected 138 previous authored source objects '+previous.id);
- assert.deepEqual(new Set(ledger.originals.map(x=>x.id)),new Set(ALL144.filter(b=>b.category!=='temple'||b.variation!==1).map(b=>b.id)));
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),144);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),276);
- assert.equal(Object.values(ledger.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),144);
+ assert.deepEqual(new Set(ledger.originals.map(x=>x.id)),new Set([...ALL144.filter(b=>b.category!=='temple'||b.variation!==1).map(b=>b.id), 'r2:market-square:temperate:small:02','r2:theater:desert:small:03']));
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),146);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),274);
+ assert.equal(Object.values(ledger.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),146);
  for(const b of ECHO_SIX)assert.equal(ledger.originals.find(x=>x.id===b.id)?.file,path,b.id+' wrong new source origin');
 });

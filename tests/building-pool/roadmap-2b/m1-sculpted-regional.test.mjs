@@ -236,10 +236,10 @@ test('read-only inherited temple and all 90 historical source identities are pre
   execFileSync('git',['hash-object',source],{encoding:'utf8'}).trim());
  const ledger=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([ledger.target,ledger.sourceExactInheritedTemples,ledger.originalNewModels,ledger.authoredCandidates,
-  ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],[420,15,129,144,276,0,0,0]);
- assert.equal(ledger.originals.length,129);
+  ledger.remainingUnauthored,ledger.creatorAccepted,ledger.integratedInGame,ledger.placedInWorld],[420,15,131,146,274,0,0,0]);
+ assert.equal(ledger.originals.length,131);
  const current=new Set(ledger.originals.map(x=>x.id));
  for(const bp of all.filter(x=>x.category!=='temple'||x.variation!==1))assert(current.has(bp.id),bp.id+' not in later ledger');
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),144);
- assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),276);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.authored,0),146);
+ assert.equal(Object.values(ledger.byCategory).reduce((n,x)=>n+x.remaining,0),274);
 });
