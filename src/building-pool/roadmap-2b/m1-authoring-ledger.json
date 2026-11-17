@@ -6,17 +6,17 @@
   "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
   "target": 420,
   "sourceExactInheritedTemples": 15,
-  "originalNewModels": 111,
-  "authoredCandidates": 126,
-  "remainingUnauthored": 294,
+  "originalNewModels": 117,
+  "authoredCandidates": 132,
+  "remainingUnauthored": 288,
   "creatorAccepted": 0,
   "integratedInGame": 0,
   "placedInWorld": 0,
   "byCategory": {
     "market-square": {
-      "authored": 18,
+      "authored": 19,
       "target": 60,
-      "remaining": 42
+      "remaining": 41
     },
     "tailor": {
       "authored": 16,
@@ -24,29 +24,29 @@
       "remaining": 44
     },
     "butcher": {
+      "authored": 18,
+      "target": 60,
+      "remaining": 42
+    },
+    "jeweler": {
       "authored": 17,
       "target": 60,
       "remaining": 43
     },
-    "jeweler": {
-      "authored": 16,
-      "target": 60,
-      "remaining": 44
-    },
     "bookshop": {
-      "authored": 16,
+      "authored": 17,
       "target": 60,
-      "remaining": 44
+      "remaining": 43
     },
     "temple": {
-      "authored": 24,
+      "authored": 25,
       "target": 75,
-      "remaining": 51
+      "remaining": 50
     },
     "theater": {
-      "authored": 19,
+      "authored": 20,
       "target": 45,
-      "remaining": 26
+      "remaining": 25
     }
   },
   "originals": [
@@ -604,13 +604,43 @@
       "id": "r2:butcher:mountain:medium:02",
       "file": "src/building-pool/roadmap-2b/m1-crossbar-switchback.mjs",
       "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:mountain:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:snow:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:mountain:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:enchanted-forest:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
     }
   ],
   "biomeSizeDistribution": {
     "temperate": {
       "small": 8,
       "medium": 9,
-      "large": 7
+      "large": 8
     },
     "desert": {
       "small": 8,
@@ -619,18 +649,18 @@
     },
     "snow": {
       "small": 8,
-      "medium": 11,
+      "medium": 12,
       "large": 7
     },
     "enchanted-forest": {
-      "small": 8,
-      "medium": 7,
+      "small": 9,
+      "medium": 8,
       "large": 10
     },
     "mountain": {
-      "small": 8,
+      "small": 9,
       "medium": 10,
-      "large": 8
+      "large": 9
     }
   },
   "productionRegistryUnchanged": true,
