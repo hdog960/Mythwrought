@@ -54,3 +54,34 @@ test('host errors invalidate sidecar without pretending rollback',async()=>{
     next:()=>({id:2,orientation:2})}),/host offline/);
   assert.equal(s.invalidated.length,1);
 });
+
+test('explicit legacy full-cube snapshot recovers default orientation without changing schema-1',async()=>{
+  const s=setup();
+  const readSnapshot=async()=>({id:2,revision:0,legacyFullCube:true});
+  assert.equal(await commitOrientedCAS({...s,readSnapshot,cell:[4,0,0],
+    next:before=>{assert.equal(before.orientation,0);return {id:2,orientation:2};},
+    compareAndSwap:async(_cell,expected,next)=>{
+      assert.equal(expected.orientation,0);
+      assert.equal(expected.legacyFullCube,true);
+      Object.assign(s.state,next,{revision:1});
+      return {ok:true,revision:1};
+    }}),true);
+  assert.equal(s.state.orientation,2);
+  assert.deepEqual(s.invalidated,[[4,0,0]]);
+});
+test('missing orientation without explicit legacy marker fails closed and invalidates',async()=>{
+  const s=setup();let writes=0;
+  await assert.rejects(commitOrientedCAS({...s,cell:[5,0,0],
+    readSnapshot:async()=>({id:2,revision:0}),
+    compareAndSwap:async()=>{writes++;return {ok:true,revision:1};},
+    next:()=>({id:2,orientation:0})}),/original snapshot/);
+  assert.equal(writes,0);
+  assert.deepEqual(s.invalidated,[[5,0,0]]);
+});
+test('failed old-save snapshot read invalidates cached orientation',async()=>{
+  const s=setup();
+  await assert.rejects(commitOrientedCAS({...s,cell:[6,0,0],
+    readSnapshot:async()=>{throw new Error('corrupt old save');},
+    next:()=>({id:2,orientation:1})}),/corrupt old save/);
+  assert.deepEqual(s.invalidated,[[6,0,0]]);
+});
