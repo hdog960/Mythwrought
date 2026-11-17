@@ -417,3 +417,28 @@ test('manual M2 scalloped crowns stay bounded, varied and save-inert in real see
   assert.equal(JSON.stringify(world.save()),before,'visual repair never writes physical tree edits');
   assert.equal(CANOPY_LIMITS.newDrawCalls,0);
 });
+
+test('manual M2 rooted trunk wedges meet ground without oversized detached spikes',()=>{
+  const seed=179,world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  let found=null;
+  for(let cx=-5;cx<=5&&!found;cx++)for(let cz=-5;cz<=5&&!found;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(mesh.length>=36*CANOPY_LIMITS.stride)found=mesh;
+  }
+  assert.ok(found,'a seeded tree must render a trunk and attached roots');
+  const x=Math.floor(found[0])+.5,z=Math.floor(found[2])+.5;
+  const ground=terrainHeight(Math.floor(x),Math.floor(z),seed)+1;
+  // Four existing trunk quads = 24 emitted vertices, followed immediately
+  // by four root triangles = 12 emitted vertices for both source tree types.
+  const roots=[];
+  for(let v=24;v<36;v++){
+    const i=v*CANOPY_LIMITS.stride;
+    roots.push({x:found[i],y:found[i+1],z:found[i+2]});
+  }
+  assert.ok(roots.every(p=>p.y>=ground&&p.y<ground+.40),
+    'upper buttress ends join the lower trunk rather than floating high');
+  assert.ok(roots.every(p=>Math.hypot(p.x-x,p.z-z)<.46),
+    'root triangles are compact instead of detached lateral spikes');
+  assert.ok(roots.some(p=>p.y<ground+.05),'at least one root tip touches the grass top');
+  assert.equal(JSON.stringify(world.save()),before,'render-only root cleanup writes no saved world voxels');
+});
