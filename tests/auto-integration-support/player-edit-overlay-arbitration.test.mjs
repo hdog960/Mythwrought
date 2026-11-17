@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {arbitrateNaturalOverlay as run} from '../../src/auto-integration-support/player-edit-overlay-arbitration.mjs';
+const p=(blockId,intent)=>({x:2,y:-3,z:4,blockId,...(intent?{intent}:{})});
+const args=()=>({natural:[p(1)],overlay:[p(2)],edits:[],registry:[0,1,2]});
+test('overlay wins without player edit',()=>{const r=run(args());assert.equal(r.cells[0].blockId,2);assert.equal(r.cells[0].source,'overlay');});
+test('restoring original natural ID still suppresses overlay',()=>{const a=args();a.edits=[p(1,'player')];const r=run(a);assert.equal(r.cells[0].blockId,1);assert.equal(r.cells[0].source,'player');});
+test('player deletion air ID suppresses overlay',()=>{const a=args();a.edits=[p(0,'player')];assert.equal(run(a).cells[0].blockId,0);});
+test('missing durable intent fails closed',()=>{const a=args();a.edits=[p(1)];assert.equal(run(a).ok,false);});
+test('unregistered overlay material fails closed',()=>{const a=args();a.overlay=[p(999)];assert.equal(run(a).ok,false);});
+test('duplicate edits fail closed',()=>{const a=args();a.edits=[p(1,'player'),p(1,'player')];assert.equal(run(a).ok,false);});
+test('no source input mutation and repeatable ordering',()=>{const a=args();a.natural.push({x:-1,y:0,z:0,blockId:1});const before=JSON.stringify(a);assert.deepEqual(run(a),run(a));assert.equal(JSON.stringify(a),before);});
