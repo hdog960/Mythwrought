@@ -66,6 +66,7 @@ try{
    assert.equal(await page.locator('#g2bFlightEnable').isChecked(),true);
    assert.equal(info.bodyClear,true);
    assert.equal(info.resident,true);
+   assert.ok(info.maxY>=60,'Sky flight ceiling must permit useful ascent above the surface');
    for(const profile of ['precision','normal','fast','travel']){
     await page.locator('#g2bFlightProfile').selectOption(profile);
     info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());

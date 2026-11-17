@@ -160,7 +160,10 @@ function start(){
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
-  const g2Section=y=>y>WORLD_MAX_Y&&y<=WORLD_MAX_Y+BODY_HEIGHT+1?0:sectionForY(y);
+  // Air above the authored top voxel is still rendered by the existing
+  // surface section (0); no new blocks, meshes, sections, or save data.
+  const G2_FLIGHT_MAX_FEET=WORLD_MAX_Y+48;
+  const g2Section=y=>y>WORLD_MAX_Y&&y<=G2_FLIGHT_MAX_FEET+BODY_HEIGHT+1?0:sectionForY(y);
   function g2MeshKey(key){
     const parts=key.split(',').map(Number);
     if(parts.length!==3||!parts.every(Number.isSafeInteger)||parts[2]>0)return null;
@@ -168,7 +171,7 @@ function start(){
   }
   function g2Ready(p){
     if(!p||!['x','y','z'].every(k=>Number.isFinite(p[k]))||
-       p.y<WORLD_MIN_Y||p.y>WORLD_MAX_Y+1||graphicsLost)return false;
+       p.y<WORLD_MIN_Y||p.y>G2_FLIGHT_MAX_FEET||graphicsLost)return false;
     const e=1e-5;
     for(const y of [p.y+e,p.y+BODY_HEIGHT-e]){
       const section=g2Section(y);
@@ -223,7 +226,7 @@ function start(){
     }
     try{
       const initial=createG2FlightState({position:at,worldToken:g2Token(),
-        heightBounds:{minFeet:WORLD_MIN_Y,maxFeet:WORLD_MAX_Y+1}});
+        heightBounds:{minFeet:WORLD_MIN_Y,maxFeet:G2_FLIGHT_MAX_FEET}});
       const active=armG2Flight(initial,{enabled:true,isRegionReady:g2Ready,isBodyClear:g2Clear});
       if(active.mode!=='flight'){g2Status.textContent=active.reason;message(active.reason);return false;}
       g2Flight=selectG2FlightProfile(active,g2Profile.value);
@@ -2114,7 +2117,7 @@ function start(){
         controlsPaused:g2Controls.paused,
         heldKeys:[...g2Controls.controls.keys],
         token:g2Token(),pendingPlans:g2Flight?.prefetch.pending.length||0,
-        minY:WORLD_MIN_Y,maxY:WORLD_MAX_Y+1,
+        minY:WORLD_MIN_Y,maxY:G2_FLIGHT_MAX_FEET,
         bodyClear:g2Clear({x:player.x,y:player.feet,z:player.z}),
         resident:g2Ready({x:player.x,y:player.feet,z:player.z}),
         residentChunks:chunks.size};},

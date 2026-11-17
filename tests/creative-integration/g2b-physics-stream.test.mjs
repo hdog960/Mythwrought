@@ -43,6 +43,14 @@ test('G2B streaming preserves real vertical section and original resident radii'
  assert.ok(main.includes('pending.size>=34'));
  assert.ok(main.includes('wanted.has(key)'),'No flight-only unbounded GPU queue');
 });
+test('G2B sky flight exceeds the top voxel without adding a GPU section or save data',()=>{
+ assert.ok(main.includes('const G2_FLIGHT_MAX_FEET=WORLD_MAX_Y+48'));
+ assert.ok(main.includes('y<=G2_FLIGHT_MAX_FEET+BODY_HEIGHT+1?0:sectionForY(y)'));
+ assert.ok(main.includes('p.y>G2_FLIGHT_MAX_FEET'));
+ assert.ok(main.includes('maxFeet:G2_FLIGHT_MAX_FEET'));
+ assert.deepEqual(sectionWindow(WORLD_MAX_Y+32,false),[0]);
+ assert.equal(collides(world,0,WORLD_MAX_Y+32,0),false);
+});
 test('G2B the physical body is sampled at both height and horizontal chunk boundaries',()=>{
  assert.ok(main.includes('p.y+BODY_HEIGHT-e'));
  assert.ok(main.includes('p.x-BODY_RADIUS+e'));
