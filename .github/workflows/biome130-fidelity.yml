@@ -1,0 +1,45 @@
+name: Biome130 renderer fidelity (isolated)
+on:
+  pull_request:
+    paths:
+      - 'src/biome130-render.mjs'
+      - 'src/voxel.mjs'
+      - 'src/depth-mesh.mjs'
+      - 'src/main.mjs'
+      - 'src/builder-assets/biome130.mjs'
+      - 'tests/biome130-render-fidelity.test.mjs'
+      - 'tests/biome130-fidelity-browser.mjs'
+      - 'docs/BIOME130_FIDELITY_GATE.md'
+      - '.github/workflows/biome130-fidelity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-specific-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Focused native shader, surface and depth tests
+        run: |
+          node --check src/biome130-render.mjs
+          node --check src/main.mjs
+          node --check tests/biome130-fidelity-browser.mjs
+          node --test tests/biome130-render-fidelity.test.mjs tests/biome130-full-roster-builder.test.mjs
+      - name: Install pinned browser test tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Real WebGL2 capture at 3 landscape viewport sizes
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-biome130.log 2>&1 &
+          node tests/biome130-fidelity-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: biome130-fidelity-webgl2
+          path: artifacts/biome130-fidelity/
+          if-no-files-found: ignore

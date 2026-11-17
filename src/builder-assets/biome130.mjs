@@ -1,6 +1,7 @@
 // Settlement builders consume the SAME registered physical voxel geometry as live play.
 // This adapter owns no manual Pack 1-5 source and places no settlement automatically.
 import {BIOME130_REGISTERED_SYMBOLS,biome130Block} from '../biome130-registry.mjs';
+import {BIOME130_ICE_BLOCK_IDS} from '../biome130-render.mjs';
 const TURNS=Object.freeze({north:0,east:1,south:2,west:3});
 const yawOf=value=>Number.isInteger(value)&&value>=0&&value<=3?value:
   (typeof value==='string'&&Object.hasOwn(TURNS,value)?TURNS[value]:null);
@@ -15,14 +16,21 @@ export function resolveBiome130BuilderAsset(symbol,orientation='north'){
   const yaw=yawOf(orientation);
   if(yaw===null)throw new RangeError('Invalid builder orientation');
   const asset=biome130Block(symbol,yaw);
+  const blended=BIOME130_ICE_BLOCK_IDS.includes(asset.blockId);
+  const wantsAlpha=asset.transparent||asset.alphaMode==='cutout'||
+    (typeof asset.opacity==='number'&&asset.opacity<1)||
+    asset.opacity==='cutout'||asset.opacity==='translucent';
+  const sourceAlphaIntent=(asset.alphaMode==='cutout'||asset.opacity==='cutout')?
+    'cutout':wantsAlpha?'blend':'opaque';
   return Object.freeze({
     symbol:asset.symbol,blockId:asset.blockId,name:asset.name,
     yaw,source:'auto:12-biome130',worldRegistered:true,livePlaceable:true,
     physical:true,solid:asset.solid,opacity:asset.opacity,
-    // Source intent is preserved for downstream art review. The current
-    // single-pass terrain renderer has no alpha blending/cutout pass.
-    alphaIntent:asset.alphaMode,transparentIntent:asset.transparent,
-    rendererFidelity:(asset.transparent||asset.opacity<1)?'opaque-fallback':'opaque',
+    // The source opacity and leaf cutouts now have a dedicated game render path.
+    alphaIntent:sourceAlphaIntent,transparentIntent:wantsAlpha,
+    rendererFidelity:blended?'alpha-blended':
+      (asset.blockId>=377&&asset.blockId<=385?'alpha-cutout':
+        (wantsAlpha?'opaque-fallback':'opaque')),
     shape:Object.freeze({boxes:asset.boxes}),colors:asset.palette,
     builderUsable:true
   });

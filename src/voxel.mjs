@@ -3,6 +3,7 @@ import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
+import {biome130TriangleMaterialTag} from './biome130-render.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -254,7 +255,8 @@ export function meshChunk(world,cx,cz){
           continue;
         }
         if(isBiome130BlockId(id)){
-          const surface=getBiomeGeometry(id,world.rotationAt?.(x,y,z)??0);
+          const rotation=world.rotationAt?.(x,y,z)??0;
+          const surface=getBiomeGeometry(id,rotation);
           // Source-accurate union surface geometry; full neighboring legacy
           // solids hide only true boundary faces, preserving internal shapes.
           for(let t=0;t<surface.indices.length;t+=3){
@@ -275,11 +277,13 @@ export function meshChunk(world,cx,cz){
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const lit=[.77,.73,1,.48,.85,.67][face];
             const color=biome130Color(id,x,y,z,face);
+            const material=biome130TriangleMaterialTag(
+              id,rotation,surface.positions,surface.indices,t);
             for(let u=t;u<t+3;u++){
               const i=surface.indices[u]*3,px=surface.positions[i],
                     py=surface.positions[i+1],pz=surface.positions[i+2];
               appendVertex(x+px,y+py,z+pz,color[0]*lit,color[1]*lit,color[2]*lit,
-                nx?pz:px,ny?pz:py,0);
+                nx?pz:px,ny?pz:py,material);
             }
           }
           continue;
