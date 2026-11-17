@@ -29,9 +29,9 @@ async function server(){
  await new Promise((ok,fail)=>{http.once('error',fail);http.listen(0,'127.0.0.1',ok);});
  return http;
 }
-// 204 real cold-start Chromium captures take longer than the prior 120-view run;
+// 216 real cold-start Chromium captures take longer than the prior 120-view run;
 // do not truncate genuine browser work at the historic 210s test deadline.
-test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authored M1 source at three phone-landscape dimensions', {timeout:670000},async(t)=>{
+test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authored M1 source at three phone-landscape dimensions', {timeout:710000},async(t)=>{
  const browser=findBrowser();
  if(!browser){t.skip('Chromium/Chrome binary not installed: candidate WebGL2 capture unverified');return;}
  const http=await server(), temp=await mkdtemp(join(tmpdir(),'mythwrought-2b-webgl-'));
@@ -241,7 +241,19 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
   ['tailor',667,375,'exterior','enchanted-forest','small',2],
   ['tailor',667,375,'cutaway','enchanted-forest','small',2],
   ['butcher',844,390,'exterior','mountain','medium',2],
-  ['butcher',844,390,'cutaway','mountain','medium',2]
+  ['butcher',844,390,'cutaway','mountain','medium',2],
+  ['market-square',932,430,'exterior','mountain','large',2],
+  ['market-square',932,430,'cutaway','mountain','large',2],
+  ['butcher',932,430,'exterior','temperate','large',2],
+  ['butcher',932,430,'cutaway','temperate','large',2],
+  ['jeweler',844,390,'exterior','snow','medium',2],
+  ['jeweler',844,390,'cutaway','snow','medium',2],
+  ['bookshop',667,375,'exterior','mountain','small',2],
+  ['bookshop',667,375,'cutaway','mountain','small',2],
+  ['theater',667,375,'exterior','enchanted-forest','small',2],
+  ['theater',667,375,'cutaway','enchanted-forest','small',2],
+  ['temple',844,390,'exterior','enchanted-forest','medium',2],
+  ['temple',844,390,'cutaway','enchanted-forest','medium',2]
  ];
  try{
   for(let i=0;i<cases.length;i++){
