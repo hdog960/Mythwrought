@@ -18,13 +18,17 @@ function quad(out,a,b,c,d,color,mat){
 // Four low, tapered root buttresses anchor trees visually into editable ground.
 // Pure mesh detail: no collision, drops, world writes or saved data changes.
 function roots(out,x,y,z,variation){
-  const colors=[[.43,.28,.18],[.56,.36,.22],[.64,.43,.27],[.49,.32,.20]];
+  const colors=[[.43,.29,.19],[.50,.34,.23],[.54,.37,.26],[.46,.31,.21]];
   for(let i=0;i<4;i++){
-    const a=i*Math.PI/2+variation*.18,dx=Math.cos(a),dz=Math.sin(a);
-    const side=[-dz,dx],spread=.47+variation*.15;
-    const foot=[x+dx*spread,y+.025,z+dz*spread];
-    const left=[x+side[0]*.17,y+.54,z+side[1]*.17];
-    const right=[x-side[0]*.17,y+.54,z-side[1]*.17];
+    const a=i*Math.PI/2+variation*.28,dx=Math.cos(a),dz=Math.sin(a);
+    const side=[-dz,dx],spread=.33+variation*.10;
+    // Short, earth-contact buttresses: the old .54-high, .6-wide paper
+    // triangles looked like detached red spikes around a narrow trunk.
+    // Both upper corners meet inside the existing trunk silhouette, while
+    // each lower root rests 0.016 above the grass top, with no extra faces.
+    const foot=[x+dx*spread,y+.016,z+dz*spread];
+    const left=[x+dx*.13+side[0]*.12,y+.31,z+dz*.13+side[1]*.12];
+    const right=[x+dx*.13-side[0]*.12,y+.31,z+dz*.13-side[1]*.12];
     tri(out,left,right,foot,colors[i],4);
   }
 }
