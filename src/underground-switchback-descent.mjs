@@ -658,6 +658,48 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // Lower-band ribbed fault canyon at Y=-150: a split, walkable erosion
+  // channel with three stepped shelves, an elevated vaulted basin, and a
+  // transverse return. Entirely outside the spiral; no legacy edits or IDs.
+  {
+    const depth=-150,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0];
+      const tangent=[outward[1],-outward[0]];
+      const cell=(d,t,y,id)=>set(anchor.x+outward[0]*d+tangent[0]*t,y,
+                               anchor.z+outward[1]*d+tangent[1]*t,id);
+      const shelf=(d,t,floor,width=2,height=8)=>{
+        for(let a=-width;a<=width;a++){
+          cell(d,t+a,floor,BLOCK.DEEPSTONE);
+          for(let h=1;h<=height;h++)cell(d,t+a,floor+h,BLOCK.AIR);
+        }
+      };
+      // Single entrance and gradual one-block downward transitions.
+      for(let d=0;d<=17;d++)shelf(d,0,depth-(d>=12?1:0));
+      // Divergent gullies reconverge at a wide, supported basin.
+      for(let d=17;d<=58;d++){
+        const spread=Math.round(11*Math.sin(Math.PI*(d-17)/41));
+        const floor=depth-(d>=43?3:d>=29?2:1);
+        shelf(d,-spread,floor,2,9);
+        shelf(d,spread,floor,2,9);
+      }
+      // Cross return connects both arms; an offset alcove branches from it.
+      for(let t=-12;t<=12;t++)shelf(58,t,depth-3,1,9);
+      for(let d=57;d<=78;d++)for(let t=-10;t<=10;t++){
+        const radial=((d-67)/12)**2+((t-2)/11)**2;
+        if(radial<=1)shelf(d,t,depth-3,0,6+Math.floor(7*(1-radial)));
+      }
+      // Solid roof-hung ribs stop above the player envelope; preserve
+      // continuous four-block headroom and never obstruct either gully.
+      for(const d of [24,35,47,55]){
+        const spread=Math.round(11*Math.sin(Math.PI*(d-17)/41));
+        const floor=depth-(d>=43?3:d>=29?2:1);
+        for(const t of [-spread,spread])
+          for(let a=-2;a<=2;a++)cell(d,t+a,floor+8,BLOCK.DEEPSTONE);
+      }
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
