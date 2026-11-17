@@ -32,12 +32,12 @@ function shape(b,mirror,turn){
  }
  return out;
 }
-test('M2M 158/435 complete original source candidates, 277 outstanding, 15 exact inherited stables',()=>{
+test('M2M 164/435 complete original source candidates, 271 outstanding, 15 exact inherited stables',()=>{
  const all=get1BCandidates(),batch=newer(),old=getInheritedStables(),v=validateAllocation(all);
- assert.equal(batch.length,9);assert.equal(old.length,15);assert.equal(all.length,158);
- assert.equal(v.authored,158);assert.equal(v.remaining,277);
- assert.equal(new Set(all.map(p=>p.id)).size,158);
- assert.equal(new Set(all.map(structuralFingerprint)).size,158);
+ assert.equal(batch.length,9);assert.equal(old.length,15);assert.equal(all.length,164);
+ assert.equal(v.authored,164);assert.equal(v.remaining,271);
+ assert.equal(new Set(all.map(p=>p.id)).size,164);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,164);
  assert.deepEqual(Object.fromEntries(Object.keys(QUOTAS).map(c=>[c,all.filter(p=>p.category===c).length])),
   {bathhouse:23,stable:28,'farm-barn':22,greenhouse:23,'fishing-lodge':21,'harbor-office':20,lighthouse:21});
  for(const b of old)assert.equal(stableBlueprintJSON(all.find(x=>x.id===b.id)),stableBlueprintJSON(b),b.id);
