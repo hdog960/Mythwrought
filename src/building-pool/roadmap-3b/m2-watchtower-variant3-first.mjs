@@ -1466,7 +1466,7 @@ function create(p){
   }
   // The signal finial is structurally attached to actual source roof cells.
   const spireX=aisle+4,spireY=deckY+t.rise+2;
-  for(let y=spireY;y<spireY+Math.max(2,Math.ceil(t.rise/2));y++)
+  for(let y=spireY;y<spireY+Math.min(3,Math.max(2,Math.ceil(t.rise/2)));y++)
    write('turret-signal-finial',spireX,y,midZ,p.post);
  }
  for(let y=2;y<=4;y++){
