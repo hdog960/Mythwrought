@@ -2643,7 +2643,8 @@ function create(p){
    if(!mask.has(flat(x,z)))throw Error(id+' skybridge hangs outside source footprint '+[x,z]);
    if((x===x0||x===x1||(x-x0)%4===0)&&z===z0+1)
     for(let y=1;y<=13;y++)write('skybridge-load-bearing-pier',x,y,z,p.post);
-   if(write('skybridge-elevated-deck',x,14,z,p.floor))delivered++;
+   write('skybridge-elevated-deck',x,14,z,p.floor);
+   if(blocks.get(key(x,14,z))==='skybridge-elevated-deck')delivered++;
    if((z===z0||z===z1)&&(x-x0)%3===0)
     write('skybridge-source-parapet',x,15,z,p.trim);
   }
