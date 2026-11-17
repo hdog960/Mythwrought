@@ -2,7 +2,9 @@
 // Every writer MUST share the same scope; this cannot protect external writers.
 import {withVoxelCellLease} from './voxel-cell-lease.mjs';
 
-export function createLeasedLegacyEditor(session, scope = {}) {
+// Default leases are keyed by the authoritative session, not by each editor.
+// Separate adapters for one session must never silently receive isolated locks.
+export function createLeasedLegacyEditor(session, scope = session) {
   if (!session || typeof session.editMany !== 'function' ||
       typeof session.read !== 'function' || typeof session.orientation !== 'function')
     throw new TypeError('A revisioned legacy session is required');
