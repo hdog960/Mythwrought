@@ -79,9 +79,28 @@ const DESIGNS=[
   "size": "medium",
   "variant": 1
 }
+,
+{
+  "type": "castle-palace",
+  "biome": "desert",
+  "size": "small",
+  "variant": 1
+},
+{
+  "type": "embassy",
+  "biome": "snow",
+  "size": "large",
+  "variant": 1
+},
+{
+  "type": "grand-archive",
+  "biome": "desert",
+  "size": "large",
+  "variant": 1
+}
 ];
 const VIEWPORTS=[[667,375],[844,390],[932,430]];
-const EXPECTED_VIEWS=66;
+const EXPECTED_VIEWS=84;
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
 function gitBlob(bytes){
@@ -93,7 +112,7 @@ function bundle(){
  const shapes=readFileSync(join(SOURCE,'m1-preview-shapes.mjs'),'utf8');
  const render=readFileSync(join(TESTS,'m3-state-knowledge-webgl2-preview.mjs'),'utf8');
  let html=readFileSync(join(TESTS,'m3-state-knowledge-webgl2-preview.html'),'utf8');
- if(gitBlob(blueprint)!=='ce3ce3222e64eee85bc4060d2907440c2afc7d4c')
+ if(gitBlob(blueprint)!=='878d2242ba996bc8125057d6179a637db9422f6d')
    throw Error('M2 authored source differs from exact original authored SHA');
  const importBlueprint="import {SCHEMA,validateBlueprint} from './schema.mjs';";
  const importRender="import {buildM3StateKnowledge} from '../../../src/building-pool/roadmap-4a/m3-state-knowledge.mjs';";
@@ -256,7 +275,7 @@ async function runWithBrowser(){
     productionPhysicalFamilyRenderer:false,realIphoneTested:false,creatorArtApproved:false,
     integratedIntoGame:false,schema1SaveCompatibilityVerified:false,results:shots};
   writeFileSync(join(OUT,'results-all.json'),JSON.stringify(evidence,null,2)+'\n');
-  if(shots.length!==EXPECTED_VIEWS||distinctScreens<46)
+  if(shots.length!==EXPECTED_VIEWS||distinctScreens<81)
    throw Error('Incomplete/visually duplicated gallery: '+shots.length+' captures, '+distinctScreens+' distinct PNGs');
   return evidence;
  }finally{
@@ -268,7 +287,7 @@ async function runWithBrowser(){
 }
 export async function runGallery(){
  const evidence=await runWithBrowser();
- console.log('4A M3 state-knowledge source-driven 48/48 WebGL2 gallery PASSED',
+ console.log('4A M3 state-knowledge source-driven 84/84 WebGL2 gallery PASSED',
   JSON.stringify({sha256:evidence.sourceBundleSha256,screens:evidence.actualViews,
    distinct:evidence.distinctScreenHashes,renderer:evidence.results[0]?.renderer,
    maxDrawCalls:Math.max(...evidence.results.map(x=>x.drawCalls)),
