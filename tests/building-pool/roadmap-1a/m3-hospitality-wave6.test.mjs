@@ -57,7 +57,7 @@ test('13 original wave6 hospitality source buildings, six taverns and seven inns
  assert.deepEqual(pool.reduce((o,b)=>(o[b.category]=(o[b.category]??0)+1,o),{}),{house:150,tavern:53,inn:42});
  assert.equal(validatePool(pool).authored,245);assert.equal(validatePool(pool).remaining,205);
  assert.equal(new Set(pool.map(b=>b.id)).size,245);
- assert.equal(new Set(pool.map(structuralFingerprint)).size,232);
+ assert.equal(new Set(pool.map(structuralFingerprint)).size,245);
  assert.deepEqual(findMirroredOrRotatedDuplicates(pool),[]);
  assert.ok(pool.every(b=>b.status==='candidate'&&b.worldPlacement===false&&b.liveIntegration===false));
 });
