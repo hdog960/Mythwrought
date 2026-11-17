@@ -30,3 +30,22 @@ test('object footprints cannot overlap resolved solid terrain but may occupy min
  a.playerEdits=[{x:1,y:9,z:0,blockId:0,sequence:1}];
  assert.equal(preflightWorldComposition(a).ok,true);
 });
+
+test('opt-in cave clearance proves known empty path cells and rejects restored obstructions',()=>{
+ const a=base();
+ a.caveRoutes=[{surfaceY:9,entrance:{x:0,y:9,z:0},exit:{x:0,y:8,z:0},path:[{x:0,y:9,z:0},{x:0,y:8,z:0}]}];
+ assert.equal(preflightWorldComposition({...a,requireClearCavePath:true}).ok,true);
+ const obstructed={...a,naturalCells:a.naturalCells.map(c=>c.y===8?cell(0,8,0,1):c)};
+ assert.equal(preflightWorldComposition({...obstructed,requireClearCavePath:true}).reason,'cave-path-obstructed');
+ const mined={...obstructed,playerEdits:[{x:0,y:8,z:0,blockId:0,sequence:1}]};
+ assert.equal(preflightWorldComposition({...mined,requireClearCavePath:true}).ok,true);
+ const restored={...a,playerEdits:[{x:0,y:8,z:0,blockId:1,sequence:1}]};
+ assert.equal(preflightWorldComposition({...restored,requireClearCavePath:true}).reason,'cave-path-obstructed');
+});
+test('sparse cave fixtures never count unknown underground cells as proven clear',()=>{
+ const a=base(); a.caveRoutes=[{surfaceY:9,entrance:{x:0,y:9,z:0},exit:{x:0,y:7,z:0},
+ path:[{x:0,y:9,z:0},{x:0,y:8,z:0},{x:0,y:7,z:0}]}];
+ assert.equal(preflightWorldComposition({...a,requireClearCavePath:true}).reason,'cave-path-cell-unverified');
+ assert.equal(preflightWorldComposition(a).ok,true);
+ assert.throws(()=>preflightWorldComposition({...a,requireClearCavePath:'yes'}),/invalid preflight inputs/);
+});
