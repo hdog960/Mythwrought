@@ -188,13 +188,13 @@ test('ledger ids are byte-for-byte sourced from exact branch files, and no histo
  }
  const l=JSON.parse(readFileSync(new URL('../../../src/building-pool/roadmap-2b/m1-authoring-ledger.json',import.meta.url),'utf8'));
  assert.deepEqual([l.target,l.sourceExactInheritedTemples,l.originalNewModels,l.authoredCandidates,l.remainingUnauthored,
-  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,106,121,299,0,0,0]);
- assert.equal(l.originals.length,106);
+  l.creatorAccepted,l.integratedInGame,l.placedInWorld],[420,15,111,126,294,0,0,0]);
+ assert.equal(l.originals.length,111);
  for(const historical of ALL115.filter(b=>b.category!=='temple'||b.variation!==1))
   assert(l.originals.some(row=>row.id===historical.id),'lost prior 115 coordinate-authored building '+historical.id);
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),121);
- assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),299);
- assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),121);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.authored,0),126);
+ assert.equal(Object.values(l.byCategory).reduce((n,x)=>n+x.remaining,0),294);
+ assert.equal(Object.values(l.biomeSizeDistribution).reduce((n,x)=>n+x.small+x.medium+x.large,0),126);
  for(const b of BESPOKE_NEXT){
   const expected=b.category==='theater'||b.category==='temple'||b.category==='bookshop'?'m1-terraces-sanctuaries.mjs':'m1-windfold-guilds.mjs';
   const item=l.originals.find(x=>x.id===b.id);
