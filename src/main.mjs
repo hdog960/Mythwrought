@@ -153,7 +153,7 @@ function start(){
     if(hint)hint.textContent='Off after world change. Enable again for this seed’s separate sidecar.';
   }
   // G2B only: explicit-session feature, no persistent settings, edits or new GPU queue.
-  let g2Epoch=0,g2Flight=null,g2Controls=createG2ControlState();
+  let g2Epoch=0,g2CreativeEnabled=false,g2Flight=null,g2Controls=createG2ControlState();
   const g2Toggle=document.getElementById('g2bFlightEnable');
   const g2Profile=document.getElementById('g2bFlightProfile');
   const g2Status=document.getElementById('g2bFlightStatus');
@@ -194,15 +194,16 @@ function start(){
   function g2Sync(){
     const on=g2Active();
     document.body.classList.toggle('g2b-flight-active',on);
-    g2Toggle.checked=on;g2Profile.disabled=!on;
+    g2Toggle.checked=g2CreativeEnabled;g2Profile.disabled=!g2CreativeEnabled;
     for(const [id,label,aria] of [
       ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
       ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
       ['jump',on?'LAND ×2':'JUMP',on?'Double-tap for safe landing':'Jump; double-tap to toggle Creative flight']]){
       const el=document.getElementById(id);el.textContent=label;el.setAttribute('aria-label',aria);
     }
-    g2Status.textContent=on?'FLIGHT · '+g2Flight.profile+' · '+g2Flight.reason:
-      'Flight OFF · normal Explore controls';
+    g2Status.textContent=on?'CREATIVE FLIGHT · '+g2Flight.profile+' · '+g2Flight.reason:
+      (g2CreativeEnabled?'CREATIVE ON · double-tap JUMP to fly · ground controls active':
+      'CREATIVE OFF · normal Explore controls');
     canvas.dataset.g2bFlight=String(on);
     canvas.dataset.g2bProfile=on?g2Flight.profile:'off';
   }
@@ -214,9 +215,10 @@ function start(){
   }
   function g2NewWorld(){
     // The original world-change code immediately installs a safe newPlayer.
-    g2Flight=null;g2Controls=createG2ControlState();g2Epoch++;g2Sync();
+    g2CreativeEnabled=false;g2Flight=null;g2Controls=createG2ControlState();g2Epoch++;g2Sync();
   }
   function g2Start(){
+    if(!g2CreativeEnabled)return false;
     if(g2Active())return true;
     const at={x:player.x,y:player.feet,z:player.z};
     if(document.hidden||graphicsLost||exploration.isOpen()||
@@ -317,10 +319,17 @@ function start(){
       g2Status.textContent=g2Flight.reason;
     }catch(e){g2Pause('Flight failed safely: '+e.message);}
   }
-  g2Toggle.checked=false;g2Profile.value='normal';g2Sync();
+  g2CreativeEnabled=false;g2Toggle.checked=false;g2Profile.value='normal';g2Sync();
+  // Creative enablement is separate from flying: enabling never lifts the player.
+  // A failed physical landing cannot silently turn Creative off midair.
   g2Toggle.addEventListener('change',()=>{
-    if(g2Toggle.checked){g2Start();g2Sync();}
-    else if(!g2Land())g2Sync();
+    if(g2Toggle.checked)g2CreativeEnabled=true;
+    else if(g2Active()&&!g2Land()){
+      g2CreativeEnabled=true;
+      message('Creative remains enabled: land safely before switching off');
+    }else g2CreativeEnabled=false;
+    lastG2JumpReleaseAt=-Infinity;
+    g2Sync();
   });
   g2Profile.addEventListener('change',()=>{
     if(!g2Active())return;
@@ -1182,7 +1191,7 @@ function start(){
     // Under a busy mobile GPU one touch can be held/processed for >500ms;
     // press-to-press timing incorrectly treats a genuine double tap as two singles.
     const gap=now-lastG2JumpReleaseAt;
-    if(gap>=0&&gap<=G2_JUMP_DOUBLE_TAP_MS){
+    if(g2CreativeEnabled&&gap>=0&&gap<=G2_JUMP_DOUBLE_TAP_MS){
       lastG2JumpReleaseAt=-Infinity;
       if(g2Active())g2Land();else g2Start();
       return true;
@@ -2142,7 +2151,7 @@ function start(){
         }
         return {...result,scene:pack5Gpu.stats(),worldSchema:world.save().schema};
       },
-      flightInfo(){return {active:g2Active(),profile:g2Active()?g2Flight.profile:'off',
+      flightInfo(){return {creativeEnabled:g2CreativeEnabled,active:g2Active(),profile:g2Active()?g2Flight.profile:'off',
         position:{x:player.x,y:player.feet,z:player.z},
         blocked:Boolean(g2Flight?.blocked),reason:g2Flight?.reason||'off',
         controlsPaused:g2Controls.paused,

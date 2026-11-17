@@ -92,6 +92,19 @@ try{
        'Touch interval was not a valid double-tap: '+JSON.stringify({gap,received}));
      return gap;
    }
+   // No Creative activation, no matter how quickly the player double-taps.
+   await doubleTapJumpTouch();
+   let beforeCreative=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.equal(beforeCreative.creativeEnabled,false,'Creative must begin disabled');
+   assert.equal(beforeCreative.active,false,'Double-tap cannot fly in Explore mode');
+   await page.waitForTimeout(900);
+   await page.locator('#menu').click();
+   assert.equal(await page.locator('#g2bFlightEnable').isChecked(),false);
+   await page.locator('#g2bFlightEnable').check();
+   let enabled=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.equal(enabled.creativeEnabled,true,'Creative toggle did not enable mode');
+   assert.equal(enabled.active,false,'Enabling Creative must NOT automatically enter flight');
+   await page.locator('#closeHelp').click();
    await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,false,
      'One JUMP touch must not enable flight');
@@ -120,6 +133,7 @@ try{
    }
    await page.locator('#menu').click();
    assert.equal(await page.locator('#g2bFlightEnable').isChecked(),true);
+   assert.equal(info.creativeEnabled,true,'Creative should remain enabled in flight');
    assert.equal(info.bodyClear,true);
    assert.equal(info.resident,true);
    assert.ok(info.maxY>=60,'Sky flight ceiling must permit useful ascent above the surface');
@@ -232,6 +246,7 @@ try{
    await doubleTapJumpTouch();
    await page.waitForTimeout(160);
    const landed=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.equal(landed.creativeEnabled,true,'Landing should not disable Creative Mode');
    if(!landed.active){
      assert.equal(landed.bodyClear,true);
      assert.equal(await page.locator('#jump').textContent(),'JUMP');

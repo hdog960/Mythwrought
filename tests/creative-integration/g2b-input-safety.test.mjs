@@ -19,6 +19,8 @@ test('G2B flight uses original physical button IDs with gated Explore actions',(
  assert.ok(src.includes("g2BindHold('dig','down')"));
  assert.ok(src.includes("g2BindHold('place','up')"));
  assert.ok(src.includes('g2BindJumpToggle()'));
+ assert.ok(src.includes('if(g2CreativeEnabled&&gap>=0&&gap<=G2_JUMP_DOUBLE_TAP_MS)'));
+ assert.ok(src.includes('if(!g2CreativeEnabled)return false;'));
  assert.ok(src.includes("if(zone==='up'||zone==='down')g2Move(.05)"));
  assert.ok(src.includes('const G2_JUMP_DOUBLE_TAP_MS=650'));
  assert.ok(src.includes('g2JumpTap(e.timeStamp)'));
@@ -84,6 +86,11 @@ test('G2B mode UI is optional, accessible, not persisted, and labels dynamically
  assert.ok(html.includes('id="g2bFlightProfile"'));
  assert.ok(html.includes('id="g2bFlightStatus"'));
  assert.ok(src.includes('g2Toggle.checked=false'));
+ assert.ok(src.includes('g2Toggle.checked=g2CreativeEnabled'));
+ assert.ok(src.includes('g2CreativeEnabled=false;g2Flight=null'));
+ assert.ok(html.includes('ENABLE CREATIVE MODE (FLIGHT CONTROLS)'));
+ assert.ok(src.includes('else if(g2Active()&&!g2Land())'));
+ assert.ok(src.includes('lastG2JumpReleaseAt=-Infinity;'));
  assert.ok(src.includes("g2Profile.value='normal'"));
  assert.ok(src.includes("el.setAttribute('aria-label',aria)"));
  assert.ok(!src.includes("localStorage.setItem('g2b"));
