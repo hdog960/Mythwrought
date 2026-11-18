@@ -25,11 +25,11 @@ const FAMILY=Object.freeze({
 });
 const PLANS=[
   {
-    "id": "r4:castle-palace:temperate:large:04",
+    "id": "r4:castle-palace:temperate:large:02",
     "type": "castle-palace",
     "biome": "temperate",
     "size": "large",
-    "variant": 4,
+    "variant": 2,
     "bounds": [
       117,
       16,
@@ -317,11 +317,11 @@ const PLANS=[
     "sourceAuthoredName": "river-hook-palace-southern-arc"
   },
   {
-    "id": "r4:castle-palace:desert:medium:04",
+    "id": "r4:castle-palace:desert:medium:03",
     "type": "castle-palace",
     "biome": "desert",
     "size": "medium",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       85,
       16,
@@ -616,11 +616,11 @@ const PLANS=[
     "sourceAuthoredName": "terraced-desert-zigzag-courtyard"
   },
   {
-    "id": "r4:castle-palace:mountain:small:04",
+    "id": "r4:castle-palace:mountain:small:03",
     "type": "castle-palace",
     "biome": "mountain",
     "size": "small",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       67,
       16,
@@ -908,11 +908,11 @@ const PLANS=[
     "sourceAuthoredName": "highpass-cliff-L-wall"
   },
   {
-    "id": "r4:embassy:snow:large:04",
+    "id": "r4:embassy:snow:large:03",
     "type": "embassy",
     "biome": "snow",
     "size": "large",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       109,
       16,
@@ -1213,11 +1213,11 @@ const PLANS=[
     "sourceAuthoredName": "snow-horseshoe-consular-garden"
   },
   {
-    "id": "r4:embassy:temperate:small:04",
+    "id": "r4:embassy:temperate:small:03",
     "type": "embassy",
     "biome": "temperate",
     "size": "small",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       66,
       16,
@@ -1511,11 +1511,11 @@ const PLANS=[
     "sourceAuthoredName": "river-bent-T-diplomacy"
   },
   {
-    "id": "r4:embassy:desert:medium:04",
+    "id": "r4:embassy:desert:medium:03",
     "type": "embassy",
     "biome": "desert",
     "size": "medium",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       87,
       16,
@@ -1816,11 +1816,11 @@ const PLANS=[
     "sourceAuthoredName": "fan-shaped-desert-trade-house"
   },
   {
-    "id": "r4:grand-archive:snow:medium:04",
+    "id": "r4:grand-archive:snow:medium:03",
     "type": "grand-archive",
     "biome": "snow",
     "size": "medium",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       89,
       16,
@@ -2102,11 +2102,11 @@ const PLANS=[
     "sourceAuthoredName": "stepped-snow-vault-long-galleries"
   },
   {
-    "id": "r4:grand-archive:enchanted-forest:small:04",
+    "id": "r4:grand-archive:enchanted-forest:small:03",
     "type": "grand-archive",
     "biome": "enchanted-forest",
     "size": "small",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       71,
       16,
@@ -2401,11 +2401,11 @@ const PLANS=[
     "sourceAuthoredName": "moss-ring-scriptorium-canopy"
   },
   {
-    "id": "r4:grand-archive:mountain:large:04",
+    "id": "r4:grand-archive:mountain:large:03",
     "type": "grand-archive",
     "biome": "mountain",
     "size": "large",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       119,
       16,
@@ -2699,11 +2699,11 @@ const PLANS=[
     "sourceAuthoredName": "mountain-dual-cliff-vaults"
   },
   {
-    "id": "r4:observatory:enchanted-forest:medium:04",
+    "id": "r4:observatory:enchanted-forest:medium:03",
     "type": "observatory",
     "biome": "enchanted-forest",
     "size": "medium",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       92,
       16,
@@ -3004,11 +3004,11 @@ const PLANS=[
     "sourceAuthoredName": "spiral-roots-tower-triptych"
   },
   {
-    "id": "r4:observatory:desert:large:04",
+    "id": "r4:observatory:desert:large:03",
     "type": "observatory",
     "biome": "desert",
     "size": "large",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       121,
       16,
@@ -3290,11 +3290,11 @@ const PLANS=[
     "sourceAuthoredName": "desert-starburst-radial-platforms"
   },
   {
-    "id": "r4:observatory:snow:small:04",
+    "id": "r4:observatory:snow:small:03",
     "type": "observatory",
     "biome": "snow",
     "size": "small",
-    "variant": 4,
+    "variant": 3,
     "bounds": [
       70,
       16,
