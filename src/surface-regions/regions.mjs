@@ -4,11 +4,11 @@
 import {biome130Block,isBiome130BlockId} from '../biome130-registry.mjs';
 import {terrainHeight} from '../voxel.mjs';
 import {WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from '../depth.mjs';
-const REGIONS=Object.freeze([
+// Main registry reconciled 2026-11-17: every automatic terrain floor and\n// stratum ID is an actually registered SOLID material. Snow 271 is powder\n// (non-solid), mountain 298 is an enchanted wood knot; never use either as\n// procedural ground. Original PR #172 is preserved unmodified.\nconst REGIONS=Object.freeze([
   {name:'desert',x:512,z:0,surface:256,subsoil:258,rock:261,salt:259},
-  {name:'snow',x:0,z:512,surface:271,subsoil:272,rock:274,salt:275},
-  {name:'mountain',x:-512,z:0,surface:298,subsoil:299,rock:300,salt:301},
-  {name:'enchanted',x:0,z:-512,surface:283,subsoil:284,rock:286,salt:287}
+  {name:'snow',x:0,z:512,surface:272,subsoil:278,rock:279,salt:277},
+  {name:'mountain',x:-512,z:0,surface:302,subsoil:303,rock:305,salt:307},
+  {name:'enchanted',x:0,z:-512,surface:286,subsoil:293,rock:294,salt:289}
 ]);
 // Exposed geological bands are selected from already-registered biome130 solids.
 // This changes actual fresh-column voxels, never the global block catalog.
@@ -276,8 +276,10 @@ export function createSurfaceBiomeWorldView(world,{
          y>Math.max(oldTop,surfaceBiomeHeight(x,z,world.seed)))
         return original;
       if(isProtected(x,y,z)||hasDurableEditIntent(x,y,z)||
-         world.edits.has(x+','+y+','+z)||world.rotations.has(x+','+y+','+z))
+         world.edits.has(x+','+y+','+z)||world.rotations.has(x+','+y+','+z)){
+        cache.delete(x+','+z);
         return original;
+      }
       return planAt(x,z)?.get(y)??original;
     },
     rotationAt(x,y,z){return world.rotationAt?.(x,y,z)??0;},
