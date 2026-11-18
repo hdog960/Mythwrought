@@ -51,5 +51,5 @@ function build(s){
  });
 }
 export function getRoadmapBWave8B1(){return SPECS.map(build);}
-export const ROADMAP_B_WAVE7_B1_IDS=Object.freeze(SPECS.map(x=>
+export const ROADMAP_B_WAVE8_B1_IDS=Object.freeze(SPECS.map(x=>
  ['r1',x.cat,x.biome,x.size,String(x.index).padStart(3,'0')].join(':')));
