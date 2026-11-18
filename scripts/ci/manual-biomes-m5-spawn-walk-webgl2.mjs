@@ -48,9 +48,11 @@ try{
      throw Error('Real WebGL2 unavailable in physical walking test');
    await page.locator('#menu').click();
    await page.locator('#seedInput').fill('179');
-   await page.locator('#createFourBiomeWorld').click();
+   if(await page.locator('#createFourBiomeWorld').count()!==1)
+     throw Error('Accepted normal v4 new-world button unexpectedly removed');
+   await page.locator('#createExperimentalV5World').click();
    if(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator)
-       !=='mythwrought-four-surface-regions-v4')
+       !=='mythwrought-four-surface-regions-v5')
      throw Error('New profile world selection failed');
    await page.locator('#closeHelp').click();
    const checkPosition=async()=>{
@@ -115,7 +117,7 @@ try{
      currentProfile:window.__mythwroughtTest.fourBiomeProfile()?.generator
    }));
    if(!storage.map||storage.legacyMap||storage.legacyProfile||
-      storage.currentProfile!=='mythwrought-four-surface-regions-v4'||
+      storage.currentProfile!=='mythwrought-four-surface-regions-v5'||
       JSON.parse(storage.map).seed!==179||
       after.discovered<current.discovered)
      throw Error('M5 map cold reload leaked fog or seed identity '+JSON.stringify({
@@ -132,6 +134,8 @@ try{
  await writeFile(path.join(out,'manifest.json'),JSON.stringify({
    kind:'mythwrought-m5-actual-keyboard-spawn-walk',
    complete512BlockJourneys:false,
+   sourceGenerator:'mythwrought-four-surface-regions-v5',
+   ordinaryNewWorldGeneratorPreserved:'mythwrought-four-surface-regions-v4',
    guarantee:'No debug teleport, no player-position writes, actual keyboard input',
    legacyWorldPreserved:true,realChromium:true,
    screens:scenes,journeys,errors
