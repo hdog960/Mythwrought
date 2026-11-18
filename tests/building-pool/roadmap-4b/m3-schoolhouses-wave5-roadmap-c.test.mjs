@@ -18,7 +18,7 @@ function maxD4(a,b){const B=orient(floor(b),0);let max=0;for(let t=0;t<8;t++){
 
 test('Luminbough new original source 151 preserves all 150 previous schoolhouse objects intact',()=>{
  const b=ROADMAP_C_4B_WAVE5_SCHOOL;
- assert.equal(b.id,'r4:schoolhouse:enchanted-forest:large:01');
+ assert.equal(b.id,'r4:schoolhouse:enchanted-forest:large:02');
  assert.ok(ROADMAP_C_4B_150_ALL.every((previous,i)=>previous===ROADMAP_C_4B_151_ALL[i]));
  assert.deepEqual(validateCollection(ROADMAP_C_4B_151_ALL),{authored:151,remaining:134,creatorApproved:0,integrated:0});
  assert.equal(new Set(ROADMAP_C_4B_151_ALL.map(geometrySignature)).size,151);
