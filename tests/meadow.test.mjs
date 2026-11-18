@@ -68,8 +68,10 @@ test('meadow mesh remains render-only alongside independently registered physica
   const mesh=meshChunk(w,-1,0),flora=accents(w,-1,0);
   assert.equal(mesh.length%9,0);
   assert.ok(mesh.length>flora.length);
-  assert.ok(packedIndex(mesh,flora)>=0,
-    'Visual accents must remain an exact contiguous section of the editable chunk mesh');
+  assert.ok(flora.length>0,'retain archived bloom source for the new interactive system');
+  for(let i=8;i<mesh.length;i+=9)
+    assert.ok(mesh[i]<7||mesh[i]>=18,
+      'unbreakable visual blossom cannot remain in gameplay mesh');
   assert.equal(JSON.stringify(w.save()),before,'Rendering changed original schema-1 bytes');
   assert.equal(w.set(0,15,0,9),false,'Unregistered decorative shader tag must not be a block');
   assert.equal(w.edits.size,0,'Decorations must not create edits');
