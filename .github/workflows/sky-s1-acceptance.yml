@@ -1,16 +1,12 @@
 name: Mythwrought SKY S1 exact-head clock and WebGL2
 on:
+  # S1 is frozen at ec62cb022ffcd9a1759b456f8e3a9c501a18d293.
+  # S2's dedicated workflow reruns the same S1 browser source as a regression.
+  # Do not reapply an S1-only ownership check to later approved sky stages.
   push:
     branches: ['sky/roadmap-s0-baseline-20261118']
     paths:
-      - 'src/world-clock.mjs'
-      - 'src/main.mjs'
-      - 'index.html'
-      - 'styles.css'
-      - 'tests/world-clock.test.mjs'
       - 'tests/sky/s1-clock-browser.mjs'
-      - 'docs/sky/**'
-      - '.github/workflows/sky-s1-acceptance.yml'
   workflow_dispatch:
 permissions:
   contents: read
