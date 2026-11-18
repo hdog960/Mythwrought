@@ -12,12 +12,12 @@ export function createAtomicVoxelHost(initialCells) {
     if (!validCell(entry?.cell) || !validId(entry.id)) throw new TypeError('Invalid legacy cell');
     const k = key(entry.cell);
     if (cells.has(k)) throw new TypeError('Duplicate legacy cell');
-    cells.set(k, {cell:copyCell(entry.cell),id:entry.id,revision:0,turn:null});
+    cells.set(k, {cell:copyCell(entry.cell),id:entry.id,revision:0,turn:null,orientationEpoch:0});
   }
   const read = cell => {
     if (!validCell(cell)) throw new TypeError('Invalid cell');
     const s = cells.get(key(cell));
-    return s ? {id:s.id,revision:s.revision,turn:s.turn} : null;
+    return s ? {id:s.id,revision:s.revision,turn:s.turn,orientationEpoch:s.orientationEpoch} : null;
   };
   const compareAndWriteMany = receipts => {
     if (!Array.isArray(receipts) || receipts.length < 1 || receipts.length > 256)
@@ -28,6 +28,7 @@ export function createAtomicVoxelHost(initialCells) {
     for (const r of receipts) {
       if (!validCell(r?.cell) || !validId(r.expectedId) || !validId(r.nextId) ||
           !Number.isSafeInteger(r.expectedRevision) || r.expectedRevision < 0 ||
+          (r.expectedOrientationEpoch !== undefined && (!Number.isSafeInteger(r.expectedOrientationEpoch) || r.expectedOrientationEpoch < 0)) ||
           (r.expectedTurn !== undefined && r.expectedTurn !== null &&
            (!Number.isSafeInteger(r.expectedTurn) || r.expectedTurn < 0 || r.expectedTurn > 3)))
         throw new TypeError('Invalid receipt');
@@ -37,13 +38,15 @@ export function createAtomicVoxelHost(initialCells) {
       const s = cells.get(k);
       if (!s || s.id !== r.expectedId || s.revision !== r.expectedRevision ||
           s.revision >= Number.MAX_SAFE_INTEGER - 1 ||
-          (r.expectedTurn !== undefined && s.turn !== r.expectedTurn)) return false;
+          (r.expectedTurn !== undefined && s.turn !== r.expectedTurn) ||
+          (r.expectedOrientationEpoch !== undefined && s.orientationEpoch !== r.expectedOrientationEpoch)) return false;
     }
     for (const r of receipts) {
       const s = cells.get(key(r.cell));
       s.id = r.nextId;
       s.revision++;
       s.turn = null;
+      s.orientationEpoch++;
     }
     return true;
   };
@@ -58,7 +61,9 @@ export function createAtomicVoxelHost(initialCells) {
       const s = cells.get(key(cell));
       if (!s || s.id !== expectedId || s.revision !== expectedRevision ||
           (expectedTurn !== undefined && s.turn !== expectedTurn)) return false;
+      if (s.orientationEpoch >= Number.MAX_SAFE_INTEGER - 1) return false;
       s.turn = turn;
+      s.orientationEpoch++;
       return true;
     },
     externalWrite(cell, nextId) {
@@ -68,6 +73,7 @@ export function createAtomicVoxelHost(initialCells) {
       s.id = nextId;
       s.revision++;
       s.turn = null;
+      s.orientationEpoch++;
       return true;
     },
     exportLegacyCells() {
