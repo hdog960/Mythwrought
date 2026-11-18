@@ -3,7 +3,7 @@
 Previous Wave5 SOURCE-ONLY technical acceptance was locked on exact HEAD `d8c70e8cb31b1f540e49695e5ca843b849624a24`, documented in `WAVE5_SOURCE_TECHNICAL_ACCEPTANCE_20261118.md`. Wave6 is a NEW isolated candidate tranche on draft PR #241 and is **not accepted until its exact-head CI and independent artifact audit pass**.
 
 ## Four independently authored Builder 1B community buildings
-- `r1:stable:snow:large:004` — **Whitecrag Seven-Stall Caravan Mews**: seven distinct supported roof masses, western high hay loft, long snowbound tack gallery, rear sheltered carriage archive and mountainward signal spur. No animal or citizen AI.
+- `r1:stable:snow:large:005` — **Whitecrag Seven-Stall Caravan Mews**: seven distinct supported roof masses, western high hay loft, long snowbound tack gallery, rear sheltered carriage archive and mountainward signal spur. No animal or citizen AI.
 - `r1:greenhouse:desert:medium:004` — **Copperbloom Crescent Seed Conservatory**: original desert crescent canopy with tall glass hood, low east shaded nursery, west dry seed vault, open sunlight court, deep rear herb logbooks.
 - `r1:bathhouse:temperate:large:004` — **Willowmere Tidal Willow Baths**: seven-plus distinct roof masses, offset western dry therapy court, high eastern steam walk, two physically connected separate upstream porticoes and protected rear resting gallery. No active liquid/fire mechanics.
 - `r1:fishing-lodge:enchanted-forest:medium:004` — **Lumenfen Crooked Reed Anglers Hall**: eastern fen record wing, narrow west tackle gallery, high southern net loft, real covered quay access and rear witness hall. No mobs or boats.

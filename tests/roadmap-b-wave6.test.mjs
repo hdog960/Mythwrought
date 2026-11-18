@@ -74,6 +74,7 @@ test('Wave6 eight original reserved IDs do not collide with historical 169/146 o
  const new1=getRoadmapBWave6B1(),new2=getRoadmapBWave6B2(),incoming=[...new1,...new2];
  assert.equal(prior.length,38);assert.equal(new1.length,4);assert.equal(new2.length,4);
  assert.deepEqual(new1.map(b=>b.id),[...ROADMAP_B_WAVE6_B1_IDS]);
+ assert.equal(new1[0].id,'r1:stable:snow:large:005','Whitecrag must use unused fifth snow-large stable variant; original Ridgebreak r1:stable:snow:large:004 remains immutable');
  assert.deepEqual(new2.map(b=>b.id),[...ROADMAP_B_WAVE6_B2_IDS]);
  assert.equal(new Set(incoming.map(b=>b.id)).size,8);
  const previous=new Set(prior.map(b=>b.id));
