@@ -79,8 +79,12 @@ function start(){
   let skyClock=loadSkyClock({seed:world.seed,storage:localStorage,
     wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
   const skyClockStatus=document.getElementById('skyClockStatus');
-  let lastSkyClockLabel=-Infinity;
+  let lastSkyClockUiAt=-Infinity;
   function paintSkyClock(now,force=false){
+    // Clock time itself is pure and continuous; S1 visual status only needs 4 Hz.
+    // Avoid five unnecessary DOM mutations per rendered WebGL2 frame.
+    if(!force&&now-lastSkyClockUiAt<250)return;
+    lastSkyClockUiAt=now;
     const phase=sampleSkyClock(skyClock,now);
     const formatted=formatSkyTime(phase);
     canvas.dataset.skyClockPhaseMs=String(Math.floor(phase));
@@ -88,12 +92,9 @@ function start(){
     canvas.dataset.skyClockTime=formatted;
     canvas.dataset.skyClockSeed=String(skyClock.seed);
     canvas.dataset.skyClockPersistence=skyClock.persistence;
-    if(force||now-lastSkyClockLabel>=500){
-      skyClockStatus.textContent='WORLD '+skyClock.seed+' · '+formatted+
-        ' · 24-MIN CYCLE RUNNING · '+(skyClock.persistence==='saved'?'SAVED':'SESSION-ONLY')+
-        (skyClock.warning?' · '+skyClock.warning:'');
-      lastSkyClockLabel=now;
-    }
+    skyClockStatus.textContent='WORLD '+skyClock.seed+' · '+formatted+
+      ' · 24-MIN CYCLE RUNNING · '+(skyClock.persistence==='saved'?'SAVED':'SESSION-ONLY')+
+      (skyClock.warning?' · '+skyClock.warning:'');
   }
   function reactivateSkyClock(){
     skyClock=loadSkyClock({seed:world.seed,storage:localStorage,
