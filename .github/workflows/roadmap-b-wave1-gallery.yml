@@ -8,6 +8,44 @@ on:
 permissions:
   contents: read
 jobs:
+  roadmap-b-1b-native:
+    if: ${{ github.event.pull_request.number == 241 && github.event.pull_request.draft == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Builder 1B source-specific native and Chromium acceptance
+        run: node scripts/ci/run-isolated.mjs roadmap-1b
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-b-1b-exact-native-evidence
+          path: artifacts/
+          if-no-files-found: ignore
+  roadmap-b-2b-native:
+    if: ${{ github.event.pull_request.number == 241 && github.event.pull_request.draft == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Builder 2B source-specific native and Chromium acceptance
+        run: node scripts/ci/run-isolated.mjs roadmap-2b
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-b-2b-exact-native-evidence
+          path: artifacts/
+          if-no-files-found: ignore
   roadmap-b-webgl2:
     if: ${{ github.event.pull_request.number == 241 && github.event.pull_request.draft == true }}
     runs-on: ubuntu-24.04
