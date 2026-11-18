@@ -43,6 +43,15 @@ try{
        if(mat===18)physicalLeaves++;
      }
    }
+   // Nearby arbitrary chunks may contain no seed-selected tree. Also inspect
+   // the exact original physical tree's occupied chunk to prove real leaves
+   // survived even where the retired fake canopy used to be.
+   const {liveVoxelDistrict}=await import('./src/live-voxel-world.mjs');
+   const district=liveVoxelDistrict(w.seed,0,0,(x,y,z)=>w.legacyBlockAt(x,y,z));
+   const real=district.trees.flatMap(t=>t.cells).find(c=>c[3]===7);
+   if(!real)throw Error('Original seeded physical foliage missing');
+   const mesh=meshChunk(w,Math.floor(real[0]/16),Math.floor(real[2]/16));
+   for(let i=8;i<mesh.length;i+=9)if(mesh[i]===18)physicalLeaves++;
    return {vertices,physicalLeaves,saveUnchanged:JSON.stringify(w.save())===old};
  });
  assert.ok(fakeMeshCheck.vertices>1000&&fakeMeshCheck.saveUnchanged);
