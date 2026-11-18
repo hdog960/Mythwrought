@@ -21,7 +21,9 @@ const folder=resolve('artifacts/cave-roadmap-actual-game');
 await mkdir(folder,{recursive:true});
 const report={status:'UNVERIFIED',kind:'ACTUAL_INDEX_MAIN_GAME_WEBGL2',
  head,productionDeployed:false,actualIPhone:false,
- preservesLegacySave:true,sizes,images:[],errors:[]};
+ preservesLegacySave:true,sizes,images:[],mobileProxy:[],
+ timingSource:'Headless Chromium SwiftShader requestAnimationFrame; NOT physical iPhone FPS',
+ errors:[]};
 const root=resolve('.'),mimes={'.mjs':'text/javascript; charset=utf-8',
  '.js':'text/javascript; charset=utf-8','.html':'text/html; charset=utf-8',
  '.json':'application/json','.css':'text/css; charset=utf-8',
@@ -150,6 +152,45 @@ try{
      actualIndexMain:true});
    }
    assert.equal(hashes.size,shots.length,'Distinct original game scenes did not render distinctly');
+   // Capture bounded, real rendered-frame cadence while the actual Cave World
+   // remains active. This is SOFTWARE Chromium telemetry, not an iPhone
+   // performance certification. Preserve the numbers for manual comparison.
+   const mobileProxy=await page.evaluate(async()=>{
+    const padIds=['movePad','lookPad','jump','dig','place'];
+    const rects=padIds.map(id=>{
+      const el=document.getElementById(id),r=el?.getBoundingClientRect();
+      if(!el||!r)throw Error('Missing original game touch control '+id);
+      return {id,width:r.width,height:r.height,
+        visible:r.width>=24&&r.height>=24&&r.left>=-1&&r.top>=-1&&
+        r.right<=innerWidth+1&&r.bottom<=innerHeight+1};
+    });
+    const canvas=document.querySelector('#scene'),gl=canvas.getContext('webgl2');
+    if(!gl||gl.isContextLost())throw Error('Original WebGL2 context is lost');
+    const intervals=[];
+    await new Promise(resolve=>{
+      let last=null,frames=0;
+      const tick=now=>{
+        if(last!==null)intervals.push(now-last);
+        last=now;
+        if(++frames>=91)resolve();
+        else requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+    intervals.sort((a,b)=>a-b);
+    const p=n=>Number(intervals[Math.min(intervals.length-1,
+      Math.floor((intervals.length-1)*n))].toFixed(3));
+    return {frames:intervals.length,p50Ms:p(.5),p95Ms:p(.95),
+      worstMs:p(1),controls:rects,contextLost:gl.isContextLost(),
+      renderer:String(gl.getParameter(gl.RENDERER))};
+   });
+   assert.equal(mobileProxy.frames,90,'Actual in-game frame telemetry incomplete');
+   assert.ok(mobileProxy.controls.every(r=>r.visible),
+      'Original iPhone touch rail clipped: '+JSON.stringify(mobileProxy.controls));
+   assert.equal(mobileProxy.contextLost,false);
+   assert.ok(mobileProxy.p50Ms>0&&mobileProxy.p95Ms>0&&
+     mobileProxy.worstMs<2000,'No usable ongoing WebGL2 frames: '+JSON.stringify(mobileProxy));
+   report.mobileProxy.push({width,height,...mobileProxy});
    if(width===667){
     const cell=shots.find(x=>x.name==='switchback-80').at;
     const before=await page.evaluate(([x,y,z])=>window.__mythwroughtTest.block(x,y,z),
@@ -183,6 +224,7 @@ try{
   }finally{await context.close()}
  }
  assert.equal(report.images.length,12);
+ assert.equal(report.mobileProxy.length,3,'Three landscape performance observations missing');
  report.status='ACTUAL_GAME_WEBGL2_STAGING_PASS';
 }catch(e){
  report.status='BLOCKED';report.errors.push(String(e.stack||e));
