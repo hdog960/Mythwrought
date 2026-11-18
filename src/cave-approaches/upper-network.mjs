@@ -64,6 +64,25 @@ export function upperCaveCells({seed=179,site=UPPER_SITES[0],descentReservation,
       plan(x,z,floor,4+Math.floor(3*(1-radial)));
     }
   }
+  // A third, long lateral mineral gallery leads to a broad sheltered vault.
+  // The branch joins the central nave at d=108, stays on its supported
+  // -26 floor, and crosses several independent streaming chunk boundaries.
+  // It never reaches the protected surface or the :36 descent footprint.
+  {
+    const d=108, x=site.x+d, floor=-8-Math.floor(d/6);
+    const base=site.z+Math.round(3*Math.sin(d/13));
+    const direction=site.x<0?-1:1;
+    for(let step=0;step<=34;step++){
+      const zz=base+direction*step;
+      for(let dx=-1;dx<=1;dx++)plan(x+dx,zz,floor,5);
+    }
+    const endZ=base+direction*34;
+    for(let dx=-10;dx<=10;dx++)for(let dz=-8;dz<=8;dz++){
+      const radial=(dx/10)**2+(dz/8)**2;
+      if(radial>1)continue;
+      plan(x+dx,endZ+direction*dz,floor,5+Math.floor(4*(1-radial)));
+    }
+  }
   // Resolve overlapping passages by column, before writing any voxels. A higher
   // supported floor wins over a lower passage's headroom; never leave a
   // contradictory AIR/stone write or an unsupported raised floor.
