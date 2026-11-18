@@ -58,15 +58,40 @@ export function pickNonblockRay(objects,origin,direction,maxDistance=6){
  }
  return best;
 }
+// Strict canonical identity validation. Tombstones are untrusted sidecar input, not save-core edits.
+function parseNonblockKey(key, expectedSeed){
+ if(typeof key!=='string')throw new TypeError('invalid tombstone identity');
+ const match=/^nb1:([^:]+):(-?(?:0|[1-9]\d*)):(-?(?:0|[1-9]\d*)),(-?(?:0|[1-9]\d*)),(-?(?:0|[1-9]\d*)):([0-3])$/.exec(key);
+ if(!match)throw new TypeError('invalid tombstone identity');
+ let sceneId;
+ try {sceneId=decodeURIComponent(match[1]);}catch{throw new TypeError('invalid scene ID encoding');}
+ const seed=Number(match[2]),anchor=match.slice(3,6).map(Number),variant=Number(match[6]);
+ if(seed!==expectedSeed||!integer(seed)||!validAnchor(anchor)||!Object.hasOwn(NONBLOCK_FAMILIES,sceneId)||
+    nonblockInstanceKey({sceneId,seed,anchor,variant})!==key)throw new TypeError('noncanonical or foreign tombstone');
+ return {sceneId,seed,anchor,variant};
+}
 export function createNonblockSidecar(seed){
  if(!integer(seed))throw new TypeError('integer seed required');
  const removed=new Set();
+ const validateObject=obj=>{
+  if(obj?.contract!==NONBLOCK_OBJECT_VERSION||obj.seed!==seed||obj.breakIntent?.action!=='remove-object'||
+     obj.breakIntent?.targetKey!==obj.instanceKey)throw new TypeError('invalid break target');
+  const identity=parseNonblockKey(obj.instanceKey,seed);
+  if(identity.sceneId!==obj.sceneId||!validAnchor(obj.anchor)||obj.anchor.some((v,i)=>v!==identity.anchor[i])||
+     obj.variant!==identity.variant)throw new TypeError('mismatched break target');
+ };
  return {
   seed,has:key=>removed.has(key),
-  breakObject:obj=>{if(obj?.contract!==NONBLOCK_OBJECT_VERSION||obj.seed!==seed||obj.breakIntent?.targetKey!==obj.instanceKey)throw new TypeError('invalid break target');removed.add(obj.instanceKey);return {action:'remove-object',instanceKey:obj.instanceKey,removed:true};},
-  visible:objects=>objects.filter(o=>o.seed===seed&&!removed.has(o.instanceKey)),
+  breakObject:obj=>{validateObject(obj);removed.add(obj.instanceKey);return {action:'remove-object',instanceKey:obj.instanceKey,removed:true};},
+  visible:objects=>objects.filter(o=>{validateObject(o);return !removed.has(o.instanceKey);}),
   snapshot:()=>({contract:NONBLOCK_OBJECT_VERSION,seed,tombstones:[...removed].sort()}),
-  restore:snapshot=>{if(snapshot?.contract!==NONBLOCK_OBJECT_VERSION||snapshot.seed!==seed||!Array.isArray(snapshot.tombstones)||snapshot.tombstones.some(k=>typeof k!=='string'||!k.startsWith('nb1:')||!k.includes(':'+seed+':')||!/^nb1:[^:]+:-?\d+:-?\d+,-?\d+,-?\d+:[0-3]$/.test(k)))throw new TypeError('invalid tombstone sidecar');removed.clear();for(const k of snapshot.tombstones)removed.add(k);}
+  restore:snapshot=>{
+   if(snapshot?.contract!==NONBLOCK_OBJECT_VERSION||snapshot.seed!==seed||!Array.isArray(snapshot.tombstones)||
+      snapshot.tombstones.length>100000)throw new TypeError('invalid tombstone sidecar');
+   const next=new Set();
+   for(const key of snapshot.tombstones){parseNonblockKey(key,seed);if(next.has(key))throw new TypeError('duplicate tombstone');next.add(key);}
+   removed.clear();for(const key of next)removed.add(key);
+  }
  };
 }
 // Explicit opt-in test fixture only. No automatic world generation or schema-1 mutation.
