@@ -49,11 +49,15 @@ function attempt(base,origin){
    const z=origin.z+d;
    const top=Math.min(WORLD_MAX_Y,Math.max(floor+7,terrainHeight(x,z,seed)+2));
    for(let y=Math.max(WORLD_MIN_Y,floor-2);y<=top;y++){
-    const k=key(x,y,z),original=base.get(x,y,z),id=reader.get(x,y,z);
-    if(original===id)continue;
+    const k=key(x,y,z);
+    // Inspect the original save's occupied cell BEFORE the old source
+    // reader applies edit precedence. Otherwise source.get() == base.get()
+    // hides the edit and incorrectly approves building through its voxel.
     if(base.edits.has(k)){
      conflicts.push({key:k,reason:'PLAYER_EDIT'});continue;
     }
+    const original=base.get(x,y,z),id=reader.get(x,y,z);
+    if(original===id)continue;
     // The previously failing original seed had AIR of a real South tunnel
     // directly where PR #147 wanted a higher STONE floor. This is an
     // authored headroom collision, not permission to overwrite old terrain.

@@ -1,0 +1,38 @@
+name: Mythwrought Cave Roadmap Focused Physical Native
+on:
+  pull_request:
+    paths:
+      - 'src/manual-caves/**'
+      - 'tests/cave-roadmap-*.test.mjs'
+      - '.github/workflows/cave-roadmap-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cave-physical-native:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'integration/caves-all-to-homescreen-20261117'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source exactness and cave module syntax
+        env:
+          CAVE_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$CAVE_EXPECTED_HEAD"
+          for file in src/manual-caves/*.mjs; do node --check "$file"; done
+      - name: Genuine four-seed physical cave integration checks
+        run: |
+          node --test tests/cave-roadmap-producer-composition.test.mjs
+          node --test tests/cave-roadmap-vault-bridges.test.mjs
+          node --test tests/cave-roadmap-east-gallery.test.mjs
+          node --test tests/cave-roadmap-runtime.test.mjs
+          node --test tests/cave-roadmap-profile-store.test.mjs
+          node --test tests/cave-roadmap-entrances.test.mjs
+          node --test tests/cave-roadmap-world-profile.test.mjs
