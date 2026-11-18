@@ -6,7 +6,7 @@ seed and immutable profile. All canonical edits remain schema-1.
 
 ## New staging cache
 `sw-m5.js` creates a **separate versioned static-only** CacheStorage namespace,
-`mythwrought-m5-shell-20261118-v1`, scoped to the app directory. Registration
+`mythwrought-m5-shell-20261118-v2`, scoped to the app directory. Registration
 is initiated **only** for a newly confirmed or previously saved experimental
 v5 world; it is not registered for ordinary legacy/v2/v3/v4 worlds. Install
 pre-caches the complete static app shell, all `src/**/*.mjs` and required

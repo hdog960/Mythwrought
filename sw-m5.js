@@ -3,7 +3,7 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261118-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261118-v2';
 const SOURCE_ASSETS=[
   "./",
   "./assets/icon.svg",
@@ -157,6 +157,7 @@ const SOURCE_ASSETS=[
   "./src/manual-biomes/desert-m3.mjs",
   "./src/manual-biomes/exploration-ink.mjs",
   "./src/manual-biomes/m2-runtime-bridge.mjs",
+  "./src/manual-biomes/m5-offline-registration.mjs",
   "./src/manual-biomes/mountain-pass-v5.mjs",
   "./src/manual-biomes/overland-walk-m5.mjs",
   "./src/manual-biomes/profile-storage.mjs",
