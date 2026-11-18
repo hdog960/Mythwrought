@@ -131,6 +131,23 @@ try{
           returningSeed:back.seed,returnPhase:back.phase};
         await page.locator('#closeHelp').click();
       }
+      // Measure actual game FrameHistory rather than claiming FPS from CI success.
+      // These are software Chromium/SwiftShader observations, not iPhone results.
+      await page.waitForTimeout(4000);
+      const beforeAudit=await storageExceptClock();
+      await page.locator('#menu').click();
+      await page.locator('#runAudit').click();
+      await page.waitForFunction(()=>document.querySelector('#auditReport')?.value.includes('Foreground play frames:'),
+        null,{timeout:10000});
+      const audit=await page.locator('#auditReport').inputValue();
+      const perfMatch=/Foreground play frames: (\d+); approx (\d+) FPS; p50 ([\d.]+) ms; p95 ([\d.]+) ms; worst ([\d.]+) ms; >33ms frames (\d+)/.exec(audit);
+      assert.ok(perfMatch,'Actual game's FrameHistory failed to return performance data');
+      const performance={samples:+perfMatch[1],approxFps:+perfMatch[2],p50Ms:+perfMatch[3],
+        p95Ms:+perfMatch[4],worstMs:+perfMatch[5],slowFrames:+perfMatch[6]};
+      assert.ok(performance.samples>=30&&performance.p95Ms>=performance.p50Ms);
+      await page.locator('#closeHelp').click();
+      assert.deepEqual(await storageExceptClock(),beforeAudit,
+        'Read-only performance audit changed non-clock saved data');
       const end=await state();
       assert.equal(end.glError,end.glNoError,'WebGL error after S1 controls');
       assert.equal(end.chunks,25);
@@ -138,11 +155,11 @@ try{
       assert.deepEqual(missing,[]);
       const entry={width,height,initial,night,day,reload,end,phaseOpenDeltaMs:phaseOpenAfter-phaseOpenBefore,
         canonicalWorldSha256:digest(Buffer.from(worldBefore['mythwrought-v002-world-179'])),
-        seedIsolation,images,errors,missing};
+        seedIsolation,performance,images,errors,missing};
       summary.viewportResults.push(entry);
       console.log('SKY_S1_BROWSER_PASS',JSON.stringify({
         head:source,width,height,screenshots:images.length,openDeltaMs:entry.phaseOpenDeltaMs,
-        glError:end.glError,chunks:end.chunks,seedIsolation}));
+        glError:end.glError,chunks:end.chunks,performance,seedIsolation}));
     }finally{await context.close();}
   }
 }catch(e){error=e;summary.error=String(e?.stack||e);console.error('SKY_S1_BROWSER_FAIL',summary.error);}
