@@ -443,3 +443,39 @@ test('manual M2 rooted trunk wedges meet ground without oversized detached spike
   assert.ok(roots.some(p=>p.y<ground+.05),'at least one root tip touches the grass top');
   assert.equal(JSON.stringify(world.save()),before,'render-only root cleanup writes no saved world voxels');
 });
+
+test('manual M2 fir shells share exact ring vertices across every bough band',()=>{
+  const seed=179,world=new VoxelWorld(seed),saved=JSON.stringify(world.save());
+  let sample=null;
+  for(let cx=-10;cx<=10&&!sample;cx++)for(let cz=-10;cz<=10&&!sample;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+    // First tree starts at offset 0. A sentinel uses the evergreen source
+    // regardless of the ordinary location-specific two-style selector.
+    if(woodlandSentinelChunk(cx,cz,seed)||
+       woodlandTreeStyle(x,z,seed)==='evergreen')sample=mesh;
+  }
+  assert.ok(sample,'locate a genuine seeded evergreen or sentinel in live source');
+  // Common trunk and floor details always precede the fir mesh:
+  // 4 trunk quads (24 verts), 4 grounded root tris (12), 3 fern fans (9),
+  // 3 fallen leaves (9), and moss-rock pair (6). That gives 60 vertices.
+  const start=60,vertsPerBand=8*6,ringCount=6;
+  const vertex=i=>Array.from(sample.slice(i*CANOPY_LIMITS.stride,
+    i*CANOPY_LIMITS.stride+3));
+  for(let band=0;band<ringCount-2;band++){
+    for(let sector=0;sector<8;sector++){
+      // Each quad is emitted as triangles (lower0,lower1,upper1)
+      // and (lower0,upper1,upper0); next band's lower0 MUST exactly
+      // equal the previous band's upper0 or a visible tier gap appears.
+      const prevUpper=start+band*vertsPerBand+sector*6+5;
+      const nextLower=start+(band+1)*vertsPerBand+sector*6;
+      assert.deepEqual(vertex(prevUpper),vertex(nextLower),
+        'adjacent bough bands must be one continuous canopy, not stacked hats');
+    }
+  }
+  assert.ok(start+5*vertsPerBand+24<=sample.length/CANOPY_LIMITS.stride,
+    'continuous fir cap stays within real-source emitted mesh');
+  assert.equal(JSON.stringify(world.save()),saved,
+    'joined decorative foliage never changes physical seed/edit/save state');
+});
