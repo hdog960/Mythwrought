@@ -19,8 +19,10 @@ export function nonblockInstanceKey({sceneId,seed,anchor,variant=0}){
 export function describeNonblockObject({sceneId,seed,anchor,variant}){
  requireFamily(sceneId);
  if(!integer(seed)||!validAnchor(anchor))throw new TypeError('invalid nonblock anchor');
- const visual=sceneVariant(seed,...anchor,'scene48:low-grass');
- const resolvedVariant=variant??visual.variant;
+ const visual=Object.hasOwn(SCENE_FAMILIES,sceneId)?sceneVariant(seed,...anchor,sceneId):null;
+ const salt=[...sceneId].reduce((n,c)=>(Math.imul(n,31)+c.charCodeAt(0))|0,17);
+ const h=(Math.imul(seed^salt,73856093)^Math.imul(anchor[0],19349663)^Math.imul(anchor[2],83492791)^Math.imul(anchor[1],2654435761))>>>0;
+ const resolvedVariant=variant??(visual?.variant??((h>>>16)&3));
  const key=nonblockInstanceKey({sceneId,seed,anchor,variant:resolvedVariant});
  const family=NONBLOCK_FAMILIES[sceneId];
  const source=Object.hasOwn(SCENE_FAMILIES,sceneId)?createSceneMesh(sceneId,seed,...anchor):makeUndergrowthMesh(sceneId,seed,...anchor);
@@ -64,7 +66,7 @@ export function createNonblockSidecar(seed){
   breakObject:obj=>{if(obj?.contract!==NONBLOCK_OBJECT_VERSION||obj.seed!==seed||obj.breakIntent?.targetKey!==obj.instanceKey)throw new TypeError('invalid break target');removed.add(obj.instanceKey);return {action:'remove-object',instanceKey:obj.instanceKey,removed:true};},
   visible:objects=>objects.filter(o=>o.seed===seed&&!removed.has(o.instanceKey)),
   snapshot:()=>({contract:NONBLOCK_OBJECT_VERSION,seed,tombstones:[...removed].sort()}),
-  restore:snapshot=>{if(snapshot?.contract!==NONBLOCK_OBJECT_VERSION||snapshot.seed!==seed||!Array.isArray(snapshot.tombstones)||snapshot.tombstones.some(k=>typeof k!=='string'||!k.startsWith('nb1:')))throw new TypeError('invalid tombstone sidecar');removed.clear();for(const k of snapshot.tombstones)removed.add(k);}
+  restore:snapshot=>{if(snapshot?.contract!==NONBLOCK_OBJECT_VERSION||snapshot.seed!==seed||!Array.isArray(snapshot.tombstones)||snapshot.tombstones.some(k=>typeof k!=='string'||!k.startsWith('nb1:')||!k.includes(':'+seed+':')||!/^nb1:[^:]+:-?\d+:-?\d+,-?\d+,-?\d+:[0-3]$/.test(k)))throw new TypeError('invalid tombstone sidecar');removed.clear();for(const k of snapshot.tombstones)removed.add(k);}
  };
 }
 // Explicit opt-in test fixture only. No automatic world generation or schema-1 mutation.
