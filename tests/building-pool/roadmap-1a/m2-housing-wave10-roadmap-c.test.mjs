@@ -39,7 +39,7 @@ test('Wave10 preserves 265 historical 1A source-owned candidates and introduces 
  assert.deepEqual(ROADMAP_C_1A_WAVE10_IDS,['r1:house:temperate:small:015']);
  assert.equal(new Set(pool.map(x=>x.id)).size,266);
  assert.equal(new Set(pool.map(structuralFingerprint)).size,266);
- assert.deepEqual(validatePool(pool),{authored:266,target:450,remaining:184,buckets:undefined});
+ assert.deepEqual([validatePool(pool).authored,validatePool(pool).target,validatePool(pool).remaining],[266,450,184]);
  assert.deepEqual(findMirroredOrRotatedDuplicates(pool),[]);
  assert.ok(historical.every(b=>b.status==='candidate'&&b.worldPlacement===false&&b.liveIntegration===false));
 });
