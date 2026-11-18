@@ -49,6 +49,9 @@ function surfaceMaterial(x,z,seed,top,old){
   // Multi-chunk, world-space material strata, never random one-block
   // confetti. At the canonical Desert anchor the pale dune remains ID 256.
   const dx=x-512,dz=z;
+  // Keep the source-exact M2 Desert anchor physically pale sand, not a
+  // salt-crust saddle. The old physical surface is at max(legacy,relief).
+  if(dx===0&&dz===0)return M3_DESERT_IDS.pale;
   const red=Math.sin(dx*.047+dz*.024+.23*Math.sin(dz*.011))+
     .4*Math.sin(dx*.013-dz*.037);
   const flat=Math.abs(Math.sin(dx*.027-dz*.021));
