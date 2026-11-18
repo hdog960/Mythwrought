@@ -57,3 +57,28 @@ test('legacy terrain and edits fail closed even at an overlapping alcove',()=>{
  o.legacyCells=(x,y,z)=>x===UPPER_SITES[1].x+48&&y===-16?BLOCK.DEEPSTONE:null;
  assert.equal(upperCaveCells(o).ok,false);
 });
+
+for(const site of UPPER_SITES)for(const seed of [179,1,2026,-77]){
+ test(`lateral mineral vault is connected, supported and four-high: ${site.name} seed ${seed}`,()=>{
+  const a=upperCaveCells(options(site,seed));
+  assert.equal(a.ok,true,a.reason);
+  const d=108,x=site.x+d,floor=-8-Math.floor(d/6);
+  const base=site.z+Math.round(3*Math.sin(d/13));
+  const direction=site.x<0?-1:1;
+  for(let step=0;step<=34;step++){
+   const z=base+direction*step;
+   for(let dx=-1;dx<=1;dx++){
+    assert.equal(a.cells.get(worldKey(x+dx,floor,z)),BLOCK.DEEPSTONE,
+      'missing supported branch floor at '+(x+dx)+','+z);
+    for(let h=1;h<=4;h++)
+     assert.equal(a.cells.get(worldKey(x+dx,floor+h,z)),BLOCK.AIR,
+       'branch clearance at '+(x+dx)+','+z+','+h);
+   }
+  }
+  const endZ=base+direction*34;
+  assert.equal(a.cells.get(worldKey(x,floor,endZ)),BLOCK.DEEPSTONE);
+  for(let h=1;h<=8;h++)
+   assert.equal(a.cells.get(worldKey(x,floor+h,endZ)),BLOCK.AIR);
+  assert.equal(a.cells.has(worldKey(x,-3,endZ)),false);
+ });
+}
