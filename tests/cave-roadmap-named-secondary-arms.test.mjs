@@ -8,7 +8,7 @@ import {VoxelWorld,BLOCK,collides} from '../src/voxel.mjs';
 import {descentRoute,DESCENT_ORIGIN} from '../src/underground-switchback-descent.mjs';
 import {stepPlayer,COYOTE_TIME} from '../src/physics.mjs';
 import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
-const SEED=179;
+const SEEDS=Object.freeze([179,1,2026,-77]);
 const TARGETS=Object.freeze([
  ['Bifurcated Mineral Gallery / opposite arm',-120,27,7,-120],
  ['Fault Cathedral / upper second lobe',-170,36,11,-170],
@@ -94,26 +94,30 @@ function walk(world,path,label){
  assert.ok(Math.abs(p.feet-q.floor-1)<1.3,label+' wrong return floor');
  return frames;
 }
-let fixture;
-function getWorld(){
- if(!fixture){const old=new VoxelWorld(SEED);
-  fixture={old,bytes:JSON.stringify(old.save()),
-   runtime:createStagedCaveRuntime(SEED,null,{approved:true})};}
- return fixture;
+const fixtures=new Map();
+function getWorld(seed){
+ assert.ok(SEEDS.includes(seed),'Unexpected historical seed');
+ if(!fixtures.has(seed)){
+  const old=new VoxelWorld(seed);
+  fixtures.set(seed,{old,bytes:JSON.stringify(old.save()),
+   runtime:createStagedCaveRuntime(seed,null,{approved:true})});
+ }
+ return fixtures.get(seed);
 }
 test('secondary historical lobe list is sourced, unique and not a feature replacement',()=>{
  assert.equal(TARGETS.length,16);
  assert.equal(new Set(TARGETS.map(x=>x[0])).size,TARGETS.length);
 });
-for(const [name,depth,d,t,floor] of TARGETS){
- test('REAL player reaches and returns from '+name+' on seed '+SEED,()=>{
-  const {old,bytes,runtime}=getWorld();
+for(const seed of SEEDS)for(const [name,depth,d,t,floor] of TARGETS){
+ test('REAL player reaches and returns from '+name+' on seed '+seed,()=>{
+  const {old,bytes,runtime}=getWorld(seed);
+  const label=name+' seed '+seed;
   const path=findPath(runtime.world,depth,d,t,floor);
-  const frames=walk(runtime.world,path,name);
+  const frames=walk(runtime.world,path,label);
   assert.ok(frames>path.length-1);
-  assert.equal(JSON.stringify(old.save()),bytes,'Historical world saves changed');
+  assert.equal(JSON.stringify(old.save()),bytes,'Historical world saves changed for '+label);
   assert.equal(runtime.registeredInHomeScreen,false);
   console.log('CAVE HISTORIC SECONDARY ARM CONTROLLER PASS',
-    name,'seed',SEED,'path',path.length,'frames',frames);
+    name,'seed',seed,'path',path.length,'frames',frames);
  });
 }
