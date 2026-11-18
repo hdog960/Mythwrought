@@ -38,6 +38,7 @@ for(const target of M5_OVERLAND_TARGETS){
   }
   const result={name:target.name,source:target,planOk:planned.ok,
     reason:planned.reason||null,sampled:planned.sampled,visited:planned.visited,
+    closestAuthenticWalkableCell:planned.closest||null,
     pathCells:planned.path?.length||0,physical,discovery:mapProof,
     minutes:(Date.now()-started)/60000};
   results.push(result);
