@@ -2266,6 +2266,7 @@ function start(){
     window.__mythwroughtTest=Object.freeze({
       fourBiomeMode(){return world.base instanceof FourRegionWorld?'four-regions':'legacy';},
       fourBiomeProfile(){return world.base instanceof FourRegionWorld?world.base.generationProfile:null;},
+      gpuUploadFaults(){return [...gpuRetry.faults.entries()].map(([key,value])=>({key,...value}));},
       // Localhost-only acceptance uses actual edit+save and never synthetic
       // screenshot fixtures. Production Pages never exposes this diagnostic.
       editBiomeCell(x,y,z,id){
