@@ -7,7 +7,7 @@ export const ROADMAP_C_4B_WAVE5_PLAN=Object.freeze({
   "t": "schoolhouse",
   "b": "enchanted-forest",
   "s": "large",
-  "variant": 1,
+  "variant": 2,
   "title": "Luminbough Conservatory of Arcane Cartography",
   "dim": [
     74,
