@@ -1,6 +1,6 @@
 # Roadmap C — Luminbough Conservatory of Arcane Cartography
 
-**NEW SOURCE-ONLY DRAFT.** New allocated candidate ID `r4:schoolhouse:enchanted-forest:large:01`. Authoring created only separate owned `src/tests/docs/building-pool/roadmap-4b` files. Prior 150 source-authored 4B designs and all original H2 355 source file Git SHA identities remain immutable, no previous file edited.
+**NEW SOURCE-ONLY DRAFT.** New allocated candidate ID `r4:schoolhouse:enchanted-forest:large:02`. Authoring created only separate owned `src/tests/docs/building-pool/roadmap-4b` files. Prior 150 source-authored 4B designs and all original H2 355 source file Git SHA identities remain immutable, no previous file edited.
 
 Original 74×20×76 eight-room enchanted-forest educational/arcane campus. 14,715 actual source-authored solid voxels, 4,072 foundation cells, 3,686 walkable, 654 physically supported raised roof voxels, two truly source-carved open moonwells, original shifted eight-wing silhouette and two genuinely flanked interior door openings with source bearing lintels. Existing unchanged 4B compiler/schema validates all eight connected functional spaces.
 
