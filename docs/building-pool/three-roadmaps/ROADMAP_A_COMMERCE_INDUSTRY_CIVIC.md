@@ -1,0 +1,23 @@
+# New Building Roadmap A — Commerce, Industry & Civic
+**Single accountable owner.** Sources retained under old Builder **2A + 3A + 4A** directories and IDs. **443 new designs** remain; approximate effort **620 planning points**, including a separate physical-acceptance/review backlog in completed 3A. Candidate-only, DRAFT / NONPRODUCTION.
+
+## Exact source baselines
+- **2A Shops & Banking PR #179** at `abbd43a896406c83521963a0438ae2860c196e77`: **128/420** source-authored, **292** remain. Six category quotas: general stores 75, pet shops 75, magic shops 75, potion shops 75, bakeries 75, banks 45. Fifteen inherited general stores retain exact original PR #124 data. No owner outside 2A may alter 2A-source manifests.
+- **3A Artisans & Resource Industry PR #183** at `bae0321c1089cc4a31df05634cff41790f484e92`: **345/345** candidate design quota *authored* (75 blacksmiths, 75 armorers, 75 carpenters, 60 stonemasons, 60 mining workshops); **0 new quota**. Source/physical art acceptance unresolved, even where focused/full CI passed. Preserve original 15 blacksmiths and all other fingerprints.
+- **4A Government & State Knowledge PR #182** at `cfbe984a0c8ba69eb4dc2b247dd5a26866e77f05`: **164/315**, **151** remain: **41 embassies, 26 castle-palaces, 41 grand archives, 43 observatories**. Already complete: 75 civic halls, 60 guildhalls. Thirty original PR #123 designs remain immutable. Keep creator acceptance separate from source CI.
+
+## Sequence of milestones
+**A0 — Handoff/stop gate:** Check heads, draft states, old source fixtures, all scoped paths and recorded CI. Do not start authoring before 4B general handoff gate, although this A lane does not edit 4B. Create an isolation branch from approved shared candidate staging base; do not rebase old source PRs into main.
+
+**A1 — Shop coverage (2A, 292):** Build category-by-biome-by-size backlog in small original source-coordinate tranches (~10–15 each), focusing on vaulted banks, specialty shops, differing storefronts and roof families. Preserve 15 inherited general stores and 269 historic over-similar comparison pairs (including 30 exact) as documented prior debt; introduce **no new** same-type eight-way D4 normalized IoU >=0.89. Real 2+ wide door access, naturally lit/glazed openings and supported asymmetrical roofs; Pack1–5 numeric variant/yaw/AABB checks are read-only until explicitly accepted. Increase unique visual quality rather than stamping facades.
+
+**A2 — Civic architecture (4A, 151):** Finish the 26 palaces, 41 embassies, 41 archives, 43 observatories in source modules with original regional masonry, true room/courtyard support and passage connectivity. Preserve full D4 normalized floor IoU **<0.85** in matching comparison groups. Keep 135 completed civic/guild buildings untouched. Grand archives/observatories require meaningful vertical volumes and producer physical stair/roof clearance audit; proxy visuals do not prove game fitting.
+
+**A3 — Industry physical remediation (3A, no new designs):** Recheck exact source physical evidence before approvals. Carry the **15 Pack4 fireplace rear-mount proposals** and **15 hollow-flue chimney structural conflicts** separately (never cap a flue); review **274 historical roof witness gaps** by family and **156 separate unplaced beam proposals**, distinguish witness limitations from real support gaps. Resolve only owner-authorized, coordinate-specific changes with structural/collision/thermal safety, source hashes, real producer offsets and screenshots. This backlog is the explicit ~50-point work allowance, not 50 invented buildings.
+
+**A4 — Portfolio acceptance:** Independently run all 2A/3A/4A source/native/physical tests, D4 and original-source fingerprints, 3 landscape source-specific WebGL2 exterior/cutaway for changed IDs (real GPU, not mock), screenshots + hash/size/artifact inspection, cross-portfolio Pack1–5 actual physical ABI read-only checks. Complete 2A 420/420 and 4A 315/315 only when true source authored; 3A 345/345 remains unchanged unless separately documented safe repairs.
+
+**A5 — Creator handoff:** Provide categorized screenshot contact sheets, exact source IDs and evidence, physical blockers and performance risks. Do not claim real-iPhone, premium-art or world placement before creator review. No production merge/deploy/save changes; Gate A v0.10, v0.11 LOCKED.
+
+## Deliverables
+One reliable commerce + industry + civic candidate catalog; 2A & 4A finished quota manifests; 3A independent debt decision matrix; source fingerprints; three-resolution WebGL2 archives; final nonproduction integration dossier. **Avoid editing Builder 1A/1B/2B/3B/4B sources, shared CI, runtime or block registration.**
