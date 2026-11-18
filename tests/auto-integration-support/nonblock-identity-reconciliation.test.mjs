@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {reconcileNonblockIdentity,auditIdentityCollisions} from '../../src/auto-integration-support/nonblock-identity-reconciliation.mjs';
+const sourceKey='nb1:scene36%3Asignpost:179:1,2,3:0:r1';
+const canonicalKey='nb1:scene36%3Asignpost:179:1,2,3:0';
+const base={producer:':36',verifiedSource:true,object:{sceneId:'scene36:signpost',seed:179,anchor:[1,2,3],variant:0,orientation:1,instanceKey:sourceKey}};
+const approval={sourceKey,canonicalKey,orientation:1,persistenceOwner:':00'};
+test('source authentication required',()=>assert.ok(reconcileNonblockIdentity({...base,verifiedSource:false}).errors.includes('SOURCE_NOT_AUTHENTICATED')));
+test('unapproved orientation suffix rejected',()=>assert.ok(reconcileNonblockIdentity(base).errors.includes('ORIENTATION_MAPPING_UNAPPROVED')));
+test('only :00 can approve mapping',()=>assert.ok(reconcileNonblockIdentity({...base,approvedOrientationMapping:{...approval,persistenceOwner:':48'}}).errors.includes('ORIENTATION_MAPPING_UNAPPROVED')));
+test('approved proposal is not production proof',()=>{const r=reconcileNonblockIdentity({...base,approvedOrientationMapping:approval});assert.equal(r.ok,true);assert.equal(r.status,'IDENTITY_PROPOSAL_ONLY_NOT_LIVE')});
+test('two orientations sharing tombstone fail',()=>{const bkey=sourceKey.replace(':r1',':r2');const r=auditIdentityCollisions([{...base,approvedOrientationMapping:approval},{...base,object:{...base.object,orientation:2,instanceKey:bkey},approvedOrientationMapping:{sourceKey:bkey,canonicalKey,orientation:2,persistenceOwner:':00'}}]);assert.ok(r.errors.some(e=>e.errors.includes('CANONICAL_TOMBSTONE_COLLISION')))});
+test('invalid anchor rejected',()=>assert.ok(reconcileNonblockIdentity({...base,object:{...base.object,anchor:[1,2,NaN]}}).errors.includes('INVALID_IDENTITY')));
