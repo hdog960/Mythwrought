@@ -85,6 +85,13 @@ self.addEventListener('fetch',event=>{
   }catch(error){
    const cached=await cache.match(request);
    if(cached)return cached;
+   // Pages/iPhone Home Screen launches navigate to the DIRECTORY ROOT,
+   // whereas install pre-caches /index.html. Give only same-origin, in-scope
+   // navigations the exact verified app shell, never a fake success page.
+   if(request.mode==='navigate'){
+     const shell=await cache.match(url('index.html'));
+     if(shell)return shell;
+   }
    return Response.error();
   }
  })());

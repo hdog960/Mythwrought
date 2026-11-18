@@ -57,6 +57,10 @@ try{
   if(!r)throw Error('Worker claimed success but cache-complete marker is absent');
   return r.json();
  });
+ const indexedShell=await page.evaluate(async()=>Boolean(await caches.match(
+  new URL('./index.html',location.href))));
+ assert.equal(indexedShell,true,'Offline startup requires the saved real index.html shell');
+
  assert.ok(verified.count>=200,'A few cached files do NOT make a complete offline game');
  const sourceCached=await page.evaluate(async()=>Boolean(await caches.match(
    new URL('./src/manual-caves/cave-voxel-world.mjs',location.href))));
