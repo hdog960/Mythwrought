@@ -106,13 +106,13 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "biome": "mountain",
     "size": "small",
     "variation": 5,
-    "w": 24,
-    "d": 24,
+    "w": 29,
+    "d": 27,
     "h": 8,
-    "entry": 12,
-    "left": 8,
-    "right": 15,
-    "depth": 8,
+    "entry": 14,
+    "left": 7,
+    "right": 21,
+    "depth": 13,
     "frontSide": "east",
     "stepWidth": 4,
     "stepDepth": 5,
@@ -160,14 +160,14 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "roof": "pack3:023",
     "furniture": [
       [
-        14,
+        19,
         5,
         "pack5:086",
         "service-counter",
         "ledger-service"
       ],
       [
-        15,
+        20,
         10,
         "pack5:087",
         "category-identity-display",
@@ -181,8 +181,8 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
         "cartographers-oak-desk"
       ],
       [
-        19,
-        20,
+        24,
+        23,
         "pack4:057",
         "sealed-rear-inventory",
         null
@@ -282,13 +282,13 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "biome": "enchanted-forest",
     "size": "large",
     "variation": 4,
-    "w": 34,
+    "w": 43,
     "d": 30,
     "h": 10,
-    "entry": 17,
-    "left": 11,
-    "right": 22,
-    "depth": 10,
+    "entry": 21,
+    "left": 7,
+    "right": 32,
+    "depth": 13,
     "frontSide": "east",
     "stepWidth": 4,
     "stepDepth": 5,
@@ -342,14 +342,14 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "roof": "pack3:026",
     "furniture": [
       [
-        24,
+        33,
         5,
         "pack5:086",
         "service-counter",
         "ledger-service"
       ],
       [
-        25,
+        34,
         10,
         "pack5:087",
         "category-identity-display",
@@ -363,7 +363,7 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
         "cartographers-oak-desk"
       ],
       [
-        29,
+        38,
         26,
         "pack4:057",
         "sealed-rear-inventory",
@@ -646,13 +646,13 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "biome": "desert",
     "size": "large",
     "variation": 4,
-    "w": 35,
-    "d": 32,
+    "w": 43,
+    "d": 39,
     "h": 10,
-    "entry": 17,
-    "left": 11,
-    "right": 23,
-    "depth": 11,
+    "entry": 21,
+    "left": 15,
+    "right": 32,
+    "depth": 12,
     "frontSide": "west",
     "stepWidth": 4,
     "stepDepth": 6,
@@ -700,14 +700,14 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "roof": "pack3:023",
     "furniture": [
       [
-        25,
+        33,
         5,
         "pack5:086",
         "service-counter",
         "ledger-service"
       ],
       [
-        26,
+        34,
         10,
         "pack5:087",
         "category-identity-display",
@@ -721,8 +721,8 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
         "iron-tripod-cauldron"
       ],
       [
-        30,
-        28,
+        38,
+        35,
         "pack4:057",
         "sealed-rear-inventory",
         null
@@ -734,16 +734,16 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "biome": "temperate",
     "size": "large",
     "variation": 4,
-    "w": 39,
-    "d": 30,
+    "w": 43,
+    "d": 34,
     "h": 10,
-    "entry": 19,
-    "left": 13,
-    "right": 26,
-    "depth": 10,
+    "entry": 21,
+    "left": 14,
+    "right": 29,
+    "depth": 12,
     "frontSide": "east",
-    "stepWidth": 4,
-    "stepDepth": 5,
+    "stepWidth": 5,
+    "stepDepth": 6,
     "opposite": false,
     "oppositeWidth": 0,
     "oppositeDepth": 0,
@@ -794,14 +794,14 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "roof": "pack3:023",
     "furniture": [
       [
-        29,
+        33,
         5,
         "pack5:086",
         "service-counter",
         "ledger-service"
       ],
       [
-        30,
+        34,
         10,
         "pack5:090",
         "category-identity-display",
@@ -815,8 +815,8 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
         "cartographers-oak-desk"
       ],
       [
-        34,
-        26,
+        38,
+        30,
         "pack4:057",
         "sealed-rear-inventory",
         null
@@ -828,13 +828,13 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "biome": "snow",
     "size": "medium",
     "variation": 4,
-    "w": 29,
-    "d": 27,
+    "w": 35,
+    "d": 33,
     "h": 9,
-    "entry": 14,
-    "left": 9,
-    "right": 19,
-    "depth": 9,
+    "entry": 17,
+    "left": 13,
+    "right": 26,
+    "depth": 14,
     "frontSide": "west",
     "stepWidth": 4,
     "stepDepth": 5,
@@ -882,14 +882,14 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "roof": "pack3:025",
     "furniture": [
       [
-        19,
+        25,
         5,
         "pack5:086",
         "service-counter",
         "ledger-service"
       ],
       [
-        20,
+        26,
         10,
         "pack5:090",
         "category-identity-display",
@@ -903,8 +903,8 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
         "cartographers-oak-desk"
       ],
       [
-        24,
-        23,
+        30,
+        29,
         "pack4:057",
         "sealed-rear-inventory",
         null
@@ -916,13 +916,13 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "biome": "snow",
     "size": "small",
     "variation": 3,
-    "w": 25,
-    "d": 25,
+    "w": 30,
+    "d": 30,
     "h": 8,
-    "entry": 12,
-    "left": 8,
-    "right": 16,
-    "depth": 9,
+    "entry": 15,
+    "left": 14,
+    "right": 22,
+    "depth": 7,
     "frontSide": "east",
     "stepWidth": 3,
     "stepDepth": 4,
@@ -970,14 +970,14 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "roof": "pack3:025",
     "furniture": [
       [
-        15,
+        20,
         5,
         "pack5:086",
         "service-counter",
         "ledger-service"
       ],
       [
-        15,
+        20,
         10,
         "pack5:086",
         "second-teller-service",
@@ -991,8 +991,8 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
         "cartographers-oak-desk"
       ],
       [
-        20,
-        21,
+        25,
+        26,
         "pack4:057",
         "sealed-rear-inventory",
         null
@@ -1004,13 +1004,13 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "biome": "enchanted-forest",
     "size": "large",
     "variation": 3,
-    "w": 35,
-    "d": 31,
+    "w": 37,
+    "d": 35,
     "h": 10,
-    "entry": 17,
-    "left": 11,
+    "entry": 18,
+    "left": 12,
     "right": 23,
-    "depth": 10,
+    "depth": 8,
     "frontSide": "west",
     "stepWidth": 4,
     "stepDepth": 5,
@@ -1064,14 +1064,14 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "roof": "pack3:026",
     "furniture": [
       [
-        25,
+        27,
         5,
         "pack5:086",
         "service-counter",
         "ledger-service"
       ],
       [
-        25,
+        27,
         10,
         "pack5:086",
         "second-teller-service",
@@ -1085,8 +1085,8 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
         "cartographers-oak-desk"
       ],
       [
-        30,
-        27,
+        32,
+        31,
         "pack4:057",
         "sealed-rear-inventory",
         null
