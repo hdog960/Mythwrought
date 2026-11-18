@@ -8,7 +8,7 @@ const READY_NAME='cave-offline-ready.json';
 const SELF_FILES=new Set(['cave-offline-assets.json','cave-offline-sw.js']);
 async function gitBlobSha1(response){
  const data=new Uint8Array(await response.clone().arrayBuffer());
- const head=new TextEncoder().encode('blob '+data.byteLength+'\\0'.replace('\\0','\0'));
+ const head=new TextEncoder().encode('blob '+data.byteLength+'\0');
  const input=new Uint8Array(head.byteLength+data.byteLength);
  input.set(head);input.set(data,head.byteLength);
  const digest=new Uint8Array(await crypto.subtle.digest('SHA-1',input));
