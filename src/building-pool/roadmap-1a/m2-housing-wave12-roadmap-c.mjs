@@ -198,29 +198,29 @@ export const ROADMAP_C_1A_WAVE12_SPECS=Object.freeze([
         "north"
       ],
       [
-        30,
-        11,
-        "east"
-      ],
-      [
-        40,
-        17,
-        "east"
-      ],
-      [
-        40,
-        29,
-        "east"
-      ],
-      [
-        23,
-        41,
-        "south"
+        21,
+        1,
+        "north"
       ],
       [
         1,
         9,
         "west"
+      ],
+      [
+        41,
+        16,
+        "east"
+      ],
+      [
+        41,
+        29,
+        "east"
+      ],
+      [
+        23,
+        40,
+        "south"
       ]
     ],
     "fixtures": [
