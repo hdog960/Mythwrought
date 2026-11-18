@@ -109,10 +109,54 @@ try{
  assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179')),
   before,'Offline cave load overwrote the ordinary saved world');
  assert.deepEqual(failures,[],'Offline browser errors');
+ // Simulate an interrupted next-version update without changing the player's
+ // cave record: previous-good full cache must still boot as one coherent set.
+ // This is a controlled isolated Chromium browser; never alter real devices.
+ await ctx.setOffline(false);
+ const prior=await page.evaluate(async()=>{
+   const markerUrl=new URL('./cave-offline-ready.json',location.href);
+   const marker=await caches.match(markerUrl);
+   if(!marker)throw Error('No verified current cache to protect for rollback');
+   const row=await marker.json();
+   const prefix='mythwrought-caves-v1-source-';
+   const active=await caches.open(prefix+row.cacheRevision);
+   const fallback=await caches.open(prefix+'test-previous-good');
+   const keys=await active.keys();
+   for(const request of keys){
+     const response=await active.match(request);
+     if(!response)throw Error('Missing current verified response during fallback setup');
+     await fallback.put(request,response);
+   }
+   if(!await fallback.match(markerUrl))throw Error('Previous-good release lacks verified marker');
+   await active.delete(markerUrl);
+   await active.delete(new URL('./src/manual-caves/cave-voxel-world.mjs',location.href));
+   return {copies:keys.length,release:row.cacheRevision};
+ });
+ assert.ok(prior.copies>=verified.count,'Incomplete previous-good source fallback');
+ await ctx.setOffline(true);
+ await page.reload({waitUntil:'domcontentloaded',timeout:45000});
+ await page.waitForFunction(()=>window.__mythwroughtTest&&
+   Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,
+   null,{timeout:90000});
+ assert.equal(await page.evaluate(()=>window.__mythwroughtTest.caveMode().enabled),false,
+   'Interrupted offline update must not auto-select a Cave World');
+ await page.evaluate(()=>document.querySelector('#menu').click());
+ await page.locator('#seedInput').fill(String(seed));
+ await page.evaluate(()=>document.querySelector('#caveLoadWorld').click());
+ await page.waitForFunction(()=>window.__mythwroughtTest.caveMode().enabled&&
+   Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,
+   null,{timeout:90000});
+ assert.equal(await page.evaluate(()=>window.__mythwroughtTest.caveMode().saveIsolation),
+   true,'Previous-good fallback changed ordinary world bytes');
+ assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-'+319731)),
+   null,'Incomplete-update recovery rewrote ordinary canonical save');
+ assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179')),
+   before,'Interrupted update overwrote original normal world');
+ assert.deepEqual(failures,[],'Actual offline or rollback browser errors');
  await ctx.setOffline(false);
  await ctx.close();
  console.log('PASS ACTUAL MYTHWROUGHT CAVE GAME OFFLINE',head,verified.count,
-  'cached original game + real WebGL2 + explicit cave load + old schema1 unchanged');
+  'Git blob verified static files + real WebGL2 + saved cave + previous-good rollback + old schema1 unchanged');
 }catch(error){
  console.error('CAVE_OFFLINE_ACTUAL_GAME_BLOCKED',String(error.stack||error));
  process.exitCode=1;
