@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {FOREST_CANDIDATES,createForestCandidate} from '../src/nonblock-scene48/forest-phase1-candidates.mjs';
-import {createOptInBreakFixture} from '../src/nonblock-scene48/opt-in-break-fixture.mjs';
 test('two distinct B families have non-cubic triangle meshes and exact anchored bounds',()=>{
  for(const id of FOREST_CANDIDATES){
   const o=createForestCandidate(id,19,3,5,-7),p=o.mesh.positions;
