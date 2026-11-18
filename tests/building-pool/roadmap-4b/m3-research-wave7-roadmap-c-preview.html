@@ -64,38 +64,62 @@ window.__m3ResearchWave7Preview=null;
 const selected=b.cells.filter(c=>view==='exterior'||c.at[1]<=3&&c.role!=='roof');
 // Cull only genuinely internal voxel-to-voxel faces; retain the actual source coordinates.
 // Reduces CPU/WebGL buffer pressure for 26k-cell third-variant buildings in CI.
+// Calculate projected bounds from authentic source voxels without duplicating
+// millions of JavaScript vertex/face objects. Every occupied cube remains
+// eligible for exterior face emission; no distance-based culling or proxies.
 const occupancy=new Set(selected.map(c=>c.at.join(',')));
-const world=[],all=[];
+const project=(x,y,z)=>{
+ const xx=x-b.bounds[0]/2,zz=z-b.bounds[2]/2;
+ return [(xx-zz)*.85,(xx+zz)*.35-y*1.32,(xx+zz+y*.55)];
+};
+let uMin=Infinity,uMax=-Infinity,vMin=Infinity,vMax=-Infinity,dMin=Infinity,dMax=-Infinity;
+let exposedFaces=0;
+for(const cell of selected){
+ const [x,y,z]=cell.at;
+ // Extrema of every source unit cube coincide with the extrema of its
+ // actually exposed voxel boundary; includes the entire true source scene.
+ for(const [px,py,pz] of cube(x,y,z)){
+  const [u,v,d]=project(px,py,pz);
+  if(u<uMin)uMin=u;if(u>uMax)uMax=u;
+  if(v<vMin)vMin=v;if(v>vMax)vMax=v;
+  if(d<dMin)dMin=d;if(d>dMax)dMax=d;
+ }
+ for(const face of faces){
+  const [dx,dy,dz]=face.neighbor;
+  if(!occupancy.has([x+dx,y+dy,z+dz].join(',')))exposedFaces++;
+ }
+}
+if(!Number.isFinite(uMin)||!exposedFaces)throw Error('missing authentic source voxel faces');
+const rx=Math.max(.1,uMax-uMin),ry=Math.max(.1,vMax-vMin),rd=Math.max(.1,dMax-dMin);
+const s=Math.min(1.56/rx,1.56*canvas.height/canvas.width/ry);
+const cameraFit={horizontalNdc:rx*s/2,verticalNdc:ry*s*canvas.width/canvas.height/2};
+// Exactly one interleaved Float32Array for exposed real source cube-face
+// vertices. No per-vertex JS objects, no world/all duplicates, no fallback
+// images, no test exemptions. One source voxel face = two actual triangles.
+const vertexCount=exposedFaces*6;
+const data=new Float32Array(vertexCount*6);
+let offset=0;
+const centerU=(uMax+uMin)/2,centerV=(vMax+vMin)/2;
+const verticalScale=s*canvas.width/canvas.height;
 for(const cell of selected){
  const [x,y,z]=cell.at,points=cube(x,y,z),base=colors[cell.role]||[.8,.2,.2];
  for(const face of faces){
   const [dx,dy,dz]=face.neighbor;
   if(occupancy.has([x+dx,y+dy,z+dz].join(',')))continue;
+  const cr=Math.min(1,base[0]*face.shade);
+  const cg=Math.min(1,base[1]*face.shade);
+  const cb=Math.min(1,base[2]*face.shade);
   for(const j of face.idx){
-   const p=points[j];all.push(p);
-   world.push({p,color:base.map(t=>Math.min(1,t*face.shade))});
+   const [u,v,d]=project(...points[j]);
+   data[offset++]=(u-centerU)*s;
+   data[offset++]=-(v-centerV)*verticalScale;
+   data[offset++]=(dMax-d)/rd*1.7-.85;
+   data[offset++]=cr;data[offset++]=cg;data[offset++]=cb;
   }
  }
 }
-let uMin=Infinity,uMax=-Infinity,vMin=Infinity,vMax=-Infinity,dMin=Infinity,dMax=-Infinity;
-const project=([x,y,z])=>{
- const xx=x-b.bounds[0]/2,zz=z-b.bounds[2]/2;
- return [(xx-zz)*.85,(xx+zz)*.35-y*1.32,(xx+zz+y*.55)];
-};
-for(const p of all){const [u,v,d]=project(p);uMin=Math.min(uMin,u);uMax=Math.max(uMax,u);
- vMin=Math.min(vMin,v);vMax=Math.max(vMax,v);dMin=Math.min(dMin,d);dMax=Math.max(dMax,d);}
-const rx=Math.max(.1,uMax-uMin),ry=Math.max(.1,vMax-vMin),rd=Math.max(.1,dMax-dMin);
-const s=Math.min(1.56/rx,1.56*canvas.height/canvas.width/ry);
-// Exact source coordinate extents remain inside the WebGL clip rectangle in both axes.
-const cameraFit={horizontalNdc:rx*s/2,verticalNdc:ry*s*canvas.width/canvas.height/2};
-const data=[];
-for(const {p,color} of world){
- const [u,v,d]=project(p);
- const cx=(u-(uMax+uMin)/2)*s,cy=-(v-(vMax+vMin)/2)*s*canvas.width/canvas.height;
- const cz=(dMax-d)/rd*1.7-.85;
- data.push(cx,cy,cz,...color);
-}
-gl.bindBuffer(gl.ARRAY_BUFFER,sharedBuffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);
+if(offset!==data.length)throw Error('source mesh face accounting mismatch');
+gl.bindBuffer(gl.ARRAY_BUFFER,sharedBuffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
 const stride=6*4,position=gl.getAttribLocation(program,'aPos'),color=gl.getAttribLocation(program,'aColor');
 for(const [loc,off] of [[position,0],[color,3*4]]){
  gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,3,gl.FLOAT,false,stride,off);
@@ -103,17 +127,17 @@ for(const [loc,off] of [[position,0],[color,3*4]]){
 gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.08,.13,.18,1);
 gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
 gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-gl.drawArrays(gl.TRIANGLES,0,world.length);
+gl.drawArrays(gl.TRIANGLES,0,vertexCount);
 // Submit authentic WebGL2 commands without blocking CDP Runtime.evaluate;
 // Page.captureScreenshot performs the real framebuffer readback and remains mandatory.
 gl.flush();
 const error=gl.getError();
 document.querySelector('#label').textContent=b.type+' · '+b.biome+' · '+b.size+' · '+view;
 document.querySelector('#metrics').textContent=selected.length+' coordinate cells · '+
- Math.floor(world.length/3)+' cube-face triangles · '+canvas.width+'×'+canvas.height+
+ Math.floor(vertexCount/3)+' cube-face triangles · '+canvas.width+'×'+canvas.height+
  ' · '+b.spaces.length+' rooms';
 window.__m3ResearchWave7Preview={ready:true,renderer:'genuine-webgl2-cube-proxy',type:b.type,
- view,drawCalls:1,triangles:world.length/3,cells:selected.length,
+ view,drawCalls:1,triangles:vertexCount/3,cells:selected.length,
  roomCount:b.spaces.length,width:canvas.width,height:canvas.height,glError:error,
  contextLost:gl.isContextLost(),sourceId:b.id,notPhysical:true,
  cameraDepthConvention:'elevated-camera-near-is-max',cameraFit,
