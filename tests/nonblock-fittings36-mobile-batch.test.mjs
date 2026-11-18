@@ -44,3 +44,20 @@ test('corrupt meshes and malformed grouping identity fail closed',()=>{
  assert.throws(()=>planFittingBatches([{...original,variant:'0'}]),/invalid/);
  assert.throws(()=>planFittingBatches([{...original,variant:4}]),/invalid/);
 });
+
+test('global object and triangle budgets fail closed across otherwise valid batches',()=>{
+ const props=objects(179);
+ const total=props.reduce((sum,o)=>sum+o.render.triangleCount,0);
+ assert.equal(planFittingBatches(props,{maxTotalTriangles:total}).totalTriangles,total);
+ assert.throws(()=>planFittingBatches(props,{maxTotalTriangles:total-1}),/global fitting batch budget/);
+ assert.throws(()=>planFittingBatches(props,{maxObjects:4}),/global fitting batch budget/);
+ for(const budget of [0,-1,1.5,NaN,Infinity]){
+  assert.throws(()=>planFittingBatches(props,{maxObjects:budget}),/invalid batch budget/);
+  assert.throws(()=>planFittingBatches(props,{maxTotalTriangles:budget}),/invalid batch budget/);
+ }
+});
+test('unregistered palette material indices cannot enter mobile batches',()=>{
+ const prop=objects(-77)[0],bad=Uint8Array.from(prop.render.mesh.materials);
+ bad[0]=255;
+ assert.throws(()=>planFittingBatches([{...prop,render:{...prop.render,mesh:{...prop.render.mesh,materials:bad}}}]),/invalid/);
+});
