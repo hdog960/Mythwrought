@@ -20,7 +20,7 @@ export function prepareBreakableObjectDraws(session,camera,{radius=48,maxInstanc
   if(selected>=maxInstances||triangles+count>maxTriangles)continue;
   // No geometry merging: each distinct mesh/variant has a stable keyed draw.
   // Reuse typed mesh buffers by object reference; renderer owns GPU upload/cache.
-  const key=obj.sceneId+':'+obj.variant;
+  // Different anchors can generate different triangle geometry even within a family/variant.\n  // Fail closed on accidental mesh reuse until exact geometry equivalence is proven.\n  const key=obj.instanceKey;
   let group=groups.get(key);
   if(!group){group={sceneId:obj.sceneId,variant:obj.variant,mesh:obj.render.mesh,instances:[]};groups.set(key,group);}
   group.instances.push({instanceKey:obj.instanceKey,anchor:[...obj.anchor],selectionAabbs:obj.selectionAabbs});
