@@ -5,11 +5,14 @@ import {stepPlayer,COYOTE_TIME} from '../src/physics.mjs';
 import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
 import {HISTORIC_NAMED_TARGETS,findNamedCavePlayerRoute}
  from '../src/manual-caves/named-destination-audit.mjs';
-let pair;
-function get(){
- if(!pair){const base=new VoxelWorld(179),bytes=JSON.stringify(base.save());
-  pair={base,bytes,runtime:createStagedCaveRuntime(179,null,{approved:true})};}
- return pair;
+const seededWorlds=new Map();
+function get(seed){
+ if(![179,1,2026,-77].includes(seed))throw Error('Unexpected source-acceptance seed');
+ if(!seededWorlds.has(seed)){
+  const base=new VoxelWorld(seed),bytes=JSON.stringify(base.save());
+  seededWorlds.set(seed,{base,bytes,runtime:createStagedCaveRuntime(seed,null,{approved:true})});
+ }
+ return seededWorlds.get(seed);
 }
 function walk(world,path,label){
  const s=path[0],p={x:s.x+.5,z:s.z+.5,feet:s.floor+1,
@@ -39,9 +42,10 @@ test('all 21 preserved named historic source labels are distinct, with unique ta
  assert.equal(new Set(HISTORIC_NAMED_TARGETS.map(x=>x.name)).size,21);
  assert.equal(new Set(HISTORIC_NAMED_TARGETS.map(x=>x.depth+','+x.d+','+x.t)).size,21);
 });
-for(const item of HISTORIC_NAMED_TARGETS){
- test('actual controller from original spiral to distinct named '+item.name+' and back',()=>{
-  const {base,bytes,runtime}=get();
+for(const seed of [179,1,2026,-77])for(const item of HISTORIC_NAMED_TARGETS){
+ test('actual controller from original spiral to distinct named '+item.name+
+  ' and back on seed '+seed,()=>{
+  const {base,bytes,runtime}=get(seed);
   const proof=findNamedCavePlayerRoute(runtime.world,item);
   assert.equal(proof.ok,true,JSON.stringify(proof));
   assert.equal(proof.name,item.name);
@@ -51,6 +55,6 @@ for(const item of HISTORIC_NAMED_TARGETS){
   assert.equal(JSON.stringify(base.save()),bytes,'Old schema1 save mutated by chamber visit');
   assert.equal(runtime.registeredInHomeScreen,false);
   console.log('CAVE NAMED CHAMBER REAL CONTROLLER PASS',item.name,
-   'frames',frames,'steps',proof.route.length);
+   'seed',seed,'frames',frames,'steps',proof.route.length);
  });
 }
