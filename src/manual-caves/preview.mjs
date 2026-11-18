@@ -21,8 +21,8 @@ const vs=[
 ].join('\n');
 const fs=[
  '#version 300 es','precision mediump float;','in vec3 vColor;in float vDepth;',
- 'out vec4 frag;','void main(){float f=smoothstep(10.0,68.0,vDepth);',
- 'frag=vec4(mix(vColor,vec3(.11,.16,.23),f),1.0);}'
+ 'out vec4 frag;','void main(){float f=smoothstep(4.0,40.0,vDepth);',
+ 'frag=vec4(mix(vColor,vec3(.045,.075,.11),f),1.0);}'
 ].join('\n');
 function shader(type,src){
  const out=gl.createShader(type);gl.shaderSource(out,src);gl.compileShader(out);
@@ -44,10 +44,14 @@ let runtime=null,view='olddeep',state=null;
 const norm=a=>{const n=Math.hypot(...a)||1;return a.map(x=>x/n)};
 const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
 function scene(name){
- const old=deepCaveRoute().find(p=>p.floor===-80);
+ const oldRoute=deepCaveRoute(),oldIndex=oldRoute.findIndex(p=>p.floor===-80);
+ const old=oldRoute[oldIndex],oldNext=oldRoute[oldIndex+11];
  const route=descentRoute(),idx=route.findIndex(p=>p.floor===-80);
+ // Look ALONG the physically carved historical corridor. An arbitrary
+ // world +X camera looked directly into a full-stone wall and yielded
+ // near-monochrome evidence despite a nonempty GPU mesh.
  if(name==='olddeep')return {label:'Historical :24 deep descent',eye:[old.x+.5,old.floor+2.5,old.z+.5],
-   target:[old.x+8.5,old.floor+2.0,old.z+.5]};
+   target:[oldNext.x+.5,oldNext.floor+2.5,oldNext.z+.5]};
  if(name==='switchback')return {label:'Historical :36 switchback',eye:[route[idx].x+.5,route[idx].floor+2.5,route[idx].z+.5],
    target:[route[idx+9].x+.5,route[idx+9].floor+2.5,route[idx+9].z+.5]};
  if(name==='whisper'){
