@@ -41,7 +41,7 @@ export function createAuthoritativeVoxelEditBridge(host) {
         if (!current || current.id !== r.expectedId ||
             current.revision !== r.expectedRevision ||
             (r.expectedTurn !== undefined && current.turn !== r.expectedTurn) ||
-            (r.expectedOrientationEpoch !== undefined && current.orientationEpoch !== r.expectedOrientationEpoch)) return false;
+            (r.expectedOrientationEpoch !== undefined && (typeof host.readOrientationEpoch !== 'function' || host.readOrientationEpoch(r.cell) !== r.expectedOrientationEpoch))) return false;
       }
       await prepare();
       cancelled();
