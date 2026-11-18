@@ -2,7 +2,9 @@
 // This does NOT register buildings, claim producer Pack AABBs or replace browser proof.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
+import {dirname} from 'node:path';
+import {createHash} from 'node:crypto';
 import {get1BCandidates} from '../src/building-pool/roadmap-1b/candidates.mjs';
 import {validateBlueprint as validate1B} from '../src/building-pool/roadmap-1b/legacy-stable-schema.mjs';
 import {validateBlueprint as validate2B,structuralFingerprint} from '../src/building-pool/roadmap-2b/schema.mjs';
@@ -100,4 +102,31 @@ test('Wave1 new community candidates are not high-overlap floor twins of existin
   const score=maxD4IoU(basePoints(b),basePoints(o));
   assert.ok(score<0.85,b.id+' near-duplicates historic '+o.id+' floor IoU '+score.toFixed(4));
  }
+});
+
+test('Wave1 exact source-byte evidence is exported for independent browser witness QA',()=>{
+ const paths=[
+  'src/building-pool/roadmap-b/wave1-community-b1.mjs',
+  'src/building-pool/roadmap-b/wave1-trades-b2.mjs',
+  'src/building-pool/roadmap-b/b1-stonevein-switchback-baths.mjs',
+  'src/building-pool/roadmap-b/b2-ironpass-market.mjs',
+  'src/building-pool/roadmap-1b/schema.mjs',
+  'src/building-pool/roadmap-1b/legacy-stable-schema.mjs',
+  'src/building-pool/roadmap-1b/m2-community-structures.mjs',
+  'src/building-pool/roadmap-2b/schema.mjs',
+  'src/building-pool/roadmap-2b/catalog.mjs'
+ ];
+ const evidence='artifacts/roadmap-b-wave1-source',records=[];
+ for(const path of paths){
+  const contents=readFileSync(path);
+  const dest=evidence+'/'+path;
+  mkdirSync(dirname(dest),{recursive:true});
+  writeFileSync(dest,contents);
+  records.push({path,sha256:createHash('sha256').update(contents).digest('hex'),bytes:contents.length});
+ }
+ const manifest={schema:'mythwrought.roadmap-b-wave1-source-witness.v1',kind:'read-only source copied by exact CI checked-out tree',
+  productionIntegrated:false,actualIPhoneAccepted:false,
+  githubSha:process.env.GITHUB_SHA||null,records};
+ writeFileSync(evidence+'/manifest.json',JSON.stringify(manifest,null,2));
+ assert.equal(records.length,9);
 });
