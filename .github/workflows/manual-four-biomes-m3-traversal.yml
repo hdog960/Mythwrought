@@ -1,0 +1,27 @@
+name: Manual Four-Biome M3 On-Foot Traversal Gate (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/manual-biomes/shoulder-traversal.mjs'
+      - 'tests/manual-biomes/shoulder-traversal.test.mjs'
+      - 'tests/manual-four-biomes-m3-traversal.test.mjs'
+      - '.github/workflows/manual-four-biomes-m3-traversal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-physical-walking:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Real collidable route, actual stepPlayer, no edits or carved caves
+        run: |
+          node --check src/manual-biomes/shoulder-traversal.mjs
+          node --test tests/manual-biomes/shoulder-traversal.test.mjs
