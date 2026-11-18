@@ -4,6 +4,7 @@ import {meshDepthSection} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
+import {loadLunarEpoch,sampleLunarAge,sampleThreeMoons,S3_LUNAR_CONTRACT} from './sky-moons.mjs';
 import {SKY_DAY_MS,SKY_DAY_TARGET_MS,SKY_NIGHT_TARGET_MS,
   loadSkyClock,sampleSkyClock,selectSkyClockTime,formatSkyTime} from './world-clock.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
@@ -76,8 +77,10 @@ function start(){
   seedLabel.textContent='WORLD '+world.seed;
   // S1: separate per-seed clock sidecar; never modify original schema-1 saves.
   // The monotonic clock advances even while settings overlay is open.
-  // S2 uses this unchanged S1 clock for atmosphere; three moons remain S3.
+  // S3 uses the unchanged S1 clock for sky time and a separate safe lunar epoch.
   let skyClock=loadSkyClock({seed:world.seed,storage:localStorage,
+    wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
+  let lunarClock=loadLunarEpoch({seed:world.seed,storage:localStorage,
     wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
   const skyClockStatus=document.getElementById('skyClockStatus');
   let lastSkyClockUiAt=-Infinity;
@@ -99,6 +102,8 @@ function start(){
   }
   function reactivateSkyClock(){
     skyClock=loadSkyClock({seed:world.seed,storage:localStorage,
+      wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
+    lunarClock=loadLunarEpoch({seed:world.seed,storage:localStorage,
       wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
     paintSkyClock(performance.now(),true);
   }
@@ -872,6 +877,12 @@ function start(){
       const atmosphere=sampleSkyAtmosphere(sampleSkyClock(skyClock,now));
       const sunScreen=projectSunToScreen(atmosphere.sunDirection,
         player.yaw,player.pitch,w/h);
+      const lunar=sampleThreeMoons(atmosphere.phaseMs,
+        sampleLunarAge(lunarClock,now),atmosphere.daylight);
+      const moonScreens=lunar.moons.map(m=>projectSunToScreen(m.direction,
+        player.yaw,player.pitch,w/h));
+      const skyLight=atmosphere.light.map((v,i)=>
+        Math.min(1,v+lunar.moonlight*[.71,.84,1][i]));
       gl.clearColor(...atmosphere.fog,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
       // Cheap procedural WebGL sky; the depth buffer is reserved for editable voxels.
       gl.disable(gl.DEPTH_TEST);
@@ -887,6 +898,11 @@ function start(){
       gl.uniform3fv(skyU.ridge,atmosphere.ridge);
       gl.uniform3fv(skyU.fog,atmosphere.fog);
       gl.uniform3fv(skyU.sunColor,atmosphere.sunColor);
+      gl.uniform2fv(skyU.lunarScreen,moonScreens.flat());
+      gl.uniform2fv(skyU.lunarPhase,lunar.moons.flatMap(m=>m.terminator));
+      gl.uniform3fv(skyU.lunarColor,lunar.moons.flatMap(m=>m.color));
+      gl.uniform1fv(skyU.lunarRadius,lunar.moons.map(m=>m.radius));
+      gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility));
       gl.drawArrays(gl.TRIANGLES,0,3);
       gl.enable(gl.DEPTH_TEST);
       gl.useProgram(program);
@@ -897,13 +913,20 @@ function start(){
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
       gl.uniform3fv(U.uFog,atmosphere.fog);
-      gl.uniform3fv(U.uSkyLight,atmosphere.light);
+      gl.uniform3fv(U.uSkyLight,skyLight);
       gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
       if(frame%12===0){
         canvas.dataset.skySunAltitude=String(atmosphere.elevation.toFixed(4));
         canvas.dataset.skySunScreen=JSON.stringify(sunScreen.map(v=>Number(v.toFixed(4))));
         canvas.dataset.skyDaylight=String(atmosphere.daylight.toFixed(4));
-        canvas.dataset.skyAmbient=JSON.stringify(atmosphere.light.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyAmbient=JSON.stringify(skyLight.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyMoonCount=String(S3_LUNAR_CONTRACT.count);
+        canvas.dataset.skyLunarPersistence=lunarClock.persistence;
+        canvas.dataset.skyLunarAgeDays=lunar.ageDays.toFixed(5);
+        canvas.dataset.skyMoonScreens=JSON.stringify(moonScreens.map(v=>v.map(n=>Number(n.toFixed(4)))));
+        canvas.dataset.skyMoonPhases=JSON.stringify(lunar.moons.map(m=>Number(m.phaseFraction.toFixed(5))));
+        canvas.dataset.skyMoonIlluminations=JSON.stringify(lunar.moons.map(m=>Number(m.illumination.toFixed(5))));
+        canvas.dataset.skyMoonVisibilities=JSON.stringify(lunar.moons.map(m=>Number(m.visibility.toFixed(5))));
         canvas.dataset.skyFog=JSON.stringify(atmosphere.fog.map(v=>Number(v.toFixed(4))));
       }
       stream();

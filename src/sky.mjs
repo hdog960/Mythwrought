@@ -1,6 +1,6 @@
-// MYTHWROUGHT S2 — original one-pass, inexpensive atmospheric sky.
+// MYTHWROUGHT S3 — original one-pass sun, atmosphere and exactly three moons.
 // Fullscreen triangle behind editable voxel world: no textures, new draw calls,
-// ray marching, S3 moons or stars. All palette/time inputs come from S1 clock.
+// ray marching or S4 stars. All time inputs come from S1 and lunar sidecars.
 export const SKY_VERTEX_SHADER=[
   '#version 300 es',
   'precision highp float;',
@@ -15,6 +15,10 @@ export const SKY_FRAGMENT_SHADER=[
   'uniform vec2 uResolution,uSunScreen;',
   'uniform float uYaw,uPitch,uSunVisibility;',
   'uniform vec3 uHorizon,uZenith,uCloud,uRidge,uSkyFog,uSunColor;',
+  // Only three source-original moons in the same existing fullscreen pass.
+  'uniform vec2 uLunarScreen[3],uLunarPhase[3];',
+  'uniform vec3 uLunarColor[3];',
+  'uniform float uLunarRadius[3],uLunarVisibility[3];',
   'out vec4 outColor;',
   'void main(){',
   'vec2 uv=gl_FragCoord.xy/uResolution;',
@@ -49,6 +53,24 @@ export const SKY_FRAGMENT_SHADER=[
   '  *(1.0-smoothstep(.13,.38,abs(uv.x-.46)));',
   'cloud+=.20*wisp;',
   'sky=mix(sky,uCloud,clamp(cloud,0.0,.63));',
+  // Bounded three-disc loop. A local branch skips expensive terminator math
+  // for almost every fragment; no texture, transparency or second GPU pass.
+  'for(int i=0;i<3;i++){',
+  ' if(uLunarVisibility[i]<.001)continue;',
+  ' vec2 local=(uv-uLunarScreen[i])*vec2(uResolution.x/uResolution.y,1.0)/uLunarRadius[i];',
+  ' float r2=dot(local,local);',
+  ' if(r2>6.76)continue;',
+  ' float radius=sqrt(r2);',
+  ' float halo=(1.0-smoothstep(1.10,2.6,radius))*.14*uLunarVisibility[i];',
+  ' sky=mix(sky,uLunarColor[i],halo);',
+  ' if(r2<1.09){',
+  '   float z=sqrt(max(0.0,1.0-min(r2,1.0)));',
+  '   float lit=smoothstep(-.09,.09,local.x*uLunarPhase[i].y+z*uLunarPhase[i].x);',
+  '   float disc=1.0-smoothstep(.955,1.045,radius);',
+  '   float pigment=.13+.87*lit;',
+  '   sky=mix(sky,uLunarColor[i]*pigment,disc*uLunarVisibility[i]);',
+  ' }',
+  '}',
   'outColor=vec4(clamp(sky,0.0,1.0),1.0);',
   '}'
 ].join('\n');
