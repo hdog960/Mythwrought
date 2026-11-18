@@ -12,6 +12,8 @@ import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block} from './biome130-registry.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,pack2ExportBundle,pack2ImportBundle} from './pack2-world.mjs';
+import {prepareExplicitCaveWorld,saveExplicitCaveWorld,rejectLegacyWorldWhereCaveExists} from './manual-caves/game-startup-contract.mjs';
+import {caveProfileStorageKey} from './manual-caves/profile-store.mjs';
 import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
   pack2NormalizeState,pack2CycleState,pack2WaterSectionVertices,
   pack2BodyIntersects} from './pack2-integration.mjs';
@@ -53,8 +55,11 @@ if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or deskt
 else start();
 
 function start(){
-  let world,storageReadOnly=false,recoveryNote='';
+  let world,storageReadOnly=false,recoveryNote='',caveSession=null;
   function loadWorld(seed){
+    // Legacy startup must NEVER silently reuse a seed reserved for the
+    // creator's explicitly chosen new cave profile sidecar.
+    rejectLegacyWorldWhereCaveExists(localStorage,seed);
     const result=loadWorldSafe(localStorage,seed);
     if(result.recovered)recoveryNote=result.warning;
     const p2=loadPack2LiveWorld(localStorage,result.world);
@@ -389,6 +394,7 @@ function start(){
     mirrorDownload.hidden=true;mirrorDownload.removeAttribute('href');
   }
   function verifiedLiveBytes(){
+    if(caveSession)throw Error('Cave profiles are isolated; legacy mirror cannot capture a cave world');
     if(storageReadOnly)throw Error('Protected read-only world: keep original damaged data');
     const raw=localStorage.getItem(worldSlotKey(world.seed));
     if(!raw||raw!==JSON.stringify(world.save()))
@@ -453,6 +459,18 @@ function start(){
       message('SAVE PROTECTION ACTIVE — damaged original world not overwritten');
       saveHealth.textContent='READ ONLY: original damaged save preserved. Import a verified backup or choose another seed.';
       return false;
+    }
+    if(caveSession){
+      try{
+        const caveSaved=saveExplicitCaveWorld(localStorage,caveSession,{approved:true});
+        changed=false;
+        saveHealth.textContent='CAVE WORLD SAVED · separate checksummed profile with journal and backup. Original world save unchanged.';
+        return caveSaved.ok===true;
+      }catch(err){
+        saveHealth.textContent='CAVE SAVE REFUSED: '+err.message+' · do not leave this unsaved world.';
+        message('Cave save refused safely · '+err.message);
+        return false;
+      }
     }
     const overlay=savePack2LiveWorld(localStorage,world);
     if(!overlay.ok){
@@ -2010,10 +2028,51 @@ function start(){
   });
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);
+  // Staging-only new-Cave World selector: explicit buttons + confirmation,
+  // never a default seed migration, never canonical v0.02/Pack2 sidecar writes.
+  const caveWorldStatus=document.getElementById('caveWorldStatus');
+  function openExplicitCaveWorld(action){
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(!window.confirm(action==='create'?
+        'CREATE a separate NEW CAVE WORLD for seed '+next+'? Existing worlds are never converted. Use a seed you have not used before.':
+        'LOAD your separately saved CAVE WORLD for seed '+next+'? Existing ordinary worlds will remain untouched.')){
+        caveWorldStatus.textContent='Cave selection cancelled; current world unchanged';return;
+      }
+      if(!storageReadOnly&&!save())throw Error('Current world is not safely saved; export before entering caves');
+      // Validate storage and all source-authored entrances *before* committing
+      // to a gameplay world switch. Failed preflight leaves current scene intact.
+      const selected=prepareExplicitCaveWorld(localStorage,next,{action,approved:true});
+      const mouth=selected.runtime.entrancePlan.entrances[0].mouth;
+      const spawn=findSafeSpawn(selected.world,mouth.x,mouth.z);
+      for(const c of chunks.values())deleteChunkBuffers(c);
+      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
+      g2NewWorld();world=selected.world;caveSession=selected;
+      world.nextPack2State=pack2Selection;
+      pack3=createPack3LiveBridge(world,localStorage);
+      resetManual14ForWorld();resetPack5ForWorld();
+      storageReadOnly=false;changed=false;respawnPrototype();
+      Object.assign(player,spawn,{vX:0,vY:0,vZ:0,onGround:true});
+      clearMirrorDownload();
+      seedLabel.textContent='CAVE WORLD '+world.seed;
+      seedInput.value=String(world.seed);
+      saveHealth.textContent='Separate CAVE profile loaded. Ordinary schema-1 save and Pack2 sidecar untouched.';
+      caveWorldStatus.textContent=(selected.created?'NEW CAVE WORLD CREATED':'CAVE WORLD LOADED')+
+        (selected.recovery?' · RECOVERED '+selected.recovery:'')+
+        ' · near '+selected.runtime.entrancePlan.entrances[0].name+' entrance. Tap RETURN to explore.';
+      message('Cave world ready · source-authored routes · ordinary worlds protected');
+    }catch(err){caveWorldStatus.textContent='CAVE NOT ACTIVATED: '+err.message;}
+  }
+  document.getElementById('caveCreateWorld').onclick=()=>openExplicitCaveWorld('create');
+  document.getElementById('caveLoadWorld').onclick=()=>openExplicitCaveWorld('load');
   document.getElementById('switchWorld').onclick=()=>{
     try{
       const next=worldSeedFromText(seedInput.value);
+      if(caveSession&&next===world.seed)
+        throw Error('This seed belongs to a cave profile. LOAD CAVE PROFILE or enter a different ordinary world seed.');
       if(next===world.seed&&!storageReadOnly){seedMessage.textContent='Already exploring this seed.';return;}
+      rejectLegacyWorldWhereCaveExists(localStorage,next);
       if(!storageReadOnly&&!save())throw Error('Current world is not verified saved. Export before switching.');
       const candidate=loadWorld(next);
       const result=saveWorldSafe(localStorage,candidate);
@@ -2022,7 +2081,7 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();
+      g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();
       storageReadOnly=false;changed=false;respawnPrototype();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
@@ -2034,6 +2093,18 @@ function start(){
   };
   document.getElementById('export').onclick=()=>{
     try{
+      if(caveSession){
+        if(!save())throw Error('Cave profile has unsaved edits; refuse incomplete export');
+        const envelope=localStorage.getItem(caveProfileStorageKey(world.seed));
+        if(!envelope)throw Error('Verified cave profile not found');
+        const blob=new Blob([envelope],{type:'application/json'});
+        const url=URL.createObjectURL(blob),a=document.createElement('a');
+        a.href=url;a.download='mythwrought-cave-profile-'+world.seed+'.json';
+        document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),3000);
+        message('Exported separate checked Cave World envelope · ordinary world untouched');
+        return;
+      }
       const exported=world.pack2Cells.size?pack2ExportBundle(world):world.save();
       const data=JSON.stringify(exported,null,2);
       importWorldData(data); // Legacy schema-1 fields remain valid and unchanged.
@@ -2050,9 +2121,11 @@ function start(){
   document.getElementById('importFile').addEventListener('change',async e=>{
     const f=e.target.files?.[0];if(!f)return;
     try{
+      if(caveSession)throw Error('Ordinary WORLD IMPORT is disabled while cave profile is selected. Save/export Cave World or switch to another seed first.');
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
       const rawImport=await f.text();
       const imported=importWorldData(rawImport); // Validate original schema-1 first.
+      rejectLegacyWorldWhereCaveExists(localStorage,imported.seed);
       const incoming=JSON.parse(rawImport);
       const previousOverlay=loadPack2LiveWorld(localStorage,imported).world;
       // Legacy-only imports must NOT delete placed Pack 2 objects. Preserve
@@ -2078,7 +2151,7 @@ function start(){
       if(!outcome.ok)throw Error(outcome.reason);
       const overlay=savePack2LiveWorld(localStorage,candidate);
       if(!overlay.ok)throw Error('Pack 2 sidecar not written; previous verified data retained: '+overlay.reason);
-      g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
+      g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
@@ -2147,6 +2220,12 @@ function start(){
   if(['localhost','127.0.0.1'].includes(location.hostname)){
     // Local-only regression interface; absent from the public Pages runtime.
     window.__mythwroughtTest=Object.freeze({
+      caveMode(){return {enabled:!!caveSession,seed:world.seed,
+        profile:caveSession?.profile??null,
+        entranceSites:caveSession?.runtime.entrancePlan.entrances.map(e=>({
+          name:e.name,mouth:e.mouth}))??[],
+        sourceCounts:caveSession?.world.base.cavePlanReport??null,
+        saveIsolation:!caveSession||localStorage.getItem(worldSlotKey(world.seed))===null};},
       teleport(x,z){
         if(![x,z].every(Number.isFinite))throw Error('Invalid debug position');
         const pos=findSafeSpawn(world,x,z);
