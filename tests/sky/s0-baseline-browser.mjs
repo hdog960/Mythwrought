@@ -70,7 +70,7 @@ try {
         null,{timeout:10000});
       const report=await page.locator('#auditReport').inputValue();
       const m=/Foreground play frames: (\d+); approx (\d+) FPS; p50 ([\d.]+) ms; p95 ([\d.]+) ms; worst ([\d.]+) ms; >33ms frames (\d+)/.exec(report);
-      assert.ok(m,'Game's FrameHistory diagnostic did not report measured frame times');
+      assert.ok(m,"Game's FrameHistory diagnostic did not report measured frame times");
       const frames={samples:Number(m[1]),approxFps:Number(m[2]),p50Ms:Number(m[3]),
         p95Ms:Number(m[4]),worstMs:Number(m[5]),slowFrames:Number(m[6])};
       assert.ok(frames.samples>=60&&frames.p50Ms>0&&frames.p95Ms>=frames.p50Ms&&frames.worstMs>=frames.p95Ms);
