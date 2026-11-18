@@ -25,7 +25,7 @@ import {auditBlueprintMaterials} from '../../../src/building-pool/roadmap-4a/m1-
 import manifest from '../../../src/building-pool/roadmap-4a/manifest.json' with {type:'json'};
 
 import {allA2OriginalStateKnowledge,buildA2OriginalStateKnowledge,A2_ORIGINAL_STATE_KNOWLEDGE_IDS} from '../../../src/building-pool/roadmap-4a/a2-original-state-knowledge.mjs';
-import {allA2Wave2StateKnowledge,buildA2Wave2StateKnowledge,A2_WAVE3_STATE_KNOWLEDGE_IDS} from '../../../src/building-pool/roadmap-4a/a2-wave2-state-knowledge.mjs';
+import {allA2Wave2StateKnowledge,buildA2Wave2StateKnowledge,A2_WAVE2_STATE_KNOWLEDGE_IDS} from '../../../src/building-pool/roadmap-4a/a2-wave2-state-knowledge.mjs';
 import {allA2Wave3StateKnowledge,buildA2Wave3StateKnowledge,A2_WAVE3_STATE_KNOWLEDGE_IDS} from '../../../src/building-pool/roadmap-4a/a2-wave3-state-knowledge.mjs';
 const protected188=()=>[...allM1(),...allM2Exemplars(),...allM2Additional(),...allM2Regional(),...allM2Expansion(),...allM2Tranche(),...allM2Next(),...allM2Silhouettes(),...allM2Profiles(),...allM2Courtyards(),...allM2Districts(),...allM2CivicWorks(),...allM2PublicWorks(),...allM2GuildAndCivic(),...allM2RegionalCourts(),...allM2ChambersCrafts(),...allM2FrontierDistricts(),...allM2FinalCivicGuild(),...allM3StateKnowledge(),...allA2OriginalStateKnowledge(),...allA2Wave2StateKnowledge()];
 const fresh=()=>allA2Wave3StateKnowledge();
