@@ -13,7 +13,7 @@ export function upperCaveCells({seed=179,site=UPPER_SITES[0],descentReservation,
   if(!(descentReservation instanceof Map)||!(protectedCells instanceof Set)||
      !(editedCells instanceof Set)||typeof legacyCells!=='function')
     return Object.freeze({ok:false,reason:'SOURCE_RESERVATION_OR_EDIT_HISTORY_MISSING',cells:new Map()});
-  const cells=new Map(),route=[],conflicts=[];
+  const cells=new Map(),route=[],conflicts=[],columns=new Map();
   const solid=BLOCK.DEEPSTONE,air=BLOCK.AIR;
   const put=(x,y,z,id)=>{
     if(y>=LEGACY_WORLD_MIN_Y||y<-45||y<WORLD_MIN_Y+1)return;
@@ -26,12 +26,16 @@ export function upperCaveCells({seed=179,site=UPPER_SITES[0],descentReservation,
     if(prev!==undefined&&!same(prev,id)){conflicts.push(k);return;}
     cells.set(k,id);
   };
+  const plan=(x,z,floor,height)=>{
+    const k=x+','+z,old=columns.get(k);
+    if(!old)columns.set(k,{x,z,floor,ceiling:Math.min(-4,floor+height)});
+    else { old.floor=Math.max(old.floor,floor); old.ceiling=Math.max(old.ceiling,Math.min(-4,floor+height)); }
+  };
   const carve=(x,z,floor,width=1,height=4)=>{
     if(floor>-8||floor<-40)return;
     for(let lateral=-width;lateral<=width;lateral++){
       const xx=x,zz=z+lateral;
-      put(xx,floor,zz,solid);
-      for(let h=1;h<=height;h++)put(xx,floor+h,zz,air);
+      plan(xx,zz,floor,height);
     }
   };
   // Supported 3-wide descending nave, six horizontal cells per vertical step.
@@ -57,9 +61,15 @@ export function upperCaveCells({seed=179,site=UPPER_SITES[0],descentReservation,
       const radial=(dx*dx+dz*dz)/(center.r*center.r);
       if(radial>1)continue;
       const x=site.x+center.d+dx,z=site.z+center.z+dz;
-      put(x,floor,z,solid);
-      for(let h=1;h<=4+Math.floor(3*(1-radial));h++)put(x,floor+h,z,air);
+      plan(x,z,floor,4+Math.floor(3*(1-radial)));
     }
+  }
+  // Resolve overlapping passages by column, before writing any voxels. A higher
+  // supported floor wins over a lower passage's headroom; never leave a
+  // contradictory AIR/stone write or an unsupported raised floor.
+  for(const {x,z,floor,ceiling} of columns.values()){
+    put(x,floor,z,solid);
+    for(let y=floor+1;y<=ceiling;y++)put(x,y,z,air);
   }
   if(conflicts.length)return Object.freeze({ok:false,reason:'PROTECTED_OR_CONFLICTING_CELLS',conflictCount:conflicts.length,cells:new Map()});
   return Object.freeze({ok:true,site:site.name,seed,cells,route:Object.freeze(route),
