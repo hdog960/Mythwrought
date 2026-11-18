@@ -10,7 +10,9 @@ test('M2 four-biome REAL source meshing fits the production 8MiB GPU chunk cap',
   const world=new Pack2LiveWorld(new FourRegionWorld(179));
   for(const biome of SURFACE_BIOME_REGIONS){
     const cx=chunkCoord(biome.x),cz=chunkCoord(biome.z);
-    for(const [dx,dz] of [[0,0],[-1,0],[1,0],[0,-1],[0,1]]){
+    // Mirror the actual 25-chunk landscape streaming window, including
+    // diagonal/outer-ring chunks that source-specific ridges may overload.
+    for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){
       const x=cx+dx,z=cz+dz;
       const vertices=meshChunk(world,x,z);
       assert.ok(vertices instanceof Float32Array,biome.name+' real chunk');
