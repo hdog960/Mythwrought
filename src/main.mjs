@@ -2309,6 +2309,9 @@ function start(){
     window.__mythwroughtTest=Object.freeze({
       fourBiomeMode(){return world.base instanceof FourRegionWorld?'four-regions':'legacy';},
       fourBiomeProfile(){return world.base instanceof FourRegionWorld?world.base.generationProfile:null;},
+      // M5 read-only local browser acceptance: no displacement/rotation methods.
+      m5ObservedPose(){return Object.freeze({x:player.x,z:player.z,feet:player.feet,
+        yaw:player.yaw,seed:world.seed,creative:g2Active(),onGround:player.onGround});},
       gpuUploadFaults(){return [...gpuRetry.faults.entries()].map(([key,value])=>({key,...value}));},
       // Localhost-only acceptance uses actual edit+save and never synthetic
       // screenshot fixtures. Production Pages never exposes this diagnostic.

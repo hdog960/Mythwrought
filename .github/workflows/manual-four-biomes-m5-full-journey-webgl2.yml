@@ -1,0 +1,57 @@
+name: Manual Four-Biome M5 Full Natural Keyboard Walks (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/main.mjs'
+      - 'src/manual-biomes/**'
+      - 'scripts/ci/manual-biomes-m5-full-journey-webgl2.mjs'
+      - '.github/workflows/manual-four-biomes-m5-full-journey-webgl2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  four-real-biome-keyboard-journeys:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: ['667x375', '844x390', '932x430']
+    env:
+      M5_VIEWPORT: ${{ matrix.viewport }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate browser-runner syntax and forbid movement shortcuts
+        run: |
+          node --check src/main.mjs
+          node --check scripts/ci/manual-biomes-m5-full-journey-webgl2.mjs
+          if grep -En '(__mythwroughtTest[.]teleport|setOrientation[(]|aimAt[(]|editBiomeCell[(]|Object[.]assign[(]player|requestAnimationFrame[ ]*=|Date[.]now[ ]*=)' scripts/ci/manual-biomes-m5-full-journey-webgl2.mjs; then
+            echo 'Invalid synthetic actor movement found'
+            exit 1
+          fi
+      - name: Source-exact paths, physical collider, fog and saved-generator gates
+        run: |
+          node --test tests/manual-biomes/m5-natural-overland.test.mjs
+          node --test tests/manual-biomes/m5-mountain-pass-v5.test.mjs
+          node --test tests/manual-biomes/m5-explicit-v5-activation.test.mjs
+          node --test tests/manual-four-biomes-m5-exploration.test.mjs
+      - name: Install pinned actual Chromium WebGL2
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Four complete player-input 500-block walks, discovery, save and reload
+        run: node scripts/ci/manual-biomes-m5-full-journey-webgl2.mjs
+      - name: Preserve success and failure PNGs, hashes and live actor trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-m5-full-keyboard-${{ matrix.viewport }}
+          path: artifacts/manual-biomes-m5-long-${{ matrix.viewport }}/
+          if-no-files-found: warn
+          retention-days: 14

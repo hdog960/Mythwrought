@@ -20,3 +20,7 @@ Parent M4 draft #263 exact accepted head `75f6f1eff51b33ac53d7dec0f3001f4be56019
 ## Outstanding non-M5 source conflicts
 
 Profiled worlds' separate vault/mirror remain intentionally fail-closed until a generator-safe backup envelope is available; WORLD EXPORT includes profile. Fogged minimap currently colors discoveries from genuine physical geology; zoom-level and large-route UX may need separate review. Existing detached Snow/Enchanted flora is owned by the non-block automation lanes: do not duplicate, absorb or overwrite it. Dedicated real iPhone Safari/Home Screen/offline PWA playtest, real 60 FPS performance and source-exact reconcile with newer production geometry-removal remain open. No production release or saved-world migration without explicit creator approval.
+
+## M5 full-length genuine Chromium keyboard gate
+
+Separate 667×375, 844×390 and 932×430 jobs each require four full-length actual-game WASD walks from natural spawn to all distant biome interiors, using the existing source planner only for route instructions. Gameplay movement is never accelerated, teleported, or assigned through a debug hook; a localhost-only read-only player-pose witness observes real-game physics. Screenshots must show arrivals, discovered maps and save/cold reload, with SHA256, image sizes, zero GL failures and genuine per-seed fog. This is a distinct hard gate from the old short 6–8-block input smoke and from source-only production stepPlayer replay. Failures preserve partial evidence; no production release or real-iPhone claim follows automatically.
