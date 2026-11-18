@@ -25,9 +25,7 @@ test('mount edit during authorization prevents removal even after prior verifica
 });
 test('unverified, occupied and unsupported mounts fail closed',()=>{
  for(const witness of [{...good(),verified:false},{...good(),occupied:true},{...good(),mountSupported:false}]){
-  const f=fixture({inspectMount:()=>witness});
-  assert.equal(f.breakPicked(ray),null);
-  assert.equal(f.visible().length,1);
+  assert.throws(()=>fixture({inspectMount:()=>witness}),{name:'RangeError',message:'mount unverified or edit-protected'});
  }
 });
 test('ray distance and occluder distance cannot be bypassed',()=>{
