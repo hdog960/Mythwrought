@@ -8,6 +8,7 @@ on:
       - 'src/exploration-map.mjs'
       - 'scripts/ci/manual-biomes-m5-overland-audit.mjs'
       - 'tests/manual-biomes/m5-natural-overland.test.mjs'
+      - 'tests/manual-four-biomes-m5-exploration.test.mjs'
       - '.github/workflows/manual-four-biomes-m5-overland.yml'
   workflow_dispatch:
 
