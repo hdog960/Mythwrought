@@ -2,14 +2,23 @@
 // The caller owns actual WebGL2 buffer creation, context restoration and draw calls.
 import {NONBLOCK_OBJECT_VERSION} from './nonblock-object-v1.mjs';
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
-export function stagePreparedBreakableDraws(prepared,{maxBytes=262144}={}){
+export function stagePreparedBreakableDraws(prepared,{maxBytes=262144,maxGeometryBytes=2097152}={}){
+ if(!Number.isSafeInteger(maxGeometryBytes)||maxGeometryBytes<1||maxGeometryBytes>16777216)throw new RangeError('invalid geometry byte cap');
  if(!Number.isSafeInteger(maxBytes)||maxBytes<12||maxBytes>16777216)throw new RangeError('invalid instance byte cap');
  if(!prepared||!Array.isArray(prepared.draws)||!prepared.stats||!Number.isSafeInteger(prepared.stats.selected))throw new TypeError('invalid prepared draws');
- let used=0,instances=0;
+ let used=0,geometryBytes=0,instances=0;
+ const uploadedMeshes=new Set();
  const batches=[];
  for(const draw of prepared.draws){
   if(typeof draw.sceneId!=='string'||!Number.isSafeInteger(draw.variant)||!Array.isArray(draw.instances)||
     !(draw.mesh?.positions instanceof Float32Array)||!(draw.mesh?.materials instanceof Uint8Array))throw new TypeError('invalid draw batch');
+  if(draw.instances.length<1||draw.instances.length>2048||draw.mesh.positions.length===0||draw.mesh.positions.length%9!==0||draw.mesh.materials.length!==draw.mesh.positions.length/9)throw new TypeError('invalid staged mesh shape');
+  for(const n of draw.mesh.positions)if(!finite(n))throw new TypeError('nonfinite mesh vertex');
+  const meshBytes=draw.mesh.positions.byteLength+draw.mesh.materials.byteLength;
+  if(!uploadedMeshes.has(draw.mesh)){
+   if(geometryBytes+meshBytes>maxGeometryBytes)throw new RangeError('geometry byte cap exceeded');
+   geometryBytes+=meshBytes;uploadedMeshes.add(draw.mesh);
+  }
   const bytes=draw.instances.length*12;
   if(used+bytes>maxBytes)throw new RangeError('instance byte cap exceeded');
   const offsets=new Float32Array(draw.instances.length*3);
@@ -23,5 +32,5 @@ export function stagePreparedBreakableDraws(prepared,{maxBytes=262144}={}){
   batches.push(Object.freeze({sceneId:draw.sceneId,variant:draw.variant,mesh:draw.mesh,offsets,instanceCount:draw.instances.length}));
  }
  if(instances!==prepared.stats.selected)throw new TypeError('instance census mismatch');
- return Object.freeze({batches:Object.freeze(batches),bytes:used,instances});
+ return Object.freeze({batches:Object.freeze(batches),bytes:used,geometryBytes,totalBytes:used+geometryBytes,uniqueMeshes:uploadedMeshes.size,instances});
 }
