@@ -17,73 +17,73 @@ const DESIGNS=[
     "type": "castle-palace",
     "biome": "temperate",
     "size": "large",
-    "variant": 4
+    "variant": 2
   },
   {
     "type": "castle-palace",
     "biome": "desert",
     "size": "medium",
-    "variant": 4
+    "variant": 3
   },
   {
     "type": "castle-palace",
     "biome": "mountain",
     "size": "small",
-    "variant": 4
+    "variant": 3
   },
   {
     "type": "embassy",
     "biome": "snow",
     "size": "large",
-    "variant": 4
+    "variant": 3
   },
   {
     "type": "embassy",
     "biome": "temperate",
     "size": "small",
-    "variant": 4
+    "variant": 3
   },
   {
     "type": "embassy",
     "biome": "desert",
     "size": "medium",
-    "variant": 4
+    "variant": 3
   },
   {
     "type": "grand-archive",
     "biome": "snow",
     "size": "medium",
-    "variant": 4
+    "variant": 3
   },
   {
     "type": "grand-archive",
     "biome": "enchanted-forest",
     "size": "small",
-    "variant": 4
+    "variant": 3
   },
   {
     "type": "grand-archive",
     "biome": "mountain",
     "size": "large",
-    "variant": 4
+    "variant": 3
   },
   {
     "type": "observatory",
     "biome": "enchanted-forest",
     "size": "medium",
-    "variant": 4
+    "variant": 3
   },
   {
     "type": "observatory",
     "biome": "desert",
     "size": "large",
-    "variant": 4
+    "variant": 3
   },
   {
     "type": "observatory",
     "biome": "snow",
     "size": "small",
-    "variant": 4
+    "variant": 3
   }
 ]
 const VIEWPORTS=[[667,375],[844,390],[932,430]];
@@ -99,7 +99,7 @@ function bundle(){
  const shapes=readFileSync(join(SOURCE,'m1-preview-shapes.mjs'),'utf8');
  const render=readFileSync(join(TESTS,'a2-wave3-state-knowledge-webgl2-preview.mjs'),'utf8');
  let html=readFileSync(join(TESTS,'a2-wave3-state-knowledge-webgl2-preview.html'),'utf8');
- if(gitBlob(blueprint)!=='3a98ae5010c032acd5733398b48a5f7e16494c18')
+ if(gitBlob(blueprint)!=='b2b3c508b75177d4bf56e10129fa197084799bb2')
    throw Error('M2 authored source differs from exact original authored SHA');
  const importBlueprint="import {SCHEMA,validateBlueprint} from './schema.mjs';";
  const importRender="import {buildA2Wave3StateKnowledge} from '../../../src/building-pool/roadmap-4a/a2-wave3-state-knowledge.mjs';";
