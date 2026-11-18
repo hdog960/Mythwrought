@@ -198,7 +198,7 @@ export const ROADMAP_C_1A_WAVE12_SPECS=Object.freeze([
         "north"
       ],
       [
-        21,
+        24,
         1,
         "north"
       ],
