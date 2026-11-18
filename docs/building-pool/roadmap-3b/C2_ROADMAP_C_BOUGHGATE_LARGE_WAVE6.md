@@ -1,0 +1,9 @@
+# MYTHWROUGHT Roadmap C — original Boughgate Eight-Wing Highwatch Barracks
+
+**NEW DRAFT-ONLY SOURCE DESIGN** `r3:barracks:temperate:large:1`. Original 82×24×78 3D large temperate defensive compound, 29,211 generated physical source voxel placements, 5,107 grounded cells, ten separately authored massing regions, eight functional guarded rooms plus a muster lane, two genuinely source-carved open courts removing 43 foundation positions, 8 separate source-bearing roof slopes, two watch spurs physically supported to heights 13–14. Independent source generator preflight with source slot and 8 room program passed; all actual Manual Five Pack source assets remain provisional.
+
+All 210 previously technically source-accepted 3B records are read-only, with no changes to historical files or their Git blob SHA identities. Current source-only count **provisional 211/360, 149 remaining**, NOT accepted until exact-head testing and screenshot inspection.
+
+**Fail-closed acceptance required:** root 922 native Node tests, 12/12 CI contracts, lane-focused genuine native with all 210 earlier source identities and strict eight-way normalized D4 uniqueness, actual physical support, room walking, read-only five manual Pack source producer AABB. 6 genuine source-original Chromium WebGL2 exteriors/cutaways at **667×375, 844×390 and 932×430**. Download ZIP, independently compare all PNG SHA-256 hashes, dimensions, bytes, IDs, GPU/context errors, 844×390 exterior/section visual framing; no fabricated final physical variants. Creator art and real iPhone acceptance remain explicitly OPEN.
+
+No production merge, rebase, deployment, live-world registry/placement, save-schema mutation, Pack asset change, hourly automations, other builder branches/roadmaps, iPhone two-thumb controls, 25-chunk budget or v0.11 unlock.
