@@ -3,6 +3,7 @@
 import {makeEnvironmentObject,validateEnvironmentObject} from './interaction.mjs';
 export const COORDINATOR_SHA='92578e5628063fb962c9632b35a2a25368be1ab9';
 export const TARGET_CONTRACT='nonblock-object-v1';
+const FAMILY_IDS=Object.freeze({stalagmite:'nonblock:e:small-stalagmite',stalactite:'nonblock:e:hanging-stalactite',crystal:'nonblock:e:crystal-shard',icicle:'nonblock:d:icicle-spear',agave:'nonblock:d:agave-rosette'});
 const valid=a=>Array.isArray(a)&&a.length===3&&a.every(Number.isSafeInteger);
 export function exportEnvironmentV1(family,{seed,anchor,variant=0}={}){
  if(!valid(anchor)||!Number.isSafeInteger(seed)||!Number.isInteger(variant)||variant<0||variant>3)
@@ -42,6 +43,30 @@ export function validateEnvironmentV1(o){
  if(!(m?.positions instanceof Float32Array)||!(m.materials instanceof Uint8Array)||
     m.positions.length!==m.triangleCount*9||m.materials.length!==m.triangleCount||
     m.triangleCount>128||m.positions.some(n=>!Number.isFinite(n)))throw new TypeError('invalid v1 mesh');
+ // Treat the descriptor as untrusted input: identity alone cannot authorize a
+ // caller-supplied mesh, mount, pick envelope or persistence behavior.
+ // Regenerate the owned source at the exact seed/anchor/variant and compare
+ // every integration-relevant field. No writes or imports from sibling lanes.
+ const family=Object.keys(FAMILY_IDS).find(k=>FAMILY_IDS[k]===o.sceneId);
+ if(!family)throw new TypeError('unknown v1 family');
+ const canonical=exportEnvironmentV1(family,{seed:o.seed,anchor:o.anchor,variant:o.variant});
+ if(o.sourceFingerprint!==canonical.sourceFingerprint||
+    o.collisionIntent!==canonical.collisionIntent||
+    o.attachment?.face!==canonical.attachment.face||
+    o.attachment?.requiresSolid!==true||o.attachment?.requiresClear!==true||
+    o.breakIntent?.action!=='remove-object'||o.breakIntent?.requiresOwner!==':00'||
+    o.persistence?.kind!==canonical.persistence.kind||
+    o.persistence?.defaultRespawn!==canonical.persistence.defaultRespawn||
+    o.render?.triangleCount!==canonical.render.triangleCount||
+    o.render?.instanced!==true||o.render?.maxInstancesPerBatch!==512||
+    o.render?.lodTier!=='environment'||o.render?.alphaMode!=='opaque-palette')
+  throw new TypeError('noncanonical v1 behavior');
+ if(m.positions.length!==canonical.render.mesh.positions.length||
+    m.positions.some((n,i)=>n!==canonical.render.mesh.positions[i])||
+    m.materials.some((n,i)=>n!==canonical.render.mesh.materials[i]))
+  throw new TypeError('noncanonical v1 geometry');
+ if(JSON.stringify(o.selectionAabbs)!==JSON.stringify(canonical.selectionAabbs))
+  throw new TypeError('noncanonical v1 pick envelope');
  if(!Array.isArray(o.selectionAabbs)||!o.selectionAabbs.length)throw new TypeError('missing v1 pick volume');
  for(const b of o.selectionAabbs){
   if(!validBounds(b))throw new TypeError('invalid v1 AABB');
