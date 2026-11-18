@@ -77,6 +77,15 @@ try{
  await page.evaluate(()=>document.querySelector('#caveLoadWorld').click());
  await page.waitForFunction(()=>window.__mythwroughtTest.caveMode().enabled,
   null,{timeout:90000});
+ // Explicit world selection clears GPU chunks before source-authored cave
+ // meshes can stream in. Require authentic completed rendering, not a stale
+ // frame from the previously loaded ordinary world or a timing assumption.
+ await page.waitForFunction(()=>{
+  const scene=document.querySelector('#scene'),state=scene?.dataset;
+  return window.__mythwroughtTest?.caveMode().enabled&&
+    !!scene.getContext('webgl2')&&Number(state.loadedChunks)>=25&&
+    Number(state.renderedMeshVertices)>1000&&Number(state.pendingChunks)===0;
+ },null,{timeout:90000});
  const actual=await page.evaluate(()=>({
   saveIsolation:window.__mythwroughtTest.caveMode().saveIsolation,
   cave:window.__mythwroughtTest.caveMode().sourceCounts,
