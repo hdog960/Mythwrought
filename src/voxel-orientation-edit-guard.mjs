@@ -30,8 +30,24 @@ export function makeOrientationEditGuard({readBlock,writeBlock,sidecar}) {
       if(before===nextId&&!replaceSameId) return Object.freeze({applied:false,reason:'unchanged'});
       writing=true;
       try {
-        const result=writeBlock(...cell,nextId);
-        if(result!==true) return Object.freeze({applied:false,reason:'rejected'});
+        let result;
+        try { result=writeBlock(...cell,nextId); }
+        catch(error) {
+          // A throwing writer may have changed the cell before failing. Never
+          // retain rotation metadata unless the original block is provably intact.
+          try { if(read(cell)!==before) sidecar.clear(cell); }
+          catch { sidecar.clear(cell); }
+          throw error;
+        }
+        if(result!==true) {
+          // A false return promises no mutation. Detect contract violations and
+          // fail closed rather than silently retaining stale orientation state.
+          let current;
+          try { current=read(cell); }
+          catch { sidecar.clear(cell); throw new Error('Rejected edit left unreadable cell'); }
+          if(current!==before) { sidecar.clear(cell); throw new Error('Rejected edit mutated world cell'); }
+          return Object.freeze({applied:false,reason:'rejected'});
+        }
         // Fail closed if the host did not actually write the requested block.
         if(read(cell)!==nextId) {sidecar.clear(cell);throw new Error('Writer acknowledged an inconsistent block');}
         sidecar.clear(cell);
