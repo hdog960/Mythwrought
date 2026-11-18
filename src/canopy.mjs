@@ -127,55 +127,69 @@ function evergreen(out,x,y,z,variation,beacon=false,profile='mixed'){
   const needles=beacon?
     [[.25,.48,.40],[.39,.62,.43],[.58,.70,.39],[.78,.77,.45]]:
     [[.19,.43,.38],[.26,.54,.43],[.34,.61,.46],[.40,.68,.48]];
-  // M2 visual correction: one uninterrupted fir canopy, not three separate
-  // conical hats. Every neighboring ring shares the exact same vertices,
-  // avoiding gaps/exposed floating trunk bands visible in real WebGL2 captures.
-  // Deliberately irregular scalloped shoulders and slight crown lean, all
-  // deterministic in the existing source coordinates and within the old
-  // world/chunk footprint. Only appearance changes, not physical WOOD/LEAVES.
-  // The optional sentinel star sits at y+6.35 and must stay visible
-  // above the green crown. Ordinary pines remain below the pre-existing
-  // six-cell overhead-clearance test even at maximum deterministic height.
-  const canopyHeight=beacon?5.53:Math.min(5.10,height+.12);
-  const maxRadius=beacon?1.45:profile==='grove'?1.39:profile==='open'?1.08:1.29;
-  const levels=[0,.20,.39,.58,.77,.96];
-  const radii=[.71,1,.82,.64,.40,.11];
+  // M2 A/B visual correction: the uninterrupted six-ring fir was too tall
+  // and read as a single smooth traffic cone. Keep its JOINED ring vertices
+  // (no detached hats), but shorten the crown, widen its lower shoulders and
+  // root eight uneven, downward-sweeping boughs onto the exact perimeter.
+  // All shapes are render-only; physical leaves, seed sites and saves remain
+  // byte-identical. Opaque facets reuse the current terrain draw call.
+  const canopyHeight=beacon?4.65:Math.min(4.15,height*.85);
+  const maxRadius=beacon?1.43:profile==='grove'?1.38:profile==='open'?1.09:1.29;
+  const levels=[0,.18,.37,.56,.76,.96];
+  const radii=[.90,1.04,.87,.73,.52,.16];
   const boughRings=[];
   for(let level=0;level<levels.length;level++){
     const t=levels[level],verts=[];
     for(let i=0;i<8;i++){
       const a=(i+variation)*Math.PI/4+t*(.07+variation*.09);
       const wave=Math.sin(i*2.37+level*1.63+variation*5.1);
-      const rad=maxRadius*radii[level]*(.93+.08*wave);
+      const rad=maxRadius*radii[level]*(.92+.12*wave);
       const bend=t*t*.085;
       verts.push([
         x+Math.cos(a)*rad+Math.sin(variation*6)*bend,
-        y+.55+t*canopyHeight+.045*Math.sin(i*2.2+level+variation*4),
+        y+.46+t*canopyHeight+.055*Math.sin(i*2.2+level+variation*4),
         z+Math.sin(a)*rad+Math.cos(variation*5)*bend
       ]);
     }
     boughRings.push(verts);
   }
+  // Shared vertices on both sides of every band guarantee contiguous foliage
+  // and reject the previous detached triangle/cone silhouette.
   for(let level=0;level<boughRings.length-1;level++){
     const lower=boughRings[level],upper=boughRings[level+1];
     for(let i=0;i<8;i++){
       const j=(i+1)%8;
-      const col=needles[(i+level)%needles.length];
-      // Two triangles share the full continuous perimeter of both rings.
-      // Per-band shading changes normals without separate tier silhouettes.
-      quad(out,lower[i],lower[j],upper[j],upper[i],col,7);
+      quad(out,lower[i],lower[j],upper[j],upper[i],
+        needles[(i+level)%needles.length],7);
     }
   }
-  // Close the continuous crown with an off-axis apex. Low overall vertex
-  // count leaves room for sentinel halo, gold band and sky-star unchanged.
   const cap=boughRings[boughRings.length-1];
   const peak=[x+Math.sin(variation*6)*.12,
-    y+.55+canopyHeight+.08,z+Math.cos(variation*5)*.12];
+    y+.46+canopyHeight+.07,z+Math.cos(variation*5)*.12];
   for(let i=0;i<8;i++){
     const j=(i+1)%8;
     tri(out,cap[i],cap[j],peak,
       beacon?[[.78,.82,.45],[.88,.82,.50]][i%2]:
         needles[(i+2)%needles.length],7);
+  }
+  // Eight seed-varied bough lobes extend the joined silhouette beyond the
+  // smooth cone side. Each lobe is TWO attached triangles reaching a tip
+  // below its branch origin. No leaf hangs free: the three shared vertices
+  // are already occupied by the continuous live canopy mesh. Maximum source
+  // evergreen: 444 vertices including sentinel halo/band/star (<450 limit).
+  for(let level=0;level<4;level++)for(let fork=0;fork<2;fork++){
+    const i=(Math.floor(variation*8)+level*2+fork*4)%8,j=(i+1)%8;
+    const p=boughRings[level][i],q=boughRings[level][j],
+      upper=boughRings[level+1][i];
+    const angle=(i+.5+variation)*Math.PI/4;
+    const reach=maxRadius*(.19+.055*(1-level/4)+.035*Math.sin(variation*11+i));
+    const tip=[
+      (p[0]+q[0])*.5+Math.cos(angle)*reach,
+      (p[1]+q[1])*.5-.115-.045*(level%2),
+      (p[2]+q[2])*.5+Math.sin(angle)*reach
+    ];
+    tri(out,p,q,tip,needles[(i+level+1)%needles.length],7);
+    tri(out,upper,p,tip,needles[(i+level+2)%needles.length],7);
   }
   if(beacon){
     // Grounded eight-sided moss-and-amber root halo: a readable landmark
