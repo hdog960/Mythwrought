@@ -3,6 +3,7 @@
 // mocked canvas or separate preview mesher. Only localhost has debug probes.
 // This script never deploys or alters a public save.
 import {chromium} from 'playwright';
+import {PNG} from 'pngjs';
 import {createServer} from 'node:http';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
@@ -73,11 +74,32 @@ try{
       await page.waitForTimeout(1600);
       const file='m2-'+anchor.name+'-'+width+'x'+height+'.png';
       const png=await page.screenshot({path:path.join(out,file)});
+      const decoded=PNG.sync.read(png),colors=new Set();
+      // Sample the unobstructed central WORLD viewport, not UI grips/map.
+      // Blank pale-green or missing geometry must fail even if world.get()
+      // reports correct underlying voxels. Mountain initially failed this.
+      for(let x=Math.floor(width*.27);x<Math.floor(width*.65);x+=7)
+        for(let y=Math.floor(height*.25);y<Math.floor(height*.75);y+=7){
+          const p=(y*decoded.width+x)*4;
+          colors.add(((decoded.data[p]/16)|0)+','+
+            ((decoded.data[p+1]/16)|0)+','+
+            ((decoded.data[p+2]/16)|0));
+        }
+      const diagnostics=await page.evaluate(()=>({
+        snapshot:window.__mythwroughtTest.snapshot(),
+        faults:window.__mythwroughtTest.gpuUploadFaults(),
+        status:document.getElementById('status')?.textContent
+      }));
+      if(colors.size<12||diagnostics.snapshot.chunks.length===0)
+        throw Error('INVISIBLE REAL '+anchor.name+' GPU scene at '+width+'x'+height+
+          ' colors='+colors.size+' '+JSON.stringify(diagnostics));
       scenes.push({file,width,height,name:anchor.name,seed:179,
         x:anchor.x,z:anchor.z,y:actual.y,block:actual.block,
         generator:actual.profile?.generator,
         sha256:createHash('sha256').update(png).digest('hex'),
-        bytes:png.length,realWebgl2:webgl});
+        bytes:png.length,realWebgl2:webgl,sceneColorBuckets:colors.size,
+        residentChunks:diagnostics.snapshot.chunks.length,
+        gpuRetries:diagnostics.snapshot.gpuRetry});
       process.stdout.write('PASS M2 live biome '+file+' block '+actual.block+' y '+actual.y+'\n');
     }
     // Mine the actual snowy terrain via the localhost-only world edit hook,
