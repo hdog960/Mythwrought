@@ -387,3 +387,169 @@ test('cave approach preservation is render-only and seed-stable',()=>{
   }
   assert.equal(JSON.stringify(world.save()),saved);
 });
+
+test('manual M2 scalloped crowns stay bounded, varied and save-inert in real seeded chunks',()=>{
+  const seed=179,world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  let sentinels=0,richBoughs=0,decoratedChunks=0;
+  outer:for(let cx=-16;cx<=16;cx++)for(let cz=-16;cz<=16;cz++){
+    if(decoratedChunks>=26&&richBoughs>0)break outer;
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    decoratedChunks++;
+    assert.deepEqual(mesh,woodlandCanopyVertices(world,cx,cz,options),
+      'the same chunk retains an identical deterministic canopy mesh');
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxVerticesPerTree*CANOPY_LIMITS.maxTreesPerChunk*CANOPY_LIMITS.stride);
+    const leafHeights=new Set();
+    for(let v=0;v<mesh.length;v+=CANOPY_LIMITS.stride){
+      const x=mesh[v],y=mesh[v+1],z=mesh[v+2];
+      assert.ok(Number.isFinite(x)&&Number.isFinite(y)&&Number.isFinite(z));
+      assert.ok(x>=cx*16&&x<(cx+1)*16&&z>=cz*16&&z<(cz+1)*16,
+        'irregular boughs remain strictly chunk-local');
+      if(mesh[v+8]===7)leafHeights.add(Math.round(y*10000)/10000);
+    }
+    if(woodlandSentinelChunk(cx,cz,seed)){
+      sentinels++;
+      if(leafHeights.size>=40)richBoughs++;
+    }
+  }
+  assert.ok(decoratedChunks>25,'an authentic seed provides many in-world trees');
+  assert.ok(sentinels>0&&richBoughs>0,
+    'at least one live sentinel has dozens of separate bough heights, not four flat cone tiers');
+  assert.equal(JSON.stringify(world.save()),before,'visual repair never writes physical tree edits');
+  assert.equal(CANOPY_LIMITS.newDrawCalls,0);
+});
+
+test('manual M2 rooted trunk wedges meet ground without oversized detached spikes',()=>{
+  const seed=179,world=new VoxelWorld(seed),before=JSON.stringify(world.save());
+  let found=null;
+  for(let cx=-5;cx<=5&&!found;cx++)for(let cz=-5;cz<=5&&!found;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(mesh.length>=36*CANOPY_LIMITS.stride)found=mesh;
+  }
+  assert.ok(found,'a seeded tree must render a trunk and attached roots');
+  const x=Math.floor(found[0])+.5,z=Math.floor(found[2])+.5;
+  const ground=terrainHeight(Math.floor(x),Math.floor(z),seed)+1;
+  // Four existing trunk quads = 24 emitted vertices, followed immediately
+  // by four root triangles = 12 emitted vertices for both source tree types.
+  const roots=[];
+  for(let v=24;v<36;v++){
+    const i=v*CANOPY_LIMITS.stride;
+    roots.push({x:found[i],y:found[i+1],z:found[i+2]});
+  }
+  assert.ok(roots.every(p=>p.y>=ground&&p.y<ground+.40),
+    'upper buttress ends join the lower trunk rather than floating high');
+  assert.ok(roots.every(p=>Math.hypot(p.x-x,p.z-z)<.46),
+    'root triangles are compact instead of detached lateral spikes');
+  assert.ok(roots.some(p=>p.y<ground+.05),'at least one root tip touches the grass top');
+  assert.equal(JSON.stringify(world.save()),before,'render-only root cleanup writes no saved world voxels');
+});
+
+test('manual M2 fir shells share exact ring vertices across every bough band',()=>{
+  const seed=179,world=new VoxelWorld(seed),saved=JSON.stringify(world.save());
+  let sample=null;
+  for(let cx=-10;cx<=10&&!sample;cx++)for(let cz=-10;cz<=10&&!sample;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+    // First tree starts at offset 0. A sentinel uses the evergreen source
+    // regardless of the ordinary location-specific two-style selector.
+    if(woodlandSentinelChunk(cx,cz,seed)||
+       woodlandTreeStyle(x,z,seed)==='evergreen')sample=mesh;
+  }
+  assert.ok(sample,'locate a genuine seeded evergreen or sentinel in live source');
+  // Common trunk and floor details always precede the fir mesh:
+  // 4 trunk quads (24 verts), 4 grounded root tris (12), 3 fern fans (9),
+  // 3 fallen leaves (9), and moss-rock pair (6). That gives 60 vertices.
+  const start=60,vertsPerBand=8*6,ringCount=6;
+  const vertex=i=>Array.from(sample.slice(i*CANOPY_LIMITS.stride,
+    i*CANOPY_LIMITS.stride+3));
+  for(let band=0;band<ringCount-2;band++){
+    for(let sector=0;sector<8;sector++){
+      // Each quad is emitted as triangles (lower0,lower1,upper1)
+      // and (lower0,upper1,upper0); next band's lower0 MUST exactly
+      // equal the previous band's upper0 or a visible tier gap appears.
+      const prevUpper=start+band*vertsPerBand+sector*6+5;
+      const nextLower=start+(band+1)*vertsPerBand+sector*6;
+      assert.deepEqual(vertex(prevUpper),vertex(nextLower),
+        'adjacent bough bands must be one continuous canopy, not stacked hats');
+    }
+  }
+  assert.ok(start+5*vertsPerBand+24<=sample.length/CANOPY_LIMITS.stride,
+    'continuous fir cap stays within real-source emitted mesh');
+  assert.equal(JSON.stringify(world.save()),saved,
+    'joined decorative foliage never changes physical seed/edit/save state');
+});
+
+test('manual M2 fir crown fits original vertical clearance with a visible sentinel sky-star',()=>{
+  const seed=179,world=new VoxelWorld(seed),saved=JSON.stringify(world.save());
+  let ordinary=false,sentinel=false;
+  for(let cx=-16;cx<=16&&(!ordinary||!sentinel);cx++)
+    for(let cz=-16;cz<=16&&(!ordinary||!sentinel);cz++){
+      const mesh=woodlandCanopyVertices(world,cx,cz,options);
+      if(!mesh.length)continue;
+      const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+      const isSentinel=woodlandSentinelChunk(cx,cz,seed);
+      if(!isSentinel&&woodlandTreeStyle(x,z,seed)!=='evergreen')continue;
+      const ground=terrainHeight(x,z,seed),start=60,end=start+5*8*6+8*3;
+      assert.ok(mesh.length>=end*CANOPY_LIMITS.stride,'source fir has joined crown and one cap');
+      let crownTop=-Infinity;
+      for(let v=start;v<end;v++)crownTop=Math.max(crownTop,
+        mesh[v*CANOPY_LIMITS.stride+1]);
+      if(isSentinel){
+        assert.ok(crownTop<ground+1.01+6.35,
+          'rare sentinel gold star must stand above every opaque fir canopy tip');
+        sentinel=true;
+      }else{
+        assert.ok(crownTop<ground+7,
+          'ordinary fir remains inside original six-high cleared-air cell envelope');
+        ordinary=true;
+      }
+    }
+  assert.ok(sentinel&&ordinary,'real seeded sentinel and ordinary pine both inspected');
+  assert.equal(JSON.stringify(world.save()),saved,'visual-only cap does not edit save');
+});
+
+test('manual M2 seed-varied connected bough lobes prevent an over-tall plain cone',()=>{
+  const world=new VoxelWorld(179),before=JSON.stringify(world.save());
+  let checked=0,beaconChecked=0;
+  outer:for(let cx=-16;cx<=16;cx++)for(let cz=-16;cz<=16;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+    const sentinel=woodlandSentinelChunk(cx,cz,179);
+    if(!sentinel&&woodlandTreeStyle(x,z,179)!=='evergreen')continue;
+    const stride=CANOPY_LIMITS.stride,base=60,bandVertices=8*6,
+      coreEnd=base+bandVertices*5+8*3;
+    const vertex=i=>[mesh[i*stride],mesh[i*stride+1],mesh[i*stride+2]];
+    assert.ok(mesh.length>=stride*(coreEnd+8*6),
+      'eight attached two-triangle bough lobes must exist after joined core');
+    const center=[x+.5,z+.5],root=vertex(base),radii=[];
+    for(let ring=0;ring<5;ring++){
+      const start=base+ring*bandVertices;
+      for(let sector=0;sector<8;sector++){
+        const p=vertex(start+sector*6);
+        radii.push({ring,r:Math.hypot(p[0]-center[0],p[2]-center[1])});
+      }
+    }
+    const baseMax=Math.max(...radii.filter(p=>p.ring<=1).map(p=>p.r));
+    const peakY=Math.max(...Array.from({length:8},(_,i)=>vertex(coreEnd-24+i*3+2)[1]));
+    assert.ok((peakY-root[1])/(2*baseMax)<2.1,
+      'fir must have a broad short crown, not the rejected over-tall traffic cone');
+    for(let i=0;i<8;i++){
+      const start=coreEnd+i*6;
+      const p=vertex(start),q=vertex(start+1),tip=vertex(start+2),
+        upper=vertex(start+3),join=vertex(start+4),tip2=vertex(start+5);
+      assert.deepEqual(join,p,'projecting bough remains physically joined to shell');
+      assert.deepEqual(tip2,tip,'two attached facets share their outward bough tip');
+      assert.ok(Math.min(p[1],q[1])-tip[1]>.06,
+        'organic leaf boughs sweep downward from shell');
+      assert.ok(Number.isFinite(upper[1]));
+    }
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxVerticesPerTree*
+      CANOPY_LIMITS.maxTreesPerChunk*stride);
+    checked++;if(sentinel)beaconChecked++;
+    if(checked>=5&&beaconChecked>0)break outer;
+  }
+  assert.ok(checked>=5&&beaconChecked>0,'real seed exercises ordinary and sentinel boughs');
+  assert.equal(JSON.stringify(world.save()),before,'bough geometry never persists as voxels');
+});
