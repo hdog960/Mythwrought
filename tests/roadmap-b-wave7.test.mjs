@@ -76,7 +76,8 @@ test('Wave7 eight original reserved IDs do not collide with historical 169/146 o
  const new1=getRoadmapBWave7B1(),new2=getRoadmapBWave7B2(),incoming=[...new1,...new2];
  assert.equal(prior.length,46);assert.equal(new1.length,4);assert.equal(new2.length,4);
  assert.deepEqual(new1.map(b=>b.id),[...ROADMAP_B_WAVE7_B1_IDS]);
- assert.equal(new1[0].id,'r1:stable:snow:large:005','Whitecrag must use unused fifth snow-large stable variant; original Ridgebreak r1:stable:snow:large:004 remains immutable');
+ assert.equal(new1[0].id,'r1:farm-barn:snow:large:004','Wave7 Icemeadow must use its original reserved snow-large farm-barn variant');
+ assert.equal(new1[1].id,'r1:stable:enchanted-forest:large:005','Wave7 Thornholt must use its fifth original enchanted-forest large stable variant');
  assert.deepEqual(new2.map(b=>b.id),[...ROADMAP_B_WAVE7_B2_IDS]);
  assert.equal(new Set(incoming.map(b=>b.id)).size,8);
  const previous=new Set(prior.map(b=>b.id));
