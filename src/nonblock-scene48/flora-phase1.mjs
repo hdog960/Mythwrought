@@ -5,6 +5,8 @@ export const SCENE_FAMILIES = Object.freeze({
   'scene48:single-wildflower': Object.freeze({attachment:'ground', footprint:[0.42,0.82,0.42], collision:'pass-through', tier:'medium', biome:['temperate','meadow'], status:'SOURCE_READY'}),
   'scene48:lavender-spike': Object.freeze({attachment:'ground', footprint:[0.65,0.9,0.65], collision:'pass-through', tier:'medium', biome:['meadow','temperate'], status:'IN_PROGRESS'}),
   'scene48:heather-sprig': Object.freeze({attachment:'ground', footprint:[0.8,0.62,0.8], collision:'pass-through', tier:'medium', biome:['meadow','temperate'], status:'IN_PROGRESS'}),
+  'scene48:clover-clump': Object.freeze({attachment:'ground', footprint:[0.62,0.3,0.62], collision:'pass-through', tier:'dense', biome:['meadow','temperate'], status:'IN_PROGRESS'}),
+  'scene48:meadow-sedge': Object.freeze({attachment:'ground', footprint:[0.72,0.76,0.72], collision:'pass-through', tier:'dense', biome:['meadow','temperate'], status:'IN_PROGRESS'}),
   'scene48:button-mushroom': Object.freeze({attachment:'ground', footprint:[0.5,0.46,0.5], collision:'pass-through', tier:'medium', biome:['forest','enchanted-forest'], status:'SOURCE_READY'})
 });
 const mix = n => { n = Math.imul(n ^ n >>> 16, 0x7feb352d); n = Math.imul(n ^ n >>> 15, 0x846ca68b); return (n ^ n >>> 16) >>> 0; };
@@ -52,7 +54,26 @@ function heather(b,v){
   }
  }
 }
-const makers={'scene48:lavender-spike':lavender,'scene48:heather-sprig':heather,'scene48:low-grass':grass,'scene48:short-fern':fern,'scene48:single-wildflower':flower,'scene48:button-mushroom':mushroom};
+function clover(b,v){
+ for(let stalk=0;stalk<4;stalk++){
+  const a=stalk*Math.PI/2+v.bend,x=Math.cos(a)*.11,z=Math.sin(a)*.11,h=.15+(stalk%2)*.045;
+  b.quad([x-.009,0,z],[x+.009,0,z],[x+.009,h,z],[x-.009,h,z],2);
+  for(let p=0;p<3;p++){
+   const t=p*2*Math.PI/3+a,dx=Math.cos(t),dz=Math.sin(t);
+   b.tri([x,h,z],[x+dx*.095-dz*.04,h+.018,z+dz*.095+dx*.04],[x+dx*.13,h+.04,z+dz*.13],0);
+   b.tri([x,h,z],[x+dx*.13,h+.04,z+dz*.13],[x+dx*.095+dz*.04,h+.018,z+dz*.095-dx*.04],0);
+  }
+ }
+}
+function sedge(b,v){
+ for(let blade=0;blade<7;blade++){
+  const a=blade*2*Math.PI/7+v.bend,dx=Math.cos(a),dz=Math.sin(a),h=.38+(blade%3)*.1;
+  const root=[dx*.035,0,dz*.035],mid=[dx*.13,h*.62,dz*.13],tip=[dx*.24,h,dz*.24];
+  b.tri(root,[mid[0]-dz*.026,mid[1],mid[2]+dx*.026],tip,0);
+  b.tri(root,tip,[mid[0]+dz*.026,mid[1],mid[2]-dx*.026],1);
+ }
+}
+const makers={'scene48:clover-clump':clover,'scene48:meadow-sedge':sedge,'scene48:lavender-spike':lavender,'scene48:heather-sprig':heather,'scene48:low-grass':grass,'scene48:short-fern':fern,'scene48:single-wildflower':flower,'scene48:button-mushroom':mushroom};
 export function createSceneMesh(id,seed,x,y,z){
  const v=sceneVariant(seed,x,y,z,id),b=builder();makers[id](b,v);const mesh=b.finish();
  // Rotation and variation happen at instance level, not in shared mesh geometry.
