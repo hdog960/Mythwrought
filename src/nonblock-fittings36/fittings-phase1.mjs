@@ -27,11 +27,23 @@ export function describeFitting({sceneId,seed,anchor,variant,orientation=0,mount
  if(!integer(resolved)||resolved<0||resolved>3)throw new RangeError('invalid variant');
  const required=family.attachment==='ground'?'below':family.attachment==='ceiling'?'above':family.attachment==='wall'?'behind':'corner';
  if(mount[required]!==true||mount.playerEdited===true||mount.occupied===true)throw new RangeError('mount not verified or edit-protected');
- const key='nb1:'+encodeURIComponent(sceneId)+':'+seed+':'+anchor.join(',')+':'+resolved;
+ const key='nb1:'+encodeURIComponent(sceneId)+':'+seed+':'+anchor.join(',')+':'+resolved+':r'+orientation;
  const b=meshBuilder();makers[sceneId](b);const mesh=b.finish();
- const [w,h,d]=family.size;
- const selectionAabbs=[{min:[anchor[0]-w/2,anchor[1],anchor[2]-d/2],max:[anchor[0]+w/2,anchor[1]+h,anchor[2]+d/2]}];
- return Object.freeze({contract:CONTRACT,sceneId,seed,anchor:[...anchor],variant:resolved,orientation,instanceKey:key,attachment:family.attachment,selectionAabbs,collisionIntent:family.collision,breakIntent:{action:'remove-object',targetKey:key,requiresOwner:':00'},persistence:{kind:'schema1-external-tombstone-sidecar',key,defaultRespawn:'never-until-explicit-reset'},render:{mesh,triangleCount:mesh.triangleCount,instanced:true,lodTier:family.tier,alphaMode:'opaque-palette',maxInstancesPerBatch:256},sourceFingerprint:hash(sceneId+':'+mesh.triangleCount).toString(16).padStart(8,'0')});
+ // Rotate every authored triangle around the anchor; pick bounds come from actual rotated
+ // mesh coordinates, never the unrotated nominal family dimensions.
+ const p=mesh.positions, world=new Float32Array(p.length);
+ const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+ for(let i=0;i<p.length;i+=3){
+  const x=p[i],y=p[i+1],z=p[i+2];
+  const rx=orientation===0?x:orientation===1?-z:orientation===2?-x:z;
+  const rz=orientation===0?z:orientation===1?x:orientation===2?-z:-x;
+  const coords=[anchor[0]+rx,anchor[1]+y,anchor[2]+rz];
+  for(let k=0;k<3;k++){world[i+k]=coords[k];min[k]=Math.min(min[k],coords[k]);max[k]=Math.max(max[k],coords[k]);}
+ }
+ // Selection volumes carry a small epsilon so thin cloth/web triangles remain targetable.
+ const selectionAabbs=[{min:min.map(v=>v-.025),max:max.map(v=>v+.025)}];
+ const worldMesh={positions:world,materials:mesh.materials,triangleCount:mesh.triangleCount};
+ return Object.freeze({contract:CONTRACT,sceneId,seed,anchor:[...anchor],variant:resolved,orientation,instanceKey:key,attachment:family.attachment,selectionAabbs,collisionIntent:family.collision,breakIntent:{action:'remove-object',targetKey:key,requiresOwner:':00'},persistence:{kind:'schema1-external-tombstone-sidecar',key,defaultRespawn:'never-until-explicit-reset'},render:{mesh:worldMesh,triangleCount:mesh.triangleCount,instanced:true,lodTier:family.tier,alphaMode:'opaque-palette',maxInstancesPerBatch:256},sourceFingerprint:hash(sceneId+':'+mesh.triangleCount).toString(16).padStart(8,'0')});
 }
 // Disposable opt-in demonstration only; no schema-1 or game mutation.
 export function createFittingFixture(seed,objects){if(!integer(seed)||!Array.isArray(objects)||objects.some(o=>o.seed!==seed||o.contract!==CONTRACT))throw new TypeError('invalid fixture');const removed=new Set();return {visible:()=>objects.filter(o=>!removed.has(o.instanceKey)),breakObject:o=>{if(!objects.includes(o)||o.breakIntent.targetKey!==o.instanceKey)throw new TypeError('invalid target');removed.add(o.instanceKey);return {action:'remove-object',instanceKey:o.instanceKey,removed:true};},snapshot:()=>({contract:CONTRACT,seed,tombstones:[...removed].sort()}),restore:s=>{if(s?.contract!==CONTRACT||s.seed!==seed||!Array.isArray(s.tombstones)||s.tombstones.some(k=>!objects.some(o=>o.instanceKey===k)))throw new TypeError('invalid sidecar');removed.clear();s.tombstones.forEach(k=>removed.add(k));}};}
