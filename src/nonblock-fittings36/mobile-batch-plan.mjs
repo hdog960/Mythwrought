@@ -5,15 +5,26 @@ export function planFittingBatches(objects,{maxTriangles=4096,maxInstances=256,m
  !Number.isSafeInteger(maxInstances)||maxInstances<1||maxInstances>256||
  !Number.isSafeInteger(maxTotalTriangles)||maxTotalTriangles<1||
  !Number.isSafeInteger(maxObjects)||maxObjects<1)throw new TypeError('invalid batch budget');
- const seen=new Set(),groups=new Map();let cumulativeTriangles=0;
+ const seen=new Set(),groups=new Map(),canonical=new Map();let cumulativeTriangles=0;
  for(const o of objects){
   const triangles=o?.render?.triangleCount;
   if(o?.contract!==CONTRACT||typeof o.instanceKey!=='string'||!o.instanceKey||
    seen.has(o.instanceKey)||typeof o.sceneId!=='string'||!Number.isSafeInteger(triangles)||
    triangles<1||triangles>maxTriangles||o.render.mesh?.positions?.length!==triangles*9||
    o.render.mesh?.materials?.length!==triangles||
+   o.render.localMesh?.positions?.length!==triangles*9||
+   o.render.localMesh?.materials?.length!==triangles||
+   !Array.isArray(o.render.transform?.translation)||
+   o.render.transform.translation.length!==3||
+   !o.render.transform.translation.every(Number.isSafeInteger)||
+   !Number.isSafeInteger(o.render.transform.quarterTurnsY)||
+   o.render.transform.quarterTurnsY<0||o.render.transform.quarterTurnsY>3||
+   o.render.transform.quarterTurnsY!==o.orientation||
+   o.render.transform.translation.some((v,i)=>v!==o.anchor?.[i])||
    !Array.from(o.render.mesh.positions).every(Number.isFinite)||
+   !Array.from(o.render.localMesh.positions).every(Number.isFinite)||
    !Array.from(o.render.mesh.materials).every(m=>Number.isSafeInteger(m)&&m>=0&&m<=6)||
+   !Array.from(o.render.localMesh.materials).every(m=>Number.isSafeInteger(m)&&m>=0&&m<=6)||
    !Number.isSafeInteger(o.variant)||o.variant<0||o.variant>3||
    o.render.instanced!==true||!['sparse','medium'].includes(o.render.lodTier))
    throw new TypeError('invalid or over-budget fitting');
@@ -21,6 +32,10 @@ export function planFittingBatches(objects,{maxTriangles=4096,maxInstances=256,m
    throw new RangeError('global fitting batch budget exceeded');
   cumulativeTriangles+=triangles;seen.add(o.instanceKey);
   const key=JSON.stringify([o.sceneId,o.variant,o.render.lodTier]);
+  // Never combine different canonical geometry under one instanced draw group.
+  const signature=JSON.stringify([Array.from(o.render.localMesh.positions),Array.from(o.render.localMesh.materials)]);
+  if(canonical.has(key)&&canonical.get(key)!==signature)throw new TypeError('incompatible instanced geometry');
+  canonical.set(key,signature);
   if(!groups.has(key))groups.set(key,[]);
   groups.get(key).push(o);
  }
