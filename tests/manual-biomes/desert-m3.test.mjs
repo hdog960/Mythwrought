@@ -211,7 +211,6 @@ test('M3: edit, replace, export/import, cold save/reload and cross-region visits
 });
 
 test('M3: actual 5x5 Desert chunk mesh remains within existing strict 8MiB GPU budget',()=>{
-  const {meshChunk}= {meshChunk};
   const world=new Pack2LiveWorld(new FourRegionWorld(179));
   for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){
     const vertices=meshChunk(world,chunkCoord(512)+dx,chunkCoord(0)+dz);
