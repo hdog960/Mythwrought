@@ -236,6 +236,6 @@ test('one original Roadmap C M3 Wave3 Alderbridge collegium × exterior/section 
     physicalFamilyRendering:false,liveGameplay:false,physicalIphone:false,
     dimensions:viewports,views:['exterior','section'],captureCount:captures.length,captures
   },null,2)+'\n');
-  console.log('4B M2: 30/6 real Chromium WebGL2 cube-proxy captures, no GL errors; source SHA256 '+sourceSha256);
+  console.log('4B Roadmap C Wave3: 6/6 real Chromium WebGL2 cube-proxy captures, no GL errors; source SHA256 '+sourceSha256);
   console.log('4B M2 diagnostic artifact: '+output);
 });
