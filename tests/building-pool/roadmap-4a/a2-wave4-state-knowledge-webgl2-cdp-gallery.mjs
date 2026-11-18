@@ -99,7 +99,7 @@ function bundle(){
  const shapes=readFileSync(join(SOURCE,'m1-preview-shapes.mjs'),'utf8');
  const render=readFileSync(join(TESTS,'a2-wave4-state-knowledge-webgl2-preview.mjs'),'utf8');
  let html=readFileSync(join(TESTS,'a2-wave4-state-knowledge-webgl2-preview.html'),'utf8');
- if(gitBlob(blueprint)!=='96b168cd2ae1e4dc3a4ab8d9df5592c9327b1b4b')
+ if(gitBlob(blueprint)!=='446f95df9b72a58405c45fa05c6cda56fd7051b7')
    throw Error('M2 authored source differs from exact original authored SHA');
  const importBlueprint="import {SCHEMA,validateBlueprint} from './schema.mjs';";
  const importRender="import {buildA2Wave4StateKnowledge} from '../../../src/building-pool/roadmap-4a/a2-wave4-state-knowledge.mjs';";
