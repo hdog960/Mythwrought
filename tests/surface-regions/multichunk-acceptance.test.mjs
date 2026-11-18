@@ -54,7 +54,8 @@ test('durable touched-cell history takes precedence after edits revert and cache
  // Force LRU eviction, then rebuild the original region column.
  view.get(x+32,y,z+32);
  assert.equal(view.get(x,y,z),original);
- assert.equal(view.cachedColumns,1);
+ assert.equal(view.cachedColumns,0,
+   'touched column must NOT remain cached after a restored legacy edit');
 });
 
 test('region boundaries remain deterministic across chunk seams without changing legacy spawn',()=>{
