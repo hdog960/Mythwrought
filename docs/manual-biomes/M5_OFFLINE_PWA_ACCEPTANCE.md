@@ -6,7 +6,7 @@ seed and immutable profile. All canonical edits remain schema-1.
 
 ## New staging cache
 `sw-m5.js` creates a **separate versioned static-only** CacheStorage namespace,
-`mythwrought-m5-shell-20261118-v2`, scoped to the app directory. Registration
+`mythwrought-m5-shell-20261118-v3`, scoped to the app directory. Registration
 is initiated **only** for a newly confirmed or previously saved experimental
 v5 world; it is not registered for ordinary legacy/v2/v3/v4 worlds. Install
 pre-caches the complete static app shell, all `src/**/*.mjs` and required
@@ -15,7 +15,7 @@ failure does not activate a partial new worker or destroy prior other caches.
 Activation deletes only *earlier M5-owned* cache names. Fetch serves only
 same-scope, same-origin **GET** for specifically known game assets, never API,
 POST, dynamic personal storage, unknown URLs, or cross-origin resources.
-Updating any cached source requires a **new unique cache version and a fresh
+Offline reloads reuse the already-active exact M5 worker instead of re-registering (and performing an offline script-update network check). Browser acceptance records any attempted HTTP request after network cutoff without loosening zero-request requirements. Updating any cached source requires a **new unique cache version and a fresh
 cache-asset list** before any future approved incorporation.
 
 This is a candidate OFFLINE implementation; do not infer that an unrelated

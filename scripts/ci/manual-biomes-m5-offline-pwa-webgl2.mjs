@@ -20,9 +20,16 @@ const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript',
  '.mjs':'text/javascript','.json':'application/json','.svg':'image/svg+xml',
  '.png':'image/png','.webmanifest':'application/manifest+json'};
-let requests=0;
+let requests=0,offlinePhase=false;
+const afterCutoffRequests=[];
 const server=createServer(async(req,res)=>{
   requests++;
+  if(offlinePhase)afterCutoffRequests.push({
+    method:req.method,url:req.url,
+    accept:req.headers.accept||'',
+    cacheControl:req.headers['cache-control']||'',
+    serviceWorker:req.headers['service-worker']||''
+  });
   try{
     const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
     const file=path.resolve(root,'.'+pathname);
@@ -46,7 +53,7 @@ const report={kind:'mythwrought-m5-offline-pwa-chromium-v1',viewport:selected,
   width,height,seed,sourceGenerator:'mythwrought-four-surface-regions-v5',
   defaultGenerator:'mythwrought-four-surface-regions-v4',
   sourceSchema:1,realChromium:true,offlineModeVerified:false,
-  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261118-v2',
+  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261118-v3',
   finished:false,screens:[],checks:[],errors:[]};
 const persist=()=>writeFile(path.join(out,'manifest.json'),JSON.stringify(report,null,2));
 const check=(name,ok,info={})=>{
@@ -141,7 +148,7 @@ try{
     {timeout:180000});
   const online=await page.evaluate(async()=>{
     const keys=await caches.keys();
-    const name=keys.find(x=>x==='mythwrought-m5-shell-20261118-v2');
+    const name=keys.find(x=>x==='mythwrought-m5-shell-20261118-v3');
     const cache=name?await caches.open(name):null;
     const urls=cache?await cache.keys():[];
     return {name,cacheCount:urls.length,controller:
@@ -171,6 +178,7 @@ try{
   const firstMap=await map(page);
   await screenshot(page,'online-initial');
   const beforeOfflineRequests=requests;
+  offlinePhase=true;
   await ctx.setOffline(true);
   check('browser-network-disabled',await page.evaluate(()=>navigator.onLine===false));
   await page.reload({waitUntil:'load',timeout:90000});
@@ -229,7 +237,7 @@ try{
         report.sourceGenerator,{count:again.count,prior:newMap.count});
   await screenshot(page,'second-offline-reload');
   check('zero-network-after-cutoff',requests===beforeOfflineRequests,
-    {onlineRequests:beforeOfflineRequests,now:requests});
+    {onlineRequests:beforeOfflineRequests,now:requests,afterCutoffRequests});
 
   // Failure-safe source identity test in ISOLATED browser storage only.
   // We restore the exact recorded bytes after asserting read-only refusal.
@@ -292,7 +300,7 @@ try{
     JSON.parse(finalMap.raw).seed===seed);
   await screenshot(page,'final-offline-recovery');
   check('no-network-leak',requests===beforeOfflineRequests,
-    {onlineRequests:beforeOfflineRequests,requests});
+    {onlineRequests:beforeOfflineRequests,requests,afterCutoffRequests});
   check('no-browser-errors',pageErrors.length===0,{errors:pageErrors});
   check('screenshots-complete',report.screens.length===8);
   report.offlineModeVerified=true;report.finished=true;
@@ -301,7 +309,9 @@ try{
   console.log('PASS M5 REAL OFFLINE PWA WEBGL2 '+selected+
     ' seven genuine PNG and persistent seed/profile/map/failure-safe checks');
 }catch(error){
-  report.errors.push(String(error));await persist();throw error;
+  report.errors.push(String(error));
+  report.afterCutoffRequests=afterCutoffRequests;
+  await persist();throw error;
 }finally{
   await ctx.close();await browser.close();
   await new Promise(resolve=>server.close(resolve));
