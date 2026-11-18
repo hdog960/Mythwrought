@@ -9,10 +9,13 @@ export function planFittingBatches(objects,{maxTriangles=4096,maxInstances=256}=
   if(o?.contract!==CONTRACT||typeof o.instanceKey!=='string'||!o.instanceKey||
    seen.has(o.instanceKey)||typeof o.sceneId!=='string'||!Number.isSafeInteger(triangles)||
    triangles<1||triangles>maxTriangles||o.render.mesh?.positions?.length!==triangles*9||
+   o.render.mesh?.materials?.length!==triangles||
+   !Array.from(o.render.mesh.positions).every(Number.isFinite)||
+   !Number.isSafeInteger(o.variant)||o.variant<0||o.variant>3||
    o.render.instanced!==true||!['sparse','medium'].includes(o.render.lodTier))
    throw new TypeError('invalid or over-budget fitting');
   seen.add(o.instanceKey);
-  const key=o.sceneId+':'+o.variant+':'+o.render.lodTier;
+  const key=JSON.stringify([o.sceneId,o.variant,o.render.lodTier]);
   if(!groups.has(key))groups.set(key,[]);
   groups.get(key).push(o);
  }
