@@ -123,7 +123,7 @@ test('M1: explicit fresh-only profile activation and reload of edited raised ter
   assert.equal(JSON.stringify(loaded.world.save()),expected);
   assert.equal(loaded.world.get(c.x,c.top,c.z),BLOCK.AIR);
   assert.equal(loaded.world.get(c.x,c.oldTop,c.z),BLOCK.WOOD);
-  assert.throws(()=>loadFourRegionWorld(storage,179,{enableNew:true}),/already/);
+  assert.throws(()=>loadFourRegionWorld(storage,179,{enableNew:true}),/existing profile/);
   assert.equal(readFourRegionProfile(storage,179).profile.generator,world.profile.generator);
 });
 
