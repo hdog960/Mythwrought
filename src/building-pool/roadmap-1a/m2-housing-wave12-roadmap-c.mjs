@@ -333,7 +333,7 @@ export const ROADMAP_C_1A_WAVE12_SPECS=Object.freeze([
     ],
     "posts": [
       6,
-      36
+      28
     ],
     "detail": "Two missing mountainside patios plus a third snowbreak terrace; six walled rooms, five interior doors, six source-borne supported pitched roofs and two Pack5 bed-foot reserved cells"
   }
