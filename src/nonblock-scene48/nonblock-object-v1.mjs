@@ -2,6 +2,7 @@
 // All removal state is a disposable sidecar. :00/manual integrator owns persistence.
 import {SCENE_FAMILIES,createSceneMesh,sceneVariant} from './flora-phase1.mjs';
 import {UNDERGROWTH_FAMILIES,makeUndergrowthMesh} from './undergrowth-phase1.mjs';
+import {meshSelectionBounds} from './mesh-pick-bounds.mjs';
 
 export const NONBLOCK_OBJECT_VERSION='nonblock-object-v1';
 export const NONBLOCK_FAMILIES=Object.freeze({...SCENE_FAMILIES,...UNDERGROWTH_FAMILIES});
@@ -31,7 +32,7 @@ export function describeNonblockObject({sceneId,seed,anchor,variant}){
  const [width,height,depth]=family.footprint;
  if(![width,height,depth].every(n=>Number.isFinite(n)&&n>0))throw new RangeError('invalid footprint');
  // AABB centered on cell anchor horizontally; anchored at its base vertically.
- const selectionAabb={min:[anchor[0]-width/2,anchor[1],anchor[2]-depth/2],max:[anchor[0]+width/2,anchor[1]+height,anchor[2]+depth/2]};
+ const selectionAabb=meshSelectionBounds(mesh,anchor);
  return Object.freeze({
   contract:NONBLOCK_OBJECT_VERSION,sceneId,instanceKey:key,seed,anchor:[...anchor],variant:resolvedVariant,
   attachment:family.attachment,selectionAabbs:[selectionAabb],
