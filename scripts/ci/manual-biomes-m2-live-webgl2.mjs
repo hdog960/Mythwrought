@@ -122,7 +122,7 @@ try{
       profile:window.__mythwroughtTest.fourBiomeProfile()
     }),{x:snow.x,y:sample.y,z:snow.z});
     if(persisted.mode!=='four-regions'||persisted.block!==0||
-       persisted.profile?.generator!=='mythwrought-four-surface-regions-v1')
+       persisted.profile?.generator!=='mythwrought-four-surface-regions-v2')
       throw Error('Actual WebGL game biome edit/save/reload failed: '+JSON.stringify(persisted));
     const profileInStorage=await page.evaluate(()=>[
       localStorage.getItem('mythwrought-v002-world-179-four-biomes-profile-v1')!==null,
