@@ -1,0 +1,9 @@
+# MYTHWROUGHT Roadmap C — original Sunrift Celestial Orrery Research Institute
+
+**NEW DRAFT-ONLY SOURCE DESIGN** `r4:magical-research-institute:desert:large:01`. Original 88×20×84 desert magical-research program rather than another schoolhouse: 18,665 genuine authored solid physical cells, 5,255 bearing foundation cells, 4,807 physical floor-navigation cells, nine distinct laboratory/observatory/repository rooms, eight structural branches and three curved orrery rotundas, two physically source-carved open sky shafts, two full-height lintelled partition doors, 739 raised bearing roof cells, real read-only Pack4 symbolic producer references. Unmodified 4B compiler and schema preflight PASS.
+
+All 152 previously technically source-accepted 4B records are read-only, with no changes to historical files or their Git blob SHA identities. Current source-only count **provisional 153/285, 132 remaining**, NOT accepted until exact-head testing and screenshot inspection.
+
+**Fail-closed acceptance required:** root 922 native Node tests, 12/12 CI contracts, lane-focused genuine native with all 152 earlier source identities and strict eight-way normalized D4 uniqueness, actual physical support, room walking, read-only five manual Pack source producer AABB. 6 genuine source-specific Chromium WebGL2 exterior/section PNGs at **667×375, 844×390 and 932×430**. Download ZIP, independently compare all PNG SHA-256 hashes, dimensions, bytes, IDs, GPU/context errors, 844×390 exterior/section visual framing; no fabricated final physical variants. Creator art and real iPhone acceptance remain explicitly OPEN.
+
+No production merge, rebase, deployment, live-world registry/placement, save-schema mutation, Pack asset change, hourly automations, other builder branches/roadmaps, iPhone two-thumb controls, 25-chunk budget or v0.11 unlock.
