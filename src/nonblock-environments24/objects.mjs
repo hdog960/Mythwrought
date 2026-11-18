@@ -37,9 +37,10 @@ export function makeEnvironmentObject(family,{seed=179,anchor,variant=0}={}){
    tapered(positions,-.21,-.09,0,height*.55,r*.45,0,5);
  }else if(def.mount==='ceiling')tapered(positions,0,0,0,-height,r,.012,7);
  else tapered(positions,0,0,0,height,r,.012,7);
+ const pickRadius=family==='crystal'?r+.3:r;
  const bounds=def.mount==='ceiling'?
-   {min:[-r,-height,-r],max:[r,0,r]}:
-   {min:[-r,0,-r],max:[r,height,r]};
+   {min:[-pickRadius,-height,-pickRadius],max:[pickRadius,0,pickRadius]}:
+   {min:[-pickRadius,0,-pickRadius],max:[pickRadius,height,pickRadius]};
  const instanceKey=key(seed,anchor,def.sceneId,variant);
  return Object.freeze({contract:CONTRACT,sceneId:def.sceneId,instanceKey,seed:seed|0,anchor:{...anchor},
    variant,mount:def.mount,mesh:{primitive:'triangles',positions,triangleCount:positions.length/9,color:def.palette},
