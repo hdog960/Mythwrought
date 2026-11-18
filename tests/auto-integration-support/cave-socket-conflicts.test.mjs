@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {inspectCaveSocketConflicts} from '../../src/auto-integration-support/cave-socket-conflicts.mjs';
+const sourceHeads={upper:'a'.repeat(40),deep:'b'.repeat(40)};
+const socket={x:192,y:-45,z:188};
+const upper=[{...socket,kind:'AIR'},{x:192,y:-44,z:188,kind:'AIR'}];
+const deep=[{...socket,kind:'AIR'},{x:192,y:-46,z:188,kind:'AIR'}];
+const check=(overrides={})=>inspectCaveSocketConflicts({upper,deep,socket,sourceHeads,...overrides});
+test('shared AIR socket remains fixture-only',()=>{const r=check();assert.equal(r.compatible,true);assert.equal(r.integrationVerified,false)});
+test('reject AIR versus solid',()=>assert.match(check({deep:[{...socket,kind:'SOLID'}]}).errors.join(),/AIR-solid/));
+test('reject unapproved shared cell',()=>assert.match(check({deep:[...deep,{...upper[1]}]}).errors.join(),/unapproved shared voxel/));
+test('reject protected edit',()=>assert.match(check({protectedCells:[socket]}).errors.join(),/player edit/));
+test('reject legacy -3 write',()=>assert.match(check({upper:[...upper,{x:192,y:-3,z:188,kind:'AIR'}]}).errors.join(),/legacy/));
+test('reject upper -46 crossing',()=>assert.match(check({upper:[...upper,{x:200,y:-46,z:200,kind:'AIR'}]}).errors.join(),/upper out of bounds/));
+test('reject cross-owner safety buffer conflict',()=>assert.match(check({deep:[...deep,{x:193,y:-44,z:188,kind:'SOLID'}]}).errors.join(),/safety-buffer/));
+test('reject missing source provenance',()=>assert.equal(check({sourceHeads:null}).compatible,false));
+test('input immutable',()=>{const a=JSON.stringify(upper),b=JSON.stringify(deep);check();assert.equal(JSON.stringify(upper),a);assert.equal(JSON.stringify(deep),b)});
