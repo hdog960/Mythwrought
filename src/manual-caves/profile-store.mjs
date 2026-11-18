@@ -3,6 +3,7 @@
 // write traditional schema-1/Pack2 slots, or mutate an existing profile.
 // Journal-first writes, strict checksum and previous-good rollback protection.
 import {worldSlotKey} from '../seeds.mjs';
+import {VoxelWorld} from '../voxel.mjs';
 import {saveFingerprint} from '../persistence.mjs';
 import {checkNewCaveWorldAdmission,CAVE_PROFILE_KIND} from './cave-voxel-world.mjs';
 import {createStagedCaveRuntime,restoreStagedCaveRuntime} from './opt-in-runtime.mjs';
@@ -46,9 +47,11 @@ function decodeRecord(text,seed){
      payload.kind!==CAVE_PROFILE_KIND||payload.version!==CAVE_PROFILE_STORE_VERSION||
      payload.seed!==seed||payload.world?.seed!==seed||payload.world?.schema!==1)
     throw Error('Cave profile kind or payload mismatch');
-  // This may be expensive, intentionally fail closed before any storage write.
-  const runtime=restoreStagedCaveRuntime(payload.world,{approved:true,profile:CAVE_PROFILE_KIND});
-  return {runtime,raw:record.raw,encoded:text};
+  // Validate the canonical save envelope WITHOUT materializing five giant
+  // cave meshes for every journal/backup inspection. Materialize exactly one
+  // selected profile on load, not two or three per atomic save.
+  VoxelWorld.restore(payload.world);
+  return {payload,raw:record.raw,encoded:text};
 }
 function readExisting(storage,seed){
   const key=caveProfileStorageKey(seed),values=[key,key+JOURNAL,key+BACKUP]
@@ -77,18 +80,17 @@ export function loadStagedCaveProfile(storage,seed,{approved=false}={}){
   if(state.journal?.error)throw Error('Damaged uncommitted cave journal preserved');
   // A valid pending journal is the latest attempted transaction; the older
   // committed primary may never shadow it and silently lose a player's edits.
-  if(state.journal?.runtime)return Object.freeze({
-    ...state.journal,runtime:state.journal.runtime,recovered:true,
-    recovery:'pending-journal',needsCommit:true
-  });
-  if(state.primary?.runtime)return Object.freeze({
-    ...state.primary,runtime:state.primary.runtime,recovered:false,
-    recovery:null,needsCommit:false
-  });
-  if(state.backup?.runtime)return Object.freeze({
-    ...state.backup,runtime:state.backup.runtime,recovered:true,
-    recovery:'previous-good-backup',needsCommit:true
-  });
+  const selected=state.journal?.payload?['pending-journal',state.journal]:
+    state.primary?.payload?['primary',state.primary]:
+    state.backup?.payload?['previous-good-backup',state.backup]:null;
+  if(selected){
+    const [recovery,candidate]=selected;
+    const runtime=restoreStagedCaveRuntime(candidate.payload.world,
+      {approved:true,profile:CAVE_PROFILE_KIND});
+    return Object.freeze({...candidate,runtime,
+      recovered:recovery!=='primary',recovery:recovery==='primary'?null:recovery,
+      needsCommit:recovery!=='primary'});
+  }
   if(state.primary?.error||state.backup?.error)
     throw Error('Cave profile damaged; preserve primary and backup for manual recovery');
   throw Error('No registered cave profile for this seed');
@@ -105,7 +107,7 @@ function commitRecord(storage,seed,encoded,{creating=false}={}){
   if(!creating&&s.rawPrimary===null&&s.rawJournal===null)
     throw Error('Missing committed cave profile; use explicit creation');
   // No implicit overwrite of a previous pending transaction.
-  if(s.journal?.runtime&&s.journal.encoded!==s.rawPrimary&&s.journal.encoded!==encoded)
+  if(s.journal?.payload&&s.journal.encoded!==s.rawPrimary&&s.journal.encoded!==encoded)
     throw Error('An uncommitted new cave save must be recovered first');
   decodeRecord(encoded,seed);
   // Journal-first, verify before setting primary. If a write throws, leave
@@ -114,7 +116,7 @@ function commitRecord(storage,seed,encoded,{creating=false}={}){
   if(storage.getItem(s.key+JOURNAL)!==encoded)throw Error('Cave journal write did not persist');
   // Preserve previous-good *before* primary replacement. Never replace an
   // existing good backup with a damaged or unverified canonical record.
-  if(s.primary?.runtime&&s.rawPrimary!==encoded){
+  if(s.primary?.payload&&s.rawPrimary!==encoded){
     storage.setItem(s.key+BACKUP,s.rawPrimary);
     if(storage.getItem(s.key+BACKUP)!==s.rawPrimary)
       throw Error('Cave backup write did not persist');
