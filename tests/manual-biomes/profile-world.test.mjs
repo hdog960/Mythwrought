@@ -202,5 +202,6 @@ test('M1: genuine mesher accepts editable profile and unchanged separate legacy 
   profile.set(c.x,c.top,c.z,BLOCK.AIR);
   assert.ok(meshChunk(profile,chunkCoord(c.x),chunkCoord(c.z)));
   assert.equal(profile.get(c.x,c.top,c.z),BLOCK.AIR);
-  assert.notEqual(legacy.get(c.x,c.top,c.z),BLOCK.AIR);
+  assert.equal(legacy.get(c.x,c.top,c.z),new VoxelWorld(179).get(c.x,c.top,c.z),
+    'legacy terrain never changes when biome world is edited');
 });
