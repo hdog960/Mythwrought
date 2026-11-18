@@ -30,3 +30,25 @@ test('invalid ray cannot trigger break or authorization',()=>{
  assert.equal(s.breakPicked({origin:[0,1,2],direction:[NaN,0,-1]}),null);
  assert.equal(calls,0);
 });
+
+test('approval-time mount edit fails closed without writing tombstone',()=>{
+ let edited=false, approvals=0;
+ const o=describeFitting({sceneId:'scene36:signpost',seed:2026,anchor:[12,0,15],mount:{below:true}});
+ const ray={origin:[12,1.6,18],direction:[0,0,-1],maxDistance:5};
+ const s=createGuardedFittingSession({
+  seed:2026,objects:[o],
+  inspectMount:()=>({...verified(),playerEdited:edited}),
+  authorizeRemoval:()=>{approvals++;edited=true;return true;}
+ });
+ assert.equal(s.breakPicked(ray),null);
+ assert.equal(approvals,1);
+ assert.deepEqual(s.snapshot().tombstones,[]);
+ assert.equal(s.visible().length,1);
+});
+test('nonboolean authorization cannot remove a prop',()=>{
+ const o=describeFitting({sceneId:'scene36:signpost',seed:-77,anchor:[12,0,15],mount:{below:true}});
+ const s=createGuardedFittingSession({seed:-77,objects:[o],inspectMount:verified,authorizeRemoval:()=>Promise.resolve(true)});
+ const ray={origin:[12,1.6,18],direction:[0,0,-1],maxDistance:5};
+ assert.equal(s.breakPicked(ray),null);
+ assert.deepEqual(s.snapshot().tombstones,[]);
+});
