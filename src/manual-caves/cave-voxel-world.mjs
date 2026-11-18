@@ -62,11 +62,14 @@ export class CaveVoxelWorld extends VoxelWorld{
   }
   static restore(payload,{approved=false}={}){
     if(approved!==true)throw Error('Explicit cave profile restore required');
+    // Validate all legacy schema-1 fields with the canonical parser first.
+    // DO NOT copy its normalized edits: a player-built DEEPSTONE block inside
+    // generated cave AIR equals the *old* solid baseline and would be dropped.
     const valid=VoxelWorld.restore(payload);
     const cave=new CaveVoxelWorld(valid.seed,{approved:true});
-    cave.edits=new Map(valid.edits);
+    for(const row of payload.edits)
+      if(!cave.set(...row))throw Error('Cave restore rejected a validated voxel edit');
     cave.rotations=new Map(valid.rotations);
-    cave.biomeCellCount=valid.biomeCellCount;
     return cave;
   }
 }

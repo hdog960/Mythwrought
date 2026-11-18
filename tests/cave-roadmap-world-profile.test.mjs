@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,worldKey,VoxelWorld,collides} from '../src/voxel.mjs';
+import {worldSlotKey,LEGACY_WORLD_KEY} from '../src/seeds.mjs';
+import {meshDepthSection} from '../src/depth-mesh.mjs';
+import {sectionForY} from '../src/depth.mjs';
 import {WORLD_MIN_Y,LEGACY_WORLD_MIN_Y} from '../src/depth.mjs';
 import {descentRoute,descentCells} from '../src/underground-switchback-descent.mjs';
 import {deepCaveCells} from '../src/deep-cave-network.mjs';
@@ -15,7 +18,13 @@ const storage=(records={})=>({
 });
 test('new caves require explicit opt-in and reject existing schema-1/save backups',()=>{
   assert.equal(checkNewCaveWorldAdmission(storage(),179).reason,'EXPLICIT_NEW_WORLD_SELECTION_REQUIRED');
-  assert.equal(checkNewCaveWorldAdmission(storage({'mythwrought.world.seed.179':'old'}),179,{approved:true}).ok,false);
+  const key=worldSlotKey(179);
+  assert.equal(checkNewCaveWorldAdmission(storage({[key]:'old'}),179,{approved:true}).ok,false);
+  assert.equal(checkNewCaveWorldAdmission(storage({[key+'-backup-v009']:'old'}),179,{approved:true}).ok,false);
+  assert.equal(checkNewCaveWorldAdmission(storage({[key+'-integrity-v009']:'old'}),179,{approved:true}).ok,false);
+  assert.equal(checkNewCaveWorldAdmission(storage({[key+'-pack2-live-v1']:'old'}),179,{approved:true}).ok,false);
+  assert.equal(checkNewCaveWorldAdmission(storage({[LEGACY_WORLD_KEY]:'old'}),179,{approved:true}).ok,false);
+  assert.equal(checkNewCaveWorldAdmission(storage({[key+'-manual-test-existing-overlay']:'old'}),179,{approved:true}).ok,false);
   assert.throws(()=>new CaveVoxelWorld(179),/EXPLICIT_NEW_WORLD_SELECTION_REQUIRED/);
   assert.equal(CAVE_PROFILE_KIND,'mythwrought-new-caves-v1');
   assert.equal(checkNewCaveWorldAdmission(storage(),179,{approved:true}).ok,true);
@@ -50,13 +59,20 @@ for(const seed of [179,1,2026,-77]){
     assert.equal(world.get(point.x,point.feet,point.z),BLOCK.AIR,'real :36 authored descent headroom');
     assert.equal(world.get(point.x,point.floor,point.z),BLOCK.DEEPSTONE,'real :36 stone support');
     assert.equal(collides(world,point.x+.5,point.feet,point.z+.5),false,'real gameplay body fits');
-    assert.equal(world.set(point.x,point.feet,point.z,BLOCK.STONE),true);
-    assert.equal(world.get(point.x,point.feet,point.z),BLOCK.STONE,'player block overrides cavern air');
+    const mesh=meshDepthSection(world,Math.floor(point.x/16),Math.floor(point.z/16),
+      sectionForY(point.floor));
+    assert.ok(mesh instanceof Float32Array&&mesh.length>0,'real depth mesher reads cave voxels');
+    assert.ok(mesh.every(Number.isFinite),'deep mesh vertices must remain finite');
+    assert.equal(world.set(point.x,point.feet,point.z,BLOCK.DEEPSTONE),true);
+    assert.equal(world.get(point.x,point.feet,point.z),BLOCK.DEEPSTONE,'player deepstone overrides cavern air');
+    assert.equal(collides(world,point.x+.5,point.feet,point.z+.5),true,
+      'actual player collision recognizes placed deepstone');
     const recorded=world.save();
     assert.equal(recorded.schema,1);
     assert.equal(JSON.stringify(old.save()),raw,'opt-in cave modifies no legacy world');
     const restored=CaveVoxelWorld.restore(recorded,{approved:true});
-    assert.equal(restored.get(point.x,point.feet,point.z),BLOCK.STONE,'saved player edit loads in cave mode');
+    assert.equal(restored.get(point.x,point.feet,point.z),BLOCK.DEEPSTONE,
+      'cave restore must retain edit equal to the old natural deepstone baseline');
     assert.equal(restored.set(point.x,point.feet,point.z,BLOCK.AIR),true);
     assert.equal(restored.get(point.x,point.feet,point.z),BLOCK.AIR,'removing placed stone restores source cavern');
     assert.equal(restored.edits.has(worldKey(point.x,point.feet,point.z)),false,
