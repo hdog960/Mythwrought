@@ -107,7 +107,7 @@ export function planDeepVaultConnections({sourceCells,seed=179}={}){
   bridges:Object.freeze(bridges),failures:Object.freeze(failures),cells});
 }
 export function auditBridgePlayerClearance(world,plan){
- if(!plan?.ok||!world||typeof world.get!=='function)
+ if(!plan?.ok||!world||typeof world.get!=='function')
   return Object.freeze({ok:false,reason:'NO_SAFE_BRIDGE_PLAN'});
  const problems=[];
  for(const bridge of plan.bridges){
