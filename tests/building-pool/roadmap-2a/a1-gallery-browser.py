@@ -5,12 +5,12 @@ import hashlib,json,os,subprocess,sys,time,urllib.request
 root=Path(__file__).resolve().parents[3]
 out=root/'artifacts'/'roadmap-a-2a-first-twelve'
 out.mkdir(parents=True,exist_ok=True)
-srv=subprocess.Popen([sys.executable,'-m','http.server','4173','--bind','127.0.0.1'],cwd=root,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+srv=subprocess.Popen([sys.executable,'-m','http.server','4174','--bind','127.0.0.1'],cwd=root,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
 records=[];groups=[];errors=[]
 try:
  for t in range(100):
   try:
-   urllib.request.urlopen('http://127.0.0.1:4173/tests/building-pool/roadmap-2a/a1-gallery.html',timeout=.5)
+   urllib.request.urlopen('http://127.0.0.1:4174/tests/building-pool/roadmap-2a/a1-gallery.html',timeout=.5)
    break
   except Exception:time.sleep(.2)
  else:raise RuntimeError('Source gallery HTTP server not responding')
@@ -22,7 +22,7 @@ try:
    page=br.new_page(viewport={'width':w,'height':h},device_scale_factor=1)
    page.on('pageerror',lambda e: errors.append(str(e)))
    for view in ['exterior','cutaway']:
-    page.goto('http://127.0.0.1:4173/tests/building-pool/roadmap-2a/a1-gallery.html?view='+view)
+    page.goto('http://127.0.0.1:4174/tests/building-pool/roadmap-2a/a1-gallery.html?view='+view)
     page.wait_for_function('window.__MW2A_GALLERY?.ready === true',timeout=45000)
     ids=page.locator('#building option').evaluate_all('(nodes)=>nodes.map(n=>n.value)')
     if len(ids)!=140 or len(set(ids))!=140:raise AssertionError('Invalid actual source ID count')
