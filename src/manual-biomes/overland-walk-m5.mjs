@@ -17,8 +17,8 @@ const TARGETS=Object.freeze(SURFACE_BIOME_REGIONS.map(b=>Object.freeze({
 })));
 export const M5_OVERLAND_TARGETS=TARGETS;
 export const M5_ROUTE_RULES=Object.freeze({
-  goalRadius:22,minBiomeWeight:.72,detourRadius:108,
-  maxVisited:14000,maxSampled:35000
+  goalRadius:22,minBiomeWeight:.72,detourRadius:160,
+  maxVisited:70000,maxSampled:120000
 });
 class MinQueue {
   a=[];
@@ -99,7 +99,7 @@ export function planM5NaturalOverland(world,{
     sampled:sampled.size,visited:0,unsafe,withoutTerrainEdits:true
   });
   const targetDist=(cell)=>distance(cell.x,cell.z,goal.x,goal.z);
-  let destination=null,iterations=0;
+  let destination=null,iterations=0,closest=null;
   const id0=key(sx,sz);
   bestCost.set(id0,0);predecessor.set(id0,null);
   queue.push({x:sx,z:sz,f:targetDist(start),g:0});
@@ -109,6 +109,9 @@ export function planM5NaturalOverland(world,{
     closed.add(id);iterations++;
     const tile=sample(current.x,current.z);
     if(!tile)continue;
+    const remaining=targetDist(tile);
+    if(!closest||remaining<closest.distanceToTarget)
+      closest={x:tile.x,z:tile.z,feet:tile.feet,distanceToTarget:remaining};
     const r=surfaceBiomeAt(tile.x,tile.z,seed);
     if(targetDist(tile)<=goalRadius&&r?.name===target&&
        r.weight>=M5_ROUTE_RULES.minBiomeWeight){
@@ -132,7 +135,7 @@ export function planM5NaturalOverland(world,{
       iterations>=maxVisited?'Natural route search reached hard visit limit':
       'No natural walkable route to biome',
     from:{x:sx,z:sz,feet:start.feet},toward:{x:goal.x,z:goal.z},
-    visited:iterations,sampled:sampled.size,unsafe,
+    visited:iterations,sampled:sampled.size,unsafe,closest,
     withoutTerrainEdits:true,needActualGameWalk:true
   });
   const path=[];let at=key(destination.x,destination.z);
