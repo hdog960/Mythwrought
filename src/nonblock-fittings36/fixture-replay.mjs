@@ -1,6 +1,5 @@
 // :36 isolated deterministic fixture runner. No production raycast, save, or renderer writes.
 import {createGuardedFittingSession} from './guarded-break-session.mjs';
-import {compileFittingDrawPackets} from './draw-packet-compiler.mjs';
 
 // The fixture only accepts externally verified mounts and synchronous :00-style approval.
 // Every frame recomputes visible geometry after an authorized removal or sidecar restore.
