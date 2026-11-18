@@ -17,7 +17,7 @@ for(const seed of [179,1,2026,-77]){
   test('bedrock-margin whisper gallery physical twin lobes seed '+seed,()=>{
     assert.ok(depth>WORLD_MIN_Y+1,'bedrock safety margin');
     const cells=descentCells(origin);
-    for(const [d,t] of [[8,0],[20,0],[35,0],[39,-9],[43,10],[41,0]]){
+    for(const [d,t] of [[8,-8],[20,-18],[35,-18],[39,-31],[43,-17],[41,-24]]){
       assert.equal(read(cells,d,t,depth),BLOCK.DEEPSTONE,'support '+d+','+t);
       for(let h=1;h<=4;h++)
         assert.equal(read(cells,d,t,depth+h),BLOCK.AIR,'headroom '+d+','+t+','+h);
@@ -25,7 +25,7 @@ for(const seed of [179,1,2026,-77]){
     const edits=new Map();
     const world={seed,edits,get(x,y,z){return edits.get(worldKey(x,y,z))??BLOCK.STONE;}};
     const reader=descentWorld(world,origin);
-    const [x,y,z]=pos(39,-9,depth+1);
+    const [x,y,z]=pos(39,-31,depth+1);
     assert.equal(reader.get(x,y,z),BLOCK.AIR);
     edits.set(worldKey(x,y,z),BLOCK.STONE);
     assert.equal(reader.get(x,y,z),BLOCK.STONE,'saved edit overrides gallery');
