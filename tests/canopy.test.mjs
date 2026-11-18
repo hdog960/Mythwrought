@@ -508,3 +508,48 @@ test('manual M2 fir crown fits original vertical clearance with a visible sentin
   assert.ok(sentinel&&ordinary,'real seeded sentinel and ordinary pine both inspected');
   assert.equal(JSON.stringify(world.save()),saved,'visual-only cap does not edit save');
 });
+
+test('manual M2 seed-varied connected bough lobes prevent an over-tall plain cone',()=>{
+  const world=new VoxelWorld(179),before=JSON.stringify(world.save());
+  let checked=0,beaconChecked=0;
+  outer:for(let cx=-16;cx<=16;cx++)for(let cz=-16;cz<=16;cz++){
+    const mesh=woodlandCanopyVertices(world,cx,cz,options);
+    if(!mesh.length)continue;
+    const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+    const sentinel=woodlandSentinelChunk(cx,cz,179);
+    if(!sentinel&&woodlandTreeStyle(x,z,179)!=='evergreen')continue;
+    const stride=CANOPY_LIMITS.stride,base=60,bandVertices=8*6,
+      coreEnd=base+bandVertices*5+8*3;
+    const vertex=i=>[mesh[i*stride],mesh[i*stride+1],mesh[i*stride+2]];
+    assert.ok(mesh.length>=stride*(coreEnd+8*6),
+      'eight attached two-triangle bough lobes must exist after joined core');
+    const center=[x+.5,z+.5],root=vertex(base),radii=[];
+    for(let ring=0;ring<5;ring++){
+      const start=base+ring*bandVertices;
+      for(let sector=0;sector<8;sector++){
+        const p=vertex(start+sector*6);
+        radii.push({ring,r:Math.hypot(p[0]-center[0],p[2]-center[1])});
+      }
+    }
+    const baseMax=Math.max(...radii.filter(p=>p.ring<=1).map(p=>p.r));
+    const peakY=Math.max(...Array.from({length:8},(_,i)=>vertex(coreEnd-24+i*3+2)[1]));
+    assert.ok((peakY-root[1])/(2*baseMax)<2.1,
+      'fir must have a broad short crown, not the rejected over-tall traffic cone');
+    for(let i=0;i<8;i++){
+      const start=coreEnd+i*6;
+      const p=vertex(start),q=vertex(start+1),tip=vertex(start+2),
+        upper=vertex(start+3),join=vertex(start+4),tip2=vertex(start+5);
+      assert.deepEqual(join,p,'projecting bough remains physically joined to shell');
+      assert.deepEqual(tip2,tip,'two attached facets share their outward bough tip');
+      assert.ok(Math.min(p[1],q[1])-tip[1]>.06,
+        'organic leaf boughs sweep downward from shell');
+      assert.ok(Number.isFinite(upper[1]));
+    }
+    assert.ok(mesh.length<=CANOPY_LIMITS.maxVerticesPerTree*
+      CANOPY_LIMITS.maxTreesPerChunk*stride);
+    checked++;if(sentinel)beaconChecked++;
+    if(checked>=5&&beaconChecked>0)break outer;
+  }
+  assert.ok(checked>=5&&beaconChecked>0,'real seed exercises ordinary and sentinel boughs');
+  assert.equal(JSON.stringify(world.save()),before,'bough geometry never persists as voxels');
+});
