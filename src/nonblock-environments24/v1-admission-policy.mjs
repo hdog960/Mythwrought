@@ -7,6 +7,8 @@ export function planEnvironmentV1Admission(descriptors,environment,{maxInstances
  if(!environment||typeof environment.isSolid!=='function'||
     typeof environment.isEdited!=='function'||typeof environment.hasTombstone!=='function')
   throw new TypeError('read-only terrain, edit and tombstone providers required');
+ if(environment.isReserved!==undefined&&typeof environment.isReserved!=='function')
+  throw new TypeError('invalid read-only reservation provider');
  const batch=auditEnvironmentV1Batch(descriptors,{maxInstances,maxTriangles});
  const overlap=new Set(batch.rejectedOverlapKeys);
  const accepted=[],rejected=[];
@@ -45,7 +47,8 @@ export function planEnvironmentV1Admission(descriptors,environment,{maxInstances
       const cell=[x,y,z],k=keyOf(cell);
       if(visited.has(k))continue;
       visited.add(k);
-      if(check(environment.isEdited,x,y,z)||check(environment.isSolid,x,y,z)){blocked=true;break;}
+      if(check(environment.isEdited,x,y,z)||check(environment.isSolid,x,y,z)||
+         (typeof environment.isReserved==='function'&&check(environment.isReserved,x,y,z))){blocked=true;break;}
      }
   }
   if(blocked){rejected.push({instanceKey:d.instanceKey,reason:'occupied'});continue;}
