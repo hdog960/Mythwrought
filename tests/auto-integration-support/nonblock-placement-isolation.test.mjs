@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditPlacementIsolation} from '../../src/auto-integration-support/nonblock-placement-isolation.mjs';
+const box=(x=0)=>({min:[x,0,0],max:[x+0.5,0.5,0.5]});
+const item=(key='nb1:a',x=0)=>({instanceKey:key,placement:{enabledByDefault:false,requiresWorldEditCheck:true,requiresAttachmentCheck:true},occupiedCells:[[x,0,0]],selectionAabbs:[box(x)],collisionAabbs:[box(x)]});
+test('safe isolated candidate is only fixture approved',()=>{const r=auditPlacementIsolation({objects:[item()]});assert.equal(r.ok,true);assert.match(r.status,/NOT_LIVE/);});
+test('never auto-spawn',()=>assert.ok(auditPlacementIsolation({objects:[{...item(),placement:{...item().placement,enabledByDefault:true}}]}).errors.includes('UNSAFE_AUTO_PLACEMENT')));
+test('protect user-edited cell',()=>assert.ok(auditPlacementIsolation({objects:[item()],editedCells:[[0,0,0]]}).errors.includes('WORLD_EDIT_OR_PROTECTED_CELL_OVERLAP')));
+test('protect reserved cell',()=>assert.ok(auditPlacementIsolation({objects:[item()],protectedCells:[[0,0,0]]}).errors.includes('WORLD_EDIT_OR_PROTECTED_CELL_OVERLAP')));
+test('reject colliding candidates',()=>assert.ok(auditPlacementIsolation({objects:[item(),item('nb1:b')]}).errors.includes('COLLISION_OVERLAP')));
+test('reject collisions with preexisting object',()=>assert.ok(auditPlacementIsolation({objects:[item()],existingObjects:[item('nb1:old')]}).errors.includes('COLLISION_OVERLAP')));
+test('reject duplicate identity',()=>assert.ok(auditPlacementIsolation({objects:[item(),item()]}).errors.includes('INVALID_OR_DUPLICATE_IDENTITY')));
+test('allow edge-touching collision bounds',()=>assert.equal(auditPlacementIsolation({objects:[item(),item('nb1:b',1)]}).ok,true));
+test('reject missing selection AABB',()=>assert.ok(auditPlacementIsolation({objects:[{...item(),selectionAabbs:[]}]}).errors.includes('INVALID_SELECTION_BOUNDS')));
+test('reject malformed collision AABB',()=>assert.ok(auditPlacementIsolation({objects:[{...item(),collisionAabbs:[{min:[0,0,0],max:[0,0,0]}]}]}).errors.includes('INVALID_COLLISION_BOUNDS')));
