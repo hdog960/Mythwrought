@@ -3721,7 +3721,7 @@ const PLANS=[
     "profile": "skybridge",
     "sourceAuthoredName": "Cloudcrest Skybridge Spire"
   }
-]
+];
 
 const VALID_IDS=new Set(PLANS.map(p=>p.id));
 function author(spec){
