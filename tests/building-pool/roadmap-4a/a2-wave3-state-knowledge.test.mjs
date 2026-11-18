@@ -132,3 +132,21 @@ test('new silhouette wave is source-distinct: stepped fork/crescent/terrace roof
  }
  assert.equal(styles.size,12);
 });
+
+test('all 72 Wave3 window sockets are on outward-facing exterior load-bearing walls despite faceted tower outcrops',()=>{
+ const toward={north:[0,1],south:[0,-1],east:[1,0],west:[-1,0]};
+ for(const b of fresh()){
+  const occupied=new Set(b.cells.filter(c=>c.role==='floor'&&c.at[1]===0).map(c=>c.at[0]+','+c.at[2]));
+  const masonry=new Map(b.cells.map(c=>[K(c.at),c]));
+  let windows=0;
+  for(const o of b.openings.filter(o=>o.kind==='window')){
+   const [dx,dz]=toward[o.facing], [x,y,z]=o.at;
+   assert.equal(y,2);
+   assert.equal(masonry.get(K(o.at))?.role,'window',b.id+' socket '+K(o.at));
+   assert.ok(occupied.has(x+','+z),b.id+' floorless window '+K(o.at));
+   assert.ok(!occupied.has((x+dx)+','+(z+dz)),b.id+' window faces into another source floor '+K(o.at));
+   windows++;
+  }
+  assert.equal(windows,6,b.id+' window count');
+ }
+});
