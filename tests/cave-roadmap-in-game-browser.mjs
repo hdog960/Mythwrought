@@ -12,6 +12,9 @@ import pngjs from 'pngjs';
 import {deepCaveRoute} from '../src/deep-cave-network.mjs';
 import {descentRoute} from '../src/underground-switchback-descent.mjs';
 import {caveRoute} from '../src/experimental-cave-route.mjs';
+import {HISTORIC_NAMED_TARGETS,findNamedCavePlayerRoute}
+ from '../src/manual-caves/named-destination-audit.mjs';
+import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
 const {PNG}=pngjs;
 const head=process.env.CAVE_EXPECTED_HEAD||'';
 assert.match(head,/^[0-9a-f]{40}$/,'Actual game source exact checkout required');
@@ -22,6 +25,8 @@ await mkdir(folder,{recursive:true});
 const report={status:'UNVERIFIED',kind:'ACTUAL_INDEX_MAIN_GAME_WEBGL2',
  head,productionDeployed:false,actualIPhone:false,
  preservesLegacySave:true,sizes,images:[],mobileProxy:[],
+ namedSitesRequested:HISTORIC_NAMED_TARGETS.length,
+ namedCaptureMethod:'Original index.html/main.mjs game renderer; diagnostic camera placement only; separate native stepPlayer routes supply C proof',
  timingSource:'Headless Chromium SwiftShader requestAnimationFrame; NOT physical iPhone FPS',
  errors:[]};
 const root=resolve('.'),mimes={'.mjs':'text/javascript; charset=utf-8',
@@ -67,6 +72,29 @@ function locators(reportFromGame){
    to:{x:east.x+a+7,y:f+2,z:east.z+8}}
  ];
 }
+function historicNamedLocators(){
+ // Independent physical source-backed route checks are required before any
+ // named chamber is allowed to count as a rendered in-game site.
+ // The photo camera is diagnostic; no claim of player walking in Chromium.
+ const runtime=createStagedCaveRuntime(seed,null,{approved:true}),slugs=new Set();
+ assert.equal(runtime.registeredInHomeScreen,false);
+ const scenes=HISTORIC_NAMED_TARGETS.map(feature=>{
+  const proof=findNamedCavePlayerRoute(runtime.world,feature);
+  assert.equal(proof.ok,true,'Cannot frame unsupported historic site '+feature.name+
+   ': '+JSON.stringify(proof));
+  assert.ok(proof.route.length>5,'Named target is not an independent chamber '+feature.name);
+  const source=proof.target,back=proof.route[Math.max(0,proof.route.length-4)];
+  const slug=feature.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  assert.ok(!slugs.has(slug),'Duplicate named photo slot '+slug);
+  slugs.add(slug);
+  return {name:'named-'+slug,named:feature.name,
+   proofSeed:seed,physicalPathSteps:proof.route.length,
+   at:{x:source.x+.5,y:source.floor+1,z:source.z+.5},
+   to:{x:back.x+.5,y:back.floor+2,z:back.z+.5}};
+ });
+ assert.equal(scenes.length,21);
+ return scenes;
+}
 async function waitRealMesh(page,x,z,depth=false){
  await page.waitForFunction(({x,z,depth})=>{
   const el=document.querySelector('#scene'),v=el?.dataset;
@@ -85,6 +113,7 @@ try{
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
   '--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
  const origin='http://127.0.0.1:'+server.address().port;
+ const namedScenes=historicNamedLocators();
  for(const [width,height] of sizes){
   const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,
    hasTouch:true,isMobile:true,serviceWorkers:'block'});
@@ -144,7 +173,8 @@ try{
      assert.equal(guards.pack3Sidecar,null,'Pack3 sidecar created in Cave World');
    }
    await page.evaluate(()=>document.getElementById('closeHelp').click());
-   const shots=locators(status),hashes=new Set();
+   const shots=[...locators(status),...namedScenes],hashes=new Set();
+   assert.equal(shots.length,25,'Four original scene witnesses + all 21 distinct named cave sites');
    for(const shot of shots){
     if(shot.surface){
      const s=await page.evaluate(({x,z})=>window.__mythwroughtTest.teleport(x,z),shot.at);
@@ -168,6 +198,13 @@ try{
     assert.equal(snapshot.mode.enabled,true);
     assert.equal(snapshot.noticeHidden,true);
     assert.ok(snapshot.gl&&snapshot.verts>800);
+    if(shot.named){
+     assert.equal(snapshot.mode.seed,seed);
+     assert.ok(snapshot.playerFeet<-10&&
+       Math.abs(snapshot.playerFeet-shot.at.y)<2,
+       'Game camera not physically inside named source scene '+shot.named+
+       ' '+JSON.stringify(snapshot));
+    }
     const raw=await page.screenshot({
      path:join(folder,'realgame-'+shot.name+'-'+width+'x'+height+'.png'),fullPage:true});
     const stats=inspect(raw,width,height);
@@ -175,9 +212,22 @@ try{
     hashes.add(stats.sha256);
     report.images.push({scene:shot.name,...stats,renderedVertices:snapshot.verts,
      loadedChunks:snapshot.chunks,playerFeet:snapshot.playerFeet,sourceHead:head,
-     actualIndexMain:true});
+     actualIndexMain:true,namedSourceFeature:shot.named||null,
+     diagnosticCameraCapture:Boolean(shot.named),
+     nativeControllerProvenSeparately:Boolean(shot.named),
+     proofSeed:shot.proofSeed||null,
+     physicalPathSteps:shot.physicalPathSteps||null});
    }
-   assert.equal(hashes.size,shots.length,'Distinct original game scenes did not render distinctly');
+   assert.equal(hashes.size,shots.length,
+    'Distinct original game scenes did not render distinctly');
+   // Restore the original east-camera area for the legacy comparable frame
+   // interval proxy; named screenshots are separate per-location visual proof.
+   const east=shots.find(s=>s.name==='historic-east-gallery');
+   await page.evaluate(({at,to})=>{
+    window.__mythwroughtTest.teleportCave(at.x,at.y,at.z);
+    window.__mythwroughtTest.aimAt(to.x,to.y,to.z);
+   },east);
+   await waitRealMesh(page,east.at.x,east.at.z,false);
    // Capture bounded, real rendered-frame cadence while the actual Cave World
    // remains active. This is SOFTWARE Chromium telemetry, not an iPhone
    // performance certification. Preserve the numbers for manual comparison.
@@ -249,7 +299,14 @@ try{
      ' authentic index.html/main.mjs WebGL2 screenshots; '+hashes.size+' unique SHA256');
   }finally{await context.close()}
  }
- assert.equal(report.images.length,12);
+ assert.equal(report.images.length,(4+21)*sizes.length);
+ for(const [width,height] of sizes){
+  const named=report.images.filter(i=>i.width===width&&i.height===height&&i.namedSourceFeature);
+  assert.equal(named.length,21,'Missing individual original-game named-site views');
+  assert.equal(new Set(named.map(i=>i.namedSourceFeature)).size,21);
+ }
+ report.namedSitesCaptured=21;
+ report.gameSnapshots=report.images.length;
  assert.equal(report.mobileProxy.length,3,'Three landscape performance observations missing');
  report.status='ACTUAL_GAME_WEBGL2_STAGING_PASS';
 }catch(e){
