@@ -3,6 +3,8 @@ import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,s
 import {meshDepthSection} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
+import {SKY_DAY_MS,SKY_DAY_TARGET_MS,SKY_NIGHT_TARGET_MS,
+  loadSkyClock,sampleSkyClock,selectSkyClockTime,formatSkyTime} from './world-clock.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
 import {clampLook,forwardVector,compassDegrees,MAX_PITCH} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
@@ -71,6 +73,47 @@ function start(){
   }
   let pack3=createPack3LiveBridge(world,localStorage);
   seedLabel.textContent='WORLD '+world.seed;
+  // S1: separate per-seed clock sidecar; never modify original schema-1 saves.
+  // The monotonic clock advances even while settings overlay is open.
+  // Sky art, sun/moons and fog remain unaltered pending S2/S3.
+  let skyClock=loadSkyClock({seed:world.seed,storage:localStorage,
+    wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
+  const skyClockStatus=document.getElementById('skyClockStatus');
+  let lastSkyClockLabel=-Infinity;
+  function paintSkyClock(now,force=false){
+    const phase=sampleSkyClock(skyClock,now);
+    const formatted=formatSkyTime(phase);
+    canvas.dataset.skyClockPhaseMs=String(Math.floor(phase));
+    canvas.dataset.skyClockCycleMs=String(SKY_DAY_MS);
+    canvas.dataset.skyClockTime=formatted;
+    canvas.dataset.skyClockSeed=String(skyClock.seed);
+    canvas.dataset.skyClockPersistence=skyClock.persistence;
+    if(force||now-lastSkyClockLabel>=500){
+      skyClockStatus.textContent='WORLD '+skyClock.seed+' · '+formatted+
+        ' · 24-MIN CYCLE RUNNING · '+(skyClock.persistence==='saved'?'SAVED':'SESSION-ONLY')+
+        (skyClock.warning?' · '+skyClock.warning:'');
+      lastSkyClockLabel=now;
+    }
+  }
+  function reactivateSkyClock(){
+    skyClock=loadSkyClock({seed:world.seed,storage:localStorage,
+      wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
+    paintSkyClock(performance.now(),true);
+  }
+  for(const [id,phase,description] of [
+    ['skySetDay',SKY_DAY_TARGET_MS,'DAY · 12:00'],
+    ['skySetNight',SKY_NIGHT_TARGET_MS,'NIGHT · 00:00']]){
+    document.getElementById(id).onclick=()=>{
+      if(help.hidden)return;
+      const now=performance.now();
+      skyClock=selectSkyClockTime(skyClock,phase,{storage:localStorage,
+        monoNowMs:now,wallNowMs:Date.now(),allowWrites:!storageReadOnly});
+      paintSkyClock(now,true);
+      message('Sky clock: '+description+' · 24-minute cycle continues'+
+        (skyClock.persistence==='saved'?'':' · clock not saved'));
+    };
+  }
+  paintSkyClock(performance.now(),true);
   const VS=[
     '#version 300 es','precision highp float;',
     'in vec3 aPos; in vec3 aColor; in vec2 aUv; in float aMat;',
@@ -805,6 +848,7 @@ function start(){
     const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
     frameHistory.frame(now,!document.hidden&&help.hidden&&!exploration.isOpen()&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
+      paintSkyClock(now);
       frame++;if(help.hidden&&!exploration.isOpen())move(dt);
       if(frame%16===0)exploration.tick(now);
       // Low-frequency real-cave check: no synthetic map markers or geometry.
@@ -2002,6 +2046,7 @@ function start(){
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();changed=false;respawnPrototype();
+    reactivateSkyClock();
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
     message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
@@ -2024,6 +2069,7 @@ function start(){
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();
       storageReadOnly=false;changed=false;respawnPrototype();
+      reactivateSkyClock();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';
