@@ -1,9 +1,11 @@
 // :36 opt-in mobile batching proposal. No GPU calls, automatic placement or runtime writes.
 import {CONTRACT} from './fittings-phase1.mjs';
-export function planFittingBatches(objects,{maxTriangles=4096,maxInstances=256}={}){
+export function planFittingBatches(objects,{maxTriangles=4096,maxInstances=256,maxTotalTriangles=65536,maxObjects=2048}={}){
  if(!Array.isArray(objects)||!Number.isSafeInteger(maxTriangles)||maxTriangles<1||
- !Number.isSafeInteger(maxInstances)||maxInstances<1||maxInstances>256)throw new TypeError('invalid batch budget');
- const seen=new Set(),groups=new Map();
+ !Number.isSafeInteger(maxInstances)||maxInstances<1||maxInstances>256||
+ !Number.isSafeInteger(maxTotalTriangles)||maxTotalTriangles<1||
+ !Number.isSafeInteger(maxObjects)||maxObjects<1)throw new TypeError('invalid batch budget');
+ const seen=new Set(),groups=new Map();let cumulativeTriangles=0;
  for(const o of objects){
   const triangles=o?.render?.triangleCount;
   if(o?.contract!==CONTRACT||typeof o.instanceKey!=='string'||!o.instanceKey||
@@ -11,10 +13,13 @@ export function planFittingBatches(objects,{maxTriangles=4096,maxInstances=256}=
    triangles<1||triangles>maxTriangles||o.render.mesh?.positions?.length!==triangles*9||
    o.render.mesh?.materials?.length!==triangles||
    !Array.from(o.render.mesh.positions).every(Number.isFinite)||
+   !Array.from(o.render.mesh.materials).every(m=>Number.isSafeInteger(m)&&m>=0&&m<=6)||
    !Number.isSafeInteger(o.variant)||o.variant<0||o.variant>3||
    o.render.instanced!==true||!['sparse','medium'].includes(o.render.lodTier))
    throw new TypeError('invalid or over-budget fitting');
-  seen.add(o.instanceKey);
+  if(seen.size>=maxObjects||cumulativeTriangles+triangles>maxTotalTriangles)
+   throw new RangeError('global fitting batch budget exceeded');
+  cumulativeTriangles+=triangles;seen.add(o.instanceKey);
   const key=JSON.stringify([o.sceneId,o.variant,o.render.lodTier]);
   if(!groups.has(key))groups.set(key,[]);
   groups.get(key).push(o);
@@ -33,5 +38,5 @@ export function planFittingBatches(objects,{maxTriangles=4096,maxInstances=256}=
   if(current.length)batches.push(Object.freeze({group:key,instanceKeys:Object.freeze(current),triangles:count}));
  }
  return Object.freeze({contract:CONTRACT,objectCount:seen.size,batches:Object.freeze(batches),
-  totalTriangles:batches.reduce((n,b)=>n+b.triangles,0)});
+  totalTriangles:cumulativeTriangles});
 }
