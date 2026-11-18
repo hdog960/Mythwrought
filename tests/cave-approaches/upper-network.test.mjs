@@ -36,3 +36,24 @@ test('player edit history blocks candidate rather than overwriting',()=>{
  o.editedCells.add(worldKey(UPPER_SITES[0].x,-8,UPPER_SITES[0].z));
  assert.equal(upperCaveCells(o).ok,false);
 });
+
+test('overlapping galleries retain supported 3-wide route with four-cell clearance',()=>{
+ const o=options(UPPER_SITES[0],179),a=upperCaveCells(o);
+ assert.equal(a.ok,true,a.reason);
+ for(const p of a.route){
+  for(let dz=-1;dz<=1;dz++){
+   const z=p.z+dz;
+   // Neighboring route slices can raise the floor by at most one step.
+   const candidates=[p.floor,p.floor+1];
+   const support=candidates.find(y=>a.cells.get(worldKey(p.x,y,z))===BLOCK.DEEPSTONE);
+   assert.notEqual(support,undefined,'missing supported floor at '+p.x+','+z);
+   for(let h=1;h<=3;h++)
+    assert.equal(a.cells.get(worldKey(p.x,support+h,z)),BLOCK.AIR,'blocked route headroom');
+  }
+ }
+});
+test('legacy terrain and edits fail closed even at an overlapping alcove',()=>{
+ const o=options(UPPER_SITES[1],-77);
+ o.legacyCells=(x,y,z)=>x===UPPER_SITES[1].x+48&&y===-16?BLOCK.DEEPSTONE:null;
+ assert.equal(upperCaveCells(o).ok,false);
+});
