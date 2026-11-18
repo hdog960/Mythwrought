@@ -83,6 +83,7 @@ try{
  await loaded();
  await mkdir('artifacts',{recursive:true});
  await page.screenshot({path:'artifacts/mythwrought-v010-sculpted-garden-groves-landscape.png'});
+ await page.screenshot({path:'artifacts/manual-remove-fake-grove-932x430.png'});
  const visual=await scene();
  assert.ok(visual.vertices>0);
  assert.ok(visual.gaps.every(n=>n>=-2),'Surface art overlaps landscape controller rails');
