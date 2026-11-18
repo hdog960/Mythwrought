@@ -23,10 +23,34 @@ const inspect=()=>page.evaluate(async()=>{
 });
 try{
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});await loaded();
- const tree=await inspect();assert.ok(tree,'seeded landscape should contain sculpted canopy');
+ // The historical sources are retained but NONE may draw into the live game.
+ const fakeMeshCheck=await page.evaluate(async()=>{
+   const {VoxelWorld,meshChunk}=await import('./src/voxel.mjs');
+   const w=new VoxelWorld(179),old=JSON.stringify(w.save());
+   let vertices=0,physicalLeaves=0;
+   for(const [cx,cz] of [[0,0],[-1,0],[0,-1]]){
+     const mesh=meshChunk(w,cx,cz);
+     for(let i=8;i<mesh.length;i+=9){
+       const mat=mesh[i];vertices++;
+       if(mat>=7&&mat<=17)throw Error('Noninteractive decorative geometry in live mesh: '+mat);
+       if(mat===18)physicalLeaves++;
+     }
+   }
+   return {vertices,physicalLeaves,saveUnchanged:JSON.stringify(w.save())===old};
+ });
+ assert.ok(fakeMeshCheck.vertices>1000&&fakeMeshCheck.saveUnchanged);
+ assert.ok(fakeMeshCheck.physicalLeaves>0,
+   'mineable seeded foliage must survive fake-canopy removal');
+
+ const tree=await inspect();assert.ok(tree,'retired canopy source remains accessible for future real trees');
  await page.evaluate(p=>{window.__mythwroughtTest.teleport(p.x-3,p.z+3);window.__mythwroughtTest.aimAt(p.x,p.y+2,p.z);},tree);
  await loaded();await mkdir('artifacts',{recursive:true});
  await page.screenshot({path:'artifacts/mythwrought-v010-woodland-canopy-landscape.png'});
+ for(const [w,h] of [[667,375],[844,390],[932,430]]){
+   await page.setViewportSize({width:w,height:h});await loaded();
+   await page.screenshot({path:`artifacts/manual-remove-fake-canopy-${w}x${h}.png`});
+ }
+ await page.setViewportSize({width:932,height:430});await loaded();
  const gap=()=>page.evaluate(()=>{const c=document.querySelector('#scene').getBoundingClientRect(),l=document.querySelector('.left').getBoundingClientRect(),r=document.querySelector('.right').getBoundingClientRect();return [c.left-l.right,r.left-c.right]});
  assert.ok((await gap()).every(x=>x>=-2));
  await page.evaluate(p=>window.__mythwroughtTest.placeFixture(p.x,p.y,p.z,0),tree);await loaded();
@@ -39,5 +63,5 @@ try{
  assert.ok((await gap()).every(x=>x>=-2));
  await page.screenshot({path:'artifacts/mythwrought-v010-woodland-canopy-compact.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS genuine WebGL2 woodland canopy, reversible edit/reload and compact external grips');
+ console.log('PASS genuine WebGL2: fake canopy absent, real editable tree blocks intact, three landscape images and historical source reversible');
 }finally{await browser.close();}
