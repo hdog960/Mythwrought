@@ -65,14 +65,18 @@ test('Roadmap A batch: 12 separately authored 3D commercial candidates, original
 test('Every new source D4 floor outline has IoU strictly below 0.89 against all previous and new designs',()=>{
  const earlier=previous.map(b=>({id:b.id,pts:floor(b)}));
  const newData=A1_FIRST_TWELVE_SHOPS.map(b=>({id:b.id,pts:floor(b)}));
+ const failures=[],nearestForAll=[];
  for(const x of newData){
   let nearest={id:null,iou:-1};const sym=D4(x.pts);
   for(const y of [...earlier,...newData])if(x.id!==y.id){
    const score=Math.max(...sym.map(z=>iou(z,y.pts)));
    if(score>nearest.iou)nearest={id:y.id,iou:score};
   }
-  assert(nearest.iou<.89,x.id+' near-duplicate '+JSON.stringify(nearest));
+  nearestForAll.push({candidate:x.id,...nearest});
+  if(nearest.iou>=.89)failures.push({candidate:x.id,...nearest});
  }
+ console.log('ROADMAP_A_2A_NEAREST_D4 '+JSON.stringify(nearestForAll));
+ assert.deepEqual(failures,[],'D4 IoU must be strictly <0.89 for every new source: '+JSON.stringify(failures));
 });
 
 test('Every real entrance and all four functional room access points are walkable with 3-high clearance',()=>{
