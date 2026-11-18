@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditNonblockManifest} from '../../src/auto-integration-support/nonblock-manifest-preflight.mjs';
+const sources={scene48:'a'.repeat(40),scene24:'b'.repeat(40),scene36:'c'.repeat(40),interaction00:'d'.repeat(40)};
+const entry=(owner='scene24',familyNumber=37)=>({owner,familyNumber,sceneId:owner+':crystal',seed:17,anchor:[2,3,4],variant:0,instanceKey:'nb1:'+owner+'%3Acrystal:17:2,3,4:0',breakIntent:{action:'remove-object',targetKey:'nb1:'+owner+'%3Acrystal:17:2,3,4:0',requiresOwner:':00'},selectionAabbs:[{min:[1,2,3],max:[3,4,5]}],triangleCount:48,maxInstancesPerBatch:128});
+const audit=(entries,s=sources)=>auditNonblockManifest({sources:s,entries});
+test('valid declared manifest is not misrepresented as live',()=>{const r=audit([entry()]);assert.equal(r.ok,true);assert.match(r.status,/DECLARED_MANIFEST_ONLY/);});
+test('missing producer provenance fails closed',()=>assert.equal(audit([entry()],{}).ok,false));
+test('foreign family number rejected',()=>assert.ok(audit([entry('scene24',61)]).errors.includes('FAMILY_OWNER_MISMATCH')));
+test('duplicate object keys rejected',()=>assert.ok(audit([entry(),entry()]).errors.includes('DUPLICATE_INSTANCE')));
+test('duplicate family allocation rejected',()=>{const b=entry();b.sceneId='scene24:rock';b.anchor=[3,3,4];b.instanceKey='nb1:scene24%3Arock:17:3,3,4:0';b.breakIntent.targetKey=b.instanceKey;assert.ok(audit([entry(),b]).errors.includes('DUPLICATE_FAMILY_NUMBER'));});
+test('unbreakable object rejected',()=>{const e=entry();e.breakIntent=null;assert.ok(audit([e]).errors.includes('UNBREAKABLE_OBJECT'));});
+test('invalid selection rejected',()=>{const e=entry();e.selectionAabbs=[{min:[0,0,0],max:[0,1,1]}];assert.ok(audit([e]).errors.includes('INVALID_PICK_BOUNDS'));});
+test('excessive batch budget rejected',()=>{const e=entry();e.maxInstancesPerBatch=513;assert.ok(audit([e]).errors.includes('RENDER_BUDGET_UNDECLARED'));});
