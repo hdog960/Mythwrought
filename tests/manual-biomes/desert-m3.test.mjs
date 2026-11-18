@@ -38,7 +38,7 @@ test('M3: v3 generator is immutable, existing v2 profile stays source-exact and 
   assert.equal(newer.generationProfile.generator,M3_FOUR_REGION_GENERATOR);
   assert.deepEqual(validateFourRegionProfile(fourRegionProfile(179,M2_FOUR_REGION_GENERATOR)),
     fourRegionProfile(179,M2_FOUR_REGION_GENERATOR));
-  assert.throws(()=>fourRegionProfile(179,'mythwrought-four-surface-regions-v5'));
+  assert.throws(()=>fourRegionProfile(179,'mythwrought-four-surface-regions-v6'));
   const cached=JSON.stringify(old.save());
   assert.equal(JSON.stringify(restoreFourRegionWorld(old.save(),old.profile).save()),cached);
   for(const r of SURFACE_BIOME_REGIONS.slice(1)){
