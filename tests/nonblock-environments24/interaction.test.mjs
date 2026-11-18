@@ -56,7 +56,7 @@ test('adjacent-cell edits and occupied voxels fail closed across full pick envel
  assert.equal(sideEdited.visible().length,0);
  assert.equal(sideEdited.breakByKey(o.instanceKey),false);
  const sideOccupied=createEnvironmentSession({seed,objects:[o],blockAt:base,
-  editedAt:edit,occupiedAt:(x,y,z)=>x===5&&y===-12&&z===8});
+  editedAt:edit,occupiedAt:(x,y,z)=>x===3&&y===-12&&z===8});
  assert.equal(sideOccupied.visible().length,0);
  const sideSolid=createEnvironmentSession({seed,objects:[o],
   blockAt:(x,y,z)=>base(x,y,z)||(x===3&&y===-12&&z===8?1:0),
