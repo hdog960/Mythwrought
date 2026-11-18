@@ -51,3 +51,23 @@ test('v1 ceiling mount requires unedited overhead support',()=>{
  assert.equal(session([a],ceiling).visible().length,1);
  assert.equal(session([a],{...ceiling,editedAt:(x,y,z)=>y===1}).visible().length,0);
 });
+
+test('v1 session isolates descriptor arrays and returned typed meshes from caller mutation',()=>{
+ const a=make('stalagmite',[0,0,0]);
+ const s=session([a]);
+ const originalKey=a.instanceKey;
+ const originalCoordinate=s.visible()[0].render.mesh.positions[0];
+ a.anchor[0]=1000;
+ a.render.mesh.positions[0]=999;
+ a.selectionAabbs[0].min[0]=999;
+ assert.equal(s.visible()[0].instanceKey,originalKey);
+ assert.equal(s.visible()[0].anchor[0],0);
+ assert.equal(s.visible()[0].render.mesh.positions[0],originalCoordinate);
+ const visible=s.visible()[0];
+ visible.render.mesh.positions[0]=888;
+ visible.anchor[0]=777;
+ assert.equal(s.visible()[0].render.mesh.positions[0],originalCoordinate);
+ assert.equal(s.visible()[0].anchor[0],0);
+ assert.equal(s.breakByKey(originalKey),true);
+ assert.deepEqual(s.snapshot().tombstones,[originalKey]);
+});
