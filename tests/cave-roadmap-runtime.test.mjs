@@ -22,6 +22,9 @@ for(const seed of [179,1,2026,-77]){
     assert.equal(runtime.registeredInHomeScreen,false);
     assert.equal(world.base.cavePlanReport.entrancesConnected,true);
     assert.equal(world.base.cavePlanReport.vaultBridgeConnected,true);
+    assert.equal(world.base.cavePlanReport.eastGalleryConnected,true);
+    assert.ok(world.base.cavePlanReport.eastGalleryCells>=100);
+    assert.ok(world.base.caveEastCells.size>=100);
     assert.ok(world.base.cavePlanReport.vaultBridgeCells>100);
     assert.equal(world.base.cavePlanReport.vaultBridgeSteps.length,4);
     assert.equal(runtime.entrancePlan.entrances.length,4);

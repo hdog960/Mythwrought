@@ -11,7 +11,7 @@ import pngjs from 'pngjs';
 const {PNG}=pngjs,head=process.env.CAVE_EXPECTED_HEAD||'';
 assert.match(head,/^[0-9a-f]{40}$/,'Exact source SHA required');
 assert.equal(execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),head);
-const scenes=['olddeep','switchback','whisper','windcut','vault','entrance'];
+const scenes=['olddeep','switchback','whisper','windcut','vault','east','entrance'];
 const viewports=[[667,375],[844,390],[932,430]];
 const dir=resolve('artifacts/cave-roadmap-source-webgl2'),root=resolve('.');
 await mkdir(dir,{recursive:true});

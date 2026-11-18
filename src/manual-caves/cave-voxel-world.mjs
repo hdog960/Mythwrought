@@ -7,6 +7,7 @@ import {WORLD_MIN_Y,LEGACY_WORLD_MIN_Y} from '../depth.mjs';
 import {worldSlotKey,LEGACY_WORLD_KEY,DEFAULT_WORLD_SEED} from '../seeds.mjs';
 import {auditCaveSourceCells} from './source-composition.mjs';
 import {planDeepVaultConnections} from './deep-vault-bridges.mjs';
+import {planHistoricalEastGallery} from './east-gallery-intake.mjs';
 
 export const CAVE_PROFILE_KIND='mythwrought-new-caves-v1';
 function existingSaveKeys(storage,seed){
@@ -53,12 +54,20 @@ export class CaveVoxelWorld extends VoxelWorld{
     const connections=planDeepVaultConnections({sourceCells:audit.cells,seed});
     if(!connections.ok)throw Error('Physical deep-vault junctions not ready: '+
       JSON.stringify(connections.failures));
+    const east=planHistoricalEastGallery({seed,approved:true});
+    if(!east.ok)throw Error('Historical East Gallery has no safe new-world site: '+
+      JSON.stringify(east.rejected?.slice(0,3)??east.reason));
     this.caveCellMap=audit.cells;
     this.caveConnectorCells=new Map(connections.cells);
+    this.caveEastCells=new Map(east.cells);
     this.cavePlanReport=Object.freeze({
       seed,sourceCount:audit.sourceCount,
       sourceReports:audit.sourceReports,overlapCount:audit.overlapCount,
       vaultBridgeConnected:true,vaultBridgeCells:this.caveConnectorCells.size,
+      eastGalleryConnected:true,eastGalleryCells:this.caveEastCells.size,
+      eastGalleryOrigin:Object.freeze({...east.origin}),
+      eastGalleryRelocated:east.relocated,
+      eastGallerySource:east.source,
       vaultBridgeSteps:Object.freeze(connections.bridges.map(b=>Object.freeze({
         floor:b.floor,steps:b.steps,widened:b.widened
       }))),
@@ -72,6 +81,10 @@ export class CaveVoxelWorld extends VoxelWorld{
       // never synthetic schema-1 player edits. Only the runtime adapter can
       // attach verified proposals; ordinary CaveVoxelWorld never has portals.
       if(this.cavePortalCells?.has(key))return this.cavePortalCells.get(key);
+      // Explicit new-cave profile: historical East+South feature is never
+      // silently installed in the existing surface/legacy saved worlds.
+      if(y>=LEGACY_WORLD_MIN_Y&&this.caveEastCells?.has(key))
+        return this.caveEastCells.get(key);
       if(y<LEGACY_WORLD_MIN_Y&&this.caveCellMap?.has(key))
         return this.caveCellMap.get(key);
       if(y<LEGACY_WORLD_MIN_Y&&this.caveConnectorCells?.has(key))

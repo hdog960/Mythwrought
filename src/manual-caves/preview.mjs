@@ -4,6 +4,7 @@ import {BLOCK,raycast,meshChunk} from '../voxel.mjs';
 import {sectionForY,WORLD_MIN_Y} from '../depth.mjs';
 import {meshDepthSection} from '../depth-mesh.mjs';
 import {deepCaveRoute} from '../deep-cave-network.mjs';
+import {caveRoute} from '../experimental-cave-route.mjs';
 import {descentRoute} from '../underground-switchback-descent.mjs';
 import {UPPER_SITES} from '../cave-approaches/upper-network.mjs';
 import {createStagedCaveProfile,loadStagedCaveProfile,saveStagedCaveProfile} from './profile-store.mjs';
@@ -67,6 +68,15 @@ function scene(name){
  }
  if(name==='vault')return {label:'Historic four vault gallery',
    eye:[116.5,-27.5,79.5],target:[121.5,-27.5,83.5]};
+ if(name==='east'){
+  if(!runtime.world.base.cavePlanReport.eastGalleryConnected)
+    throw Error('Historical East source not integrated into verified new cave world');
+  const origin=runtime.world.base.cavePlanReport.eastGalleryOrigin;
+  const anchor=origin.length-9,floor=caveRoute(seed,origin).floorAt(anchor);
+  return {label:'Historic PR147 East Gallery, source-verified physical chamber',
+    eye:[origin.x+anchor+3+.5,floor+2.5,origin.z+8+.5],
+    target:[origin.x+anchor+7+.5,floor+2.5,origin.z+8+.5]};
+ }
  if(name==='entrance'){
   const arr=runtime.entrancePlan.entrances[0].route;
   const n=Math.floor(arr.length*.48),p=arr[n],q=arr[Math.min(arr.length-1,n+5)];
