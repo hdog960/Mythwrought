@@ -209,6 +209,15 @@ test('Wave6: each of the five integrated Manual Pack producers resolves genuine 
   assert.ok(available.length>=1&&available[0].pack===pack,symbol+' missing source family');
   assert.ok(MANUAL_FIVE_PACK_CATALOG.some(x=>x.symbol===symbol&&x.pack===pack));
   for(const orientation of ['north','east','south','west']){
+   // The real integrated Pack3 producer intentionally does not certify roof-surface
+   // rotations other than north for IDs 109-112. Prove it FAILS CLOSED, not that
+   // an unsafe yaw magically receives a valid AABB or saved state.
+   if(pack===3&&orientation!=='north'){
+    assert.throws(()=>resolveManualFivePackAsset(symbol,{
+      numericId:available[0].numericId,orientation
+    }),/not certified/,symbol+' must reject uncertified '+orientation+' roof yaw');
+    continue;
+   }
    const shape=resolveManualFivePackAsset(symbol,{numericId:available[0].numericId,orientation,
     ...(variant===null?{}:{variant})});
    assert.equal(shape.sourcePack,pack);

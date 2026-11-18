@@ -77,6 +77,18 @@ const PLANS=[
         82,
         88,
         105
+      ],
+      [
+        7,
+        40,
+        38,
+        87
+      ],
+      [
+        68,
+        62,
+        92,
+        105
       ]
     ],
     "notches": [
@@ -299,7 +311,7 @@ const PLANS=[
           31,
           41
         ],
-        "profile": "shed",
+        "profile": "hip",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -323,7 +335,7 @@ const PLANS=[
           31,
           92
         ],
-        "profile": "gable",
+        "profile": "saw",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -335,7 +347,7 @@ const PLANS=[
           81,
           112
         ],
-        "profile": "shed",
+        "profile": "gable",
         "axis": "x",
         "high": 12,
         "period": 4
@@ -405,6 +417,24 @@ const PLANS=[
         54,
         62,
         86
+      ],
+      [
+        8,
+        13,
+        22,
+        37
+      ],
+      [
+        50,
+        15,
+        71,
+        51
+      ],
+      [
+        8,
+        39,
+        20,
+        83
       ]
     ],
     "notches": [
@@ -620,7 +650,7 @@ const PLANS=[
           23,
           40
         ],
-        "profile": "gable",
+        "profile": "shed",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -644,7 +674,7 @@ const PLANS=[
           23,
           86
         ],
-        "profile": "shed",
+        "profile": "gable",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -726,6 +756,18 @@ const PLANS=[
         43,
         98,
         116
+      ],
+      [
+        90,
+        66,
+        128,
+        124
+      ],
+      [
+        10,
+        49,
+        46,
+        104
       ]
     ],
     "notches": [
@@ -929,7 +971,7 @@ const PLANS=[
           76,
           20
         ],
-        "profile": "saw",
+        "profile": "shed",
         "axis": "x",
         "high": 12,
         "period": 5
@@ -941,7 +983,7 @@ const PLANS=[
           40,
           46
         ],
-        "profile": "hip",
+        "profile": "saw",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -953,7 +995,7 @@ const PLANS=[
           107,
           70
         ],
-        "profile": "hip",
+        "profile": "gable",
         "axis": "x",
         "high": 12,
         "period": 6
@@ -965,7 +1007,7 @@ const PLANS=[
           40,
           109
         ],
-        "profile": "saw",
+        "profile": "hip",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -977,7 +1019,7 @@ const PLANS=[
           107,
           131
         ],
-        "profile": "gable",
+        "profile": "shed",
         "axis": "x",
         "high": 12,
         "period": 4
@@ -1047,6 +1089,12 @@ const PLANS=[
         60,
         69,
         91
+      ],
+      [
+        7,
+        41,
+        26,
+        84
       ]
     ],
     "notches": [
@@ -1257,7 +1305,7 @@ const PLANS=[
           47,
           20
         ],
-        "profile": "shed",
+        "profile": "saw",
         "axis": "x",
         "high": 12,
         "period": 5
@@ -1269,7 +1317,7 @@ const PLANS=[
           25,
           41
         ],
-        "profile": "saw",
+        "profile": "gable",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -1281,7 +1329,7 @@ const PLANS=[
           66,
           57
         ],
-        "profile": "gable",
+        "profile": "hip",
         "axis": "x",
         "high": 12,
         "period": 6
@@ -1293,7 +1341,7 @@ const PLANS=[
           25,
           85
         ],
-        "profile": "hip",
+        "profile": "shed",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -1375,6 +1423,24 @@ const PLANS=[
         89,
         94,
         112
+      ],
+      [
+        8,
+        44,
+        38,
+        99
+      ],
+      [
+        73,
+        64,
+        98,
+        114
+      ],
+      [
+        41,
+        96,
+        69,
+        99
       ]
     ],
     "notches": [
@@ -1590,7 +1656,7 @@ const PLANS=[
           32,
           44
         ],
-        "profile": "shed",
+        "profile": "hip",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -1614,7 +1680,7 @@ const PLANS=[
           32,
           99
         ],
-        "profile": "gable",
+        "profile": "saw",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -1626,7 +1692,7 @@ const PLANS=[
           85,
           119
         ],
-        "profile": "shed",
+        "profile": "gable",
         "axis": "x",
         "high": 12,
         "period": 4
@@ -1696,6 +1762,18 @@ const PLANS=[
         71,
         91,
         120
+      ],
+      [
+        82,
+        74,
+        123,
+        131
+      ],
+      [
+        46,
+        53,
+        51,
+        118
       ]
     ],
     "notches": [
@@ -1911,7 +1989,7 @@ const PLANS=[
           38,
           51
         ],
-        "profile": "gable",
+        "profile": "shed",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -1935,7 +2013,7 @@ const PLANS=[
           38,
           115
         ],
-        "profile": "shed",
+        "profile": "gable",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -2017,6 +2095,18 @@ const PLANS=[
         45,
         95,
         127
+      ],
+      [
+        7,
+        50,
+        45,
+        117
+      ],
+      [
+        81,
+        81,
+        118,
+        139
       ]
     ],
     "notches": [
@@ -2227,7 +2317,7 @@ const PLANS=[
           73,
           20
         ],
-        "profile": "saw",
+        "profile": "shed",
         "axis": "x",
         "high": 12,
         "period": 5
@@ -2239,7 +2329,7 @@ const PLANS=[
           38,
           48
         ],
-        "profile": "hip",
+        "profile": "saw",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -2251,7 +2341,7 @@ const PLANS=[
           103,
           78
         ],
-        "profile": "hip",
+        "profile": "gable",
         "axis": "x",
         "high": 12,
         "period": 6
@@ -2263,7 +2353,7 @@ const PLANS=[
           38,
           114
         ],
-        "profile": "saw",
+        "profile": "hip",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -2275,7 +2365,7 @@ const PLANS=[
           103,
           142
         ],
-        "profile": "gable",
+        "profile": "shed",
         "axis": "x",
         "high": 12,
         "period": 4
@@ -2345,6 +2435,18 @@ const PLANS=[
         65,
         74,
         103
+      ],
+      [
+        8,
+        42,
+        29,
+        92
+      ],
+      [
+        60,
+        62,
+        79,
+        107
       ]
     ],
     "notches": [
@@ -2548,7 +2650,7 @@ const PLANS=[
           50,
           20
         ],
-        "profile": "shed",
+        "profile": "saw",
         "axis": "x",
         "high": 12,
         "period": 5
@@ -2560,7 +2662,7 @@ const PLANS=[
           27,
           43
         ],
-        "profile": "saw",
+        "profile": "gable",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -2572,7 +2674,7 @@ const PLANS=[
           70,
           62
         ],
-        "profile": "gable",
+        "profile": "hip",
         "axis": "x",
         "high": 12,
         "period": 6
@@ -2584,7 +2686,7 @@ const PLANS=[
           27,
           94
         ],
-        "profile": "hip",
+        "profile": "shed",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -2666,6 +2768,24 @@ const PLANS=[
         97,
         110,
         119
+      ],
+      [
+        9,
+        46,
+        45,
+        105
+      ],
+      [
+        79,
+        66,
+        114,
+        121
+      ],
+      [
+        47,
+        108,
+        80,
+        112
       ]
     ],
     "notches": [
@@ -2881,7 +3001,7 @@ const PLANS=[
           36,
           46
         ],
-        "profile": "shed",
+        "profile": "hip",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -2905,7 +3025,7 @@ const PLANS=[
           36,
           107
         ],
-        "profile": "gable",
+        "profile": "saw",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -2917,7 +3037,7 @@ const PLANS=[
           96,
           126
         ],
-        "profile": "shed",
+        "profile": "gable",
         "axis": "x",
         "high": 12,
         "period": 4
@@ -2987,6 +3107,24 @@ const PLANS=[
         64,
         79,
         109
+      ],
+      [
+        7,
+        45,
+        39,
+        102
+      ],
+      [
+        69,
+        67,
+        96,
+        120
+      ],
+      [
+        59,
+        47,
+        65,
+        100
       ]
     ],
     "notches": [
@@ -3209,7 +3347,7 @@ const PLANS=[
           31,
           43
         ],
-        "profile": "gable",
+        "profile": "shed",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -3233,7 +3371,7 @@ const PLANS=[
           31,
           105
         ],
-        "profile": "shed",
+        "profile": "gable",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -3315,6 +3453,24 @@ const PLANS=[
         41,
         85,
         104
+      ],
+      [
+        8,
+        44,
+        41,
+        96
+      ],
+      [
+        74,
+        68,
+        103,
+        115
+      ],
+      [
+        46,
+        118,
+        70,
+        123
       ]
     ],
     "notches": [
@@ -3518,7 +3674,7 @@ const PLANS=[
           63,
           20
         ],
-        "profile": "saw",
+        "profile": "shed",
         "axis": "x",
         "high": 12,
         "period": 5
@@ -3530,7 +3686,7 @@ const PLANS=[
           33,
           44
         ],
-        "profile": "hip",
+        "profile": "saw",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -3542,7 +3698,7 @@ const PLANS=[
           88,
           69
         ],
-        "profile": "hip",
+        "profile": "gable",
         "axis": "x",
         "high": 12,
         "period": 6
@@ -3554,7 +3710,7 @@ const PLANS=[
           33,
           98
         ],
-        "profile": "saw",
+        "profile": "hip",
         "axis": "z",
         "high": 11,
         "period": 5
@@ -3566,7 +3722,7 @@ const PLANS=[
           88,
           119
         ],
-        "profile": "gable",
+        "profile": "shed",
         "axis": "x",
         "high": 12,
         "period": 4
@@ -3636,6 +3792,24 @@ const PLANS=[
         64,
         67,
         100
+      ],
+      [
+        9,
+        41,
+        26,
+        84
+      ],
+      [
+        54,
+        60,
+        72,
+        103
+      ],
+      [
+        28,
+        91,
+        50,
+        95
       ]
     ],
     "notches": [
@@ -3839,7 +4013,7 @@ const PLANS=[
           47,
           20
         ],
-        "profile": "shed",
+        "profile": "saw",
         "axis": "x",
         "high": 12,
         "period": 5
@@ -3851,7 +4025,7 @@ const PLANS=[
           26,
           42
         ],
-        "profile": "saw",
+        "profile": "gable",
         "axis": "z",
         "high": 13,
         "period": 5
@@ -3863,7 +4037,7 @@ const PLANS=[
           65,
           61
         ],
-        "profile": "gable",
+        "profile": "hip",
         "axis": "x",
         "high": 12,
         "period": 6
@@ -3875,7 +4049,7 @@ const PLANS=[
           26,
           90
         ],
-        "profile": "hip",
+        "profile": "shed",
         "axis": "z",
         "high": 11,
         "period": 5

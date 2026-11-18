@@ -24,3 +24,11 @@ These independent source envelopes feature asymmetrical elevated court structure
 If all pass, technical source candidate count may be **236/315, 79 remaining**. Otherwise hold at accepted **224/315** and repair only Wave6-owned files.
 
 **Hard safeguards:** No changes to sibling 2A/3A, original builder PRs #179/#182/#183, Manual Five Packs, biome130, automations, world engine, schema-1 saves, iPhone controls, PWA, v0.11 or main. No merge, rebase, deployment, production registration, world placement or repairs without separate explicit approval.
+
+## Wave6 isolated exact-head repair notes
+
+Initial [run #44391504759](https://github.com/hdog960/Mythwrought/actions/runs/44391504759) was **RED**, not accepted: all 12 CI contracts and 920 repository native passed; focused 288/290 passed, 72/72 genuine Chromium WebGL2 captures produced. Two focused diagnostics were legitimately fail-closed: one initial Wave6 roof cross-section plan had fewer than three different pitched roof *types*, and an overly broad producer acceptance check incorrectly expected all Pack3 roof orientations to be certified when integrated Pack3 IDs 109–112 reject them.
+
+Repair is exclusively Wave6-owned: source authoring now uses **all four source-authored pitched profiles (gable, hip, shed, saw)** on each new building and substantial revised connecting side galleries for stronger silhouettes while preserving 5 genuinely reachable public rooms and legal historical slots; the native producer test now positively resolves each source for certified yaws and **asserts true Pack3 east/south/west rotation rejection** rather than weakening or bypassing physical safety contracts. Immutable prior 224 source blueprints and the integrated real producer stay untouched. The new source Git blob is `9eefa91affdec8cdf8bf497809281b44e14282b5`; Chromium gallery and exact source identity pins follow that blob. An independent pre-CI all-eight normalized same-category D4 audit across historic state-and-knowledge peers measured worst **0.79474043715847**, under 0.85.
+
+This is only a repaired *candidate* until the replacement exact-head workflow and its fresh PNG binary evidence pass in full.
