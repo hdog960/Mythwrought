@@ -2068,7 +2068,11 @@ function start(){
     for(const c of chunks.values())deleteChunkBuffers(c);
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;
+    // Preserve Creative flight's full reset-before-spawn invariant on the
+    // explicitly NEW four-biome world path. World assignment is separate
+    // so existing restore paths retain their original exact contracts.
+    g2NewWorld();
+    world=candidate;world.nextPack2State=pack2Selection;
     pack3=createPack3LiveBridge(world,localStorage);
     resetManual14ForWorld();resetPack5ForWorld();
     storageReadOnly=false;changed=false;respawnPrototype();
