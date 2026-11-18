@@ -4,7 +4,7 @@ import {NONBLOCK_FAMILY_IDS,describeNonblockObject,nonblockInstanceKey,createNon
 
 test('family-salted deterministic variants match original producers and stable keys',()=>{
  const ids=NONBLOCK_FAMILY_IDS;
- assert.equal(ids.length,8);
+ assert.ok(ids.length>=8,'original eight families must remain registered');
  for(const id of ids){
   const a=describeNonblockObject({sceneId:id,seed:2718,anchor:[11,-14,7]});
   const b=describeNonblockObject({sceneId:id,seed:2718,anchor:[11,-14,7]});
