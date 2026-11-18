@@ -12,3 +12,18 @@ test('duplicate family allocation rejected',()=>{const b=entry();b.sceneId='scen
 test('unbreakable object rejected',()=>{const e=entry();e.breakIntent=null;assert.ok(audit([e]).errors.includes('UNBREAKABLE_OBJECT'));});
 test('invalid selection rejected',()=>{const e=entry();e.selectionAabbs=[{min:[0,0,0],max:[0,1,1]}];assert.ok(audit([e]).errors.includes('INVALID_PICK_BOUNDS'));});
 test('excessive batch budget rejected',()=>{const e=entry();e.maxInstancesPerBatch=513;assert.ok(audit([e]).errors.includes('RENDER_BUDGET_UNDECLARED'));});
+
+test('scene48 namespaced families need no invented numeric allocation',()=>{
+ const e=entry('scene48',undefined);delete e.familyNumber;
+ assert.equal(audit([e]).ok,true);
+});
+test('scene48 invented numeric allocation fails closed',()=>{
+ const e=entry('scene48',12);
+ assert.ok(audit([e]).errors.includes('SCENE48_NUMERIC_ALLOCATION_UNAUTHENTICATED'));
+});
+test('different scene48 namespaced families do not collide on absent numeric slots',()=>{
+ const a=entry('scene48',undefined);delete a.familyNumber;
+ const b={...a,sceneId:'scene48:fern',anchor:[7,3,4],instanceKey:'nb1:scene48%3Afern:17:7,3,4:0'};
+ b.breakIntent={...a.breakIntent,targetKey:b.instanceKey};
+ assert.equal(audit([a,b]).ok,true);
+});
