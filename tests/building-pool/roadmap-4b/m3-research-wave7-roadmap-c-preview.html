@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mythwrought Roadmap C 4B M3 SCHOOLHOUSE WAVE7 — Cube-only WebGL2 diagnostic</title>
+<title>Mythwrought Roadmap C 4B M3 RESEARCH INSTITUTE WAVE7 — Cube-only WebGL2 diagnostic</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#15202c;color:#e4e7ea;font:12px system-ui,sans-serif}
 canvas{width:100vw;height:100vh;display:block}aside{position:absolute;left:8px;top:8px;max-width:95vw;
@@ -104,7 +104,7 @@ gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.08,.13,.18,1);
 gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
 gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 gl.drawArrays(gl.TRIANGLES,0,world.length);
-gl.finish();
+// Submit authentic WebGL2 commands without blocking CDP Runtime.evaluate;\n// Page.captureScreenshot performs the real framebuffer readback and remains mandatory.\ngl.flush();
 const error=gl.getError();
 document.querySelector('#label').textContent=b.type+' · '+b.biome+' · '+b.size+' · '+view;
 document.querySelector('#metrics').textContent=selected.length+' coordinate cells · '+
