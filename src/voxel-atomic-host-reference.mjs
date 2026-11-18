@@ -46,11 +46,15 @@ export function createAtomicVoxelHost(initialCells) {
   };
   return Object.freeze({
     read, compareAndWriteMany,
-    setOrientation(cell, expectedId, expectedRevision, turn) {
-      if (!validCell(cell) || !Number.isSafeInteger(turn) || turn < 0 || turn > 3)
+    setOrientation(cell, expectedId, expectedRevision, turn, expectedTurn = undefined) {
+      if (!validCell(cell) || !validId(expectedId) || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0 ||
+          !Number.isSafeInteger(turn) || turn < 0 || turn > 3 ||
+          (expectedTurn !== undefined && expectedTurn !== null &&
+           (!Number.isSafeInteger(expectedTurn) || expectedTurn < 0 || expectedTurn > 3)))
         throw new TypeError('Invalid orientation');
       const s = cells.get(key(cell));
-      if (!s || s.id !== expectedId || s.revision !== expectedRevision) return false;
+      if (!s || s.id !== expectedId || s.revision !== expectedRevision ||
+          (expectedTurn !== undefined && s.turn !== expectedTurn)) return false;
       s.turn = turn;
       return true;
     },
