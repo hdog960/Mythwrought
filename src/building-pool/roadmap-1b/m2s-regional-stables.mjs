@@ -3,7 +3,7 @@
 import {sourcePlan} from './m2-community-structures.mjs';
 const K=(x,z)=>x+','+z;
 function authored(d){
- const [w,h,depth]=d.dim,b=sourcePlan('stable',d.biome,d.size,2,d.title,w,h,depth),shape=new Set(),roofAt=new Map();
+ const [w,h,depth]=d.dim,b=sourcePlan('stable',d.biome,d.size,d.size==='medium'?5:2,d.title,w,h,depth),shape=new Set(),roofAt=new Map();
  for(const [x0,z0,x1,z1] of d.blocks)for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
   if(x<1||z<1||x>=w-1||z>=depth-1)throw Error(d.key+' invalid source footprint '+K(x,z));shape.add(K(x,z));
  }
@@ -40,7 +40,7 @@ function authored(d){
   b.put(x,1,z,'furnishing',asset,'north',{purpose,producerOccupiedOffsetsApproved:false,fullAABBApproved:false,yawApproved:false,mountingApproved:false});}
  for(const room of d.rooms)b.room(...room);
  for(const portal of d.portals)b.portal(...portal);
- return b.finish(d.program,{sourceAuthor:'Builder 1B M2S five independent variant 002 authored XYZ stable polygons',
+ return b.finish(d.program,{sourceAuthor:'Builder 1B M2S five original XYZ stable polygons; medium uses reserved 005 to preserve inherited 002',
   worldInteractionsEnabled:false,stableAnimalsDisabled:true,weatherproofApproval:false,certifiedLoadPath:false,
   physicalPackProducerABIApproved:false,pack4GlazingApproved:false,roofSupportApproved:false,
   creatorArtApproved:false,hardwareIphoneApproved:false,fullBiomeGameplay:false});

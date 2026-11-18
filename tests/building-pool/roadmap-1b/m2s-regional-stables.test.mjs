@@ -20,7 +20,7 @@ function d4(b,mirror,rotation){
  }
  return out;
 }
-test('M2S exact 169/435 census, five true independent stable 002 IDs and unchanged 15 original source-exact stables',()=>{
+test('M2S exact 169/435 census, five collision-free new stable IDs and unchanged 15 original source-exact stables',()=>{
  const all=get1BCandidates(),newer=fresh(),prior=getInheritedStables(),n=validateAllocation(all);
  assert.equal(all.length,169);assert.equal(n.authored,169);assert.equal(n.remaining,266);
  assert.equal(newer.length,5);assert.equal(prior.length,15);
@@ -33,8 +33,9 @@ test('M2S exact 169/435 census, five true independent stable 002 IDs and unchang
  for(const category of Object.keys(QUOTAS))for(const biome of BIOMES)for(const size of SIZES)
   assert.ok(all.filter(x=>x.category===category&&x.biome===biome&&x.size===size).length<=QUOTAS[category]);
  for(const b of newer){
-  assert.equal(b.index,2);assert.ok(b.id.endsWith(':002'));assert.equal(b.category,'stable');
-  assert.ok(all.some(x=>x.id===b.id.replace(':002',':001')),b.id+' inherited first variation missing');
+  const expectedIndex=b.size==='medium'?5:2;
+  assert.equal(b.index,expectedIndex);assert.ok(b.id.endsWith(':'+String(expectedIndex).padStart(3,'0')));assert.equal(b.category,'stable');
+  assert.ok(prior.some(x=>x.category==='stable'&&x.biome===b.biome&&x.size===b.size),b.id+' inherited original stable missing');
   assert.equal(all.find(x=>x.id===b.id)?.title,b.title);
  }
 });

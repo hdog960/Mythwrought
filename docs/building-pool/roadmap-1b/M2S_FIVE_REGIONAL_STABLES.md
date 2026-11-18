@@ -1,6 +1,6 @@
 # Builder 1B M2S — Five Original Regional Livery Stables
 
-**Scope:** five fully independent Builder 1B XYZ source-authored *second-variant* stables. Candidate-only; no production registration, world placement, animals, run-time interactions, save ABI changes, v0.11 unlock or shared CI/other builder modifications. Keep canonical PR #184 and separate source-exact verification PR #222 draft/unmerged.
+**Scope:** five fully independent Builder 1B XYZ source-authored *M2S stable wave* candidates. Candidate-only; no production registration, world placement, animals, run-time interactions, save ABI changes, v0.11 unlock or shared CI/other builder modifications. Keep canonical PR #184 and separate source-exact verification PR #222 draft/unmerged.
 
 ## Accepted M2R checkpoint
 
@@ -12,14 +12,14 @@
 
 ## Newly authored M2S stable sources
 
-Five completely new `:002` stable slots (one per biome), with independent coordinate-authored polygons, **24,169 occupied original XYZ placements in source preflight** and multiple 2-wide physical pen-door cuts. All have a genuinely absent-sky courtyard foundation, >=7 distinct roof profiles, actual foundation-to-roof source-bearing columns and real reachable 2-high ground-floor rooms; true physical Pack ABI approval remains unresolved.
+Five newly authored stable slots (three `:002`, two `:005` to preserve original inherited `:002` identities), with independent coordinate-authored polygons, **24,169 occupied original XYZ placements in source preflight** and multiple 2-wide physical pen-door cuts. All have a genuinely absent-sky courtyard foundation, >=7 distinct roof profiles, actual foundation-to-roof source-bearing columns and real reachable 2-high ground-floor rooms; true physical Pack ABI approval remains unresolved.
 
 | ID biome/size | Original stable | Architectural separation |
 |---|---|---|
-| `stable:temperate:medium:002` | Cloverhollow Horseshoe Livery | Deep horseshoe court, long low west pen wing, tall staggered east hay gable and narrow central bridge to two separate back feeding arms |
+| `stable:temperate:medium:005` | Cloverhollow Horseshoe Livery | Deep horseshoe court, long low west pen wing, tall staggered east hay gable and narrow central bridge to two separate back feeding arms |
 | `stable:desert:large:002` | Saffron Seven-Court Caravan Stable | Broad street arcade, much taller east caravan survey wing, stretched low west shade colonnade, narrow royal hay crossing and rear covered warehouse |
 | `stable:snow:small:002` | Hoarcurve Fold-Back Mule Yard | Low extended west windbreak, high narrow east cold-feed prism, enclosed two-wide front/back stall accesses, folded rear insulated storage |
-| `stable:enchanted-forest:medium:002` | Brambleclasp Twin-Bough Livery | Independent low deep west bark stalls and elevated east moonwood loft, open forked sky courtyard, back two-return arch and dry moss crossing |
+| `stable:enchanted-forest:medium:005` | Brambleclasp Twin-Bough Livery | Independent low deep west bark stalls and elevated east moonwood loft, open forked sky courtyard, back two-return arch and dry moss crossing |
 | `stable:mountain:large:002` | Basaltwind Split-Ridge Packhouse | Much higher right wind turret over large cliff pack pens, switchback western ridge, central wind corridor, tall east terrace and narrow south archive |
 
 ## Updated census and tests
