@@ -78,7 +78,8 @@ test('M1: all four physical baseline surfaces are authoritative in one world',()
 });
 
 test('M1: mining raised shelf + legacy-equivalent edits persist across profile restore',()=>{
-  const world=new FourRegionWorld(179),r=SURFACE_BIOME_REGIONS[0],c=center(r);
+  const world=new FourRegionWorld(179),r=SURFACE_BIOME_REGIONS[2],c=center(r);
+  assert.ok(c.top>c.oldTop,'exercise genuinely raised mountain shelf, not a flat dune');
   const oldId=new VoxelWorld(179).get(c.x,c.oldTop,c.z);
   assert.notEqual(world.get(c.x,c.oldTop,c.z),oldId,
     'selected center must differ from legacy baseline for this regression');
