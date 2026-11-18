@@ -32,11 +32,15 @@ jobs:
           npx playwright install chromium
       - name: Real keyboard input from spawn, physical map discovery, reload in three sizes
         run: node scripts/ci/manual-biomes-m5-spawn-walk-webgl2.mjs
+      - name: Hard long-distance physical walking route audit (no teleports)
+        run: node scripts/ci/manual-biomes-m5-overland-audit.mjs
       - name: Preserve genuine screenshots and any failed physical movement evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mythwrought-m5-actual-keyboard-spawn-webgl2
-          path: artifacts/manual-biomes-m5-spawn/
+          path: |
+            artifacts/manual-biomes-m5-spawn/
+            artifacts/manual-biomes-m5-route/
           if-no-files-found: warn
           retention-days: 14
