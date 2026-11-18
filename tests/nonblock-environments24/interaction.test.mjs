@@ -64,3 +64,23 @@ test('adjacent-cell edits and occupied voxels fail closed across full pick envel
  assert.equal(sideSolid.visible().length,0);
  assert.deepEqual(sideSolid.snapshot().tombstones,[]);
 });
+
+test('overlapping objects reserve one deterministic footprint, even after break and reload',()=>{
+ const a=make('stalagmite',0),b=make('crystal',1);
+ const world={seed,blockAt:(x,y,z)=>y===-13?1:0,editedAt:edit,occupiedAt:occupied};
+ const forward=createEnvironmentSession({...world,objects:[a,b]});
+ const reverse=createEnvironmentSession({...world,objects:[b,a]});
+ assert.equal(forward.visible().length,1);
+ assert.deepEqual(forward.visible().map(o=>o.instanceKey),reverse.visible().map(o=>o.instanceKey));
+ const winner=forward.visible()[0].instanceKey;
+ assert.equal(forward.breakByKey(winner),true);
+ assert.equal(forward.visible().length,0,'breaking does not reveal overlapping rejected object');
+ const restored=createEnvironmentSession({...world,objects:[b,a],snapshot:forward.snapshot()});
+ assert.equal(restored.visible().length,0);
+ assert.equal(restored.breakByKey(b.instanceKey===winner?a.instanceKey:b.instanceKey),false);
+});
+test('non-overlapping placements survive deterministic reservation',()=>{
+ const a=make('stalagmite',0),b=make('crystal',1,{x:8,y:-12,z:8});
+ const session=createEnvironmentSession({seed,objects:[b,a],blockAt:(x,y,z)=>y===-13?1:0,editedAt:edit,occupiedAt:occupied});
+ assert.equal(session.visible().length,2);
+});
