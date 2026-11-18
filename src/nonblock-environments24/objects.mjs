@@ -9,7 +9,8 @@ export const FAMILIES = Object.freeze({
   agave: {sceneId:'nonblock:d:agave-rosette',mount:'ground',collision:'pass-through',palette:[.28,.51,.34]}
 });
 const hash=(s)=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;};
-const key=(seed,a,id,v)=>[seed|0,a.x|0,a.y|0,a.z|0,id,v].join(':');
+// Preserve the full safe-integer world identity; bitwise truncation aliases distinct seeds/anchors.
+const key=(seed,a,id,v)=>[seed,a.x,a.y,a.z,id,v].join(':');
 function triangle(out,a,b,c){out.push(...a,...b,...c);}
 function tapered(out,x,z,y0,y1,r0,r1,sides=7){
   for(let j=0;j<sides;j++){const a=j*2*Math.PI/sides,b=(j+1)*2*Math.PI/sides;
@@ -25,7 +26,7 @@ function blade(out,angle,length,height,width){
 }
 export function makeEnvironmentObject(family,{seed=179,anchor,variant=0}={}){
  const def=FAMILIES[family];
- if(!def||!anchor||![anchor.x,anchor.y,anchor.z].every(Number.isInteger)||!Number.isInteger(variant)||variant<0||variant>7)throw Error('Invalid environmental object');
+ if(!def||!Number.isSafeInteger(seed)||!anchor||![anchor.x,anchor.y,anchor.z].every(Number.isSafeInteger)||!Number.isInteger(variant)||variant<0||variant>7)throw Error('Invalid environmental object');
  const h=hash(key(seed,anchor,def.sceneId,variant)),t=h/4294967295;
  const height=(family==='agave'?.48:family==='crystal'?1.15:1.5)+variant*.075+t*.2;
  const r=family==='agave'?.62:family==='crystal'?.36:.28+variant*.025;
@@ -42,7 +43,7 @@ export function makeEnvironmentObject(family,{seed=179,anchor,variant=0}={}){
    {min:[-pickRadius,-height,-pickRadius],max:[pickRadius,0,pickRadius]}:
    {min:[-pickRadius,0,-pickRadius],max:[pickRadius,height,pickRadius]};
  const instanceKey=key(seed,anchor,def.sceneId,variant);
- return Object.freeze({contract:CONTRACT,sceneId:def.sceneId,instanceKey,seed:seed|0,anchor:{...anchor},
+ return Object.freeze({contract:CONTRACT,sceneId:def.sceneId,instanceKey,seed,anchor:{...anchor},
    variant,mount:def.mount,mesh:{primitive:'triangles',positions,triangleCount:positions.length/9,color:def.palette},
    selection:[bounds],collision:def.collision,attachment:{face:def.mount==='ground'?'up':'down',requireSolid:true,requireClear:true},
    removal:{action:'break',tombstoneKey:'nonblock:'+instanceKey,respawn:'never-unless-explicit-reset'},
