@@ -27,14 +27,17 @@ export function createAtomicVoxelHost(initialCells) {
     // writers must also advance revision and clear orientation.
     for (const r of receipts) {
       if (!validCell(r?.cell) || !validId(r.expectedId) || !validId(r.nextId) ||
-          !Number.isSafeInteger(r.expectedRevision) || r.expectedRevision < 0)
+          !Number.isSafeInteger(r.expectedRevision) || r.expectedRevision < 0 ||
+          (r.expectedTurn !== undefined && r.expectedTurn !== null &&
+           (!Number.isSafeInteger(r.expectedTurn) || r.expectedTurn < 0 || r.expectedTurn > 3)))
         throw new TypeError('Invalid receipt');
       const k = key(r.cell);
       if (seen.has(k)) throw new TypeError('Duplicate cell');
       seen.add(k);
       const s = cells.get(k);
       if (!s || s.id !== r.expectedId || s.revision !== r.expectedRevision ||
-          s.revision >= Number.MAX_SAFE_INTEGER - 1) return false;
+          s.revision >= Number.MAX_SAFE_INTEGER - 1 ||
+          (r.expectedTurn !== undefined && s.turn !== r.expectedTurn)) return false;
     }
     for (const r of receipts) {
       const s = cells.get(key(r.cell));
