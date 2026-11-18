@@ -35,8 +35,18 @@ export function firstSolidVoxel(origin,direction,maxDistance,blockAt,editedAt){
 }
 export function pickEnvironmentWithoutWall(session,origin,direction,maxDistance,blockAt,editedAt){
  if(!session||typeof session.pick!=='function')throw new TypeError('missing isolated session');
+ // A foreign picker must not extend reach or return a malformed/behind-camera hit.
+ // Validate even on a miss: malformed rays and missing callbacks fail closed.
+ if(!Array.isArray(origin)||!Array.isArray(direction)||origin.length!==3||direction.length!==3||
+    !origin.every(Number.isFinite)||!direction.every(Number.isFinite)||
+    Math.hypot(...direction)<1e-10||!Number.isFinite(maxDistance)||
+    maxDistance<=0||maxDistance>128||typeof blockAt!=='function'||typeof editedAt!=='function')
+  throw new TypeError('invalid isolated pick inputs');
  const hit=session.pick(origin,direction,maxDistance);
  if(!hit)return null;
- const wall=firstSolidVoxel(origin,direction,Math.min(hit.distance+1e-8,128),blockAt,editedAt);
- return wall&&wall.distance<=hit.distance+1e-8?null:hit;
+ if(!Number.isFinite(hit.distance)||hit.distance<0||hit.distance>maxDistance)
+  return null;
+ // A hit exactly at the reach limit must not cause traversal beyond that limit.
+ const wall=firstSolidVoxel(origin,direction,hit.distance||1e-9,blockAt,editedAt);
+ return wall&&wall.distance<=hit.distance?null:hit;
 }
