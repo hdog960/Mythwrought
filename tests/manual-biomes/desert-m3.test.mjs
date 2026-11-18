@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {VoxelWorld,BLOCK,terrainHeight,meshChunk,chunkCoord} from '../../src/voxel.mjs';
+import {VoxelWorld,BLOCK,terrainHeight,meshChunk,chunkCoord,collides} from '../../src/voxel.mjs';
 import {Pack2LiveWorld} from '../../src/pack2-world.mjs';
-import {collides,findSafeSpawn} from '../../src/physics.mjs';
+import {findSafeSpawn} from '../../src/physics.mjs';
 import {biome130Block,isBiome130BlockId} from '../../src/biome130-registry.mjs';
 import {surfaceBiomeAt,surfaceBiomeHeight,SURFACE_BIOME_REGIONS} from '../../src/surface-regions/regions.mjs';
 import {FOUR_REGION_GENERATOR,M2_FOUR_REGION_GENERATOR,FourRegionWorld,
