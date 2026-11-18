@@ -89,8 +89,10 @@ function historicNamedLocators(){
   slugs.add(slug);
   return {name:'named-'+slug,named:feature.name,
    proofSeed:seed,physicalPathSteps:proof.route.length,
-   at:{x:source.x+.5,y:source.floor+1,z:source.z+.5},
-   to:{x:back.x+.5,y:back.floor+2,z:back.z+.5}};
+   // The localhost-only original game camera accepts integer voxel positions;
+   // it moves to cell center internally and rejects fractional coordinates.
+   at:{x:source.x,y:source.floor+1,z:source.z},
+   to:{x:back.x,y:back.floor+2,z:back.z}};
  });
  assert.equal(scenes.length,21);
  return scenes;
