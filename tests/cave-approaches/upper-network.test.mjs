@@ -62,7 +62,8 @@ for(const site of UPPER_SITES)for(const seed of [179,1,2026,-77]){
  test(`lateral mineral vault is connected, supported and four-high: ${site.name} seed ${seed}`,()=>{
   const a=upperCaveCells(options(site,seed));
   assert.equal(a.ok,true,a.reason);
-  const d=108,x=site.x+d,floor=-8-Math.floor(d/6);
+  // Source-specific junction moved to the three-wide level floor at d=110.
+  const d=110,x=site.x+d,floor=-8-Math.floor(d/6);
   const base=site.z+Math.round(3*Math.sin(d/13));
   const direction=site.x<0?-1:1;
   for(let step=0;step<=34;step++){
