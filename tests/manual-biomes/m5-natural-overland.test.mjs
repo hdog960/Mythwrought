@@ -65,9 +65,7 @@ test('M5: biome map source reads only real registered geology, and legacy uses u
    const sample=profiledDiscoveredCellInk(world,128,0,MAP_CELL_SIZE);
    assert.match(sample||'',/^#[0-9a-f]{6}$/i);
  }
- const legacy=new Pack2LiveWorld({
-   seed:179,get(){throw Error('Legacy samples must not happen in new ink')}
- });
+ const legacy={seed:179,get(){throw Error('Legacy samples must not happen in new ink')}};
  assert.equal(profiledDiscoveredCellInk(legacy,128,0,MAP_CELL_SIZE),null);
 });
 
