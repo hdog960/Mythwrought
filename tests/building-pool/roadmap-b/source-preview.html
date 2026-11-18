@@ -4,10 +4,12 @@
 <script type="module">
 import {getRoadmapBWave1B1} from '../../../src/building-pool/roadmap-b/wave1-community-b1.mjs';
 import {getRoadmapBWave1B2} from '../../../src/building-pool/roadmap-b/wave1-trades-b2.mjs';
+import {getRoadmapBWave2B1} from '../../../src/building-pool/roadmap-b/wave2-community-b1.mjs';
+import {getRoadmapBWave2B2} from '../../../src/building-pool/roadmap-b/wave2-trades-b2.mjs';
 const params=new URLSearchParams(location.search),id=params.get('id'),view=params.get('view')||'exterior';
 window.__ROADMAP_B={ready:false,webgl2:false,id,view};
 try{
- const buildings=[...getRoadmapBWave1B1(),...getRoadmapBWave1B2()];
+ const buildings=[...getRoadmapBWave1B1(),...getRoadmapBWave1B2(),...getRoadmapBWave2B1(),...getRoadmapBWave2B2()];
  const b=buildings.find(x=>x.id===id);
  if(!b)throw Error('Missing exact source candidate '+id);
  const canvas=document.getElementById('canvas');
