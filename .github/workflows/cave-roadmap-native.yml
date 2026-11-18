@@ -35,6 +35,7 @@ jobs:
           node --test tests/cave-roadmap-destinations-controller.test.mjs
           node --test tests/cave-roadmap-historic-sidepaths-controller.test.mjs
           node --test tests/cave-roadmap-named-destinations.test.mjs
+          node --test tests/cave-roadmap-named-secondary-arms.test.mjs
           node --test tests/cave-roadmap-end-to-end-controller.test.mjs
           node --test tests/cave-roadmap-surface-transition.test.mjs
           node --test tests/cave-roadmap-game-startup.test.mjs
