@@ -33,7 +33,9 @@ test('manifest records five original M1 categories without phantom inherited des
   assert.equal(new Set(manifest.authoredIds).size,143);
   assert.equal(Object.values(manifest.byCategoryAuthorCount).reduce((a,b)=>a+b,0),143);
   assert.equal(Object.values(manifest.byBiomeSizeAuthorCount).flatMap(x=>Object.values(x)).reduce((a,b)=>a+b,0),143);
-  assert.match(manifest.milestones.M2,/SOURCE-AUTHORED COMPLETE/);
+  assert.match(manifest.milestones.M2,/^SOURCE\/WEBGL2 TECHNICALLY ACCEPTED:/);
+  assert.match(manifest.milestones.M2,/135\/135 M2 designs/);
+  assert.match(manifest.milestones.M2,/NOT ACCEPTED/);
 });
 test('eight-lane roster grants no sibling-owned categories to Builder 4B',()=>{
   assert.ok(lane);
