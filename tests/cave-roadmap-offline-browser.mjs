@@ -46,16 +46,15 @@ try{
  await page.waitForFunction(()=>window.__mythwroughtTest.caveMode().enabled,
   null,{timeout:90000});
  assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-'+319731)),null);
- await page.waitForFunction(async()=>{
-  const reg=await navigator.serviceWorker.ready;
-  const ready=await caches.match(new URL('./cave-offline-ready.json',location.href));
-  if(!reg?.active||!ready)return false;
-  const metadata=await ready.json();
-  return metadata.kind==='MYTHWROUGHT_CAVE_SOURCE_ASSETS_V1'&&
-   metadata.count>=200;
- },null,{timeout:160000});
+ // Playwright polling does not guarantee that an async function's
+ // Promise has resolved. Wait for the actual SERVICE WORKER COMPLETION
+ // MESSAGE surfaced by the production UI; never accept a pending Promise
+ // as proof that the app's files are cached.
+ await page.waitForFunction(()=>document.getElementById('caveWorldStatus')?.
+  textContent.includes('OFFLINE ASSETS VERIFIED'),null,{timeout:160000});
  const verified=await page.evaluate(async()=>{
   const r=await caches.match(new URL('./cave-offline-ready.json',location.href));
+  if(!r)throw Error('Worker claimed success but cache-complete marker is absent');
   return r.json();
  });
  assert.ok(verified.count>=200,'A few cached files do NOT make a complete offline game');
