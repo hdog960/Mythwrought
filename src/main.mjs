@@ -913,7 +913,10 @@ function start(){
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
       gl.uniform3fv(U.uFog,atmosphere.fog);
-      gl.uniform3fv(U.uSkyLight,skyLight);
+      // Preserve S2's exact live ambient uniform path, then layer only the
+      // bounded S3 lunar contribution if at least one moon illuminates night.
+      gl.uniform3fv(U.uSkyLight,atmosphere.light);
+      if(lunar.moonlight>0)gl.uniform3fv(U.uSkyLight,skyLight);
       gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
       if(frame%12===0){
         canvas.dataset.skySunAltitude=String(atmosphere.elevation.toFixed(4));
