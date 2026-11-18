@@ -51,6 +51,13 @@ async function choose(page,which){
     return which==='night'?phase>=0&&phase<16000:
       phase>=720000&&phase<736000;
   },which,{timeout:15000});
+  // S1's clock label updates immediately, but the actual WebGL2 atmosphere
+  // diagnostics are sampled every 12 rendered frames: never inspect stale GPU
+  // state after a DAY/NIGHT click on a slower software renderer.
+  await page.waitForFunction(which=>{
+    const daylight=+document.querySelector('#scene')?.dataset.skyDaylight;
+    return which==='night'?daylight<.1:daylight>.9;
+  },which,{timeout:15000});
 }
 async function faceMoonSky(page){
   await page.locator('#scene').focus();
