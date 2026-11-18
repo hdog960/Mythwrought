@@ -1,6 +1,6 @@
 // Mythwrought #240 genuine source-authored cave voxel WebGL2 preview.
 // This is a separate opt-in visual fixture, NOT the deployed game's main.mjs.
-import {BLOCK,raycast} from '../voxel.mjs';
+import {BLOCK,raycast,meshChunk} from '../voxel.mjs';
 import {sectionForY,WORLD_MIN_Y} from '../depth.mjs';
 import {meshDepthSection} from '../depth-mesh.mjs';
 import {deepCaveRoute} from '../deep-cave-network.mjs';
@@ -79,15 +79,24 @@ function composeMesh(world,cam){
  const cx=Math.floor(cam.eye[0]/16),cz=Math.floor(cam.eye[2]/16);
  const sec=sectionForY(Math.floor(cam.eye[1])-1),min=sectionForY(WORLD_MIN_Y);
  const parts=[];let total=0;
- for(let x=cx-1;x<=cx+1;x++)for(let z=cz-1;z<=cz+1;z++)
-  for(let s=sec-1;s<=sec+1;s++){
-   if(s<min||s>=0)continue;
-   const mesh=meshDepthSection(world,x,z,s);
+ const include=mesh=>{
    if(mesh.length%9)throw Error('Nontriangular source mesh');
    total+=mesh.length;
    if(total>3000000)throw Error('Strict cave preview GPU budget exceeded');
    parts.push(mesh);
+ };
+ for(let x=cx-1;x<=cx+1;x++)for(let z=cz-1;z<=cz+1;z++)
+  for(let s=sec-1;s<=sec+1;s++){
+   if(s<min||s>=0)continue;
+   include(meshDepthSection(world,x,z,s));
   }
+ // The cave mouth physically rises into the original -3..19 surface world.
+ // Draw the same authoritative meshChunk used by the live game as well as
+ // depth section mesh; deep-only snapshots clipped the surface to blank sky.
+ if(cam.eye[1]>-10){
+   for(let x=cx-1;x<=cx+1;x++)for(let z=cz-1;z<=cz+1;z++)
+     include(meshChunk(world,x,z));
+ }
  const all=new Float32Array(total);let i=0;
  for(const part of parts){all.set(part,i);i+=part.length}
  return all;
