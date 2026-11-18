@@ -25,11 +25,11 @@ const FAMILY=Object.freeze({
 });
 const PLANS=[
   {
-    "id": "r4:castle-palace:temperate:small:01",
+    "id": "r4:castle-palace:temperate:small:02",
     "type": "castle-palace",
     "biome": "temperate",
     "size": "small",
-    "variant": 1,
+    "variant": 2,
     "bounds": [
       71,
       17,
@@ -318,11 +318,11 @@ const PLANS=[
     "sourceAuthoredName": "Stonebridge Hook Court"
   },
   {
-    "id": "r4:castle-palace:snow:medium:01",
+    "id": "r4:castle-palace:snow:medium:02",
     "type": "castle-palace",
     "biome": "snow",
     "size": "medium",
-    "variant": 1,
+    "variant": 2,
     "bounds": [
       93,
       17,
@@ -617,11 +617,11 @@ const PLANS=[
     "sourceAuthoredName": "Frostspire Fork Palace"
   },
   {
-    "id": "r4:castle-palace:enchanted-forest:large:01",
+    "id": "r4:castle-palace:enchanted-forest:large:03",
     "type": "castle-palace",
     "biome": "enchanted-forest",
     "size": "large",
-    "variant": 1,
+    "variant": 3,
     "bounds": [
       123,
       17,
