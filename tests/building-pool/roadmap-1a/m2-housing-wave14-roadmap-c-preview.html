@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roadmap C 1A Original House Wave14 WebGL2 evidence</title><style>
+:root{color-scheme:dark;font:14px system-ui,-apple-system,Arial,sans-serif}*{box-sizing:border-box}
+body{margin:0;padding:7px;background:#101b26;color:#ebf4ed;height:100dvh;min-height:220px;display:flex;flex-direction:column}
+header{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px}header strong{color:#f3d8a6}
+label{display:inline-flex;gap:4px;align-items:center}
+select{font:inherit;max-width:230px;padding:4px;border:1px solid #577070;border-radius:5px;background:#213642;color:inherit}
+#frame{flex:1;min-height:100px;overflow:hidden;border:1px solid #577070;border-radius:6px}
+canvas{display:block;width:100%;height:100%}
+footer{font-size:11px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;padding-top:6px;color:#bbd4d7}
+#notice{color:#ffd99d}
+</style></head><body>
+<header><strong>Mythwrought · Builder 1A source QA</strong>
+<label>Blueprint <select id="blueprint" aria-label="Source-authored building"></select></label>
+<label>Geometry <select id="geometry"><option value="cube">Authored cell cubes</option><option value="physical">Source Pack visibleBoxes (provisional)</option></select></label>
+<label>View <select id="view"><option value="exterior">Exterior</option><option value="cutaway">Cutaway</option></select></label>
+</header><div id="frame"><canvas id="render" aria-label="Real WebGL2 voxel diagnostic, cube proxies only"></canvas></div>
+<footer><span id="details">Initializing source WebGL2…</span><span id="notice">Cell cube mode or source physical AABB mode · no final textures/load/weather/saves, live game or iPhone approval</span></footer>
+<script type="module" src="./m2-housing-wave14-roadmap-c-preview.mjs"></script></body></html>
