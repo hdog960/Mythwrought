@@ -39,8 +39,8 @@ function orient(depth){
   at(d,t){return {x:anchor.x+d*out[0]+t*across[0],
      z:anchor.z+d*out[1]+t*across[1]}},
   toLocal(x,z){const dx=x-anchor.x,dz=z-anchor.z;
-    return {d:dx*out[0]+dz*out[1],t:dx*across[0]+dz*across[1]}};
- }
+    return {d:dx*out[0]+dz*out[1],t:dx*across[0]+dz*across[1]};}
+ };
 }
 export function findNamedCavePlayerRoute(world,feature,{maxVisits=100000}={}){
  if(!world||typeof world.get!=='function'||!HISTORIC_NAMED_TARGETS.includes(feature))
