@@ -22,8 +22,8 @@ const ids=[
  'r2:market-square:snow:medium:04','r2:tailor:mountain:large:04','r2:bookshop:temperate:medium:04','r2:jeweler:snow:large:04',
  'r1:farm-barn:snow:large:004','r1:stable:enchanted-forest:large:005','r1:harbor-office:mountain:small:004','r1:lighthouse:enchanted-forest:small:004',
  'r2:market-square:temperate:small:04','r2:theater:mountain:large:03','r2:tailor:enchanted-forest:medium:04','r2:bookshop:snow:large:04',
- 'r1:greenhouse:desert:large:005','r1:bathhouse:snow:large:005','r1:fishing-lodge:mountain:medium:005','r1:harbor-office:enchanted-forest:medium:005',
- 'r2:tailor:desert:medium:05','r2:theater:snow:large:04','r2:jeweler:mountain:medium:05','r2:butcher:enchanted-forest:large:05'
+ 'r1:greenhouse:desert:large:004','r1:bathhouse:snow:large:004','r1:fishing-lodge:mountain:medium:004','r1:harbor-office:enchanted-forest:medium:004',
+ 'r2:tailor:desert:medium:04','r2:theater:snow:large:03','r2:jeweler:mountain:medium:04','r2:butcher:temperate:large:04'
 ];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const files=['src/building-pool/roadmap-b/wave1-community-b1.mjs','src/building-pool/roadmap-b/wave1-trades-b2.mjs',
