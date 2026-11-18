@@ -63,3 +63,36 @@ test('legacy input and exported arrays cannot alias authoritative state',()=>{
   output[0].cell[0]=42;output[0].id=8;
   assert.equal(host.read(cell(0)).id,1);
 });
+
+test('orientation compare-and-set rejects stale turn while preserving edit revision',()=>{
+  const host=createAtomicVoxelHost([{cell:[-7,3,11],id:4}]);
+  const p=[-7,3,11];
+  assert.equal(host.setOrientation(p,4,0,1,null),true);
+  assert.equal(host.setOrientation(p,4,0,2,null),false);
+  assert.equal(host.setOrientation(p,4,0,2,1),true);
+  assert.equal(host.setOrientation(p,4,0,3,1),false);
+  assert.deepEqual(host.read(p),{id:4,revision:0,turn:2});
+  assert.equal(host.compareAndWriteMany([{cell:p,expectedId:4,expectedRevision:0,nextId:4}]),true);
+  assert.deepEqual(host.read(p),{id:4,revision:1,turn:null});
+  assert.equal(host.setOrientation(p,4,0,1,2),false);
+  assert.equal(host.setOrientation(p,4,1,3,null),true);
+  assert.equal(host.externalWrite(p,4),true);
+  assert.deepEqual(host.read(p),{id:4,revision:2,turn:null});
+  assert.deepEqual(host.exportLegacyCells(),[{cell:p,id:4}]);
+  const recovered=createAtomicVoxelHost(JSON.parse(JSON.stringify(host.exportLegacyCells())));
+  assert.deepEqual(recovered.read(p),{id:4,revision:0,turn:null});
+  assert.equal(recovered.setOrientation(p,4,0,0,null),true);
+});
+
+test('invalid expected orientation and missing cells never create phantom edits',()=>{
+  const host=createAtomicVoxelHost([{cell:[0,0,0],id:1}]);
+  assert.throws(()=>host.setOrientation([0,0,0],1,0,2,4),/Invalid orientation/);
+  assert.throws(()=>host.setOrientation([0,0,0],1,0,2,-1),/Invalid orientation/);
+  assert.equal(host.setOrientation([4,0,0],1,0,2,null),false);
+  assert.equal(host.externalWrite([4,0,0],2),false);
+  assert.equal(host.compareAndWriteMany([
+    {cell:[0,0,0],expectedId:1,expectedRevision:0,nextId:2},
+    {cell:[4,0,0],expectedId:1,expectedRevision:0,nextId:2}
+  ]),false);
+  assert.deepEqual(host.exportLegacyCells(),[{cell:[0,0,0],id:1}]);
+});
