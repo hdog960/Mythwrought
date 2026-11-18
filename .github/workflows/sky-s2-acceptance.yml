@@ -9,6 +9,7 @@ on:
       - 'src/gpu-pipeline.mjs'
       - 'tests/sky-atmosphere.test.mjs'
       - 'tests/sky/s2-atmosphere-browser.mjs'
+      - 'tests/sky/s2-paired-benchmark.mjs'
       - 'docs/sky/**'
       - '.github/workflows/sky-s2-acceptance.yml'
   workflow_dispatch:
@@ -60,6 +61,19 @@ jobs:
       - name: Quiet original-game WebGL2 performance — same S0 capture protocol
         run: |
           node tests/sky/s0-baseline-browser.mjs
+      - name: Same-run ABBA paired performance against immutable S0 production source
+        run: |
+          mkdir -p /tmp/mythwrought-s0-exact
+          git archive e9223217ef1e91d282900c3fc13a21eeda316b63 | tar -x -C /tmp/mythwrought-s0-exact
+          python3 -m http.server 4174 --directory /tmp/mythwrought-s0-exact >/tmp/mythwrought-s0-paired.log 2>&1 &
+          node tests/sky/s2-paired-benchmark.mjs
+      - name: Upload actual S0/S2 paired performance manifest
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s2-paired-${{ github.sha }}
+          path: artifacts/sky-s2-paired/
+          if-no-files-found: warn
       - name: Upload original-game S2 visual evidence and SHA256 manifest
         uses: actions/upload-artifact@v4
         if: always()
