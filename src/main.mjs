@@ -12,7 +12,7 @@ import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block} from './biome130-registry.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,pack2ExportBundle,pack2ImportBundle} from './pack2-world.mjs';
-import {prepareExplicitCaveWorld,saveExplicitCaveWorld,rejectLegacyWorldWhereCaveExists} from './manual-caves/game-startup-contract.mjs';
+import {prepareExplicitCaveWorld,saveExplicitCaveWorld,rejectLegacyWorldWhereCaveExists,existingWorldNeedsSaveBeforeCaveSwitch} from './manual-caves/game-startup-contract.mjs';
 import {caveProfileStorageKey} from './manual-caves/profile-store.mjs';
 import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
   pack2NormalizeState,pack2CycleState,pack2WaterSectionVertices,
@@ -2039,7 +2039,8 @@ function start(){
         'LOAD your separately saved CAVE WORLD for seed '+next+'? Existing ordinary worlds will remain untouched.')){
         caveWorldStatus.textContent='Cave selection cancelled; current world unchanged';return;
       }
-      if(!storageReadOnly&&!save())throw Error('Current world is not safely saved; export before entering caves');
+      if(!storageReadOnly&&existingWorldNeedsSaveBeforeCaveSwitch(localStorage,world,changed)&&!save())
+        throw Error('Current world is not safely saved; export before entering caves');
       // Validate storage and all source-authored entrances *before* committing
       // to a gameplay world switch. Failed preflight leaves current scene intact.
       const selected=prepareExplicitCaveWorld(localStorage,next,{action,approved:true});

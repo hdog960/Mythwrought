@@ -6,6 +6,15 @@ import {CaveVoxelWorld,CAVE_PROFILE_KIND} from './cave-voxel-world.mjs';
 import {caveProfileStorageKey,createStagedCaveProfile,
   loadStagedCaveProfile,saveStagedCaveProfile} from './profile-store.mjs';
 
+export function existingWorldNeedsSaveBeforeCaveSwitch(storage,world,changed=false){
+ if(!storage||typeof storage.getItem!=='function'||!world||!Number.isInteger(world.seed))
+  throw Error('Original world preflight unavailable');
+ return changed===true||Number(world.edits?.size||0)>0||
+  Number(world.pack2Cells?.size||0)>0||
+  storage.getItem(worldSlotKey(world.seed))!==null;
+}
+// Newly visited, unedited starter worlds must NOT gain a fabricated canonical
+// save just because the player opened a completely separate Cave World.
 export function rejectLegacyWorldWhereCaveExists(storage,seed){
  if(!storage||typeof storage.getItem!=='function')
   throw Error('Storage preflight required for switching worlds');

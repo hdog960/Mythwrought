@@ -5,7 +5,7 @@ import {BLOCK,VoxelWorld,worldKey} from '../src/voxel.mjs';
 import {descentRoute} from '../src/underground-switchback-descent.mjs';
 import {caveProfileStorageKey} from '../src/manual-caves/profile-store.mjs';
 import {rejectLegacyWorldWhereCaveExists,prepareExplicitCaveWorld,
- saveExplicitCaveWorld} from '../src/manual-caves/game-startup-contract.mjs';
+ saveExplicitCaveWorld,existingWorldNeedsSaveBeforeCaveSwitch} from '../src/manual-caves/game-startup-contract.mjs';
 
 function store(){
  const m=new Map();
@@ -61,4 +61,19 @@ test('a cave selected world cannot be saved into a normal world or mixed with Pa
  world.pack2Cells.set('1,1,1',{id:59});
  assert.throws(()=>saveExplicitCaveWorld(s,chosen,{approved:true}),/cannot yet persist Pack2/);
  assert.equal(s.getItem(caveProfileStorageKey(66677)),old);
+});
+
+test('cave selection does not create canonical save for untouched starter world',()=>{
+ const s=store(),normal=new VoxelWorld(179);
+ assert.equal(existingWorldNeedsSaveBeforeCaveSwitch(s,normal),false);
+ assert.equal(s.getItem(worldSlotKey(179)),null);
+ const cave=prepareExplicitCaveWorld(s,314159,{action:'create',approved:true});
+ assert.equal(cave.world.seed,314159);
+ assert.equal(s.getItem(worldSlotKey(179)),null);
+ normal.set(0,2,0,BLOCK.STONE);
+ assert.equal(existingWorldNeedsSaveBeforeCaveSwitch(s,normal),true);
+ const existing='{"schema":1,"seed":179,"edits":[]}';
+ s.setItem(worldSlotKey(179),existing);
+ assert.equal(existingWorldNeedsSaveBeforeCaveSwitch(s,new VoxelWorld(179)),true);
+ assert.equal(s.getItem(worldSlotKey(179)),existing);
 });
