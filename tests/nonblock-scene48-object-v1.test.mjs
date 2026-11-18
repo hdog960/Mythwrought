@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {NONBLOCK_OBJECT_VERSION,NONBLOCK_FAMILY_IDS,nonblockInstanceKey,describeNonblockObject,pickNonblockRay,createNonblockSidecar,makeNonblockFixture} from '../src/nonblock-scene48/nonblock-object-v1.mjs';
 
-test('eight distinct family descriptors have shaped mesh, stable identity, selection and break intent',()=>{
- assert.equal(NONBLOCK_FAMILY_IDS.length,8);
- assert.equal(new Set(NONBLOCK_FAMILY_IDS).size,8);
+test('all registered family descriptors have shaped mesh, stable identity, selection and break intent',()=>{
+ assert.ok(NONBLOCK_FAMILY_IDS.length>=8,'original eight families must remain registered');
+ assert.equal(new Set(NONBLOCK_FAMILY_IDS).size,NONBLOCK_FAMILY_IDS.length);
  for(const sceneId of NONBLOCK_FAMILY_IDS){
   const a=describeNonblockObject({sceneId,seed:17,anchor:[2,3,-9]});
   const b=describeNonblockObject({sceneId,seed:17,anchor:[2,3,-9]});
