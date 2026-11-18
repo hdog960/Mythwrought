@@ -104,7 +104,9 @@ gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.08,.13,.18,1);
 gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
 gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 gl.drawArrays(gl.TRIANGLES,0,world.length);
-// Submit authentic WebGL2 commands without blocking CDP Runtime.evaluate;\n// Page.captureScreenshot performs the real framebuffer readback and remains mandatory.\ngl.flush();
+// Submit authentic WebGL2 commands without blocking CDP Runtime.evaluate;
+// Page.captureScreenshot performs the real framebuffer readback and remains mandatory.
+gl.flush();
 const error=gl.getError();
 document.querySelector('#label').textContent=b.type+' · '+b.biome+' · '+b.size+' · '+view;
 document.querySelector('#metrics').textContent=selected.length+' coordinate cells · '+
