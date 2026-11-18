@@ -17,7 +17,7 @@ export function createAtomicVoxelHost(initialCells) {
   const read = cell => {
     if (!validCell(cell)) throw new TypeError('Invalid cell');
     const s = cells.get(key(cell));
-    return s ? {id:s.id,revision:s.revision,turn:s.turn,orientationEpoch:s.orientationEpoch} : null;
+    return s ? {id:s.id,revision:s.revision,turn:s.turn} : null;
   };
   const compareAndWriteMany = receipts => {
     if (!Array.isArray(receipts) || receipts.length < 1 || receipts.length > 256)
@@ -52,6 +52,10 @@ export function createAtomicVoxelHost(initialCells) {
   };
   return Object.freeze({
     read, compareAndWriteMany,
+    readOrientationEpoch(cell) {
+      if (!validCell(cell)) throw new TypeError('Invalid cell');
+      return cells.get(key(cell))?.orientationEpoch ?? null;
+    },
     setOrientation(cell, expectedId, expectedRevision, turn, expectedTurn = undefined) {
       if (!validCell(cell) || !validId(expectedId) || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0 ||
           !Number.isSafeInteger(turn) || turn < 0 || turn > 3 ||
