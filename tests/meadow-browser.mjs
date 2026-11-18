@@ -88,6 +88,9 @@ try{
  assert.equal(bytesBefore,null,'Rendering blooms modified original schema-1 storage');
  await mkdir('artifacts',{recursive:true});
  await page.screenshot({path:'artifacts/mythwrought-v010-whimsical-meadow-blooms.png'});
+ // Current game view: the archived source has blossoms, but none are
+ // rendered as untargetable ghost objects in the playable world.
+ await page.screenshot({path:'artifacts/manual-remove-fake-meadow-932x430.png'});
 
  // Mining or constructing over a real flower removes only its visual accents;
  // the *existing* original save schema remains authoritative and reversible.
