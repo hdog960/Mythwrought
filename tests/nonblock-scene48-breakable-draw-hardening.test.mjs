@@ -29,7 +29,8 @@ test('bounded draw selection is deterministic regardless of placement order',()=
 });
 test('break and restored tombstone suppress draw without touching other objects',()=>{
  const s=session(),first=s.visible()[0];
- const rayOrigin=[first.anchor[0],first.anchor[1]+0.25,first.anchor[2]-2];
+ const bounds=first.selectionAabbs[0];
+ const rayOrigin=[(bounds.min[0]+bounds.max[0])/2,(bounds.min[1]+bounds.max[1])/2,bounds.min[2]-2];
  const hit=s.breakAt(rayOrigin,[0,0,1],6);
  assert.equal(hit.removed,true);
  assert.equal(draw(s).stats.selected,3);
