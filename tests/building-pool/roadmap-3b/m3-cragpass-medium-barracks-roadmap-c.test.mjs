@@ -126,7 +126,9 @@ test('medium six-room Cragpass barracks carries genuine connected physical cells
  assert.ok(b.modules.find(m=>m.role==='source-bearing-roof-mass')?.cells.length>100);
  assert.ok(reachable(b,map)>150);assert.equal(foundationSupport(b,map),map.size);
  for(const [a,c,d,e] of b.architecture.courtyardRects)for(let x=a;x<=c;x++)for(let z=d;z<=e;z++)for(let y=0;y<=15;y++)assert.ok(!map.has(k(x,y,z)),'open court contains a physical block');
- for(const [z,rise] of b.architecture.roofSpurs)for(const x of [34,35])for(const zz of [z,z+1]){
+ const spineX=b.spaces.find(s=>s.kind==='muster')?.bounds.x;
+ assert.equal(spineX,23,'original Cragpass centre muster aisle must remain source x=23');
+ for(const [z,rise] of b.architecture.roofSpurs)for(const x of [spineX+3,spineX+4])for(const zz of [z,z+1]){
   assert.equal(map.get(k(x,0,zz))?.role,'foundation');assert.equal(map.get(k(x,7,zz))?.role,'roof');
   for(let y=8;y<=8+rise;y++)assert.ok(map.has(k(x,y,zz)),'spurious rooftop support gap');}
  assert.equal(b.architecture.creatorApproved,false);assert.equal(b.architecture.worldPlaced,false);
