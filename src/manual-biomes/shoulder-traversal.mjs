@@ -10,7 +10,7 @@ import {STEP_HEIGHT,GROUND_PROBE} from '../physics.mjs';
 const key=(x,z)=>x+','+z;
 const NEIGHBORS=Object.freeze([[1,0],[0,1],[0,-1],[-1,0]]);
 export function walkableSurfaceCell(world,x,z,{
-  maxY=WORLD_MAX_Y+1,minY=-12
+  maxY=WORLD_MAX_Y+1,minY=0
 }={}){
   if(typeof world?.get!=='function'||![x,z,maxY,minY].every(Number.isInteger)||
      maxY>WORLD_MAX_Y+1||minY<0||minY>maxY)
