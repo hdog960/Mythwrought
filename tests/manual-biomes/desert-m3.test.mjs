@@ -31,12 +31,14 @@ const oldWorld=(seed=179)=>new FourRegionWorld(seed,
 test('M3: v3 generator is immutable, existing v2 profile stays source-exact and loadable',()=>{
   assert.equal(M3_FOUR_REGION_GENERATOR,'mythwrought-four-surface-regions-v3');
   assert.equal(FOUR_REGION_GENERATOR,'mythwrought-four-surface-regions-v4');
-  const old=oldWorld(),newer=new FourRegionWorld(179);
+  // Test the original immutable M3 world, not the newly selected M4 one.
+  const old=oldWorld(),newer=new FourRegionWorld(179,
+    fourRegionProfile(179,M3_FOUR_REGION_GENERATOR));
   assert.equal(old.generationProfile.generator,M2_FOUR_REGION_GENERATOR);
-  assert.equal(newer.generationProfile.generator,FOUR_REGION_GENERATOR);
+  assert.equal(newer.generationProfile.generator,M3_FOUR_REGION_GENERATOR);
   assert.deepEqual(validateFourRegionProfile(fourRegionProfile(179,M2_FOUR_REGION_GENERATOR)),
     fourRegionProfile(179,M2_FOUR_REGION_GENERATOR));
-  assert.throws(()=>fourRegionProfile(179,'mythwrought-four-surface-regions-v4'));
+  assert.throws(()=>fourRegionProfile(179,'mythwrought-four-surface-regions-v5'));
   const cached=JSON.stringify(old.save());
   assert.equal(JSON.stringify(restoreFourRegionWorld(old.save(),old.profile).save()),cached);
   for(const r of SURFACE_BIOME_REGIONS.slice(1)){
