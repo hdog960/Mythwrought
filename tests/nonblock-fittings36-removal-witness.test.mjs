@@ -26,9 +26,7 @@ test('denied authorization cannot change geometry or tombstones',()=>{
 test('edited or unsupported mount cannot remove a prop',()=>{
  for(const field of ['playerEdited','mountSupported','verified','occupied']){
   const altered={...mount(),[field]:field==='playerEdited'||field==='occupied'};
-  const w=witnessFittingRemoval({...args(),inspectMount:()=>altered});
-  assert.equal(w.removedKey,null,field);
-  assert.deepEqual(w.beforeKeys,w.reloadedKeys);
+  assert.throws(()=>witnessFittingRemoval({...args(),inspectMount:()=>altered}),{name:'RangeError',message:'mount unverified or edit-protected'},field);
  }
 });
 test('existing tombstone survives reload without respawning',()=>{
