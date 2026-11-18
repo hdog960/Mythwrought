@@ -2,7 +2,7 @@
 
 **Purpose.** Every historical cave feature needs its *own* factual, source-backed entry. This is a protected working inventory, **not** a claim that source-intake or screenshots make each feature playable on a published Home Screen icon.
 
-**Evidence levels:** S = historical physical authored-source code preserved; V = source-exact voxel/headroom/connection checked; C = actual production \`stepPlayer\` player-controlled traversal and return through that destination; B = genuine original-game Chromium WebGL2 screenshot; H = real iPhone Safari Home Screen walk and save/reload/offline evidence. These levels are not interchangeable.
+**Evidence levels:** S = historical physical authored-source code preserved; V = source-exact voxel/headroom/connection checked; C = actual production `stepPlayer` player-controlled traversal and return through that destination; B = genuine original-game Chromium WebGL2 screenshot; H = real iPhone Safari Home Screen walk and save/reload/offline evidence. These levels are not interchangeable.
 
 ## Prior to cave automation split
 
@@ -20,9 +20,11 @@
 |---|---|---|---|
 | #156 newer | Four-band deep spiral and broad rest chambers | S+V; entire surface→bottom→surface route C (29,416 real frames); B for spiral | Visit each rest chamber on real iPhone |
 | #170 | Lateral deep vaults at Y=-30,-75,-130,-185 | S+V; C for all four on four seeds in 2026-11-18 focused test | Individual B views and H walkthrough of all four |
-| #173 | 10× depth switchback and four historic grotto return loops at -30/-80/-130/-180 | S+V; whole switchback source geometry preserved | Individual C/H side-grotto loops |
-| #228 | Windcut upper nave + lateral mineral vault | S+V and its entrance C at four seeds | Full nave/mineral-vault C and H |
-| #228 | Hollowbend upper loop + lateral mineral vault | S+V and its entrance C at four seeds | Full nave/mineral-vault C and H |
+| #173 | 10× depth switchback and four historic grotto return loops at -30/-80/-130/-180 | S+V+C: all four independent grotto loops walked out/back on four seeds, [focused #44380716423](https://github.com/hdog960/Mythwrought/actions/runs/44380716423) | Individual B/H visits, visual framing and independent smaller pockets |
+| #228 | Windcut upper nave + lateral mineral vault | S+V+C: full nave/mineral vault out-and-back on four seeds | Separate B/H visual and iPhone visit |
+| #228 | Hollowbend upper loop + lateral mineral vault | S+V+C: full nave/mineral vault out-and-back on four seeds | Separate B/H visual and iPhone visit |
+
+**Controller evidence milestone (2026-11-18):** [focused run #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) passed **102/102**, including distinct actual player-walking outbound/return evidence for 21/21 named chambers on **seed 179**. Each path was independently searched against actual composed world support/headroom, then walked at 60 Hz without teleporting. Additional branch wings, 3 other seeds, source-exact individual in-game screenshots and real device acceptance remain outstanding. This does not claim online Pages publication.
 
 ## Historical independent #173 named side chambers
 
@@ -30,26 +32,26 @@ These names come directly from the original protected generator's authored geome
 
 | Feature name | Authored Y level | Current claim | Required future proof |
 |---|---:|---|---|
-| Stepped Echo Hall | near -80 to -130 | S, V not separately certified | named room physical C/B/H |
-| Crescent Refuge | -195 | S | C/B/H |
-| Winding Erosion Vault | -60 | S | C/B/H |
-| Transverse Gallery | -150 | S | C/B/H |
-| Bifurcated Mineral Gallery | -120 | S | both arms C/B/H |
-| Fault Cathedral | -170 | S | two lobes C/B/H |
-| Rift Terraces | -90 | S | stepped terraces C/B/H |
-| Erosion Labyrinth | -45 | S | return branch C/B/H |
-| Split-Fault Grotto | -135 | S | dogleg and rear pocket C/B/H |
-| Deep Fault Bypass | -185 | S | alternate loop C/B/H |
-| Braided Ravine | -70 | S | two channels and reconnect C/B/H |
-| Forked Basalt Sanctuary | -160 | S | main room and blind branch C/B/H |
-| Stepped Confluence | -110 | S | three landings C/B/H |
-| Windcut Antechamber | -20 | S | paired arms C/B/H |
-| Shattered Shelf | -145 | S | level changes and side refuge C/B/H |
-| Bedrock Labyrinth | -200 | S | meanders and blind refuge C/B/H |
-| Broken-Column Grotto | -35 | S | side niche and return C/B/H |
-| Ribbed Fault Canyon | -150 | S | gullies and side alcove C/B/H |
-| Vaulted Stone Fan | -125 | S | supported curved route C/B/H |
-| Folded Fault Amphitheater | -190 | S | both arms C/B/H |
-| Bedrock Whisper Gallery | -202 | S+V (collision fixed to preserve -200 labyrinth) | independent C/B/H |
+| Stepped Echo Hall | -105 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: terraces, individual Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Crescent Refuge | -195 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: second refuge pocket, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Winding Erosion Vault | -60 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: chamber perimeter, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Transverse Gallery | -150 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: full transverse wings, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Bifurcated Mineral Gallery | -120 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: both diverging arms, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Fault Cathedral | -170 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: second lobe, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Rift Terraces | -90 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: all landings and pockets, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Erosion Labyrinth | -45 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: both branches and return, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Split-Fault Grotto | -135 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: side pocket, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Deep Fault Bypass | -185 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: both arms, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Braided Ravine | -70 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: both channels, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Forked Basalt Sanctuary | -160 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: blind branch, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Stepped Confluence | -110 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: outer branches, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Windcut Antechamber | -20 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: paired arms, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Shattered Shelf | -145 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: higher shelf and side refuge, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Bedrock Labyrinth | -200 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: other terminals, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Broken-Column Grotto | -35 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: side niche and rock ribs, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Ribbed Fault Canyon | -150 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: split gullies and side alcove, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Vaulted Stone Fan | -125 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: other lobes, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Folded Fault Amphitheater | -190 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: other arm and side recess, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
+| Bedrock Whisper Gallery | -202 | S+V+C, **seed 179**: original spiral→representative room target→same anchor, genuine `stepPlayer` round trip, [native #44388023602](https://github.com/hdog960/Mythwrought/actions/runs/44388023602) | Still open: second lobe and transverse link, Chromium view and iPhone; 3 additional seeds (1, 2026, −77) not individually controller-checked |
 
 **Additional required gates:** 4 explicit safe surface portals, complete old world source preservation, separate cave-profile saved edits and previous-good offline rollback, actual iPhone control ergonomics/performance and exact Pages/public-byte proof. There is **no** exception list signed off by the creator. Do not mark any row H without physical device evidence, and leave GitHub issue #240 OPEN.
