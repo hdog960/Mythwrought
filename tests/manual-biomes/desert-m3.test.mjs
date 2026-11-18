@@ -54,8 +54,8 @@ test('M3: v3 generator is immutable, existing v2 profile stays source-exact and 
 test('M3: dunes create physical continuous non-chunk-aligned multi-chunk relief',()=>{
   const seed=179,oldTop=terrainHeight(512,0,seed);
   const anchor=m3DesertHeight(512,0,seed);
-  assert.equal(anchor,surfaceBiomeHeight(512,0,seed),
-    'preserve M2 canonical anchor for repeatable camera and save screenshots');
+  assert.equal(anchor,Math.max(oldTop,surfaceBiomeHeight(512,0,seed)),
+    'preserve M2 true physical top (never lower old legacy floor)');
   assert.ok(anchor>=oldTop);
   const shifts=[],heights=new Set(),chunks=new Set();
   for(let x=456;x<=568;x+=4)for(let z=-40;z<=40;z+=4){
@@ -153,13 +153,13 @@ test('M3: true physical collision, passable headroom and Pack 2 placement',()=>{
 test('M3: sparse xeric trunk, gypsum and thorn are supported and mined without floating',()=>{
   const world=new FourRegionWorld(179);
   let foundCactus=null,seen=0;
-  for(let x=465;x<=565&&!foundCactus;x++)
+  for(let x=465;x<=565;x++)
     for(let z=-47;z<=47;z++){
       const y=m3DesertHeight(x,z,179);
       if(y===null||surfaceBiomeAt(x,z,179)?.weight<.84)continue;
       const d=m3DesertXeric(x,z,179,y,surfaceBiomeAt(x,z,179).weight);
       if(d.length)seen++;
-      if(d.length===2&&world.get(x,y+1,z)===M3_DESERT_IDS.cactus&&
+      if(!foundCactus&&d.length===2&&world.get(x,y+1,z)===M3_DESERT_IDS.cactus&&
          world.get(x,y+2,z)===M3_DESERT_IDS.cactus)
         {foundCactus={x,y,z};break;}
     }
@@ -188,7 +188,9 @@ test('M3: edit, replace, export/import, cold save/reload and cross-region visits
   assert.equal(w.get(x,y,z),M3_DESERT_IDS.red);
   const editState=JSON.stringify(w.save()),pack2Before=JSON.stringify(w.pack2Snapshot());
   for(const r of SURFACE_BIOME_REGIONS.slice(1)){
-    assert.equal(w.get(r.x,surfaceBiomeHeight(r.x,r.z,179),r.z),r.surface);
+    const top=Math.max(terrainHeight(r.x,r.z,179),
+      surfaceBiomeHeight(r.x,r.z,179));
+    assert.equal(w.get(r.x,top,r.z),r.surface);
   }
   const exported=exportM2World(w),parsed=inspectM2WorldExport(exported);
   assert.equal(parsed.mode,'four-regions');
