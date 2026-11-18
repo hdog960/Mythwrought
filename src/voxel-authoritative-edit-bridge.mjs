@@ -19,13 +19,16 @@ export function createAuthoritativeVoxelEditBridge(host) {
       const seen = new Set();
       const snapshot = receipts.map(r => {
         if (!validCell(r?.cell) || !validId(r.expectedId) ||
-            !validId(r.nextId) || !validRevision(r.expectedRevision))
+            !validId(r.nextId) || !validRevision(r.expectedRevision) ||
+            (r.expectedTurn !== undefined && r.expectedTurn !== null &&
+             (!Number.isSafeInteger(r.expectedTurn) || r.expectedTurn < 0 || r.expectedTurn > 3)))
           throw new TypeError('Invalid receipt');
         const key = r.cell.join(',');
         if (seen.has(key)) throw new TypeError('Duplicate cell');
         seen.add(key);
         return Object.freeze({cell:Object.freeze([...r.cell]),
-          expectedId:r.expectedId, expectedRevision:r.expectedRevision, nextId:r.nextId});
+          expectedId:r.expectedId, expectedRevision:r.expectedRevision, nextId:r.nextId,
+          ...(r.expectedTurn !== undefined ? {expectedTurn:r.expectedTurn} : {})});
       });
       const cancelled = () => {
         if (signal?.aborted) throw new DOMException('Voxel edit aborted','AbortError');
@@ -34,7 +37,8 @@ export function createAuthoritativeVoxelEditBridge(host) {
       for (const r of snapshot) {
         const current = host.read(r.cell);
         if (!current || current.id !== r.expectedId ||
-            current.revision !== r.expectedRevision) return false;
+            current.revision !== r.expectedRevision ||
+            (r.expectedTurn !== undefined && current.turn !== r.expectedTurn)) return false;
       }
       await prepare();
       cancelled();
