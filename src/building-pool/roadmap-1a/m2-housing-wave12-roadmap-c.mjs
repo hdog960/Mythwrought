@@ -306,7 +306,7 @@ export const ROADMAP_C_1A_WAVE12_SPECS=Object.freeze([
           34
         ],
         "style": "edge-rise",
-        "raise": 3
+        "raise": 2
       },
       {
         "name": "southern-cartography-gable",
