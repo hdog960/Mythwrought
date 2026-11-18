@@ -742,6 +742,32 @@ export function descentCells(origin=DESCENT_ORIGIN){
       for(let t=-13;t<=13;t++)for(let d=43;d<=45;d++)carve(d,t,7);
     }
   }
+  // The pre-existing -195 Crescent Refuge has priority over later -190
+  // geology: its standing envelope reaches Y=-190. Reserve every actual
+  // refuge AIR cell at that elevation before authoring the amphitheater.
+  // This is an exact source-owned mask, not a guessed bounding rectangle.
+  const refugeHeadroom=new Set();
+  {
+    const anchor=route.find(p=>p.floor===-195);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const reserve=(d,t,r)=>{
+        for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){
+          if(a*a+b*b>r*r)continue;
+          const x=anchor.x+outward[0]*(d+a)+tangent[0]*(t+b);
+          const z=anchor.z+outward[1]*(d+a)+tangent[1]*(t+b);
+          const key=worldKey(x,-190,z);
+          if(cells.get(key)===BLOCK.AIR)refugeHeadroom.add(key);
+        }
+      };
+      for(let d=0;d<=30;d++)reserve(d,0,2);
+      reserve(31,0,11);
+      reserve(40,10,7);
+      for(let t=0;t<=10;t++)reserve(39,t,2);
+    }
+  }
   // Deepest-band folded fault amphitheater at -190: a walkable fork around
   // an intact rock wedge, two lateral galleries, and an offset oval vault.
   // Both arms reconnect; all excavations use existing AIR/DEEPSTONE only.
@@ -755,7 +781,11 @@ export function descentCells(origin=DESCENT_ORIGIN){
         for(let a=-width;a<=width;a++){
           const x=anchor.x+outward[0]*d+tangent[0]*(t+a);
           const z=anchor.z+outward[1]*d+tangent[1]*(t+a);
-          set(x,depth,z,BLOCK.DEEPSTONE);
+          // Never seal the older refuge's six-cell-high roof envelope.
+          // Leave the original AIR cell untouched; the later cavern must
+          // route around this reservation rather than silently win overlay.
+          if(!refugeHeadroom.has(worldKey(x,depth,z)))
+            set(x,depth,z,BLOCK.DEEPSTONE);
           for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
         }
       };
