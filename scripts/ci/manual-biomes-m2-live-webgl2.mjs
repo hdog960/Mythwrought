@@ -73,7 +73,11 @@ try{
         throw Error('Wrong physical '+anchor.name+' terrain '+JSON.stringify(actual));
       await page.waitForTimeout(1600);
       const file='m2-'+anchor.name+'-'+width+'x'+height+'.png';
-      const png=await page.screenshot({path:path.join(out,file)});
+      // A full WebGL2 scene under parallel native/depth runners can take over
+      // Playwright's default 30s capture deadline on CI software GPUs.
+      // Require a REAL rendered PNG rather than skipping this size; extend
+      // only the capture deadline. GPU faults/blank frames still fail below.
+      const png=await page.screenshot({path:path.join(out,file),timeout:90000});
       const decoded=PNG.sync.read(png),colors=new Set();
       // Sample the unobstructed central WORLD viewport, not UI grips/map.
       // Blank pale-green or missing geometry must fail even if world.get()
