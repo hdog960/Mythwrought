@@ -4,7 +4,11 @@
 import {biome130Block,isBiome130BlockId} from '../biome130-registry.mjs';
 import {terrainHeight} from '../voxel.mjs';
 import {WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from '../depth.mjs';
-// Main registry reconciled 2026-11-17: every automatic terrain floor and\n// stratum ID is an actually registered SOLID material. Snow 271 is powder\n// (non-solid), mountain 298 is an enchanted wood knot; never use either as\n// procedural ground. Original PR #172 is preserved unmodified.\nconst REGIONS=Object.freeze([
+// Main registry reconciled 2026-11-17: every automatic terrain floor and
+// stratum ID is an actually registered SOLID material. Snow 271 is powder
+// (non-solid), mountain 298 is an enchanted wood knot; never use either as
+// procedural ground. Original PR #172 is preserved unmodified.
+const REGIONS=Object.freeze([
   {name:'desert',x:512,z:0,surface:256,subsoil:258,rock:261,salt:259},
   {name:'snow',x:0,z:512,surface:272,subsoil:278,rock:279,salt:277},
   {name:'mountain',x:-512,z:0,surface:302,subsoil:303,rock:305,salt:307},
