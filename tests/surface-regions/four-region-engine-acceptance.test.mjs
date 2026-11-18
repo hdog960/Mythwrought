@@ -22,8 +22,8 @@ test('all four regions simultaneously compose protected, supported multichunk su
     const top=Math.max(old,surfaceBiomeHeight(x,z,seed));
     assert.ok(top+2<=WORLD_MAX_Y,region.name+' requires headroom');
     // Source-derived safety is decisive, not a blanket requirement to
-    // replace every existing natural/landmark column. The old test demanded
-    // overwriting a protected snow landmark in seed 7/2201.
+    // replace every existing natural/landmark column. The old assertion
+    // incorrectly assumed every sample was eligible for new terrain.
     const plan=surfaceBiomeFreshColumn(x,z,seed,{
       enabled:true,profileIsFresh:true,
       readBaseline:(cx,y,cz)=>world.naturalAndLandmarkBlock(cx,y,cz),
