@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {checkCaveTransition} from '../../src/auto-integration-support/cave-transition-provenance.mjs';
+const socket={x:192,y:-45,z:188};
+const s=[{...socket,kind:'AIR'},{x:191,y:-44,z:188,kind:'AIR'}];
+const d=[{...socket,kind:'AIR'},{x:192,y:-46,z:188,kind:'AIR'}];
+const run=(x={})=>checkCaveTransition({shallow:s,deep:d,socket,...x});
+test('joint AIR socket is a fixture-only success',()=>{const r=run();assert.equal(r.ok,true);assert.match(r.status,/NOT_SOURCE_AUTHENTICATED/);});
+test('socket absent in deep fails closed',()=>assert.ok(run({deep:d.slice(1)}).errors.includes('SOCKET_NOT_JOINTLY_PROVEN')));
+test('AIR versus solid collision rejected',()=>assert.ok(run({deep:[{...socket,kind:'SOLID'},...d.slice(1)]}).errors.includes('UNAUTHORIZED_OVERLAP')));
+test('legacy floor protected',()=>assert.ok(run({shallow:[...s,{x:1,y:-3,z:1,kind:'AIR'}]}).errors.includes('LEGACY_FLOOR')));
+test('shallow cannot write below -45',()=>assert.ok(run({shallow:[...s,{x:1,y:-46,z:1,kind:'AIR'}]}).errors.includes('SHALLOW_BOUNDS')));
+test('deep cannot edit upper footprint except socket',()=>assert.ok(run({deep:[...d,{x:1,y:-30,z:1,kind:'AIR'}]}).errors.includes('DEEP_UPPER_OWNERSHIP')));
+test('protected player edits reject',()=>assert.ok(run({protectedCells:[socket]}).errors.includes('PLAYER_EDIT')));
+test('input stays unchanged',()=>{const before=JSON.stringify({s,d});run();assert.equal(JSON.stringify({s,d}),before);});
+test('invalid coordinate rejects',()=>assert.ok(run({shallow:[...s,{x:NaN,y:-20,z:1,kind:'AIR'}]}).errors.includes('INVALID_WRITE')));

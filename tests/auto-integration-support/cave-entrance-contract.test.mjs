@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {inspectEntranceHandshake} from '../../src/auto-integration-support/cave-entrance-contract.mjs';
+const surface={x:3,y:4,z:2},cave={x:3,y:1,z:2},cells=[4,3,2,1].map(y=>({x:3,y,z:2}));
+const args=()=>({surface,cave,bounds:{minY:-210,maxY:64},cells,isPassable:()=>true});
+test('connected source-supplied fixture is not integration proof',()=>{const r=inspectEntranceHandshake(args());assert.equal(r.status,'FIXTURE_CONNECTED_ONLY');assert.equal(r.integrationVerified,false);});
+test('missing middle cell fails six-neighbor traversal',()=>{const r=inspectEntranceHandshake({...args(),cells:[cells[0],cells[1],cells[3]]});assert.equal(r.connected,false);});
+test('blocked endpoint and blocked middle fail',()=>{assert.equal(inspectEntranceHandshake({...args(),isPassable:c=>c.y!==4}).connected,false);assert.equal(inspectEntranceHandshake({...args(),isPassable:c=>c.y!==3}).connected,false);});
+test('invalid bounds, duplicate cells and unsafe coordinates fail closed',()=>{for(const change of [{bounds:{minY:5,maxY:4}},{cells:[...cells,cells[0]]},{surface:{x:NaN,y:4,z:2}},{isPassable:null}])assert.equal(inspectEntranceHandshake({...args(),...change}).status,'NOT_VERIFIED');});
+test('budget exhaustion and caller immutability',()=>{const before=JSON.stringify(cells);const r=inspectEntranceHandshake({...args(),maxSteps:2});assert.match(r.errors.join(' '),/budget/);assert.equal(JSON.stringify(cells),before);});
