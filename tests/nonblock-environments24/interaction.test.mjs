@@ -106,3 +106,21 @@ test('full safe-integer seed and anchor identity never alias via 32-bit truncati
  assert.equal(createEnvironmentSession({seed:largeSeed,objects:[differentSeed],blockAt:(x,y,z)=>y===-13?1:0,editedAt:edit,occupiedAt:occupied,snapshot:saved}).visible().length,1);
  assert.throws(()=>createEnvironmentSession({seed:179,objects:[differentSeed],blockAt:support,editedAt:edit,occupiedAt:occupied}));
 });
+
+test('forged identity cannot pick, remove or poison persisted tombstones',()=>{
+ const original=make('crystal',2);
+ const forged=[
+  {...original,instanceKey:'forged',removal:{...original.removal,tombstoneKey:'nonblock:forged'}},
+  {...original,seed:seed+1},
+  {...original,anchor:{...anchor,x:anchor.x+1}},
+  {...original,variant:8},
+  {...original,anchor:{...anchor,z:Number.MAX_SAFE_INTEGER+1}},
+  {...original,sceneId:'nonblock:e:unknown'}
+ ];
+ for(const o of forged){
+  assert.throws(()=>validateEnvironmentObject(o));
+  assert.throws(()=>environmentRayPick([o],[4,-11,4],[0,0,1]));
+  assert.throws(()=>createEnvironmentSession({seed,objects:[o],blockAt:support,editedAt:edit,occupiedAt:occupied}));
+ }
+ assert.equal(validateEnvironmentObject(original),true);
+});
