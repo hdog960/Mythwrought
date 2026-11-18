@@ -3,6 +3,15 @@
 import {NONBLOCK_OBJECT_VERSION} from './nonblock-object-v1.mjs';
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
 const vec=v=>Array.isArray(v)&&v.length===3&&v.every(finite);
+// Exact bytewise geometry equivalence only. A family/variant label is not a mesh identity.
+// This intentionally avoids hash collisions and preserves source-specific procedural shapes.
+function sameMesh(a,b){
+ if(a===b)return true;
+ if(a.positions.length!==b.positions.length||a.materials.length!==b.materials.length)return false;
+ for(let i=0;i<a.positions.length;i++)if(!Object.is(a.positions[i],b.positions[i]))return false;
+ for(let i=0;i<a.materials.length;i++)if(a.materials[i]!==b.materials[i])return false;
+ return true;
+}
 export function prepareBreakableObjectDraws(session,camera,{radius=48,maxInstances=512,maxTriangles=120000}={}){
  if(!session||session.contract!==NONBLOCK_OBJECT_VERSION||typeof session.visible!=='function'||!camera||!vec(camera.position))throw new TypeError('invalid session or camera');
  if(!finite(radius)||radius<=0||!Number.isSafeInteger(maxInstances)||maxInstances<1||maxInstances>2048||!Number.isSafeInteger(maxTriangles)||maxTriangles<1||maxTriangles>1000000)throw new RangeError('invalid draw limits');
@@ -19,21 +28,18 @@ export function prepareBreakableObjectDraws(session,camera,{radius=48,maxInstanc
   if(d2<=(radius+extent)**2)within.push({obj,d2});
  }
  within.sort((a,b)=>a.d2-b.d2||a.obj.instanceKey.localeCompare(b.obj.instanceKey));
- const groups=new Map();let triangles=0,selected=0;
+ const groups=[];let triangles=0,selected=0;
  for(const {obj} of within){
   const count=obj.render.triangleCount;
   if(!(obj.render.mesh.positions instanceof Float32Array)||!(obj.render.mesh.materials instanceof Uint8Array)||obj.render.mesh.positions.length!==count*9||obj.render.mesh.materials.length!==count)throw new TypeError('invalid triangle buffers');
   if(selected>=maxInstances||triangles+count>maxTriangles)continue;
-  // No geometry merging: each distinct mesh/variant has a stable keyed draw.
-  // Reuse typed mesh buffers by object reference; renderer owns GPU upload/cache.
-  // Different anchors can generate different triangle geometry even within a family/variant.
-  // Fail closed on accidental mesh reuse until exact geometry equivalence is proven.
-  const key=obj.instanceKey;
-  let group=groups.get(key);
-  if(!group){group={sceneId:obj.sceneId,variant:obj.variant,mesh:obj.render.mesh,instances:[]};groups.set(key,group);}
+  // Batch only byte-identical meshes with the same scene family and stable variant.
+  // Anchors are still per-instance; no geometry is mutated or deduplicated by tint alone.
+  let group=groups.find(g=>g.sceneId===obj.sceneId&&g.variant===obj.variant&&sameMesh(g.mesh,obj.render.mesh));
+  if(!group){group={sceneId:obj.sceneId,variant:obj.variant,mesh:obj.render.mesh,instances:[]};groups.push(group);}
   group.instances.push({instanceKey:obj.instanceKey,anchor:[...obj.anchor],selectionAabbs:obj.selectionAabbs});
   triangles+=count;selected++;
  }
- return {draws:[...groups.values()].map(g=>({...g,instances:Object.freeze(g.instances)})),
+ return {draws:groups.map(g=>({...g,instances:Object.freeze(g.instances)})),
   stats:Object.freeze({submitted:objects.length,withinRadius:within.length,selected,triangles,budgetDropped:within.length-selected,culled:objects.length-within.length,radius,maxInstances,maxTriangles})};
 }
