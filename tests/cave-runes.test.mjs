@@ -70,7 +70,7 @@ test('mining an original glyph wall removes its render-only art and restores it 
   assert.equal(world.set(x,y,z,13),false,'Art material accidentally became a physical block');
   assert.equal(world.set(x,y,z,14),false,'Art material accidentally became a physical block');
 });
-test('cave rune geometry is in the existing chunk GPU data and separate from seeded flora',()=>{
+test('archived cave rune geometry remains available but is absent from live chunks',()=>{
   const w=new VoxelWorld(179),saved=JSON.stringify(w.save());
   let found=false;
   for(let cx=-2;cx<=2;cx++)for(let cz=-2;cz<=2;cz++){
@@ -79,10 +79,10 @@ test('cave rune geometry is in the existing chunk GPU data and separate from see
     const fromChunk=[];
     for(let i=0;i<mesh.length;i+=9)
       if(mesh[i+8]===13||mesh[i+8]===14)fromChunk.push(...mesh.subarray(i,i+9));
-    assert.deepEqual(new Float32Array(fromChunk),actual);
+    assert.equal(fromChunk.length,0,'inert cave-wall drawings must not render in live play');
     found ||=actual.length>0;
   }
-  assert.ok(found,'No rune geom found in the active chunk mesh');
+  assert.ok(found,'retired rune source is still available for the future interactive replacement');
   assert.equal(JSON.stringify(w.save()),saved);
 });
 test('invalid placement sources or chunk coordinates fail instead of adding saved blocks',()=>{
