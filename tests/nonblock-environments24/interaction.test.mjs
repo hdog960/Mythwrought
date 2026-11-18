@@ -45,3 +45,22 @@ test('malformed geometry and invalid rays fail closed',()=>{
  assert.throws(()=>environmentRayPick([o],[0,0,0],[0,0,0]));
  assert.throws(()=>environmentRayPick([o],[0,0,0],[0,0,1],-1));
 });
+
+test('adjacent-cell edits and occupied voxels fail closed across full pick envelope',()=>{
+ const o=make('crystal',7);
+ const base=(x,y,z)=>y===-13?1:0;
+ const clear=createEnvironmentSession({seed,objects:[o],blockAt:base,editedAt:edit,occupiedAt:occupied});
+ assert.equal(clear.visible().length,1);
+ const sideEdited=createEnvironmentSession({seed,objects:[o],blockAt:base,
+  editedAt:(x,y,z)=>x===3&&y===-12&&z===8,occupiedAt:occupied});
+ assert.equal(sideEdited.visible().length,0);
+ assert.equal(sideEdited.breakByKey(o.instanceKey),false);
+ const sideOccupied=createEnvironmentSession({seed,objects:[o],blockAt:base,
+  editedAt:edit,occupiedAt:(x,y,z)=>x===5&&y===-12&&z===8});
+ assert.equal(sideOccupied.visible().length,0);
+ const sideSolid=createEnvironmentSession({seed,objects:[o],
+  blockAt:(x,y,z)=>base(x,y,z)||(x===3&&y===-12&&z===8?1:0),
+  editedAt:edit,occupiedAt:occupied});
+ assert.equal(sideSolid.visible().length,0);
+ assert.deepEqual(sideSolid.snapshot().tombstones,[]);
+});
