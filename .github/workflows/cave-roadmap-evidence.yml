@@ -1,0 +1,39 @@
+name: Mythwrought Cave Roadmap Source WebGL2 Evidence
+on:
+  pull_request:
+    paths:
+      - 'src/manual-caves/**'
+      - 'tests/cave-roadmap-browser.mjs'
+      - 'tests/cave-roadmap-*.test.mjs'
+      - '.github/workflows/cave-roadmap-evidence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cave-source-evidence:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'integration/caves-all-to-homescreen-20261117'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Chromium browser tooling
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Real source cave WebGL2 and cave-only save/reload captures
+        env:
+          CAVE_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node tests/cave-roadmap-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-cave-source-webgl2
+          path: artifacts/cave-roadmap-source-webgl2/
+          if-no-files-found: error
+          retention-days: 30
