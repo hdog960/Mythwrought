@@ -47,7 +47,7 @@ function overlap(a,b){let best=0;for(const left of a)for(const right of b){
  let n=0;for(const k of small)if(large.has(k))n++;
  best=Math.max(best,n/(left.size+right.size-n));
 }return best;}
-const expected=["r4:castle-palace:temperate:small:01","r4:castle-palace:snow:medium:01","r4:castle-palace:enchanted-forest:large:01","r4:embassy:desert:large:01","r4:embassy:mountain:small:01","r4:embassy:enchanted-forest:medium:01","r4:grand-archive:desert:medium:01","r4:grand-archive:mountain:large:02","r4:grand-archive:snow:small:01","r4:observatory:temperate:large:01","r4:observatory:desert:small:01","r4:observatory:mountain:medium:01"];
+const expected=["r4:castle-palace:temperate:small:02","r4:castle-palace:snow:medium:02","r4:castle-palace:enchanted-forest:large:03","r4:embassy:desert:large:01","r4:embassy:mountain:small:01","r4:embassy:enchanted-forest:medium:01","r4:grand-archive:desert:medium:01","r4:grand-archive:mountain:large:02","r4:grand-archive:snow:small:01","r4:observatory:temperate:large:01","r4:observatory:desert:small:01","r4:observatory:mountain:medium:01"];
 test('Roadmap A2 fifth tranche: twelve distinct new original castle/embassy/archive/observatory sources; preserve protected 212',()=>{
  const old=protected212(),candidate=fresh(),all=[...old,...candidate];
  assert.equal(old.length,212);assert.equal(candidate.length,12);assert.equal(all.length,224);
