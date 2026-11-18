@@ -15,6 +15,8 @@ import {caveRoute} from '../src/experimental-cave-route.mjs';
 import {HISTORIC_NAMED_TARGETS,findNamedCavePlayerRoute}
  from '../src/manual-caves/named-destination-audit.mjs';
 import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
+import {historicSecondaryScenes,inspectDeepSkySourceBoundary}
+ from './cave-roadmap-secondary-browser-evidence.mjs';
 const {PNG}=pngjs;
 const head=process.env.CAVE_EXPECTED_HEAD||'';
 assert.match(head,/^[0-9a-f]{40}$/,'Actual game source exact checkout required');
@@ -26,6 +28,10 @@ const report={status:'UNVERIFIED',kind:'ACTUAL_INDEX_MAIN_GAME_WEBGL2',
  head,productionDeployed:false,actualIPhone:false,
  preservesLegacySave:true,sizes,images:[],mobileProxy:[],
  namedSitesRequested:HISTORIC_NAMED_TARGETS.length,
+ secondarySitesRequested:16,
+ secondarySource:'Protected tests/cave-roadmap-named-secondary-arms.test.mjs 16-case original #173 fixture',
+ secondaryCaptureMethod:'Original game diagnostic camera, not a controller walk; four-seed native C separately verified',
+ deepSkySourceProbes:[],
  namedCaptureMethod:'Original index.html/main.mjs game renderer; diagnostic camera placement only; separate native stepPlayer routes supply C proof',
  timingSource:'Headless Chromium SwiftShader requestAnimationFrame; NOT physical iPhone FPS',
  errors:[]};
@@ -116,6 +122,9 @@ try{
   '--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
  const origin='http://127.0.0.1:'+server.address().port;
  const namedScenes=historicNamedLocators();
+ const sourceWorld=createStagedCaveRuntime(seed,null,{approved:true}).world;
+ const secondaryScenes=await historicSecondaryScenes(sourceWorld,seed);
+ report.deepSkySourceProbes=inspectDeepSkySourceBoundary(sourceWorld,seed);
  for(const [width,height] of sizes){
   const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,
    hasTouch:true,isMobile:true,serviceWorkers:'block'});
@@ -175,8 +184,9 @@ try{
      assert.equal(guards.pack3Sidecar,null,'Pack3 sidecar created in Cave World');
    }
    await page.evaluate(()=>document.getElementById('closeHelp').click());
-   const shots=[...locators(status),...namedScenes],hashes=new Set();
-   assert.equal(shots.length,25,'Four original scene witnesses + all 21 distinct named cave sites');
+   const shots=[...locators(status),...namedScenes,...secondaryScenes],hashes=new Set();
+   assert.equal(shots.length,41,
+    'Four original scenes + 21 named chambers + 16 historical secondary arms');
    for(const shot of shots){
     if(shot.surface){
      const s=await page.evaluate(({x,z})=>window.__mythwroughtTest.teleport(x,z),shot.at);
@@ -200,11 +210,11 @@ try{
     assert.equal(snapshot.mode.enabled,true);
     assert.equal(snapshot.noticeHidden,true);
     assert.ok(snapshot.gl&&snapshot.verts>800);
-    if(shot.named){
+    if(shot.named||shot.secondary){
      assert.equal(snapshot.mode.seed,seed);
      assert.ok(snapshot.playerFeet<-10&&
        Math.abs(snapshot.playerFeet-shot.at.y)<2,
-       'Game camera not physically inside named source scene '+shot.named+
+       'Original game camera not at protected source target '+(shot.named||shot.secondary)+
        ' '+JSON.stringify(snapshot));
     }
     const raw=await page.screenshot({
@@ -215,8 +225,11 @@ try{
     report.images.push({scene:shot.name,...stats,renderedVertices:snapshot.verts,
      loadedChunks:snapshot.chunks,playerFeet:snapshot.playerFeet,sourceHead:head,
      actualIndexMain:true,namedSourceFeature:shot.named||null,
-     diagnosticCameraCapture:Boolean(shot.named),
-     nativeControllerProvenSeparately:Boolean(shot.named),
+      secondarySourceFeature:shot.secondary||null,
+      originalSecondarySourceFrame:shot.sourceFrame||null,
+     diagnosticCameraCapture:Boolean(shot.named||shot.secondary),
+     nativeControllerProvenSeparately:Boolean(shot.named||shot.secondary),
+      nativeControllerProofSeeds:shot.named||shot.secondary?[179,1,2026,-77]:null,
      proofSeed:shot.proofSeed||null,
      physicalPathSteps:shot.physicalPathSteps||null});
    }
@@ -301,13 +314,17 @@ try{
      ' authentic index.html/main.mjs WebGL2 screenshots; '+hashes.size+' unique SHA256');
   }finally{await context.close()}
  }
- assert.equal(report.images.length,(4+21)*sizes.length);
+ assert.equal(report.images.length,(4+21+16)*sizes.length);
  for(const [width,height] of sizes){
   const named=report.images.filter(i=>i.width===width&&i.height===height&&i.namedSourceFeature);
   assert.equal(named.length,21,'Missing individual original-game named-site views');
   assert.equal(new Set(named.map(i=>i.namedSourceFeature)).size,21);
+   const secondary=report.images.filter(i=>i.width===width&&i.height===height&&i.secondarySourceFeature);
+   assert.equal(secondary.length,16,'Missing individual original-game historical secondary B views');
+   assert.equal(new Set(secondary.map(i=>i.secondarySourceFeature)).size,16);
  }
  report.namedSitesCaptured=21;
+ report.secondarySitesCaptured=16;
  report.gameSnapshots=report.images.length;
  assert.equal(report.mobileProxy.length,3,'Three landscape performance observations missing');
  report.status='ACTUAL_GAME_WEBGL2_STAGING_PASS';
