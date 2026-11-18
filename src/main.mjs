@@ -2,7 +2,8 @@ import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainH
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
-import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
+import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
+import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
 import {SKY_DAY_MS,SKY_DAY_TARGET_MS,SKY_NIGHT_TARGET_MS,
   loadSkyClock,sampleSkyClock,selectSkyClockTime,formatSkyTime} from './world-clock.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
@@ -75,7 +76,7 @@ function start(){
   seedLabel.textContent='WORLD '+world.seed;
   // S1: separate per-seed clock sidecar; never modify original schema-1 saves.
   // The monotonic clock advances even while settings overlay is open.
-  // Sky art, sun/moons and fog remain unaltered pending S2/S3.
+  // S2 uses this unchanged S1 clock for atmosphere; three moons remain S3.
   let skyClock=loadSkyClock({seed:world.seed,storage:localStorage,
     wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
   const skyClockStatus=document.getElementById('skyClockStatus');
@@ -128,10 +129,13 @@ function start(){
   ].join('\n');
   // Reserved transparent-water material 20; legacy materials stay unchanged.
   const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER
+    .replace('uniform vec3 uFog;','uniform vec3 uFog; uniform vec3 uSkyLight;')
+    .replace('mix(vColor,uFog,distant)','mix(vColor*uSkyLight,uFog,distant)')
+    .replace('mix(colored,uFog,fog)','mix(colored*uSkyLight,uFog,fog)')
     .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
     .replace('void main(){',
       'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
-      'outColor=vec4(mix(vColor,uFog,f),vPack2Alpha); return; }');
+      'outColor=vec4(mix(vColor*uSkyLight,uFog,f),vPack2Alpha); return; }');
   let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
   function initializeGpuPipeline(){
     const resources=buildGpuPipeline(gl,{
@@ -863,13 +867,26 @@ function start(){
       canvas.dataset.storybookQuality=renderPreset==='economy'?'base-colors':'painted-materials';
       canvas.dataset.renderScale=String(buffer.scale);
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
-      gl.clearColor(...DISTANCE_FOG_COLOR,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+      // S2 uses one authoritative S1 timestamp for the sky, terrain fog and
+      // ambient block lighting. Movement's clamped dt never drives solar time.
+      const atmosphere=sampleSkyAtmosphere(sampleSkyClock(skyClock,now));
+      const sunScreen=projectSunToScreen(atmosphere.sunDirection,
+        player.yaw,player.pitch,w/h);
+      gl.clearColor(...atmosphere.fog,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
       // Cheap procedural WebGL sky; the depth buffer is reserved for editable voxels.
       gl.disable(gl.DEPTH_TEST);
       gl.useProgram(skyProgram);
       gl.uniform2f(skyU.resolution,w,h);
       gl.uniform1f(skyU.yaw,player.yaw);
       gl.uniform1f(skyU.pitch,player.pitch);
+      gl.uniform2f(skyU.sunScreen,...sunScreen);
+      gl.uniform1f(skyU.sunVisibility,atmosphere.sunVisibility);
+      gl.uniform3fv(skyU.horizon,atmosphere.horizon);
+      gl.uniform3fv(skyU.zenith,atmosphere.zenith);
+      gl.uniform3fv(skyU.cloud,atmosphere.cloud);
+      gl.uniform3fv(skyU.ridge,atmosphere.ridge);
+      gl.uniform3fv(skyU.fog,atmosphere.fog);
+      gl.uniform3fv(skyU.sunColor,atmosphere.sunColor);
       gl.drawArrays(gl.TRIANGLES,0,3);
       gl.enable(gl.DEPTH_TEST);
       gl.useProgram(program);
@@ -879,8 +896,16 @@ function start(){
       gl.uniform3fv(U.uUp,[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),-Math.sin(player.pitch)*Math.cos(player.yaw)]);
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
-      gl.uniform3fv(U.uFog,DISTANCE_FOG_COLOR);
+      gl.uniform3fv(U.uFog,atmosphere.fog);
+      gl.uniform3fv(U.uSkyLight,atmosphere.light);
       gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
+      if(frame%12===0){
+        canvas.dataset.skySunAltitude=String(atmosphere.elevation.toFixed(4));
+        canvas.dataset.skySunScreen=JSON.stringify(sunScreen.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyDaylight=String(atmosphere.daylight.toFixed(4));
+        canvas.dataset.skyAmbient=JSON.stringify(atmosphere.light.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyFog=JSON.stringify(atmosphere.fog.map(v=>Number(v.toFixed(4))));
+      }
       stream();
       canvas.dataset.renderedFrames=String(frame);
       canvas.dataset.meshCadenceSkipped=String(meshCadence.skipped);
