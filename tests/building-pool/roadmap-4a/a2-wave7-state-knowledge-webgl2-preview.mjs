@@ -7,10 +7,10 @@ import {buildA2Wave7StateKnowledge} from '../../../src/building-pool/roadmap-4a/
 import {candidatePreviewShape,candidateBatchedPreviewBudget} from '../../../src/building-pool/roadmap-4a/m1-preview-shapes.mjs';
 const params=new URLSearchParams(location.search);
 const type=params.get('type')||'castle-palace';
-const biome=params.get('biome')||'temperate';
-const size=params.get('size')||'small';
+const biome=params.get('biome')||'desert';
+const size=params.get('size')||'large';
 const cutaway=params.get('cutaway')==='1';
-const variant=Number(params.get('variant')||1);
+const variant=Number(params.get('variant')||3);
 const b=buildA2Wave7StateKnowledge('r4:'+type+':'+biome+':'+size+':'+String(variant).padStart(2,'0'));
 const storyCount=b.architecturalNotes.storyCount;
 const floorIndex=cutaway?Math.max(0,Math.min(storyCount-1,Number(params.get('floor')??0)|0)):0;

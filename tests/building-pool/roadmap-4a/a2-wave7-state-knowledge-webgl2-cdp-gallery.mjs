@@ -16,74 +16,74 @@ const DESIGNS=[
   {
     "type": "castle-palace",
     "biome": "desert",
-    "size": "medium",
-    "variant": 2
-  },
-  {
-    "type": "castle-palace",
-    "biome": "snow",
-    "size": "small",
+    "size": "large",
     "variant": 3
   },
   {
     "type": "castle-palace",
+    "biome": "enchanted-forest",
+    "size": "small",
+    "variant": 2
+  },
+  {
+    "type": "castle-palace",
     "biome": "mountain",
+    "size": "medium",
+    "variant": 3
+  },
+  {
+    "type": "embassy",
+    "biome": "temperate",
     "size": "large",
     "variant": 2
   },
   {
     "type": "embassy",
-    "biome": "temperate",
-    "size": "small",
-    "variant": 1
-  },
-  {
-    "type": "embassy",
-    "biome": "snow",
-    "size": "medium",
-    "variant": 1
-  },
-  {
-    "type": "embassy",
-    "biome": "mountain",
-    "size": "large",
-    "variant": 1
-  },
-  {
-    "type": "grand-archive",
     "biome": "desert",
-    "size": "large",
+    "size": "small",
+    "variant": 1
+  },
+  {
+    "type": "embassy",
+    "biome": "enchanted-forest",
+    "size": "medium",
     "variant": 3
+  },
+  {
+    "type": "grand-archive",
+    "biome": "snow",
+    "size": "large",
+    "variant": 1
   },
   {
     "type": "grand-archive",
     "biome": "enchanted-forest",
     "size": "small",
-    "variant": 2
+    "variant": 1
   },
   {
     "type": "grand-archive",
-    "biome": "temperate",
-    "size": "large",
-    "variant": 1
-  },
-  {
-    "type": "observatory",
-    "biome": "snow",
-    "size": "medium",
-    "variant": 1
-  },
-  {
-    "type": "observatory",
-    "biome": "enchanted-forest",
+    "biome": "mountain",
     "size": "medium",
     "variant": 2
+  },
+  {
+    "type": "observatory",
+    "biome": "temperate",
+    "size": "large",
+    "variant": 3
+  },
+  {
+    "type": "observatory",
+    "biome": "desert",
+    "size": "medium",
+    "variant": 1
   },
   {
     "type": "observatory",
     "biome": "mountain",
     "size": "small",
-    "variant": 3
+    "variant": 1
   }
 ];
 const VIEWPORTS=[[667,375],[844,390],[932,430]];
@@ -245,10 +245,10 @@ async function runWithBrowser(){
       submittedBufferBytes:data.submittedBufferBytes,
       proxyCells:data.unresolvedFullCellProxyCount,
       pngSha256:createHash('sha256').update(png).digest('hex')});
-    if(shots.length%6===0)console.log('4A A2 Wave7 source-original state-knowledge Chromium WebGL2 candidate captures',shots.length,'/ 60');
+    if(shots.length%6===0)console.log('4A A2 Wave7 source-original state-knowledge Chromium WebGL2 candidate captures',shots.length,'/ 72');
    }
   }
-  // Fail closed on actual files, not merely 60 in-memory capture hashes.
+  // Fail closed on actual files, not merely 72 in-memory capture hashes.
    const filenameCount=new Set(shots.map(x=>x.name)).size;
    const mismatched=shots.filter(x=>!existsSync(join(OUT,x.name))||
       createHash('sha256').update(readFileSync(join(OUT,x.name))).digest('hex')!==x.pngSha256);
@@ -273,6 +273,14 @@ async function runWithBrowser(){
  }
 }
 export async function runGallery(){
+ // Reject stale copied gallery rosters before starting Chromium or writing PNGs.
+ const srcText=readFileSync(join(SOURCE,'a2-wave7-state-knowledge.mjs'),'utf8');
+ const match=/const PLANS=(\\[[\\s\\S]*?\\n\\]);/.exec(srcText);
+ if(!match)throw Error('Wave7 source roster is unreadable');
+ const expected=JSON.parse(match[1]).map(p=>p.id);
+ const configured=DESIGNS.map(p=>'r4:'+p.type+':'+p.biome+':'+p.size+':'+String(p.variant).padStart(2,'0'));
+ if(JSON.stringify(expected)!==JSON.stringify(configured))
+  throw Error('Wave7 Chromium source roster mismatch: '+JSON.stringify({expected,configured}));
  const evidence=await runWithBrowser();
  console.log('4A A2 Wave7 source-original state-knowledge source-driven 72/72 WebGL2 gallery PASSED',
   JSON.stringify({sha256:evidence.sourceBundleSha256,screens:evidence.actualViews,
