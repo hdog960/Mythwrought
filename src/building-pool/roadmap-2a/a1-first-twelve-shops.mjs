@@ -742,7 +742,7 @@ export const A1_FIRST_TWELVE_SPECS=Object.freeze([
     "right": 29,
     "depth": 12,
     "frontSide": "east",
-    "stepWidth": 5,
+    "stepWidth": 4,
     "stepDepth": 6,
     "opposite": false,
     "oppositeWidth": 0,
