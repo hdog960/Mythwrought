@@ -1,4 +1,4 @@
-// Roadmap C 3B original temperate Boughgate large barracks, eight defended rooms and two true courtyard slots.
+// Roadmap C 3B original temperate Boughgate large barracks, eight defended rooms, two true courtyard slots, and asymmetrically extended perimeter wings.
 // No world registration, gameplay, save migration, or changes outside this isolated builder lane.
 import {assertSlot} from './roster.mjs';
 import {ASSET_CATALOG} from './assets.mjs';
@@ -19,7 +19,7 @@ const plans=[
         77
       ],
       [
-        3,
+        0,
         36,
         5,
         26
@@ -38,12 +38,12 @@ const plans=[
       ],
       [
         44,
-        79,
+        81,
         37,
         56
       ],
       [
-        3,
+        0,
         36,
         59,
         76
