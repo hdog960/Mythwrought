@@ -3,7 +3,6 @@
 // Read the SAME authoritative physical world.get() as collision and mining;
 // do not reveal unvisited regions, auto-generate preview terrain or write saves.
 import {WORLD_MAX_Y} from '../depth.mjs';
-import {MAP_CELL_SIZE} from '../exploration-map.mjs';
 
 const DESERT=new Map([
   [256,'#d5b276'],[257,'#bd765c'],[258,'#aa8a63'],[259,'#dfd4ae'],
@@ -26,13 +25,15 @@ const GROUPS=[DESERT,SNOW,MOUNTAIN,ENCHANTED];
  * in the authoritative column. Never paint a protected legacy landmark as
  * an authored biome. Cannot change gameplay voxels or edit records.
  */
-export function profiledDiscoveredCellInk(world,cx,cz){
+export function profiledDiscoveredCellInk(world,cx,cz,cellSize=4){
   const base=world?.base||world;
   if(base?.generationProfile?.kind!=='mythwrought-generation-profile'||
      typeof world?.get!=='function')return null;
-  if(!Number.isInteger(cx)||!Number.isInteger(cz))
+  if(!Number.isInteger(cx)||!Number.isInteger(cz)||
+     !Number.isInteger(cellSize)||cellSize<1||cellSize>16)
     throw Error('Invalid discovered map tile');
-  const x=cx*MAP_CELL_SIZE+2,z=cz*MAP_CELL_SIZE+2;
+  const x=cx*cellSize+Math.floor(cellSize/2),
+    z=cz*cellSize+Math.floor(cellSize/2);
   // Trees, canopies, real cactus and shaped non-block objects can sit above
   // the ground. Only registered physical GEOLOGY is painted as a biome.
   for(let y=WORLD_MAX_Y;y>=0;y--){
