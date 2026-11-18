@@ -17,7 +17,8 @@ export function createIronpassHorseshoeExchange(){
   [2,10,13,37],   // mountain west stonemason and supply terrace
   [27,10,36,31],  // east winter cloth and high forage gallery
   [10,31,34,40],  // rear protected mountain merchant arcade
-  [10,26,30,32]   // independent south-facing narrow return bridge
+  [10,26,30,32],  // independent south-facing narrow return bridge
+  [33,27,38,41]    // extra northeast cliff-ledger gallery: new physical footprint
  ];
  for(const [x0,z0,x1,z1] of parts)for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++)
   footprint.add(g(x,z));
@@ -43,7 +44,8 @@ export function createIronpassHorseshoeExchange(){
   [2,10,13,37,10,'low-staggered-west-cliff','pack3:025'],
   [27,10,36,31,14,'high-east-caravan-ridge','pack3:023'],
   [10,31,34,40,12,'rear-arcade-forked-roof','pack3:025'],
-  [10,26,30,32,13,'crossing-spine-bridged-truss','pack3:023']
+  [10,26,30,32,13,'crossing-spine-bridged-truss','pack3:023'],
+  [33,27,38,41,16,'new-cliff-ledger-annex-hip','pack3:025']
  ];
  for(const [x0,z0,x1,z1,base,form,material] of roofs)for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
   if(!has(x,z)||roofMap.has(g(x,z)))continue;
@@ -63,7 +65,7 @@ export function createIronpassHorseshoeExchange(){
   windows.push({type:'window',x,y:3,z,material:'pack4:030'});
  }
  const supports=[];
- for(const [x,z] of [[10,5],[27,5],[7,17],[8,28],[32,16],[32,26],[14,35],[23,35],[30,36]]){
+ for(const [x,z] of [[10,5],[27,5],[7,17],[8,28],[32,16],[32,26],[14,35],[23,35],[30,36],[36,34]]){
   const upper=roofMap.get(g(x,z));
   if(!upper||!has(x,z))throw Error('Missing Ironpass roof support '+g(x,z));
   let p=0;
@@ -77,7 +79,8 @@ export function createIronpassHorseshoeExchange(){
   [31,16,'folded-fabric-storage','pack5:087'],
   [31,25,'winter-feed-ledger','pack4:057'],
   [17,35,'mountain-tool-stand','pack4:057'],
-  [25,35,'weathered-signage','pack4:061']
+  [25,35,'weathered-signage','pack4:061'],
+   [36,36,'caravan-ledger-reading-bench','pack4:057']
  ])if(has(x,z)&&!cells.has(k(x,2,z)))put(x,2,z,'fixture',material,{purpose:kind});
  for(const [x,z] of [[15,6],[22,6],[6,28],[34,27],[24,36]])if(has(x,z)&&!cells.has(k(x,2,z)))
   put(x,2,z,'decor','pack4:035',{purpose:'unlit-wayfinding-light'});
@@ -88,13 +91,14 @@ export function createIronpassHorseshoeExchange(){
   biome:'mountain',size:'medium',variation:3,title:'Ironpass Broken-Horseshoe Mountain Exchange',
   status:'authored-candidate',isolated:true,worldPlaced:false,numericIdsAssigned:false,
   extents:{x:W,y:H,z:D},units:'integer physical source-cell anchors, producer ABI not certified',
-  architecturalSignature:'original steep asymmetric mountain longhouse, cliff market wings, undercut sky-open court and high narrow east caravan gallery',
-  roof:{form:'five independent three-height stepped original pitched gables',biomeSpecific:true},
+  architecturalSignature:'original steep asymmetric mountain longhouse, cliff market wings, undercut sky-open court, high narrow east caravan gallery and distinctive northeast cliff-ledger annex',
+  roof:{form:'six independent four-height roof masses with northeast cliff-ledger annex',biomeSpecific:true},
   rooms:[
    {name:'Front public mountain trade hall',uses:['square','public-circulation'],bounds:{x0:6,x1:32,z0:3,z1:10}},
    {name:'Western individual quarry and food sellers',uses:['vendor-stalls'],bounds:{x0:3,x1:12,z0:11,z1:35}},
    {name:'Eastern covered winter supply',uses:['vendor-stalls','public-circulation'],bounds:{x0:28,x1:35,z0:11,z1:30}},
-   {name:'Rear linked shelter corridor',uses:['public-circulation'],bounds:{x0:12,x1:33,z0:32,z1:39}}
+   {name:'Rear linked shelter corridor',uses:['public-circulation'],bounds:{x0:12,x1:33,z0:32,z1:39}},
+    {name:'Northeast overcliff ledgers',uses:['public-circulation'],bounds:{x0:34,x1:38,z0:30,z1:41}}
   ],
   circulation:[
    {from:'exterior',to:'square',via:'physical three-high northern mountain gate'},
@@ -108,7 +112,8 @@ export function createIronpassHorseshoeExchange(){
   ],
   features:['square','vendor-stalls','public-circulation','true open sky between supported mountain trade wings'],
   routeTargets:[{x:19,z:2,label:'street entrance'},{x:8,z:23,label:'west stalls'},
-    {x:31,z:18,label:'east caravan gallery'},{x:20,z:35,label:'rear market link'}],
+    {x:31,z:18,label:'east caravan gallery'},{x:20,z:35,label:'rear market link'},
+    {x:36,z:35,label:'new physical cliff-ledger annex'}],
   intentionallyOpenRoof:[{x0:14,x1:26,z0:14,z1:25,groundAbsent:true}],
   symbolicStairApproaches:[],
   unresolvedDependencies:[...materialRefs].sort().map(ref=>({ref,issue:
