@@ -826,14 +826,20 @@ export function descentCells(origin=DESCENT_ORIGIN){
         set(x,depth,z,BLOCK.DEEPSTONE);
         for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
       };
-      for(let d=0;d<=35;d++)for(let t=-2;t<=2;t++)carve(d,t);
-      for(const lobe of [{d:39,t:-9,rx:9,rz:7},{d:43,t:10,rx:8,rz:8}]){
+      // Bend away from the older Y=-200 bedrock labyrinth. Both galleries
+      // remain independently walkable: the -202 standing AIR must never
+      // replace the -200 labyrinth's support floor directly above it.
+      for(let d=0;d<=35;d++){
+        const center=-Math.min(18,d);
+        for(let t=center-2;t<=center+2;t++)carve(d,t);
+      }
+      for(const lobe of [{d:39,t:-31,rx:9,rz:7},{d:43,t:-17,rx:8,rz:8}]){
         for(let dd=-lobe.rx;dd<=lobe.rx;dd++)for(let tt=-lobe.rz;tt<=lobe.rz;tt++){
           const radial=(dd/lobe.rx)**2+(tt/lobe.rz)**2;
           if(radial<=1)carve(lobe.d+dd,lobe.t+tt,4);
         }
       }
-      for(let t=-9;t<=10;t++)for(let d=40;d<=42;d++)carve(d,t);
+      for(let t=-31;t<=-17;t++)for(let d=40;d<=42;d++)carve(d,t);
     }
   }
   // Alcove floors can intersect the sloping approach at a different height.
