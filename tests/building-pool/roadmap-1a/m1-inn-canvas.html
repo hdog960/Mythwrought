@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Builder 1A — Inn 3D source schematic</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#15232b;color:#f5efe2;font-family:system-ui,-apple-system,sans-serif}
+canvas{width:100vw;height:100vh;display:block}header{position:absolute;top:8px;left:8px;max-width:calc(100vw - 118px);background:rgba(12,23,31,.89);border:1px solid #8d7450;border-radius:8px;padding:7px 10px}
+header strong{display:block;font-size:clamp(11px,1.8vw,16px);color:#f4dbb1}header small{font-size:clamp(9px,1.4vw,11px);color:#ddd2bf}
+button{position:absolute;right:8px;top:8px;border:1px solid #f2c788;border-radius:7px;background:#28404b;color:#f9e5c1;font-weight:bold;font-size:11px;padding:8px}
+footer{position:absolute;bottom:7px;left:8px;right:8px;background:rgba(12,23,31,.86);border-radius:6px;padding:5px 9px;font-size:10px;color:#d4d6ce}
+</style></head><body><canvas id="view"></canvas><header><strong>Wayfarer's Lantern Inn</strong><small>Builder 1A · Temperate small · 17×18 footprint</small><br><small>TRUE CHROMIUM CANVAS2D · SOURCE COORDINATES</small></header><button id="switch">CUTAWAY</button><footer id="info">Theoretical blueprint • Proxy unit-cells, not physical-family meshes • Never deployed</footer>
+<script type="module">
+import {getM1InnExemplars} from '../../../src/building-pool/roadmap-1a/m1-inn-exemplars.mjs';
+const b=getM1InnExemplars()[0],canvas=document.getElementById('view'),ctx=canvas.getContext('2d');
+let cutaway=new URLSearchParams(location.search).get('mode')==='cutaway';
+const palette={foundation:'#53606b',wall:'#ac7750',partition:'#786044',support:'#785d42',roof:'#9e4b43',window:'#7db1cc',door:'#e6ae58',furnishing:'#d3ba77'};
+function shown(p){return !cutaway||!(p.role==='roof'||p.roofBacking||p.roofRiser||p.at[1]>=4||((p.role==='wall'||p.role==='partition')&&p.at[1]>=2)||(p.at[2]<=1&&p.at[1]>0));}
+function paint(){const width=innerWidth,height=innerHeight;canvas.width=width;canvas.height=height;
+ ctx.fillStyle='#15232b';ctx.fillRect(0,0,width,height);
+ const scale=Math.min(width/43,height/26),ox=width*.50,oy=height*.57;
+ const project=(x,y,z)=>[ox+(x-z)*.76*scale,oy+(x+z-18)*.36*scale-(y-2)*.95*scale];
+ const polys=[];
+ function block(x,y,z,role,asset){const a=project(x,y,z),B=project(x+1,y,z),c=project(x+1,y,z+1),d=project(x,y,z+1);
+  const A=project(x,y+1,z),E=project(x+1,y+1,z),F=project(x+1,y+1,z+1),G=project(x,y+1,z+1);
+  const col=asset==='pack5:082'?'#9dcbd0':palette[role]||'#a5a69b';
+  const ydepth=x+z+y*.04;
+  polys.push({depth:ydepth,quads:[[[A,E,F,G],col],[[a,A,G,d],shade(col,.76)],[[B,E,F,c],shade(col,.85)] ]});
+ }
+ const visible=b.placements.filter(shown);
+ for(const p of visible)block(...p.at,p.role,p.asset);
+ if(cutaway)for(const r of b.footprintReservations)for(const pos of r.extraCells)block(...pos,'furnishing','pack5:082');
+ polys.sort((a,b)=>a.depth-b.depth);
+ for(const p of polys)for(const [pts,color] of p.quads){ctx.beginPath();ctx.moveTo(...pts[0]);for(const pt of pts.slice(1))ctx.lineTo(...pt);ctx.closePath();ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='rgba(20,25,25,.15)';ctx.lineWidth=.35;ctx.stroke();}
+ document.getElementById('switch').textContent=cutaway?'EXTERIOR':'CUTAWAY';
+ document.getElementById('info').textContent=b.id+' • '+b.placements.length+' authored cells • '+visible.length+' visible • '+(cutaway?'interior cutaway':'exterior')+' • Canvas2D proxy cuboids — NOT production WebGL2';
+ window.__preview={renderer:'Chromium Canvas2D (proxy voxels)',id:b.id,authored:b.placements.length,visible:visible.length,mode:cutaway?'cutaway':'exterior',viewport:[width,height],webgl2:false};
+}
+function shade(hex,t){const c=[1,3,5].map(i=>Math.round(parseInt(hex.slice(i,i+2),16)*t).toString(16).padStart(2,'0'));return '#'+c.join('');}
+document.getElementById('switch').onclick=()=>{cutaway=!cutaway;paint()};onresize=paint;paint();
+</script></body></html>

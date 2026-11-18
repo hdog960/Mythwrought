@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mythwrought Builder 4B M2 VARIANT 03 — Cube-only WebGL2 diagnostic</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#15202c;color:#e4e7ea;font:12px system-ui,sans-serif}
+canvas{width:100vw;height:100vh;display:block}aside{position:absolute;left:8px;top:8px;max-width:95vw;
+background:rgba(10,20,28,.87);border:1px solid #718397a0;border-radius:7px;padding:6px 9px;pointer-events:none}
+strong{font-size:13px}small{display:block;color:#b5c2d4}#warning{color:#ffd8a0}
+</style>
+</head>
+<body>
+<canvas id="scene" aria-label="source-coordinate diagnostic"></canvas>
+<aside><strong id="label">Loading coordinate-authored blueprint…</strong>
+<small id="metrics"></small><small id="warning">CUBE-PROXY WEBGL2 DIAGNOSTIC — NOT physical family assets or live gameplay.</small></aside>
+<script type="module">
+import {M2_VARIANT03_SECOND10} from '../../../src/building-pool/roadmap-4b/m2-variant03-second10.mjs';
+const query=new URLSearchParams(location.search);
+const initialIndex=Number(query.get('index')||0);
+const initialView=query.get('view')==='section'?'section':'exterior';
+const canvas=document.querySelector('canvas');
+const gl=canvas.getContext('webgl2',{antialias:false,preserveDrawingBuffer:true,alpha:false});
+if(!gl)throw Error('genuine WebGL2 context unavailable');
+const vert=`#version 300 es
+in vec3 aPos;in vec3 aColor;out vec3 vColor;
+void main(){gl_Position=vec4(aPos,1.0);vColor=aColor;}`;
+const frag=`#version 300 es
+precision mediump float;in vec3 vColor;out vec4 outColor;
+void main(){outColor=vec4(vColor,1.0);}`;
+function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
+const program=gl.createProgram();
+gl.attachShader(program,shader(gl.VERTEX_SHADER,vert));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,frag));
+gl.linkProgram(program);
+if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
+gl.useProgram(program);
+const colors={
+  foundation:[.31,.34,.38],floor:[.66,.48,.32],wall:[.65,.62,.54],
+  partition:[.49,.43,.37],roof:[.49,.28,.27],beam:[.43,.28,.18],
+  window:[.37,.73,.82],fixture:[.79,.58,.30],column:[.57,.56,.53],
+  stair:[.52,.5,.42],landing:[.61,.51,.39],trim:[.72,.59,.39],
+  railing:[.58,.47,.31],parapet:[.51,.5,.46]
+};
+const faces=[
+  {idx:[0,1,2,0,2,3],shade:1,neighbor:[0,-1,0]},
+  {idx:[4,7,6,4,6,5],shade:.62,neighbor:[0,1,0]},
+  {idx:[0,4,5,0,5,1],shade:.78,neighbor:[0,0,-1]},
+  {idx:[3,2,6,3,6,7],shade:.9,neighbor:[0,0,1]},
+  {idx:[0,3,7,0,7,4],shade:.73,neighbor:[-1,0,0]},
+  {idx:[1,5,6,1,6,2],shade:.82,neighbor:[1,0,0]}
+];
+const cube=(x,y,z)=>[
+ [x,y,z],[x+1,y,z],[x+1,y,z+1],[x,y,z+1],
+ [x,y+1,z],[x+1,y+1,z],[x+1,y+1,z+1],[x,y+1,z+1]];
+const sharedBuffer=gl.createBuffer();
+// Real WebGL2: preserve the module/shaders; redraw every source frame.
+window.__renderFourBFrame=(i,view,width=innerWidth,height=innerHeight)=>{
+if(!Number.isInteger(i)||i<0||i>=M2_VARIANT03_SECOND10.length||!['exterior','section'].includes(view))throw Error('invalid frame');
+if(innerWidth!==width||innerHeight!==height)throw Error('viewport mismatch');
+const b=M2_VARIANT03_SECOND10[i];if(!b)throw Error("unknown authored M2 index");
+canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;
+window.__m2Variant03Second10Preview=null;
+const selected=b.cells.filter(c=>view==='exterior'||c.at[1]<=3&&c.role!=='roof');
+// Cull only genuinely internal voxel-to-voxel faces; retain the actual source coordinates.
+// Reduces CPU/WebGL buffer pressure for 26k-cell third-variant buildings in CI.
+const occupancy=new Set(selected.map(c=>c.at.join(',')));
+const world=[],all=[];
+for(const cell of selected){
+ const [x,y,z]=cell.at,points=cube(x,y,z),base=colors[cell.role]||[.8,.2,.2];
+ for(const face of faces){
+  const [dx,dy,dz]=face.neighbor;
+  if(occupancy.has([x+dx,y+dy,z+dz].join(',')))continue;
+  for(const j of face.idx){
+   const p=points[j];all.push(p);
+   world.push({p,color:base.map(t=>Math.min(1,t*face.shade))});
+  }
+ }
+}
+let uMin=Infinity,uMax=-Infinity,vMin=Infinity,vMax=-Infinity,dMin=Infinity,dMax=-Infinity;
+const project=([x,y,z])=>{
+ const xx=x-b.bounds[0]/2,zz=z-b.bounds[2]/2;
+ return [(xx-zz)*.85,(xx+zz)*.35-y*1.32,(xx+zz+y*.55)];
+};
+for(const p of all){const [u,v,d]=project(p);uMin=Math.min(uMin,u);uMax=Math.max(uMax,u);
+ vMin=Math.min(vMin,v);vMax=Math.max(vMax,v);dMin=Math.min(dMin,d);dMax=Math.max(dMax,d);}
+const rx=Math.max(.1,uMax-uMin),ry=Math.max(.1,vMax-vMin),rd=Math.max(.1,dMax-dMin);
+const s=Math.min(1.56/rx,1.56*canvas.height/canvas.width/ry);
+// Exact source coordinate extents remain inside the WebGL clip rectangle in both axes.
+const cameraFit={horizontalNdc:rx*s/2,verticalNdc:ry*s*canvas.width/canvas.height/2};
+const data=[];
+for(const {p,color} of world){
+ const [u,v,d]=project(p);
+ const cx=(u-(uMax+uMin)/2)*s,cy=-(v-(vMax+vMin)/2)*s*canvas.width/canvas.height;
+ const cz=(dMax-d)/rd*1.7-.85;
+ data.push(cx,cy,cz,...color);
+}
+gl.bindBuffer(gl.ARRAY_BUFFER,sharedBuffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);
+const stride=6*4,position=gl.getAttribLocation(program,'aPos'),color=gl.getAttribLocation(program,'aColor');
+for(const [loc,off] of [[position,0],[color,3*4]]){
+ gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,3,gl.FLOAT,false,stride,off);
+}
+gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.08,.13,.18,1);
+gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
+gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+gl.drawArrays(gl.TRIANGLES,0,world.length);
+gl.finish();
+const error=gl.getError();
+document.querySelector('#label').textContent=b.type+' · '+b.biome+' · '+b.size+' · '+view;
+document.querySelector('#metrics').textContent=selected.length+' coordinate cells · '+
+ Math.floor(world.length/3)+' cube-face triangles · '+canvas.width+'×'+canvas.height+
+ ' · '+b.spaces.length+' rooms';
+window.__m2Variant03Second10Preview={ready:true,renderer:'genuine-webgl2-cube-proxy',type:b.type,
+ view,drawCalls:1,triangles:world.length/3,cells:selected.length,
+ roomCount:b.spaces.length,width:canvas.width,height:canvas.height,glError:error,
+ contextLost:gl.isContextLost(),sourceId:b.id,notPhysical:true,
+ cameraDepthConvention:'elevated-camera-near-is-max',cameraFit,
+ projectionWithinFrame:Math.max(cameraFit.horizontalNdc,cameraFit.verticalNdc)<0.86};
+};
+window.__renderFourBFrame(initialIndex,initialView);
+</script>
+</body></html>
