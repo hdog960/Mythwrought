@@ -21,13 +21,18 @@ test('GPU matrices reproduce source world-space triangles for four orientations'
   const objects=[0,1,2,3].map(r=>make(sceneId,r,[r*5,2,7]));
   const payload=compileFittingGpuPayload(objects).payloads[0];
   assert.equal(payload.instanceCount,4);
-  for(let i=0;i<4;i++){
+  // Packet instances are sorted by stable instanceKey, not caller array order.
+  // Anchor 10 sorts before anchor 5 lexically; always resolve by identity.
+  assert.deepEqual([...payload.instanceKeys].sort(),payload.instanceKeys);
+  for(const object of objects){
+   const i=payload.instanceKeys.indexOf(object.instanceKey);
+   assert.ok(i>=0,'missing '+object.instanceKey);
    const m=payload.transforms.subarray(i*16,(i+1)*16),p=payload.vertexData;
-   const world=objects[i].render.mesh.positions;
+   const world=object.render.mesh.positions;
    for(let v=0;v<world.length/3;v++){
     const x=p[v*4],y=p[v*4+1],z=p[v*4+2];
     const actual=[m[0]*x+m[8]*z+m[12],y+m[13],m[2]*x+m[10]*z+m[14]];
-    for(let k=0;k<3;k++)assert.ok(Math.abs(actual[k]-world[v*3+k])<0.000003,sceneId+' rotation '+i+' vertex '+v);
+    for(let k=0;k<3;k++)assert.ok(Math.abs(actual[k]-world[v*3+k])<0.000003,sceneId+' rotation '+object.orientation+' vertex '+v);
    }
   }
  }
