@@ -16,7 +16,7 @@ test('opt-in fixture picks nearest shaped descriptor, removes only hit and exclu
  assert.equal(result.removed,true);
  assert.equal(s.visible().length,3);
  assert.equal(s.drawCandidates().some(o=>o.instanceKey===result.instanceKey),false);
- assert.equal(s.breakAt([-2,.2,0],[1,0,0]).removed,false);
+ assert.equal(s.target([-2,.2,0],[1,0,0]).sceneId,'scene48:short-fern');
  assert.equal(s.revision(),1);
 });
 test('tombstone snapshot survives isolated fixture reload without modifying schema-1',()=>{
