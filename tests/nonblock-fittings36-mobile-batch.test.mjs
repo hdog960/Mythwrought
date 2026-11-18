@@ -61,3 +61,15 @@ test('unregistered palette material indices cannot enter mobile batches',()=>{
  bad[0]=255;
  assert.throws(()=>planFittingBatches([{...prop,render:{...prop.render,mesh:{...prop.render.mesh,materials:bad}}}]),/invalid/);
 });
+
+test('instancing shares canonical geometry but preserves distinct transforms and world picks',()=>{
+ const a=describeFitting({sceneId:'scene36:signpost',seed:179,anchor:[0,0,0],orientation:0,variant:0,mount:{below:true}});
+ const b=describeFitting({sceneId:'scene36:signpost',seed:179,anchor:[8,0,2],orientation:1,variant:0,mount:{below:true}});
+ assert.deepEqual(a.render.localMesh.positions,b.render.localMesh.positions);
+ assert.notDeepEqual(a.render.mesh.positions,b.render.mesh.positions);
+ assert.deepEqual(b.render.transform,{translation:[8,0,2],quarterTurnsY:1});
+ assert.equal(planFittingBatches([a,b]).batches.length,1);
+ const corrupted=Float32Array.from(b.render.localMesh.positions);corrupted[0]+=.125;
+ assert.throws(()=>planFittingBatches([a,{...b,render:{...b.render,localMesh:{...b.render.localMesh,positions:corrupted}}}]),/incompatible instanced geometry/);
+ assert.throws(()=>planFittingBatches([{...b,render:{...b.render,transform:{translation:[0,0,0],quarterTurnsY:1}}}]),/invalid/);
+});
