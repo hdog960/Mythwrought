@@ -31,6 +31,7 @@ jobs:
         run: |
           node --test tests/cave-roadmap-producer-composition.test.mjs
           node --test tests/cave-roadmap-vault-bridges.test.mjs
+          node --test tests/cave-roadmap-real-controller.test.mjs
           node --test tests/cave-roadmap-east-gallery.test.mjs
           node --test tests/cave-roadmap-runtime.test.mjs
           node --test tests/cave-roadmap-profile-store.test.mjs
