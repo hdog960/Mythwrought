@@ -69,6 +69,12 @@ try{
       baselineP95:median2(beforeP95),s2P95:median2(afterP95)};
     result.viewports.push({width,height,trials,comparison});
     console.log('SKY_S2_AB_PAIRED',JSON.stringify({width,height,comparison}));
+    // Paired-source workload gate: tolerate normal runner variability, but
+    // never accept a repeatable >20% FPS loss or severe p95 degradation.
+    assert.ok(comparison.fpsRatio>=.80,
+      'S2 paired software WebGL2 FPS regressed >20% at '+width+'x'+height);
+    assert.ok(comparison.s2P95<=comparison.baselineP95*1.30+10,
+      'S2 paired frame p95 regressed excessively at '+width+'x'+height);
   }
 }catch(err){failure=err;result.errors.push(String(err?.stack||err));}
 finally{

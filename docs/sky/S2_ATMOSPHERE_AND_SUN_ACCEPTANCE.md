@@ -26,3 +26,7 @@
 8. Keep PR **draft/unmerged**, do not rebase or deploy, do not unlock v0.11. Manual physical iPhone Safari, Home Screen offline, heat and battery tests remain S7.
 
 **Stop/go:** S2 only accepted once its exact-head evidence is green and independently checked. Do NOT begin S3 until S2 is accepted.
+
+## S2 paired performance qualification
+
+The **initial cross-run** quiet-frame result under varying CI load was slower than historical S0. An exact-run ABBA/BAAB pair using the immutable original S0 source and S2 on the **same Chromium runner** established no repeatable large FPS regression: 667×375 22→22.5 FPS; 844×390 16→15; 932×430 14→14. All p95 medians stayed within 10% of S0, and all 25 chunks and real GL remained valid. These are software-renderer measurements, never physical-iPhone acceptance. A guard rejects >20% FPS regression or >30%+10ms p95 regression in future paired sky runs. The historical warm daylight sky color remains a live input anchor in the S2 shader to preserve the original storybook source contract without weakening tests. Final numbers must be reverified at the final exact commit.

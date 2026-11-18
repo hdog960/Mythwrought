@@ -91,6 +91,7 @@ test('S2 projection validates bad camera data and remains deterministic',()=>{
 test('S2 maintains the existing fullscreen sky pass and avoids all S3 assets',()=>{
   assert.match(SKY_VERTEX_SHADER,/gl_VertexID/);
   assert.match(SKY_FRAGMENT_SHADER,/uSunScreen/);
+  assert.match(SKY_FRAGMENT_SHADER,/vec3 warm=vec3\\(\\.80,\\.81,\\.73\\)/);
   for(const s of ['uSunVisibility','uSkyFog','uCloud','uRidge','uSunColor','uHorizon','uZenith'])
     assert.ok(SKY_FRAGMENT_SHADER.includes(s),s);
   assert.doesNotMatch(SKY_FRAGMENT_SHADER,/sampler2D|samplerCube|uMoon|uStars|uCloudTime/);

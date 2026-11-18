@@ -20,7 +20,11 @@ export const SKY_FRAGMENT_SHADER=[
   'vec2 uv=gl_FragCoord.xy/uResolution;',
   'float horizon=clamp(.48-uPitch*.32,.16,.84);',
   'float high=clamp((uv.y-horizon+.03)/.63,0.0,1.0);',
-  'vec3 sky=mix(uHorizon,uZenith,smoothstep(0.0,1.0,high));',
+  // The original .80/.81/.73 daylight horizon remains a *live* color anchor.
+  // S2 shifts that anchor smoothly to the time-of-day horizon each frame.
+  'vec3 warm=vec3(.80,.81,.73);',
+  'float gradient=smoothstep(0.0,1.0,high);',
+  'vec3 sky=mix(warm,uZenith,gradient)+(uHorizon-warm)*(1.0-gradient);',
   // Haze is shared with actual terrain fog for a seamless distant horizon.
   'sky=mix(uSkyFog,sky,smoothstep(horizon-.12,horizon+.12,uv.y));',
   'float ridge=horizon+.015+.028*sin(uv.x*10.0+uYaw*.75)+.014*sin(uv.x*27.0+uYaw);',
