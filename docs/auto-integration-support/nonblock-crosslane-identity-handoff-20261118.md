@@ -1,0 +1,11 @@
+# :12 Cross-lane identity admission — 2026-11-18
+This is an opt-in non-production declaration gate, **not** a :00 save-core bridge or real breakability proof. Source-authenticated must only be set by a runner that fetched and checked exact Git object bytes. A caller-provided boolean is not independent proof.
+## Exact examined sources
+- :48 PR #226 HEAD `411b0bf6049d1af69b907a5cb57afe70c6c6af6c`, `src/nonblock-scene48/nonblock-object-v1.mjs` blob `33ee82e68be152586548bc0975cd11d0cca5dffa`. Canonical `scene48:...` key with no orientation suffix; sidecar parser accepts only registered :48 families.
+- :24 PR #247 HEAD `d473662d176c102ed99757a269b4f159b9a3af50`, `src/nonblock-environments24/v1-bridge.mjs` blob `0b846c34ef5a66796b5772f91538f68ff53de2fe`. Exports `nonblock:d:...` and `nonblock:e:...` IDs, not `scene24:...`; coordinator pin `92578e5628063fb962c9632b35a2a25368be1ab9` differs from examined :48 HEAD.
+- :36 PR #249 HEAD `7964f86d8923a128442ccc5b44655126d360174d`, `src/nonblock-fittings36/fittings-phase1.mjs`. Exports `scene36:...` and appends `:rN` orientation to the key. This cannot round-trip through :48's strict tombstone parser.
+- Historical :12 PR #206 HEAD `aedabf1d3e6250f16e3495ec77bdc056fafc1f46` preserved.
+## Findings and handoffs
+The older :12 adversarial removal validator assumes `scene24:...` and thus rejects actual :24 IDs; do not mistake its fixture success for :24 compatibility. This gate corrects namespace admission without altering historical validators. :48 must not be asked to register unmerged :24/:36 source in production. :00 owner must decide a canonical orientation-aware identity and cross-family tombstone parser, with seed isolation and old schema-1 backup preservation. :24 owner must reconcile its coordinator pin. No default spawning, no object authorship, no save writes, no graphics-core changes.
+## Acceptance
+Run `node --test tests/auto-integration-support/nonblock-crosslane-identity.test.mjs` on exact PR HEAD; then independent producer-byte authentication, source descriptor replay, real :00 PICK → BREAK → TOMBSTONE → RELOAD, and genuine Chromium/WebGL2 667x375, 844x390, 932x430 remain required. Fixture results must never be reported as live.
