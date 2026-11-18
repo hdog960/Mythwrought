@@ -50,12 +50,20 @@ export function buildGpuPipeline(gl,{terrainVertex,terrainFragment,skyVertex,sky
       gl.enableVertexAttribArray(index);
     }
     resources.uniforms={};
-    for(const key of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog','uArtQuality'])
+    for(const key of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog','uArtQuality','uSkyLight'])
       resources.uniforms[key]=gl.getUniformLocation(resources.terrainProgram,key);
     resources.skyUniforms={
       resolution:gl.getUniformLocation(resources.skyProgram,'uResolution'),
       yaw:gl.getUniformLocation(resources.skyProgram,'uYaw'),
-      pitch:gl.getUniformLocation(resources.skyProgram,'uPitch')
+      pitch:gl.getUniformLocation(resources.skyProgram,'uPitch'),
+      sunScreen:gl.getUniformLocation(resources.skyProgram,'uSunScreen'),
+      sunVisibility:gl.getUniformLocation(resources.skyProgram,'uSunVisibility'),
+      horizon:gl.getUniformLocation(resources.skyProgram,'uHorizon'),
+      zenith:gl.getUniformLocation(resources.skyProgram,'uZenith'),
+      cloud:gl.getUniformLocation(resources.skyProgram,'uCloud'),
+      ridge:gl.getUniformLocation(resources.skyProgram,'uRidge'),
+      fog:gl.getUniformLocation(resources.skyProgram,'uSkyFog'),
+      sunColor:gl.getUniformLocation(resources.skyProgram,'uSunColor')
     };
     resources.outlineBuffer=gl.createBuffer();
     if(!resources.outlineBuffer)throw Error('WebGL outline buffer allocation failed');
