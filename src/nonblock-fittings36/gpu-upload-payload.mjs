@@ -4,6 +4,19 @@ import {compileFittingDrawPackets} from './draw-packet-compiler.mjs';
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
 export function compileFittingGpuPayload(objects,options={}){
  const plan=compileFittingDrawPackets(objects,options);
+ const maxUploadBytes=options.maxUploadBytes??(4*1024*1024);
+ // Fail before allocating typed GPU buffers, including when callers request an unsafe cap.
+ if(!Number.isSafeInteger(maxUploadBytes)||maxUploadBytes<1||maxUploadBytes>4*1024*1024)
+  throw new RangeError('invalid GPU upload budget');
+ let projectedBytes=0;
+ for(const packet of plan.packets){
+  const vertices=packet.positions.length/3;
+  if(!Number.isSafeInteger(vertices)||vertices%3!==0||packet.materials.length!==vertices/3)
+   throw new TypeError('invalid triangle payload');
+  projectedBytes+=vertices*4*Float32Array.BYTES_PER_ELEMENT+packet.instances.length*16*Float32Array.BYTES_PER_ELEMENT;
+  if(!Number.isSafeInteger(projectedBytes)||projectedBytes>maxUploadBytes)
+   throw new RangeError('GPU upload budget exceeded before allocation');
+ }
  const payloads=plan.packets.map(packet=>{
   const count=packet.instances.length,vertices=packet.positions.length/3;
   if(!Number.isSafeInteger(vertices)||vertices%3!==0||packet.materials.length!==vertices/3)
@@ -29,8 +42,7 @@ export function compileFittingGpuPayload(objects,options={}){
    bytes:vertexData.byteLength+transforms.byteLength});
  });
  const bytes=payloads.reduce((sum,p)=>sum+p.bytes,0);
- const maxUploadBytes=options.maxUploadBytes??(4*1024*1024);
- if(!Number.isSafeInteger(maxUploadBytes)||maxUploadBytes<1||bytes>maxUploadBytes)
+ if(bytes!==projectedBytes||bytes>maxUploadBytes)
   throw new RangeError('GPU upload budget exceeded');
  return Object.freeze({contract:plan.contract,objectCount:plan.objectCount,totalTriangles:plan.totalTriangles,
   uploadBytes:bytes,payloads:Object.freeze(payloads)});
