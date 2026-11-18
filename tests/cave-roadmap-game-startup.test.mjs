@@ -70,7 +70,8 @@ test('cave selection does not create canonical save for untouched starter world'
  const cave=prepareExplicitCaveWorld(s,314159,{action:'create',approved:true});
  assert.equal(cave.world.seed,314159);
  assert.equal(s.getItem(worldSlotKey(179)),null);
- normal.set(0,2,0,BLOCK.STONE);
+ assert.equal(normal.set(0,2,0,BLOCK.WOOD),true);
+ assert.ok(normal.edits.size>0,'fixture must really differ from unchanged seeded stone');
  assert.equal(existingWorldNeedsSaveBeforeCaveSwitch(s,normal),true);
  const existing='{"schema":1,"seed":179,"edits":[]}';
  s.setItem(worldSlotKey(179),existing);
