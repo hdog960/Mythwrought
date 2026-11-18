@@ -4,7 +4,15 @@ export const COMPATIBILITY = Object.freeze({producer:':24',contract:CONTRACT,req
 const finite3 = a=>Array.isArray(a)&&a.length===3&&a.every(Number.isFinite);
 const validKey = o=>typeof o?.instanceKey==='string'&&o.instanceKey.length>0&&o.removal?.tombstoneKey==='nonblock:'+o.instanceKey;
 export function validateEnvironmentObject(o){
- if(o?.contract!==CONTRACT||!validKey(o)||!Object.values(FAMILIES).some(f=>f.sceneId===o.sceneId))throw new TypeError('invalid environment descriptor');
+ if(o?.contract!==CONTRACT||!validKey(o))throw new TypeError('invalid environment descriptor');
+ // Never trust a caller-supplied key or anchor: tombstones must identify exactly
+ // the source-modeled family, safe-integer seed, coordinate and variant.
+ const family=Object.keys(FAMILIES).find(name=>FAMILIES[name].sceneId===o.sceneId);
+ if(!family||!Number.isSafeInteger(o.seed)||!o.anchor||
+    ![o.anchor.x,o.anchor.y,o.anchor.z].every(Number.isSafeInteger)||
+    !Number.isInteger(o.variant)||o.variant<0||o.variant>7||
+    o.instanceKey!==makeEnvironmentObject(family,{seed:o.seed,anchor:o.anchor,variant:o.variant}).instanceKey)
+   throw new TypeError('noncanonical environmental identity');
  const p=o.mesh?.positions;
  if(!Array.isArray(p)||p.length===0||p.length%9!==0||p.length/9!==o.mesh.triangleCount||p.some(n=>!Number.isFinite(n)))throw new TypeError('invalid triangle mesh');
  if(o.mesh.triangleCount>o.render?.maxTriangles||o.render.maxTriangles>128)throw new RangeError('mesh budget exceeded');
