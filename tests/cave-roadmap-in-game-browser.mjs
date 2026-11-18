@@ -117,6 +117,32 @@ try{
    assert.equal(status.entranceSites.length,4);
    assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-'+314159)),null);
    assert.ok(await page.evaluate(()=>localStorage.getItem('mythwrought-caves-v1-seed-'+314159)));
+   if(width===667){
+     // Use the *actual* Cave World menu handlers, not a fake API, to show
+     // that legacy shaped construction and device vault/mirror writes
+     // cannot mutate a cave save or the matching ordinary-world keys.
+     const guards=await page.evaluate(()=>{
+       const pack5=document.getElementById('pack5Enabled');
+       pack5.checked=true;
+       pack5.dispatchEvent(new Event('change',{bubbles:true}));
+       document.getElementById('vaultBackup').click();
+       document.getElementById('mirrorRestore').click();
+       return {
+         pack5Checked:pack5.checked,
+         vaultStatus:document.getElementById('vaultStatus').textContent,
+         mirrorStatus:document.getElementById('mirrorStatus').textContent,
+         oldCanonical:localStorage.getItem('mythwrought-v002-world-'+314159),
+         pack5Sidecar:localStorage.getItem('mythwrought.pack5.builder.seed.'+314159),
+         pack3Sidecar:localStorage.getItem('mythwrought-pack3-construction-v1:'+314159)
+       };
+     });
+     assert.equal(guards.pack5Checked,false,'Cave World unexpectedly enabled unsaved Pack5 construction');
+     assert.match(guards.vaultStatus,/Cave World|Cave profile/i);
+     assert.match(guards.mirrorStatus,/Cave World|Cave profile/i);
+     assert.equal(guards.oldCanonical,null,'Legacy vault/mirror wrote the protected ordinary world');
+     assert.equal(guards.pack5Sidecar,null,'Pack5 sidecar created in Cave World');
+     assert.equal(guards.pack3Sidecar,null,'Pack3 sidecar created in Cave World');
+   }
    await page.evaluate(()=>document.getElementById('closeHelp').click());
    const shots=locators(status),hashes=new Set();
    for(const shot of shots){
