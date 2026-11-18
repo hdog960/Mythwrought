@@ -88,12 +88,15 @@ async function setPhaseBySidecar(page,phase){
 }
 async function aim(page,dir){
   await page.locator('#scene').focus();
-  const key=dir==='east'?'ArrowRight':'ArrowLeft';
+  // newPlayer() begins facing south (yaw=PI), not yaw=0:
+  // LEFT aims east (~+PI/2), RIGHT wraps and aims west (~-PI/2).
+  const key=dir==='east'?'ArrowLeft':'ArrowRight';
   await page.keyboard.down(key);
   try{
     await page.waitForFunction(dir=>{
       const yaw=+document.querySelector('#scene')?.dataset.cameraYaw;
-      return dir==='east'?yaw>1.19:yaw< -1.19;
+      return dir==='east'?(yaw>1.32&&yaw<1.73):
+        (yaw> -1.73&&yaw< -1.32);
     },dir,{timeout:22000});
   }finally{await page.keyboard.up(key);}
   await page.waitForFunction(()=>{
