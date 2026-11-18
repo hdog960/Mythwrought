@@ -1,0 +1,61 @@
+name: Mythwrought SKY S1 exact-head clock and WebGL2
+on:
+  push:
+    branches: ['sky/roadmap-s0-baseline-20261118']
+    paths:
+      - 'src/world-clock.mjs'
+      - 'src/main.mjs'
+      - 'index.html'
+      - 'styles.css'
+      - 'tests/world-clock.test.mjs'
+      - 'tests/sky/s1-clock-browser.mjs'
+      - 'docs/sky/**'
+      - '.github/workflows/sky-s1-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sky-s1-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-exact-s1:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert exact checkout and sky-only ownership
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          for file in $(git diff --name-only e9223217ef1e91d282900c3fc13a21eeda316b63 HEAD); do
+            case "$file" in
+              src/world-clock.mjs|src/main.mjs|index.html|styles.css|tests/world-clock.test.mjs|tests/sky/*|docs/sky/*|.github/workflows/sky-s0-baseline.yml|.github/workflows/sky-s1-acceptance.yml) ;;
+              *) echo "S1 OUTSIDE SKY OWNERSHIP: $file"; exit 1;;
+            esac
+          done
+          git diff --exit-code e9223217ef1e91d282900c3fc13a21eeda316b63 HEAD -- src/sky.mjs src/gpu-pipeline.mjs src/persistence.mjs src/voxel.mjs src/foreground.mjs src/render-budget.mjs
+      - name: Native clock mathematics and protected storage
+        run: |
+          node --check src/main.mjs
+          node --check src/world-clock.mjs
+          node --check tests/sky/s1-clock-browser.mjs
+          node --test tests/world-clock.test.mjs
+      - name: Install pinned genuine Chromium test runner
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Capture S1 day and night original-game WebGL2 in three landscape sizes
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-sky-s1.log 2>&1 &
+          node tests/sky/s1-clock-browser.mjs
+      - name: Upload original-game screenshots and reproducible manifest
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s1-${{ github.sha }}
+          path: artifacts/sky-s1/
+          if-no-files-found: warn
