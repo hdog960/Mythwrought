@@ -40,7 +40,7 @@ test('GPU matrices reproduce source world-space triangles for four orientations'
 test('upload budget fails closed without partial result',()=>{
  const objects=[make('scene36:signpost',0,[0,0,0])];
  assert.throws(()=>compileFittingGpuPayload(objects,{maxUploadBytes:1}),/budget exceeded/);
- assert.throws(()=>compileFittingGpuPayload(objects,{maxUploadBytes:0}),/budget exceeded/);
+ assert.throws(()=>compileFittingGpuPayload(objects,{maxUploadBytes:0}),/invalid GPU upload budget/);
 });
 test('source mutation after compile cannot modify prepared upload data',()=>{
  const o=make('scene36:rope-coil',0,[0,0,0]);
