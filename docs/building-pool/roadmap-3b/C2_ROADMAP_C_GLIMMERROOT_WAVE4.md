@@ -2,7 +2,7 @@
 
 **NEW SOURCE-ONLY DRAFT.** New allocated candidate ID `r3:barracks:enchanted-forest:medium:1`. Authoring created only separate owned `src/tests/docs/building-pool/roadmap-3b` files. Prior 208 source-authored 3B designs and all original H2 355 source file Git SHA identities remain immutable, no previous file edited.
 
-Original 65×20×66 medium forest defensive source, nine unique structural wings, six functional true rooms (bunks, mess, armory, duty, infirmary, drill), six two-wide bridging routes and two genuinely open forest courtyard openings. Independently verified 3,324/3,324 connected real ground source foundation tiles with 49 carved courtyard tiles and no blocked room supports.
+Original 65×20×66 medium forest defensive source, ten unique structural wings, six functional true rooms (bunks, mess, armory, duty, infirmary, drill), six two-wide bridging routes and two genuinely open forest courtyard openings. Independently verified 3,433/3,433 connected real ground source foundation tiles with 49 carved courtyard tiles and no blocked room supports.
 
 **Technical preflight:** existing unchanged source compiler/schema validation verified, candidate only. **Provisional 209/360** (151 remaining for this lane), not acceptance until exact-head focused CI.
 
