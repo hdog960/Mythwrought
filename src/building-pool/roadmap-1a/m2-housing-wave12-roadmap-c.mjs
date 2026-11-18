@@ -16,20 +16,20 @@ export const ROADMAP_C_1A_WAVE12_SPECS=Object.freeze([
     "exteriorNotches": [
       [
         0,
-        9,
         21,
+        9,
         41
       ],
       [
         34,
-        42,
         0,
+        42,
         9
       ],
       [
         35,
-        42,
         35,
+        42,
         41
       ]
     ],
