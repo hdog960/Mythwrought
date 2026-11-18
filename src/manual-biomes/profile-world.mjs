@@ -4,24 +4,31 @@
 import {VoxelWorld,BLOCK,terrainHeight,worldKey} from '../voxel.mjs';
 import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y,WORLD_MIN_Y} from '../depth.mjs';
 import {isBiome130BlockId} from '../biome130-registry.mjs';
-import {surfaceBiomeFreshColumn} from '../surface-regions/regions.mjs';
+import {surfaceBiomeFreshColumn,surfaceBiomeAt} from '../surface-regions/regions.mjs';
+import {m3DesertFreshColumn,M3_XERIC_IDS} from './desert-m3.mjs';
 
-export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v2';
+// Profile version v2 remains loadable with byte-identical natural voxels;
+ // NEW explicitly created M3 worlds use v3. A v2 world is NEVER upgraded
+ // by merely opening it in the M3 game candidate.
+export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v3';
+export const M2_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v2';
+const ACCEPTED_GENERATORS=new Set([FOUR_REGION_GENERATOR,M2_FOUR_REGION_GENERATOR]);
 const MAX_EDIT_ROWS=300000;
 const MAX_COLUMNS=1024;
-export function fourRegionProfile(seed){
+export function fourRegionProfile(seed,generator=FOUR_REGION_GENERATOR){
   if(!Number.isInteger(seed)||seed!==(seed|0))throw Error('Invalid biome profile seed');
+  if(!ACCEPTED_GENERATORS.has(generator))throw Error('Unknown biome generator');
   return Object.freeze({kind:'mythwrought-generation-profile',version:1,
-    generator:FOUR_REGION_GENERATOR,seed});
+    generator,seed});
 }
 export function validateFourRegionProfile(input,seed){
   if(!input||typeof input!=='object'||Array.isArray(input)||
      Object.keys(input).sort().join(',')!=='generator,kind,seed,version'||
      input.kind!=='mythwrought-generation-profile'||input.version!==1||
-     input.generator!==FOUR_REGION_GENERATOR||!Number.isInteger(input.seed)||
+     !ACCEPTED_GENERATORS.has(input.generator)||!Number.isInteger(input.seed)||
      input.seed!==(input.seed|0)||(seed!==undefined&&seed!==input.seed))
     throw Error('Unsupported or mismatched biome generation profile');
-  return fourRegionProfile(input.seed);
+  return fourRegionProfile(input.seed,input.generator);
 }
 
 /** A real VoxelWorld subclass: super.get/set/save use this canonical natural
@@ -44,11 +51,15 @@ export class FourRegionWorld extends VoxelWorld{
     // The authoritative non-profile baseline includes existing seeded
     // landmarks/districts and caves, so the proposal cannot bury their AIR,
     // replace their blocks or silently lift their geometry.
-    const plan=surfaceBiomeFreshColumn(x,z,this.seed,{
+    const opts={
       enabled:true,profileIsFresh:true,
       readBaseline:(a,b,c)=>super.naturalAndLandmarkBlock(a,b,c),
       hasEdit:()=>false,isProtected:()=>false
-    });
+    };
+    const isM3Desert=this.profile.generator===FOUR_REGION_GENERATOR&&
+      surfaceBiomeAt(x,z,this.seed)?.name==='desert';
+    const plan=isM3Desert?m3DesertFreshColumn(x,z,this.seed,opts):
+      surfaceBiomeFreshColumn(x,z,this.seed,opts);
     // M2 GPU and support correction: preserve every source-authored visible
     // Mountain top, while filling *concealed raised interiors* with real
     // full-cube stone instead of thousands of partial cliffstone surfaces.
@@ -90,6 +101,20 @@ export class FourRegionWorld extends VoxelWorld{
     this.biomeCellCount=count-Number(isBiome130BlockId(previous))+
       Number(isBiome130BlockId(next));
     if(!this.edits.has(key))this.rotations.delete(key);
+    if(this.profile.generator===FOUR_REGION_GENERATOR&&id===BLOCK.AIR){
+      // When the player mines the support of a naturally authored xeric
+      // formation, persist AIR edits for its supported stack, too. No fake
+      // floating cactus after mining or after a cold world reload.
+      for(let above=y+1;above<=WORLD_MAX_Y;above++){
+        const k=worldKey(x,above,z);
+        if(this.edits.has(k))break; // never remove a player-made structure
+        const natural=this.naturalAndLandmarkBlock(x,above,z);
+        if(!M3_XERIC_IDS.includes(natural)||this.get(x,above,z)!==natural)
+          break;
+        if(!this.set(x,above,z,BLOCK.AIR))
+          throw Error('Could not persist removed xeric support');
+      }
+    }
     return true;
   }
   get cachedBiomeColumns(){return this._biomeColumns.size;}
