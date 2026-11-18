@@ -6,6 +6,7 @@ import {VoxelWorld,worldKey} from '../voxel.mjs';
 import {WORLD_MIN_Y,LEGACY_WORLD_MIN_Y} from '../depth.mjs';
 import {worldSlotKey,LEGACY_WORLD_KEY,DEFAULT_WORLD_SEED} from '../seeds.mjs';
 import {auditCaveSourceCells} from './source-composition.mjs';
+import {planDeepVaultConnections} from './deep-vault-bridges.mjs';
 
 export const CAVE_PROFILE_KIND='mythwrought-new-caves-v1';
 function existingSaveKeys(storage,seed){
@@ -46,10 +47,21 @@ export class CaveVoxelWorld extends VoxelWorld{
     // Do not expose a partially composed cave map as a playable world.
     if(!audit.ok)throw Error('Cave source composition not safe: '+audit.reasons.join('; ')+
       ' '+JSON.stringify(audit.conflicts.slice(0,3)));
+    // Preserve all five historical source layers without collision. Add only
+    // independently authored connective geometry that cannot overwrite any
+    // existing AIR/stone cell; fail closed if a vault remains disconnected.
+    const connections=planDeepVaultConnections({sourceCells:audit.cells,seed});
+    if(!connections.ok)throw Error('Physical deep-vault junctions not ready: '+
+      JSON.stringify(connections.failures));
     this.caveCellMap=audit.cells;
+    this.caveConnectorCells=new Map(connections.cells);
     this.cavePlanReport=Object.freeze({
       seed,sourceCount:audit.sourceCount,
       sourceReports:audit.sourceReports,overlapCount:audit.overlapCount,
+      vaultBridgeConnected:true,vaultBridgeCells:this.caveConnectorCells.size,
+      vaultBridgeSteps:Object.freeze(connections.bridges.map(b=>Object.freeze({
+        floor:b.floor,steps:b.steps,widened:b.widened
+      }))),
       entrancesConnected:false,productionRegistered:false
     });
   }
@@ -62,6 +74,8 @@ export class CaveVoxelWorld extends VoxelWorld{
       if(this.cavePortalCells?.has(key))return this.cavePortalCells.get(key);
       if(y<LEGACY_WORLD_MIN_Y&&this.caveCellMap?.has(key))
         return this.caveCellMap.get(key);
+      if(y<LEGACY_WORLD_MIN_Y&&this.caveConnectorCells?.has(key))
+        return this.caveConnectorCells.get(key);
     }
     return super.naturalAndLandmarkBlock(x,y,z);
   }

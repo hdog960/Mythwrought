@@ -21,6 +21,9 @@ for(const seed of [179,1,2026,-77]){
     assert.ok(world instanceof Pack2LiveWorld,'use real game-facing Pack2 world wrapper');
     assert.equal(runtime.registeredInHomeScreen,false);
     assert.equal(world.base.cavePlanReport.entrancesConnected,true);
+    assert.equal(world.base.cavePlanReport.vaultBridgeConnected,true);
+    assert.ok(world.base.cavePlanReport.vaultBridgeCells>100);
+    assert.equal(world.base.cavePlanReport.vaultBridgeSteps.length,4);
     assert.equal(runtime.entrancePlan.entrances.length,4);
     for(const entry of runtime.entrancePlan.entrances){
       for(const p of entry.route){
