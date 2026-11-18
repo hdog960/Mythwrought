@@ -68,7 +68,7 @@ test('M5 v5 profile-aware imports: preserve exact v2,v3,v4,v5 generator and Pack
    const source=new Pack2LiveWorld(new FourRegionWorld(seed,fourRegionProfile(seed,version)));
    const x=4+i,z=-4-i,y=7;
    assert.equal(source.set(x,y,z,3),true);
-   assert.equal(source.placePack2(x,y+3,z,59,{}),true);
+   assert.equal(source.placePack2(x,18,z,59,{}),true);
    const raw=exportM2World(source),examined=inspectM2WorldExport(raw);
    assert.equal(examined.world.base.generationProfile.generator,version);
    assert.throws(()=>planM2WorldChoice(String(seed),M2_WORLD_MODE.IMPORT_PROFILE,
