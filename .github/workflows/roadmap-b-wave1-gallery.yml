@@ -1,0 +1,35 @@
+name: Roadmap B Wave1 isolated source WebGL2 gallery
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-b/**'
+      - 'tests/building-pool/roadmap-b/**'
+      - '.github/workflows/roadmap-b-wave1-gallery.yml'
+permissions:
+  contents: read
+jobs:
+  roadmap-b-webgl2:
+    if: ${{ github.event.pull_request.number == 241 && github.event.pull_request.draft == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser witness tooling
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Capture exact source-supported 36 WebGL2 landscape PNGs
+        env:
+          ROADMAP_B_EXACT_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node tests/building-pool/roadmap-b/source-gallery.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-b-wave1-exact-source-webgl2
+          path: artifacts/roadmap-b-wave1-webgl2
+          if-no-files-found: warn

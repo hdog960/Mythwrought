@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mythwrought Roadmap B source gallery</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#121924}canvas{display:block;width:100%;height:100%}aside{position:absolute;top:9px;left:10px;color:#fbf5e8;font:12px system-ui;text-shadow:0 1px 2px black}</style>
+<canvas id="canvas"></canvas><aside id="label">Mythwrought source-only evidence</aside>
+<script type="module">
+import {getRoadmapBWave1B1} from '../../../src/building-pool/roadmap-b/wave1-community-b1.mjs';
+import {getRoadmapBWave1B2} from '../../../src/building-pool/roadmap-b/wave1-trades-b2.mjs';
+const params=new URLSearchParams(location.search),id=params.get('id'),view=params.get('view')||'exterior';
+window.__ROADMAP_B={ready:false,webgl2:false,id,view};
+try{
+ const buildings=[...getRoadmapBWave1B1(),...getRoadmapBWave1B2()];
+ const b=buildings.find(x=>x.id===id);
+ if(!b)throw Error('Missing exact source candidate '+id);
+ const canvas=document.getElementById('canvas');
+ const gl=canvas.getContext('webgl2',{antialias:false,preserveDrawingBuffer:true});
+ if(!gl)throw Error('WebGL2 context unavailable');
+ canvas.width=innerWidth;canvas.height=innerHeight;
+ gl.viewport(0,0,canvas.width,canvas.height);
+ const vs=[
+ '#version 300 es','precision highp float;','in vec3 position;in float shade;',
+ 'uniform vec3 span;uniform float aspect;','out float colorIndex;',
+ 'void main(){','float x=position.x-span.x*.5,z=position.z-span.z*.5,y=position.y;',
+ 'float sx=.79*x-.62*z,sz=.62*x+.79*z;','float scale=1.52/max(span.x,span.z);',
+ 'gl_Position=vec4(sx*scale/aspect,((sx+sz)*.17-y*.82+span.y*.35)*scale,0.,1.);',
+ 'gl_PointSize=3.3;','colorIndex=shade;','}'].join('\n');
+ const fs=['#version 300 es','precision highp float;','in float colorIndex;out vec4 fragColor;',
+ 'void main(){','vec3 c=colorIndex<.5?vec3(.55,.62,.57):colorIndex<1.5?vec3(.91,.56,.27):',
+ 'colorIndex<2.5?vec3(.28,.78,.92):colorIndex<3.5?vec3(.72,.69,.54):',
+ 'colorIndex<4.5?vec3(.63,.39,.22):vec3(.54,.84,.43);',
+ 'fragColor=vec4(c,1.);','}'].join('\n');
+ const make=(kind,s)=>{const v=gl.createShader(kind);gl.shaderSource(v,s);gl.compileShader(v);if(!gl.getShaderParameter(v,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(v));return v;};
+ const program=gl.createProgram();gl.attachShader(program,make(gl.VERTEX_SHADER,vs));gl.attachShader(program,make(gl.FRAGMENT_SHADER,fs));gl.linkProgram(program);
+ if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);
+ const source=b.placements?b.placements.map(p=>({x:p.at[0],y:p.at[1],z:p.at[2],kind:p.role})):b.voxels;
+ const ext=b.footprint||b.extents,W=ext.width||ext.x,H=ext.height||ext.y,D=ext.depth||ext.z;
+ const visible=source.filter(p=>view!=='cutaway'||(p.kind!=='roof'&&(p.kind!=='wall'||p.z>D*.42)&&p.kind!=='support'));
+ const shade=k=>k==='roof'?1:k==='window'?2:k==='foundation'||k==='floor'?3:k==='fixture'||k==='furnishing'?5:k==='support'?4:0;
+ const attr=new Float32Array(visible.length*4);
+ visible.forEach((p,i)=>{attr[4*i]=p.x;attr[4*i+1]=p.y;attr[4*i+2]=p.z;attr[4*i+3]=shade(p.kind);});
+ const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,attr,gl.STATIC_DRAW);
+ const pos=gl.getAttribLocation(program,'position'),role=gl.getAttribLocation(program,'shade');
+ gl.vertexAttribPointer(pos,3,gl.FLOAT,false,16,0);gl.enableVertexAttribArray(pos);
+ gl.vertexAttribPointer(role,1,gl.FLOAT,false,16,12);gl.enableVertexAttribArray(role);
+ gl.uniform3f(gl.getUniformLocation(program,'span'),W,H,D);
+ gl.uniform1f(gl.getUniformLocation(program,'aspect'),canvas.width/canvas.height);
+ gl.clearColor(.07,.10,.15,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.POINTS,0,visible.length);
+ const error=gl.getError();if(error!==0)throw Error('WebGL2 error '+error);
+ document.getElementById('label').textContent=b.title+' / '+view+' / source-cell WebGL2 proxy';
+ window.__ROADMAP_B={ready:true,webgl2:true,id,view,sourceCells:source.length,visibleCells:visible.length,dimensions:[canvas.width,canvas.height],error};
+}catch(e){document.getElementById('label').textContent=String(e);window.__ROADMAP_B={ready:true,webgl2:false,id,view,error:String(e)};}
+</script></html>
