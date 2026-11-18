@@ -239,9 +239,9 @@ const PLANS=[
         "kind": "tower-or-wing",
         "rect": [
           75,
-          45,
+          49,
           83,
-          54
+          55
         ]
       }
     ],
@@ -830,9 +830,9 @@ const PLANS=[
         "kind": "tower-or-wing",
         "rect": [
           50,
-          38,
+          47,
           58,
-          47
+          53
         ]
       }
     ],
@@ -2024,7 +2024,7 @@ const PLANS=[
         "kind": "copying-gallery",
         "rect": [
           61,
-          52,
+          53,
           69,
           61
         ]
@@ -3523,9 +3523,9 @@ const PLANS=[
         "kind": "public-lecture",
         "rect": [
           52,
-          41,
+          45,
           60,
-          50
+          51
         ]
       }
     ],
