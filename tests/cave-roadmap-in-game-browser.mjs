@@ -40,7 +40,7 @@ let browser=null;
 function inspect(raw,w,h){
  const png=PNG.sync.read(raw);
  assert.equal(png.width,w);assert.equal(png.height,h);
- const values=new Set(),pixelCount=0;
+ const values=new Set();let pixelCount=0;
  for(let y=Math.floor(h*.27);y<Math.floor(h*.77);y+=7)
   for(let x=Math.floor(w*.22);x<Math.floor(w*.78);x+=7){
    const i=(y*w+x)*4;values.add([png.data[i]>>4,png.data[i+1]>>4,png.data[i+2]>>4].join(','));
