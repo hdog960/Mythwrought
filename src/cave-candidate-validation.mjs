@@ -28,8 +28,16 @@ export function caveTraversalTrace(world,origin=CAVE_CANDIDATE){
     samples.push({x:x+sideT,y:feet,z:z+dz,clear:!collides(candidate,x+sideT+.5,feet,z+dz+.5),
       supported:candidate.get(x+sideT,sideFloor,z+dz)!==BLOCK.AIR,rise:0});
   }
+  // Traverse the new west gallery from the corridor center to its far wall.
+  const westT=12,westFloor=route.floorAt(westT);
+  for(let dz=-1;dz>=-4;dz--){
+    const feet=westFloor+1;
+    samples.push({x:x+westT,y:feet,z:z+dz,
+      clear:!collides(candidate,x+westT+.5,feet,z+dz+.5),
+      supported:candidate.get(x+westT,westFloor,z+dz)!==BLOCK.AIR,rise:0});
+  }
   const failures=samples.filter(p=>!p.clear||!p.supported||Math.abs(p.rise)>1);
   const entrance={x,y:terrainHeight(x,z,world.seed),z};
-  return {entrance,chamber:route.chamber,grotto:route.grotto,samples,failures,
+  return {entrance,chamber:route.chamber,grotto:route.grotto,westGallery:route.westGallery,samples,failures,
     walkable:failures.length===0,bodyHeight:BODY_HEIGHT,bodyRadius:BODY_RADIUS};
 }
