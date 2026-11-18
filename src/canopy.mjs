@@ -185,7 +185,7 @@ function evergreen(out,x,y,z,variation,beacon=false,profile='mixed'){
     const reach=maxRadius*(.19+.055*(1-level/4)+.035*Math.sin(variation*11+i));
     const tip=[
       (p[0]+q[0])*.5+Math.cos(angle)*reach,
-      (p[1]+q[1])*.5-.115-.045*(level%2),
+      (p[1]+q[1])*.5-.18-.045*(level%2),
       (p[2]+q[2])*.5+Math.sin(angle)*reach
     ];
     tri(out,p,q,tip,needles[(i+level+1)%needles.length],7);
