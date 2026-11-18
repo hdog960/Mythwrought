@@ -84,3 +84,25 @@ test('non-overlapping placements survive deterministic reservation',()=>{
  const session=createEnvironmentSession({seed,objects:[b,a],blockAt:(x,y,z)=>y===-13?1:0,editedAt:edit,occupiedAt:occupied});
  assert.equal(session.visible().length,2);
 });
+
+
+test('full safe-integer seed and anchor identity never alias via 32-bit truncation',()=>{
+ const largeSeed=179+2**32;
+ const largeX=4+2**32;
+ const base=makeEnvironmentObject('stalagmite',{seed:179,anchor,variant:0});
+ const differentSeed=makeEnvironmentObject('stalagmite',{seed:largeSeed,anchor,variant:0});
+ const differentAnchor=makeEnvironmentObject('stalagmite',{seed:179,anchor:{...anchor,x:largeX},variant:0});
+ assert.notEqual(base.instanceKey,differentSeed.instanceKey);
+ assert.notEqual(base.instanceKey,differentAnchor.instanceKey);
+ assert.equal(differentSeed.seed,largeSeed);
+ assert.equal(differentAnchor.anchor.x,largeX);
+ assert.equal(validateEnvironmentObject(differentSeed),true);
+ assert.throws(()=>makeEnvironmentObject('stalagmite',{seed:Number.MAX_SAFE_INTEGER+1,anchor}));
+ assert.throws(()=>makeEnvironmentObject('stalagmite',{seed:179,anchor:{...anchor,x:Number.MAX_SAFE_INTEGER+1}}));
+ const session=createEnvironmentSession({seed:largeSeed,objects:[differentSeed],blockAt:(x,y,z)=>y===-13?1:0,editedAt:edit,occupiedAt:occupied});
+ assert.equal(session.visible().length,1);
+ const saved=session.snapshot();
+ assert.equal(saved.seed,largeSeed);
+ assert.equal(createEnvironmentSession({seed:largeSeed,objects:[differentSeed],blockAt:(x,y,z)=>y===-13?1:0,editedAt:edit,occupiedAt:occupied,snapshot:saved}).visible().length,1);
+ assert.throws(()=>createEnvironmentSession({seed:179,objects:[differentSeed],blockAt:support,editedAt:edit,occupiedAt:occupied}));
+});
