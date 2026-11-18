@@ -33,6 +33,7 @@ jobs:
           node --test tests/cave-roadmap-vault-bridges.test.mjs
           node --test tests/cave-roadmap-real-controller.test.mjs
           node --test tests/cave-roadmap-end-to-end-controller.test.mjs
+          node --test tests/cave-roadmap-surface-transition.test.mjs
           node --test tests/cave-roadmap-game-startup.test.mjs
           node --test tests/cave-roadmap-east-gallery.test.mjs
           node --test tests/cave-roadmap-runtime.test.mjs

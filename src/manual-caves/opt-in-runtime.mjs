@@ -5,6 +5,7 @@ import {VoxelWorld,worldKey} from '../voxel.mjs';
 import {Pack2LiveWorld} from '../pack2-world.mjs';
 import {CAVE_PROFILE_KIND,CaveVoxelWorld} from './cave-voxel-world.mjs';
 import {planNewCaveEntrances} from './entrance-preflight.mjs';
+import {planSpiralSurfaceTransition,inspectSpiralSurfaceTransition} from './surface-transition.mjs';
 
 function attachVerifiedEntrances(base){
   if(!(base instanceof CaveVoxelWorld))throw Error('Expected genuine opt-in CaveVoxelWorld');
@@ -17,8 +18,25 @@ function attachVerifiedEntrances(base){
     if(base.caveCellMap.has(key)&&base.caveCellMap.get(key)!==id)
       throw Error('Portal would overwrite authored cave geometry at '+key);
   }
-  base.cavePortalCells=new Map(plan.cells);
+  const collar=planSpiralSurfaceTransition({seed:base.seed,
+    baseWorld:new VoxelWorld(base.seed),portals:plan.cells,
+    forbiddenCells:base.caveEastCells,approved:true});
+  if(!collar.ok)throw Error('Historical deep spiral surface seam is unsafe: '+
+    JSON.stringify(collar.conflicts?.slice(0,3)??collar.reason));
+  const combined=new Map(plan.cells);
+  for(const [key,id] of collar.cells){
+    if(combined.has(key)&&combined.get(key)!==id)
+      throw Error('Source portal/collar AIR/STONE collision at '+key);
+    combined.set(key,id);
+  }
+  base.cavePortalCells=combined;
+  const collarInspect=inspectSpiralSurfaceTransition(base,collar);
+  if(!collarInspect.ok)throw Error('Unwalkable cave entrance-to-spiral seam: '+
+    JSON.stringify(collarInspect.bad));
   base.cavePlanReport=Object.freeze({...base.cavePlanReport,
+    surfaceTransitionConnected:true,
+    surfaceTransitionCells:collar.cells.size,
+    surfaceTransitionSteps:collar.sourceSteps,
     entrancesConnected:true,productionRegistered:false,
     entranceSites:Object.freeze(plan.entrances.map(x=>Object.freeze({
       name:x.name,mouth:x.mouth,steps:x.route.length
