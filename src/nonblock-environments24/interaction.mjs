@@ -42,7 +42,22 @@ export function createEnvironmentSession({seed,objects,blockAt,editedAt,occupied
   if(snapshot?.contract!==CONTRACT||snapshot.seed!==seed||!Array.isArray(snapshot.tombstones)||snapshot.tombstones.some(k=>typeof k!=='string'||!objects.some(o=>o.removal.tombstoneKey===k)))throw new TypeError('invalid tombstone snapshot');
   snapshot.tombstones.forEach(k=>tombstones.add(k));
  }
- const eligible=o=>canAttach(o,{blockAt,editedAt,occupiedAt});
+ // Check every voxel intersected by the mesh selection envelope, not only its
+ // anchor column. A broad crystal or future multi-cell object must never clip
+ // a player edit, existing block or another occupied object.
+ const footprintClear=o=>{
+  for(const box of o.selection){
+   const x0=o.anchor.x+box.min[0],x1=o.anchor.x+box.max[0];
+   const y0=o.anchor.y+box.min[1],y1=o.anchor.y+box.max[1];
+   const z0=o.anchor.z+box.min[2],z1=o.anchor.z+box.max[2];
+   for(let x=Math.floor(x0);x<=Math.ceil(x1)-1;x++)
+    for(let y=Math.floor(y0);y<=Math.ceil(y1)-1;y++)
+     for(let z=Math.floor(z0);z<=Math.ceil(z1)-1;z++)
+      if(blockAt(x,y,z)||editedAt(x,y,z)||occupiedAt(x,y,z))return false;
+  }
+  return true;
+ };
+ const eligible=o=>canAttach(o,{blockAt,editedAt,occupiedAt})&&footprintClear(o);
  const visible=()=>objects.filter(o=>!tombstones.has(o.removal.tombstoneKey)&&eligible(o));
  return Object.freeze({
   visible,
