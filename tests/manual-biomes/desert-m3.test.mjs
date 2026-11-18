@@ -5,7 +5,7 @@ import {Pack2LiveWorld} from '../../src/pack2-world.mjs';
 import {findSafeSpawn} from '../../src/physics.mjs';
 import {biome130Block,isBiome130BlockId} from '../../src/biome130-registry.mjs';
 import {surfaceBiomeAt,surfaceBiomeHeight,SURFACE_BIOME_REGIONS} from '../../src/surface-regions/regions.mjs';
-import {FOUR_REGION_GENERATOR,M2_FOUR_REGION_GENERATOR,FourRegionWorld,
+import {FOUR_REGION_GENERATOR,M3_FOUR_REGION_GENERATOR,M2_FOUR_REGION_GENERATOR,FourRegionWorld,
   fourRegionProfile,validateFourRegionProfile,restoreFourRegionWorld} from '../../src/manual-biomes/profile-world.mjs';
 import {M3_DESERT_IDS,M3_XERIC_IDS,m3DesertHeight,
   m3DesertXeric,m3DesertFreshColumn} from '../../src/manual-biomes/desert-m3.mjs';
@@ -29,7 +29,8 @@ const oldWorld=(seed=179)=>new FourRegionWorld(seed,
   fourRegionProfile(seed,M2_FOUR_REGION_GENERATOR));
 
 test('M3: v3 generator is immutable, existing v2 profile stays source-exact and loadable',()=>{
-  assert.equal(FOUR_REGION_GENERATOR,'mythwrought-four-surface-regions-v3');
+  assert.equal(M3_FOUR_REGION_GENERATOR,'mythwrought-four-surface-regions-v3');
+  assert.equal(FOUR_REGION_GENERATOR,'mythwrought-four-surface-regions-v4');
   const old=oldWorld(),newer=new FourRegionWorld(179);
   assert.equal(old.generationProfile.generator,M2_FOUR_REGION_GENERATOR);
   assert.equal(newer.generationProfile.generator,FOUR_REGION_GENERATOR);
