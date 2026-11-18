@@ -2063,6 +2063,36 @@ function start(){
         (selected.recovery?' · RECOVERED '+selected.recovery:'')+
         ' · near '+selected.runtime.entrancePlan.entrances[0].name+' entrance. Tap RETURN to explore.';
       message('Cave world ready · source-authored routes · ordinary worlds protected');
+      // On-demand cave offline preparation only: never register the new
+      // service worker for a normal world, never claim offline until its
+      // entire static source manifest is verified and the worker replies.
+      if('serviceWorker' in navigator){
+        if(!window.__mythwroughtCaveOfflineListener){
+          navigator.serviceWorker.addEventListener('message',event=>{
+            if(event.data?.type==='MYTHWROUGHT_CAVE_OFFLINE_READY')
+              caveWorldStatus.textContent+=' · OFFLINE ASSETS VERIFIED ('+event.data.assets+')';
+            if(event.data?.type==='MYTHWROUGHT_CAVE_OFFLINE_FAILED')
+              caveWorldStatus.textContent+=' · OFFLINE NOT READY: '+event.data.error;
+          });
+          window.__mythwroughtCaveOfflineListener=true;
+        }
+        void navigator.serviceWorker.register('./cave-offline-sw.js')
+          .then(()=>navigator.serviceWorker.ready)
+          .then(async reg=>{
+            const previouslyReady=await caches.match(new URL(
+              './cave-offline-ready.json',location.href));
+            if(!navigator.onLine){
+              caveWorldStatus.textContent+=previouslyReady?
+                ' · OFFLINE CAVE SOURCE CACHE PREVIOUSLY VERIFIED':
+                ' · OFFLINE NOT READY: complete source caching while online';
+              return;
+            }
+            caveWorldStatus.textContent+=' · preparing source cache (online required)';
+            reg.active?.postMessage({type:'MYTHWROUGHT_PREPARE_CAVE_OFFLINE'});
+          }).catch(error=>{
+            caveWorldStatus.textContent+=' · OFFLINE NOT READY: '+error.message;
+          });
+      }else caveWorldStatus.textContent+=' · OFFLINE NOT AVAILABLE ON THIS BROWSER';
     }catch(err){caveWorldStatus.textContent='CAVE NOT ACTIVATED: '+err.message;}
   }
   document.getElementById('caveCreateWorld').onclick=()=>openExplicitCaveWorld('create');
