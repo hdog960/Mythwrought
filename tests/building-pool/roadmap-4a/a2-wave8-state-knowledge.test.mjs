@@ -251,3 +251,12 @@ test('Wave8: every entrance has genuine 6-neighbor source navigation into every 
    assert.ok(seen.has(room.access[0]+','+room.access[2]),b.id+' formal room unreachable '+room.id);
  }
 });
+
+test('Wave8 Windglass Solar Meridian is a real original D4-disjoint public observatory, not a Wave7 desert observatory clone',()=>{
+ const unique=buildA2Wave8StateKnowledge('r4:observatory:temperate:medium:01');
+ const earlier=buildA2Wave7StateKnowledge('r4:observatory:desert:medium:01');
+ assert.ok(unique.navigation.length>1000&&unique.spaces.length===5);
+ assert.equal(unique.openings.filter(o=>o.kind==='window').length,6);
+ const max=overlap(floorSymmetry(unique),floorSymmetry(earlier));
+ assert.ok(max<0.82,'Windglass must preserve distinct meridian arms; source D4 '+max);
+});

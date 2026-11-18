@@ -10,7 +10,7 @@ test('A2 eighth tranche: twelve original 4A state/knowledge candidates render 72
  assert.deepEqual([...new Set(r.results.map(x=>x.viewport.join('x')))],['667x375','844x390','932x430']);
  assert.equal(r.distinctScreenHashes,72);
  assert.ok(r.results.every(x=>x.drawCalls>0&&x.drawnTriangles>100&&x.pngSha256.length===64));
- assert.equal(r.authoredGeneratorGitBlob,'2e10e88359dfb7853e8744c0da3e46434581c5c8');
+ assert.equal(r.authoredGeneratorGitBlob,'25b40b43e47896c9abc51322bf581fe2fe353b8e');
  assert.equal(r.productionPhysicalFamilyRenderer,false);assert.equal(r.realIphoneTested,false);
  assert.equal(r.creatorArtApproved,false);assert.equal(r.integratedIntoGame,false);
 });

@@ -3110,6 +3110,24 @@ const PLANS=[
         115,
         77,
         121
+      ],
+      [
+        31,
+        113,
+        88,
+        124
+      ],
+      [
+        71,
+        26,
+        109,
+        38
+      ],
+      [
+        8,
+        16,
+        48,
+        24
       ]
     ],
     "notches": [
@@ -3124,6 +3142,12 @@ const PLANS=[
         89,
         75,
         92
+      ],
+      [
+        38,
+        116,
+        42,
+        120
       ]
     ],
     "octagons": [
@@ -3144,6 +3168,12 @@ const PLANS=[
         47,
         4,
         7
+      ],
+      [
+        60,
+        120,
+        8,
+        11
       ]
     ],
     "skyline": [
@@ -3380,7 +3410,10 @@ const PLANS=[
       40,
       78,
       100,
-      109
+      109,
+      "northwide-meridian",
+      "east-sun-forecourt",
+      "southwest-colonnade"
     ],
     "profile": "heliograph-spear",
     "sourceAuthoredName": "Windglass Solar Meridian"
