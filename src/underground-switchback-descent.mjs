@@ -810,6 +810,32 @@ export function descentCells(origin=DESCENT_ORIGIN){
       }
     }
   }
+  // Bedrock-margin whisper gallery at -202. A supported outward approach
+  // branches into two low vaulted lobes linked by a transverse passage.
+  // Keep the ceiling below -195 to avoid the protected Crescent Refuge,
+  // and preserve the final bedrock safety margin beneath the floors.
+  {
+    const depth=-202,anchor=route.find(p=>p.floor===depth);
+    if(anchor){
+      const lx=anchor.x-origin.x,lz=anchor.z-origin.z;
+      const outward=lz===0?[0,-1]:lz===SIDE?[0,1]:lx===0?[-1,0]:[1,0];
+      const tangent=[outward[1],-outward[0]];
+      const carve=(d,t,height=4)=>{
+        const x=anchor.x+outward[0]*d+tangent[0]*t;
+        const z=anchor.z+outward[1]*d+tangent[1]*t;
+        set(x,depth,z,BLOCK.DEEPSTONE);
+        for(let h=1;h<=height;h++)set(x,depth+h,z,BLOCK.AIR);
+      };
+      for(let d=0;d<=35;d++)for(let t=-2;t<=2;t++)carve(d,t);
+      for(const lobe of [{d:39,t:-9,rx:9,rz:7},{d:43,t:10,rx:8,rz:8}]){
+        for(let dd=-lobe.rx;dd<=lobe.rx;dd++)for(let tt=-lobe.rz;tt<=lobe.rz;tt++){
+          const radial=(dd/lobe.rx)**2+(tt/lobe.rz)**2;
+          if(radial<=1)carve(lobe.d+dd,lobe.t+tt,4);
+        }
+      }
+      for(let t=-9;t<=10;t++)for(let d=40;d<=42;d++)carve(d,t);
+    }
+  }
   // Alcove floors can intersect the sloping approach at a different height.
   // Recarve the entire ordered player corridor AFTER the chambers, then
   // restore its support. Otherwise chamber floors seal three or more steps.
