@@ -38,7 +38,11 @@ test('mining natural tree anchors or building into canopy removes visuals on rem
   }
   assert.ok(match);
   const {cx,cz,x,z,h,before}=match;
-  assert.ok(meshChunk(world,cx,cz).length>=before.length);
+  const live=meshChunk(world,cx,cz);
+  assert.ok(live.length>0,'real playable terrain remains');
+  for(let i=8;i<live.length;i+=9)
+    assert.ok(live[i]<7||live[i]>=18,
+      'the archived fake canopy must no longer draw into the live game');
   assert.equal(world.set(x,h,z,BLOCK.AIR),true);
   // Four candidates can fill two tree slots. Removing the first tree may
   // reveal a previously capped replacement, so vertex count need not drop.
