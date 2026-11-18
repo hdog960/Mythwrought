@@ -151,10 +151,10 @@ const PLANS=Object.freeze([
     ],
     "holes": [
       [
-        34,
-        32,
-        1,
-        1
+        40,
+        22,
+        2,
+        2
       ]
     ],
     "e": [
