@@ -1,4 +1,4 @@
-name: Roadmap B Waves1-3 isolated source WebGL2 gallery
+name: Roadmap B Waves1-4 isolated source WebGL2 gallery
 on:
   pull_request:
     paths:
@@ -67,13 +67,13 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-      - name: Capture exact source-supported 120 WebGL2 landscape PNGs
+      - name: Capture exact source-supported 168 WebGL2 landscape PNGs
         env:
           ROADMAP_B_EXACT_HEAD: ${{ github.event.pull_request.head.sha }}
         run: node tests/building-pool/roadmap-b/source-gallery.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: roadmap-b-waves123-exact-source-webgl2
-          path: artifacts/roadmap-b-waves123-webgl2
+          name: roadmap-b-waves1234-exact-source-webgl2
+          path: artifacts/roadmap-b-waves1234-webgl2
           if-no-files-found: warn
