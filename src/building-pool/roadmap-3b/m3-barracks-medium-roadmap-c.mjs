@@ -274,11 +274,11 @@ function create(p){
   clearances,openings:[{id:'main-guard-door',facing:'south',x:p.aisle,y:2,z:d-1,width:2,height:3}],
   spaces,navigation:{entry:'entry',nodes,edges},
   features:[
-   {name:'source-backed four-room garrison',position:[p.aisle,2,1],assetRef:p.post,unresolvedDependency:null},
+   {name:'source-backed six-room medium garrison',position:[p.aisle,2,1],assetRef:p.post,unresolvedDependency:null},
    {name:'actual supply cache',position:[roomData[0].rect[0],2,roomData[0].rect[2]],assetRef:'pack4:057',unresolvedDependency:null},
    {name:'not-installed garrison AI',position:[p.aisle,2,d-1],assetRef:null,unresolvedDependency:'Barracks guard AI and gameplay staffing remain unimplemented'}
   ],
-  architecture:{kind:p.title,physicalFourRoomPlan:true,groundedTwoWideRoute:true,
+  architecture:{kind:p.title,physicalSixRoomPlan:true,groundedTwoWideRoute:true,
    originalMaskRegions:p.mask.length,openCourtyards:p.voids.length,courtyardRects:p.voids.map(x=>[...x]),actualRemovedCourtyardCells,roofSpurs:p.spurs.map(a=>[...a]),roofAxes:[...p.roofAxes],sourceRooms:roomData.map(r=>({name:r.name,side:r.side,bounds:[...r.rect],doorZ:r.doorZ,bridge:[...r.bridge]})),
    footprintCells:footprint.size,roofFamily:p.roofStyle,physicalRoofMassing:true,sourceCellCount:occupied.size,
    creatorApproved:false,worldPlaced:false,perCellVariantResolved:false,perCellYawResolved:false},
