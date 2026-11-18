@@ -329,6 +329,6 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
   }
  }finally{
   await new Promise(ok=>http.close(ok));
-  await rm(temp,{recursive:true,force:true});
+  await rm(temp,{recursive:true,force:true,maxRetries:8,retryDelay:200});
  }
 });

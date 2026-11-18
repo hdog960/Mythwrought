@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -35,11 +36,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Verify Builder 2B source-specific native and Chromium acceptance
-        run: node scripts/ci/run-isolated.mjs roadmap-2b
+        run: |
+          mapfile -d '' files < <(find tests/building-pool/roadmap-2b -type f -name '*.test.mjs' -print0 | sort -z)
+          test "${#files[@]}" -gt 0
+          node --test --test-concurrency=1 "${files[@]}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -54,6 +59,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
