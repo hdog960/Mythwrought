@@ -1,7 +1,7 @@
 {
   "kind": "MYTHWROUGHT_CAVE_SOURCE_ASSETS_V1",
-  "sourceHead": "08e11c402ca5a2da23790f8fe8eeab46bdf6bae1",
-  "cacheRevision": "08e11c402ca5a2da",
+  "sourceHead": "990a02b6324fe0d9d44d7f0b1884c0dde00687fb",
+  "cacheRevision": "990a02b6324fe0d9",
   "verification": "Git blob SHA-1 of source bytes: SHA1('blob '+byteLength+'\\0'+contents)",
   "assets": [
     "assets/icon.svg",
@@ -168,6 +168,7 @@
     "src/manual-caves/east-gallery-intake.mjs",
     "src/manual-caves/entrance-preflight.mjs",
     "src/manual-caves/game-startup-contract.mjs",
+    "src/manual-caves/named-destination-audit.mjs",
     "src/manual-caves/opt-in-runtime.mjs",
     "src/manual-caves/preview.mjs",
     "src/manual-caves/profile-store.mjs",
@@ -387,6 +388,7 @@
     "src/manual-caves/east-gallery-intake.mjs": "6f185028eec52c397e01ff9db4fbf4d4565ce418",
     "src/manual-caves/entrance-preflight.mjs": "702724cb6ee9d6f41d573069969718188e4c1569",
     "src/manual-caves/game-startup-contract.mjs": "27fe66c270229364d6f006467cfd135b82fc567d",
+    "src/manual-caves/named-destination-audit.mjs": "1dcdee5312c89cfe79eec6f26c82205e7cd64132",
     "src/manual-caves/opt-in-runtime.mjs": "2757773e6169cfdf693a4df371bf9a86b9622c6d",
     "src/manual-caves/preview.mjs": "dce47abe48c5e9168a22fa565cbe30c37ee73874",
     "src/manual-caves/profile-store.mjs": "0953e027b489bbfedb0e9902348ac2eee7f88b6e",
