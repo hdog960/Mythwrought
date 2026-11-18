@@ -58,7 +58,18 @@ export function createEnvironmentSession({seed,objects,blockAt,editedAt,occupied
   return true;
  };
  const eligible=o=>canAttach(o,{blockAt,editedAt,occupiedAt})&&footprintClear(o);
- const visible=()=>objects.filter(o=>!tombstones.has(o.removal.tombstoneKey)&&eligible(o));
+ // Candidate objects compete for the same physical space. Reserve complete AABBs
+ // in stable key order so input enumeration cannot change which one survives.
+ // Tombstoned objects never release a slot to a previously rejected candidate:
+ // a break must not cause a second object to appear unexpectedly.
+ const accepted=[];
+ const overlaps=(a,b)=>a.selection.some(p=>b.selection.some(q=>
+  [0,1,2].every(i=>a.anchor[['x','y','z'][i]]+p.min[i]<b.anchor[['x','y','z'][i]]+q.max[i]&&
+   b.anchor[['x','y','z'][i]]+q.min[i]<a.anchor[['x','y','z'][i]]+p.max[i])));
+ for(const o of [...objects].sort((a,b)=>a.instanceKey.localeCompare(b.instanceKey))){
+  if(eligible(o)&&!accepted.some(other=>overlaps(o,other)))accepted.push(o);
+ }
+ const visible=()=>accepted.filter(o=>!tombstones.has(o.removal.tombstoneKey)&&eligible(o));
  return Object.freeze({
   visible,
   pick:(origin,direction,maxDistance)=>environmentRayPick(visible(),origin,direction,maxDistance),
