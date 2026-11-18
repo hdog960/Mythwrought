@@ -2,16 +2,10 @@ name: Mythwrought SKY S2 exact-head sun and atmosphere WebGL2
 on:
   push:
     branches: ['sky/roadmap-s0-baseline-20261118']
+    # S2 is frozen at 9606b32f32d5a2252923b8f833a8dd0d54bed2bb.
+    # S3 runs historical S2 visual/regression checks itself instead.
     paths:
-      - 'src/sky.mjs'
-      - 'src/sky-atmosphere.mjs'
-      - 'src/main.mjs'
-      - 'src/gpu-pipeline.mjs'
-      - 'tests/sky-atmosphere.test.mjs'
       - 'tests/sky/s2-atmosphere-browser.mjs'
-      - 'tests/sky/s2-paired-benchmark.mjs'
-      - 'docs/sky/**'
-      - '.github/workflows/sky-s2-acceptance.yml'
   workflow_dispatch:
 permissions:
   contents: read
