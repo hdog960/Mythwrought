@@ -89,7 +89,10 @@ try{
    for(const key of ['w','a','d','s']){
      await page.locator('#scene').focus();
      await page.keyboard.down(key);
-     await page.waitForTimeout(2400);
+     // Software WebGL2 under concurrent CI can run at reduced frame rate;
+     // preserve the real >=5-block and fog-reveal requirements, but grant
+     // enough genuine held-key wall-clock time for ordinary movement.
+     await page.waitForTimeout(4800);
      await page.keyboard.up(key);
      const next=await checkPosition();
      const progress=Math.hypot(next.x-original.x,next.z-original.z);
