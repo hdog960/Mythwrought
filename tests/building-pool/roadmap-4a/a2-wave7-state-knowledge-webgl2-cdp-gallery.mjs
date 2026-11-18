@@ -275,7 +275,7 @@ async function runWithBrowser(){
 export async function runGallery(){
  // Reject stale copied gallery rosters before starting Chromium or writing PNGs.
  const srcText=readFileSync(join(SOURCE,'a2-wave7-state-knowledge.mjs'),'utf8');
- const match=/const PLANS=(\\[[\\s\\S]*?\\n\\]);/.exec(srcText);
+ const match=/const PLANS=(\[[\s\S]*?\n\]);/.exec(srcText);
  if(!match)throw Error('Wave7 source roster is unreadable');
  const expected=JSON.parse(match[1]).map(p=>p.id);
  const configured=DESIGNS.map(p=>'r4:'+p.type+':'+p.biome+':'+p.size+':'+String(p.variant).padStart(2,'0'));
