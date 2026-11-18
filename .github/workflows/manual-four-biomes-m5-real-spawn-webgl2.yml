@@ -27,7 +27,9 @@ jobs:
           node --check src/manual-biomes/exploration-ink.mjs
           node --check scripts/ci/manual-biomes-m5-spawn-walk-webgl2.mjs
       - name: Experimental immutable v5 Mountain pass real native and physics gate
-        run: node --test tests/manual-biomes/m5-mountain-pass-v5.test.mjs
+        run: |
+          node --test tests/manual-biomes/m5-mountain-pass-v5.test.mjs
+          node --test tests/manual-biomes/m5-explicit-v5-activation.test.mjs
       - name: Install pinned real Chromium WebGL2 browser
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
