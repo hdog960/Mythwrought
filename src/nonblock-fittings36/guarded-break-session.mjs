@@ -20,7 +20,12 @@ export function createGuardedFittingSession({seed,objects,inspectMount,authorize
    const o=byKey.get(proposal.instanceKey);if(!o)return false;
    const w=inspectMount(Object.freeze([...o.anchor]),o.attachment);
    if(w?.verified!==true||w.playerEdited!==false||w.mountSupported!==true||w.occupied!==false)return false;
-   return authorizeRemoval(Object.freeze({...proposal,seed,anchor:Object.freeze([...o.anchor])}))===true;
+   // Authorization can be asynchronous in a future bridge, but this v1 fixture only
+   // accepts a synchronous boolean. Recheck after the callback to close the
+   // edit-between-approval-and-removal window without touching world state.
+   if(authorizeRemoval(Object.freeze({...proposal,seed,anchor:Object.freeze([...o.anchor])}))!==true)return false;
+   const after=inspectMount(Object.freeze([...o.anchor]),o.attachment);
+   return after?.verified===true&&after.playerEdited===false&&after.mountSupported===true&&after.occupied===false;
   })
  });
 }
