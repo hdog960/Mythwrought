@@ -39,7 +39,10 @@ const server=createServer(async(req,res)=>{
     const served=file===root?path.join(root,'index.html'):file;
     const bytes=await readFile(served);
     res.writeHead(200,{'Content-Type':mime[path.extname(served)]||
-      'application/octet-stream','Cache-Control':'no-store'});
+      'application/octet-stream',
+      // Browser-internal SW update checks are HTTP-cache served while offline.
+      // Cached script remains refreshable ONLINE after a bounded 5-minute TTL.
+      'Cache-Control':pathname==='/sw-m5.js'?'public, max-age=300':'no-store'});
     res.end(bytes);
   }catch(error){res.writeHead(404);res.end(String(error));}
 });
@@ -53,7 +56,7 @@ const report={kind:'mythwrought-m5-offline-pwa-chromium-v1',viewport:selected,
   width,height,seed,sourceGenerator:'mythwrought-four-surface-regions-v5',
   defaultGenerator:'mythwrought-four-surface-regions-v4',
   sourceSchema:1,realChromium:true,offlineModeVerified:false,
-  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261118-v3',
+  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261118-v4',
   finished:false,screens:[],checks:[],errors:[]};
 const persist=()=>writeFile(path.join(out,'manifest.json'),JSON.stringify(report,null,2));
 const check=(name,ok,info={})=>{
@@ -148,7 +151,7 @@ try{
     {timeout:180000});
   const online=await page.evaluate(async()=>{
     const keys=await caches.keys();
-    const name=keys.find(x=>x==='mythwrought-m5-shell-20261118-v3');
+    const name=keys.find(x=>x==='mythwrought-m5-shell-20261118-v4');
     const cache=name?await caches.open(name):null;
     const urls=cache?await cache.keys():[];
     return {name,cacheCount:urls.length,controller:
