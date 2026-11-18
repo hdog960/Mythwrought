@@ -46,8 +46,12 @@ function cells(origin){
       for(let dy=1;dy<=6;dy++)put(p.x+dx,target+dy,p.z+dz,BLOCK.AIR);
     }
   }
-  // Restore the precise centerline's support after overlapping corridor cuts.
-  // This avoids a lower ramp step accidentally erasing the higher step's floor.
+  // Chamber floors (especially the Y=-30 rest room) can seal the next
+  // descending step's standing envelope at Y=-30. Recarve the actual ordered
+  // route FIRST and then restore every step's supporting voxel, preserving
+  // both the chamber and the walkable descent without altering old terrain.
+  for(const p of route)for(let dy=1;dy<=4;dy++)
+    put(p.x,p.floor+dy,p.z,BLOCK.AIR);
   for(const p of route)put(p.x,p.floor,p.z,BLOCK.DEEPSTONE);
   return map;
 }
