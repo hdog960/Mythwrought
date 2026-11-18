@@ -82,13 +82,18 @@ try{
        FOUR_REGION_GENERATOR)throw Error('M3 UI did not create the versioned v3 generation profile');
     await page.locator('#closeHelp').click();
     const capture=async(point,kind='exterior')=>{
-      const observed=await page.evaluate(({x,z,y})=>{
+      const observed=await page.evaluate(({x,z,y,kind})=>{
         const test=window.__mythwroughtTest;
-        const position=test.teleport(x,z);
-        test.aimAt(x+6,Math.max(2,y),z+6);
+        // Exterior: look across a dune at a shallow angle. Cutaway: step
+        // back before looking INTO the actual mined cell so the shot
+        // includes visible surrounding terrain, not a close-up flat wall.
+        const position=kind==='cutaway'?
+          test.teleport(x-6,z-6):test.teleport(x,z);
+        if(kind==='cutaway')test.aimAt(x,y,z);
+        else test.aimAt(x+6,Math.max(2,y),z+6);
         return {block:test.block(x,y,z),position,
           mode:test.fourBiomeMode(),generator:test.fourBiomeProfile()?.generator};
-      },point);
+      },{...point,kind});
       if(observed.block!==point.id||observed.mode!=='four-regions'||
          observed.generator!==FOUR_REGION_GENERATOR)
         throw Error('Wrong M3 real physical '+point.name+' source '+JSON.stringify(observed));
