@@ -1,0 +1,30 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-2b.m1.v1",
+  "lane": "roadmap-2b",
+  "priorM0Manifest": "src/building-pool/roadmap-2b/manifest.json",
+  "oldPR": 124,
+  "legacySourceHead": "07c45d27bd36f4f3aa3197bba0e4f49ce2a58c68",
+  "target": 420,
+  "authored": 16,
+  "inherited": 15,
+  "newlyAuthored": 1,
+  "unauthored": 404,
+  "creatorAccepted": 0,
+  "integrated": 0,
+  "categoryCounts": {
+    "market-square": 1,
+    "tailor": 0,
+    "butcher": 0,
+    "jeweler": 0,
+    "bookshop": 0,
+    "temple": 15,
+    "theater": 0
+  },
+  "candidateIds": [
+    "r2:market-square:temperate:small:01"
+  ],
+  "source": "src/building-pool/roadmap-2b/market-square-temperate-small.mjs",
+  "rendererEvidence": "pending dedicated building-source Chromium exterior/cutaway",
+  "productionRegistered": false,
+  "runtimePlacement": false
+}
