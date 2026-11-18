@@ -126,7 +126,7 @@ try{
       window.__mythwroughtTest.teleportCave(at.x,at.y,at.z);
       window.__mythwroughtTest.aimAt(to.x,to.y,to.z);
      },shot);
-     await waitRealMesh(page,shot.at.x,shot.at.z,true);
+     await waitRealMesh(page,shot.at.x,shot.at.z,shot.at.y<-10);
     }
     const snapshot=await page.evaluate(()=>{
      const el=document.querySelector('#scene'),t=window.__mythwroughtTest;
