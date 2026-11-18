@@ -127,41 +127,52 @@ function evergreen(out,x,y,z,variation,beacon=false,profile='mixed'){
   const needles=beacon?
     [[.25,.48,.40],[.39,.62,.43],[.58,.70,.39],[.78,.77,.45]]:
     [[.19,.43,.38],[.26,.54,.43],[.34,.61,.46],[.40,.68,.48]];
-  // Replace four identical cone-stack tiers with three overlapping,
-  // scalloped bough shells. A lower skirt, uneven shoulder and tapered upper
-  // ring make each bough a solid faceted mass rather than a flat triangle
-  // pointing to the same apex. Only the uppermost bough needs a closed cap.
-  // The connected shells add detail over the old flat cones, but stay
-  // below the existing 450-vertex per-tree, zero-extra-draw-call budget.
-  // Frame-time acceptance still requires real browser and iPhone evidence.
-  for(let tier=0;tier<3;tier++){
-    const base=y+(beacon?.68:.52)+tier*(beacon?1.62:height*.27);
-    const rad=(beacon?1.43:profile==='grove'?1.39:profile==='open'?1.08:1.29)-tier*.15;
-    const rise=beacon?2.12:1.50;
-    const skirt=[],shoulder=[],upper=[];
+  // M2 visual correction: one uninterrupted fir canopy, not three separate
+  // conical hats. Every neighboring ring shares the exact same vertices,
+  // avoiding gaps/exposed floating trunk bands visible in real WebGL2 captures.
+  // Deliberately irregular scalloped shoulders and slight crown lean, all
+  // deterministic in the existing source coordinates and within the old
+  // world/chunk footprint. Only appearance changes, not physical WOOD/LEAVES.
+  const canopyHeight=beacon?6.03:height+.12;
+  const maxRadius=beacon?1.45:profile==='grove'?1.39:profile==='open'?1.08:1.29;
+  const levels=[0,.20,.39,.58,.77,.96];
+  const radii=[.71,1,.82,.64,.40,.11];
+  const boughRings=[];
+  for(let level=0;level<levels.length;level++){
+    const t=levels[level],verts=[];
     for(let i=0;i<8;i++){
-      const a=(i+variation)*Math.PI/4;
-      const ca=Math.cos(a),sa=Math.sin(a);
-      const wave=Math.sin(i*2.4+variation*6+tier*1.7);
-      const foot=rad*(.68+.06*wave);
-      const wide=rad*(.95+.065*Math.cos(i*2.15+variation*5+tier));
-      const tip=rad*(.23+.045*Math.sin(i*1.9+variation*4+tier));
-      skirt.push([x+ca*foot,base+.035+.045*wave,z+sa*foot]);
-      shoulder.push([x+ca*wide,base+.30+.065*Math.sin(i*1.8+variation*3+tier),z+sa*wide]);
-      upper.push([x+ca*tip,base+rise*.81+.075*Math.cos(i*2.1+variation*2+tier),z+sa*tip]);
+      const a=(i+variation)*Math.PI/4+t*(.07+variation*.09);
+      const wave=Math.sin(i*2.37+level*1.63+variation*5.1);
+      const rad=maxRadius*radii[level]*(.93+.08*wave);
+      const bend=t*t*.085;
+      verts.push([
+        x+Math.cos(a)*rad+Math.sin(variation*6)*bend,
+        y+.55+t*canopyHeight+.045*Math.sin(i*2.2+level+variation*4),
+        z+Math.sin(a)*rad+Math.cos(variation*5)*bend
+      ]);
     }
+    boughRings.push(verts);
+  }
+  for(let level=0;level<boughRings.length-1;level++){
+    const lower=boughRings[level],upper=boughRings[level+1];
     for(let i=0;i<8;i++){
       const j=(i+1)%8;
-      const shade=beacon&&tier===2?[[.82,.79,.47],[.67,.83,.47]][i%2]:
-        needles[(i+tier)%needles.length];
-      quad(out,skirt[i],skirt[j],shoulder[j],shoulder[i],shade,7);
-      quad(out,shoulder[i],shoulder[j],upper[j],upper[i],
-        needles[(i+tier+1)%needles.length],7);
-      if(tier===2)tri(out,upper[i],upper[j],
-        [x+.035*Math.sin(variation*6),base+rise*.96,z+.035*Math.cos(variation*6)],
-        beacon?[[.91,.79,.42],[.98,.87,.55]][i%2]:
-          needles[(i+tier+2)%needles.length],7);
+      const col=needles[(i+level)%needles.length];
+      // Two triangles share the full continuous perimeter of both rings.
+      // Per-band shading changes normals without separate tier silhouettes.
+      quad(out,lower[i],lower[j],upper[j],upper[i],col,7);
     }
+  }
+  // Close the continuous crown with an off-axis apex. Low overall vertex
+  // count leaves room for sentinel halo, gold band and sky-star unchanged.
+  const cap=boughRings[boughRings.length-1];
+  const peak=[x+Math.sin(variation*6)*.12,
+    y+.55+canopyHeight+.08,z+Math.cos(variation*5)*.12];
+  for(let i=0;i<8;i++){
+    const j=(i+1)%8;
+    tri(out,cap[i],cap[j],peak,
+      beacon?[[.78,.82,.45],[.88,.82,.50]][i%2]:
+        needles[(i+2)%needles.length],7);
   }
   if(beacon){
     // Grounded eight-sided moss-and-amber root halo: a readable landmark
