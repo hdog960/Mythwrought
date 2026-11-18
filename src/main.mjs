@@ -2049,6 +2049,53 @@ function start(){
   });
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);
+  // Explicit, separate NEW WORLD action in the existing settings sheet:
+  // never an implicit alternate seed, ordinary LOAD or save migration.
+  const createFourBiomeButton=document.createElement('button');
+  createFourBiomeButton.id='createFourBiomeWorld';createFourBiomeButton.type='button';
+  createFourBiomeButton.textContent='CREATE NEW FOUR-BIOME WORLD';
+  createFourBiomeButton.setAttribute('aria-label','Create separate new world with Desert, Snow, Mountains and Enchanted Forest');
+  const biomeChoiceHint=document.createElement('p');
+  biomeChoiceHint.className='controlhint';
+  biomeChoiceHint.textContent='New and unused seeds only. Ordinary LOAD / CREATE retains all legacy terrain and saves. Four-biome worlds use a separate, immutable generation profile.';
+  const seedRow=document.getElementById('switchWorld').closest('.seedrow');
+  if(seedRow){
+    seedRow.insertAdjacentElement('afterend',createFourBiomeButton);
+    createFourBiomeButton.insertAdjacentElement('afterend',biomeChoiceHint);
+  }
+  function enterPreparedM2World(candidate,statusText){
+    // This commits only a PREVIOUSLY verified and persisted candidate.
+    for(const c of chunks.values())deleteChunkBuffers(c);
+    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
+    g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;
+    pack3=createPack3LiveBridge(world,localStorage);
+    resetManual14ForWorld();resetPack5ForWorld();
+    storageReadOnly=false;changed=false;respawnPrototype();
+    clearMirrorDownload();
+    seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
+    seedMessage.textContent=statusText;
+    saveHealth.textContent='Four-biome profile and schema-1 saved with independent Pack 2 state; use WORLD EXPORT for profile-safe backup.';
+    message(statusText);
+  }
+  createFourBiomeButton.onclick=()=>{
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(next===world.seed)throw Error('Choose a new unused seed different from your current world');
+      if(!window.confirm('CREATE A NEW FOUR-BIOME WORLD for seed '+next+'? Only an unused seed is allowed. Older worlds are never converted.'))
+        return;
+      if(!storageReadOnly&&!save())throw Error('Current world has unsaved edits; export or save before creating a different world');
+      const choice=planM2WorldChoice(seedInput.value,M2_WORLD_MODE.CREATE_FOUR,{confirmed:true});
+      const loaded=openM2World(localStorage,choice);
+      if(!(loaded.base instanceof FourRegionWorld))
+        throw Error('New-world generator profile did not activate');
+      const stored=saveM2World(localStorage,loaded.world);
+      if(!stored.ok)throw Error('Biome world was not verified saved: '+stored.reason);
+      enterPreparedM2World(loaded.world,'New four-biome world '+next+' created safely. Desert, Snow, Mountains and Enchanted Forest are generated in this seed.');
+    }catch(error){
+      seedMessage.textContent='Four-biome creation refused; original world retained: '+String(error.message||error);
+    }
+  };
   document.getElementById('switchWorld').onclick=()=>{
     try{
       const next=worldSeedFromText(seedInput.value);
@@ -2098,8 +2145,32 @@ function start(){
     try{
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
       const rawImport=await f.text();
-      const imported=importWorldData(rawImport); // Validate original schema-1 first.
       const incoming=JSON.parse(rawImport);
+      if(incoming?.kind==='mythwrought-four-biomes-export'){
+        // Never flatten a profiled world through the legacy importer.
+        // New-seed-only restore; no destructive overwrite of a prior seed.
+        const examined=inspectM2WorldExport(rawImport);
+        if(storageReadOnly)throw Error('Read-only save protection is active');
+        if(examined.seed===world.seed)
+          throw Error('Biome bundle cannot replace your active seed; export your world and choose a separate unused seed');
+        if(!window.confirm('IMPORT a verified FOUR-BIOME profile for UNUSED seed '+examined.seed+'? Existing worlds are never overwritten.'))
+          return;
+        if(!save())throw Error('Save your current world before importing');
+        const intent=planM2WorldChoice(String(examined.seed),
+          M2_WORLD_MODE.CREATE_FOUR,{confirmed:true});
+        openM2World(localStorage,intent); // Durable profile, fresh-slot check.
+        const stored=saveM2World(localStorage,examined.world);
+        if(!stored.ok)throw Error('Profile import not verified; seed is protected: '+stored.reason);
+        enterPreparedM2World(examined.world,
+          'Imported verified four-biome profile for seed '+examined.seed+
+          '; source world and other seed slots preserved.');
+        return;
+      }
+      if(incoming?.profile||incoming?.kind)
+        throw Error('Unknown generator metadata; refusing unsafe legacy import');
+      const imported=importWorldData(rawImport); // Validate original schema-1 first.
+      if(readFourRegionProfile(localStorage,imported.seed))
+        throw Error('Legacy import cannot overwrite a four-biome generation profile');
       const previousOverlay=loadPack2LiveWorld(localStorage,imported).world;
       // Legacy-only imports must NOT delete placed Pack 2 objects. Preserve
       // the matching per-seed sidecar, or refuse incompatible old-world bytes.
@@ -2193,6 +2264,14 @@ function start(){
   if(['localhost','127.0.0.1'].includes(location.hostname)){
     // Local-only regression interface; absent from the public Pages runtime.
     window.__mythwroughtTest=Object.freeze({
+      fourBiomeMode(){return world.base instanceof FourRegionWorld?'four-regions':'legacy';},
+      fourBiomeProfile(){return world.base instanceof FourRegionWorld?world.base.generationProfile:null;},
+      // Localhost-only acceptance uses actual edit+save and never synthetic
+      // screenshot fixtures. Production Pages never exposes this diagnostic.
+      editBiomeCell(x,y,z,id){
+        if(![x,y,z,id].every(Number.isInteger))throw Error('Invalid test cell');
+        return world.set(x,y,z,id);
+      },
       teleport(x,z){
         if(![x,z].every(Number.isFinite))throw Error('Invalid debug position');
         const pos=findSafeSpawn(world,x,z);
