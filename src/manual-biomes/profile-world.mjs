@@ -1,12 +1,12 @@
 // MANUAL M1: canonical, editable four-region world baseline for explicitly NEW profiles.
 // Not loaded by production src/main.mjs until the separately reviewed M2 integration.
 // Legacy VoxelWorld remains unchanged. Schema-1 edit deltas keep their original shape.
-import {VoxelWorld,terrainHeight,worldKey} from '../voxel.mjs';
+import {VoxelWorld,BLOCK,terrainHeight,worldKey} from '../voxel.mjs';
 import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y,WORLD_MIN_Y} from '../depth.mjs';
 import {isBiome130BlockId} from '../biome130-registry.mjs';
 import {surfaceBiomeFreshColumn} from '../surface-regions/regions.mjs';
 
-export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v1';
+export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v2';
 const MAX_EDIT_ROWS=300000;
 const MAX_COLUMNS=1024;
 export function fourRegionProfile(seed){
@@ -49,7 +49,20 @@ export class FourRegionWorld extends VoxelWorld{
       readBaseline:(a,b,c)=>super.naturalAndLandmarkBlock(a,b,c),
       hasEdit:()=>false,isProtected:()=>false
     });
-    const lookup=new Map(plan?.writes?.map(p=>[p.y,p.to])??[]);
+    // M2 GPU and support correction: preserve every source-authored visible
+    // Mountain top, while filling *concealed raised interiors* with real
+    // full-cube stone instead of thousands of partial cliffstone surfaces.
+    // This is canonical physical terrain (mineable, saved and collidable),
+    // not hidden/painted shader geometry or a raised per-chunk GPU limit.
+    // Scope only the new mountain shelf ABOVE the untouched legacy top;
+    // leave top/one subsoil layer and all unraised existing cells source-exact.
+    // The generator identity is deliberately v2 to prevent loading an older
+    // v1-profile world with different natural baselines.
+    const lookup=new Map(plan?.writes?.map(p=>[
+      p.y,
+      plan.name==='mountain'&&p.y>plan.oldTop&&p.y<plan.top-1?
+        BLOCK.STONE:p.to
+    ])??[]);
     this._biomeColumns.set(key,lookup);
     if(this._biomeColumns.size>this.maxCachedColumns)
       this._biomeColumns.delete(this._biomeColumns.keys().next().value);
