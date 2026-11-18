@@ -69,7 +69,10 @@ try{
     page.on('pageerror',error=>pageErrors.push(width+'x'+height+': '+error.message));
     page.on('dialog',dialog=>dialog.accept());
     await page.addInitScript(()=>{
-      localStorage.setItem('mythwrought-v002-selected-seed','7');
+      // Set up a separate legacy starting seed once; NEVER overwrite the
+      // actual game's newly selected biome seed during the cold reload.
+      if(localStorage.getItem('mythwrought-v002-selected-seed')===null)
+        localStorage.setItem('mythwrought-v002-selected-seed','7');
     });
     await page.goto(url,{waitUntil:'load'});
     await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:30000});
