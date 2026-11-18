@@ -308,12 +308,22 @@ test('genuine Chromium software WebGL2 cube-proxy screenshots use actual authore
     '--timeout=10000','--dump-dom','--screenshot='+file,url
    ];
    let stdout='';
-   try{
-    const result=await invoke(browser,args,{timeout:22000,maxBuffer:4*1024*1024});
-    stdout=result.stdout;
-   }catch(e){
-    throw Error(category+' '+view+' '+width+'x'+height+
-      ': Chromium capture failed: '+String(e.message).slice(0,450));
+   // Some runner cold starts exit zero without producing --dump-dom text.
+   // Retry ONLY empty outputs with fresh profile directories; all real DOM,
+   // source identity, WebGL2 and PNG assertions remain unchanged and mandatory.
+   for(let attempt=0;attempt<3;attempt++){
+    args[args.findIndex(arg=>arg.startsWith('--user-data-dir='))]=
+      '--user-data-dir='+profile+'-try'+attempt;
+    try{
+     const result=await invoke(browser,args,{timeout:22000,maxBuffer:4*1024*1024});
+     stdout=result.stdout;
+    }catch(e){
+     throw Error(category+' '+view+' '+width+'x'+height+
+       ': Chromium capture failed: '+String(e.message).slice(0,450));
+    }
+    if(stdout.trim())break;
+    if(attempt===2)throw Error(category+' '+view+' '+width+'x'+height+
+      ': Chromium returned empty --dump-dom on all three independent profiles');
    }
    assert.match(stdout,/data-ready="yes"/,category+' browser did not load source-authentic blueprint');
    assert.match(stdout,/data-webgl="WebGL2"/,category+' no real WebGL2 context');
