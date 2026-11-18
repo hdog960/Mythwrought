@@ -620,6 +620,14 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
+    // The cave profile stores ordinary schema-1 cube edits ONLY. Reject any
+    // shaped/Pack2 placement BEFORE it can write a separate construction
+    // sidecar that the cave save would not persist. Normal worlds unchanged.
+    if(caveSession&&(pack5Mode||(mode==='place'&&(
+      manual14Ids.has(selected)||isPack3BlockId(selected)||isPack2LiveId(selected))))){
+      message('CAVE WORLD: basic voxel blocks only. Shaped Pack 1–5 construction is disabled to protect separate saves.');
+      return;
+    }
     if(pack5Mode&&pack5Builder){
       if(storageReadOnly){message('Protected world read-only; Pack 5 edit blocked');return;}
       const result=mode==='place'?
@@ -1479,7 +1487,7 @@ function start(){
     }
   }
   async function restoreSavedPack5Scene(){
-    if(storageReadOnly||pack5Builder)return;
+    if(caveSession||storageReadOnly||pack5Builder)return;
     const key='mythwrought.pack5.builder.seed.'+world.seed;
     try{
       if([key,key+'.journal',key+'.backup'].every(k=>localStorage.getItem(k)===null))
@@ -1493,6 +1501,11 @@ function start(){
     }
   }
   pack5Enabled.addEventListener('change',async()=>{
+    if(caveSession){
+      pack5Enabled.checked=false;pack5Mode=false;
+      pack5Status.textContent='Cave World keeps a separate voxel-only profile; shaped furnishings are available in ordinary worlds.';
+      return;
+    }
     if(!pack5Enabled.checked){
       pack5Mode=false;
       pack5Status.textContent='Editing off. Placed Pack 5 pieces remain rendered and solid.';
@@ -1529,6 +1542,10 @@ function start(){
   });
   const pack5ImportFile=document.getElementById('pack5ImportFile');
   document.getElementById('pack5Import').addEventListener('click',()=>{
+    if(caveSession){
+      pack5Status.textContent='Cave World cannot import Pack5 sidecars; existing ordinary-world builds are protected.';
+      return;
+    }
     if(storageReadOnly){
       pack5Status.textContent='Protected world read-only; Pack 5 import blocked';
       return;
@@ -1539,6 +1556,7 @@ function start(){
     const file=e.target.files?.[0];
     try{
       if(!file||storageReadOnly)return;
+      if(caveSession)throw Error('Pack 5 import cannot write into the protected Cave World profile');
       if(file.size>2*1024*1024)throw Error('Pack 5 JSON exceeds 2 MiB limit');
       const raw=await file.text(),data=JSON.parse(raw),requestedWorld=world;
       if(!data||data.format!=='mythwrought.pack5.builder-layer.v1'||
@@ -1708,6 +1726,7 @@ function start(){
   },{
     onExport:()=>({raw:exportPack3Portable(pack3,world,localStorage),seed:world.seed}),
     onImport:async raw=>{
+      if(caveSession)throw Error('Pack3 import unavailable in separately saved Cave World; existing construction is protected');
       if(storageReadOnly||changed)throw Error('Save current world safely before importing physical construction');
       if(help.hidden||document.hidden||graphicsLost)throw Error('Pack 3 import requires active settings');
       const examined=inspectPack3Portable(raw,world);
@@ -1821,6 +1840,10 @@ function start(){
     return id;
   }
   async function useVault(action){
+    if(caveSession){
+      vaultStatus.textContent='Device vault uses ordinary-world schema-1 snapshots. In Cave World use SAVE / EXPORT CAVE PROFILE; vault writes and restores are blocked.';
+      return;
+    }
     if(vaultBusy)return;
     vaultBusy=true;vaultButtons.forEach(button=>button.disabled=true);
     vaultStatus.textContent='Checking on-device backup storage…';
@@ -1939,6 +1962,7 @@ function start(){
     try{
       // Refuse enabling before changing preferences when startup has protected
       // a damaged world; otherwise a reload could accidentally opt the user in.
+      if(requested&&caveSession)throw Error('Normal-world mirroring is disabled in Cave World; use separate Cave SAVE / EXPORT');
       if(requested&&storageReadOnly)throw Error('Selected world is protected read-only; export or select a healthy seed first');
       localStorage.setItem(MIRROR_PREF,requested?'enabled':'disabled');
       if(localStorage.getItem(MIRROR_PREF)!==(requested?'enabled':'disabled'))
@@ -1958,6 +1982,10 @@ function start(){
     }
   });
   async function withMirror(action){
+    if(caveSession){
+      mirrorStatus.textContent='Normal-world mirror writes and restores are blocked in Cave World. Use SAVE / EXPORT CAVE PROFILE.';
+      return;
+    }
     if(mirrorBusy)return;
     mirrorBusy=true;mirrorButtons.forEach(button=>button.disabled=true);
     clearMirrorDownload();
@@ -2058,7 +2086,7 @@ function start(){
       clearMirrorDownload();
       seedLabel.textContent='CAVE WORLD '+world.seed;
       seedInput.value=String(world.seed);
-      saveHealth.textContent='Separate CAVE profile loaded. Ordinary schema-1 save and Pack2 sidecar untouched.';
+      saveHealth.textContent='Separate CAVE profile loaded. Basic voxel editing and separate SAVE/EXPORT only. Shaped Pack 1–5 and ordinary-world vault/mirror edits are disabled.';
       caveWorldStatus.textContent=(selected.created?'NEW CAVE WORLD CREATED':'CAVE WORLD LOADED')+
         (selected.recovery?' · RECOVERED '+selected.recovery:'')+
         ' · near '+selected.runtime.entrancePlan.entrances[0].name+' entrance. Tap RETURN to explore.';

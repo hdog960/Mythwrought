@@ -78,3 +78,29 @@ test('cave selection does not create canonical save for untouched starter world'
  assert.equal(existingWorldNeedsSaveBeforeCaveSwitch(s,new VoxelWorld(179)),true);
  assert.equal(s.getItem(worldSlotKey(179)),existing);
 });
+
+test('all historic per-seed builder sidecars block new Cave World creation without mutation',()=>{
+ const seed=7193;
+ const protectedKeys=[
+  'mythwrought.manual14.seed.'+seed,
+  'mythwrought.manual14.seed.'+seed+'.journal',
+  'mythwrought-pack3-construction-v1:'+seed,
+  'mythwrought-pack3-construction-v1:'+seed+':previous-good',
+  'mythwrought.pack5.builder.seed.'+seed,
+  'mythwrought.pack5.builder.seed.'+seed+'.backup'
+ ];
+ for(const key of protectedKeys){
+  const storage=store(),value='IMMUTABLE EXISTING BUILDER SAVE '+key;
+  storage.setItem(key,value);
+  assert.throws(()=>prepareExplicitCaveWorld(storage,seed,{action:'create',approved:true}),
+    /existing world/i,'Unprotected historical sidecar: '+key);
+  assert.equal(storage.getItem(key),value,'Blocked cave selection changed a saved builder');
+  assert.equal(storage.getItem(caveProfileStorageKey(seed)),null,
+    'Blocked cave selection created a cave profile');
+ }
+ const independent=store();
+ independent.setItem('mythwrought.manual14.seed.71930','DIFFERENT SEED');
+ const candidate=prepareExplicitCaveWorld(independent,seed,{action:'create',approved:true});
+ assert.equal(candidate.created,true,'A different saved seed must not block creation');
+ assert.equal(independent.getItem('mythwrought.manual14.seed.71930'),'DIFFERENT SEED');
+});

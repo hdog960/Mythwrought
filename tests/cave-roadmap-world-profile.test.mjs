@@ -81,3 +81,16 @@ for(const seed of [179,1,2026,-77]){
     assert.equal(restored.cavePlanReport.entrancesConnected,false);
   });
 }
+
+test('old independent Pack3 and Manual1/4 build files refuse cave-world seed admission',()=>{
+ const seed=179;
+ for(const key of ['mythwrought.manual14.seed.179',
+                   'mythwrought-pack3-construction-v1:179',
+                   'mythwrought.pack5.builder.seed.179']){
+  const records={[key]:'PRESERVED BUILDER BYTES'};
+  const admission=checkNewCaveWorldAdmission(storage(records),seed,{approved:true});
+  assert.equal(admission.ok,false,key+' must block cave creation');
+  assert.equal(admission.reason,'EXISTING_WORLD_MUST_NOT_BE_REPROFILED');
+  assert.equal(records[key],'PRESERVED BUILDER BYTES');
+ }
+});

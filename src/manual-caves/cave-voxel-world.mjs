@@ -19,12 +19,24 @@ function existingSaveKeys(storage,seed){
     base+'-pack2-live-v1-backup'
   ];
   if(seed===DEFAULT_WORLD_SEED)keys.push(LEGACY_WORLD_KEY);
+  // Shaped construction producers use DIFFERENT namespaced storage keys.
+  // The old prefix-only guard missed these and could open Cave World on a
+  // seed that already had valuable Pack1/4, Pack3 or Pack5 saved builds.
+  const otherSeedPrefixes=[
+    'mythwrought.manual14.seed.'+seed,
+    'mythwrought-pack3-construction-v1:'+seed,
+    'mythwrought.pack5.builder.seed.'+seed
+  ];
+  keys.push(...otherSeedPrefixes);
   // Do not trust a new seed if any existing source-owned per-seed sidecar
   // is present; preserving saved buildings and other overlays takes priority.
   if(Number.isInteger(storage.length)&&typeof storage.key==='function'){
     for(let i=0;i<storage.length;i++){
       const k=storage.key(i);
-      if(typeof k==='string'&&k.startsWith(base))keys.push(k);
+      if(typeof k==='string'&&(k.startsWith(base)||
+        otherSeedPrefixes.some(prefix=>
+          k===prefix||k.startsWith(prefix+'.')||k.startsWith(prefix+':'))))
+        keys.push(k);
     }
   }
   return [...new Set(keys)].filter(k=>storage.getItem(k)!==null);
