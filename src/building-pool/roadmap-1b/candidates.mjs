@@ -20,10 +20,11 @@ import {getM2ORegional1BPlans} from './m2o-regional-source.mjs';
 import {getM2PRegional1BPlans} from './m2p-regional-source.mjs';
 import {getM2QRegional1BPlans} from './m2q-regional-source.mjs';
 import {getM2RRegional1BPlans} from './m2r-regional-source.mjs';
+import {getM2SRegionalStable1BPlans} from './m2s-regional-stables.mjs';
 import {validateAllocation} from './schema.mjs';
 export function get1BCandidates(){
- const result=[...getInheritedStables(),createTemperateSmallBathhouse(),...getM1ServiceExemplars(),...getCrossBiome1BPlans(),...getM2Community1BPlans(),...getM2Expansion1BPlans(),...getM2Diverse1BPlans(),...getM2NextRegion1BPlans(),...getM2Asymmetric1BPlans(),...getM2Beacon1BPlans(),...getM2GroveHarbor1BPlans(),...getM2IRegional1BPlans(),...getM2JRegional1BPlans(),...getM2KRegional1BPlans(),...getM2LRegional1BPlans(),...getM2MRegional1BPlans(),...getM2NRegional1BPlans(),...getM2ORegional1BPlans(),...getM2PRegional1BPlans(),...getM2QRegional1BPlans(),...getM2RRegional1BPlans()];
+ const result=[...getInheritedStables(),createTemperateSmallBathhouse(),...getM1ServiceExemplars(),...getCrossBiome1BPlans(),...getM2Community1BPlans(),...getM2Expansion1BPlans(),...getM2Diverse1BPlans(),...getM2NextRegion1BPlans(),...getM2Asymmetric1BPlans(),...getM2Beacon1BPlans(),...getM2GroveHarbor1BPlans(),...getM2IRegional1BPlans(),...getM2JRegional1BPlans(),...getM2KRegional1BPlans(),...getM2LRegional1BPlans(),...getM2MRegional1BPlans(),...getM2NRegional1BPlans(),...getM2ORegional1BPlans(),...getM2PRegional1BPlans(),...getM2QRegional1BPlans(),...getM2RRegional1BPlans(),...getM2SRegionalStable1BPlans()];
  const allocation=validateAllocation(result);
- if(allocation.authored!==164||allocation.remaining!==271)throw Error('Builder 1B M2 census drift');
+ if(allocation.authored!==169||allocation.remaining!==266)throw Error('Builder 1B M2 census drift');
  return result;
 }
