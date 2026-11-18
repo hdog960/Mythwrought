@@ -297,9 +297,9 @@ const PLANS=[
       {
         "rect": [
           74,
-          45,
+          49,
           82,
-          54
+          55
         ],
         "profile": "saw",
         "axis": "x",
@@ -888,9 +888,9 @@ const PLANS=[
       {
         "rect": [
           49,
-          38,
+          47,
           57,
-          47
+          53
         ],
         "profile": "gable",
         "axis": "x",
@@ -2082,7 +2082,7 @@ const PLANS=[
       {
         "rect": [
           60,
-          52,
+          53,
           68,
           61
         ],
@@ -3581,9 +3581,9 @@ const PLANS=[
       {
         "rect": [
           51,
-          41,
+          45,
           59,
-          50
+          51
         ],
         "profile": "hip",
         "axis": "x",
