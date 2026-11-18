@@ -91,11 +91,17 @@ try{
       throw Error('M4 explicitly new world did not activate v4 immutable profile');
     await page.locator('#closeHelp').click();
     const capture=async(point,kind)=>{
-      const actual=await page.evaluate(({x,y,z,kind})=>{
+      const actual=await page.evaluate(({x,y,z,kind,name})=>{
         const t=window.__mythwroughtTest;
         if(kind==='cutaway'){
           t.teleport(x-6,z-6);
           t.aimAt(x,y,z);
+        }else if(name==='enchanted'){
+          // Previous source-specific Enchanted exterior aimed OUT of the
+          // biome at the empty sky; frame from a safe outward shoulder and
+          // look INWARD across real glade stone and legacy canopy.
+          t.teleport(x,z+7);
+          t.aimAt(x+4,Math.max(2,y),z-11);
         }else{
           t.teleport(x,z);
           t.aimAt(x+6,Math.max(2,y),z+6);
@@ -124,7 +130,10 @@ try{
         snapshot:window.__mythwroughtTest.snapshot(),
         faults:window.__mythwroughtTest.gpuUploadFaults()
       }));
-      if(colors.size<12||diag.snapshot.chunks.length<5||
+      // A few colorful UI pixels and a sky gradient are not convincing
+      // proof of a visible biome. Reject horizon-only exterior frames.
+      const minColors=kind==='exterior'?28:24;
+      if(colors.size<minColors||diag.snapshot.chunks.length<5||
          diag.snapshot.gpuRetry.failures>0||diag.faults.length)
         throw Error('M4 '+file+' blank or GPU upload failure '+JSON.stringify({
           colors:colors.size,diag
