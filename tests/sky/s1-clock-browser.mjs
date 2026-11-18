@@ -141,7 +141,7 @@ try{
         null,{timeout:10000});
       const audit=await page.locator('#auditReport').inputValue();
       const perfMatch=/Foreground play frames: (\d+); approx (\d+) FPS; p50 ([\d.]+) ms; p95 ([\d.]+) ms; worst ([\d.]+) ms; >33ms frames (\d+)/.exec(audit);
-      assert.ok(perfMatch,'Actual game's FrameHistory failed to return performance data');
+      assert.ok(perfMatch,"Actual game FrameHistory failed to return performance data");
       const performance={samples:+perfMatch[1],approxFps:+perfMatch[2],p50Ms:+perfMatch[3],
         p95Ms:+perfMatch[4],worstMs:+perfMatch[5],slowFrames:+perfMatch[6]};
       assert.ok(performance.samples>=30&&performance.p95Ms>=performance.p50Ms);
