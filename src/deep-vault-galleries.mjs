@@ -81,3 +81,10 @@ export function deepVaultEvidence(world){
     return {floor,air,solid,approach:approach.length,failures:failures.length};
   });
 }
+
+// Cave integration #240: a source-exact snapshot of the original four vaults;
+// callers cannot mutate the canonical cached world reader.
+export function deepVaultCells(seed=179){
+  if(!Number.isSafeInteger(seed))throw Error('Invalid vault seed');
+  return new Map(build(seed));
+}

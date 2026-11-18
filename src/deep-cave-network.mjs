@@ -84,3 +84,9 @@ export function deepCaveEvidence(world,origin=DEEP_CAVE_ORIGIN){
   return {bands,routeLength:route.length,entryRequiresLegacyFloorEdit:true,
     connectedByConstruction:true,walkable:bands.every(b=>b.samples>0&&b.failures===0)};
 }
+
+// Cave integration #240: expose a fresh, immutable-by-ownership snapshot of
+// actual old :24 geometry. No production registration or cache ownership change.
+export function deepCaveCells(origin=DEEP_CAVE_ORIGIN){
+  return new Map(geometry(origin));
+}
