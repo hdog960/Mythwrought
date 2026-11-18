@@ -93,4 +93,4 @@ function build(s){
  validateBlueprint(bp);return Object.freeze(bp);
 }
 export function getRoadmapBWave8B2(){return SPECS.map(build);}
-export const ROADMAP_B_WAVE7_B2_IDS=Object.freeze(SPECS.map(s=>['r2',s.cat,s.biome,s.size,String(s.v).padStart(2,'0')].join(':')));
+export const ROADMAP_B_WAVE8_B2_IDS=Object.freeze(SPECS.map(s=>['r2',s.cat,s.biome,s.size,String(s.v).padStart(2,'0')].join(':')));
