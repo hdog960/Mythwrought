@@ -7,6 +7,7 @@ import {BLOCK,VoxelWorld,meshChunk,terrainHeight,baseBlock} from '../src/voxel.m
 import {woodlandCanopyVertices} from '../src/canopy.mjs';
 import {meadowAccentVertices} from '../src/meadow.mjs';
 import {storybookGroveVertices} from '../src/grove.mjs';
+import {liveVoxelDistrict} from '../src/live-voxel-world.mjs';
 
 const FAKE_MATERIAL_TAGS=new Set([7,8,9,10,11,12,13,14,15,16,17]);
 const meshTags=mesh=>new Set(Array.from({length:mesh.length/9},(_,i)=>mesh[i*9+8]));
@@ -28,8 +29,18 @@ test('live chunk meshes contain no unbreakable decorative geometry tags',()=>{
     solidVertices+=mesh.length/9;
   }
   assert.ok(solidVertices>500,'real terrain faces remain visible');
-  assert.ok(physicalLeafFaces>0&&physicalWoodFaces>0,
-    'real seed-generated physical trees remain mineable and visible');
+  // Source-selected district trees can be outside the five sampled chunks.
+  // Find an ACTUAL visible tree in the original deterministic seeded district
+  // and inspect that exact active chunk instead of relying on a lucky region.
+  const scene=liveVoxelDistrict(w.seed,0,0,(x,y,z)=>w.legacyBlockAt(x,y,z));
+  const tree=scene.trees.find(t=>t.cells.some(row=>row[3]===BLOCK.LEAVES));
+  assert.ok(tree,'known original live district retains a physical harvestable tree');
+  const [lx,ly,lz]=tree.cells.find(row=>row[3]===BLOCK.LEAVES);
+  const leafMesh=meshChunk(w,Math.floor(lx/16),Math.floor(lz/16));
+  assert.ok(meshTags(leafMesh).has(18),
+    'actual seeded physical leaf face stays in the playable mesh');
+  assert.ok(physicalWoodFaces>0||meshTags(leafMesh).has(BLOCK.WOOD),
+    'actual seeded physical timber remains visible');
   assert.equal(JSON.stringify(w.save()),before,
     'geometry cleanup must not persist an invisible world edit');
 });
@@ -53,13 +64,8 @@ test('old decorative generators are retained as inert source references only',()
 
 test('physical leaf mining, save and restoration remain exactly functional',()=>{
   const w=new VoxelWorld(179),before=JSON.stringify(w.save());
-  let leaf=null;
-  for(let x=-36;x<=36&&!leaf;x++)for(let z=-36;z<=36&&!leaf;z++){
-    const h=terrainHeight(x,z,w.seed);
-    for(let y=h+1;y<=19;y++){
-      if(w.get(x,y,z)===BLOCK.LEAVES){leaf=[x,y,z];break;}
-    }
-  }
+  const scene=liveVoxelDistrict(w.seed,0,0,(x,y,z)=>w.legacyBlockAt(x,y,z));
+  const leaf=scene.trees.flatMap(t=>t.cells).find(row=>row[3]===BLOCK.LEAVES);
   assert.ok(leaf,'find real seeded editable foliage');
   const [x,y,z]=leaf;
   assert.equal(w.edits.size,0);
