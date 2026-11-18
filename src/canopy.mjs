@@ -133,7 +133,10 @@ function evergreen(out,x,y,z,variation,beacon=false,profile='mixed'){
   // Deliberately irregular scalloped shoulders and slight crown lean, all
   // deterministic in the existing source coordinates and within the old
   // world/chunk footprint. Only appearance changes, not physical WOOD/LEAVES.
-  const canopyHeight=beacon?6.03:height+.12;
+  // The optional sentinel star sits at y+6.35 and must stay visible
+  // above the green crown. Ordinary pines remain below the pre-existing
+  // six-cell overhead-clearance test even at maximum deterministic height.
+  const canopyHeight=beacon?5.53:Math.min(5.10,height+.12);
   const maxRadius=beacon?1.45:profile==='grove'?1.39:profile==='open'?1.08:1.29;
   const levels=[0,.20,.39,.58,.77,.96];
   const radii=[.71,1,.82,.64,.40,.11];
