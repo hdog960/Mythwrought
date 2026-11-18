@@ -65,6 +65,12 @@ const plans=[
         61,
         27,
         35
+      ],
+      [
+        1,
+        17,
+        55,
+        65
       ]
     ],
     "rooms": [
@@ -181,8 +187,8 @@ const plans=[
       "z",
       "x"
     ],
-    "title": "Glimmerroot Canopy-Bridge Barracks",
-    "roofStyle": "glimmerroot-nine-twinwood-canopy-spurs-and-raising-gabled-studios",
+    "title": "Glimmerroot Canopy-Bridge Barracks with Western Moonleaf Overlook",
+    "roofStyle": "glimmerroot-ten-wing-moonleaf-overlook-and-twin-canopy-roof-spurs",
     "wall": "pack1:002",
     "floor": "pack1:007",
     "roof": "pack3:023",
