@@ -8,6 +8,7 @@ export function stagePreparedBreakableDraws(prepared,{maxBytes=262144,maxGeometr
  if(!prepared||!Array.isArray(prepared.draws)||!prepared.stats||!Number.isSafeInteger(prepared.stats.selected))throw new TypeError('invalid prepared draws');
  let used=0,geometryBytes=0,instances=0;
  const uploadedMeshes=new Set();
+ const seenInstanceKeys=new Set();
  const batches=[];
  for(const draw of prepared.draws){
   if(typeof draw.sceneId!=='string'||!Number.isSafeInteger(draw.variant)||!Array.isArray(draw.instances)||
@@ -24,8 +25,10 @@ export function stagePreparedBreakableDraws(prepared,{maxBytes=262144,maxGeometr
   const offsets=new Float32Array(draw.instances.length*3);
   for(let i=0;i<draw.instances.length;i++){
    const item=draw.instances[i];
-   if(typeof item?.instanceKey!=='string'||!Array.isArray(item.anchor)||item.anchor.length!==3||
+   if(typeof item?.instanceKey!=='string'||item.instanceKey.length===0||!Array.isArray(item.anchor)||item.anchor.length!==3||
       !item.anchor.every(finite)||item.anchor.some(n=>Math.abs(n)>16777216))throw new TypeError('invalid instance anchor');
+   if(seenInstanceKeys.has(item.instanceKey))throw new TypeError('duplicate staged instance identity');
+   seenInstanceKeys.add(item.instanceKey);
    offsets.set(item.anchor,i*3);
   }
   used+=bytes;instances+=draw.instances.length;
