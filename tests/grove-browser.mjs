@@ -28,6 +28,25 @@ const scene=()=>page.evaluate(()=>{
 try{
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
  await loaded();
+ // The historical sources are retained but NONE may draw into the live game.
+ const fakeMeshCheck=await page.evaluate(async()=>{
+   const {VoxelWorld,meshChunk}=await import('./src/voxel.mjs');
+   const w=new VoxelWorld(179),old=JSON.stringify(w.save());
+   let vertices=0,physicalLeaves=0;
+   for(const [cx,cz] of [[0,0],[-1,0],[0,-1]]){
+     const mesh=meshChunk(w,cx,cz);
+     for(let i=8;i<mesh.length;i+=9){
+       const mat=mesh[i];vertices++;
+       if(mat>=7&&mat<=17)throw Error('Noninteractive decorative geometry in live mesh: '+mat);
+       if(mat===18)physicalLeaves++;
+     }
+   }
+   return {vertices,physicalLeaves,saveUnchanged:JSON.stringify(w.save())===old};
+ });
+ assert.ok(fakeMeshCheck.vertices>1000&&fakeMeshCheck.saveUnchanged);
+ assert.ok(fakeMeshCheck.physicalLeaves>0,
+   'mineable seeded foliage must survive fake-canopy removal');
+
  const before=await scene();
  assert.equal(before.saved,null);
  assert.equal(before.quality,'painted-materials');
@@ -108,5 +127,5 @@ try{
  await page.screenshot({path:'artifacts/mythwrought-v010-sculpted-garden-groves-compact.png'});
  assert.deepEqual(errors,[]);
  assert.deepEqual(missing,[]);
- console.log('PASS original three-dimensional garden patches, genuine Chromium WebGL capture, edit/remesh/save/reload, compact landscape and external dual-thumb rails');
+ console.log('PASS fake ground groves absent from live mesh; archived source remains deterministic; edits, save, WebGL2 and thumb rails preserved');
 }finally{await browser.close();}
