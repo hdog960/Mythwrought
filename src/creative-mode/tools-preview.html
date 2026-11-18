@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"><title>Mythwrought M6 · Detached Advanced Tool Laboratory</title><link rel="stylesheet" href="./build-preview.css"><link rel="stylesheet" href="./tools-preview.css"></head>
+<body>
+<div id="portraitWarning" class="portrait-warning">Rotate to landscape for this M6 detached advanced-tools preview.</div>
+<main class="shell" aria-label="M6 synthetic advanced-building tool preview, no live world integration">
+ <aside class="rail left" aria-label="Protected left thumb rail"><div class="rail-title">✦ MOVE</div><div class="rail-hint">THUMB RAIL · RESERVED</div><div class="pad" aria-hidden="true"><span>✦</span></div><nav class="rail-tools" aria-label="Bounded advanced edit modes"><button id="modeFill" aria-pressed="true" type="button">FILL</button><button id="modeLine" aria-pressed="false" type="button">LINE</button><button id="modePlane" aria-pressed="false" type="button">PLANE</button><button id="modeReplace" aria-pressed="false" type="button">REPLACE</button></nav><div class="rail-label">SELECTION ≤216</div></aside>
+ <section class="screen"><header class="header"><strong>MYTHWROUGHT</strong><span>TOOLS · M6</span><small>DETACHED ONLY</small></header>
+  <div class="world" id="world">
+   <div class="toolbar" role="group" aria-label="Synthetic placed item and rotation"><button type="button" id="chooseStone" aria-pressed="true">STONE</button><button type="button" id="chooseMoss" aria-pressed="false">MOSS</button><button type="button" id="chooseArch" aria-pressed="false">ARCH</button><button type="button" id="rotateTool">ROT <span id="rotation">0°</span></button></div>
+   <div id="mapReservation" class="map" role="img" aria-label="Upper-right minimap reservation, not a live map">◇<small>MAP SPACE</small></div>
+   <div class="tool-readout" id="toolReadout" aria-live="polite">REV 0 · UNDO 0 · REDO 0</div>
+   <div class="cell-grid" id="cellGrid" role="group" aria-label="Synthetic 10 by 10 edit-selection grid: tap two endpoints"></div>
+   <div class="tool-help" id="toolHelp">TAP FIRST &amp; LAST GRID CELL · PREVIEW BEFORE COMMIT</div>
+   <div class="tool-evidence" id="toolEvidence" aria-hidden="true"></div>
+  </div>
+  <footer class="status"><span id="toolStatus" role="status">M6 LAB · SELECT CELLS THEN PREVIEW · NO LIVE WORLD</span><span>NO LIVE SAVE</span></footer>
+ </section>
+ <aside class="rail right" aria-label="Protected right thumb rail"><div class="rail-title">✦ ACTION</div><div class="rail-hint">THUMB RAIL · RESERVED</div><div class="pad" aria-hidden="true"><span>✧</span></div><div class="rail-tools" aria-label="Atomic preview and M5 history controls"><button type="button" id="previewTool">PREVIEW</button><button type="button" id="commitTool">COMMIT</button><button type="button" id="undoTool">UNDO</button><button type="button" id="redoTool">REDO</button><button type="button" id="resetTool">RESET</button></div><div class="rail-label">RAM ONLY · 24 ACTIONS</div></aside>
+</main>
+<script type="module" src="./tools-preview.mjs"></script>
+</body></html>

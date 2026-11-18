@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"><meta name="theme-color" content="#17282b"><title>Mythwrought — Creative Mode UX (isolated preview)</title><link rel="stylesheet" href="./preview.css"></head>
+<body>
+<div class="portrait-warning" role="note">Rotate your phone to landscape for the Creative Mode UX preview.</div>
+<main class="shell" aria-label="Mythwrought Creative Mode standalone interface preview">
+  <aside class="rail left" data-rail="left" aria-label="Left thumb rail — movement preview">
+    <div class="rail-title">✦ MOVE</div>
+    <div class="rail-hint">LEFT THUMB</div>
+    <div class="thumb-pad" id="movePad" role="group" aria-label="Preview movement pad, drag to test input" tabindex="0"><span class="pad-ring"></span><span class="pad-knob">✦</span></div>
+    <div class="rail-caption" id="moveReadout">IDLE</div>
+    <div class="rail-foot">INPUT PREVIEW</div>
+  </aside>
+  <section class="screen" aria-label="Standalone Creative Mode viewport concept">
+    <header class="chrome"><strong>MYTHWROUGHT</strong><span>CREATIVE · ROADMAP 9</span><small>CREATIVE LAB · M3</small></header>
+    <div class="world" id="world" data-mode="explore" data-drawer="closed">
+      <div class="landscape" aria-hidden="true"><div class="mountain far"></div><div class="mountain near"></div><div class="ground"></div><div class="path"></div></div>
+      <div class="world-label"><span>STANDALONE FLIGHT LAB</span><small>Fixture motion only · not connected to the game</small></div><div class="flight-ghost" id="flightGhost" aria-hidden="true">✦</div>
+      <nav class="mode-switch" aria-label="Interface mode">
+        <button type="button" id="exploreMode" data-mode="explore" aria-pressed="true">Explore</button>
+        <button type="button" id="creativeMode" data-mode="creative" aria-pressed="false">Creative</button>
+      </nav>
+      <div class="map-reservation" id="miniMapReservation" role="img" aria-label="Reserved upper-right in-game minimap area; no live map data"><span class="map-glyph" aria-hidden="true">◇</span><span>MAP SPACE</span></div>
+      <div class="center-mark" aria-hidden="true">+</div>
+      <div class="mode-note" id="modeNote">EXPLORE PREVIEW</div>
+      <div class="flight-dashboard" id="flightDashboard" hidden>
+        <output id="flightTelemetry" aria-label="Preview flight coordinates and safety status">Flight off</output>
+        <nav class="speed-switch" id="flightProfiles" aria-label="Creative flight speed profiles">
+          <button type="button" data-speed="precision">PRECISION</button><button type="button" data-speed="normal">NORMAL</button><button type="button" data-speed="fast">FAST</button><button type="button" data-speed="travel">TRAVEL</button>
+        </nav>
+      </div>
+      <div class="bottom-tools" id="bottomTools">
+        <div class="slot-list" id="hotbar" role="group" aria-label="Preview hotbar with six slots"></div>
+        <button type="button" id="inventoryButton" class="inventory-button" disabled aria-label="Open sample inventory">INVENTORY</button>
+      </div>
+      <section class="inventory-panel" id="inventoryPanel" role="dialog" aria-modal="true" aria-label="Sample inventory, not connected to live placeables" hidden>
+        <div class="inventory-header"><div><b>CREATIVE INVENTORY</b><small id="inventoryOrigin">UX samples · not registered or placeable</small></div><button type="button" id="closeInventory" aria-label="Close inventory">✕</button></div>
+        <nav class="inventory-sources" aria-label="Inventory data mode"><button type="button" id="sampleSource" aria-pressed="true">UX SAMPLES</button><button type="button" id="registryFixtureSource" aria-pressed="false">REGISTRY LAB</button></nav>
+        <label class="search-label" for="inventorySearch">Search sample tiles</label>
+        <input id="inventorySearch" type="search" autocomplete="off" placeholder="Find a sample…" maxlength="80">
+        <nav class="categories" id="categories" aria-label="Sample item categories"><button type="button" data-category="all" aria-pressed="true">All</button><button type="button" data-category="blocks" aria-pressed="false">Blocks</button><button type="button" data-category="objects" aria-pressed="false">Objects</button></nav>
+        <nav class="catalog-categories" id="catalogCategories" aria-label="Simulated placeable categories" hidden></nav>
+        <div class="item-grid" id="sampleItems" aria-label="UX-only sample tile selection"></div>
+        <div class="catalog-scroller" id="catalogScroller" role="list" aria-label="Virtualized synthetic contract-placeables inventory" hidden><div class="catalog-spacer" id="catalogSpacer"><div class="catalog-viewport" id="catalogViewport"></div></div></div>
+        <output id="catalogStats" class="catalog-stats" hidden aria-live="polite"></output>
+        <div class="inventory-footer"><span>Assign to selected hotbar slot · never places blocks</span><button type="button" id="clearHotbar">CLEAR SLOT</button></div>
+      </section>
+    </div>
+    <footer class="status-bar"><span id="announcement" role="status" aria-live="polite">Explore mode. Standalone interface preview.</span><span>NO LIVE GAME</span></footer>
+  </section>
+  <aside class="rail right" data-rail="right" aria-label="Right thumb rail — look and action preview">
+    <div class="rail-title">✦ LOOK</div>
+    <div class="rail-hint">RIGHT THUMB</div>
+    <div class="thumb-pad" id="lookPad" role="group" aria-label="Preview camera pad, drag to test input" tabindex="0"><span class="pad-ring"></span><span class="pad-knob">◇</span></div>
+    <div class="rail-caption" id="lookReadout">IDLE</div>
+    <div class="flight-rail" aria-label="Standalone Creative flight controls">
+      <div class="vertical-controls"><button type="button" id="ascend" aria-label="Hold to ascend in flight preview">UP ↑</button><button type="button" id="descend" aria-label="Hold to descend in flight preview">DOWN ↓</button></div>
+      <button type="button" id="flightToggle" aria-pressed="false">FLY OFF</button>
+      <button type="button" id="landButton">LAND</button>
+    </div>
+    <div class="rail-foot">NO GAME ACTIONS</div>
+  </aside>
+</main>
+<script type="module" src="./preview.mjs"></script>
+</body></html>

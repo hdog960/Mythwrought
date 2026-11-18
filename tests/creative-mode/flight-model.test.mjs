@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createFlightState,enterFlight,setFlightProfile,planFlightStep,returnToGround,flightRegionKey,
+ FLIGHT_PROFILES,MAX_FRAME_SECONDS,MAX_PREFETCH_PER_STEP,MAX_PREFETCH_PENDING} from '../../src/creative-mode/flight-model.mjs';
+const ready=()=>true;
+const start=()=>enterFlight(createFlightState(),ready);
+const tick=(state,intent={},env={isRegionReady:ready})=>planFlightStep(state,{dt:.05,...intent},env);
+test('M2 starts disabled, immutable and detached',()=>{const s=createFlightState();assert.equal(s.active,false);assert.ok(Object.isFrozen(s));assert.ok(Object.isFrozen(s.position));assert.equal(tick(s,{vertical:1}).state,s);});
+test('flight cannot arm if starting region is unloaded',()=>{const s=enterFlight(createFlightState(),()=>false);assert.equal(s.active,false);assert.equal(s.blocked,true);});
+test('hover preserves position and avoids prefetch',()=>{const s=start(),p=tick(s);assert.deepEqual(p.state.position,s.position);assert.deepEqual(p.requests,[]);});
+test('ascend and descend at normal speed; finite dt is clamped',()=>{let s=start();s=tick(s,{vertical:1,dt:99}).state;assert.ok(Math.abs(s.position.y-6-FLIGHT_PROFILES.normal*MAX_FRAME_SECONDS)<1e-8);s=tick(s,{vertical:-1}).state;assert.ok(Math.abs(s.position.y-6)<1e-8);});
+test('four profiles are ordered, invalid profile ignored',()=>{const s=start();for(const profile of Object.keys(FLIGHT_PROFILES)){const a=tick(setFlightProfile(s,profile),{forward:1}).state;assert.ok(Math.abs(a.position.z- FLIGHT_PROFILES[profile]*.05)<1e-8);}assert.equal(setFlightProfile(s,'turbo'),s);});
+test('yaw rotates directional movement without changing height',()=>{const s=start();const p=tick(s,{yaw:Math.PI/2,forward:1});assert.ok(p.state.position.x>0);assert.ok(Math.abs(p.state.position.z)<1e-8);assert.equal(p.state.position.y,6);});
+test('diagonal input is normalized to profile speed',()=>{const s=start();const p=tick(s,{forward:1,strafe:1,vertical:1});const d=Math.hypot(...['x','y','z'].map(k=>p.state.position[k]-s.position[k]));assert.ok(Math.abs(d-.2)<1e-8);});
+test('height clamp and unloaded region block movement before crossing',()=>{let s=enterFlight(createFlightState({x:0,y:29.99,z:0}),ready);let a=tick(s,{vertical:1});assert.equal(a.state.blocked,true);assert.deepEqual(a.state.position,s.position);
+ const border=p=>p.z<=.12; s=enterFlight(createFlightState(),border);a=tick(s,{forward:1},{isRegionReady:border});assert.equal(a.state.blocked,true);assert.equal(a.state.position.z,0);assert.ok(a.requests.length>0);});
+test('prefetch de-duplicates and caps queue and per-step requests',()=>{let s=enterFlight(createFlightState(),p=>p.z<=.01);for(let i=0;i<30;i++){const result=tick(s,{forward:1},{isRegionReady:p=>p.z<=.01});assert.ok(result.requests.length<=MAX_PREFETCH_PER_STEP);s=result.state;assert.ok(s.pending.length<=MAX_PREFETCH_PENDING);}assert.equal(s.pending.length,1);});
+test('landing safely ends flight and clears requests',()=>{let s=tick(start(),{vertical:1}).state;const result=returnToGround(s,p=>({...p,y:4}),ready);assert.equal(result.landed,true);assert.equal(result.state.active,false);assert.equal(result.state.position.y,4);assert.deepEqual(result.state.pending,[]);});
+test('landing refuses absent, higher, unloaded or out-of-height targets',()=>{const s=start();for(const landing of [null,{x:0,y:9,z:0},{x:0,y:-5,z:0},{x:0,y:4,z:0}]){const r=returnToGround(s,()=>landing,p=>landing?.y===4?false:true);assert.equal(r.landed,false);assert.equal(r.state.active,true);}});
+test('invalid coordinates/directions and missing readiness fail safely',()=>{assert.throws(()=>createFlightState({x:Infinity,y:6,z:0}));assert.throws(()=>flightRegionKey({x:NaN,y:0,z:0}));assert.throws(()=>tick(start(),{forward:NaN}));assert.throws(()=>tick(start(),{forward:1},{}));});

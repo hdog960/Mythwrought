@@ -1,0 +1,6 @@
+/* M5 additions to feature-owned M4 layout. No shared/game styles. */
+.history-readout{position:absolute;top:43px;left:8px;max-width:calc(100% - 90px);background:#182e35dc;border:1px solid #a4b7a0;border-radius:5px;color:#e9ddbd;letter-spacing:.04em;font-size:clamp(8px,1vw,11px);font-weight:800;padding:4px 6px;white-space:nowrap;z-index:1}
+.storage-tools button{min-height:25px;font-size:clamp(8px,1vw,10px)}
+#historyStatus{font-variant-numeric:tabular-nums}
+@media(max-width:690px){.history-readout{top:33px;left:5px;font-size:8px;padding:3px 4px}.storage-tools{gap:2px}.storage-tools button{min-height:22px;font-size:8px;padding:3px 2px}.rail-tools{gap:3px}.rail-tools button{min-height:24px}}
+@media(max-height:340px){.history-readout{top:28px}.pad{height:48px}.rail-tools{gap:2px}.rail-tools button{min-height:22px;padding:2px}.rail-hint{display:none}}
