@@ -37,7 +37,7 @@ export function createAtomicVoxelHost(initialCells) {
       seen.add(k);
       const s = cells.get(k);
       if (!s || s.id !== r.expectedId || s.revision !== r.expectedRevision ||
-          s.revision >= Number.MAX_SAFE_INTEGER - 1 ||
+          (s.revision >= Number.MAX_SAFE_INTEGER - 1 || s.orientationEpoch >= Number.MAX_SAFE_INTEGER - 1) ||
           (r.expectedTurn !== undefined && s.turn !== r.expectedTurn) ||
           (r.expectedOrientationEpoch !== undefined && s.orientationEpoch !== r.expectedOrientationEpoch)) return false;
     }
@@ -73,7 +73,8 @@ export function createAtomicVoxelHost(initialCells) {
     externalWrite(cell, nextId) {
       if (!validCell(cell) || !validId(nextId)) throw new TypeError('Invalid external write');
       const s = cells.get(key(cell));
-      if (!s || s.revision >= Number.MAX_SAFE_INTEGER - 1) return false;
+      if (!s || s.revision >= Number.MAX_SAFE_INTEGER - 1 ||
+          s.orientationEpoch >= Number.MAX_SAFE_INTEGER - 1) return false;
       s.id = nextId;
       s.revision++;
       s.turn = null;
