@@ -31,3 +31,16 @@ test('duplicate keys and impossible triangle budgets fail closed',()=>{
  assert.throws(()=>planFittingBatches(props,{maxInstances:257}),/invalid/);
  assert.throws(()=>planFittingBatches([{...props[0],render:{...props[0].render,triangleCount:0}}]),/invalid/);
 });
+
+test('corrupt meshes and malformed grouping identity fail closed',()=>{
+ const original=objects(2026)[0];
+ const corrupted=Float32Array.from(original.render.mesh.positions);
+ corrupted[0]=NaN;
+ assert.throws(()=>planFittingBatches([{...original,render:{...original.render,mesh:{...original.render.mesh,positions:corrupted}}}]),/invalid/);
+ const infinite=Float32Array.from(original.render.mesh.positions);
+ infinite[1]=Infinity;
+ assert.throws(()=>planFittingBatches([{...original,render:{...original.render,mesh:{...original.render.mesh,positions:infinite}}}]),/invalid/);
+ assert.throws(()=>planFittingBatches([{...original,render:{...original.render,mesh:{...original.render.mesh,materials:new Uint8Array(0)}}}]),/invalid/);
+ assert.throws(()=>planFittingBatches([{...original,variant:'0'}]),/invalid/);
+ assert.throws(()=>planFittingBatches([{...original,variant:4}]),/invalid/);
+});
