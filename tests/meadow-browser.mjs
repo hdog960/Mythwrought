@@ -30,6 +30,25 @@ const stats=()=>page.evaluate(()=>({
 try{
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
  await loaded();
+ // The historical sources are retained but NONE may draw into the live game.
+ const fakeMeshCheck=await page.evaluate(async()=>{
+   const {VoxelWorld,meshChunk}=await import('./src/voxel.mjs');
+   const w=new VoxelWorld(179),old=JSON.stringify(w.save());
+   let vertices=0,physicalLeaves=0;
+   for(const [cx,cz] of [[0,0],[-1,0],[0,-1]]){
+     const mesh=meshChunk(w,cx,cz);
+     for(let i=8;i<mesh.length;i+=9){
+       const mat=mesh[i];vertices++;
+       if(mat>=7&&mat<=17)throw Error('Noninteractive decorative geometry in live mesh: '+mat);
+       if(mat===18)physicalLeaves++;
+     }
+   }
+   return {vertices,physicalLeaves,saveUnchanged:JSON.stringify(w.save())===old};
+ });
+ assert.ok(fakeMeshCheck.vertices>1000&&fakeMeshCheck.saveUnchanged);
+ assert.ok(fakeMeshCheck.physicalLeaves>0,
+   'mineable seeded foliage must survive fake-canopy removal');
+
  assert.equal(await saved(),null,'Fresh seed should not be silently saved by a visual-only feature');
 
  // Find a real blossom attached to the currently visible natural grass, not
@@ -122,5 +141,5 @@ try{
  assert.ok(Number(last.d.renderedMeshVertices)>0);
  assert.deepEqual(errors,[],'JavaScript or shader runtime exception');
  assert.deepEqual(missing,[],'Missing public resources');
- console.log('PASS Gate A edit-aware whimsical voxel meadows: actual colorful bloom geometry, untouched initial save, mined/restored schema-1 grass, complete 25-chunk streaming and external grips');
+ console.log('PASS fake meadow blooms absent from live mesh; archived source remains edit-aware; schema-1 grass, 25 chunks and grips intact');
 }finally{await browser.close();}
