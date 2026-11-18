@@ -52,6 +52,16 @@ jobs:
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-sky-s1.log 2>&1 &
           node tests/sky/s1-clock-browser.mjs
+          # Exact same quiet-frame protocol used at the previously accepted S0
+          # production commit, to separate screenshot interactions from FPS.
+          node tests/sky/s0-baseline-browser.mjs
+      - name: Upload matched quiet-frame comparison from original S0 protocol
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s1-matched-perf-${{ github.sha }}
+          path: artifacts/sky-s0/
+          if-no-files-found: warn
       - name: Upload original-game screenshots and reproducible manifest
         uses: actions/upload-artifact@v4
         if: always()
