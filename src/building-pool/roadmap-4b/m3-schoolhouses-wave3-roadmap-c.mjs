@@ -147,6 +147,7 @@ export const ROADMAP_C_4B_WAVE3_SCHOOL=Object.freeze((()=>{
  const candidate={...b,provenance:{...b.provenance,milestone:'M3-wave3',source:'Roadmap C original seven-pavilion educational roundcourt',method:'literal authored six teaching wings, linked rounded lecture courts, regional source bearing roofs and full two-high circulation'}};
  validateBlueprint(candidate);return Object.freeze(candidate);
 })());
+export const ROADMAP_C_4B_WAVE3_SCHOOLS=Object.freeze([ROADMAP_C_4B_WAVE3_SCHOOL]);
 export const ROADMAP_C_4B_149_ALL=Object.freeze([...M3_148_ALL,ROADMAP_C_4B_WAVE3_SCHOOL]);
 validateCollection(ROADMAP_C_4B_149_ALL);
 if(ROADMAP_C_4B_149_ALL.length!==149||new Set(ROADMAP_C_4B_149_ALL.map(geometrySignature)).size!==149)throw Error('Roadmap C 4B new roundcourt school lacks unique source geometry or historical preservation');
