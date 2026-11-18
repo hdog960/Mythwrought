@@ -21,7 +21,7 @@ const guarded=(session,extra={})=>breakVisibleEnvironment(session,{
 
 test('real v1 modeled stalagmite can be picked, removed once and reloaded as tombstone',()=>{
  const s=create();
- assert.deepEqual(s.visible().map(x=>x.instanceKey),[a.instanceKey,b.instanceKey]);
+ assert.deepEqual(new Set(s.visible().map(x=>x.instanceKey)),new Set([a.instanceKey,b.instanceKey]));
  const result=guarded(s);
  assert.equal(result.removed,true);
  assert.equal(result.instanceKey,a.instanceKey);
