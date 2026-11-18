@@ -167,12 +167,14 @@ try{
         assert.ok(rise.sunAltitude>.15&&rise.sunAltitude<.5);
         assert.ok(rise.sunScreen[0]>.06&&rise.sunScreen[0]<.94);
         const sunrise=await capture(page,viewport,'sunrise-world');
+        await capture(page,viewport,'sunrise-world','canvas');
         await setPhaseBySidecar(page,1020000); // 17:00 sunset glow
         await aim(page,'west');
         const set=await scene(page);
         assert.ok(set.sunAltitude>.15&&set.sunAltitude<.5);
         assert.ok(set.sunScreen[0]>.06&&set.sunScreen[0]<.94);
         const sunset=await capture(page,viewport,'sunset-world');
+        await capture(page,viewport,'sunset-world','canvas');
         assert.notEqual(sunrise.sha256,sunset.sha256,
           'Sunrise/sunset real directional captures must differ');
         assert.deepEqual(await nonSky(page),protectedBytes,'Sun orbit test mutated original world save');
