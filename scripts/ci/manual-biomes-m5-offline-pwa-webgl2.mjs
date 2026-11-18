@@ -27,8 +27,11 @@ const server=createServer(async(req,res)=>{
     const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
     const file=path.resolve(root,'.'+pathname);
     if(!(file===root||file.startsWith(root+path.sep)))throw Error('Bad path');
-    const bytes=await readFile(file.endsWith(path.sep)?path.join(file,'index.html'):file);
-    res.writeHead(200,{'Content-Type':mime[path.extname(file)]||
+    // The installed webmanifest start_url './' resolves to '/', and the
+    // root path resolves to the directory itself; serve the real index HTML.
+    const served=file===root?path.join(root,'index.html'):file;
+    const bytes=await readFile(served);
+    res.writeHead(200,{'Content-Type':mime[path.extname(served)]||
       'application/octet-stream','Cache-Control':'no-store'});
     res.end(bytes);
   }catch(error){res.writeHead(404);res.end(String(error));}
@@ -127,7 +130,13 @@ try{
   await page.locator('#closeHelp').click();
   await page.waitForFunction(()=>window.__mythwroughtTest.fourBiomeProfile()
     ?.generator==='mythwrought-four-surface-regions-v5',null,{timeout:30000});
-  await page.evaluate(()=>navigator.serviceWorker.ready);
+  // A broken installation must fail promptly with preserved evidence,
+  // rather than leave three runners hung on an unbounded ready promise.
+  await page.evaluate(()=>Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise((_,reject)=>setTimeout(()=>reject(
+      Error('M5 offline ServiceWorker install not ready after 90s')),90000))
+  ]));
   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),null,
     {timeout:180000});
   const online=await page.evaluate(async()=>{
