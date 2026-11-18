@@ -19,6 +19,7 @@ import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.m
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
 import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
   exportM2World,inspectM2WorldExport} from './manual-biomes/m2-runtime-bridge.mjs';
@@ -83,6 +84,10 @@ function start(){
     recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
   }
   let pack3=createPack3LiveBridge(world,localStorage);
+  // Only a previously selected immutable v5 world may opt into M5 PWA caching.
+  if(world.base instanceof FourRegionWorld&&
+      world.base.generationProfile.generator===M5_EXPERIMENTAL_GENERATOR)
+    void ensureM5OfflineCache();
   seedLabel.textContent='WORLD '+world.seed;
   const VS=[
     '#version 300 es','precision highp float;',
@@ -2088,6 +2093,10 @@ function start(){
     g2NewWorld();
     world=candidate;world.nextPack2State=pack2Selection;
     pack3=createPack3LiveBridge(world,localStorage);
+    // Register *after* the explicit unused-seed v5 creation is safely saved.
+    if(world.base instanceof FourRegionWorld&&
+        world.base.generationProfile.generator===M5_EXPERIMENTAL_GENERATOR)
+      void ensureM5OfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
     storageReadOnly=false;changed=false;respawnPrototype();
     clearMirrorDownload();
