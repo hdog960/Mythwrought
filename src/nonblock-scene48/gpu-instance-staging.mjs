@@ -23,16 +23,18 @@ export function stagePreparedBreakableDraws(prepared,{maxBytes=262144,maxGeometr
   const bytes=draw.instances.length*12;
   if(used+bytes>maxBytes)throw new RangeError('instance byte cap exceeded');
   const offsets=new Float32Array(draw.instances.length*3);
+  const instanceKeys=[];
   for(let i=0;i<draw.instances.length;i++){
    const item=draw.instances[i];
    if(typeof item?.instanceKey!=='string'||item.instanceKey.length===0||!Array.isArray(item.anchor)||item.anchor.length!==3||
       !item.anchor.every(finite)||item.anchor.some(n=>Math.abs(n)>16777216))throw new TypeError('invalid instance anchor');
    if(seenInstanceKeys.has(item.instanceKey))throw new TypeError('duplicate staged instance identity');
    seenInstanceKeys.add(item.instanceKey);
+   instanceKeys.push(item.instanceKey);
    offsets.set(item.anchor,i*3);
   }
   used+=bytes;instances+=draw.instances.length;
-  batches.push(Object.freeze({sceneId:draw.sceneId,variant:draw.variant,mesh:draw.mesh,offsets,instanceCount:draw.instances.length}));
+  batches.push(Object.freeze({sceneId:draw.sceneId,variant:draw.variant,mesh:draw.mesh,offsets,instanceKeys:Object.freeze(instanceKeys),instanceCount:draw.instances.length}));
  }
  if(instances!==prepared.stats.selected)throw new TypeError('instance census mismatch');
  return Object.freeze({batches:Object.freeze(batches),bytes:used,geometryBytes,totalBytes:used+geometryBytes,uniqueMeshes:uploadedMeshes.size,instances});
