@@ -50,13 +50,14 @@ test('natural grotto art is deterministic, 9-float packed, bounded and seed-spec
  assert.ok(count>0,'No naturally hollow grotto contained any decoration');
  assert.deepEqual(GROTTO_LIMITS.materialIds,[10,11,12]);
 });
-test('cave fungi and crystal geometry never change saves, block selection or collision',()=>{
+test('retired fake cave fungi/crystals are absent from live mesh and cannot affect saves',()=>{
  const w=new VoxelWorld(179),original=JSON.stringify(w.save());
  const all=accents(w,0,0),chunk=meshChunk(w,0,0);
  assert.equal(JSON.stringify(w.save()),original);
- assert.ok(chunk.length>=all.length);
- assert.ok(packedIndex(chunk,all)>=0,
-   'Grotto colors must remain an exact contiguous section of the original chunk GPU buffer');
+ assert.ok(chunk.length>0,'real cave rock and terrain faces remain live');
+ for(let i=8;i<chunk.length;i+=9)
+   assert.ok(!GROTTO_LIMITS.materialIds.includes(chunk[i]),
+     'old intangible fungi/crystals must be absent from the playable mesh');
  assert.equal(w.set(1,4,1,10),false);
  assert.equal(w.set(1,4,1,11),false);
  assert.equal(w.set(1,4,1,12),false);
