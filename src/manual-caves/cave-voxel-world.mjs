@@ -54,9 +54,14 @@ export class CaveVoxelWorld extends VoxelWorld{
     });
   }
   naturalAndLandmarkBlock(x,y,z){
-    if([x,y,z].every(Number.isSafeInteger)&&y>=WORLD_MIN_Y&&y<LEGACY_WORLD_MIN_Y){
+    if([x,y,z].every(Number.isSafeInteger)&&y>=WORLD_MIN_Y){
       const key=worldKey(x,y,z);
-      if(this.caveCellMap?.has(key))return this.caveCellMap.get(key);
+      // Explicit new-world profile entry portals are physical baseline cells,
+      // never synthetic schema-1 player edits. Only the runtime adapter can
+      // attach verified proposals; ordinary CaveVoxelWorld never has portals.
+      if(this.cavePortalCells?.has(key))return this.cavePortalCells.get(key);
+      if(y<LEGACY_WORLD_MIN_Y&&this.caveCellMap?.has(key))
+        return this.caveCellMap.get(key);
     }
     return super.naturalAndLandmarkBlock(x,y,z);
   }
