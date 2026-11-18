@@ -3,6 +3,8 @@ export const SCENE_FAMILIES = Object.freeze({
   'scene48:low-grass': Object.freeze({attachment:'ground', footprint:[0.75,0.42,0.75], collision:'pass-through', tier:'dense', biome:['temperate','meadow'], status:'SOURCE_READY'}),
   'scene48:short-fern': Object.freeze({attachment:'ground', footprint:[0.9,0.7,0.9], collision:'pass-through', tier:'medium', biome:['temperate','enchanted-forest'], status:'SOURCE_READY'}),
   'scene48:single-wildflower': Object.freeze({attachment:'ground', footprint:[0.42,0.82,0.42], collision:'pass-through', tier:'medium', biome:['temperate','meadow'], status:'SOURCE_READY'}),
+  'scene48:lavender-spike': Object.freeze({attachment:'ground', footprint:[0.65,0.9,0.65], collision:'pass-through', tier:'medium', biome:['meadow','temperate'], status:'IN_PROGRESS'}),
+  'scene48:heather-sprig': Object.freeze({attachment:'ground', footprint:[0.8,0.62,0.8], collision:'pass-through', tier:'medium', biome:['meadow','temperate'], status:'IN_PROGRESS'}),
   'scene48:button-mushroom': Object.freeze({attachment:'ground', footprint:[0.5,0.46,0.5], collision:'pass-through', tier:'medium', biome:['forest','enchanted-forest'], status:'SOURCE_READY'})
 });
 const mix = n => { n = Math.imul(n ^ n >>> 16, 0x7feb352d); n = Math.imul(n ^ n >>> 15, 0x846ca68b); return (n ^ n >>> 16) >>> 0; };
@@ -24,7 +26,33 @@ function grass(b,v){for(let i=0;i<5;i++){const a=i*Math.PI*2/5+v.bend,r=.09+(i%2
 function fern(b,v){for(let f=0;f<3;f++){const a=f*Math.PI*2/3+v.bend,dx=Math.cos(a),dz=Math.sin(a);for(let i=1;i<=4;i++){const t=i/5;for(const s of [-1,1])leaf(b,dx*t*.26,.06+t*.42,dz*t*.26,dx*.11+s*(-dz)*.17*(1-t),.07,dz*.11+s*dx*.17*(1-t),.07,1);}}}
 function flower(b,v){const z=v.bend;b.quad([-.018,0,z],[.018,0,z],[.018,.58,z],[ -.018,.58,z],2);for(let i=0;i<5;i++){const a=i*Math.PI*2/5;leaf(b,0,.58,z,Math.cos(a)*.17,.09,Math.sin(a)*.17,.07,3);}b.tri([-.05,.59,z],[.05,.59,z],[0,.65,z],4);}
 function mushroom(b,v){const sides=8,r=.19;for(let i=0;i<sides;i++){const a=i*Math.PI*2/sides,c=(i+1)*Math.PI*2/sides;b.quad([Math.cos(a)*.035,0,Math.sin(a)*.035],[Math.cos(c)*.035,0,Math.sin(c)*.035],[Math.cos(c)*.047,.25,Math.sin(c)*.047],[Math.cos(a)*.047,.25,Math.sin(a)*.047],5);b.tri([0,.4,0],[Math.cos(a)*r,.25,Math.sin(a)*r],[Math.cos(c)*r,.25,Math.sin(c)*r],6);b.tri([0,.24,0],[Math.cos(c)*r,.25,Math.sin(c)*r],[Math.cos(a)*r,.25,Math.sin(a)*r],7);}}
-const makers={'scene48:low-grass':grass,'scene48:short-fern':fern,'scene48:single-wildflower':flower,'scene48:button-mushroom':mushroom};
+function lavender(b,v){
+ for(let stalk=0;stalk<3;stalk++){
+  const a=stalk*2*Math.PI/3+v.bend, x=Math.cos(a)*.13,z=Math.sin(a)*.13,h=.58+stalk*.075;
+  b.quad([x-.012,0,z],[x+.012,0,z],[x+.012,h,z],[x-.012,h,z],2);
+  for(let ring=0;ring<4;ring++){
+   const cy=h-.04-ring*.055,r=.048+ring*.008;
+   for(let petal=0;petal<4;petal++){
+    const t=petal*Math.PI/2+ring*.4;
+    b.tri([x,cy,z],[x+Math.cos(t)*r,cy+.018,z+Math.sin(t)*r],[x+Math.cos(t+.45)*r,cy+.065,z+Math.sin(t+.45)*r],8);
+   }
+  }
+ }
+}
+function heather(b,v){
+ for(let stem=0;stem<5;stem++){
+  const a=stem*2*Math.PI/5+v.bend,dx=Math.cos(a),dz=Math.sin(a),h=.36+(stem%3)*.06;
+  b.quad([0,0,0],[.012,0,.012],[dx*.22+.012,h,dz*.22+.012],[dx*.22,h,dz*.22],2);
+  for(let j=1;j<=4;j++){
+   const t=j/5,x=dx*.22*t,y=h*t,z=dz*.22*t;
+   for(const side of [-1,1]){
+    const sx=-dz*side,sz=dx*side;
+    b.tri([x,y,z],[x+sx*.055,y+.045,z+sz*.055],[x+dx*.05,y+.07,z+dz*.05],9);
+   }
+  }
+ }
+}
+const makers={'scene48:lavender-spike':lavender,'scene48:heather-sprig':heather,'scene48:low-grass':grass,'scene48:short-fern':fern,'scene48:single-wildflower':flower,'scene48:button-mushroom':mushroom};
 export function createSceneMesh(id,seed,x,y,z){
  const v=sceneVariant(seed,x,y,z,id),b=builder();makers[id](b,v);const mesh=b.finish();
  // Rotation and variation happen at instance level, not in shared mesh geometry.
