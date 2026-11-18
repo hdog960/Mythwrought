@@ -69,7 +69,10 @@ export function upperCaveCells({seed=179,site=UPPER_SITES[0],descentReservation,
   // -26 floor, and crosses several independent streaming chunk boundaries.
   // It never reaches the protected surface or the :36 descent footprint.
   {
-    const d=108, x=site.x+d, floor=-8-Math.floor(d/6);
+    // Begin where all three entrance columns share the same supported
+    // -26 floor; the former d=108 start intersected a higher ramp step at
+    // x=site.x+107 and left one side of the mineral branch unsupported.
+    const d=110, x=site.x+d, floor=-8-Math.floor(d/6);
     const base=site.z+Math.round(3*Math.sin(d/13));
     const direction=site.x<0?-1:1;
     for(let step=0;step<=34;step++){
