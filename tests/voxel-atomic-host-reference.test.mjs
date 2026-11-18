@@ -96,3 +96,40 @@ test('invalid expected orientation and missing cells never create phantom edits'
   ]),false);
   assert.deepEqual(host.exportLegacyCells(),[{cell:[0,0,0],id:1}]);
 });
+
+test('orientation CAS rejects concurrent rotations without partial batch writes',async()=>{
+  const host=createAtomicVoxelHost([{cell:[-2,0,5],id:1},{cell:[3,0,5],id:1}]);
+  const bridge=createAuthoritativeVoxelEditBridge(host);
+  assert.equal(host.setOrientation([-2,0,5],1,0,1,null),true);
+  assert.equal(host.setOrientation([3,0,5],1,0,2,null),true);
+  let release;
+  const gate=new Promise(resolve=>{release=resolve;});
+  const edits=[
+    {cell:[-2,0,5],expectedId:1,expectedRevision:0,expectedTurn:1,nextId:2},
+    {cell:[3,0,5],expectedId:1,expectedRevision:0,expectedTurn:2,nextId:2}
+  ];
+  const pending=bridge.editMany(edits,()=>gate);
+  await Promise.resolve();
+  assert.equal(host.setOrientation([3,0,5],1,0,3,2),true);
+  release();
+  assert.equal(await pending,false);
+  assert.deepEqual(host.read([-2,0,5]),{id:1,revision:0,turn:1});
+  assert.deepEqual(host.read([3,0,5]),{id:1,revision:0,turn:3});
+  assert.equal(await bridge.editMany([{...edits[0]},{...edits[1],expectedTurn:3}]),true);
+  assert.deepEqual(host.read([-2,0,5]),{id:2,revision:1,turn:null});
+  assert.deepEqual(host.read([3,0,5]),{id:2,revision:1,turn:null});
+});
+
+test('explicit null expected turn protects old-save unrotated state',async()=>{
+  const host=createAtomicVoxelHost(JSON.parse('[{"cell":[0,0,0],"id":1}]'));
+  const bridge=createAuthoritativeVoxelEditBridge(host);
+  const r={cell:[0,0,0],expectedId:1,expectedRevision:0,expectedTurn:null,nextId:2};
+  assert.equal(host.setOrientation([0,0,0],1,0,2,null),true);
+  assert.equal(await bridge.editMany([r]),false);
+  assert.deepEqual(host.exportLegacyCells(),[{cell:[0,0,0],id:1}]);
+  assert.equal(await bridge.editMany([{...r,expectedTurn:2}]),true);
+  assert.deepEqual(host.read([0,0,0]),{id:2,revision:1,turn:null});
+  assert.deepEqual(host.exportLegacyCells(),[{cell:[0,0,0],id:2}]);
+  assert.throws(()=>host.compareAndWriteMany([{...r,expectedTurn:4}]),/Invalid receipt/);
+  await assert.rejects(bridge.editMany([{...r,expectedTurn:-1}]),/Invalid receipt/);
+});
