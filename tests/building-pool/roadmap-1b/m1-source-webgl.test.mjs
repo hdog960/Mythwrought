@@ -162,10 +162,10 @@ const ids=[
  'r1:fishing-lodge:snow:large:003',
  'r1:harbor-office:enchanted-forest:small:003',
  'r1:lighthouse:enchanted-forest:small:003',
- 'r1:stable:temperate:medium:002',
+ 'r1:stable:temperate:medium:005',
  'r1:stable:desert:large:002',
  'r1:stable:snow:small:002',
- 'r1:stable:enchanted-forest:medium:002',
+ 'r1:stable:enchanted-forest:medium:005',
  'r1:stable:mountain:large:002'
 ];
 const sizes=[[667,375],[844,390],[932,430]];
