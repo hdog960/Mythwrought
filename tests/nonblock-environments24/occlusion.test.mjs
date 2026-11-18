@@ -21,3 +21,16 @@ test('invalid rays and missing world callbacks reject',()=>{
  assert.throws(()=>firstSolidVoxel([0,0,0],[1,0,0],129,clear,clear));
  assert.throws(()=>firstSolidVoxel([0,0,0],[1,0,0],4,null,clear));
 });
+
+test('foreign picker cannot extend reach or smuggle malformed hits',()=>{
+ const pick=distance=>({pick:()=>({instanceKey:'object',distance})});
+ const origin=[0.5,0.5,0.5],direction=[1,0,0];
+ for(const distance of [-1,NaN,Infinity,4.001])
+  assert.equal(pickEnvironmentWithoutWall(pick(distance),origin,direction,4,clear,clear),null);
+ assert.equal(pickEnvironmentWithoutWall(pick(4),origin,direction,4,clear,clear).instanceKey,'object');
+ assert.equal(pickEnvironmentWithoutWall(pick(4),origin,direction,4,(x)=>x===4,clear),null);
+ assert.equal(pickEnvironmentWithoutWall(pick(0),origin,direction,4,(x)=>x===0,clear),null);
+ assert.throws(()=>pickEnvironmentWithoutWall(pick(1),origin,[0,0,0],4,clear,clear));
+ assert.throws(()=>pickEnvironmentWithoutWall({pick:()=>null},origin,direction,129,clear,clear));
+ assert.throws(()=>pickEnvironmentWithoutWall(pick(1),origin,direction,4,null,clear));
+});
