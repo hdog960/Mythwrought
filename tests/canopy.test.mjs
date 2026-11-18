@@ -479,3 +479,32 @@ test('manual M2 fir shells share exact ring vertices across every bough band',()
   assert.equal(JSON.stringify(world.save()),saved,
     'joined decorative foliage never changes physical seed/edit/save state');
 });
+
+test('manual M2 fir crown fits original vertical clearance with a visible sentinel sky-star',()=>{
+  const seed=179,world=new VoxelWorld(seed),saved=JSON.stringify(world.save());
+  let ordinary=false,sentinel=false;
+  for(let cx=-16;cx<=16&&(!ordinary||!sentinel);cx++)
+    for(let cz=-16;cz<=16&&(!ordinary||!sentinel);cz++){
+      const mesh=woodlandCanopyVertices(world,cx,cz,options);
+      if(!mesh.length)continue;
+      const x=Math.floor(mesh[0]),z=Math.floor(mesh[2]);
+      const isSentinel=woodlandSentinelChunk(cx,cz,seed);
+      if(!isSentinel&&woodlandTreeStyle(x,z,seed)!=='evergreen')continue;
+      const ground=terrainHeight(x,z,seed),start=60,end=start+5*8*6+8*3;
+      assert.ok(mesh.length>=end*CANOPY_LIMITS.stride,'source fir has joined crown and one cap');
+      let crownTop=-Infinity;
+      for(let v=start;v<end;v++)crownTop=Math.max(crownTop,
+        mesh[v*CANOPY_LIMITS.stride+1]);
+      if(isSentinel){
+        assert.ok(crownTop<ground+1.01+6.35,
+          'rare sentinel gold star must stand above every opaque fir canopy tip');
+        sentinel=true;
+      }else{
+        assert.ok(crownTop<ground+7,
+          'ordinary fir remains inside original six-high cleared-air cell envelope');
+        ordinary=true;
+      }
+    }
+  assert.ok(sentinel&&ordinary,'real seeded sentinel and ordinary pine both inspected');
+  assert.equal(JSON.stringify(world.save()),saved,'visual-only cap does not edit save');
+});
