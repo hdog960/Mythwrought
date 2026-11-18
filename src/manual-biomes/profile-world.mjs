@@ -6,13 +6,17 @@ import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y,WORLD_MIN_Y} from '../depth.mjs';
 import {isBiome130BlockId} from '../biome130-registry.mjs';
 import {surfaceBiomeFreshColumn,surfaceBiomeAt} from '../surface-regions/regions.mjs';
 import {m3DesertFreshColumn,M3_XERIC_IDS} from './desert-m3.mjs';
+import {m4ThreeRegionFreshColumn,M4_REGION_NAMES} from './three-regions-m4.mjs';
 
-// Profile version v2 remains loadable with byte-identical natural voxels;
- // NEW explicitly created M3 worlds use v3. A v2 world is NEVER upgraded
- // by merely opening it in the M3 game candidate.
-export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v3';
+// NEVER change a legacy generation profile's physical natural baseline.
+// M4 created worlds use v4; existing M3 (v3) Desert and M2 (v2) profiles
+// are explicitly supported as-is, without automatic upgrades on open/save.
+export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v4';
+export const M3_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v3';
 export const M2_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v2';
-const ACCEPTED_GENERATORS=new Set([FOUR_REGION_GENERATOR,M2_FOUR_REGION_GENERATOR]);
+const ACCEPTED_GENERATORS=new Set([
+  FOUR_REGION_GENERATOR,M3_FOUR_REGION_GENERATOR,M2_FOUR_REGION_GENERATOR
+]);
 const MAX_EDIT_ROWS=300000;
 const MAX_COLUMNS=1024;
 export function fourRegionProfile(seed,generator=FOUR_REGION_GENERATOR){
@@ -56,10 +60,15 @@ export class FourRegionWorld extends VoxelWorld{
       readBaseline:(a,b,c)=>super.naturalAndLandmarkBlock(a,b,c),
       hasEdit:()=>false,isProtected:()=>false
     };
-    const isM3Desert=this.profile.generator===FOUR_REGION_GENERATOR&&
-      surfaceBiomeAt(x,z,this.seed)?.name==='desert';
+    const region=surfaceBiomeAt(x,z,this.seed);
+    const newOrM3=this.profile.generator===FOUR_REGION_GENERATOR||
+      this.profile.generator===M3_FOUR_REGION_GENERATOR;
+    const isM3Desert=newOrM3&&region?.name==='desert';
+    const isM4Interior=this.profile.generator===FOUR_REGION_GENERATOR&&
+      M4_REGION_NAMES.includes(region?.name);
     const plan=isM3Desert?m3DesertFreshColumn(x,z,this.seed,opts):
-      surfaceBiomeFreshColumn(x,z,this.seed,opts);
+      isM4Interior?m4ThreeRegionFreshColumn(x,z,this.seed,opts):
+        surfaceBiomeFreshColumn(x,z,this.seed,opts);
     // M2 GPU and support correction: preserve every source-authored visible
     // Mountain top, while filling *concealed raised interiors* with real
     // full-cube stone instead of thousands of partial cliffstone surfaces.
@@ -101,7 +110,8 @@ export class FourRegionWorld extends VoxelWorld{
     this.biomeCellCount=count-Number(isBiome130BlockId(previous))+
       Number(isBiome130BlockId(next));
     if(!this.edits.has(key))this.rotations.delete(key);
-    if(this.profile.generator===FOUR_REGION_GENERATOR&&id===BLOCK.AIR){
+    if((this.profile.generator===FOUR_REGION_GENERATOR||
+        this.profile.generator===M3_FOUR_REGION_GENERATOR)&&id===BLOCK.AIR){
       // When the player mines the support of a naturally authored xeric
       // formation, persist AIR edits for its supported stack, too. No fake
       // floating cactus after mining or after a cold world reload.
