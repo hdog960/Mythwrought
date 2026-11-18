@@ -21,7 +21,7 @@ export function compileFittingGpuPayload(objects,options={}){
    const o=packet.instances[i],r=o.quarterTurnsY,t=o.translation;
    if(!Number.isInteger(r)||r<0||r>3||t.length!==3||!t.every(finite))throw new TypeError('invalid transform');
    const c=[1,0,-1,0][r],s=[0,1,0,-1][r],j=i*16;
-   transforms.set([c,0,-s,0, 0,1,0,0, s,0,c,0, t[0],t[1],t[2],1],j);
+   transforms.set([c,0,s,0, 0,1,0,0, -s,0,c,0, t[0],t[1],t[2],1],j);
    instanceKeys.push(o.instanceKey);
   }
   return Object.freeze({group:packet.group,triangleCount:packet.triangleCount,
