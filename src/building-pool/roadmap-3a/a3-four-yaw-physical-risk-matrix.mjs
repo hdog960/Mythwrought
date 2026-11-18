@@ -131,7 +131,7 @@ export function auditA3FourYawPhysicalRisks(){
  return Object.freeze({schema:'mythwrought.roadmap-a3.yaw-physical-risk-matrix.v1',
   sourceDesigns:345,originalLegacyFixtures:30,legacyYawWitnesses:120,unplacedBeamCandidates:156,
   unplacedBeamYawWitnesses:624,roofWitnessLocations:274,
-  legacySourceMountStillMissing:count(mounted,'missingAuthoredSourceSupports'), // inspect arrays by individual row below
+  legacySourceMountStillMissing:mounted.filter(x=>x.missingAuthoredSourceSupports.length>0).length,
   legacyFlueCollisionYawCases:count(mounted,'intersectsReservedHollowFlue'),
   beamProducerUnresolved:beams.filter(x=>!x.producerResolved).length,
   beamFlueCollisionYawCases:count(beams,'intersectsHollowFlue'),
