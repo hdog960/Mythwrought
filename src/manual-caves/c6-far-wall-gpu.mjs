@@ -104,14 +104,16 @@ export function planCaveFarWallSources(world,player,viewport,
  const selected=ranked.slice(0,bounds.maxChunks).map(c=>({...c}));
  // Genuine Rift screenshot pixel x206,y135 projects to normalized ray
  // x=-.666,y=.3375. Both the original -0.75/-0.625 rays and half-step
- // -0.6875 miss its x176,-83,192 DEEPSTONE source boundary. Sample
- // two interior thirds at y=.35 for authentic narrow ceiling seams,
+ // -0.6875 miss its x176,-83,192 DEEPSTONE source boundary. At y=.35
+ // the third-step ray first hits x175,-83,192 near rock and stops; the
+ // genuine image ray y=.3375 first intersects the MISSING far section.
+ // Sample at that physical screen band as a genuine source witness,
  // only as companion sources; never displace four coarse-priority
  // GPU buffers or increase the SAME maxSourceSamples=3264 CPU budget.
  const midpoints=new Map();
  for(let i=0;i<bounds.horizontalRays-1;i++)
   for(const fraction of [1/3,2/3])
-   sampleRay(-1+2*(i+fraction)/(bounds.horizontalRays-1),.35,midpoints);
+   sampleRay(-1+2*(i+fraction)/(bounds.horizontalRays-1),.3375,midpoints);
  const available=new Map(ranked.slice(bounds.maxChunks).map(c=>[c.key,c]));
  for(const [k,c] of midpoints)
   if(!candidates.has(k)&&!available.has(k))available.set(k,c);
