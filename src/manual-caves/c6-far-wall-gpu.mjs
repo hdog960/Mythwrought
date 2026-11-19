@@ -10,7 +10,7 @@ import {uploadChunkBuffer} from '../gpu-recovery.mjs';
 
 export const C6_FAR_BOUNDS=Object.freeze({
  maxChunks:4,maxBytes:1048576,maxRing:2,maxCells:64,
- horizontalRays:17,verticalOffsets:Object.freeze([0,.45,-.45,.9,-.9]),
+ horizontalRays:17,verticalOffsets:Object.freeze([0,.35,.68,.88,-.35,-.7]),
  minFramesBetweenPlans:24,maxSourceSamples:3264
 });
 const key=(x,z,s)=>depthMeshKey(x,z,s);
@@ -35,28 +35,30 @@ export function planCaveFarWallSources(world,player,viewport,
  }));
  const aspect=viewport[0]/viewport[1];
  if(!Number.isFinite(aspect)||aspect<=0)throw Error('C6_FAR_BAD_ASPECT');
- const half=Math.atan(aspect*Math.tan(72*Math.PI/360));
- // Authoritative source-rock rays previously skipped the mid-height roof gap.
- // Sample the real camera's middle-upper elevations first, WITHOUT changing
- // maxSourceSamples, GPU memory, streaming radius or chunk upload caps.
- // The real game camera has a 72-degree VERTICAL FOV. The prior +/-1-voxel
- // samples saw distant walls at eye height but missed real overhead stone in
- // the adjacent streamed section; exposed procedural sky was visible through
- // those unmeshed farther ceilings. Sample the same genuine source voxels
- // across the visible vertical frustum without changing the GPU budgets.
- const verticalHalf=72*Math.PI/360;
+ // Match the exact original WebGL perspective rays, not independent
+ // yaw/pitch angles. The old lattice missed genuine upper-section roof
+ // rock (Fan visible pixel x408,y78 intersects missing 12,10,-7).
+ // Preserve the same source sample, two-ring and four-GPU-slot limits.
+ const tanVertical=Math.tan(72*Math.PI/360);
  const candidates=new Map();
  const yaw=player.yaw,pitch=clamp(player.pitch,-0.85,0.85);
+ const cp=Math.cos(pitch),sp=Math.sin(pitch),cy=Math.cos(yaw),sy=Math.sin(yaw);
+ const forward=[sy*cp,sp,cy*cp],right=[-cy,0,sy],
+  up=[-sp*sy,cp,-sp*cy];
  let uncovered=0,firstFarRock=0,samples=0;
- for(const height of bounds.verticalOffsets)
+ for(const screenY of bounds.verticalOffsets)
   for(let i=0;i<bounds.horizontalRays;i++){
-   const rayPitch=clamp(pitch+height*verticalHalf*.95,-1.3,1.3);
-   const theta=yaw-half+i*2*half/(bounds.horizontalRays-1);
-   const dx=Math.sin(theta),dz=Math.cos(theta);
+   const screenX=-1+2*i/(bounds.horizontalRays-1);
+   const factorX=screenX*aspect*tanVertical,factorY=screenY*tanVertical;
+   const rawX=forward[0]+right[0]*factorX+up[0]*factorY;
+   const rawY=forward[1]+right[1]*factorX+up[1]*factorY;
+   const rawZ=forward[2]+right[2]*factorX+up[2]*factorY;
+   const inverse=1/Math.hypot(rawX,rawY,rawZ);
+   const dx=rawX*inverse,dy=rawY*inverse,dz=rawZ*inverse;
    let prev='',found=false;
    for(let t=1;t<=bounds.maxCells;t++){
     const x=Math.floor(player.x+dx*t),z=Math.floor(player.z+dz*t);
-    const y=Math.floor(player.feet+1.55+t*Math.tan(rayPitch));
+    const y=Math.floor(player.feet+1.55+dy*t);
     const pos=x+','+y+','+z;
     if(pos===prev)continue;prev=pos;
     // Enforce the original strict CPU ceiling across ALL rays, including

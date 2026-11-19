@@ -59,6 +59,19 @@ test('C6 distant overhead source rock is chosen from a REAL adjacent depth secti
  assert.ok(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples);
  assert.ok(plan.selected.length<=C6_FAR_BOUNDS.maxChunks);
 });
+test('C6 actual Fan pixel ray selects its source-authenticated upper roof chunk',()=>{
+ // Original 667x375 screen has a 383x320 genuine WebGL canvas.
+ // The captured sky pixel x408,y78 rays to DEEPSTONE in 12,10,-7.
+ assert.equal(world.get(196,-111,160),BLOCK.DEEPSTONE);
+ const camera={x:204.5,z:136.5,feet:-123.99,yaw:0,
+  pitch:-0.01999733397315129};
+ const plan=planCaveFarWallSources(world,camera,[383,320]);
+ assert.ok(plan.selected.some(c=>c.key==='12,10,-7'),
+  'Original camera screen ray overhead rock omitted: '+
+  JSON.stringify(plan.selected.map(c=>[c.key,c.hits])));
+ assert.ok(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples);
+ assert.ok(plan.selected.length<=C6_FAR_BOUNDS.maxChunks);
+});
 test('C6 no GPU allocations in any ordinary world or while near meshes pending',()=>{
  const g=fakeGl(),far=createCaveFarWallGpu(g.gl);
  assert.equal(step(far,fan,{enabled:false}).chunks,0);
