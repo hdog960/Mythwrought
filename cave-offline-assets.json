@@ -1,7 +1,7 @@
 {
   "kind": "MYTHWROUGHT_CAVE_SOURCE_ASSETS_V1",
-  "sourceHead": "990a02b6324fe0d9d44d7f0b1884c0dde00687fb",
-  "cacheRevision": "990a02b6324fe0d9",
+  "sourceHead": "963458d3ed486dbe973ce67a87715b57282647e0",
+  "cacheRevision": "963458d3ed486dbe",
   "verification": "Git blob SHA-1 of source bytes: SHA1('blob '+byteLength+'\\0'+contents)",
   "assets": [
     "assets/icon.svg",
@@ -163,6 +163,7 @@
     "src/layout.mjs",
     "src/live-voxel-world.mjs",
     "src/main.mjs",
+    "src/manual-caves/c6-far-wall-gpu.mjs",
     "src/manual-caves/cave-voxel-world.mjs",
     "src/manual-caves/deep-vault-bridges.mjs",
     "src/manual-caves/east-gallery-intake.mjs",
@@ -382,7 +383,8 @@
     "src/interactions/shape-edit-transaction.mjs": "cb879fa96853d3927d7a7962921a0714a352793e",
     "src/layout.mjs": "8496e32da3422ad591c92f80a4f0113ca68c2749",
     "src/live-voxel-world.mjs": "aa274dfc5752c566cfd671e297aa8bc1b6b32d83",
-    "src/main.mjs": "1728abfda655193ac708e3b1ac2ddc4d5537357a",
+    "src/main.mjs": "6367fbf02d4c0f9bf62bb3aac60dd5561769f4f0",
+    "src/manual-caves/c6-far-wall-gpu.mjs": "f7f62e5e7f384d1ab480c253623aefde01c527b6",
     "src/manual-caves/cave-voxel-world.mjs": "30a0fd452a759047d7eaebbabda94aebb435ba97",
     "src/manual-caves/deep-vault-bridges.mjs": "ea204c302164a1f91a8316ed05cfc1b0790c5782",
     "src/manual-caves/east-gallery-intake.mjs": "6f185028eec52c397e01ff9db4fbf4d4565ce418",
