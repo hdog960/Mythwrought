@@ -92,9 +92,13 @@ export function planCaveFarWallSources(world,player,viewport,
    }
    if(!found)uncovered++;
   }
+ // Reserve genuine upper-ceiling sections before peripheral walls. Among
+ // lower-section walls, select the NEAREST actual source ray to close
+ // the central Fan sky opening, not just the most frequent distant wall.
  const ranked=[...candidates.values()].sort((a,b)=>
-  b.roofHits-a.roofHits||b.hits-a.hits||
-  a.nearest-b.nearest||a.cz-b.cz||a.cx-b.cx);
+  b.roofHits-a.roofHits||
+  (a.roofHits===0&&b.roofHits===0?a.nearest-b.nearest:0)||
+  b.hits-a.hits||a.nearest-b.nearest||a.cz-b.cz||a.cx-b.cx);
  return {section,selected:ranked.slice(0,bounds.maxChunks),
   pending:ranked.slice(bounds.maxChunks),uncovered,firstFarRock,
   samples,estimatedBytes:0,nearExpected:near.size,

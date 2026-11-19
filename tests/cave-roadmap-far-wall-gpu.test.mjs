@@ -75,6 +75,12 @@ test('C6 actual Fan pixel ray selects its source-authenticated upper roof chunk'
  assert.ok(plan.selected.some(c=>c.key==='13,10,-7'),
   'Original game remaining Fan upper left skylight chunk omitted: '+
   JSON.stringify(plan.selected.map(c=>[c.key,c.hits,c.roofHits])));
+ // The next real 667x375 screenshot records x303/y118 -> actual
+ // DEEPSTONE at x207,-116,160 in a fourth mandatory source chunk.
+ assert.equal(world.get(207,-116,160),BLOCK.DEEPSTONE);
+ assert.ok(plan.selected.some(c=>c.key==='12,10,-8'),
+  'Central Fan sky ray must select genuine fourth lower rock source: '+
+  JSON.stringify(plan.selected.map(c=>[c.key,c.hits,c.nearest])));
  assert.ok(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples);
  assert.ok(plan.selected.length<=C6_FAR_BOUNDS.maxChunks);
 });
