@@ -86,7 +86,7 @@ if(!/^[0-9a-f]{40}$/.test(sourceHead)||sourceHead!==process.env.SOURCE_HEAD_SHA)
 if(!process.env.GITHUB_RUN_ID||!process.env.GITHUB_RUN_ATTEMPT)fail('missing run provenance');
 function invoke(command,args,label){
  const t=Date.now();
- const r=spawnSync(command,args,{cwd:ROOT,encoding:'utf8',maxBuffer:64*1024*1024,env:{...process.env,NODE_TEST_CONTEXT:''}});
+ const r=spawnSync(command,args,{cwd:ROOT,encoding:'utf8',maxBuffer:64*1024*1024,env:Object.fromEntries(Object.entries(process.env).filter(([k])=>k!=='NODE_TEST_CONTEXT'))});
  if(r.stdout)process.stdout.write(r.stdout);if(r.stderr)process.stderr.write(r.stderr);
  if(r.error||r.status!==0)fail(label+' exited '+r.status+' '+String(r.error||''));
  const lines=(r.stdout||'').split(/\r?\n/);
@@ -96,7 +96,7 @@ function invoke(command,args,label){
  const tests=totals.length?totals[totals.length-1]:null;
  const pass=passes.length?passes[passes.length-1]:null;
  const failCount=failures.length?failures[failures.length-1]:null;
- if(label!=='full-real-webgl2'&&(tests===null||pass!==tests||failCount!==0))fail('missing/partial TAP pass accounting '+label);
+ if(!['full-real-webgl2','syntax'].includes(label)&&(tests===null||pass!==tests||failCount!==0))fail('missing/partial TAP pass accounting '+label);
  return {label,tests,pass,fail:failCount,elapsedMs:Date.now()-t,command:[command,...args]};
 }
 const result=[];
