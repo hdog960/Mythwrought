@@ -104,6 +104,14 @@ test('C6 true Rift screen rays select source-authentic upper boundary within fou
   c.companion?.key==='11,12,-5'),
   'Rift missing upper real boundary must be joined in existing GPU slot: '+
   JSON.stringify(plan.selected.map(c=>[c.key,c.companion?.key])));
+ // The separate screenshot-proven Rift void is NOT this existing source.
+ // It first intersects physical x174,-84,187 in the adjacent lower slice.
+ assert.equal(world.get(174,-84,187),BLOCK.DEEPSTONE);
+ assert.equal(plan.seamSources,1);
+ assert.ok(plan.selected.some(c=>c.key==='10,11,-5'&&
+  c.seamCompanion?.key==='10,11,-6'),
+  'Rift first-solid lower seam must join without replacing existing roof: '+
+  JSON.stringify(plan.selected.map(c=>[c.key,c.seamCompanion?.key])));
 });
 test('C6 no GPU allocations in any ordinary world or while near meshes pending',()=>{
  const g=fakeGl(),far=createCaveFarWallGpu(g.gl);
@@ -122,7 +130,8 @@ test('C6 far opaque draw uses genuine 36-byte packed source mesh and exact caps'
  assert.ok(s.chunks>0,'Expected original-world far rock beyond 27 near buffers');
  assert.ok(s.chunks<=4);
  assert.ok(s.joinedSources<=1);
- assert.equal(s.sourceSections,s.chunks+s.joinedSources);
+ assert.ok(s.seamSources<=C6_FAR_BOUNDS.maxSeamSources);
+ assert.equal(s.sourceSections,s.chunks+s.joinedSources+s.seamSources);
  assert.ok(s.bytes>0&&s.bytes<=1048576);
  assert.ok(s.vertices>0);
  assert.equal(g.uploaded.reduce((n,v)=>n+v,0),s.bytes);
