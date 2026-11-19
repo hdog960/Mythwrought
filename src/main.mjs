@@ -254,17 +254,19 @@ function start(){
         world,seed:world.seed,storage:localStorage,
         resident:(cx,cz,section)=>chunks.has(depthMeshKey(cx,cz,section)),
         biomeAt:point=>{
-          if(caveSession&&point[1]<-3.5)return 'cave';
+          // Every genuine deep mined shaft is underground, not just the
+          // separately saved opt-in Cave World profile.
+          if(point[1]<-3.5)return 'cave';
           const region=hasValidatedV6SkyProfile(world)?
             resolveV6SkyBiome(world,point[0],point[2]):
             resolveS6Biome(world,point[0],point[2],s6Source);
           return region?.name??'plains';
         },
-        caveAt:point=>({underground:!!caveSession&&point[1]<-3.5}),
+        caveAt:point=>({underground:point[1]<-3.5}),
         skyAt:point=>{
           const sunlight=mobEnvironment??sampleSkyAtmosphere(
             sampleSkyClock(skyClock,performance.now()));
-          const under=!!caveSession&&point[1]<-3.5;
+          const under=point[1]<-3.5;
           return {light:under?.29:Math.max(.42,Math.min(1,sunlight.daylight)),
             dayPhase:sunlight.daylight>.8?'day':sunlight.daylight<.17?'night':
               sunlight.elevation>=0?'dawn':'dusk'};
