@@ -38,7 +38,8 @@ test('C6 actual source-planner is bounded, deterministic and opt-in within the c
  assert.equal(a.nearExpected,27);
  assert.ok(a.samples<=C6_FAR_BOUNDS.maxSourceSamples);
  assert.ok(a.selected.length<=4);
- assert.ok(a.selected.every(c=>c.section===-8));
+ assert.ok(a.selected.every(c=>sectionWindow(fan.feet,false).includes(c.section)),
+  'Far genuine-rock meshes must stay inside already-approved vertical sections');
  assert.ok(a.selected.every(c=>Number.isInteger(c.cx)&&Number.isInteger(c.cz)));
  const surface=planCaveFarWallSources(world,{...fan,feet:4},[844,390]);
  assert.equal(surface.selected.length,0);
