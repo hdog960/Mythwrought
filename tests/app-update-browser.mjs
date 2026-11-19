@@ -50,6 +50,12 @@ const context=await browser.newContext({viewport:{width:932,height:430},
   deviceScaleFactor:1,isMobile:true,hasTouch:true,serviceWorkers:'allow'});
 const page=await context.newPage(),errors=[];
 page.on('pageerror',e=>errors.push(e.message));
+context.on('serviceworker',worker=>{
+  worker.on('console',message=>{
+    if(message.type()==='error')
+      console.error('HOME SCREEN SERVICE WORKER ERROR',message.text());
+  });
+});
 const target='http://127.0.0.1:4173/';
 const caches=()=>page.evaluate(async()=>await caches.keys());
 try{
@@ -104,11 +110,23 @@ try{
     if(!reg)throw Error('Previous registration missing');
     await reg.update();
   });
-  await page.waitForFunction(async()=>{
-    const keys=await caches.keys();
-    return keys.includes('mythwrought-m5-shell-20261119-v6-safe-refresh')&&
-      !keys.includes('mythwrought-m5-shell-20261118-v5-recorder');
-  },null,{timeout:180000});
+  // The cache name is created BEFORE the 212 real file fetches complete.
+  // A failed or in-flight installation must never count as an upgraded app.
+  await page.waitForFunction(async({cacheName,release})=>{
+    const names=await caches.keys();
+    if(!names.includes(cacheName))return false;
+    const cache=await caches.open(cacheName);
+    const files=await cache.keys();
+    if(files.length<200)return false;
+    const index=new URL('/index.html',location.href).href;
+    const response=await cache.match(index);
+    if(!response||response.headers.get('X-MW-Origin-Build')!=='new')
+      return false;
+    const html=await response.text();
+    return html.includes('data-mw-release="'+release+'"')&&
+      html.includes('id="captureToggle"')&&
+      Boolean((await navigator.serviceWorker.getRegistration('/'))?.active);
+  },{cacheName:NEW_CACHE,release:RELEASE},{timeout:180000});
   const installed=await page.evaluate(async()=>{
     const cache=await caches.open('mythwrought-m5-shell-20261119-v6-safe-refresh');
     const index=new URL('/index.html',location.href).href;
