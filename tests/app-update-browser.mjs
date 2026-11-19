@@ -111,11 +111,24 @@ try{
   },null,{timeout:180000});
   const installed=await page.evaluate(async()=>{
     const cache=await caches.open('mythwrought-m5-shell-20261119-v6-safe-refresh');
-    const response=await cache.match(new URL('/index.html',location.href).href);
-    return response&&{origin:response.headers.get('X-MW-Origin-Build'),
-      html:await response.text()};
+    const index=new URL('/index.html',location.href).href;
+    const response=await cache.match(index);
+    const rootResponse=await cache.match(new URL('/',location.href).href);
+    const keys=await cache.keys();
+    const current=await navigator.serviceWorker.getRegistration('/');
+    return {origin:response?.headers.get('X-MW-Origin-Build'),
+      html:response?await response.text():null,
+      rootOrigin:rootResponse?.headers.get('X-MW-Origin-Build'),
+      cachedKeyCount:keys.length,
+      sampleKeys:keys.slice(0,8).map(x=>x.url),
+      indexFound:keys.some(x=>x.url===index),
+      registration:{active:current?.active?.scriptURL,
+        state:current?.active?.state,
+        waiting:current?.waiting?.scriptURL},
+      cacheNames:await caches.keys()};
   });
-  assert.equal(installed?.origin,'new',
+  if(installed.origin!=='new')console.error('HOME SCREEN CACHE DIAGNOSTIC',JSON.stringify(installed));
+  assert.equal(installed.origin,'new',
     'The worker installation copied an old cached index instead of fresh origin source');
   assert.ok(installed.html.includes('id="captureToggle"')&&
     installed.html.includes('data-mw-release="'+RELEASE+'"'),
