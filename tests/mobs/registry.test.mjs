@@ -13,9 +13,9 @@ test('the approved symbolic roster has exactly 20 passive and 20 hostile species
   assert.equal(getSpecies('constructor'), undefined);
 });
 
-test('only Deer, Goblin and Glownewt have an implementation scheduled for the preview', () => {
+test('reference creatures and the familiar wildlife wave are registered for the preview', () => {
   assert.deepEqual(speciesRegistry.filter(entry => entry.implementation === 'preview').map(entry => entry.id).sort(),
-    ['deer', 'glownewt', 'goblin']);
+    ['chicken', 'cow', 'deer', 'fox', 'glownewt', 'goblin', 'horse', 'mountain-goat', 'pig', 'rabbit', 'sheep', 'wolf']);
   assert.equal(getSpecies('deer').bonding.eligible, false);
   assert.equal(getSpecies('glownewt').bonding.eligible, true);
   assert.deepEqual(getSpecies('goblin').interactions, ['door']);

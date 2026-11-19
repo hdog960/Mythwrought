@@ -19,7 +19,7 @@ function snapshot(mob) {
     id: mob.id, species: mob.species, position: Object.freeze([...mob.position]),
     velocity: Object.freeze([...mob.velocity]), yaw: mob.yaw, state: mob.state,
     health: mob.health, grounded: mob.grounded, origin: mob.origin,
-    homeChunk: mob.homeChunk, important: mob.important
+    homeChunk: mob.homeChunk, important: mob.important, juvenile: mob.juvenile
   });
 }
 
@@ -54,7 +54,7 @@ export class MobEngine {
     this.#events.push(Object.freeze(event));
   }
 
-  spawn(speciesId, point, { dormant = false, homeChunk = null } = {}) {
+  spawn(speciesId, point, { dormant = false, homeChunk = null, juvenile = false } = {}) {
     if (this.#disposed || this.#entities.size >= this.#maxEntities || !validPoint(point)) return null;
     const species = getSpecies(speciesId);
     if (!species || species.implementation !== 'preview' ||
@@ -63,7 +63,7 @@ export class MobEngine {
     const id = 'mob-' + (this.#seed >>> 0).toString(36) + '-' + count.toString(36);
     const state = dormant || this.#awake >= this.#maxActive ? 'dormant' : 'idle';
     const entity = {
-      id, species, origin: Object.freeze([...point]), position: [...point],
+      id, species, origin: Object.freeze([...point]), position: [...point], juvenile: juvenile === true,
       velocity: [0, 0, 0], yaw: 0, health: species.combat.health, state,
       grounded: this.#world.grounded(point, species.body), homeChunk, important: false,
       randomState: (this.#seed ^ Math.imul(count, 0x9e3779b9)) >>> 0
@@ -164,12 +164,13 @@ export class MobEngine {
           continue;
         }
         const command = controller?.(snapshot(mob), FIXED_STEP);
-        const heading = Array.isArray(command) && command.length === 2 &&
-          command.every(Number.isFinite) ? command : NO_MOVEMENT;
+        const direction = Array.isArray(command) ? command : command?.direction;
+        const heading = Array.isArray(direction) && direction.length === 2 &&
+          direction.every(Number.isFinite) ? direction : NO_MOVEMENT;
         if (awake.has(mob.state) && this.#entities.get(mob.id) === mob) {
           const state = heading.some(Boolean) ? 'active' : 'idle';
           if (state !== mob.state) this.transition(mob.id, state);
-          moveBody(this.#world, mob, heading, FIXED_STEP);
+          moveBody(this.#world, mob, heading, FIXED_STEP, Array.isArray(command) ? undefined : command);
         }
       }
       steps++;

@@ -104,6 +104,7 @@ export function createWorldQuery(world, {
       biome: typeof sample.biome === 'string' ? sample.biome : null,
       light: Number.isFinite(sample.light) && sample.light >= 0 && sample.light <= 1 ? sample.light : null,
       hazard: sample.hazard !== false,
+      climbable: sample.climbable === true,
       objects: Array.isArray(sample.objects) ? sample.objects.slice(0, 8) : []
     };
   }

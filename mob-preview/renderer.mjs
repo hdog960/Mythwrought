@@ -1,5 +1,6 @@
 import { bufferDimensions } from '../src/render-budget.mjs';
 import { meshes } from './models.mjs';
+import { familiarWildlife } from '../src/mobs/familiar-wildlife.mjs';
 
 const project = `
 uniform vec3 uEye, uForward, uRight, uUp;
@@ -37,7 +38,16 @@ out float vDistance;
 void main() {
   float cycle = sin(uTime*11.0+aMotion.w);
   vec3 p = aPosition;
-  if (abs(aJoint) > 1.5) {
+  if (abs(aJoint) > 3.5) {
+    p.y += sin(uTime*23.0)*aMotion.x*.065;
+  } else if (abs(aJoint) > 2.5) {
+    if (aMotion.y < 0.0) {
+      p.y -= (-aMotion.y)*(.08 + abs(sin(uTime*7.0))*.12);
+      p.z += (-aMotion.y)*.07;
+    } else {
+      p.y += sin(uTime*4.0)*.016;
+    }
+  } else if (abs(aJoint) > 1.5) {
     p.x += sin(uTime*3.0+aMotion.w)*.10;
   } else {
     p.z += aJoint*cycle*aMotion.x*.12*max(0.0,.9-p.y);
@@ -46,11 +56,12 @@ void main() {
   if (aMotion.z > .5) {
     p=vec3(-p.y,p.x+.24,p.z);
   } else {
-    p.z += aMotion.y*.16*p.y;
+    p.z += max(0.0,aMotion.y)*.16*p.y;
   }
+  if (aMotion.z < -.5) p *= .65;
   float s=sin(aTransform.w),c=cos(aTransform.w);
   gl_Position=project(vec3(c*p.x+s*p.z,p.y,-s*p.x+c*p.z)+aTransform.xyz);
-  vColor=mix(aColor,vec3(.94,.45,.19),aMotion.y*.36);
+  vColor=mix(aColor,vec3(.94,.45,.19),max(0.0,aMotion.y)*.36);
   vDistance=gl_Position.w;
 }`;
 
@@ -69,8 +80,12 @@ const unit = v => { const length = Math.hypot(...v); return v.map(n => n / lengt
 const cross = ([a,b,c], [x,y,z]) => [b*z-c*y, c*x-a*z, a*y-b*x];
 
 function camera(point, species, cameraClear) {
-  const distance = species === 'glownewt' ? .68 : species === 'goblin' ? .89 : 1;
-  const focus = [point[0], point[1] + (species === 'glownewt' ? .23 : .66), point[2]];
+  const id = species.id;
+  const familiar = Object.hasOwn(familiarWildlife, id);
+  const distance = familiar ? Math.max(.58, Math.min(1.08, .45 + species.body.height * .35)) :
+    id === 'glownewt' ? .68 : id === 'goblin' ? .89 : 1;
+  const level = familiar ? species.body.height * .57 : id === 'glownewt' ? .23 : .66;
+  const focus = [point[0], point[1] + level, point[2]];
   const choices = [[3.4,1.85,4.7],[-3.4,2.2,4.5],[4.7,2,-2.7],[-4.3,2,-3.3],[1.15,1.6,2.4]];
   const eyes = choices.map(offset => focus.map((value, axis) => value + offset[axis] * distance));
   const eye = eyes.find(candidate => cameraClear(candidate, focus)) ?? eyes[4];
@@ -184,7 +199,7 @@ export function createRenderer(gl, terrainMeshes, cameraClear) {
     gl.viewport(0, 0, size.width, size.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     const aspect = size.width / size.height;
-    const view = camera(subject.position, subject.species.id, cameraClear);
+    const view = camera(subject.position, subject.species, cameraClear);
     bind(scene, view, aspect, time);
     for (const mesh of scenery) {
       gl.bindVertexArray(mesh.array);
@@ -197,10 +212,11 @@ export function createRenderer(gl, terrainMeshes, cameraClear) {
       let count = 0;
       for (const entity of entities) {
         if (entity.species.id !== id || count === MAX_INSTANCES) continue;
-        const moving = Math.min(1, Math.hypot(entity.velocity[0], entity.velocity[2]) / 2);
-        const intent = entity.visual === 'prepare-attack' ? .7 : entity.visual === 'attack' ? 1 : 0;
+        const moving = Math.min(1, Math.hypot(...entity.velocity) / 2);
+        const foraging = ['graze','forage','peck','browse','sniff','scent','stalk'].includes(entity.visual);
+        const intent = entity.visual === 'prepare-attack' ? .7 : entity.visual === 'attack' ? 1 : foraging ? -.75 : 0;
         const idleYaw = entity.state === 'idle' && !entity.velocity.some(Boolean) && !entity.yaw ? .56 : entity.yaw;
-        scratch.set([...entity.position, idleYaw, moving, intent, Number(entity.state === 'downed'), count * .68], count++ * 8);
+        scratch.set([...entity.position, idleYaw, moving, intent, entity.state === 'downed' ? 1 : entity.juvenile ? -1 : 0, count * .68], count++ * 8);
       }
       if (!count) continue;
       gl.bindVertexArray(mesh.array);

@@ -1,6 +1,7 @@
 import { LocalNavigator } from './navigation.mjs';
 import { supportedPosition } from './movement.mjs';
 import { validPoint } from './world-query.mjs';
+import { familiarWildlife } from './familiar-wildlife.mjs';
 
 export const distanceTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 const atEye = (point, height) => [point[0], point[1] + height * .72, point[2]];
@@ -126,6 +127,86 @@ export class BehaviorController {
     return null;
   }
 
+  #familiar(mob, memory, seen, peers, profile) {
+    const id = mob.species.id;
+    const hazard = seen.hazard || !mob.species.habitat.biomes.includes(seen.biome);
+    const threat = seen.visible && seen.distance < 5 && seen.target.threatening !== false;
+    if (threat && id === 'rabbit' && ['hide', 'flee'].includes(memory.state)) {
+      if (memory.state !== 'hide') {
+        const angle = Math.atan2(mob.position[2] - seen.target.position[2], mob.position[0] - seen.target.position[0]);
+        const candidates = [0, -.6, .6, -1.1, 1.1].map(turn =>
+          positionNear(this.#world, mob, mob.position, angle + turn, 2.4)).filter(Boolean);
+        const observer = atEye(seen.target.position, seen.target.height);
+        memory.destination = candidates.find(point =>
+          !this.#world.lineOfSight(observer, atEye(point, mob.species.body.height))) ?? candidates[0];
+        setState(memory, 'hide');
+      }
+      return memory.destination && this.#navigator.steer(mob, memory.destination) || [0, 0];
+    }
+    if (threat && id === 'wolf' && seen.target.threatening === true) {
+      setState(memory, 'hold-ground');
+      const delta = seen.target.position.map((value, axis) => value - mob.position[axis]);
+      if (seen.distance > 2.2) return this.#navigator.steer(mob, seen.target.position);
+      return seen.distance < 1 ? { direction: [-delta[0], -delta[2]], pace: .85 } : [0, 0];
+    }
+    if (threat || hazard || ['observe', 'flee', 'calm-down'].includes(memory.state)) {
+      const destination = this.#passive(mob, memory, seen);
+      const direction = destination ? this.#navigator.steer(mob, destination) : [0, 0];
+      return { direction, pace: memory.state === 'flee' ? 1.45 : 1, jump: profile.jump };
+    }
+    if (id === 'mountain-goat' && seen.climbable) {
+      for (const [dx, dz] of [[1,0], [-1,0], [0,1], [0,-1]]) {
+        const [x, y, z] = mob.position;
+        const face = [x + dx * .38, y, z + dz * .38];
+        if (this.#world.volume(face, mob.species.body) === 'solid') {
+          setState(memory, 'climb');
+          return { direction: [dx, dz], climb: true, pace: .65 };
+        }
+      }
+    }
+    if (id === 'fox') {
+      const prey = peers.find(other => (other.species.id === 'rabbit' || other.species.id === 'chicken') &&
+        other.state !== 'dormant' && distanceTo(other.position, mob.position) < 5 &&
+        this.#world.lineOfSight(atEye(mob.position, mob.species.body.height),
+          atEye(other.position, other.species.body.height)));
+      if (prey) {
+        setState(memory, 'stalk');
+        if (distanceTo(prey.position, mob.position) < .9) return [0,0];
+        return { direction: this.#navigator.steer(mob, prey.position), pace: .45 };
+      }
+    }
+    const leader = peers.find(other => other.id !== mob.id && other.id < mob.id &&
+      other.species === mob.species && other.state !== 'dormant' &&
+      distanceTo(other.position, mob.position) < 6);
+    if (leader && distanceTo(leader.position, mob.position) > 1.65) {
+      setState(memory, profile.travel);
+      return { direction: this.#navigator.steer(mob, leader.position), pace: .82, jump: profile.jump };
+    }
+
+    if (memory.state === 'idle' || ![profile.activity, profile.travel].includes(memory.state)) {
+      memory.destination = null;
+      setState(memory, profile.activity);
+    }
+    if (memory.state === profile.activity && memory.age < profile.rest) {
+      if (id === 'horse') return { direction: [.45, .2], pace: .6 };
+      return [0, 0];
+    }
+    if (memory.state === profile.activity) {
+      const angle = this.#engine.random(mob.id) * Math.PI * 2;
+      memory.destination = positionNear(this.#world, mob, mob.origin, angle, profile.range);
+      setState(memory, profile.travel);
+    }
+    if (!memory.destination || memory.age >= 2.2 || distanceTo(mob.position, memory.destination) < .3) {
+      memory.destination = null;
+      setState(memory, profile.activity);
+      return [0, 0];
+    }
+    return {
+      direction: this.#navigator.steer(mob, memory.destination),
+      pace: id === 'horse' ? 1.36 : id === 'pig' ? .7 : 1, jump: profile.jump
+    };
+  }
+
   #hostile(mob, memory, seen, context) {
     const { combat, behavior } = mob.species;
     const territory = distanceTo(mob.position, mob.origin) <= behavior.territory;
@@ -202,7 +283,8 @@ export class BehaviorController {
   }
 
   advance(seconds, context = {}) {
-    const alive = new Set(this.#engine.all().map(mob => mob.id));
+    const peers = this.#engine.all();
+    const alive = new Set(peers.map(mob => mob.id));
     for (const id of this.#memory.keys()) if (!alive.has(id)) this.forget(id);
     this.#navigator.beginTick();
     return this.#engine.advance(seconds, (mob, dt) => {
@@ -216,8 +298,10 @@ export class BehaviorController {
       const override = context.override?.(mob, seen);
       if (override) {
         setState(memory, override.state);
-        return override.destination ? this.#navigator.steer(mob, override.destination) : [0, 0];
+        return override.heading ?? (override.destination ? this.#navigator.steer(mob, override.destination) : [0, 0]);
       }
+      const profile = Object.hasOwn(familiarWildlife, mob.species.id) ? familiarWildlife[mob.species.id] : null;
+      if (profile) return this.#familiar(mob, memory, seen, peers, profile);
       const destination = mob.species.classification === 'hostile' ?
         this.#hostile(mob, memory, seen, context) : this.#passive(mob, memory, seen);
       if (!destination) return [0, 0];

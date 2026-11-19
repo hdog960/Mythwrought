@@ -1,5 +1,7 @@
 import { ForegroundFrameDriver } from '../src/foreground.mjs';
 import { FIXED_STEP } from '../src/mobs/engine.mjs';
+import { familiarWildlife } from '../src/mobs/familiar-wildlife.mjs';
+import { getSpecies } from '../src/mobs/species.mjs';
 import { createScene } from './scene.mjs';
 import { createRenderer } from './renderer.mjs';
 
@@ -13,6 +15,9 @@ const state = document.querySelector('#state');
 const health = document.querySelector('#health');
 const stats = document.querySelector('#stats');
 const tabs = [...document.querySelectorAll('[data-species]')];
+const picker = document.querySelector('#wildlife');
+for (const key of Object.keys(familiarWildlife)) picker.add(new Option(getSpecies(key).displayName, key));
+picker.addEventListener('change', () => select(picker.value));
 const commands = {
   deer: [['approach', 'Approach deer'], ['withdraw', 'Step away']],
   goblin: [['encounter', 'Start encounter'], ['withdraw', 'Leave encounter'], ['door', 'Open test door']],
@@ -102,10 +107,24 @@ function construct() {
   }
 }
 
+function wildlifeCommands(id) {
+  const entry = getSpecies(id);
+  const list = [['approach', 'Approach'], ['withdraw', 'Step away'], ['group', 'Add group member']];
+  if (id === 'fox') list.push(['prey', 'Introduce rabbit']);
+  if (entry.breeding.eligible) list.push(['breed', 'Breed nearby pair']);
+  if (entry.taming.eligible) list.push(['near', 'Move nearby'], ['tame', 'Tame']);
+  if (entry.riding.eligible) list.push(['mount', 'Mount'], ['walk', 'Walk'], ['run', 'Run'],
+    ['turn', 'Turn'], ['halt', 'Halt'], ['dismount', 'Dismount']);
+  if (entry.bonding.eligible) list.push(['near', 'Move nearby'], ['bond', 'Befriend'], ['move', 'Move guide'],
+    ['follow', 'Follow'], ['stay', 'Stay'], ['threat', 'Introduce threat'], ['down', 'Simulate injury'], ['rescue', 'Rescue']);
+  return list;
+}
+
 function select(species) {
   if (!scene.select(species)) return;
   for (const tab of tabs) tab.setAttribute('aria-pressed', String(tab.dataset.species === species));
-  actions.replaceChildren(...commands[species].map(([id, label]) => {
+  picker.value = Object.hasOwn(familiarWildlife, species) ? species : '';
+  actions.replaceChildren(...(commands[species] ?? wildlifeCommands(species)).map(([id, label]) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.dataset.action = id;
@@ -122,7 +141,10 @@ const feedbackText = {
   stay: 'The Glownewt will stay here.',
   down: 'The Glownewt is downed. Move nearby and give it a moment before rescue.',
   rescue: 'Rescued. The Glownewt can follow again.',
-  door: 'The approved outpost door opened.'
+  door: 'The approved outpost door opened.',
+  tame: 'Taming succeeded.',
+  breed: 'A young animal joined the group.',
+  mount: 'Mounted. Choose Walk, Run or Turn.'
 };
 
 for (const tab of tabs) tab.addEventListener('click', () => select(tab.dataset.species));
@@ -130,7 +152,7 @@ actions.addEventListener('click', event => {
   const command = event.target.closest('button')?.dataset.action;
   if (!command) return;
   const success = scene.action(command);
-  feedback.textContent = success ? (feedbackText[command] ?? '') :
+  feedback.textContent = success ? (feedbackText[command]?.replace('Glownewt', scene.snapshot().fixture.title) ?? '') :
     'This action is unavailable at the current position or state.';
   renderControls(scene.snapshot());
   redraw();
@@ -243,7 +265,8 @@ if (testMode) Object.defineProperty(window, 'mobPreview', { value: Object.freeze
     redraw();
   },
   inspect() {
-    return { ...scene.snapshot(true), graphics: Boolean(renderer), frames, draw, losses, restores,
+    const snapshot = scene.snapshot(true);
+    return { ...snapshot, actors: snapshot.draw, graphics: Boolean(renderer), frames, draw, losses, restores,
       glError: !gl || gl.isContextLost() ? null : gl.getError(), contextLost: gl?.isContextLost() ?? false,
       resources: renderer?.resources(), submissionMs: lastRender };
   },

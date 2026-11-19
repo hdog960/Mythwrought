@@ -4,6 +4,8 @@ import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { familiarWildlife } from '../../src/mobs/familiar-wildlife.mjs';
+import { speciesRegistry } from '../../src/mobs/species.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
@@ -21,6 +23,7 @@ const seedKey = 'mythwrought-v002-world-179';
 const hashes = [];
 const scenarios = [];
 const performance = [];
+const wildlifeResults = [];
 const executablePath = process.env.CHROMIUM_PATH || undefined;
 const browser = await chromium.launch({ executablePath, args: [
   '--no-sandbox', '--disable-dev-shm-usage', '--enable-webgl', '--use-gl=angle',
@@ -74,6 +77,86 @@ async function capture(page, viewport, tag, evidence, assertions) {
     dimensions: [png.width,png.height], sha256: createHash('sha256').update(data).digest('hex'),
     state: evidence.state, position: evidence.mob.position, camera: framing,
     glError: evidence.glError, contextLost: evidence.contextLost, assertions });
+}
+
+async function verifyWildlife(page, viewport) {
+  for (const [id, profile] of Object.entries(familiarWildlife)) {
+    await page.locator('#wildlife').selectOption(id);
+    const initial = await step(page, 0);
+    assert.equal(initial.species, id);
+    assert.equal(initial.eligibility, true);
+    assert.equal(initial.mob.state, 'idle');
+    await capture(page, viewport, 'idle', initial, ['Selected species loaded an eligible physical fixture']);
+    const signatureState = id === 'mountain-goat' ? 'climb' : profile.activity;
+    const signature = await step(page, 130, signatureState);
+    assert.equal(signature.state, signatureState, id);
+    const actionFrame = await step(page, 4);
+    assert.equal(actionFrame.state, signatureState, id);
+    await capture(page, viewport, 'signature-' + signatureState, actionFrame,
+      ['Behavior state selected the matching model animation']);
+    const movementState = id === 'mountain-goat' ? 'climb' : profile.travel;
+    assert.equal((await step(page, 125, movementState)).state, movementState, id);
+    const movement = await step(page, 16);
+    assert.ok(Math.hypot(...movement.mob.position.map((value, axis) => value - initial.mob.position[axis])) > .23,
+      id + ' did not move in world coordinates');
+    await capture(page, viewport, 'movement-' + movementState, movement,
+      ['Fixed-step movement displaced the body in the voxel world']);
+    wildlifeResults.push({ species: id, viewport, status: 'PASS', signature: signatureState, movement: movementState });
+  }
+
+  await page.locator('#wildlife').selectOption('cow');
+  await command(page, 'breed');
+  const herd = await step(page, 1);
+  assert.equal(herd.actors.filter(entity => entity.species.id === 'cow').length, 3);
+  assert.equal(herd.actors.filter(entity => entity.juvenile).length, 1);
+  await capture(page, viewport, 'offspring', herd, ['A nearby eligible pair produced one calf']);
+  await command(page, 'breed');
+  assert.equal((await step(page, 1)).actors.filter(entity => entity.juvenile).length, 1);
+
+  await page.locator('#wildlife').selectOption('horse');
+  await command(page, 'near');
+  await command(page, 'tame');
+  assert.equal((await step(page, 0)).tamed, true);
+  await command(page, 'mount');
+  const mounted = await step(page, 1);
+  assert.ok(mounted.rider);
+  await command(page, 'run');
+  const ridden = await step(page, 14);
+  assert.equal(ridden.state, 'mounted-run');
+  assert.ok(horizontal(mounted.mob.position, ridden.mob.position) > .65);
+  assert.deepEqual(ridden.target.position, ridden.rider);
+  await capture(page, viewport, 'mounted-run', ridden, ['Rider position followed the actual horse body']);
+  await command(page, 'halt');
+  await command(page, 'dismount');
+  assert.equal((await step(page, 1)).rider, null);
+
+  await page.locator('#wildlife').selectOption('fox');
+  await command(page, 'prey');
+  const stalking = await step(page, 100, 'stalk');
+  assert.equal(stalking.state, 'stalk');
+  assert.ok(stalking.actors.some(entity => entity.species.id === 'rabbit'));
+  await capture(page, viewport, 'stalk', stalking, ['Fox detected and stalked a physically simulated rabbit']);
+
+  await page.locator('#wildlife').selectOption('wolf');
+  await command(page, 'near');
+  await command(page, 'bond');
+  const wolf = await step(page, 1);
+  assert.ok(wolf.companions.some(slot => slot.id === wolf.mob.id));
+  await command(page, 'threat');
+  const defended = await step(page, 3);
+  const enemy = defended.actors.find(entity => entity.species.id === 'goblin');
+  assert.ok(enemy?.health < enemy?.species.combat.health);
+  await command(page, 'stay');
+  assert.equal((await step(page, 2)).state, 'stay');
+  await command(page, 'down');
+  assert.equal((await step(page, 1)).state, 'downed');
+  await command(page, 'near');
+  await step(page, 32);
+  await command(page, 'rescue');
+  const rescued = await step(page, 1);
+  assert.equal(rescued.state, 'follow');
+  assert.equal(rescued.mob.id, wolf.mob.id);
+  await capture(page, viewport, 'wolf-rescue', rescued, ['Wolf resumed following with the original bonded identity']);
 }
 
 try {
@@ -184,6 +267,7 @@ try {
           performance.push(result);
         }
       }
+      await verifyWildlife(page, viewport);
       const started = await step(page,0);
       await page.evaluate(() => window.mobPreview.teardown());
       const stopped = await page.evaluate(() => ({
@@ -200,9 +284,26 @@ try {
       await context.close();
     }
   }
+  const requiredWidths = [667,844,932];
+  const speciesAcceptance = speciesRegistry.map(species => {
+    const captures = hashes.filter(image => image.species === species.id);
+    const verifiedWidths = [...new Set(captures.map(image => image.viewport[0]))];
+    const verified = species.implementation === 'preview' && !dirty &&
+      requiredWidths.every(width => verifiedWidths.includes(width));
+    return {
+      species: species.id, classification: species.classification, registry: 'PASS',
+      implementation: species.implementation, staging: verified ? 'PASS' : 'BLOCKED',
+      detail: verified ? 'Phase checkpoint scenario gate passed' : species.implementation === 'definition'
+        ? 'Implementation and browser scenarios pending' : 'Source-matched viewport matrix pending',
+      screenshotCount: captures.length, verifiedWidths
+    };
+  });
+  await writeFile(join(output,'species-acceptance.json'),JSON.stringify({
+    source, phase: 1, finalAcceptance: false, species: speciesAcceptance
+  },null,2)+'\n');
   await writeFile(join(output,'manifest.json'),JSON.stringify({
     source, dirty, browser:browser.version(), renderer:'Chromium ANGLE SwiftShader WebGL2',
-    mobileViewportEmulation:true, physicalDevice:false, scenarios, performance, screenshots:hashes
+    mobileViewportEmulation:true, physicalDevice:false, scenarios, wildlifeResults, performance, screenshots:hashes
   },null,2)+'\n');
 } finally {
   await browser.close();
