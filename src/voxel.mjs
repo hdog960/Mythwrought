@@ -10,15 +10,7 @@ import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // separately exported by depth.mjs so old cave floors do not shift.
 export const WORLD_MIN_Y=LEGACY_WORLD_MIN_Y;
 export {WORLD_MAX_Y} from './depth.mjs';
-import {meadowAccentVertices} from './meadow.mjs';
-import {storybookGroveVertices} from './grove.mjs';
-import {woodlandCanopyVertices} from './canopy.mjs';
-import {grottoAccentVertices} from './grotto.mjs';
-import {caveRuneVertices} from './cave-runes.mjs';
-import {caveThresholdVertices} from './cave-thresholds.mjs';
 import {voxelLandmarksForChunk,VOXEL_LANDMARK_CACHE_LIMIT} from './voxel-landmarks.mjs';
-import {moonbellVertices} from './moonbells.mjs';
-import {ridgeStrataVertices} from './ridge-strata.mjs';
 import {liveVoxelDistrict,LIVE_DISTRICT_SIZE,LIVE_DISTRICT_CACHE_LIMIT} from './live-voxel-world.mjs';
 // This is an engineering prototype, not the finished game's terrain art or save system.
 export const CHUNK_SIZE = 16;
@@ -210,7 +202,6 @@ export function meshChunk(world,cx,cz){
     cells[index]=id;
     return id;
   };
-  const readWorld={seed:world.seed,get:blockAt};
   // Each authored multi-box shape is surface-unioned only once per rotation.
   // No false full-cube fallback for these physical automation materials.
   const getBiomeGeometry=(id,rotation)=>{
@@ -304,49 +295,18 @@ export function meshChunk(world,cx,cz){
           }
         }
       }
-  // Decorative meadows are purely rendered geometry anchored to the current
-  // grass voxel. They never enter world.get(), raycasts, collisions or saves.
-  // Crucially, they piggyback the existing chunk buffer and mesh invalidation.
-  const grove=storybookGroveVertices(readWorld,cx,cz,{
-    chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,
-    grass:BLOCK.GRASS,air:BLOCK.AIR
-  });
-  const canopy=woodlandCanopyVertices(readWorld,cx,cz,{
-    chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,
-    grass:BLOCK.GRASS,air:BLOCK.AIR
-  });
-  const meadow=meadowAccentVertices(readWorld,cx,cz,{
-    chunkSize:CHUNK_SIZE,heightAt:terrainHeight,grass:BLOCK.GRASS,air:BLOCK.AIR
-  });
-  // Underground mushrooms and crystal tips reuse this SAME chunk mesh and
-  // existing edit invalidation; no physics, lighting pass or persisted blocks.
-  const grotto=grottoAccentVertices(readWorld,cx,cz,{
-    chunkSize:CHUNK_SIZE,minY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y,
-    heightAt:terrainHeight,baseAt:baseBlock,
-    air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
-  });
-  const runes=caveRuneVertices(readWorld,cx,cz,{
-    chunkSize:CHUNK_SIZE,minY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y,
-    heightAt:terrainHeight,baseAt:baseBlock,
-    air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
-  });
-  const caveThresholds=caveThresholdVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,air:BLOCK.AIR,stoneId:BLOCK.STONE,minY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y});
-  // Waystones, towers, shrines, arches and causeways are now real voxels from
-  // VoxelWorld.get(). Do NOT append the old non-collidable meshes as duplicates.
-  const moonbells=moonbellVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,baseAt:baseBlock,grass:BLOCK.GRASS,air:BLOCK.AIR});
-  const ridgeStrata=ridgeStrataVertices(readWorld,cx,cz,{chunkSize:CHUNK_SIZE,heightAt:terrainHeight,stone:BLOCK.STONE,air:BLOCK.AIR});
-  // Ruined bridge prototype remains staged but disabled: terrain must first
-  // establish a REAL natural crossing; never paint an invented river.
-  const solid=solidBuffer.slice(0,solidLength);
-  const ornaments=[canopy,grove,meadow,runes,grotto,moonbells,ridgeStrata,caveThresholds];
-  let total=solid.length;
-  for(const part of ornaments)total+=part.length;
-  if(total===solid.length)return solid;
-  const combined=new Float32Array(total);
-  combined.set(solid);
-  let offset=solid.length;
-  for(const part of ornaments){combined.set(part,offset);offset+=part.length;}
-  return combined;
+  // CREATOR GEOMETRY CLEANUP: a visible world object must be editable or
+  // genuinely interactable. The eight prior render-only generators (canopy
+  // trees, groves, meadow blossoms, cave mushrooms/crystals, cave glyphs,
+  // entrance dressing, moonbells/lichen and ridge decorations) were appended
+  // to the terrain mesh but never existed in world.get(), raycasts, mining,
+  // collision or schema-1 saves. Do NOT draw those fake objects in gameplay.
+  //
+  // Keep their original source modules available as non-live references for
+  // the separate :48 interactive non-block object roadmap. Terrain, physical
+  // LEAVES/WOOD, caves, mined structures and all saved edits remain exactly
+  // as before; there are no new draw calls, saves, IDs or worldgen changes.
+  return solidBuffer.slice(0,solidLength);
 }
 const biomeSurfaceCache=new Map(); // 57 assets x 4 rotations, bounded by registry.
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.
