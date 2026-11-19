@@ -108,6 +108,12 @@ async function map(page){
 const ctx=await browser.newContext({viewport:{width,height},
   deviceScaleFactor:1,serviceWorkers:'allow'});
 const page=await ctx.newPage(),pageErrors=[];
+ctx.on('serviceworker',worker=>{
+  worker.on('console',message=>{
+    if(message.type()==='error')
+      console.error('M5 INSTALLING WORKER ERROR',message.text());
+  });
+});
 page.on('pageerror',e=>pageErrors.push(String(e.message)));
 page.on('dialog',dialog=>dialog.accept());
 const worldKey='mythwrought-v002-world-179',
@@ -142,11 +148,34 @@ try{
     ?.generator==='mythwrought-four-surface-regions-v5',null,{timeout:30000});
   // A broken installation must fail promptly with preserved evidence,
   // rather than leave three runners hung on an unbounded ready promise.
-  await page.evaluate(()=>Promise.race([
-    navigator.serviceWorker.ready,
-    new Promise((_,reject)=>setTimeout(()=>reject(
-      Error('M5 offline ServiceWorker install not ready after 90s')),90000))
-  ]));
+  try {
+    await page.evaluate(()=>Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_,reject)=>setTimeout(()=>reject(
+        Error('M5 offline ServiceWorker install not ready after 90s')),90000))
+    ]));
+  }catch(error){
+    const diagnostic=await page.evaluate(async()=>{
+      const registration=await navigator.serviceWorker.getRegistration();
+      const names=await caches.keys();
+      const data=[];
+      for(const name of names){
+        if(!name.startsWith('mythwrought-m5-shell-'))continue;
+        const cache=await caches.open(name);
+        const keys=await cache.keys();
+        data.push({name,assets:keys.length,
+          hasMain:keys.some(req=>req.url.endsWith('/src/main.mjs')),
+          hasUpdater:keys.some(req=>req.url.endsWith('/src/app-update.mjs'))});
+      }
+      return {controller:navigator.serviceWorker.controller?.scriptURL,
+        active:registration?.active?.state,
+        installing:registration?.installing?.state,
+        waiting:registration?.waiting?.state,
+        script:registration?.active?.scriptURL,cache:data};
+    });
+    throw Error('M5 PWA worker startup failed '+
+      JSON.stringify(diagnostic)+' original='+String(error));
+  }
   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),null,
     {timeout:180000});
   const online=await page.evaluate(async()=>{
