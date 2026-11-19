@@ -198,7 +198,7 @@ const PLANS=[
     "rooms": [
       {
         "id": "wave13-1-treaty-hall",
-        "kind": "treaty-hall",
+        "kind": "formal-chamber",
         "rect": [
           80,
           14,
@@ -208,7 +208,7 @@ const PLANS=[
       },
       {
         "id": "wave13-1-consular-library",
-        "kind": "consular-library",
+        "kind": "guest-area",
         "rect": [
           11,
           31,
@@ -501,7 +501,7 @@ const PLANS=[
     "rooms": [
       {
         "id": "wave13-2-reading-hall",
-        "kind": "reading-hall",
+        "kind": "records-vault",
         "rect": [
           58,
           14,
@@ -511,7 +511,7 @@ const PLANS=[
       },
       {
         "id": "wave13-2-vaulted-catalogue",
-        "kind": "vaulted-catalogue",
+        "kind": "consultation-room",
         "rect": [
           11,
           25,
@@ -804,7 +804,7 @@ const PLANS=[
     "rooms": [
       {
         "id": "wave13-3-reading-hall",
-        "kind": "reading-hall",
+        "kind": "records-vault",
         "rect": [
           60,
           14,
@@ -814,7 +814,7 @@ const PLANS=[
       },
       {
         "id": "wave13-3-vaulted-catalogue",
-        "kind": "vaulted-catalogue",
+        "kind": "consultation-room",
         "rect": [
           11,
           37,
@@ -1107,7 +1107,7 @@ const PLANS=[
     "rooms": [
       {
         "id": "wave13-4-lens-gallery",
-        "kind": "lens-gallery",
+        "kind": "observation-deck",
         "rect": [
           43,
           14,
@@ -1117,7 +1117,7 @@ const PLANS=[
       },
       {
         "id": "wave13-4-star-chart-library",
-        "kind": "star-chart-library",
+        "kind": "instrument-room",
         "rect": [
           11,
           27,
@@ -1410,7 +1410,7 @@ const PLANS=[
     "rooms": [
       {
         "id": "wave13-5-lens-gallery",
-        "kind": "lens-gallery",
+        "kind": "observation-deck",
         "rect": [
           43,
           14,
@@ -1420,7 +1420,7 @@ const PLANS=[
       },
       {
         "id": "wave13-5-star-chart-library",
-        "kind": "star-chart-library",
+        "kind": "instrument-room",
         "rect": [
           11,
           33,
@@ -1713,7 +1713,7 @@ const PLANS=[
     "rooms": [
       {
         "id": "wave13-6-lens-gallery",
-        "kind": "lens-gallery",
+        "kind": "observation-deck",
         "rect": [
           80,
           14,
@@ -1723,7 +1723,7 @@ const PLANS=[
       },
       {
         "id": "wave13-6-star-chart-library",
-        "kind": "star-chart-library",
+        "kind": "instrument-room",
         "rect": [
           11,
           42,
@@ -2016,7 +2016,7 @@ const PLANS=[
     "rooms": [
       {
         "id": "wave13-7-lens-gallery",
-        "kind": "lens-gallery",
+        "kind": "observation-deck",
         "rect": [
           64,
           14,
@@ -2026,7 +2026,7 @@ const PLANS=[
       },
       {
         "id": "wave13-7-star-chart-library",
-        "kind": "star-chart-library",
+        "kind": "instrument-room",
         "rect": [
           11,
           30,
