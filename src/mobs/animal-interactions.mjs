@@ -15,6 +15,24 @@ export class AnimalInteractions {
     this.#world = world;
   }
 
+  checkpoint() {
+    return [...this.#tamed.entries()].filter(([id])=>this.#engine.get(id));
+  }
+
+  static fromCheckpoint(engine,world,records) {
+    if (!Array.isArray(records) || records.length>128) throw TypeError('Invalid tame checkpoint');
+    const animals=new AnimalInteractions(engine,world);
+    for (const row of records) {
+      if (!Array.isArray(row) || row.length!==2) throw TypeError('Invalid tame ownership');
+      const [id,owner]=row;
+      const mob=engine.get(id);
+      if (!mob?.species.taming.eligible || mob.juvenile || typeof owner!=='string' ||
+          !owner.length || owner.length>128 || animals.#tamed.has(id)) throw TypeError('Invalid tame ownership');
+      animals.#tamed.set(id,owner);
+    }
+    return animals;
+  }
+
   advance(seconds) {
     if (!Number.isFinite(seconds) || seconds < 0) return;
     this.#time += Math.min(.2, seconds);

@@ -26,6 +26,7 @@ const hashes = [];
 const scenarios = [];
 const performance = [];
 const wildlifeResults = [];
+const verifiedIdle = new Set();
 const executablePath = process.env.CHROMIUM_PATH || undefined;
 const browser = await chromium.launch({ executablePath, args: [
   '--no-sandbox', '--disable-dev-shm-usage', '--enable-webgl', '--use-gl=angle',
@@ -70,6 +71,15 @@ async function capture(page, viewport, tag, evidence, assertions) {
   const png = PNG.sync.read(data);
   assert.deepEqual([png.width, png.height], viewport);
   const canvas = await page.locator('canvas').boundingBox();
+  const idleTags=['idle','clearing','outpost','wetland','disguise','perched','half-buried','thicket'];
+  if (viewport[0]===667 && idleTags.includes(tag) && !verifiedIdle.has(evidence.species)) {
+    assert.equal(await page.evaluate(()=>window.mobPreview.animateIdle(.31)),true);
+    const animated=PNG.sync.read(await page.screenshot({animations:'disabled'}));
+    assert.ok(framedPixels(png,animated,canvas).count>10,filename+' did not animate at rest');
+    const physics=await page.evaluate(()=>window.mobPreview.inspect().mob.position);
+    assert.deepEqual(physics,evidence.mob.position);
+    verifiedIdle.add(evidence.species);
+  }
   await page.evaluate(() => window.mobPreview.showSubject(false));
   const baseline = PNG.sync.read(await page.screenshot({ animations: 'disabled' }));
   await page.evaluate(() => window.mobPreview.showSubject(true));
@@ -256,7 +266,24 @@ async function verifyHostiles(page,viewport) {
     const disengaged=await step(page,250,'disengage');
     assert.equal(disengaged.state,'disengage',id);
     assert.equal(disengaged.target.health,recovering.target.health,id);
-    wildlifeResults.push({species:id,viewport,status:'PASS',attack:tactic.attack});
+    await command(page,'hurt');
+    const hurt=await step(page,1);
+    assert.equal(hurt.state,'hurt');
+    assert.ok(hurt.mob.health < hurt.mob.species.combat.health);
+    await command(page,'defeat');
+    const defeat=await step(page,1);
+    assert.equal(defeat.state,'defeat');
+    assert.equal(defeat.mob.health,0);
+    if (id==='troll' || id==='shardmaw') await capture(page,viewport,'defeat',defeat,
+      ['Lethal damage removed the runtime body and retained a brief defeat pose']);
+    const despawn=await step(page,45);
+    assert.equal(despawn.state,'removed');
+    assert.equal(despawn.actors.some(actor=>actor.id===initial.mob.id),false);
+    await command(page,'restart');
+    const retry=await step(page,0);
+    assert.notEqual(retry.mob.id,initial.mob.id);
+    assert.equal(retry.mob.health,retry.mob.species.combat.health);
+    wildlifeResults.push({species:id,viewport,status:'PASS',attack:tactic.attack,cleanup:true});
   }
 }
 
@@ -364,12 +391,21 @@ try {
         assert.deepEqual(restored.resources,loss.resources);
         contextRecovered = true;
         await choose(page,'deer');
-        for (const count of [0,24]) {
-          const result = await page.evaluate(n => window.mobPreview.benchmark(n,60),count);
+        const loads=[
+          [0,{},0], [1,{},1], [8,{},8], [16,{activeLimit:16},16],
+          [24,{activeLimit:16},16], [24,{activeLimit:24},24],
+          [0,{place:'cave',encounter:true},0],
+          [8,{place:'cave',encounter:true},8],
+          [16,{place:'cave',encounter:true,activeLimit:16},16],
+          [24,{place:'cave',encounter:true,activeLimit:24},24]
+        ];
+        for (const [count,options,active] of loads) {
+          const result = await page.evaluate(([n,scene])=>window.mobPreview.benchmark(n,32,scene),[count,options]);
           assert.equal(result.emptyAfterDispose,true);
-          assert.equal(result.active,count ? 16 : 0);
-          assert.equal(result.dormant,count ? 8 : 0);
+          assert.equal(result.active,active);
+          assert.equal(result.dormant,count-active);
           assert.equal(result.liveAfterStress,count);
+          if (options.encounter && count) assert.ok(result.attackEvents>0);
           performance.push(result);
         }
       }
@@ -396,7 +432,7 @@ try {
   const speciesAcceptance = speciesRegistry.map(species => {
     const captures = hashes.filter(image => image.species === species.id);
     const verifiedWidths = [...new Set(captures.map(image => image.viewport[0]))];
-    const verified = species.implementation === 'preview' && !dirty &&
+    const verified = species.implementation === 'preview' && !dirty && verifiedIdle.has(species.id) &&
       requiredWidths.every(width => captures.filter(image=>image.viewport[0]===width).length>=3 &&
         (['deer','goblin','glownewt'].includes(species.id) ||
           wildlifeResults.some(result=>result.species===species.id && result.viewport[0]===width)));
@@ -405,11 +441,19 @@ try {
       implementation: species.implementation, staging: verified ? 'PASS' : 'BLOCKED',
       detail: verified ? 'Phase checkpoint scenario gate passed' : species.implementation === 'definition'
         ? 'Implementation and browser scenarios pending' : 'Source-matched viewport matrix pending',
-      screenshotCount: captures.length, verifiedWidths
+      screenshotCount: captures.length, verifiedWidths, idleAnimation:verifiedIdle.has(species.id)
     };
   });
+  assert.equal(verifiedIdle.size,40);
+  const exactRun = !dirty && process.env.MOB_DEBUG !== '1';
+  const scenarioAcceptance = exactRun && speciesAcceptance.every(entry=>entry.staging==='PASS');
+  if (exactRun) {
+    assert.equal(scenarioAcceptance,true);
+    assert.ok(hashes.length>=360);
+  }
   await writeFile(join(output,'species-acceptance.json'),JSON.stringify({
-    source, phase: 4, finalAcceptance: false, species: speciesAcceptance
+    source, phase: 9, scenarioAcceptance: scenarioAcceptance ? 'PASS' : 'BLOCKED',
+    physicalIPhoneAcceptance:'CREATOR_PENDING', species: speciesAcceptance
   },null,2)+'\n');
   await writeFile(join(output,'manifest.json'),JSON.stringify({
     source, dirty, browser:browser.version(), renderer:'Chromium ANGLE SwiftShader WebGL2',

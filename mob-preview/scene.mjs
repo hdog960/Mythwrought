@@ -3,13 +3,13 @@ import { meshDepthSection } from '../src/depth-mesh.mjs';
 import { Pack2LiveWorld } from '../src/pack2-world.mjs';
 import { pack2WaterSectionVertices } from '../src/pack2-integration.mjs';
 import { createWorldQuery } from '../src/mobs/world-query.mjs';
-import { MobEngine } from '../src/mobs/engine.mjs';
+import { DEFAULT_ACTIVE_MOBS, MobEngine } from '../src/mobs/engine.mjs';
 import { BehaviorController } from '../src/mobs/behavior.mjs';
 import { DemoTarget, MobCombat, ObjectAccess } from '../src/mobs/combat.mjs';
 import { CompanionManager } from '../src/mobs/companion.mjs';
 import { PopulationManager, spawnEligible } from '../src/mobs/ecology.mjs';
 import { AnimalInteractions } from '../src/mobs/animal-interactions.mjs';
-import { getSpecies } from '../src/mobs/species.mjs';
+import { getSpecies, speciesRegistry } from '../src/mobs/species.mjs';
 import { familiarWildlife } from '../src/mobs/familiar-wildlife.mjs';
 import { originalWildlife } from '../src/mobs/original-wildlife.mjs';
 import { hostileTactics } from '../src/mobs/hostile-tactics.mjs';
@@ -145,10 +145,13 @@ export function createScene() {
   let nearbyEntities = [];
   let destination = null;
   let climbTrial = false;
+  let recentlyHurt = 0;
+  let defeated = null;
+  let defeatSeconds = 0;
 
   function select(name) {
     if (!Object.hasOwn(fixtures, name)) return false;
-    if (!ids[name]) {
+    if (!engine.get(ids[name])) {
       const id = engine.spawn(name, fixtures[name].start, { dormant: true });
       if (!id) return false;
       ids[name] = id;
@@ -156,10 +159,14 @@ export function createScene() {
     animals.dismount(target);
     destination = null;
     climbTrial = false;
+    recentlyHurt = 0;
+    defeated = null;
+    defeatSeconds = 0;
     for (const id of nearbyEntities) engine.transition(id, 'removed');
     nearbyEntities = [];
     for (const [kind, id] of Object.entries(ids)) {
       const mob = engine.get(id);
+      if (!mob) continue;
       if (kind === name && mob.state === 'dormant') engine.transition(id, 'idle');
       else if (kind !== name && ['active', 'idle'].includes(mob.state)) engine.transition(id, 'dormant');
     }
@@ -178,6 +185,24 @@ export function createScene() {
   function action(command) {
     const id = ids[species];
     const mob = engine.get(id);
+    if (command==='restart') {
+      if (mob?.species.classification==='hostile') engine.transition(id,'removed');
+      return select(species);
+    }
+    if (!mob) return false;
+    if (command==='hurt' || command==='defeat') {
+      if (mob.species.classification!=='hostile') return false;
+      const fatal=command==='defeat';
+      if (!engine.damage(id,fatal ? mob.health : Math.min(4,mob.health*.4))) return false;
+      if (fatal) {
+        defeated={...mob,health:0,velocity:[0,0,0],state:'removed',visual:'defeat'};
+        defeatSeconds=.95;
+        targetVisible=false;
+        disturbance=false;
+        combat.clearProjectiles();
+      } else recentlyHurt=.3;
+      return true;
+    }
     if (command === 'approach' || command === 'encounter') {
       target.place(fixtures[species].target);
       if (mob.species.classification === 'hostile') target.reset();
@@ -286,6 +311,8 @@ export function createScene() {
   }
 
   function tick(seconds) {
+    recentlyHurt=Math.max(0,recentlyHurt-seconds);
+    defeatSeconds=Math.max(0,defeatSeconds-seconds);
     companions.advance(seconds);
     animals.advance(seconds);
     const threat = nearbyEntities.find(id => engine.get(id)?.species.id === 'goblin');
@@ -303,34 +330,59 @@ export function createScene() {
   }
 
   function snapshot(integrity = false) {
-    const mob = engine.get(ids[species]);
+    const mob = engine.get(ids[species]) ?? defeated;
     const draw = engine.all().filter(entity => entity.state !== 'dormant' && (entity.id === mob.id || nearbyEntities.includes(entity.id)))
-      .map(entity => ({ ...entity, visual: behavior.state(entity.id) }));
+      .map(entity => ({ ...entity, visual: recentlyHurt>0 && entity.id===mob.id ? 'hurt' : behavior.state(entity.id) }));
+    if (defeated && defeatSeconds>0) draw.push(defeated);
     for (const shot of combat.projectiles) draw.push({ ...shot, species:{id:shot.visual},
       yaw:Math.atan2(shot.velocity[0],shot.velocity[2]),state:'active' });
     if (targetVisible) draw.push({ species: { id: 'target' }, position: target.position,
       yaw: 0, velocity: [0, 0, 0], state: target.alive ? 'idle' : 'downed' });
-    return { species, fixture: fixtures[species], mob, draw, projectiles:combat.projectiles, state: behavior.state(mob.id) ?? mob.state,
+    return { species, fixture: fixtures[species], mob, draw, projectiles:combat.projectiles, state: defeated ? (defeatSeconds ? 'defeat' : 'removed') :
+      recentlyHurt>0 ? 'hurt' : behavior.state(mob.id) ?? mob.state,
       target: { position: target.position, health: target.health, visible: targetVisible },
-      companions: companions.slots(), rider: animals.riderPosition(target), tamed: animals.isTamed(mob.id,target),
+      environment: query.environment(mob.position), companions: companions.slots(), rider: animals.riderPosition(target), tamed: animals.isTamed(mob.id,target),
       eligibility: integrity && (Object.hasOwn(stagedWildlife, species) || Object.hasOwn(hostileTactics,species)) ? spawnEligible(query, mob.species,
         fixtures[species].start, fixtures[species].start.map((value, axis) => axis ? value : value - 6)) : undefined,
       doorOpen: world.getPack2State(...doorCell).open,
       revision, events, work: behavior.navigationWork, schema1Untouched: integrity ? JSON.stringify(base.save()) === baseBytes : undefined };
   }
 
-  function benchmark(count) {
-    const runtime = new MobEngine(query, 179, { maxActive: 16, maxEntities: 48 });
-    const steering = new BehaviorController(runtime, query);
-    const population = new PopulationManager(runtime, query);
-    for (let n = 0, admitted = 0; n < 56 && admitted < count; n++) {
-      const x = -12.5 + n % 8;
-      const z = 4.5 + Math.floor(n / 8);
-      const id = runtime.spawn(admitted % 5 === 0 ? 'goblin' : admitted % 3 === 0 ? 'glownewt' : 'deer',
-        [x, Y, z], { dormant: admitted >= 16 });
-      if (id) admitted++;
+  function benchmark(count, { activeLimit=DEFAULT_ACTIVE_MOBS, place='surface', encounter=false } = {}) {
+    const runtime = new MobEngine(query,179,{maxActive:activeLimit,maxEntities:48});
+    const steering = new BehaviorController(runtime,query);
+    const combat = new MobCombat(runtime,query,steering);
+    const population = new PopulationManager(runtime,query);
+    const cave=place==='cave';
+    const observer=cave ? [-9.5,-8,1.5] : [-8,Y,5];
+    const position=cave ? [-10.5,-8,-1.5] : [-7.5,Y,.5];
+    const subject={position,species:getSpecies(cave?'goblin':'deer')};
+    const target=encounter ? new DemoTarget(observer,{health:500}) : null;
+    let ticks=0, attackEvents=0;
+    const course=[
+      [-9.5,-8,1.5],[-9.5,-8,-1.5],[-6.5,-8,-1.5],[-6.5,-8,1.5]
+    ];
+    for(let slot=0,admitted=0;slot<96&&admitted<count;slot++) {
+      const point=cave ? [-13.5+slot%9,-8,-5.5+Math.floor(slot/9)] :
+        [-12.5+slot%8,Y,4.5+Math.floor(slot/8)];
+      const {biome}=query.environment(point);
+      const candidates=speciesRegistry.filter(entry=>entry.habitat.biomes.includes(biome) &&
+        (admitted%3===0 ? entry.classification==='hostile' : entry.classification==='passive'));
+      const candidate=candidates[(slot*7)%candidates.length];
+      if(!candidate || !query.grounded(point,candidate.body)) continue;
+      const entity=runtime.spawn(candidate.id,point,{dormant:admitted>=activeLimit});
+      if(entity) admitted++;
     }
-    return { runtime, steering, population };
+    return {
+      runtime,steering,population,subject,observer,
+      advance(seconds) {
+        if (target && ++ticks%12===0) target.place(course[Math.floor(ticks/12)%course.length]);
+        const steps=combat.advance(seconds,target);
+        attackEvents+=combat.events.filter(event=>event.type==='damage').length;
+        return steps;
+      },
+      get attackEvents() { return attackEvents; }
+    };
   }
 
   return {

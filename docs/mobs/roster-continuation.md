@@ -82,3 +82,60 @@ Gloomcrawler, Ashfang, Briarlurker and Voidmoth join the preview. The wave
 exercises heavy attacks, compact cave traversal, physical flight, ambush,
 pack coordination and different projectile meshes over the common bounded
 projectile solver. The full scene still uses a disposable voxel world.
+
+## Staged persistence and host readiness
+
+The V1 mob snapshot is a separate bounded payload with its own envelope and
+checksum. It never reads or writes the existing save keys. It verifies seeded
+IDs, sequence bounds, species, pose, lifecycle, active capacity, and owner
+records before returning a new runtime. Duplicate identities, damaged payloads
+and unsupported versions are rejected. A valid body in an unavailable chunk
+restores dormant. An authorized companion can be recovered once after reload.
+The snapshot preserves bonded modes, recovery timers, ownership and eligible
+tames. A rider must mount again after reload. A future format reader should
+decode earlier envelopes explicitly, then validate before enabling actors.
+
+| Protected dependency | Staged adapter input | Production evidence required before incorporation |
+| --- | --- | --- |
+| Four-biome roadmap | Resident coordinates, authoritative biome ID, hazards and eligible terrain | Supported habitat mapping, edits, spawn boundaries, and untouched biome-owned structures |
+| Sky/day-night roadmap | Current phase and normalized light | Dusk, dark habitat, transitions, pause and resume, and deterministic spawn eligibility |
+| Cave roadmap | Loaded vertical section, cave readiness and climb surfaces | Deep collision, water availability, terrain revision, and resident seam and unload behavior |
+
+The read-only host view waits for all relevant observations. Before activating
+any mob, obtain explicit creator approval after all three protected roadmaps
+are complete. Wire the host view and the read-only world revision, validate
+active/dormant transitions in the existing scheduler, and run production
+browser and actual device gates with spawning disabled. Introduce any later
+pilot behind a separately approved feature gate. Approve world-object
+capabilities, draw ordering and resource ownership, then stage reversible
+spawn, combat, UI and persistence integration individually. Define migration
+and rollback against a copy of existing saves before accepting a production
+creature format. The current draft activates none of those integrations.
+
+## Device acceptance
+
+The creator owns real landscape Safari and installed Home Screen checks. Test
+camera framing and input reach on an iPhone, movement and habitat transitions,
+mixed combat, companion rescue, pause/resume, offline access and cold restart.
+Capture frame times and device model during a long session at the proposed
+cap, compare against the no-creature scene, and check storage before and
+after. Record trouble with thermal throttling, memory or context loss before
+approving any production cap.
+
+## Technical acceptance evidence
+
+The exact-head browser run checks idle animation for all 40, automatic
+movement, signatures, camera framing, native pose transitions, damage and
+cleanup. It keeps the original four landscape sizes and requires the
+creator's three specified sizes for every species. The archive carries
+`manifest.json` and `species-acceptance.json`.
+
+The configurable active population defaults to eight in staging. A
+preliminary local cave encounter with 16 active creatures measured 6.5 ms
+simulation p95 and exceeded the low-single-digit target. The final browser
+benchmark compares zero, one, eight, sixteen and twenty-four active
+creatures, dormant populations, and cave encounters with a moving target.
+Use the exact-head manifest for the final measured numbers. The preview
+culls distant instances, batches survivors by model, caps projectile and
+navigation work, and checks explicit GPU and runtime release. A device
+measurement is still required before adopting a production cap.

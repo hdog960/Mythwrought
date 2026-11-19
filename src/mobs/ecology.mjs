@@ -1,6 +1,6 @@
 import { CHUNK_SIZE } from '../voxel.mjs';
 import { sectionForY } from '../depth.mjs';
-import { getSpecies } from './species.mjs';
+import { getSpecies, speciesRegistry } from './species.mjs';
 import { validPoint } from './world-query.mjs';
 import { supportedPosition } from './movement.mjs';
 import { distanceTo } from './behavior.mjs';
@@ -13,6 +13,7 @@ const MAX_TESTS = 6;
 const ACTIVE_RADIUS = 18;
 const MIN_SPAWN_DISTANCE = 5;
 const MAX_SPAWN_DISTANCE = 26;
+const implementedIds=speciesRegistry.filter(species=>species.implementation==='preview').map(species=>species.id);
 
 function hash(seed, cx, cz, section, sequence) {
   let number = seed ^ Math.imul(cx, 0x9e3779b9) ^ Math.imul(cz, 0x85ebca6b) ^
@@ -53,7 +54,7 @@ export class PopulationManager {
   #time = 0;
   #next = INTERVAL;
 
-  constructor(engine, world, { seed = 179, species = ['deer', 'goblin', 'glownewt'] } = {}) {
+  constructor(engine, world, { seed = 179, species = implementedIds } = {}) {
     if (!Number.isSafeInteger(seed) || !Array.isArray(species) ||
         !species.length || species.length > 40 || new Set(species).size !== species.length)
       throw new TypeError('Invalid ecology options');

@@ -70,7 +70,10 @@ function renderControls(snapshot) {
   health.textContent = 'Target HP ' + snapshot.target.health;
   if (frames % 10 === 0 || testMode)
     stats.value = 'WebGL2 · ' + draw.actors + ' visible · ' + draw.draws + ' draw calls · ' +
-      snapshot.work + ' navigation nodes · ' + lastSimulation.toFixed(2) + ' ms simulation';
+      snapshot.work + ' navigation nodes · ' + lastSimulation.toFixed(2) + ' ms simulation · ' +
+      (snapshot.environment.biome ?? 'unknown habitat') + ' · light ' +
+      (snapshot.environment.light?.toFixed(2) ?? 'unknown') + ' · Y ' +
+      snapshot.mob.position[1].toFixed(1) + ' · ' + snapshot.mob.motionMode;
 }
 
 function simulate(dt) {
@@ -120,7 +123,8 @@ function construct() {
 function wildlifeCommands(id) {
   const entry = getSpecies(id);
   if (entry.classification === 'hostile') {
-    const list=[['encounter','Start encounter'],['withdraw','Leave encounter']];
+    const list=[['encounter','Start encounter'],['withdraw','Leave encounter'],
+      ['hurt','Strike'],['defeat','Defeat'],['restart','Reset encounter']];
     if (hostileTactics[id]?.climb) list.push(['wall','Toggle wall climb']);
     if (hostileTactics[id]?.pack) list.push(['group','Add pack member']);
     return list;
@@ -210,15 +214,14 @@ function sample(values, quantile) {
   return Number(sorted[Math.floor((sorted.length - 1) * quantile)].toFixed(3));
 }
 
-async function benchmark(count, samples = 90) {
-  if (!testMode || !renderer || ![0, 24].includes(count) || !Number.isInteger(samples) || samples < 20 || samples > 360)
+async function benchmark(count, samples = 90, options = {}) {
+  if (!testMode || !renderer || ![0,1,8,16,24].includes(count) || !Number.isInteger(samples) || samples < 20 || samples > 360)
     return null;
   stop();
-  const { runtime, steering, population } = scene.benchmark(count);
+  const benchmarkScene=scene.benchmark(count,options);
+  const { runtime, steering, population, subject, observer, advance } = benchmarkScene;
   const simulation = [], submission = [], intervals = [];
-  const subject = scene.snapshot().mob;
   const jsHeapBefore = performance.memory?.usedJSHeapSize ?? null;
-  const observer = [-8, 9, 5];
   let last, nodes = 0, active = 0, dormant = 0, elapsed = 0, draws = 0;
   // Keep the camera, world, buffer dimensions, and sample count fixed for both
   // runs. This measures CPU work and RAF intervals, not hardware GPU timings.
@@ -227,7 +230,7 @@ async function benchmark(count, samples = 90) {
       const stamp = await new Promise(requestAnimationFrame);
       const before = performance.now();
       population.advance(FIXED_STEP, observer, []);
-      steering.advance(FIXED_STEP);
+      advance(FIXED_STEP);
       elapsed += FIXED_STEP;
       const sim = performance.now() - before;
       const entities = runtime.all();
@@ -248,16 +251,16 @@ async function benchmark(count, samples = 90) {
     const extendedStart = performance.now();
     for (let i = 0; i < 1800; i++) {
       population.advance(FIXED_STEP, observer, []);
-      steering.advance(FIXED_STEP);
+      advance(FIXED_STEP);
     }
     const extendedMs = performance.now() - extendedStart;
     const liveAfterStress = runtime.counts().total;
     runtime.dispose();
-    return { count, samples, active, dormant, draws, nodeExpansions: nodes,
+    return { count, samples, active, dormant, draws, nodeExpansions: nodes, place:options.place ?? 'surface', encounter:options.encounter===true,
       simulationP50: sample(simulation, .5), simulationP95: sample(simulation, .95),
       renderSubmitP50: sample(submission, .5), renderSubmitP95: sample(submission, .95),
       frameP50: sample(intervals, .5), frameP95: sample(intervals, .95),
-      extendedSteps: 1800, extendedMs, liveAfterStress,
+      extendedSteps: 1800, extendedMs, liveAfterStress, attackEvents:benchmarkScene.attackEvents,
       emptyAfterDispose: runtime.counts().total === 0,
       jsHeapBefore, jsHeapAfter: performance.memory?.usedJSHeapSize ?? null,
       resources: renderer.resources() };
@@ -277,6 +280,12 @@ if (testMode) Object.defineProperty(window, 'mobPreview', { value: Object.freeze
     const snapshot = scene.snapshot();
     redraw(snapshot);
     renderControls(snapshot);
+    return true;
+  },
+  animateIdle(seconds) {
+    if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 1 || destroyed) return false;
+    time+=seconds;
+    redraw();
     return true;
   },
   showSubject(visible) {

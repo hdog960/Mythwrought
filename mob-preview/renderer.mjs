@@ -228,15 +228,22 @@ export function createRenderer(gl, terrainMeshes, cameraClear, waterMeshes = [],
     bind(animalsProgram, view, aspect, time);
     let draws = visibleTerrain.length;
     let actors = 0;
-    for (const [id, mesh] of Object.entries(models)) {
+    const batches=new Map();
+    for (const entity of entities) {
+      const id=entity.species.id;
+      if (!Object.hasOwn(models,id) || Math.hypot(...entity.position.map((value,axis)=>value-view.eye[axis])) > 34) continue;
+      if (!batches.has(id)) batches.set(id,[]);
+      if (batches.get(id).length<MAX_INSTANCES) batches.get(id).push(entity);
+    }
+    for (const [id, batch] of batches) {
+      const mesh=models[id];
       let count = 0;
-      for (const entity of entities) {
-        if (entity.species.id !== id || count === MAX_INSTANCES) continue;
+      for (const entity of batch) {
         const moving = Math.min(1, Math.max(entity.motionMode === 'fly' ? .6 : 0, Math.hypot(...entity.velocity) / 2));
         const foraging = ['graze','forage','peck','browse','sniff','scent','stalk','dusk-watch','shell-retreat','snow-browse','gather'].includes(entity.visual);
-        const intent = entity.visual === 'prepare-attack' ? .7 : entity.visual === 'attack' ? 1 : ['reveal','awaken'].includes(entity.visual) ? .55 : foraging ? -.75 : 0;
+        const intent = entity.visual === 'prepare-attack' ? .7 : entity.visual === 'attack' ? 1 : ['reveal','awaken','uncoil','unmask','hurt'].includes(entity.visual) ? .55 : foraging ? -.75 : 0;
         const idleYaw = entity.state === 'idle' && !entity.velocity.some(Boolean) && !entity.yaw ? .56 : entity.yaw;
-        scratch.set([...entity.position, idleYaw, moving, intent, entity.state === 'downed' ? 1 : entity.juvenile ? -1 : 0, count * .68], count++ * 8);
+        scratch.set([...entity.position, idleYaw, moving, intent, (entity.state === 'downed' || entity.visual === 'defeat') ? 1 : entity.juvenile ? -1 : 0, count * .68], count++ * 8);
       }
       if (!count) continue;
       gl.bindVertexArray(mesh.array);
