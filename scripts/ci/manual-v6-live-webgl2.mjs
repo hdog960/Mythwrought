@@ -146,10 +146,10 @@ try{
     // then cold reload with the actual Chromium network entirely disabled.
     await page.waitForFunction(async()=>{
       const keys=await caches.keys();
-      return keys.includes('mythwrought-m5-shell-20261119-v6-recorder-v1');
+      return keys.includes('mythwrought-m5-shell-20261119-v6-safe-refresh');
     },null,{timeout:180000});
     const before=await page.evaluate(async()=>{
-      const name='mythwrought-m5-shell-20261119-v6-recorder-v1';
+      const name='mythwrought-m5-shell-20261119-v6-safe-refresh';
       const cache=await caches.open(name);
       const files=(await cache.keys()).map(x=>x.url);
       return {assets:files.length,hasV6:files.some(x=>
