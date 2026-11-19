@@ -24,6 +24,8 @@ jobs:
     timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -36,6 +38,7 @@ jobs:
       - name: Native forty-species real game, depth and isolated save contracts
         run: |
           node --test tests/live-five-system-mobs.test.mjs
+          node --test tests/unified-offline-atomic-cache.test.mjs
           node --test tests/mobs/full-roster.test.mjs
           node --test tests/mobs/roster-persistence.test.mjs
       - name: Install pinned WebGL2 Chromium and genuine PNG inspection
