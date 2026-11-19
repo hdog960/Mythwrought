@@ -25,10 +25,15 @@ const modelIds=new Set(speciesRegistry.map(x=>x.id));
 if(modelIds.size!==LIVE_MOB_COUNT || speciesRegistry.some(s=>s.implementation!=='preview'))
   throw Error('All 40 creature definitions must be gameplay implemented');
 
-export function mobSaveKey(seed){
+export function mobSaveKey(seed,worldKind='normal'){
   if(!Number.isSafeInteger(seed)||seed!==(seed|0))
     throw TypeError('Mob save requires an int32 world seed');
-  return PREFIX+seed;
+  if(worldKind!=='normal'&&worldKind!=='cave')
+    throw TypeError('Unknown mob world profile');
+  // Preserve every already-staged normal seed key byte-identically.
+  // The explicitly opt-in Cave World is a DIFFERENT save slot even when
+  // its numeric seed collides with an ordinary legacy/profiler seed.
+  return worldKind==='cave'?'mythwrought-mobs-v1-caves-seed-'+seed:PREFIX+seed;
 }
 export function classifyLiveBiome(name,feet,cave){
   if(cave&&feet<-3.5)return 'cave';
@@ -37,14 +42,14 @@ export function classifyLiveBiome(name,feet,cave){
 
 export function createLiveMobSession({
   world,seed,storage,resident,biomeAt,skyAt,caveAt,playerAt,
-  allowWrites=()=>true,onPlayerDamage=()=>{}
+  worldKind='normal',allowWrites=()=>true,onPlayerDamage=()=>{}
 }={}){
   if(!world||typeof world.get!=='function'||!storage||!Number.isSafeInteger(seed)||
     typeof resident!=='function'||typeof biomeAt!=='function'||
     typeof skyAt!=='function'||typeof caveAt!=='function'||
     typeof playerAt!=='function')
     throw TypeError('Invalid live mob host');
-  const key=mobSaveKey(seed);
+  const key=mobSaveKey(seed,worldKind);
   let damaged=false,readOnly=false,damageCooldown=0,health=100,lastStored='',elapsed=0;
   const query=createMobHostView(world,{
     resident,revision:()=>world.editRevision||0,

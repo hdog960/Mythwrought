@@ -252,6 +252,7 @@ function start(){
     try{
       mobSession=createLiveMobSession({
         world,seed:world.seed,storage:localStorage,
+        worldKind:caveSession?'cave':'normal',
         resident:(cx,cz,section)=>chunks.has(depthMeshKey(cx,cz,section)),
         biomeAt:point=>{
           // Every genuine deep mined shaft is underground, not just the

@@ -167,3 +167,31 @@ test('actual-game creature commands are safe without eligible tame, mount, breed
   assert.equal(JSON.stringify(world.save()),initial);
   session.dispose();
 });
+
+test('cave-specific creature roster cannot overwrite ordinary world of same seed',()=>{
+  const seed=4848,storage=memoryStorage(),world=new VoxelWorld(seed);
+  const ordinary=mobSaveKey(seed),cave=mobSaveKey(seed,'cave');
+  assert.notEqual(cave,ordinary);
+  assert.equal(ordinary,'mythwrought-mobs-v1-seed-'+seed,
+    'Original ordinary mob sidecar naming must remain backward-compatible');
+  const open=(kind)=>createLiveMobSession({
+    world,seed,storage,worldKind:kind,resident:()=>true,
+    biomeAt:()=> 'cave',skyAt:()=>({light:.3,dayPhase:'night'}),
+    caveAt:()=>({underground:true}),playerAt:()=>[.5,-8,.5]
+  });
+  const before=JSON.stringify(world.save());
+  const legacy=open('normal');
+  assert.equal(legacy.save(),true);
+  const preserved=storage.getItem(ordinary);
+  legacy.dispose();
+  assert.equal(storage.getItem(cave),null);
+  const caves=open('cave');
+  assert.equal(caves.save(),true);
+  assert.ok(storage.getItem(cave)?.includes('checksum'));
+  assert.equal(storage.getItem(ordinary),preserved,
+    'Separate cave sidecar changed existing same-seed ordinary creature roster');
+  assert.equal(JSON.stringify(world.save()),before,
+    'Profile-isolated creature rosters may never rewrite schema-1 world bytes');
+  caves.dispose();
+  assert.throws(()=>mobSaveKey(seed,'untrusted'),/profile/);
+});
