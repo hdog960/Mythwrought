@@ -28,13 +28,20 @@ const registered={
 const centers={plains:[0,0],desert:[512,0],snow:[0,512],
   mountain:[-512,0],enchanted:[0,-512]};
 function findNaturalPhysicalAnchor(name,[cx,cz]){
-  for(let dx=-48;dx<=48;dx+=8)for(let dz=-48;dz<=48;dz+=8){
-    const x=cx+dx,z=cz+dz;
-    if((v6BiomeAt(x,z,seed)?.name||'plains')!==name)continue;
-    for(let y=WORLD_MAX_Y-1;y>=0;y--){
-      const id=sourceWorld.get(x,y,z);
-      if(registered[name].has(id)&&sourceWorld.get(x,y+1,z)===BLOCK.AIR)
-        return {name,x,y,z,id};
+  // Prefer a representative biome INTERIOR over the previous first corner
+  // match, which generated authentic but unusably close cliff screenshots.
+  for(let radius=0;radius<=48;radius+=8){
+    for(let dx=-radius;dx<=radius;dx+=8){
+      for(let dz=-radius;dz<=radius;dz+=8){
+        if(Math.max(Math.abs(dx),Math.abs(dz))!==radius)continue;
+        const x=cx+dx,z=cz+dz;
+        if((v6BiomeAt(x,z,seed)?.name||'plains')!==name)continue;
+        for(let y=WORLD_MAX_Y-1;y>=0;y--){
+          const id=sourceWorld.get(x,y,z);
+          if(registered[name].has(id)&&sourceWorld.get(x,y+1,z)===BLOCK.AIR)
+            return {name,x,y,z,id};
+        }
+      }
     }
   }
   throw Error('V6 '+name+' has no visible true solid source anchor around '+cx+','+cz);
@@ -95,8 +102,10 @@ try{
     for(const anchor of anchors){
       const observed=await page.evaluate(({x,y,z})=>{
         const test=window.__mythwroughtTest;
-        const camera=test.teleport(x,z); // Camera evidence only, NOT walking
-        test.aimAt(x+8,Math.max(y,2),z+8);
+        // Inspect the TRUE cap from 24 blocks away, never from inside
+        // its own wall. Test-only viewpoint is disclosed, not foot travel.
+        const camera=test.teleport(x-24,z-24);
+        test.aimAt(x,Math.max(y,2),z);
         return {id:test.block(x,y,z),generator:test.fourBiomeProfile()?.generator,
           camera};
       },anchor);
