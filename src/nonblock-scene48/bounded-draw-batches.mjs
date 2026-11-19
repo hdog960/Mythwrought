@@ -14,17 +14,19 @@ function meshBounds(o){
 }
 // Returns bounded, deterministic batches of visible geometry references; no draw calls.
 // Callers own actual GPU uploads and must explicitly opt into this preparation.
-export function prepareNonblockDrawBatches(objects,viewBounds,{maxObjects=4096,maxTriangles=65536,maxBatchTriangles=4096}={}){
+export function prepareNonblockDrawBatches(objects,viewBounds,{maxObjects=4096,maxTriangles=65536,maxBatchTriangles=4096,removedKeys=[]}={}){
  if(!Array.isArray(objects)||objects.length>maxObjects||!validBounds(viewBounds)||
     ![maxObjects,maxTriangles,maxBatchTriangles].every(n=>Number.isSafeInteger(n)&&n>0)||
     maxBatchTriangles>maxTriangles)throw new TypeError('invalid batch budget');
+ if(!Array.isArray(removedKeys)||removedKeys.some(k=>!validKey(k))||new Set(removedKeys).size!==removedKeys.length)throw new TypeError('invalid removed identities');
+ const removed=new Set(removedKeys);
  const seen=new Set(),visible=[];let triangles=0;
  for(const obj of objects){
   if(!validKey(obj?.instanceKey)||!validSceneId(obj?.sceneId)||seen.has(obj.instanceKey))throw new TypeError('duplicate/missing identity or invalid scene namespace');
   seen.add(obj.instanceKey);
   const bounds=meshBounds(obj),count=obj.mesh.positions.length/9;
   if(!Number.isSafeInteger(count)||count>maxBatchTriangles)throw new RangeError('oversized object');
-  if(!overlaps(bounds,viewBounds))continue;
+  if(removed.has(obj.instanceKey)||!overlaps(bounds,viewBounds))continue;
   triangles+=count;
   if(triangles>maxTriangles)throw new RangeError('visible triangle budget exceeded');
   visible.push({instanceKey:obj.instanceKey,sceneId:obj.sceneId,triangles:count,bounds,mesh:obj.mesh,anchor:[...obj.anchor]});
