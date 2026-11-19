@@ -67,6 +67,9 @@ export function createNonblockHostBridge({seed,objects,attest,voxelPick,eligible
   };
   let removed=validateSnapshot(readSidecar());
   let epoch=0;
+  // Capability receipts are issued by this exact host instance only. Reconstructed,
+  // cloned or cross-world hits cannot authorize removal even if fields match.
+  const issuedHits=new WeakSet();
   const visible=()=>[...registry.values()].filter(e=>!removed.has(e.object.instanceKey)&&eligible(e.object,e.lane));
   const pick=(origin,direction,maxDistance=6)=>{
     if(!vec(origin)||!vec(direction)||!Number.isFinite(maxDistance)||maxDistance<=0||maxDistance>12)throw new TypeError('invalid bounded ray');
@@ -84,11 +87,15 @@ export function createNonblockHostBridge({seed,objects,attest,voxelPick,eligible
     }
     // Existing voxel target wins exact ties: no stealing legacy block clicks.
     if(voxel && (!best||voxel.distance<=best.distance+1e-9))return {kind:'voxel',hit:voxel,distance:voxel.distance};
-    return best?Object.freeze({...best,seed,epoch}):null;
+    if(!best)return null;
+    const receipt=Object.freeze({...best,seed,epoch});
+    issuedHits.add(receipt);
+    return receipt;
   };
   const snapshot=()=>({version:HOST_BRIDGE_VERSION,seed,tombstones:[...removed].sort()});
   const breakHit=(hit,origin,direction,maxDistance=6)=>{
-    if(hit?.kind!=='nonblock'||hit.seed!==seed||hit.epoch!==epoch||
+    if(!hit || typeof hit!=='object' || !issuedHits.has(hit) ||
+       hit.kind!=='nonblock'||hit.seed!==seed||hit.epoch!==epoch||
        typeof hit.instanceKey!=='string'||!registry.has(hit.instanceKey))return false;
     const current=pick(origin,direction,maxDistance);
     if(current?.kind!=='nonblock'||current.instanceKey!==hit.instanceKey||
