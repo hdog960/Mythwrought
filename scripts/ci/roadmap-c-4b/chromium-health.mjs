@@ -1,7 +1,8 @@
 // Additive CI-owned Chromium startup diagnostic. Does not alter, mock or retry original tests.
 // Selects only a real installed Chrome/Chromium executable that answers an actual DevTools port.
 // The original 4B Chromium test still uses its exact original code, flags, CDP timeouts and assertions.
-import {existsSync,mkdtempSync,readFileSync,rmSync,mkdirSync,writeFileSync,appendFileSync} from 'node:fs';
+import {existsSync,mkdtempSync,readFileSync,mkdirSync,writeFileSync,appendFileSync} from 'node:fs';
+import {rm} from 'node:fs/promises';
 import {tmpdir,freemem,totalmem} from 'node:os';
 import {join,resolve} from 'node:path';
 import {spawn,spawnSync} from 'node:child_process';
@@ -9,7 +10,29 @@ import {setTimeout as sleep} from 'node:timers/promises';
 const candidates=[process.env.CHROME_BIN,'/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser'].filter((x,i,a)=>x&&existsSync(x)&&a.indexOf(x)===i);
 const observations=[];
 const mem={freeBefore:freemem(),total:totalmem()};
-function stop(child){try{if(child.pid)process.kill(-child.pid,'SIGTERM');}catch{try{child.kill('SIGTERM');}catch{}}}
+function hasExited(child){return child.exitCode!==null||child.signalCode!==null;}
+function awaitExit(child,deadlineMs){
+ return new Promise(resolve=>{
+  if(hasExited(child)){resolve(true);return;}
+  let done=false;
+  const finish=ok=>{if(done)return;done=true;clearTimeout(timeout);child.off('exit',onExit);resolve(ok);};
+  const onExit=()=>finish(true);
+  const timeout=setTimeout(()=>finish(false),deadlineMs);
+  child.on('exit',onExit);
+  if(hasExited(child))finish(true);
+ });
+}
+async function stop(child){
+ if(!hasExited(child)){
+  try{if(child.pid)process.kill(-child.pid,'SIGTERM');else child.kill('SIGTERM');}
+  catch{try{child.kill('SIGTERM');}catch{}}
+  if(!(await awaitExit(child,3000))){
+   try{if(child.pid)process.kill(-child.pid,'SIGKILL');else child.kill('SIGKILL');}
+   catch{try{child.kill('SIGKILL');}catch{}}
+   if(!(await awaitExit(child,5000)))throw Error('Real Chromium health probe process did not exit after SIGKILL');
+  }
+ }
+}
 async function probe(binary){
  const profile=mkdtempSync(join(tmpdir(),'mythwrought-rc4b-real-cdp-probe-'));
  const version=spawnSync(binary,['--version'],{encoding:'utf8',timeout:10000});
@@ -41,7 +64,12 @@ async function probe(binary){
    if(child.exitCode!==null){reason='real-Chromium-exit-'+child.exitCode;break;}
    await sleep(100);
   }
- }finally{stop(child);await sleep(200);rmSync(profile,{recursive:true,force:true,maxRetries:15,retryDelay:100});}
+  }finally{
+  // Actual real Chromium must exit BEFORE deleting its profile. This is only
+  // lifecycle cleanup: never skip the original unchanged Chromium test.
+  await stop(child);
+  await rm(profile,{recursive:true,force:true,maxRetries:60,retryDelay:250});
+ }
  return {binary,version:(version.stdout||version.stderr||'').trim(),success:port!==null,reason,stdout,stderr,freeAfter:freemem()};
 }
 for(const bin of candidates){const result=await probe(bin);observations.push(result);console.log(JSON.stringify({chromiumDiagnostic:result}));if(result.success){
