@@ -245,9 +245,10 @@ function start(){
   const name=chunkKey;
   const player=newPlayer(world);
   let mobSession=null,mobRenderer=null,mobEnvironment=null,mobLastSave=0;
-  let mobAcceptanceFrozen=false,mobAcceptanceHidden=false;
+  let mobAcceptanceFrozen=false,mobAcceptanceHidden=false,mobRuntimeError=null;
   function resetLiveMobSession(){
     mobSession?.dispose();mobSession=null;mobEnvironment=null;
+    mobRuntimeError=null;mobAcceptanceFrozen=false;mobAcceptanceHidden=false;
     try{
       mobSession=createLiveMobSession({
         world,seed:world.seed,storage:localStorage,
@@ -289,8 +290,11 @@ function start(){
   }
   function restartMobRenderer(){
     if(mobRenderer){mobRenderer.dispose();mobRenderer=null;}
-    try{mobRenderer=createLiveMobRenderer(gl);}
-    catch(error){console.error('MYTHWROUGHT MOB GPU UNAVAILABLE',error);}
+    try{mobRenderer=createLiveMobRenderer(gl);mobRuntimeError=null;}
+    catch(error){
+      mobRuntimeError='WebGL2 creature renderer unavailable';
+      console.error('MYTHWROUGHT MOB GPU UNAVAILABLE',error);
+    }
   }
   resetLiveMobSession();
   restartMobRenderer();
@@ -304,12 +308,13 @@ function start(){
   help.querySelector('.helpbody')?.append(mobActions);
   const mobInfo=mobActions.querySelector('#mobInfo');
   mobActions.querySelector('#mobInteract').onclick=()=>{
-    const result=mobSession?.interact()??'Creature runtime not available';
+    const result=mobRuntimeError||!mobRenderer?'Creature simulation paused for GPU safety':
+      mobSession?.interact()??'Creature runtime not available';
     mobInfo.textContent=result;mobSession?.save();message(result);
   };
   mobActions.querySelector('#mobStatus').onclick=()=>{
     const state=mobSession?.status();
-    mobInfo.textContent=state?
+    mobInfo.textContent=mobRuntimeError?'Creature system paused: '+mobRuntimeError:state?
       '40 authored species · '+state.counts.total+' present · '+state.counts.awake+
         ' active · '+state.companions+' companions · health '+Math.ceil(state.health)+
         '/100'+(state.readonly?' · protected read-only save':''):
@@ -834,7 +839,7 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
-    if(mode==='mine'){
+    if(mode==='mine'&&mobRenderer&&!mobRuntimeError){
       const hit=mobSession?.attack(eye(),facing());
       if(hit){mobSession.save();message('Hit '+hit.name+' · '+
         (hit.downed?'downed':Math.ceil(hit.health)+' health'));return;}
@@ -1168,7 +1173,9 @@ function start(){
       }
       stream();
       mobEnvironment=atmosphere;
-      if(help.hidden&&!exploration.isOpen()&&mobSession&&!mobAcceptanceFrozen){
+      if(help.hidden&&!exploration.isOpen()&&mobSession&&mobRenderer&&
+         !mobAcceptanceFrozen&&!mobRuntimeError){
+        try{
         const section=sectionForY(Math.floor(player.feet))??0;
         const regions=[...chunks.values()].filter(c=>c.section===section)
           .sort((a,b)=>(a.x*16+8-player.x)**2+(a.z*16+8-player.z)**2-
@@ -1176,6 +1183,11 @@ function start(){
           .slice(0,32).map(c=>({cx:c.x,cz:c.z,section:c.section,feet:player.feet}));
         mobSession.advance(dt,regions);
         if(now-mobLastSave>12000){mobSession.save();mobLastSave=now;}
+        }catch(error){
+          mobRuntimeError=String(error?.message||error);
+          console.error('MYTHWROUGHT CREATURE SIMULATION PAUSED',error);
+          message('Creatures paused safely · terrain and saved world remain active');
+        }
       }
       const c6Far=caveFarGpu?.step({world,player,nearChunks:chunks,
         nearPending:pending,frame,viewport:[w,h],enabled:!!caveSession})??
@@ -1246,7 +1258,8 @@ function start(){
         canvas.dataset.pack5BudgetExcluded='0';
       }
       // Real depth-tested 40-model instancing, inside the existing WebGL pass.
-      if(mobRenderer&&mobSession){
+      if(mobRenderer&&mobSession&&!mobRuntimeError){
+        try{
         const mobDraw=mobRenderer.render(mobAcceptanceHidden?[]:mobSession.drawEntities(),{
           eye:eye(),forward:facing(),
           right:[-Math.cos(player.yaw),0,Math.sin(player.yaw)],
@@ -1260,6 +1273,13 @@ function start(){
         canvas.dataset.mobTotal=String(mobSession.status().counts.total);
         canvas.dataset.mobHealth=String(mobSession.status().health);
         canvas.dataset.mobSpecies='40';
+        }catch(error){
+          mobRuntimeError=String(error?.message||error);
+          console.error('MYTHWROUGHT CREATURE GPU PAUSED',error);
+          message('Creature rendering paused safely · original terrain remains playable');
+          canvas.dataset.mobActors='0';canvas.dataset.mobDrawCalls='0';
+          canvas.dataset.mobSpecies='0';
+        }
       }else{
         canvas.dataset.mobActors='0';canvas.dataset.mobTotal='0';
         canvas.dataset.mobDrawCalls='0';canvas.dataset.mobSpecies='0';
@@ -2946,7 +2966,7 @@ function start(){
         // Localhost ONLY. Real game GPU, voxel collision and camera; no fake
         // models, fabricated blocks, offscreen canvas or save mutations.
         const species=getSpecies(speciesId);
-        if(!species||!mobSession||mobSession.status().readonly)
+        if(!species||!mobSession||!mobRenderer||mobRuntimeError||mobSession.status().readonly)
           throw Error('Creature fixture requires active, healthy live game');
         mobAcceptanceFrozen=true;mobAcceptanceHidden=false;
         for(const mob of mobSession.engine.all()){
