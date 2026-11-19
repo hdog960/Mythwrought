@@ -10,7 +10,7 @@ test('A2 Wave13 final seven original state/knowledge source candidates render 42
  assert.deepEqual([...new Set(r.results.map(x=>x.viewport.join('x')))],['667x375','844x390','932x430']);
  assert.equal(r.distinctScreenHashes,42);
  assert.ok(r.results.every(x=>x.drawCalls>0&&x.drawnTriangles>100&&x.pngSha256.length===64));
- assert.equal(r.authoredGeneratorGitBlob,'5c6eec5707fad0cb2ba067d72b8f1843c6f36c20');
+ assert.equal(r.authoredGeneratorGitBlob,'55d5a5ccf5d51aba547ca0fd97d24744ded2e3a3');
  assert.equal(r.productionPhysicalFamilyRenderer,false);assert.equal(r.realIphoneTested,false);
  assert.equal(r.creatorArtApproved,false);assert.equal(r.integratedIntoGame,false);
 });
