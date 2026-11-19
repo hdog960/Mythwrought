@@ -1,6 +1,7 @@
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
+import {createCaveFarWallGpu} from './manual-caves/c6-far-wall-gpu.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
@@ -116,6 +117,8 @@ function start(){
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
   const chunks=new Map(),pending=new Map();
+  // Cave-only outer-ring opaque meshes, never scheduled in normal save profiles.
+  const caveFarGpu=createCaveFarWallGpu(gl);
   const name=chunkKey;
   const player=newPlayer(world);
   const manual14Ids=new Set(MANUAL_FIVE_PACK_CATALOG.filter(x=>x.pack===1||x.pack===4).map(x=>x.numericId));
@@ -564,6 +567,7 @@ function start(){
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
+    if(caveSession)caveFarGpu.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
   function refreshPhysicalChunk(x,z,y){
@@ -863,6 +867,16 @@ function start(){
       gl.uniform3fv(U.uFog,DISTANCE_FOG_COLOR);
       gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
       stream();
+      const c6Far=caveFarGpu.step({world,player,nearChunks:chunks,
+        nearPending:pending,frame,viewport:[w,h],enabled:!!caveSession});
+      canvas.dataset.c6FarChunks=String(c6Far.chunks);
+      canvas.dataset.c6FarBytes=String(c6Far.bytes);
+      canvas.dataset.c6FarPending=String(c6Far.pending);
+      canvas.dataset.c6FarUncovered=String(c6Far.uncovered);
+      canvas.dataset.c6FarVertices=String(c6Far.vertices);
+      canvas.dataset.c6FarFailures=String(c6Far.failures);
+      canvas.dataset.c6FarUploads=String(c6Far.uploads);
+      canvas.dataset.c6FarMeshMs=String(c6Far.lastMeshMs);
       canvas.dataset.renderedFrames=String(frame);
       canvas.dataset.meshCadenceSkipped=String(meshCadence.skipped);
       canvas.dataset.loadedChunks=String(chunks.size);
@@ -893,6 +907,9 @@ function start(){
         gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
       }
+      // Original source-composed far-rock opaque pass: same terrain shader,
+      // depth buffer and fog, before the existing transparent-water draw.
+      canvas.dataset.c6FarDrawn=String(caveFarGpu.draw({atPos,atColor,atUv,atMat}));
       // Pack 5 uses the EXISTING game terrain program and fog, exactly one
       // optional shaped-triangle draw, with bounded GPU memory and streaming.
       if(pack5Gpu){
@@ -2231,6 +2248,7 @@ function start(){
     e.preventDefault();
     if(graphicsLost)return;
     graphicsLost=true;graphicsLossCount++;
+    caveFarGpu.resetForLostContext();
     pack5Gpu?.invalidate();
     frameDriver.pause();cancelAllPointers();
     frameHistory.frame(performance.now(),false);
@@ -2244,6 +2262,7 @@ function start(){
       initializeGpuPipeline();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
       chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
+      caveFarGpu.resetForLostContext();
       pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
       outlineKey='';outlineCount=0;lastTargetText='';
@@ -2259,6 +2278,8 @@ function start(){
     }
   });
   window.addEventListener('pagehide',()=>{
+    if(graphicsLost)caveFarGpu.resetForLostContext();
+    else caveFarGpu.invalidate();
     frameDriver.pause();
     frameHistory.frame(performance.now(),false);
     cancelAllPointers();
