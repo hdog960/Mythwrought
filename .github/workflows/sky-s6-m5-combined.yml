@@ -44,7 +44,7 @@ jobs:
             "src/sky-v6-adapter.mjs:ed327fdf311ef1cb35b05f730521c66b745b221d" \
             "tests/sky-v6-adapter.test.mjs:348b97ec203c4a8c1fdfabc74dc142135f63de44" \
             "scripts/ci/sky-s6-v6-live-webgl2.mjs:b37c6bd2ee0f41823bffd6c1f7412385d2d7340d" \
-            "tests/sky/s6-v6-paired-benchmark.mjs:055c0033de7e04720746976a03ec290ce002038e"; do
+            "tests/sky/s6-v6-paired-benchmark.mjs:fb2dba6808dc45e452153535f935fcccd443741d"; do
             path="${check%%:*}"; expected="${check#*:}"
             test "$(git rev-parse HEAD:"$path")" = "$expected" || { echo "REVIEWED V6 + S6 SOURCE CHANGED $path"; exit 1; }
           done

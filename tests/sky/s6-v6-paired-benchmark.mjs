@@ -18,6 +18,10 @@ async function sample(source,width,height){
   const context=await browser.newContext({viewport:{width,height},
     deviceScaleFactor:1,isMobile:true,hasTouch:true});
   const page=await context.newPage(),errors=[],missing=[];
+  // The genuine V6 unused-seed creation button requires user confirmation.
+  // Playwright dismisses dialogs by default; explicitly accept this test-only
+  // world creation just as the protected original V6 real-game runner does.
+  page.on('dialog',dialog=>dialog.accept());
   page.on('pageerror',e=>errors.push(e.message));
   page.on('response',r=>{if(r.status()>=400)missing.push(r.status()+' '+r.url());});
   try{
