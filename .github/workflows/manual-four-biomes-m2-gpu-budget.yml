@@ -1,0 +1,25 @@
+name: Manual Four-Biome M2 GPU Budget (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/manual-biomes/**'
+      - 'src/main.mjs'
+      - 'tests/manual-four-biomes-m2-mesh-budget.test.mjs'
+      - '.github/workflows/manual-four-biomes-m2-gpu-budget.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-voxel-chunk-budget:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check source-authentic four-biome chunks against production upload cap
+        run: node --test tests/manual-four-biomes-m2-mesh-budget.test.mjs

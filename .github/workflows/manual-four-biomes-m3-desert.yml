@@ -1,0 +1,45 @@
+name: Manual Four-Biome M3 Real Desert Acceptance (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/manual-biomes/**'
+      - 'scripts/ci/manual-biomes-m3-desert-live-webgl2.mjs'
+      - 'tests/manual-biomes/desert-m3.test.mjs'
+      - 'tests/manual-four-biomes-m3-desert.test.mjs'
+      - '.github/workflows/manual-four-biomes-m3-desert.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authentic-desert-slice:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm exact source syntax
+        run: |
+          node --check src/manual-biomes/desert-m3.mjs
+          node --check src/manual-biomes/profile-world.mjs
+          node --check scripts/ci/manual-biomes-m3-desert-live-webgl2.mjs
+      - name: Run dedicated source/authentic physical Desert native acceptance
+        run: node --test tests/manual-biomes/desert-m3.test.mjs
+      - name: Install pinned genuine Chromium browser tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Execute REAL game crosswind dunes, transition and mined cutaway at all 3 sizes
+        run: node scripts/ci/manual-biomes-m3-desert-live-webgl2.mjs
+      - name: Preserve genuine source-specific screenshots, hashes, and failure manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-manual-m3-desert-real-chromium
+          path: artifacts/manual-biomes-m3-desert/
+          if-no-files-found: warn
+          retention-days: 14

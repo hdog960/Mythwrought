@@ -1,0 +1,60 @@
+name: Manual Four-Biome M5 Real Offline PWA Chromium (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'sw-m5.js'
+      - 'src/main.mjs'
+      - 'src/manual-biomes/m5-offline-registration.mjs'
+      - 'src/manual-biomes/**'
+      - 'scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs'
+      - '.github/workflows/manual-four-biomes-m5-offline-pwa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  opt-in-v5-offline-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: ['667x375', '844x390', '932x430']
+    env:
+      M5_VIEWPORT: ${{ matrix.viewport }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate exact-source M5 offline registration and browser script
+        run: |
+          node --check sw-m5.js
+          node --check src/main.mjs
+          node --check src/manual-biomes/m5-offline-registration.mjs
+          node --check scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs
+          if grep -En '(test[.]teleport|__mythwroughtTest[.]teleport|setOrientation[(]|aimAt[(]|Object[.]assign[(]player|Date[.]now[ ]*=)' scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs; then
+            echo 'FAIL: test contains forbidden artificial movement or injected clocks'
+            exit 1
+          fi
+      - name: Preserve source-exact default v4 and historical profile safety
+        run: |
+          node --test tests/manual-biomes/m5-explicit-v5-activation.test.mjs
+          node --test tests/manual-biomes/m5-mountain-pass-v5.test.mjs
+          node --test tests/manual-four-biomes-m5-exploration.test.mjs
+      - name: Install pinned real Chromium with software WebGL2
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Install M5-only cache online then run actual network-disabled Chromium
+        run: node scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs
+      - name: Preserve genuine offline screenshots, hashes, manifests and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-m5-offline-pwa-${{ matrix.viewport }}
+          path: artifacts/m5-offline-${{ matrix.viewport }}/
+          if-no-files-found: warn
+          retention-days: 14

@@ -1,0 +1,48 @@
+name: Manual Four-Biome M3 Depth and Creative Regression (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/manual-biomes/**'
+      - 'tests/manual-biomes/desert-m3.test.mjs'
+      - 'tests/manual-four-biomes-m3-desert.test.mjs'
+      - 'scripts/ci/manual-biomes-m3-desert-live-webgl2.mjs'
+      - '.github/workflows/manual-four-biomes-m3-depth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-desert-depth-creative:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Full native including exact depth and Creative flight safety
+        run: |
+          node --check src/depth.mjs
+          node --check src/depth-mesh.mjs
+          node --check src/voxel.mjs
+          node --check src/main.mjs
+          node --check tests/depth-browser.mjs
+          npm test
+      - name: Install pinned genuine depth browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Actual deep-world game WebGL2 at all iPhone landscapes
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-m3-depth-site.log 2>&1 &
+          node tests/depth-browser.mjs
+      - name: Preserve real depth screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-manual-m3-desert-depth-screenshots
+          path: artifacts/mythwrought-depth-*.png
+          if-no-files-found: ignore
+          retention-days: 14

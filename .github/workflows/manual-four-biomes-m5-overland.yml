@@ -1,0 +1,44 @@
+name: Manual Four-Biome M5 Natural On-Foot Route Hard Gate (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/manual-biomes/overland-walk-m5.mjs'
+      - 'src/manual-biomes/exploration-ink.mjs'
+      - 'src/exploration-map.mjs'
+      - 'scripts/ci/manual-biomes-m5-overland-audit.mjs'
+      - 'tests/manual-biomes/m5-natural-overland.test.mjs'
+      - 'tests/manual-four-biomes-m5-exploration.test.mjs'
+      - '.github/workflows/manual-four-biomes-m5-overland.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-four-region-walk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate M5 physical route and fog modules
+        run: |
+          node --check src/manual-biomes/overland-walk-m5.mjs
+          node --check src/manual-biomes/exploration-ink.mjs
+          node --check src/exploration-map.mjs
+          node --check scripts/ci/manual-biomes-m5-overland-audit.mjs
+      - name: Source physical path + fog unit tests
+        run: node --test tests/manual-biomes/m5-natural-overland.test.mjs
+      - name: Hard route gate: ACTUAL spawn to all four region interiors
+        run: node scripts/ci/manual-biomes-m5-overland-audit.mjs
+      - name: Preserve successful AND failing route evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-m5-real-four-region-overland-audit
+          path: artifacts/manual-biomes-m5-route/
+          if-no-files-found: warn
+          retention-days: 14
