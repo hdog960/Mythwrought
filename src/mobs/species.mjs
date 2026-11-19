@@ -117,54 +117,55 @@ export function normalizeSpecies(input) {
 
 // Profile values are provisional gameplay parameters for the isolated foundation.
 const passive = [
-  ['Cow', 'meadow forest', .47, 1.45, 31, 1.4, 'herd', 'walk', true, true],
-  ['Sheep', 'meadow alpine', .33, 1.02, 22, 1.5, 'herd', 'walk', true, true],
-  ['Pig', 'meadow forest', .34, .90, 23, 1.5, 'herd', 'walk', true, false],
-  ['Chicken', 'meadow forest', .18, .49, 8, 1.7, 'herd', 'walk', true, false, false, 'biped'],
-  ['Horse', 'meadow alpine', .48, 1.72, 42, 2.5, 'herd', 'walk jump', true, true, true],
-  ['Deer', 'forest meadow', .38, 1.46, 26, 2.65, 'herd', 'walk', true, true],
-  ['Rabbit', 'meadow forest', .17, .38, 7, 2.4, 'pair', 'walk jump', true, true],
-  ['Fox', 'forest snow', .24, .62, 15, 2.65, 'pair', 'walk jump', true, false],
-  ['Mountain Goat', 'alpine snow', .30, .97, 24, 1.9, 'herd', 'walk climb', true, true],
-  ['Wolf', 'forest snow', .34, .82, 26, 2.5, 'pack', 'walk jump', true, false],
-  ['Duskhorn', 'forest meadow', .43, 1.58, 35, 1.9, 'herd', 'walk', true, true],
-  ['Moonmoth', 'forest cave', .16, .25, 6, 1.5, 'pair', 'fly', false, false],
-  ['Glassback', 'desert cave', .38, .74, 29, 1.1, 'solitary', 'walk crawl', false, false],
-  ['Frosthorn', 'snow alpine', .53, 1.73, 42, 1.55, 'herd', 'walk', true, true],
-  ['Mossback', 'wetland forest', .50, .83, 36, .85, 'pair', 'walk swim', false, true],
-  ['Sunskipper', 'meadow desert', .22, .46, 10, 2.8, 'pair', 'walk jump', true, false],
-  ['Cloudfinch', 'alpine forest', .15, .31, 7, 2.15, 'herd', 'fly', false, false],
-  ['Glownewt', 'cave wetland', .22, .38, 18, 1.95, 'pair', 'walk', false, false, false, 'crawler'],
-  ['Reedwhisker', 'wetland', .25, .48, 16, 1.8, 'pair', 'walk swim', true, false],
-  ['Emberwing', 'volcanic alpine', .24, .51, 18, 2.1, 'pair', 'fly', false, false]
+  ['cow', 'Cow', 'meadow forest', .47, 1.45, 31, 1.4, 'herd', 'walk', true, true],
+  ['sheep', 'Sheep', 'meadow alpine', .33, 1.02, 22, 1.5, 'herd', 'walk', true, true],
+  ['pig', 'Pig', 'meadow forest', .34, .90, 23, 1.5, 'herd', 'walk', true, false],
+  ['chicken', 'Chicken', 'meadow forest', .18, .49, 8, 1.7, 'herd', 'walk', true, false, false, 'biped'],
+  ['horse', 'Horse', 'meadow alpine', .48, 1.72, 42, 2.5, 'herd', 'walk jump', true, true, true],
+  ['deer', 'Deer', 'forest meadow', .38, 1.46, 26, 2.65, 'herd', 'walk', true, true],
+  ['rabbit', 'Rabbit', 'meadow forest', .17, .38, 7, 2.4, 'pair', 'walk jump', true, true],
+  ['fox', 'Fox', 'forest snow', .24, .62, 15, 2.65, 'pair', 'walk jump', true, false],
+  ['mountain-goat', 'Mountain Goat', 'alpine snow', .30, .97, 24, 1.9, 'herd', 'walk climb', true, true],
+  ['wolf', 'Wolf', 'forest snow', .34, .82, 26, 2.5, 'pack', 'walk jump', true, false],
+  ['duskhorn', 'Duskhorn', 'forest meadow', .43, 1.58, 35, 1.9, 'herd', 'walk', true, true],
+  ['moonmoth', 'Moonmoth', 'forest cave', .16, .25, 6, 1.5, 'pair', 'fly', false, false],
+  ['glassback', 'Glassback', 'desert cave', .38, .74, 29, 1.1, 'solitary', 'walk crawl', false, false],
+  ['frosthorn', 'Frosthorn', 'snow alpine', .53, 1.73, 42, 1.55, 'herd', 'walk', true, true],
+  ['mossback', 'Mossback', 'wetland forest', .50, .83, 36, .85, 'pair', 'walk swim', false, true],
+  ['sunskipper', 'Sunskipper', 'meadow desert', .22, .46, 10, 2.8, 'pair', 'walk jump', true, false],
+  ['cloudfinch', 'Cloudfinch', 'alpine forest', .15, .31, 7, 2.15, 'herd', 'fly', false, false],
+  ['glownewt', 'Glownewt', 'cave wetland', .22, .38, 18, 1.95, 'pair', 'walk', false, false, false, 'crawler'],
+  ['reedwhisker', 'Reedwhisker', 'wetland', .25, .48, 16, 1.8, 'pair', 'walk swim', true, false],
+  ['emberwing', 'Emberwing', 'volcanic alpine', .24, .51, 18, 2.1, 'pair', 'fly', false, false]
 ];
 
 const hostile = [
-  ['Zombie', 'forest cave', .30, 1.66, 32, 1.25, 'solitary', 'walk', 5],
-  ['Skeleton', 'cave desert', .28, 1.63, 24, 1.55, 'solitary', 'walk', 5],
-  ['Giant Spider', 'cave forest', .46, .68, 24, 2.3, 'solitary', 'walk climb crawl', 6],
-  ['Goblin', 'cave forest', .28, 1.28, 31, 2.05, 'pack', 'walk', 7, ['door']],
-  ['Slime', 'wetland cave', .36, .58, 23, 1.2, 'solitary', 'walk jump', 3],
-  ['Wraith', 'cave snow', .28, 1.57, 26, 1.7, 'solitary', 'fly', 8],
-  ['Troll', 'cave alpine', .59, 2.48, 74, 1.3, 'solitary', 'walk', 13],
-  ['Harpy', 'alpine', .32, 1.35, 28, 2.5, 'pair', 'fly walk', 7],
-  ['Mimic', 'cave', .36, .71, 42, 1.4, 'solitary', 'walk crawl', 10],
-  ['Gargoyle', 'alpine cave', .43, 1.49, 48, 1.3, 'pair', 'fly walk', 9],
-  ['Shardmaw', 'cave', .51, .93, 46, 1.65, 'solitary', 'walk crawl', 9],
-  ['Thornwraith', 'forest', .30, 1.73, 32, 1.5, 'solitary', 'walk', 7],
-  ['Hollowbound', 'cave forest', .36, 1.85, 38, 1.35, 'solitary', 'walk', 8],
-  ['Sandstalker', 'desert', .35, .65, 29, 2.6, 'pair', 'walk crawl', 6],
-  ['Frostwraith', 'snow cave', .30, 1.53, 34, 1.85, 'solitary', 'fly', 8],
-  ['Stoneclaw', 'alpine cave', .44, 1.19, 45, 1.55, 'pair', 'walk climb', 8, ['climb-surface']],
-  ['Gloomcrawler', 'cave', .32, .48, 22, 2.05, 'pack', 'walk climb crawl', 5],
-  ['Ashfang', 'volcanic cave', .37, .83, 37, 2.35, 'pack', 'walk jump', 8],
-  ['Briarlurker', 'forest wetland', .31, .72, 27, 1.85, 'solitary', 'walk crawl', 6],
-  ['Voidmoth', 'cave', .22, .42, 24, 2.05, 'pair', 'fly', 6]
+  ['zombie', 'Zombie', 'forest cave', .30, 1.66, 32, 1.25, 'solitary', 'walk', 5],
+  ['skeleton', 'Skeleton', 'cave desert', .28, 1.63, 24, 1.55, 'solitary', 'walk', 5],
+  ['giant-spider', 'Giant Spider', 'cave forest', .46, .68, 24, 2.3, 'solitary', 'walk climb crawl', 6],
+  ['goblin', 'Goblin', 'cave forest', .28, 1.28, 31, 2.05, 'pack', 'walk', 7, ['door']],
+  ['slime', 'Slime', 'wetland cave', .36, .58, 23, 1.2, 'solitary', 'walk jump', 3],
+  ['wraith', 'Wraith', 'cave snow', .28, 1.57, 26, 1.7, 'solitary', 'fly', 8],
+  ['troll', 'Troll', 'cave alpine', .59, 2.48, 74, 1.3, 'solitary', 'walk', 13],
+  ['harpy', 'Harpy', 'alpine', .32, 1.35, 28, 2.5, 'pair', 'fly walk', 7],
+  ['mimic', 'Mimic', 'cave', .36, .71, 42, 1.4, 'solitary', 'walk crawl', 10],
+  ['gargoyle', 'Gargoyle', 'alpine cave', .43, 1.49, 48, 1.3, 'pair', 'fly walk', 9],
+  ['shardmaw', 'Shardmaw', 'cave', .51, .93, 46, 1.65, 'solitary', 'walk crawl', 9],
+  ['thornwraith', 'Thornwraith', 'forest', .30, 1.73, 32, 1.5, 'solitary', 'walk', 7],
+  ['hollowbound', 'Hollowbound', 'cave forest', .36, 1.85, 38, 1.35, 'solitary', 'walk', 8],
+  ['sandstalker', 'Sandstalker', 'desert', .35, .65, 29, 2.6, 'pair', 'walk crawl', 6],
+  ['frostwraith', 'Frostwraith', 'snow cave', .30, 1.53, 34, 1.85, 'solitary', 'fly', 8],
+  ['stoneclaw', 'Stoneclaw', 'alpine cave', .44, 1.19, 45, 1.55, 'pair', 'walk climb', 8, ['climb-surface']],
+  ['gloomcrawler', 'Gloomcrawler', 'cave', .32, .48, 22, 2.05, 'pack', 'walk climb crawl', 5],
+  ['ashfang', 'Ashfang', 'volcanic cave', .37, .83, 37, 2.35, 'pack', 'walk jump', 8],
+  ['briarlurker', 'Briarlurker', 'forest wetland', .31, .72, 27, 1.85, 'solitary', 'walk crawl', 6],
+  ['voidmoth', 'Voidmoth', 'cave', .22, .42, 24, 2.05, 'pair', 'fly', 6]
 ];
 
-function baseProfile(row, classification, index) {
-  const [displayName, habitatTags, radius, height, health, speed, social, modes] = row;
-  const id = displayName.toLowerCase().replaceAll(' ', '-');
+function baseProfile({
+  id, displayName, habitatTags, radius, height, health, speed, social, modes,
+  canBreed = false, grazes = false, rides = false, damage = 0, permissions = [], animation
+}, classification, index) {
   const isHostile = classification === 'hostile';
   const canBond = id === 'glownewt';
   const model = ['deer', 'goblin', 'glownewt'].includes(id) ? id : 'unassigned';
@@ -172,10 +173,10 @@ function baseProfile(row, classification, index) {
   const capabilities = modes.split(' ');
   const cave = habitatBiomes.includes('cave');
   const grouped = social === 'herd' || social === 'pack';
-  const animation = capabilities.includes('fly') ?
+  const animationStyle = animation ?? (capabilities.includes('fly') ?
     (id.endsWith('wraith') ? 'floating' : 'winged') :
     (isHostile ? (capabilities.includes('crawl') ? 'crawler' :
-      (id === 'ashfang' ? 'quadruped' : 'biped')) : (row[11] ?? 'quadruped'));
+      (id === 'ashfang' ? 'quadruped' : 'biped')) : 'quadruped'));
   return normalizeSpecies({
     id, displayName, classification,
     body: { radius, height, collision: 'aabb' },
@@ -186,7 +187,7 @@ function baseProfile(row, classification, index) {
       light: [cave ? 0 : .2, cave && habitatBiomes.length === 1 ? .45 : 1]
     },
     combat: {
-      health, damage: isHostile ? row[8] : canBond ? 2 : 0,
+      health, damage: canBond ? 2 : damage,
       reach: isHostile ? 1.35 : .8, windup: isHostile ? .55 : .4, cooldown: isHostile ? 1.1 : 3
     },
     perception: { sight: isHostile ? 11 : 8, hearing: isHostile ? 8 : 6,
@@ -194,20 +195,27 @@ function baseProfile(row, classification, index) {
     population: { localLimit: grouped ? (isHostile ? 3 : 4) : social === 'pair' ? 2 : 1,
       rarity: index < 10 ? .75 : .35 },
     behavior: { social, territory: isHostile ? 14 : 9,
-      defensive: isHostile || canBond || id === 'wolf', grazes: !isHostile && row[9] },
+      defensive: isHostile || canBond || id === 'wolf', grazes },
     bonding: { eligible: canBond },
-    breeding: { eligible: !isHostile && row[8] },
-    riding: { eligible: !isHostile && (row[10] ?? false) },
-    interactions: isHostile ? (row[9] ?? []) : [],
-    render: { model, animation },
+    breeding: { eligible: canBreed },
+    riding: { eligible: rides },
+    interactions: permissions,
+    render: { model, animation: animationStyle },
     lifecycle: { replenishes: true, persistence: canBond ? 'bonded' : 'transient' },
     implementation: model === 'unassigned' ? 'definition' : 'preview'
   });
 }
 
 export const speciesRegistry = Object.freeze([
-  ...passive.map((row, index) => baseProfile(row, 'passive', index)),
-  ...hostile.map((row, index) => baseProfile(row, 'hostile', index))
+  ...passive.map(([id, displayName, habitatTags, radius, height, health, speed, social, modes,
+    canBreed, grazes, rides, animation], index) => baseProfile({
+    id, displayName, habitatTags, radius, height, health, speed, social, modes,
+    canBreed, grazes, rides, animation
+  }, 'passive', index)),
+  ...hostile.map(([id, displayName, habitatTags, radius, height, health, speed, social, modes,
+    damage, permissions], index) => baseProfile({
+    id, displayName, habitatTags, radius, height, health, speed, social, modes, damage, permissions
+  }, 'hostile', index))
 ]);
 
 const byId = new Map(speciesRegistry.map(entry => [entry.id, entry]));

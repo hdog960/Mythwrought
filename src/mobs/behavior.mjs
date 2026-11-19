@@ -135,6 +135,9 @@ export class BehaviorController {
     if (canSee) {
       memory.lastSeen = [...seen.target.position];
       memory.lost = 0;
+    } else if (seen.heard && territory && distanceTo(seen.heard, mob.origin) <= behavior.territory) {
+      memory.lastSeen = [...seen.heard];
+      memory.lost = 0;
     } else {
       memory.lost += memory.dt;
     }

@@ -13,7 +13,9 @@ function elevation(world, species, from, x, z) {
   const current = from[1];
   const high = current + rise;
   const low = current - .72;
-  if (world.environment([x, current, z]).hazard) return null;
+  const level = [x, current, z];
+  if (world.environment(level).hazard) return null;
+  if (world.grounded(level, body)) return level;
   const highStatus = world.volume([x, high, z], body);
   if (highStatus === 'unknown') return null;
   return supportedPosition(world, x, z, highStatus === 'clear' ? high : current, low, body);
@@ -40,6 +42,18 @@ function transition(world, species, start, end) {
   return Math.abs(previous[1] - end[1]) <= .075;
 }
 
+function flatConnection(world, species, from, to) {
+  const distance = horizontal(from, to);
+  if (distance > 5 || Math.abs(from[1] - to[1]) > .03) return false;
+  const samples = Math.max(1, Math.ceil(distance / .2));
+  for (let i = 1; i <= samples; i++) {
+    const fraction = i / samples;
+    const point = from.map((value, axis) => value + (to[axis] - value) * fraction);
+    if (world.environment(point).hazard || !world.grounded(point, species.body)) return false;
+  }
+  return true;
+}
+
 export function findRoute(world, species, from, target, { quota = 72, radius = 9 } = {}) {
   const maxWork = budgetValue(quota, 72, 128);
   const maxRadius = budgetValue(radius, 9, 14);
@@ -49,6 +63,8 @@ export function findRoute(world, species, from, target, { quota = 72, radius = 9
       !world.grounded(from, species.body) || !world.residentAt(target) ||
       world.environment(target).hazard || horizontal(from, target) > maxRadius)
     return failure('unreachable');
+  if (flatConnection(world, species, from, target))
+    return { status: 'complete', nodes: [[...target]], work: 1 };
   const heuristic = point => horizontal(point, target) + Math.abs(point[1] - target[1]) * .3;
   const first = { point: [...from], cost: 0, score: heuristic(from), previous: null };
   const open = [first];

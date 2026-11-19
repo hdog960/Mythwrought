@@ -1,0 +1,34 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  color: #eee7d4;
+  background: #18211f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr) clamp(225px, 31vw, 320px); }
+.stage { position: relative; min-height: 100dvh; overflow: hidden; background: #4a6361; }
+canvas { position: absolute; width: 100%; height: 100%; display: block; }
+header { position: absolute; top: max(14px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); pointer-events: none; text-shadow: 0 2px 6px #101715; }
+header p { margin: 0; font-size: .63rem; font-weight: 700; letter-spacing: .28em; color: #ffddb0; }
+h1 { font: 500 clamp(1.2rem, 3vw, 2rem) Georgia, serif; margin: .2rem 0 0; }
+#graphics { position: absolute; bottom: 0; left: 14px; background: #18211f; border-radius: 5px; padding: .35rem .55rem; font-size: .8rem; }
+#graphics:empty, #feedback:empty { display: none; }
+aside { padding: max(14px, env(safe-area-inset-top)) max(13px, env(safe-area-inset-right)) 12px 13px; border-left: 1px solid #495450; }
+h2 { font: 500 1.33rem Georgia, serif; margin: 0 0 .7rem; }
+nav, #actions { display: flex; flex-wrap: wrap; gap: .38rem; }
+button { border: 1px solid #59645b; background: #283632; color: inherit; border-radius: 6px; padding: .28rem .5rem; min-height: 36px; font: inherit; font-size: .76rem; cursor: pointer; touch-action: manipulation; }
+button:hover, button:focus-visible { border-color: #f2cc8c; }
+button[aria-pressed="true"] { background: #e6c28a; color: #1e241e; border-color: #e6c28a; font-weight: 700; }
+.readout { display: flex; flex-wrap: wrap; align-items: center; gap: .38rem .5rem; padding: .68rem 0; margin: .62rem 0 .55rem; border-block: 1px solid #45534c; }
+#state { color: #c6e5c0; font-size: .77rem; }
+#health, #feedback, details { color: #bec9be; font-size: .75rem; }
+#feedback { margin: .55rem 0; }
+details { margin-top: .55rem; }
+summary { cursor: pointer; }
+output { display: block; margin-top: .35rem; font-variant-numeric: tabular-nums; }
+@media (orientation: portrait) {
+  main { grid-template-columns: 1fr; }
+  .stage { min-height: 57dvh; }
+  aside { border-left: none; border-top: 1px solid #495450; }
+}

@@ -152,9 +152,11 @@ export class MobEngine {
           this.transition(mob.id, 'dormant');
           continue;
         }
-        const heading = controller?.(snapshot(mob), FIXED_STEP);
+        const command = controller?.(snapshot(mob), FIXED_STEP);
+        const heading = Array.isArray(command) && command.length === 2 &&
+          command.every(Number.isFinite) ? command : [0, 0];
         if (awake.has(mob.state) && this.#entities.get(mob.id) === mob) {
-          const state = heading?.some?.(value => Number.isFinite(value) && value !== 0) ? 'active' : 'idle';
+          const state = heading.some(Boolean) ? 'active' : 'idle';
           if (state !== mob.state) this.transition(mob.id, state);
           moveBody(this.#world, mob, heading, FIXED_STEP);
         }

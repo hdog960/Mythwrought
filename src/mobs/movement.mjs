@@ -43,8 +43,7 @@ function attemptAxis(world, mob, axis, displacement) {
 }
 
 export function moveBody(world, mob, heading, dt) {
-  const [dx, dz] = Array.isArray(heading) && heading.length === 2 &&
-    heading.every(Number.isFinite) ? heading : [0, 0];
+  const [dx, dz] = heading;
   const magnitude = Math.hypot(dx, dz);
   const speed = mob.species.movement.speed;
   const scale = Number.isFinite(magnitude) ? speed / Math.max(1, magnitude) : 0;

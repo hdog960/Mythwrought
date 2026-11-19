@@ -30,7 +30,14 @@ export class CompanionManager {
   }
 
   advance(seconds) {
-    if (Number.isFinite(seconds) && seconds >= 0) this.#time += Math.min(seconds, 4 / 30);
+    if (!Number.isFinite(seconds) || seconds < 0) return;
+    this.#time += Math.min(seconds, 4 / 30);
+    for (const slot of this.#slots.values()) this.#noteDowned(slot);
+  }
+
+  #noteDowned(slot) {
+    if (!slot.rescueAt && this.#engine.get(slot.id)?.state === 'downed')
+      slot.rescueAt = this.#time + 1;
   }
 
   slots() {
@@ -68,13 +75,14 @@ export class CompanionManager {
   hurt(id, amount) {
     const slot = this.#slots.get(id);
     if (!slot || this.#time < slot.immuneUntil || !this.#engine.damage(id, amount)) return false;
-    if (this.#engine.get(id)?.state === 'downed') slot.rescueAt = this.#time + 1;
+    this.#noteDowned(slot);
     return true;
   }
 
   rescue(id, owner) {
     const slot = this.#slots.get(id);
     const mob = this.#engine.get(id);
+    if (slot) this.#noteDowned(slot);
     if (!slot || slot.owner !== owner?.id || mob?.state !== 'downed' ||
         this.#time < slot.rescueAt || !this.#near(mob, owner) ||
         this.#world.environment(mob.position).hazard || !this.#engine.recover(id))
