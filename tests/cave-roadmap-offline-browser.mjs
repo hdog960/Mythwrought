@@ -61,12 +61,12 @@ try{
   new URL('./index.html',location.href))));
  assert.equal(indexedShell,true,'Offline startup requires the saved real index.html shell');
 
- assert.equal(verified.count,233,'Cave + accepted-biome source must include all 233 exact cached assets');
- assert.equal(verified.cacheRevision,'3de4702abd2a7821',
+ assert.equal(verified.count,234,'Cave + accepted-biome + approved recorder must include all 234 exact cached assets');
+ assert.equal(verified.cacheRevision,'7d555354da89e613',
    'A stale offline worker must not impersonate the exact cave source');
  assert.equal(verified.verifiedBlobs,verified.count-2,
    'Every external static source blob must be SHA-1 Git-verified before offline approval');
- assert.equal(verified.sourceHead,'3de4702abd2a78217947733c956be85b0106cb33',
+ assert.equal(verified.sourceHead,'7d555354da89e6138245109fb37bcca8d54dee05',
    'Recorded offline source identity must be the immutable staging snapshot');
  const sourceCached=await page.evaluate(async()=>Boolean(await caches.match(
    new URL('./src/manual-caves/cave-voxel-world.mjs',location.href))));
@@ -88,6 +88,9 @@ try{
  assert.ok(newBiomeSource.every(x=>x.present),
   'Merged biome source missing from genuine cave offline-ready cache: '+
   JSON.stringify(newBiomeSource));
+ const recorderCached=await page.evaluate(async()=>Boolean(await caches.match(
+  new URL('./src/gameplay-recorder.mjs',location.href))));
+ assert.equal(recorderCached,true,'Approved gameplay recorder source missing from complete Cave World offline cache');
  await ctx.setOffline(true);
  await page.reload({waitUntil:'domcontentloaded',timeout:45000});
  await page.waitForFunction(()=>window.__mythwroughtTest &&

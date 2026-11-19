@@ -1,7 +1,7 @@
 {
   "kind": "MYTHWROUGHT_CAVE_SOURCE_ASSETS_V1",
-  "sourceHead": "3de4702abd2a78217947733c956be85b0106cb33",
-  "cacheRevision": "3de4702abd2a7821",
+  "sourceHead": "7d555354da89e6138245109fb37bcca8d54dee05",
+  "cacheRevision": "7d555354da89e613",
   "verification": "Git blob SHA-1 of source bytes: SHA1('blob '+byteLength+'\\0'+contents)",
   "assets": [
     "assets/icon.svg",
@@ -154,6 +154,7 @@
     "src/exploration-map.mjs",
     "src/fallen-giant.mjs",
     "src/foreground.mjs",
+    "src/gameplay-recorder.mjs",
     "src/gpu-pipeline.mjs",
     "src/gpu-recovery.mjs",
     "src/grotto.mjs",
@@ -240,7 +241,7 @@
   ],
   "sourceBlobSha1": {
     "assets/icon.svg": "a6fcfab8c084be3b4fa0db66bea8215f0921eaae",
-    "index.html": "b815f3557b2bd14bfefaf51f66991bfeaaef3059",
+    "index.html": "95e5871b5b2f5b95935fa51eda162b14368742d5",
     "manifest.webmanifest": "2e31d164776d4835cf82db5f2c348df35236bef4",
     "src/auto-block-catalog/biome130/ancient-ruin-details.mjs": "74a1efc8e9f6f0df3b4066e1a092c971c61f3841",
     "src/auto-block-catalog/biome130/ancient-ruin-foundations.mjs": "a4b341b609e0732a3746c50258a59903e90f5bf9",
@@ -387,6 +388,7 @@
     "src/exploration-map.mjs": "a07775a24b5fd59fafa1df42a861da47ead1de18",
     "src/fallen-giant.mjs": "6d19fda8f54a084db4303207b26f980d2bfd2b1f",
     "src/foreground.mjs": "9d0245765d65b8ee9f892612e055a017c1f08bdf",
+    "src/gameplay-recorder.mjs": "f224d611b82a526bf7fc2d5e8173b49a71184a1b",
     "src/gpu-pipeline.mjs": "35ff1b9f5907bebdcbe4a822a9ed181d85509df1",
     "src/gpu-recovery.mjs": "422ef73e383bda78ff94607abb858e3c8a57c2d1",
     "src/grotto.mjs": "0b7187147875fe99278dad3d235e33873ee79438",
@@ -395,7 +397,7 @@
     "src/interactions/shape-edit-transaction.mjs": "cb879fa96853d3927d7a7962921a0714a352793e",
     "src/layout.mjs": "8496e32da3422ad591c92f80a4f0113ca68c2749",
     "src/live-voxel-world.mjs": "aa274dfc5752c566cfd671e297aa8bc1b6b32d83",
-    "src/main.mjs": "7c8fa819f47900c06f3ff55fa2e8eeaca849ffd0",
+    "src/main.mjs": "3b17aae25dd1a1b2d8ffd9ae3cf2d1c8aef7b398",
     "src/manual-biomes/desert-m3.mjs": "536d6c4a488eaa8f0ecc2ade81b34804650ba351",
     "src/manual-biomes/exploration-ink.mjs": "3bd72f2db6a4bce392ab493a4df29b590ff8f289",
     "src/manual-biomes/m2-runtime-bridge.mjs": "59b9db31999d2c4b05fb5a1d26ff915048a2f595",
@@ -468,7 +470,7 @@
     "src/voxel.mjs": "aac71e010babc7cc71979c7badedccd396950ae4",
     "src/west-gallery-world.mjs": "b074e0caeb916003840c5c3b12a8af884c94e5a1",
     "src/world-atmosphere/canopy-bridges.mjs": "0825f5572c5991fac173555c38bd241524884383",
-    "styles.css": "6f6ce70a4fb78454269065694b667bf7f2804a6d",
-    "sw-m5.js": "082cc14e5216b0a7a861133228a42c7f4b673a08"
+    "styles.css": "a994c1f7346e23d5fd0f1b3e5089a2c497d0be12",
+    "sw-m5.js": "2a3572446998cf941b8a773d06e5b650324a8aea"
   }
 }
