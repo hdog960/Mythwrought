@@ -11,7 +11,7 @@ function ray(obj){
   const n=[u[1]*w[2]-u[2]*w[1],u[2]*w[0]-u[0]*w[2],u[0]*w[1]-u[1]*w[0]];
   const len=Math.hypot(...n);if(len<1e-8)continue;
   const direction=n.map(x=>-x/len);
-  return {origin:[0,1,2].map(k=>(v[0][k]+v[1][k]+v[2][k])/3-n[k]/len*.1),direction};
+  return {origin:[0,1,2].map(k=>(v[0][k]+v[1][k]+v[2][k])/3+n[k]/len*.1),direction};
  }
  throw new Error('no pickable triangle');
 }
