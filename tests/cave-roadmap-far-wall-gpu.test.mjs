@@ -113,6 +113,47 @@ test('C6 true Rift screen rays select source-authentic upper boundary within fou
   'Rift first-solid lower seam must join without replacing existing roof: '+
   JSON.stringify(plan.selected.map(c=>[c.key,c.seamCompanion?.key])));
 });
+
+test('C6 original Rift two real seam sources upload and draw under 4 GPU buffers / 1 MiB',()=>{
+ const camera={x:159.5,z:210.5,feet:-90.99,
+  yaw:1.8650308919060845,pitch:0.05620218481286228};
+ const viewport=[383,320];
+ // The actual original-game screenshot previously showed 586 sky pixels.
+ // Real rock at x174,-84,187 was omitted from the four GPU buffers.
+ assert.equal(world.get(174,-84,187),BLOCK.DEEPSTONE);
+ const plan=planCaveFarWallSources(world,camera,viewport);
+ assert.equal(plan.joinedSources,1);
+ assert.equal(plan.seamSources,1);
+ assert.ok(plan.selected.some(c=>c.key==='11,12,-6' &&
+  c.companion?.key==='11,12,-5'));
+ assert.ok(plan.selected.some(c=>c.key==='10,11,-5' &&
+  c.seamCompanion?.key==='10,11,-6'));
+ const g=fakeGl(),far=createCaveFarWallGpu(g.gl),near=complete(camera);
+ for(let frame=30;frame<42;frame++){
+  const snapshot=far.step({world,player:camera,nearChunks:near,
+    nearPending:new Map(),frame,viewport,enabled:true});
+  assert.equal(snapshot.failures,0,'Actual Rift rock GPU mesh upload failed');
+  assert.ok(snapshot.bytes<=1048576,'Rift wall exceeds 1MiB GPU budget');
+ }
+ const state=far.stats();
+ assert.equal(state.chunks,plan.selected.length,
+  'Genuine far rock selected by source ray was never uploaded');
+ assert.equal(state.pending,0,'Source rock remains unuploaded');
+ assert.equal(state.budgetExcluded,0,
+  'Mandatory sky-covering rock is silently excluded by GPU budget');
+ assert.equal(state.joinedSources,1);
+ assert.equal(state.seamSources,1);
+ assert.equal(state.sourceSections,state.chunks+2);
+ assert.equal(g.uploaded.length,state.chunks,
+  'A fifth GPU buffer must never be used to mask the leak');
+ assert.ok(g.uploaded.every(n=>n>0&&n%36===0));
+ assert.equal(g.uploaded.reduce((sum,n)=>sum+n,0),state.bytes);
+ assert.ok(state.bytes>0&&state.bytes<=1048576);
+ assert.equal(far.draw({atPos:0,atColor:1,atUv:2,atMat:3}),state.vertices);
+ far.invalidate();
+ assert.equal(far.stats().bytes,0);
+ assert.equal(g.live.size,0);
+});
 test('C6 no GPU allocations in any ordinary world or while near meshes pending',()=>{
  const g=fakeGl(),far=createCaveFarWallGpu(g.gl);
  assert.equal(step(far,fan,{enabled:false}).chunks,0);
