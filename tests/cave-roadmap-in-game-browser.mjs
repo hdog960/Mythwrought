@@ -124,7 +124,11 @@ async function readActualGameFrame(page){
 // Strict test-only C6: never substitutes fake meshes, edits physical caves,
 // hides the sky, or changes shared production renderer budgets.
 async function requireSettledDeepGameFrame(page,shot,viewport){
- const expected=expectedDeepSceneResidency(shot.at);
+ // Only measured original-game physics feet establish the live depth
+ // section. A collider can settle just under a seam (e.g. -19.00001),
+ // even when the protected authored camera request was y=-19.
+ const liveStart=await readActualGameFrame(page);
+ const expected=expectedDeepSceneResidency(shot.at,liveStart?.playerFeet);
  try{
   await page.waitForFunction(expected=>{
    const canvas=document.querySelector('#scene'),v=canvas?.dataset,
