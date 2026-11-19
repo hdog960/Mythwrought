@@ -168,12 +168,13 @@ export function createLiveMobSession({
       lastStored=value;return true;
     }catch(error){readOnly=true;damaged=true;return false;}
   }
+  function revive(){health=100;damageCooldown=2;return health;}
   function status(){return {
     enabled:true,species:LIVE_MOB_COUNT,counts:engine.counts(),
     health,readonly:readOnly,damaged,companions:companions.slots().length,
     gpuSafe:true,elapsed
   };}
   function dispose(){engine.dispose();}
-  return {advance,drawEntities,attack,interact,save,dispose,status,
+  return {advance,drawEntities,attack,interact,save,dispose,status,revive,
     get query(){return query;}, get engine(){return engine;}};
 }
