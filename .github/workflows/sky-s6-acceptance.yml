@@ -60,9 +60,15 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-      - name: True original-game 3-landscape LEGACY no-op, DAY/NIGHT and saves
+      # S1 clock/menu/save regression is run on a fresh original Chromium
+      # context before the long S5/S4/S3 screenshot sequence. Its strict
+      # 25-resident-chunk and schema-1 guards are unchanged.
+      - name: Inherited S1 DAY/NIGHT and schema-1 profile protection
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-s6.log 2>&1 &
+          node tests/sky/s1-clock-browser.mjs
+      - name: True original-game 3-landscape LEGACY no-op, DAY/NIGHT and saves
+        run: |
           node tests/sky/s6-legacy-browser.mjs
       - name: Inherited S5 real rare event and matched no-event Chromium proof
         run: |
@@ -76,9 +82,6 @@ jobs:
       - name: Inherited S2 actual sun/fog and shader original-game regression
         run: |
           node tests/sky/s2-atmosphere-browser.mjs
-      - name: Inherited S1 DAY/NIGHT and schema-1 profile protection
-        run: |
-          node tests/sky/s1-clock-browser.mjs
       - name: S5 vs S6 true legacy same-run ABBA 3-landscape FPS guard
         run: |
           mkdir -p /tmp/mythwrought-s5-exact
