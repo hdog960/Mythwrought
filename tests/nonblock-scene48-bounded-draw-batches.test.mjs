@@ -28,3 +28,15 @@ test('batch triangle cap splits groups without dropping instances',()=>{
  assert.equal(result.batches.length,2);
  assert.deepEqual(result.batches.map(b=>b.triangles),[1,1]);
 });
+
+test('reject invalid namespaces and nonfinite translated vertices before draw preparation',()=>{
+ const a=obj('a','forest:root',[0,0,0]);
+ for(const sceneId of ['', 'forest', 'forest:root:extra', '123', 'forest:Root', null]){
+  assert.throws(()=>prepareNonblockDrawBatches([{...a,sceneId}],view),TypeError);
+ }
+ assert.throws(()=>prepareNonblockDrawBatches([{...a,instanceKey:'x'.repeat(513)}],view),TypeError);
+ const overflow=obj('overflow','forest:root',[Number.MAX_VALUE,0,0]);
+ overflow.mesh={positions:[Number.MAX_VALUE,0,0,0,1,0,0,0,1]};
+ assert.throws(()=>prepareNonblockDrawBatches([overflow],view),TypeError);
+ assert.equal(prepareNonblockDrawBatches([a],view).visibleCount,1);
+});
