@@ -8,19 +8,19 @@ const sha1 = bytes => createHash('sha1').update(Buffer.concat([Buffer.from('blob
 function exportedLiteral(source,name){
  const lines=source.split(/\r?\n/);
  const matches=[];
- const pattern=new RegExp('^\\s*export\\s+const\\s+'+name+'\\s*=\\s*[\\x27\\x22]([^\\x27\\x22\\r\\n]+)[\\x27\\x22]\\s*;?\\s*(?://.*)?$');
+ const pattern=new RegExp('(?:^|;)\\s*export\\s+const\\s+'+name+'\\s*=\\s*[\\x27\\x22]([^\\x27\\x22\\r\\n]+)[\\x27\\x22](?=\\s*(?:;|$))','g');
  for(let i=0;i<lines.length;i++){
   if(/^\s*(?:\/\/|\*|\/\*)/.test(lines[i]))continue;
   const line=lines[i].trim();
   // Multiline declaration support, but never cross a comment or unrelated statement.
-  if(/^export\s+const\s+/.test(line)){
+  if(/^(?:export\s+const\s+|.*;\s*export\s+const\s+)/.test(line)){
    const candidate=[lines[i]];
    for(let j=i+1;j<Math.min(i+5,lines.length)&&!candidate.join(' ').includes(';');j++){
     if(/^\s*(?:\/\/|\/\*|\*)/.test(lines[j]))break;
     candidate.push(lines[j]);
    }
-   const match=pattern.exec(candidate.join(' ').replace(/\s+/g,' '));
-   if(match)matches.push({name:match[1],line:i+1});
+   const joined=candidate.join(' ').replace(/\s+/g,' ');
+   for(const match of joined.matchAll(pattern))matches.push({name:match[1],line:i+1});
   }
  }
  return matches.length===1?matches[0].name:null;
