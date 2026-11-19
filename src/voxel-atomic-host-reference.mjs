@@ -52,6 +52,21 @@ export function createAtomicVoxelHost(initialCells) {
   };
   return Object.freeze({
     read, compareAndWriteMany,
+    // One synchronous snapshot prevents consumers from assembling a receipt
+    // from separately observed revision, orientation and ID reads.
+    snapshotEdit(cell, nextId) {
+      if (!validCell(cell) || !validId(nextId)) throw new TypeError('Invalid edit snapshot');
+      const state = cells.get(key(cell));
+      if (!state) return null;
+      return Object.freeze({
+        cell: Object.freeze(copyCell(state.cell)),
+        expectedId: state.id,
+        expectedRevision: state.revision,
+        expectedOrientationEpoch: state.orientationEpoch,
+        expectedTurn: state.turn,
+        nextId
+      });
+    },
     readOrientationEpoch(cell) {
       if (!validCell(cell)) throw new TypeError('Invalid cell');
       return cells.get(key(cell))?.orientationEpoch ?? null;
