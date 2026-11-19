@@ -4141,4 +4141,4 @@ export function buildA2Wave12StateKnowledge(id){
  return author(PLANS.find(p=>p.id===id));
 }
 export function allA2Wave12StateKnowledge(){return PLANS.map(author);}
-export const A2_WAVE11_STATE_KNOWLEDGE_IDS=Object.freeze(PLANS.map(p=>p.id));
+export const A2_WAVE12_STATE_KNOWLEDGE_IDS=Object.freeze(PLANS.map(p=>p.id));
