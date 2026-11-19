@@ -81,8 +81,8 @@ test('new groves are anchored only to untouched natural grass and edit away reve
   assert.equal(w.set(x,h+2,z,BLOCK.AIR),true);
   assert.deepEqual(grove(w,cx,cz),foliage);
 });
-test('true renderer integrates surface foliage into the existing single chunk mesh',()=>{
-  const w=new VoxelWorld(179),original=JSON.stringify(w.save());
+test('live renderer omits the archived unharvestable meadow, grove, grotto and rune meshes',()=>{
+  const w=new VoxelWorld(179),before=JSON.stringify(w.save());
   const {cx,cz,foliage}=findFirst(w);
   const meadow=meadowAccentVertices(w,cx,cz,{heightAt:terrainHeight});
   const runes=caveRuneVertices(w,cx,cz,{
@@ -93,21 +93,20 @@ test('true renderer integrates surface foliage into the existing single chunk me
     heightAt:terrainHeight,baseAt:baseBlock,
     minY:-3,maxY:19,air:BLOCK.AIR,stone:BLOCK.STONE,ore:BLOCK.ORE
   });
+  assert.ok(foliage.length>0&&meadow.length>0,
+    'archived source references remain available for interactive replacements');
+  assert.equal(runes.length%9,0);assert.equal(grotto.length%9,0);
   const mesh=meshChunk(w,cx,cz);
-  assert.ok(mesh.length>foliage.length+meadow.length,'No real voxel triangles');
-  const groveAt=packedIndex(mesh,foliage);
-  assert.ok(groveAt>=0,'Original grove must be an exact contiguous section of the shared mesh');
-  const meadowAt=packedIndex(mesh,meadow);
-  assert.ok(meadowAt>=0&&meadowAt>groveAt,'Original meadow must follow grove without reordering');
-  if(grotto.length)assert.ok(packedIndex(mesh,grotto)>=0,
-    'Grotto art must remain an exact contiguous section of the shared mesh');
-  assert.equal(JSON.stringify(w.save()),original);
-  // Decorative mesh tags 7/8 now deliberately share numbers with physical
-  // LEAVES/DEEPSTONE block IDs, but solid faces use distinct tags 18/19.
+  assert.ok(mesh.length>0,'real voxel surfaces are still drawn');
+  for(let i=8;i<mesh.length;i+=9)
+    assert.ok(mesh[i]<7||mesh[i]>=18,
+      'non-placeable shader-only object was unexpectedly rendered');
+  assert.equal(JSON.stringify(w.save()),before,
+    'removing fake artwork cannot alter original schema-1 saves');
   assert.deepEqual(GROVE_LIMITS.materialIds,[7,8,9]);
-  assert.equal(w.set(0,15,0,9),false,'Unknown decorative tag must remain unplaceable');
-  assert.equal(w.edits.size,0,'Rendering must not create saved edits');
-  assert.equal(w.set(0,15,0,BLOCK.LEAVES),true);
+  assert.equal(w.set(0,15,0,9),false,'decorative material tags stay non-placeable');
+  assert.equal(w.set(0,15,0,BLOCK.LEAVES),true,
+    'real harvestable leaf block remains placeable');
   assert.equal(VoxelWorld.restore(w.save()).get(0,15,0),BLOCK.LEAVES);
 });
 test('do not create physical scenery in artificial grass or blocked pockets',()=>{
