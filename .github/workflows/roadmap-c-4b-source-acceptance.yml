@@ -74,6 +74,7 @@ jobs:
         index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     env:
       SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      NODE_OPTIONS: '--max-old-space-size=2048'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -82,6 +83,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Prove installed real Chrome DevTools startup before historical test import
+        run: node scripts/ci/roadmap-c-4b/chromium-health.mjs
       - name: One unchanged original Chromium test per independent runner
         run: node scripts/ci/roadmap-c-4b/run-shard.mjs browser "${{ matrix.index }}"
       - uses: actions/upload-artifact@v4
