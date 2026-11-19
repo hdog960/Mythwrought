@@ -21,7 +21,7 @@ def sha(b):return hashlib.sha256(b).hexdigest()
 def digest_file(p):
  with open(p,"rb") as f:return hashlib.sha256(f.read()).hexdigest()
 def png_dimensions(data):
- require(data[:8]==b"\\x89PNG\\r\\n\\x1a\\n","not an actual PNG")
+ require(data[:8]==b"\x89PNG\r\n\x1a\n","not an actual PNG")
  pos=8;idat=[];dims=None;ended=False
  while pos<len(data):
   require(pos+12<=len(data),"truncated PNG chunk")
