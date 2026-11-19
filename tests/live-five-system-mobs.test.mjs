@@ -87,3 +87,28 @@ test('unified V6/Cave biome adapter preserves five source biome identities',()=>
   assert.equal(classifyLiveBiome('plains',-40,true),'cave');
   assert.throws(()=>mobSaveKey(2**33),/int32/);
 });
+
+test('creature occupancy uses original surface section 0 and exact offset deep sections',()=>{
+  const sections=[];
+  const world=new VoxelWorld(1001);
+  const session=createLiveMobSession({
+    world,seed:1001,storage:memoryStorage(),
+    resident:(cx,cz,section)=>{sections.push(section);return true;},
+    biomeAt:()=> 'plains',
+    skyAt:()=>({light:.8,dayPhase:'day'}),
+    caveAt:()=>({underground:true}),
+    playerAt:()=>[0,10,0]
+  });
+  for(const [y,section] of [[19,0],[17,0],[16,0],[0,0],[-3,0],
+    [-4,-1],[-16,-1],[-19,-1],[-20,-2],[-35,-2],[-36,-3]]){
+    sections.length=0;
+    assert.equal(session.query.environment([.5,y,.5]).hazard,false,
+      'valid resident creature section at '+y);
+    assert.equal(session.query.residentAt([.5,y,.5]),true);
+    assert.ok(sections.includes(section),
+      'Y '+y+' must use game depth section '+section+', got '+JSON.stringify(sections));
+    assert.ok(sections.every(value=>value===section),
+      'No false section lookup at Y '+y+': '+JSON.stringify(sections));
+  }
+  session.dispose();
+});

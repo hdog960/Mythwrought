@@ -10,6 +10,7 @@ import {AnimalInteractions} from './animal-interactions.mjs';
 import {PopulationManager} from './ecology.mjs';
 import {serializeRoster,restoreRoster} from './roster-persistence.mjs';
 import {speciesRegistry} from './species.mjs';
+import {sectionForY} from '../depth.mjs';
 
 export const LIVE_MOB_COUNT=40;
 export const LIVE_MOB_ACTIVE_LIMIT=DEFAULT_ACTIVE_MOBS;
@@ -61,8 +62,10 @@ export function createLiveMobSession({
   function queryResident(point){
     if(!Array.isArray(point)||point.length!==3||!point.every(Number.isFinite))return false;
     const x=Math.floor(point[0]/16),z=Math.floor(point[2]/16);
-    const y=Math.floor(point[1]/16);
-    return resident(x,z,y);
+    // Surface section 0 owns EVERY original Y from -3 through +19;
+    // deep sections are offset from -3, not multiples of 16 at origin.
+    const section=sectionForY(Math.floor(point[1]));
+    return section!==null&&resident(x,z,section);
   }
   // Active-world residency is checked by createWorldQuery for every collision
   // and eye ray. No mob can spawn on an unloaded or unknown physical surface.
