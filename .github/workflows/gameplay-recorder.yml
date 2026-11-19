@@ -1,0 +1,45 @@
+name: Gameplay Recorder 10-second genuine WebGL2 acceptance
+on:
+  pull_request:
+    paths:
+      - 'src/gameplay-recorder.mjs'
+      - 'src/main.mjs'
+      - 'index.html'
+      - 'styles.css'
+      - 'sw-m5.js'
+      - 'tests/gameplay-recorder.test.mjs'
+      - 'tests/gameplay-recorder-browser.mjs'
+      - '.github/workflows/gameplay-recorder.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gameplay-recorder:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and isolated native contracts
+        run: |
+          node --check src/gameplay-recorder.mjs
+          node --check src/main.mjs
+          node --test tests/gameplay-recorder.test.mjs
+      - name: Install pinned original-game browser test tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Real WebGL2 three and ten-second video capture
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-recorder.log 2>&1 &
+          node tests/gameplay-recorder-browser.mjs
+      - name: Preserve authentic test images
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-gameplay-recorder-original-game
+          path: artifacts/gameplay-recorder/
+          if-no-files-found: warn
+          retention-days: 14

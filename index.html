@@ -9,7 +9,7 @@
     <button id="precision" class="action precision" aria-label="Hold for precision aiming">HOLD · AIM</button><span class="tiny">WASD · SPACE</span>
   </aside>
   <section class="screen" aria-label="3D world">
-    <header class="bezel"><span>✧</span><b id="compass">N · 000°</b><small id="seed">WORLD 0179</small></header>
+    <header class="bezel"><span>✧</span><b id="compass">N · 000°</b><button id="captureToggle" type="button" class="capture-toggle" aria-pressed="false" aria-label="Record 10 seconds of gameplay">● REC</button><small id="seed">WORLD 0179</small></header>
     <div class="viewport"><canvas id="scene" tabindex="-1" aria-label="Editable voxel world"></canvas><button id="miniMapButton" class="map-button" type="button" aria-label="Open explored world map"><canvas id="miniMap" width="80" height="80" aria-hidden="true"></canvas><span class="map-caption">MAP · TAP</span></button><div id="notice" hidden role="alert"></div></div>
     <footer class="bezel foot"><span id="status" role="status" aria-live="polite">Preparing world…</span><strong>PROTOTYPE v0.09</strong></footer>
   </section>
@@ -21,6 +21,18 @@
     <span class="tiny target-info" id="targetInfo" aria-label="Target and building space">LOOK AT A BLOCK</span>
   </aside>
 </main>
+<div id="capturePanel" hidden role="dialog" aria-modal="true" aria-label="Gameplay recording preview">
+  <section class="capture-dialog">
+    <h2>MYTHWROUGHT · GAMEPLAY CLIP</h2>
+    <p id="captureInfo" role="status" aria-live="polite">Recorded gameplay preview.</p>
+    <video id="capturePreview" controls playsinline muted preload="metadata" hidden aria-label="Recorded Mythwrought gameplay"></video>
+    <div class="capture-actions">
+      <a id="captureSave" class="capture-action" href="#" download hidden>↓ SAVE VIDEO</a>
+      <button id="captureShare" type="button" class="capture-action" disabled>SHARE VIDEO</button>
+      <button id="captureClose" type="button" class="capture-action">CLOSE</button>
+    </div>
+  </section>
+</div>
 <div id="explorationOverlay" hidden role="dialog" aria-modal="true" aria-label="Exploration map"><div class="exploration-panel"><header class="exploration-heading"><strong>✦ THE DISCOVERED WORLD</strong><button type="button" id="closeExploration" aria-label="Close exploration map">✕ CLOSE</button></header><p id="explorationCoordinates" class="map-coordinates">Your position</p><canvas id="expandedMap" width="320" height="320" aria-label="Map of visited locations, drag to pan"></canvas><p id="explorationSummary" class="map-summary" role="status">Unexplored regions remain hidden.</p><nav class="map-controls" aria-label="Map controls"><button type="button" id="mapZoomOut">− ZOOM</button><button type="button" id="mapRecenter">◎ RECENTER</button><button type="button" id="mapZoomIn">+ ZOOM</button></nav></div></div>
 <div id="help" hidden><div class="helpbody"><h1>MYTHWROUGHT</h1><p><b>Engineering prototype:</b> Move with the left pad, look with the right pad, and MINE/PLACE the block in the center of your view. JUMP from the right grip; hold AIM on the left grip for finer looking.</p>
 <section class="looksetting sky-clock-settings" aria-label="Day and night world clock">

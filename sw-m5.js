@@ -3,7 +3,7 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261119-s6-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261119-s6-recorder-v1';
 const SOURCE_ASSETS=[
   "./",
   "./assets/icon.svg",
@@ -153,6 +153,7 @@ const SOURCE_ASSETS=[
   "./src/interactions/shape-edit-transaction.mjs",
   "./src/layout.mjs",
   "./src/live-voxel-world.mjs",
+  "./src/gameplay-recorder.mjs",
   "./src/main.mjs",
   "./src/manual-biomes/desert-m3.mjs",
   "./src/manual-biomes/exploration-ink.mjs",
