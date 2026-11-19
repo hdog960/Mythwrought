@@ -106,7 +106,12 @@ export function createLiveMobSession({
     companions=new CompanionManager(engine,query,combat);
     animals=new AnimalInteractions(engine,query);
   }
-  const ecology=new PopulationManager(engine,query,{seed,species:[...modelIds]});
+  const ecology=new PopulationManager(engine,query,{seed,species:[...modelIds],
+    // Tame ownership persists in the existing per-seed checksummed sidecar.
+    // Protect it from six-second ecology GC without elevating a horse to a
+    // bonded-only MobEngine.important checkpoint bit.
+    isProtected:mob=>animals.isTamed(mob.id,{id:OWNER})
+  });
   const player={
     id:OWNER,height:1.72,threatening:true,
     get position(){return playerAt();},

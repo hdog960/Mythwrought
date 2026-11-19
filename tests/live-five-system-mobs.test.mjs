@@ -242,3 +242,41 @@ test('original voxel gameplay tames, mounts, steers and safely reloads a real ho
   assert.equal(JSON.stringify(world.save()),baseline);
   restored.dispose();
 });
+
+
+test('tamed horse survives unloaded chunks beyond six-second ecology GC and restores exact ownership',()=>{
+  const seed=9921,world=new VoxelWorld(seed),storage=memoryStorage();
+  for(let x=-2;x<=3;x++)for(let z=-2;z<=3;z++){
+    assert.equal(world.set(x,9,z,BLOCK.STONE),true);
+    for(let y=10;y<=15;y++)assert.equal(world.set(x,y,z,BLOCK.AIR),true);
+  }
+  const schema1=JSON.stringify(world.save());
+  let resident=true;
+  const player=[.5,10,.5];
+  const build=()=>createLiveMobSession({
+    world,seed,storage,resident:()=>resident,
+    biomeAt:()=> 'plains',skyAt:()=>({light:.7,dayPhase:'day'}),
+    caveAt:()=>({underground:false}),playerAt:()=>player
+  });
+  const first=build();
+  const id=first.engine.spawn('horse',[.5,10,1.5]);
+  assert.ok(id);
+  assert.match(first.interact(),/Horse tamed/);
+  resident=false;
+  for(let i=0;i<25;i++)first.advance(.5,[]);
+  assert.equal(first.engine.get(id)?.state,'dormant',
+    'Owned horse was removed instead of kept dormant while its chunk was unloaded');
+  assert.equal(first.save(),true);
+  assert.equal(JSON.stringify(world.save()),schema1,
+    'Unloaded owned horse rewrote original voxel schema-1');
+  first.dispose();
+  resident=true;
+  const returned=build();
+  assert.equal(returned.engine.get(id)?.state,'dormant');
+  for(let i=0;i<3;i++)returned.advance(.5,[]);
+  assert.equal(returned.engine.get(id)?.state,'idle');
+  assert.match(returned.toggleMount(),/Mounted Horse/,
+    'Owned horse did not survive sidecar reload at original identity');
+  assert.equal(JSON.stringify(world.save()),schema1);
+  returned.dispose();
+});

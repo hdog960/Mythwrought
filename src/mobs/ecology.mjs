@@ -48,19 +48,27 @@ export class PopulationManager {
   #world;
   #species;
   #seed;
+  #isProtected;
   #cursor = 0;
   #regions = new Map();
   #away = new Map();
   #time = 0;
   #next = INTERVAL;
 
-  constructor(engine, world, { seed = 179, species = implementedIds } = {}) {
-    if (!Number.isSafeInteger(seed) || !Array.isArray(species) ||
+  constructor(engine, world, { seed = 179, species = implementedIds,
+    isProtected = () => false } = {}) {
+    if (typeof isProtected !== 'function' ||
+        !Number.isSafeInteger(seed) || !Array.isArray(species) ||
         !species.length || species.length > 40 || new Set(species).size !== species.length)
       throw new TypeError('Invalid ecology options');
     this.#engine = engine;
     this.#world = world;
     this.#seed = seed;
+    // A tamed horse must be as persistent across chunk unload as a bonded
+    // companion, but its schema-1 engine identity must NOT be forged into
+    // a bonding-only important identity (checkpoint validation rejects that).
+    // The gameplay host supplies the original AnimalInteractions ownership.
+    this.#isProtected = isProtected;
     this.#species = species.map(id => {
       const entry = getSpecies(id);
       if (entry?.implementation !== 'preview') throw new TypeError('Ecology requires an implemented species');
@@ -80,7 +88,10 @@ export class PopulationManager {
         continue;
       }
       if (mob.state === 'active' || mob.state === 'idle') this.#engine.transition(mob.id, 'dormant');
-      if (mob.important) continue;
+      if (mob.important || this.#isProtected(mob)) {
+        this.#away.delete(mob.id);
+        continue;
+      }
       if (!this.#away.has(mob.id)) this.#away.set(mob.id, this.#time);
       if (this.#time - this.#away.get(mob.id) >= GRACE) {
         this.#engine.transition(mob.id, 'removed');
@@ -116,7 +127,8 @@ export class PopulationManager {
     }
     const local = entities.filter(mob => mob.homeChunk === name);
     for (const entry of this.#species) {
-      const count = local.filter(mob => mob.species === entry && !mob.important).length;
+      const count = local.filter(mob => mob.species === entry &&
+        !mob.important && !this.#isProtected(mob)).length;
       if (count < (record.high.get(entry.id) ?? 0))
         record.next = Math.max(record.next, this.#time + REPLENISH);
       record.high.set(entry.id, count);
