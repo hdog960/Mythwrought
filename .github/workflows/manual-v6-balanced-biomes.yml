@@ -1,0 +1,40 @@
+name: Manual V6 Balanced Five-Biome Native Acceptance (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/manual-biomes/v6-balanced-biomes.mjs'
+      - 'src/manual-biomes/profile-world.mjs'
+      - 'src/manual-biomes/desert-m3.mjs'
+      - 'src/manual-biomes/three-regions-m4.mjs'
+      - 'src/surface-regions/regions.mjs'
+      - 'src/manual-biomes/m2-runtime-bridge.mjs'
+      - 'src/main.mjs'
+      - 'tests/manual-biomes/v6-balanced-biomes.test.mjs'
+      - '.github/workflows/manual-v6-balanced-biomes.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  immutable-v6-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify V6 generation and source syntax
+        run: |
+          node --check src/manual-biomes/v6-balanced-biomes.mjs
+          node --check src/manual-biomes/profile-world.mjs
+          node --check src/manual-biomes/desert-m3.mjs
+          node --check src/manual-biomes/three-regions-m4.mjs
+          node --check src/surface-regions/regions.mjs
+          node --check src/manual-biomes/m2-runtime-bridge.mjs
+          node --check src/main.mjs
+      - name: Verify V6 coverage, save identity and historic M2-M5 native acceptance
+        run: |
+          node --test tests/manual-biomes/v6-balanced-biomes.test.mjs tests/manual-biomes/profile-world.test.mjs tests/manual-biomes/m2-runtime-bridge.test.mjs tests/manual-biomes/desert-m3.test.mjs tests/manual-biomes/three-regions-m4.test.mjs tests/manual-biomes/m5-explicit-v5-activation.test.mjs tests/manual-biomes/m5-mountain-pass-v5.test.mjs
