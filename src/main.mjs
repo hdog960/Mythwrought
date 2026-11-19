@@ -2,7 +2,15 @@ import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainH
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
-import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
+import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
+import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
+import {loadLunarEpoch,sampleLunarAge,sampleThreeMoons,S3_LUNAR_CONTRACT} from './sky-moons.mjs';
+import {sampleS4Sky,SKY_S4_CONTRACT} from './sky-stars.mjs';
+import {sampleS5Events,S5_EVENT_CONTRACT} from './sky-events.mjs';
+import {hasValidatedFourBiomeProfile,resolveS6Biome,sampleS6BiomeSky,
+  S6_SKY_CONTRACT} from './sky-biome-adapter.mjs';
+import {SKY_DAY_MS,SKY_DAY_TARGET_MS,SKY_NIGHT_TARGET_MS,
+  loadSkyClock,sampleSkyClock,selectSkyClockTime,formatSkyTime} from './world-clock.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
 import {clampLook,forwardVector,compassDegrees,MAX_PITCH} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
@@ -71,6 +79,73 @@ function start(){
   }
   let pack3=createPack3LiveBridge(world,localStorage);
   seedLabel.textContent='WORLD '+world.seed;
+  // S1: separate per-seed clock sidecar; never modify original schema-1 saves.
+  // The monotonic clock advances even while settings overlay is open.
+  // S3 uses the unchanged S1 clock for sky time and a separate safe lunar epoch.
+  let skyClock=loadSkyClock({seed:world.seed,storage:localStorage,
+    wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
+  let lunarClock=loadLunarEpoch({seed:world.seed,storage:localStorage,
+    wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
+  // Fail closed. The separately staged M5 source does not exist in this
+  // branch, so default/legacy gameplay never requests it or changes color.
+  let s6Source=null,s6SourceState='legacy-unchanged',s6Epoch=0;
+  function refreshS6Source(){
+    const ticket=++s6Epoch;
+    s6Source=null;
+    if(!hasValidatedFourBiomeProfile(world)){
+      s6SourceState='legacy-unchanged';return;
+    }
+    s6SourceState='profile-source-unavailable';
+    import('./surface-regions/regions.mjs').then(module=>{
+      if(ticket!==s6Epoch)return;
+      if(typeof module.surfaceBiomeAt!=='function')return;
+      s6Source=module.surfaceBiomeAt;
+      s6SourceState='authoritative-profile-source';
+    }).catch(()=>{
+      if(ticket===s6Epoch)s6SourceState='profile-source-unavailable';
+    });
+  }
+  refreshS6Source();
+  const skyClockStatus=document.getElementById('skyClockStatus');
+  let lastSkyClockUiAt=-Infinity;
+  function paintSkyClock(now,force=false){
+    // Clock time itself is pure and continuous; S1 visual status only needs 4 Hz.
+    // Avoid five unnecessary DOM mutations per rendered WebGL2 frame.
+    if(!force&&now-lastSkyClockUiAt<250)return;
+    lastSkyClockUiAt=now;
+    const phase=sampleSkyClock(skyClock,now);
+    const formatted=formatSkyTime(phase);
+    canvas.dataset.skyClockPhaseMs=String(Math.floor(phase));
+    canvas.dataset.skyClockCycleMs=String(SKY_DAY_MS);
+    canvas.dataset.skyClockTime=formatted;
+    canvas.dataset.skyClockSeed=String(skyClock.seed);
+    canvas.dataset.skyClockPersistence=skyClock.persistence;
+    skyClockStatus.textContent='WORLD '+skyClock.seed+' · '+formatted+
+      ' · 24-MIN CYCLE RUNNING · '+(skyClock.persistence==='saved'?'SAVED':'SESSION-ONLY')+
+      (skyClock.warning?' · '+skyClock.warning:'');
+  }
+  function reactivateSkyClock(){
+    skyClock=loadSkyClock({seed:world.seed,storage:localStorage,
+      wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
+    lunarClock=loadLunarEpoch({seed:world.seed,storage:localStorage,
+      wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
+    refreshS6Source();
+    paintSkyClock(performance.now(),true);
+  }
+  for(const [id,phase,description] of [
+    ['skySetDay',SKY_DAY_TARGET_MS,'DAY · 12:00'],
+    ['skySetNight',SKY_NIGHT_TARGET_MS,'NIGHT · 00:00']]){
+    document.getElementById(id).onclick=()=>{
+      if(help.hidden)return;
+      const now=performance.now();
+      skyClock=selectSkyClockTime(skyClock,phase,{storage:localStorage,
+        monoNowMs:now,wallNowMs:Date.now(),allowWrites:!storageReadOnly});
+      paintSkyClock(now,true);
+      message('Sky clock: '+description+' · 24-minute cycle continues'+
+        (skyClock.persistence==='saved'?'':' · clock not saved'));
+    };
+  }
+  paintSkyClock(performance.now(),true);
   const VS=[
     '#version 300 es','precision highp float;',
     'in vec3 aPos; in vec3 aColor; in vec2 aUv; in float aMat;',
@@ -84,10 +159,13 @@ function start(){
   ].join('\n');
   // Reserved transparent-water material 20; legacy materials stay unchanged.
   const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER
+    .replace('uniform vec3 uFog;','uniform vec3 uFog; uniform vec3 uSkyLight;')
+    .replace('mix(vColor,uFog,distant)','mix(vColor*uSkyLight,uFog,distant)')
+    .replace('mix(colored,uFog,fog)','mix(colored*uSkyLight,uFog,fog)')
     .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
     .replace('void main(){',
       'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
-      'outColor=vec4(mix(vColor,uFog,f),vPack2Alpha); return; }');
+      'outColor=vec4(mix(vColor*uSkyLight,uFog,f),vPack2Alpha); return; }');
   let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
   function initializeGpuPipeline(){
     const resources=buildGpuPipeline(gl,{
@@ -805,6 +883,7 @@ function start(){
     const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
     frameHistory.frame(now,!document.hidden&&help.hidden&&!exploration.isOpen()&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
+      paintSkyClock(now);
       frame++;if(help.hidden&&!exploration.isOpen())move(dt);
       if(frame%16===0)exploration.tick(now);
       // Low-frequency real-cave check: no synthetic map markers or geometry.
@@ -818,13 +897,55 @@ function start(){
       canvas.dataset.storybookQuality=renderPreset==='economy'?'base-colors':'painted-materials';
       canvas.dataset.renderScale=String(buffer.scale);
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
-      gl.clearColor(...DISTANCE_FOG_COLOR,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+      // S2 uses one authoritative S1 timestamp for the sky, terrain fog and
+      // ambient block lighting. Movement's clamped dt never drives solar time.
+      const atmosphere=sampleSkyAtmosphere(sampleSkyClock(skyClock,now));
+      const s6Biome=resolveS6Biome(world,player.x,player.z,s6Source);
+      const s6Mood=sampleS6BiomeSky(atmosphere,s6Biome);
+      const sunScreen=projectSunToScreen(atmosphere.sunDirection,
+        player.yaw,player.pitch,w/h);
+      const lunar=sampleThreeMoons(atmosphere.phaseMs,
+        sampleLunarAge(lunarClock,now),atmosphere.daylight);
+      const nightCanvas=sampleS4Sky(atmosphere.phaseMs,atmosphere.daylight);
+      const moonScreens=lunar.moons.map(m=>projectSunToScreen(m.direction,
+        player.yaw,player.pitch,w/h));
+      const skyEvent=sampleS5Events(atmosphere.phaseMs,lunar,atmosphere.daylight);
+      const skyEventCenter=skyEvent.kind===0?[-10,-10]:
+        projectSunToScreen(skyEvent.direction,player.yaw,player.pitch,w/h);
+      const skyLight=atmosphere.light.map((v,i)=>
+        Math.min(1,v+lunar.moonlight*[.71,.84,1][i]));
+      gl.clearColor(...atmosphere.fog,1);
+      if(s6Biome)gl.clearColor(...s6Mood.fog,1);
+      gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
       // Cheap procedural WebGL sky; the depth buffer is reserved for editable voxels.
       gl.disable(gl.DEPTH_TEST);
       gl.useProgram(skyProgram);
       gl.uniform2f(skyU.resolution,w,h);
       gl.uniform1f(skyU.yaw,player.yaw);
       gl.uniform1f(skyU.pitch,player.pitch);
+      gl.uniform2f(skyU.sunScreen,...sunScreen);
+      gl.uniform1f(skyU.sunVisibility,atmosphere.sunVisibility);
+      gl.uniform3fv(skyU.horizon,s6Mood.horizon);
+      gl.uniform3fv(skyU.zenith,s6Mood.zenith);
+      gl.uniform3fv(skyU.cloud,s6Mood.cloud);
+      gl.uniform3fv(skyU.ridge,s6Mood.ridge);
+      gl.uniform3fv(skyU.fog,s6Mood.fog);
+      gl.uniform3fv(skyU.sunColor,atmosphere.sunColor);
+      gl.uniform2fv(skyU.lunarScreen,moonScreens.flat());
+      gl.uniform2fv(skyU.lunarPhase,lunar.moons.flatMap(m=>m.terminator));
+      gl.uniform3fv(skyU.lunarColor,lunar.moons.flatMap(m=>m.color));
+      gl.uniform1fv(skyU.lunarRadius,lunar.moons.map(m=>m.radius));
+      gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility));
+      gl.uniform1f(skyU.starVisibility,nightCanvas.starVisibility);
+      gl.uniform1f(skyU.twinkleAngle,nightCanvas.twinkleAngle);
+      gl.uniform2fv(skyU.cloudShiftA,nightCanvas.cloudA);
+      gl.uniform2fv(skyU.cloudShiftB,nightCanvas.cloudB);
+      gl.uniform1i(skyU.s5Type,skyEvent.kind);
+      gl.uniform1f(skyU.s5Strength,skyEvent.strength);
+      gl.uniform1f(skyU.s5Progress,skyEvent.progress);
+      gl.uniform2fv(skyU.s5Center,skyEventCenter);
+      gl.uniform2fv(skyU.s5Vector,skyEvent.vector);
+      gl.uniform3fv(skyU.s5Color,skyEvent.color);
       gl.drawArrays(gl.TRIANGLES,0,3);
       gl.enable(gl.DEPTH_TEST);
       gl.useProgram(program);
@@ -834,8 +955,45 @@ function start(){
       gl.uniform3fv(U.uUp,[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),-Math.sin(player.pitch)*Math.cos(player.yaw)]);
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
-      gl.uniform3fv(U.uFog,DISTANCE_FOG_COLOR);
+      gl.uniform3fv(U.uFog,atmosphere.fog);
+      if(s6Biome)gl.uniform3fv(U.uFog,s6Mood.fog);
+      // Preserve S2's exact live ambient uniform path, then layer only the
+      // bounded S3 lunar contribution if at least one moon illuminates night.
+      gl.uniform3fv(U.uSkyLight,atmosphere.light);
+      if(lunar.moonlight>0)gl.uniform3fv(U.uSkyLight,skyLight);
       gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
+      if(frame%12===0){
+        canvas.dataset.skySunAltitude=String(atmosphere.elevation.toFixed(4));
+        canvas.dataset.skySunScreen=JSON.stringify(sunScreen.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyDaylight=String(atmosphere.daylight.toFixed(4));
+        canvas.dataset.skyAmbient=JSON.stringify(skyLight.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyMoonCount=String(S3_LUNAR_CONTRACT.count);
+        canvas.dataset.skyLunarPersistence=lunarClock.persistence;
+        canvas.dataset.skyLunarAgeDays=lunar.ageDays.toFixed(5);
+        canvas.dataset.skyMoonScreens=JSON.stringify(moonScreens.map(v=>v.map(n=>Number(n.toFixed(4)))));
+        canvas.dataset.skyMoonPhases=JSON.stringify(lunar.moons.map(m=>Number(m.phaseFraction.toFixed(5))));
+        canvas.dataset.skyMoonIlluminations=JSON.stringify(lunar.moons.map(m=>Number(m.illumination.toFixed(5))));
+        canvas.dataset.skyMoonVisibilities=JSON.stringify(lunar.moons.map(m=>Number(m.visibility.toFixed(5))));
+        canvas.dataset.skyFog=JSON.stringify(s6Mood.fog.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyS6SourceStatus=s6SourceState;
+        canvas.dataset.skyS6BiomeName=s6Biome?.name??'none';
+        canvas.dataset.skyS6BiomeStrength=(s6Biome?.strength??0).toFixed(5);
+        canvas.dataset.skyS6Profile=s6Biome?.generator??'none';
+        canvas.dataset.skyS6BiomeCount=String(S6_SKY_CONTRACT.count);
+        canvas.dataset.skyS6Horizon=JSON.stringify(s6Mood.horizon.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyS4StarCount=String(SKY_S4_CONTRACT.starFamilyCount);
+        canvas.dataset.skyS4StarVisibility=nightCanvas.starVisibility.toFixed(5);
+        canvas.dataset.skyS4FieldCells=String(nightCanvas.starFieldCellCount);
+        canvas.dataset.skyS4CloudA=JSON.stringify(nightCanvas.cloudA.map(v=>Number(v.toFixed(5))));
+        canvas.dataset.skyS4CloudB=JSON.stringify(nightCanvas.cloudB.map(v=>Number(v.toFixed(5))));
+        canvas.dataset.skyS5EventType=String(skyEvent.kind);
+        canvas.dataset.skyS5EventId=skyEvent.id;
+        canvas.dataset.skyS5EventStrength=skyEvent.strength.toFixed(5);
+        canvas.dataset.skyS5EventProgress=skyEvent.progress.toFixed(5);
+        canvas.dataset.skyS5EventCenter=JSON.stringify(skyEventCenter.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyS5EventDirection=JSON.stringify(skyEvent.direction.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyS5EventTypes=String(S5_EVENT_CONTRACT.kinds);
+      }
       stream();
       canvas.dataset.renderedFrames=String(frame);
       canvas.dataset.meshCadenceSkipped=String(meshCadence.skipped);
@@ -2002,6 +2160,7 @@ function start(){
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();changed=false;respawnPrototype();
+    reactivateSkyClock();
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
     message('Restored '+which+' device mirror · '+snap.edits+' edits · saved');
@@ -2024,6 +2183,7 @@ function start(){
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();
       storageReadOnly=false;changed=false;respawnPrototype();
+      reactivateSkyClock();
       clearMirrorDownload();
       seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
       saveHealth.textContent='Verified separate seed '+world.seed+'; other world slots preserved.';

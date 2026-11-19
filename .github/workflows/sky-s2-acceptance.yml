@@ -1,0 +1,91 @@
+name: Mythwrought SKY S2 exact-head sun and atmosphere WebGL2
+on:
+  push:
+    branches: ['sky/roadmap-s0-baseline-20261118']
+    # S2 is frozen at 9606b32f32d5a2252923b8f833a8dd0d54bed2bb.
+    # S3 runs historical S2 visual/regression checks itself instead.
+    paths:
+      - 'tests/sky/s2-atmosphere-browser.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sky-s2-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-exact-s2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert exact commit and sky-only ownership
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          for file in $(git diff --name-only e9223217ef1e91d282900c3fc13a21eeda316b63 HEAD); do
+            case "$file" in
+              src/world-clock.mjs|src/sky-atmosphere.mjs|src/sky.mjs|src/main.mjs|src/gpu-pipeline.mjs|index.html|styles.css|tests/world-clock.test.mjs|tests/sky-atmosphere.test.mjs|tests/sky/*|docs/sky/*|.github/workflows/sky-*.yml) ;;
+              *) echo "S2 OUTSIDE SKY OWNERSHIP: $file"; exit 1;;
+            esac
+          done
+          git diff --exit-code e9223217ef1e91d282900c3fc13a21eeda316b63 HEAD -- src/persistence.mjs src/storybook-materials.mjs src/voxel.mjs src/physics.mjs src/foreground.mjs src/render-budget.mjs
+      - name: Clock, atmosphere and source-safe shader syntax + native contracts
+        run: |
+          node --check src/main.mjs
+          node --check src/sky.mjs
+          node --check src/sky-atmosphere.mjs
+          node --check src/gpu-pipeline.mjs
+          node --check tests/sky/s2-atmosphere-browser.mjs
+          node --test tests/world-clock.test.mjs tests/sky-atmosphere.test.mjs
+      - name: Install pinned original-game Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Genuine 3-viewport S2 sky, fog, lighting and camera-tracked sun evidence
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-sky-s2.log 2>&1 &
+          node tests/sky/s2-atmosphere-browser.mjs
+      - name: S1 controls, reload, save and world-switch regression
+        run: |
+          node tests/sky/s1-clock-browser.mjs
+      - name: Quiet original-game WebGL2 performance — same S0 capture protocol
+        run: |
+          node tests/sky/s0-baseline-browser.mjs
+      - name: Same-run ABBA paired performance against immutable S0 production source
+        run: |
+          mkdir -p /tmp/mythwrought-s0-exact
+          git archive e9223217ef1e91d282900c3fc13a21eeda316b63 | tar -x -C /tmp/mythwrought-s0-exact
+          python3 -m http.server 4174 --directory /tmp/mythwrought-s0-exact >/tmp/mythwrought-s0-paired.log 2>&1 &
+          node tests/sky/s2-paired-benchmark.mjs
+      - name: Upload actual S0/S2 paired performance manifest
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s2-paired-${{ github.sha }}
+          path: artifacts/sky-s2-paired/
+          if-no-files-found: warn
+      - name: Upload original-game S2 visual evidence and SHA256 manifest
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s2-${{ github.sha }}
+          path: artifacts/sky-s2/
+          if-no-files-found: warn
+      - name: Upload exact-head S1 regression visual evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s2-s1-regression-${{ github.sha }}
+          path: artifacts/sky-s1/
+          if-no-files-found: warn
+      - name: Upload matched quiet-frame performance
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s2-matched-perf-${{ github.sha }}
+          path: artifacts/sky-s0/
+          if-no-files-found: warn
