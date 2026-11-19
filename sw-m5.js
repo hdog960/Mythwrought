@@ -270,8 +270,28 @@ self.addEventListener('install',event=>{
       // Only a fully verified new shell can replace the previous-good worker.
       await self.skipWaiting();
     }catch(error){
-      console.error('MYTHWROUGHT PWA ATOMIC INSTALL FAILED',String(error));
-      await caches.delete(CACHE_NAME);
+      // Two install/update attempts can overlap on the SAME cache name.
+      // A failed late attempt must not erase a complete, already verified
+      // shell installed by another attempt. Preserve only a genuinely
+      // complete, REC-capable immutable shell; incomplete shells fail closed.
+      let complete=false;
+      try {
+        const current=await caches.open(CACHE_NAME);
+        const keys=await current.keys();
+        if(keys.length===allowed.size){
+          const response=await current.match(new URL('index.html',
+            self.registration.scope).href);
+          const html=response?await response.text():'';
+          complete=html.includes('data-mw-release="'+ASSET_RELEASE+'"')&&
+            html.includes('id="captureToggle"');
+        }
+      }catch(verifyError){
+        console.error('MYTHWROUGHT PWA FAILED CACHE VERIFICATION',
+          String(verifyError));
+      }
+      console.error('MYTHWROUGHT PWA ATOMIC INSTALL FAILED',
+        String(error),'complete-verified-cache-preserved='+complete);
+      if(!complete)await caches.delete(CACHE_NAME);
       throw error;
     }
   })());
