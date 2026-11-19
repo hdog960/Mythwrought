@@ -46,9 +46,9 @@ export function planCaveFarWallSources(world,player,viewport,
  const forward=[sy*cp,sp,cy*cp],right=[-cy,0,sy],
   up=[-sp*sy,cp,-sp*cy];
  let uncovered=0,firstFarRock=0,samples=0;
- for(const screenY of bounds.verticalOffsets)
-  for(let i=0;i<bounds.horizontalRays;i++){
-   const screenX=-1+2*i/(bounds.horizontalRays-1);
+ // Reuse the exact production perspective ray for both the original
+ // coarse ranking and later source-only midpoint coverage witness.
+ const sampleRay=(screenX,screenY,target)=>{
    const factorX=screenX*aspect*tanVertical,factorY=screenY*tanVertical;
    const rawX=forward[0]+right[0]*factorX+up[0]*factorY;
    const rawY=forward[1]+right[1]*factorX+up[1]*factorY;
@@ -76,7 +76,7 @@ export function planCaveFarWallSources(world,player,viewport,
      const radius=Math.max(Math.abs(sx-cx),Math.abs(sz-cz));
      if(radius<=bounds.maxRing&&visible.includes(actualSection) &&
         (id===BLOCK.STONE||id===BLOCK.DEEPSTONE)){
-      const old=candidates.get(k)||{key:k,cx:sx,cz:sz,section:actualSection,
+      const old=target.get(k)||{key:k,cx:sx,cz:sz,section:actualSection,
        hits:0,roofHits:0,nearest:t,source:[x,y,z]};
       old.hits++;
       // Screenshot-proven Fan sky pixels at y108-118 hit genuine roof
@@ -85,13 +85,16 @@ export function planCaveFarWallSources(world,player,viewport,
       // rank real upper-section surface voxels above distant lower walls.
       if(screenY>=.48&&actualSection>section)old.roofHits++;
       old.nearest=Math.min(old.nearest,t);
-      candidates.set(k,old);
+      target.set(k,old);
      }else uncovered++;
     }
     break;
    }
    if(!found)uncovered++;
-  }
+ };
+ for(const screenY of bounds.verticalOffsets)
+  for(let i=0;i<bounds.horizontalRays;i++)
+   sampleRay(-1+2*i/(bounds.horizontalRays-1),screenY,candidates);
  const ranked=[...candidates.values()].sort((a,b)=>
   b.roofHits-a.roofHits||b.hits-a.hits||
   a.nearest-b.nearest||a.cz-b.cz||a.cx-b.cx);
@@ -99,19 +102,34 @@ export function planCaveFarWallSources(world,player,viewport,
  // column may share ONE far GPU buffer. This is not a fifth draw slot
  // or fabricated rock. At most one real source section may be joined.
  const selected=ranked.slice(0,bounds.maxChunks).map(c=>({...c}));
- const pending=ranked.slice(bounds.maxChunks);
- let joinedSources=0;
- for(const companion of pending){
-  const owner=selected.find(c=>c.cx===companion.cx&&c.cz===companion.cz&&
-   Math.abs(c.section-companion.section)===1);
-  if(owner){
-   owner.companion={...companion};joinedSources=1;
-   break;
-  }
- }
- const companionKey=selected.find(c=>c.companion)?.companion.key;
+ // Real screenshots uncovered a narrow rock seam between the original
+ // 17 horizontal rays. Sample every half-step at the upper-middle screen
+ // band ONLY to discover adjacent real source sections, never to evict
+ // the four coarse-priority GPU buffers. These extra voxels count against
+ // the SAME unchanged maxSourceSamples=3264 CPU budget.
+ const midpoints=new Map();
+ for(let i=0;i<bounds.horizontalRays-1;i++)
+  sampleRay(-1+(2*i+1)/(bounds.horizontalRays-1),.35,midpoints);
+ const available=new Map(ranked.slice(bounds.maxChunks).map(c=>[c.key,c]));
+ for(const [k,c] of midpoints)
+  if(!candidates.has(k)&&!available.has(k))available.set(k,c);
+ const joinable=[...available.values()].map(companion=>({
+  companion,owner:selected.find(c=>c.cx===companion.cx&&
+   c.cz===companion.cz&&Math.abs(c.section-companion.section)===1)
+ })).filter(c=>c.owner);
+ // An upper-section exposed roof takes priority over a lower wall when
+ // both are from genuine first-solid physical rays. The 708-pixel Fan
+ // source still retains its original mandatory lower-section companion.
+ joinable.sort((a,b)=>
+  Number(b.companion.section>section)-Number(a.companion.section>section)||
+  b.companion.hits-a.companion.hits||
+  a.companion.nearest-b.companion.nearest);
+ const selectedJoin=joinable[0];
+ if(selectedJoin)selectedJoin.owner.companion={...selectedJoin.companion};
+ const joinedSources=selectedJoin?1:0;
+ const companionKey=selectedJoin?.companion.key;
  return {section,selected,
-  pending:pending.filter(c=>c.key!==companionKey),
+  pending:[...available.values()].filter(c=>c.key!==companionKey),
   joinedSources,uncovered,firstFarRock,
   samples,estimatedBytes:0,nearExpected:near.size,
   viewport:[...viewport]};

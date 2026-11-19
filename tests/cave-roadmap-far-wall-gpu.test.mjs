@@ -87,6 +87,24 @@ test('C6 actual Fan pixel ray selects its source-authenticated upper roof chunk'
  assert.ok(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples);
  assert.ok(plan.selected.length<=C6_FAR_BOUNDS.maxChunks);
 });
+test('C6 true Rift screen rays select source-authentic upper boundary within four GPU buffers',()=>{
+ // Genuine original-game 667x375 diagnostic Rift camera on seed 314159:
+ // blue x202..208/y134..137 first intersects real DEEPSTONE at
+ // x176,y=-83,z192 in section 11,12,-5, absent from coarse 17-ray grid.
+ const camera={x:159.5,z:210.5,feet:-90.99,
+  yaw:1.8650308919060845,pitch:0.05620218481286228};
+ assert.equal(world.get(176,-83,192),BLOCK.DEEPSTONE);
+ const plan=planCaveFarWallSources(world,camera,[383,320]);
+ assert.ok(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples);
+ assert.ok(plan.selected.length<=C6_FAR_BOUNDS.maxChunks);
+ assert.equal(plan.joinedSources,1);
+ assert.ok(plan.selected.some(c=>c.key==='11,11,-5'),
+  'Rift original upper rock must not be displaced');
+ assert.ok(plan.selected.some(c=>c.key==='11,12,-6'&&
+  c.companion?.key==='11,12,-5'),
+  'Rift missing upper real boundary must be joined in existing GPU slot: '+
+  JSON.stringify(plan.selected.map(c=>[c.key,c.companion?.key])));
+});
 test('C6 no GPU allocations in any ordinary world or while near meshes pending',()=>{
  const g=fakeGl(),far=createCaveFarWallGpu(g.gl);
  assert.equal(step(far,fan,{enabled:false}).chunks,0);
