@@ -72,7 +72,13 @@ export function buildGpuPipeline(gl,{terrainVertex,terrainFragment,skyVertex,sky
       starVisibility:gl.getUniformLocation(resources.skyProgram,'uStarVisibility'),
       twinkleAngle:gl.getUniformLocation(resources.skyProgram,'uTwinkleAngle'),
       cloudShiftA:gl.getUniformLocation(resources.skyProgram,'uCloudShiftA'),
-      cloudShiftB:gl.getUniformLocation(resources.skyProgram,'uCloudShiftB')
+      cloudShiftB:gl.getUniformLocation(resources.skyProgram,'uCloudShiftB'),
+      s5Type:gl.getUniformLocation(resources.skyProgram,'uS5EventType'),
+      s5Strength:gl.getUniformLocation(resources.skyProgram,'uS5EventStrength'),
+      s5Progress:gl.getUniformLocation(resources.skyProgram,'uS5EventProgress'),
+      s5Center:gl.getUniformLocation(resources.skyProgram,'uS5EventCenter'),
+      s5Vector:gl.getUniformLocation(resources.skyProgram,'uS5EventVector'),
+      s5Color:gl.getUniformLocation(resources.skyProgram,'uS5EventColor')
     };
     resources.outlineBuffer=gl.createBuffer();
     if(!resources.outlineBuffer)throw Error('WebGL outline buffer allocation failed');
