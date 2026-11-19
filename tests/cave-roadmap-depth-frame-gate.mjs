@@ -5,10 +5,17 @@ import {chunkCoord} from '../src/voxel.mjs';
 import {sectionForY,sectionWindow,sectionChunkRadius} from '../src/depth.mjs';
 
 export const C6_STABLE_RENDERED_FRAMES=4;
-export function expectedDeepSceneResidency(at){
+export function expectedDeepSceneResidency(at,actualFeet=at?.y+.01){
+ // A real onGround physics position can settle a few hundredths below the
+ // requested debug feet at a 16-voxel vertical-section seam. Derive the exact
+ // window from the ACTUAL original-game playerFeet and refuse any position
+ // outside the protected source camera tolerance. Never accept fewer chunks.
+ if(!Number.isFinite(actualFeet)||!Number.isInteger(at?.y)||
+    Math.abs(actualFeet-(at.y+.01))>.05)
+  throw Error('C6_SOURCE_CAMERA_PHYSICS_MISMATCH');
  if(!at||![at.x,at.y,at.z].every(Number.isInteger))
   throw Error('C6_EXPECTED_INVALID_SOURCE_CAMERA');
- const feet=at.y+.01,active=sectionForY(feet);
+ const feet=actualFeet,active=sectionForY(feet);
  if(active===null||active>=0)throw Error('C6_EXPECTED_NOT_A_DEEP_CAMERA');
  const sections=sectionWindow(feet,false);
  if(!sections.length||sections[0]!==active)throw Error('C6_EXPECTED_BAD_SECTION_WINDOW');
