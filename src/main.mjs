@@ -56,6 +56,23 @@ import {createPack3LiveBridge,combinePack3ChunkMesh,isPack3BlockId} from './buil
 import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
 import {exportPack3Portable,inspectPack3Portable,restorePack3Portable} from './builder-assets/pack3-portable.mjs';
 
+ // Cave profile admission remains synchronous for every ordinary world;
+ // source-heavy cave modules are loaded only after explicit cave selection.
+ // The key, journal and backup names match cave profile-store exactly.
+const CAVE_PROFILE_PREFIX='mythwrought-caves-v1-seed-';
+function caveProfileStorageKey(seed){
+ if(!Number.isSafeInteger(seed)||seed!==(seed|0))throw Error('Invalid cave seed');
+ return CAVE_PROFILE_PREFIX+seed;
+}
+function rejectLegacyWorldWhereCaveExists(storage,seed){
+ if(!storage||typeof storage.getItem!=='function')
+  throw Error('Storage preflight required for switching worlds');
+ const k=caveProfileStorageKey(seed);
+ if([k,k+'.journal',k+'.backup'].some(key=>storage.getItem(key)!==null))
+  throw Error('Seed '+seed+' belongs to a protected Cave World. Choose LOAD CAVE PROFILE or another seed.');
+ return true;
+}
+
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
 const status=document.getElementById('status');
@@ -70,8 +87,11 @@ else start();
 
 function start(){
   let gameplayRecorder=null;
-  let world,storageReadOnly=false,recoveryNote='';
+  let world,storageReadOnly=false,recoveryNote='',caveSession=null,caveOps=null;
   function loadWorld(seed){
+    // Legacy startup must NEVER silently reuse a seed reserved for the
+    // creator's explicitly chosen new cave profile sidecar.
+    rejectLegacyWorldWhereCaveExists(localStorage,seed);
     // Profiled worlds must never be restored using the old bare VoxelWorld
     // baseline, which can silently discard legacy-equivalent player edits.
     // The old loader below remains EXACT for every ordinary legacy seed.
@@ -216,6 +236,9 @@ function start(){
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
   const chunks=new Map(),pending=new Map();
+  // Cave-only outer-ring opaque meshes, never scheduled in normal save profiles.
+  // Keep accepted M5/legacy module graph free of cave-only imports.
+  let caveFarGpu=null;
   const name=chunkKey;
   const player=newPlayer(world);
   const manual14Ids=new Set(MANUAL_FIVE_PACK_CATALOG.filter(x=>x.pack===1||x.pack===4).map(x=>x.numericId));
@@ -494,6 +517,7 @@ function start(){
     mirrorDownload.hidden=true;mirrorDownload.removeAttribute('href');
   }
   function verifiedLiveBytes(){
+    if(caveSession)throw Error('Cave profiles are isolated; legacy mirror cannot capture a cave world');
     // The legacy mirror stores ONLY schema-1 bytes, not immutable generator
     // profile metadata. Never mirror a biome world as if it were legacy.
     if(world.base instanceof FourRegionWorld)
@@ -562,6 +586,18 @@ function start(){
       message('SAVE PROTECTION ACTIVE — damaged original world not overwritten');
       saveHealth.textContent='READ ONLY: original damaged save preserved. Import a verified backup or choose another seed.';
       return false;
+    }
+    if(caveSession){
+      try{
+        const caveSaved=caveOps.saveExplicitCaveWorld(localStorage,caveSession,{approved:true});
+        changed=false;
+        saveHealth.textContent='CAVE WORLD SAVED · separate checksummed profile with journal and backup. Original world save unchanged.';
+        return caveSaved.ok===true;
+      }catch(err){
+        saveHealth.textContent='CAVE SAVE REFUSED: '+err.message+' · do not leave this unsaved world.';
+        message('Cave save refused safely · '+err.message);
+        return false;
+      }
     }
     if(world.base instanceof FourRegionWorld){
       const result=saveM2World(localStorage,world);
@@ -667,6 +703,7 @@ function start(){
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
+    if(caveSession)caveFarGpu?.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
   function refreshPhysicalChunk(x,z,y){
@@ -723,6 +760,14 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
+    // The cave profile stores ordinary schema-1 cube edits ONLY. Reject any
+    // shaped/Pack2 placement BEFORE it can write a separate construction
+    // sidecar that the cave save would not persist. Normal worlds unchanged.
+    if(caveSession&&(pack5Mode||(mode==='place'&&(
+      manual14Ids.has(selected)||isPack3BlockId(selected)||isPack2LiveId(selected))))){
+      message('CAVE WORLD: basic voxel blocks only. Shaped Pack 1–5 construction is disabled to protect separate saves.');
+      return;
+    }
     if(pack5Mode&&pack5Builder){
       if(storageReadOnly){message('Protected world read-only; Pack 5 edit blocked');return;}
       const result=mode==='place'?
@@ -1043,6 +1088,17 @@ function start(){
         canvas.dataset.skyS5EventTypes=String(S5_EVENT_CONTRACT.kinds);
       }
       stream();
+      const c6Far=caveFarGpu?.step({world,player,nearChunks:chunks,
+        nearPending:pending,frame,viewport:[w,h],enabled:!!caveSession})??
+        {chunks:0,bytes:0,pending:0,uncovered:0,vertices:0,failures:0,uploads:0,lastMeshMs:0};
+      canvas.dataset.c6FarChunks=String(c6Far.chunks);
+      canvas.dataset.c6FarBytes=String(c6Far.bytes);
+      canvas.dataset.c6FarPending=String(c6Far.pending);
+      canvas.dataset.c6FarUncovered=String(c6Far.uncovered);
+      canvas.dataset.c6FarVertices=String(c6Far.vertices);
+      canvas.dataset.c6FarFailures=String(c6Far.failures);
+      canvas.dataset.c6FarUploads=String(c6Far.uploads);
+      canvas.dataset.c6FarMeshMs=String(c6Far.lastMeshMs);
       canvas.dataset.renderedFrames=String(frame);
       canvas.dataset.meshCadenceSkipped=String(meshCadence.skipped);
       canvas.dataset.loadedChunks=String(chunks.size);
@@ -1073,6 +1129,9 @@ function start(){
         gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
       }
+      // Original source-composed far-rock opaque pass: same terrain shader,
+      // depth buffer and fog, before the existing transparent-water draw.
+      canvas.dataset.c6FarDrawn=String(caveFarGpu?.draw({atPos,atColor,atUv,atMat})??0);
       // Pack 5 uses the EXISTING game terrain program and fog, exactly one
       // optional shaped-triangle draw, with bounded GPU memory and streaming.
       if(pack5Gpu){
@@ -1667,7 +1726,7 @@ function start(){
     }
   }
   async function restoreSavedPack5Scene(){
-    if(storageReadOnly||pack5Builder)return;
+    if(caveSession||storageReadOnly||pack5Builder)return;
     const key='mythwrought.pack5.builder.seed.'+world.seed;
     try{
       if([key,key+'.journal',key+'.backup'].every(k=>localStorage.getItem(k)===null))
@@ -1681,6 +1740,11 @@ function start(){
     }
   }
   pack5Enabled.addEventListener('change',async()=>{
+    if(caveSession){
+      pack5Enabled.checked=false;pack5Mode=false;
+      pack5Status.textContent='Cave World keeps a separate voxel-only profile; shaped furnishings are available in ordinary worlds.';
+      return;
+    }
     if(!pack5Enabled.checked){
       pack5Mode=false;
       pack5Status.textContent='Editing off. Placed Pack 5 pieces remain rendered and solid.';
@@ -1717,6 +1781,10 @@ function start(){
   });
   const pack5ImportFile=document.getElementById('pack5ImportFile');
   document.getElementById('pack5Import').addEventListener('click',()=>{
+    if(caveSession){
+      pack5Status.textContent='Cave World cannot import Pack5 sidecars; existing ordinary-world builds are protected.';
+      return;
+    }
     if(storageReadOnly){
       pack5Status.textContent='Protected world read-only; Pack 5 import blocked';
       return;
@@ -1727,6 +1795,7 @@ function start(){
     const file=e.target.files?.[0];
     try{
       if(!file||storageReadOnly)return;
+      if(caveSession)throw Error('Pack 5 import cannot write into the protected Cave World profile');
       if(file.size>2*1024*1024)throw Error('Pack 5 JSON exceeds 2 MiB limit');
       const raw=await file.text(),data=JSON.parse(raw),requestedWorld=world;
       if(!data||data.format!=='mythwrought.pack5.builder-layer.v1'||
@@ -1896,6 +1965,7 @@ function start(){
   },{
     onExport:()=>({raw:exportPack3Portable(pack3,world,localStorage),seed:world.seed}),
     onImport:async raw=>{
+      if(caveSession)throw Error('Pack3 import unavailable in separately saved Cave World; existing construction is protected');
       if(storageReadOnly||changed)throw Error('Save current world safely before importing physical construction');
       if(help.hidden||document.hidden||graphicsLost)throw Error('Pack 3 import requires active settings');
       const examined=inspectPack3Portable(raw,world);
@@ -2009,6 +2079,10 @@ function start(){
     return id;
   }
   async function useVault(action){
+    if(caveSession){
+      vaultStatus.textContent='Device vault uses ordinary-world schema-1 snapshots. In Cave World use SAVE / EXPORT CAVE PROFILE; vault writes and restores are blocked.';
+      return;
+    }
     if(vaultBusy)return;
     vaultBusy=true;vaultButtons.forEach(button=>button.disabled=true);
     vaultStatus.textContent='Checking on-device backup storage…';
@@ -2131,6 +2205,7 @@ function start(){
     try{
       // Refuse enabling before changing preferences when startup has protected
       // a damaged world; otherwise a reload could accidentally opt the user in.
+      if(requested&&caveSession)throw Error('Normal-world mirroring is disabled in Cave World; use separate Cave SAVE / EXPORT');
       if(requested&&storageReadOnly)throw Error('Selected world is protected read-only; export or select a healthy seed first');
       if(requested&&world.base instanceof FourRegionWorld)
         throw Error('Four-biome world requires profile-safe WORLD EXPORT; legacy mirror cannot hold its generation identity');
@@ -2152,6 +2227,10 @@ function start(){
     }
   });
   async function withMirror(action){
+    if(caveSession){
+      mirrorStatus.textContent='Normal-world mirror writes and restores are blocked in Cave World. Use SAVE / EXPORT CAVE PROFILE.';
+      return;
+    }
     if(mirrorBusy)return;
     mirrorBusy=true;mirrorButtons.forEach(button=>button.disabled=true);
     clearMirrorDownload();
@@ -2227,6 +2306,86 @@ function start(){
   });
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);
+  // Staging-only new-Cave World selector: explicit buttons + confirmation,
+  // never a default seed migration, never canonical v0.02/Pack2 sidecar writes.
+  const caveWorldStatus=document.getElementById('caveWorldStatus');
+  async function openExplicitCaveWorld(action){
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(!window.confirm(action==='create'?
+        'CREATE a separate NEW CAVE WORLD for seed '+next+'? Existing worlds are never converted. Use a seed you have not used before.':
+        'LOAD your separately saved CAVE WORLD for seed '+next+'? Existing ordinary worlds will remain untouched.')){
+        caveWorldStatus.textContent='Cave selection cancelled; current world unchanged';return;
+      }
+      // The accepted M5 service worker caches its unchanged biome module list.
+      // Load cave code only on explicitly confirmed Cave World selection;
+      // the separate cave SW caches/validates all cave modules for offline.
+      const [loadedOps,farModule]=await Promise.all([
+        import('./manual-caves/game-startup-contract.mjs'),
+        import('./manual-caves/c6-far-wall-gpu.mjs')]);
+      if(!storageReadOnly&&loadedOps.existingWorldNeedsSaveBeforeCaveSwitch(localStorage,world,changed)&&!save())
+        throw Error('Current world is not safely saved; export before entering caves');
+      // Validate storage and all source-authored entrances *before* committing
+      // to a gameplay world switch. Failed preflight leaves current scene intact.
+      if(readFourRegionProfile(localStorage,next))
+        throw Error('Cave World cannot overwrite the four-biome generation profile for this seed');
+      const selected=loadedOps.prepareExplicitCaveWorld(localStorage,next,{action,approved:true});
+      const mouth=selected.runtime.entrancePlan.entrances[0].mouth;
+      const spawn=findSafeSpawn(selected.world,mouth.x,mouth.z);
+      // Validate the actual renderer before clearing a previous world.
+      const newCaveFar=farModule.createCaveFarWallGpu(gl);
+      for(const c of chunks.values())deleteChunkBuffers(c);
+      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
+      g2NewWorld();world=selected.world;caveOps=loadedOps;
+      caveFarGpu?.invalidate();caveFarGpu=newCaveFar;caveSession=selected;
+      world.nextPack2State=pack2Selection;
+      pack3=createPack3LiveBridge(world,localStorage);
+      resetManual14ForWorld();resetPack5ForWorld();
+      storageReadOnly=false;changed=false;respawnPrototype();
+      Object.assign(player,spawn,{vX:0,vY:0,vZ:0,onGround:true});
+      clearMirrorDownload();
+      seedLabel.textContent='CAVE WORLD '+world.seed;
+      seedInput.value=String(world.seed);
+      saveHealth.textContent='Separate CAVE profile loaded. Basic voxel editing and separate SAVE/EXPORT only. Shaped Pack 1–5 and ordinary-world vault/mirror edits are disabled.';
+      caveWorldStatus.textContent=(selected.created?'NEW CAVE WORLD CREATED':'CAVE WORLD LOADED')+
+        (selected.recovery?' · RECOVERED '+selected.recovery:'')+
+        ' · near '+selected.runtime.entrancePlan.entrances[0].name+' entrance. Tap RETURN to explore.';
+      message('Cave world ready · source-authored routes · ordinary worlds protected');
+      // On-demand cave offline preparation only: never register the new
+      // service worker for a normal world, never claim offline until its
+      // entire static source manifest is verified and the worker replies.
+      if('serviceWorker' in navigator){
+        if(!window.__mythwroughtCaveOfflineListener){
+          navigator.serviceWorker.addEventListener('message',event=>{
+            if(event.data?.type==='MYTHWROUGHT_CAVE_OFFLINE_READY')
+              caveWorldStatus.textContent+=' · OFFLINE ASSETS VERIFIED ('+event.data.assets+')';
+            if(event.data?.type==='MYTHWROUGHT_CAVE_OFFLINE_FAILED')
+              caveWorldStatus.textContent+=' · OFFLINE NOT READY: '+event.data.error;
+          });
+          window.__mythwroughtCaveOfflineListener=true;
+        }
+        void navigator.serviceWorker.register('./cave-offline-sw.js')
+          .then(()=>navigator.serviceWorker.ready)
+          .then(async reg=>{
+            const previouslyReady=await caches.match(new URL(
+              './cave-offline-ready.json',location.href));
+            if(!navigator.onLine){
+              caveWorldStatus.textContent+=previouslyReady?
+                ' · OFFLINE CAVE SOURCE CACHE PREVIOUSLY VERIFIED':
+                ' · OFFLINE NOT READY: complete source caching while online';
+              return;
+            }
+            caveWorldStatus.textContent+=' · preparing source cache (online required)';
+            reg.active?.postMessage({type:'MYTHWROUGHT_PREPARE_CAVE_OFFLINE'});
+          }).catch(error=>{
+            caveWorldStatus.textContent+=' · OFFLINE NOT READY: '+error.message;
+          });
+      }else caveWorldStatus.textContent+=' · OFFLINE NOT AVAILABLE ON THIS BROWSER';
+    }catch(err){caveWorldStatus.textContent='CAVE NOT ACTIVATED: '+err.message;}
+  }
+  document.getElementById('caveCreateWorld').onclick=()=>openExplicitCaveWorld('create');
+  document.getElementById('caveLoadWorld').onclick=()=>openExplicitCaveWorld('load');
   // Explicit, separate NEW WORLD action in the existing settings sheet:
   // never an implicit alternate seed, ordinary LOAD or save migration.
   const createFourBiomeButton=document.createElement('button');
@@ -2276,7 +2435,7 @@ function start(){
     // explicitly NEW four-biome world path. World assignment is separate
     // so existing restore paths retain their original exact contracts.
     g2NewWorld();
-    world=candidate;world.nextPack2State=pack2Selection;
+    caveSession=null;world=candidate;world.nextPack2State=pack2Selection;
     pack3=createPack3LiveBridge(world,localStorage);
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
     // Register *after* the explicit unused-seed v5 creation is safely saved.
@@ -2299,6 +2458,7 @@ function start(){
       if(!window.confirm('CREATE A NEW FOUR-BIOME WORLD for seed '+next+'? Only an unused seed is allowed. Older worlds are never converted.'))
         return;
       if(!storageReadOnly&&!save())throw Error('Current world has unsaved edits; export or save before creating a different world');
+      rejectLegacyWorldWhereCaveExists(localStorage,next);
       const choice=planM2WorldChoice(seedInput.value,M2_WORLD_MODE.CREATE_FOUR,{confirmed:true});
       const loaded=openM2World(localStorage,choice);
       if(!(loaded.base instanceof FourRegionWorld))
@@ -2317,6 +2477,7 @@ function start(){
       if(!window.confirm('CREATE an EXPERIMENTAL V5 MOUNTAIN-PASS FOUR-BIOME WORLD for UNUSED seed '+next+'? Existing worlds are NEVER upgraded or overwritten.'))
         return;
       if(!storageReadOnly&&!save())throw Error('Save your current world before a new experimental seed');
+      rejectLegacyWorldWhereCaveExists(localStorage,next);
       const choice=planM2WorldChoice(seedInput.value,
         M2_WORLD_MODE.CREATE_FOUR_V5,{confirmed:true});
       const loaded=openM2World(localStorage,choice);
@@ -2357,7 +2518,10 @@ function start(){
   document.getElementById('switchWorld').onclick=()=>{
     try{
       const next=worldSeedFromText(seedInput.value);
+      if(caveSession&&next===world.seed)
+        throw Error('This seed belongs to a cave profile. LOAD CAVE PROFILE or enter a different ordinary world seed.');
       if(next===world.seed&&!storageReadOnly){seedMessage.textContent='Already exploring this seed.';return;}
+      rejectLegacyWorldWhereCaveExists(localStorage,next);
       if(!storageReadOnly&&!save())throw Error('Current world is not verified saved. Export before switching.');
       const candidate=loadWorld(next);
       const result=candidate.base instanceof FourRegionWorld?
@@ -2368,7 +2532,7 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();
+      g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();
       storageReadOnly=false;changed=false;respawnPrototype();
       reactivateSkyClock();
       clearMirrorDownload();
@@ -2381,6 +2545,18 @@ function start(){
   };
   document.getElementById('export').onclick=()=>{
     try{
+      if(caveSession){
+        if(!save())throw Error('Cave profile has unsaved edits; refuse incomplete export');
+        const envelope=localStorage.getItem(caveProfileStorageKey(world.seed));
+        if(!envelope)throw Error('Verified cave profile not found');
+        const blob=new Blob([envelope],{type:'application/json'});
+        const url=URL.createObjectURL(blob),a=document.createElement('a');
+        a.href=url;a.download='mythwrought-cave-profile-'+world.seed+'.json';
+        document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),3000);
+        message('Exported separate checked Cave World envelope · ordinary world untouched');
+        return;
+      }
       const profiled=world.base instanceof FourRegionWorld;
       const exported=profiled?JSON.parse(exportM2World(world)):
         (world.pack2Cells.size?pack2ExportBundle(world):world.save());
@@ -2402,6 +2578,7 @@ function start(){
   document.getElementById('importFile').addEventListener('change',async e=>{
     const f=e.target.files?.[0];if(!f)return;
     try{
+      if(caveSession)throw Error('Ordinary WORLD IMPORT is disabled while cave profile is selected. Save/export Cave World or switch to another seed first.');
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
       const rawImport=await f.text();
       const incoming=JSON.parse(rawImport);
@@ -2419,6 +2596,7 @@ function start(){
         const intent=planM2WorldChoice(String(examined.seed),
           M2_WORLD_MODE.IMPORT_PROFILE,{confirmed:true,
             generator:examined.world.base.generationProfile.generator});
+        rejectLegacyWorldWhereCaveExists(localStorage,examined.seed);
         openM2World(localStorage,intent); // Exact profile, fresh-slot check.
         const stored=saveM2World(localStorage,examined.world);
         if(!stored.ok)throw Error('Profile import not verified; seed is protected: '+stored.reason);
@@ -2430,6 +2608,7 @@ function start(){
       if(incoming?.profile||incoming?.kind)
         throw Error('Unknown generator metadata; refusing unsafe legacy import');
       const imported=importWorldData(rawImport); // Validate original schema-1 first.
+      rejectLegacyWorldWhereCaveExists(localStorage,imported.seed);
       if(readFourRegionProfile(localStorage,imported.seed))
         throw Error('Legacy import cannot overwrite a four-biome generation profile');
       const previousOverlay=loadPack2LiveWorld(localStorage,imported).world;
@@ -2456,7 +2635,7 @@ function start(){
       if(!outcome.ok)throw Error(outcome.reason);
       const overlay=savePack2LiveWorld(localStorage,candidate);
       if(!overlay.ok)throw Error('Pack 2 sidecar not written; previous verified data retained: '+overlay.reason);
-      g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
+      g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
@@ -2477,6 +2656,7 @@ function start(){
     e.preventDefault();
     if(graphicsLost)return;
     graphicsLost=true;graphicsLossCount++;
+    caveFarGpu?.resetForLostContext();
     pack5Gpu?.invalidate();
     frameDriver.pause();cancelAllPointers();
     frameHistory.frame(performance.now(),false);
@@ -2490,6 +2670,7 @@ function start(){
       initializeGpuPipeline();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
       chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
+      caveFarGpu?.resetForLostContext();
       pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
       outlineKey='';outlineCount=0;lastTargetText='';
@@ -2505,6 +2686,8 @@ function start(){
     }
   });
   window.addEventListener('pagehide',()=>{
+    if(graphicsLost)caveFarGpu?.resetForLostContext();
+    else caveFarGpu?.invalidate();
     frameDriver.pause();
     frameHistory.frame(performance.now(),false);
     cancelAllPointers();
@@ -2525,6 +2708,12 @@ function start(){
   if(['localhost','127.0.0.1'].includes(location.hostname)){
     // Local-only regression interface; absent from the public Pages runtime.
     window.__mythwroughtTest=Object.freeze({
+      caveMode(){return {enabled:!!caveSession,seed:world.seed,
+        profile:caveSession?.profile??null,
+        entranceSites:caveSession?.runtime.entrancePlan.entrances.map(e=>({
+          name:e.name,mouth:e.mouth}))??[],
+        sourceCounts:caveSession?.world.base.cavePlanReport??null,
+        saveIsolation:!caveSession||localStorage.getItem(worldSlotKey(world.seed))===null};},
       fourBiomeMode(){return world.base instanceof FourRegionWorld?'four-regions':'legacy';},
       fourBiomeProfile(){return world.base instanceof FourRegionWorld?world.base.generationProfile:null;},
       // M5 read-only local browser acceptance: no displacement/rotation methods.
