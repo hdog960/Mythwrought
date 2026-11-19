@@ -56,3 +56,68 @@ jobs:
           path: artifacts/gameplay-recorder/
           if-no-files-found: warn
           retention-days: 14
+
+  live-original-game-40-creature-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-head native 40-species and independent schema-1 save checks
+        run: |
+          node --check src/main.mjs
+          node --check src/mobs/live-render.mjs
+          node --check src/mobs/live-game.mjs
+          node --check tests/live-five-system-mobs-browser.mjs
+          node --test tests/live-five-system-mobs.test.mjs
+          node --test tests/mobs/full-roster.test.mjs
+          node --test tests/mobs/roster-persistence.test.mjs
+      - name: Install real WebGL2 Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Verify forty real-game creature meshes at three phone sizes
+        run: node tests/live-five-system-mobs-browser.mjs
+      - name: Preserve genuine 120 source-authentic PNGs and SHA256 manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-unified-actual-game-40-mobs
+          path: artifacts/five-systems-live-mobs/
+          if-no-files-found: warn
+          retention-days: 14
+
+  deep-cave-real-sky-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    env:
+      CAVE_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict native cave 4-GPU source budget and real voxel seam tests
+        run: |
+          node --check src/manual-caves/c6-far-wall-gpu.mjs
+          node --test tests/cave-roadmap-far-wall-gpu.test.mjs
+      - name: Install real WebGL2 Chromium and PNG inspector
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Reject real sky leak in all named and secondary original-game cave scenes
+        run: node tests/cave-roadmap-in-game-browser.mjs
+      - name: Preserve original-game cave screenshot/ray source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-unified-actual-game-cave-source-rays
+          path: artifacts/cave-roadmap-actual-game/
+          if-no-files-found: warn
+          retention-days: 14
