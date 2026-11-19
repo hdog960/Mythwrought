@@ -1,7 +1,7 @@
 {
   "kind": "MYTHWROUGHT_CAVE_SOURCE_ASSETS_V1",
-  "sourceHead": "963458d3ed486dbe973ce67a87715b57282647e0",
-  "cacheRevision": "963458d3ed486dbe",
+  "sourceHead": "9b521c08ddcb0328fafe39ebcfa0693003cc5f0e",
+  "cacheRevision": "9b521c08ddcb0328",
   "verification": "Git blob SHA-1 of source bytes: SHA1('blob '+byteLength+'\\0'+contents)",
   "assets": [
     "assets/icon.svg",
@@ -442,7 +442,7 @@
     "src/voxel-shape-interactions.mjs": "01be82e6c308e47a35fa6588cc6ed1ebeafca307",
     "src/voxel-trees.mjs": "b3bf04c8db67b479cc90292a155f574ef2885315",
     "src/voxel-watchtower.mjs": "ce6d84be85a61f7da819804fe7d8b0c30510c91b",
-    "src/voxel.mjs": "beaa7c9de60e6326128357c9dd3a498a154f255a",
+    "src/voxel.mjs": "aac71e010babc7cc71979c7badedccd396950ae4",
     "src/west-gallery-world.mjs": "b074e0caeb916003840c5c3b12a8af884c94e5a1",
     "src/world-atmosphere/canopy-bridges.mjs": "0825f5572c5991fac173555c38bd241524884383",
     "styles.css": "6f6ce70a4fb78454269065694b667bf7f2804a6d"
