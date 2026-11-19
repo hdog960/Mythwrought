@@ -61,3 +61,16 @@ test('removed instance keys are excluded from draw preparation and remain absent
  }
  assert.throws(()=>prepareNonblockDrawBatches([a,a],view,{removedKeys:sidecar}),TypeError);
 });
+
+
+test('fail closed on unknown and oversized removal sidecars while retaining valid distant removals',()=>{
+ const a=obj('seed7:root:a','forest:root',[0,0,0]);
+ const distant=obj('seed7:root:distant','forest:root',[100,0,0]);
+ assert.throws(()=>prepareNonblockDrawBatches([a],view,{removedKeys:['seed7:root:unknown']}),/unknown removed identity/);
+ assert.throws(()=>prepareNonblockDrawBatches([a],view,{maxObjects:1,removedKeys:['seed7:root:a','seed7:root:unknown']}),/removed identity budget/);
+ const valid=prepareNonblockDrawBatches([a,distant],view,{removedKeys:['seed7:root:distant']});
+ assert.equal(valid.visibleCount,1);
+ assert.equal(valid.triangles,1);
+ assert.deepEqual(valid.batches.flatMap(b=>b.instances.map(i=>i.instanceKey)),['seed7:root:a']);
+ assert.throws(()=>prepareNonblockDrawBatches([a,a],view,{removedKeys:['seed7:root:a']}),/duplicate/);
+});
