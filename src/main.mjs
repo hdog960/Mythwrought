@@ -35,6 +35,8 @@ import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {installGameplayRecorder} from './gameplay-recorder.mjs';
 import {installGameUpdater} from './app-update.mjs';
+import {createLiveMobSession} from './mobs/live-game.mjs';
+import {createLiveMobRenderer} from './mobs/live-render.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
@@ -241,6 +243,76 @@ function start(){
   let caveFarGpu=null;
   const name=chunkKey;
   const player=newPlayer(world);
+  let mobSession=null,mobRenderer=null,mobEnvironment=null,mobLastSave=0;
+  function resetLiveMobSession(){
+    mobSession?.dispose();mobSession=null;mobEnvironment=null;
+    try{
+      mobSession=createLiveMobSession({
+        world,seed:world.seed,storage:localStorage,
+        resident:(cx,cz,section)=>chunks.has(depthMeshKey(cx,cz,section)),
+        biomeAt:point=>{
+          if(caveSession&&point[1]<-3.5)return 'cave';
+          const region=hasValidatedV6SkyProfile(world)?
+            resolveV6SkyBiome(world,point[0],point[2]):
+            resolveS6Biome(world,point[0],point[2],s6Source);
+          return region?.name??'plains';
+        },
+        caveAt:point=>({underground:!!caveSession&&point[1]<-3.5}),
+        skyAt:point=>{
+          const sunlight=mobEnvironment??sampleSkyAtmosphere(
+            sampleSkyClock(skyClock,performance.now()));
+          const under=!!caveSession&&point[1]<-3.5;
+          return {light:under?.29:Math.max(.42,Math.min(1,sunlight.daylight)),
+            dayPhase:sunlight.daylight>.8?'day':sunlight.daylight<.17?'night':
+              sunlight.elevation>=0?'dawn':'dusk'};
+        },
+        playerAt:()=>[player.x,player.feet,player.z],
+        allowWrites:()=>!storageReadOnly,
+        onPlayerDamage:event=>{
+          if(event.down){
+            mobSession?.revive();
+            respawnPrototype();
+            message('CREATURE ENCOUNTER · returned safely to spawn');
+          }else if(event.health<50){
+            message('CREATURE ATTACK · health '+Math.ceil(event.health)+'/100');
+          }
+        }
+      });
+    }catch(error){
+      mobSession=null;console.error('MYTHWROUGHT CREATURE SYSTEM UNAVAILABLE',error);
+    }
+  }
+  function disposeLiveMobSession(){
+    if(mobSession){mobSession.save();mobSession.dispose();mobSession=null;}
+  }
+  function restartMobRenderer(){
+    if(mobRenderer){mobRenderer.dispose();mobRenderer=null;}
+    try{mobRenderer=createLiveMobRenderer(gl);}
+    catch(error){console.error('MYTHWROUGHT MOB GPU UNAVAILABLE',error);}
+  }
+  resetLiveMobSession();
+  restartMobRenderer();
+  const mobActions=document.createElement('section');
+  mobActions.className='looksetting';
+  mobActions.setAttribute('aria-label','Wildlife and creatures');
+  mobActions.innerHTML='<h2 class="audit-title">CREATURES · 20 PASSIVE + 20 HOSTILE</h2>'+
+    '<p id="mobInfo" class="controlhint" role="status">Creatures appear in loaded world chunks. MINE attacks a creature in reach. INTERACT befriends, tames or rescues an eligible creature.</p>'+
+    '<div class="helpbuttons"><button id="mobInteract" type="button">INTERACT WITH NEARBY CREATURE</button>'+
+    '<button id="mobStatus" type="button">CREATURE STATUS</button></div>';
+  help.querySelector('.helpbody')?.append(mobActions);
+  const mobInfo=mobActions.querySelector('#mobInfo');
+  mobActions.querySelector('#mobInteract').onclick=()=>{
+    const result=mobSession?.interact()??'Creature runtime not available';
+    mobInfo.textContent=result;mobSession?.save();message(result);
+  };
+  mobActions.querySelector('#mobStatus').onclick=()=>{
+    const state=mobSession?.status();
+    mobInfo.textContent=state?
+      '40 authored species · '+state.counts.total+' present · '+state.counts.awake+
+        ' active · '+state.companions+' companions · health '+Math.ceil(state.health)+
+        '/100'+(state.readonly?' · protected read-only save':''):
+      'Creature runtime not available';
+  };
   const manual14Ids=new Set(MANUAL_FIVE_PACK_CATALOG.filter(x=>x.pack===1||x.pack===4).map(x=>x.numericId));
   const manual14ById=new Map(MANUAL_FIVE_PACK_CATALOG.filter(x=>manual14Ids.has(x.numericId))
     .map(x=>[x.numericId,x]));
@@ -760,6 +832,11 @@ function start(){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
+    if(mode==='mine'){
+      const hit=mobSession?.attack(eye(),facing());
+      if(hit){mobSession.save();message('Hit '+hit.name+' · '+
+        (hit.downed?'downed':Math.ceil(hit.health)+' health'));return;}
+    }
     // The cave profile stores ordinary schema-1 cube edits ONLY. Reject any
     // shaped/Pack2 placement BEFORE it can write a separate construction
     // sidecar that the cave save would not persist. Normal worlds unchanged.
@@ -1088,6 +1165,16 @@ function start(){
         canvas.dataset.skyS5EventTypes=String(S5_EVENT_CONTRACT.kinds);
       }
       stream();
+      mobEnvironment=atmosphere;
+      if(help.hidden&&!exploration.isOpen()&&mobSession){
+        const section=sectionForY(Math.floor(player.feet))??0;
+        const regions=[...chunks.values()].filter(c=>c.section===section)
+          .sort((a,b)=>(a.x*16+8-player.x)**2+(a.z*16+8-player.z)**2-
+            ((b.x*16+8-player.x)**2+(b.z*16+8-player.z)**2))
+          .slice(0,32).map(c=>({cx:c.x,cz:c.z,section:c.section,feet:player.feet}));
+        mobSession.advance(dt,regions);
+        if(now-mobLastSave>12000){mobSession.save();mobLastSave=now;}
+      }
       const c6Far=caveFarGpu?.step({world,player,nearChunks:chunks,
         nearPending:pending,frame,viewport:[w,h],enabled:!!caveSession})??
         {chunks:0,bytes:0,pending:0,uncovered:0,vertices:0,failures:0,uploads:0,lastMeshMs:0};
@@ -1155,6 +1242,25 @@ function start(){
         canvas.dataset.pack5DrawCalls='0';
         canvas.dataset.pack5PendingPages='0';
         canvas.dataset.pack5BudgetExcluded='0';
+      }
+      // Real depth-tested 40-model instancing, inside the existing WebGL pass.
+      if(mobRenderer&&mobSession){
+        const mobDraw=mobRenderer.render(mobSession.drawEntities(),{
+          eye:eye(),forward:facing(),
+          right:[-Math.cos(player.yaw),0,Math.sin(player.yaw)],
+          up:[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),
+            -Math.sin(player.pitch)*Math.cos(player.yaw)],
+          aspect:w/h,light:skyLight,fog:s6Mood.fog,time:now/1000,restoreProgram:program
+        });
+        canvas.dataset.mobActors=String(mobDraw.actors);
+        canvas.dataset.mobDrawCalls=String(mobDraw.draws);
+        canvas.dataset.mobGpuBytes=String(mobDraw.bytes);
+        canvas.dataset.mobTotal=String(mobSession.status().counts.total);
+        canvas.dataset.mobHealth=String(mobSession.status().health);
+        canvas.dataset.mobSpecies='40';
+      }else{
+        canvas.dataset.mobActors='0';canvas.dataset.mobTotal='0';
+        canvas.dataset.mobDrawCalls='0';canvas.dataset.mobSpecies='0';
       }
       // Genuine transparent-water pass, only for chunks with water candidates.
       if([...chunks.values()].some(c=>c.waterBuffer)){
@@ -2296,7 +2402,7 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();changed=false;respawnPrototype();
+    disposeLiveMobSession();g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();changed=false;respawnPrototype();
     reactivateSkyClock();
     seedLabel.textContent='WORLD '+seed;
     saveHealth.textContent='Verified mirror restored to original schema-1 canonical storage; previous-good backup retained.';
@@ -2337,12 +2443,12 @@ function start(){
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
       gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      g2NewWorld();world=selected.world;caveOps=loadedOps;
+      disposeLiveMobSession();g2NewWorld();world=selected.world;caveOps=loadedOps;
       caveFarGpu?.invalidate();caveFarGpu=newCaveFar;caveSession=selected;
       world.nextPack2State=pack2Selection;
       pack3=createPack3LiveBridge(world,localStorage);
       resetManual14ForWorld();resetPack5ForWorld();
-      storageReadOnly=false;changed=false;respawnPrototype();
+      storageReadOnly=false;resetLiveMobSession();changed=false;respawnPrototype();
       Object.assign(player,spawn,{vX:0,vY:0,vZ:0,onGround:true});
       clearMirrorDownload();
       seedLabel.textContent='CAVE WORLD '+world.seed;
@@ -2434,7 +2540,7 @@ function start(){
     // Preserve Creative flight's full reset-before-spawn invariant on the
     // explicitly NEW four-biome world path. World assignment is separate
     // so existing restore paths retain their original exact contracts.
-    g2NewWorld();
+    disposeLiveMobSession();g2NewWorld();
     caveSession=null;world=candidate;world.nextPack2State=pack2Selection;
     pack3=createPack3LiveBridge(world,localStorage);
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
@@ -2444,7 +2550,7 @@ function start(){
           world.base.generationProfile.generator))
       void ensureM5OfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
-    storageReadOnly=false;changed=false;respawnPrototype();
+    storageReadOnly=false;resetLiveMobSession();changed=false;respawnPrototype();
     clearMirrorDownload();
     seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
     seedMessage.textContent=statusText;
@@ -2532,7 +2638,7 @@ function start(){
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();
+      disposeLiveMobSession();g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();
       storageReadOnly=false;changed=false;respawnPrototype();
       reactivateSkyClock();
       clearMirrorDownload();
@@ -2635,7 +2741,7 @@ function start(){
       if(!outcome.ok)throw Error(outcome.reason);
       const overlay=savePack2LiveWorld(localStorage,candidate);
       if(!overlay.ok)throw Error('Pack 2 sidecar not written; previous verified data retained: '+overlay.reason);
-      g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
+      disposeLiveMobSession();g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
@@ -2656,6 +2762,7 @@ function start(){
     e.preventDefault();
     if(graphicsLost)return;
     graphicsLost=true;graphicsLossCount++;
+    mobRenderer=null;
     caveFarGpu?.resetForLostContext();
     pack5Gpu?.invalidate();
     frameDriver.pause();cancelAllPointers();
@@ -2668,6 +2775,7 @@ function start(){
       // Context loss invalidates EVERY old WebGL object; rebuilding only the
       // terrain mesh buffers while keeping old programs produces black frames.
       initializeGpuPipeline();
+      restartMobRenderer();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
       chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
       caveFarGpu?.resetForLostContext();
@@ -2686,6 +2794,7 @@ function start(){
     }
   });
   window.addEventListener('pagehide',()=>{
+    mobSession?.save();
     if(graphicsLost)caveFarGpu?.resetForLostContext();
     else caveFarGpu?.invalidate();
     frameDriver.pause();
@@ -2854,6 +2963,8 @@ function start(){
         bodyClear:g2Clear({x:player.x,y:player.feet,z:player.z}),
         resident:g2Ready({x:player.x,y:player.feet,z:player.z}),
         residentChunks:chunks.size};},
+      mobStatus(){return mobSession?.status()??null;},
+      mobRoster(){return mobSession?.drawEntities().map(m=>({id:m.id,species:m.species.id,position:m.position,state:m.state}))??[];},
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
         frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats(),
