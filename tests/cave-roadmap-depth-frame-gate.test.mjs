@@ -67,3 +67,22 @@ test('C6 never accepts surface/invalid coordinates as a deep screenshot',()=>{
  assert.throws(()=>expectedDeepSceneResidency({x:0,y:5,z:0}),/NOT_A_DEEP_CAMERA/);
  assert.throws(()=>expectedDeepSceneResidency({x:0.5,y:-120,z:0}),/INVALID_SOURCE_CAMERA/);
 });
+
+test('C6 live physics section seam uses observed feet without relaxing residency',()=>{
+ // Original authored Windcut camera requests floor+1=-19. Collider settles
+ // -19.000009947.., legitimately selecting the adjacent deeper section.
+ const source={x:271,y:-19,z:214};
+ const requested=expectedDeepSceneResidency(source);
+ const measured=expectedDeepSceneResidency(source,-19.000009947683715);
+ assert.equal(requested.requiredChunks,27);
+ assert.equal(measured.requiredChunks,27);
+ assert.equal(requested.expectedCenter,'16,13|-1,0,-2');
+ assert.equal(measured.expectedCenter,'16,13|-2,-1,-3');
+ assert.equal(measured.activeSection,-2);
+ assert.equal(measured.feet,-19.000009947683715);
+ assert.ok(assessDeepSceneFrame(complete(measured,180),measured).ok);
+ assert.equal(assessDeepSceneFrame(complete(requested,180),measured).ok,false);
+ // A real player moving away from the exact source location is NOT exempt.
+ assert.throws(()=>expectedDeepSceneResidency(source,-19.20),/PHYSICS_MISMATCH/);
+ assert.throws(()=>expectedDeepSceneResidency(source,-18.89),/PHYSICS_MISMATCH/);
+});
