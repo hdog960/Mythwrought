@@ -10,7 +10,7 @@ import {uploadChunkBuffer} from '../gpu-recovery.mjs';
 
 export const C6_FAR_BOUNDS=Object.freeze({
  maxChunks:4,maxBytes:1048576,maxRing:2,maxCells:64,
- horizontalRays:17,verticalOffsets:Object.freeze([-1,0,1]),
+ horizontalRays:17,verticalOffsets:Object.freeze([0,.45,-.45,.9,-.9]),
  minFramesBetweenPlans:24,maxSourceSamples:3264
 });
 const key=(x,z,s)=>depthMeshKey(x,z,s);
@@ -36,6 +36,9 @@ export function planCaveFarWallSources(world,player,viewport,
  const aspect=viewport[0]/viewport[1];
  if(!Number.isFinite(aspect)||aspect<=0)throw Error('C6_FAR_BAD_ASPECT');
  const half=Math.atan(aspect*Math.tan(72*Math.PI/360));
+ // Authoritative source-rock rays previously skipped the mid-height roof gap.
+ // Sample the real camera's middle-upper elevations first, WITHOUT changing
+ // maxSourceSamples, GPU memory, streaming radius or chunk upload caps.
  // The real game camera has a 72-degree VERTICAL FOV. The prior +/-1-voxel
  // samples saw distant walls at eye height but missed real overhead stone in
  // the adjacent streamed section; exposed procedural sky was visible through

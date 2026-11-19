@@ -1,7 +1,6 @@
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
-import {createCaveFarWallGpu} from './manual-caves/c6-far-wall-gpu.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER,DISTANCE_FOG_COLOR} from './sky.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
@@ -13,8 +12,6 @@ import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block} from './biome130-registry.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,pack2ExportBundle,pack2ImportBundle} from './pack2-world.mjs';
-import {prepareExplicitCaveWorld,saveExplicitCaveWorld,rejectLegacyWorldWhereCaveExists,existingWorldNeedsSaveBeforeCaveSwitch} from './manual-caves/game-startup-contract.mjs';
-import {caveProfileStorageKey} from './manual-caves/profile-store.mjs';
 import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
   pack2NormalizeState,pack2CycleState,pack2WaterSectionVertices,
   pack2BodyIntersects} from './pack2-integration.mjs';
@@ -48,6 +45,23 @@ import {createPack3LiveBridge,combinePack3ChunkMesh,isPack3BlockId} from './buil
 import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
 import {exportPack3Portable,inspectPack3Portable,restorePack3Portable} from './builder-assets/pack3-portable.mjs';
 
+ // Cave profile admission remains synchronous for every ordinary world;
+ // source-heavy cave modules are loaded only after explicit cave selection.
+ // The key, journal and backup names match cave profile-store exactly.
+const CAVE_PROFILE_PREFIX='mythwrought-caves-v1-seed-';
+function caveProfileStorageKey(seed){
+ if(!Number.isSafeInteger(seed)||seed!==(seed|0))throw Error('Invalid cave seed');
+ return CAVE_PROFILE_PREFIX+seed;
+}
+function rejectLegacyWorldWhereCaveExists(storage,seed){
+ if(!storage||typeof storage.getItem!=='function')
+  throw Error('Storage preflight required for switching worlds');
+ const k=caveProfileStorageKey(seed);
+ if([k,k+'.journal',k+'.backup'].some(key=>storage.getItem(key)!==null))
+  throw Error('Seed '+seed+' belongs to a protected Cave World. Choose LOAD CAVE PROFILE or another seed.');
+ return true;
+}
+
 const canvas=document.getElementById('scene');
 const notice=document.getElementById('notice');
 const status=document.getElementById('status');
@@ -61,7 +75,7 @@ if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or deskt
 else start();
 
 function start(){
-  let world,storageReadOnly=false,recoveryNote='',caveSession=null;
+  let world,storageReadOnly=false,recoveryNote='',caveSession=null,caveOps=null;
   function loadWorld(seed){
     // Legacy startup must NEVER silently reuse a seed reserved for the
     // creator's explicitly chosen new cave profile sidecar.
@@ -136,7 +150,8 @@ function start(){
   let lastTargetText='';
   const chunks=new Map(),pending=new Map();
   // Cave-only outer-ring opaque meshes, never scheduled in normal save profiles.
-  const caveFarGpu=createCaveFarWallGpu(gl);
+  // Keep accepted M5/legacy module graph free of cave-only imports.
+  let caveFarGpu=null;
   const name=chunkKey;
   const player=newPlayer(world);
   const manual14Ids=new Set(MANUAL_FIVE_PACK_CATALOG.filter(x=>x.pack===1||x.pack===4).map(x=>x.numericId));
@@ -487,7 +502,7 @@ function start(){
     }
     if(caveSession){
       try{
-        const caveSaved=saveExplicitCaveWorld(localStorage,caveSession,{approved:true});
+        const caveSaved=caveOps.saveExplicitCaveWorld(localStorage,caveSession,{approved:true});
         changed=false;
         saveHealth.textContent='CAVE WORLD SAVED · separate checksummed profile with journal and backup. Original world save unchanged.';
         return caveSaved.ok===true;
@@ -601,7 +616,7 @@ function start(){
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
-    if(caveSession)caveFarGpu.invalidate();
+    if(caveSession)caveFarGpu?.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
   function refreshPhysicalChunk(x,z,y){
@@ -901,8 +916,9 @@ function start(){
       gl.uniform3fv(U.uFog,DISTANCE_FOG_COLOR);
       gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
       stream();
-      const c6Far=caveFarGpu.step({world,player,nearChunks:chunks,
-        nearPending:pending,frame,viewport:[w,h],enabled:!!caveSession});
+      const c6Far=caveFarGpu?.step({world,player,nearChunks:chunks,
+        nearPending:pending,frame,viewport:[w,h],enabled:!!caveSession})??
+        {chunks:0,bytes:0,pending:0,uncovered:0,vertices:0,failures:0,uploads:0,lastMeshMs:0};
       canvas.dataset.c6FarChunks=String(c6Far.chunks);
       canvas.dataset.c6FarBytes=String(c6Far.bytes);
       canvas.dataset.c6FarPending=String(c6Far.pending);
@@ -943,7 +959,7 @@ function start(){
       }
       // Original source-composed far-rock opaque pass: same terrain shader,
       // depth buffer and fog, before the existing transparent-water draw.
-      canvas.dataset.c6FarDrawn=String(caveFarGpu.draw({atPos,atColor,atUv,atMat}));
+      canvas.dataset.c6FarDrawn=String(caveFarGpu?.draw({atPos,atColor,atUv,atMat})??0);
       // Pack 5 uses the EXISTING game terrain program and fog, exactly one
       // optional shaped-triangle draw, with bounded GPU memory and streaming.
       if(pack5Gpu){
@@ -2120,7 +2136,7 @@ function start(){
   // Staging-only new-Cave World selector: explicit buttons + confirmation,
   // never a default seed migration, never canonical v0.02/Pack2 sidecar writes.
   const caveWorldStatus=document.getElementById('caveWorldStatus');
-  function openExplicitCaveWorld(action){
+  async function openExplicitCaveWorld(action){
     try{
       const next=worldSeedFromText(seedInput.value);
       if(!window.confirm(action==='create'?
@@ -2128,19 +2144,28 @@ function start(){
         'LOAD your separately saved CAVE WORLD for seed '+next+'? Existing ordinary worlds will remain untouched.')){
         caveWorldStatus.textContent='Cave selection cancelled; current world unchanged';return;
       }
-      if(!storageReadOnly&&existingWorldNeedsSaveBeforeCaveSwitch(localStorage,world,changed)&&!save())
+      // The accepted M5 service worker caches its unchanged biome module list.
+      // Load cave code only on explicitly confirmed Cave World selection;
+      // the separate cave SW caches/validates all cave modules for offline.
+      const [loadedOps,farModule]=await Promise.all([
+        import('./manual-caves/game-startup-contract.mjs'),
+        import('./manual-caves/c6-far-wall-gpu.mjs')]);
+      if(!storageReadOnly&&loadedOps.existingWorldNeedsSaveBeforeCaveSwitch(localStorage,world,changed)&&!save())
         throw Error('Current world is not safely saved; export before entering caves');
       // Validate storage and all source-authored entrances *before* committing
       // to a gameplay world switch. Failed preflight leaves current scene intact.
       if(readFourRegionProfile(localStorage,next))
         throw Error('Cave World cannot overwrite the four-biome generation profile for this seed');
-      const selected=prepareExplicitCaveWorld(localStorage,next,{action,approved:true});
+      const selected=loadedOps.prepareExplicitCaveWorld(localStorage,next,{action,approved:true});
       const mouth=selected.runtime.entrancePlan.entrances[0].mouth;
       const spawn=findSafeSpawn(selected.world,mouth.x,mouth.z);
+      // Validate the actual renderer before clearing a previous world.
+      const newCaveFar=farModule.createCaveFarWallGpu(gl);
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
       gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-      g2NewWorld();world=selected.world;caveSession=selected;
+      g2NewWorld();world=selected.world;caveOps=loadedOps;
+      caveFarGpu?.invalidate();caveFarGpu=newCaveFar;caveSession=selected;
       world.nextPack2State=pack2Selection;
       pack3=createPack3LiveBridge(world,localStorage);
       resetManual14ForWorld();resetPack5ForWorld();
@@ -2422,7 +2447,7 @@ function start(){
     e.preventDefault();
     if(graphicsLost)return;
     graphicsLost=true;graphicsLossCount++;
-    caveFarGpu.resetForLostContext();
+    caveFarGpu?.resetForLostContext();
     pack5Gpu?.invalidate();
     frameDriver.pause();cancelAllPointers();
     frameHistory.frame(performance.now(),false);
@@ -2436,7 +2461,7 @@ function start(){
       initializeGpuPipeline();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
       chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
-      caveFarGpu.resetForLostContext();
+      caveFarGpu?.resetForLostContext();
       pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
       outlineKey='';outlineCount=0;lastTargetText='';
@@ -2452,8 +2477,8 @@ function start(){
     }
   });
   window.addEventListener('pagehide',()=>{
-    if(graphicsLost)caveFarGpu.resetForLostContext();
-    else caveFarGpu.invalidate();
+    if(graphicsLost)caveFarGpu?.resetForLostContext();
+    else caveFarGpu?.invalidate();
     frameDriver.pause();
     frameHistory.frame(performance.now(),false);
     cancelAllPointers();
