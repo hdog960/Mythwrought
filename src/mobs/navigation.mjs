@@ -161,3 +161,36 @@ export class LocalNavigator {
     return [dx / scale, dz / scale];
   }
 }
+
+// Bounded local volumetric steering. Each candidate crosses two sampled body
+// volumes before the existing swept physics solver commits movement.
+export function steerInVolume(world, mob, target, mode) {
+  const idle = { direction: [0,0], vertical: 0, mode };
+  if (!validPoint(target) || !['fly','swim'].includes(mode)) return idle;
+  const delta = target.map((value, axis) => value - mob.position[axis]);
+  const distance = Math.hypot(...delta);
+  if (distance < .055) return idle;
+  const [dx,dy,dz] = delta.map(value => value / distance);
+  const adjacent = [
+    [dx,dy,dz], [dx*.55, dy*.45, dz*.55+.85], [dx*.55, dy*.45, dz*.55-.85],
+    [dx*.55+.85, dy*.45, dz*.55], [dx*.55-.85, dy*.45, dz*.55],
+    [dx*.4, .9,dz*.4], [dx*.4,-.9,dz*.4]
+  ];
+  for (const candidate of adjacent) {
+    const length = Math.hypot(...candidate);
+    if (length < .05) continue;
+    const direction = candidate.map(value => value / length);
+    const safe = [.19,.42].every(step => {
+      const point = mob.position.map((value, axis) => value + direction[axis] * Math.min(step,distance));
+      if (world.volume(point,mob.species.body) !== 'clear' || world.environment(point).hazard) return false;
+      if (mode === 'fly') return true;
+      const medium = world.medium?.([point[0],point[1]+.12,point[2]]);
+      return medium === 'water' || (medium === 'air' && direction[1] <= .15 && world.grounded(point,mob.species.body));
+    });
+    if (safe) {
+      const strength = Math.min(1, distance * 4);
+      return { direction: [direction[0]*strength,direction[2]*strength], vertical: direction[1]*strength, mode };
+    }
+  }
+  return idle;
+}

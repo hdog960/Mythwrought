@@ -1,6 +1,7 @@
 import { ForegroundFrameDriver } from '../src/foreground.mjs';
 import { FIXED_STEP } from '../src/mobs/engine.mjs';
 import { familiarWildlife } from '../src/mobs/familiar-wildlife.mjs';
+import { originalWildlife } from '../src/mobs/original-wildlife.mjs';
 import { getSpecies } from '../src/mobs/species.mjs';
 import { createScene } from './scene.mjs';
 import { createRenderer } from './renderer.mjs';
@@ -16,7 +17,13 @@ const health = document.querySelector('#health');
 const stats = document.querySelector('#stats');
 const tabs = [...document.querySelectorAll('[data-species]')];
 const picker = document.querySelector('#wildlife');
-for (const key of Object.keys(familiarWildlife)) picker.add(new Option(getSpecies(key).displayName, key));
+const stagedWildlife = { ...familiarWildlife, ...originalWildlife };
+for (const [label, ids] of [['Familiar wildlife',Object.keys(familiarWildlife)],['Mythwrought wildlife',Object.keys(originalWildlife)]]) {
+  const group=document.createElement('optgroup');
+  group.label=label;
+  for (const id of ids) group.append(new Option(getSpecies(id).displayName,id));
+  picker.append(group);
+}
 picker.addEventListener('change', () => select(picker.value));
 const commands = {
   deer: [['approach', 'Approach deer'], ['withdraw', 'Step away']],
@@ -28,6 +35,7 @@ const testMode = ['localhost', '127.0.0.1'].includes(location.hostname) &&
   new URL(location.href).searchParams.has('test');
 const scene = createScene();
 const terrain = scene.meshes();
+const water = scene.waters();
 const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, powerPreference: 'low-power' });
 let lossExtension = testMode ? gl?.getExtension('WEBGL_lose_context') : null;
 let renderer;
@@ -97,7 +105,7 @@ function construct() {
     return false;
   }
   try {
-    renderer = createRenderer(gl, terrain, scene.cameraClear);
+    renderer = createRenderer(gl, terrain, scene.cameraClear, water);
     message.textContent = '';
     return true;
   } catch (error) {
@@ -110,6 +118,9 @@ function construct() {
 function wildlifeCommands(id) {
   const entry = getSpecies(id);
   const list = [['approach', 'Approach'], ['withdraw', 'Step away'], ['group', 'Add group member']];
+  const original=originalWildlife[id];
+  if (original?.medium === 'fly') list.push(['fly','Take flight'],['land','Land']);
+  if (original?.medium === 'swim') list.push(['bank','Swim to bank'],['pool','Return to water']);
   if (id === 'fox') list.push(['prey', 'Introduce rabbit']);
   if (entry.breeding.eligible) list.push(['breed', 'Breed nearby pair']);
   if (entry.taming.eligible) list.push(['near', 'Move nearby'], ['tame', 'Tame']);
@@ -123,7 +134,7 @@ function wildlifeCommands(id) {
 function select(species) {
   if (!scene.select(species)) return;
   for (const tab of tabs) tab.setAttribute('aria-pressed', String(tab.dataset.species === species));
-  picker.value = Object.hasOwn(familiarWildlife, species) ? species : '';
+  picker.value = Object.hasOwn(stagedWildlife, species) ? species : '';
   actions.replaceChildren(...(commands[species] ?? wildlifeCommands(species)).map(([id, label]) => {
     const button = document.createElement('button');
     button.type = 'button';

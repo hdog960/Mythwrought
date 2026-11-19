@@ -1,6 +1,7 @@
 import { bufferDimensions } from '../src/render-budget.mjs';
 import { meshes } from './models.mjs';
 import { familiarWildlife } from '../src/mobs/familiar-wildlife.mjs';
+import { originalWildlife } from '../src/mobs/original-wildlife.mjs';
 
 const project = `
 uniform vec3 uEye, uForward, uRight, uUp;
@@ -39,7 +40,8 @@ void main() {
   float cycle = sin(uTime*11.0+aMotion.w);
   vec3 p = aPosition;
   if (abs(aJoint) > 3.5) {
-    p.y += sin(uTime*23.0)*aMotion.x*.065;
+    float stroke = sin(uTime*23.0)*aMotion.x;
+    p.y += stroke*max(0.0,abs(p.x)-.075)*.68;
   } else if (abs(aJoint) > 2.5) {
     if (aMotion.y < 0.0) {
       p.y -= (-aMotion.y)*(.08 + abs(sin(uTime*7.0))*.12);
@@ -69,10 +71,11 @@ const fragment = `#version 300 es
 precision highp float;
 in vec3 vColor;
 in float vDistance;
+uniform float uOpacity;
 out vec4 color;
 void main() {
   float fog=smoothstep(10.0,45.0,vDistance);
-  color=vec4(mix(vColor,vec3(.29,.39,.38),fog),1.0);
+  color=vec4(mix(vColor,vec3(.29,.39,.38),fog),uOpacity);
 }`;
 
 const MAX_INSTANCES = 32;
@@ -81,7 +84,7 @@ const cross = ([a,b,c], [x,y,z]) => [b*z-c*y, c*x-a*z, a*y-b*x];
 
 function camera(point, species, cameraClear) {
   const id = species.id;
-  const familiar = Object.hasOwn(familiarWildlife, id);
+  const familiar = Object.hasOwn(familiarWildlife, id) || Object.hasOwn(originalWildlife,id);
   const distance = familiar ? Math.max(.58, Math.min(1.08, .45 + species.body.height * .35)) :
     id === 'glownewt' ? .68 : id === 'goblin' ? .89 : 1;
   const level = familiar ? species.body.height * .57 : id === 'glownewt' ? .23 : .66;
@@ -94,7 +97,7 @@ function camera(point, species, cameraClear) {
   return { eye, forward, right, up: cross(right, forward) };
 }
 
-export function createRenderer(gl, terrainMeshes, cameraClear) {
+export function createRenderer(gl, terrainMeshes, cameraClear, waterMeshes = []) {
   const buffers = [];
   const arrays = [];
   const programs = [];
@@ -127,7 +130,7 @@ export function createRenderer(gl, terrainMeshes, cameraClear) {
     }
     gl.linkProgram(handle);
     if (!gl.getProgramParameter(handle, gl.LINK_STATUS)) throw Error(gl.getProgramInfoLog(handle));
-    return { handle, uniforms: Object.fromEntries(['uEye','uForward','uRight','uUp','uAspect','uTime']
+    return { handle, uniforms: Object.fromEntries(['uEye','uForward','uRight','uUp','uAspect','uTime','uOpacity']
       .map(name => [name, gl.getUniformLocation(handle, name)])) };
   }
 
@@ -165,11 +168,12 @@ export function createRenderer(gl, terrainMeshes, cameraClear) {
     return { array, count: data.length / stride, instanceBuffer };
   }
 
-  let scene, animalsProgram, scenery, models;
+  let scene, animalsProgram, scenery, fluids, models;
   try {
     scene = program(terrain);
     animalsProgram = program(animals);
     scenery = terrainMeshes.map(mesh => geometry(mesh, 9, false));
+    fluids = waterMeshes.map(mesh => geometry(mesh,9,false));
     models = Object.fromEntries(Object.entries(meshes).map(([id, mesh]) => [id, geometry(mesh, 7, true)]));
   } catch (error) {
     dispose();
@@ -181,11 +185,12 @@ export function createRenderer(gl, terrainMeshes, cameraClear) {
   gl.depthFunc(gl.LEQUAL);
   gl.clearColor(.29, .39, .38, 1);
 
-  function bind(shader, view, aspect, time) {
+  function bind(shader, view, aspect, time, opacity = 1) {
     gl.useProgram(shader.handle);
     for (const [key, value] of [['uEye',view.eye],['uForward',view.forward],['uRight',view.right],['uUp',view.up]])
       gl.uniform3fv(shader.uniforms[key], value);
     gl.uniform1f(shader.uniforms.uAspect, aspect);
+    gl.uniform1f(shader.uniforms.uOpacity, opacity);
     if (shader.uniforms.uTime !== null) gl.uniform1f(shader.uniforms.uTime, time);
   }
 
@@ -212,8 +217,8 @@ export function createRenderer(gl, terrainMeshes, cameraClear) {
       let count = 0;
       for (const entity of entities) {
         if (entity.species.id !== id || count === MAX_INSTANCES) continue;
-        const moving = Math.min(1, Math.hypot(...entity.velocity) / 2);
-        const foraging = ['graze','forage','peck','browse','sniff','scent','stalk'].includes(entity.visual);
+        const moving = Math.min(1, Math.max(entity.motionMode === 'fly' ? .6 : 0, Math.hypot(...entity.velocity) / 2));
+        const foraging = ['graze','forage','peck','browse','sniff','scent','stalk','dusk-watch','shell-retreat','snow-browse','gather'].includes(entity.visual);
         const intent = entity.visual === 'prepare-attack' ? .7 : entity.visual === 'attack' ? 1 : foraging ? -.75 : 0;
         const idleYaw = entity.state === 'idle' && !entity.velocity.some(Boolean) && !entity.yaw ? .56 : entity.yaw;
         scratch.set([...entity.position, idleYaw, moving, intent, entity.state === 'downed' ? 1 : entity.juvenile ? -1 : 0, count * .68], count++ * 8);
@@ -225,6 +230,19 @@ export function createRenderer(gl, terrainMeshes, cameraClear) {
       gl.drawArraysInstanced(gl.TRIANGLES, 0, mesh.count, count);
       actors += count;
       draws++;
+    }
+    if (fluids.length) {
+      bind(scene,view,aspect,time,.38);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+      gl.depthMask(false);
+      for (const mesh of fluids) {
+        gl.bindVertexArray(mesh.array);
+        gl.drawArrays(gl.TRIANGLES,0,mesh.count);
+        draws++;
+      }
+      gl.depthMask(true);
+      gl.disable(gl.BLEND);
     }
     return { draws, actors };
   }

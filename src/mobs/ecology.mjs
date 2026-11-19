@@ -37,7 +37,9 @@ export function spawnEligible(world, species, point, observer) {
   const { biomes, depth, light: bounds } = species.habitat;
   return !hazard && biomes.includes(biome) && Number.isFinite(light) &&
     light >= bounds[0] && light <= bounds[1] && point[1] >= depth[0] &&
-    point[1] <= depth[1] && world.grounded(point, species.body);
+    point[1] <= depth[1] && (world.grounded(point, species.body) ||
+      (species.movement.capabilities.includes('swim') && world.volume(point,species.body) === 'clear' &&
+        world.medium?.([point[0],point[1] + Math.min(.18,species.body.height*.3),point[2]]) === 'water'));
 }
 
 export class PopulationManager {

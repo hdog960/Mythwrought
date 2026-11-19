@@ -5,6 +5,7 @@ import { createRequire } from 'node:module';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { familiarWildlife } from '../../src/mobs/familiar-wildlife.mjs';
+import { originalWildlife } from '../../src/mobs/original-wildlife.mjs';
 import { speciesRegistry } from '../../src/mobs/species.mjs';
 
 const require = createRequire(import.meta.url);
@@ -159,6 +160,54 @@ async function verifyWildlife(page, viewport) {
   await capture(page, viewport, 'wolf-rescue', rescued, ['Wolf resumed following with the original bonded identity']);
 }
 
+async function verifyOriginalWildlife(page, viewport) {
+  for (const [id, profile] of Object.entries(originalWildlife)) {
+    await page.locator('#wildlife').selectOption(id);
+    const initial = await step(page,0);
+    assert.equal(initial.species,id);
+    assert.equal(initial.eligibility,true,id);
+    assert.equal(initial.mob.state,'idle');
+    await capture(page,viewport,'idle',initial,['Original model and eligible world fixture loaded']);
+    const signature = await step(page,200,profile.activity);
+    assert.equal(signature.state,profile.activity,id);
+    await capture(page,viewport,'signature-'+profile.activity,await step(page,4),
+      ['Runtime generated the species-specific activity']);
+    const started = await step(page,200,profile.travel);
+    assert.equal(started.state,profile.travel,id);
+    const motion = await step(page,21);
+    assert.ok(Math.hypot(...motion.mob.position.map((value,i)=>value-initial.mob.position[i])) > .20,id);
+    if (profile.medium) assert.equal(motion.mob.motionMode,profile.medium,id);
+    await capture(page,viewport,'movement-'+profile.travel,motion,
+      ['World coordinates changed through the collision solver']);
+
+    if (profile.medium==='fly') {
+      await command(page,'fly');
+      const flying=await step(page,120);
+      assert.equal(flying.mob.motionMode,'fly');
+      assert.ok(flying.mob.position[1] > initial.mob.position[1] + 1);
+      assert.equal(flying.mob.grounded,false);
+      await capture(page,viewport,'airborne',flying,['Flight moved and held the body above the terrain']);
+      await command(page,'land');
+      const landed=await step(page,165);
+      assert.equal(landed.mob.grounded,true,id);
+      assert.equal(landed.mob.motionMode,'walk',id);
+      assert.ok(Math.abs(landed.mob.position[1]-initial.mob.position[1]) < .055,id);
+    }
+    if (profile.medium==='swim') {
+      await command(page,'bank');
+      const bank=await step(page,275);
+      assert.equal(bank.mob.grounded,true,id);
+      assert.equal(bank.mob.motionMode,'walk',id);
+      assert.ok(bank.mob.position[0] > -3.7,id);
+      await capture(page,viewport,'bank',bank,['Creature exited verified water onto physical ground']);
+      await command(page,'pool');
+      const pool=await step(page,275);
+      assert.equal(pool.mob.motionMode,'swim',id);
+    }
+    wildlifeResults.push({species:id,viewport,status:'PASS',signature:profile.activity,movement:profile.travel});
+  }
+}
+
 try {
   for (const [width,height] of sizes) {
     const viewport = [width,height];
@@ -268,6 +317,7 @@ try {
         }
       }
       await verifyWildlife(page, viewport);
+      await verifyOriginalWildlife(page,viewport);
       const started = await step(page,0);
       await page.evaluate(() => window.mobPreview.teardown());
       const stopped = await page.evaluate(() => ({
@@ -279,7 +329,7 @@ try {
       assert.deepEqual(errors,[]);
       scenarios.push({viewport, screenshots:hashes.filter(entry=>entry.viewport[0]===width).length,
         contextRecovered, storageUnchanged:true, pageErrors:errors});
-      console.log(width+'x'+height+': Deer, Goblin, Glownewt and storage assertions passed');
+      console.log(width+'x'+height+': reference, familiar and original wildlife scenarios passed');
     } finally {
       await context.close();
     }
@@ -299,7 +349,7 @@ try {
     };
   });
   await writeFile(join(output,'species-acceptance.json'),JSON.stringify({
-    source, phase: 1, finalAcceptance: false, species: speciesAcceptance
+    source, phase: 2, finalAcceptance: false, species: speciesAcceptance
   },null,2)+'\n');
   await writeFile(join(output,'manifest.json'),JSON.stringify({
     source, dirty, browser:browser.version(), renderer:'Chromium ANGLE SwiftShader WebGL2',

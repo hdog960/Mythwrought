@@ -102,7 +102,9 @@ export class AnimalInteractions {
       const { biomes, light: bounds, depth } = species.habitat;
       if (hazard || !biomes.includes(biome) || light === null ||
           light < bounds[0] || light > bounds[1] || y < depth[0] || y > depth[1] ||
-          !this.#world.grounded(point, species.body) ||
+          (!this.#world.grounded(point,species.body) &&
+            !(species.movement.capabilities.includes('swim') && this.#world.volume(point,species.body)==='clear' &&
+              this.#world.medium?.([point[0],point[1]+Math.min(.18,species.body.height*.3),point[2]])==='water')) ||
           nearby.some(mob => distanceTo(point, mob.position) < species.body.radius * 2)) continue;
       const child = this.#engine.spawn(species.id, point, { juvenile: true });
       if (!child) return null;

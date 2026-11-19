@@ -43,3 +43,20 @@ The stacked preview workflow checks out the exact draft head and publishes
 the screenshot manifest and a Phase 1 species acceptance report.
 `finalAcceptance` stays false while future waves and the final matrix remain.
 The continuation has no production entry point.
+
+## Original passive wildlife checkpoint
+
+The next nine original creatures add distinct models and authored activities
+for dusk, light seeking, shell retreat, alpine movement, paddling, bounding,
+flock flight, diving and thermal flight. Glownewt retains its original
+preview and companion interactions. Flight uses real three-axis movement
+through resident, collision-checked space. Swimming samples the authoritative
+Pack 2 sloped water volume. Missing fluid state fails closed. The preview's
+water mesh uses a local transparent draw pass and the shared voxel renderer
+remains untouched.
+
+Original wildlife exercise takeoff and landing, bank exit and re-entry in the
+browser. Native tests verify volumetric flight near solid and unloaded
+boundaries and water entry, depth and exit. The beta biome, sky and pool
+inputs in this preview are staging fixtures. Future production integration
+will obtain these observations through approved world adapters.

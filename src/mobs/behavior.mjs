@@ -1,7 +1,8 @@
-import { LocalNavigator } from './navigation.mjs';
+import { LocalNavigator, steerInVolume } from './navigation.mjs';
 import { supportedPosition } from './movement.mjs';
 import { validPoint } from './world-query.mjs';
 import { familiarWildlife } from './familiar-wildlife.mjs';
+import { originalWildlife } from './original-wildlife.mjs';
 
 export const distanceTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 const atEye = (point, height) => [point[0], point[1] + height * .72, point[2]];
@@ -203,8 +204,98 @@ export class BehaviorController {
     }
     return {
       direction: this.#navigator.steer(mob, memory.destination),
-      pace: id === 'horse' ? 1.36 : id === 'pig' ? .7 : 1, jump: profile.jump
+      pace: profile.pace ?? (id === 'horse' ? 1.36 : id === 'pig' ? .7 : 1), jump: profile.jump
     };
+  }
+
+  #original(mob, memory, seen, peers, profile, requestedPoint) {
+    if (!mob.species.habitat.biomes.includes(seen.biome) || seen.hazard) return [0, 0];
+    const [x, y, z] = mob.position;
+    const [ox, oy, oz] = mob.origin;
+    const threatened = seen.visible && seen.distance < 4 && seen.target.threatening !== false;
+    const angle = threatened ? Math.atan2(z-seen.target.position[2],x-seen.target.position[0]) :
+      (memory.patternAngle ??= this.#engine.random(mob.id) * Math.PI * 2);
+    if (profile.medium === 'fly') {
+      if (validPoint(requestedPoint)) {
+        const requested = [...requestedPoint];
+        requested[1] = Math.max(oy, Math.min(oy+4, requested[1]));
+        const landing = requested[1] <= oy + .01;
+        setState(memory,landing ? 'land' : profile.travel);
+        if (landing && distanceTo(mob.position,requested) < .14) return [0,0];
+        return steerInVolume(this.#world,mob,requested,'fly');
+      }
+      if (threatened) {
+        setState(memory, 'air-escape');
+        return steerInVolume(this.#world,mob,[ox+Math.cos(angle)*2.9,oy+profile.height,oz+Math.sin(angle)*2.9],'fly');
+      }
+      const cycle = (memory.cycle = (memory.cycle ?? 0) + memory.dt) % 6.4;
+      if (cycle < .64) {
+        setState(memory, profile.activity);
+        return [0,0];
+      }
+      if (cycle < 1.72) {
+        setState(memory, 'takeoff');
+        return steerInVolume(this.#world,mob,[x,oy+profile.height,z],'fly');
+      }
+      if (cycle > 5.0) {
+        setState(memory,'land');
+        if (distanceTo(mob.position,mob.origin) < .14) return [0,0];
+        return steerInVolume(this.#world,mob,[ox,oy,oz],'fly');
+      }
+      const turn = angle + cycle * (mob.species.id === 'emberwing' ? 1.2 : .77);
+      let goal = [ox+Math.cos(turn)*profile.range*.63,oy+profile.height,oz+Math.sin(turn)*profile.range*.63];
+      if (mob.species.id === 'moonmoth') {
+        const lit = [goal,[x+.65,y,z],[x-.65,y,z],[x,y,z+.65],[x,y,z-.65]]
+          .filter(point=>distanceTo(point,mob.origin) <= 5);
+        const score = point => {
+          const sample=this.#world.environment(point);
+          return sample.hazard || !Number.isFinite(sample.light) ? -Infinity : sample.light;
+        };
+        goal = lit.reduce((best,point)=>score(point)>score(best) ? point : best,goal);
+        if (cycle < 2.08) {
+          setState(memory,'hover');
+          return {direction:[0,0],vertical:0,mode:'fly'};
+        }
+      }
+      if (mob.species.id === 'cloudfinch') {
+        const lead = peers.find(other => other.id < mob.id && other.species === mob.species &&
+          other.motionMode === 'fly' && distanceTo(mob.position,other.position) < 5);
+        if (lead) goal = [lead.position[0]-.7,lead.position[1]-.14,lead.position[2]-.55];
+      }
+      setState(memory,profile.travel);
+      return steerInVolume(this.#world,mob,goal,'fly');
+    }
+
+    if (profile.medium === 'swim') {
+      const wet = this.#world.medium([x,y+Math.min(.18,mob.species.body.height*.3),z]) === 'water';
+      const cycle = (memory.cycle = (memory.cycle ?? 0) + memory.dt) % 4.4;
+      if (validPoint(requestedPoint)) {
+        setState(memory, wet ? 'swim-to-bank' : 'shore-walk');
+        if (!wet && this.#world.grounded(requestedPoint,mob.species.body))
+          return this.#navigator.steer(mob,requestedPoint);
+        return steerInVolume(this.#world,mob,requestedPoint,'swim');
+      }
+      if (cycle < .75 && !threatened) {
+        setState(memory, profile.activity);
+        return { direction:[0,0],vertical:0,mode:'swim' };
+      }
+      const turn = threatened ? angle : angle + cycle * .82;
+      const point = [ox+Math.cos(turn)*profile.range*.65,
+        Math.max(oy-.24, oy + (mob.species.id==='reedwhisker'?-.23:.06)),oz+Math.sin(turn)*profile.range*.65];
+      setState(memory,profile.travel);
+      return { ...steerInVolume(this.#world,mob,point,'swim'),pace:profile.pace };
+    }
+
+    if (threatened && mob.species.id === 'glassback') {
+      if (memory.state !== 'shell-retreat') memory.destination = positionNear(this.#world,mob,mob.position,angle,1.65);
+      setState(memory,'shell-retreat');
+      return { direction: memory.destination ? this.#navigator.steer(mob,memory.destination) : [0,0], pace:.58 };
+    }
+    if (profile.day && seen.dayPhase !== profile.day && seen.dayPhase !== 'night' && !threatened) {
+      setState(memory,'day-rest');
+      return [0,0];
+    }
+    return this.#familiar(mob,memory,seen,peers,{ rest:.7, ...profile });
   }
 
   #hostile(mob, memory, seen, context) {
@@ -302,6 +393,8 @@ export class BehaviorController {
       }
       const profile = Object.hasOwn(familiarWildlife, mob.species.id) ? familiarWildlife[mob.species.id] : null;
       if (profile) return this.#familiar(mob, memory, seen, peers, profile);
+      if (Object.hasOwn(originalWildlife, mob.species.id))
+        return this.#original(mob,memory,seen,peers,originalWildlife[mob.species.id],context.destination?.(mob));
       const destination = mob.species.classification === 'hostile' ?
         this.#hostile(mob, memory, seen, context) : this.#passive(mob, memory, seen);
       if (!destination) return [0, 0];

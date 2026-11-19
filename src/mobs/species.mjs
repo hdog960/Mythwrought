@@ -1,4 +1,5 @@
 import { familiarWildlife } from './familiar-wildlife.mjs';
+import { originalWildlife } from './original-wildlife.mjs';
 
 const movements = ['walk', 'swim', 'fly', 'climb', 'jump', 'crawl'];
 const biomes = ['meadow', 'forest', 'wetland', 'alpine', 'desert', 'snow', 'cave', 'volcanic'];
@@ -172,7 +173,7 @@ function baseProfile({
   const isHostile = classification === 'hostile';
   const familiar = Object.hasOwn(familiarWildlife, id) ? familiarWildlife[id] : null;
   const canBond = id === 'glownewt' || familiar?.bond === true;
-  const model = familiar || ['deer', 'goblin', 'glownewt'].includes(id) ? id : 'unassigned';
+  const model = familiar || Object.hasOwn(originalWildlife, id) || ['deer', 'goblin', 'glownewt'].includes(id) ? id : 'unassigned';
   const habitatBiomes = habitatTags.split(' ');
   const capabilities = modes.split(' ');
   const cave = habitatBiomes.includes('cave');
