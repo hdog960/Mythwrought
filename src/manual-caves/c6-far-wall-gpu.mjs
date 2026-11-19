@@ -59,7 +59,10 @@ export function planCaveFarWallSources(world,player,viewport,
     const y=Math.floor(player.feet+1.55+t*Math.tan(rayPitch));
     const pos=x+','+y+','+z;
     if(pos===prev)continue;prev=pos;
-    if(++samples>bounds.maxSourceSamples)break;
+    // Enforce the original strict CPU ceiling across ALL rays, including
+    // rays that arrive after the budget is exhausted (no off-by-one counts).
+    if(samples>=bounds.maxSourceSamples)break;
+    samples++;
     const id=world.get(x,y,z);
     if(id===BLOCK.AIR)continue;
     found=true;
