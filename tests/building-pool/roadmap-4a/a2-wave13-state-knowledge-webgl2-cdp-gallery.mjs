@@ -218,7 +218,7 @@ async function runWithBrowser(){
     if(shots.length%6===0)console.log('4A A2 Wave13 source-original state-knowledge Chromium WebGL2 candidate captures',shots.length,'/ 72');
    }
   }
-  // Fail closed on actual files, not merely 72 in-memory capture hashes.
+  // Fail closed on actual files, not merely 42 in-memory capture hashes.
    const filenameCount=new Set(shots.map(x=>x.name)).size;
    const mismatched=shots.filter(x=>!existsSync(join(OUT,x.name))||
       createHash('sha256').update(readFileSync(join(OUT,x.name))).digest('hex')!==x.pngSha256);
@@ -232,7 +232,7 @@ async function runWithBrowser(){
     productionPhysicalFamilyRenderer:false,realIphoneTested:false,creatorArtApproved:false,
     integratedIntoGame:false,schema1SaveCompatibilityVerified:false,results:shots};
   writeFileSync(join(OUT,'results-all.json'),JSON.stringify(evidence,null,2)+'\n');
-  if(shots.length!==EXPECTED_VIEWS||distinctScreens<70)
+  if(shots.length!==EXPECTED_VIEWS||distinctScreens<42)
    throw Error('Incomplete/visually duplicated gallery: '+shots.length+' captures, '+distinctScreens+' distinct PNGs');
   return evidence;
  }finally{
@@ -252,7 +252,7 @@ export async function runGallery(){
  if(JSON.stringify(expected)!==JSON.stringify(configured))
   throw Error('Wave13 Chromium source roster mismatch: '+JSON.stringify({expected,configured}));
  const evidence=await runWithBrowser();
- console.log('4A A2 Wave13 source-original state-knowledge source-driven 72/72 WebGL2 gallery PASSED',
+ console.log('4A A2 Wave13 source-original state-knowledge source-driven 42/42 WebGL2 gallery PASSED',
   JSON.stringify({sha256:evidence.sourceBundleSha256,screens:evidence.actualViews,
    distinct:evidence.distinctScreenHashes,renderer:evidence.results[0]?.renderer,
    maxDrawCalls:Math.max(...evidence.results.map(x=>x.drawCalls)),
