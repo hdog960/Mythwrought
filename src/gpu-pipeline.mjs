@@ -68,7 +68,11 @@ export function buildGpuPipeline(gl,{terrainVertex,terrainFragment,skyVertex,sky
       lunarPhase:gl.getUniformLocation(resources.skyProgram,'uLunarPhase[0]'),
       lunarColor:gl.getUniformLocation(resources.skyProgram,'uLunarColor[0]'),
       lunarRadius:gl.getUniformLocation(resources.skyProgram,'uLunarRadius[0]'),
-      lunarVisibility:gl.getUniformLocation(resources.skyProgram,'uLunarVisibility[0]')
+      lunarVisibility:gl.getUniformLocation(resources.skyProgram,'uLunarVisibility[0]'),
+      starVisibility:gl.getUniformLocation(resources.skyProgram,'uStarVisibility'),
+      twinkleAngle:gl.getUniformLocation(resources.skyProgram,'uTwinkleAngle'),
+      cloudShiftA:gl.getUniformLocation(resources.skyProgram,'uCloudShiftA'),
+      cloudShiftB:gl.getUniformLocation(resources.skyProgram,'uCloudShiftB')
     };
     resources.outlineBuffer=gl.createBuffer();
     if(!resources.outlineBuffer)throw Error('WebGL outline buffer allocation failed');

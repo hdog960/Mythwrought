@@ -5,6 +5,7 @@ import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
 import {loadLunarEpoch,sampleLunarAge,sampleThreeMoons,S3_LUNAR_CONTRACT} from './sky-moons.mjs';
+import {sampleS4Sky,SKY_S4_CONTRACT} from './sky-stars.mjs';
 import {SKY_DAY_MS,SKY_DAY_TARGET_MS,SKY_NIGHT_TARGET_MS,
   loadSkyClock,sampleSkyClock,selectSkyClockTime,formatSkyTime} from './world-clock.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
@@ -879,6 +880,7 @@ function start(){
         player.yaw,player.pitch,w/h);
       const lunar=sampleThreeMoons(atmosphere.phaseMs,
         sampleLunarAge(lunarClock,now),atmosphere.daylight);
+      const nightCanvas=sampleS4Sky(atmosphere.phaseMs,atmosphere.daylight);
       const moonScreens=lunar.moons.map(m=>projectSunToScreen(m.direction,
         player.yaw,player.pitch,w/h));
       const skyLight=atmosphere.light.map((v,i)=>
@@ -903,6 +905,10 @@ function start(){
       gl.uniform3fv(skyU.lunarColor,lunar.moons.flatMap(m=>m.color));
       gl.uniform1fv(skyU.lunarRadius,lunar.moons.map(m=>m.radius));
       gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility));
+      gl.uniform1f(skyU.starVisibility,nightCanvas.starVisibility);
+      gl.uniform1f(skyU.twinkleAngle,nightCanvas.twinkleAngle);
+      gl.uniform2fv(skyU.cloudShiftA,nightCanvas.cloudA);
+      gl.uniform2fv(skyU.cloudShiftB,nightCanvas.cloudB);
       gl.drawArrays(gl.TRIANGLES,0,3);
       gl.enable(gl.DEPTH_TEST);
       gl.useProgram(program);
@@ -931,6 +937,11 @@ function start(){
         canvas.dataset.skyMoonIlluminations=JSON.stringify(lunar.moons.map(m=>Number(m.illumination.toFixed(5))));
         canvas.dataset.skyMoonVisibilities=JSON.stringify(lunar.moons.map(m=>Number(m.visibility.toFixed(5))));
         canvas.dataset.skyFog=JSON.stringify(atmosphere.fog.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyS4StarCount=String(SKY_S4_CONTRACT.starFamilyCount);
+        canvas.dataset.skyS4StarVisibility=nightCanvas.starVisibility.toFixed(5);
+        canvas.dataset.skyS4FieldCells=String(nightCanvas.starFieldCellCount);
+        canvas.dataset.skyS4CloudA=JSON.stringify(nightCanvas.cloudA.map(v=>Number(v.toFixed(5))));
+        canvas.dataset.skyS4CloudB=JSON.stringify(nightCanvas.cloudB.map(v=>Number(v.toFixed(5))));
       }
       stream();
       canvas.dataset.renderedFrames=String(frame);
