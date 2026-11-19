@@ -68,7 +68,7 @@ export function planCaveFarWallSources(world,player,viewport,
      const radius=Math.max(Math.abs(sx-cx),Math.abs(sz-cz));
      if(radius<=bounds.maxRing&&visible.includes(actualSection) &&
         (id===BLOCK.STONE||id===BLOCK.DEEPSTONE)){
-      const old=candidates.get(k)||{key:k,cx:sx,cz:sz,section,
+      const old=candidates.get(k)||{key:k,cx:sx,cz:sz,section:actualSection,
        hits:0,nearest:t,source:[x,y,z]};
       old.hits++;old.nearest=Math.min(old.nearest,t);
       candidates.set(k,old);
