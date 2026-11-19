@@ -38,6 +38,26 @@ jobs:
           node --test tests/sky-v6-adapter.test.mjs tests/sky-biome-adapter.test.mjs
           node --test tests/manual-biomes/v6-balanced-biomes.test.mjs tests/manual-biomes/profile-world.test.mjs tests/manual-biomes/m5-explicit-v5-activation.test.mjs
           node --test tests/gameplay-recorder.test.mjs
+  original-m5-hard-walk-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original physical M5 route/source and fog hard gates retained
+        run: |
+          node --check scripts/ci/manual-biomes-m5-overland-audit.mjs
+          node --test tests/manual-biomes/m5-natural-overland.test.mjs
+          node scripts/ci/manual-biomes-m5-overland-audit.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sky-s6-v6-preserved-original-m5-overland-${{ github.sha }}
+          path: artifacts/manual-biomes-m5-route/
+          if-no-files-found: error
+          retention-days: 14
   v6-original-physical-and-offline:
     runs-on: ubuntu-24.04
     timeout-minutes: 75
