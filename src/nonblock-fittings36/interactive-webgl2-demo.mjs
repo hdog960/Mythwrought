@@ -12,7 +12,7 @@ export function createInteractiveFittingsDemo({canvas,seed,objects,authorize,rea
  const renderer=createFittingsWebGL2Fixture(canvas);
  let selected=null,closed=false;
  const ensure=()=>{if(closed)throw new Error('fixture disposed');};
- const upload=()=>renderer.upload(fixture.visible());
+ const upload=()=>renderer.upload(fixture.visible(),{selectedKey:selected});
  try {
   const saved=readSidecar();
   if(saved!==null&&saved!==undefined)fixture.restore(saved);
@@ -26,6 +26,7 @@ export function createInteractiveFittingsDemo({canvas,seed,objects,authorize,rea
    if(typeof instanceKey!=='string'||!fixture.visible().some(o=>o.instanceKey===instanceKey))
     throw new RangeError('object not visible');
    selected=instanceKey;
+   upload();
    return objects.find(o=>o.instanceKey===instanceKey).selectionAabbs;
   },
   breakSelected(){
