@@ -1,0 +1,5 @@
+# :12 source reconciliation witness — 2026-11-18
+Opt-in only; no production imports, spawning, merges, or save-core modifications.
+Producer PR HEADs observed this run: :48 #226 d5abe35ab0bbddf3e6f17aa40595668a697cad96; :24 #247 e5b99ca2d6af25a18dcf667d6556658d95bf0383; :36 #249 c575468d9a8cce381de61f4f4e99495613a294ac. Historical :12 #206 aedabf1d3e6250f16e3495ec77bdc056fafc1f46 remains untouched. PR #245 prior HEAD 64d54aa58a5a493a850c69f7716817fbf9ce04e5.
+This validator hashes supplied Git source bytes using Git blob SHA-1, checks owner path confinement, instance identity, breakability, tombstone equality, AABB, seed/edit constraints, and mandatory lifecycle and three-size screenshot declarations. It does NOT independently fetch producer commits, authenticate caller HEAD associations, or execute :00. Even a successful declaration returns live:false and breakabilityReady:false.
+Next: independent source-byte/commit provenance, actual :00 PICK→BREAK→TOMBSTONE→RELOAD with schema-1 backups, orientation-safe :36 identity agreement, real Chromium WebGL2 at 667x375 / 844x390 / 932x430. No source-ready or live acceptance claimed.
