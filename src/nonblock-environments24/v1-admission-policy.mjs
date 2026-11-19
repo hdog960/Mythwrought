@@ -31,7 +31,7 @@ export function planEnvironmentV1Admission(descriptors,environment,{maxInstances
   if(check(environment.isEdited,...a)||check(environment.isEdited,...support)){
    rejected.push({instanceKey:d.instanceKey,reason:'edited'});continue;
   }
-  if(!check(environment.isSolid,...support)||check(environment.isSolid,...a)){
+  // Reserved supporting terrain is owned by another placement proposal. A\n  // solid support voxel is not automatically available for attachment.\n  if(typeof environment.isReserved==='function'&&check(environment.isReserved,...support)){\n   rejected.push({instanceKey:d.instanceKey,reason:'support-reserved'});continue;\n  }\n  if(!check(environment.isSolid,...support)||check(environment.isSolid,...a)){
    rejected.push({instanceKey:d.instanceKey,reason:'mount'});continue;
   }
   // Sample all integer voxel cells intersected by selection bounds. This is
