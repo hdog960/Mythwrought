@@ -18,7 +18,7 @@ const oldFiles={
  'sw-m5.js':execFileSync('git',['show',BASE_CACHE_FIRST+':sw-m5.js'],{encoding:'utf8'})
 };
 const root=process.cwd();
-let deploy='old',requests=0;
+let deploy='old',requests=0,serverEpoch='a';
 function mime(file){
  if(file.endsWith('.mjs')||file.endsWith('.js'))return 'text/javascript';
  if(file.endsWith('.css'))return 'text/css';
@@ -36,7 +36,8 @@ const server=createServer(async(req,res)=>{
    const fromOld=deploy==='old'&&Object.prototype.hasOwnProperty.call(oldFiles,relative);
    const content=fromOld?oldFiles[relative]:await readFile(path.resolve(root,relative));
    res.writeHead(200,{'Content-Type':mime(relative),'Cache-Control':'no-store',
-     'X-MW-Origin-Build':fromOld?'old':'new'});
+     'X-MW-Origin-Build':fromOld?'old':'new',
+     'X-MW-Server-Epoch':serverEpoch});
    res.end(content);
  }catch(err){res.writeHead(404,{'Content-Type':'text/plain'});res.end(String(err));}
 });
@@ -94,7 +95,12 @@ try{
     return keys.includes('mythwrought-m5-shell-20261119-v6-safe-refresh')&&
       !keys.includes('mythwrought-m5-shell-20261118-v5-recorder');
   },null,{timeout:180000});
+  // Change a response header AFTER the new cache was installed. Only a real
+  // network-first navigation can observe epoch b; cached HTML stays epoch a.
+  serverEpoch='b';
   const refreshed=await page.reload({waitUntil:'networkidle',timeout:45000});
+  assert.equal(refreshed.headers()['x-mw-server-epoch'],'b',
+    'Game shell was still served cache-first despite an available live page');
   assert.equal(refreshed.headers()['x-mw-origin-build'],'new',
     'Updated service worker did not perform online-first document request');
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
