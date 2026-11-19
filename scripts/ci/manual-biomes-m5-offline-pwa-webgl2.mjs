@@ -56,7 +56,7 @@ const report={kind:'mythwrought-m5-offline-pwa-chromium-v1',viewport:selected,
   width,height,seed,sourceGenerator:'mythwrought-four-surface-regions-v5',
   defaultGenerator:'mythwrought-four-surface-regions-v4',
   sourceSchema:1,realChromium:true,offlineModeVerified:false,
-  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261118-v4',
+  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261119-s6-v1',
   finished:false,screens:[],checks:[],errors:[]};
 const persist=()=>writeFile(path.join(out,'manifest.json'),JSON.stringify(report,null,2));
 const check=(name,ok,info={})=>{
@@ -151,15 +151,20 @@ try{
     {timeout:180000});
   const online=await page.evaluate(async()=>{
     const keys=await caches.keys();
-    const name=keys.find(x=>x==='mythwrought-m5-shell-20261118-v4');
+    const name=keys.find(x=>x==='mythwrought-m5-shell-20261119-s6-v1');
     const cache=name?await caches.open(name):null;
     const urls=cache?await cache.keys():[];
-    return {name,cacheCount:urls.length,controller:
+    const skyAssets=['sky-atmosphere.mjs','sky-biome-adapter.mjs','sky-events.mjs',
+      'sky-moons.mjs','sky-stars.mjs','world-clock.mjs'];
+    const skyCached=skyAssets.every(asset=>urls.some(req=>
+      req.url.endsWith('/src/'+asset)));
+    return {name,cacheCount:urls.length,skyCached,controller:
       navigator.serviceWorker.controller?.scriptURL,urls:urls.map(x=>x.url),
       secure:window.isSecureContext};
   });
   check('atomic-versioned-shell-install',online.secure&&
-    online.name===report.serviceWorkerVersion&&online.cacheCount>=190&&
+    online.name===report.serviceWorkerVersion&&online.cacheCount>=215&&
+    online.skyCached&&
     online.controller?.endsWith('/sw-m5.js')&&
     ['src/main.mjs','src/manual-biomes/profile-world.mjs',
      'src/manual-biomes/m5-offline-registration.mjs','index.html',

@@ -1,0 +1,43 @@
+name: Mythwrought SKY S0 original-game Chromium baseline
+# S0 frozen at 7840b4cb22a1209406abdfb465b3630af16709c3.
+# Do not rerun its production-identical check on later S1+ gameplay commits.
+on:
+  push:
+    branches: ['sky/roadmap-s0-baseline-20261118']
+    paths:
+      - 'tests/sky/s0-baseline-browser.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sky-s0-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  original-game-sky-s0:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert exact source and no modified production gameplay files
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code 'e9223217ef1e91d282900c3fc13a21eeda316b63' HEAD -- src/main.mjs src/sky.mjs src/gpu-pipeline.mjs src/persistence.mjs src/render-budget.mjs index.html styles.css
+      - name: Install Chromium and minimal screenshot dependencies
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Capture 3 original-game sky baselines and measured foreground frames
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-sky-s0.log 2>&1 &
+          node tests/sky/s0-baseline-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s0-${{ github.sha }}
+          path: artifacts/sky-s0/
+          if-no-files-found: warn

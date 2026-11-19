@@ -22,7 +22,17 @@
   </aside>
 </main>
 <div id="explorationOverlay" hidden role="dialog" aria-modal="true" aria-label="Exploration map"><div class="exploration-panel"><header class="exploration-heading"><strong>✦ THE DISCOVERED WORLD</strong><button type="button" id="closeExploration" aria-label="Close exploration map">✕ CLOSE</button></header><p id="explorationCoordinates" class="map-coordinates">Your position</p><canvas id="expandedMap" width="320" height="320" aria-label="Map of visited locations, drag to pan"></canvas><p id="explorationSummary" class="map-summary" role="status">Unexplored regions remain hidden.</p><nav class="map-controls" aria-label="Map controls"><button type="button" id="mapZoomOut">− ZOOM</button><button type="button" id="mapRecenter">◎ RECENTER</button><button type="button" id="mapZoomIn">+ ZOOM</button></nav></div></div>
-<div id="help" hidden><div class="helpbody"><h1>MYTHWROUGHT</h1><p><b>Engineering prototype:</b> Move with the left pad, look with the right pad, and MINE/PLACE the block in the center of your view. JUMP from the right grip; hold AIM on the left grip for finer looking.</p><section class="looksetting g2b-flight-settings" aria-label="Creative flight settings">
+<div id="help" hidden><div class="helpbody"><h1>MYTHWROUGHT</h1><p><b>Engineering prototype:</b> Move with the left pad, look with the right pad, and MINE/PLACE the block in the center of your view. JUMP from the right grip; hold AIM on the left grip for finer looking.</p>
+<section class="looksetting sky-clock-settings" aria-label="Day and night world clock">
+<h2 class="audit-title">✦ SKY CLOCK · DAY &amp; NIGHT</h2>
+<p id="skyClockStatus" class="controlhint sky-clock-readout" role="timer" aria-live="off">WORLD TIME · 12:00 · 24-MIN CYCLE RUNNING</p>
+<div class="helpbuttons sky-clock-buttons" role="group" aria-label="Set sky time without pausing">
+<button type="button" id="skySetDay" aria-label="Set day, noon, keep clock running">☀ SET DAY</button>
+<button type="button" id="skySetNight" aria-label="Set night, midnight, keep clock running">☾ SET NIGHT</button>
+</div>
+<p class="controlhint">The 24-minute automatic cycle keeps running while this menu is open. This S1 clock changes time only; the sun, moon, and lighting artwork arrive in later sky stages.</p>
+</section>
+<section class="looksetting g2b-flight-settings" aria-label="Creative flight settings">
 <h2 class="audit-title">CREATIVE MODE · FLIGHT CONTROLS</h2>
 <p class="controlhint">Enable Creative Mode, then RETURN to the world. Double-tap JUMP to start flying. Tap or hold UP to rise and DOWN to descend; double-tap LAND to land safely. Creative stays enabled until you turn it off. Normal JUMP works before flight. Off each new session. Creative inventory and unlimited blocks are still in development.</p>
 <label class="g2b-flight-toggle"><input type="checkbox" id="g2bFlightEnable" aria-label="Enable Creative Mode flight controls for this session"> ENABLE CREATIVE MODE (FLIGHT CONTROLS)</label>
