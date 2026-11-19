@@ -12,7 +12,7 @@ import {spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {setTimeout as sleep} from 'node:timers/promises';
 import {fileURLToPath} from 'node:url';
-import {ROADMAP_C_4B_WAVE7_INSTITUTES} from '../../../src/building-pool/roadmap-4b/m3-research-wave7-roadmap-c.mjs';
+import {ROADMAP_C_4B_WAVE7_INSTITUTES} from '../../../src/building-pool/roadmap-4b/m3-research-wave7-roadmap-c-single.mjs';
 
 const root=resolve(fileURLToPath(new URL('../../../',import.meta.url)));
 const viewports=[[667,375],[844,390],[932,430]];
@@ -165,7 +165,7 @@ test('one original Roadmap C M3 Wave7 Sunrift collegium × exterior/section × t
   const site=await launchServer();
   let browser,releaseLock=null;
   const captures=[];
-  const source=readFileSync(resolve(root,'src/building-pool/roadmap-4b/m3-research-wave7-roadmap-c.mjs'));
+  const source=readFileSync(resolve(root,'src/building-pool/roadmap-4b/m3-research-wave7-roadmap-c-single.mjs'));
   const sourceSha256=createHash('sha256').update(source).digest('hex');
   mkdirSync(output,{recursive:true});
   try{
