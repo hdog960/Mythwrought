@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {auditCoordinatorDrift} from '../../src/auto-integration-support/nonblock-coordinator-drift.mjs';
 const head='a'.repeat(40), old='b'.repeat(40);
-function file(text){const bytes=Buffer.from(text);return {text,head,blob:createHash('sha1').update(Buffer.concat([Buffer.from('blob '+bytes.length+'\\0'),bytes])).digest('hex')};}
+function file(text){const bytes=Buffer.from(text);return {text,head,blob:createHash('sha1').update(Buffer.concat([Buffer.from('blob '+bytes.length+'\0'),bytes])).digest('hex')};}
 const make=()=>{const coordinator=file("export const NONBLOCK_OBJECT_VERSION='nonblock-object-v1';");
 const environment=file("export const TARGET_CONTRACT='nonblock-object-v1'; export const COORDINATOR_SHA='"+head+"';");
 const fittings=file("export const CONTRACT='nonblock-object-v1'; export const CONTRACT_SOURCE_SHA='"+coordinator.blob+"';");
