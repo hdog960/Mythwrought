@@ -1,0 +1,37 @@
+name: Mythwrought Cave Roadmap Actual Offline Home Screen Staging
+on:
+  pull_request:
+    paths:
+      - 'cave-offline-sw.js'
+      - 'cave-offline-assets.json'
+      - 'src/main.mjs'
+      - 'tests/cave-roadmap-offline-browser.mjs'
+      - '.github/workflows/cave-roadmap-offline.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cave-offline:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'integration/caves-all-to-homescreen-20261117'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Chromium for real offline game test
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Check offline worker and screenshot test syntax
+        run: |
+          node --check cave-offline-sw.js
+          node --check tests/cave-roadmap-offline-browser.mjs
+      - name: Explicit cave profile full-asset-cache offline startup and restore
+        env:
+          CAVE_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node tests/cave-roadmap-offline-browser.mjs
