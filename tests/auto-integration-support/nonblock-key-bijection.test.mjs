@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditKeyBijection} from '../../src/auto-integration-support/nonblock-key-bijection.mjs';
+const objects=[{id:'nonblock:f:61',seed:'seed-1',orientation:0},{id:'nonblock:f:61',seed:'seed-1',orientation:1}];
+const encode=o=>`${o.seed}|${o.id}|r${o.orientation}`;
+const decode=k=>{const [seed,id,rot]=k.split('|');return {seed,id,orientation:Number(rot?.slice(1))};};
+const save=items=>({items:[...items],tombstones:[]});
+const remove=(snap,key)=>({...snap,tombstones:[...snap.tombstones,key]});
+const reload=snap=>snap.items.filter(o=>!snap.tombstones.includes(encode(o)));
+const run=(extra={})=>auditKeyBijection({objects,encode,decode,save,remove,reload,...extra});
+test('rotated objects survive distinct identity and individual removal',()=>{const r=run();assert.equal(r.ok,true);assert.equal(r.live,false);});
+test('orientation-stripping persistence is rejected',()=>assert.ok(run({encode:o=>`${o.seed}|${o.id}`,decode:k=>{const [seed,id]=k.split('|');return {seed,id,orientation:0};}}).errors.length));
+test('duplicate canonical keys rejected',()=>assert.ok(run({objects:[objects[0],objects[0]]}).errors.some(e=>e.startsWith('duplicate-key'))));
+test('removed object respawn rejected',()=>assert.ok(run({reload:snap=>snap.items}).errors.includes('removed-object-respawned')));
+test('neighbor deletion rejected',()=>assert.ok(run({reload:()=>[]}).errors.some(e=>e.startsWith('neighbor-lost'))));
+test('missing callbacks fail closed',()=>assert.ok(run({remove:null}).errors.includes('missing-remove')));
+test('cross-seed decode drift rejected',()=>assert.ok(run({decode:k=>({...decode(k),seed:'wrong'})}).errors.some(e=>e.startsWith('nonbijective'))));
+test('non-namespaced ids rejected',()=>assert.ok(run({objects:[{...objects[0],id:'61'}]}).errors.includes('invalid-descriptor')));
