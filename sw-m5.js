@@ -234,20 +234,43 @@ self.addEventListener('install',event=>{
       // Fail atomically if even one source is missing; preserve previous-good.
       for(let i=0;i<assetUrls.length;i+=12){
         const batch=await Promise.all(assetUrls.slice(i,i+12).map(async url=>{
-          const freshUrl=new URL(url);
-          freshUrl.searchParams.set('mw-cache-install',CACHE_NAME);
-          const response=await fetch(new Request(freshUrl.href,{
-            cache:'reload',credentials:'same-origin'
-          }));
-          if(!response.ok||response.type==='opaque')
-            throw Error('Fresh asset unavailable during worker update: '+url);
-          return {url,response};
+          try {
+            const freshUrl=new URL(url);
+            freshUrl.searchParams.set('mw-cache-install',CACHE_NAME);
+            const response=await fetch(new Request(freshUrl.href,{
+              cache:'reload',credentials:'same-origin'
+            }));
+            if(!response.ok||response.type==='opaque')
+              throw Error('HTTP '+response.status);
+            return {url,response};
+          }catch(error){
+            throw Error('Fresh source unavailable '+url+': '+String(error));
+          }
         }));
-        await Promise.all(batch.map(({url,response})=>cache.put(url,response)));
+        // Wait for ALL writes before a failure can delete the candidate cache.
+        // Other in-flight writes must never leave a partial cache behind.
+        const written=await Promise.allSettled(batch.map(({url,response})=>
+          cache.put(url,response).catch(error=>{
+            throw Error('Cannot cache '+url+': '+String(error));
+          })));
+        const failed=written.find(result=>result.status==='rejected');
+        if(failed)throw failed.reason;
       }
-      // Only an entirely verified installation can replace an older worker.
+      // Cache existence is not installation success. Prove the entire atomic
+      // shell, including authentic REC and same-install release marker, first.
+      const files=await cache.keys();
+      const index=await cache.match(new URL('index.html',self.registration.scope).href);
+      const html=index?await index.text():'';
+      if(files.length!==allowed.size||
+          !html.includes('data-mw-release="'+ASSET_RELEASE+'"')||
+          !html.includes('id="captureToggle"'))
+        throw Error('Incomplete/mismatched PWA shell: cached='+
+          files.length+' expected='+allowed.size+
+          ' index='+Boolean(index));
+      // Only a fully verified new shell can replace the previous-good worker.
       await self.skipWaiting();
     }catch(error){
+      console.error('MYTHWROUGHT PWA ATOMIC INSTALL FAILED',String(error));
       await caches.delete(CACHE_NAME);
       throw error;
     }
