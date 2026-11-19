@@ -1,0 +1,178 @@
+name: SKY S6 + V6 integrated original M5 regression acceptance (staging only)
+on:
+  push:
+    branches: ['sky/s6-m5-controlled-20261118']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sky-s6-m5-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  exact-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fail-closed immutable production M5 and protected SKY S0–S6 sources
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 64245c76a9e265f17bf387e3fd209bbfc9f6d950 HEAD
+          git fetch --no-tags origin refs/pull/269/head:refs/remotes/origin/s6-accepted
+          test "$(git rev-parse refs/remotes/origin/s6-accepted)" = 84501c125ecd582ef6a91dbfc3996398531ad5c3
+          # Preserve ALL 41 separately-owned sky files, including historical tests,
+          # byte-identical to accepted PR #269. Shared UI/source files are pinned
+          # separately to their reviewed recorder+M5+SKY combined Git blobs.
+          for f in $(git diff --name-only e9223217ef1e91d282900c3fc13a21eeda316b63 84501c125ecd582ef6a91dbfc3996398531ad5c3); do
+            case "$f" in src/main.mjs|index.html|styles.css) continue;; esac
+            test "$(git rev-parse HEAD:"$f")" = "$(git rev-parse 84501c125ecd582ef6a91dbfc3996398531ad5c3:"$f")" || { echo "ACCEPTED SKY SOURCE CHANGED $f"; exit 1; }
+          done
+          # Reviewed seven-way current V6 + protected S0-S6 integration.
+          # Do not use stale pre-V6 cache, startup or save pins.
+          for check in \
+            "src/main.mjs:a6d81e992c3b41ec6f79e472dcf42adaaf072131" \
+            "index.html:9cad0f5f52186a38ab0076aa2c0cbaf4f6ce468b" \
+            "styles.css:ae46a6a90ec858247970e1c053f2e71a5e70f69c" \
+            "sw-m5.js:18fd058453eb72b687bcbb74870aff105077c389" \
+            "scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs:f03b8b06b170b82d466607040dce4d27284b8ba3" \
+            "scripts/ci/manual-v6-live-webgl2.mjs:7cbf2e1ad3dad42367b86cd4f9acf3a1094f5e5b" \
+            "src/sky-v6-adapter.mjs:ed327fdf311ef1cb35b05f730521c66b745b221d" \
+            "tests/sky-v6-adapter.test.mjs:348b97ec203c4a8c1fdfabc74dc142135f63de44" \
+            "scripts/ci/sky-s6-v6-live-webgl2.mjs:b37c6bd2ee0f41823bffd6c1f7412385d2d7340d" \
+            "tests/sky/s6-v6-paired-benchmark.mjs:fb2dba6808dc45e452153535f935fcccd443741d"; do
+            path="${check%%:*}"; expected="${check#*:}"
+            test "$(git rev-parse HEAD:"$path")" = "$expected" || { echo "REVIEWED V6 + S6 SOURCE CHANGED $path"; exit 1; }
+          done
+          # Original recorder implementation/tests and all generator-owned
+          # V6 and previous-era terrain modules are SHA-identical to current
+          # approved production main; integration may not overwrite them.
+          for f in \
+            src/gameplay-recorder.mjs tests/gameplay-recorder.test.mjs \
+            tests/gameplay-recorder-browser.mjs .github/workflows/gameplay-recorder.yml \
+            src/manual-biomes/profile-world.mjs \
+            src/manual-biomes/v6-balanced-biomes.mjs \
+            src/manual-biomes/desert-m3.mjs \
+            src/manual-biomes/three-regions-m4.mjs \
+            src/manual-biomes/m2-runtime-bridge.mjs \
+            src/manual-biomes/mountain-pass-v5.mjs \
+            src/manual-biomes/profile-storage.mjs \
+            src/manual-biomes/m5-offline-registration.mjs \
+            src/manual-biomes/overland-walk-m5.mjs \
+            src/surface-regions/regions.mjs \
+            tests/manual-biomes/v6-balanced-biomes.test.mjs; do
+            test "$(git rev-parse HEAD:"$f")" = "$(git rev-parse 64245c76a9e265f17bf387e3fd209bbfc9f6d950:"$f")" || { echo "APPROVED V6 OR REC SOURCE CHANGED $f"; exit 1; }
+          done
+          node --check src/main.mjs
+          node --check sw-m5.js
+          node --check src/sky-v6-adapter.mjs
+          node --check scripts/ci/sky-s6-v6-live-webgl2.mjs
+          node --check scripts/ci/manual-v6-live-webgl2.mjs
+          node --check tests/sky/s6-v6-paired-benchmark.mjs
+          node --check tests/sky/s6-m5-combined-webgl2.mjs
+          node --check scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs
+      - name: Strict native M5 worlds, save, and preserved S1–S6 sky contracts
+        run: |
+          node --test tests/sky-biome-adapter.test.mjs tests/sky-atmosphere.test.mjs tests/sky-events.test.mjs tests/sky-moons.test.mjs tests/sky-stars.test.mjs tests/world-clock.test.mjs
+          node --test tests/sky-v6-adapter.test.mjs tests/manual-biomes/v6-balanced-biomes.test.mjs
+          node --test tests/manual-biomes/m5-natural-overland.test.mjs tests/manual-biomes/m5-mountain-pass-v5.test.mjs tests/manual-biomes/m5-explicit-v5-activation.test.mjs tests/manual-biomes/profile-world.test.mjs
+  sky-history:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pinned genuine Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Original-game WebGL2 S1, S6 legacy and untouched S5/S4/S3/S2
+        run: |
+          python3 -m http.server 4173 >/tmp/sky-s6-m5-legacy.log 2>&1 &
+          node tests/sky/s1-clock-browser.mjs
+          node tests/sky/s6-legacy-browser.mjs
+          node tests/sky/s5-events-browser.mjs
+          node tests/sky/s4-stars-browser.mjs
+          node tests/sky/s3-moons-browser.mjs
+          node tests/sky/s2-atmosphere-browser.mjs
+      - name: Preserve authentic inherited sky PNGs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sky-s6-m5-original-legacy-regressions-${{ github.sha }}
+          path: |
+            artifacts/sky-s1/
+            artifacts/sky-s6/
+            artifacts/sky-s5/
+            artifacts/sky-s4/
+            artifacts/sky-s3/
+            artifacts/sky-s2/
+          if-no-files-found: error
+  real-four-biome-sky:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: ['667x375','844x390','932x430']
+    env:
+      M5_VIEWPORT: ${{ matrix.viewport }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require original-game full-distance no-teleport M5 walking
+        run: |
+          node --check tests/sky/s6-m5-combined-webgl2.mjs
+          if grep -En '(__mythwroughtTest[.]teleport|setOrientation[(]|aimAt[(]|editBiomeCell[(]|Object[.]assign[(]player|requestAnimationFrame[ ]*=|Date[.]now[ ]*=)' tests/sky/s6-m5-combined-webgl2.mjs; then
+            echo 'Rejected synthetic movement or fake clock'; exit 1
+          fi
+      - name: Install pinned real Chromium WebGL2
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Genuine four-biome WASD, real S6 day/night, fog, save and reload
+        run: node tests/sky/s6-m5-combined-webgl2.mjs
+      - name: Upload per-viewport original-game PNG and live-actor manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sky-s6-m5-real-four-biome-${{ matrix.viewport }}-${{ github.sha }}
+          path: artifacts/manual-biomes-m5-long-${{ matrix.viewport }}/
+          if-no-files-found: error
+          retention-days: 14
+  combined-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: ['667x375','844x390','932x430']
+    env:
+      M5_VIEWPORT: ${{ matrix.viewport }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned actual Chromium WebGL2 and pngjs
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Actual online install + network-disabled cold reload twice, sky assets and saves
+        run: node scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs
+      - name: Upload real offline evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sky-s6-m5-offline-${{ matrix.viewport }}-${{ github.sha }}
+          path: artifacts/m5-offline-${{ matrix.viewport }}/
+          if-no-files-found: error
+          retention-days: 14

@@ -3,7 +3,7 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261119-v6-recorder-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261119-v6-s6-recorder-v1';
 const SOURCE_ASSETS=[
   "./",
   "./assets/icon.svg",
@@ -191,6 +191,13 @@ const SOURCE_ASSETS=[
   "./src/ruined-bridge.mjs",
   "./src/seeds.mjs",
   "./src/shape-prototypes.mjs",
+  "./src/sky-atmosphere.mjs",
+  "./src/sky-biome-adapter.mjs",
+  "./src/sky-events.mjs",
+  "./src/sky-moons.mjs",
+  "./src/sky-stars.mjs",
+  "./src/world-clock.mjs",
+  "./src/sky-v6-adapter.mjs",
   "./src/sky.mjs",
   "./src/south-gallery-cave.mjs",
   "./src/stone-rotunda-v2.mjs",

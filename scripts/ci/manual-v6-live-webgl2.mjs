@@ -146,19 +146,22 @@ try{
     // then cold reload with the actual Chromium network entirely disabled.
     await page.waitForFunction(async()=>{
       const keys=await caches.keys();
-      return keys.includes('mythwrought-m5-shell-20261119-v6-recorder-v1');
+      return keys.includes('mythwrought-m5-shell-20261119-v6-s6-recorder-v1');
     },null,{timeout:180000});
     const before=await page.evaluate(async()=>{
-      const name='mythwrought-m5-shell-20261119-v6-recorder-v1';
+      const name='mythwrought-m5-shell-20261119-v6-s6-recorder-v1';
       const cache=await caches.open(name);
       const files=(await cache.keys()).map(x=>x.url);
-      return {assets:files.length,hasV6:files.some(x=>
+      const sevenSkyCached=['sky-atmosphere.mjs','sky-biome-adapter.mjs',
+        'sky-v6-adapter.mjs','sky-events.mjs','sky-moons.mjs','sky-stars.mjs',
+        'world-clock.mjs'].every(n=>files.some(uri=>uri.endsWith('/src/'+n)));
+      return {assets:files.length,sevenSkyCached,hasV6:files.some(x=>
         x.endsWith('/src/manual-biomes/v6-balanced-biomes.mjs')),
         hasMain:files.some(x=>x.endsWith('/src/main.mjs')),
         controlled:Boolean(navigator.serviceWorker.controller),
         save:localStorage.getItem('mythwrought-v002-world-179')};
     });
-    if(!before.hasV6||!before.hasMain||before.assets<190||
+    if(!before.sevenSkyCached||!before.hasV6||!before.hasMain||before.assets<217||
        !before.controlled||!before.save)
       throw Error('V6 online atomic cache missing '+JSON.stringify(before));
     await context.setOffline(true);
@@ -178,7 +181,7 @@ try{
         JSON.stringify({width,height,before,after}));
     checks.push({width,height,realChromium:true,sourceVersion:profile,
       savedWorldBytesUnchanged:true,offlineCacheAssets:before.assets,
-      offlineCacheIncludesV6:true,offlineColdReload:true,
+      offlineCacheIncludesV6:true,offlineCacheIncludesSevenSkyModules:true,offlineColdReload:true,
       offlineWebGL2:true,realWorldResidentChunks:after.chunks});
     await context.close();
   }

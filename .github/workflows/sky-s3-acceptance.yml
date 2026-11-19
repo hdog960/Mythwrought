@@ -1,0 +1,92 @@
+name: Mythwrought SKY S3 triple-moon WebGL2 acceptance
+on:
+  push:
+    branches: ['sky/roadmap-s0-baseline-20261118']
+    # S3 formally accepted at 01bf9edad81f8cdaa2a9cbef6bf5be2adcd394c2.
+    # S4 runs S3 original-game Chromium as a read-only regression instead.
+    paths:
+      - 'tests/sky/s3-moons-browser.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sky-s3-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-exact-s3:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Protect accepted S0–S2, all unrelated owners and schema-1
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 9606b32f32d5a2252923b8f833a8dd0d54bed2bb HEAD
+          for file in $(git diff --name-only e9223217ef1e91d282900c3fc13a21eeda316b63 HEAD); do
+            case "$file" in
+              src/world-clock.mjs|src/sky-atmosphere.mjs|src/sky-moons.mjs|src/sky.mjs|src/main.mjs|src/gpu-pipeline.mjs|index.html|styles.css|tests/world-clock.test.mjs|tests/sky-atmosphere.test.mjs|tests/sky-moons.test.mjs|tests/sky/*|docs/sky/*|.github/workflows/sky-*.yml) ;;
+              *) echo "S3 NON-SKY OWNER MODIFIED: $file"; exit 1;;
+            esac
+          done
+          git diff --exit-code 9606b32f32d5a2252923b8f833a8dd0d54bed2bb HEAD -- src/world-clock.mjs src/sky-atmosphere.mjs index.html styles.css tests/world-clock.test.mjs tests/sky-atmosphere.test.mjs tests/sky/s2-atmosphere-browser.mjs
+          git diff --exit-code e9223217ef1e91d282900c3fc13a21eeda316b63 HEAD -- src/persistence.mjs src/storybook-materials.mjs src/voxel.mjs src/physics.mjs src/foreground.mjs src/render-budget.mjs
+      - name: Exact native sky math, lunar epoch and shader contracts
+        run: |
+          node --check src/main.mjs
+          node --check src/sky-moons.mjs
+          node --check tests/sky/s3-moons-browser.mjs
+          node --check tests/sky/s3-paired-benchmark.mjs
+          node --test tests/world-clock.test.mjs tests/sky-atmosphere.test.mjs tests/sky-moons.test.mjs
+      - name: Install pinned Chromium and PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Three genuine original-game 3-moon WebGL2 landscape captures
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-sky-s3.log 2>&1 &
+          node tests/sky/s3-moons-browser.mjs
+      - name: Historical S2 day/night, orbital sun, fog and real screenshots
+        run: |
+          node tests/sky/s2-atmosphere-browser.mjs
+      - name: Historical S1 clock, menu and schema-1 save protections
+        run: |
+          node tests/sky/s1-clock-browser.mjs
+      - name: Same-run ABBA performance against immutable accepted S2 source
+        run: |
+          mkdir -p /tmp/mythwrought-s2-exact
+          git archive 9606b32f32d5a2252923b8f833a8dd0d54bed2bb | tar -x -C /tmp/mythwrought-s2-exact
+          python3 -m http.server 4174 --directory /tmp/mythwrought-s2-exact >/tmp/mythwrought-s2-paired.log 2>&1 &
+          node tests/sky/s3-paired-benchmark.mjs
+      - name: Upload 3-moon actual Chromium screenshot evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s3-${{ github.sha }}
+          path: artifacts/sky-s3/
+          if-no-files-found: warn
+      - name: Upload S2 real-game visuals
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s3-S2-regression-${{ github.sha }}
+          path: artifacts/sky-s2/
+          if-no-files-found: warn
+      - name: Upload S1 real-game regression
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s3-S1-regression-${{ github.sha }}
+          path: artifacts/sky-s1/
+          if-no-files-found: warn
+      - name: Upload S2 vs S3 same-run performance
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s3-paired-${{ github.sha }}
+          path: artifacts/sky-s3-paired/
+          if-no-files-found: warn
