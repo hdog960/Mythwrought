@@ -124,3 +124,47 @@ jobs:
           path: artifacts/cave-roadmap-actual-game/
           if-no-files-found: warn
           retention-days: 14
+
+  unified-sky-s0-s6-real-world:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict S0-S6 native original-world, three-moon and biome identity
+        run: |
+          node --check src/main.mjs
+          node --check src/sky-atmosphere.mjs
+          node --check src/sky-moons.mjs
+          node --check src/sky-stars.mjs
+          node --check src/sky-events.mjs
+          node --check src/sky-biome-adapter.mjs
+          node --test tests/sky-*.test.mjs
+      - name: Install pinned WebGL2 Chromium and PNG decoding
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Original game genuine S0-S6 sky across landscape sizes
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-unified-sky.log 2>&1 &
+          node tests/sky/s0-baseline-browser.mjs
+          node tests/sky/s1-clock-browser.mjs
+          node tests/sky/s2-atmosphere-browser.mjs
+          node tests/sky/s3-moons-browser.mjs
+          node tests/sky/s4-stars-browser.mjs
+          node tests/sky/s5-events-browser.mjs
+          node tests/sky/s6-legacy-browser.mjs
+      - name: Preserve original game sun, 3-moons, stars and celestial events PNGs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-unified-sky-S0-S6-real-webgl2
+          path: artifacts/sky-*/
+          if-no-files-found: warn
+          retention-days: 14
