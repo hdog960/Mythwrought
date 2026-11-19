@@ -10,7 +10,7 @@ export function auditCaptureManifest(manifest,readPng){
  if(!manifest||manifest.canvasCaptures!==60||!Array.isArray(manifest.manifest)||manifest.manifest.length!==60)
   throw Error('60 real capture records required');
  if(typeof readPng!=='function')throw TypeError('PNG reader required');
- const expected=expectedCaptureNames(),hashes=new Set(),perScene=new Map();
+ const expected=expectedCaptureNames(),hashes=new Set(),perScene=new Map(),counts=new Map();
  return Promise.all(manifest.manifest.map(async(entry,i)=>{
   if(entry.filename!==expected[i]||basename(entry.filename)!==entry.filename)throw Error('capture ordering/name mismatch');
   const bytes=await readPng(entry.filename);
@@ -30,15 +30,21 @@ export function auditCaptureManifest(manifest,readPng){
   const stage=STAGES[i%4];
   if(entry.stage!==stage||entry.sceneId!==`scene36:${SCENES[Math.floor(i/4)%5]}`)
    throw Error('scene/stage mismatch');
-  if((stage==='removed'||stage==='restored')&&entry.triangleCount!==0)
-   throw Error('tombstoned object still draws triangles');
   if((stage==='visible'||stage==='selected')&&entry.triangleCount<=0)
    throw Error('live object has no geometry');
   const key=`${w}x${h}:${entry.sceneId}`;
   if(perScene.has(key)&&perScene.get(key)!==entry.instanceKey)throw Error('unstable instance identity');
   perScene.set(key,entry.instanceKey);
- })).then(()=>Object.freeze({captures:60,uniquePngHashes:hashes.size,sceneViewports:perScene.size,
-  productionBreakVerified:false,productionSaveVerified:false}));
+  counts.set(`${key}:${stage}`,entry.triangleCount);
+ })).then(()=>{
+  for(const key of perScene.keys()){
+   const visible=counts.get(`${key}:visible`),selected=counts.get(`${key}:selected`),removed=counts.get(`${key}:removed`),restored=counts.get(`${key}:restored`);
+   if(selected!==visible||removed>=visible||restored!==removed)
+    throw Error('selected object geometry not removed or tombstone restoration inconsistent');
+  }
+  return Object.freeze({captures:60,uniquePngHashes:hashes.size,sceneViewports:perScene.size,
+  productionBreakVerified:false,productionSaveVerified:false});
+ });
 }
 export async function auditCaptureDirectory(directory){
  const manifest=JSON.parse(await readFile(join(directory,'manifest.json'),'utf8'));
