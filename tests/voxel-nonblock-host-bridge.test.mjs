@@ -83,3 +83,31 @@ test('receipt from prior pick cannot remove a different rotated neighbor',()=>{
  assert.equal(host.breakHit(c,...ray(4)),true);
  assert.equal(host.pick(...ray(0)).instanceKey,flora.instanceKey);
 });
+
+test('failed readback rolls back durable tombstone without hiding the object on reload',()=>{
+ let disk={version:HOST_BRIDGE_VERSION,seed,tombstones:[]},reads=0;
+ const deps={seed,objects:entries,attest:PRODUCER_SOURCES,voxelPick:()=>null,eligible:()=>true,
+   readSidecar:()=>{reads++;return reads===2?{...disk,tombstones:[]}:structuredClone(disk);},
+   writeSidecar:value=>{disk=structuredClone(value);}};
+ const host=createNonblockHostBridge(deps),hit=host.pick(...ray(0));
+ assert.equal(host.breakHit(hit,...ray(0)),false);
+ assert.deepEqual(disk.tombstones,[]);
+ assert.equal(host.visible().length,3);
+ assert.equal(createNonblockHostBridge(deps).pick(...ray(0)).instanceKey,flora.instanceKey);
+});
+
+test('unrecoverable storage mismatch disables all later picks and breaks on the same host',()=>{
+ let disk={version:HOST_BRIDGE_VERSION,seed,tombstones:[]},reads=0,writes=0;
+ const host=createNonblockHostBridge({seed,objects:entries,attest:PRODUCER_SOURCES,
+  voxelPick:()=>null,eligible:()=>true,
+  readSidecar:()=>{reads++;return reads===1?structuredClone(disk):{...disk,tombstones:[]};},
+  writeSidecar:value=>{writes++;if(writes===1)disk=structuredClone(value);}});
+ const hit=host.pick(...ray(0));
+ assert.equal(host.breakHit(hit,...ray(0)),false);
+ assert.equal(writes,2);
+ assert.equal(host.breakHit(hit,...ray(0)),false);
+ assert.throws(()=>host.pick(...ray(0)),/recovery required/);
+ // A fresh host must independently validate the durable sidecar; no automatic
+ // repair of a possibly committed tombstone or legacy schema-1 payload.
+ assert.deepEqual(disk.tombstones,[flora.instanceKey]);
+});
