@@ -7,6 +7,7 @@ import {VoxelWorld,raycast} from '../src/voxel.mjs';
 import {findSafeSpawn} from '../src/physics.mjs';
 import {ENCHANTED_FUNGI_IDS} from '../src/nonblock-scene48/enchanted-fungi.mjs';
 import {MEADOW_WOODLAND_IDS} from '../src/nonblock-scene48/meadow-woodland.mjs';
+import {inheritedStageFamilies} from '../src/nonblock/staged-inherited-families.mjs';
 import {candidateFamilies} from '../src/nonblock/candidate-families.mjs';
 import {createCandidateScene} from '../src/nonblock/candidate-scene.mjs';
 
@@ -16,7 +17,8 @@ const catalog = process.env.NONBLOCK_CATALOG_SET||'catalog';
 const directory = 'artifacts/nonblock-'+catalog;
 const groups = {
   catalog:{wallNames:['cloth-banner'],length:31,include:id=>
-    !MEADOW_WOODLAND_IDS.includes(id)&&!ENCHANTED_FUNGI_IDS.includes(id)},
+    !MEADOW_WOODLAND_IDS.includes(id)&&!ENCHANTED_FUNGI_IDS.includes(id)&&
+      !inheritedStageFamilies.some(([familyId])=>familyId===id)},
   'meadow-woodland':{wallNames:['crawling-ivy','trail-vine'],length:8,
     include:id=>MEADOW_WOODLAND_IDS.includes(id)},
   'enchanted-fungi':{wallNames:['shelf-fungus','glowing-vine'],length:10,

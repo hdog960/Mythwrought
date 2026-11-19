@@ -19,6 +19,7 @@ import {makeCaveRubbleCluster} from '../nonblock-environments24/cave-rubble-clus
 import {createEnchantedFungus,ENCHANTED_FUNGI_IDS} from '../nonblock-scene48/enchanted-fungi.mjs';
 import {createMeadowWoodland,MEADOW_WOODLAND_IDS} from '../nonblock-scene48/meadow-woodland.mjs';
 import {createCaveFormation} from '../nonblock-environments24/cave-formations.mjs';
+import {inheritedStageFamilies} from './staged-inherited-families.mjs';
 import {describeFitting} from '../nonblock-fittings36/fittings-phase1.mjs';
 
 const floraPalette = [
@@ -59,6 +60,7 @@ function newFloraFamily(sceneId,build,wall) {
 }
 
 export const candidateFamilies = new Map([
+  ...inheritedStageFamilies,
   ...MEADOW_WOODLAND_IDS.map(sceneId=>newFloraFamily(sceneId,createMeadowWoodland,
     sceneId==='scene48:crawling-ivy'||sceneId==='scene48:trail-vine')),
   ...ENCHANTED_FUNGI_IDS.map(sceneId=>newFloraFamily(sceneId,createEnchantedFungus,

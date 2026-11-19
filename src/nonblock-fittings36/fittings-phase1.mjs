@@ -48,7 +48,34 @@ function banner(b,variant){
   b.quad(point(3,center+.12,.012),point(3.61,center,.012),point(3,center-.12,.012),point(2.39,center,.012),7);
  }
 }
-function web(b){const center=[0,.52,0];for(let k=0;k<7;k++){const a=k*Math.PI/12,edge=[Math.cos(a)*.51,.52+Math.sin(a)*.51,0];b.tri(center,edge,[edge[0]*.82,edge[1]*.82+.095,.005],4);}for(let ring=1;ring<=3;ring++)for(let k=0;k<6;k++){const a=k*Math.PI/12,c=(k+1)*Math.PI/12,r=ring*.16;const p=[Math.cos(a)*r,.52+Math.sin(a)*r,.008],q=[Math.cos(c)*r,.52+Math.sin(c)*r,.008];b.tri(p,q,[p[0]*.98,p[1]+.012,.008],5);}}
+function web(b,variant){
+ const hub=[-.40,.25,.022];
+ const edges=7,rings=4;
+ const edgePoints=Array.from({length:edges},(_,i)=>{
+  const angle=(i/6)*Math.PI*.52;
+  const radius=.63+.05*Math.sin(i*1.42+variant*.81);
+  return [hub[0]+Math.cos(angle)*radius,hub[1]+Math.sin(angle)*radius,
+   .015+.036*Math.sin(angle*1.9)];
+ });
+ const stroke=(a,c,width,material)=>{
+  const dx=c[0]-a[0],dy=c[1]-a[1],length=Math.hypot(dx,dy);
+  const offset=[-dy*width/length,dx*width/length,0];
+  const side=(p,k)=>p.map((n,i)=>n+k*offset[i]);
+  b.quad(side(a,-1),side(a,1),side(c,1),side(c,-1),material);
+ };
+ for(const point of edgePoints)stroke(hub,point,.008,4);
+ for(let ring=1;ring<=rings;ring++){
+  const t=ring/(rings+1);
+  const points=edgePoints.map(edge=>edge.map((value,i)=>hub[i]+(value-hub[i])*t));
+  for(let i=0;i<points.length-1;i++){
+   const a=points[i],c=points[i+1];
+   const sag=a.map((value,j)=>(value+c[j])*.5-(j===1?.011*t:0));
+   stroke(a,sag,.006,5);
+   stroke(sag,c,.006,4);
+  }
+ }
+ stroke([-.489,hub[1]-.038,hub[2]],hub,.007,5);
+}
 function coil(b,variant){
  // Single continuous rope, from a free outer end into the stacked turns.
  const segments=28, sides=4, radius=.035;

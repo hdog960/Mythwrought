@@ -6,7 +6,7 @@ const workerUrl=new URL(self.location.href);
 const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
   workerUrl.searchParams.get('nonblock-staging')==='1';
 const CACHE_PREFIX=staging?'mythwrought-nonblock-stage-shell-':'mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+(staging?'20261119-v3':'20261119-v6-recorder-v1');
+const CACHE_NAME=CACHE_PREFIX+(staging?'20261119-v4':'20261119-v6-recorder-v1');
 const SOURCE_ASSETS=[
   "./",
   "./assets/icon.svg",
@@ -225,7 +225,13 @@ if(staging)SOURCE_ASSETS.push(
   "./src/nonblock/candidate-families.mjs",
   "./src/nonblock/candidate-scene.mjs",
   "./src/nonblock/stage-offline.mjs",
+  "./src/nonblock/staged-inherited-families.mjs",
   "./src/nonblock-environments24/agave-rosette.mjs",
+  "./src/nonblock-environments24/branching-crystal-cluster.mjs",
+  "./src/nonblock-environments24/column-cactus.mjs",
+  "./src/nonblock-environments24/geode-opening.mjs",
+  "./src/nonblock-environments24/mineral-encrustation.mjs",
+  "./src/nonblock-environments24/prickly-pear-cactus.mjs",
   "./src/nonblock-environments24/alpine-wildflower.mjs",
   "./src/nonblock-environments24/cave-formations.mjs",
   "./src/nonblock-environments24/cave-rubble-cluster.mjs",

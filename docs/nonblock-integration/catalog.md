@@ -43,8 +43,8 @@ The names for empty slots in groups A, B, C and H are working names. Clover clum
 | 35 | C | Inkcap cluster | scene48:inkcap-cluster | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
 | 36 | C | Velvet cup | scene48:velvet-cup | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
 | 37 | D | Desert scrub | nonblock:d:desert-scrub | [Inherited](../../src/nonblock-environments24/desert-scrub.mjs) | Native + Chromium |
-| 38 | D | Prickly pear cactus | nonblock:d:prickly-pear-cactus | Inherited | Pending |
-| 39 | D | Column cactus | nonblock:d:column-cactus | Inherited | Pending |
+| 38 | D | Prickly pear cactus | nonblock:d:prickly-pear-cactus | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
+| 39 | D | Column cactus | nonblock:d:column-cactus | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 40 | D | Agave rosette | nonblock:d:agave-rosette | [Inherited](../../src/nonblock-environments24/agave-rosette.mjs) | Native + Chromium |
 | 41 | D | Tumblebrush | nonblock:d:tumblebrush | [Inherited](../../src/nonblock-environments24/tumblebrush.mjs) | Native + Chromium |
 | 42 | D | Desert bloom | nonblock:d:desert-bloom | [Inherited](../../src/nonblock-environments24/desert-bloom.mjs) | Native + Chromium |
@@ -53,19 +53,19 @@ The names for empty slots in groups A, B, C and H are working names. Clover clum
 | 45 | D | Alpine wildflower | nonblock:d:alpine-wildflower | [Inherited](../../src/nonblock-environments24/alpine-wildflower.mjs) | Native + Chromium |
 | 46 | D | Frost fern | nonblock:d:frost-fern | [Inherited](../../src/nonblock-environments24/frost-fern.mjs) | Native + Chromium |
 | 47 | D | Dwarf juniper | nonblock:d:dwarf-juniper | [Inherited](../../src/nonblock-environments24/dwarf-juniper.mjs) | Native + Chromium |
-| 48 | D | Icicle spear | nonblock:d:icicle-spear | Inherited | Pending |
-| 49 | E | Small stalagmite | nonblock:e:small-stalagmite | Inherited | Pending |
+| 48 | D | Icicle spear | nonblock:d:icicle-spear | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
+| 49 | E | Small stalagmite | nonblock:e:small-stalagmite | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 50 | E | Giant stalagmite spire | nonblock:e:giant-stalagmite-spire | [New](../../src/nonblock-environments24/cave-formations.mjs) | Native + Chromium |
-| 51 | E | Hanging stalactite | nonblock:e:hanging-stalactite | Inherited | Pending |
+| 51 | E | Hanging stalactite | nonblock:e:hanging-stalactite | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 52 | E | Clustered dripstone | nonblock:e:clustered-dripstone | [New](../../src/nonblock-environments24/cave-formations.mjs) | Native + Chromium |
 | 53 | E | Limestone cave column | nonblock:e:limestone-cave-column | [New](../../src/nonblock-environments24/cave-formations.mjs) | Native + Chromium |
 | 54 | E | Flowstone curtain | nonblock:e:flowstone-curtain | [New](../../src/nonblock-environments24/cave-formations.mjs) | Native + Chromium |
-| 55 | E | Crystal shard | nonblock:e:crystal-shard | Inherited | Pending |
-| 56 | E | Branching crystal cluster | nonblock:e:branching-crystal-cluster | Inherited | Pending |
-| 57 | E | Geode opening | nonblock:e:geode-opening | Inherited | Pending |
+| 55 | E | Crystal shard | nonblock:e:crystal-shard | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
+| 56 | E | Branching crystal cluster | nonblock:e:branching-crystal-cluster | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
+| 57 | E | Geode opening | nonblock:e:geode-opening | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 58 | E | Pebble scatter | nonblock:e:pebble-scatter | [Inherited](../../src/nonblock-environments24/pebble-scatter.mjs) | Native + Chromium |
 | 59 | E | Cave rubble cluster | nonblock:e:cave-rubble-cluster | [Inherited](../../src/nonblock-environments24/cave-rubble-cluster.mjs) | Native + Chromium |
-| 60 | E | Mineral encrustation | nonblock:e:mineral-encrustation | Inherited | Pending |
+| 60 | E | Mineral encrustation | nonblock:e:mineral-encrustation | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 61 | F | Hinged door leaf |  | Pending | Pending |
 | 62 | F | Double door pair |  | Pending | Pending |
 | 63 | F | Trapdoor |  | Pending | Pending |
@@ -75,7 +75,7 @@ The names for empty slots in groups A, B, C and H are working names. Clover clum
 | 67 | F | Ladder assembly |  | Pending | Pending |
 | 68 | F | Rope ladder |  | Pending | Pending |
 | 69 | F | Fence rail |  | Pending | Pending |
-| 70 | F | Hanging chain | scene36:hanging-chain | Inherited | Pending |
+| 70 | F | Hanging chain | scene36:hanging-chain | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 71 | F | Cloth banner | scene36:cloth-banner | [Inherited](../../src/nonblock-fittings36/fittings-phase1.mjs) | Native + Chromium |
 | 72 | F | Fabric awning |  | Pending | Pending |
 | 73 | G | Wall torch bracket |  | Pending | Pending |
@@ -83,12 +83,12 @@ The names for empty slots in groups A, B, C and H are working names. Clover clum
 | 75 | G | Hanging lantern |  | Pending | Pending |
 | 76 | G | Campfire fuel stack |  | Pending | Pending |
 | 77 | G | Brazier |  | Pending | Pending |
-| 78 | G | Signpost | scene36:signpost | Inherited | Pending |
+| 78 | G | Signpost | scene36:signpost | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 79 | G | Direction sign |  | Pending | Pending |
 | 80 | G | Hanging bell |  | Pending | Pending |
 | 81 | G | Rope coil | scene36:rope-coil | [Inherited](../../src/nonblock-fittings36/fittings-phase1.mjs) | Native + Chromium |
 | 82 | G | Broken pottery scatter |  | Pending | Pending |
-| 83 | G | Hanging cobweb | scene36:hanging-cobweb | Inherited | Pending |
+| 83 | G | Hanging cobweb | scene36:hanging-cobweb | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 84 | G | Pennant flag |  | Pending | Pending |
 | 85 | H | Flame |  | Pending | Pending |
 | 86 | H | Embers |  | Pending | Pending |

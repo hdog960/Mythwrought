@@ -137,11 +137,80 @@ function flowstoneCurtain(mesh,noise,variant) {
   return [];
 }
 
+// Rebuild the four inherited taper-only forms around their original IDs.
+function smallStalagmite(mesh,noise,variant) {
+  const height=.62+variant*.046+noise()*.12;
+  const levels=[
+    [0,0,0,.29,.235],[-.021,.14,.025,.25,.215],
+    [.018,height*.48,.014,.16,.148],[.078,height*.78,-.036,.092,.078],
+    [.087,height,-.052,.028,.022]
+  ];
+  const phase=noise()*Math.PI*2;
+  sectionedRock(mesh,levels,8,phase,noise);
+  for(let i=0;i<2;i++){
+    const angle=phase+(i+.7)*Math.PI, x=Math.cos(angle)*.18,z=Math.sin(angle)*.18;
+    sectionedRock(mesh,[
+      [x,0,z,.101,.083],[x*.91,height*(.35+i*.12),z*.90,.053,.051],
+      [x*.86,height*(.53+i*.13),z*.87,.013,.011]
+    ],5,angle,noise);
+  }
+  return solidSections(levels);
+}
+
+function hangingStalactite(mesh,noise,variant) {
+  const height=.76+variant*.085+noise()*.21, bend=(noise()-.5)*.24;
+  const levels=[
+    [0,0,0,.29,.24],[.014,-height*.19,-.025,.22,.19],
+    [.051,-height*.42,.034,.18,.14],[.071,-height*.65,.024,.09,.092],
+    [bend,-height*.82,-.013,.041,.055],[bend-.015,-height,.008,.012,.014]
+  ];
+  sectionedRock(mesh,levels,8,noise()*Math.PI*2,noise);
+  return solidSections([...levels].reverse());
+}
+
+function icicleSpear(mesh,noise,variant) {
+  const height=.83+variant*.095+noise()*.14, z=(noise()-.5)*.14;
+  const levels=[
+    [0,0,0,.20,.16],[.017,-height*.12,.012,.175,.14],
+    [-.034,-height*.39,z*.17,.123,.11],[-.071,-height*.71,z*.55,.073,.053],
+    [-.091,-height*.94,z,.027,.032],[-.13,-height,z+.026,.008,.009]
+  ];
+  sectionedRock(mesh,levels,5,noise(),noise);
+  return solidSections([...levels].reverse());
+}
+
+function facetedCrystal(mesh,noise,variant) {
+  const height=.72+variant*.064+noise()*.17, lean=(noise()-.5)*.21;
+  const levels=[
+    [0,0,0,.208,.165],[.006,height*.15,.021,.193,.158],
+    [lean,height*.78,.10,.169,.145],[lean+.063,height,.136,.083,.071],
+    [lean+.068,height*1.06,.176,.030,.022]
+  ];
+  const phase=noise()*Math.PI*2;
+  sectionedRock(mesh,levels,6,phase,noise);
+  sectionedRock(mesh,[
+    [-.16,0,-.12,.105,.071],[-.20,height*.37,-.10,.077,.067],
+    [-.23,height*.56,-.044,.025,.021]
+  ],5,phase+.22,noise);
+  return solidSections(levels);
+}
+
+const icePalette=Object.freeze([
+  [.30,.55,.67],[.46,.73,.85],[.65,.86,.92],[.84,.94,.98]
+].map(color=>Object.freeze(color)));
+const crystalPalette=Object.freeze([
+  [.22,.39,.45],[.30,.63,.70],[.49,.81,.82],[.63,.89,.85]
+].map(color=>Object.freeze(color)));
+
 const definitions = new Map([
   ['nonblock:e:giant-stalagmite-spire',{build:giantSpire,attachment:'ground',collision:'solid'}],
   ['nonblock:e:clustered-dripstone',{build:dripstone,attachment:'ceiling',collision:'pass-through'}],
   ['nonblock:e:limestone-cave-column',{build:limestoneColumn,attachment:'span',collision:'solid'}],
-  ['nonblock:e:flowstone-curtain',{build:flowstoneCurtain,attachment:'ceiling',collision:'pass-through'}]
+  ['nonblock:e:flowstone-curtain',{build:flowstoneCurtain,attachment:'ceiling',collision:'pass-through'}],
+  ['nonblock:e:small-stalagmite',{build:smallStalagmite,attachment:'ground',collision:'solid'}],
+  ['nonblock:e:hanging-stalactite',{build:hangingStalactite,attachment:'ceiling',collision:'solid'}],
+  ['nonblock:d:icicle-spear',{build:icicleSpear,attachment:'ceiling',collision:'solid',palette:icePalette}],
+  ['nonblock:e:crystal-shard',{build:facetedCrystal,attachment:'ground',collision:'solid',palette:crystalPalette}]
 ]);
 
 export function createCaveFormation(sceneId,{seed,anchor,variant=0}={}) {
@@ -152,5 +221,5 @@ export function createCaveFormation(sceneId,{seed,anchor,variant=0}={}) {
   const mesh=builder();
   const colliders=family.build(mesh,noiseFor(seed,anchor,variant),variant);
   return {sceneId,variant,attachment:family.attachment,collision:family.collision,
-    mesh:mesh.finish(),colliders,palette};
+    mesh:mesh.finish(),colliders,palette:family.palette??palette};
 }

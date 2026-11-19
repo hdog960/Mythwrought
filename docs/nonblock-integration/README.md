@@ -85,3 +85,13 @@ The provisional matrix has 55 source-authored families and 43 with game lifecycl
 Ten new families complete the staged group C slot coverage. All ten have four distinct deterministic variants with native mesh checks. The shelf fungus and glowing vine attach to two natural backing cells. Chromium rendered, mined and cold-reopened all ten against seeded terrain in the actual game, including the wall placements. The ordinary schema-1 bytes matched and the sole scenery draw used 140,940 bytes for 1,305 triangles. The current vine uses a colored palette. Emissive treatment and placement in representative enchanted and cave scenes remain open. [Capture and source manifest](gallery/enchanted-fungi/manifest.json)
 
 The candidate now has 65 source-authored families and 53 with real staged lifecycle evidence, under the provisional 96-slot assignment.
+
+## Remaining inherited scenery
+
+Chromium verified all 12 remaining inherited families on natural mounts. The shared stage now covers all 43 inherited source mesh IDs, plus 22 original families. Each of the 12 displayed, accepted an exact-triangle MINE action and stayed removed on reload. These tests seeded a nonempty schema-1 save before opening the game, and its exact bytes matched afterward.
+
+Four taper-only cavity/ice meshes and the cobweb were rebuilt around their original IDs. The crystal shard now has 90 nondegenerate triangles and distinct faceted shapes through eight variants. The hanging cobweb uses a continuous corner-mounted strand pattern, with a clear opening between strands. The [original mesh sheets](mesh-review.md) and [new game captures](gallery/remaining-inherited/) show the revisions. Their viewpoints differ. The captures establish gameplay and geometry evidence, with contextual biome art and final screen-size parity still open.
+
+Eleven additional architectural roster slots have exact physical Block Pack planning adapters. They use existing source IDs, shapes and world-save owners. The adapters are native-tested and remain outside the lifecycle count pending game-placement acceptance.
+
+The original 20-script suite ran against checkpoint `b77497f04e2125a74002f958cc3c8dd26fe4b96d`. Eighteen passed in the first run. The voxel-landmark test timed out at the same chunk-load assertion on untouched main and passed on the isolated candidate rerun. The touch script failed two different movement timing assertions on the candidate and passed on the baseline rerun. Full exact-head regression and device acceptance remain open.

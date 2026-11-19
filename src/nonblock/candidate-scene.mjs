@@ -55,12 +55,21 @@ export function describeCandidateObject(seed, placement) {
   const height = ay+(ceiling?1:0);
   const wallInset = family.wall ? family.wallInset??.42 : 0;
   const origin = [ax+.5+wallX*wallInset,height,az+.5+wallZ*wallInset];
-  const supports = family.wall ? [[ax+wallX,ay+1,az+wallZ]] :
+  const supports = family.wall ? [[ax+wallX,ay+(family.wallY??1),az+wallZ]] :
     ceiling ? [[ax,ay+1,az]] : [[ax,ay-1,az]];
   if (family.wall&&family.wallHeight===2) supports.push([ax+wallX,ay,az+wallZ]);
   if (family.attachment==='span') supports.push([ax,ay+3,az]);
+  if (family.corner) {
+    const [sideX,sideZ] = rotation(-1,0,orientation);
+    supports.push([ax+sideX,ay,az+sideZ]);
+  }
 
-  const colliders = (source.colliders??[]).map(box=>box.map((v,i)=>v+origin[i%3]));
+  const colliders = (source.colliders??[]).map(box=>{
+    const [left,back] = rotation(box[0],box[2],orientation);
+    const [right,front] = rotation(box[3],box[5],orientation);
+    return [Math.min(left,right)+origin[0],box[1]+origin[1],Math.min(back,front)+origin[2],
+      Math.max(left,right)+origin[0],box[4]+origin[1],Math.max(back,front)+origin[2]];
+  });
   const positions = new Float32Array(mesh.positions.length);
   const min = [Infinity,Infinity,Infinity];
   const max = [-Infinity,-Infinity,-Infinity];

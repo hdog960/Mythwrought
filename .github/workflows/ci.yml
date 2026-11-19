@@ -98,6 +98,7 @@ jobs:
           NONBLOCK_CATALOG_SET=meadow-woodland node tests/nonblock-catalog-browser.mjs
           NONBLOCK_CATALOG_SET=enchanted-fungi node tests/nonblock-catalog-browser.mjs
           node tests/nonblock-cave-browser.mjs
+          node tests/nonblock-inherited-extra-browser.mjs
           node tests/nonblock-offline-browser.mjs
       - name: Advisory queue health snapshot
         if: always()
