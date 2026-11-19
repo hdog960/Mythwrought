@@ -2,7 +2,7 @@
 // Only registered after explicit new Cave World selection, not in the
 // ordinary default game. Public code/assets only; NO private save data.
 const PREFIX='mythwrought-caves-v1-source-';
-const REVISION='e1a4a4dd355ff069';
+const REVISION='738c39cd197fa209';
 const CACHE=PREFIX+REVISION;
 const READY_NAME='cave-offline-ready.json';
 const SELF_FILES=new Set(['cave-offline-assets.json','cave-offline-sw.js']);
