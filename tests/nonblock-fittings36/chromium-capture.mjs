@@ -51,7 +51,7 @@ try{
  const manifest=[];
  for(const capture of payload.captures){
   if(!/^fittings36-[a-z0-9x-]+\.png$/.test(capture.filename))throw Error('invalid filename');
-  const prefix='data:image/png;base64:';
+  const prefix='data:image/png;base64,';
   if(!capture.data.startsWith(prefix))throw Error('invalid PNG URL');
   const bytes=Buffer.from(capture.data.slice(prefix.length),'base64');
   if(bytes.subarray(0,8).toString('hex')!=='89504e470d0a1a0a')throw Error('PNG signature mismatch');
