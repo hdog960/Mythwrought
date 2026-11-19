@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#18211f">
+  <title>Mythwrought · Mob preview</title>
+  <link rel="stylesheet" href="./preview.css">
+  <script type="module" src="./preview.mjs"></script>
+</head>
+<body>
+  <main>
+    <section class="stage" aria-label="Creature viewport">
+      <canvas aria-label="Mythwrought creature scene"></canvas>
+      <header><p>MYTHWROUGHT</p><h1 id="habitat">Woodland clearing</h1></header>
+      <p id="graphics" role="status">Loading WebGL2…</p>
+    </section>
+    <aside>
+      <h2>Mob preview</h2>
+      <nav aria-label="Creatures">
+        <button type="button" data-species="deer" aria-pressed="true">Deer</button>
+        <button type="button" data-species="goblin" aria-pressed="false">Goblin</button>
+        <button type="button" data-species="glownewt" aria-pressed="false">Glownewt</button>
+      </nav>
+      <div class="readout">
+        <span id="name">Deer</span><strong id="state">Idle</strong>
+        <span id="health" hidden></span>
+      </div>
+      <div id="actions" aria-label="Scenario controls"></div>
+      <p id="feedback" role="status"></p>
+      <details>
+        <summary>Diagnostics</summary>
+        <output id="stats">Waiting for frames</output>
+      </details>
+    </aside>
+  </main>
+</body>
+</html>

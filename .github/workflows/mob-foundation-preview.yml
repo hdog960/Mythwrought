@@ -1,0 +1,46 @@
+name: Mob Foundation preview
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/mobs/**'
+      - 'tests/mobs/**'
+      - 'mob-preview/**'
+      - '.github/workflows/mob-foundation-preview.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'mob-foundation'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native mob tests
+        run: node --test tests/mobs/*.test.mjs
+      - name: Install pinned browser tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+      - name: Verify the WebGL2 preview
+        run: |
+          python3 -m http.server 4176 --bind 127.0.0.1 >/tmp/mythwrought-mob-preview.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          curl --retry 10 --retry-connrefused --retry-delay 1 --fail --silent http://127.0.0.1:4176/mob-preview/ >/dev/null
+          node tests/mobs/browser.mjs
+      - name: Upload source-matched preview evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-mob-preview-${{ github.event.pull_request.head.sha }}
+          path: artifacts/mob-preview/
+          if-no-files-found: error
