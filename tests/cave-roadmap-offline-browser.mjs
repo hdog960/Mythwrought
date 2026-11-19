@@ -62,11 +62,11 @@ try{
  assert.equal(indexedShell,true,'Offline startup requires the saved real index.html shell');
 
  assert.equal(verified.count,234,'Cave + accepted-biome + approved recorder must include all 234 exact cached assets');
- assert.equal(verified.cacheRevision,'ab0733bcb0792d24',
+ assert.equal(verified.cacheRevision,'a44f17936accbe0c',
    'A stale offline worker must not impersonate the exact cave source');
  assert.equal(verified.verifiedBlobs,verified.count-2,
    'Every external static source blob must be SHA-1 Git-verified before offline approval');
- assert.equal(verified.sourceHead,'ab0733bcb0792d246766f5a654de8af10f7fa3c1',
+ assert.equal(verified.sourceHead,'a44f17936accbe0cbfe179ec160e4333d4140299',
    'Recorded offline source identity must be the immutable staging snapshot');
  const sourceCached=await page.evaluate(async()=>Boolean(await caches.match(
    new URL('./src/manual-caves/cave-voxel-world.mjs',location.href))));
