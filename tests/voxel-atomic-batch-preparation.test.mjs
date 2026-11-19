@@ -41,3 +41,31 @@ test('duplicate, malformed and missing cell fail closed',()=>{
  assert.equal(prepareVoxelEditBatch(host,[{cell:a,nextId:3},{cell:[999,0,0],nextId:3}]),null);
  assert.deepEqual(host.read(a),{id:1,revision:0,turn:null});
 });
+
+test('stale expected ID fails before commit even when host snapshot is fresh',()=>{
+ const host=make();
+ assert.equal(prepareVoxelEditBatch(host,[{cell:a,nextId:4,expectedId:2}]),null);
+ assert.deepEqual(host.read(a),{id:1,revision:0,turn:null});
+ assert.equal(commitPreparedVoxelEditBatch(host,prepareVoxelEditBatch(host,[{cell:a,nextId:4,expectedId:1}])),true);
+});
+
+test('orientation intent guard distinguishes null and all four rotations',()=>{
+ const host=make();
+ assert.equal(host.setOrientation(a,1,0,2),true);
+ assert.equal(prepareVoxelEditBatch(host,[{cell:a,nextId:4,expectedTurn:null}]),null);
+ assert.equal(prepareVoxelEditBatch(host,[{cell:a,nextId:4,expectedTurn:1}]),null);
+ const batch=prepareVoxelEditBatch(host,[{cell:a,nextId:4,expectedId:1,expectedTurn:2},{cell:b,nextId:5,expectedTurn:null}]);
+ assert.equal(commitPreparedVoxelEditBatch(host,batch),true);
+ assert.equal(host.read(a).turn,null);
+});
+
+test('malformed intent guards throw without modifying any cell',()=>{
+ const host=make();
+ for (const expectedId of [-1,255,1.5,NaN,'1']) {
+   assert.throws(()=>prepareVoxelEditBatch(host,[{cell:a,nextId:4,expectedId}]),TypeError);
+ }
+ for (const expectedTurn of [-1,4,1.5,undefined,'2']) {
+   assert.throws(()=>prepareVoxelEditBatch(host,[{cell:a,nextId:4,expectedTurn}]),TypeError);
+ }
+ assert.deepEqual(host.exportLegacyCells(),[{cell:a,id:1},{cell:b,id:2}]);
+});
