@@ -34,7 +34,7 @@ const ids=[
  'r2:market-square:snow:large:04','r2:butcher:snow:small:04','r2:tailor:temperate:large:04','r2:temple:temperate:medium:05',
  'r1:harbor-office:mountain:medium:004','r1:bathhouse:desert:large:004','r1:stable:enchanted-forest:medium:003','r1:fishing-lodge:temperate:small:004',
  'r2:bookshop:mountain:large:04','r2:jeweler:enchanted-forest:medium:04','r2:tailor:desert:small:04','r2:theater:enchanted-forest:medium:03',
- 'r1:greenhouse:enchanted-forest:medium:004','r1:farm-barn:mountain:small:004','r1:lighthouse:desert:medium:004','r1:bathhouse:mountain:medium:004',
+ 'r1:greenhouse:enchanted-forest:medium:004','r1:farm-barn:mountain:small:004','r1:lighthouse:desert:medium:004','r1:bathhouse:mountain:large:004',
  'r2:bookshop:enchanted-forest:large:04','r2:jeweler:temperate:small:04','r2:temple:mountain:large:05','r2:butcher:desert:medium:04'
 ];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
