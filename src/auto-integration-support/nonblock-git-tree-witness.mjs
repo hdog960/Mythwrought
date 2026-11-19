@@ -5,13 +5,13 @@ export function gitBlobSha(content) {
  return createHash('sha1').update(Buffer.from('blob '+bytes.length+'\\0'.replace('\\0','\0'))).update(bytes).digest('hex');
 }
 const HEX=/^[a-f0-9]{40}$/;
-export function verifyProducerTreeWitness({manifest, trees, sourceBytes, expectedHeads}) {
+export function verifyProducerTreeWitness({manifest, trees, sourceBytes, expectedHeads, commitTrees}) {
  const errors=[], witnessed=[];
  if(manifest?.version!==1||!Array.isArray(manifest.producers)||manifest.producers.length!==3) return {ok:false,errors:['invalid manifest'],witnessed};
  for(const p of manifest.producers){
   if(!['24','36','48'].includes(p.lane)||!HEX.test(p.head)||expectedHeads?.[p.lane]!==p.head){errors.push('head mismatch '+p.lane);continue;}
   const tree=trees?.[p.lane];
-  if(tree?.sha!==p.head||tree.truncated===true||!Array.isArray(tree.tree)){errors.push('unverified tree '+p.lane);continue;}
+  if(!HEX.test(commitTrees?.[p.lane])||tree?.sha!==commitTrees[p.lane]||tree.truncated===true||!Array.isArray(tree.tree)){errors.push('unverified tree '+p.lane);continue;}
   const prefix={'24':'src/nonblock-environments24/','36':'src/nonblock-fittings36/','48':'src/nonblock-scene48/'}[p.lane];
   for(const file of p.files){
    const member=tree.tree.find(e=>e.path===file.path&&e.type==='blob'&&e.mode==='100644');
