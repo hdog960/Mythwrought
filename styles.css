@@ -236,3 +236,53 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media(max-height:350px){
  .g2b-flight-active .grip.right .actions .action{font-size:9px;min-height:31px}
 }
+
+
+/* Opt-in gameplay capture: bezel button and preview only, no thumb-rail or world overlay. */
+.capture-toggle{
+  flex:none;min-width:53px;min-height:28px;padding:2px 6px;
+  border-radius:7px;border:1px solid #e5bd80;
+  background:linear-gradient(#785150,#492e35);color:#ffe6d7;
+  font-size:clamp(9px,1.3vw,11px);font-weight:900;letter-spacing:.04em;
+  box-shadow:inset 0 1px #f3d7be44,0 1px 6px #090c11;
+  touch-action:manipulation;white-space:nowrap;
+}
+.capture-toggle.capturing{border-color:#ffc4a5;background:#992d3f;color:#fff9e5}
+.capture-toggle:disabled{opacity:.65}
+#capturePanel[hidden],#capturePreview[hidden],#captureSave[hidden]{display:none}
+#capturePanel{
+  position:fixed;inset:0;z-index:22;display:grid;place-items:center;
+  background:#071217ed;padding:12px;overscroll-behavior:contain;
+  touch-action:pan-y;
+}
+.capture-dialog{
+  display:flex;flex-direction:column;align-items:stretch;gap:9px;
+  width:min(560px,96vw);max-height:97dvh;overflow:auto;
+  border:2px solid #c5a16c;border-radius:13px;
+  padding:clamp(8px,2vh,15px);
+  background:linear-gradient(145deg,#2d4241,#152a31);
+  box-shadow:0 10px 32px #000c;color:#f3e3bd;
+  -webkit-overflow-scrolling:touch;
+}
+.capture-dialog h2{margin:0;font-size:clamp(12px,2.2vw,16px);letter-spacing:.055em}
+.capture-dialog p{margin:0;font-size:11px;line-height:1.4;color:#d0ded6}
+#capturePreview{
+  display:block;width:100%;max-height:57dvh;aspect-ratio:16/9;
+  border:1px solid #b4a077;border-radius:7px;background:#060b0e;
+  object-fit:contain;touch-action:manipulation;
+}
+.capture-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
+.capture-action{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:1 1 108px;min-height:39px;padding:7px 10px;text-align:center;
+  border:1px solid #cab083;border-radius:8px;
+  color:#fff1cc;background:linear-gradient(#536b64,#24463f);
+  text-decoration:none;font-size:11px;font-weight:900;
+  touch-action:manipulation;
+}
+.capture-action:disabled{opacity:.5}
+@media(max-height:350px){
+  .capture-dialog{gap:5px;padding:7px}
+  #capturePreview{max-height:46dvh}
+  .capture-action{min-height:32px}
+}
