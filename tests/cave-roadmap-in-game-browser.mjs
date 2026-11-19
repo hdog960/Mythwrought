@@ -60,12 +60,25 @@ function inspect(raw,w,h){
  const png=PNG.sync.read(raw);
  assert.equal(png.width,w);assert.equal(png.height,h);
  const values=new Set();let pixelCount=0;
+ // Measured against original-game prior screenshots at all three viewports:
+ // bright cyan/white deep openings remained despite valid hashes, 27/27
+ // near buffers and positive real far GPU draws. The sampling region is
+ // inside #scene, away from phone rails, minimap and gold UI elements.
+ // This is an ADDITIONAL fail-closed visual gate, not a geometry substitute.
+ let brightCyanGapPixels=0,originalOpenSkyPixels=0;
+ for(let y=Math.floor(h*.09);y<Math.floor(h*.56);y++)
+  for(let x=Math.floor(w*.19);x<Math.floor(w*.70);x++){
+   const i=(y*w+x)*4,r=png.data[i],g=png.data[i+1],b=png.data[i+2];
+   if(r>=140&&g>=155&&b>=170&&b-r>=10)brightCyanGapPixels++;
+   if(r>=60&&g>=115&&b>=150&&b-r>=35)originalOpenSkyPixels++;
+  }
  for(let y=Math.floor(h*.27);y<Math.floor(h*.77);y+=7)
   for(let x=Math.floor(w*.22);x<Math.floor(w*.78);x+=7){
    const i=(y*w+x)*4;values.add([png.data[i]>>4,png.data[i+1]>>4,png.data[i+2]>>4].join(','));
    if(png.data[i]>35||png.data[i+1]>35||png.data[i+2]>35)pixelCount++;
   }
  return {width:w,height:h,paletteBins:values.size,litSamples:pixelCount,
+  brightCyanGapPixels,originalOpenSkyPixels,
   sha256:createHash('sha256').update(raw).digest('hex')};
 }
 function locators(reportFromGame){
@@ -329,6 +342,16 @@ try{
     }
     const stats=inspect(raw,width,height);
     assert.ok(stats.paletteBins>=3,'Actual WebGL2 game cave screenshot appears blank: '+shot.name);
+    // These deep named and secondary sites are protected authored caverns,
+    // not the intentionally open-sky East Gallery. Assert REAL screenshot
+    // closure, not just resident-count / far-GPU activity / image hashes.
+    if(farExpected.has(shot.name))
+     assert.equal(stats.brightCyanGapPixels,0,
+      'C6_DEEP_SKY_VISUAL_LEAK '+shot.name+' '+width+'x'+height+
+      ' bright source-world sky pixels='+stats.brightCyanGapPixels);
+    if(shot.name==='historic-east-gallery')
+     assert.ok(stats.originalOpenSkyPixels>500,
+      'The historical East Gallery must retain its intentionally visible open sky');
     hashes.add(stats.sha256);
     report.images.push({scene:shot.name,...stats,renderedVertices:snapshot.verts,
      loadedChunks:snapshot.chunks,playerFeet:snapshot.playerFeet,sourceHead:head,
