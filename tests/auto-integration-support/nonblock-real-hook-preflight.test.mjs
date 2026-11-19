@@ -5,7 +5,7 @@ const sha='a'.repeat(40);
 const sources=Object.fromEntries([['scene48','src/nonblock-scene48/'],['environments24','src/nonblock-environments24/'],['fittings36','src/nonblock-fittings36/']].map(([k,p])=>[k,{head:sha,files:[{path:p+'fixture.mjs',blobSha:sha,verifiedAtHead:true}]}]));
 const obj=(key,anchor)=>({owner:'scene48',instanceKey:key,seed:17,anchor,attachment:'ground',collisionIntent:'pass-through',occupancyGroup:'flora',selectionAabbs:[{min:[0,0,0],max:[1,1,1]}],breakIntent:{action:'remove-object',targetKey:key,requiresOwner:':00'},render:{triangleCount:12,maxInstancesPerBatch:512,instanced:true}});
 const callbacks={pick:async k=>({instanceKey:k}),remove:async k=>({instanceKey:k,removed:true}),snapshot:async()=>({}),restore:async()=>{},visible:async objects=>objects.filter(o=>o.instanceKey!=='a')};
-const good=()=>({sources,instances:[obj('a',[0,0,0]),obj('b',[2,0,0])],seed:17,callbacks,saveWitness:{source:':00-real-schema1',backupPreserved:true,oldSaveCompatible:true}});
+const good=()=>({sources:structuredClone(sources),instances:[obj('a',[0,0,0]),obj('b',[2,0,0])],seed:17,callbacks,saveWitness:{source:':00-real-schema1',backupPreserved:true,oldSaveCompatible:true}});
 test('static preflight cannot claim live',()=>{const r=probeNonblockHandoff(good());assert.equal(r.ok,true);assert.equal(r.live,false)});
 test('unverified source fails closed',()=>{const x=good();x.sources.scene48.files[0].verifiedAtHead=false;assert.equal(probeNonblockHandoff(x).ok,false)});
 test('duplicate instance fails',()=>{const x=good();x.instances[1].instanceKey='a';assert.equal(probeNonblockHandoff(x).ok,false)});
