@@ -77,7 +77,13 @@ try{
   assert.ok(full.bytes>2048,'10-second recording has no encoded video bytes');
   assert.ok(full.width>200&&full.height>100);
   assert.equal(full.width,short.width,'Unexpected video resolution difference');
-  assert.equal(full.height,short.height,'Unexpected video resolution difference');
+  // MediaRecorder/MP4 may encode an odd-height WebGL frame at the neighboring
+  // even pixel height. Verify the same genuine full-width moving scene, with
+  // no more than one pixel of height rounding; never skip playback/frame tests.
+  assert.ok(Math.abs(full.height-short.height)<=1,
+    'Unexpected video resolution difference beyond encoder pixel rounding');
+  assert.ok(Math.abs(full.width/full.height-short.width/short.height)<0.01,
+    'Recorded video aspect ratio changed unexpectedly');
   const play=await page.evaluate(async()=>{
     const v=document.querySelector('#capturePreview');
     v.muted=true;v.currentTime=0;
