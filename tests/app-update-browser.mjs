@@ -84,7 +84,21 @@ try{
   console.log('PASS OLD CACHE-FIRST APP NO REC',prior,'requests',requests);
 
   // Server publishes the exact proposed new files, not a mock screenshot.
+  // A query request must bypass the OLD worker and return the NEW origin
+  // before the new worker is permitted to install.
   deploy='new';
+  const live=await page.evaluate(async release=>{
+    const url=new URL('/index.html',location.href);
+    url.searchParams.set('mw-cache-install',release);
+    const response=await fetch(url.href,{cache:'no-store'});
+    return {ok:response.ok,html:await response.text(),
+      epoch:response.headers.get('X-MW-Server-Epoch'),
+      origin:response.headers.get('X-MW-Origin-Build')};
+  },NEW_CACHE);
+  assert.equal(live.origin,'new','Versioned origin lookup still served the old app');
+  assert.ok(live.html.includes('id="captureToggle"')&&
+    live.html.includes('data-mw-release="'+RELEASE+'"'),
+    'The live origin is not the current REC-capable version');
   await page.evaluate(async()=>{
     const reg=await navigator.serviceWorker.getRegistration('/');
     if(!reg)throw Error('Previous registration missing');
@@ -95,6 +109,17 @@ try{
     return keys.includes('mythwrought-m5-shell-20261119-v6-safe-refresh')&&
       !keys.includes('mythwrought-m5-shell-20261118-v5-recorder');
   },null,{timeout:180000});
+  const installed=await page.evaluate(async()=>{
+    const cache=await caches.open('mythwrought-m5-shell-20261119-v6-safe-refresh');
+    const response=await cache.match(new URL('/index.html',location.href).href);
+    return response&&{origin:response.headers.get('X-MW-Origin-Build'),
+      html:await response.text()};
+  });
+  assert.equal(installed?.origin,'new',
+    'The worker installation copied an old cached index instead of fresh origin source');
+  assert.ok(installed.html.includes('id="captureToggle"')&&
+    installed.html.includes('data-mw-release="'+RELEASE+'"'),
+    'Verified offline shell is missing the actual REC release');
   // A normal boot MUST use only the new, atomically verified cache.
   // It was installed at epoch a and must now expose REC, not old HTML.
   serverEpoch='b';

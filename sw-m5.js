@@ -227,12 +227,23 @@ self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
     const cache=await caches.open(CACHE_NAME);
     try {
-      // Full app shell + all runtime JS modules, including cold v5 profile
-      // imports. Small bounded groups avoid throttling low-power iPhones.
+      // Fetch all assets from a query-versioned origin URL. An older active
+      // cache-first worker can otherwise serve OLD index.html/main.mjs to this
+      // new install. Old workers deliberately bypass any query request.
+      // Cache under CANONICAL query-free URLs for genuine offline operation.
+      // Fail atomically if even one source is missing; preserve previous-good.
       for(let i=0;i<assetUrls.length;i+=12){
-        const requests=assetUrls.slice(i,i+12).map(url=>
-          new Request(url,{cache:'reload',credentials:'same-origin'}));
-        await cache.addAll(requests);
+        const batch=await Promise.all(assetUrls.slice(i,i+12).map(async url=>{
+          const freshUrl=new URL(url);
+          freshUrl.searchParams.set('mw-cache-install',CACHE_NAME);
+          const response=await fetch(new Request(freshUrl.href,{
+            cache:'reload',credentials:'same-origin'
+          }));
+          if(!response.ok||response.type==='opaque')
+            throw Error('Fresh asset unavailable during worker update: '+url);
+          return {url,response};
+        }));
+        await Promise.all(batch.map(({url,response})=>cache.put(url,response)));
       }
       // Only an entirely verified installation can replace an older worker.
       await self.skipWaiting();
