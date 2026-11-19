@@ -14,3 +14,8 @@ test('fittings coordinator blob drift fails closed',()=>{const x=make();x.fittin
 test('tampered bytes rejected',()=>{const x=make();x.coordinator.text+='tamper';assert.match(auditCoordinatorDrift(x).errors.join(','),/blob bytes mismatch/)});
 test('stale HEAD rejected',()=>{const x=make();x.expectedHeads.coordinator=old;assert.match(auditCoordinatorDrift(x).errors.join(','),/stale producer HEAD/)});
 test('version mismatch rejected',()=>{const x=make();x.environment=file(x.environment.text.replace('nonblock-object-v1','v2'));assert.match(auditCoordinatorDrift(x).errors.join(','),/contract version mismatch/)});
+
+test('whitespace and newline declarations are parsed as real JavaScript',()=>{const x=make();x.coordinator=file("export const NONBLOCK_OBJECT_VERSION\n = \n 'nonblock-object-v1';");x.fittings=file("export const CONTRACT = 'nonblock-object-v1'; export const CONTRACT_SOURCE_SHA = '"+x.coordinator.blob+"';");assert.equal(auditCoordinatorDrift(x).ok,true)});
+test('missing environment pin fails closed',()=>{const x=make();x.environment=file("export const TARGET_CONTRACT='nonblock-object-v1';");assert.match(auditCoordinatorDrift(x).errors.join(','),/coordinator HEAD drift/)});
+test('missing fittings blob pin fails closed',()=>{const x=make();x.fittings=file("export const CONTRACT='nonblock-object-v1';");assert.match(auditCoordinatorDrift(x).errors.join(','),/blob drift/)});
+test('missing coordinator declaration fails closed',()=>{const x=make();x.coordinator=file('export const OTHER=1;');assert.match(auditCoordinatorDrift(x).errors.join(','),/contract version mismatch/)});
