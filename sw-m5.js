@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261119-five-systems-rc2';
-const ASSET_RELEASE='20261119-five-systems-rc2';
+const CACHE_NAME=CACHE_PREFIX+'20261119-five-systems-rc3';
+const ASSET_RELEASE='20261119-five-systems-rc3';
 const SOURCE_ASSETS=[
   "./src/mobs/animal-interactions.mjs",
   "./src/mobs/behavior.mjs",
@@ -283,27 +283,31 @@ self.addEventListener('install',event=>{
       // new install. Old workers deliberately bypass any query request.
       // Cache under CANONICAL query-free URLs for genuine offline operation.
       // Fail atomically if even one source is missing; preserve previous-good.
-      for(let i=0;i<assetUrls.length;i+=12){
-        const batch=await Promise.all(assetUrls.slice(i,i+12).map(async url=>{
-          try {
-            const freshUrl=new URL(url);
-            freshUrl.searchParams.set('mw-cache-install',CACHE_NAME);
-            const response=await fetch(new Request(freshUrl.href,{
-              cache:'reload',credentials:'same-origin'
-            }));
-            if(!response.ok||response.type==='opaque')
-              throw Error('HTTP '+response.status);
-            return {url,response};
-          }catch(error){
-            throw Error('Fresh source unavailable '+url+': '+String(error));
-          }
-        }));
-        // Wait for ALL writes before a failure can delete the candidate cache.
-        // Other in-flight writes must never leave a partial cache behind.
-        const written=await Promise.allSettled(batch.map(({url,response})=>
-          cache.put(url,response).catch(error=>{
-            throw Error('Cannot cache '+url+': '+String(error));
-          })));
+      // Earlier genuine V6 WebGL2 run #44626707681 documented a
+      // 180-second install stuck on a ZERO-entry candidate cache.
+      // The old 12-wide Promise.all waited for EVERY response BEFORE writing
+      // even the first entry. Stream each verified source into CacheStorage
+      // promptly and reduce simultaneous fetch/cache work to six requests,
+      // preserving the exact full-shell and previous-good atomic contracts.
+      // Do NOT allow an incomplete shell to activate or mix with older code.
+      const batchWidth=6;
+      for(let i=0;i<assetUrls.length;i+=batchWidth){
+        const written=await Promise.allSettled(
+          assetUrls.slice(i,i+batchWidth).map(async url=>{
+            try{
+              const freshUrl=new URL(url);
+              freshUrl.searchParams.set('mw-cache-install',CACHE_NAME);
+              const response=await fetch(new Request(freshUrl.href,{
+                cache:'reload',credentials:'same-origin'
+              }));
+              if(!response.ok||response.type==='opaque')
+                throw Error('HTTP '+response.status);
+              await cache.put(url,response);
+            }catch(error){
+              throw Error('Cannot verify/cache original source '+url+
+                ' in batch '+Math.floor(i/batchWidth)+': '+String(error));
+            }
+          }));
         const failed=written.find(result=>result.status==='rejected');
         if(failed)throw failed.reason;
       }
