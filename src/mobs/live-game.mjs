@@ -118,9 +118,17 @@ export function createLiveMobSession({
     engine.drainEvents();
   }
   function drawEntities(){
-    return engine.all().filter(m=>m.state!=='dormant').map(m=>({
+    const creatures=engine.all().filter(m=>m.state!=='dormant').map(m=>({
       ...m, visual:behavior.state(m.id)
     }));
+    // Real hostile ranged attacks must not strike an invisible projectile.
+    // Use the four original authored preview projectile meshes with real
+    // position/velocity from MobCombat, not synthetic screen-space sprites.
+    const projectiles=combat.projectiles.slice(0,8).map(shot=>({
+      ...shot,species:{id:shot.visual},state:'active',juvenile:false,
+      yaw:Math.atan2(shot.velocity[0],shot.velocity[2]),visual:'projectile'
+    }));
+    return [...creatures,...projectiles];
   }
   function attack(eye,forward){
     if(readOnly||!player.alive)return null;

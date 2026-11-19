@@ -6,7 +6,9 @@ import {speciesRegistry} from './species.mjs';
 
 const MAX_VISIBLE=8, MAX_GPU_MODELS=12, MAX_DISTANCE=32;
 const modelIds=new Set(speciesRegistry.map(s=>s.id));
-if(modelIds.size!==40 || [...modelIds].some(id=>!(meshes[id] instanceof Float32Array)))
+const projectileIds=new Set(['projectile','briar-spore','frost-splinter','void-mote']);
+const renderIds=new Set([...modelIds,...projectileIds]);
+if(modelIds.size!==40 || [...renderIds].some(id=>!(meshes[id] instanceof Float32Array)))
   throw Error('Incomplete original 40-creature 3D model registry');
 
 const VS=String.raw`#version 300 es
@@ -94,7 +96,7 @@ export function createLiveMobRenderer(gl){
     let item=cache.get(id);
     if(item){item.last=frame;return item;}
     const data=meshes[id];
-    if(!modelIds.has(id)||!data||data.length%7!==0) return null;
+    if(!renderIds.has(id)||!data||data.length%7!==0) return null;
     if(cache.size===MAX_GPU_MODELS){
       const old=[...cache].sort((a,b)=>a[1].last-b[1].last)[0][0];
       evict(old);
@@ -133,7 +135,7 @@ export function createLiveMobRenderer(gl){
     frame++;
     const groups=new Map(),selected=[];
     for(const e of entities){
-      if(!modelIds.has(e?.species?.id)||e.state==='dormant'||e.state==='removed')continue;
+      if(!renderIds.has(e?.species?.id)||e.state==='dormant'||e.state==='removed')continue;
       const dx=e.position[0]-eye[0],dy=e.position[1]-eye[1],dz=e.position[2]-eye[2];
       if(dx*dx+dy*dy+dz*dz>MAX_DISTANCE*MAX_DISTANCE)continue;
       selected.push({e,d:dx*dx+dy*dy+dz*dz});

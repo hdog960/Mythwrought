@@ -6,6 +6,7 @@ import {meshes} from '../mob-preview/models.mjs';
 import {createLiveMobSession,mobSaveKey,LIVE_MOB_COUNT,classifyLiveBiome}
   from '../src/mobs/live-game.mjs';
 import {createLiveMobRenderer} from '../src/mobs/live-render.mjs';
+import {hostileTactics} from '../src/mobs/hostile-tactics.mjs';
 
 function memoryStorage(){
   const entries=new Map();
@@ -111,4 +112,13 @@ test('creature occupancy uses original surface section 0 and exact offset deep s
       'No false section lookup at Y '+y+': '+JSON.stringify(sections));
   }
   session.dispose();
+});
+
+test('ranged hostile attack visuals use original GPU mesh, never invisible damage',()=>{
+  const projectileMeshes=['projectile','briar-spore','frost-splinter','void-mote'];
+  assert.deepEqual([...new Set(Object.values(hostileTactics)
+    .filter(t=>t.attack==='ranged')
+    .map(t=>t.projectile??'projectile'))].sort(),projectileMeshes.sort());
+  for(const id of projectileMeshes)
+    assert.ok(meshes[id]?.length>=21,'Missing visible genuine '+id+' ranged model');
 });
