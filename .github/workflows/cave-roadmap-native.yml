@@ -29,6 +29,7 @@ jobs:
           for file in src/manual-caves/*.mjs; do node --check "$file"; done
       - name: Genuine four-seed physical cave integration checks
         run: |
+          node --test tests/cave-roadmap-far-wall-gpu.test.mjs
           node --test tests/cave-roadmap-producer-composition.test.mjs
           node --test tests/cave-roadmap-vault-bridges.test.mjs
           node --test tests/cave-roadmap-real-controller.test.mjs
