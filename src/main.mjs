@@ -306,6 +306,10 @@ function start(){
   mobActions.innerHTML='<h2 class="audit-title">CREATURES · 20 PASSIVE + 20 HOSTILE</h2>'+
     '<p id="mobInfo" class="controlhint" role="status">Creatures appear in loaded world chunks. MINE attacks a creature in reach. INTERACT befriends, tames or rescues an eligible creature.</p>'+
     '<div class="helpbuttons"><button id="mobInteract" type="button">INTERACT WITH NEARBY CREATURE</button>'+
+    '<button id="mobMount" type="button">MOUNT / DISMOUNT</button>'+
+    '<button id="mobBreed" type="button">BREED NEARBY PAIR</button>'+
+    '<button id="mobFollow" type="button">COMPANION FOLLOW</button>'+
+    '<button id="mobStay" type="button">COMPANION STAY</button>'+
     '<button id="mobStatus" type="button">CREATURE STATUS</button></div>';
   help.querySelector('.helpbody')?.append(mobActions);
   const mobInfo=mobActions.querySelector('#mobInfo');
@@ -314,12 +318,27 @@ function start(){
       mobSession?.interact()??'Creature runtime not available';
     mobInfo.textContent=result;mobSession?.save();message(result);
   };
+  for(const [id,action] of [
+    ['mobMount',session=>g2Active()?'Exit Creative flight before mounting':session.toggleMount()],
+    ['mobBreed',session=>session.breedNearby()],
+    ['mobFollow',session=>session.companionOrder('follow')],
+    ['mobStay',session=>session.companionOrder('stay')]
+  ]){
+    mobActions.querySelector('#'+id).onclick=()=>{
+      const result=mobSession&&!mobRuntimeError&&mobRenderer?
+        action(mobSession):'Creature interaction is unavailable';
+      mobInfo.textContent=result;
+      if(mobSession&&!mobSession.status().readonly)mobSession.save();
+      message(result);
+    };
+  }
   mobActions.querySelector('#mobStatus').onclick=()=>{
     const state=mobSession?.status();
     mobInfo.textContent=mobRuntimeError?'Creature system paused: '+mobRuntimeError:state?
       '40 authored species · '+state.counts.total+' present · '+state.counts.awake+
         ' active · '+state.companions+' companions · health '+Math.ceil(state.health)+
-        '/100'+(state.readonly?' · protected read-only save':''):
+        '/100'+(state.mounted?' · RIDING':'')+
+        (state.readonly?' · protected read-only save':''):
       'Creature runtime not available';
   };
   const manual14Ids=new Set(MANUAL_FIVE_PACK_CATALOG.filter(x=>x.pack===1||x.pack===4).map(x=>x.numericId));
@@ -1029,6 +1048,7 @@ function start(){
     }
   }
   function respawnPrototype(){
+    mobSession?.dismount();
     Object.assign(player,newPlayer(world));
     jumpQueued=false;
     message('Returned to a safe surface near spawn (prototype void recovery)');
@@ -1038,7 +1058,11 @@ function start(){
     const strafe=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joystick.x;
     const forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)-joystick.y;
     if(g2Active()){jumpQueued=false;g2Move(dt);}
-    else{
+    else if(mobSession?.steerMount(strafe,forward,player.yaw,keys.has('ShiftLeft'))){
+      // Rider movement belongs to the source creature physics, not a second
+      // independent stepPlayer call that would detach the camera on iPhone.
+      jumpQueued=false;
+    }else{
       const result=stepPlayer(world,player,{strafe,forward,jump:jumpQueued},dt);
       jumpQueued=false;
       if(result.landed && !result.stepped)
@@ -1184,6 +1208,11 @@ function start(){
             ((b.x*16+8-player.x)**2+(b.z*16+8-player.z)**2))
           .slice(0,32).map(c=>({cx:c.x,cz:c.z,section:c.section,feet:player.feet}));
         mobSession.advance(dt,regions);
+        const riding=mobSession.riderPosition();
+        if(riding){
+          [player.x,player.feet,player.z]=riding;
+          player.vX=player.vY=player.vZ=0;player.onGround=true;
+        }
         if(now-mobLastSave>12000){mobSession.save();mobLastSave=now;}
         }catch(error){
           mobRuntimeError=String(error?.message||error);

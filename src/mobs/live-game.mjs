@@ -178,6 +178,63 @@ export function createLiveMobSession({
       return mob.species.displayName+' tamed';
     return 'No eligible interaction with '+mob.species.displayName;
   }
+  function toggleMount(){
+    if(readOnly||!player.alive)return 'Creature riding unavailable in protected mode';
+    if(animals.riderPosition(player)){
+      animals.dismount(player);
+      return 'Dismounted; regular walking controls restored';
+    }
+    const eligible=engine.all().filter(m=>m.species.riding.eligible&&
+      animals.isTamed(m.id,player)&&
+      ['idle','active'].includes(m.state)&&
+      Math.hypot(...m.position.map((v,i)=>v-player.position[i]))<=2)
+      .sort((a,b)=>Math.hypot(...a.position.map((v,i)=>v-player.position[i]))-
+        Math.hypot(...b.position.map((v,i)=>v-player.position[i])));
+    for(const mob of eligible){
+      if(animals.mount(mob.id,player))
+        return 'Mounted '+mob.species.displayName+' · move with your normal controls';
+    }
+    return 'No nearby tamed rideable creature with safe headroom';
+  }
+  function dismount(){return animals.dismount(player);}
+  function riderPosition(){return animals.riderPosition(player);}
+  function steerMount(strafe,forward,yaw,run=false){
+    if(readOnly||!riderPosition()||![strafe,forward,yaw].every(Number.isFinite))
+      return false;
+    // Match original iPhone/keyboard two-thumb frame, not preview axes.
+    const dx=Math.sin(yaw)*forward+Math.cos(yaw)*strafe;
+    const dz=Math.cos(yaw)*forward-Math.sin(yaw)*strafe;
+    return animals.steer(player,[dx,dz],run===true);
+  }
+  function breedNearby(){
+    if(readOnly||!player.alive)return 'Breeding unavailable in protected mode';
+    const eligible=engine.all().filter(m=>
+      ['idle','active'].includes(m.state)&&
+      m.species.breeding.eligible&&!m.juvenile&&
+      Math.hypot(...m.position.map((v,i)=>v-player.position[i]))<=3);
+    for(let i=0;i<eligible.length;i++)for(let j=i+1;j<eligible.length;j++){
+      const first=eligible[i],second=eligible[j];
+      if(first.species.id!==second.species.id||
+        Math.hypot(...first.position.map((v,k)=>v-second.position[k]))>2.4)continue;
+      const child=animals.breed(first.id,second.id);
+      if(child)return 'New '+first.species.displayName+' offspring born';
+    }
+    return 'Breeding needs two nearby healthy matching adults and clear habitat';
+  }
+  function companionOrder(mode){
+    if(readOnly||!player.alive)return 'Companion commands unavailable in protected mode';
+    if(!['follow','stay','return'].includes(mode))return 'Unknown companion order';
+    const slots=companions.slots().filter(slot=>slot.owner===player.id)
+      .map(slot=>({slot,mob:engine.get(slot.id)}))
+      .filter(x=>x.mob&&['idle','active'].includes(x.mob.state)&&
+        Math.hypot(...x.mob.position.map((v,i)=>v-player.position[i]))<=8)
+      .sort((a,b)=>Math.hypot(...a.mob.position.map((v,i)=>v-player.position[i]))-
+        Math.hypot(...b.mob.position.map((v,i)=>v-player.position[i])));
+    if(!slots.length)return 'No awake bonded companion within command range';
+    const {slot,mob}=slots[0];
+    return companions.command(slot.id,player,mode)?
+      mob.species.displayName+' ordered to '+mode:'Companion order rejected safely';
+  }
   function save(){
     if(readOnly||!allowWrites())return false;
     let value;
@@ -197,9 +254,10 @@ export function createLiveMobSession({
   function status(){return {
     enabled:true,species:LIVE_MOB_COUNT,counts:engine.counts(),
     health,readonly:readOnly,damaged,companions:companions.slots().length,
-    gpuSafe:true,elapsed
+    mounted:Boolean(riderPosition()),gpuSafe:true,elapsed
   };}
   function dispose(){engine.dispose();}
   return {advance,drawEntities,attack,interact,save,dispose,status,revive,
+    toggleMount,dismount,riderPosition,steerMount,breedNearby,companionOrder,
     get query(){return query;}, get engine(){return engine;}};
 }

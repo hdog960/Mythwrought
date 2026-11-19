@@ -153,3 +153,17 @@ test('live creature sightline respects real Pack 5 authoritative shape raycast',
     'Invalid Pack 5 shape service fails closed');
   clear.dispose();
 });
+
+test('actual-game creature commands are safe without eligible tame, mount, breed or pet',()=>{
+  const {world,initial,build}=setup(811);
+  const session=build();
+  assert.equal(session.riderPosition(),null);
+  assert.equal(session.steerMount(0,1,0),false);
+  assert.match(session.toggleMount(),/No nearby tamed rideable/);
+  assert.match(session.breedNearby(),/two nearby healthy matching adults/);
+  assert.match(session.companionOrder('follow'),/No awake bonded companion/);
+  assert.equal(session.dismount(),false);
+  assert.equal(session.save(),true);
+  assert.equal(JSON.stringify(world.save()),initial);
+  session.dispose();
+});
