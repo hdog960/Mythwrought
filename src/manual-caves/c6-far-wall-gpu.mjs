@@ -95,8 +95,24 @@ export function planCaveFarWallSources(world,player,viewport,
  const ranked=[...candidates.values()].sort((a,b)=>
   b.roofHits-a.roofHits||b.hits-a.hits||
   a.nearest-b.nearest||a.cz-b.cz||a.cx-b.cx);
- return {section,selected:ranked.slice(0,bounds.maxChunks),
-  pending:ranked.slice(bounds.maxChunks),uncovered,firstFarRock,
+ // Two neighboring vertical sections in the SAME real source x/z
+ // column may share ONE far GPU buffer. This is not a fifth draw slot
+ // or fabricated rock. At most one real source section may be joined.
+ const selected=ranked.slice(0,bounds.maxChunks).map(c=>({...c}));
+ const pending=ranked.slice(bounds.maxChunks);
+ let joinedSources=0;
+ for(const companion of pending){
+  const owner=selected.find(c=>c.cx===companion.cx&&c.cz===companion.cz&&
+   Math.abs(c.section-companion.section)===1);
+  if(owner){
+   owner.companion={...companion};joinedSources=1;
+   break;
+  }
+ }
+ const companionKey=selected.find(c=>c.companion)?.companion.key;
+ return {section,selected,
+  pending:pending.filter(c=>c.key!==companionKey),
+  joinedSources,uncovered,firstFarRock,
   samples,estimatedBytes:0,nearExpected:near.size,
   viewport:[...viewport]};
 }
@@ -105,17 +121,17 @@ export function createCaveFarWallGpu(gl,{bounds=C6_FAR_BOUNDS}={}){
  if(!gl||typeof gl.createBuffer!=='function')throw Error('C6_FAR_NO_WEBGL');
  const buffers=new Map(),wanted=new Map();
  let worldRef=null,nearCenter='',planPos=null,lastPlanFrame=-Infinity;
- let bytes=0,uploads=0,failures=0,uncovered=0,farRock=0,sourceSamples=0;
+ let bytes=0,uploads=0,failures=0,uncovered=0,farRock=0,sourceSamples=0,joinedSources=0;
  let lastMeshMs=0,budgetExcluded=0;
  function invalidate(){
   for(const c of buffers.values())if(c.buffer)gl.deleteBuffer(c.buffer);
   buffers.clear();wanted.clear();bytes=0;nearCenter='';planPos=null;
-  lastPlanFrame=-Infinity;uncovered=farRock=sourceSamples=budgetExcluded=0;
+  lastPlanFrame=-Infinity;uncovered=farRock=sourceSamples=budgetExcluded=joinedSources=0;
  }
  function resetForLostContext(){
   // WebGL objects are invalid already; do not call WebGL during a loss.
   buffers.clear();wanted.clear();bytes=0;nearCenter='';planPos=null;
-  lastPlanFrame=-Infinity;uncovered=farRock=sourceSamples=budgetExcluded=0;
+  lastPlanFrame=-Infinity;uncovered=farRock=sourceSamples=budgetExcluded=joinedSources=0;
  }
  function step({world,player,nearChunks,nearPending,frame,viewport,enabled}){
   if(!enabled||!world||!player||!viewport||player.feet>=-3){
@@ -149,6 +165,7 @@ export function createCaveFarWallGpu(gl,{bounds=C6_FAR_BOUNDS}={}){
     wanted.clear();for(const [k,c] of newWanted)wanted.set(k,c);
     uncovered=plan.uncovered+plan.pending.length;
     farRock=plan.firstFarRock;sourceSamples=plan.samples;
+    joinedSources=plan.joinedSources;
     planPos=nowPos;lastPlanFrame=frame;
    }
   }
@@ -160,6 +177,15 @@ export function createCaveFarWallGpu(gl,{bounds=C6_FAR_BOUNDS}={}){
     let data=null;
     try{
      data=meshDepthSection(world,c.cx,c.cz,c.section);
+     if(c.companion){
+      const join=c.companion;
+      // Every vertex comes from the existing production depth mesher
+      // and real world.get; no synthetic geometry or source edit.
+      const second=meshDepthSection(world,join.cx,join.cz,join.section);
+      const merged=new Float32Array(data.length+second.length);
+      merged.set(data);merged.set(second,data.length);
+      data=merged;
+     }
      const size=data.byteLength;
      if(size===0){wanted.delete(k);break;}
      if(size>bounds.maxBytes-bytes){budgetExcluded++;wanted.delete(k);break;}
@@ -189,7 +215,7 @@ export function createCaveFarWallGpu(gl,{bounds=C6_FAR_BOUNDS}={}){
  }
  function stats(){
   return {chunks:buffers.size,bytes,pending:[...wanted.keys()].filter(k=>!buffers.has(k)).length,
-   uploads,failures,uncovered,farRock,sourceSamples,budgetExcluded,lastMeshMs,
+   uploads,failures,uncovered,farRock,sourceSamples,joinedSources,sourceSections:buffers.size+joinedSources,budgetExcluded,lastMeshMs,
    vertices:[...buffers.values()].reduce((n,c)=>n+c.count,0),
    maxChunks:bounds.maxChunks,maxBytes:bounds.maxBytes};
  }

@@ -75,6 +75,15 @@ test('C6 actual Fan pixel ray selects its source-authenticated upper roof chunk'
  assert.ok(plan.selected.some(c=>c.key==='13,10,-7'),
   'Original game remaining Fan upper left skylight chunk omitted: '+
   JSON.stringify(plan.selected.map(c=>[c.key,c.hits,c.roofHits])));
+ // Four output buffers, but source-authentic adjacent seam slices:
+ // actual screenshot sees both 12,10,-8 and 13,10,-8.
+ assert.equal(world.get(207,-116,160),BLOCK.DEEPSTONE);
+ assert.ok(plan.selected.some(c=>c.key==='13,10,-8'),
+  'Real peripheral 13,10,-8 rock must remain visible');
+ const joined=plan.selected.find(c=>c.key==='12,10,-7');
+ assert.equal(joined?.companion?.key,'12,10,-8',
+  'Must pack the real adjacent lower section into a single buffer');
+ assert.equal(plan.joinedSources,1);
  assert.ok(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples);
  assert.ok(plan.selected.length<=C6_FAR_BOUNDS.maxChunks);
 });
@@ -94,10 +103,14 @@ test('C6 far opaque draw uses genuine 36-byte packed source mesh and exact caps'
  const s=far.stats();
  assert.ok(s.chunks>0,'Expected original-world far rock beyond 27 near buffers');
  assert.ok(s.chunks<=4);
+ assert.ok(s.joinedSources<=1);
+ assert.equal(s.sourceSections,s.chunks+s.joinedSources);
  assert.ok(s.bytes>0&&s.bytes<=1048576);
  assert.ok(s.vertices>0);
  assert.equal(g.uploaded.reduce((n,v)=>n+v,0),s.bytes);
  assert.equal(g.uploaded.every(n=>n%36===0),true);
+ assert.equal(g.uploaded.length,s.chunks,
+  'Real adjacent source slices must upload into one far GPU buffer');
  assert.equal(s.uploads,g.uploaded.length);
  const vertices=far.draw({atPos:0,atColor:1,atUv:2,atMat:3});
  assert.equal(vertices,s.vertices);
