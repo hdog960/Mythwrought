@@ -2,6 +2,7 @@
 // A map cell is revealed ONLY by visiting its vicinity; never prefill from a seed.
 // Discovery is stored outside the canonical schema-1 voxel save and never rewrites it.
 import {terrainHeight,BLOCK} from './voxel.mjs';
+import {profiledDiscoveredCellInk} from './manual-biomes/exploration-ink.mjs';
 
 export const MAP_CELL_SIZE=4;
 export const MAP_REVEAL_RADIUS=3;
@@ -105,7 +106,11 @@ export function paintExploration(canvas,map,world,player,{expanded=false,panX=0,
       const cx=mx+dx,cz=mz+dz;
       // CRITICAL: never query world terrain for undiscovered cells.
       if(!map.seen.has(cx+','+cz))continue;
-      ctx.fillStyle=surfaceInk(world,cx,cz);
+      // CRITICAL: the fog check above must happen before ALL source calls.
+      // Use actual profiled-world solid geology for previously visited tiles;
+      // preserve the old source-exact color path on every legacy seed.
+      ctx.fillStyle=profiledDiscoveredCellInk(world,cx,cz,MAP_CELL_SIZE)||
+        surfaceInk(world,cx,cz);
       ctx.fillRect(Math.floor(w/2+dx*px-px/2),Math.floor(h/2+dz*px-px/2),px,px);
     }
   }

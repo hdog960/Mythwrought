@@ -1,0 +1,294 @@
+// :24 candidate surface composition. Pure, opt-in baseline sampler; no save writes.
+// Integration seam: consult surfaceBiomeBlock before legacy baseline generation
+// only for explicitly new-world-enabled regions. Do NOT alter existing saves.
+import {biome130Block,isBiome130BlockId} from '../biome130-registry.mjs';
+import {terrainHeight} from '../voxel.mjs';
+import {WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from '../depth.mjs';
+// Main registry reconciled 2026-11-17: every automatic terrain floor and
+// stratum ID is an actually registered SOLID material. Snow 271 is powder
+// (non-solid), mountain 298 is an enchanted wood knot; never use either as
+// procedural ground. Original PR #172 is preserved unmodified.
+const REGIONS=Object.freeze([
+  {name:'desert',x:512,z:0,surface:256,subsoil:258,rock:261,salt:259},
+  {name:'snow',x:0,z:512,surface:272,subsoil:278,rock:279,salt:277},
+  {name:'mountain',x:-512,z:0,surface:302,subsoil:303,rock:305,salt:307},
+  {name:'enchanted',x:0,z:-512,surface:286,subsoil:293,rock:294,salt:289}
+]);
+// Exposed geological bands are selected from already-registered biome130 solids.
+// This changes actual fresh-column voxels, never the global block catalog.
+function bandMaterial(region,x,z,y,top,seed){
+ const depth=top-y;
+ if(depth===0)return region.surface;
+ if(depth<=2)return region.subsoil;
+ // Warped horizontal strata form broad, discoverable stone/salt outcrops.
+ // Keep the cap and near-surface subsoil continuous for traversability.
+ const seam=Math.floor((y+(valueNoise(x/29,z/29,seed+1703)-.5)*5)/3);
+ return seam%5===0?region.salt:region.rock;
+}
+const smooth=t=>t*t*(3-2*t);
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+function hash(x,z,seed){
+ let n=Math.imul(x|0,0x7feb352d)^Math.imul(z|0,0x846ca68b)^(seed|0);
+ n=Math.imul(n^(n>>>16),0x45d9f3b);return ((n^(n>>>16))>>>0)/4294967295;
+}
+function valueNoise(x,z,seed){
+ const a=Math.floor(x),b=Math.floor(z),u=smooth(x-a),v=smooth(z-b);
+ const q=(i,j)=>hash(i,j,seed);
+ return (q(a,b)*(1-u)+q(a+1,b)*u)*(1-v)+
+        (q(a,b+1)*(1-u)+q(a+1,b+1)*u)*v;
+}
+export const SURFACE_BIOME_REGIONS=Object.freeze(REGIONS.map(r=>Object.freeze({...r})));
+export function surfaceBiomeAt(x,z,seed=179){
+ if(!Number.isFinite(x)||!Number.isFinite(z)||!Number.isInteger(seed))return null;
+ let chosen=null,weight=0;
+ for(const r of REGIONS){
+   const distance=Math.hypot(x-r.x,z-r.z);
+   const warped=distance+(valueNoise(x/64,z/64,seed+31)-.5)*34;
+   const w=1-smooth(clamp((warped-96)/72,0,1));
+   if(w>weight){weight=w;chosen=r;}
+ }
+ return weight>0?{name:chosen.name,weight,center:[chosen.x,chosen.z]}:null;
+}
+export function surfaceBiomeHeight(x,z,seed=179){
+ const old=terrainHeight(x,z,seed),b=surfaceBiomeAt(x,z,seed);
+ if(!b)return old;
+ const n=valueNoise(x/24,z/24,seed+811);
+ // Region-specific *physical* relief, not merely a change of ground color.
+ // Mountain crests combine broad folded ridges and narrow eroded shoulders;
+ // dunes travel in long, wind-aligned waves; snow drifts stay low and broad.
+ // All frequencies use world coordinates so neighboring chunks share edges.
+ const ridgeNoise=valueNoise(x/47,z/47,seed+431);
+ const ridges=1-Math.abs(2*ridgeNoise-1);
+ const mountainFold=Math.pow(1-Math.abs(Math.sin((x*.052+z*.021)+
+   (valueNoise(x/83,z/83,seed+433)-.5)*3)),2);
+ const duneWave=Math.pow(.5+.5*Math.sin(x*.085+z*.031+
+   (valueNoise(x/68,z/68,seed+812)-.5)*2),2);
+ const snowDrift=valueNoise(x/61,z/61,seed+813);
+ const relief=b.name==='mountain'?Math.floor(3+6*ridges+8*mountainFold+2*n):
+              b.name==='desert'?Math.floor(1+5*duneWave+2*n):
+              b.name==='snow'?Math.floor(1+4*snowDrift+2*n):
+              // Enchanted woodland: low glade basins interrupted by broad,
+              // root-like earthen rises. These are terrain only; :48 owns
+              // non-block vegetation and its placement conventions.
+              Math.floor(1+3*Math.pow(1-Math.abs(2*valueNoise(x/58,z/58,seed+919)-1),2)
+                +2*Math.pow(Math.abs(Math.sin(x*.043-z*.057+
+                  (valueNoise(x/91,z/91,seed+921)-.5)*2)),6)+n);
+ // Blend over a 72-block shoulder, keeping the protected spawn unchanged.
+ // The fresh-column writer activates at weight .35. Blend *physical height*
+// from zero at that same threshold, rather than creating a sudden raised
+// shelf at the first eligible column. Keep the unmodified legacy elevation
+// outside the writer's region and use world coordinates on both sides.
+const shoulder=smooth(clamp((b.weight-.35)/.65,0,1));
+if(shoulder===0)return old;
+return clamp(Math.round(old+(relief-old+3)*shoulder),2,WORLD_MAX_Y-3);
+}
+export function surfaceBiomeBlock(x,y,z,seed=179,{enabled=false}={}){
+ if(!enabled||![x,y,z].every(Number.isInteger)||y<LEGACY_WORLD_MIN_Y||
+    y>WORLD_MAX_Y)return null;
+ const b=surfaceBiomeAt(x,z,seed);
+ if(!b||b.weight<.35)return null;
+ const r=REGIONS.find(r=>r.name===b.name);
+ const top=surfaceBiomeHeight(x,z,seed);
+ if(y>top)return null; // Never erase existing legacy terrain or cave entrances.
+ // Preserve original stone foundation, caves and deep substrate: caller must
+ // apply only to unedited, previously solid topsoil and never to cave AIR.
+ // Only offer a bounded surface veneer; never replace the cave-bearing foundation.
+ if(y<top-2)return null;
+ const id=y===top?r.surface:r.subsoil;
+ if(!isBiome130BlockId(id)||!biome130Block(id).solid)
+   throw Error('Unregistered or non-solid surface material '+id);
+ return id;
+}
+
+// Safe opt-in adapter for a future new-world terrain reader. Null means
+// defer to the unchanged existing world; never manufacture AIR or erase edits.
+// Caller supplies the exact pre-overlay natural/landmark voxel and edit status.
+// Candidate-only, non-destructive veneer for *natural* legacy ground.
+// Baseline AIR, ore, wood, landmarks, user edits, deepstone and stone are
+// never converted. The integrator must additionally prove a cell is natural
+// (not a structure) before invoking this function in a new-world reader.
+export function surfaceBiomeOverlay(x,y,z,seed=179,{
+  enabled=false,baseline,hasEdit=false,isNaturalGround=false
+}={}){
+  if(!enabled||hasEdit||!isNaturalGround||
+     ![x,y,z].every(Number.isInteger)||!Number.isInteger(seed)||
+     (baseline!==1&&baseline!==2))return null;
+  const b=surfaceBiomeAt(x,z,seed);
+  if(!b||b.weight<.35)return null;
+  const legacyTop=terrainHeight(x,z,seed);
+  if(y>legacyTop||y<legacyTop-2)return null;
+  // Deterministic feathering across the biome boundary. This does not
+  // introduce geometry, destroy legacy caves or alter terrain elevation.
+  const coverage=clamp((b.weight-.35)/.4,0,1);
+  if(hash(x,z,seed+907)>coverage)return null;
+  const r=REGIONS.find(region=>region.name===b.name);
+  const id=y===legacyTop?r.surface:r.subsoil;
+  if(!isBiome130BlockId(id)||!biome130Block(id).solid)
+    throw Error('Unregistered or non-solid surface material '+id);
+  return id;
+}
+
+// Pure new-world elevation plan, deliberately separate from voxel placement.
+// A manual integrator must first prove entire-column safety, then apply
+// these bounded layers as a unit so no raised shelf floats over a cave.
+export function surfaceBiomeElevationPlan(x,z,seed=179,{
+  enabled=false,profileIsFresh=false,columnClear=false
+}={}){
+  if(!enabled||!profileIsFresh||!columnClear||
+     ![x,z].every(Number.isInteger)||!Number.isInteger(seed))return null;
+  const biome=surfaceBiomeAt(x,z,seed);
+  if(!biome||biome.weight<.35)return null;
+  const oldTop=terrainHeight(x,z,seed);
+  const top=surfaceBiomeHeight(x,z,seed);
+  if(top<=oldTop)return null;
+  const material=REGIONS.find(r=>r.name===biome.name);
+  if(![material.surface,material.subsoil,material.rock].every(id=>
+    isBiome130BlockId(id)&&biome130Block(id).solid))return null;
+  const layers=[];
+  for(let y=oldTop+1;y<=top;y++)
+    layers.push(Object.freeze({y,id:y===top?material.surface:
+      y>=top-2?material.subsoil:material.rock}));
+  return Object.freeze({name:biome.name,x,z,oldTop,top,
+    layers:Object.freeze(layers)});
+}
+
+
+// Prepare an all-or-nothing new-world column write set. The integrator may
+// commit these writes only after verifying that the chunk has never been
+// generated or persisted. A missing callback is fail-closed, not permission.
+// This deliberately leaves the underlying voxel reader and save format alone.
+export function surfaceBiomeFreshColumn(x,z,seed=179,{
+  enabled=false,profileIsFresh=false,readBaseline=null,hasEdit=null,
+  isProtected=null
+}={}){
+  if(!enabled||!profileIsFresh||typeof readBaseline!=='function'||
+     typeof hasEdit!=='function'||typeof isProtected!=='function'||
+     !Number.isInteger(x)||!Number.isInteger(z)||!Number.isInteger(seed))
+    return null;
+  const b=surfaceBiomeAt(x,z,seed);
+  if(!b||b.weight<.35)return null;
+  const oldTop=terrainHeight(x,z,seed);
+  // Never lower an existing natural surface; preserve its physical height.
+  const newTop=Math.max(oldTop,surfaceBiomeHeight(x,z,seed));
+  const r=REGIONS.find(region=>region.name===b.name);
+  const writes=[];
+  // Real legacy terrain includes STONE (3) beneath the dirt veneer.
+  // Its inclusion is safe only for fresh, unedited, unprotected columns;
+  // AIR and non-natural landmark materials remain hard blockers.
+  // Entire changed envelope is checked before a single write is returned.
+  // Protect a headroom cell above the new surface, including landmarks.
+  for(let y=oldTop-2;y<=newTop+1;y++){
+    const baseline=readBaseline(x,y,z);
+    if(!Number.isInteger(baseline)||hasEdit(x,y,z)||isProtected(x,y,z))
+      return null;
+    if(y>oldTop&&baseline!==0)return null;
+    if(y<=oldTop&&baseline!==1&&baseline!==2&&baseline!==3)return null;
+  }
+  // A raised shelf must not bury the trunk of a landmark whose canopy or
+  // other occupied cells sit above the one-block headroom check. Inspect the
+  // complete remaining surface envelope, not only the proposed write range.
+  // This is bounded by WORLD_MAX_Y and fails closed for any existing object,
+  // edit or protected cell; never truncate a naturally generated structure.
+  for(let y=newTop+2;y<=WORLD_MAX_Y;y++){
+    if(readBaseline(x,y,z)!==0||hasEdit(x,y,z)||isProtected(x,y,z))
+      return null;
+  }
+  const coverage=clamp((b.weight-.35)/.4,0,1);
+  for(let y=oldTop-2;y<=newTop;y++){
+    const baseline=readBaseline(x,y,z);
+    let id=null;
+    if(y>oldTop){
+      id=bandMaterial(r,x,z,y,newTop,seed);
+    }else if(hash(x,z,seed+907)<=coverage){
+      id=bandMaterial(r,x,z,y,newTop,seed);
+    }
+    if(id===null||id===baseline)continue;
+    if(!isBiome130BlockId(id)||!biome130Block(id).solid)return null;
+    writes.push(Object.freeze({x,y,z,from:baseline,to:id}));
+  }
+  return Object.freeze({name:b.name,x,z,oldTop,top:newTop,
+    writes:Object.freeze(writes)});
+}
+
+
+// A renderable VoxelWorld-compatible view for a *new, explicitly opted-in*
+// world profile. The underlying world, its edits and schema-1 save remain
+// untouched. The manual integrator can pass this view to meshChunk and the
+// collision/raycast readers only after selecting a fresh-world profile.
+// Never infer freshness from an empty edits map: an explored save can be empty.
+export function createSurfaceBiomeWorldView(world,{
+  enabled=false,profileIsFresh=false,isProtected=null,hasDurableEditIntent=null,maxCachedColumns=1024
+}={}){
+  if(!enabled||!profileIsFresh||!world||
+     typeof world.naturalAndLandmarkBlock!=='function'||
+     typeof world.get!=='function'||typeof isProtected!=='function'||
+     typeof hasDurableEditIntent!=='function'||
+     !Number.isInteger(maxCachedColumns)||maxCachedColumns<1||
+     maxCachedColumns>4096||!Number.isInteger(world.seed)||
+     !(world.edits instanceof Map)||world.edits.size!==0||
+     !(world.rotations instanceof Map)||world.rotations.size!==0)return null;
+  const cache=new Map();
+  // The fresh-profile eligibility gate is checked only when the view is
+  // constructed. Later edits must not remove already visible natural terrain.
+  // Individual edited or newly protected cells always defer to the authoritative
+  // world reader, even if their column was already cached.
+  // Persistence of the opt-in profile flag remains a manual integrator gate.
+  // hasDurableEditIntent MUST be backed by persistent touched-cell history,
+  // including edits later reverted to their legacy natural value. An empty
+  // current edits map cannot prove a cell was never modified. Missing durable
+  // history fails closed; this view must not silently resurrect biome blocks.
+  const planAt=(x,z)=>{
+    const key=x+','+z;
+    // A cached column is never authoritative after a saved edit or protected
+    // landmark appears anywhere in its surface envelope. Re-check on reads:
+    // a previously cached ridge must not remain beside a newly built wall.
+    const oldTop=terrainHeight(x,z,world.seed);
+    const top=Math.max(oldTop,surfaceBiomeHeight(x,z,world.seed));
+    for(let y=oldTop-2;y<=WORLD_MAX_Y;y++){
+      const cell=x+','+y+','+z;
+      if(world.edits.has(cell)||world.rotations.has(cell)||
+         hasDurableEditIntent(x,y,z)||isProtected(x,y,z)){
+        cache.delete(key);
+        return null;
+      }
+    }
+    if(cache.has(key))return cache.get(key);
+    const plan=surfaceBiomeFreshColumn(x,z,world.seed,{
+      enabled:true,profileIsFresh:true,
+      readBaseline:(cx,y,cz)=>world.naturalAndLandmarkBlock(cx,y,cz),
+      // The baseline is immutable for a fresh profile. Post-creation edits
+      // are masked per-cell by get(), not used to invalidate a column.
+      hasEdit:()=>false,
+      isProtected
+    });
+    const byY=plan?new Map(plan.writes.map(w=>[w.y,w.to])):null;
+    cache.set(key,byY);
+    if(cache.size>maxCachedColumns)cache.delete(cache.keys().next().value);
+    return byY;
+  };
+  return Object.freeze({
+    seed:world.seed,
+    get(x,y,z){
+      const original=world.get(x,y,z);
+      if(![x,y,z].every(Number.isInteger))return original;
+      // Only the surface veneer and raised shelf can differ from the legacy
+      // world. Deep cave reads, high-air reads and distant regions must never
+      // perform a full protected-column scan on the mobile collision path.
+      // This is a conservative bounds check: it never authorizes an overlay.
+      const oldTop=terrainHeight(x,z,world.seed);
+      if(y<oldTop-2||y>WORLD_MAX_Y||!surfaceBiomeAt(x,z,world.seed)||
+         y>Math.max(oldTop,surfaceBiomeHeight(x,z,world.seed)))
+        return original;
+      if(isProtected(x,y,z)||hasDurableEditIntent(x,y,z)||
+         world.edits.has(x+','+y+','+z)||world.rotations.has(x+','+y+','+z)){
+        cache.delete(x+','+z);
+        return original;
+      }
+      return planAt(x,z)?.get(y)??original;
+    },
+    rotationAt(x,y,z){return world.rotationAt?.(x,y,z)??0;},
+    // No set/save/restore methods: the view is deliberately read-only.
+    get cachedColumns(){return cache.size;},
+    get active(){return true;}
+  });
+}

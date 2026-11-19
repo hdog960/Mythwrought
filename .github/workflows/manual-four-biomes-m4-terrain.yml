@@ -1,0 +1,29 @@
+name: Manual Four-Biome M4 Registered Physical Terrain (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/manual-biomes/three-regions-m4.mjs'
+      - 'src/manual-biomes/profile-world.mjs'
+      - 'tests/manual-biomes/three-regions-m4.test.mjs'
+      - 'tests/manual-four-biomes-m4-terrain.test.mjs'
+      - '.github/workflows/manual-four-biomes-m4-terrain.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-three-biome-geology:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Physical geology, protected entrances and v2/v3/v4 source integrity
+        run: |
+          node --check src/manual-biomes/three-regions-m4.mjs
+          node --check src/manual-biomes/profile-world.mjs
+          node --test tests/manual-biomes/three-regions-m4.test.mjs
