@@ -1,0 +1,54 @@
+name: Unified Five-System Live 40-Creature Real Game WebGL2 (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/main.mjs'
+      - 'src/mobs/**'
+      - 'mob-preview/**'
+      - 'src/manual-caves/**'
+      - 'src/manual-biomes/**'
+      - 'src/sky*.mjs'
+      - 'sw-m5.js'
+      - 'tests/live-five-system-mobs.test.mjs'
+      - 'tests/live-five-system-mobs-browser.mjs'
+      - '.github/workflows/unified-five-system-live-mobs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-original-game-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check actual original-game 40-creature source
+        run: |
+          node --check src/main.mjs
+          node --check src/mobs/live-game.mjs
+          node --check src/mobs/live-render.mjs
+          node --check tests/live-five-system-mobs-browser.mjs
+      - name: Native forty-species real game, depth and isolated save contracts
+        run: |
+          node --test tests/live-five-system-mobs.test.mjs
+          node --test tests/mobs/full-roster.test.mjs
+          node --test tests/mobs/roster-persistence.test.mjs
+      - name: Install pinned WebGL2 Chromium and genuine PNG inspection
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Capture all forty real-game model meshes at three iPhone landscape sizes
+        run: node tests/live-five-system-mobs-browser.mjs
+      - name: Preserve source-exact real WebGL2 screenshots and checked SHA256 manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-five-system-120-real-game-mobs
+          path: artifacts/five-systems-live-mobs/
+          if-no-files-found: warn
+          retention-days: 14
