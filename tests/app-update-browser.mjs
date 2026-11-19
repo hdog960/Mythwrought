@@ -105,6 +105,14 @@ try{
   assert.ok(live.html.includes('id="captureToggle"')&&
     live.html.includes('data-mw-release="'+RELEASE+'"'),
     'The live origin is not the current REC-capable version');
+  // The old worker already has an active registration. A populated new
+  // cache alone does not prove its worker took control of this installed app.
+  await page.evaluate(()=>{
+    window.__mwControllerChanged=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      window.__mwControllerChanged=true;
+    },{once:true});
+  });
   await page.evaluate(async()=>{
     const reg=await navigator.serviceWorker.getRegistration('/');
     if(!reg)throw Error('Previous registration missing');
@@ -114,6 +122,7 @@ try{
   // A failed or in-flight installation must never count as an upgraded app.
   await page.waitForFunction(async({cacheName,release})=>{
     const names=await caches.keys();
+    if(!window.__mwControllerChanged)return false;
     if(!names.includes(cacheName))return false;
     const cache=await caches.open(cacheName);
     const files=await cache.keys();
