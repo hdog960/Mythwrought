@@ -1,0 +1,46 @@
+name: Same-install Home Screen PWA update acceptance
+on:
+  pull_request:
+    paths:
+      - 'src/app-update.mjs'
+      - 'src/main.mjs'
+      - 'index.html'
+      - 'sw-m5.js'
+      - 'scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs'
+      - 'tests/app-update.test.mjs'
+      - 'tests/app-update-browser.mjs'
+      - '.github/workflows/app-update.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  same-install-recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native update contracts without destructive storage calls
+        run: |
+          node --check src/app-update.mjs
+          node --check src/main.mjs
+          node --check sw-m5.js
+          node --test tests/app-update.test.mjs
+      - name: Install pinned real browser test tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Historic cache-first Home Screen upgrade, REC, save preservation, offline
+        run: node tests/app-update-browser.mjs
+      - name: Preserve real browser witness
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-pwa-same-install-recovery
+          path: artifacts/pwa-safe-refresh/
+          retention-days: 14
+          if-no-files-found: warn
