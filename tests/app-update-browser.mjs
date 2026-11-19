@@ -143,11 +143,15 @@ try{
       registration:{active:current?.active?.scriptURL,
         state:current?.active?.state,
         waiting:current?.waiting?.scriptURL},
-      cacheNames:await caches.keys()};
+      cacheNames:await caches.keys(),
+      oldCacheAssetCount:(await (await caches.open('mythwrought-m5-shell-20261118-v5-recorder')).keys()).length};
   });
   if(installed.origin!=='new')console.error('HOME SCREEN CACHE DIAGNOSTIC',JSON.stringify(installed));
   assert.equal(installed.origin,'new',
     'The worker installation copied an old cached index instead of fresh origin source');
+  assert.ok(installed.cacheNames.includes(OLD_CACHE)&&
+    installed.oldCacheAssetCount>=190,
+    'The original previous-good offline Home Screen cache was destroyed');
   assert.ok(installed.html.includes('id="captureToggle"')&&
     installed.html.includes('data-mw-release="'+RELEASE+'"'),
     'Verified offline shell is missing the actual REC release');
