@@ -42,6 +42,10 @@ Initial broad focused Node 24 runs used each exact PR tree. Counts include match
 
 Two :36 evidence files require Playwright. The third failure needs separate fixture review. GitHub reports passing `node-and-browser` checks for #245, #247, #249 and #226 and no check rollup for #106. The local results above are the executed coverage for this audit.
 
+## Inherited mesh review
+
+[Mesh review and in-game comparisons](mesh-review.md) documents 43 exact-source mesh previews across both viewing angles and sample variants, with per-family provisional dispositions. The cloth banner and rope coil revisions preserve the original IDs and pass the staged gameplay verification.
+
 ## First staged gameplay slice
 
 The adapter directly imports inherited source meshes for wildflower, desert scrub, pebble scatter, cloth banner and rope coil. It keeps each scene ID and the :36 orientation identity, and evaluates support and edited occupancy against the actual game world. Tests opt in through a bounded layout on loopback, with the original action controls and raycast. Staged removals use a separate versioned key scoped to the world generator and seed. The native tests cover exact triangles, edit-safe mounts, voxel tie precedence, foreign and forged picks, stored state isolation and write rejection. Shipped world formats are outside this staging path.

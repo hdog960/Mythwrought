@@ -1,0 +1,21 @@
+{
+  "originalHead": "7a73d59b7448c6f51da420776237064ee5897dac",
+  "revisedSourceSha256": {
+    "src/main.mjs": "4299b4a492d9f893df3235bf43432159fb2211e1cbb63343d0ce3a8d8fa9fa97",
+    "src/nonblock/candidate-scene.mjs": "c082fc71858ae19e23b4048a970400fd7fa78fb72413001c73346796e1e30ff1",
+    "src/nonblock-scene48/flora-phase1.mjs": "5ced9c4a8b9cfef11fc38e3bfa537b4047c12a54fcf71e3296b5b4cb580187ca",
+    "src/nonblock-environments24/desert-scrub.mjs": "48b8eabaa7e33e1abf80fe5d2847500597461d2c1ae0bb67f0af033d535b564a",
+    "src/nonblock-environments24/pebble-scatter.mjs": "32520748be51385a6cf8861d1d61b78fb113424cde434f6cbe1789af1fff8870",
+    "src/nonblock-fittings36/fittings-phase1.mjs": "3f14401a237ef7c09173fc6985d45ec4d124777f8bd45dfdfe8554f0152c9f7f"
+  },
+  "captureSha256": {
+    "banner-original.png": "ab4ad340072135c92a6a3c2cb39ca77b8936e8fbf292faafa72acef10c06c42b",
+    "banner-refined.png": "63cf491cf0d8a32854ea98ce5a1355c85040486316b8f7ad4e1a4954bdb1aed8",
+    "rope-original.png": "935b3cbaa6b511bc002d93e8f87ff1bad49071d7801ba3d5f1ee2e53a978101d",
+    "rope-rebuilt.png": "7db36525e908bdfe72e08616d0d86a2f60b2af641e287a0f4057b1b22e93217e"
+  },
+  "captureSize": [
+    932,
+    430
+  ]
+}

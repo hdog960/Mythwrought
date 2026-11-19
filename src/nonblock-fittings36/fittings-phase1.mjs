@@ -16,9 +16,60 @@ function meshBuilder(){const p=[],m=[];return {tri(a,b,c,mat){p.push(...a,...b,.
 function rod(b,a,c,r,mat,sides=6){for(let i=0;i<sides;i++){const t=i*2*Math.PI/sides,u=(i+1)*2*Math.PI/sides;const q=(p,k)=>[p[0]+Math.cos(k)*r,p[1],p[2]+Math.sin(k)*r];b.quad(q(a,t),q(a,u),q(c,u),q(c,t),mat);}}
 function signpost(b){rod(b,[0,0,0],[0,2.15,0],.075,0);b.quad([-.47,1.45,.09],[.47,1.45,.09],[.47,1.82,.09],[-.47,1.82,.09],1);b.quad([.47,1.45,-.09],[-.47,1.45,-.09],[-.47,1.82,-.09],[.47,1.82,-.09],1);b.tri([.47,1.45,.09],[.56,1.64,0],[.47,1.82,.09],1);}
 function chain(b){for(let j=0;j<8;j++){const y=1.65-j*.205,axis=j%2;for(let i=0;i<8;i++){const t=i*Math.PI/4,u=(i+1)*Math.PI/4;const a=[Math.cos(t)*.105,y+Math.sin(t)*.145,0],c=[Math.cos(u)*.105,y+Math.sin(u)*.145,0];if(axis){a[2]=a[0];a[0]=0;c[2]=c[0];c[0]=0;}const offset=axis?[.025,0,0]:[0,0,.025];b.quad(a,c,c.map((v,k)=>v+offset[k]),a.map((v,k)=>v+offset[k]),2);}}}
-function banner(b){rod(b,[-.48,1.65,0],[.48,1.65,0],.027,0);for(let i=0;i<5;i++){const x=-.43+i*.172,n=-.43+(i+1)*.172;const bottom=i===2?.16:.3;b.quad([x,1.61,.035],[n,1.61,.035],[n,bottom,.055],[x,bottom,.055],3);b.quad([n,1.61,-.035],[x,1.61,-.035],[x,bottom,-.055],[n,bottom,-.055],3);}}
+function banner(b,variant){
+ const top=1.61, hem=.29+variant*.025, width=.43, folds=6;
+ // Horizontal rail: rings live on its YZ cross-section.
+ const radius=.025;
+ for(let i=0;i<8;i++){
+  const angle=i*Math.PI/4, next=(i+1)*Math.PI/4;
+  const ring=(x,a)=>[x,1.65+Math.cos(a)*radius,Math.sin(a)*radius];
+  b.quad(ring(-.48,angle),ring(.48,angle),ring(.48,next),ring(-.48,next),0);
+  b.tri([-.48,1.65,0],ring(-.48,next),ring(-.48,angle),9);
+  b.tri([.48,1.65,0],ring(.48,angle),ring(.48,next),9);
+ }
+ const fabric=(i,y,side,offset=0)=>{
+  const x=-width+2*width*i/folds;
+  return [x,y,Math.sin(i*Math.PI*.68+variant*.8)*.019*(top-y)+side*(.014+offset)];
+ };
+ const lower=i=>hem-Math.max(0,1-Math.abs(i-folds/2)/2)*.15;
+ for(const side of [-1,1]){
+  for(let i=0;i<folds;i++){
+   const j=i+1, bottom=lower(i), nextBottom=lower(j);
+   b.quad(fabric(i,top,side),fabric(j,top,side),
+    fabric(j,nextBottom+.045,side),fabric(i,bottom+.045,side),(i+variant)%3===1?7:3);
+   b.quad(fabric(i,bottom+.045,side),fabric(j,nextBottom+.045,side),
+    fabric(j,nextBottom,side),fabric(i,bottom,side),8);
+   b.quad(fabric(i,top,side,.001),fabric(j,top,side,.001),
+    fabric(j,top-.045,side,.001),fabric(i,top-.045,side,.001),8);
+  }
+  const center=1.02+variant*.035;
+  const point=(i,y,offset=.009)=>fabric(i,y,side,offset);
+  b.quad(point(3,center+.23),point(4.16,center),point(3,center-.23),point(1.84,center),8);
+  b.quad(point(3,center+.12,.012),point(3.61,center,.012),point(3,center-.12,.012),point(2.39,center,.012),7);
+ }
+}
 function web(b){const center=[0,.52,0];for(let k=0;k<7;k++){const a=k*Math.PI/12,edge=[Math.cos(a)*.51,.52+Math.sin(a)*.51,0];b.tri(center,edge,[edge[0]*.82,edge[1]*.82+.095,.005],4);}for(let ring=1;ring<=3;ring++)for(let k=0;k<6;k++){const a=k*Math.PI/12,c=(k+1)*Math.PI/12,r=ring*.16;const p=[Math.cos(a)*r,.52+Math.sin(a)*r,.008],q=[Math.cos(c)*r,.52+Math.sin(c)*r,.008];b.tri(p,q,[p[0]*.98,p[1]+.012,.008],5);}}
-function coil(b){for(let turn=0;turn<3;turn++){const r=.12+turn*.1;for(let k=0;k<16;k++){const a=k*Math.PI/8,c=(k+1)*Math.PI/8,y=.055+turn*.065;const p=[Math.cos(a)*r,y,Math.sin(a)*r],q=[Math.cos(c)*r,y,Math.sin(c)*r];b.quad(p,q,[q[0],y+.045,q[2]],[p[0],y+.045,p[2]],6);}}}
+function coil(b,variant){
+ // Single continuous rope, from a free outer end into the stacked turns.
+ const segments=28, sides=4, radius=.035;
+ const phase=variant*.45, turns=2.28+variant*.09;
+ const sample=(index,side)=>{
+  const t=index/segments, angle=phase+t*Math.PI*2*turns;
+  const r=.337-.19*t, y=.036+.112*t*t;
+  const a=side*2*Math.PI/sides+Math.PI/4;
+  return [Math.cos(angle)*(r+Math.cos(a)*radius),y+Math.sin(a)*radius,
+   Math.sin(angle)*(r+Math.cos(a)*radius)];
+ };
+ for(let i=0;i<segments;i++){
+  for(let j=0;j<sides;j++){
+   const next=(j+1)%sides;
+   b.quad(sample(i,j),sample(i+1,j),sample(i+1,next),sample(i,next),
+    i===0||i===segments-1?9:6+Number((i+j)%4===0)*4);
+  }
+ }
+ b.quad(...[3,2,1,0].map(side=>sample(0,side)),9);
+ b.quad(...[0,1,2,3].map(side=>sample(segments,side)),9);
+}
 const makers={'scene36:signpost':signpost,'scene36:hanging-chain':chain,'scene36:cloth-banner':banner,'scene36:hanging-cobweb':web,'scene36:rope-coil':coil};
 export function describeFitting({sceneId,seed,anchor,variant,orientation=0,mount={}}){
  const family=FITTINGS[sceneId];if(!family)throw new RangeError('unknown scene family');
@@ -28,7 +79,7 @@ export function describeFitting({sceneId,seed,anchor,variant,orientation=0,mount
  const required=family.attachment==='ground'?'below':family.attachment==='ceiling'?'above':family.attachment==='wall'?'behind':'corner';
  if(mount[required]!==true||mount.playerEdited===true||mount.occupied===true)throw new RangeError('mount not verified or edit-protected');
  const key='nb1:'+encodeURIComponent(sceneId)+':'+seed+':'+anchor.join(',')+':'+resolved+':r'+orientation;
- const b=meshBuilder();makers[sceneId](b);const mesh=b.finish();
+ const b=meshBuilder();makers[sceneId](b,resolved);const mesh=b.finish();
  // Rotate every authored triangle around the anchor; pick bounds come from actual rotated
  // mesh coordinates, never the unrotated nominal family dimensions.
  const p=mesh.positions, world=new Float32Array(p.length);

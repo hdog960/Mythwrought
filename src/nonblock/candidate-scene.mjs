@@ -13,8 +13,9 @@ const families = new Map([
   ]}],
   ['nonblock:d:desert-scrub',{lane:'24', maker:makeDesertScrub, palette:[[.54,.62,.31]]}],
   ['nonblock:e:pebble-scatter',{lane:'24', maker:makePebbleScatter, palette:[[.49,.46,.41]]}],
-  ['scene36:cloth-banner',{lane:'36', wall:true, palette:[[.37,.24,.14],null,null,[.72,.25,.29]]}],
-  ['scene36:rope-coil',{lane:'36', palette:[null,null,null,null,null,null,[.71,.52,.31]]}]
+  ['scene36:cloth-banner',{lane:'36', wall:true, palette:[[.42,.27,.15],null,null,[.65,.19,.24],null,null,null,
+    [.46,.12,.19],[.87,.64,.30],[.62,.40,.19]]}],
+  ['scene36:rope-coil',{lane:'36', palette:[null,null,null,null,null,null,[.68,.48,.26],null,null,[.45,.31,.17],[.78,.57,.32]]}]
 ]);
 
 export function readCandidateLayout(url) {

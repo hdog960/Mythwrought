@@ -135,11 +135,24 @@ function start(nonblockStage=null){
       Math.hypot(anchor[0]-origin[0],anchor[1]-origin[1],anchor[2]-origin[2])<32)??[];
     const key=objects.map(o=>o.instanceKey).join('|');
     if(key!==nonblockDrawKey){
-      if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
-      nonblockDrawKey=key;
       const vertices=nonblockStage.module.candidateVertices(objects);
-      nonblockVertexCount=vertices.length/9;
-      nonblockBuffer=vertices.length?uploadChunkBuffer(gl,vertices):null;
+      try{
+        const next=vertices.length?uploadChunkBuffer(gl,vertices):null;
+        if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
+        nonblockBuffer=next;
+        nonblockVertexCount=vertices.length/9;
+        nonblockDrawKey=key;
+      }catch(error){
+        // An upload failure must not expose selectable invisible scenery.
+        if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
+        nonblockBuffer=null;
+        nonblockVertexCount=0;
+        canvas.dataset.nonblockTarget='';
+        canvas.dataset.nonblockVertices='0';
+        canvas.dataset.nonblockInstances='0';
+        console.warn('Nonblock staging geometry upload failed',error);
+        return null;
+      }
     }
     if(nonblockBuffer){
       gl.bindBuffer(gl.ARRAY_BUFFER,nonblockBuffer);
@@ -151,7 +164,11 @@ function start(nonblockStage=null){
     }
     canvas.dataset.nonblockVertices=String(nonblockVertexCount);
     canvas.dataset.nonblockInstances=String(objects.length);
-    canvas.dataset.nonblockTarget=scene?.pick(origin,facing())?.instanceKey??'';
+    canvas.dataset.nonblockGpuBytes=String(nonblockVertexCount*36);
+    canvas.dataset.nonblockDrawCalls=String(Number(Boolean(nonblockBuffer)));
+    const hit=help.hidden?scene?.pick(origin,facing()):null;
+    canvas.dataset.nonblockTarget=hit?.instanceKey??'';
+    return hit;
   }
   // Only a previously selected immutable v5 world may opt into M5 PWA caching.
   if(world.base instanceof FourRegionWorld&&
@@ -724,7 +741,7 @@ function start(nonblockStage=null){
       }else message(result.reason||'Pack 5 construction rejected');
       return;
     }
-    if(mode==='mine'&&nonblockStage){
+    if(mode==='mine'&&nonblockStage&&nonblockBuffer){
       const scene=stagedScene();
       const origin=eye(), direction=facing();
       const hit=scene?.pick(origin,direction);
@@ -1008,7 +1025,7 @@ function start(nonblockStage=null){
         canvas.dataset.pack5PendingPages='0';
         canvas.dataset.pack5BudgetExcluded='0';
       }
-      if(nonblockStage)drawStagedScene();
+      const sceneryHit=nonblockStage?drawStagedScene():null;
       // Genuine transparent-water pass, only for chunks with water candidates.
       if([...chunks.values()].some(c=>c.waterBuffer)){
         gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
@@ -1029,13 +1046,16 @@ function start(nonblockStage=null){
         gl.depthMask(true);gl.disable(gl.BLEND);
       }
       // A faint world-space targeted-block outline, never a HUD covering the scene.
-      const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
+      const focused=help.hidden&&!sceneryHit?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
       const focusKey=focused?.hit?.join(',')||'';
       const placeKey=focused?.canPlace?focused.adjacent.join(','):'';
       canvas.dataset.targetBlock=focusKey;
       canvas.dataset.targetPlace=placeKey;
       canvas.dataset.canPlace=String(Boolean(placeKey));
-      const display=focused?.hit?
+      const display=sceneryHit
+        ? sceneryHit.sceneId.split(':').at(-1).replaceAll('-',' ').toUpperCase()+
+          ' · '+sceneryHit.distance.toFixed(1)+'m\nMINE = REMOVE SCENERY'
+        : focused?.hit?
         (BLOCK_NAMES[focused.block]||'block').toUpperCase()+' · '+focused.distance.toFixed(1)+'m'+
         '\n'+(focused.canPlace?'GOLD = BUILD SPACE':'PLACE BLOCKED'):
         'LOOK AT A BLOCK';

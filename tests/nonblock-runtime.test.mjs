@@ -92,3 +92,19 @@ class MapStorage {
   }
   removeItem(key){this.values.delete(key);}
 }
+
+test('refined fittings use finite, nondegenerate triangles and distinct bounded variants', () => {
+  for (const sceneId of ['scene36:cloth-banner','scene36:rope-coil']) {
+    const variants = [0,1,2,3].map(variant=>describeCandidateObject(seed,{sceneId,anchor,variant}));
+    assert.equal(new Set(variants.map(o=>o.positions.join(','))).size,4);
+    for(const {positions:p} of variants) {
+      assert.ok(p.length/9 <= 256);
+      for(let i=0;i<p.length;i+=9) {
+        const [x,y,z,bx,by,bz,cx,cy,cz]=p.slice(i,i+9);
+        const a=[bx-x,by-y,bz-z], b=[cx-x,cy-y,cz-z];
+        const area=Math.hypot(a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]);
+        assert.ok(area>1e-8,sceneId+' has a degenerate triangle');
+      }
+    }
+  }
+});

@@ -1,0 +1,67 @@
+# Inherited mesh review
+
+The four WebGL2 sheets show 43 distinct source meshes at two angles and show a second sample for each mesh. The preview uses an inspection palette and fits the camera to each mesh. Judge in-game color, relative size and legibility from the gameplay captures. The [mesh manifest](gallery/manifest.json) records source paths, triangle counts, degenerates, geometry digests and screenshot digests. [Source commit ledger](source-ledger.tsv)
+
+- [Sheet 1 · biome specialists](gallery/inherited-1.png)
+- [Sheet 2 · cave formations and fittings](gallery/inherited-2.png)
+- [Sheet 3 · world props, fungi and forest](gallery/inherited-3.png)
+- [Sheet 4 · meadow and woodland](gallery/inherited-4.png)
+
+The dispositions below are provisional. Runtime attachment, collision, removal, replay, and measured performance must pass before a family is accepted. Same-geometry sample digests do not rule out variation in a separate instance transform.
+
+| Inherited mesh | Disposition | Geometry review |
+| --- | --- | --- |
+| Agave rosette | Refine | Recognizable rosette. Sharpen the curved leaf tips and show differences among age variants. |
+| Alpine wildflower | Refine | Slender long stems suit the alpine profile. Give the open petals support from below and keep a distinct color from the meadow flower. |
+| Column cactus | Refine | Upright stem and separate branches read well. Add shallow ribs and check branch joints. |
+| Desert bloom | Refine | Flower and leaves read from two sides. Resolve floating-looking petals and distinguish the leaf profile from the alpine flower. |
+| Desert scrub | Refine | Distinct splayed shoots. The widest shoot gaps and sparse stems can lose the bush silhouette on mobile. |
+| Dwarf juniper | Refine | Recognizable trunk and massing. Join branches to the trunk and give the foliage greater depth. |
+| Frost fern | Refine | Frond silhouette reads in the oblique view. Add frost-specific detail that survives mobile scale. |
+| Icicle spear | Rebuild | Plain tapered cone shares the stalactite profile. Give it angular ice facets and a credible attachment. |
+| Prickly pear | Refine | Pads have good thickness but some read as disconnected polygons. Improve pad joints. |
+| Saltgrass | Refine | Seed heads could distinguish it from snowgrass and sedge at gameplay distance. |
+| Snowgrass | Refine | Narrow fan is coherent. Distinguish the blade posture and coating from other grasses. |
+| Tumblebrush | Rebuild | Six radial sections read as a star. Replace with a sparse spherical lattice and a compact core. |
+| Branching crystal cluster | Refine | Spikes lack convincing intersections and terminated crystal facets. |
+| Cave rubble | Refine | Angular fragments read as rubble. Add broad, fractured surfaces and avoid the repeated pyramid outline. |
+| Crystal shard | Rebuild | The source emits 16 degenerate triangles in a 32-triangle mesh and reads too similarly to the branching cluster. Preserve the distinct shard ID. |
+| Geode opening | Refine | The large hollow is legible. Show an irregular outer host rock and improve the transition into the crystal rim. |
+| Hanging stalactite | Rebuild | Generic cone opens into the ceiling. Use layered mineral growth and an irregular taper distinct from ice. |
+| Mineral encrustation | Refine | Flat quadrilaterals leave conspicuous gaps. Build overlapping shallow crystalline facets that hug the wall. |
+| Pebble scatter | Refine | Low count suits distance. Original pebbles look like pointed chips. Soften faceting and review dark cave contrast. |
+| Small stalagmite | Rebuild | Uniform circular cone lacks a signature silhouette. Improve asymmetric growth and taper. |
+| Cloth banner | Refine | Original broad cloth reads, but the rod includes four degenerate triangles and the cloth has no modeled detail. |
+| Hanging chain | Refine | Alternating links read at close range. Add a credible link cross-section and verify each opening remains pick-through. |
+| Hanging cobweb | Refine | Basic radial pattern works. Improve the corner anchor and visibility of connecting strands. |
+| Rope coil | Rebuild | Open wall rings read as disconnected cutouts. Replace the cross-section with one continuous solid rope. |
+| Signpost | Refine | Readable at mobile scale. Add thickness to the plank and close the post ends. |
+| Bracken fern | Refine | Broad fronds differ from meadow fern. Connect the leaflets to a clear rachis. |
+| Button mushroom | Refine | Strong silhouette for very few triangles. Give the cap a rounded button profile and vary cap size and color by variant. |
+| Clover clump | Defer | Compare with clover patch and establish distinct placement or assign one shared slot while retaining both source IDs. |
+| Clover patch | Defer | Lower profile than clover clump. Further gameplay distinction and ledger reconciliation are open. |
+| Clustered toadstools | Refine | Cohesive three-cap silhouette. Distinguish stem contours and surface pattern from button mushroom. |
+| Exposed root | Refine | Good low, branching footprint. Joint openings and abrupt segment ends need treatment. |
+| Fallen branch | Refine | Trunk and fork are recognizable. Add a coherent break face and end caps. |
+| Forest lichen patch | Refine | Patch feels tall and rocky. Flatten it against the mounting face and review the stone-specific palette. |
+| Forest moss mat | Refine | Rectangular silhouette reads as a tile. Break up the edges and check for ground z-fighting. |
+| Heather sprig | Refine | Repeating triangular florets convey a sprig. Improve variation and distinguish it from lavender. |
+| Lavender spike | Refine | The vertical clustered stems read well. Improve the continuity of blooms around each stalk. |
+| Low grass | Refine | Efficient low clump. Review blade visibility from head-on and edge-on approaches. |
+| Meadow sedge | Refine | Broad upright blades read. Add the characteristic stalk/seed-head break in the silhouette. |
+| Moss cushion | Defer | Resolve overlap with forest moss mat and confirm that the mound appearance is intentional. |
+| Short fern | Refine | Slender, widely separated fronds look disconnected at grazing angles. |
+| Single wildflower | Refine | Extremely economical silhouette. The stem is a single plane and fades to a line from the side. |
+| Woodland sapling | Refine | Simple growth hierarchy is visible. Add credible joins and reconnect angular foliage to branches. |
+| Woodland shrub | Refine | Broader than the sapling. Thin triangular leaf surfaces leave gaps through the crown. |
+
+## First in-game comparisons
+
+Both pairs use the original seed, camera position and mobile viewport. Aim shifted slightly to hit the revised geometry. The captures include the actual game, not the isolated mesh preview.
+
+| Family | Original | Revised | Geometry cost |
+| --- | --- | --- | --- |
+| Cloth banner | [In-game original](gallery/banner-original.png) | [Refined](gallery/banner-refined.png) | 32 triangles with four degenerates → 112 triangles with none |
+| Rope coil | [In-game original](gallery/rope-original.png) | [Rebuilt](gallery/rope-rebuilt.png) | 96 → 228 triangles |
+
+The banner now has a cylindrical rail, modeled folds, trim and an inset emblem. The rope has closed ends and a continuous cross-section. Four bounded variants are distinct for both families. Both retained their instance identities, responded to the existing MINE touch control, and stayed removed after opening a fresh game page. The same test verifies that the ordinary schema-1 save bytes stay intact. Source and capture digests are in [the comparison manifest](gallery/fittings-comparison.json). Mobile GPU and frame-time parity remain open.

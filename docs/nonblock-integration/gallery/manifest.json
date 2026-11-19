@@ -1,0 +1,1189 @@
+{
+  "seed": 179,
+  "anchor": [
+    0,
+    0,
+    0
+  ],
+  "captures": [
+    {
+      "path": "inherited-1.png",
+      "sha256": "2e9e3b8a30b1f0464fe70f9d2f18ea96cbefe12c4701b857b4ebbac3ac49cb66"
+    },
+    {
+      "path": "inherited-2.png",
+      "sha256": "81d496162efb82005a8018f51a3c55278779dcbf9fa69d57362727ae617cc064"
+    },
+    {
+      "path": "inherited-3.png",
+      "sha256": "007fd6326d649fd90792be9caddaf0d7636f142436ff05560fde38faeabcb759"
+    },
+    {
+      "path": "inherited-4.png",
+      "sha256": "5c2c7e232900c1a21063390488b18ee984c9bfaebbbd82796ca9b2d312639096"
+    }
+  ],
+  "inventory": [
+    {
+      "lane": "24",
+      "id": "nonblock:d:agave-rosette",
+      "path": "src/nonblock-environments24/agave-rosette.mjs",
+      "samples": [
+        {
+          "triangles": 36,
+          "degenerates": 0,
+          "sha256": "dda33dd96631f61f73136a0439b496fec77591a93dd3235e59317e2f427ea3f6"
+        },
+        {
+          "triangles": 48,
+          "degenerates": 0,
+          "sha256": "333c3f7f86bd728a0c5a25b3db7ef09b979293e1fce194c85ef74dff596ba441"
+        },
+        {
+          "triangles": 60,
+          "degenerates": 0,
+          "sha256": "595d17daf6ba34123bb3f8b7a21085055a0411385c086dadbb7cf4ce88d08359"
+        },
+        {
+          "triangles": 72,
+          "degenerates": 0,
+          "sha256": "2a1f656f1e460814764ecf1494c10b88d6c9ed9c1359bfdcaf0390b837869860"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:alpine-wildflower",
+      "path": "src/nonblock-environments24/alpine-wildflower.mjs",
+      "samples": [
+        {
+          "triangles": 36,
+          "degenerates": 0,
+          "sha256": "48c4dafe98be243ed358a8fe9883d1e828059f188401f7dd1b1f6a7f144781c3"
+        },
+        {
+          "triangles": 53,
+          "degenerates": 0,
+          "sha256": "c4498e1c39fcfe73aeab8ee1027a61a90dd3ec83d1249e2437653a2ba800faf7"
+        },
+        {
+          "triangles": 72,
+          "degenerates": 0,
+          "sha256": "66e9af7d71c69543ec59173a41118cf00022505ba0d83d527a8a57fd485c70ac"
+        },
+        {
+          "triangles": 89,
+          "degenerates": 0,
+          "sha256": "ebf75bbd8ebae87a1eb124a130c75ad8740e3a00883cc4197f01e4a3500bdae6"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:column-cactus",
+      "path": "src/nonblock-environments24/column-cactus.mjs",
+      "samples": [
+        {
+          "triangles": 54,
+          "degenerates": 0,
+          "sha256": "932d55fb0a9b5b3e5665f1bdf5dee3afd03d35171350528395a3733f75634b1e"
+        },
+        {
+          "triangles": 90,
+          "degenerates": 0,
+          "sha256": "1ba98216da9ce733c4b454f078d7e49706e47e7324b9f917b3a031a4d41e0c32"
+        },
+        {
+          "triangles": 126,
+          "degenerates": 0,
+          "sha256": "31118c1ca6b6cefd2a3de7dad95fce9e3d5da18499393439781e27625d9d3246"
+        },
+        {
+          "triangles": 162,
+          "degenerates": 0,
+          "sha256": "c60abb67daa02721f7ef89098a91af8441c170fa9b7125fd79169d1f05467762"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:desert-bloom",
+      "path": "src/nonblock-environments24/desert-bloom.mjs",
+      "samples": [
+        {
+          "triangles": 30,
+          "degenerates": 0,
+          "sha256": "bdc3f6ecab75881d7250c21bc5f9b47b4c5ab96749dffefe9167c106d0a7e543"
+        },
+        {
+          "triangles": 34,
+          "degenerates": 0,
+          "sha256": "789e818c9ddf6f518a94edd160eccc494238e4667fa01597b4c68efe49c4adaf"
+        },
+        {
+          "triangles": 38,
+          "degenerates": 0,
+          "sha256": "c5d4df3c7f7d43c162e43a010e146e3b7b20030f439b5a0de710525a871a1573"
+        },
+        {
+          "triangles": 42,
+          "degenerates": 0,
+          "sha256": "152ea6d76916115e1cc68c10f39fdea456102819b3f1a05bcd25eefdc96c0ad4"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:desert-scrub",
+      "path": "src/nonblock-environments24/desert-scrub.mjs",
+      "samples": [
+        {
+          "triangles": 25,
+          "degenerates": 0,
+          "sha256": "18a9cd47f41739d00bc8dbf42aa9888e0752b25d9dc7f1b0897ca5e378360aa9"
+        },
+        {
+          "triangles": 35,
+          "degenerates": 0,
+          "sha256": "f1f176548f42ee1a59c28825c8b4ed298cb2c8ce321246072c9959f1ec534af4"
+        },
+        {
+          "triangles": 45,
+          "degenerates": 0,
+          "sha256": "be34fc7cf2ce6b80e55bcc17d0c84d19e7907409951711ce408793a92663e38c"
+        },
+        {
+          "triangles": 55,
+          "degenerates": 0,
+          "sha256": "df6751ed669c89a94c64ac038a637400e32ae6477721a6f370041517623d00ec"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:dwarf-juniper",
+      "path": "src/nonblock-environments24/dwarf-juniper.mjs",
+      "samples": [
+        {
+          "triangles": 34,
+          "degenerates": 0,
+          "sha256": "346d1b5d897c3a99916a45e0760918d02ba7a6fc87d02267d7cf82c1dfa112b1"
+        },
+        {
+          "triangles": 41,
+          "degenerates": 0,
+          "sha256": "a20dd4d7460d7e3992c5470861f35e3e31dea1bef545c0dbfdfa8fab370a4707"
+        },
+        {
+          "triangles": 48,
+          "degenerates": 0,
+          "sha256": "a06742d97f44b13a7695b07e25afdf2c90313121f302d2d5b08f018d926dbac7"
+        },
+        {
+          "triangles": 55,
+          "degenerates": 0,
+          "sha256": "b39c91aec0dd5ad4528bd45383f105599ee07f15b43be9675045f4bdc534c780"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:frost-fern",
+      "path": "src/nonblock-environments24/frost-fern.mjs",
+      "samples": [
+        {
+          "triangles": 45,
+          "degenerates": 0,
+          "sha256": "9154a1b8e006b0d883f445eaeab7e65ad4e7e6f119ea32d7c4379c05bb7fd33b"
+        },
+        {
+          "triangles": 54,
+          "degenerates": 0,
+          "sha256": "e4fa23cd76cc1b2df831af58ac40147b43be3075a4f9489f7ae57c2471656c6f"
+        },
+        {
+          "triangles": 63,
+          "degenerates": 0,
+          "sha256": "ee273920e5925ab36ff3108949c1f5278e009b2a6cebe3343c07b8c8ce74df4d"
+        },
+        {
+          "triangles": 72,
+          "degenerates": 0,
+          "sha256": "3a08865142f59060bf2bd1e55db2119d16d0716374e48f922dd983d1d1ee6a25"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:icicle-spear",
+      "path": "src/nonblock-environments24/objects.mjs",
+      "samples": [
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "222d02a076ee0857517ad1f75cf6906c845cc31b5f81f93ea891b1009d424b3e"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "55cbcfdff391d72d2ae8cef481997dad9643ba78bc705e3fdfa5c5e50a522d7d"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "e348e97c8110fa79ece8d981e9bccc75049d01c7f8dd03533a5c3e6c4cf6988a"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "4801fd71b83b470b2ba16f79bc9d988f15ee6e8060be63ce131555c4021950c6"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:prickly-pear-cactus",
+      "path": "src/nonblock-environments24/prickly-pear-cactus.mjs",
+      "samples": [
+        {
+          "triangles": 64,
+          "degenerates": 0,
+          "sha256": "196bdf54f49cbbad5ba2fa179a63331c437ccce328e799be375f12f9bebd8232"
+        },
+        {
+          "triangles": 96,
+          "degenerates": 0,
+          "sha256": "c756b9d3164cabecc552bb2e357bc3ba3e59df90e5e6ac9d5a7fc966313a4573"
+        },
+        {
+          "triangles": 128,
+          "degenerates": 0,
+          "sha256": "f12ac323a8b58a210b34bc301c2e426d519ee1781e7912de6d081bd0ea87555b"
+        },
+        {
+          "triangles": 160,
+          "degenerates": 0,
+          "sha256": "3a0d068c813774907f4ec9106695fda2e917814258efde4d035fca4c64f984a3"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:saltgrass",
+      "path": "src/nonblock-environments24/saltgrass.mjs",
+      "samples": [
+        {
+          "triangles": 30,
+          "degenerates": 0,
+          "sha256": "71124de43cda1000203e27b945d4c55278ec4ba713fe8d0bc9182dcb43be87d3"
+        },
+        {
+          "triangles": 42,
+          "degenerates": 0,
+          "sha256": "665142644358562776d7309d338630a0f64a757962ca8a47aa3b46f036f9255f"
+        },
+        {
+          "triangles": 54,
+          "degenerates": 0,
+          "sha256": "961bd479fa1afebc3b3bef24220fb0216018f61bf89213c52acff34202b159da"
+        },
+        {
+          "triangles": 66,
+          "degenerates": 0,
+          "sha256": "8bab2797e8ad6fa6e45744b57e46343ce90856f3fef293fb624333609737da72"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:snowgrass",
+      "path": "src/nonblock-environments24/snowgrass.mjs",
+      "samples": [
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "997321576f95b51ec18d664b30ee6a0b8bd2e1b0fb367830657dbb81bf7f689d"
+        },
+        {
+          "triangles": 18,
+          "degenerates": 0,
+          "sha256": "8d55d94c50f38e743d71441b74c2be1b394eecb903ef8243bc7849d017468a49"
+        },
+        {
+          "triangles": 22,
+          "degenerates": 0,
+          "sha256": "b44e75f0bd7dec39007e9915c6cbd16bab9d3971638745f94e2d4bf23a987692"
+        },
+        {
+          "triangles": 26,
+          "degenerates": 0,
+          "sha256": "ce1efadc82d014e4ce3711f84adca154285a6aadca96784e820b67c7d1135e19"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:d:tumblebrush",
+      "path": "src/nonblock-environments24/tumblebrush.mjs",
+      "samples": [
+        {
+          "triangles": 28,
+          "degenerates": 0,
+          "sha256": "202688a273aa7136dee45753611f162d6d05b491fe6da2883710230726c51c8d"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 0,
+          "sha256": "9d8134e6fc0db6fe623407b7f7ff725c48c8dd9309292a6b995d2170c80f3753"
+        },
+        {
+          "triangles": 36,
+          "degenerates": 0,
+          "sha256": "149ea7fb4845a163a9c2d8fc6cc87525f835003c4fa2807fa1af8d09078bca7f"
+        },
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "2ff1b8b8604953e85ca920a76453b6227de49f42ff254d7314eb457d117a6999"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:e:branching-crystal-cluster",
+      "path": "src/nonblock-environments24/branching-crystal-cluster.mjs",
+      "samples": [
+        {
+          "triangles": 30,
+          "degenerates": 0,
+          "sha256": "fe716e4a2659debf56bc10fe7744781cc5739910de74e134656f3f47af7eaae0"
+        },
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "dfc75d67abc197f8c3056d3bc536a62164925bbe776356622e3551ca4e4cabb5"
+        },
+        {
+          "triangles": 50,
+          "degenerates": 0,
+          "sha256": "43ee86a49b13f744aaa2273ecdb19e13655b557f0fa3c721e792ade4e3e1d809"
+        },
+        {
+          "triangles": 60,
+          "degenerates": 0,
+          "sha256": "4d437b7cb85a99faa61c220680a1954a9324964e3762da618edec8d8c7c43d21"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:e:cave-rubble-cluster",
+      "path": "src/nonblock-environments24/cave-rubble-cluster.mjs",
+      "samples": [
+        {
+          "triangles": 30,
+          "degenerates": 0,
+          "sha256": "4b289322df86770ea78af8cbf8c2eba8181ca8d8bb37db7967f5f93a3de6968b"
+        },
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "4910bc53b593f301d9593c4c0c1897322a6c817cfc3927cc513bc50f9d4c39f0"
+        },
+        {
+          "triangles": 50,
+          "degenerates": 0,
+          "sha256": "5aea40944a71111d38d0e695a9bb81f155c71896701120ce69ddc6c824f18652"
+        },
+        {
+          "triangles": 60,
+          "degenerates": 0,
+          "sha256": "84c4b3ab1fd8bf61e8e1aa67bc2c41ff148a13af9bbd0d9c39597b9df56bdcdc"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:e:crystal-shard",
+      "path": "src/nonblock-environments24/objects.mjs",
+      "samples": [
+        {
+          "triangles": 32,
+          "degenerates": 16,
+          "sha256": "0c8b68e649af8ecfc8ff27188f11ee47ecedaa6d84e45f47f95721e3fe20832f"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 16,
+          "sha256": "5f4211c882b4a44874d9731ca774cc830b916274c59eb2a69a6b3bd7ceafb796"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 16,
+          "sha256": "44674935a4ed3a697c60673c7cba11cb31349759d2ee4cf1554ed1fff1202c38"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 16,
+          "sha256": "817792f707c87af95e8df5cc49eb3513f58bd963b697d337f55a66a10e784ed9"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:e:geode-opening",
+      "path": "src/nonblock-environments24/geode-opening.mjs",
+      "samples": [
+        {
+          "triangles": 48,
+          "degenerates": 0,
+          "sha256": "9c2ddf6102cc78e899563de7ece5108baab5b355e4fd9651eb34b637ed216771"
+        },
+        {
+          "triangles": 60,
+          "degenerates": 0,
+          "sha256": "83734e70ddf57b609aa11c9e46754589081efaf2b721b5d47878b2fd52af7307"
+        },
+        {
+          "triangles": 72,
+          "degenerates": 0,
+          "sha256": "a1e2c6575727958f9eb023d39ba84401090a2db906b6965a305a89eed50c0128"
+        },
+        {
+          "triangles": 84,
+          "degenerates": 0,
+          "sha256": "6e2d1640ba6b8c0a7965e855e031e72270142293c2cda0fdf987199a0b3699d1"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:e:hanging-stalactite",
+      "path": "src/nonblock-environments24/objects.mjs",
+      "samples": [
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "99004d8987115b97d2caa038ac4c286347ed6dc07a3a9ab46079adb747234714"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "d5e10ba65f6661bd0e80ebf875fbf9a051c81d49226360fe44dc9ae6d3b1ba35"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "bb111bbf0ebcbf482007e27963987e084fd8a0c8352ec650c11876e1794abe1b"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "027bcb9641bdc2b6f39b15b4c61bcf5ae3571295391192a4f115820f5aa54508"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:e:mineral-encrustation",
+      "path": "src/nonblock-environments24/mineral-encrustation.mjs",
+      "samples": [
+        {
+          "triangles": 24,
+          "degenerates": 0,
+          "sha256": "e40d0fa348c8f5e2bed4943a807d6099d3a79f65005236958e96be9f51ab8b5f"
+        },
+        {
+          "triangles": 30,
+          "degenerates": 0,
+          "sha256": "81933b696af42c5d9a12e559c50b3ae106b2d1cb09a99d76de177f701650d113"
+        },
+        {
+          "triangles": 36,
+          "degenerates": 0,
+          "sha256": "7701df2839bd6f2024cceefef3a4d0c3823ed92117e3fcd06dcb3cfba0edffba"
+        },
+        {
+          "triangles": 42,
+          "degenerates": 0,
+          "sha256": "39cee7a8261fc3c4299c6182240598ab17904c43d854a3a2a3468d25a6bbd9a2"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:e:pebble-scatter",
+      "path": "src/nonblock-environments24/pebble-scatter.mjs",
+      "samples": [
+        {
+          "triangles": 24,
+          "degenerates": 0,
+          "sha256": "6eb1cfb5f0f83ab47abf6831fbe85462d2ce461af05c094a8de6b68586e74e98"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 0,
+          "sha256": "22980a85c83bd5ba3e10594d7393c93bade99834da30f87fcf0ef0c42b70b9bb"
+        },
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "d00c5905d94c7f5e7c59728cf5a177174db554fcd3ed79ff9150ad021278fd61"
+        },
+        {
+          "triangles": 48,
+          "degenerates": 0,
+          "sha256": "08c4a3fa32d80ea8c78c7e779ad450313a4972a1177ac5d3b04889467d052317"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "id": "nonblock:e:small-stalagmite",
+      "path": "src/nonblock-environments24/objects.mjs",
+      "samples": [
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "817e8291d5a1cbb70ecef7f8aaa4f1d121918b07a00a7d4996910f83a6df5aaf"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "d7f447540109cfbe97e1c51aed15744cb3ab636cf87fec63c6c3f8ea9b2297fa"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "43a57a7b1a867f3a03410ca4a0e2ee2db61fa609187fbe6ce2df8a467068d9fb"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "d429f661dafe86a56ca9929940e3ebcf25404a4ebf7904db90b8c5cf1cd74081"
+        }
+      ]
+    },
+    {
+      "lane": "36",
+      "id": "scene36:cloth-banner",
+      "path": "src/nonblock-fittings36/fittings-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 32,
+          "degenerates": 4,
+          "sha256": "0dea65e7e2fd71f5ef93226c45dc57f2fc1152b81fb3c845218697c3b4abd2fe"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 4,
+          "sha256": "0dea65e7e2fd71f5ef93226c45dc57f2fc1152b81fb3c845218697c3b4abd2fe"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 4,
+          "sha256": "0dea65e7e2fd71f5ef93226c45dc57f2fc1152b81fb3c845218697c3b4abd2fe"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 4,
+          "sha256": "0dea65e7e2fd71f5ef93226c45dc57f2fc1152b81fb3c845218697c3b4abd2fe"
+        }
+      ]
+    },
+    {
+      "lane": "36",
+      "id": "scene36:hanging-chain",
+      "path": "src/nonblock-fittings36/fittings-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 128,
+          "degenerates": 0,
+          "sha256": "c34253e5cd39462e2000a2ebec4f36f6b831817b08370400805dc578be2d83e2"
+        },
+        {
+          "triangles": 128,
+          "degenerates": 0,
+          "sha256": "c34253e5cd39462e2000a2ebec4f36f6b831817b08370400805dc578be2d83e2"
+        },
+        {
+          "triangles": 128,
+          "degenerates": 0,
+          "sha256": "c34253e5cd39462e2000a2ebec4f36f6b831817b08370400805dc578be2d83e2"
+        },
+        {
+          "triangles": 128,
+          "degenerates": 0,
+          "sha256": "c34253e5cd39462e2000a2ebec4f36f6b831817b08370400805dc578be2d83e2"
+        }
+      ]
+    },
+    {
+      "lane": "36",
+      "id": "scene36:hanging-cobweb",
+      "path": "src/nonblock-fittings36/fittings-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 25,
+          "degenerates": 0,
+          "sha256": "28c4bde2904c7c2f5405cfb766137c06d99a9a6fc8301d8cba240ce0707275bd"
+        },
+        {
+          "triangles": 25,
+          "degenerates": 0,
+          "sha256": "28c4bde2904c7c2f5405cfb766137c06d99a9a6fc8301d8cba240ce0707275bd"
+        },
+        {
+          "triangles": 25,
+          "degenerates": 0,
+          "sha256": "28c4bde2904c7c2f5405cfb766137c06d99a9a6fc8301d8cba240ce0707275bd"
+        },
+        {
+          "triangles": 25,
+          "degenerates": 0,
+          "sha256": "28c4bde2904c7c2f5405cfb766137c06d99a9a6fc8301d8cba240ce0707275bd"
+        }
+      ]
+    },
+    {
+      "lane": "36",
+      "id": "scene36:rope-coil",
+      "path": "src/nonblock-fittings36/fittings-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 96,
+          "degenerates": 0,
+          "sha256": "0fb72ea4d57df61820b6ac882a24343c4bb435172a54a1efd7bda0ffb852f711"
+        },
+        {
+          "triangles": 96,
+          "degenerates": 0,
+          "sha256": "0fb72ea4d57df61820b6ac882a24343c4bb435172a54a1efd7bda0ffb852f711"
+        },
+        {
+          "triangles": 96,
+          "degenerates": 0,
+          "sha256": "0fb72ea4d57df61820b6ac882a24343c4bb435172a54a1efd7bda0ffb852f711"
+        },
+        {
+          "triangles": 96,
+          "degenerates": 0,
+          "sha256": "0fb72ea4d57df61820b6ac882a24343c4bb435172a54a1efd7bda0ffb852f711"
+        }
+      ]
+    },
+    {
+      "lane": "36",
+      "id": "scene36:signpost",
+      "path": "src/nonblock-fittings36/fittings-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 17,
+          "degenerates": 0,
+          "sha256": "02ac48facf2dc974bc1913f27904556cf68b5686800bee72307af30a6379e497"
+        },
+        {
+          "triangles": 17,
+          "degenerates": 0,
+          "sha256": "02ac48facf2dc974bc1913f27904556cf68b5686800bee72307af30a6379e497"
+        },
+        {
+          "triangles": 17,
+          "degenerates": 0,
+          "sha256": "02ac48facf2dc974bc1913f27904556cf68b5686800bee72307af30a6379e497"
+        },
+        {
+          "triangles": 17,
+          "degenerates": 0,
+          "sha256": "02ac48facf2dc974bc1913f27904556cf68b5686800bee72307af30a6379e497"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:bracken-fern",
+      "path": "src/nonblock-scene48/undergrowth-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 56,
+          "degenerates": 0,
+          "sha256": "bc3b56b7891a87d8a32b289c8a5ff4f771912e5975a45ce3a20cc397427e4d9c"
+        },
+        {
+          "triangles": 56,
+          "degenerates": 0,
+          "sha256": "bc3b56b7891a87d8a32b289c8a5ff4f771912e5975a45ce3a20cc397427e4d9c"
+        },
+        {
+          "triangles": 56,
+          "degenerates": 0,
+          "sha256": "bc3b56b7891a87d8a32b289c8a5ff4f771912e5975a45ce3a20cc397427e4d9c"
+        },
+        {
+          "triangles": 56,
+          "degenerates": 0,
+          "sha256": "bc3b56b7891a87d8a32b289c8a5ff4f771912e5975a45ce3a20cc397427e4d9c"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:button-mushroom",
+      "path": "src/nonblock-scene48/flora-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 32,
+          "degenerates": 0,
+          "sha256": "28a8d4ad8408ec682b43c06039a67cd2aab0724c287a61ee5ca2b885750ff914"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 0,
+          "sha256": "28a8d4ad8408ec682b43c06039a67cd2aab0724c287a61ee5ca2b885750ff914"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 0,
+          "sha256": "28a8d4ad8408ec682b43c06039a67cd2aab0724c287a61ee5ca2b885750ff914"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 0,
+          "sha256": "28a8d4ad8408ec682b43c06039a67cd2aab0724c287a61ee5ca2b885750ff914"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:clover-clump",
+      "path": "src/nonblock-scene48/flora-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 32,
+          "degenerates": 0,
+          "sha256": "b6bdacbda52033ea02705408e199756369588168681102f47708365fc7381226"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 0,
+          "sha256": "b6bdacbda52033ea02705408e199756369588168681102f47708365fc7381226"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 0,
+          "sha256": "92c72e09098e2c634f9cb8c18b9b15c40e191c3d1d44cc3dadffb7a71d0abd77"
+        },
+        {
+          "triangles": 32,
+          "degenerates": 0,
+          "sha256": "198be47bfbab3b419acbe7a5441931b7beeeedf404852556335853dbf79ac050"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:clover-patch",
+      "path": "src/nonblock-scene48/undergrowth-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 42,
+          "degenerates": 0,
+          "sha256": "e09a73e77b37f223cdaa2aea59e3e5a14363804f615df040c45671a8a91b44a0"
+        },
+        {
+          "triangles": 42,
+          "degenerates": 0,
+          "sha256": "e09a73e77b37f223cdaa2aea59e3e5a14363804f615df040c45671a8a91b44a0"
+        },
+        {
+          "triangles": 42,
+          "degenerates": 0,
+          "sha256": "e09a73e77b37f223cdaa2aea59e3e5a14363804f615df040c45671a8a91b44a0"
+        },
+        {
+          "triangles": 42,
+          "degenerates": 0,
+          "sha256": "e09a73e77b37f223cdaa2aea59e3e5a14363804f615df040c45671a8a91b44a0"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:clustered-toadstools",
+      "path": "src/nonblock-scene48/undergrowth-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 63,
+          "degenerates": 0,
+          "sha256": "c328c6ac57c3c75ced53039ed56712008269c3749c410cae21cdb8d660cebeb0"
+        },
+        {
+          "triangles": 63,
+          "degenerates": 0,
+          "sha256": "c328c6ac57c3c75ced53039ed56712008269c3749c410cae21cdb8d660cebeb0"
+        },
+        {
+          "triangles": 63,
+          "degenerates": 0,
+          "sha256": "c328c6ac57c3c75ced53039ed56712008269c3749c410cae21cdb8d660cebeb0"
+        },
+        {
+          "triangles": 63,
+          "degenerates": 0,
+          "sha256": "c328c6ac57c3c75ced53039ed56712008269c3749c410cae21cdb8d660cebeb0"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:exposed-root",
+      "path": "src/nonblock-scene48/forest-phase1-candidates.mjs",
+      "samples": [
+        {
+          "triangles": 60,
+          "degenerates": 0,
+          "sha256": "33f4850e9f592b3afd3ad01c434364b7b925d3374f6ae80256ca6ce39cb6a0db"
+        },
+        {
+          "triangles": 60,
+          "degenerates": 0,
+          "sha256": "33f4850e9f592b3afd3ad01c434364b7b925d3374f6ae80256ca6ce39cb6a0db"
+        },
+        {
+          "triangles": 60,
+          "degenerates": 0,
+          "sha256": "33f4850e9f592b3afd3ad01c434364b7b925d3374f6ae80256ca6ce39cb6a0db"
+        },
+        {
+          "triangles": 60,
+          "degenerates": 0,
+          "sha256": "33f4850e9f592b3afd3ad01c434364b7b925d3374f6ae80256ca6ce39cb6a0db"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:fallen-branch",
+      "path": "src/nonblock-scene48/forest-phase1-candidates.mjs",
+      "samples": [
+        {
+          "triangles": 50,
+          "degenerates": 0,
+          "sha256": "a179258c5f3560f3c8f0db6cc77a777114f3ced194ed1ed4096872a8fcde3cc0"
+        },
+        {
+          "triangles": 50,
+          "degenerates": 0,
+          "sha256": "a179258c5f3560f3c8f0db6cc77a777114f3ced194ed1ed4096872a8fcde3cc0"
+        },
+        {
+          "triangles": 50,
+          "degenerates": 0,
+          "sha256": "a179258c5f3560f3c8f0db6cc77a777114f3ced194ed1ed4096872a8fcde3cc0"
+        },
+        {
+          "triangles": 50,
+          "degenerates": 0,
+          "sha256": "a179258c5f3560f3c8f0db6cc77a777114f3ced194ed1ed4096872a8fcde3cc0"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:forest-lichen-patch",
+      "path": "src/nonblock-scene48/forest-lichen-patch.mjs",
+      "samples": [
+        {
+          "triangles": 21,
+          "degenerates": 0,
+          "sha256": "4fbcfc0ed2107a875c8c2376625eba3e0b4d9d8f579b982337818f7f5152cd11"
+        },
+        {
+          "triangles": 24,
+          "degenerates": 0,
+          "sha256": "d2bcef9e0f88d0de89c3faa715fa4a14a0d6387d92cecb5312a48b87ce254037"
+        },
+        {
+          "triangles": 27,
+          "degenerates": 0,
+          "sha256": "113172bdc9e3ad69290f0085112e178c73d19cc98ab1774ff5af78de5b4d2e81"
+        },
+        {
+          "triangles": 27,
+          "degenerates": 0,
+          "sha256": "113172bdc9e3ad69290f0085112e178c73d19cc98ab1774ff5af78de5b4d2e81"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:forest-moss-mat",
+      "path": "src/nonblock-scene48/forest-moss-mat.mjs",
+      "samples": [
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "3ad09c18b7965821d8045f28512590ad4a0eb75151a91883fab5e136b440a349"
+        },
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "fcacf22a8abf0e86526f93065cfe1b09c5f38316d558b97c2defb3f6a99f1fe0"
+        },
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "6aeb715fe2f97eff3418ad372c33c0e074695ee748055fa8020be5bf4d5eafdf"
+        },
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "6aeb715fe2f97eff3418ad372c33c0e074695ee748055fa8020be5bf4d5eafdf"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:heather-sprig",
+      "path": "src/nonblock-scene48/flora-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 50,
+          "degenerates": 0,
+          "sha256": "907a7b33850be5a698ba02274973975b1a30ee61bc7cc1cb7c8a4b61329c92b8"
+        },
+        {
+          "triangles": 50,
+          "degenerates": 0,
+          "sha256": "88567d4459c98a65cee54cdcbb710457ac2a50effcd3e2a813b340f6521c3f15"
+        },
+        {
+          "triangles": 50,
+          "degenerates": 0,
+          "sha256": "907a7b33850be5a698ba02274973975b1a30ee61bc7cc1cb7c8a4b61329c92b8"
+        },
+        {
+          "triangles": 50,
+          "degenerates": 0,
+          "sha256": "b45c86a742d3908b36f7da1a8471cc6ab7b73b4af1662d98c646ca9124066331"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:lavender-spike",
+      "path": "src/nonblock-scene48/flora-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 54,
+          "degenerates": 0,
+          "sha256": "0140060788227ba2fa035ba6049844514d1533a138b26e9ae75d906a1ace19b3"
+        },
+        {
+          "triangles": 54,
+          "degenerates": 0,
+          "sha256": "b417145d8b6a67b20419602521599951cedc613500ba09f60be267745929fb06"
+        },
+        {
+          "triangles": 54,
+          "degenerates": 0,
+          "sha256": "17fe4f23d5356ae963a22630533679bd2d0970b5964840e98fdc4f92f5579064"
+        },
+        {
+          "triangles": 54,
+          "degenerates": 0,
+          "sha256": "e6f92a8b612e58bcb534526924038c02f4b1f53a4d40cbfaaa94ce89c76b634c"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:low-grass",
+      "path": "src/nonblock-scene48/flora-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 10,
+          "degenerates": 0,
+          "sha256": "30c5503dcf0507987242ff92aa243d226a823062fd6dea0e464a284e10bfa7f6"
+        },
+        {
+          "triangles": 10,
+          "degenerates": 0,
+          "sha256": "c6e1352d11307420939c193fa267db300b357ffd1e0c419b167ee4f73667a70f"
+        },
+        {
+          "triangles": 10,
+          "degenerates": 0,
+          "sha256": "20c19b3f29b2e58e007c151f127f4fd87d62e924ecbe576c6c74bc0888b580a0"
+        },
+        {
+          "triangles": 10,
+          "degenerates": 0,
+          "sha256": "722b46fb58a78d25a2e450a1002450bf0a39ec91f51282158bfb81a94b85cca6"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:meadow-sedge",
+      "path": "src/nonblock-scene48/flora-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "f5e8c71607085377eeaee38a2c6fd087f54154b0e7025ca02fea4e02e6ebab10"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "6d9bb6031113cda22718a61dd8475d3532f2eac8600825cd5f6824b878bda86d"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "e3cc069bf8552382a40d3886fa8ac24de2a02481d30a7c6ca03f757f2ff0d4b4"
+        },
+        {
+          "triangles": 14,
+          "degenerates": 0,
+          "sha256": "e3cc069bf8552382a40d3886fa8ac24de2a02481d30a7c6ca03f757f2ff0d4b4"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:moss-cushion",
+      "path": "src/nonblock-scene48/undergrowth-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 35,
+          "degenerates": 0,
+          "sha256": "030cfdf50a32f2be819aad7d31b6016202afee46fa1a99936dc4648311dc3d02"
+        },
+        {
+          "triangles": 35,
+          "degenerates": 0,
+          "sha256": "030cfdf50a32f2be819aad7d31b6016202afee46fa1a99936dc4648311dc3d02"
+        },
+        {
+          "triangles": 35,
+          "degenerates": 0,
+          "sha256": "030cfdf50a32f2be819aad7d31b6016202afee46fa1a99936dc4648311dc3d02"
+        },
+        {
+          "triangles": 35,
+          "degenerates": 0,
+          "sha256": "030cfdf50a32f2be819aad7d31b6016202afee46fa1a99936dc4648311dc3d02"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:short-fern",
+      "path": "src/nonblock-scene48/flora-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 48,
+          "degenerates": 0,
+          "sha256": "4b941ea8df42ebc8697839729b17d72ed0a685e3aaa69c390f062c1430e92fa6"
+        },
+        {
+          "triangles": 48,
+          "degenerates": 0,
+          "sha256": "4b941ea8df42ebc8697839729b17d72ed0a685e3aaa69c390f062c1430e92fa6"
+        },
+        {
+          "triangles": 48,
+          "degenerates": 0,
+          "sha256": "ffa7d0b981ac882ddf83032aba759fee426c506a0ea4aa927c653ebb7b5f045f"
+        },
+        {
+          "triangles": 48,
+          "degenerates": 0,
+          "sha256": "4b941ea8df42ebc8697839729b17d72ed0a685e3aaa69c390f062c1430e92fa6"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:single-wildflower",
+      "path": "src/nonblock-scene48/flora-phase1.mjs",
+      "samples": [
+        {
+          "triangles": 13,
+          "degenerates": 0,
+          "sha256": "b3849a5cc0259a34b91426ef0618f7991386f0d71d7525deeee96cd1a854ab03"
+        },
+        {
+          "triangles": 13,
+          "degenerates": 0,
+          "sha256": "fa8190c53e604d747d69b73f6ee768a6bcc5b68483d6f328f2ca676b456b04e8"
+        },
+        {
+          "triangles": 13,
+          "degenerates": 0,
+          "sha256": "fa8190c53e604d747d69b73f6ee768a6bcc5b68483d6f328f2ca676b456b04e8"
+        },
+        {
+          "triangles": 13,
+          "degenerates": 0,
+          "sha256": "c2040993d3ab174b17b5f0155f0becc27e74c276dc1f1e6a65dd1f572ef99f9a"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:woodland-sapling",
+      "path": "src/nonblock-scene48/woodland-sapling.mjs",
+      "samples": [
+        {
+          "triangles": 68,
+          "degenerates": 0,
+          "sha256": "b4892e65d4a20885771d4cc261f85087b5ab997b66980988a662ae75af05a645"
+        },
+        {
+          "triangles": 68,
+          "degenerates": 0,
+          "sha256": "ba7f06a0521d0910700f27608bc88cd2c2ff416f0375895d024e22c398f51227"
+        },
+        {
+          "triangles": 68,
+          "degenerates": 0,
+          "sha256": "b7e2c8729ac2bebd17f06f677ca9c273d8eb04b44a04493ec6e517b1aa2d4fa5"
+        },
+        {
+          "triangles": 68,
+          "degenerates": 0,
+          "sha256": "b7e2c8729ac2bebd17f06f677ca9c273d8eb04b44a04493ec6e517b1aa2d4fa5"
+        }
+      ]
+    },
+    {
+      "lane": "48",
+      "id": "scene48:woodland-shrub",
+      "path": "src/nonblock-scene48/woodland-shrub.mjs",
+      "samples": [
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "eeb359873603f82ba8dd5dfca8eb7ab9858a1812818a1dcce97a0958c94cce44"
+        },
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "1a88c4386c5ca0212cb856269724db581d5d57f419af2c9c0ed94e29f6326d2b"
+        },
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "d8df721f42cab9b7073d36905a886f650613792fa3f77c32ecbbdc3542201028"
+        },
+        {
+          "triangles": 40,
+          "degenerates": 0,
+          "sha256": "d8df721f42cab9b7073d36905a886f650613792fa3f77c32ecbbdc3542201028"
+        }
+      ]
+    }
+  ]
+}
