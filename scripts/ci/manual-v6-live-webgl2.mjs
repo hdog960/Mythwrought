@@ -144,10 +144,23 @@ try{
     }
     // Explicitly verify real source-cache completion with the new V6 JS,
     // then cold reload with the actual Chromium network entirely disabled.
-    await page.waitForFunction(async()=>{
-      const keys=await caches.keys();
-      return keys.includes('mythwrought-m5-shell-20261119-v6-safe-refresh');
-    },null,{timeout:180000});
+    // A cache name appears at install START, not after the verified contents
+    // finish. Only proceed offline when the FULL V6/REC shell is active.
+    await page.waitForFunction(async name=>{
+      const names=await caches.keys();
+      if(!names.includes(name)||!navigator.serviceWorker.controller)
+        return false;
+      const registration=await navigator.serviceWorker.getRegistration();
+      if(!registration?.active||registration.active.state!=='activated')
+        return false;
+      const cache=await caches.open(name);
+      const urls=(await cache.keys()).map(request=>request.url);
+      return urls.length>=200&&
+        urls.some(url=>url.endsWith('/src/main.mjs'))&&
+        urls.some(url=>url.endsWith('/src/manual-biomes/v6-balanced-biomes.mjs'))&&
+        urls.some(url=>url.endsWith('/src/app-update.mjs'))&&
+        urls.some(url=>url.endsWith('/src/gameplay-recorder.mjs'));
+    },'mythwrought-m5-shell-20261119-v6-safe-refresh',{timeout:180000});
     const before=await page.evaluate(async()=>{
       const name='mythwrought-m5-shell-20261119-v6-safe-refresh';
       const cache=await caches.open(name);
