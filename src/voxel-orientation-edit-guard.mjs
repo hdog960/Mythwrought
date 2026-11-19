@@ -4,11 +4,18 @@
 // force invalidation for a same-ID replacement of a physically different shape.
 import {cellKey} from './voxel-orientation-sidecar.mjs';
 
-export function makeOrientationEditGuard({readBlock,writeBlock,sidecar}) {
+export function makeOrientationEditGuard({readBlock,writeBlock,sidecar,readRevision=null}) {
   if(typeof readBlock!=='function'||typeof writeBlock!=='function'||
     !sidecar||typeof sidecar.clear!=='function'||typeof sidecar.get!=='function')
     throw new TypeError('Invalid orientation edit dependencies');
+  if(readRevision!==null&&typeof readRevision!=='function') throw new TypeError('Invalid revision reader');
   let writing=false;
+  function revision(cell) {
+    if(!readRevision) return null;
+    const n=readRevision(...cell);
+    if(!Number.isSafeInteger(n)||n<0) throw new TypeError('Invalid world revision');
+    return n;
+  }
   function read(cell) {
     const id=readBlock(...cell);
     if(!Number.isSafeInteger(id)||id<0||id>255) throw new TypeError('Invalid world block');
@@ -26,6 +33,7 @@ export function makeOrientationEditGuard({readBlock,writeBlock,sidecar}) {
         throw new TypeError('Invalid expected block');
       if(writing) throw new Error('Reentrant orientation edit');
       const before=read(cell);
+      const beforeRevision=revision(cell);
       if(expectedId!==undefined&&before!==expectedId) return Object.freeze({applied:false,reason:'stale'});
       if(before===nextId&&!replaceSameId) return Object.freeze({applied:false,reason:'unchanged'});
       writing=true;
@@ -35,7 +43,7 @@ export function makeOrientationEditGuard({readBlock,writeBlock,sidecar}) {
         catch(error) {
           // A throwing writer may have changed the cell before failing. Never
           // retain rotation metadata unless the original block is provably intact.
-          try { if(read(cell)!==before) sidecar.clear(cell); }
+          try { if(read(cell)!==before || (readRevision&&revision(cell)!==beforeRevision)) sidecar.clear(cell); }
           catch { sidecar.clear(cell); }
           throw error;
         }
@@ -45,7 +53,7 @@ export function makeOrientationEditGuard({readBlock,writeBlock,sidecar}) {
           let current;
           try { current=read(cell); }
           catch { sidecar.clear(cell); throw new Error('Rejected edit left unreadable cell'); }
-          if(current!==before) { sidecar.clear(cell); throw new Error('Rejected edit mutated world cell'); }
+          if(current!==before || (readRevision&&revision(cell)!==beforeRevision)) { sidecar.clear(cell); throw new Error('Rejected edit mutated world cell'); }
           return Object.freeze({applied:false,reason:'rejected'});
         }
         // Fail closed if the host did not actually write the requested block.
