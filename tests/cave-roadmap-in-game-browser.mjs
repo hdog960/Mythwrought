@@ -15,6 +15,9 @@ import {caveRoute} from '../src/experimental-cave-route.mjs';
 import {HISTORIC_NAMED_TARGETS,findNamedCavePlayerRoute}
  from '../src/manual-caves/named-destination-audit.mjs';
 import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
+import {planCaveFarWallSources} from '../src/manual-caves/c6-far-wall-gpu.mjs';
+import {sectionForY} from '../src/depth.mjs';
+import {chunkCoord} from '../src/voxel.mjs';
 import {historicSecondaryScenes,inspectDeepSkySourceBoundary}
  from './cave-roadmap-secondary-browser-evidence.mjs';
 import {C6_STABLE_RENDERED_FRAMES,expectedDeepSceneResidency,
@@ -326,6 +329,63 @@ try{
     }
     const raw=await page.screenshot({
      path:join(folder,'realgame-'+shot.name+'-'+width+'x'+height+'.png'),fullPage:true});
+    if(shot.name==='named-vaulted-stone-fan'&&width===667){
+     // Read-only, genuinely captured original-game source-ray diagnosis.
+     // Preserve the real sky-leak ASSERTION below; no color substitutions,
+     // fake meshes, raised CPU/GPU budgets, or player-world edits.
+     const rect=await page.evaluate(()=>{
+      const el=document.querySelector('#scene'),r=el.getBoundingClientRect();
+      return {left:r.left,top:r.top,width:r.width,height:r.height,
+       bufferWidth:el.width,bufferHeight:el.height};
+     });
+     const camera={x:shot.at.x+.5,z:shot.at.z+.5,feet:shot.at.y+.01,
+      yaw:Math.atan2(shot.to.x-shot.at.x,shot.to.z-shot.at.z),
+      pitch:Math.atan2(shot.to.y+.5-(shot.at.y+.01+1.55),
+       Math.hypot(shot.to.x-shot.at.x,shot.to.z-shot.at.z))};
+     const plan=planCaveFarWallSources(sourceWorld,camera,
+      [rect.bufferWidth,rect.bufferHeight]);
+     const pixels=PNG.sync.read(raw),blue=[];
+     for(let py=Math.floor(rect.top+rect.height*.06);
+         py<Math.floor(rect.top+rect.height*.48);py+=5)
+      for(let px=Math.floor(rect.left+rect.width*.20);
+          px<Math.floor(rect.left+rect.width*.80);px+=5){
+       const i=(py*pixels.width+px)*4;
+       const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2];
+       if(r>=140&&g>=155&&b>=170&&b-r>=10)
+        blue.push({px,py,r,g,b});
+      }
+     const sampleCount=Math.min(12,blue.length);
+     const chosen=Array.from({length:sampleCount},(_,i)=>
+      blue[Math.min(blue.length-1,Math.floor(i*blue.length/sampleCount))]);
+     const aspect=rect.bufferWidth/rect.bufferHeight,tan=Math.tan(72*Math.PI/360);
+     const cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch);
+     const cy=Math.cos(camera.yaw),sy=Math.sin(camera.yaw);
+     const forward=[sy*cp,sp,cy*cp],right=[-cy,0,sy],
+      up=[-sp*sy,cp,-sp*cy];
+     const rays=chosen.map(pixel=>{
+      const nx=(pixel.px-(rect.left+rect.width/2))/(rect.width/2);
+      const ny=((rect.top+rect.height/2)-pixel.py)/(rect.height/2);
+      let d=forward.map((v,i)=>v+right[i]*nx*aspect*tan+up[i]*ny*tan);
+      const norm=Math.hypot(...d);d=d.map(v=>v/norm);
+      let first=null;
+      for(let t=1;t<=64;t++){
+       const x=Math.floor(camera.x+d[0]*t),y=Math.floor(camera.feet+1.55+d[1]*t),
+        z=Math.floor(camera.z+d[2]*t),id=sourceWorld.get(x,y,z);
+       if(id!==0){first={t,x,y,z,id,section:sectionForY(y),
+        ring:Math.max(Math.abs(chunkCoord(x)-chunkCoord(camera.x)),
+         Math.abs(chunkCoord(z)-chunkCoord(camera.z)))};break;}
+      }
+      return {pixel,first};
+     });
+     const proof={scene:shot.name,sourceSeed:seed,rect,camera,
+      sourceSampler:{selected:plan.selected.map(c=>({key:c.key,
+       section:c.section,source:c.source,hits:c.hits,nearest:c.nearest})),
+       pending:plan.pending.length,uncovered:plan.uncovered,
+       samples:plan.samples,maxSamples:3264},
+      candidateSkySamples:blue.length,rays};
+     report.deepSkyPhysicalRays=[proof];
+     console.log('C6_REAL_SKY_PIXEL_SOURCE_RAYS',JSON.stringify(proof));
+    }
     if(deepGate){
      const after=await readActualGameFrame(page);
      const state=assessDeepSceneFrame(after,deepGate.expected);
