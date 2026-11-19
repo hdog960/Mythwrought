@@ -74,7 +74,7 @@ function walk2B(b){
   assert.ok(visited.has(t.x+','+t.z),b.id+' unreachable physically authored destination '+t.purpose);
  return visited.size;
 }
-test('Wave12 eight original reserved IDs do not collide with historical 169/146 or previous 94 staged source IDs',()=>{
+test('Wave12 eight original reserved IDs do not collide with historical 169/146 or previous 86 staged source IDs',()=>{
  const historic1=get1BCandidates();
  const hist2=JSON.parse(readFileSync('src/building-pool/roadmap-2b/m1-authoring-ledger.json','utf8'));
  assert.equal(historic1.length,169);assert.equal(hist2.authoredCandidates,146);
