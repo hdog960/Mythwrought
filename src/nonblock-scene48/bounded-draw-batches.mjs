@@ -1,13 +1,15 @@
 // :48 opt-in scene draw preparation; never mutates production renderer or world.
 export const NONBLOCK_BATCH_PREP_VERSION='nonblock-batch-prep-v1';
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
+const validSceneId=s=>typeof s==='string'&&/^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$/.test(s);
+const validKey=s=>typeof s==='string'&&s.length>0&&s.length<=512;
 const validBounds=b=>Array.isArray(b)&&b.length===2&&b.every(p=>Array.isArray(p)&&p.length===3&&p.every(finite))&&b[0].every((n,i)=>n<=b[1][i]);
 const overlaps=(a,b)=>a[0].every((n,i)=>n<=b[1][i]&&a[1][i]>=b[0][i]);
 function meshBounds(o){
  const p=o?.mesh?.positions,a=o?.anchor;
  if(!p||!Array.isArray(a)||a.length!==3||!a.every(finite)||p.length===0||p.length%9!==0)throw new TypeError('invalid mesh');
  const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
- for(let i=0;i<p.length;i++){const v=p[i];if(!finite(v))throw new TypeError('nonfinite mesh');const k=i%3;lo[k]=Math.min(lo[k],v+a[k]);hi[k]=Math.max(hi[k],v+a[k]);}
+ for(let i=0;i<p.length;i++){const v=p[i];if(!finite(v))throw new TypeError('nonfinite mesh');const k=i%3,w=v+a[k];if(!finite(w))throw new TypeError('nonfinite world-space mesh');lo[k]=Math.min(lo[k],w);hi[k]=Math.max(hi[k],w);}
  return [lo,hi];
 }
 // Returns bounded, deterministic batches of visible geometry references; no draw calls.
@@ -18,7 +20,7 @@ export function prepareNonblockDrawBatches(objects,viewBounds,{maxObjects=4096,m
     maxBatchTriangles>maxTriangles)throw new TypeError('invalid batch budget');
  const seen=new Set(),visible=[];let triangles=0;
  for(const obj of objects){
-  if(typeof obj?.instanceKey!=='string'||!obj.instanceKey||seen.has(obj.instanceKey))throw new TypeError('duplicate or missing identity');
+  if(!validKey(obj?.instanceKey)||!validSceneId(obj?.sceneId)||seen.has(obj.instanceKey))throw new TypeError('duplicate/missing identity or invalid scene namespace');
   seen.add(obj.instanceKey);
   const bounds=meshBounds(obj),count=obj.mesh.positions.length/9;
   if(!Number.isSafeInteger(count)||count>maxBatchTriangles)throw new RangeError('oversized object');
