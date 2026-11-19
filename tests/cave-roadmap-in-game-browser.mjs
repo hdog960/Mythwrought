@@ -386,6 +386,70 @@ try{
      report.deepSkyPhysicalRays=[proof];
      console.log('C6_REAL_SKY_PIXEL_SOURCE_RAYS',JSON.stringify(proof));
     }
+    if(shot.name==='secondary-rift-terraces-second-offset-chamber'&&width===667){
+     // Read-only genuine source rays for Rift's tiny strict sky failure.
+     // Do not change renderer, screenshots, color threshold, or sky assertion.
+     const rect=await page.evaluate(()=>{
+      const el=document.querySelector('#scene'),r=el.getBoundingClientRect();
+      return {left:r.left,top:r.top,width:r.width,height:r.height,
+       bufferWidth:el.width,bufferHeight:el.height};
+     });
+     const camera={x:shot.at.x+.5,z:shot.at.z+.5,feet:shot.at.y+.01,
+      yaw:Math.atan2(shot.to.x-shot.at.x,shot.to.z-shot.at.z),
+      pitch:Math.atan2(shot.to.y+.5-(shot.at.y+.01+1.55),
+       Math.hypot(shot.to.x-shot.at.x,shot.to.z-shot.at.z))};
+     const plan=planCaveFarWallSources(sourceWorld,camera,
+      [rect.bufferWidth,rect.bufferHeight]);
+     const png=PNG.sync.read(raw),blue=[];
+     for(let py=Math.floor(height*.09);py<Math.floor(height*.56);py++)
+      for(let px=Math.floor(width*.19);px<Math.floor(width*.70);px++){
+       const i=(py*png.width+px)*4;
+       const r=png.data[i],g=png.data[i+1],b=png.data[i+2];
+       if(r>=140&&g>=155&&b>=170&&b-r>=10)
+        blue.push({px,py,r,g,b});
+      }
+     const a=rect.bufferWidth/rect.bufferHeight,tan=Math.tan(72*Math.PI/360);
+     const cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch),
+      cy=Math.cos(camera.yaw),sy=Math.sin(camera.yaw);
+     const forward=[sy*cp,sp,cy*cp],right=[-cy,0,sy],
+      up=[-sp*sy,cp,-sp*cy];
+     const near={cx:chunkCoord(camera.x),cz:chunkCoord(camera.z)};
+     const selected=new Set(plan.selected.flatMap(c=>[
+      c.key,...(c.companion?[c.companion.key]:[])]));
+     const rays=blue.slice(0,32).map(pixel=>{
+      const nx=(pixel.px-(rect.left+rect.width/2))/(rect.width/2);
+      const ny=((rect.top+rect.height/2)-pixel.py)/(rect.height/2);
+      let d=forward.map((v,i)=>v+right[i]*nx*a*tan+up[i]*ny*tan);
+      const norm=Math.hypot(...d);d=d.map(v=>v/norm);
+      let first=null;
+      for(let t=1;t<=64;t++){
+       const x=Math.floor(camera.x+d[0]*t),
+        y=Math.floor(camera.feet+1.55+d[1]*t),
+        z=Math.floor(camera.z+d[2]*t),
+        id=sourceWorld.get(x,y,z);
+       if(id!==0){
+        const cx=chunkCoord(x),cz=chunkCoord(z),section=sectionForY(y);
+        const key=cx+','+cz+(section===0?'':','+section);
+        first={t,x,y,z,id,section,key,
+         inNearStream:Math.max(Math.abs(cx-near.cx),
+          Math.abs(cz-near.cz))<=1,
+         inFarGpuSelection:selected.has(key)};
+        break;
+       }
+      }
+      return {pixel,first};
+     });
+     const proof={scene:shot.name,sourceSeed:seed,sourceFrame:shot.sourceFrame,
+      rect,camera,sourceSampler:{selected:plan.selected.map(c=>({
+       key:c.key,hits:c.hits,nearest:c.nearest,roofHits:c.roofHits,
+       source:c.source,companion:c.companion?.key??null})),
+       pending:plan.pending.map(c=>c.key),joinedSources:plan.joinedSources,
+       uncovered:plan.uncovered,samples:plan.samples},skyPixelCount:blue.length,
+      actualGpu:snapshot,rays};
+     report.deepSkyPhysicalRays??=[];
+     report.deepSkyPhysicalRays.push(proof);
+     console.log('C6_REAL_RIFT_SKY_PIXEL_SOURCE_RAYS',JSON.stringify(proof));
+    }
     if(deepGate){
      const after=await readActualGameFrame(page);
      const state=assessDeepSceneFrame(after,deepGate.expected);
