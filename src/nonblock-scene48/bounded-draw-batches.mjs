@@ -19,6 +19,7 @@ export function prepareNonblockDrawBatches(objects,viewBounds,{maxObjects=4096,m
     ![maxObjects,maxTriangles,maxBatchTriangles].every(n=>Number.isSafeInteger(n)&&n>0)||
     maxBatchTriangles>maxTriangles)throw new TypeError('invalid batch budget');
  if(!Array.isArray(removedKeys)||removedKeys.some(k=>!validKey(k))||new Set(removedKeys).size!==removedKeys.length)throw new TypeError('invalid removed identities');
+ if(removedKeys.length>maxObjects)throw new RangeError('removed identity budget exceeded');
  const removed=new Set(removedKeys);
  const seen=new Set(),visible=[];let triangles=0;
  for(const obj of objects){
@@ -31,6 +32,7 @@ export function prepareNonblockDrawBatches(objects,viewBounds,{maxObjects=4096,m
   if(triangles>maxTriangles)throw new RangeError('visible triangle budget exceeded');
   visible.push({instanceKey:obj.instanceKey,sceneId:obj.sceneId,triangles:count,bounds,mesh:obj.mesh,anchor:[...obj.anchor]});
  }
+ if(removed.size && [...removed].some(key=>!seen.has(key)))throw new TypeError('unknown removed identity');
  visible.sort((a,b)=>a.sceneId===b.sceneId?a.instanceKey.localeCompare(b.instanceKey):String(a.sceneId).localeCompare(String(b.sceneId)));
  const batches=[];let current=null;
  for(const entry of visible){
