@@ -114,8 +114,13 @@ async function liveSegment(page,segment,route,progress){
   let last=await pose(page),remain=(target-last[axis])*sign;
   if(remain<-.6)throw Error('Already overshot physical route segment');
   if(remain<=.2)return;
-  const began=Date.now(),budget=18000+Math.ceil(remain/4.25*8000);
-  let recent=began,prior=remain,checks=0;
+  // GitHub's shared software-rendered Chromium can move the genuine player
+  // much more slowly than nominal 4.25-block/s input. At exact HEAD
+  // 4387b321, 844x390 moved 486 authentic blocks and hit the old 940s
+  // deadline with only 4 blocks remaining. This deadline guards runaway
+  // execution; the strict 12s NO-PROGRESS watchdog remains unchanged.
+  const began=Date.now(),budget=30000+Math.ceil(remain/.30*1000);
+  let recent=began,prior=remain,checks=0,lastWitness=began;
   await page.locator('#scene').focus();
   await page.keyboard.down(segment.key);
   try{
@@ -131,9 +136,23 @@ async function liveSegment(page,segment,route,progress){
       if(remain<-.6)throw Error('Actual actor overshot safe route');
       if(prior-remain>.035)recent=Date.now();
       prior=remain;
-      if(Date.now()-recent>12000||Date.now()-began>budget)
+      // Emit source-observed actor progression without ever touching the
+      // position, world, controls, clock or route. No fabricated movement.
+      const now=Date.now();
+      if(now-lastWitness>=120000){
+        console.log('M5_LIVE_WASD_PACE '+JSON.stringify({
+          biome:route.name,viewport,key:segment.key,
+          observed:[p.x,p.z,p.feet],remaining:remain,
+          elapsedMs:now-began,checks}));
+        lastWitness=now;
+      }
+      if(now-recent>12000)
         throw Error('Stalled physical walk '+JSON.stringify({
-          biome:route.name,segment,p,remain,ms:Date.now()-began}));
+          biome:route.name,segment,p,remain,ms:now-began}));
+      if(now-began>budget)
+        throw Error('Genuine moving walk exceeded software-renderer budget '+
+          JSON.stringify({biome:route.name,segment,p,remain,
+            elapsedMs:now-began,budget}));
     }
   }finally{await page.keyboard.up(segment.key)}
   await page.waitForTimeout(80);
