@@ -67,11 +67,13 @@ export function createNonblockHostBridge({seed,objects,attest,voxelPick,eligible
   };
   let removed=validateSnapshot(readSidecar());
   let epoch=0;
+  let storageUncertain=false;
   // Capability receipts are issued by this exact host instance only. Reconstructed,
   // cloned or cross-world hits cannot authorize removal even if fields match.
   const issuedHits=new WeakSet();
   const visible=()=>[...registry.values()].filter(e=>!removed.has(e.object.instanceKey)&&eligible(e.object,e.lane));
   const pick=(origin,direction,maxDistance=6)=>{
+    if(storageUncertain)throw new Error('nonblock sidecar recovery required');
     if(!vec(origin)||!vec(direction)||!Number.isFinite(maxDistance)||maxDistance<=0||maxDistance>12)throw new TypeError('invalid bounded ray');
     const len=Math.hypot(...direction);if(len<1e-9)throw new TypeError('zero ray');
     const d=direction.map(v=>v/len);
@@ -94,6 +96,7 @@ export function createNonblockHostBridge({seed,objects,attest,voxelPick,eligible
   };
   const snapshot=()=>({version:HOST_BRIDGE_VERSION,seed,tombstones:[...removed].sort()});
   const breakHit=(hit,origin,direction,maxDistance=6)=>{
+    if(storageUncertain)return false;
     if(!hit || typeof hit!=='object' || !issuedHits.has(hit) ||
        hit.kind!=='nonblock'||hit.seed!==seed||hit.epoch!==epoch||
        typeof hit.instanceKey!=='string'||!registry.has(hit.instanceKey))return false;
@@ -105,8 +108,25 @@ export function createNonblockHostBridge({seed,objects,attest,voxelPick,eligible
     const value={version:HOST_BRIDGE_VERSION,seed,tombstones:[...next].sort()};
     // Commit and verify storage BEFORE making object disappear. A failed write
     // or readback must never create a visually removed but respawning object.
-    try {writeSidecar(value);if(JSON.stringify(value)!==JSON.stringify(readSidecar()))return false;}
-    catch{return false;}
+    // A storage write can succeed even when readback fails (quota, corruption,
+    // interrupted adapter). Attempt to restore the prior durable snapshot and
+    // verify it before reporting a rejected break. If restoration cannot be
+    // proven, fail closed by disabling further edits on this host instance.
+    const previous=snapshot();
+    try {
+      writeSidecar(value);
+      if(JSON.stringify(value)!==JSON.stringify(readSidecar()))
+        throw new Error('nonblock sidecar readback mismatch');
+    } catch {
+      try {
+        writeSidecar(previous);
+        if(JSON.stringify(previous)!==JSON.stringify(readSidecar()))
+          throw new Error('nonblock sidecar rollback mismatch');
+      } catch {
+        storageUncertain=true;
+      }
+      return false;
+    }
     removed=next;epoch++;return true;
   };
   return Object.freeze({pick,breakHit,visible:()=>visible().map(e=>e.object),snapshot});
