@@ -102,14 +102,16 @@ export function planCaveFarWallSources(world,player,viewport,
  // column may share ONE far GPU buffer. This is not a fifth draw slot
  // or fabricated rock. At most one real source section may be joined.
  const selected=ranked.slice(0,bounds.maxChunks).map(c=>({...c}));
- // Real screenshots uncovered a narrow rock seam between the original
- // 17 horizontal rays. Sample every half-step at the upper-middle screen
- // band ONLY to discover adjacent real source sections, never to evict
- // the four coarse-priority GPU buffers. These extra voxels count against
- // the SAME unchanged maxSourceSamples=3264 CPU budget.
+ // Genuine Rift screenshot pixel x206,y135 projects to normalized ray
+ // x=-.666,y=.3375. Both the original -0.75/-0.625 rays and half-step
+ // -0.6875 miss its x176,-83,192 DEEPSTONE source boundary. Sample
+ // two interior thirds at y=.35 for authentic narrow ceiling seams,
+ // only as companion sources; never displace four coarse-priority
+ // GPU buffers or increase the SAME maxSourceSamples=3264 CPU budget.
  const midpoints=new Map();
  for(let i=0;i<bounds.horizontalRays-1;i++)
-  sampleRay(-1+(2*i+1)/(bounds.horizontalRays-1),.35,midpoints);
+  for(const fraction of [1/3,2/3])
+   sampleRay(-1+2*(i+fraction)/(bounds.horizontalRays-1),.35,midpoints);
  const available=new Map(ranked.slice(bounds.maxChunks).map(c=>[c.key,c]));
  for(const [k,c] of midpoints)
   if(!candidates.has(k)&&!available.has(k))available.set(k,c);
