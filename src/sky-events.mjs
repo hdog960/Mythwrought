@@ -29,10 +29,11 @@ const NONE=Object.freeze({kind:0,id:'none',strength:0,progress:0,eligible:false,
 export function sampleS5Events(phaseMs,lunar,daylight){
   const phase=normalizeSkyPhase(phaseMs);
   if(!lunar||!Number.isFinite(lunar.ageDays)||lunar.ageDays<0||
-     !Array.isArray(lunar.moons)||lunar.moons.length!==3||
-     lunar.moons.some(m=>!Array.isArray(m.direction)||m.direction.length!==3||
-       !m.direction.every(Number.isFinite)||!Number.isFinite(m.illumination)||
-       !Number.isFinite(m.visibility)))throw Error('Invalid S5 lunar state');
+     !Array.isArray(lunar.moons)||lunar.moons.length!==3)
+    throw Error('Invalid S5 lunar state');
+  if(lunar.moons.some(m=>!Array.isArray(m.direction)||m.direction.length!==3||
+     !m.direction.every(Number.isFinite)||!Number.isFinite(m.illumination)||
+     !Number.isFinite(m.visibility)))throw Error('Invalid S5 moon vector');
   if(!Number.isFinite(daylight)||daylight<0||daylight>1)
     throw Error('Invalid S5 daylight');
   const darkness=1-smooth(.025,.20,daylight);
