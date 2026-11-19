@@ -1,7 +1,7 @@
 {
   "kind": "MYTHWROUGHT_CAVE_SOURCE_ASSETS_V1",
-  "sourceHead": "559ba1cd7cba5846086973742c2560035b6e1d87",
-  "cacheRevision": "559ba1cd7cba5846",
+  "sourceHead": "c770ba49c10c30bca2730f5817a44ccb39ba1b31",
+  "cacheRevision": "c770ba49c10c30bc",
   "verification": "Git blob SHA-1 of source bytes: SHA1('blob '+byteLength+'\\0'+contents)",
   "assets": [
     "assets/icon.svg",
@@ -408,7 +408,7 @@
     "src/manual-biomes/profile-world.mjs": "d3b6233f00daeaa793444ac3ac60bc2de2b75d6c",
     "src/manual-biomes/shoulder-traversal.mjs": "e0510918952dfead0c997550c97dc136e4107022",
     "src/manual-biomes/three-regions-m4.mjs": "92aa434e86f6dd084480fecdb70901694801bc0a",
-    "src/manual-caves/c6-far-wall-gpu.mjs": "07ed4f2422ff369f2085034ebfd8fc03e1edf859",
+    "src/manual-caves/c6-far-wall-gpu.mjs": "ae073e36ce16c613166e99b6b7f5f061efccdf4d",
     "src/manual-caves/cave-voxel-world.mjs": "30a0fd452a759047d7eaebbabda94aebb435ba97",
     "src/manual-caves/deep-vault-bridges.mjs": "ea204c302164a1f91a8316ed05cfc1b0790c5782",
     "src/manual-caves/east-gallery-intake.mjs": "6f185028eec52c397e01ff9db4fbf4d4565ce418",
