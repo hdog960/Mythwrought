@@ -217,7 +217,11 @@ export class BehaviorController {
       }
       const destination = mob.species.classification === 'hostile' ?
         this.#hostile(mob, memory, seen, context) : this.#passive(mob, memory, seen);
-      return destination ? this.#navigator.steer(mob, destination) : [0, 0];
+      if (!destination) return [0, 0];
+      const heading = this.#navigator.steer(mob, destination);
+      if (mob.species.classification === 'hostile' && ['pursue', 'investigate'].includes(memory.state) &&
+          !heading.some(Boolean)) context.onBlocked?.(mob, seen);
+      return heading;
     });
   }
 }

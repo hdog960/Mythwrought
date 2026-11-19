@@ -18,7 +18,7 @@ function snapshot(mob) {
     id: mob.id, species: mob.species, position: Object.freeze([...mob.position]),
     velocity: Object.freeze([...mob.velocity]), yaw: mob.yaw, state: mob.state,
     health: mob.health, grounded: mob.grounded, origin: mob.origin,
-    homeChunk: mob.homeChunk
+    homeChunk: mob.homeChunk, important: mob.important
   });
 }
 
@@ -64,7 +64,7 @@ export class MobEngine {
     const entity = {
       id, species, origin: Object.freeze([...point]), position: [...point],
       velocity: [0, 0, 0], yaw: 0, health: species.combat.health, state,
-      grounded: this.#world.grounded(point, species.body), homeChunk,
+      grounded: this.#world.grounded(point, species.body), homeChunk, important: false,
       randomState: (this.#seed ^ Math.imul(count, 0x9e3779b9)) >>> 0
     };
     if (awake.has(state)) this.#awake++;
@@ -93,9 +93,17 @@ export class MobEngine {
     return mob.randomState / 2 ** 32;
   }
 
+  protectIdentity(id) {
+    const mob = this.#entities.get(id);
+    if (!mob?.species.bonding.eligible) return false;
+    mob.important = true;
+    return true;
+  }
+
   transition(id, state) {
     const mob = this.#entities.get(id);
-    if (!mob || !transitions[mob.state].includes(state)) return false;
+    if (!mob || !transitions[mob.state].includes(state) ||
+        (state === 'removed' && mob.important)) return false;
     const wasAwake = awake.has(mob.state);
     const willBeAwake = awake.has(state);
     if (willBeAwake && !wasAwake &&
@@ -114,7 +122,7 @@ export class MobEngine {
     if (!mob || !awake.has(mob.state) || !Number.isFinite(amount) || amount <= 0) return false;
     mob.health = Math.max(0, mob.health - amount);
     this.#emit({ type: 'hurt', id, health: mob.health });
-    if (!mob.health) this.transition(id, recoverable ? 'downed' : 'removed');
+    if (!mob.health) this.transition(id, recoverable || mob.important ? 'downed' : 'removed');
     return true;
   }
 
@@ -163,7 +171,9 @@ export class MobEngine {
   }
 
   dispose() {
-    for (const id of this.#entities.keys()) this.transition(id, 'removed');
+    for (const mob of this.#entities.values()) this.#emit({ type: 'state', id: mob.id, state: 'removed' });
+    this.#entities.clear();
+    this.#awake = 0;
     this.#disposed = true;
     this.#time = 0;
   }
