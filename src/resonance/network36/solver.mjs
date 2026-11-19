@@ -42,8 +42,10 @@ export function solveResonance({nodes=[], generators=[], devices=[], stores=[], 
   for(const n of conductors){const r=root(n.id);if(!groups.has(r))groups.set(r,[]);groups.get(r).push(n);}
   const networks=[];
   const connected=n=> {
-    const candidates=conductors.filter(c=>adjacent(c.anchor,n.anchor)||(c.kind==='wireless'&&distance(c.anchor,n.anchor)<=c.radius));
-    return candidates.length?root(candidates[0].id):null;
+    const candidates=conductors.filter(c=>distance(c.anchor,n.anchor)<=1||(c.kind==='wireless'&&distance(c.anchor,n.anchor)<=c.radius));
+    const roots=[...new Set(candidates.map(c=>root(c.id)))];
+    if(roots.length>1) throw Error('ambiguous multi-network attachment: '+n.id);
+    return roots.length?roots[0]:null;
   };
   const allocations=new Map();
   for(const n of [...generators,...devices,...stores]) {
@@ -65,7 +67,6 @@ export function solveResonance({nodes=[], generators=[], devices=[], stores=[], 
       if(d.demand<=available+remainingReserve){
         let deficit=Math.max(0,d.demand-available);available=Math.max(0,available-d.demand);
         for(const s of [...ss].sort((a,b)=>idSort(a.id,b.id))){
-          const already=s._unusedNeverRead; // never mutate source store
           const used=(nextCharges[s.id]===undefined?s.charge:nextCharges[s.id]);
           const take=Math.min(deficit,used,s.maxOutput-(s.charge-used));
           nextCharges[s.id]=used-take;deficit-=take;remainingReserve-=take;
