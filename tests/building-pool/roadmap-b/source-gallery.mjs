@@ -6,7 +6,7 @@ import {extname,resolve,sep} from 'node:path';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
-const cwd=process.cwd(),dir='artifacts/roadmap-b-waves12345678910-webgl2',records=[];
+const cwd=process.cwd(),dir='artifacts/roadmap-b-waves1235047891011-webgl2',records=[];
 const ids=[
  'r1:farm-barn:desert:large:004','r1:greenhouse:snow:medium:004','r1:harbor-office:enchanted-forest:large:004',
  'r2:tailor:desert:large:04','r2:butcher:enchanted-forest:large:04','r2:bookshop:snow:medium:04',
@@ -27,7 +27,9 @@ const ids=[
  'r1:farm-barn:mountain:medium:004','r1:stable:desert:medium:005','r1:lighthouse:mountain:small:004','r1:bathhouse:enchanted-forest:small:004',
  'r2:bookshop:mountain:small:04','r2:temple:desert:large:05','r2:market-square:enchanted-forest:medium:04','r2:butcher:desert:large:04',
  'r1:farm-barn:snow:medium:004','r1:stable:mountain:small:005','r1:greenhouse:enchanted-forest:small:004','r1:fishing-lodge:temperate:large:004',
- 'r2:tailor:temperate:small:04','r2:temple:enchanted-forest:small:05','r2:jeweler:temperate:medium:04','r2:theater:temperate:small:03'
+ 'r2:tailor:temperate:small:04','r2:temple:enchanted-forest:small:05','r2:jeweler:temperate:medium:04','r2:theater:temperate:small:03',
+ 'r1:lighthouse:mountain:medium:004','r1:farm-barn:desert:small:004','r1:fishing-lodge:snow:small:004','r1:greenhouse:enchanted-forest:large:004',
+ 'r2:butcher:desert:small:04','r2:market-square:mountain:small:04','r2:jeweler:snow:small:04','r2:bookshop:temperate:large:04'
 ];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const files=['src/building-pool/roadmap-b/wave1-community-b1.mjs','src/building-pool/roadmap-b/wave1-trades-b2.mjs',
@@ -40,6 +42,7 @@ const files=['src/building-pool/roadmap-b/wave1-community-b1.mjs','src/building-
  'src/building-pool/roadmap-b/wave8-community-b1.mjs','src/building-pool/roadmap-b/wave8-trades-b2.mjs',
  'src/building-pool/roadmap-b/wave9-community-b1.mjs','src/building-pool/roadmap-b/wave9-trades-b2.mjs',
  'src/building-pool/roadmap-b/wave10-community-b1.mjs','src/building-pool/roadmap-b/wave10-trades-b2.mjs',
+ 'src/building-pool/roadmap-b/wave11-community-b1.mjs','src/building-pool/roadmap-b/wave11-trades-b2.mjs',
  'src/building-pool/roadmap-1b/m2-community-structures.mjs','src/building-pool/roadmap-1b/legacy-stable-schema.mjs',
  'src/building-pool/roadmap-1b/schema.mjs','src/building-pool/roadmap-2b/schema.mjs','src/building-pool/roadmap-2b/catalog.mjs'];
 await mkdir(dir,{recursive:true});
@@ -98,15 +101,15 @@ try{
   await page.close();
  }
  const keys=new Set(records.map(x=>x.sha256));
- if(records.length!==456||keys.size!==456)throw Error('76 source captures not unique and complete');
+ if(records.length!==504||keys.size!==504)throw Error('84 source captures not unique and complete');
  for(const id of ids)for(const [width,height] of sizes){
   const p=records.find(r=>r.id===id&&r.width===width&&r.height===height&&r.view==='exterior');
   const q=records.find(r=>r.id===id&&r.width===width&&r.height===height&&r.view==='cutaway');
   if(!p||!q||q.visibleCells>=p.visibleCells)throw Error('Cutaway not source-backed '+id);
  }
- await writeFile(dir+'/manifest.json',JSON.stringify({schema:'mythwrought.roadmap-b-waves12345678910.webgl2.v1',
+ await writeFile(dir+'/manifest.json',JSON.stringify({schema:'mythwrought.roadmap-b-waves1235047891011.webgl2.v1',
   gitHead:process.env.ROADMAP_B_EXACT_HEAD||null,
   countedAsProductionBuilds:false,producerPackAABBsApproved:false,actualPhysicalIPhone:false,
   sourceEvidence,records},null,2));
- console.log('ROADMAP B GENUINE SOURCE WEBGL2 PASS: '+records.length+'/456 with 456 distinct PNG SHA-256');
+ console.log('ROADMAP B GENUINE SOURCE WEBGL2 PASS: '+records.length+'/504 with 504 distinct PNG SHA-256');
 }finally{await browser?.close();server.close();}
