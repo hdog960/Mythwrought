@@ -2458,9 +2458,13 @@ function start(){
         (selected.recovery?' · RECOVERED '+selected.recovery:'')+
         ' · near '+selected.runtime.entrancePlan.entrances[0].name+' entrance. Tap RETURN to explore.';
       message('Cave world ready · source-authored routes · ordinary worlds protected');
-      // The same original Home Screen service worker owns all five systems.
-      // Do not register a cave-scoped root worker and replace its update chain.
-      caveWorldStatus.textContent+=' · cave modules are covered by the unified offline shell';
+      // Use the EXISTING same-scope M5 PWA registration for explicit cave
+      // profiles as well: no second worker can replace the Home Screen app.
+      void ensureM5OfflineCache().then(result=>{
+        if(result.supported)
+          caveWorldStatus.textContent+=' · shared offline shell requested; complete its install while online';
+        else caveWorldStatus.textContent+=' · offline not verified: '+result.reason;
+      });
     }catch(err){caveWorldStatus.textContent='CAVE NOT ACTIVATED: '+err.message;}
   }
   document.getElementById('caveCreateWorld').onclick=()=>openExplicitCaveWorld('create');
