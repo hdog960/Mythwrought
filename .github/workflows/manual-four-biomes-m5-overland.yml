@@ -32,7 +32,7 @@ jobs:
           node --check scripts/ci/manual-biomes-m5-overland-audit.mjs
       - name: Source physical path + fog unit tests
         run: node --test tests/manual-biomes/m5-natural-overland.test.mjs
-      - name: Hard route gate: ACTUAL spawn to all four region interiors
+      - name: "Hard route gate: ACTUAL spawn to all four region interiors"
         run: node scripts/ci/manual-biomes-m5-overland-audit.mjs
       - name: Preserve successful AND failing route evidence
         if: always()
