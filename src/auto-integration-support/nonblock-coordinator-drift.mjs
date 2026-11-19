@@ -1,6 +1,6 @@
 // :12 opt-in, source-authenticated coordinator drift gate. Never imports producer branches.
 import {createHash} from 'node:crypto';
-const sha1 = bytes => createHash('sha1').update(Buffer.concat([Buffer.from('blob '+bytes.length+'\\0'),bytes])).digest('hex');
+const sha1 = bytes => createHash('sha1').update(Buffer.concat([Buffer.from('blob '+bytes.length+'\0'),bytes])).digest('hex');
 export function auditCoordinatorDrift({coordinator,environment,fittings,expectedHeads}={}){
  const errors=[];
  for(const [name,file] of Object.entries({coordinator,environment,fittings})){
