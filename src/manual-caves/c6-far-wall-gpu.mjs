@@ -36,17 +36,24 @@ export function planCaveFarWallSources(world,player,viewport,
  const aspect=viewport[0]/viewport[1];
  if(!Number.isFinite(aspect)||aspect<=0)throw Error('C6_FAR_BAD_ASPECT');
  const half=Math.atan(aspect*Math.tan(72*Math.PI/360));
+ // The real game camera has a 72-degree VERTICAL FOV. The prior +/-1-voxel
+ // samples saw distant walls at eye height but missed real overhead stone in
+ // the adjacent streamed section; exposed procedural sky was visible through
+ // those unmeshed farther ceilings. Sample the same genuine source voxels
+ // across the visible vertical frustum without changing the GPU budgets.
+ const verticalHalf=72*Math.PI/360;
  const candidates=new Map();
  const yaw=player.yaw,pitch=clamp(player.pitch,-0.85,0.85);
  let uncovered=0,firstFarRock=0,samples=0;
  for(const height of bounds.verticalOffsets)
   for(let i=0;i<bounds.horizontalRays;i++){
+   const rayPitch=clamp(pitch+height*verticalHalf*.95,-1.3,1.3);
    const theta=yaw-half+i*2*half/(bounds.horizontalRays-1);
    const dx=Math.sin(theta),dz=Math.cos(theta);
    let prev='',found=false;
    for(let t=1;t<=bounds.maxCells;t++){
     const x=Math.floor(player.x+dx*t),z=Math.floor(player.z+dz*t);
-    const y=Math.floor(player.feet+1.55+height+t*Math.tan(pitch));
+    const y=Math.floor(player.feet+1.55+t*Math.tan(rayPitch));
     const pos=x+','+y+','+z;
     if(pos===prev)continue;prev=pos;
     if(++samples>bounds.maxSourceSamples)break;
@@ -59,7 +66,7 @@ export function planCaveFarWallSources(world,player,viewport,
     if(k&&!near.has(k)){
      firstFarRock++;
      const radius=Math.max(Math.abs(sx-cx),Math.abs(sz-cz));
-     if(radius<=bounds.maxRing&&actualSection===section &&
+     if(radius<=bounds.maxRing&&visible.includes(actualSection) &&
         (id===BLOCK.STONE||id===BLOCK.DEEPSTONE)){
       const old=candidates.get(k)||{key:k,cx:sx,cz:sz,section,
        hits:0,nearest:t,source:[x,y,z]};
