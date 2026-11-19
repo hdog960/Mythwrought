@@ -6,6 +6,7 @@ export const FIXED_STEP = 1 / 30;
 const MAX_STEPS = 4;
 const MAX_EVENTS = 256;
 const awake = new Set(['active', 'idle']);
+const NO_MOVEMENT = Object.freeze([0, 0]);
 const transitions = Object.freeze({
   active: ['idle', 'dormant', 'downed', 'removed'],
   idle: ['active', 'dormant', 'downed', 'removed'],
@@ -147,14 +148,24 @@ export class MobEngine {
       // An event or controller may alter admission. Snapshot the bounded roster
       // so entities created by a controller do not receive a same-tick step.
       for (const mob of [...this.#entities.values()]) {
-        if (!awake.has(mob.state) || this.#entities.get(mob.id) !== mob) continue;
+        if (this.#entities.get(mob.id) !== mob) continue;
+        if (mob.state === 'downed') {
+          // Downing stops voluntary movement. A body that was falling still
+          // settles on real ground before it can become eligible for rescue.
+          if (this.#world.volume(mob.position, mob.species.body) === 'clear' &&
+              (mob.velocity[1] < 0 || !this.#world.grounded(mob.position, mob.species.body))) {
+            moveBody(this.#world, mob, NO_MOVEMENT, FIXED_STEP);
+          }
+          continue;
+        }
+        if (!awake.has(mob.state)) continue;
         if (this.#world.volume(mob.position, mob.species.body) !== 'clear') {
           this.transition(mob.id, 'dormant');
           continue;
         }
         const command = controller?.(snapshot(mob), FIXED_STEP);
         const heading = Array.isArray(command) && command.length === 2 &&
-          command.every(Number.isFinite) ? command : [0, 0];
+          command.every(Number.isFinite) ? command : NO_MOVEMENT;
         if (awake.has(mob.state) && this.#entities.get(mob.id) === mob) {
           const state = heading.some(Boolean) ? 'active' : 'idle';
           if (state !== mob.state) this.transition(mob.id, state);

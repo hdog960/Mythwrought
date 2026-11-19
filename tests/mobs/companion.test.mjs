@@ -8,7 +8,7 @@ import { CompanionManager, wildlifeActions } from '../../src/mobs/companion.mjs'
 import { getSpecies } from '../../src/mobs/species.mjs';
 import { arena } from './fixture.mjs';
 
-function setup() {
+function setup(point = [.5, -34, .5]) {
   const world = arena();
   const query = createWorldQuery(world, { resident: () => true,
     observe: () => ({ biome: 'cave', light: .4, hazard: false }) });
@@ -16,7 +16,7 @@ function setup() {
   const behavior = new BehaviorController(engine, query);
   const combat = new MobCombat(engine, query, behavior);
   const companions = new CompanionManager(engine, query, combat, { capacity: 1 });
-  const id = engine.spawn('glownewt', [.5, -34, .5]);
+  const id = engine.spawn('glownewt', point);
   const owner = new DemoTarget([-.5, -34, .5]);
   const run = (count, threatId) => {
     for (let n = 0; n < count; n++) {
@@ -74,4 +74,18 @@ test('passive capability descriptors distinguish grazers, riders, breeders and c
   assert.deepEqual(wildlifeActions(getSpecies('glownewt')),
     { grazes: false, group: 'pair', breeds: false, rides: false, bonds: true });
   assert.equal(wildlifeActions(getSpecies('goblin')), null);
+});
+
+test('a companion downed while falling lands before it can be rescued', () => {
+  const { engine, companions, id, owner, run } = setup([.5, -32.8, .5]);
+  assert.equal(engine.get(id).grounded, false);
+  assert.ok(companions.befriend(id, owner));
+  assert.ok(companions.hurt(id, 50));
+  assert.equal(companions.rescue(id, owner), false);
+  run(38);
+  const landed = engine.get(id);
+  assert.equal(landed.state, 'downed');
+  assert.equal(landed.grounded, true);
+  assert.ok(Math.abs(landed.position[1] + 34) < .001);
+  assert.ok(companions.rescue(id, owner));
 });
