@@ -42,7 +42,16 @@ export function makeOrientationEditGuard({readBlock,writeBlock,sidecar}) {
         // A rejected writer is required to be atomic. Detect violations and
         // invalidate stale rotation rather than silently treating them as safe.
         if(result!==true) {
-          if(read(cell)!==before) {
+          // A rejected write is safe only if a subsequent authoritative read
+          // proves the original cell survived. An unreadable cell is unknown,
+          // not evidence that its old orientation remains valid.
+          let after;
+          try { after=read(cell); }
+          catch (error) {
+            sidecar.clear(cell);
+            throw new Error('Rejected writer left cell state unverifiable', {cause:error});
+          }
+          if(after!==before) {
             sidecar.clear(cell);
             throw new Error('Rejected writer mutated the world');
           }

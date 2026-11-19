@@ -44,3 +44,25 @@ test('reader failure after throwing writer invalidates state defensively',()=>{
   assert.throws(()=>guard.edit([0,0,0],5),/writer failed/);
   assert.equal(sidecar.size(),0);
 });
+
+test('rejected writer with unreadable authoritative cell clears rotation',()=>{
+  let reads=0;
+  const sidecar=makeOrientationSidecar();
+  const cell=[0,0,0];
+  sidecar.set(cell,4,2);
+  const guard=makeOrientationEditGuard({sidecar,
+    readBlock(){reads++;if(reads>1)throw new Error('storage unavailable');return 4;},
+    writeBlock(){return false;}});
+  assert.throws(()=>guard.edit(cell,5),/state unverifiable/);
+  assert.equal(sidecar.size(),0);
+});
+test('rejected same-ID replacement preserves orientation only after verified unchanged read',()=>{
+  const f=fixture(()=>false);
+  assert.equal(f.guard.edit(f.cell,7,{replaceSameId:true}).reason,'rejected');
+  assert.equal(f.sidecar.get(f.cell,7),3);
+});
+test('successful same-ID replacement clears prior orientation',()=>{
+  const f=fixture((world,key,id)=>{world.set(key,id);return true;});
+  assert.equal(f.guard.edit(f.cell,7,{replaceSameId:true}).applied,true);
+  assert.equal(f.sidecar.size(),0);
+});
