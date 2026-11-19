@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {VoxelWorld} from '../src/voxel.mjs';
+import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
 import {speciesRegistry} from '../src/mobs/species.mjs';
 import {meshes} from '../mob-preview/models.mjs';
 import {createLiveMobSession,mobSaveKey,LIVE_MOB_COUNT,classifyLiveBiome}
@@ -194,4 +194,51 @@ test('cave-specific creature roster cannot overwrite ordinary world of same seed
     'Profile-isolated creature rosters may never rewrite schema-1 world bytes');
   caves.dispose();
   assert.throws(()=>mobSaveKey(seed,'untrusted'),/profile/);
+});
+
+test('original voxel gameplay tames, mounts, steers and safely reloads a real horse',()=>{
+  const seed=179,world=new VoxelWorld(seed),storage=memoryStorage();
+  // A physically authored, bounded test arena in the original VoxelWorld.
+  // This is native test-only world.set, not a fabricated mob preview world.
+  for(let x=-3;x<=3;x++)for(let z=-3;z<=8;z++){
+    assert.equal(world.set(x,9,z,BLOCK.STONE),true);
+    for(let y=10;y<=18;y++)assert.equal(world.set(x,y,z,BLOCK.AIR),true);
+  }
+  const baseline=JSON.stringify(world.save());
+  let player=[.5,10,1.5];
+  const build=()=>createLiveMobSession({
+    world,seed,storage,resident:()=>true,
+    biomeAt:()=> 'plains',skyAt:()=>({light:.8,dayPhase:'day'}),
+    caveAt:()=>({underground:false}),playerAt:()=>player
+  });
+  const live=build(),start=[.5,10,2.5];
+  assert.equal(live.query.grounded(start,speciesRegistry.find(s=>s.id==='horse').body),true);
+  const id=live.engine.spawn('horse',start);
+  assert.ok(id,'Original voxel horse was not physically spawned');
+  assert.match(live.interact(),/Horse tamed/);
+  assert.match(live.toggleMount(),/Mounted Horse/);
+  assert.equal(live.status().mounted,true);
+  assert.equal(live.steerMount(0,1,0),true);
+  for(let i=0;i<48;i++)live.advance(1/30,[]);
+  const horse=live.engine.get(id);
+  assert.ok(horse,'Mounted horse entity was discarded');
+  assert.ok(horse.position[2]>start[2]+.03,
+    'Original creature physics ignored actual live mounted movement');
+  const rider=live.riderPosition();
+  assert.ok(rider&&rider[1]>horse.position[1],
+    'Original mounted camera must follow real creature height');
+  assert.equal(live.dismount(),true);
+  assert.equal(live.status().mounted,false);
+  assert.equal(live.save(),true);
+  assert.equal(JSON.stringify(world.save()),baseline,
+    'Mounting/taming changed canonical schema-1 voxel edits');
+  live.dispose();
+  player=[horse.position[0],horse.position[1],horse.position[2]-.6];
+  const restored=build();
+  assert.ok(restored.engine.get(id),'Persisted original-world horse missing');
+  assert.match(restored.toggleMount(),/Mounted Horse/,
+    'Tamed ownership failed real same-seed sidecar restore');
+  assert.equal(restored.save(),true);
+  assert.equal(JSON.stringify(world.save()),baseline);
+  restored.dispose();
 });
