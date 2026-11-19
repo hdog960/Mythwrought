@@ -260,7 +260,8 @@ test('tamed horse survives unloaded chunks beyond six-second ecology GC and rest
   });
   const first=build();
   const id=first.engine.spawn('horse',[.5,10,1.5]);
-  assert.ok(id);
+  const wildId=first.engine.spawn('horse',[2.5,10,1.5]);
+  assert.ok(id&&wildId,'Owned and untamed horses both require physical spawn');
   assert.match(first.interact(),/Horse tamed/);
   resident=false;
   // createLiveMobSession deliberately clamps each live frame to .1s.
@@ -270,6 +271,8 @@ test('tamed horse survives unloaded chunks beyond six-second ecology GC and rest
   for(let i=0;i<90;i++)first.advance(.1,[]);
   assert.equal(first.engine.get(id)?.state,'dormant',
     'Owned horse was removed instead of kept dormant while its chunk was unloaded');
+  assert.equal(first.engine.get(wildId),undefined,
+    'Wild unowned horse must still be evicted by the original six-second ecology budget');
   assert.equal(first.save(),true);
   assert.equal(JSON.stringify(world.save()),schema1,
     'Unloaded owned horse rewrote original voxel schema-1');
@@ -277,6 +280,8 @@ test('tamed horse survives unloaded chunks beyond six-second ecology GC and rest
   resident=true;
   const returned=build();
   assert.equal(returned.engine.get(id)?.state,'dormant');
+  assert.equal(returned.engine.get(wildId),undefined,
+    'Unowned creatures must not reappear through the persistent roster');
   // At least one complete .5s ecology reconciliation interval must pass;
   // .5 input is clamped to .1 and three calls do not run this transition.
   for(let i=0;i<10;i++)returned.advance(.1,[]);
