@@ -41,7 +41,8 @@ hidden, dimensions, PNG hashes, WebGL state, and scenario assertions.
 It also records a context-loss/restore test, explicit GPU teardown, and a
 same-camera no-mob and 16-active/8-dormant stress comparison. SwiftShader
 software rendering, frame scheduling, and coarse JavaScript timing limit
-comparisons with phone hardware.
+comparisons with phone hardware. The isolated Mob Foundation Actions job
+collects the same evidence from the draft PR head and uploads it for review.
 
 The existing production check is `npm test` and the 20 Chromium scripts
 listed in `.github/workflows/ci.yml`. In a low-core environment the Pack 2
