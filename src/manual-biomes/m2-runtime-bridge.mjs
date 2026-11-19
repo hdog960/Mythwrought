@@ -8,7 +8,7 @@ import {loadWorldSafe,saveWorldSafe,importWorldData} from '../persistence.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,
   pack2ExportBundle,pack2ImportBundle} from '../pack2-world.mjs';
 import {FourRegionWorld,fourRegionProfile,FOUR_REGION_GENERATOR,
-  M5_EXPERIMENTAL_GENERATOR} from './profile-world.mjs';
+  M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR} from './profile-world.mjs';
 import {loadFourRegionWorld,saveFourRegionWorld,readFourRegionProfile,
   exportFourRegionWorld,inspectFourRegionExport} from './profile-storage.mjs';
 
@@ -16,6 +16,7 @@ export const M2_WORLD_MODE=Object.freeze({
   OPEN:'open-existing',
   CREATE_FOUR:'create-new-four-biomes',
   CREATE_FOUR_V5:'create-new-four-biomes-experimental-v5',
+  CREATE_BALANCED_V6:'create-new-balanced-five-biomes-v6',
   IMPORT_PROFILE:'import-verified-four-biome-profile'
 });
 
@@ -64,7 +65,8 @@ function validChoice(c){
 export function openM2World(storage,choice){
   if(!validChoice(choice))throw Error('Invalid/unconfirmed M2 world choice');
   const fresh=choice.mode!==M2_WORLD_MODE.OPEN;
-  const newGenerator=choice.mode===M2_WORLD_MODE.CREATE_FOUR_V5?
+  const newGenerator=choice.mode===M2_WORLD_MODE.CREATE_BALANCED_V6?
+    M6_BALANCED_GENERATOR:choice.mode===M2_WORLD_MODE.CREATE_FOUR_V5?
     M5_EXPERIMENTAL_GENERATOR:choice.mode===M2_WORLD_MODE.IMPORT_PROFILE?
       choice.generator:FOUR_REGION_GENERATOR;
   const result=loadFourRegionWorld(storage,choice.seed,{

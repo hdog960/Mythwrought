@@ -32,11 +32,11 @@ export const M3_XERIC_IDS=Object.freeze([266,268,270]);
  * Wave frequencies never use chunk coordinates, so seams are deterministic.
  * M2 original seed-179 Desert anchor remains at its original visible crest.
  */
-export function m3DesertHeight(x,z,seed=179){
+export function m3DesertHeight(x,z,seed=179,biomeAt=surfaceBiomeAt){
   if(![x,z,seed].every(Number.isInteger))return null;
-  const biome=surfaceBiomeAt(x,z,seed);
+  const biome=biomeAt(x,z,seed);
   if(biome?.name!=='desert'||biome.weight<.35)return null;
-  const old=terrainHeight(x,z,seed),base=surfaceBiomeHeight(x,z,seed);
+  const old=terrainHeight(x,z,seed),base=surfaceBiomeHeight(x,z,seed,biomeAt);
   const feather=smooth(clamp((biome.weight-.35)/.65,0,1));
   const dx=x-512,dz=z;
   const main=Math.sin(dx*.091+dz*.034+.24*Math.sin(dz*.025));
@@ -96,18 +96,18 @@ export function m3DesertXeric(x,z,seed,top,weight){
  */
 export function m3DesertFreshColumn(x,z,seed=179,{
   enabled=false,profileIsFresh=false,readBaseline=null,
-  hasEdit=null,isProtected=null
+  hasEdit=null,isProtected=null,biomeAt=surfaceBiomeAt
 }={}){
   if(!enabled||!profileIsFresh||typeof readBaseline!=='function'||
      typeof hasEdit!=='function'||typeof isProtected!=='function')
     return null;
-  const biome=surfaceBiomeAt(x,z,seed);
+  const biome=biomeAt(x,z,seed);
   if(biome?.name!=='desert'||biome.weight<.35)return null;
   const original=surfaceBiomeFreshColumn(x,z,seed,{
-    enabled,profileIsFresh,readBaseline,hasEdit,isProtected
+    enabled,profileIsFresh,readBaseline,hasEdit,isProtected,biomeAt
   });
   if(!original)return null;
-  const oldTop=original.oldTop,top=m3DesertHeight(x,z,seed);
+  const oldTop=original.oldTop,top=m3DesertHeight(x,z,seed,biomeAt);
   if(top===null||top<oldTop||top>WORLD_MAX_Y-3)return null;
   // Protect every baseline cell that would change, including old caves,
   // landmarks, trees, and future non-block attachment candidates.

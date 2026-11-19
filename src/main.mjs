@@ -18,7 +18,7 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
@@ -86,7 +86,8 @@ function start(){
   let pack3=createPack3LiveBridge(world,localStorage);
   // Only a previously selected immutable v5 world may opt into M5 PWA caching.
   if(world.base instanceof FourRegionWorld&&
-      world.base.generationProfile.generator===M5_EXPERIMENTAL_GENERATOR)
+      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR].includes(
+        world.base.generationProfile.generator))
     void ensureM5OfflineCache();
   seedLabel.textContent='WORLD '+world.seed;
   const VS=[
@@ -2082,6 +2083,18 @@ function start(){
     biomeChoiceHint.insertAdjacentElement('afterend',createV5MountainWorldButton);
     createV5MountainWorldButton.insertAdjacentElement('afterend',v5Hint);
   }
+  // V6 is a distinct generator: NEVER reinterpret any older saved profile.
+  const createBalancedV6Button=document.createElement('button');
+  createBalancedV6Button.id='createBalancedV6World';createBalancedV6Button.type='button';
+  createBalancedV6Button.textContent='CREATE NEW BALANCED FIVE-BIOME WORLD (V6)';
+  createBalancedV6Button.setAttribute('aria-label',
+    'Create unused-seed world with 30 percent Plains and 17.5 percent each other biome');
+  const v6Hint=document.createElement('p');v6Hint.className='controlhint';
+  v6Hint.textContent='NEW UNUSED SEEDS ONLY: 30% Plains; 17.5% each Mountains, Desert, Snow and Enchanted Forest. Your existing worlds and saves stay intact.';
+  if(seedRow){
+    v5Hint.insertAdjacentElement('afterend',createBalancedV6Button);
+    createBalancedV6Button.insertAdjacentElement('afterend',v6Hint);
+  }
   function enterPreparedM2World(candidate,statusText){
     // This commits only a PREVIOUSLY verified and persisted candidate.
     for(const c of chunks.values())deleteChunkBuffers(c);
@@ -2095,7 +2108,8 @@ function start(){
     pack3=createPack3LiveBridge(world,localStorage);
     // Register *after* the explicit unused-seed v5 creation is safely saved.
     if(world.base instanceof FourRegionWorld&&
-        world.base.generationProfile.generator===M5_EXPERIMENTAL_GENERATOR)
+        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR].includes(
+          world.base.generationProfile.generator))
       void ensureM5OfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
     storageReadOnly=false;changed=false;respawnPrototype();
@@ -2143,6 +2157,27 @@ function start(){
         ' created. Other world seeds, profiles and saves remain unchanged.');
     }catch(error){
       seedMessage.textContent='Experimental v5 creation refused; original world retained: '+
+        String(error.message||error);
+    }
+  };
+  createBalancedV6Button.onclick=()=>{
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(next===world.seed)throw Error('Choose a different unused seed for balanced v6');
+      if(!window.confirm('CREATE NEW BALANCED FIVE-BIOME WORLD for unused seed '+next+'? 30% Plains and 17.5% each other biome. Existing worlds NEVER convert.'))return;
+      if(!storageReadOnly&&!save())throw Error('Save current world before creating a balanced seed');
+      const choice=planM2WorldChoice(seedInput.value,
+        M2_WORLD_MODE.CREATE_BALANCED_V6,{confirmed:true});
+      const loaded=openM2World(localStorage,choice);
+      if(!(loaded.base instanceof FourRegionWorld)||
+         loaded.base.generationProfile.generator!==M6_BALANCED_GENERATOR)
+        throw Error('Balanced v6 profile did not activate');
+      const stored=saveM2World(localStorage,loaded.world);
+      if(!stored.ok)throw Error('Balanced v6 save not verified: '+stored.reason);
+      enterPreparedM2World(loaded.world,
+        'Balanced five-biome world '+next+' created: 30% Plains, 17.5% each special biome.');
+    }catch(error){
+      seedMessage.textContent='Balanced v6 creation refused; original world retained: '+
         String(error.message||error);
     }
   };

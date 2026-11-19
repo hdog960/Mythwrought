@@ -49,8 +49,8 @@ export function surfaceBiomeAt(x,z,seed=179){
  }
  return weight>0?{name:chosen.name,weight,center:[chosen.x,chosen.z]}:null;
 }
-export function surfaceBiomeHeight(x,z,seed=179){
- const old=terrainHeight(x,z,seed),b=surfaceBiomeAt(x,z,seed);
+export function surfaceBiomeHeight(x,z,seed=179,biomeAt=surfaceBiomeAt){
+ const old=terrainHeight(x,z,seed),b=biomeAt(x,z,seed);
  if(!b)return old;
  const n=valueNoise(x/24,z/24,seed+811);
  // Region-specific *physical* relief, not merely a change of ground color.
@@ -159,17 +159,17 @@ export function surfaceBiomeElevationPlan(x,z,seed=179,{
 // This deliberately leaves the underlying voxel reader and save format alone.
 export function surfaceBiomeFreshColumn(x,z,seed=179,{
   enabled=false,profileIsFresh=false,readBaseline=null,hasEdit=null,
-  isProtected=null
+  isProtected=null,biomeAt=surfaceBiomeAt
 }={}){
   if(!enabled||!profileIsFresh||typeof readBaseline!=='function'||
      typeof hasEdit!=='function'||typeof isProtected!=='function'||
      !Number.isInteger(x)||!Number.isInteger(z)||!Number.isInteger(seed))
     return null;
-  const b=surfaceBiomeAt(x,z,seed);
+  const b=biomeAt(x,z,seed);
   if(!b||b.weight<.35)return null;
   const oldTop=terrainHeight(x,z,seed);
   // Never lower an existing natural surface; preserve its physical height.
-  const newTop=Math.max(oldTop,surfaceBiomeHeight(x,z,seed));
+  const newTop=Math.max(oldTop,surfaceBiomeHeight(x,z,seed,biomeAt));
   const r=REGIONS.find(region=>region.name===b.name);
   const writes=[];
   // Real legacy terrain includes STONE (3) beneath the dirt veneer.

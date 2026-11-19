@@ -8,18 +8,20 @@ import {surfaceBiomeFreshColumn,surfaceBiomeAt} from '../surface-regions/regions
 import {m3DesertFreshColumn,M3_XERIC_IDS} from './desert-m3.mjs';
 import {m4ThreeRegionFreshColumn,M4_REGION_NAMES} from './three-regions-m4.mjs';
 import {m5V5MountainFreshColumn} from './mountain-pass-v5.mjs';
+import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 
 // NEVER change a legacy generation profile's physical natural baseline.
 // M4 created worlds use v4; existing M3 (v3) Desert and M2 (v2) profiles
 // are explicitly supported as-is, without automatic upgrades on open/save.
 // Experimental v5 is opt-in via an EXPLICIT generated-world profile only.
 // The default new-world action and all historical saves stay on accepted v4.
+export const M6_BALANCED_GENERATOR='mythwrought-five-surface-regions-v6';
 export const M5_EXPERIMENTAL_GENERATOR='mythwrought-four-surface-regions-v5';
 export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v4';
 export const M3_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v3';
 export const M2_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v2';
 const ACCEPTED_GENERATORS=new Set([
-  M5_EXPERIMENTAL_GENERATOR,FOUR_REGION_GENERATOR,
+  M6_BALANCED_GENERATOR,M5_EXPERIMENTAL_GENERATOR,FOUR_REGION_GENERATOR,
   M3_FOUR_REGION_GENERATOR,M2_FOUR_REGION_GENERATOR
 ]);
 const MAX_EDIT_ROWS=300000;
@@ -60,17 +62,19 @@ export class FourRegionWorld extends VoxelWorld{
     // The authoritative non-profile baseline includes existing seeded
     // landmarks/districts and caves, so the proposal cannot bury their AIR,
     // replace their blocks or silently lift their geometry.
+    const isV6=this.profile.generator===M6_BALANCED_GENERATOR;
+    const biomeAt=isV6?v6BiomeAt:surfaceBiomeAt;
     const opts={
       enabled:true,profileIsFresh:true,
       readBaseline:(a,b,c)=>super.naturalAndLandmarkBlock(a,b,c),
-      hasEdit:()=>false,isProtected:()=>false
+      hasEdit:()=>false,isProtected:()=>false,biomeAt
     };
-    const region=surfaceBiomeAt(x,z,this.seed);
+    const region=biomeAt(x,z,this.seed);
     const isV5=this.profile.generator===M5_EXPERIMENTAL_GENERATOR;
-    const newOrM3=isV5||this.profile.generator===FOUR_REGION_GENERATOR||
+    const newOrM3=isV6||isV5||this.profile.generator===FOUR_REGION_GENERATOR||
       this.profile.generator===M3_FOUR_REGION_GENERATOR;
     const isM3Desert=newOrM3&&region?.name==='desert';
-    const isM4Interior=(isV5||this.profile.generator===FOUR_REGION_GENERATOR)&&
+    const isM4Interior=(isV6||isV5||this.profile.generator===FOUR_REGION_GENERATOR)&&
       M4_REGION_NAMES.includes(region?.name);
     const plan=isM3Desert?m3DesertFreshColumn(x,z,this.seed,opts):
       isM4Interior?(isV5&&region.name==='mountain'?
@@ -118,7 +122,8 @@ export class FourRegionWorld extends VoxelWorld{
     this.biomeCellCount=count-Number(isBiome130BlockId(previous))+
       Number(isBiome130BlockId(next));
     if(!this.edits.has(key))this.rotations.delete(key);
-    if((this.profile.generator===M5_EXPERIMENTAL_GENERATOR||
+    if((this.profile.generator===M6_BALANCED_GENERATOR||
+        this.profile.generator===M5_EXPERIMENTAL_GENERATOR||
         this.profile.generator===FOUR_REGION_GENERATOR||
         this.profile.generator===M3_FOUR_REGION_GENERATOR)&&id===BLOCK.AIR){
       // When the player mines the support of a naturally authored xeric
