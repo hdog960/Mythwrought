@@ -1,0 +1,4 @@
+# :12 source-bound non-block handoff — 2026-11-19
+Contract: nonblock-object-v1. This is opt-in, never a production import. The gate checks declared exact commit identities, owner paths, Git blob byte hashes and real-removal evidence presence. It does NOT establish Git tree membership, genuine browser origin, or live :00 behavior.
+Current PR metadata checkpoints: :48 #226 8c9deb6c181f0efd93f6a1a9017fca0df73e676b; :24 #247 294d0b4c98c59a0ffb7896a8155f33255e0354cd; :36 #249 f87889c6be2c9745b257dc602c3f5d0ed0300124; historical :12 #206 aedabf1d3e6250f16e3495ec77bdc056fafc1f46. Main and :00 HEAD must be independently refreshed before acceptance.
+Next: authenticate Git tree membership, inspect actual :00 hooks, and collect genuine three-size Chromium PICK -> BREAK -> TOMBSTONE -> RELOAD evidence. No production registration, no spawn, no save migration.
