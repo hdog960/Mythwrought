@@ -1,0 +1,135 @@
+// Genuine SW upgrade from an old cached REC-less game to the current full
+// WebGL2 app: preserve original seed saves, same browser storage and offline.
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';
+import {readFile,mkdir} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import path from 'node:path';
+import {chromium} from 'playwright';
+
+const BASE_REC_LESS='474f6c2439865454f80b995af31120c024cdbc2d';
+const BASE_CACHE_FIRST='edc6ceae728840bfc361cd8a6437e8a1fa674c42';
+const OLD_CACHE='mythwrought-m5-shell-20261118-v5-recorder';
+const NEW_CACHE='mythwrought-m5-shell-20261119-v6-safe-refresh';
+const RELEASE='20261119-v6-safe-refresh';
+const oldFiles={
+ 'index.html':execFileSync('git',['show',BASE_REC_LESS+':index.html'],{encoding:'utf8'}),
+ 'src/main.mjs':execFileSync('git',['show',BASE_REC_LESS+':src/main.mjs'],{encoding:'utf8'}),
+ 'sw-m5.js':execFileSync('git',['show',BASE_CACHE_FIRST+':sw-m5.js'],{encoding:'utf8'})
+};
+const root=process.cwd();
+let deploy='old',requests=0;
+function mime(file){
+ if(file.endsWith('.mjs')||file.endsWith('.js'))return 'text/javascript';
+ if(file.endsWith('.css'))return 'text/css';
+ if(file.endsWith('.json')||file.endsWith('.webmanifest'))return 'application/json';
+ if(file.endsWith('.svg'))return 'image/svg+xml';
+ if(file.endsWith('.html'))return 'text/html';
+ return 'application/octet-stream';
+}
+const server=createServer(async(req,res)=>{
+ const url=new URL(req.url||'/', 'http://127.0.0.1:4173');
+ const relative=url.pathname==='/'?'index.html':decodeURIComponent(url.pathname.slice(1));
+ if(relative.includes('..')){res.writeHead(403);res.end();return;}
+ ++requests;
+ try{
+   const fromOld=deploy==='old'&&Object.prototype.hasOwnProperty.call(oldFiles,relative);
+   const content=fromOld?oldFiles[relative]:await readFile(path.resolve(root,relative));
+   res.writeHead(200,{'Content-Type':mime(relative),'Cache-Control':'no-store',
+     'X-MW-Origin-Build':fromOld?'old':'new'});
+   res.end(content);
+ }catch(err){res.writeHead(404,{'Content-Type':'text/plain'});res.end(String(err));}
+});
+await new Promise(resolve=>server.listen(4173,'127.0.0.1',resolve));
+const browser=await chromium.launch({headless:true,args:[
+  '--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
+  '--enable-unsafe-swiftshader'
+]});
+const context=await browser.newContext({viewport:{width:932,height:430},
+  deviceScaleFactor:1,isMobile:true,hasTouch:true,serviceWorkers:'allow'});
+const page=await context.newPage(),errors=[];
+page.on('pageerror',e=>errors.push(e.message));
+const target='http://127.0.0.1:4173/';
+const caches=()=>page.evaluate(async()=>await caches.keys());
+try{
+  await page.goto(target,{waitUntil:'networkidle',timeout:45000});
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
+    null,{timeout:45000});
+  assert.equal(await page.locator('#captureToggle').count(),0,'Expected genuine REC-less historical shell');
+  await page.evaluate(()=>localStorage.setItem('mythwrought-v002-selected-seed','11111222'));
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
+    null,{timeout:45000});
+  await page.locator('#menu').click();
+  await page.locator('#save').click();
+  await page.locator('#closeHelp').click();
+  const saved=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-11111222'));
+  assert.ok(saved?.includes('"schema":1'),'Real original seed 11111222 did not save');
+  await page.evaluate(()=>navigator.serviceWorker.register('./sw-m5.js',{
+    scope:'/',updateViaCache:'none'
+  }));
+  await page.waitForFunction(async()=>{
+    const keys=await caches.keys();
+    return keys.includes('mythwrought-m5-shell-20261118-v5-recorder');
+  },null,{timeout:100000});
+  await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),
+    null,{timeout:45000});
+  await page.reload({waitUntil:'networkidle'});
+  assert.equal(await page.locator('#captureToggle').count(),0,
+    'Historical cache-first worker should keep serving REC-less HTML');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-11111222')),saved);
+  const prior=await caches();
+  assert.ok(prior.includes(OLD_CACHE),'Historical shell did not install');
+  console.log('PASS OLD CACHE-FIRST APP NO REC',prior,'requests',requests);
+
+  // Server publishes the exact proposed new files, not a mock screenshot.
+  deploy='new';
+  await page.evaluate(async()=>{
+    const reg=await navigator.serviceWorker.getRegistration('/');
+    if(!reg)throw Error('Previous registration missing');
+    await reg.update();
+  });
+  await page.waitForFunction(async()=>{
+    const keys=await caches.keys();
+    return keys.includes('mythwrought-m5-shell-20261119-v6-safe-refresh')&&
+      !keys.includes('mythwrought-m5-shell-20261118-v5-recorder');
+  },null,{timeout:180000});
+  const refreshed=await page.reload({waitUntil:'networkidle',timeout:45000});
+  assert.equal(refreshed.headers()['x-mw-origin-build'],'new',
+    'Updated service worker did not perform online-first document request');
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
+    null,{timeout:45000});
+  assert.equal(await page.locator('#captureToggle').count(),1,'REC did not appear after same-app worker update');
+  assert.equal(await page.locator('#checkGameUpdate').count(),1,'Safe update action missing');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-11111222')),saved,
+    'Canonical world changed during service worker update');
+  await mkdir('artifacts/pwa-safe-refresh',{recursive:true});
+  await page.screenshot({path:'artifacts/pwa-safe-refresh/updated-game-932x430.png'});
+  console.log('PASS ONLINE UPGRADE REC VISIBLE',await caches(),'saved seed 11111222 intact');
+
+  await page.locator('#menu').click();
+  await page.locator('#checkGameUpdate').click();
+  await page.waitForURL(u=>new URL(u).searchParams.get('mw-refresh')===RELEASE,
+    {timeout:30000});
+  assert.equal(await page.locator('#captureToggle').count(),1);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-11111222')),saved);
+  console.log('PASS IN-APP UPDATE BUTTON SAME INSTALL',page.url());
+
+  await context.setOffline(true);
+  await page.reload({waitUntil:'load',timeout:45000});
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0,
+    null,{timeout:45000});
+  assert.equal(await page.locator('#captureToggle').count(),1);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-11111222')),saved);
+  const gl=await page.evaluate(()=>{
+    const c=document.querySelector('#scene');const g=c.getContext('webgl2');
+    return {gl:!!g,error:g?.getError(),w:c.width,h:c.height};
+  });
+  assert.ok(gl.gl&&gl.w>200&&gl.h>100&&!gl.error,'Offline WebGL2 broken');
+  await page.screenshot({path:'artifacts/pwa-safe-refresh/offline-game-932x430.png'});
+  assert.deepEqual(errors,[],'Browser generated errors during same-app recovery');
+  console.log('PASS OFFLINE AFTER SAME-APP RECOVERY',gl,'no world save changes, no reset');
+}finally{
+  await browser.close();
+  await new Promise(resolve=>server.close(resolve));
+}

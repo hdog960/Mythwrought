@@ -3,7 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261118-v5-recorder';
+const CACHE_NAME=CACHE_PREFIX+'20261119-v6-safe-refresh';
+const ASSET_RELEASE='20261119-v6-safe-refresh';
 const SOURCE_ASSETS=[
   "./",
   "./assets/icon.svg",
@@ -153,6 +154,7 @@ const SOURCE_ASSETS=[
   "./src/interactions/shape-edit-transaction.mjs",
   "./src/layout.mjs",
   "./src/live-voxel-world.mjs",
+  "./src/app-update.mjs",
   "./src/gameplay-recorder.mjs",
   "./src/main.mjs",
   "./src/manual-biomes/desert-m3.mjs",
@@ -248,14 +250,39 @@ self.addEventListener('activate',event=>{
   })());
 });
 self.addEventListener('fetch',event=>{
-  const req=event.request, url=new URL(req.url);
-  // No arbitrary response fallback, no cross-origin responses, no API/write
-  // interception, and no mutation or caching of personal world save data.
-  if(req.method!=='GET'||url.search||!allowed.has(url.href))return;
+  const req=event.request,url=new URL(req.url);
+  if(req.method!=='GET'||url.origin!==self.location.origin||
+      !url.href.startsWith(self.registration.scope))return;
+  const root=new URL('./',self.registration.scope);
+  const index=new URL('index.html',root);
+  const canonical=new URL(url.href);
+  canonical.search='';canonical.hash='';
+  // Online-first for navigation only; current cache-first navigation can
+  // preserve an outdated Home Screen app even while newer code is deployed.
+  // Offline fallback remains the fully verified, versioned static shell.
+  if(req.mode==='navigate'&&(canonical.href===root.href||
+      canonical.href===index.href)){
+    event.respondWith((async()=>{
+      try{
+        const fresh=await fetch(req,{cache:'no-store'});
+        if(fresh.ok&&fresh.type!=='opaque')return fresh;
+      }catch(_){}
+      const cache=await caches.open(CACHE_NAME);
+      return await cache.match(index.href)||await cache.match(root.href)||
+        Response.error();
+    })());return;
+  }
+  // Release-pinned app shell assets can be fetched through a stale worker
+  // online. Once v6 takes control they resolve to the same verified source
+  // blobs from this cache, including during fully offline reloads.
+  const pinned=url.searchParams.size===1&&
+    url.searchParams.get('mw-release')===ASSET_RELEASE&&
+    (canonical.href===new URL('styles.css',root).href||
+      canonical.href===new URL('src/main.mjs',root).href);
+  if(url.search&&!pinned)return;
+  if(!allowed.has(canonical.href))return;
   event.respondWith((async()=>{
     const cache=await caches.open(CACHE_NAME);
-    // Cache-first is deliberate: offline uses the exact versioned source
-    // assets which created the immutable v5 generation profile.
-    return await cache.match(req,{ignoreVary:false})||fetch(req);
+    return await cache.match(canonical.href,{ignoreVary:false})||fetch(req);
   })());
 });

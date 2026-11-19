@@ -25,6 +25,7 @@ import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
   exportM2World,inspectM2WorldExport} from './manual-biomes/m2-runtime-bridge.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {installGameplayRecorder} from './gameplay-recorder.mjs';
+import {installGameUpdater} from './app-update.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
@@ -2476,6 +2477,12 @@ function start(){
   if(!document.hidden)frameDriver.resume();
   // Recorder is installed only after a valid world and WebGL render loop exist.
   // Recording never touches canonical saves, gameplay controls or GPU state.
+  installGameUpdater({
+    button:document.getElementById('checkGameUpdate'),
+    status:document.getElementById('gameUpdateStatus'),
+    baseUrl:new URL('../',import.meta.url),
+    hasUnsavedChanges:()=>changed
+  });
   gameplayRecorder=installGameplayRecorder({
     canvas,button:document.getElementById('captureToggle'),
     panel:document.getElementById('capturePanel'),
