@@ -7,6 +7,8 @@ import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
 import {loadLunarEpoch,sampleLunarAge,sampleThreeMoons,S3_LUNAR_CONTRACT} from './sky-moons.mjs';
 import {sampleS4Sky,SKY_S4_CONTRACT} from './sky-stars.mjs';
 import {sampleS5Events,S5_EVENT_CONTRACT} from './sky-events.mjs';
+import {hasValidatedFourBiomeProfile,resolveS6Biome,sampleS6BiomeSky,
+  S6_SKY_CONTRACT} from './sky-biome-adapter.mjs';
 import {SKY_DAY_MS,SKY_DAY_TARGET_MS,SKY_NIGHT_TARGET_MS,
   loadSkyClock,sampleSkyClock,selectSkyClockTime,formatSkyTime} from './world-clock.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
@@ -84,6 +86,26 @@ function start(){
     wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
   let lunarClock=loadLunarEpoch({seed:world.seed,storage:localStorage,
     wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
+  // Fail closed. The separately staged M5 source does not exist in this
+  // branch, so default/legacy gameplay never requests it or changes color.
+  let s6Source=null,s6SourceState='legacy-unchanged',s6Epoch=0;
+  function refreshS6Source(){
+    const ticket=++s6Epoch;
+    s6Source=null;
+    if(!hasValidatedFourBiomeProfile(world)){
+      s6SourceState='legacy-unchanged';return;
+    }
+    s6SourceState='profile-source-unavailable';
+    import('./surface-regions/regions.mjs').then(module=>{
+      if(ticket!==s6Epoch)return;
+      if(typeof module.surfaceBiomeAt!=='function')return;
+      s6Source=module.surfaceBiomeAt;
+      s6SourceState='authoritative-profile-source';
+    }).catch(()=>{
+      if(ticket===s6Epoch)s6SourceState='profile-source-unavailable';
+    });
+  }
+  refreshS6Source();
   const skyClockStatus=document.getElementById('skyClockStatus');
   let lastSkyClockUiAt=-Infinity;
   function paintSkyClock(now,force=false){
@@ -107,6 +129,7 @@ function start(){
       wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
     lunarClock=loadLunarEpoch({seed:world.seed,storage:localStorage,
       wallNowMs:Date.now(),monoNowMs:performance.now(),allowWrites:!storageReadOnly});
+    refreshS6Source();
     paintSkyClock(performance.now(),true);
   }
   for(const [id,phase,description] of [
@@ -877,6 +900,8 @@ function start(){
       // S2 uses one authoritative S1 timestamp for the sky, terrain fog and
       // ambient block lighting. Movement's clamped dt never drives solar time.
       const atmosphere=sampleSkyAtmosphere(sampleSkyClock(skyClock,now));
+      const s6Biome=resolveS6Biome(world,player.x,player.z,s6Source);
+      const s6Mood=sampleS6BiomeSky(atmosphere,s6Biome);
       const sunScreen=projectSunToScreen(atmosphere.sunDirection,
         player.yaw,player.pitch,w/h);
       const lunar=sampleThreeMoons(atmosphere.phaseMs,
@@ -889,7 +914,9 @@ function start(){
         projectSunToScreen(skyEvent.direction,player.yaw,player.pitch,w/h);
       const skyLight=atmosphere.light.map((v,i)=>
         Math.min(1,v+lunar.moonlight*[.71,.84,1][i]));
-      gl.clearColor(...atmosphere.fog,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+      gl.clearColor(...atmosphere.fog,1);
+      if(s6Biome)gl.clearColor(...s6Mood.fog,1);
+      gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
       // Cheap procedural WebGL sky; the depth buffer is reserved for editable voxels.
       gl.disable(gl.DEPTH_TEST);
       gl.useProgram(skyProgram);
@@ -898,11 +925,11 @@ function start(){
       gl.uniform1f(skyU.pitch,player.pitch);
       gl.uniform2f(skyU.sunScreen,...sunScreen);
       gl.uniform1f(skyU.sunVisibility,atmosphere.sunVisibility);
-      gl.uniform3fv(skyU.horizon,atmosphere.horizon);
-      gl.uniform3fv(skyU.zenith,atmosphere.zenith);
-      gl.uniform3fv(skyU.cloud,atmosphere.cloud);
-      gl.uniform3fv(skyU.ridge,atmosphere.ridge);
-      gl.uniform3fv(skyU.fog,atmosphere.fog);
+      gl.uniform3fv(skyU.horizon,s6Mood.horizon);
+      gl.uniform3fv(skyU.zenith,s6Mood.zenith);
+      gl.uniform3fv(skyU.cloud,s6Mood.cloud);
+      gl.uniform3fv(skyU.ridge,s6Mood.ridge);
+      gl.uniform3fv(skyU.fog,s6Mood.fog);
       gl.uniform3fv(skyU.sunColor,atmosphere.sunColor);
       gl.uniform2fv(skyU.lunarScreen,moonScreens.flat());
       gl.uniform2fv(skyU.lunarPhase,lunar.moons.flatMap(m=>m.terminator));
@@ -929,6 +956,7 @@ function start(){
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
       gl.uniform3fv(U.uFog,atmosphere.fog);
+      if(s6Biome)gl.uniform3fv(U.uFog,s6Mood.fog);
       // Preserve S2's exact live ambient uniform path, then layer only the
       // bounded S3 lunar contribution if at least one moon illuminates night.
       gl.uniform3fv(U.uSkyLight,atmosphere.light);
@@ -946,7 +974,13 @@ function start(){
         canvas.dataset.skyMoonPhases=JSON.stringify(lunar.moons.map(m=>Number(m.phaseFraction.toFixed(5))));
         canvas.dataset.skyMoonIlluminations=JSON.stringify(lunar.moons.map(m=>Number(m.illumination.toFixed(5))));
         canvas.dataset.skyMoonVisibilities=JSON.stringify(lunar.moons.map(m=>Number(m.visibility.toFixed(5))));
-        canvas.dataset.skyFog=JSON.stringify(atmosphere.fog.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyFog=JSON.stringify(s6Mood.fog.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyS6SourceStatus=s6SourceState;
+        canvas.dataset.skyS6BiomeName=s6Biome?.name??'none';
+        canvas.dataset.skyS6BiomeStrength=(s6Biome?.strength??0).toFixed(5);
+        canvas.dataset.skyS6Profile=s6Biome?.generator??'none';
+        canvas.dataset.skyS6BiomeCount=String(S6_SKY_CONTRACT.count);
+        canvas.dataset.skyS6Horizon=JSON.stringify(s6Mood.horizon.map(v=>Number(v.toFixed(4))));
         canvas.dataset.skyS4StarCount=String(SKY_S4_CONTRACT.starFamilyCount);
         canvas.dataset.skyS4StarVisibility=nightCanvas.starVisibility.toFixed(5);
         canvas.dataset.skyS4FieldCells=String(nightCanvas.starFieldCellCount);
