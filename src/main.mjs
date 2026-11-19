@@ -24,6 +24,7 @@ import {readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
   exportM2World,inspectM2WorldExport} from './manual-biomes/m2-runtime-bridge.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
+import {installGameplayRecorder} from './gameplay-recorder.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
@@ -58,6 +59,7 @@ if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or deskt
 else start();
 
 function start(){
+  let gameplayRecorder=null;
   let world,storageReadOnly=false,recoveryNote='';
   function loadWorld(seed){
     // Profiled worlds must never be restored using the old bare VoxelWorld
@@ -1754,7 +1756,7 @@ function start(){
       updatePack2SelectionUI();
     };
   }
-  document.getElementById('menu').onclick=()=>{cancelAllPointers();help.hidden=false;};
+  document.getElementById('menu').onclick=()=>{gameplayRecorder?.interrupt('Settings opened');cancelAllPointers();help.hidden=false;};
   document.getElementById('closeHelp').onclick=()=>{
     cancelAllPointers();help.hidden=true;
     // Return keyboard/gamepad-like input focus to world after closing modal.
@@ -2472,4 +2474,16 @@ function start(){
   // Restore saved shaped pieces without enabling construction editing.
   void restoreSavedPack5Scene();
   if(!document.hidden)frameDriver.resume();
+  // Recorder is installed only after a valid world and WebGL render loop exist.
+  // Recording never touches canonical saves, gameplay controls or GPU state.
+  gameplayRecorder=installGameplayRecorder({
+    canvas,button:document.getElementById('captureToggle'),
+    panel:document.getElementById('capturePanel'),
+    video:document.getElementById('capturePreview'),
+    info:document.getElementById('captureInfo'),
+    saveLink:document.getElementById('captureSave'),
+    shareButton:document.getElementById('captureShare'),
+    closeButton:document.getElementById('captureClose'),
+    canRecord:()=>help.hidden&&!exploration.isOpen()&&!graphicsLost
+  });
 }
