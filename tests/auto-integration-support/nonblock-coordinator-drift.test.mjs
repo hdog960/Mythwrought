@@ -19,3 +19,8 @@ test('whitespace and newline declarations are parsed as real JavaScript',()=>{co
 test('missing environment pin fails closed',()=>{const x=make();x.environment=file("export const TARGET_CONTRACT='nonblock-object-v1';");assert.match(auditCoordinatorDrift(x).errors.join(','),/coordinator HEAD drift/)});
 test('missing fittings blob pin fails closed',()=>{const x=make();x.fittings=file("export const CONTRACT='nonblock-object-v1';");assert.match(auditCoordinatorDrift(x).errors.join(','),/blob drift/)});
 test('missing coordinator declaration fails closed',()=>{const x=make();x.coordinator=file('export const OTHER=1;');assert.match(auditCoordinatorDrift(x).errors.join(','),/contract version mismatch/)});
+
+test('comment-only coordinator declaration cannot satisfy source pin',()=>{const x=make();x.coordinator=file("// export const NONBLOCK_OBJECT_VERSION='nonblock-object-v1';");assert.equal(auditCoordinatorDrift(x).ok,false)});
+test('duplicate coordinator declarations fail closed',()=>{const x=make();x.coordinator=file("export const NONBLOCK_OBJECT_VERSION='nonblock-object-v1';\nexport const NONBLOCK_OBJECT_VERSION='nonblock-object-v1';");assert.equal(auditCoordinatorDrift(x).ok,false)});
+test('commented-out environment coordinator pin fails closed',()=>{const x=make();x.environment=file("export const TARGET_CONTRACT='nonblock-object-v1';\n// export const COORDINATOR_SHA='"+head+"';");assert.match(auditCoordinatorDrift(x).errors.join(','),/coordinator HEAD drift/)});
+test('unrelated literal containing exported declaration does not authenticate',()=>{const x=make();x.coordinator=file("export const NOTE=\"export const NONBLOCK_OBJECT_VERSION='nonblock-object-v1';\";");assert.equal(auditCoordinatorDrift(x).ok,false)});
