@@ -25,11 +25,17 @@ export function prepareVoxelEditBatch(host, edits) {
       throw new TypeError('Invalid expected turn');
     const receipt = host.snapshotEdit(edit.cell, edit.nextId);
     if (receipt === null) return null;
+    if (!receipt || !Object.isFrozen(receipt) || !Object.isFrozen(receipt.cell) ||
+        !Array.isArray(receipt.cell) || receipt.cell.length !== 3 ||
+        !receipt.cell.every(Number.isSafeInteger) ||
+        receipt.cell.some((value, index) => value !== edit.cell[index]) ||
+        !Number.isSafeInteger(receipt.expectedId) || receipt.expectedId < 0 || receipt.expectedId >= 255 ||
+        (receipt.expectedTurn !== null &&
+         (!Number.isSafeInteger(receipt.expectedTurn) || receipt.expectedTurn < 0 || receipt.expectedTurn > 3)))
+      throw new TypeError('Host violated immutable receipt contract');
     if ((Object.hasOwn(edit, 'expectedId') && receipt.expectedId !== edit.expectedId) ||
         (Object.hasOwn(edit, 'expectedTurn') && receipt.expectedTurn !== edit.expectedTurn))
       return null;
-    if (!receipt || !Object.isFrozen(receipt) || !Object.isFrozen(receipt.cell))
-      throw new TypeError('Host violated immutable receipt contract');
     receipts.push(receipt);
   }
   return Object.freeze(receipts);
