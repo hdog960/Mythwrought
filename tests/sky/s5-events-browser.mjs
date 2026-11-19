@@ -93,16 +93,43 @@ function eventContrast(eventCanvas,quietCanvas,center,kind){
 }
 async function pose(page,alignment){
   await page.locator('#scene').focus();
-  await page.keyboard.down('ArrowUp');
-  try{await page.waitForFunction(()=>
-    +document.querySelector('#scene').dataset.cameraPitch>.42,
-    null,{timeout:23000});}finally{await page.keyboard.up('ArrowUp');}
+  // Real source stepPlayer/look from genuine keyboard. Reloaded game cameras can
+  // retain a previous pitch: blindly holding UP on each case climbs toward the
+  // pitch clamp and pushes a world-space sky event out of view.
+  const current=await page.evaluate(()=>{
+    const c=document.querySelector('#scene');
+    return {pitch:+c.dataset.cameraPitch,yaw:+c.dataset.cameraYaw};
+  });
+  if(current.pitch<.42){
+    await page.keyboard.down('ArrowUp');
+    try{await page.waitForFunction(()=>
+      +document.querySelector('#scene').dataset.cameraPitch>.42,
+      null,{timeout:23000});}finally{await page.keyboard.up('ArrowUp');}
+  }else if(current.pitch>.54){
+    await page.keyboard.down('ArrowDown');
+    try{await page.waitForFunction(()=>
+      +document.querySelector('#scene').dataset.cameraPitch<.54,
+      null,{timeout:23000});}finally{await page.keyboard.up('ArrowDown');}
+  }
+  const yaw=+await page.evaluate(()=>
+    document.querySelector('#scene').dataset.cameraYaw);
   if(alignment){
-    await page.keyboard.down('ArrowLeft');
-    try{await page.waitForFunction(()=>{
-      const yaw=+document.querySelector('#scene').dataset.cameraYaw;
-      return yaw>2.28&&yaw<2.46;
-    },null,{timeout:22000});}finally{await page.keyboard.up('ArrowLeft');}
+    if(!(yaw>2.28&&yaw<2.46)){
+      await page.keyboard.down('ArrowLeft');
+      try{await page.waitForFunction(()=>{
+        const yaw=+document.querySelector('#scene').dataset.cameraYaw;
+        return yaw>2.28&&yaw<2.46;
+      },null,{timeout:22000});}finally{await page.keyboard.up('ArrowLeft');}
+    }
+  }else if(Math.abs(Math.abs(yaw)-Math.PI)>.14){
+    // Restore the actual saved south-facing source camera using keyboard, not
+    // injected player angles or a synthetic viewport.
+    const key=yaw>=0?'ArrowRight':'ArrowLeft';
+    await page.keyboard.down(key);
+    try{await page.waitForFunction(()=>
+      Math.abs(Math.abs(+document.querySelector('#scene').dataset.cameraYaw)-
+        Math.PI)<.14,null,{timeout:22000});
+    }finally{await page.keyboard.up(key);}
   }
   await page.waitForTimeout(420);
 }
@@ -131,7 +158,9 @@ async function activate(page,phase,age,expected,alignment=false){
   assert.equal(status.moonCount,3);
   if(expected){
     assert.ok(status.center.every(x=>x>.07&&x<.93),
-      'Event must actually appear in the physical phone landscape view');
+      'Event must actually appear in the physical phone landscape view: '+
+      JSON.stringify({id:status.id,center:status.center,yaw:status.yaw,
+        pitch:status.pitch,frame:status.framebuffer}));
     assert.ok(status.strength>.25,
       'Celestial event has insufficient physical WebGL visibility');
   }
