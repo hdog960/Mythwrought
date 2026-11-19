@@ -195,6 +195,9 @@ try{
      null,{timeout:80000});
    const original=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
    assert.equal(await page.evaluate(()=>window.__mythwroughtTest.caveMode().enabled),false);
+   assert.equal(await page.locator('#scene').evaluate(
+     el=>Number(el.dataset.c6FarChunks||0)),0,
+    'Ordinary original game must never activate cave-only far-rock GPU');
    assert.ok(await page.locator('#scene').evaluate(el=>!!el.getContext('webgl2')));
    assert.equal(await page.locator('#dig').textContent(),'MINE');
    assert.equal(await page.locator('#jump').textContent(),'JUMP');
