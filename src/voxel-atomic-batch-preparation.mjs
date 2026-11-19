@@ -14,8 +14,20 @@ export function prepareVoxelEditBatch(host, edits) {
     const key = edit.cell.join(',');
     if (seen.has(key)) throw new TypeError('Duplicate edit cell');
     seen.add(key);
+    // Optional intent guards prevent a stale UI/adapter request from silently
+    // targeting a different block or orientation before the snapshot begins.
+    if (Object.hasOwn(edit, 'expectedId') &&
+        (!Number.isSafeInteger(edit.expectedId) || edit.expectedId < 0 || edit.expectedId >= 255))
+      throw new TypeError('Invalid expected ID');
+    if (Object.hasOwn(edit, 'expectedTurn') &&
+        edit.expectedTurn !== null &&
+        (!Number.isSafeInteger(edit.expectedTurn) || edit.expectedTurn < 0 || edit.expectedTurn > 3))
+      throw new TypeError('Invalid expected turn');
     const receipt = host.snapshotEdit(edit.cell, edit.nextId);
     if (receipt === null) return null;
+    if ((Object.hasOwn(edit, 'expectedId') && receipt.expectedId !== edit.expectedId) ||
+        (Object.hasOwn(edit, 'expectedTurn') && receipt.expectedTurn !== edit.expectedTurn))
+      return null;
     if (!receipt || !Object.isFrozen(receipt) || !Object.isFrozen(receipt.cell))
       throw new TypeError('Host violated immutable receipt contract');
     receipts.push(receipt);
