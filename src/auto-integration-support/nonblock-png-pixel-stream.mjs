@@ -17,10 +17,10 @@ export function auditPngPixels(bytes,{width,height,sha256,maxInflatedBytes=16_00
   const body=bytes.subarray(pos+8,pos+8+size);
   if(crc32(bytes.subarray(pos+4,pos+8+size))!==bytes.readUInt32BE(pos+8+size))return fail('crc');
   if(!ihdr&&type!=='IHDR')return fail('ihdr-order');
+  if(sawIDAT&&type!=='IDAT'&&type!=='IEND')idatClosed=true;
   if(type==='IHDR'){if(ihdr||size!==13)return fail('ihdr');ihdr=body;}
   else if(type==='IDAT'&&idatClosed)return fail('idat-nonconsecutive');
   else if(type==='IDAT'){if(ended)return fail('idat-order');sawIDAT=true;idat.push(body);}
-  else if(sawIDAT&&type!=='IEND')idatClosed=true;
   else if(type==='IEND'){if(size!==0||end!==bytes.length)return fail('iend-trailing');ended=true;break;}
   else if(type[0]===type[0].toUpperCase())return fail('unsupported-critical-chunk');
   pos=end;
