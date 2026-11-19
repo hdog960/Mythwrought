@@ -53,16 +53,19 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-      - name: Original-game rare event and true non-event Chromium visual proof
+      # Test the untouched S3 moon camera on a fresh Chromium runner,
+      # before the expensive S5 multi-reload source comparisons. Its unchanged
+      # source still must pass all three real phone landscapes and real pixels.
+      - name: Inherited S3 three-moon lunar phase and schema-1 browser acceptance
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-sky-s5.log 2>&1 &
+          node tests/sky/s3-moons-browser.mjs
+      - name: Original-game rare event and true non-event Chromium visual proof
+        run: |
           node tests/sky/s5-events-browser.mjs
       - name: Inherited S4 real stars, moving clouds, moon composition screenshots
         run: |
           node tests/sky/s4-stars-browser.mjs
-      - name: Inherited S3 three-moon lunar phase and schema-1 browser acceptance
-        run: |
-          node tests/sky/s3-moons-browser.mjs
       - name: Inherited S2 moving sun, fog and original-game screenshots
         run: |
           node tests/sky/s2-atmosphere-browser.mjs
