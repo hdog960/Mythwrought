@@ -40,3 +40,24 @@ test('reject invalid namespaces and nonfinite translated vertices before draw pr
  assert.throws(()=>prepareNonblockDrawBatches([overflow],view),TypeError);
  assert.equal(prepareNonblockDrawBatches([a],view).visibleCount,1);
 });
+
+
+test('removed instance keys are excluded from draw preparation and remain absent after fixture reload',()=>{
+ const a=obj('seed7:root:a','forest:root',[0,0,0]);
+ const b=obj('seed7:root:b','forest:root',[1,0,0]);
+ const sidecar=['seed7:root:a'];
+ const before=prepareNonblockDrawBatches([a,b],view);
+ assert.equal(before.visibleCount,2);
+ const after=prepareNonblockDrawBatches([a,b],view,{removedKeys:sidecar});
+ assert.equal(after.visibleCount,1);
+ assert.equal(after.triangles,1);
+ assert.deepEqual(after.batches.flatMap(batch=>batch.instances.map(i=>i.instanceKey)),['seed7:root:b']);
+ assert.equal(after.culledCount,1);
+ const reloaded=prepareNonblockDrawBatches([b,a],view,{removedKeys:JSON.parse(JSON.stringify(sidecar))});
+ assert.deepEqual(reloaded.batches.flatMap(batch=>batch.instances.map(i=>i.instanceKey)),['seed7:root:b']);
+ assert.equal(prepareNonblockDrawBatches([a,b],view).visibleCount,2);
+ for(const removedKeys of [null,{},[''],['duplicate','duplicate'],[4]]){
+  assert.throws(()=>prepareNonblockDrawBatches([a,b],view,{removedKeys}),TypeError);
+ }
+ assert.throws(()=>prepareNonblockDrawBatches([a,a],view,{removedKeys:sidecar}),TypeError);
+});
