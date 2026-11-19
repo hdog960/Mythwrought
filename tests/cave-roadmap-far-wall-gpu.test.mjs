@@ -3,6 +3,7 @@
 // genuine original index/main WebGL2 browser suite proves actual GPU rendering.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {BLOCK} from '../src/voxel.mjs';
 import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
 import {createCaveFarWallGpu,planCaveFarWallSources,C6_FAR_BOUNDS}
  from '../src/manual-caves/c6-far-wall-gpu.mjs';
@@ -43,6 +44,20 @@ test('C6 actual source-planner is bounded, deterministic and opt-in within the c
  assert.ok(a.selected.every(c=>Number.isInteger(c.cx)&&Number.isInteger(c.cz)));
  const surface=planCaveFarWallSources(world,{...fan,feet:4},[844,390]);
  assert.equal(surface.selected.length,0);
+});
+test('C6 distant overhead source rock is chosen from a REAL adjacent depth section',()=>{
+ // Camera at section -8. The rock roof is physically in section -7 and
+ // beyond the 3x3 near stream, but still within the approved two-chunk ring.
+ // Old eye-height-only rays/active-section filtering returned no roof mesh.
+ const rock={get(x,y,z){return z>=32&&z<48&&y>=-115&&y<=-100?
+  BLOCK.DEEPSTONE:BLOCK.AIR;}};
+ const camera={x:8,z:8,feet:-124,yaw:0,pitch:0};
+ const plan=planCaveFarWallSources(rock,camera,[844,390]);
+ assert.ok(plan.selected.some(c=>c.section===-7&&c.cz===2&&
+  c.source[1]>=-115&&c.source[1]<=-100),
+ 'Source-authenticated overhead ceiling was not found outside near stream');
+ assert.ok(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples);
+ assert.ok(plan.selected.length<=C6_FAR_BOUNDS.maxChunks);
 });
 test('C6 no GPU allocations in any ordinary world or while near meshes pending',()=>{
  const g=fakeGl(),far=createCaveFarWallGpu(g.gl);
