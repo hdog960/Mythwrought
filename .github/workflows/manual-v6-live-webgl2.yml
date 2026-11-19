@@ -46,6 +46,12 @@ jobs:
           path: artifacts/manual-v6-live/
           if-no-files-found: warn
           retention-days: 14
+      - name: Install original encoded-video probe and decoder (strict video gate)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffprobe -version
+          ffmpeg -version
       - name: Prove recorder survives V6 integration with native and genuine WebGL2 moving video
         run: |
           node --test tests/gameplay-recorder.test.mjs
