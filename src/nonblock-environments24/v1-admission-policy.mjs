@@ -7,6 +7,8 @@ export function planEnvironmentV1Admission(descriptors,environment,{maxInstances
  if(!environment||typeof environment.isSolid!=='function'||
     typeof environment.isEdited!=='function'||typeof environment.hasTombstone!=='function')
   throw new TypeError('read-only terrain, edit and tombstone providers required');
+ if(environment.wallSupportCell!==undefined&&typeof environment.wallSupportCell!=='function')
+  throw new TypeError('invalid read-only wall support provider');
  if(environment.isReserved!==undefined&&typeof environment.isReserved!=='function')
   throw new TypeError('invalid read-only reservation provider');
  const batch=auditEnvironmentV1Batch(descriptors,{maxInstances,maxTriangles});
@@ -23,7 +25,15 @@ export function planEnvironmentV1Admission(descriptors,environment,{maxInstances
   const offset=face==='ground'?[0,-1,0]:face==='ceiling'?[0,1,0]:null;
   // A wall mount cannot guess an attachment direction; require an explicit
   // owner-supplied support cell, never silently place against the wrong wall.
-  const support=offset?a.map((v,i)=>v+offset[i]):null;
+  let support=offset?a.map((v,i)=>v+offset[i]):null;
+  if(face==='wall'&&typeof environment.wallSupportCell==='function'){
+   const candidate=environment.wallSupportCell(d.sceneId,[...a],d.instanceKey);
+   // A wall support must be an immediately adjacent horizontal voxel;
+   // diagonals, remote cells, vertical mounts and unknown results fail closed.
+   if(integer3(candidate)&&candidate[1]===a[1]&&
+      Math.abs(candidate[0]-a[0])+Math.abs(candidate[2]-a[2])===1)
+    support=[...candidate];
+  }
   if(!support){rejected.push({instanceKey:d.instanceKey,reason:'wall-support-unresolved'});continue;}
   if(check(environment.hasTombstone,d.instanceKey)){
    rejected.push({instanceKey:d.instanceKey,reason:'removed'});continue;
