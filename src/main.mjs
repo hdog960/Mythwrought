@@ -56,9 +56,20 @@ const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,powe
 function message(s){status.textContent=s;}
 function fatal(s){notice.hidden=false;notice.textContent=s;message('3D renderer unavailable');}
 if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or desktop browser is required.');
-else start();
+else if(['localhost','127.0.0.1'].includes(location.hostname)&&
+    new URLSearchParams(location.search).has('nonblock-stage')){
+  import('./nonblock/candidate-scene.mjs').then(module=>{
+    let layout;
+    try{layout=module.readCandidateLayout(new URL(location.href));}
+    catch(error){console.warn('Nonblock staging layout disabled',error);}
+    start(layout?{module,layout}:null);
+  },error=>{
+    console.warn('Nonblock staging module unavailable',error);
+    start();
+  });
+}else start();
 
-function start(){
+function start(nonblockStage=null){
   let gameplayRecorder=null;
   let world,storageReadOnly=false,recoveryNote='';
   function loadWorld(seed){
@@ -86,6 +97,62 @@ function start(){
     recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
   }
   let pack3=createPack3LiveBridge(world,localStorage);
+  let nonblockWorld,nonblockScene,nonblockBuffer,nonblockDrawKey='',nonblockVertexCount=0;
+
+  function stagedScene(){
+    if(storageReadOnly)return null;
+    if(nonblockWorld!==world){
+      nonblockWorld=world;
+      nonblockScene=null;
+      try{
+        const worldId=world.base?.generationProfile?.generator??'legacy';
+        nonblockScene=nonblockStage.module.createCandidateScene(world.seed,worldId,nonblockStage.layout,{
+          storage:localStorage,
+          blockAt:(x,y,z)=>{
+            if(manual14.layer.get([x,y,z])||pack3.getAt(x,y,z)||
+                pack5Builder?.layer.cell([x,y,z]))return true;
+            const block=world.get(x,y,z);
+            return block!==BLOCK.AIR&&block!==76;
+          },
+          editedAt:(x,y,z)=>world.edits.has([x,y,z].join(',')),
+          voxelPick:(origin,direction,maxDistance)=>{
+            const voxel=raycast(world,origin,direction,maxDistance);
+            const furniture=pack5Builder?.layer.raycast(origin,direction,maxDistance);
+            return furniture&&(!voxel||furniture.distance<voxel.distance)?furniture:voxel;
+          }
+        });
+      }catch(error){
+        console.warn('Nonblock staging scene disabled',error);
+      }
+    }
+    return nonblockScene;
+  }
+
+  function drawStagedScene(){
+    const origin=eye();
+    const scene=stagedScene();
+    const objects=scene?.visible().filter(({anchor})=>
+      Math.hypot(anchor[0]-origin[0],anchor[1]-origin[1],anchor[2]-origin[2])<32)??[];
+    const key=objects.map(o=>o.instanceKey).join('|');
+    if(key!==nonblockDrawKey){
+      if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
+      nonblockDrawKey=key;
+      const vertices=nonblockStage.module.candidateVertices(objects);
+      nonblockVertexCount=vertices.length/9;
+      nonblockBuffer=vertices.length?uploadChunkBuffer(gl,vertices):null;
+    }
+    if(nonblockBuffer){
+      gl.bindBuffer(gl.ARRAY_BUFFER,nonblockBuffer);
+      gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
+      gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
+      gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
+      gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
+      gl.drawArrays(gl.TRIANGLES,0,nonblockVertexCount);
+    }
+    canvas.dataset.nonblockVertices=String(nonblockVertexCount);
+    canvas.dataset.nonblockInstances=String(objects.length);
+    canvas.dataset.nonblockTarget=scene?.pick(origin,facing())?.instanceKey??'';
+  }
   // Only a previously selected immutable v5 world may opt into M5 PWA caching.
   if(world.base instanceof FourRegionWorld&&
       [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR].includes(
@@ -108,7 +175,10 @@ function start(){
     .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
     .replace('void main(){',
       'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
-      'outColor=vec4(mix(vColor,uFog,f),vPack2Alpha); return; }');
+      'outColor=vec4(mix(vColor,uFog,f),vPack2Alpha); return; }'+
+      (nonblockStage?'if(vMat==21){ float f=smoothstep(29.0,68.0,vDistance);'+
+        'outColor=vec4(mix(vColor,uFog,f),1.0); return; }':'')
+    );
   let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
   function initializeGpuPipeline(){
     const resources=buildGpuPipeline(gl,{
@@ -654,6 +724,16 @@ function start(){
       }else message(result.reason||'Pack 5 construction rejected');
       return;
     }
+    if(mode==='mine'&&nonblockStage){
+      const scene=stagedScene();
+      const origin=eye(), direction=facing();
+      const hit=scene?.pick(origin,direction);
+      if(hit){
+        const removed=scene.breakHit(hit,origin,direction);
+        message(removed?'Scenery removed · staged save verified':'Scenery removal could not be saved');
+        return;
+      }
+    }
     const physicalState=inspectBlockTarget(world,eye(),facing(),selected,player,
       isPack3BlockId(selected)?pack3Yaw:selectedRotation);
     const existingPack3=physicalState.hit?pack3.getAt(...physicalState.hit):null;
@@ -928,6 +1008,7 @@ function start(){
         canvas.dataset.pack5PendingPages='0';
         canvas.dataset.pack5BudgetExcluded='0';
       }
+      if(nonblockStage)drawStagedScene();
       // Genuine transparent-water pass, only for chunks with water candidates.
       if([...chunks.values()].some(c=>c.waterBuffer)){
         gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
@@ -2318,6 +2399,7 @@ function start(){
       initializeGpuPipeline();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
       chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
+      nonblockBuffer=null;nonblockDrawKey='';nonblockVertexCount=0;
       pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
       outlineKey='';outlineCount=0;lastTargetText='';
@@ -2386,6 +2468,12 @@ function start(){
         const dx=x+.5-player.x,dy=y+.5-(player.feet+1.55),dz=z+.5-player.z;
         player.yaw=Math.atan2(dx,dz);
         player.pitch=Math.atan2(dy,Math.hypot(dx,dz));
+      },
+      aimAtStagedPoint(x,y,z){
+        if(!nonblockStage||![x,y,z].every(Number.isFinite))throw Error('Invalid staged aim');
+        const [ex,ey,ez]=eye();
+        player.yaw=Math.atan2(x-ex,z-ez);
+        player.pitch=Math.atan2(y-ey,Math.hypot(x-ex,z-ez));
       },
       block(x,y,z){return manual14.layer.get([x,y,z])?.numericId??pack3.getAt(x,y,z)?.id??world.get(x,y,z);},
       manual14Block(x,y,z){return manual14.layer.get([x,y,z])??null;},

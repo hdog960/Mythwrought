@@ -93,6 +93,7 @@ jobs:
           node tests/voxel-landmarks-browser.mjs
           node tests/live-world-browser.mjs
           node tests/context-restore-browser.mjs
+          node tests/nonblock-runtime-browser.mjs
       - name: Advisory queue health snapshot
         if: always()
         env:
