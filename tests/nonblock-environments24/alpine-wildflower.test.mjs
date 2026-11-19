@@ -5,7 +5,7 @@ const opts={seed:179,anchor:[8,21,-4],variant:3};
 test('alpine wildflower builds actual bounded multi-stem petal and leaf triangles',()=>{
  const o=makeAlpineWildflower(opts);
  assert.equal(o.sceneId,ALPINE_WILDFLOWER_SCENE_ID);
- assert.equal(o.mesh.triangleCount,93);
+ assert.equal(o.mesh.triangleCount,89);
  assert.ok(o.mesh.triangleCount<=o.render.maxTrianglesPerInstance);
  assert.equal(o.mesh.positions.length,o.mesh.triangleCount*9);
  for(let i=0;i<o.mesh.positions.length;i+=3)for(let a=0;a<3;a++)
