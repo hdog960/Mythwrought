@@ -162,6 +162,7 @@ const SOURCE_ASSETS=[
   "./src/manual-biomes/m2-runtime-bridge.mjs",
   "./src/manual-biomes/m5-offline-registration.mjs",
   "./src/manual-biomes/mountain-pass-v5.mjs",
+  "./src/manual-biomes/v6-balanced-biomes.mjs",
   "./src/manual-biomes/overland-walk-m5.mjs",
   "./src/manual-biomes/profile-storage.mjs",
   "./src/manual-biomes/profile-world.mjs",
@@ -257,24 +258,29 @@ self.addEventListener('fetch',event=>{
   const index=new URL('index.html',root);
   const canonical=new URL(url.href);
   canonical.search='';canonical.hash='';
-  // Online-first for navigation only; current cache-first navigation can
-  // preserve an outdated Home Screen app even while newer code is deployed.
-  // Offline fallback remains the fully verified, versioned static shell.
+  // Ordinary Home Screen boot uses ONLY the atomically verified cache;
+  // never attempt a network request during an offline M5 reload.
+  // Explicit user-initiated ?mw-refresh=release is online-first.
   if(req.mode==='navigate'&&(canonical.href===root.href||
       canonical.href===index.href)){
+    const explicitRefresh=url.searchParams.size===1&&
+      url.searchParams.get('mw-refresh')===ASSET_RELEASE;
     event.respondWith((async()=>{
-      try{
-        const fresh=await fetch(req,{cache:'no-store'});
-        if(fresh.ok&&fresh.type!=='opaque')return fresh;
-      }catch(_){}
       const cache=await caches.open(CACHE_NAME);
-      return await cache.match(index.href)||await cache.match(root.href)||
-        Response.error();
+      const cached=async()=>await cache.match(index.href)||
+        await cache.match(root.href)||Response.error();
+      if(explicitRefresh){
+        if(self.navigator.onLine===false)return cached();
+        try{
+          const fresh=await fetch(req,{cache:'no-store'});
+          if(fresh.ok&&fresh.type!=='opaque')return fresh;
+        }catch(_){}
+      }
+      return await cached();
     })());return;
   }
-  // Release-pinned app shell assets can be fetched through a stale worker
-  // online. Once v6 takes control they resolve to the same verified source
-  // blobs from this cache, including during fully offline reloads.
+  // Only exact release-pinned module/CSS URLs are mapped to cached source
+  // for offline use; other query requests bypass this worker.
   const pinned=url.searchParams.size===1&&
     url.searchParams.get('mw-release')===ASSET_RELEASE&&
     (canonical.href===new URL('styles.css',root).href||

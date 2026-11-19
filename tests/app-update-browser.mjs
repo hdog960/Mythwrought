@@ -95,14 +95,14 @@ try{
     return keys.includes('mythwrought-m5-shell-20261119-v6-safe-refresh')&&
       !keys.includes('mythwrought-m5-shell-20261118-v5-recorder');
   },null,{timeout:180000});
-  // Change a response header AFTER the new cache was installed. Only a real
-  // network-first navigation can observe epoch b; cached HTML stays epoch a.
+  // A normal boot MUST use only the new, atomically verified cache.
+  // It was installed at epoch a and must now expose REC, not old HTML.
   serverEpoch='b';
   const refreshed=await page.reload({waitUntil:'networkidle',timeout:45000});
-  assert.equal(refreshed.headers()['x-mw-server-epoch'],'b',
-    'Game shell was still served cache-first despite an available live page');
+  assert.equal(refreshed.headers()['x-mw-server-epoch'],'a',
+    'Ordinary boot fetched over network instead of using the verified shell');
   assert.equal(refreshed.headers()['x-mw-origin-build'],'new',
-    'Updated service worker did not perform online-first document request');
+    'The upgraded cache did not contain current game HTML');
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
     null,{timeout:45000});
   assert.equal(await page.locator('#captureToggle').count(),1,'REC did not appear after same-app worker update');
@@ -114,13 +114,22 @@ try{
   console.log('PASS ONLINE UPGRADE REC VISIBLE',await caches(),'saved seed 11111222 intact');
 
   await page.locator('#menu').click();
-  await page.locator('#checkGameUpdate').click();
-  await page.waitForURL(u=>new URL(u).searchParams.get('mw-refresh')===RELEASE,
-    {timeout:30000});
+  const [onlineRefresh]=await Promise.all([
+    page.waitForNavigation({waitUntil:'networkidle',timeout:45000}),
+    page.locator('#checkGameUpdate').click()
+  ]);
+  assert.equal(onlineRefresh?.headers()['x-mw-server-epoch'],'b',
+    'Explicit in-game update did not fetch a fresh document online');
+  assert.equal(new URL(page.url()).searchParams.get('mw-refresh'),RELEASE);
   assert.equal(await page.locator('#captureToggle').count(),1);
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-11111222')),saved);
   console.log('PASS IN-APP UPDATE BUTTON SAME INSTALL',page.url());
 
+  // The manifest start URL is the clean root; verify a clean root boot before
+  // the STRICT no-network offline test (not a query left from an update).
+  await page.goto(target,{waitUntil:'networkidle',timeout:45000});
+  assert.equal(await page.locator('#captureToggle').count(),1);
+  const beforeOfflineRequests=requests;
   await context.setOffline(true);
   await page.reload({waitUntil:'load',timeout:45000});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0,
@@ -133,8 +142,10 @@ try{
   });
   assert.ok(gl.gl&&gl.w>200&&gl.h>100&&!gl.error,'Offline WebGL2 broken');
   await page.screenshot({path:'artifacts/pwa-safe-refresh/offline-game-932x430.png'});
+  assert.equal(requests,beforeOfflineRequests,
+    'Offline Home Screen boot must make ZERO actual network requests');
   assert.deepEqual(errors,[],'Browser generated errors during same-app recovery');
-  console.log('PASS OFFLINE AFTER SAME-APP RECOVERY',gl,'no world save changes, no reset');
+  console.log('PASS OFFLINE AFTER SAME-APP RECOVERY',gl,'no network, no world save changes');
 }finally{
   await browser.close();
   await new Promise(resolve=>server.close(resolve));
