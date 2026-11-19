@@ -6,7 +6,7 @@ import {extname,resolve,sep} from 'node:path';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
-const cwd=process.cwd(),dir='artifacts/roadmap-b-waves1234567891011121314-webgl2',records=[];
+const cwd=process.cwd(),dir='artifacts/roadmap-b-waves123456789101112131415-webgl2',records=[];
 const ids=[
  'r1:farm-barn:desert:large:004','r1:greenhouse:snow:medium:004','r1:harbor-office:enchanted-forest:large:004',
  'r2:tailor:desert:large:04','r2:butcher:enchanted-forest:large:04','r2:bookshop:snow:medium:04',
@@ -36,6 +36,15 @@ const ids=[
  'r2:bookshop:mountain:large:04','r2:jeweler:enchanted-forest:medium:04','r2:tailor:desert:small:04','r2:theater:enchanted-forest:medium:03',
  'r1:greenhouse:enchanted-forest:medium:004','r1:farm-barn:mountain:small:004','r1:lighthouse:desert:medium:004','r1:bathhouse:mountain:large:004',
  'r2:bookshop:enchanted-forest:large:04','r2:jeweler:temperate:small:04','r2:temple:mountain:large:05','r2:butcher:desert:medium:04'
+,
+ 'r1:greenhouse:desert:small:005',
+ 'r1:bathhouse:snow:medium:005',
+ 'r1:lighthouse:temperate:medium:005',
+ 'r1:farm-barn:enchanted-forest:large:006',
+ 'r2:butcher:mountain:medium:05',
+ 'r2:theater:temperate:large:04',
+ 'r2:temple:enchanted-forest:medium:06',
+ 'r2:bookshop:snow:small:05'
 ];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const files=['src/building-pool/roadmap-b/wave1-community-b1.mjs','src/building-pool/roadmap-b/wave1-trades-b2.mjs',
@@ -51,7 +60,7 @@ const files=['src/building-pool/roadmap-b/wave1-community-b1.mjs','src/building-
  'src/building-pool/roadmap-b/wave11-community-b1.mjs','src/building-pool/roadmap-b/wave11-trades-b2.mjs',
  'src/building-pool/roadmap-b/wave12-community-b1.mjs','src/building-pool/roadmap-b/wave12-trades-b2.mjs',
  'src/building-pool/roadmap-b/wave13-community-b1.mjs','src/building-pool/roadmap-b/wave13-trades-b2.mjs',
- 'src/building-pool/roadmap-b/wave14-community-b1.mjs','src/building-pool/roadmap-b/wave14-trades-b2.mjs',
+ 'src/building-pool/roadmap-b/wave14-community-b1.mjs','src/building-pool/roadmap-b/wave14-trades-b2.mjs','src/building-pool/roadmap-b/wave15-community-b1.mjs','src/building-pool/roadmap-b/wave15-trades-b2.mjs',
  'src/building-pool/roadmap-1b/m2-community-structures.mjs','src/building-pool/roadmap-1b/legacy-stable-schema.mjs',
  'src/building-pool/roadmap-1b/schema.mjs','src/building-pool/roadmap-2b/schema.mjs','src/building-pool/roadmap-2b/catalog.mjs'];
 await mkdir(dir,{recursive:true});
@@ -116,7 +125,7 @@ try{
   const q=records.find(r=>r.id===id&&r.width===width&&r.height===height&&r.view==='cutaway');
   if(!p||!q||q.visibleCells>=p.visibleCells)throw Error('Cutaway not source-backed '+id);
  }
- await writeFile(dir+'/manifest.json',JSON.stringify({schema:'mythwrought.roadmap-b-waves1234567891011121314.webgl2.v1',
+ await writeFile(dir+'/manifest.json',JSON.stringify({schema:'mythwrought.roadmap-b-waves123456789101112131415.webgl2.v1',
   gitHead:process.env.ROADMAP_B_EXACT_HEAD||null,
   countedAsProductionBuilds:false,producerPackAABBsApproved:false,actualPhysicalIPhone:false,
   sourceEvidence,records},null,2));
