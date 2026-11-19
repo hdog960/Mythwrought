@@ -146,6 +146,14 @@ async function activate(page,phase,age,expected,alignment=false){
   await page.reload({waitUntil:'networkidle',timeout:45000});
   await settle(page);
   await pose(page,alignment);
+  // The live original game repaints the sky every frame, while its read-only
+  // S5 event center is sampled every TWELVE frames. Wait a complete telemetry
+  // cycle after the last physical Arrow key before asserting source projection.
+  const poseFrame=await page.evaluate(()=>
+    +document.querySelector('#scene').dataset.renderedFrames);
+  await page.waitForFunction(start=>
+    +document.querySelector('#scene').dataset.renderedFrames>=start+14,
+    poseFrame,{timeout:35000});
   await page.waitForFunction(({kind,phase})=>{
     const c=document.querySelector('#scene');
     return +c.dataset.skyS5EventType===kind&&
