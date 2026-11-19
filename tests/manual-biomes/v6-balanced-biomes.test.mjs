@@ -51,6 +51,70 @@ test('V6 preserves all previously accepted v4/v5 generator identities',()=>{
   assert.equal(balanced.generationProfile.generator,M6_BALANCED_GENERATOR);
   assert.ok(Number.isInteger(balanced.naturalAndLandmarkBlock(512,6,0)));
 });
+// Verify the ACTUAL gameplay-reader voxel materials, not the biome labels
+// alone. This catches a correct distribution map whose world still looks
+// entirely like legacy Plains because protected full-column writes failed.
+import {meshChunk,chunkCoord} from '../../src/voxel.mjs';
+import {Pack2LiveWorld} from '../../src/pack2-world.mjs';
+import {MAX_CHUNK_UPLOAD_BYTES,validateChunkUploadBytes}
+  from '../../src/gpu-recovery.mjs';
+
+const physicalMaterials={
+  desert:new Set([256,257,258,259,260,261,262,263,264,266]),
+  snow:new Set([272,277,278,279]),
+  mountain:new Set([302,303,305,307]),
+  enchanted:new Set([286,293,294,289])
+};
+test('V6 every named biome has genuine visible physical geology in the world reader',()=>{
+  const world=new FourRegionWorld(179,fourRegionProfile(179,M6_BALANCED_GENERATOR));
+  const centers={desert:[512,0],snow:[0,512],
+    mountain:[-512,0],enchanted:[0,-512]};
+  for(const [biomeName,[cx,cz]] of Object.entries(centers)){
+    let physical=0,examined=0;
+    for(let dx=-48;dx<=48;dx+=16)for(let dz=-48;dz<=48;dz+=16){
+      const x=cx+dx,z=cz+dz;
+      assert.equal(biome(x,z,179),biomeName,
+        'Sample has to be inside its intended V6 region');
+      examined++;
+      let present=false;
+      // Check every possible surface/raised cap without assuming a single
+      // flat y or counting a synthetic minimap tint as a physical biome.
+      for(let y=23;y>=0;y--){
+        if(physicalMaterials[biomeName].has(world.get(x,y,z))){
+          present=true;break;
+        }
+      }
+      if(present)physical++;
+    }
+    assert.ok(physical>=examined*.72,
+      biomeName+' source world lacks enough real terrain: '+physical+'/'+examined);
+    console.log('# V6 REAL GEOLOGY '+JSON.stringify({biome:biomeName,physical,examined}));
+  }
+});
+test('V6 genuine 100-chunk four-biome meshes respect 8MiB GPU upload cap',()=>{
+  const world=new Pack2LiveWorld(new FourRegionWorld(
+    179,fourRegionProfile(179,M6_BALANCED_GENERATOR)));
+  const centers={desert:[512,0],snow:[0,512],
+    mountain:[-512,0],enchanted:[0,-512]};
+  let checked=0,peak=0;
+  for(const [biomeName,[x,z]] of Object.entries(centers)){
+    const cx=chunkCoord(x),cz=chunkCoord(z);
+    for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){
+      const vertices=meshChunk(world,cx+dx,cz+dz);
+      assert.ok(vertices instanceof Float32Array,
+        biomeName+' must generate real mesh vertex buffers');
+      peak=Math.max(peak,vertices.byteLength);
+      assert.doesNotThrow(()=>validateChunkUploadBytes(vertices),
+        biomeName+' over 8MiB at '+(cx+dx)+','+(cz+dz));
+      assert.ok(vertices.byteLength<=MAX_CHUNK_UPLOAD_BYTES);
+      checked++;
+    }
+  }
+  assert.equal(checked,100);
+  console.log('# V6 REAL GPU '+JSON.stringify({checked,peak,
+    max:MAX_CHUNK_UPLOAD_BYTES}));
+});
+
 class Storage{
   state=new Map();
   get length(){return this.state.size;}
