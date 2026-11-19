@@ -122,7 +122,9 @@ function start(nonblockStage=null){
             return furniture&&(!voxel||furniture.distance<voxel.distance)?furniture:voxel;
           }
         });
-        world.stagedNonblockCollision=nonblockScene.bodyIntersects;
+        const scene=nonblockScene, loadedWorld=world;
+        world.stagedNonblockCollision=body=>!storageReadOnly&&world===loadedWorld&&
+          Boolean(nonblockBuffer)&&scene.bodyIntersects(body);
       }catch(error){
         console.warn('Nonblock staging scene disabled',error);
       }
@@ -148,7 +150,10 @@ function start(nonblockStage=null){
         // An upload failure must not expose selectable invisible scenery.
         if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
         nonblockBuffer=null;
+        nonblockDrawKey='';
         nonblockVertexCount=0;
+        canvas.dataset.nonblockDrawCalls='0';
+        canvas.dataset.nonblockGpuBytes='0';
         canvas.dataset.nonblockTarget='';
         canvas.dataset.nonblockVertices='0';
         canvas.dataset.nonblockInstances='0';
@@ -746,7 +751,7 @@ function start(nonblockStage=null){
       }else message(result.reason||'Pack 5 construction rejected');
       return;
     }
-    if(mode==='mine'&&nonblockStage&&nonblockBuffer){
+    if(mode==='mine'&&nonblockStage&&nonblockWorld===world&&nonblockBuffer){
       const scene=stagedScene();
       const origin=eye(), direction=facing();
       const hit=scene?.pick(origin,direction);

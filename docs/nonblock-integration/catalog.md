@@ -32,16 +32,16 @@ The names for empty slots in groups A, B, C and H are working names. Clover clum
 | 24 | B | Woodland horsetail | scene48:woodland-horsetail | [New](../../src/nonblock-scene48/meadow-woodland.mjs) | Native + Chromium |
 | 25 | C | Button mushroom | scene48:button-mushroom | [Inherited](../../src/nonblock-scene48/flora-phase1.mjs) | Native + Chromium |
 | 26 | C | Clustered toadstools | scene48:clustered-toadstools | [Inherited](../../src/nonblock-scene48/undergrowth-phase1.mjs) | Native + Chromium |
-| 27 | C | Shelf fungus |  | Pending | Pending |
-| 28 | C | Cavecap |  | Pending | Pending |
-| 29 | C | Spore pod |  | Pending | Pending |
-| 30 | C | Enchanted flower |  | Pending | Pending |
-| 31 | C | Glowing vine |  | Pending | Pending |
-| 32 | C | Lantern mushroom |  | Pending | Pending |
-| 33 | C | Ringed morel |  | Pending | Pending |
-| 34 | C | Starpetal |  | Pending | Pending |
-| 35 | C | Inkcap cluster |  | Pending | Pending |
-| 36 | C | Velvet cup |  | Pending | Pending |
+| 27 | C | Shelf fungus | scene48:shelf-fungus | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
+| 28 | C | Cavecap | scene48:cavecap | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
+| 29 | C | Spore pod | scene48:spore-pod | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
+| 30 | C | Enchanted flower | scene48:enchanted-flower | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
+| 31 | C | Glowing vine | scene48:glowing-vine | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
+| 32 | C | Lantern mushroom | scene48:lantern-mushroom | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
+| 33 | C | Ringed morel | scene48:ringed-morel | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
+| 34 | C | Starpetal | scene48:starpetal | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
+| 35 | C | Inkcap cluster | scene48:inkcap-cluster | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
+| 36 | C | Velvet cup | scene48:velvet-cup | [New](../../src/nonblock-scene48/enchanted-fungi.mjs) | Native + Chromium |
 | 37 | D | Desert scrub | nonblock:d:desert-scrub | [Inherited](../../src/nonblock-environments24/desert-scrub.mjs) | Native + Chromium |
 | 38 | D | Prickly pear cactus | nonblock:d:prickly-pear-cactus | Inherited | Pending |
 | 39 | D | Column cactus | nonblock:d:column-cactus | Inherited | Pending |

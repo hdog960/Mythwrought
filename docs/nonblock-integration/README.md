@@ -79,3 +79,9 @@ Chromium reopened a fresh page with the network disabled. The worker served the 
 Eight new families fill the previously empty A and B staging slots. All eight have four deterministic variants with nondegenerate meshes under the 256-triangle limit. Ivy and vine require two natural backing cells and preserve wall orientation in their tombstone IDs. Chromium rendered all eight on actual surfaces, mined them with the touch control, and verified all eight tombstones after reopening while preserving the schema-1 save bytes. The [captures and source manifest](gallery/meadow-woodland/) include per-family triangle totals. Grass and horsetail stems were visible in the recorded views, with thin fronds still needing device-scale art review.
 
 The provisional matrix has 55 source-authored families and 43 with game lifecycle evidence at this checkpoint. Acceptance remains open.
+
+## Enchanted and fungal source
+
+Ten new families complete the staged group C slot coverage. All ten have four distinct deterministic variants with native mesh checks. The shelf fungus and glowing vine attach to two natural backing cells. Chromium rendered, mined and cold-reopened all ten against seeded terrain in the actual game, including the wall placements. The ordinary schema-1 bytes matched and the sole scenery draw used 140,940 bytes for 1,305 triangles. The current vine uses a colored palette. Emissive treatment and placement in representative enchanted and cave scenes remain open. [Capture and source manifest](gallery/enchanted-fungi/manifest.json)
+
+The candidate now has 65 source-authored families and 53 with real staged lifecycle evidence, under the provisional 96-slot assignment.

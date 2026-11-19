@@ -5,14 +5,25 @@ import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
 import {VoxelWorld,raycast} from '../src/voxel.mjs';
 import {findSafeSpawn} from '../src/physics.mjs';
+import {ENCHANTED_FUNGI_IDS} from '../src/nonblock-scene48/enchanted-fungi.mjs';
 import {MEADOW_WOODLAND_IDS} from '../src/nonblock-scene48/meadow-woodland.mjs';
 import {candidateFamilies} from '../src/nonblock/candidate-families.mjs';
 import {createCandidateScene} from '../src/nonblock/candidate-scene.mjs';
 
 const world = new VoxelWorld(179);
 const origin = process.env.NONBLOCK_CATALOG_ORIGIN||'http://127.0.0.1:4173';
-const meadowWoodland = process.env.NONBLOCK_CATALOG_SET==='meadow-woodland';
-const directory = meadowWoodland?'artifacts/nonblock-meadow-woodland':'artifacts/nonblock-catalog';
+const catalog = process.env.NONBLOCK_CATALOG_SET||'catalog';
+const directory = 'artifacts/nonblock-'+catalog;
+const groups = {
+  catalog:{wallNames:['cloth-banner'],length:31,include:id=>
+    !MEADOW_WOODLAND_IDS.includes(id)&&!ENCHANTED_FUNGI_IDS.includes(id)},
+  'meadow-woodland':{wallNames:['crawling-ivy','trail-vine'],length:8,
+    include:id=>MEADOW_WOODLAND_IDS.includes(id)},
+  'enchanted-fungi':{wallNames:['shelf-fungus','glowing-vine'],length:10,
+    include:id=>ENCHANTED_FUNGI_IDS.includes(id)}
+};
+const group=groups[catalog];
+assert.ok(group,'Unknown staged catalog set');
 const classicSaveKey = 'mythwrought-v002-world-179';
 const stageSaveKey = 'mythwrought:nonblock-stage:v1:legacy:179';
 const digest = bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -42,10 +53,10 @@ function seekView(scene,object) {
 }
 
 // Use genuine seeded floor and wall cells. The setup never places voxels or edits a save.
-const layout=meadowWoodland?[
-  {sceneId:'scene48:crawling-ivy',anchor:[11,8,10],orientation:2,variant:2},
-  {sceneId:'scene48:trail-vine',anchor:[10,8,11],orientation:1,variant:1}
-]:[{sceneId:'scene36:cloth-banner',anchor:[11,9,10],orientation:2}];
+const layout=catalog==='catalog'?
+  [{sceneId:'scene36:cloth-banner',anchor:[11,9,10],orientation:2}]:
+  [{sceneId:'scene48:'+group.wallNames[0],anchor:[11,8,10],orientation:2,variant:2},
+   {sceneId:'scene48:'+group.wallNames[1],anchor:[10,8,11],orientation:1,variant:1}];
 let site=0;
 const sites=[];
 for(let z=-9;z<=13;z+=3){
@@ -57,7 +68,7 @@ for(let z=-9;z<=13;z+=3){
   }
 }
 for(const [sceneId,family] of candidateFamilies){
-  if(family.wall || family.attachment || MEADOW_WOODLAND_IDS.includes(sceneId)!==meadowWoodland) continue;
+  if(family.wall || family.attachment || !group.include(sceneId)) continue;
   while(site<sites.length){
     const placement={sceneId,anchor:sites[site++],variant:1};
     const candidate=sceneFor([placement]);
@@ -71,7 +82,7 @@ for(const [sceneId,family] of candidateFamilies){
 }
 const nativeScene=sceneFor(layout);
 const objects=nativeScene.visible();
-assert.equal(objects.length,meadowWoodland?8:31);
+assert.equal(objects.length,group.length);
 const views=objects.map(o=>{
   const aim=seekView(nativeScene,o);
   assert.ok(aim,'No unobstructed exact-triangle view for '+o.sceneId);

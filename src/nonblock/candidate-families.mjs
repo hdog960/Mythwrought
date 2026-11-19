@@ -16,6 +16,7 @@ import {makeSnowgrass} from '../nonblock-environments24/snowgrass.mjs';
 import {makeTumblebrush} from '../nonblock-environments24/tumblebrush.mjs';
 import {makePebbleScatter} from '../nonblock-environments24/pebble-scatter.mjs';
 import {makeCaveRubbleCluster} from '../nonblock-environments24/cave-rubble-cluster.mjs';
+import {createEnchantedFungus,ENCHANTED_FUNGI_IDS} from '../nonblock-scene48/enchanted-fungi.mjs';
 import {createMeadowWoodland,MEADOW_WOODLAND_IDS} from '../nonblock-scene48/meadow-woodland.mjs';
 import {createCaveFormation} from '../nonblock-environments24/cave-formations.mjs';
 import {describeFitting} from '../nonblock-fittings36/fittings-phase1.mjs';
@@ -53,12 +54,15 @@ function caveFamily(sceneId,attachment) {
   return {lane:'24',attachment,variantMax:7,build:options=>createCaveFormation(sceneId,options)};
 }
 
+function newFloraFamily(sceneId,build,wall) {
+  return [sceneId,{lane:'48',wall,wallInset:.49,wallHeight:2,build:options=>build(sceneId,options)}];
+}
+
 export const candidateFamilies = new Map([
-  ...MEADOW_WOODLAND_IDS.map(sceneId=>{
-    const wall=sceneId==='scene48:crawling-ivy'||sceneId==='scene48:trail-vine';
-    return [sceneId,{lane:'48',wall,wallInset:.49,wallHeight:2,
-      build:options=>createMeadowWoodland(sceneId,options)}];
-  }),
+  ...MEADOW_WOODLAND_IDS.map(sceneId=>newFloraFamily(sceneId,createMeadowWoodland,
+    sceneId==='scene48:crawling-ivy'||sceneId==='scene48:trail-vine')),
+  ...ENCHANTED_FUNGI_IDS.map(sceneId=>newFloraFamily(sceneId,createEnchantedFungus,
+    sceneId==='scene48:shelf-fungus'||sceneId==='scene48:glowing-vine')),
   ...Object.keys(SCENE_FAMILIES).map(sceneId=>[sceneId,floraFamily(
     ({seed,anchor})=>createSceneMesh(sceneId,seed,...anchor).mesh,floraPalette)]),
   ...Object.keys(UNDERGROWTH_FAMILIES).map(sceneId=>[sceneId,floraFamily(
