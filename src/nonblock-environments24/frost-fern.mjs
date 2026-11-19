@@ -31,7 +31,7 @@ export function makeFrostFern({seed,anchor,variant=0}={}){
   breakIntent:{action:'remove-object',targetKey:instanceKey,requiresOwner:':00'},
   persistence:{kind:'schema1-external-tombstone-sidecar',key:instanceKey,defaultRespawn:'never-until-explicit-reset'},
   spawn:'explicit-opt-in-only',
-  render:{batchKey:sceneId+':'+variant,instanced:true,maxInstancesPerBatch:256,maxTrianglesPerInstance:60,lodTriangles:[60,30,12]},
+  render:{batchKey:sceneId+':'+variant,instanced:true,maxInstancesPerBatch:256,maxTrianglesPerInstance:72,lodTriangles:[72,36,12]},
   integrationStatus:'source-candidate-only'};
  return Object.freeze(descriptor);
 }
