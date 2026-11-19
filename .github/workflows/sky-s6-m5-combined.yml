@@ -25,8 +25,28 @@ jobs:
           git merge-base --is-ancestor 474f6c2439865454f80b995af31120c024cdbc2d HEAD
           git fetch --no-tags origin refs/pull/269/head:refs/remotes/origin/s6-accepted
           test "$(git rev-parse refs/remotes/origin/s6-accepted)" = 84501c125ecd582ef6a91dbfc3996398531ad5c3
-          for f in src/sky.mjs src/sky-atmosphere.mjs src/sky-biome-adapter.mjs src/sky-events.mjs src/sky-moons.mjs src/sky-stars.mjs src/world-clock.mjs src/gpu-pipeline.mjs index.html styles.css; do
+          # Preserve ALL 41 separately-owned sky files, including historical tests,
+          # byte-identical to accepted PR #269. Shared UI/source files are pinned
+          # separately to their reviewed recorder+M5+SKY combined Git blobs.
+          for f in $(git diff --name-only e9223217ef1e91d282900c3fc13a21eeda316b63 84501c125ecd582ef6a91dbfc3996398531ad5c3); do
+            case "$f" in src/main.mjs|index.html|styles.css) continue;; esac
             test "$(git rev-parse HEAD:"$f")" = "$(git rev-parse 84501c125ecd582ef6a91dbfc3996398531ad5c3:"$f")" || { echo "ACCEPTED SKY SOURCE CHANGED $f"; exit 1; }
+          done
+          # Exact, audited three-way combined-source Git hashes: never substitute
+          # old SKY-only index/styles that would delete production REC controls.
+          for check in \
+            "src/main.mjs:8565072b54168504b1923bb80c96e728e993a7ac" \
+            "index.html:9cad0f5f52186a38ab0076aa2c0cbaf4f6ce468b" \
+            "styles.css:ae46a6a90ec858247970e1c053f2e71a5e70f69c" \
+            "sw-m5.js:ace90517b4ad905a6dd16f961bf3bc6ea947bb6f" \
+            "scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs:9161acd2f1aefef8bfc165e028dffdd3eb10ff15"; do
+            path="${check%%:*}"; expected="${check#*:}"
+            test "$(git rev-parse HEAD:"$path")" = "$expected" || { echo "REVIEWED JOINT INTEGRATION SOURCE CHANGED $path"; exit 1; }
+          done
+          # The existing, separately approved REC implementation, browser/native
+          # tests and workflow must not be changed by SKY integration.
+          for f in src/gameplay-recorder.mjs tests/gameplay-recorder.test.mjs tests/gameplay-recorder-browser.mjs .github/workflows/gameplay-recorder.yml; do
+            test "$(git rev-parse HEAD:"$f")" = "$(git rev-parse edc6ceae728840bfc361cd8a6437e8a1fa674c42:"$f")" || { echo "PRODUCTION REC SOURCE CHANGED $f"; exit 1; }
           done
           for f in src/manual-biomes/profile-world.mjs src/manual-biomes/m2-runtime-bridge.mjs src/manual-biomes/mountain-pass-v5.mjs src/manual-biomes/overland-walk-m5.mjs src/manual-biomes/profile-storage.mjs src/manual-biomes/m5-offline-registration.mjs src/surface-regions/regions.mjs; do
             test "$(git rev-parse HEAD:"$f")" = "$(git rev-parse 474f6c2439865454f80b995af31120c024cdbc2d:"$f")" || { echo "ACCEPTED M5 SOURCE CHANGED $f"; exit 1; }
