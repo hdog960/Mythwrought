@@ -41,7 +41,7 @@ try{
  child.stderr.on('data',b=>stderr+=b);
  const exit=await new Promise((done,reject)=>{child.on('error',reject);child.on('close',done);setTimeout(()=>{child.kill('SIGKILL');reject(Error('Chromium timed out'));},120000).unref();});
  if(exit!==0)throw Error(`Chromium exit ${exit}: ${stderr.slice(-1500)}`);
- const match=stdout.match(/<pre id="result">([\\s\\S]*?)<\\/pre>/);
+ const match=stdout.match(/<pre id="result">([\s\S]*?)<\/pre>/);
  if(!match||match[1]==='PENDING')throw Error('Chromium fixture did not complete');
  const unescape=s=>s.replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
  const payload=JSON.parse(unescape(match[1]));
@@ -50,7 +50,7 @@ try{
  await mkdir(out,{recursive:true});
  const manifest=[];
  for(const capture of payload.captures){
-  if(!/^fittings36-[a-z0-9x-]+\\.png$/.test(capture.filename))throw Error('invalid filename');
+  if(!/^fittings36-[a-z0-9x-]+\.png$/.test(capture.filename))throw Error('invalid filename');
   const prefix='data:image/png;base64:';
   if(!capture.data.startsWith(prefix))throw Error('invalid PNG URL');
   const bytes=Buffer.from(capture.data.slice(prefix.length),'base64');
