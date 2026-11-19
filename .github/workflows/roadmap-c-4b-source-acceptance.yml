@@ -1,0 +1,164 @@
+name: MYTHWROUGHT Roadmap C 4B exact-source acceptance (isolated draft)
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/roadmap-c-4b-source-acceptance.yml'
+      - 'scripts/ci/roadmap-c-4b/**'
+  workflow_dispatch:
+
+# Additive and isolated; does not edit or replace the historical CI workflow.
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: roadmap-c-4b-source-evidence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  roots:
+    name: Original 12 contracts and 922 repository tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_HEAD_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original syntax, contracts and root native tests without skips
+        run: node scripts/ci/roadmap-c-4b/run-shard.mjs roots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rc4b-roots
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+
+  native:
+    name: All 22 original 4B nonbrowser source test files
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_HEAD_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Full original native test inventory, bounded concurrency=2
+        run: node scripts/ci/roadmap-c-4b/run-shard.mjs native
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rc4b-native
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+
+  chromium:
+    name: Genuine 4B Chromium source shard ${{ matrix.index }}/19
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    env:
+      SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_HEAD_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: One unchanged original Chromium test per independent runner
+        run: node scripts/ci/roadmap-c-4b/run-shard.mjs browser "${{ matrix.index }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rc4b-browser-${{ matrix.index }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+
+  webgl:
+    name: All 20 original real Chromium WebGL2 scripts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_HEAD_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned real Chromium tools (no simulator)
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Execute ALL 20 unchanged genuine WebGL2 scripts
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-rc4b-ci-http.log 2>&1 &
+          node scripts/ci/roadmap-c-4b/run-shard.mjs full
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rc4b-full-real-webgl2
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+
+  aggregate:
+    name: Fail-closed one-attempt 918-source 153-ID acceptance audit
+    if: always()
+    needs: [roots, native, chromium, webgl]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      NEEDS_JSON: ${{ toJSON(needs) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_HEAD_SHA }}
+          persist-credentials: false
+      - name: Download ONLY this run/attempt's attestations and genuine captures
+        uses: actions/download-artifact@v4
+        with:
+          pattern: rc4b-*
+          path: collected/
+          merge-multiple: true
+      - name: Obtain SHA-pinned formally accepted 152-source screenshot baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail --silent --show-error --location --retry 3 \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "Accept: application/vnd.github+json" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/hdog960/Mythwrought/actions/artifacts/14454022536/zip" \
+            -o baseline-152.zip
+          echo "Baseline ZIP from accepted artifact #14454022536 downloaded; exact SHA pinned in auditor"
+      - name: Verify ALL real source/CI evidence and emit 918-frame immutable archive
+        run: python3 scripts/ci/roadmap-c-4b/aggregate-918.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rc4b-final-audit
+          path: acceptance/
+          if-no-files-found: error
+          retention-days: 14
