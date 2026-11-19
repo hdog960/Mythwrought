@@ -62,12 +62,12 @@ function waveRise(x,z,name,weight){
   const threshold=name==='mountain'?.88:name==='snow'?.58:.73;
   return wave*feather>threshold?1:0;
 }
-export function m4PhysicalTerrainHeight(x,z,seed=179){
+export function m4PhysicalTerrainHeight(x,z,seed=179,biomeAt=surfaceBiomeAt){
   if(![x,z,seed].every(Number.isInteger))return null;
-  const region=surfaceBiomeAt(x,z,seed);
+  const region=biomeAt(x,z,seed);
   if(!region||!M4_REGION_NAMES.includes(region.name)||region.weight<.5)
     return null;
-  const base=surfaceBiomeHeight(x,z,seed);
+  const base=surfaceBiomeHeight(x,z,seed,biomeAt);
   const old=terrainHeight(x,z,seed);
   return clamp(Math.max(old,base+waveRise(x,z,region.name,region.weight)),
     old,WORLD_MAX_Y-3);
@@ -79,19 +79,19 @@ export function m4PhysicalTerrainHeight(x,z,seed=179){
  */
 export function m4ThreeRegionFreshColumn(x,z,seed=179,{
  enabled=false,profileIsFresh=false,readBaseline=null,hasEdit=null,
- isProtected=null
+ isProtected=null,biomeAt=surfaceBiomeAt
 }={}){
   if(!enabled||!profileIsFresh||typeof readBaseline!=='function'||
      typeof hasEdit!=='function'||typeof isProtected!=='function')return null;
-  const biome=surfaceBiomeAt(x,z,seed);
+  const biome=biomeAt(x,z,seed);
   if(!biome||!M4_REGION_NAMES.includes(biome.name))return null;
-  const opts={enabled,profileIsFresh,readBaseline,hasEdit,isProtected};
+  const opts={enabled,profileIsFresh,readBaseline,hasEdit,isProtected,biomeAt};
   const original=surfaceBiomeFreshColumn(x,z,seed,opts);
   if(!original)return null;
   // Keep the same original output through the inter-region fade. This
   // prevents a stepped material ring or a new cliff at the original seam.
   if(biome.weight<.5)return original;
-  const top=m4PhysicalTerrainHeight(x,z,seed);
+  const top=m4PhysicalTerrainHeight(x,z,seed,biomeAt);
   if(top===null||top<original.oldTop||top>WORLD_MAX_Y-3)return null;
   for(let y=original.oldTop-2;y<=WORLD_MAX_Y;y++){
     const prior=readBaseline(x,y,z);

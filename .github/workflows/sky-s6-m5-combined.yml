@@ -1,4 +1,4 @@
-name: SKY S6 + production M5 combined release acceptance (draft only)
+name: SKY S6 + V6 integrated original M5 regression acceptance (staging only)
 on:
   push:
     branches: ['sky/s6-m5-controlled-20261118']
@@ -22,7 +22,7 @@ jobs:
       - name: Fail-closed immutable production M5 and protected SKY S0–S6 sources
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git merge-base --is-ancestor 474f6c2439865454f80b995af31120c024cdbc2d HEAD
+          git merge-base --is-ancestor 64245c76a9e265f17bf387e3fd209bbfc9f6d950 HEAD
           git fetch --no-tags origin refs/pull/269/head:refs/remotes/origin/s6-accepted
           test "$(git rev-parse refs/remotes/origin/s6-accepted)" = 84501c125ecd582ef6a91dbfc3996398531ad5c3
           # Preserve ALL 41 separately-owned sky files, including historical tests,
@@ -32,32 +32,53 @@ jobs:
             case "$f" in src/main.mjs|index.html|styles.css) continue;; esac
             test "$(git rev-parse HEAD:"$f")" = "$(git rev-parse 84501c125ecd582ef6a91dbfc3996398531ad5c3:"$f")" || { echo "ACCEPTED SKY SOURCE CHANGED $f"; exit 1; }
           done
-          # Exact, audited three-way combined-source Git hashes: never substitute
-          # old SKY-only index/styles that would delete production REC controls.
+          # Reviewed seven-way current V6 + protected S0-S6 integration.
+          # Do not use stale pre-V6 cache, startup or save pins.
           for check in \
-            "src/main.mjs:8565072b54168504b1923bb80c96e728e993a7ac" \
+            "src/main.mjs:a6d81e992c3b41ec6f79e472dcf42adaaf072131" \
             "index.html:9cad0f5f52186a38ab0076aa2c0cbaf4f6ce468b" \
             "styles.css:ae46a6a90ec858247970e1c053f2e71a5e70f69c" \
-            "sw-m5.js:ace90517b4ad905a6dd16f961bf3bc6ea947bb6f" \
-            "scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs:9161acd2f1aefef8bfc165e028dffdd3eb10ff15"; do
+            "sw-m5.js:18fd058453eb72b687bcbb74870aff105077c389" \
+            "scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs:f03b8b06b170b82d466607040dce4d27284b8ba3" \
+            "scripts/ci/manual-v6-live-webgl2.mjs:7cbf2e1ad3dad42367b86cd4f9acf3a1094f5e5b" \
+            "src/sky-v6-adapter.mjs:ed327fdf311ef1cb35b05f730521c66b745b221d" \
+            "tests/sky-v6-adapter.test.mjs:348b97ec203c4a8c1fdfabc74dc142135f63de44" \
+            "scripts/ci/sky-s6-v6-live-webgl2.mjs:b37c6bd2ee0f41823bffd6c1f7412385d2d7340d" \
+            "tests/sky/s6-v6-paired-benchmark.mjs:055c0033de7e04720746976a03ec290ce002038e"; do
             path="${check%%:*}"; expected="${check#*:}"
-            test "$(git rev-parse HEAD:"$path")" = "$expected" || { echo "REVIEWED JOINT INTEGRATION SOURCE CHANGED $path"; exit 1; }
+            test "$(git rev-parse HEAD:"$path")" = "$expected" || { echo "REVIEWED V6 + S6 SOURCE CHANGED $path"; exit 1; }
           done
-          # The existing, separately approved REC implementation, browser/native
-          # tests and workflow must not be changed by SKY integration.
-          for f in src/gameplay-recorder.mjs tests/gameplay-recorder.test.mjs tests/gameplay-recorder-browser.mjs .github/workflows/gameplay-recorder.yml; do
-            test "$(git rev-parse HEAD:"$f")" = "$(git rev-parse edc6ceae728840bfc361cd8a6437e8a1fa674c42:"$f")" || { echo "PRODUCTION REC SOURCE CHANGED $f"; exit 1; }
-          done
-          for f in src/manual-biomes/profile-world.mjs src/manual-biomes/m2-runtime-bridge.mjs src/manual-biomes/mountain-pass-v5.mjs src/manual-biomes/overland-walk-m5.mjs src/manual-biomes/profile-storage.mjs src/manual-biomes/m5-offline-registration.mjs src/surface-regions/regions.mjs; do
-            test "$(git rev-parse HEAD:"$f")" = "$(git rev-parse 474f6c2439865454f80b995af31120c024cdbc2d:"$f")" || { echo "ACCEPTED M5 SOURCE CHANGED $f"; exit 1; }
+          # Original recorder implementation/tests and all generator-owned
+          # V6 and previous-era terrain modules are SHA-identical to current
+          # approved production main; integration may not overwrite them.
+          for f in \
+            src/gameplay-recorder.mjs tests/gameplay-recorder.test.mjs \
+            tests/gameplay-recorder-browser.mjs .github/workflows/gameplay-recorder.yml \
+            src/manual-biomes/profile-world.mjs \
+            src/manual-biomes/v6-balanced-biomes.mjs \
+            src/manual-biomes/desert-m3.mjs \
+            src/manual-biomes/three-regions-m4.mjs \
+            src/manual-biomes/m2-runtime-bridge.mjs \
+            src/manual-biomes/mountain-pass-v5.mjs \
+            src/manual-biomes/profile-storage.mjs \
+            src/manual-biomes/m5-offline-registration.mjs \
+            src/manual-biomes/overland-walk-m5.mjs \
+            src/surface-regions/regions.mjs \
+            tests/manual-biomes/v6-balanced-biomes.test.mjs; do
+            test "$(git rev-parse HEAD:"$f")" = "$(git rev-parse 64245c76a9e265f17bf387e3fd209bbfc9f6d950:"$f")" || { echo "APPROVED V6 OR REC SOURCE CHANGED $f"; exit 1; }
           done
           node --check src/main.mjs
           node --check sw-m5.js
+          node --check src/sky-v6-adapter.mjs
+          node --check scripts/ci/sky-s6-v6-live-webgl2.mjs
+          node --check scripts/ci/manual-v6-live-webgl2.mjs
+          node --check tests/sky/s6-v6-paired-benchmark.mjs
           node --check tests/sky/s6-m5-combined-webgl2.mjs
           node --check scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs
       - name: Strict native M5 worlds, save, and preserved S1–S6 sky contracts
         run: |
           node --test tests/sky-biome-adapter.test.mjs tests/sky-atmosphere.test.mjs tests/sky-events.test.mjs tests/sky-moons.test.mjs tests/sky-stars.test.mjs tests/world-clock.test.mjs
+          node --test tests/sky-v6-adapter.test.mjs tests/manual-biomes/v6-balanced-biomes.test.mjs
           node --test tests/manual-biomes/m5-natural-overland.test.mjs tests/manual-biomes/m5-mountain-pass-v5.test.mjs tests/manual-biomes/m5-explicit-v5-activation.test.mjs tests/manual-biomes/profile-world.test.mjs
   sky-history:
     runs-on: ubuntu-24.04

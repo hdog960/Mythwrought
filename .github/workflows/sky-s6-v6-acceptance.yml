@@ -1,0 +1,146 @@
+name: SKY S6 V6 five-biome source-real release gates (staging only)
+on:
+  push:
+    branches: ['sky/s6-m5-controlled-20261118']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sky-s6-v6-reality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  v6-sky-native-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: No accepted V6 generator, original REC, or SKY S0-S6 edits
+        run: |
+          git merge-base --is-ancestor 64245c76a9e265f17bf387e3fd209bbfc9f6d950 HEAD
+          test "$(git rev-parse HEAD:src/manual-biomes/v6-balanced-biomes.mjs)" = "$(git rev-parse 64245c76a9e265f17bf387e3fd209bbfc9f6d950:src/manual-biomes/v6-balanced-biomes.mjs)"
+          test "$(git rev-parse HEAD:src/manual-biomes/profile-world.mjs)" = "$(git rev-parse 64245c76a9e265f17bf387e3fd209bbfc9f6d950:src/manual-biomes/profile-world.mjs)"
+          test "$(git rev-parse HEAD:src/gameplay-recorder.mjs)" = "$(git rev-parse 64245c76a9e265f17bf387e3fd209bbfc9f6d950:src/gameplay-recorder.mjs)"
+          test "$(git rev-parse HEAD:src/sky-biome-adapter.mjs)" = 27d65055ced6493af8d3f21e53c4661cd1d94554
+          node --check src/main.mjs
+          node --check src/sky-v6-adapter.mjs
+          node --check scripts/ci/sky-s6-v6-live-webgl2.mjs
+          node --check scripts/ci/manual-v6-live-webgl2.mjs
+          node --check tests/sky/recorder-artifact-probe.mjs
+          node --check tests/sky/s6-v6-paired-benchmark.mjs
+          node --check sw-m5.js
+      - name: Immutable original and new authority + physical five-biome native regression
+        run: |
+          node --test tests/sky-v6-adapter.test.mjs tests/sky-biome-adapter.test.mjs
+          node --test tests/manual-biomes/v6-balanced-biomes.test.mjs tests/manual-biomes/profile-world.test.mjs tests/manual-biomes/m5-explicit-v5-activation.test.mjs
+          node --test tests/gameplay-recorder.test.mjs
+  v6-original-physical-and-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned real Chromium and PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Unmodified V6 15 real physical region captures, new joint SW cache and three network-disabled reloads
+        run: node scripts/ci/manual-v6-live-webgl2.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sky-s6-v6-original-physical-offline-${{ github.sha }}
+          path: artifacts/manual-v6-live/
+          if-no-files-found: error
+          retention-days: 14
+  v6-original-game-five-region-day-night:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned actual Chromium 3D renderer and PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Genuine V6 Plains-neutral plus four distinct bounded S6 day/night skies at three landscape sizes
+        run: node scripts/ci/sky-s6-v6-live-webgl2.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sky-s6-v6-real-five-biome-day-night-${{ github.sha }}
+          path: artifacts/sky-s6-v6-live/
+          if-no-files-found: error
+          retention-days: 14
+  recorder-real-video-files:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Guarantee unchanged recorder code and original Chromium test
+        run: |
+          test "$(git rev-parse HEAD:src/gameplay-recorder.mjs)" = "$(git rev-parse 64245c76a9e265f17bf387e3fd209bbfc9f6d950:src/gameplay-recorder.mjs)"
+          test "$(git rev-parse HEAD:tests/gameplay-recorder-browser.mjs)" = "$(git rev-parse 64245c76a9e265f17bf387e3fd209bbfc9f6d950:tests/gameplay-recorder-browser.mjs)"
+          node --check tests/sky/recorder-artifact-probe.mjs
+      - name: Install pinned Chromium and actual MP4 decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          ffprobe -version | head -1
+          ffmpeg -version | head -1
+      - name: Genuine original-game 3s/10s MP4, decoded moving frames, saved raw video files
+        run: |
+          python3 -m http.server 4173 >/tmp/sky-s6-v6-recorder.log 2>&1 &
+          node tests/gameplay-recorder-browser.mjs
+          node tests/sky/recorder-artifact-probe.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sky-s6-v6-authentic-mp4-files-${{ github.sha }}
+          path: artifacts/sky-s6-m5-real-recorder/
+          if-no-files-found: error
+          retention-days: 14
+  v6-s6-guarded-paired-gpu-performance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact immutable approved V6 baseline and only existing paired guard
+        run: |
+          git cat-file -e 64245c76a9e265f17bf387e3fd209bbfc9f6d950^{commit}
+          test "$(git rev-parse HEAD:tests/sky/s6-paired-benchmark.mjs)" = ad1f5113d3420d52341fbcdedb68f7091ffe2f99
+          node --check tests/sky/s6-v6-paired-benchmark.mjs
+          mkdir -p /tmp/mythwrought-v6-main
+          git archive 64245c76a9e265f17bf387e3fd209bbfc9f6d950 | tar -xf - -C /tmp/mythwrought-v6-main
+      - name: Install pinned real WebGL2 Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: ABBA/BAAB same V6 source + five-biome Desert, no more than 20 percent repeatable FPS loss
+        run: |
+          python3 -m http.server 4173 >/tmp/sky-s6-v6-current.log 2>&1 &
+          python3 -m http.server 4174 --directory /tmp/mythwrought-v6-main >/tmp/sky-s6-v6-previous.log 2>&1 &
+          node tests/sky/s6-v6-paired-benchmark.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sky-s6-v6-real-paired-performance-${{ github.sha }}
+          path: artifacts/sky-s6-v6-paired/
+          if-no-files-found: error
+          retention-days: 14
