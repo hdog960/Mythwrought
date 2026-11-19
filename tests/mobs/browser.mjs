@@ -217,7 +217,7 @@ async function verifyHostiles(page,viewport) {
     assert.equal(initial.eligibility,true,id);
     if (tactic.sleep) assert.equal(initial.state,tactic.sleep,id);
     await capture(page,viewport,tactic.sleep??'idle',initial,['Independent hostile model loaded in eligible terrain']);
-    if (id==='giant-spider') {
+    if (tactic.climb) {
       await command(page,'wall');
       const climbed=await step(page,19);
       assert.equal(climbed.mob.motionMode,'climb');
@@ -234,7 +234,7 @@ async function verifyHostiles(page,viewport) {
     }
     const pursuing=await step(page,150,'pursue');
     assert.equal(pursuing.state,'pursue',id);
-    const moved=await step(page,18);
+    const moved=await step(page,18,'prepare-attack');
     assert.ok(Math.hypot(...moved.mob.position.map((value,index)=>value-initial.mob.position[index]))>.16,id);
     if (tactic.medium==='fly') assert.equal(moved.mob.motionMode,'fly',id);
     await capture(page,viewport,'movement-'+tactic.attack,moved,['Pursuit displaced the physical body']);
@@ -281,6 +281,7 @@ try {
       const fleeing = await step(page,20,'flee');
       assert.equal(fleeing.state,'flee');
       const moved = await step(page,14);
+      await capture(page,viewport,'first-response',fleeing,['Detection led to a genuine flee state']);
       assert.ok(horizontal(initial.mob.position,moved.mob.position) > .35);
       await capture(page, viewport, 'flee-response', moved, ['Approach drove the flee state', 'Physics moved the deer']);
       await command(page, 'withdraw');
@@ -292,7 +293,11 @@ try {
       assert.equal(opened.doorOpen,true);
       assert.equal(opened.revision,1);
       await command(page,'encounter');
-      const windup = await step(page,220,'prepare-attack');
+      const pursuingGoblin=await step(page,120,'pursue');
+      const movingGoblin=await step(page,15,'prepare-attack');
+      assert.ok(horizontal(pursuingGoblin.mob.position,movingGoblin.mob.position)>.12);
+      await capture(page,viewport,'pursuit',movingGoblin,['Goblin moved using the navigable open doorway']);
+      const windup = movingGoblin.state==='prepare-attack' ? movingGoblin : await step(page,220,'prepare-attack');
       assert.equal(windup.state,'prepare-attack');
       assert.ok(windup.mob.position[2] > 1.5);
       assert.equal(windup.target.health,100);
@@ -382,7 +387,7 @@ try {
       assert.deepEqual(errors,[]);
       scenarios.push({viewport, screenshots:hashes.filter(entry=>entry.viewport[0]===width).length,
         contextRecovered, storageUnchanged:true, pageErrors:errors});
-      console.log(width+'x'+height+': reference, familiar and original wildlife scenarios passed');
+      console.log(width+'x'+height+': all 40 creature scenarios passed');
     } finally {
       await context.close();
     }
@@ -392,7 +397,9 @@ try {
     const captures = hashes.filter(image => image.species === species.id);
     const verifiedWidths = [...new Set(captures.map(image => image.viewport[0]))];
     const verified = species.implementation === 'preview' && !dirty &&
-      requiredWidths.every(width => verifiedWidths.includes(width));
+      requiredWidths.every(width => captures.filter(image=>image.viewport[0]===width).length>=3 &&
+        (['deer','goblin','glownewt'].includes(species.id) ||
+          wildlifeResults.some(result=>result.species===species.id && result.viewport[0]===width)));
     return {
       species: species.id, classification: species.classification, registry: 'PASS',
       implementation: species.implementation, staging: verified ? 'PASS' : 'BLOCKED',
@@ -402,7 +409,7 @@ try {
     };
   });
   await writeFile(join(output,'species-acceptance.json'),JSON.stringify({
-    source, phase: 3, finalAcceptance: false, species: speciesAcceptance
+    source, phase: 4, finalAcceptance: false, species: speciesAcceptance
   },null,2)+'\n');
   await writeFile(join(output,'manifest.json'),JSON.stringify({
     source, dirty, browser:browser.version(), renderer:'Chromium ANGLE SwiftShader WebGL2',

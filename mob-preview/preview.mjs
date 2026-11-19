@@ -19,7 +19,7 @@ const stats = document.querySelector('#stats');
 const tabs = [...document.querySelectorAll('[data-species]')];
 const picker = document.querySelector('#wildlife');
 const stagedWildlife = { ...familiarWildlife, ...originalWildlife };
-for (const [label, ids] of [['Familiar wildlife',Object.keys(familiarWildlife)],['Mythwrought wildlife',Object.keys(originalWildlife)],['Familiar hostiles',Object.keys(hostileTactics)]]) {
+for (const [label, ids] of [['Familiar wildlife',Object.keys(familiarWildlife)],['Mythwrought wildlife',Object.keys(originalWildlife)],['Familiar hostiles',Object.keys(hostileTactics).filter(id=>!hostileTactics[id].original)],['Mythwrought hostiles',Object.keys(hostileTactics).filter(id=>hostileTactics[id].original)]]) {
   const group=document.createElement('optgroup');
   group.label=label;
   for (const id of ids) group.append(new Option(getSpecies(id).displayName,id));
@@ -121,7 +121,8 @@ function wildlifeCommands(id) {
   const entry = getSpecies(id);
   if (entry.classification === 'hostile') {
     const list=[['encounter','Start encounter'],['withdraw','Leave encounter']];
-    if (id==='giant-spider') list.push(['wall','Toggle wall climb']);
+    if (hostileTactics[id]?.climb) list.push(['wall','Toggle wall climb']);
+    if (hostileTactics[id]?.pack) list.push(['group','Add pack member']);
     return list;
   }
   const list = [['approach', 'Approach'], ['withdraw', 'Step away'], ['group', 'Add group member']];

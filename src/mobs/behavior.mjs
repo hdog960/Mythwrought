@@ -299,14 +299,14 @@ export class BehaviorController {
     return this.#familiar(mob,memory,seen,peers,{ rest:.7, ...profile });
   }
 
-  #movesForHostile(mob, memory, seen, tactic, destination) {
+  #movesForHostile(mob, memory, seen, tactic, destination, peers) {
     if (tactic.medium === 'fly') {
       if (!destination) {
         const flying = ['detect','acquire','prepare-attack','attack','recover'].includes(memory.state);
         if (!flying) return [0,0];
-        if (!mob.grounded || memory.state !== 'detect')
-          return { direction:[0,0],vertical:0,mode:'fly' };
-        return steerInVolume(this.#world,mob,[mob.position[0],mob.origin[1]+tactic.height,mob.position[2]],'fly');
+        if (['detect','acquire'].includes(memory.state) && mob.position[1] < mob.origin[1]+tactic.height-.08)
+          return steerInVolume(this.#world,mob,[mob.position[0],mob.origin[1]+tactic.height,mob.position[2]],'fly');
+        return { direction:[0,0],vertical:0,mode:'fly' };
       }
       const [x,y,z] = destination;
       const height = memory.state === 'return' ? 0 :
@@ -330,6 +330,15 @@ export class BehaviorController {
       const step=positionNear(this.#world,mob,[x,y,z],Math.atan2(dz,dx),1.3);
       if (step) return { direction:this.#navigator.steer(mob,step),pace:.86 };
       return { direction:[dx/distance,dz/distance],pace:.65 };
+    }
+    if (tactic.pack && seen.visible && seen.distance > 2.25 && memory.state === 'pursue') {
+      const leader = peers.find(other=>other.id<mob.id && other.species===mob.species &&
+        other.state==='active' && distanceTo(other.position,mob.position)<4.4);
+      if (leader) {
+        const dx=seen.target.position[0]-mob.position[0], dz=seen.target.position[2]-mob.position[2];
+        const angle=Math.atan2(dz,dx)+Math.PI*.65;
+        destination=positionNear(this.#world,mob,destination,angle,1.45) ?? destination;
+      }
     }
     const heading = this.#navigator.steer(mob,destination);
     if (tactic.climb && seen.climbable && !heading.some(Boolean) && memory.state === 'pursue') {
@@ -358,7 +367,9 @@ export class BehaviorController {
     const territory = distanceTo(mob.position, mob.origin) <= behavior.territory;
     const canSee = seen.visible && territory &&
       distanceTo(seen.target.position, mob.origin) <= behavior.territory;
-    const inReach = canSee && seen.distance <= combat.reach && (!tactic?.standoff || seen.distance >= tactic.standoff*.75);
+    const inReach = canSee && seen.distance <= combat.reach &&
+      (!tactic?.standoff || seen.distance >= tactic.standoff*.75) &&
+      (tactic?.medium !== 'fly' || mob.position[1] >= seen.target.position[1] + .22);
     if (canSee) {
       memory.lastSeen = [...seen.target.position];
       memory.lost = 0;
@@ -392,6 +403,7 @@ export class BehaviorController {
     if (memory.state === 'return') {
       if (distanceTo(mob.position, mob.origin) > .45 && memory.age < 8) return mob.origin;
       setState(memory, 'idle');
+      if (tactic?.sleep) memory.awake=false;
       return null;
     }
     if (['detect', 'acquire', 'pursue', 'investigate'].includes(memory.state)) {
@@ -453,7 +465,7 @@ export class BehaviorController {
       const tactic = Object.hasOwn(hostileTactics,mob.species.id) ? hostileTactics[mob.species.id] : null;
       const destination = mob.species.classification === 'hostile' ?
         this.#hostile(mob, memory, seen, context,tactic) : this.#passive(mob, memory, seen);
-      if (tactic) return this.#movesForHostile(mob,memory,seen,tactic,destination);
+      if (tactic) return this.#movesForHostile(mob,memory,seen,tactic,destination,peers);
       if (!destination) return [0, 0];
       const heading = this.#navigator.steer(mob, destination);
       if (mob.species.classification === 'hostile' && ['pursue', 'investigate'].includes(memory.state) &&

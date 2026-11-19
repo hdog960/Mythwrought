@@ -9,8 +9,10 @@ import { getSpecies } from '../../src/mobs/species.mjs';
 import { meshes } from '../../mob-preview/models.mjs';
 import { arena } from './fixture.mjs';
 
-const familiarHostiles = [
-  'zombie','skeleton','giant-spider','slime','wraith','troll','harpy','mimic','gargoyle'
+const implementedHostiles = [
+  'zombie','skeleton','giant-spider','slime','wraith','troll','harpy','mimic','gargoyle',
+  'shardmaw','thornwraith','hollowbound','sandstalker','frostwraith','stoneclaw',
+  'gloomcrawler','ashfang','briarlurker','voidmoth'
 ];
 
 function encounter(species, targetPoint = [1.5,-34,.5]) {
@@ -27,9 +29,9 @@ function encounter(species, targetPoint = [1.5,-34,.5]) {
   return { world, engine, control, combat, id, target: new DemoTarget(targetPoint) };
 }
 
-test('each familiar hostile has distinct geometry and commits a timed physical attack', () => {
+test('each continuation hostile has distinct geometry and commits a timed physical attack', () => {
   const geometries = new Set();
-  for (const species of familiarHostiles) {
+  for (const species of implementedHostiles) {
     assert.ok(meshes[species]?.length > 300,species);
     geometries.add(Array.from(meshes[species].filter((_,i)=>i%7<3)).join(','));
     const { world, engine, control, combat, id, target } = encounter(species);
@@ -48,7 +50,7 @@ test('each familiar hostile has distinct geometry and commits a timed physical a
     assert.ok(states.has('prepare-attack') && states.has('recover') && hit,species+' '+[...states]);
     assert.ok(target.health < 100,species);
     if (species==='slime') assert.ok(highest>-33.71,'slime bounced above its floor');
-    if (['wraith','harpy','gargoyle'].includes(species))
+    if (['wraith','harpy','gargoyle','frostwraith','voidmoth'].includes(species))
       assert.ok(modes.has('fly') && highest>-33.8,species+' changed altitude through flight');
     if (species==='mimic') assert.ok(states.has('disguise') && states.has('reveal'));
     if (species==='gargoyle') assert.ok(states.has('perched') && states.has('awaken'));
@@ -63,7 +65,7 @@ test('each familiar hostile has distinct geometry and commits a timed physical a
     assert.equal(JSON.stringify(world.base.save()),original);
     engine.dispose();
   }
-  assert.equal(geometries.size,familiarHostiles.length);
+  assert.equal(geometries.size,implementedHostiles.length);
 });
 
 test('a launched Skeleton projectile hits after travel and is blocked by a newly placed wall', () => {

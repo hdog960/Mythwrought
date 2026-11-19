@@ -83,7 +83,7 @@ export class MobCombat {
   get events() { return [...this.#events]; }
 
   get projectiles() {
-    return this.#projectiles.map(({id,position,velocity})=>({id,position:[...position],velocity:[...velocity]}));
+    return this.#projectiles.map(({id,position,velocity,visual})=>({id,position:[...position],velocity:[...velocity],visual}));
   }
 
   clearProjectiles() {
@@ -102,7 +102,7 @@ export class MobCombat {
     this.#projectiles.push({
       id:'bolt-'+(++this.#sequence),position,velocity,
       remaining:Math.min(1,(distance+.7)/8),targetId:target.id,
-      source:mob.id,damage:mob.species.combat.damage
+      source:mob.id,damage:mob.species.combat.damage,visual:hostileTactics[mob.species.id]?.projectile ?? 'projectile'
     });
     this.#events.push(Object.freeze({type:'projectile',source:mob.id,target:target.id}));
     return true;

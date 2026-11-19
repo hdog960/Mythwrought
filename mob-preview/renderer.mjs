@@ -100,7 +100,8 @@ function camera(point, species, cameraClear) {
     id === 'glownewt' ? .68 : id === 'goblin' ? .89 : 1;
   const level = familiar ? species.body.height * .57 : id === 'glownewt' ? .23 : .66;
   const focus = [point[0], point[1] + level, point[2]];
-  const choices = [[3.4,1.85,4.7],[-3.4,2.2,4.5],[4.7,2,-2.7],[-4.3,2,-3.3],[1.15,1.6,2.4]];
+  const choices = [[3.4,1.85,4.7],[-3.4,2.2,4.5],[4.7,2,-2.7],[-4.3,2,-3.3],[1.15,1.6,2.4],
+    [.05,3.1,.85],[-.25,2.65,-.6],[.05,2.9,-.13]];
   const eyes = choices.map(offset => focus.map((value, axis) => value + offset[axis] * distance));
   const eye = eyes.find(candidate => cameraClear(candidate, focus)) ?? eyes[4];
   const forward = unit(focus.map((value, i) => value - eye[i]));

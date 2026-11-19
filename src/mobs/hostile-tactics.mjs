@@ -8,5 +8,17 @@ export const hostileTactics = Object.freeze(Object.fromEntries([
   ['harpy', { attack: 'aerial', reach: 1.54, windup: .41, cooldown: 1.17, medium: 'fly', height: 1.28 }],
   ['mimic', { attack: 'ambush', reach: 1.38, windup: .31, cooldown: 1.31, sleep: 'disguise', wake: 'reveal', approach: 3.8 }],
   ['gargoyle', { attack: 'aerial', reach: 1.58, windup: .74, cooldown: 1.51, medium: 'fly', height: .9,
-    sleep: 'perched', wake: 'awaken', approach: 5.8 }]
+    sleep: 'perched', wake: 'awaken', approach: 5.8 }],
+  ['shardmaw', { original:true, attack:'heavy', reach:1.78, windup:.94, cooldown:1.58, pace:1.1 }],
+  ['thornwraith', { original:true, attack:'ranged', reach:4.3, windup:.84, cooldown:1.77, standoff:1.72, projectile:'briar-spore' }],
+  ['hollowbound', { original:true, attack:'melee', reach:1.44, windup:.87, cooldown:1.55, pace:.72 }],
+  ['sandstalker', { original:true, attack:'lunge', reach:1.42, windup:.26, cooldown:1.28, pace:1.22,
+    sleep:'half-buried',wake:'uncoil',approach:5.2 }],
+  ['frostwraith', { original:true, attack:'ranged', reach:4.6, windup:.83, cooldown:1.53, medium:'fly',height:1.18,projectile:'frost-splinter' }],
+  ['stoneclaw', { original:true, attack:'heavy', reach:1.65, windup:.92, cooldown:1.39, pace:.83, climb:true }],
+  ['gloomcrawler', { original:true, attack:'lunge', reach:1.23, windup:.27, cooldown:.89, pace:1.15, climb:true,pack:true }],
+  ['ashfang', { original:true, attack:'lunge', reach:1.39, windup:.36, cooldown:1.16, pace:1.18,jump:.7,pack:true }],
+  ['briarlurker', { original:true, attack:'ambush', reach:1.31, windup:.37, cooldown:1.48,
+    sleep:'thicket',wake:'unmask',approach:4.65 }],
+  ['voidmoth', { original:true, attack:'ranged', reach:3.9, windup:.51, cooldown:1.25, medium:'fly',height:1.34,projectile:'void-mote' }]
 ].map(([id, tactics]) => [id,Object.freeze(tactics)])));

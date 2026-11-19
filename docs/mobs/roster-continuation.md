@@ -74,3 +74,11 @@ physically, Spider can climb authorized stone, and the flying foes use the
 same three-axis solver as flying wildlife. Mimic and Gargoyle require actual
 reveal or awakening transitions before their attacks. Encounters check
 windup, impact, target loss, and preservation of world bytes.
+
+## Original hostile checkpoint
+
+Shardmaw, Thornwraith, Hollowbound, Sandstalker, Frostwraith, Stoneclaw,
+Gloomcrawler, Ashfang, Briarlurker and Voidmoth join the preview. The wave
+exercises heavy attacks, compact cave traversal, physical flight, ambush,
+pack coordination and different projectile meshes over the common bounded
+projectile solver. The full scene still uses a disposable voxel world.

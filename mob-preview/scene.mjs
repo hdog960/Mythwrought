@@ -39,10 +39,20 @@ const originals = {
   emberwing: [11.5,Y,9.5,'Alpine updraft']
 };
 function hostileFixture(id) {
-  const aerialShelf = ['harpy','gargoyle'].includes(id);
-  const start = aerialShelf ? [9.5,Y,12.5] : id==='giant-spider' ? [-10.5,-8,1.5] : [-11.5,-8,-2.5];
-  const target = aerialShelf ? [9.5,Y,9.5] : id==='giant-spider' ? [-7.2,-8,1.5] : [id==='skeleton' ? -5.5 : -8.2,-8,-2.5];
-  return { start, target, title:getSpecies(id).displayName, habitat:aerialShelf ? 'High outcrop' : 'Carved gallery' };
+  const field = {
+    harpy:[[9.5,Y,12.5],[9.5,Y,9.5],'High outcrop'],
+    gargoyle:[[9.5,Y,12.5],[9.5,Y,9.5],'High outcrop'],
+    'giant-spider':[[-10.5,-8,1.5],[-7.2,-8,1.5],'Carved gallery'],
+    stoneclaw:[[-10.5,-8,1.5],[-7.2,-8,1.5],'Carved gallery'],
+    gloomcrawler:[[-10.5,-8,1.5],[-7.2,-8,1.5],'Narrow cavern'],
+    thornwraith:[[4.5,Y,-2.5],[9.5,Y,-2.5],'Forest margin'],
+    sandstalker:[[-11.5,Y,9.5],[-11.5,Y,12.6],'Dry stone bank'],
+    frostwraith:[[12.5,Y,11.5],[12.5,Y,6.5],'Snow shelf'],
+    briarlurker:[[-.5,Y,7.5],[-.5,Y,10.6],'Reed margin']
+  }[id];
+  const [start,target,habitat] = field ?? [
+    [-11.5,-8,-2.5],[id==='skeleton' ? -5.5 : id==='voidmoth' ? -7.05 : -8.2,-8,-2.5],'Carved gallery'];
+  return { start,target,title:getSpecies(id).displayName,habitat };
 }
 const fixtures = Object.freeze({
   ...Object.fromEntries(Object.keys(hostileTactics).map(id=>[id,hostileFixture(id)])),
@@ -103,7 +113,7 @@ export function createScene() {
       cx >= -1 && cx <= 1 && cz >= -1 && cz <= 1,
     revision: () => revision,
     observe: ([x, y, z]) => ({
-      biome: y < -3 ? 'cave' : x > 6 && z > 8 ? 'alpine' : x < -9 && z > 6 ? 'desert' : z > 6 ? 'wetland' : x < 0 ? 'meadow' : 'forest',
+      biome: y < -3 ? 'cave' : x > 11.75 && z > 9 ? 'snow' : x > 6 && z > 8 ? 'alpine' : x < -9 && z > 6 ? 'desert' : z > 6 ? 'wetland' : x < 0 ? 'meadow' : 'forest',
       climbable: (y < -3 && x < -3) || (x > 8.5 && x < 11.5 && z > 8.5 && z < 10.5),
       light: y < -3 ? .29 : x >= 1 && x < 5 && Math.abs(z) < 2 ? .25 + x*.11 : z > 6 ? .42 : .82,
       dayPhase: 'dusk',
@@ -177,8 +187,9 @@ export function createScene() {
       return true;
     }
     if (command === 'wall') {
-      climbTrial = !climbTrial && species==='giant-spider';
-      return species==='giant-spider';
+      const capable = hostileTactics[species]?.climb === true;
+      climbTrial = !climbTrial && capable;
+      return capable;
     }
     if (command === 'withdraw') {
       climbTrial = false;
@@ -188,7 +199,7 @@ export function createScene() {
     }
     if (command === 'door') return species === 'goblin' && access.request(mob, door.id);
     const familiar = Object.hasOwn(stagedWildlife, species);
-    if (!familiar && species !== 'glownewt') return false;
+    if (!familiar && species !== 'glownewt' && !(command==='group' && hostileTactics[species]?.pack)) return false;
     if (command === 'near') {
       const [x, y, z] = mob.position;
       for (const point of [[x + .85, y, z], [x - .85, y, z], [x, y, z + .85]]) {
@@ -295,7 +306,7 @@ export function createScene() {
     const mob = engine.get(ids[species]);
     const draw = engine.all().filter(entity => entity.state !== 'dormant' && (entity.id === mob.id || nearbyEntities.includes(entity.id)))
       .map(entity => ({ ...entity, visual: behavior.state(entity.id) }));
-    for (const shot of combat.projectiles) draw.push({ ...shot, species:{id:'projectile'},
+    for (const shot of combat.projectiles) draw.push({ ...shot, species:{id:shot.visual},
       yaw:Math.atan2(shot.velocity[0],shot.velocity[2]),state:'active' });
     if (targetVisible) draw.push({ species: { id: 'target' }, position: target.position,
       yaw: 0, velocity: [0, 0, 0], state: target.alive ? 'idle' : 'downed' });
