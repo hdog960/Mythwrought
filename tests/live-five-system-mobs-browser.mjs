@@ -53,22 +53,37 @@ async function rendered(page,actors){
   },actors,{timeout:30000});
   await page.waitForTimeout(80);
 }
-function differences(a,b){
-  const x=PNG.sync.read(a),y=PNG.sync.read(b);
-  assert.equal(x.width,y.width);
-  assert.equal(x.height,y.height);
+function differences(before,visible,after){
+  // Time advances in the REAL sky and game render loop. A simple
+  // before/after comparison incorrectly credits sky twinkle/cloud motion
+  // as creature pixels. Bracket the live-actor frame with TWO genuine
+  // actor-hidden original-game GPU frames; require a material departure
+  // outside the interval spanned by both hidden frames, in the center
+  // camera aim region where the physically grounded creature was placed.
+  const a=PNG.sync.read(before),b=PNG.sync.read(visible),c=PNG.sync.read(after);
+  assert.equal(a.width,b.width);assert.equal(a.height,b.height);
+  assert.equal(c.width,b.width);assert.equal(c.height,b.height);
   let changed=0,box=[Infinity,Infinity,-Infinity,-Infinity];
-  for(let row=0;row<x.height;row++)
-    for(let col=0;col<x.width;col++){
-      const offset=(row*x.width+col)*4;
-      const diff=[0,1,2].reduce((n,i)=>n+
-        Math.abs(x.data[offset+i]-y.data[offset+i]),0);
-      if(diff<35)continue;
+  const minX=Math.floor(b.width*.15),maxX=Math.ceil(b.width*.85);
+  const minY=Math.floor(b.height*.10),maxY=Math.ceil(b.height*.90);
+  for(let row=minY;row<maxY;row++)
+    for(let col=minX;col<maxX;col++){
+      const offset=(row*b.width+col)*4;
+      let delta=0;
+      for(let i=0;i<3;i++){
+        // Source color must differ from BOTH actual background frames,
+        // not just from one earlier arbitrary animation frame.
+        const low=Math.min(a.data[offset+i],c.data[offset+i]);
+        const high=Math.max(a.data[offset+i],c.data[offset+i]);
+        delta+=Math.max(0,low-b.data[offset+i],b.data[offset+i]-high);
+      }
+      if(delta<45)continue;
       changed++;
       box=[Math.min(box[0],col),Math.min(box[1],row),
         Math.max(box[2],col),Math.max(box[3],row)];
     }
-  return {changed,box,width:x.width,height:x.height};
+  return {changed,box,width:b.width,height:b.height,
+    evidence:'actor-pixels-outside-two-hidden-live-sky-background-frames'};
 }
 let error=null;
 try{
@@ -116,12 +131,19 @@ try{
         const png=await page.locator('#scene').screenshot({animations:'disabled'});
         const evidence=await page.evaluate(()=>
           window.__mythwroughtTest.mobAcceptanceSnapshot());
+        // Second actor-hidden screenshot brackets the changing real sky.
+        // Preserve the original source mesh PNG only; all 3 probes use
+        // the same original canvas and real render loop.
+        await page.evaluate(()=>
+          window.__mythwroughtTest.mobAcceptanceVisible(false));
+        await rendered(page,0);
+        const emptyAfter=await page.locator('#scene').screenshot({animations:'disabled'});
         assert.equal(evidence.contextLost,false,'WebGL context lost at '+id);
         assert.equal(evidence.glError,0,'WebGL invalid error at '+id);
         assert.equal(evidence.drawn,1,'Source model not sent to GPU at '+id);
         assert.ok(evidence.gpuBytes>0&&evidence.gpuBytes<=1_000_000,
           'Creature GPU budget incorrect for '+id+': '+evidence.gpuBytes);
-        const stats=differences(empty,png);
+        const stats=differences(empty,png,emptyAfter);
         assert.ok(stats.changed>=25,
           'No source-identical gameplay render difference for '+id+
           ' at '+width+'x'+height+': '+JSON.stringify(stats));
