@@ -95,6 +95,7 @@ jobs:
           node tests/context-restore-browser.mjs
           node tests/nonblock-runtime-browser.mjs
           node tests/nonblock-catalog-browser.mjs
+          NONBLOCK_CATALOG_SET=meadow-woodland node tests/nonblock-catalog-browser.mjs
           node tests/nonblock-cave-browser.mjs
           node tests/nonblock-offline-browser.mjs
       - name: Advisory queue health snapshot

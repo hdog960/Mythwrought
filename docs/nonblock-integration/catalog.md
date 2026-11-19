@@ -7,7 +7,7 @@ The names for empty slots in groups A, B, C and H are working names. Clover clum
 | Slot | Group | Family | Scene ID | Source | Staging evidence |
 | ---: | :---: | --- | --- | --- | --- |
 | 1 | A | Low grass | scene48:low-grass | [Inherited](../../src/nonblock-scene48/flora-phase1.mjs) | Native + Chromium |
-| 2 | A | Grass plume |  | Pending | Pending |
+| 2 | A | Grass plume | scene48:grass-plume | [New](../../src/nonblock-scene48/meadow-woodland.mjs) | Native + Chromium |
 | 3 | A | Clover clump | scene48:clover-clump | [Inherited](../../src/nonblock-scene48/flora-phase1.mjs) | Native + Chromium |
 | 4 | A | Meadow sedge | scene48:meadow-sedge | [Inherited](../../src/nonblock-scene48/flora-phase1.mjs) | Native + Chromium |
 | 5 | A | Short fern | scene48:short-fern | [Inherited](../../src/nonblock-scene48/flora-phase1.mjs) | Native + Chromium |
@@ -15,21 +15,21 @@ The names for empty slots in groups A, B, C and H are working names. Clover clum
 | 7 | A | Lavender spike | scene48:lavender-spike | [Inherited](../../src/nonblock-scene48/flora-phase1.mjs) | Native + Chromium |
 | 8 | A | Heather sprig | scene48:heather-sprig | [Inherited](../../src/nonblock-scene48/flora-phase1.mjs) | Native + Chromium |
 | 9 | A | Clover patch | scene48:clover-patch | [Inherited](../../src/nonblock-scene48/undergrowth-phase1.mjs) | Native + Chromium |
-| 10 | A | Meadow fescue |  | Pending | Pending |
-| 11 | A | Buttercup bunch |  | Pending | Pending |
-| 12 | A | Seedhead meadow mix |  | Pending | Pending |
+| 10 | A | Meadow fescue | scene48:meadow-fescue | [New](../../src/nonblock-scene48/meadow-woodland.mjs) | Native + Chromium |
+| 11 | A | Buttercup bunch | scene48:buttercup-bunch | [New](../../src/nonblock-scene48/meadow-woodland.mjs) | Native + Chromium |
+| 12 | A | Seedhead meadow mix | scene48:seedhead-meadow-mix | [New](../../src/nonblock-scene48/meadow-woodland.mjs) | Native + Chromium |
 | 13 | B | Woodland sapling | scene48:woodland-sapling | [Inherited](../../src/nonblock-scene48/woodland-sapling.mjs) | Native + Chromium |
 | 14 | B | Woodland shrub | scene48:woodland-shrub | [Inherited](../../src/nonblock-scene48/woodland-shrub.mjs) | Native + Chromium |
-| 15 | B | Crawling ivy |  | Pending | Pending |
-| 16 | B | Trail vine |  | Pending | Pending |
+| 15 | B | Crawling ivy | scene48:crawling-ivy | [New](../../src/nonblock-scene48/meadow-woodland.mjs) | Native + Chromium |
+| 16 | B | Trail vine | scene48:trail-vine | [New](../../src/nonblock-scene48/meadow-woodland.mjs) | Native + Chromium |
 | 17 | B | Forest moss mat | scene48:forest-moss-mat | [Inherited](../../src/nonblock-scene48/forest-moss-mat.mjs) | Native + Chromium |
 | 18 | B | Forest lichen patch | scene48:forest-lichen-patch | [Inherited](../../src/nonblock-scene48/forest-lichen-patch.mjs) | Native + Chromium |
 | 19 | B | Exposed root | scene48:exposed-root | [Inherited](../../src/nonblock-scene48/forest-phase1-candidates.mjs) | Native + Chromium |
 | 20 | B | Fallen branch | scene48:fallen-branch | [Inherited](../../src/nonblock-scene48/forest-phase1-candidates.mjs) | Native + Chromium |
 | 21 | B | Bracken fern | scene48:bracken-fern | [Inherited](../../src/nonblock-scene48/undergrowth-phase1.mjs) | Native + Chromium |
 | 22 | B | Moss cushion | scene48:moss-cushion | [Inherited](../../src/nonblock-scene48/undergrowth-phase1.mjs) | Native + Chromium |
-| 23 | B | Forest leaf litter |  | Pending | Pending |
-| 24 | B | Woodland horsetail |  | Pending | Pending |
+| 23 | B | Forest leaf litter | scene48:forest-leaf-litter | [New](../../src/nonblock-scene48/meadow-woodland.mjs) | Native + Chromium |
+| 24 | B | Woodland horsetail | scene48:woodland-horsetail | [New](../../src/nonblock-scene48/meadow-woodland.mjs) | Native + Chromium |
 | 25 | C | Button mushroom | scene48:button-mushroom | [Inherited](../../src/nonblock-scene48/flora-phase1.mjs) | Native + Chromium |
 | 26 | C | Clustered toadstools | scene48:clustered-toadstools | [Inherited](../../src/nonblock-scene48/undergrowth-phase1.mjs) | Native + Chromium |
 | 27 | C | Shelf fungus |  | Pending | Pending |

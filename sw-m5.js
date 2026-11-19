@@ -6,7 +6,7 @@ const workerUrl=new URL(self.location.href);
 const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
   workerUrl.searchParams.get('nonblock-staging')==='1';
 const CACHE_PREFIX=staging?'mythwrought-nonblock-stage-shell-':'mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+(staging?'20261119-v1':'20261119-v6-recorder-v1');
+const CACHE_NAME=CACHE_PREFIX+(staging?'20261119-v2':'20261119-v6-recorder-v1');
 const SOURCE_ASSETS=[
   "./",
   "./assets/icon.svg",
@@ -242,6 +242,7 @@ if(staging)SOURCE_ASSETS.push(
   "./src/nonblock-scene48/forest-lichen-patch.mjs",
   "./src/nonblock-scene48/forest-moss-mat.mjs",
   "./src/nonblock-scene48/forest-phase1-candidates.mjs",
+  "./src/nonblock-scene48/meadow-woodland.mjs",
   "./src/nonblock-scene48/undergrowth-phase1.mjs",
   "./src/nonblock-scene48/woodland-sapling.mjs",
   "./src/nonblock-scene48/woodland-shrub.mjs",

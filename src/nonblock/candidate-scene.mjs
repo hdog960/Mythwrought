@@ -22,9 +22,9 @@ function rotation(x,z,orientation) {
   return [[x,z],[-z,x],[-x,-z],[z,-x]][orientation];
 }
 
-function keyOf(sceneId,seed,anchor,variant,orientation,lane) {
+function keyOf(sceneId,seed,anchor,variant,orientation,family) {
   return 'nb1:'+encodeURIComponent(sceneId)+':'+seed+':'+anchor.join(',')+':'+variant+
-    (lane === '36' ? ':r'+orientation : '');
+    (family.lane==='36'||family.wall ? ':r'+orientation : '');
 }
 
 function validAnchor(anchor) {
@@ -38,9 +38,9 @@ export function describeCandidateObject(seed, placement) {
   if (!family || !Number.isSafeInteger(seed) || !validAnchor(anchor) ||
       !Number.isInteger(variant) || variant < 0 || variant > (family.variantMax??3) ||
       !Number.isInteger(orientation) || orientation < 0 || orientation > 3 ||
-      (family.lane !== '36' && orientation !== 0)) throw new TypeError('Invalid nonblock staging identity');
+      (family.lane !== '36' && !family.wall && orientation !== 0)) throw new TypeError('Invalid nonblock staging identity');
 
-  const instanceKey = keyOf(sceneId,seed,anchor,variant,orientation,family.lane);
+  const instanceKey = keyOf(sceneId,seed,anchor,variant,orientation,family);
   const options = {seed,anchor,variant,orientation};
   const source = family.build ? family.build(options) :
     {mesh:family.mesh(options),palette:family.palette,colliders:[]};
@@ -53,13 +53,14 @@ export function describeCandidateObject(seed, placement) {
   const [ax,ay,az] = anchor;
   const ceiling = family.attachment==='ceiling';
   const height = ay+(ceiling?1:0);
-  const origin = [ax+.5+(family.wall ? wallX*.42 : 0),height,
-    az+.5+(family.wall ? wallZ*.42 : 0)];
+  const wallInset = family.wall ? family.wallInset??.42 : 0;
+  const origin = [ax+.5+wallX*wallInset,height,az+.5+wallZ*wallInset];
   const supports = family.wall ? [[ax+wallX,ay+1,az+wallZ]] :
     ceiling ? [[ax,ay+1,az]] : [[ax,ay-1,az]];
+  if (family.wall&&family.wallHeight===2) supports.push([ax+wallX,ay,az+wallZ]);
   if (family.attachment==='span') supports.push([ax,ay+3,az]);
 
-  const colliders = source.colliders.map(box=>box.map((v,i)=>v+origin[i%3]));
+  const colliders = (source.colliders??[]).map(box=>box.map((v,i)=>v+origin[i%3]));
   const positions = new Float32Array(mesh.positions.length);
   const min = [Infinity,Infinity,Infinity];
   const max = [-Infinity,-Infinity,-Infinity];
@@ -138,7 +139,7 @@ function validateTombstone(key,seed) {
   const family = families.get(sceneId);
   const anchor = match.slice(3,6).map(Number);
   return family && validAnchor(anchor) && Number(match[6])<=(family.variantMax??3) &&
-    keyOf(sceneId,seed,anchor,Number(match[6]),Number(match[7]),family.lane)===key;
+    keyOf(sceneId,seed,anchor,Number(match[6]),Number(match[7]),family)===key;
 }
 
 export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelPick,editedAt=()=>false}) {

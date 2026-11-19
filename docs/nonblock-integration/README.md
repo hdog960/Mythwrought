@@ -73,3 +73,9 @@ All four have eight deterministic geometric variants. The [cave captures](galler
 An explicit second loopback option selects the existing cache worker with an independent staging cache. The worker installs the complete existing shell plus the staged source modules before taking control. It caches the static shell under its canonical path. The staged layout remains in the navigation query and tombstones remain in their own versioned save key.
 
 Chromium reopened a fresh page with the network disabled. The worker served the shell, the mined wildflower stayed removed, and the remaining rope coil drew against the original terrain. Ordinary offline loading remained opt-out and the schema-1 world bytes matched. The [offline manifest](gallery/offline/manifest.json) records the independently matched digest for every cached asset and the [actual offline game frame](gallery/offline/cold-offline-932x430.png). Production Home Screen registration, same-install release rehearsal and physical-device acceptance are open.
+
+## Meadow and woodland source
+
+Eight new families fill the previously empty A and B staging slots. All eight have four deterministic variants with nondegenerate meshes under the 256-triangle limit. Ivy and vine require two natural backing cells and preserve wall orientation in their tombstone IDs. Chromium rendered all eight on actual surfaces, mined them with the touch control, and verified all eight tombstones after reopening while preserving the schema-1 save bytes. The [captures and source manifest](gallery/meadow-woodland/) include per-family triangle totals. Grass and horsetail stems were visible in the recorded views, with thin fronds still needing device-scale art review.
+
+The provisional matrix has 55 source-authored families and 43 with game lifecycle evidence at this checkpoint. Acceptance remains open.
