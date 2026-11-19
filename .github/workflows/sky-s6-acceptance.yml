@@ -1,0 +1,136 @@
+name: Mythwrought SKY S6 protected four-biome source adapter (provisional)
+on:
+  push:
+    branches: ['sky/roadmap-s0-baseline-20261118']
+    paths:
+      - 'src/sky-biome-adapter.mjs'
+      - 'src/main.mjs'
+      - 'tests/sky-biome-adapter.test.mjs'
+      - 'tests/sky/s6-m5-source-attestation.test.mjs'
+      - 'tests/sky/s6-legacy-browser.mjs'
+      - 'tests/sky/s6-paired-benchmark.mjs'
+      - 'docs/sky/S6_*'
+      - '.github/workflows/sky-s6-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sky-s6-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  s6-protected-adapter:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source ownership and accepted S0–S5 immutable behavior
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 37fe30fe11652dce2a967280823ee3937bbd6505 HEAD
+          for file in $(git diff --name-only e9223217ef1e91d282900c3fc13a21eeda316b63 HEAD); do
+            case "$file" in
+              src/world-clock.mjs|src/sky-atmosphere.mjs|src/sky-moons.mjs|src/sky-stars.mjs|src/sky-events.mjs|src/sky-biome-adapter.mjs|src/sky.mjs|src/main.mjs|src/gpu-pipeline.mjs|index.html|styles.css|tests/world-clock.test.mjs|tests/sky-atmosphere.test.mjs|tests/sky-moons.test.mjs|tests/sky-stars.test.mjs|tests/sky-events.test.mjs|tests/sky-biome-adapter.test.mjs|tests/sky/*|docs/sky/*|.github/workflows/sky-*.yml) ;;
+              *) echo "OUTSIDE SKY OWNER: $file"; exit 1;;
+            esac
+          done
+          git diff --exit-code 37fe30fe11652dce2a967280823ee3937bbd6505 HEAD -- src/sky.mjs src/sky-events.mjs src/sky-moons.mjs src/sky-stars.mjs src/sky-atmosphere.mjs src/world-clock.mjs src/gpu-pipeline.mjs index.html styles.css tests/world-clock.test.mjs tests/sky-atmosphere.test.mjs tests/sky-moons.test.mjs tests/sky-stars.test.mjs tests/sky-events.test.mjs tests/sky/s1-clock-browser.mjs tests/sky/s2-atmosphere-browser.mjs tests/sky/s3-moons-browser.mjs tests/sky/s4-stars-browser.mjs tests/sky/s5-events-browser.mjs
+      - name: S6 pure source and untouched S1–S5 native acceptance
+        run: |
+          node --check src/main.mjs
+          node --check src/sky-biome-adapter.mjs
+          node --check tests/sky/s6-m5-source-attestation.test.mjs
+          node --check tests/sky/s6-legacy-browser.mjs
+          node --check tests/sky/s6-paired-benchmark.mjs
+          node --test tests/world-clock.test.mjs tests/sky-atmosphere.test.mjs tests/sky-moons.test.mjs tests/sky-stars.test.mjs tests/sky-events.test.mjs tests/sky-biome-adapter.test.mjs
+      - name: Verify read-only four-biome PR 265 source exactly, no integration or copy
+        run: |
+          git fetch --no-tags origin refs/pull/265/head:refs/remotes/origin/sky-s6-m5-authority
+          test "$(git rev-parse refs/remotes/origin/sky-s6-m5-authority)" = "0140db9ad5e599ac84850fdb17529b7f4d96e4f4"
+          mkdir -p /tmp/mythwrought-s6-authentic-m5
+          git archive 0140db9ad5e599ac84850fdb17529b7f4d96e4f4 | tar -x -C /tmp/mythwrought-s6-authentic-m5
+          test -s /tmp/mythwrought-s6-authentic-m5/src/surface-regions/regions.mjs
+          test -s /tmp/mythwrought-s6-authentic-m5/src/manual-biomes/profile-world.mjs
+          MYTHWROUGHT_M5_READONLY_DIR=/tmp/mythwrought-s6-authentic-m5 MYTHWROUGHT_M5_EXPECTED_SHA=0140db9ad5e599ac84850fdb17529b7f4d96e4f4 node --test tests/sky/s6-m5-source-attestation.test.mjs
+      - name: Install pinned Chromium and original PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: True original-game 3-landscape LEGACY no-op, DAY/NIGHT and saves
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-s6.log 2>&1 &
+          node tests/sky/s6-legacy-browser.mjs
+      - name: Inherited S5 real rare event and matched no-event Chromium proof
+        run: |
+          node tests/sky/s5-events-browser.mjs
+      - name: Inherited S4 original star and cloud-motion Chromium proof
+        run: |
+          node tests/sky/s4-stars-browser.mjs
+      - name: Inherited S3 three lunar orbits and physical screenshot regression
+        run: |
+          node tests/sky/s3-moons-browser.mjs
+      - name: Inherited S2 actual sun/fog and shader original-game regression
+        run: |
+          node tests/sky/s2-atmosphere-browser.mjs
+      - name: Inherited S1 DAY/NIGHT and schema-1 profile protection
+        run: |
+          node tests/sky/s1-clock-browser.mjs
+      - name: S5 vs S6 true legacy same-run ABBA 3-landscape FPS guard
+        run: |
+          mkdir -p /tmp/mythwrought-s5-exact
+          git archive 37fe30fe11652dce2a967280823ee3937bbd6505 | tar -x -C /tmp/mythwrought-s5-exact
+          python3 -m http.server 4174 --directory /tmp/mythwrought-s5-exact >/tmp/mythwrought-s5-paired.log 2>&1 &
+          node tests/sky/s6-paired-benchmark.mjs
+      - name: Upload genuine S6 legacy no-op game screenshot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-sky-s6-legacy-${{ github.sha }}
+          path: artifacts/sky-s6/
+          if-no-files-found: warn
+      - name: Upload S5 genuine event regression screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-sky-s6-S5-${{ github.sha }}
+          path: artifacts/sky-s5/
+          if-no-files-found: warn
+      - name: Upload S4 stars and cloud regression screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-sky-s6-S4-${{ github.sha }}
+          path: artifacts/sky-s4/
+          if-no-files-found: warn
+      - name: Upload S3 original moon screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-sky-s6-S3-${{ github.sha }}
+          path: artifacts/sky-s3/
+          if-no-files-found: warn
+      - name: Upload S2 original atmosphere screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-sky-s6-S2-${{ github.sha }}
+          path: artifacts/sky-s2/
+          if-no-files-found: warn
+      - name: Upload S1 original world-clock screenshot acceptance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-sky-s6-S1-${{ github.sha }}
+          path: artifacts/sky-s1/
+          if-no-files-found: warn
+      - name: Upload guarded S5 versus S6 measured performance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-sky-s6-paired-${{ github.sha }}
+          path: artifacts/sky-s6-paired/
+          if-no-files-found: warn
