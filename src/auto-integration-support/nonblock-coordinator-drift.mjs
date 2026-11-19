@@ -9,11 +9,11 @@ export function auditCoordinatorDrift({coordinator,environment,fittings,expected
   if(expectedHeads?.[name]!==file.head)errors.push(name+': stale producer HEAD');
  }
  if(errors.length)return {ok:false,live:false,errors};
- const coordinatorVersion=coordinator.text.match(/NONBLOCK_OBJECT_VERSION\\s*=\\s*['"]([^'"]+)/)?.[1];
- const target=environment.text.match(/TARGET_CONTRACT\\s*=\\s*['"]([^'"]+)/)?.[1];
- const pinnedCoordinator=environment.text.match(/COORDINATOR_SHA\\s*=\\s*['"]([a-f0-9]{40})/)?.[1];
- const fittingVersion=fittings.text.match(/CONTRACT\\s*=\\s*['"]([^'"]+)/)?.[1];
- const fittingBlob=fittings.text.match(/CONTRACT_SOURCE_SHA\\s*=\\s*['"]([a-f0-9]{40})/)?.[1];
+ const coordinatorVersion=coordinator.text.match(/NONBLOCK_OBJECT_VERSION\s*=\s*['"]([^'"]+)/)?.[1];
+ const target=environment.text.match(/TARGET_CONTRACT\s*=\s*['"]([^'"]+)/)?.[1];
+ const pinnedCoordinator=environment.text.match(/COORDINATOR_SHA\s*=\s*['"]([a-f0-9]{40})/)?.[1];
+ const fittingVersion=fittings.text.match(/CONTRACT\s*=\s*['"]([^'"]+)/)?.[1];
+ const fittingBlob=fittings.text.match(/CONTRACT_SOURCE_SHA\s*=\s*['"]([a-f0-9]{40})/)?.[1];
  if(!coordinatorVersion||coordinatorVersion!==target||target!==fittingVersion)errors.push('contract version mismatch');
  if(pinnedCoordinator!==coordinator.head)errors.push('environment coordinator HEAD drift');
  if(fittingBlob!==coordinator.blob)errors.push('fittings coordinator blob drift');
