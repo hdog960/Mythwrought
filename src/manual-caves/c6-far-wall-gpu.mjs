@@ -10,7 +10,7 @@ import {uploadChunkBuffer} from '../gpu-recovery.mjs';
 
 export const C6_FAR_BOUNDS=Object.freeze({
  maxChunks:4,maxBytes:1048576,maxRing:2,maxCells:64,
- horizontalRays:17,verticalOffsets:Object.freeze([0,.35,.69,.88,-.35,-.7]),
+ horizontalRays:17,verticalOffsets:Object.freeze([0,.35,.51,.69,.88,-.35,-.7]),
  minFramesBetweenPlans:24,maxSourceSamples:3264
 });
 const key=(x,z,s)=>depthMeshKey(x,z,s);
@@ -79,9 +79,11 @@ export function planCaveFarWallSources(world,player,viewport,
       const old=candidates.get(k)||{key:k,cx:sx,cz:sz,section:actualSection,
        hits:0,roofHits:0,nearest:t,source:[x,y,z]};
       old.hits++;
-      // Screen-visible upper-section source rock closes real ceilings;
-      // rank genuine upper camera rays before distant lower wall faces.
-      if(screenY>=.6&&actualSection>section)old.roofHits++;
+      // Screenshot-proven Fan sky pixels at y108-118 hit genuine roof
+      // x209..215/y-115 in 13,10,-7 at normalized height ~.51.
+      // Prior .35/.69-only rays missed that band even with a free GPU slot;
+      // rank real upper-section surface voxels above distant lower walls.
+      if(screenY>=.48&&actualSection>section)old.roofHits++;
       old.nearest=Math.min(old.nearest,t);
       candidates.set(k,old);
      }else uncovered++;

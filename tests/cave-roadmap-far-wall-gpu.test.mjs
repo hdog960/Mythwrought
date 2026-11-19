@@ -69,6 +69,12 @@ test('C6 actual Fan pixel ray selects its source-authenticated upper roof chunk'
  assert.ok(plan.selected.some(c=>c.key==='12,10,-7'),
   'Original camera screen ray overhead rock omitted: '+
   JSON.stringify(plan.selected.map(c=>[c.key,c.hits])));
+ // Current-head actual screenshot x228..283/y108..118 reveals real
+ // ceiling in a second upper section chunk. Both rock roofs must be drawn.
+ assert.equal(world.get(215,-115,160),BLOCK.DEEPSTONE);
+ assert.ok(plan.selected.some(c=>c.key==='13,10,-7'),
+  'Original game remaining Fan upper left skylight chunk omitted: '+
+  JSON.stringify(plan.selected.map(c=>[c.key,c.hits,c.roofHits])));
  assert.ok(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples);
  assert.ok(plan.selected.length<=C6_FAR_BOUNDS.maxChunks);
 });
