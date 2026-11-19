@@ -1,0 +1,119 @@
+name: Mythwrought SKY S5 rare celestial events WebGL2 acceptance
+on:
+  push:
+    branches: ['sky/roadmap-s0-baseline-20261118']
+    paths:
+      - 'src/sky-events.mjs'
+      - 'src/sky.mjs'
+      - 'src/main.mjs'
+      - 'src/gpu-pipeline.mjs'
+      - 'tests/sky-events.test.mjs'
+      - 'tests/sky/s5-events-browser.mjs'
+      - 'tests/sky/s5-paired-benchmark.mjs'
+      - 'docs/sky/S5_*'
+      - '.github/workflows/sky-s5-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sky-s5-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-exact-s5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fail-closed S0-S4 ownership, schema-1 and sibling protection
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor a80cf705c539360440eabe8d7ffe931f9a730a7d HEAD
+          for file in $(git diff --name-only e9223217ef1e91d282900c3fc13a21eeda316b63 HEAD); do
+            case "$file" in
+              src/world-clock.mjs|src/sky-atmosphere.mjs|src/sky-moons.mjs|src/sky-stars.mjs|src/sky-events.mjs|src/sky.mjs|src/main.mjs|src/gpu-pipeline.mjs|index.html|styles.css|tests/world-clock.test.mjs|tests/sky-atmosphere.test.mjs|tests/sky-moons.test.mjs|tests/sky-stars.test.mjs|tests/sky-events.test.mjs|tests/sky/*|docs/sky/*|.github/workflows/sky-*.yml) ;;
+              *) echo "S5 NON-SKY OWNER MODIFIED: $file"; exit 1;;
+            esac
+          done
+          git diff --exit-code a80cf705c539360440eabe8d7ffe931f9a730a7d HEAD -- src/world-clock.mjs src/sky-atmosphere.mjs src/sky-moons.mjs src/sky-stars.mjs index.html styles.css tests/world-clock.test.mjs tests/sky-atmosphere.test.mjs tests/sky-moons.test.mjs tests/sky-stars.test.mjs tests/sky/s1-clock-browser.mjs tests/sky/s2-atmosphere-browser.mjs tests/sky/s3-moons-browser.mjs tests/sky/s4-stars-browser.mjs
+          git diff --exit-code e9223217ef1e91d282900c3fc13a21eeda316b63 HEAD -- src/persistence.mjs src/storybook-materials.mjs src/voxel.mjs src/physics.mjs src/foreground.mjs src/render-budget.mjs
+      - name: Exact native deterministic 1000-day rarity and inherited celestial contracts
+        run: |
+          node --check src/main.mjs
+          node --check src/sky.mjs
+          node --check src/sky-events.mjs
+          node --check tests/sky/s5-events-browser.mjs
+          node --check tests/sky/s5-paired-benchmark.mjs
+          node --test tests/world-clock.test.mjs tests/sky-atmosphere.test.mjs tests/sky-moons.test.mjs tests/sky-stars.test.mjs tests/sky-events.test.mjs
+      - name: Install pinned Chromium and original PNG verifier
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Original-game rare event and true non-event Chromium visual proof
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-sky-s5.log 2>&1 &
+          node tests/sky/s5-events-browser.mjs
+      - name: Inherited S4 real stars, moving clouds, moon composition screenshots
+        run: |
+          node tests/sky/s4-stars-browser.mjs
+      - name: Inherited S3 three-moon lunar phase and schema-1 browser acceptance
+        run: |
+          node tests/sky/s3-moons-browser.mjs
+      - name: Inherited S2 moving sun, fog and original-game screenshots
+        run: |
+          node tests/sky/s2-atmosphere-browser.mjs
+      - name: Inherited S1 24-minute clock, controls and world-switch regression
+        run: |
+          node tests/sky/s1-clock-browser.mjs
+      - name: Same-run S4 versus S5 three-landscape ABBA WebGL2 performance budget
+        run: |
+          mkdir -p /tmp/mythwrought-s4-exact
+          git archive a80cf705c539360440eabe8d7ffe931f9a730a7d | tar -x -C /tmp/mythwrought-s4-exact
+          python3 -m http.server 4174 --directory /tmp/mythwrought-s4-exact >/tmp/mythwrought-s4-paired.log 2>&1 &
+          node tests/sky/s5-paired-benchmark.mjs
+      - name: Upload genuine rare S5 celestial event and ordinary sky screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s5-${{ github.sha }}
+          path: artifacts/sky-s5/
+          if-no-files-found: warn
+      - name: Upload S4 star and cloud-motion regression images
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s5-S4-regression-${{ github.sha }}
+          path: artifacts/sky-s4/
+          if-no-files-found: warn
+      - name: Upload S3 lunar regression images
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s5-S3-regression-${{ github.sha }}
+          path: artifacts/sky-s3/
+          if-no-files-found: warn
+      - name: Upload S2 atmosphere regression images
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s5-S2-regression-${{ github.sha }}
+          path: artifacts/sky-s2/
+          if-no-files-found: warn
+      - name: Upload S1 clock and controls regression images
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s5-S1-regression-${{ github.sha }}
+          path: artifacts/sky-s1/
+          if-no-files-found: warn
+      - name: Upload same-run protected S4 to S5 performance
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-sky-s5-paired-${{ github.sha }}
+          path: artifacts/sky-s5-paired/
+          if-no-files-found: warn

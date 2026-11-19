@@ -2,16 +2,10 @@ name: Mythwrought SKY S4 majestic stars and animated clouds WebGL2
 on:
   push:
     branches: ['sky/roadmap-s0-baseline-20261118']
+    # S4 accepted at a80cf705c539360440eabe8d7ffe931f9a730a7d.
+    # S5 reruns unmodified S4 visual acceptance as its own regression step.
     paths:
-      - 'src/sky-stars.mjs'
-      - 'src/sky.mjs'
-      - 'src/main.mjs'
-      - 'src/gpu-pipeline.mjs'
-      - 'tests/sky-stars.test.mjs'
       - 'tests/sky/s4-stars-browser.mjs'
-      - 'tests/sky/s4-paired-benchmark.mjs'
-      - 'docs/sky/S4_*'
-      - '.github/workflows/sky-s4-acceptance.yml'
   workflow_dispatch:
 permissions:
   contents: read
