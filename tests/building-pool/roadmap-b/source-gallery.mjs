@@ -41,10 +41,10 @@ const ids=[
  'r1:bathhouse:snow:medium:004',
  'r1:lighthouse:temperate:medium:004',
  'r1:farm-barn:enchanted-forest:large:004',
- 'r2:butcher:mountain:medium:05',
- 'r2:theater:temperate:large:04',
- 'r2:temple:enchanted-forest:medium:06',
- 'r2:bookshop:snow:small:05'
+ 'r2:butcher:mountain:medium:04',
+ 'r2:theater:temperate:large:03',
+ 'r2:temple:enchanted-forest:medium:05',
+ 'r2:bookshop:snow:small:04'
 ];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const files=['src/building-pool/roadmap-b/wave1-community-b1.mjs','src/building-pool/roadmap-b/wave1-trades-b2.mjs',
