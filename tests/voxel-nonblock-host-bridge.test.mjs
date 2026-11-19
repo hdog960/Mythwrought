@@ -53,3 +53,33 @@ test('foreign seed, orphan and duplicate sidecars fail closed',()=>{
     readSidecar:()=>({version:HOST_BRIDGE_VERSION,seed,tombstones}),writeSidecar:()=>{}}),/tombstone/);
  }
 });
+
+test('only genuine current-host pick receipts authorize removal; clones and foreign hosts fail',()=>{
+ const f=fixture(),first=f.create(),second=f.create();
+ const genuine=first.pick(...ray(0));
+ assert.equal(genuine.kind,'nonblock');
+ for(const forged of [
+   {...genuine},
+   structuredClone(genuine),
+   Object.freeze({...genuine}),
+   {...genuine,instanceKey:environment.instanceKey},
+   {...genuine,epoch:genuine.epoch+1},
+ ]) {
+   assert.equal(first.breakHit(forged,...ray(0)),false);
+ }
+ assert.equal(second.breakHit(genuine,...ray(0)),false);
+ assert.equal(first.visible().length,3);
+ assert.equal(first.breakHit(genuine,...ray(0)),true);
+ assert.equal(first.breakHit(genuine,...ray(0)),false);
+ assert.equal(f.create().pick(...ray(0)),null);
+});
+test('receipt from prior pick cannot remove a different rotated neighbor',()=>{
+ const f=fixture(),host=f.create();
+ const a=host.pick(...ray(0));
+ const c=host.pick(...ray(4));
+ assert.equal(host.breakHit(a,...ray(4)),false);
+ assert.equal(host.breakHit({...c,instanceKey:a.instanceKey},...ray(4)),false);
+ assert.equal(host.visible().length,3);
+ assert.equal(host.breakHit(c,...ray(4)),true);
+ assert.equal(host.pick(...ray(0)).instanceKey,flora.instanceKey);
+});
