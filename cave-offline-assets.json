@@ -1,7 +1,7 @@
 {
   "kind": "MYTHWROUGHT_CAVE_SOURCE_ASSETS_V1",
-  "sourceHead": "1c83bde1793059a03c9e369f7a31fea6c7f2e9dc",
-  "cacheRevision": "1c83bde1793059a0",
+  "sourceHead": "3de4702abd2a78217947733c956be85b0106cb33",
+  "cacheRevision": "3de4702abd2a7821",
   "verification": "Git blob SHA-1 of source bytes: SHA1('blob '+byteLength+'\\0'+contents)",
   "assets": [
     "assets/icon.svg",
@@ -395,7 +395,7 @@
     "src/interactions/shape-edit-transaction.mjs": "cb879fa96853d3927d7a7962921a0714a352793e",
     "src/layout.mjs": "8496e32da3422ad591c92f80a4f0113ca68c2749",
     "src/live-voxel-world.mjs": "aa274dfc5752c566cfd671e297aa8bc1b6b32d83",
-    "src/main.mjs": "a14b2f95b68b8d78fb737b37ed789b286aa48059",
+    "src/main.mjs": "7c8fa819f47900c06f3ff55fa2e8eeaca849ffd0",
     "src/manual-biomes/desert-m3.mjs": "536d6c4a488eaa8f0ecc2ade81b34804650ba351",
     "src/manual-biomes/exploration-ink.mjs": "3bd72f2db6a4bce392ab493a4df29b590ff8f289",
     "src/manual-biomes/m2-runtime-bridge.mjs": "59b9db31999d2c4b05fb5a1d26ff915048a2f595",
@@ -406,7 +406,7 @@
     "src/manual-biomes/profile-world.mjs": "d3b6233f00daeaa793444ac3ac60bc2de2b75d6c",
     "src/manual-biomes/shoulder-traversal.mjs": "e0510918952dfead0c997550c97dc136e4107022",
     "src/manual-biomes/three-regions-m4.mjs": "92aa434e86f6dd084480fecdb70901694801bc0a",
-    "src/manual-caves/c6-far-wall-gpu.mjs": "eaef832e8713845b6b2eb270228ef7acfbe4877a",
+    "src/manual-caves/c6-far-wall-gpu.mjs": "abe82f967362c0f4ef0b8c36bc0cdf55c142a165",
     "src/manual-caves/cave-voxel-world.mjs": "30a0fd452a759047d7eaebbabda94aebb435ba97",
     "src/manual-caves/deep-vault-bridges.mjs": "ea204c302164a1f91a8316ed05cfc1b0790c5782",
     "src/manual-caves/east-gallery-intake.mjs": "6f185028eec52c397e01ff9db4fbf4d4565ce418",
