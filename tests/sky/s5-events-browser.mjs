@@ -69,6 +69,28 @@ const brightness=(png,u,v)=>{
   const off=4*(y*png.width+x);
   return (.2126*png.data[off]+.7152*png.data[off+1]+.0722*png.data[off+2])/255;
 };
+// Compare genuine GPU pixels at the SAME phase and camera against an actual
+// ordinary-night control. Moving streak heads cannot be validated by sampling
+// only the unshifted anchor pixel; demand a coherent bright pixel population.
+function eventContrast(eventCanvas,quietCanvas,center,kind){
+  assert.deepEqual([eventCanvas.width,eventCanvas.height],
+    [quietCanvas.width,quietCanvas.height]);
+  const aspect=eventCanvas.width/eventCanvas.height;
+  const u=center[0]+(kind===2?.19/aspect:0);
+  const v=center[1]+(kind===2?.04:0);
+  let brighter=0,peakDelta=0,maxLuminance=0;
+  for(let dy=-19;dy<=19;dy++)for(let dx=-19;dx<=19;dx++){
+    const x=u+dx/eventCanvas.width,y=v-dy/eventCanvas.height;
+    if(x<=0||x>=1||y<=0||y>=1)continue;
+    const actual=brightness(eventCanvas,x,y);
+    const baseline=brightness(quietCanvas,x,y);
+    const delta=actual-baseline;
+    if(delta>.12)brighter++;
+    peakDelta=Math.max(peakDelta,delta);
+    maxLuminance=Math.max(maxLuminance,actual);
+  }
+  return {brighter,peakDelta,maxLuminance,comparison:'same-time-no-event-GPU-control'};
+}
 async function pose(page,alignment){
   await page.locator('#scene').focus();
   await page.keyboard.down('ArrowUp');
@@ -152,23 +174,27 @@ try{
       ];
       const proof=[];
       for(const entry of cases){
+        const control=await activate(page,entry.phase,entry.age+1,0,
+          entry.alignment||false);
+        assert.equal(control.kind,0,'Control sky must have no celestial event');
+        const quiet=await screenshot(page,viewport,'no-'+entry.id,false);
+        const quietCanvas=await screenshot(page,viewport,'no-'+entry.id,true);
         const live=await activate(page,entry.phase,entry.age,entry.kind,
           entry.alignment||false);
         assert.equal(live.id,entry.id);
         const full=await screenshot(page,viewport,entry.id,false);
         const image=await screenshot(page,viewport,entry.id,true);
-        const [u,v]=live.center;
-        const aspect=image.decoded.width/image.decoded.height;
-        const x=entry.kind===2?u+.19/aspect:u;
-        const y=entry.kind===2?v+.04:v;
-        const centerLum=brightness(image.decoded,x,y);
-        assert.ok(centerLum>.19,
-          'Original WebGL2 event produced no illuminated pixel: '+entry.id+
-          ' '+centerLum);
+        const contrast=eventContrast(image.decoded,quietCanvas.decoded,
+          live.center,entry.kind);
+        assert.ok(contrast.brighter>=20&&contrast.peakDelta>.23&&
+          contrast.maxLuminance>.30,
+          'Real WebGL2 '+entry.id+' lacks a visible event-specific pixel cluster: '+
+          JSON.stringify(contrast));
         proof.push({id:entry.id,kind:entry.kind,center:live.center,
-          colorAtCenter:centerLum,strength:live.strength,
+          contrast,strength:live.strength,
           lunarAgeDays:live.lunarAgeDays,moonPhases:live.moonPhases,
-          glError:live.glError,fullImage:full.item.sha256});
+          glError:live.glError,fullImage:full.item.sha256,
+          sameTimeNoEventSha256:quiet.item.sha256});
         assert.deepEqual(await nonSky(page),saved,
           entry.id+' changed canonical schema-1 world data');
       }
@@ -208,7 +234,7 @@ try{
       console.log('SKY_S5_REAL_WEBGL_PASS',JSON.stringify({
         head:HEAD,viewport,nonEvent:ordinary.kind,
         eventKinds:proof.map(p=>p.kind),
-        eventBrightness:proof.map(p=>+p.colorAtCenter.toFixed(3)),
+        eventBrightPixelCounts:proof.map(p=>p.contrast.brighter),
         glError:day.glError,chunks:day.chunks,
         protectedSchemaOne:true,repeat}));
     }finally{await ctx.close();}
