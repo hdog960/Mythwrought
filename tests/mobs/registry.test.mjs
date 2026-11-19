@@ -13,12 +13,12 @@ test('the approved symbolic roster has exactly 20 passive and 20 hostile species
   assert.equal(getSpecies('constructor'), undefined);
 });
 
-test('only Deer, Goblin and Glownewt have an implementation scheduled for the preview', () => {
-  assert.deepEqual(speciesRegistry.filter(entry => entry.implementation === 'preview').map(entry => entry.id).sort(),
-    ['deer', 'glownewt', 'goblin']);
-  assert.equal(getSpecies('deer').bonding.eligible, false);
-  assert.equal(getSpecies('glownewt').bonding.eligible, true);
-  assert.deepEqual(getSpecies('goblin').interactions, ['door']);
+test('all approved species have an explicit staging model and retain capability boundaries', () => {
+  assert.equal(speciesRegistry.filter(entry=>entry.implementation==='preview').length,40);
+  assert.ok(speciesRegistry.every(entry=>entry.render.model===entry.id));
+  assert.equal(getSpecies('deer').bonding.eligible,false);
+  assert.equal(getSpecies('glownewt').bonding.eligible,true);
+  assert.deepEqual(getSpecies('goblin').interactions,['door']);
 });
 
 test('normalization is deterministic, independent of input ordering, and deeply immutable', () => {

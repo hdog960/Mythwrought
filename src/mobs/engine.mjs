@@ -3,6 +3,7 @@ import { moveBody } from './movement.mjs';
 import { validPoint } from './world-query.mjs';
 
 export const FIXED_STEP = 1 / 30;
+export const DEFAULT_ACTIVE_MOBS = 8;
 const MAX_STEPS = 4;
 const MAX_EVENTS = 256;
 const awake = new Set(['active', 'idle']);
@@ -19,7 +20,7 @@ function snapshot(mob) {
     id: mob.id, species: mob.species, position: Object.freeze([...mob.position]),
     velocity: Object.freeze([...mob.velocity]), yaw: mob.yaw, state: mob.state,
     health: mob.health, grounded: mob.grounded, origin: mob.origin,
-    homeChunk: mob.homeChunk, important: mob.important
+    homeChunk: mob.homeChunk, important: mob.important, juvenile: mob.juvenile, motionMode: mob.motionMode
   });
 }
 
@@ -39,7 +40,7 @@ export class MobEngine {
   #maxActive;
   #disposed = false;
 
-  constructor(world, seed = 179, { maxEntities = 64, maxActive = 16 } = {}) {
+  constructor(world, seed = 179, { maxEntities = 64, maxActive = DEFAULT_ACTIVE_MOBS } = {}) {
     if (typeof world?.volume !== 'function' || typeof world?.grounded !== 'function' ||
         !Number.isSafeInteger(seed) || !limits(maxEntities, 1, 128) ||
         !limits(maxActive, 1, 32)) throw new TypeError('Invalid mob engine options');
@@ -54,8 +55,9 @@ export class MobEngine {
     this.#events.push(Object.freeze(event));
   }
 
-  spawn(speciesId, point, { dormant = false, homeChunk = null } = {}) {
-    if (this.#disposed || this.#entities.size >= this.#maxEntities || !validPoint(point)) return null;
+  spawn(speciesId, point, { dormant = false, homeChunk = null, juvenile = false } = {}) {
+    if (this.#disposed || this.#entities.size >= this.#maxEntities ||
+        this.#next >= Number.MAX_SAFE_INTEGER-1 || !validPoint(point)) return null;
     const species = getSpecies(speciesId);
     if (!species || species.implementation !== 'preview' ||
         this.#world.volume(point, species.body) !== 'clear') return null;
@@ -63,9 +65,9 @@ export class MobEngine {
     const id = 'mob-' + (this.#seed >>> 0).toString(36) + '-' + count.toString(36);
     const state = dormant || this.#awake >= this.#maxActive ? 'dormant' : 'idle';
     const entity = {
-      id, species, origin: Object.freeze([...point]), position: [...point],
+      id, species, origin: Object.freeze([...point]), position: [...point], juvenile: juvenile === true,
       velocity: [0, 0, 0], yaw: 0, health: species.combat.health, state,
-      grounded: this.#world.grounded(point, species.body), homeChunk, important: false,
+      grounded: this.#world.grounded(point, species.body), homeChunk, important: false, motionMode: 'walk',
       randomState: (this.#seed ^ Math.imul(count, 0x9e3779b9)) >>> 0
     };
     if (awake.has(state)) this.#awake++;
@@ -164,17 +166,69 @@ export class MobEngine {
           continue;
         }
         const command = controller?.(snapshot(mob), FIXED_STEP);
-        const heading = Array.isArray(command) && command.length === 2 &&
-          command.every(Number.isFinite) ? command : NO_MOVEMENT;
+        const direction = Array.isArray(command) ? command : command?.direction;
+        const heading = Array.isArray(direction) && direction.length === 2 &&
+          direction.every(Number.isFinite) ? direction : NO_MOVEMENT;
         if (awake.has(mob.state) && this.#entities.get(mob.id) === mob) {
-          const state = heading.some(Boolean) ? 'active' : 'idle';
+          const moving = heading.some(Boolean) || (Number.isFinite(command?.vertical) && command.vertical !== 0);
+          const state = moving ? 'active' : 'idle';
           if (state !== mob.state) this.transition(mob.id, state);
-          moveBody(this.#world, mob, heading, FIXED_STEP);
+          moveBody(this.#world, mob, heading, FIXED_STEP, Array.isArray(command) ? undefined : command);
         }
       }
       steps++;
     }
     return steps;
+  }
+
+  checkpoint() {
+    if (this.#disposed) throw TypeError('Cannot snapshot a disposed mob engine');
+    return {
+      seed: this.#seed, next: this.#next, maxEntities: this.#maxEntities, maxActive: this.#maxActive,
+      entities: Array.from(this.#entities.values(),mob=>({
+        id:mob.id,species:mob.species.id,origin:[...mob.origin],position:[...mob.position],
+        velocity:[...mob.velocity],yaw:mob.yaw,state:mob.state,health:mob.health,
+        homeChunk:mob.homeChunk,important:mob.important,juvenile:mob.juvenile,randomState:mob.randomState
+      }))
+    };
+  }
+
+  static fromCheckpoint(world, state) {
+    if (!state || !limits(state.seed,-2147483648,2147483647) ||
+        !limits(state.next,0,Number.MAX_SAFE_INTEGER-1) || !Array.isArray(state.entities) ||
+        state.entities.length > state.maxEntities) throw TypeError('Invalid mob engine checkpoint');
+    const engine=new MobEngine(world,state.seed,{maxEntities:state.maxEntities,maxActive:state.maxActive});
+    const identityPrefix='mob-'+(state.seed>>>0).toString(36)+'-';
+    engine.#next=state.next;
+    for (const row of state.entities) {
+      const key=typeof row?.id==='string' && row.id.startsWith(identityPrefix)
+        ? row.id.slice(identityPrefix.length) : '';
+      const serial=Number.parseInt(key,36);
+      if (!limits(serial,1,state.next) || serial.toString(36)!==key || engine.#entities.has(row.id))
+        throw TypeError('Invalid or duplicate mob identity');
+      const species=getSpecies(row.species);
+      if (species?.implementation!=='preview' || !Object.hasOwn(transitions,row.state) ||
+          !validPoint(row.origin) || !validPoint(row.position) || !validPoint(row.velocity) ||
+          row.velocity.some(value=>Math.abs(value)>16) || !Number.isFinite(row.yaw) ||
+          Math.abs(row.yaw)>Math.PI || !Number.isFinite(row.health) || row.health<0 ||
+          row.health>species.combat.health || (row.state!=='downed' && row.health===0) ||
+          !limits(row.randomState,0,0xffffffff) || typeof row.important!=='boolean' ||
+          typeof row.juvenile!=='boolean' || (row.important&&!species.bonding.eligible) ||
+          (row.juvenile&&!species.breeding.eligible) ||
+          (row.homeChunk!==null && (typeof row.homeChunk!=='string' || !/^-?\d+,-?\d+,-?\d+$/.test(row.homeChunk) ||
+            row.homeChunk.length>64))) throw TypeError('Invalid mob state');
+      let nextState=row.state;
+      const resident=world.volume(row.position,species.body)==='clear';
+      if (awake.has(nextState) && !resident) nextState='dormant';
+      if (awake.has(nextState) && ++engine.#awake > engine.#maxActive)
+        throw TypeError('Mob checkpoint exceeds active capacity');
+      engine.#entities.set(row.id,{
+        ...row,species,state:nextState,origin:Object.freeze([...row.origin]),position:[...row.position],
+        velocity:nextState===row.state && resident ? [...row.velocity] : [0,0,0],
+        grounded:resident && world.grounded(row.position,species.body),motionMode:'walk'
+      });
+    }
+    return engine;
   }
 
   drainEvents() {

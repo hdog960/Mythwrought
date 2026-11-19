@@ -1,3 +1,7 @@
+import { familiarWildlife } from './familiar-wildlife.mjs';
+import { originalWildlife } from './original-wildlife.mjs';
+import { hostileTactics } from './hostile-tactics.mjs';
+
 const movements = ['walk', 'swim', 'fly', 'climb', 'jump', 'crawl'];
 const biomes = ['meadow', 'forest', 'wetland', 'alpine', 'desert', 'snow', 'cave', 'volcanic'];
 const interactions = ['door', 'switch', 'climb-surface'];
@@ -46,7 +50,7 @@ function flag(value, field) {
 export function normalizeSpecies(input) {
   const {
     id, displayName, classification, body, movement, habitat, combat, perception,
-    population, behavior, bonding, breeding, riding, interactions: permissions,
+    population, behavior, bonding, breeding, riding, taming, interactions: permissions,
     render, lifecycle, implementation
   } = object(input, 'record');
   check(typeof id === 'string' && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(id) && id.length <= 40, 'id');
@@ -97,9 +101,10 @@ export function normalizeSpecies(input) {
     bonding: Object.freeze({ eligible: flag(bonding.eligible, 'bonding') }),
     breeding: Object.freeze({ eligible: flag(breeding.eligible, 'breeding') }),
     riding: Object.freeze({ eligible: flag(riding.eligible, 'riding') }),
+    taming: Object.freeze({ eligible: flag(taming?.eligible ?? false, 'taming') }),
     interactions: tags(permissions, interactions, 'environment interactions'),
     render: Object.freeze({
-      model: choice(render.model, ['deer', 'goblin', 'glownewt', 'unassigned'], 'render model'),
+      model: choice(render.model, [id, 'unassigned'], 'render model'),
       animation: choice(render.animation, ['biped', 'quadruped', 'crawler', 'winged', 'floating'], 'animation')
     }),
     lifecycle: Object.freeze({
@@ -111,7 +116,7 @@ export function normalizeSpecies(input) {
   check(entry.bonding.eligible === (entry.lifecycle.persistence === 'bonded'), 'bonded persistence');
   check(!entry.riding.eligible || entry.movement.capabilities.includes('walk'), 'riding capability');
   check(entry.implementation === 'definition' ? entry.render.model === 'unassigned' :
-    entry.render.model === entry.id && entry.movement.capabilities.includes('walk'), 'implementation model');
+    entry.render.model === entry.id, 'implementation model');
   return Object.freeze(entry);
 }
 
@@ -120,7 +125,7 @@ const passive = [
   ['cow', 'Cow', 'meadow forest', .47, 1.45, 31, 1.4, 'herd', 'walk', true, true],
   ['sheep', 'Sheep', 'meadow alpine', .33, 1.02, 22, 1.5, 'herd', 'walk', true, true],
   ['pig', 'Pig', 'meadow forest', .34, .90, 23, 1.5, 'herd', 'walk', true, false],
-  ['chicken', 'Chicken', 'meadow forest', .18, .49, 8, 1.7, 'herd', 'walk', true, false, false, 'biped'],
+  ['chicken', 'Chicken', 'meadow forest', .18, .49, 8, 1.7, 'herd', 'walk jump', true, false, false, 'biped'],
   ['horse', 'Horse', 'meadow alpine', .48, 1.72, 42, 2.5, 'herd', 'walk jump', true, true, true],
   ['deer', 'Deer', 'forest meadow', .38, 1.46, 26, 2.65, 'herd', 'walk', true, true],
   ['rabbit', 'Rabbit', 'meadow forest', .17, .38, 7, 2.4, 'pair', 'walk jump', true, true],
@@ -167,8 +172,10 @@ function baseProfile({
   canBreed = false, grazes = false, rides = false, damage = 0, permissions = [], animation
 }, classification, index) {
   const isHostile = classification === 'hostile';
-  const canBond = id === 'glownewt';
-  const model = ['deer', 'goblin', 'glownewt'].includes(id) ? id : 'unassigned';
+  const familiar = Object.hasOwn(familiarWildlife, id) ? familiarWildlife[id] : null;
+  const canBond = id === 'glownewt' || familiar?.bond === true;
+  const tactic = Object.hasOwn(hostileTactics,id) ? hostileTactics[id] : null;
+  const model = familiar || tactic || Object.hasOwn(originalWildlife, id) || ['deer', 'goblin', 'glownewt'].includes(id) ? id : 'unassigned';
   const habitatBiomes = habitatTags.split(' ');
   const capabilities = modes.split(' ');
   const cave = habitatBiomes.includes('cave');
@@ -188,7 +195,8 @@ function baseProfile({
     },
     combat: {
       health, damage: canBond ? 2 : damage,
-      reach: isHostile ? 1.35 : .8, windup: isHostile ? .55 : .4, cooldown: isHostile ? 1.1 : 3
+      reach: tactic?.reach ?? (isHostile ? 1.35 : .8), windup: tactic?.windup ?? (isHostile ? .55 : .4),
+      cooldown: tactic?.cooldown ?? (isHostile ? 1.1 : 3)
     },
     perception: { sight: isHostile ? 11 : 8, hearing: isHostile ? 8 : 6,
       threat: isHostile ? 'hunt' : canBond || id === 'wolf' ? 'defend' : 'avoid' },
@@ -199,6 +207,7 @@ function baseProfile({
     bonding: { eligible: canBond },
     breeding: { eligible: canBreed },
     riding: { eligible: rides },
+    taming: { eligible: familiar?.tame === true },
     interactions: permissions,
     render: { model, animation: animationStyle },
     lifecycle: { replenishes: true, persistence: canBond ? 'bonded' : 'transient' },

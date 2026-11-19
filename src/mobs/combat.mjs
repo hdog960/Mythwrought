@@ -1,3 +1,5 @@
+import { FIXED_STEP } from './engine.mjs';
+import { hostileTactics } from './hostile-tactics.mjs';
 import { distanceTo, eligibleTarget } from './behavior.mjs';
 import { validPoint } from './world-query.mjs';
 
@@ -67,6 +69,8 @@ export class MobCombat {
   #access;
   #attempts = new Map();
   #events = [];
+  #projectiles = [];
+  #sequence = 0;
   #time = 0;
 
   constructor(engine, world, behavior, access = null) {
@@ -77,6 +81,58 @@ export class MobCombat {
   }
 
   get events() { return [...this.#events]; }
+
+  get projectiles() {
+    return this.#projectiles.map(({id,position,velocity,visual})=>({id,position:[...position],velocity:[...velocity],visual}));
+  }
+
+  clearProjectiles() {
+    this.#projectiles.length = 0;
+  }
+
+  #launch(mob,target) {
+    if (this.#projectiles.length >= 32 || !eligibleTarget(target) ||
+        distanceTo(mob.position,target.position)>mob.species.combat.reach) return false;
+    const position = eye(mob.position,mob.species.body.height);
+    const aim = eye(target.position,target.height);
+    if (!this.#world.lineOfSight(position,aim)) return false;
+    const distance=distanceTo(position,aim);
+    if (distance<.1) return false;
+    const velocity=aim.map((value,axis)=>(value-position[axis])*8/distance);
+    this.#projectiles.push({
+      id:'bolt-'+(++this.#sequence),position,velocity,
+      remaining:Math.min(1,(distance+.7)/8),targetId:target.id,
+      source:mob.id,damage:mob.species.combat.damage,visual:hostileTactics[mob.species.id]?.projectile ?? 'projectile'
+    });
+    this.#events.push(Object.freeze({type:'projectile',source:mob.id,target:target.id}));
+    return true;
+  }
+
+  #advanceProjectiles(target,seconds) {
+    for (let index=this.#projectiles.length-1;index>=0;index--) {
+      const bolt=this.#projectiles[index];
+      const next=bolt.position.map((value,axis)=>value+bolt.velocity[axis]*seconds);
+      if (!this.#world.residentAt(next) || !this.#world.lineOfSight(bolt.position,next) ||
+          !eligibleTarget(target) || typeof target.damage!=='function' || target.id!==bolt.targetId) {
+        this.#projectiles.splice(index,1);
+        continue;
+      }
+      const center=eye(target.position,target.height);
+      const displacement=next.map((value,axis)=>value-bolt.position[axis]);
+      const projection=displacement.reduce((sum,value,axis)=>sum+value*(center[axis]-bolt.position[axis]),0) /
+        (8*seconds)**2;
+      const closest=bolt.position.map((value,axis)=>value+displacement[axis]*Math.max(0,Math.min(1,projection)));
+      if (distanceTo(closest,center)<.29 && this.#world.lineOfSight(closest,center)) {
+        if (target.damage(bolt.damage))
+          this.#events.push(Object.freeze({type:'damage',source:bolt.source,target:bolt.targetId,amount:bolt.damage}));
+        this.#projectiles.splice(index,1);
+        continue;
+      }
+      bolt.position=next;
+      bolt.remaining-=seconds;
+      if (bolt.remaining<=0) this.#projectiles.splice(index,1);
+    }
+  }
 
   #strike(mob, target, applyDamage) {
     if (!active(mob) || !eligibleTarget(target) || target.id === mob.id ||
@@ -113,13 +169,16 @@ export class MobCombat {
     this.#events = [];
     if (Number.isFinite(seconds) && seconds >= 0) this.#time += Math.min(seconds, 4 / 30);
     for (const id of this.#attempts.keys()) if (!this.#engine.get(id)) this.#attempts.delete(id);
-    return this.#behavior.advance(seconds, {
+    const steps = this.#behavior.advance(seconds, {
       ...context, target,
       onAttack: (mob, candidate) => {
-        if (candidate === target && typeof target.damage === 'function')
-          this.#strike(mob, target, damage => target.damage(damage));
+        if (candidate !== target || typeof target.damage !== 'function') return;
+        if (hostileTactics[mob.species.id]?.attack === 'ranged') this.#launch(mob,target);
+        else this.#strike(mob,target,damage => target.damage(damage));
       },
       onBlocked: (mob, seen) => this.#tryObject(mob, seen)
     });
+    for (let tick=0;tick<steps;tick++) this.#advanceProjectiles(target,FIXED_STEP);
+    return steps;
   }
 }

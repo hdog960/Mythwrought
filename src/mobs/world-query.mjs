@@ -2,11 +2,12 @@ import { BLOCK, chunkCoord } from '../voxel.mjs';
 import { sectionForY } from '../depth.mjs';
 import { biome130Block, isBiome130BlockId } from '../biome130-registry.mjs';
 import { isPack2LiveId, pack2ShapeOf } from '../pack2-integration.mjs';
+import { WATER_CANDIDATE_ID, waterVolumeContains } from '../block-packs/pack-2/water.mjs';
 import { FULL_CUBE, raycastShapes } from '../voxel-shape-interactions.mjs';
 
 const EPSILON = 1e-5;
 const EMPTY = Object.freeze({ boxes: [] });
-const BLOCKED = Object.freeze({ biome: null, light: null, hazard: true, objects: [] });
+const BLOCKED = Object.freeze({ biome: null, light: null, hazard: true, dayPhase: null, objects: [] });
 
 export function validPoint(point) {
   return Array.isArray(point) && point.length === 3 &&
@@ -39,7 +40,8 @@ export function createWorldQuery(world, {
   function shapeAt(x, y, z) {
     if (!cellResident(x, y, z)) return null;
     const id = world.get(x, y, z);
-    if (id === BLOCK.AIR || id === 76) return EMPTY;
+    if (id === BLOCK.AIR) return EMPTY;
+    if (id === WATER_CANDIDATE_ID) return world.getPack2State?.(x,y,z) ? EMPTY : null;
     if (isPack2LiveId(id)) {
       const state = world.getPack2State?.(x, y, z);
       return state ? pack2ShapeOf(id, state) : null;
@@ -96,6 +98,21 @@ export function createWorldQuery(world, {
     return !overlayRayHit?.(from, vector, distance);
   }
 
+  function medium(point) {
+    if (!validPoint(point)) return 'unknown';
+    const cell = point.map(Math.floor);
+    if (!cellResident(...cell)) return 'unknown';
+    if (world.get(...cell) !== WATER_CANDIDATE_ID) return 'air';
+    const state = world.getPack2State?.(...cell);
+    if (!state) return 'unknown';
+    try {
+      return waterVolumeContains(state, point.map((value, axis) => value - cell[axis])) ? 'water' : 'air';
+    } catch (error) {
+      if (error instanceof TypeError || error instanceof RangeError) return 'unknown';
+      throw error;
+    }
+  }
+
   function environment(point) {
     if (!validPoint(point) || !cellResident(...point.map(Math.floor))) return BLOCKED;
     const sample = observe([...point]);
@@ -104,10 +121,12 @@ export function createWorldQuery(world, {
       biome: typeof sample.biome === 'string' ? sample.biome : null,
       light: Number.isFinite(sample.light) && sample.light >= 0 && sample.light <= 1 ? sample.light : null,
       hazard: sample.hazard !== false,
+      climbable: sample.climbable === true,
+      dayPhase: ['dawn', 'day', 'dusk', 'night'].includes(sample.dayPhase) ? sample.dayPhase : null,
       objects: Array.isArray(sample.objects) ? sample.objects.slice(0, 8) : []
     };
   }
 
-  return Object.freeze({ volume, grounded, lineOfSight, environment, revision,
+  return Object.freeze({ volume, grounded, lineOfSight, environment, medium, revision,
     residentAt: point => validPoint(point) && cellResident(...point.map(Math.floor)) });
 }

@@ -3,12 +3,19 @@ import { GRAVITY } from '../physics.mjs';
 const PRECISION = .0001;
 const RISE_SAMPLE = .05;
 
-function attemptAxis(world, mob, axis, displacement) {
+function bodyClear(world, mob, position, riderHeight) {
+  const status = world.volume(position, mob.species.body);
+  if (status !== 'clear' || !riderHeight) return status;
+  const [x, y, z] = position;
+  return world.volume([x, y + mob.species.body.height, z], { radius: .24, height: riderHeight });
+}
+
+function attemptAxis(world, mob, axis, displacement, riderHeight) {
   if (!displacement) return;
   const start = mob.position;
   const next = [...start];
   next[axis] += displacement;
-  const collision = world.volume(next, mob.species.body);
+  const collision = bodyClear(world, mob, next, riderHeight);
   if (collision === 'clear') {
     mob.position = next;
     return;
@@ -17,10 +24,11 @@ function attemptAxis(world, mob, axis, displacement) {
     const maxRise = mob.species.movement.stepHeight;
     for (let rise = Math.min(RISE_SAMPLE, maxRise); rise > 0; rise = Math.min(maxRise, rise + RISE_SAMPLE)) {
       const raised = [start[0], start[1] + rise, start[2]];
-      if (world.volume(raised, mob.species.body) !== 'clear') break;
+      if (bodyClear(world, mob, raised, riderHeight) !== 'clear') break;
       const raisedDestination = [...next];
       raisedDestination[1] += rise;
-      if (world.grounded(raisedDestination, mob.species.body)) {
+      if (bodyClear(world, mob, raisedDestination, riderHeight) === 'clear' &&
+          world.grounded(raisedDestination, mob.species.body)) {
         mob.position = raisedDestination;
         return;
       }
@@ -33,7 +41,7 @@ function attemptAxis(world, mob, axis, displacement) {
     const midpoint = (low + high) / 2;
     const point = [...start];
     point[axis] += displacement * midpoint;
-    if (world.volume(point, mob.species.body) === 'clear') low = midpoint;
+    if (bodyClear(world, mob, point, riderHeight) === 'clear') low = midpoint;
     else high = midpoint;
   }
   const clipped = [...start];
@@ -42,23 +50,63 @@ function attemptAxis(world, mob, axis, displacement) {
   mob.velocity[axis] = 0;
 }
 
-export function moveBody(world, mob, heading, dt) {
+export function moveBody(world, mob, heading, dt, controls) {
   const [dx, dz] = heading;
-  const magnitude = Math.hypot(dx, dz);
-  const speed = mob.species.movement.speed;
+  const requested = controls?.mode;
+  const vertical = Number.isFinite(controls?.vertical) ? Math.max(-1, Math.min(1, controls.vertical)) : 0;
+  const [x, y, z] = mob.position;
+  const torso = y + Math.min(.18, mob.species.body.height * .3);
+  const medium = requested === 'swim' ? world.medium?.([x, torso, z]) : null;
+  const flying = requested === 'fly' && supportsMovement(mob.species, 'fly');
+  const swimming = requested === 'swim' && supportsMovement(mob.species, 'swim') && medium === 'water';
+  const spatial = flying || swimming;
+  const magnitude = Math.hypot(dx, dz, spatial ? vertical : 0);
+  const pace = Number.isFinite(controls?.pace) ? Math.max(0, Math.min(1.65, controls.pace)) : 1;
+  const speed = mob.species.movement.speed * pace * (swimming ? .87 : 1);
+  mob.motionMode = flying ? 'fly' : swimming ? 'swim' : 'walk';
+  const riderHeight = supportsMovement(mob.species, 'walk') && mob.species.riding.eligible &&
+    Number.isFinite(controls?.riderHeight) && controls.riderHeight >= .12 && controls.riderHeight <= 3.5
+    ? controls.riderHeight : 0;
   const scale = Number.isFinite(magnitude) ? speed / Math.max(1, magnitude) : 0;
   if (magnitude > 0 && scale) mob.yaw = Math.atan2(dx, dz);
   mob.grounded = world.grounded(mob.position, mob.species.body);
   mob.velocity[0] = dx * scale;
   mob.velocity[2] = dz * scale;
   mob.velocity[1] = Math.max(-10, (mob.grounded ? 0 : mob.velocity[1]) - GRAVITY * dt);
+  if (spatial) mob.velocity[1] = vertical * scale;
+  if (!spatial && mob.grounded && controls?.jump && supportsMovement(mob.species, 'jump')) {
+    const strength = typeof controls.jump === 'number' ? Math.max(.2, Math.min(1, controls.jump)) : 1;
+    mob.velocity[1] = 5.2 * strength;
+    mob.grounded = false;
+  }
+  if (!spatial && controls?.climb === true && supportsMovement(mob.species, 'climb') &&
+      magnitude > 0 && world.environment?.(mob.position).climbable === true) {
+    const [x, y, z] = mob.position;
+    const probe = [x + dx / magnitude * .18, y, z + dz / magnitude * .18];
+    if (world.volume(probe, mob.species.body) === 'solid') {
+      mob.motionMode = 'climb';
+      mob.velocity[0] = 0;
+      mob.velocity[1] = 2;
+      mob.velocity[2] = 0;
+    }
+  }
   const distance = Math.max(...mob.velocity.map(Math.abs)) * dt;
   // Narrow registered planes can be crossed between frame endpoints. Slice
   // motion below the minimum body diameter and test each axis independently.
   const substeps = Math.max(1, Math.ceil(distance / .065));
   for (let i = 0; i < substeps; i++) {
     const time = dt / substeps;
-    for (const axis of [0, 2, 1]) attemptAxis(world, mob, axis, mob.velocity[axis] * time);
+    for (const axis of [0, 2, 1]) {
+      const displacement = mob.velocity[axis] * time;
+      if (swimming && axis === 1 && displacement > 0) {
+        const [px, py, pz] = mob.position;
+        if (world.medium([px, py + Math.min(.18, mob.species.body.height * .3) + displacement, pz]) !== 'water') {
+          mob.velocity[1] = 0;
+          continue;
+        }
+      }
+      attemptAxis(world, mob, axis, displacement, riderHeight);
+    }
     mob.grounded = world.grounded(mob.position, mob.species.body);
   }
 }

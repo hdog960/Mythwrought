@@ -1,5 +1,6 @@
 import { distanceTo, eligibleTarget } from './behavior.mjs';
 import { supportedPosition } from './movement.mjs';
+import { validPoint } from './world-query.mjs';
 
 const commands = ['follow', 'stay', 'return'];
 const awake = mob => mob && ['idle', 'active'].includes(mob.state);
@@ -43,6 +44,38 @@ export class CompanionManager {
   slots() {
     return [...this.#slots.values()].map(({ id, owner, mode, anchor }) =>
       Object.freeze({ id, owner, mode, anchor: Object.freeze([...anchor]) }));
+  }
+
+  checkpoint() {
+    return {
+      capacity:this.#capacity,
+      slots:Array.from(this.#slots.values(),slot=>({
+        id:slot.id,owner:slot.owner,mode:slot.mode,anchor:[...slot.anchor],
+        rescueDelay:Math.max(0,slot.rescueAt-this.#time),
+        immuneDelay:Math.max(0,slot.immuneUntil-this.#time),
+        defendDelay:Math.max(0,slot.defendAt-this.#time)
+      }))
+    };
+  }
+
+  static fromCheckpoint(engine,world,combat,state) {
+    if (!state || !Array.isArray(state.slots) || state.slots.length>state.capacity)
+      throw TypeError('Invalid companion checkpoint');
+    const manager=new CompanionManager(engine,world,combat,{capacity:state.capacity});
+    for (const row of state.slots) {
+      const animal=engine.get(row?.id);
+      if (!animal?.important || !animal.species.bonding.eligible || manager.#slots.has(row.id) ||
+          typeof row.owner!=='string' || !row.owner.length || row.owner.length>128 ||
+          !commands.includes(row.mode) || !validPoint(row.anchor) ||
+          ![row.rescueDelay,row.immuneDelay,row.defendDelay].every(time=>Number.isFinite(time)&&time>=0&&time<=16))
+        throw TypeError('Invalid or duplicate companion ownership');
+      manager.#slots.set(row.id,{id:row.id,owner:row.owner,mode:row.mode,anchor:[...row.anchor],
+        rescueAt:row.rescueDelay || (animal.state==='downed' ? -1 : 0),
+        immuneUntil:row.immuneDelay,defendAt:row.defendDelay});
+    }
+    if (engine.all().some(entity=>entity.important&&!manager.#slots.has(entity.id)))
+      throw TypeError('Missing companion ownership');
+    return manager;
   }
 
   #near(mob, owner) {

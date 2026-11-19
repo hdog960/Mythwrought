@@ -1,3 +1,8 @@
+import { familiarModels } from './familiar-models.mjs';
+import { originalModels } from './original-models.mjs';
+import { hostileModels } from './hostile-models.mjs';
+import { mythwroughtHostileModels } from './mythwrought-hostile-models.mjs';
+
 const faces = [
   [[1, 5, 6, 2], .75], [[4, 0, 3, 7], .6], [[3, 2, 6, 7], 1],
   [[4, 5, 1, 0], .48], [[5, 4, 7, 6], .91], [[0, 1, 2, 3], .7]
@@ -25,6 +30,10 @@ function model(build) {
 }
 
 export const meshes = Object.freeze({
+  ...familiarModels(model),
+  ...originalModels(model),
+  ...hostileModels(model),
+  ...mythwroughtHostileModels(model),
   deer: model(box => {
     box(0,.88,-.11,.56,.51,1.12,'ac6b3c',0,0,.77);
     box(0,.70,-.06,.44,.19,.79,'ead3a8');
