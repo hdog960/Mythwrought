@@ -4,7 +4,7 @@ import {worldSlotKey,SELECTED_SEED_KEY} from '../seeds.mjs';
 import {saveFingerprint,loadWorldSafe,saveWorldSafe,
   SAVE_JOURNAL_SUFFIX,SAVE_BACKUP_SUFFIX} from '../persistence.mjs';
 import {fourRegionProfile,validateFourRegionProfile,FourRegionWorld,
-  restoreFourRegionWorld} from './profile-world.mjs';
+  restoreFourRegionWorld,FOUR_REGION_GENERATOR} from './profile-world.mjs';
 
 export const BIOME_PROFILE_SUFFIX='-four-biomes-profile-v1';
 const PROFILE_JOURNAL='-journal';
@@ -58,12 +58,17 @@ function assertFreshAndUnclaimed(storage,seed){
   }
   return loaded;
 }
-export function activateFourRegionProfile(storage,seed,{explicitNewWorld=false}={}){
+export function activateFourRegionProfile(storage,seed,{
+  explicitNewWorld=false,generator=FOUR_REGION_GENERATOR
+}={}){
   if(!explicitNewWorld)throw Error('Explicit NEW biome-enabled world choice required');
   if(readFourRegionProfile(storage,seed))
     throw Error('World already has a generation profile');
   assertFreshAndUnclaimed(storage,seed);
-  const profile=fourRegionProfile(seed);
+  // A previously saved profile is never remapped. This option is used
+  // solely AFTER a distinct, confirmed new-seed action or validated import.
+  // Default remains the accepted v4 generator.
+  const profile=fourRegionProfile(seed,generator);
   const key=profileKey(seed),raw=record(profile);
   // Immutable generator version. Write a verified journal before the primary
   // sidecar. An interrupted write never permits silent legacy regeneration.
@@ -95,12 +100,14 @@ function selectedWorldPayload(storage,seed,source){
 /** Explicit entry point for M2. Regular callers still use loadWorldSafe().
  * No global startup mutation; legacy seeds get their original world object.
  */
-export function loadFourRegionWorld(storage,seed,{enableNew=false}={}){
+export function loadFourRegionWorld(storage,seed,{
+  enableNew=false,newGenerator=FOUR_REGION_GENERATOR
+}={}){
   const metadata=readFourRegionProfile(storage,seed);
   if(enableNew){
     if(metadata)throw Error('Use existing profile; do not recreate');
     return Object.freeze({world:activateFourRegionProfile(storage,seed,
-      {explicitNewWorld:true}),mode:'four-regions',created:true});
+      {explicitNewWorld:true,generator:newGenerator}),mode:'four-regions',created:true});
   }
   const loaded=loadWorldSafe(storage,seed);
   if(!metadata)return Object.freeze({world:loaded.world,mode:'legacy',

@@ -7,13 +7,16 @@ import {worldSeedFromText} from '../seeds.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData} from '../persistence.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,
   pack2ExportBundle,pack2ImportBundle} from '../pack2-world.mjs';
-import {FourRegionWorld} from './profile-world.mjs';
+import {FourRegionWorld,fourRegionProfile,FOUR_REGION_GENERATOR,
+  M5_EXPERIMENTAL_GENERATOR} from './profile-world.mjs';
 import {loadFourRegionWorld,saveFourRegionWorld,readFourRegionProfile,
   exportFourRegionWorld,inspectFourRegionExport} from './profile-storage.mjs';
 
 export const M2_WORLD_MODE=Object.freeze({
   OPEN:'open-existing',
-  CREATE_FOUR:'create-new-four-biomes'
+  CREATE_FOUR:'create-new-four-biomes',
+  CREATE_FOUR_V5:'create-new-four-biomes-experimental-v5',
+  IMPORT_PROFILE:'import-verified-four-biome-profile'
 });
 
 /** Pure new-world selection gate. A settings menu can request this mode;
@@ -21,18 +24,37 @@ export const M2_WORLD_MODE=Object.freeze({
  * It does NOT check slot availability; activation does so again on write.
  */
 export function planM2WorldChoice(seedText,mode=M2_WORLD_MODE.OPEN,
-  {confirmed=false}={}){
+  {confirmed=false,generator=undefined}={}){
   const seed=worldSeedFromText(seedText);
-  if(mode!==M2_WORLD_MODE.OPEN&&mode!==M2_WORLD_MODE.CREATE_FOUR)
+  if(!Object.values(M2_WORLD_MODE).includes(mode))
     throw Error('Unsupported manual biome world choice');
-  if(mode===M2_WORLD_MODE.CREATE_FOUR&&confirmed!==true)
+  const fresh=mode!==M2_WORLD_MODE.OPEN;
+  if(fresh&&confirmed!==true)
     throw Error('Biome-enabled NEW world requires explicit creator confirmation');
-  return Object.freeze({seed,mode,confirmed:mode===M2_WORLD_MODE.CREATE_FOUR});
+  if(mode!==M2_WORLD_MODE.IMPORT_PROFILE&&generator!==undefined)
+    throw Error('Generator override requires inspected profile import');
+  if(mode===M2_WORLD_MODE.IMPORT_PROFILE){
+    // Inspection must pass before any storage mutation. Only the exact
+    // generator identity from the source bundle may be written.
+    const canonical=fourRegionProfile(seed,generator);
+    return Object.freeze({seed,mode,confirmed:true,generator:canonical.generator});
+  }
+  return Object.freeze({seed,mode,confirmed:fresh});
 }
-const validChoice=c=>c&&typeof c==='object'&&
-  Number.isInteger(c.seed)&&c.seed===(c.seed|0)&&
-  (c.mode===M2_WORLD_MODE.OPEN&&c.confirmed===false||
-   c.mode===M2_WORLD_MODE.CREATE_FOUR&&c.confirmed===true);
+function validChoice(c){
+  if(!c||typeof c!=='object'||!Number.isInteger(c.seed)||
+     c.seed!==(c.seed|0)||!Object.values(M2_WORLD_MODE).includes(c.mode))
+    return false;
+  const importing=c.mode===M2_WORLD_MODE.IMPORT_PROFILE;
+  if(Object.keys(c).sort().join(',')!==
+      (importing?'confirmed,generator,mode,seed':'confirmed,mode,seed'))
+    return false;
+  if(c.confirmed!==(c.mode!==M2_WORLD_MODE.OPEN))return false;
+  if(importing){
+    try{fourRegionProfile(c.seed,c.generator);}catch{return false;}
+  }
+  return true;
+}
 
 /** Candidate for the actual game's loadWorld() seam, not yet activated.
  * The public game must keep using its previous loader until the distinct
@@ -41,10 +63,16 @@ const validChoice=c=>c&&typeof c==='object'&&
  */
 export function openM2World(storage,choice){
   if(!validChoice(choice))throw Error('Invalid/unconfirmed M2 world choice');
-  const fresh=choice.mode===M2_WORLD_MODE.CREATE_FOUR;
-  const result=loadFourRegionWorld(storage,choice.seed,{enableNew:fresh});
-  if(fresh&&(!result.created||result.mode!=='four-regions'))
-    throw Error('New four-region world was not explicitly activated');
+  const fresh=choice.mode!==M2_WORLD_MODE.OPEN;
+  const newGenerator=choice.mode===M2_WORLD_MODE.CREATE_FOUR_V5?
+    M5_EXPERIMENTAL_GENERATOR:choice.mode===M2_WORLD_MODE.IMPORT_PROFILE?
+      choice.generator:FOUR_REGION_GENERATOR;
+  const result=loadFourRegionWorld(storage,choice.seed,{
+    enableNew:fresh,newGenerator
+  });
+  if(fresh&&(!result.created||result.mode!=='four-regions'||
+     result.world.generationProfile.generator!==newGenerator))
+    throw Error('New four-region world was not explicitly activated with its requested generator');
   const loaded=loadPack2LiveWorld(storage,result.world);
   if(!(loaded.world instanceof Pack2LiveWorld)||
      loaded.world.base!==result.world||

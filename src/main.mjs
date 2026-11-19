@@ -18,7 +18,8 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
   exportM2World,inspectM2WorldExport} from './manual-biomes/m2-runtime-bridge.mjs';
@@ -83,6 +84,10 @@ function start(){
     recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
   }
   let pack3=createPack3LiveBridge(world,localStorage);
+  // Only a previously selected immutable v5 world may opt into M5 PWA caching.
+  if(world.base instanceof FourRegionWorld&&
+      world.base.generationProfile.generator===M5_EXPERIMENTAL_GENERATOR)
+    void ensureM5OfflineCache();
   seedLabel.textContent='WORLD '+world.seed;
   const VS=[
     '#version 300 es','precision highp float;',
@@ -2063,6 +2068,20 @@ function start(){
     seedRow.insertAdjacentElement('afterend',createFourBiomeButton);
     createFourBiomeButton.insertAdjacentElement('afterend',biomeChoiceHint);
   }
+  // Different explicit NEW seed action: existing v4 selection stays default.
+  const createV5MountainWorldButton=document.createElement('button');
+  createV5MountainWorldButton.id='createExperimentalV5World';
+  createV5MountainWorldButton.type='button';
+  createV5MountainWorldButton.textContent='CREATE NEW MOUNTAIN-PASS WORLD (V5 TEST)';
+  createV5MountainWorldButton.setAttribute('aria-label',
+    'Experimental version 5 Mountain walking world, unused seed only');
+  const v5Hint=document.createElement('p');
+  v5Hint.className='controlhint';
+  v5Hint.textContent='Experimental v5 for NEW UNUSED SEEDS only. The ordinary v4 generator, older worlds and existing saves are unchanged. Use WORLD EXPORT for version-safe backups.';
+  if(seedRow){
+    biomeChoiceHint.insertAdjacentElement('afterend',createV5MountainWorldButton);
+    createV5MountainWorldButton.insertAdjacentElement('afterend',v5Hint);
+  }
   function enterPreparedM2World(candidate,statusText){
     // This commits only a PREVIOUSLY verified and persisted candidate.
     for(const c of chunks.values())deleteChunkBuffers(c);
@@ -2074,6 +2093,10 @@ function start(){
     g2NewWorld();
     world=candidate;world.nextPack2State=pack2Selection;
     pack3=createPack3LiveBridge(world,localStorage);
+    // Register *after* the explicit unused-seed v5 creation is safely saved.
+    if(world.base instanceof FourRegionWorld&&
+        world.base.generationProfile.generator===M5_EXPERIMENTAL_GENERATOR)
+      void ensureM5OfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
     storageReadOnly=false;changed=false;respawnPrototype();
     clearMirrorDownload();
@@ -2098,6 +2121,29 @@ function start(){
       enterPreparedM2World(loaded.world,'New four-biome world '+next+' created safely. Desert, Snow, Mountains and Enchanted Forest are generated in this seed.');
     }catch(error){
       seedMessage.textContent='Four-biome creation refused; original world retained: '+String(error.message||error);
+    }
+  };
+  createV5MountainWorldButton.onclick=()=>{
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(next===world.seed)throw Error('Choose a different unused seed for experimental v5');
+      if(!window.confirm('CREATE an EXPERIMENTAL V5 MOUNTAIN-PASS FOUR-BIOME WORLD for UNUSED seed '+next+'? Existing worlds are NEVER upgraded or overwritten.'))
+        return;
+      if(!storageReadOnly&&!save())throw Error('Save your current world before a new experimental seed');
+      const choice=planM2WorldChoice(seedInput.value,
+        M2_WORLD_MODE.CREATE_FOUR_V5,{confirmed:true});
+      const loaded=openM2World(localStorage,choice);
+      if(!(loaded.base instanceof FourRegionWorld)||
+         loaded.base.generationProfile.generator!==M5_EXPERIMENTAL_GENERATOR)
+        throw Error('Experimental v5 generator did not activate');
+      const stored=saveM2World(localStorage,loaded.world);
+      if(!stored.ok)throw Error('Experimental v5 save not verified: '+stored.reason);
+      enterPreparedM2World(loaded.world,
+        'Experimental v5 Mountain-pass four-biome world '+next+
+        ' created. Other world seeds, profiles and saves remain unchanged.');
+    }catch(error){
+      seedMessage.textContent='Experimental v5 creation refused; original world retained: '+
+        String(error.message||error);
     }
   };
   document.getElementById('switchWorld').onclick=()=>{
@@ -2160,9 +2206,11 @@ function start(){
         if(!window.confirm('IMPORT a verified FOUR-BIOME profile for UNUSED seed '+examined.seed+'? Existing worlds are never overwritten.'))
           return;
         if(!save())throw Error('Save your current world before importing');
+        // Preserve EXACT imported generator identity, even for older v2/v3.
         const intent=planM2WorldChoice(String(examined.seed),
-          M2_WORLD_MODE.CREATE_FOUR,{confirmed:true});
-        openM2World(localStorage,intent); // Durable profile, fresh-slot check.
+          M2_WORLD_MODE.IMPORT_PROFILE,{confirmed:true,
+            generator:examined.world.base.generationProfile.generator});
+        openM2World(localStorage,intent); // Exact profile, fresh-slot check.
         const stored=saveM2World(localStorage,examined.world);
         if(!stored.ok)throw Error('Profile import not verified; seed is protected: '+stored.reason);
         enterPreparedM2World(examined.world,
@@ -2270,6 +2318,9 @@ function start(){
     window.__mythwroughtTest=Object.freeze({
       fourBiomeMode(){return world.base instanceof FourRegionWorld?'four-regions':'legacy';},
       fourBiomeProfile(){return world.base instanceof FourRegionWorld?world.base.generationProfile:null;},
+      // M5 read-only local browser acceptance: no displacement/rotation methods.
+      m5ObservedPose(){return Object.freeze({x:player.x,z:player.z,feet:player.feet,
+        yaw:player.yaw,seed:world.seed,creative:g2Active(),onGround:player.onGround});},
       gpuUploadFaults(){return [...gpuRetry.faults.entries()].map(([key,value])=>({key,...value}));},
       // Localhost-only acceptance uses actual edit+save and never synthetic
       // screenshot fixtures. Production Pages never exposes this diagnostic.
