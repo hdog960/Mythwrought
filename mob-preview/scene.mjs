@@ -362,7 +362,10 @@ export function createScene() {
     const course=[
       [-9.5,-8,1.5],[-9.5,-8,-1.5],[-6.5,-8,-1.5],[-6.5,-8,1.5]
     ];
-    for(let slot=0,admitted=0;slot<96&&admitted<count;slot++) {
+    // Give every non-empty combat load one real attack opportunity before
+    // the rapid-movement segment can break its line of sight or windup.
+    let admitted=target && count && runtime.spawn('goblin',[-10.8,-8,1.5]) ? 1 : 0;
+    for(let slot=0;slot<96&&admitted<count;slot++) {
       const point=cave ? [-13.5+slot%9,-8,-5.5+Math.floor(slot/9)] :
         [-12.5+slot%8,Y,4.5+Math.floor(slot/8)];
       const {biome}=query.environment(point);
@@ -376,7 +379,7 @@ export function createScene() {
     return {
       runtime,steering,population,subject,observer,
       advance(seconds) {
-        if (target && ++ticks%12===0) target.place(course[Math.floor(ticks/12)%course.length]);
+        if (target && ++ticks>=72 && ticks%12===0) target.place(course[Math.floor(ticks/12)%course.length]);
         const steps=combat.advance(seconds,target);
         attackEvents+=combat.events.filter(event=>event.type==='damage').length;
         return steps;

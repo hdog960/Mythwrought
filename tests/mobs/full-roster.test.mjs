@@ -80,3 +80,16 @@ test('cave pack members use the same real combat target and survive roster clean
   assert.equal(scene.snapshot().draw.some(actor=>actor.id===before[1].id),false);
   scene.dispose();
 });
+
+test('the default cave load includes a real combat opportunity before the moving-target segment',()=>{
+  const scene=createScene();
+  const bench=scene.benchmark(8,{place:'cave',encounter:true});
+  for(let tick=0;tick<110;tick++){
+    bench.population.advance(FIXED_STEP,bench.observer,[]);
+    bench.advance(FIXED_STEP);
+  }
+  assert.equal(bench.runtime.counts().awake,8);
+  assert.ok(bench.attackEvents>0);
+  bench.runtime.dispose();
+  scene.dispose();
+});
