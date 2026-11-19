@@ -22,10 +22,12 @@ import {getRoadmapBWave9B1} from '../../../src/building-pool/roadmap-b/wave9-com
 import {getRoadmapBWave9B2} from '../../../src/building-pool/roadmap-b/wave9-trades-b2.mjs';
 import {getRoadmapBWave10B1} from '../../../src/building-pool/roadmap-b/wave10-community-b1.mjs';
 import {getRoadmapBWave10B2} from '../../../src/building-pool/roadmap-b/wave10-trades-b2.mjs';
+import {getRoadmapBWave11B1} from '../../../src/building-pool/roadmap-b/wave11-community-b1.mjs';
+import {getRoadmapBWave11B2} from '../../../src/building-pool/roadmap-b/wave11-trades-b2.mjs';
 const params=new URLSearchParams(location.search),id=params.get('id'),view=params.get('view')||'exterior';
 window.__ROADMAP_B={ready:false,webgl2:false,id,view};
 try{
- const buildings=[...getRoadmapBWave1B1(),...getRoadmapBWave1B2(),...getRoadmapBWave2B1(),...getRoadmapBWave2B2(),...getRoadmapBWave3B1(),...getRoadmapBWave3B2(),...getRoadmapBWave4B1(),...getRoadmapBWave4B2(),...getRoadmapBWave5B1(),...getRoadmapBWave5B2(),...getRoadmapBWave6B1(),...getRoadmapBWave6B2(),...getRoadmapBWave7B1(),...getRoadmapBWave7B2(),...getRoadmapBWave8B1(),...getRoadmapBWave8B2(),...getRoadmapBWave9B1(),...getRoadmapBWave9B2(),...getRoadmapBWave10B1(),...getRoadmapBWave10B2()];
+ const buildings=[...getRoadmapBWave1B1(),...getRoadmapBWave1B2(),...getRoadmapBWave2B1(),...getRoadmapBWave2B2(),...getRoadmapBWave3B1(),...getRoadmapBWave3B2(),...getRoadmapBWave4B1(),...getRoadmapBWave4B2(),...getRoadmapBWave5B1(),...getRoadmapBWave5B2(),...getRoadmapBWave6B1(),...getRoadmapBWave6B2(),...getRoadmapBWave7B1(),...getRoadmapBWave7B2(),...getRoadmapBWave8B1(),...getRoadmapBWave8B2(),...getRoadmapBWave9B1(),...getRoadmapBWave9B2(),...getRoadmapBWave10B1(),...getRoadmapBWave10B2(),...getRoadmapBWave11B1(),...getRoadmapBWave11B2()];
  const b=buildings.find(x=>x.id===id);
  if(!b)throw Error('Missing exact source candidate '+id);
  const canvas=document.getElementById('canvas');
