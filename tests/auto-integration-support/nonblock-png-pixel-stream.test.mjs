@@ -17,3 +17,24 @@ test('rejects tampered bytes',()=>{const b=png();b[20]^=1;assert.equal(audit(b).
 test('rejects incorrect declared screenshot dimensions',()=>assert.equal(audit(png(),{width:3}).reason,'unsupported-format'));
 test('rejects incorrect SHA-256',()=>assert.equal(audit(png(),{sha256:'0'.repeat(64)}).reason,'hash'));
 test('rejects trailing bytes',()=>assert.equal(audit(Buffer.concat([png(),Buffer.from([1])])).reason,'iend-trailing'));
+
+test('rejects IDAT chunks split by a valid ancillary chunk',()=>{
+ const b=png(),ihdr=b.subarray(16,29),compressed=deflateSync(Buffer.from([0,255,0,0,255,0,255,0,255]));
+ const split=Math.max(1,Math.floor(compressed.length/2));
+ const altered=Buffer.concat([sig,chunk('IHDR',ihdr),chunk('IDAT',compressed.subarray(0,split)),chunk('tEXt',Buffer.from('note\\0gap')),chunk('IDAT',compressed.subarray(split)),chunk('IEND',Buffer.alloc(0))]);
+ assert.equal(audit(altered).reason,'idat-nonconsecutive');
+});
+test('allows consecutive IDAT chunks',()=>{
+ const b=png(),ihdr=b.subarray(16,29),compressed=deflateSync(Buffer.from([0,255,0,0,255,0,255,0,255])),split=4;
+ const altered=Buffer.concat([sig,chunk('IHDR',ihdr),chunk('IDAT',compressed.subarray(0,split)),chunk('IDAT',compressed.subarray(split)),chunk('IEND',Buffer.alloc(0))]);
+ assert.equal(audit(altered).ok,true);
+});
+test('rejects unknown critical chunk after IDAT',()=>{
+ const b=png(),ihdr=b.subarray(16,29),compressed=deflateSync(Buffer.from([0,255,0,0,255,0,255,0,255]));
+ const altered=Buffer.concat([sig,chunk('IHDR',ihdr),chunk('IDAT',compressed),chunk('ABCD',Buffer.alloc(0)),chunk('IEND',Buffer.alloc(0))]);
+ assert.equal(audit(altered).reason,'unsupported-critical-chunk');
+});
+test('rejects invalid inflated-byte budget declarations',()=>{
+ assert.equal(audit(png(),{maxInflatedBytes:0}).reason,'inflate-budget-parameter');
+ assert.equal(audit(png(),{maxInflatedBytes:1.5}).reason,'inflate-budget-parameter');
+});
