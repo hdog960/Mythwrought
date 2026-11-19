@@ -53,7 +53,21 @@ export function createLiveMobSession({
       return {id:biome,hazard:false,climbable:biome==='cave'||biome==='alpine'};
     },
     caveAt(point){return {ready:residentAt(point),climbable:caveAt(point)?.underground===true};},
-    skyAt
+    skyAt,
+    // The live Pack 5 layer exports a shape-exact raycast. Without this
+    // authority, createWorldQuery intentionally rejects EVERY mob sightline
+    // once furnishings are loaded. Supply real occluder hits, never assume
+    // decorative objects are transparent or bypass unknown overlays.
+    overlayRayHit(from,direction,distance){
+      if(typeof world.pack5Collision!=='function')return false;
+      const raycast=world.pack5Layer?.raycast;
+      if(typeof raycast!=='function')return true; // fail closed
+      try{
+        const hit=raycast.call(world.pack5Layer,from,direction,distance);
+        return hit!==null&&hit!==undefined &&
+          (!Number.isFinite(hit.distance)||hit.distance<distance-1e-5);
+      }catch(_){return true;}
+    }
   });
   function residentAt(point){
     // Never query a distant, unmeshed chunk during active gameplay.

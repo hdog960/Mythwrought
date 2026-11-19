@@ -122,3 +122,34 @@ test('ranged hostile attack visuals use original GPU mesh, never invisible damag
   for(const id of projectileMeshes)
     assert.ok(meshes[id]?.length>=21,'Missing visible genuine '+id+' ranged model');
 });
+
+test('live creature sightline respects real Pack 5 authoritative shape raycast',()=>{
+  const world=new VoxelWorld(179);
+  world.pack5Collision=()=>false;
+  const source=[.5,18,.5],dest=[1.5,18,.5];
+  const make=()=>createLiveMobSession({
+    world,seed:179,storage:memoryStorage(),resident:()=>true,
+    biomeAt:()=> 'plains',skyAt:()=>({light:.8,dayPhase:'day'}),
+    caveAt:()=>({underground:false}),playerAt:()=>[.5,18,.5]
+  });
+  const blocked=make();
+  assert.equal(blocked.query.lineOfSight(source,dest),false,
+    'Unknown loaded Pack 5 layer must NOT authorize hit through furnishing');
+  blocked.dispose();
+  const observed=[];
+  world.pack5Layer={raycast(origin,direction,length){
+    observed.push({origin,direction,length});
+    return null;
+  }};
+  const clear=make();
+  assert.equal(clear.query.lineOfSight(source,dest),true,
+    'Verified empty Pack 5 ray must not disable all gameplay');
+  assert.ok(observed.length);
+  world.pack5Layer.raycast=()=>({distance:.3});
+  assert.equal(clear.query.lineOfSight(source,dest),false,
+    'Occupied Pack 5 fixture must stop the creature ray');
+  world.pack5Layer.raycast=()=>{throw Error('Pack 5 shape unavailable');};
+  assert.equal(clear.query.lineOfSight(source,dest),false,
+    'Invalid Pack 5 shape service fails closed');
+  clear.dispose();
+});
