@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 // :36 opt-in pixel-decodability gate. CRC-only PNGs are not visual/browser evidence.
 import {inflateSync} from 'node:zlib';
 import {inspectFittingPng} from './png-integrity.mjs';
@@ -23,9 +24,27 @@ export function inspectFittingPngPixels(bytes,{maxBytes=16*1024*1024,maxPixels=9
  try{raw=inflateSync(Buffer.concat(compressed),{maxOutputLength:expected+1});}
  catch{throw Error('PNG IDAT deflate invalid or oversized');}
  if(raw.length!==expected)throw Error('PNG scanline byte count mismatch');
+ // Decode all five PNG filter modes rather than merely checking filter bytes.
+ // This detects malformed scanline reconstruction and yields a stable pixel digest
+ // independent of PNG compression choices. It is NOT browser provenance.
+ const decoded=Buffer.allocUnsafe(rowBytes*meta.height);
  for(let y=0;y<meta.height;y++){
-  const filter=raw[y*(rowBytes+1)];
+  const start=y*(rowBytes+1),filter=raw[start],dst=y*rowBytes;
   if(filter>4)throw Error('PNG invalid scanline filter');
+  for(let x=0;x<rowBytes;x++){
+   const left=x>=channels?decoded[dst+x-channels]:0;
+   const above=y?decoded[dst-rowBytes+x]:0;
+   const upperLeft=y&&x>=channels?decoded[dst-rowBytes+x-channels]:0;
+   let predictor=0;
+   if(filter===1)predictor=left;
+   else if(filter===2)predictor=above;
+   else if(filter===3)predictor=Math.floor((left+above)/2);
+   else if(filter===4){
+    const p=left+above-upperLeft,a=Math.abs(p-left),b=Math.abs(p-above),c=Math.abs(p-upperLeft);
+    predictor=a<=b&&a<=c?left:b<=c?above:upperLeft;
+   }
+   decoded[dst+x]=(raw[start+1+x]+predictor)&255;
+  }
  }
- return Object.freeze({...meta,pixelDataDecodable:true,chromiumProvenanceVerified:false});
+ return Object.freeze({...meta,pixelDataDecodable:true,pixelSha256:createHash('sha256').update(decoded).digest('hex'),chromiumProvenanceVerified:false});
 }
