@@ -54,3 +54,51 @@ test('same-ID replacement clears rotation; stale expected ID never calls writer'
   assert.equal(f.guard.edit(CELL,4,{replaceSameId:true}).applied,true);
   assert.equal(f.sidecar.size(),0);
 });
+
+test('revision detects same-ID mutation before throwing, clearing stale orientation',()=>{
+  let revision=0;
+  const error=new Error('partial same-ID write');
+  const f=fixture(({set})=>{set(4);revision++;throw error;});
+  const guard=makeOrientationEditGuard({
+    readBlock:f.readBlock,
+    writeBlock:()=>{revision++;throw error;},
+    readRevision:()=>revision,
+    sidecar:f.sidecar
+  });
+  assert.throws(()=>guard.edit(CELL,5),e=>e===error);
+  assert.equal(f.sidecar.size(),0);
+});
+test('revision detects false-with-same-ID mutation and preserves clean rejection',()=>{
+  let revision=0;
+  const f=fixture(()=>false);
+  const guard=makeOrientationEditGuard({
+    readBlock:f.readBlock,
+    writeBlock:()=>{revision++;return false;},
+    readRevision:()=>revision,
+    sidecar:f.sidecar
+  });
+  assert.throws(()=>guard.edit(CELL,5),/Rejected edit mutated world cell/);
+  assert.equal(f.sidecar.size(),0);
+});
+test('unchanged revision preserves rotation after pre-write failure',()=>{
+  const f=fixture(()=>false);
+  const guard=makeOrientationEditGuard({
+    readBlock:f.readBlock,
+    writeBlock:()=>{throw Error('pre-write failure');},
+    readRevision:()=>7,
+    sidecar:f.sidecar
+  });
+  assert.throws(()=>guard.edit(CELL,5),/pre-write failure/);
+  assert.equal(f.sidecar.get(CELL,4),3);
+});
+test('invalid revision reader is rejected without writing',()=>{
+  const f=fixture(()=>true);
+  assert.throws(()=>makeOrientationEditGuard({
+    readBlock:f.readBlock,writeBlock:()=>true,sidecar:f.sidecar,readRevision:5
+  }),/Invalid revision reader/);
+  const guard=makeOrientationEditGuard({
+    readBlock:f.readBlock,writeBlock:()=>true,sidecar:f.sidecar,readRevision:()=>-1
+  });
+  assert.throws(()=>guard.edit(CELL,5),/Invalid world revision/);
+  assert.equal(f.sidecar.get(CELL,4),3);
+});
