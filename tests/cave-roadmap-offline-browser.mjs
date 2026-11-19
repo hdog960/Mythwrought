@@ -61,16 +61,20 @@ try{
   new URL('./index.html',location.href))));
  assert.equal(indexedShell,true,'Offline startup requires the saved real index.html shell');
 
- assert.ok(verified.count>=200,'A few cached files do NOT make a complete offline game');
- assert.equal(verified.cacheRevision,'990a02b6324fe0d9',
+ assert.equal(verified.count,221,'Offline source must include all 221 exact cached assets');
+ assert.equal(verified.cacheRevision,'963458d3ed486dbe',
    'A stale offline worker must not impersonate the exact cave source');
  assert.equal(verified.verifiedBlobs,verified.count-2,
    'Every external static source blob must be SHA-1 Git-verified before offline approval');
- assert.equal(verified.sourceHead,'990a02b6324fe0d9d44d7f0b1884c0dde00687fb',
+ assert.equal(verified.sourceHead,'963458d3ed486dbe973ce67a87715b57282647e0',
    'Recorded offline source identity must be the immutable staging snapshot');
  const sourceCached=await page.evaluate(async()=>Boolean(await caches.match(
    new URL('./src/manual-caves/cave-voxel-world.mjs',location.href))));
  assert.equal(sourceCached,true,'Cannot load cave voxel module without the network');
+ const farRendererCached=await page.evaluate(async()=>Boolean(await caches.match(
+   new URL('./src/manual-caves/c6-far-wall-gpu.mjs',location.href))));
+ assert.equal(farRendererCached,true,
+   'New genuine far-rock GPU module missing from verified Home Screen cache');
  await ctx.setOffline(true);
  await page.reload({waitUntil:'domcontentloaded',timeout:45000});
  await page.waitForFunction(()=>window.__mythwroughtTest &&
