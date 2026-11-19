@@ -3,8 +3,16 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261119-v6-s6-recorder-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261119-v6-safe-refresh';
+const ASSET_RELEASE='20261119-v6-safe-refresh';
 const SOURCE_ASSETS=[
+  "./src/sky-atmosphere.mjs",
+  "./src/sky-biome-adapter.mjs",
+  "./src/sky-events.mjs",
+  "./src/sky-moons.mjs",
+  "./src/sky-stars.mjs",
+  "./src/world-clock.mjs",
+  "./src/sky-v6-adapter.mjs",
   "./",
   "./assets/icon.svg",
   "./index.html",
@@ -153,6 +161,7 @@ const SOURCE_ASSETS=[
   "./src/interactions/shape-edit-transaction.mjs",
   "./src/layout.mjs",
   "./src/live-voxel-world.mjs",
+  "./src/app-update.mjs",
   "./src/gameplay-recorder.mjs",
   "./src/main.mjs",
   "./src/manual-biomes/desert-m3.mjs",
@@ -191,13 +200,6 @@ const SOURCE_ASSETS=[
   "./src/ruined-bridge.mjs",
   "./src/seeds.mjs",
   "./src/shape-prototypes.mjs",
-  "./src/sky-atmosphere.mjs",
-  "./src/sky-biome-adapter.mjs",
-  "./src/sky-events.mjs",
-  "./src/sky-moons.mjs",
-  "./src/sky-stars.mjs",
-  "./src/world-clock.mjs",
-  "./src/sky-v6-adapter.mjs",
   "./src/sky.mjs",
   "./src/south-gallery-cave.mjs",
   "./src/stone-rotunda-v2.mjs",
@@ -232,38 +234,123 @@ self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
     const cache=await caches.open(CACHE_NAME);
     try {
-      // Full app shell + all runtime JS modules, including cold v5 profile
-      // imports. Small bounded groups avoid throttling low-power iPhones.
+      // Fetch all assets from a query-versioned origin URL. An older active
+      // cache-first worker can otherwise serve OLD index.html/main.mjs to this
+      // new install. Old workers deliberately bypass any query request.
+      // Cache under CANONICAL query-free URLs for genuine offline operation.
+      // Fail atomically if even one source is missing; preserve previous-good.
       for(let i=0;i<assetUrls.length;i+=12){
-        const requests=assetUrls.slice(i,i+12).map(url=>
-          new Request(url,{cache:'reload',credentials:'same-origin'}));
-        await cache.addAll(requests);
+        const batch=await Promise.all(assetUrls.slice(i,i+12).map(async url=>{
+          try {
+            const freshUrl=new URL(url);
+            freshUrl.searchParams.set('mw-cache-install',CACHE_NAME);
+            const response=await fetch(new Request(freshUrl.href,{
+              cache:'reload',credentials:'same-origin'
+            }));
+            if(!response.ok||response.type==='opaque')
+              throw Error('HTTP '+response.status);
+            return {url,response};
+          }catch(error){
+            throw Error('Fresh source unavailable '+url+': '+String(error));
+          }
+        }));
+        // Wait for ALL writes before a failure can delete the candidate cache.
+        // Other in-flight writes must never leave a partial cache behind.
+        const written=await Promise.allSettled(batch.map(({url,response})=>
+          cache.put(url,response).catch(error=>{
+            throw Error('Cannot cache '+url+': '+String(error));
+          })));
+        const failed=written.find(result=>result.status==='rejected');
+        if(failed)throw failed.reason;
       }
-      // Only an entirely verified installation can replace an older worker.
+      // Cache existence is not installation success. Prove the entire atomic
+      // shell, including authentic REC and same-install release marker, first.
+      const files=await cache.keys();
+      const index=await cache.match(new URL('index.html',self.registration.scope).href);
+      const html=index?await index.text():'';
+      if(files.length!==allowed.size||
+          !html.includes('data-mw-release="'+ASSET_RELEASE+'"')||
+          !html.includes('id="captureToggle"'))
+        throw Error('Incomplete/mismatched PWA shell: cached='+
+          files.length+' expected='+allowed.size+
+          ' index='+Boolean(index));
+      // Only a fully verified new shell can replace the previous-good worker.
       await self.skipWaiting();
     }catch(error){
-      await caches.delete(CACHE_NAME);
+      // Two install/update attempts can overlap on the SAME cache name.
+      // A failed late attempt must not erase a complete, already verified
+      // shell installed by another attempt. Preserve only a genuinely
+      // complete, REC-capable immutable shell; incomplete shells fail closed.
+      let complete=false;
+      try {
+        const current=await caches.open(CACHE_NAME);
+        const keys=await current.keys();
+        if(keys.length===allowed.size){
+          const response=await current.match(new URL('index.html',
+            self.registration.scope).href);
+          const html=response?await response.text():'';
+          complete=html.includes('data-mw-release="'+ASSET_RELEASE+'"')&&
+            html.includes('id="captureToggle"');
+        }
+      }catch(verifyError){
+        console.error('MYTHWROUGHT PWA FAILED CACHE VERIFICATION',
+          String(verifyError));
+      }
+      console.error('MYTHWROUGHT PWA ATOMIC INSTALL FAILED',
+        String(error),'complete-verified-cache-preserved='+complete);
+      if(!complete)await caches.delete(CACHE_NAME);
       throw error;
     }
   })());
 });
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
-    const keys=await caches.keys();
-    await Promise.all(keys.filter(k=>
-      k.startsWith(CACHE_PREFIX)&&k!==CACHE_NAME).map(k=>caches.delete(k)));
+    // Never purge a previous-good game-shell cache during an app upgrade.
+    // The current cache was fully verified before skipWaiting(); keeping the
+    // older shell permits recovery if this browser installation goes wrong.
+    // World saves in localStorage/IndexedDB are never touched by this worker.
     await self.clients.claim();
   })());
 });
 self.addEventListener('fetch',event=>{
-  const req=event.request, url=new URL(req.url);
-  // No arbitrary response fallback, no cross-origin responses, no API/write
-  // interception, and no mutation or caching of personal world save data.
-  if(req.method!=='GET'||url.search||!allowed.has(url.href))return;
+  const req=event.request,url=new URL(req.url);
+  if(req.method!=='GET'||url.origin!==self.location.origin||
+      !url.href.startsWith(self.registration.scope))return;
+  const root=new URL('./',self.registration.scope);
+  const index=new URL('index.html',root);
+  const canonical=new URL(url.href);
+  canonical.search='';canonical.hash='';
+  // Ordinary Home Screen boot uses ONLY the atomically verified cache;
+  // never attempt a network request during an offline M5 reload.
+  // Explicit user-initiated ?mw-refresh=release is online-first.
+  if(req.mode==='navigate'&&(canonical.href===root.href||
+      canonical.href===index.href)){
+    const explicitRefresh=url.searchParams.size===1&&
+      url.searchParams.get('mw-refresh')===ASSET_RELEASE;
+    event.respondWith((async()=>{
+      const cache=await caches.open(CACHE_NAME);
+      const cached=async()=>await cache.match(index.href)||
+        await cache.match(root.href)||Response.error();
+      if(explicitRefresh){
+        if(self.navigator.onLine===false)return cached();
+        try{
+          const fresh=await fetch(req,{cache:'no-store'});
+          if(fresh.ok&&fresh.type!=='opaque')return fresh;
+        }catch(_){}
+      }
+      return await cached();
+    })());return;
+  }
+  // Only exact release-pinned module/CSS URLs are mapped to cached source
+  // for offline use; other query requests bypass this worker.
+  const pinned=url.searchParams.size===1&&
+    url.searchParams.get('mw-release')===ASSET_RELEASE&&
+    (canonical.href===new URL('styles.css',root).href||
+      canonical.href===new URL('src/main.mjs',root).href);
+  if(url.search&&!pinned)return;
+  if(!allowed.has(canonical.href))return;
   event.respondWith((async()=>{
     const cache=await caches.open(CACHE_NAME);
-    // Cache-first is deliberate: offline uses the exact versioned source
-    // assets which created the immutable v5 generation profile.
-    return await cache.match(req,{ignoreVary:false})||fetch(req);
+    return await cache.match(canonical.href,{ignoreVary:false})||fetch(req);
   })());
 });
