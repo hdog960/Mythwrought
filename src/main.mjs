@@ -37,6 +37,7 @@ import {installGameplayRecorder} from './gameplay-recorder.mjs';
 import {installGameUpdater} from './app-update.mjs';
 import {createLiveMobSession} from './mobs/live-game.mjs';
 import {createLiveMobRenderer} from './mobs/live-render.mjs';
+import {getSpecies} from './mobs/species.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
@@ -244,6 +245,7 @@ function start(){
   const name=chunkKey;
   const player=newPlayer(world);
   let mobSession=null,mobRenderer=null,mobEnvironment=null,mobLastSave=0;
+  let mobAcceptanceFrozen=false,mobAcceptanceHidden=false;
   function resetLiveMobSession(){
     mobSession?.dispose();mobSession=null;mobEnvironment=null;
     try{
@@ -1166,7 +1168,7 @@ function start(){
       }
       stream();
       mobEnvironment=atmosphere;
-      if(help.hidden&&!exploration.isOpen()&&mobSession){
+      if(help.hidden&&!exploration.isOpen()&&mobSession&&!mobAcceptanceFrozen){
         const section=sectionForY(Math.floor(player.feet))??0;
         const regions=[...chunks.values()].filter(c=>c.section===section)
           .sort((a,b)=>(a.x*16+8-player.x)**2+(a.z*16+8-player.z)**2-
@@ -1245,7 +1247,7 @@ function start(){
       }
       // Real depth-tested 40-model instancing, inside the existing WebGL pass.
       if(mobRenderer&&mobSession){
-        const mobDraw=mobRenderer.render(mobSession.drawEntities(),{
+        const mobDraw=mobRenderer.render(mobAcceptanceHidden?[]:mobSession.drawEntities(),{
           eye:eye(),forward:facing(),
           right:[-Math.cos(player.yaw),0,Math.sin(player.yaw)],
           up:[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),
@@ -2940,6 +2942,56 @@ function start(){
         bodyClear:g2Clear({x:player.x,y:player.feet,z:player.z}),
         resident:g2Ready({x:player.x,y:player.feet,z:player.z}),
         residentChunks:chunks.size};},
+      mobAcceptanceFixture(speciesId){
+        // Localhost ONLY. Real game GPU, voxel collision and camera; no fake
+        // models, fabricated blocks, offscreen canvas or save mutations.
+        const species=getSpecies(speciesId);
+        if(!species||!mobSession||mobSession.status().readonly)
+          throw Error('Creature fixture requires active, healthy live game');
+        mobAcceptanceFrozen=true;mobAcceptanceHidden=false;
+        for(const mob of mobSession.engine.all()){
+          if(mob.important)throw Error('Cannot replace a real bonded companion');
+          if(mobSession.engine.get(mob.id))mobSession.engine.transition(mob.id,'removed');
+        }
+        const body=species.body,query=mobSession.query;
+        const baseYaw=player.yaw,eyePos=eye();
+        let placed=null;
+        for(const delta of [0,.22,-.22,.48,-.48,.8,-.8]){
+          if(placed)break;
+          const yaw=baseYaw+delta;
+          for(const radius of [5.5,4.5,6.5,3.5,7.5,8.5,2.6]){
+            if(placed)break;
+            const x=Math.floor(player.x+Math.sin(yaw)*radius)+.5;
+            const z=Math.floor(player.z+Math.cos(yaw)*radius)+.5;
+            for(let y=Math.floor(player.feet)+3;y>=Math.floor(player.feet)-5;y-=.25){
+              const at=[x,y,z];
+              if(!query.grounded(at,body))continue;
+              const focus=[x,y+body.height*.6,z];
+              if(!query.lineOfSight(eyePos,focus))continue;
+              const id=mobSession.engine.spawn(speciesId,at);
+              if(id){placed={id,at,focus};break;}
+            }
+          }
+        }
+        if(!placed)throw Error('No real resident/grounded spawn for '+speciesId);
+        const dx=placed.focus[0]-eyePos[0],dy=placed.focus[1]-eyePos[1],
+          dz=placed.focus[2]-eyePos[2];
+        player.yaw=Math.atan2(dx,dz);
+        player.pitch=Math.max(-MAX_PITCH,Math.min(MAX_PITCH,
+          Math.atan2(dy,Math.hypot(dx,dz))));
+        return {speciesId,entityId:placed.id,position:placed.at,
+          camera:[player.yaw,player.pitch],worldSeed:world.seed,
+          schema:world.save().schema};
+      },
+      mobAcceptanceVisible(value){mobAcceptanceHidden=value===false;return !mobAcceptanceHidden;},
+      mobAcceptanceSnapshot(){return {
+        ...mobSession?.status(),visible:!mobAcceptanceHidden,
+        drawn:Number(canvas.dataset.mobActors||0),
+        drawCalls:Number(canvas.dataset.mobDrawCalls||0),
+        gpuBytes:Number(canvas.dataset.mobGpuBytes||0),
+        glError:gl.getError(),contextLost:gl.isContextLost(),
+        scene:canvas.dataset.skyDrawn,renderedFrames:Number(canvas.dataset.renderedFrames)
+      };},
       mobStatus(){return mobSession?.status()??null;},
       mobRoster(){return mobSession?.drawEntities().map(m=>({id:m.id,species:m.species.id,position:m.position,state:m.state}))??[];},
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
