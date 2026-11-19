@@ -60,3 +60,17 @@ browser. Native tests verify volumetric flight near solid and unloaded
 boundaries and water entry, depth and exit. The beta biome, sky and pool
 inputs in this preview are staging fixtures. Future production integration
 will obtain these observations through approved world adapters.
+
+## Familiar hostile checkpoint
+
+Zombie, Skeleton, Giant Spider, Slime, Wraith, Troll, Harpy, Mimic and Gargoyle
+join the preserved Goblin encounter. The caverns are isolated VoxelWorld
+fixtures rendered by the shared depth mesher. The preview also uses physical
+high terrain for the aerial encounters.
+
+Skeleton projectiles travel through world coordinates with a lifetime and
+queue cap. Changes to terrain can block a projectile after launch. Slime hops
+physically, Spider can climb authorized stone, and the flying foes use the
+same three-axis solver as flying wildlife. Mimic and Gargoyle require actual
+reveal or awakening transitions before their attacks. Encounters check
+windup, impact, target loss, and preservation of world bytes.

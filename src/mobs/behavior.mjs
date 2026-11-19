@@ -3,6 +3,7 @@ import { supportedPosition } from './movement.mjs';
 import { validPoint } from './world-query.mjs';
 import { familiarWildlife } from './familiar-wildlife.mjs';
 import { originalWildlife } from './original-wildlife.mjs';
+import { hostileTactics } from './hostile-tactics.mjs';
 
 export const distanceTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 const atEye = (point, height) => [point[0], point[1] + height * .72, point[2]];
@@ -298,12 +299,66 @@ export class BehaviorController {
     return this.#familiar(mob,memory,seen,peers,{ rest:.7, ...profile });
   }
 
-  #hostile(mob, memory, seen, context) {
+  #movesForHostile(mob, memory, seen, tactic, destination) {
+    if (tactic.medium === 'fly') {
+      if (!destination) {
+        const flying = ['detect','acquire','prepare-attack','attack','recover'].includes(memory.state);
+        if (!flying) return [0,0];
+        if (!mob.grounded || memory.state !== 'detect')
+          return { direction:[0,0],vertical:0,mode:'fly' };
+        return steerInVolume(this.#world,mob,[mob.position[0],mob.origin[1]+tactic.height,mob.position[2]],'fly');
+      }
+      const [x,y,z] = destination;
+      const height = memory.state === 'return' ? 0 :
+        memory.state === 'pursue' && seen.distance < 2.8 ? .38 : tactic.height;
+      if (memory.state === 'return' && distanceTo(mob.position,destination) < .14) return [0,0];
+      return steerInVolume(this.#world,mob,[x,y+height,z],'fly');
+    }
+    if (!destination) {
+      if (tactic.attack === 'lunge' && seen.visible && memory.state === 'attack') {
+        const dx=seen.target.position[0]-mob.position[0], dz=seen.target.position[2]-mob.position[2];
+        const scale=Math.hypot(dx,dz)||1;
+        return {direction:[dx/scale,dz/scale],pace:1.62};
+      }
+      return [0,0];
+    }
+    if (seen.visible && tactic.standoff && seen.distance < tactic.standoff) {
+      const dx = mob.position[0]-seen.target.position[0];
+      const dz = mob.position[2]-seen.target.position[2];
+      const distance=Math.hypot(dx,dz)||1;
+      const [x,y,z]=mob.position;
+      const step=positionNear(this.#world,mob,[x,y,z],Math.atan2(dz,dx),1.3);
+      if (step) return { direction:this.#navigator.steer(mob,step),pace:.86 };
+      return { direction:[dx/distance,dz/distance],pace:.65 };
+    }
+    const heading = this.#navigator.steer(mob,destination);
+    if (tactic.climb && seen.climbable && !heading.some(Boolean) && memory.state === 'pursue') {
+      const [x,y,z] = mob.position;
+      const angle = Math.atan2(destination[2]-z,destination[0]-x);
+      const probe = [x+Math.cos(angle)*.38,y,z+Math.sin(angle)*.38];
+      if (this.#world.volume(probe,mob.species.body)==='solid')
+        return { direction:[Math.cos(angle),Math.sin(angle)],climb:true,pace:.66 };
+    }
+    return { direction:heading,pace:tactic.pace??1,jump:tactic.jump };
+  }
+
+  #hostile(mob, memory, seen, context, tactic) {
     const { combat, behavior } = mob.species;
+    if (tactic?.sleep && !memory.awake) {
+      if (memory.state === tactic.wake) {
+        if (memory.age < .35) return null;
+        memory.awake = true;
+        setState(memory,'idle');
+      } else {
+        if (memory.state !== tactic.sleep) setState(memory,tactic.sleep);
+        if (seen.visible && seen.distance < tactic.approach && memory.age >= .12) setState(memory,tactic.wake);
+        return null;
+      }
+    }
     const territory = distanceTo(mob.position, mob.origin) <= behavior.territory;
     const canSee = seen.visible && territory &&
       distanceTo(seen.target.position, mob.origin) <= behavior.territory;
-    const inReach = canSee && seen.distance <= combat.reach;
+    const inReach = canSee && seen.distance <= combat.reach && (!tactic?.standoff || seen.distance >= tactic.standoff*.75);
     if (canSee) {
       memory.lastSeen = [...seen.target.position];
       memory.lost = 0;
@@ -395,8 +450,10 @@ export class BehaviorController {
       if (profile) return this.#familiar(mob, memory, seen, peers, profile);
       if (Object.hasOwn(originalWildlife, mob.species.id))
         return this.#original(mob,memory,seen,peers,originalWildlife[mob.species.id],context.destination?.(mob));
+      const tactic = Object.hasOwn(hostileTactics,mob.species.id) ? hostileTactics[mob.species.id] : null;
       const destination = mob.species.classification === 'hostile' ?
-        this.#hostile(mob, memory, seen, context) : this.#passive(mob, memory, seen);
+        this.#hostile(mob, memory, seen, context,tactic) : this.#passive(mob, memory, seen);
+      if (tactic) return this.#movesForHostile(mob,memory,seen,tactic,destination);
       if (!destination) return [0, 0];
       const heading = this.#navigator.steer(mob, destination);
       if (mob.species.classification === 'hostile' && ['pursue', 'investigate'].includes(memory.state) &&

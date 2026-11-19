@@ -1,5 +1,6 @@
 import { familiarWildlife } from './familiar-wildlife.mjs';
 import { originalWildlife } from './original-wildlife.mjs';
+import { hostileTactics } from './hostile-tactics.mjs';
 
 const movements = ['walk', 'swim', 'fly', 'climb', 'jump', 'crawl'];
 const biomes = ['meadow', 'forest', 'wetland', 'alpine', 'desert', 'snow', 'cave', 'volcanic'];
@@ -173,7 +174,8 @@ function baseProfile({
   const isHostile = classification === 'hostile';
   const familiar = Object.hasOwn(familiarWildlife, id) ? familiarWildlife[id] : null;
   const canBond = id === 'glownewt' || familiar?.bond === true;
-  const model = familiar || Object.hasOwn(originalWildlife, id) || ['deer', 'goblin', 'glownewt'].includes(id) ? id : 'unassigned';
+  const tactic = Object.hasOwn(hostileTactics,id) ? hostileTactics[id] : null;
+  const model = familiar || tactic || Object.hasOwn(originalWildlife, id) || ['deer', 'goblin', 'glownewt'].includes(id) ? id : 'unassigned';
   const habitatBiomes = habitatTags.split(' ');
   const capabilities = modes.split(' ');
   const cave = habitatBiomes.includes('cave');
@@ -193,7 +195,8 @@ function baseProfile({
     },
     combat: {
       health, damage: canBond ? 2 : damage,
-      reach: isHostile ? 1.35 : .8, windup: isHostile ? .55 : .4, cooldown: isHostile ? 1.1 : 3
+      reach: tactic?.reach ?? (isHostile ? 1.35 : .8), windup: tactic?.windup ?? (isHostile ? .55 : .4),
+      cooldown: tactic?.cooldown ?? (isHostile ? 1.1 : 3)
     },
     perception: { sight: isHostile ? 11 : 8, hearing: isHostile ? 8 : 6,
       threat: isHostile ? 'hunt' : canBond || id === 'wolf' ? 'defend' : 'avoid' },

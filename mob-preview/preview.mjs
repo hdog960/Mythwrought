@@ -2,6 +2,7 @@ import { ForegroundFrameDriver } from '../src/foreground.mjs';
 import { FIXED_STEP } from '../src/mobs/engine.mjs';
 import { familiarWildlife } from '../src/mobs/familiar-wildlife.mjs';
 import { originalWildlife } from '../src/mobs/original-wildlife.mjs';
+import { hostileTactics } from '../src/mobs/hostile-tactics.mjs';
 import { getSpecies } from '../src/mobs/species.mjs';
 import { createScene } from './scene.mjs';
 import { createRenderer } from './renderer.mjs';
@@ -18,7 +19,7 @@ const stats = document.querySelector('#stats');
 const tabs = [...document.querySelectorAll('[data-species]')];
 const picker = document.querySelector('#wildlife');
 const stagedWildlife = { ...familiarWildlife, ...originalWildlife };
-for (const [label, ids] of [['Familiar wildlife',Object.keys(familiarWildlife)],['Mythwrought wildlife',Object.keys(originalWildlife)]]) {
+for (const [label, ids] of [['Familiar wildlife',Object.keys(familiarWildlife)],['Mythwrought wildlife',Object.keys(originalWildlife)],['Familiar hostiles',Object.keys(hostileTactics)]]) {
   const group=document.createElement('optgroup');
   group.label=label;
   for (const id of ids) group.append(new Option(getSpecies(id).displayName,id));
@@ -36,6 +37,7 @@ const testMode = ['localhost', '127.0.0.1'].includes(location.hostname) &&
 const scene = createScene();
 const terrain = scene.meshes();
 const water = scene.waters();
+const caves = scene.caves();
 const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, powerPreference: 'low-power' });
 let lossExtension = testMode ? gl?.getExtension('WEBGL_lose_context') : null;
 let renderer;
@@ -64,7 +66,7 @@ function renderControls(snapshot) {
   habitat.textContent = snapshot.fixture.habitat;
   name.textContent = snapshot.fixture.title;
   state.textContent = snapshot.state.replaceAll('-', ' ');
-  health.hidden = snapshot.species !== 'goblin' || !snapshot.target.visible;
+  health.hidden = snapshot.mob.species.classification !== 'hostile' || !snapshot.target.visible;
   health.textContent = 'Target HP ' + snapshot.target.health;
   if (frames % 10 === 0 || testMode)
     stats.value = 'WebGL2 · ' + draw.actors + ' visible · ' + draw.draws + ' draw calls · ' +
@@ -105,7 +107,7 @@ function construct() {
     return false;
   }
   try {
-    renderer = createRenderer(gl, terrain, scene.cameraClear, water);
+    renderer = createRenderer(gl, terrain, scene.cameraClear, water, caves);
     message.textContent = '';
     return true;
   } catch (error) {
@@ -117,6 +119,11 @@ function construct() {
 
 function wildlifeCommands(id) {
   const entry = getSpecies(id);
+  if (entry.classification === 'hostile') {
+    const list=[['encounter','Start encounter'],['withdraw','Leave encounter']];
+    if (id==='giant-spider') list.push(['wall','Toggle wall climb']);
+    return list;
+  }
   const list = [['approach', 'Approach'], ['withdraw', 'Step away'], ['group', 'Add group member']];
   const original=originalWildlife[id];
   if (original?.medium === 'fly') list.push(['fly','Take flight'],['land','Land']);
@@ -134,7 +141,7 @@ function wildlifeCommands(id) {
 function select(species) {
   if (!scene.select(species)) return;
   for (const tab of tabs) tab.setAttribute('aria-pressed', String(tab.dataset.species === species));
-  picker.value = Object.hasOwn(stagedWildlife, species) ? species : '';
+  picker.value = Object.hasOwn(stagedWildlife, species) || Object.hasOwn(hostileTactics,species) ? species : '';
   actions.replaceChildren(...(commands[species] ?? wildlifeCommands(species)).map(([id, label]) => {
     const button = document.createElement('button');
     button.type = 'button';

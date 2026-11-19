@@ -6,6 +6,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { familiarWildlife } from '../../src/mobs/familiar-wildlife.mjs';
 import { originalWildlife } from '../../src/mobs/original-wildlife.mjs';
+import { hostileTactics } from '../../src/mobs/hostile-tactics.mjs';
 import { speciesRegistry } from '../../src/mobs/species.mjs';
 
 const require = createRequire(import.meta.url);
@@ -208,6 +209,57 @@ async function verifyOriginalWildlife(page, viewport) {
   }
 }
 
+async function verifyHostiles(page,viewport) {
+  for (const [id,tactic] of Object.entries(hostileTactics)) {
+    await page.locator('#wildlife').selectOption(id);
+    const initial=await step(page,tactic.sleep ? 2:0);
+    assert.equal(initial.species,id);
+    assert.equal(initial.eligibility,true,id);
+    if (tactic.sleep) assert.equal(initial.state,tactic.sleep,id);
+    await capture(page,viewport,tactic.sleep??'idle',initial,['Independent hostile model loaded in eligible terrain']);
+    if (id==='giant-spider') {
+      await command(page,'wall');
+      const climbed=await step(page,19);
+      assert.equal(climbed.mob.motionMode,'climb');
+      assert.ok(climbed.mob.position[1]>initial.mob.position[1]+.5);
+      await capture(page,viewport,'climb',climbed,['Approved cave face changed the actual body altitude']);
+      await command(page,'wall');
+      assert.equal((await step(page,45)).mob.grounded,true);
+    }
+    await command(page,'encounter');
+    if (tactic.wake) {
+      const awake=await step(page,30,tactic.wake);
+      assert.equal(awake.state,tactic.wake,id);
+      await capture(page,viewport,tactic.wake,awake,['Target triggered the actual foiled disguise or perch transition']);
+    }
+    const pursuing=await step(page,150,'pursue');
+    assert.equal(pursuing.state,'pursue',id);
+    const moved=await step(page,18);
+    assert.ok(Math.hypot(...moved.mob.position.map((value,index)=>value-initial.mob.position[index]))>.16,id);
+    if (tactic.medium==='fly') assert.equal(moved.mob.motionMode,'fly',id);
+    await capture(page,viewport,'movement-'+tactic.attack,moved,['Pursuit displaced the physical body']);
+    const windup=['prepare-attack'].includes(moved.state) ? moved : await step(page,165,'prepare-attack');
+    assert.equal(windup.state,'prepare-attack',id);
+    assert.equal(windup.target.health,100,id);
+    await capture(page,viewport,'windup-'+tactic.attack,windup,['Attack windup preceded damage']);
+    const firing=await step(page,60,'attack');
+    assert.equal(firing.state,'attack',id);
+    if (tactic.attack==='ranged') {
+      assert.equal(firing.projectiles.length,1);
+      assert.equal(firing.target.health,100);
+      await capture(page,viewport,'projectile-flight',firing,['Projectile was in actual flight before impact']);
+    }
+    const recovering=await step(page,20);
+    assert.ok(recovering.target.health < 100,id);
+    assert.ok(recovering.events.some(event=>event.type==='damage' && event.source===initial.mob.id),id);
+    await command(page,'withdraw');
+    const disengaged=await step(page,250,'disengage');
+    assert.equal(disengaged.state,'disengage',id);
+    assert.equal(disengaged.target.health,recovering.target.health,id);
+    wildlifeResults.push({species:id,viewport,status:'PASS',attack:tactic.attack});
+  }
+}
+
 try {
   for (const [width,height] of sizes) {
     const viewport = [width,height];
@@ -318,6 +370,7 @@ try {
       }
       await verifyWildlife(page, viewport);
       await verifyOriginalWildlife(page,viewport);
+      await verifyHostiles(page,viewport);
       const started = await step(page,0);
       await page.evaluate(() => window.mobPreview.teardown());
       const stopped = await page.evaluate(() => ({
@@ -349,7 +402,7 @@ try {
     };
   });
   await writeFile(join(output,'species-acceptance.json'),JSON.stringify({
-    source, phase: 2, finalAcceptance: false, species: speciesAcceptance
+    source, phase: 3, finalAcceptance: false, species: speciesAcceptance
   },null,2)+'\n');
   await writeFile(join(output,'manifest.json'),JSON.stringify({
     source, dirty, browser:browser.version(), renderer:'Chromium ANGLE SwiftShader WebGL2',

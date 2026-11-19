@@ -2,6 +2,7 @@ import { bufferDimensions } from '../src/render-budget.mjs';
 import { meshes } from './models.mjs';
 import { familiarWildlife } from '../src/mobs/familiar-wildlife.mjs';
 import { originalWildlife } from '../src/mobs/original-wildlife.mjs';
+import { hostileTactics } from '../src/mobs/hostile-tactics.mjs';
 
 const project = `
 uniform vec3 uEye, uForward, uRight, uUp;
@@ -39,7 +40,17 @@ out float vDistance;
 void main() {
   float cycle = sin(uTime*11.0+aMotion.w);
   vec3 p = aPosition;
-  if (abs(aJoint) > 3.5) {
+  if (aJoint > 6.5) {
+    p.y += max(0.0,aMotion.y)*(.14+.22*max(0.0,p.z));
+    p.z -= max(0.0,aMotion.y)*.09;
+  } else if (aJoint > 5.5) {
+    float stretch=sin(uTime*9.0)*aMotion.x*.19;
+    p.y *= 1.0+stretch;
+    p.x *= 1.0-stretch*.55;
+  } else if (aJoint > 4.5) {
+    p.y += max(0.0,aMotion.y)*.22;
+    p.z += max(0.0,aMotion.y)*.11;
+  } else if (abs(aJoint) > 3.5) {
     float stroke = sin(uTime*23.0)*aMotion.x;
     p.y += stroke*max(0.0,abs(p.x)-.075)*.68;
   } else if (abs(aJoint) > 2.5) {
@@ -84,7 +95,7 @@ const cross = ([a,b,c], [x,y,z]) => [b*z-c*y, c*x-a*z, a*y-b*x];
 
 function camera(point, species, cameraClear) {
   const id = species.id;
-  const familiar = Object.hasOwn(familiarWildlife, id) || Object.hasOwn(originalWildlife,id);
+  const familiar = Object.hasOwn(familiarWildlife, id) || Object.hasOwn(originalWildlife,id) || Object.hasOwn(hostileTactics,id);
   const distance = familiar ? Math.max(.58, Math.min(1.08, .45 + species.body.height * .35)) :
     id === 'glownewt' ? .68 : id === 'goblin' ? .89 : 1;
   const level = familiar ? species.body.height * .57 : id === 'glownewt' ? .23 : .66;
@@ -97,7 +108,7 @@ function camera(point, species, cameraClear) {
   return { eye, forward, right, up: cross(right, forward) };
 }
 
-export function createRenderer(gl, terrainMeshes, cameraClear, waterMeshes = []) {
+export function createRenderer(gl, terrainMeshes, cameraClear, waterMeshes = [], caveMeshes = []) {
   const buffers = [];
   const arrays = [];
   const programs = [];
@@ -168,11 +179,12 @@ export function createRenderer(gl, terrainMeshes, cameraClear, waterMeshes = [])
     return { array, count: data.length / stride, instanceBuffer };
   }
 
-  let scene, animalsProgram, scenery, fluids, models;
+  let scene, animalsProgram, scenery, caveScenery, fluids, models;
   try {
     scene = program(terrain);
     animalsProgram = program(animals);
     scenery = terrainMeshes.map(mesh => geometry(mesh, 9, false));
+    caveScenery = caveMeshes.map(mesh=>geometry(mesh,9,false));
     fluids = waterMeshes.map(mesh => geometry(mesh,9,false));
     models = Object.fromEntries(Object.entries(meshes).map(([id, mesh]) => [id, geometry(mesh, 7, true)]));
   } catch (error) {
@@ -206,12 +218,14 @@ export function createRenderer(gl, terrainMeshes, cameraClear, waterMeshes = [])
     const aspect = size.width / size.height;
     const view = camera(subject.position, subject.species, cameraClear);
     bind(scene, view, aspect, time);
-    for (const mesh of scenery) {
+    const underground=subject.position[1] < -3.5;
+    const visibleTerrain=underground ? caveScenery : scenery;
+    for (const mesh of visibleTerrain) {
       gl.bindVertexArray(mesh.array);
       gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
     }
     bind(animalsProgram, view, aspect, time);
-    let draws = scenery.length;
+    let draws = visibleTerrain.length;
     let actors = 0;
     for (const [id, mesh] of Object.entries(models)) {
       let count = 0;
@@ -219,7 +233,7 @@ export function createRenderer(gl, terrainMeshes, cameraClear, waterMeshes = [])
         if (entity.species.id !== id || count === MAX_INSTANCES) continue;
         const moving = Math.min(1, Math.max(entity.motionMode === 'fly' ? .6 : 0, Math.hypot(...entity.velocity) / 2));
         const foraging = ['graze','forage','peck','browse','sniff','scent','stalk','dusk-watch','shell-retreat','snow-browse','gather'].includes(entity.visual);
-        const intent = entity.visual === 'prepare-attack' ? .7 : entity.visual === 'attack' ? 1 : foraging ? -.75 : 0;
+        const intent = entity.visual === 'prepare-attack' ? .7 : entity.visual === 'attack' ? 1 : ['reveal','awaken'].includes(entity.visual) ? .55 : foraging ? -.75 : 0;
         const idleYaw = entity.state === 'idle' && !entity.velocity.some(Boolean) && !entity.yaw ? .56 : entity.yaw;
         scratch.set([...entity.position, idleYaw, moving, intent, entity.state === 'downed' ? 1 : entity.juvenile ? -1 : 0, count * .68], count++ * 8);
       }
@@ -231,7 +245,7 @@ export function createRenderer(gl, terrainMeshes, cameraClear, waterMeshes = [])
       actors += count;
       draws++;
     }
-    if (fluids.length) {
+    if (!underground && fluids.length) {
       bind(scene,view,aspect,time,.38);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
