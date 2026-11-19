@@ -17,6 +17,9 @@ import {HISTORIC_NAMED_TARGETS,findNamedCavePlayerRoute}
 import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
 import {historicSecondaryScenes,inspectDeepSkySourceBoundary}
  from './cave-roadmap-secondary-browser-evidence.mjs';
+import {C6_STABLE_RENDERED_FRAMES,expectedDeepSceneResidency,
+ assessDeepSceneFrame,verifyStableDeepSceneFrames}
+ from './cave-roadmap-depth-frame-gate.mjs';
 const {PNG}=pngjs;
 const head=process.env.CAVE_EXPECTED_HEAD||'';
 assert.match(head,/^[0-9a-f]{40}$/,'Actual game source exact checkout required');
@@ -32,6 +35,8 @@ const report={status:'UNVERIFIED',kind:'ACTUAL_INDEX_MAIN_GAME_WEBGL2',
  secondarySource:'Protected tests/cave-roadmap-named-secondary-arms.test.mjs 16-case original #173 fixture',
  secondaryCaptureMethod:'Original game diagnostic camera, not a controller walk; four-seed native C separately verified',
  deepSkySourceProbes:[],
+ deepVisualGate:'STRICT_FULL_RESIDENCY_FOUR_ADVANCING_RENDERED_FRAMES',
+ deepResidencyChecks:[],deepResidencyFailures:[],
  namedCaptureMethod:'Original index.html/main.mjs game renderer; diagnostic camera placement only; separate native stepPlayer routes supply C proof',
  timingSource:'Headless Chromium SwiftShader requestAnimationFrame; NOT physical iPhone FPS',
  errors:[]};
@@ -103,6 +108,51 @@ function historicNamedLocators(){
  assert.equal(scenes.length,21);
  return scenes;
 }
+
+async function readActualGameFrame(page){
+ return page.evaluate(()=>{
+  const canvas=document.querySelector('#scene'),v=canvas?.dataset;
+  const gl=canvas?.getContext('webgl2');
+  if(!v)return null;
+  return {center:v.chunkCenter??null,
+   loadedChunks:Number(v.loadedChunks),pendingChunks:Number(v.pendingChunks),
+   renderedMeshVertices:Number(v.renderedMeshVertices),
+   renderedFrames:Number(v.renderedFrames),playerFeet:Number(v.playerFeet),
+   webgl2:!!gl,contextLost:gl?.isContextLost()??true};
+ });
+}
+// Strict test-only C6: never substitutes fake meshes, edits physical caves,
+// hides the sky, or changes shared production renderer budgets.
+async function requireSettledDeepGameFrame(page,shot,viewport){
+ const expected=expectedDeepSceneResidency(shot.at);
+ try{
+  await page.waitForFunction(expected=>{
+   const canvas=document.querySelector('#scene'),v=canvas?.dataset,
+    gl=canvas?.getContext('webgl2');
+   return !!v&&!!gl&&!gl.isContextLost()&&
+    v.chunkCenter===expected.expectedCenter &&
+    Number(v.loadedChunks)===expected.requiredChunks &&
+    Number(v.pendingChunks)===0 &&
+    Number(v.renderedMeshVertices)>800 &&
+    Number(v.renderedFrames)>0 &&
+    Math.abs(Number(v.playerFeet)-expected.feet)<=.2;
+  },expected,{timeout:90000,polling:'raf'});
+  const samples=[];
+  for(let i=0;i<C6_STABLE_RENDERED_FRAMES;i++){
+   await page.evaluate(()=>new Promise(ok=>requestAnimationFrame(ok)));
+   samples.push(await readActualGameFrame(page));
+  }
+  return {expected,receipt:verifyStableDeepSceneFrames(samples,expected)};
+ }catch(error){
+  const actual=await readActualGameFrame(page).catch(()=>null);
+  const failure={scene:shot.name,viewport,expected,actual,
+   cause:String(error.message||error)};
+  report.deepResidencyFailures.push(failure);
+  console.error('C6_DEEP_RESIDENCY_BLOCKED',JSON.stringify(failure));
+  throw Error('C6_DEEP_RESIDENCY_BLOCKED '+JSON.stringify(failure));
+ }
+}
+
 async function waitRealMesh(page,x,z,depth=false){
  await page.waitForFunction(({x,z,depth})=>{
   const el=document.querySelector('#scene'),v=el?.dataset;
@@ -198,6 +248,11 @@ try{
      },shot);
      await waitRealMesh(page,shot.at.x,shot.at.z,shot.at.y<-10);
     }
+    // Only legitimate deep scenes must pass exact resident chunk budgets:
+    // normally 27, or 18 beside the lowest bedrock floor. Preserve the
+    // original East Gallery open-to-sky design and all surface behavior.
+    const deepGate=!shot.surface&&shot.at.y<-3?
+     await requireSettledDeepGameFrame(page,shot,width+'x'+height):null;
     const snapshot=await page.evaluate(()=>{
      const el=document.querySelector('#scene'),t=window.__mythwroughtTest;
      return {mode:t.caveMode(),center:el.dataset.chunkCenter,
@@ -219,11 +274,27 @@ try{
     }
     const raw=await page.screenshot({
      path:join(folder,'realgame-'+shot.name+'-'+width+'x'+height+'.png'),fullPage:true});
+    if(deepGate){
+     const after=await readActualGameFrame(page);
+     const state=assessDeepSceneFrame(after,deepGate.expected);
+     if(!state.ok||after.renderedFrames<deepGate.receipt.lastFrame){
+      const failure={scene:shot.name,viewport:width+'x'+height,
+       reason:'C6_POST_CAPTURE_RESIDENCY_LOST',faults:state.faults,
+       expected:deepGate.expected,actual:after};
+      report.deepResidencyFailures.push(failure);
+      throw Error('C6_POST_CAPTURE_RESIDENCY_LOST '+JSON.stringify(failure));
+     }
+     report.deepResidencyChecks.push({scene:shot.name,viewport:width+'x'+height,
+      ...deepGate.receipt,afterCaptureFrame:after.renderedFrames,
+      loadedChunks:after.loadedChunks,pendingChunks:after.pendingChunks});
+    }
     const stats=inspect(raw,width,height);
     assert.ok(stats.paletteBins>=3,'Actual WebGL2 game cave screenshot appears blank: '+shot.name);
     hashes.add(stats.sha256);
     report.images.push({scene:shot.name,...stats,renderedVertices:snapshot.verts,
      loadedChunks:snapshot.chunks,playerFeet:snapshot.playerFeet,sourceHead:head,
+     fullyResidentAndFrameStable:Boolean(deepGate),
+     requiredDepthChunks:deepGate?.expected.requiredChunks??null,
      actualIndexMain:true,namedSourceFeature:shot.named||null,
       secondarySourceFeature:shot.secondary||null,
       originalSecondarySourceFrame:shot.sourceFrame||null,
@@ -323,6 +394,10 @@ try{
    assert.equal(secondary.length,16,'Missing individual original-game historical secondary B views');
    assert.equal(new Set(secondary.map(i=>i.secondarySourceFeature)).size,16);
  }
+ assert.equal(report.deepResidencyChecks.length,39*sizes.length,
+  'C6 strict four-frame residency evidence missing from deep scenes');
+ assert.deepEqual(report.deepResidencyFailures,[],
+  'C6 accepted incomplete or unstable original-game depth meshes');
  report.namedSitesCaptured=21;
  report.secondarySitesCaptured=16;
  report.gameSnapshots=report.images.length;
