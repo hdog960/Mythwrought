@@ -1,0 +1,43 @@
+name: Manual Four-Biome M4 Real Three-Region Chromium (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/manual-biomes/**'
+      - 'scripts/ci/manual-biomes-m4-real-three-regions.mjs'
+      - 'tests/manual-biomes/three-regions-m4.test.mjs'
+      - '.github/workflows/manual-four-biomes-m4-real-webgl2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authentic-snow-mountain-enchanted:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Ensure exact-source M4 native and real browser syntax
+        run: |
+          node --check src/manual-biomes/profile-world.mjs
+          node --check src/manual-biomes/three-regions-m4.mjs
+          node --check scripts/ci/manual-biomes-m4-real-three-regions.mjs
+          node --test tests/manual-biomes/three-regions-m4.test.mjs
+      - name: Install pinned genuine Chromium WebGL2 runtime
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Capture actual Snow, Mountain and Enchanted solids and mined cutaways
+        run: node scripts/ci/manual-biomes-m4-real-three-regions.mjs
+      - name: Preserve source-identical native browser PNGs with SHA256 manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-manual-m4-three-real-biomes
+          path: artifacts/manual-biomes-m4-live/
+          if-no-files-found: warn
+          retention-days: 14

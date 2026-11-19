@@ -18,6 +18,11 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
+import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
+import {readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
+import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
+  exportM2World,inspectM2WorldExport} from './manual-biomes/m2-runtime-bridge.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
@@ -55,6 +60,15 @@ else start();
 function start(){
   let world,storageReadOnly=false,recoveryNote='';
   function loadWorld(seed){
+    // Profiled worlds must never be restored using the old bare VoxelWorld
+    // baseline, which can silently discard legacy-equivalent player edits.
+    // The old loader below remains EXACT for every ordinary legacy seed.
+    if(readFourRegionProfile(localStorage,seed)){
+      const result=openM2World(localStorage,planM2WorldChoice(String(seed)));
+      if(result.recovered)recoveryNote=result.warning||
+        'Recovered a verified four-biome profile; export a backup';
+      return result.world;
+    }
     const result=loadWorldSafe(localStorage,seed);
     if(result.recovered)recoveryNote=result.warning;
     const p2=loadPack2LiveWorld(localStorage,result.world);
@@ -70,6 +84,10 @@ function start(){
     recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
   }
   let pack3=createPack3LiveBridge(world,localStorage);
+  // Only a previously selected immutable v5 world may opt into M5 PWA caching.
+  if(world.base instanceof FourRegionWorld&&
+      world.base.generationProfile.generator===M5_EXPERIMENTAL_GENERATOR)
+    void ensureM5OfflineCache();
   seedLabel.textContent='WORLD '+world.seed;
   const VS=[
     '#version 300 es','precision highp float;',
@@ -389,6 +407,10 @@ function start(){
     mirrorDownload.hidden=true;mirrorDownload.removeAttribute('href');
   }
   function verifiedLiveBytes(){
+    // The legacy mirror stores ONLY schema-1 bytes, not immutable generator
+    // profile metadata. Never mirror a biome world as if it were legacy.
+    if(world.base instanceof FourRegionWorld)
+      throw Error('Four-biome world: use WORLD EXPORT (profile-safe JSON); legacy mirror disabled');
     if(storageReadOnly)throw Error('Protected read-only world: keep original damaged data');
     const raw=localStorage.getItem(worldSlotKey(world.seed));
     if(!raw||raw!==JSON.stringify(world.save()))
@@ -453,6 +475,18 @@ function start(){
       message('SAVE PROTECTION ACTIVE — damaged original world not overwritten');
       saveHealth.textContent='READ ONLY: original damaged save preserved. Import a verified backup or choose another seed.';
       return false;
+    }
+    if(world.base instanceof FourRegionWorld){
+      const result=saveM2World(localStorage,world);
+      if(!result.ok){
+        message('Four-biome save blocked; export your world');
+        saveHealth.textContent='SAVE PROTECTION '+result.stage+': '+result.reason+
+          (result.partialCommit?' · Independent sidecar may have changed':'');
+        return false;
+      }
+      changed=false;
+      saveHealth.textContent='Verified biome-generation profile, schema-1 edits and Pack 2 sidecar; use profile-safe WORLD EXPORT for off-device backup.';
+      return true;
     }
     const overlay=savePack2LiveWorld(localStorage,world);
     if(!overlay.ok){
@@ -1833,6 +1867,8 @@ function start(){
   document.getElementById('vaultRefresh').onclick=()=>useVault(()=>refreshVault());
   document.getElementById('vaultBackup').onclick=()=>useVault(async()=>{
     if(storageReadOnly)throw Error('Current world is in protected read-only mode; select a healthy seed or import a backup');
+    if(world.base instanceof FourRegionWorld)
+      throw Error('Four-biome backups require WORLD EXPORT with generation profile. Legacy vault cannot safely back up this world');
     const capturedSeed=world.seed;
     // Legacy vault parser accepts the original schema-1 envelope while the
     // additional Pack 2 sidecar is retained for a complete JSON restore.
@@ -1860,6 +1896,8 @@ function start(){
     clearVaultLink();
     const activeSeed=world.seed;
     const snapshot=await inspectVaultBackup(chosenVaultId());
+    if(world.base instanceof FourRegionWorld||readFourRegionProfile(localStorage,snapshot.seed))
+      throw Error('Legacy vault restore cannot overwrite a biome-profile world. Use profile-safe WORLD EXPORT; no save was changed');
     const imported=importWorldData(snapshot.raw);
     // Legacy vault snapshots retain schema-1 bytes. Restore the independently
     // verified Pack 2 overlay for this seed, or abort before touching saves.
@@ -1922,6 +1960,8 @@ function start(){
       // Refuse enabling before changing preferences when startup has protected
       // a damaged world; otherwise a reload could accidentally opt the user in.
       if(requested&&storageReadOnly)throw Error('Selected world is protected read-only; export or select a healthy seed first');
+      if(requested&&world.base instanceof FourRegionWorld)
+        throw Error('Four-biome world requires profile-safe WORLD EXPORT; legacy mirror cannot hold its generation identity');
       localStorage.setItem(MIRROR_PREF,requested?'enabled':'disabled');
       if(localStorage.getItem(MIRROR_PREF)!==(requested?'enabled':'disabled'))
         throw Error('Preference read-back failed');
@@ -1968,6 +2008,8 @@ function start(){
   });
   mirrorSlot.addEventListener('change',clearMirrorDownload);
   document.getElementById('mirrorPrepare').onclick=()=>withMirror(async()=>{
+    if(world.base instanceof FourRegionWorld)
+      throw Error('Use profile-safe WORLD EXPORT for four-biome backups; this mirror contains only legacy schema-1 bytes');
     await settleMirrorWrites();
     const selectedSeed=world.seed,selectedVersion=mirrorSlot.value;
     const snap=await getMirrorCopy(selectedSeed,selectedVersion);
@@ -1979,6 +2021,8 @@ function start(){
     mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap the separate DOWNLOAD link to export this original schema-1 JSON file.';
   });
   document.getElementById('mirrorRestore').onclick=()=>withMirror(async()=>{
+    if(world.base instanceof FourRegionWorld||readFourRegionProfile(localStorage,world.seed))
+      throw Error('Refusing legacy mirror restore on a four-biome profile; generation identity would be lost');
     if(storageReadOnly)throw Error('Read-only startup protection active; use the regular IMPORT flow to repair damaged saved bytes');
     await settleMirrorWrites(); // Never let an older queued write race a restore.
     const seed=world.seed,which=mirrorSlot.value;
@@ -2010,14 +2054,108 @@ function start(){
   });
   const seedInput=document.getElementById('seedInput'),seedMessage=document.getElementById('seedMessage');
   seedInput.value=String(world.seed);
+  // Explicit, separate NEW WORLD action in the existing settings sheet:
+  // never an implicit alternate seed, ordinary LOAD or save migration.
+  const createFourBiomeButton=document.createElement('button');
+  createFourBiomeButton.id='createFourBiomeWorld';createFourBiomeButton.type='button';
+  createFourBiomeButton.textContent='CREATE NEW FOUR-BIOME WORLD';
+  createFourBiomeButton.setAttribute('aria-label','Create separate new world with Desert, Snow, Mountains and Enchanted Forest');
+  const biomeChoiceHint=document.createElement('p');
+  biomeChoiceHint.className='controlhint';
+  biomeChoiceHint.textContent='New and unused seeds only. Ordinary LOAD / CREATE retains all legacy terrain and saves. Four-biome worlds use a separate, immutable generation profile.';
+  const seedRow=document.getElementById('switchWorld').closest('.seedrow');
+  if(seedRow){
+    seedRow.insertAdjacentElement('afterend',createFourBiomeButton);
+    createFourBiomeButton.insertAdjacentElement('afterend',biomeChoiceHint);
+  }
+  // Different explicit NEW seed action: existing v4 selection stays default.
+  const createV5MountainWorldButton=document.createElement('button');
+  createV5MountainWorldButton.id='createExperimentalV5World';
+  createV5MountainWorldButton.type='button';
+  createV5MountainWorldButton.textContent='CREATE NEW MOUNTAIN-PASS WORLD (V5 TEST)';
+  createV5MountainWorldButton.setAttribute('aria-label',
+    'Experimental version 5 Mountain walking world, unused seed only');
+  const v5Hint=document.createElement('p');
+  v5Hint.className='controlhint';
+  v5Hint.textContent='Experimental v5 for NEW UNUSED SEEDS only. The ordinary v4 generator, older worlds and existing saves are unchanged. Use WORLD EXPORT for version-safe backups.';
+  if(seedRow){
+    biomeChoiceHint.insertAdjacentElement('afterend',createV5MountainWorldButton);
+    createV5MountainWorldButton.insertAdjacentElement('afterend',v5Hint);
+  }
+  function enterPreparedM2World(candidate,statusText){
+    // This commits only a PREVIOUSLY verified and persisted candidate.
+    for(const c of chunks.values())deleteChunkBuffers(c);
+    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
+    // Preserve Creative flight's full reset-before-spawn invariant on the
+    // explicitly NEW four-biome world path. World assignment is separate
+    // so existing restore paths retain their original exact contracts.
+    g2NewWorld();
+    world=candidate;world.nextPack2State=pack2Selection;
+    pack3=createPack3LiveBridge(world,localStorage);
+    // Register *after* the explicit unused-seed v5 creation is safely saved.
+    if(world.base instanceof FourRegionWorld&&
+        world.base.generationProfile.generator===M5_EXPERIMENTAL_GENERATOR)
+      void ensureM5OfflineCache();
+    resetManual14ForWorld();resetPack5ForWorld();
+    storageReadOnly=false;changed=false;respawnPrototype();
+    clearMirrorDownload();
+    seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
+    seedMessage.textContent=statusText;
+    saveHealth.textContent='Four-biome profile and schema-1 saved with independent Pack 2 state; use WORLD EXPORT for profile-safe backup.';
+    message(statusText);
+  }
+  createFourBiomeButton.onclick=()=>{
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(next===world.seed)throw Error('Choose a new unused seed different from your current world');
+      if(!window.confirm('CREATE A NEW FOUR-BIOME WORLD for seed '+next+'? Only an unused seed is allowed. Older worlds are never converted.'))
+        return;
+      if(!storageReadOnly&&!save())throw Error('Current world has unsaved edits; export or save before creating a different world');
+      const choice=planM2WorldChoice(seedInput.value,M2_WORLD_MODE.CREATE_FOUR,{confirmed:true});
+      const loaded=openM2World(localStorage,choice);
+      if(!(loaded.base instanceof FourRegionWorld))
+        throw Error('New-world generator profile did not activate');
+      const stored=saveM2World(localStorage,loaded.world);
+      if(!stored.ok)throw Error('Biome world was not verified saved: '+stored.reason);
+      enterPreparedM2World(loaded.world,'New four-biome world '+next+' created safely. Desert, Snow, Mountains and Enchanted Forest are generated in this seed.');
+    }catch(error){
+      seedMessage.textContent='Four-biome creation refused; original world retained: '+String(error.message||error);
+    }
+  };
+  createV5MountainWorldButton.onclick=()=>{
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(next===world.seed)throw Error('Choose a different unused seed for experimental v5');
+      if(!window.confirm('CREATE an EXPERIMENTAL V5 MOUNTAIN-PASS FOUR-BIOME WORLD for UNUSED seed '+next+'? Existing worlds are NEVER upgraded or overwritten.'))
+        return;
+      if(!storageReadOnly&&!save())throw Error('Save your current world before a new experimental seed');
+      const choice=planM2WorldChoice(seedInput.value,
+        M2_WORLD_MODE.CREATE_FOUR_V5,{confirmed:true});
+      const loaded=openM2World(localStorage,choice);
+      if(!(loaded.base instanceof FourRegionWorld)||
+         loaded.base.generationProfile.generator!==M5_EXPERIMENTAL_GENERATOR)
+        throw Error('Experimental v5 generator did not activate');
+      const stored=saveM2World(localStorage,loaded.world);
+      if(!stored.ok)throw Error('Experimental v5 save not verified: '+stored.reason);
+      enterPreparedM2World(loaded.world,
+        'Experimental v5 Mountain-pass four-biome world '+next+
+        ' created. Other world seeds, profiles and saves remain unchanged.');
+    }catch(error){
+      seedMessage.textContent='Experimental v5 creation refused; original world retained: '+
+        String(error.message||error);
+    }
+  };
   document.getElementById('switchWorld').onclick=()=>{
     try{
       const next=worldSeedFromText(seedInput.value);
       if(next===world.seed&&!storageReadOnly){seedMessage.textContent='Already exploring this seed.';return;}
       if(!storageReadOnly&&!save())throw Error('Current world is not verified saved. Export before switching.');
       const candidate=loadWorld(next);
-      const result=saveWorldSafe(localStorage,candidate);
-      if(!result.ok)throw Error(result.reason);
+      const result=candidate.base instanceof FourRegionWorld?
+        saveM2World(localStorage,candidate):
+        saveWorldSafe(localStorage,candidate);
+      if(!result.ok)throw Error(result.reason||result.detail||'World save refused');
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
@@ -2034,10 +2172,15 @@ function start(){
   };
   document.getElementById('export').onclick=()=>{
     try{
-      const exported=world.pack2Cells.size?pack2ExportBundle(world):world.save();
+      const profiled=world.base instanceof FourRegionWorld;
+      const exported=profiled?JSON.parse(exportM2World(world)):
+        (world.pack2Cells.size?pack2ExportBundle(world):world.save());
       const data=JSON.stringify(exported,null,2);
-      importWorldData(data); // Legacy schema-1 fields remain valid and unchanged.
-      if(exported.pack2)pack2ImportBundle(exported,world.base); // Verify extended records.
+      if(profiled)inspectM2WorldExport(data); // Profile and Pack 2 must BOTH survive.
+      else{
+        importWorldData(data); // Legacy schema-1 fields remain valid and unchanged.
+        if(exported.pack2)pack2ImportBundle(exported,world.base);
+      }
       const blob=new Blob([data],{type:'application/json'});
       const url=URL.createObjectURL(blob),a=document.createElement('a');
       a.href=url;a.download='mythwrought-seed-'+world.seed+'-prototype.json';
@@ -2052,8 +2195,34 @@ function start(){
     try{
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
       const rawImport=await f.text();
-      const imported=importWorldData(rawImport); // Validate original schema-1 first.
       const incoming=JSON.parse(rawImport);
+      if(incoming?.kind==='mythwrought-four-biomes-export'){
+        // Never flatten a profiled world through the legacy importer.
+        // New-seed-only restore; no destructive overwrite of a prior seed.
+        const examined=inspectM2WorldExport(rawImport);
+        if(storageReadOnly)throw Error('Read-only save protection is active');
+        if(examined.seed===world.seed)
+          throw Error('Biome bundle cannot replace your active seed; export your world and choose a separate unused seed');
+        if(!window.confirm('IMPORT a verified FOUR-BIOME profile for UNUSED seed '+examined.seed+'? Existing worlds are never overwritten.'))
+          return;
+        if(!save())throw Error('Save your current world before importing');
+        // Preserve EXACT imported generator identity, even for older v2/v3.
+        const intent=planM2WorldChoice(String(examined.seed),
+          M2_WORLD_MODE.IMPORT_PROFILE,{confirmed:true,
+            generator:examined.world.base.generationProfile.generator});
+        openM2World(localStorage,intent); // Exact profile, fresh-slot check.
+        const stored=saveM2World(localStorage,examined.world);
+        if(!stored.ok)throw Error('Profile import not verified; seed is protected: '+stored.reason);
+        enterPreparedM2World(examined.world,
+          'Imported verified four-biome profile for seed '+examined.seed+
+          '; source world and other seed slots preserved.');
+        return;
+      }
+      if(incoming?.profile||incoming?.kind)
+        throw Error('Unknown generator metadata; refusing unsafe legacy import');
+      const imported=importWorldData(rawImport); // Validate original schema-1 first.
+      if(readFourRegionProfile(localStorage,imported.seed))
+        throw Error('Legacy import cannot overwrite a four-biome generation profile');
       const previousOverlay=loadPack2LiveWorld(localStorage,imported).world;
       // Legacy-only imports must NOT delete placed Pack 2 objects. Preserve
       // the matching per-seed sidecar, or refuse incompatible old-world bytes.
@@ -2147,6 +2316,18 @@ function start(){
   if(['localhost','127.0.0.1'].includes(location.hostname)){
     // Local-only regression interface; absent from the public Pages runtime.
     window.__mythwroughtTest=Object.freeze({
+      fourBiomeMode(){return world.base instanceof FourRegionWorld?'four-regions':'legacy';},
+      fourBiomeProfile(){return world.base instanceof FourRegionWorld?world.base.generationProfile:null;},
+      // M5 read-only local browser acceptance: no displacement/rotation methods.
+      m5ObservedPose(){return Object.freeze({x:player.x,z:player.z,feet:player.feet,
+        yaw:player.yaw,seed:world.seed,creative:g2Active(),onGround:player.onGround});},
+      gpuUploadFaults(){return [...gpuRetry.faults.entries()].map(([key,value])=>({key,...value}));},
+      // Localhost-only acceptance uses actual edit+save and never synthetic
+      // screenshot fixtures. Production Pages never exposes this diagnostic.
+      editBiomeCell(x,y,z,id){
+        if(![x,y,z,id].every(Number.isInteger))throw Error('Invalid test cell');
+        return world.set(x,y,z,id);
+      },
       teleport(x,z){
         if(![x,z].every(Number.isFinite))throw Error('Invalid debug position');
         const pos=findSafeSpawn(world,x,z);

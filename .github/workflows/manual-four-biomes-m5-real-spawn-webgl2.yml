@@ -1,0 +1,50 @@
+name: Manual Four-Biome M5 Real Spawn Walking and Fog WebGL2 (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/exploration-map.mjs'
+      - 'src/manual-biomes/**'
+      - 'scripts/ci/manual-biomes-m5-spawn-walk-webgl2.mjs'
+      - '.github/workflows/manual-four-biomes-m5-real-spawn-webgl2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actual-keyboard-spawn-walk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check exact M5 authentic no-teleport browser code
+        run: |
+          node --check src/exploration-map.mjs
+          node --check src/manual-biomes/exploration-ink.mjs
+          node --check scripts/ci/manual-biomes-m5-spawn-walk-webgl2.mjs
+      - name: Experimental immutable v5 Mountain pass real native and physics gate
+        run: |
+          node --test tests/manual-biomes/m5-mountain-pass-v5.test.mjs
+          node --test tests/manual-biomes/m5-explicit-v5-activation.test.mjs
+      - name: Install pinned real Chromium WebGL2 browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Real keyboard input from spawn, physical map discovery, reload in three sizes
+        run: node scripts/ci/manual-biomes-m5-spawn-walk-webgl2.mjs
+      - name: Hard long-distance physical walking route audit (no teleports)
+        run: node scripts/ci/manual-biomes-m5-overland-audit.mjs
+      - name: Preserve genuine screenshots and any failed physical movement evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-m5-actual-keyboard-spawn-webgl2
+          path: |
+            artifacts/manual-biomes-m5-spawn/
+            artifacts/manual-biomes-m5-route/
+          if-no-files-found: warn
+          retention-days: 14
