@@ -17,7 +17,7 @@ export function inspectFittingPng(bytes,{maxBytes=16*1024*1024}={}){
   if(!seenIHDR){
    if(type!=='IHDR'||len!==13)throw Error('IHDR must be first');
    width=dv.getUint32(offset+8);height=dv.getUint32(offset+12);
-   if(!width||!height||width>8192||height>8192||bytes[offset+16]!==8||![2,6].includes(bytes[offset+17])||bytes[offset+20]!==0)throw Error('unsupported PNG format');
+   if(!width||!height||width>8192||height>8192||bytes[offset+16]!==8||![2,6].includes(bytes[offset+17])||(bytes[offset+18]!==0||bytes[offset+19]!==0||bytes[offset+20]!==0))throw Error('unsupported PNG format');
    seenIHDR=true;
   }else if(type==='IHDR')throw Error('duplicate IHDR');
   if(type==='IDAT'){if(seenIEND||len===0)throw Error('invalid IDAT');seenIDAT=true;}
