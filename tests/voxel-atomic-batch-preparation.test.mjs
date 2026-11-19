@@ -69,3 +69,27 @@ test('malformed intent guards throw without modifying any cell',()=>{
  }
  assert.deepEqual(host.exportLegacyCells(),[{cell:a,id:1},{cell:b,id:2}]);
 });
+
+test('malformed host receipts fail closed before intent guards inspect them',()=>{
+ const host={snapshotEdit:()=>null};
+ assert.equal(prepareVoxelEditBatch(host,[{cell:a,nextId:4,expectedId:1}]),null);
+ const malformed=[
+   Object.freeze({cell:Object.freeze([...b]),expectedId:1,expectedTurn:null}),
+   Object.freeze({cell:Object.freeze([...a]),expectedId:255,expectedTurn:null}),
+   Object.freeze({cell:Object.freeze([...a]),expectedId:1,expectedTurn:4}),
+   Object.freeze({cell:Object.freeze([...a]),expectedId:1,expectedTurn:null}),
+ ];
+ for(const receipt of malformed){
+   const candidate=receipt===malformed[3]?Object.freeze({...receipt,cell:[...a]}):receipt;
+   assert.throws(()=>prepareVoxelEditBatch({snapshotEdit:()=>candidate},[{cell:a,nextId:4,expectedId:1}]),TypeError);
+ }
+});
+
+test('multi-cell receipt mismatch never advances to commit',()=>{
+ const host=make();
+ const good=host.snapshotEdit(a,4);
+ const wrong=Object.freeze({...good,cell:Object.freeze([...b])});
+ const adapter={snapshotEdit:()=>wrong,compareAndWriteMany:()=>{throw Error('must not commit')}};
+ assert.throws(()=>prepareVoxelEditBatch(adapter,[{cell:a,nextId:4}]),TypeError);
+ assert.deepEqual(host.read(a),{id:1,revision:0,turn:null});
+});
