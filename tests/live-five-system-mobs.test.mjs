@@ -263,7 +263,11 @@ test('tamed horse survives unloaded chunks beyond six-second ecology GC and rest
   assert.ok(id);
   assert.match(first.interact(),/Horse tamed/);
   resident=false;
-  for(let i=0;i<25;i++)first.advance(.5,[]);
+  // createLiveMobSession deliberately clamps each live frame to .1s.
+  // Ninety frames cross ecology's actual six-second GC grace with enough
+  // .5-second PopulationManager reconciliation ticks to evict an UNowned
+  // animal. A 25-frame test accidentally only simulated 2.5 seconds.
+  for(let i=0;i<90;i++)first.advance(.1,[]);
   assert.equal(first.engine.get(id)?.state,'dormant',
     'Owned horse was removed instead of kept dormant while its chunk was unloaded');
   assert.equal(first.save(),true);
@@ -273,7 +277,9 @@ test('tamed horse survives unloaded chunks beyond six-second ecology GC and rest
   resident=true;
   const returned=build();
   assert.equal(returned.engine.get(id)?.state,'dormant');
-  for(let i=0;i<3;i++)returned.advance(.5,[]);
+  // At least one complete .5s ecology reconciliation interval must pass;
+  // .5 input is clamped to .1 and three calls do not run this transition.
+  for(let i=0;i<10;i++)returned.advance(.1,[]);
   assert.equal(returned.engine.get(id)?.state,'idle');
   assert.match(returned.toggleMount(),/Mounted Horse/,
     'Owned horse did not survive sidecar reload at original identity');
