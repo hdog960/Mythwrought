@@ -5,6 +5,9 @@ import {compileFittingDrawPackets} from './draw-packet-compiler.mjs';
 export function flattenFittingTriangles(objects, options={}){
  const compiled=compileFittingDrawPackets(objects,options);
  const vertices=[], colors=[];
+ const selectedKey=options.selectedKey??null;
+ if(selectedKey!==null && (typeof selectedKey!=='string'||!objects.some(o=>o.instanceKey===selectedKey)))
+  throw new RangeError('selected object must be visible');
  for(const packet of compiled.packets){
   const p=packet.positions, m=packet.materials;
   if(p.length!==packet.triangleCount*9||m.length!==packet.triangleCount)
@@ -21,7 +24,8 @@ export function flattenFittingTriangles(objects, options={}){
     // Stable material palette; every triangle remains real mesh geometry.
     const palette=[[0.55,0.37,0.21],[0.77,0.67,0.45],[0.36,0.43,0.49],
       [0.62,0.25,0.19],[0.31,0.48,0.32],[0.74,0.73,0.68]];
-    colors.push(...palette[material%palette.length]);
+    const base=palette[material%palette.length];
+    colors.push(...(instance.instanceKey===selectedKey ? [Math.min(1,base[0]*0.35+0.65),Math.min(1,base[1]*0.35+0.58),base[2]*0.25] : base));
    }
   }
  }
