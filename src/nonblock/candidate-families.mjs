@@ -16,6 +16,7 @@ import {makeSnowgrass} from '../nonblock-environments24/snowgrass.mjs';
 import {makeTumblebrush} from '../nonblock-environments24/tumblebrush.mjs';
 import {makePebbleScatter} from '../nonblock-environments24/pebble-scatter.mjs';
 import {makeCaveRubbleCluster} from '../nonblock-environments24/cave-rubble-cluster.mjs';
+import {createCaveFormation} from '../nonblock-environments24/cave-formations.mjs';
 import {describeFitting} from '../nonblock-fittings36/fittings-phase1.mjs';
 
 const floraPalette = [
@@ -47,6 +48,10 @@ function fittingFamily(sceneId,palette,wall=false) {
   }).render.localMesh};
 }
 
+function caveFamily(sceneId,attachment) {
+  return {lane:'24',attachment,variantMax:7,build:options=>createCaveFormation(sceneId,options)};
+}
+
 export const candidateFamilies = new Map([
   ...Object.keys(SCENE_FAMILIES).map(sceneId=>[sceneId,floraFamily(
     ({seed,anchor})=>createSceneMesh(sceneId,seed,...anchor).mesh,floraPalette)]),
@@ -74,6 +79,10 @@ export const candidateFamilies = new Map([
   ['nonblock:d:tumblebrush',environmentFamily(makeTumblebrush,[.60,.44,.30])],
   ['nonblock:e:pebble-scatter',environmentFamily(makePebbleScatter,[.49,.46,.41])],
   ['nonblock:e:cave-rubble-cluster',environmentFamily(makeCaveRubbleCluster,[.49,.49,.53])],
+  ['nonblock:e:giant-stalagmite-spire',caveFamily('nonblock:e:giant-stalagmite-spire','ground')],
+  ['nonblock:e:clustered-dripstone',caveFamily('nonblock:e:clustered-dripstone','ceiling')],
+  ['nonblock:e:limestone-cave-column',caveFamily('nonblock:e:limestone-cave-column','span')],
+  ['nonblock:e:flowstone-curtain',caveFamily('nonblock:e:flowstone-curtain','ceiling')],
   ['scene36:cloth-banner',fittingFamily('scene36:cloth-banner',
     [[.42,.27,.15],null,null,[.65,.19,.24],null,null,null,[.46,.12,.19],[.87,.64,.30],[.62,.40,.19]],true)],
   ['scene36:rope-coil',fittingFamily('scene36:rope-coil',

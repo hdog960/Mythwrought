@@ -2,7 +2,7 @@
 
 The names for empty slots in groups A, B, C and H are working names. Clover clump and clover patch, and moss cushion and moss mat, occupy provisional separate slots. A later design review can consolidate a pair if its gameplay roles are too similar while keeping the source IDs and saved removal state.
 
-“Native + Chromium” means exact-triangle selection, the existing MINE control, a verified tombstone and a fresh page were exercised against seeded terrain in the actual game. Final art, device, biome placement and performance gates are open. “Source native only” covers geometry, variants and collider intent outside the runtime.
+“Native + Chromium” means exact-triangle selection, the existing MINE control, a verified tombstone and a fresh page were exercised against seeded terrain in the actual game. Final art, device, biome placement and performance gates are open.
 
 | Slot | Group | Family | Scene ID | Source | Staging evidence |
 | ---: | :---: | --- | --- | --- | --- |
@@ -55,11 +55,11 @@ The names for empty slots in groups A, B, C and H are working names. Clover clum
 | 47 | D | Dwarf juniper | nonblock:d:dwarf-juniper | [Inherited](../../src/nonblock-environments24/dwarf-juniper.mjs) | Native + Chromium |
 | 48 | D | Icicle spear | nonblock:d:icicle-spear | Inherited | Pending |
 | 49 | E | Small stalagmite | nonblock:e:small-stalagmite | Inherited | Pending |
-| 50 | E | Giant stalagmite spire | nonblock:e:giant-stalagmite-spire | [New](../../src/nonblock-environments24/cave-formations.mjs) | Source native only |
+| 50 | E | Giant stalagmite spire | nonblock:e:giant-stalagmite-spire | [New](../../src/nonblock-environments24/cave-formations.mjs) | Native + Chromium |
 | 51 | E | Hanging stalactite | nonblock:e:hanging-stalactite | Inherited | Pending |
-| 52 | E | Clustered dripstone | nonblock:e:clustered-dripstone | [New](../../src/nonblock-environments24/cave-formations.mjs) | Source native only |
-| 53 | E | Limestone cave column | nonblock:e:limestone-cave-column | [New](../../src/nonblock-environments24/cave-formations.mjs) | Source native only |
-| 54 | E | Flowstone curtain | nonblock:e:flowstone-curtain | [New](../../src/nonblock-environments24/cave-formations.mjs) | Source native only |
+| 52 | E | Clustered dripstone | nonblock:e:clustered-dripstone | [New](../../src/nonblock-environments24/cave-formations.mjs) | Native + Chromium |
+| 53 | E | Limestone cave column | nonblock:e:limestone-cave-column | [New](../../src/nonblock-environments24/cave-formations.mjs) | Native + Chromium |
+| 54 | E | Flowstone curtain | nonblock:e:flowstone-curtain | [New](../../src/nonblock-environments24/cave-formations.mjs) | Native + Chromium |
 | 55 | E | Crystal shard | nonblock:e:crystal-shard | Inherited | Pending |
 | 56 | E | Branching crystal cluster | nonblock:e:branching-crystal-cluster | Inherited | Pending |
 | 57 | E | Geode opening | nonblock:e:geode-opening | Inherited | Pending |

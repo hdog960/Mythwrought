@@ -47,3 +47,36 @@ test('solid profiles follow the footprint and reject invalid scene identity',()=
   assert.throws(()=>createCaveFormation(forms[0][0],{...options,variant:8}));
   assert.throws(()=>createCaveFormation('__proto__',options));
 });
+
+test('cave stage admits floor, ceiling and spanning mounts and removes solid collision on mining',async()=>{
+  const {createCandidateScene}=await import('../src/nonblock/candidate-scene.mjs');
+  const {collides}=await import('../src/voxel.mjs');
+  const layout=forms.map(([sceneId,attachment],i)=>({
+    sceneId,variant:7,anchor:[i*3,attachment==='ceiling'?3:1,0]
+  }));
+  const storage={
+    raw:null,
+    getItem(){return this.raw;},
+    setItem(_key,value){this.raw=value;},
+    removeItem(){this.raw=null;}
+  };
+  const cells=new Set(['0,0,0','3,4,0','6,0,0','6,4,0','9,4,0']);
+  const blockAt=(...p)=>Number(cells.has(p.join(',')));
+  const deps={storage,blockAt,voxelPick:()=>null};
+  const scene=createCandidateScene(179,'legacy',layout,deps);
+  assert.equal(scene.visible().length,4);
+  const world={get:blockAt,stagedNonblockCollision:scene.bodyIntersects};
+  assert.equal(collides(world,.5,1,.5),true);
+  assert.equal(collides(world,6.5,1,.5),true);
+  assert.equal(collides(world,3.5,2,.5),false);
+  cells.delete('6,4,0');
+  assert.equal(collides(world,6.5,1,.5),false);
+  assert.equal(scene.visible().length,3);
+  const eye=[.5,1.28,-1.5], direction=[0,0,1];
+  const hit=scene.pick(eye,direction);
+  assert.equal(hit?.sceneId,forms[0][0]);
+  assert.equal(scene.breakHit(hit,eye,direction),true);
+  assert.equal(collides(world,.5,1,.5),false);
+  assert.equal(createCandidateScene(179,'legacy',layout,deps).visible().some(
+    item=>item.instanceKey===hit.instanceKey),false);
+});

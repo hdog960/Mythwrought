@@ -36,21 +36,30 @@ export function describeCandidateObject(seed, placement) {
   const {sceneId,anchor,variant=0,orientation=0} = placement ?? {};
   const family = families.get(sceneId);
   if (!family || !Number.isSafeInteger(seed) || !validAnchor(anchor) ||
-      !Number.isInteger(variant) || variant < 0 || variant > 3 ||
+      !Number.isInteger(variant) || variant < 0 || variant > (family.variantMax??3) ||
       !Number.isInteger(orientation) || orientation < 0 || orientation > 3 ||
       (family.lane !== '36' && orientation !== 0)) throw new TypeError('Invalid nonblock staging identity');
 
   const instanceKey = keyOf(sceneId,seed,anchor,variant,orientation,family.lane);
-  const mesh = family.mesh({seed,anchor,variant,orientation});
+  const options = {seed,anchor,variant,orientation};
+  const source = family.build ? family.build(options) :
+    {mesh:family.mesh(options),palette:family.palette,colliders:[]};
+  const {mesh} = source;
   if (mesh.positions.length!==mesh.triangleCount*9 || mesh.triangleCount<1 ||
       mesh.triangleCount>256 || !mesh.positions.every(Number.isFinite))
     throw new TypeError('Invalid nonblock source mesh');
 
   const [wallX,wallZ] = rotation(0,-1,orientation);
-  const origin = [anchor[0]+.5+(family.wall ? wallX*.42 : 0),anchor[1],
-    anchor[2]+.5+(family.wall ? wallZ*.42 : 0)];
-  const support = [anchor[0]+(family.wall ? wallX : 0),anchor[1]+(family.wall ? 1 : -1),
-    anchor[2]+(family.wall ? wallZ : 0)];
+  const [ax,ay,az] = anchor;
+  const ceiling = family.attachment==='ceiling';
+  const height = ay+(ceiling?1:0);
+  const origin = [ax+.5+(family.wall ? wallX*.42 : 0),height,
+    az+.5+(family.wall ? wallZ*.42 : 0)];
+  const supports = family.wall ? [[ax+wallX,ay+1,az+wallZ]] :
+    ceiling ? [[ax,ay+1,az]] : [[ax,ay-1,az]];
+  if (family.attachment==='span') supports.push([ax,ay+3,az]);
+
+  const colliders = source.colliders.map(box=>box.map((v,i)=>v+origin[i%3]));
   const positions = new Float32Array(mesh.positions.length);
   const min = [Infinity,Infinity,Infinity];
   const max = [-Infinity,-Infinity,-Infinity];
@@ -64,8 +73,8 @@ export function describeCandidateObject(seed, placement) {
       max[axis] = Math.max(max[axis],positions[i+axis]);
     }
   }
-  return {contract,sceneId,seed,anchor:[...anchor],variant,orientation,instanceKey,support,min,max,
-    positions,materials:mesh.materials,palette:family.palette,embedDepth:family.embedDepth??0};
+  return {contract,sceneId,seed,anchor:[...anchor],variant,orientation,instanceKey,supports,min,max,colliders,
+    positions,materials:mesh.materials,palette:source.palette,embedDepth:family.embedDepth??0};
 }
 
 function sub(a,b) { return a.map((value,i)=>value-b[i]); }
@@ -105,7 +114,7 @@ function intersectsBounds(object,origin,unit,max) {
 }
 
 function canAttach(object,blockAt,editedAt) {
-  if (!blockAt(...object.support) || editedAt(...object.support)) return false;
+  if (!object.supports.every(support=>blockAt(...support)&&!editedAt(...support))) return false;
   const min = object.min.map(x=>Math.floor(x+1e-6));
   // The exposed root has a shallow buried base. Its support is still
   // protected and the exact ray cannot select geometry behind terrain.
@@ -123,12 +132,12 @@ function canAttach(object,blockAt,editedAt) {
 
 function validateTombstone(key,seed) {
   if (typeof key !== 'string') return false;
-  const match = /^nb1:([^:]+):(-?\d+):(-?\d+),(-?\d+),(-?\d+):([0-3])(?::r([0-3]))?$/.exec(key);
+  const match = /^nb1:([^:]+):(-?\d+):(-?\d+),(-?\d+),(-?\d+):([0-7])(?::r([0-3]))?$/.exec(key);
   if (!match || Number(match[2])!==seed) return false;
   const sceneId = [...families.keys()].find(id => encodeURIComponent(id)===match[1]);
   const family = families.get(sceneId);
   const anchor = match.slice(3,6).map(Number);
-  return family && validAnchor(anchor) &&
+  return family && validAnchor(anchor) && Number(match[6])<=(family.variantMax??3) &&
     keyOf(sceneId,seed,anchor,Number(match[6]),Number(match[7]),family.lane)===key;
 }
 
@@ -148,6 +157,7 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
       new Set(snapshot.tombstones).size!==snapshot.tombstones.length) throw new TypeError('Invalid nonblock sidecar');
 
   const removed = new Set(snapshot.tombstones);
+  const solid = objects.filter(o=>o.colliders.length>0);
   const issued = new WeakSet();
   let uncertain = false;
   let epoch = 0;
@@ -206,7 +216,15 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
     epoch++;
     return true;
   }
-  return Object.freeze({visible,pick,breakHit});
+  function bodyIntersects(body) {
+    const epsilon = 1e-5;
+    return solid.some(o=>!removed.has(o.instanceKey)&&o.colliders.some(box=>
+      body[0]<box[3]-epsilon && body[3]>box[0]+epsilon &&
+      body[1]<box[4]-epsilon && body[4]>box[1]+epsilon &&
+      body[2]<box[5]-epsilon && body[5]>box[2]+epsilon
+    )&&canAttach(o,blockAt,editedAt));
+  }
+  return Object.freeze({visible,pick,breakHit,bodyIntersects});
 }
 
 export function candidateVertices(objects) {

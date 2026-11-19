@@ -453,5 +453,6 @@ export function collides(world,x,feet,z){
   if(world?.pack3Runtime?.size?.()>0 && !world.pack3Runtime.playerFits(body).fits)return true;
   if(typeof world?.manual14Collision==='function'&&world.manual14Collision(body))return true;
   if(typeof world?.pack5Collision==='function'&&world.pack5Collision(body))return true;
+  if(typeof world?.stagedNonblockCollision==='function'&&world.stagedNonblockCollision(body))return true;
   return false;
 }

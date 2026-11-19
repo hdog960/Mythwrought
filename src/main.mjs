@@ -121,6 +121,7 @@ function start(nonblockStage=null){
             return furniture&&(!voxel||furniture.distance<voxel.distance)?furniture:voxel;
           }
         });
+        world.stagedNonblockCollision=nonblockScene.bodyIntersects;
       }catch(error){
         console.warn('Nonblock staging scene disabled',error);
       }
@@ -753,6 +754,13 @@ function start(nonblockStage=null){
     }
     const physicalState=inspectBlockTarget(world,eye(),facing(),selected,player,
       isPack3BlockId(selected)?pack3Yaw:selectedRotation);
+    if(mode==='place'&&nonblockStage&&physicalState.adjacent){
+      const cell=physicalState.adjacent;
+      if(stagedScene()?.bodyIntersects([...cell,...cell.map(n=>n+1)])){
+        message('Building space occupied by scenery');
+        return;
+      }
+    }
     const existingPack3=physicalState.hit?pack3.getAt(...physicalState.hit):null;
     const existingManual14=physicalState.hit?manual14.layer.get(physicalState.hit):null;
     if((mode==='place'&&manual14Ids.has(selected))||(mode==='mine'&&existingManual14)){

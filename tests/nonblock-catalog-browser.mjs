@@ -52,7 +52,7 @@ for(let z=-9;z<=13;z+=3){
   }
 }
 for(const [sceneId,family] of candidateFamilies){
-  if(family.wall) continue;
+  if(family.wall || family.attachment) continue;
   while(site<sites.length){
     const placement={sceneId,anchor:sites[site++],variant:1};
     const candidate=sceneFor([placement]);
@@ -66,7 +66,7 @@ for(const [sceneId,family] of candidateFamilies){
 }
 const nativeScene=sceneFor(layout);
 const objects=nativeScene.visible();
-assert.equal(objects.length,candidateFamilies.size);
+assert.equal(objects.length,31);
 const views=objects.map(o=>{
   const aim=seekView(nativeScene,o);
   assert.ok(aim,'No unobstructed exact-triangle view for '+o.sceneId);
@@ -93,6 +93,12 @@ try{
     return Number(data.nonblockInstances)===value && Number(data.loadedChunks)===25;
   },count,{timeout:45000});
   await waitForVisible(page,layout.length);
+  const setView=aim=>page.evaluate(({x,z,point})=>{
+    window.__mythwroughtTest.teleport(x,z);
+    window.__mythwroughtTest.aimAtStagedPoint(...point);
+  },aim);
+  await setView(views[0]);
+  await waitForVisible(page,layout.length);
   const before=await page.evaluate(key=>localStorage.getItem(key),classicSaveKey);
   counts=await canvas.evaluate(c=>({
     instances:Number(c.dataset.nonblockInstances),vertices:Number(c.dataset.nonblockVertices),
@@ -115,11 +121,7 @@ try{
   });
   frameSamples={softwareRenderer:'Chromium SwiftShader',withScenery:await sampleFrames()};
   for(const [i,object] of objects.entries()){
-    const aim=views[i];
-    await page.evaluate(({x,z,point})=>{
-      window.__mythwroughtTest.teleport(x,z);
-      window.__mythwroughtTest.aimAtStagedPoint(...point);
-    },aim);
+    await setView(views[i]);
     try{
       await page.waitForFunction(key=>document.querySelector('#scene').dataset.nonblockTarget===key,
         object.instanceKey,{timeout:8000});
@@ -141,10 +143,8 @@ try{
       triangles:object.positions.length/9,file,sha256:digest(image)});
     console.log('PASS',object.sceneId,object.positions.length/9,'triangles');
   }
-  await page.evaluate(({x,z,point})=>{
-    window.__mythwroughtTest.teleport(x,z);
-    window.__mythwroughtTest.aimAtStagedPoint(...point);
-  },views[0]);
+  await setView(views[0]);
+  await waitForVisible(page,0);
   frameSamples.withoutScenery=await sampleFrames();
   const tombstones=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).tombstones,stageSaveKey);
   assert.deepEqual(tombstones,[...objects.map(o=>o.instanceKey)].sort());
