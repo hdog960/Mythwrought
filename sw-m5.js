@@ -3,9 +3,31 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261119-v6-safe-refresh';
-const ASSET_RELEASE='20261119-v6-safe-refresh';
+const CACHE_NAME=CACHE_PREFIX+'20261119-five-systems-rc1';
+const ASSET_RELEASE='20261119-five-systems-rc1';
 const SOURCE_ASSETS=[
+  "./src/mobs/animal-interactions.mjs",
+  "./src/mobs/behavior.mjs",
+  "./src/mobs/combat.mjs",
+  "./src/mobs/companion.mjs",
+  "./src/mobs/ecology.mjs",
+  "./src/mobs/engine.mjs",
+  "./src/mobs/familiar-wildlife.mjs",
+  "./src/mobs/host-view.mjs",
+  "./src/mobs/hostile-tactics.mjs",
+  "./src/mobs/live-game.mjs",
+  "./src/mobs/live-render.mjs",
+  "./src/mobs/movement.mjs",
+  "./src/mobs/navigation.mjs",
+  "./src/mobs/original-wildlife.mjs",
+  "./src/mobs/roster-persistence.mjs",
+  "./src/mobs/species.mjs",
+  "./src/mobs/world-query.mjs",
+  "./mob-preview/familiar-models.mjs",
+  "./mob-preview/hostile-models.mjs",
+  "./mob-preview/models.mjs",
+  "./mob-preview/mythwrought-hostile-models.mjs",
+  "./mob-preview/original-models.mjs",
   "./src/auto-integration-support/cave-clearance-proof.mjs",
   "./src/auto-integration-support/cave-entrance-contract.mjs",
   "./src/auto-integration-support/cave-socket-conflicts.mjs",
