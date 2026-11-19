@@ -67,3 +67,9 @@ The expanded Chromium test used the seeded voxel world and the existing MINE tou
 Four new formations now draw, pick and mine in actual seeded cave cells. The stalagmite spire uses a floor support and the limestone column needs both ends anchored. The dripstone cluster and flowstone curtain use ceiling support and allow players to pass beneath their hanging geometry. The two solid formations block the existing body collision test while attached. Mining releases the collision and leaves a tombstone that survives a fresh page.
 
 All four have eight deterministic geometric variants. The [cave captures](gallery/caves/) show the tested variant in the original renderer. The screenshot framing in narrow passages crops some views, and final material blending and visual acceptance are open. The matrix now has 35 in-game lifecycle results.
+
+## Offline staged cold start
+
+An explicit second loopback option selects the existing cache worker with an independent staging cache. The worker installs the complete existing shell plus the staged source modules before taking control. It caches the static shell under its canonical path. The staged layout remains in the navigation query and tombstones remain in their own versioned save key.
+
+Chromium reopened a fresh page with the network disabled. The worker served the shell, the mined wildflower stayed removed, and the remaining rope coil drew against the original terrain. Ordinary offline loading remained opt-out and the schema-1 world bytes matched. The [offline manifest](gallery/offline/manifest.json) records the independently matched digest for every cached asset and the [actual offline game frame](gallery/offline/cold-offline-932x430.png). Production Home Screen registration, same-install release rehearsal and physical-device acceptance are open.

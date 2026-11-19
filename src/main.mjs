@@ -62,7 +62,8 @@ else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     let layout;
     try{layout=module.readCandidateLayout(new URL(location.href));}
     catch(error){console.warn('Nonblock staging layout disabled',error);}
-    start(layout?{module,layout}:null);
+    const offline=new URLSearchParams(location.search).get('nonblock-offline')==='1';
+    start(layout?{module,layout,offline}:null);
   },error=>{
     console.warn('Nonblock staging module unavailable',error);
     start();
@@ -172,7 +173,10 @@ function start(nonblockStage=null){
     return hit;
   }
   // Only a previously selected immutable v5 world may opt into M5 PWA caching.
-  if(world.base instanceof FourRegionWorld&&
+  if(nonblockStage?.offline){
+    void import('./nonblock/stage-offline.mjs').then(({ensureStagedOfflineCache})=>
+      ensureStagedOfflineCache()).catch(error=>console.warn('Nonblock staging cache unavailable',error));
+  }else if(world.base instanceof FourRegionWorld&&
       [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR].includes(
         world.base.generationProfile.generator))
     void ensureM5OfflineCache();

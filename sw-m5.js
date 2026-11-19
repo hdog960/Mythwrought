@@ -2,8 +2,11 @@
 // Not a world save/migration or a new generator; CacheStorage remains separate
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
-const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261119-v6-recorder-v1';
+const workerUrl=new URL(self.location.href);
+const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
+  workerUrl.searchParams.get('nonblock-staging')==='1';
+const CACHE_PREFIX=staging?'mythwrought-nonblock-stage-shell-':'mythwrought-m5-shell-';
+const CACHE_NAME=CACHE_PREFIX+(staging?'20261119-v1':'20261119-v6-recorder-v1');
 const SOURCE_ASSETS=[
   "./",
   "./assets/icon.svg",
@@ -218,6 +221,32 @@ const SOURCE_ASSETS=[
   "./styles.css",
   "./sw-m5.js"
 ];
+if(staging)SOURCE_ASSETS.push(
+  "./src/nonblock/candidate-families.mjs",
+  "./src/nonblock/candidate-scene.mjs",
+  "./src/nonblock/stage-offline.mjs",
+  "./src/nonblock-environments24/agave-rosette.mjs",
+  "./src/nonblock-environments24/alpine-wildflower.mjs",
+  "./src/nonblock-environments24/cave-formations.mjs",
+  "./src/nonblock-environments24/cave-rubble-cluster.mjs",
+  "./src/nonblock-environments24/desert-bloom.mjs",
+  "./src/nonblock-environments24/desert-scrub.mjs",
+  "./src/nonblock-environments24/dwarf-juniper.mjs",
+  "./src/nonblock-environments24/frost-fern.mjs",
+  "./src/nonblock-environments24/pebble-scatter.mjs",
+  "./src/nonblock-environments24/saltgrass.mjs",
+  "./src/nonblock-environments24/snowgrass.mjs",
+  "./src/nonblock-environments24/tumblebrush.mjs",
+  "./src/nonblock-fittings36/fittings-phase1.mjs",
+  "./src/nonblock-scene48/flora-phase1.mjs",
+  "./src/nonblock-scene48/forest-lichen-patch.mjs",
+  "./src/nonblock-scene48/forest-moss-mat.mjs",
+  "./src/nonblock-scene48/forest-phase1-candidates.mjs",
+  "./src/nonblock-scene48/undergrowth-phase1.mjs",
+  "./src/nonblock-scene48/woodland-sapling.mjs",
+  "./src/nonblock-scene48/woodland-shrub.mjs",
+);
+const scopeUrl=new URL(self.registration.scope);
 const assetUrls=SOURCE_ASSETS.map(p=>new URL(p,self.registration.scope).href);
 const allowed=new Set(assetUrls);
 
@@ -252,11 +281,15 @@ self.addEventListener('fetch',event=>{
   const req=event.request, url=new URL(req.url);
   // No arbitrary response fallback, no cross-origin responses, no API/write
   // interception, and no mutation or caching of personal world save data.
-  if(req.method!=='GET'||url.search||!allowed.has(url.href))return;
+  const stagedNavigation=staging&&req.mode==='navigate'&&url.origin===scopeUrl.origin&&
+    url.pathname===scopeUrl.pathname&&url.searchParams.has('nonblock-stage')&&
+    url.searchParams.get('nonblock-offline')==='1';
+  const cachedUrl=stagedNavigation?scopeUrl.href:url.href;
+  if(req.method!=='GET'||url.search&&!stagedNavigation||!allowed.has(cachedUrl))return;
   event.respondWith((async()=>{
     const cache=await caches.open(CACHE_NAME);
-    // Cache-first is deliberate: offline uses the exact versioned source
-    // assets which created the immutable v5 generation profile.
-    return await cache.match(req,{ignoreVary:false})||fetch(req);
+    // The staged query selects a layout client-side. It shares the cached
+    // shell bytes without creating a cache entry for the query or saved data.
+    return await cache.match(stagedNavigation?cachedUrl:req,{ignoreVary:false})||fetch(req);
   })());
 });
