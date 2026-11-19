@@ -56,6 +56,29 @@ context.on('serviceworker',worker=>{
       console.error('HOME SCREEN SERVICE WORKER ERROR',message.text());
   });
 });
+// Playwright waitForFunction can consider a returned Promise truthy before
+// its asynchronous predicate settles. Poll through page.evaluate instead.
+async function waitForAsyncCondition(page, predicate, argument, {timeout=30000}={}){
+  const deadline=Date.now()+timeout;
+  while(Date.now()<deadline){
+    if(await page.evaluate(predicate,argument))return;
+    await page.waitForTimeout(250);
+  }
+  const diagnostic=await page.evaluate(async()=>{
+    const registration=await navigator.serviceWorker.getRegistration();
+    const names=await caches.keys();
+    const shellCaches=await Promise.all(names.filter(name=>
+      name.startsWith('mythwrought-m5-shell-')).map(async name=>({
+        name,assets:(await (await caches.open(name)).keys()).length
+      })));
+    return {controller:navigator.serviceWorker.controller?.scriptURL,
+      active:registration?.active?.state,installing:registration?.installing?.state,
+      waiting:registration?.waiting?.state,shellCaches};
+  });
+  throw Error('Verified asynchronous worker/cache condition timed out after '+
+    timeout+'ms '+JSON.stringify(diagnostic));
+}
+
 const target='http://127.0.0.1:4173/';
 const caches=()=>page.evaluate(async()=>await caches.keys());
 try{
@@ -75,7 +98,7 @@ try{
   await page.evaluate(()=>navigator.serviceWorker.register('./sw-m5.js',{
     scope:'/',updateViaCache:'none'
   }));
-  await page.waitForFunction(async()=>{
+  await waitForAsyncCondition(page,async()=>{
     const keys=await caches.keys();
     return keys.includes('mythwrought-m5-shell-20261118-v5-recorder');
   },null,{timeout:100000});
@@ -120,7 +143,7 @@ try{
   });
   // The cache name is created BEFORE the 212 real file fetches complete.
   // A failed or in-flight installation must never count as an upgraded app.
-  await page.waitForFunction(async({cacheName,release})=>{
+  await waitForAsyncCondition(page,async({cacheName,release})=>{
     const names=await caches.keys();
     if(!window.__mwControllerChanged)return false;
     if(!names.includes(cacheName))return false;

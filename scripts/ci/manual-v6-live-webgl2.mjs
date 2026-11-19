@@ -70,6 +70,29 @@ const browser=await chromium.launch({headless:true,args:[
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
   '--disable-gpu-sandbox','--no-sandbox'
 ]});
+// Playwright waitForFunction can consider a returned Promise truthy before
+// its asynchronous predicate settles. Poll through page.evaluate instead.
+async function waitForAsyncCondition(page, predicate, argument, {timeout=30000}={}){
+  const deadline=Date.now()+timeout;
+  while(Date.now()<deadline){
+    if(await page.evaluate(predicate,argument))return;
+    await page.waitForTimeout(250);
+  }
+  const diagnostic=await page.evaluate(async()=>{
+    const registration=await navigator.serviceWorker.getRegistration();
+    const names=await caches.keys();
+    const shellCaches=await Promise.all(names.filter(name=>
+      name.startsWith('mythwrought-m5-shell-')).map(async name=>({
+        name,assets:(await (await caches.open(name)).keys()).length
+      })));
+    return {controller:navigator.serviceWorker.controller?.scriptURL,
+      active:registration?.active?.state,installing:registration?.installing?.state,
+      waiting:registration?.waiting?.state,shellCaches};
+  });
+  throw Error('Verified asynchronous worker/cache condition timed out after '+
+    timeout+'ms '+JSON.stringify(diagnostic));
+}
+
 const frames=[],checks=[],errors=[],sizes=[[667,375],[844,390],[932,430]];
 try{
   for(const [width,height] of sizes){
@@ -146,7 +169,7 @@ try{
     // then cold reload with the actual Chromium network entirely disabled.
     // A cache name appears at install START, not after the verified contents
     // finish. Only proceed offline when the FULL V6/REC shell is active.
-    await page.waitForFunction(async name=>{
+    await waitForAsyncCondition(page,async name=>{
       const names=await caches.keys();
       if(!names.includes(name)||!navigator.serviceWorker.controller)
         return false;
