@@ -1,23 +1,9 @@
-import {createSceneMesh} from '../nonblock-scene48/flora-phase1.mjs';
-import {makeDesertScrub} from '../nonblock-environments24/desert-scrub.mjs';
-import {makePebbleScatter} from '../nonblock-environments24/pebble-scatter.mjs';
-import {describeFitting} from '../nonblock-fittings36/fittings-phase1.mjs';
+import {candidateFamilies as families} from './candidate-families.mjs';
 
 const contract = 'nonblock-object-v1';
 const sidecarVersion = 'mythwrought-nonblock-removals-v1';
 const maxObjects = 32;
 const maxTombstones = 4096;
-const families = new Map([
-  ['scene48:single-wildflower',{lane:'48', palette:[
-    [.24,.43,.25],[.36,.58,.30],[.31,.54,.29],[.96,.64,.32],[1,.84,.44]
-  ]}],
-  ['nonblock:d:desert-scrub',{lane:'24', maker:makeDesertScrub, palette:[[.54,.62,.31]]}],
-  ['nonblock:e:pebble-scatter',{lane:'24', maker:makePebbleScatter, palette:[[.49,.46,.41]]}],
-  ['scene36:cloth-banner',{lane:'36', wall:true, palette:[[.42,.27,.15],null,null,[.65,.19,.24],null,null,null,
-    [.46,.12,.19],[.87,.64,.30],[.62,.40,.19]]}],
-  ['scene36:rope-coil',{lane:'36', palette:[null,null,null,null,null,null,[.68,.48,.26],null,null,[.45,.31,.17],[.78,.57,.32]]}]
-]);
-
 export function readCandidateLayout(url) {
   if (!['localhost','127.0.0.1'].includes(url.hostname)) return null;
   const encoded = url.searchParams.get('nonblock-stage');
@@ -55,15 +41,10 @@ export function describeCandidateObject(seed, placement) {
       (family.lane !== '36' && orientation !== 0)) throw new TypeError('Invalid nonblock staging identity');
 
   const instanceKey = keyOf(sceneId,seed,anchor,variant,orientation,family.lane);
-  let mesh;
-  if (family.lane === '36') {
-    const fitting = describeFitting({sceneId,seed,anchor,variant,orientation,mount:{behind:true,below:true}});
-    mesh = fitting.render.localMesh;
-  } else if (family.lane === '48') {
-    mesh = createSceneMesh(sceneId,seed,...anchor).mesh;
-  } else {
-    mesh = family.maker({seed,anchor,variant}).mesh;
-  }
+  const mesh = family.mesh({seed,anchor,variant,orientation});
+  if (mesh.positions.length!==mesh.triangleCount*9 || mesh.triangleCount<1 ||
+      mesh.triangleCount>256 || !mesh.positions.every(Number.isFinite))
+    throw new TypeError('Invalid nonblock source mesh');
 
   const [wallX,wallZ] = rotation(0,-1,orientation);
   const origin = [anchor[0]+.5+(family.wall ? wallX*.42 : 0),anchor[1],
@@ -84,7 +65,7 @@ export function describeCandidateObject(seed, placement) {
     }
   }
   return {contract,sceneId,seed,anchor:[...anchor],variant,orientation,instanceKey,support,min,max,
-    positions,materials:mesh.materials,palette:family.palette};
+    positions,materials:mesh.materials,palette:family.palette,embedDepth:family.embedDepth??0};
 }
 
 function sub(a,b) { return a.map((value,i)=>value-b[i]); }
@@ -126,6 +107,9 @@ function intersectsBounds(object,origin,unit,max) {
 function canAttach(object,blockAt,editedAt) {
   if (!blockAt(...object.support) || editedAt(...object.support)) return false;
   const min = object.min.map(x=>Math.floor(x+1e-6));
+  // The exposed root has a shallow buried base. Its support is still
+  // protected and the exact ray cannot select geometry behind terrain.
+  if (object.embedDepth && object.min[1]>=object.anchor[1]-object.embedDepth) min[1]=object.anchor[1];
   const max = object.max.map((x,i)=>Math.max(min[i],Math.ceil(x-1e-6)-1));
   for (let x=min[0];x<=max[0];x++) {
     for (let y=min[1];y<=max[1];y++) {

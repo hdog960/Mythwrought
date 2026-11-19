@@ -94,6 +94,7 @@ jobs:
           node tests/live-world-browser.mjs
           node tests/context-restore-browser.mjs
           node tests/nonblock-runtime-browser.mjs
+          node tests/nonblock-catalog-browser.mjs
       - name: Advisory queue health snapshot
         if: always()
         env:

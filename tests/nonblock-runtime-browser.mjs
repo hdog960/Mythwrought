@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,readdir,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
 import {describeCandidateObject} from '../src/nonblock/candidate-scene.mjs';
@@ -16,9 +16,11 @@ const layout = [
 const addresses = layout.map(placement=>describeCandidateObject(179,placement).instanceKey);
 const stageUrl = origin+'/?nonblock-stage='+encodeURIComponent(JSON.stringify(layout));
 const captures = [];
-const sourceFiles = ['src/main.mjs','src/nonblock/candidate-scene.mjs',
-  'src/nonblock-scene48/flora-phase1.mjs','src/nonblock-environments24/desert-scrub.mjs',
-  'src/nonblock-environments24/pebble-scatter.mjs','src/nonblock-fittings36/fittings-phase1.mjs'];
+const sourceFolders = ['src/nonblock','src/nonblock-scene48','src/nonblock-environments24',
+  'src/nonblock-fittings36'];
+const sourceFiles = ['src/main.mjs',...(await Promise.all(sourceFolders.map(async folder=>
+  (await readdir(folder)).filter(name=>name.endsWith('.mjs')).sort().map(name=>folder+'/'+name)
+))).flat()];
 const digest = bytes=>createHash('sha256').update(bytes).digest('hex');
 const directory = 'artifacts/nonblock-runtime';
 await mkdir(directory,{recursive:true});

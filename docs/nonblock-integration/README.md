@@ -55,3 +55,9 @@ This is an interim draft. All five samples await final art and mobile performanc
 ## Reproduction
 
 Run `npm test` and `node --test tests/ci/*.test.mjs` for native and CI contracts. Install the CI-pinned Playwright and pngjs versions, serve the repo on loopback port 4173, and run `node tests/nonblock-runtime-browser.mjs` for the staged browser evidence and capture manifest. The standard CI gate lists the existing 20 browser checks.
+
+## Expanded catalog checkpoint
+
+The [96-family matrix](catalog.md) maps 43 inherited source mesh IDs and four new cave designs to the planned slots. The current source count is 47 under this provisional slot assignment. Four new cave designs have native geometry and collision-profile tests and still need game integration. Thirty-one inherited families now use the same opt-in game path, including the revised banner and rope. Solid and additional ceiling/wall families still need mounting and collision integration.
+
+The expanded Chromium test used the seeded voxel world and the existing MINE touch control for all 31. After reopening the same browser storage context, all 31 tombstones remained and there were zero scenery vertices. Ordinary schema-1 save bytes matched. The captured load used 25 terrain chunks, one scenery draw call and 161,676 bytes of scenery vertex data for 1,497 triangles. The timing samples use SwiftShader and different camera poses. They do not establish a performance delta or iPhone acceptance. The [capture manifest](gallery/staged-catalog-manifest.json) records all 31 game screenshot digests and source inputs. CI uploads the screenshots through the existing browser artifact step.
