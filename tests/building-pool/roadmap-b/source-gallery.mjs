@@ -6,7 +6,7 @@ import {extname,resolve,sep} from 'node:path';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
-const cwd=process.cwd(),dir='artifacts/roadmap-b-waves1235047891011-webgl2',records=[];
+const cwd=process.cwd(),dir='artifacts/roadmap-b-waves1234567891011-webgl2',records=[];
 const ids=[
  'r1:farm-barn:desert:large:004','r1:greenhouse:snow:medium:004','r1:harbor-office:enchanted-forest:large:004',
  'r2:tailor:desert:large:04','r2:butcher:enchanted-forest:large:04','r2:bookshop:snow:medium:04',
@@ -107,7 +107,7 @@ try{
   const q=records.find(r=>r.id===id&&r.width===width&&r.height===height&&r.view==='cutaway');
   if(!p||!q||q.visibleCells>=p.visibleCells)throw Error('Cutaway not source-backed '+id);
  }
- await writeFile(dir+'/manifest.json',JSON.stringify({schema:'mythwrought.roadmap-b-waves1235047891011.webgl2.v1',
+ await writeFile(dir+'/manifest.json',JSON.stringify({schema:'mythwrought.roadmap-b-waves1234567891011.webgl2.v1',
   gitHead:process.env.ROADMAP_B_EXACT_HEAD||null,
   countedAsProductionBuilds:false,producerPackAABBsApproved:false,actualPhysicalIPhone:false,
   sourceEvidence,records},null,2));
