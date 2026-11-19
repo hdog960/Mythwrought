@@ -50,8 +50,11 @@ const server=createServer(async(req,res)=>{
     const name=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
     const file=path.resolve(root,'.'+name);
     if(!(file===root||file.startsWith(root+path.sep)))throw Error('unsafe path');
-    const bytes=await readFile(file.endsWith(path.sep)?path.join(file,'index.html'):file);
-    res.writeHead(200,{'Content-Type':mime[path.extname(file)]||
+    // SW precaches './' as well as index.html; path.resolve() strips the
+    // trailing slash, so resolve the project root explicitly to index.html.
+    const target=file===root?path.join(root,'index.html'):file;
+    const bytes=await readFile(target);
+    res.writeHead(200,{'Content-Type':mime[path.extname(target)]||
       'application/octet-stream','Cache-Control':'no-store'});res.end(bytes);
   }catch(e){res.writeHead(404);res.end(String(e));}
 });
