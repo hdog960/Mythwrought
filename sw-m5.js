@@ -278,9 +278,10 @@ self.addEventListener('install',event=>{
 });
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
-    const keys=await caches.keys();
-    await Promise.all(keys.filter(k=>
-      k.startsWith(CACHE_PREFIX)&&k!==CACHE_NAME).map(k=>caches.delete(k)));
+    // Never purge a previous-good game-shell cache during an app upgrade.
+    // The current cache was fully verified before skipWaiting(); keeping the
+    // older shell permits recovery if this browser installation goes wrong.
+    // World saves in localStorage/IndexedDB are never touched by this worker.
     await self.clients.claim();
   })());
 });
