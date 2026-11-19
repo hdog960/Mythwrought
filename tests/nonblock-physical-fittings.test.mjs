@@ -28,3 +28,35 @@ test('paired leaves have separated hinges and use only existing coordinate and s
   assert.throws(()=>planOwnedFitting('scene36:window-shutters',{anchor:[0,2,0],open:true}));
   assert.throws(()=>planOwnedFitting('scene36:hanging-lantern',{anchor:[0,2,0]}));
 });
+
+test('pair placement rolls back both cells and owner storage if the physical save cannot commit',async()=>{
+  const {placeOwnedDoorPair}=await import('../src/nonblock/physical-fittings.mjs');
+  const {VoxelWorld}=await import('../src/voxel.mjs');
+  const {Pack2LiveWorld,loadPack2LiveWorld}=await import('../src/pack2-world.mjs');
+  const source=new VoxelWorld(179);
+  const live=new Pack2LiveWorld(source);
+  const data=new Map();
+  let rejectPrimary=true;
+  const storage={
+    getItem:key=>data.get(key)??null,
+    setItem(key,value){
+      if(rejectPrimary&&key.endsWith('-pack2-live-v1'))throw Error('primary write rejected');
+      data.set(key,value);
+    },
+    removeItem:key=>data.delete(key)
+  };
+  const options={anchor:[10,9,7]};
+  const worldSave=JSON.stringify(source.save());
+  const host={world:live,storage,rebuild:()=>{},player:{x:.5,z:.5,feet:12}};
+  const failed=placeOwnedDoorPair(options,host);
+  assert.equal(failed.ok,false);
+  assert.equal(failed.requiresRecovery,false);
+  assert.equal(live.pack2Cells.size,0);
+  assert.equal(data.size,0);
+  rejectPrimary=false;
+  const committed=placeOwnedDoorPair(options,host);
+  assert.equal(committed.ok,true);
+  assert.deepEqual(loadPack2LiveWorld(storage,source).world.pack2Snapshot(),live.pack2Snapshot());
+  assert.equal(live.pack2Cells.size,2);
+  assert.equal(JSON.stringify(source.save()),worldSave);
+});

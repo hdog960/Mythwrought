@@ -66,30 +66,30 @@ The names for empty slots in groups A, B, C and H are working names. Clover clum
 | 58 | E | Pebble scatter | nonblock:e:pebble-scatter | [Inherited](../../src/nonblock-environments24/pebble-scatter.mjs) | Native + Chromium |
 | 59 | E | Cave rubble cluster | nonblock:e:cave-rubble-cluster | [Inherited](../../src/nonblock-environments24/cave-rubble-cluster.mjs) | Native + Chromium |
 | 60 | E | Mineral encrustation | nonblock:e:mineral-encrustation | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
-| 61 | F | Hinged door leaf |  | Pending | Pending |
-| 62 | F | Double door pair |  | Pending | Pending |
-| 63 | F | Trapdoor |  | Pending | Pending |
-| 64 | F | Swinging gate |  | Pending | Pending |
-| 65 | F | Window shutters |  | Pending | Pending |
-| 66 | F | Hinged hatch |  | Pending | Pending |
-| 67 | F | Ladder assembly |  | Pending | Pending |
-| 68 | F | Rope ladder |  | Pending | Pending |
-| 69 | F | Fence rail |  | Pending | Pending |
+| 61 | F | Hinged door leaf | scene36:hinged-door-leaf | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
+| 62 | F | Double door pair | scene36:double-door-pair | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
+| 63 | F | Trapdoor | scene36:trapdoor | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
+| 64 | F | Swinging gate | scene36:swinging-gate | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
+| 65 | F | Window shutters | scene36:window-shutters | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
+| 66 | F | Hinged hatch | scene36:hinged-hatch | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
+| 67 | F | Ladder assembly | scene36:ladder-assembly | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
+| 68 | F | Rope ladder | scene36:rope-ladder | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
+| 69 | F | Fence rail | scene36:fence-rail | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
 | 70 | F | Hanging chain | scene36:hanging-chain | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 71 | F | Cloth banner | scene36:cloth-banner | [Inherited](../../src/nonblock-fittings36/fittings-phase1.mjs) | Native + Chromium |
-| 72 | F | Fabric awning |  | Pending | Pending |
-| 73 | G | Wall torch bracket |  | Pending | Pending |
-| 74 | G | Freestanding torch |  | Pending | Pending |
+| 72 | F | Fabric awning | scene36:fabric-awning | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
+| 73 | G | Wall torch bracket | scene36:wall-torch-bracket | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
+| 74 | G | Freestanding torch | scene36:freestanding-torch | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
 | 75 | G | Hanging lantern |  | Pending | Pending |
-| 76 | G | Campfire fuel stack |  | Pending | Pending |
-| 77 | G | Brazier |  | Pending | Pending |
+| 76 | G | Campfire fuel stack | scene36:campfire-fuel-stack | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
+| 77 | G | Brazier | scene36:brazier | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
 | 78 | G | Signpost | scene36:signpost | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
-| 79 | G | Direction sign |  | Pending | Pending |
-| 80 | G | Hanging bell |  | Pending | Pending |
+| 79 | G | Direction sign | scene36:direction-sign | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
+| 80 | G | Hanging bell | scene36:hanging-bell | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
 | 81 | G | Rope coil | scene36:rope-coil | [Inherited](../../src/nonblock-fittings36/fittings-phase1.mjs) | Native + Chromium |
-| 82 | G | Broken pottery scatter |  | Pending | Pending |
+| 82 | G | Broken pottery scatter | scene36:broken-pottery-scatter | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
 | 83 | G | Hanging cobweb | scene36:hanging-cobweb | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
-| 84 | G | Pennant flag |  | Pending | Pending |
+| 84 | G | Pennant flag | scene36:pennant-flag | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
 | 85 | H | Flame |  | Pending | Pending |
 | 86 | H | Embers |  | Pending | Pending |
 | 87 | H | Smoke |  | Pending | Pending |

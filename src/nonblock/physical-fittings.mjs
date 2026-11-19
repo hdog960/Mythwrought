@@ -1,5 +1,7 @@
 // Existing Block Packs remain responsible for geometry, state and world saves
 // for these roster slots. This adapter produces their ordinary builder inputs.
+import {Pack2LiveWorld,savePack2LiveWorld} from '../pack2-world.mjs';
+import {BLOCK,BODY_HEIGHT,BODY_RADIUS} from '../voxel.mjs';
 import {planManualFivePackBlueprint} from '../builder-assets/manual-five-pack.mjs';
 
 const definitions = new Map([
@@ -42,4 +44,58 @@ export function planOwnedFitting(sceneId,{anchor,orientation=0,open=false}={}) {
     sceneId,placements:Object.freeze(placements),
     blueprint:planManualFivePackBlueprint(placements)
   });
+}
+
+// Stage a pair against the real Pack 2 owner and commit one owner snapshot.
+// If its journal or primary write fails, restore the exact observed bytes.
+export function placeOwnedDoorPair(options,{world,storage,rebuild,player}) {
+  const placed=[], writes=new Map();
+  let needsReplay=false;
+  try {
+    if (!(world instanceof Pack2LiveWorld) || !storage || typeof rebuild!=='function' ||
+        ![player?.x,player?.feet,player?.z].every(Number.isFinite))
+      throw new TypeError('Missing live Pack 2 placement owner');
+    const {placements,blueprint}=planOwnedFitting('scene36:double-door-pair',options);
+    const body=[player.x-BODY_RADIUS,player.feet,player.z-BODY_RADIUS,
+      player.x+BODY_RADIUS,player.feet+BODY_HEIGHT,player.z+BODY_RADIUS];
+    for(const asset of blueprint.physicalAssets){
+      if(world.get(...asset.at)!==BLOCK.AIR)throw new Error('A door position is already occupied');
+      if(asset.collision.some(box=>[0,1,2].every(axis=>
+        box[axis]<body[axis+3]&&box[axis+3]>body[axis])))
+        throw new Error('A door leaf overlaps the player');
+    }
+    for(const row of placements){
+      if(!world.placePack2(...row.at,row.numericId,{...row.state,rotation:row.orientation}))
+        throw new Error('Pack 2 declined a door leaf');
+      placed.push(row.at);
+    }
+    for(const [x,y,z] of placed)rebuild(x,z,y);
+    const trackedStorage={
+      getItem:key=>storage.getItem(key),
+      setItem(key,value) {
+        const previous=writes.has(key)?writes.get(key).previous:storage.getItem(key);
+        writes.set(key,{previous,value});
+        storage.setItem(key,value);
+      }
+    };
+    const saved=savePack2LiveWorld(trackedStorage,world);
+    if(!saved.ok)throw new Error(saved.reason);
+    return {ok:true,at:placed.map(cell=>[...cell]),verifiedSave:true};
+  }catch(error){
+    for(const cell of placed)if(!world.set(...cell,BLOCK.AIR))needsReplay=true;
+    for(const [key,{previous,value}] of writes){
+      try{
+        const current=storage.getItem(key);
+        if(current===value&&current!==previous){
+          if(previous===null)storage.removeItem(key);
+          else storage.setItem(key,previous);
+        }
+        if(storage.getItem(key)!==previous)needsReplay=true;
+      }catch{
+        needsReplay=true;
+      }
+    }
+    for(const [x,y,z] of placed)try{rebuild(x,z,y);}catch{needsReplay=true;}
+    return {ok:false,reason:String(error.message??error),requiresRecovery:needsReplay};
+  }
 }

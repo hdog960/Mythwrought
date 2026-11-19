@@ -95,3 +95,9 @@ Four taper-only cavity/ice meshes and the cobweb were rebuilt around their origi
 Eleven additional architectural roster slots have exact physical Block Pack planning adapters. They use existing source IDs, shapes and world-save owners. The adapters are native-tested and remain outside the lifecycle count pending game-placement acceptance.
 
 The original 20-script suite ran against checkpoint `b77497f04e2125a74002f958cc3c8dd26fe4b96d`. Eighteen passed in the first run. The voxel-landmark test timed out at the same chunk-load assertion on untouched main and passed on the isolated candidate rerun. The touch script failed two different movement timing assertions on the candidate and passed on the baseline rerun. Full exact-head regression and device acceptance remain open.
+
+## Existing physical owners and new prop source
+
+All 11 owner-backed cuts placed and reopened in Chromium through the existing Pack 2 or Pack 4 game path. Their geometry and save rows remain with those owners. The paired door placement commits both leaves in one owner snapshot. Its native failure injection proves both cells and the observed owner-storage bytes roll back after a primary write is rejected. The staging browser scenario reopened 12 physical cells after placing 11 roster entries and verified that the nonempty schema-1 bytes stayed intact. [Physical source and capture manifest](gallery/physical-fittings/manifest.json)
+
+Seven newly authored fittings and props add ladders, a freestanding torch body, a fuel stack, a brazier, a bell, and pottery fragments. Their four deterministic variants pass native geometry tests. They still need game behavior and art acceptance. Overall coverage at this checkpoint is 65 staged scenery lifecycles, 11 Block Pack placement and reload results, and seven additional source-native families.

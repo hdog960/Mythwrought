@@ -2517,6 +2517,22 @@ function start(nonblockStage=null){
       // Localhost-only building-roadmap acceptance: the actual internal
       // production builder contract, not a separate mock voxel world.
       placeBuilderAsset(row){return fivePackBuilder.place(row);},
+      async placeOwnedFitting(sceneId,options){
+        if(!nonblockStage||storageReadOnly||graphicsLost||document.hidden)
+          throw Error('Owned fitting stage is unavailable');
+        const originalWorld=world;
+        const {planOwnedFitting,placeOwnedDoorPair}=await import('./nonblock/physical-fittings.mjs');
+        if(originalWorld!==world||storageReadOnly||graphicsLost||document.hidden)
+          throw Error('World changed before owned fitting placement');
+        if(sceneId==='scene36:double-door-pair'){
+          const result=placeOwnedDoorPair(options,{world,storage:localStorage,
+            rebuild:refreshEditedMeshes,player});
+          if(result.requiresRecovery)storageReadOnly=true;
+          return result;
+        }
+        const {placements}=planOwnedFitting(sceneId,options);
+        return fivePackBuilder.place(placements[0]);
+      },
       placeManualBuilderBatch(rows){return fivePackBuilder.placeManual14Batch(rows);},
       builderInventory(){return fivePackBuilder.inventory;},
       placeManual14Fixture(x,y,z,id,yaw=0,variant='lower'){
