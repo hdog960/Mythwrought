@@ -1,7 +1,8 @@
 // Genuine original-game, no mocked media input: WebGL2 canvas -> MediaRecorder ->
 // 3-second manual stop and 10-second auto-stop -> decoded playable file.
 import assert from 'node:assert/strict';
-import {mkdir,readFile} from 'node:fs/promises';
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {spawnSync,execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 const browser=await chromium.launch({headless:true,args:[
@@ -12,6 +13,16 @@ const context=await browser.newContext({
   acceptDownloads:true
 });
 const page=await context.newPage();
+const OUT='artifacts/gameplay-recorder';
+const sourceHead=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+const sha256Of=raw=>createHash('sha256').update(raw).digest('hex');
+const report={
+  kind:'MYTHWROUGHT_ACTUAL_ORIGINAL_GAME_REC_3_AND_10_SECONDS',
+  sourceHead,browser:'real Chromium WebGL2 MediaRecorder',
+  physicalIphone:false,productionDeployed:false,
+  canonicalSchema1SavePreserved:false,
+  clips:[],errors:[],status:'INCOMPLETE'
+};
 const errors=[],badResponses=[];
 page.on('pageerror',error=>errors.push(error.message));
 page.on('response',r=>{if(r.status()>=400)badResponses.push(r.status()+' '+r.url());});
@@ -32,7 +43,50 @@ async function getClip(){
       sourceMime:document.querySelector('#capturePreview').currentSrc};
   });
 }
+async function preserveVerifiedClip(label,metadata){
+  assert.ok(['three','ten'].includes(label));
+  assert.match(metadata.name,/\.((mp4)|(webm))$/);
+  const format=metadata.name.endsWith('.mp4')?'mp4':'webm';
+  const target=OUT+'/real-original-game-'+label+'-second.'+format;
+  const [download]=await Promise.all([
+    page.waitForEvent('download',{timeout:15000}),
+    page.locator('#captureSave').click()
+  ]);
+  await download.saveAs(target);
+  const encoded=await readFile(target);
+  assert.equal(encoded.byteLength,metadata.bytes,
+    'Downloaded genuine recorder output differs from original in-memory Blob');
+  assert.ok(encoded.length>2048,'Actual encoded clip is empty');
+  if(format==='mp4')
+    assert.equal(encoded.toString('ascii',4,8),'ftyp','MP4 source does not contain valid ftyp');
+  else
+    assert.equal(encoded.subarray(0,4).toString('hex'),'1a45dfa3',
+      'WebM source lacks genuine EBML header');
+  const probe=spawnSync('ffprobe',['-v','error','-select_streams','v:0',
+    '-show_entries','stream=codec_name,width,height,duration:format=duration,format_name',
+    '-of','json',target],{encoding:'utf8',timeout:30000});
+  assert.equal(probe.status,0,'Actual video ffprobe failed: '+String(probe.stderr||probe.error));
+  const info=JSON.parse(probe.stdout),stream=info.streams?.[0];
+  assert.ok(stream,'Actual encoded file has no video stream');
+  assert.equal(stream.width,metadata.width,'Encoded video width differs from actual decoded preview');
+  assert.equal(stream.height,metadata.height,'Encoded video height differs from actual decoded preview');
+  const duration=Number(info.format?.duration??stream.duration);
+  assert.ok(Number.isFinite(duration),'Actual video duration not measurable');
+  assert.ok(label==='three'?duration>=2.3&&duration<=4.5:
+    duration>=8&&duration<=11.5,'Genuine '+label+' seconds duration invalid: '+duration);
+  const decode=spawnSync('ffmpeg',['-v','error','-i',target,'-f','null','-'],
+    {encoding:'utf8',timeout:45000});
+  assert.equal(decode.status,0,'Real captured WebGL2 video frames could not decode: '+
+    String(decode.stderr||decode.error));
+  const record={label,filename:target.split('/').at(-1),mime:metadata.type,
+    sha256:sha256Of(encoded),bytes:encoded.length,duration,codec:stream.codec_name,
+    dimensions:[stream.width,stream.height],ffmpegDecoded:true};
+  report.clips.push(record);
+  console.log('GENUINE_SOURCE_VIDEO_FILE_PASS',JSON.stringify(record));
+  return record;
+}
 try{
+  await mkdir(OUT,{recursive:true});
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:30000});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
     null,{timeout:30000});
@@ -65,6 +119,7 @@ try{
   const bytes=await readFile(shotPath);
   assert.ok(bytes.length>15000,'Real 3D viewport screenshot is suspiciously small');
   const sha256=createHash('sha256').update(bytes).digest('hex');
+  const originalThree=await preserveVerifiedClip('three',short);
   console.log('PASS REAL 3s VIDEO',short,'frame screenshot SHA256',sha256);
   await page.locator('#captureClose').click();
   assert.ok(await page.locator('#capturePanel').isHidden());
@@ -104,12 +159,24 @@ try{
   assert.ok(play.started,'Recorded video would not play: '+play.error);
   assert.ok(play.sums.some(x=>x>20000),'Recorded image is black or empty');
   assert.ok(new Set(play.sums).size>1,'Recorded image appears frozen, not moving gameplay');
+  const originalTen=await preserveVerifiedClip('ten',full);
+  assert.equal(originalThree.dimensions[0],originalTen.dimensions[0]);
+  assert.ok(Math.abs(originalThree.dimensions[1]-originalTen.dimensions[1])<=1,
+    'Actual two encoded videos have incompatible physical output dimensions');
   assert.equal(await saved(),beforeSave,'Recorder modified the canonical world save');
+  report.canonicalSchema1SavePreserved=true;
+  report.status='ORIGINAL_GAME_3_AND_10_SECOND_VIDEOS_DECODED_AND_AUTHENTIC';
   const glError=await page.evaluate(()=>document.querySelector('#scene').getContext('webgl2').getError());
   assert.equal(glError,0,'WebGL error after recording');
   assert.deepEqual(errors,[],'Game threw errors while recording');
   assert.deepEqual(badResponses,[],'Missing assets during recording');
   console.log('PASS REAL 10s VIDEO',full,'decoded moving frames',play.sums,'no save changes/GL errors');
+}catch(error){
+  report.errors.push(String(error?.stack||error));
+  throw error;
 }finally{
+  await mkdir(OUT,{recursive:true});
+  await writeFile(OUT+'/original-video-proof.json',
+    JSON.stringify(report,null,2)+'\n');
   await browser.close();
 }
