@@ -61,12 +61,12 @@ try{
   new URL('./index.html',location.href))));
  assert.equal(indexedShell,true,'Offline startup requires the saved real index.html shell');
 
- assert.equal(verified.count,221,'Offline source must include all 221 exact cached assets');
- assert.equal(verified.cacheRevision,'9b521c08ddcb0328',
+ assert.equal(verified.count,233,'Cave + accepted-biome source must include all 233 exact cached assets');
+ assert.equal(verified.cacheRevision,'0aa117920dfe50a2',
    'A stale offline worker must not impersonate the exact cave source');
  assert.equal(verified.verifiedBlobs,verified.count-2,
    'Every external static source blob must be SHA-1 Git-verified before offline approval');
- assert.equal(verified.sourceHead,'9b521c08ddcb0328fafe39ebcfa0693003cc5f0e',
+ assert.equal(verified.sourceHead,'0aa117920dfe50a2bf2c04993c53a7492fa324c5',
    'Recorded offline source identity must be the immutable staging snapshot');
  const sourceCached=await page.evaluate(async()=>Boolean(await caches.match(
    new URL('./src/manual-caves/cave-voxel-world.mjs',location.href))));
@@ -75,6 +75,19 @@ try{
    new URL('./src/manual-caves/c6-far-wall-gpu.mjs',location.href))));
  assert.equal(farRendererCached,true,
    'New genuine far-rock GPU module missing from verified Home Screen cache');
+ // Accepted four-biome modules are imported by the shared original game.
+ // A stale 221-file cave cache could claim ready but fail an offline boot.
+ const newBiomeSource=await page.evaluate(async()=>{
+  const paths=['src/manual-biomes/profile-world.mjs',
+   'src/manual-biomes/m2-runtime-bridge.mjs',
+   'src/manual-biomes/m5-offline-registration.mjs',
+   'src/surface-regions/regions.mjs','sw-m5.js'];
+  return Promise.all(paths.map(async path=>({path,
+   present:Boolean(await caches.match(new URL('./'+path,location.href)))})));
+ });
+ assert.ok(newBiomeSource.every(x=>x.present),
+  'Merged biome source missing from genuine cave offline-ready cache: '+
+  JSON.stringify(newBiomeSource));
  await ctx.setOffline(true);
  await page.reload({waitUntil:'domcontentloaded',timeout:45000});
  await page.waitForFunction(()=>window.__mythwroughtTest &&
