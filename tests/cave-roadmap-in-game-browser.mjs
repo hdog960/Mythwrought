@@ -37,6 +37,7 @@ const report={status:'UNVERIFIED',kind:'ACTUAL_INDEX_MAIN_GAME_WEBGL2',
  deepSkySourceProbes:[],
  deepVisualGate:'STRICT_FULL_RESIDENCY_FOUR_ADVANCING_RENDERED_FRAMES',
  deepResidencyChecks:[],deepResidencyFailures:[],
+ farRockGpuWitnesses:[],
  namedCaptureMethod:'Original index.html/main.mjs game renderer; diagnostic camera placement only; separate native stepPlayer routes supply C proof',
  timingSource:'Headless Chromium SwiftShader requestAnimationFrame; NOT physical iPhone FPS',
  errors:[]};
@@ -257,6 +258,16 @@ try{
     // original East Gallery open-to-sky design and all surface behavior.
     const deepGate=!shot.surface&&shot.at.y<-3?
      await requireSettledDeepGameFrame(page,shot,width+'x'+height):null;
+    const farExpected=new Set(['named-vaulted-stone-fan',
+     'secondary-rift-terraces-second-offset-chamber',
+     'secondary-crescent-refuge-secondary-refugial-pocket']);
+    if(farExpected.has(shot.name)){
+     await page.waitForFunction(()=>{
+      const v=document.querySelector('#scene')?.dataset;
+      return !!v&&Number(v.c6FarChunks)>0 &&
+       Number(v.c6FarDrawn)>0&&Number(v.c6FarPending)===0;
+     },null,{timeout:90000,polling:'raf'});
+    }
     const snapshot=await page.evaluate(()=>{
      const el=document.querySelector('#scene'),t=window.__mythwroughtTest;
      return {mode:t.caveMode(),center:el.dataset.chunkCenter,
@@ -264,11 +275,32 @@ try{
       chunks:Number(el.dataset.loadedChunks),
       playerFeet:Number(el.dataset.playerFeet),
       gl:!!el.getContext('webgl2'),
-      noticeHidden:document.querySelector('#notice').hidden};
+      noticeHidden:document.querySelector('#notice').hidden,
+      farChunks:Number(el.dataset.c6FarChunks||0),
+      farBytes:Number(el.dataset.c6FarBytes||0),
+      farVertices:Number(el.dataset.c6FarVertices||0),
+      farDrawn:Number(el.dataset.c6FarDrawn||0),
+      farPending:Number(el.dataset.c6FarPending||0),
+      farUncovered:Number(el.dataset.c6FarUncovered||0),
+      farFailures:Number(el.dataset.c6FarFailures||0)};
     });
     assert.equal(snapshot.mode.enabled,true);
     assert.equal(snapshot.noticeHidden,true);
     assert.ok(snapshot.gl&&snapshot.verts>800);
+    assert.ok(snapshot.farChunks<=4&&snapshot.farBytes<=1048576,
+     'Original game far GPU budget violated: '+JSON.stringify(snapshot));
+    assert.equal(snapshot.farFailures,0,'C6 far GPU upload failed');
+    if(farExpected.has(shot.name)){
+     assert.ok(snapshot.farChunks>0&&snapshot.farDrawn>0,
+      'C6 far source-rock not drawn: '+shot.name);
+     assert.equal(snapshot.farPending,0,'C6 far GPU still pending');
+     report.farRockGpuWitnesses.push({scene:shot.name,
+      viewport:width+'x'+height,chunks:snapshot.farChunks,
+      bytes:snapshot.farBytes,vertices:snapshot.farVertices,
+      drawn:snapshot.farDrawn,uncovered:snapshot.farUncovered});
+    }
+    if(shot.surface)assert.equal(snapshot.farChunks,0,
+     'C6 far rock leaked into surface scene');
     if(shot.named||shot.secondary){
      assert.equal(snapshot.mode.seed,seed);
      assert.ok(snapshot.playerFeet<-10&&
@@ -299,6 +331,9 @@ try{
      loadedChunks:snapshot.chunks,playerFeet:snapshot.playerFeet,sourceHead:head,
      fullyResidentAndFrameStable:Boolean(deepGate),
      requiredDepthChunks:deepGate?.expected.requiredChunks??null,
+     farRockGpuChunks:snapshot.farChunks,
+     farRockGpuBytes:snapshot.farBytes,
+     farRockGpuDrawn:snapshot.farDrawn,
      actualIndexMain:true,namedSourceFeature:shot.named||null,
       secondarySourceFeature:shot.secondary||null,
       originalSecondarySourceFrame:shot.sourceFrame||null,
@@ -402,6 +437,8 @@ try{
   'C6 strict four-frame residency evidence missing from deep scenes');
  assert.deepEqual(report.deepResidencyFailures,[],
   'C6 accepted incomplete or unstable original-game depth meshes');
+ assert.equal(report.farRockGpuWitnesses.length,3*sizes.length,
+  'C6 missing genuine source far-rock GPU in three affected scenes');
  report.namedSitesCaptured=21;
  report.secondarySitesCaptured=16;
  report.gameSnapshots=report.images.length;
