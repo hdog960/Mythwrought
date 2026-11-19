@@ -119,7 +119,7 @@ try{
   await page.close();
  }
  const keys=new Set(records.map(x=>x.sha256));
- if(records.length!==648||keys.size!==648)throw Error('108 source captures not unique and complete');
+ if(records.length!==696||keys.size!==696)throw Error('116 source captures not unique and complete');
  for(const id of ids)for(const [width,height] of sizes){
   const p=records.find(r=>r.id===id&&r.width===width&&r.height===height&&r.view==='exterior');
   const q=records.find(r=>r.id===id&&r.width===width&&r.height===height&&r.view==='cutaway');
@@ -129,5 +129,5 @@ try{
   gitHead:process.env.ROADMAP_B_EXACT_HEAD||null,
   countedAsProductionBuilds:false,producerPackAABBsApproved:false,actualPhysicalIPhone:false,
   sourceEvidence,records},null,2));
- console.log('ROADMAP B GENUINE SOURCE WEBGL2 PASS: '+records.length+'/648 with 648 distinct PNG SHA-256');
+ console.log('ROADMAP B GENUINE SOURCE WEBGL2 PASS: '+records.length+'/696 with 696 distinct PNG SHA-256');
 }finally{await browser?.close();server.close();}
