@@ -2314,7 +2314,13 @@ function start(){
     vaultStatus.textContent='Checking on-device backup storage…';
     try{await action();}
     catch(error){vaultStatus.textContent='Device vault: '+String(error.message||error)+'. Live world unchanged unless explicitly stated.';}
-    finally{vaultButtons.forEach(button=>button.disabled=false);vaultBusy=false;}
+    finally{
+      vaultButtons.forEach(button=>{
+        button.disabled=storageReadOnly&&
+          ['vaultBackup','vaultRestore','vaultDelete'].includes(button.id);
+      });
+      vaultBusy=false;
+    }
   }
   async function refreshVault(prefer=''){
     clearVaultLink();
@@ -2365,6 +2371,7 @@ function start(){
     vaultStatus.textContent='Backup verified. Tap DOWNLOAD VERIFIED JSON BACKUP; use regular IMPORT to restore this file later.';
   });
   document.getElementById('vaultRestore').onclick=()=>useVault(async()=>{
+    if(storageReadOnly)throw Error('Protected old world: direct vault restore is disabled. Download the snapshot as JSON without replacing the active world');
     clearVaultLink();
     const activeSeed=world.seed;
     const snapshot=await inspectVaultBackup(chosenVaultId());
@@ -2403,6 +2410,7 @@ function start(){
     scheduleMirrorForWorld();
   });
   document.getElementById('vaultDelete').onclick=()=>useVault(async()=>{
+    if(storageReadOnly)throw Error('Protected old world: device-vault deletion is disabled until current-generation recovery is complete');
     clearVaultLink();
     const id=chosenVaultId();
     const all=await listVaultBackups();
