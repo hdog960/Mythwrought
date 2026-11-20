@@ -244,12 +244,12 @@ export const BUILDER_B_HOMES_WAVE6_SPECS=Object.freeze([
       ],
       [
         13,
-        32,
+        31,
         "south"
       ],
       [
         22,
-        32,
+        31,
         "south"
       ],
       [
