@@ -195,7 +195,15 @@ export function planCaveFarWallSources(world,player,viewport,
   Number(b.companion.section>section)-Number(a.companion.section>section)||
   b.companion.hits-a.companion.hits||
   a.companion.nearest-b.companion.nearest);
- const selectedJoin=compactedKey?null:joinable[0];
+ // Preserve the original coarse/midpoint-certified source when an
+ // additional wide Rift pixel witness arrives. Otherwise its higher hit
+ // count can displace the previously genuine 11,11,-5 upper rock and
+ // merely MOVE the 844-pixel sky hole to another real seam.
+ // The new screenshot-certified rock uses the already allowed seam slot.
+ const preexistingJoin=joinable.find(j=>
+  candidates.has(j.companion.key)||midpoints.has(j.companion.key));
+ const selectedJoin=compactedKey?null:
+  (riftWideWitness.size?(preexistingJoin??joinable[0]):joinable[0]);
  if(selectedJoin)selectedJoin.owner.companion={...selectedJoin.companion};
  const joinedSources=compactedKey||selectedJoin?1:0;
  const companionKey=compactedKey??selectedJoin?.companion.key;

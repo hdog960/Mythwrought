@@ -183,7 +183,8 @@ test('C6 genuine 844x390 Rift upper seam is sourced and rendered without extra b
  assert.equal(plan.seamSources,1,'One real source-bound seam, not a new buffer');
  assert.ok(plan.selected.some(c=>c.key==='11,11,-6'&&
    c.companion?.key==='11,11,-5'),
-   'Keep the already accepted real 844px Rift rock join');
+   'Keep the already accepted real 844px Rift rock join: '+
+   JSON.stringify(plan.selected.map(c=>[c.key,c.companion?.key,c.seamCompanion?.key])));
  assert.ok(plan.selected.some(c=>c.key==='11,12,-6'&&
    c.seamCompanion?.key==='11,12,-5'),
    'Screenshot-proven second Rift source must share the 11,12,-6 GPU buffer: '+
