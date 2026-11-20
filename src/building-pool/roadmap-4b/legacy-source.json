@@ -1,0 +1,19 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-4b.legacy-source.v1",
+  "originalPR": 123,
+  "originalHeadAudited": "564330635f18e10215a3bf93901923fbf5af528d",
+  "originalSchemaSource": "src/building-pool/roadmap-4/schema.mjs",
+  "originalCategoryIdPrefix": "r4:",
+  "categoryFilter": [
+    "healers-house",
+    "library",
+    "schoolhouse",
+    "magical-research-institute",
+    "arcane-academy"
+  ],
+  "originalCategoryMatchingCandidateIds": [],
+  "importedCount": 0,
+  "geometryCopied": false,
+  "originalPRModified": false,
+  "rationale": "At the audited original PR #123 head all 30 M1 candidates are civic halls or castle-palaces; none belongs to Builder 4B. Read-only schema conventions were consulted; fixtures count as zero authored."
+}
