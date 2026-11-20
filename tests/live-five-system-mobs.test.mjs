@@ -307,6 +307,8 @@ test('tamed horse survives unloaded chunks beyond six-second ecology GC and rest
   // awake, valid states; the mount/identity checks below remain mandatory.
   assert.ok(['idle','active'].includes(returned.engine.get(id)?.state),
     'Owned horse did not reawaken after actual chunk residency returned');
+  assert.ok(Math.hypot(...returned.engine.get(id).position.map((v,i)=>v-player[i]))<=2,
+    'Owned horse must remain within actual mounting distance after owner reentry');
   assert.match(returned.toggleMount(),/Mounted Horse/,
     'Owned horse did not survive sidecar reload at original identity');
   assert.equal(JSON.stringify(world.save()),schema1);

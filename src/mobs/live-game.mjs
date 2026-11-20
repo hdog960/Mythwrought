@@ -137,7 +137,15 @@ export function createLiveMobSession({
       m.state==='active'&&Math.hypot(...m.position.map((x,i)=>x-player.position[i]))<8);
     combat.advance(dt,player,{
       override:mob=>animals.directive(mob)??
-        companions.directive(mob,player,threat?.id??null)
+        companions.directive(mob,player,threat?.id??null)??
+        // An owned animal must not run from its own player as though the
+        // threatening flag represented a stranger. Stay approachable within
+        // mounting distance; otherwise use the original voxel navigator to
+        // follow toward the owner. Wild animals retain their normal instincts.
+        (animals.isTamed(mob.id,player)?
+          (Math.hypot(...mob.position.map((v,i)=>v-player.position[i]))<=1.5?
+            {state:'tamed-calm',heading:[0,0]}:
+            {state:'tamed-follow',destination:player.position}):null)
     });
     engine.drainEvents();
   }
