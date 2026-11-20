@@ -12,7 +12,7 @@ if(!expectedHead||!/^[0-9a-f]{40}$/i.test(expectedHead)||sourceHead!==expectedHe
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const root='artifacts/builder-b-hospitality-wave5-foxglade';
 const ids=getBuilderBHospitalityWave5().map(b=>b.id);
-if(ids.length!==1||new Set(ids).size!==5)throw Error('1A screenshot source not exactly one unique authored mountain residence');
+if(ids.length!==1||new Set(ids).size!==1)throw Error('Foxglade source IDs not exactly one genuinely authored building');
 const views=['exterior','cutaway'],sizes=[[667,375],[844,390],[932,430]];
 const allHashes=new Set(),final=[];
 for(const [mode,folder,manifestName,renderer] of [
@@ -21,7 +21,7 @@ for(const [mode,folder,manifestName,renderer] of [
 ]){
  const dir=join(root,folder),file=JSON.parse(await readFile(join(dir,manifestName),'utf8'));
  const records=file.captures;
- if(records?.length!==6||new Set(records.map(x=>x.filename)).size!==30)throw Error('Missing 6 original '+mode+' source frames');
+ if(records?.length!==6||new Set(records.map(x=>x.filename)).size!==6)throw Error('Missing 6 original '+mode+' source frames');
  if(file.renderer!==renderer)throw Error('Renderer identity mismatch '+mode);
  if(mode==='cube'&&file.familyPhysicalAABBsRendered!==false)throw Error('Source-cube falsely claims physical geometry');
  if(mode==='pack-visible-aabb'&&file.sourceVisibleAABBs!==true)throw Error('Pack physical source AABB metadata invalid');
