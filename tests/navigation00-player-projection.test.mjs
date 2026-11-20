@@ -21,7 +21,7 @@ for(const [width,height] of [[667,375],[844,390],[932,430]]){
     a.updatePlayer({x:4,z:0,yaw:0});
     f=a.frame();
     assert.equal(f.player.worldY,-18,'horizontal updates must retain depth');
-    assert.equal(f.player.screenX,f.frame.x+f.frame.width/2-7);
+    assert.equal(f.player.screenX,f.frame.x+f.frame.width/2);
     assert.equal(f.player.screenY,f.frame.y+f.frame.height/2);
     assert.deepEqual([...d.seen].sort(),seenBefore,'navigation must not reveal terrain');
     assert.ok(f.cells.every(c=>d.seen.has(c.x+','+c.z)));
