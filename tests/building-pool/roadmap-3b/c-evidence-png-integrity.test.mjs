@@ -9,18 +9,21 @@ import {createHash} from 'node:crypto';
 import pngjs from 'pngjs';
 const {PNG}=pngjs;
 const entries=[
- ['roadmap-c-3b-twinstone-gatehouse','r3:gatehouse:temperate:small:1'],
- ['roadmap-c-3b-fourwatch-city-wall','r3:city-wall:temperate:small:1'],
- ['roadmap-c-3b-sandglass-fork-barracks','r3:barracks:desert:medium:2']
+ ['roadmap-c-3b-twinstone-gatehouse','r3:gatehouse:temperate:small:1','src/building-pool/roadmap-3b/c1-twinstone-pass-gatehouse.mjs'],
+ ['roadmap-c-3b-fourwatch-city-wall','r3:city-wall:temperate:small:1','src/building-pool/roadmap-3b/c3-fourwatch-closed-city-wall.mjs'],
+ ['roadmap-c-3b-sandglass-fork-barracks','r3:barracks:desert:medium:2','src/building-pool/roadmap-3b/c4-sandglass-fork-desert-barracks.mjs']
 ];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const exactHead=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 test('C 3B three source-specific fortifications have 18 genuine real Chromium PNGs, exact same-head origin, decoded CRCs and unique SHA256',async()=>{
  let n=0,shaSet=new Set();
- for(const [dirname,id] of entries){
+ for(const [dirname,id,sourcePath] of entries){
   const folder=resolve('artifacts',dirname,'chromium-webgl2-source');
   const acceptance=JSON.parse(await readFile(join(folder,'acceptance.json'),'utf8'));
   assert.equal(acceptance.exactSourceCommit,exactHead,'wrong capture checkout SHA '+dirname);
+  assert.equal(acceptance.sourceModulePath,sourcePath,'wrong original 3B module path');
+  const recordedSourceHash=createHash('sha256').update(await readFile(sourcePath)).digest('hex');
+  assert.equal(acceptance.sourceModuleSha256,recordedSourceHash,'source blob revision mismatch');
   assert.equal(acceptance.renderer,'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES');
   assert.equal(acceptance.physicalFamilyShapesRendered,false);
   assert.equal(acceptance.creatorArtApproved,false);
