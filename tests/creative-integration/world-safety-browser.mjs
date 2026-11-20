@@ -30,6 +30,11 @@ try{
       localStorage.setItem('mythwrought-v002-world-179',raw);
       localStorage.setItem('mythwrought-v002-world-179-backup-v009','unaltered old backup');
     },original);
+    // This is a genuine independently checked IndexedDB snapshot built from
+    // the original VoxelWorld schema-1 serializer, not a forged vault row.
+    const oldVault=await page.evaluate(raw=>
+      import('./src/vault.mjs').then(mod=>mod.createVaultBackup(raw)),original);
+    assert.equal(oldVault.seed,179);
     await page.reload({waitUntil:'domcontentloaded',timeout:30000});
     await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
     assert.equal(await page.locator('#help').isVisible(),true,
@@ -42,6 +47,34 @@ try{
     assert.equal(await page.locator('#playerSafety').isVisible(),true);
     assert.equal(await page.locator('.player-safety-actions').isVisible(),false,
       'Old-world protection must block save/export/import on the read-only preview');
+    assert.equal(await page.locator('#vaultRefresh').isVisible(),true,
+      'Old-world gate concealed independently verified IndexedDB vault snapshots');
+    for(const id of ['vaultBackup','vaultRestore','vaultDelete'])
+      assert.equal(await page.locator('#'+id).isEnabled(),false,
+        'Mutating vault action must remain disabled during protected preview: '+id);
+    await page.locator('#vaultRefresh').click();
+    await page.waitForFunction(()=>
+      [...document.querySelector('#vaultSelect').options].some(x=>x.textContent.includes('Seed 179')),
+      undefined,{timeout:15000});
+    await page.locator('#vaultSelect').selectOption(oldVault.id);
+    await page.locator('#vaultPrepare').click();
+    await page.locator('#vaultDownloadLink').waitFor({state:'visible',timeout:15000});
+    const vaultDownload=page.waitForEvent('download',{timeout:20000});
+    await page.locator('#vaultDownloadLink').click();
+    const originalVaultDownload=await vaultDownload;
+    assert.equal(readFileSync(await originalVaultDownload.path(),'utf8'),original,
+      'Verified historical IndexedDB JSON download changed even one original save byte');
+    // Bypassing disabled DOM buttons is not sufficient: mutation handlers must
+    // also reject direct invocation while an obsolete world is protected.
+    const denied=await page.evaluate(async()=>{
+      await document.getElementById('vaultDelete').onclick();
+      return document.getElementById('vaultStatus').textContent;
+    });
+    assert.match(denied,/Protected old world/,
+      'Historical vault deletion was not rejected inside the actual handler');
+    assert.equal(await page.evaluate(async id=>
+      (await import('./src/vault.mjs')).inspectVaultBackup(id).then(x=>x.raw),oldVault.id),
+      original,'Rejected vault deletion removed or corrupted historical snapshot');
     const downloadPromise=page.waitForEvent('download',{timeout:20000});
     await page.locator('.player-safety-archive').click();
     const download=await downloadPromise;
