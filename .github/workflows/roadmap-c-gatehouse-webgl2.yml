@@ -1,4 +1,4 @@
-name: Roadmap C four original fortifications source WebGL2
+name: Roadmap C five original fortifications source WebGL2
 
 on:
   pull_request:
@@ -12,6 +12,10 @@ on:
       - 'tests/building-pool/roadmap-3b/c4-sandglass-fork-barracks*'
       - 'src/building-pool/roadmap-3b/c5-sunbarrow-desert-gatehouse.mjs'
       - 'tests/building-pool/roadmap-3b/c5-sunbarrow-gatehouse*'
+      - 'src/building-pool/roadmap-3b/c6-granite-switchback-mountain-wall.mjs'
+      - 'tests/building-pool/roadmap-3b/c6-granite-switchback-wall*'
+      - 'src/building-pool/roadmap-3b/c-granite-switchback-handoff.mjs'
+      - 'tests/building-pool/roadmap-3b/c-granite-switchback-handoff.test.mjs'
       - 'src/building-pool/roadmap-3b/c-sunbarrow-settlement-handoff.mjs'
       - 'tests/building-pool/roadmap-3b/c-sunbarrow-settlement-handoff.test.mjs'
       - 'tests/building-pool/roadmap-3b/c-all-protected-211-d4.test.mjs'
@@ -54,30 +58,34 @@ jobs:
           node --test tests/building-pool/roadmap-3b/c3-fourwatch-wall.test.mjs
           node --test tests/building-pool/roadmap-3b/c4-sandglass-fork-barracks.test.mjs
           node --test tests/building-pool/roadmap-3b/c5-sunbarrow-gatehouse.test.mjs
+          node --test tests/building-pool/roadmap-3b/c6-granite-switchback-wall.test.mjs
           node --test tests/building-pool/roadmap-3b/c-settlement-handoff.test.mjs
           node --test tests/building-pool/roadmap-3b/c-barracks-settlement-handoff.test.mjs
           node --test tests/building-pool/roadmap-3b/c-sunbarrow-settlement-handoff.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-granite-switchback-handoff.test.mjs
           node --test tests/building-pool/roadmap-3b/c-all-protected-211-d4.test.mjs
       - name: Install pinned Chromium
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
           node -e "import('playwright').then(({chromium})=>process.stdout.write('MYTHWROUGHT_CHROME_BIN='+chromium.executablePath()+'\n'))" >> "$GITHUB_ENV"
-      - name: Capture twenty-four original gatehouse, wall, and barracks source WebGL2 images
+      - name: Capture thirty original gatehouse, wall, and barracks source WebGL2 images
         run: |
           node --test tests/building-pool/roadmap-3b/c2-twinstone-gatehouse-chromium.test.mjs
           node --test tests/building-pool/roadmap-3b/c3-fourwatch-wall-chromium.test.mjs
           node --test tests/building-pool/roadmap-3b/c4-sandglass-fork-barracks-chromium.test.mjs
           node --test tests/building-pool/roadmap-3b/c5-sunbarrow-gatehouse-chromium.test.mjs
-      - name: Decode real 24 fortification PNGs and verify CRC, SHA256 and exact source HEAD
+          node --test tests/building-pool/roadmap-3b/c6-granite-switchback-wall-chromium.test.mjs
+      - name: Decode real 30 fortification PNGs and verify CRC, SHA256 and exact source HEAD
         run: node --test tests/building-pool/roadmap-3b/c-evidence-png-integrity.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: roadmap-c-four-fortifications-genuine-webgl2
+          name: roadmap-c-five-fortifications-genuine-webgl2
           path: |
             artifacts/roadmap-c-3b-twinstone-gatehouse/
             artifacts/roadmap-c-3b-fourwatch-city-wall/
             artifacts/roadmap-c-3b-sandglass-fork-barracks/
             artifacts/roadmap-c-3b-sunbarrow-gatehouse/
+            artifacts/roadmap-c-3b-granite-switchback-wall/
           if-no-files-found: ignore
