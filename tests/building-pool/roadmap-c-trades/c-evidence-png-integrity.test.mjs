@@ -9,21 +9,24 @@ import {execFileSync} from 'node:child_process';
 import pngjs from 'pngjs';
 const {PNG}=pngjs;
 const want=[
- ['roadmap-c-trade-desert-market','r2:market-square:desert:small:01'],
- ['roadmap-c-trade-riverbend-tailor','r2:tailor:temperate:small:03'],
- ['roadmap-c-trade-copperford-butcher','r2:butcher:temperate:small:02'],
- ['roadmap-c-trade-silverfinch-jeweler','r2:jeweler:temperate:small:02'],
- ['roadmap-c-trade-wrenfield-bookshop','r2:bookshop:temperate:small:02']
+ ['roadmap-c-trade-desert-market','r2:market-square:desert:small:01','src/building-pool/roadmap-c-trades/wave1-desert-market.mjs'],
+ ['roadmap-c-trade-riverbend-tailor','r2:tailor:temperate:small:03','src/building-pool/roadmap-c-trades/wave2-riverbend-tailor.mjs'],
+ ['roadmap-c-trade-copperford-butcher','r2:butcher:temperate:small:02','src/building-pool/roadmap-c-trades/wave3-copperford-butcher.mjs'],
+ ['roadmap-c-trade-silverfinch-jeweler','r2:jeweler:temperate:small:02','src/building-pool/roadmap-c-trades/wave4-silverfinch-jeweler.mjs'],
+ ['roadmap-c-trade-wrenfield-bookshop','r2:bookshop:temperate:small:02','src/building-pool/roadmap-c-trades/wave5-wrenfield-bookshop.mjs']
 ];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 test('Every real Roadmap C trade candidate has all six source-specific PNGs: decoded CRC, exact dimensions, authentic same-run SHA and distinct content',async()=>{
  let total=0,global=new Set();
- for(const [dir,id] of want){
+ for(const [dir,id,sourcePath] of want){
   const base=resolve('artifacts',dir,'chromium-webgl2-source');
   const info=JSON.parse(await readFile(join(base,'acceptance.json'),'utf8'));
   assert.equal(info.exactSourceCommit,head,dir+' source checkout SHA not exact PR head');
+  assert.equal(info.sourceModulePath,sourcePath,'different original blueprint source file');
+  const recordedSourceHash=digest(await readFile(sourcePath));
+  assert.equal(info.sourceModuleSha256,recordedSourceHash,'source blob revision mismatch');
   assert.equal(info.id,id,dir+' wrong C-owned original identity');
   assert.equal(info.sourceOnly,true);assert.equal(info.approved,false);
   assert.equal(info.captured,6);
