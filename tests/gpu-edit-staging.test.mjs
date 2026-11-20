@@ -81,6 +81,6 @@ test('large edits fall back to original validated upload and unchanged cap',()=>
 test('untrusted spare and above-budget geometry fail without touching GL',()=>{
   const t=fakeGL();
   assert.throws(()=>uploadEditedChunkBuffer(t.gl,packed(1),{buffer:{},capacity:-1}),/Invalid/);
-  assert.throws(()=>uploadEditedChunkBuffer(t.gl,new Float32Array(MAX_CHUNK_UPLOAD_BYTES/4+9)),/safe staging budget/);
+  assert.throws(()=>uploadEditedChunkBuffer(t.gl,packed(Math.floor(MAX_CHUNK_UPLOAD_BYTES/36)+1)),/safe staging budget/);
   assert.equal(t.buffers.length,0);
 });
