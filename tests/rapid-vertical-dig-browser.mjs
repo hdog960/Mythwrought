@@ -49,7 +49,8 @@ try{
           const nextFrame=await new Promise(resolve=>requestAnimationFrame(resolve));
           samples.push({y,actionMs,meshMs:result?.meshMs??null,
             uploadMs:result?.uploadMs??null,saveMs:result?.saveMs??null,
-            saved:result?.saved??null,frameMs:nextFrame-lastFrame,
+            saved:result?.saved??null,reusedGpuBuffers:result?.reusedGpuBuffers??null,
+            frameMs:nextFrame-lastFrame,
             resident:Number(scene.dataset.loadedChunks),
             pending:Number(scene.dataset.pendingChunks)});
           lastFrame=nextFrame;
@@ -65,6 +66,7 @@ try{
         return {count:samples.length,action:stat('actionMs'),
           mesh:stat('meshMs'),upload:stat('uploadMs'),
           save:stat('saveMs'),frame:stat('frameMs'),
+          totalReusedGpuBuffers:samples.reduce((n,s)=>n+(s.reusedGpuBuffers??0),0),
           framesOver33:samples.filter(s=>s.frameMs>33).length,
           maxResident:Math.max(...samples.map(s=>s.resident)),
           maxPending:Math.max(...samples.map(s=>s.pending)),
