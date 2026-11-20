@@ -69,7 +69,10 @@ jobs:
     timeout-minutes: 40
     strategy:
       fail-fast: false
-      max-parallel: 3
+      # Serialize genuine Chromium CDP/WebGL2 source shards after observed
+      # Runtime.evaluate 150s timeout. Original tests, binary, timeouts,
+      # screenshots and fail-closed acceptance remain unchanged.
+      max-parallel: 1
       matrix:
         index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     env:
