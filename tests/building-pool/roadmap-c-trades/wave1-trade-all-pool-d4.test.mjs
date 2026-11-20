@@ -138,3 +138,20 @@ test('all six C-owned new original trade sources are strictly D4-distinct agains
   console.log(JSON.stringify({id:fresh.id,protectedSameCategoryComparisons:count,maxD4IoU:max,nearestProtectedId:closest,sourceOnly:true}));
  }
 });
+
+
+test('all six new C-only trade source footprints pass every 15 pairwise eight-way D4 under strict unchanged <0.85',()=>{
+ const items=[createCDesertSmallMarket(),createCRiverbendTailor(),createCCopperfordButcher(),
+  createCSilverfinchJeweler(),createCWrenfieldBookshop(),createCWinterglassMarket()];
+ assert.equal(items.length,6);
+ let compared=0,maxD4=0,closest=[];
+ for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++){
+  const similarity=d4max(floor(items[i]),floor(items[j]));
+  if(similarity>maxD4){maxD4=similarity;closest=[items[i].id,items[j].id];}
+  assert.ok(similarity<0.85,'Roadmap C original sources have cross-palette/source shape overlap '+items[i].id+' vs '+items[j].id+' max D4 '+similarity.toFixed(8));
+  compared++;
+ }
+ assert.equal(compared,15);
+ console.log(JSON.stringify({originalCCount:items.length,sourcePeerComparisons:compared,
+  maxD4IoU:maxD4,nearest:closest,sourceOnly:true}));
+});
