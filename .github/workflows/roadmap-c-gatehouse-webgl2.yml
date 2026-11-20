@@ -59,6 +59,8 @@ jobs:
           node --test tests/building-pool/roadmap-3b/c2-twinstone-gatehouse-chromium.test.mjs
           node --test tests/building-pool/roadmap-3b/c3-fourwatch-wall-chromium.test.mjs
           node --test tests/building-pool/roadmap-3b/c4-sandglass-fork-barracks-chromium.test.mjs
+      - name: Decode real 18 fortification PNGs and verify CRC, SHA256 and exact source HEAD
+        run: node --test tests/building-pool/roadmap-3b/c-evidence-png-integrity.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
