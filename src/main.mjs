@@ -36,6 +36,7 @@ import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} 
 import {installGameplayRecorder} from './gameplay-recorder.mjs';
 import {installGameUpdater} from './app-update.mjs';
 import {installPlayerMenu} from './creative-integration/player-menu.mjs';
+import {buildReadOnlyGameArchive} from './creative-integration/world-safety.mjs';
 import {buildCreativeCatalog} from './creative-integration/creative-catalog.mjs';
 import {installCreativeInventory} from './creative-integration/creative-inventory.mjs';
 import {CURRENT_INSTALLED_GENERATOR,chooseUnusedCurrentSeed,
@@ -627,7 +628,11 @@ function start(){
     else if(g2Active()&&!g2Land()){
       g2CreativeEnabled=true;
       message('Creative remains enabled: land safely before switching off');
-    }else g2CreativeEnabled=false;
+    }else{
+      g2CreativeEnabled=false;
+      // A stale creature egg must never hijack normal Explore PLACE after Creative OFF.
+      creativeSpawnSpecies=null;
+    }
     lastG2JumpReleaseAt=-Infinity;
     g2Sync();
   });
@@ -2780,10 +2785,14 @@ function start(){
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
       const rawImport=await f.text();
       const incoming=JSON.parse(rawImport);
+      if(incoming?.kind!=='mythwrought-four-biomes-export')
+        throw Error('Old or unprofiled world backups stay archived. Only verified current-generation bundles may be opened; use the read-only recovery download to preserve legacy bytes.');
       if(incoming?.kind==='mythwrought-four-biomes-export'){
         // Never flatten a profiled world through the legacy importer.
         // New-seed-only restore; no destructive overwrite of a prior seed.
         const examined=inspectM2WorldExport(rawImport);
+        if(examined.world.base.generationProfile.generator!==CURRENT_INSTALLED_GENERATOR)
+          throw Error('Previous-generation worlds may be archived but must not become current playable terrain');
         if(storageReadOnly)throw Error('Read-only save protection is active');
         if(examined.seed===world.seed)
           throw Error('Biome bundle cannot replace your active seed; export your world and choose a separate unused seed');
@@ -3268,6 +3277,30 @@ function start(){
       mustChooseCurrentWorld=false;
       document.getElementById('closeHelp').click();
     },
+    isReadOnly:()=>storageReadOnly||mustChooseCurrentWorld,
+    onSave:()=>{
+      if(!save())throw Error('Current world could not be verified saved; export local archive before changing worlds');
+      playerSettings.showStatus('Current world save verified');
+    },
+    onExport:()=>{
+      if(!save())throw Error('Current world could not be safely saved before export');
+      document.getElementById('export').click(); // original profile-aware V6 exporter
+      playerSettings.showStatus('Current-generation export requested via native Save dialog');
+    },
+    onImport:()=>document.getElementById('import').click(),
+    onArchive:()=>{
+      const archived=buildReadOnlyGameArchive(localStorage);
+      const url=URL.createObjectURL(new Blob([archived.text],{type:'application/json'}));
+      try{
+        const link=document.createElement('a');
+        link.href=url;link.download=archived.filename;
+        document.body.append(link);link.click();link.remove();
+        playerSettings.showStatus('Read-only localStorage archive prepared: '+archived.count+' game-owned records');
+      }finally{
+        setTimeout(()=>URL.revokeObjectURL(url),5000);
+      }
+    },
+    onCheckUpdate:()=>document.getElementById('checkGameUpdate').click(),
     onClose:()=>document.getElementById('closeHelp').click()
   });
   if(mustChooseCurrentWorld){
