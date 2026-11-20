@@ -329,7 +329,7 @@ try{
     }
     const raw=await page.screenshot({
      path:join(folder,'realgame-'+shot.name+'-'+width+'x'+height+'.png'),fullPage:true});
-    if(shot.name==='named-vaulted-stone-fan'&&width===667){
+    if(shot.name==='named-vaulted-stone-fan'&&(width===667||width===844)){
      // Read-only, genuinely captured original-game source-ray diagnosis.
      // Preserve the real sky-leak ASSERTION below; no color substitutions,
      // fake meshes, raised CPU/GPU budgets, or player-world edits.
@@ -347,7 +347,9 @@ try{
      const pixels=PNG.sync.read(raw),blue=[];
      for(let py=Math.floor(rect.top+rect.height*.06);
          py<Math.floor(rect.top+rect.height*.48);py+=5)
-      for(let px=Math.floor(rect.left+rect.width*.20);
+      // The 844px failure exposes source-world sky at the far left edge;
+     // include that edge in diagnostic rays without changing strict gate.
+     for(let px=Math.floor(rect.left+rect.width*(width===844?0:.20));
           px<Math.floor(rect.left+rect.width*.80);px+=5){
        const i=(py*pixels.width+px)*4;
        const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2];
@@ -377,13 +379,14 @@ try{
       }
       return {pixel,first};
      });
-     const proof={scene:shot.name,sourceSeed:seed,rect,camera,
+     const proof={scene:shot.name,sourceSeed:seed,viewport:[width,height],rect,camera,
       sourceSampler:{selected:plan.selected.map(c=>({key:c.key,
        section:c.section,source:c.source,hits:c.hits,nearest:c.nearest})),
        pending:plan.pending.length,uncovered:plan.uncovered,
        samples:plan.samples,maxSamples:3264},
       candidateSkySamples:blue.length,rays};
-     report.deepSkyPhysicalRays=[proof];
+     report.deepSkyPhysicalRays??=[];
+     report.deepSkyPhysicalRays.push(proof);
      console.log('C6_REAL_SKY_PIXEL_SOURCE_RAYS',JSON.stringify(proof));
     }
     if(shot.name==='secondary-rift-terraces-second-offset-chamber'&&width===667){

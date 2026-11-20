@@ -36,8 +36,14 @@ try{
         framebuffer:[c.width,c.height],gripGaps:[v.left-left.right,right.left-v.right],
         noticeHidden:document.querySelector('#notice').hidden};
     });
+    // Mob ecology independently checkpoints its own checksummed sidecar
+    // about every 12s. Sky commands cannot be charged for that autonomous
+    // activity; still compare ALL canonical world, pack and other sidecars.
+    // Mob sidecar validity and schema-1 isolation have separate strict gates.
     const storageExceptClock=()=>page.evaluate(()=>Object.fromEntries(
-      Object.entries(localStorage).filter(([key])=>!key.startsWith('mythwrought-sky-s1-clock-'))));
+      Object.entries(localStorage).filter(([key])=>
+        !key.startsWith('mythwrought-sky-s1-clock-')&&
+        !key.startsWith('mythwrought-mobs-v1-'))));
     const shot=async(kind)=>{
       const path=dir+'/s1-'+width+'x'+height+'-'+kind+'.png';
       const b=await page.screenshot({path,animations:'disabled'});

@@ -69,7 +69,14 @@ async function preserveVerifiedClip(label,metadata){
   const info=JSON.parse(probe.stdout),stream=info.streams?.[0];
   assert.ok(stream,'Actual encoded file has no video stream');
   assert.equal(stream.width,metadata.width,'Encoded video width differs from actual decoded preview');
-  assert.equal(stream.height,metadata.height,'Encoded video height differs from actual decoded preview');
+  // The actual original H.264 MP4 encoder rounds a 369px decoded preview
+  // down to 368 coded rows; require the exact same width and permit ONLY
+  // that proven odd-to-even one-pixel H.264 case. Full ffmpeg frame decode,
+  // both real clip durations and independent SHA256 are still required.
+  assert.ok(stream.height===metadata.height ||
+    (format==='mp4'&&stream.codec_name==='h264'&&
+     metadata.height%2===1&&stream.height===metadata.height-1),
+    'Encoded video height differs from actual decoded preview beyond proven H.264 alignment');
   const duration=Number(info.format?.duration??stream.duration);
   assert.ok(Number.isFinite(duration),'Actual video duration not measurable');
   assert.ok(label==='three'?duration>=2.3&&duration<=4.5:

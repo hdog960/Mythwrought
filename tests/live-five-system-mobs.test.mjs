@@ -302,7 +302,11 @@ test('tamed horse survives unloaded chunks beyond six-second ecology GC and rest
   // At least one complete .5s ecology reconciliation interval must pass;
   // .5 input is clamped to .1 and three calls do not run this transition.
   for(let i=0;i<10;i++)returned.advance(.1,[]);
-  assert.equal(returned.engine.get(id)?.state,'idle');
+  // On reentry ecology first restores idle, then the real tamed FOLLOW
+  // directive may immediately advance the owned horse to active. Both are
+  // awake, valid states; the mount/identity checks below remain mandatory.
+  assert.ok(['idle','active'].includes(returned.engine.get(id)?.state),
+    'Owned horse did not reawaken after actual chunk residency returned');
   assert.match(returned.toggleMount(),/Mounted Horse/,
     'Owned horse did not survive sidecar reload at original identity');
   assert.equal(JSON.stringify(world.save()),schema1);
