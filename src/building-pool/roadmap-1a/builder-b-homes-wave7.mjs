@@ -190,15 +190,6 @@ export const BUILDER_B_HOMES_WAVE7_SPECS=Object.freeze([
       },
       {
         "at": [
-          27,
-          1,
-          9
-        ],
-        "from": "north-survey-arrival",
-        "to": "east-ridge-chart-library"
-      },
-      {
-        "at": [
           30,
           1,
           14
