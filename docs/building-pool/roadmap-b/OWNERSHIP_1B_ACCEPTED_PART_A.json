@@ -1,0 +1,186 @@
+{
+  "schema": "mythwrought.builder-b.1b.provenance-a.v1",
+  "sourceHead": "6ab800a9cc16f31fdc5655f119979390992effcf",
+  "rows": [
+    {
+      "path": "src/building-pool/roadmap-1b/legacy-import.mjs",
+      "sourceBlob": "7fc6a9ff83b8668b605911596e18d6d0e973b7c8",
+      "ids": [
+        "r1:stable:temperate:small:001",
+        "r1:stable:temperate:medium:002",
+        "r1:stable:temperate:large:003",
+        "r1:stable:desert:small:001",
+        "r1:stable:desert:medium:002",
+        "r1:stable:desert:large:003",
+        "r1:stable:snow:small:001",
+        "r1:stable:snow:medium:002",
+        "r1:stable:snow:large:003",
+        "r1:stable:enchanted-forest:small:001",
+        "r1:stable:enchanted-forest:medium:002",
+        "r1:stable:enchanted-forest:large:003",
+        "r1:stable:mountain:small:001",
+        "r1:stable:mountain:medium:002",
+        "r1:stable:mountain:large:003"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m1-bathhouse-temperate-small.mjs",
+      "sourceBlob": "a3188b8cc3bfcd2c5243119e5e224de7df939165",
+      "ids": [
+        "r1:bathhouse:temperate:small:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m1-regional-services.mjs",
+      "sourceBlob": "d3b2609caf83522b4bcdda39e2785b7e427320ae",
+      "ids": [
+        "r1:farm-barn:temperate:small:001",
+        "r1:greenhouse:enchanted-forest:small:001",
+        "r1:fishing-lodge:temperate:small:001",
+        "r1:harbor-office:temperate:small:001",
+        "r1:lighthouse:mountain:small:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m1-cross-biome-plans.mjs",
+      "sourceBlob": "d7a65145270ce8dc28dfdd6980ed083ca0e8edf7",
+      "ids": [
+        "r1:bathhouse:desert:medium:001",
+        "r1:stable:snow:medium:004",
+        "r1:farm-barn:mountain:medium:001",
+        "r1:greenhouse:mountain:large:001",
+        "r1:fishing-lodge:desert:medium:001",
+        "r1:harbor-office:enchanted-forest:medium:001",
+        "r1:lighthouse:snow:medium:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m2-community-structures.mjs",
+      "sourceBlob": "64b93c02e262b7fe4049408c2458faa985a710a3",
+      "ids": [
+        "r1:bathhouse:snow:small:001",
+        "r1:bathhouse:enchanted-forest:medium:001",
+        "r1:bathhouse:mountain:large:001",
+        "r1:stable:desert:small:004",
+        "r1:stable:mountain:large:004",
+        "r1:stable:enchanted-forest:small:004",
+        "r1:farm-barn:desert:large:001",
+        "r1:farm-barn:snow:small:001",
+        "r1:farm-barn:enchanted-forest:medium:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m2-community-expansion.mjs",
+      "sourceBlob": "1f18ecec08d88ce76080f0d70ad113a17044f31d",
+      "ids": [
+        "r1:bathhouse:temperate:medium:001",
+        "r1:bathhouse:desert:small:001",
+        "r1:bathhouse:snow:medium:001",
+        "r1:stable:temperate:large:004",
+        "r1:stable:desert:large:004",
+        "r1:stable:snow:small:004",
+        "r1:farm-barn:temperate:medium:001",
+        "r1:farm-barn:mountain:small:001",
+        "r1:farm-barn:enchanted-forest:large:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m2-diverse-regions.mjs",
+      "sourceBlob": "cf4526cec43e1211d0175998c9e9d257857dc63b",
+      "ids": [
+        "r1:bathhouse:temperate:large:001",
+        "r1:bathhouse:desert:large:001",
+        "r1:bathhouse:snow:large:001",
+        "r1:stable:temperate:medium:004",
+        "r1:stable:snow:large:004",
+        "r1:stable:enchanted-forest:medium:004",
+        "r1:farm-barn:temperate:large:001",
+        "r1:farm-barn:desert:medium:001",
+        "r1:farm-barn:snow:medium:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m2-next-regions.mjs",
+      "sourceBlob": "d318f16bb801398a0d25a740d154ce243d5bd587",
+      "ids": [
+        "r1:bathhouse:enchanted-forest:small:001",
+        "r1:bathhouse:enchanted-forest:large:001",
+        "r1:bathhouse:mountain:small:001",
+        "r1:stable:temperate:small:004",
+        "r1:stable:desert:medium:004",
+        "r1:stable:mountain:small:004",
+        "r1:farm-barn:desert:small:001",
+        "r1:farm-barn:snow:large:001",
+        "r1:farm-barn:enchanted-forest:small:001"
+      ]
+    }
+  ],
+  "total": 64,
+  "ids": [
+    "r1:bathhouse:desert:large:001",
+    "r1:bathhouse:desert:medium:001",
+    "r1:bathhouse:desert:small:001",
+    "r1:bathhouse:enchanted-forest:large:001",
+    "r1:bathhouse:enchanted-forest:medium:001",
+    "r1:bathhouse:enchanted-forest:small:001",
+    "r1:bathhouse:mountain:large:001",
+    "r1:bathhouse:mountain:small:001",
+    "r1:bathhouse:snow:large:001",
+    "r1:bathhouse:snow:medium:001",
+    "r1:bathhouse:snow:small:001",
+    "r1:bathhouse:temperate:large:001",
+    "r1:bathhouse:temperate:medium:001",
+    "r1:bathhouse:temperate:small:001",
+    "r1:farm-barn:desert:large:001",
+    "r1:farm-barn:desert:medium:001",
+    "r1:farm-barn:desert:small:001",
+    "r1:farm-barn:enchanted-forest:large:001",
+    "r1:farm-barn:enchanted-forest:medium:001",
+    "r1:farm-barn:enchanted-forest:small:001",
+    "r1:farm-barn:mountain:medium:001",
+    "r1:farm-barn:mountain:small:001",
+    "r1:farm-barn:snow:large:001",
+    "r1:farm-barn:snow:medium:001",
+    "r1:farm-barn:snow:small:001",
+    "r1:farm-barn:temperate:large:001",
+    "r1:farm-barn:temperate:medium:001",
+    "r1:farm-barn:temperate:small:001",
+    "r1:fishing-lodge:desert:medium:001",
+    "r1:fishing-lodge:temperate:small:001",
+    "r1:greenhouse:enchanted-forest:small:001",
+    "r1:greenhouse:mountain:large:001",
+    "r1:harbor-office:enchanted-forest:medium:001",
+    "r1:harbor-office:temperate:small:001",
+    "r1:lighthouse:mountain:small:001",
+    "r1:lighthouse:snow:medium:001",
+    "r1:stable:desert:large:003",
+    "r1:stable:desert:large:004",
+    "r1:stable:desert:medium:002",
+    "r1:stable:desert:medium:004",
+    "r1:stable:desert:small:001",
+    "r1:stable:desert:small:004",
+    "r1:stable:enchanted-forest:large:003",
+    "r1:stable:enchanted-forest:medium:002",
+    "r1:stable:enchanted-forest:medium:004",
+    "r1:stable:enchanted-forest:small:001",
+    "r1:stable:enchanted-forest:small:004",
+    "r1:stable:mountain:large:003",
+    "r1:stable:mountain:large:004",
+    "r1:stable:mountain:medium:002",
+    "r1:stable:mountain:small:001",
+    "r1:stable:mountain:small:004",
+    "r1:stable:snow:large:003",
+    "r1:stable:snow:large:004",
+    "r1:stable:snow:medium:002",
+    "r1:stable:snow:medium:004",
+    "r1:stable:snow:small:001",
+    "r1:stable:snow:small:004",
+    "r1:stable:temperate:large:003",
+    "r1:stable:temperate:large:004",
+    "r1:stable:temperate:medium:002",
+    "r1:stable:temperate:medium:004",
+    "r1:stable:temperate:small:001",
+    "r1:stable:temperate:small:004"
+  ],
+  "sourceReadOnly": true
+}
