@@ -1,0 +1,44 @@
+name: MYTHWROUGHT Builder D D1 original-source acceptance (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/**'
+      - 'tests/building-pool/roadmap-d/**'
+      - 'tests/roadmap-d-wave1.test.mjs'
+      - 'docs/building-pool/roadmap-d/**'
+      - '.github/workflows/roadmap-d-d1-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-roadmap-d-d1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  builder-d-native-and-real-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify original source compiler and six-slot 4B preservation
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave1.test.mjs
+      - name: Require a real Chromium binary (no mock or screenshot substitution)
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+      - name: Install exact pinned PNG decoding dependency
+        run: npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Capture six genuine source structures, two views each, three iPhone landscape sizes
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave1-webgl2.test.mjs
+      - name: Independently decode all 36 images, check identities/source and CRC/SHA/colored pixel bounds
+        run: node tests/building-pool/roadmap-d/audit-wave1-gallery.mjs
+      - name: Export actual source-only acceptance evidence; never claim mobile or physical render approval
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-d1-36-genuine-chromium-frames
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave1-webgl2-cube-proxy/
+          if-no-files-found: ignore
