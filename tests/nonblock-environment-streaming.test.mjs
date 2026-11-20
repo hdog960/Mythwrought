@@ -72,3 +72,23 @@ test('landmark props use the real district and wait for resident mounts before c
   assert.ok(world.set(...mount,BLOCK.AIR));
   assert.ok(!planEnvironmentalScenery(world,-30,2).some(item=>item.anchor.join(',')===prop.anchor.join(',')));
 });
+
+test('native wall vines, snow icicles and cave columns find their actual support faces',()=>{
+  const seed=179,world=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
+  for(const [cx,cz,caveSection,sceneId,supportCount] of [
+    [-12,-44,undefined,'scene48:glowing-vine',2],
+    [-9,23,undefined,'nonblock:d:icicle-spear',1],
+    [4,11,-1,'nonblock:e:limestone-cave-column',2]
+  ]){
+    const layout=planEnvironmentalScenery(world,cx,cz,{caveSection});
+    const fixture=layout.find(item=>item.sceneId===sceneId);
+    assert.ok(fixture,'Expected naturally generated '+sceneId);
+    const geometry=describeCandidateObject(seed,fixture);
+    assert.equal(geometry.supports.length,supportCount);
+    assert.ok(geometry.supports.every(cell=>world.get(...cell)!==BLOCK.AIR));
+    const [support]=geometry.supports;
+    assert.ok(world.set(...support,BLOCK.AIR));
+    const remaining=planEnvironmentalScenery(world,cx,cz,{caveSection});
+    assert.ok(!remaining.some(item=>describeCandidateObject(seed,item).instanceKey===geometry.instanceKey));
+  }
+});

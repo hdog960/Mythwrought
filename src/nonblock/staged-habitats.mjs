@@ -7,7 +7,7 @@ import {M4_PHYSICAL_MATERIALS} from '../manual-biomes/three-regions-m4.mjs';
 import {v6BiomeAt} from '../manual-biomes/v6-balanced-biomes.mjs';
 import {surfaceBiomeAt} from '../surface-regions/regions.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
-import {createCandidateScene} from './candidate-scene.mjs';
+import {candidateWallSupportOffset,createCandidateScene} from './candidate-scene.mjs';
 import {candidateFamilies} from './candidate-families.mjs';
 
 const flora=names=>names.split(' ').map(name=>'scene48:'+name);
@@ -18,11 +18,10 @@ const caveCover=[...rock,BLOCK.DIRT,BLOCK.GRASS];
 const landmarkProps=['signpost','freestanding-torch','campfire-fuel-stack','brazier',
   'broken-pottery-scatter','rope-coil','cloth-banner','hanging-bell','ladder-assembly',
   'rope-ladder','hanging-chain','hanging-cobweb'].map(name=>'scene36:'+name);
-const directions=[[0,1],[-1,0],[0,-1],[1,0]];
 const mounts=new Map([
   ['meadow',{families:flora('crawling-ivy trail-vine'),blocks:[BLOCK.WOOD]}],
   ['enchanted',{families:flora('shelf-fungus glowing-vine'),blocks:[G.aetherBark,BLOCK.WOOD]}],
-  ['snow',{families:scenery('d','icicle-spear'),blocks:[276,279,G.snowyNeedles]}]
+  ['snow',{families:scenery('d','icicle-spear'),blocks:[276,279,G.coldNeedles,G.snowyNeedles]}]
 ]);
 const habitats=new Map([
   ['meadow',{ground:[BLOCK.GRASS],families:flora(
@@ -128,8 +127,8 @@ function surfaceMount(world,habitat,x,z,hash){
   for(let y=floor;y<=Math.min(WORLD_MAX_Y-1,floor+8);y++){
     if(world.get(x,y,z)!==BLOCK.AIR)continue;
     for(let r=0;r<(above?1:4);r++){
-      const orientation=(r+hash)%4;
-      const [dx,dz]=above?[0,0]:directions[orientation];
+      const orientation=above?0:(r+hash)%4;
+      const [dx,dz]=above?[0,0]:candidateWallSupportOffset(orientation);
       if(!rule.blocks.includes(world.get(x+dx,y+1,z+dz)))continue;
       if(!above&&!rule.blocks.includes(world.get(x+dx,y,z+dz)))continue;
       const request={habitat,sceneId,anchor:[x,y,z],variant:hash%4,orientation};
@@ -157,7 +156,7 @@ function findLandmarkProp(baseline,district,x,z,hash){
     if(!attached&&(baseline.get(x,y-1,z)===BLOCK.AIR||canopyIds.has(baseline.get(x,y-1,z))))continue;
     for(let r=0;r<(family.wall?4:1);r++){
       const orientation=(r+hash)%4;
-      const [dx,dz]=family.wall?directions[orientation]:[0,0];
+      const [dx,dz]=family.wall?candidateWallSupportOffset(orientation):[0,0];
       const supportY=y+(ceiling?1:family.wallY??1);
       if(attached&&!mountSet.has(worldKey(x+dx,supportY,z+dz)))continue;
       if(!attached){
@@ -173,9 +172,19 @@ function findLandmarkProp(baseline,district,x,z,hash){
   return null;
 }
 
-function environmentalCaveSite(world,baseline,x,z,section,hash,options){
-  const families=habitats.get('cave').families;
-  const sceneId=families[(hash>>>12)%families.length];
+const limestoneSpan='nonblock:e:limestone-cave-column';
+function caveSpanLeavesPassage(natural,x,y,z){
+  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+    if([-1,0,1].every(offset=>{
+      const a=x+dx+dz*offset,b=z+dz+dx*offset;
+      return rock.includes(natural(a,y-1,b))&&
+        natural(a,y,b)===BLOCK.AIR&&natural(a,y+1,b)===BLOCK.AIR;
+    }))return true;
+  }
+  return false;
+}
+
+function findCaveMount(baseline,x,z,section,hash,sceneId){
   const family=candidateFamilies.get(sceneId);
   const natural=baseline.get;
   for(let i=0;i<8;i++){
@@ -184,15 +193,25 @@ function environmentalCaveSite(world,baseline,x,z,section,hash,options){
     if(natural(...anchor)!==BLOCK.AIR)continue;
     if(family.attachment==='ceiling'&&!rock.includes(natural(x,y+1,z)))continue;
     if(!family.wall&&family.attachment!=='ceiling'&&!rock.includes(natural(x,y-1,z)))continue;
+    if(sceneId===limestoneSpan&&(!rock.includes(natural(x,y+3,z))||
+        !caveSpanLeavesPassage(natural,x,y,z)))continue;
     const directionCount=family.wall?4:1;
     for(let r=0;r<directionCount;r++){
       const orientation=family.wall?(r+hash)%4:0;
       const request={habitat:'cave',sceneId,anchor,variant:hash%4,orientation};
-      if(planStagedHabitat(baseline,[request]).length)
-        return planStagedHabitat(world,[request],options)[0]??null;
+      if(planStagedHabitat(baseline,[request]).length)return request;
     }
   }
   return null;
+}
+
+function environmentalCaveSite(world,baseline,x,z,section,hash,options){
+  const families=habitats.get('cave').families;
+  const sceneId=families[(hash>>>12)%families.length];
+  const plan=findCaveMount(baseline,x,z,section,hash,sceneId)??
+    (sceneId!==limestoneSpan&&(hash>>>20)%2===0?
+      findCaveMount(baseline,x,z,section,hash,limestoneSpan):null);
+  return plan?planStagedHabitat(world,[plan],options)[0]??null:null;
 }
 
 export function planEnvironmentalScenery(world,cx,cz,options={}){

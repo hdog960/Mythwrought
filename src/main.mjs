@@ -2652,7 +2652,7 @@ function start(nonblockStage=null){
     mirrorDownload.href=mirrorDownloadUrl;
     mirrorDownload.download='mythwrought-mirror-seed-'+selectedSeed+'-'+selectedVersion+'.json';
     mirrorDownload.hidden=false;
-    mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap DOWNLOAD to export the verified world JSON.';
+    mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap the separate DOWNLOAD link to export the verified world JSON.';
   });
   document.getElementById('mirrorRestore').onclick=()=>withMirror(async()=>{
     if(storageReadOnly)throw Error('Read-only startup protection active; use the regular IMPORT flow to repair damaged saved bytes');

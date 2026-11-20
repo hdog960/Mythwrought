@@ -24,6 +24,7 @@ function validateLayout(layout) {
 function rotation(x,z,orientation) {
   return [[x,z],[-z,x],[-x,-z],[z,-x]][orientation];
 }
+export function candidateWallSupportOffset(orientation){return rotation(0,-1,orientation);}
 
 function keyOf(sceneId,seed,anchor,variant,orientation,family) {
   return 'nb1:'+encodeURIComponent(sceneId)+':'+seed+':'+anchor.join(',')+':'+variant+
@@ -62,7 +63,7 @@ export function describeCandidateObject(seed, placement) {
     {mesh:family.mesh(options),palette:family.palette,colliders:[]};
   const {mesh} = source;
 
-  const [wallX,wallZ] = rotation(0,-1,orientation);
+  const [wallX,wallZ] = candidateWallSupportOffset(orientation);
   const [ax,ay,az] = anchor;
   const ceiling = family.attachment==='ceiling';
   const height = ay+(ceiling?1:0);
