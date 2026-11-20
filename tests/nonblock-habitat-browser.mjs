@@ -79,10 +79,9 @@ async function observed(page,condition,timeout){
 }
 try{
   const context=await browser.newContext({viewport:{width:932,height:430},
-    hasTouch:true,isMobile:true,deviceScaleFactor:1});
-  await context.addInitScript(entries=>{
-    for(const [key,value] of entries)if(localStorage.getItem(key)===null)localStorage.setItem(key,value);
-  },fixture);
+    hasTouch:true,isMobile:true,deviceScaleFactor:1,
+    storageState:{cookies:[],origins:[{origin,localStorage:fixture.map(([name,value])=>({name,value}))}]}
+  });
   const open=async()=>{
     const page=await context.newPage();
     page.on('pageerror',error=>errors.push(error.message));
@@ -111,7 +110,7 @@ try{
       throw Error('Profiled '+sample.habitat+' did not settle at the target. '+JSON.stringify(data),{cause:error});
     }
     const file=directory+'/'+sample.habitat+'.png';
-    const image=await page.screenshot({path:file});
+    const image=await page.screenshot({path:file,timeout:90000});
     const decoded=PNG.sync.read(image);
     assert.deepEqual([decoded.width,decoded.height],[932,430]);
     assert.ok(new Set(decoded.data.filter((_,i)=>i%64===0)).size>32);

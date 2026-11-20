@@ -42,11 +42,9 @@ const errors=[],captures=[];
 let minedCell=null;
 try{
   const context=await browser.newContext({
-    viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1
+    viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1,
+    storageState:{cookies:[],origins:[{origin,localStorage:[{name:saveKey,value:save}]}]}
   });
-  await context.addInitScript(({key,value})=>{
-    if(localStorage.getItem(key)===null)localStorage.setItem(key,value);
-  },{key:saveKey,value:save});
   const page=await context.newPage();
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(target);

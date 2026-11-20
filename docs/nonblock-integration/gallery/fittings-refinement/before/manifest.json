@@ -1,0 +1,96 @@
+{
+  "seed": 179,
+  "results": [
+    {
+      "placement": {
+        "sceneId": "scene36:signpost",
+        "anchor": [
+          7,
+          10,
+          5
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          7,
+          11,
+          3
+        ],
+        "point": [
+          7.3,
+          11.66,
+          5.52
+        ]
+      },
+      "instanceKey": "nb1:scene36%3Asignpost:179:7,10,5:2:r0",
+      "solid": true,
+      "triangles": 17,
+      "underSurface": false,
+      "filename": "artifacts/nonblock-fitting-comparison-before/signpost.png",
+      "sha256": "4176422225d6bdd6c922a6f8cdf26a71281c278998ad34e66a0eb04cfb8e7a05"
+    },
+    {
+      "placement": {
+        "sceneId": "scene36:hanging-chain",
+        "anchor": [
+          9,
+          10,
+          10
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          7,
+          9,
+          10
+        ],
+        "point": [
+          9.5494976,
+          10.15168699,
+          10.51666641
+        ]
+      },
+      "instanceKey": "nb1:scene36%3Ahanging-chain:179:9,10,10:2:r0",
+      "solid": false,
+      "triangles": 128,
+      "underSurface": false,
+      "filename": "artifacts/nonblock-fitting-comparison-before/hanging-chain.png",
+      "sha256": "0101d42c382fa6847c7d909ebb682b9f5a7f2cdaf2339ca3551e58d84d2e9631"
+    }
+  ],
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/voxel.mjs": "6df6d3c5a0223cee405656afd0548fea3a957ae0c5185d7130a34d7198c3f981",
+    "tests/nonblock-inherited-extra-browser.mjs": "e75d67e8740eb4273d39d0bfb6284fe1d513784ade14b07b0d1e341959e4ec8f",
+    "src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
+    "src/nonblock/candidate-families.mjs": "05b0fecb85acdb0941e4a65adcf86d37bcb5651ece2f8b279ea5979b768f92a1",
+    "src/nonblock/candidate-scene.mjs": "117603583035b7436c8b50eb4b206afaba7cff72d287f5a79a4d6058768549c8",
+    "src/nonblock/physical-fittings.mjs": "c9dc6bcb1d42e21e0fb2a0f304caa9d5053cbbccc06d60fea7769dfd714ee16e",
+    "src/nonblock/stage-offline.mjs": "c74fc6d09a4ef96cf476a9158004f88cc15a6dc1efe0d44943f83c77b5e155a8",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/staged-inherited-families.mjs": "d2c3ee59248ad68cd76086992689e15e18ed4b59109d736f0308d2ea315b798e",
+    "src/nonblock-environments24/agave-rosette.mjs": "05d324294d808c81c6bbac1a626530cadc1c11a700b3b13bdf27a7e9c238d3db",
+    "src/nonblock-environments24/alpine-wildflower.mjs": "4ee8317a14c4043cd43d7d8dfe9c3d1475573d88946bc88822b714cdd880d60c",
+    "src/nonblock-environments24/branching-crystal-cluster.mjs": "c3bb73bc3b49de6623f9e8eb5579a8383665f42d5e4c1ab7abd69b93f618618f",
+    "src/nonblock-environments24/cave-formations.mjs": "598eba5c9864a2f1c210d0eb2cfe2f6088ef7cac9bc4bfe4446f1c28ac63c751",
+    "src/nonblock-environments24/cave-rubble-cluster.mjs": "25d9d37ebb62f57b548298217ef9d78b0d05a8ec07fffb49b49a80d5104e22a3",
+    "src/nonblock-environments24/column-cactus.mjs": "7f27d1eb59a2dfd9ea5d2d60573b3b8f050c6500588d81bc60b7214860dadc7e",
+    "src/nonblock-environments24/desert-bloom.mjs": "7862693515cb9d3e757baccc8be6e5827ec12aa07736aa05da75c5a946ad0155",
+    "src/nonblock-environments24/desert-scrub.mjs": "48b8eabaa7e33e1abf80fe5d2847500597461d2c1ae0bb67f0af033d535b564a",
+    "src/nonblock-environments24/dwarf-juniper.mjs": "be8493eaf0dbcbbe52e703d6d1e9366a6822be94c89a9c3b79830ef7a237ca67",
+    "src/nonblock-environments24/frost-fern.mjs": "7b2e5329be0a61aefb76bcab3a9c8fe66c19275858e0047b3583ad7c57b622b8",
+    "src/nonblock-environments24/geode-opening.mjs": "a4702efc983516cbff79a7df24db5fe2ff5eb7443196519abbbab162d866e6b6",
+    "src/nonblock-environments24/mineral-encrustation.mjs": "1a179ec6f5d54ca0c1d4d3c0a2f0c96712d460ba416c3d79c7c48c8ef58fffb3",
+    "src/nonblock-environments24/pebble-scatter.mjs": "32520748be51385a6cf8861d1d61b78fb113424cde434f6cbe1789af1fff8870",
+    "src/nonblock-environments24/prickly-pear-cactus.mjs": "2df88401215b3beec1f974a6bad06cfda0a795d3a3ce9240f3c7a276267ebbc1",
+    "src/nonblock-environments24/saltgrass.mjs": "ac729d8acae64c763333163585872b16f12e1c958e2ecf9142e575aa41a7f361",
+    "src/nonblock-environments24/snowgrass.mjs": "519c241b2d0a8eb4e6cfefaffdb0c4d2d963221204630a240e4c46390c2e257e",
+    "src/nonblock-environments24/tumblebrush.mjs": "f00b26b92c90f95cf5bf6e1159326c6829a0d18c8c4b3206ff29b5efa4cb4682",
+    "src/nonblock-fittings36/fittings-phase1.mjs": "ed78a367ba60977dd15adbb8448f8c58047cb32a5d2bbdfa014fd71fe05471b7",
+    "src/nonblock-fittings36/world-props.mjs": "8b9299c73ed1195e175c3b685fa667f58a54b4ef93737ffc44956c6af8c768b5"
+  }
+}

@@ -105,3 +105,14 @@ The same four plants use 332 triangles at close range in both builds. The distan
 | --- | --- | --- |
 | Near | [View](gallery/foliage-lod/before/near.png) | [View](gallery/foliage-lod/after/near.png) |
 | Far | [View](gallery/foliage-lod/before/far.png) | [View](gallery/foliage-lod/after/far.png) |
+
+## Signpost and chain refinement
+
+The signpost now has a closed, subtly tapered post and a board with a visible arrow tip from either side. The chain's alternating links have three-dimensional cross-sections and open centers. The captures use the same seed, natural ground or ceiling mount, variant, standing eye and aim. Both versions accepted the original MINE control and stayed removed on reload. The signpost still blocks the player at the post and board, and the chain remains pass-through. [Before manifest](gallery/fittings-refinement/before/manifest.json) · [After manifest](gallery/fittings-refinement/after/manifest.json)
+
+| Family | Before | After | Sample triangles |
+| --- | --- | --- | --- |
+| Signpost | [View](gallery/fittings-refinement/before/signpost.png) | [View](gallery/fittings-refinement/after/signpost.png) | 17 → 48 |
+| Hanging chain | [View](gallery/fittings-refinement/before/hanging-chain.png) | [View](gallery/fittings-refinement/after/hanging-chain.png) | 128 → 252 |
+
+The comparison pair uses 15,660 packed vertex bytes before and 32,400 after. Each family has four distinct variants. The native mesh checks verify closed edges, finite nondegenerate faces and the original orientation-bearing instance IDs. The chain stays within the 256-triangle budget.

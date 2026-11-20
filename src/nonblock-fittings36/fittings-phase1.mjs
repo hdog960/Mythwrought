@@ -13,9 +13,62 @@ export const FITTINGS=Object.freeze({
 const integer=Number.isSafeInteger;
 const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0;};
 function meshBuilder(){const p=[],m=[];return {tri(a,b,c,mat){p.push(...a,...b,...c);m.push(mat);},quad(a,b,c,d,mat){this.tri(a,b,c,mat);this.tri(a,c,d,mat);},finish(){return {positions:new Float32Array(p),materials:new Uint8Array(m),triangleCount:m.length};}};}
-function rod(b,a,c,r,mat,sides=6){for(let i=0;i<sides;i++){const t=i*2*Math.PI/sides,u=(i+1)*2*Math.PI/sides;const q=(p,k)=>[p[0]+Math.cos(k)*r,p[1],p[2]+Math.sin(k)*r];b.quad(q(a,t),q(a,u),q(c,u),q(c,t),mat);}}
-function signpost(b){rod(b,[0,0,0],[0,2.15,0],.075,0);b.quad([-.47,1.45,.09],[.47,1.45,.09],[.47,1.82,.09],[-.47,1.82,.09],1);b.quad([.47,1.45,-.09],[-.47,1.45,-.09],[-.47,1.82,-.09],[.47,1.82,-.09],1);b.tri([.47,1.45,.09],[.56,1.64,0],[.47,1.82,.09],1);}
-function chain(b){for(let j=0;j<8;j++){const y=1.65-j*.205,axis=j%2;for(let i=0;i<8;i++){const t=i*Math.PI/4,u=(i+1)*Math.PI/4;const a=[Math.cos(t)*.105,y+Math.sin(t)*.145,0],c=[Math.cos(u)*.105,y+Math.sin(u)*.145,0];if(axis){a[2]=a[0];a[0]=0;c[2]=c[0];c[0]=0;}const offset=axis?[.025,0,0]:[0,0,.025];b.quad(a,c,c.map((v,k)=>v+offset[k]),a.map((v,k)=>v+offset[k]),2);}}}
+const turn=Math.PI*2;
+function signpost(b,variant){
+ const height=2.15, sides=6, angle=variant*.1;
+ const circle=(radius,y)=>Array.from({length:sides},(_,i)=>{
+  const a=angle+i*turn/sides;
+  return [Math.cos(a)*radius,y,Math.sin(a)*radius];
+ });
+ const lower=circle(.077,0),upper=circle(.055+variant*.004,height);
+ for(let i=0;i<sides;i++){
+  const j=(i+1)%sides;
+  b.quad(lower[i],lower[j],upper[j],upper[i],i%3===0?2:0);
+  b.tri([0,0,0],lower[j],lower[i],2);
+  b.tri([0,height,0],upper[i],upper[j],3);
+ }
+ const lift=variant*.018,tail=-.47+variant*.014,shoulder=.255+variant*.013;
+ const tip=.55-variant*.014,thickness=.068+variant*.005;
+ const outline=[[tail,1.47],[shoulder,1.47],[shoulder,1.40],[tip,1.64],
+  [shoulder,1.88],[shoulder,1.81],[tail,1.81]];
+ const face=z=>outline.map(([x,y])=>[x,y+lift,z]);
+ const front=face(thickness),back=face(-thickness);
+ const panels=[[0,1,5],[0,5,6],[2,3,1],[1,3,5],[3,4,5]];
+ for(const [i,[a,c,d]] of panels.entries()){
+  const material=i%3===0?3:1;
+  b.tri(front[a],front[c],front[d],material);
+  b.tri(back[d],back[c],back[a],material);
+ }
+ for(let i=0;i<outline.length;i++){
+  const j=(i+1)%outline.length;
+  b.quad(front[i],back[i],back[j],front[j],2);
+ }
+}
+
+function chain(b,variant){
+ const linkCount=6,samples=7,sides=3;
+ const width=.107+variant*.006,height=.181,radius=.018+variant*.001;
+ for(let link=0;link<linkCount;link++){
+  const center=1.63-link*.278;
+  const turnLink=(link+variant)%2!==0;
+  const points=Array.from({length:samples},(_,i)=>{
+   const angle=i*turn/samples+variant*.12,dx=Math.cos(angle),dy=Math.sin(angle);
+   const normal=Math.hypot(dx/width,dy/height);
+   return Array.from({length:sides},(_,side)=>{
+    const around=side*turn/sides;
+    const radial=Math.cos(around)*radius;
+    const x=dx*(width+radial/(width*normal));
+    const y=center+dy*(height+radial/(height*normal));
+    const z=Math.sin(around)*radius;
+    return turnLink?[z,y,x]:[x,y,z];
+   });
+  });
+  for(let i=0;i<samples;i++)for(let side=0;side<sides;side++){
+   const j=(i+1)%samples,next=(side+1)%sides;
+   b.quad(points[i][side],points[i][next],points[j][next],points[j][side],side===0?3:2);
+  }
+ }
+}
 function banner(b,variant){
  const top=1.61, hem=.29+variant*.025, width=.43, folds=6;
  // Horizontal rail: rings live on its YZ cross-section.

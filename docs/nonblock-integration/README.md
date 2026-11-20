@@ -2,7 +2,7 @@
 
 The roster has 96 source-backed and browser-tested slots. Standard game actions cover 72 removable scenery families and 12 existing Block Pack roles. The 12 environmental effects have draw, animation and lifecycle evidence. All three landscape viewports have Chromium evidence. Final visual parity, device frame-time and physical iPhone acceptance remain open. [Master draft PR #285](https://github.com/hdog960/Mythwrought/pull/285) · [Catalog and evidence](catalog.md) · [Home Screen release hold](release-hold.md)
 
-The retrospective audit inspected 43 inherited meshes. The staged quality pass has rebuilt six and refined eleven. The other inherited meshes retain their original source geometry at this checkpoint. Matched captures cover the banner and rope, meadow foliage and forest floor revisions. [Individual mesh decisions and captures](mesh-review.md)
+The retrospective audit inspected 43 inherited meshes. The staged quality pass has rebuilt six and refined thirteen. The other inherited meshes retain their original source geometry at this checkpoint. Matched captures cover the banner, rope, signpost, chain, meadow foliage and forest floor revisions. [Individual mesh decisions and captures](mesh-review.md)
 
 ## Production and source provenance
 
@@ -139,3 +139,7 @@ In the actual four-region game, Chromium rendered and mined an agave in desert s
 The renderer now checks draw distance before asking the world about mounts. One frame uses the same mounted objects for render and target feedback. MINE independently rechecks the live mount and the exact triangle before saving. In a deterministic 32-object scene with nine objects inside draw range, 300 identical views used 5,400 terrain reads, down from 38,400 at the previous checkpoint. The visible count and selected instance matched. This is a terrain-read comparison. Device frame-time and LOD acceptance remain open.
 
 Low grass, short fern, clover clump and meadow sedge now have authored distant meshes. Detail switches beyond 16 blocks and returns inside 13 blocks to avoid repeated uploads at the boundary. The close mesh remains the source for targeting and collision. Chromium held 25 loaded terrain chunks and one scenery draw throughout the matched route. The four-family scenery batch used 35,856 bytes close up and 20,088 bytes at distance, about 44% less. The attached pollen effect still drew through both transitions. [Near and far comparison](mesh-review.md#distant-foliage-comparison)
+
+## Browser catalog coverage
+
+The exact `e853b66726b9978ec76292e1e0d06496789b7cfa` staging run produced matching source digests and valid PNGs for 87 captures across the catalog, original controls, offline storage, cache update and WebGL recovery tests. The independent roster check found all 72 scenery IDs, 12 physical-owner IDs and 12 effect IDs exactly once. In the longer run, the additional habitat screenshot timed out when multiple software-rendered browsers were running. The four habitat captures and their lifecycle checks passed in the separate habitat run. The published-build loopback update and rollback also has its own captured rehearsal. [Habitat evidence](gallery/habitats/manifest.json) · [Install rehearsal](gallery/install-rehearsal/manifest.json)

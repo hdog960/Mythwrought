@@ -11,7 +11,10 @@ import {inheritedStageFamilies} from '../src/nonblock/staged-inherited-families.
 const seed=179;
 const base=process.env.NONBLOCK_EXTRA_ORIGIN||'http://127.0.0.1:4173';
 const worldProps=process.env.NONBLOCK_EXTRA_SET==='world-props';
-const directory=worldProps?'artifacts/nonblock-world-props':'artifacts/nonblock-inherited-extra';
+const comparison=process.env.NONBLOCK_EXTRA_COMPARISON;
+if(comparison&&!['before','after'].includes(comparison))throw Error('Invalid fitting comparison label');
+const directory=comparison?'artifacts/nonblock-fitting-comparison-'+comparison:
+  worldProps?'artifacts/nonblock-world-props':'artifacts/nonblock-inherited-extra';
 const world=new VoxelWorld(seed);
 const deps={
   storage:{getItem:()=>null},
@@ -27,6 +30,11 @@ const samples=[];
 const targetFamily=process.env.NONBLOCK_EXTRA_FAMILY;
 const sceneFor=placement=>createCandidateScene(seed,'legacy',[placement],deps);
 const occupied=(x,y,z)=>world.get(x,y,z)!==0;
+function sample(placement,view,object){
+  const [x,y,z]=object.anchor;
+  return {placement,view,instanceKey:object.instanceKey,solid:object.colliders.length>0,
+    triangles:object.positions.length/9,underSurface:terrainHeight(x,z,seed)-y>=3};
+}
 
 function findView(scene,object){
   const [x,y,z]=object.anchor, points=object.positions;
@@ -51,7 +59,20 @@ function findView(scene,object){
   return null;
 }
 
-for(const [sceneId,family] of (worldProps?stagedWorldPropFamilies:inheritedStageFamilies)){
+if(comparison){
+  for(const [sceneId,anchor,cell,point] of [
+    ['scene36:signpost',[7,10,5],[7,11,3],[7.3,11.66,5.52]],
+    ['scene36:hanging-chain',[9,10,10],[7,9,10],[9.54949760,10.15168699,10.51666641]]
+  ]){
+    const placement={sceneId,anchor,variant:2,orientation:0};
+    const scene=sceneFor(placement);
+    const [object]=scene.visible();
+    assert.ok(object,sceneId+' lacks a natural mount');
+    const [x,y,z]=cell,eye=[x+.5,y+1.56,z+.5];
+    assert.equal(scene.pick(eye,point.map((coord,i)=>coord-eye[i]))?.instanceKey,object.instanceKey);
+    samples.push(sample(placement,{cell,point},object));
+  }
+}else for(const [sceneId,family] of (worldProps?stagedWorldPropFamilies:inheritedStageFamilies)){
   if(targetFamily&&sceneId!==targetFamily)continue;
   const orientations=family.wall?[0,1,2,3]:[0];
   const yOrder=family.attachment==='ceiling'?[9,8,10,7,6,5,4,3,2,1,0,11,12]:
@@ -67,8 +88,7 @@ for(const [sceneId,family] of (worldProps?stagedWorldPropFamilies:inheritedStage
       if(!object)continue;
       const view=findView(scene,object);
       if(!view)continue;
-      samples.push({placement,view,instanceKey:object.instanceKey,solid:object.colliders.length>0,
-        triangles:object.positions.length/9,underSurface:terrainHeight(x,z,seed)-y>=3});
+      samples.push(sample(placement,view,object));
       break search;
     }
   }
@@ -82,14 +102,13 @@ const browser=await chromium.launch({headless:true,args:[
 ]});
 const results=[];
 try{
-  const context=await browser.newContext({
-    viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1
-  });
   const savedWorld=JSON.stringify({schema:1,seed,edits:[[100,12,100,3]]});
-  await context.addInitScript(raw=>{
-    const key='mythwrought-v002-world-179';
-    if(localStorage.getItem(key)===null)localStorage.setItem(key,raw);
-  },savedWorld);
+  const context=await browser.newContext({
+    viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1,
+    storageState:{cookies:[],origins:[{origin:base,localStorage:[{
+      name:'mythwrought-v002-world-179',value:savedWorld
+    }]}]}
+  });
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));

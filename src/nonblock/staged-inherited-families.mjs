@@ -66,11 +66,11 @@ export const inheritedStageFamilies = [
   ['nonblock:e:geode-opening',mountedGeode()],
   ['nonblock:e:mineral-encrustation',mineralWall()],
   ['scene36:signpost',fitting('scene36:signpost',{},'below',
-    [[.38,.26,.16],[.67,.49,.31]],[
+    [[.37,.25,.15],[.66,.47,.26],[.29,.19,.12],[.73,.53,.31]],[
       [-.057,0,-.057,.057,2.15,.057],[-.43,1.46,-.075,.44,1.81,.075]
     ])],
   ['scene36:hanging-chain',fitting('scene36:hanging-chain',{attachment:'ceiling'},'above',
-    [null,null,[.47,.49,.51]])],
+    [null,null,[.39,.43,.46],[.58,.62,.61]])],
   ['scene36:hanging-cobweb',fitting('scene36:hanging-cobweb',{wall:true,corner:true,wallY:0,wallInset:.49},
     'corner',[null,null,null,null,[.70,.72,.69],[.64,.67,.65]])]
 ];

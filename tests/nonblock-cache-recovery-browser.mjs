@@ -66,11 +66,9 @@ const browser=await chromium.launch({headless:true,args:[
 const captures=[];
 try{
   const context=await browser.newContext({
-    viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1,serviceWorkers:'allow'
+    viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1,serviceWorkers:'allow',
+    storageState:{cookies:[],origins:[{origin,localStorage:[{name:worldKey,value:saved}]}]}
   });
-  await context.addInitScript(({worldKey,saved})=>{
-    if(localStorage.getItem(worldKey)===null)localStorage.setItem(worldKey,saved);
-  },{worldKey,saved});
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
