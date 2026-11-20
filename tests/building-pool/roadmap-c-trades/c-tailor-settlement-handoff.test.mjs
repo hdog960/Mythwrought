@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createCRiverbendTailorHandoff} from '../../../src/building-pool/roadmap-c-trades/c-tailor-settlement-handoff.mjs';
+test('C7 tailor exports immutable actual footprint, 24 windows, 9 absent-ground columns and four real internal shop doors without enabling runtime',()=>{
+ const p=createCRiverbendTailorHandoff();
+ assert.deepEqual(p,createCRiverbendTailorHandoff());
+ assert.equal(p.id,'r2:tailor:temperate:small:03');
+ assert.equal(p.sourceFingerprint.authoredVoxels,2846);
+ assert.match(p.sourceFingerprint.sha256,/^[0-9a-f]{64}$/);
+ assert.equal(p.actualFoundationColumns,652);
+ assert.equal(p.realGlazedWindows,24);
+ assert.equal(p.dyeSunCourt.absentGroundColumns,9);
+ assert.equal(p.internalPassages.length,4);
+ assert.equal(p.program.length,5);
+ assert.equal(p.streetSocket.width,2);
+ assert.equal(p.streetSocket.clearHeight,3);
+ assert.equal(p.sourceOnly,true);
+ assert.equal(p.gameRegistered,false);
+ assert.equal(p.producerApproval.realWebGL2Images,false);
+ assert.equal(p.villagerCommerceEnabled,false);
+ assert.ok(Object.isFrozen(p));
+});
