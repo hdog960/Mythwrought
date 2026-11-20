@@ -29,6 +29,7 @@ jobs:
           node --test tests/building-pool/roadmap-c-trades/wave1-desert-market.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave2-riverbend-tailor.test.mjs
           node --test tests/building-pool/roadmap-c-trades/c-market-handoff.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/c-tailor-settlement-handoff.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave1-trade-all-pool-d4.test.mjs
       - name: Pinned Chromium install
         run: |
