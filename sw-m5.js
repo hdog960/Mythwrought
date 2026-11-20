@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261120-five-systems-rc11';
-const ASSET_RELEASE='20261120-five-systems-rc11';
+const CACHE_NAME=CACHE_PREFIX+'20261120-creative-m1m6-candidate1';
+const ASSET_RELEASE='20261120-creative-m1m6-candidate1';
 const SOURCE_ASSETS=[
   "./src/mobs/animal-interactions.mjs",
   "./src/mobs/behavior.mjs",
@@ -186,6 +186,12 @@ const SOURCE_ASSETS=[
   "./src/creative-integration/g2-flight.mjs",
   "./src/creative-integration/g2-landing.mjs",
   "./src/creative-integration/g2-streaming.mjs",
+  "./src/creative-integration/creative-catalog.mjs",
+  "./src/creative-integration/creative-inventory.mjs",
+  "./src/creative-integration/creative-thumbnails.mjs",
+  "./src/creative-integration/current-world.mjs",
+  "./src/creative-integration/player-menu.mjs",
+  "./src/creative-integration/world-safety.mjs",
   "./src/creative-integration/registry-snapshot.mjs",
   "./src/creative-integration/registry-validation.mjs",
   "./src/depth-mesh.mjs",
