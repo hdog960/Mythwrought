@@ -1,5 +1,5 @@
 {
-  "version": "20261119-v14",
+  "version": "20261119-v15",
   "assets": {
     "./": "5fd59b19473c8465027531a97472fb2445a56d5c89d9d83a117d159151db058f",
     "./assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
@@ -212,9 +212,9 @@
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "a5977bef2a6b14602348775e41c071534fd583719259803d7e8d10cb80eaf4a7",
-    "./sw-m5.js": "1f1850ee77082002cd59ad40793fd5b6bd50f204ac9bbb68bb62a614b913da16",
+    "./sw-m5.js": "7467ec6f77cc1277f4504cf49b326584097d08726b0f88f28e5a99876b0a2790",
     "./src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
-    "./src/nonblock/candidate-families.mjs": "ad2cce4056048a4b1e55b8d0d0e3eabb69ea54e45243bd00f1034a1a457a05ef",
+    "./src/nonblock/candidate-families.mjs": "7b136f75bd586298dafc844deccbf952029af2b0bb3f0ab10c770b92bae218bc",
     "./src/nonblock/candidate-scene.mjs": "117603583035b7436c8b50eb4b206afaba7cff72d287f5a79a4d6058768549c8",
     "./src/nonblock/physical-fittings.mjs": "c9dc6bcb1d42e21e0fb2a0f304caa9d5053cbbccc06d60fea7769dfd714ee16e",
     "./src/nonblock/stage-offline.mjs": "c74fc6d09a4ef96cf476a9158004f88cc15a6dc1efe0d44943f83c77b5e155a8",
@@ -235,7 +235,7 @@
     "./src/nonblock-environments24/pebble-scatter.mjs": "32520748be51385a6cf8861d1d61b78fb113424cde434f6cbe1789af1fff8870",
     "./src/nonblock-environments24/saltgrass.mjs": "ac729d8acae64c763333163585872b16f12e1c958e2ecf9142e575aa41a7f361",
     "./src/nonblock-environments24/snowgrass.mjs": "519c241b2d0a8eb4e6cfefaffdb0c4d2d963221204630a240e4c46390c2e257e",
-    "./src/nonblock-environments24/tumblebrush.mjs": "f00b26b92c90f95cf5bf6e1159326c6829a0d18c8c4b3206ff29b5efa4cb4682",
+    "./src/nonblock-environments24/tumblebrush.mjs": "7d9188626b7ef2c265803cd787978daafb83d7ae58b8f4382f9e20b04492b804",
     "./src/nonblock-fittings36/fittings-phase1.mjs": "f82a4e6dac058c5381894fc49903ce7447f7ed81bd2f4bec345b3868804fe68a",
     "./src/nonblock-fittings36/world-props.mjs": "8b9299c73ed1195e175c3b685fa667f58a54b4ef93737ffc44956c6af8c768b5",
     "./src/nonblock-scene48/enchanted-fungi.mjs": "3a5fbcf0e50b089b361a344b71515100cd4ce9b3f89a47d786b4c1a14998d87d",

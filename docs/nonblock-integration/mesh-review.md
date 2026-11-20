@@ -127,3 +127,7 @@ The desert bloom has a green anchored stalk, folded orange petals and a gold cen
 | Frost fern | [View](gallery/biome-flora-refinement/before/snow.png) | [View](gallery/biome-flora-refinement/after/snow.png) | 54 → 90 |
 
 The two samples use 9,936 packed vertex bytes before and 14,472 after. Native tests check all four variants, every face pigment, the original instance IDs, finite nondegenerate geometry and the source bounds. Long-range readability remains open for the thinner fern tips.
+
+## Tumblebrush rebuild
+
+The old spokes now form rooted twigs with curved sides and cross-branches. The matched desert view shows space between the branches and a larger silhouette against sand. Both versions used the same natural mount, standing eye, aim and variant, and both removals persisted after a new page. The sample grows from 32 to 128 triangles, or 3,456 to 13,824 packed vertex bytes. Four variants preserve the original instance IDs. The result retains a faceted, open silhouette at the review distance. [Before capture](gallery/tumblebrush-refinement/before/desert.png) · [After capture](gallery/tumblebrush-refinement/after/desert.png) · [Replay manifest](gallery/tumblebrush-refinement/after/manifest.json)

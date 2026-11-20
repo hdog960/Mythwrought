@@ -104,7 +104,7 @@ export const candidateFamilies = new Map([
   ['nonblock:d:frost-fern',environmentFamily(makeFrostFern,[.28,.45,.41],[.48,.66,.61],[.76,.87,.86])],
   ['nonblock:d:saltgrass',environmentFamily(makeSaltgrass,[.61,.64,.43])],
   ['nonblock:d:snowgrass',environmentFamily(makeSnowgrass,[.73,.79,.65])],
-  ['nonblock:d:tumblebrush',environmentFamily(makeTumblebrush,[.60,.44,.30])],
+  ['nonblock:d:tumblebrush',environmentFamily(makeTumblebrush,[.44,.31,.22],[.58,.43,.29],[.79,.60,.37])],
   ['nonblock:e:pebble-scatter',environmentFamily(makePebbleScatter,[.49,.46,.41])],
   ['nonblock:e:cave-rubble-cluster',environmentFamily(makeCaveRubbleCluster,[.49,.49,.53])],
   ['nonblock:e:giant-stalagmite-spire',caveFamily('nonblock:e:giant-stalagmite-spire','ground')],

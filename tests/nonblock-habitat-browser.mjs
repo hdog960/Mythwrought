@@ -15,9 +15,13 @@ import {planStagedHabitat} from '../src/nonblock/staged-habitats.mjs';
 const origin=process.env.NONBLOCK_HABITAT_ORIGIN||'http://127.0.0.1:4173';
 const comparison=process.env.NONBLOCK_HABITAT_COMPARISON;
 if(comparison&&!['before','after'].includes(comparison))throw Error('Invalid habitat comparison label');
-const directory=comparison?'artifacts/nonblock-biome-flora-'+comparison:'artifacts/nonblock-habitat';
+const brushReview=comparison&&process.env.NONBLOCK_HABITAT_SAMPLE==='tumblebrush';
+const directory=comparison?'artifacts/nonblock-'+(brushReview?'tumblebrush':'biome-flora')+'-'+comparison:
+  'artifacts/nonblock-habitat';
 const seed=179;
-const requested=comparison?[
+const requested=brushReview?[
+  {habitat:'desert',column:[512,0],sceneId:'nonblock:d:tumblebrush',variant:1}
+]:comparison?[
   {habitat:'desert',column:[512,0],sceneId:'nonblock:d:desert-bloom',variant:2},
   {habitat:'snow',column:[0,512],sceneId:'nonblock:d:frost-fern',variant:1}
 ]:[
@@ -47,7 +51,7 @@ profileStorage.set(SELECTED_SEED_KEY,String(seed));
 profileStorage.set(RENDER_PREF,'economy');
 const fixture=[...profileStorage];
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
-const comparisonViews=[
+const comparisonViews=brushReview?[{pose:[512.5,-.5],point:[512.41583252,9.30278524,.53196516]}]:[
   {pose:[512.5,-.5],point:[512.40311686,9.27933311,.52881004]},
   {pose:[.5,511.5],point:[.67367985,10.35231654,512.71217855]}
 ];
@@ -154,7 +158,8 @@ const source=['src/main.mjs','src/nonblock/staged-habitats.mjs','src/nonblock/ca
   'src/nonblock/candidate-families.mjs','src/manual-biomes/profile-world.mjs',
   'src/manual-biomes/desert-m3.mjs','src/manual-biomes/three-regions-m4.mjs','src/render-budget.mjs',
   'tests/nonblock-habitat-browser.mjs'];
-if(comparison)source.push('src/nonblock-environments24/desert-bloom.mjs','src/nonblock-environments24/frost-fern.mjs');
+if(brushReview)source.push('src/nonblock-environments24/tumblebrush.mjs');
+else if(comparison)source.push('src/nonblock-environments24/desert-bloom.mjs','src/nonblock-environments24/frost-fern.mjs');
 const sourceSha256=Object.fromEntries(await Promise.all(source.map(async file=>[file,digest(await readFile(file))])));
 await writeFile(directory+'/manifest.json',JSON.stringify({
   seed,generator,renderPreset:'economy',sourceSha256,captures,nonemptySchema1AndProfileBytesUnchanged:true
