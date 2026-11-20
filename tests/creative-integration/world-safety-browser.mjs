@@ -105,8 +105,10 @@ try{
     assert.equal(await page.evaluate(async()=>
       (await import('./src/mirror.mjs')).getMirrorCopy(179).then(x=>x.raw)),
       original,'Rejected mirror restore corrupted the archived verified snapshot');
-    const downloadPromise=page.waitForEvent('download',{timeout:20000});
     await page.locator('.player-safety-archive').click();
+    await page.locator('.player-safety-download').waitFor({state:'visible',timeout:15000});
+    const downloadPromise=page.waitForEvent('download',{timeout:20000});
+    await page.locator('.player-safety-download').click();
     const download=await downloadPromise;
     const archive=inspectReadOnlyGameArchive(readFileSync(await download.path(),'utf8'));
     const records=new Map(archive.entries);
