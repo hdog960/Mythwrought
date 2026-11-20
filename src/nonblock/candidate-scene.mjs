@@ -183,10 +183,9 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
   const issued = new WeakSet();
   let uncertain = false;
   let epoch = 0;
-  function visible() {
-    return objects.filter(object=>!removed.has(object.instanceKey) && canAttach(object,blockAt,editedAt));
-  }
-  function pick(origin,direction,max=6) {
+  const mounted=object=>!removed.has(object.instanceKey)&&canAttach(object,blockAt,editedAt);
+  function visible(){return objects.filter(mounted);}
+  function pickFrom(origin,direction,max,checkedObjects=null) {
     if (uncertain || !Array.isArray(origin) || origin.length!==3 ||
         !Array.isArray(direction) || direction.length!==3 ||
         ![...origin,...direction,max].every(Number.isFinite) || max<=0 || max>6) return null;
@@ -196,8 +195,8 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
     const voxel = voxelPick(origin,unit,max);
     let best = null;
     let limit = voxel ? voxel.distance-1e-8 : max;
-    for (const o of visible()) {
-      if (!intersectsBounds(o,origin,unit,limit)) continue;
+    for (const o of checkedObjects??objects) {
+      if (!intersectsBounds(o,origin,unit,limit)||(!checkedObjects&&!mounted(o))) continue;
       for (let i=0;i<o.positions.length;i+=9) {
         const distance=triangleDistance(o.positions,i,origin,unit);
         if (distance<=limit && (!best || distance<limit || o.instanceKey<best.instanceKey)) {
@@ -210,6 +209,15 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
     Object.freeze(best);
     issued.add(best);
     return best;
+  }
+  function pick(origin,direction,max=6){return pickFrom(origin,direction,max);}
+  function frame(origin,direction){
+    const [x,y,z]=origin;
+    const nearby=objects.filter(object=>{
+      const [a,b,c]=object.anchor;
+      return (a-x)**2+(b-y)**2+(c-z)**2<32**2&&mounted(object);
+    });
+    return {objects:nearby,hit:direction?pickFrom(origin,direction,6,nearby):null};
   }
   function breakHit(hit,origin,direction) {
     if (!issued.has(hit) || hit.epoch!==epoch || recovered || uncertain || removed.size>=maxTombstones) return false;
@@ -255,7 +263,7 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
       x>=o.min[0]-.20&&x<=o.max[0]+.20&&z>=o.min[2]-.28&&z<=o.max[2]+.28&&
       feet+1.10>o.min[1]&&feet<o.max[1]+.18&&canAttach(o,blockAt,editedAt));
   }
-  return Object.freeze({visible,pick,breakHit,bodyIntersects,climbableAt,recovered});
+  return Object.freeze({visible,pick,frame,breakHit,bodyIntersects,climbableAt,recovered});
 }
 
 export function candidateVertices(objects) {

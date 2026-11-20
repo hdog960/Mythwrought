@@ -146,9 +146,9 @@ function start(nonblockStage=null){
   function drawStagedScene(){
     const origin=eye();
     const scene=stagedScene();
-    canvas.dataset.nonblockSaveState=scene?(scene.recovered?'recovered':'ready'):'unavailable';
-    const objects=scene?.visible().filter(({anchor})=>
-      Math.hypot(anchor[0]-origin[0],anchor[1]-origin[1],anchor[2]-origin[2])<32)??[];
+    const saveState=scene?(scene.recovered?'recovered':'ready'):'unavailable';
+    if(canvas.dataset.nonblockSaveState!==saveState)canvas.dataset.nonblockSaveState=saveState;
+    const {objects,hit}=scene?.frame(origin,help.hidden?facing():null)??{objects:[],hit:null};
     const key=objects.map(o=>o.instanceKey).join('|');
     if(key!==nonblockDrawKey){
       const vertices=nonblockStage.module.candidateVertices(objects);
@@ -185,7 +185,6 @@ function start(nonblockStage=null){
     canvas.dataset.nonblockInstances=String(objects.length);
     canvas.dataset.nonblockGpuBytes=String(nonblockVertexCount*36);
     canvas.dataset.nonblockDrawCalls=String(Number(Boolean(nonblockBuffer)));
-    const hit=help.hidden?scene?.pick(origin,facing()):null;
     canvas.dataset.nonblockTarget=hit?.instanceKey??'';
     return hit;
   }

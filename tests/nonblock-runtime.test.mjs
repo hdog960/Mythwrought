@@ -217,3 +217,35 @@ test('a legacy primary without a backup remains writable and gains a verified ba
   assert.equal(scene.breakHit(scene.pick(origin,facing),origin,facing),true);
   assert.equal(storage.getItem(primary),storage.getItem(backup));
 });
+
+test('a draw frame shares mount checks and avoids querying terrain outside draw distance',()=>{
+  const far={...flower,anchor:[60,1,0]};
+  const lookups=[];
+  const storage=new MapStorage();
+  const scene=createCandidateScene(seed,'legacy',[flower,neighbor,far],{
+    storage,blockAt:(...cell)=>{lookups.push(cell);return ground(...cell);},voxelPick:()=>null
+  });
+  const frame=scene.frame(origin,facing);
+  assert.deepEqual(frame.objects.map(object=>object.sceneId),[flower.sceneId,neighbor.sceneId]);
+  assert.equal(frame.hit?.instanceKey,frame.objects[0].instanceKey);
+  assert.equal(lookups.filter(([x,y,z])=>x===0&&y===0&&z===0).length,1);
+  assert.ok(lookups.every(([x])=>x<32));
+
+  lookups.length=0;
+  assert.equal(scene.pick(origin,facing)?.instanceKey,frame.hit.instanceKey);
+  assert.ok(lookups.every(([x])=>x<2));
+  assert.equal(scene.breakHit(frame.hit,origin,facing),true);
+  assert.deepEqual(scene.frame(origin,facing).objects.map(object=>object.sceneId),[neighbor.sceneId]);
+});
+
+test('render eligibility and the claimed pick agree when a mount disappears before the edit',()=>{
+  let kept=true;
+  const scene=createCandidateScene(...args,{storage:new MapStorage(),
+    blockAt:(...cell)=>kept&&ground(...cell),voxelPick:()=>null});
+  const frame=scene.frame(origin,facing);
+  assert.equal(frame.hit?.sceneId,flower.sceneId);
+  assert.equal(scene.frame(origin).hit,null);
+  kept=false;
+  assert.equal(scene.breakHit(frame.hit,origin,facing),false);
+  assert.deepEqual(scene.frame(origin,facing),{objects:[],hit:null});
+});
