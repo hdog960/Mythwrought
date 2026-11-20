@@ -144,7 +144,7 @@ function start(){
   }
   let pack3=createPack3LiveBridge(world,localStorage);
   // Only a previously selected immutable v5 world may opt into M5 PWA caching.
-  if(world.base instanceof FourRegionWorld&&
+  if(!mustChooseCurrentWorld&&world.base instanceof FourRegionWorld&&
       [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR].includes(
         world.base.generationProfile.generator))
     void ensureM5OfflineCache();
