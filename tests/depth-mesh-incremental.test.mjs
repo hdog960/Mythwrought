@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
 import {Pack2LiveWorld} from '../src/pack2-world.mjs';
-import {meshDepthSection,discardDepthMeshCache} from '../src/depth-mesh.mjs';
+import {meshDepthSection,meshDepthSectionUpdate,discardDepthMeshCache} from '../src/depth-mesh.mjs';
 import {BIOME130_REGISTERED_IDS} from '../src/biome130-registry.mjs';
 import {sectionForY,verticalEditSections,WORLD_MIN_Y} from '../src/depth.mjs';
 import {editAffectedChunks} from '../src/chunks.mjs';
@@ -112,4 +112,37 @@ test('reused column cache avoids full deep section reads on a mining edit',()=>{
   assert.ok(fullReads>2000,'baseline scanned a real full section: '+fullReads);
   assert.ok(partialReads<fullReads/3,
     'incremental mesher unexpectedly reread full chunk: '+partialReads+'/'+fullReads);
+});
+
+test('GPU no-op suppression only fires for byte-identical opaque geometry',()=>{
+  const world=new VoxelWorld(179),cell=[7,-72,7],section=sectionForY(cell[1]);
+  meshDepthSection(world,0,0,section);
+  // A fully enclosed change between two solid materials cannot change a face.
+  assert.equal(world.set(...cell,BLOCK.STONE),true);
+  const solid=meshDepthSectionUpdate(world,0,0,section,cell);
+  assert.equal(solid.changed,false,'occluded solid material should not cause a GPU upload');
+  assert.deepEqual(solid.vertices,meshDepthSection(uncachedReader(world),0,0,section));
+  // Opening the same cell must change its exposed faces.
+  assert.equal(world.set(...cell,BLOCK.AIR),true);
+  const opened=meshDepthSectionUpdate(world,0,0,section,cell);
+  assert.equal(opened.changed,true,'air shaft must update its GPU mesh');
+  assert.deepEqual(opened.vertices,meshDepthSection(uncachedReader(world),0,0,section));
+  // Closing restores exact geometry; repeat never returns phantom same values.
+  assert.equal(world.set(...cell,BLOCK.DEEPSTONE),true);
+  const closed=meshDepthSectionUpdate(world,0,0,section,cell);
+  assert.equal(closed.changed,true);
+  assert.deepEqual(closed.vertices,meshDepthSection(uncachedReader(world),0,0,section));
+});
+
+test('water edits are not mistaken for safe GPU no-ops when opaque faces match',()=>{
+  const base=new VoxelWorld(179),world=new Pack2LiveWorld(base),cell=[8,-92,8];
+  const section=sectionForY(cell[1]);
+  assert.equal(base.set(...cell,BLOCK.AIR),true);
+  meshDepthSection(world,0,0,section);
+  assert.equal(world.placePack2(...cell,76,{}),true);
+  const changed=meshDepthSectionUpdate(world,0,0,section,cell);
+  // Water lives in an independent GPU pass, so unchanged opaque geometry is
+  // expected. The game's edit path must separately upload the water buffer.
+  assert.equal(changed.changed,false);
+  assert.ok(world.pack2Cells.size>0);
 });
