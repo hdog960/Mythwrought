@@ -31,6 +31,12 @@ const BIOME_GROUND_COLORS=new Map([
   const {palette}=biome130Block(id);
   return [id,palette[0].map((_,index)=>palette.reduce((sum,color)=>sum+color[index],0)/palette.length)];
 }));
+function terrainArtMaterial(id){
+  if(id<=264)return 40;
+  if(id<=279)return 41;
+  if(id>=400&&id<=402||id>=302&&id<=307)return 42;
+  return 43;
+}
 const FACE = [
   {d:[1,0,0],q:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],lit:.77},
   {d:[-1,0,0],q:[[0,0,1],[0,1,1],[0,1,0],[0,0,0]],lit:.73},
@@ -291,7 +297,8 @@ export function meshChunk(world,cx,cz){
                     py=surface.positions[i+1],pz=surface.positions[i+2];
               const shade=lit*(groundColor?groundTint(x+px,z+pz):1);
               appendVertex(x+px,y+py,z+pz,clamp(color[0]*shade,0,1),clamp(color[1]*shade,0,1),clamp(color[2]*shade,0,1),
-                nx?pz:px,ny?pz:py,0);
+                (nx?pz:px)+(groundColor?(nx?z:x):0),(ny?pz:py)+(groundColor?(ny?z:y):0),
+                groundColor?terrainArtMaterial(id):0);
             }
           }
           continue;
@@ -316,7 +323,11 @@ export function meshChunk(world,cx,cz){
             const p=face.q[k],uv=FACE_UV[k];
             if(newGround){
               const shade=face.lit*groundTint(x+p[0],z+p[2]);
-              appendVertex(x+p[0],y+p[1],z+p[2],color[0]*shade,color[1]*shade,color[2]*shade,uv[0],uv[1],0);
+              const terrain=id<=405,nx=face.d[0],ny=face.d[1];
+              const u=terrain?(nx?z+p[2]:x+p[0]):uv[0];
+              const v=terrain?(ny?z+p[2]:y+p[1]):uv[1];
+              appendVertex(x+p[0],y+p[1],z+p[2],color[0]*shade,color[1]*shade,color[2]*shade,
+                u,v,terrain?terrainArtMaterial(id):id===408?4:18);
             }else
               appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
           }

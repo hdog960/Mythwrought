@@ -4,13 +4,13 @@ import {biome130Color} from '../src/biome130-registry.mjs';
 import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 import {meshChunk,worldKey} from '../src/voxel.mjs';
 
-function surface(id,{profiled=true,edited=false}={}){
+function surface(id,{profiled=true,edited=false,cx=0}={}){
   const world={
     seed:179,generationProfile:profiled?{generator:M6_BALANCED_GENERATOR}:null,
     edits:new Map(edited?[[worldKey(0,8,0),id]]:[]),
     get:(x,y,z)=>y===8&&x>=0&&x<=17&&z>=0&&z<3?id:0
   };
-  return meshChunk(world,0,0);
+  return meshChunk(world,cx,0);
 }
 
 function colorsAt(mesh,x,y,z){
@@ -27,6 +27,18 @@ test('natural profiled desert faces share color at an interior grid corner',()=>
   assert.equal(colorsAt(mesh,1,9,1).size,1);
   assert.notDeepEqual(colorsAt(mesh,1,9,1),colorsAt(mesh,12,9,1),
     'continuous terrain should still have spatial variation');
+});
+
+test('terrain texture coordinates remain in world space at adjacent chunk edges',()=>{
+  for(const cx of [0,1]){
+    const mesh=surface(256,{cx});
+    const coordinates=[];
+    for(let i=0;i<mesh.length;i+=9)
+      if(mesh[i]===16&&mesh[i+1]===9&&mesh[i+2]===1)
+        coordinates.push([...mesh.slice(i+6,i+9)]);
+    assert.ok(coordinates.length>0);
+    assert.deepEqual(coordinates,[...coordinates].fill([16,1,40]));
+  }
 });
 
 test('legacy and player-placed biome materials keep their authored palette',()=>{

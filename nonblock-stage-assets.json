@@ -1,5 +1,5 @@
 {
-  "version": "20261120-v27",
+  "version": "20261120-v28",
   "assets": {
     "./src/mobs/animal-interactions.mjs": "e04f6692fc93ef6c44711cb10eafab261ceb7488383e55bf95067de724f99113",
     "./src/mobs/behavior.mjs": "4a65b4ca044a47e70a164929e2ce4552f0d11f811a61c3da5607de87ef1a7bfb",
@@ -243,7 +243,7 @@
     "./src/south-gallery-cave.mjs": "8a5504f4ecabc3485c5b5a75dc0675492fcc7903d936310f138dfd1d3a540146",
     "./src/stone-rotunda-v2.mjs": "68bd508bbdbbff96881db7798410072a7e7db07dc25d4322ef05fbdbd05b70ce",
     "./src/stone-rotunda.mjs": "53b4c8340e585ae7009a318e9880bb4d08799b61c14a09006a867fc2f5fcd6d2",
-    "./src/storybook-materials.mjs": "9b6ebb3d34489941eac5ff01a7e57b487b0142792e61e196f004482d3bd697ff",
+    "./src/storybook-materials.mjs": "01fd051238d835449b4b5ea5f0f45c2acb8343d2ff245da978d9ad803ab9b416",
     "./src/storybook-roof.mjs": "13ce602d811db977325fee2446cad9398a241712374dfdbfc176e67f2fad351a",
     "./src/surface-regions/regions.mjs": "60bd97e67d19546d28766798c680f3488a4b9f6f30bc8b17c8ab89ff3fca3f3a",
     "./src/vault.mjs": "8055c11411800f54d74a0b46e3604c7cae8263705bbc096ee41995ed439d771d",
@@ -260,7 +260,7 @@
     "./src/voxel-shape-interactions.mjs": "46049b127f4496ac72b780dc196c72dd581c25e79bd0462df5fcd475425962c9",
     "./src/voxel-trees.mjs": "bfd15de08ff5c7768f9985ab1564827a472ec5dfde48022ec7aca88f3bae4549",
     "./src/voxel-watchtower.mjs": "b157c18c15a66be513013afde4701d3d529027337da660f2b7156e6a1e57008a",
-    "./src/voxel.mjs": "3794712ee86e4964627d7a12748e23be81db57cf1bed48c8da9dafc067d40622",
+    "./src/voxel.mjs": "1a1c124ce037c4b1ad31e5599e1a931714af94ee59d756a98b8ee9b7c0028af1",
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "718c946759e7ea30206bcf94b825a540a5a8ada2b8325ce7aee98bb776814dfb",
@@ -302,6 +302,6 @@
     "./src/nonblock-scene48/undergrowth-phase1.mjs": "96607a48f2ed3146d3d0bc4b94dbf1fc81d4c6206a37a5c962854493d6e7b61f",
     "./src/nonblock-scene48/woodland-sapling.mjs": "6a3e8a61d67908261107a22e085082d4887a75decbd819a8ceb769a6256593ed",
     "./src/nonblock-scene48/woodland-shrub.mjs": "2419aed3138df3256e302b40f068079f6c89e51cf58d8a73b2df4fade2a803f5",
-    "./sw-nonblock-stage.js": "789ec237e55cefb502f9937798de0f5d02d5cc3d1dd7a744207ed89949101bc9"
+    "./sw-nonblock-stage.js": "af28a3045bf4c3df70cee40d2253c8a16afa14b5689cb857bee5e5d845e753a0"
   }
 }
