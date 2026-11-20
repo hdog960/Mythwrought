@@ -1,7 +1,8 @@
 // G2A pure flight math. Not connected to the game loop or native controls.
 // All readiness and physical collision authority must come from production hosts.
 import {createG2PrefetchState,planG2Prefetch,G2_MAX_LOOKAHEAD} from './g2-streaming.mjs';
-export const G2_FLIGHT_SPEEDS=Object.freeze({precision:1.4,normal:4,fast:8,travel:15});
+// Only the current creator-approved Creative travel speed is valid.
+export const G2_FLIGHT_SPEEDS=Object.freeze({travel:15});
 export const G2_MAX_FRAME_SECONDS=0.05;
 export const G2_MAX_SEGMENT_LENGTH=0.25;
 const num=n=>typeof n==='number'&&Number.isFinite(n);
@@ -18,7 +19,7 @@ export function createG2FlightState({position,heightBounds,worldToken}={}){
      typeof worldToken!=='string'||!worldToken.length)fail('verified position, feet bounds and world token required');
   return Object.freeze({mode:'off',position:freezePos(position),
     heightBounds:Object.freeze({minFeet:heightBounds.minFeet,maxFeet:heightBounds.maxFeet}),
-    worldToken,profile:'normal',yaw:0,pitch:0,blocked:false,reason:'Flight off',
+    worldToken,profile:'travel',yaw:0,pitch:0,blocked:false,reason:'Flight off',
     prefetch:createG2PrefetchState(worldToken)});
 }
 export function armG2Flight(state,{isRegionReady,isBodyClear,enabled=false}={}){
