@@ -1,0 +1,98 @@
+// Genuine current-generation safety gate acceptance on the actual WebGL2 app.
+// Original schema-1 bytes are authored by its real VoxelWorld serializer,
+// NOT a synthetic replacement game. No production writes or deployments.
+import assert from 'node:assert/strict';
+import {mkdirSync,readFileSync} from 'node:fs';
+import {chromium} from 'playwright';
+import {VoxelWorld,BLOCK} from '../../src/voxel.mjs';
+import {M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
+import {inspectReadOnlyGameArchive} from '../../src/creative-integration/world-safety.mjs';
+
+const origin=process.env.CREATIVE_BROWSER_ORIGIN||'http://127.0.0.1:4174';
+const legacy=new VoxelWorld(179);
+assert.equal(legacy.set(2,15,2,BLOCK.CRYSTAL),true);
+const original=JSON.stringify(legacy.save()),seed=179;
+mkdirSync('artifacts',{recursive:true});
+const browser=await chromium.launch({headless:true,args:[
+  '--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
+  '--enable-unsafe-swiftshader','--disable-dev-shm-usage'
+]});
+try{
+  const context=await browser.newContext({viewport:{width:956,height:440},
+    hasTouch:true,isMobile:true,deviceScaleFactor:1,acceptDownloads:true});
+  try{
+    const page=await context.newPage(),errors=[];
+    page.on('pageerror',e=>errors.push(e.message));
+    await page.goto(origin+'/',{waitUntil:'domcontentloaded',timeout:30000});
+    await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+    await page.evaluate(raw=>{
+      localStorage.setItem('mythwrought-v002-selected-seed','179');
+      localStorage.setItem('mythwrought-v002-world-179',raw);
+      localStorage.setItem('mythwrought-v002-world-179-backup-v009','unaltered old backup');
+    },original);
+    await page.reload({waitUntil:'domcontentloaded',timeout:30000});
+    await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+    assert.equal(await page.locator('#help').isVisible(),true,
+      'Legacy generator cannot enter live Creative gameplay');
+    await page.screenshot({path:'artifacts/mythwrought-legacy-readonly-956x440.png'});
+    await page.getByRole('button',{name:'RETURN TO GAME'}).click();
+    assert.equal(await page.locator('#help').isVisible(),true,
+      'Read-only gate must not be dismissed to render obsolete terrain');
+    await page.locator('.player-menu-safety-link').click();
+    assert.equal(await page.locator('#playerSafety').isVisible(),true);
+    assert.equal(await page.locator('.player-safety-actions').isVisible(),false,
+      'Old-world protection must block save/export/import on the read-only preview');
+    const downloadPromise=page.waitForEvent('download',{timeout:20000});
+    await page.locator('.player-safety-archive').click();
+    const download=await downloadPromise;
+    const archive=inspectReadOnlyGameArchive(readFileSync(await download.path(),'utf8'));
+    const records=new Map(archive.entries);
+    assert.equal(records.get('mythwrought-v002-world-179'),original,
+      'The complete immutable original schema-1 save was absent from the recovery archive');
+    assert.equal(records.get('mythwrought-v002-world-179-backup-v009'),
+      'unaltered old backup','Old verified backup bytes were not preserved');
+    assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179')),
+      original,'Recovery archive changed the original world');
+    await page.locator('.player-safety-back').click();
+    page.once('dialog',dialog=>dialog.accept());
+    await page.getByRole('button',{name:/NEW WORLD/}).click();
+    await page.locator('#help').waitFor({state:'hidden',timeout:30000});
+    const current=await page.evaluate(()=>{
+      const seed=localStorage.getItem('mythwrought-v002-selected-seed');
+      return {seed,world:localStorage.getItem('mythwrought-v002-world-'+seed),
+        preserved:localStorage.getItem('mythwrought-v002-world-179'),
+        profile:window.__mythwroughtTest?.fourBiomeProfile?.()?.generator};
+    });
+    assert.notEqual(current.seed,'179','Fresh current world reused the archived legacy seed');
+    assert.equal(current.preserved,original,'New V6 world overwrote original legacy data');
+    assert.ok(current.world,'Fresh current V6 world lacks a verified schema-1 save');
+    assert.equal(current.profile,M6_BALANCED_GENERATOR,
+      'The newly entered world does not run the accepted current generator');
+
+    // File imports use real original file-change handlers, not fabricated
+    // methods. Old schema-1 backups must NOT replace this current world.
+    await page.locator('#menu').click();
+    await page.locator('.player-menu-safety-link').click();
+    await page.locator('#importFile').setInputFiles({
+      name:'archived-legacy-world.json',mimeType:'application/json',
+      buffer:Buffer.from(original)
+    });
+    await page.waitForFunction(()=>document.getElementById('status')?.textContent
+      .includes('Import rejected'),undefined,{timeout:10000});
+    const unchanged=await page.evaluate(()=>{
+      const seed=localStorage.getItem('mythwrought-v002-selected-seed');
+      return {seed,current:localStorage.getItem('mythwrought-v002-world-'+seed),
+        legacy:localStorage.getItem('mythwrought-v002-world-179')};
+    });
+    assert.equal(unchanged.seed,current.seed,'Legacy import changed active world identity');
+    assert.equal(unchanged.current,current.world,'Legacy import overwrote current world');
+    assert.equal(unchanged.legacy,original,'Legacy import rewrote the archived source');
+    await page.reload({waitUntil:'domcontentloaded',timeout:30000});
+    await page.waitForFunction(generator=>window.__mythwroughtTest?.fourBiomeProfile?.()?.generator===generator,
+      M6_BALANCED_GENERATOR,{timeout:40000});
+    assert.equal(await page.locator('#help').isVisible(),false,
+      'Installed current V6 world did not resume normally on same-install reload');
+    assert.deepEqual(errors,[],'Real-world rendering or safety gate raised browser exceptions');
+    console.log('PASS current-generation startup / old-world archive / rejected legacy import / same-install reload');
+  }finally{await context.close();}
+}finally{await browser.close();}
