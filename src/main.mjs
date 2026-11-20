@@ -3313,16 +3313,10 @@ function start(){
     },
     onImport:()=>document.getElementById('import').click(),
     onArchive:()=>{
-      const archived=buildReadOnlyGameArchive(localStorage);
-      const url=URL.createObjectURL(new Blob([archived.text],{type:'application/json'}));
-      try{
-        const link=document.createElement('a');
-        link.href=url;link.download=archived.filename;
-        document.body.append(link);link.click();link.remove();
-        playerSettings.showStatus('Read-only localStorage archive prepared: '+archived.count+' game-owned records');
-      }finally{
-        setTimeout(()=>URL.revokeObjectURL(url),5000);
-      }
+      // Archive the exact verified bytes synchronously, but DO NOT trigger a
+      // programmatic download. iPhone Safari needs a separate tapped link,
+      // which the dedicated safety drawer presents after preparation.
+      return buildReadOnlyGameArchive(localStorage);
     },
     onCheckUpdate:()=>document.getElementById('checkGameUpdate').click(),
     onClose:()=>document.getElementById('closeHelp').click()
