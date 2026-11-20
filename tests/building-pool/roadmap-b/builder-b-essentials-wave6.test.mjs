@@ -36,7 +36,7 @@ function d4(b,flip,turn){
 }
 const iou=(a,b)=>{let n=0;for(const v of a)if(b.has(v))n++;return n/(a.size+b.size-n||1)};
 test('Tidehollow exact new temperate harbor office is B-exclusive and protected D 92 unchanged',()=>{
- const owner=getBuilderBServiceOwnership(),b=buildSunshardSplitWellBathhouse(),all=[
+ const owner=getBuilderBServiceOwnership(),b=buildTidehollowCrosswharfHarborOffice(),all=[
   buildBriarfordSwitchwingBarn(),buildAlderglassTrellisConservatory(),
   buildSedgewatchTidehookFishingLodge(),buildMeadowstepSplitAisleStables(),buildSunshardSplitWellBathhouse(),b
  ];
@@ -48,7 +48,7 @@ test('Tidehollow exact new temperate harbor office is B-exclusive and protected 
  assert.equal(b.worldPlacement,false);
 });
 test('Original seven-room temperate harbor office has fully connected authentic XY/Z circulation, sky-open 30-column court, backed roof and two-high portals',()=>{
- const b=buildSunshardSplitWellBathhouse(),vox=allOccupied(b);
+ const b=buildTidehollowCrosswharfHarborOffice(),vox=allOccupied(b);
  assert.equal(b.rooms.length,7);assert.equal(b.portals.length,9);
  assert.ok(b.walkable.length>1000);
  for(let x=21;x<=25;x++)for(let z=19;z<=24;z++)
@@ -56,14 +56,14 @@ test('Original seven-room temperate harbor office has fully connected authentic 
  for(const p of b.placements.filter(p=>p.role==='roof'))
   assert.ok(vox.has(K([p.at[0],p.at[1]-1,p.at[2]])),'unsupported original desert bath roof');
  for(const d of b.portals)
-  assert.ok(!vox.has(K(d.at))&&!vox.has(K([d.at[0],d.at[1]+1,d.at[2]])),'physically blocked bathhouse portal');
- assert.equal(structuralFingerprint(b),structuralFingerprint(buildSunshardSplitWellBathhouse()));
+  assert.ok(!vox.has(K(d.at))&&!vox.has(K([d.at[0],d.at[1]+1,d.at[2]])),'physically blocked harbor-office portal');
+ assert.equal(structuralFingerprint(b),structuralFingerprint(buildTidehollowCrosswharfHarborOffice()));
 });
 test('Strict 8-way same-category D4 below .85 against every prior accepted 1B original', {timeout:240000},async()=>{
- const old=await historical(),b=buildSunshardSplitWellBathhouse();
+ const old=await historical(),b=buildTidehollowCrosswharfHarborOffice();
  assert.equal(old.length,228);
  const category=old.filter(x=>x.category===b.category);
- assert.ok(category.length>=20,'historical bathhouses unexpectedly absent');
+ assert.ok(category.length>=20,'historical harbor offices unexpectedly absent');
  const original=d4(b,false,0);
  let max=0,near=null;
  for(const source of category){
