@@ -10,7 +10,7 @@ const shell=()=>'<meta data-mw-release="'+GAME_RELEASE+'">'+
   '<script src="./src/main.mjs?mw-release='+GAME_RELEASE+'"></script>';
 
 test('current release is explicit and update navigation stays on same app URL',()=>{
-  assert.equal(GAME_RELEASE,'20261120-five-systems-rc11');
+  assert.equal(GAME_RELEASE,'20261120-unified-environment-rc1');
   const old='https://example.test/Mythwrought/?world=179#game';
   const next=new URL(versionedGameUrl(old));
   assert.equal(next.origin,'https://example.test');

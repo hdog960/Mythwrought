@@ -10,8 +10,8 @@ import {chromium} from 'playwright';
 const BASE_REC_LESS='474f6c2439865454f80b995af31120c024cdbc2d';
 const BASE_CACHE_FIRST='edc6ceae728840bfc361cd8a6437e8a1fa674c42';
 const OLD_CACHE='mythwrought-m5-shell-20261118-v5-recorder';
-const NEW_CACHE='mythwrought-m5-shell-20261120-five-systems-rc11';
-const RELEASE='20261120-five-systems-rc11';
+const NEW_CACHE='mythwrought-m5-shell-20261120-unified-environment-rc1';
+const RELEASE='20261120-unified-environment-rc1';
 const oldFiles={
  'index.html':execFileSync('git',['show',BASE_REC_LESS+':index.html'],{encoding:'utf8'}),
  'src/main.mjs':execFileSync('git',['show',BASE_REC_LESS+':src/main.mjs'],{encoding:'utf8'}),
@@ -160,7 +160,7 @@ try{
       Boolean((await navigator.serviceWorker.getRegistration('/'))?.active);
   },{cacheName:NEW_CACHE,release:RELEASE},{timeout:180000});
   const installed=await page.evaluate(async()=>{
-    const cache=await caches.open('mythwrought-m5-shell-20261120-five-systems-rc11');
+    const cache=await caches.open('mythwrought-m5-shell-20261120-unified-environment-rc1');
     const index=new URL('/index.html',location.href).href;
     const response=await cache.match(index);
     const rootResponse=await cache.match(new URL('/',location.href).href);

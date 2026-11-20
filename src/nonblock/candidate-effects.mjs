@@ -45,6 +45,35 @@ export function readCandidateEffectLayout(url) {
   return JSON.parse(value);
 }
 
+const ambientByFamily=new Map([
+  ['scene48:single-wildflower',['pollen']],
+  ['scene48:buttercup-bunch',['pollen']],
+  ['scene48:enchanted-flower',['wisps']],
+  ['scene48:lantern-mushroom',['magic-dust']],
+  ['scene48:glowing-vine',['magic-dust']],
+  ['scene48:forest-moss-mat',['mist']],
+  ['nonblock:d:frost-fern',['snow-gust']],
+  ['nonblock:d:snowgrass',['snow-gust']],
+  ['nonblock:e:hanging-stalactite',['cave-drip']],
+  ['nonblock:e:clustered-dripstone',['cave-drip']],
+  ['scene36:freestanding-torch',['flame','flicker']],
+  ['scene36:campfire-fuel-stack',['flame','embers','smoke']],
+  ['scene36:brazier',['flame','embers','smoke']]
+]);
+
+export function prepareEnvironmentalEffects(objects){
+  const layout=[];
+  for(const {sceneId,anchor,instanceKey} of objects){
+    for(const effect of ambientByFamily.get(sceneId)??[]){
+      const height=sceneId==='scene36:freestanding-torch'||sceneId==='scene36:brazier'?1:0;
+      layout.push({sceneId:'scene48:'+effect,anchor:[anchor[0],anchor[1]+height,anchor[2]],
+        parentKey:instanceKey});
+      if(layout.length===MAX_EFFECTS)return prepareCandidateEffects(layout);
+    }
+  }
+  return layout.length?prepareCandidateEffects(layout):null;
+}
+
 function hash(id,anchor,seed,index) {
   let state=2166136261;
   for(const char of [seed,id,...anchor,index].join(':'))

@@ -92,7 +92,7 @@ export function describeCandidateObject(seed, placement) {
   }
   const distantMesh=family.distantMesh?.(options);
   const farDetail=distantMesh?{
-    sceneId,instanceKey,palette:source.palette,positions:placeMesh(distantMesh,origin,orientation),
+    sceneId,instanceKey,anchor:[...anchor],palette:source.palette,positions:placeMesh(distantMesh,origin,orientation),
     materials:distantMesh.materials,luminousMaterials:source.luminousMaterials,detail:'far'
   }:null;
   return {contract,sceneId,seed,anchor:[...anchor],variant,orientation,instanceKey,supports,min,max,colliders,
@@ -175,7 +175,9 @@ function readSidecar(raw,{version,seed,worldId}) {
   return snapshot;
 }
 
-export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelPick,editedAt=()=>false}) {
+export function createCandidateScene(seed,worldId,layout,{
+  storage,blockAt,voxelPick,editedAt=()=>false,residentAt=()=>true
+}) {
   validateLayout(layout);
   const objects = layout.map(placement=>describeCandidateObject(seed,placement));
   if (new Set(objects.map(o=>o.anchor.join(','))).size !== objects.length)
@@ -197,7 +199,8 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
   const distantObjects=new Set();
   let uncertain = false;
   let epoch = 0;
-  const mounted=object=>!removed.has(object.instanceKey)&&canAttach(object,blockAt,editedAt);
+  const mounted=object=>!removed.has(object.instanceKey)&&residentAt(...object.anchor)&&
+    object.supports.every(support=>residentAt(...support))&&canAttach(object,blockAt,editedAt);
   function visible(){return objects.filter(mounted);}
   function pickFrom(origin,direction,max,checkedObjects=null) {
     if (uncertain || !Array.isArray(origin) || origin.length!==3 ||

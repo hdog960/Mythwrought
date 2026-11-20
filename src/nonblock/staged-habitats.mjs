@@ -14,6 +14,11 @@ const scenery=(group,names)=>names.split(' ').map(name=>'nonblock:'+group+':'+na
 const alpine=scenery('d','alpine-wildflower dwarf-juniper');
 const rock=[BLOCK.STONE,BLOCK.DEEPSTONE];
 const caveCover=[...rock,BLOCK.DIRT,BLOCK.GRASS];
+const mounts=new Map([
+  ['meadow',{families:flora('crawling-ivy trail-vine'),blocks:[BLOCK.WOOD]}],
+  ['enchanted',{families:flora('shelf-fungus glowing-vine'),blocks:[G.aetherBark,BLOCK.WOOD]}],
+  ['snow',{families:scenery('d','icicle-spear'),blocks:[276,279,G.snowyNeedles]}]
+]);
 const habitats=new Map([
   ['meadow',{ground:[BLOCK.GRASS],families:flora(
     'low-grass short-fern single-wildflower lavender-spike heather-sprig clover-clump meadow-sedge clover-patch grass-plume meadow-fescue buttercup-bunch seedhead-meadow-mix button-mushroom')}],
@@ -35,16 +40,20 @@ function coordinates(value,size){
     value.every(number=>Number.isInteger(number)&&Math.abs(number)<10_000);
 }
 
-function surfaceAnchor(world,habitat,column){
-  if(!coordinates(column,2))throw new TypeError('Invalid scenery surface column');
-  const [x,z]=column;
+function surfaceHabitat(world,x,z){
   const {seed,generationProfile:profile}=world;
   const evolved=profile?.generator===M7_ENVIRONMENT_GENERATOR;
   const sample=evolved||profile?.generator===M6_BALANCED_GENERATOR?v6BiomeAt:surfaceBiomeAt;
   const region=profile?sample(x,z,seed):null;
-  const name=region?.weight>=.35?region.name:'meadow';
-  if(name!==habitat)return null;
-  const floor=terrainHeight(x,z,seed)-2;
+  return region?.weight>=.35?region.name:'meadow';
+}
+
+function surfaceAnchor(world,habitat,column){
+  if(!coordinates(column,2))throw new TypeError('Invalid scenery surface column');
+  const [x,z]=column;
+  if(surfaceHabitat(world,x,z)!==habitat)return null;
+  const evolved=world.generationProfile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const floor=terrainHeight(x,z,world.seed)-2;
   for(let y=WORLD_MAX_Y;y>=floor;y--){
     const block=evolved?world.naturalAndLandmarkBlock(x,y,z):world.get(x,y,z);
     if(block!==BLOCK.AIR&&(!evolved||!canopyIds.has(block)))return [x,y+1,z];
@@ -61,9 +70,8 @@ function caveAnchor(world,anchor){
     caveCover.includes(coverBlock)?anchor:null;
 }
 
-// Explicit staging requests against existing terrain. The result can be passed
-// to the loopback runtime as an ordinary layout. This function performs no edits,
-// writes no save keys and never runs on world load or while streaming chunks.
+// Resolve plans against the same exact placement geometry used by gameplay.
+// The planner leaves voxel edits and scenery removal records to their owners.
 export function planStagedHabitat(world,requests,{occupied=()=>false}={}){
   if(!Array.isArray(requests)||requests.length>32)throw new TypeError('Invalid scenery site requests');
   const editedAt=(x,y,z)=>world.edits.has(worldKey(x,y,z))||occupied(x,y,z);
@@ -73,15 +81,20 @@ export function planStagedHabitat(world,requests,{occupied=()=>false}={}){
   const accepted=[];
   const used=new Set();
   for(const request of requests){
-    const {habitat,sceneId,column,anchor:cave,variant=0,orientation=0}=request??{};
+    const {habitat,sceneId,column,anchor:hint,variant=0,orientation=0}=request??{};
     const rules=habitats.get(habitat);
-    if(!rules?.families.includes(sceneId))continue;
-    const anchor=habitat==='cave'?caveAnchor(world,cave):surfaceAnchor(world,habitat,column);
+    const mount=mounts.get(habitat);
+    const mounted=mount?.families.includes(sceneId);
+    if(!mounted&&!rules?.families.includes(sceneId))continue;
+    const anchor=habitat==='cave'?caveAnchor(world,hint):mounted?
+      (coordinates(hint,3)&&surfaceHabitat(world,hint[0],hint[2])===habitat?hint:null):
+      surfaceAnchor(world,habitat,column);
     if(!anchor||used.has(anchor.join(','))||anchor[1]>WORLD_MAX_Y)continue;
     const placement={sceneId,anchor:[...anchor],variant,orientation};
     const [visible]=createCandidateScene(world.seed,worldId,[placement],sceneDeps).visible();
+    const blocks=mounted?mount.blocks:rules.ground;
     if(!visible||!visible.supports.every(([x,y,z])=>
-      rules.ground.includes(world.naturalAndLandmarkBlock(x,y,z))))continue;
+      blocks.includes(world.naturalAndLandmarkBlock(x,y,z))))continue;
     accepted.push(placement);
     used.add(anchor.join(','));
   }
@@ -94,12 +107,38 @@ function placementRoll(x,z,seed){
   return (value^(value>>>16))>>>0;
 }
 
-function environmentalCaveSite(world,x,z,section,hash,options){
+function terrainOnly(world){
+  const natural=(x,y,z)=>world.naturalAndLandmarkBlock(x,y,z);
+  return {seed:world.seed,generationProfile:world.generationProfile,get:natural,
+    naturalAndLandmarkBlock:natural,edits:new Map()};
+}
+
+function surfaceMount(world,habitat,x,z,hash){
+  const rule=mounts.get(habitat);
+  if(!rule)return null;
+  const sceneId=rule.families[(hash>>>19)%rule.families.length];
+  const floor=terrainHeight(x,z,world.seed);
+  const above=habitat==='snow';
+  const offsets=[[0,1],[-1,0],[0,-1],[1,0]];
+  for(let y=floor;y<=Math.min(WORLD_MAX_Y-1,floor+8);y++){
+    if(world.get(x,y,z)!==BLOCK.AIR)continue;
+    for(let r=0;r<(above?1:4);r++){
+      const orientation=(r+hash)%4;
+      const [dx,dz]=above?[0,0]:offsets[orientation];
+      if(!rule.blocks.includes(world.get(x+dx,y+1,z+dz)))continue;
+      if(!above&&!rule.blocks.includes(world.get(x+dx,y,z+dz)))continue;
+      const request={habitat,sceneId,anchor:[x,y,z],variant:hash%4,orientation};
+      if(planStagedHabitat(world,[request]).length)return request;
+    }
+  }
+  return null;
+}
+
+function environmentalCaveSite(world,baseline,x,z,section,hash,options){
   const families=habitats.get('cave').families;
   const sceneId=families[(hash>>>12)%families.length];
   const family=candidateFamilies.get(sceneId);
-  const natural=(a,b,c)=>world.naturalAndLandmarkBlock(a,b,c);
-  const baseline={seed:world.seed,get:natural,naturalAndLandmarkBlock:natural,edits:new Map()};
+  const natural=baseline.get;
   for(let i=0;i<8;i++){
     const y=section*8+(i+hash)%8;
     const anchor=[x,y,z];
@@ -121,6 +160,7 @@ export function planEnvironmentalScenery(world,cx,cz,options={}){
   if(world.generationProfile?.generator!==M7_ENVIRONMENT_GENERATOR)return [];
   const requests=[];
   const cave=[];
+  const baseline=terrainOnly(world);
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)for(let site=0;site<3;site++){
     const tx=cx+dx,tz=cz+dz;
     const hash=placementRoll(tx*5+site,tz*7-site,world.seed);
@@ -128,13 +168,14 @@ export function planEnvironmentalScenery(world,cx,cz,options={}){
     const z=tz*16+2+(site>>1)*8+(hash>>>8)%5;
     if(Math.abs(x)>=10_000||Math.abs(z)>=10_000)continue;
     if(Number.isInteger(options.caveSection)){
-      const specimen=environmentalCaveSite(world,x,z,options.caveSection,hash,options);
+      const specimen=environmentalCaveSite(world,baseline,x,z,options.caveSection,hash,options);
       if(specimen)cave.push(specimen);
       continue;
     }
-    const region=v6BiomeAt(x,z,world.seed);
-    const habitat=region?.name??'meadow';
+    const habitat=surfaceHabitat(world,x,z);
     if(habitat==='desert'&&site===2)continue;
+    const mounted=surfaceMount(baseline,habitat,x,z,hash);
+    if(mounted){requests.push(mounted);continue;}
     const families=habitats.get(habitat).families;
     requests.push({habitat,column:[x,z],sceneId:families[(hash>>>12)%families.length],variant:hash%4});
   }

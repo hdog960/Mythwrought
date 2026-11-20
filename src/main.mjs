@@ -60,6 +60,7 @@ import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
 import {exportPack3Portable,inspectPack3Portable,restorePack3Portable} from './builder-assets/pack3-portable.mjs';
 import {createCaveFarWallGpu} from './manual-caves/c6-far-wall-gpu.mjs';
 import * as nonblockGeometry from './nonblock/candidate-scene.mjs';
+import {prepareCandidateEffects,prepareEnvironmentalEffects,readCandidateEffectLayout} from './nonblock/candidate-effects.mjs';
 import {planEnvironmentalScenery} from './nonblock/staged-habitats.mjs';
 
 // Separate historical Cave World slots keep their original storage identity.
@@ -89,21 +90,17 @@ function fatal(s){notice.hidden=false;notice.textContent=s;message('3D renderer 
 if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or desktop browser is required.');
 else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).has('nonblock-stage')){
-  (async()=>{
-    let layout;
-    try{layout=nonblockGeometry.readCandidateLayout(new URL(location.href));}
-    catch(error){console.warn('Nonblock staging layout disabled',error);}
-    const url=new URL(location.href);
-    const offline=url.searchParams.get('nonblock-offline')==='1';
-    let effects=null;
-    if(layout&&url.searchParams.has('nonblock-fx')){
-      try{
-        const fx=await import('./nonblock/candidate-effects.mjs');
-        effects=fx.prepareCandidateEffects(fx.readCandidateEffectLayout(url));
-      }catch(error){console.warn('Nonblock staging effects disabled',error);}
-    }
-    start(layout?{layout,offline,effects}:null);
-  })();
+  const url=new URL(location.href);
+  let layout;
+  try{layout=nonblockGeometry.readCandidateLayout(url);}
+  catch(error){console.warn('Nonblock staging layout disabled',error);}
+  const offline=url.searchParams.get('nonblock-offline')==='1';
+  let effects=null;
+  if(layout&&url.searchParams.has('nonblock-fx')){
+    try{effects=prepareCandidateEffects(readCandidateEffectLayout(url));}
+    catch(error){console.warn('Nonblock staging effects disabled',error);}
+  }
+  start(layout?{layout,offline,effects}:null);
 }else start();
 
 function start(nonblockStage=null){
@@ -145,7 +142,17 @@ function start(nonblockStage=null){
   let pack3=createPack3LiveBridge(world,localStorage);
   let nonblockWorld,nonblockChunk,nonblockScene,nonblockBuffer,nonblockDrawKey='',nonblockVertexCount=0;
   let nonblockParents=new Set();
-  let effectBuffer,effectBytes=0,effectVertexCount=0,lastEffectUpload=-Infinity;
+  let effectBuffer,effectBytes=0,effectVertexCount=0,lastEffectUpload=-Infinity,worldEffects=null;
+  function retireLiveScenery(){
+    if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
+    nonblockWorld=null;nonblockScene=null;nonblockBuffer=null;nonblockVertexCount=0;nonblockDrawKey='';
+    nonblockParents.clear();effectVertexCount=0;lastEffectUpload=-Infinity;worldEffects=null;
+    for(const key of ['nonblockVertices','nonblockInstances','nonblockFarInstances',
+      'nonblockGpuBytes','nonblockDrawCalls','nonblockEffects','nonblockEffectVertices'])
+      canvas.dataset[key]='0';
+    canvas.dataset.nonblockTarget='';
+    canvas.dataset.nonblockSaveState='unavailable';
+  }
 
   function stagedScene(){
     if(storageReadOnly)return null;
@@ -165,6 +172,7 @@ function start(nonblockStage=null){
         const layout=streamed?planEnvironmentalScenery(world.base,cx,cz,{occupied:placed,caveSection}):nonblockStage.layout;
         nonblockScene=nonblockGeometry.createCandidateScene(world.seed,worldId,layout,{
           storage:localStorage,
+          residentAt:(x,y,z)=>!streamed||chunks.has(depthMeshKey(chunkCoord(x),chunkCoord(z),sectionForY(y))),
           blockAt:(x,y,z)=>{
             if(manual14.layer.get([x,y,z])||pack3.getAt(x,y,z)||
                 pack5Builder?.layer.cell([x,y,z]))return true;
@@ -206,12 +214,19 @@ function start(nonblockStage=null){
         nonblockVertexCount=vertices.length/9;
         nonblockDrawKey=key;
         nonblockParents=new Set(objects.map(o=>o.instanceKey));
+        if(combinedWorld()&&!nonblockStage?.layout.length){
+          worldEffects=prepareEnvironmentalEffects(objects);
+          lastEffectUpload=-Infinity;
+          effectVertexCount=0;
+          if(!worldEffects){canvas.dataset.nonblockEffects='0';canvas.dataset.nonblockEffectVertices='0';}
+        }
       }catch(error){
         // An upload failure must not expose selectable invisible scenery.
         if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
         nonblockBuffer=null;
         nonblockDrawKey='';
         nonblockVertexCount=0;
+        worldEffects=null;effectVertexCount=0;
         canvas.dataset.nonblockDrawCalls='0';
         canvas.dataset.nonblockGpuBytes='0';
         canvas.dataset.nonblockTarget='';
@@ -238,11 +253,11 @@ function start(nonblockStage=null){
     canvas.dataset.nonblockTarget=hit?.instanceKey??'';
     return hit;
   }
-  function drawStagedEffects(now){
+  function drawStagedEffects(now,sampleEffects){
     if(now-lastEffectUpload>=65){
       lastEffectUpload=now;
       const parents=nonblockBuffer?nonblockParents:new Set();
-      const effects=nonblockStage.effects({
+      const effects=sampleEffects({
         seconds:now/1000,seed:world.seed,viewer:eye(),parents
       });
       const {vertices}=effects;
@@ -1474,6 +1489,7 @@ function start(nonblockStage=null){
         canvas.dataset.pack5PendingPages='0';
         canvas.dataset.pack5BudgetExcluded='0';
       }
+      if(nonblockWorld&&!hasLiveScenery())retireLiveScenery();
       const sceneryHit=hasLiveScenery()?drawStagedScene():null;
       // Real depth-tested 40-model instancing, inside the existing WebGL pass.
       if(mobRenderer&&mobSession&&!mobRuntimeError){
@@ -1521,7 +1537,8 @@ function start(nonblockStage=null){
         }
         gl.depthMask(true);gl.disable(gl.BLEND);
       }
-      if(nonblockStage?.effects)drawStagedEffects(now);
+      const effects=nonblockStage?.effects??worldEffects;
+      if(effects)drawStagedEffects(now,effects);
       // A faint world-space targeted-block outline, never a HUD covering the scene.
       const focused=help.hidden&&!sceneryHit?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
       const focusKey=focused?.hit?.join(',')||'';
@@ -3049,6 +3066,7 @@ function start(nonblockStage=null){
         saveIsolation:!caveSession||localStorage.getItem(worldSlotKey(world.seed))===null};},
       fourBiomeMode(){return world.base instanceof FourRegionWorld?'four-regions':'legacy';},
       fourBiomeProfile(){return world.base instanceof FourRegionWorld?world.base.generationProfile:null;},
+      environmentEntrances(){return world.base?.environmentCaves?.entranceSites??[];},
       // M5 read-only local browser acceptance: no displacement/rotation methods.
       m5ObservedPose(){return Object.freeze({x:player.x,z:player.z,feet:player.feet,
         yaw:player.yaw,seed:world.seed,creative:g2Active(),onGround:player.onGround});},
