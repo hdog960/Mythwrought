@@ -7,24 +7,30 @@ export function createForestMossMat(seed,x,y,z,variant=1){
     [x,y,z].some(v=>Math.abs(v)>1000000))throw new TypeError('invalid moss identity');
  const positions=[],materials=[];
  const triangle=(a,b,c,material)=>{positions.push(...a,...b,...c);materials.push(material);};
- // A continuous uneven ground-hugging surface, with raised asymmetric tuft ridges.
- // 4x4 cells, two real triangles per cell, plus four tapered tuft fins.
- const radius=.32+variant*.075,step=radius/2;
- const vertex=(i,j)=>{
-  const u=i/2,v=j/2;
-  const h=.025+.022*(1+Math.sin((i+seed%17)*2.1+(j+variant)*1.7))*.5;
-  return [u*radius,h,v*radius];
- };
- for(let i=-2;i<2;i++)for(let j=-2;j<2;j++){
-  const a=vertex(i,j),b=vertex(i+1,j),c=vertex(i,j+1),d=vertex(i+1,j+1);
-  triangle(a,b,c,(i+j+8)%2);triangle(c,b,d,(i+j+8)%2);
+ const sides=10, radius=.30+variant*.058;
+ const phase=seed%89+x*.17+y*.11+z*.23+variant*.73;
+ const edge=[],interior=[];
+ for(let i=0;i<sides;i++){
+  const angle=(i/sides+variant*.031)*Math.PI*2;
+  const radial=radius*(.86+.18*Math.sin(phase+i*1.91));
+  const x=Math.cos(angle)*radial,z=Math.sin(angle)*radial;
+  edge.push([x,.016+.008*(i%3),z]);
+  interior.push([x*.49,.048+.016*Math.sin(phase+i*2.19),z*.49]);
  }
- for(let k=0;k<4;k++){
-  const angle=k*Math.PI/2+variant*.19;
-  const px=Math.cos(angle)*step,pz=Math.sin(angle)*step;
-  const a=[px-.055,.04,pz],b=[px+.055,.04,pz];
-  const tip=[px+.018,.14+variant*.028,pz+.045];
-  triangle(a,b,tip,2);triangle(tip,b,a,2);
+ const center=[.022,.055,-.018];
+ for(let i=0;i<sides;i++){
+  const j=(i+1)%sides;
+  const pigment=(i%4===0)?0:1;
+  triangle(edge[i],edge[j],interior[j],0);
+  triangle(edge[i],interior[j],interior[i],pigment);
+  triangle(center,interior[i],interior[j],i%3===0?2:1);
+ }
+ for(let i=0;i<3+variant;i++){
+  const [x,y,z]=interior[(i*2+variant)%sides];
+  const peak=[x+.014,y+.032+(i%3)*.013,z-.014];
+  const spine=[x,y+.020,z+.053];
+  triangle([x-.036,y-.006,z],peak,spine,3);
+  triangle(peak,[x+.033,y-.004,z+.027],spine,2);
  }
  const bounds={min:[Infinity,Infinity,Infinity],max:[-Infinity,-Infinity,-Infinity]};
  for(let i=0;i<positions.length;i+=3)for(let k=0;k<3;k++){

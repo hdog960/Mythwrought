@@ -1,0 +1,63 @@
+{
+  "label": "before",
+  "sourceSha256": {
+    "src/main.mjs": "f2e021f87b2777225d0a5d606ee96c4f96c09f770fe39612494fce689c161438",
+    "src/nonblock/candidate-families.mjs": "473b76098990bee05269cd7fe9f4ca78792777832abb3f7d8eea0bb15d195e49",
+    "src/nonblock-scene48/forest-moss-mat.mjs": "ff8ec93e023528d5837456d81ee0e44db98513885c6ef20ad82499f20eba6f43",
+    "src/nonblock-scene48/forest-lichen-patch.mjs": "48ae5290ceb87660d5140b869e65bccf81becd9ee5ad9446f4d0347703bb7a70"
+  },
+  "captures": [
+    {
+      "filename": "mixed-oblique.png",
+      "x": 10.5,
+      "z": 6.5,
+      "point": [
+        10.9,
+        9.04,
+        7.5
+      ],
+      "sha256": "95d3a918c57dab606bfff0edf6855f4805d08f70e2e84e8994d053ba0bf9fb9b",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "forest-moss-mat.png",
+      "x": 10.5,
+      "z": 6.5,
+      "point": [
+        10.23666636,
+        9.02915001,
+        7.43416659
+      ],
+      "sha256": "4bb58839170ed30c3595ca888691e2decf7c54b18e6d0e542341973ad441523b",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "forest-lichen-patch.png",
+      "x": 11.5,
+      "z": 6.5,
+      "point": [
+        11.47336451,
+        9.02699979,
+        7.71423737
+      ],
+      "sha256": "31d396a10a74ec711d372ef38f85fca9b8886761e23ec4bd1362293c0088ce02",
+      "width": 932,
+      "height": 430
+    }
+  ],
+  "removalAndColdReopen": true,
+  "families": [
+    {
+      "id": "scene48:forest-moss-mat",
+      "variant": 1,
+      "triangles": 40
+    },
+    {
+      "id": "scene48:forest-lichen-patch",
+      "variant": 2,
+      "triangles": 24
+    }
+  ]
+}

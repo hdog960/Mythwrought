@@ -84,3 +84,15 @@ The paired Chromium captures show eight inherited families in the original game 
 | Meadow sedge | [View](gallery/foliage-refinement/before/meadow-sedge.png) | [View](gallery/foliage-refinement/after/meadow-sedge.png) | 14 → 84 |
 
 At nine 32-bit floats per vertex, the sampled eight plants increase the one scenery batch from 27,324 to 81,216 bytes. The measurements describe geometry and upload size. Device frame times and final parity remain open.
+
+## Forest floor refinement
+
+The old moss read as a checkerboard tile in the near game view. The revised footprint is irregular, and the ridges sit low against the ground. The lichen now has separate curled lobes and a muted stone palette. The comparison uses the same standing eye, aim and anchors before and after. Both versions accepted the standard MINE control and preserved both removals on fresh pages. [Before manifest](gallery/forest-floor-refinement/before/manifest.json) · [After manifest](gallery/forest-floor-refinement/after/manifest.json)
+
+| Family or scene | Before | After | Sample triangles |
+| --- | --- | --- | --- |
+| Forest moss mat | [View](gallery/forest-floor-refinement/before/forest-moss-mat.png) | [View](gallery/forest-floor-refinement/after/forest-moss-mat.png) | 40 → 38 |
+| Forest lichen patch | [View](gallery/forest-floor-refinement/before/forest-lichen-patch.png) | [View](gallery/forest-floor-refinement/after/forest-lichen-patch.png) | 24 → 48 |
+| Mixed oblique view | [View](gallery/forest-floor-refinement/before/mixed-oblique.png) | [View](gallery/forest-floor-refinement/after/mixed-oblique.png) | 64 → 86 |
+
+The two-family sample used 6,912 packed vertex bytes before and 9,288 after. The revision removes the moss's coincident faces. Close-up silhouette is visible on the grass fixture. Final contrast on stone and at device-scale view distance is open.

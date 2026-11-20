@@ -7,20 +7,23 @@ export function createForestLichenPatch(seed,x,y,z,variant=1){
     [x,y,z].some(n=>Math.abs(n)>1000000))throw new TypeError('invalid lichen identity');
  const positions=[],materials=[];
  const tri=(a,b,c,m)=>{positions.push(...a,...b,...c);materials.push(m);};
- // Six separate irregular lobes; their inner vertices meet a shallow raised hub.
- // Unlike the continuous moss mat, this forms a radial crust with distinct scalloped edges.
  const phase=((seed%97)+97)%97*.013+variant*.21;
- const hub=[0,.028,0],lobes=6+variant;
+ const hub=[.018,.025,-.012],lobes=6+variant;
  for(let i=0;i<lobes;i++){
-  const angle=phase+i*2*Math.PI/lobes;
-  const next=phase+(i+1)*2*Math.PI/lobes;
-  const radius=.24+variant*.035+(i%3)*.025;
-  const a=[Math.cos(angle)*radius,.018+(i%2)*.012,Math.sin(angle)*radius];
-  const b=[Math.cos(next)*(radius*.88),.02,Math.sin(next)*(radius*.88)];
-  const mid=[Math.cos((angle+next)/2)*(radius*1.13),.035,Math.sin((angle+next)/2)*(radius*1.13)];
-  tri(hub,a,mid,i%3);tri(hub,mid,b,i%3);
-  // Raised curling rim, non-cubic and ray-pickable.
-  tri(a,b,[mid[0]*.96,.075+variant*.012,mid[2]*.96],3);
+  const center=phase+(i+.5)*2*Math.PI/lobes;
+  const halfWidth=Math.PI/lobes;
+  const extent=.228+variant*.032+.045*Math.sin(phase+i*2.24);
+  const point=(a,r,h)=>[Math.cos(a)*r,h,Math.sin(a)*r];
+  const a=point(center-halfWidth,.46*extent,.026), b=point(center+halfWidth,.46*extent,.026);
+  const left=point(center-halfWidth*.62,extent,.037), right=point(center+halfWidth*.66,extent,.041);
+  const rim=point(center,extent*(1.1+.065*(i%2)),.022);
+  const fold=point(center,extent*.76,.046+variant*.004);
+  tri(hub,a,b,i%3);
+  tri(a,left,fold,1);
+  tri(a,fold,b,0);
+  tri(b,fold,right,1);
+  tri(left,rim,fold,2);
+  tri(rim,right,fold,3);
  }
  const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
  for(let i=0;i<positions.length;i+=3)for(let k=0;k<3;k++){
@@ -34,5 +37,5 @@ export function createForestLichenPatch(seed,x,y,z,variant=1){
   mesh:{positions:new Float32Array(positions),materials:new Uint8Array(materials),
    triangleCount:materials.length},breakIntent:'remove-instance',
   tombstoneKey:instanceKey,spawn:'opt-in-only',respawn:'never-with-tombstone',
-  lod:{maxTriangles:32,batch:'scene-family',distanceCull:28}});
+  lod:{maxTriangles:54,batch:'scene-family',distanceCull:28}});
 }

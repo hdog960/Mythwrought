@@ -87,7 +87,7 @@ export const candidateFamilies = new Map([
   ['scene48:woodland-sapling',forestFamily(createWoodlandSapling,forestPalette)],
   ['scene48:woodland-shrub',forestFamily(createWoodlandShrub,forestPalette)],
   ['scene48:forest-lichen-patch',forestFamily(createForestLichenPatch,
-    [[.45,.53,.38],[.61,.63,.45],[.70,.73,.51]])],
+    [[.37,.43,.37],[.49,.54,.46],[.63,.64,.56],[.72,.69,.57]])],
   ['scene48:forest-moss-mat',forestFamily(createForestMossMat,groundCoverPalette)],
   ['nonblock:d:agave-rosette',environmentFamily(makeAgaveRosette,[.38,.55,.43])],
   ['nonblock:d:alpine-wildflower',environmentFamily(makeAlpineWildflower,[.73,.72,.90])],
