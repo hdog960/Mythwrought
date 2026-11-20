@@ -84,7 +84,7 @@ export function describeCandidateObject(seed, placement) {
     }
   }
   return {contract,sceneId,seed,anchor:[...anchor],variant,orientation,instanceKey,supports,min,max,colliders,
-    positions,materials:mesh.materials,palette:source.palette,embedDepth:family.embedDepth??0};
+    positions,materials:mesh.materials,palette:source.palette,climbable:source.climbable===true,embedDepth:family.embedDepth??0};
 }
 
 function sub(a,b) { return a.map((value,i)=>value-b[i]); }
@@ -168,6 +168,7 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
 
   const removed = new Set(snapshot.tombstones);
   const solid = objects.filter(o=>o.colliders.length>0);
+  const ladders = objects.filter(o=>o.climbable);
   const issued = new WeakSet();
   let uncertain = false;
   let epoch = 0;
@@ -234,7 +235,12 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
       body[2]<box[5]-epsilon && body[5]>box[2]+epsilon
     )&&canAttach(o,blockAt,editedAt));
   }
-  return Object.freeze({visible,pick,breakHit,bodyIntersects});
+  function climbableAt({x,feet,z}) {
+    return ladders.some(o=>!removed.has(o.instanceKey)&&
+      x>=o.min[0]-.20&&x<=o.max[0]+.20&&z>=o.min[2]-.28&&z<=o.max[2]+.28&&
+      feet+1.10>o.min[1]&&feet<o.max[1]+.18&&canAttach(o,blockAt,editedAt));
+  }
+  return Object.freeze({visible,pick,breakHit,bodyIntersects,climbableAt});
 }
 
 export function candidateVertices(objects) {

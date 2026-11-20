@@ -2,7 +2,7 @@
 
 The names for empty slots in groups A, B, C and H are working names. Clover clump and clover patch, and moss cushion and moss mat, occupy provisional separate slots. A later design review can consolidate a pair if its gameplay roles are too similar while keeping the source IDs and saved removal state.
 
-“Native + Chromium” means exact-triangle selection, the existing MINE control, a verified tombstone and a fresh page were exercised against seeded terrain in the actual game. Final art, device, biome placement and performance gates are open.
+“Native + Chromium” means exact-triangle selection, the existing MINE control, a verified tombstone and a fresh page were exercised against seeded terrain in the actual game. “Owner placement + reload” uses the existing Block Pack geometry and save path. Effect rows cover animation and the shared render pass. Final art, device, biome placement and performance gates are open.
 
 | Slot | Group | Family | Scene ID | Source | Staging evidence |
 | ---: | :---: | --- | --- | --- | --- |
@@ -72,33 +72,33 @@ The names for empty slots in groups A, B, C and H are working names. Clover clum
 | 64 | F | Swinging gate | scene36:swinging-gate | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
 | 65 | F | Window shutters | scene36:window-shutters | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
 | 66 | F | Hinged hatch | scene36:hinged-hatch | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
-| 67 | F | Ladder assembly | scene36:ladder-assembly | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
-| 68 | F | Rope ladder | scene36:rope-ladder | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
+| 67 | F | Ladder assembly | scene36:ladder-assembly | [New](../../src/nonblock-fittings36/world-props.mjs) | Native + Chromium |
+| 68 | F | Rope ladder | scene36:rope-ladder | [New](../../src/nonblock-fittings36/world-props.mjs) | Native + Chromium |
 | 69 | F | Fence rail | scene36:fence-rail | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
 | 70 | F | Hanging chain | scene36:hanging-chain | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 71 | F | Cloth banner | scene36:cloth-banner | [Inherited](../../src/nonblock-fittings36/fittings-phase1.mjs) | Native + Chromium |
 | 72 | F | Fabric awning | scene36:fabric-awning | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
 | 73 | G | Wall torch bracket | scene36:wall-torch-bracket | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
-| 74 | G | Freestanding torch | scene36:freestanding-torch | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
-| 75 | G | Hanging lantern |  | Pending | Pending |
-| 76 | G | Campfire fuel stack | scene36:campfire-fuel-stack | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
-| 77 | G | Brazier | scene36:brazier | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
+| 74 | G | Freestanding torch | scene36:freestanding-torch | [New](../../src/nonblock-fittings36/world-props.mjs) | Native + Chromium |
+| 75 | G | Hanging lantern | scene36:hanging-lantern | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
+| 76 | G | Campfire fuel stack | scene36:campfire-fuel-stack | [New](../../src/nonblock-fittings36/world-props.mjs) | Native + Chromium |
+| 77 | G | Brazier | scene36:brazier | [New](../../src/nonblock-fittings36/world-props.mjs) | Native + Chromium |
 | 78 | G | Signpost | scene36:signpost | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 79 | G | Direction sign | scene36:direction-sign | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
-| 80 | G | Hanging bell | scene36:hanging-bell | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
+| 80 | G | Hanging bell | scene36:hanging-bell | [New](../../src/nonblock-fittings36/world-props.mjs) | Native + Chromium |
 | 81 | G | Rope coil | scene36:rope-coil | [Inherited](../../src/nonblock-fittings36/fittings-phase1.mjs) | Native + Chromium |
-| 82 | G | Broken pottery scatter | scene36:broken-pottery-scatter | [New](../../src/nonblock-fittings36/world-props.mjs) | Source native only |
+| 82 | G | Broken pottery scatter | scene36:broken-pottery-scatter | [New](../../src/nonblock-fittings36/world-props.mjs) | Native + Chromium |
 | 83 | G | Hanging cobweb | scene36:hanging-cobweb | [Inherited](../../src/nonblock/staged-inherited-families.mjs) | Native + Chromium |
 | 84 | G | Pennant flag | scene36:pennant-flag | [Existing Block Pack](../../src/nonblock/physical-fittings.mjs) | Owner placement + reload |
-| 85 | H | Flame |  | Pending | Pending |
-| 86 | H | Embers |  | Pending | Pending |
-| 87 | H | Smoke |  | Pending | Pending |
-| 88 | H | Flicker |  | Pending | Pending |
-| 89 | H | Magic dust |  | Pending | Pending |
-| 90 | H | Cave drip |  | Pending | Pending |
-| 91 | H | Spray |  | Pending | Pending |
-| 92 | H | Mist |  | Pending | Pending |
-| 93 | H | Wisps |  | Pending | Pending |
-| 94 | H | Pollen |  | Pending | Pending |
-| 95 | H | Snow gust |  | Pending | Pending |
-| 96 | H | Heat shimmer |  | Pending | Pending |
+| 85 | H | Flame | scene48:flame | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 86 | H | Embers | scene48:embers | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 87 | H | Smoke | scene48:smoke | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 88 | H | Flicker | scene48:flicker | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 89 | H | Magic dust | scene48:magic-dust | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 90 | H | Cave drip | scene48:cave-drip | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 91 | H | Spray | scene48:spray | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 92 | H | Mist | scene48:mist | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 93 | H | Wisps | scene48:wisps | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 94 | H | Pollen | scene48:pollen | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 95 | H | Snow gust | scene48:snow-gust | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |
+| 96 | H | Surface ripples | scene48:surface-ripples | [New](../../src/nonblock/candidate-effects.mjs) | Native + Chromium effects |

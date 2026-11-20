@@ -58,12 +58,20 @@ function fatal(s){notice.hidden=false;notice.textContent=s;message('3D renderer 
 if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or desktop browser is required.');
 else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).has('nonblock-stage')){
-  import('./nonblock/candidate-scene.mjs').then(module=>{
+  import('./nonblock/candidate-scene.mjs').then(async module=>{
     let layout;
     try{layout=module.readCandidateLayout(new URL(location.href));}
     catch(error){console.warn('Nonblock staging layout disabled',error);}
-    const offline=new URLSearchParams(location.search).get('nonblock-offline')==='1';
-    start(layout?{module,layout,offline}:null);
+    const url=new URL(location.href);
+    const offline=url.searchParams.get('nonblock-offline')==='1';
+    let effects=null;
+    if(layout&&url.searchParams.has('nonblock-fx')){
+      try{
+        const fx=await import('./nonblock/candidate-effects.mjs');
+        effects=fx.prepareCandidateEffects(fx.readCandidateEffectLayout(url));
+      }catch(error){console.warn('Nonblock staging effects disabled',error);}
+    }
+    start(layout?{module,layout,offline,effects}:null);
   },error=>{
     console.warn('Nonblock staging module unavailable',error);
     start();
@@ -99,6 +107,7 @@ function start(nonblockStage=null){
   }
   let pack3=createPack3LiveBridge(world,localStorage);
   let nonblockWorld,nonblockScene,nonblockBuffer,nonblockDrawKey='',nonblockVertexCount=0;
+  let effectBuffer,effectBytes=0,effectVertexCount=0,lastEffectUpload=-Infinity;
 
   function stagedScene(){
     if(storageReadOnly)return null;
@@ -125,6 +134,8 @@ function start(nonblockStage=null){
         const scene=nonblockScene, loadedWorld=world;
         world.stagedNonblockCollision=body=>!storageReadOnly&&world===loadedWorld&&
           Boolean(nonblockBuffer)&&scene.bodyIntersects(body);
+        world.stagedNonblockClimb=current=>!storageReadOnly&&world===loadedWorld&&
+          Boolean(nonblockBuffer)&&scene.climbableAt(current);
       }catch(error){
         console.warn('Nonblock staging scene disabled',error);
       }
@@ -177,6 +188,42 @@ function start(nonblockStage=null){
     canvas.dataset.nonblockTarget=hit?.instanceKey??'';
     return hit;
   }
+  function drawStagedEffects(now){
+    if(now-lastEffectUpload>=65){
+      lastEffectUpload=now;
+      const parents=new Set(nonblockBuffer?nonblockDrawKey.split('|'):[]);
+      const effects=nonblockStage.effects({
+        seconds:now/1000,seed:world.seed,viewer:eye(),parents
+      });
+      const {vertices}=effects;
+      effectVertexCount=vertices.length/9;
+      canvas.dataset.nonblockEffects=String(effects.instances);
+      canvas.dataset.nonblockEffectVertices=String(effectVertexCount);
+      canvas.dataset.nonblockEffectFrame=String(now);
+      if(effectVertexCount){
+        effectBuffer??=gl.createBuffer();
+        if(!effectBuffer){effectVertexCount=0;return;}
+        gl.bindBuffer(gl.ARRAY_BUFFER,effectBuffer);
+        if(vertices.byteLength>effectBytes){
+          effectBytes=2**Math.ceil(Math.log2(vertices.byteLength));
+          gl.bufferData(gl.ARRAY_BUFFER,effectBytes,gl.DYNAMIC_DRAW);
+        }
+        gl.bufferSubData(gl.ARRAY_BUFFER,0,vertices);
+      }
+    }
+    if(!effectVertexCount)return;
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+    gl.depthMask(false);
+    gl.bindBuffer(gl.ARRAY_BUFFER,effectBuffer);
+    gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
+    gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
+    gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
+    gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
+    gl.drawArrays(gl.TRIANGLES,0,effectVertexCount);
+    gl.depthMask(true);
+    gl.disable(gl.BLEND);
+  }
   // Only a previously selected immutable v5 world may opt into M5 PWA caching.
   if(nonblockStage?.offline){
     void import('./nonblock/stage-offline.mjs').then(({ensureStagedOfflineCache})=>
@@ -204,7 +251,9 @@ function start(nonblockStage=null){
       'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
       'outColor=vec4(mix(vColor,uFog,f),vPack2Alpha); return; }'+
       (nonblockStage?'if(vMat==21){ float f=smoothstep(29.0,68.0,vDistance);'+
-        'outColor=vec4(mix(vColor,uFog,f),1.0); return; }':'')
+        'outColor=vec4(mix(vColor,uFog,f),1.0); return; }':'')+
+      (nonblockStage?.effects?'if(vMat==23){ float f=smoothstep(14.0,24.0,vDistance);'+
+        'outColor=vec4(vColor,vPack2Alpha*(1.0-f)); return; }':'')
     );
   let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
   function initializeGpuPipeline(){
@@ -1062,6 +1111,7 @@ function start(nonblockStage=null){
         }
         gl.depthMask(true);gl.disable(gl.BLEND);
       }
+      if(nonblockStage?.effects)drawStagedEffects(now);
       // A faint world-space targeted-block outline, never a HUD covering the scene.
       const focused=help.hidden&&!sceneryHit?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
       const focusKey=focused?.hit?.join(',')||'';
@@ -2437,6 +2487,7 @@ function start(nonblockStage=null){
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
       chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
       nonblockBuffer=null;nonblockDrawKey='';nonblockVertexCount=0;
+      effectBuffer=null;effectBytes=0;effectVertexCount=0;lastEffectUpload=-Infinity;
       pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
       outlineKey='';outlineCount=0;lastTargetText='';

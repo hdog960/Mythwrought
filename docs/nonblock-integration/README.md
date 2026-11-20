@@ -101,3 +101,15 @@ The original 20-script suite ran against checkpoint `b77497f04e2125a74002f958cc3
 All 11 owner-backed cuts placed and reopened in Chromium through the existing Pack 2 or Pack 4 game path. Their geometry and save rows remain with those owners. The paired door placement commits both leaves in one owner snapshot. Its native failure injection proves both cells and the observed owner-storage bytes roll back after a primary write is rejected. The staging browser scenario reopened 12 physical cells after placing 11 roster entries and verified that the nonempty schema-1 bytes stayed intact. [Physical source and capture manifest](gallery/physical-fittings/manifest.json)
 
 Seven newly authored fittings and props add ladders, a freestanding torch body, a fuel stack, a brazier, a bell, and pottery fragments. Their four deterministic variants pass native geometry tests. They still need game behavior and art acceptance. Overall coverage at this checkpoint is 65 staged scenery lifecycles, 11 Block Pack placement and reload results, and seven additional source-native families.
+
+## All 96 slots staged
+
+The [catalog matrix](catalog.md) now has 72 source-authored scenery families with in-game MINE and reload evidence, 12 scene roles backed by their original Block Pack placement and persistence owners, and 12 environmental effects. The hanging lantern uses the existing Hawthorn wall lantern and its original physical wall mount.
+
+The seven additional props draw and remove in the original game. The ordinary movement control also climbed the wall ladder against a naturally mounted tree-trunk fixture. The source test verifies loss of climbing support when the mount disappears. [Prop evidence](gallery/world-props/manifest.json)
+
+The twelve effects draw together in a bounded translucent pass. Chromium observed different animation frames, removed an attached effect when its parent was mined, and brought the surviving ambient effects back after genuine WebGL context loss and restore. The parent remained removed across a fresh page. The effect shapes are render-only. [Effect evidence](gallery/effects/manifest.json)
+
+The original game at 667 × 375, 844 × 390, and 932 × 430 is captured in the [landscape evidence](gallery/landscape/manifest.json). The production activation path, same-install recovery rehearsal, comparative art passes, device-scale performance and physical iPhone acceptance remain open. This draft is still on release hold.
+
+The latest physical test also placed the wall lantern through Pack 4 and used the existing PLACE and MINE controls to swing and remove one leaf of the paired door. The sibling remained, the mined leaf stayed absent on cold reopen, and the nonempty schema-1 bytes matched. The independent coordinator checks files against their source SHA-256 digests and uses the inherited PNG structure validator to verify each artifact's dimensions, digest and chunk CRC. [Home Screen release hold](release-hold.md)

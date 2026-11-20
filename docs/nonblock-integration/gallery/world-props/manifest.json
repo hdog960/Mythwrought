@@ -1,0 +1,245 @@
+{
+  "seed": 179,
+  "results": [
+    {
+      "placement": {
+        "sceneId": "scene36:ladder-assembly",
+        "anchor": [
+          8,
+          11,
+          10
+        ],
+        "variant": 2,
+        "orientation": 1
+      },
+      "view": {
+        "cell": [
+          8,
+          9,
+          7
+        ],
+        "point": [
+          8.880199750264486,
+          11.895000457763672,
+          10.60533332824707
+        ]
+      },
+      "instanceKey": "nb1:scene36%3Aladder-assembly:179:8,11,10:2:r1",
+      "solid": false,
+      "triangles": 144,
+      "underSurface": false,
+      "filename": "artifacts/nonblock-world-props/ladder-assembly.png",
+      "sha256": "4a05d841415fe78f176624a0ac2893e19b57f604d6c639da7602532ec219ea7e"
+    },
+    {
+      "placement": {
+        "sceneId": "scene36:rope-ladder",
+        "anchor": [
+          9,
+          10,
+          10
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          9,
+          9,
+          7
+        ],
+        "point": [
+          9.592840512593588,
+          10.110722541809082,
+          10.480241775512695
+        ]
+      },
+      "instanceKey": "nb1:scene36%3Arope-ladder:179:9,10,10:2:r0",
+      "solid": false,
+      "triangles": 240,
+      "underSurface": false,
+      "filename": "artifacts/nonblock-world-props/rope-ladder.png",
+      "sha256": "d5162b1a17b6e366089b41e035fbb5f59278027d789d2af59acbb6442294a24e"
+    },
+    {
+      "placement": {
+        "sceneId": "scene36:freestanding-torch",
+        "anchor": [
+          7,
+          10,
+          5
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          7,
+          11,
+          2
+        ],
+        "point": [
+          7.471833229064941,
+          10.775333086649576,
+          5.51125701268514
+        ]
+      },
+      "instanceKey": "nb1:scene36%3Afreestanding-torch:179:7,10,5:2:r0",
+      "solid": true,
+      "triangles": 124,
+      "underSurface": false,
+      "filename": "artifacts/nonblock-world-props/freestanding-torch.png",
+      "sha256": "e2f61a4ad49178a3fb31443595d95911142bbd0cb85a927481acdfed301af280"
+    },
+    {
+      "placement": {
+        "sceneId": "scene36:campfire-fuel-stack",
+        "anchor": [
+          7,
+          10,
+          5
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          7,
+          9,
+          8
+        ],
+        "point": [
+          7.470836957295735,
+          10.155100186665853,
+          5.604331175486247
+        ]
+      },
+      "instanceKey": "nb1:scene36%3Acampfire-fuel-stack:179:7,10,5:2:r0",
+      "solid": true,
+      "triangles": 180,
+      "underSurface": false,
+      "filename": "artifacts/nonblock-world-props/campfire-fuel-stack.png",
+      "sha256": "293e671ea2dcd7165831a83b0350aadebeaab69053d7750f0fc0bbbfc1ea2a7a"
+    },
+    {
+      "placement": {
+        "sceneId": "scene36:brazier",
+        "anchor": [
+          7,
+          10,
+          5
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          7,
+          11,
+          2
+        ],
+        "point": [
+          7.673378308614095,
+          10.547333081563314,
+          5.741852919260661
+        ]
+      },
+      "instanceKey": "nb1:scene36%3Abrazier:179:7,10,5:2:r0",
+      "solid": true,
+      "triangles": 120,
+      "underSurface": false,
+      "filename": "artifacts/nonblock-world-props/brazier.png",
+      "sha256": "2d029f5b852361d2fc0978c3378649b393b27d35019d78c4a8b69958c2f44292"
+    },
+    {
+      "placement": {
+        "sceneId": "scene36:hanging-bell",
+        "anchor": [
+          9,
+          10,
+          10
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          9,
+          9,
+          7
+        ],
+        "point": [
+          9.496166865030924,
+          10.710000038146973,
+          10.488233884175619
+        ]
+      },
+      "instanceKey": "nb1:scene36%3Ahanging-bell:179:9,10,10:2:r0",
+      "solid": false,
+      "triangles": 150,
+      "underSurface": false,
+      "filename": "artifacts/nonblock-world-props/hanging-bell.png",
+      "sha256": "178751044ed1dea5ded11a0e7f5a9fc6220bd3c982bb6e6e2237166bb3b9156e"
+    },
+    {
+      "placement": {
+        "sceneId": "scene36:broken-pottery-scatter",
+        "anchor": [
+          7,
+          10,
+          5
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          7,
+          9,
+          8
+        ],
+        "point": [
+          7.4345634778340655,
+          10.069731076558432,
+          5.700297832489014
+        ]
+      },
+      "instanceKey": "nb1:scene36%3Abroken-pottery-scatter:179:7,10,5:2:r0",
+      "solid": false,
+      "triangles": 40,
+      "underSurface": false,
+      "filename": "artifacts/nonblock-world-props/broken-pottery-scatter.png",
+      "sha256": "c773cc3f1b6612d0d65ba003d73254f17c471f8b422fc56e2edc065f17d66d41"
+    }
+  ],
+  "sourceSha256": {
+    "src/main.mjs": "34e73098d8f32ec62c93ae2bf8fdfb7a21102e8f1d25cdb64b2999fef05e5fd3",
+    "src/voxel.mjs": "6df6d3c5a0223cee405656afd0548fea3a957ae0c5185d7130a34d7198c3f981",
+    "tests/nonblock-inherited-extra-browser.mjs": "fbf54797555c6859fd6ecb33854b772bbd4989b556b6685add8897d4f0377e8c",
+    "src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
+    "src/nonblock/candidate-families.mjs": "1256e93ff7596858a213a171ba26b56244d57b40ae628e8cf608ab3e98381732",
+    "src/nonblock/candidate-scene.mjs": "93743d4367336422c5d9af8b887417c4310542a5c4527ff148faf80c3373b15c",
+    "src/nonblock/physical-fittings.mjs": "c9dc6bcb1d42e21e0fb2a0f304caa9d5053cbbccc06d60fea7769dfd714ee16e",
+    "src/nonblock/stage-offline.mjs": "c74fc6d09a4ef96cf476a9158004f88cc15a6dc1efe0d44943f83c77b5e155a8",
+    "src/nonblock/staged-inherited-families.mjs": "d2c3ee59248ad68cd76086992689e15e18ed4b59109d736f0308d2ea315b798e",
+    "src/nonblock-environments24/agave-rosette.mjs": "05d324294d808c81c6bbac1a626530cadc1c11a700b3b13bdf27a7e9c238d3db",
+    "src/nonblock-environments24/alpine-wildflower.mjs": "4ee8317a14c4043cd43d7d8dfe9c3d1475573d88946bc88822b714cdd880d60c",
+    "src/nonblock-environments24/branching-crystal-cluster.mjs": "c3bb73bc3b49de6623f9e8eb5579a8383665f42d5e4c1ab7abd69b93f618618f",
+    "src/nonblock-environments24/cave-formations.mjs": "598eba5c9864a2f1c210d0eb2cfe2f6088ef7cac9bc4bfe4446f1c28ac63c751",
+    "src/nonblock-environments24/cave-rubble-cluster.mjs": "25d9d37ebb62f57b548298217ef9d78b0d05a8ec07fffb49b49a80d5104e22a3",
+    "src/nonblock-environments24/column-cactus.mjs": "7f27d1eb59a2dfd9ea5d2d60573b3b8f050c6500588d81bc60b7214860dadc7e",
+    "src/nonblock-environments24/desert-bloom.mjs": "7862693515cb9d3e757baccc8be6e5827ec12aa07736aa05da75c5a946ad0155",
+    "src/nonblock-environments24/desert-scrub.mjs": "48b8eabaa7e33e1abf80fe5d2847500597461d2c1ae0bb67f0af033d535b564a",
+    "src/nonblock-environments24/dwarf-juniper.mjs": "be8493eaf0dbcbbe52e703d6d1e9366a6822be94c89a9c3b79830ef7a237ca67",
+    "src/nonblock-environments24/frost-fern.mjs": "7b2e5329be0a61aefb76bcab3a9c8fe66c19275858e0047b3583ad7c57b622b8",
+    "src/nonblock-environments24/geode-opening.mjs": "a4702efc983516cbff79a7df24db5fe2ff5eb7443196519abbbab162d866e6b6",
+    "src/nonblock-environments24/mineral-encrustation.mjs": "1a179ec6f5d54ca0c1d4d3c0a2f0c96712d460ba416c3d79c7c48c8ef58fffb3",
+    "src/nonblock-environments24/pebble-scatter.mjs": "32520748be51385a6cf8861d1d61b78fb113424cde434f6cbe1789af1fff8870",
+    "src/nonblock-environments24/prickly-pear-cactus.mjs": "2df88401215b3beec1f974a6bad06cfda0a795d3a3ce9240f3c7a276267ebbc1",
+    "src/nonblock-environments24/saltgrass.mjs": "ac729d8acae64c763333163585872b16f12e1c958e2ecf9142e575aa41a7f361",
+    "src/nonblock-environments24/snowgrass.mjs": "519c241b2d0a8eb4e6cfefaffdb0c4d2d963221204630a240e4c46390c2e257e",
+    "src/nonblock-environments24/tumblebrush.mjs": "f00b26b92c90f95cf5bf6e1159326c6829a0d18c8c4b3206ff29b5efa4cb4682",
+    "src/nonblock-fittings36/fittings-phase1.mjs": "ed78a367ba60977dd15adbb8448f8c58047cb32a5d2bbdfa014fd71fe05471b7",
+    "src/nonblock-fittings36/world-props.mjs": "8b9299c73ed1195e175c3b685fa667f58a54b4ef93737ffc44956c6af8c768b5"
+  }
+}

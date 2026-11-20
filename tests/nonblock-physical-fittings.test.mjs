@@ -3,7 +3,7 @@ import test from 'node:test';
 import {planOwnedFitting,OWNED_FITTING_IDS} from '../src/nonblock/physical-fittings.mjs';
 
 test('matching roster slots resolve the physical owner and its approved geometry',()=>{
-  const ids=[67,67,68,66,163,68,65,175,168,173,174];
+  const ids=[67,67,68,66,163,68,65,175,168,166,173,174];
   assert.equal(OWNED_FITTING_IDS.length,ids.length);
   for(const [index,id] of OWNED_FITTING_IDS.entries()) {
     const plan=planOwnedFitting(id,{anchor:[2,5,9],orientation:1});
@@ -26,7 +26,9 @@ test('paired leaves have separated hinges and use only existing coordinate and s
   assert.equal(planOwnedFitting('scene36:trapdoor',{anchor:[0,2,0]}).placements[0].state.variant,'lower');
   assert.equal(planOwnedFitting('scene36:hinged-hatch',{anchor:[0,2,0]}).placements[0].state.variant,'upper');
   assert.throws(()=>planOwnedFitting('scene36:window-shutters',{anchor:[0,2,0],open:true}));
-  assert.throws(()=>planOwnedFitting('scene36:hanging-lantern',{anchor:[0,2,0]}));
+  const lantern=planOwnedFitting('scene36:hanging-lantern',{anchor:[0,2,0]});
+  assert.equal(lantern.placements[0].numericId,166);
+  assert.deepEqual(lantern.blueprint.unresolvedSupports[0].at,[0,2,1]);
 });
 
 test('pair placement rolls back both cells and owner storage if the physical save cannot commit',async()=>{

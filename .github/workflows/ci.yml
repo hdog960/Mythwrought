@@ -20,6 +20,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -59,6 +60,7 @@ jobs:
             ~/.cache/ms-playwright
           key: mythwrought-ubuntu-node22-playwright1.58.2-pngjs7-v1
       - name: Install pinned browser test tools
+        id: browser_tools
         if: steps.scope.outputs.mode != 'docs-only'
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
@@ -73,6 +75,8 @@ jobs:
         if: steps.scope.outputs.mode == 'full'
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-site.log 2>&1 &
+          site_server=$!
+          trap 'kill "$site_server" 2>/dev/null || true' EXIT
           node tests/browser-smoke.mjs
           node tests/exploration-map-browser.mjs
           node tests/touch-browser.mjs
@@ -93,14 +97,23 @@ jobs:
           node tests/voxel-landmarks-browser.mjs
           node tests/live-world-browser.mjs
           node tests/context-restore-browser.mjs
+      - name: Staged non-block gameplay and evidence
+        if: ${{ !cancelled() && steps.scope.outputs.mode == 'full' && steps.browser_tools.outcome == 'success' }}
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-nonblock-site.log 2>&1 &
+          site_server=$!
+          trap 'kill "$site_server" 2>/dev/null || true' EXIT
           node tests/nonblock-runtime-browser.mjs
           node tests/nonblock-catalog-browser.mjs
           NONBLOCK_CATALOG_SET=meadow-woodland node tests/nonblock-catalog-browser.mjs
           NONBLOCK_CATALOG_SET=enchanted-fungi node tests/nonblock-catalog-browser.mjs
           node tests/nonblock-cave-browser.mjs
           node tests/nonblock-inherited-extra-browser.mjs
+          NONBLOCK_EXTRA_SET=world-props node tests/nonblock-inherited-extra-browser.mjs
           node tests/nonblock-offline-browser.mjs
           node tests/nonblock-physical-fittings-browser.mjs
+          node tests/nonblock-effects-browser.mjs
+          node scripts/ci/verify-nonblock-evidence.mjs
       - name: Advisory queue health snapshot
         if: always()
         env:

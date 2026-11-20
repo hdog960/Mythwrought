@@ -181,6 +181,9 @@ const families=new Map([
   ['scene36:broken-pottery-scatter',{make:pottery,attachment:'ground'}]
 ]);
 export const WORLD_PROP_IDS=Object.freeze([...families.keys()]);
+export function worldPropAttachment(sceneId) {
+  return families.get(sceneId)?.attachment??null;
+}
 
 export function createWorldProp(sceneId,{seed,anchor,variant=0}={}) {
   const family=families.get(sceneId);
@@ -189,6 +192,14 @@ export function createWorldProp(sceneId,{seed,anchor,variant=0}={}) {
     throw new TypeError('Invalid fitting or prop identity');
   const mesh=builder();
   const colliders=family.make(mesh,noiseFrom(sceneId,seed,anchor,variant),variant);
+  const geometry=mesh.finish();
+  if(family.make===ropeLadder){
+    // Seat the upper rope surface on the same plane as the ceiling mount.
+    const p=geometry.positions;
+    let top=-Infinity;
+    for(let i=1;i<p.length;i+=3)top=Math.max(top,p[i]);
+    for(let i=1;i<p.length;i+=3)p[i]-=top;
+  }
   return {sceneId,variant,attachment:family.attachment,climbable:Boolean(family.climbable),
-    mesh:mesh.finish(),colliders,palette};
+    mesh:geometry,colliders,palette};
 }

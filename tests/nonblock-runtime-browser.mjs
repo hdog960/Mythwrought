@@ -5,7 +5,7 @@ import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
 import {describeCandidateObject} from '../src/nonblock/candidate-scene.mjs';
 
-const origin = 'http://127.0.0.1:4173';
+const origin = process.env.NONBLOCK_RUNTIME_ORIGIN||'http://127.0.0.1:4173';
 const layout = [
   {sceneId:'scene48:single-wildflower',anchor:[10,9,7]},
   {sceneId:'nonblock:d:desert-scrub',anchor:[11,9,7],variant:3},

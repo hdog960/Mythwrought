@@ -14,6 +14,7 @@ const definitions = new Map([
   ['scene36:fence-rail',{asset:'pack2:018',numericId:65}],
   ['scene36:fabric-awning',{asset:'pack4:062',numericId:175}],
   ['scene36:wall-torch-bracket',{asset:'pack4:038',numericId:168}],
+  ['scene36:hanging-lantern',{asset:'pack4:036',numericId:166}],
   ['scene36:direction-sign',{asset:'pack4:060',numericId:173}],
   ['scene36:pennant-flag',{asset:'pack4:061',numericId:174}]
 ]);

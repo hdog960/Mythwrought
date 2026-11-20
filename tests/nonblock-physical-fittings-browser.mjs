@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {mkdir,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {VoxelWorld} from '../src/voxel.mjs';
 import {OWNED_FITTING_IDS,planOwnedFitting} from '../src/nonblock/physical-fittings.mjs';
@@ -39,6 +39,7 @@ const browser=await chromium.launch({headless:true,args:[
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'
 ]});
 const errors=[],captures=[];
+let minedCell=null;
 try{
   const context=await browser.newContext({
     viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1
@@ -76,6 +77,27 @@ try{
   const image=await page.screenshot({path:filename});
   assert.deepEqual([image.readUInt32BE(16),image.readUInt32BE(20)],[932,430]);
   captures.push({filename,sha256:createHash('sha256').update(image).digest('hex')});
+  const waitHit=cell=>page.waitForFunction(key=>
+    document.querySelector('#scene').dataset.targetBlock===key,cell.join(','),{timeout:15000});
+  await waitHit(door.at);
+  await page.locator('#menu').tap();
+  await page.locator('#pack2Materials [data-block="67"]').tap();
+  await page.locator('#closeHelp').tap();
+  await page.locator('#place').tap();
+  const ownerState=cell=>page.evaluate(cell=>{
+    const key=Object.keys(localStorage).find(name=>name.endsWith('-pack2-live-v1'));
+    return JSON.parse(localStorage.getItem(key)).cells.find(row=>
+      row[0]===cell[0]&&row[1]===cell[1]&&row[2]===cell[2])?.[4]??null;
+  },cell);
+  assert.equal((await ownerState(door.at)).open,true);
+  const sibling=plans.find(p=>p.sceneId==='scene36:double-door-pair').items[1];
+  assert.equal((await ownerState(sibling.at)).open,false);
+  await page.evaluate(([x,y,z])=>window.__mythwroughtTest.aimAtStagedPoint(x+.15,y+.50,z+.50),door.at);
+  await waitHit(door.at);
+  await page.locator('#dig').tap();
+  assert.equal(await ownerState(door.at),null);
+  assert.equal((await ownerState(sibling.at)).id,67);
+  minedCell=door.at;
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),saveKey),save);
   await page.close();
 
@@ -85,12 +107,20 @@ try{
   await reopened.waitForFunction(()=>window.__mythwroughtTest&&
     Number(document.querySelector('#scene').dataset.loadedChunks)===25,null,{timeout:45000});
   for(const {at,numericId} of plans.flatMap(p=>p.items))
-    assert.equal(await reopened.evaluate(cell=>window.__mythwroughtTest.block(...cell),at),numericId);
+    assert.equal(await reopened.evaluate(cell=>window.__mythwroughtTest.block(...cell),at),
+      at.join(',')===minedCell?.join(',')?0:numericId);
   assert.equal(await reopened.evaluate(key=>localStorage.getItem(key),saveKey),save);
   assert.deepEqual(errors,[]);
   await context.close();
 }finally{
   await browser.close();
 }
-await writeFile(directory+'/manifest.json',JSON.stringify({seed,plans,captures,schema1SaveBytesUnchanged:true},null,2)+'\n');
+const sourceFiles=['src/main.mjs','src/nonblock/physical-fittings.mjs','src/pack2-world.mjs',
+  'src/builder-assets/manual-five-pack.mjs','src/builder-assets/manual-five-pack-live.mjs',
+  'tests/nonblock-physical-fittings-browser.mjs'];
+const sourceSha256=Object.fromEntries(await Promise.all(sourceFiles.map(async file=>
+  [file,createHash('sha256').update(await readFile(file)).digest('hex')])));
+await writeFile(directory+'/manifest.json',JSON.stringify({
+  seed,plans,captures,minedCell,sourceSha256,schema1SaveBytesUnchanged:true
+},null,2)+'\n');
 console.log('PASS physical fittings used original Pack 2 and Pack 4 placement and reload owners');

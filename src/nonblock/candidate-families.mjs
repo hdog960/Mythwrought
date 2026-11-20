@@ -20,6 +20,7 @@ import {createEnchantedFungus,ENCHANTED_FUNGI_IDS} from '../nonblock-scene48/enc
 import {createMeadowWoodland,MEADOW_WOODLAND_IDS} from '../nonblock-scene48/meadow-woodland.mjs';
 import {createCaveFormation} from '../nonblock-environments24/cave-formations.mjs';
 import {inheritedStageFamilies} from './staged-inherited-families.mjs';
+import {createWorldProp,WORLD_PROP_IDS,worldPropAttachment} from '../nonblock-fittings36/world-props.mjs';
 import {describeFitting} from '../nonblock-fittings36/fittings-phase1.mjs';
 
 const floraPalette = [
@@ -59,7 +60,14 @@ function newFloraFamily(sceneId,build,wall) {
   return [sceneId,{lane:'48',wall,wallInset:.49,wallHeight:2,build:options=>build(sceneId,options)}];
 }
 
+export const stagedWorldPropFamilies = WORLD_PROP_IDS.map(sceneId=>{
+  const attachment=worldPropAttachment(sceneId);
+  return [sceneId,{lane:'36',attachment,wall:attachment==='wall',wallHeight:2,wallInset:.49,
+    build:options=>createWorldProp(sceneId,options)}];
+});
+
 export const candidateFamilies = new Map([
+  ...stagedWorldPropFamilies,
   ...inheritedStageFamilies,
   ...MEADOW_WOODLAND_IDS.map(sceneId=>newFloraFamily(sceneId,createMeadowWoodland,
     sceneId==='scene48:crawling-ivy'||sceneId==='scene48:trail-vine')),

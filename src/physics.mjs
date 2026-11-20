@@ -102,7 +102,8 @@ export function stepPlayer(world,p,input,dt){
   const out={stepped:false,landed:false,jumped:false,hitWall:false,ceiling:false};
   if(!dt)return out;
   const elapsed=Math.min(MAX_FRAME_DT,dt);
-  if(input.jump)p.jumpBuffer=JUMP_BUFFER;
+  const climbing=world?.stagedNonblockClimb?.(p)===true;
+  if(input.jump&&!climbing)p.jumpBuffer=JUMP_BUFFER;
   // dt subdivision limits every physics step: never tunnel through a cube on a slow frame.
   const count=Math.max(1,Math.ceil(elapsed/MAX_PHYSICS_DT));
   const h=elapsed/count;
@@ -111,8 +112,9 @@ export function stepPlayer(world,p,input,dt){
   const magnitude=Math.hypot(side,front);
   if(magnitude>1){side/=magnitude;front/=magnitude;}
   const yaw=Number.isFinite(p.yaw)?p.yaw:0;
-  const targetX=(Math.sin(yaw)*front+Math.cos(yaw)*side)*WALK_SPEED;
-  const targetZ=(Math.cos(yaw)*front-Math.sin(yaw)*side)*WALK_SPEED;
+  const travel=climbing?0:front;
+  const targetX=(Math.sin(yaw)*travel+Math.cos(yaw)*side)*WALK_SPEED;
+  const targetZ=(Math.cos(yaw)*travel-Math.sin(yaw)*side)*WALK_SPEED;
   for(let i=0;i<count;i++){
     // A support probe helps with step checks, but it must NOT freeze a falling
     // player several centimeters above the floor. Ground contact is near-exact.
@@ -120,7 +122,7 @@ export function stepPlayer(world,p,input,dt){
     if(touchingFloor&&p.vY<=0){p.onGround=true;p.coyote=COYOTE_TIME;}
     else if(!touchingFloor){p.onGround=false;p.coyote=Math.max(0,(p.coyote||0)-h);}
     p.jumpBuffer=Math.max(0,(p.jumpBuffer||0)-h);
-    if(p.jumpBuffer>0&&(p.onGround||p.coyote>0)){
+    if(!climbing&&p.jumpBuffer>0&&(p.onGround||p.coyote>0)){
       p.vY=JUMP_VELOCITY;p.onGround=false;p.coyote=0;p.jumpBuffer=0;out.jumped=true;
     }
     // Two-thumb release must stop promptly; gradual build-up is pleasant but
@@ -137,7 +139,10 @@ export function stepPlayer(world,p,input,dt){
       if(collision.blocked)p[velocityAxis]=0;
     }
     // Don't repeatedly accelerate downward when standing on a stable surface.
-    if(p.onGround&&p.vY<=0)p.vY=0;
+    if(climbing){
+      p.vY=front*2.0;
+      p.jumpBuffer=0;p.coyote=0;
+    }else if(p.onGround&&p.vY<=0)p.vY=0;
     else p.vY=Math.max(-28,p.vY-GRAVITY*h);
     if(p.vY!==0){
       const vertical=resolveY(world,p,h);

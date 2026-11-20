@@ -5,11 +5,13 @@ import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
 import {VoxelWorld,collides,raycast,terrainHeight} from '../src/voxel.mjs';
 import {createCandidateScene} from '../src/nonblock/candidate-scene.mjs';
+import {stagedWorldPropFamilies} from '../src/nonblock/candidate-families.mjs';
 import {inheritedStageFamilies} from '../src/nonblock/staged-inherited-families.mjs';
 
 const seed=179;
 const base=process.env.NONBLOCK_EXTRA_ORIGIN||'http://127.0.0.1:4173';
-const directory='artifacts/nonblock-inherited-extra';
+const worldProps=process.env.NONBLOCK_EXTRA_SET==='world-props';
+const directory=worldProps?'artifacts/nonblock-world-props':'artifacts/nonblock-inherited-extra';
 const world=new VoxelWorld(seed);
 const deps={
   storage:{getItem:()=>null},
@@ -49,7 +51,7 @@ function findView(scene,object){
   return null;
 }
 
-for(const [sceneId,family] of inheritedStageFamilies){
+for(const [sceneId,family] of (worldProps?stagedWorldPropFamilies:inheritedStageFamilies)){
   if(targetFamily&&sceneId!==targetFamily)continue;
   const orientations=family.wall?[0,1,2,3]:[0];
   const yOrder=family.attachment==='ceiling'?[9,8,10,7,6,5,4,3,2,1,0,11,12]:
@@ -72,7 +74,7 @@ for(const [sceneId,family] of inheritedStageFamilies){
   }
   assert.equal(samples.at(-1)?.placement.sceneId,sceneId,'No natural support and target for '+sceneId);
 }
-console.log('Located natural supports for '+samples.length+' inherited families');
+console.log('Located natural supports for '+samples.length+' scenery families');
 
 await mkdir(directory,{recursive:true});
 const browser=await chromium.launch({headless:true,args:[
@@ -134,6 +136,25 @@ try{
   });
   assert.equal(stored.world,savedWorld);
   assert.deepEqual(stored.tombstones,samples.map(s=>s.instanceKey).sort());
+  if(worldProps){
+    // The low tree-trunk mount makes the ladder reachable with the same
+    // movement input as the original game. Both source loads use real terrain.
+    const climbing=[{sceneId:'scene36:ladder-assembly',anchor:[11,8,10],orientation:2}];
+    await page.goto(base+'/?nonblock-stage='+encodeURIComponent(JSON.stringify(climbing)));
+    await count(1);
+    await page.evaluate(()=>{
+      window.__mythwroughtTest.teleportCave(11,8,10);
+      window.__mythwroughtTest.aimAt(11,9,11);
+    });
+    await page.keyboard.down('w');
+    try{
+      await page.waitForFunction(()=>Number(document.querySelector('#scene').dataset.playerFeet)>8.5,
+        null,{timeout:15000});
+    }finally{
+      await page.keyboard.up('w');
+    }
+    console.log('PASS regular game movement climbs the staged ladder');
+  }
   assert.deepEqual(errors,[]);
   await context.close();
 }finally{
@@ -144,4 +165,4 @@ for(const path of ['src/nonblock','src/nonblock-environments24','src/nonblock-fi
   for(const name of (await readdir(path)).sort())if(name.endsWith('.mjs'))sources.push(path+'/'+name);
 const sourceSha256=Object.fromEntries(await Promise.all(sources.map(async path=>[path,digest(await readFile(path))])));
 await writeFile(directory+'/manifest.json',JSON.stringify({seed,results,sourceSha256},null,2)+'\n');
-console.log('PASS exact gameplay lifecycle for',results.length,'remaining inherited props');
+console.log('PASS exact gameplay lifecycle for',results.length,'scenery props');
