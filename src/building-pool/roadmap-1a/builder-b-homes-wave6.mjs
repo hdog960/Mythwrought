@@ -10,7 +10,7 @@ export const BUILDER_B_HOMES_WAVE6_SPECS=Object.freeze([
     "w": 35,
     "d": 33,
     "plan": "open west orchard court, sheltered asymmetric front entry, tool workshop, social hearth, east cooking bay, two private rear rooms, and true detached roof massing",
-    "roof": "mixed",
+    "roof": "courtyard",
     "skin": "live:wood",
     "roofAsset": "pack3:023",
     "exteriorNotches": [
