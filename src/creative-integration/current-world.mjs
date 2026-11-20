@@ -1,7 +1,7 @@
 // Creator-owned current-generation authority. Read-only until an explicit new-world
 // commit; never relabel, rewrite or interpret legacy terrain as a newer generator.
 import {M6_BALANCED_GENERATOR} from '../manual-biomes/profile-world.mjs';
-import {worldSlotKey} from '../seeds.mjs';
+import {worldSlotKey,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,DEFAULT_WORLD_SEED} from '../seeds.mjs';
 import {GAME_RELEASE} from '../app-update.mjs';
 export const CURRENT_INSTALLED_GENERATOR=M6_BALANCED_GENERATOR;
 export const WORLD_SAVE_SCHEMA=1;
@@ -33,6 +33,11 @@ export function seedHasAnySavedData(storage,seed){
     throw TypeError('Verified storage and int32 seed required');
   // Existing schema-1 records and backup/journal never change key or bytes.
   const worldKey=worldSlotKey(seed);
+  // A selected seed remains reserved even when its canonical save is empty,
+  // and the pre-slot legacy save belongs to its original default seed.
+  if(storage.getItem(SELECTED_SEED_KEY)===String(seed)||
+     (seed===DEFAULT_WORLD_SEED&&storage.getItem(LEGACY_WORLD_KEY)!==null))
+    return true;
   if([worldKey,worldKey+'-integrity-v009',worldKey+'-backup-v009',
     'mythwrought-caves-v1-seed-'+seed,
     'mythwrought-mobs-v1-seed-'+seed,
