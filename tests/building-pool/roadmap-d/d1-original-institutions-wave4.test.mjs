@@ -22,7 +22,7 @@ function eightWayFloorD4(a,b){
 const historical=ROADMAP_C_4B_153_ALL;
 const previous=[...historical,...ROADMAP_D_WAVE1_BUILDINGS,...ROADMAP_D_WAVE2_BUILDINGS,...ROADMAP_D_WAVE3_BUILDINGS];
 const together=[...previous,...ROADMAP_D_WAVE4_BUILDINGS];
-test('D4 eight genuine vacant original 4B IDs, all earlier 165 source objects unchanged, no gallery proxy or live registration',()=>{
+test('D4 eight genuine vacant original 4B IDs, all earlier 173 source objects unchanged, no gallery proxy or live registration',()=>{
  const quota=new Set(expectedIds()),old=new Set(previous.map(x=>x.id));
  assert.deepEqual([historical.length,ROADMAP_D_WAVE1_BUILDINGS.length,ROADMAP_D_WAVE2_BUILDINGS.length,ROADMAP_D_WAVE3_BUILDINGS.length,ROADMAP_D_WAVE4_BUILDINGS.length],[153,6,6,8,8]);
  assert.equal(ROADMAP_D_WAVE4_IDS.length,8);
