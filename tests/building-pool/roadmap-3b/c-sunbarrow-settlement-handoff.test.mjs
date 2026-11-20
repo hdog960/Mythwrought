@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createCSunbarrowFortificationHandoff} from '../../../src/building-pool/roadmap-3b/c-sunbarrow-settlement-handoff.mjs';
+test('C7 original Sunbarrow C-only gate exports real three-wide crossing, 34 longitudinal samples and two road mouths with no world registration',()=>{
+ const a=createCSunbarrowFortificationHandoff(),b=createCSunbarrowFortificationHandoff();
+ assert.deepEqual(a,b);
+ assert.equal(a.id,'r3:gatehouse:desert:small:1');
+ assert.equal(a.gateway.width,3);assert.equal(a.gateway.height,3);
+ assert.equal(a.gateway.sourceRouteLength,34);
+ assert.equal(a.roadSockets.length,2);
+ assert.equal(a.wallJoinSockets.length,2);
+ assert.equal(a.sourceFingerprint.sourceVoxelCount,3535);
+ assert.equal(a.occupiedFoundationFootprint.occupiedFootprintColumns,881);
+ assert.match(a.sourceFingerprint.value,/^[a-f0-9]{64}$/);
+ assert.equal(a.sourceOnly,true);assert.equal(a.approvedForProduction,false);
+ assert.equal(a.registeredInGame,false);
+ assert.equal(a.producerFit.manualFivePackPhysicalApproval,false);
+ assert.equal(a.webgl2Evidence.galleryAcceptancePending,true);
+ assert.ok(Object.isFrozen(a));
+});
