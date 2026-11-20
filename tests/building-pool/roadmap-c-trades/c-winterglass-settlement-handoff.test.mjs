@@ -1,0 +1,26 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createCWinterglassHandoff} from '../../../src/building-pool/roadmap-c-trades/c-winterglass-settlement-handoff.mjs';
+test('C7 Winterglass source-only winter market handoff pins exact true plaza/shelter interfaces without enabling anything',()=>{
+ const a=createCWinterglassHandoff(),b=createCWinterglassHandoff();
+ assert.deepEqual(a,b);
+ assert.equal(a.id,'r2:market-square:snow:small:03');
+ assert.deepEqual(a.envelope,{x:55,y:17,z:49});
+ assert.equal(a.sourceWitness.voxelCells,4968);
+ assert.equal(a.sourceWitness.foundationColumns,1929);
+ assert.equal(a.sourceWitness.roofCells,710);
+ assert.equal(a.sourceWitness.glassCells,28);
+ assert.match(a.sourceWitness.sha256,/^[0-9a-f]{64}$/);
+ assert.equal(a.tradeBooths.length,7);
+ assert.equal(a.trueSourceAbsentGround.length,30);
+ assert.equal(a.realPublicPlazaWitness.length,12);
+ assert.equal(a.roadSockets.length,1);
+ assert.equal(a.sourceOnly,true);
+ assert.equal(a.approvedForProduction,false);
+ assert.equal(a.registeredInGame,false);
+ assert.equal(a.settlementPlaced,false);
+ assert.equal(a.merchantAIEnabled,false);
+ assert.equal(a.worldGenerationEnabled,false);
+ assert.equal(a.technicalAcceptance.realProducerAABBAndYawPassed,false);
+ assert.ok(Object.isFrozen(a));
+});
