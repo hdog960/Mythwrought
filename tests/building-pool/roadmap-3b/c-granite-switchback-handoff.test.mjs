@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createCGraniteSwitchbackHandoff} from '../../../src/building-pool/roadmap-3b/c-granite-switchback-handoff.mjs';
+test('C7 new original mountain wall exports true closed 176-step ridge, eight step-break sockets and 14-long source gate, remains unregistered',()=>{
+ const a=createCGraniteSwitchbackHandoff();
+ assert.deepEqual(a,createCGraniteSwitchbackHandoff());
+ assert.equal(a.id,'r3:city-wall:mountain:small:1');
+ assert.equal(a.occupiedFoundationFootprint.occupiedFootprintColumns,805);
+ assert.equal(a.sourceFingerprint.sourceVoxelCount,3936);
+ assert.match(a.sourceFingerprint.value,/^[0-9a-f]{64}$/);
+ assert.equal(a.defendedRampart.length,176);
+ assert.equal(a.closedPerimeter.length,9);
+ assert.deepEqual(a.closedPerimeter[0],a.closedPerimeter.at(-1));
+ assert.equal(a.wallJoinSockets.length,8);
+ assert.equal(a.roadSockets.length,2);
+ assert.equal(a.gateway.width,2);assert.equal(a.gateway.height,3);
+ assert.equal(a.gateway.sourceRouteLength,14);
+ assert.equal(a.supportAudit.actualPhysicalStairVoxels,10);
+ assert.equal(a.sourceOnly,true);assert.equal(a.registeredInGame,false);
+ assert.equal(a.producerFit.manualFivePackPhysicalApproval,false);
+ assert.equal(a.webgl2Evidence.galleryAcceptancePending,true);
+ assert.ok(Object.isFrozen(a));
+});
