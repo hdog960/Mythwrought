@@ -47,6 +47,14 @@ function rememberColumns(world,key,columns){
     cache.delete(oldest);total-=removed.bytes;
   }
 }
+function sameColumnBytes(a,b){
+  if(a===b)return true;
+  if(a.length!==b.length)return false;
+  const aa=new Uint32Array(a.buffer,a.byteOffset,a.length),
+    bb=new Uint32Array(b.buffer,b.byteOffset,b.length);
+  for(let k=0;k<aa.length;k++)if(aa[k]!==bb[k])return false;
+  return true;
+}
 function joinColumns(columns){
   let length=0;
   for(const column of columns)length+=column.length;
@@ -56,6 +64,16 @@ function joinColumns(columns){
   return result;
 }
 export function meshDepthSection(world,cx,cz,section,editedCell=null){
+  return depthMeshResult(world,cx,cz,section,editedCell).vertices;
+}
+// Optional read-only change flag for the GPU edit path. This is deliberately
+// separate from the original Float32Array ABI used by all older callers.
+export function meshDepthSectionUpdate(world,cx,cz,section,editedCell){
+  if(!Array.isArray(editedCell)||editedCell.length!==3||!editedCell.every(Number.isInteger))
+    throw Error('Incremental section update requires one integer edited cell');
+  return depthMeshResult(world,cx,cz,section,editedCell);
+}
+function depthMeshResult(world,cx,cz,section,editedCell){
   if(!world||typeof world.get!=='function'||![cx,cz,section].every(Number.isInteger)||section>=0)
     throw Error('Invalid deep mesh request');
   const key=sectionKey(cx,cz,section);
@@ -75,12 +93,17 @@ export function meshDepthSection(world,cx,cz,section,editedCell=null){
   const next=buildDepthColumns(world,cx,cz,section,dirty);
   if(dirty){
     const updated=previous.columns.slice();
-    for(const index of dirty)updated[index]=next.columns[index];
+    let changed=false;
+    for(const index of dirty){
+      if(!sameColumnBytes(updated[index],next.columns[index]))changed=true;
+      updated[index]=next.columns[index];
+    }
+    if(!changed)return {vertices:joinColumns(previous.columns),changed:false};
     rememberColumns(world,key,updated);
-    return joinColumns(updated);
+    return {vertices:joinColumns(updated),changed:true};
   }
   rememberColumns(world,key,next.columns);
-  return next.vertices;
+  return {vertices:next.vertices,changed:true};
 }
 function buildDepthColumns(world,cx,cz,section,dirtyColumns){
 
