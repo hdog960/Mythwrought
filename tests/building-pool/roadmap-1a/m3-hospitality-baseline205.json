@@ -1,0 +1,1031 @@
+{
+  "source": "205 full complete source object snapshot of exact-GREEN 032c4e91200fb605ca9f90e6711bf138d1a8e5e1, preserving all 191 historical source-object fingerprints and the 14 M3 wave2 source candidates",
+  "count": 205,
+  "records": [
+    {
+      "id": "r1:house:temperate:small:001",
+      "chars": 103097,
+      "fnv": "df2e33f3"
+    },
+    {
+      "id": "r1:house:temperate:medium:002",
+      "chars": 187009,
+      "fnv": "b073f129"
+    },
+    {
+      "id": "r1:house:temperate:large:003",
+      "chars": 318001,
+      "fnv": "20aac903"
+    },
+    {
+      "id": "r1:house:desert:small:001",
+      "chars": 107942,
+      "fnv": "6a9397bb"
+    },
+    {
+      "id": "r1:house:desert:medium:002",
+      "chars": 187921,
+      "fnv": "842b041d"
+    },
+    {
+      "id": "r1:house:desert:large:003",
+      "chars": 355943,
+      "fnv": "e02cd31b"
+    },
+    {
+      "id": "r1:house:snow:small:001",
+      "chars": 104112,
+      "fnv": "cccd14ce"
+    },
+    {
+      "id": "r1:house:snow:medium:002",
+      "chars": 179717,
+      "fnv": "bbb88c47"
+    },
+    {
+      "id": "r1:house:snow:large:003",
+      "chars": 286314,
+      "fnv": "8c8fdc1e"
+    },
+    {
+      "id": "r1:house:enchanted-forest:small:001",
+      "chars": 112986,
+      "fnv": "dcce7fa4"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:002",
+      "chars": 209206,
+      "fnv": "c9ca1efd"
+    },
+    {
+      "id": "r1:house:enchanted-forest:large:003",
+      "chars": 356702,
+      "fnv": "13a2f215"
+    },
+    {
+      "id": "r1:house:mountain:small:001",
+      "chars": 109753,
+      "fnv": "ac7b2180"
+    },
+    {
+      "id": "r1:house:mountain:medium:002",
+      "chars": 192932,
+      "fnv": "c3935e15"
+    },
+    {
+      "id": "r1:house:mountain:large:003",
+      "chars": 368145,
+      "fnv": "1456adee"
+    },
+    {
+      "id": "r1:tavern:temperate:small:001",
+      "chars": 117662,
+      "fnv": "772f86bf"
+    },
+    {
+      "id": "r1:tavern:temperate:medium:002",
+      "chars": 213059,
+      "fnv": "d33e0d3a"
+    },
+    {
+      "id": "r1:tavern:temperate:large:003",
+      "chars": 358182,
+      "fnv": "890c9ad1"
+    },
+    {
+      "id": "r1:tavern:desert:small:001",
+      "chars": 125295,
+      "fnv": "808f0032"
+    },
+    {
+      "id": "r1:tavern:desert:medium:002",
+      "chars": 207537,
+      "fnv": "210e8b1d"
+    },
+    {
+      "id": "r1:tavern:desert:large:003",
+      "chars": 381753,
+      "fnv": "dc5f9932"
+    },
+    {
+      "id": "r1:tavern:snow:small:001",
+      "chars": 111141,
+      "fnv": "59401bfe"
+    },
+    {
+      "id": "r1:tavern:snow:medium:002",
+      "chars": 203919,
+      "fnv": "46c7e5c8"
+    },
+    {
+      "id": "r1:tavern:snow:large:003",
+      "chars": 318483,
+      "fnv": "872abe91"
+    },
+    {
+      "id": "r1:tavern:enchanted-forest:small:001",
+      "chars": 121505,
+      "fnv": "855a295d"
+    },
+    {
+      "id": "r1:tavern:enchanted-forest:medium:002",
+      "chars": 229485,
+      "fnv": "98b1a9e1"
+    },
+    {
+      "id": "r1:tavern:enchanted-forest:large:003",
+      "chars": 365267,
+      "fnv": "d2bc4155"
+    },
+    {
+      "id": "r1:tavern:mountain:small:001",
+      "chars": 125194,
+      "fnv": "8ddbe3f1"
+    },
+    {
+      "id": "r1:tavern:mountain:medium:002",
+      "chars": 228118,
+      "fnv": "e54e9388"
+    },
+    {
+      "id": "r1:tavern:mountain:large:003",
+      "chars": 409738,
+      "fnv": "ae931300"
+    },
+    {
+      "id": "r1:inn:temperate:small:001",
+      "chars": 281783,
+      "fnv": "ea312bc9"
+    },
+    {
+      "id": "r1:house:desert:small:002",
+      "chars": 185876,
+      "fnv": "aef5ed7d"
+    },
+    {
+      "id": "r1:house:snow:medium:004",
+      "chars": 308709,
+      "fnv": "1026b7e3"
+    },
+    {
+      "id": "r1:house:mountain:large:002",
+      "chars": 394444,
+      "fnv": "a80f63e4"
+    },
+    {
+      "id": "r1:tavern:temperate:small:002",
+      "chars": 212359,
+      "fnv": "ee7ec65e"
+    },
+    {
+      "id": "r1:tavern:enchanted-forest:medium:004",
+      "chars": 380960,
+      "fnv": "784e0584"
+    },
+    {
+      "id": "r1:inn:desert:medium:001",
+      "chars": 340811,
+      "fnv": "e6c81e40"
+    },
+    {
+      "id": "r1:inn:snow:small:001",
+      "chars": 258002,
+      "fnv": "85a843e4"
+    },
+    {
+      "id": "r1:inn:mountain:large:001",
+      "chars": 538979,
+      "fnv": "d864b24b"
+    },
+    {
+      "id": "r1:house:temperate:small:002",
+      "chars": 240412,
+      "fnv": "7e4a16ca"
+    },
+    {
+      "id": "r1:house:temperate:medium:003",
+      "chars": 345749,
+      "fnv": "f2574d69"
+    },
+    {
+      "id": "r1:house:temperate:large:002",
+      "chars": 417838,
+      "fnv": "26a1896c"
+    },
+    {
+      "id": "r1:house:desert:small:003",
+      "chars": 229971,
+      "fnv": "4f0707ac"
+    },
+    {
+      "id": "r1:house:desert:medium:003",
+      "chars": 370108,
+      "fnv": "cd66ab29"
+    },
+    {
+      "id": "r1:house:desert:large:002",
+      "chars": 431542,
+      "fnv": "97df4598"
+    },
+    {
+      "id": "r1:house:snow:small:002",
+      "chars": 289732,
+      "fnv": "035d609f"
+    },
+    {
+      "id": "r1:house:snow:medium:003",
+      "chars": 412841,
+      "fnv": "9a656772"
+    },
+    {
+      "id": "r1:house:snow:large:002",
+      "chars": 574098,
+      "fnv": "66579600"
+    },
+    {
+      "id": "r1:house:enchanted-forest:small:002",
+      "chars": 314993,
+      "fnv": "9243bc4e"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:003",
+      "chars": 360967,
+      "fnv": "4e44d456"
+    },
+    {
+      "id": "r1:house:enchanted-forest:large:002",
+      "chars": 620476,
+      "fnv": "bcd809fa"
+    },
+    {
+      "id": "r1:house:mountain:small:002",
+      "chars": 335550,
+      "fnv": "72a98b0d"
+    },
+    {
+      "id": "r1:house:mountain:medium:003",
+      "chars": 405745,
+      "fnv": "0c353e76"
+    },
+    {
+      "id": "r1:house:mountain:large:004",
+      "chars": 708991,
+      "fnv": "3a813ed9"
+    },
+    {
+      "id": "r1:house:temperate:small:003",
+      "chars": 252418,
+      "fnv": "238d1099"
+    },
+    {
+      "id": "r1:house:temperate:medium:004",
+      "chars": 408568,
+      "fnv": "6f46f230"
+    },
+    {
+      "id": "r1:house:temperate:large:004",
+      "chars": 587906,
+      "fnv": "6fab6e15"
+    },
+    {
+      "id": "r1:house:desert:small:004",
+      "chars": 242951,
+      "fnv": "08226875"
+    },
+    {
+      "id": "r1:house:desert:medium:004",
+      "chars": 339693,
+      "fnv": "949e32fb"
+    },
+    {
+      "id": "r1:house:desert:large:004",
+      "chars": 654691,
+      "fnv": "ab12d88e"
+    },
+    {
+      "id": "r1:house:snow:small:003",
+      "chars": 288995,
+      "fnv": "067962d1"
+    },
+    {
+      "id": "r1:house:snow:medium:005",
+      "chars": 463680,
+      "fnv": "73866f54"
+    },
+    {
+      "id": "r1:house:snow:large:004",
+      "chars": 666596,
+      "fnv": "acdb59b4"
+    },
+    {
+      "id": "r1:house:enchanted-forest:small:003",
+      "chars": 281945,
+      "fnv": "2a05c111"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:004",
+      "chars": 462036,
+      "fnv": "8db5ba8c"
+    },
+    {
+      "id": "r1:house:enchanted-forest:large:004",
+      "chars": 723484,
+      "fnv": "c75baedf"
+    },
+    {
+      "id": "r1:house:mountain:small:003",
+      "chars": 312921,
+      "fnv": "64d4764b"
+    },
+    {
+      "id": "r1:house:mountain:medium:004",
+      "chars": 445362,
+      "fnv": "8ac3e0b9"
+    },
+    {
+      "id": "r1:house:mountain:large:005",
+      "chars": 802058,
+      "fnv": "0f893c9c"
+    },
+    {
+      "id": "r1:house:temperate:small:004",
+      "chars": 271345,
+      "fnv": "41a5fa72"
+    },
+    {
+      "id": "r1:house:temperate:medium:005",
+      "chars": 531562,
+      "fnv": "656eefde"
+    },
+    {
+      "id": "r1:house:temperate:large:005",
+      "chars": 739968,
+      "fnv": "0ced0edd"
+    },
+    {
+      "id": "r1:house:desert:small:005",
+      "chars": 254375,
+      "fnv": "09f981d6"
+    },
+    {
+      "id": "r1:house:desert:medium:005",
+      "chars": 440059,
+      "fnv": "4c76edd2"
+    },
+    {
+      "id": "r1:house:desert:large:005",
+      "chars": 804120,
+      "fnv": "9f7b7e27"
+    },
+    {
+      "id": "r1:house:snow:small:004",
+      "chars": 317825,
+      "fnv": "de5ff15d"
+    },
+    {
+      "id": "r1:house:snow:medium:006",
+      "chars": 510231,
+      "fnv": "b33bc7f4"
+    },
+    {
+      "id": "r1:house:snow:large:005",
+      "chars": 834368,
+      "fnv": "9b7cb20d"
+    },
+    {
+      "id": "r1:house:enchanted-forest:small:004",
+      "chars": 328493,
+      "fnv": "99ac3730"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:005",
+      "chars": 453509,
+      "fnv": "e157a1ce"
+    },
+    {
+      "id": "r1:house:enchanted-forest:large:005",
+      "chars": 771334,
+      "fnv": "8b58b44d"
+    },
+    {
+      "id": "r1:house:mountain:small:004",
+      "chars": 349240,
+      "fnv": "6b972d2f"
+    },
+    {
+      "id": "r1:house:mountain:medium:005",
+      "chars": 502171,
+      "fnv": "263384c3"
+    },
+    {
+      "id": "r1:house:mountain:large:006",
+      "chars": 764178,
+      "fnv": "6d0138bd"
+    },
+    {
+      "id": "r1:house:temperate:small:005",
+      "chars": 346049,
+      "fnv": "593fd405"
+    },
+    {
+      "id": "r1:house:temperate:medium:006",
+      "chars": 608906,
+      "fnv": "141984c5"
+    },
+    {
+      "id": "r1:house:temperate:large:006",
+      "chars": 988954,
+      "fnv": "c2e044cd"
+    },
+    {
+      "id": "r1:house:desert:small:006",
+      "chars": 374070,
+      "fnv": "2c77209a"
+    },
+    {
+      "id": "r1:house:desert:medium:006",
+      "chars": 605215,
+      "fnv": "0187c21c"
+    },
+    {
+      "id": "r1:house:desert:large:006",
+      "chars": 1038626,
+      "fnv": "5d8c6e55"
+    },
+    {
+      "id": "r1:house:snow:small:005",
+      "chars": 391614,
+      "fnv": "2c9d5acb"
+    },
+    {
+      "id": "r1:house:snow:medium:007",
+      "chars": 676268,
+      "fnv": "024a849c"
+    },
+    {
+      "id": "r1:house:snow:large:006",
+      "chars": 1010292,
+      "fnv": "8c0dc271"
+    },
+    {
+      "id": "r1:house:enchanted-forest:small:005",
+      "chars": 477316,
+      "fnv": "7a3f5eb1"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:006",
+      "chars": 623272,
+      "fnv": "b8447c47"
+    },
+    {
+      "id": "r1:house:enchanted-forest:large:006",
+      "chars": 1046311,
+      "fnv": "d01ff862"
+    },
+    {
+      "id": "r1:house:mountain:small:005",
+      "chars": 429549,
+      "fnv": "4f67f4f1"
+    },
+    {
+      "id": "r1:house:mountain:medium:006",
+      "chars": 685732,
+      "fnv": "8178530e"
+    },
+    {
+      "id": "r1:house:mountain:large:007",
+      "chars": 1134689,
+      "fnv": "0c6d926a"
+    },
+    {
+      "id": "r1:house:temperate:small:006",
+      "chars": 321812,
+      "fnv": "28a1176b"
+    },
+    {
+      "id": "r1:house:temperate:medium:007",
+      "chars": 672729,
+      "fnv": "5bd25b54"
+    },
+    {
+      "id": "r1:house:temperate:large:007",
+      "chars": 845157,
+      "fnv": "ddfd6707"
+    },
+    {
+      "id": "r1:house:desert:small:007",
+      "chars": 276162,
+      "fnv": "7f9048c1"
+    },
+    {
+      "id": "r1:house:desert:medium:007",
+      "chars": 471530,
+      "fnv": "b9c6a451"
+    },
+    {
+      "id": "r1:house:desert:large:007",
+      "chars": 1029654,
+      "fnv": "196fedf0"
+    },
+    {
+      "id": "r1:house:snow:small:006",
+      "chars": 403338,
+      "fnv": "11cd8f58"
+    },
+    {
+      "id": "r1:house:snow:medium:008",
+      "chars": 563233,
+      "fnv": "1662cf94"
+    },
+    {
+      "id": "r1:house:snow:large:007",
+      "chars": 1045713,
+      "fnv": "8cd20b2d"
+    },
+    {
+      "id": "r1:house:enchanted-forest:small:006",
+      "chars": 360611,
+      "fnv": "666e5acb"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:007",
+      "chars": 655743,
+      "fnv": "a27c96c6"
+    },
+    {
+      "id": "r1:house:enchanted-forest:large:007",
+      "chars": 937406,
+      "fnv": "b584c64d"
+    },
+    {
+      "id": "r1:house:mountain:small:006",
+      "chars": 350218,
+      "fnv": "13825850"
+    },
+    {
+      "id": "r1:house:mountain:medium:007",
+      "chars": 727027,
+      "fnv": "7ff768df"
+    },
+    {
+      "id": "r1:house:mountain:large:008",
+      "chars": 1004753,
+      "fnv": "ffeaa822"
+    },
+    {
+      "id": "r1:house:temperate:small:007",
+      "chars": 407469,
+      "fnv": "e88dacb5"
+    },
+    {
+      "id": "r1:house:temperate:medium:008",
+      "chars": 685877,
+      "fnv": "0e3582a0"
+    },
+    {
+      "id": "r1:house:temperate:large:008",
+      "chars": 839180,
+      "fnv": "fe0ba30c"
+    },
+    {
+      "id": "r1:house:desert:small:008",
+      "chars": 380606,
+      "fnv": "5a534bae"
+    },
+    {
+      "id": "r1:house:desert:medium:008",
+      "chars": 540870,
+      "fnv": "d59b15b2"
+    },
+    {
+      "id": "r1:house:desert:large:008",
+      "chars": 1153215,
+      "fnv": "8ac44c98"
+    },
+    {
+      "id": "r1:house:snow:small:007",
+      "chars": 372469,
+      "fnv": "72b0292a"
+    },
+    {
+      "id": "r1:house:snow:medium:009",
+      "chars": 592238,
+      "fnv": "802c0189"
+    },
+    {
+      "id": "r1:house:snow:large:008",
+      "chars": 1029983,
+      "fnv": "aa9505a6"
+    },
+    {
+      "id": "r1:house:enchanted-forest:small:007",
+      "chars": 379462,
+      "fnv": "d50e7f6f"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:008",
+      "chars": 581758,
+      "fnv": "253cb1d3"
+    },
+    {
+      "id": "r1:house:enchanted-forest:large:008",
+      "chars": 1080815,
+      "fnv": "3734306f"
+    },
+    {
+      "id": "r1:house:mountain:small:007",
+      "chars": 472335,
+      "fnv": "fbdbd1bd"
+    },
+    {
+      "id": "r1:house:mountain:medium:008",
+      "chars": 592680,
+      "fnv": "d723997f"
+    },
+    {
+      "id": "r1:house:mountain:large:009",
+      "chars": 877510,
+      "fnv": "d654fdda"
+    },
+    {
+      "id": "r1:house:temperate:small:008",
+      "chars": 490315,
+      "fnv": "03fabe19"
+    },
+    {
+      "id": "r1:house:temperate:medium:009",
+      "chars": 844264,
+      "fnv": "52a31a49"
+    },
+    {
+      "id": "r1:house:temperate:large:009",
+      "chars": 1195997,
+      "fnv": "fa8bf8fd"
+    },
+    {
+      "id": "r1:house:desert:small:009",
+      "chars": 413349,
+      "fnv": "e4d97c3f"
+    },
+    {
+      "id": "r1:house:desert:medium:009",
+      "chars": 655187,
+      "fnv": "e88d5c4b"
+    },
+    {
+      "id": "r1:house:desert:large:009",
+      "chars": 1264902,
+      "fnv": "94a456a5"
+    },
+    {
+      "id": "r1:house:snow:small:008",
+      "chars": 484769,
+      "fnv": "30a41c61"
+    },
+    {
+      "id": "r1:house:snow:medium:010",
+      "chars": 825752,
+      "fnv": "57bf6493"
+    },
+    {
+      "id": "r1:house:snow:large:009",
+      "chars": 1054443,
+      "fnv": "8ce5008c"
+    },
+    {
+      "id": "r1:house:enchanted-forest:small:008",
+      "chars": 595827,
+      "fnv": "d6c4ca50"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:009",
+      "chars": 876043,
+      "fnv": "086500b9"
+    },
+    {
+      "id": "r1:house:enchanted-forest:large:009",
+      "chars": 1390865,
+      "fnv": "53e3eb1d"
+    },
+    {
+      "id": "r1:house:mountain:small:008",
+      "chars": 424492,
+      "fnv": "92876a05"
+    },
+    {
+      "id": "r1:house:mountain:medium:009",
+      "chars": 895065,
+      "fnv": "ed423171"
+    },
+    {
+      "id": "r1:house:mountain:large:010",
+      "chars": 1577678,
+      "fnv": "e19e4a01"
+    },
+    {
+      "id": "r1:house:temperate:small:012",
+      "chars": 520656,
+      "fnv": "81b4e448"
+    },
+    {
+      "id": "r1:house:desert:medium:012",
+      "chars": 615793,
+      "fnv": "331ef3e4"
+    },
+    {
+      "id": "r1:house:snow:large:012",
+      "chars": 977650,
+      "fnv": "043d5b4d"
+    },
+    {
+      "id": "r1:house:enchanted-forest:small:012",
+      "chars": 423160,
+      "fnv": "9a0bf2a0"
+    },
+    {
+      "id": "r1:house:mountain:medium:012",
+      "chars": 846317,
+      "fnv": "e6dfe553"
+    },
+    {
+      "id": "r1:house:temperate:small:013",
+      "chars": 427547,
+      "fnv": "c9764baa"
+    },
+    {
+      "id": "r1:house:temperate:medium:010",
+      "chars": 754673,
+      "fnv": "97063ea0"
+    },
+    {
+      "id": "r1:house:temperate:large:010",
+      "chars": 1132485,
+      "fnv": "ec3d6ede"
+    },
+    {
+      "id": "r1:house:desert:small:010",
+      "chars": 633662,
+      "fnv": "15baed27"
+    },
+    {
+      "id": "r1:house:desert:medium:013",
+      "chars": 796772,
+      "fnv": "51298055"
+    },
+    {
+      "id": "r1:house:desert:large:010",
+      "chars": 1194342,
+      "fnv": "a14e387a"
+    },
+    {
+      "id": "r1:house:snow:small:009",
+      "chars": 455439,
+      "fnv": "d8593e9c"
+    },
+    {
+      "id": "r1:house:snow:medium:011",
+      "chars": 806050,
+      "fnv": "8adc18ea"
+    },
+    {
+      "id": "r1:house:snow:large:013",
+      "chars": 1324591,
+      "fnv": "72789f86"
+    },
+    {
+      "id": "r1:house:enchanted-forest:small:013",
+      "chars": 493333,
+      "fnv": "c0e39e0c"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:010",
+      "chars": 925642,
+      "fnv": "663051fa"
+    },
+    {
+      "id": "r1:house:enchanted-forest:large:010",
+      "chars": 1160260,
+      "fnv": "b8975e61"
+    },
+    {
+      "id": "r1:house:mountain:small:009",
+      "chars": 537404,
+      "fnv": "c3e7774b"
+    },
+    {
+      "id": "r1:house:mountain:medium:013",
+      "chars": 820063,
+      "fnv": "eb2816bd"
+    },
+    {
+      "id": "r1:house:mountain:large:011",
+      "chars": 1202330,
+      "fnv": "d9625877"
+    },
+    {
+      "id": "r1:house:temperate:small:014",
+      "chars": 672924,
+      "fnv": "004ab2b8"
+    },
+    {
+      "id": "r1:house:desert:large:011",
+      "chars": 1218207,
+      "fnv": "c66ad431"
+    },
+    {
+      "id": "r1:house:snow:small:010",
+      "chars": 483439,
+      "fnv": "d7914ace"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:011",
+      "chars": 826269,
+      "fnv": "d1af1d23"
+    },
+    {
+      "id": "r1:house:mountain:small:010",
+      "chars": 551719,
+      "fnv": "734218f1"
+    },
+    {
+      "id": "r1:house:temperate:large:011",
+      "chars": 1268410,
+      "fnv": "db651762"
+    },
+    {
+      "id": "r1:house:mountain:large:012",
+      "chars": 1520938,
+      "fnv": "ebdb6d9b"
+    },
+    {
+      "id": "r1:tavern:temperate:small:003",
+      "chars": 780902,
+      "fnv": "66fb5c11"
+    },
+    {
+      "id": "r1:tavern:temperate:medium:003",
+      "chars": 1041012,
+      "fnv": "79f632d7"
+    },
+    {
+      "id": "r1:tavern:desert:small:002",
+      "chars": 837671,
+      "fnv": "e5735a94"
+    },
+    {
+      "id": "r1:tavern:desert:large:004",
+      "chars": 1410698,
+      "fnv": "309e565c"
+    },
+    {
+      "id": "r1:tavern:snow:medium:003",
+      "chars": 1004612,
+      "fnv": "760b5c8c"
+    },
+    {
+      "id": "r1:tavern:snow:large:004",
+      "chars": 1671482,
+      "fnv": "8f2e2e0d"
+    },
+    {
+      "id": "r1:tavern:enchanted-forest:small:002",
+      "chars": 779868,
+      "fnv": "828e4e21"
+    },
+    {
+      "id": "r1:tavern:enchanted-forest:medium:005",
+      "chars": 1245825,
+      "fnv": "2e336c82"
+    },
+    {
+      "id": "r1:tavern:mountain:medium:003",
+      "chars": 1256538,
+      "fnv": "846400a5"
+    },
+    {
+      "id": "r1:tavern:mountain:large:004",
+      "chars": 1482170,
+      "fnv": "3246d47f"
+    },
+    {
+      "id": "r1:inn:temperate:small:002",
+      "chars": 721865,
+      "fnv": "303d7944"
+    },
+    {
+      "id": "r1:inn:temperate:large:001",
+      "chars": 1963255,
+      "fnv": "6891dc52"
+    },
+    {
+      "id": "r1:inn:desert:medium:002",
+      "chars": 1117666,
+      "fnv": "240580f3"
+    },
+    {
+      "id": "r1:inn:desert:large:001",
+      "chars": 1863595,
+      "fnv": "be1ba6b2"
+    },
+    {
+      "id": "r1:inn:snow:small:002",
+      "chars": 767690,
+      "fnv": "867dd4b6"
+    },
+    {
+      "id": "r1:inn:snow:medium:001",
+      "chars": 1645882,
+      "fnv": "28565701"
+    },
+    {
+      "id": "r1:inn:enchanted-forest:medium:001",
+      "chars": 1480973,
+      "fnv": "9f93cb85"
+    },
+    {
+      "id": "r1:inn:enchanted-forest:large:001",
+      "chars": 1775364,
+      "fnv": "449d87c2"
+    },
+    {
+      "id": "r1:inn:mountain:small:001",
+      "chars": 1067288,
+      "fnv": "7c8b0b61"
+    },
+    {
+      "id": "r1:inn:mountain:large:002",
+      "chars": 1873353,
+      "fnv": "5986ba3d"
+    },
+    {
+      "id": "r1:tavern:temperate:medium:004",
+      "chars": 943086,
+      "fnv": "3b36f552"
+    },
+    {
+      "id": "r1:tavern:desert:medium:003",
+      "chars": 1353865,
+      "fnv": "29e66730"
+    },
+    {
+      "id": "r1:tavern:snow:small:002",
+      "chars": 834845,
+      "fnv": "3245bd62"
+    },
+    {
+      "id": "r1:tavern:snow:medium:004",
+      "chars": 1059871,
+      "fnv": "c67a85ad"
+    },
+    {
+      "id": "r1:tavern:enchanted-forest:small:003",
+      "chars": 903614,
+      "fnv": "2ab9a616"
+    },
+    {
+      "id": "r1:tavern:enchanted-forest:large:004",
+      "chars": 1981735,
+      "fnv": "2190eeb9"
+    },
+    {
+      "id": "r1:tavern:mountain:large:005",
+      "chars": 2363750,
+      "fnv": "240cef4b"
+    },
+    {
+      "id": "r1:inn:temperate:medium:001",
+      "chars": 1573227,
+      "fnv": "2cc28149"
+    },
+    {
+      "id": "r1:inn:desert:small:001",
+      "chars": 978100,
+      "fnv": "d2dadfac"
+    },
+    {
+      "id": "r1:inn:desert:medium:003",
+      "chars": 1171364,
+      "fnv": "8cbf30f7"
+    },
+    {
+      "id": "r1:inn:snow:medium:002",
+      "chars": 1514130,
+      "fnv": "468e43b4"
+    },
+    {
+      "id": "r1:inn:enchanted-forest:small:001",
+      "chars": 953737,
+      "fnv": "1bd5c6ec"
+    },
+    {
+      "id": "r1:inn:enchanted-forest:large:002",
+      "chars": 2100739,
+      "fnv": "8b575baf"
+    },
+    {
+      "id": "r1:inn:mountain:small:002",
+      "chars": 1059739,
+      "fnv": "cff575e9"
+    }
+  ]
+}
