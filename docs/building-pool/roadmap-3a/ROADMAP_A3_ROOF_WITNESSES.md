@@ -1,0 +1,7 @@
+# MYTHWROUGHT Roadmap A3 — source-exact 274 roof warning locations
+
+This separate draft child PR extends the read-only A3 audit on protected exact parent HEAD `76656f35d2065bf24f288ea828f9e33f134cefd0`. It does not modify a single original industrial blueprint. It reconstructs the original four archived proximity-sampling algorithms **with the same fifth-cell iteration, roof/purlin/wall/support source roles, Manhattan radius 3 and vertical depth 0–2**, and records exact 3D roof coordinates for all sampled positions lacking local bearing witnesses.
+
+On successful exact-head GitHub CI, the native test exports `artifacts/building-roadmap-a-industrial/A3_ROOF_WITNESS_EXACT_COORDINATES.json`. It asserts 33/118/83/40 across M2 fourth/M2 fifth/M3 second/M3 third, for 274 source-specific coordinates, separately from 156 already unplaced candidate roof beams and 30 legacy fireplaces/chimneys.
+
+A lack of a nearby witness is not an engineering load failure. The nearest authored source cell and its material/role are recorded strictly as navigational audit context, NOT a proposed safe attachment. Each warning still needs a source span/load-path classification and producer-variant approval. Do not add solids to hollow flues. The final Manual Five Pack meshes, mounting yaw, AABB fit, climate, screenshot art, creator and iPhone acceptance remain unresolved. Source files, tests, sibling builders, automations, main and saved worlds remain untouched. This PR must never be merged without explicit creator authorization.
