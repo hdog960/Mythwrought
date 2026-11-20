@@ -118,9 +118,11 @@ async function liveSegment(page,segment,route,progress){
   // much more slowly than nominal 4.25-block/s input. At exact HEAD
   // 4387b321, 844x390 moved 486 authentic blocks and hit the old 940s
   // deadline with only 4 blocks remaining. This deadline guards runaway
-  // execution; the strict 12s NO-PROGRESS watchdog remains unchanged.
+  // execution. The strict 12s no-progress watchdog still rejects a stopped
+  // actor. Crossing a low cell can legitimately require the actor to descend
+  // before the front step becomes climbable, especially under SwiftShader.
   const began=Date.now(),budget=30000+Math.ceil(remain/.30*1000);
-  let recent=began,prior=remain,checks=0,lastWitness=began;
+  let recent=began,checkpoint=remain,lowestFeet=last.feet,checks=0,lastWitness=began;
   await page.locator('#scene').focus();
   await page.keyboard.down(segment.key);
   try{
@@ -134,11 +136,17 @@ async function liveSegment(page,segment,route,progress){
         throw Error('Actual actor left safe route corridor');
       remain=(target-p[axis])*sign;
       if(remain<-.6)throw Error('Actual actor overshot safe route');
-      if(prior-remain>.035)recent=Date.now();
-      prior=remain;
+      const now=Date.now();
+      if(checkpoint-remain>.035){
+        checkpoint=remain;
+        lowestFeet=p.feet;
+        recent=now;
+      }else if(!p.onGround&&lowestFeet-p.feet>.035){
+        lowestFeet=p.feet;
+        recent=now;
+      }
       // Emit source-observed actor progression without ever touching the
       // position, world, controls, clock or route. No fabricated movement.
-      const now=Date.now();
       if(now-lastWitness>=120000){
         console.log('M5_LIVE_WASD_PACE '+JSON.stringify({
           biome:route.name,viewport,key:segment.key,
