@@ -64,7 +64,27 @@ export function installPlayerMenu({
     button('EXPORT CURRENT WORLD',onExport),
     button('IMPORT VERIFIED CURRENT WORLD',onImport)
   );
-  const archive=button('↓ DOWNLOAD ALL LOCAL SAVE DATA',onArchive);
+  // iPhone Home Screen Safari requires the actual DOWNLOAD to be a second
+  // trusted user tap, like the existing proven Device Vault export.
+  // Preparing the bytes never writes game state and never navigates away.
+  let preparedArchiveUrl=null;
+  const archiveDownload=make('a','vault-download player-safety-download',
+    '↓ DOWNLOAD VERIFIED LOCAL SAVE JSON');
+  archiveDownload.hidden=true;
+  const archive=button('PREPARE LOCAL SAVE ARCHIVE',()=>{
+    const file=onArchive();
+    if(typeof file?.text!=='string'||typeof file.filename!=='string'||
+       !/^mythwrought-local-saves-\d{4}-\d{2}-\d{2}\.json$/.test(file.filename))
+      throw Error('Read-only archive did not produce verified bytes and a safe filename');
+    const url=URL.createObjectURL(new Blob([file.text],{type:'application/json'}));
+    if(preparedArchiveUrl)URL.revokeObjectURL(preparedArchiveUrl);
+    preparedArchiveUrl=url;
+    archiveDownload.href=url;
+    archiveDownload.download=file.filename;
+    archiveDownload.hidden=false;
+    safetyFeedback.textContent='Verified '+file.count+
+      ' local-save records prepared. Tap DOWNLOAD VERIFIED LOCAL SAVE JSON to save on iPhone.';
+  });
   archive.classList.add('player-safety-archive');
   const safetyFeedback=make('p','player-safety-feedback','');
   safetyFeedback.setAttribute('role','status');
@@ -73,7 +93,7 @@ export function installPlayerMenu({
   const returnSettings=button('← BACK TO SETTINGS',()=>showSafety(false));
   returnSettings.classList.add('player-safety-back');
   safety.append(returnSettings,safetyHeading,safetyNote,archive,
-    safetyFeedback,actions,updater);
+    archiveDownload,safetyFeedback,actions,updater);
   const backing=[...container.querySelectorAll('.vault-settings,.mirror-settings')];
   if(backing.length!==2)throw Error('Original save-vault and mirror controls missing');
   for(const original of backing)safety.append(original);
@@ -84,6 +104,12 @@ export function installPlayerMenu({
   panel.append(heading,tagline,diagnostics,clock,world,status,safetyLink,back,safety);
   container.prepend(panel);
   function showSafety(open){
+    if(!open&&preparedArchiveUrl){
+      URL.revokeObjectURL(preparedArchiveUrl);
+      preparedArchiveUrl=null;
+      archiveDownload.hidden=true;
+      archiveDownload.removeAttribute('href');
+    }
     const blocked=Boolean(isReadOnly());
     actions.hidden=blocked;
     // IndexedDB vault snapshots are independently retained. Their list and
