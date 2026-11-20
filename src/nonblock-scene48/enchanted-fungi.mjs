@@ -224,6 +224,10 @@ const makers=new Map([
   ['scene48:lantern-mushroom',lantern],['scene48:ringed-morel',morel],
   ['scene48:starpetal',starpetal],['scene48:inkcap-cluster',inkcap],['scene48:velvet-cup',velvetCup]
 ]);
+const luminousPigments=new Map([
+  ['scene48:glowing-vine',Object.freeze([6,12])],
+  ['scene48:lantern-mushroom',Object.freeze([15,16])]
+]);
 
 export const ENCHANTED_FUNGI_IDS=Object.freeze([...makers.keys()]);
 
@@ -235,5 +239,6 @@ export function createEnchantedFungus(sceneId,{seed,anchor,variant=0}={}) {
   const mesh=createMesh();
   maker(mesh,randomFrom(sceneId,seed,anchor,variant),variant);
   return {sceneId,variant,mesh:mesh.finish(),palette:colors,
+    luminousMaterials:luminousPigments.get(sceneId),
     attachment:maker===shelf||maker===lightVine?'wall':'ground'};
 }

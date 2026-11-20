@@ -92,10 +92,10 @@ export function describeCandidateObject(seed, placement) {
   const distantMesh=family.distantMesh?.(options);
   const farDetail=distantMesh?{
     sceneId,instanceKey,palette:source.palette,positions:placeMesh(distantMesh,origin,orientation),
-    materials:distantMesh.materials,detail:'far'
+    materials:distantMesh.materials,luminousMaterials:source.luminousMaterials,detail:'far'
   }:null;
   return {contract,sceneId,seed,anchor:[...anchor],variant,orientation,instanceKey,supports,min,max,colliders,
-    positions,materials:mesh.materials,palette:source.palette,farDetail,
+    positions,materials:mesh.materials,palette:source.palette,luminousMaterials:source.luminousMaterials,farDetail,
     climbable:source.climbable===true,embedDepth:family.embedDepth??0};
 }
 
@@ -296,12 +296,18 @@ export function candidateVertices(objects) {
   for (const o of objects) {
     for (let i=0;i<o.positions.length;i+=9) {
       const p = o.positions;
-      const normal = cross(sub(p.subarray(i+3,i+6),p.subarray(i,i+3)),
-        sub(p.subarray(i+6,i+9),p.subarray(i,i+3)));
-      const shade = .72+.28*Math.abs(dot(normal,[.35,.84,.4]))/(Math.hypot(...normal)||1);
-      const color = o.palette[o.materials?.[i/9]??0] ?? o.palette[0];
+      const pigment=o.materials?.[i/9]??0;
+      const luminous=o.luminousMaterials?.includes(pigment)===true;
+      let shade=1;
+      if(!luminous){
+        const normal=cross(sub(p.subarray(i+3,i+6),p.subarray(i,i+3)),
+          sub(p.subarray(i+6,i+9),p.subarray(i,i+3)));
+        shade=.72+.28*Math.abs(dot(normal,[.35,.84,.4]))/(Math.hypot(...normal)||1);
+      }
+      const color=(o.palette[pigment]??o.palette[0]).map(n=>n*shade);
       for (let j=i;j<i+9;j+=3) {
-        packed.set([p[j],p[j+1],p[j+2],...color.map(n=>n*shade),0,0,21],offset);
+        // The existing opaque grotto material keeps selected pigments bright.
+        packed.set([p[j],p[j+1],p[j+2],...color,0,0,luminous?11:21],offset);
         offset+=9;
       }
     }

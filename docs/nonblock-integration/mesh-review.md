@@ -131,3 +131,12 @@ The two samples use 9,936 packed vertex bytes before and 14,472 after. Native te
 ## Tumblebrush rebuild
 
 The old spokes now form rooted twigs with curved sides and cross-branches. The matched desert view shows space between the branches and a larger silhouette against sand. Both versions used the same natural mount, standing eye, aim and variant, and both removals persisted after a new page. The sample grows from 32 to 128 triangles, or 3,456 to 13,824 packed vertex bytes. Four variants preserve the original instance IDs. The result retains a faceted, open silhouette at the review distance. [Before capture](gallery/tumblebrush-refinement/before/desert.png) · [After capture](gallery/tumblebrush-refinement/after/desert.png) · [Replay manifest](gallery/tumblebrush-refinement/after/manifest.json)
+
+## Luminous vine and lantern mushroom
+
+The vine's blue-green tips and the lantern mushroom's orange cap rim use Mythwrought's existing opaque luminous material. The stem and unlit surfaces keep their normal shading. Both versions drew the ten-family scene in one batch of 140,940 GPU bytes with 25 terrain chunks loaded. The geometry and game MINE lifecycle stayed the same, and the ten removals survived a fresh page. The wall vine has a modest highlight change. The mushroom's alternating rim reads more clearly at the tested view. [Before manifest](gallery/enchanted-materials/before/manifest.json) · [After manifest](gallery/enchanted-materials/after/manifest.json)
+
+| Family | Before | After |
+| --- | --- | --- |
+| Glowing vine | [View](gallery/enchanted-materials/before/glowing-vine.png) | [View](gallery/enchanted-materials/after/glowing-vine.png) |
+| Lantern mushroom | [View](gallery/enchanted-materials/before/lantern-mushroom.png) | [View](gallery/enchanted-materials/after/lantern-mushroom.png) |
