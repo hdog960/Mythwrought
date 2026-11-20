@@ -1,0 +1,126 @@
+{
+  "seed": 179,
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/voxel.mjs": "6df6d3c5a0223cee405656afd0548fea3a957ae0c5185d7130a34d7198c3f981",
+    "src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
+    "src/nonblock/candidate-families.mjs": "7b136f75bd586298dafc844deccbf952029af2b0bb3f0ab10c770b92bae218bc",
+    "src/nonblock-environments24/cave-formations.mjs": "598eba5c9864a2f1c210d0eb2cfe2f6088ef7cac9bc4bfe4446f1c28ac63c751",
+    "tests/nonblock-cave-browser.mjs": "016ecb49b4bd39ff9f58eae006dd3111ec45caba6601178fdd9ff1efdcef4edb",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/staged-inherited-families.mjs": "deb1dbb950395ced53e563aaa428fbe70f9584f74bccbed105dc560ef0a254eb",
+    "src/nonblock-environments24/branching-crystal-cluster.mjs": "c3bb73bc3b49de6623f9e8eb5579a8383665f42d5e4c1ab7abd69b93f618618f",
+    "src/nonblock-environments24/pebble-scatter.mjs": "32520748be51385a6cf8861d1d61b78fb113424cde434f6cbe1789af1fff8870",
+    "src/nonblock-environments24/geode-opening.mjs": "a4702efc983516cbff79a7df24db5fe2ff5eb7443196519abbbab162d866e6b6"
+  },
+  "captures": [
+    {
+      "placement": {
+        "sceneId": "nonblock:e:branching-crystal-cluster",
+        "anchor": [
+          16,
+          3,
+          4
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Abranching-crystal-cluster:179:16,3,4:2",
+      "solid": true,
+      "view": {
+        "cell": [
+          17,
+          2,
+          4
+        ],
+        "point": [
+          16.65722402,
+          3.2166667,
+          4.40342363
+        ]
+      },
+      "triangles": 50,
+      "rendererState": {
+        "gpuBytes": 5400,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "bodyProbe": "released",
+      "file": "artifacts/nonblock-cave-art-before/branching-crystal-cluster.png",
+      "sha256": "cb63570bbbe2029b0a42c6328b751fd370621ef9569783acdad91ba438ad5bed"
+    },
+    {
+      "placement": {
+        "sceneId": "nonblock:e:pebble-scatter",
+        "anchor": [
+          16,
+          3,
+          4
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Apebble-scatter:179:16,3,4:2",
+      "solid": false,
+      "view": {
+        "cell": [
+          17,
+          2,
+          4
+        ],
+        "point": [
+          16.56195704,
+          3.01833328,
+          4.48225021
+        ]
+      },
+      "triangles": 40,
+      "rendererState": {
+        "gpuBytes": 4320,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "bodyProbe": "pass-through",
+      "file": "artifacts/nonblock-cave-art-before/pebble-scatter.png",
+      "sha256": "bafac410a2b82a80368e1ba9c81e30aec74024559f8b9909db07d3fca5d54d3f"
+    },
+    {
+      "placement": {
+        "sceneId": "nonblock:e:geode-opening",
+        "anchor": [
+          15,
+          4,
+          6
+        ],
+        "variant": 2,
+        "orientation": 3
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Ageode-opening:179:15,4,6:2:r3",
+      "solid": true,
+      "view": {
+        "cell": [
+          16,
+          3,
+          6
+        ],
+        "point": [
+          15.01000023,
+          4.86240371,
+          6.575
+        ]
+      },
+      "triangles": 72,
+      "rendererState": {
+        "gpuBytes": 7776,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "bodyProbe": "site-collision",
+      "file": "artifacts/nonblock-cave-art-before/geode-opening.png",
+      "sha256": "18981e92143c872e2d5ce29a1068fd457b4d0ffe090db9377e3c64a29b475045"
+    }
+  ],
+  "label": "before",
+  "removalAndColdReopen": true,
+  "nonemptySchema1SaveBytesUnchanged": true
+}

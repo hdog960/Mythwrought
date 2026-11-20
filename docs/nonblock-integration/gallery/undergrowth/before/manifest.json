@@ -1,0 +1,208 @@
+{
+  "label": "before",
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/nonblock/candidate-families.mjs": "7b136f75bd586298dafc844deccbf952029af2b0bb3f0ab10c770b92bae218bc",
+    "src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
+    "src/nonblock-scene48/undergrowth-phase1.mjs": "db682e1579a45ac1756186f8d7739a709f7cec6ad3d8c3d745268ec2453a809c",
+    "src/nonblock-scene48/forest-phase1-candidates.mjs": "39e5941c7ce1d8f0a792c8060bc35885ec169f01cc438b629a77c4bab5841486",
+    "src/nonblock-scene48/woodland-sapling.mjs": "b21086f06296ec4c52dc06091a16b4a1e70f3e219e1934c5b3e68d9c30004225",
+    "src/nonblock-scene48/woodland-shrub.mjs": "7edf4b5621d66b851709cb3eb7368fda02be369c5774b665c39db94e02fcc6de",
+    "src/nonblock-scene48/forest-moss-mat.mjs": "3110e1e121235e6352723d3cd26e4f87ccd43a1e6d96a56e190b17682f8f6540",
+    "src/nonblock-scene48/forest-lichen-patch.mjs": "a67f4d4d53eba35567753248c3e882d58b9b31f9e839aa6a5cacae955ad871db",
+    "tests/nonblock-foliage-review-browser.mjs": "aa41fa5fd821f53e89c476758bf94c9f55cf720576ac035d39cff10fbb777737"
+  },
+  "captures": [
+    {
+      "filename": "artifacts/undergrowth-review-before/clover-patch.png",
+      "x": -7.5,
+      "z": -6.5,
+      "point": [
+        -7.38826672,
+        9.0716664,
+        -5.48979998
+      ],
+      "sha256": "8040996c8e178ac33874bf50659c4049de407b1c3b65f4c5aecc1f785a4ed0e7",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "artifacts/undergrowth-review-before/bracken-fern.png",
+      "x": -4.5,
+      "z": -6.5,
+      "point": [
+        -4.47195244,
+        11.8092858,
+        -5.06047614
+      ],
+      "sha256": "6ac821999fed80246af54b0421b742e5b88e5a2702ec97c54a4367d5c9a3f489",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "artifacts/undergrowth-review-before/moss-cushion.png",
+      "x": -1.5,
+      "z": -6.5,
+      "point": [
+        -1.39176734,
+        12.05333328,
+        -5.44787788
+      ],
+      "sha256": "976a528d0ab942bb3c8eddeaa57e30969940f6bccdd3d0fed3d225a674b32cf1",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "artifacts/undergrowth-review-before/clustered-toadstools.png",
+      "x": 1.5,
+      "z": -6.5,
+      "point": [
+        1.76282104,
+        12.39479987,
+        -5.37048403
+      ],
+      "sha256": "dcf5a50597deaba9649d19dcc99ed7a5d8170072d3a68e3343591442a1eac291",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "artifacts/undergrowth-review-before/exposed-root.png",
+      "x": 4.5,
+      "z": -6.5,
+      "point": [
+        4.63490343,
+        11.19314543,
+        -5.51245801
+      ],
+      "sha256": "e2935997ac6b73fa92695570126b83627ea549a9ef82617b368bc7ea7a123ed1",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "artifacts/undergrowth-review-before/fallen-branch.png",
+      "x": 7.5,
+      "z": -6.5,
+      "point": [
+        7.70129013,
+        11.29172961,
+        -5.23581823
+      ],
+      "sha256": "eeced240ef9011d3fd0fc261b8d01bf00185eff301cdbf7d9040a6b2e9919b57",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "artifacts/undergrowth-review-before/woodland-sapling.png",
+      "x": 10.5,
+      "z": -6.5,
+      "point": [
+        10.19130516,
+        12.10166677,
+        -5.58033991
+      ],
+      "sha256": "50d2d58f4f9865c583f45323e131392a0f0b5b7be70e9128851c748ef305dd06",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "artifacts/undergrowth-review-before/woodland-shrub.png",
+      "x": 13.5,
+      "z": -6.5,
+      "point": [
+        13.59097989,
+        11.57333342,
+        -5.71667401
+      ],
+      "sha256": "4617db14c8ef20460b0d4ed7acea9c1bc29a2ca00255e32ba27818eb7cd8e046",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "artifacts/undergrowth-review-before/forest-lichen-patch.png",
+      "x": -7.5,
+      "z": -3.5,
+      "point": [
+        -7.58208179,
+        10.03900019,
+        -2.29490129
+      ],
+      "sha256": "918e66e8b62e083c4ba7411d7e45d83575454bdebf02098de7a5a2099b87b6e2",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "artifacts/undergrowth-review-before/forest-moss-mat.png",
+      "x": -4.5,
+      "z": -3.5,
+      "point": [
+        -4.56936677,
+        11.08422597,
+        -2.32560102
+      ],
+      "sha256": "6ab4b58299029d8bc69f0f4b69abdcb89c4d051b0b514d560f6fc11eb9b6ac9d",
+      "width": 932,
+      "height": 430
+    }
+  ],
+  "removalAndColdReopen": true,
+  "rendererState": {
+    "instances": 10,
+    "vertices": 1482,
+    "gpuBytes": 53352,
+    "drawCalls": 1,
+    "terrainChunks": 25
+  },
+  "nonemptySchema1SaveBytesUnchanged": true,
+  "families": [
+    {
+      "id": "scene48:clover-patch",
+      "variant": 1,
+      "triangles": 42
+    },
+    {
+      "id": "scene48:bracken-fern",
+      "variant": 1,
+      "triangles": 56
+    },
+    {
+      "id": "scene48:moss-cushion",
+      "variant": 1,
+      "triangles": 35
+    },
+    {
+      "id": "scene48:clustered-toadstools",
+      "variant": 1,
+      "triangles": 63
+    },
+    {
+      "id": "scene48:exposed-root",
+      "variant": 1,
+      "triangles": 60
+    },
+    {
+      "id": "scene48:fallen-branch",
+      "variant": 1,
+      "triangles": 50
+    },
+    {
+      "id": "scene48:woodland-sapling",
+      "variant": 0,
+      "triangles": 68
+    },
+    {
+      "id": "scene48:woodland-shrub",
+      "variant": 0,
+      "triangles": 40
+    },
+    {
+      "id": "scene48:forest-lichen-patch",
+      "variant": 0,
+      "triangles": 42
+    },
+    {
+      "id": "scene48:forest-moss-mat",
+      "variant": 0,
+      "triangles": 38
+    }
+  ]
+}

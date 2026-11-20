@@ -3,7 +3,7 @@ export const MOSS_SCENE_ID='scene48:forest-moss-mat';
 export const MOSS_CONTRACT='nonblock-object-v1';
 const integer=Number.isSafeInteger;
 export function createForestMossMat(seed,x,y,z,variant=1){
- if(![seed,x,y,z,variant].every(integer)||variant<1||variant>3||
+ if(![seed,x,y,z,variant].every(integer)||variant<0||variant>3||
     [x,y,z].some(v=>Math.abs(v)>1000000))throw new TypeError('invalid moss identity');
  const positions=[],materials=[];
  const triangle=(a,b,c,material)=>{positions.push(...a,...b,...c);materials.push(material);};

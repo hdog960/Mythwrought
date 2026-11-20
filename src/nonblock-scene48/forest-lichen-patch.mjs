@@ -3,7 +3,7 @@ export const LICHEN_SCENE_ID='scene48:forest-lichen-patch';
 export const LICHEN_CONTRACT='nonblock-object-v1';
 const safe=Number.isSafeInteger;
 export function createForestLichenPatch(seed,x,y,z,variant=1){
- if(![seed,x,y,z,variant].every(safe)||variant<1||variant>3||
+ if(![seed,x,y,z,variant].every(safe)||variant<0||variant>3||
     [x,y,z].some(n=>Math.abs(n)>1000000))throw new TypeError('invalid lichen identity');
  const positions=[],materials=[];
  const tri=(a,b,c,m)=>{positions.push(...a,...b,...c);materials.push(m);};

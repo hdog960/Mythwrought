@@ -57,15 +57,15 @@ The dispositions below are provisional. Runtime attachment, collision, removal, 
 
 ## Current decisions on inherited meshes
 
-The original-source review above remains the record of what arrived from the five automation branches. The current candidate has changed 22 of those 43 meshes. All 43 have an in-game staging lifecycle, and the art decisions remain subject to the final parity and device pass. [Catalog evidence](catalog.md)
+The original-source review above remains the record of what arrived from the five automation branches. The current candidate has changed 35 of those 43 meshes. All 43 have an in-game staging lifecycle, and the art decisions remain subject to the final parity and device pass. [Catalog evidence](catalog.md)
 
 | Decision | Families |
 | --- | --- |
 | Rebuilt | Icicle spear, crystal shard, hanging stalactite, small stalagmite, rope coil, hanging cobweb and tumblebrush |
-| Refined | Cloth banner, low grass, short fern, single wildflower, button mushroom, lavender spike, heather sprig, clover clump, meadow sedge, forest lichen patch, forest moss mat, signpost, hanging chain, desert bloom and frost fern |
-| Original geometry retained provisionally | Agave rosette, alpine wildflower, column cactus, desert scrub, dwarf juniper, prickly pear, saltgrass, snowgrass, branching crystal cluster, cave rubble, geode opening, mineral encrustation, pebble scatter, bracken fern, clover patch, clustered toadstools, exposed root, fallen branch, moss cushion, woodland sapling and woodland shrub |
+| Refined | Cloth banner, low grass, short fern, single wildflower, button mushroom, lavender spike, heather sprig, clover clump, meadow sedge, forest lichen patch, forest moss mat, signpost, hanging chain, desert bloom, frost fern, dwarf juniper, prickly pear, bracken fern, clover patch, clustered toadstools, exposed root, fallen branch, moss cushion, woodland sapling, woodland shrub, branching crystal cluster, geode opening and pebble scatter |
+| Original geometry retained provisionally | Agave rosette, alpine wildflower, column cactus, desert scrub, saltgrass, snowgrass, cave rubble and mineral encrustation |
 
-The current landscape evidence puts bracken fern and clustered toadstools behind the authored foliage and fungi in visible detail. The bracken's narrow center and sparse leaflet joins are visible against the grass. The toadstool caps still read as cones beside the modeled lantern mushroom rim. Juniper density, the clover and moss role distinctions, and the forest wood joins also remain open. [Representative foliage and fungi](gallery/enchanted-fungi/manifest.json)
+Earlier landscape frames showed the bracken and toadstools alongside richer authored foliage and fungi. The matched undergrowth views below verify revisions to six shapes and four previously aliased variants. The remaining biome and cave families still need a comparable habitat review. [Representative authored foliage and fungi](gallery/enchanted-fungi/manifest.json)
 
 ## First in-game comparisons
 
@@ -152,3 +152,45 @@ The vine's blue-green tips and the lantern mushroom's orange cap rim use Mythwro
 | --- | --- | --- |
 | Glowing vine | [View](gallery/enchanted-materials/before/glowing-vine.png) | [View](gallery/enchanted-materials/after/glowing-vine.png) |
 | Lantern mushroom | [View](gallery/enchanted-materials/before/lantern-mushroom.png) | [View](gallery/enchanted-materials/after/lantern-mushroom.png) |
+
+## Mountain juniper and desert prickly pear
+
+The juniper has capped woody boughs and folded evergreen sprays. The prickly pear pads overlap at their joints and have thick, faceted faces. The matched mountain and desert captures each use the same natural mount, aim and render preset before and after. Both plants were removed with MINE and remained absent on a fresh game page. The schema-1 world, generation profile and matched removal records were verified across the reload.
+
+| Family | Before | After | Sample triangles | GPU bytes |
+| --- | --- | --- | --- | --- |
+| Dwarf juniper | [Mountain view](gallery/dwarf-juniper/before/mountain.png) | [Mountain view](gallery/dwarf-juniper/after/mountain.png) | 48 → 128 | 5,184 → 13,824 |
+| Prickly pear | [Desert view](gallery/prickly-pear/before/desert.png) | [Desert view](gallery/prickly-pear/after/desert.png) | 128 → 128 | 13,824 → 13,824 |
+
+The juniper remains pass-through. The sampled prickly pear retains its four individual solid pad collision parts. Both captures used one scenery draw with 25 chunks loaded. The angled juniper branches and joined cactus pads are visible against the terrain. Device-scale performance remains open. [Juniper source and replay](gallery/dwarf-juniper/after/manifest.json) · [Prickly pear source and replay](gallery/prickly-pear/after/manifest.json)
+
+## Undergrowth, fallen wood and previously aliased variants
+
+Clover now forms low crowns with folded three-leaf profiles. Bracken has a joined rachis and alternating leaflets. Moss cushions sit in shallow irregular mounds, and the toadstools have separate modeled stems and cap rims. The roots and fallen branch use continuous rings with capped ends. Sapling, shrub, lichen and forest moss now expose distinct geometry for variant zero alongside their three existing variants.
+
+| Family | Before | After | Sample triangles |
+| --- | --- | --- | --- |
+| Clover patch | [View](gallery/undergrowth/before/clover-patch.png) | [View](gallery/undergrowth/after/clover-patch.png) | 42 → 98 |
+| Bracken fern | [View](gallery/undergrowth/before/bracken-fern.png) | [View](gallery/undergrowth/after/bracken-fern.png) | 56 → 190 |
+| Moss cushion | [View](gallery/undergrowth/before/moss-cushion.png) | [View](gallery/undergrowth/after/moss-cushion.png) | 35 → 210 |
+| Clustered toadstools | [View](gallery/undergrowth/before/clustered-toadstools.png) | [View](gallery/undergrowth/after/clustered-toadstools.png) | 63 → 126 |
+| Exposed root | [View](gallery/undergrowth/before/exposed-root.png) | [View](gallery/undergrowth/after/exposed-root.png) | 60 → 108 |
+| Fallen branch | [View](gallery/undergrowth/before/fallen-branch.png) | [View](gallery/undergrowth/after/fallen-branch.png) | 50 → 84 |
+| Woodland sapling, variant zero | [View](gallery/undergrowth/before/woodland-sapling.png) | [View](gallery/undergrowth/after/woodland-sapling.png) | 68 → 68 |
+| Woodland shrub, variant zero | [View](gallery/undergrowth/before/woodland-shrub.png) | [View](gallery/undergrowth/after/woodland-shrub.png) | 40 → 40 |
+| Forest lichen patch, variant zero | [View](gallery/undergrowth/before/forest-lichen-patch.png) | [View](gallery/undergrowth/after/forest-lichen-patch.png) | 42 → 36 |
+| Forest moss mat, variant zero | [View](gallery/undergrowth/before/forest-moss-mat.png) | [View](gallery/undergrowth/after/forest-moss-mat.png) | 38 → 36 |
+
+The ten-family scene used one scenery draw and all 25 terrain chunks in both runs. The sample increased from 53,352 to 107,568 packed GPU bytes. Exact MINE removed all ten families, the removals survived a fresh page, the two removal records matched, and the nonempty schema-1 bytes were preserved. Native tests compare the 320 declared scenery variants for distinct geometry at the same seed and anchor and reject degenerate triangles. Final device frame-time and foliage readability at longer ranges remain open. [Before source and replay](gallery/undergrowth/before/manifest.json) · [After source and replay](gallery/undergrowth/after/manifest.json)
+
+## Crystal, geode and pebble refinement
+
+The cave cluster now uses joined hexagonal crystals with faceted terminations. Pebbles have broad uneven faces that catch the cave light. The geode has a layered host-rock rim and a visible purple seam around its open center. Before and after frames share the same eye, aim and natural rock mount.
+
+| Family | Before | After | Sample triangles | GPU bytes |
+| --- | --- | --- | --- | --- |
+| Branching crystal cluster | [View](gallery/cave-art/before/branching-crystal-cluster.png) | [View](gallery/cave-art/after/branching-crystal-cluster.png) | 50 → 120 | 5,400 → 12,960 |
+| Pebble scatter | [View](gallery/cave-art/before/pebble-scatter.png) | [View](gallery/cave-art/after/pebble-scatter.png) | 40 → 60 | 4,320 → 6,480 |
+| Geode opening | [View](gallery/cave-art/before/geode-opening.png) | [View](gallery/cave-art/after/geode-opening.png) | 72 → 156 | 7,776 → 16,848 |
+
+All three drew in one scenery call with 25 chunks loaded. The original MINE control released the cluster's body collision. The pebble site stayed pass-through. The wall-mounted geode retained its bounded solid rim, and native rays passed through the center. The geode's cave fixture verified removal and persistence while the surrounding terrain blocked direct entry at the wall cell. All three removals survived a new page, the two scenery records matched, and the nonempty schema-1 save bytes stayed intact. [Before source and replay](gallery/cave-art/before/manifest.json) · [After source and replay](gallery/cave-art/after/manifest.json)

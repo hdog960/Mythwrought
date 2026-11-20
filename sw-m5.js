@@ -6,7 +6,7 @@ const workerUrl=new URL(self.location.href);
 const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
   workerUrl.searchParams.get('nonblock-staging')==='1';
 const CACHE_PREFIX=staging?'mythwrought-nonblock-stage-shell-':'mythwrought-m5-shell-';
-const STAGE_VERSION='20261119-v16';
+const STAGE_VERSION='20261119-v17';
 const STAGE_PREVIOUS_VERSION='20261119-v15';
 const STAGE_MANIFEST='./nonblock-stage-assets.json';
 const CACHE_NAME=CACHE_PREFIX+(staging?STAGE_VERSION:'20261119-v6-recorder-v1');

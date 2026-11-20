@@ -29,9 +29,14 @@ const floraPalette = [
   [.73,.48,.28],[.67,.47,.83],[.84,.45,.68],[.58,.44,.24],[.72,.59,.31]
 ];
 const forestPalette = [[.37,.26,.16],[.28,.48,.24],[.49,.58,.29],[.62,.69,.37]];
-const barkPalette = [[.36,.25,.17],[.50,.34,.20]];
+const barkPalette = [[.36,.25,.17],[.50,.34,.20],[.69,.52,.33]];
 const groundCoverPalette = [[.22,.35,.22],[.36,.48,.25],[.52,.61,.32],[.61,.66,.40]];
-const fungiPalette = [null,null,null,null,[.81,.69,.56],[.64,.30,.40]];
+const cloverPatchPalette=[[.15,.35,.26],[.20,.50,.35],[.31,.60,.41],[.50,.72,.50]];
+const cushionPalette=[[.20,.34,.22],[.31,.48,.25],[.43,.58,.29],[.53,.64,.35]];
+const undergrowthPalettes={
+  'scene48:clover-patch':cloverPatchPalette,'scene48:moss-cushion':cushionPalette
+};
+const fungiPalette = [null,null,null,null,[.82,.70,.54],[.49,.20,.30],[.94,.78,.62],[.72,.31,.40]];
 const distantFlora=new Set(['scene48:low-grass','scene48:short-fern','scene48:clover-clump','scene48:meadow-sedge']);
 
 function floraFamily(mesh,palette) {
@@ -46,9 +51,7 @@ function authoredFloraFamily(sceneId){
 }
 
 function forestFamily(maker,palette) {
-  // These sources number geometric options 1–3. The master identity's default
-  // zero uses the source's own default mesh without remapping its instance key.
-  return floraFamily(({seed,anchor,variant})=>maker(seed,...anchor,variant||1).mesh,palette);
+  return floraFamily(({seed,anchor,variant})=>maker(seed,...anchor,variant).mesh,palette);
 }
 
 function environmentFamily(maker,...palette) {
@@ -84,13 +87,13 @@ export const candidateFamilies = new Map([
     sceneId==='scene48:shelf-fungus'||sceneId==='scene48:glowing-vine')),
   ...Object.keys(SCENE_FAMILIES).map(sceneId=>[sceneId,authoredFloraFamily(sceneId)]),
   ...Object.keys(UNDERGROWTH_FAMILIES).map(sceneId=>[sceneId,floraFamily(
-    ({seed,anchor})=>makeUndergrowthMesh(sceneId,seed,...anchor).mesh,
-    sceneId.endsWith('toadstools')?fungiPalette:groundCoverPalette)]),
+    ({seed,anchor,variant})=>makeUndergrowthMesh(sceneId,seed,...anchor,variant).mesh,
+    sceneId.endsWith('toadstools')?fungiPalette:undergrowthPalettes[sceneId]??groundCoverPalette)]),
   ['scene48:exposed-root',{...floraFamily(
-    ({seed,anchor})=>createForestCandidate('scene48:exposed-root',seed,...anchor).mesh,barkPalette),
+    ({seed,anchor,variant})=>createForestCandidate('scene48:exposed-root',seed,...anchor,variant).mesh,barkPalette),
     embedDepth:.02}],
   ['scene48:fallen-branch',floraFamily(
-    ({seed,anchor})=>createForestCandidate('scene48:fallen-branch',seed,...anchor).mesh,barkPalette)],
+    ({seed,anchor,variant})=>createForestCandidate('scene48:fallen-branch',seed,...anchor,variant).mesh,barkPalette)],
   ['scene48:woodland-sapling',forestFamily(createWoodlandSapling,forestPalette)],
   ['scene48:woodland-shrub',forestFamily(createWoodlandShrub,forestPalette)],
   ['scene48:forest-lichen-patch',forestFamily(createForestLichenPatch,
@@ -100,12 +103,12 @@ export const candidateFamilies = new Map([
   ['nonblock:d:alpine-wildflower',environmentFamily(makeAlpineWildflower,[.73,.72,.90])],
   ['nonblock:d:desert-bloom',environmentFamily(makeDesertBloom,[.32,.51,.31],[.94,.45,.21],[.72,.23,.17],[1,.76,.30])],
   ['nonblock:d:desert-scrub',environmentFamily(makeDesertScrub,[.54,.62,.31])],
-  ['nonblock:d:dwarf-juniper',environmentFamily(makeDwarfJuniper,[.37,.49,.32])],
+  ['nonblock:d:dwarf-juniper',environmentFamily(makeDwarfJuniper,[.38,.27,.17],[.20,.34,.25],[.32,.46,.32],[.46,.56,.37])],
   ['nonblock:d:frost-fern',environmentFamily(makeFrostFern,[.28,.45,.41],[.48,.66,.61],[.76,.87,.86])],
   ['nonblock:d:saltgrass',environmentFamily(makeSaltgrass,[.61,.64,.43])],
   ['nonblock:d:snowgrass',environmentFamily(makeSnowgrass,[.73,.79,.65])],
   ['nonblock:d:tumblebrush',environmentFamily(makeTumblebrush,[.44,.31,.22],[.58,.43,.29],[.79,.60,.37])],
-  ['nonblock:e:pebble-scatter',environmentFamily(makePebbleScatter,[.49,.46,.41])],
+  ['nonblock:e:pebble-scatter',environmentFamily(makePebbleScatter,[.38,.36,.35],[.48,.46,.43],[.58,.56,.50])],
   ['nonblock:e:cave-rubble-cluster',environmentFamily(makeCaveRubbleCluster,[.49,.49,.53])],
   ['nonblock:e:giant-stalagmite-spire',caveFamily('nonblock:e:giant-stalagmite-spire','ground')],
   ['nonblock:e:clustered-dripstone',caveFamily('nonblock:e:clustered-dripstone','ceiling')],

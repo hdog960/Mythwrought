@@ -3,12 +3,16 @@ import {createHash} from 'node:crypto';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
-import {VoxelWorld,collides,raycast,terrainHeight} from '../src/voxel.mjs';
+import {VoxelWorld,chunkCoord,collides,raycast,terrainHeight} from '../src/voxel.mjs';
 import {createCandidateScene} from '../src/nonblock/candidate-scene.mjs';
+import {planStagedHabitat} from '../src/nonblock/staged-habitats.mjs';
+import {SELECTED_SEED_KEY,worldSlotKey} from '../src/seeds.mjs';
 
 const seed=179;
-const origin='http://127.0.0.1:4173';
-const directory='artifacts/nonblock-caves';
+const origin=process.env.NONBLOCK_CAVE_ORIGIN||'http://127.0.0.1:4173';
+const comparison=process.env.NONBLOCK_CAVE_COMPARISON;
+if(comparison&&!['before','after'].includes(comparison))throw Error('Invalid cave comparison label');
+const directory=comparison?'artifacts/nonblock-cave-art-'+comparison:'artifacts/nonblock-caves';
 const world=new VoxelWorld(seed);
 const setups=[
   ['nonblock:e:giant-stalagmite-spire','ground',true],
@@ -43,7 +47,22 @@ function aimFromCave(scene,object) {
 }
 
 const samples=[];
-for(const [sceneId,attachment,solid] of setups){
+if(comparison){
+  for(const [sceneId,solid,anchor,cell,point,orientation=0] of [
+    ['nonblock:e:branching-crystal-cluster',true,[16,3,4],[17,2,4],[16.65722402,3.21666670,4.40342363]],
+    ['nonblock:e:pebble-scatter',false,[16,3,4],[17,2,4],[16.56195704,3.01833328,4.48225021]],
+    ['nonblock:e:geode-opening',true,[15,4,6],[16,3,6],[15.01000023,4.86240371,6.575],3]
+  ]){
+    const [placement]=planStagedHabitat(world,[{sceneId,habitat:'cave',anchor,variant:2,orientation}]);
+    assert.ok(placement,sceneId+' requires a natural rock anchor');
+    const scene=createCandidateScene(seed,'legacy',[placement],deps);
+    const [object]=scene.visible();
+    assert.ok(object);
+    const eye=[cell[0]+.5,cell[1]+1.56,cell[2]+.5];
+    assert.equal(scene.pick(eye,point.map((value,index)=>value-eye[index]))?.instanceKey,object.instanceKey);
+    samples.push({placement,instanceKey:object.instanceKey,solid,view:{cell,point},triangles:object.positions.length/9});
+  }
+}else for(const [sceneId,attachment,solid] of setups){
   search:for(let x=14;x<=42;x++)for(let z=-15;z<=22;z++)for(let y=-1;y<=5;y++){
     if(surface(x,z)-y<3 || world.get(x,y,z) ||
         samples.some(({placement:{anchor:[px,,pz]}})=>Math.hypot(px-x,pz-z)<3)) continue;
@@ -62,7 +81,7 @@ for(const [sceneId,attachment,solid] of setups){
   }
   assert.equal(samples.at(-1)?.placement.sceneId,sceneId,'No natural cave site for '+sceneId);
 }
-console.log('Located four natural cave sites',JSON.stringify(samples.map(s=>s.placement.anchor)));
+console.log('Located natural cave sites',JSON.stringify(samples.map(s=>s.placement.anchor)));
 
 await mkdir(directory,{recursive:true});
 const browser=await chromium.launch({headless:true,args:[
@@ -70,9 +89,14 @@ const browser=await chromium.launch({headless:true,args:[
 ]});
 const captures=[];
 const errors=[];
+const slot=worldSlotKey(seed),stageKey='mythwrought:nonblock-stage:v1:legacy:'+seed;
+const savedWorld=comparison?JSON.stringify({schema:1,seed,edits:[[100,12,100,3]]}):null;
 try{
   const context=await browser.newContext({
-    viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1
+    viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1,
+    ...(comparison?{storageState:{cookies:[],origins:[{origin,localStorage:[
+      {name:SELECTED_SEED_KEY,value:String(seed)},{name:slot,value:savedWorld}
+    ]}]}}:{})
   });
   for(const sample of samples){
     const {placement,instanceKey,view,solid}=sample;
@@ -83,7 +107,12 @@ try{
     const count=(tab,n)=>tab.waitForFunction(value=>
       Number(document.querySelector('#scene').dataset.nonblockInstances)===value,n,{timeout:45000});
     await count(page,1);
-    if(solid){
+    if(comparison&&!solid){
+      const entered=await page.evaluate(cell=>window.__mythwroughtTest.teleportCave(...cell),placement.anchor);
+      assert.equal(entered.x,placement.anchor[0]+.5);
+    }
+    const probeSolid=solid&&(!comparison||placement.sceneId!=="nonblock:e:geode-opening");
+    if(probeSolid){
       assert.equal(await page.evaluate(cell=>{
         try{window.__mythwroughtTest.teleportCave(...cell);return false;}
         catch(error){return error.message.includes('Unsafe');}
@@ -93,8 +122,21 @@ try{
       window.__mythwroughtTest.teleportCave(...cell);
       window.__mythwroughtTest.aimAtStagedPoint(...point);
     },view);
+    if(comparison){
+      await page.waitForFunction(center=>{
+        const d=document.querySelector('#scene').dataset;
+        return d.chunkCenter===center&&Number(d.loadedChunks)===25&&Number(d.pendingChunks)===0;
+      },chunkCoord(view.cell[0])+','+chunkCoord(view.cell[2]),{timeout:60000});
+      await page.evaluate(point=>window.__mythwroughtTest.aimAtStagedPoint(...point),view.point);
+    }
     await page.waitForFunction(key=>document.querySelector('#scene').dataset.nonblockTarget===key,
       instanceKey,{timeout:16000});
+    const rendererState=comparison?await page.locator('#scene').evaluate(canvas=>{
+      const d=canvas.dataset;
+      return {gpuBytes:Number(d.nonblockGpuBytes),drawCalls:Number(d.nonblockDrawCalls),
+        terrainChunks:Number(d.loadedChunks)};
+    }):null;
+    if(comparison)assert.deepEqual(rendererState,{gpuBytes:sample.triangles*108,drawCalls:1,terrainChunks:25});
     const file=directory+'/'+placement.sceneId.split(':').at(-1)+'.png';
     const image=await page.screenshot({path:file});
     const png=PNG.sync.read(image);
@@ -103,7 +145,7 @@ try{
     await page.locator('#dig').tap();
     await count(page,0);
     assert.match(await page.locator('#status').textContent(),/Scenery removed/);
-    if(solid){
+    if(probeSolid){
       const entered=await page.evaluate(cell=>window.__mythwroughtTest.teleportCave(...cell),placement.anchor);
       assert.equal(entered.x,placement.anchor[0]+.5);
     }
@@ -112,10 +154,17 @@ try{
     reopened.on('pageerror',error=>errors.push(error.message));
     await reopened.goto(url);
     await count(reopened,0);
-    assert.equal(await reopened.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179')),null);
+    assert.equal(await reopened.evaluate(key=>localStorage.getItem(key),slot),savedWorld);
+    if(comparison){
+      const storage=await reopened.evaluate(key=>({
+        primary:localStorage.getItem(key),backup:localStorage.getItem(key+':previous-good')
+      }),stageKey);
+      assert.equal(storage.primary,storage.backup);
+      assert.ok(JSON.parse(storage.primary).tombstones.includes(instanceKey));
+    }
     await reopened.close();
-    captures.push({...sample,file,sha256:digest(image)});
-    console.log('PASS',placement.sceneId,solid?'solid collision released':'ceiling pass-through');
+    captures.push({...sample,...(comparison?{rendererState,bodyProbe:solid?(probeSolid?'released':'site-collision'):'pass-through'}:{}),file,sha256:digest(image)});
+    console.log('PASS',placement.sceneId,probeSolid?'solid collision released':solid?'wall-mounted removal':'pass-through');
   }
   assert.deepEqual(errors,[]);
   await context.close();
@@ -125,5 +174,10 @@ try{
 const sourceFiles=['src/main.mjs','src/voxel.mjs','src/nonblock/candidate-scene.mjs',
   'src/nonblock/candidate-families.mjs','src/nonblock-environments24/cave-formations.mjs',
   'tests/nonblock-cave-browser.mjs'];
+if(comparison)sourceFiles.push('src/nonblock/staged-habitats.mjs','src/nonblock/staged-inherited-families.mjs',
+  'src/nonblock-environments24/branching-crystal-cluster.mjs','src/nonblock-environments24/pebble-scatter.mjs',
+  'src/nonblock-environments24/geode-opening.mjs');
 const sourceSha256=Object.fromEntries(await Promise.all(sourceFiles.map(async path=>[path,digest(await readFile(path))])));
-await writeFile(directory+'/manifest.json',JSON.stringify({seed,sourceSha256,captures},null,2)+'\n');
+await writeFile(directory+'/manifest.json',JSON.stringify({seed,sourceSha256,captures,
+  ...(comparison?{label:comparison,removalAndColdReopen:true,nonemptySchema1SaveBytesUnchanged:true}:{})
+},null,2)+'\n');

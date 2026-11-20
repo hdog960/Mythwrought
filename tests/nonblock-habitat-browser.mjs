@@ -15,13 +15,20 @@ import {planStagedHabitat} from '../src/nonblock/staged-habitats.mjs';
 const origin=process.env.NONBLOCK_HABITAT_ORIGIN||'http://127.0.0.1:4173';
 const comparison=process.env.NONBLOCK_HABITAT_COMPARISON;
 if(comparison&&!['before','after'].includes(comparison))throw Error('Invalid habitat comparison label');
-const brushReview=comparison&&process.env.NONBLOCK_HABITAT_SAMPLE==='tumblebrush';
-const directory=comparison?'artifacts/nonblock-'+(brushReview?'tumblebrush':'biome-flora')+'-'+comparison:
+const comparisons={
+  tumblebrush:{habitat:'desert',column:[512,0],sceneId:'nonblock:d:tumblebrush',variant:1,
+    view:{pose:[512.5,-.5],point:[512.41583252,9.30278524,.53196516]},source:'tumblebrush.mjs'},
+  'dwarf-juniper':{habitat:'mountain',column:[-512,0],sceneId:'nonblock:d:dwarf-juniper',variant:2,
+    view:{pose:[-511.5,-.5],point:[-511.68595378,13.16605028,.43378700]},source:'dwarf-juniper.mjs'},
+  'prickly-pear':{habitat:'desert',column:[512,0],sceneId:'nonblock:d:prickly-pear-cactus',variant:2,
+    view:{pose:[512.5,-.5],point:[512.61600749,9.77522405,.79790874]},source:'prickly-pear-cactus.mjs'}
+};
+const sampleName=process.env.NONBLOCK_HABITAT_SAMPLE;
+const specific=comparison&&Object.hasOwn(comparisons,sampleName)&&comparisons[sampleName];
+const directory=comparison?'artifacts/nonblock-'+(specific?sampleName:'biome-flora')+'-'+comparison:
   'artifacts/nonblock-habitat';
 const seed=179;
-const requested=brushReview?[
-  {habitat:'desert',column:[512,0],sceneId:'nonblock:d:tumblebrush',variant:1}
-]:comparison?[
+const requested=specific?[specific]:comparison?[
   {habitat:'desert',column:[512,0],sceneId:'nonblock:d:desert-bloom',variant:2},
   {habitat:'snow',column:[0,512],sceneId:'nonblock:d:frost-fern',variant:1}
 ]:[
@@ -51,7 +58,7 @@ profileStorage.set(SELECTED_SEED_KEY,String(seed));
 profileStorage.set(RENDER_PREF,'economy');
 const fixture=[...profileStorage];
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
-const comparisonViews=brushReview?[{pose:[512.5,-.5],point:[512.41583252,9.30278524,.53196516]}]:[
+const comparisonViews=specific?[specific.view]:[
   {pose:[512.5,-.5],point:[512.40311686,9.27933311,.52881004]},
   {pose:[.5,511.5],point:[.67367985,10.35231654,512.71217855]}
 ];
@@ -74,7 +81,7 @@ function stagingView(object){
 const samples=scene.visible().map((object,index)=>({
   habitat:requested[index].habitat,placement:layout[index],instanceKey:object.instanceKey,
   ground:world.get(object.anchor[0],object.anchor[1]-1,object.anchor[2]),
-  triangles:object.positions.length/9,view:comparison?comparisonViews[index]:stagingView(object)
+  triangles:object.positions.length/9,collisionParts:object.colliders.length,view:comparison?comparisonViews[index]:stagingView(object)
 }));
 assert.equal(samples.length,requested.length);
 await mkdir(directory,{recursive:true});
@@ -128,12 +135,21 @@ try{
       await context.close();
       throw Error('Profiled '+sample.habitat+' did not settle at the target. '+JSON.stringify(data),{cause:error});
     }
+    const rendererState=await page.locator('#scene').evaluate(canvas=>{
+      const d=canvas.dataset;
+      return {instances:Number(d.nonblockInstances),vertices:Number(d.nonblockVertices),
+        gpuBytes:Number(d.nonblockGpuBytes),drawCalls:Number(d.nonblockDrawCalls),
+        terrainChunks:Number(d.loadedChunks)};
+    });
+    assert.deepEqual(rendererState,{
+      instances:1,vertices:sample.triangles*3,gpuBytes:sample.triangles*108,drawCalls:1,terrainChunks:25
+    });
     const file=directory+'/'+sample.habitat+'.png';
     const image=await page.screenshot({path:file,timeout:90000});
     const decoded=PNG.sync.read(image);
     assert.deepEqual([decoded.width,decoded.height],[932,430]);
     assert.ok(new Set(decoded.data.filter((_,i)=>i%64===0)).size>32);
-    captures.push({...sample,file,width:932,height:430,sha256:digest(image)});
+    captures.push({...sample,rendererState,file,width:932,height:430,sha256:digest(image)});
     await page.locator('#dig').tap();
     await observed(page,scene=>Number(scene.nonblockInstances)===0,15000);
     assert.match(await page.locator('#status').textContent(),/Scenery removed/);
@@ -158,8 +174,9 @@ const source=['src/main.mjs','src/nonblock/staged-habitats.mjs','src/nonblock/ca
   'src/nonblock/candidate-families.mjs','src/manual-biomes/profile-world.mjs',
   'src/manual-biomes/desert-m3.mjs','src/manual-biomes/three-regions-m4.mjs','src/render-budget.mjs',
   'tests/nonblock-habitat-browser.mjs'];
-if(brushReview)source.push('src/nonblock-environments24/tumblebrush.mjs');
-else if(comparison)source.push('src/nonblock-environments24/desert-bloom.mjs','src/nonblock-environments24/frost-fern.mjs');
+if(specific)source.push('src/nonblock-environments24/'+specific.source);
+if(sampleName==='prickly-pear')source.push('src/nonblock/staged-inherited-families.mjs');
+if(!specific&&comparison)source.push('src/nonblock-environments24/desert-bloom.mjs','src/nonblock-environments24/frost-fern.mjs');
 const sourceSha256=Object.fromEntries(await Promise.all(source.map(async file=>[file,digest(await readFile(file))])));
 await writeFile(directory+'/manifest.json',JSON.stringify({
   seed,generator,renderPreset:'economy',sourceSha256,captures,nonemptySchema1AndProfileBytesUnchanged:true

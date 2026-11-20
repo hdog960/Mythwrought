@@ -3,7 +3,7 @@ export const SAPLING_SCENE_ID='scene48:woodland-sapling';
 export const SAPLING_VERSION='nonblock-sapling-v1';
 const valid=Number.isSafeInteger;
 export function createWoodlandSapling(seed,x,y,z,variant=1){
- if(![seed,x,y,z,variant].every(valid)||variant<1||variant>3)throw new TypeError('invalid sapling identity');
+ if(![seed,x,y,z,variant].every(valid)||variant<0||variant>3)throw new TypeError('invalid sapling identity');
  const positions=[],materials=[];
  const tri=(a,b,c,mat)=>{positions.push(...a,...b,...c);materials.push(mat);};
  const stem=(a,b,r,mat)=>{

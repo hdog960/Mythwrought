@@ -3,7 +3,7 @@ export const SHRUB_SCENE_ID='scene48:woodland-shrub';
 export const SHRUB_VERSION='nonblock-shrub-v1';
 const safe=Number.isSafeInteger;
 export function createWoodlandShrub(seed,x,y,z,variant=1){
- if(![seed,x,y,z,variant].every(safe)||variant<1||variant>3||[x,y,z].some(n=>Math.abs(n)>1000000))throw new TypeError('invalid shrub identity');
+ if(![seed,x,y,z,variant].every(safe)||variant<0||variant>3||[x,y,z].some(n=>Math.abs(n)>1000000))throw new TypeError('invalid shrub identity');
  const p=[],m=[];
  const tri=(a,b,c,material)=>{p.push(...a,...b,...c);m.push(material);};
  const stem=(a,b,r)=>{

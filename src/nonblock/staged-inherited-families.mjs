@@ -23,7 +23,7 @@ function revisedCave(sceneId,attachment) {
 function mountedGeode() {
   return {lane:'24',wall:true,wallY:0,wallInset:.49,build:options=>{
     const source=makeGeodeOpening(options);
-    const {positions,triangleCount}=source.mesh;
+    const {positions}=source.mesh;
     const transformed=new Float32Array(positions.length);
     for(let i=0;i<positions.length;i+=3){
       transformed[i]=positions[i];
@@ -32,7 +32,8 @@ function mountedGeode() {
     }
     const colliders=source.selectionAabbs.map(({min,max})=>
       [min[0],min[2]+.5,-max[1],max[0],max[2]+.5,-min[1]]);
-    return {mesh:{positions:transformed,triangleCount},palette:[[.46,.45,.64]],colliders};
+    return {mesh:{...source.mesh,positions:transformed},
+      palette:[[.32,.31,.39],[.46,.43,.49],[.54,.35,.68],[.76,.61,.84],[.30,.22,.43]],colliders};
   }};
 }
 
@@ -56,13 +57,13 @@ function fitting(sceneId,profile,mount,palette,colliders=[]) {
 }
 
 export const inheritedStageFamilies = [
-  ['nonblock:d:prickly-pear-cactus',environment(makePricklyPear,[[.34,.55,.36]])],
+  ['nonblock:d:prickly-pear-cactus',environment(makePricklyPear,[[.26,.42,.28],[.36,.55,.35],[.48,.64,.41]])],
   ['nonblock:d:column-cactus',environment(makeColumnCactus,[[.30,.48,.29]])],
   ['nonblock:d:icicle-spear',revisedCave('nonblock:d:icicle-spear','ceiling')],
   ['nonblock:e:small-stalagmite',revisedCave('nonblock:e:small-stalagmite','ground')],
   ['nonblock:e:hanging-stalactite',revisedCave('nonblock:e:hanging-stalactite','ceiling')],
   ['nonblock:e:crystal-shard',revisedCave('nonblock:e:crystal-shard','ground')],
-  ['nonblock:e:branching-crystal-cluster',environment(makeBranchingCrystalCluster,[[.41,.62,.73]])],
+  ['nonblock:e:branching-crystal-cluster',environment(makeBranchingCrystalCluster,[[.28,.35,.46],[.30,.51,.60],[.39,.65,.72],[.58,.77,.81]])],
   ['nonblock:e:geode-opening',mountedGeode()],
   ['nonblock:e:mineral-encrustation',mineralWall()],
   ['scene36:signpost',fitting('scene36:signpost',{},'below',
