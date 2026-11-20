@@ -19,6 +19,13 @@ try{
   page.on('pageerror',e=>errors.push(e.message));
   try{
    await page.goto(origin+'/',{waitUntil:'domcontentloaded',timeout:30000});
+   // A real empty browser has no accepted world: confirm V6 without bypasses.
+   if(await page.locator('#playerMenu').isVisible()){
+    page.once('dialog',dialog=>dialog.accept());
+    await page.getByRole('button',{name:/NEW WORLD/}).click();
+    assert.equal(await page.locator('#help').isVisible(),false,
+      'V6 must save before completing protected new-world entry');
+   }
    await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,
      undefined,{timeout:40000});
    const state=await page.evaluate(()=>{
@@ -28,7 +35,8 @@ try{
      return {left:r('.grip.left'),right:r('.grip.right'),world,map,
        canvas:r('#scene'),gl:!!el.getContext('webgl2'),off:el.dataset.g2bFlight,
        loaded:Number(el.dataset.loadedChunks),notice:document.querySelector('#notice').hidden,
-       save:localStorage.getItem('mythwrought-v002-world-179')};
+       save:localStorage.getItem('mythwrought-v002-world-'+
+           localStorage.getItem('mythwrought-v002-selected-seed'))};
    });
    assert.ok(state.gl,'G2B requires actual WebGL2');
    assert.ok(state.notice,'G2B production renderer failed');
@@ -98,13 +106,12 @@ try{
    assert.equal(beforeCreative.creativeEnabled,false,'Creative must begin disabled');
    assert.equal(beforeCreative.active,false,'Double-tap cannot fly in Explore mode');
    await page.waitForTimeout(900);
-   await page.locator('#menu').click();
-   assert.equal(await page.locator('#g2bFlightEnable').isChecked(),false);
-   await page.locator('#g2bFlightEnable').check();
+   assert.equal(await page.locator('#creativeToggle').getAttribute('aria-pressed'),'false');
+   await page.locator('#creativeToggle').click();
    let enabled=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    assert.equal(enabled.creativeEnabled,true,'Creative toggle did not enable mode');
    assert.equal(enabled.active,false,'Enabling Creative must NOT automatically enter flight');
-   await page.locator('#closeHelp').click();
+   assert.equal(await page.locator('#creativeToggle').getAttribute('aria-pressed'),'true');
    await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,false,
      'One JUMP touch must not enable flight');
@@ -131,19 +138,19 @@ try{
      info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
      assert.equal(info.active,true,'Repeat double-tap JUMP did not re-enable flight: '+JSON.stringify(await jumpTouchProof()));
    }
-   await page.locator('#menu').click();
-   assert.equal(await page.locator('#g2bFlightEnable').isChecked(),true);
+   assert.equal(await page.locator('#creativeToggle').getAttribute('aria-pressed'),'true');
    assert.equal(info.creativeEnabled,true,'Creative should remain enabled in flight');
    assert.equal(info.bodyClear,true);
    assert.equal(info.resident,true);
    assert.ok(info.maxY>=60,'Sky flight ceiling must permit useful ascent above the surface');
-   for(const profile of ['precision','normal','fast','travel']){
-    await page.locator('#g2bFlightProfile').selectOption(profile);
-    info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
-    assert.equal(info.profile,profile,'G2B profile not applied');
-   }
-   await page.locator('#g2bFlightProfile').selectOption('normal');
-   await page.locator('#closeHelp').click();
+   assert.equal(await page.locator('#g2bFlightProfile').isDisabled(),true);
+   assert.equal(info.profile,'travel','The real flight speed must remain 15');
+   await page.evaluate(()=>{
+    const field=document.getElementById('g2bFlightProfile');
+    field.value='precision';field.dispatchEvent(new Event('change',{bubbles:true}));
+   });
+   info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.equal(info.profile,'travel','Spoofed lower speed must be blocked');
    await page.waitForTimeout(250); // paused controls may resume only after the next safe GPU frame.
    assert.equal(await page.locator('#dig').textContent(),'DOWN');
    assert.equal(await page.locator('#place').textContent(),'UP');
