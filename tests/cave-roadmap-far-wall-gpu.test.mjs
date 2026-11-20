@@ -104,7 +104,16 @@ test('C6 wide original Fan source rock is covered in exactly four real GPU buffe
   c.companion?.key==='13,10,-8'),
   'Existing lower section must be joined to its real upper neighbor');
  assert.equal(plan.joinedSources,1);
- assert.ok(plan.seamSources<=1);
+ // Real remaining upper-right 329-pixel hole is NOT open world:
+ // screenshot first-solid x182,-116,z169 must occupy the existing
+ // 11,10,-7 GPU buffer as one allowed lower-section seam slice.
+ assert.equal(world.get(182,-116,169),BLOCK.DEEPSTONE);
+ const westRoof=plan.selected.find(c=>c.key==='11,10,-7');
+ assert.equal(westRoof?.seamCompanion?.key,'11,10,-8',
+  'Screen-ray-certified lower rock must share existing western Fan GPU buffer');
+ assert.equal(plan.seamSources,1);
+ assert.equal(plan.pending.some(c=>c.key==='11,10,-8'),false,
+  'Real sky-covering lower rock must no longer be pending');
  const g=fakeGl(),far=createCaveFarWallGpu(g.gl);
  const near=complete(camera);
  for(let frame=30;frame<43;frame++)far.step({
@@ -116,6 +125,9 @@ test('C6 wide original Fan source rock is covered in exactly four real GPU buffe
  assert.equal(state.pending,0);
  assert.equal(state.budgetExcluded,0);
  assert.equal(state.failures,0);
+ assert.equal(state.joinedSources,1);
+ assert.equal(state.seamSources,1);
+ assert.equal(state.sourceSections,6,'Only four GPU buffers with two real joined rock sections');
  assert.ok(state.sourceSamples<=3264&&state.bytes>0&&state.bytes<=1048576);
  assert.equal(g.uploaded.length,4);
  assert.equal(g.uploaded.reduce((sum,n)=>sum+n,0),state.bytes);

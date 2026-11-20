@@ -149,6 +149,22 @@ export function planCaveFarWallSources(world,player,viewport,
   selected.push({...edge});
   available.delete(edge.key);
  }
+ // RC7's genuine 844x390 original-game screenshot removed 1809/2138 sky
+ // pixels, then isolated a remaining 329px upper-right opening. Pixels
+ // x562..582/y139..144 first hit DEEPSTONE x182,-116,168..170 in source
+ // slice 11,10,-8. Reuse that physical screenshot ray rather than fabricate
+ // rock or widen the CPU/ring/GPU budgets. These four rays consume at most
+ // the remaining 3264 source-cell CPU allowance.
+ const rightEdgeWitness=new Map();
+ if(compactedKey&&aspect>=1.45&&bounds.maxSeamSources>0){
+  for(const [screenX,screenY] of [
+   [.518519,.313433],[.574074,.313433],[.592593,.343284],
+   [.462963,.283582]
+  ])sampleRay(screenX,screenY,rightEdgeWitness);
+  for(const [k,c] of rightEdgeWitness)
+   if(!selected.some(s=>s.key===k)&&!available.has(k))
+    available.set(k,c);
+ }
  const joinable=[...available.values()].map(companion=>({
   companion,owner:selected.find(c=>!c.companion&&c.cx===companion.cx&&
    c.cz===companion.cz&&Math.abs(c.section-companion.section)===1)
@@ -169,7 +185,11 @@ export function planCaveFarWallSources(world,player,viewport,
  // primary seam 11,12,-5 must remain. Independently sample ONE additional
  // neighbor from the same real coarse camera rays, in another GPU owner.
  const secondary=joinable.find(j=>j.owner!==selectedJoin?.owner&&
-   j.companion.key!==companionKey&&candidates.has(j.companion.key));
+   j.companion.key!==companionKey&&
+   // A compacted wide Fan has a screenshot-proven lower physical ray.
+   // Preserve original Rift strict selection for un-compacted scenes.
+   (compactedKey?rightEdgeWitness.has(j.companion.key):
+    candidates.has(j.companion.key)));
  if(secondary&&bounds.maxSeamSources>0)
    secondary.owner.seamCompanion={...secondary.companion};
  const seamKey=secondary&&bounds.maxSeamSources>0?secondary.companion.key:null;
