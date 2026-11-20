@@ -22,3 +22,9 @@ After publication, verify the Pages commit, app shell and manifest from the orig
 If an update fails before activation, retain the last verified worker and asset cache. If an approved production revision fails after activation, restore the last verified app code with a history-preserving revert on the existing release branch and publish a new recovery cache revision on the same Pages URL. Preserve saved worlds, physical-owner sidecars, backup files, and scenery-removal state throughout. Reverify existing worlds and offline startup before clearing the release incident.
 
 No production incorporation or rollback has been executed from this draft.
+
+## Staged same-origin rehearsal
+
+The loopback worker now verifies SHA-256 for the entire versioned static bank before activation. A browser rehearsal served altered bytes for one asset during an attempted update. Chromium rejected the installing worker, retained the previous verified bank, and used it to open the original scoped game offline. The existing nonempty schema-1 bytes and scenery removal stayed intact. A subsequent valid update activated and retained the two verified banks. [Cache and capture manifest](gallery/cache-recovery/manifest.json)
+
+The rehearsal used a loopback origin and Chromium. The original installed shortcut and its public Pages scope still need creator-authorized device acceptance.

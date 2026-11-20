@@ -8,7 +8,7 @@ import {verifyPngEvidence} from '../../src/auto-integration-support/nonblock-png
 export const stageEvidenceGroups=Object.freeze([
   'nonblock-runtime','nonblock-catalog','nonblock-meadow-woodland','nonblock-enchanted-fungi',
   'nonblock-caves','nonblock-inherited-extra','nonblock-world-props','nonblock-physical-fittings',
-  'nonblock-effects','nonblock-offline'
+  'nonblock-effects','nonblock-offline','nonblock-cache-recovery'
 ]);
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sizes=new Set(['667x375','844x390','932x430']);

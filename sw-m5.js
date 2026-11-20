@@ -6,7 +6,11 @@ const workerUrl=new URL(self.location.href);
 const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
   workerUrl.searchParams.get('nonblock-staging')==='1';
 const CACHE_PREFIX=staging?'mythwrought-nonblock-stage-shell-':'mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+(staging?'20261119-v6':'20261119-v6-recorder-v1');
+const STAGE_VERSION='20261119-v7';
+const STAGE_PREVIOUS_VERSION='20261119-v6';
+const STAGE_MANIFEST='./nonblock-stage-assets.json';
+const CACHE_NAME=CACHE_PREFIX+(staging?STAGE_VERSION:'20261119-v6-recorder-v1');
+const PREVIOUS_STAGE_CACHE=CACHE_PREFIX+STAGE_PREVIOUS_VERSION;
 const SOURCE_ASSETS=[
   "./",
   "./assets/icon.svg",
@@ -258,8 +262,37 @@ if(staging)SOURCE_ASSETS.push(
   "./src/nonblock-scene48/woodland-shrub.mjs",
 );
 const scopeUrl=new URL(self.registration.scope);
-const assetUrls=SOURCE_ASSETS.map(p=>new URL(p,self.registration.scope).href);
-const allowed=new Set(assetUrls);
+const assetUrls=SOURCE_ASSETS.map(p=>new URL(p,scopeUrl).href);
+const manifestUrl=new URL(STAGE_MANIFEST,scopeUrl).href;
+const allowed=new Set(staging?[...assetUrls,manifestUrl]:assetUrls);
+
+function cacheRequest(url){
+  return new Request(url,{cache:'reload',credentials:'same-origin'});
+}
+
+async function populateStagedBank(cache){
+  const manifestRequest=cacheRequest(manifestUrl);
+  const response=await fetch(manifestRequest);
+  if(!response.ok)throw new Error('Staged cache manifest unavailable');
+  const manifest=await response.clone().json();
+  if(manifest?.version!==STAGE_VERSION||typeof manifest.assets!=='object'||
+    Object.keys(manifest.assets??{}).length!==SOURCE_ASSETS.length||
+    SOURCE_ASSETS.some(path=>!/^[a-f0-9]{64}$/.test(manifest.assets[path]??'')))
+    throw new Error('Staged cache manifest does not cover this source shell');
+  for(let i=0;i<assetUrls.length;i+=12){
+    await Promise.all(assetUrls.slice(i,i+12).map(async (url,index)=>{
+      const path=SOURCE_ASSETS[i+index];
+      const request=cacheRequest(url),asset=await fetch(request);
+      if(!asset.ok)throw new Error('Staged asset unavailable '+path);
+      const bytes=await asset.clone().arrayBuffer();
+      const hash=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
+      const sha=[...hash].map(n=>n.toString(16).padStart(2,'0')).join('');
+      if(sha!==manifest.assets[path])throw new Error('Staged asset changed '+path);
+      await cache.put(request,asset);
+    }));
+  }
+  await cache.put(manifestRequest,response);
+}
 
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
@@ -267,11 +300,9 @@ self.addEventListener('install',event=>{
     try {
       // Full app shell + all runtime JS modules, including cold v5 profile
       // imports. Small bounded groups avoid throttling low-power iPhones.
-      for(let i=0;i<assetUrls.length;i+=12){
-        const requests=assetUrls.slice(i,i+12).map(url=>
-          new Request(url,{cache:'reload',credentials:'same-origin'}));
-        await cache.addAll(requests);
-      }
+      if(staging)await populateStagedBank(cache);
+      else for(let i=0;i<assetUrls.length;i+=12)
+        await cache.addAll(assetUrls.slice(i,i+12).map(cacheRequest));
       // Only an entirely verified installation can replace an older worker.
       await self.skipWaiting();
     }catch(error){
@@ -284,7 +315,8 @@ self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>
-      k.startsWith(CACHE_PREFIX)&&k!==CACHE_NAME).map(k=>caches.delete(k)));
+      k.startsWith(CACHE_PREFIX)&&k!==CACHE_NAME&&
+      (!staging||k!==PREVIOUS_STAGE_CACHE)).map(k=>caches.delete(k)));
     await self.clients.claim();
   })());
 });

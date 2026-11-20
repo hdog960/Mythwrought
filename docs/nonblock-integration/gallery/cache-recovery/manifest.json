@@ -1,0 +1,21 @@
+{
+  "version": "20261119-v7",
+  "attemptedVersion": "20261119-v8",
+  "rejectedMismatchedAsset": true,
+  "previousShellOpenedOffline": true,
+  "retainedTwoVerifiedBanks": true,
+  "schema1SaveBytesUnchanged": true,
+  "captures": [
+    {
+      "file": "artifacts/nonblock-cache-recovery/previous-good-offline-932x430.png",
+      "sha256": "3101ede17764a8554e76f237415f4bd695f36134a7d88018a5ed32606012405b",
+      "width": 932,
+      "height": 430
+    }
+  ],
+  "sourceSha256": {
+    "sw-m5.js": "353ab3fee519122e2164fdcdc36238cd22317c6ab552bcb10a5274875e3e74ef",
+    "nonblock-stage-assets.json": "2e56ecf4887897b7eb94cc35bcaaf6fe60c6008b923a114cb3270094175a791b",
+    "tests/nonblock-cache-recovery-browser.mjs": "42ac971f9dd08eb774b0f86081ab2b25c81cb6cb16c1ac1a98ca31c20b541ce3"
+  }
+}
