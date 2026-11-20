@@ -15,7 +15,7 @@ const source=readFileSync(resolve(root,'src/building-pool/roadmap-d/d1-original-
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const sourceSha=sha(source);
 assert.equal(manifest.exactSourceSHA256,sourceSha,'frame source differs from checked out Builder D commit');
-assert.equal(manifest.captureCount,48,'six original designs x 2 authentic views x 3 sizes are required');
+assert.equal(manifest.captureCount,48,'eight original designs x 2 authentic views x 3 sizes are required');
 assert.equal(manifest.captures.length,48);
 assert.deepEqual([manifest.physicalFamilyRendering,manifest.liveGameplay,manifest.physicalIphone],[false,false,false]);
 const sizes=[[667,375],[844,390],[932,430]], expected=new Set();
@@ -60,7 +60,7 @@ for(const b of ROADMAP_D_WAVE3_BUILDINGS)for(const [w,h] of sizes){
 }
 const result={schema:'mythwrought.roadmap-d.d2.genuine-webgl2-evidence.v1',
  gitHead:process.env.GITHUB_SHA||null,runId:process.env.GITHUB_RUN_ID||null,attempt:process.env.GITHUB_RUN_ATTEMPT||null,
- exactSourceSHA256:sourceSha,sourceCount:8,views:['exterior','section'],sizes,captureCount:36,uniquePNG:hashes.size,
+ exactSourceSHA256:sourceSha,sourceCount:8,views:['exterior','section'],sizes,captureCount:48,uniquePNG:hashes.size,
  status:'PASS',realChromium:true,cubeProxy:true,physicalMeshesAccepted:false,iphoneAccepted:false,productionRegistered:false,
  captures:records.sort((a,b)=>a.sourceId.localeCompare(b.sourceId)||a.width-b.width||a.view.localeCompare(b.view))};
 writeFileSync(join(folder,'audit.json'),JSON.stringify(result,null,2)+'\n');
