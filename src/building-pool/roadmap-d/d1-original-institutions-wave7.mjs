@@ -1277,8 +1277,8 @@ export const ROADMAP_D_WAVE7_PLANS=Object.freeze([
       ],
       [
         "cliffside-thaumaturgy",
-        15,
-        47
+        17,
+        57
       ]
     ],
     "div": [
