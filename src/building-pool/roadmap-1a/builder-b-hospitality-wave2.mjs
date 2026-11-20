@@ -224,12 +224,12 @@ export const BUILDER_B_HOSPITALITY_WAVE2_SPECS=Object.freeze([
         "west"
       ],
       [
-        38,
+        37,
         15,
         "east"
       ],
       [
-        38,
+        37,
         27,
         "east"
       ],
