@@ -286,7 +286,7 @@ export const BUILDER_B_HOSPITALITY_WAVE5_SPECS=Object.freeze([
         "north"
       ],
       [
-        16,
+        15,
         10,
         "west"
       ],
