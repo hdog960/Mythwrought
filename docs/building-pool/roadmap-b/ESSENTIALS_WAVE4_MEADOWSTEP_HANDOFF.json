@@ -1,0 +1,262 @@
+{
+  "schema": "mythwrought.builder-b.1b.wave4-village-stable-handoff.v1",
+  "status": "PROVISIONAL_UNMERGED_SOURCE",
+  "sourceFile": "src/building-pool/roadmap-b/builder-b-essentials-wave4.mjs",
+  "sourceGitBlob": "c2b50e89dda88018a51482ca60e276921a771e58",
+  "owner": "Builder B 115-exclusive ID freeze",
+  "otherOwner": "Builder D 92-exclusive frozen untouched",
+  "worldRegistration": false,
+  "livestockBehavior": false,
+  "creatorPhysicalAcceptance": false,
+  "source": {
+    "id": "r1:stable:temperate:small:002",
+    "title": "Meadowstep Split-Aisle Stables",
+    "category": "stable",
+    "biome": "temperate",
+    "size": "small",
+    "coordinateFNV64": "ba5be0701c5e4c47",
+    "footprint": {
+      "width": 44,
+      "height": 25,
+      "depth": 40
+    },
+    "entranceRoadFacing": "north",
+    "rooms": [
+      {
+        "id": "public-gear-entrance",
+        "min": [
+          16,
+          1,
+          3
+        ],
+        "max": [
+          30,
+          5,
+          12
+        ]
+      },
+      {
+        "id": "west-stall-one",
+        "min": [
+          4,
+          1,
+          11
+        ],
+        "max": [
+          17,
+          5,
+          21
+        ]
+      },
+      {
+        "id": "west-stall-two",
+        "min": [
+          4,
+          1,
+          23
+        ],
+        "max": [
+          17,
+          5,
+          31
+        ]
+      },
+      {
+        "id": "east-stall-one",
+        "min": [
+          28,
+          1,
+          11
+        ],
+        "max": [
+          40,
+          5,
+          22
+        ]
+      },
+      {
+        "id": "east-stall-two",
+        "min": [
+          28,
+          1,
+          23
+        ],
+        "max": [
+          40,
+          5,
+          31
+        ]
+      },
+      {
+        "id": "central-human-service-aisle",
+        "min": [
+          19,
+          1,
+          16
+        ],
+        "max": [
+          26,
+          5,
+          28
+        ]
+      },
+      {
+        "id": "rear-loft-and-hay-workroom",
+        "min": [
+          13,
+          1,
+          29
+        ],
+        "max": [
+          35,
+          5,
+          37
+        ]
+      },
+      {
+        "id": "low-west-tack-storage",
+        "min": [
+          3,
+          1,
+          29
+        ],
+        "max": [
+          12,
+          5,
+          37
+        ]
+      }
+    ],
+    "portals": [
+      {
+        "from": "outside",
+        "to": "public-gear-entrance",
+        "at": [
+          23,
+          1,
+          2
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "public-gear-entrance",
+        "to": "west-stall-one",
+        "at": [
+          18,
+          1,
+          17
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "public-gear-entrance",
+        "to": "east-stall-one",
+        "at": [
+          27,
+          1,
+          15
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "west-stall-one",
+        "to": "west-stall-two",
+        "at": [
+          10,
+          1,
+          22
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "east-stall-one",
+        "to": "east-stall-two",
+        "at": [
+          35,
+          1,
+          22
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "west-stall-two",
+        "to": "central-human-service-aisle",
+        "at": [
+          18,
+          1,
+          25
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "east-stall-two",
+        "to": "central-human-service-aisle",
+        "at": [
+          27,
+          1,
+          25
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "central-human-service-aisle",
+        "to": "rear-loft-and-hay-workroom",
+        "at": [
+          22,
+          1,
+          28
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "rear-loft-and-hay-workroom",
+        "to": "low-west-tack-storage",
+        "at": [
+          13,
+          1,
+          33
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      }
+    ],
+    "walkableSourceCells": 938,
+    "sourceVoxelCount": 5325,
+    "roofCells": 1207,
+    "genuineSkyOpenAbsentCourtyardColumns": 36,
+    "stallReservations": 4,
+    "futureUse": [
+      "stall spaces",
+      "tack store",
+      "hay room",
+      "human-access center aisle"
+    ],
+    "slopeShoreline": "none certified, future settlement should require dry graded ground and road approach",
+    "estimatedRenderCollisionCost": "source cells only; physical iPhone render and collider cost not yet measured",
+    "visuals": {
+      "captureScriptsReady": true,
+      "exteriorCutawaySizes": [
+        "667x375",
+        "844x390",
+        "932x430"
+      ],
+      "genuineChromiumFramesRequired": 6,
+      "executed": false
+    },
+    "unresolved": [
+      "roof span structural load",
+      "stall door clearances and real player collision",
+      "animal behavior intentionally disabled",
+      "Pack physical weather/roof yaw",
+      "renderer iPhone frame budget"
+    ]
+  }
+}
