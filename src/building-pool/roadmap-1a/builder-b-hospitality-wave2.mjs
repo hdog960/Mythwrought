@@ -352,7 +352,7 @@ export const BUILDER_B_HOSPITALITY_WAVE2_SPECS=Object.freeze([
     ],
     "posts": [
       15,
-      31
+      22
     ],
     "detail": "Genuinely asymmetric windbreak service hall, wide guest seating, protected kitchen, separate cellar and storage, varied snowproof six-wing gables"
   }
