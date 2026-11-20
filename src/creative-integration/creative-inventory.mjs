@@ -9,9 +9,9 @@ const el=(tag,className,text)=>{
   if(text!==undefined)n.textContent=text;
   return n;
 };
-export function installCreativeInventory({catalog,onSelect,onOpen,onClose}={}){
-  if(!catalog?.records||typeof onSelect!=='function'||typeof onOpen!=='function'||
-     typeof onClose!=='function')throw TypeError('Creative inventory requires live item authority');
+export function installCreativeInventory({catalog,onSelect,onOpen,onClose,onRotate,onVariant}={}){
+  if(!catalog?.records||[onSelect,onOpen,onClose,onRotate,onVariant].some(fn=>typeof fn!=='function'))
+    throw TypeError('Creative inventory requires live item authority and context handlers');
   const overlay=el('div','mw-inventory');
   overlay.id='creativeInventory';overlay.hidden=true;
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
@@ -33,13 +33,17 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose}={}){
   const preview=el('div','mw-inventory-preview','Select an item');
   preview.setAttribute('role','status');preview.setAttribute('aria-live','polite');
   const hotbar=el('div','mw-inventory-hotbar');hotbar.setAttribute('aria-label','Creative quick slots');
+  const controls=el('div','mw-inventory-context');
+  const rotation=el('button','mw-inventory-context-action','↻ ROTATE');
+  const variant=el('button','mw-inventory-context-action','◈ VARIANT');
+  rotation.type=variant.type='button';controls.append(rotation,variant);
   const quickbar=el('div','mw-creative-quickbar');quickbar.id='creativeQuickbar';
   quickbar.hidden=true;quickbar.setAttribute('aria-label','Selected Creative quick items');
   const viewport=document.querySelector('.viewport');
   if(!viewport)throw TypeError('Creative viewport missing');
   viewport.append(quickbar);
   const panel=el('section','mw-inventory-panel');
-  panel.append(header,description,search,categories,sub,grid,preview,hotbar);
+  panel.append(header,description,search,categories,sub,grid,preview,controls,hotbar);
   overlay.append(panel);document.body.append(overlay);
   let category='all',classification='all',selected=null,loaded=0;
   let found=[],visible=false,pending=false;
@@ -66,8 +70,23 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose}={}){
         });
         host.append(b);
       }
+      const rotateButton=el('button','mw-inventory-context-action','↻');
+      rotateButton.type='button';rotateButton.title='Rotate selected building piece';
+      rotateButton.setAttribute('aria-label','Rotate selected Creative material');
+      rotateButton.addEventListener('click',()=>void contextAction(onRotate));
+      host.append(rotateButton);
     }
   }
+  async function contextAction(handler){
+    const item=selected??slots[activeSlot];
+    if(!item)return;
+    try{
+      const result=await handler(item);
+      if(result)preview.textContent=result;
+    }catch(error){preview.textContent='No change: '+String(error?.message||error);}
+  }
+  rotation.addEventListener('click',()=>void contextAction(onRotate));
+  variant.addEventListener('click',()=>void contextAction(onVariant));
   async function select(item,assign=true){
     if(pending)return;
     pending=true;
