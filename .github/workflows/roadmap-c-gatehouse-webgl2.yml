@@ -1,0 +1,44 @@
+name: Roadmap C Twinstone six-view source WebGL2
+
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-3b/c1-twinstone-pass-gatehouse.mjs'
+      - 'src/building-pool/roadmap-3b/fortification-topology.mjs'
+      - 'tests/building-pool/roadmap-3b/c2-twinstone-gatehouse*'
+      - '.github/workflows/roadmap-c-gatehouse-webgl2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: roadmap-c-gatehouse-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  genuine-source-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native authoring and topology
+        run: |
+          node --test tests/building-pool/roadmap-3b/fortification-topology.test.mjs
+          node --test tests/building-pool/roadmap-3b/c2-twinstone-gatehouse.test.mjs
+      - name: Install pinned Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          node -e "import('playwright').then(({chromium})=>process.stdout.write('MYTHWROUGHT_CHROME_BIN='+chromium.executablePath()+'\n'))" >> "$GITHUB_ENV"
+      - name: Capture six genuine source-specific WebGL2 images
+        run: node --test tests/building-pool/roadmap-3b/c2-twinstone-gatehouse-chromium.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-c-twinstone-genuine-webgl2
+          path: artifacts/roadmap-c-3b-twinstone-gatehouse/
+          if-no-files-found: ignore
