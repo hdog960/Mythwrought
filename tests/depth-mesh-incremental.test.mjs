@@ -116,8 +116,17 @@ test('reused column cache avoids full deep section reads on a mining edit',()=>{
 
 test('GPU no-op suppression only fires for byte-identical opaque geometry',()=>{
   const world=new VoxelWorld(179),cell=[7,-72,7],section=sectionForY(cell[1]);
+  // Establish an actually sealed 3x3x3 fixture, independent of procedural
+  // cave openings or seed-dependent pockets. This is a geometry-parity test,
+  // not an assumption that any generated coordinate is naturally enclosed.
+  for(let x=6;x<=8;x++)for(let y=-73;y<=-71;y++)for(let z=6;z<=8;z++)
+    assert.equal(world.set(x,y,z,BLOCK.DEEPSTONE),true);
+  assert.equal(world.get(...cell),BLOCK.DEEPSTONE);
+  for(const [dx,dy,dz] of [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]])
+    assert.equal(world.get(cell[0]+dx,cell[1]+dy,cell[2]+dz),BLOCK.DEEPSTONE);
   meshDepthSection(world,0,0,section);
-  // A fully enclosed change between two solid materials cannot change a face.
+  // An invisible, fully enclosed solid-to-solid edit must keep the original
+  // byte-identical GPU mesh, regardless of surrounding procedural terrain.
   assert.equal(world.set(...cell,BLOCK.STONE),true);
   const solid=meshDepthSectionUpdate(world,0,0,section,cell);
   assert.equal(solid.changed,false,'occluded solid material should not cause a GPU upload');
