@@ -54,6 +54,8 @@ jobs:
           node --test tests/building-pool/roadmap-c-trades/wave3-5-butcher-chromium.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave3-5-jeweler-chromium.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave3-5-bookshop-chromium.test.mjs
+      - name: Decode real 30 trade PNGs and verify CRC, SHA256 and exact source HEAD
+        run: node --test tests/building-pool/roadmap-c-trades/c-evidence-png-integrity.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
