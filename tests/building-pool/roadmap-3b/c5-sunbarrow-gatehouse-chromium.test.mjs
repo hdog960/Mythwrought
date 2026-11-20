@@ -139,14 +139,14 @@ test('C2 original Sunbarrow gatehouse captures six genuine Chromium WebGL2 exter
      gpuError:data.gpuError,pngBytes:png.length,sha256});
    }
   }
-  assert.equal(reports.length,6,'6 distinct second-variation M3 gatehouse source views required');
+  assert.equal(reports.length,6,'6 genuine Sunbarrow original desert gatehouse source views required');
   assert.equal(new Set(reports.map(r=>r.filename)).size,6);
   assert.equal(new Set(reports.map(r=>r.sha256)).size,6,'nonunique source PNG screenshot evidence');
   const exactSourceCommit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   assert.match(exactSourceCommit,/^[0-9a-f]{40}$/);
   const sourceModulePath='src/building-pool/roadmap-3b/c5-sunbarrow-desert-gatehouse.mjs';
   const sourceModuleSha256=createHash('sha256').update(await readFile(sourceModulePath)).digest('hex');
-  const summary={exactSourceCommit,sourceModulePath,sourceModuleSha256,source:'Roadmap C Sunbarrow original temperate small gatehouse source-cube evidence',renderer:'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES',
+  const summary={exactSourceCommit,sourceModulePath,sourceModuleSha256,source:'Roadmap C Sunbarrow original desert small gatehouse source-cube evidence',renderer:'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES',
    physicalFamilyShapesRendered:false,creatorArtApproved:false,physicalIPhoneTested:false,
    count:reports.length,reports};
   await writeFile(join(output,'acceptance.json'),JSON.stringify(summary,null,2)+'\n');
