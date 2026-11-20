@@ -39,6 +39,10 @@ export function buildBriarfordSwitchwingBarn(){
    if(!has(x,z)||roofs.has(K(x,z)))continue;
    const y=base+Math.floor(Math.min(x-x0,x1-x,z-z0,z1-z)/4);
    roofs.set(K(x,z),y);
+   // Continuous wood decking beneath every roof tile ties the pitch into supported walls/trusses.
+   // Periodic grounded columns below share the load; structural certification remains pending.
+   if(b.clear(x,y-1,z))b.put(x,y-1,z,'support','live:wood','north',
+    {roofBacking:true,sourceSupported:true,finalLoadCertification:false});
    b.put(x,y,z,'roof','pack3:026','north',{roofProfile:name,physicalProducerApproved:false});
   }
  for(const [x,z] of [[18,6],[10,20],[35,19],[22,36],[7,34],[18,27],[30,29],[31,12]]){
