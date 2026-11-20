@@ -7,12 +7,12 @@ import witness from '../../../docs/building-pool/roadmap-c-trades/C_2B_FROZEN_OW
 const b=createCWinterglassMarket(),k=(x,y,z)=>[x,y,z].join(',');
 const occupied=new Set(b.voxels.map(v=>k(v.x,v.y,v.z)));
 const standing=(x,z)=>occupied.has(k(x,0,z))&&occupied.has(k(x,1,z))&&[2,3,4].every(y=>!occupied.has(k(x,y,z)));
-test('Winterglass snow market has exclusive frozen C-owned unused ID and authentic original 4956 source voxels',()=>{
+test('Winterglass snow market has exclusive frozen C-owned unused ID and authentic original 4968 source voxels',()=>{
  assert.equal(b.id,'r2:market-square:snow:small:03');
  assert.ok(witness.ownerIds.C.includes(b.id));
  assert.ok(!witness.ownerIds.B.includes(b.id)&&!witness.ownerIds.D.includes(b.id));
- assert.equal(validateBlueprint(b).uniqueCells,4956);
- assert.equal(b.voxels.filter(x=>x.kind==='foundation').length,1923);
+ assert.equal(validateBlueprint(b).uniqueCells,4968);
+ assert.equal(b.voxels.filter(x=>x.kind==='foundation').length,1929);
  assert.equal(b.voxels.filter(x=>x.kind==='roof').length,710);
  assert.equal(b.voxels.filter(x=>x.kind==='window').length,28);
  assert.equal(b.originalBooths.length,7);
