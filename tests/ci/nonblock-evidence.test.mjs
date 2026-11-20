@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {mkdtemp,mkdir,readFile,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {verifyStageEvidenceGroup} from '../../scripts/ci/verify-nonblock-evidence.mjs';
+import {verifyStageEvidenceGroup,verifyStageCatalogCoverage} from '../../scripts/ci/verify-nonblock-evidence.mjs';
 import {candidateFamilies} from '../../src/nonblock/candidate-families.mjs';
 import {OWNED_FITTING_IDS} from '../../src/nonblock/physical-fittings.mjs';
 import {EFFECT_IDS} from '../../src/nonblock/candidate-effects.mjs';
@@ -15,6 +15,20 @@ test('all 96 roster slots have exactly one scenery, effect or source-owner ident
   const ids=[...candidateFamilies.keys(),...OWNED_FITTING_IDS,...EFFECT_IDS];
   assert.deepEqual([candidateFamilies.size,OWNED_FITTING_IDS.length,EFFECT_IDS.length],[72,12,12]);
   assert.equal(new Set(ids).size,96);
+});
+
+test('catalog evidence rejects duplicate or missing identities even with the expected count',()=>{
+  const groups=[
+    {catalog:{kind:'scenery',ids:[...candidateFamilies.keys()]}},
+    {catalog:{kind:'fittings',ids:OWNED_FITTING_IDS}},
+    {catalog:{kind:'effects',ids:EFFECT_IDS}}
+  ];
+  assert.deepEqual(verifyStageCatalogCoverage(groups),{scenery:72,fittings:12,effects:12});
+  for(const invalid of [EFFECT_IDS.slice(1),[...EFFECT_IDS.slice(1),EFFECT_IDS.at(-1)],
+    [...EFFECT_IDS.slice(1),'wrong-effect']]){
+    const modified=[...groups.slice(0,2),{catalog:{kind:'effects',ids:invalid}}];
+    assert.throws(()=>verifyStageCatalogCoverage(modified),/Effects catalog evidence mismatch/i);
+  }
 });
 
 test('coordinator checks actual PNG bytes and fails closed on source or artifact corruption',async()=>{
