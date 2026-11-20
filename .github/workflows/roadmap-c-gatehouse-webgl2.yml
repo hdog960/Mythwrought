@@ -19,6 +19,7 @@ on:
       - 'src/building-pool/roadmap-3b/c-sunbarrow-settlement-handoff.mjs'
       - 'tests/building-pool/roadmap-3b/c-sunbarrow-settlement-handoff.test.mjs'
       - 'tests/building-pool/roadmap-3b/c-all-protected-211-d4.test.mjs'
+      - 'tests/building-pool/roadmap-3b/c-browser-evidence-path-contract.test.mjs'
       - 'docs/building-pool/roadmap-3b/C_PROTECTED_ACCEPTED211_SOURCE_BLOBS.json'
       - 'src/building-pool/roadmap-3b/c-barracks-settlement-handoff.mjs'
       - 'tests/building-pool/roadmap-3b/c-barracks-settlement-handoff.test.mjs'
@@ -64,6 +65,7 @@ jobs:
           node --test tests/building-pool/roadmap-3b/c-sunbarrow-settlement-handoff.test.mjs
           node --test tests/building-pool/roadmap-3b/c-granite-switchback-handoff.test.mjs
           node --test tests/building-pool/roadmap-3b/c-all-protected-211-d4.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-browser-evidence-path-contract.test.mjs
       - name: Install pinned Chromium
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
