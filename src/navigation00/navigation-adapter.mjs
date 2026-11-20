@@ -12,7 +12,7 @@ export function createNavigationAdapter({seed,discovery,storage=null,width,heigh
   function updatePlayer(next) {
     if (!next || ![next.x,next.z,next.yaw].every(Number.isFinite) ||
         (next.y!==undefined&&!Number.isFinite(next.y))) throw Error('Invalid player position');
-    current=Object.freeze({x:next.x,z:next.z,yaw:next.yaw,y:next.y});
+    current=Object.freeze({x:next.x,z:next.z,yaw:next.yaw,y:next.y===undefined?current.y:next.y});
   }
   function frame() {
     const camera=viewport.snapshot();
@@ -33,7 +33,8 @@ export function createNavigationAdapter({seed,discovery,storage=null,width,heigh
       cells:Object.freeze(cells),pins:Object.freeze(pins),
       player:Object.freeze({worldX:current.x,worldZ:current.z,worldY:current.y,
         bearing:projected.player.bearing,
-        screenX:projected.player.x+camera.frame.x,screenY:projected.player.y+camera.frame.y}),
+        screenX:camera.frame.x+camera.frame.width/2+(Math.floor(current.x/NAV00_CELL_SIZE)-projected.center.x)*camera.zoom,
+        screenY:camera.frame.y+camera.frame.height/2+(Math.floor(current.z/NAV00_CELL_SIZE)-projected.center.z)*camera.zoom}),
       undiscoveredCount:null});
   }
   return Object.freeze({seed,navigator,viewport,updatePlayer,frame});
