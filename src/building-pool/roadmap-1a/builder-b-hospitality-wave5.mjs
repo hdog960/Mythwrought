@@ -56,7 +56,7 @@ export const BUILDER_B_HOSPITALITY_WAVE5_SPECS=Object.freeze([
         35,
         22,
         35,
-        37
+        47
       ],
       [
         16,
