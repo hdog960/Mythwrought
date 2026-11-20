@@ -82,7 +82,7 @@ export function createCDesertSmallMarket(){
   approaches.push(approach);
  }
  // Actual non-rectangular southern triumph arch and four angled desert market pylons.
- for(const [x,z] of [[17,0],[26,0],[14,7],[31,7],[17,37],[26,37]]){
+ for(const [x,z] of [[17,0],[26,0],[14,7],[31,7],[18,38],[26,37]]){
   for(let y=2;y<=5;y++)put(x,y,z,P.sandstone,'wall',{role:'sandstone-weather-pier'});
  }
  for(let x=17;x<=26;x++)put(x,6,0,P.post,'roof',{roofProfile:'desert-caravan-triumph-arch'});
