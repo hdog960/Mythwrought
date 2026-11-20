@@ -6,6 +6,7 @@ import {createLegacyWatchtowerPool} from '../../../src/building-pool/roadmap-3b/
 import {createRoadmapCFirstGatehouseBlueprint} from '../../../src/building-pool/roadmap-3b/c1-twinstone-pass-gatehouse.mjs';
 import {createRoadmapCFirstCityWallBlueprint} from '../../../src/building-pool/roadmap-3b/c3-fourwatch-closed-city-wall.mjs';
 import {createCRoadmapCDesertBarracks} from '../../../src/building-pool/roadmap-3b/c4-sandglass-fork-desert-barracks.mjs';
+import {createCSunbarrowCaravanGatehouse} from '../../../src/building-pool/roadmap-3b/c5-sunbarrow-desert-gatehouse.mjs';
 import {readFile} from 'node:fs/promises';
 
 // 26 nonlegacy historical files from the explicitly accepted #271 parent.
@@ -87,10 +88,10 @@ test('Roadmap C protected accepted 3B parent contains 211 unique byte-for-byte u
   assert.ok(foundation(x).length>=50);
  }
 });
-test('All three new original C 3B architectures are D4-distinct from every protected historical 3B blueprint, eight symmetries, strict <0.89',async()=>{
+test('All four new original C 3B architectures are D4-distinct from every protected historical 3B blueprint, eight symmetries, strict <0.89',async()=>{
  const all=await originalPool();
- const fresh=[createRoadmapCFirstGatehouseBlueprint(),createRoadmapCFirstCityWallBlueprint(),createCRoadmapCDesertBarracks()];
- assert.equal(new Set(fresh.map(x=>x.id)).size,3);
+ const fresh=[createRoadmapCFirstGatehouseBlueprint(),createRoadmapCFirstCityWallBlueprint(),createCRoadmapCDesertBarracks(),createCSunbarrowCaravanGatehouse()];
+ assert.equal(new Set(fresh.map(x=>x.id)).size,4);
  for(const candidate of fresh){
   assert.ok(!all.some(x=>x.id===candidate.id),'original C building reused accepted 3B ID '+candidate.id);
   let score=0,closest='',checked=0;
@@ -105,4 +106,16 @@ test('All three new original C 3B architectures are D4-distinct from every prote
   console.log('MYTHWROUGHT_C_3B_ALL_211_STRICT_D4='+JSON.stringify({
    id:candidate.id,compared:checked,maxD4IoU:score,nearest:closest,sourceOnly:true}));
  }
+});
+
+test('All four newly authored C-only 3B sources reject mirrored/recolored geometry clones of one another',()=>{
+ const fresh=[createRoadmapCFirstGatehouseBlueprint(),createRoadmapCFirstCityWallBlueprint(),
+  createCRoadmapCDesertBarracks(),createCSunbarrowCaravanGatehouse()];
+ let comparisons=0;
+ for(let i=0;i<fresh.length;i++)for(let j=i+1;j<fresh.length;j++){
+  const score=d4max(foundation(fresh[i]),foundation(fresh[j]));
+  assert.ok(score<0.89,'NEW ROADMAP C source clone '+fresh[i].id+' vs '+fresh[j].id+' D4 '+score.toFixed(8));
+  comparisons++;
+ }
+ assert.equal(comparisons,6);
 });
