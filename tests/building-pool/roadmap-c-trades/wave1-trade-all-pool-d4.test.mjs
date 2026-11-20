@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readdir,readFile} from 'node:fs/promises';
 import {createCDesertSmallMarket} from '../../../src/building-pool/roadmap-c-trades/wave1-desert-market.mjs';
+import {createCRiverbendTailor} from '../../../src/building-pool/roadmap-c-trades/wave2-riverbend-tailor.mjs';
 
 const canonicalDir=new URL('../../../src/building-pool/roadmap-2b/',import.meta.url);
 const bDir=new URL('../../../src/building-pool/roadmap-b/',import.meta.url);
@@ -66,17 +67,25 @@ test('C trade imports preserve 146 canonical plus 59 staged distinct B records b
  for(const id of b.keys())assert.ok(!c.has(id),'B staged source overwrote an accepted canonical ID '+id);
  assert.ok(!c.has('r2:market-square:desert:small:01'));
  assert.ok(!b.has('r2:market-square:desert:small:01'));
+ assert.ok(!c.has('r2:tailor:temperate:small:03'));
+ assert.ok(!b.has('r2:tailor:temperate:small:03'));
  assert.equal(new Set([...c.keys(),...b.keys()]).size,205);
 });
-test('first C market is physically non-cloned against every preserved same-category 2B source under all eight D4 symmetries',async()=>{
- const c=await canonical(),b=await stageB(),fresh=createCDesertSmallMarket(),f=floor(fresh);
- let count=0,max=0,closest=null;
- for(const other of [...c.values(),...b.values()].filter(x=>x.category===fresh.category)){
-  const score=d4max(f,floor(other));
-  if(score>max){max=score;closest=other.id;}
-  assert.ok(score<0.85,fresh.id+' mirrored '+other.id+' eight-way floor IoU '+score.toFixed(8));
-  count++;
+test('both C market and C tailor are strictly D4-distinct against ALL preserved same-category 2B sources',async()=>{
+ const canonicalItems=await canonical(),stagedItems=await stageB();
+ const protectedItems=[...canonicalItems.values(),...stagedItems.values()];
+ const newSources=[createCDesertSmallMarket(),createCRiverbendTailor()];
+ assert.equal(new Set(newSources.map(s=>s.id)).size,2);
+ for(const fresh of newSources){
+  const points=floor(fresh),otherSources=protectedItems.filter(x=>x.category===fresh.category);
+  let max=0,closest=null,count=0;
+  for(const other of otherSources){
+   const score=d4max(points,floor(other));
+   if(score>max){max=score;closest=other.id;}
+   assert.ok(score<0.85,fresh.id+' structurally mirrored '+other.id+' D4 floor IoU '+score.toFixed(8));
+   count++;
+  }
+  assert.ok(count>=15,'not enough protected historical same-category source comparisons for '+fresh.id);
+  console.log(JSON.stringify({id:fresh.id,protectedSameCategoryComparisons:count,maxD4IoU:max,nearestProtectedId:closest,sourceOnly:true}));
  }
- assert.ok(count>=29,'expected all historically protected market square sources');
- console.log(JSON.stringify({id:fresh.id,comparisons:count,maxD4IoU:max,nearest:closest,sourceOnly:true}));
 });
