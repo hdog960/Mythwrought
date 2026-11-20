@@ -490,6 +490,9 @@ function start(){
   function g2NewWorld(){
     // The original world-change code immediately installs a safe newPlayer.
     g2CreativeEnabled=false;g2Flight=null;g2Controls=createG2ControlState();
+    // A creature sigil never silently carries into a newly created world.
+    // Quick-slot labels may remain, but deliberate re-selection is required.
+    creativeSpawnSpecies=null;
     g2TouchVertical.up=g2TouchVertical.down=false;g2Epoch++;g2Sync();
   }
   function g2Start(){
