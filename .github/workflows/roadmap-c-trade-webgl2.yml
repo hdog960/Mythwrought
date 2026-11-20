@@ -1,4 +1,4 @@
-name: Roadmap C five original trade buildings source WebGL2
+name: Roadmap C six original trade buildings source WebGL2
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  five-original-trade-architectures:
+  six-original-trade-architectures:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -34,36 +34,40 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: All five new C-owned trade source geometries, handoffs and strict protected all-pool D4
+      - name: All six new C-owned trade source geometries, handoffs and strict protected all-pool D4
         run: |
           node --test tests/building-pool/roadmap-c-trades/wave1-desert-market.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave2-riverbend-tailor.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave3-5-original-workshops.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave6-winterglass-snow-market.test.mjs
           node --test tests/building-pool/roadmap-c-trades/c-market-handoff.test.mjs
           node --test tests/building-pool/roadmap-c-trades/c-tailor-settlement-handoff.test.mjs
           node --test tests/building-pool/roadmap-c-trades/c-trade-wave3-5-settlement-handoff.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/c-winterglass-settlement-handoff.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave1-trade-all-pool-d4.test.mjs
       - name: Pinned Chromium install
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-      - name: Capture all thirty genuine C-owned market, tailor, butcher, jeweler and bookshop source WebGL2 images
+      - name: Capture all thirty-six genuine C-owned market, tailor, butcher, jeweler and bookshop source WebGL2 images
         run: |
           node --test tests/building-pool/roadmap-c-trades/wave1-desert-market-chromium.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave2-riverbend-tailor-chromium.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave3-5-butcher-chromium.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave3-5-jeweler-chromium.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave3-5-bookshop-chromium.test.mjs
-      - name: Decode real 30 trade PNGs and verify CRC, SHA256 and exact source HEAD
+          node --test tests/building-pool/roadmap-c-trades/wave6-winterglass-chromium.test.mjs
+      - name: Decode real 36 trade PNGs and verify CRC, SHA256 and exact source HEAD
         run: node --test tests/building-pool/roadmap-c-trades/c-evidence-png-integrity.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: roadmap-c-five-original-trade-genuine-webgl2
+          name: roadmap-c-six-original-trade-genuine-webgl2
           path: |
             artifacts/roadmap-c-trade-desert-market/
             artifacts/roadmap-c-trade-riverbend-tailor/
             artifacts/roadmap-c-trade-copperford-butcher/
             artifacts/roadmap-c-trade-silverfinch-jeweler/
             artifacts/roadmap-c-trade-wrenfield-bookshop/
+            artifacts/roadmap-c-trade-winterglass-snow-market/
           if-no-files-found: ignore
