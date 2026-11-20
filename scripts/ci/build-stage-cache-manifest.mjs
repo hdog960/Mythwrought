@@ -4,6 +4,8 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 
 const stagedPaths=[
+  "./src/environment-ground.mjs",
+  "./src/manual-biomes/environment-v7.mjs",
   "./src/nonblock/candidate-effects.mjs",
   "./src/nonblock/candidate-families.mjs",
   "./src/nonblock/candidate-scene.mjs",

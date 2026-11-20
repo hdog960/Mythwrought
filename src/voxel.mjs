@@ -3,6 +3,7 @@ import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
+import {environmentGround} from './environment-ground.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -144,7 +145,7 @@ export class VoxelWorld{
   set(x,y,z,id,rotation=0){
     if(![x,y,z,id,rotation].every(Number.isInteger)||
        y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y||
-       !(id>=0&&id<=8||isBiome130BlockId(id))||
+       !(id>=0&&id<=8||isBiome130BlockId(id)||environmentGround(id))||
        rotation<0||rotation>3||rotation!==0&&!isBiome130BlockId(id))return false;
     const key=worldKey(x,y,z),previous=this.edits.get(key);
     if(isBiome130BlockId(previous))this.biomeCellCount--;
@@ -295,7 +296,8 @@ export function meshChunk(world,cx,cz){
           }
           continue;
         }
-        const color=COLORS[id]||COLORS[3];
+        const newGround=environmentGround(id);
+        const color=newGround?.color??COLORS[id]??COLORS[3];
         // Most underground voxels are fully enclosed. Defer the two noise
         // samples and tint calculation until the FIRST exposed face; otherwise
         // a solid chunk pays for shading thousands of invisible blocks.
@@ -312,7 +314,11 @@ export function meshChunk(world,cx,cz){
           const b=clamp(color[2]*variance*face.lit,0,1);
           for(const k of [0,1,2,0,2,3]){
             const p=face.q[k],uv=FACE_UV[k];
-            appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
+            if(newGround){
+              const shade=face.lit*groundTint(x+p[0],z+p[2]);
+              appendVertex(x+p[0],y+p[1],z+p[2],color[0]*shade,color[1]*shade,color[2]*shade,uv[0],uv[1],0);
+            }else
+              appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
           }
         }
       }

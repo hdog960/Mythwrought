@@ -1,5 +1,5 @@
 {
-  "version": "20261120-v23",
+  "version": "20261120-v24",
   "assets": {
     "./src/mobs/animal-interactions.mjs": "e04f6692fc93ef6c44711cb10eafab261ceb7488383e55bf95067de724f99113",
     "./src/mobs/behavior.mjs": "4a65b4ca044a47e70a164929e2ce4552f0d11f811a61c3da5607de87ef1a7bfb",
@@ -154,7 +154,7 @@
     "./src/block-packs/pack-5/residential-furnishings.mjs": "3758a513b9dd410a9a71c35f8fc4cc5a96f520d5436f0c5bee6ae109cd3c50ea",
     "./src/block-packs/pack-5/shop-workshop.mjs": "71ccd7439c9bda004282d368bb8e17b32d841380955e53cbc34a31e01d471f0b",
     "./src/block-packs/pack-5/workshop-fixtures.mjs": "428bee5bf57c3780dace7a7a9cc788bc211201eddaa958af493780e76f43b759",
-    "./src/blocks.mjs": "282041b01acde146b99647acb4948249160492c1ffc4ee16950656052118dd1b",
+    "./src/blocks.mjs": "9f04815fbf8185c64ee6abbae8551b8037c6c8e3afde87994a6ffdca507389f6",
     "./src/branched-cave-world.mjs": "892e7a3dacd69fcea75d442b90ff17428f21251edbd0b46bd6298f959fc4502a",
     "./src/builder-assets/biome130.mjs": "f60b289ed05aa058b6324c27ada95b7ca7ef9fd1068fdfd8dbbaade30b1bb313",
     "./src/builder-assets/manual-five-pack-live.mjs": "86ebc68be5bb5e4d196fb5472868e6522c46c6f16fc814d3e51036cd90c4b7be",
@@ -183,7 +183,7 @@
     "./src/creative-integration/g2-streaming.mjs": "928d2f7ca2093aeccedc0b9f7b52d51c1f234989e54b3561e72b8a1736851898",
     "./src/creative-integration/registry-snapshot.mjs": "7a29d5bd4e420c17da18c2af173f49715b6c26782757b15c80d953a817e2622e",
     "./src/creative-integration/registry-validation.mjs": "498e720731802cbb2d3d6fd745d7363185e5b8a57f2e0166357fc2aaff44c052",
-    "./src/depth-mesh.mjs": "299b8c5aa9e3799dd6b21db4d8ad01de45147799349eecbec83c046a4bcec005",
+    "./src/depth-mesh.mjs": "7c6b0fc6a8a338d92cb0bafe773f76b03b51c389c75ae93640066c7d58413cf7",
     "./src/depth.mjs": "f39e63e941529c93aabc9d197aaa5e3c74aba4cd6a46272804ad306c4a216497",
     "./src/edit-echo.mjs": "ecf6c328f73bba5b3ada4024aefb89722723f1602ba0507de4727557f2f8ba34",
     "./src/edit-feedback.mjs": "22b157cc21043b9eafa6bccecc7964e7c2eac6ba58291f16c31bbec815a98ec5",
@@ -211,7 +211,7 @@
     "./src/manual-biomes/v6-balanced-biomes.mjs": "8ecae4258684b63148ca548af8f27771fa70fe6a0e84a55ac1ef75ff43f182cc",
     "./src/manual-biomes/overland-walk-m5.mjs": "aba7a6568996f431fd984c5f090a03ce14534aabd4792d69198ba99ddccba3d7",
     "./src/manual-biomes/profile-storage.mjs": "c7de837b07a0c405626c41e16877bb3783a6d3ff49f6e060c9872ed55512cf72",
-    "./src/manual-biomes/profile-world.mjs": "ae374a51657bcd895f0a07163f90b35e0177cdd382ac543d8c540871276687f8",
+    "./src/manual-biomes/profile-world.mjs": "cc8eb2b035c7b2c51ae7f9e2cc322e76f80585e6984c71d3c44c1ea203d1bcc7",
     "./src/manual-biomes/shoulder-traversal.mjs": "f54ef77060131d8bfd5b43c5ab232d9ab9049d664d7b3a46642f0cd24bb3bffe",
     "./src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
     "./src/meadow.mjs": "971be34a7b15baaf678265dfc9da2918ef6bc2b72761fc7763f71d94063a3f05",
@@ -260,11 +260,13 @@
     "./src/voxel-shape-interactions.mjs": "46049b127f4496ac72b780dc196c72dd581c25e79bd0462df5fcd475425962c9",
     "./src/voxel-trees.mjs": "bfd15de08ff5c7768f9985ab1564827a472ec5dfde48022ec7aca88f3bae4549",
     "./src/voxel-watchtower.mjs": "b157c18c15a66be513013afde4701d3d529027337da660f2b7156e6a1e57008a",
-    "./src/voxel.mjs": "f98356fdc15a38fecbf7945c48fb1c4a72bdda085a0c42e96f58547cc2a7b751",
+    "./src/voxel.mjs": "3794712ee86e4964627d7a12748e23be81db57cf1bed48c8da9dafc067d40622",
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "718c946759e7ea30206bcf94b825a540a5a8ada2b8325ce7aee98bb776814dfb",
     "./sw-m5.js": "b9a5ea052e180c0ce528011833d2fe08204e9e38c7f0c35ed66ff0f5536edac3",
+    "./src/environment-ground.mjs": "bb83a819e209464865aa6d999a733c3dff68786ca4aa33895fb7f9cf10b3b002",
+    "./src/manual-biomes/environment-v7.mjs": "8f324996482fad53c84a61114a0135386d04388a7867cae6cacb93556f2c9e41",
     "./src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
     "./src/nonblock/candidate-families.mjs": "b67401eeb2c45998ebc979701719313d103ea23daa939ed933972ac62b1cdc62",
     "./src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
@@ -299,6 +301,6 @@
     "./src/nonblock-scene48/undergrowth-phase1.mjs": "96607a48f2ed3146d3d0bc4b94dbf1fc81d4c6206a37a5c962854493d6e7b61f",
     "./src/nonblock-scene48/woodland-sapling.mjs": "6a3e8a61d67908261107a22e085082d4887a75decbd819a8ceb769a6256593ed",
     "./src/nonblock-scene48/woodland-shrub.mjs": "2419aed3138df3256e302b40f068079f6c89e51cf58d8a73b2df4fade2a803f5",
-    "./sw-nonblock-stage.js": "77a403fb5d290ca833af79df79c7445ef71a8f2e2e5d97b8164b9fa4a6710cb2"
+    "./sw-nonblock-stage.js": "beaef3d3723ff281dac642ec6ea8798052cac0e0fababf3ce53a8897b9f17542"
   }
 }
