@@ -93,15 +93,20 @@ export function installPlayerMenu({
     // a disabled button alone is never a data-safety boundary.
     const [vault,mirror]=backing;
     vault.hidden=false;
-    mirror.hidden=blocked;
-    for(const id of ['vaultBackup','vaultRestore','vaultDelete']){
-      const control=vault.querySelector('#'+id);
-      if(!control)throw Error('Original vault recovery action missing: '+id);
-      control.disabled=blocked;
+    mirror.hidden=false;
+    for(const [root,ids] of [
+      [vault,['vaultBackup','vaultRestore','vaultDelete']],
+      [mirror,['mirrorSync','mirrorRestore','mirrorEnabled']]
+    ]){
+      for(const id of ids){
+        const control=root.querySelector('#'+id);
+        if(!control)throw Error('Original backup recovery action missing: '+id);
+        control.disabled=blocked;
+      }
     }
     safetyNote.textContent=blocked?
-      'Older/damaged worlds remain archived. Download raw local saves above, or inspect and download original IndexedDB device-vault snapshots below. No restore, delete, or gameplay conversion is permitted.':
-      'Download localStorage saves here. IndexedDB device-vault snapshots need separate downloads below.';
+      'Older/damaged worlds remain archived. Download raw local saves, or inspect and download original IndexedDB vault AND mirror snapshots below. All save, sync, restore, and delete actions are disabled.':
+      'Download localStorage saves here. IndexedDB device-vault and mirrored snapshots need separate downloads below.';
     panel.classList.toggle('safety-open',Boolean(open));
     safety.hidden=!open;
     return open;
