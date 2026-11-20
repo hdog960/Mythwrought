@@ -19,7 +19,12 @@ const updateWorker=originalWorker
   .replace(new RegExp("const STAGE_PREVIOUS_VERSION='[^']+'"),"const STAGE_PREVIOUS_VERSION='"+version+"'")
   .replace("const STAGE_VERSION='"+version+"'","const STAGE_VERSION='"+next+"'");
 assert.notEqual(updateWorker,originalWorker);
-const updateManifest={version:next,assets:{...originalManifest.assets,'./sw-m5.js':digest(updateWorker)}};
+const repairedWorker=updateWorker+`
+self.addEventListener('message',event=>{
+  if(event.data==='verify-staged-recovery-controller')event.ports[0]?.postMessage(STAGE_VERSION);
+});
+`;
+const updateManifest=body=>({version:next,assets:{...originalManifest.assets,'./sw-m5.js':digest(body)}});
 const contentTypes={'.html':'text/html','.css':'text/css','.js':'text/javascript','.mjs':'text/javascript',
   '.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png'};
 let publish='original';
@@ -31,8 +36,9 @@ const server=createServer(async(req,res)=>{
   try{
     let body=await readFile(file);
     if(publish!=='original'){
-      if(pathname==='/sw-m5.js')body=Buffer.from(updateWorker);
-      if(pathname==='/'+manifestPath)body=Buffer.from(JSON.stringify(updateManifest)+'\n');
+      const worker=publish==='broken'?updateWorker:repairedWorker;
+      if(pathname==='/sw-m5.js')body=Buffer.from(worker);
+      if(pathname==='/'+manifestPath)body=Buffer.from(JSON.stringify(updateManifest(worker))+'\n');
       if(publish==='broken'&&pathname==='/src/nonblock/candidate-effects.mjs'){
         body=Buffer.concat([body,Buffer.from('\n/* deliberately mismatched staged publish bytes */\n')]);
         alteredResponseCount++;
@@ -132,9 +138,23 @@ try{
   captures.push({file,sha256:digest(bytes),width:932,height:430});
   assert.equal(await retained.evaluate(()=>localStorage.getItem('mythwrought:nonblock-stage:v1:legacy:179')),originalTombstone);
 
-  await context.setOffline(false);
   publish='updated';
-  assert.equal(await triggerUpdate(retained),'activated');
+  await context.setOffline(false);
+  // The browser may already check for an update when the network returns.
+  // Query the controlling worker itself instead of requiring a transient event.
+  await retained.evaluate(async()=>{
+    const registration=await navigator.serviceWorker.getRegistration();
+    await registration.update();
+  });
+  await retained.waitForFunction(expected=>new Promise(resolve=>{
+    const worker=navigator.serviceWorker.controller;
+    if(!worker){resolve(false);return;}
+    const channel=new MessageChannel();
+    const finish=version=>{clearTimeout(timer);channel.port1.close();resolve(version===expected);};
+    const timer=setTimeout(finish,750);
+    channel.port1.onmessage=event=>finish(event.data);
+    worker.postMessage('verify-staged-recovery-controller',[channel.port2]);
+  }),next,{timeout:90000,polling:300});
   assert.deepEqual(await banks(retained),[oldBank,newBank].sort());
   assert.equal(await retained.evaluate(key=>localStorage.getItem(key),worldKey),saved);
   assert.deepEqual(errors,[]);
