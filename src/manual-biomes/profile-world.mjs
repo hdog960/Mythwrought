@@ -11,6 +11,7 @@ import {m5V5MountainFreshColumn} from './mountain-pass-v5.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {environmentalTreesForChunk,keepLegacyGroveTree,planEnvironmentalColumn} from './environment-v7.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
+import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 
 // NEVER change a legacy generation profile's physical natural baseline.
 // M4 created worlds use v4; existing M3 (v3) Desert and M2 (v2) profiles
@@ -59,6 +60,7 @@ export class FourRegionWorld extends VoxelWorld{
     this.maxCachedColumns=maxCachedColumns;
     this._biomeColumns=new Map();
     if(this.profile.generator===M7_ENVIRONMENT_GENERATOR){
+      this.environmentCaves=combinedEnvironmentCaves(seed);
       this._environmentGroveMasks=new Map();
       this._environmentTreeChunks=new Map();
     }
@@ -113,6 +115,8 @@ export class FourRegionWorld extends VoxelWorld{
     ])??[]);
   }
   _environmentBaseline(x,y,z,block=super.naturalAndLandmarkBlock(x,y,z)){
+    const cave=this.environmentCaves.get(x,y,z);
+    if(cave!==undefined)return cave;
     // Only ordinary grove provenance can be suppressed. Named old landmarks,
     // player edits and cave geometry continue through their original readers.
     if(block!==BLOCK.WOOD&&block!==BLOCK.LEAVES)return block;
@@ -145,6 +149,8 @@ export class FourRegionWorld extends VoxelWorld{
     return cells.get(worldKey(x,y,z))??BLOCK.AIR;
   }
   naturalAndLandmarkBlock(x,y,z){
+    const cave=this.environmentCaves?.get(x,y,z);
+    if(cave!==undefined)return cave;
     const base=super.naturalAndLandmarkBlock(x,y,z);
     // Critical collision/mesh fast path: deep sections never scan a surface
     // column. Only natural topsoil and potentially raised shelves are sampled.

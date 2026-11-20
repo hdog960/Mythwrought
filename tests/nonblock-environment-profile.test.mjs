@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {BLOCK,VoxelWorld,raycast,terrainHeight} from '../src/voxel.mjs';
+import {BLOCK,VoxelWorld,collides,raycast,terrainHeight} from '../src/voxel.mjs';
 import {biome130Block,isBiome130BlockId} from '../src/biome130-registry.mjs';
+import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
 import {FourRegionWorld,fourRegionProfile,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,
   restoreFourRegionWorld} from '../src/manual-biomes/profile-world.mjs';
 
@@ -71,6 +72,30 @@ test('new biome terrain keeps actual cave air and existing protected mouths',()=
     }
     assert.ok(air>0,'The sample must include real cave air');
   }
+});
+
+test('the combined world uses the protected cave routes, with ordinary collision and save edits',()=>{
+  const seed=179,profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+  const world=new FourRegionWorld(seed,profile);
+  const {world:original,entrancePlan}=createStagedCaveRuntime(seed,undefined,{approved:true});
+  assert.equal(world.environmentCaves.entranceSites.length,4);
+  assert.ok(world.environmentCaves.cavePlanReport.surfaceTransitionConnected);
+  assert.ok(world.environmentCaves.cavePlanReport.vaultBridgeConnected);
+  assert.ok(world.environmentCaves.cavePlanReport.eastGalleryConnected);
+  for(const {route} of entrancePlan.entrances){
+    for(const {x,z,floor,feet} of route){
+      assert.equal(world.get(x,floor,z),original.get(x,floor,z));
+      assert.equal(world.get(x,feet,z),BLOCK.AIR);
+      assert.equal(collides(world,x+.5,feet,z+.5),false);
+      assert.equal(collides(world,x+.5,feet-.06,z+.5),true);
+    }
+  }
+  const {x,z,floor}=entrancePlan.entrances[0].route[0];
+  assert.ok(world.set(x,floor,z,BLOCK.AIR));
+  const saved=world.save(),reopened=restoreFourRegionWorld(saved,profile);
+  assert.equal(saved.schema,1);
+  assert.equal(reopened.get(x,floor,z),BLOCK.AIR);
+  assert.notEqual(original.get(x,floor,z),BLOCK.AIR);
 });
 
 test('new biome forests use climate-specific editable trees with deterministic chunk edges',()=>{

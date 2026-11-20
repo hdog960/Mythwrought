@@ -51,6 +51,13 @@ export function checkNewCaveWorldAdmission(storage,seed,{approved=false}={}){
     blockedKeys:Object.freeze(blocked)});
   return Object.freeze({ok:true,profile:CAVE_PROFILE_KIND,seed});
 }
+export function sourceCaveCell(world,x,y,z){
+  if(![x,y,z].every(Number.isSafeInteger)||y<WORLD_MIN_Y)return undefined;
+  const key=worldKey(x,y,z);
+  // AIR is an authored cell too, especially in the protected portal mesh.
+  return world.cavePortalCells?.get(key)??(y>=LEGACY_WORLD_MIN_Y?
+    world.caveEastCells?.get(key):world.caveCellMap?.get(key)??world.caveConnectorCells?.get(key));
+}
 export class CaveVoxelWorld extends VoxelWorld{
   constructor(seed=179,options={}){
     const permission=checkNewCaveWorldAdmission(options.storage,seed,options);
@@ -87,22 +94,7 @@ export class CaveVoxelWorld extends VoxelWorld{
     });
   }
   naturalAndLandmarkBlock(x,y,z){
-    if([x,y,z].every(Number.isSafeInteger)&&y>=WORLD_MIN_Y){
-      const key=worldKey(x,y,z);
-      // Explicit new-world profile entry portals are physical baseline cells,
-      // never synthetic schema-1 player edits. Only the runtime adapter can
-      // attach verified proposals; ordinary CaveVoxelWorld never has portals.
-      if(this.cavePortalCells?.has(key))return this.cavePortalCells.get(key);
-      // Explicit new-cave profile: historical East+South feature is never
-      // silently installed in the existing surface/legacy saved worlds.
-      if(y>=LEGACY_WORLD_MIN_Y&&this.caveEastCells?.has(key))
-        return this.caveEastCells.get(key);
-      if(y<LEGACY_WORLD_MIN_Y&&this.caveCellMap?.has(key))
-        return this.caveCellMap.get(key);
-      if(y<LEGACY_WORLD_MIN_Y&&this.caveConnectorCells?.has(key))
-        return this.caveConnectorCells.get(key);
-    }
-    return super.naturalAndLandmarkBlock(x,y,z);
+    return sourceCaveCell(this,x,y,z)??super.naturalAndLandmarkBlock(x,y,z);
   }
   static restore(payload,{approved=false}={}){
     if(approved!==true)throw Error('Explicit cave profile restore required');

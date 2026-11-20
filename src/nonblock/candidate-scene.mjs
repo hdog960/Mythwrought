@@ -6,6 +6,7 @@ const maxObjects = 32;
 const maxTombstones = 4096;
 const farEnterDistanceSquared=16**2;
 const farExitDistanceSquared=13**2;
+export const NONBLOCK_SCENERY_MATERIAL=24;
 export function readCandidateLayout(url) {
   if (!['localhost','127.0.0.1'].includes(url.hostname)) return null;
   const encoded = url.searchParams.get('nonblock-stage');
@@ -307,7 +308,7 @@ export function candidateVertices(objects) {
       const color=(o.palette[pigment]??o.palette[0]).map(n=>n*shade);
       for (let j=i;j<i+9;j+=3) {
         // The existing opaque grotto material keeps selected pigments bright.
-        packed.set([p[j],p[j+1],p[j+2],...color,0,0,luminous?11:21],offset);
+        packed.set([p[j],p[j+1],p[j+2],...color,0,0,luminous?11:NONBLOCK_SCENERY_MATERIAL],offset);
         offset+=9;
       }
     }

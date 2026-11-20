@@ -1,5 +1,5 @@
 {
-  "version": "20261120-v28",
+  "version": "20261120-v29",
   "assets": {
     "./src/mobs/animal-interactions.mjs": "e04f6692fc93ef6c44711cb10eafab261ceb7488383e55bf95067de724f99113",
     "./src/mobs/behavior.mjs": "4a65b4ca044a47e70a164929e2ce4552f0d11f811a61c3da5607de87ef1a7bfb",
@@ -33,13 +33,13 @@
     "./src/deep-vault-galleries.mjs": "f720ff486fdb765001306bc8c4ef38c6cd4327c8601906a9b9dd7e7d55c8127f",
     "./src/east-gallery-cave.mjs": "664316a1167c6dd2ec754f06b6efb730453eeabfa484ddf3b77853dae48cddca",
     "./src/manual-caves/c6-far-wall-gpu.mjs": "724ebdfe6f64ebb0966c4d103234b679f42f0fdedf88e437f0924064f5fdf91b",
-    "./src/manual-caves/cave-voxel-world.mjs": "8e5dafaa180f6f083d570b1975e6061f47012633c49658c0a5a2996afda0a35c",
+    "./src/manual-caves/cave-voxel-world.mjs": "b312e3cc31aa99d4370769a654f7ca141b6185ae9032e86ca492777286d062d4",
     "./src/manual-caves/deep-vault-bridges.mjs": "86486e3d7ae5c381602731ec965c94274b7bc61e64708143b2028718ce8971d2",
     "./src/manual-caves/east-gallery-intake.mjs": "8236c70b8c78e98ec3b34d97c43048e23cbfd0b957f371e90d6d7b4a5e547f8f",
     "./src/manual-caves/entrance-preflight.mjs": "b24302799a29a5681bba3fda4306eb18d3f6ac9c3f4c3a8a4f05664ad929a468",
     "./src/manual-caves/game-startup-contract.mjs": "28f19ab019a0b071278e575d1112c7d185d4f518195594d6fee0dadebb08769c",
     "./src/manual-caves/named-destination-audit.mjs": "741d6f37d49fdd9ad42b1b3a0abeede1cf1d78ef93403098a0bcc1992e1630a9",
-    "./src/manual-caves/opt-in-runtime.mjs": "88ba9c5f3dc734a6680b61bc6b8c8803fd0ed01b95dcef0cff69b4fb088d4ecc",
+    "./src/manual-caves/opt-in-runtime.mjs": "9a0f88dddd9399aeb119b5a1713e8db0b769c3e1b2baf74e3beb4b3a2179d294",
     "./src/manual-caves/preview.mjs": "98756d9bed7d33142c7e63b45546459e804396ac5f7c837e3343953b78913c5a",
     "./src/manual-caves/profile-store.mjs": "c4de5081436c85b676ca474c966bfe6a8938d447d0b775b83f4881b4d6302a0d",
     "./src/manual-caves/source-composition.mjs": "06cfd945b1ec803d952d3d1a8b96250a73f4eb90bc53398c0f506223516e07a4",
@@ -202,7 +202,7 @@
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
     "./src/app-update.mjs": "0147a855a346029d64f7bbec505b1150b30f225eca12f62749b3c128c4ecf3b1",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
-    "./src/main.mjs": "0c50c2ff8316326ac9d1dc035ef587d47e6ef7bcdd342cb844c6868fb96baad8",
+    "./src/main.mjs": "39eb9f433b7d3f863ee901e3cb82e020af7c26032781d0260633534b294900c9",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
     "./src/manual-biomes/exploration-ink.mjs": "9c16ec1277c762a328331e17d7aab61a55152dc601844473a8a7a85577dac5ed",
     "./src/manual-biomes/m2-runtime-bridge.mjs": "a01dbf2e99639238cd2647e07fea39cd7372aa47c07f4194fc9e91a16f207ebb",
@@ -210,8 +210,8 @@
     "./src/manual-biomes/mountain-pass-v5.mjs": "6202dd29472d126229fa5aec381c14a3947b5478efe8a08883d59ae5d566c147",
     "./src/manual-biomes/v6-balanced-biomes.mjs": "8ecae4258684b63148ca548af8f27771fa70fe6a0e84a55ac1ef75ff43f182cc",
     "./src/manual-biomes/overland-walk-m5.mjs": "aba7a6568996f431fd984c5f090a03ce14534aabd4792d69198ba99ddccba3d7",
-    "./src/manual-biomes/profile-storage.mjs": "c7de837b07a0c405626c41e16877bb3783a6d3ff49f6e060c9872ed55512cf72",
-    "./src/manual-biomes/profile-world.mjs": "544398fba30e3a1e7e7c5e73c6614d86825b98844c8c397cce2528a5926bca86",
+    "./src/manual-biomes/profile-storage.mjs": "870d81e9f7eef43322d3de27b150fcb38f2128fdf1194d2cd8620153490be4a3",
+    "./src/manual-biomes/profile-world.mjs": "957ebad523694fc48d1191da41a987c5044f868fddbf66399961c789cf7ef41f",
     "./src/manual-biomes/shoulder-traversal.mjs": "f54ef77060131d8bfd5b43c5ab232d9ab9049d664d7b3a46642f0cd24bb3bffe",
     "./src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
     "./src/meadow.mjs": "971be34a7b15baaf678265dfc9da2918ef6bc2b72761fc7763f71d94063a3f05",
@@ -270,7 +270,7 @@
     "./src/manual-biomes/environment-v7.mjs": "37b1bb6886a1e9ae6ff46455ca5f9fbfb21c7e337f2898e8f44ac19e90322ad5",
     "./src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
     "./src/nonblock/candidate-families.mjs": "b67401eeb2c45998ebc979701719313d103ea23daa939ed933972ac62b1cdc62",
-    "./src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
+    "./src/nonblock/candidate-scene.mjs": "5f78cdb3c09805443d44a139b40ceee11ac957cc14384a9a24f2d9cd3ed65bd5",
     "./src/nonblock/physical-fittings.mjs": "c9dc6bcb1d42e21e0fb2a0f304caa9d5053cbbccc06d60fea7769dfd714ee16e",
     "./src/nonblock/stage-offline.mjs": "da998c5e067defd0d9c1b3678ed56bfeba00230e6358328fc095ce72de7597c5",
     "./src/nonblock/staged-inherited-families.mjs": "957e5f44baa32acb9e77795a98176b0bccb85794914887cbcf6b0e98e79a3508",
@@ -302,6 +302,6 @@
     "./src/nonblock-scene48/undergrowth-phase1.mjs": "96607a48f2ed3146d3d0bc4b94dbf1fc81d4c6206a37a5c962854493d6e7b61f",
     "./src/nonblock-scene48/woodland-sapling.mjs": "6a3e8a61d67908261107a22e085082d4887a75decbd819a8ceb769a6256593ed",
     "./src/nonblock-scene48/woodland-shrub.mjs": "2419aed3138df3256e302b40f068079f6c89e51cf58d8a73b2df4fade2a803f5",
-    "./sw-nonblock-stage.js": "af28a3045bf4c3df70cee40d2253c8a16afa14b5689cb857bee5e5d845e753a0"
+    "./sw-nonblock-stage.js": "5b5df46164b1e22bd2bf6121125816e9e2a3a54562f3da1c90c2b129d9bd479c"
   }
 }

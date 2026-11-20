@@ -39,24 +39,23 @@ export function readFourRegionProfile(storage,seed){
   return Object.freeze({profile:primary??journal,
     source:primary?'primary':'journal',recovered:!primary});
 }
-function assertFreshAndUnclaimed(storage,seed){
-  const loaded=loadWorldSafe(storage,seed);
-  if(loaded.source!=='new')
-    throw Error('Existing seed/save cannot silently become a biome-enabled world');
-  // No auto conversion of an explored world that happens to contain zero
-  // edits. Check every seed-specific sidecar, map and prior selected seed.
-  const base=worldSlotKey(seed);
-  if(storage.getItem(SELECTED_SEED_KEY)===String(seed)||
-     storage.getItem('mythwrought-exploration-v1-'+seed)!==null)
-    throw Error('Previously selected/explored world is not fresh');
+export function isUnclaimedWorldSeed(storage,seed,loaded=loadWorldSafe(storage,seed)){
+  if(loaded.source!=='new'||storage.getItem(SELECTED_SEED_KEY)===String(seed))return false;
+  const prefixes=[worldSlotKey(seed),'mythwrought-exploration-v1-'+seed,
+    'mythwrought-sky-s1-clock-'+seed,'mythwrought-sky-s3-lunar-'+seed,
+    'mythwrought-mobs-v1-seed-'+seed,'mythwrought.manual14.seed.'+seed,
+    'mythwrought-pack3-construction-v1:'+seed,'mythwrought.pack5.builder.seed.'+seed,
+    'mythwrought-caves-v1-seed-'+seed];
   if(typeof storage.key!=='function'||!Number.isInteger(storage.length))
     throw Error('Cannot audit existing per-seed storage keys');
   for(let i=0;i<storage.length;i++){
     const key=storage.key(i);
-    if(typeof key==='string'&&(key===base||key.startsWith(base+'-')))
-      throw Error('Existing world sidecar prevents new-profile activation');
+    if(typeof key==='string'&&(
+      prefixes.some(prefix=>key===prefix||['-', '.', ':'].some(s=>key.startsWith(prefix+s)))||
+      (key.startsWith('mythwrought:nonblock-stage:v1:')&&
+        (key.endsWith(':'+seed)||key.endsWith(':'+seed+':previous-good')))))return false;
   }
-  return loaded;
+  return true;
 }
 export function activateFourRegionProfile(storage,seed,{
   explicitNewWorld=false,generator=FOUR_REGION_GENERATOR
@@ -64,11 +63,13 @@ export function activateFourRegionProfile(storage,seed,{
   if(!explicitNewWorld)throw Error('Explicit NEW biome-enabled world choice required');
   if(readFourRegionProfile(storage,seed))
     throw Error('World already has a generation profile');
-  assertFreshAndUnclaimed(storage,seed);
+  if(!isUnclaimedWorldSeed(storage,seed))
+    throw Error('Existing seed/save prevents activation. Previously selected, explored or saved seeds retain their world generation.');
   // A previously saved profile is never remapped. This option is used
   // solely AFTER a distinct, confirmed new-seed action or validated import.
   // Default remains the accepted v4 generator.
   const profile=fourRegionProfile(seed,generator);
+  const world=new FourRegionWorld(seed,profile);
   const key=profileKey(seed),raw=record(profile);
   // Immutable generator version. Write a verified journal before the primary
   // sidecar. An interrupted write never permits silent legacy regeneration.
@@ -80,7 +81,7 @@ export function activateFourRegionProfile(storage,seed,{
     throw Error('Could not verify biome profile primary');
   if(!readFourRegionProfile(storage,seed))
     throw Error('Biome profile not durably recorded');
-  return new FourRegionWorld(seed,profile);
+  return world;
 }
 function selectedWorldPayload(storage,seed,source){
   const key=worldSlotKey(seed);

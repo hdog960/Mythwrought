@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {candidateVertices,describeCandidateObject} from '../src/nonblock/candidate-scene.mjs';
+import {candidateVertices,describeCandidateObject,NONBLOCK_SCENERY_MATERIAL} from '../src/nonblock/candidate-scene.mjs';
 
 for(const [sceneId,lit] of [['scene48:glowing-vine',[6,12]],['scene48:lantern-mushroom',[15,16]],
   ['scene48:cavecap',[]]]){
@@ -12,7 +12,7 @@ for(const [sceneId,lit] of [['scene48:glowing-vine',[6,12]],['scene48:lantern-mu
     for(let i=0;i<shape.materials.length;i++){
       const pigment=shape.materials[i];
       const treated=lit.includes(pigment);
-      assert.equal(vertices[i*27+8],treated?11:21);
+      assert.equal(vertices[i*27+8],treated?11:NONBLOCK_SCENERY_MATERIAL);
       if(treated){
         luminous++;
         const rgb=vertices.subarray(i*27+3,i*27+6);
