@@ -1,6 +1,6 @@
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
-import {meshDepthSection} from './depth-mesh.mjs';
+import {meshDepthSection,discardDepthMeshCache} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
@@ -751,6 +751,23 @@ function start(){
   }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
+  let lastEditMeshTiming={meshMs:0,uploadMs:0,chunks:0};
+  const recentDigEdits=[];
+  function recordDigEdit(actionMs,saveMs){
+    recentDigEdits.push({actionMs,saveMs,...lastEditMeshTiming});
+    if(recentDigEdits.length>128)recentDigEdits.shift();
+  }
+  function digEditStats(){
+    if(!recentDigEdits.length)return 'no measured edits in this session';
+    const stat=key=>{
+      const v=recentDigEdits.map(e=>e[key]).sort((a,b)=>a-b);
+      return 'p95 '+v[Math.floor((v.length-1)*.95)].toFixed(1)+
+        ' ms; max '+v[v.length-1].toFixed(1)+' ms';
+    };
+    return recentDigEdits.length+' latest edits · action '+stat('actionMs')+
+      ', mesh '+stat('meshMs')+', upload '+stat('uploadMs')+
+      ', save '+stat('saveMs');
+  }
   function manual14AtChunk(cx,cz,section){
     const key=depthMeshKey(cx,cz,section);
     if(manual14MeshCache.has(key))return manual14MeshCache.get(key);
@@ -765,8 +782,9 @@ function start(){
     combined.set(base);combined.set(extra,base.length);
     return combined;
   }
-  function meshPlayableChunk(cx,cz,section){
-    const original=section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section);
+  function meshPlayableChunk(cx,cz,section,editedCell=null){
+    const original=section===0?meshChunk(world,cx,cz):
+      meshDepthSection(world,cx,cz,section,editedCell);
     const pack3Mesh=combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
     return combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
   }
@@ -778,21 +796,33 @@ function start(){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
     const batch=[];
-    for(const section of verticalEditSections(y))
-      for(const {cx,cz} of editAffectedChunks(x,z)){
-        const key=depthMeshKey(cx,cz,section);
-        if(!chunks.has(key))continue;
-        const vertices=meshPlayableChunk(cx,cz,section);
-        const water=meshPlayableWater(cx,cz,section);
-        batch.push({key,cx,cz,section,vertices,water});
-      }
+    let meshMs=0,uploadMs=0;
+    try{
+      for(const section of verticalEditSections(y))
+        for(const {cx,cz} of editAffectedChunks(x,z)){
+          const key=depthMeshKey(cx,cz,section);
+          if(!chunks.has(key))continue;
+          const start=performance.now();
+          const vertices=meshPlayableChunk(cx,cz,section,[x,y,z]);
+          const water=meshPlayableWater(cx,cz,section);
+          meshMs+=performance.now()-start;
+          batch.push({key,cx,cz,section,vertices,water});
+        }
+    }catch(error){
+      discardDepthMeshCache(world);
+      throw error;
+    }
     const ready=[];
     try{
       for(const item of batch){
-        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
+        const start=performance.now();
+        const uploaded=uploadPack2Chunk(item.vertices,item.water);
+        uploadMs+=performance.now()-start;
+        ready.push({...item,...uploaded});
       }
     }catch(err){
       for(const item of ready)deleteChunkBuffers(item);
+      discardDepthMeshCache(world);
       throw err;
     }
     for(const item of ready){
@@ -804,6 +834,7 @@ function start(){
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
+    lastEditMeshTiming={meshMs,uploadMs,chunks:ready.length};
     if(caveSession)caveFarGpu?.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
@@ -979,12 +1010,16 @@ function start(){
         return;
       }
     }
+    const actionBegin=performance.now();
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
+    const actionMs=performance.now()-actionBegin;
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;
+    const saveBegin=performance.now();
     const persisted=save();
+    recordDigEdit(actionMs,performance.now()-saveBegin);
     const label=BLOCK_NAMES[result.block]||'block';
     const action=mode==='mine'?'Removed':'Placed';
     message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
@@ -2205,7 +2240,7 @@ function start(){
         dimensions:innerWidth+'×'+innerHeight+' CSS px, DPR '+(devicePixelRatio||1),
         homeScreen:standalone?'standalone reported, not independently confirmed':'browser or unknown',
         grips,frames:frameHistory.stats(),
-        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels; mesh uploads '+meshCadence.meshes+', deferred frames '+meshCadence.skipped+', longest measured mesh '+meshCadence.slowestMs+' ms; GPU upload retry faults '+gpuRetry.stats().failures+', pending '+gpuRetry.stats().pendingRetries,
+        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels; mesh uploads '+meshCadence.meshes+', deferred frames '+meshCadence.skipped+', longest measured mesh '+meshCadence.slowestMs+' ms; GPU upload retry faults '+gpuRetry.stats().failures+', pending '+gpuRetry.stats().pendingRetries+'; underground edit timings: '+digEditStats(),
         save:saved,probe,quota
       });
       auditStatus.textContent='Report ready. Copy it for Gate A review; manual iPhone and art approval remain open.';
@@ -2926,10 +2961,15 @@ function start(){
         player.yaw=yaw;player.pitch=Math.max(-MAX_PITCH,Math.min(MAX_PITCH,pitch));
       },
       placeFixture(x,y,z,id){
-        const old=world.get(x,y,z);
+        const old=world.get(x,y,z),actionBegin=performance.now();
         if(!world.set(x,y,z,id))throw Error('Invalid test block');
-        try{refreshEditedMeshes(x,z,y);}catch(err){world.set(x,y,z,old);throw err;}
-        save();
+        try{refreshEditedMeshes(x,z,y);}catch(err){
+          world.set(x,y,z,old);discardDepthMeshCache(world);throw err;
+        }
+        const actionMs=performance.now()-actionBegin,saveBegin=performance.now();
+        const saved=save(),saveMs=performance.now()-saveBegin;
+        recordDigEdit(actionMs,saveMs);
+        return {saved,actionMs,saveMs,...lastEditMeshTiming};
       },
       // Localhost-only real-game GPU fixture, unavailable on deployed Pages.
       // Used by Chromium to verify the actual terrain shader + Pack 5 buffer.
