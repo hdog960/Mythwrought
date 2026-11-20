@@ -425,3 +425,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .mw-creative-air-tools{right:2px;bottom:38px}
   .mw-creative-air-tools button{min-height:24px;padding:2px 4px;font-size:9px}
 }
+
+
+.mw-item-thumbnail{width:40px;height:40px;max-width:100%;object-fit:contain;flex-shrink:0;
+  image-rendering:auto;pointer-events:none}
+.mw-inventory-context{display:flex;justify-content:center;gap:7px;flex-shrink:0}
+.mw-inventory-context-action{min-width:28px;min-height:27px;
+  background:linear-gradient(#5e6555,#374c47);border:1px solid #c7ac78;
+  color:#f9eacb;border-radius:7px;font-weight:800;font-size:10px;
+  padding:3px 7px;touch-action:manipulation}
+.mw-creative-quickbar .mw-inventory-context-action{font-size:16px;min-width:23px;padding:1px 3px}
+@media(max-height:375px){
+ .mw-item-thumbnail{width:31px;height:31px}
+ .mw-inventory-context-action{min-height:23px}
+}
