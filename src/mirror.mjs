@@ -1,7 +1,8 @@
 // MYTHWROUGHT v0.10 Gate A: consented, separate IndexedDB live-save mirror.
 // The existing v0.02 localStorage schema-1 slots stay authoritative. The mirror
 // is disabled by default and NEVER automatically restores a world.
-import {parseWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
+import {saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
+import {inspectSnapshotWorld} from './manual-biomes/m2-runtime-bridge.mjs';
 
 export const MIRROR_DB='mythwrought-v010-save-mirror';
 export const MIRROR_STORE='seeds';
@@ -14,7 +15,7 @@ function checkSeed(seed){
 export function mirrorSnapshot(raw,seed,createdAt=new Date().toISOString()){
   checkSeed(seed);
   if(typeof raw!=='string'||raw.length>MAX_IMPORT_BYTES)throw Error('Mirror save is oversized or invalid');
-  const world=parseWorldData(raw,seed);
+  const world=inspectSnapshotWorld(raw,seed);
   if(!Number.isFinite(Date.parse(createdAt)))throw Error('Invalid mirror snapshot timestamp');
   return {raw,checksum:saveFingerprint(raw),seed,edits:world.edits.size,createdAt};
 }
@@ -23,7 +24,7 @@ export function validateMirrorSnapshot(snapshot,seed){
   if(!snapshot||snapshot.seed!==seed||typeof snapshot.raw!=='string'||
     snapshot.raw.length>MAX_IMPORT_BYTES||snapshot.checksum!==saveFingerprint(snapshot.raw))
     throw Error('Mirror checksum, size or seed mismatch');
-  const world=parseWorldData(snapshot.raw,seed);
+  const world=inspectSnapshotWorld(snapshot.raw,seed);
   if(snapshot.edits!==world.edits.size)throw Error('Mirror edit count mismatch');
   if(typeof snapshot.createdAt!=='string'||!Number.isFinite(Date.parse(snapshot.createdAt)))
     throw Error('Mirror timestamp invalid');
@@ -94,7 +95,7 @@ export async function getMirrorCopy(seed,which='current',factory=globalThis.inde
 // Read-modify-write runs within ONE native IndexedDB readwrite transaction;
 // both the latest and previous-good copies commit or abort together.
 export async function writeMirror(raw,factory=globalThis.indexedDB){
-  const next=mirrorSnapshot(raw,parseWorldData(raw).seed);
+  const next=mirrorSnapshot(raw,inspectSnapshotWorld(raw).seed);
   await useDB(factory,db=>new Promise((resolve,reject)=>{
     let tx,request,lastError=null,changed=false;
     try{
@@ -128,7 +129,7 @@ export async function writeMirror(raw,factory=globalThis.indexedDB){
 export class MirrorWriteQueue {
   constructor(writer=writeMirror){this.writer=writer;this.tails=new Map();}
   enqueue(raw){
-    const seed=parseWorldData(raw).seed;
+    const seed=inspectSnapshotWorld(raw).seed;
     const former=this.tails.get(seed)||Promise.resolve();
     const next=former.catch(()=>{}).then(()=>this.writer(raw));
     this.tails.set(seed,next);

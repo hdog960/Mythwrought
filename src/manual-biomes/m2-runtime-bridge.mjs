@@ -4,7 +4,7 @@
 // Pack2LiveWorld adapter used by player mesh, raycast, collision and editing.
 import {VoxelWorld} from '../voxel.mjs';
 import {worldSeedFromText} from '../seeds.mjs';
-import {loadWorldSafe,saveWorldSafe,importWorldData} from '../persistence.mjs';
+import {loadWorldSafe,saveWorldSafe,importWorldData,parseWorldData} from '../persistence.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,
   pack2ExportBundle,pack2ImportBundle} from '../pack2-world.mjs';
 import {FourRegionWorld,fourRegionProfile,FOUR_REGION_GENERATOR,
@@ -95,7 +95,7 @@ export function openM2World(storage,choice){
  * If either step fails, do not pretend an atomic success: surface a FAILED
  * result including whether a sidecar write may already have completed.
  */
-export function saveM2World(storage,world){
+export function saveM2World(storage,world,{allowReplaceCorrupt=false}={}){
   if(!(world instanceof Pack2LiveWorld)||
      !(world.base instanceof VoxelWorld)||world.seed!==world.base.seed)
     throw Error('Expected real Pack2LiveWorld with VoxelWorld base');
@@ -110,8 +110,8 @@ export function saveM2World(storage,world){
   if(!p2.ok)return Object.freeze({ok:false,stage:'pack2',
     partialCommit:false,reason:p2.reason});
   let base;
-  try{base=profiled?saveFourRegionWorld(storage,world.base):
-    saveWorldSafe(storage,world);}
+  try{base=profiled?saveFourRegionWorld(storage,world.base,{allowReplaceCorrupt}):
+    saveWorldSafe(storage,world,{allowReplaceCorrupt});}
   catch(e){return Object.freeze({ok:false,stage:'base',
     partialCommit:!p2.unchanged,reason:String(e)});}
   if(!base?.ok)return Object.freeze({ok:false,stage:'base',
@@ -161,4 +161,15 @@ export function inspectM2WorldExport(raw){
     throw Error('Profile-bearing export cannot be treated as legacy');
   const base=importWorldData(raw),world=pack2ImportBundle(record,base);
   return Object.freeze({mode:'legacy',world,seed:base.seed});
+}
+
+export function inspectSnapshotWorld(raw,seed){
+  const record=JSON.parse(raw);
+  if(record?.kind!=='mythwrought-four-biomes-export'){
+    if(record?.profile||record?.kind)throw Error('Unsupported snapshot profile');
+    return parseWorldData(raw,seed);
+  }
+  const {world}=inspectM2WorldExport(raw);
+  if(seed!==undefined&&seed!==world.seed)throw Error('Snapshot world seed mismatch');
+  return world;
 }

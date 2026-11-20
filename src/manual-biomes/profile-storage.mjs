@@ -122,12 +122,12 @@ export function loadFourRegionWorld(storage,seed,{
   return Object.freeze({world,mode:'four-regions',
     recovered:Boolean(loaded.recovered||metadata.recovered)});
 }
-export function saveFourRegionWorld(storage,world){
+export function saveFourRegionWorld(storage,world,{allowReplaceCorrupt=false}={}){
   if(!(world instanceof FourRegionWorld))throw Error('Not an authoritative biome world');
   const metadata=readFourRegionProfile(storage,world.seed);
   if(!metadata||JSON.stringify(metadata.profile)!==JSON.stringify(world.profile))
     throw Error('Missing/mismatched biome profile; refusing save');
-  const status=saveWorldSafe(storage,world);
+  const status=saveWorldSafe(storage,world,{allowReplaceCorrupt});
   if(!status.ok)return status;
   // Verify through the NEW profile-aware loader. Plain VoxelWorld.restore
   // would discard edits equal to OLD legacy terrain: that is not sufficient.

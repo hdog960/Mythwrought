@@ -1,7 +1,8 @@
 // Mythwrought v0.10 Gate A: OPTIONAL IndexedDB snapshot vault.
 // No automatic migration or write-through: canonical v0.02 schema-1 localStorage
 // slots and v0.09 checksum journals remain the authoritative live save.
-import {parseWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
+import {saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
+import {inspectSnapshotWorld} from './manual-biomes/m2-runtime-bridge.mjs';
 
 export const VAULT_DB='mythwrought-v010-optional-vault';
 export const VAULT_STORE='snapshots';
@@ -68,7 +69,7 @@ function assertRecordId(id){
 export function makeVaultRecord(raw,id,createdAt=new Date().toISOString()){
   assertRecordId(id);
   if(typeof raw!=='string'||raw.length>MAX_IMPORT_BYTES)throw Error('Vault payload is too large');
-  const world=parseWorldData(raw);
+  const world=inspectSnapshotWorld(raw);
   return {id,seed:world.seed,raw,checksum:saveFingerprint(raw),edits:world.edits.size,
     format:1,createdAt};
 }
@@ -77,7 +78,7 @@ export function validateVaultRecord(record){
   assertRecordId(record.id);
   if(typeof record.raw!=='string'||record.raw.length>MAX_IMPORT_BYTES||
       record.checksum!==saveFingerprint(record.raw))throw Error('Vault checksum mismatch');
-  const world=parseWorldData(record.raw,record.seed);
+  const world=inspectSnapshotWorld(record.raw,record.seed);
   if(!Number.isInteger(record.edits)||record.edits!==world.edits.size)throw Error('Vault edit count mismatch');
   if(typeof record.createdAt!=='string'||!Number.isFinite(Date.parse(record.createdAt)))
     throw Error('Vault snapshot has invalid timestamp');

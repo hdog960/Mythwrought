@@ -120,6 +120,13 @@ jobs:
           NONBLOCK_EXTRA_COMPARISON=after node tests/nonblock-inherited-extra-browser.mjs
           node tests/nonblock-parity-browser.mjs
           node scripts/ci/verify-nonblock-evidence.mjs
+      - name: Unified default world and profile backups
+        if: ${{ !cancelled() && steps.scope.outputs.mode == 'full' && steps.browser_tools.outcome == 'success' }}
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-unified-site.log 2>&1 &
+          site_server=$!
+          trap 'kill "$site_server" 2>/dev/null || true' EXIT
+          node tests/nonblock-unified-world-browser.mjs
       - name: Advisory queue health snapshot
         if: always()
         env:

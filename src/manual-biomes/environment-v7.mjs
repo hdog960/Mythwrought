@@ -22,19 +22,35 @@ function sharedShoulder(biome,x,z,seed){
   return null;
 }
 
-function groundAt(name,x,z,seed,top){
+function desertOutcrop(x,z,phase){
+  const bed=undulation(x*.015+z*.024+phase);
+  if(bed<.88)return 0;
+  const stone=undulation(x*.113-z*.083+Math.sin(z*.062)*1.6-phase);
+  return smooth(clamp((stone-.75)/.25))*smooth(clamp((bed-.88)/.12));
+}
+
+function mountainRelief(x,z,phase){
+  const spine=x*.023+z*.037+phase+1.5*Math.sin(z*.017);
+  const ribs=x*.059-z*.037-phase+Math.sin(x*.013);
+  const crest=(1-Math.abs(Math.sin(spine)))**1.55;
+  const buttress=undulation(ribs)**2.4;
+  return 5.1+11.2*crest+3.5*buttress;
+}
+
+function groundAt(name,x,z,seed,top,outcrop){
   const phase=(seed%223)*.19;
   const band=undulation(x*.043+z*.028+phase+Math.sin(z*.026)*.63);
   const patch=undulation(x*.023-z*.028-phase+Math.sin(x*.032)*.84);
   if(name==='desert')return {
-    cap:band>.74?257:patch<.12?259:256,subsoil:258,rock:261
+    cap:outcrop>.45?261:band>.74?257:patch<.12?259:256,
+    subsoil:outcrop>.26?261:258,rock:261
   };
   if(name==='snow')return {
     cap:patch<.10?276:band>.92?279:272,subsoil:278,rock:279
   };
   if(name==='mountain')return {
-    cap:top>=15&&patch>.69?272:band>.72?G.gneiss:patch<.36?G.scree:G.slate,
-    subsoil:G.slate,rock:BLOCK.STONE
+    cap:top>=15&&patch>.52?272:band>.72?G.gneiss:patch<.36?G.scree:G.slate,
+    subsoil:band>.66?G.gneiss:G.slate,rock:BLOCK.STONE
   };
   return {
     cap:band>.79?G.woodlandMoss:patch<.25?G.woodlandPeat:G.woodlandLoam,
@@ -52,9 +68,10 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline){
   const phase=(seed%223)*.19;
   const wind=undulation(x*.06+z*.022+phase+Math.sin(z*.025)*.75);
   const fold=undulation(x*.034-z*.044+phase+Math.sin(x*.021)*1.3);
-  const height=biome.name==='desert'?old+3.5*wind:
+  const outcrop=biome.name==='desert'?desertOutcrop(x,z,phase):0;
+  const height=biome.name==='desert'?old+3.5*wind+4*outcrop:
     biome.name==='snow'?old+2.6*fold:
-    biome.name==='mountain'?Math.max(old,6+11*Math.pow(fold,1.7)+wind*2):
+    biome.name==='mountain'?Math.max(old,mountainRelief(x,z,phase)):
     old+2.1*wind;
   const top=Math.min(WORLD_MAX_Y-2,Math.round(old+(height-old)*blend));
   for(let y=old-2;y<=WORLD_MAX_Y;y++){
@@ -65,7 +82,7 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline){
   // The shoulder replaces the grass in a broad contiguous band. The
   // natural wood and cave checks above remain authoritative.
   if(blend<.065&&shoulder===null)return writes;
-  const {cap,subsoil,rock}=groundAt(biome.name,x,z,seed,top);
+  const {cap,subsoil,rock}=groundAt(biome.name,x,z,seed,top,outcrop);
   for(let y=old-1;y<=top;y++)
     writes.set(y,y===top?(shoulder??cap):y>=top-2?subsoil:rock);
   return writes;

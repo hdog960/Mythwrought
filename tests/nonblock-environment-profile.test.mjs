@@ -3,6 +3,10 @@ import test from 'node:test';
 import {BLOCK,VoxelWorld,collides,raycast,terrainHeight} from '../src/voxel.mjs';
 import {biome130Block,isBiome130BlockId} from '../src/biome130-registry.mjs';
 import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
+import {Pack2LiveWorld} from '../src/pack2-world.mjs';
+import {exportM2World,inspectSnapshotWorld} from '../src/manual-biomes/m2-runtime-bridge.mjs';
+import {makeVaultRecord,validateVaultRecord} from '../src/vault.mjs';
+import {mirrorSnapshot,validateMirrorSnapshot} from '../src/mirror.mjs';
 import {FourRegionWorld,fourRegionProfile,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,
   restoreFourRegionWorld} from '../src/manual-biomes/profile-world.mjs';
 
@@ -140,4 +144,23 @@ test('neighboring special biomes share a solid shoulder without an exposed Plain
     assert.notEqual(id,BLOCK.GRASS,'Special-biome transition exposed a legacy grass column at '+[x,z]);
     assert.notEqual(world.get(x,y-1,z),BLOCK.AIR);
   }
+});
+
+test('the vault and mirror retain the immutable profile and Schema-1 edits together',()=>{
+  const seed=179,profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+  const world=new Pack2LiveWorld(new FourRegionWorld(seed,profile));
+  assert.ok(world.set(50,18,50,404));
+  const raw=exportM2World(world);
+  const vault=validateVaultRecord(makeVaultRecord(raw,'v010:fixed:abcdefghij'));
+  const mirror=validateMirrorSnapshot(mirrorSnapshot(raw,seed),seed);
+  for(const copy of [vault,mirror]){
+    assert.equal(copy.raw,raw);
+    const restored=inspectSnapshotWorld(copy.raw,seed);
+    assert.deepEqual(restored.base.generationProfile,profile);
+    assert.equal(restored.save().schema,1);
+    assert.equal(restored.get(50,18,50),404);
+  }
+  assert.throws(()=>mirrorSnapshot(raw,seed+1),/seed mismatch/);
+  const {pack2,...damaged}=JSON.parse(raw);
+  assert.throws(()=>makeVaultRecord(JSON.stringify(damaged),'v010:fixed:abcdefghij'),/Incomplete biome export/);
 });

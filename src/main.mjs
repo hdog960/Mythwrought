@@ -31,7 +31,7 @@ import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIR
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {isUnclaimedWorldSeed,readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
-  exportM2World,inspectM2WorldExport} from './manual-biomes/m2-runtime-bridge.mjs';
+  exportM2World,inspectM2WorldExport,inspectSnapshotWorld} from './manual-biomes/m2-runtime-bridge.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {installGameplayRecorder} from './gameplay-recorder.mjs';
 import {installGameUpdater} from './app-update.mjs';
@@ -801,14 +801,17 @@ function start(nonblockStage=null){
   }
   function verifiedLiveBytes(){
     if(caveSession)throw Error('Cave profiles are isolated; legacy mirror cannot capture a cave world');
-    // The legacy mirror stores ONLY schema-1 bytes, not immutable generator
-    // profile metadata. Never mirror a biome world as if it were legacy.
-    if(world.base instanceof FourRegionWorld)
-      throw Error('Four-biome world: use WORLD EXPORT (profile-safe JSON); legacy mirror disabled');
     if(storageReadOnly)throw Error('Protected read-only world: keep original damaged data');
     const raw=localStorage.getItem(worldSlotKey(world.seed));
     if(!raw||raw!==JSON.stringify(world.save()))
       throw Error('Live world does not match a verified primary save. Use SAVE first.');
+    if(world.base instanceof FourRegionWorld){
+      const verified=openM2World(localStorage,planM2WorldChoice(String(world.seed)));
+      const bundle=exportM2World(world);
+      if(verified.warning||exportM2World(verified.world)!==bundle)
+        throw Error('Live profile or Pack 2 state differs from the verified save. Use SAVE first.');
+      return bundle;
+    }
     return raw;
   }
   function queueMirror(seed,raw){
@@ -892,6 +895,7 @@ function start(nonblockStage=null){
       }
       changed=false;
       saveHealth.textContent='Verified biome-generation profile, schema-1 edits and Pack 2 sidecar; use profile-safe WORLD EXPORT for off-device backup.';
+      scheduleMirrorForWorld();
       return true;
     }
     const overlay=savePack2LiveWorld(localStorage,world);
@@ -2390,10 +2394,12 @@ function start(nonblockStage=null){
         const raw=localStorage.getItem(worldSlotKey(world.seed));
         if(raw===null)saved='No canonical save for this seed yet';
         else{
-          const loaded=loadWorldSafe(localStorage,world.seed);
+          const loaded=world.base instanceof FourRegionWorld?
+            openM2World(localStorage,planM2WorldChoice(String(world.seed))):
+            loadWorldSafe(localStorage,world.seed);
           const same=JSON.stringify(loaded.world.save())===JSON.stringify(world.save());
           saved=(same?'Current world matches stored edits':'MISMATCH: world edits differ')+
-            '; source='+loaded.source;
+            '; source='+(loaded.source??loaded.mode);
         }
       }catch(err){saved='UNVERIFIED: '+String(err);}
       const probe=probeTemporaryStorage(localStorage,
@@ -2436,6 +2442,20 @@ function start(nonblockStage=null){
   const vaultLink=document.getElementById('vaultDownloadLink');
   const vaultButtons=[...document.querySelectorAll('.vault-settings button')];
   let vaultBusy=false,vaultObjectUrl=null;
+  function prepareSnapshotRestore(raw,seed){
+    rejectLegacyWorldWhereCaveExists(localStorage,seed);
+    const restored=inspectSnapshotWorld(raw,seed);
+    const profile=readFourRegionProfile(localStorage,seed)?.profile;
+    if(restored instanceof Pack2LiveWorld){
+      if(!profile||JSON.stringify(profile)!==JSON.stringify(restored.base.generationProfile))
+        throw Error('Backup generation profile differs from this seed. Use WORLD IMPORT to open a profiled backup on an unused seed.');
+      return restored;
+    }
+    if(profile)throw Error('A legacy snapshot cannot replace a seed with a saved generation profile');
+    const bundle=JSON.parse(raw);
+    return bundle.pack2?pack2ImportBundle(bundle,restored):
+      loadPack2LiveWorld(localStorage,restored).world;
+  }
   function clearVaultLink(){
     if(vaultObjectUrl){URL.revokeObjectURL(vaultObjectUrl);vaultObjectUrl=null;}
     vaultLink.hidden=true;vaultLink.removeAttribute('href');
@@ -2480,18 +2500,14 @@ function start(nonblockStage=null){
   document.getElementById('vaultRefresh').onclick=()=>useVault(()=>refreshVault());
   document.getElementById('vaultBackup').onclick=()=>useVault(async()=>{
     if(storageReadOnly)throw Error('Current world is in protected read-only mode; select a healthy seed or import a backup');
-    if(world.base instanceof FourRegionWorld)
-      throw Error('Four-biome backups require WORLD EXPORT with generation profile. Legacy vault cannot safely back up this world');
     const capturedSeed=world.seed;
-    // Legacy vault parser accepts the original schema-1 envelope while the
-    // additional Pack 2 sidecar is retained for a complete JSON restore.
-    const raw=JSON.stringify(world.pack2Cells.size?
+    const raw=world.base instanceof FourRegionWorld?exportM2World(world):JSON.stringify(world.pack2Cells.size?
       pack2ExportBundle(world):world.save());
     const snapshot=await createVaultBackup(raw);
     if(capturedSeed!==snapshot.seed)throw Error('Snapshot seed mismatch');
     await refreshVault(snapshot.id);
     vaultStatus.textContent='Verified device backup for seed '+snapshot.seed+
-      ' ('+snapshot.edits+' legacy edits'+
+      ' ('+snapshot.edits+' world edits'+
       (world.pack2Cells.size?', '+world.pack2Cells.size+' Pack 2 placements':'')+
       '). Download JSON for an independent off-device copy.';
   });
@@ -2509,14 +2525,7 @@ function start(nonblockStage=null){
     clearVaultLink();
     const activeSeed=world.seed;
     const snapshot=await inspectVaultBackup(chosenVaultId());
-    if(world.base instanceof FourRegionWorld||readFourRegionProfile(localStorage,snapshot.seed))
-      throw Error('Legacy vault restore cannot overwrite a biome-profile world. Use profile-safe WORLD EXPORT; no save was changed');
-    const imported=importWorldData(snapshot.raw);
-    // Legacy vault snapshots retain schema-1 bytes. Restore the independently
-    // verified Pack 2 overlay for this seed, or abort before touching saves.
-    const candidate=JSON.parse(snapshot.raw).pack2?
-      pack2ImportBundle(JSON.parse(snapshot.raw),imported):
-      loadPack2LiveWorld(localStorage,imported).world;
+    const candidate=prepareSnapshotRestore(snapshot.raw,snapshot.seed);
     // Always require approval, including when restoring a different seed.
     if(!window.confirm('RESTORE device backup for seed '+snapshot.seed+' with '+snapshot.edits+
       ' edits? The current saved world will be preserved in the previous-good slot where possible. Cancel changes nothing.')) {
@@ -2525,8 +2534,15 @@ function start(nonblockStage=null){
     if(world.seed!==activeSeed)throw Error('Current world changed while restoring; retry');
     if(!storageReadOnly&&changed&&!save())throw Error('Current world has unsaved edits. Export it before restoring');
     let damaged=false;
-    try{loadWorldSafe(localStorage,imported.seed);}catch(_){damaged=true;}
-    const result=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
+    try{loadWorldSafe(localStorage,candidate.seed);}catch(_){damaged=true;}
+    if(candidate.base instanceof FourRegionWorld){
+      const status=saveM2World(localStorage,candidate,{allowReplaceCorrupt:damaged});
+      if(!status.ok)throw Error('Profile snapshot restore failed: '+status.reason);
+      enterPreparedM2World(candidate,'Restored device backup for seed '+candidate.seed);
+      vaultStatus.textContent='Verified device snapshot restored with the matching generation profile.';
+      return;
+    }
+    const result=saveWorldSafe(localStorage,candidate.base,{allowReplaceCorrupt:damaged});
     if(!result.ok)throw Error('Restore failed without replacing the active game: '+result.detail);
     const overlay=savePack2LiveWorld(localStorage,candidate);
     if(!overlay.ok)throw Error('Pack 2 verified overlay not updated; export backups before retry: '+overlay.reason);
@@ -2534,7 +2550,10 @@ function start(nonblockStage=null){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
+    disposeLiveMobSession();g2NewWorld();caveFarGpu.invalidate();
+    world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);
+    resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
+    reactivateSkyClock();resetLiveMobSession();
     clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
@@ -2574,8 +2593,6 @@ function start(nonblockStage=null){
       // a damaged world; otherwise a reload could accidentally opt the user in.
       if(requested&&caveSession)throw Error('Normal-world mirroring is disabled in Cave World; use separate Cave SAVE / EXPORT');
       if(requested&&storageReadOnly)throw Error('Selected world is protected read-only; export or select a healthy seed first');
-      if(requested&&world.base instanceof FourRegionWorld)
-        throw Error('Four-biome world requires profile-safe WORLD EXPORT; legacy mirror cannot hold its generation identity');
       localStorage.setItem(MIRROR_PREF,requested?'enabled':'disabled');
       if(localStorage.getItem(MIRROR_PREF)!==(requested?'enabled':'disabled'))
         throw Error('Preference read-back failed');
@@ -2626,8 +2643,6 @@ function start(nonblockStage=null){
   });
   mirrorSlot.addEventListener('change',clearMirrorDownload);
   document.getElementById('mirrorPrepare').onclick=()=>withMirror(async()=>{
-    if(world.base instanceof FourRegionWorld)
-      throw Error('Use profile-safe WORLD EXPORT for four-biome backups; this mirror contains only legacy schema-1 bytes');
     await settleMirrorWrites();
     const selectedSeed=world.seed,selectedVersion=mirrorSlot.value;
     const snap=await getMirrorCopy(selectedSeed,selectedVersion);
@@ -2636,26 +2651,27 @@ function start(nonblockStage=null){
     mirrorDownload.href=mirrorDownloadUrl;
     mirrorDownload.download='mythwrought-mirror-seed-'+selectedSeed+'-'+selectedVersion+'.json';
     mirrorDownload.hidden=false;
-    mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap the separate DOWNLOAD link to export this original schema-1 JSON file.';
+    mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap DOWNLOAD to export the verified world JSON.';
   });
   document.getElementById('mirrorRestore').onclick=()=>withMirror(async()=>{
-    if(world.base instanceof FourRegionWorld||readFourRegionProfile(localStorage,world.seed))
-      throw Error('Refusing legacy mirror restore on a four-biome profile; generation identity would be lost');
     if(storageReadOnly)throw Error('Read-only startup protection active; use the regular IMPORT flow to repair damaged saved bytes');
     await settleMirrorWrites(); // Never let an older queued write race a restore.
     const seed=world.seed,which=mirrorSlot.value;
     const snap=await getMirrorCopy(seed,which);
-    const restored=importWorldData(snap.raw);
-    const candidate=JSON.parse(snap.raw).pack2?
-      pack2ImportBundle(JSON.parse(snap.raw),restored):
-      loadPack2LiveWorld(localStorage,restored).world;
-    if(restored.seed!==seed)throw Error('Mirror seed does not match the active world');
+    const candidate=prepareSnapshotRestore(snap.raw,seed);
     if(!window.confirm('RESTORE the '+which+' verified mirror of seed '+seed+
       ' with '+snap.edits+' edits? The current primary will be kept in the previous-good local backup. Cancel changes nothing.')){
       mirrorStatus.textContent='Restore cancelled. No world or mirror copy changed.';return;
     }
     if(world.seed!==seed||changed)throw Error('World changed or contains unsaved edits; export or SAVE before restoring');
-    const out=saveWorldSafe(localStorage,restored);
+    if(candidate.base instanceof FourRegionWorld){
+      const status=saveM2World(localStorage,candidate);
+      if(!status.ok)throw Error('Profile mirror restore failed: '+status.reason);
+      enterPreparedM2World(candidate,'Restored '+which+' device mirror for seed '+seed);
+      mirrorStatus.textContent='Restore verified with the matching generation profile.';
+      return;
+    }
+    const out=saveWorldSafe(localStorage,candidate.base);
     if(!out.ok)throw Error('Canonical world restore failed; '+out.detail);
     const overlay=savePack2LiveWorld(localStorage,candidate);
     if(!overlay.ok)throw Error('Cannot verify Pack 2 state after restore: '+overlay.reason);
