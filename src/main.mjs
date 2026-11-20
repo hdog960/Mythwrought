@@ -3132,6 +3132,41 @@ function start(){
   const creativeCatalog=buildCreativeCatalog();
   creativeInventory=installCreativeInventory({
     catalog:creativeCatalog,
+    onRotate:item=>{
+      if(item.kind!=='block')return 'Creature sigils have no orientation';
+      const next=field=>{
+        const n=(Number(field.value)+1)%4;field.value=String(n);
+        field.dispatchEvent(new Event('change',{bubbles:true}));
+        return item.name+' · rotated '+n*90+'°';
+      };
+      if(item.owner==='biome130')return next(biomeRotation);
+      if(item.owner==='pack1'||item.owner==='pack4')return next(manual14Rotate);
+      if(item.owner==='pack3'){
+        if(pack3Palette.yaw.disabled)return item.name+' has fixed orientation';
+        return next(pack3Palette.yaw);
+      }
+      if(item.owner==='pack2'){
+        document.getElementById('pack2Rotate').click();
+        return pack2StateText.textContent;
+      }
+      if(item.owner==='pack5')return next(document.getElementById('pack5Rotation'));
+      return item.name+' has no rotational variant';
+    },
+    onVariant:item=>{
+      if(item.kind!=='block')return 'Creature sigils have no variant settings';
+      if(item.owner==='pack2'){
+        const water=/water/i.test(item.name);
+        document.getElementById(water?'pack2WaterLevel':'pack2Variant').click();
+        return pack2StateText.textContent;
+      }
+      if(item.owner==='pack5'){
+        const field=pack5Variant,variants=item.variants||[];
+        if(variants.length<2)return item.name+' has one variant';
+        field.value=variants[(variants.indexOf(field.value)+1)%variants.length];
+        return item.name+' · '+field.value.replaceAll('-',' ');
+      }
+      return item.name+' · available variants are separate catalog entries';
+    },
     onOpen:()=>{
       if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return false;
       gameplayRecorder?.interrupt('Creative inventory opened');
