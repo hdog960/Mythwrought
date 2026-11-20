@@ -2,7 +2,8 @@
 // Required localhost: http://127.0.0.1:4174 unless G2B_BROWSER_ORIGIN overrides.
 // Test file lives strictly within G2B ownership; never replays real user saves.
 import assert from 'node:assert/strict';
-import {mkdirSync} from 'node:fs';
+import {mkdirSync,readFileSync} from 'node:fs';
+import {inspectReadOnlyGameArchive} from '../../src/creative-integration/world-safety.mjs';
 import {chromium} from 'playwright';
 const origin=process.env.G2B_BROWSER_ORIGIN||'http://127.0.0.1:4174';
 const sizes=[[568,320],[667,375],[844,390],[932,430],[956,440],[1180,520]];
@@ -14,7 +15,7 @@ mkdirSync('artifacts',{recursive:true});
 try{
  for(const [width,height] of sizes){
   const context=await browser.newContext({viewport:{width,height},hasTouch:true,
-    isMobile:true,deviceScaleFactor:1});
+    isMobile:true,deviceScaleFactor:1,acceptDownloads:true});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   try{
@@ -61,6 +62,42 @@ try{
      assert.equal(await page.locator('#help').isVisible(),true);
      assert.equal(await page.locator('#playerMenu .player-menu-row').count(),3,
        'The user-facing menu must contain only Test Code, time and New World');
+     const menuGeometry=await page.evaluate(()=>{
+       const n=document.querySelector('#playerMenu'),r=n.getBoundingClientRect();
+       return {scroll:n.scrollHeight,client:n.clientHeight,
+         left:r.left,right:r.right,top:r.top,bottom:r.bottom};
+     });
+     assert.ok(menuGeometry.scroll<=menuGeometry.client+1,
+       'Main menu started scrolling in iPhone landscape: '+JSON.stringify(menuGeometry));
+     assert.ok(menuGeometry.left>=0&&menuGeometry.right<=width+1&&
+       menuGeometry.top>=0&&menuGeometry.bottom<=height+1,
+       'Main menu escapes real landscape viewport');
+     await page.screenshot({path:'artifacts/mythwrought-creative-settings-'+width+'x'+height+'.png'});
+     await page.locator('.player-menu-safety-link').click();
+     assert.equal(await page.locator('#playerSafety').isVisible(),true,
+       'Opt-in backup drawer must remain accessible without cluttering normal settings');
+     assert.equal(await page.locator('#vaultBackup').isVisible(),true,
+       'Original device-vault controls vanished from recovery drawer');
+     await page.screenshot({path:'artifacts/mythwrought-creative-recovery-'+width+'x'+height+'.png'});
+     // GitHub Pages shares origin storage across games. The real local archive
+     // must not leak another project's storage or modify the verified world.
+     await page.evaluate(()=>localStorage.setItem('unwritten-realms-owned','exclude-foreign-save'));
+     const archivePromise=page.waitForEvent('download',{timeout:20000});
+     await page.locator('.player-safety-archive').click();
+     const downloaded=await archivePromise;
+     assert.match(downloaded.suggestedFilename(),/^mythwrought-local-saves-\d{4}-\d{2}-\d{2}\.json$/);
+     const archive=inspectReadOnlyGameArchive(readFileSync(await downloaded.path(),'utf8'));
+     const records=new Map(archive.entries);
+     assert.equal(records.get('mythwrought-v002-world-'+state.savedSeed),state.save,
+       'Archive lost original selected schema-1 world bytes');
+     assert.ok(records.has('mythwrought-v002-world-'+state.savedSeed+'-four-biomes-profile-v1'),
+       'Archive omitted original current-generation profile');
+     assert.equal(records.has('unwritten-realms-owned'),false,
+       'Shared-origin archive accidentally exported another game');
+     await page.evaluate(()=>localStorage.removeItem('unwritten-realms-owned'));
+     await page.locator('.player-safety-back').click();
+     assert.equal(await page.locator('#playerSafety').isVisible(),false,
+       'Backup panel did not return to compact settings');
      await page.getByRole('button',{name:'RETURN TO GAME'}).click();
      await page.locator('#creativeToggle').click();
      assert.equal(await page.locator('#creativeInventoryToggle').isVisible(),true);
@@ -69,9 +106,11 @@ try{
      assert.equal(await page.locator('.mw-inventory-category').count(),10);
      assert.equal(await page.locator('.mw-inventory-grid button').count(),48,
        'Source-driven inventory must use bounded initial rendering');
+     await page.screenshot({path:'artifacts/mythwrought-creative-items-'+width+'x'+height+'.png'});
      await page.locator('.mw-inventory-category').filter({hasText:'Creatures'}).click();
      assert.equal(await page.locator('.mw-inventory-grid button').count(),40,
        'All 40 genuine live creature spawn sigils must be present');
+     await page.screenshot({path:'artifacts/mythwrought-creative-eggs-'+width+'x'+height+'.png'});
      await page.locator('.mw-inventory-grid [data-key="spawn:horse"]').click();
      assert.match(await page.locator('.mw-inventory-preview').textContent(),/Horse/);
      await page.locator('.mw-inventory-close').click();
