@@ -7,6 +7,7 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {extname,resolve,sep,join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
+import {execFileSync} from 'node:child_process';
 
 const root=resolve('.'),id='r2:tailor:temperate:small:03',sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const output=resolve('artifacts/roadmap-c-trade-riverbend-tailor/chromium-webgl2-source');
@@ -59,7 +60,9 @@ test('Roadmap C temperate tailor: six authentic Chromium source-specific WebGL2 
    await page.close();
   }
   assert.equal(manifest.length,6);assert.equal(new Set(manifest.map(m=>m.sha256)).size,6);
-  await writeFile(join(output,'acceptance.json'),JSON.stringify({schema:'mythwrought.roadmap-c.trade-wave2.webgl2.v1',id,
+  const exactSourceCommit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+  assert.match(exactSourceCommit,/^[0-9a-f]{40}$/);
+  await writeFile(join(output,'acceptance.json'),JSON.stringify({exactSourceCommit,schema:'mythwrought.roadmap-c.trade-wave2.webgl2.v1',id,
     sourceOnly:true,approved:false,captured:manifest.length,records:manifest},null,2)+'\n');
   console.log('MYTHWROUGHT_ROADMAP_C_RIVERBEND_TAILOR_SOURCE_WEBGL2=6/6');
  }finally{
