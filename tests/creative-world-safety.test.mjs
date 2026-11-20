@@ -25,7 +25,7 @@ test('read-only archive covers every actual Mythwrought world/sidecar byte but n
   ];
   const device=storage(rows),at='2026-11-20T19:00:00.000Z';
   const archive=buildReadOnlyGameArchive(device,at);
-  assert.equal(archive.filename,'mythwrought-all-worlds-2026-11-20.json');
+  assert.equal(archive.filename,'mythwrought-local-saves-2026-11-20.json');
   const saved=inspectReadOnlyGameArchive(archive.text);
   assert.equal(JSON.parse(archive.text).format,GAME_ARCHIVE_FORMAT);
   assert.deepEqual(Object.fromEntries(saved.entries),
