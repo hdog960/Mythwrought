@@ -45,7 +45,9 @@ export function seedHasAnySavedData(storage,seed){
   for(let i=0;i<storage.length;i++){
     const name=storage.key(i);
     if(typeof name!=='string')throw Error('Could not inspect saved world slots');
-    if(name.endsWith('-'+seed)||name.endsWith('.'+seed)||
+    if(name===worldKey||name.startsWith(worldKey+'-')||
+       name.startsWith(worldKey+'.')||
+       name.endsWith('-'+seed)||name.endsWith('.'+seed)||
        name.includes('-seed-'+seed+'.')||name.includes('.seed.'+seed+'.')||
        name.includes('-world-'+seed+'.'))
       return true;
