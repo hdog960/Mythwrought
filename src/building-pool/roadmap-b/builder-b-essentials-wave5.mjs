@@ -68,7 +68,7 @@ export function buildSunshardSplitWellBathhouse(){
   ['outside','north-registration-gallery',26,2],
   ['north-registration-gallery','northwest-solar-cistern-store',19,10],
   ['north-registration-gallery','east-waterless-heat-gallery',34,11],
-  ['north-registration-gallery','central-open-air-walk',27,16],
+  ['north-registration-gallery','central-open-air-walk',22,16],
   ['west-dry-steam-alcove','central-open-air-walk',20,22],
   ['west-dry-steam-alcove','west-dressing-and-storage',12,26],
   ['central-open-air-walk','rear-community-cloister',31,28],
@@ -78,6 +78,8 @@ export function buildSunshardSplitWellBathhouse(){
   if(!has(x,z))throw Error('Sunshard entrance has no real source footprint '+K(x,z));
   b.opening(x,z);b.portal(from,to,x,z);
  }
+ // A grounded sun-court jamb seals a genuine one-cell unreachable pocket; retain fully connected source circulation.
+ for(let y=1;y<=3;y++)if(b.clear(31,y,17))b.put(31,y,17,'support','live:wood','north',{sunCourtJamb:true});
  for(const [x,z,label] of [
   [29,7,'inert-registration-slate'],[9,19,'dry-sauna-seating'],[11,30,'linen-storage'],
   [41,19,'inert-desert-heat-register'],[22,33,'dry-communal-dais'],[12,11,'empty-cistern-rack']
