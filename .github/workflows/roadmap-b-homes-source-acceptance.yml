@@ -40,7 +40,8 @@ jobs:
             tests/building-pool/roadmap-1a/builder-b-hospitality-wave5.test.mjs \
             tests/building-pool/roadmap-1a/builder-b-preview-wiring.test.mjs \
             tests/building-pool/roadmap-1a/builder-b-homes-wave6.test.mjs \
-            tests/building-pool/roadmap-1a/builder-b-native-import-contract.test.mjs
+            tests/building-pool/roadmap-1a/builder-b-native-import-contract.test.mjs \
+            tests/building-pool/roadmap-1a/builder-b-evidence-count-contract.test.mjs
       - name: Require actual system Chromium
         run: |
           command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
