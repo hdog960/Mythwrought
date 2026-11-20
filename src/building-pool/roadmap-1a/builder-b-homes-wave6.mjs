@@ -6,7 +6,7 @@ export const BUILDER_B_HOMES_WAVE6_SPECS=Object.freeze([
     "biome": "temperate",
     "size": "small",
     "index": 20,
-    "title": "Willowmere Four-Notch Orchard Cottage",
+    "title": "Willowmere Split-Orchard Cottage",
     "w": 35,
     "d": 33,
     "plan": "open west orchard court, sheltered asymmetric front entry, tool workshop, social hearth, east cooking bay, two private rear rooms, and true detached roof massing",
@@ -30,12 +30,6 @@ export const BUILDER_B_HOMES_WAVE6_SPECS=Object.freeze([
         0,
         24,
         8,
-        32
-      ],
-      [
-        26,
-        26,
-        34,
         32
       ]
     ],
@@ -364,7 +358,7 @@ export const BUILDER_B_HOMES_WAVE6_SPECS=Object.freeze([
       11,
       24
     ],
-    "detail": "Four distinct genuine sky-open absent-ground porch/orchard recesses, separate western workshop and eastern foyer, connecting central family hearth, working pantry, one two-cell guest bed and nontrivial five-wing timber roof support"
+    "detail": "Three authentically absent terrain courts, separate western workshop and eastern foyer with weather porch, central family hearth, working pantry, a reserved two-cell guest bed and five distinct timber roof masses."
   }
 ]);
 export const BUILDER_B_HOMES_WAVE6_IDS=Object.freeze(BUILDER_B_HOMES_WAVE6_SPECS.map(s=>
