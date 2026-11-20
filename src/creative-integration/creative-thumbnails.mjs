@@ -15,7 +15,7 @@ const palette=Object.freeze({
   water:['#b8ecf7','#5fbed1','#3b7b9b'],
   creatures:['#d9b3eb','#9363ab','#526c7c']
 });
-function genuineBoxes(item){
+export function creativePhysicalBoxes(item){
   if(item.owner==='core')return CUBE;
   if(item.owner==='biome130')return biome130Block(item.id,0).boxes;
   if(item.owner==='pack2'){
@@ -52,7 +52,7 @@ export function makeCreativeThumbnail(item){
     return c;
   }
   let boxes;
-  try{boxes=genuineBoxes(item);}
+  try{boxes=creativePhysicalBoxes(item);}
   catch(_){boxes=CUBE;c.dataset.fallback='true';}
   if(!Array.isArray(boxes)||!boxes.length)boxes=CUBE;
   const proj=(x,y,z)=>[(x-z)*.866,(x+z)*.35-y*.8];
