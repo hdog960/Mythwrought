@@ -1,4 +1,4 @@
-// Independent same-run PNG decode and CRC/SHA audit of all 5 C trade sources.
+// Independent same-run PNG decode and CRC/SHA audit of all 6 C trade sources.
 // This is an acceptance gate, NOT proof that a capture already exists.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -13,7 +13,8 @@ const want=[
  ['roadmap-c-trade-riverbend-tailor','r2:tailor:temperate:small:03','src/building-pool/roadmap-c-trades/wave2-riverbend-tailor.mjs'],
  ['roadmap-c-trade-copperford-butcher','r2:butcher:temperate:small:02','src/building-pool/roadmap-c-trades/wave3-copperford-butcher.mjs'],
  ['roadmap-c-trade-silverfinch-jeweler','r2:jeweler:temperate:small:02','src/building-pool/roadmap-c-trades/wave4-silverfinch-jeweler.mjs'],
- ['roadmap-c-trade-wrenfield-bookshop','r2:bookshop:temperate:small:02','src/building-pool/roadmap-c-trades/wave5-wrenfield-bookshop.mjs']
+ ['roadmap-c-trade-wrenfield-bookshop','r2:bookshop:temperate:small:02','src/building-pool/roadmap-c-trades/wave5-wrenfield-bookshop.mjs'],
+ ['roadmap-c-trade-winterglass-snow-market','r2:market-square:snow:small:03','src/building-pool/roadmap-c-trades/wave6-winterglass-snow-market.mjs']
 ];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
@@ -70,6 +71,6 @@ test('Every real Roadmap C trade candidate has all six source-specific PNGs: dec
   }
   assert.equal(local.size,6);
  }
- assert.equal(global.size,30);assert.equal(total,30);
- console.log('MYTHWROUGHT_ROADMAP_C_5_TRADE_PNG_CRC_SHA_REAL_EXACT_HEAD=30/30 '+head);
+ assert.equal(global.size,36);assert.equal(total,36);
+ console.log('MYTHWROUGHT_ROADMAP_C_6_TRADE_PNG_CRC_SHA_REAL_EXACT_HEAD=36/36 '+head);
 });
