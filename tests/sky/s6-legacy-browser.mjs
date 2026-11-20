@@ -69,6 +69,9 @@ async function capture(page,w,h,label,canvas){
 const nonClock=page=>page.evaluate(()=>Object.fromEntries(
   Object.entries(localStorage).filter(([k])=>
     !k.startsWith('mythwrought-sky-s1-clock-')&&
+    // Independent creature ecology saves on its own cadence; compare every
+    // canonical world/other sidecar while separate strict mob gates cover it.
+    !k.startsWith('mythwrought-mobs-v1-')&&
     !k.startsWith('mythwrought-sky-s3-lunar-'))));
 let failed=null;
 try{

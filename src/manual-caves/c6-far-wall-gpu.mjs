@@ -117,8 +117,40 @@ export function planCaveFarWallSources(world,player,viewport,
  const available=new Map(ranked.slice(bounds.maxChunks).map(c=>[c.key,c]));
  for(const [k,c] of midpoints)
   if(!candidates.has(k)&&!available.has(k))available.set(k,c);
+ // Authentic 844x390 Fan screenshots expose a real first-solid wall at
+ // x225,-116,155 (14,9,-8), outside all four original buffer choices.
+ // The wider original camera aspect reveals these far-left rays. Sample
+ // FIVE exact perspective rays inside the existing 3264-source-cell CPU cap;
+ // never invent rock, extend the ring or change the sky-pixel acceptance.
+ const edgeWitness=new Map();
+ if(aspect>=1.45 && selected.length===bounds.maxChunks)
+  for(const [screenX,screenY] of [
+   [-.98,.52],[-.98,.49],[-.96,.46],[-.94,.43],[-.87,.40]
+  ])sampleRay(screenX,screenY,edgeWitness);
+ for(const [k,c] of edgeWitness)
+  if(!candidates.has(k)&&!available.has(k))available.set(k,c);
+ // When two of the four chosen sources are real adjacent vertical sections
+ // in one x/z column, pack them together in the SAME original GPU buffer.
+ // Reuse the freed fourth slot for the unrendered first-solid edge rock.
+ // Keep the existing maximum ONE joined and ONE seam slice; all original
+ // near priority, 4 buffers, 1MiB and complete-source requirements remain.
+ let compactedKey=null;
+ const edge=[...edgeWitness.values()].sort((a,b)=>
+  b.hits-a.hits||a.nearest-b.nearest).find(c=>c.section===section&&
+   c.hits>=2&&available.has(c.key)&&!selected.some(s=>s.key===c.key));
+ const upper=edge&&selected.find(c=>c.section===section+1&&
+  selected.some(lower=>lower.cx===c.cx&&lower.cz===c.cz&&lower.section===section));
+ const lower=upper&&selected.find(c=>c.cx===upper.cx&&c.cz===upper.cz&&
+  c.section===section);
+ if(edge&&upper&&lower){
+  upper.companion={...lower};
+  compactedKey=lower.key;
+  selected.splice(selected.indexOf(lower),1);
+  selected.push({...edge});
+  available.delete(edge.key);
+ }
  const joinable=[...available.values()].map(companion=>({
-  companion,owner:selected.find(c=>c.cx===companion.cx&&
+  companion,owner:selected.find(c=>!c.companion&&c.cx===companion.cx&&
    c.cz===companion.cz&&Math.abs(c.section-companion.section)===1)
  })).filter(c=>c.owner);
  // An upper-section exposed roof takes priority over a lower wall when
@@ -128,10 +160,10 @@ export function planCaveFarWallSources(world,player,viewport,
   Number(b.companion.section>section)-Number(a.companion.section>section)||
   b.companion.hits-a.companion.hits||
   a.companion.nearest-b.companion.nearest);
- const selectedJoin=joinable[0];
+ const selectedJoin=compactedKey?null:joinable[0];
  if(selectedJoin)selectedJoin.owner.companion={...selectedJoin.companion};
- const joinedSources=selectedJoin?1:0;
- const companionKey=selectedJoin?.companion.key;
+ const joinedSources=compactedKey||selectedJoin?1:0;
+ const companionKey=compactedKey??selectedJoin?.companion.key;
  // Original Rift screenshot pixel x145..152/y134..135 first intersects
  // x174,-84,187 DEEPSTONE: real lower chunk 10,11,-6. The existing
  // primary seam 11,12,-5 must remain. Independently sample ONE additional

@@ -21,6 +21,9 @@ const phaseToMs=phase=>Math.floor(phase*1440000);
 const nonSky=page=>page.evaluate(()=>Object.fromEntries(
   Object.entries(localStorage).filter(([k])=>
     !k.startsWith('mythwrought-sky-s1-clock-')&&
+    // Independent creature ecology saves on its own cadence; compare every
+    // canonical world/other sidecar while separate strict mob gates cover it.
+    !k.startsWith('mythwrought-mobs-v1-')&&
     !k.startsWith('mythwrought-sky-s3-lunar-'))));
 async function settle(page){
   await page.waitForFunction(()=>{

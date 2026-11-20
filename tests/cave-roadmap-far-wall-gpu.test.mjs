@@ -87,6 +87,42 @@ test('C6 actual Fan pixel ray selects its source-authenticated upper roof chunk'
  assert.ok(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples);
  assert.ok(plan.selected.length<=C6_FAR_BOUNDS.maxChunks);
 });
+test('C6 wide original Fan source rock is covered in exactly four real GPU buffers',()=>{
+ // Actual original-game 844x390 screenshot inner WebGL canvas is 540x335.
+ // The formerly open sky edge rays first hit DEEPSTONE x225,-116,155,
+ // beyond the three-chunk near radius, in source chunk 14,9,-8.
+ const camera={x:204.5,z:136.5,feet:-123.99,
+  yaw:0,pitch:-0.01999733397315129};
+ const viewport=[540,335];
+ assert.equal(world.get(225,-116,155),BLOCK.DEEPSTONE);
+ const plan=planCaveFarWallSources(world,camera,viewport);
+ assert.ok(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples);
+ assert.equal(plan.selected.length,4,'Source-aware Fan must still use only 4 GPU buffers');
+ assert.ok(plan.selected.some(c=>c.key==='14,9,-8'),
+  'Actual wide Fan missing first-solid rock: '+JSON.stringify(plan.selected.map(c=>c.key)));
+ assert.ok(plan.selected.some(c=>c.key==='13,10,-7'&&
+  c.companion?.key==='13,10,-8'),
+  'Existing lower section must be joined to its real upper neighbor');
+ assert.equal(plan.joinedSources,1);
+ assert.ok(plan.seamSources<=1);
+ const g=fakeGl(),far=createCaveFarWallGpu(g.gl);
+ const near=complete(camera);
+ for(let frame=30;frame<43;frame++)far.step({
+  world,player:camera,nearChunks:near,nearPending:new Map(),
+  frame,viewport,enabled:true
+ });
+ const state=far.stats();
+ assert.equal(state.chunks,4);
+ assert.equal(state.pending,0);
+ assert.equal(state.budgetExcluded,0);
+ assert.equal(state.failures,0);
+ assert.ok(state.sourceSamples<=3264&&state.bytes>0&&state.bytes<=1048576);
+ assert.equal(g.uploaded.length,4);
+ assert.equal(g.uploaded.reduce((sum,n)=>sum+n,0),state.bytes);
+ assert.equal(far.draw({atPos:0,atColor:1,atUv:2,atMat:3}),state.vertices);
+ far.invalidate();assert.equal(g.live.size,0);
+});
+
 test('C6 true Rift screen rays select source-authentic upper boundary within four GPU buffers',()=>{
  // Genuine original-game 667x375 diagnostic Rift camera on seed 314159:
  // blue x202..208/y134..137 first intersects real DEEPSTONE at

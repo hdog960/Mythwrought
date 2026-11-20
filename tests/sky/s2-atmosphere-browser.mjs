@@ -62,7 +62,10 @@ async function scene(page){
   });
 }
 const nonSky=page=>page.evaluate(()=>Object.fromEntries(
-  Object.entries(localStorage).filter(([k])=>!k.startsWith('mythwrought-sky-s1-clock-'))));
+  Object.entries(localStorage).filter(([k])=>!k.startsWith('mythwrought-sky-s1-clock-')&&
+    // Independent creature ecology saves on its own cadence; compare every
+    // canonical world/other sidecar while separate strict mob gates cover it.
+    !k.startsWith('mythwrought-mobs-v1-'))));
 const settle=page=>page.waitForFunction(()=>{
   const c=document.querySelector('#scene');
   return c?.dataset.skyDrawn==='true'&&+c.dataset.loadedChunks===25&&

@@ -16,6 +16,9 @@ const manifest={stage:'S3',head:HEAD,render:'real original-game Chromium WebGL2 
 const sum=b=>createHash('sha256').update(b).digest('hex');
 const nonSky=page=>page.evaluate(()=>Object.fromEntries(Object.entries(localStorage)
   .filter(([k])=>!k.startsWith('mythwrought-sky-s1-clock-')&&
+    // Independent creature ecology saves on its own cadence; compare every
+    // canonical world/other sidecar while separate strict mob gates cover it.
+    !k.startsWith('mythwrought-mobs-v1-')&&
     !k.startsWith('mythwrought-sky-s3-lunar-'))));
 async function state(page){
   return page.evaluate(()=>{
