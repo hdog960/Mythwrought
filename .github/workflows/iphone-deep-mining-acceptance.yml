@@ -9,6 +9,8 @@ on:
       - tests/depth-mesh-incremental.test.mjs
       - tests/rapid-vertical-dig-browser.mjs
       - tests/rapid-deep-player-browser.mjs
+      - tests/rapid-dig-performance-gate.mjs
+      - tests/rapid-dig-performance-gate.test.mjs
       - .github/workflows/iphone-deep-mining-acceptance.yml
 permissions:
   contents: read
@@ -30,7 +32,10 @@ jobs:
           node --check tests/depth-mesh-incremental.test.mjs
           node --check tests/rapid-vertical-dig-browser.mjs
           node --check tests/rapid-deep-player-browser.mjs
+          node --check tests/rapid-dig-performance-gate.mjs
+          node --check tests/rapid-dig-performance-gate.test.mjs
           npm test
+          node --test tests/rapid-dig-performance-gate.test.mjs
       - name: Install genuine Chromium test driver
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
@@ -47,6 +52,8 @@ jobs:
           DIG_PORT=4174 DIG_BASELINE=1 node tests/rapid-vertical-dig-browser.mjs
           DIG_PORT=4173 node tests/rapid-vertical-dig-browser.mjs
           node tests/rapid-deep-player-browser.mjs
+      - name: Fail closed on slower mining, GPU p95 or unverified frame timing
+        run: node tests/rapid-dig-performance-gate.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
