@@ -493,40 +493,58 @@ export const ROADMAP_D_WAVE2_PLANS = Object.freeze([
     ],
     "r": [
       [
-        30,
+        32,
         40,
         1,
-        64
+        67
       ],
       [
-        5,
-        31,
-        11,
-        32
+        3,
+        33,
+        10,
+        24
       ],
       [
         40,
-        66,
-        10,
-        31
+        65,
+        14,
+        36
       ],
       [
         8,
-        33,
-        45,
+        37,
+        44,
+        67
+      ],
+      [
+        42,
+        67,
+        51,
         65
       ],
       [
-        40,
-        67,
-        44,
-        66
+        19,
+        54,
+        25,
+        44
       ],
       [
-        18,
-        54,
-        29,
-        47
+        1,
+        16,
+        28,
+        46
+      ],
+      [
+        57,
+        69,
+        33,
+        54
+      ],
+      [
+        27,
+        55,
+        59,
+        68
       ]
     ],
     "discs": [
@@ -644,7 +662,7 @@ export const ROADMAP_D_WAVE2_PLANS = Object.freeze([
         59
       ]
     ],
-    "roof": "foxglimmer-seven-root-nave-offset-beacon-roofs"
+    "roof": "foxglimmer-branching-mycelial-spiral-with-three-root-galleries"
   },
   {
     "t": "arcane-academy",
@@ -659,40 +677,58 @@ export const ROADMAP_D_WAVE2_PLANS = Object.freeze([
     ],
     "r": [
       [
-        38,
-        50,
+        37,
+        48,
         1,
         82
       ],
       [
-        4,
-        39,
-        9,
-        31
+        3,
+        40,
+        11,
+        28
       ],
       [
-        50,
+        48,
         84,
-        9,
-        31
+        8,
+        34
       ],
       [
         5,
-        40,
-        50,
-        79
+        38,
+        48,
+        80
       ],
       [
-        49,
-        85,
-        51,
-        79
+        53,
+        86,
+        55,
+        75
       ],
       [
-        21,
-        67,
-        30,
+        22,
+        57,
+        26,
         54
+      ],
+      [
+        1,
+        21,
+        33,
+        47
+      ],
+      [
+        69,
+        88,
+        32,
+        50
+      ],
+      [
+        25,
+        57,
+        70,
+        84
       ]
     ],
     "discs": [
@@ -825,7 +861,7 @@ export const ROADMAP_D_WAVE2_PLANS = Object.freeze([
         42
       ]
     ],
-    "roof": "icefallow-eight-steep-ice-shield-roofs-and-two-aurora-courts"
+    "roof": "icefallow-nine-angle-snow-break-citadel-with-open-prism-watch-bays"
   },
   {
     "t": "arcane-academy",
