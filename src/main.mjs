@@ -36,6 +36,8 @@ import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} 
 import {installGameplayRecorder} from './gameplay-recorder.mjs';
 import {installGameUpdater} from './app-update.mjs';
 import {installPlayerMenu} from './creative-integration/player-menu.mjs';
+import {buildCreativeCatalog} from './creative-integration/creative-catalog.mjs';
+import {installCreativeInventory} from './creative-integration/creative-inventory.mjs';
 import {CURRENT_INSTALLED_GENERATOR,chooseUnusedCurrentSeed,
   secureRandomWorldSeed} from './creative-integration/current-world.mjs';
 import {createLiveMobSession} from './mobs/live-game.mjs';
@@ -237,6 +239,7 @@ function start(){
 
   let caveDiscovery={inside:false,last:-Infinity,discoveries:0};
   let selected=BLOCK.STONE,selectedRotation=0,pack3Yaw=0;
+  let creativeSpawnSpecies=null;
   let pack2Selection=null;
   let outlineKey='',outlineCount=0,editFeedback=[];
   const targetInfo=document.getElementById('targetInfo');
@@ -396,6 +399,8 @@ function start(){
   const g2Profile=document.getElementById('g2bFlightProfile');
   const g2Status=document.getElementById('g2bFlightStatus');
   const g2Header=document.getElementById('creativeToggle');
+  const inventoryHeader=document.getElementById('creativeInventoryToggle');
+  let creativeInventory=null;
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
@@ -441,6 +446,8 @@ function start(){
       g2Header.classList.toggle('creative-enabled',g2CreativeEnabled);
       g2Header.textContent=g2CreativeEnabled?'✦ CREATIVE ON':'✧ CREATIVE';
     }
+    if(inventoryHeader)inventoryHeader.hidden=!g2CreativeEnabled;
+    creativeInventory?.setEnabled(g2CreativeEnabled);
     for(const [id,label,aria] of [
       ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
       ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
@@ -878,7 +885,19 @@ function start(){
   }
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
-    if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
+    if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
+    if(mode==='place'&&creativeSpawnSpecies){
+      const creature=getSpecies(creativeSpawnSpecies);
+      const target=raycast(world,eye(),facing(),6);
+      if(!g2CreativeEnabled||!creature||!target?.adjacent||!mobSession){
+        message('Creature sigil requires Creative, a real mob host and clear ground');return;
+      }
+      const [x,y,z]=target.adjacent,point=[x+.5,y,z+.5];
+      const result=mobSession.spawnCreative(creature.id,point);
+      if(!result.ok){message('Cannot summon '+creature.displayName+': '+result.reason);return;}
+      message('Summoned '+creature.displayName+' · verified creature roster saved');
+      return;
+    }
     if(mode==='mine'&&mobRenderer&&!mobRuntimeError){
       const hit=mobSession?.attack(eye(),facing());
       if(hit){mobSession.save();message('Hit '+hit.name+' · '+
@@ -3073,6 +3092,60 @@ function start(){
           restoredCount:graphicsRestoreCount,shaderReady:Boolean(program&&skyProgram)}};}
     });
   }
+  // Production-source Creative item resolver. Every selection reuses its
+  // original physical placement owner rather than writing speculative voxels.
+  const creativeCatalog=buildCreativeCatalog();
+  creativeInventory=installCreativeInventory({
+    catalog:creativeCatalog,
+    onOpen:()=>{
+      if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return false;
+      gameplayRecorder?.interrupt('Creative inventory opened');
+      cancelAllPointers();
+      help.hidden=false;help.classList.add('mw-inventory-paused');
+      return true;
+    },
+    onClose:()=>{
+      help.classList.remove('mw-inventory-paused');help.hidden=true;
+      canvas.focus({preventScroll:true});
+    },
+    onSelect:async item=>{
+      if(!g2CreativeEnabled)throw Error('Creative Mode is off');
+      if(item.kind==='spawn'){
+        if(!getSpecies(item.id))throw Error('Unregistered live creature');
+        if(pack5Mode){pack5Mode=false;pack5Enabled.checked=false;}
+        creativeSpawnSpecies=item.id;
+        return;
+      }
+      if(caveSession&&!['core','biome130'].includes(item.owner))
+        throw Error('Shaped materials cannot be saved in a protected cave world');
+      creativeSpawnSpecies=null;
+      if(item.owner==='pack5'){
+        if(storageReadOnly)throw Error('Pack 5 needs an editable world');
+        if(!await ensurePack5Loaded())throw Error('Pack 5 did not finish loading');
+        pack5Enabled.checked=true;pack5Mode=true;
+        pack5Family.value=item.symbol;
+        pack5Family.dispatchEvent(new Event('change',{bubbles:true}));
+        pack5Variant.value=item.variants?.[0]??pack5Variant.value;
+        return;
+      }
+      if(pack5Mode){pack5Mode=false;pack5Enabled.checked=false;}
+      let target;
+      if(item.owner==='core'||item.owner==='pack2'){
+        target=help.querySelector('[data-block="'+item.id+'"]');
+      }else if(item.owner==='biome130')target=biomeSelect;
+      else if(item.owner==='pack1'||item.owner==='pack4')target=manual14Select;
+      else if(item.owner==='pack3')target=pack3Palette.material;
+      if(!target)throw Error('Production placement owner not mounted for '+item.key);
+      if(target.dataset.block)target.click();
+      else {target.value=String(item.id);target.dispatchEvent(new Event('change',{bubbles:true}));}
+    }
+  });
+  inventoryHeader?.addEventListener('click',()=>{
+    if(!g2CreativeEnabled||!creativeInventory)return;
+    if(creativeInventory.isOpen())creativeInventory.close();else creativeInventory.open();
+  });
+  g2Sync();
+
   // Three-action player menu. Legacy controls retain their original DOM,
   // listeners and storage contracts but are not player-visible settings.
   const playerSettings=installPlayerMenu({
