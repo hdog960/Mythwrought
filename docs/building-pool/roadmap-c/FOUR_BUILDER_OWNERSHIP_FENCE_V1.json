@@ -1,0 +1,5162 @@
+{
+  "schema": "mythwrought.four-builder-ownership-fence.v1",
+  "status": "FROZEN-SNAPSHOT-source-only",
+  "frozenDate": "2026-11-20",
+  "scope": "Builder 2B full 420-slot catalog and Builder 3B full 360-slot catalog; other builder categories remain unchanged and are not reassigned",
+  "immutablePolicy": "Never edit this v1 file in place after publication; changes require a creator-coordinated v2 ledger, collision audits, and updated affected-builder approvals.",
+  "pins": {
+    "canonical2B": "f54995fd818e805c2c17a7fcf6467f1e862f827b",
+    "roadmapBStaging": "6ab800a9cc16f31fdc5655f119979390992effcf",
+    "accepted3B": "b6de730a017f54db115db0741b9ec0b8e358ee66",
+    "sourcePRs": [
+      187,
+      241,
+      181,
+      271
+    ]
+  },
+  "owners": {
+    "A": "outside this two-lane fence; existing Roadmap A ownership unmodified",
+    "B": "205 protected existing 2B sources (146 canonical + 59 Roadmap B staged)",
+    "C": "all 360 3B slots and exactly 146 previously empty 2B trade slots",
+    "D": "69 remaining previously empty 2B cultural/trade slots"
+  },
+  "counts": {
+    "canonical2B": 146,
+    "stageB2B": 59,
+    "protected2B": 205,
+    "remaining2BBeforeAllocation": 215,
+    "reserved2BC": 146,
+    "reserved2BD": 69,
+    "accepted3B": 211,
+    "remaining3B": 149,
+    "roadmapCNewTotal": 295,
+    "ownerCounts": {
+      "B": 205,
+      "C": 506,
+      "D": 69
+    },
+    "roadmapCCategoryAllocations": {
+      "market-square": 31,
+      "tailor": 33,
+      "butcher": 32,
+      "jeweler": 32,
+      "bookshop": 18
+    }
+  },
+  "slots": {
+    "roadmap2B": [
+      {
+        "id": "r2:market-square:temperate:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/market-square-temperate-small.mjs"
+      },
+      {
+        "id": "r2:market-square:temperate:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-river-sundial.mjs"
+      },
+      {
+        "id": "r2:market-square:temperate:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:temperate:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave7-trades-b2.mjs"
+      },
+      {
+        "id": "r2:market-square:temperate:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs"
+      },
+      {
+        "id": "r2:market-square:temperate:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:temperate:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:temperate:medium:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:temperate:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs"
+      },
+      {
+        "id": "r2:market-square:temperate:large:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:temperate:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:temperate:large:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:desert:small:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:desert:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-crescent-merchants.mjs"
+      },
+      {
+        "id": "r2:market-square:desert:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:desert:small:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:desert:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:market-square:desert:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:desert:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:desert:medium:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:desert:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs"
+      },
+      {
+        "id": "r2:market-square:desert:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs"
+      },
+      {
+        "id": "r2:market-square:desert:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:desert:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave2-trades-b2.mjs"
+      },
+      {
+        "id": "r2:market-square:snow:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs"
+      },
+      {
+        "id": "r2:market-square:snow:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs"
+      },
+      {
+        "id": "r2:market-square:snow:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:snow:small:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:snow:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs"
+      },
+      {
+        "id": "r2:market-square:snow:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs"
+      },
+      {
+        "id": "r2:market-square:snow:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:snow:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave6-trades-b2.mjs"
+      },
+      {
+        "id": "r2:market-square:snow:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:market-square:snow:large:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:snow:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:snow:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave12-trades-b2.mjs"
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:small:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs"
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:small:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs"
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-crescent-merchants.mjs"
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave9-trades-b2.mjs"
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs"
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:large:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:enchanted-forest:large:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:mountain:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs"
+      },
+      {
+        "id": "r2:market-square:mountain:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs"
+      },
+      {
+        "id": "r2:market-square:mountain:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:mountain:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave11-trades-b2.mjs"
+      },
+      {
+        "id": "r2:market-square:mountain:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs"
+      },
+      {
+        "id": "r2:market-square:mountain:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:mountain:medium:03",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/b2-ironpass-market.mjs"
+      },
+      {
+        "id": "r2:market-square:mountain:medium:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:mountain:large:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:mountain:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs"
+      },
+      {
+        "id": "r2:market-square:mountain:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:market-square:mountain:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave3-trades-b2.mjs"
+      },
+      {
+        "id": "r2:tailor:temperate:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs"
+      },
+      {
+        "id": "r2:tailor:temperate:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs"
+      },
+      {
+        "id": "r2:tailor:temperate:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:temperate:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave10-trades-b2.mjs"
+      },
+      {
+        "id": "r2:tailor:temperate:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-concave-courts.mjs"
+      },
+      {
+        "id": "r2:tailor:temperate:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:temperate:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:temperate:medium:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:temperate:large:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:temperate:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-guildwings.mjs"
+      },
+      {
+        "id": "r2:tailor:temperate:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:temperate:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave12-trades-b2.mjs"
+      },
+      {
+        "id": "r2:tailor:desert:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs"
+      },
+      {
+        "id": "r2:tailor:desert:small:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:desert:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:desert:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave13-trades-b2.mjs"
+      },
+      {
+        "id": "r2:tailor:desert:medium:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:desert:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-ritual-trades.mjs"
+      },
+      {
+        "id": "r2:tailor:desert:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:desert:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave8-trades-b2.mjs"
+      },
+      {
+        "id": "r2:tailor:desert:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs"
+      },
+      {
+        "id": "r2:tailor:desert:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-weave-gem-triptych.mjs"
+      },
+      {
+        "id": "r2:tailor:desert:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:desert:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave1-trades-b2.mjs"
+      },
+      {
+        "id": "r2:tailor:snow:small:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:snow:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-weave-gem-triptych.mjs"
+      },
+      {
+        "id": "r2:tailor:snow:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:snow:small:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:snow:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs"
+      },
+      {
+        "id": "r2:tailor:snow:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-windfold-guilds.mjs"
+      },
+      {
+        "id": "r2:tailor:snow:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:snow:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave3-trades-b2.mjs"
+      },
+      {
+        "id": "r2:tailor:snow:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs"
+      },
+      {
+        "id": "r2:tailor:snow:large:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:snow:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:snow:large:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:small:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-crossbar-switchback.mjs"
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:small:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs"
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave7-trades-b2.mjs"
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:large:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:large:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:enchanted-forest:large:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:mountain:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs"
+      },
+      {
+        "id": "r2:tailor:mountain:small:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:mountain:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:mountain:small:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:mountain:medium:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:mountain:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs"
+      },
+      {
+        "id": "r2:tailor:mountain:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:mountain:medium:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:mountain:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:tailor:mountain:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-forms.mjs"
+      },
+      {
+        "id": "r2:tailor:mountain:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:tailor:mountain:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave6-trades-b2.mjs"
+      },
+      {
+        "id": "r2:butcher:temperate:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs"
+      },
+      {
+        "id": "r2:butcher:temperate:small:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:temperate:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:temperate:small:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:temperate:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs"
+      },
+      {
+        "id": "r2:butcher:temperate:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:temperate:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:temperate:medium:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:temperate:large:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:temperate:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs"
+      },
+      {
+        "id": "r2:butcher:temperate:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:temperate:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave8-trades-b2.mjs"
+      },
+      {
+        "id": "r2:butcher:desert:small:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:desert:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-guildwings.mjs"
+      },
+      {
+        "id": "r2:butcher:desert:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:desert:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave11-trades-b2.mjs"
+      },
+      {
+        "id": "r2:butcher:desert:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-concave-courts.mjs"
+      },
+      {
+        "id": "r2:butcher:desert:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:desert:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:desert:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave14-trades-b2.mjs"
+      },
+      {
+        "id": "r2:butcher:desert:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:butcher:desert:large:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:desert:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:desert:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave9-trades-b2.mjs"
+      },
+      {
+        "id": "r2:butcher:snow:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs"
+      },
+      {
+        "id": "r2:butcher:snow:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs"
+      },
+      {
+        "id": "r2:butcher:snow:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:snow:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave12-trades-b2.mjs"
+      },
+      {
+        "id": "r2:butcher:snow:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:butcher:snow:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs"
+      },
+      {
+        "id": "r2:butcher:snow:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:snow:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave4-trades-b2.mjs"
+      },
+      {
+        "id": "r2:butcher:snow:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs"
+      },
+      {
+        "id": "r2:butcher:snow:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-rime-and-river.mjs"
+      },
+      {
+        "id": "r2:butcher:snow:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:snow:large:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs"
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-forms.mjs"
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:small:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:medium:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:medium:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs"
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-windfold-guilds.mjs"
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:enchanted-forest:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave1-trades-b2.mjs"
+      },
+      {
+        "id": "r2:butcher:mountain:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs"
+      },
+      {
+        "id": "r2:butcher:mountain:small:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:mountain:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:mountain:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave5-trades-b2.mjs"
+      },
+      {
+        "id": "r2:butcher:mountain:medium:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:mountain:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-crossbar-switchback.mjs"
+      },
+      {
+        "id": "r2:butcher:mountain:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:mountain:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave15-trades-b2.mjs"
+      },
+      {
+        "id": "r2:butcher:mountain:large:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:mountain:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-bespoke-courts.mjs"
+      },
+      {
+        "id": "r2:butcher:mountain:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:butcher:mountain:large:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:temperate:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs"
+      },
+      {
+        "id": "r2:jeweler:temperate:small:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:temperate:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:temperate:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave14-trades-b2.mjs"
+      },
+      {
+        "id": "r2:jeweler:temperate:medium:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:temperate:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-bespoke-courts.mjs"
+      },
+      {
+        "id": "r2:jeweler:temperate:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:temperate:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave10-trades-b2.mjs"
+      },
+      {
+        "id": "r2:jeweler:temperate:large:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:temperate:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-weave-gem-triptych.mjs"
+      },
+      {
+        "id": "r2:jeweler:temperate:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:temperate:large:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:desert:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs"
+      },
+      {
+        "id": "r2:jeweler:desert:small:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:desert:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:desert:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave4-trades-b2.mjs"
+      },
+      {
+        "id": "r2:jeweler:desert:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:jeweler:desert:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-diadem-folios.mjs"
+      },
+      {
+        "id": "r2:jeweler:desert:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:desert:medium:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:desert:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs"
+      },
+      {
+        "id": "r2:jeweler:desert:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-windfold-guilds.mjs"
+      },
+      {
+        "id": "r2:jeweler:desert:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:desert:large:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:snow:small:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:snow:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-guildwings.mjs"
+      },
+      {
+        "id": "r2:jeweler:snow:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:snow:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave11-trades-b2.mjs"
+      },
+      {
+        "id": "r2:jeweler:snow:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs"
+      },
+      {
+        "id": "r2:jeweler:snow:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs"
+      },
+      {
+        "id": "r2:jeweler:snow:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:snow:medium:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:snow:large:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:snow:large:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:snow:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:snow:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave6-trades-b2.mjs"
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs"
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-rime-and-river.mjs"
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:small:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:medium:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave13-trades-b2.mjs"
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs"
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-bespoke-courts.mjs"
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:enchanted-forest:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave5-trades-b2.mjs"
+      },
+      {
+        "id": "r2:jeweler:mountain:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs"
+      },
+      {
+        "id": "r2:jeweler:mountain:small:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:mountain:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:mountain:small:04",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:mountain:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-concave-courts.mjs"
+      },
+      {
+        "id": "r2:jeweler:mountain:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:mountain:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:mountain:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave8-trades-b2.mjs"
+      },
+      {
+        "id": "r2:jeweler:mountain:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:jeweler:mountain:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-forms.mjs"
+      },
+      {
+        "id": "r2:jeweler:mountain:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:jeweler:mountain:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave2-trades-b2.mjs"
+      },
+      {
+        "id": "r2:bookshop:temperate:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs"
+      },
+      {
+        "id": "r2:bookshop:temperate:small:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:temperate:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:temperate:small:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:temperate:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs"
+      },
+      {
+        "id": "r2:bookshop:temperate:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-crescent-merchants.mjs"
+      },
+      {
+        "id": "r2:bookshop:temperate:medium:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:temperate:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave6-trades-b2.mjs"
+      },
+      {
+        "id": "r2:bookshop:temperate:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs"
+      },
+      {
+        "id": "r2:bookshop:temperate:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs"
+      },
+      {
+        "id": "r2:bookshop:temperate:large:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:temperate:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave11-trades-b2.mjs"
+      },
+      {
+        "id": "r2:bookshop:desert:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs"
+      },
+      {
+        "id": "r2:bookshop:desert:small:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:desert:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:desert:small:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:desert:medium:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:desert:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs"
+      },
+      {
+        "id": "r2:bookshop:desert:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:desert:medium:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:desert:large:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:desert:large:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:desert:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:desert:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave3-trades-b2.mjs"
+      },
+      {
+        "id": "r2:bookshop:snow:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs"
+      },
+      {
+        "id": "r2:bookshop:snow:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs"
+      },
+      {
+        "id": "r2:bookshop:snow:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:snow:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave15-trades-b2.mjs"
+      },
+      {
+        "id": "r2:bookshop:snow:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-concave-courts.mjs"
+      },
+      {
+        "id": "r2:bookshop:snow:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:snow:medium:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:snow:medium:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave1-trades-b2.mjs"
+      },
+      {
+        "id": "r2:bookshop:snow:large:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:snow:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-diadem-folios.mjs"
+      },
+      {
+        "id": "r2:bookshop:snow:large:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:snow:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave7-trades-b2.mjs"
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:small:01",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-diadem-folios.mjs"
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:small:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave4-trades-b2.mjs"
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs"
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:medium:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:medium:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs"
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:enchanted-forest:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave14-trades-b2.mjs"
+      },
+      {
+        "id": "r2:bookshop:mountain:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs"
+      },
+      {
+        "id": "r2:bookshop:mountain:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs"
+      },
+      {
+        "id": "r2:bookshop:mountain:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:mountain:small:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave9-trades-b2.mjs"
+      },
+      {
+        "id": "r2:bookshop:mountain:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:bookshop:mountain:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs"
+      },
+      {
+        "id": "r2:bookshop:mountain:medium:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:mountain:medium:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:mountain:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs"
+      },
+      {
+        "id": "r2:bookshop:mountain:large:02",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:mountain:large:03",
+        "owner": "C",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-C-v1",
+        "file": null
+      },
+      {
+        "id": "r2:bookshop:mountain:large:04",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave13-trades-b2.mjs"
+      },
+      {
+        "id": "r2:temple:temperate:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:temperate:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs"
+      },
+      {
+        "id": "r2:temple:temperate:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:temperate:small:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:temperate:small:05",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:temperate:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:temperate:medium:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:temperate:medium:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:temperate:medium:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:temperate:medium:05",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave12-trades-b2.mjs"
+      },
+      {
+        "id": "r2:temple:temperate:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:temperate:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs"
+      },
+      {
+        "id": "r2:temple:temperate:large:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:temperate:large:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:temperate:large:05",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:desert:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:desert:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs"
+      },
+      {
+        "id": "r2:temple:desert:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:desert:small:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:desert:small:05",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:desert:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:desert:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs"
+      },
+      {
+        "id": "r2:temple:desert:medium:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:desert:medium:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:desert:medium:05",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:desert:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:desert:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs"
+      },
+      {
+        "id": "r2:temple:desert:large:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:desert:large:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:desert:large:05",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave9-trades-b2.mjs"
+      },
+      {
+        "id": "r2:temple:snow:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:snow:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs"
+      },
+      {
+        "id": "r2:temple:snow:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:snow:small:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:snow:small:05",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:snow:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:snow:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs"
+      },
+      {
+        "id": "r2:temple:snow:medium:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:snow:medium:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:snow:medium:05",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave5-trades-b2.mjs"
+      },
+      {
+        "id": "r2:temple:snow:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:snow:large:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:snow:large:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:snow:large:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:snow:large:05",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:enchanted-forest:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:enchanted-forest:small:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:enchanted-forest:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:enchanted-forest:small:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:enchanted-forest:small:05",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave10-trades-b2.mjs"
+      },
+      {
+        "id": "r2:temple:enchanted-forest:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:enchanted-forest:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs"
+      },
+      {
+        "id": "r2:temple:enchanted-forest:medium:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:enchanted-forest:medium:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:enchanted-forest:medium:05",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave15-trades-b2.mjs"
+      },
+      {
+        "id": "r2:temple:enchanted-forest:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:enchanted-forest:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-ritual-trades.mjs"
+      },
+      {
+        "id": "r2:temple:enchanted-forest:large:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:enchanted-forest:large:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:enchanted-forest:large:05",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:mountain:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:mountain:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs"
+      },
+      {
+        "id": "r2:temple:mountain:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:mountain:small:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:mountain:small:05",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:mountain:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:mountain:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs"
+      },
+      {
+        "id": "r2:temple:mountain:medium:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:mountain:medium:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:mountain:medium:05",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave4-trades-b2.mjs"
+      },
+      {
+        "id": "r2:temple:mountain:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-inherited",
+        "file": "src/building-pool/roadmap-2b/legacy-temples.mjs"
+      },
+      {
+        "id": "r2:temple:mountain:large:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:mountain:large:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:mountain:large:04",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:temple:mountain:large:05",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave14-trades-b2.mjs"
+      },
+      {
+        "id": "r2:theater:temperate:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs"
+      },
+      {
+        "id": "r2:theater:temperate:small:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:temperate:small:03",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave10-trades-b2.mjs"
+      },
+      {
+        "id": "r2:theater:temperate:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs"
+      },
+      {
+        "id": "r2:theater:temperate:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-rime-and-river.mjs"
+      },
+      {
+        "id": "r2:theater:temperate:medium:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:temperate:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs"
+      },
+      {
+        "id": "r2:theater:temperate:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs"
+      },
+      {
+        "id": "r2:theater:temperate:large:03",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave15-trades-b2.mjs"
+      },
+      {
+        "id": "r2:theater:desert:small:01",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:desert:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-shadowstage.mjs"
+      },
+      {
+        "id": "r2:theater:desert:small:03",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-river-sundial.mjs"
+      },
+      {
+        "id": "r2:theater:desert:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs"
+      },
+      {
+        "id": "r2:theater:desert:medium:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:desert:medium:03",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave5-trades-b2.mjs"
+      },
+      {
+        "id": "r2:theater:desert:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs"
+      },
+      {
+        "id": "r2:theater:desert:large:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:desert:large:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:snow:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs"
+      },
+      {
+        "id": "r2:theater:snow:small:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:snow:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:snow:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs"
+      },
+      {
+        "id": "r2:theater:snow:medium:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:snow:medium:03",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave2-trades-b2.mjs"
+      },
+      {
+        "id": "r2:theater:snow:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:theater:snow:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs"
+      },
+      {
+        "id": "r2:theater:snow:large:03",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave8-trades-b2.mjs"
+      },
+      {
+        "id": "r2:theater:enchanted-forest:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs"
+      },
+      {
+        "id": "r2:theater:enchanted-forest:small:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs"
+      },
+      {
+        "id": "r2:theater:enchanted-forest:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:enchanted-forest:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs"
+      },
+      {
+        "id": "r2:theater:enchanted-forest:medium:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:enchanted-forest:medium:03",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave13-trades-b2.mjs"
+      },
+      {
+        "id": "r2:theater:enchanted-forest:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-concave-courts.mjs"
+      },
+      {
+        "id": "r2:theater:enchanted-forest:large:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:enchanted-forest:large:03",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave3-trades-b2.mjs"
+      },
+      {
+        "id": "r2:theater:mountain:small:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs"
+      },
+      {
+        "id": "r2:theater:mountain:small:02",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:mountain:small:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:mountain:medium:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs"
+      },
+      {
+        "id": "r2:theater:mountain:medium:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs"
+      },
+      {
+        "id": "r2:theater:mountain:medium:03",
+        "owner": "D",
+        "state": "exclusively-reserved",
+        "origin": "Roadmap-D-v1",
+        "file": null
+      },
+      {
+        "id": "r2:theater:mountain:large:01",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs"
+      },
+      {
+        "id": "r2:theater:mountain:large:02",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "2B-canonical",
+        "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs"
+      },
+      {
+        "id": "r2:theater:mountain:large:03",
+        "owner": "B",
+        "state": "source-preserved",
+        "origin": "B-staged",
+        "file": "src/building-pool/roadmap-b/wave7-trades-b2.mjs"
+      }
+    ],
+    "roadmap3B": [
+      {
+        "id": "r3:lumberyard:temperate:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:temperate:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:desert:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:snow:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:enchanted-forest:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:lumberyard:mountain:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:temperate:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:desert:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:snow:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:enchanted-forest:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:mill:mountain:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:small:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:medium:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:temperate:large:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:small:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:medium:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:desert:large:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:small:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:medium:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:snow:large:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:small:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:medium:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:enchanted-forest:large:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:small:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:medium:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:watchtower:mountain:large:5",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:temperate:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:desert:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:snow:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:enchanted-forest:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:barracks:mountain:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:temperate:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:desert:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:snow:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:enchanted-forest:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:small:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:medium:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:gatehouse:mountain:large:4",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:temperate:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:temperate:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:temperate:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:temperate:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:temperate:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:temperate:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:temperate:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:temperate:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:temperate:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:desert:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:desert:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:desert:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:desert:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:desert:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:desert:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:desert:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:desert:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:desert:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:snow:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:snow:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:snow:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:snow:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:snow:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:snow:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:snow:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:snow:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:snow:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:enchanted-forest:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:enchanted-forest:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:enchanted-forest:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:enchanted-forest:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:enchanted-forest:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:enchanted-forest:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:enchanted-forest:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:enchanted-forest:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:enchanted-forest:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:mountain:small:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:mountain:small:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:mountain:small:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:mountain:medium:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:mountain:medium:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:mountain:medium:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:mountain:large:1",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:mountain:large:2",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      },
+      {
+        "id": "r3:city-wall:mountain:large:3",
+        "owner": "C",
+        "state": "lane-reserved",
+        "origin": "3B-accepted-211-plus-149-open"
+      }
+    ]
+  },
+  "notApproved": [
+    "game registration",
+    "world placement",
+    "production merge",
+    "deployment",
+    "schema-1 saves",
+    "creature AI",
+    "settlement generation"
+  ]
+}

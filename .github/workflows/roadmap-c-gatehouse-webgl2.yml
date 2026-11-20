@@ -1,0 +1,94 @@
+name: Roadmap C five original fortifications source WebGL2
+
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-3b/c1-twinstone-pass-gatehouse.mjs'
+      - 'src/building-pool/roadmap-3b/fortification-topology.mjs'
+      - 'tests/building-pool/roadmap-3b/c2-twinstone-gatehouse*'
+      - 'src/building-pool/roadmap-3b/c3-fourwatch-closed-city-wall.mjs'
+      - 'tests/building-pool/roadmap-3b/c3-fourwatch-wall*'
+      - 'src/building-pool/roadmap-3b/c4-sandglass-fork-desert-barracks.mjs'
+      - 'tests/building-pool/roadmap-3b/c4-sandglass-fork-barracks*'
+      - 'src/building-pool/roadmap-3b/c5-sunbarrow-desert-gatehouse.mjs'
+      - 'tests/building-pool/roadmap-3b/c5-sunbarrow-gatehouse*'
+      - 'src/building-pool/roadmap-3b/c6-granite-switchback-mountain-wall.mjs'
+      - 'tests/building-pool/roadmap-3b/c6-granite-switchback-wall*'
+      - 'src/building-pool/roadmap-3b/c-granite-switchback-handoff.mjs'
+      - 'tests/building-pool/roadmap-3b/c-granite-switchback-handoff.test.mjs'
+      - 'src/building-pool/roadmap-3b/c-sunbarrow-settlement-handoff.mjs'
+      - 'tests/building-pool/roadmap-3b/c-sunbarrow-settlement-handoff.test.mjs'
+      - 'tests/building-pool/roadmap-3b/c-all-protected-211-d4.test.mjs'
+      - 'tests/building-pool/roadmap-3b/c-browser-evidence-path-contract.test.mjs'
+      - 'docs/building-pool/roadmap-3b/C_PROTECTED_ACCEPTED211_SOURCE_BLOBS.json'
+      - 'src/building-pool/roadmap-3b/c-barracks-settlement-handoff.mjs'
+      - 'tests/building-pool/roadmap-3b/c-barracks-settlement-handoff.test.mjs'
+      - '.github/workflows/roadmap-c-gatehouse-webgl2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: roadmap-c-gatehouse-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  genuine-source-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source branch HEAD before authoring acceptance
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          ACTUAL_SOURCE_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SOURCE_SHA" = "$EXPECTED_SOURCE_SHA"
+          echo "MYTHWROUGHT_ROADMAP_C_EXACT_SOURCE_HEAD=$ACTUAL_SOURCE_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native authoring and topology
+        run: |
+          node --test tests/building-pool/roadmap-3b/fortification-topology.test.mjs
+          node --test tests/building-pool/roadmap-3b/c2-twinstone-gatehouse.test.mjs
+          node --test tests/building-pool/roadmap-3b/c3-fourwatch-wall.test.mjs
+          node --test tests/building-pool/roadmap-3b/c4-sandglass-fork-barracks.test.mjs
+          node --test tests/building-pool/roadmap-3b/c5-sunbarrow-gatehouse.test.mjs
+          node --test tests/building-pool/roadmap-3b/c6-granite-switchback-wall.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-settlement-handoff.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-barracks-settlement-handoff.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-sunbarrow-settlement-handoff.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-granite-switchback-handoff.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-all-protected-211-d4.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-browser-evidence-path-contract.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-physical-producer-hold.test.mjs
+      - name: Install pinned Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          node -e "import('playwright').then(({chromium})=>process.stdout.write('MYTHWROUGHT_CHROME_BIN='+chromium.executablePath()+'\n'))" >> "$GITHUB_ENV"
+      - name: Capture thirty original gatehouse, wall, and barracks source WebGL2 images
+        run: |
+          node --test tests/building-pool/roadmap-3b/c2-twinstone-gatehouse-chromium.test.mjs
+          node --test tests/building-pool/roadmap-3b/c3-fourwatch-wall-chromium.test.mjs
+          node --test tests/building-pool/roadmap-3b/c4-sandglass-fork-barracks-chromium.test.mjs
+          node --test tests/building-pool/roadmap-3b/c5-sunbarrow-gatehouse-chromium.test.mjs
+          node --test tests/building-pool/roadmap-3b/c6-granite-switchback-wall-chromium.test.mjs
+      - name: Decode real 30 fortification PNGs and verify CRC, SHA256 and exact source HEAD
+        run: node --test tests/building-pool/roadmap-3b/c-evidence-png-integrity.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-c-five-fortifications-genuine-webgl2
+          path: |
+            artifacts/roadmap-c-3b-twinstone-gatehouse/
+            artifacts/roadmap-c-3b-fourwatch-city-wall/
+            artifacts/roadmap-c-3b-sandglass-fork-barracks/
+            artifacts/roadmap-c-3b-sunbarrow-gatehouse/
+            artifacts/roadmap-c-3b-granite-switchback-wall/
+          if-no-files-found: ignore
