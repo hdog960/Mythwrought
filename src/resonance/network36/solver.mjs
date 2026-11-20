@@ -21,7 +21,7 @@ export function solveResonance({nodes=[], generators=[], devices=[], stores=[], 
   }
   for(const n of nodes) {
     if(!['channel','wireless'].includes(n.kind)) throw Error('conductor kind');
-    if(n.kind==='wireless') nonneg(n.radius,'radius');
+    if(n.kind==='wireless') { nonneg(n.radius,'radius'); if(n.radius>8) throw Error('wireless radius budget exceeded'); }
   }
   for(const g of generators) nonneg(g.output,'output');
   for(const d of devices) { nonneg(d.demand,'demand'); nonneg(d.priority??100,'priority'); }
@@ -29,21 +29,38 @@ export function solveResonance({nodes=[], generators=[], devices=[], stores=[], 
     for(const field of ['capacity','charge','maxInput','maxOutput']) nonneg(s[field],field);
     if(s.charge>s.capacity) throw Error('overfilled store');
   }
+  // N1 bounded spatial graph: one conductor per integer anchor, radius capped for mobile work.
+  if(nodes.length>2048) throw Error('conductor budget exceeded');
   const conductors=[...nodes].sort((a,b)=>idSort(a.id,b.id));
+  const byAnchor=new Map(conductors.map(n=>[key(n.anchor),n]));
+  const wireless=conductors.filter(n=>n.kind==='wireless');
+  const nearby=(anchor,radius)=>{
+    const found=[];
+    for(let x=-radius;x<=radius;x++)for(let y=-radius;y<=radius;y++)for(let z=-radius;z<=radius;z++){
+      if(Math.abs(x)+Math.abs(y)+Math.abs(z)>radius)continue;
+      const n=byAnchor.get(key({x:anchor.x+x,y:anchor.y+y,z:anchor.z+z}));
+      if(n)found.push(n);
+    }
+    return found;
+  };
   const parent=new Map(conductors.map(n=>[n.id,n.id]));
   const root=id=>{ while(parent.get(id)!==id) id=parent.get(id); return id; };
   const join=(a,b)=>{let x=root(a),y=root(b);if(x!==y) parent.set(idSort(x,y)<0?y:x,idSort(x,y)<0?x:y);};
-  // Wireless auto-links only within bounded radius, to channels or other transmitters.
-  for(let i=0;i<conductors.length;i++) for(let j=i+1;j<conductors.length;j++){
-    const a=conductors[i],b=conductors[j],d=distance(a.anchor,b.anchor);
-    if(adjacent(a.anchor,b.anchor) || (a.kind==='wireless'&&d<=a.radius) || (b.kind==='wireless'&&d<=b.radius)) join(a.id,b.id);
+  // Each channel checks six neighbors; each radio checks a bounded Manhattan sphere.
+  // No all-pairs conductor scan, no persistent links or chunk mutations.
+  for(const a of conductors){
+    for(const b of nearby(a.anchor,1)) if(a.id!==b.id)join(a.id,b.id);
+    if(a.kind==='wireless')for(const b of nearby(a.anchor,a.radius))
+      if(a.id!==b.id)join(a.id,b.id);
   }
   const groups=new Map();
   for(const n of conductors){const r=root(n.id);if(!groups.has(r))groups.set(r,[]);groups.get(r).push(n);}
   const networks=[];
   const connected=n=> {
-    const candidates=conductors.filter(c=>distance(c.anchor,n.anchor)<=1||(c.kind==='wireless'&&distance(c.anchor,n.anchor)<=c.radius));
-    const roots=[...new Set(candidates.map(c=>root(c.id)))];
+    const candidates=new Map(nearby(n.anchor,1).map(c=>[c.id,c]));
+    for(const radio of wireless)if(distance(radio.anchor,n.anchor)<=radio.radius)
+      candidates.set(radio.id,radio);
+    const roots=[...new Set([...candidates.values()].map(c=>root(c.id)))];
     if(roots.length>1) throw Error('ambiguous multi-network attachment: '+n.id);
     return roots.length?roots[0]:null;
   };
