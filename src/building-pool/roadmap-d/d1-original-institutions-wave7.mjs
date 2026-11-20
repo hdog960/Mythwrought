@@ -1209,10 +1209,10 @@ export const ROADMAP_D_WAVE7_PLANS=Object.freeze([
         8
       ],
       [
-        85,
-        47,
-        9,
-        8
+        83,
+      47,
+      8,
+      8
       ],
       [
         44,
