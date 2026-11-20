@@ -35,6 +35,9 @@ import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {installGameplayRecorder} from './gameplay-recorder.mjs';
 import {installGameUpdater} from './app-update.mjs';
+import {installPlayerMenu} from './creative-integration/player-menu.mjs';
+import {CURRENT_INSTALLED_GENERATOR,chooseUnusedCurrentSeed,
+  secureRandomWorldSeed} from './creative-integration/current-world.mjs';
 import {createLiveMobSession} from './mobs/live-game.mjs';
 import {createLiveMobRenderer} from './mobs/live-render.mjs';
 import {getSpecies} from './mobs/species.mjs';
@@ -392,6 +395,7 @@ function start(){
   const g2Toggle=document.getElementById('g2bFlightEnable');
   const g2Profile=document.getElementById('g2bFlightProfile');
   const g2Status=document.getElementById('g2bFlightStatus');
+  const g2Header=document.getElementById('creativeToggle');
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
@@ -429,7 +433,14 @@ function start(){
   function g2Sync(){
     const on=g2Active();
     document.body.classList.toggle('g2b-flight-active',on);
-    g2Toggle.checked=g2CreativeEnabled;g2Profile.disabled=!g2CreativeEnabled;
+    g2Toggle.checked=g2CreativeEnabled;
+    // Only speed 15 is ever executable through the player Creative UI.
+    g2Profile.value='travel';g2Profile.disabled=true;
+    if(g2Header){
+      g2Header.setAttribute('aria-pressed',String(g2CreativeEnabled));
+      g2Header.classList.toggle('creative-enabled',g2CreativeEnabled);
+      g2Header.textContent=g2CreativeEnabled?'✦ CREATIVE ON':'✧ CREATIVE';
+    }
     for(const [id,label,aria] of [
       ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
       ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
@@ -468,7 +479,7 @@ function start(){
         heightBounds:{minFeet:WORLD_MIN_Y,maxFeet:G2_FLIGHT_MAX_FEET}});
       const active=armG2Flight(initial,{enabled:true,isRegionReady:g2Ready,isBodyClear:g2Clear});
       if(active.mode!=='flight'){g2Status.textContent=active.reason;message(active.reason);return false;}
-      g2Flight=selectG2FlightProfile(active,g2Profile.value);
+      g2Flight=selectG2FlightProfile(active,'travel');
       g2Controls=enterG2ControlOwnership(createG2ControlState(),
         {featureEnabled:true,flightReady:true});
       player.vX=player.vY=player.vZ=0;player.onGround=false;player.coyote=0;
@@ -578,7 +589,7 @@ function start(){
       g2Status.textContent=g2Flight.reason;
     }catch(e){g2Pause('Flight failed safely: '+e.message);}
   }
-  g2CreativeEnabled=false;g2Toggle.checked=false;g2Profile.value='normal';g2Sync();
+  g2CreativeEnabled=false;g2Toggle.checked=false;g2Profile.value='travel';g2Sync();
   // Creative enablement is separate from flying: enabling never lifts the player.
   // A failed physical landing cannot silently turn Creative off midair.
   g2Toggle.addEventListener('change',()=>{
@@ -590,10 +601,17 @@ function start(){
     lastG2JumpReleaseAt=-Infinity;
     g2Sync();
   });
+  // The old profile selector stays mounted solely to preserve dependencies.
+  // It has no player-visible or executable lower-speed mode.
   g2Profile.addEventListener('change',()=>{
-    if(!g2Active())return;
-    try{g2Flight=selectG2FlightProfile(g2Flight,g2Profile.value);g2Sync();}
-    catch(e){g2Status.textContent=e.message;}
+    g2Profile.value='travel';
+    if(g2Active())g2Flight=selectG2FlightProfile(g2Flight,'travel');
+    g2Sync();
+  });
+  g2Header?.addEventListener('click',()=>{
+    if(!help.hidden||exploration.isOpen()||graphicsLost)return;
+    g2Toggle.checked=!g2CreativeEnabled;
+    g2Toggle.dispatchEvent(new Event('change',{bubbles:true}));
   });
   // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
   const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
@@ -3055,6 +3073,44 @@ function start(){
           restoredCount:graphicsRestoreCount,shaderReady:Boolean(program&&skyProgram)}};}
     });
   }
+  // Three-action player menu. Legacy controls retain their original DOM,
+  // listeners and storage contracts but are not player-visible settings.
+  const playerSettings=installPlayerMenu({
+    container:help.querySelector('.helpbody'),
+    onDiagnostics:async()=>{
+      await document.getElementById('runAudit').onclick();
+      await document.getElementById('copyAudit').onclick();
+      playerSettings.showStatus(document.getElementById('auditStatus').textContent);
+    },
+    onDay:()=>{
+      document.getElementById('skySetDay').click();
+      playerSettings.showStatus('Day selected · the 24-minute clock keeps running');
+    },
+    onNight:()=>{
+      document.getElementById('skySetNight').click();
+      playerSettings.showStatus('Night selected · the 24-minute clock keeps running');
+    },
+    onNewWorld:()=>{
+      if(!window.confirm('Create a new world with the current installed '+
+          CURRENT_INSTALLED_GENERATOR+' generator? Existing worlds and saves are preserved.'))
+        return;
+      if(!storageReadOnly&&!save())
+        throw Error('Save verification failed; old world preserved. Export your backup first');
+      const next=chooseUnusedCurrentSeed(localStorage,secureRandomWorldSeed);
+      const choice=planM2WorldChoice(String(next),
+        M2_WORLD_MODE.CREATE_BALANCED_V6,{confirmed:true});
+      const loaded=openM2World(localStorage,choice);
+      if(!(loaded.base instanceof FourRegionWorld)||
+         loaded.base.generationProfile.generator!==CURRENT_INSTALLED_GENERATOR)
+        throw Error('Refusing an obsolete or unknown world generator');
+      const stored=saveM2World(localStorage,loaded.world);
+      if(!stored.ok)throw Error('New world not verified: '+stored.reason);
+      enterPreparedM2World(loaded.world,'New current-generation world '+next+
+        ' · old worlds and saves remain protected');
+      document.getElementById('closeHelp').click();
+    },
+    onClose:()=>document.getElementById('closeHelp').click()
+  });
   saveHealth.textContent=storageReadOnly?
     'READ ONLY: damaged world data preserved; import or select another seed.':
     'Schema-1 saved edits; checksum journal and verified previous-world backup.';
