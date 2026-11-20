@@ -1,0 +1,1470 @@
+{
+  "schema": "mythwrought.roadmap-c.h2-provenance.v1",
+  "purpose": "unmerged source-only candidate intake; no production registration",
+  "mainParent": "104e57ff678a0c58593d1e3c85c13c6c112da992",
+  "mainTree": "a71a0de9b133e22efa4e10a81b9b9a26798c1da8",
+  "verification": "pending exact-head post-stage CI and source-blob parity check",
+  "lanes": [
+    {
+      "name": "1A",
+      "pr": 180,
+      "head": "628134928a171d6db46d0e9d2aa68a4bf877a08e",
+      "dir": "roadmap-1a",
+      "authored": 265,
+      "target": 450,
+      "files": [
+        {
+          "path": "docs/building-pool/roadmap-1a/M0_ACCEPTANCE.md",
+          "sha": "2509ce80bcf003e5b6cfd4c409b43eaba4e91754"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M1_INN_BROWSER_HANDOFF.md",
+          "sha": "85bac9a6a9f3814f1197fb89b9307be3afc312a5"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M1_LEGACY_PARITY.md",
+          "sha": "f70985cfe5bb6235c02561cc323ed9f63d53c055"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M2_DOMESTIC_FOUNDATIONS.md",
+          "sha": "6d8706182871c0ddd44a0a96e6460fa7bc924631"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M2_HOUSING_WAVE2.md",
+          "sha": "a6853558ace03290b1e8e0509a35065c9bfa95d1"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M2_HOUSING_WAVE3.md",
+          "sha": "f9e27ff1366eeafdc841af13e4c028cfa40d6e99"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M2_HOUSING_WAVE4.md",
+          "sha": "f81aa927bab46018da37ced42301078e1b1dd21f"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M2_HOUSING_WAVE5_CONCAVE.md",
+          "sha": "ebe7bdd0fe16855316119750680a7a51252421c3"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M2_HOUSING_WAVE6.md",
+          "sha": "8b42b9bdf99e093a25aa5654616edca910351bc3"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M2_HOUSING_WAVE7.md",
+          "sha": "0882b6038349dba2f70529acefa9d8b0a4329b83"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M2_HOUSING_WAVE8.md",
+          "sha": "ab1dd72c3aad9f99da9d9672898af7d025d60f69"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M2_HOUSING_WAVE9.md",
+          "sha": "4944aaf2c0cc1cc312c06dfdbe6fa15481ac4152"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M2_SOURCE_AABB_WEBGL2.md",
+          "sha": "8d859fe36315f341b58529b9fe8a6a83808813a7"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M3_HOSPITALITY_WAVE1.md",
+          "sha": "1fa01ec1e314f4fdb197ea4edb56d7b87f16da98"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M3_HOSPITALITY_WAVE2.md",
+          "sha": "535fcf5fadddf00f53ea906f758b00264145a08a"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M3_HOSPITALITY_WAVE3.md",
+          "sha": "833824c7c0c562dc03844c3380988d8d249ff9aa"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M3_HOSPITALITY_WAVE4.md",
+          "sha": "03b01deb3a823f2ab493eac1ead62b33dd5057dd"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M3_HOSPITALITY_WAVE5.md",
+          "sha": "d6eced8610fb1045045c6ecf1d4f133c19af7111"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M3_HOSPITALITY_WAVE6.md",
+          "sha": "6b9b758e940accdb02d0785708d49eb0203e0b4f"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M3_HOSPITALITY_WAVE7.md",
+          "sha": "11951859832ac6cf4c2e189b150b328bd50a1028"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M3_HOSPITALITY_WAVE8.md",
+          "sha": "03dd4b8a6426004aaf10bc2a2125b93444e4cba1"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/M3_HOSPITALITY_WAVE9.md",
+          "sha": "99519331f23bbcbb447b6549595c8ef73385607a"
+        },
+        {
+          "path": "docs/building-pool/roadmap-1a/PRELAUNCH.md",
+          "sha": "a046c42a6116de19149b09ef42cd3b753bc265dc"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/legacy-buildings.mjs",
+          "sha": "b0c07602dd5625aed10d42f566bb60e18fa661dc"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/legacy-candidate-footprints.mjs",
+          "sha": "2fdbb4e6d6b04e9f2ce4aa4685ae840bcaa7798e"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/legacy-designs.mjs",
+          "sha": "05cfa61d8f848b736afd8a1113c07cb3b830d07d"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/legacy-reference.json",
+          "sha": "c66ed9aa1ac37e5455846b1c627682fdc9c2254d"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/legacy-schema.mjs",
+          "sha": "802bbffc64b7852f78bcb7ffab2488b0f8ba1552"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/legacy-uniqueness.mjs",
+          "sha": "85898289b9d820d18a3600c1f5043e07e07b4ce5"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m0-contract.mjs",
+          "sha": "be00c3242601687c9772294d2936d7f3ae461926"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m1-inn-exemplars.mjs",
+          "sha": "833a4ddd7f79578a6dc12710316735136172c080"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m1-physical-sources.mjs",
+          "sha": "7b7b7809e90bc82340dfae6083dedb90e417540a"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m2-housing-tranche.mjs",
+          "sha": "5a7fe70a17850af9ea61dba58a399c57c2b4c386"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m2-housing-wave2.mjs",
+          "sha": "30a965695a9749bbe822bd52830fc51dd85bd6ec"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m2-housing-wave3.mjs",
+          "sha": "3dd1c207f1c543e7f5139df0e99424a1a03687b3"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m2-housing-wave4.mjs",
+          "sha": "a457d53bc7f7d912fdf90f7ca3c15e2a9f22de59"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m2-housing-wave5.mjs",
+          "sha": "3dad5db5516b01bbcb37fc5c1f8f7f8b0d5d2e4c"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m2-housing-wave6.mjs",
+          "sha": "765c901609dfc8a834ec8ac3b9c61ca698d7e6d1"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m2-housing-wave7.mjs",
+          "sha": "c8a3070e3678dcd245b5f8e531ccc39951086a4f"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m2-housing-wave8.mjs",
+          "sha": "9935d395d4b20ef35a99832daef0594f73328bfa"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m2-housing-wave9.mjs",
+          "sha": "8fc11b1ea780f90354d6826f1b2d728a522689f8"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m2-originals.mjs",
+          "sha": "d54ac32eed40971bf7b18e7c4433c2207fb397be"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m3-hospitality-wave1.mjs",
+          "sha": "55bc68021d879fba6f5926ef5f4513005f83037d"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m3-hospitality-wave2.mjs",
+          "sha": "83deadcb51a87e0e9394286c765c3c9167558593"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m3-hospitality-wave3.mjs",
+          "sha": "39e676386e93833a23d588a9516dbfd895d89d39"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m3-hospitality-wave4.mjs",
+          "sha": "6a6db68d4fe470368b5498204963bd31540dc878"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m3-hospitality-wave5.mjs",
+          "sha": "c41ac21c4a06eca33ede73bcd088969ff5db95cc"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m3-hospitality-wave6.mjs",
+          "sha": "496dab3c5d68d48542c3a29b7179ee957e4614a1"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m3-hospitality-wave7.mjs",
+          "sha": "1a2c7a693acf768f39142557865ef4696fd7c513"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m3-hospitality-wave8.mjs",
+          "sha": "b726431561b00b72211a8d84fd59c27fbe6bda04"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/m3-hospitality-wave9.mjs",
+          "sha": "ccf0a3e9820599155723caf179c13aa25169aeda"
+        },
+        {
+          "path": "src/building-pool/roadmap-1a/manifest.json",
+          "sha": "c84e3344056b17f2a6063c39cce42ed285ddc6ae"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/legacy-geometry.test.mjs",
+          "sha": "ed141cdc1ad5b97d84f35b8602c70137f41215f3"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m0-contract.test.mjs",
+          "sha": "d1771ee59ad8a7de9189d83bd71eef86220f1d83"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m1-gallery.test.mjs",
+          "sha": "573e37a2aa343e705fd6f872908c3cb7a507d16f"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m1-inn-canvas.html",
+          "sha": "806fe6e75d9c483690b287e5f9a7d2b96336eb4d"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m1-inn-exemplars.test.mjs",
+          "sha": "8c0fa124444d4e6eebc59d59bcb15dd85f1051e7"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m1-physical-sources.test.mjs",
+          "sha": "c8cda357e25a7ff2fec498b85a75dea41d27172e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-chromium.test.mjs",
+          "sha": "d28d8d1b2198ca9d4852486cdb460df1ed6f8d5c"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-housing-tranche.test.mjs",
+          "sha": "19d2b3cb80309803f3de4d5575401d26642fd3f6"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-housing-wave2.test.mjs",
+          "sha": "9811764f5fae57aef7ff16358c2b748a5dd8e0e3"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-housing-wave3.test.mjs",
+          "sha": "df692015af080c4527c069edd6c35f20d80c936d"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-housing-wave4.test.mjs",
+          "sha": "4333081e582946f650c6601109ebd21fa5c2f03e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-housing-wave5.test.mjs",
+          "sha": "101909327688f2407e3347ebf1361fe8f9d1c1e4"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-housing-wave6.test.mjs",
+          "sha": "faf54bc7f13a150dfa6ff5357ec1151cb60f3e67"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-housing-wave7.test.mjs",
+          "sha": "8563fd0e51a6a50fdf60f7502091168c59a1b428"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-housing-wave8.test.mjs",
+          "sha": "94af1a9dd49c9f88fec77acab3a9707ae2a8d95c"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-housing-wave9.test.mjs",
+          "sha": "7c6faf0ba6452cbfecfcc310367b21272d691a5d"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-originals.test.mjs",
+          "sha": "49c163c1c6e75fac32a90c94fa8ddb5ff0a654a6"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-preview-camera.mjs",
+          "sha": "c60e06a95ebee5f4ff47e3f792c9bde0f3bb441e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-preview-mesh.mjs",
+          "sha": "723c8b8256c112a456ee8ba12b5ca14e0cbf510f"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-preview-source.test.mjs",
+          "sha": "0f1d9abe0c8a9631001d7f486bbf69a09eeb2362"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-preview.html",
+          "sha": "1320f77d364ab951935b16f5a5dcd45ec6059b81"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-preview.mjs",
+          "sha": "a9b6c337d26fbb1faf9b6c4c97302da2815ed312"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-source-aabb-mesh.mjs",
+          "sha": "fe83e8c20894d14c162a3e16604b7b0353ea8af2"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-source-aabb-mesh.test.mjs",
+          "sha": "26c7e86628f437b316fbe7c6e57d93690d36f802"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-wave4-baseline84.json",
+          "sha": "a3b69e52e414c43baa63f673227a546c533ba3f7"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-wave5-baseline99.json",
+          "sha": "e73254edc76f4f90c7138902c906fbdf783505bf"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-wave6-baseline114.json",
+          "sha": "4930d1e959bb6fddaa569ef5688fb11959e604ad"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m2-wave9-baseline149.json",
+          "sha": "ca7c93a4ac8e9d2854c27601d77d4395ec4d3f78"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-baseline171.json",
+          "sha": "5314504a1abb726b919038b52f7538f24767600d"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-baseline191.json",
+          "sha": "ec215b3f7978cd814d8b3dbe5f53d44a445d6744"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-baseline205.json",
+          "sha": "738347417025583cfe66cc47deaa907b813a4374"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-baseline214.json",
+          "sha": "0932d206395fe8d0d741154b9072a7d7d44b7323"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-baseline224.json",
+          "sha": "86ab2bde57d6e2e698b9aa479ed66fff22f2f61c"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-baseline232.json",
+          "sha": "db1c5b9391440a7ddd2ff63c4063b538e5529ca0"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-baseline245.json",
+          "sha": "b721aa0240bc023f5035037933b01da453070b81"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-baseline260.json",
+          "sha": "2ae422a082c1d2f6560c46372f25270d36724bc0"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-wave1.test.mjs",
+          "sha": "ee5dff76b89d82f399d7de18692c740680555c27"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-wave2.test.mjs",
+          "sha": "c0c1abeb0c30ddb77f9fb8ce41f3ffe6ac244d5e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-wave3.test.mjs",
+          "sha": "41dea3f333de6cf42269c83037547bb8e40b80d4"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-wave4.test.mjs",
+          "sha": "61389c9d16efffa814779322e9e3969a1d1ab666"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-wave5.test.mjs",
+          "sha": "29f4ed7a8e00d3f708ba4ea2fe730fc58862f401"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-wave6.test.mjs",
+          "sha": "2afad1a2a91e24edb13b4a0a92a73d198fbf5f91"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-wave7.test.mjs",
+          "sha": "2ba83b3f3f6112f983fdf9d2088153aba751861d"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-wave8.test.mjs",
+          "sha": "21d831879fff447eb35a79ea29f9005d5895a57c"
+        },
+        {
+          "path": "tests/building-pool/roadmap-1a/m3-hospitality-wave9.test.mjs",
+          "sha": "567d41ba31fd006477a1bd1838e6834204467f0f"
+        }
+      ]
+    },
+    {
+      "name": "3B",
+      "pr": 181,
+      "head": "af1ba6f1259d094c4d3ed34f5ed8183fb3948424",
+      "dir": "roadmap-3b",
+      "authored": 205,
+      "target": 360,
+      "files": [
+        {
+          "path": "docs/building-pool/roadmap-3b/M0_STATUS.md",
+          "sha": "d14ba427e0d53a15dbf934b8d273da7fd3032618"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M0_WATCHTOWER_IMPORT.json",
+          "sha": "4c32cfa09714f5b633a192e5413b3358ab7b993d"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M1_EXACT_HEAD_ACCEPTANCE.md",
+          "sha": "8d86f5491e79bda77942dd777a136a1a5333ccd0"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M1_GEOMETRY_WITNESSES.json",
+          "sha": "3f76cee29fd939f09650784bd629ac8428dbec65"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M1_PREVIEW_USAGE.md",
+          "sha": "351d8354b181b17d230bcc6e9e621bd2efce1a98"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M1_SOURCE_AND_PHYSICAL_REVIEW.md",
+          "sha": "e5dc270c70c16afeb1157d8ea1be8869a42514db"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_CHROMIUM_RESOURCE_GATE.md",
+          "sha": "89c81fd509da0be2dcf76935da752ef9a4d825b5"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_FRONTIER_DESIGNS.md",
+          "sha": "026afe203beb285553f9e3f1ac5f6f8a12a44435"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_HINTERLAND_DESIGNS.md",
+          "sha": "248ed0f8c8a15ae658fc781d0841c1f3b9188bab"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_INDUSTRY_START.md",
+          "sha": "9b924452bfec5050ac743ecc43e75303fa24e218"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_REGIONAL_INDUSTRY.md",
+          "sha": "73a6c927fb33245b78565b41c65b12d7eff441ab"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_VARIANT1_COVERAGE.md",
+          "sha": "728a9f2d3715240f09316271f385cc7a605a7b11"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_VARIANT2_DISTINCTNESS.md",
+          "sha": "577fd88c6aeff22b6ddf44a67eb7c693c295140f"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_VARIANT2_EXPANSION.md",
+          "sha": "28cd397591d4def88a229983078babb4a0eabb97"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_VARIANT2_FIRST_COVERAGE.md",
+          "sha": "5108fd1aa4302a9636e4bd7524695531a71eb155"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_VARIANT3_FINAL_TEN.md",
+          "sha": "27d1d29bf3dddb1e17696b2d27ea0451d226f72b"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_VARIANT3_FIRST_TEN.md",
+          "sha": "3c3b8403567b3a6909ba229c71625ab9dd53e46e"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_VARIANT3_SECOND_TEN.md",
+          "sha": "172c973f98b64986ef6e2884ed63155253910d82"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_VARIANT4_COMPLETION.md",
+          "sha": "dab10cbf49249298582b6002df26c92f2d5543f4"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_VARIANT4_FIRST_TEN.md",
+          "sha": "4d284f6d1029f3a5075d1589adae69bd32bd39b6"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_WATCHTOWER_VARIANT2_FIRST.md",
+          "sha": "772b80b324053ccd3d74d3ec294616d84b46ac32"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_WATCHTOWER_VARIANT2_MEDIUM_LARGE.md",
+          "sha": "c22fbb5c712704a49062c0c40b51d3b653d0e4e8"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_WATCHTOWER_VARIANT3_FIRST.md",
+          "sha": "025f553e5d6fe7bd5eb4ae436de32a0bb9aaf3f0"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_WATCHTOWER_VARIANT4_FIRST.md",
+          "sha": "5153c1a22b7d48bf9563572f6096f56877d10730"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M2_WATCHTOWER_VARIANT5_FINAL.md",
+          "sha": "45e1a8b5482f41958d7668026d61aab0c9bd2323"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M3_BARRACKS_SMALL_FIRST.md",
+          "sha": "8d92296cd8eafa7b5d4bbed2bc5d4c6f17baa031"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M3_BARRACKS_SMALL_SECOND.md",
+          "sha": "4606600a4df32dd3fed8bc10d27dd8f0630bedbc"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/M3_MEDIUM_LARGE_BARRACKS_SOURCE_PREP.md",
+          "sha": "209df6bc6970a14d0bf6bd73a56b6830544e71a3"
+        },
+        {
+          "path": "docs/building-pool/roadmap-3b/PRELAUNCH.md",
+          "sha": "7d38cd19d93076239fd913376210f09bd1f5ed57"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/assets.mjs",
+          "sha": "3c510de4056d17d4953b301e181bc2ef7c98f7e8"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/contract.mjs",
+          "sha": "306e67a0b8e5a5cc77cc6f7ef392a56f44adb946"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/legacy-watchtowers.mjs",
+          "sha": "2d4e1c7161072717009023cda132208bc9ea2234"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-dependency-review.mjs",
+          "sha": "0349d2fb9d118184c6dabebd5ebd252372bdfecb"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-frontier-dependencies.mjs",
+          "sha": "b457d8e467b5faab2d6d349074c01b7c350eb592"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-frontier.mjs",
+          "sha": "efca249e458ec7cfb672dd3a63a5b3cdc4a32743"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-hinterland-dependencies.mjs",
+          "sha": "f6dedf50d6e15bd49cfff820740bf46bc98a91ec"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-hinterland.mjs",
+          "sha": "2043f2602298c5c5c88a36fbc7fbe7331457bb49"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-industry.mjs",
+          "sha": "6cd3f2538ea95cb1fe2c1bd141aab983c4104301"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-missing-sizes-dependencies.mjs",
+          "sha": "a6186bb328d153f6e2bace5e89c61828958434c0"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-missing-sizes.mjs",
+          "sha": "05b67daa0cf179be9ab4aaa7d22294eda37941d7"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-regional.mjs",
+          "sha": "e803474c0809276201350ed308dd7e3fd5a4f3d3"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant2-completion-dependencies.mjs",
+          "sha": "f859d1ee3f5dba7fe01392dcfa6a89b7840dd4d3"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant2-completion.mjs",
+          "sha": "51436374defd2f7d8556d46d2164340a6b6d3049"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant2-dependencies.mjs",
+          "sha": "a5e0589599dce472097e9c99f5c52d34c244874d"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant2-expansion-dependencies.mjs",
+          "sha": "dd273948167ccd7fdd2e9f8ac12e02111e45cc25"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant2-expansion.mjs",
+          "sha": "d295eeac83fcee7fd215326f27d40974a6330fe4"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant2.mjs",
+          "sha": "13a08ed4ff990bd41093130670fcb397cb3f791d"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant3-final-dependencies.mjs",
+          "sha": "ead98db99bf3f934693cb99d1a23f5adef2fc37f"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant3-final.mjs",
+          "sha": "a77d96feb7d07ff0e896840594c002876ef20b75"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant3-first-dependencies.mjs",
+          "sha": "c0a46e00231c0a65aeeeac9acfd21f05d8de30cf"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant3-first.mjs",
+          "sha": "54d7a18ff17cbf8e328a0645f67149cb31a32336"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant3-second-dependencies.mjs",
+          "sha": "312c1f0c40bcf6e93c76c676f22fe6e3ab09a067"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant3-second.mjs",
+          "sha": "daa832caf187f25657a1287fbbf3dd6321a87316"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant4-completion-dependencies.mjs",
+          "sha": "76ac3b04fcd08b3dea0f326cfa6735ae1af7a0b1"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant4-completion.mjs",
+          "sha": "77159e45fdcaab84cb40f5e7ffb63395b800be7d"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant4-first-dependencies.mjs",
+          "sha": "ed0abcdfd24e82d2dcbc8f74cc5b7bd5b9c30a9e"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-variant4-first.mjs",
+          "sha": "136a0085c9427f11f2af300a631fb26fe2e01b30"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-watchtower-variant2-first-dependencies.mjs",
+          "sha": "46fca8ff74faeed812211c3e56205ea91f66e87a"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-watchtower-variant2-first.mjs",
+          "sha": "7007760e21a76443101602823af0285564419ffa"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-watchtower-variant2-medium-large-dependencies.mjs",
+          "sha": "09fe0abeab1f1b77be493197104c4f9cbae2330f"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-watchtower-variant2-medium-large.mjs",
+          "sha": "d8f50ee663bf94eb538eb31a341fbce615bb4174"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-watchtower-variant3-first-dependencies.mjs",
+          "sha": "3ef0090c453bedc405b740078b90fe2ffb38dc67"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-watchtower-variant3-first.mjs",
+          "sha": "affa871fb066a06c88c992c0c5bd5ed7f42d48ac"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-watchtower-variant4-first-dependencies.mjs",
+          "sha": "15562c63d167f3b0aac91fbdb964fbfa454dab85"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-watchtower-variant4-first.mjs",
+          "sha": "4aa3115296a3ee24a534dba41dde95d18ccebb1a"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-watchtower-variant5-final-dependencies.mjs",
+          "sha": "6ec24c141a1aa261e67f2bda06f916c9fcdee555"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m2-watchtower-variant5-final.mjs",
+          "sha": "98fe89210c43d167be77eaf3597ff73c5523d97d"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m3-barracks-small-first-dependencies.mjs",
+          "sha": "aec9bec7fc88badc9e6ac58d96a84ebe4703147b"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m3-barracks-small-first.mjs",
+          "sha": "6ab087e3ff9af2362cc9e9970bbe90e34ef2b1de"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m3-barracks-small-second-dependencies.mjs",
+          "sha": "193063a4806fd722ef883679d39f3cff79bba323"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/m3-barracks-small-second.mjs",
+          "sha": "d75c778f5c5e2bf562f17a64229df4d373a4f686"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/physical-review.mjs",
+          "sha": "f96365bfc51afaecbffc8bb50bd0ae80a1a630cc"
+        },
+        {
+          "path": "src/building-pool/roadmap-3b/roster.mjs",
+          "sha": "6c8b5a832a7090b1b32afe216c2ecce1171eac47"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/chromium-diagnostic.test.mjs",
+          "sha": "5f440fe35b1758567370424cbab835d6e8e1e56e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/chromium-resource-lock-contract.test.mjs",
+          "sha": "efdb294a18cbd9d39bcd2f5b2c70f2d3dac7fae0"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/chromium-resource-lock.mjs",
+          "sha": "bdb144a702626ac0ca4fce2ec0a6b45352857213"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/geometry-circulation.test.mjs",
+          "sha": "dc836384c8da1f45fcf7a5b4d8815309919d0099"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m0.test.mjs",
+          "sha": "1a1e9d7ca1fd61fbabdbb85d7c7bf58d6e0cc03d"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-chromium.test.mjs",
+          "sha": "eb9c73c54d6bbfa579a5b772ea56812500992f39"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-frontier-chromium.test.mjs",
+          "sha": "6edd1eb594087225ea6c5d09f337e3e6a1a8ebf1"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-frontier-preview-contract.test.mjs",
+          "sha": "d1ccc47237d81263dc5e7d16cc3c7ed25f4774fa"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-frontier-preview.html",
+          "sha": "538c2b9b702e65d4d9e877ba184f2f2ab46e070e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-frontier-preview.mjs",
+          "sha": "fa18d55e0203c18f4462f35036dd081fb50bf096"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-frontier.test.mjs",
+          "sha": "e89190876f63c5dacdc057f72784352517b2d4e1"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-hinterland-chromium.test.mjs",
+          "sha": "10b5b7e5b0ae5a6c59d33addd03107285d9fbd43"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-hinterland-preview-contract.test.mjs",
+          "sha": "660257de99273536a626838e240afdd97056aded"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-hinterland-preview.html",
+          "sha": "f016632a4166288dd4a24e207f6a2a1e2d4fac06"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-hinterland-preview.mjs",
+          "sha": "7d3664c20fd20eb48ab80745b4421d8d875721bc"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-hinterland.test.mjs",
+          "sha": "7e9058f035afcb55b842e37fd1582cea8f323717"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-industry.test.mjs",
+          "sha": "c6bd5107c0a20da58ecea13a0b7353ae1bb74481"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-missing-sizes-chromium.test.mjs",
+          "sha": "324269151f76edf822b0891c54b130d4f68c36fd"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-missing-sizes-preview-contract.test.mjs",
+          "sha": "3c18bfbf2539e1e5009f0860169b3c46872abb84"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-missing-sizes-preview.html",
+          "sha": "0d69b4eaa400d1aa415892c6b2f1247f3b94ab82"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-missing-sizes-preview.mjs",
+          "sha": "10f2c147028a1faec0765552043c6960d528f066"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-missing-sizes.test.mjs",
+          "sha": "36b876788f84b7ba032a578b26fa6cb110604349"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-preview.html",
+          "sha": "1cd08bc711e79d52aad52e9c511e7a512be267fa"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-preview.mjs",
+          "sha": "be5cc5f105b3b74b032d54ca40df46f09bba96de"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-preview.test.mjs",
+          "sha": "d2887033bc3846cc1b6889facf9edc2a277bf0ce"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-regional-chromium.test.mjs",
+          "sha": "8da9fac1723fe09bff75b6da858fc213fcb22ff1"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-regional-preview-contract.test.mjs",
+          "sha": "fe3944df8ea1230ace5476e3541f20bc1ec65f43"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-regional-preview.html",
+          "sha": "f7592fa5fdaec68dfae0d6a7bf13f0b7911b0534"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-regional-preview.mjs",
+          "sha": "0f83b8008d37ceeb032f78d6a3c4658995d5ebb0"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-regional.test.mjs",
+          "sha": "53953e43d03580de66466894c192b49a11cbd417"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-chromium.test.mjs",
+          "sha": "b5b828bd998d3abfec72135e37850d3c917d4eb7"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-completion-chromium.test.mjs",
+          "sha": "eef9ee1f5a86c0cda43a0dc5b6f6899fe187f7aa"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-completion-preview-contract.test.mjs",
+          "sha": "ff382b51c16009ebd0df4b15eaa53dc544e20c24"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-completion-preview.html",
+          "sha": "bb546db02719e385f50fc972611c6513b645f0e2"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-completion-preview.mjs",
+          "sha": "2540ce61517558f51bf20da335962056e2d60665"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-completion.test.mjs",
+          "sha": "bde8c13dc7f53b121db0da8f559fa97f34e899a3"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-expansion-chromium.test.mjs",
+          "sha": "6ed2ac0a20cd655ab6d944f77d3913776d0cde8c"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-expansion-preview-contract.test.mjs",
+          "sha": "c2bcd48ea5ecf88e74f89223cc75b1cafdee8a79"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-expansion-preview.html",
+          "sha": "2b8e655e7d2e5d762adb9845fa3b09ef68696f91"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-expansion-preview.mjs",
+          "sha": "cd7b6132c9ddf0f3ae11e91d1de120776403501c"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-expansion.test.mjs",
+          "sha": "e6f93854cbb9abdc917dcad4c9bc716fb50a2219"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-preview-contract.test.mjs",
+          "sha": "32e4c78fe2afb711257918de0d87dfa3d1786ac2"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-preview.html",
+          "sha": "0610d5fa47b4692bb7972f55fac2d2d0bea9d583"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2-preview.mjs",
+          "sha": "8f987ed962852b52985713569a8131c659beb711"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant2.test.mjs",
+          "sha": "2aa220a8e7bd3fdd23534a157c73fc0b0b7a8fc1"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-final-chromium.test.mjs",
+          "sha": "5ac9c343ee6a4a8a18add5e6a2da65cab8720484"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-final-preview.html",
+          "sha": "6b9c7c63357c9a6e34508bba06f6bcfda9ad51d8"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-final-preview.mjs",
+          "sha": "bb96a1d2a0fd298f0491dd79ce67388e66bb6582"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-final.test.mjs",
+          "sha": "8c07efd796f423b6394bd10d3c6b96765308781b"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-first-chromium.test.mjs",
+          "sha": "d1dc7432838ec7708ac112bf1f532f1a896acca3"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-first-preview-contract.test.mjs",
+          "sha": "7ad2d3c6af5b6a4215e78cf5301b887e70e90aeb"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-first-preview.html",
+          "sha": "3afc95e7f074db6d501ca5d2ad6c804d8afbc7cd"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-first-preview.mjs",
+          "sha": "b50b47be630172fe79b01621d74288f55afe3e14"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-first.test.mjs",
+          "sha": "c51201958ddb06bcd51d70a408bbb22bffa77ddc"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-second-chromium.test.mjs",
+          "sha": "defebf2bc4fbefc038980c70a101a3ee6bc5f94e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-second-preview-contract.test.mjs",
+          "sha": "695a1cfc2bd4357b44334dee3e8c8acd37d44841"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-second-preview.html",
+          "sha": "f6785041073bbc0e14c923fc805af3bfacf0c21c"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-second-preview.mjs",
+          "sha": "630d744f612e19114be7003229aaa85aaef8dd44"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant3-second.test.mjs",
+          "sha": "cfde1e6107457a18612e8a75d6023be51ba89f8e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant4-completion-chromium.test.mjs",
+          "sha": "dc8e7e6de95398781f258d1d0893565cdc411ffe"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant4-completion-preview.html",
+          "sha": "0f49790b639708922298af6ae28da986acc2d3e2"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant4-completion-preview.mjs",
+          "sha": "ae5b692407b627a2631f30442dec260ead03472b"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant4-completion.test.mjs",
+          "sha": "651fa5c938ac7738068d098d13900079df6af234"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant4-first-chromium.test.mjs",
+          "sha": "69ee9551b0036c3e75c655e7f6016314bdf81ae2"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant4-first-preview.html",
+          "sha": "d562aa1635c3d25263e4f2cc1d9cbd90ebb5d4b0"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant4-first-preview.mjs",
+          "sha": "e30f7afe254e4b84addc5c5cad6121647f417d6b"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-variant4-first.test.mjs",
+          "sha": "69298da5e9432e8ec33f64d9cb1e926bf2e98aae"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant2-first-chromium.test.mjs",
+          "sha": "8159a6acd91790bb4785c2f6f6eb1cec822f700d"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant2-first-preview.html",
+          "sha": "c744f0ddb5dcbc479eb2349f55f2a2569c0028bf"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant2-first-preview.mjs",
+          "sha": "abee43eeec31ea1a5d7dbb0b58cd850a3db22672"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant2-first.test.mjs",
+          "sha": "5e39c0b0077ee3938b2087a432f910b85c831318"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant2-medium-large-chromium.test.mjs",
+          "sha": "3d6616c31567f1158226cc8a51cf406879e8f60d"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant2-medium-large-preview.html",
+          "sha": "e568f4ea97750a0075d033ae962bfe17b31583a1"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant2-medium-large-preview.mjs",
+          "sha": "321b6abe1a2a2724dfceee998ff8f944813d375a"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant2-medium-large.test.mjs",
+          "sha": "2b23d064cbcbb1af1e37ebd1c0918945ec627cf7"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant3-first-chromium.test.mjs",
+          "sha": "5e1e0481233ebcd3044bc1c061dda8328ebd61eb"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant3-first-preview.html",
+          "sha": "c761c014e108ca8c538efade77e095cc731cb387"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant3-first-preview.mjs",
+          "sha": "1e1525c2fc95307ac51d46c12c2f040749b490a5"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant3-first.test.mjs",
+          "sha": "ab5a03a31977f3d37f07f709475e68200ebfab01"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant4-first-chromium.test.mjs",
+          "sha": "d454b8b3a1030b1c8b29e308811dc4daeb17527c"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant4-first-preview.html",
+          "sha": "c2b32172099e6202080956e5fcf447ff8b833258"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant4-first-preview.mjs",
+          "sha": "88092f142ba3094fc5bbc04302c6ccb9cfccfce7"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant4-first.test.mjs",
+          "sha": "6d4b29d3fa55eaf33afa9322e85054914e7bce2b"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant5-final-chromium.test.mjs",
+          "sha": "80a3ae668b6cada3fcc612f6739195a89176bf04"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant5-final-preview.html",
+          "sha": "044288cb60ddb5b29496eb635884e351219b9e0b"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant5-final-preview.mjs",
+          "sha": "ddb81d0d7c243a4d4607b616cefeac25a9fc692f"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m2-watchtower-variant5-final.test.mjs",
+          "sha": "9a784a33e852d7b33f4cb205bf0814b7a7f5fb95"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m3-barracks-small-first-chromium.test.mjs",
+          "sha": "c66eaed9cba6acf0a749da9c727d14a33d3d9757"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m3-barracks-small-first-preview.html",
+          "sha": "a488efc72ec14d6744b90d56d0090ee47ff3cce5"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m3-barracks-small-first-preview.mjs",
+          "sha": "b6d97319233db686e9b6ec5b5605a0bd7c497938"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m3-barracks-small-first.test.mjs",
+          "sha": "112b3871a186618cf8b90fa07f28a2a37de744e5"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m3-barracks-small-second-chromium.test.mjs",
+          "sha": "547da2d7cbe01d3b3c770a96eb5aa80f26eeb926"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m3-barracks-small-second-preview.html",
+          "sha": "2f2b06d92cf60b152253614bfc70addd3d3396fc"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m3-barracks-small-second-preview.mjs",
+          "sha": "64025a29680570eadfcf74a4b5c5d4404060fecb"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/m3-barracks-small-second.test.mjs",
+          "sha": "6ac11ff0996ad10d330531e215b1dd0f2c7357c0"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/physical-review.test.mjs",
+          "sha": "19f88989d632297d3579fe734f80ce8626c843e6"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/preview-browser-regression.test.mjs",
+          "sha": "4b2d2bcebe5bc45dfee6505a2f0178d77542e543"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/preview-browser.mjs",
+          "sha": "ff5fd56d36b58cc08623eff5b3c84e9d5c489ee0"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/preview-camera.mjs",
+          "sha": "7181e1d5fd2e85fb6bedbabb89e62852a6b110f4"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/preview-camera.test.mjs",
+          "sha": "bb72ebb891407b283c7f581e8a5f1f9086ec06ce"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/preview-mesh.mjs",
+          "sha": "1ba4369dbf0df26b9027f834012b2ee3615a8ea1"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/preview-mesh.test.mjs",
+          "sha": "4d81e1205dc0646beca4027f4010fa85f31cd6c6"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/preview.html",
+          "sha": "cf9eb2755f665e7b985b11710a7385640ffa1360"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/preview.mjs",
+          "sha": "46bf6b651bd79ab49b74c961d6d9b6d7898587e6"
+        },
+        {
+          "path": "tests/building-pool/roadmap-3b/source-parity.test.mjs",
+          "sha": "cdb9a9765a5b32f87ca3e1ad7a923bc79e4680a5"
+        }
+      ]
+    },
+    {
+      "name": "4B",
+      "pr": 185,
+      "head": "315eb1f3635aff4057542beae98dd7cf2d9da33a",
+      "dir": "roadmap-4b",
+      "authored": 143,
+      "target": 285,
+      "files": [
+        {
+          "path": "docs/building-pool/roadmap-4b/M0_FOUNDATION.md",
+          "sha": "0d3ca06c8b4352bbba09907b32d0ae4c716d83ca"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M1_CANDIDATES.md",
+          "sha": "9769148f87ca230b7a536fc1f655f59a358be694"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M1_TECHNICAL_ACCEPTANCE.md",
+          "sha": "991cdf694bf492ae50142603d53294b6c460cf88"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_COMPLETION_HANDOFF.md",
+          "sha": "f43ccfc19971735f0adc0e934bec40a8f456a5c0"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_FIRST_16_CANDIDATES.md",
+          "sha": "2d89843be98f549b2aaae359740c32df327b6056"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_SECOND_12_DISTINCTIVE.md",
+          "sha": "71fe1edabc095b656d28df2ebeed75a0334f6a0b"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_VARIANT02_COMPLETE_10.md",
+          "sha": "62fabe06626b27d175568ee5e067d704bcc7b8ea"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_VARIANT02_FIRST_10.md",
+          "sha": "835a67361f4129729c3ff884239e1df3a2fdfcae"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_VARIANT02_SECOND_10.md",
+          "sha": "c671c86fac9983e754950dba26b36b6b9e43dd10"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_VARIANT03_FINAL10.md",
+          "sha": "28e3240b4f321a5f13b935a75362575e01b7086f"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_VARIANT03_FIRST10.md",
+          "sha": "6e29af4664dc17686299ead2d0df5eec847321ac"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_VARIANT03_SECOND10.md",
+          "sha": "8ccafb5eb361d6966f26db8836261e56e17b9267"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_VARIANT04_FINAL10.md",
+          "sha": "bf1a6f81a6d3df75c85ccde5a52c21f0297ade26"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_VARIANT04_FIRST10.md",
+          "sha": "419768d10017937bf20c4fd21455bed5e6827b40"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_VARIANT04_SECOND10.md",
+          "sha": "dde61cef23a5aa5952df43c2849805ed2477e8e7"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M2_VARIANT05_FINAL15.md",
+          "sha": "d32583631b105de8f535c01592e81ceaa05891d1"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/M3_SCHOOLHOUSES_FIRST5.md",
+          "sha": "158dcccf938bef42dfeadbca9bbd7e46a73d8d37"
+        },
+        {
+          "path": "docs/building-pool/roadmap-4b/PRELAUNCH.md",
+          "sha": "d6c4dff7f544dbe5beba81499018119c193541c2"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/legacy-source.json",
+          "sha": "b98ed5c764d8c19576607bec24b86c3895651798"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m1-exemplars.mjs",
+          "sha": "d6b64c19f2a76099fbeb80954e644d57d09d076b"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-distinctive.mjs",
+          "sha": "4a3bddd06d4d8d91f65279649c7545661c81729d"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-healing-library.mjs",
+          "sha": "fe3bd70477c9dc87ba02c5b2b3430cc69112fee1"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-variant02-completion.mjs",
+          "sha": "b0837e3cbfe24062e0af7f2ab593d27381e8abff"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-variant02-expansion.mjs",
+          "sha": "ca346ebb4a5621a678d92a2b92a69a1c4a8fd9d5"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-variant02.mjs",
+          "sha": "d9edd7205fc439eeb96260d8b9f85b1574b9b36e"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-variant03-final10.mjs",
+          "sha": "802dcf69f465013456fe58bdaa80bcced4f3984b"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-variant03-first10.mjs",
+          "sha": "93322a0f203a5e72473267e85bc7df554844c4a6"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-variant03-second10.mjs",
+          "sha": "aa40241e832d349d0b1622891140ceccf87b7b19"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-variant04-final10.mjs",
+          "sha": "d2a5e18fac8258f74a2979bdc464b2b5679d2b6f"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-variant04-first10.mjs",
+          "sha": "1529e797e412021ba821deb06d92bef1f9b3d03d"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-variant04-second10.mjs",
+          "sha": "68368f6c198e38df68ce2b406d149ced133f463e"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m2-variant05-final15.mjs",
+          "sha": "dc40ccc938eeed16a7005b6d0cfa9b5862bbffd7"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/m3-schoolhouses-first5.mjs",
+          "sha": "ea652d538a7f22e4ba23d4b5563c260e093018c5"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/manifest.json",
+          "sha": "ed76331611e13b05bd9daea5ac9bf147770ce6a4"
+        },
+        {
+          "path": "src/building-pool/roadmap-4b/schema.mjs",
+          "sha": "458c4f4bd580311fd844c6f5aeeccb7212db863a"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m1-exemplars.test.mjs",
+          "sha": "e1879c7aa90d36cf87f4438ab725a1ea5bbfcd87"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m1-preview-browser.py",
+          "sha": "975f3471c22ab59d0f9ae31c52b3710803041802"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m1-preview.html",
+          "sha": "7cc9c3a4425844f397d091da86e8e9df91e2cedd"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m1-webgl2.test.mjs",
+          "sha": "1b036ef8799607a137ab904db002956aa21c19ed"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-distinctive-preview.html",
+          "sha": "32c9adec4fab8c3d61a7332f198905579be8c33e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-distinctive-webgl2.test.mjs",
+          "sha": "3ab31d6148e6234aa344c0d52b9aca069d2992ba"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-distinctive.test.mjs",
+          "sha": "aeff14abc981516c99a0d14f510d13177d99c5b5"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-healing-library.test.mjs",
+          "sha": "da827b42e0531180a1054d09ead385aca90c7210"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-preview.html",
+          "sha": "bf61202208ed01ed61ed329b087bbb8243156f14"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant02-completion-preview.html",
+          "sha": "eb176e31f0b7d5c985931e7c3552cb9cc92ce252"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant02-completion-webgl2.test.mjs",
+          "sha": "3e440e836f565fdd9e30d38f6ca68611bc3adc72"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant02-completion.test.mjs",
+          "sha": "54532e968699b37ff98da401c5069b0cbfb1f6fa"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant02-expansion-preview.html",
+          "sha": "82b9029fa4e58c8e10466614fe53b19e30076ffd"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant02-expansion-webgl2.test.mjs",
+          "sha": "db1b22bb825c1c8b1d5600eaf08cff1e177bdd4f"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant02-expansion.test.mjs",
+          "sha": "de88637aa463a2649c682a89380e2217fc584ff7"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant02-preview.html",
+          "sha": "30e3693c608f2a67eb0bc7db80d78bdf475f79bb"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant02-webgl2.test.mjs",
+          "sha": "a677751a1d2b437512f6de9d4633d125325c83ec"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant02.test.mjs",
+          "sha": "d1dae795e0d72c7a899dd02d5ff81f91bab81a7a"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant03-final10-preview.html",
+          "sha": "df931f84e0d714461cad658c9b8b1c1a5452a8c1"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant03-final10-webgl2.test.mjs",
+          "sha": "8680c915517191aab426f9a182afe48582b2ae0b"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant03-final10.test.mjs",
+          "sha": "ce33162fc83b4482e8ab1c9ff19245dfb505bead"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant03-first10-preview.html",
+          "sha": "8bc887b2e0affa27e2fffb75b59fb91fd301408a"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant03-first10-webgl2.test.mjs",
+          "sha": "54e936b16eb83fe514dbc2426dc43f461729d20e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant03-first10.test.mjs",
+          "sha": "6798e9783eb661c26ad70f1fd144658a88717d15"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant03-second10-preview.html",
+          "sha": "6656cb9408a91bb36bfb07e3436b53d35e2a040d"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant03-second10-webgl2.test.mjs",
+          "sha": "83f7a1eee54bee707de4ecd311a9050ff56ec001"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant03-second10.test.mjs",
+          "sha": "b82a331554f71c5e86c956a63c46a2f316eb776c"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant04-final10-preview.html",
+          "sha": "d5b0e457bfb06d0c690d3ef29c02157dceef1b71"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant04-final10-webgl2.test.mjs",
+          "sha": "fa238a5e7b804acc155636ad651d65913bcdb86e"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant04-final10.test.mjs",
+          "sha": "acd124b7948beedbd392c71fb9b8954e70365950"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant04-first10-preview.html",
+          "sha": "1e7085cab162bab946233f95d7f7a488d1f5c9fa"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant04-first10-webgl2.test.mjs",
+          "sha": "c914a14233769f1050e5906fbe138a7e0504494c"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant04-first10.test.mjs",
+          "sha": "f6644d39f4f76f4a081d2ca7076ea651b7aaffd4"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant04-second10-preview.html",
+          "sha": "528d0633ffbdcc239f54524b07c726dcbbe2a86f"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant04-second10-webgl2.test.mjs",
+          "sha": "6cb60bee4d897c7a17f8634abb3412154c0a749a"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant04-second10.test.mjs",
+          "sha": "e637c0b176fec44ac8073181b6d6d1f7bd9c3517"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant05-final15-preview.html",
+          "sha": "de063d4dffda6d68ca0f0425f8c2749f50db8620"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant05-final15-webgl2.test.mjs",
+          "sha": "cbf2d3af07f0540c4fddb8eb18e864f67c6b3439"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-variant05-final15.test.mjs",
+          "sha": "3d9a1371ed73bdc7fcfd0cdddeceaf8b5327e373"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m2-webgl2.test.mjs",
+          "sha": "257a53fab3c52249f9d3d588e388381dce577b24"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m3-schoolhouses-first5-preview.html",
+          "sha": "52fbce603b088735e461c5bea14c6cc93362f789"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m3-schoolhouses-first5-webgl2.test.mjs",
+          "sha": "4500c4ab5d4b14e2bd1a1b3cd1c5d88df8e55b6a"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/m3-schoolhouses-first5.test.mjs",
+          "sha": "08ed7c3018eb0ba097ba10c59eba5a6dd4e4bc2f"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/manifest.test.mjs",
+          "sha": "3857b7179a86a3d78ee3a24a0ae2f6517d6ffcb0"
+        },
+        {
+          "path": "tests/building-pool/roadmap-4b/schema.test.mjs",
+          "sha": "5b46230f5c10b2d47f28feefa22c13ca4a7f42c2"
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "all": 355,
+    "authored": 613,
+    "target": 1095,
+    "remaining": 482
+  },
+  "constraints": [
+    "no main, runtime, save, integration, iPhone controls or deployment mutation",
+    "retain original PRs and immutable IDs; no v0.11 unlock",
+    "creator approval required for world placement"
+  ]
+}

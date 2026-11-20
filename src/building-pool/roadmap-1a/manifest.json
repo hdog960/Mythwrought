@@ -1,0 +1,706 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-1a.m0.v1",
+  "lane": "roadmap-1a",
+  "title": "Homes & Hospitality",
+  "milestone": "M3 hospitality wave7 source candidates: 255/450 originals (150 houses / 58 taverns / 47 inns), all 245 previous source objects immutable; three U/T/L roof layouts, exact-head CI PENDING",
+  "sourceMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "checkpoint": "009",
+  "infrastructurePR": 178,
+  "infrastructureExactHeadCI": {
+    "head": "7f7431f97a137c89d900735758b3cd2d183ea47b",
+    "run": 43762245025,
+    "conclusion": "success"
+  },
+  "sourcePR": {
+    "number": 121,
+    "head": "88a9e410a0eda7cf961cb6b624241666eb3a48a1",
+    "draft": true,
+    "merged": false
+  },
+  "sourceBlobs": {
+    "generator": "7187753ae344217d7fa81da296b9122b68f3ca97",
+    "designMatrix": "f9d45b0b17cbc217fd24cba5f684eb54aa572cd5",
+    "legacySchema": "ea1cb53b48dd7f4c51c8da69bf59531d1226aad2"
+  },
+  "biomes": [
+    "temperate",
+    "desert",
+    "snow",
+    "enchanted-forest",
+    "mountain"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "quotaPerBiomeSize": {
+    "house": 20,
+    "tavern": 5,
+    "inn": 5
+  },
+  "target": 450,
+  "originalCandidatesIdentified": 30,
+  "originalGeometryMigrated": 30,
+  "additionalDesignsRequired": 195,
+  "newDesignsAuthored": 225,
+  "totalLaneGeometryAuthored": 255,
+  "creatorAccepted": 0,
+  "integrated": 0,
+  "runtimeWorldPlaced": false,
+  "geometryParityCertified": false,
+  "physicalRendererCertified": false,
+  "realIPhoneCertified": false,
+  "assetPolicy": "Pack 1–5 integrated 96-family / 106-physical-variant builder catalog; resolve by exact source at migration; unregistered biome130 stays symbolic. No numeric ID writes.",
+  "pending": [
+    "Exact-head dedicated 1A native tests including full 245 immutable source fingerprints and 255 D4 uniqueness, plus genuine Chromium source-cell 1362 and physical Pack AABB 1086 screenshots.",
+    "195 source candidates remain: 150 houses, 17 taverns, 28 inns.",
+    "Real Pack2 hinged doors/schema1 saves, Pack3 structural/weather roofs, Pack4 optical/weather glass, Pack5 bed collision/occupancy persistence; premium visual art/physical iPhone acceptance and integration require separate creator approval.",
+    "No merges, deployments, shared CI, main, sibling builders, world registration, save changes or v0.11 unlock."
+  ],
+  "gates": {
+    "v010": "Gate A OPEN",
+    "v011": "LOCKED",
+    "merge": false,
+    "deployment": false
+  },
+  "sourceExactParity": {
+    "originalSourcePR": 121,
+    "head": "88a9e410a0eda7cf961cb6b624241666eb3a48a1",
+    "originalCandidateObjectsMatched": 30,
+    "placementAnchors": 33555,
+    "independentRuntimeComparison": "30/30 legacy source JSON parity; 30 per-building native geometry SHA fixtures PASS in Actions #43768982035",
+    "referenceFile": "src/building-pool/roadmap-1a/legacy-reference.json",
+    "hash": "FNV-1a-64 on original PR-generated objects"
+  },
+  "innCount": 1,
+  "categoriesAuthored": {
+    "house": 150,
+    "tavern": 58,
+    "inn": 47
+  },
+  "firstInn": {
+    "id": "r1:inn:temperate:small:001",
+    "title": "Wayfarer's Lantern Inn",
+    "placementCount": 1493,
+    "rooms": 5,
+    "portals": 5,
+    "bedReservations": 2,
+    "assetFamilies": 10,
+    "creatorApproved": false,
+    "worldPlaced": false
+  },
+  "gallery": {
+    "renderer": "real Chromium Canvas2D with source-authored coordinate proxy cuboids; NOT physical-family WebGL2",
+    "viewportEvidence": [
+      "667x375",
+      "844x390",
+      "932x430"
+    ],
+    "captures": 6,
+    "webgl2CandidateCertified": false,
+    "physicalIPhoneCertified": false,
+    "sourceCoordinateFNV64": {
+      "placements": "097896c4e4ddeb7c",
+      "walkable": "cbb7d9a5d191b77c",
+      "rooms": "010bf2ffaf0892f8",
+      "portals": "37725f71b44c4c6b"
+    },
+    "repoGallery": "tests/building-pool/roadmap-1a/m1-inn-canvas.html"
+  },
+  "m2AddedThisCycle": [
+    {
+      "category": "house",
+      "biome": "desert",
+      "size": "small",
+      "id": "r1:house:desert:small:002"
+    },
+    {
+      "category": "house",
+      "biome": "snow",
+      "size": "medium",
+      "id": "r1:house:snow:medium:004"
+    },
+    {
+      "category": "house",
+      "biome": "mountain",
+      "size": "large",
+      "id": "r1:house:mountain:large:002"
+    },
+    {
+      "category": "tavern",
+      "biome": "temperate",
+      "size": "small",
+      "id": "r1:tavern:temperate:small:002"
+    },
+    {
+      "category": "tavern",
+      "biome": "enchanted-forest",
+      "size": "medium",
+      "id": "r1:tavern:enchanted-forest:medium:004"
+    },
+    {
+      "category": "inn",
+      "biome": "desert",
+      "size": "medium",
+      "id": "r1:inn:desert:medium:001"
+    },
+    {
+      "category": "inn",
+      "biome": "snow",
+      "size": "small",
+      "id": "r1:inn:snow:small:001"
+    },
+    {
+      "category": "inn",
+      "biome": "mountain",
+      "size": "large",
+      "id": "r1:inn:mountain:large:001"
+    }
+  ],
+  "m2CrossBiomeHousing": {
+    "newHouses": 15,
+    "source": "src/building-pool/roadmap-1a/m2-housing-tranche.mjs",
+    "authoredPlacementCount": 32859,
+    "coverage": "exactly one new house per biome x size",
+    "nativeCI": "PASS 88/88 1A, 735/735 root, 156/156 cube WebGL2 at exact HEAD 60509268f0a1cf49c547443410351d14e72484f3 Actions #43776708423",
+    "browserCaptureTarget": 156,
+    "webgl2Mode": "source CELL cube proxy, NOT final Pack AABBs",
+    "authoredHouses": 33,
+    "m2HouseTarget": 150,
+    "legacyIdentityRepair": "New Mountain Large ordinal changed from 003 (original inherited house) to 004; original geometry/ID untouched"
+  },
+  "m2Wave2": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave2.mjs",
+    "houseCount": 15,
+    "voxelPlacements": 37564,
+    "coverage": "15 unique new houses; one each of five biomes x three sizes",
+    "originalSourceGeometryPreserved": 30,
+    "exactHeadNode": "pending",
+    "webgl2Mode": "candidate source-cell-cube diagnostic NOT physical-family AABB",
+    "cubeCaptureTarget": 246,
+    "physicalCaptureTarget": 30,
+    "creatorApproved": 0,
+    "physicalRenderer": "true original Pack1–5 source visibleBoxes AABB geometry; provisional candidate state/colors, no production final visual/art or ABI approval",
+    "screenshotBasedRoofCorrection": {
+      "temperate": "hip-ring",
+      "desert": "asymmetric-pavilions",
+      "enchanted-forest": "lantern-ribs",
+      "mountain": "ascending-terraces"
+    }
+  },
+  "m2Wave3": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave3.mjs",
+    "newHouses": 15,
+    "placements": 43330,
+    "biomeSizeCoverage": "one source-authored house in each of 5 x 3 cells",
+    "sourceInitial": "PASS 84 canonical validated unique IDs, D4 rotations/mirrors none, real route/support/bed preflight",
+    "nativeExactHead": "PASS Actions #43782346948 at 7e7d5eb124e4aaaa4aca0e77b00ac9da5b9a6e44: 735 root / 130 lane tests / 336 cube / 60 source AABB captures",
+    "original69SourceGeometryPreserved": true,
+    "webgl2SourceCellTarget": 336,
+    "webgl2SourcePackAABBTarget": 60,
+    "finalProductionApproved": false,
+    "floorplanRepairs": [
+      "temperate small changed to full-width transverse parlor",
+      "enchanted small changed to independent back-wing rooms",
+      "snow medium changed to grand hall and offset double-service rooms",
+      "enchanted large changed to longitudinal axis and rear-open moonwell"
+    ]
+  },
+  "m2Wave4": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave4.mjs",
+    "authored": 15,
+    "newPlacements": 56658,
+    "roofWingRegions": 37,
+    "baselineHead": "7e7d5eb124e4aaaa4aca0e77b00ac9da5b9a6e44",
+    "fullPriorGeometryPreserved": 84,
+    "maxCrossWavePlanIoU": 0.833,
+    "nativeCI": "Exact-head Actions #43785560459 SUCCESS at d502c5c41eeeeb942f04ba349f43f5005ecdf83f: 735/735 root, 150/150 Builder 1A, 426/426 cell cube, 150/150 physical AABB WebGL2",
+    "sourceCellBrowserTarget": 426,
+    "physicalVisibleBoxBrowserTarget": 150,
+    "creatorApproved": 0,
+    "integrated": 0,
+    "worldPlaced": false
+  },
+  "m2Wave5": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave5.mjs",
+    "newHouseCount": 15,
+    "placementCells": 52722,
+    "removedExteriorFootprintCells": 2455,
+    "regionCoverage": "each biome × each size",
+    "shapes": "L-left, L-right, U rear-open",
+    "newPhysicalPerimeter": true,
+    "allOld99Unchanged": true,
+    "maxNewWaveFloorplanIoU": 0.654,
+    "webgl2CellCubeTarget": 516,
+    "webgl2ProducerVisibleAABBTarget": 240,
+    "nativeExactHead": "SUCCESS #43788929815 at bdad24c32a4fc8e3f13fd72da24db4869816c2e9: 735 root, 170 1A Node, 516 source cubes, 240 producer Pack source-AABB views",
+    "creatorApproved": 0,
+    "integrated": 0,
+    "finalPhysicalApproval": false
+  },
+  "m2Wave6": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave6.mjs",
+    "newHouses": 15,
+    "genuinePlacementCells": 54239,
+    "genuineRemovedExteriorCells": 3069,
+    "biomeSizeCoverage": "15/15 slots",
+    "shapes": "L-left, L-right, U rear-open, two-notch T",
+    "preservedHistoricalBaseline": 114,
+    "sourceBaselineHead": "bdad24c32a4fc8e3f13fd72da24db4869816c2e9",
+    "maxNormalizedFloorplanIoU": 0.6,
+    "maxNormalizedSilhouetteIoU": 0.968944099378882,
+    "exactHeadNode": "SUCCESS: Actions #43802527086 at 5c1ddda225166083aee0671364fbb7683b551c89, 12/12 contracts, 735 root, 190 1A, 606 source cubes and 330 producer AABB WebGL2",
+    "cubeWebGL2Target": 606,
+    "producerAABBWebGL2Target": 330,
+    "approved": 0,
+    "integrated": 0,
+    "placed": 0,
+    "defectCorrections": "Snow Small rear partition x13 and Enchanted Forest Large three rear-east partitions x25 removed from authored physical VOID (12 source voxels)"
+  },
+  "m2Wave7": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave7.mjs",
+    "authoredOriginalHouses": 15,
+    "authoredVoxelPlacements": 71243,
+    "physicallyRemovedExteriorCells": 2463,
+    "biomeSizeCoverage": "5 biomes x 3 sizes",
+    "previousSourceCandidatesPreserved": 129,
+    "baselineHead": "5c1ddda225166083aee0671364fbb7683b551c89",
+    "maxNormalizedFloorplanIoU": 0.6538461538461539,
+    "maxNormalizedExteriorIoU": 0.948936170212766,
+    "sourcePreflight": "144/144 VALID, 144 independent source fingerprints, real connected walking paths, roof support and bed footprints; native exact-head pending",
+    "nativeExactHead": "PENDING",
+    "webgl2AuthoredCellCubeTarget": 696,
+    "webgl2PhysicalSourceAABBTarget": 420,
+    "creatorAccepted": 0,
+    "integrated": 0,
+    "worldPlaced": false
+  },
+  "m2Wave8": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave8.mjs",
+    "authoredHouses": 5,
+    "biomes": [
+      "temperate",
+      "desert",
+      "snow",
+      "enchanted-forest",
+      "mountain"
+    ],
+    "sizesByBiome": [
+      "small",
+      "medium",
+      "large",
+      "small",
+      "medium"
+    ],
+    "index": 12,
+    "physicalCandidate": true,
+    "sourceCoordinates": true,
+    "genuineConcaveFootprints": true,
+    "exactHeadNode": "pending",
+    "webgl2CubeCaptureTarget": 726,
+    "webgl2SourcePackAABBCaptureTarget": 450,
+    "creatorApproved": 0,
+    "liveWorldPlaced": 0
+  },
+  "m2Wave9": {
+    "source": "src/building-pool/roadmap-1a/m2-housing-wave9.mjs",
+    "test": "tests/building-pool/roadmap-1a/m2-housing-wave9.test.mjs",
+    "preserved149Fixture": "tests/building-pool/roadmap-1a/m2-wave9-baseline149.json",
+    "newHouses": 22,
+    "originalVoxelPlacements": 108715,
+    "physicalExteriorVoidColumns": 6759,
+    "rooms": 93,
+    "bedReservations": 22,
+    "firstM2HousingGoal": {
+      "sourceAuthored": 150,
+      "target": 150,
+      "creatorAccepted": 0,
+      "integrated": 0
+    },
+    "nativeStatus": "exact-head CI pending",
+    "webgl2SourceCubeTargets": 858,
+    "webgl2ProducerPhysicalAABBTargets": 582,
+    "landscapeViewportTargets": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "productionApproved": false
+  },
+  "m3HospitalityWave1": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave1.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave1.test.mjs",
+    "protected171Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline171.json",
+    "newTaverns": 10,
+    "newInns": 10,
+    "newVoxelPlacements": 144733,
+    "trueRemovedOutdoorColumns": 10849,
+    "walkableRooms": 105,
+    "pack5TwoCellBedReservations": 43,
+    "strictNoD4": true,
+    "normalizedPlanThreshold": 0.88,
+    "normalizedExteriorThreshold": 0.975,
+    "sourceGalleryCandidates": 163,
+    "sourceCubeScreenshotTarget": 978,
+    "packVisibleAABBCandidateCount": 117,
+    "packAABBScreenshotTarget": 702,
+    "viewportSizes": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": {
+      "head": "2b3a25fda43ecb51791e66365d7833c3b3c814b6",
+      "run": 43914059052,
+      "conclusion": "success",
+      "ciContract": "12/12",
+      "rootNative": "837/837",
+      "builderNative": "266/266",
+      "chromiumSourceCube": "978/978",
+      "chromiumSourcePhysical": "702/702",
+      "artifact": 14249796483
+    },
+    "creatorApproved": 0,
+    "worldIntegrated": 0
+  },
+  "m3HospitalityWave2": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave2.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave2.test.mjs",
+    "immutable191Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline191.json",
+    "newTaverns": 7,
+    "newInns": 7,
+    "newSourceVoxelPlacements": 107370,
+    "genuineAbsentExteriorFootprintColumns": 6998,
+    "walkableRooms": 72,
+    "pack5TwoCellBedReservations": 29,
+    "normalizedPlanStrictIoUBelow": 0.88,
+    "normalizedExteriorStrictIoUBelow": 0.975,
+    "sourceGalleryCandidates": 177,
+    "sourceCubeScreenshotTarget": 1062,
+    "packVisibleAABBCandidateCount": 131,
+    "packAABBScreenshotTarget": 786,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": {
+      "head": "032c4e91200fb605ca9f90e6711bf138d1a8e5e1",
+      "run": 43920970569,
+      "conclusion": "success",
+      "ciContract": "12/12",
+      "rootNative": "837/837",
+      "builderNative": "284/284",
+      "chromiumSourceCube": "1062/1062",
+      "chromiumSourcePhysical": "786/786",
+      "artifact": 14254303551
+    },
+    "creatorApproved": 0,
+    "worldIntegrated": 0
+  },
+  "m3HospitalityWave3": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave3.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave3.test.mjs",
+    "immutable205Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline205.json",
+    "newTaverns": 4,
+    "newInns": 5,
+    "newVoxelPlacements": 110037,
+    "trueExteriorEmptyColumns": 6126,
+    "distinctWalkableRooms": 46,
+    "pack5TwoCellBedReservations": 19,
+    "strictNoD4": true,
+    "normalizedFloorPlanIoUThreshold": 0.88,
+    "normalizedExteriorSilhouetteThreshold": 0.975,
+    "sourceGalleryBlueprints": 186,
+    "sourceCellWebGL2Screenshots": 1116,
+    "physicalPackSourceGalleryBlueprints": 140,
+    "packAABBWebGL2Screenshots": 840,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": {
+      "head": "ec6c74fa942876a75cee3ab61a1365f76f35fd33",
+      "run": 43984440893,
+      "conclusion": "success",
+      "ciContracts": "12/12",
+      "rootNative": "837/837",
+      "builderNative": "297/297",
+      "sourceWebGL2": "1116/1116",
+      "packWebGL2": "840/840",
+      "artifact": 14285805349
+    },
+    "creatorApproved": 0,
+    "worldIntegrated": 0
+  },
+  "m3HospitalityWave4": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave4.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave4.test.mjs",
+    "immutable214Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline214.json",
+    "newTaverns": 4,
+    "newInns": 6,
+    "newSourceVoxelPlacements": 92724,
+    "trueAbsentExteriorFootprintColumns": 6334,
+    "walkableRooms": 53,
+    "pack5TwoCellBedReservations": 24,
+    "strictNoD4": true,
+    "normalizedFloorPartitionIoUThreshold": 0.88,
+    "normalizedExteriorSilhouetteIoUThreshold": 0.975,
+    "sourceGalleryCandidateCount": 196,
+    "sourceCellScreenshotTarget": 1176,
+    "packAABBGalleryCandidateCount": 150,
+    "packAABBScreenshotTarget": 900,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": {
+      "head": "661033847f2dd7450b662784e38f07c2e80e8d66",
+      "run": 43987727766,
+      "conclusion": "success",
+      "ciContracts": "12/12",
+      "rootNative": "837/837",
+      "builderNative": "311/311",
+      "sourceWebGL2": "1176/1176",
+      "packWebGL2": "900/900",
+      "artifact": 14286402412
+    },
+    "creatorApproved": 0,
+    "integrated": 0
+  },
+  "m3HospitalityWave5": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave5.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave5.test.mjs",
+    "immutable224Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline224.json",
+    "newTaverns": 5,
+    "newInns": 3,
+    "newVoxelPlacements": 64299,
+    "trueAbsentExteriorFootprintColumns": 5974,
+    "walkableRooms": 42,
+    "pack5TwoCellBedReservations": 14,
+    "strictNoD4": true,
+    "normalizedFloorPartitionIoUThreshold": 0.88,
+    "normalizedExteriorSilhouetteIoUThreshold": 0.975,
+    "sourceGalleryCandidateCount": 204,
+    "sourceCellScreenshotTarget": 1224,
+    "packAABBGalleryCandidateCount": 158,
+    "packAABBScreenshotTarget": 948,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": {
+      "head": "27cd009ff4aed7063fe4b8f80b9959af09233794",
+      "run": 44015759371,
+      "conclusion": "success",
+      "contracts": "12/12",
+      "rootNode": "837/837",
+      "builderNative": "323/323",
+      "chromiumSource": "1224/1224",
+      "physicalPackAABB": "948/948",
+      "artifact": 14299516326
+    },
+    "creatorApproved": 0,
+    "integrated": 0
+  },
+  "m3HospitalityWave6": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave6.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave6.test.mjs",
+    "immutable232Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline232.json",
+    "newTaverns": 6,
+    "newInns": 7,
+    "physicalVoxelCells": 162447,
+    "absentExteriorFootprintColumns": 8949,
+    "walkableRooms": 65,
+    "pack5TwoCellBedReservations": 27,
+    "roofWingsPerOriginal": 5,
+    "roofProfileStylesPerOriginalMinimum": 3,
+    "roofRaiseTiers": [
+      0,
+      1,
+      2
+    ],
+    "noD4": true,
+    "normalizedPartitionIoUThresholdExclusive": 0.88,
+    "normalizedExteriorIoUThresholdExclusive": 0.975,
+    "sourceGalleryIDs": 217,
+    "sourceCellWebGL2Target": 1302,
+    "packVisibleBoxesGalleryIDs": 171,
+    "physicalPackAABBWebGL2Target": 1026,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": {
+      "head": "5af8624aa68d6c6148e52ee86920d33f8042bde5",
+      "run": 44125054552,
+      "conclusion": "success",
+      "contracts": "12/12",
+      "rootNode": "920/920",
+      "builderNative": "341/341",
+      "chromiumSource": "1302/1302",
+      "producerPhysical": "1026/1026",
+      "artifact": 14348785669
+    },
+    "productionRegistration": 0,
+    "creatorFinalApproved": 0
+  },
+  "m3HospitalityWave7": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave7.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave7.test.mjs",
+    "immutable245Fixture": "tests/building-pool/roadmap-1a/m3-hospitality-baseline245.json",
+    "newTaverns": 5,
+    "newInns": 5,
+    "newSourceVoxels": 134427,
+    "trueAbsentExteriorColumns": 9145,
+    "walkableRooms": 51,
+    "pack5ReservedTwoCellBeds": 20,
+    "roofPlanFamilies": {
+      "courtyardU": 1,
+      "crossGabledT": 3,
+      "offsetL": 6
+    },
+    "roofRegionsMin": 5,
+    "roofRegionsMax": 6,
+    "distinctRoofPitchStylesMin": 3,
+    "roofRaiseTiers": [
+      0,
+      1,
+      2
+    ],
+    "zeroD4Required": true,
+    "partitionIoUExclusive": 0.88,
+    "exteriorIoUExclusive": 0.975,
+    "sourceGalleryCandidates": 227,
+    "sourceWebGL2CaptureTarget": 1362,
+    "physicalGalleryCandidates": 181,
+    "packAABBWebGL2CaptureTarget": 1086,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exactHeadCI": "PENDING",
+    "creatorApproved": 0,
+    "registered": 0,
+    "integrated": 0,
+    "deployed": 0
+  },
+  "m3HospitalityWave8": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave8.mjs",
+    "tests": "tests/building-pool/roadmap-1a/m3-hospitality-wave8.test.mjs",
+    "newTaverns": 3,
+    "newInns": 2,
+    "sourceVoxelPlacements": 86269,
+    "exteriorVoidColumns": 5299,
+    "rooms": 29,
+    "bedReservations": 9,
+    "protectedSources": 255,
+    "sourceGalleryCandidates": 232,
+    "physicalGalleryCandidates": 186,
+    "sourceWebGL2CaptureTarget": 1392,
+    "physicalPackAABBCaptureTarget": 1116,
+    "exactHeadCI": "PENDING",
+    "creatorApproved": 0,
+    "registered": 0,
+    "integrated": 0,
+    "deployed": 0
+  },
+  "m3HospitalityWave9": {
+    "source": "src/building-pool/roadmap-1a/m3-hospitality-wave9.mjs",
+    "test": "tests/building-pool/roadmap-1a/m3-hospitality-wave9.test.mjs",
+    "priorBaseline": "tests/building-pool/roadmap-1a/m3-hospitality-baseline260.json",
+    "newTaverns": 3,
+    "newInns": 2,
+    "sourceVoxelPlacements": 89104,
+    "exteriorVoidColumns": 3804,
+    "rooms": 34,
+    "bedReservations": 9,
+    "sourceGalleryCandidates": 237,
+    "physicalGalleryCandidates": 191,
+    "sourceWebGL2CaptureTarget": 1422,
+    "physicalPackAABBCaptureTarget": 1146,
+    "exactHeadCI": "PENDING",
+    "creatorApproved": 0,
+    "registered": 0,
+    "integrated": 0,
+    "deployed": 0
+  }
+}
