@@ -45,6 +45,23 @@ test('live integrated catalog has exactly 20 passive and 20 hostile authored 3D 
   assert.equal(typeof createLiveMobRenderer,'function');
 });
 
+test('all 40 authored creatures have at least one actually reachable V6/cave habitat',()=>{
+  // Main gameplay classifies exactly five V6 surface biome identities plus
+  // the real underground cave profile. A preview-only wetland or volcanic
+  // tag must not make an authored species impossible to encounter.
+  const reachable=new Set(['meadow','forest','alpine','desert','snow','cave']);
+  assert.equal(speciesRegistry.length,40);
+  for(const creature of speciesRegistry)
+    assert.ok(creature.habitat.biomes.some(b=>reachable.has(b)),
+      'Unspawnable in original integrated world: '+creature.id+
+      ' / '+creature.habitat.biomes.join(','));
+  const reed=speciesRegistry.find(s=>s.id==='reedwhisker');
+  assert.ok(reed.habitat.biomes.includes('wetland'),
+    'Preserve future wetland source habitat');
+  assert.ok(reed.habitat.biomes.includes('forest'),
+    'Reedwhisker must have an accessible enchanted forest habitat');
+});
+
 test('live session uses independent checksummed sidecar without modifying schema-1 world',()=>{
   const {world,initial,storage,build}=setup(179);
   const original=storage.getItem(mobSaveKey(179));

@@ -140,7 +140,10 @@ const passive = [
   ['sunskipper', 'Sunskipper', 'meadow desert', .22, .46, 10, 2.8, 'pair', 'walk jump', true, false],
   ['cloudfinch', 'Cloudfinch', 'alpine forest', .15, .31, 7, 2.15, 'herd', 'fly', false, false],
   ['glownewt', 'Glownewt', 'cave wetland', .22, .38, 18, 1.95, 'pair', 'walk', false, false, false, 'crawler'],
-  ['reedwhisker', 'Reedwhisker', 'wetland', .25, .48, 16, 1.8, 'pair', 'walk swim', true, false],
+  // V6 exposes five named surface biomes plus caves, not a standalone wetland.
+  // Reedwhisker inhabits wet forest glades as well as future wetland regions;
+  // keep its authored model, aquatic movement and original wetland identity.
+  ['reedwhisker', 'Reedwhisker', 'wetland forest', .25, .48, 16, 1.8, 'pair', 'walk swim', true, false],
   ['emberwing', 'Emberwing', 'volcanic alpine', .24, .51, 18, 2.1, 'pair', 'fly', false, false]
 ];
 

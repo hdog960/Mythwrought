@@ -8,7 +8,7 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261119-five-systems-rc4';
+const RELEASE='20261119-five-systems-rc5';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
 const PREVIOUS='mythwrought-m5-shell-20261118-v5-recorder';
 const ROOT='https://example.test/Mythwrought/';
@@ -76,7 +76,7 @@ function stage({missing=null}={}){
     get peak(){return peak;}};
 }
 
-test('complete RC3 original Home Screen shell installs source-exact and leaves prior cache',async()=>{
+test('complete RC5 original Home Screen shell installs source-exact and leaves prior cache',async()=>{
   const candidate=stage();
   await candidate.install();
   assert.equal(candidate.skipped,1,'Only complete verified shell can activate');
