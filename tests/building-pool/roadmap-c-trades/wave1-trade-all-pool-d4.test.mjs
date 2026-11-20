@@ -8,6 +8,7 @@ import {createCRiverbendTailor} from '../../../src/building-pool/roadmap-c-trade
 import {createCCopperfordButcher} from '../../../src/building-pool/roadmap-c-trades/wave3-copperford-butcher.mjs';
 import {createCSilverfinchJeweler} from '../../../src/building-pool/roadmap-c-trades/wave4-silverfinch-jeweler.mjs';
 import {createCWrenfieldBookshop} from '../../../src/building-pool/roadmap-c-trades/wave5-wrenfield-bookshop.mjs';
+import {createCWinterglassMarket} from '../../../src/building-pool/roadmap-c-trades/wave6-winterglass-snow-market.mjs';
 
 const canonicalDir=new URL('../../../src/building-pool/roadmap-2b/',import.meta.url);
 const bDir=new URL('../../../src/building-pool/roadmap-b/',import.meta.url);
@@ -81,20 +82,20 @@ test('C trade imports preserve 146 canonical plus 59 staged distinct B records b
  assert.ok(!b.has('r2:market-square:desert:small:01'));
  assert.ok(!c.has('r2:tailor:temperate:small:03'));
  assert.ok(!b.has('r2:tailor:temperate:small:03'));
- const fresh=[createCDesertSmallMarket(),createCRiverbendTailor(),createCCopperfordButcher(),createCSilverfinchJeweler(),createCWrenfieldBookshop()];
+ const fresh=[createCDesertSmallMarket(),createCRiverbendTailor(),createCCopperfordButcher(),createCSilverfinchJeweler(),createCWrenfieldBookshop(),createCWinterglassMarket()];
  for(const item of fresh){
   assert.ok(frozenOwners.C.includes(item.id),'original blueprint uses non-C-owned frozen ID '+item.id);
   assert.ok(!frozenOwners.B.includes(item.id)&&!frozenOwners.D.includes(item.id),'source ownership crossed protected B or D');
   assert.ok(!c.has(item.id)&&!b.has(item.id),'already authored protected identity reused');
  }
- assert.equal(new Set(fresh.map(x=>x.id)).size,5);
+ assert.equal(new Set(fresh.map(x=>x.id)).size,6);
  assert.equal(new Set([...c.keys(),...b.keys()]).size,205);
 });
-test('all five C-owned new original trade sources are strictly D4-distinct against ALL preserved same-category 2B sources',async()=>{
+test('all six C-owned new original trade sources are strictly D4-distinct against ALL preserved same-category 2B sources',async()=>{
  const canonicalItems=await canonical(),stagedItems=await stageB();
  const protectedItems=[...canonicalItems.values(),...stagedItems.values()];
- const newSources=[createCDesertSmallMarket(),createCRiverbendTailor(),createCCopperfordButcher(),createCSilverfinchJeweler(),createCWrenfieldBookshop()];
- assert.equal(new Set(newSources.map(s=>s.id)).size,5);
+ const newSources=[createCDesertSmallMarket(),createCRiverbendTailor(),createCCopperfordButcher(),createCSilverfinchJeweler(),createCWrenfieldBookshop(),createCWinterglassMarket()];
+ assert.equal(new Set(newSources.map(s=>s.id)).size,6);
  for(const fresh of newSources){
   const points=floor(fresh),otherSources=protectedItems.filter(x=>x.category===fresh.category);
   let max=0,closest=null,count=0;
