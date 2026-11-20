@@ -16,52 +16,58 @@ export const ROADMAP_D_WAVE4_PLANS=Object.freeze([
     ],
     "r": [
       [
-        25,
-        34,
+        24,
+        32,
         1,
-        52
-      ],
-      [
-        5,
-        26,
-        8,
-        28
-      ],
-      [
-        34,
-        52,
-        12,
-        31
-      ],
-      [
-        4,
-        28,
-        39,
-        53
-      ],
-      [
-        36,
-        53,
-        39,
         54
       ],
       [
-        18,
-        43,
+        2,
         25,
-        43
+        6,
+        24
+      ],
+      [
+        34,
+        54,
+        16,
+        35
+      ],
+      [
+        7,
+        26,
+        41,
+        56
+      ],
+      [
+        34,
+        53,
+        40,
+        52
+      ],
+      [
+        18,
+        44,
+        22,
+        45
       ],
       [
         1,
-        18,
-        29,
-        39
+        17,
+        25,
+        41
       ],
       [
-        42,
+        43,
         55,
-        28,
-        38
+        34,
+        48
+      ],
+      [
+        26,
+        42,
+        49,
+        56
       ]
     ],
     "discs": [
@@ -164,7 +170,7 @@ export const ROADMAP_D_WAVE4_PLANS=Object.freeze([
         35
       ]
     ],
-    "roof": "whitepine-triple-snow-break-roofs-and-deep-warming-court"
+    "roof": "whitepine-northern-open-snow-signal-bastions-offset-nine-bay-roofs"
   },
   {
     "t": "schoolhouse",
@@ -1394,7 +1400,7 @@ export const ROADMAP_D_WAVE4_PLANS=Object.freeze([
       [
         "eastern-spellcraft",
         90,
-      52
+        52
       ]
     ],
     "div": [
