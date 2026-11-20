@@ -49,6 +49,7 @@ export class PopulationManager {
   #species;
   #seed;
   #isProtected;
+  #spawnOnFirstVisit;
   #cursor = 0;
   #regions = new Map();
   #away = new Map();
@@ -56,8 +57,9 @@ export class PopulationManager {
   #next = INTERVAL;
 
   constructor(engine, world, { seed = 179, species = implementedIds,
-    isProtected = () => false } = {}) {
+    isProtected = () => false, spawnOnFirstVisit = false } = {}) {
     if (typeof isProtected !== 'function' ||
+        typeof spawnOnFirstVisit !== 'boolean' ||
         !Number.isSafeInteger(seed) || !Array.isArray(species) ||
         !species.length || species.length > 40 || new Set(species).size !== species.length)
       throw new TypeError('Invalid ecology options');
@@ -69,6 +71,7 @@ export class PopulationManager {
     // a bonding-only important identity (checkpoint validation rejects that).
     // The gameplay host supplies the original AnimalInteractions ownership.
     this.#isProtected = isProtected;
+    this.#spawnOnFirstVisit = spawnOnFirstVisit;
     this.#species = species.map(id => {
       const entry = getSpecies(id);
       if (entry?.implementation !== 'preview') throw new TypeError('Ecology requires an implemented species');
@@ -122,7 +125,9 @@ export class PopulationManager {
         if (!stale) return { evaluated: 0, spawned: null };
         this.#regions.delete(stale[0]);
       }
-      record = { serial: 0, next: this.#time + INTERVAL, high: new Map() };
+      // A complete new-world profile can survey freshly resident terrain
+      // immediately. The original poll, range and per-tick ceiling remain.
+      record = { serial: 0, next: this.#time+(this.#spawnOnFirstVisit?0:INTERVAL), high: new Map() };
       this.#regions.set(name, record);
     }
     const local = entities.filter(mob => mob.homeChunk === name);

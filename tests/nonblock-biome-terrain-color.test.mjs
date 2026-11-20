@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {biome130Color} from '../src/biome130-registry.mjs';
-import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
+import {M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 import {meshChunk,worldKey} from '../src/voxel.mjs';
 
-function surface(id,{profiled=true,edited=false,cx=0}={}){
+function surface(id,{generator=M7_ENVIRONMENT_GENERATOR,edited=false,cx=0}={}){
   const world={
-    seed:179,generationProfile:profiled?{generator:M6_BALANCED_GENERATOR}:null,
+    seed:179,generationProfile:generator?{generator}:null,
     edits:new Map(edited?[[worldKey(0,8,0),id]]:[]),
     get:(x,y,z)=>y===8&&x>=0&&x<=17&&z>=0&&z<3?id:0
   };
@@ -42,16 +42,17 @@ test('terrain texture coordinates remain in world space at adjacent chunk edges'
 });
 
 test('legacy and player-placed biome materials keep their authored palette',()=>{
-  const natural=surface(256),legacy=surface(256,{profiled:false}),edited=surface(256,{edited:true});
+  const natural=surface(256),legacy=surface(256,{generator:null}),edited=surface(256,{edited:true});
   const authored=biome130Color(256,0,8,0,2).map(value=>value.toFixed(6)).join(',');
   assert.ok(colorsAt(legacy,1,9,1).has(authored));
+  assert.deepEqual(surface(256,{generator:M6_BALANCED_GENERATOR}),legacy);
   assert.ok(colorsAt(edited,1,9,1).has(authored));
   assert.ok(!colorsAt(natural,1,9,1).has(authored));
 });
 
 test('a partial cliff block leaves the exposed part of its neighboring stone wall',()=>{
   function sharedFaces(neighbor){
-    const mesh=meshChunk({seed:179,get:(x,y,z)=>{
+    const mesh=meshChunk({seed:179,generationProfile:{generator:M7_ENVIRONMENT_GENERATOR},get:(x,y,z)=>{
       if(y!==8||z!==0)return 0;
       return x===0?3:x===1?neighbor:0;
     }},0,0);

@@ -4,9 +4,13 @@ import {BLOCK,VoxelWorld,collides,raycast,terrainHeight} from '../src/voxel.mjs'
 import {biome130Block,isBiome130BlockId} from '../src/biome130-registry.mjs';
 import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
 import {Pack2LiveWorld} from '../src/pack2-world.mjs';
+import {pack2WaterSectionVertices} from '../src/pack2-integration.mjs';
 import {exportM2World,inspectSnapshotWorld} from '../src/manual-biomes/m2-runtime-bridge.mjs';
 import {makeVaultRecord,validateVaultRecord} from '../src/vault.mjs';
 import {mirrorSnapshot,validateMirrorSnapshot} from '../src/mirror.mjs';
+import {findSafeSpawn} from '../src/physics.mjs';
+import {createLiveMobSession} from '../src/mobs/live-game.mjs';
+import {planEnvironmentalScenery} from '../src/nonblock/staged-habitats.mjs';
 import {FourRegionWorld,fourRegionProfile,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,
   restoreFourRegionWorld} from '../src/manual-biomes/profile-world.mjs';
 
@@ -163,4 +167,44 @@ test('the vault and mirror retain the immutable profile and Schema-1 edits toget
   assert.throws(()=>mirrorSnapshot(raw,seed+1),/seed mismatch/);
   const {pack2,...damaged}=JSON.parse(raw);
   assert.throws(()=>makeVaultRecord(JSON.stringify(damaged),'v010:fixed:abcdefghij'),/Incomplete biome export/);
+});
+
+test('real combined spawn terrain attracts its native creatures during the first habitat survey',()=>{
+  for(const seed of [179,2026]){
+    const world=new Pack2LiveWorld(new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR)));
+    const player=findSafeSpawn(world);
+    const regions=[];
+    for(let cz=-1;cz<=1;cz++)for(let cx=-1;cx<=1;cx++)
+      regions.push({cx,cz,section:0,feet:player.feet});
+    regions.sort((a,b)=>a.cx**2+a.cz**2-b.cx**2-b.cz**2);
+    const session=createLiveMobSession({world,seed,storage:{getItem:()=>null},resident:()=>true,
+      biomeAt:()=> 'plains',skyAt:()=>({light:1,dayPhase:'day'}),caveAt:()=>({underground:false}),
+      playerAt:()=>[player.x,player.feet,player.z],spawnOnFirstVisit:true});
+    for(let i=0;i<100;i++)session.advance(.1,regions);
+    assert.equal(session.status().species,40);
+    const inhabitants=session.drawEntities();
+    assert.ok(inhabitants.length>0,'Fresh combined region stayed empty for seed '+seed);
+    assert.ok(inhabitants.every(({species})=>species.habitat.biomes.includes('meadow')));
+    session.dispose();
+  }
+});
+
+test('a natural desert oasis shares the ordinary fluid mesh, interaction and save paths',()=>{
+  const seed=179,profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+  const world=new Pack2LiveWorld(new FourRegionWorld(seed,profile));
+  const pool=[572,7,63], [x,y,z]=pool;
+  assert.equal(world.get(...pool),76);
+  assert.equal(world.getPack2State(...pool).source,true);
+  assert.equal(collides(world,x+.5,y+.05,z+.5),false);
+  assert.deepEqual(raycast(world,[x+.5,y+3,z+.5],[0,-1,0],6)?.hit,pool);
+  assert.ok(pack2WaterSectionVertices(world,35,3,0).length>0);
+  assert.ok(world.base.environmentOasisShore(35,3).length>0);
+  assert.ok(planEnvironmentalScenery(world.base,35,3).some(item=>
+    item.sceneId==='nonblock:d:saltgrass'||item.sceneId==='nonblock:d:desert-bloom'));
+  assert.deepEqual(world.save().edits,[]);
+  assert.equal(world.set(...pool,BLOCK.AIR),true);
+  const restored=inspectSnapshotWorld(exportM2World(world),seed);
+  assert.equal(restored.get(...pool),BLOCK.AIR);
+  assert.equal(restored.getPack2State(...pool),null);
+  assert.equal(restored.get(x+1,y,z),76);
 });

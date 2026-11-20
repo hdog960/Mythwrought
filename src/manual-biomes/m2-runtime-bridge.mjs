@@ -4,7 +4,7 @@
 // Pack2LiveWorld adapter used by player mesh, raycast, collision and editing.
 import {VoxelWorld} from '../voxel.mjs';
 import {worldSeedFromText} from '../seeds.mjs';
-import {loadWorldSafe,saveWorldSafe,importWorldData,parseWorldData} from '../persistence.mjs';
+import {loadWorldSafe,saveWorldSafe,importWorldData,parseWorldData,MAX_IMPORT_BYTES} from '../persistence.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,
   pack2ExportBundle,pack2ImportBundle} from '../pack2-world.mjs';
 import {FourRegionWorld,fourRegionProfile,FOUR_REGION_GENERATOR,
@@ -164,9 +164,11 @@ export function inspectM2WorldExport(raw){
 }
 
 export function inspectSnapshotWorld(raw,seed){
+  if(typeof raw!=='string'||raw.length>MAX_IMPORT_BYTES)throw Error('Snapshot is invalid or oversized');
   const record=JSON.parse(raw);
   if(record?.kind!=='mythwrought-four-biomes-export'){
-    if(record?.profile||record?.kind)throw Error('Unsupported snapshot profile');
+    if(record&&(Object.hasOwn(record,'profile')||Object.hasOwn(record,'kind')))
+      throw Error('Unsupported snapshot profile');
     return parseWorldData(raw,seed);
   }
   const {world}=inspectM2WorldExport(raw);

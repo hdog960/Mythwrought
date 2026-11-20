@@ -3,7 +3,7 @@ import test from 'node:test';
 import {BLOCK} from '../src/voxel.mjs';
 import {FourRegionWorld,fourRegionProfile,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 import {planEnvironmentalScenery} from '../src/nonblock/staged-habitats.mjs';
-import {describeCandidateObject} from '../src/nonblock/candidate-scene.mjs';
+import {createCandidateScene,describeCandidateObject} from '../src/nonblock/candidate-scene.mjs';
 
 test('environment scenery is deterministic, bounded, and agrees across overlapping chunks',()=>{
   const seed=179,profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
@@ -49,4 +49,26 @@ test('streamed cave specimens use existing rock and do not relocate after a moun
   assert.ok(world.set(...specimen.supports[0],BLOCK.AIR));
   const cut=planEnvironmentalScenery(world,0,0,{caveSection:0});
   assert.ok(!cut.some(({anchor})=>anchor[0]===x&&anchor[2]===z));
+});
+
+test('landmark props use the real district and wait for resident mounts before colliding',()=>{
+  const seed=179,world=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
+  const plan=planEnvironmentalScenery(world,-30,2);
+  const prop=plan.find(({sceneId,anchor})=>sceneId==='scene36:brazier'&&anchor.join(',')==='-475,10,43');
+  assert.ok(prop);
+  const geometry=describeCandidateObject(seed,prop);
+  const [mount]=geometry.supports;
+  assert.notEqual(world.get(...mount),BLOCK.AIR);
+  let ready=false;
+  const scene=createCandidateScene(seed,M7_ENVIRONMENT_GENERATOR,[prop],{
+    storage:{getItem:()=>null},blockAt:(...p)=>world.get(...p)!==BLOCK.AIR,
+    voxelPick:()=>null,residentAt:()=>ready
+  });
+  assert.deepEqual(scene.visible(),[]);
+  assert.equal(scene.bodyIntersects(geometry.colliders[0]),false);
+  ready=true;
+  assert.equal(scene.visible()[0].instanceKey,geometry.instanceKey);
+  assert.equal(scene.bodyIntersects(geometry.colliders[0]),true);
+  assert.ok(world.set(...mount,BLOCK.AIR));
+  assert.ok(!planEnvironmentalScenery(world,-30,2).some(item=>item.anchor.join(',')===prop.anchor.join(',')));
 });

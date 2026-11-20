@@ -15,6 +15,10 @@ const get=async k=>page.evaluate(k=>localStorage.getItem(k),k);
 const block=async(x,y,z)=>page.evaluate(([x,y,z])=>window.__mythwroughtTest.block(x,y,z),[x,y,z]);
 const inputFile=(data)=>({name:'verified-backup.json',mimeType:'application/json',buffer:Buffer.from(data)});
 try{
+  await page.addInitScript(()=>{
+    if(localStorage.getItem('mythwrought-v002-selected-seed')===null)
+      localStorage.setItem('mythwrought-v002-selected-seed','179');
+  });
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
   await scene();
   assert.match(await page.title(),/v0\.09/);

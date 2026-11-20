@@ -10,6 +10,8 @@ import {m4ThreeRegionFreshColumn,M4_REGION_NAMES} from './three-regions-m4.mjs';
 import {m5V5MountainFreshColumn} from './mountain-pass-v5.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {environmentalTreesForChunk,keepLegacyGroveTree,planEnvironmentalColumn} from './environment-v7.mjs';
+import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
+import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
 import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 
@@ -18,7 +20,7 @@ import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 // are explicitly supported as-is, without automatic upgrades on open/save.
 // Experimental v5 is opt-in via an EXPLICIT generated-world profile only.
 // The default new-world action and all historical saves stay on accepted v4.
-export const M7_ENVIRONMENT_GENERATOR='mythwrought-five-surface-regions-v7';
+export {M7_ENVIRONMENT_GENERATOR};
 export const M6_BALANCED_GENERATOR='mythwrought-five-surface-regions-v6';
 export const M5_EXPERIMENTAL_GENERATOR='mythwrought-four-surface-regions-v5';
 export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v4';
@@ -63,18 +65,49 @@ export class FourRegionWorld extends VoxelWorld{
       this.environmentCaves=combinedEnvironmentCaves(seed);
       this._environmentGroveMasks=new Map();
       this._environmentTreeChunks=new Map();
+      this._environmentOases=new Map();
     }
   }
   _columnPlan(x,z){
     const key=x+','+z;
     if(this._biomeColumns.has(key))return this._biomeColumns.get(key);
-    const lookup=this.profile.generator===M7_ENVIRONMENT_GENERATOR?
-      planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c)):
-      this._existingBiomeColumn(x,z);
+    let lookup;
+    if(this.profile.generator===M7_ENVIRONMENT_GENERATOR){
+      const region=v6BiomeAt(x,z,this.seed);
+      lookup=this._oasisNear(x,z,0,region)?.columns.get(key)??
+        planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c),region);
+    }else lookup=this._existingBiomeColumn(x,z);
     this._biomeColumns.set(key,lookup);
     if(this._biomeColumns.size>this.maxCachedColumns)
       this._biomeColumns.delete(this._biomeColumns.keys().next().value);
     return lookup;
+  }
+  _oasisNear(x,z,padding=0,region=v6BiomeAt(x,z,this.seed)){
+    if(!this._environmentOases||region?.name!=='desert')return null;
+    const sites=oasisSites(region.center,this.seed);
+    if(!nearOasisSite(sites,x,z,padding))return null;
+    const key=region.center.join(',');
+    if(!this._environmentOases.has(key)){
+      this._environmentOases.set(key,planOasis(sites,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c)));
+      if(this._environmentOases.size>32)this._environmentOases.delete(this._environmentOases.keys().next().value);
+    }
+    return this._environmentOases.get(key);
+  }
+  environmentOasisWaterEntries(cx,cz){
+    if(!this._environmentOases)return [];
+    const site=this._oasisNear(cx*16+8,cz*16+8,8);
+    return (site?.water??[]).filter(([x,,z,key])=>chunkCoord(x)===cx&&chunkCoord(z)===cz&&
+      !this.edits.has(key)).map(([,,,key])=>[key,OASIS_WATER]);
+  }
+  environmentWaterState(x,y,z){
+    if(!this._environmentOases||y<2||y>13)return null;
+    const cell=this._oasisNear(x,z)?.columns.get(x+','+z);
+    return cell?.get(y)===OASIS_WATER.id&&!this.edits.has(worldKey(x,y,z))?OASIS_WATER:null;
+  }
+  environmentOasisShore(cx,cz){
+    if(!this._environmentOases)return [];
+    const site=this._oasisNear(cx*16+8,cz*16+8,8);
+    return (site?.shore??[]).filter(([x,z])=>chunkCoord(x)===cx&&chunkCoord(z)===cz);
   }
   _existingBiomeColumn(x,z){
     // The authoritative non-profile baseline includes existing seeded

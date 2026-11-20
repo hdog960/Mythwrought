@@ -31,9 +31,11 @@ test('M2 live: exports include profile, and unsafe import/vault/mirror restore r
   assert.match(main,/inspectM2WorldExport\(data\)/);
   assert.match(main,/const examined=inspectM2WorldExport\(rawImport\)/);
   assert.match(main,/readFourRegionProfile\(localStorage,imported\.seed\)/);
-  assert.match(main,/readFourRegionProfile\(localStorage,snapshot\.seed\)/);
-  assert.match(main,/Refusing legacy mirror restore on a four-biome profile/);
-  assert.match(main,/Four-biome world requires profile-safe WORLD EXPORT/);
+  assert.match(main,/prepareSnapshotRestore\(snapshot\.raw,snapshot\.seed\)/);
+  assert.match(main,/prepareSnapshotRestore\(snap\.raw,seed\)/);
+  assert.match(main,/readFourRegionProfile\(localStorage,seed\)\?\.profile/);
+  assert.match(main,/JSON\.stringify\(profile\)!==JSON\.stringify\(restored\.base\.generationProfile\)/);
+  assert.match(main,/if\(profile\)throw Error\('A legacy snapshot cannot replace a seed/);
 });
 test('M2 live: authentic browser script captures all four with independent sizes and real saves',()=>{
   assert.match(browser,/chromium\.launch/);

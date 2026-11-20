@@ -280,16 +280,16 @@ export function createCandidateScene(seed,worldId,layout,{
   }
   function bodyIntersects(body) {
     const epsilon = 1e-5;
-    return solid.some(o=>!removed.has(o.instanceKey)&&o.colliders.some(box=>
+    return solid.some(o=>o.colliders.some(box=>
       body[0]<box[3]-epsilon && body[3]>box[0]+epsilon &&
       body[1]<box[4]-epsilon && body[4]>box[1]+epsilon &&
       body[2]<box[5]-epsilon && body[5]>box[2]+epsilon
-    )&&canAttach(o,blockAt,editedAt));
+    )&&mounted(o));
   }
   function climbableAt({x,feet,z}) {
-    return ladders.some(o=>!removed.has(o.instanceKey)&&
+    return ladders.some(o=>
       x>=o.min[0]-.20&&x<=o.max[0]+.20&&z>=o.min[2]-.28&&z<=o.max[2]+.28&&
-      feet+1.10>o.min[1]&&feet<o.max[1]+.18&&canAttach(o,blockAt,editedAt));
+      feet+1.10>o.min[1]&&feet<o.max[1]+.18&&mounted(o));
   }
   return Object.freeze({visible,pick,frame,breakHit,bodyIntersects,climbableAt,recovered});
 }

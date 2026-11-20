@@ -141,7 +141,7 @@ export function pack2CycleState(id,state,action){
 // and old-world byte output unchanged. At most one extra GPU buffer is uploaded
 // for each chunk that actually contains a placed water candidate.
 export function pack2WaterSectionVertices(world,cx,cz,section){
-  if(!world?.pack2Cells?.size)return new Float32Array();
+  if(!world?.pack2Cells?.size&&!world?.base?.environmentOasisWaterEntries)return new Float32Array();
   if(![cx,cz,section].every(Number.isInteger)||section>0)
     throw new TypeError('Invalid water chunk location');
   const result=[];let length=0;

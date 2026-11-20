@@ -3,7 +3,7 @@ import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
-import {environmentGround} from './environment-ground.mjs';
+import {environmentGround,M7_ENVIRONMENT_GENERATOR} from './environment-ground.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -207,6 +207,7 @@ export function meshChunk(world,cx,cz){
   cells.fill(65535); // 16-bit sentinel: old 255 remains reserved; biome130 uses 256..312.
   const extra=new Map();
   const profile=world.base?.generationProfile??world.generationProfile;
+  const unifiedTerrain=profile?.generator===M7_ENVIRONMENT_GENERATOR;
   const groundTints=new Map();
   function groundTint(x,z){
     const key=x+','+z;
@@ -271,7 +272,7 @@ export function meshChunk(world,cx,cz){
         }
         if(isBiome130BlockId(id)){
           const surface=getBiomeGeometry(id,world.rotationAt?.(x,y,z)??0);
-          const groundColor=profile&&!world.edits?.has(worldKey(x,y,z))?BIOME_GROUND_COLORS.get(id):undefined;
+          const groundColor=unifiedTerrain&&!world.edits?.has(worldKey(x,y,z))?BIOME_GROUND_COLORS.get(id):undefined;
           // Source-accurate union surface geometry; full neighboring legacy
           // solids hide only true boundary faces, preserving internal shapes.
           for(let t=0;t<surface.indices.length;t+=3){
@@ -288,7 +289,8 @@ export function meshChunk(world,cx,cz){
               }
             }
             if(boundary&&neighbor!==BLOCK.AIR&&
-                ((!isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))||BIOME_SOLID_CUBES.has(neighbor)))continue;
+                ((!isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))||
+                  unifiedTerrain&&BIOME_SOLID_CUBES.has(neighbor)))continue;
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const lit=[.77,.73,1,.48,.85,.67][face];
             const color=groundColor??biome130Color(id,x,y,z,face);
@@ -313,7 +315,7 @@ export function meshChunk(world,cx,cz){
         for(const face of FACE){
           const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
           if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor)&&
-              (!isBiome130BlockId(neighbor)||BIOME_SOLID_CUBES.has(neighbor)))continue;
+              (!unifiedTerrain||!isBiome130BlockId(neighbor)||BIOME_SOLID_CUBES.has(neighbor)))continue;
           if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
             hash(x+y*5,z-y*3,world.seed+91)*.08;
           const r=clamp(color[0]*variance*face.lit,0,1);

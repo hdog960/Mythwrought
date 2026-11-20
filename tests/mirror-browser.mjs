@@ -26,6 +26,10 @@ const dims=()=>page.evaluate(()=>{
   renderPreset:canvas.dataset.renderPreset,scale:canvas.dataset.renderScale};
 });
 try{
+ await page.addInitScript(()=>{
+  if(localStorage.getItem('mythwrought-v002-selected-seed')===null)
+   localStorage.setItem('mythwrought-v002-selected-seed','179');
+ });
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
  await scene();
  assert.equal((await dims()).renderPreset,'balanced');

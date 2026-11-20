@@ -63,7 +63,9 @@ export class Pack2LiveWorld{
   pack2WaterSectionEntries(cx,cz,section){
     if(![cx,cz,section].every(Number.isInteger)||section>0)
       throw new TypeError('Invalid Pack 2 water chunk');
-    return this._pack2WaterBuckets.get(cx+','+cz+','+section)?.entries()??[];
+    const placed=this._pack2WaterBuckets.get(cx+','+cz+','+section)?.entries()??[];
+    if(section!==0||!this.base.environmentOasisWaterEntries)return placed;
+    return [...placed,...this.base.environmentOasisWaterEntries(cx,cz)];
   }
   get biomeCellCount(){return this.base.biomeCellCount;}
   rotationAt(x,y,z){return this.base.rotationAt(x,y,z);}
@@ -71,7 +73,9 @@ export class Pack2LiveWorld{
   // Existing subsystems call these pure, production-authentic voxel helpers.
   legacyBlockAt(...args){return this.base.legacyBlockAt(...args);}
   naturalAndLandmarkBlock(...args){return this.base.naturalAndLandmarkBlock(...args);}
-  getPack2State(x,y,z){return this.pack2Cells.get(coord(x,y,z))??null;}
+  getPack2State(x,y,z){
+    return this.pack2Cells.get(coord(x,y,z))??this.base.environmentWaterState?.(x,y,z)??null;
+  }
   set(x,y,z,id,rotation=0){
     if(!within(x,y,z)||!Number.isInteger(id)||
        !Number.isInteger(rotation)||rotation<0||rotation>3)return false;

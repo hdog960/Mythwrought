@@ -58,8 +58,7 @@ function groundAt(name,x,z,seed,top,outcrop){
   };
 }
 
-export function planEnvironmentalColumn(x,z,seed,readBaseline){
-  const biome=v6BiomeAt(x,z,seed);
+export function planEnvironmentalColumn(x,z,seed,readBaseline,biome=v6BiomeAt(x,z,seed)){
   if(!biome)return new Map();
   const old=terrainHeight(x,z,seed);
   // Coarse terrain changes smoothly over shoulders. Each column stays
