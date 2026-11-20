@@ -14,7 +14,8 @@ test('C7 exports exact, immutable settlement-ready envelopes and physical occupa
   assert.match(b.sourceFingerprint.value,/^[a-f0-9]{64}$/);
   assert.ok(b.sourceFingerprint.sourceVoxelCount>1000);
   assert.equal(b.sourceFingerprint.sourceVoxelCount,b.renderingAndCollision.sourceVoxelCount);
-  assert.ok(b.occupiedFoundationFootprint.occupiedFootprintColumns>500);
+  const expectedGroundColumns={'r3:gatehouse:temperate:small:1':547,'r3:city-wall:temperate:small:1':419};
+  assert.equal(b.occupiedFoundationFootprint.occupiedFootprintColumns,expectedGroundColumns[b.id],b.id+' exact source-foundation footprint drift');
   assert.ok(b.occupiedFoundationFootprint.width<=b.envelope.width);
   assert.ok(b.occupiedFoundationFootprint.depth<=b.envelope.depth);
   assert.equal(b.sourceOnly,true);
