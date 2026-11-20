@@ -16,6 +16,7 @@ const originalManifest=JSON.parse(await readFile(manifestPath,'utf8'));
 const version=originalManifest.version;
 const increment=(release,offset)=>release.replace(/v(\d+)$/,(_,n)=>'v'+(Number(n)+offset));
 const rejectedVersion=increment(version,1),next=increment(version,2);
+const futureBank=prefix+increment(version,3);
 function updateWorker(target){
   return originalWorker
     .replace(/const STAGE_PREVIOUS_VERSION='[^']+'/, "const STAGE_PREVIOUS_VERSION='"+version+"'")
@@ -83,6 +84,13 @@ try{
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
+  // A newer installation can have started filling a bank while an older
+  // worker still owns the scope. Activation may only prune superseded banks.
+  await page.goto(origin+'/'+manifestPath);
+  await page.evaluate(async key=>{
+    const bank=await caches.open(key);
+    await bank.put(new URL('/__future-bank',location.href),new Response('pending'));
+  },futureBank);
   await page.goto(route);
   const count=(tab,n)=>tab.waitForFunction(value=>{
     const c=document.querySelector('#scene').dataset;
@@ -103,7 +111,7 @@ try{
   const banks=tab=>tab.evaluate(prefix=>caches.keys().then(keys=>
     keys.filter(key=>key.startsWith(prefix)).sort()),prefix);
   const oldBank=prefix+version,newBank=prefix+next;
-  assert.deepEqual(await banks(page),[oldBank]);
+  assert.deepEqual(await banks(page),[oldBank,futureBank].sort());
   async function triggerUpdate(tab){
     return tab.evaluate(async()=>{
       const registration=await navigator.serviceWorker.getRegistration();
@@ -126,7 +134,7 @@ try{
   }
   publish='reused';
   assert.equal(await triggerUpdate(page),'redundant');
-  assert.deepEqual(await banks(page),[oldBank]);
+  assert.deepEqual(await banks(page),[oldBank,futureBank].sort());
   assert.equal(await page.evaluate(async({key,path})=>{
     const cache=await caches.open(key);
     const artifact=await cache.match(new URL(path,location.href));
@@ -135,7 +143,7 @@ try{
   publish='broken';
   assert.equal(await triggerUpdate(page),'redundant');
   assert.ok(alteredResponseCount>0);
-  assert.deepEqual(await banks(page),[oldBank]);
+  assert.deepEqual(await banks(page),[oldBank,futureBank].sort());
   await page.close();
 
   await context.setOffline(true);
@@ -163,7 +171,7 @@ try{
     const registration=await navigator.serviceWorker.getRegistration();
     await registration.update();
   });
-  await retained.waitForFunction(expected=>new Promise(resolve=>{
+  const waitForController=tab=>tab.waitForFunction(expected=>new Promise(resolve=>{
     const worker=navigator.serviceWorker.controller;
     if(!worker){resolve(false);return;}
     const channel=new MessageChannel();
@@ -172,30 +180,37 @@ try{
     channel.port1.onmessage=event=>finish(event.data);
     worker.postMessage('verify-staged-recovery-controller',[channel.port2]);
   }),next,{timeout:90000,polling:300});
-  assert.deepEqual(await banks(retained),[oldBank,newBank].sort());
+  await waitForController(retained);
+  assert.deepEqual(await banks(retained),[oldBank,newBank,futureBank].sort());
   await retained.close();
   await context.setOffline(true);
   const updated=await context.newPage();
   updated.on('pageerror',error=>errors.push(error.message));
   assert.equal((await updated.goto(route)).fromServiceWorker(),true);
   await count(updated,1);
+  await waitForController(updated);
+  assert.deepEqual(await banks(updated),[oldBank,newBank,futureBank].sort());
+  assert.equal(await updated.evaluate(async key=>{
+    const response=await caches.match(new URL('/__future-bank',location.href),{cacheName:key});
+    return response?.text();
+  },futureBank),'pending');
   const cachedManifests=await updated.evaluate(async({keys,path})=>
     Promise.all(keys.map(async key=>{
-      const cache=await caches.open(key);
-      const response=await cache.match(new URL(path,location.href));
+      const response=await caches.match(new URL(path,location.href),{cacheName:key});
       const artifact=await response?.json();
-      const worker=await cache.match(new URL('sw-m5.js',location.href));
-      const hash=new Uint8Array(await crypto.subtle.digest('SHA-256',await worker.arrayBuffer()));
+      const worker=await caches.match(new URL('sw-m5.js',location.href),{cacheName:key});
+      const hash=worker&&new Uint8Array(await crypto.subtle.digest('SHA-256',await worker.arrayBuffer()));
       return {
-        version:artifact?.version,
-        workerMatchesManifest:[...hash].map(value=>value.toString(16).padStart(2,'0')).join('')===artifact?.assets?.['./sw-m5.js']
+        key,version:artifact?.version,
+        workerMatchesManifest:Boolean(hash&&[...hash].map(value=>value.toString(16).padStart(2,'0')).join('')===artifact?.assets?.['./sw-m5.js'])
       };
     })),{keys:[oldBank,newBank],path:manifestPath});
   assert.deepEqual(cachedManifests,[
-    {version,workerMatchesManifest:true},
-    {version:next,workerMatchesManifest:true}
+    {key:oldBank,version,workerMatchesManifest:true},
+    {key:newBank,version:next,workerMatchesManifest:true}
   ]);
   assert.equal(await updated.evaluate(key=>localStorage.getItem(key),worldKey),saved);
+  assert.equal(await updated.evaluate(()=>localStorage.getItem('mythwrought:nonblock-stage:v1:legacy:179')),originalTombstone);
   assert.deepEqual(errors,[]);
   await context.close();
 }finally{
@@ -206,6 +221,6 @@ const paths=['sw-m5.js',manifestPath,'tests/nonblock-cache-recovery-browser.mjs'
 const sourceSha256=Object.fromEntries(await Promise.all(paths.map(async path=>[path,digest(await readFile(path))])));
 await writeFile(directory+'/manifest.json',JSON.stringify({
   version,attemptedVersion:rejectedVersion,repairedVersion:next,rejectedVersionReuse:true,rejectedMismatchedAsset:true,previousShellOpenedOffline:true,
-  retainedTwoVerifiedBanks:true,repairedShellOpenedOffline:true,schema1SaveBytesUnchanged:true,captures,sourceSha256
+  retainedTwoVerifiedBanks:true,preservedFutureBank:true,repairedShellOpenedOffline:true,schema1SaveBytesUnchanged:true,captures,sourceSha256
 },null,2)+'\n');
 console.log('PASS staged cache rejected version reuse and invalid assets; both verified banks opened offline');

@@ -6,8 +6,8 @@ const workerUrl=new URL(self.location.href);
 const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
   workerUrl.searchParams.get('nonblock-staging')==='1';
 const CACHE_PREFIX=staging?'mythwrought-nonblock-stage-shell-':'mythwrought-m5-shell-';
-const STAGE_VERSION='20261119-v20';
-const STAGE_PREVIOUS_VERSION='20261119-v19';
+const STAGE_VERSION='20261119-v21';
+const STAGE_PREVIOUS_VERSION='20261119-v20';
 const STAGE_MANIFEST='./nonblock-stage-assets.json';
 const CACHE_NAME=CACHE_PREFIX+(staging?STAGE_VERSION:'20261119-v6-recorder-v1');
 const PREVIOUS_STAGE_CACHE=CACHE_PREFIX+STAGE_PREVIOUS_VERSION;
@@ -315,12 +315,21 @@ self.addEventListener('install',event=>{
     }
   })());
 });
+function isOlderStagedBank(key) {
+  const version=/^(\d{8})-v(\d+)$/.exec(key.slice(CACHE_PREFIX.length));
+  if(!version)return false;
+  const [,date,serial]=version;
+  const [currentDate,currentSerial]=STAGE_VERSION.split('-v');
+  return date<currentDate||date===currentDate&&Number(serial)<Number(currentSerial);
+}
+
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>
       k.startsWith(CACHE_PREFIX)&&k!==CACHE_NAME&&
-      (!staging||k!==PREVIOUS_STAGE_CACHE)).map(k=>caches.delete(k)));
+      // Older workers must leave banks being prepared by a newer worker alone.
+      (!staging||k!==PREVIOUS_STAGE_CACHE&&isOlderStagedBank(k))).map(k=>caches.delete(k)));
     await self.clients.claim();
   })());
 });
