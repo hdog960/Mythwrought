@@ -87,7 +87,7 @@ function expressionFor(design,view){
   +'innerWidth:innerWidth,innerHeight:innerHeight};})()';
 }
 
-test('M3 five second-variation courtyard gatehouse capture 6 genuine Chromium WebGL2 exteriors and cutaways', {timeout:240000}, async()=>{
+test('C2 original Twinstone gatehouse captures six genuine Chromium WebGL2 exteriors and cutaways', {timeout:240000}, async()=>{
  let chrome,cdp,site,temp;
  const reports=[];
  const releaseChromium=await acquire3BChromiumPermit();
@@ -141,7 +141,7 @@ test('M3 five second-variation courtyard gatehouse capture 6 genuine Chromium We
    physicalFamilyShapesRendered:false,creatorArtApproved:false,physicalIPhoneTested:false,
    count:reports.length,reports};
   await writeFile(join(output,'acceptance.json'),JSON.stringify(summary,null,2)+'\n');
-  console.log('MYTHWROUGHT_3B_ROADMAP_C_WHITEGALE_CHROMIUM_DIAGNOSTIC=6/6 ('+viewports.map(v=>v.join('x')).join(', ')+')');
+  console.log('MYTHWROUGHT_3B_ROADMAP_C_TWINSTONE_GATEHOUSE_CHROMIUM_DIAGNOSTIC=6/6 ('+viewports.map(v=>v.join('x')).join(', ')+')');
  }finally{
   try{
   if(cdp)cdp.close();
