@@ -20,13 +20,14 @@ export function createNavigationAdapter({seed,discovery,storage=null,width,heigh
     // Project returns cell-center coordinates relative to the safe-area frame.
     // Preserve immutable world coordinates on pins; never confuse them with screen pixels.
     const cells=projected.cells.map(c=>Object.freeze({...c,screenX:c.screenX+camera.frame.x,screenY:c.screenY+camera.frame.y}));
-    const pins=projected.pins.map(p=>Object.freeze({
-      id:p.id,label:p.label,worldX:p.x,worldZ:p.z,
+    const knownPins=new Map(navigator.visiblePins().map(p=>[p.id,p]));
+    const pins=projected.pins.map(p=>{const world=knownPins.get(p.id);return Object.freeze({
+      id:p.id,label:p.label,worldX:world.x,worldZ:world.z,
       screenX:camera.frame.x+camera.frame.width/2+
-        (Math.floor(p.x/NAV00_CELL_SIZE)-projected.center.x)*camera.zoom,
+        (Math.floor(world.x/NAV00_CELL_SIZE)-projected.center.x)*camera.zoom,
       screenY:camera.frame.y+camera.frame.height/2+
-        (Math.floor(p.z/NAV00_CELL_SIZE)-projected.center.z)*camera.zoom
-    })).filter(p=>p.screenX>=camera.frame.x-camera.zoom&&p.screenX<=camera.frame.x+camera.frame.width+camera.zoom&&
+        (Math.floor(world.z/NAV00_CELL_SIZE)-projected.center.z)*camera.zoom
+    });}).filter(p=>p.screenX>=camera.frame.x-camera.zoom&&p.screenX<=camera.frame.x+camera.frame.width+camera.zoom&&
       p.screenY>=camera.frame.y-camera.zoom&&p.screenY<=camera.frame.y+camera.frame.height+camera.zoom);
     return Object.freeze({version:NAV00_ADAPTER_VERSION,seed,frame:camera.frame,zoom:camera.zoom,
       cells:Object.freeze(cells),pins:Object.freeze(pins),
