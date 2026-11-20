@@ -870,8 +870,8 @@ export const ROADMAP_D_WAVE7_PLANS=Object.freeze([
       ],
       [
         "east-sand-harmonics",
-        83,
-        46
+        90,
+        54
       ]
     ],
     "div": [
