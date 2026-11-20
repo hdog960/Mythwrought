@@ -1,0 +1,330 @@
+{
+  "schema": "mythwrought.builder-b.1a.willowmere-1-source-only-settlement-handoff.v1",
+  "status": "ORIGINAL_BLUEPRINT_PROVISIONAL_NOT_CI_OR_CREATOR_ACCEPTED",
+  "date": "2026-11-20",
+  "author": "Builder B",
+  "sourceBlob": "6fce46884ff3a21378674939de2be47faaf29df4",
+  "sourcePath": "src/building-pool/roadmap-1a/builder-b-homes-wave6.mjs",
+  "parentAcceptedHistorical1A": 271,
+  "projectedPoolCountIfAccepted": 279,
+  "otherBranchesEdited": false,
+  "productionRegistered": false,
+  "source": {
+    "id": "r1:house:temperate:small:020",
+    "title": "Willowmere Split-Orchard Cottage",
+    "biome": "temperate",
+    "size": "small",
+    "structuralFNV64": "e804467b85dcef1e",
+    "footprint": {
+      "width": 35,
+      "height": 12,
+      "depth": 33
+    },
+    "roadFacing": "north",
+    "plotConstraints": "dry flat temperate orchard margin; terrain grading / road site survey still required",
+    "entry": [
+      22,
+      1,
+      "east-arrival-foyer"
+    ],
+    "rooms": [
+      {
+        "id": "west-orchard-workroom",
+        "min": [
+          9,
+          1,
+          2
+        ],
+        "max": [
+          18,
+          4,
+          14
+        ]
+      },
+      {
+        "id": "east-arrival-foyer",
+        "min": [
+          19,
+          1,
+          2
+        ],
+        "max": [
+          26,
+          4,
+          14
+        ]
+      },
+      {
+        "id": "west-hearth-family-room",
+        "min": [
+          1,
+          1,
+          15
+        ],
+        "max": [
+          18,
+          4,
+          22
+        ]
+      },
+      {
+        "id": "east-kitchen-and-pantry",
+        "min": [
+          19,
+          1,
+          15
+        ],
+        "max": [
+          33,
+          4,
+          22
+        ]
+      },
+      {
+        "id": "south-sleeping-chamber",
+        "min": [
+          9,
+          1,
+          24
+        ],
+        "max": [
+          18,
+          4,
+          31
+        ]
+      },
+      {
+        "id": "south-map-reading-room",
+        "min": [
+          19,
+          1,
+          24
+        ],
+        "max": [
+          25,
+          4,
+          31
+        ]
+      }
+    ],
+    "portals": [
+      {
+        "from": "outside",
+        "to": "east-arrival-foyer",
+        "at": [
+          22,
+          1,
+          1
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "east-arrival-foyer",
+        "to": "west-orchard-workroom",
+        "at": [
+          18,
+          1,
+          7
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "east-arrival-foyer",
+        "to": "east-kitchen-and-pantry",
+        "at": [
+          23,
+          1,
+          14
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "west-orchard-workroom",
+        "to": "west-hearth-family-room",
+        "at": [
+          13,
+          1,
+          14
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "west-hearth-family-room",
+        "to": "east-kitchen-and-pantry",
+        "at": [
+          18,
+          1,
+          18
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "west-hearth-family-room",
+        "to": "south-sleeping-chamber",
+        "at": [
+          14,
+          1,
+          23
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "east-kitchen-and-pantry",
+        "to": "south-map-reading-room",
+        "at": [
+          22,
+          1,
+          23
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "south-sleeping-chamber",
+        "to": "south-map-reading-room",
+        "at": [
+          18,
+          1,
+          27
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      }
+    ],
+    "roofs": [
+      {
+        "name": "north-cross-window-gable",
+        "rect": [
+          8,
+          0,
+          26,
+          13
+        ],
+        "style": "long-gable",
+        "raise": 1
+      },
+      {
+        "name": "west-ivy-low-porch",
+        "rect": [
+          0,
+          13,
+          18,
+          22
+        ],
+        "style": "edge-rise",
+        "raise": 0
+      },
+      {
+        "name": "east-sheltered-dormer",
+        "rect": [
+          19,
+          9,
+          34,
+          23
+        ],
+        "style": "double-hill",
+        "raise": 2
+      },
+      {
+        "name": "south-dual-sleeping-roof",
+        "rect": [
+          9,
+          23,
+          25,
+          32
+        ],
+        "style": "long-gable",
+        "raise": 1
+      },
+      {
+        "name": "central-hearth-crossroof",
+        "rect": [
+          12,
+          15,
+          27,
+          24
+        ],
+        "style": "step-front",
+        "raise": 2
+      }
+    ],
+    "authoredSourceCells": 4719,
+    "walkableSourceCells": 624,
+    "fullyBackedRoofTiles": 898,
+    "bedExtraCellReservations": [
+      {
+        "asset": "pack5:082",
+        "anchor": [
+          12,
+          1,
+          27
+        ],
+        "extraCells": [
+          [
+            12,
+            1,
+            28
+          ]
+        ],
+        "source": "pack5:082-physical-authored-two-cell-bed",
+        "approval": "unresolved"
+      }
+    ],
+    "realExteriorAbsentGroundNotches": [
+      [
+        0,
+        0,
+        7,
+        12
+      ],
+      [
+        27,
+        0,
+        34,
+        8
+      ],
+      [
+        0,
+        24,
+        8,
+        32
+      ]
+    ],
+    "futureProps": [
+      "orchard workstation",
+      "family hearth",
+      "closed pantry",
+      "map desk"
+    ],
+    "creaturesDisabled": true,
+    "saveSchema1Untouched": true
+  },
+  "visualEvidence": {
+    "webgl2SourceCubeFrames": 6,
+    "packSourceVisibleAABBFrames": 6,
+    "requiredViewports": [
+      "667x375",
+      "844x390",
+      "932x430"
+    ],
+    "views": [
+      "exterior",
+      "cutaway"
+    ],
+    "actualSourceScreenshotStatus": "SCRIPT_AUTHORED_NEVER_EXECUTED",
+    "gpuCostNotMeasured": true
+  },
+  "pending": [
+    "read-only historical 271 same-category D4 and silhouette uniqueness native run",
+    "genuine decoded source-specific PNG ZIP and independent CRC SHA check",
+    "Pack5 real bed collider and doors swept volume",
+    "roof load weather and AABB producer certification",
+    "actual iPhone landscape GPU/frame-time and creator art approval"
+  ]
+}
