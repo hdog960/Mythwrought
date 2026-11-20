@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {inspectProducerSamples} from '../../src/auto-integration-support/producer-sample-harness.mjs';
+const args=()=>({seed:42,columns:[{x:1,z:2}],bounds:{minY:-210,maxY:50},registry:[0,1],sourceVerified:true,surface:()=>({height:5,blockId:1}),cave:()=>({solid:false}),objects:()=>[{id:'flora:fern',anchor:{x:1,y:6,z:2},footprint:[{x:1,y:6,z:2}]}]});
+test('deterministic source sample remains candidate-only',()=>{const r=inspectProducerSamples(args());assert.equal(r.status,'SOURCE_SAMPLED_CONTRACT_ONLY');assert.equal(r.integrationVerified,false)});
+test('rejects unverified source',()=>assert.equal(inspectProducerSamples({...args(),sourceVerified:false}).reason,'producer-source-unverified'));
+test('rejects non deterministic producer',()=>{let n=0;assert.equal(inspectProducerSamples({...args(),surface:()=>({height:++n,blockId:1})}).reason,'nondeterministic-producer-output')});
+test('rejects unregistered material',()=>assert.equal(inspectProducerSamples({...args(),surface:()=>({height:5,blockId:99})}).reason,'invalid-surface'));
+test('rejects solid cave overlap',()=>assert.equal(inspectProducerSamples({...args(),cave:()=>({solid:true})}).reason,'object-intersects-cave-solid'));
+test('rejects duplicate footprint',()=>{const a=args();a.objects=()=>[{id:'flora:fern',anchor:{x:1,y:6,z:2},footprint:[{x:1,y:6,z:2},{x:1,y:6,z:2}]}];assert.equal(inspectProducerSamples(a).reason,'overlapping-object-footprints')});
+test('rejects duplicate columns',()=>{const a=args();a.columns.push({x:1,z:2});assert.equal(inspectProducerSamples(a).reason,'duplicate-column')});
+test('rejects unnamespaced object',()=>{const a=args();a.objects=()=>[{id:'fern',anchor:{x:1,y:6,z:2},footprint:[{x:1,y:6,z:2}]}];assert.equal(inspectProducerSamples(a).reason,'invalid-object-identity')});
+test('preserves input arrays',()=>{const a=args();const before=JSON.stringify([a.columns,a.bounds,a.registry]);inspectProducerSamples(a);assert.equal(JSON.stringify([a.columns,a.bounds,a.registry]),before)});

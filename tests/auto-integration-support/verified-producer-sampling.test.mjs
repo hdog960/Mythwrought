@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {inspectVerifiedProducerSamples} from '../../src/auto-integration-support/verified-producer-sampling.mjs';
+const sha='a'.repeat(40),digest='b'.repeat(64),lanes=['surface','caves','objects'];
+const manifest={producers:Object.fromEntries(lanes.map((lane,i)=>[lane,{pr:170+i,head:sha,files:[{path:`src/${lane}.mjs`,sha256:digest}]}]))};
+const checkouts=Object.fromEntries(lanes.map(lane=>[lane,'/read-only/'+lane]));
+const verify=async ({manifest:m})=>{const [lane,entry]=Object.entries(m)[0];return {status:'SOURCE_MATCH_ONLY',results:[{lane,status:'SOURCE_MATCH',commit:entry.commit,path:entry.path,sha256:entry.sha256}]};};
+const sample=()=>({seed:42,columns:[{x:1,z:2}],bounds:{minY:-210,maxY:50},registry:[0,1],surface:()=>({height:5,blockId:1}),cave:()=>({solid:false}),objects:()=>[]});
+const run=(patch={})=>inspectVerifiedProducerSamples({manifest,checkouts,verify,sample:sample(),...patch});
+test('matching files and deterministic samples remain explicitly unbound',async()=>{const r=await run();assert.equal(r.status,'SOURCE_MATCH_SAMPLED_UNBOUND');assert.equal(r.callbackProvenanceVerified,false);assert.equal(r.integrationVerified,false);assert.equal(r.samples.length,1)});
+test('missing checkout prevents callbacks executing',async()=>{let called=0;const s=sample();s.surface=()=>{called++;throw Error('must not run')};const r=await run({checkouts:{...checkouts,caves:''},sample:s});assert.equal(r.reason,'source-verification-incomplete');assert.equal(called,0)});
+test('aggregate verifier failure fails closed',async()=>{const r=await run({verify:async ({manifest:m})=>{const [lane,entry]=Object.entries(m)[0];return {status:'NOT_VERIFIED',results:[{lane,status:'SOURCE_MATCH',commit:entry.commit,path:entry.path,sha256:entry.sha256}]}}});assert.equal(r.reason,'source-verification-incomplete')});
+test('digest mismatch fails closed',async()=>{const r=await run({verify:async ({manifest:m})=>{const [lane,entry]=Object.entries(m)[0];return {status:'SOURCE_MATCH_ONLY',results:[{lane,status:'SOURCE_MATCH',commit:entry.commit,path:entry.path,sha256:'c'.repeat(64)}]}}});assert.equal(r.reason,'source-verification-incomplete')});
+test('missing callback fails closed after source verification',async()=>{const s=sample();delete s.cave;const r=await run({sample:s});assert.equal(r.reason,'sample-contract-failed');assert.equal(r.detail,'missing-producer-api')});
+test('nondeterministic producer fails closed',async()=>{let n=0;const s=sample();s.surface=()=>({height:++n,blockId:1});const r=await run({sample:s});assert.equal(r.reason,'sample-contract-failed');assert.equal(r.detail,'nondeterministic-producer-output')});
+test('verifier exception fails closed',async()=>{const r=await run({verify:async()=>{throw Error('offline')}});assert.equal(r.reason,'source-verification-incomplete')});
+test('caller sourceVerified false cannot override file checks',async()=>{const r=await run({sample:{...sample(),sourceVerified:false}});assert.equal(r.status,'SOURCE_MATCH_SAMPLED_UNBOUND')});
