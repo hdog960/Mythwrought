@@ -1,0 +1,31 @@
+name: MYTHWROUGHT Builder D historical bidirectional D4 source repair (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave2.mjs'
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave4.mjs'
+      - 'tests/building-pool/roadmap-d/d5-historical-bidirectional-d4.test.mjs'
+      - 'tests/roadmap-d-historical-bidirectional-d4.test.mjs'
+      - 'docs/building-pool/roadmap-d/D5_HISTORICAL_D4_REMEDIATION.md'
+      - '.github/workflows/roadmap-d-historical-bidirectional-d4.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-d-historical-2way-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  historical-d4-original-153-and-36:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run independent historic 153 original + 36 new bidirectional source D4 acceptance
+        run: node --test tests/building-pool/roadmap-d/d5-historical-bidirectional-d4.test.mjs
+      - name: Recheck strict historical D2 and D4 original source-specific physical/layout gates
+        run: node --test --test-concurrency=1 tests/building-pool/roadmap-d/d1-original-institutions-wave2.test.mjs tests/building-pool/roadmap-d/d1-original-institutions-wave4.test.mjs tests/building-pool/roadmap-d/d1-original-institutions-wave5.test.mjs
