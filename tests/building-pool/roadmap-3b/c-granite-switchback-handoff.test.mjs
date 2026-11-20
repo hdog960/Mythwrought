@@ -12,6 +12,9 @@ test('C7 new original mountain wall exports true closed 176-step ridge, eight st
  assert.equal(a.closedPerimeter.length,9);
  assert.deepEqual(a.closedPerimeter[0],a.closedPerimeter.at(-1));
  assert.equal(a.wallJoinSockets.length,8);
+ assert.equal(a.terrainRequirements.mountainPlateauRequired,true);
+ assert.equal(a.terrainRequirements.minUnderwallSupport,1);
+ assert.equal(a.terrainRequirements.terrainCutbackCertificationPending,true);
  assert.equal(a.roadSockets.length,2);
  assert.equal(a.gateway.width,2);assert.equal(a.gateway.height,3);
  assert.equal(a.gateway.sourceRouteLength,14);
