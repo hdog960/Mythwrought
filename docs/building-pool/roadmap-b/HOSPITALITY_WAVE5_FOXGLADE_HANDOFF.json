@@ -5,7 +5,7 @@
   "expectedAcceptedBaseline": 271,
   "additionalProvisionalIncludingThis": 7,
   "sourceFile": "src/building-pool/roadmap-1a/builder-b-hospitality-wave5.mjs",
-  "sourceGitBlob": "5410ad3110d9e3aaf44fbf438aba5c3fa63fb3b7",
+  "sourceGitBlob": "eef52596583441b07a10b152f2419fe5b4c16e65",
   "projected1ACount": 278,
   "worldRegistration": false,
   "creatorArtworkApproved": false,
@@ -16,7 +16,7 @@
     "biome": "temperate",
     "size": "medium",
     "category": "inn",
-    "structuralFNV64": "f31083804d9210a3",
+    "structuralFNV64": "7830ef88d979fa0a",
     "footprint": {
       "width": 53,
       "height": 12,
@@ -383,24 +383,24 @@
         0,
         0,
         14,
-        13
+        18
       ],
       [
         38,
         0,
         52,
-        12
+        7
       ],
       [
         0,
-        36,
-        15,
+        30,
+        12,
         48
       ]
     ],
-    "authoredSourceCells": 10174,
+    "authoredSourceCells": 10036,
     "walkableCells": 1523,
-    "backedRoofCells": 1984,
+    "backedRoofCells": 1945,
     "requiredTerrain": "level plot, dry temperate foundation, road access and post certified",
     "slopeAndShoreline": "no automatic placement until terrain preflight certifies",
     "cost": "physical renderer/solver/collision/iPhone GPU budgets unmeasured",
@@ -416,8 +416,10 @@
       ],
       "cubeFrames": 6,
       "visiblePackAABBFrames": 6,
-      "state": "SCRIPTS_READY_NOT_CAPTURED"
+      "state": "SCRIPTS_READY_NOT_CAPTURED",
+      "sourceRevisionAfterRepair": "eef52596583441b07a10b152f2419fe5b4c16e65"
     },
-    "physicalArtAndSaveABI": "NOT_CERTIFIED"
+    "physicalArtAndSaveABI": "NOT_CERTIFIED",
+    "silhouetteIssue": "Corrected real architectural duplicate: earlier normalized exterior shared Moonmoss outline. Changed actual courthouse/courtyard geometry. Seven new 1A candidates mutual similarity max partition IoU 0.4412 (<0.88), outline IoU 0.95385 (<0.975); original 271 historical comparison still queued."
   }
 }
