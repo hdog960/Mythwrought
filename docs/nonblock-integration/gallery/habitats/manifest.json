@@ -1,0 +1,139 @@
+{
+  "seed": 179,
+  "generator": "mythwrought-four-surface-regions-v4",
+  "renderPreset": "economy",
+  "sourceSha256": {
+    "src/main.mjs": "f2e021f87b2777225d0a5d606ee96c4f96c09f770fe39612494fce689c161438",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/candidate-scene.mjs": "f7768a74ca679a2a2bf6c81c20f6f0846369f79d9afb7131a82c52352328233e",
+    "src/nonblock/candidate-families.mjs": "473b76098990bee05269cd7fe9f4ca78792777832abb3f7d8eea0bb15d195e49",
+    "src/manual-biomes/profile-world.mjs": "ae374a51657bcd895f0a07163f90b35e0177cdd382ac543d8c540871276687f8",
+    "src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
+    "src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
+    "src/render-budget.mjs": "2da16f5acfddb3e6d1989b337c5b80ae40987336be2f3cff680cd038400218b3",
+    "tests/nonblock-habitat-browser.mjs": "7fa269ff7346e23670170c7269ea0bd540b31649b1e88b071ffab122eb43fa4a"
+  },
+  "captures": [
+    {
+      "habitat": "desert",
+      "placement": {
+        "sceneId": "nonblock:d:agave-rosette",
+        "anchor": [
+          512,
+          9,
+          0
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Aagave-rosette:179:512,9,0:2",
+      "ground": 256,
+      "view": {
+        "pose": [
+          512.5,
+          -1.5
+        ],
+        "point": [
+          512.4627685546875,
+          9.135333061218262,
+          0.5939620733261108
+        ]
+      },
+      "file": "artifacts/nonblock-habitat/desert.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "6c95f938d4cfe93a0b1c91698cd6352c37cc51aca8f8f313da84497a9ff7f8de"
+    },
+    {
+      "habitat": "snow",
+      "placement": {
+        "sceneId": "nonblock:d:frost-fern",
+        "anchor": [
+          0,
+          10,
+          512
+        ],
+        "variant": 1,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Afrost-fern:179:0,10,512:1",
+      "ground": 272,
+      "view": {
+        "pose": [
+          0.5,
+          510.5
+        ],
+        "point": [
+          0.5710355540116628,
+          10.154999732971191,
+          512.581787109375
+        ]
+      },
+      "file": "artifacts/nonblock-habitat/snow.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "fa4d077cd2776bc7fdfcae3d6d74d49c97e78d9170276278820cc2df1525727b"
+    },
+    {
+      "habitat": "mountain",
+      "placement": {
+        "sceneId": "nonblock:d:alpine-wildflower",
+        "anchor": [
+          -512,
+          13,
+          0
+        ],
+        "variant": 0,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Aalpine-wildflower:179:-512,13,0:0",
+      "ground": 302,
+      "view": {
+        "pose": [
+          -511.5,
+          -1.5
+        ],
+        "point": [
+          -511.5088704427083,
+          13.103333473205566,
+          0.43803099791208905
+        ]
+      },
+      "file": "artifacts/nonblock-habitat/mountain.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "9f881cd2bc6b20d5511606ace4334f937afc83b983045baabdc8f426c2fa6766"
+    },
+    {
+      "habitat": "enchanted",
+      "placement": {
+        "sceneId": "scene48:enchanted-flower",
+        "anchor": [
+          0,
+          9,
+          -512
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:scene48%3Aenchanted-flower:179:0,9,-512:2",
+      "ground": 286,
+      "view": {
+        "pose": [
+          0.5,
+          -513.5
+        ],
+        "point": [
+          0.44479501247406006,
+          9.095100084940592,
+          -511.55690511067706
+        ]
+      },
+      "file": "artifacts/nonblock-habitat/enchanted.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "347c2cfda6e5df800766f89a979264b435d69ac5e4ce99f0a078eeb392f4572e"
+    }
+  ],
+  "nonemptySchema1AndProfileBytesUnchanged": true
+}

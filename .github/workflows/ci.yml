@@ -114,6 +114,7 @@ jobs:
           node tests/nonblock-physical-fittings-browser.mjs
           node tests/nonblock-effects-browser.mjs
           node tests/nonblock-cache-recovery-browser.mjs
+          node tests/nonblock-habitat-browser.mjs
           node scripts/ci/verify-nonblock-evidence.mjs
       - name: Advisory queue health snapshot
         if: always()
