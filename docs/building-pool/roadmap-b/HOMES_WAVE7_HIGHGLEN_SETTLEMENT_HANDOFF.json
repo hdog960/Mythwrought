@@ -1,0 +1,358 @@
+{
+  "schema": "mythwrought.builder-b.1a.wave7-highglen-settlement-handoff.v1",
+  "status": "PROVISIONAL_SOURCE_ONLY_NO_CI_OR_ART_ACCEPTANCE",
+  "sourceModule": "src/building-pool/roadmap-1a/builder-b-homes-wave7.mjs",
+  "gitSourceBlob": "4b6017a2d2806857138a7c62ff99b5eb09d94763",
+  "protectedPreviousAccepted1A": 271,
+  "projectedCandidatePool": 280,
+  "productionRegistered": false,
+  "saveSchema1Untouched": true,
+  "blueprint": {
+    "id": "r1:house:mountain:medium:020",
+    "title": "Highglen Staggered-Terrace Survey House",
+    "biome": "mountain",
+    "size": "medium",
+    "category": "house",
+    "structuralFNV64": "893bf98dc3b0a653",
+    "footprint": {
+      "width": 47,
+      "height": 12,
+      "depth": 43
+    },
+    "sourceVoxels": 9481,
+    "sourceWalkableCells": 1253,
+    "rooms": [
+      {
+        "id": "north-survey-arrival",
+        "min": [
+          23,
+          1,
+          2
+        ],
+        "max": [
+          33,
+          4,
+          14
+        ]
+      },
+      {
+        "id": "west-windbreak-and-lantern",
+        "min": [
+          12,
+          1,
+          2
+        ],
+        "max": [
+          22,
+          4,
+          14
+        ]
+      },
+      {
+        "id": "west-stone-tool-workshop",
+        "min": [
+          10,
+          1,
+          15
+        ],
+        "max": [
+          27,
+          4,
+          30
+        ]
+      },
+      {
+        "id": "east-ridge-chart-library",
+        "min": [
+          28,
+          1,
+          15
+        ],
+        "max": [
+          45,
+          4,
+          30
+        ]
+      },
+      {
+        "id": "south-common-hearth-room",
+        "min": [
+          18,
+          1,
+          32
+        ],
+        "max": [
+          33,
+          4,
+          41
+        ]
+      },
+      {
+        "id": "west-guest-sleeping-room",
+        "min": [
+          10,
+          1,
+          32
+        ],
+        "max": [
+          17,
+          4,
+          41
+        ]
+      },
+      {
+        "id": "east-rainwatch-dining-bay",
+        "min": [
+          34,
+          1,
+          32
+        ],
+        "max": [
+          45,
+          4,
+          41
+        ]
+      }
+    ],
+    "portals": [
+      {
+        "from": "outside",
+        "to": "north-survey-arrival",
+        "at": [
+          24,
+          1,
+          1
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "north-survey-arrival",
+        "to": "west-windbreak-and-lantern",
+        "at": [
+          22,
+          1,
+          9
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "west-windbreak-and-lantern",
+        "to": "west-stone-tool-workshop",
+        "at": [
+          19,
+          1,
+          14
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "north-survey-arrival",
+        "to": "east-ridge-chart-library",
+        "at": [
+          30,
+          1,
+          14
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "west-stone-tool-workshop",
+        "to": "east-ridge-chart-library",
+        "at": [
+          27,
+          1,
+          21
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "west-stone-tool-workshop",
+        "to": "south-common-hearth-room",
+        "at": [
+          23,
+          1,
+          31
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "east-ridge-chart-library",
+        "to": "east-rainwatch-dining-bay",
+        "at": [
+          38,
+          1,
+          31
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "south-common-hearth-room",
+        "to": "west-guest-sleeping-room",
+        "at": [
+          17,
+          1,
+          37
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "south-common-hearth-room",
+        "to": "east-rainwatch-dining-bay",
+        "at": [
+          33,
+          1,
+          36
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      }
+    ],
+    "roomGraphRequiresPhysicalSweep": true,
+    "entry": [
+      24,
+      1,
+      "north-survey-arrival"
+    ],
+    "roadFacing": "north",
+    "sourceBackedRoofCells": 1658,
+    "roofWings": [
+      {
+        "name": "north-pass-high-two-ridges",
+        "rect": [
+          12,
+          0,
+          33,
+          13
+        ],
+        "style": "long-gable",
+        "raise": 2
+      },
+      {
+        "name": "west-angled-workshop-snow-shed",
+        "rect": [
+          9,
+          13,
+          27,
+          30
+        ],
+        "style": "edge-rise",
+        "raise": 1
+      },
+      {
+        "name": "east-tall-chart-library-monitor",
+        "rect": [
+          28,
+          12,
+          46,
+          30
+        ],
+        "style": "double-hill",
+        "raise": 2
+      },
+      {
+        "name": "south-hearth-double-eave",
+        "rect": [
+          18,
+          30,
+          33,
+          42
+        ],
+        "style": "step-front",
+        "raise": 2
+      },
+      {
+        "name": "west-guest-low-perched-roof",
+        "rect": [
+          10,
+          32,
+          17,
+          42
+        ],
+        "style": "long-gable",
+        "raise": 0
+      },
+      {
+        "name": "east-rainwatch-gable",
+        "rect": [
+          34,
+          32,
+          46,
+          42
+        ],
+        "style": "double-hill",
+        "raise": 1
+      }
+    ],
+    "trueAbsentGroundExteriorNotches": [
+      [
+        0,
+        0,
+        11,
+        9
+      ],
+      [
+        34,
+        0,
+        46,
+        10
+      ],
+      [
+        0,
+        33,
+        9,
+        42
+      ]
+    ],
+    "guestBedFuturePhysicalFootprint": [
+      {
+        "asset": "pack5:082",
+        "anchor": [
+          13,
+          1,
+          37
+        ],
+        "extraCells": [
+          [
+            13,
+            1,
+            38
+          ]
+        ],
+        "source": "pack5:082-physical-authored-two-cell-bed",
+        "approval": "unresolved"
+      }
+    ],
+    "siteRequirements": "mountain ramp/slope support, ridge wind/snow path and real footprint grading must be proven before settlement placement",
+    "functionalStatus": "source-only inert house, no game world/spawn/save code"
+  },
+  "screenshots": {
+    "viewports": [
+      "667x375",
+      "844x390",
+      "932x430"
+    ],
+    "views": [
+      "exterior",
+      "cutaway"
+    ],
+    "sourceCubeFrames": 6,
+    "sourcePackAABBFrames": 6,
+    "actualFramesGenerated": 0,
+    "artifactStatus": "CI_WAITING_NOT_AUTHENTICATED"
+  },
+  "physicalHold": [
+    "full 271 historical D4/silhouette and source physical inventory",
+    "roof span/weather-proof and snow bearing",
+    "Pack5 guest bed mesh collision and rotation",
+    "swept doors / colliders and real iPhone GPU",
+    "creator artwork acceptance"
+  ]
+}
