@@ -10,6 +10,7 @@ import {uploadChunkBuffer} from '../gpu-recovery.mjs';
 
 export const C6_FAR_BOUNDS=Object.freeze({
  maxChunks:4,maxBytes:1048576,maxRing:2,maxCells:64,maxSeamSources:1,
+  maxWideWitnessSources:1,
  horizontalRays:17,verticalOffsets:Object.freeze([0,.35,.51,.69,.88,-.35,-.7]),
  minFramesBetweenPlans:24,maxSourceSamples:3264
 });
@@ -184,19 +185,29 @@ export function planCaveFarWallSources(world,player,viewport,
  // x174,-84,187 DEEPSTONE: real lower chunk 10,11,-6. The existing
  // primary seam 11,12,-5 must remain. Independently sample ONE additional
  // neighbor from the same real coarse camera rays, in another GPU owner.
+ // Two independent genuine 844px Fan sky gaps require TWO real lower
+ // source slices: original middle 12,10,-8 (RC7) and western 11,10,-8
+ // (RC8). Keep the original one-seam ranking and dedicate ONE explicitly
+ // bounded wide witness to the newly proven western rock in another
+ // existing buffer. No new GPU slot, higher byte cap, CPU cap, or voxels.
  const secondary=joinable.find(j=>j.owner!==selectedJoin?.owner&&
-   j.companion.key!==companionKey&&
-   // A compacted wide Fan has a screenshot-proven lower physical ray.
-   // Preserve original Rift strict selection for un-compacted scenes.
-   (compactedKey?rightEdgeWitness.has(j.companion.key):
-    candidates.has(j.companion.key)));
+  j.companion.key!==companionKey&&candidates.has(j.companion.key));
  if(secondary&&bounds.maxSeamSources>0)
-   secondary.owner.seamCompanion={...secondary.companion};
+  secondary.owner.seamCompanion={...secondary.companion};
  const seamKey=secondary&&bounds.maxSeamSources>0?secondary.companion.key:null;
  const seamSources=seamKey?1:0;
+ const wideWitness=compactedKey&&bounds.maxWideWitnessSources>0?
+  joinable.find(j=>rightEdgeWitness.has(j.companion.key)&&
+   j.companion.key!==companionKey&&j.companion.key!==seamKey&&
+   j.owner!==secondary?.owner&&j.owner!==selectedJoin?.owner&&
+   !j.owner.companion&&!j.owner.seamCompanion):null;
+ if(wideWitness)wideWitness.owner.wideWitnessCompanion={...wideWitness.companion};
+ const wideWitnessKey=wideWitness?.companion.key;
+ const wideWitnessSources=wideWitnessKey?1:0;
  return {section,selected,
-  pending:[...available.values()].filter(c=>c.key!==companionKey&&c.key!==seamKey),
-  joinedSources,seamSources,uncovered,firstFarRock,
+  pending:[...available.values()].filter(c=>c.key!==companionKey&&
+    c.key!==seamKey&&c.key!==wideWitnessKey),
+  joinedSources,seamSources,wideWitnessSources,uncovered,firstFarRock,
   samples,estimatedBytes:0,nearExpected:near.size,
   viewport:[...viewport]};
 }
@@ -205,17 +216,18 @@ export function createCaveFarWallGpu(gl,{bounds=C6_FAR_BOUNDS}={}){
  if(!gl||typeof gl.createBuffer!=='function')throw Error('C6_FAR_NO_WEBGL');
  const buffers=new Map(),wanted=new Map();
  let worldRef=null,nearCenter='',planPos=null,lastPlanFrame=-Infinity;
- let bytes=0,uploads=0,failures=0,uncovered=0,farRock=0,sourceSamples=0,joinedSources=0,seamSources=0;
+ let bytes=0,uploads=0,failures=0,uncovered=0,farRock=0,sourceSamples=0,
+      joinedSources=0,seamSources=0,wideWitnessSources=0;
  let lastMeshMs=0,budgetExcluded=0;
  function invalidate(){
   for(const c of buffers.values())if(c.buffer)gl.deleteBuffer(c.buffer);
   buffers.clear();wanted.clear();bytes=0;nearCenter='';planPos=null;
-  lastPlanFrame=-Infinity;uncovered=farRock=sourceSamples=budgetExcluded=joinedSources=seamSources=0;
+  lastPlanFrame=-Infinity;uncovered=farRock=sourceSamples=budgetExcluded=joinedSources=seamSources=wideWitnessSources=0;
  }
  function resetForLostContext(){
   // WebGL objects are invalid already; do not call WebGL during a loss.
   buffers.clear();wanted.clear();bytes=0;nearCenter='';planPos=null;
-  lastPlanFrame=-Infinity;uncovered=farRock=sourceSamples=budgetExcluded=joinedSources=seamSources=0;
+  lastPlanFrame=-Infinity;uncovered=farRock=sourceSamples=budgetExcluded=joinedSources=seamSources=wideWitnessSources=0;
  }
  function step({world,player,nearChunks,nearPending,frame,viewport,enabled}){
   if(!enabled||!world||!player||!viewport||player.feet>=-3){
@@ -251,6 +263,7 @@ export function createCaveFarWallGpu(gl,{bounds=C6_FAR_BOUNDS}={}){
     farRock=plan.firstFarRock;sourceSamples=plan.samples;
     joinedSources=plan.joinedSources;
     seamSources=plan.seamSources;
+    wideWitnessSources=plan.wideWitnessSources??0;
     planPos=nowPos;lastPlanFrame=frame;
    }
   }
@@ -262,7 +275,7 @@ export function createCaveFarWallGpu(gl,{bounds=C6_FAR_BOUNDS}={}){
     let data=null;
     try{
      data=meshDepthSection(world,c.cx,c.cz,c.section);
-     for(const join of [c.companion,c.seamCompanion].filter(Boolean)){
+     for(const join of [c.companion,c.seamCompanion,c.wideWitnessCompanion].filter(Boolean)){
       // Genuine world.get rock from a real source-ray-certified adjacent
       // section: four existing GPU buffers and 1MiB total remain unchanged.
       const second=meshDepthSection(world,join.cx,join.cz,join.section);
@@ -299,8 +312,8 @@ export function createCaveFarWallGpu(gl,{bounds=C6_FAR_BOUNDS}={}){
  }
  function stats(){
   return {chunks:buffers.size,bytes,pending:[...wanted.keys()].filter(k=>!buffers.has(k)).length,
-   uploads,failures,uncovered,farRock,sourceSamples,joinedSources,seamSources,
-   sourceSections:buffers.size+joinedSources+seamSources,budgetExcluded,lastMeshMs,
+   uploads,failures,uncovered,farRock,sourceSamples,joinedSources,seamSources,wideWitnessSources,
+   sourceSections:buffers.size+joinedSources+seamSources+wideWitnessSources,budgetExcluded,lastMeshMs,
    vertices:[...buffers.values()].reduce((n,c)=>n+c.count,0),
    maxChunks:bounds.maxChunks,maxBytes:bounds.maxBytes};
  }

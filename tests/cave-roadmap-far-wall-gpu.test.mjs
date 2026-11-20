@@ -109,11 +109,17 @@ test('C6 wide original Fan source rock is covered in exactly four real GPU buffe
  // 11,10,-7 GPU buffer as one allowed lower-section seam slice.
  assert.equal(world.get(182,-116,169),BLOCK.DEEPSTONE);
  const westRoof=plan.selected.find(c=>c.key==='11,10,-7');
- assert.equal(westRoof?.seamCompanion?.key,'11,10,-8',
-  'Screen-ray-certified lower rock must share existing western Fan GPU buffer');
- assert.equal(plan.seamSources,1);
- assert.equal(plan.pending.some(c=>c.key==='11,10,-8'),false,
-  'Real sky-covering lower rock must no longer be pending');
+ const middleRoof=plan.selected.find(c=>c.key==='12,10,-7');
+ assert.equal(world.get(194,-116,162),BLOCK.DEEPSTONE);
+ assert.equal(middleRoof?.seamCompanion?.key,'12,10,-8',
+  'Original screenshot-proven middle rock seam must remain rendered');
+ assert.equal(westRoof?.wideWitnessCompanion?.key,'11,10,-8',
+  'Western screenshot-proven lower rock must share the existing GPU slot');
+ assert.equal(plan.joinedSources,1);
+ assert.equal(plan.seamSources,1,'Original strict one-seam cap remains');
+ assert.equal(plan.wideWitnessSources,1,'At most one extra real wide source slice');
+ assert.equal(plan.pending.some(c=>c.key==='11,10,-8'||c.key==='12,10,-8'),false,
+  'Both physical lower sky-covering slices must be resident');
  const g=fakeGl(),far=createCaveFarWallGpu(g.gl);
  const near=complete(camera);
  for(let frame=30;frame<43;frame++)far.step({
@@ -127,7 +133,8 @@ test('C6 wide original Fan source rock is covered in exactly four real GPU buffe
  assert.equal(state.failures,0);
  assert.equal(state.joinedSources,1);
  assert.equal(state.seamSources,1);
- assert.equal(state.sourceSections,6,'Only four GPU buffers with two real joined rock sections');
+ assert.equal(state.wideWitnessSources,1);
+ assert.equal(state.sourceSections,7,'Four buffers must count all seven physical source sections');
  assert.ok(state.sourceSamples<=3264&&state.bytes>0&&state.bytes<=1048576);
  assert.equal(g.uploaded.length,4);
  assert.equal(g.uploaded.reduce((sum,n)=>sum+n,0),state.bytes);
@@ -220,7 +227,8 @@ test('C6 far opaque draw uses genuine 36-byte packed source mesh and exact caps'
  assert.ok(s.chunks<=4);
  assert.ok(s.joinedSources<=1);
  assert.ok(s.seamSources<=C6_FAR_BOUNDS.maxSeamSources);
- assert.equal(s.sourceSections,s.chunks+s.joinedSources+s.seamSources);
+ assert.ok(s.wideWitnessSources<=C6_FAR_BOUNDS.maxWideWitnessSources);
+ assert.equal(s.sourceSections,s.chunks+s.joinedSources+s.seamSources+s.wideWitnessSources);
  assert.ok(s.bytes>0&&s.bytes<=1048576);
  assert.ok(s.vertices>0);
  assert.equal(g.uploaded.reduce((n,v)=>n+v,0),s.bytes);

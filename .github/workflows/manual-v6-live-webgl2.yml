@@ -175,7 +175,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  original-home-screen-same-install-rc8:
+  original-home-screen-same-install-rc9:
     runs-on: ubuntu-24.04
     timeout-minutes: 65
     env:
@@ -202,13 +202,13 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-      - name: Prove exact original installed Home Screen app upgrades to RC8 without new install or data loss
+      - name: Prove exact original installed Home Screen app upgrades to RC9 without new install or data loss
         run: node tests/app-update-browser.mjs
       - name: Preserve real old-to-new same-install offline screenshots and recovery evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mythwrought-five-system-same-original-home-screen-RC8
+          name: mythwrought-five-system-same-original-home-screen-RC9
           path: artifacts/pwa-safe-refresh/
           if-no-files-found: warn
           retention-days: 14
