@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: '22'
       - name: Verify original source compiler and six-slot 4B preservation
-        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave1.test.mjs
+        run: node --test --test-concurrency=1 tests/building-pool/roadmap-d/d0-ownership-fence.test.mjs tests/building-pool/roadmap-d/d1-original-institutions-wave1.test.mjs
       - name: Require a real Chromium binary (no mock or screenshot substitution)
         run: |
           command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
