@@ -54,6 +54,31 @@ try{
    assert.equal(await page.locator('#explorationOverlay').isVisible(),true);
    await page.locator('#closeExploration').click();
    assert.equal(await page.locator('#explorationOverlay').isVisible(),false);
+   // Exercise the real iPhone-sized three-row menu and dynamic Creative
+   // inventory without mocked selectors or a second app-rendering harness.
+   if(width===956){
+     await page.locator('#menu').click();
+     assert.equal(await page.locator('#help').isVisible(),true);
+     assert.equal(await page.locator('#playerMenu .player-menu-row').count(),3,
+       'The user-facing menu must contain only Test Code, time and New World');
+     await page.getByRole('button',{name:'RETURN TO GAME'}).click();
+     await page.locator('#creativeToggle').click();
+     assert.equal(await page.locator('#creativeInventoryToggle').isVisible(),true);
+     await page.locator('#creativeInventoryToggle').click();
+     assert.equal(await page.locator('#creativeInventory').isVisible(),true);
+     assert.equal(await page.locator('.mw-inventory-category').count(),10);
+     assert.equal(await page.locator('.mw-inventory-grid button').count(),48,
+       'Source-driven inventory must use bounded initial rendering');
+     await page.locator('.mw-inventory-category').filter({hasText:'Creatures'}).click();
+     assert.equal(await page.locator('.mw-inventory-grid button').count(),40,
+       'All 40 genuine live creature spawn sigils must be present');
+     await page.locator('.mw-inventory-grid [data-key="spawn:horse"]').click();
+     assert.match(await page.locator('.mw-inventory-preview').textContent(),/Horse/);
+     await page.locator('.mw-inventory-close').click();
+     assert.equal(await page.locator('#creativeInventory').isVisible(),false);
+     await page.locator('#creativeToggle').click();
+     assert.equal(await page.locator('#creativeToggle').getAttribute('aria-pressed'),'false');
+   }
    // Genuine CDP touchstart/touchend makes a precise double-tap even when
    // software WebGL2 is slow; Playwright locator.tap() can insert long layout
    // waits *between* taps that are not part of an actual user's double-tap.
