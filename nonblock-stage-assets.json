@@ -1,5 +1,5 @@
 {
-  "version": "20261120-v25",
+  "version": "20261120-v26",
   "assets": {
     "./src/mobs/animal-interactions.mjs": "e04f6692fc93ef6c44711cb10eafab261ceb7488383e55bf95067de724f99113",
     "./src/mobs/behavior.mjs": "4a65b4ca044a47e70a164929e2ce4552f0d11f811a61c3da5607de87ef1a7bfb",
@@ -202,7 +202,7 @@
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
     "./src/app-update.mjs": "0147a855a346029d64f7bbec505b1150b30f225eca12f62749b3c128c4ecf3b1",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
-    "./src/main.mjs": "f1ee2d318cf37394730216af9d378cc57d06755d043f0dd859dab34854ad5620",
+    "./src/main.mjs": "0c50c2ff8316326ac9d1dc035ef587d47e6ef7bcdd342cb844c6868fb96baad8",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
     "./src/manual-biomes/exploration-ink.mjs": "9c16ec1277c762a328331e17d7aab61a55152dc601844473a8a7a85577dac5ed",
     "./src/manual-biomes/m2-runtime-bridge.mjs": "a01dbf2e99639238cd2647e07fea39cd7372aa47c07f4194fc9e91a16f207ebb",
@@ -265,7 +265,7 @@
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "718c946759e7ea30206bcf94b825a540a5a8ada2b8325ce7aee98bb776814dfb",
     "./sw-m5.js": "b9a5ea052e180c0ce528011833d2fe08204e9e38c7f0c35ed66ff0f5536edac3",
-    "./src/nonblock/staged-habitats.mjs": "70dd0acc0c475e9844ca9d4ffa795494bffa2fe2136dba44be34761476067dd9",
+    "./src/nonblock/staged-habitats.mjs": "cffaea5b457a89b5f96f4de49c6b61a1364fa8c3bf1bf05bcc77196e1ecbe82d",
     "./src/environment-ground.mjs": "3b7e0c070b6a7b833c4cbbc6b406cc7342aac1236b6ec5b3f57f5dc533703692",
     "./src/manual-biomes/environment-v7.mjs": "16f50e2546fa184691eaa722947d9745d783a313862f09e34fb1d70eddb87e8a",
     "./src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
@@ -302,6 +302,6 @@
     "./src/nonblock-scene48/undergrowth-phase1.mjs": "96607a48f2ed3146d3d0bc4b94dbf1fc81d4c6206a37a5c962854493d6e7b61f",
     "./src/nonblock-scene48/woodland-sapling.mjs": "6a3e8a61d67908261107a22e085082d4887a75decbd819a8ceb769a6256593ed",
     "./src/nonblock-scene48/woodland-shrub.mjs": "2419aed3138df3256e302b40f068079f6c89e51cf58d8a73b2df4fade2a803f5",
-    "./sw-nonblock-stage.js": "ae1d49069edff4c92a03cca8241a6b99a16d46199d5d68a901571327a1304bd7"
+    "./sw-nonblock-stage.js": "26b451161e9d4e3c97859fe1dfa38dc7343f2162955f9505dce387c1755ef5ae"
   }
 }

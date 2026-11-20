@@ -33,3 +33,20 @@ test('live physical occupants and excavated supports exclude streamed placement'
   assert.ok(world.set(x,y-1,z,BLOCK.AIR));
   assert.ok(!planEnvironmentalScenery(world,0,0).find(same));
 });
+
+test('streamed cave specimens use existing rock and do not relocate after a mount is mined',()=>{
+  const seed=179,world=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
+  const first=planEnvironmentalScenery(world,0,0,{caveSection:0});
+  assert.ok(first.length>=2);
+  const shard=first.find(item=>item.sceneId==='nonblock:e:crystal-shard');
+  assert.ok(shard);
+  const specimen=describeCandidateObject(seed,shard);
+  const [x,y,z]=shard.anchor;
+  assert.equal(world.get(x,y,z),BLOCK.AIR);
+  assert.ok(specimen.supports.every(cell=>world.get(...cell)===BLOCK.STONE));
+  const adjacent=planEnvironmentalScenery(world,1,0,{caveSection:0});
+  assert.ok(adjacent.some(item=>describeCandidateObject(seed,item).instanceKey===specimen.instanceKey));
+  assert.ok(world.set(...specimen.supports[0],BLOCK.AIR));
+  const cut=planEnvironmentalScenery(world,0,0,{caveSection:0});
+  assert.ok(!cut.some(({anchor})=>anchor[0]===x&&anchor[2]===z));
+});

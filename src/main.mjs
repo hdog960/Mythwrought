@@ -152,7 +152,9 @@ function start(nonblockStage=null){
     if(storageReadOnly)return null;
     const streamed=nonblockStage.habitat&&world.base?.generationProfile?.generator===M7_ENVIRONMENT_GENERATOR;
     const cx=streamed?chunkCoord(player.x):0,cz=streamed?chunkCoord(player.z):0;
-    const center=streamed?cx+','+cz:null;
+    const roof=streamed?terrainHeight(Math.floor(player.x),Math.floor(player.z),world.seed)-2:null;
+    const caveSection=streamed&&player.feet<roof?Math.floor(player.feet/8):null;
+    const center=streamed?cx+','+cz+(caveSection===null?'':':'+caveSection):null;
     if(nonblockWorld!==world||nonblockChunk!==center){
       nonblockWorld=world;
       nonblockChunk=center;
@@ -161,7 +163,7 @@ function start(nonblockStage=null){
         const worldId=caveSession?.profile??world.base?.generationProfile?.generator??'legacy';
         const placed=(x,y,z)=>Boolean(manual14.layer.get([x,y,z])||pack3.getAt(x,y,z)||
           pack5Builder?.layer.cell([x,y,z])||world.getPack2State?.(x,y,z));
-        const layout=streamed?nonblockStage.habitat(world.base,cx,cz,{occupied:placed}):nonblockStage.layout;
+        const layout=streamed?nonblockStage.habitat(world.base,cx,cz,{occupied:placed,caveSection}):nonblockStage.layout;
         nonblockScene=nonblockStage.module.createCandidateScene(world.seed,worldId,layout,{
           storage:localStorage,
           blockAt:(x,y,z)=>{
