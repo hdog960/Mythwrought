@@ -26,6 +26,7 @@ jobs:
           node-version: '22'
       - name: New market native source acceptance
         run: node --test tests/building-pool/roadmap-c-trades/wave1-desert-market.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave1-trade-all-pool-d4.test.mjs
       - name: Pinned Chromium install
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
