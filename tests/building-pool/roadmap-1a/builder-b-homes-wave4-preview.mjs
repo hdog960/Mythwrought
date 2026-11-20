@@ -1,4 +1,7 @@
 import {getBuilderBHomesWave4} from '../../../src/building-pool/roadmap-1a/builder-b-homes-wave4.mjs';
+import {makeM2DiagnosticMesh} from './m2-preview-mesh.mjs';
+import {makeM2SourceAABBMesh} from './m2-source-aabb-mesh.mjs';
+import {fitM2Camera} from './m2-preview-camera.mjs';
 const buildings=getBuilderBHomesWave4();
 const unique=new Map(buildings.map(b=>[b.id,b]));
 if(unique.size!==1)throw Error('Builder B mountain Wave4 preview requires the one new 1A source');
