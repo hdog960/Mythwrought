@@ -9,12 +9,12 @@ const adjacent = (a,b) => distance(a,b)===1;
 const safeAdd=(a,b,label)=>{const sum=a+b;if(!Number.isSafeInteger(sum))throw Error(label+' overflow');return sum;};
 export function solveResonance({nodes=[], generators=[], devices=[], stores=[], tick=0}={}) {
   nonneg(tick,'tick');
-  const all=[...nodes,...generators,...devices,...stores];
+  // Cap all candidate work, not just conductors: consumers otherwise make each tick unbounded.\n  for (const [name,items] of [['nodes',nodes],['generators',generators],['devices',devices],['stores',stores]]) {\n    if (!Array.isArray(items) || items.length > 2048) throw Error(name+' budget exceeded');\n  }\n  const all=[...nodes,...generators,...devices,...stores];
   const ids=new Set(), positions=new Set();
   for(const n of all) {
     if(typeof n.id!=='string'||!n.id||ids.has(n.id)) throw Error('duplicate/invalid id');
     ids.add(n.id);
-    if(!n.anchor||!['x','y','z'].every(k=>Number.isSafeInteger(n.anchor[k]))) throw Error('anchor');
+    if(!n.anchor||!['x','y','z'].every(k=>Number.isSafeInteger(n.anchor[k]) && Math.abs(n.anchor[k])<=1000000)) throw Error('anchor bounds');
     if(n.kind==='channel'||n.kind==='wireless') {
       if(positions.has(key(n.anchor))) throw Error('duplicate conductor anchor');
       positions.add(key(n.anchor));
