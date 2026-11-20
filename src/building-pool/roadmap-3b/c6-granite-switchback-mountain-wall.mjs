@@ -90,7 +90,10 @@ export function createCGraniteSwitchbackCityWall(){
     points:Array.from({length:14},(_,i)=>[23,i+1])}],
    roadwaySockets:[{x:23,z:1,width:2,facing:'north'},{x:23,z:14,width:2,facing:'south'}],
    junctionSockets:vertices.slice(0,-1).map(([x,z],i)=>({x,y:7,z,name:'ridge-break-'+(i+1)})),
-   mountainTerrainSupportRequired:true,creatorApproved:false
+   mountainTerrainSupportRequired:true,
+   terrainConstraints:{mountainPlateauRequired:true,minUnderwallSupport:1,
+    levelEntranceGradeRequired:0,terrainCutbackCertificationPending:true},
+   creatorApproved:false
   },
   features:[{name:'unpowered northern ridge gate',position:[23,2,4],assetRef:null,
    unresolvedDependency:'Physical gate, terrain cutbacks and road/gradient join pending'},
