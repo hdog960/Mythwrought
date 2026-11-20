@@ -35,6 +35,9 @@ try{
     const oldVault=await page.evaluate(raw=>
       import('./src/vault.mjs').then(mod=>mod.createVaultBackup(raw)),original);
     assert.equal(oldVault.seed,179);
+    const oldMirror=await page.evaluate(raw=>
+      import('./src/mirror.mjs').then(mod=>mod.writeMirror(raw)),original);
+    assert.equal(oldMirror.seed,179,'Genuine original mirror did not persist');
     await page.reload({waitUntil:'domcontentloaded',timeout:30000});
     await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
     assert.equal(await page.locator('#help').isVisible(),true,
@@ -75,6 +78,33 @@ try{
     assert.equal(await page.evaluate(async id=>
       (await import('./src/vault.mjs')).inspectVaultBackup(id).then(x=>x.raw),oldVault.id),
       original,'Rejected vault deletion removed or corrupted historical snapshot');
+    // The opt-in legacy mirror may hold a previous good copy that exists only
+    // in IndexedDB. Read the archived selected seed, never the V6 preview seed.
+    assert.equal(await page.locator('#mirrorCheck').isVisible(),true,
+      'Protected startup hid the original IndexedDB mirror export');
+    for(const id of ['mirrorSync','mirrorRestore','mirrorEnabled'])
+      assert.equal(await page.locator('#'+id).isEnabled(),false,
+        'Read-only mirror write control unexpectedly enabled: '+id);
+    await page.locator('#mirrorCheck').click();
+    await page.waitForFunction(()=>
+      document.getElementById('mirrorStatus').textContent.includes('Seed 179 (archived read-only)'),
+      undefined,{timeout:15000});
+    await page.locator('#mirrorPrepare').click();
+    await page.locator('#mirrorDownload').waitFor({state:'visible',timeout:15000});
+    const mirrorDownload=page.waitForEvent('download',{timeout:20000});
+    await page.locator('#mirrorDownload').click();
+    const mirrored=await mirrorDownload;
+    assert.equal(readFileSync(await mirrored.path(),'utf8'),original,
+      'IndexedDB mirror downloaded different legacy save bytes');
+    const deniedMirror=await page.evaluate(async()=>{
+      await document.getElementById('mirrorRestore').onclick();
+      return document.getElementById('mirrorStatus').textContent;
+    });
+    assert.match(deniedMirror,/Protected older-world preview/,
+      'Direct mirror restore was not rejected in real protected-world handler');
+    assert.equal(await page.evaluate(async()=>
+      (await import('./src/mirror.mjs')).getMirrorCopy(179).then(x=>x.raw)),
+      original,'Rejected mirror restore corrupted the archived verified snapshot');
     const downloadPromise=page.waitForEvent('download',{timeout:20000});
     await page.locator('.player-safety-archive').click();
     const download=await downloadPromise;
