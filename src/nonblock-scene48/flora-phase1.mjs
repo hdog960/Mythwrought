@@ -18,23 +18,31 @@ export function sceneVariant(seed, x, y, z, id) {
   return {yaw:(h&3)*Math.PI/2, scale:0.88+((h>>>4)&15)/100, bend:((h>>>8)&7)/70-0.05, variant:(h>>>12)&3};
 }
 // Each triangle has 3 positions (xyz) and a palette index; no textures, alpha sorting or draw-per-leaf.
-function builder(){const positions=[],materials=[];return {positions,materials,tri(a,b,c,m){positions.push(...a,...b,...c);materials.push(m);},quad(a,b,c,d,m){this.tri(a,b,c,m);this.tri(a,c,d,m);},finish(){return {positions:new Float32Array(positions),materials:new Uint8Array(materials),triangleCount:materials.length};}};}
+function builder(distant){const positions=[],materials=[];return {positions,materials,distant,tri(a,b,c,m){positions.push(...a,...b,...c);materials.push(m);},quad(a,b,c,d,m){this.tri(a,b,c,m);this.tri(a,c,d,m);},finish(){return {positions:new Float32Array(positions),materials:new Uint8Array(materials),triangleCount:materials.length};}};}
 function leaf(b,x,y,z,dx,dy,dz,w,m){
   const p=[x,y,z], tip=[x+dx,y+dy,z+dz], side=[-dz*w,0,dx*w];
   b.tri(p,[x+dx*.48+side[0],y+dy*.46,z+dz*.48+side[2]],tip,m);
   b.tri(p,tip,[x+dx*.48-side[0],y+dy*.46,z+dz*.48-side[2]],m);
 }
 const TAU=2*Math.PI;
+function bladeFaces(b,base,left,center,right,tip,material){
+ if(b.distant){
+  b.tri(base,left,right,material);
+  b.tri(tip,right,left,material+1);
+  return;
+ }
+ b.tri(base,left,center,material);
+ b.tri(base,center,right,material+1);
+ b.tri(center,left,tip,material);
+ b.tri(center,tip,right,material+1);
+}
 function blade(b,base,angle,reach,height,width,material) {
  const [x,y,z]=base, dx=Math.cos(angle), dz=Math.sin(angle);
  const center=[x+dx*reach*.48,y+height*.60,z+dz*reach*.48];
  const tip=[x+dx*reach,y+height,z+dz*reach];
  const left=[center[0]-dz*width,center[1]-width*.21,center[2]+dx*width];
  const right=[center[0]+dz*width,center[1]-width*.21,center[2]-dx*width];
- b.tri(base,left,center,material);
- b.tri(base,center,right,material+1);
- b.tri(center,left,tip,material);
- b.tri(center,tip,right,material+1);
+ bladeFaces(b,base,left,center,right,tip,material);
 }
 
 function stalk(b,[x,y,z],[tx,ty,tz],width,material) {
@@ -177,10 +185,7 @@ function clover(b,v) {
    const tip=[x+dx*reach,h+.026,z+dz*reach];
    const left=[center[0]-dz*.035,h+.026,center[2]+dx*.035];
    const right=[center[0]+dz*.035,h+.026,center[2]-dx*.035];
-   b.tri(base,left,center,1);
-   b.tri(base,center,right,2);
-   b.tri(center,left,tip,1);
-   b.tri(center,tip,right,2);
+   bladeFaces(b,base,left,center,right,tip,1);
   }
  }
 }
@@ -196,19 +201,19 @@ function sedge(b,v) {
   const a=v.bend+i*Math.PI,x=Math.cos(a)*.086,z=Math.sin(a)*.086;
   const height=.59+i*.07+v.variant*.032;
   stalk(b,[x,0,z],[x,height,z],.011,2);
-  ring(b,[x,z],[[height-.083,.019,13],[height-.05,.037,13],
-   [height+.021,.016,14]],5,a);
+  if(b.distant)ring(b,[x,z],[[height-.05,.037,13],[height+.021,.016,14]],3,a);
+  else ring(b,[x,z],[[height-.083,.019,13],[height-.05,.037,13],[height+.021,.016,14]],5,a);
  }
 }
 const makers={'scene48:clover-clump':clover,'scene48:meadow-sedge':sedge,'scene48:lavender-spike':lavender,'scene48:heather-sprig':heather,'scene48:low-grass':grass,'scene48:short-fern':fern,'scene48:single-wildflower':flower,'scene48:button-mushroom':mushroom};
-export function createSceneMesh(id,seed,x,y,z,requestedVariant){
+export function createSceneMesh(id,seed,x,y,z,requestedVariant,{distant=false}={}){
  const v=sceneVariant(seed,x,y,z,id);
  if(requestedVariant!==undefined){
   if(!Number.isInteger(requestedVariant)||requestedVariant<0||requestedVariant>3)
    throw new RangeError('Invalid flora variant');
   v.variant=requestedVariant;
  }
- const b=builder();
+ const b=builder(distant);
  makers[id](b,v);
  return {id,anchor:[x,y,z],variant:v,mesh:b.finish(),attachment:SCENE_FAMILIES[id].attachment,collision:'pass-through'};
 }

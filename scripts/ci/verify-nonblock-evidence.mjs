@@ -11,7 +11,8 @@ import {EFFECT_IDS} from '../../src/nonblock/candidate-effects.mjs';
 export const stageEvidenceGroups=Object.freeze([
   'nonblock-runtime','nonblock-catalog','nonblock-meadow-woodland','nonblock-enchanted-fungi',
   'nonblock-caves','nonblock-inherited-extra','nonblock-world-props','nonblock-physical-fittings',
-  'nonblock-effects','nonblock-offline','nonblock-cache-recovery','nonblock-habitat','forest-floor-review-after'
+  'nonblock-effects','nonblock-offline','nonblock-cache-recovery','nonblock-habitat',
+  'forest-floor-review-after','nonblock-lod'
 ]);
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sizes=new Set(['667x375','844x390','932x430']);

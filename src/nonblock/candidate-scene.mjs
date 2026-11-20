@@ -4,6 +4,8 @@ const contract = 'nonblock-object-v1';
 const sidecarVersion = 'mythwrought-nonblock-removals-v1';
 const maxObjects = 32;
 const maxTombstones = 4096;
+const farEnterDistanceSquared=16**2;
+const farExitDistanceSquared=13**2;
 export function readCandidateLayout(url) {
   if (!['localhost','127.0.0.1'].includes(url.hostname)) return null;
   const encoded = url.searchParams.get('nonblock-stage');
@@ -32,6 +34,19 @@ function validAnchor(anchor) {
     anchor.every(value => Number.isInteger(value) && Math.abs(value) < 10_000);
 }
 
+function placeMesh(mesh,origin,orientation){
+  if(mesh.positions.length!==mesh.triangleCount*9||mesh.triangleCount<1||
+     mesh.triangleCount>256||!mesh.positions.every(Number.isFinite))throw new TypeError('Invalid nonblock source mesh');
+  const positions=new Float32Array(mesh.positions.length);
+  for(let i=0;i<positions.length;i+=3){
+    const [x,z]=rotation(mesh.positions[i],mesh.positions[i+2],orientation);
+    positions[i]=origin[0]+x;
+    positions[i+1]=origin[1]+mesh.positions[i+1];
+    positions[i+2]=origin[2]+z;
+  }
+  return positions;
+}
+
 export function describeCandidateObject(seed, placement) {
   const {sceneId,anchor,variant=0,orientation=0} = placement ?? {};
   const family = families.get(sceneId);
@@ -45,9 +60,6 @@ export function describeCandidateObject(seed, placement) {
   const source = family.build ? family.build(options) :
     {mesh:family.mesh(options),palette:family.palette,colliders:[]};
   const {mesh} = source;
-  if (mesh.positions.length!==mesh.triangleCount*9 || mesh.triangleCount<1 ||
-      mesh.triangleCount>256 || !mesh.positions.every(Number.isFinite))
-    throw new TypeError('Invalid nonblock source mesh');
 
   const [wallX,wallZ] = rotation(0,-1,orientation);
   const [ax,ay,az] = anchor;
@@ -70,21 +82,21 @@ export function describeCandidateObject(seed, placement) {
     return [Math.min(left,right)+origin[0],box[1]+origin[1],Math.min(back,front)+origin[2],
       Math.max(left,right)+origin[0],box[4]+origin[1],Math.max(back,front)+origin[2]];
   });
-  const positions = new Float32Array(mesh.positions.length);
+  const positions=placeMesh(mesh,origin,orientation);
   const min = [Infinity,Infinity,Infinity];
   const max = [-Infinity,-Infinity,-Infinity];
-  for (let i=0;i<positions.length;i+=3) {
-    const [x,z] = rotation(mesh.positions[i],mesh.positions[i+2],orientation);
-    positions[i] = origin[0]+x;
-    positions[i+1] = origin[1]+mesh.positions[i+1];
-    positions[i+2] = origin[2]+z;
-    for (let axis=0;axis<3;axis++) {
-      min[axis] = Math.min(min[axis],positions[i+axis]);
-      max[axis] = Math.max(max[axis],positions[i+axis]);
-    }
+  for(let i=0;i<positions.length;i+=3)for(let axis=0;axis<3;axis++){
+    min[axis]=Math.min(min[axis],positions[i+axis]);
+    max[axis]=Math.max(max[axis],positions[i+axis]);
   }
+  const distantMesh=family.distantMesh?.(options);
+  const farDetail=distantMesh?{
+    sceneId,instanceKey,palette:source.palette,positions:placeMesh(distantMesh,origin,orientation),
+    materials:distantMesh.materials,detail:'far'
+  }:null;
   return {contract,sceneId,seed,anchor:[...anchor],variant,orientation,instanceKey,supports,min,max,colliders,
-    positions,materials:mesh.materials,palette:source.palette,climbable:source.climbable===true,embedDepth:family.embedDepth??0};
+    positions,materials:mesh.materials,palette:source.palette,farDetail,
+    climbable:source.climbable===true,embedDepth:family.embedDepth??0};
 }
 
 function sub(a,b) { return a.map((value,i)=>value-b[i]); }
@@ -181,6 +193,7 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
   const solid = objects.filter(o=>o.colliders.length>0);
   const ladders = objects.filter(o=>o.climbable);
   const issued = new WeakSet();
+  const distantObjects=new Set();
   let uncertain = false;
   let epoch = 0;
   const mounted=object=>!removed.has(object.instanceKey)&&canAttach(object,blockAt,editedAt);
@@ -213,11 +226,22 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
   function pick(origin,direction,max=6){return pickFrom(origin,direction,max);}
   function frame(origin,direction){
     const [x,y,z]=origin;
-    const nearby=objects.filter(object=>{
+    const nearby=[],drawn=[];
+    for(const object of objects){
       const [a,b,c]=object.anchor;
-      return (a-x)**2+(b-y)**2+(c-z)**2<32**2&&mounted(object);
-    });
-    return {objects:nearby,hit:direction?pickFrom(origin,direction,6,nearby):null};
+      const distanceSquared=(a-x)**2+(b-y)**2+(c-z)**2;
+      if(distanceSquared>=32**2||!mounted(object))continue;
+      nearby.push(object);
+      const threshold=distantObjects.has(object)?farExitDistanceSquared:farEnterDistanceSquared;
+      if(object.farDetail&&distanceSquared>threshold){
+        distantObjects.add(object);
+        drawn.push(object.farDetail);
+      }else{
+        distantObjects.delete(object);
+        drawn.push(object);
+      }
+    }
+    return {objects:drawn,hit:direction?pickFrom(origin,direction,6,nearby):null};
   }
   function breakHit(hit,origin,direction) {
     if (!issued.has(hit) || hit.epoch!==epoch || recovered || uncertain || removed.size>=maxTombstones) return false;

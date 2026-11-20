@@ -32,9 +32,17 @@ const forestPalette = [[.37,.26,.16],[.28,.48,.24],[.49,.58,.29],[.62,.69,.37]];
 const barkPalette = [[.36,.25,.17],[.50,.34,.20]];
 const groundCoverPalette = [[.22,.35,.22],[.36,.48,.25],[.52,.61,.32],[.61,.66,.40]];
 const fungiPalette = [null,null,null,null,[.81,.69,.56],[.64,.30,.40]];
+const distantFlora=new Set(['scene48:low-grass','scene48:short-fern','scene48:clover-clump','scene48:meadow-sedge']);
 
 function floraFamily(mesh,palette) {
   return {lane:'48',mesh,palette};
+}
+
+function authoredFloraFamily(sceneId){
+  const mesh=({seed,anchor,variant},options)=>createSceneMesh(sceneId,seed,...anchor,variant,options).mesh;
+  const family=floraFamily(mesh,floraPalette);
+  if(distantFlora.has(sceneId))family.distantMesh=options=>mesh(options,{distant:true});
+  return family;
 }
 
 function forestFamily(maker,palette) {
@@ -74,8 +82,7 @@ export const candidateFamilies = new Map([
     sceneId==='scene48:crawling-ivy'||sceneId==='scene48:trail-vine')),
   ...ENCHANTED_FUNGI_IDS.map(sceneId=>newFloraFamily(sceneId,createEnchantedFungus,
     sceneId==='scene48:shelf-fungus'||sceneId==='scene48:glowing-vine')),
-  ...Object.keys(SCENE_FAMILIES).map(sceneId=>[sceneId,floraFamily(
-    ({seed,anchor,variant})=>createSceneMesh(sceneId,seed,...anchor,variant).mesh,floraPalette)]),
+  ...Object.keys(SCENE_FAMILIES).map(sceneId=>[sceneId,authoredFloraFamily(sceneId)]),
   ...Object.keys(UNDERGROWTH_FAMILIES).map(sceneId=>[sceneId,floraFamily(
     ({seed,anchor})=>makeUndergrowthMesh(sceneId,seed,...anchor).mesh,
     sceneId.endsWith('toadstools')?fungiPalette:groundCoverPalette)]),

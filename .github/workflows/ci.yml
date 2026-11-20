@@ -116,6 +116,7 @@ jobs:
           node tests/nonblock-cache-recovery-browser.mjs
           node tests/nonblock-habitat-browser.mjs
           NONBLOCK_REVIEW_SET=forest-floor NONBLOCK_REVIEW_LABEL=after NONBLOCK_REVIEW_ORIGIN=http://127.0.0.1:4173 node tests/nonblock-foliage-review-browser.mjs
+          node tests/nonblock-lod-browser.mjs
           node scripts/ci/verify-nonblock-evidence.mjs
       - name: Advisory queue health snapshot
         if: always()

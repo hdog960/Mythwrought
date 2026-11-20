@@ -96,3 +96,12 @@ The old moss read as a checkerboard tile in the near game view. The revised foot
 | Mixed oblique view | [View](gallery/forest-floor-refinement/before/mixed-oblique.png) | [View](gallery/forest-floor-refinement/after/mixed-oblique.png) | 64 → 86 |
 
 The two-family sample used 6,912 packed vertex bytes before and 9,288 after. The revision removes the moss's coincident faces. Close-up silhouette is visible on the grass fixture. Final contrast on stone and at device-scale view distance is open.
+
+## Distant foliage comparison
+
+The same four plants use 332 triangles at close range in both builds. The distant pass uses 186 triangles. It flattens thin leaves and simplifies sedge seed heads within the same source bounds. The matched standing views preserve the grove composition at both distances. Individual blades are small at the distant pose. Chromium observed one batch and 25 terrain chunks at both distances, and the effect attached to the fern remained active. [Before source and observations](gallery/foliage-lod/before/manifest.json) · [After source and observations](gallery/foliage-lod/after/manifest.json)
+
+| View | Before | After |
+| --- | --- | --- |
+| Near | [View](gallery/foliage-lod/before/near.png) | [View](gallery/foliage-lod/after/near.png) |
+| Far | [View](gallery/foliage-lod/before/far.png) | [View](gallery/foliage-lod/after/far.png) |

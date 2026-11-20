@@ -107,6 +107,7 @@ function start(nonblockStage=null){
   }
   let pack3=createPack3LiveBridge(world,localStorage);
   let nonblockWorld,nonblockScene,nonblockBuffer,nonblockDrawKey='',nonblockVertexCount=0;
+  let nonblockParents=new Set();
   let effectBuffer,effectBytes=0,effectVertexCount=0,lastEffectUpload=-Infinity;
 
   function stagedScene(){
@@ -149,7 +150,7 @@ function start(nonblockStage=null){
     const saveState=scene?(scene.recovered?'recovered':'ready'):'unavailable';
     if(canvas.dataset.nonblockSaveState!==saveState)canvas.dataset.nonblockSaveState=saveState;
     const {objects,hit}=scene?.frame(origin,help.hidden?facing():null)??{objects:[],hit:null};
-    const key=objects.map(o=>o.instanceKey).join('|');
+    const key=objects.map(o=>o.instanceKey+(o.detail==='far'?'#far':'')).join('|');
     if(key!==nonblockDrawKey){
       const vertices=nonblockStage.module.candidateVertices(objects);
       try{
@@ -158,6 +159,7 @@ function start(nonblockStage=null){
         nonblockBuffer=next;
         nonblockVertexCount=vertices.length/9;
         nonblockDrawKey=key;
+        nonblockParents=new Set(objects.map(o=>o.instanceKey));
       }catch(error){
         // An upload failure must not expose selectable invisible scenery.
         if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
@@ -169,6 +171,7 @@ function start(nonblockStage=null){
         canvas.dataset.nonblockTarget='';
         canvas.dataset.nonblockVertices='0';
         canvas.dataset.nonblockInstances='0';
+        canvas.dataset.nonblockFarInstances='0';
         console.warn('Nonblock staging geometry upload failed',error);
         return null;
       }
@@ -183,6 +186,7 @@ function start(nonblockStage=null){
     }
     canvas.dataset.nonblockVertices=String(nonblockVertexCount);
     canvas.dataset.nonblockInstances=String(objects.length);
+    canvas.dataset.nonblockFarInstances=String(objects.filter(o=>o.detail==='far').length);
     canvas.dataset.nonblockGpuBytes=String(nonblockVertexCount*36);
     canvas.dataset.nonblockDrawCalls=String(Number(Boolean(nonblockBuffer)));
     canvas.dataset.nonblockTarget=hit?.instanceKey??'';
@@ -191,7 +195,7 @@ function start(nonblockStage=null){
   function drawStagedEffects(now){
     if(now-lastEffectUpload>=65){
       lastEffectUpload=now;
-      const parents=new Set(nonblockBuffer?nonblockDrawKey.split('|'):[]);
+      const parents=nonblockBuffer?nonblockParents:new Set();
       const effects=nonblockStage.effects({
         seconds:now/1000,seed:world.seed,viewer:eye(),parents
       });
