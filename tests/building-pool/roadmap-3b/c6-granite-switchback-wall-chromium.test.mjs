@@ -15,7 +15,7 @@ const root=resolve('.');
 const viewports=[[667,375],[844,390],[932,430]];
 const designs=['city-wall:mountain:small'];
 const views=['exterior','cutaway'];
-const output=resolve('artifacts/roadmap-c-3b-granite-switchback-city-wall/chromium-webgl2-source');
+const output=resolve('artifacts/roadmap-c-3b-granite-switchback-wall/chromium-webgl2-source');
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 
 async function findChrome(){
@@ -139,14 +139,14 @@ test('C6 original closed city wall captures six genuine Chromium WebGL2 exterior
      gpuError:data.gpuError,pngBytes:png.length,sha256});
    }
   }
-  assert.equal(reports.length,6,'6 distinct second-variation M3 city-wall source views required');
+  assert.equal(reports.length,6,'6 authentic Granite Switchback original mountain city-wall source views required');
   assert.equal(new Set(reports.map(r=>r.filename)).size,6);
   assert.equal(new Set(reports.map(r=>r.sha256)).size,6,'nonunique source PNG screenshot evidence');
   const exactSourceCommit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   assert.match(exactSourceCommit,/^[0-9a-f]{40}$/);
   const sourceModulePath='src/building-pool/roadmap-3b/c6-granite-switchback-mountain-wall.mjs';
   const sourceModuleSha256=createHash('sha256').update(await readFile(sourceModulePath)).digest('hex');
-  const summary={exactSourceCommit,sourceModulePath,sourceModuleSha256,source:'Roadmap C Granite Switchback original temperate small city-wall source-cube evidence',renderer:'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES',
+  const summary={exactSourceCommit,sourceModulePath,sourceModuleSha256,source:'Roadmap C Granite Switchback original mountain small city-wall source-cube evidence',renderer:'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES',
    physicalFamilyShapesRendered:false,creatorArtApproved:false,physicalIPhoneTested:false,
    count:reports.length,reports};
   await writeFile(join(output,'acceptance.json'),JSON.stringify(summary,null,2)+'\n');
