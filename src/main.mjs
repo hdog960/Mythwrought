@@ -2429,6 +2429,14 @@ function start(){
   // secondary copy, and only while the player has enabled this preference.
   const mirrorEnabledCheck=document.getElementById('mirrorEnabled');
   const mirrorButtons=[...document.querySelectorAll('.mirror-settings button')];
+  // During a protected current-gen preview, the last-selected historical
+  // seed is an ARCHIVE SOURCE, never the preview's randomly chosen seed.
+  // Reads of checked IndexedDB snapshots remain legal; writes never are.
+  function mirrorInspectionSeed(){
+    if(!storageReadOnly)return world.seed;
+    const archived=localStorage.getItem(SELECTED_SEED_KEY);
+    return archived===null?DEFAULT_WORLD_SEED:worldSeedFromText(archived);
+  }
   let mirrorBusy=false;
   mirrorEnabledCheck.checked=mirrorEnabled;
   mirrorStatus.textContent=mirrorEnabled?
@@ -2472,9 +2480,15 @@ function start(){
     try{await action();}
     catch(error){mirrorStatus.textContent='Mirror operation refused: '+String(error.message||error)+
       '. Check the current world and exported backups before retrying.';}
-    finally{mirrorBusy=false;mirrorButtons.forEach(button=>button.disabled=false);}
+    finally{
+      mirrorBusy=false;
+      mirrorButtons.forEach(button=>{
+        button.disabled=storageReadOnly&&['mirrorSync','mirrorRestore'].includes(button.id);
+      });
+    }
   }
   document.getElementById('mirrorSync').onclick=()=>withMirror(async()=>{
+    if(storageReadOnly)throw Error('Protected older-world preview: mirror sync is disabled; inspect or export the checked archived copy instead');
     const raw=verifiedLiveBytes(),seed=world.seed;
     await settleMirrorWrites();
     const result=await queueMirror(seed,raw);
@@ -2483,22 +2497,23 @@ function start(){
   });
   document.getElementById('mirrorCheck').onclick=()=>withMirror(async()=>{
     await settleMirrorWrites();
-    const state=await inspectMirror(world.seed);
-    if(!state.exists){mirrorStatus.textContent='No device mirror for seed '+world.seed+'. Save and SYNC to make one.';return;}
+    const seed=mirrorInspectionSeed();
+    const state=await inspectMirror(seed);
+    if(!state.exists){mirrorStatus.textContent='No device mirror for seed '+seed+'. Save and SYNC to make one.';return;}
     const summarize=(label,slot)=>label+': '+(slot===null?'absent':
       slot.valid?'verified, '+slot.edits+' edits, '+slot.createdAt:'DAMAGED ('+slot.error+')');
-    mirrorStatus.textContent='Seed '+world.seed+' — '+
+    mirrorStatus.textContent='Seed '+seed+(storageReadOnly?' (archived read-only)':'')+' — '+
       summarize('latest',state.current)+'; '+summarize('previous',state.previous)+
       '. No restoration performed.';
   });
   mirrorSlot.addEventListener('change',clearMirrorDownload);
   document.getElementById('mirrorPrepare').onclick=()=>withMirror(async()=>{
-    if(world.base instanceof FourRegionWorld)
+    if(!storageReadOnly&&world.base instanceof FourRegionWorld)
       throw Error('Use profile-safe WORLD EXPORT for four-biome backups; this mirror contains only legacy schema-1 bytes');
     await settleMirrorWrites();
-    const selectedSeed=world.seed,selectedVersion=mirrorSlot.value;
+    const selectedSeed=mirrorInspectionSeed(),selectedVersion=mirrorSlot.value;
     const snap=await getMirrorCopy(selectedSeed,selectedVersion);
-    if(world.seed!==selectedSeed)throw Error('Active world changed during export; select this seed again');
+    if(mirrorInspectionSeed()!==selectedSeed)throw Error('Archived world selection changed during mirror export; retry without modifying saves');
     mirrorDownloadUrl=URL.createObjectURL(new Blob([snap.raw],{type:'application/json'}));
     mirrorDownload.href=mirrorDownloadUrl;
     mirrorDownload.download='mythwrought-mirror-seed-'+selectedSeed+'-'+selectedVersion+'.json';
@@ -2506,6 +2521,7 @@ function start(){
     mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap the separate DOWNLOAD link to export this original schema-1 JSON file.';
   });
   document.getElementById('mirrorRestore').onclick=()=>withMirror(async()=>{
+    if(storageReadOnly)throw Error('Protected older-world preview: mirror restoration is disabled; download the checked archived snapshot instead');
     if(world.base instanceof FourRegionWorld||readFourRegionProfile(localStorage,world.seed))
       throw Error('Refusing legacy mirror restore on a four-biome profile; generation identity would be lost');
     if(storageReadOnly)throw Error('Read-only startup protection active; use the regular IMPORT flow to repair damaged saved bytes');
