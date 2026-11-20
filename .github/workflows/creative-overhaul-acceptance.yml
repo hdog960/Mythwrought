@@ -25,6 +25,8 @@ jobs:
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # genuine historical installed worker upgrade fixtures
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -50,6 +52,9 @@ jobs:
           curl --fail --silent http://127.0.0.1:4174/ > /dev/null
           node tests/creative-integration/world-safety-browser.mjs
           node tests/creative-integration/g2b-browser.mjs
+          # Genuine old-to-current Home Screen upgrade, previous-good cache,
+          # selected V6 save and ZERO network requests after offline reload.
+          node tests/app-update-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
