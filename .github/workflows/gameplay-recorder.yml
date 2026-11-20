@@ -19,6 +19,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -31,11 +33,17 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
+      - name: Install and require real MP4/WebM probe and decoder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffprobe -version
+          ffmpeg -version
       - name: Real WebGL2 three and ten-second video capture
         run: |
           python3 -m http.server 4173 >/tmp/mythwrought-recorder.log 2>&1 &
           node tests/gameplay-recorder-browser.mjs
-      - name: Preserve authentic test images
+      - name: Preserve two actual encoded video files, screenshot, SHA256 and probe manifest
         if: always()
         uses: actions/upload-artifact@v4
         with:

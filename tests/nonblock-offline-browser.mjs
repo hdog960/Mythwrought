@@ -35,7 +35,7 @@ try{
     Number(document.querySelector('#scene').dataset.nonblockInstances)===value,n,{timeout:30000});
   await count(page,2);
   await page.waitForFunction(()=>navigator.serviceWorker.controller?.scriptURL.endsWith(
-    '/sw-m5.js?nonblock-staging=1'),null,{timeout:12000});
+    '/sw-nonblock-stage.js?nonblock-staging=1'),null,{timeout:12000});
   cachedAssets=await page.evaluate(async()=>{
     const cacheKeys=(await caches.keys()).filter(key=>key.startsWith('mythwrought-nonblock-stage-shell-'));
     if(cacheKeys.length!==1)throw Error('Missing dedicated versioned stage cache');
@@ -112,7 +112,7 @@ try{
   await browser.close();
 }
 const sourceSha256=Object.fromEntries(await Promise.all(
-  ['sw-m5.js','src/main.mjs','src/nonblock/stage-offline.mjs','tests/nonblock-offline-browser.mjs']
+  ['sw-nonblock-stage.js','src/main.mjs','src/nonblock/stage-offline.mjs','tests/nonblock-offline-browser.mjs']
     .map(async file=>[file,createHash('sha256').update(await readFile(file)).digest('hex')])
 ));
 await writeFile(directory+'/manifest.json',JSON.stringify({

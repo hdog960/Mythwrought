@@ -16,7 +16,9 @@ The retrospective audit inspected all 43 inherited meshes. The staged quality pa
 
 ## Production and source provenance
 
-GitHub Pages reports a successful build of `64245c76a9e265f17bf387e3fd209bbfc9f6d950`, the same SHA as current `main`. The latest numbered automation incorporation is [015](
+The current published baseline is the five-system RC11 release at `8de40ca8451b6268cfdfefaa5d9a66b72caca799`. The baseline and source heads below record the original inheritance audit. The RC11 reconciliation keeps the published cache worker and installation identity intact. [RC11 release and same-install rehearsal](release-hold.md#published-rc11-baseline)
+
+At the original audit, GitHub Pages and `main` resolved to `64245c76a9e265f17bf387e3fd209bbfc9f6d950`. The latest numbered automation incorporation at that baseline was [015](
 https://github.com/hdog960/Mythwrought/commit/1f67efc9805e83866549515ffdad4dc7e225b234), which makes the physical biome130 blocks available to builders. The later [PR #232](
 https://github.com/hdog960/Mythwrought/pull/232) removed eight noninteractive scenery families from default terrain and provides the common divergence point for the newer non-block producers and coordinator. The baseline also contains the accepted manual four-biome work, the recorder and the V6 biome update. [Published source](https://github.com/hdog960/Mythwrought/actions/runs/44580805478)
 

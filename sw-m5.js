@@ -2,16 +2,61 @@
 // Not a world save/migration or a new generator; CacheStorage remains separate
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
-const workerUrl=new URL(self.location.href);
-const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
-  workerUrl.searchParams.get('nonblock-staging')==='1';
-const CACHE_PREFIX=staging?'mythwrought-nonblock-stage-shell-':'mythwrought-m5-shell-';
-const STAGE_VERSION='20261119-v21';
-const STAGE_PREVIOUS_VERSION='20261119-v20';
-const STAGE_MANIFEST='./nonblock-stage-assets.json';
-const CACHE_NAME=CACHE_PREFIX+(staging?STAGE_VERSION:'20261119-v6-recorder-v1');
-const PREVIOUS_STAGE_CACHE=CACHE_PREFIX+STAGE_PREVIOUS_VERSION;
+const CACHE_PREFIX='mythwrought-m5-shell-';
+const CACHE_NAME=CACHE_PREFIX+'20261120-five-systems-rc11';
+const ASSET_RELEASE='20261120-five-systems-rc11';
 const SOURCE_ASSETS=[
+  "./src/mobs/animal-interactions.mjs",
+  "./src/mobs/behavior.mjs",
+  "./src/mobs/combat.mjs",
+  "./src/mobs/companion.mjs",
+  "./src/mobs/ecology.mjs",
+  "./src/mobs/engine.mjs",
+  "./src/mobs/familiar-wildlife.mjs",
+  "./src/mobs/host-view.mjs",
+  "./src/mobs/hostile-tactics.mjs",
+  "./src/mobs/live-game.mjs",
+  "./src/mobs/live-render.mjs",
+  "./src/mobs/movement.mjs",
+  "./src/mobs/navigation.mjs",
+  "./src/mobs/original-wildlife.mjs",
+  "./src/mobs/roster-persistence.mjs",
+  "./src/mobs/species.mjs",
+  "./src/mobs/world-query.mjs",
+  "./mob-preview/familiar-models.mjs",
+  "./mob-preview/hostile-models.mjs",
+  "./mob-preview/models.mjs",
+  "./mob-preview/mythwrought-hostile-models.mjs",
+  "./mob-preview/original-models.mjs",
+  "./src/auto-integration-support/cave-clearance-proof.mjs",
+  "./src/auto-integration-support/cave-entrance-contract.mjs",
+  "./src/auto-integration-support/cave-socket-conflicts.mjs",
+  "./src/auto-integration-support/cave-transition-provenance.mjs",
+  "./src/auto-integration-support/snapshot-route-proof.mjs",
+  "./src/cave-approaches/upper-network.mjs",
+  "./src/deep-cave-network.mjs",
+  "./src/deep-vault-galleries.mjs",
+  "./src/east-gallery-cave.mjs",
+  "./src/manual-caves/c6-far-wall-gpu.mjs",
+  "./src/manual-caves/cave-voxel-world.mjs",
+  "./src/manual-caves/deep-vault-bridges.mjs",
+  "./src/manual-caves/east-gallery-intake.mjs",
+  "./src/manual-caves/entrance-preflight.mjs",
+  "./src/manual-caves/game-startup-contract.mjs",
+  "./src/manual-caves/named-destination-audit.mjs",
+  "./src/manual-caves/opt-in-runtime.mjs",
+  "./src/manual-caves/preview.mjs",
+  "./src/manual-caves/profile-store.mjs",
+  "./src/manual-caves/source-composition.mjs",
+  "./src/manual-caves/surface-transition.mjs",
+  "./src/underground-switchback-descent.mjs",
+  "./src/sky-atmosphere.mjs",
+  "./src/sky-biome-adapter.mjs",
+  "./src/sky-events.mjs",
+  "./src/sky-moons.mjs",
+  "./src/sky-stars.mjs",
+  "./src/world-clock.mjs",
+  "./src/sky-v6-adapter.mjs",
   "./",
   "./assets/icon.svg",
   "./index.html",
@@ -160,6 +205,7 @@ const SOURCE_ASSETS=[
   "./src/interactions/shape-edit-transaction.mjs",
   "./src/layout.mjs",
   "./src/live-voxel-world.mjs",
+  "./src/app-update.mjs",
   "./src/gameplay-recorder.mjs",
   "./src/main.mjs",
   "./src/manual-biomes/desert-m3.mjs",
@@ -225,127 +271,134 @@ const SOURCE_ASSETS=[
   "./styles.css",
   "./sw-m5.js"
 ];
-if(staging)SOURCE_ASSETS.push(
-  "./src/nonblock/candidate-effects.mjs",
-  "./src/nonblock/candidate-families.mjs",
-  "./src/nonblock/candidate-scene.mjs",
-  "./src/nonblock/physical-fittings.mjs",
-  "./src/nonblock/stage-offline.mjs",
-  "./src/nonblock/staged-inherited-families.mjs",
-  "./src/nonblock-environments24/agave-rosette.mjs",
-  "./src/nonblock-environments24/branching-crystal-cluster.mjs",
-  "./src/nonblock-environments24/column-cactus.mjs",
-  "./src/nonblock-environments24/geode-opening.mjs",
-  "./src/nonblock-environments24/mineral-encrustation.mjs",
-  "./src/nonblock-environments24/prickly-pear-cactus.mjs",
-  "./src/nonblock-environments24/alpine-wildflower.mjs",
-  "./src/nonblock-environments24/cave-formations.mjs",
-  "./src/nonblock-environments24/cave-rubble-cluster.mjs",
-  "./src/nonblock-environments24/desert-bloom.mjs",
-  "./src/nonblock-environments24/desert-scrub.mjs",
-  "./src/nonblock-environments24/dwarf-juniper.mjs",
-  "./src/nonblock-environments24/frost-fern.mjs",
-  "./src/nonblock-environments24/pebble-scatter.mjs",
-  "./src/nonblock-environments24/saltgrass.mjs",
-  "./src/nonblock-environments24/snowgrass.mjs",
-  "./src/nonblock-environments24/tumblebrush.mjs",
-  "./src/nonblock-fittings36/fittings-phase1.mjs",
-  "./src/nonblock-fittings36/world-props.mjs",
-  "./src/nonblock-scene48/enchanted-fungi.mjs",
-  "./src/nonblock-scene48/flora-phase1.mjs",
-  "./src/nonblock-scene48/forest-lichen-patch.mjs",
-  "./src/nonblock-scene48/forest-moss-mat.mjs",
-  "./src/nonblock-scene48/forest-phase1-candidates.mjs",
-  "./src/nonblock-scene48/meadow-woodland.mjs",
-  "./src/nonblock-scene48/undergrowth-phase1.mjs",
-  "./src/nonblock-scene48/woodland-sapling.mjs",
-  "./src/nonblock-scene48/woodland-shrub.mjs",
-);
-const scopeUrl=new URL(self.registration.scope);
-const assetUrls=SOURCE_ASSETS.map(p=>new URL(p,scopeUrl).href);
-const manifestUrl=new URL(STAGE_MANIFEST,scopeUrl).href;
-const allowed=new Set(staging?[...assetUrls,manifestUrl]:assetUrls);
-
-function cacheRequest(url){
-  return new Request(url,{cache:'reload',credentials:'same-origin'});
-}
-
-async function populateStagedBank(cache){
-  const manifestRequest=cacheRequest(manifestUrl);
-  const response=await fetch(manifestRequest);
-  if(!response.ok)throw new Error('Staged cache manifest unavailable');
-  const manifest=await response.clone().json();
-  if(manifest?.version!==STAGE_VERSION||typeof manifest.assets!=='object'||
-    Object.keys(manifest.assets??{}).length!==SOURCE_ASSETS.length||
-    SOURCE_ASSETS.some(path=>!/^[a-f0-9]{64}$/.test(manifest.assets[path]??'')))
-    throw new Error('Staged cache manifest does not cover this source shell');
-  for(let i=0;i<assetUrls.length;i+=12){
-    await Promise.all(assetUrls.slice(i,i+12).map(async (url,index)=>{
-      const path=SOURCE_ASSETS[i+index];
-      const request=cacheRequest(url),asset=await fetch(request);
-      if(!asset.ok)throw new Error('Staged asset unavailable '+path);
-      const bytes=await asset.clone().arrayBuffer();
-      const hash=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
-      const sha=[...hash].map(n=>n.toString(16).padStart(2,'0')).join('');
-      if(sha!==manifest.assets[path])throw new Error('Staged asset changed '+path);
-      await cache.put(request,asset);
-    }));
-  }
-  await cache.put(manifestRequest,response);
-}
+const assetUrls=SOURCE_ASSETS.map(p=>new URL(p,self.registration.scope).href);
+const allowed=new Set(assetUrls);
 
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
     const cache=await caches.open(CACHE_NAME);
-    // The manifest is written last. An installed version already owns this
-    // bank, so a different worker served under its version cannot replace it.
-    if(staging&&await cache.match(manifestUrl))
-      throw new Error('Staged cache version already has a verified bank');
     try {
-      // Full app shell + all runtime JS modules, including cold v5 profile
-      // imports. Small bounded groups avoid throttling low-power iPhones.
-      if(staging)await populateStagedBank(cache);
-      else for(let i=0;i<assetUrls.length;i+=12)
-        await cache.addAll(assetUrls.slice(i,i+12).map(cacheRequest));
-      // Only an entirely verified installation can replace an older worker.
+      // Fetch all assets from a query-versioned origin URL. An older active
+      // cache-first worker can otherwise serve OLD index.html/main.mjs to this
+      // new install. Old workers deliberately bypass any query request.
+      // Cache under CANONICAL query-free URLs for genuine offline operation.
+      // Fail atomically if even one source is missing; preserve previous-good.
+      // Earlier genuine V6 WebGL2 run #44626707681 documented a
+      // 180-second install stuck on a ZERO-entry candidate cache.
+      // The old 12-wide Promise.all waited for EVERY response BEFORE writing
+      // even the first entry. Stream each verified source into CacheStorage
+      // promptly and reduce simultaneous fetch/cache work to six requests,
+      // preserving the exact full-shell and previous-good atomic contracts.
+      // Do NOT allow an incomplete shell to activate or mix with older code.
+      const batchWidth=6;
+      for(let i=0;i<assetUrls.length;i+=batchWidth){
+        const written=await Promise.allSettled(
+          assetUrls.slice(i,i+batchWidth).map(async url=>{
+            try{
+              const freshUrl=new URL(url);
+              freshUrl.searchParams.set('mw-cache-install',CACHE_NAME);
+              const response=await fetch(new Request(freshUrl.href,{
+                cache:'reload',credentials:'same-origin'
+              }));
+              if(!response.ok||response.type==='opaque')
+                throw Error('HTTP '+response.status);
+              await cache.put(url,response);
+            }catch(error){
+              throw Error('Cannot verify/cache original source '+url+
+                ' in batch '+Math.floor(i/batchWidth)+': '+String(error));
+            }
+          }));
+        const failed=written.find(result=>result.status==='rejected');
+        if(failed)throw failed.reason;
+      }
+      // Cache existence is not installation success. Prove the entire atomic
+      // shell, including authentic REC and same-install release marker, first.
+      const files=await cache.keys();
+      const index=await cache.match(new URL('index.html',self.registration.scope).href);
+      const html=index?await index.text():'';
+      if(files.length!==allowed.size||
+          !html.includes('data-mw-release="'+ASSET_RELEASE+'"')||
+          !html.includes('id="captureToggle"'))
+        throw Error('Incomplete/mismatched PWA shell: cached='+
+          files.length+' expected='+allowed.size+
+          ' index='+Boolean(index));
+      // Only a fully verified new shell can replace the previous-good worker.
       await self.skipWaiting();
     }catch(error){
-      await caches.delete(CACHE_NAME);
+      // Two install/update attempts can overlap on the SAME cache name.
+      // A failed late attempt must not erase a complete, already verified
+      // shell installed by another attempt. Preserve only a genuinely
+      // complete, REC-capable immutable shell; incomplete shells fail closed.
+      let complete=false;
+      try {
+        const current=await caches.open(CACHE_NAME);
+        const keys=await current.keys();
+        if(keys.length===allowed.size){
+          const response=await current.match(new URL('index.html',
+            self.registration.scope).href);
+          const html=response?await response.text():'';
+          complete=html.includes('data-mw-release="'+ASSET_RELEASE+'"')&&
+            html.includes('id="captureToggle"');
+        }
+      }catch(verifyError){
+        console.error('MYTHWROUGHT PWA FAILED CACHE VERIFICATION',
+          String(verifyError));
+      }
+      console.error('MYTHWROUGHT PWA ATOMIC INSTALL FAILED',
+        String(error),'complete-verified-cache-preserved='+complete);
+      if(!complete)await caches.delete(CACHE_NAME);
       throw error;
     }
   })());
 });
-function isOlderStagedBank(key) {
-  const version=/^(\d{8})-v(\d+)$/.exec(key.slice(CACHE_PREFIX.length));
-  if(!version)return false;
-  const [,date,serial]=version;
-  const [currentDate,currentSerial]=STAGE_VERSION.split('-v');
-  return date<currentDate||date===currentDate&&Number(serial)<Number(currentSerial);
-}
-
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
-    const keys=await caches.keys();
-    await Promise.all(keys.filter(k=>
-      k.startsWith(CACHE_PREFIX)&&k!==CACHE_NAME&&
-      // Older workers must leave banks being prepared by a newer worker alone.
-      (!staging||k!==PREVIOUS_STAGE_CACHE&&isOlderStagedBank(k))).map(k=>caches.delete(k)));
+    // Never purge a previous-good game-shell cache during an app upgrade.
+    // The current cache was fully verified before skipWaiting(); keeping the
+    // older shell permits recovery if this browser installation goes wrong.
+    // World saves in localStorage/IndexedDB are never touched by this worker.
     await self.clients.claim();
   })());
 });
 self.addEventListener('fetch',event=>{
-  const req=event.request, url=new URL(req.url);
-  // No arbitrary response fallback, no cross-origin responses, no API/write
-  // interception, and no mutation or caching of personal world save data.
-  const stagedNavigation=staging&&req.mode==='navigate'&&url.origin===scopeUrl.origin&&
-    url.pathname===scopeUrl.pathname&&url.searchParams.has('nonblock-stage')&&
-    url.searchParams.get('nonblock-offline')==='1';
-  const cachedUrl=stagedNavigation?scopeUrl.href:url.href;
-  if(req.method!=='GET'||url.search&&!stagedNavigation||!allowed.has(cachedUrl))return;
+  const req=event.request,url=new URL(req.url);
+  if(req.method!=='GET'||url.origin!==self.location.origin||
+      !url.href.startsWith(self.registration.scope))return;
+  const root=new URL('./',self.registration.scope);
+  const index=new URL('index.html',root);
+  const canonical=new URL(url.href);
+  canonical.search='';canonical.hash='';
+  // Ordinary Home Screen boot uses ONLY the atomically verified cache;
+  // never attempt a network request during an offline M5 reload.
+  // Explicit user-initiated ?mw-refresh=release is online-first.
+  if(req.mode==='navigate'&&(canonical.href===root.href||
+      canonical.href===index.href)){
+    const explicitRefresh=url.searchParams.size===1&&
+      url.searchParams.get('mw-refresh')===ASSET_RELEASE;
+    event.respondWith((async()=>{
+      const cache=await caches.open(CACHE_NAME);
+      const cached=async()=>await cache.match(index.href)||
+        await cache.match(root.href)||Response.error();
+      if(explicitRefresh){
+        if(self.navigator.onLine===false)return cached();
+        try{
+          const fresh=await fetch(req,{cache:'no-store'});
+          if(fresh.ok&&fresh.type!=='opaque')return fresh;
+        }catch(_){}
+      }
+      return await cached();
+    })());return;
+  }
+  // Only exact release-pinned module/CSS URLs are mapped to cached source
+  // for offline use; other query requests bypass this worker.
+  const pinned=url.searchParams.size===1&&
+    url.searchParams.get('mw-release')===ASSET_RELEASE&&
+    (canonical.href===new URL('styles.css',root).href||
+      canonical.href===new URL('src/main.mjs',root).href);
+  if(url.search&&!pinned)return;
+  if(!allowed.has(canonical.href))return;
   event.respondWith((async()=>{
     const cache=await caches.open(CACHE_NAME);
-    // The staged query selects a layout client-side. It shares the cached
-    // shell bytes without creating a cache entry for the query or saved data.
-    return await cache.match(stagedNavigation?cachedUrl:req,{ignoreVary:false})||fetch(req);
+    return await cache.match(canonical.href,{ignoreVary:false})||fetch(req);
   })());
 });

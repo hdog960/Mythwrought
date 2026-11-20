@@ -9,7 +9,7 @@ test('checked-in staged asset manifest matches every source shell byte',async()=
   assert.deepEqual(actual,expected);
   assert.match(actual.version,/^\d{8}-v\d+$/);
   assert.equal(actual.assets['./'],actual.assets['./index.html']);
-  for(const path of ['./src/main.mjs','./sw-m5.js','./src/nonblock/candidate-effects.mjs'])
+  for(const path of ['./src/main.mjs','./sw-m5.js','./sw-nonblock-stage.js','./src/nonblock/candidate-effects.mjs'])
     assert.match(actual.assets[path],/^[a-f0-9]{64}$/);
   assert.ok(Object.keys(actual.assets).length>200);
 });

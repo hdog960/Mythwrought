@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {proveSnapshotRoutes} from '../../src/auto-integration-support/snapshot-route-proof.mjs';
+const fixture=()=>({surface:[{x:0,y:5,z:0}],caves:[{entrance:{x:0,y:5,z:0},path:[{x:0,y:5,z:0},{x:0,y:4,z:0},{x:0,y:3,z:0}],exit:{x:0,y:3,z:0}}],minY:-210,maxY:20});
+test('proves bounded continuous entrance-to-exit snapshot without source claim',()=>{const r=proveSnapshotRoutes(fixture());assert.equal(r.ok,true);assert.match(r.status,/NOT-PRODUCER-VERIFIED/)});
+test('rejects disconnected steps, loops and incorrect exits',()=>{const a=fixture();a.caves[0].path[1].y=3;assert.ok(proveSnapshotRoutes(a).errors.includes('cave:0:disconnected-step'));const b=fixture();b.caves[0].path.push({...b.caves[0].path[1]});assert.ok(proveSnapshotRoutes(b).errors.includes('cave:0:revisited-cell'));const c=fixture();c.caves[0].exit.y=2;assert.ok(proveSnapshotRoutes(c).errors.includes('cave:0:exit-mismatch'))});
+test('rejects absent surface, high entrance and depth overflow',()=>{const a=fixture();a.surface=[];assert.ok(proveSnapshotRoutes(a).errors.includes('cave:0:missing-surface'));const b=fixture();b.surface[0].y=4;assert.ok(proveSnapshotRoutes(b).errors.includes('cave:0:entrance-above-surface'));const c=fixture();c.minY=4;assert.ok(proveSnapshotRoutes(c).errors.includes('cave:0:out-of-bounds'))});
+test('uses exact BigInt adjacency for extreme safe coordinates',()=>{const a=fixture(),x=Number.MAX_SAFE_INTEGER;a.surface=[{x,y:5,z:0}];a.caves=[{entrance:{x,y:5,z:0},path:[{x,y:5,z:0},{x:x-1,y:5,z:0}],exit:{x:x-1,y:5,z:0}}];assert.equal(proveSnapshotRoutes(a).ok,true);a.caves[0].path[1].x=-x;assert.ok(proveSnapshotRoutes(a).errors.includes('cave:0:disconnected-step'))});

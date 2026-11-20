@@ -11,7 +11,7 @@ const prefix='mythwrought-nonblock-stage-shell-';
 const manifestPath='nonblock-stage-assets.json';
 const directory='artifacts/nonblock-cache-recovery';
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
-const originalWorker=await readFile('sw-m5.js','utf8');
+const originalWorker=await readFile('sw-nonblock-stage.js','utf8');
 const originalManifest=JSON.parse(await readFile(manifestPath,'utf8'));
 const version=originalManifest.version;
 const increment=(release,offset)=>release.replace(/v(\d+)$/,(_,n)=>'v'+(Number(n)+offset));
@@ -35,7 +35,7 @@ const releases={
   updated:{version:next,worker:repairedWorker}
 };
 const updateManifest=({version:release,worker})=>({
-  version:release,assets:{...originalManifest.assets,'./sw-m5.js':digest(worker)}
+  version:release,assets:{...originalManifest.assets,'./sw-nonblock-stage.js':digest(worker)}
 });
 const contentTypes={'.html':'text/html','.css':'text/css','.js':'text/javascript','.mjs':'text/javascript',
   '.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png'};
@@ -49,7 +49,7 @@ const server=createServer(async(req,res)=>{
     let body=await readFile(file);
     if(publish!=='original'){
       const release=releases[publish];
-      if(pathname==='/sw-m5.js')body=Buffer.from(release.worker);
+      if(pathname==='/sw-nonblock-stage.js')body=Buffer.from(release.worker);
       if(pathname==='/'+manifestPath)body=Buffer.from(JSON.stringify(updateManifest(release))+'\n');
       if(publish==='broken'&&pathname==='/src/nonblock/candidate-effects.mjs'){
         body=Buffer.concat([body,Buffer.from('\n/* deliberately mismatched staged publish bytes */\n')]);
@@ -98,7 +98,7 @@ try{
   },n,{timeout:45000});
   await count(page,2);
   await page.waitForFunction(()=>navigator.serviceWorker.controller?.scriptURL.endsWith(
-    '/sw-m5.js?nonblock-staging=1'),null,{timeout:45000});
+    '/sw-nonblock-stage.js?nonblock-staging=1'),null,{timeout:45000});
   await page.evaluate(()=>{
     window.__mythwroughtTest.teleport(10.5,5.5);
     window.__mythwroughtTest.aimAtStagedPoint(10.58387,9.6238,7.5254);
@@ -120,7 +120,7 @@ try{
         const manifestUrl=new URL(path,location.href);
         const asset=await bank.match(manifestUrl);
         const artifact=await asset?.json();
-        const worker=await bank.match(new URL('sw-m5.js',location.href));
+        const worker=await bank.match(new URL('sw-nonblock-stage.js',location.href));
         const hash=worker&&new Uint8Array(await crypto.subtle.digest('SHA-256',await worker.arrayBuffer()));
         const sha=hash&&[...hash].map(value=>value.toString(16).padStart(2,'0')).join('');
         const entries=new Set((await bank.keys()).map(request=>request.url));
@@ -129,7 +129,7 @@ try{
           assets.every(assetPath=>entries.has(new URL(assetPath,location.href).href));
         if(artifact?.version!==version||!completeShell)
           throw new Error('Incomplete installed bank '+key+' ('+entries.size+' assets, '+(artifact?.version??'missing manifest')+')');
-        results.push({key,version:artifact.version,workerMatchesManifest:sha===artifact.assets['./sw-m5.js']});
+        results.push({key,version:artifact.version,workerMatchesManifest:sha===artifact.assets['./sw-nonblock-stage.js']});
       }
       return results;
     },{expected,path:manifestPath});
@@ -240,7 +240,7 @@ try{
   await browser.close();
   await new Promise(resolve=>server.close(resolve));
 }
-const paths=['sw-m5.js',manifestPath,'tests/nonblock-cache-recovery-browser.mjs'];
+const paths=['sw-nonblock-stage.js',manifestPath,'tests/nonblock-cache-recovery-browser.mjs'];
 const sourceSha256=Object.fromEntries(await Promise.all(paths.map(async path=>[path,digest(await readFile(path))])));
 await writeFile(directory+'/manifest.json',JSON.stringify({
   version,attemptedVersion:rejectedVersion,repairedVersion:next,rejectedVersionReuse:true,rejectedMismatchedAsset:true,previousShellOpenedOffline:true,

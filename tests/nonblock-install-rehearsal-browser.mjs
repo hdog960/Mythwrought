@@ -87,7 +87,7 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const origin='http://127.0.0.1:'+server.address().port;
 const app=origin+appPath;
 const stage=app+'?nonblock-stage='+encodeURIComponent(JSON.stringify(layout))+'&nonblock-offline=1';
-const worker='sw-m5.js',stagingWorker=worker+'?nonblock-staging=1';
+const worker='sw-m5.js',stagingWorker='sw-nonblock-stage.js?nonblock-staging=1';
 const profile=await mkdtemp(join(tmpdir(),'mythwrought-staged-rehearsal-'));
 const launch=()=>chromium.launchPersistentContext(profile,{
   headless:true,viewport:{width:932,height:430},hasTouch:true,isMobile:true,
@@ -212,7 +212,7 @@ try{
   await rm(profile,{recursive:true,force:true});
   await new Promise(resolve=>server.close(resolve));
 }
-const paths=[...identityFiles,'nonblock-stage-assets.json','tests/nonblock-install-rehearsal-browser.mjs'];
+const paths=[...identityFiles,'sw-nonblock-stage.js','nonblock-stage-assets.json','tests/nonblock-install-rehearsal-browser.mjs'];
 const sourceSha256=Object.fromEntries(await Promise.all(paths.map(async path=>[path,digest(await readFile(path))])));
 await writeFile(directory+'/manifest.json',JSON.stringify({
   baselineRevision,baselineSha256,sourceSha256,appPath,
