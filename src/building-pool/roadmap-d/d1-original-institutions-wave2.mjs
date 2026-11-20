@@ -16,40 +16,58 @@ export const ROADMAP_D_WAVE2_PLANS = Object.freeze([
     ],
     "r": [
       [
-        34,
-        42,
+        32,
+        43,
         1,
         68
       ],
       [
-        5,
+        2,
         35,
-        9,
-        29
+        7,
+        24
       ],
       [
-        42,
-        70,
-        11,
-        30
+        44,
+        73,
+        14,
+        32
       ],
       [
         7,
-        35,
-        45,
-        69
+        37,
+        47,
+        68
       ],
       [
-        42,
-        69,
+        45,
+        74,
         44,
-        70
+        71
+      ],
+      [
+        19,
+        58,
+        24,
+        50
+      ],
+      [
+        1,
+        20,
+        27,
+        43
+      ],
+      [
+        63,
+        75,
+        34,
+        53
       ],
       [
         22,
-        57,
-        28,
-        48
+        55,
+        62,
+        73
       ]
     ],
     "discs": [
@@ -161,7 +179,7 @@ export const ROADMAP_D_WAVE2_PLANS = Object.freeze([
         62
       ]
     ],
-    "roof": "pinewater-crosswise-slate-pavilions-and-round-lantern-courts"
+    "roof": "pinewater-nine-broken-roofline-branch-pavilions-with-open-bridge-observation-courts"
   },
   {
     "t": "schoolhouse",
