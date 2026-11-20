@@ -10,6 +10,8 @@ on:
       - 'tests/building-pool/roadmap-3b/c3-fourwatch-wall*'
       - 'src/building-pool/roadmap-3b/c4-sandglass-fork-desert-barracks.mjs'
       - 'tests/building-pool/roadmap-3b/c4-sandglass-fork-barracks*'
+      - 'tests/building-pool/roadmap-3b/c-all-protected-211-d4.test.mjs'
+      - 'docs/building-pool/roadmap-3b/C_PROTECTED_ACCEPTED211_SOURCE_BLOBS.json'
       - 'src/building-pool/roadmap-3b/c-barracks-settlement-handoff.mjs'
       - 'tests/building-pool/roadmap-3b/c-barracks-settlement-handoff.test.mjs'
       - '.github/workflows/roadmap-c-gatehouse-webgl2.yml'
@@ -49,6 +51,7 @@ jobs:
           node --test tests/building-pool/roadmap-3b/c4-sandglass-fork-barracks.test.mjs
           node --test tests/building-pool/roadmap-3b/c-settlement-handoff.test.mjs
           node --test tests/building-pool/roadmap-3b/c-barracks-settlement-handoff.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-all-protected-211-d4.test.mjs
       - name: Install pinned Chromium
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
