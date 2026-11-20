@@ -535,7 +535,7 @@ export const BUILDER_B_HOMES_WAVE1_SPECS=Object.freeze([
     ],
     "posts": [
       10,
-      17
+      21
     ],
     "detail": "Real asymmetric frozen porch, six connected winter rooms, two stepped roof ridges and rear quiet sleeping room"
   },
