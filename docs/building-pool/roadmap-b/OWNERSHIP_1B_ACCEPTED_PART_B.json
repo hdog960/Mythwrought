@@ -1,0 +1,154 @@
+{
+  "schema": "mythwrought.builder-b.1b.provenance-b.v1",
+  "sourceHead": "6ab800a9cc16f31fdc5655f119979390992effcf",
+  "rows": [
+    {
+      "path": "src/building-pool/roadmap-1b/m2-asymmetric-services.mjs",
+      "sourceBlob": "a84b1694f0492bc09988935e5074948d59232ac7",
+      "ids": [
+        "r1:greenhouse:temperate:medium:001",
+        "r1:greenhouse:desert:large:001",
+        "r1:greenhouse:snow:small:001",
+        "r1:fishing-lodge:temperate:large:001",
+        "r1:fishing-lodge:mountain:medium:001",
+        "r1:harbor-office:desert:small:001",
+        "r1:harbor-office:snow:large:001",
+        "r1:lighthouse:temperate:medium:001",
+        "r1:lighthouse:enchanted-forest:large:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m2-beacon-regions.mjs",
+      "sourceBlob": "71e66fa6eaf364b9ca55f7b632d9ff2fd5fed809",
+      "ids": [
+        "r1:greenhouse:mountain:medium:001",
+        "r1:greenhouse:enchanted-forest:large:001",
+        "r1:greenhouse:snow:large:001",
+        "r1:fishing-lodge:snow:medium:001",
+        "r1:fishing-lodge:enchanted-forest:medium:001",
+        "r1:harbor-office:temperate:large:001",
+        "r1:harbor-office:mountain:medium:001",
+        "r1:lighthouse:desert:large:001",
+        "r1:lighthouse:snow:large:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m2-grove-harbor.mjs",
+      "sourceBlob": "574619bf7c3f9aa89eb2d8922359db6b6f30455d",
+      "ids": [
+        "r1:greenhouse:temperate:large:001",
+        "r1:greenhouse:desert:medium:001",
+        "r1:greenhouse:mountain:small:001",
+        "r1:fishing-lodge:desert:large:001",
+        "r1:fishing-lodge:mountain:small:001",
+        "r1:harbor-office:desert:large:001",
+        "r1:harbor-office:enchanted-forest:large:001",
+        "r1:lighthouse:temperate:small:001",
+        "r1:lighthouse:mountain:large:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m2i-regional-source.mjs",
+      "sourceBlob": "159bec275114ba4f5333e7df06338afca0f6130a",
+      "ids": [
+        "r1:greenhouse:snow:medium:001",
+        "r1:greenhouse:enchanted-forest:medium:001",
+        "r1:greenhouse:desert:small:001",
+        "r1:fishing-lodge:snow:large:001",
+        "r1:fishing-lodge:enchanted-forest:large:001",
+        "r1:harbor-office:mountain:large:001",
+        "r1:harbor-office:snow:small:001",
+        "r1:lighthouse:desert:medium:001",
+        "r1:lighthouse:enchanted-forest:medium:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m2j-regional-source.mjs",
+      "sourceBlob": "2310e6cb50143b59f17b3a917d1f16d5e8eb8011",
+      "ids": [
+        "r1:greenhouse:temperate:small:001",
+        "r1:fishing-lodge:desert:small:001",
+        "r1:fishing-lodge:mountain:large:001",
+        "r1:harbor-office:snow:medium:001",
+        "r1:harbor-office:enchanted-forest:small:001",
+        "r1:harbor-office:desert:medium:001",
+        "r1:lighthouse:snow:small:001",
+        "r1:lighthouse:mountain:medium:001",
+        "r1:lighthouse:temperate:large:001"
+      ]
+    },
+    {
+      "path": "src/building-pool/roadmap-1b/m2k-regional-source.mjs",
+      "sourceBlob": "ebc450dded04b52d8aa90d7f5b6c6b7147053bd6",
+      "ids": [
+        "r1:bathhouse:mountain:medium:001",
+        "r1:farm-barn:mountain:large:001",
+        "r1:fishing-lodge:temperate:medium:001",
+        "r1:fishing-lodge:snow:small:001",
+        "r1:fishing-lodge:enchanted-forest:small:001",
+        "r1:harbor-office:temperate:medium:001",
+        "r1:harbor-office:mountain:small:001",
+        "r1:lighthouse:desert:small:001",
+        "r1:lighthouse:enchanted-forest:small:001"
+      ]
+    }
+  ],
+  "total": 54,
+  "ids": [
+    "r1:bathhouse:mountain:medium:001",
+    "r1:farm-barn:mountain:large:001",
+    "r1:fishing-lodge:desert:large:001",
+    "r1:fishing-lodge:desert:small:001",
+    "r1:fishing-lodge:enchanted-forest:large:001",
+    "r1:fishing-lodge:enchanted-forest:medium:001",
+    "r1:fishing-lodge:enchanted-forest:small:001",
+    "r1:fishing-lodge:mountain:large:001",
+    "r1:fishing-lodge:mountain:medium:001",
+    "r1:fishing-lodge:mountain:small:001",
+    "r1:fishing-lodge:snow:large:001",
+    "r1:fishing-lodge:snow:medium:001",
+    "r1:fishing-lodge:snow:small:001",
+    "r1:fishing-lodge:temperate:large:001",
+    "r1:fishing-lodge:temperate:medium:001",
+    "r1:greenhouse:desert:large:001",
+    "r1:greenhouse:desert:medium:001",
+    "r1:greenhouse:desert:small:001",
+    "r1:greenhouse:enchanted-forest:large:001",
+    "r1:greenhouse:enchanted-forest:medium:001",
+    "r1:greenhouse:mountain:medium:001",
+    "r1:greenhouse:mountain:small:001",
+    "r1:greenhouse:snow:large:001",
+    "r1:greenhouse:snow:medium:001",
+    "r1:greenhouse:snow:small:001",
+    "r1:greenhouse:temperate:large:001",
+    "r1:greenhouse:temperate:medium:001",
+    "r1:greenhouse:temperate:small:001",
+    "r1:harbor-office:desert:large:001",
+    "r1:harbor-office:desert:medium:001",
+    "r1:harbor-office:desert:small:001",
+    "r1:harbor-office:enchanted-forest:large:001",
+    "r1:harbor-office:enchanted-forest:small:001",
+    "r1:harbor-office:mountain:large:001",
+    "r1:harbor-office:mountain:medium:001",
+    "r1:harbor-office:mountain:small:001",
+    "r1:harbor-office:snow:large:001",
+    "r1:harbor-office:snow:medium:001",
+    "r1:harbor-office:snow:small:001",
+    "r1:harbor-office:temperate:large:001",
+    "r1:harbor-office:temperate:medium:001",
+    "r1:lighthouse:desert:large:001",
+    "r1:lighthouse:desert:medium:001",
+    "r1:lighthouse:desert:small:001",
+    "r1:lighthouse:enchanted-forest:large:001",
+    "r1:lighthouse:enchanted-forest:medium:001",
+    "r1:lighthouse:enchanted-forest:small:001",
+    "r1:lighthouse:mountain:large:001",
+    "r1:lighthouse:mountain:medium:001",
+    "r1:lighthouse:snow:large:001",
+    "r1:lighthouse:snow:small:001",
+    "r1:lighthouse:temperate:large:001",
+    "r1:lighthouse:temperate:medium:001",
+    "r1:lighthouse:temperate:small:001"
+  ],
+  "sourceReadOnly": true
+}
