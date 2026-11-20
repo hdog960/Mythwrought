@@ -4,8 +4,12 @@ import {createServer} from 'node:http';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {extname,resolve,sep} from 'node:path';
 import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
+const gitCheckoutHead=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+if(process.env.BUILDER_B_EXPECTED_HEAD && gitCheckoutHead!==process.env.BUILDER_B_EXPECTED_HEAD)
+ throw Error('Not exact-head source checkout: '+gitCheckoutHead+' != '+process.env.BUILDER_B_EXPECTED_HEAD);
 const cwd=process.cwd(),dir='artifacts/builder-b-essentials-two-originals-webgl2',records=[];
 const ids=['r1:farm-barn:temperate:small:004','r1:greenhouse:temperate:small:002'];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
@@ -72,9 +76,10 @@ try{
   const q=records.find(r=>r.id===id&&r.width===width&&r.height===height&&r.view==='cutaway');
   if(!p||!q||q.visibleCells>=p.visibleCells)throw Error('Cutaway not source-backed '+id);
  }
- await writeFile(dir+'/manifest.json',JSON.stringify({schema:'mythwrought.mythwrought.builder-b-essentials-2-originals.webgl2.v1',
-  gitHead:process.env.ROADMAP_B_EXACT_HEAD||null,
+ await writeFile(dir+'/manifest.json',JSON.stringify({schema:'mythwrought.builder-b-essentials-2-originals.webgl2.v1',
+  gitHead:gitCheckoutHead,expectedGitHead:process.env.BUILDER_B_EXPECTED_HEAD||null,
+  exactHeadVerified:Boolean(process.env.BUILDER_B_EXPECTED_HEAD&&gitCheckoutHead===process.env.BUILDER_B_EXPECTED_HEAD),
   countedAsProductionBuilds:false,producerPackAABBsApproved:false,actualPhysicalIPhone:false,
   sourceEvidence,records},null,2));
- console.log('ROADMAP B GENUINE SOURCE WEBGL2 PASS: '+records.length+'/12 with 696 distinct PNG SHA-256');
+ console.log('ROADMAP B GENUINE SOURCE WEBGL2 PASS: '+records.length+'/12 with 12 distinct PNG SHA-256');
 }finally{await browser?.close();server.close();}
