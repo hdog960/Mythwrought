@@ -32,7 +32,7 @@ export function buildReadOnlyGameArchive(storage,now=new Date()){
     payload,checksum:saveFingerprint(payload)});
   // A downloaded archive is evidence; it is NOT a verified playable save.
   return Object.freeze({text,count:entries.length,checksum:saveFingerprint(payload),
-    filename:'mythwrought-all-worlds-'+stamp.slice(0,10)+'.json'});
+    filename:'mythwrought-local-saves-'+stamp.slice(0,10)+'.json'});
 }
 
 export function inspectReadOnlyGameArchive(text){
