@@ -38,7 +38,9 @@ jobs:
             tests/building-pool/roadmap-b/builder-bd-1b-freeze.test.mjs \
             tests/building-pool/roadmap-b/builder-b-essentials-wave1.test.mjs \
             tests/building-pool/roadmap-b/builder-b-essentials-wave2.test.mjs \
-            tests/building-pool/roadmap-b/builder-b-essentials-wave3.test.mjs
+            tests/building-pool/roadmap-b/builder-b-essentials-wave3.test.mjs \
+            tests/building-pool/roadmap-b/builder-b-essentials-wave4.test.mjs \
+            tests/building-pool/roadmap-b/builder-b-glass-rib-spacing.test.mjs
       - name: Install exact pinned standalone visual audit dependencies
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
@@ -59,12 +61,21 @@ jobs:
         env:
           BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
         run: node tests/building-pool/roadmap-b/audit-builder-b-essentials-wave3-gallery.mjs
+      - name: Capture genuine original Meadowstep stable three-size WebGL2 exterior and cutaway source frames
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node tests/building-pool/roadmap-b/builder-b-essentials-wave4-gallery.mjs
+      - name: Independently verify all six Meadowstep PNGs with CRC SHA and exact-head source identity
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node tests/building-pool/roadmap-b/audit-builder-b-essentials-wave4-gallery.mjs
       - name: Export draft-only genuine source frames and independent audit
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: builder-b-essentials-three-originals-18-real-chromium-source-frames
+          name: builder-b-essentials-four-originals-24-real-chromium-source-frames
           path: |
             artifacts/builder-b-essentials-two-originals-webgl2/
             artifacts/builder-b-essentials-wave3-sedgewatch-webgl2/
+            artifacts/builder-b-essentials-wave4-meadowstep-webgl2/
           if-no-files-found: ignore
