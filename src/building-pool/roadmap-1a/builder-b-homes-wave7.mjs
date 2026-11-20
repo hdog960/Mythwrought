@@ -406,7 +406,7 @@ export const BUILDER_B_HOMES_WAVE7_SPECS=Object.freeze([
     ],
     "posts": [
       15,
-      39
+      31
     ],
     "detail": "Real wind-protected staggered mountain terrace source with three truly absent-ground notch courts, seven separately partitioned rooms, physical support beams, one two-cell Pack5 bed and six distinct roof pitch profiles"
   }
