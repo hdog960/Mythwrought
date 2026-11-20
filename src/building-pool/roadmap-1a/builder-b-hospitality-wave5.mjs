@@ -18,18 +18,18 @@ export const BUILDER_B_HOSPITALITY_WAVE5_SPECS=Object.freeze([
         0,
         0,
         14,
-        13
+        18
       ],
       [
         38,
         0,
         52,
-        12
+        7
       ],
       [
         0,
-        36,
-        15,
+        30,
+        12,
         48
       ]
     ],
@@ -446,7 +446,7 @@ export const BUILDER_B_HOSPITALITY_WAVE5_SPECS=Object.freeze([
       18,
       33
     ],
-    "detail": "Eight connected source-authored hospitality rooms, dedicated guest paths, service kitchen, weatherproof asymmetrical rooflines, three true terrain-empty gardens and three two-cell Pack5 bed reservations"
+    "detail": "Eight connected hospitality rooms and three Pack5 beds under asymmetric six-roof massing; unusually deep west arrival courtyard, shallow east balcony recess and narrow southern service yard — source-unique true absent-ground footprint"
   }
 ]);
 export const BUILDER_B_HOSPITALITY_WAVE5_IDS=Object.freeze(BUILDER_B_HOSPITALITY_WAVE5_SPECS.map(s=>
