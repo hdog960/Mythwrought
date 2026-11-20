@@ -368,7 +368,7 @@ export const BUILDER_B_HOMES_WAVE7_SPECS=Object.freeze([
           30
         ],
         "style": "double-hill",
-        "raise": 3
+        "raise": 2
       },
       {
         "name": "south-hearth-double-eave",
