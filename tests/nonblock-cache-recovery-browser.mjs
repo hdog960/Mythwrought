@@ -111,6 +111,30 @@ try{
   const banks=tab=>tab.evaluate(prefix=>caches.keys().then(keys=>
     keys.filter(key=>key.startsWith(prefix)).sort()),prefix);
   const oldBank=prefix+version,newBank=prefix+next;
+  async function verifyCompleteBanks(tab,expected){
+    const cached=await tab.evaluate(async({expected,path})=>{
+      const results=[];
+      for(const {key,version} of expected){
+        if(!await caches.has(key))throw new Error('Missing installed bank '+key);
+        const bank=await caches.open(key);
+        const manifestUrl=new URL(path,location.href);
+        const asset=await bank.match(manifestUrl);
+        const artifact=await asset?.json();
+        const worker=await bank.match(new URL('sw-m5.js',location.href));
+        const hash=worker&&new Uint8Array(await crypto.subtle.digest('SHA-256',await worker.arrayBuffer()));
+        const sha=hash&&[...hash].map(value=>value.toString(16).padStart(2,'0')).join('');
+        const entries=new Set((await bank.keys()).map(request=>request.url));
+        const assets=Object.keys(artifact?.assets??{});
+        const completeShell=entries.delete(manifestUrl.href)&&entries.size===assets.length&&
+          assets.every(assetPath=>entries.has(new URL(assetPath,location.href).href));
+        if(artifact?.version!==version||!completeShell)
+          throw new Error('Incomplete installed bank '+key+' ('+entries.size+' assets, '+(artifact?.version??'missing manifest')+')');
+        results.push({key,version:artifact.version,workerMatchesManifest:sha===artifact.assets['./sw-m5.js']});
+      }
+      return results;
+    },{expected,path:manifestPath});
+    assert.deepEqual(cached,expected.map(bank=>({...bank,workerMatchesManifest:true})));
+  }
   assert.deepEqual(await banks(page),[oldBank,futureBank].sort());
   async function triggerUpdate(tab){
     return tab.evaluate(async()=>{
@@ -171,17 +195,30 @@ try{
     const registration=await navigator.serviceWorker.getRegistration();
     await registration.update();
   });
-  const waitForController=tab=>tab.waitForFunction(expected=>new Promise(resolve=>{
-    const worker=navigator.serviceWorker.controller;
-    if(!worker){resolve(false);return;}
-    const channel=new MessageChannel();
-    const finish=version=>{clearTimeout(timer);channel.port1.close();resolve(version===expected);};
-    const timer=setTimeout(finish,750);
-    channel.port1.onmessage=event=>finish(event.data);
-    worker.postMessage('verify-staged-recovery-controller',[channel.port2]);
-  }),next,{timeout:90000,polling:300});
+  const waitForController=tab=>tab.evaluate(async expected=>{
+    // waitForFunction tests the returned Promise object for truthiness, before
+    // its reply resolves. Poll the actual version reported by the controller.
+    const deadline=performance.now()+90000;
+    while(performance.now()<deadline){
+      const worker=navigator.serviceWorker.controller;
+      if(worker?.state==='activated'){
+        const version=await new Promise(resolve=>{
+          const channel=new MessageChannel();
+          const finish=reply=>{clearTimeout(timer);channel.port1.close();resolve(reply);};
+          const timer=setTimeout(finish,750);
+          channel.port1.onmessage=event=>finish(event.data);
+          worker.postMessage('verify-staged-recovery-controller',[channel.port2]);
+        });
+        if(version===expected&&navigator.serviceWorker.controller===worker)return;
+      }
+      await new Promise(resolve=>setTimeout(resolve,300));
+    }
+    throw new Error('Controlling staged worker did not report '+expected);
+  },next);
   await waitForController(retained);
   assert.deepEqual(await banks(retained),[oldBank,newBank,futureBank].sort());
+  const expectedBanks=[{key:oldBank,version},{key:newBank,version:next}];
+  await verifyCompleteBanks(retained,expectedBanks);
   await retained.close();
   await context.setOffline(true);
   const updated=await context.newPage();
@@ -194,21 +231,7 @@ try{
     const response=await caches.match(new URL('/__future-bank',location.href),{cacheName:key});
     return response?.text();
   },futureBank),'pending');
-  const cachedManifests=await updated.evaluate(async({keys,path})=>
-    Promise.all(keys.map(async key=>{
-      const response=await caches.match(new URL(path,location.href),{cacheName:key});
-      const artifact=await response?.json();
-      const worker=await caches.match(new URL('sw-m5.js',location.href),{cacheName:key});
-      const hash=worker&&new Uint8Array(await crypto.subtle.digest('SHA-256',await worker.arrayBuffer()));
-      return {
-        key,version:artifact?.version,
-        workerMatchesManifest:Boolean(hash&&[...hash].map(value=>value.toString(16).padStart(2,'0')).join('')===artifact?.assets?.['./sw-m5.js'])
-      };
-    })),{keys:[oldBank,newBank],path:manifestPath});
-  assert.deepEqual(cachedManifests,[
-    {key:oldBank,version,workerMatchesManifest:true},
-    {key:newBank,version:next,workerMatchesManifest:true}
-  ]);
+  await verifyCompleteBanks(updated,expectedBanks);
   assert.equal(await updated.evaluate(key=>localStorage.getItem(key),worldKey),saved);
   assert.equal(await updated.evaluate(()=>localStorage.getItem('mythwrought:nonblock-stage:v1:legacy:179')),originalTombstone);
   assert.deepEqual(errors,[]);
