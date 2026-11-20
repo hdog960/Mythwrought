@@ -14,6 +14,9 @@ test('every 1A Builder B wave imports unique real exported original symbols, wit
   const imports=[...body.matchAll(/import\s+\{([^}]+)\}\s+from\s+['"]([^'"]+)['"]/g)];
   assert.ok(imports.length>12,name+' native historical source imports missing');
   for(const found of imports){
+   // Built-in Node imports are real, but not repository source files.
+   // The source-export contract applies ONLY to relative authored modules.
+   if(!found[2].startsWith('./')&&!found[2].startsWith('../'))continue;
    const dependency=resolve(dirname(file),found[2]);
    const source=readFileSync(dependency,'utf8');
    for(const part of found[1].split(',')){
