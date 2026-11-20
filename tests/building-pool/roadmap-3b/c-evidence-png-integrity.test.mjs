@@ -11,11 +11,12 @@ const {PNG}=pngjs;
 const entries=[
  ['roadmap-c-3b-twinstone-gatehouse','r3:gatehouse:temperate:small:1','src/building-pool/roadmap-3b/c1-twinstone-pass-gatehouse.mjs'],
  ['roadmap-c-3b-fourwatch-city-wall','r3:city-wall:temperate:small:1','src/building-pool/roadmap-3b/c3-fourwatch-closed-city-wall.mjs'],
- ['roadmap-c-3b-sandglass-fork-barracks','r3:barracks:desert:medium:2','src/building-pool/roadmap-3b/c4-sandglass-fork-desert-barracks.mjs']
+ ['roadmap-c-3b-sandglass-fork-barracks','r3:barracks:desert:medium:2','src/building-pool/roadmap-3b/c4-sandglass-fork-desert-barracks.mjs'],
+ ['roadmap-c-3b-sunbarrow-gatehouse','r3:gatehouse:desert:small:1','src/building-pool/roadmap-3b/c5-sunbarrow-desert-gatehouse.mjs']
 ];
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const exactHead=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
-test('C 3B three source-specific fortifications have 18 genuine real Chromium PNGs, exact same-head origin, decoded CRCs and unique SHA256',async()=>{
+test('C 3B three source-specific fortifications have 24 genuine real Chromium PNGs, exact same-head origin, decoded CRCs and unique SHA256',async()=>{
  let n=0,shaSet=new Set();
  for(const [dirname,id,sourcePath] of entries){
   const folder=resolve('artifacts',dirname,'chromium-webgl2-source');
@@ -56,6 +57,6 @@ test('C 3B three source-specific fortifications have 18 genuine real Chromium PN
   }
   assert.equal(files.size,6);
  }
- assert.equal(shaSet.size,18);assert.equal(n,18);
- console.log('MYTHWROUGHT_ROADMAP_C_3B_EXACT_HEAD_REAL_PNG_CRC_SHA=18/18 '+exactHead);
+ assert.equal(shaSet.size,24);assert.equal(n,24);
+ console.log('MYTHWROUGHT_ROADMAP_C_3B_EXACT_HEAD_REAL_PNG_CRC_SHA=24/24 '+exactHead);
 });
