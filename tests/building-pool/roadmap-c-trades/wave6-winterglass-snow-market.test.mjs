@@ -58,3 +58,28 @@ test('Winterglass every pavilion entrance and open-plaza landmark is reachable v
    assert.ok(!occupied.has(k(entry.x,y,entry.z)),'fake source clear doorway '+JSON.stringify(entry));
  }
 });
+
+
+test('Winterglass and Desert Caravan original source ground shapes are strictly independent across all eight D4 reflections/rotations, IoU <0.85',async()=>{
+ const {createCDesertSmallMarket}=await import('../../../src/building-pool/roadmap-c-trades/wave1-desert-market.mjs');
+ const desert=createCDesertSmallMarket();
+ const points=x=>x.voxels.filter(v=>v.kind==='floor').map(v=>[v.x,v.z]);
+ const normalize=q=>{
+  const x=Math.min(...q.map(a=>a[0])),z=Math.min(...q.map(a=>a[1]));
+  return new Set(q.map(([xx,zz])=>(xx-x)+','+(zz-z)));
+ };
+ const old=normalize(points(desert)),fresh=points(b);
+ let max=0;
+ for(let mirror=0;mirror<2;mirror++)for(let rot=0;rot<4;rot++){
+  const transformed=normalize(fresh.map(([u,v])=>{
+   let x=mirror?-u:u,z=v;
+   for(let i=0;i<rot;i++){const t=x;x=-z;z=t;}
+   return [x,z];
+  }));
+  let intersection=0;for(const p of transformed)if(old.has(p))intersection++;
+  const iou=intersection/(transformed.size+old.size-intersection);
+  max=Math.max(max,iou);
+  assert.ok(iou<0.85,'C-owned Snow Market too similar to C-owned Desert Market; D4 IoU '+iou);
+ }
+ assert.ok(max>0.5,'unexpected source geometry/witness drift');
+});
