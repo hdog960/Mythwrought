@@ -1,0 +1,44 @@
+name: MYTHWROUGHT Builder D Wave6 genuine source WebGL2 acceptance (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave6.mjs'
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave6*'
+      - 'tests/building-pool/roadmap-d/audit-wave6-gallery.mjs'
+      - 'tests/roadmap-d-wave6.test.mjs'
+      - '.github/workflows/roadmap-d-d6-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-d-wave6-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  builder-d-wave6-real-chromium-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict complete 197-source historic and bi-directional 604 D4 checks
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave6.test.mjs
+      - name: Exact physical-source cube proxy requires a real Chromium binary
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+      - name: Install exact PNG decoding dependency for independent CRC audit
+        run: npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Capture eight real authored structures in Chromium WebGL2 with exterior and section views at three landscape dimensions
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave6-webgl2.test.mjs
+      - name: Independently audit 48 source-specific PNGs, exact SHA/CRC, dimensions, real GL and cutaways
+        run: node tests/building-pool/roadmap-d/audit-wave6-gallery.mjs
+      - name: Upload real source cube geometry screenshots; not final physical Pack or iPhone validation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-wave6-48-true-chromium-webgl2-source-frames
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave6-webgl2-cube-proxy/
+          if-no-files-found: ignore
