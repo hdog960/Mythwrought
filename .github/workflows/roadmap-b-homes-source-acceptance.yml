@@ -1,0 +1,59 @@
+name: MYTHWROUGHT Builder B homes and hospitality exact-head source acceptance
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-1a/builder-b-*'
+      - 'tests/building-pool/roadmap-1a/builder-b-*'
+      - 'tests/building-pool/roadmap-1a/audit-builder-b-current-wave.mjs'
+      - 'docs/building-pool/roadmap-b/**'
+      - '.github/workflows/roadmap-b-homes-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-b-homes-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-and-authentic-chromium:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require exact source HEAD, not synthetic PR merge checkout
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$BUILDER_B_EXPECTED_HEAD"
+      - name: Run genuine original 1A historical uniqueness, native source and physical producer audits
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-1a/builder-b-homes-wave1.test.mjs \
+            tests/building-pool/roadmap-1a/builder-b-hospitality-wave2.test.mjs \
+            tests/building-pool/roadmap-1a/builder-b-inns-wave3.test.mjs \
+            tests/building-pool/roadmap-1a/builder-b-homes-wave4.test.mjs
+      - name: Require actual system Chromium
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+      - name: Install exact PNG decoder for independent CRC audit only
+        run: npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Run true source WebGL2 and Pack1-5 visible-AABB Chromium captures
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node --test tests/building-pool/roadmap-1a/builder-b-current-wave-webgl2.test.mjs
+      - name: Independently verify all 60 PNGs' CRC SHA dimensions, original IDs, and source checkout
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node tests/building-pool/roadmap-1a/audit-builder-b-current-wave.mjs
+      - name: Preserve actual source-only PNG and audit evidence, no creator art approval
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-b-homes-five-originals-60-genuine-chromium-pngs
+          path: artifacts/builder-b-housing-five-originals/
+          if-no-files-found: ignore
