@@ -36,7 +36,8 @@ jobs:
             tests/building-pool/roadmap-1a/builder-b-homes-wave1.test.mjs \
             tests/building-pool/roadmap-1a/builder-b-hospitality-wave2.test.mjs \
             tests/building-pool/roadmap-1a/builder-b-inns-wave3.test.mjs \
-            tests/building-pool/roadmap-1a/builder-b-homes-wave4.test.mjs
+            tests/building-pool/roadmap-1a/builder-b-homes-wave4.test.mjs \
+            tests/building-pool/roadmap-1a/builder-b-hospitality-wave5.test.mjs
       - name: Require actual system Chromium
         run: |
           command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
@@ -58,12 +59,21 @@ jobs:
         env:
           BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
         run: node tests/building-pool/roadmap-1a/audit-builder-b-homes-wave4.mjs
+      - name: Capture Foxglade inn exact-source WebGL2 and Pack-visible-AABB in all three sizes
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node --test tests/building-pool/roadmap-1a/builder-b-hospitality-wave5-webgl2.test.mjs
+      - name: Independently CRC SHA verify 12 real Foxglade source/Pack AABB PNGs
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node tests/building-pool/roadmap-1a/audit-builder-b-hospitality-wave5.mjs
       - name: Preserve actual source-only PNG and audit evidence, no creator art approval
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: builder-b-homes-six-originals-72-genuine-chromium-pngs
+          name: builder-b-homes-seven-originals-84-genuine-chromium-pngs
           path: |
             artifacts/builder-b-housing-five-originals/
             artifacts/builder-b-housing-wave4-single-original/
+            artifacts/builder-b-hospitality-wave5-foxglade/
           if-no-files-found: ignore
