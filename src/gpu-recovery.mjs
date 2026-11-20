@@ -70,3 +70,42 @@ export function uploadChunkBuffer(gl,vertices){
     return buffer;
   }catch(error){gl.deleteBuffer(buffer);throw error;}
 }
+
+// Edit-only GPU staging. A retired, no-longer-published WebGLBuffer may be
+// safely recycled after a frame delay; NEVER write to the currently displayed
+// buffer. The returned staging buffer is still atomically published by caller.
+// When capacity is sufficient, bufferSubData avoids repeated GPU allocations.
+export const MAX_REUSABLE_EDIT_BYTES=256*1024;
+export function uploadEditedChunkBuffer(gl,vertices,spare=null){
+  const bytes=validateChunkUploadBytes(vertices);
+  if(bytes>MAX_REUSABLE_EDIT_BYTES)
+    return {buffer:uploadChunkBuffer(gl,vertices),capacity:bytes};
+  if(!gl||typeof gl.createBuffer!=='function'||typeof gl.bufferSubData!=='function'||
+     typeof gl.getError!=='function')
+    throw Error('No usable WebGL edit upload context');
+  if(spare&&(!spare.buffer||!Number.isInteger(spare.capacity)||
+     spare.capacity<0||spare.capacity>MAX_REUSABLE_EDIT_BYTES))
+    throw Error('Invalid unpublished GPU staging buffer');
+  const buffer=spare?.buffer??gl.createBuffer();
+  if(!buffer)throw Error('GPU edit staging buffer allocation unavailable');
+  let capacity=spare?.capacity??0;
+  try{
+    let cleared=false;
+    for(let i=0;i<8;i++){
+      if(gl.getError()===gl.NO_ERROR){cleared=true;break;}
+    }
+    if(!cleared)throw Error('GPU edit error queue could not drain');
+    gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+    if(capacity<bytes||capacity===0){
+      capacity=4096;
+      while(capacity<bytes)capacity*=2;
+      capacity=Math.min(capacity,MAX_REUSABLE_EDIT_BYTES);
+      gl.bufferData(gl.ARRAY_BUFFER,capacity,gl.DYNAMIC_DRAW);
+    }
+    if(bytes)gl.bufferSubData(gl.ARRAY_BUFFER,0,vertices);
+    const error=gl.getError();
+    if(error!==gl.NO_ERROR)
+      throw Error('WebGL staged edit upload error '+error);
+    return {buffer,capacity};
+  }catch(error){gl.deleteBuffer(buffer);throw error;}
+}
