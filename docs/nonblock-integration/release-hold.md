@@ -1,6 +1,6 @@
 # Home Screen release hold
 
-The active release remains the original GitHub Pages deployment and the installed Home Screen app. The master candidate stays in draft. Its scene and cache switches are loopback-only.
+The active release remains the original GitHub Pages deployment and the installed Home Screen app. The master candidate stays in draft. The candidate uses the standard world flow for the combined generator and keeps its diagnostic scene and cache switches scoped to loopback.
 
 ## Incorporation prerequisites
 
@@ -8,16 +8,16 @@ The active release remains the original GitHub Pages deployment and the installe
 - Run the native suite, original 20 Chromium scripts, staged family browser scripts and artifact verification on one clean revision. Preserve screenshots, exact source digests, measurements and any failed results.
 - Review mixed surface, desert, snow, mountain, enchanted, cave and architectural scenes at all landscape sizes. Record creator art decisions and collect real iPhone measurements and controls evidence.
 - Rehearse a versioned update from the current Home Screen build in an isolated browser profile and on the target iPhone. The rehearsal must start with a populated schema-1 save and representative physical sidecars. It must verify the ordinary shortcut URL, icon, orientation, storage and backup recovery.
-- Verify the production activation plan with new-world opt-in and explicit legacy-world protection. The release candidate's loopback query is a test interface and must stay scoped to development.
+- Verify that ordinary LOAD / CREATE and first launch open the combined generator on an unused seed. Check that saved, explored, and previously selected seeds retain their generation profile.
 - Build the exact-source cache manifest, exercise an interrupted installation and confirm that the previous verified shell can still open offline.
 
 ## Creator-authorized release procedure
 
 Use the existing Pages repository and installation URLs. Recheck the release commit and previous successful Pages build before any incorporation. Publish a new cache identity only with verified manifest bytes. Keep the prior shell available until the new shell is validated through a real same-install cold-open. Keep scene-removal state in its own versioned storage. Confirm untouched worlds and backups by matching their exact saved bytes.
 
-The approved production handoff should give the ordinary startup path a layout only for an explicitly opted-in new world. Keep that choice scoped to the world and generation profile. Resolve its mounts through `planStagedHabitat` and pass the valid layout to the existing scene runtime. The current loopback query remains a local test interface. Include the approved scene assets in the original worker's versioned shell and verify the full manifest from the incorporation revision. Exercise the same update and recovery sequence on a disposable copy of the installed data before creator sign-off.
+The combined generator selects biome, cave, and landmark scenery through its world profile. The original worker caches the approved scene assets in the same installation scope. Verify the full manifest from the incorporation revision and run the update and recovery sequence on a disposable copy of the installed data before creator sign-off.
 
-After publication, verify the Pages commit, app shell and manifest from the original URL. On the installed device test online and offline startup, original controls, Creative and minimap continuity, ordinary block mining, opt-in scenery lifecycle, and opening and exporting an existing world. Record the observed build, device, orientation and source fingerprints.
+After publication, verify the Pages commit, app shell and manifest from the original URL. On the installed device test online and offline startup, original controls, Creative and minimap continuity, ordinary block mining, streamed scenery removal, and opening and exporting an existing world. Record the observed build, device, orientation and source fingerprints.
 
 ## Recovery
 
@@ -38,6 +38,8 @@ Chromium opened the exact published build at the original `/Mythwrought/` path o
 The preloaded schema-1 world, Pack 2 door, generation profile and both previous-good backups matched byte for byte at every phase. The game resolved the same terrain edit and physical door after rollback, and the separate scenery removal stayed stored. The rehearsal ran in Chromium and used a loopback-only staged worker. Acceptance on the original iPhone Home Screen installation remains open. [Source and capture manifest](gallery/install-rehearsal/manifest.json)
 
 The follow-up rehearsal shut down Chromium after rollback and launched a fresh process on the same isolated disk profile. With networking disabled, the original worker opened the shortcut and served its installation assets. The original world, door, profile and backup bytes still matched, and the separate scenery removal remained stored. [Offline process restart](gallery/install-rehearsal/process-restart-offline.png) · [Rehearsal manifest](gallery/install-rehearsal/manifest.json)
+
+The combined candidate at `995933f8d445e263041b06891aa6f0e234fcc7c6` upgraded exact published RC11 `8de40ca8451b6268cfdfefaa5d9a66b72caca799` through the installation's ordinary worker. Eight saved profile, Schema-1, Pack 2, and backup records matched byte for byte. The candidate created seed 2026 through LOAD / CREATE. After Chromium and the origin server shut down, a fresh process on the same profile rendered that combined seed offline with zero requests to the origin. [Upgrade and offline report](gallery/combined-qualification/install.json) · [Cold offline capture](gallery/combined-qualification/combined-seed-cold-offline.png)
 
 ## Stage v19 reproduction
 

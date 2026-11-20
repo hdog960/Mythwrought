@@ -11,6 +11,7 @@ import {mirrorSnapshot,validateMirrorSnapshot} from '../src/mirror.mjs';
 import {findSafeSpawn} from '../src/physics.mjs';
 import {createLiveMobSession} from '../src/mobs/live-game.mjs';
 import {planEnvironmentalScenery} from '../src/nonblock/staged-habitats.mjs';
+import {environmentalWaterEffects,prepareCandidateEffects} from '../src/nonblock/candidate-effects.mjs';
 import {FourRegionWorld,fourRegionProfile,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,
   restoreFourRegionWorld} from '../src/manual-biomes/profile-world.mjs';
 
@@ -201,7 +202,14 @@ test('a natural desert oasis shares the ordinary fluid mesh, interaction and sav
   assert.ok(world.base.environmentOasisShore(35,3).length>0);
   assert.ok(planEnvironmentalScenery(world.base,35,3).some(item=>
     item.sceneId==='nonblock:d:saltgrass'||item.sceneId==='nonblock:d:desert-bloom'));
+  const waterChunks=[{x:35,z:3,section:0}],viewer=[x+.5,y+2,z+.5];
+  const naturalEffects=environmentalWaterEffects(world,waterChunks,viewer,2);
+  assert.deepEqual(naturalEffects.map(effect=>effect.sceneId),['scene48:surface-ripples']);
+  assert.ok(prepareCandidateEffects(naturalEffects)({seconds:1,seed,viewer,parents:new Set()}).vertices.length>0);
   assert.deepEqual(world.save().edits,[]);
+  assert.equal(world.placePack2(x,y+2,z,76,{level:3,source:false,flow:'north'}),true);
+  assert.ok(environmentalWaterEffects(world,waterChunks,viewer,2).some(effect=>effect.sceneId==='scene48:spray'));
+  assert.equal(environmentalWaterEffects(world,waterChunks,viewer,1).length,1);
   assert.equal(world.set(...pool,BLOCK.AIR),true);
   const restored=inspectSnapshotWorld(exportM2World(world),seed);
   assert.equal(restored.get(...pool),BLOCK.AIR);

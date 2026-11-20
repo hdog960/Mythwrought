@@ -45,6 +45,18 @@ try{
   assert.equal(initial.mobs.readonly,false);
   assert.ok(initial.webgl);
   await page.screenshot({path:output+'/fresh-default-844x390.png',timeout:90000});
+  const oasis=await page.evaluate(()=>{
+    const api=window.__mythwroughtTest,p=api.teleport(570,68);
+    api.aimAt(572,7,63);
+    return {pose:p,fluid:api.block(572,7,63)};
+  });
+  assert.equal(oasis.fluid,76);
+  await wait(()=>{
+    const d=document.querySelector('#scene').dataset;
+    return d.skyS6WorldBiomeName==='desert'&&Number(d.waterSections)>0&&
+      Number(d.nonblockWaterEffects)>0&&Number(d.pendingChunks)===0;
+  });
+  await page.screenshot({path:output+'/ordinary-desert-oasis-844x390.png',timeout:90000});
 
   async function switchSeed(seed){
     await page.locator('#menu').click();
@@ -89,6 +101,6 @@ try{
   assert.equal(reopened.generator,initial.generator);
   assert.equal(reopened.oldSave,legacy);
   assert.deepEqual(errors,[]);
-  await writeFile(output+'/report.json',JSON.stringify({initial,existing,created,night,reopened},null,2)+'\n');
+  await writeFile(output+'/report.json',JSON.stringify({initial,oasis,existing,created,night,reopened},null,2)+'\n');
   console.log('Verified ordinary creation, legacy seed bytes, day/night and generation-aware vault and mirror in WebGL2');
 }finally{await browser.close();}

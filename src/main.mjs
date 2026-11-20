@@ -60,7 +60,7 @@ import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
 import {exportPack3Portable,inspectPack3Portable,restorePack3Portable} from './builder-assets/pack3-portable.mjs';
 import {createCaveFarWallGpu} from './manual-caves/c6-far-wall-gpu.mjs';
 import * as nonblockGeometry from './nonblock/candidate-scene.mjs';
-import {prepareCandidateEffects,prepareEnvironmentalEffects,readCandidateEffectLayout} from './nonblock/candidate-effects.mjs';
+import {environmentalWaterEffects,prepareCandidateEffects,prepareEnvironmentalEffects,readCandidateEffectLayout} from './nonblock/candidate-effects.mjs';
 import {planEnvironmentalScenery} from './nonblock/staged-habitats.mjs';
 
 // Separate historical Cave World slots keep their original storage identity.
@@ -148,7 +148,7 @@ function start(nonblockStage=null){
     nonblockWorld=null;nonblockScene=null;nonblockBuffer=null;nonblockVertexCount=0;nonblockDrawKey='';
     nonblockParents.clear();effectVertexCount=0;lastEffectUpload=-Infinity;worldEffects=null;
     for(const key of ['nonblockVertices','nonblockInstances','nonblockFarInstances',
-      'nonblockGpuBytes','nonblockDrawCalls','nonblockEffects','nonblockEffectVertices'])
+      'nonblockGpuBytes','nonblockDrawCalls','nonblockEffects','nonblockEffectVertices','nonblockWaterEffects'])
       canvas.dataset[key]='0';
     canvas.dataset.nonblockTarget='';
     canvas.dataset.nonblockSaveState='unavailable';
@@ -253,13 +253,21 @@ function start(nonblockStage=null){
     canvas.dataset.nonblockTarget=hit?.instanceKey??'';
     return hit;
   }
-  function drawStagedEffects(now,sampleEffects){
+  const emptyEffects={instances:0,vertices:new Float32Array()};
+  function drawStagedEffects(now,sampleEffects,waterChunks){
     if(now-lastEffectUpload>=65){
       lastEffectUpload=now;
       const parents=nonblockBuffer?nonblockParents:new Set();
-      const effects=sampleEffects({
-        seconds:now/1000,seed:world.seed,viewer:eye(),parents
-      });
+      const state={seconds:now/1000,seed:world.seed,viewer:eye(),parents};
+      let effects=sampleEffects?.(state)??emptyEffects;
+      const water=waterChunks?.length?environmentalWaterEffects(world,waterChunks,state.viewer,16-effects.instances):[];
+      canvas.dataset.nonblockWaterEffects=String(water.length);
+      if(water.length){
+        const wet=prepareCandidateEffects(water)(state);
+        const vertices=new Float32Array(effects.vertices.length+wet.vertices.length);
+        vertices.set(effects.vertices);vertices.set(wet.vertices,effects.vertices.length);
+        effects={instances:effects.instances+wet.instances,vertices};
+      }
       const {vertices}=effects;
       effectVertexCount=vertices.length/9;
       canvas.dataset.nonblockEffects=String(effects.instances);
@@ -1524,10 +1532,12 @@ function start(nonblockStage=null){
         canvas.dataset.mobDrawCalls='0';canvas.dataset.mobSpecies='0';
       }
       // Genuine transparent-water pass, only for chunks with water candidates.
-      if([...chunks.values()].some(c=>c.waterBuffer)){
+      const waterChunks=[...chunks.values()].filter(c=>c.waterBuffer);
+      canvas.dataset.waterSections=String(waterChunks.length);
+      if(waterChunks.length){
         gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
         gl.depthMask(false);
-        const waterChunks=[...chunks.values()].filter(c=>c.waterBuffer).sort((a,b)=>{
+        waterChunks.sort((a,b)=>{
           const distance=c=>((c.x*16+8-player.x)**2+(c.z*16+8-player.z)**2+
             (c.section*16-player.feet)**2);
           return distance(b)-distance(a);
@@ -1543,7 +1553,13 @@ function start(nonblockStage=null){
         gl.depthMask(true);gl.disable(gl.BLEND);
       }
       const effects=nonblockStage?.effects??worldEffects;
-      if(effects)drawStagedEffects(now,effects);
+      const wet=combinedWorld()&&!nonblockStage?.effects?waterChunks:null;
+      if(effects||wet?.length)drawStagedEffects(now,effects,wet);
+      else if(effectVertexCount){
+        effectVertexCount=0;lastEffectUpload=-Infinity;
+        canvas.dataset.nonblockEffects='0';canvas.dataset.nonblockEffectVertices='0';
+        canvas.dataset.nonblockWaterEffects='0';
+      }
       // A faint world-space targeted-block outline, never a HUD covering the scene.
       const focused=help.hidden&&!sceneryHit?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
       const focusKey=focused?.hit?.join(',')||'';

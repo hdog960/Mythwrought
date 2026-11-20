@@ -1,0 +1,2008 @@
+{
+  "head": "58255904ed836d27510e1714fae64868be843752",
+  "physical": "source terrain native; browser proof is separate",
+  "count": 72,
+  "eligible": 72,
+  "families": [
+    {
+      "seed": 179,
+      "chunk": [
+        20,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Aagave-rosette:179:323,10,-186:3",
+      "supports": [
+        {
+          "cell": [
+            323,
+            9,
+            -186
+          ],
+          "block": 256
+        }
+      ],
+      "sceneId": "nonblock:d:agave-rosette",
+      "anchor": [
+        323,
+        10,
+        -186
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        0,
+        12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Aalpine-wildflower:179:-6,7,214:3",
+      "supports": [
+        {
+          "cell": [
+            -6,
+            6,
+            214
+          ],
+          "block": 279
+        }
+      ],
+      "sceneId": "nonblock:d:alpine-wildflower",
+      "anchor": [
+        -6,
+        7,
+        214
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        20,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Acolumn-cactus:179:315,11,-187:1",
+      "supports": [
+        {
+          "cell": [
+            315,
+            10,
+            -187
+          ],
+          "block": 256
+        }
+      ],
+      "sceneId": "nonblock:d:column-cactus",
+      "anchor": [
+        315,
+        11,
+        -187
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        20,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Adesert-bloom:179:333,11,-173:3",
+      "supports": [
+        {
+          "cell": [
+            333,
+            10,
+            -173
+          ],
+          "block": 256
+        }
+      ],
+      "sceneId": "nonblock:d:desert-bloom",
+      "anchor": [
+        333,
+        11,
+        -173
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Adesert-scrub:179:213,6,-202:1",
+      "supports": [
+        {
+          "cell": [
+            213,
+            5,
+            -202
+          ],
+          "block": 256
+        }
+      ],
+      "sceneId": "nonblock:d:desert-scrub",
+      "anchor": [
+        213,
+        6,
+        -202
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        0,
+        12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Adwarf-juniper:179:-12,8,219:2",
+      "supports": [
+        {
+          "cell": [
+            -12,
+            7,
+            219
+          ],
+          "block": 279
+        }
+      ],
+      "sceneId": "nonblock:d:dwarf-juniper",
+      "anchor": [
+        -12,
+        8,
+        219
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        6,
+        12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Afrost-fern:179:85,6,222:2",
+      "supports": [
+        {
+          "cell": [
+            85,
+            5,
+            222
+          ],
+          "block": 272
+        }
+      ],
+      "sceneId": "nonblock:d:frost-fern",
+      "anchor": [
+        85,
+        6,
+        222
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        20
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Aicicle-spear:179:-204,8,308:0",
+      "supports": [
+        {
+          "cell": [
+            -204,
+            9,
+            308
+          ],
+          "block": 406
+        }
+      ],
+      "sceneId": "nonblock:d:icicle-spear",
+      "anchor": [
+        -204,
+        8,
+        308
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        20,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Aprickly-pear-cactus:179:326,9,-204:3",
+      "supports": [
+        {
+          "cell": [
+            326,
+            8,
+            -204
+          ],
+          "block": 256
+        }
+      ],
+      "sceneId": "nonblock:d:prickly-pear-cactus",
+      "anchor": [
+        326,
+        9,
+        -204
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        20,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Asaltgrass:179:307,11,-206:2",
+      "supports": [
+        {
+          "cell": [
+            307,
+            10,
+            -206
+          ],
+          "block": 256
+        }
+      ],
+      "sceneId": "nonblock:d:saltgrass",
+      "anchor": [
+        307,
+        11,
+        -206
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        0,
+        12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Asnowgrass:179:4,8,214:0",
+      "supports": [
+        {
+          "cell": [
+            4,
+            7,
+            214
+          ],
+          "block": 276
+        }
+      ],
+      "sceneId": "nonblock:d:snowgrass",
+      "anchor": [
+        4,
+        8,
+        214
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ad%3Atumblebrush:179:220,8,-206:3",
+      "supports": [
+        {
+          "cell": [
+            220,
+            7,
+            -206
+          ],
+          "block": 257
+        }
+      ],
+      "sceneId": "nonblock:d:tumblebrush",
+      "anchor": [
+        220,
+        8,
+        -206
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        11,
+        10
+      ],
+      "section": -19,
+      "instanceKey": "nb1:nonblock%3Ae%3Abranching-crystal-cluster:179:188,-152,148:3",
+      "supports": [
+        {
+          "cell": [
+            188,
+            -153,
+            148
+          ],
+          "block": 8
+        }
+      ],
+      "sceneId": "nonblock:e:branching-crystal-cluster",
+      "anchor": [
+        188,
+        -152,
+        148
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        2,
+        4
+      ],
+      "section": -1,
+      "instanceKey": "nb1:nonblock%3Ae%3Acave-rubble-cluster:179:61,-1,68:1",
+      "supports": [
+        {
+          "cell": [
+            61,
+            -2,
+            68
+          ],
+          "block": 3
+        }
+      ],
+      "sceneId": "nonblock:e:cave-rubble-cluster",
+      "anchor": [
+        61,
+        -1,
+        68
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        11,
+        10
+      ],
+      "section": -18,
+      "instanceKey": "nb1:nonblock%3Ae%3Aclustered-dripstone:179:198,-140,158:0",
+      "supports": [
+        {
+          "cell": [
+            198,
+            -139,
+            158
+          ],
+          "block": 8
+        }
+      ],
+      "sceneId": "nonblock:e:clustered-dripstone",
+      "anchor": [
+        198,
+        -140,
+        158
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        0,
+        0
+      ],
+      "section": 0,
+      "instanceKey": "nb1:nonblock%3Ae%3Acrystal-shard:179:19,2,4:2",
+      "supports": [
+        {
+          "cell": [
+            19,
+            1,
+            4
+          ],
+          "block": 3
+        }
+      ],
+      "sceneId": "nonblock:e:crystal-shard",
+      "anchor": [
+        19,
+        2,
+        4
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        11,
+        10
+      ],
+      "section": -14,
+      "instanceKey": "nb1:nonblock%3Ae%3Aflowstone-curtain:179:196,-112,149:3",
+      "supports": [
+        {
+          "cell": [
+            196,
+            -111,
+            149
+          ],
+          "block": 8
+        }
+      ],
+      "sceneId": "nonblock:e:flowstone-curtain",
+      "anchor": [
+        196,
+        -112,
+        149
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        12,
+        11
+      ],
+      "section": -22,
+      "instanceKey": "nb1:nonblock%3Ae%3Ageode-opening:179:213,-174,190:2:r1",
+      "supports": [
+        {
+          "cell": [
+            214,
+            -174,
+            190
+          ],
+          "block": 8
+        }
+      ],
+      "sceneId": "nonblock:e:geode-opening",
+      "anchor": [
+        213,
+        -174,
+        190
+      ],
+      "variant": 2,
+      "orientation": 1
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        11,
+        10
+      ],
+      "section": -16,
+      "instanceKey": "nb1:nonblock%3Ae%3Agiant-stalagmite-spire:179:203,-124,149:2",
+      "supports": [
+        {
+          "cell": [
+            203,
+            -125,
+            149
+          ],
+          "block": 8
+        }
+      ],
+      "sceneId": "nonblock:e:giant-stalagmite-spire",
+      "anchor": [
+        203,
+        -124,
+        149
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        11,
+        10
+      ],
+      "section": -19,
+      "instanceKey": "nb1:nonblock%3Ae%3Ahanging-stalactite:179:198,-145,162:1",
+      "supports": [
+        {
+          "cell": [
+            198,
+            -144,
+            162
+          ],
+          "block": 8
+        }
+      ],
+      "sceneId": "nonblock:e:hanging-stalactite",
+      "anchor": [
+        198,
+        -145,
+        162
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        4,
+        11
+      ],
+      "section": -1,
+      "instanceKey": "nb1:nonblock%3Ae%3Alimestone-cave-column:179:59,-1,194:3",
+      "supports": [
+        {
+          "cell": [
+            59,
+            -2,
+            194
+          ],
+          "block": 3
+        },
+        {
+          "cell": [
+            59,
+            2,
+            194
+          ],
+          "block": 3
+        }
+      ],
+      "sceneId": "nonblock:e:limestone-cave-column",
+      "anchor": [
+        59,
+        -1,
+        194
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        4,
+        -8
+      ],
+      "section": 0,
+      "instanceKey": "nb1:nonblock%3Ae%3Amineral-encrustation:179:62,1,-107:0:r2",
+      "supports": [
+        {
+          "cell": [
+            62,
+            1,
+            -106
+          ],
+          "block": 3
+        }
+      ],
+      "sceneId": "nonblock:e:mineral-encrustation",
+      "anchor": [
+        62,
+        1,
+        -107
+      ],
+      "variant": 0,
+      "orientation": 2
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -44,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:nonblock%3Ae%3Apebble-scatter:179:-717,6,-164:1",
+      "supports": [
+        {
+          "cell": [
+            -717,
+            5,
+            -164
+          ],
+          "block": 401
+        }
+      ],
+      "sceneId": "nonblock:e:pebble-scatter",
+      "anchor": [
+        -717,
+        6,
+        -164
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        11,
+        10
+      ],
+      "section": -12,
+      "instanceKey": "nb1:nonblock%3Ae%3Asmall-stalagmite:179:166,-90,188:0",
+      "supports": [
+        {
+          "cell": [
+            166,
+            -91,
+            188
+          ],
+          "block": 8
+        }
+      ],
+      "sceneId": "nonblock:e:small-stalagmite",
+      "anchor": [
+        166,
+        -90,
+        188
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -9,
+        0
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Abrazier:179:-138,7,14:0:r0",
+      "supports": [
+        {
+          "cell": [
+            -138,
+            6,
+            14
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene36:brazier",
+      "variant": 0,
+      "orientation": 0,
+      "anchor": [
+        -138,
+        7,
+        14
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -9
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Abroken-pottery-scatter:179:-170,5,-115:1:r1",
+      "supports": [
+        {
+          "cell": [
+            -170,
+            4,
+            -115
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene36:broken-pottery-scatter",
+      "variant": 1,
+      "orientation": 1,
+      "anchor": [
+        -170,
+        5,
+        -115
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        6
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Acampfire-fuel-stack:179:-206,5,108:0:r0",
+      "supports": [
+        {
+          "cell": [
+            -206,
+            4,
+            108
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene36:campfire-fuel-stack",
+      "variant": 0,
+      "orientation": 0,
+      "anchor": [
+        -206,
+        5,
+        108
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -3,
+        -38
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Acloth-banner:179:-26,7,-597:0:r2",
+      "supports": [
+        {
+          "cell": [
+            -26,
+            8,
+            -596
+          ],
+          "block": 4
+        }
+      ],
+      "sceneId": "scene36:cloth-banner",
+      "variant": 0,
+      "orientation": 2,
+      "anchor": [
+        -26,
+        7,
+        -597
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -3,
+        9
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Afreestanding-torch:179:-42,8,158:0:r0",
+      "supports": [
+        {
+          "cell": [
+            -42,
+            7,
+            158
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene36:freestanding-torch",
+      "variant": 0,
+      "orientation": 0,
+      "anchor": [
+        -42,
+        8,
+        158
+      ]
+    },
+    {
+      "seed": 2026,
+      "chunk": [
+        -3,
+        -32
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Ahanging-bell:2026:-46,13,-484:0:r0",
+      "supports": [
+        {
+          "cell": [
+            -46,
+            14,
+            -484
+          ],
+          "block": 4
+        }
+      ],
+      "sceneId": "scene36:hanging-bell",
+      "variant": 0,
+      "orientation": 0,
+      "anchor": [
+        -46,
+        13,
+        -484
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -29,
+        14
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Ahanging-chain:179:-459,12,236:3:r3",
+      "supports": [
+        {
+          "cell": [
+            -459,
+            13,
+            236
+          ],
+          "block": 4
+        }
+      ],
+      "sceneId": "scene36:hanging-chain",
+      "variant": 3,
+      "orientation": 3,
+      "anchor": [
+        -459,
+        12,
+        236
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -3,
+        41
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Ahanging-cobweb:179:-59,6,651:3:r1",
+      "supports": [
+        {
+          "cell": [
+            -58,
+            6,
+            651
+          ],
+          "block": 3
+        },
+        {
+          "cell": [
+            -59,
+            6,
+            650
+          ],
+          "block": 272
+        }
+      ],
+      "sceneId": "scene36:hanging-cobweb",
+      "variant": 3,
+      "orientation": 1,
+      "anchor": [
+        -59,
+        6,
+        651
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -9,
+        9
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Aladder-assembly:179:-157,7,156:1:r3",
+      "supports": [
+        {
+          "cell": [
+            -158,
+            8,
+            156
+          ],
+          "block": 3
+        },
+        {
+          "cell": [
+            -158,
+            7,
+            156
+          ],
+          "block": 3
+        }
+      ],
+      "sceneId": "scene36:ladder-assembly",
+      "variant": 1,
+      "orientation": 3,
+      "anchor": [
+        -157,
+        7,
+        156
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -6
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Arope-coil:179:-173,4,-98:2:r2",
+      "supports": [
+        {
+          "cell": [
+            -173,
+            3,
+            -98
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene36:rope-coil",
+      "variant": 2,
+      "orientation": 2,
+      "anchor": [
+        -173,
+        4,
+        -98
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        0,
+        41
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Arope-ladder:179:19,12,685:3:r3",
+      "supports": [
+        {
+          "cell": [
+            19,
+            13,
+            685
+          ],
+          "block": 3
+        }
+      ],
+      "sceneId": "scene36:rope-ladder",
+      "variant": 3,
+      "orientation": 3,
+      "anchor": [
+        19,
+        12,
+        685
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -3,
+        6
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene36%3Asignpost:179:-30,6,109:0:r0",
+      "supports": [
+        {
+          "cell": [
+            -30,
+            5,
+            109
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene36:signpost",
+      "variant": 0,
+      "orientation": 0,
+      "anchor": [
+        -30,
+        6,
+        109
+      ]
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Abracken-fern:179:-180,12,-717:1",
+      "supports": [
+        {
+          "cell": [
+            -180,
+            11,
+            -717
+          ],
+          "block": 403
+        }
+      ],
+      "sceneId": "scene48:bracken-fern",
+      "anchor": [
+        -180,
+        12,
+        -717
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Abuttercup-bunch:179:-178,5,-205:0",
+      "supports": [
+        {
+          "cell": [
+            -178,
+            4,
+            -205
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:buttercup-bunch",
+      "anchor": [
+        -178,
+        5,
+        -205
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Abutton-mushroom:179:-203,6,-187:0",
+      "supports": [
+        {
+          "cell": [
+            -203,
+            5,
+            -187
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:button-mushroom",
+      "anchor": [
+        -203,
+        6,
+        -187
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        2,
+        4
+      ],
+      "section": 0,
+      "instanceKey": "nb1:scene48%3Acavecap:179:27,3,51:0",
+      "supports": [
+        {
+          "cell": [
+            27,
+            2,
+            51
+          ],
+          "block": 3
+        }
+      ],
+      "sceneId": "scene48:cavecap",
+      "anchor": [
+        27,
+        3,
+        51
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aclover-clump:179:-188,6,-196:3",
+      "supports": [
+        {
+          "cell": [
+            -188,
+            5,
+            -196
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:clover-clump",
+      "anchor": [
+        -188,
+        6,
+        -196
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aclover-patch:179:-189,9,-162:1",
+      "supports": [
+        {
+          "cell": [
+            -189,
+            8,
+            -162
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:clover-patch",
+      "anchor": [
+        -189,
+        9,
+        -162
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aclustered-toadstools:179:-180,11,-698:0",
+      "supports": [
+        {
+          "cell": [
+            -180,
+            10,
+            -698
+          ],
+          "block": 405
+        }
+      ],
+      "sceneId": "scene48:clustered-toadstools",
+      "anchor": [
+        -180,
+        11,
+        -698
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -6
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Acrawling-ivy:179:-178,10,-108:3:r3",
+      "supports": [
+        {
+          "cell": [
+            -179,
+            11,
+            -108
+          ],
+          "block": 4
+        },
+        {
+          "cell": [
+            -179,
+            10,
+            -108
+          ],
+          "block": 4
+        }
+      ],
+      "sceneId": "scene48:crawling-ivy",
+      "anchor": [
+        -178,
+        10,
+        -108
+      ],
+      "variant": 3,
+      "orientation": 3
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aenchanted-flower:179:-205,9,-714:1",
+      "supports": [
+        {
+          "cell": [
+            -205,
+            8,
+            -714
+          ],
+          "block": 403
+        }
+      ],
+      "sceneId": "scene48:enchanted-flower",
+      "anchor": [
+        -205,
+        9,
+        -714
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aexposed-root:179:-198,9,-714:2",
+      "supports": [
+        {
+          "cell": [
+            -198,
+            8,
+            -714
+          ],
+          "block": 403
+        }
+      ],
+      "sceneId": "scene48:exposed-root",
+      "anchor": [
+        -198,
+        9,
+        -714
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Afallen-branch:179:-188,11,-685:0",
+      "supports": [
+        {
+          "cell": [
+            -188,
+            10,
+            -685
+          ],
+          "block": 405
+        }
+      ],
+      "sceneId": "scene48:fallen-branch",
+      "anchor": [
+        -188,
+        11,
+        -685
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -41
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aforest-leaf-litter:179:-205,8,-670:2",
+      "supports": [
+        {
+          "cell": [
+            -205,
+            7,
+            -670
+          ],
+          "block": 405
+        }
+      ],
+      "sceneId": "scene48:forest-leaf-litter",
+      "anchor": [
+        -205,
+        8,
+        -670
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aforest-lichen-patch:179:-186,12,-717:3",
+      "supports": [
+        {
+          "cell": [
+            -186,
+            11,
+            -717
+          ],
+          "block": 403
+        }
+      ],
+      "sceneId": "scene48:forest-lichen-patch",
+      "anchor": [
+        -186,
+        12,
+        -717
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -41
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aforest-moss-mat:179:-197,7,-667:3",
+      "supports": [
+        {
+          "cell": [
+            -197,
+            6,
+            -667
+          ],
+          "block": 405
+        }
+      ],
+      "sceneId": "scene48:forest-moss-mat",
+      "anchor": [
+        -197,
+        7,
+        -667
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aglowing-vine:179:-186,11,-707:2:r3",
+      "supports": [
+        {
+          "cell": [
+            -187,
+            12,
+            -707
+          ],
+          "block": 408
+        },
+        {
+          "cell": [
+            -187,
+            11,
+            -707
+          ],
+          "block": 408
+        }
+      ],
+      "sceneId": "scene48:glowing-vine",
+      "anchor": [
+        -186,
+        11,
+        -707
+      ],
+      "variant": 2,
+      "orientation": 3
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Agrass-plume:179:-190,5,-206:1",
+      "supports": [
+        {
+          "cell": [
+            -190,
+            4,
+            -206
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:grass-plume",
+      "anchor": [
+        -190,
+        5,
+        -206
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aheather-sprig:179:-202,6,-205:2",
+      "supports": [
+        {
+          "cell": [
+            -202,
+            5,
+            -205
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:heather-sprig",
+      "anchor": [
+        -202,
+        6,
+        -205
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Ainkcap-cluster:179:-206,10,-710:1",
+      "supports": [
+        {
+          "cell": [
+            -206,
+            9,
+            -710
+          ],
+          "block": 403
+        }
+      ],
+      "sceneId": "scene48:inkcap-cluster",
+      "anchor": [
+        -206,
+        10,
+        -710
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Alantern-mushroom:179:-206,8,-675:0",
+      "supports": [
+        {
+          "cell": [
+            -206,
+            7,
+            -675
+          ],
+          "block": 404
+        }
+      ],
+      "sceneId": "scene48:lantern-mushroom",
+      "anchor": [
+        -206,
+        8,
+        -675
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Alavender-spike:179:-202,7,-164:2",
+      "supports": [
+        {
+          "cell": [
+            -202,
+            6,
+            -164
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:lavender-spike",
+      "anchor": [
+        -202,
+        7,
+        -164
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Alow-grass:179:-197,6,-188:2",
+      "supports": [
+        {
+          "cell": [
+            -197,
+            5,
+            -188
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:low-grass",
+      "anchor": [
+        -197,
+        6,
+        -188
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Ameadow-fescue:179:-170,5,-205:2",
+      "supports": [
+        {
+          "cell": [
+            -170,
+            4,
+            -205
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:meadow-fescue",
+      "anchor": [
+        -170,
+        5,
+        -205
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Ameadow-sedge:179:-204,6,-181:2",
+      "supports": [
+        {
+          "cell": [
+            -204,
+            5,
+            -181
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:meadow-sedge",
+      "anchor": [
+        -204,
+        6,
+        -181
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -35
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Amoss-cushion:179:-204,8,-565:0",
+      "supports": [
+        {
+          "cell": [
+            -204,
+            7,
+            -565
+          ],
+          "block": 403
+        }
+      ],
+      "sceneId": "scene48:moss-cushion",
+      "anchor": [
+        -204,
+        8,
+        -565
+      ],
+      "variant": 0,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aringed-morel:179:-186,11,-700:1",
+      "supports": [
+        {
+          "cell": [
+            -186,
+            10,
+            -700
+          ],
+          "block": 403
+        }
+      ],
+      "sceneId": "scene48:ringed-morel",
+      "anchor": [
+        -186,
+        11,
+        -700
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aseedhead-meadow-mix:179:-198,7,-206:2",
+      "supports": [
+        {
+          "cell": [
+            -198,
+            6,
+            -206
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:seedhead-meadow-mix",
+      "anchor": [
+        -198,
+        7,
+        -206
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -38
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Ashelf-fungus:179:-189,10,-619:2:r0",
+      "supports": [
+        {
+          "cell": [
+            -189,
+            11,
+            -620
+          ],
+          "block": 408
+        },
+        {
+          "cell": [
+            -189,
+            10,
+            -620
+          ],
+          "block": 408
+        }
+      ],
+      "sceneId": "scene48:shelf-fungus",
+      "anchor": [
+        -189,
+        10,
+        -619
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Ashort-fern:179:-188,5,-181:1",
+      "supports": [
+        {
+          "cell": [
+            -188,
+            4,
+            -181
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:short-fern",
+      "anchor": [
+        -188,
+        5,
+        -181
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -12
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Asingle-wildflower:179:-181,7,-170:3",
+      "supports": [
+        {
+          "cell": [
+            -181,
+            6,
+            -170
+          ],
+          "block": 1
+        }
+      ],
+      "sceneId": "scene48:single-wildflower",
+      "anchor": [
+        -181,
+        7,
+        -170
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Aspore-pod:179:-195,10,-683:3",
+      "supports": [
+        {
+          "cell": [
+            -195,
+            9,
+            -683
+          ],
+          "block": 405
+        }
+      ],
+      "sceneId": "scene48:spore-pod",
+      "anchor": [
+        -195,
+        10,
+        -683
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Astarpetal:179:-204,9,-683:1",
+      "supports": [
+        {
+          "cell": [
+            -204,
+            8,
+            -683
+          ],
+          "block": 404
+        }
+      ],
+      "sceneId": "scene48:starpetal",
+      "anchor": [
+        -204,
+        9,
+        -683
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -9,
+        3
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Atrail-vine:179:-122,11,44:2:r1",
+      "supports": [
+        {
+          "cell": [
+            -121,
+            12,
+            44
+          ],
+          "block": 4
+        },
+        {
+          "cell": [
+            -121,
+            11,
+            44
+          ],
+          "block": 4
+        }
+      ],
+      "sceneId": "scene48:trail-vine",
+      "anchor": [
+        -122,
+        11,
+        44
+      ],
+      "variant": 2,
+      "orientation": 1
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Avelvet-cup:179:-170,10,-691:1",
+      "supports": [
+        {
+          "cell": [
+            -170,
+            9,
+            -691
+          ],
+          "block": 405
+        }
+      ],
+      "sceneId": "scene48:velvet-cup",
+      "anchor": [
+        -170,
+        10,
+        -691
+      ],
+      "variant": 1,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -41
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Awoodland-horsetail:179:-171,7,-637:2",
+      "supports": [
+        {
+          "cell": [
+            -171,
+            6,
+            -637
+          ],
+          "block": 404
+        }
+      ],
+      "sceneId": "scene48:woodland-horsetail",
+      "anchor": [
+        -171,
+        7,
+        -637
+      ],
+      "variant": 2,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -44
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Awoodland-sapling:179:-203,12,-702:3",
+      "supports": [
+        {
+          "cell": [
+            -203,
+            11,
+            -702
+          ],
+          "block": 403
+        }
+      ],
+      "sceneId": "scene48:woodland-sapling",
+      "anchor": [
+        -203,
+        12,
+        -702
+      ],
+      "variant": 3,
+      "orientation": 0
+    },
+    {
+      "seed": 179,
+      "chunk": [
+        -12,
+        -41
+      ],
+      "section": null,
+      "instanceKey": "nb1:scene48%3Awoodland-shrub:179:-205,8,-629:2",
+      "supports": [
+        {
+          "cell": [
+            -205,
+            7,
+            -629
+          ],
+          "block": 405
+        }
+      ],
+      "sceneId": "scene48:woodland-shrub",
+      "anchor": [
+        -205,
+        8,
+        -629
+      ],
+      "variant": 2,
+      "orientation": 0
+    }
+  ]
+}

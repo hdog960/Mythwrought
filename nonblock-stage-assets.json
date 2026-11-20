@@ -1,11 +1,11 @@
 {
-  "version": "20261120-v33",
+  "version": "20261120-v34",
   "assets": {
     "./src/nonblock/staged-habitats.mjs": "adcf082ddc016e9a11d1becfdb6fbd172344b0f109ad9d4c2b1b41f463ba86b1",
     "./src/environment-ground.mjs": "90b3375fc29c1cae061681ccb2d2ddbd77926e884478a4dcbf29c5c5e731b6dc",
     "./src/manual-biomes/environment-v7.mjs": "cda3ad834f356b3382bcbd22441659b6e630aa0a8328a7e3a25584b8bdfd0302",
     "./src/manual-biomes/environment-oasis.mjs": "6627e772dbded074cb85cf99c79f9f92e61c21cb50c43f392dac1526f6c3e42f",
-    "./src/nonblock/candidate-effects.mjs": "ff77dab5ae681d9297fde72cf4aba5f516f9ae90790ba5d93459fc94a6945a2a",
+    "./src/nonblock/candidate-effects.mjs": "2bcbdff0a68c595521d619f10f0f1671ac358e79af812af74b20df875462b424",
     "./src/nonblock/candidate-families.mjs": "b67401eeb2c45998ebc979701719313d103ea23daa939ed933972ac62b1cdc62",
     "./src/nonblock/candidate-scene.mjs": "a7aeea4eed9bb097ffe1596d8e72c2c93089bcdfbe906f4235dc81fbcaf4e6b9",
     "./src/nonblock/physical-fittings.mjs": "c9dc6bcb1d42e21e0fb2a0f304caa9d5053cbbccc06d60fea7769dfd714ee16e",
@@ -89,9 +89,9 @@
     "./src/sky-stars.mjs": "92c65df7f06b0fb94c6591c8b8a067271c42a88153e60a8437a6ce85df793438",
     "./src/world-clock.mjs": "de6848e90c98f598bfad13a9e4e0dea379d0f75f543c8cb30c5259e5e70370a4",
     "./src/sky-v6-adapter.mjs": "a8c4a65c63c1d9a593cc621567b7a2bd315e9d61bd6f65992ff0200ac0c0f176",
-    "./": "55fdc083f67a13d4a29201f62cf1763a6ff743f3e0b5669e09e1884dc340069b",
+    "./": "186e2dbcf30e67081829a83bb6740c5808657cad52e10107e0c683b5a386daf1",
     "./assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
-    "./index.html": "55fdc083f67a13d4a29201f62cf1763a6ff743f3e0b5669e09e1884dc340069b",
+    "./index.html": "186e2dbcf30e67081829a83bb6740c5808657cad52e10107e0c683b5a386daf1",
     "./manifest.webmanifest": "0e9e0ab922ba9a1239982ae35b665503dc1f5772737e78e950c9baf0c82fc3b8",
     "./src/auto-block-catalog/biome130/ancient-ruin-details.mjs": "bc9f916c76bd32789ed2b482cf887528f4e519e20e8062592d2d4d0368d0359e",
     "./src/auto-block-catalog/biome130/ancient-ruin-foundations.mjs": "a0be2ccba487cd44db302d95773bbae2dd296efcab51e53b85b0a19837b6a0d5",
@@ -237,9 +237,9 @@
     "./src/interactions/shape-edit-transaction.mjs": "6e2605bbaa9894e3a130baff1622f7ee92b46a2e0a1eef47329b8892b859d6b1",
     "./src/layout.mjs": "237a5529c726300291cde7fbed0b7ecc98ae545748aff23e31528aecbc1beea0",
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
-    "./src/app-update.mjs": "76895f9da122895978aaab03432fcdde91455244dca6ac84c5c245791822a516",
+    "./src/app-update.mjs": "7c0685c160d32fd589b08bc3437bdff0a17acd8afd11465d9eeaa11348ba64e4",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
-    "./src/main.mjs": "dbbbf2d8fac45751eae191521a73ae39d23dc03761e2ce8b4c38f92b7784bb6f",
+    "./src/main.mjs": "7fd72dd5f480d25f377362c74d21f2c1abb90ce23957b4f8e4924996422d3cc1",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
     "./src/manual-biomes/exploration-ink.mjs": "9c16ec1277c762a328331e17d7aab61a55152dc601844473a8a7a85577dac5ed",
     "./src/manual-biomes/m2-runtime-bridge.mjs": "8b20bb69a1aca5578864f0973cf7415d2cd5981f91e8bb949364df4b6e309864",
@@ -301,8 +301,8 @@
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "718c946759e7ea30206bcf94b825a540a5a8ada2b8325ce7aee98bb776814dfb",
-    "./sw-m5.js": "2a83fbcbcbcc1c629b3f16286b9d8fb45b389a10c93857875b8c01c4e3c9d93c",
+    "./sw-m5.js": "0b2731e36c8b75d9853e3ace4a0276160f59471368edaf96dc0902e558cfaaee",
     "./src/nonblock/stage-offline.mjs": "da998c5e067defd0d9c1b3678ed56bfeba00230e6358328fc095ce72de7597c5",
-    "./sw-nonblock-stage.js": "ae73bd9d751d5e54475da2e839e5b16ace6f459306939fef5cea96379c3d9586"
+    "./sw-nonblock-stage.js": "96286a87ef59973f6c8feea62f1aee4542199e2b98b61ada2d011ea537645782"
   }
 }

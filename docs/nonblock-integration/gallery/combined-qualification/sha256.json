@@ -1,0 +1,54 @@
+{
+  "authored-cave-mouth-walk.png": {
+    "bytes": 385966,
+    "sha256": "47737e66c80fcc9051312278bd24efea9aa5571d522592ca63a7fd65e34e1a0e"
+  },
+  "combined-seed-cold-offline.png": {
+    "bytes": 260120,
+    "sha256": "14ce9a1b95b74d8f72c692e62d437114ce3dfb5258f3f3faa7c7c83767013b79"
+  },
+  "desert-creative.png": {
+    "bytes": 263793,
+    "sha256": "585b6ddf52a1ff3f22ed7fe02b96a784ef3596f017d34806c93d7c3f43aaa0ba"
+  },
+  "desert-ground.png": {
+    "bytes": 254156,
+    "sha256": "b9675d2324e422f3bfe531d4070732234f373ee39013620363f5c307bd5d7a99"
+  },
+  "enchanted-ground.png": {
+    "bytes": 287636,
+    "sha256": "276a016fee3c0ed266f1e529afd8b65268e744d49e63ac9604d0f06f893e3797"
+  },
+  "habitat-census.json": {
+    "bytes": 35806,
+    "sha256": "443deccd083858a704245e6d55d9e41831d120bcff0d9439743863a7406ac722"
+  },
+  "install.json": {
+    "bytes": 538,
+    "sha256": "de7eada01ce09f3d59b7b84ba886fdce3630978db19a6e6dc29d9cbbddd7b26b"
+  },
+  "mountain-creative.png": {
+    "bytes": 321320,
+    "sha256": "ebf7ad2de1aefc5340dad36b3e6c9b32d50ee88d54e33e7785c40f68163fa0e8"
+  },
+  "mountain-ground.png": {
+    "bytes": 278992,
+    "sha256": "a665cb97f740bada961914207e81604f805c16a47b9ebd32228512045e6f5dfb"
+  },
+  "plains-ground.png": {
+    "bytes": 325237,
+    "sha256": "01512561e811fb519429f13430424602d7df0f050605c519f4574af087399141"
+  },
+  "snow-ground.png": {
+    "bytes": 279644,
+    "sha256": "7b3f5f7415ff168688fc79d831bf056f7be87bb56c11b56538d0be5dceb73612"
+  },
+  "traversal.json": {
+    "bytes": 9172,
+    "sha256": "987185e908c8accf681367ff4e47e13e0181182f224bf21394f88fbeb21eada0"
+  },
+  "upgraded-existing-world.png": {
+    "bytes": 234598,
+    "sha256": "bcd7f40480822c8dc0dff0b3a4012693a1f20cb84e558bc3cd320f8c2393733a"
+  }
+}

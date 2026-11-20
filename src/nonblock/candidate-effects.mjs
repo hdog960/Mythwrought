@@ -1,3 +1,6 @@
+import {BLOCK} from '../voxel.mjs';
+import {WATER_CANDIDATE_ID} from '../block-packs/pack-2/water.mjs';
+
 // Ambient effects are render-only. A parent key makes an effect follow a
 // source-authored scenery instance's actual render and removal lifetime.
 const MAX_EFFECTS=16;
@@ -72,6 +75,28 @@ export function prepareEnvironmentalEffects(objects){
     }
   }
   return layout.length?prepareCandidateEffects(layout):null;
+}
+
+const flowOffsets={north:[0,-1],east:[1,0],south:[0,1],west:[-1,0]};
+
+export function environmentalWaterEffects(world,chunks,viewer,remaining){
+  if(remaining<=0)return [];
+  const nearest=new Map();
+  for(const {x:cx,z:cz,section} of chunks){
+    if(Math.abs(cx*16+8-viewer[0])>RANGE+8||Math.abs(cz*16+8-viewer[2])>RANGE+8)
+      continue;
+    for(const [key,state] of world.pack2WaterSectionEntries(cx,cz,section)){
+      const [x,y,z]=key.split(',').map(Number),anchor=[x,y+1,z];
+      if(anchor.some(n=>Math.abs(n)>=10_000)||world.get(...anchor)!==BLOCK.AIR)continue;
+      const distance=Math.hypot(x+.5-viewer[0],y+1-viewer[1],z+.5-viewer[2]);
+      if(distance>=RANGE)continue;
+      const offset=flowOffsets[state.flow];
+      if(offset&&world.getPack2State(x+offset[0],y,z+offset[1])?.id===WATER_CANDIDATE_ID)continue;
+      const sceneId=offset?'scene48:spray':'scene48:surface-ripples';
+      if(distance<(nearest.get(sceneId)?.distance??Infinity))nearest.set(sceneId,{sceneId,anchor,distance});
+    }
+  }
+  return [...nearest.values()].sort((a,b)=>a.distance-b.distance).slice(0,Math.min(remaining,2));
 }
 
 function hash(id,anchor,seed,index) {
