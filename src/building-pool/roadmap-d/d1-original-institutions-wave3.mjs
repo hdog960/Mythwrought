@@ -382,46 +382,52 @@ export const ROADMAP_D_WAVE3_PLANS=Object.freeze([
     ],
     "r": [
       [
-        20,
-        27,
+        19,
+        26,
         1,
         49
       ],
       [
-        3,
+        2,
         21,
-        8,
-        25
-      ],
-      [
-        27,
-        45,
-        10,
-        28
-      ],
-      [
-        3,
-        25,
-        34,
-        48
+        7,
+        23
       ],
       [
         29,
+        46,
+        14,
+        30
+      ],
+      [
+        4,
+        24,
+        36,
+        48
+      ],
+      [
+        33,
         47,
         36,
         49
       ],
       [
         13,
-        36,
+        37,
         22,
-        40
+        39
       ],
       [
         1,
-        13,
-        26,
+        16,
+        24,
         35
+      ],
+      [
+        26,
+        42,
+        28,
+        39
       ]
     ],
     "discs": [
@@ -517,7 +523,7 @@ export const ROADMAP_D_WAVE3_PLANS=Object.freeze([
         31
       ]
     ],
-    "roof": "glimmerfern-small-ringwood-petalled-canopy-with-well-nave"
+    "roof": "glimmerfern-offset-ring-petalled-forest-nursery-and-eastwood-canopy"
   },
   {
     "t": "schoolhouse",
