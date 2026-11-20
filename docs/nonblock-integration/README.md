@@ -2,7 +2,7 @@
 
 The roster has 96 source-backed and browser-tested slots. Standard game actions cover 72 removable scenery families and 12 existing Block Pack roles. The 12 environmental effects have draw, animation and lifecycle evidence. All three landscape viewports have Chromium evidence. Final visual parity, device frame-time and physical iPhone acceptance remain open. [Master draft PR #285](https://github.com/hdog960/Mythwrought/pull/285) · [Catalog and evidence](catalog.md) · [Home Screen release hold](release-hold.md)
 
-The retrospective audit inspected 43 inherited meshes. The staged quality pass has rebuilt six and refined thirteen. The other inherited meshes retain their original source geometry at this checkpoint. Matched captures cover the banner, rope, signpost, chain, meadow foliage and forest floor revisions. [Individual mesh decisions and captures](mesh-review.md)
+The retrospective audit inspected 43 inherited meshes. The staged quality pass has rebuilt six and refined fifteen. The other inherited meshes retain their original source geometry at this checkpoint. Matched captures cover the banner, rope, signpost, chain, meadow foliage and forest floor revisions. [Individual mesh decisions and captures](mesh-review.md)
 
 ## Production and source provenance
 

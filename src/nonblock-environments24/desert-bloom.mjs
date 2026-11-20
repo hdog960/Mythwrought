@@ -1,36 +1,49 @@
 // :24 desert bloom: original opt-in ground flower, never production spawned.
 export const DESERT_BLOOM_SCENE_ID='nonblock:d:desert-bloom';
 const safe=a=>Array.isArray(a)&&a.length===3&&a.every(Number.isSafeInteger);
-const triangle=(out,a,b,c)=>out.push(...a,...b,...c);
 const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0;};
 export function makeDesertBloom({seed,anchor,variant=0}={}){
  if(!Number.isSafeInteger(seed)||!safe(anchor)||!Number.isInteger(variant)||variant<0||variant>3)throw new TypeError('invalid desert bloom identity');
  const sceneId=DESERT_BLOOM_SCENE_ID,instanceKey='nb1:'+encodeURIComponent(sceneId)+':'+seed+':'+anchor.join(',')+':'+variant;
- const positions=[],h=hash(instanceKey),petals=5+variant,theta=(h%360)*Math.PI/180;
- const height=.19+.035*variant,core=[0,height,0],r=.105+.013*variant;
- // Tapered four-sided succulent stalk, not a cubic block.
- const stem=[[ -.018,0,-.014],[.018,0,-.014],[.018,0,.014],[-.018,0,.014]];
- for(let k=0;k<4;k++)triangle(positions,stem[k],stem[(k+1)%4],core);
- // Thick diamond-shaped petals: raised outer tips and folded midribs.
- for(let k=0;k<petals;k++){
-  const a=theta+k*2*Math.PI/petals,dx=Math.cos(a),dz=Math.sin(a),nx=-dz,nz=dx;
-  const inner=[dx*.018,height-.008,dz*.018],ridge=[dx*r*.58,height+.037,dz*r*.58];
-  const left=[dx*r*.72+nx*.034,height+.008,dz*r*.72+nz*.034];
-  const right=[dx*r*.72-nx*.034,height+.008,dz*r*.72-nz*.034];
-  const tip=[dx*r,height+.013,dz*r];
-  triangle(positions,inner,left,ridge);triangle(positions,inner,ridge,right);
-  triangle(positions,ridge,left,tip);triangle(positions,ridge,tip,right);
+ const positions=[],materials=[],h=hash(instanceKey),petals=5+variant,theta=(h%360)*Math.PI/180;
+ const triangle=(a,b,c,material)=>{positions.push(...a,...b,...c);materials.push(material);};
+ const height=.19+.035*variant,r=.116+.017*variant,turn=Math.PI*2;
+ const point=(angle,radius,y)=>[Math.cos(angle)*radius,y,Math.sin(angle)*radius];
+ const lower=Array.from({length:4},(_,i)=>point(theta+i*turn/4,.021,0));
+ const upper=Array.from({length:4},(_,i)=>point(theta+i*turn/4,.026,height));
+ for(let i=0;i<4;i++){
+  const j=(i+1)%4;
+  triangle(lower[i],lower[j],upper[j],0);
+  triangle(lower[i],upper[j],upper[i],0);
  }
- // Three stout, ground-hugging basal leaves with folded triangular profiles.
- for(let k=0;k<3;k++){
-  const a=theta+.4+k*2*Math.PI/3,dx=Math.cos(a),dz=Math.sin(a),nx=-dz,nz=dx;
-  triangle(positions,[0,.045,0],[dx*.12+nx*.024,.022,dz*.12+nz*.024],[dx*.065,.068,dz*.065]);
-  triangle(positions,[0,.045,0],[dx*.065,.068,dz*.065],[dx*.12-nx*.024,.022,dz*.12-nz*.024]);
+ for(let i=0;i<petals;i++){
+  const angle=theta+i*turn/petals,dx=Math.cos(angle),dz=Math.sin(angle);
+  const reach=r*(.95+.09*Math.sin(i*2.3+variant));
+  const throat=point(angle,.021,height+.006),ridge=point(angle,reach*.55,height+.044);
+  const left=[dx*reach*.57-dz*.041,height+.017,dz*reach*.57+dx*.041];
+  const right=[dx*reach*.61+dz*.033,height+.014,dz*reach*.61-dx*.033];
+  const tip=point(angle,reach,height+.025+(i%2)*.008);
+  triangle(throat,left,ridge,1);
+  triangle(throat,ridge,right,2);
+  triangle(left,tip,right,1);
  }
- const radius=r+.035,selectionAabbs=[{min:[-radius,0,-radius],max:[radius,height+.045,radius]}];
+ for(let i=0;i<6;i++){
+  triangle([0,height+.027,0],point(theta+i*turn/6,.034,height+.009),
+   point(theta+(i+1)*turn/6,.034,height+.009),3);
+ }
+ for(let i=0;i<3;i++){
+  const angle=theta+.38+i*turn/3,reach=.14+variant*.005,root=[0,.046,0];
+  const left=point(angle-.40,reach*.64,.034),right=point(angle+.38,reach*.66,.036);
+  const tip=point(angle,reach,.072),ridge=point(angle,reach*.52,.076);
+  triangle(root,left,ridge,0);
+  triangle(root,ridge,right,0);
+  triangle(left,tip,right,0);
+ }
+ const radius=Math.max(.18+variant*.005,r+.04);
+ const selectionAabbs=[{min:[-radius,0,-radius],max:[radius,height+.06,radius]}];
  const triangleCount=positions.length/9;
  return Object.freeze({contract:'nonblock-object-v1-proposal-24',sceneId,instanceKey,seed,anchor:[...anchor],variant,
-  mesh:{primitive:'triangles',positions,triangleCount},selectionAabbs,collisionIntent:'pass-through',
+  mesh:{primitive:'triangles',positions,materials,triangleCount},selectionAabbs,collisionIntent:'pass-through',
   attachment:{face:'ground',requiresSolid:true,requiresClear:true,supportOffset:[0,-1,0]},
   breakIntent:{action:'remove-object',targetKey:instanceKey,requiresOwner:':00'},
   persistence:{kind:'schema1-external-tombstone-sidecar',key:instanceKey,defaultRespawn:'never-until-explicit-reset'},

@@ -116,3 +116,14 @@ The signpost now has a closed, subtly tapered post and a board with a visible ar
 | Hanging chain | [View](gallery/fittings-refinement/before/hanging-chain.png) | [View](gallery/fittings-refinement/after/hanging-chain.png) | 128 → 252 |
 
 The comparison pair uses 15,660 packed vertex bytes before and 32,400 after. Each family has four distinct variants. The native mesh checks verify closed edges, finite nondegenerate faces and the original orientation-bearing instance IDs. The chain stays within the 256-triangle budget.
+
+## Desert and snow flora refinement
+
+The desert bloom has a green anchored stalk, folded orange petals and a gold center that reads against sand. The frost fern has darker frond spines and pale ridges that remain visible against snow. The game captures use the same camera in each pair and wait for all 25 chunks around the new viewpoint before capture. Each plant was mined in its original biome, and its removal survived a fresh page with the existing world and profile bytes intact. [Before manifest](gallery/biome-flora-refinement/before/manifest.json) · [After manifest](gallery/biome-flora-refinement/after/manifest.json)
+
+| Family | Before | After | Sample triangles |
+| --- | --- | --- | --- |
+| Desert bloom | [View](gallery/biome-flora-refinement/before/desert.png) | [View](gallery/biome-flora-refinement/after/desert.png) | 38 → 44 |
+| Frost fern | [View](gallery/biome-flora-refinement/before/snow.png) | [View](gallery/biome-flora-refinement/after/snow.png) | 54 → 90 |
+
+The two samples use 9,936 packed vertex bytes before and 14,472 after. Native tests check all four variants, every face pigment, the original instance IDs, finite nondegenerate geometry and the source bounds. Long-range readability remains open for the thinner fern tips.

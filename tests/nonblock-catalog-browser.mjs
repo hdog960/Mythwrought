@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import {mkdir,readFile,readdir,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
-import {VoxelWorld,raycast} from '../src/voxel.mjs';
+import {VoxelWorld,chunkCoord,raycast} from '../src/voxel.mjs';
 import {findSafeSpawn} from '../src/physics.mjs';
 import {ENCHANTED_FUNGI_IDS} from '../src/nonblock-scene48/enchanted-fungi.mjs';
 import {MEADOW_WOODLAND_IDS} from '../src/nonblock-scene48/meadow-woodland.mjs';
@@ -90,6 +90,16 @@ const views=objects.map(o=>{
   assert.ok(aim,'No unobstructed exact-triangle view for '+o.sceneId);
   return aim;
 });
+const distantMeshes=objects.filter(object=>object.farDetail);
+const benchmark=distantMeshes.length?{
+  x:distantMeshes.reduce((sum,{anchor})=>sum+anchor[0]+.5,0)/distantMeshes.length,
+  z:distantMeshes.reduce((sum,{anchor})=>sum+anchor[2]+.5,0)/distantMeshes.length,
+  point:views[0].point
+}:views[0];
+const player=findSafeSpawn(world,benchmark.x,benchmark.z);
+assert.ok(distantMeshes.every(({anchor:[x,y,z]})=>
+  Math.hypot(x-player.x,y-player.feet-1.55,z-player.z)<13),'Catalog measurement requires full foliage detail');
+const expectedVertices=objects.reduce((sum,object)=>sum+object.positions.length/3,0);
 const url=origin+'/?nonblock-stage='+encodeURIComponent(JSON.stringify(layout));
 
 await mkdir(directory,{recursive:true});
@@ -112,20 +122,29 @@ try{
   },count,{timeout:45000});
   await waitForVisible(page,layout.length);
   const setView=aim=>page.evaluate(({x,z,point})=>{
-    window.__mythwroughtTest.teleport(x,z);
+    const at=window.__mythwroughtTest.teleport(x,z);
     window.__mythwroughtTest.aimAtStagedPoint(...point);
+    return at;
   },aim);
-  await setView(views[0]);
-  await waitForVisible(page,layout.length);
+  const waitForTerrain=({x,z})=>page.waitForFunction(center=>{
+    const data=document.querySelector('#scene').dataset;
+    return data.chunkCenter===center&&Number(data.loadedChunks)===25&&Number(data.pendingChunks)===0;
+  },chunkCoord(x)+','+chunkCoord(z),{timeout:45000});
+  await waitForTerrain(await setView(benchmark));
+  await page.waitForFunction(expected=>{
+    const data=document.querySelector('#scene').dataset;
+    return Number(data.nonblockVertices)===expected&&Number(data.nonblockFarInstances??0)===0;
+  },expectedVertices,{timeout:15000});
   const before=await page.evaluate(key=>localStorage.getItem(key),classicSaveKey);
   counts=await canvas.evaluate(c=>({
     instances:Number(c.dataset.nonblockInstances),vertices:Number(c.dataset.nonblockVertices),
     gpuBytes:Number(c.dataset.nonblockGpuBytes),drawCalls:Number(c.dataset.nonblockDrawCalls),
     terrainChunks:Number(c.dataset.loadedChunks)
   }));
-  assert.equal(counts.vertices,objects.reduce((n,o)=>n+o.positions.length/3,0));
+  assert.equal(counts.vertices,expectedVertices);
   assert.equal(counts.gpuBytes,counts.vertices*36);
   assert.equal(counts.drawCalls,1);
+  assert.equal(counts.terrainChunks,25);
   const sampleFrames=()=>page.evaluate(async()=>{
     const elapsed=[];
     let last=await new Promise(resolve=>requestAnimationFrame(resolve));
@@ -139,7 +158,7 @@ try{
   });
   frameSamples={softwareRenderer:'Chromium SwiftShader',withScenery:await sampleFrames()};
   for(const [i,object] of objects.entries()){
-    await setView(views[i]);
+    await waitForTerrain(await setView(views[i]));
     try{
       await page.waitForFunction(key=>document.querySelector('#scene').dataset.nonblockTarget===key,
         object.instanceKey,{timeout:8000});
@@ -161,7 +180,7 @@ try{
       triangles:object.positions.length/9,file,sha256:digest(image)});
     console.log('PASS',object.sceneId,object.positions.length/9,'triangles');
   }
-  await setView(views[0]);
+  await waitForTerrain(await setView(benchmark));
   await waitForVisible(page,0);
   frameSamples.withoutScenery=await sampleFrames();
   const tombstones=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).tombstones,stageSaveKey);

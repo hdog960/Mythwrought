@@ -51,8 +51,8 @@ function forestFamily(maker,palette) {
   return floraFamily(({seed,anchor,variant})=>maker(seed,...anchor,variant||1).mesh,palette);
 }
 
-function environmentFamily(maker,color) {
-  return {lane:'24',mesh:options=>maker(options).mesh,palette:[color]};
+function environmentFamily(maker,...palette) {
+  return {lane:'24',mesh:options=>maker(options).mesh,palette};
 }
 
 function fittingFamily(sceneId,palette,wall=false) {
@@ -98,10 +98,10 @@ export const candidateFamilies = new Map([
   ['scene48:forest-moss-mat',forestFamily(createForestMossMat,groundCoverPalette)],
   ['nonblock:d:agave-rosette',environmentFamily(makeAgaveRosette,[.38,.55,.43])],
   ['nonblock:d:alpine-wildflower',environmentFamily(makeAlpineWildflower,[.73,.72,.90])],
-  ['nonblock:d:desert-bloom',environmentFamily(makeDesertBloom,[.94,.62,.32])],
+  ['nonblock:d:desert-bloom',environmentFamily(makeDesertBloom,[.32,.51,.31],[.94,.45,.21],[.72,.23,.17],[1,.76,.30])],
   ['nonblock:d:desert-scrub',environmentFamily(makeDesertScrub,[.54,.62,.31])],
   ['nonblock:d:dwarf-juniper',environmentFamily(makeDwarfJuniper,[.37,.49,.32])],
-  ['nonblock:d:frost-fern',environmentFamily(makeFrostFern,[.62,.79,.78])],
+  ['nonblock:d:frost-fern',environmentFamily(makeFrostFern,[.28,.45,.41],[.48,.66,.61],[.76,.87,.86])],
   ['nonblock:d:saltgrass',environmentFamily(makeSaltgrass,[.61,.64,.43])],
   ['nonblock:d:snowgrass',environmentFamily(makeSnowgrass,[.73,.79,.65])],
   ['nonblock:d:tumblebrush',environmentFamily(makeTumblebrush,[.60,.44,.30])],

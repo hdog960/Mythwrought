@@ -4,7 +4,7 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {setTimeout as delay} from 'node:timers/promises';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
-import {raycast} from '../src/voxel.mjs';
+import {chunkCoord,raycast} from '../src/voxel.mjs';
 import {findSafeSpawn} from '../src/physics.mjs';
 import {worldSlotKey,SELECTED_SEED_KEY} from '../src/seeds.mjs';
 import {RENDER_PREF} from '../src/render-budget.mjs';
@@ -13,9 +13,14 @@ import {createCandidateScene} from '../src/nonblock/candidate-scene.mjs';
 import {planStagedHabitat} from '../src/nonblock/staged-habitats.mjs';
 
 const origin=process.env.NONBLOCK_HABITAT_ORIGIN||'http://127.0.0.1:4173';
-const directory='artifacts/nonblock-habitat';
+const comparison=process.env.NONBLOCK_HABITAT_COMPARISON;
+if(comparison&&!['before','after'].includes(comparison))throw Error('Invalid habitat comparison label');
+const directory=comparison?'artifacts/nonblock-biome-flora-'+comparison:'artifacts/nonblock-habitat';
 const seed=179;
-const requested=[
+const requested=comparison?[
+  {habitat:'desert',column:[512,0],sceneId:'nonblock:d:desert-bloom',variant:2},
+  {habitat:'snow',column:[0,512],sceneId:'nonblock:d:frost-fern',variant:1}
+]:[
   {habitat:'desert',column:[512,0],sceneId:'nonblock:d:agave-rosette',variant:2},
   {habitat:'snow',column:[0,512],sceneId:'nonblock:d:frost-fern',variant:1},
   {habitat:'mountain',column:[-512,0],sceneId:'nonblock:d:alpine-wildflower'},
@@ -42,6 +47,10 @@ profileStorage.set(SELECTED_SEED_KEY,String(seed));
 profileStorage.set(RENDER_PREF,'economy');
 const fixture=[...profileStorage];
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
+const comparisonViews=[
+  {pose:[512.5,-.5],point:[512.40311686,9.27933311,.52881004]},
+  {pose:[.5,511.5],point:[.67367985,10.35231654,512.71217855]}
+];
 
 function stagingView(object){
   const [x,,z]=object.anchor;
@@ -60,9 +69,10 @@ function stagingView(object){
 }
 const samples=scene.visible().map((object,index)=>({
   habitat:requested[index].habitat,placement:layout[index],instanceKey:object.instanceKey,
-  ground:world.get(object.anchor[0],object.anchor[1]-1,object.anchor[2]),view:stagingView(object)
+  ground:world.get(object.anchor[0],object.anchor[1]-1,object.anchor[2]),
+  triangles:object.positions.length/9,view:comparison?comparisonViews[index]:stagingView(object)
 }));
-assert.equal(samples.length,4);
+assert.equal(samples.length,requested.length);
 await mkdir(directory,{recursive:true});
 const browser=await chromium.launch({headless:true,args:[
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'
@@ -91,16 +101,21 @@ try{
     return page;
   };
   const move=(page,{pose,point})=>page.evaluate(({pose,point})=>{
-    window.__mythwroughtTest.teleport(...pose);
+    const player=window.__mythwroughtTest.teleport(...pose);
     window.__mythwroughtTest.aimAtStagedPoint(...point);
+    return player;
   },{pose,point});
+  const settled=({x,z})=>scene=>Number(scene.loadedChunks)===25&&Number(scene.pendingChunks)===0&&
+    scene.chunkCenter===chunkCoord(x)+','+chunkCoord(z)&&Number(scene.renderedMeshVertices)>0;
   const page=await open();
   for(const sample of samples){
-    await move(page,sample.view);
+    const player=await move(page,sample.view);
+    const terrainReady=settled(player);
     try{
-      await observed(page,scene=>Number(scene.loadedChunks)===25,120000);
+      await observed(page,terrainReady,120000);
       await move(page,sample.view);
-      await observed(page,scene=>scene.nonblockTarget===sample.instanceKey&&Number(scene.nonblockInstances)===1,15000);
+      await observed(page,scene=>terrainReady(scene)&&scene.nonblockTarget===sample.instanceKey&&
+        Number(scene.nonblockInstances)===1,15000);
     }catch(error){
       const data=await page.locator('#scene').evaluate(canvas=>({
         ...canvas.dataset,profile:window.__mythwroughtTest.fourBiomeProfile(),
@@ -122,8 +137,9 @@ try{
   }
   await page.close();
   const reopened=await open();
-  await move(reopened,samples.at(-1).view);
-  await observed(reopened,scene=>Number(scene.loadedChunks)===25&&Number(scene.nonblockInstances)===0,120000);
+  const reopenedAt=await move(reopened,samples.at(-1).view);
+  const reopenedTerrain=settled(reopenedAt);
+  await observed(reopened,scene=>reopenedTerrain(scene)&&Number(scene.nonblockInstances)===0,120000);
   const check=await reopened.evaluate(({fixture,stageKey})=>({
     ordinary:fixture.map(([key])=>localStorage.getItem(key)),
     primary:localStorage.getItem(stageKey),backup:localStorage.getItem(stageKey+':previous-good')
@@ -138,6 +154,7 @@ const source=['src/main.mjs','src/nonblock/staged-habitats.mjs','src/nonblock/ca
   'src/nonblock/candidate-families.mjs','src/manual-biomes/profile-world.mjs',
   'src/manual-biomes/desert-m3.mjs','src/manual-biomes/three-regions-m4.mjs','src/render-budget.mjs',
   'tests/nonblock-habitat-browser.mjs'];
+if(comparison)source.push('src/nonblock-environments24/desert-bloom.mjs','src/nonblock-environments24/frost-fern.mjs');
 const sourceSha256=Object.fromEntries(await Promise.all(source.map(async file=>[file,digest(await readFile(file))])));
 await writeFile(directory+'/manifest.json',JSON.stringify({
   seed,generator,renderPreset:'economy',sourceSha256,captures,nonemptySchema1AndProfileBytesUnchanged:true
