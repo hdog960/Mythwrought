@@ -1,0 +1,44 @@
+name: MYTHWROUGHT Builder D Wave5 authentic Chromium source acceptance (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave5.mjs'
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave5*'
+      - 'tests/building-pool/roadmap-d/audit-wave5-gallery.mjs'
+      - 'tests/roadmap-d-wave5.test.mjs'
+      - '.github/workflows/roadmap-d-d5-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-roadmap-d-wave5-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  builder-d-wave5-native-and-real-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require 153 unchanged historical plus 36 D1–D5 candidates and exact 189/285 catalog
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave5.test.mjs
+      - name: Require actual Chromium binary, no simulated screenshot allowance
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+      - name: Install pinned independent PNG decoder
+        run: npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Capture eight original coordinate-authored sources times exterior/section times three landscapes
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave5-webgl2.test.mjs
+      - name: Independently verify all 48 PNG CRC/SHA/pixel occupancy and source metadata
+        run: node tests/building-pool/roadmap-d/audit-wave5-gallery.mjs
+      - name: Publish real screenshot data, not physical Pack-family or iPhone art certification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-wave5-48-genuine-webgl2-source-captures
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave5-webgl2-cube-proxy/
+          if-no-files-found: ignore
