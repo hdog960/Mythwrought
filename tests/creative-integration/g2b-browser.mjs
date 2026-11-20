@@ -82,8 +82,10 @@ try{
      // GitHub Pages shares origin storage across games. The real local archive
      // must not leak another project's storage or modify the verified world.
      await page.evaluate(()=>localStorage.setItem('unwritten-realms-owned','exclude-foreign-save'));
-     const archivePromise=page.waitForEvent('download',{timeout:20000});
      await page.locator('.player-safety-archive').click();
+     await page.locator('.player-safety-download').waitFor({state:'visible',timeout:15000});
+     const archivePromise=page.waitForEvent('download',{timeout:20000});
+     await page.locator('.player-safety-download').click();
      const downloaded=await archivePromise;
      assert.match(downloaded.suggestedFilename(),/^mythwrought-local-saves-\d{4}-\d{2}-\d{2}\.json$/);
      const archive=inspectReadOnlyGameArchive(readFileSync(await downloaded.path(),'utf8'));
