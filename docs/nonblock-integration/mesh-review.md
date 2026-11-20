@@ -55,6 +55,18 @@ The dispositions below are provisional. Runtime attachment, collision, removal, 
 | Woodland sapling | Refine | Simple growth hierarchy is visible. Add credible joins and reconnect angular foliage to branches. |
 | Woodland shrub | Refine | Broader than the sapling. Thin triangular leaf surfaces leave gaps through the crown. |
 
+## Current decisions on inherited meshes
+
+The original-source review above remains the record of what arrived from the five automation branches. The current candidate has changed 22 of those 43 meshes. All 43 have an in-game staging lifecycle, and the art decisions remain subject to the final parity and device pass. [Catalog evidence](catalog.md)
+
+| Decision | Families |
+| --- | --- |
+| Rebuilt | Icicle spear, crystal shard, hanging stalactite, small stalagmite, rope coil, hanging cobweb and tumblebrush |
+| Refined | Cloth banner, low grass, short fern, single wildflower, button mushroom, lavender spike, heather sprig, clover clump, meadow sedge, forest lichen patch, forest moss mat, signpost, hanging chain, desert bloom and frost fern |
+| Original geometry retained provisionally | Agave rosette, alpine wildflower, column cactus, desert scrub, dwarf juniper, prickly pear, saltgrass, snowgrass, branching crystal cluster, cave rubble, geode opening, mineral encrustation, pebble scatter, bracken fern, clover patch, clustered toadstools, exposed root, fallen branch, moss cushion, woodland sapling and woodland shrub |
+
+The current landscape evidence puts bracken fern and clustered toadstools behind the authored foliage and fungi in visible detail. The bracken's narrow center and sparse leaflet joins are visible against the grass. The toadstool caps still read as cones beside the modeled lantern mushroom rim. Juniper density, the clover and moss role distinctions, and the forest wood joins also remain open. [Representative foliage and fungi](gallery/enchanted-fungi/manifest.json)
+
 ## First in-game comparisons
 
 Both pairs use the original seed, camera position and mobile viewport. Aim shifted slightly to hit the revised geometry. The captures include the actual game, not the isolated mesh preview.
