@@ -4,7 +4,7 @@ import {CURRENT_INSTALLED_GENERATOR,GENERATION_AUTHORITY_ABI,WORLD_SAVE_SCHEMA,
   inspectWorldGeneration,currentWorldMetadata,seedHasAnySavedData,
   chooseUnusedCurrentSeed} from '../src/creative-integration/current-world.mjs';
 import {M6_BALANCED_GENERATOR,FOUR_REGION_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
-import {worldSlotKey} from '../src/seeds.mjs';
+import {worldSlotKey,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,DEFAULT_WORLD_SEED} from '../src/seeds.mjs';
 import {GAME_RELEASE} from '../src/app-update.mjs';
 const memory=entries=>{
   const store=new Map(entries);
@@ -31,6 +31,14 @@ test('Existing schema-1, journal, cave, creature and future sidecars block seed 
     'mythwrought.pack5.builder.seed.42','unrecognized-v10-feature-seed-42.journal']){
     assert.equal(seedHasAnySavedData(memory([[key,'preserved']]),42),true,key);
   }
+  assert.equal(seedHasAnySavedData(memory([[SELECTED_SEED_KEY,'42']]),42),true,
+    'The selected legacy seed remains reserved without an existing world slot');
+  assert.equal(seedHasAnySavedData(memory([[LEGACY_WORLD_KEY,'original schema-1 bytes']]),
+    DEFAULT_WORLD_SEED),true,'An original pre-slot world must block seed reuse');
+  assert.equal(seedHasAnySavedData(memory([[LEGACY_WORLD_KEY,'old world']]),42),false,
+    'Legacy fixed-slot data must not falsely reserve unrelated seeds');
+  assert.equal(seedHasAnySavedData(memory([[SELECTED_SEED_KEY,'43']]),42),false,
+    'Only the selected seed should be reserved');
   assert.equal(seedHasAnySavedData(memory([[worldSlotKey(43),'different world']]),42),false);
   assert.throws(()=>seedHasAnySavedData({getItem(){return null;}},42),/enumerate/);
 });
