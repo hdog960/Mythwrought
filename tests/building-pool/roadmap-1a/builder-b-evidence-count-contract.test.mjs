@@ -11,7 +11,8 @@ const read=n=>readFileSync(join(here,n),'utf8');
 for(const [family,auditName,captureName,sourceName] of [
  ['Granitebell','audit-builder-b-homes-wave4.mjs','builder-b-homes-wave4-webgl2.test.mjs','builder-b-homes-wave4.mjs'],
  ['Foxglade','audit-builder-b-hospitality-wave5.mjs','builder-b-hospitality-wave5-webgl2.test.mjs','builder-b-hospitality-wave5.mjs'],
- ['Willowmere','audit-builder-b-homes-wave6.mjs','builder-b-homes-wave6-webgl2.test.mjs','builder-b-homes-wave6.mjs']
+ ['Willowmere','audit-builder-b-homes-wave6.mjs','builder-b-homes-wave6-webgl2.test.mjs','builder-b-homes-wave6.mjs'],
+ ['Highglen','audit-builder-b-homes-wave7.mjs','builder-b-homes-wave7-webgl2.test.mjs','builder-b-homes-wave7.mjs']
 ]){
  test(family+' exact one-source/six-per-renderer screenshot audit and capture counts agree',()=>{
   const audit=read(auditName),capture=read(captureName);
