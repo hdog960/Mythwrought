@@ -1,0 +1,44 @@
+name: MYTHWROUGHT Builder D Wave3 authentic WebGL2 source acceptance (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave3.mjs'
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave3*'
+      - 'tests/building-pool/roadmap-d/audit-wave3-gallery.mjs'
+      - 'tests/roadmap-d-wave3.test.mjs'
+      - '.github/workflows/roadmap-d-d3-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-roadmap-d-wave3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  builder-d-wave3-native-and-real-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require all 153 historic plus D1 6 plus D2 6 plus eight new D3 sources and strict eight-way D4
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave3.test.mjs
+      - name: Require genuine Chromium binary, not a simulated screenshot service
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+      - name: Install pinned PNG image integrity decoder
+        run: npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Render eight real original voxel structures times exterior and cutaway at three landscapes
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave3-webgl2.test.mjs
+      - name: Audit all 48 PNGs for true pixels, CRC, identity, source, GL, camera and cutaways
+        run: node tests/building-pool/roadmap-d/audit-wave3-gallery.mjs
+      - name: Retain the 48 genuine WebGL2 cube-proxy screenshots for independent evidence review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-wave3-48-genuine-chromium-source-frames
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave3-webgl2-cube-proxy/
+          if-no-files-found: ignore
