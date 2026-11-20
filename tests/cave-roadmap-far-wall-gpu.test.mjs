@@ -169,6 +169,48 @@ test('C6 true Rift screen rays select source-authentic upper boundary within fou
   JSON.stringify(plan.selected.map(c=>[c.key,c.seamCompanion?.key])));
 });
 
+test('C6 genuine 844x390 Rift upper seam is sourced and rendered without extra buffers',()=>{
+ // Exact screenshot: 15 cyan pixels at x284..291/y139..142,
+ // first-solid DEEPSTONE at x176,-83,z192. Never paint over sky.
+ const camera={x:159.5,z:210.5,feet:-90.99,
+  yaw:1.8650308919060845,pitch:0.05620218481286228};
+ const viewport=[540,335];
+ assert.equal(world.get(176,-83,192),BLOCK.DEEPSTONE);
+ const plan=planCaveFarWallSources(world,camera,viewport);
+ assert.equal(plan.samples<=C6_FAR_BOUNDS.maxSourceSamples,true);
+ assert.equal(plan.selected.length,4,'Retain strict four-buffer cap');
+ assert.equal(plan.joinedSources,1);
+ assert.equal(plan.seamSources,1,'One real source-bound seam, not a new buffer');
+ assert.ok(plan.selected.some(c=>c.key==='11,11,-6'&&
+   c.companion?.key==='11,11,-5'),
+   'Keep the already accepted real 844px Rift rock join');
+ assert.ok(plan.selected.some(c=>c.key==='11,12,-6'&&
+   c.seamCompanion?.key==='11,12,-5'),
+   'Screenshot-proven second Rift source must share the 11,12,-6 GPU buffer: '+
+   JSON.stringify(plan.selected.map(c=>[c.key,c.companion?.key,c.seamCompanion?.key])));
+ assert.equal(plan.pending.some(c=>c.key==='11,12,-5'),false);
+ const g=fakeGl(),far=createCaveFarWallGpu(g.gl),near=complete(camera);
+ for(let frame=30;frame<43;frame++)far.step({
+  world,player:camera,nearChunks:near,nearPending:new Map(),
+  frame,viewport,enabled:true
+ });
+ const state=far.stats();
+ assert.equal(state.chunks,4);
+ assert.equal(state.pending,0);
+ assert.equal(state.budgetExcluded,0);
+ assert.equal(state.failures,0);
+ assert.equal(state.joinedSources,1);
+ assert.equal(state.seamSources,1);
+ assert.equal(state.wideWitnessSources,0,'No extra wide GPU rock joining');
+ assert.equal(state.sourceSections,6);
+ assert.ok(state.sourceSamples<=3264);
+ assert.ok(state.bytes>0&&state.bytes<=1048576);
+ assert.equal(g.uploaded.length,4);
+ assert.equal(g.uploaded.reduce((n,x)=>n+x,0),state.bytes);
+ assert.equal(far.draw({atPos:0,atColor:1,atUv:2,atMat:3}),state.vertices);
+ far.invalidate();assert.equal(g.live.size,0);
+});
+
 test('C6 original Rift two real seam sources upload and draw under 4 GPU buffers / 1 MiB',()=>{
  const camera={x:159.5,z:210.5,feet:-90.99,
   yaw:1.8650308919060845,pitch:0.05620218481286228};

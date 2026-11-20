@@ -166,6 +166,24 @@ export function planCaveFarWallSources(world,player,viewport,
    if(!selected.some(s=>s.key===k)&&!available.has(k))
     available.set(k,c);
  }
+ // Genuine original-game 844x390 Rift Terraces screenshot: exactly 15
+ // remaining bright pixels, x284..291/y139..142, first intersect real
+ // DEEPSTONE at x176,-83,192, section 11,12,-5. At the 540x335
+ // inner WebGL viewport that is about (-.49,.33) in perspective NDC.
+ // The ordinary coarse camera rays can hit different near rock before
+ // the far boundary and omit it. These are source-true first-solid
+ // witnesses, capped by the ORIGINAL 3264 world.get source samples.
+ // Limit this supplemental witness to wide deep -6 views: the accepted
+ // narrow Rift and deep Fan source rankings must remain unchanged.
+ const riftWideWitness=new Map();
+ if(section===-6&&aspect>=1.45&&selected.length===bounds.maxChunks){
+  for(const [screenX,screenY] of [
+    [-.493,.331],[-.489,.337],[-.487,.331],[-.498,.338]
+  ])sampleRay(screenX,screenY,riftWideWitness);
+  for(const [k,c] of riftWideWitness)
+   if(!candidates.has(k)&&!available.has(k)&&
+      !selected.some(x=>x.key===k))available.set(k,c);
+ }
  const joinable=[...available.values()].map(companion=>({
   companion,owner:selected.find(c=>!c.companion&&c.cx===companion.cx&&
    c.cz===companion.cz&&Math.abs(c.section-companion.section)===1)
@@ -191,7 +209,8 @@ export function planCaveFarWallSources(world,player,viewport,
  // bounded wide witness to the newly proven western rock in another
  // existing buffer. No new GPU slot, higher byte cap, CPU cap, or voxels.
  const secondary=joinable.find(j=>j.owner!==selectedJoin?.owner&&
-  j.companion.key!==companionKey&&candidates.has(j.companion.key));
+  j.companion.key!==companionKey&&
+  (candidates.has(j.companion.key)||riftWideWitness.has(j.companion.key)));
  if(secondary&&bounds.maxSeamSources>0)
   secondary.owner.seamCompanion={...secondary.companion};
  const seamKey=secondary&&bounds.maxSeamSources>0?secondary.companion.key:null;
