@@ -27,7 +27,7 @@ function clover(b,variant){
   }
  }
 }
-function bracken(b,variant){
+function bracken(b,variant,distant){
  const turn=2*pi,fronds=4+variant%2;
  for(let f=0;f<fronds;f++){
   const angle=turn*f/fronds+variant*.18,dx=Math.cos(angle),dz=Math.sin(angle);
@@ -43,6 +43,10 @@ function bracken(b,variant){
    const root=[x,y,z],join=center(t+.072);
    for(const direction of [-1,1]){
     const tip=[x-dz*width*direction+dx*.075,y+.047,z+dx*width*direction+dz*.075];
+    if(distant){
+     b.tri(root,[tip[0],tip[1]+.014,tip[2]],join,2);
+     continue;
+    }
     const ridge=[x-dz*width*.46*direction+dx*.037,y+.075,z+dx*width*.46*direction+dz*.037];
     b.tri(root,tip,ridge,1);
     b.tri(root,ridge,join,2);
@@ -51,7 +55,7 @@ function bracken(b,variant){
   }
  }
 }
-function moss(b,variant){
+function moss(b,variant,distant){
  const pads=[[0,0,.19],[-.22,-.07,.14],[.21,.08,.155],[-.10,.20,.11],[.11,-.20,.12],[.21,.19,.096]];
  const phase=variant*.19,sides=7;
  for(let pad=0;pad<5+variant%2;pad++){
@@ -66,8 +70,9 @@ function moss(b,variant){
   for(let i=0;i<sides;i++){
    const j=(i+1)%sides;
    b.quad(foot[i],foot[j],skirt[j],skirt[i],0);
-   b.quad(skirt[i],skirt[j],shoulder[j],shoulder[i],i%3===0?2:1);
-   b.tri(shoulder[i],shoulder[j],[x+.018,height,z-.014],(i+pad)%3===0?3:2);
+   if(!distant)b.quad(skirt[i],skirt[j],shoulder[j],shoulder[i],i%3===0?2:1);
+   const crown=distant?skirt:shoulder;
+   b.tri(crown[i],crown[j],[x+.018,height,z-.014],(i+pad)%3===0?3:2);
   }
  }
 }
@@ -102,13 +107,13 @@ function undergrowthVariant(id,seed,x,y,z){
  const h=(Math.imul(seed^salt,73856093)^Math.imul(x,19349663)^Math.imul(z,83492791)^Math.imul(y,2654435761))>>>0;
  return {yaw:(h&7)*pi/4,scale:.86+((h>>>8)&15)*.012,variant:(h>>>16)&3};
 }
-export function makeUndergrowthMesh(id,seed,x,y,z,requestedVariant){
+export function makeUndergrowthMesh(id,seed,x,y,z,requestedVariant,{distant=false}={}){
  if(!Object.hasOwn(UNDERGROWTH_FAMILIES,id))throw new RangeError('unknown undergrowth family');
  if(![seed,x,y,z].every(Number.isSafeInteger))throw new TypeError('integer anchor required');
  const variant=requestedVariant??undergrowthVariant(id,seed,x,y,z).variant;
  if(!Number.isInteger(variant)||variant<0||variant>3)throw new RangeError('invalid undergrowth variant');
  const b=meshBuilder();
- makers[id](b,variant);
+ makers[id](b,variant,distant);
  return {id,anchor:[x,y,z],mesh:b.finish(),attachment:'ground',collision:'pass-through'};
 }
 export function makeUndergrowthBatch(instances){

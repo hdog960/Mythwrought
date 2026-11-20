@@ -1,0 +1,82 @@
+{
+  "mode": "after",
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
+    "src/nonblock-scene48/flora-phase1.mjs": "3abb46a9e5b3fee140506bb74c90219034850dfea23168e86943d82187d45745",
+    "src/nonblock/candidate-families.mjs": "2f1ab27f1a81d0ff85b1a255816dd1185928adf514fb2fef1ca90f9f25f144e6",
+    "src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
+    "tests/nonblock-lod-browser.mjs": "f87492d561be34e2af448dccb22e95ea19c73f160247c4750a767a212b0696ff",
+    "src/nonblock-scene48/undergrowth-phase1.mjs": "96607a48f2ed3146d3d0bc4b94dbf1fc81d4c6206a37a5c962854493d6e7b61f"
+  },
+  "captures": [
+    {
+      "file": "artifacts/nonblock-undergrowth-lod/near.png",
+      "x": 9.5,
+      "z": 5.5,
+      "point": [
+        9.98,
+        9.41,
+        7.55
+      ],
+      "width": 932,
+      "height": 430,
+      "sha256": "5b72334bb6665c3c9385bc9f8d6756631079b9fa1ecabdc1e13f496a9f25cfdf"
+    },
+    {
+      "file": "artifacts/nonblock-undergrowth-lod/far.png",
+      "x": 20.5,
+      "z": 22.5,
+      "point": [
+        9.97,
+        9.34,
+        7.5
+      ],
+      "width": 932,
+      "height": 430,
+      "sha256": "c03eef3daecee957fd4c0e81b27a23fd9e9efe081d84e93b4ac6b2c1bf077389"
+    }
+  ],
+  "observations": [
+    {
+      "name": "near",
+      "bytes": 39096,
+      "far": 0,
+      "drawCalls": 1,
+      "terrainChunks": 25,
+      "parentEffectDrawn": true
+    },
+    {
+      "name": "boundary",
+      "bytes": 39096,
+      "far": 0,
+      "drawCalls": 1,
+      "terrainChunks": 25,
+      "parentEffectDrawn": true
+    },
+    {
+      "name": "far",
+      "bytes": 21384,
+      "far": 2,
+      "drawCalls": 1,
+      "terrainChunks": 25,
+      "parentEffectDrawn": true
+    },
+    {
+      "name": "boundary",
+      "bytes": 21384,
+      "far": 2,
+      "drawCalls": 1,
+      "terrainChunks": 25,
+      "parentEffectDrawn": true
+    },
+    {
+      "name": "near",
+      "bytes": 39096,
+      "far": 0,
+      "drawCalls": 1,
+      "terrainChunks": 25,
+      "parentEffectDrawn": true
+    }
+  ]
+}

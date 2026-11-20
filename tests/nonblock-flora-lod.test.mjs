@@ -3,7 +3,7 @@ import test from 'node:test';
 import {candidateVertices,createCandidateScene} from '../src/nonblock/candidate-scene.mjs';
 
 const seed=179;
-const ids=['low-grass','short-fern','clover-clump','meadow-sedge'];
+const ids=['low-grass','short-fern','clover-clump','meadow-sedge','bracken-fern','moss-cushion'];
 const deps={storage:{getItem:()=>null},blockAt:(x,y)=>y===0,voxelPick:()=>null};
 const direction=[0,0,1];
 

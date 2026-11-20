@@ -50,6 +50,15 @@ function authoredFloraFamily(sceneId){
   return family;
 }
 
+function authoredUndergrowthFamily(sceneId){
+  const palette=sceneId.endsWith('toadstools')?fungiPalette:undergrowthPalettes[sceneId]??groundCoverPalette;
+  const mesh=({seed,anchor,variant},options)=>makeUndergrowthMesh(sceneId,seed,...anchor,variant,options).mesh;
+  const family=floraFamily(mesh,palette);
+  if(sceneId==='scene48:bracken-fern'||sceneId==='scene48:moss-cushion')
+    family.distantMesh=options=>mesh(options,{distant:true});
+  return family;
+}
+
 function forestFamily(maker,palette) {
   return floraFamily(({seed,anchor,variant})=>maker(seed,...anchor,variant).mesh,palette);
 }
@@ -86,9 +95,7 @@ export const candidateFamilies = new Map([
   ...ENCHANTED_FUNGI_IDS.map(sceneId=>newFloraFamily(sceneId,createEnchantedFungus,
     sceneId==='scene48:shelf-fungus'||sceneId==='scene48:glowing-vine')),
   ...Object.keys(SCENE_FAMILIES).map(sceneId=>[sceneId,authoredFloraFamily(sceneId)]),
-  ...Object.keys(UNDERGROWTH_FAMILIES).map(sceneId=>[sceneId,floraFamily(
-    ({seed,anchor,variant})=>makeUndergrowthMesh(sceneId,seed,...anchor,variant).mesh,
-    sceneId.endsWith('toadstools')?fungiPalette:undergrowthPalettes[sceneId]??groundCoverPalette)]),
+  ...Object.keys(UNDERGROWTH_FAMILIES).map(sceneId=>[sceneId,authoredUndergrowthFamily(sceneId)]),
   ['scene48:exposed-root',{...floraFamily(
     ({seed,anchor,variant})=>createForestCandidate('scene48:exposed-root',seed,...anchor,variant).mesh,barkPalette),
     embedDepth:.02}],
