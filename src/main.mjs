@@ -3218,10 +3218,22 @@ function start(){
 
   // Three-action player menu. Legacy controls retain their original DOM,
   // listeners and storage contracts but are not player-visible settings.
+  let preparedDiagnosticSeed=null;
   const playerSettings=installPlayerMenu({
     container:help.querySelector('.helpbody'),
     onDiagnostics:async()=>{
-      await document.getElementById('runAudit').onclick();
+      // iOS Safari requires a *fresh user gesture* for clipboard.writeText.
+      // Never await the expensive read-only diagnostic before attempting copy
+      // in the same click; generate on the first tap, copy on the second.
+      if(preparedDiagnosticSeed!==world.seed||!auditReport.value){
+        preparedDiagnosticSeed=null;
+        await document.getElementById('runAudit').onclick();
+        if(auditReport.value){
+          preparedDiagnosticSeed=world.seed;
+          playerSettings.showStatus('Diagnostic ready · tap COPY TEST CODE again to copy');
+        }else playerSettings.showStatus(auditStatus.textContent);
+        return;
+      }
       await document.getElementById('copyAudit').onclick();
       playerSettings.showStatus(document.getElementById('auditStatus').textContent);
     },
