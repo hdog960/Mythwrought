@@ -24,7 +24,7 @@ https://github.com/hdog960/Mythwrought/pull/232) removed eight noninteractive sc
 
 A family passes visual review after inspection of source meshes and deterministic variants from multiple useful viewpoints, with attention to silhouette, material, scale and visibility in actual landscape gameplay. Revised assets need comparable original and revised captures. Engine acceptance requires shared transform and triangle evidence for drawing and picking, real support and clearance checks, six-block reach, voxel precedence and physical asset compatibility. Removals need verified durable commit, isolation and reload evidence. Measured frame time, GPU bytes, draw calls and triangle totals must fit the production budget with 25 surface chunks. Offline, context recovery and legacy saves require regression runs. Classifications remain provisional until the evidence for each family is recorded.
 
-## Source assessment
+## Initial source assessment
 
 | Lane | Existing functionality | Open issues and disposition |
 | --- | --- | --- |
@@ -54,7 +54,7 @@ Two :36 evidence files require Playwright. The third failure needs separate fixt
 
 The adapter directly imports inherited source meshes for wildflower, desert scrub, pebble scatter, cloth banner and rope coil. It keeps each scene ID and the :36 orientation identity, and evaluates support and edited occupancy against the actual game world. Tests opt in through a bounded layout on loopback, with the original action controls and raycast. Staged removals use a separate versioned key scoped to the world generator and seed. The native tests cover exact triangles, edit-safe mounts, voxel tie precedence, foreign and forged picks, stored state isolation and write rejection. Shipped world formats are outside this staging path.
 
-This is an interim draft. All five samples await final art and mobile performance acceptance. The full 96-family catalog, remaining shape and collision behaviors, production-quality batch/LOD and storage recovery, offline staging and release manifests, comparative gallery, final parity review and physical iPhone acceptance are open.
+At the first staging checkpoint, all five samples awaited final art and mobile performance acceptance. The full 96-family catalog, remaining shape and collision behaviors, production-quality batch/LOD and storage recovery, offline staging and release manifests, comparative gallery, final parity review and physical iPhone acceptance were open.
 
 ## Reproduction
 
@@ -155,3 +155,21 @@ At the stage v14 checkpoint, the full-detail 31-object catalog benchmark held 25
 The exact `a8d1d5e068537dea072d3e29537ccec12812f420` checkout passed all 1,083 root tests and the original 20-script GitHub WebGL2 gate. The separate staged browser run verified exactly 72 scenery families, 12 physical fittings and 12 render-only effects. The evidence verifier checked source digests and PNG dimensions, file digests and chunk integrity for 98 genuine frames across all three landscape viewports. [Staged evidence index](gallery/staging-a8d1d5e.json) · [GitHub WebGL2 run](https://github.com/hdog960/Mythwrought/actions/runs/44691596449)
 
 The 31-object stage v16 scene held all 25 terrain chunks and used one scenery draw with 6,603 vertices and 237,708 GPU bytes. Its 31 MINE operations survived a fresh page with the original schema-1 save intact. The same staged run confirmed offline recovery, rejected cache bytes, four biome mounts, physical-owner placement and WebGL context restoration. These measurements come from Chromium with software rendering. Device frame-time acceptance remains open.
+
+### Stage v19 art and integration
+
+At `22d5f916d03dd12dc0c8028a424f180fd460b269`, the candidate records seven rebuilds and 36 refinements among the 43 inherited meshes. The geometry audit exercised all 320 scenery variants at four seed and anchor pairs, including negative seed and distant coordinates. It checked finite nondegenerate close and distant output. The largest sampled close mesh was the 252-triangle hanging chain. [Inherited art review](mesh-review.md) · [Published-scope rehearsal and device hold](release-hold.md#stage-v19-reproduction)
+
+The mixed-scene review captured 14 original-game frames using a nonempty four-region world and the Economy render preset. The meadow and enchanted scenes show inherited and newly authored plants together. The desert and snow fixtures show the different plant silhouettes at normal play distance. The mountain scene exposes how quickly small stones and low evergreens recede into the terrain. The cave puts sediment, crystals and dripstone in one underground room. The fittings scene places staged props on the same meadow surface as an authored plant.
+
+| Scene | Drawn instances | Scenery GPU bytes | Overview |
+| --- | ---: | ---: | --- |
+| Meadow | 8 | 83,160 | [View](gallery/mixed-v19/meadow-overview.png) |
+| Desert | 7 | 72,900 | [View](gallery/mixed-v19/desert-overview.png) |
+| Snow | 4 | 45,576 | [View](gallery/mixed-v19/snow-overview.png) |
+| Mountain | 6 | 57,132 | [View](gallery/mixed-v19/mountain-overview.png) |
+| Enchanted | 8 | 102,168 | [View](gallery/mixed-v19/enchanted-overview.png) |
+| Fittings | 6 | 60,048 | [View](gallery/mixed-v19/fittings-overview.png) |
+| Cave | 9 | 121,176 | [View](gallery/mixed-v19/cave-overview.png) |
+
+Each scene drew in one scenery call with 25 loaded terrain chunks. One exact MINE removal per scene survived a fresh page. Both scenery records matched at each reopen, and the fixture's schema-1 and generation profile bytes stayed intact. The manifest preserves warm foreground frame samples from Chromium SwiftShader. The actual iPhone frame-time measurements remain open. [Source, captures and frame samples](gallery/mixed-v19/manifest.json)

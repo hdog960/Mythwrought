@@ -12,7 +12,7 @@ export const stageEvidenceGroups=Object.freeze([
   'nonblock-runtime','nonblock-catalog','nonblock-meadow-woodland','nonblock-enchanted-fungi',
   'nonblock-caves','nonblock-inherited-extra','nonblock-world-props','nonblock-physical-fittings',
   'nonblock-effects','nonblock-offline','nonblock-cache-recovery','nonblock-habitat',
-  'forest-floor-review-after','nonblock-lod','nonblock-fitting-comparison-after'
+  'forest-floor-review-after','nonblock-lod','nonblock-fitting-comparison-after','nonblock-parity'
 ]);
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sizes=new Set(['667x375','844x390','932x430']);
@@ -66,6 +66,22 @@ export function verifyStageCatalogCoverage(groups) {
   }));
 }
 
+function verifyParityScenes(data,shots) {
+  const habitats=['meadow','desert','snow','mountain','enchanted','fittings','cave'];
+  const removals=data.removals??[];
+  if(data.nonemptySchema1AndProfileBytesUnchanged!==true||removals.length!==habitats.length||
+     new Set(removals).size!==habitats.length||shots.length!==2*habitats.length)
+    throw new Error('Mixed-scene persistence evidence is incomplete');
+  for(const habitat of habitats){
+    const views=shots.filter(shot=>shot.habitat===habitat);
+    const modes=views.map(({filename})=>filename?.match(/-(overview|focus)\.png$/)?.[1]).sort();
+    if(modes.join(',')!=='focus,overview'||views.some(({render,placement})=>
+        render?.instances!==placement?.length||render?.drawCalls!==1||render?.terrainChunks!==25||
+        !Number.isInteger(render.gpuBytes)||render.gpuBytes<108))
+      throw new Error('Mixed-scene render evidence is incomplete for '+habitat);
+  }
+}
+
 export async function verifyStageEvidenceGroup(root,group) {
   const prefix='artifacts/'+group;
   const data=JSON.parse(await readFile(inside(root,prefix+'/manifest.json'),'utf8'));
@@ -80,6 +96,7 @@ export async function verifyStageEvidenceGroup(root,group) {
     {file:prefix+'/cold-offline-932x430.png',sha256:data.screenshotSha256}
   ];
   if(!Array.isArray(shots)||shots.length===0)throw new Error(group+' has no screenshots');
+  if(group==='nonblock-parity')verifyParityScenes(data,shots);
   const verified=[];
   for(const shot of shots){
     const path=shot.path??shot.file??shot.filename;

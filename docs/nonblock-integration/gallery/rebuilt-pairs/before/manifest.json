@@ -1,0 +1,216 @@
+{
+  "seed": 179,
+  "results": [
+    {
+      "placement": {
+        "sceneId": "nonblock:d:icicle-spear",
+        "anchor": [
+          16,
+          4,
+          4
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          16,
+          3,
+          6
+        ],
+        "point": [
+          16.37281291,
+          4.43536997,
+          4.3432951
+        ]
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Aicicle-spear:179:16,4,4:2",
+      "solid": true,
+      "triangles": 14,
+      "underSurface": true,
+      "render": {
+        "gpuBytes": 1512,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "filename": "artifacts/nonblock-rebuilds-before/icicle-spear.png",
+      "sha256": "ad929e382b998a22f2995b258a44f93e4ce4eae277e8bd3b012976c7520ba098"
+    },
+    {
+      "placement": {
+        "sceneId": "nonblock:e:small-stalagmite",
+        "anchor": [
+          15,
+          4,
+          7
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          16,
+          4,
+          9
+        ],
+        "point": [
+          15.54660034,
+          4.55951325,
+          7.69637076
+        ]
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Asmall-stalagmite:179:15,4,7:2",
+      "solid": true,
+      "triangles": 14,
+      "underSurface": true,
+      "render": {
+        "gpuBytes": 1512,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "filename": "artifacts/nonblock-rebuilds-before/small-stalagmite.png",
+      "sha256": "76325b9850c4b6f9c68f3c13e16b8d088fe41c8191f820e3fadfe54a4e0c287f"
+    },
+    {
+      "placement": {
+        "sceneId": "nonblock:e:hanging-stalactite",
+        "anchor": [
+          15,
+          5,
+          7
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          16,
+          4,
+          9
+        ],
+        "point": [
+          15.37281227,
+          5.38680315,
+          7.3432951
+        ]
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Ahanging-stalactite:179:15,5,7:2",
+      "solid": true,
+      "triangles": 14,
+      "underSurface": true,
+      "render": {
+        "gpuBytes": 1512,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "filename": "artifacts/nonblock-rebuilds-before/hanging-stalactite.png",
+      "sha256": "16ae99b8bce7c448aa4fa44e91b8fac7287f9b7c5d4c588b1a479f3ed8a2475a"
+    },
+    {
+      "placement": {
+        "sceneId": "nonblock:e:crystal-shard",
+        "anchor": [
+          15,
+          4,
+          7
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          16,
+          4,
+          9
+        ],
+        "point": [
+          15.34399986,
+          4.47764969,
+          7.40999985
+        ]
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Acrystal-shard:179:15,4,7:2",
+      "solid": true,
+      "triangles": 32,
+      "underSurface": true,
+      "render": {
+        "gpuBytes": 3456,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "filename": "artifacts/nonblock-rebuilds-before/crystal-shard.png",
+      "sha256": "1d5fc355bc9a426842bf89779ef0775bc6b621fe0b9755a79503012794140588"
+    },
+    {
+      "placement": {
+        "sceneId": "scene36:hanging-cobweb",
+        "anchor": [
+          13,
+          11,
+          13
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "view": {
+        "cell": [
+          11,
+          7,
+          14
+        ],
+        "point": [
+          13.6291647,
+          11.61504555,
+          13.01799965
+        ]
+      },
+      "instanceKey": "nb1:scene36%3Ahanging-cobweb:179:13,11,13:2:r0",
+      "solid": false,
+      "triangles": 25,
+      "underSurface": false,
+      "render": {
+        "gpuBytes": 2700,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "filename": "artifacts/nonblock-rebuilds-before/hanging-cobweb.png",
+      "sha256": "0a3226de3f8942e8b78ffeb77fc18ec65965257c0ace3329e83b0dd192180af5"
+    }
+  ],
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/voxel.mjs": "6df6d3c5a0223cee405656afd0548fea3a957ae0c5185d7130a34d7198c3f981",
+    "tests/nonblock-inherited-extra-browser.mjs": "919f4a23ec238be878cb8e4310969fee392168829d2ed0243e7eb483fd34dc68",
+    "src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
+    "src/nonblock/candidate-families.mjs": "b67401eeb2c45998ebc979701719313d103ea23daa939ed933972ac62b1cdc62",
+    "src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
+    "src/nonblock/physical-fittings.mjs": "c9dc6bcb1d42e21e0fb2a0f304caa9d5053cbbccc06d60fea7769dfd714ee16e",
+    "src/nonblock/stage-offline.mjs": "c74fc6d09a4ef96cf476a9158004f88cc15a6dc1efe0d44943f83c77b5e155a8",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/staged-inherited-families.mjs": "98f3b215e6c29df25e166f6a9af6b5833927faa740444926ddef39aabce5db6a",
+    "src/nonblock-environments24/agave-rosette.mjs": "cf6a43c47bad586aaacec57f001e9ff8ab34ac2b1293a5d99664f1050533854c",
+    "src/nonblock-environments24/alpine-wildflower.mjs": "83be6613f41de08a491a3ac5b9e28df22998bb962167a82c5716872bd71399a0",
+    "src/nonblock-environments24/branching-crystal-cluster.mjs": "e16462cd4d0bf9ae7dec6bb2cda246e19b18dd5959e057347505a78b6fae1786",
+    "src/nonblock-environments24/cave-formations.mjs": "598eba5c9864a2f1c210d0eb2cfe2f6088ef7cac9bc4bfe4446f1c28ac63c751",
+    "src/nonblock-environments24/cave-rubble-cluster.mjs": "16e5a1df974bb3b4b21fc71b10caa2a6d74e177109f5bc4548f8680596fe1c63",
+    "src/nonblock-environments24/column-cactus.mjs": "5823cb50d83d6f3fd9ec6d616ad8540ddf6a5a6d00ecba1c0cfb8fc07b096fbb",
+    "src/nonblock-environments24/desert-bloom.mjs": "2961e396787056570dad5f57814fc93c5f3ebe79de95dd2fc02f6235865e6769",
+    "src/nonblock-environments24/desert-scrub.mjs": "9e72eb72935504eec761d8384ecd66c4dd8e38eea024f0f21791077e96a2e34c",
+    "src/nonblock-environments24/dwarf-juniper.mjs": "7d9719432acdb2467f26ff2af47b9375ab50a2d26d25b424fd69b88297d6c8c2",
+    "src/nonblock-environments24/frost-fern.mjs": "0b31422adf207983679f7d111f05d5d7436fd98c1945dc148ad86b4de22cfff1",
+    "src/nonblock-environments24/geode-opening.mjs": "cb5ad2199cfd11bd3dec79994a75f1c70f5899d854a54b19e6592b09120538d7",
+    "src/nonblock-environments24/inherited-review-objects.mjs": "664135edf885f4479b63717afa418e3f5503d4836f5cd6cceb82c969cb027c00",
+    "src/nonblock-environments24/mineral-encrustation.mjs": "e8dbd0c96bdb1bbce4d534441798a52aaf1e67ffae5680a2f75e7088846d4420",
+    "src/nonblock-environments24/pebble-scatter.mjs": "d5da79419c9bc79e1bed3b5ef3567665926b44f3257a3ace4bf97c144a80e18c",
+    "src/nonblock-environments24/prickly-pear-cactus.mjs": "fe26a83004d838d7cbce647feecaacb0ab8cb6673a0e88811e00307b7f617e54",
+    "src/nonblock-environments24/saltgrass.mjs": "c03a71e12e2a2437b8d5cf482f05ed4731d5116b281e3dbc872140a162170dc8",
+    "src/nonblock-environments24/snowgrass.mjs": "b288656b6237a871b1e58a2cd63fd9be88f5266dc867fdf8855f540ded0182cf",
+    "src/nonblock-environments24/tumblebrush.mjs": "7d9188626b7ef2c265803cd787978daafb83d7ae58b8f4382f9e20b04492b804",
+    "src/nonblock-fittings36/fittings-phase1.mjs": "f82a4e6dac058c5381894fc49903ce7447f7ed81bd2f4bec345b3868804fe68a",
+    "src/nonblock-fittings36/inherited-review-fittings.mjs": "479c580f9749ee3b45a68f3fcfebd08402cb0f15d163d4ce9b7599868583c719",
+    "src/nonblock-fittings36/world-props.mjs": "8b9299c73ed1195e175c3b685fa667f58a54b4ef93737ffc44956c6af8c768b5"
+  },
+  "label": "before",
+  "removalAndColdReopen": true,
+  "nonemptySchema1SaveBytesUnchanged": true
+}

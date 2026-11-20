@@ -36,3 +36,13 @@ Chromium opened the exact published build at the original `/Mythwrought/` path o
 The preloaded schema-1 world, Pack 2 door, generation profile and both previous-good backups matched byte for byte at every phase. The game resolved the same terrain edit and physical door after rollback, and the separate scenery removal stayed stored. The rehearsal ran in Chromium and used a loopback-only staged worker. Acceptance on the original iPhone Home Screen installation remains open. [Source and capture manifest](gallery/install-rehearsal/manifest.json)
 
 The follow-up rehearsal shut down Chromium after rollback and launched a fresh process on the same isolated disk profile. With networking disabled, the original worker opened the shortcut and served its installation assets. The original world, door, profile and backup bytes still matched, and the separate scenery removal remained stored. [Offline process restart](gallery/install-rehearsal/process-restart-offline.png) · [Rehearsal manifest](gallery/install-rehearsal/manifest.json)
+
+## Stage v19 reproduction
+
+The candidate at `22d5f916d03dd12dc0c8028a424f180fd460b269` repeated the same-origin installation rehearsal from published build `64245c76a9e265f17bf387e3fd209bbfc9f6d950`. The browser kept the same app path, manifest and icon. It loaded both source revisions in the same disposable profile, retained the stage removal across rollback, and reopened the original cached shell in a fresh Chromium process with networking disabled. The schema-1 save, Pack 2 door, generation profile and previous-good records matched byte for byte. [Rehearsal manifest](gallery/install-v19/manifest.json) · [Fresh offline process](gallery/install-v19/process-restart-offline.png)
+
+## Evidence to collect on the target iPhone
+
+Use a disposable copy of the installation data and the creator-approved test build. Record the source revision, iPhone model, iOS version, landscape dimensions, device pixel ratio and render preset. Use the existing **Gate A · Device Check** after warming the same ordinary and scenery-heavy routes. Capture the foreground median and 95th-percentile frame times, slow-frame count, framebuffer dimensions, chunk count and grip clearance. Repeat the route at the same settings on the published baseline.
+
+Confirm the original Home Screen icon and launch path, both grips, touch MINE and PLACE, Creative, the minimap and existing physical fittings. On the disposable copy, verify a scenery removal after full application termination, an offline cold start and the existing world and backup records after the approved recovery procedure. Record the observed build at each step. Final device acceptance and creator approval are open.

@@ -223,3 +223,17 @@ Each comparison held the camera, natural mount and installed render preset fixed
 ## Distant bracken and moss
 
 Bracken fern keeps the same frond outlines with one face per leaflet across the distance threshold. The moss cushion keeps its outer rim and apex and drops the intermediate bevel. The matched Chromium route recorded 39,096 bytes near in both builds and 21,384 bytes at distance after the revision, a 45% reduction. The same one scenery batch, 25 terrain chunks and attached pollen effect persisted across the transitions. The lower-detail meshes remained active inside the hysteresis band on the return trip and the original detail returned up close. Native checks confirm each distant variant stays within 0.035 blocks of its original bounds. Device frame time remains open. [Before capture and measurements](gallery/undergrowth-lod/before/manifest.json) · [After capture and measurements](gallery/undergrowth-lod/after/manifest.json)
+
+## Matched views of the early rebuilds
+
+The two original producers supplied the exact taper and web geometry for the before captures. The source files were copied from the protected commits into an isolated review tree and drawn through the current staging mount and picking interfaces. The before and after frames share one seed, natural anchors, variants, standing eyes and aim. [Original environment source](https://github.com/hdog960/Mythwrought/blob/dacbadd1abb6dc83164374fccf59a43a9578baef/src/nonblock-environments24/objects.mjs) · [Original fitting source](https://github.com/hdog960/Mythwrought/blob/e3a26c086e3b20ff787abe8f85ae691aea881dcc/src/nonblock-fittings36/fittings-phase1.mjs)
+
+| Family | Before | After | Sample triangles | GPU bytes |
+| --- | --- | --- | --- | --- |
+| Icicle spear | [View](gallery/rebuilt-pairs/before/icicle-spear.png) | [View](gallery/rebuilt-pairs/after/icicle-spear.png) | 14 → 60 | 1,512 → 6,480 |
+| Small stalagmite | [View](gallery/rebuilt-pairs/before/small-stalagmite.png) | [View](gallery/rebuilt-pairs/after/small-stalagmite.png) | 14 → 140 | 1,512 → 15,120 |
+| Hanging stalactite | [View](gallery/rebuilt-pairs/before/hanging-stalactite.png) | [View](gallery/rebuilt-pairs/after/hanging-stalactite.png) | 14 → 96 | 1,512 → 10,368 |
+| Crystal shard | [View](gallery/rebuilt-pairs/before/crystal-shard.png) | [View](gallery/rebuilt-pairs/after/crystal-shard.png) | 32 → 90 | 3,456 → 9,720 |
+| Hanging cobweb | [View](gallery/rebuilt-pairs/before/hanging-cobweb.png) | [View](gallery/rebuilt-pairs/after/hanging-cobweb.png) | 25 → 112 | 2,700 → 12,096 |
+
+Shorter silhouettes and material bands separate ice, sediment and crystal in the actual cave. The cobweb strands are visible against the canopy in the full frame and remain subtle at 3.9 blocks. Both runs used exact triangle MINE, preserved the ordinary schema-1 save and retained all five removals after reloading. Each sample used one scenery draw with 25 terrain chunks loaded. [Before source and replay](gallery/rebuilt-pairs/before/manifest.json) · [After source and replay](gallery/rebuilt-pairs/after/manifest.json)
