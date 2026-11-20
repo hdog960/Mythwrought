@@ -1,5 +1,5 @@
 {
-  "version": "20261120-v22",
+  "version": "20261120-v23",
   "assets": {
     "./src/mobs/animal-interactions.mjs": "e04f6692fc93ef6c44711cb10eafab261ceb7488383e55bf95067de724f99113",
     "./src/mobs/behavior.mjs": "4a65b4ca044a47e70a164929e2ce4552f0d11f811a61c3da5607de87ef1a7bfb",
@@ -260,7 +260,7 @@
     "./src/voxel-shape-interactions.mjs": "46049b127f4496ac72b780dc196c72dd581c25e79bd0462df5fcd475425962c9",
     "./src/voxel-trees.mjs": "bfd15de08ff5c7768f9985ab1564827a472ec5dfde48022ec7aca88f3bae4549",
     "./src/voxel-watchtower.mjs": "b157c18c15a66be513013afde4701d3d529027337da660f2b7156e6a1e57008a",
-    "./src/voxel.mjs": "6df6d3c5a0223cee405656afd0548fea3a957ae0c5185d7130a34d7198c3f981",
+    "./src/voxel.mjs": "f98356fdc15a38fecbf7945c48fb1c4a72bdda085a0c42e96f58547cc2a7b751",
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "718c946759e7ea30206bcf94b825a540a5a8ada2b8325ce7aee98bb776814dfb",
@@ -299,6 +299,6 @@
     "./src/nonblock-scene48/undergrowth-phase1.mjs": "96607a48f2ed3146d3d0bc4b94dbf1fc81d4c6206a37a5c962854493d6e7b61f",
     "./src/nonblock-scene48/woodland-sapling.mjs": "6a3e8a61d67908261107a22e085082d4887a75decbd819a8ceb769a6256593ed",
     "./src/nonblock-scene48/woodland-shrub.mjs": "2419aed3138df3256e302b40f068079f6c89e51cf58d8a73b2df4fade2a803f5",
-    "./sw-nonblock-stage.js": "4e6e8663af1f596921bd49a52e904a7cee28a7268fe6de2561c1cd3f0a23fee2"
+    "./sw-nonblock-stage.js": "77a403fb5d290ca833af79df79c7445ef71a8f2e2e5d97b8164b9fa4a6710cb2"
   }
 }

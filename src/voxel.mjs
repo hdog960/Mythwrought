@@ -2,7 +2,7 @@
 import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
-import {biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
+import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -20,6 +20,16 @@ const COLORS = {
   4:[0.60,0.39,0.23], 5:[0.36,0.79,0.92], 6:[0.70,0.58,0.33],
   7:[0.27,0.57,0.31], 8:[0.32,0.39,0.48]
 };
+const BIOME_SOLID_CUBES=new Set(BIOME130_REGISTERED_IDS.filter(id=>{
+  const {boxes,opacity,solid,transparent}=biome130Block(id);
+  return solid&&!transparent&&opacity===1&&boxes.some(box=>box.every((v,i)=>v===FULL_CUBE.boxes[0][i]));
+}));
+const BIOME_GROUND_COLORS=new Map([
+  256,257,258,259,260,261,262,263,264,272,277,278,279,286,289,293,294,302,303,305,307
+].map(id=>{
+  const {palette}=biome130Block(id);
+  return [id,palette[0].map((_,index)=>palette.reduce((sum,color)=>sum+color[index],0)/palette.length)];
+}));
 const FACE = [
   {d:[1,0,0],q:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],lit:.77},
   {d:[-1,0,0],q:[[0,0,1],[0,1,1],[0,1,0],[0,0,0]],lit:.73},
@@ -189,6 +199,14 @@ export function meshChunk(world,cx,cz){
   const cells=new Uint16Array(side*side*depth);
   cells.fill(65535); // 16-bit sentinel: old 255 remains reserved; biome130 uses 256..312.
   const extra=new Map();
+  const profile=world.base?.generationProfile??world.generationProfile;
+  const groundTints=new Map();
+  function groundTint(x,z){
+    const key=x+','+z;
+    if(!groundTints.has(key))groundTints.set(key,.91+
+      noise(x/31,z/31,world.seed+2401)*.15+noise(x/9,z/9,world.seed+2479)*.045);
+    return groundTints.get(key);
+  }
   const blockAt=(x,y,z)=>{
     if(x<minX||x>=minX+side||z<minZ||z>=minZ+side||y<minY||y>=minY+depth){
       const key=x+','+y+','+z;
@@ -246,6 +264,7 @@ export function meshChunk(world,cx,cz){
         }
         if(isBiome130BlockId(id)){
           const surface=getBiomeGeometry(id,world.rotationAt?.(x,y,z)??0);
+          const groundColor=profile&&!world.edits?.has(worldKey(x,y,z))?BIOME_GROUND_COLORS.get(id):undefined;
           // Source-accurate union surface geometry; full neighboring legacy
           // solids hide only true boundary faces, preserving internal shapes.
           for(let t=0;t<surface.indices.length;t+=3){
@@ -262,14 +281,15 @@ export function meshChunk(world,cx,cz){
               }
             }
             if(boundary&&neighbor!==BLOCK.AIR&&
-                !isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))continue;
+                ((!isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))||BIOME_SOLID_CUBES.has(neighbor)))continue;
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const lit=[.77,.73,1,.48,.85,.67][face];
-            const color=biome130Color(id,x,y,z,face);
+            const color=groundColor??biome130Color(id,x,y,z,face);
             for(let u=t;u<t+3;u++){
               const i=surface.indices[u]*3,px=surface.positions[i],
                     py=surface.positions[i+1],pz=surface.positions[i+2];
-              appendVertex(x+px,y+py,z+pz,color[0]*lit,color[1]*lit,color[2]*lit,
+              const shade=lit*(groundColor?groundTint(x+px,z+pz):1);
+              appendVertex(x+px,y+py,z+pz,clamp(color[0]*shade,0,1),clamp(color[1]*shade,0,1),clamp(color[2]*shade,0,1),
                 nx?pz:px,ny?pz:py,0);
             }
           }
@@ -283,7 +303,8 @@ export function meshChunk(world,cx,cz){
         let variance;
         for(const face of FACE){
           const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
-          if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor))continue;
+          if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor)&&
+              (!isBiome130BlockId(neighbor)||BIOME_SOLID_CUBES.has(neighbor)))continue;
           if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
             hash(x+y*5,z-y*3,world.seed+91)*.08;
           const r=clamp(color[0]*variance*face.lit,0,1);
