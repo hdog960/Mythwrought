@@ -577,52 +577,58 @@ export const ROADMAP_D_WAVE7_PLANS=Object.freeze([
     ],
     "r": [
       [
-        23,
-        33,
+        19,
+        31,
         1,
         59
       ],
       [
+        2,
+        22,
+        5,
+        23
+      ],
+      [
+        31,
+        57,
+        18,
+        37
+      ],
+      [
         3,
-        25,
-        8,
-        25
-      ],
-      [
-        33,
-        59,
-        16,
-        35
-      ],
-      [
-        7,
-        29,
-        42,
-        61
-      ],
-      [
-        38,
-        61,
-        38,
+        28,
+        39,
         60
       ],
       [
-        14,
-        48,
-        24,
-        48
+        38,
+        62,
+        44,
+        61
+      ],
+      [
+        12,
+        50,
+        22,
+        50
       ],
       [
         1,
-        18,
-        29,
-        44
+        13,
+        25,
+        41
       ],
       [
-        52,
+        51,
         62,
-        30,
-        45
+        32,
+        46
+      ],
+      [
+        22,
+        41,
+        52,
+        62
       ]
     ],
     "discs": [
@@ -725,7 +731,7 @@ export const ROADMAP_D_WAVE7_PLANS=Object.freeze([
         36
       ]
     ],
-    "roof": "glacierwhorl-bifurcated-crystal-observer-wings-and-snow-shielded-lightshafts"
+    "roof": "glacierwhorl-nine-offset-thin-ice-probe-wings-with-spine-and-shielded-snow-moonshafts"
   },
   {
     "t": "magical-research-institute",
@@ -1210,9 +1216,9 @@ export const ROADMAP_D_WAVE7_PLANS=Object.freeze([
       ],
       [
         83,
-      47,
-      8,
-      8
+        47,
+        8,
+        8
       ],
       [
         44,
