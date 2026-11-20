@@ -1,4 +1,4 @@
-name: Roadmap C desert market source WebGL2
+name: Roadmap C market and tailor source WebGL2
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  desert-market-architecture:
+  market-and-tailor-architecture:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -24,18 +24,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: New market native source acceptance
-        run: node --test tests/building-pool/roadmap-c-trades/wave1-desert-market.test.mjs
+      - name: Both new trade sources, both handoffs and strict all-pool D4
+        run: |
+          node --test tests/building-pool/roadmap-c-trades/wave1-desert-market.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave2-riverbend-tailor.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/c-market-handoff.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave1-trade-all-pool-d4.test.mjs
       - name: Pinned Chromium install
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-      - name: Capture all six genuine source WebGL2 images
-        run: node --test tests/building-pool/roadmap-c-trades/wave1-desert-market-chromium.test.mjs
+      - name: Capture all twelve genuine market and tailor source WebGL2 images
+        run: |
+          node --test tests/building-pool/roadmap-c-trades/wave1-desert-market-chromium.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave2-riverbend-tailor-chromium.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: roadmap-c-desert-market-genuine-webgl2
-          path: artifacts/roadmap-c-trade-desert-market/
+          name: roadmap-c-market-and-tailor-genuine-webgl2
+          path: |
+            artifacts/roadmap-c-trade-desert-market/
+            artifacts/roadmap-c-trade-riverbend-tailor/
           if-no-files-found: ignore
