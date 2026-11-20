@@ -2,6 +2,7 @@
 // catalog presentation; never owns voxel edits or saved species identities.
 import {CREATIVE_CATEGORIES,filterCreativeItems}
   from './creative-catalog.mjs';
+import {makeCreativeThumbnail} from './creative-thumbnails.mjs';
 const el=(tag,className,text)=>{
   const n=document.createElement(tag);
   if(className)n.className=className;
@@ -90,7 +91,7 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose}={}){
       b.type='button';b.dataset.key=item.key;
       b.setAttribute('role','option');b.setAttribute('aria-selected',String(selected?.key===item.key));
       b.setAttribute('aria-label',item.name);
-      b.append(el('span','mw-inventory-icon',item.glyph),el('small','',item.name));
+      b.append(makeCreativeThumbnail(item),el('small','',item.name));
       b.addEventListener('click',()=>void select(item));
       fragment.append(b);
     }
