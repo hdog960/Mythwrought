@@ -86,9 +86,21 @@ export function installPlayerMenu({
   function showSafety(open){
     const blocked=Boolean(isReadOnly());
     actions.hidden=blocked;
-    for(const original of backing)original.hidden=blocked;
+    // IndexedDB vault snapshots are independently retained. Their list and
+    // verified JSON download must remain available even when the CURRENT
+    // playable world is a protected preview of obsolete/damaged terrain.
+    // All mutating operations are blocked in the actual event handlers too;
+    // a disabled button alone is never a data-safety boundary.
+    const [vault,mirror]=backing;
+    vault.hidden=false;
+    mirror.hidden=blocked;
+    for(const id of ['vaultBackup','vaultRestore','vaultDelete']){
+      const control=vault.querySelector('#'+id);
+      if(!control)throw Error('Original vault recovery action missing: '+id);
+      control.disabled=blocked;
+    }
     safetyNote.textContent=blocked?
-      'Older or damaged world protected: download its raw localStorage bytes here. Device-vault IndexedDB snapshots require separate export; old terrain cannot be opened as current.':
+      'Older/damaged worlds remain archived. Download raw local saves above, or inspect and download original IndexedDB device-vault snapshots below. No restore, delete, or gameplay conversion is permitted.':
       'Download localStorage saves here. IndexedDB device-vault snapshots need separate downloads below.';
     panel.classList.toggle('safety-open',Boolean(open));
     safety.hidden=!open;
