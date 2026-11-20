@@ -107,7 +107,10 @@ test('G2B mode UI is optional, accessible, not persisted, and labels dynamically
  assert.ok(html.includes('ENABLE CREATIVE MODE (FLIGHT CONTROLS)'));
  assert.ok(src.includes('else if(g2Active()&&!g2Land())'));
  assert.ok(src.includes('lastG2JumpReleaseAt=-Infinity;'));
- assert.ok(src.includes("g2Profile.value='normal'"));
+ assert.ok(src.includes("g2Profile.value='travel'"));
+ assert.ok(src.includes("selectG2FlightProfile(active,'travel')"));
+ assert.ok(html.includes('id="creativeToggle"'));
+ assert.ok(html.includes('id="creativeInventoryToggle"'));
  assert.ok(src.includes("el.setAttribute('aria-label',aria)"));
  assert.ok(!src.includes("localStorage.setItem('g2b"));
 });
