@@ -444,7 +444,7 @@ export const BUILDER_B_HOSPITALITY_WAVE5_SPECS=Object.freeze([
     ],
     "posts": [
       18,
-      30
+      33
     ],
     "detail": "Eight connected source-authored hospitality rooms, dedicated guest paths, service kitchen, weatherproof asymmetrical rooflines, three true terrain-empty gardens and three two-cell Pack5 bed reservations"
   }
