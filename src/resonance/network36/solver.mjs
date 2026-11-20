@@ -6,6 +6,7 @@ const nonneg = (v,name) => { if(!Number.isSafeInteger(v)||v<0) throw Error('inva
 const key = p => p.x+','+p.y+','+p.z;
 const distance = (a,b) => Math.abs(a.x-b.x)+Math.abs(a.y-b.y)+Math.abs(a.z-b.z);
 const adjacent = (a,b) => distance(a,b)===1;
+const safeAdd=(a,b,label)=>{const sum=a+b;if(!Number.isSafeInteger(sum))throw Error(label+' overflow');return sum;};
 export function solveResonance({nodes=[], generators=[], devices=[], stores=[], tick=0}={}) {
   nonneg(tick,'tick');
   const all=[...nodes,...generators,...devices,...stores];
@@ -77,11 +78,11 @@ export function solveResonance({nodes=[], generators=[], devices=[], stores=[], 
     if(!Number.isSafeInteger(supply))throw Error('supply overflow');
     let available=supply;
     const ordered=[...ds].sort((a,b)=>(a.priority??100)-(b.priority??100)||idSort(a.id,b.id));
-    const potentialDischarge=ss.reduce((n,s)=>n+Math.min(s.charge,s.maxOutput),0);
+    const potentialDischarge=ss.reduce((n,s)=>safeAdd(n,Math.min(s.charge,s.maxOutput),'reserve'),0);
     let remainingReserve=potentialDischarge;
     const active=[];
     for(const d of ordered){
-      if(d.demand<=available+remainingReserve){
+      if(d.demand<=safeAdd(available,remainingReserve,'available energy')){
         let deficit=Math.max(0,d.demand-available);available=Math.max(0,available-d.demand);
         for(const s of [...ss].sort((a,b)=>idSort(a.id,b.id))){
           const used=(nextCharges[s.id]===undefined?s.charge:nextCharges[s.id]);
@@ -98,7 +99,7 @@ export function solveResonance({nodes=[], generators=[], devices=[], stores=[], 
       const gain=Math.min(available,s.maxInput,s.capacity-charge);
       nextCharges[s.id]=charge+gain;available-=gain;
     }
-    summaries.push({id:r,conductors:conductorGroup.map(n=>n.id),production:supply,use:ordered.filter(d=>deviceStates[d.id]==='active').reduce((n,d)=>n+d.demand,0),curtailed:ordered.filter(d=>deviceStates[d.id]==='shortage').map(d=>d.id),surplus:available,stored:ss.reduce((n,s)=>n+nextCharges[s.id],0)});
+    summaries.push({id:r,conductors:conductorGroup.map(n=>n.id),production:supply,use:ordered.filter(d=>deviceStates[d.id]==='active').reduce((n,d)=>safeAdd(n,d.demand,'use'),0),curtailed:ordered.filter(d=>deviceStates[d.id]==='shortage').map(d=>d.id),surplus:available,stored:ss.reduce((n,s)=>safeAdd(n,nextCharges[s.id],'stored'),0)});
   }
   for(const s of stores)if(nextCharges[s.id]===undefined)nextCharges[s.id]=s.charge;
   for(const d of devices)if(deviceStates[d.id]===undefined)deviceStates[d.id]='disconnected';
