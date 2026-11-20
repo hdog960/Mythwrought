@@ -1,0 +1,40 @@
+name: Roadmap C desert market source WebGL2
+
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-c-trades/**'
+      - 'tests/building-pool/roadmap-c-trades/**'
+      - '.github/workflows/roadmap-c-trade-webgl2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: roadmap-c-trade-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desert-market-architecture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: New market native source acceptance
+        run: node --test tests/building-pool/roadmap-c-trades/wave1-desert-market.test.mjs
+      - name: Pinned Chromium install
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Capture all six genuine source WebGL2 images
+        run: node --test tests/building-pool/roadmap-c-trades/wave1-desert-market-chromium.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-c-desert-market-genuine-webgl2
+          path: artifacts/roadmap-c-trade-desert-market/
+          if-no-files-found: ignore
