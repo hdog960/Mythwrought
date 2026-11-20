@@ -1,0 +1,1078 @@
+{
+  "schema": "mythwrought.builder-b.1a-source-handoff.v1",
+  "baseline": "PR #270 accepted 271/450",
+  "sourceHead": "118e5ed140e63d6b5958853d3d52f327acc203cc",
+  "sourceModule": "src/building-pool/roadmap-1a/builder-b-homes-wave1.mjs",
+  "draft": true,
+  "sourceCompiled": true,
+  "technicalAccepted": false,
+  "physicalProducerCertified": false,
+  "chromeWebGL2Accepted": false,
+  "realIphoneAccepted": false,
+  "registeredInRuntime": false,
+  "integrated": false,
+  "candidates": [
+    {
+      "id": "r1:house:desert:medium:020",
+      "title": "Ambercross Two-Court Saltwind Residence",
+      "category": "house",
+      "biome": "desert",
+      "size": "medium",
+      "sourceFingerprintFNV64": "55d518558d589a4f",
+      "footprint": {
+        "width": 35,
+        "height": 12,
+        "depth": 30
+      },
+      "rooms": [
+        {
+          "id": "sheltered-front-arcade",
+          "min": [
+            19,
+            1,
+            2
+          ],
+          "max": [
+            33,
+            4,
+            16
+          ]
+        },
+        {
+          "id": "west-wind-library",
+          "min": [
+            10,
+            1,
+            2
+          ],
+          "max": [
+            18,
+            4,
+            16
+          ]
+        },
+        {
+          "id": "lower-shade-bedchamber",
+          "min": [
+            10,
+            1,
+            17
+          ],
+          "max": [
+            18,
+            4,
+            28
+          ]
+        },
+        {
+          "id": "inner-salt-courtyard-gallery",
+          "min": [
+            19,
+            1,
+            17
+          ],
+          "max": [
+            26,
+            4,
+            28
+          ]
+        }
+      ],
+      "portals": [
+        {
+          "from": "outside",
+          "to": "sheltered-front-arcade",
+          "at": [
+            23,
+            1,
+            1
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "sheltered-front-arcade",
+          "to": "west-wind-library",
+          "at": [
+            18,
+            1,
+            8
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "sheltered-front-arcade",
+          "to": "inner-salt-courtyard-gallery",
+          "at": [
+            23,
+            1,
+            16
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "west-wind-library",
+          "to": "lower-shade-bedchamber",
+          "at": [
+            14,
+            1,
+            16
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "lower-shade-bedchamber",
+          "to": "inner-salt-courtyard-gallery",
+          "at": [
+            18,
+            1,
+            22
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        }
+      ],
+      "roadFacing": "north",
+      "entrance": [
+        23,
+        1,
+        "sheltered-front-arcade"
+      ],
+      "roofWings": [
+        {
+          "name": "front-high-windcatcher",
+          "rect": [
+            10,
+            0,
+            34,
+            15
+          ],
+          "style": "step-front",
+          "raise": 2
+        },
+        {
+          "name": "west-sandshade-slope",
+          "rect": [
+            0,
+            13,
+            18,
+            29
+          ],
+          "style": "long-gable",
+          "raise": 0
+        },
+        {
+          "name": "rear-covered-arcade",
+          "rect": [
+            19,
+            16,
+            25,
+            29
+          ],
+          "style": "double-hill",
+          "raise": 1
+        }
+      ],
+      "skyOpenTerrainVoids": [
+        [
+          0,
+          0,
+          9,
+          12
+        ],
+        [
+          26,
+          17,
+          34,
+          29
+        ]
+      ],
+      "foundationRequirements": "site-levelled terrain and supported wall bearing; physical placement not yet certified",
+      "slopeShorelineRules": "unresolved; do not place in generated settlements until integration audit",
+      "beds": [
+        {
+          "asset": "pack5:082",
+          "anchor": [
+            12,
+            1,
+            21
+          ],
+          "extraCells": [
+            [
+              12,
+              1,
+              22
+            ]
+          ],
+          "source": "pack5:082-physical-authored-two-cell-bed",
+          "approval": "unresolved"
+        }
+      ],
+      "dependencies": [
+        {
+          "asset": "pack2:020",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack2:022",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack3:024",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:030",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:059",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:064",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack5:080",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack5:082",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack5:084",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        }
+      ],
+      "estimatedSourceCells": 4518,
+      "estimatedRoofCells": 803,
+      "threeSizeVisualEvidence": {
+        "status": "PENDING",
+        "dimensions": [
+          "667x375",
+          "844x390",
+          "932x430"
+        ],
+        "viewsPerSize": [
+          "exterior",
+          "cutaway"
+        ]
+      },
+      "renderingCollisionCost": "proxy source-cell counts only; real Pack producer AABB/collider/iPhone costs not yet measured"
+    },
+    {
+      "id": "r1:house:snow:small:020",
+      "title": "Winterbrook Staggered Six-Room Hearthhouse",
+      "category": "house",
+      "biome": "snow",
+      "size": "small",
+      "sourceFingerprintFNV64": "d6f84a588224a062",
+      "footprint": {
+        "width": 26,
+        "height": 12,
+        "depth": 27
+      },
+      "rooms": [
+        {
+          "id": "warming-hall",
+          "min": [
+            13,
+            1,
+            2
+          ],
+          "max": [
+            24,
+            4,
+            13
+          ]
+        },
+        {
+          "id": "left-snow-mudroom",
+          "min": [
+            8,
+            1,
+            2
+          ],
+          "max": [
+            12,
+            4,
+            13
+          ]
+        },
+        {
+          "id": "west-cookhouse",
+          "min": [
+            2,
+            1,
+            14
+          ],
+          "max": [
+            12,
+            4,
+            18
+          ]
+        },
+        {
+          "id": "east-fireside-study",
+          "min": [
+            13,
+            1,
+            14
+          ],
+          "max": [
+            19,
+            4,
+            18
+          ]
+        },
+        {
+          "id": "rear-sheltered-workshop",
+          "min": [
+            2,
+            1,
+            19
+          ],
+          "max": [
+            12,
+            4,
+            25
+          ]
+        },
+        {
+          "id": "rear-quiet-bedroom",
+          "min": [
+            13,
+            1,
+            19
+          ],
+          "max": [
+            19,
+            4,
+            25
+          ]
+        }
+      ],
+      "portals": [
+        {
+          "from": "outside",
+          "to": "warming-hall",
+          "at": [
+            17,
+            1,
+            1
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "warming-hall",
+          "to": "left-snow-mudroom",
+          "at": [
+            12,
+            1,
+            7
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "left-snow-mudroom",
+          "to": "west-cookhouse",
+          "at": [
+            9,
+            1,
+            13
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "warming-hall",
+          "to": "east-fireside-study",
+          "at": [
+            16,
+            1,
+            13
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "west-cookhouse",
+          "to": "rear-sheltered-workshop",
+          "at": [
+            6,
+            1,
+            18
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "east-fireside-study",
+          "to": "rear-quiet-bedroom",
+          "at": [
+            16,
+            1,
+            18
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "rear-sheltered-workshop",
+          "to": "rear-quiet-bedroom",
+          "at": [
+            12,
+            1,
+            21
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        }
+      ],
+      "roadFacing": "north",
+      "entrance": [
+        17,
+        1,
+        "warming-hall"
+      ],
+      "roofWings": [
+        {
+          "name": "north-windbreak-high-pitch",
+          "rect": [
+            8,
+            0,
+            25,
+            12
+          ],
+          "style": "long-gable",
+          "raise": 2
+        },
+        {
+          "name": "west-stacked-storehouse",
+          "rect": [
+            0,
+            9,
+            12,
+            26
+          ],
+          "style": "step-front",
+          "raise": 1
+        },
+        {
+          "name": "back-hearth-ridge",
+          "rect": [
+            13,
+            13,
+            18,
+            26
+          ],
+          "style": "double-hill",
+          "raise": 2
+        }
+      ],
+      "skyOpenTerrainVoids": [
+        [
+          0,
+          0,
+          7,
+          8
+        ],
+        [
+          19,
+          18,
+          25,
+          26
+        ]
+      ],
+      "foundationRequirements": "site-levelled terrain and supported wall bearing; physical placement not yet certified",
+      "slopeShorelineRules": "unresolved; do not place in generated settlements until integration audit",
+      "beds": [
+        {
+          "asset": "pack5:082",
+          "anchor": [
+            15,
+            1,
+            20
+          ],
+          "extraCells": [
+            [
+              15,
+              1,
+              21
+            ]
+          ],
+          "source": "pack5:082-physical-authored-two-cell-bed",
+          "approval": "unresolved"
+        }
+      ],
+      "dependencies": [
+        {
+          "asset": "pack2:020",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack2:022",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack3:025",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:030",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:057",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:059",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:064",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack5:082",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack5:084",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        }
+      ],
+      "estimatedSourceCells": 3501,
+      "estimatedRoofCells": 567,
+      "threeSizeVisualEvidence": {
+        "status": "PENDING",
+        "dimensions": [
+          "667x375",
+          "844x390",
+          "932x430"
+        ],
+        "viewsPerSize": [
+          "exterior",
+          "cutaway"
+        ]
+      },
+      "renderingCollisionCost": "proxy source-cell counts only; real Pack producer AABB/collider/iPhone costs not yet measured"
+    },
+    {
+      "id": "r1:house:enchanted-forest:medium:020",
+      "title": "Moonmoss Three-Garden Lantern Longhouse",
+      "category": "house",
+      "biome": "enchanted-forest",
+      "size": "medium",
+      "sourceFingerprintFNV64": "6c3e49f5316796fa",
+      "footprint": {
+        "width": 31,
+        "height": 12,
+        "depth": 33
+      },
+      "rooms": [
+        {
+          "id": "moonlit-front-gallery",
+          "min": [
+            15,
+            1,
+            2
+          ],
+          "max": [
+            21,
+            4,
+            15
+          ]
+        },
+        {
+          "id": "fern-morning-study",
+          "min": [
+            10,
+            1,
+            2
+          ],
+          "max": [
+            14,
+            4,
+            15
+          ]
+        },
+        {
+          "id": "east-glow-library",
+          "min": [
+            22,
+            1,
+            9
+          ],
+          "max": [
+            29,
+            4,
+            15
+          ]
+        },
+        {
+          "id": "west-moss-parlor",
+          "min": [
+            9,
+            1,
+            16
+          ],
+          "max": [
+            14,
+            4,
+            24
+          ]
+        },
+        {
+          "id": "heartwood-banquet-gallery",
+          "min": [
+            15,
+            1,
+            16
+          ],
+          "max": [
+            21,
+            4,
+            24
+          ]
+        },
+        {
+          "id": "east-sleeping-nook",
+          "min": [
+            22,
+            1,
+            16
+          ],
+          "max": [
+            30,
+            4,
+            29
+          ]
+        },
+        {
+          "id": "rear-springwalk",
+          "min": [
+            9,
+            1,
+            25
+          ],
+          "max": [
+            21,
+            4,
+            31
+          ]
+        }
+      ],
+      "portals": [
+        {
+          "from": "outside",
+          "to": "moonlit-front-gallery",
+          "at": [
+            17,
+            1,
+            1
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "moonlit-front-gallery",
+          "to": "fern-morning-study",
+          "at": [
+            14,
+            1,
+            9
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "moonlit-front-gallery",
+          "to": "heartwood-banquet-gallery",
+          "at": [
+            18,
+            1,
+            15
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "fern-morning-study",
+          "to": "west-moss-parlor",
+          "at": [
+            12,
+            1,
+            15
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "heartwood-banquet-gallery",
+          "to": "east-sleeping-nook",
+          "at": [
+            21,
+            1,
+            19
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "heartwood-banquet-gallery",
+          "to": "rear-springwalk",
+          "at": [
+            18,
+            1,
+            24
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "west-moss-parlor",
+          "to": "rear-springwalk",
+          "at": [
+            12,
+            1,
+            24
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "east-glow-library",
+          "to": "east-sleeping-nook",
+          "at": [
+            25,
+            1,
+            15
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        },
+        {
+          "from": "moonlit-front-gallery",
+          "to": "east-glow-library",
+          "at": [
+            21,
+            1,
+            11
+          ],
+          "passable": true,
+          "opening": "hinged-leaf"
+        }
+      ],
+      "roadFacing": "north",
+      "entrance": [
+        17,
+        1,
+        "moonlit-front-gallery"
+      ],
+      "roofWings": [
+        {
+          "name": "northern-lantern-spine",
+          "rect": [
+            10,
+            0,
+            21,
+            15
+          ],
+          "style": "long-gable",
+          "raise": 2
+        },
+        {
+          "name": "west-moss-ridge",
+          "rect": [
+            0,
+            11,
+            14,
+            24
+          ],
+          "style": "double-hill",
+          "raise": 1
+        },
+        {
+          "name": "eastern-glow-crossroof",
+          "rect": [
+            22,
+            9,
+            30,
+            29
+          ],
+          "style": "edge-rise",
+          "raise": 2
+        },
+        {
+          "name": "heartwood-clearing-arc",
+          "rect": [
+            15,
+            16,
+            21,
+            24
+          ],
+          "style": "step-front",
+          "raise": 0
+        },
+        {
+          "name": "rear-moongarden-lean",
+          "rect": [
+            9,
+            25,
+            30,
+            32
+          ],
+          "style": "long-gable",
+          "raise": 1
+        }
+      ],
+      "skyOpenTerrainVoids": [
+        [
+          0,
+          0,
+          9,
+          10
+        ],
+        [
+          22,
+          0,
+          30,
+          8
+        ],
+        [
+          0,
+          25,
+          8,
+          32
+        ]
+      ],
+      "foundationRequirements": "site-levelled terrain and supported wall bearing; physical placement not yet certified",
+      "slopeShorelineRules": "unresolved; do not place in generated settlements until integration audit",
+      "beds": [
+        {
+          "asset": "pack5:082",
+          "anchor": [
+            25,
+            1,
+            22
+          ],
+          "extraCells": [
+            [
+              25,
+              1,
+              23
+            ]
+          ],
+          "source": "pack5:082-physical-authored-two-cell-bed",
+          "approval": "unresolved"
+        }
+      ],
+      "dependencies": [
+        {
+          "asset": "pack2:013",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack2:020",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack2:022",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack3:023",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:030",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:058",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:059",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack4:064",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack5:082",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        },
+        {
+          "asset": "pack5:084",
+          "status": "unresolved",
+          "requires": [
+            "real source AABB/state/rotation and support",
+            "waterproofing, door-swing clearance and physical collision when placed",
+            "save-schema-1 sidecar, runtime selection and future settlement integration"
+          ]
+        }
+      ],
+      "estimatedSourceCells": 4488,
+      "estimatedRoofCells": 760,
+      "threeSizeVisualEvidence": {
+        "status": "PENDING",
+        "dimensions": [
+          "667x375",
+          "844x390",
+          "932x430"
+        ],
+        "viewsPerSize": [
+          "exterior",
+          "cutaway"
+        ]
+      },
+      "renderingCollisionCost": "proxy source-cell counts only; real Pack producer AABB/collider/iPhone costs not yet measured"
+    }
+  ]
+}
