@@ -50,10 +50,20 @@ jobs:
         env:
           BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
         run: node tests/building-pool/roadmap-1a/audit-builder-b-current-wave.mjs
+      - name: Capture six genuine Granitebell original WebGL2 + six genuine Pack-visible-AABB frames
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node --test tests/building-pool/roadmap-1a/builder-b-homes-wave4-webgl2.test.mjs
+      - name: Independently CRC/SHA audit all 12 exact-head Granitebell images
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node tests/building-pool/roadmap-1a/audit-builder-b-homes-wave4.mjs
       - name: Preserve actual source-only PNG and audit evidence, no creator art approval
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: builder-b-homes-five-originals-60-genuine-chromium-pngs
-          path: artifacts/builder-b-housing-five-originals/
+          name: builder-b-homes-six-originals-72-genuine-chromium-pngs
+          path: |
+            artifacts/builder-b-housing-five-originals/
+            artifacts/builder-b-housing-wave4-single-original/
           if-no-files-found: ignore
