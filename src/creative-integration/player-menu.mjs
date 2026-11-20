@@ -14,7 +14,9 @@ function button(label,handler){
     element.disabled=true;
     try{await handler();}
     catch(error){
-      const status=element.closest('.player-menu')?.querySelector('[role=status]');
+      const panel=element.closest('.player-menu');
+      const status=panel?.querySelector(panel.classList.contains('safety-open')?
+        '.player-safety-feedback':'.player-menu-status');
       if(status)status.textContent='Action protected: '+String(error?.message||error);
     }finally{element.disabled=false;}
   });
@@ -64,10 +66,14 @@ export function installPlayerMenu({
   );
   const archive=button('↓ DOWNLOAD ALL LOCAL SAVE DATA',onArchive);
   archive.classList.add('player-safety-archive');
+  const safetyFeedback=make('p','player-safety-feedback','');
+  safetyFeedback.setAttribute('role','status');
+  safetyFeedback.setAttribute('aria-live','polite');
   const updater=button('CHECK APP UPDATE',onCheckUpdate);
   const returnSettings=button('← BACK TO SETTINGS',()=>showSafety(false));
   returnSettings.classList.add('player-safety-back');
-  safety.append(returnSettings,safetyHeading,safetyNote,archive,actions,updater);
+  safety.append(returnSettings,safetyHeading,safetyNote,archive,
+    safetyFeedback,actions,updater);
   const backing=[...container.querySelectorAll('.vault-settings,.mirror-settings')];
   if(backing.length!==2)throw Error('Original save-vault and mirror controls missing');
   for(const original of backing)safety.append(original);
@@ -91,6 +97,6 @@ export function installPlayerMenu({
   return Object.freeze({
     panel,safety,openSafety:()=>showSafety(true),
     closeSafety:()=>showSafety(false),
-    showStatus:message=>{status.textContent=message;}
+    showStatus:message=>{status.textContent=message;safetyFeedback.textContent=message;}
   });
 }
