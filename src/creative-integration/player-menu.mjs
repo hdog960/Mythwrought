@@ -1,7 +1,11 @@
-// MYTHWROUGHT player-facing no-scroll settings. Hidden legacy controls remain
-// mounted for their proven gameplay/save adapters, never removed or cloned.
+// MYTHWROUGHT's compact three-row everyday menu. Original save/vault/mirror
+// DOM nodes are MOVED into an explicit recovery drawer, not cloned or removed.
+// Existing listeners and their checked storage/repair semantics remain intact.
 const make=(tag,cls,text)=>{const n=document.createElement(tag);
-  if(cls)n.className=cls;if(text)n.textContent=text;return n;};
+  if(cls)n.className=cls;
+  if(text!==undefined)n.textContent=text;
+  return n;
+};
 function button(label,handler){
   const element=make('button','player-menu-button',label);
   element.type='button';
@@ -9,17 +13,21 @@ function button(label,handler){
     if(element.disabled)return;
     element.disabled=true;
     try{await handler();}
-    catch(error){const status=element.closest('.player-menu')?.querySelector('[role=status]');
-      if(status)status.textContent='Action protected: '+String(error?.message||error);}
-    finally{element.disabled=false;}
+    catch(error){
+      const status=element.closest('.player-menu')?.querySelector('[role=status]');
+      if(status)status.textContent='Action protected: '+String(error?.message||error);
+    }finally{element.disabled=false;}
   });
   return element;
 }
-export function installPlayerMenu({container,onDiagnostics,onDay,onNight,
-  onNewWorld,onClose}={}){
-  if(!container?.prepend||[onDiagnostics,onDay,onNight,onNewWorld,onClose]
+export function installPlayerMenu({
+  container,onDiagnostics,onDay,onNight,onNewWorld,onClose,
+  onSave,onExport,onImport,onArchive,onCheckUpdate,isReadOnly
+}={}){
+  if(!container?.prepend||[onDiagnostics,onDay,onNight,onNewWorld,onClose,
+    onSave,onExport,onImport,onArchive,onCheckUpdate,isReadOnly]
     .some(fn=>typeof fn!=='function'))
-    throw TypeError('Player settings require mounted DOM and working callbacks');
+    throw TypeError('Player settings require actual mounted save and UI callbacks');
   const panel=make('section','player-menu');
   panel.id='playerMenu';
   panel.setAttribute('aria-label','Mythwrought player settings');
@@ -31,15 +39,58 @@ export function installPlayerMenu({container,onDiagnostics,onDay,onNight,
   const clock=make('div','player-menu-row');
   clock.append(make('span','player-menu-label','Time of Day'));
   const times=make('div','player-menu-times');
-  times.append(button('☀ DAY',onDay),button('☾ NIGHT',onNight));clock.append(times);
+  times.append(button('☀ DAY',onDay),button('☾ NIGHT',onNight));
+  clock.append(times);
   const world=make('div','player-menu-row');
   world.append(make('span','player-menu-label','World Generation'));
   world.append(button('✦ NEW WORLD',onNewWorld));
   const status=make('p','player-menu-status','Current accepted generation · saves protected');
-  status.setAttribute('role','status');status.setAttribute('aria-live','polite');
-  const back=button('RETURN TO GAME',onClose);
+  status.setAttribute('role','status');
+  status.setAttribute('aria-live','polite');
+
+  // Backup tools are deliberately discoverable, but are NOT a fourth scrolling
+  // development settings section. Only choosing them opens the scrollable drawer.
+  const safety=make('section','player-safety');
+  safety.id='playerSafety';
+  safety.hidden=true;
+  safety.setAttribute('aria-label','Saved worlds and recovery');
+  const safetyHeading=make('h2','player-safety-heading','✦ SAVED WORLDS & RECOVERY');
+  const safetyNote=make('p','player-safety-note');
+  const actions=make('div','player-safety-actions');
+  actions.append(
+    button('SAVE CURRENT WORLD',onSave),
+    button('EXPORT CURRENT WORLD',onExport),
+    button('IMPORT VERIFIED CURRENT WORLD',onImport)
+  );
+  const archive=button('↓ DOWNLOAD ALL MYTHWROUGHT DATA',onArchive);
+  archive.classList.add('player-safety-archive');
+  const updater=button('CHECK APP UPDATE',onCheckUpdate);
+  const returnSettings=button('← BACK TO SETTINGS',()=>showSafety(false));
+  returnSettings.classList.add('player-safety-back');
+  safety.append(returnSettings,safetyHeading,safetyNote,archive,actions,updater);
+  const backing=[...container.querySelectorAll('.vault-settings,.mirror-settings')];
+  if(backing.length!==2)throw Error('Original save-vault and mirror controls missing');
+  for(const original of backing)safety.append(original);
+  const safetyLink=button('⚿ BACKUPS & RECOVERY',()=>showSafety(true));
+  safetyLink.classList.add('player-menu-safety-link');
+  const back=button('RETURN TO GAME',()=>{showSafety(false);return onClose();});
   back.classList.add('player-menu-close');
-  panel.append(heading,tagline,diagnostics,clock,world,status,back);
+  panel.append(heading,tagline,diagnostics,clock,world,status,safetyLink,back,safety);
   container.prepend(panel);
-  return Object.freeze({panel,showStatus:(message)=>{status.textContent=message;}});
+  function showSafety(open){
+    const blocked=Boolean(isReadOnly());
+    actions.hidden=blocked;
+    for(const original of backing)original.hidden=blocked;
+    safetyNote.textContent=blocked?
+      'Older or damaged world protected: download the exact game-owned saved data. Restoring old terrain into the current generator is disabled.':
+      'Optional verified on-device backups remain accessible below. Download a separate off-device archive regularly.';
+    panel.classList.toggle('safety-open',Boolean(open));
+    safety.hidden=!open;
+    return open;
+  }
+  return Object.freeze({
+    panel,safety,openSafety:()=>showSafety(true),
+    closeSafety:()=>showSafety(false),
+    showStatus:message=>{status.textContent=message;}
+  });
 }
