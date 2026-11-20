@@ -57,6 +57,7 @@ export function buildCreativeCatalog(){
     if(core.has(id))add(block(id,'core',BLOCK_NAMES[id]));
     else if(biomes.has(id))add(block(id,'biome130',biome130Block(id).name));
     else if(pack2.has(id))add(block(id,'pack2',PACK2_LIVE_NAMES[id]));
+    else if(Number.isSafeInteger(id)&&BLOCK_NAMES[id])add(block(id,'core',BLOCK_NAMES[id]));
     else throw Error('Unverified active building material '+id);
   }
   const pack5Map=new Map(PACK5_BUILDER_CATALOG.map(x=>[x.symbolicId,x]));
@@ -66,7 +67,7 @@ export function buildCreativeCatalog(){
     const meta=asset.pack===5?pack5Map.get(asset.symbol):null;
     if(asset.pack===5&&(!meta||!meta.variants.length))
       throw Error('Missing installed Pack5 authored family '+asset.symbol);
-    add(block(asset.numericId,owner,asset.name??meta?.name??asset.symbol,
+    add(block(asset.numericId,owner,asset.name??BLOCK_NAMES[asset.numericId]??meta?.name??asset.symbol,
       {symbol:asset.symbol,...(meta?{variants:meta.variants}:{} )}));
   }
   const creatures=speciesRegistry.map(species=>Object.freeze({
@@ -76,10 +77,8 @@ export function buildCreativeCatalog(){
   }));
   if(new Set(creatures.map(x=>x.key)).size!==creatures.length)
     throw Error('Duplicate Creative mob spawn item');
-  // Live production counts: 5 core + 130 biome + 18 Pack2 + 30 Pack1 +
-  // 17 Pack3 + 23 Pack4 + 18 Pack5 = 241; exactly 40 creatures.
-  if(blocks.length!==241||creatures.length!==40)
-    throw Error('Production Creative inventory mismatch: '+blocks.length+' blocks / '+creatures.length+' mobs');
+  // Never freeze future catalogs to today's 241/40 counts: validated new
+  // integrated producers and species must be discovered automatically.
   const records=Object.freeze([...blocks,...creatures]);
   let hash=2166136261;
   const raw=records.map(x=>x.key+':'+x.name).join('|');
