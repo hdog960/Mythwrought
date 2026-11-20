@@ -48,7 +48,7 @@ import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
-import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
+import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy,listMirrorSeeds} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
 import {installExplorationMap} from './exploration-map.mjs';
 import {createG2FlightState,armG2Flight,selectG2FlightProfile,planG2FlightStep,
@@ -2428,15 +2428,46 @@ function start(){
   // startup. Only successful, read-back-verified canonical writes enqueue a
   // secondary copy, and only while the player has enabled this preference.
   const mirrorEnabledCheck=document.getElementById('mirrorEnabled');
+  // Archived IndexedDB mirrors must remain downloadable after the selected
+  // playable seed changes. Keep this inside the secondary recovery drawer.
+  const mirrorArchiveLabel=document.createElement('label');
+  mirrorArchiveLabel.htmlFor='mirrorArchiveSeed';
+  mirrorArchiveLabel.textContent='Mirror world to inspect (archives are download-only)';
+  const mirrorArchiveSeed=document.createElement('select');
+  mirrorArchiveSeed.id='mirrorArchiveSeed';
+  const activeMirrorOption=document.createElement('option');
+  activeMirrorOption.value='active';
+  activeMirrorOption.textContent='Current / last selected world';
+  mirrorArchiveSeed.append(activeMirrorOption);
+  const mirrorArchiveRefresh=document.createElement('button');
+  mirrorArchiveRefresh.id='mirrorArchiveRefresh';
+  mirrorArchiveRefresh.type='button';
+  mirrorArchiveRefresh.textContent='FIND SAVED MIRROR WORLDS';
+  document.querySelector('label[for="mirrorSlot"]').before(
+    mirrorArchiveLabel,mirrorArchiveSeed,mirrorArchiveRefresh);
+  const archivedMirrorSeeds=new Set();
   const mirrorButtons=[...document.querySelectorAll('.mirror-settings button')];
-  // During a protected current-gen preview, the last-selected historical
-  // seed is an ARCHIVE SOURCE, never the preview's randomly chosen seed.
-  // Reads of checked IndexedDB snapshots remain legal; writes never are.
-  function mirrorInspectionSeed(){
+  function previousMirrorSeed(){
     if(!storageReadOnly)return world.seed;
     const archived=localStorage.getItem(SELECTED_SEED_KEY);
     return archived===null?DEFAULT_WORLD_SEED:worldSeedFromText(archived);
   }
+  function mirrorInspectionSeed(){
+    if(mirrorArchiveSeed.value==='active')return previousMirrorSeed();
+    const seed=Number(mirrorArchiveSeed.value);
+    if(!Number.isSafeInteger(seed)||seed!==(seed|0)||!archivedMirrorSeeds.has(seed))
+      throw Error('This archived mirror was not independently enumerated');
+    return seed;
+  }
+  const mirrorReadOnlySelection=()=>storageReadOnly||mirrorArchiveSeed.value!=='active';
+  mirrorArchiveSeed.addEventListener('change',()=>{
+    clearMirrorDownload();
+    document.getElementById('mirrorRestore').disabled=
+      mirrorReadOnlySelection()||world.base instanceof FourRegionWorld;
+    mirrorStatus.textContent=mirrorArchiveSeed.value==='active'?
+      'Current/last selected mirror. CHECK MIRROR before export.':
+      'Archived seed '+mirrorInspectionSeed()+' is DOWNLOAD ONLY; never restored to current gameplay.';
+  });
   let mirrorBusy=false;
   mirrorEnabledCheck.checked=mirrorEnabled;
   mirrorStatus.textContent=mirrorEnabled?
@@ -2483,10 +2514,28 @@ function start(){
     finally{
       mirrorBusy=false;
       mirrorButtons.forEach(button=>{
-        button.disabled=storageReadOnly&&['mirrorSync','mirrorRestore'].includes(button.id);
+        button.disabled=(storageReadOnly&&button.id==='mirrorSync')||
+          (button.id==='mirrorRestore'&&
+           (mirrorReadOnlySelection()||world.base instanceof FourRegionWorld));
       });
     }
   }
+  mirrorArchiveRefresh.onclick=()=>withMirror(async()=>{
+    const before=mirrorArchiveSeed.value;
+    const seeds=await listMirrorSeeds();
+    archivedMirrorSeeds.clear();
+    mirrorArchiveSeed.replaceChildren(activeMirrorOption);
+    for(const seed of seeds){
+      archivedMirrorSeeds.add(seed);
+      const option=document.createElement('option');
+      option.value=String(seed);
+      option.textContent='ARCHIVED SEED '+seed+' · download only';
+      mirrorArchiveSeed.append(option);
+    }
+    if(before!=='active'&&archivedMirrorSeeds.has(Number(before)))
+      mirrorArchiveSeed.value=before;
+    mirrorStatus.textContent=seeds.length+' saved mirror world(s) located. Select an archived seed, CHECK MIRROR, and PREPARE JSON EXPORT. No saved bytes changed.';
+  });
   document.getElementById('mirrorSync').onclick=()=>withMirror(async()=>{
     if(storageReadOnly)throw Error('Protected older-world preview: mirror sync is disabled; inspect or export the checked archived copy instead');
     const raw=verifiedLiveBytes(),seed=world.seed;
@@ -2502,14 +2551,14 @@ function start(){
     if(!state.exists){mirrorStatus.textContent='No device mirror for seed '+seed+'. Save and SYNC to make one.';return;}
     const summarize=(label,slot)=>label+': '+(slot===null?'absent':
       slot.valid?'verified, '+slot.edits+' edits, '+slot.createdAt:'DAMAGED ('+slot.error+')');
-    mirrorStatus.textContent='Seed '+seed+(storageReadOnly?' (archived read-only)':'')+' — '+
+    mirrorStatus.textContent='Seed '+seed+(mirrorReadOnlySelection()?' (archived read-only)':'')+' — '+
       summarize('latest',state.current)+'; '+summarize('previous',state.previous)+
       '. No restoration performed.';
   });
   mirrorSlot.addEventListener('change',clearMirrorDownload);
   document.getElementById('mirrorPrepare').onclick=()=>withMirror(async()=>{
-    if(!storageReadOnly&&world.base instanceof FourRegionWorld)
-      throw Error('Use profile-safe WORLD EXPORT for four-biome backups; this mirror contains only legacy schema-1 bytes');
+    if(!mirrorReadOnlySelection()&&world.base instanceof FourRegionWorld)
+      throw Error('Use profile-safe WORLD EXPORT for current four-biome backups; select an archived mirror for read-only historical download');
     await settleMirrorWrites();
     const selectedSeed=mirrorInspectionSeed(),selectedVersion=mirrorSlot.value;
     const snap=await getMirrorCopy(selectedSeed,selectedVersion);
@@ -2522,6 +2571,8 @@ function start(){
   });
   document.getElementById('mirrorRestore').onclick=()=>withMirror(async()=>{
     if(storageReadOnly)throw Error('Protected older-world preview: mirror restoration is disabled; download the checked archived snapshot instead');
+    if(mirrorArchiveSeed.value!=='active')
+      throw Error('Archived mirrors are download-only; restoration to the current world is forbidden');
     if(world.base instanceof FourRegionWorld||readFourRegionProfile(localStorage,world.seed))
       throw Error('Refusing legacy mirror restore on a four-biome profile; generation identity would be lost');
     if(storageReadOnly)throw Error('Read-only startup protection active; use the regular IMPORT flow to repair damaged saved bytes');

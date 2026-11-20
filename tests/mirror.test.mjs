@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
 import {MIRROR_DB,MIRROR_PREF,mirrorSnapshot,validateMirrorSnapshot,
-  inspectMirrorRecord,MirrorWriteQueue,inspectMirror} from '../src/mirror.mjs';
+  inspectMirrorRecord,MirrorWriteQueue,inspectMirror,listMirrorSeeds} from '../src/mirror.mjs';
 const world=(seed=179,id=BLOCK.WOOD)=>{const w=new VoxelWorld(seed);w.set(15,18,-1,id);return JSON.stringify(w.save());};
 test('separate mirror preserves exact original schema-1 bytes and checksum',()=>{
  const raw=world(),slot=mirrorSnapshot(raw,179,'2026-11-11T20:00:00Z');
@@ -45,5 +45,6 @@ test('a failed mirror write does not prevent a subsequent canonical snapshot',as
 test('unavailable IndexedDB rejects without touching live world bytes',async()=>{
  const raw=world(),saved=new Map([['mythwrought-v002-world-179',raw]]);
  await assert.rejects(inspectMirror(179,null),/IndexedDB unavailable/);
+ await assert.rejects(listMirrorSeeds(null),/IndexedDB unavailable/);
  assert.equal(saved.get('mythwrought-v002-world-179'),raw);
 });

@@ -134,10 +134,35 @@ try{
     assert.equal(current.profile,M6_BALANCED_GENERATOR,
       'The newly entered world does not run the accepted current generator');
 
-    // File imports use real original file-change handlers, not fabricated
-    // methods. Old schema-1 backups must NOT replace this current world.
+    // Genuine IndexedDB history must still be downloadable AFTER creating a
+    // new current-gen V6 world. No archived mirror may become playable.
     await page.locator('#menu').click();
     await page.locator('.player-menu-safety-link').click();
+    await page.locator('#mirrorArchiveRefresh').click();
+    await page.waitForFunction(()=>
+      [...document.getElementById('mirrorArchiveSeed').options]
+        .some(option=>option.value==='179'),undefined,{timeout:15000});
+    await page.locator('#mirrorArchiveSeed').selectOption('179');
+    assert.equal(await page.locator('#mirrorRestore').isEnabled(),false,
+      'Archived mirror became restorable after selecting a current V6 world');
+    await page.locator('#mirrorCheck').click();
+    await page.waitForFunction(()=>
+      document.getElementById('mirrorStatus').textContent.includes('Seed 179 (archived read-only)'),
+      undefined,{timeout:15000});
+    await page.locator('#mirrorPrepare').click();
+    await page.locator('#mirrorDownload').waitFor({state:'visible',timeout:15000});
+    const archivedDownload=page.waitForEvent('download',{timeout:20000});
+    await page.locator('#mirrorDownload').click();
+    const archivedFile=await archivedDownload;
+    assert.equal(readFileSync(await archivedFile.path(),'utf8'),original,
+      'New V6 world made archived mirror unavailable or changed its bytes');
+    await page.screenshot({path:'artifacts/mythwrought-archived-mirror-956x440.png'});
+    assert.equal(await page.evaluate(async()=>
+      (await import('./src/mirror.mjs')).getMirrorCopy(179).then(x=>x.raw)),original);
+    assert.equal(await page.evaluate(()=>
+      localStorage.getItem('mythwrought-v002-world-179')),original);
+    // File imports use real original file-change handlers, not fabricated
+    // methods. Old schema-1 backups must NOT replace this current world.
     await page.locator('#importFile').setInputFiles({
       name:'archived-legacy-world.json',mimeType:'application/json',
       buffer:Buffer.from(original)

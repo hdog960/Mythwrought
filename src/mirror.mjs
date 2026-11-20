@@ -83,6 +83,23 @@ export async function inspectMirror(seed,factory=globalThis.indexedDB){
   checkSeed(seed);
   return useDB(factory,async db=>inspectMirrorRecord(await readRecord(db,seed),seed));
 }
+// Existing mirror identities stay discoverable after a new V6 world is
+// selected. This is a readonly IndexedDB transaction: no snapshot rewrite,
+// seed migration, restore, or automatic archived-world activation.
+export async function listMirrorSeeds(factory=globalThis.indexedDB){
+  return useDB(factory,db=>new Promise((resolve,reject)=>{
+    let tx,request,keys=[];
+    try{
+      tx=db.transaction(MIRROR_STORE,'readonly');
+      request=tx.objectStore(MIRROR_STORE).getAllKeys();
+      request.onsuccess=()=>{keys=request.result;};
+    }catch(error){reject(Error('Mirror archive listing unavailable: '+detail(error)));return;}
+    tx.oncomplete=()=>resolve(keys.filter(seed=>Number.isSafeInteger(seed)&&
+      seed===(seed|0)).sort((a,b)=>a-b));
+    tx.onabort=()=>reject(Error('Mirror archive listing aborted: '+detail(tx.error)));
+    tx.onerror=()=>reject(Error('Mirror archive listing failed: '+detail(tx.error)));
+  }));
+}
 export async function getMirrorCopy(seed,which='current',factory=globalThis.indexedDB){
   if(which!=='current'&&which!=='previous')throw Error('Choose a current or previous mirror');
   const state=await inspectMirror(seed,factory);
