@@ -32,6 +32,11 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose}={}){
   const preview=el('div','mw-inventory-preview','Select an item');
   preview.setAttribute('role','status');preview.setAttribute('aria-live','polite');
   const hotbar=el('div','mw-inventory-hotbar');hotbar.setAttribute('aria-label','Creative quick slots');
+  const quickbar=el('div','mw-creative-quickbar');quickbar.id='creativeQuickbar';
+  quickbar.hidden=true;quickbar.setAttribute('aria-label','Selected Creative quick items');
+  const viewport=document.querySelector('.viewport');
+  if(!viewport)throw TypeError('Creative viewport missing');
+  viewport.append(quickbar);
   const panel=el('section','mw-inventory-panel');
   panel.append(header,description,search,categories,sub,grid,preview,hotbar);
   overlay.append(panel);document.body.append(overlay);
@@ -45,19 +50,21 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose}={}){
     sub.hidden=category!=='creatures';
   }
   function renderSlots(){
-    hotbar.replaceChildren();
-    for(let i=0;i<slots.length;i++){
-      const b=el('button','mw-inventory-slot'+(activeSlot===i?' active':''),slots[i]?.glyph??'＋');
-      b.type='button';b.title=slots[i]?.name??'Empty slot';
-      b.setAttribute('aria-label','Hotbar slot '+(i+1)+': '+(slots[i]?.name??'Empty'));
-      const index=el('small','',String(i+1));b.append(index);
-      b.addEventListener('click',()=>{
-        activeSlot=i;
-        if(slots[i])void select(slots[i],false);
-        else if(selected){slots[i]=selected;renderSlots();}
-        else renderSlots();
-      });
-      hotbar.append(b);
+    hotbar.replaceChildren();quickbar.replaceChildren();
+    for(const host of [hotbar,quickbar]){
+      for(let i=0;i<slots.length;i++){
+        const b=el('button','mw-inventory-slot'+(activeSlot===i?' active':''),slots[i]?.glyph??'＋');
+        b.type='button';b.title=slots[i]?.name??'Empty slot';
+        b.setAttribute('aria-label','Hotbar slot '+(i+1)+': '+(slots[i]?.name??'Empty'));
+        const index=el('small','',String(i+1));b.append(index);
+        b.addEventListener('click',()=>{
+          activeSlot=i;
+          if(slots[i])void select(slots[i],false);
+          else if(selected){slots[i]=selected;renderSlots();}
+          else renderSlots();
+        });
+        host.append(b);
+      }
     }
   }
   async function select(item,assign=true){
@@ -137,6 +144,7 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose}={}){
   renderSlots();refresh();
   return Object.freeze({
     open:openInventory,close:closeInventory,isOpen:()=>visible,
+    setEnabled(value){quickbar.hidden=!value; if(!value)closeInventory();},
     catalog,selected:()=>selected,slot:()=>slots[activeSlot],
     setCategory:key=>{if(!categoryButtons.has(key))return false;category=key;refresh();return true;}
   });
