@@ -45,6 +45,7 @@ jobs:
           node --test tests/building-pool/roadmap-c-trades/c-trade-wave3-5-settlement-handoff.test.mjs
           node --test tests/building-pool/roadmap-c-trades/c-winterglass-settlement-handoff.test.mjs
           node --test tests/building-pool/roadmap-c-trades/wave1-trade-all-pool-d4.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/c-evidence-path-contract.test.mjs
       - name: Pinned Chromium install
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
