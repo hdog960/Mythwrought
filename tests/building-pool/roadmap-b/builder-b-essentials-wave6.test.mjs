@@ -1,8 +1,8 @@
-// Builder B 1B source-only Tidehollow bathhouse Wave5: exact 115 B / 92 D ownership and strict historic D4 gate.
+// Builder B 1B source-only Tidehollow Harbor Office Wave6: exact 115 B / 92 D ownership and strict historic D4 gate.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildTidehollowCrosswharfHarborOffice,TIDEHOLLOW_HARBOR_OFFICE_ID} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave6.mjs';
-import {buildTidehollowSplitWellBathhouse} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave5.mjs';
+import {buildSunshardSplitWellBathhouse} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave5.mjs';
 import {buildMeadowstepSplitAisleStables} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave4.mjs';
 import {buildSedgewatchTidehookFishingLodge} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave3.mjs';
 import {buildAlderglassTrellisConservatory} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave2.mjs';
@@ -36,7 +36,7 @@ function d4(b,flip,turn){
 }
 const iou=(a,b)=>{let n=0;for(const v of a)if(b.has(v))n++;return n/(a.size+b.size-n||1)};
 test('Tidehollow exact new temperate harbor office is B-exclusive and protected D 92 unchanged',()=>{
- const owner=getBuilderBServiceOwnership(),b=buildTidehollowSplitWellBathhouse(),all=[
+ const owner=getBuilderBServiceOwnership(),b=buildSunshardSplitWellBathhouse(),all=[
   buildBriarfordSwitchwingBarn(),buildAlderglassTrellisConservatory(),
   buildSedgewatchTidehookFishingLodge(),buildMeadowstepSplitAisleStables(),buildSunshardSplitWellBathhouse(),b
  ];
@@ -48,7 +48,7 @@ test('Tidehollow exact new temperate harbor office is B-exclusive and protected 
  assert.equal(b.worldPlacement,false);
 });
 test('Original seven-room temperate harbor office has fully connected authentic XY/Z circulation, sky-open 30-column court, backed roof and two-high portals',()=>{
- const b=buildTidehollowSplitWellBathhouse(),vox=allOccupied(b);
+ const b=buildSunshardSplitWellBathhouse(),vox=allOccupied(b);
  assert.equal(b.rooms.length,7);assert.equal(b.portals.length,9);
  assert.ok(b.walkable.length>1000);
  for(let x=21;x<=25;x++)for(let z=19;z<=24;z++)
@@ -57,10 +57,10 @@ test('Original seven-room temperate harbor office has fully connected authentic 
   assert.ok(vox.has(K([p.at[0],p.at[1]-1,p.at[2]])),'unsupported original desert bath roof');
  for(const d of b.portals)
   assert.ok(!vox.has(K(d.at))&&!vox.has(K([d.at[0],d.at[1]+1,d.at[2]])),'physically blocked bathhouse portal');
- assert.equal(structuralFingerprint(b),structuralFingerprint(buildTidehollowSplitWellBathhouse()));
+ assert.equal(structuralFingerprint(b),structuralFingerprint(buildSunshardSplitWellBathhouse()));
 });
 test('Strict 8-way same-category D4 below .85 against every prior accepted 1B original', {timeout:240000},async()=>{
- const old=await historical(),b=buildTidehollowSplitWellBathhouse();
+ const old=await historical(),b=buildSunshardSplitWellBathhouse();
  assert.equal(old.length,228);
  const category=old.filter(x=>x.category===b.category);
  assert.ok(category.length>=20,'historical bathhouses unexpectedly absent');
