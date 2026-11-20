@@ -1,0 +1,21 @@
+// :48 original ground-cover silhouettes; visual-only, no block IDs or world placement.
+import {sceneVariant} from './flora-phase1.mjs';
+export const UNDERGROWTH_FAMILIES=Object.freeze({
+ 'scene48:clover-patch':Object.freeze({attachment:'ground',collision:'pass-through',footprint:[0.85,0.18,0.85],tier:'dense',biome:['meadow','temperate'],status:'IN_PROGRESS'}),
+ 'scene48:bracken-fern':Object.freeze({attachment:'ground',collision:'pass-through',footprint:[1.25,1.05,1.25],tier:'medium',biome:['forest','enchanted-forest'],status:'IN_PROGRESS'}),
+ 'scene48:moss-cushion':Object.freeze({attachment:'ground',collision:'pass-through',footprint:[0.95,0.22,0.95],tier:'dense',biome:['forest','cave'],status:'IN_PROGRESS'}),
+ 'scene48:clustered-toadstools':Object.freeze({attachment:'ground',collision:'pass-through',footprint:[0.9,0.68,0.9],tier:'medium',biome:['forest','enchanted-forest'],status:'IN_PROGRESS'})
+});
+const pi=Math.PI;
+function meshBuilder(){const positions=[],materials=[];return {tri(a,b,c,m){positions.push(...a,...b,...c);materials.push(m);},quad(a,b,c,d,m){this.tri(a,b,c,m);this.tri(a,c,d,m);},finish(){return {positions:new Float32Array(positions),materials:new Uint8Array(materials),triangleCount:materials.length};}};}
+function fan(b,cx,cy,cz,r,height,sides,m){const top=[cx,cy+height,cz];for(let i=0;i<sides;i++){const a=2*pi*i/sides,d=2*pi*(i+1)/sides;b.tri(top,[cx+Math.cos(a)*r,cy,cz+Math.sin(a)*r],[cx+Math.cos(d)*r,cy,cz+Math.sin(d)*r],m);}}
+function clover(b){for(let j=0;j<7;j++){const a=j*2.399963,r=.08+.045*(j%4),x=Math.cos(a)*r,z=Math.sin(a)*r;for(let k=0;k<3;k++){const t=a+k*2*pi/3,dx=Math.cos(t)*.085,dz=Math.sin(t)*.085;b.tri([x,.065,z],[x+dx*.7,.075,z+dz*.7],[x+dx*.42-dz*.36,.075,z+dz*.42+dx*.36],0);b.tri([x,.065,z],[x+dx*.42+dz*.36,.075,z+dz*.42-dx*.36],[x+dx*.7,.075,z+dz*.7],0);}}}
+function bracken(b){for(let f=0;f<4;f++){const a=f*pi/2,ux=Math.cos(a),uz=Math.sin(a),sx=-uz,sz=ux;const tip=[ux*.47,.88,uz*.47];b.quad([0,0,0],[.018,0,.018],[tip[0]+.018,tip[1],tip[2]+.018],tip,1);for(let j=1;j<=6;j++){const t=j/7,px=tip[0]*t,py=tip[1]*t,pz=tip[2]*t,w=.19*(1-t*.65);for(const s of [-1,1]){b.tri([px,py,pz],[px+sx*s*w,py+.055,pz+sz*s*w],[px+ux*.11,py+.11,pz+uz*.11],2);}}}}
+function moss(b){const centers=[[0,0,.2],[-.23,-.07,.15],[.21,.09,.17],[-.09,.23,.12],[.11,-.21,.14]];for(const [x,z,r] of centers)fan(b,x,0,z,r,.09+r*.35,7,3);}
+function toadstools(b){const specs=[[-.19,-.09,.34,.15],[.16,.08,.47,.19],[.02,.23,.25,.12]];for(const [x,z,h,r] of specs){const sides=7;for(let i=0;i<sides;i++){const a=i*2*pi/sides,d=(i+1)*2*pi/sides;b.quad([x+Math.cos(a)*.024,0,z+Math.sin(a)*.024],[x+Math.cos(d)*.024,0,z+Math.sin(d)*.024],[x+Math.cos(d)*.031,h*.76,z+Math.sin(d)*.031],[x+Math.cos(a)*.031,h*.76,z+Math.sin(a)*.031],4);}fan(b,x,h*.76,z,r,h*.24,sides,5);}}
+const makers={'scene48:clover-patch':clover,'scene48:bracken-fern':bracken,'scene48:moss-cushion':moss,'scene48:clustered-toadstools':toadstools};
+export function makeUndergrowthMesh(id,seed,x,y,z){if(!Object.hasOwn(UNDERGROWTH_FAMILIES,id))throw new RangeError('unknown undergrowth family');if(![seed,x,y,z].every(Number.isSafeInteger))throw new TypeError('integer anchor required');const b=meshBuilder();makers[id](b);return {id,anchor:[x,y,z],mesh:b.finish(),attachment:'ground',collision:'pass-through'};}
+export function makeUndergrowthBatch(instances){if(!Array.isArray(instances))throw new TypeError('instances required');const batches=new Map();for(const item of instances){if(!item||!Object.hasOwn(UNDERGROWTH_FAMILIES,item.id)||![item.seed,item.x,item.y,item.z].every(Number.isSafeInteger))throw new TypeError('invalid anchor');let batch=batches.get(item.id);if(!batch){batch={id:item.id,mesh:makeUndergrowthMesh(item.id,0,0,0,0).mesh,instances:[]};batches.set(item.id,batch);}const {seed,x,y,z}=item; // family-salted variant, independent of legacy block identities
+const salt=[...item.id].reduce((n,c)=>Math.imul(n,31)+c.charCodeAt(0)|0,17);
+const h=(Math.imul(seed^salt,73856093)^Math.imul(x,19349663)^Math.imul(z,83492791)^Math.imul(y,2654435761))>>>0;
+batch.instances.push({anchor:[x,y,z],yaw:(h&7)*pi/4,scale:.86+((h>>>8)&15)*.012,variant:(h>>>16)&3});}return [...batches.values()];}

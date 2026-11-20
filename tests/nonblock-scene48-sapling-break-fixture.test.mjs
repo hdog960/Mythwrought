@@ -1,0 +1,37 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {makeSaplingBreakFixture,SAPLING_FIXTURE_VERSION} from '../src/nonblock-scene48/sapling-break-fixture.mjs';
+const placements=[{anchor:[0,0,0],variant:1},{anchor:[8,0,0],variant:2}];
+test('sapling exact-triangle ray breaks only hit instance and persists after reload',()=>{
+ const f=makeSaplingBreakFixture(29,placements);
+ assert.equal(f.visible().length,2);
+ const hit=f.pickRay([0,.7,3],[0,0,-1],5);
+ assert.ok(hit,'expected trunk side triangle hit');
+ assert.equal(hit.instanceKey,f.visible()[0].instanceKey);
+ assert.equal(f.pickRay([0,.7,3],[0,0,-1],1),null);
+ const broken=f.breakRay([0,.7,3],[0,0,-1],5);
+ assert.equal(broken.instanceKey,hit.instanceKey);
+ assert.equal(f.visible().length,1);
+ assert.equal(f.breakByKey(hit.instanceKey),false);
+ const snap=f.snapshot();
+ assert.equal(snap.contract,SAPLING_FIXTURE_VERSION);
+ assert.equal(snap.seed,29);
+ assert.deepEqual(snap.removed,[hit.instanceKey]);
+ const restored=makeSaplingBreakFixture(29,placements,snap);
+ assert.equal(restored.visible().length,1);
+ assert.equal(restored.pickRay([0,.7,3],[0,0,-1],5),null);
+ assert.equal(restored.visible()[0].instanceKey,f.visible()[0].instanceKey);
+});
+test('sapling world isolation, duplicate protection, and fail-closed sidecars',()=>{
+ const f=makeSaplingBreakFixture(5,placements);
+ const snap=f.snapshot();
+ assert.throws(()=>makeSaplingBreakFixture(6,placements,snap),TypeError);
+ assert.throws(()=>makeSaplingBreakFixture(5,[placements[0],placements[0]]),TypeError);
+ assert.throws(()=>makeSaplingBreakFixture(5,[{seed:6,anchor:[0,0,0]}]),TypeError);
+ assert.throws(()=>makeSaplingBreakFixture(5,placements,{...snap,removed:['unknown']}),TypeError);
+ const key=f.visible()[0].instanceKey;
+ assert.throws(()=>makeSaplingBreakFixture(5,placements,{...snap,removed:[key,key]}),TypeError);
+ assert.throws(()=>f.pickRay([0,0,0],[0,0,0],6),TypeError);
+ assert.throws(()=>f.pickRay([0,0,0],[0,0,1],-1),TypeError);
+ assert.equal(f.visible().length,2);
+});
