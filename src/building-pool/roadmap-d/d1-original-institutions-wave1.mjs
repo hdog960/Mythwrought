@@ -1,0 +1,971 @@
+// MYTHWROUGHT Builder D first original institutional source wave. Draft only, no world registration.
+// Every design has individually measured original wings, rotundas, functional rooms, source-bearing roofs.
+// Historical Builder 4B modules are imported read-only; source-specific previews must be independently audited.
+import {buildDistinctive4B} from '../roadmap-4b/m2-distinctive.mjs';
+import {validateBlueprint} from '../roadmap-4b/schema.mjs';
+export const ROADMAP_D_WAVE1_PLANS = Object.freeze([
+  {
+    "t": "magical-research-institute",
+    "b": "temperate",
+    "s": "medium",
+    "variant": 1,
+    "title": "Greenwake Split Orrery Research Hall",
+    "dim": [
+      65,
+      19,
+      63
+    ],
+    "r": [
+      [
+        28,
+        35,
+        1,
+        58
+      ],
+      [
+        5,
+        29,
+        10,
+        28
+      ],
+      [
+        34,
+        59,
+        9,
+        29
+      ],
+      [
+        7,
+        29,
+        38,
+        55
+      ],
+      [
+        34,
+        57,
+        39,
+        57
+      ],
+      [
+        18,
+        46,
+        27,
+        43
+      ]
+    ],
+    "discs": [
+      [
+        14,
+        33,
+        8,
+        7
+      ],
+      [
+        50,
+        33,
+        8,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        14,
+        33,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      31,
+      1
+    ],
+    "rooms": [
+      [
+        "research-hall",
+        13,
+        18
+      ],
+      [
+        "secure-repository",
+        49,
+        17
+      ],
+      [
+        "botanical-crystal-lab",
+        14,
+        48
+      ],
+      [
+        "astral-mapping-chamber",
+        48,
+        48
+      ],
+      [
+        "scriptorium",
+        31,
+        7
+      ],
+      [
+        "observation-gallery",
+        31,
+        33
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        28,
+        10,
+        26,
+        18
+      ],
+      [
+        "x",
+        35,
+        39,
+        56,
+        48
+      ]
+    ],
+    "peak": [
+      [
+        13,
+        18
+      ],
+      [
+        49,
+        17
+      ],
+      [
+        14,
+        48
+      ],
+      [
+        48,
+        48
+      ],
+      [
+        31,
+        7
+      ],
+      [
+        31,
+        33
+      ]
+    ],
+    "roof": "greenwake-six-part-offset-orrery-hip-and-copper-ridges"
+  },
+  {
+    "t": "magical-research-institute",
+    "b": "snow",
+    "s": "small",
+    "variant": 1,
+    "title": "Rimeglass Prism and Frost-Lens Laboratory",
+    "dim": [
+      51,
+      19,
+      54
+    ],
+    "r": [
+      [
+        22,
+        28,
+        1,
+        49
+      ],
+      [
+        3,
+        23,
+        8,
+        23
+      ],
+      [
+        27,
+        46,
+        7,
+        23
+      ],
+      [
+        5,
+        24,
+        32,
+        49
+      ],
+      [
+        27,
+        46,
+        32,
+        50
+      ],
+      [
+        13,
+        39,
+        22,
+        38
+      ]
+    ],
+    "discs": [
+      [
+        12,
+        29,
+        6,
+        6
+      ],
+      [
+        40,
+        29,
+        6,
+        6
+      ]
+    ],
+    "holes": [
+      [
+        12,
+        29,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      25,
+      1
+    ],
+    "rooms": [
+      [
+        "research-hall",
+        12,
+        15
+      ],
+      [
+        "secure-repository",
+        37,
+        15
+      ],
+      [
+        "glacial-optics-laboratory",
+        12,
+        43
+      ],
+      [
+        "heated-scriptorium",
+        37,
+        43
+      ],
+      [
+        "prism-examination-chamber",
+        25,
+        29
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        22,
+        10,
+        21,
+        16
+      ]
+    ],
+    "peak": [
+      [
+        12,
+        15
+      ],
+      [
+        37,
+        15
+      ],
+      [
+        12,
+        43
+      ],
+      [
+        37,
+        43
+      ],
+      [
+        25,
+        29
+      ]
+    ],
+    "roof": "rimeglass-five-steep-snow-shed-prism-roofs"
+  },
+  {
+    "t": "magical-research-institute",
+    "b": "mountain",
+    "s": "large",
+    "variant": 1,
+    "title": "Cairnwatch Seven-Ridge Geomancy Institute",
+    "dim": [
+      92,
+      21,
+      89
+    ],
+    "r": [
+      [
+        40,
+        50,
+        1,
+        84
+      ],
+      [
+        5,
+        41,
+        11,
+        31
+      ],
+      [
+        49,
+        85,
+        9,
+        29
+      ],
+      [
+        7,
+        42,
+        51,
+        79
+      ],
+      [
+        48,
+        86,
+        50,
+        79
+      ],
+      [
+        23,
+        68,
+        29,
+        56
+      ],
+      [
+        13,
+        28,
+        37,
+        48
+      ],
+      [
+        65,
+        84,
+        35,
+        48
+      ]
+    ],
+    "discs": [
+      [
+        15,
+        43,
+        9,
+        8
+      ],
+      [
+        77,
+        43,
+        9,
+        8
+      ],
+      [
+        44,
+        73,
+        10,
+        7
+      ]
+    ],
+    "holes": [
+      [
+        15,
+        43,
+        1,
+        1
+      ],
+      [
+        77,
+        43,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      45,
+      1
+    ],
+    "rooms": [
+      [
+        "research-hall",
+        19,
+        20
+      ],
+      [
+        "secure-repository",
+        72,
+        18
+      ],
+      [
+        "strata-analysis-vault",
+        20,
+        66
+      ],
+      [
+        "mountain-observatory",
+        74,
+        65
+      ],
+      [
+        "geomantic-map-archive",
+        45,
+        10
+      ],
+      [
+        "fault-line-theater",
+        45,
+        42
+      ],
+      [
+        "seismic-lens-room",
+        44,
+        74
+      ],
+      [
+        "western-mineral-gallery",
+        16,
+        39
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        40,
+        12,
+        29,
+        20
+      ],
+      [
+        "x",
+        50,
+        52,
+        76,
+        64
+      ]
+    ],
+    "peak": [
+      [
+        19,
+        20
+      ],
+      [
+        72,
+        18
+      ],
+      [
+        20,
+        66
+      ],
+      [
+        74,
+        65
+      ],
+      [
+        45,
+        10
+      ],
+      [
+        45,
+        42
+      ],
+      [
+        44,
+        74
+      ]
+    ],
+    "roof": "cairnwatch-seven-stepped-ridge-vaults-and-three-lens-courts"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "desert",
+    "s": "medium",
+    "variant": 1,
+    "title": "Amberstar Sand-Script Arcane Academy",
+    "dim": [
+      70,
+      20,
+      64
+    ],
+    "r": [
+      [
+        31,
+        38,
+        1,
+        59
+      ],
+      [
+        3,
+        32,
+        10,
+        26
+      ],
+      [
+        37,
+        65,
+        9,
+        28
+      ],
+      [
+        5,
+        33,
+        37,
+        58
+      ],
+      [
+        36,
+        65,
+        38,
+        58
+      ],
+      [
+        16,
+        53,
+        25,
+        44
+      ]
+    ],
+    "discs": [
+      [
+        12,
+        34,
+        8,
+        7
+      ],
+      [
+        57,
+        34,
+        8,
+        7
+      ]
+    ],
+    "holes": [
+      [
+        12,
+        34,
+        1,
+        1
+      ],
+      [
+        57,
+        34,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      34,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        17,
+        17
+      ],
+      [
+        "study-chamber",
+        52,
+        17
+      ],
+      [
+        "mirage-practice-court",
+        16,
+        48
+      ],
+      [
+        "rune-ink-scriptorium",
+        53,
+        48
+      ],
+      [
+        "sun-compass-galley",
+        34,
+        8
+      ],
+      [
+        "desert-observation-hall",
+        34,
+        33
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        31,
+        11,
+        25,
+        19
+      ],
+      [
+        "x",
+        38,
+        38,
+        57,
+        47
+      ]
+    ],
+    "peak": [
+      [
+        17,
+        17
+      ],
+      [
+        52,
+        17
+      ],
+      [
+        16,
+        48
+      ],
+      [
+        53,
+        48
+      ],
+      [
+        34,
+        8
+      ],
+      [
+        34,
+        33
+      ]
+    ],
+    "roof": "amberstar-shade-arcades-split-sun-domes-and-terraces"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "enchanted-forest",
+    "s": "large",
+    "variant": 1,
+    "title": "Moonlace Canopy Arcane Athenaeum",
+    "dim": [
+      90,
+      22,
+      84
+    ],
+    "r": [
+      [
+        39,
+        49,
+        1,
+        80
+      ],
+      [
+        4,
+        40,
+        12,
+        32
+      ],
+      [
+        48,
+        85,
+        10,
+        31
+      ],
+      [
+        5,
+        42,
+        48,
+        76
+      ],
+      [
+        47,
+        85,
+        49,
+        77
+      ],
+      [
+        20,
+        68,
+        30,
+        53
+      ],
+      [
+        8,
+        25,
+        34,
+        47
+      ],
+      [
+        65,
+        83,
+        35,
+        49
+      ]
+    ],
+    "discs": [
+      [
+        15,
+        41,
+        10,
+        9
+      ],
+      [
+        75,
+        42,
+        10,
+        9
+      ],
+      [
+        44,
+        70,
+        11,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        15,
+        41,
+        1,
+        1
+      ],
+      [
+        75,
+        42,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      44,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        20,
+        21
+      ],
+      [
+        "study-chamber",
+        68,
+        20
+      ],
+      [
+        "moonroot-practice-hall",
+        20,
+        62
+      ],
+      [
+        "starlit-archive",
+        70,
+        63
+      ],
+      [
+        "grand-entrance-atrium",
+        44,
+        9
+      ],
+      [
+        "transmutation-studio",
+        44,
+        40
+      ],
+      [
+        "canopy-observation-gallery",
+        44,
+        71
+      ],
+      [
+        "lunar-song-pavilion",
+        14,
+        40
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        39,
+        12,
+        31,
+        22
+      ],
+      [
+        "x",
+        49,
+        50,
+        76,
+        64
+      ]
+    ],
+    "peak": [
+      [
+        20,
+        21
+      ],
+      [
+        68,
+        20
+      ],
+      [
+        20,
+        62
+      ],
+      [
+        70,
+        63
+      ],
+      [
+        44,
+        9
+      ],
+      [
+        44,
+        40
+      ],
+      [
+        44,
+        71
+      ]
+    ],
+    "roof": "moonlace-seven-staggered-crown-ridges-two-sky-wells"
+  },
+  {
+    "t": "schoolhouse",
+    "b": "snow",
+    "s": "medium",
+    "variant": 2,
+    "title": "Frosthaven Three-Court Winter School",
+    "dim": [
+      60,
+      19,
+      59
+    ],
+    "r": [
+      [
+        26,
+        34,
+        1,
+        55
+      ],
+      [
+        4,
+        27,
+        10,
+        28
+      ],
+      [
+        33,
+        56,
+        9,
+        27
+      ],
+      [
+        5,
+        28,
+        35,
+        54
+      ],
+      [
+        32,
+        56,
+        34,
+        54
+      ],
+      [
+        17,
+        44,
+        27,
+        41
+      ]
+    ],
+    "discs": [
+      [
+        14,
+        32,
+        7,
+        6
+      ],
+      [
+        47,
+        32,
+        7,
+        6
+      ]
+    ],
+    "e": [
+      30,
+      1
+    ],
+    "rooms": [
+      [
+        "classroom",
+        14,
+        18
+      ],
+      [
+        "shared-study",
+        46,
+        17
+      ],
+      [
+        "winter-craft-hall",
+        14,
+        46
+      ],
+      [
+        "safe-warming-library",
+        46,
+        45
+      ],
+      [
+        "teacher-area",
+        30,
+        8
+      ],
+      [
+        "shared-lunch-court",
+        30,
+        34
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        26,
+        10,
+        27,
+        18
+      ]
+    ],
+    "peak": [
+      [
+        14,
+        18
+      ],
+      [
+        46,
+        17
+      ],
+      [
+        14,
+        46
+      ],
+      [
+        46,
+        45
+      ],
+      [
+        30,
+        8
+      ],
+      [
+        30,
+        34
+      ]
+    ],
+    "roof": "frosthaven-six-crosswind-pitched-roofs-and-sheltered-study-courts"
+  }
+].map(p=>Object.freeze(p)));
+export const ROADMAP_D_WAVE1_BUILDINGS = Object.freeze(ROADMAP_D_WAVE1_PLANS.map(p=>{
+ const original=buildDistinctive4B(p);
+ const candidate=Object.freeze({...original,provenance:{...original.provenance,lane:'roadmap-d',milestone:'D1-wave1',source:'Builder D original coordinate-authored institutional layout',originalPlan:p.title,method:'independent connected site wings, live XYZ floors/walls, measured courtyard absence, region-specific supported roof bands, reachable named rooms',historicalSourcesUnchanged:true,liveIntegration:false}});
+ validateBlueprint(candidate); return candidate;
+}));
+export const ROADMAP_D_WAVE1_IDS = Object.freeze(ROADMAP_D_WAVE1_BUILDINGS.map(b=>b.id));
+if(ROADMAP_D_WAVE1_IDS.length!==6 || new Set(ROADMAP_D_WAVE1_IDS).size!==6) throw Error('Builder D original Wave1 count or ID collision');
