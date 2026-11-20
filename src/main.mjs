@@ -740,6 +740,7 @@ function start(){
   // edits; never stage over a published chunk or a recently drawn buffer.
   // This pool is not part of the original 25/34/27 resident chunk budgets.
   const editGpuSparePool=[];
+  let editGpuReuses=0;
   const MAX_EDIT_GPU_SPARES=3;
   function releaseEditGpuSparePool(){
     for(const spare of editGpuSparePool)gl.deleteBuffer(spare.buffer);
@@ -750,6 +751,7 @@ function start(){
       const spare=editGpuSparePool[i];
       if(frame-spare.retiredFrame>=3&&spare.capacity>=bytes){
         editGpuSparePool.splice(i,1);
+        editGpuReuses++;
         return spare;
       }
     }
@@ -847,6 +849,7 @@ function start(){
     // sections at Y-seams. All buffers stage before any published replacement.
     const batch=[];
     let meshMs=0,uploadMs=0;
+    const gpuReusesBefore=editGpuReuses;
     try{
       for(const section of verticalEditSections(y))
         for(const {cx,cz} of editAffectedChunks(x,z)){
@@ -892,7 +895,8 @@ function start(){
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
-    lastEditMeshTiming={meshMs,uploadMs,chunks:ready.length};
+    lastEditMeshTiming={meshMs,uploadMs,chunks:ready.length,
+      reusedGpuBuffers:editGpuReuses-gpuReusesBefore};
     if(caveSession)caveFarGpu?.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
@@ -1331,6 +1335,7 @@ function start(){
       canvas.dataset.pendingChunks=String(pending.size);
       canvas.dataset.chunkCenter=lastStreamingCenter;
       canvas.dataset.meshEditBatches=String(editMeshBatches);
+      canvas.dataset.editGpuBufferReuses=String(editGpuReuses);
       canvas.dataset.lastEditedChunks=lastEditMeshKeys.join(';');
       canvas.dataset.renderedMeshVertices=String([...chunks.values()].reduce((sum,c)=>sum+c.count,0));
       canvas.dataset.pack3PhysicalCount=String(pack3.runtime.size());
