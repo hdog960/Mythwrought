@@ -3,6 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readdir,readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {createCDesertSmallMarket} from '../../../src/building-pool/roadmap-c-trades/wave1-desert-market.mjs';
 import {createCRiverbendTailor} from '../../../src/building-pool/roadmap-c-trades/wave2-riverbend-tailor.mjs';
 import {createCCopperfordButcher} from '../../../src/building-pool/roadmap-c-trades/wave3-copperford-butcher.mjs';
@@ -13,6 +14,34 @@ import {createCWinterglassMarket} from '../../../src/building-pool/roadmap-c-tra
 const canonicalDir=new URL('../../../src/building-pool/roadmap-2b/',import.meta.url);
 const bDir=new URL('../../../src/building-pool/roadmap-b/',import.meta.url);
 const ownersUrl=new URL('../../../docs/building-pool/roadmap-c-trades/C_2B_FROZEN_OWNER_WITNESS_V1.json',import.meta.url);
+const sourceBlobsUrl=new URL('../../../docs/building-pool/roadmap-c-trades/C_PROTECTED_B205_SOURCE_BLOBS.json',import.meta.url);
+async function verifyExactHistoricalBSourceBytes(){
+ const frozen=JSON.parse(await readFile(sourceBlobsUrl,'utf8'));
+ assert.equal(frozen.sourceAcceptedParentHead,'6ab800a9cc16f31fdc5655f119979390992effcf');
+ assert.equal(frozen.historicalProtectedBuildingCount,205);
+ assert.equal(frozen.canonicalOriginalBlueprints,146);
+ assert.equal(frozen.stageBOriginalBlueprints,59);
+ assert.equal(frozen.sourceFileCount,47);
+ const canonicalFiles=(await readdir(canonicalDir))
+  .filter(name=>name.endsWith('.mjs'))
+  .map(name=>'src/building-pool/roadmap-2b/'+name);
+ const staged=['b2-ironpass-market.mjs',...Array.from({length:15},(_,i)=>'wave'+(i+1)+'-trades-b2.mjs')]
+  .map(name=>'src/building-pool/roadmap-b/'+name);
+ const actual=[...canonicalFiles,...staged].sort();
+ const expected=Object.keys(frozen.sourceModules).sort();
+ assert.deepEqual(actual,expected,'protected historical original B source modules changed or missing');
+ for(const file of expected){
+  const bytes=await readFile(new URL('../../../'+file,import.meta.url));
+  const actualBlob=createHash('sha1').update('blob '+bytes.length+'\0').update(bytes).digest('hex');
+  assert.equal(actualBlob,frozen.sourceModules[file],
+   'protected accepted Builder B original source file modified: '+file);
+ }
+ console.log('MYTHWROUGHT_ROADMAP_C_PROTECTED_205_B_SOURCE_BLOBS=47/47 byte-exact');
+}
+test('C-owned trade original source cannot mutate ANY of 47 accepted B source/catalog blobs',async()=>{
+ await verifyExactHistoricalBSourceBytes();
+});
+
 function gather(thing,map){
  if(!thing||typeof thing!=='object')return;
  if(Array.isArray(thing)){for(const item of thing)gather(item,map);return;}
