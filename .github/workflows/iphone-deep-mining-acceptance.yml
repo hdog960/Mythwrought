@@ -1,0 +1,48 @@
+name: Mythwrought isolated deep-mining repair acceptance
+on:
+  pull_request:
+    paths:
+      - src/depth-mesh.mjs
+      - src/main.mjs
+      - tests/depth-mesh-incremental.test.mjs
+      - tests/rapid-vertical-dig-browser.mjs
+      - .github/workflows/iphone-deep-mining-acceptance.yml
+permissions:
+  contents: read
+jobs:
+  parity-and-real-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Full source syntax and all root native regressions
+        run: |
+          node --check src/main.mjs
+          node --check src/depth-mesh.mjs
+          node --check tests/depth-mesh-incremental.test.mjs
+          node --check tests/rapid-vertical-dig-browser.mjs
+          npm test
+      - name: Install genuine Chromium test driver
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Fetch precisely pinned unoptimized production baseline
+        uses: actions/checkout@v4
+        with:
+          ref: 8de40ca8451b6268cfdfefaa5d9a66b72caca799
+          path: baseline-main
+      - name: Run authentic baseline and optimized in same runner
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/iphone-dig-candidate.log 2>&1 &
+          python3 -m http.server 4174 --directory baseline-main >/tmp/iphone-dig-baseline.log 2>&1 &
+          DIG_PORT=4174 DIG_BASELINE=1 node tests/rapid-vertical-dig-browser.mjs
+          DIG_PORT=4173 node tests/rapid-vertical-dig-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iphone-deep-mining-authentic-webgl2-evidence
+          path: artifacts/rapid-dig-*
+          if-no-files-found: ignore
