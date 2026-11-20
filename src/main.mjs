@@ -27,7 +27,7 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
@@ -95,13 +95,18 @@ else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     const url=new URL(location.href);
     const offline=url.searchParams.get('nonblock-offline')==='1';
     let effects=null;
+    let habitat=null;
+    if(layout?.length===0&&url.searchParams.get('nonblock-environment')==='1'){
+      try{habitat=(await import('./nonblock/staged-habitats.mjs')).planEnvironmentalScenery;}
+      catch(error){console.warn('Environment scenery unavailable',error);}
+    }
     if(layout&&url.searchParams.has('nonblock-fx')){
       try{
         const fx=await import('./nonblock/candidate-effects.mjs');
         effects=fx.prepareCandidateEffects(fx.readCandidateEffectLayout(url));
       }catch(error){console.warn('Nonblock staging effects disabled',error);}
     }
-    start(layout?{module,layout,offline,effects}:null);
+    start(layout?{module,layout,offline,effects,habitat}:null);
   },error=>{
     console.warn('Nonblock staging module unavailable',error);
     start();
@@ -139,18 +144,25 @@ function start(nonblockStage=null){
     recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
   }
   let pack3=createPack3LiveBridge(world,localStorage);
-  let nonblockWorld,nonblockScene,nonblockBuffer,nonblockDrawKey='',nonblockVertexCount=0;
+  let nonblockWorld,nonblockChunk,nonblockScene,nonblockBuffer,nonblockDrawKey='',nonblockVertexCount=0;
   let nonblockParents=new Set();
   let effectBuffer,effectBytes=0,effectVertexCount=0,lastEffectUpload=-Infinity;
 
   function stagedScene(){
     if(storageReadOnly)return null;
-    if(nonblockWorld!==world){
+    const streamed=nonblockStage.habitat&&world.base?.generationProfile?.generator===M7_ENVIRONMENT_GENERATOR;
+    const cx=streamed?chunkCoord(player.x):0,cz=streamed?chunkCoord(player.z):0;
+    const center=streamed?cx+','+cz:null;
+    if(nonblockWorld!==world||nonblockChunk!==center){
       nonblockWorld=world;
+      nonblockChunk=center;
       nonblockScene=null;
       try{
         const worldId=caveSession?.profile??world.base?.generationProfile?.generator??'legacy';
-        nonblockScene=nonblockStage.module.createCandidateScene(world.seed,worldId,nonblockStage.layout,{
+        const placed=(x,y,z)=>Boolean(manual14.layer.get([x,y,z])||pack3.getAt(x,y,z)||
+          pack5Builder?.layer.cell([x,y,z])||world.getPack2State?.(x,y,z));
+        const layout=streamed?nonblockStage.habitat(world.base,cx,cz,{occupied:placed}):nonblockStage.layout;
+        nonblockScene=nonblockStage.module.createCandidateScene(world.seed,worldId,layout,{
           storage:localStorage,
           blockAt:(x,y,z)=>{
             if(manual14.layer.get([x,y,z])||pack3.getAt(x,y,z)||
@@ -158,7 +170,7 @@ function start(nonblockStage=null){
             const block=world.get(x,y,z);
             return block!==BLOCK.AIR&&block!==76;
           },
-          editedAt:(x,y,z)=>world.edits.has([x,y,z].join(',')),
+          editedAt:(x,y,z)=>world.edits.has([x,y,z].join(','))||Boolean(streamed&&placed(x,y,z)),
           voxelPick:(origin,direction,maxDistance)=>{
             const voxel=raycast(world,origin,direction,maxDistance);
             const furniture=pack5Builder?.layer.raycast(origin,direction,maxDistance);
@@ -2740,6 +2752,31 @@ function start(nonblockStage=null){
     v5Hint.insertAdjacentElement('afterend',createBalancedV6Button);
     createBalancedV6Button.insertAdjacentElement('afterend',v6Hint);
   }
+  if(seedRow&&['localhost','127.0.0.1'].includes(location.hostname)){
+    const createEnvironmentWorld=document.createElement('button');
+    createEnvironmentWorld.id='createEnvironmentWorld';createEnvironmentWorld.type='button';
+    createEnvironmentWorld.textContent='CREATE NEW ENVIRONMENT WORLD (PREVIEW)';
+    v6Hint.insertAdjacentElement('afterend',createEnvironmentWorld);
+    createEnvironmentWorld.onclick=()=>{
+      try{
+        const next=worldSeedFromText(seedInput.value);
+        if(next===world.seed)throw Error('Choose a different unused seed for the environment preview');
+        if(!window.confirm('Create the environment preview for unused seed '+next+'?'))return;
+        if(!storageReadOnly&&!save())throw Error('Save the current world before creating a new seed');
+        rejectLegacyWorldWhereCaveExists(localStorage,next);
+        const choice=planM2WorldChoice(seedInput.value,M2_WORLD_MODE.CREATE_ENVIRONMENT_V7,{confirmed:true});
+        const {world:prepared,base}=openM2World(localStorage,choice);
+        if(base.generationProfile.generator!==M7_ENVIRONMENT_GENERATOR)
+          throw Error('Environment profile did not activate');
+        const stored=saveM2World(localStorage,prepared);
+        if(!stored.ok)throw Error('Environment save could not be verified: '+stored.reason);
+        enterPreparedM2World(prepared,'Environment world '+next+' created safely.');
+      }catch(error){
+        seedMessage.textContent='Environment world creation refused: '+String(error.message||error);
+      }
+    };
+  }
+
   function enterPreparedM2World(candidate,statusText){
     // This commits only a PREVIOUSLY verified and persisted candidate.
     for(const c of chunks.values())deleteChunkBuffers(c);
@@ -2753,9 +2790,9 @@ function start(nonblockStage=null){
     pack3=createPack3LiveBridge(world,localStorage);
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
     // Register *after* the explicit unused-seed v5 creation is safely saved.
-    if(world.base instanceof FourRegionWorld&&
+    if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
         [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR].includes(
-          world.base.generationProfile.generator))
+          world.base.generationProfile.generator)))
       void ensureWorldOfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
     storageReadOnly=false;resetLiveMobSession();changed=false;respawnPrototype();

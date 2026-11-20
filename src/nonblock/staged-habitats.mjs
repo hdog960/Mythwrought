@@ -1,6 +1,7 @@
 import {BLOCK,terrainHeight,worldKey} from '../voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y} from '../depth.mjs';
-import {M6_BALANCED_GENERATOR} from '../manual-biomes/profile-world.mjs';
+import {M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from '../manual-biomes/profile-world.mjs';
+import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
 import {M3_DESERT_IDS} from '../manual-biomes/desert-m3.mjs';
 import {M4_PHYSICAL_MATERIALS} from '../manual-biomes/three-regions-m4.mjs';
 import {v6BiomeAt} from '../manual-biomes/v6-balanced-biomes.mjs';
@@ -17,15 +18,16 @@ const habitats=new Map([
     'low-grass short-fern single-wildflower lavender-spike heather-sprig clover-clump meadow-sedge clover-patch grass-plume meadow-fescue buttercup-bunch seedhead-meadow-mix')}],
   ['desert',{ground:[M3_DESERT_IDS.pale,M3_DESERT_IDS.red,M3_DESERT_IDS.salt],
     families:scenery('d','desert-scrub prickly-pear-cactus column-cactus agave-rosette tumblebrush desert-bloom saltgrass')}],
-  ['snow',{ground:Object.values(M4_PHYSICAL_MATERIALS.snow),
+  ['snow',{ground:[276,...Object.values(M4_PHYSICAL_MATERIALS.snow)],
     families:[...scenery('d','snowgrass frost-fern'),...alpine]}],
-  ['mountain',{ground:Object.values(M4_PHYSICAL_MATERIALS.mountain),
+  ['mountain',{ground:[G.slate,G.scree,G.gneiss,272,...Object.values(M4_PHYSICAL_MATERIALS.mountain)],
     families:[...alpine,...scenery('e','pebble-scatter')]}],
-  ['enchanted',{ground:Object.values(M4_PHYSICAL_MATERIALS.enchanted),
+  ['enchanted',{ground:[G.woodlandLoam,G.woodlandPeat,G.woodlandMoss,...Object.values(M4_PHYSICAL_MATERIALS.enchanted)],
     families:flora('spore-pod enchanted-flower lantern-mushroom ringed-morel starpetal inkcap-cluster velvet-cup forest-leaf-litter woodland-horsetail moss-cushion woodland-sapling woodland-shrub')}],
   ['cave',{ground:rock,families:[...scenery('e','small-stalagmite giant-stalagmite-spire hanging-stalactite clustered-dripstone limestone-cave-column flowstone-curtain crystal-shard branching-crystal-cluster geode-opening pebble-scatter cave-rubble-cluster mineral-encrustation'),...flora('cavecap')]}]
 ]);
 const emptyStorage={getItem:()=>null};
+const canopyIds=new Set([BLOCK.LEAVES,G.coldNeedles,G.snowyNeedles,G.aetherLeaves,G.moonLeaves]);
 
 function coordinates(value,size){
   return Array.isArray(value)&&value.length===size&&
@@ -36,13 +38,15 @@ function surfaceAnchor(world,habitat,column){
   if(!coordinates(column,2))throw new TypeError('Invalid scenery surface column');
   const [x,z]=column;
   const {seed,generationProfile:profile}=world;
-  const sample=profile?.generator===M6_BALANCED_GENERATOR?v6BiomeAt:surfaceBiomeAt;
+  const evolved=profile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const sample=evolved||profile?.generator===M6_BALANCED_GENERATOR?v6BiomeAt:surfaceBiomeAt;
   const region=profile?sample(x,z,seed):null;
   const name=region?.weight>=.35?region.name:'meadow';
   if(name!==habitat)return null;
   const floor=terrainHeight(x,z,seed)-2;
   for(let y=WORLD_MAX_Y;y>=floor;y--){
-    if(world.get(x,y,z)!==BLOCK.AIR)return [x,y+1,z];
+    const block=evolved?world.naturalAndLandmarkBlock(x,y,z):world.get(x,y,z);
+    if(block!==BLOCK.AIR&&(!evolved||!canopyIds.has(block)))return [x,y+1,z];
   }
   return null;
 }
@@ -81,4 +85,28 @@ export function planStagedHabitat(world,requests,{occupied=()=>false}={}){
     used.add(anchor.join(','));
   }
   return accepted;
+}
+
+function placementRoll(x,z,seed){
+  let value=Math.imul(x,0x7feb352d)^Math.imul(z,0x846ca68b)^seed;
+  value=Math.imul(value^(value>>>16),0x45d9f3b);
+  return (value^(value>>>16))>>>0;
+}
+
+export function planEnvironmentalScenery(world,cx,cz,options){
+  if(world.generationProfile?.generator!==M7_ENVIRONMENT_GENERATOR)return [];
+  const requests=[];
+  for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)for(let site=0;site<3;site++){
+    const tx=cx+dx,tz=cz+dz;
+    const hash=placementRoll(tx*5+site,tz*7-site,world.seed);
+    const x=tx*16+2+(site&1)*8+hash%5;
+    const z=tz*16+2+(site>>1)*8+(hash>>>8)%5;
+    if(Math.abs(x)>=10_000||Math.abs(z)>=10_000)continue;
+    const region=v6BiomeAt(x,z,world.seed);
+    const habitat=region?.name??'meadow';
+    if(habitat==='desert'&&site===2)continue;
+    const families=habitats.get(habitat).families;
+    requests.push({habitat,column:[x,z],sceneId:families[(hash>>>12)%families.length],variant:hash%4});
+  }
+  return planStagedHabitat(world,requests,options);
 }

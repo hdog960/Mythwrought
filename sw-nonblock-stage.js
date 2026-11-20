@@ -3,8 +3,8 @@ const workerUrl=new URL(self.location.href);
 const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
   workerUrl.searchParams.get('nonblock-staging')==='1';
 const CACHE_PREFIX='mythwrought-nonblock-stage-shell-';
-const STAGE_VERSION='20261120-v24';
-const STAGE_PREVIOUS_VERSION='20261120-v23';
+const STAGE_VERSION='20261120-v25';
+const STAGE_PREVIOUS_VERSION='20261120-v24';
 const SITE_RELEASE='20261120-five-systems-rc11';
 const CACHE_NAME=CACHE_PREFIX+STAGE_VERSION;
 const scopeUrl=new URL(self.registration.scope);

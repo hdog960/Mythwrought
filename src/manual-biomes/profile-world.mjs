@@ -1,7 +1,7 @@
 // MANUAL M1: canonical, editable four-region world baseline for explicitly NEW profiles.
 // Not loaded by production src/main.mjs until the separately reviewed M2 integration.
 // Legacy VoxelWorld remains unchanged. Schema-1 edit deltas keep their original shape.
-import {VoxelWorld,BLOCK,terrainHeight,worldKey} from '../voxel.mjs';
+import {VoxelWorld,BLOCK,chunkCoord,terrainHeight,worldKey} from '../voxel.mjs';
 import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y,WORLD_MIN_Y} from '../depth.mjs';
 import {isBiome130BlockId} from '../biome130-registry.mjs';
 import {surfaceBiomeFreshColumn,surfaceBiomeAt} from '../surface-regions/regions.mjs';
@@ -9,7 +9,8 @@ import {m3DesertFreshColumn,M3_XERIC_IDS} from './desert-m3.mjs';
 import {m4ThreeRegionFreshColumn,M4_REGION_NAMES} from './three-regions-m4.mjs';
 import {m5V5MountainFreshColumn} from './mountain-pass-v5.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
-import {planEnvironmentalColumn} from './environment-v7.mjs';
+import {environmentalTreesForChunk,keepLegacyGroveTree,planEnvironmentalColumn} from './environment-v7.mjs';
+import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
 
 // NEVER change a legacy generation profile's physical natural baseline.
 // M4 created worlds use v4; existing M3 (v3) Desert and M2 (v2) profiles
@@ -57,12 +58,16 @@ export class FourRegionWorld extends VoxelWorld{
        maxCachedColumns>4096)throw Error('Invalid biome column budget');
     this.maxCachedColumns=maxCachedColumns;
     this._biomeColumns=new Map();
+    if(this.profile.generator===M7_ENVIRONMENT_GENERATOR){
+      this._environmentGroveMasks=new Map();
+      this._environmentTreeChunks=new Map();
+    }
   }
   _columnPlan(x,z){
     const key=x+','+z;
     if(this._biomeColumns.has(key))return this._biomeColumns.get(key);
     const lookup=this.profile.generator===M7_ENVIRONMENT_GENERATOR?
-      planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>super.naturalAndLandmarkBlock(a,b,c)):
+      planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c)):
       this._existingBiomeColumn(x,z);
     this._biomeColumns.set(key,lookup);
     if(this._biomeColumns.size>this.maxCachedColumns)
@@ -107,6 +112,38 @@ export class FourRegionWorld extends VoxelWorld{
         BLOCK.STONE:p.to
     ])??[]);
   }
+  _environmentBaseline(x,y,z,block=super.naturalAndLandmarkBlock(x,y,z)){
+    // Only ordinary grove provenance can be suppressed. Named old landmarks,
+    // player edits and cave geometry continue through their original readers.
+    if(block!==BLOCK.WOOD&&block!==BLOCK.LEAVES)return block;
+    const districtKey=Math.floor(x/LIVE_DISTRICT_SIZE)+','+Math.floor(z/LIVE_DISTRICT_SIZE);
+    let hidden=this._environmentGroveMasks.get(districtKey);
+    if(!hidden){
+      hidden=new Set();
+      const district=this.liveDistrictCache.get(districtKey);
+      for(const tree of district?.trees??[]){
+        if(keepLegacyGroveTree(this.seed,tree))continue;
+        for(const [tx,ty,tz] of tree.cells)hidden.add(worldKey(tx,ty,tz));
+      }
+      this._environmentGroveMasks.set(districtKey,hidden);
+      if(this._environmentGroveMasks.size>48)
+        this._environmentGroveMasks.delete(this._environmentGroveMasks.keys().next().value);
+    }
+    return hidden.has(worldKey(x,y,z))?BLOCK.AIR:block;
+  }
+  _environmentTreeAt(x,y,z){
+    const cx=chunkCoord(x),cz=chunkCoord(z),key=cx+','+cz;
+    let cells=this._environmentTreeChunks.get(key);
+    if(!cells){
+      cells=environmentalTreesForChunk(cx,cz,this.seed,
+        (a,c)=>this._columnPlan(a,c),
+        (a,b,c)=>this._columnPlan(a,c).get(b)??this._environmentBaseline(a,b,c));
+      this._environmentTreeChunks.set(key,cells);
+      if(this._environmentTreeChunks.size>64)
+        this._environmentTreeChunks.delete(this._environmentTreeChunks.keys().next().value);
+    }
+    return cells.get(worldKey(x,y,z))??BLOCK.AIR;
+  }
   naturalAndLandmarkBlock(x,y,z){
     const base=super.naturalAndLandmarkBlock(x,y,z);
     // Critical collision/mesh fast path: deep sections never scan a surface
@@ -114,7 +151,10 @@ export class FourRegionWorld extends VoxelWorld{
     if(![x,y,z].every(Number.isInteger)||y<LEGACY_WORLD_MIN_Y||
        y>WORLD_MAX_Y||y<terrainHeight(x,z,this.seed)-2)
       return base;
-    return this._columnPlan(x,z).get(y)??base;
+    const overlay=this._columnPlan(x,z).get(y);
+    if(this.profile.generator!==M7_ENVIRONMENT_GENERATOR)return overlay??base;
+    const ground=overlay??this._environmentBaseline(x,y,z,base);
+    return ground===BLOCK.AIR&&y>terrainHeight(x,z,this.seed)?this._environmentTreeAt(x,y,z):ground;
   }
   set(x,y,z,id,rotation=0){
     // Original setter knows the original block registry, validation,

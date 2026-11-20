@@ -72,3 +72,37 @@ test('new biome terrain keeps actual cave air and existing protected mouths',()=
     assert.ok(air>0,'The sample must include real cave air');
   }
 });
+
+test('new biome forests use climate-specific editable trees with deterministic chunk edges',()=>{
+  const seed=179,profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+  const world=new FourRegionWorld(seed,profile);
+  const reload=new FourRegionWorld(seed,profile);
+  for(const [name,leaves] of [['snow',[406,407]],['enchanted',[409,410]]]){
+    const [cx,cz]=sites[name];
+    let seen=0;
+    for(let z=cz+20;z>=cz-20;z--)for(let x=cx-20;x<=cx+20;x++){
+      for(let y=9;y<=19;y++){
+        const block=world.get(x,y,z);
+        if(!leaves.includes(block))continue;
+        assert.equal(reload.get(x,y,z),block);
+        seen++;
+      }
+    }
+    assert.ok(seen>=30,name+' needs a visible climate-specific canopy');
+  }
+  assert.equal(world.save().edits.length,0);
+});
+
+test('a piece of generated canopy stays mined on reload',()=>{
+  const seed=179,profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+  const world=new FourRegionWorld(seed,profile);
+  let target;
+  for(let x=-20;x<=20&&!target;x++)for(let z=490;z<=535&&!target;z++)
+    for(let y=17;y>=8;y--)if([406,407].includes(world.get(x,y,z))){
+      target=[x,y,z];
+      break;
+    }
+  assert.ok(target);
+  assert.ok(world.set(...target,BLOCK.AIR));
+  assert.equal(restoreFourRegionWorld(world.save(),profile).get(...target),BLOCK.AIR);
+});

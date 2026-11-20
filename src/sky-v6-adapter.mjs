@@ -2,7 +2,7 @@
 // Original V2–V5 sky adapter remains byte-identical to accepted PR #269.
 // V6 terrain remains wholly owned by src/manual-biomes/v6-balanced-biomes.mjs.
 import {v6BiomeAt,V6_BIOME_TILE_SIZE} from './manual-biomes/v6-balanced-biomes.mjs';
-import {M6_BALANCED_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from './manual-biomes/profile-world.mjs';
 const NAMES=Object.freeze(['mountain','desert','snow','enchanted']);
 const smooth=t=>{const u=Math.max(0,Math.min(1,t));return u*u*(3-2*u);};
 function verifiedV6(world){
@@ -10,7 +10,7 @@ function verifiedV6(world){
   return Boolean(p&&typeof p==='object'&&!Array.isArray(p)&&
     Object.keys(p).sort().join(',')==='generator,kind,seed,version'&&
     p.kind==='mythwrought-generation-profile'&&p.version===1&&
-    p.generator===M6_BALANCED_GENERATOR&&Number.isInteger(p.seed)&&
+    [M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR].includes(p.generator)&&Number.isInteger(p.seed)&&
     p.seed===(p.seed|0)&&Number.isInteger(world?.seed)&&
     world.seed===(world.seed|0)&&world.seed===p.seed&&
     world.base?.seed===p.seed);
@@ -28,7 +28,7 @@ export function resolveV6SkyBiome(world,x,z){
     return null;
   return Object.freeze({name:region.name,
     strength:smooth((region.weight-.35)/.60),weight:region.weight,
-    generator:M6_BALANCED_GENERATOR,seed:world.seed,
+    generator:world.base.generationProfile.generator,seed:world.seed,
     center:Object.freeze({x:region.center[0],z:region.center[1]})});
 }
 export const S6_V6_AUTHORITY=Object.freeze({
