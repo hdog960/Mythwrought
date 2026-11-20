@@ -1,0 +1,418 @@
+{
+  "schema": "mythwrought.builder-b.1b.essentials-wave1-2-handoff.v1",
+  "date": "2026-11-20",
+  "status": "PROVISIONAL_SOURCE_ONLY_NOT_TECHNICALLY_ACCEPTED",
+  "frozenReservation": "docs/building-pool/roadmap-b/BUILDER_BD_EXCLUSIVE_1B_FREEZE.json",
+  "pr": 295,
+  "physicalIPhoneTested": false,
+  "runtimePlaced": false,
+  "settlementGenerationNotAuthorized": true,
+  "buildings": [
+    {
+      "id": "r1:farm-barn:temperate:small:004",
+      "title": "Briarford Switchwing Grain Barn",
+      "biome": "temperate",
+      "size": "small",
+      "category": "farm-barn",
+      "sourcePath": "src/building-pool/roadmap-b/builder-b-essentials-wave1.mjs",
+      "sourceBlob": "0ee4197f30e11065e38c87132afd9c2b05af42c5",
+      "coordinateFingerprintFNV64": "526c938d3a574114",
+      "footprint": {
+        "width": 46,
+        "height": 26,
+        "depth": 45
+      },
+      "entranceRoadFacing": "north",
+      "entranceAndPortals": [
+        {
+          "from": "outside",
+          "to": "public-threshing-entry",
+          "at": [
+            23,
+            1,
+            2
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "public-threshing-entry",
+          "to": "west-grain-processing",
+          "at": [
+            18,
+            1,
+            12
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "public-threshing-entry",
+          "to": "east-cart-holding",
+          "at": [
+            29,
+            1,
+            17
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "west-grain-processing",
+          "to": "rear-hay-distribution",
+          "at": [
+            17,
+            1,
+            26
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "east-cart-holding",
+          "to": "rear-hay-distribution",
+          "at": [
+            31,
+            1,
+            26
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "west-grain-processing",
+          "to": "low-river-drying-annex",
+          "at": [
+            10,
+            1,
+            28
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "rear-hay-distribution",
+          "to": "low-river-drying-annex",
+          "at": [
+            12,
+            1,
+            35
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        }
+      ],
+      "rooms": [
+        {
+          "id": "public-threshing-entry",
+          "min": [
+            15,
+            1,
+            3
+          ],
+          "max": [
+            30,
+            5,
+            13
+          ]
+        },
+        {
+          "id": "west-grain-processing",
+          "min": [
+            6,
+            1,
+            11
+          ],
+          "max": [
+            17,
+            5,
+            31
+          ]
+        },
+        {
+          "id": "east-cart-holding",
+          "min": [
+            30,
+            1,
+            12
+          ],
+          "max": [
+            40,
+            5,
+            27
+          ]
+        },
+        {
+          "id": "rear-hay-distribution",
+          "min": [
+            14,
+            1,
+            27
+          ],
+          "max": [
+            36,
+            5,
+            40
+          ]
+        },
+        {
+          "id": "low-river-drying-annex",
+          "min": [
+            3,
+            1,
+            25
+          ],
+          "max": [
+            11,
+            5,
+            41
+          ]
+        }
+      ],
+      "sourceWalkableCells": 1003,
+      "authoredVoxelCount": 5410,
+      "sourceRoofTiles": 1259,
+      "glazedRoofTiles": 0,
+      "emptyCourtyardColumns": 56,
+      "foundation": "level terrain; source-bearing wall/post foundations; supported multi-wing roofs",
+      "slopeAndShoreline": "not certified; forbid automatic settlement placement until slope, collision and water proximity gates",
+      "potentialRuralGrouping": "rural farm and grain district",
+      "futureFixtures": [
+        "farm storage",
+        "wagon entrance",
+        "grain processing"
+      ],
+      "worldGameplayFeaturesEnabled": false,
+      "estimatedRenderAndColliderCost": "source placements only; actual iPhone mesh upload/physics not measured",
+      "threeLandscapeEvidence": {
+        "requiredSizes": [
+          "667x375",
+          "844x390",
+          "932x430"
+        ],
+        "views": [
+          "exterior",
+          "cutaway"
+        ],
+        "status": "CAPTURE_SCRIPT_AUTHORED_NOT_EXECUTED"
+      },
+      "physicalProducerAABB": "NOT CERTIFIED",
+      "creatorArtAccepted": false
+    },
+    {
+      "id": "r1:greenhouse:temperate:small:002",
+      "title": "Alderglass Split-Trellis Conservatory",
+      "biome": "temperate",
+      "size": "small",
+      "category": "greenhouse",
+      "sourcePath": "src/building-pool/roadmap-b/builder-b-essentials-wave2.mjs",
+      "sourceBlob": "7c4943033417bb1b0f726c123934456fdc0fb942",
+      "coordinateFingerprintFNV64": "6d7eb8a542d43cb5",
+      "footprint": {
+        "width": 43,
+        "height": 26,
+        "depth": 41
+      },
+      "entranceRoadFacing": "north",
+      "entranceAndPortals": [
+        {
+          "from": "outside",
+          "to": "north-glass-gallery",
+          "at": [
+            22,
+            1,
+            2
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "north-glass-gallery",
+          "to": "west-propagation-wing",
+          "at": [
+            17,
+            1,
+            14
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "north-glass-gallery",
+          "to": "east-botanical-display",
+          "at": [
+            27,
+            1,
+            12
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "north-glass-gallery",
+          "to": "central-courtyard-aisle",
+          "at": [
+            21,
+            1,
+            14
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "west-propagation-wing",
+          "to": "central-courtyard-aisle",
+          "at": [
+            18,
+            1,
+            27
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "east-botanical-display",
+          "to": "rear-seed-catalogue",
+          "at": [
+            30,
+            1,
+            28
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "central-courtyard-aisle",
+          "to": "rear-seed-catalogue",
+          "at": [
+            22,
+            1,
+            28
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        },
+        {
+          "from": "west-propagation-wing",
+          "to": "low-west-shade-appendix",
+          "at": [
+            9,
+            1,
+            32
+          ],
+          "passable": true,
+          "opening": "two-high-physical-opening"
+        }
+      ],
+      "rooms": [
+        {
+          "id": "north-glass-gallery",
+          "min": [
+            16,
+            1,
+            3
+          ],
+          "max": [
+            27,
+            5,
+            13
+          ]
+        },
+        {
+          "id": "west-propagation-wing",
+          "min": [
+            4,
+            1,
+            12
+          ],
+          "max": [
+            17,
+            5,
+            32
+          ]
+        },
+        {
+          "id": "east-botanical-display",
+          "min": [
+            26,
+            1,
+            11
+          ],
+          "max": [
+            38,
+            5,
+            29
+          ]
+        },
+        {
+          "id": "rear-seed-catalogue",
+          "min": [
+            13,
+            1,
+            28
+          ],
+          "max": [
+            33,
+            5,
+            37
+          ]
+        },
+        {
+          "id": "central-courtyard-aisle",
+          "min": [
+            16,
+            1,
+            15
+          ],
+          "max": [
+            28,
+            5,
+            27
+          ]
+        },
+        {
+          "id": "low-west-shade-appendix",
+          "min": [
+            3,
+            1,
+            29
+          ],
+          "max": [
+            9,
+            5,
+            37
+          ]
+        }
+      ],
+      "sourceWalkableCells": 863,
+      "authoredVoxelCount": 4448,
+      "sourceRoofTiles": 1097,
+      "glazedRoofTiles": 371,
+      "emptyCourtyardColumns": 42,
+      "foundation": "level terrain; source-bearing wall/post foundations; supported multi-wing roofs",
+      "slopeAndShoreline": "not certified; forbid automatic settlement placement until slope, collision and water proximity gates",
+      "potentialRuralGrouping": "village garden/education district",
+      "futureFixtures": [
+        "inert seed trays",
+        "plant aisle",
+        "glazed roof support"
+      ],
+      "worldGameplayFeaturesEnabled": false,
+      "estimatedRenderAndColliderCost": "source placements only; actual iPhone mesh upload/physics not measured",
+      "threeLandscapeEvidence": {
+        "requiredSizes": [
+          "667x375",
+          "844x390",
+          "932x430"
+        ],
+        "views": [
+          "exterior",
+          "cutaway"
+        ],
+        "status": "CAPTURE_SCRIPT_AUTHORED_NOT_EXECUTED"
+      },
+      "physicalProducerAABB": "NOT CERTIFIED",
+      "creatorArtAccepted": false
+    }
+  ]
+}
