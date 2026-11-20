@@ -1,0 +1,437 @@
+{
+  "schema": "mythwrought.builder-b.1a.wave4-settlement-handoff.v1",
+  "status": "PROVISIONAL_SOURCE_ONLY",
+  "authoringLane": "Builder B / homes",
+  "sourceHead": "3e5c6f11e3a2ef410053a80d8cc77e60e7cbf3d1",
+  "sourceModule": "src/building-pool/roadmap-1a/builder-b-homes-wave4.mjs",
+  "originalProtectedAcceptedRoster": "271/450 from PR #270",
+  "candidateCountIfAllAccepted": 277,
+  "worldRegistered": false,
+  "sourceOnly": true,
+  "creatorArtApproved": false,
+  "physicalIPhoneTested": false,
+  "blueprint": {
+    "id": "r1:house:mountain:small:020",
+    "title": "Granitebell Ridge-Survey Split-Cottage",
+    "category": "house",
+    "biome": "mountain",
+    "size": "small",
+    "sourceStructuralFNV64": "41615bd31c852bd3",
+    "footprint": {
+      "width": 35,
+      "height": 12,
+      "depth": 34
+    },
+    "groundAndSlope": "Mountain slope-aware terracing not accepted; site requires grading, bearing support and player-safe path audit",
+    "roadFacing": "north",
+    "entrance": [
+      24,
+      1,
+      "north-weather-entry"
+    ],
+    "rooms": [
+      {
+        "id": "north-weather-entry",
+        "min": [
+          18,
+          1,
+          2
+        ],
+        "max": [
+          34,
+          4,
+          16
+        ]
+      },
+      {
+        "id": "west-surveyor-table",
+        "min": [
+          2,
+          1,
+          11
+        ],
+        "max": [
+          17,
+          4,
+          16
+        ]
+      },
+      {
+        "id": "east-signal-workshop",
+        "min": [
+          28,
+          1,
+          11
+        ],
+        "max": [
+          34,
+          4,
+          16
+        ]
+      },
+      {
+        "id": "central-slate-hearth",
+        "min": [
+          18,
+          1,
+          17
+        ],
+        "max": [
+          27,
+          4,
+          26
+        ]
+      },
+      {
+        "id": "south-guest-bedroom",
+        "min": [
+          9,
+          1,
+          27
+        ],
+        "max": [
+          26,
+          4,
+          33
+        ]
+      },
+      {
+        "id": "west-storm-storage",
+        "min": [
+          2,
+          1,
+          17
+        ],
+        "max": [
+          17,
+          4,
+          25
+        ]
+      },
+      {
+        "id": "east-protected-ridge-porch",
+        "min": [
+          28,
+          1,
+          17
+        ],
+        "max": [
+          34,
+          4,
+          22
+        ]
+      }
+    ],
+    "portals": [
+      {
+        "from": "outside",
+        "to": "north-weather-entry",
+        "at": [
+          24,
+          1,
+          1
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "north-weather-entry",
+        "to": "west-surveyor-table",
+        "at": [
+          17,
+          1,
+          8
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "north-weather-entry",
+        "to": "east-signal-workshop",
+        "at": [
+          27,
+          1,
+          13
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "north-weather-entry",
+        "to": "central-slate-hearth",
+        "at": [
+          22,
+          1,
+          16
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "west-surveyor-table",
+        "to": "west-storm-storage",
+        "at": [
+          9,
+          1,
+          16
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "west-storm-storage",
+        "to": "central-slate-hearth",
+        "at": [
+          17,
+          1,
+          21
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "central-slate-hearth",
+        "to": "south-guest-bedroom",
+        "at": [
+          20,
+          1,
+          26
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "east-signal-workshop",
+        "to": "east-protected-ridge-porch",
+        "at": [
+          31,
+          1,
+          16
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      },
+      {
+        "from": "east-protected-ridge-porch",
+        "to": "central-slate-hearth",
+        "at": [
+          27,
+          1,
+          20
+        ],
+        "passable": true,
+        "opening": "hinged-leaf"
+      }
+    ],
+    "walkableCellCount": 617,
+    "bedFootprintReservations": [
+      {
+        "asset": "pack5:082",
+        "anchor": [
+          15,
+          1,
+          29
+        ],
+        "extraCells": [
+          [
+            15,
+            1,
+            30
+          ]
+        ],
+        "source": "pack5:082-physical-authored-two-cell-bed",
+        "approval": "unresolved"
+      }
+    ],
+    "roofWings": [
+      {
+        "name": "north-high-snow-cleaver",
+        "rect": [
+          11,
+          0,
+          34,
+          10
+        ],
+        "style": "long-gable",
+        "raise": 2
+      },
+      {
+        "name": "west-low-survey-awning",
+        "rect": [
+          0,
+          10,
+          17,
+          25
+        ],
+        "style": "edge-rise",
+        "raise": 1
+      },
+      {
+        "name": "east-short-stone-monitor",
+        "rect": [
+          18,
+          11,
+          34,
+          21
+        ],
+        "style": "double-hill",
+        "raise": 2
+      },
+      {
+        "name": "south-inward-ridge",
+        "rect": [
+          9,
+          26,
+          26,
+          33
+        ],
+        "style": "step-front",
+        "raise": 0
+      },
+      {
+        "name": "middle-hearth-crosswing",
+        "rect": [
+          11,
+          22,
+          26,
+          29
+        ],
+        "style": "long-gable",
+        "raise": 1
+      }
+    ],
+    "realAbsentExteriorNotches": [
+      [
+        0,
+        0,
+        10,
+        9
+      ],
+      [
+        27,
+        22,
+        34,
+        33
+      ],
+      [
+        0,
+        26,
+        8,
+        33
+      ]
+    ],
+    "sourceVoxels": 5331,
+    "sourceRoofCells": 912,
+    "packDependencies": [
+      {
+        "asset": "pack1:006",
+        "status": "unresolved",
+        "requires": [
+          "real source AABB/state/rotation and support",
+          "waterproofing, door-swing clearance and physical collision when placed",
+          "save-schema-1 sidecar, runtime selection and future settlement integration"
+        ]
+      },
+      {
+        "asset": "pack2:020",
+        "status": "unresolved",
+        "requires": [
+          "real source AABB/state/rotation and support",
+          "waterproofing, door-swing clearance and physical collision when placed",
+          "save-schema-1 sidecar, runtime selection and future settlement integration"
+        ]
+      },
+      {
+        "asset": "pack2:022",
+        "status": "unresolved",
+        "requires": [
+          "real source AABB/state/rotation and support",
+          "waterproofing, door-swing clearance and physical collision when placed",
+          "save-schema-1 sidecar, runtime selection and future settlement integration"
+        ]
+      },
+      {
+        "asset": "pack3:025",
+        "status": "unresolved",
+        "requires": [
+          "real source AABB/state/rotation and support",
+          "waterproofing, door-swing clearance and physical collision when placed",
+          "save-schema-1 sidecar, runtime selection and future settlement integration"
+        ]
+      },
+      {
+        "asset": "pack4:030",
+        "status": "unresolved",
+        "requires": [
+          "real source AABB/state/rotation and support",
+          "waterproofing, door-swing clearance and physical collision when placed",
+          "save-schema-1 sidecar, runtime selection and future settlement integration"
+        ]
+      },
+      {
+        "asset": "pack4:058",
+        "status": "unresolved",
+        "requires": [
+          "real source AABB/state/rotation and support",
+          "waterproofing, door-swing clearance and physical collision when placed",
+          "save-schema-1 sidecar, runtime selection and future settlement integration"
+        ]
+      },
+      {
+        "asset": "pack4:059",
+        "status": "unresolved",
+        "requires": [
+          "real source AABB/state/rotation and support",
+          "waterproofing, door-swing clearance and physical collision when placed",
+          "save-schema-1 sidecar, runtime selection and future settlement integration"
+        ]
+      },
+      {
+        "asset": "pack4:064",
+        "status": "unresolved",
+        "requires": [
+          "real source AABB/state/rotation and support",
+          "waterproofing, door-swing clearance and physical collision when placed",
+          "save-schema-1 sidecar, runtime selection and future settlement integration"
+        ]
+      },
+      {
+        "asset": "pack5:082",
+        "status": "unresolved",
+        "requires": [
+          "real source AABB/state/rotation and support",
+          "waterproofing, door-swing clearance and physical collision when placed",
+          "save-schema-1 sidecar, runtime selection and future settlement integration"
+        ]
+      },
+      {
+        "asset": "pack5:084",
+        "status": "unresolved",
+        "requires": [
+          "real source AABB/state/rotation and support",
+          "waterproofing, door-swing clearance and physical collision when placed",
+          "save-schema-1 sidecar, runtime selection and future settlement integration"
+        ]
+      }
+    ],
+    "threeViewportEvidence": {
+      "sizes": [
+        "667x375",
+        "844x390",
+        "932x430"
+      ],
+      "views": [
+        "exterior",
+        "cutaway"
+      ],
+      "sourceCube": "SCRIPT_COMMITTED_NOT_EXECUTED",
+      "packVisibleAABB": "SCRIPT_COMMITTED_NOT_EXECUTED"
+    },
+    "renderingAndCollisionCost": "not measured on an iPhone; only authored source cell count recorded",
+    "remainingPhysicalLimitations": [
+      "full Pack producer ABI and yaw not certified",
+      "weather-tight roof, swept doors and player collision not certified",
+      "live settlement site preparation and renderer cost not certified"
+    ]
+  }
+}
