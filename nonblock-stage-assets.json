@@ -1,5 +1,5 @@
 {
-  "version": "20261120-v26",
+  "version": "20261120-v27",
   "assets": {
     "./src/mobs/animal-interactions.mjs": "e04f6692fc93ef6c44711cb10eafab261ceb7488383e55bf95067de724f99113",
     "./src/mobs/behavior.mjs": "4a65b4ca044a47e70a164929e2ce4552f0d11f811a61c3da5607de87ef1a7bfb",
@@ -267,7 +267,7 @@
     "./sw-m5.js": "b9a5ea052e180c0ce528011833d2fe08204e9e38c7f0c35ed66ff0f5536edac3",
     "./src/nonblock/staged-habitats.mjs": "cffaea5b457a89b5f96f4de49c6b61a1364fa8c3bf1bf05bcc77196e1ecbe82d",
     "./src/environment-ground.mjs": "3b7e0c070b6a7b833c4cbbc6b406cc7342aac1236b6ec5b3f57f5dc533703692",
-    "./src/manual-biomes/environment-v7.mjs": "16f50e2546fa184691eaa722947d9745d783a313862f09e34fb1d70eddb87e8a",
+    "./src/manual-biomes/environment-v7.mjs": "37b1bb6886a1e9ae6ff46455ca5f9fbfb21c7e337f2898e8f44ac19e90322ad5",
     "./src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
     "./src/nonblock/candidate-families.mjs": "b67401eeb2c45998ebc979701719313d103ea23daa939ed933972ac62b1cdc62",
     "./src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
@@ -302,6 +302,6 @@
     "./src/nonblock-scene48/undergrowth-phase1.mjs": "96607a48f2ed3146d3d0bc4b94dbf1fc81d4c6206a37a5c962854493d6e7b61f",
     "./src/nonblock-scene48/woodland-sapling.mjs": "6a3e8a61d67908261107a22e085082d4887a75decbd819a8ceb769a6256593ed",
     "./src/nonblock-scene48/woodland-shrub.mjs": "2419aed3138df3256e302b40f068079f6c89e51cf58d8a73b2df4fade2a803f5",
-    "./sw-nonblock-stage.js": "26b451161e9d4e3c97859fe1dfa38dc7343f2162955f9505dce387c1755ef5ae"
+    "./sw-nonblock-stage.js": "789ec237e55cefb502f9937798de0f5d02d5cc3d1dd7a744207ed89949101bc9"
   }
 }

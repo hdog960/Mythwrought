@@ -6,6 +6,21 @@ import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 const smooth=value=>value*value*(3-2*value);
 const clamp=value=>Math.max(0,Math.min(1,value));
 const undulation=(angle)=>.5+.5*Math.sin(angle);
+const shoulderSamples=[[14,0],[-14,0],[0,14],[0,-14]];
+
+function sharedShoulder(biome,x,z,seed){
+  if(biome.weight>.50)return null;
+  for(const [dx,dz] of shoulderSamples){
+    const neighbor=v6BiomeAt(x+dx,z+dz,seed);
+    if(!neighbor||neighbor.name===biome.name)continue;
+    // Both sides of a special-biome seam share an actual continuous material.
+    const pair=[biome.name,neighbor.name];
+    if(pair.includes('mountain'))return G.scree;
+    if(pair.includes('snow')&&pair.includes('enchanted'))return G.woodlandMoss;
+    return 258;
+  }
+  return null;
+}
 
 function groundAt(name,x,z,seed,top){
   const phase=(seed%223)*.19;
@@ -46,13 +61,13 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline){
     const prior=readBaseline(x,y,z);
     if(y>old?prior!==BLOCK.AIR:![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior))return new Map();
   }
-  const writes=new Map();
+  const writes=new Map(),shoulder=sharedShoulder(biome,x,z,seed);
   // The shoulder replaces the grass in a broad contiguous band. The
   // natural wood and cave checks above remain authoritative.
-  if(blend<.065)return writes;
+  if(blend<.065&&shoulder===null)return writes;
   const {cap,subsoil,rock}=groundAt(biome.name,x,z,seed,top);
   for(let y=old-1;y<=top;y++)
-    writes.set(y,y===top?cap:y>=top-2?subsoil:rock);
+    writes.set(y,y===top?(shoulder??cap):y>=top-2?subsoil:rock);
   return writes;
 }
 

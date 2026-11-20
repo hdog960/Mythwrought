@@ -106,3 +106,13 @@ test('a piece of generated canopy stays mined on reload',()=>{
   assert.ok(world.set(...target,BLOCK.AIR));
   assert.equal(restoreFourRegionWorld(world.save(),profile).get(...target),BLOCK.AIR);
 });
+
+test('neighboring special biomes share a solid shoulder without an exposed Plains ribbon',()=>{
+  const seed=179;
+  const world=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
+  for(const [x,z] of [[-640,288],[-260,440],[252,-432],[512,284]]){
+    const {id,y}=surface(world,x,z);
+    assert.notEqual(id,BLOCK.GRASS,'Special-biome transition exposed a legacy grass column at '+[x,z]);
+    assert.notEqual(world.get(x,y-1,z),BLOCK.AIR);
+  }
+});

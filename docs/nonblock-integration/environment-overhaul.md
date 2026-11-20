@@ -21,6 +21,8 @@ The terrain writer currently protects older tree and landmark volumes by rejecti
 
 ## Combined release work
 
+The first V7 terrain checkpoint uses the existing desert and snow cubes. It adds six solid mountain and woodland ground materials and five full-block canopy and bark materials. Terrain and trees are defined by the new explicit profile. Earlier profiles continue to resolve the physical cells behind their existing saves. Seeded tests cover a shared shoulder between special biomes, canopy continuity across chunk edges, protected cave air, and Schema-1 reload after mining. The streaming prototype adds at most 27 local surface or cave scenery placements. Natural anchors remain stable when an edit or a physical build prevents placement.
+
 1. Capture matched views in the actual game and verify the renderer against ordinary terrain, edits, and cave openings.
 2. Give physically changed terrain an explicit generation profile. Keep the existing profiles as the authority for older saved edits. Select continuous solid surfaces, keep decorative shapes for actual outcrops, and use deterministic climate-aware trees while protecting legitimate cave and landmark cells.
 3. Extend the existing staging habitat rules into bounded world streaming. Reuse world-scoped instance IDs, authoritative mounts, removal tombstones and physical ownership. Test ordinary and cave saves separately.
