@@ -1,0 +1,922 @@
+{
+  "revision": "0886a90023b257e27059822ac77ca9631a527790",
+  "catalog": {
+    "scenery": 72,
+    "fittings": 12,
+    "effects": 12
+  },
+  "groups": [
+    {
+      "group": "nonblock-runtime",
+      "sourceFiles": 36,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-runtime/mixed-667.png",
+          "width": 667,
+          "height": 375,
+          "sha256": "125cb3c7268343bef2287fa6ce9358f1856a7bac26631b8af0cf919d683cad7d"
+        },
+        {
+          "path": "artifacts/nonblock-runtime/mixed-844.png",
+          "width": 844,
+          "height": 390,
+          "sha256": "a6f13003d66aacda631412cf0d8ce725af01459e88f9321c7e8e179de881f627"
+        },
+        {
+          "path": "artifacts/nonblock-runtime/mixed-932.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "cdb6256cf09b4d69cb3f499ca299eb93b07101a19e76b4da16bc81575ab304a9"
+        },
+        {
+          "path": "artifacts/nonblock-runtime/target-single-wildflower.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "42e808493623513b25889de4c8fd110e5ed5397d6345230d3cacd314a383ca12"
+        },
+        {
+          "path": "artifacts/nonblock-runtime/target-desert-scrub.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "5c5ed13e93a55cdb4917b9bc545c73f9f86738ef3d85a7e46580991eb87016ae"
+        },
+        {
+          "path": "artifacts/nonblock-runtime/target-pebble-scatter.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "c244d111fd625983a4a9469c809572e6bd2ab2e731e67690499194795fd3c438"
+        },
+        {
+          "path": "artifacts/nonblock-runtime/target-cloth-banner.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "f523108eaea888480d77072d09574a7b0da2637a77cd0b206d3895598c439aca"
+        },
+        {
+          "path": "artifacts/nonblock-runtime/target-rope-coil.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "d9b6cc5e8b63ca6c761da1c4fdf045a0532d31e1200457f986c7aa8946e6c1c7"
+        },
+        {
+          "path": "artifacts/nonblock-runtime/cold-reopen-932.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "ea639f417fa54acaa0c28b8df883f24c100b4ac689eea03ace5645dc556be4b6"
+        }
+      ],
+      "catalog": null
+    },
+    {
+      "group": "nonblock-catalog",
+      "sourceFiles": 39,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-catalog/cloth-banner.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "73c096fa96d09a400bf8c471ece2829076afea628ba1e4a7cc2f00cfa1d37db8"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/low-grass.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "204d570638bef8a2e99d3369c10bfba87c4576cc29a3ef6769406ac0dcfcb1b6"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/short-fern.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "8b4035432e53009761d88f82d92c1fe19db607de60cf74b0fb1d080b3e0ba9b8"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/single-wildflower.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "8cf0c8a74d7f9986e3d83005b147ac26ac4c3841fe5ccd5bf25b994c7d953f3b"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/lavender-spike.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "f749bbdb200f83879d43721bf45b96e5c6b5eeb45f86323bef74abbd326bc211"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/heather-sprig.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "fa2dfc5be86022824f09123ea178e99777d6400d5e3619ca6a08ec35e62c961b"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/clover-clump.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "fcf68cb30dd04c415485145c143d7ea16a3282a8262675d90540c2d6fd81c83d"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/meadow-sedge.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "9de35d4d10dd1513ad3c8a1010ac197c8a62b234820d248b387cf91072575491"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/button-mushroom.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "3ec90db5eefbeb3b6cec832c3b70f893ca51e49c8ff950763d09f6ace40d729d"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/clover-patch.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "baf76885f2917b6585b03b7e1cd9ffefbf843961d6115f44914de7031106896f"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/bracken-fern.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "c0bd0acf01bc214bda1a25e214571d1164515b45c95f6f666c0a51ebb5d8f1e9"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/moss-cushion.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "c87e949ba0b00649bd2477946314c77f20dac97bdaeddf72c9262eecbdd2cf07"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/clustered-toadstools.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "9911a6ea52222ba3031c121987f4e0cec6faf77131aaab447376ee3b1819c564"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/exposed-root.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "d016fb97763bf30e1cc044bd81f9e643c90336e30f1023418262704649e68c27"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/fallen-branch.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "dc59e87c64489fb8b8faf2780142206f5c36455b4ccd6079e39b1987c91f43e2"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/woodland-sapling.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "1a1d21a530a015d9d75a2bd9de452e0eeab542c0c2afecae4c2259fc3182a517"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/woodland-shrub.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "d8a056588ad412dad59dfc1be4ba2c37fa29563962f943a4637097e82b06cd50"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/forest-lichen-patch.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "555a14267d918a64bfa2adb8a89b8b624769a6563dc9c10e6e923af1d479ed9e"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/forest-moss-mat.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "f033f985aa4bf564e8e539fb3188920be983ce3b25849ef20463589a6727f029"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/agave-rosette.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "88ee556e8861ab48e96412af8691e37aee7ccba646e0892e9598d593ac17c1f0"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/alpine-wildflower.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "5f64d4bfec4cca713e228b84ae948ce55e26e7d335dd2cd23bc7da0f4380148b"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/desert-bloom.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "d0865891cc2bc636400608d2623fb2b8894108b89cf0b8d743e630e058a72ecb"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/desert-scrub.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "befa7e82e0db266abaa8f0e6f6747377dca9c2aa5d79811de6db0e5e86b3ce1c"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/dwarf-juniper.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "fe56fcafa6f80daf7c241c9051ddd000f1664f65d4531be36c4663b1befeff9e"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/frost-fern.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e39bc0ff05e3e7aad8fa3b8952c141f0cb53ba09277bd1098d31a10a1973f132"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/saltgrass.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e80fe1ddf62ffcbea2e512e3e4c2fe656f55c56610417f4a12dc28e900def095"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/snowgrass.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "30d099a30640ada4a90d278ea2c50723dca3cb6d8c0ccb3abb223be25bbc45b2"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/tumblebrush.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "2541a674f22ea0f16ddaba98ebe99a052a16f27f5a5f0836129d872e244d56d8"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/pebble-scatter.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "dabdf86ca21dc24bb6037292735fbe17e2fe57ee929d2cc23dc9018c40da69dc"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/cave-rubble-cluster.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "b7595bd31a76c5e797dbfa9d369be942f2bca9d74dc0e2a75f9b758f342dd750"
+        },
+        {
+          "path": "artifacts/nonblock-catalog/rope-coil.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "320adf87b3331d8c59288a8a36f2876f70458ae6ae0830d583e657949126ace0"
+        }
+      ],
+      "catalog": {
+        "kind": "scenery",
+        "ids": [
+          "scene36:cloth-banner",
+          "scene48:low-grass",
+          "scene48:short-fern",
+          "scene48:single-wildflower",
+          "scene48:lavender-spike",
+          "scene48:heather-sprig",
+          "scene48:clover-clump",
+          "scene48:meadow-sedge",
+          "scene48:button-mushroom",
+          "scene48:clover-patch",
+          "scene48:bracken-fern",
+          "scene48:moss-cushion",
+          "scene48:clustered-toadstools",
+          "scene48:exposed-root",
+          "scene48:fallen-branch",
+          "scene48:woodland-sapling",
+          "scene48:woodland-shrub",
+          "scene48:forest-lichen-patch",
+          "scene48:forest-moss-mat",
+          "nonblock:d:agave-rosette",
+          "nonblock:d:alpine-wildflower",
+          "nonblock:d:desert-bloom",
+          "nonblock:d:desert-scrub",
+          "nonblock:d:dwarf-juniper",
+          "nonblock:d:frost-fern",
+          "nonblock:d:saltgrass",
+          "nonblock:d:snowgrass",
+          "nonblock:d:tumblebrush",
+          "nonblock:e:pebble-scatter",
+          "nonblock:e:cave-rubble-cluster",
+          "scene36:rope-coil"
+        ]
+      }
+    },
+    {
+      "group": "nonblock-meadow-woodland",
+      "sourceFiles": 39,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-meadow-woodland/crawling-ivy.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "2d9550367aca60262e57fc15f1921670db567ee5de1c07edc6161256e1ac59b8"
+        },
+        {
+          "path": "artifacts/nonblock-meadow-woodland/trail-vine.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "95ef3dee67dd3b96090fed1cedd5440cb8615e77803d0c152bb4f7b748b6aa62"
+        },
+        {
+          "path": "artifacts/nonblock-meadow-woodland/grass-plume.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "42f543742a398180b7069446eaf66d9f135dbe71fc10da5cf444d32f88dc995a"
+        },
+        {
+          "path": "artifacts/nonblock-meadow-woodland/meadow-fescue.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "6e39db750f6fd5dbecfd5b35ebc1e781bab7f8e809e5a985b3dc44888d46d419"
+        },
+        {
+          "path": "artifacts/nonblock-meadow-woodland/buttercup-bunch.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "4d6cc46a73a8b58eb2b909980b89cbee7e4d652b0e7feaeee135f7a9f255a888"
+        },
+        {
+          "path": "artifacts/nonblock-meadow-woodland/seedhead-meadow-mix.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "3cec9eab39ec35c71e18cded79c725ec0e53cdf7507c1f2e91f84030e04432c9"
+        },
+        {
+          "path": "artifacts/nonblock-meadow-woodland/forest-leaf-litter.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "3e054f9c997a6365e0c03bcf37a1fe223d3417a3a23e5948da0822f1e89a401c"
+        },
+        {
+          "path": "artifacts/nonblock-meadow-woodland/woodland-horsetail.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "bbd033a337918d6cd86a5422780d0be3630d400c7c1b6e15614638328bde69e6"
+        }
+      ],
+      "catalog": {
+        "kind": "scenery",
+        "ids": [
+          "scene48:crawling-ivy",
+          "scene48:trail-vine",
+          "scene48:grass-plume",
+          "scene48:meadow-fescue",
+          "scene48:buttercup-bunch",
+          "scene48:seedhead-meadow-mix",
+          "scene48:forest-leaf-litter",
+          "scene48:woodland-horsetail"
+        ]
+      }
+    },
+    {
+      "group": "nonblock-enchanted-fungi",
+      "sourceFiles": 39,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-enchanted-fungi/shelf-fungus.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "fbc2df028c722d92272fd282db667c9a87687bb202dbb625063a19ddf2cff559"
+        },
+        {
+          "path": "artifacts/nonblock-enchanted-fungi/glowing-vine.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "440eb33c40adff1a2777489887dd4b77a8484c7083de23accaf9619626921642"
+        },
+        {
+          "path": "artifacts/nonblock-enchanted-fungi/cavecap.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "430fe56ac4344a13e693e421ba234ba93101f1d7c98b8a28fd132f80fdb4fa32"
+        },
+        {
+          "path": "artifacts/nonblock-enchanted-fungi/spore-pod.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "d65eddcc166c440a9a4b9c8052e30c63e1e1503a50acc7ef0a9a4466ed903b24"
+        },
+        {
+          "path": "artifacts/nonblock-enchanted-fungi/enchanted-flower.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "8ee2db0e351273a1d594c53ea43b0f22ce9f2fdc01fd5675bd2dc983011cdb4a"
+        },
+        {
+          "path": "artifacts/nonblock-enchanted-fungi/lantern-mushroom.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "36af833999c36aab8d5b87be4aaee87eeb0b367057f706c60064f9703f9b3b88"
+        },
+        {
+          "path": "artifacts/nonblock-enchanted-fungi/ringed-morel.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "06f96c8b80797eb4fda37112a132fda3a97f43975a6403e859126e1f4ccaae82"
+        },
+        {
+          "path": "artifacts/nonblock-enchanted-fungi/starpetal.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e9220de0e7724a2264c1dd6d9765594e307be054b45c75c4bd1903ede8759b01"
+        },
+        {
+          "path": "artifacts/nonblock-enchanted-fungi/inkcap-cluster.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "58fe4f97663371739aa6c6f9c5f9e6984e47a79abfea766814175d4f4f8852ba"
+        },
+        {
+          "path": "artifacts/nonblock-enchanted-fungi/velvet-cup.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "8bd71080b1cae4984601509938090670aacb24bca5c03c473cdfc987af728aff"
+        }
+      ],
+      "catalog": {
+        "kind": "scenery",
+        "ids": [
+          "scene48:shelf-fungus",
+          "scene48:glowing-vine",
+          "scene48:cavecap",
+          "scene48:spore-pod",
+          "scene48:enchanted-flower",
+          "scene48:lantern-mushroom",
+          "scene48:ringed-morel",
+          "scene48:starpetal",
+          "scene48:inkcap-cluster",
+          "scene48:velvet-cup"
+        ]
+      }
+    },
+    {
+      "group": "nonblock-caves",
+      "sourceFiles": 6,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-caves/giant-stalagmite-spire.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "029b76c70a11a00f669dd9225a566b2aa18cea610bb40f7d2265d846ab26786b"
+        },
+        {
+          "path": "artifacts/nonblock-caves/clustered-dripstone.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e8d4d1cd154ba6cff55d6a7f65040a018db40040bc65ccc577586666607beb3a"
+        },
+        {
+          "path": "artifacts/nonblock-caves/limestone-cave-column.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "2207a15865624d22047a9c76b0e152f234e98fa90d134a9b99b299e5ff167fb4"
+        },
+        {
+          "path": "artifacts/nonblock-caves/flowstone-curtain.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "933653c459a119a4d199628e467b677ba42c87b311b7396e3578e8f178f03d66"
+        }
+      ],
+      "catalog": {
+        "kind": "scenery",
+        "ids": [
+          "nonblock:e:giant-stalagmite-spire",
+          "nonblock:e:clustered-dripstone",
+          "nonblock:e:limestone-cave-column",
+          "nonblock:e:flowstone-curtain"
+        ]
+      }
+    },
+    {
+      "group": "nonblock-inherited-extra",
+      "sourceFiles": 29,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-inherited-extra/prickly-pear-cactus.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e89d9e9304157b7118a431d4d1e576b269084e8d92f7eb883754ce467e6c2dde"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/column-cactus.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "2385521bb25b29f8a2b11e66a7d7e615775a786c97b3dc44f6ca70c022c0ae9c"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/icicle-spear.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "7a70c6e75eaae6feabe96c8bcfbc64b114f4db1211ee15e32aec49759c53ed78"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/small-stalagmite.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "dc8eb8439ca984dec87ce0b1442781cf0d195810344f0004f2df71e231d574d8"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/hanging-stalactite.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "bb2ec392cfa19af68382753dc84804a7f2c4c2cfbab02d62198931eb5ce542d9"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/crystal-shard.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "69bdf3d914f2de538e1472a47fa808f55b8717293910f5d85e3b0e2949ddc44c"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/branching-crystal-cluster.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "0e542b0b913ed7a312c11ff3fdf4e8daa03c6f4b092596b911cd80eb31c523b9"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/geode-opening.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "761c74a879b10ea99bffd12ec3e8ab8a70396f45bb13bca492b7664901cd166f"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/mineral-encrustation.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "c4a1aeeadafec15ba7f08e32f1c6e7394da57aa8d20b3dd550464d591dfc95de"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/signpost.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "f722d0e0da7cb050e6a1e31c7610a7015bff1d9f2adc60b48185cbf6e77bb1e8"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/hanging-chain.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "de107793ab6488db9691b7ff75db4eb8ad09d207a136d7e74418992ebd6b0323"
+        },
+        {
+          "path": "artifacts/nonblock-inherited-extra/hanging-cobweb.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e087d2cfcf8be31faf9460b6c457080f951ab9e7bb176dea3469e5cb4b660288"
+        }
+      ],
+      "catalog": {
+        "kind": "scenery",
+        "ids": [
+          "nonblock:d:prickly-pear-cactus",
+          "nonblock:d:column-cactus",
+          "nonblock:d:icicle-spear",
+          "nonblock:e:small-stalagmite",
+          "nonblock:e:hanging-stalactite",
+          "nonblock:e:crystal-shard",
+          "nonblock:e:branching-crystal-cluster",
+          "nonblock:e:geode-opening",
+          "nonblock:e:mineral-encrustation",
+          "scene36:signpost",
+          "scene36:hanging-chain",
+          "scene36:hanging-cobweb"
+        ]
+      }
+    },
+    {
+      "group": "nonblock-world-props",
+      "sourceFiles": 29,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-world-props/ladder-assembly.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "432a802b44909ab23ce420861ca1099e150604f8685eebd74d82ada262e70e76"
+        },
+        {
+          "path": "artifacts/nonblock-world-props/rope-ladder.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "04d8f7927cb42c6138e4f4cea0e5a44f31e0d99fdea8ff154bb248ea579824d2"
+        },
+        {
+          "path": "artifacts/nonblock-world-props/freestanding-torch.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "2ccacce702bfe50200ecef01d7baed50c087c55c03fc063ed0cd64e1948aad4e"
+        },
+        {
+          "path": "artifacts/nonblock-world-props/campfire-fuel-stack.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "0d5d47b64aa616ad83292c4620730ea1cbf1dd329a1c071895a5e99c98c296b6"
+        },
+        {
+          "path": "artifacts/nonblock-world-props/brazier.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "34043f8097793db83bf966d37782dad068efb6668a293022a5520503f6eca6ec"
+        },
+        {
+          "path": "artifacts/nonblock-world-props/hanging-bell.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "4e2b7e50666f17874f3ab563eaee754bed9ef16ab0bf1614791fde604bf00eba"
+        },
+        {
+          "path": "artifacts/nonblock-world-props/broken-pottery-scatter.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "7de2a645ec53b2053f0da1bf3ea77fef8397f825b9a1063e49e723bfa9e73f0c"
+        }
+      ],
+      "catalog": {
+        "kind": "scenery",
+        "ids": [
+          "scene36:ladder-assembly",
+          "scene36:rope-ladder",
+          "scene36:freestanding-torch",
+          "scene36:campfire-fuel-stack",
+          "scene36:brazier",
+          "scene36:hanging-bell",
+          "scene36:broken-pottery-scatter"
+        ]
+      }
+    },
+    {
+      "group": "nonblock-physical-fittings",
+      "sourceFiles": 6,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-physical-fittings/owned-fittings-932x430.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "1f2320b6f266360e0a9636d84001d7d47c4bed333c6f4506c083a042ce4e0cd8"
+        }
+      ],
+      "catalog": {
+        "kind": "fittings",
+        "ids": [
+          "scene36:hinged-door-leaf",
+          "scene36:double-door-pair",
+          "scene36:trapdoor",
+          "scene36:swinging-gate",
+          "scene36:window-shutters",
+          "scene36:hinged-hatch",
+          "scene36:fence-rail",
+          "scene36:fabric-awning",
+          "scene36:wall-torch-bracket",
+          "scene36:hanging-lantern",
+          "scene36:direction-sign",
+          "scene36:pennant-flag"
+        ]
+      }
+    },
+    {
+      "group": "nonblock-effects",
+      "sourceFiles": 3,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-effects/scene-effects-first.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "9c4fa7f8edfb8d8913e1a7700f1fc7343347d5d684f2b875b1ed02a1d341f844"
+        },
+        {
+          "path": "artifacts/nonblock-effects/scene-effects-next.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e78058a8025febb2116207f0ecbdc2be596ff109f6006a4035b308fc08886973"
+        },
+        {
+          "path": "artifacts/nonblock-effects/scene-effects-restored.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "0ce14feeefe67fc5f04f3542b5157da7a087b79c4e5be4a74dbc90292f312b0b"
+        }
+      ],
+      "catalog": {
+        "kind": "effects",
+        "ids": [
+          "scene48:flame",
+          "scene48:embers",
+          "scene48:smoke",
+          "scene48:flicker",
+          "scene48:magic-dust",
+          "scene48:cave-drip",
+          "scene48:spray",
+          "scene48:mist",
+          "scene48:wisps",
+          "scene48:pollen",
+          "scene48:snow-gust",
+          "scene48:surface-ripples"
+        ]
+      }
+    },
+    {
+      "group": "nonblock-offline",
+      "sourceFiles": 4,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-offline/cold-offline-932x430.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "c74c40afd4b2469a6498e5806ba43c0e55d0fa4d3fef9c62d1cd8ff768217a4e"
+        }
+      ],
+      "catalog": null
+    },
+    {
+      "group": "nonblock-cache-recovery",
+      "sourceFiles": 3,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-cache-recovery/previous-good-offline-932x430.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "789c7d858ffcf99c99c833411b4987f7b32d9f5d2f871d20116e402553973d26"
+        }
+      ],
+      "catalog": null
+    },
+    {
+      "group": "nonblock-habitat",
+      "sourceFiles": 9,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-habitat/desert.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "6d383a21a57391d500dd40dbb07fea78529a8d3a0fede5a6caca7f352da3099e"
+        },
+        {
+          "path": "artifacts/nonblock-habitat/snow.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "f69329d5af7b11142f9729a3e20ff767dae46d418e6e1a1e325602b81fa2ac0c"
+        },
+        {
+          "path": "artifacts/nonblock-habitat/mountain.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e1b7960cd89fd2f2847acd2b6f3524d8a64dc1e6a094c74dbed371735c6dcf49"
+        },
+        {
+          "path": "artifacts/nonblock-habitat/enchanted.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "93d25352451ca5b9e3d03fa0ac0e894b899fb31de230786c783eebe847925762"
+        }
+      ],
+      "catalog": null
+    },
+    {
+      "group": "forest-floor-review-after",
+      "sourceFiles": 4,
+      "screenshots": [
+        {
+          "path": "artifacts/forest-floor-review-after/mixed-oblique.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "aeaae1ce70e6a72c4cf9a9c5f857f92a2812a9b4436307e8616e098a2b2e0a54"
+        },
+        {
+          "path": "artifacts/forest-floor-review-after/forest-moss-mat.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e618a6e999b00adeb0f582bd3c94fbdfe751966f1806204d9212c7463f6e229a"
+        },
+        {
+          "path": "artifacts/forest-floor-review-after/forest-lichen-patch.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "72362e88257803f8137fbec1bd2d3eae2b7d14bb2c680b9012e9e6cefa6fb106"
+        }
+      ],
+      "catalog": null
+    },
+    {
+      "group": "nonblock-lod",
+      "sourceFiles": 6,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-lod/near.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "cf71390b7896a28c9ba825334de07f48d8028de12c56a62c0b8493383c1a1e76"
+        },
+        {
+          "path": "artifacts/nonblock-lod/far.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e7cac267b5d9179e94d410abe7665a8eb79df1db3dd319a3043c80447a420164"
+        }
+      ],
+      "catalog": null
+    },
+    {
+      "group": "nonblock-fitting-comparison-after",
+      "sourceFiles": 29,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-fitting-comparison-after/signpost.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "cf4db110d236e3e72bfdc485ceafb4b8930071269997fcd6ea86ef2f899049a8"
+        },
+        {
+          "path": "artifacts/nonblock-fitting-comparison-after/hanging-chain.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "752a6f6aef39233904c6e20d6f6af46fb236d0f9c7d4ffa332fde015a04a6259"
+        }
+      ],
+      "catalog": null
+    },
+    {
+      "group": "nonblock-parity",
+      "sourceFiles": 8,
+      "screenshots": [
+        {
+          "path": "artifacts/nonblock-parity/meadow-overview.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "da44b9a756b8014ea9ecf89851684c3ff7563ca4c380886a3f420baca671ed59"
+        },
+        {
+          "path": "artifacts/nonblock-parity/meadow-focus.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "fd35d74e38f1199d15d258a545f1cfc469dabd69a1348fb2fd3805a9175ba5ee"
+        },
+        {
+          "path": "artifacts/nonblock-parity/desert-overview.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "67bc17c38fdb08da54cbef2dc7c226d5409a28ee467632789e34cf521af73540"
+        },
+        {
+          "path": "artifacts/nonblock-parity/desert-focus.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "9a34df649ae033a9b95362a1aa6cb4989162fef7fb3580bd2310f9f56950aeba"
+        },
+        {
+          "path": "artifacts/nonblock-parity/snow-overview.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "0e69c35d505879483e33115d230dcfcc149a405e189e2512e64e4671321ff896"
+        },
+        {
+          "path": "artifacts/nonblock-parity/snow-focus.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "5acefc48d16ac893ee8acec938a5551033008815f4278a3f80f11f22418cc02c"
+        },
+        {
+          "path": "artifacts/nonblock-parity/mountain-overview.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "e41566aa452f2e8729751b388e4a748c43b667451cc169afbf8366772528d8c2"
+        },
+        {
+          "path": "artifacts/nonblock-parity/mountain-focus.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "7d299679bf23aa45131f9eeb6a095a8984dfe2a6963817a8cd1bdc772217fcc2"
+        },
+        {
+          "path": "artifacts/nonblock-parity/enchanted-overview.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "ae08b64dd3cfa6d33fc3356612e375e909b60769f04ef5b45c7a7968d317c497"
+        },
+        {
+          "path": "artifacts/nonblock-parity/enchanted-focus.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "1b327c585da22bcd723dfdd6b8387fd1133831ca92ca8daf0b85e88b49a9c3a6"
+        },
+        {
+          "path": "artifacts/nonblock-parity/fittings-overview.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "2d88e5ec3a4185c2da62ad6e62b1e31d7215be8b4d4d376d31a73459dd014d84"
+        },
+        {
+          "path": "artifacts/nonblock-parity/fittings-focus.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "29e960b3f40962886884116962640b44b8f33674762673c099483ab794732740"
+        },
+        {
+          "path": "artifacts/nonblock-parity/cave-overview.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "6f3fe2f985bdfacf5accd736b5229122933dcdbc9e9ffb451a8d8055aa85e585"
+        },
+        {
+          "path": "artifacts/nonblock-parity/cave-focus.png",
+          "width": 932,
+          "height": 430,
+          "sha256": "ad5d0ef466469ab5a9b291cd4014f69875b284c5bd6996f86a0e6d3693a1ae84"
+        }
+      ],
+      "catalog": null
+    }
+  ]
+}

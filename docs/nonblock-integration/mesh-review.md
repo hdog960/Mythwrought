@@ -72,6 +72,8 @@ The overview and focus frames pair inherited and newly authored shapes in the sa
 
 The amber lantern mushroom and faceted authored fungi share consistent scale on the enchanted floor. The fittings view shows the refined signpost beside the authored brazier and fuel pile. Underground, the blue crystal tips, gold mineral patch and layered dripstone are visually distinct. The overview gives a clearer sense of the ceiling mounts than the tight cave focus. Creator review should address grass and pebble contrast on the target screen, the default viewing distance for narrow cave details, and the apparent strength of the enchanted glow at the same render preset. [Enchanted](gallery/mixed-v19/enchanted-focus.png) · [Fittings](gallery/mixed-v19/fittings-focus.png) · [Cave](gallery/mixed-v19/cave-overview.png)
 
+The 667 × 375 and 844 × 390 replays kept all seven layouts and camera poses. Each size produced 14 verified images and completed a touch removal and fresh-page check in every scene. The smallest layout crops side details in the close fittings and cave views while keeping the selected signpost and flowstone in frame. Wider views expose more surrounding mounts at the same pose. All three sizes matched the original placement, scenery buffer size, single scenery draw and 25 loaded terrain chunks. [667 × 375 gallery](gallery/mixed-v21/667x375/) · [844 × 390 gallery](gallery/mixed-v21/844x390/) · [932 × 430 gallery](gallery/mixed-v19/)
+
 ## First in-game comparisons
 
 Both pairs use the original seed, camera position and mobile viewport. Aim shifted slightly to hit the revised geometry. The captures include the actual game, not the isolated mesh preview.

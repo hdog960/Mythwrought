@@ -9,9 +9,9 @@ The retrospective audit inspected all 43 inherited meshes. The staged quality pa
 | Production baseline, protected source heads and five-lane provenance | [Production and source provenance](#production-and-source-provenance) · [Path and commit ledger](source-ledger.tsv) |
 | 96 slots, native and in-game acceptance, physical owners and effect lifetimes | [Catalog and lifecycle matrix](catalog.md) |
 | Inherited review and matched revisions | [Before-and-after gallery](mesh-review.md) |
-| Mixed habitats, GPU bytes and software-rendered frame timings | [Mixed game scenes](#stage-v19-art-and-integration) |
+| Mixed habitats at three landscape sizes, GPU bytes and software-rendered frame timings | [Mixed game scenes](#stage-v19-art-and-integration) · [Visual review](mesh-review.md#mixed-scene-visual-review) |
 | Ordinary controls, exact picks, save recovery and offline startup | [Gameplay and offline evidence](#browser-catalog-coverage) · [Same-install rehearsal](release-hold.md#stage-v21-activation-cleanup) |
-| Current draft and verification results | [PR #285 and checks](https://github.com/hdog960/Mythwrought/pull/285) |
+| Current draft and verification results | [PR #285 and checks](https://github.com/hdog960/Mythwrought/pull/285) · [Downloaded evidence verification](#hosted-staging-verification) |
 | Original Home Screen preparation, rollback and physical acceptance | [Creator procedure and device requirements](release-hold.md) |
 
 ## Production and source provenance
@@ -185,3 +185,11 @@ The mixed-scene review captured 14 original-game frames using a nonempty four-re
 | Cave | 9 | 121,176 | [View](gallery/mixed-v19/cave-overview.png) |
 
 Each scene drew in one scenery call with 25 loaded terrain chunks. One exact MINE removal per scene survived a fresh page. Both scenery records matched at each reopen, and the fixture's schema-1 and generation profile bytes stayed intact. The manifest preserves warm foreground frame samples from Chromium SwiftShader. The actual iPhone frame-time measurements remain open. [Source, captures and frame samples](gallery/mixed-v19/manifest.json)
+
+### Hosted staging verification
+
+The GitHub run on `0886a90023b257e27059822ac77ca9631a527790` passed 1,102 root tests, 16 CI contracts, all 20 original WebGL2 scripts and the staged game and storage checks. A separate replay checked the downloaded artifact against that source revision. Its 112 captures matched the uploaded manifest, including all 96 roster slots, all seven mixed scenes, the two-bank offline cache recovery and the original landscape sizes. [GitHub run](https://github.com/hdog960/Mythwrought/actions/runs/44754369521) · [Original artifact](https://github.com/hdog960/Mythwrought/actions/runs/44754369521/artifacts/14641036501) · [Verified capture index](gallery/staging-v21-hosted.json)
+
+The three-size keyboard matrix on `c040e55e5c5a604b53fb53071b519ff7d19a62ca` finished all four walks at each size. An independent check of the three downloads matched all 36 PNGs, the source route hashes and the discovery and save-reload records. The later watchdog change addresses the software-renderer stalls documented in the release hold. [Keyboard matrix and captures](https://github.com/hdog960/Mythwrought/actions/runs/44749630845) · [Crossing diagnosis](release-hold.md#desert-crossing-in-software-rendered-chromium)
+
+The two narrower layouts add 28 verified mixed-scene captures. Their manifests match the hosted 932 × 430 mounts, camera poses, upload sizes and removal identities. Chromium kept the seed's schema-1 and generation profile bytes intact in each replay. [667 × 375 evidence](gallery/mixed-v21/667x375/manifest.json) · [844 × 390 evidence](gallery/mixed-v21/844x390/manifest.json)

@@ -1,0 +1,1424 @@
+{
+  "seed": 179,
+  "generator": "mythwrought-four-surface-regions-v4",
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/voxel.mjs": "6df6d3c5a0223cee405656afd0548fea3a957ae0c5185d7130a34d7198c3f981",
+    "src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/candidate-families.mjs": "b67401eeb2c45998ebc979701719313d103ea23daa939ed933972ac62b1cdc62",
+    "src/preflight.mjs": "c2d83eb90b0a7b73eb28ef979482159a9c3cb601dd5026e5227056da10fb94aa",
+    "nonblock-stage-assets.json": "cb8c8f2c3190979fd81334fcf26106a87843680cb41484ebd7e245f5570c97bd",
+    "tests/nonblock-parity-browser.mjs": "e51e08f309409ff98ebf005071d99293df0ae26825e4ab25213f16ecb9ef8419"
+  },
+  "captures": [
+    {
+      "habitat": "meadow",
+      "view": {
+        "pose": [
+          9.5,
+          4.5
+        ],
+        "point": [
+          9.8,
+          10.6,
+          7.9
+        ]
+      },
+      "render": {
+        "instances": 8,
+        "gpuBytes": 83160,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "scene48:low-grass",
+          "anchor": [
+            8,
+            9,
+            7
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:buttercup-bunch",
+          "anchor": [
+            9,
+            9,
+            7
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:short-fern",
+          "anchor": [
+            10,
+            9,
+            7
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:meadow-fescue",
+          "anchor": [
+            11,
+            9,
+            7
+          ],
+          "variant": 3,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:clover-clump",
+          "anchor": [
+            8,
+            9,
+            8
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:grass-plume",
+          "anchor": [
+            9,
+            9,
+            8
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:seedhead-meadow-mix",
+          "anchor": [
+            10,
+            9,
+            8
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:meadow-sedge",
+          "anchor": [
+            11,
+            9,
+            8
+          ],
+          "variant": 3,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/meadow-overview.png",
+      "sha256": "8817c9aa8b96ea68531f8bbfc1b699e5435a0ec337b52bb8a0e088861ae87fc2",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "meadow",
+      "view": {
+        "pose": [
+          8.5,
+          6.5
+        ],
+        "point": [
+          8.599814732869467,
+          9.070110003153482,
+          7.512571970621745
+        ]
+      },
+      "render": {
+        "instances": 8,
+        "gpuBytes": 83160,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "scene48:low-grass",
+          "anchor": [
+            8,
+            9,
+            7
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:buttercup-bunch",
+          "anchor": [
+            9,
+            9,
+            7
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:short-fern",
+          "anchor": [
+            10,
+            9,
+            7
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:meadow-fescue",
+          "anchor": [
+            11,
+            9,
+            7
+          ],
+          "variant": 3,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:clover-clump",
+          "anchor": [
+            8,
+            9,
+            8
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:grass-plume",
+          "anchor": [
+            9,
+            9,
+            8
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:seedhead-meadow-mix",
+          "anchor": [
+            10,
+            9,
+            8
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:meadow-sedge",
+          "anchor": [
+            11,
+            9,
+            8
+          ],
+          "variant": 3,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/meadow-focus.png",
+      "sha256": "6ff45e54a6361ba0542eb1e2bb29d87310ac6847d12d8caf2b7d5cf0bc4988a8",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "desert",
+      "view": {
+        "pose": [
+          510.5,
+          -2.5
+        ],
+        "point": [
+          510.7,
+          10.2,
+          0.8
+        ]
+      },
+      "render": {
+        "instances": 7,
+        "gpuBytes": 72900,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "nonblock:d:desert-bloom",
+          "anchor": [
+            509,
+            9,
+            0
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:agave-rosette",
+          "anchor": [
+            510,
+            9,
+            0
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:saltgrass",
+          "anchor": [
+            511,
+            9,
+            0
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:prickly-pear-cactus",
+          "anchor": [
+            512,
+            9,
+            0
+          ],
+          "variant": 3,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:column-cactus",
+          "anchor": [
+            509,
+            9,
+            1
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:tumblebrush",
+          "anchor": [
+            510,
+            9,
+            1
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:desert-scrub",
+          "anchor": [
+            511,
+            9,
+            1
+          ],
+          "variant": 2,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/desert-overview.png",
+      "sha256": "dc5f2243848e42d5ae648767b395a2c686538c71421c424ceb798e583fe28612",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "desert",
+      "view": {
+        "pose": [
+          509.5,
+          -0.5
+        ],
+        "point": [
+          509.4862772623698,
+          9.0633331934611,
+          0.48969128727912903
+        ]
+      },
+      "render": {
+        "instances": 7,
+        "gpuBytes": 72900,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "nonblock:d:desert-bloom",
+          "anchor": [
+            509,
+            9,
+            0
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:agave-rosette",
+          "anchor": [
+            510,
+            9,
+            0
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:saltgrass",
+          "anchor": [
+            511,
+            9,
+            0
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:prickly-pear-cactus",
+          "anchor": [
+            512,
+            9,
+            0
+          ],
+          "variant": 3,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:column-cactus",
+          "anchor": [
+            509,
+            9,
+            1
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:tumblebrush",
+          "anchor": [
+            510,
+            9,
+            1
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:desert-scrub",
+          "anchor": [
+            511,
+            9,
+            1
+          ],
+          "variant": 2,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/desert-focus.png",
+      "sha256": "2d48fe0aaa04b63ef75b46110b2f575f870c27d5a32d96b8ca1756baa0996db0",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "snow",
+      "view": {
+        "pose": [
+          0.5,
+          508.5
+        ],
+        "point": [
+          0.15,
+          11.05,
+          511.8
+        ]
+      },
+      "render": {
+        "instances": 4,
+        "gpuBytes": 45576,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "nonblock:d:frost-fern",
+          "anchor": [
+            -2,
+            10,
+            511
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:snowgrass",
+          "anchor": [
+            -1,
+            10,
+            511
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:alpine-wildflower",
+          "anchor": [
+            0,
+            10,
+            511
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:dwarf-juniper",
+          "anchor": [
+            1,
+            10,
+            511
+          ],
+          "variant": 3,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/snow-overview.png",
+      "sha256": "6df59954dacc2dd225fde969aba7666863cb2960e697966cd335e8e3cbfb8301",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "snow",
+      "view": {
+        "pose": [
+          -1.5,
+          510.5
+        ],
+        "point": [
+          -1.4725757439931233,
+          10.05013338724772,
+          511.51075236002606
+        ]
+      },
+      "render": {
+        "instances": 4,
+        "gpuBytes": 45576,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "nonblock:d:frost-fern",
+          "anchor": [
+            -2,
+            10,
+            511
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:snowgrass",
+          "anchor": [
+            -1,
+            10,
+            511
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:alpine-wildflower",
+          "anchor": [
+            0,
+            10,
+            511
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:dwarf-juniper",
+          "anchor": [
+            1,
+            10,
+            511
+          ],
+          "variant": 3,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/snow-focus.png",
+      "sha256": "a7fd51e246031c914a2425a0ff102ac3b3b95dee62c5f37f1054a0c6b371335a",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "mountain",
+      "view": {
+        "pose": [
+          -512.5,
+          -3.5
+        ],
+        "point": [
+          -512.2,
+          14.1,
+          -0.1
+        ]
+      },
+      "render": {
+        "instances": 6,
+        "gpuBytes": 57132,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "nonblock:d:dwarf-juniper",
+          "anchor": [
+            -514,
+            13,
+            -1
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:alpine-wildflower",
+          "anchor": [
+            -513,
+            13,
+            -1
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:pebble-scatter",
+          "anchor": [
+            -512,
+            13,
+            -1
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:dwarf-juniper",
+          "anchor": [
+            -511,
+            13,
+            0
+          ],
+          "variant": 3,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:alpine-wildflower",
+          "anchor": [
+            -513,
+            13,
+            0
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:pebble-scatter",
+          "anchor": [
+            -512,
+            13,
+            0
+          ],
+          "variant": 1,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/mountain-overview.png",
+      "sha256": "384b99cf8111df8ec9a1474ee9def94a16b2a51c6d996f5a5652af13b83f4337",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "mountain",
+      "view": {
+        "pose": [
+          -513.5,
+          -1.5
+        ],
+        "point": [
+          -513.4849853515625,
+          13.06000010172526,
+          -0.4920303424199422
+        ]
+      },
+      "render": {
+        "instances": 6,
+        "gpuBytes": 57132,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "nonblock:d:dwarf-juniper",
+          "anchor": [
+            -514,
+            13,
+            -1
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:alpine-wildflower",
+          "anchor": [
+            -513,
+            13,
+            -1
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:pebble-scatter",
+          "anchor": [
+            -512,
+            13,
+            -1
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:dwarf-juniper",
+          "anchor": [
+            -511,
+            13,
+            0
+          ],
+          "variant": 3,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:d:alpine-wildflower",
+          "anchor": [
+            -513,
+            13,
+            0
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:pebble-scatter",
+          "anchor": [
+            -512,
+            13,
+            0
+          ],
+          "variant": 1,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/mountain-focus.png",
+      "sha256": "72ea2faf1899b7fb9eb3190e2d4f3e43f9462e77e7ece369abb539a04ab4b7e6",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "enchanted",
+      "view": {
+        "pose": [
+          0.5,
+          -516.5
+        ],
+        "point": [
+          0.1,
+          10.14,
+          -513.1
+        ]
+      },
+      "render": {
+        "instances": 8,
+        "gpuBytes": 102168,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "scene48:lantern-mushroom",
+          "anchor": [
+            -2,
+            9,
+            -514
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:moss-cushion",
+          "anchor": [
+            -1,
+            9,
+            -514
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:enchanted-flower",
+          "anchor": [
+            0,
+            9,
+            -514
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:starpetal",
+          "anchor": [
+            1,
+            9,
+            -514
+          ],
+          "variant": 3,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:woodland-shrub",
+          "anchor": [
+            -2,
+            9,
+            -513
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:ringed-morel",
+          "anchor": [
+            -1,
+            9,
+            -513
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:inkcap-cluster",
+          "anchor": [
+            0,
+            9,
+            -513
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:woodland-sapling",
+          "anchor": [
+            1,
+            9,
+            -513
+          ],
+          "variant": 3,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/enchanted-overview.png",
+      "sha256": "36b814a670b19f5818fe386eb65ba9582a89a2ece55b91cbc4fa1716cef9eeee",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "enchanted",
+      "view": {
+        "pose": [
+          -1.5,
+          -514.5
+        ],
+        "point": [
+          -1.507336934407552,
+          9.05012321472168,
+          -513.4421590169271
+        ]
+      },
+      "render": {
+        "instances": 8,
+        "gpuBytes": 102168,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "scene48:lantern-mushroom",
+          "anchor": [
+            -2,
+            9,
+            -514
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:moss-cushion",
+          "anchor": [
+            -1,
+            9,
+            -514
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:enchanted-flower",
+          "anchor": [
+            0,
+            9,
+            -514
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:starpetal",
+          "anchor": [
+            1,
+            9,
+            -514
+          ],
+          "variant": 3,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:woodland-shrub",
+          "anchor": [
+            -2,
+            9,
+            -513
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:ringed-morel",
+          "anchor": [
+            -1,
+            9,
+            -513
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:inkcap-cluster",
+          "anchor": [
+            0,
+            9,
+            -513
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:woodland-sapling",
+          "anchor": [
+            1,
+            9,
+            -513
+          ],
+          "variant": 3,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/enchanted-focus.png",
+      "sha256": "5b76db64203dfa2faec8712d1260a4626c983f115cd922feeb2f76ccb51564c2",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "fittings",
+      "view": {
+        "pose": [
+          9.5,
+          4.5
+        ],
+        "point": [
+          9.9,
+          10.6,
+          7.7
+        ]
+      },
+      "render": {
+        "instances": 6,
+        "gpuBytes": 60048,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "scene36:signpost",
+          "anchor": [
+            8,
+            9,
+            7
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene36:campfire-fuel-stack",
+          "anchor": [
+            9,
+            9,
+            7
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene36:brazier",
+          "anchor": [
+            10,
+            9,
+            7
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene36:freestanding-torch",
+          "anchor": [
+            11,
+            9,
+            7
+          ],
+          "variant": 3,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene36:broken-pottery-scatter",
+          "anchor": [
+            9,
+            9,
+            8
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:meadow-fescue",
+          "anchor": [
+            10,
+            9,
+            8
+          ],
+          "variant": 1,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/fittings-overview.png",
+      "sha256": "9bdaea3f9a424ab5c5bfa62be586f117662904ea77344ba53d42f3b93e27ec68",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "fittings",
+      "view": {
+        "pose": [
+          8.5,
+          6.5
+        ],
+        "point": [
+          8.547666549682617,
+          9.716666539510092,
+          7.538105010986328
+        ]
+      },
+      "render": {
+        "instances": 6,
+        "gpuBytes": 60048,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "scene36:signpost",
+          "anchor": [
+            8,
+            9,
+            7
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene36:campfire-fuel-stack",
+          "anchor": [
+            9,
+            9,
+            7
+          ],
+          "variant": 1,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene36:brazier",
+          "anchor": [
+            10,
+            9,
+            7
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene36:freestanding-torch",
+          "anchor": [
+            11,
+            9,
+            7
+          ],
+          "variant": 3,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene36:broken-pottery-scatter",
+          "anchor": [
+            9,
+            9,
+            8
+          ],
+          "variant": 0,
+          "orientation": 0
+        },
+        {
+          "sceneId": "scene48:meadow-fescue",
+          "anchor": [
+            10,
+            9,
+            8
+          ],
+          "variant": 1,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/fittings-focus.png",
+      "sha256": "5e22254a80e47e9dc641d3e476d31fccd931c755a4cc75a263ff7e6c092f2b6c",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "cave",
+      "view": {
+        "pose": [
+          16,
+          3,
+          4
+        ],
+        "point": [
+          17.18393257,
+          4.41,
+          7.42099919
+        ]
+      },
+      "render": {
+        "instances": 9,
+        "gpuBytes": 121176,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "nonblock:e:flowstone-curtain",
+          "anchor": [
+            17,
+            4,
+            5
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:geode-opening",
+          "anchor": [
+            16,
+            5,
+            6
+          ],
+          "variant": 2,
+          "orientation": 3
+        },
+        {
+          "sceneId": "nonblock:e:mineral-encrustation",
+          "anchor": [
+            16,
+            3,
+            6
+          ],
+          "variant": 2,
+          "orientation": 2
+        },
+        {
+          "sceneId": "nonblock:e:clustered-dripstone",
+          "anchor": [
+            18,
+            4,
+            6
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:branching-crystal-cluster",
+          "anchor": [
+            16,
+            4,
+            7
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:crystal-shard",
+          "anchor": [
+            18,
+            3,
+            7
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:giant-stalagmite-spire",
+          "anchor": [
+            17,
+            3,
+            7
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:small-stalagmite",
+          "anchor": [
+            17,
+            4,
+            8
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:cave-rubble-cluster",
+          "anchor": [
+            15,
+            4,
+            8
+          ],
+          "variant": 2,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/cave-overview.png",
+      "sha256": "040e2c1471bd2fca02597b47b71df1e6e45fa5a444c47abb4f44168fa9b08d96",
+      "width": 844,
+      "height": 390
+    },
+    {
+      "habitat": "cave",
+      "view": {
+        "pose": [
+          16,
+          3,
+          4
+        ],
+        "point": [
+          17.12795703,
+          4.92287588,
+          5.55060673
+        ]
+      },
+      "render": {
+        "instances": 9,
+        "gpuBytes": 121176,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "placement": [
+        {
+          "sceneId": "nonblock:e:flowstone-curtain",
+          "anchor": [
+            17,
+            4,
+            5
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:geode-opening",
+          "anchor": [
+            16,
+            5,
+            6
+          ],
+          "variant": 2,
+          "orientation": 3
+        },
+        {
+          "sceneId": "nonblock:e:mineral-encrustation",
+          "anchor": [
+            16,
+            3,
+            6
+          ],
+          "variant": 2,
+          "orientation": 2
+        },
+        {
+          "sceneId": "nonblock:e:clustered-dripstone",
+          "anchor": [
+            18,
+            4,
+            6
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:branching-crystal-cluster",
+          "anchor": [
+            16,
+            4,
+            7
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:crystal-shard",
+          "anchor": [
+            18,
+            3,
+            7
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:giant-stalagmite-spire",
+          "anchor": [
+            17,
+            3,
+            7
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:small-stalagmite",
+          "anchor": [
+            17,
+            4,
+            8
+          ],
+          "variant": 2,
+          "orientation": 0
+        },
+        {
+          "sceneId": "nonblock:e:cave-rubble-cluster",
+          "anchor": [
+            15,
+            4,
+            8
+          ],
+          "variant": 2,
+          "orientation": 0
+        }
+      ],
+      "filename": "artifacts/nonblock-parity-844x390/cave-focus.png",
+      "sha256": "b2f20baa98faba6543af75ddddd256ac2629395416c63daed69c0b2d257b469b",
+      "width": 844,
+      "height": 390
+    }
+  ],
+  "observations": [
+    {
+      "habitat": "meadow",
+      "softwareRenderer": "Chromium SwiftShader",
+      "frames": 18,
+      "p50Ms": 83.3,
+      "p95Ms": 133.4,
+      "worstMs": 133.4,
+      "approxFps": 11,
+      "slowFrames": 18
+    },
+    {
+      "habitat": "desert",
+      "softwareRenderer": "Chromium SwiftShader",
+      "frames": 17,
+      "p50Ms": 699.9,
+      "p95Ms": 800,
+      "worstMs": 800,
+      "approxFps": 2,
+      "slowFrames": 14
+    },
+    {
+      "habitat": "snow",
+      "softwareRenderer": "Chromium SwiftShader",
+      "frames": 15,
+      "p50Ms": 566.6,
+      "p95Ms": 683.3,
+      "worstMs": 683.3,
+      "approxFps": 2,
+      "slowFrames": 15
+    },
+    {
+      "habitat": "mountain",
+      "softwareRenderer": "Chromium SwiftShader",
+      "frames": 18,
+      "p50Ms": 216.7,
+      "p95Ms": 500,
+      "worstMs": 500,
+      "approxFps": 4,
+      "slowFrames": 18
+    },
+    {
+      "habitat": "enchanted",
+      "softwareRenderer": "Chromium SwiftShader",
+      "frames": 16,
+      "p50Ms": 616.7,
+      "p95Ms": 800,
+      "worstMs": 800,
+      "approxFps": 2,
+      "slowFrames": 15
+    },
+    {
+      "habitat": "fittings",
+      "softwareRenderer": "Chromium SwiftShader",
+      "frames": 18,
+      "p50Ms": 83.3,
+      "p95Ms": 166.6,
+      "worstMs": 166.6,
+      "approxFps": 12,
+      "slowFrames": 14
+    },
+    {
+      "habitat": "cave",
+      "softwareRenderer": "Chromium SwiftShader",
+      "frames": 18,
+      "p50Ms": 116.5,
+      "p95Ms": 250,
+      "worstMs": 250,
+      "approxFps": 9,
+      "slowFrames": 16
+    }
+  ],
+  "removals": [
+    "nb1:scene48%3Alow-grass:179:8,9,7:0",
+    "nb1:nonblock%3Ad%3Adesert-bloom:179:509,9,0:0",
+    "nb1:nonblock%3Ad%3Afrost-fern:179:-2,10,511:0",
+    "nb1:nonblock%3Ad%3Adwarf-juniper:179:-514,13,-1:0",
+    "nb1:scene48%3Alantern-mushroom:179:-2,9,-514:0",
+    "nb1:scene36%3Asignpost:179:8,9,7:0:r0",
+    "nb1:nonblock%3Ae%3Aflowstone-curtain:179:17,4,5:2"
+  ],
+  "nonemptySchema1AndProfileBytesUnchanged": true
+}
