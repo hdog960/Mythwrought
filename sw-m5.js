@@ -6,8 +6,8 @@ const workerUrl=new URL(self.location.href);
 const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
   workerUrl.searchParams.get('nonblock-staging')==='1';
 const CACHE_PREFIX=staging?'mythwrought-nonblock-stage-shell-':'mythwrought-m5-shell-';
-const STAGE_VERSION='20261119-v19';
-const STAGE_PREVIOUS_VERSION='20261119-v15';
+const STAGE_VERSION='20261119-v20';
+const STAGE_PREVIOUS_VERSION='20261119-v19';
 const STAGE_MANIFEST='./nonblock-stage-assets.json';
 const CACHE_NAME=CACHE_PREFIX+(staging?STAGE_VERSION:'20261119-v6-recorder-v1');
 const PREVIOUS_STAGE_CACHE=CACHE_PREFIX+STAGE_PREVIOUS_VERSION;
@@ -297,6 +297,10 @@ async function populateStagedBank(cache){
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
     const cache=await caches.open(CACHE_NAME);
+    // The manifest is written last. An installed version already owns this
+    // bank, so a different worker served under its version cannot replace it.
+    if(staging&&await cache.match(manifestUrl))
+      throw new Error('Staged cache version already has a verified bank');
     try {
       // Full app shell + all runtime JS modules, including cold v5 profile
       // imports. Small bounded groups avoid throttling low-power iPhones.

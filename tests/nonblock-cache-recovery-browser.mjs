@@ -14,17 +14,28 @@ const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const originalWorker=await readFile('sw-m5.js','utf8');
 const originalManifest=JSON.parse(await readFile(manifestPath,'utf8'));
 const version=originalManifest.version;
-const next=version.replace(/v(\d+)$/,(_,n)=>'v'+(Number(n)+1));
-const updateWorker=originalWorker
-  .replace(new RegExp("const STAGE_PREVIOUS_VERSION='[^']+'"),"const STAGE_PREVIOUS_VERSION='"+version+"'")
-  .replace("const STAGE_VERSION='"+version+"'","const STAGE_VERSION='"+next+"'");
-assert.notEqual(updateWorker,originalWorker);
-const repairedWorker=updateWorker+`
+const increment=(release,offset)=>release.replace(/v(\d+)$/,(_,n)=>'v'+(Number(n)+offset));
+const rejectedVersion=increment(version,1),next=increment(version,2);
+function updateWorker(target){
+  return originalWorker
+    .replace(/const STAGE_PREVIOUS_VERSION='[^']+'/, "const STAGE_PREVIOUS_VERSION='"+version+"'")
+    .replace("const STAGE_VERSION='"+version+"'","const STAGE_VERSION='"+target+"'");
+}
+const reusedWorker=originalWorker+'\n/* another worker under the published version */\n';
+const brokenWorker=updateWorker(rejectedVersion);
+const repairedWorker=updateWorker(next)+`
 self.addEventListener('message',event=>{
   if(event.data==='verify-staged-recovery-controller')event.ports[0]?.postMessage(STAGE_VERSION);
 });
 `;
-const updateManifest=body=>({version:next,assets:{...originalManifest.assets,'./sw-m5.js':digest(body)}});
+const releases={
+  reused:{version,worker:reusedWorker},
+  broken:{version:rejectedVersion,worker:brokenWorker},
+  updated:{version:next,worker:repairedWorker}
+};
+const updateManifest=({version:release,worker})=>({
+  version:release,assets:{...originalManifest.assets,'./sw-m5.js':digest(worker)}
+});
 const contentTypes={'.html':'text/html','.css':'text/css','.js':'text/javascript','.mjs':'text/javascript',
   '.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png'};
 let publish='original';
@@ -36,9 +47,9 @@ const server=createServer(async(req,res)=>{
   try{
     let body=await readFile(file);
     if(publish!=='original'){
-      const worker=publish==='broken'?updateWorker:repairedWorker;
-      if(pathname==='/sw-m5.js')body=Buffer.from(worker);
-      if(pathname==='/'+manifestPath)body=Buffer.from(JSON.stringify(updateManifest(worker))+'\n');
+      const release=releases[publish];
+      if(pathname==='/sw-m5.js')body=Buffer.from(release.worker);
+      if(pathname==='/'+manifestPath)body=Buffer.from(JSON.stringify(updateManifest(release))+'\n');
       if(publish==='broken'&&pathname==='/src/nonblock/candidate-effects.mjs'){
         body=Buffer.concat([body,Buffer.from('\n/* deliberately mismatched staged publish bytes */\n')]);
         alteredResponseCount++;
@@ -113,6 +124,14 @@ try{
       });
     });
   }
+  publish='reused';
+  assert.equal(await triggerUpdate(page),'redundant');
+  assert.deepEqual(await banks(page),[oldBank]);
+  assert.equal(await page.evaluate(async({key,path})=>{
+    const cache=await caches.open(key);
+    const artifact=await cache.match(new URL(path,location.href));
+    return (await artifact?.json())?.version;
+  },{key:oldBank,path:manifestPath}),version);
   publish='broken';
   assert.equal(await triggerUpdate(page),'redundant');
   assert.ok(alteredResponseCount>0);
@@ -154,7 +173,29 @@ try{
     worker.postMessage('verify-staged-recovery-controller',[channel.port2]);
   }),next,{timeout:90000,polling:300});
   assert.deepEqual(await banks(retained),[oldBank,newBank].sort());
-  assert.equal(await retained.evaluate(key=>localStorage.getItem(key),worldKey),saved);
+  await retained.close();
+  await context.setOffline(true);
+  const updated=await context.newPage();
+  updated.on('pageerror',error=>errors.push(error.message));
+  assert.equal((await updated.goto(route)).fromServiceWorker(),true);
+  await count(updated,1);
+  const cachedManifests=await updated.evaluate(async({keys,path})=>
+    Promise.all(keys.map(async key=>{
+      const cache=await caches.open(key);
+      const response=await cache.match(new URL(path,location.href));
+      const artifact=await response?.json();
+      const worker=await cache.match(new URL('sw-m5.js',location.href));
+      const hash=new Uint8Array(await crypto.subtle.digest('SHA-256',await worker.arrayBuffer()));
+      return {
+        version:artifact?.version,
+        workerMatchesManifest:[...hash].map(value=>value.toString(16).padStart(2,'0')).join('')===artifact?.assets?.['./sw-m5.js']
+      };
+    })),{keys:[oldBank,newBank],path:manifestPath});
+  assert.deepEqual(cachedManifests,[
+    {version,workerMatchesManifest:true},
+    {version:next,workerMatchesManifest:true}
+  ]);
+  assert.equal(await updated.evaluate(key=>localStorage.getItem(key),worldKey),saved);
   assert.deepEqual(errors,[]);
   await context.close();
 }finally{
@@ -164,7 +205,7 @@ try{
 const paths=['sw-m5.js',manifestPath,'tests/nonblock-cache-recovery-browser.mjs'];
 const sourceSha256=Object.fromEntries(await Promise.all(paths.map(async path=>[path,digest(await readFile(path))])));
 await writeFile(directory+'/manifest.json',JSON.stringify({
-  version,attemptedVersion:next,rejectedMismatchedAsset:true,previousShellOpenedOffline:true,
-  retainedTwoVerifiedBanks:true,schema1SaveBytesUnchanged:true,captures,sourceSha256
+  version,attemptedVersion:rejectedVersion,repairedVersion:next,rejectedVersionReuse:true,rejectedMismatchedAsset:true,previousShellOpenedOffline:true,
+  retainedTwoVerifiedBanks:true,repairedShellOpenedOffline:true,schema1SaveBytesUnchanged:true,captures,sourceSha256
 },null,2)+'\n');
-console.log('PASS stale asset blocked activation, the prior shell opened offline, and a valid update retained both banks');
+console.log('PASS staged cache rejected version reuse and invalid assets; both verified banks opened offline');

@@ -1,5 +1,5 @@
 {
-  "version": "20261119-v19",
+  "version": "20261119-v20",
   "assets": {
     "./": "5fd59b19473c8465027531a97472fb2445a56d5c89d9d83a117d159151db058f",
     "./assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
@@ -212,7 +212,7 @@
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "a5977bef2a6b14602348775e41c071534fd583719259803d7e8d10cb80eaf4a7",
-    "./sw-m5.js": "ab66ae92737d447e7eeb51317a141ef93b61b45df736b2d1fc6afcd0cb9dddb2",
+    "./sw-m5.js": "ce65c420fe513f0ce5e23204df16428be27a044cf7b21a9abe546d3619ef382a",
     "./src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
     "./src/nonblock/candidate-families.mjs": "b67401eeb2c45998ebc979701719313d103ea23daa939ed933972ac62b1cdc62",
     "./src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",

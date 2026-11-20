@@ -46,3 +46,11 @@ The candidate at `22d5f916d03dd12dc0c8028a424f180fd460b269` repeated the same-or
 Use a disposable copy of the installation data and the creator-approved test build. Record the source revision, iPhone model, iOS version, landscape dimensions, device pixel ratio and render preset. Use the existing **Gate A · Device Check** after warming the same ordinary and scenery-heavy routes. Capture the foreground median and 95th-percentile frame times, slow-frame count, framebuffer dimensions, chunk count and grip clearance. Repeat the route at the same settings on the published baseline.
 
 Confirm the original Home Screen icon and launch path, both grips, touch MINE and PLACE, Creative, the minimap and existing physical fittings. On the disposable copy, verify a scenery removal after full application termination, an offline cold start and the existing world and backup records after the approved recovery procedure. Record the observed build at each step. Final device acceptance and creator approval are open.
+
+## Stage v20 cache ownership
+
+The `9feb2fe` run observed the repaired worker but found only the previous cache bank. Its failed and repaired test publications had shared one cache version. The revised replay uses three distinct versions for the incumbent, rejected publication and repaired publication. It also exercises a separate attempt to reuse the incumbent version.
+
+A staged worker now refuses to replace a bank that already has its completed manifest. The v20 worker keeps v19 as its previous bank. Chromium rejected same-version replacement and the source mismatch, loaded the old shell offline, then activated the valid repaired version. An offline reopen verified both bank manifests and their exact cached worker digests, with the existing schema-1 save and scenery removal intact. Rollback publications use a fresh cache version. [Cache update and offline evidence](gallery/cache-recovery-v20/manifest.json)
+
+The same-origin rehearsal also passed with the v20 worker and the verified published baseline. The exact manifest and icon matched. Rollback and a fresh offline Chromium launch preserved the saved world, Pack 2 door, generation profile and both previous-good backups. [V20 installation rehearsal](gallery/install-v20/manifest.json)

@@ -1,0 +1,24 @@
+{
+  "version": "20261119-v20",
+  "attemptedVersion": "20261119-v21",
+  "repairedVersion": "20261119-v22",
+  "rejectedVersionReuse": true,
+  "rejectedMismatchedAsset": true,
+  "previousShellOpenedOffline": true,
+  "retainedTwoVerifiedBanks": true,
+  "repairedShellOpenedOffline": true,
+  "schema1SaveBytesUnchanged": true,
+  "captures": [
+    {
+      "file": "artifacts/nonblock-cache-recovery/previous-good-offline-932x430.png",
+      "sha256": "3101ede17764a8554e76f237415f4bd695f36134a7d88018a5ed32606012405b",
+      "width": 932,
+      "height": 430
+    }
+  ],
+  "sourceSha256": {
+    "sw-m5.js": "ce65c420fe513f0ce5e23204df16428be27a044cf7b21a9abe546d3619ef382a",
+    "nonblock-stage-assets.json": "3bc871ecad8d97496a9b8bd4362f323932ea4eab85f05457699096a90945aa91",
+    "tests/nonblock-cache-recovery-browser.mjs": "c3eed3fa2a6b60d9a726e007975525021dcd9c1c2b81f340faee53ef59586fc5"
+  }
+}
