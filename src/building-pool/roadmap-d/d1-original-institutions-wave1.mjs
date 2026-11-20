@@ -773,7 +773,7 @@ export const ROADMAP_D_WAVE1_PLANS = Object.freeze([
       ],
       [
         "lunar-song-pavilion",
-        14,
+        11,
         40
       ]
     ],
