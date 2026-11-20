@@ -29,9 +29,24 @@ try{
           const r=t.placeFixture(x,y,z,0);
           if(!r?.saved)throw Error('Chamber preparation was not saved');
         }
-      return t.teleportCave(6,-78,6);
+      // The real player must mine twelve known SOLID cells. Procedural
+      // caves can otherwise leave a missing floor below the prepared room,
+      // which would misclassify an empty target as a failed MINE action.
+      // Preparation is still a real VoxelWorld.set + GPU edit + schema-1 save.
+      const floors=[];
+      for(let y=-79;y>=-90;y--){
+        const original=t.block(6,y,6);
+        const setup=t.placeFixture(6,y,6,8);
+        if(!setup?.saved||t.block(6,y,6)!==8)
+          throw Error('Cannot prepare a solid mining target at '+y);
+        floors.push({y,original});
+      }
+      return {...t.teleportCave(6,-78,6),floors};
     });
     result.startFeet=prepared.feet;
+    assert.equal(prepared.floors.length,12);
+    assert.ok(prepared.floors.some(f=>f.original!==0),
+      'At least one original deep solid must have a persistent mined-air edit');
     await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===27,
       null,{timeout:120000});
     for(let y=-79;y>=-90;y--){
@@ -59,13 +74,21 @@ try{
     const save=await page.evaluate(()=>JSON.parse(
       localStorage.getItem('mythwrought-v002-world-179')||'{}'));
     assert.equal(save.schema,1,'Original schema-1 world save not persisted');
-    assert.ok(save.edits.some(e=>e[0]===6&&e[1]===-90&&e[2]===6&&e[3]===0),
-      'Last actual player MINE edit missing in saved world');
+    for(const {y,original} of prepared.floors){
+      const persisted=save.edits.find(e=>e[0]===6&&e[1]===y&&e[2]===6);
+      if(original!==0)
+        assert.deepEqual(persisted,[6,y,6,0],
+          'Actual player MINE edit was not saved for naturally solid cell '+y);
+      else
+        assert.equal(persisted,undefined,
+          'Reverted naturally empty cell incorrectly retained an edit at '+y);
+    }
     await page.screenshot({path:'artifacts/rapid-dig-real-player-956x440.png',fullPage:true});
     await page.reload({waitUntil:'networkidle'});
     await page.waitForFunction(()=>window.__mythwroughtTest,null,{timeout:60000});
-    assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(6,-90,6)),0,
-      'Last real MINE edit disappeared after browser reload');
+    for(const {y} of prepared.floors)
+      assert.equal(await page.evaluate(y=>window.__mythwroughtTest.block(6,y,6),y),
+        0,'A real MINE edit disappeared after browser reload at '+y);
     assert.deepEqual(errors,[],'Actual-player WebGL2 runtime errors');
     result.saveReloadVerified=true;
     await writeFile('artifacts/rapid-dig-real-player-metrics.json',JSON.stringify(result,null,2)+'\n');
