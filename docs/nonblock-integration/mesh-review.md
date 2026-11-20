@@ -57,15 +57,14 @@ The dispositions below are provisional. Runtime attachment, collision, removal, 
 
 ## Current decisions on inherited meshes
 
-The original-source review above remains the record of what arrived from the five automation branches. The current candidate has changed 35 of those 43 meshes. All 43 have an in-game staging lifecycle, and the art decisions remain subject to the final parity and device pass. [Catalog evidence](catalog.md)
+The original-source review above remains the record of what arrived from the five automation branches. The current candidate has changed all 43 inherited meshes. All 43 have an in-game staging lifecycle, and the art decisions remain subject to the final parity and device pass. [Catalog evidence](catalog.md)
 
 | Decision | Families |
 | --- | --- |
 | Rebuilt | Icicle spear, crystal shard, hanging stalactite, small stalagmite, rope coil, hanging cobweb and tumblebrush |
-| Refined | Cloth banner, low grass, short fern, single wildflower, button mushroom, lavender spike, heather sprig, clover clump, meadow sedge, forest lichen patch, forest moss mat, signpost, hanging chain, desert bloom, frost fern, dwarf juniper, prickly pear, bracken fern, clover patch, clustered toadstools, exposed root, fallen branch, moss cushion, woodland sapling, woodland shrub, branching crystal cluster, geode opening and pebble scatter |
-| Original geometry retained provisionally | Agave rosette, alpine wildflower, column cactus, desert scrub, saltgrass, snowgrass, cave rubble and mineral encrustation |
+| Refined | Cloth banner, low grass, short fern, single wildflower, button mushroom, lavender spike, heather sprig, clover clump, meadow sedge, forest lichen patch, forest moss mat, signpost, hanging chain, desert bloom, frost fern, dwarf juniper, prickly pear, bracken fern, clover patch, clustered toadstools, exposed root, fallen branch, moss cushion, woodland sapling, woodland shrub, branching crystal cluster, geode opening, pebble scatter, column cactus, desert scrub, saltgrass, snowgrass, agave rosette, alpine wildflower, cave rubble and mineral encrustation |
 
-Earlier landscape frames showed the bracken and toadstools alongside richer authored foliage and fungi. The matched undergrowth views below verify revisions to six shapes and four previously aliased variants. The remaining biome and cave families still need a comparable habitat review. [Representative authored foliage and fungi](gallery/enchanted-fungi/manifest.json)
+Earlier landscape frames showed the bracken and toadstools alongside richer authored foliage and fungi. The matched undergrowth views below verify revisions to six shapes and four previously aliased variants. The biome and cave comparisons below show the other revisions on natural mounts. [Representative authored foliage and fungi](gallery/enchanted-fungi/manifest.json)
 
 ## First in-game comparisons
 
@@ -194,3 +193,29 @@ The cave cluster now uses joined hexagonal crystals with faceted terminations. P
 | Geode opening | [View](gallery/cave-art/before/geode-opening.png) | [View](gallery/cave-art/after/geode-opening.png) | 72 → 156 | 7,776 → 16,848 |
 
 All three drew in one scenery call with 25 chunks loaded. The original MINE control released the cluster's body collision. The pebble site stayed pass-through. The wall-mounted geode retained its bounded solid rim, and native rays passed through the center. The geode's cave fixture verified removal and persistence while the surrounding terrain blocked direct entry at the wall cell. All three removals survived a new page, the two scenery records matched, and the nonempty schema-1 save bytes stayed intact. [Before source and replay](gallery/cave-art/before/manifest.json) · [After source and replay](gallery/cave-art/after/manifest.json)
+
+## Desert branches and cold- and salt-tolerant tufts
+
+Column cactus now has a ribbed trunk and continuous elbows. Desert scrub uses branched woody shapes with sparse olive leaves. The grass meshes replace paired overlapping faces with a single folded surface. Tall seed heads distinguish saltgrass from the broader, cooler snowgrass fan.
+
+| Family | Before | After | Sample triangles | GPU bytes |
+| --- | --- | --- | --- | --- |
+| Desert scrub | [Sand](gallery/arid/before/desert-scrub.png) | [Sand](gallery/arid/after/desert-scrub.png) | 45 → 126 | 4,860 → 13,608 |
+| Column cactus | [Red sand](gallery/arid/before/column-cactus.png) | [Red sand](gallery/arid/after/column-cactus.png) | 126 → 180 | 13,608 → 19,440 |
+| Saltgrass | [Sand](gallery/grasses/before/desert.png) | [Sand](gallery/grasses/after/desert.png) | 54 → 51 | 5,832 → 5,508 |
+| Snowgrass | [Snow](gallery/grasses/before/snow.png) | [Snow](gallery/grasses/after/snow.png) | 18 → 54 | 1,944 → 5,832 |
+
+The matched captures used actual terrain and the same standing views at 932 × 430. Each sample drew in one call with 25 terrain chunks. The standing-body probe confirmed collision at the column cactus and clear entry after MINE. The four removals stayed absent on fresh pages with the initial schema-1 world and generation profile bytes intact. The distant appearance of thinner desert shoots remains a device review item. [Desert manifests](gallery/arid/) · [Grass manifests](gallery/grasses/)
+
+## Agave, alpine wildflower and cave surface detail
+
+The agave has a grounded center and two layers of thick leaves. The alpine flower has a closed stem, folded lilac petals and a visible gold center. Cave rubble uses broad fractured faces, while the encrustation forms overlapping shallow deposits on natural rock.
+
+| Family | Before | After | Sample triangles | GPU bytes |
+| --- | --- | --- | --- | --- |
+| Agave rosette | [Sand](gallery/succulent-alpine/before/desert.png) | [Sand](gallery/succulent-alpine/after/desert.png) | 60 → 80 | 6,480 → 8,640 |
+| Alpine wildflower | [Mountain](gallery/succulent-alpine/before/mountain.png) | [Mountain](gallery/succulent-alpine/after/mountain.png) | 53 → 111 | 5,724 → 11,988 |
+| Cave rubble cluster | [Cave floor](gallery/cave-wall/before/cave-rubble-cluster.png) | [Cave floor](gallery/cave-wall/after/cave-rubble-cluster.png) | 50 → 80 | 5,400 → 8,640 |
+| Mineral encrustation | [Cave wall](gallery/cave-wall/before/mineral-encrustation.png) | [Cave wall](gallery/cave-wall/after/mineral-encrustation.png) | 36 → 96 | 3,888 → 10,368 |
+
+Each comparison held the camera, natural mount and installed render preset fixed. All four samples used one scenery draw and 25 loaded chunks. Normal MINE removed each object and the removal survived a fresh page with the existing schema-1 bytes intact. The live rubble case remained pass-through. The wall sample verified orientation and removal on its original rock support, and native tests verified pass-through on all four orientations. The moss, foliage and mineral colors still need a physical-device review at normal play distance. [Plant source and replay](gallery/succulent-alpine/) · [Cave source and replay](gallery/cave-wall/)

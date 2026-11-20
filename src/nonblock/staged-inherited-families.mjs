@@ -40,7 +40,7 @@ function mountedGeode() {
 function mineralWall() {
   return {lane:'24',wall:true,wallY:0,wallInset:.49,build:options=>{
     const source=makeMineralEncrustation({...options,face:'south'});
-    return {mesh:source.mesh,palette:[[.59,.69,.46]],colliders:[]};
+    return {mesh:source.mesh,palette:[[.38,.40,.28],[.51,.52,.34],[.65,.64,.43],[.74,.69,.52]],colliders:[]};
   }};
 }
 
@@ -58,7 +58,7 @@ function fitting(sceneId,profile,mount,palette,colliders=[]) {
 
 export const inheritedStageFamilies = [
   ['nonblock:d:prickly-pear-cactus',environment(makePricklyPear,[[.26,.42,.28],[.36,.55,.35],[.48,.64,.41]])],
-  ['nonblock:d:column-cactus',environment(makeColumnCactus,[[.30,.48,.29]])],
+  ['nonblock:d:column-cactus',environment(makeColumnCactus,[[.24,.40,.29],[.34,.53,.34],[.44,.59,.40],[.56,.68,.46]])],
   ['nonblock:d:icicle-spear',revisedCave('nonblock:d:icicle-spear','ceiling')],
   ['nonblock:e:small-stalagmite',revisedCave('nonblock:e:small-stalagmite','ground')],
   ['nonblock:e:hanging-stalactite',revisedCave('nonblock:e:hanging-stalactite','ceiling')],

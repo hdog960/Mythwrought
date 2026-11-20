@@ -12,7 +12,9 @@ const seed=179;
 const origin=process.env.NONBLOCK_CAVE_ORIGIN||'http://127.0.0.1:4173';
 const comparison=process.env.NONBLOCK_CAVE_COMPARISON;
 if(comparison&&!['before','after'].includes(comparison))throw Error('Invalid cave comparison label');
-const directory=comparison?'artifacts/nonblock-cave-art-'+comparison:'artifacts/nonblock-caves';
+const comparisonSet=process.env.NONBLOCK_CAVE_SET||'art';
+if(comparison&&!['art','wall'].includes(comparisonSet))throw Error('Invalid cave comparison set');
+const directory=comparison?'artifacts/nonblock-cave-'+comparisonSet+'-'+comparison:'artifacts/nonblock-caves';
 const world=new VoxelWorld(seed);
 const setups=[
   ['nonblock:e:giant-stalagmite-spire','ground',true],
@@ -48,19 +50,25 @@ function aimFromCave(scene,object) {
 
 const samples=[];
 if(comparison){
-  for(const [sceneId,solid,anchor,cell,point,orientation=0] of [
-    ['nonblock:e:branching-crystal-cluster',true,[16,3,4],[17,2,4],[16.65722402,3.21666670,4.40342363]],
-    ['nonblock:e:pebble-scatter',false,[16,3,4],[17,2,4],[16.56195704,3.01833328,4.48225021]],
-    ['nonblock:e:geode-opening',true,[15,4,6],[16,3,6],[15.01000023,4.86240371,6.575],3]
-  ]){
+  const reviewSites=comparisonSet==='wall'?[
+    ['cave-rubble-cluster',false,[16,3,4],[17,2,4],[16.38792229,3.06679996,4.49265099]],
+    ['mineral-encrustation',false,[15,4,5],[16,3,5],[15.46344471,4.61557706,5.02500010],0,true]
+  ]:[
+    ['branching-crystal-cluster',true,[16,3,4],[17,2,4],[16.65722402,3.21666670,4.40342363]],
+    ['pebble-scatter',false,[16,3,4],[17,2,4],[16.56195704,3.01833328,4.48225021]],
+    ['geode-opening',true,[15,4,6],[16,3,6],[15.01000023,4.86240371,6.575],3,true]
+  ];
+  for(const [name,solid,anchor,cell,point,orientation=0,wall=false] of reviewSites){
+    const sceneId='nonblock:e:'+name;
     const [placement]=planStagedHabitat(world,[{sceneId,habitat:'cave',anchor,variant:2,orientation}]);
     assert.ok(placement,sceneId+' requires a natural rock anchor');
     const scene=createCandidateScene(seed,'legacy',[placement],deps);
     const [object]=scene.visible();
     assert.ok(object);
+    assert.equal(object.colliders.length>0,solid);
     const eye=[cell[0]+.5,cell[1]+1.56,cell[2]+.5];
     assert.equal(scene.pick(eye,point.map((value,index)=>value-eye[index]))?.instanceKey,object.instanceKey);
-    samples.push({placement,instanceKey:object.instanceKey,solid,view:{cell,point},triangles:object.positions.length/9});
+    samples.push({placement,instanceKey:object.instanceKey,solid,wall,view:{cell,point},triangles:object.positions.length/9});
   }
 }else for(const [sceneId,attachment,solid] of setups){
   search:for(let x=14;x<=42;x++)for(let z=-15;z<=22;z++)for(let y=-1;y<=5;y++){
@@ -107,11 +115,11 @@ try{
     const count=(tab,n)=>tab.waitForFunction(value=>
       Number(document.querySelector('#scene').dataset.nonblockInstances)===value,n,{timeout:45000});
     await count(page,1);
-    if(comparison&&!solid){
+    if(comparison&&!solid&&!sample.wall){
       const entered=await page.evaluate(cell=>window.__mythwroughtTest.teleportCave(...cell),placement.anchor);
       assert.equal(entered.x,placement.anchor[0]+.5);
     }
-    const probeSolid=solid&&(!comparison||placement.sceneId!=="nonblock:e:geode-opening");
+    const probeSolid=solid&&!sample.wall;
     if(probeSolid){
       assert.equal(await page.evaluate(cell=>{
         try{window.__mythwroughtTest.teleportCave(...cell);return false;}
@@ -163,8 +171,8 @@ try{
       assert.ok(JSON.parse(storage.primary).tombstones.includes(instanceKey));
     }
     await reopened.close();
-    captures.push({...sample,...(comparison?{rendererState,bodyProbe:solid?(probeSolid?'released':'site-collision'):'pass-through'}:{}),file,sha256:digest(image)});
-    console.log('PASS',placement.sceneId,probeSolid?'solid collision released':solid?'wall-mounted removal':'pass-through');
+    captures.push({...sample,...(comparison?{rendererState,bodyProbe:sample.wall?'site-collision':probeSolid?'released':'pass-through'}:{}),file,sha256:digest(image)});
+    console.log('PASS',placement.sceneId,probeSolid?'solid collision released':sample.wall?'wall-mounted removal':'pass-through');
   }
   assert.deepEqual(errors,[]);
   await context.close();
@@ -175,8 +183,7 @@ const sourceFiles=['src/main.mjs','src/voxel.mjs','src/nonblock/candidate-scene.
   'src/nonblock/candidate-families.mjs','src/nonblock-environments24/cave-formations.mjs',
   'tests/nonblock-cave-browser.mjs'];
 if(comparison)sourceFiles.push('src/nonblock/staged-habitats.mjs','src/nonblock/staged-inherited-families.mjs',
-  'src/nonblock-environments24/branching-crystal-cluster.mjs','src/nonblock-environments24/pebble-scatter.mjs',
-  'src/nonblock-environments24/geode-opening.mjs');
+  ...samples.map(({placement})=>'src/nonblock-environments24/'+placement.sceneId.split(':').at(-1)+'.mjs'));
 const sourceSha256=Object.fromEntries(await Promise.all(sourceFiles.map(async path=>[path,digest(await readFile(path))])));
 await writeFile(directory+'/manifest.json',JSON.stringify({seed,sourceSha256,captures,
   ...(comparison?{label:comparison,removalAndColdReopen:true,nonemptySchema1SaveBytesUnchanged:true}:{})

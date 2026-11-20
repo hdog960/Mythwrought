@@ -1,0 +1,92 @@
+{
+  "seed": 179,
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/voxel.mjs": "6df6d3c5a0223cee405656afd0548fea3a957ae0c5185d7130a34d7198c3f981",
+    "src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
+    "src/nonblock/candidate-families.mjs": "7b136f75bd586298dafc844deccbf952029af2b0bb3f0ab10c770b92bae218bc",
+    "src/nonblock-environments24/cave-formations.mjs": "598eba5c9864a2f1c210d0eb2cfe2f6088ef7cac9bc4bfe4446f1c28ac63c751",
+    "tests/nonblock-cave-browser.mjs": "d21e6d4152b93e67a49f6f443e6ecf501c4725e062018387bef3485a4ddbfb5c",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/staged-inherited-families.mjs": "deb1dbb950395ced53e563aaa428fbe70f9584f74bccbed105dc560ef0a254eb",
+    "src/nonblock-environments24/cave-rubble-cluster.mjs": "25d9d37ebb62f57b548298217ef9d78b0d05a8ec07fffb49b49a80d5104e22a3",
+    "src/nonblock-environments24/mineral-encrustation.mjs": "1a179ec6f5d54ca0c1d4d3c0a2f0c96712d460ba416c3d79c7c48c8ef58fffb3"
+  },
+  "captures": [
+    {
+      "placement": {
+        "sceneId": "nonblock:e:cave-rubble-cluster",
+        "anchor": [
+          16,
+          3,
+          4
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Acave-rubble-cluster:179:16,3,4:2",
+      "solid": false,
+      "wall": false,
+      "view": {
+        "cell": [
+          17,
+          2,
+          4
+        ],
+        "point": [
+          16.38792229,
+          3.06679996,
+          4.49265099
+        ]
+      },
+      "triangles": 50,
+      "rendererState": {
+        "gpuBytes": 5400,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "bodyProbe": "pass-through",
+      "file": "artifacts/nonblock-cave-wall-before/cave-rubble-cluster.png",
+      "sha256": "5a0f4f6ffee26a18c5e1252d6e65740adac26e65f082a938e6a90d29bfc48e17"
+    },
+    {
+      "placement": {
+        "sceneId": "nonblock:e:mineral-encrustation",
+        "anchor": [
+          15,
+          4,
+          5
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Amineral-encrustation:179:15,4,5:2:r0",
+      "solid": false,
+      "wall": true,
+      "view": {
+        "cell": [
+          16,
+          3,
+          5
+        ],
+        "point": [
+          15.46344471,
+          4.61557706,
+          5.0250001
+        ]
+      },
+      "triangles": 36,
+      "rendererState": {
+        "gpuBytes": 3888,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "bodyProbe": "site-collision",
+      "file": "artifacts/nonblock-cave-wall-before/mineral-encrustation.png",
+      "sha256": "72017dedf8c5c18c64ebe02a92f37de58cc7941c7f71efac4fe55ee6a347407d"
+    }
+  ],
+  "label": "before",
+  "removalAndColdReopen": true,
+  "nonemptySchema1SaveBytesUnchanged": true
+}
