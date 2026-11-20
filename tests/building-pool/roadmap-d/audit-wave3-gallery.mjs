@@ -58,10 +58,10 @@ for(const b of ROADMAP_D_WAVE3_BUILDINGS)for(const [w,h] of sizes){
  assert.ok(section.sourceCells<exterior.sourceCells,'cutaway does not expose interiors for '+b.id);
  assert.equal(section.roomCount,b.spaces.length);assert.equal(exterior.roomCount,b.spaces.length);
 }
-const result={schema:'mythwrought.roadmap-d.d2.genuine-webgl2-evidence.v1',
+const result={schema:'mythwrought.roadmap-d.d3.genuine-webgl2-evidence.v1',
  gitHead:process.env.GITHUB_SHA||null,runId:process.env.GITHUB_RUN_ID||null,attempt:process.env.GITHUB_RUN_ATTEMPT||null,
  exactSourceSHA256:sourceSha,sourceCount:8,views:['exterior','section'],sizes,captureCount:48,uniquePNG:hashes.size,
  status:'PASS',realChromium:true,cubeProxy:true,physicalMeshesAccepted:false,iphoneAccepted:false,productionRegistered:false,
  captures:records.sort((a,b)=>a.sourceId.localeCompare(b.sourceId)||a.width-b.width||a.view.localeCompare(b.view))};
 writeFileSync(join(folder,'audit.json'),JSON.stringify(result,null,2)+'\n');
-console.log('Builder D D2 genuine-source WebGL2 gallery PASS: 48/48 decoded CRC-checked PNGs, unique hashes, three landscape sizes, real cutaways, zero GL errors');
+console.log('Builder D D3 genuine-source WebGL2 gallery PASS: 48/48 decoded CRC-checked PNGs, unique hashes, three landscape sizes, real cutaways, zero GL errors');
