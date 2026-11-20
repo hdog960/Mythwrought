@@ -1393,8 +1393,8 @@ export const ROADMAP_D_WAVE4_PLANS=Object.freeze([
       ],
       [
         "eastern-spellcraft",
-        87,
-        47
+        90,
+      52
       ]
     ],
     "div": [
