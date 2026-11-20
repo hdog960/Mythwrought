@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {mkdtemp,mkdir,readFile,rm,writeFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
-import {extname,resolve,sep} from 'node:path';
+import {tmpdir} from 'node:os';
+import {extname,join,resolve,sep} from 'node:path';
 import {chromium} from 'playwright';
 import {activateFourRegionProfile} from '../src/manual-biomes/profile-storage.mjs';
 import {M5_EXPERIMENTAL_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
@@ -87,15 +88,23 @@ const origin='http://127.0.0.1:'+server.address().port;
 const app=origin+appPath;
 const stage=app+'?nonblock-stage='+encodeURIComponent(JSON.stringify(layout))+'&nonblock-offline=1';
 const worker='sw-m5.js',stagingWorker=worker+'?nonblock-staging=1';
-const browser=await chromium.launch({headless:true,args:[
-  '--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'
-]});
+const profile=await mkdtemp(join(tmpdir(),'mythwrought-staged-rehearsal-'));
+const launch=()=>chromium.launchPersistentContext(profile,{
+  headless:true,viewport:{width:932,height:430},hasTouch:true,isMobile:true,
+  deviceScaleFactor:1,serviceWorkers:'allow',args:[
+    '--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'
+  ]
+});
 const captures=[];
+let context;
 try{
-  const context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,isMobile:true,
-    deviceScaleFactor:1,serviceWorkers:'allow',
-    storageState:{cookies:[],origins:[{origin,localStorage:expected.map(([name,value])=>({name,value}))}]}
-  });
+  context=await launch();
+  const setup=await context.newPage();
+  await setup.goto(app+'assets/icon.svg');
+  await setup.evaluate(entries=>{
+    for(const [key,value] of entries)localStorage.setItem(key,value);
+  },expected);
+  await setup.close();
   const errors=[];
   const page=async()=>{
     const tab=await context.newPage();
@@ -189,11 +198,18 @@ try{
   assert.equal(await rolledBack.locator('#scene').getAttribute('data-nonblock-instances'),null);
   assert.equal(await rolledBack.evaluate(key=>localStorage.getItem(key),tombstoneKey),stagedBytes);
   await capture(rolledBack,'rollback-offline');
-  assert.deepEqual(errors,[]);
   await context.close();
+  context=await launch();
+  await context.setOffline(true);
+  const restarted=await openCached(app,worker);
+  assert.equal(await restarted.evaluate(key=>localStorage.getItem(key),tombstoneKey),stagedBytes);
+  await capture(restarted,'process-restart-offline');
+  assert.deepEqual(errors,[]);
+  console.log('PASS a fresh Chromium process cold-opened the same saved installation offline');
   console.log('PASS rollback restored the original offline shortcut scope and retained both save owners');
 }finally{
-  await browser.close();
+  await context?.close();
+  await rm(profile,{recursive:true,force:true});
   await new Promise(resolve=>server.close(resolve));
 }
 const paths=[...identityFiles,'nonblock-stage-assets.json','tests/nonblock-install-rehearsal-browser.mjs'];
@@ -201,6 +217,6 @@ const sourceSha256=Object.fromEntries(await Promise.all(paths.map(async path=>[p
 await writeFile(directory+'/manifest.json',JSON.stringify({
   baselineRevision,baselineSha256,sourceSha256,appPath,
   manifestAndIconEqual:true,ordinaryAndPhysicalBytesUnchanged:true,previousGoodBackupsUnchanged:true,
-  stagedRemovalRetainedAfterRollback:true,
+  stagedRemovalRetainedAfterRollback:true,persistedAcrossChromiumProcessRestart:true,
   captures
 },null,2)+'\n');
