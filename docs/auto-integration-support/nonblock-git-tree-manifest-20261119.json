@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "generated": "2026-11-19",
+  "producers": [
+    {
+      "lane": "48",
+      "pr": 226,
+      "head": "cec70254bcbacca0d49d4ad39777bd79051f0d66",
+      "files": [
+        {
+          "path": "src/nonblock-scene48/nonblock-object-v1.mjs",
+          "blob": "33ee82e68be152586548bc0975cd11d0cca5dffa"
+        },
+        {
+          "path": "src/nonblock-scene48/interactive-session.mjs",
+          "blob": "4e6d4fbe8c7d309a33fc9775b768f397e80bdfe6"
+        }
+      ]
+    },
+    {
+      "lane": "24",
+      "pr": 247,
+      "head": "3b31e5f648297dcfe7b67eff9fdce070d267efaf",
+      "files": [
+        {
+          "path": "src/nonblock-environments24/objects.mjs",
+          "blob": "6cfff08a2ae7815b6af9dff197d09d1cba439f01"
+        },
+        {
+          "path": "src/nonblock-environments24/v1-bridge.mjs",
+          "blob": "0b846c34ef5a66796b5772f91538f68ff53de2fe"
+        }
+      ]
+    },
+    {
+      "lane": "36",
+      "pr": 249,
+      "head": "3365213abd8fc6a49779a7ba256134efff58f514",
+      "files": [
+        {
+          "path": "src/nonblock-fittings36/fittings-phase1.mjs",
+          "blob": "562e360b259f5aca00ab8ce859bb5b8e2f09bc36"
+        },
+        {
+          "path": "src/nonblock-fittings36/guarded-break-session.mjs",
+          "blob": "0bc1c05ee8484fd86fae3db4539b85a37b2f776a"
+        }
+      ]
+    }
+  ]
+}

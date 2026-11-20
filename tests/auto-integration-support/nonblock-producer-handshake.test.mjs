@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditNonblockProducerHandshake as audit} from '../../src/auto-integration-support/nonblock-producer-handshake.mjs';
+const sha='a'.repeat(40),blob='b'.repeat(40);
+const descriptor=()=>{const sceneId='scene48:test',seed=7,anchor=[1,2,3],variant=0,key='nb1:scene48%3Atest:7:1,2,3:0';return {contract:'nonblock-object-v1',sceneId,seed,anchor,variant,instanceKey:key,selectionAabbs:[{min:[0,2,2],max:[2,3,4]}],breakIntent:{action:'remove-object',targetKey:key,requiresOwner:':00'},persistence:{kind:'schema1-external-tombstone-sidecar',key},render:{mesh:{positions:new Float32Array(9),materials:new Uint8Array(1),triangleCount:1},instanced:true,maxInstancesPerBatch:256}}};
+const run=(producer,descriptorValue,overrides={})=>audit({producer,descriptor:descriptorValue,expectedHead:sha,actualHead:sha,sourceBlob:blob,expectedBlob:blob,...overrides});
+test('canonical v1 fixture is shape-only, never live',()=>{const r=run(':48',descriptor());assert.equal(r.ok,true);assert.equal(r.level,'DESCRIPTOR_SHAPE_ONLY_NOT_LIVE')});
+test('rejects unauthenticated producer blob',()=>assert(run(':48',descriptor(),{actualHead:'c'.repeat(40)}).issues.some(x=>x.code==='SOURCE_UNAUTHENTICATED')));
+test('rejects :24 proposal contract and coordinate object',()=>{const d=descriptor();d.contract='nonblock-object-v1-proposal-24';d.sceneId='nonblock:e:small-stalagmite';d.anchor={x:1,y:2,z:3};assert(run(':24',d).issues.some(x=>x.code==='CONTRACT_VERSION'));assert(run(':24',d).issues.some(x=>x.code==='IDENTITY_FIELDS'))});
+test('rejects :36 orientation-suffixed key against v1',()=>{const d=descriptor();d.sceneId='scene36:signpost';d.instanceKey+=':r0';assert(run(':36',d).issues.some(x=>x.code==='CANONICAL_KEY'))});
+test('rejects missing :00 break and tombstone contract',()=>{const d=descriptor();delete d.breakIntent;delete d.persistence;const r=run(':48',d);assert(r.issues.some(x=>x.code==='BREAK_INTENT'));assert(r.issues.some(x=>x.code==='TOMBSTONE'))});
+test('rejects malformed mesh and overbudget batches',()=>{const d=descriptor();d.render.mesh.positions=[1,2,3];d.render.maxInstancesPerBatch=513;const r=run(':48',d);assert(r.issues.some(x=>x.code==='MESH_ABI'));assert(r.issues.some(x=>x.code==='BATCH_BUDGET'))});
+test('rejects absent source descriptor',()=>assert.equal(run(':24',null).level,'NOT_VERIFIED'));

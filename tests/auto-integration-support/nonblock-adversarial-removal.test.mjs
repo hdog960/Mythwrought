@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditAdversarialRemoval} from '../../src/auto-integration-support/nonblock-adversarial-removal.mjs';
+const source=()=>({verifiedByRunner:true,sources:[':24',':36',':48'].map(lane=>({lane,headSha:'a'.repeat(40),blobSha:'b'.repeat(40),byteVerified:true}))});
+const obj=(id,x)=>({contract:'nonblock-object-v1',sceneId:id,seed:17,anchor:[x,0,0],variant:0,instanceKey:'nb1:'+encodeURIComponent(id)+':17:'+x+',0,0:0',selectionAabbs:[{min:[x,0,0],max:[x+0.5,1,0.5]}],persistence:{key:'nb1:'+encodeURIComponent(id)+':17:'+x+',0,0:0',defaultRespawn:'never-until-explicit-reset'},breakIntent:{action:'remove-object',targetKey:'nb1:'+encodeURIComponent(id)+':17:'+x+',0,0:0',requiresOwner:':00'}});
+const objects=()=>[obj('scene48:low-grass',0),obj('scene48:short-fern',3)];
+const producer=()=>({pickNonblockRay:(o)=>({instanceKey:o[0].instanceKey}),createNonblockSidecar:(seed)=>{let removed=new Set();return {visible:os=>os.filter(o=>!removed.has(o.instanceKey)),breakObject:o=>removed.add(o.instanceKey),snapshot:()=>({seed,tombstones:[...removed]}),restore:s=>{if(s.seed!==seed)throw Error('seed');removed=new Set(s.tombstones)}};}});
+const run=(patch={})=>auditAdversarialRemoval({producer:producer(),provenance:source(),seed:17,descriptors:objects(),...patch});
+test('injected producer sidecar succeeds but is explicitly not live',async()=>{const r=await run();assert.equal(r.ok,true);assert.equal(r.live,false);assert.equal(r.breakabilityReady,false)});
+test('missing source bytes proof fails closed',async()=>assert.equal((await run({provenance:{}})).code,'UNAUTHENTICATED_SOURCE_BYTES'));
+test('unverified producer blob fails closed',async()=>{const p=source();p.sources[1].byteVerified=false;assert.equal((await run({provenance:p})).ok,false)});
+test('duplicate identity rejected',async()=>assert.equal((await run({descriptors:[objects()[0],objects()[0]]})).code,'DUPLICATE_INSTANCE_KEY'));
+test('render-only object rejected',async()=>{const os=objects();delete os[0].breakIntent;assert.equal((await run({descriptors:os})).code,'INVALID_OBJECT_CONTRACT')});
+test('unbounded selection rejected',async()=>{const os=objects();os[0].selectionAabbs[0].max[0]=Infinity;assert.equal((await run({descriptors:os})).code,'INVALID_OBJECT_CONTRACT')});
+test('cross-seed descriptor rejected',async()=>{const os=objects();os[0].seed=18;assert.equal((await run({descriptors:os})).code,'INVALID_OBJECT_CONTRACT')});
+test('missing sidecar interface rejected',async()=>assert.equal((await run({producer:{}})).code,'MISSING_PRODUCER_EXPORT'));
+test('wrong pick rejected',async()=>{const p=producer();p.pickNonblockRay=()=>null;assert.equal((await run({producer:p})).code,'PICK_FAILED')});
+test('broken neighbor preservation rejected',async()=>{const p=producer();p.createNonblockSidecar=()=>({visible:()=>[],breakObject:()=>{},snapshot:()=>({}),restore:()=>{}});assert.equal((await run({producer:p})).code,'INITIAL_VISIBILITY')});

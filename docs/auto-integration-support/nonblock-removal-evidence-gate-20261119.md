@@ -1,0 +1,4 @@
+# :12 removal evidence gate — 2026-11-19
+Opt-in, non-production, no imports from unmerged producer branches. Gate requires source commit pin, namespaced identity, unchanged seed/neighbors/world edits, PICK → REMOVE → tombstone → schema-1 cold reload, backup evidence and three landscape capture digests. Declared provenance is insufficient for real acceptance; passing fixtures remain live:false.
+Source metadata checkpoints (GitHub PR API, not byte authenticated): :48 #226 a5bddc3577fba786654e61d70d4c7aabd3f21491; :24 #247 dcb48cd3dbb68282d5aa88e768238d9edca96d29; :36 #249 f87889c6be2c9745b257dc602c3f5d0ed0300124; old :12 #206 aedabf1d3e6250f16e3495ec77bdc056fafc1f46; previous :12 #245 aa0ae6d6e337b0d182df2057471a5b67c39e7d8c.
+Next: independently authenticate Git trees, run committed tests, acquire genuine :00 callback evidence and actual browser captures. Do not enable scene spawning or claim live integration.

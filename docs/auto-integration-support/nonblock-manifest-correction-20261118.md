@@ -1,0 +1,7 @@
+# :12 manifest correction — 2026-11-18
+
+Scope: draft PR #245 only. The earlier manifest preflight incorrectly assigned :48 slots 1–36. Actual inspected :48 `src/nonblock-scene48/nonblock-object-v1.mjs` exports `NONBLOCK_FAMILIES` with namespaced scene IDs and `nonblockInstanceKey`; it does not allocate numeric family slots. The revised manifest accepts an absent `familyNumber` for scene48 and rejects invented scene48 numeric allocations. :24 retains declared 37–60, :36 retains 61–84; neither is a numeric block ID. This change never registers assets or writes save core.
+
+Evidence: inspected source at branch `auto-48-nonblock-flora-phase1-20261117`, without independent commit SHA authentication. The :12 manifest and three additional regression tests were committed. Node execution from exact GitHub HEAD and Chromium/WebGL2 captures are NOT VERIFIED because direct checkout DNS failed. Declared source SHA fields remain unauthenticated; passing fixtures cannot certify production interaction or schema-1 persistence.
+
+Owner handoff: :48 should publish a source-exact family registry and stable descriptor version; :24 should reconcile object-shaped anchors/local selection boxes; :36 and :00 must decide whether orientation affects canonical identity and tombstones. :00 alone owns real PICK→BREAK→TOMBSTONE→schema-1 RELOAD. No automatic spawning, renderer registration, or producer writes are permitted here.

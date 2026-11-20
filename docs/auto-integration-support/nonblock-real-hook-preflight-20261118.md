@@ -1,0 +1,8 @@
+# :12 non-block real-hook preflight — 2026-11-18
+This is a **non-production, opt-in** compatibility gate, not an object producer or a live bridge. Source metadata must be independently authenticated by the runner against exact GitHub commit/tree/blob objects; the `verifiedAtHead` flag alone is **not** proof. Static checks never set `live:true`. The lifecycle witness invokes externally injected callbacks but cannot establish their provenance; mock passes must not be called :00 acceptance.
+
+Observed PR HEADs at authoring: :48 #226 `4e63bc41af205cafe08fc7beeaf5b7f639d8f465`, :24 #247 `f2b915d14b117de39ec2bd78558d859c6f29bde1`, :36 #249 `b2d7548d63de81a379e79d673f2213094a5122c7`, historical :12 #206 `aedabf1d3e6250f16e3495ec77bdc056fafc1f46`. These are metadata checkpoints, not full authenticated source acceptance.
+
+Observed :48 contract at HEAD `4e63bc41af205cafe08fc7beeaf5b7f639d8f465`: `nonblock-object-v1.mjs` blob `33ee82e68be152586548bc0975cd11d0cca5dffa` exports `NONBLOCK_OBJECT_VERSION`, `describeNonblockObject`, `pickNonblockRay`, `createNonblockSidecar`; descriptors expose `selectionAabbs`, `breakIntent`, `collisionIntent`, `attachment`, and `render`. This producer sidecar is disposable and does not prove real schema-1 persistence.
+
+Outstanding: exact source tree verification for all three producers; :36 orientation identity compatibility; :00 authenticated pick/remove/schema-1 save/reload/backup; real Chromium WebGL2 at 667x375, 844x390, 932x430. No default spawning, runtime registration, save edits, deployment or production merge permitted. Old cave PRs and :12 PR #206 remain frozen. Next: bind real authenticated :00 callbacks and add screenshot/hash witnesses.

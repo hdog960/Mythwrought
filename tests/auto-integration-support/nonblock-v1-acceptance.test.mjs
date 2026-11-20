@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateNonblockCandidates,verifyRemovalRoundTrip} from '../../src/auto-integration-support/nonblock-v1-acceptance.mjs';
+const sample=(id='scene48:low-grass')=>({contract:'nonblock-object-v1',sceneId:id,seed:17,anchor:[0,0,0],variant:0,instanceKey:'nb1:'+encodeURIComponent(id)+':17:0,0,0:0',selectionAabbs:[{min:[-.3,0,-.3],max:[.3,1,.3]}],collisionIntent:'pass-through',breakIntent:{action:'remove-object',targetKey:'nb1:'+encodeURIComponent(id)+':17:0,0,0:0',requiresOwner:':00'},persistence:{kind:'schema1-external-tombstone-sidecar',key:'nb1:'+encodeURIComponent(id)+':17:0,0,0:0',defaultRespawn:'never-until-explicit-reset'},render:{triangleCount:12,instanced:true,maxInstancesPerBatch:512}});
+test('valid descriptor is fixture-only',()=>assert.equal(validateNonblockCandidates({objects:[sample()],seed:17}).level,'DESCRIPTOR_FIXTURE_ONLY'));
+test('reject duplicate identity',()=>assert.equal(validateNonblockCandidates({objects:[sample(),sample()],seed:17}).ok,false));
+test('reject unbreakable object',()=>{const x=sample();delete x.breakIntent;assert.equal(validateNonblockCandidates({objects:[x],seed:17}).ok,false)});
+test('reject mismatched tombstone',()=>assert.equal(validateNonblockCandidates({objects:[sample()],seed:17,removedKeys:['nb1:other']}).ok,false));
+test('reject triangle budget',()=>{const x=sample();x.render.triangleCount=999999;assert.equal(validateNonblockCandidates({objects:[x],seed:17}).ok,false)});
+test('reject wrong seed',()=>assert.equal(validateNonblockCandidates({objects:[sample()],seed:18}).ok,false));
+test('external callback roundtrip is explicitly not persistence proof',()=>{const removed=new Set();const sidecar={breakObject:o=>{removed.add(o.instanceKey);return {instanceKey:o.instanceKey,removed:true}},snapshot:()=>({seed:17,contract:'nonblock-object-v1',tombstones:[...removed]}),restore:s=>{removed.clear();s.tombstones.forEach(k=>removed.add(k))},visible:objects=>objects.filter(o=>!removed.has(o.instanceKey))};assert.equal(verifyRemovalRoundTrip({objects:[sample()],seed:17,sidecar,pick:objects=>({instanceKey:objects[0].instanceKey}),origin:[0,0,0],direction:[1,0,0]}).level,'EXTERNAL_CALLBACK_FIXTURE_ONLY')});

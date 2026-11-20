@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {verifyNonblockRemovalIsolation as check} from '../../src/auto-integration-support/nonblock-removal-isolation.mjs';
+const sha='a'.repeat(40);
+const provenance={scene48:sha,environments24:sha,fittings36:sha,interaction00:sha};
+const obj=(key,owner,sceneId)=>({instanceKey:key,owner,sceneId,selectionAabbs:[{}],breakIntent:{action:'remove-object',targetKey:key}});
+const a='nb1:a:1:0,0,0:0',b='nb1:b:1:1,0,0:0';
+const base=()=>({descriptors:[obj(a,':48','a'),obj(b,':24','b')],removedKey:a,tombstonesAfter:[a],restoredKeys:[b],provenance});
+test('isolated fixture removal never claims schema1 proof',()=>{const r=check(base());assert.equal(r.ok,true);assert.match(r.status,/NOT_SCHEMA1_PROOF/);});
+test('rejects respawn',()=>assert.ok(check({...base(),restoredKeys:[a,b]}).errors.includes('REMOVED_OBJECT_RESPAWNED')));
+test('rejects lost neighbor',()=>assert.ok(check({...base(),restoredKeys:[]}).errors.includes('NEIGHBOR_DISAPPEARED')));
+test('rejects missing producer provenance',()=>assert.ok(check({...base(),provenance:{}}).errors.includes('UNAUTHENTICATED_scene48')));
+test('rejects duplicate tombstones',()=>assert.ok(check({...base(),tombstonesAfter:[a,a]}).errors.includes('DUPLICATE_TOMBSTONE')));
+test('rejects duplicate instance identity',()=>assert.ok(check({...base(),descriptors:[obj(a,':48','a'),obj(a,':24','b')]}).errors.includes('DUPLICATE_INSTANCE_KEY')));
+test('rejects unbreakable objects',()=>assert.ok(check({...base(),descriptors:[{...obj(a,':48','a'),breakIntent:null},obj(b,':24','b')]}).errors.includes('UNBREAKABLE_OR_WRONG_TARGET')));
+test('rejects old tombstone loss',()=>assert.ok(check({...base(),tombstonesBefore:['old']}).errors.includes('PREVIOUS_TOMBSTONE_LOST')));
