@@ -8,6 +8,7 @@ on:
       - tests/gpu-edit-staging.test.mjs
       - tests/depth-mesh-incremental.test.mjs
       - tests/rapid-vertical-dig-browser.mjs
+      - tests/rapid-deep-player-browser.mjs
       - .github/workflows/iphone-deep-mining-acceptance.yml
 permissions:
   contents: read
@@ -28,6 +29,7 @@ jobs:
           node --check tests/gpu-edit-staging.test.mjs
           node --check tests/depth-mesh-incremental.test.mjs
           node --check tests/rapid-vertical-dig-browser.mjs
+          node --check tests/rapid-deep-player-browser.mjs
           npm test
       - name: Install genuine Chromium test driver
         run: |
@@ -44,6 +46,7 @@ jobs:
           python3 -m http.server 4174 --directory baseline-main >/tmp/iphone-dig-baseline.log 2>&1 &
           DIG_PORT=4174 DIG_BASELINE=1 node tests/rapid-vertical-dig-browser.mjs
           DIG_PORT=4173 node tests/rapid-vertical-dig-browser.mjs
+          node tests/rapid-deep-player-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
