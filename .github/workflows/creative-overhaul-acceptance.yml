@@ -1,0 +1,58 @@
+name: Creative Overhaul — genuine isolated acceptance (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/creative-integration/**'
+      - 'tests/creative-*.test.mjs'
+      - 'tests/creative-integration/**'
+      - 'src/main.mjs'
+      - 'styles.css'
+  workflow_dispatch:
+
+# Never alters main, installed PWA assets or saves; no deploy permissions.
+permissions:
+  contents: read
+
+concurrency:
+  group: creative-overhaul-acceptance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  original-creative-webgl2:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.number == 292
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify untouched full native contracts and new Creative safety invariants
+        run: |
+          node --check src/main.mjs
+          node --check src/creative-integration/player-menu.mjs
+          node --check src/creative-integration/world-safety.mjs
+          node --check tests/creative-integration/g2b-browser.mjs
+          node --check tests/creative-integration/world-safety-browser.mjs
+          npm test
+      - name: Install pinned Chromium WebGL2 acceptance dependencies
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Genuine current-only restore, mobile Creative inventory and flight
+        run: |
+          python3 -m http.server 4174 > /tmp/mythwrought-creative-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4174/ > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4174/ > /dev/null
+          node tests/creative-integration/world-safety-browser.mjs
+          node tests/creative-integration/g2b-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-creative-real-browser
+          path: artifacts/
+          if-no-files-found: ignore
