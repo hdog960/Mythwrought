@@ -27,7 +27,7 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,fourRegionProfile,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
@@ -96,6 +96,7 @@ else start();
 function start(){
   let gameplayRecorder=null;
   let world,storageReadOnly=false,recoveryNote='',caveSession=null,caveOps=null;
+  let mustChooseCurrentWorld=false;
   function loadWorld(seed){
     // Legacy startup must NEVER silently reuse a seed reserved for the
     // creator's explicitly chosen new cave profile sidecar.
@@ -115,13 +116,31 @@ function start(){
     if(p2.recovered||p2.warning)recoveryNote=p2.warning||recoveryNote;
     return p2.world;
   }
+  // CURRENT-ONLY ENTRY: an old or unknown generator must never silently
+  // become the playable world. Show a protected, UNSAVED current-gen preview
+  // behind the new-world confirmation instead; legacy bytes remain untouched.
   try{
     const choice=localStorage.getItem(SELECTED_SEED_KEY);
-    world=loadWorld(choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice));
+    const requested=choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice);
+    const profile=readFourRegionProfile(localStorage,requested);
+    if(profile?.profile?.generator===CURRENT_INSTALLED_GENERATOR){
+      world=loadWorld(requested);
+    }else{
+      mustChooseCurrentWorld=true;storageReadOnly=true;
+      const previewSeed=chooseUnusedCurrentSeed(localStorage,secureRandomWorldSeed);
+      world=new Pack2LiveWorld(new FourRegionWorld(previewSeed,
+        fourRegionProfile(previewSeed,CURRENT_INSTALLED_GENERATOR)));
+      recoveryNote='The previous world is preserved but uses older or unknown terrain. '+
+        'Choose NEW WORLD to enter the current installed generation.';
+    }
   }catch(err){
-    // A damaged seed is NEVER replaced by auto-saving a fresh starter world.
-    storageReadOnly=true;world=new Pack2LiveWorld(new VoxelWorld(DEFAULT_WORLD_SEED));
-    recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
+    // Protect damaged metadata/edits. Never load obsolete terrain as a
+    // fallback, never convert or save a damaged world by guessing a version.
+    mustChooseCurrentWorld=true;storageReadOnly=true;
+    world=new Pack2LiveWorld(new FourRegionWorld(DEFAULT_WORLD_SEED,
+      fourRegionProfile(DEFAULT_WORLD_SEED,CURRENT_INSTALLED_GENERATOR)));
+    recoveryNote='SAVE PROTECTION: '+err.message+
+      ' · Old saved data untouched. Confirm a new current world to play.';
   }
   let pack3=createPack3LiveBridge(world,localStorage);
   // Only a previously selected immutable v5 world may opt into M5 PWA caching.
@@ -2195,6 +2214,7 @@ function start(){
   }
   document.getElementById('menu').onclick=()=>{gameplayRecorder?.interrupt('Settings opened');cancelAllPointers();help.hidden=false;};
   document.getElementById('closeHelp').onclick=()=>{
+    if(mustChooseCurrentWorld){message('Choose NEW WORLD before gameplay; previous world is preserved');return;}
     cancelAllPointers();help.hidden=true;
     // Return keyboard/gamepad-like input focus to world after closing modal.
     canvas.focus({preventScroll:true});
@@ -3180,10 +3200,16 @@ function start(){
       if(!stored.ok)throw Error('New world not verified: '+stored.reason);
       enterPreparedM2World(loaded.world,'New current-generation world '+next+
         ' · old worlds and saves remain protected');
+      mustChooseCurrentWorld=false;
       document.getElementById('closeHelp').click();
     },
     onClose:()=>document.getElementById('closeHelp').click()
   });
+  if(mustChooseCurrentWorld){
+    help.hidden=false;
+    playerSettings.showStatus('An earlier world is safely archived. '+
+      'Choose NEW WORLD to create the current installed generation.');
+  }
   saveHealth.textContent=storageReadOnly?
     'READ ONLY: damaged world data preserved; import or select another seed.':
     'Schema-1 saved edits; checksum journal and verified previous-world backup.';
