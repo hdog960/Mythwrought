@@ -404,3 +404,24 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .mw-inventory-hotbar .mw-inventory-slot{height:29px}
   .creative-inventory-toggle{padding:1px 3px;max-width:45px}
 }
+
+
+.mw-creative-quickbar{position:absolute;bottom:7px;left:50%;
+  transform:translateX(-50%);display:flex;gap:4px;z-index:4;
+  border:1px solid #b6a478;border-radius:9px;padding:3px;
+  background:#152529bf;touch-action:manipulation}
+.mw-creative-quickbar[hidden],.mw-creative-air-tools[hidden]{display:none!important}
+.mw-creative-quickbar .mw-inventory-slot{width:32px;height:30px;font-size:16px;
+  background:linear-gradient(#4c5b52,#253d41);touch-action:manipulation}
+.mw-creative-quickbar .mw-inventory-slot.active{outline:2px solid #ffe3a0}
+.mw-creative-air-tools{position:absolute;right:4px;bottom:50px;z-index:4;
+  display:flex;flex-direction:column;gap:4px}
+.mw-creative-air-tools button{border:1px solid #e7c889;border-radius:7px;
+  background:#293d4fdf;color:#ffedd0;font-weight:850;font-size:10px;
+  min-height:29px;padding:4px 7px;touch-action:manipulation}
+@media(max-width:710px){
+  .mw-creative-quickbar .mw-inventory-slot{width:26px;height:26px}
+  .mw-creative-quickbar{bottom:3px;padding:2px}
+  .mw-creative-air-tools{right:2px;bottom:38px}
+  .mw-creative-air-tools button{min-height:24px;padding:2px 4px;font-size:9px}
+}
