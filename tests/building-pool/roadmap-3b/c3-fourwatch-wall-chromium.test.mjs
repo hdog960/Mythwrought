@@ -144,7 +144,9 @@ test('C3 original closed city wall captures six genuine Chromium WebGL2 exterior
   assert.equal(new Set(reports.map(r=>r.sha256)).size,6,'nonunique source PNG screenshot evidence');
   const exactSourceCommit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   assert.match(exactSourceCommit,/^[0-9a-f]{40}$/);
-  const summary={exactSourceCommit,source:'Roadmap C Fourwatch original temperate small city-wall source-cube evidence',renderer:'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES',
+  const sourceModulePath='src/building-pool/roadmap-3b/c3-fourwatch-closed-city-wall.mjs';
+  const sourceModuleSha256=createHash('sha256').update(await readFile(sourceModulePath)).digest('hex');
+  const summary={exactSourceCommit,sourceModulePath,sourceModuleSha256,source:'Roadmap C Fourwatch original temperate small city-wall source-cube evidence',renderer:'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES',
    physicalFamilyShapesRendered:false,creatorArtApproved:false,physicalIPhoneTested:false,
    count:reports.length,reports};
   await writeFile(join(output,'acceptance.json'),JSON.stringify(summary,null,2)+'\n');
