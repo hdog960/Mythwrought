@@ -12,9 +12,12 @@ import {activateFourRegionProfile} from '../src/manual-biomes/profile-storage.mj
 import {createCandidateScene} from '../src/nonblock/candidate-scene.mjs';
 import {planStagedHabitat} from '../src/nonblock/staged-habitats.mjs';
 
-const seed=179, width=932, height=430;
+const landscapeSizes={'667x375':[667,375],'844x390':[844,390],'932x430':[932,430]};
+const viewport=process.env.NONBLOCK_PARITY_VIEWPORT??'932x430';
+assert.ok(Object.hasOwn(landscapeSizes,viewport),'Unknown landscape parity viewport');
+const seed=179,[width,height]=landscapeSizes[viewport];
 const origin=process.env.NONBLOCK_PARITY_ORIGIN||'http://127.0.0.1:4173';
-const directory='artifacts/nonblock-parity';
+const directory='artifacts/nonblock-parity'+(viewport==='932x430'?'':'-'+viewport);
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const fixtures=[
   {habitat:'meadow',pose:[9.5,4.5],point:[9.8,10.6,7.9],sites:[

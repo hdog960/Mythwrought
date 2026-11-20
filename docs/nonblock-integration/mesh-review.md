@@ -66,6 +66,12 @@ The original-source review above remains the record of what arrived from the fiv
 
 Earlier landscape frames showed the bracken and toadstools alongside richer authored foliage and fungi. The matched undergrowth views below verify revisions to six shapes and four previously aliased variants. The biome and cave comparisons below show the other revisions on natural mounts. [Representative authored foliage and fungi](gallery/enchanted-fungi/manifest.json)
 
+## Mixed-scene visual review
+
+The overview and focus frames pair inherited and newly authored shapes in the same seeded scene, light and render preset. The meadow flowers and seed heads read at standing height. Low grass and small clover are easiest to identify near the player. In the desert, the thick agave blades, cactus stem and open tumblebrush separate clearly against sand. The pale snow grasses retain a low profile, with their darker stems most visible in the focus frame. Mountain pebbles and small evergreens are less distinct against the highly patterned ground. [Meadow](gallery/mixed-v19/meadow-focus.png) · [Desert](gallery/mixed-v19/desert-overview.png) · [Snow](gallery/mixed-v19/snow-focus.png) · [Mountain](gallery/mixed-v19/mountain-overview.png)
+
+The amber lantern mushroom and faceted authored fungi share consistent scale on the enchanted floor. The fittings view shows the refined signpost beside the authored brazier and fuel pile. Underground, the blue crystal tips, gold mineral patch and layered dripstone are visually distinct. The overview gives a clearer sense of the ceiling mounts than the tight cave focus. Creator review should address grass and pebble contrast on the target screen, the default viewing distance for narrow cave details, and the apparent strength of the enchanted glow at the same render preset. [Enchanted](gallery/mixed-v19/enchanted-focus.png) · [Fittings](gallery/mixed-v19/fittings-focus.png) · [Cave](gallery/mixed-v19/cave-overview.png)
+
 ## First in-game comparisons
 
 Both pairs use the original seed, camera position and mobile viewport. Aim shifted slightly to hit the revised geometry. The captures include the actual game, not the isolated mesh preview.

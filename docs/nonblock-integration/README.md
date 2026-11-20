@@ -2,7 +2,17 @@
 
 The roster has 96 source-backed and browser-tested slots. Standard game actions cover 72 removable scenery families and 12 existing Block Pack roles. The 12 environmental effects have draw, animation and lifecycle evidence. All three landscape viewports have Chromium evidence. Final visual parity, device frame-time and physical iPhone acceptance remain open. [Master draft PR #285](https://github.com/hdog960/Mythwrought/pull/285) · [Catalog and evidence](catalog.md) · [Home Screen release hold](release-hold.md)
 
-The retrospective audit inspected 43 inherited meshes. The staged quality pass has rebuilt seven and refined fifteen. The other inherited meshes retain their original source geometry at this checkpoint. Matched captures cover the banner, rope, signpost, chain, meadow foliage and forest floor revisions. [Individual mesh decisions and captures](mesh-review.md)
+The retrospective audit inspected all 43 inherited meshes. The staged quality pass rebuilt seven and refined 36. Each has a recorded disposition and an in-game lifecycle. The matched gallery covers the changes from the original automation sources through the current models. [Individual mesh decisions and captures](mesh-review.md)
+
+| Evidence | Reference |
+| --- | --- |
+| Production baseline, protected source heads and five-lane provenance | [Production and source provenance](#production-and-source-provenance) · [Path and commit ledger](source-ledger.tsv) |
+| 96 slots, native and in-game acceptance, physical owners and effect lifetimes | [Catalog and lifecycle matrix](catalog.md) |
+| Inherited review and matched revisions | [Before-and-after gallery](mesh-review.md) |
+| Mixed habitats, GPU bytes and software-rendered frame timings | [Mixed game scenes](#stage-v19-art-and-integration) |
+| Ordinary controls, exact picks, save recovery and offline startup | [Gameplay and offline evidence](#browser-catalog-coverage) · [Same-install rehearsal](release-hold.md#stage-v21-activation-cleanup) |
+| Current draft and verification results | [PR #285 and checks](https://github.com/hdog960/Mythwrought/pull/285) |
+| Original Home Screen preparation, rollback and physical acceptance | [Creator procedure and device requirements](release-hold.md) |
 
 ## Production and source provenance
 
@@ -59,6 +69,8 @@ At the first staging checkpoint, all five samples awaited final art and mobile p
 ## Reproduction
 
 Run `npm test` and `node --test tests/ci/*.test.mjs` for native and CI contracts. Install the CI-pinned Playwright and pngjs versions, serve the repo on loopback port 4173, and run `node tests/nonblock-runtime-browser.mjs` for the staged browser evidence and capture manifest. The standard CI gate lists the existing 20 browser checks.
+
+Run `node tests/nonblock-parity-browser.mjs` for the seven mixed scenes at 932 × 430. Set `NONBLOCK_PARITY_VIEWPORT` to `667x375` or `844x390` to replay the same mounts, camera poses, touch removal and cold reopen in those layouts. The alternate sizes use distinct artifact directories.
 
 ## Expanded catalog checkpoint
 

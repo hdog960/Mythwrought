@@ -96,7 +96,8 @@ export async function verifyStageEvidenceGroup(root,group) {
     {file:prefix+'/cold-offline-932x430.png',sha256:data.screenshotSha256}
   ];
   if(!Array.isArray(shots)||shots.length===0)throw new Error(group+' has no screenshots');
-  if(group==='nonblock-parity')verifyParityScenes(data,shots);
+  const paritySize=/^nonblock-parity(?:-(667x375|844x390))?$/.exec(group);
+  if(paritySize)verifyParityScenes(data,shots);
   const verified=[];
   for(const shot of shots){
     const path=shot.path??shot.file??shot.filename;
@@ -106,7 +107,8 @@ export async function verifyStageEvidenceGroup(root,group) {
     const bytes=await readFile(inside(root,path));
     if(bytes.length<33)throw new Error(group+' screenshot missing PNG header');
     const width=bytes.readUInt32BE(16), height=bytes.readUInt32BE(20);
-    if(!sizes.has(width+'x'+height)||shot.width!==undefined&&shot.width!==width||
+    const size=width+'x'+height;
+    if(!sizes.has(size)||paritySize&&size!==(paritySize[1]??'932x430')||shot.width!==undefined&&shot.width!==width||
       shot.height!==undefined&&shot.height!==height)throw new Error(group+' screenshot size mismatch');
     const result=verifyPngEvidence(bytes.toString('base64'),{width,height,sha256:shot.sha256});
     if(!result.ok)throw new Error(path+' '+result.reason);

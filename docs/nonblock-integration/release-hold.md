@@ -15,6 +15,8 @@ The active release remains the original GitHub Pages deployment and the installe
 
 Use the existing Pages repository and installation URLs. Recheck the release commit and previous successful Pages build before any incorporation. Publish a new cache identity only with verified manifest bytes. Keep the prior shell available until the new shell is validated through a real same-install cold-open. Keep scene-removal state in its own versioned storage. Confirm untouched worlds and backups by matching their exact saved bytes.
 
+The approved production handoff should give the ordinary startup path a layout only for an explicitly opted-in new world. Keep that choice scoped to the world and generation profile. Resolve its mounts through `planStagedHabitat` and pass the valid layout to the existing scene runtime. The current loopback query remains a local test interface. Include the approved scene assets in the original worker's versioned shell and verify the full manifest from the incorporation revision. Exercise the same update and recovery sequence on a disposable copy of the installed data before creator sign-off.
+
 After publication, verify the Pages commit, app shell and manifest from the original URL. On the installed device test online and offline startup, original controls, Creative and minimap continuity, ordinary block mining, opt-in scenery lifecycle, and opening and exporting an existing world. Record the observed build, device, orientation and source fingerprints.
 
 ## Recovery

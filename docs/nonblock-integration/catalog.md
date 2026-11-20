@@ -2,7 +2,7 @@
 
 The names for empty slots in groups A, B, C and H are working names. Clover clump and clover patch, and moss cushion and moss mat, occupy provisional separate slots. A later design review can consolidate a pair if its gameplay roles are too similar while keeping the source IDs and saved removal state.
 
-“Native + Chromium” means exact-triangle selection, the existing MINE control, a verified tombstone and a fresh page were exercised against seeded terrain in the actual game. “Owner placement + reload” uses the existing Block Pack geometry and save path. Effect rows cover animation and the shared render pass. Final art, device, biome placement and performance gates are open.
+“Native + Chromium” means exact-triangle selection, the existing MINE control, a verified tombstone and a fresh page were exercised against seeded terrain in the actual game. “Owner placement + reload” uses the existing Block Pack geometry and save path. Effect rows cover animation and the shared render pass. Opt-in mounts have desktop evidence for the seeded biomes and caves. Creator art approval, frame timing on the target iPhone and acceptance on the existing Home Screen install remain open. [Mixed scenes and measurements](README.md#stage-v19-art-and-integration) · [Device checklist](release-hold.md#evidence-to-collect-on-the-target-iphone)
 
 | Slot | Group | Family | Scene ID | Source | Staging evidence |
 | ---: | :---: | --- | --- | --- | --- |
