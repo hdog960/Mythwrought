@@ -1,0 +1,46 @@
+name: MYTHWROUGHT Builder D Wave7 actual source WebGL2 acceptance (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave7.mjs'
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave7*'
+      - 'tests/building-pool/roadmap-d/audit-wave7-gallery.mjs'
+      - 'tests/roadmap-d-wave7.test.mjs'
+      - '.github/workflows/roadmap-d-d7-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-d-wave7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  builder-d-wave7-real-chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require original 153 plus 52 D1-D7 = 205 source buildings, 784 bidirectional D4 pairs
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave7.test.mjs
+      - name: Recheck strict historical D5 repairs and all original D6 contracts, without weakening
+        run: node --test tests/building-pool/roadmap-d/d5-historical-bidirectional-d4.test.mjs tests/building-pool/roadmap-d/d1-original-institutions-wave6.test.mjs
+      - name: Require actual Chromium binary, never fake accepted source screenshots
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+      - name: Install exact PNG decoder for independent image CRC and source checks
+        run: npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Render 8 originals x exterior and true section views x three phone landscape dimensions in actual Chromium WebGL2
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave7-webgl2.test.mjs
+      - name: Verify all 48 real images with decoded CRC, image SHA, source SHA, camera/GL integrity and cutaway provenance
+        run: node tests/building-pool/roadmap-d/audit-wave7-gallery.mjs
+      - name: Preserve authentic 48 WebGL2 source-only captures for separate human review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-wave7-48-genuine-webgl2-source-frames
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave7-webgl2-cube-proxy/
+          if-no-files-found: ignore
