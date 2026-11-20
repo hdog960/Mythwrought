@@ -1,0 +1,228 @@
+{
+  "schema": "mythwrought.builder-b.1b.wave3-fishing-settlement-handoff.v1",
+  "status": "PROVISIONAL_SOURCE_ONLY_NOT_ACCEPTED",
+  "pr": 307,
+  "sourceModule": "src/building-pool/roadmap-b/builder-b-essentials-wave3.mjs",
+  "immutableGitSourceBlob": "23bb594889beab3cf27b43c95cab5e9c7debb76f",
+  "ownershipFreeze": "docs/building-pool/roadmap-b/BUILDER_BD_EXCLUSIVE_1B_FREEZE.json",
+  "B115ReservationChecked": true,
+  "D92Untouched": true,
+  "blueprint": {
+    "id": "r1:fishing-lodge:temperate:small:002",
+    "title": "Sedgewatch Tidehook Fishing Lodge",
+    "category": "fishing-lodge",
+    "biome": "temperate",
+    "size": "small",
+    "sourceCoordinateFNV64": "79bbbd12995e15b8",
+    "plot": {
+      "width": 43,
+      "height": 25,
+      "depth": 43
+    },
+    "roadFacing": "north",
+    "entrancesAndPortals": [
+      {
+        "from": "outside",
+        "to": "north-river-register",
+        "at": [
+          20,
+          1,
+          2
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "north-river-register",
+        "to": "west-net-repair-bay",
+        "at": [
+          15,
+          1,
+          12
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "north-river-register",
+        "to": "east-navigation-chart-room",
+        "at": [
+          27,
+          1,
+          12
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "north-river-register",
+        "to": "central-covered-passage",
+        "at": [
+          22,
+          1,
+          12
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "west-net-repair-bay",
+        "to": "central-covered-passage",
+        "at": [
+          16,
+          1,
+          22
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "east-navigation-chart-room",
+        "to": "central-covered-passage",
+        "at": [
+          27,
+          1,
+          23
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "central-covered-passage",
+        "to": "rear-kitchen-and-mess",
+        "at": [
+          22,
+          1,
+          26
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "west-net-repair-bay",
+        "to": "outer-low-boat-kit-store",
+        "at": [
+          9,
+          1,
+          29
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      }
+    ],
+    "rooms": [
+      {
+        "id": "north-river-register",
+        "min": [
+          13,
+          1,
+          3
+        ],
+        "max": [
+          27,
+          5,
+          11
+        ]
+      },
+      {
+        "id": "west-net-repair-bay",
+        "min": [
+          5,
+          1,
+          11
+        ],
+        "max": [
+          15,
+          5,
+          30
+        ]
+      },
+      {
+        "id": "east-navigation-chart-room",
+        "min": [
+          27,
+          1,
+          11
+        ],
+        "max": [
+          37,
+          5,
+          25
+        ]
+      },
+      {
+        "id": "rear-kitchen-and-mess",
+        "min": [
+          14,
+          1,
+          26
+        ],
+        "max": [
+          31,
+          5,
+          37
+        ]
+      },
+      {
+        "id": "central-covered-passage",
+        "min": [
+          15,
+          1,
+          15
+        ],
+        "max": [
+          28,
+          5,
+          26
+        ]
+      },
+      {
+        "id": "outer-low-boat-kit-store",
+        "min": [
+          3,
+          1,
+          27
+        ],
+        "max": [
+          10,
+          5,
+          37
+        ]
+      }
+    ],
+    "walkableSourceCells": 791,
+    "authoredSourceVoxels": 4793,
+    "backedRoofCells": 1044,
+    "openAirAbsentFoundationColumns": 36,
+    "foundation": "level source stone base with project shoreline site/ground bearing verification",
+    "slopeShorelineRestrictions": "do not place automatically until real shoreline access, water boundary, slope, stilts and flooding rules certified",
+    "futureFixtures": [
+      "net repair",
+      "river chart office",
+      "dry tackle storage",
+      "guest mess"
+    ],
+    "fishingGameplay": false,
+    "fluidSimulation": false,
+    "worldPlaced": false,
+    "threeViewportEvidence": {
+      "sizes": [
+        "667x375",
+        "844x390",
+        "932x430"
+      ],
+      "views": [
+        "exterior",
+        "cutaway"
+      ],
+      "sourceWebGL2": "SCRIPT_COMMITTED_NOT_EXECUTED"
+    },
+    "renderingCollisionCost": "not measured; proxy source voxels only",
+    "remainingLimitations": [
+      "not actual final Pack textured artwork",
+      "true water/shoreline and landscape grading not implemented",
+      "roof weather seal, door sweep and actual player physical collider not certified",
+      "no actual iPhone screenshot or performance proof"
+    ]
+  }
+}
