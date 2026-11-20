@@ -146,6 +146,7 @@ function start(nonblockStage=null){
   function drawStagedScene(){
     const origin=eye();
     const scene=stagedScene();
+    canvas.dataset.nonblockSaveState=scene?(scene.recovered?'recovered':'ready'):'unavailable';
     const objects=scene?.visible().filter(({anchor})=>
       Math.hypot(anchor[0]-origin[0],anchor[1]-origin[1],anchor[2]-origin[2])<32)??[];
     const key=objects.map(o=>o.instanceKey).join('|');
@@ -806,7 +807,8 @@ function start(nonblockStage=null){
       const hit=scene?.pick(origin,direction);
       if(hit){
         const removed=scene.breakHit(hit,origin,direction);
-        message(removed?'Scenery removed · staged save verified':'Scenery removal could not be saved');
+        if(scene.recovered)message('Staged scenery recovered from backup · removals are read-only');
+        else message(removed?'Scenery removed · staged save verified':'Scenery removal could not be saved');
         return;
       }
     }

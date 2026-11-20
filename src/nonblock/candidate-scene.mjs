@@ -151,22 +151,33 @@ function validateTombstone(key,seed) {
     keyOf(sceneId,seed,anchor,Number(match[6]),Number(match[7]),family)===key;
 }
 
+function readSidecar(raw,{version,seed,worldId}) {
+  if(raw===null||raw.length>600_000)return null;
+  let snapshot;
+  try {snapshot=JSON.parse(raw);} catch {return null;}
+  if(snapshot?.version!==version||snapshot.seed!==seed||snapshot.worldId!==worldId||
+      !Array.isArray(snapshot.tombstones)||snapshot.tombstones.length>maxTombstones||
+      snapshot.tombstones.some(key=>!validateTombstone(key,seed))||
+      new Set(snapshot.tombstones).size!==snapshot.tombstones.length)return null;
+  return snapshot;
+}
+
 export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelPick,editedAt=()=>false}) {
   validateLayout(layout);
   const objects = layout.map(placement=>describeCandidateObject(seed,placement));
   if (new Set(objects.map(o=>o.anchor.join(','))).size !== objects.length)
     throw new TypeError('Duplicate nonblock staging anchor');
   const key = 'mythwrought:nonblock-stage:v1:'+encodeURIComponent(worldId)+':'+seed;
-  let raw = storage.getItem(key);
-  if (raw !== null && raw.length > 600_000) throw new TypeError('Oversized nonblock sidecar');
+  const backupKey = key+':previous-good';
+  const records = [key,backupKey].map(key=>({key,raw:storage.getItem(key)}));
   const expected = {version:sidecarVersion,seed,worldId};
-  const snapshot = raw === null ? {...expected,tombstones:[]} : JSON.parse(raw);
-  if (snapshot?.version!==expected.version || snapshot.seed!==seed || snapshot.worldId!==worldId ||
-      !Array.isArray(snapshot.tombstones) || snapshot.tombstones.length>maxTombstones ||
-      snapshot.tombstones.some(k=>!validateTombstone(k,seed)) ||
-      new Set(snapshot.tombstones).size!==snapshot.tombstones.length) throw new TypeError('Invalid nonblock sidecar');
+  const primary = readSidecar(records[0].raw,expected);
+  const backup = primary ? null : readSidecar(records[1].raw,expected);
+  const recovered = backup!==null;
+  const snapshot = primary??backup;
+  if(!snapshot&&records.some(record=>record.raw!==null))throw new TypeError('Invalid nonblock sidecar');
 
-  const removed = new Set(snapshot.tombstones);
+  const removed = new Set(snapshot?.tombstones??[]);
   const solid = objects.filter(o=>o.colliders.length>0);
   const ladders = objects.filter(o=>o.climbable);
   const issued = new WeakSet();
@@ -201,28 +212,32 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
     return best;
   }
   function breakHit(hit,origin,direction) {
-    if (!issued.has(hit) || hit.epoch!==epoch || uncertain || removed.size>=maxTombstones) return false;
+    if (!issued.has(hit) || hit.epoch!==epoch || recovered || uncertain || removed.size>=maxTombstones) return false;
     const current = pick(origin,direction);
     if (current?.instanceKey!==hit.instanceKey || Math.abs(current.distance-hit.distance)>1e-7) return false;
     const next = JSON.stringify({...expected,tombstones:[...removed,hit.instanceKey].sort()});
-    let attempted = false;
+    const attempted = [];
     try {
-      if (storage.getItem(key)!==raw) {uncertain=true; return false;}
-      attempted = true;
-      storage.setItem(key,next);
-      if (storage.getItem(key)!==next) throw new Error('Nonblock sidecar readback mismatch');
+      if(records.some(({key,raw})=>storage.getItem(key)!==raw)){uncertain=true;return false;}
+      for(const record of records){
+        if(storage.getItem(record.key)!==record.raw)throw new Error('Nonblock sidecar changed during write');
+        attempted.push(record);
+        storage.setItem(record.key,next);
+      }
+      if(records.some(({key})=>storage.getItem(key)!==next))throw new Error('Nonblock sidecar readback mismatch');
     } catch {
-      try {
-        // Restore only a value this attempt wrote. Never override another tab's data.
-        if (attempted && storage.getItem(key)===next) {
+      for(const {key,raw} of attempted.reverse()){
+        try {
+          if(storage.getItem(key)!==next)continue;
           if (raw===null) storage.removeItem(key);
           else storage.setItem(key,raw);
-        }
-        uncertain = storage.getItem(key)!==raw;
-      } catch {uncertain=true;}
+        } catch {uncertain=true;}
+      }
+      try {uncertain ||= records.some(({key,raw})=>storage.getItem(key)!==raw);}
+      catch {uncertain=true;}
       return false;
     }
-    raw=next;
+    for(const record of records)record.raw=next;
     removed.add(hit.instanceKey);
     epoch++;
     return true;
@@ -240,7 +255,7 @@ export function createCandidateScene(seed,worldId,layout,{storage,blockAt,voxelP
       x>=o.min[0]-.20&&x<=o.max[0]+.20&&z>=o.min[2]-.28&&z<=o.max[2]+.28&&
       feet+1.10>o.min[1]&&feet<o.max[1]+.18&&canAttach(o,blockAt,editedAt));
   }
-  return Object.freeze({visible,pick,breakHit,bodyIntersects,climbableAt});
+  return Object.freeze({visible,pick,breakHit,bodyIntersects,climbableAt,recovered});
 }
 
 export function candidateVertices(objects) {

@@ -11,9 +11,12 @@ const options=[
 ];
 const seed=179;
 const wildflower=describeCandidateObject(seed,options[0]).instanceKey;
+const rope=describeCandidateObject(seed,options[1]).instanceKey;
 const route=origin+'/?nonblock-stage='+encodeURIComponent(JSON.stringify(options))+'&nonblock-offline=1';
 const stageKey='mythwrought:nonblock-stage:v1:legacy:179';
+const backupKey=stageKey+':previous-good';
 const worldKey='mythwrought-v002-world-179';
+const saved=JSON.stringify({schema:1,seed,edits:[[100,12,100,3]]});
 const directory='artifacts/nonblock-offline';
 const browser=await chromium.launch({headless:true,args:[
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'
@@ -24,6 +27,9 @@ try{
   const context=await browser.newContext({
     viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1,serviceWorkers:'allow'
   });
+  await context.addInitScript(({worldKey,saved})=>{
+    if(localStorage.getItem(worldKey)===null)localStorage.setItem(worldKey,saved);
+  },{worldKey,saved});
   const page=await context.newPage();
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(route);
@@ -49,6 +55,7 @@ try{
     assert.equal(createHash('sha256').update(await readFile(file)).digest('hex'),expected,file);
   }
   const untouched=await page.evaluate(key=>localStorage.getItem(key),worldKey);
+  assert.equal(untouched,saved);
   await page.evaluate(()=>{
     window.__mythwroughtTest.teleport(10.5,5.5);
     window.__mythwroughtTest.aimAtStagedPoint(10.58387,9.6238,7.5254);
@@ -58,6 +65,7 @@ try{
   await count(page,1);
   const removed=await page.evaluate(key=>localStorage.getItem(key),stageKey);
   assert.deepEqual(JSON.parse(removed).tombstones,[wildflower]);
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),backupKey),removed);
 
   await page.close();
   await context.setOffline(true);
@@ -77,10 +85,29 @@ try{
   const image=await offline.screenshot({path:directory+'/cold-offline-932x430.png'});
   assert.deepEqual([image.readUInt32BE(16),image.readUInt32BE(20)],[932,430]);
   screenshotSha256=createHash('sha256').update(image).digest('hex');
-  const plain=await offline.goto(origin+'/');
+  const damaged='{"version":"interrupted';
+  await offline.evaluate(({stageKey,damaged})=>localStorage.setItem(stageKey,damaged),{stageKey,damaged});
+  await offline.close();
+  const recovered=await context.newPage();
+  recovered.on('pageerror',error=>errors.push(error.message));
+  assert.equal((await recovered.goto(route)).fromServiceWorker(),true);
+  await count(recovered,1);
+  assert.equal(await recovered.locator('#scene').getAttribute('data-nonblock-save-state'),'recovered');
+  await recovered.evaluate(()=>{
+    window.__mythwroughtTest.teleport(11.5,7.5);
+    window.__mythwroughtTest.aimAtStagedPoint(11.64314,9.10556,8.54205);
+  });
+  await recovered.waitForFunction(key=>document.querySelector('#scene').dataset.nonblockTarget===key,rope);
+  await recovered.locator('#dig').tap();
+  assert.match(await recovered.locator('#status').textContent(),/recovered from backup/);
+  await count(recovered,1);
+  const recoveredBytes=await recovered.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),
+    [stageKey,backupKey,worldKey]);
+  assert.deepEqual(recoveredBytes,[damaged,removed,untouched]);
+  const plain=await recovered.goto(origin+'/');
   assert.equal(plain.fromServiceWorker(),true);
-  await offline.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#scene').dataset.loadedChunks)===25);
-  assert.equal(await offline.locator('#scene').getAttribute('data-nonblock-instances'),null);
+  await recovered.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#scene').dataset.loadedChunks)===25);
+  assert.equal(await recovered.locator('#scene').getAttribute('data-nonblock-instances'),null);
   assert.deepEqual(errors,[]);
   await context.close();
 }finally{
@@ -91,6 +118,7 @@ const sourceSha256=Object.fromEntries(await Promise.all(
     .map(async file=>[file,createHash('sha256').update(await readFile(file)).digest('hex')])
 ));
 await writeFile(directory+'/manifest.json',JSON.stringify({
-  cachedAssets,sourceSha256,screenshotSha256,removed:[wildflower],schema1SaveBytesUnchanged:true
+  cachedAssets,sourceSha256,screenshotSha256,removed:[wildflower],schema1SaveBytesUnchanged:true,
+  damagedSidecarRecoveredOffline:true,recoveredSidecarReadOnly:true
 },null,2)+'\n');
-console.log('PASS staged offline cold-open preserves removal, draws the sibling and leaves ordinary loading opt-out.');
+console.log('PASS staged offline cold-open retained removal after sidecar damage and preserved both records and the schema-1 save.');

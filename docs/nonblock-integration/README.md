@@ -117,3 +117,9 @@ The latest physical test also placed the wall lantern through Pack 4 and used th
 ## Matched foliage comparisons
 
 Eight inherited meadow and woodland assets have revised meshes and palettes. The four modeled variants of each family keep the existing instance identity. Ten paired Chromium views use the same terrain, anchors and camera poses. The sample's packed vertex data grew from 27,324 to 81,216 bytes. Device frame times and longer-range foliage legibility remain open. [Foliage comparison gallery](mesh-review.md#meadow-and-woodland-refinement)
+
+## Staged save recovery
+
+The version-1 scenery sidecar remains compatible with earlier staged saves. A successful removal verifies both the existing primary record and its separate previous-good copy before removing the mesh. Failed backup writes and failed readbacks restore the preceding bytes. A stale copy refuses to amend a newer record. Recovery from a damaged or missing primary uses a matching seed and world ID and opens scenery removals read-only.
+
+Chromium reopened the cached game offline after deliberately damaging only the staged primary. The mined wildflower stayed absent. MINE on the remaining rope reported recovery and preserved both sidecar records and the preloaded nonempty schema-1 save byte for byte. A second test verified the separate interrupted shell update path. [Offline evidence](gallery/offline/manifest.json) · [Shell update evidence](gallery/cache-recovery/manifest.json)

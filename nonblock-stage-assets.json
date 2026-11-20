@@ -1,5 +1,5 @@
 {
-  "version": "20261119-v8",
+  "version": "20261119-v9",
   "assets": {
     "./": "5fd59b19473c8465027531a97472fb2445a56d5c89d9d83a117d159151db058f",
     "./assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
@@ -150,7 +150,7 @@
     "./src/layout.mjs": "237a5529c726300291cde7fbed0b7ecc98ae545748aff23e31528aecbc1beea0",
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
-    "./src/main.mjs": "34e73098d8f32ec62c93ae2bf8fdfb7a21102e8f1d25cdb64b2999fef05e5fd3",
+    "./src/main.mjs": "f2e021f87b2777225d0a5d606ee96c4f96c09f770fe39612494fce689c161438",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
     "./src/manual-biomes/exploration-ink.mjs": "9c16ec1277c762a328331e17d7aab61a55152dc601844473a8a7a85577dac5ed",
     "./src/manual-biomes/m2-runtime-bridge.mjs": "ac41c0cffd08e3bf5941417e40e508c926ccb5a3a7e736eac7e30d0175922d74",
@@ -212,10 +212,10 @@
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "a5977bef2a6b14602348775e41c071534fd583719259803d7e8d10cb80eaf4a7",
-    "./sw-m5.js": "e075120eaf1c620f4cb11b7eac357e6a4eab8c6fe13e177628e0e7b965c16df7",
+    "./sw-m5.js": "6b1294b82129138fa1aed83f65a4479af6ff31cc4602cf2714b5295b1b79cab6",
     "./src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
     "./src/nonblock/candidate-families.mjs": "473b76098990bee05269cd7fe9f4ca78792777832abb3f7d8eea0bb15d195e49",
-    "./src/nonblock/candidate-scene.mjs": "93743d4367336422c5d9af8b887417c4310542a5c4527ff148faf80c3373b15c",
+    "./src/nonblock/candidate-scene.mjs": "f7768a74ca679a2a2bf6c81c20f6f0846369f79d9afb7131a82c52352328233e",
     "./src/nonblock/physical-fittings.mjs": "c9dc6bcb1d42e21e0fb2a0f304caa9d5053cbbccc06d60fea7769dfd714ee16e",
     "./src/nonblock/stage-offline.mjs": "c74fc6d09a4ef96cf476a9158004f88cc15a6dc1efe0d44943f83c77b5e155a8",
     "./src/nonblock/staged-inherited-families.mjs": "d2c3ee59248ad68cd76086992689e15e18ed4b59109d736f0308d2ea315b798e",

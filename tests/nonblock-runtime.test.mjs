@@ -79,6 +79,7 @@ test('failed writes leave both objects visible and reject corrupted storage', ()
   assert.equal(scene.breakHit(hit,origin,facing),true);
   const [key] = storage.values.keys();
   storage.setItem(key,'{"version":false}');
+  storage.setItem(key+':previous-good','{"version":false}');
   assert.throws(()=>createCandidateScene(...args,deps),/sidecar/i);
 });
 
@@ -107,4 +108,112 @@ test('refined fittings use finite, nondegenerate triangles and distinct bounded 
       }
     }
   }
+});
+
+
+test('a staged previous-good backup recovers removal when the primary is damaged',()=>{
+  const storage=new MapStorage();
+  const primary='mythwrought:nonblock-stage:v1:legacy:179';
+  const deps={storage,blockAt:ground,voxelPick:()=>null};
+  const scene=createCandidateScene(...args,deps);
+  const hit=scene.pick(origin,facing);
+  assert.equal(scene.breakHit(hit,origin,facing),true);
+  assert.equal(storage.getItem(primary+':previous-good'),storage.getItem(primary));
+  storage.setItem(primary,'{unfinished');
+  const recovered=createCandidateScene(...args,deps);
+  assert.equal(recovered.recovered,true);
+  assert.deepEqual(recovered.visible().map(o=>o.sceneId),[neighbor.sceneId]);
+  const neighborOrigin=[2.65,1.13,-2];
+  const neighborHit=recovered.pick(neighborOrigin,facing);
+  assert.equal(neighborHit?.sceneId,neighbor.sceneId);
+  assert.equal(recovered.breakHit(neighborHit,neighborOrigin,facing),false);
+  assert.equal(storage.getItem(primary),'{unfinished');
+  assert.equal(storage.getItem(primary+':previous-good'),JSON.stringify({
+    version:'mythwrought-nonblock-removals-v1',seed,worldId:'legacy',tombstones:[hit.instanceKey]
+  }));
+});
+
+test('a backup failure after primary write rolls back the complete staged removal',()=>{
+  const storage=new MapStorage();
+  const deps={storage,blockAt:ground,voxelPick:()=>null};
+  const scene=createCandidateScene(...args,deps);
+  const hit=scene.pick(origin,facing);
+  const original=storage.setItem.bind(storage);
+  storage.setItem=(key,value)=>{
+    if(key.endsWith(':previous-good'))throw Error('backup write rejected');
+    original(key,value);
+  };
+  assert.equal(scene.breakHit(hit,origin,facing),false);
+  assert.equal(storage.values.size,0);
+  assert.equal(scene.visible().length,2);
+  storage.setItem=original;
+  assert.equal(scene.breakHit(hit,origin,facing),true);
+});
+
+test('a stale copy never replaces a newer primary or its backup',()=>{
+  const storage=new MapStorage();
+  const deps={storage,blockAt:ground,voxelPick:()=>null};
+  const first=createCandidateScene(...args,deps),stale=createCandidateScene(...args,deps);
+  const firstHit=first.pick(origin,facing),staleHit=stale.pick(origin,facing);
+  assert.equal(first.breakHit(firstHit,origin,facing),true);
+  const stored=new Map(storage.values);
+  assert.equal(stale.breakHit(staleHit,origin,facing),false);
+  assert.deepEqual(storage.values,stored);
+  assert.equal(stale.pick(origin,facing),null);
+});
+
+test('a failed sidecar readback restores the exact earlier primary and backup',()=>{
+  const storage=new MapStorage();
+  const deps={storage,blockAt:ground,voxelPick:()=>null};
+  const scene=createCandidateScene(...args,deps);
+  assert.equal(scene.breakHit(scene.pick(origin,facing),origin,facing),true);
+  const records=new Map(storage.values);
+  const write=storage.setItem.bind(storage),read=storage.getItem.bind(storage);
+  let rejectRead=false;
+  storage.setItem=(key,value)=>{
+    write(key,value);
+    if(key.endsWith(':previous-good')&&value!==records.get(key))rejectRead=true;
+  };
+  storage.getItem=key=>{
+    if(rejectRead&&key.endsWith(':previous-good')){rejectRead=false;return 'readback mismatch';}
+    return read(key);
+  };
+  const neighborOrigin=[2.65,1.13,-2];
+  assert.equal(scene.breakHit(scene.pick(neighborOrigin,facing),neighborOrigin,facing),false);
+  assert.deepEqual(storage.values,records);
+  assert.deepEqual(scene.visible().map(object=>object.sceneId),[neighbor.sceneId]);
+});
+
+
+test('only a valid world-scoped backup can recover a missing primary',()=>{
+  const primary='mythwrought:nonblock-stage:v1:legacy:179';
+  const backup=primary+':previous-good';
+  const storage=new MapStorage();
+  const deps={storage,blockAt:ground,voxelPick:()=>null};
+  const scene=createCandidateScene(...args,deps);
+  assert.equal(scene.breakHit(scene.pick(origin,facing),origin,facing),true);
+  const valid=storage.getItem(backup);
+  storage.removeItem(primary);
+  assert.equal(createCandidateScene(...args,deps).recovered,true);
+  assert.equal(storage.getItem(primary),null);
+  const state=JSON.parse(valid);
+  for(const patch of [{worldId:'other-world'},{seed:428},{tombstones:[...state.tombstones,...state.tombstones]},
+    {tombstones:[state.tombstones[0].replace(':179:',':428:')]}]){
+    storage.setItem(backup,JSON.stringify({...state,...patch}));
+    assert.throws(()=>createCandidateScene(...args,deps),/sidecar/i);
+  }
+});
+
+test('a legacy primary without a backup remains writable and gains a verified backup',()=>{
+  const primary='mythwrought:nonblock-stage:v1:legacy:179';
+  const backup=primary+':previous-good';
+  const storage=new MapStorage();
+  const old='{"version":"mythwrought-nonblock-removals-v1","seed":179,"worldId":"legacy","tombstones":[]}';
+  storage.setItem(primary,old);
+  const scene=createCandidateScene(...args,{storage,blockAt:ground,voxelPick:()=>null});
+  assert.equal(scene.recovered,false);
+  assert.equal(storage.getItem(primary),old);
+  assert.equal(storage.getItem(backup),null);
+  assert.equal(scene.breakHit(scene.pick(origin,facing),origin,facing),true);
+  assert.equal(storage.getItem(primary),storage.getItem(backup));
 });

@@ -1,6 +1,6 @@
 {
-  "version": "20261119-v7",
-  "attemptedVersion": "20261119-v8",
+  "version": "20261119-v9",
+  "attemptedVersion": "20261119-v10",
   "rejectedMismatchedAsset": true,
   "previousShellOpenedOffline": true,
   "retainedTwoVerifiedBanks": true,
@@ -14,8 +14,8 @@
     }
   ],
   "sourceSha256": {
-    "sw-m5.js": "353ab3fee519122e2164fdcdc36238cd22317c6ab552bcb10a5274875e3e74ef",
-    "nonblock-stage-assets.json": "2e56ecf4887897b7eb94cc35bcaaf6fe60c6008b923a114cb3270094175a791b",
+    "sw-m5.js": "6b1294b82129138fa1aed83f65a4479af6ff31cc4602cf2714b5295b1b79cab6",
+    "nonblock-stage-assets.json": "beb6fbecd24cf6cedc7b5d5a0a179300c35b214664c2b177ec9a050167da26ce",
     "tests/nonblock-cache-recovery-browser.mjs": "42ac971f9dd08eb774b0f86081ab2b25c81cb6cb16c1ac1a98ca31c20b541ce3"
   }
 }
