@@ -1,0 +1,244 @@
+{
+  "schema": "mythwrought.builder-b.1b.wave6-tidehollow-harbor-settlement-handoff.v1",
+  "status": "NEW_ORIGINAL_PROVISIONAL_NOT_ACCEPTED",
+  "protectedAcceptedHistorical1B": 228,
+  "exclusiveBuilderBIDCount": 115,
+  "protectedBuilderDIDCount": 92,
+  "sourceModule": "src/building-pool/roadmap-b/builder-b-essentials-wave6.mjs",
+  "sourceGitBlob": "e564dd85543e60d0b04bfff1337dbbd1233ef5d2",
+  "productionRegistered": false,
+  "saveSchema1Writes": false,
+  "blueprint": {
+    "id": "r1:harbor-office:temperate:small:003",
+    "title": "Tidehollow Crosswharf Harbor Office",
+    "category": "harbor-office",
+    "biome": "temperate",
+    "size": "small",
+    "sourceCoordinateFNV64": "4122f8c64cdf4e8c",
+    "plot": {
+      "width": 46,
+      "height": 26,
+      "depth": 43
+    },
+    "entryRoadFacing": "north",
+    "rooms": [
+      {
+        "id": "north-harbor-register",
+        "min": [
+          15,
+          1,
+          3
+        ],
+        "max": [
+          32,
+          5,
+          12
+        ]
+      },
+      {
+        "id": "west-crew-record-archive",
+        "min": [
+          5,
+          1,
+          11
+        ],
+        "max": [
+          18,
+          5,
+          28
+        ]
+      },
+      {
+        "id": "east-signal-and-chart-office",
+        "min": [
+          28,
+          1,
+          11
+        ],
+        "max": [
+          42,
+          5,
+          25
+        ]
+      },
+      {
+        "id": "east-crate-supply-gallery",
+        "min": [
+          28,
+          1,
+          26
+        ],
+        "max": [
+          42,
+          5,
+          33
+        ]
+      },
+      {
+        "id": "central-dry-wharf-reporting",
+        "min": [
+          17,
+          1,
+          15
+        ],
+        "max": [
+          30,
+          5,
+          30
+        ]
+      },
+      {
+        "id": "south-port-assembly-room",
+        "min": [
+          13,
+          1,
+          30
+        ],
+        "max": [
+          35,
+          5,
+          39
+        ]
+      },
+      {
+        "id": "low-west-rescue-kit-store",
+        "min": [
+          3,
+          1,
+          29
+        ],
+        "max": [
+          12,
+          5,
+          38
+        ]
+      }
+    ],
+    "portals": [
+      {
+        "from": "outside",
+        "to": "north-harbor-register",
+        "at": [
+          24,
+          1,
+          2
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "north-harbor-register",
+        "to": "west-crew-record-archive",
+        "at": [
+          18,
+          1,
+          12
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "north-harbor-register",
+        "to": "east-signal-and-chart-office",
+        "at": [
+          30,
+          1,
+          13
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "west-crew-record-archive",
+        "to": "central-dry-wharf-reporting",
+        "at": [
+          19,
+          1,
+          22
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "east-signal-and-chart-office",
+        "to": "central-dry-wharf-reporting",
+        "at": [
+          27,
+          1,
+          23
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "east-signal-and-chart-office",
+        "to": "east-crate-supply-gallery",
+        "at": [
+          35,
+          1,
+          25
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "central-dry-wharf-reporting",
+        "to": "south-port-assembly-room",
+        "at": [
+          24,
+          1,
+          29
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "south-port-assembly-room",
+        "to": "low-west-rescue-kit-store",
+        "at": [
+          12,
+          1,
+          34
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "west-crew-record-archive",
+        "to": "low-west-rescue-kit-store",
+        "at": [
+          9,
+          1,
+          28
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      }
+    ],
+    "sourceVoxelCells": 5669,
+    "sourceWalkableCells": 1082,
+    "sourceBackedRoofCells": 1344,
+    "skyOpenUnfoundedCourtColumns": 30,
+    "siteRequirements": "real waterfront proximity, flood level, bridge/shoreline contact, slope grading, pier walk-in and safe land entrance preflight required",
+    "adminAndHarborBehavior": "inert paper charts; NO boats/NPC/trade/water physics",
+    "sourceOnlyNoActualProduction": true
+  },
+  "pendingEvidence": {
+    "sizes": [
+      "667x375",
+      "844x390",
+      "932x430"
+    ],
+    "views": [
+      "exterior",
+      "cutaway"
+    ],
+    "realWebGL2FrameRequirement": 6,
+    "generated": 0,
+    "accepted": false,
+    "needHistoricalStrictEightWayD4": true,
+    "needSourceAndZipCRC_SHA": true,
+    "needFullManualPackRoofWeatherCollision": true,
+    "needMobilePerformanceAndArtReview": true
+  }
+}
