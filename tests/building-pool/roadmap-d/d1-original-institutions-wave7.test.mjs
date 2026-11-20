@@ -34,7 +34,7 @@ function eightD4(a,b){
   high=Math.max(high,hit/(p.size+other.size-hit));}
  return high;
 }
-test('original 153 historical 4B + 6 + 6 + 8 + 8 + 8 + 8 = 205 canonical source identities untouched, 80 vacant',()=>{
+test('original 153 historical 4B + 6 + 6 + 8 + 8 + 8 + 8 + 8 = 205 canonical source identities untouched, 80 vacant',()=>{
  assert.deepEqual([old.length,ROADMAP_D_WAVE1_BUILDINGS.length,ROADMAP_D_WAVE2_BUILDINGS.length,
  ROADMAP_D_WAVE3_BUILDINGS.length,ROADMAP_D_WAVE4_BUILDINGS.length,ROADMAP_D_WAVE5_BUILDINGS.length,ROADMAP_D_WAVE6_BUILDINGS.length,
  ROADMAP_D_WAVE7_BUILDINGS.length],[153,6,6,8,8,8,8,8]);
