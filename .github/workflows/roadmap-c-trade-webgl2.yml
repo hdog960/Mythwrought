@@ -1,0 +1,75 @@
+name: Roadmap C six original trade buildings source WebGL2
+
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-c-trades/**'
+      - 'tests/building-pool/roadmap-c-trades/**'
+      - '.github/workflows/roadmap-c-trade-webgl2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: roadmap-c-trade-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  six-original-trade-architectures:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source branch HEAD before authoring acceptance
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          ACTUAL_SOURCE_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SOURCE_SHA" = "$EXPECTED_SOURCE_SHA"
+          echo "MYTHWROUGHT_ROADMAP_C_EXACT_SOURCE_HEAD=$ACTUAL_SOURCE_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: All six new C-owned trade source geometries, handoffs and strict protected all-pool D4
+        run: |
+          node --test tests/building-pool/roadmap-c-trades/wave1-desert-market.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave2-riverbend-tailor.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave3-5-original-workshops.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave6-winterglass-snow-market.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/c-market-handoff.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/c-tailor-settlement-handoff.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/c-trade-wave3-5-settlement-handoff.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/c-winterglass-settlement-handoff.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave1-trade-all-pool-d4.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/c-evidence-path-contract.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/c-physical-producer-hold.test.mjs
+      - name: Pinned Chromium install
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Capture all thirty-six genuine C-owned market, tailor, butcher, jeweler and bookshop source WebGL2 images
+        run: |
+          node --test tests/building-pool/roadmap-c-trades/wave1-desert-market-chromium.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave2-riverbend-tailor-chromium.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave3-5-butcher-chromium.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave3-5-jeweler-chromium.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave3-5-bookshop-chromium.test.mjs
+          node --test tests/building-pool/roadmap-c-trades/wave6-winterglass-chromium.test.mjs
+      - name: Decode real 36 trade PNGs and verify CRC, SHA256 and exact source HEAD
+        run: node --test tests/building-pool/roadmap-c-trades/c-evidence-png-integrity.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-c-six-original-trade-genuine-webgl2
+          path: |
+            artifacts/roadmap-c-trade-desert-market/
+            artifacts/roadmap-c-trade-riverbend-tailor/
+            artifacts/roadmap-c-trade-copperford-butcher/
+            artifacts/roadmap-c-trade-silverfinch-jeweler/
+            artifacts/roadmap-c-trade-wrenfield-bookshop/
+            artifacts/roadmap-c-trade-winterglass-snow-market/
+          if-no-files-found: ignore

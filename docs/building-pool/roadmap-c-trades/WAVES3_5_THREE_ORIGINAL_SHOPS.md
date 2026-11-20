@@ -1,0 +1,17 @@
+# Roadmap C original trade Waves 03–05 — C-exclusive source architecture
+
+All three identities are newly authored **only** inside draft PR #301, with no file edits to the historical Builder B or D source portfolios. The 780-ID master frozen owner ledger remains on draft PR #300 and is independently mirrored **read-only** as `C_2B_FROZEN_OWNER_WITNESS_V1.json` in this trade branch. That verification witness enumerates all 205 protected B IDs, 146 C-exclusive IDs and 69 D-reserved IDs; these designs all use an explicitly C-exclusive unused ID.
+
+| Wave | New frozen C ID | Original architectural form | Real voxels | Ground + roof cells | Windows | True groundless void |
+|---|---|---|---:|---:|---:|---:|
+| 03 | `r2:butcher:temperate:small:02` | Copperford Provision House — western smokehouse prep, east tile-backed cold vault, deep central market, rear wagon dock | 2,927 | 708 + 708 | 18 | 8 |
+| 04 | `r2:jeweler:temperate:small:02` | Silverfinch Lapidary — long jewel gallery, west polishing studio, east barred vault, 12-high rear appraisal lantern | 3,043 | 682 + 682 | 22 | 6 |
+| 05 | `r2:bookshop:temperate:small:02` | Wrenfield Archive — western scriptoria, east public reading conservatory, deep main gallery and 12-high rear library | 3,911 | 933 + 933 | 20 | 6 |
+
+Every source is a real XYZ occupied-voxel blueprint, not a mere metadata declaration or recolored previously accepted structure. All have distinct irregular footprint proportions, category programs, roof source elevations, real 3-high storefront and side workshop clearances, 4 internal shop portals, literal windows and inert actual fixtures, 6–8 totally absent-ground sky courts and original room-access source coordinates. No active meat decay, temperature-controlled cooling, jewel security, book-reading AI, shop inventory, currency or merchants have been implemented.
+
+**Preflight executed (not full Actions):** Seven new focused checks pass in independent original-source execution, including 3 exact-voxel schema checks, 3 genuinely grounded route flood-fills and an anti-duplicate identity/fingerprint check. The new C7 source-only handoff also passed its independent focused test: exact captured footprints, source-baked door/road sockets, source geometry SHA256 witnesses, true open-court coordinates and all game/AI/settlement approval switches OFF.
+
+**Acceptance safeguards now in CI:** Preserve the original B205 and D69 owner list, exactly C146, zero duplicate IDs. Verify every new source against *all* historical same-category canonical and staged B 2B source geometry under all eight D4 mirrors/rotations with floor IoU strictly below 0.85. Demand 30 total real Chromium/WebGL2 exterior/cutaway source PNGs for all FIVE C trade candidates at 667×375, 844×390 and 932×430; decoded image dimensions, PNG CRC, actual screenshot SHA256, source-module SHA256, exact checked-out PR HEAD and true WebGL2 GPU/readback are enforced in the same-run acceptance script. Artifacts will be independently inspected when available. Fortifications require 18 additional PNGs, 48 total for the eight new C candidates.
+
+**Unmet acceptance (hard HOLD):** GitHub Actions completed CI and genuine ZIP artifacts, historical D4 numeric scores, physical Manual Packs 1–5 producer AABB/orientation/variant, mobile iPhone screenshot and real game integration. A source-level preflight success is not final technical acceptance. No merges, deployments, live placement, Save Schema-1 changes, edits to old source portfolios, or v0.11 changes.
