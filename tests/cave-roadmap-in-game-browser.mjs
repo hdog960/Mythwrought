@@ -389,7 +389,8 @@ try{
      report.deepSkyPhysicalRays.push(proof);
      console.log('C6_REAL_SKY_PIXEL_SOURCE_RAYS',JSON.stringify(proof));
     }
-    if(shot.name==='secondary-rift-terraces-second-offset-chamber'&&width===667){
+    if(shot.name==='secondary-rift-terraces-second-offset-chamber'&&
+      (width===667||width===844)){
      // Read-only genuine source rays for Rift's tiny strict sky failure.
      // Do not change renderer, screenshots, color threshold, or sky assertion.
      const rect=await page.evaluate(()=>{
@@ -418,7 +419,8 @@ try{
       up=[-sp*sy,cp,-sp*cy];
      const near={cx:chunkCoord(camera.x),cz:chunkCoord(camera.z)};
      const selected=new Set(plan.selected.flatMap(c=>[
-      c.key,...(c.companion?[c.companion.key]:[])]));
+      c.key,...[c.companion,c.seamCompanion,c.wideWitnessCompanion]
+        .filter(Boolean).map(v=>v.key)]));
      const rays=blue.slice(0,32).map(pixel=>{
       const nx=(pixel.px-(rect.left+rect.width/2))/(rect.width/2);
       const ny=((rect.top+rect.height/2)-pixel.py)/(rect.height/2);
@@ -443,9 +445,11 @@ try{
       return {pixel,first};
      });
      const proof={scene:shot.name,sourceSeed:seed,sourceFrame:shot.sourceFrame,
-      rect,camera,sourceSampler:{selected:plan.selected.map(c=>({
+      viewport:[width,height],rect,camera,sourceSampler:{selected:plan.selected.map(c=>({
        key:c.key,hits:c.hits,nearest:c.nearest,roofHits:c.roofHits,
-       source:c.source,companion:c.companion?.key??null})),
+       source:c.source,companion:c.companion?.key??null,
+       seamCompanion:c.seamCompanion?.key??null,
+       wideWitnessCompanion:c.wideWitnessCompanion?.key??null})),
        pending:plan.pending.map(c=>c.key),joinedSources:plan.joinedSources,
        uncovered:plan.uncovered,samples:plan.samples},skyPixelCount:blue.length,
       actualGpu:snapshot,rays};

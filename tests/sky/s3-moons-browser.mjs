@@ -64,14 +64,39 @@ async function choose(page,which){
 }
 async function faceMoonSky(page){
   await page.locator('#scene').focus();
-  await page.keyboard.down('ArrowUp');
+  // Actual accepted 932x430 evidence aimed at pitch 0.43744 radians.
+  // The original unmodified ArrowUp held across slow SwiftShader frames can
+  // overshoot this target and put the *real* moon projection outside view.
+  // Use the game's normal precision control (Shift+Arrow) to reproduce the
+  // physically accepted camera angle; retain the unchanged 3-moon pixel gate.
+  await page.keyboard.down('ShiftLeft');
   try{
-    await page.waitForFunction(()=>{
-      const pitch=+document.querySelector('#scene')?.dataset.cameraPitch;
-      return pitch>.42;
-    },null,{timeout:20000});
-  }finally{await page.keyboard.up('ArrowUp');}
-  await page.waitForTimeout(450);
+    await page.keyboard.down('ArrowUp');
+    try{
+      await page.waitForFunction(()=>
+        +document.querySelector('#scene')?.dataset.cameraPitch>=.435,
+      null,{timeout:20000});
+    }finally{await page.keyboard.up('ArrowUp');}
+    const angle=await page.evaluate(()=>
+      +document.querySelector('#scene').dataset.cameraPitch);
+    if(angle>.51){
+      await page.keyboard.down('ArrowDown');
+      try{
+        await page.waitForFunction(()=>
+          +document.querySelector('#scene')?.dataset.cameraPitch<=.47,
+        null,{timeout:20000});
+      }finally{await page.keyboard.up('ArrowDown');}
+    }
+  }finally{await page.keyboard.up('ShiftLeft');}
+  // Wait for at least one full new sky-uniform sampling cadence, not only
+  // the camera label: slower software WebGL2 samples celestial uniforms
+  // intermittently. Otherwise the assertion compares a new camera pitch
+  // against an old moonScreens frame.
+  const start=await page.evaluate(()=>
+    +document.querySelector('#scene')?.dataset.renderedFrames);
+  await page.waitForFunction(start=>
+    +document.querySelector('#scene')?.dataset.renderedFrames>=start+16,
+  start,{timeout:45000});
 }
 function rgbAt(image,x,y){
   const px=Math.max(0,Math.min(image.width-1,Math.round(x)));
@@ -118,6 +143,9 @@ try{
       assert.equal(night.lunarPersistence,'saved');
       assert.ok(night.phases.length===3&&night.illuminations.length===3);
       assert.ok(night.visibilities.every(x=>x>.9));
+      console.log('SKY_S3_REAL_AIM_DIAGNOSTIC',JSON.stringify({
+        w,h,pitch:night.pitch,yaw:night.yaw,rendered:night.rendered,
+        screens:night.screens,visibilities:night.visibilities}));
       assert.ok(night.screens.every(([x,y])=>x>.06&&x<.94&&y>.06&&y<.94),
         'Exactly three real lunar directions must fit night-sky viewport');
       const fullNight=await shot(page,w,h,'three-moons-night');
