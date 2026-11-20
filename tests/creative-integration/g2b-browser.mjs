@@ -20,12 +20,12 @@ try{
   try{
    await page.goto(origin+'/',{waitUntil:'domcontentloaded',timeout:30000});
    // A real empty browser has no accepted world: confirm V6 without bypasses.
-   if(await page.locator('#playerMenu').isVisible()){
-    page.once('dialog',dialog=>dialog.accept());
-    await page.getByRole('button',{name:/NEW WORLD/}).click();
-    assert.equal(await page.locator('#help').isVisible(),false,
-      'V6 must save before completing protected new-world entry');
-   }
+   await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+   page.once('dialog',dialog=>dialog.accept());
+   await page.getByRole('button',{name:/NEW WORLD/}).click();
+   await page.locator('#help').waitFor({state:'hidden',timeout:30000});
+   assert.equal(await page.locator('#help').isVisible(),false,
+     'V6 must save before completing protected new-world entry');
    await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,
      undefined,{timeout:40000});
    const state=await page.evaluate(()=>{
@@ -35,6 +35,7 @@ try{
      return {left:r('.grip.left'),right:r('.grip.right'),world,map,
        canvas:r('#scene'),gl:!!el.getContext('webgl2'),off:el.dataset.g2bFlight,
        loaded:Number(el.dataset.loadedChunks),notice:document.querySelector('#notice').hidden,
+       savedSeed:localStorage.getItem('mythwrought-v002-selected-seed'),
        save:localStorage.getItem('mythwrought-v002-world-'+
            localStorage.getItem('mythwrought-v002-selected-seed'))};
    });
@@ -278,8 +279,12 @@ try{
    }
    await page.screenshot({path:'artifacts/mythwrought-g2b-'+width+'x'+height+'.png'});
    assert.deepEqual(errors,[],'Uncaught real-game runtime exceptions');
-   const still=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
-   assert.equal(still,state.save,'Flight changed the existing canonical world save bytes');
+   const still=await page.evaluate(()=>{
+     const seed=localStorage.getItem('mythwrought-v002-selected-seed');
+     return {seed,save:localStorage.getItem('mythwrought-v002-world-'+seed)};
+   });
+   assert.equal(still.seed,state.savedSeed,'Flight changed the current-world identity');
+   assert.equal(still.save,state.save,'Flight changed the existing canonical world save bytes');
    console.log('PASS G2B real Chromium WebGL2 flight and two-thumb safety '+width+'x'+height+
      ' · moved '+moved.toFixed(3)+' · gap '+firstDoubleGap.toFixed(0)+'ms'+
      ' · held up '+heldUp.toFixed(3)+' / down '+heldDown.toFixed(3)+
