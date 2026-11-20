@@ -62,7 +62,7 @@ export function installPlayerMenu({
     button('EXPORT CURRENT WORLD',onExport),
     button('IMPORT VERIFIED CURRENT WORLD',onImport)
   );
-  const archive=button('↓ DOWNLOAD ALL MYTHWROUGHT DATA',onArchive);
+  const archive=button('↓ DOWNLOAD ALL LOCAL SAVE DATA',onArchive);
   archive.classList.add('player-safety-archive');
   const updater=button('CHECK APP UPDATE',onCheckUpdate);
   const returnSettings=button('← BACK TO SETTINGS',()=>showSafety(false));
@@ -82,8 +82,8 @@ export function installPlayerMenu({
     actions.hidden=blocked;
     for(const original of backing)original.hidden=blocked;
     safetyNote.textContent=blocked?
-      'Older or damaged world protected: download the exact game-owned saved data. Restoring old terrain into the current generator is disabled.':
-      'Optional verified on-device backups remain accessible below. Download a separate off-device archive regularly.';
+      'Older or damaged world protected: download its raw localStorage bytes here. Device-vault IndexedDB snapshots require separate export; old terrain cannot be opened as current.':
+      'Download localStorage saves here. IndexedDB device-vault snapshots need separate downloads below.';
     panel.classList.toggle('safety-open',Boolean(open));
     safety.hidden=!open;
     return open;
