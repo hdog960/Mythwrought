@@ -3,7 +3,9 @@ on:
   pull_request:
     paths:
       - src/depth-mesh.mjs
+      - src/gpu-recovery.mjs
       - src/main.mjs
+      - tests/gpu-edit-staging.test.mjs
       - tests/depth-mesh-incremental.test.mjs
       - tests/rapid-vertical-dig-browser.mjs
       - .github/workflows/iphone-deep-mining-acceptance.yml
@@ -22,6 +24,8 @@ jobs:
         run: |
           node --check src/main.mjs
           node --check src/depth-mesh.mjs
+          node --check src/gpu-recovery.mjs
+          node --check tests/gpu-edit-staging.test.mjs
           node --check tests/depth-mesh-incremental.test.mjs
           node --check tests/rapid-vertical-dig-browser.mjs
           npm test
