@@ -28,3 +28,9 @@ No production incorporation or rollback has been executed from this draft.
 The loopback worker now verifies SHA-256 for the entire versioned static bank before activation. A browser rehearsal served altered bytes for one asset during an attempted update. Chromium rejected the installing worker, retained the previous verified bank, and used it to open the original scoped game offline. The existing nonempty schema-1 bytes and scenery removal stayed intact. A subsequent valid update activated and retained the two verified banks. [Cache and capture manifest](gallery/cache-recovery/manifest.json)
 
 The rehearsal used a loopback origin and Chromium. The original installed shortcut and its public Pages scope still need creator-authorized device acceptance.
+
+## Published build rehearsal on a loopback origin
+
+Chromium opened the exact published build at the original `/Mythwrought/` path on an isolated origin. The production worker served the shortcut offline. The candidate then took control of the same scope with a verified staging cache, while the original cache bank remained available. The candidate used the same manifest and icon and served both offline. A regular MINE action persisted a staged removal across a fresh offline page. The original worker took control again during the rehearsal and served the same shortcut offline.
+
+The preloaded schema-1 world, Pack 2 door, generation profile and both previous-good backups matched byte for byte at every phase. The game resolved the same terrain edit and physical door after rollback, and the separate scenery removal stayed stored. The rehearsal ran in Chromium and used a loopback-only staged worker. Acceptance on the original iPhone Home Screen installation remains open. [Source and capture manifest](gallery/install-rehearsal/manifest.json)
