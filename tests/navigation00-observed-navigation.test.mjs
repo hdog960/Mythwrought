@@ -47,3 +47,19 @@ test('viewport projections remain bounded across phone landscape sizes',()=>{
   assert.equal(r.cells.length,3);assert.equal(r.player.x,width/2);assert.equal(r.player.y,height/2);
  }
 });
+
+test('bounded viewport refuses excessive projection work without reading hidden terrain',()=>{
+ const d=discovery(),n=createObservedNavigator({seed:2,discovery:d});
+ assert.throws(()=>n.project({player:{x:0,z:0,yaw:0},width:4096,height:4096,zoom:4}),/bounded discovery scan/);
+ assert.throws(()=>n.project({player:{x:0,z:0,yaw:0},width:5000,height:375,zoom:7}),/Invalid map camera/);
+ assert.equal(d.seen.size,3);
+});
+test('offscreen waypoints stay persisted but are not rendered or revealed',()=>{
+ const d=discovery(),s=store(),n=createObservedNavigator({seed:2,discovery:d,storage:s});
+ assert.equal(n.pin({id:'west',x:-2,z:-2,label:'West'}),true);
+ const near=n.project({player:{x:0,z:0,yaw:0},width:667,height:375});
+ assert.equal(near.pins.length,1);
+ const far=n.project({player:{x:20000,z:20000,yaw:0},width:667,height:375});
+ assert.equal(far.pins.length,0);
+ assert.equal(createObservedNavigator({seed:2,discovery:d,storage:s}).visiblePins().length,1);
+});
