@@ -238,7 +238,7 @@ export const BUILDER_B_HOMES_WAVE6_SPECS=Object.freeze([
         "west"
       ],
       [
-        34,
+        33,
         18,
         "east"
       ],
@@ -253,7 +253,7 @@ export const BUILDER_B_HOMES_WAVE6_SPECS=Object.freeze([
         "south"
       ],
       [
-        34,
+        33,
         21,
         "east"
       ]
