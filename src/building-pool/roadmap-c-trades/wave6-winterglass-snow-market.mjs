@@ -68,7 +68,7 @@ export function createCWinterglassMarket(){
     via:'open real stall threshold at '+b.approach.x+','+b.approach.z}))],
   openings:[{type:'entrance',x:24,y:2,z:0,clearHeightCells:3,doorSymbol:'pack2:020'},
    ...booths.map(b=>({type:'internal-doorway',x:b.approach.x,y:2,z:b.approach.z,clearHeightCells:3})),...windows],
-  features:['public-circulation','vendor-stalls','service-counter','stockroom',
+  features:['square','public-circulation','vendor-stalls','service-counter','stockroom',
    'seven separate architectural roof forms','30 literally groundless thermal courts',
    'four inert source-lantern landmark blocks'],
   actualSourceCourts:voids,originalBooths:booths,
