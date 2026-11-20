@@ -66,6 +66,7 @@ jobs:
           node --test tests/building-pool/roadmap-3b/c-granite-switchback-handoff.test.mjs
           node --test tests/building-pool/roadmap-3b/c-all-protected-211-d4.test.mjs
           node --test tests/building-pool/roadmap-3b/c-browser-evidence-path-contract.test.mjs
+          node --test tests/building-pool/roadmap-3b/c-physical-producer-hold.test.mjs
       - name: Install pinned Chromium
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
