@@ -11,7 +11,9 @@ const assignments=[
  ['builder-b-essentials-wave3-preview.html','builder-b-essentials-wave3-gallery.mjs',
   ['buildSedgewatchTidehookFishingLodge'],['builder-b-essentials-wave3.mjs']],
  ['builder-b-essentials-wave4-preview.html','builder-b-essentials-wave4-gallery.mjs',
-  ['buildMeadowstepSplitAisleStables'],['builder-b-essentials-wave4.mjs']]
+  ['buildMeadowstepSplitAisleStables'],['builder-b-essentials-wave4.mjs']],
+ ['builder-b-essentials-wave5-preview.html','builder-b-essentials-wave5-gallery.mjs',
+  ['buildSunshardSplitWellBathhouse'],['builder-b-essentials-wave5.mjs']]
 ];
 test('all three service source preview pages reference exactly their exported original constructors',()=>{
  for(const [preview,gallery,names,modules] of assignments){
