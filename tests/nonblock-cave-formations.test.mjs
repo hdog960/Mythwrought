@@ -54,11 +54,11 @@ test('cave stage admits floor, ceiling and spanning mounts and removes solid col
   const layout=forms.map(([sceneId,attachment],i)=>({
     sceneId,variant:7,anchor:[i*3,attachment==='ceiling'?3:1,0]
   }));
+  const records=new Map();
   const storage={
-    raw:null,
-    getItem(){return this.raw;},
-    setItem(_key,value){this.raw=value;},
-    removeItem(){this.raw=null;}
+    getItem:key=>records.get(key)??null,
+    setItem:(key,value)=>records.set(key,value),
+    removeItem:key=>records.delete(key)
   };
   const cells=new Set(['0,0,0','3,4,0','6,0,0','6,4,0','9,4,0']);
   const blockAt=(...p)=>Number(cells.has(p.join(',')));
@@ -76,6 +76,8 @@ test('cave stage admits floor, ceiling and spanning mounts and removes solid col
   const hit=scene.pick(eye,direction);
   assert.equal(hit?.sceneId,forms[0][0]);
   assert.equal(scene.breakHit(hit,eye,direction),true);
+  const key='mythwrought:nonblock-stage:v1:legacy:179';
+  assert.equal(storage.getItem(key),storage.getItem(key+':previous-good'));
   assert.equal(collides(world,.5,1,.5),false);
   assert.equal(createCandidateScene(179,'legacy',layout,deps).visible().some(
     item=>item.instanceKey===hit.instanceKey),false);
