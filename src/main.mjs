@@ -1,6 +1,6 @@
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
-import {meshDepthSection,discardDepthMeshCache} from './depth-mesh.mjs';
+import {meshDepthSection,meshDepthSectionUpdate,discardDepthMeshCache} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
@@ -783,10 +783,14 @@ function start(){
     return combined;
   }
   function meshPlayableChunk(cx,cz,section,editedCell=null){
-    const original=section===0?meshChunk(world,cx,cz):
-      meshDepthSection(world,cx,cz,section,editedCell);
-    const pack3Mesh=combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
-    return combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
+    // Deep edits expose strict source-column byte parity. No apparent geometry
+    // change means no need to allocate and upload another WebGL buffer.
+    const update=section===0?{vertices:meshChunk(world,cx,cz),changed:true}:
+      editedCell?meshDepthSectionUpdate(world,cx,cz,section,editedCell):
+        {vertices:meshDepthSection(world,cx,cz,section),changed:true};
+    const pack3Mesh=combinePack3ChunkMesh(update.vertices,pack3.runtime,cx,cz,section);
+    const vertices=combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
+    return editedCell?{vertices,changed:update.changed}:vertices;
   }
   function meshPlayableWater(cx,cz,section){
     return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
@@ -803,10 +807,17 @@ function start(){
           const key=depthMeshKey(cx,cz,section);
           if(!chunks.has(key))continue;
           const start=performance.now();
-          const vertices=meshPlayableChunk(cx,cz,section,[x,y,z]);
+          const update=meshPlayableChunk(cx,cz,section,[x,y,z]);
+          const old=chunks.get(key);
+          // Water may have changed even if opaque geometry did not. Keep the
+          // existing fluid rebuild path whenever water is or was present.
+          if(!update.changed&&!world.pack2Cells?.size&&!old?.waterCount){
+            meshMs+=performance.now()-start;
+            continue;
+          }
           const water=meshPlayableWater(cx,cz,section);
           meshMs+=performance.now()-start;
-          batch.push({key,cx,cz,section,vertices,water});
+          batch.push({key,cx,cz,section,vertices:update.vertices,water});
         }
     }catch(error){
       discardDepthMeshCache(world);
