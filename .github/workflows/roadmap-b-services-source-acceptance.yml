@@ -39,7 +39,8 @@ jobs:
             tests/building-pool/roadmap-b/builder-b-essentials-wave1.test.mjs \
             tests/building-pool/roadmap-b/builder-b-essentials-wave2.test.mjs \
             tests/building-pool/roadmap-b/builder-b-essentials-wave3.test.mjs \
-            tests/building-pool/roadmap-b/builder-b-essentials-wave4.test.mjs
+            tests/building-pool/roadmap-b/builder-b-essentials-wave4.test.mjs \
+            tests/building-pool/roadmap-b/builder-b-glass-rib-spacing.test.mjs
       - name: Install exact pinned standalone visual audit dependencies
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
