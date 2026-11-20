@@ -66,7 +66,7 @@ try:
      fp=out/f'{w}x{h}-{view}-{idx:02d}.png'
      page.screenshot(path=str(fp),full_page=False,animations='disabled')
      blob=fp.read_bytes()
-     if len(blob)<3000 or blob[:8]!=b'\\x89PNG\\r\\n\\x1a\\n':raise AssertionError('Invalid Chromium PNG: '+str(fp))
+     if len(blob)<3000 or blob[:8]!=b'\x89PNG\r\n\x1a\n':raise AssertionError('Invalid Chromium PNG: '+str(fp))
      pw,ph=struct.unpack('>II',blob[16:24])
      if (pw,ph)!=(w,h):raise AssertionError('Chromium PNG dimensions mismatch: '+repr((bid,pw,ph,w,h)))
      records.append({'id':bid,'viewport':[w,h],'view':view,'file':fp.name,
