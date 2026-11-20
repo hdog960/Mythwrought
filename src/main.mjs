@@ -742,8 +742,12 @@ function start(){
   const editGpuSparePool=[];
   let editGpuReuses=0;
   const MAX_EDIT_GPU_SPARES=3;
-  function releaseEditGpuSparePool(){
-    for(const spare of editGpuSparePool)gl.deleteBuffer(spare.buffer);
+  function releaseEditGpuSparePool(contextWasLost=false){
+    // After WebGL context restoration, old buffer handles belong to a dead
+    // context. Drop references without issuing INVALID_OPERATION to the new
+    // context. Normal world transitions still explicitly delete every spare.
+    if(!contextWasLost)
+      for(const spare of editGpuSparePool)gl.deleteBuffer(spare.buffer);
     editGpuSparePool.length=0;
   }
   function takeEditGpuSpare(bytes){
@@ -2906,7 +2910,7 @@ function start(){
       initializeGpuPipeline();
       restartMobRenderer();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
-      releaseEditGpuSparePool();chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
+      releaseEditGpuSparePool(true);chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
       caveFarGpu?.resetForLostContext();
       pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
