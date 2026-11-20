@@ -6,7 +6,7 @@ export function createCWinterglassMarket(){
  const K=(x,y,z)=>[x,y,z].join(','),F=(x,z)=>x+','+z;
  const rect=(a,b,c,d,fn)=>{for(let x=a;x<=b;x++)for(let z=c;z<=d;z++)fn(x,z)};
  for(const r of [[15,34,0,47],[3,14,4,17],[3,14,25,38],[35,47,3,16],
-  [35,51,19,31],[38,50,35,44],[9,20,37,47],[21,33,39,47],[0,9,18,24]])
+  [35,51,19,31],[38,50,35,44],[34,39,38,39],[9,20,37,47],[21,33,39,47],[0,9,18,24]])
   rect(...r,(x,z)=>ground.add(F(x,z)));
  for(const r of [[6,9,10,12],[43,46,24,26],[13,14,40,42]])
   rect(...r,(x,z)=>{if(ground.delete(F(x,z)))voids.push({x,z})});
