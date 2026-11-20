@@ -56,7 +56,7 @@ const report={kind:'mythwrought-m5-offline-pwa-chromium-v1',viewport:selected,
   width,height,seed,sourceGenerator:'mythwrought-four-surface-regions-v5',
   defaultGenerator:'mythwrought-four-surface-regions-v4',
   sourceSchema:1,realChromium:true,offlineModeVerified:false,
-  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261119-v6-recorder-v1',
+  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261120-five-systems-rc11',
   finished:false,screens:[],checks:[],errors:[]};
 const persist=()=>writeFile(path.join(out,'manifest.json'),JSON.stringify(report,null,2));
 const check=(name,ok,info={})=>{
@@ -108,6 +108,12 @@ async function map(page){
 const ctx=await browser.newContext({viewport:{width,height},
   deviceScaleFactor:1,serviceWorkers:'allow'});
 const page=await ctx.newPage(),pageErrors=[];
+ctx.on('serviceworker',worker=>{
+  worker.on('console',message=>{
+    if(message.type()==='error')
+      console.error('M5 INSTALLING WORKER ERROR',message.text());
+  });
+});
 page.on('pageerror',e=>pageErrors.push(String(e.message)));
 page.on('dialog',dialog=>dialog.accept());
 const worldKey='mythwrought-v002-world-179',
@@ -142,16 +148,39 @@ try{
     ?.generator==='mythwrought-four-surface-regions-v5',null,{timeout:30000});
   // A broken installation must fail promptly with preserved evidence,
   // rather than leave three runners hung on an unbounded ready promise.
-  await page.evaluate(()=>Promise.race([
-    navigator.serviceWorker.ready,
-    new Promise((_,reject)=>setTimeout(()=>reject(
-      Error('M5 offline ServiceWorker install not ready after 90s')),90000))
-  ]));
+  try {
+    await page.evaluate(()=>Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_,reject)=>setTimeout(()=>reject(
+        Error('M5 offline ServiceWorker install not ready after 90s')),90000))
+    ]));
+  }catch(error){
+    const diagnostic=await page.evaluate(async()=>{
+      const registration=await navigator.serviceWorker.getRegistration();
+      const names=await caches.keys();
+      const data=[];
+      for(const name of names){
+        if(!name.startsWith('mythwrought-m5-shell-'))continue;
+        const cache=await caches.open(name);
+        const keys=await cache.keys();
+        data.push({name,assets:keys.length,
+          hasMain:keys.some(req=>req.url.endsWith('/src/main.mjs')),
+          hasUpdater:keys.some(req=>req.url.endsWith('/src/app-update.mjs'))});
+      }
+      return {controller:navigator.serviceWorker.controller?.scriptURL,
+        active:registration?.active?.state,
+        installing:registration?.installing?.state,
+        waiting:registration?.waiting?.state,
+        script:registration?.active?.scriptURL,cache:data};
+    });
+    throw Error('M5 PWA worker startup failed '+
+      JSON.stringify(diagnostic)+' original='+String(error));
+  }
   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),null,
     {timeout:180000});
   const online=await page.evaluate(async()=>{
     const keys=await caches.keys();
-    const name=keys.find(x=>x==='mythwrought-m5-shell-20261119-v6-recorder-v1');
+    const name=keys.find(x=>x==='mythwrought-m5-shell-20261120-five-systems-rc11');
     const cache=name?await caches.open(name):null;
     const urls=cache?await cache.keys():[];
     return {name,cacheCount:urls.length,controller:
@@ -161,7 +190,7 @@ try{
   check('atomic-versioned-shell-install',online.secure&&
     online.name===report.serviceWorkerVersion&&online.cacheCount>=190&&
     online.controller?.endsWith('/sw-m5.js')&&
-    ['src/main.mjs','src/gameplay-recorder.mjs',
+    ['src/main.mjs','src/app-update.mjs','src/gameplay-recorder.mjs',
      'src/manual-biomes/profile-world.mjs',
      'src/manual-biomes/m5-offline-registration.mjs','index.html',
      'manifest.webmanifest','styles.css'].every(p=>online.urls.some(u=>

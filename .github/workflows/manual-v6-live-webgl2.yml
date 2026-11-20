@@ -19,6 +19,8 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -29,6 +31,7 @@ jobs:
           node --check src/manual-biomes/profile-world.mjs
           node --check src/main.mjs
           node --check sw-m5.js
+          node --test tests/unified-offline-atomic-cache.test.mjs
       - name: Install pinned Chromium and real PNG decoder
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
@@ -43,6 +46,12 @@ jobs:
           path: artifacts/manual-v6-live/
           if-no-files-found: warn
           retention-days: 14
+      - name: Install original encoded-video probe and decoder (strict video gate)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffprobe -version
+          ffmpeg -version
       - name: Prove recorder survives V6 integration with native and genuine WebGL2 moving video
         run: |
           node --test tests/gameplay-recorder.test.mjs
@@ -54,5 +63,152 @@ jobs:
         with:
           name: mythwrought-v6-recorder-compatibility
           path: artifacts/gameplay-recorder/
+          if-no-files-found: warn
+          retention-days: 14
+
+  live-original-game-40-creature-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-head native 40-species and independent schema-1 save checks
+        run: |
+          node --check src/main.mjs
+          node --check src/mobs/live-render.mjs
+          node --check src/mobs/live-game.mjs
+          node --check tests/live-five-system-mobs-browser.mjs
+          node --test tests/live-five-system-mobs.test.mjs
+          node --test tests/mobs/full-roster.test.mjs
+          node --test tests/mobs/roster-persistence.test.mjs
+      - name: Install real WebGL2 Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Verify forty real-game creature meshes at three phone sizes
+        run: node tests/live-five-system-mobs-browser.mjs
+      - name: Preserve genuine 120 source-authentic PNGs and SHA256 manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-unified-actual-game-40-mobs
+          path: artifacts/five-systems-live-mobs/
+          if-no-files-found: warn
+          retention-days: 14
+
+  deep-cave-real-sky-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    env:
+      CAVE_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict native cave 4-GPU source budget and real voxel seam tests
+        run: |
+          node --check src/manual-caves/c6-far-wall-gpu.mjs
+          node --test tests/cave-roadmap-far-wall-gpu.test.mjs
+      - name: Install real WebGL2 Chromium and PNG inspector
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Reject real sky leak in all named and secondary original-game cave scenes
+        run: node tests/cave-roadmap-in-game-browser.mjs
+      - name: Preserve original-game cave screenshot/ray source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-unified-actual-game-cave-source-rays
+          path: artifacts/cave-roadmap-actual-game/
+          if-no-files-found: warn
+          retention-days: 14
+
+  unified-sky-s0-s6-real-world:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict S0-S6 native original-world, three-moon and biome identity
+        run: |
+          node --check src/main.mjs
+          node --check src/sky-atmosphere.mjs
+          node --check src/sky-moons.mjs
+          node --check src/sky-stars.mjs
+          node --check src/sky-events.mjs
+          node --check src/sky-biome-adapter.mjs
+          node --test tests/sky-*.test.mjs
+      - name: Install pinned WebGL2 Chromium and PNG decoding
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Original game genuine S0-S6 sky across landscape sizes
+        run: |
+          python3 -m http.server 4173 >/tmp/mythwrought-unified-sky.log 2>&1 &
+          node tests/sky/s0-baseline-browser.mjs
+          node tests/sky/s1-clock-browser.mjs
+          node tests/sky/s2-atmosphere-browser.mjs
+          node tests/sky/s3-moons-browser.mjs
+          node tests/sky/s4-stars-browser.mjs
+          node tests/sky/s5-events-browser.mjs
+          node tests/sky/s6-legacy-browser.mjs
+      - name: Preserve original game sun, 3-moons, stars and celestial events PNGs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-unified-sky-S0-S6-real-webgl2
+          path: artifacts/sky-*/
+          if-no-files-found: warn
+          retention-days: 14
+
+  original-home-screen-same-install-rc11:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    env:
+      GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native strict 263-source atomic cache and old-install recovery contracts
+        run: |
+          node --check sw-m5.js
+          node --check src/app-update.mjs
+          node --check tests/app-update-browser.mjs
+          node --test tests/unified-offline-atomic-cache.test.mjs tests/app-update.test.mjs
+      - name: Require both historical original app source commits
+        run: |
+          git cat-file -e 474f6c2439865454f80b995af31120c024cdbc2d:src/main.mjs
+          git cat-file -e edc6ceae728840bfc361cd8a6437e8a1fa674c42:sw-m5.js
+      - name: Install genuine software WebGL2 Chromium with SW support
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Prove exact original installed Home Screen app upgrades to RC11 without new install or data loss
+        run: node tests/app-update-browser.mjs
+      - name: Preserve real old-to-new same-install offline screenshots and recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-five-system-same-original-home-screen-RC11
+          path: artifacts/pwa-safe-refresh/
           if-no-files-found: warn
           retention-days: 14
