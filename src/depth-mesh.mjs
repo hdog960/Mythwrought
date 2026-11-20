@@ -21,7 +21,69 @@ const COLORS={
   4:[.60,.39,.23],5:[.36,.79,.92],6:[.70,.58,.33],
   7:[.27,.57,.31],8:[.32,.39,.48]
 };
-export function meshDepthSection(world,cx,cz,section){
+// Per-world, transient column meshes: mining one voxel changes faces in at
+// most five horizontal columns per affected section. The authoritative full
+// pass remains the fallback for non-edit callers and cache misses. No save data.
+const EMPTY_COLUMN=new Float32Array(0);
+const MAX_CACHED_SECTIONS=36;
+const MAX_COLUMN_CACHE_BYTES=12*1024*1024;
+const columnMeshes=new WeakMap();
+const sectionKey=(cx,cz,section)=>cx+','+cz+','+section;
+export function discardDepthMeshCache(world){
+  if(world&&(typeof world==='object'||typeof world==='function'))
+    columnMeshes.delete(world);
+}
+function rememberColumns(world,key,columns){
+  let cache=columnMeshes.get(world);
+  if(!cache){cache=new Map();columnMeshes.set(world,cache);}
+  const bytes=columns.reduce((n,c)=>n+(c?.byteLength??0),0);
+  cache.delete(key);
+  if(bytes>MAX_COLUMN_CACHE_BYTES)return;
+  cache.set(key,{columns,bytes});
+  let total=0;
+  for(const entry of cache.values())total+=entry.bytes;
+  while(cache.size>MAX_CACHED_SECTIONS||total>MAX_COLUMN_CACHE_BYTES){
+    const oldest=cache.keys().next().value,removed=cache.get(oldest);
+    cache.delete(oldest);total-=removed.bytes;
+  }
+}
+function joinColumns(columns){
+  let length=0;
+  for(const column of columns)length+=column.length;
+  const result=new Float32Array(length);
+  let offset=0;
+  for(const column of columns){result.set(column,offset);offset+=column.length;}
+  return result;
+}
+export function meshDepthSection(world,cx,cz,section,editedCell=null){
+  if(!world||typeof world.get!=='function'||![cx,cz,section].every(Number.isInteger)||section>=0)
+    throw Error('Invalid deep mesh request');
+  const key=sectionKey(cx,cz,section);
+  const previous=columnMeshes.get(world)?.get(key);
+  let dirty=null;
+  if(previous&&Array.isArray(editedCell)&&editedCell.length===3&&
+     editedCell.every(Number.isInteger)){
+    const [x,,z]=editedCell,originX=cx*CHUNK_SIZE,originZ=cz*CHUNK_SIZE;
+    dirty=new Set();
+    for(const [dx,dz] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){
+      const localX=x+dx-originX,localZ=z+dz-originZ;
+      if(localX>=0&&localX<CHUNK_SIZE&&localZ>=0&&localZ<CHUNK_SIZE)
+        dirty.add(localX*CHUNK_SIZE+localZ);
+    }
+    if(!dirty.size)dirty=null;
+  }
+  const next=buildDepthColumns(world,cx,cz,section,dirty);
+  if(dirty){
+    const updated=previous.columns.slice();
+    for(const index of dirty)updated[index]=next.columns[index];
+    rememberColumns(world,key,updated);
+    return joinColumns(updated);
+  }
+  rememberColumns(world,key,next.columns);
+  return next.vertices;
+}
+function buildDepthColumns(world,cx,cz,section,dirtyColumns){
+
   if(!world||typeof world.get!=='function'||![cx,cz,section].every(Number.isInteger)||section>=0)
     throw Error('Invalid deep mesh request');
   const bounds=sectionBounds(section);
@@ -50,8 +112,12 @@ export function meshDepthSection(world,cx,cz,section){
     vertices[length++]=r;vertices[length++]=g;vertices[length++]=b;
     vertices[length++]=u;vertices[length++]=v;vertices[length++]=mat;
   };
+  const columns=new Array(CHUNK_SIZE*CHUNK_SIZE);
   for(let x=cx*CHUNK_SIZE;x<(cx+1)*CHUNK_SIZE;x++)
-    for(let z=cz*CHUNK_SIZE;z<(cz+1)*CHUNK_SIZE;z++)
+    for(let z=cz*CHUNK_SIZE;z<(cz+1)*CHUNK_SIZE;z++){
+      const index=(x-cx*CHUNK_SIZE)*CHUNK_SIZE+z-cz*CHUNK_SIZE;
+      if(dirtyColumns&&!dirtyColumns.has(index))continue;
+      const columnStart=length;
       for(let y=bounds.minY;y<=bounds.maxY;y++){
         const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
@@ -110,5 +176,7 @@ export function meshDepthSection(world,cx,cz,section){
           }
         }
       }
-  return vertices.slice(0,length);
+      columns[index]=length===columnStart?EMPTY_COLUMN:vertices.slice(columnStart,length);
+    }
+  return {vertices:vertices.slice(0,length),columns};
 }
