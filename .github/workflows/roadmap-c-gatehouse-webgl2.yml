@@ -1,4 +1,4 @@
-name: Roadmap C Twinstone six-view source WebGL2
+name: Roadmap C gatehouse and closed-wall source WebGL2
 
 on:
   pull_request:
@@ -6,6 +6,8 @@ on:
       - 'src/building-pool/roadmap-3b/c1-twinstone-pass-gatehouse.mjs'
       - 'src/building-pool/roadmap-3b/fortification-topology.mjs'
       - 'tests/building-pool/roadmap-3b/c2-twinstone-gatehouse*'
+      - 'src/building-pool/roadmap-3b/c3-fourwatch-closed-city-wall.mjs'
+      - 'tests/building-pool/roadmap-3b/c3-fourwatch-wall*'
       - '.github/workflows/roadmap-c-gatehouse-webgl2.yml'
   workflow_dispatch:
 
@@ -29,16 +31,21 @@ jobs:
         run: |
           node --test tests/building-pool/roadmap-3b/fortification-topology.test.mjs
           node --test tests/building-pool/roadmap-3b/c2-twinstone-gatehouse.test.mjs
+          node --test tests/building-pool/roadmap-3b/c3-fourwatch-wall.test.mjs
       - name: Install pinned Chromium
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
           node -e "import('playwright').then(({chromium})=>process.stdout.write('MYTHWROUGHT_CHROME_BIN='+chromium.executablePath()+'\n'))" >> "$GITHUB_ENV"
-      - name: Capture six genuine source-specific WebGL2 images
-        run: node --test tests/building-pool/roadmap-3b/c2-twinstone-gatehouse-chromium.test.mjs
+      - name: Capture twelve genuine gatehouse and city-wall source WebGL2 images
+        run: |
+          node --test tests/building-pool/roadmap-3b/c2-twinstone-gatehouse-chromium.test.mjs
+          node --test tests/building-pool/roadmap-3b/c3-fourwatch-wall-chromium.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: roadmap-c-twinstone-genuine-webgl2
-          path: artifacts/roadmap-c-3b-twinstone-gatehouse/
+          name: roadmap-c-fortifications-genuine-webgl2
+          path: |
+            artifacts/roadmap-c-3b-twinstone-gatehouse/
+            artifacts/roadmap-c-3b-fourwatch-city-wall/
           if-no-files-found: ignore
