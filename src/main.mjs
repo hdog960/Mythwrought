@@ -419,7 +419,7 @@ function start(){
   const g2Status=document.getElementById('g2bFlightStatus');
   const g2Header=document.getElementById('creativeToggle');
   const inventoryHeader=document.getElementById('creativeInventoryToggle');
-  let creativeInventory=null;
+  let creativeInventory=null,creativeAirTools=null;
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
@@ -467,6 +467,7 @@ function start(){
     }
     if(inventoryHeader)inventoryHeader.hidden=!g2CreativeEnabled;
     creativeInventory?.setEnabled(g2CreativeEnabled);
+    if(creativeAirTools)creativeAirTools.hidden=!on;
     for(const [id,label,aria] of [
       ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
       ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
@@ -3112,6 +3113,20 @@ function start(){
           restoredCount:graphicsRestoreCount,shaderReady:Boolean(program&&skyProgram)}};}
     });
   }
+  // Distinct in-flight build controls: the established two-thumb MINE/PLACE
+  // rails remain DOWN/UP during flight. Never steal their vertical gestures.
+  creativeAirTools=document.createElement('div');
+  creativeAirTools.className='mw-creative-air-tools';
+  creativeAirTools.hidden=true;creativeAirTools.setAttribute('aria-label','In-flight building tools');
+  for(const [label,mode] of [['▦ PLACE','place'],['✕ MINE','mine']]){
+    const button=document.createElement('button');
+    button.type='button';button.textContent=label;
+    button.setAttribute('aria-label',mode==='place'?'Place selected item while flying':'Mine targeted block while flying');
+    button.addEventListener('click',()=>edit(mode));
+    creativeAirTools.append(button);
+  }
+  document.querySelector('.viewport').append(creativeAirTools);
+
   // Production-source Creative item resolver. Every selection reuses its
   // original physical placement owner rather than writing speculative voxels.
   const creativeCatalog=buildCreativeCatalog();
