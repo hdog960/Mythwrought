@@ -3,7 +3,8 @@
 // No manual-pack physical shape approval, gameplay, save, or iPhone evidence.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {spawn} from 'node:child_process';
+import {spawn,execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {createServer} from 'node:http';
 import {access, mkdtemp, readFile, mkdir, writeFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -128,16 +129,22 @@ test('C2 original Twinstone gatehouse captures six genuine Chromium WebGL2 barra
     const png=Buffer.from(shot.data,'base64');
     assert.equal(png.subarray(0,8).toString('hex'),'89504e470d0a1a0a','invalid PNG screenshot');
     assert.ok(png.length>2048,'empty screenshot');
+    assert.equal(png.readUInt32BE(16),width,'source PNG width drift');
+    assert.equal(png.readUInt32BE(20),height,'source PNG height drift');
+    const sha256=createHash('sha256').update(png).digest('hex');
     const filename=type+'-'+biome+'-'+size+'-'+view+'-'+width+'x'+height+'.png';
     await writeFile(join(output,filename),png);
     reports.push({id:expectedId,type,biome,size,view,viewport:[width,height],filename,
      renderer:'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES',foreground:data.foreground,
-     gpuError:data.gpuError,pngBytes:png.length});
+     gpuError:data.gpuError,pngBytes:png.length,sha256});
    }
   }
   assert.equal(reports.length,6,'6 distinct C4 medium 3B barracks source views required');
   assert.equal(new Set(reports.map(r=>r.filename)).size,6);
-  const summary={source:'Roadmap C Sandglass Fork original desert medium barracks source-cube evidence',renderer:'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES',
+  assert.equal(new Set(reports.map(r=>r.sha256)).size,6,'nonunique source PNG screenshot evidence');
+  const exactSourceCommit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+  assert.match(exactSourceCommit,/^[0-9a-f]{40}$/);
+  const summary={exactSourceCommit,source:'Roadmap C Sandglass Fork original desert medium barracks source-cube evidence',renderer:'CHROMIUM_WEBGL2_DIAGNOSTIC_CUBE_ENVELOPES',
    physicalFamilyShapesRendered:false,creatorArtApproved:false,physicalIPhoneTested:false,
    count:reports.length,reports};
   await writeFile(join(output,'acceptance.json'),JSON.stringify(summary,null,2)+'\n');
