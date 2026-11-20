@@ -32,7 +32,7 @@ test('Roadmap C copperford butcher: six authentic Chromium source-specific WebGL
    const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
    const address='http://127.0.0.1:'+site.address().port+'/tests/building-pool/roadmap-c-trades/wave3-5-preview.html?id='+encodeURIComponent(id)+'&view='+view;
    await page.goto(address,{waitUntil:'load',timeout:30000});
-   await page.waitForFunction(()=>document.body.dataset.ready==='yes',{timeout:30000});
+   await page.waitForFunction(()=>document.body.dataset.ready==='yes',null,{timeout:30000});
    const info=await page.evaluate(()=>{
     const scene=document.getElementById('scene'),gl=scene.getContext('webgl2',{preserveDrawingBuffer:true});
     const pixels=new Uint8Array(scene.width*scene.height*4);
@@ -62,7 +62,9 @@ test('Roadmap C copperford butcher: six authentic Chromium source-specific WebGL
   assert.equal(manifest.length,6);assert.equal(new Set(manifest.map(m=>m.sha256)).size,6);
   const exactSourceCommit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   assert.match(exactSourceCommit,/^[0-9a-f]{40}$/);
-  await writeFile(join(output,'acceptance.json'),JSON.stringify({exactSourceCommit,schema:'mythwrought.roadmap-c.trade-wave3-5.butcher.webgl2.v1',id,
+  const sourceModulePath='src/building-pool/roadmap-c-trades/wave3-copperford-butcher.mjs';
+  const sourceModuleSha256=createHash('sha256').update(await readFile(sourceModulePath)).digest('hex');
+  await writeFile(join(output,'acceptance.json'),JSON.stringify({exactSourceCommit,sourceModulePath,sourceModuleSha256,schema:'mythwrought.roadmap-c.trade-wave3-5.butcher.webgl2.v1',id,
     sourceOnly:true,approved:false,captured:manifest.length,records:manifest},null,2)+'\n');
   console.log('MYTHWROUGHT_ROADMAP_C_BUTCHER_SOURCE_WEBGL2=6/6');
  }finally{
