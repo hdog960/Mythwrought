@@ -69,6 +69,12 @@ export const BUILDER_B_HOMES_WAVE7_SPECS=Object.freeze([
         25,
         27,
         25
+      ],
+      [
+        33,
+        32,
+        33,
+        41
       ]
     ],
     "entry": [
