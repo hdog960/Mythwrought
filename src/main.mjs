@@ -39,7 +39,7 @@ import {createLiveMobSession} from './mobs/live-game.mjs';
 import {createLiveMobRenderer} from './mobs/live-render.mjs';
 import {getSpecies} from './mobs/species.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
-import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
+import {GpuUploadRetry,uploadChunkBuffer,uploadEditedChunkBuffer,MAX_REUSABLE_EDIT_BYTES} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
@@ -736,13 +736,59 @@ function start(){
     gl.deleteBuffer(chunk.buffer);
     if(chunk.waterBuffer)gl.deleteBuffer(chunk.waterBuffer);
   }
-  // Both buffers stage before publishing; on failure neither can leak.
-  function uploadPack2Chunk(vertices,water){
+  // At most three retired buffers (<=768 KiB total) may be reused by future
+  // edits; never stage over a published chunk or a recently drawn buffer.
+  // This pool is not part of the original 25/34/27 resident chunk budgets.
+  const editGpuSparePool=[];
+  const MAX_EDIT_GPU_SPARES=3;
+  function releaseEditGpuSparePool(){
+    for(const spare of editGpuSparePool)gl.deleteBuffer(spare.buffer);
+    editGpuSparePool.length=0;
+  }
+  function takeEditGpuSpare(bytes){
+    for(let i=0;i<editGpuSparePool.length;i++){
+      const spare=editGpuSparePool[i];
+      if(frame-spare.retiredFrame>=3&&spare.capacity>=bytes){
+        editGpuSparePool.splice(i,1);
+        return spare;
+      }
+    }
+    return null;
+  }
+  function retireEditGpuBuffer(buffer,capacity){
+    if(!buffer)return;
+    if(!Number.isInteger(capacity)||capacity<0||
+       capacity>MAX_REUSABLE_EDIT_BYTES||
+       editGpuSparePool.length>=MAX_EDIT_GPU_SPARES){
+      gl.deleteBuffer(buffer);return;
+    }
+    editGpuSparePool.push({buffer,capacity,retiredFrame:frame});
+  }
+  function retireEditedChunkBuffers(chunk){
+    if(!chunk)return;
+    retireEditGpuBuffer(chunk.buffer,chunk.bufferCapacity??chunk.count*36);
+    if(chunk.waterBuffer)
+      retireEditGpuBuffer(chunk.waterBuffer,chunk.waterCapacity??chunk.waterCount*36);
+  }
+  // Both buffers stage before publishing. A failed upload may destroy only
+  // unpublished staging buffers; the previously visible chunk is untouched.
+  function uploadPack2Chunk(vertices,water,edited=false){
     let buffer=null,waterBuffer=null;
+    let bufferCapacity=vertices.byteLength,waterCapacity=water.byteLength;
     try{
-      buffer=uploadChunkBuffer(gl,vertices);
-      if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
-      return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
+      if(edited){
+        const opaque=uploadEditedChunkBuffer(gl,vertices,takeEditGpuSpare(vertices.byteLength));
+        buffer=opaque.buffer;bufferCapacity=opaque.capacity;
+        if(water.length){
+          const liquid=uploadEditedChunkBuffer(gl,water,takeEditGpuSpare(water.byteLength));
+          waterBuffer=liquid.buffer;waterCapacity=liquid.capacity;
+        }
+      }else{
+        buffer=uploadChunkBuffer(gl,vertices);
+        if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
+      }
+      return {buffer,count:vertices.length/9,bufferCapacity,
+        waterBuffer,waterCount:water.length/9,waterCapacity};
     }catch(error){
       if(buffer)gl.deleteBuffer(buffer);
       if(waterBuffer)gl.deleteBuffer(waterBuffer);
@@ -827,7 +873,7 @@ function start(){
     try{
       for(const item of batch){
         const start=performance.now();
-        const uploaded=uploadPack2Chunk(item.vertices,item.water);
+        const uploaded=uploadPack2Chunk(item.vertices,item.water,true);
         uploadMs+=performance.now()-start;
         ready.push({...item,...uploaded});
       }
@@ -839,9 +885,10 @@ function start(){
     for(const item of ready){
       const old=chunks.get(item.key);
       chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
-        buffer:item.buffer,count:item.count,
-        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
-      deleteChunkBuffers(old);
+        buffer:item.buffer,count:item.count,bufferCapacity:item.bufferCapacity,
+        waterBuffer:item.waterBuffer,waterCount:item.waterCount,
+        waterCapacity:item.waterCapacity});
+      retireEditedChunkBuffers(old);
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
@@ -2370,7 +2417,7 @@ function start(){
     const overlay=savePack2LiveWorld(localStorage,candidate);
     if(!overlay.ok)throw Error('Pack 2 verified overlay not updated; export backups before retry: '+overlay.reason);
     for(const c of chunks.values())deleteChunkBuffers(c);
-    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
@@ -2499,7 +2546,7 @@ function start(){
     const overlay=savePack2LiveWorld(localStorage,candidate);
     if(!overlay.ok)throw Error('Cannot verify Pack 2 state after restore: '+overlay.reason);
     for(const c of chunks.values())deleteChunkBuffers(c);
-    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     disposeLiveMobSession();g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();changed=false;respawnPrototype();
@@ -2541,7 +2588,7 @@ function start(){
       // Validate the actual renderer before clearing a previous world.
       const newCaveFar=farModule.createCaveFarWallGpu(gl);
       for(const c of chunks.values())deleteChunkBuffers(c);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
       gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       disposeLiveMobSession();g2NewWorld();world=selected.world;caveOps=loadedOps;
       caveFarGpu?.invalidate();caveFarGpu=newCaveFar;caveSession=selected;
@@ -2612,7 +2659,7 @@ function start(){
   function enterPreparedM2World(candidate,statusText){
     // This commits only a PREVIOUSLY verified and persisted candidate.
     for(const c of chunks.values())deleteChunkBuffers(c);
-    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     // Preserve Creative flight's full reset-before-spawn invariant on the
     // explicitly NEW four-biome world path. World assignment is separate
@@ -2712,7 +2759,7 @@ function start(){
         saveWorldSafe(localStorage,candidate);
       if(!result.ok)throw Error(result.reason||result.detail||'World save refused');
       for(const c of chunks.values())deleteChunkBuffers(c);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       disposeLiveMobSession();g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();
@@ -2821,7 +2868,7 @@ function start(){
       disposeLiveMobSession();g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())deleteChunkBuffers(c);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
@@ -2854,7 +2901,7 @@ function start(){
       initializeGpuPipeline();
       restartMobRenderer();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
-      chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
+      releaseEditGpuSparePool();chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
       caveFarGpu?.resetForLostContext();
       pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
