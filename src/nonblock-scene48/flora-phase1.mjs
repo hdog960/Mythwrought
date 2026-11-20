@@ -24,60 +24,193 @@ function leaf(b,x,y,z,dx,dy,dz,w,m){
   b.tri(p,[x+dx*.48+side[0],y+dy*.46,z+dz*.48+side[2]],tip,m);
   b.tri(p,tip,[x+dx*.48-side[0],y+dy*.46,z+dz*.48-side[2]],m);
 }
-function grass(b,v){for(let i=0;i<5;i++){const a=i*Math.PI*2/5+v.bend,r=.09+(i%2)*.045;leaf(b,Math.cos(a)*r,0,Math.sin(a)*r,Math.cos(a)*.26,.27+(i%3)*.07,Math.sin(a)*.26,.16,0);}}
-function fern(b,v){for(let f=0;f<3;f++){const a=f*Math.PI*2/3+v.bend,dx=Math.cos(a),dz=Math.sin(a);for(let i=1;i<=4;i++){const t=i/5;for(const s of [-1,1])leaf(b,dx*t*.26,.06+t*.42,dz*t*.26,dx*.11+s*(-dz)*.17*(1-t),.07,dz*.11+s*dx*.17*(1-t),.07,1);}}}
-function flower(b,v){const z=v.bend;b.quad([-.018,0,z],[.018,0,z],[.018,.58,z],[ -.018,.58,z],2);for(let i=0;i<5;i++){const a=i*Math.PI*2/5;leaf(b,0,.58,z,Math.cos(a)*.17,.09,Math.sin(a)*.17,.07,3);}b.tri([-.05,.59,z],[.05,.59,z],[0,.65,z],4);}
-function mushroom(b,v){const sides=8,r=.19;for(let i=0;i<sides;i++){const a=i*Math.PI*2/sides,c=(i+1)*Math.PI*2/sides;b.quad([Math.cos(a)*.035,0,Math.sin(a)*.035],[Math.cos(c)*.035,0,Math.sin(c)*.035],[Math.cos(c)*.047,.25,Math.sin(c)*.047],[Math.cos(a)*.047,.25,Math.sin(a)*.047],5);b.tri([0,.4,0],[Math.cos(a)*r,.25,Math.sin(a)*r],[Math.cos(c)*r,.25,Math.sin(c)*r],6);b.tri([0,.24,0],[Math.cos(c)*r,.25,Math.sin(c)*r],[Math.cos(a)*r,.25,Math.sin(a)*r],7);}}
-function lavender(b,v){
- for(let stalk=0;stalk<3;stalk++){
-  const a=stalk*2*Math.PI/3+v.bend, x=Math.cos(a)*.13,z=Math.sin(a)*.13,h=.58+stalk*.075;
-  b.quad([x-.012,0,z],[x+.012,0,z],[x+.012,h,z],[x-.012,h,z],2);
-  for(let ring=0;ring<4;ring++){
-   const cy=h-.04-ring*.055,r=.048+ring*.008;
-   for(let petal=0;petal<4;petal++){
-    const t=petal*Math.PI/2+ring*.4;
-    b.tri([x,cy,z],[x+Math.cos(t)*r,cy+.018,z+Math.sin(t)*r],[x+Math.cos(t+.45)*r,cy+.065,z+Math.sin(t+.45)*r],8);
-   }
+const TAU=2*Math.PI;
+function blade(b,base,angle,reach,height,width,material) {
+ const [x,y,z]=base, dx=Math.cos(angle), dz=Math.sin(angle);
+ const center=[x+dx*reach*.48,y+height*.60,z+dz*reach*.48];
+ const tip=[x+dx*reach,y+height,z+dz*reach];
+ const left=[center[0]-dz*width,center[1]-width*.21,center[2]+dx*width];
+ const right=[center[0]+dz*width,center[1]-width*.21,center[2]-dx*width];
+ b.tri(base,left,center,material);
+ b.tri(base,center,right,material+1);
+ b.tri(center,left,tip,material);
+ b.tri(center,tip,right,material+1);
+}
+
+function stalk(b,[x,y,z],[tx,ty,tz],width,material) {
+ b.quad([x-width,y,z],[x+width,y,z],
+  [tx+width*.65,ty,tz],[tx-width*.65,ty,tz],material);
+ b.quad([x,y,z-width],[x,y,z+width],
+  [tx,ty,tz+width*.65],[tx,ty,tz-width*.65],material);
+}
+
+function ring(b,center,levels,sides,angle) {
+ const [x,z]=center;
+ const circles=levels.map(([height,radius])=>Array.from({length:sides},(_,i)=>{
+  const heading=angle+i*TAU/sides;
+  return [x+Math.cos(heading)*radius,height,z+Math.sin(heading)*radius];
+ }));
+ for(let level=1;level<circles.length;level++){
+  const from=circles[level-1],to=circles[level],material=levels[level][2];
+  for(let side=0;side<sides;side++){
+   const next=(side+1)%sides;
+   b.quad(from[side],from[next],to[next],to[side],material);
   }
  }
 }
-function heather(b,v){
- for(let stem=0;stem<5;stem++){
-  const a=stem*2*Math.PI/5+v.bend,dx=Math.cos(a),dz=Math.sin(a),h=.36+(stem%3)*.06;
-  b.quad([0,0,0],[.012,0,.012],[dx*.22+.012,h,dz*.22+.012],[dx*.22,h,dz*.22],2);
-  for(let j=1;j<=4;j++){
-   const t=j/5,x=dx*.22*t,y=h*t,z=dz*.22*t;
+
+function grass(b,v) {
+ const count=6+v.variant;
+ for(let i=0;i<count;i++){
+  const angle=i*2.399963+v.bend+v.variant*.14;
+  const r=.049+.026*(i%3);
+  const base=[Math.cos(angle)*r,0,Math.sin(angle)*r];
+  blade(b,base,angle,.16+(i%3)*.054,.18+(i%4)*.053+v.variant*.014,
+   .027+.007*(i%2),i%3===0?1:0);
+ }
+}
+
+function fern(b,v) {
+ const count=3+v.variant%2;
+ for(let f=0;f<count;f++){
+  const angle=f*TAU/count+v.bend+v.variant*.19;
+  const dx=Math.cos(angle), dz=Math.sin(angle);
+  const reach=.31+.032*(f%3), height=.50+.044*v.variant;
+  const point=t=>[dx*reach*t,height*(1-(1-t)**2),dz*reach*t];
+  for(let j=0;j<4;j++){
+   const a=point(j/4),c=point((j+1)/4);
+   b.quad([a[0]-dz*.009,a[1],a[2]+dx*.009],
+    [a[0]+dz*.009,a[1],a[2]-dx*.009],
+    [c[0]+dz*.007,c[1],c[2]-dx*.007],
+    [c[0]-dz*.007,c[1],c[2]+dx*.007],2);
+   const attach=point((j+.60)/4);
    for(const side of [-1,1]){
-    const sx=-dz*side,sz=dx*side;
-    b.tri([x,y,z],[x+sx*.055,y+.045,z+sz*.055],[x+dx*.05,y+.07,z+dz*.05],9);
+    const width=.022+.008*(3-j);
+    blade(b,attach,angle+side*.92,.18-j*.028,.036+j*.004,width,0);
    }
   }
  }
 }
-function clover(b,v){
- for(let stalk=0;stalk<4;stalk++){
-  const a=stalk*Math.PI/2+v.bend,x=Math.cos(a)*.11,z=Math.sin(a)*.11,h=.15+(stalk%2)*.045;
-  b.quad([x-.009,0,z],[x+.009,0,z],[x+.009,h,z],[x-.009,h,z],2);
-  for(let p=0;p<3;p++){
-   const t=p*2*Math.PI/3+a,dx=Math.cos(t),dz=Math.sin(t);
-   b.tri([x,h,z],[x+dx*.095-dz*.04,h+.018,z+dz*.095+dx*.04],[x+dx*.13,h+.04,z+dz*.13],0);
-   b.tri([x,h,z],[x+dx*.13,h+.04,z+dz*.13],[x+dx*.095+dz*.04,h+.018,z+dz*.095-dx*.04],0);
+
+function flower(b,v) {
+ const z=v.bend, base=[0,0,z], crown=[0,.58,z];
+ // Keep the anchor and original reach around the central visible bloom.
+ stalk(b,base,crown,.018,2);
+ blade(b,[0,.25,z],.55,.14,.045,.041,0);
+ blade(b,[0,.37,z],3.64,.12,.063,.037,1);
+ const petals=5+v.variant;
+ for(let i=0;i<petals;i++){
+  const a=i*TAU/petals,dx=Math.cos(a),dz=Math.sin(a);
+  const span=.17+((i+v.variant)%2)*.013;
+  leaf(b,0,.58,z,dx*span,.09+v.variant*.009,dz*span,.15,3);
+  b.tri([dx*.052,.593,z+dz*.052],
+   [dx*.121-dz*.032,.623,z+dz*.121+dx*.032],
+   [dx*.159,.646,z+dz*.159],4);
+ }
+ const ringCenter=[0,.634,z];
+ for(let i=0;i<8;i++){
+  const a=i*TAU/8,c=(i+1)*TAU/8;
+  b.tri(ringCenter,[Math.cos(a)*.057,.613,z+Math.sin(a)*.057],
+   [Math.cos(c)*.057,.613,z+Math.sin(c)*.057],4);
+ }
+ // Central calyx triangle retained from the inherited pickable source.
+ b.tri([-.05,.59,z],[.05,.59,z],[0,.65,z],4);
+}
+
+function mushroom(b,v) {
+ const height=.37+v.variant*.031, width=.174+v.variant*.017;
+ const angle=v.bend+v.variant*.13;
+ ring(b,[0,0],[[0,.042,5],[height*.32,.034,5],[height*.68,.047,7]],6,angle);
+ ring(b,[0,0],[[height*.66,.049,7],[height*.67,width*.88,7],
+  [height*.76,width,6],[height*.91,width*.74,6],[height,width*.32,10]],8,angle);
+ for(let i=0;i<8;i++){
+  const a=angle+i*TAU/8,c=angle+(i+1)*TAU/8;
+  b.tri([0,height+.008,0],[Math.cos(a)*width*.32,height,Math.sin(a)*width*.32],
+   [Math.cos(c)*width*.32,height,Math.sin(c)*width*.32],10);
+ }
+}
+
+function lavender(b,v) {
+ const count=3+v.variant%2;
+ for(let i=0;i<count;i++){
+  const a=i*TAU/count+v.bend+v.variant*.27;
+  const x=Math.cos(a)*.11,z=Math.sin(a)*.11,h=.57+i*.068+v.variant*.012;
+  stalk(b,[x,0,z],[x,h,z],.012,2);
+  blade(b,[x,h*.32,z],a,.10,.05,.023,1);
+  ring(b,[x,z],[[h-.17,.025,8],[h-.13,.052,8],
+   [h-.05,.038,11],[h+.022,.019,8]],5,a+.27);
+ }
+}
+
+function heather(b,v) {
+ const count=5+v.variant%2;
+ for(let i=0;i<count;i++){
+  const angle=i*TAU/count+v.bend+v.variant*.16;
+  const dx=Math.cos(angle),dz=Math.sin(angle),height=.33+(i%3)*.052+v.variant*.02;
+  const root=[dx*.04,0,dz*.04], tip=[dx*.25,height,dz*.25];
+  stalk(b,root,tip,.011,2);
+  for(let j=1;j<=4;j++){
+   const t=j/5,x=root[0]+(tip[0]-root[0])*t,y=height*t,z=root[2]+(tip[2]-root[2])*t;
+   if(j<3)blade(b,[x,y,z],angle+(j%2===0?1:-1)*.86,.105,.038,.028,0);
+   const r=.045+j*.003;
+   for(const side of [-1,1]){
+    const left=[x-dz*side*r,y+.03,z+dx*side*r];
+    const right=[x+dx*.032,y+.058,z+dz*.032];
+    const top=[left[0]+dx*.024,left[1]+.042,left[2]+dz*.024];
+    b.tri([x,y,z],left,right,9);
+    b.tri(left,top,right,12);
+   }
   }
  }
 }
-function sedge(b,v){
- for(let blade=0;blade<7;blade++){
-  const a=blade*2*Math.PI/7+v.bend,dx=Math.cos(a),dz=Math.sin(a),h=.38+(blade%3)*.1;
-  const root=[dx*.035,0,dz*.035],mid=[dx*.13,h*.62,dz*.13],tip=[dx*.24,h,dz*.24];
-  b.tri(root,[mid[0]-dz*.026,mid[1],mid[2]+dx*.026],tip,0);
-  b.tri(root,tip,[mid[0]+dz*.026,mid[1],mid[2]-dx*.026],1);
+
+function clover(b,v) {
+ const count=4+v.variant%2;
+ for(let i=0;i<count;i++){
+  const a=i*TAU/count+v.bend+v.variant*.16,x=Math.cos(a)*.105,z=Math.sin(a)*.105;
+  const h=.17+(i%2)*.034+v.variant*.025;
+  stalk(b,[x*.6,0,z*.6],[x,h,z],.009,2);
+  for(let p=0;p<3;p++){
+   const heading=a+p*TAU/3,dx=Math.cos(heading),dz=Math.sin(heading);
+   const reach=.112+(i%3)*.009;
+   const base=[x,h,z], center=[x+dx*.064,h+.038,z+dz*.064];
+   const tip=[x+dx*reach,h+.026,z+dz*reach];
+   const left=[center[0]-dz*.035,h+.026,center[2]+dx*.035];
+   const right=[center[0]+dz*.035,h+.026,center[2]-dx*.035];
+   b.tri(base,left,center,1);
+   b.tri(base,center,right,2);
+   b.tri(center,left,tip,1);
+   b.tri(center,tip,right,2);
+  }
+ }
+}
+
+function sedge(b,v) {
+ const count=6+v.variant;
+ for(let i=0;i<count;i++){
+  const angle=i*TAU/count+v.bend+v.variant*.11;
+  const root=[Math.cos(angle)*.044,0,Math.sin(angle)*.044];
+  blade(b,root,angle,.19+(i%2)*.04,.33+(i%3)*.071,.032,0);
+ }
+ for(let i=0;i<2;i++){
+  const a=v.bend+i*Math.PI,x=Math.cos(a)*.086,z=Math.sin(a)*.086;
+  const height=.59+i*.07+v.variant*.032;
+  stalk(b,[x,0,z],[x,height,z],.011,2);
+  ring(b,[x,z],[[height-.083,.019,13],[height-.05,.037,13],
+   [height+.021,.016,14]],5,a);
  }
 }
 const makers={'scene48:clover-clump':clover,'scene48:meadow-sedge':sedge,'scene48:lavender-spike':lavender,'scene48:heather-sprig':heather,'scene48:low-grass':grass,'scene48:short-fern':fern,'scene48:single-wildflower':flower,'scene48:button-mushroom':mushroom};
-export function createSceneMesh(id,seed,x,y,z){
- const v=sceneVariant(seed,x,y,z,id),b=builder();makers[id](b,v);const mesh=b.finish();
- // Rotation and variation happen at instance level, not in shared mesh geometry.
- return {id,anchor:[x,y,z],variant:v,mesh,attachment:SCENE_FAMILIES[id].attachment,collision:'pass-through'};
+export function createSceneMesh(id,seed,x,y,z,requestedVariant){
+ const v=sceneVariant(seed,x,y,z,id);
+ if(requestedVariant!==undefined){
+  if(!Number.isInteger(requestedVariant)||requestedVariant<0||requestedVariant>3)
+   throw new RangeError('Invalid flora variant');
+  v.variant=requestedVariant;
+ }
+ const b=builder();
+ makers[id](b,v);
+ return {id,anchor:[x,y,z],variant:v,mesh:b.finish(),attachment:SCENE_FAMILIES[id].attachment,collision:'pass-through'};
 }
 export function makeSceneBatch(instances){
  const batches=new Map();

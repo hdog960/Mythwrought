@@ -65,3 +65,22 @@ Both pairs use the original seed, camera position and mobile viewport. Aim shift
 | Rope coil | [In-game original](gallery/rope-original.png) | [Rebuilt](gallery/rope-rebuilt.png) | 96 → 228 triangles |
 
 The banner now has a cylindrical rail, modeled folds, trim and an inset emblem. The rope has closed ends and a continuous cross-section. Four bounded variants are distinct for both families. Both retained their instance identities, responded to the existing MINE touch control, and stayed removed after opening a fresh game page. The same test verifies that the ordinary schema-1 save bytes stay intact. Source and capture digests are in [the comparison manifest](gallery/fittings-comparison.json). Mobile GPU and frame-time parity remain open.
+
+## Meadow and woodland refinement
+
+The paired Chromium captures show eight inherited families in the original game at 932 × 430. Each view uses the same seed, anchors, variants and camera pose. The oblique view shows the rounder mushroom and catches the folded grass and fern against the terrain. Low grass and sedge still blend into similarly colored terrain at the longer view. Four distinct geometric variants per family retain the existing instance IDs. [Before manifest](gallery/foliage-refinement/before/manifest.json) · [After manifest](gallery/foliage-refinement/after/manifest.json)
+
+| Family or scene | Before | After | Sample triangles |
+| --- | --- | --- | --- |
+| Mixed planting, front | [View](gallery/foliage-refinement/before/mixed-front.png) | [View](gallery/foliage-refinement/after/mixed-front.png) | 253 → 752 |
+| Mixed planting, oblique | [View](gallery/foliage-refinement/before/mixed-oblique.png) | [View](gallery/foliage-refinement/after/mixed-oblique.png) | 253 → 752 |
+| Low grass | [View](gallery/foliage-refinement/before/low-grass.png) | [View](gallery/foliage-refinement/after/low-grass.png) | 10 → 24 |
+| Short fern | [View](gallery/foliage-refinement/before/short-fern.png) | [View](gallery/foliage-refinement/after/short-fern.png) | 48 → 160 |
+| Single wildflower | [View](gallery/foliage-refinement/before/single-wildflower.png) | [View](gallery/foliage-refinement/after/single-wildflower.png) | 13 → 42 |
+| Button mushroom | [View](gallery/foliage-refinement/before/button-mushroom.png) | [View](gallery/foliage-refinement/after/button-mushroom.png) | 32 → 96 |
+| Lavender spike | [View](gallery/foliage-refinement/before/lavender-spike.png) | [View](gallery/foliage-refinement/after/lavender-spike.png) | 54 → 114 |
+| Heather sprig | [View](gallery/foliage-refinement/before/heather-sprig.png) | [View](gallery/foliage-refinement/after/heather-sprig.png) | 50 → 168 |
+| Clover clump | [View](gallery/foliage-refinement/before/clover-clump.png) | [View](gallery/foliage-refinement/after/clover-clump.png) | 32 → 64 |
+| Meadow sedge | [View](gallery/foliage-refinement/before/meadow-sedge.png) | [View](gallery/foliage-refinement/after/meadow-sedge.png) | 14 → 84 |
+
+At nine 32-bit floats per vertex, the sampled eight plants increase the one scenery batch from 27,324 to 81,216 bytes. The measurements describe geometry and upload size. Device frame times and final parity remain open.

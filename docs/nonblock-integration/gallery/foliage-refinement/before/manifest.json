@@ -1,0 +1,182 @@
+{
+  "label": "before",
+  "sourceSha256": {
+    "src/main.mjs": "34e73098d8f32ec62c93ae2bf8fdfb7a21102e8f1d25cdb64b2999fef05e5fd3",
+    "src/nonblock/candidate-families.mjs": "1256e93ff7596858a213a171ba26b56244d57b40ae628e8cf608ab3e98381732",
+    "src/nonblock-scene48/flora-phase1.mjs": "5ced9c4a8b9cfef11fc38e3bfa537b4047c12a54fcf71e3296b5b4cb580187ca"
+  },
+  "captures": [
+    {
+      "filename": "mixed-front.png",
+      "x": 10.5,
+      "z": 4.5,
+      "point": [
+        10.5,
+        9.44,
+        7.7
+      ],
+      "sha256": "c4e114608370bf61430c4b2597132ff0644353ba8d96b21cd7fdbbb877cc7132",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "mixed-oblique.png",
+      "x": 14.5,
+      "z": 7.5,
+      "point": [
+        10.8,
+        9.46,
+        7.9
+      ],
+      "sha256": "03f5edc95c90ae7d688176d235c580f8e34d7a7c3e2feb8537668d0aa38d4e48",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "low-grass.png",
+      "x": 9.5,
+      "z": 5.5,
+      "point": [
+        9.5,
+        9.3,
+        7.5
+      ],
+      "sha256": "b584c99337cdeb37c11bcb42abae036049045ed03a96357df80a9e38989a97a5",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "short-fern.png",
+      "x": 10.5,
+      "z": 5.5,
+      "point": [
+        10.5,
+        9.3,
+        7.5
+      ],
+      "sha256": "38ed10977bf4899dfa2e3060148d1eb26c59b770506f6ab640222bca485b7c2f",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "single-wildflower.png",
+      "x": 11.5,
+      "z": 5.5,
+      "point": [
+        11.5,
+        9.3,
+        7.5
+      ],
+      "sha256": "d0b2b78f98caf2bdf7ac9507b93fbb676bed01e633497c38c05e5672a5b198ae",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "button-mushroom.png",
+      "x": 12.5,
+      "z": 5.5,
+      "point": [
+        12.5,
+        9.3,
+        7.5
+      ],
+      "sha256": "08f73ab072e19c0f675ad52c3e37cf0478fe339c0bfb9400f8eec9369a6b7c61",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "lavender-spike.png",
+      "x": 9.5,
+      "z": 6.5,
+      "point": [
+        9.5,
+        9.3,
+        8.5
+      ],
+      "sha256": "4f367b5b78345d825ce6cc7754a0efb18472957613f5040cae7fd9e5fb0dcf28",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "heather-sprig.png",
+      "x": 10.5,
+      "z": 6.5,
+      "point": [
+        10.5,
+        9.3,
+        8.5
+      ],
+      "sha256": "612bb65a01e2c4adffdec213893db58bcf4809974e87c36088b2b60cb13216ef",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "clover-clump.png",
+      "x": 11.5,
+      "z": 6.5,
+      "point": [
+        11.5,
+        9.3,
+        8.5
+      ],
+      "sha256": "553712f63f86ba5602bd4ea633c48ef2b76c3fa523252b07a48972b778287fc2",
+      "width": 932,
+      "height": 430
+    },
+    {
+      "filename": "meadow-sedge.png",
+      "x": 12.5,
+      "z": 6.5,
+      "point": [
+        12.5,
+        9.3,
+        8.5
+      ],
+      "sha256": "bcb3dbda895e7175481c55860acda19ded6af3e27eecb6030c5dee754e71526a",
+      "width": 932,
+      "height": 430
+    }
+  ],
+  "families": [
+    {
+      "id": "scene48:low-grass",
+      "variant": 0,
+      "triangles": 10
+    },
+    {
+      "id": "scene48:short-fern",
+      "variant": 1,
+      "triangles": 48
+    },
+    {
+      "id": "scene48:single-wildflower",
+      "variant": 2,
+      "triangles": 13
+    },
+    {
+      "id": "scene48:button-mushroom",
+      "variant": 3,
+      "triangles": 32
+    },
+    {
+      "id": "scene48:lavender-spike",
+      "variant": 0,
+      "triangles": 54
+    },
+    {
+      "id": "scene48:heather-sprig",
+      "variant": 1,
+      "triangles": 50
+    },
+    {
+      "id": "scene48:clover-clump",
+      "variant": 2,
+      "triangles": 32
+    },
+    {
+      "id": "scene48:meadow-sedge",
+      "variant": 3,
+      "triangles": 14
+    }
+  ]
+}

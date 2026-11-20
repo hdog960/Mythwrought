@@ -113,3 +113,7 @@ The twelve effects draw together in a bounded translucent pass. Chromium observe
 The original game at 667 × 375, 844 × 390, and 932 × 430 is captured in the [landscape evidence](gallery/landscape/manifest.json). The production activation path, same-install recovery rehearsal, comparative art passes, device-scale performance and physical iPhone acceptance remain open. This draft is still on release hold.
 
 The latest physical test also placed the wall lantern through Pack 4 and used the existing PLACE and MINE controls to swing and remove one leaf of the paired door. The sibling remained, the mined leaf stayed absent on cold reopen, and the nonempty schema-1 bytes matched. The independent coordinator checks files against their source SHA-256 digests and uses the inherited PNG structure validator to verify each artifact's dimensions, digest and chunk CRC. [Home Screen release hold](release-hold.md)
+
+## Matched foliage comparisons
+
+Eight inherited meadow and woodland assets have revised meshes and palettes. The four modeled variants of each family keep the existing instance identity. Ten paired Chromium views use the same terrain, anchors and camera poses. The sample's packed vertex data grew from 27,324 to 81,216 bytes. Device frame times and longer-range foliage legibility remain open. [Foliage comparison gallery](mesh-review.md#meadow-and-woodland-refinement)

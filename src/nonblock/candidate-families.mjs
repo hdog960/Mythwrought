@@ -25,7 +25,8 @@ import {describeFitting} from '../nonblock-fittings36/fittings-phase1.mjs';
 
 const floraPalette = [
   [.24,.43,.25],[.36,.58,.30],[.31,.54,.29],[.96,.64,.32],[1,.84,.44],
-  [.78,.65,.49],[.62,.34,.22],[.92,.80,.61],[.56,.39,.75],[.73,.37,.58]
+  [.78,.65,.49],[.62,.34,.22],[.92,.80,.61],[.56,.39,.75],[.73,.37,.58],
+  [.73,.48,.28],[.67,.47,.83],[.84,.45,.68],[.58,.44,.24],[.72,.59,.31]
 ];
 const forestPalette = [[.37,.26,.16],[.28,.48,.24],[.49,.58,.29],[.62,.69,.37]];
 const barkPalette = [[.36,.25,.17],[.50,.34,.20]];
@@ -74,7 +75,7 @@ export const candidateFamilies = new Map([
   ...ENCHANTED_FUNGI_IDS.map(sceneId=>newFloraFamily(sceneId,createEnchantedFungus,
     sceneId==='scene48:shelf-fungus'||sceneId==='scene48:glowing-vine')),
   ...Object.keys(SCENE_FAMILIES).map(sceneId=>[sceneId,floraFamily(
-    ({seed,anchor})=>createSceneMesh(sceneId,seed,...anchor).mesh,floraPalette)]),
+    ({seed,anchor,variant})=>createSceneMesh(sceneId,seed,...anchor,variant).mesh,floraPalette)]),
   ...Object.keys(UNDERGROWTH_FAMILIES).map(sceneId=>[sceneId,floraFamily(
     ({seed,anchor})=>makeUndergrowthMesh(sceneId,seed,...anchor).mesh,
     sceneId.endsWith('toadstools')?fungiPalette:groundCoverPalette)]),
