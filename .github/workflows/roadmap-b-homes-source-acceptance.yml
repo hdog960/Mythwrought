@@ -41,7 +41,8 @@ jobs:
             tests/building-pool/roadmap-1a/builder-b-preview-wiring.test.mjs \
             tests/building-pool/roadmap-1a/builder-b-homes-wave6.test.mjs \
             tests/building-pool/roadmap-1a/builder-b-native-import-contract.test.mjs \
-            tests/building-pool/roadmap-1a/builder-b-evidence-count-contract.test.mjs
+            tests/building-pool/roadmap-1a/builder-b-evidence-count-contract.test.mjs \
+            tests/building-pool/roadmap-1a/builder-b-homes-wave7.test.mjs
       - name: Require actual system Chromium
         run: |
           command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
@@ -79,14 +80,23 @@ jobs:
         env:
           BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
         run: node tests/building-pool/roadmap-1a/audit-builder-b-homes-wave6.mjs
+      - name: Capture 12 authentic Highglen 667/844/932 original source and Pack AABB PNGs
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node --test tests/building-pool/roadmap-1a/builder-b-homes-wave7-webgl2.test.mjs
+      - name: Independently verify Highglen source-only PNG CRC SHA exact repository/renderer identity
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node tests/building-pool/roadmap-1a/audit-builder-b-homes-wave7.mjs
       - name: Preserve actual source-only PNG and audit evidence, no creator art approval
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: builder-b-homes-eight-originals-96-genuine-chromium-pngs
+          name: builder-b-homes-nine-originals-108-genuine-chromium-pngs
           path: |
             artifacts/builder-b-housing-five-originals/
             artifacts/builder-b-housing-wave4-single-original/
             artifacts/builder-b-hospitality-wave5-foxglade/
             artifacts/builder-b-homes-wave6-willowmere/
+            artifacts/builder-b-homes-wave7-highglen/
           if-no-files-found: ignore
