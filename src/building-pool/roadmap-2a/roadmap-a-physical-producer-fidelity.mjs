@@ -23,6 +23,8 @@ const pos=(v,y=v.y)=>v.x+','+y+','+v.z;
 const sortedEntries=o=>Object.fromEntries(Object.entries(o).sort((a,b)=>a[0].localeCompare(b[0])));
 const bump=(obj,key,count=1)=>obj[key]=(obj[key]??0)+count;
 const roster=new Map(MANUAL_FIVE_PACK_CATALOG.map(r=>[r.symbol,1]));
+const familyCache=new Map();
+const familyFor=ref=>{if(!familyCache.has(ref))familyCache.set(ref,manualFivePackVariants(ref));return familyCache.get(ref);};
 const pack5=new Map(PACK5_BUILDER_CATALOG.map(r=>[r.symbolicId,r]));
 function demonstratedProducer(symbol,variant){
  const a=resolveManualFivePackAsset(symbol,{orientation:'north',variant});
@@ -62,7 +64,7 @@ export function auditRoadmapAProducerFidelity(){
    if(!roster.has(v.material))problems.push({id:b.id,kind:v.kind,ref:v.material,reason:'not-in-actual-manual-five-pack-family-catalog'});
    bump(byKind,v.kind);bump(byMaterial,v.material);bump(byKindMaterial,v.kind+'|'+v.material);
    bump(local.kindCount,v.kind);bump(local.materials,v.material);
-   const family=manualFivePackVariants(v.material);
+   const family=familyFor(v.material);
    if(family.length!==1)familyAliases[v.material]=family.map(x=>x.numericId);
    if(v.material.startsWith('pack5:')&&!v.physicalVariant){
     bump(sourceVariantless,v.material);unresolvedVariantCount++;local.variantlessPack5Cells++;
