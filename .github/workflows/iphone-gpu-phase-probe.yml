@@ -1,0 +1,45 @@
+name: Isolated iPhone GPU frame-phase diagnostic (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-gpu-phase-291-20261121
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-phase-microprobe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reject any wrong-source benchmark and check probe script syntax
+        run: |
+          test "$(git rev-parse HEAD^)" = "82f8828945b464acf0a71faddfe2d18ffa4df245"
+          node --check scripts/ci/iphone-gpu-phase-probe.mjs
+      - name: Install original actual WebGL2 Chromium driver
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Check out exact published baseline separately
+        uses: actions/checkout@v4
+        with:
+          ref: 8de40ca8451b6268cfdfefaa5d9a66b72caca799
+          path: baseline-main
+      - name: Measure exact real game GPU error validation at three actual frame phases
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/phase-candidate.log 2>&1 &
+          python3 -m http.server 4174 --directory baseline-main >/tmp/phase-baseline.log 2>&1 &
+          node scripts/ci/iphone-gpu-phase-probe.mjs
+      - name: Preserve diagnostic original WebGL2 JSON and PNGs on pass or fail
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iphone-gpu-frame-phase-original-webgl2-diagnostic
+          path: artifacts/iphone-gpu-phase/
+          if-no-files-found: warn
+          retention-days: 14
