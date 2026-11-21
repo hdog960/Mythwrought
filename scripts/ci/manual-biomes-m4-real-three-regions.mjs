@@ -145,7 +145,20 @@ try{
       if(actual.value!==(kind==='cutaway'?0:point.id)||
          actual.profile!==M6_BALANCED_GENERATOR||actual.mode!=='four-regions')
         throw Error('Actual M4 '+point.name+' terrain not source-exact '+JSON.stringify(actual));
-      await page.waitForTimeout(1600);
+      // The first V6 snow frame can render only 10 GPU chunks with 15
+      // pending. The original 28/24 color gates must sample a fully
+      // resident scene, not incomplete software-renderer chunk streaming.
+      // Never fabricate a frame, skip the palette test or relax thresholds.
+      await page.waitForFunction(()=>{
+        const c=document.querySelector('#scene'),d=c?.dataset;
+        return d?.skyDrawn==='true'&&Number(d.loadedChunks)===25&&
+          Number(d.pendingChunks)===0&&Number(d.renderedMeshVertices)>800;
+      },null,{timeout:90000});
+      const frameStart=await page.evaluate(()=>
+        Number(document.querySelector('#scene').dataset.renderedFrames));
+      await page.waitForFunction(n=>
+        Number(document.querySelector('#scene')?.dataset.renderedFrames)>=n+4,
+        frameStart,{timeout:30000});
       const file='m4-current-v6-'+point.name+'-'+kind+'-'+width+'x'+height+'.png';
       const png=await page.screenshot({path:path.join(out,file),timeout:90000});
       const decoded=PNG.sync.read(png);

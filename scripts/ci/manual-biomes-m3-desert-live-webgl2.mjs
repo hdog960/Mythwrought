@@ -132,7 +132,18 @@ try{
       if(observed.block!==point.id||observed.mode!=='four-regions'||
          observed.generator!==M6_BALANCED_GENERATOR)
         throw Error('Wrong M3 real physical '+point.name+' source '+JSON.stringify(observed));
-      await page.waitForTimeout(1700);
+      // Live V6 streaming is asynchronous: never judge original Desert
+      // pixel diversity or GPU residency while 15+ chunks are pending.
+      await page.waitForFunction(()=>{
+        const c=document.querySelector('#scene'),d=c?.dataset;
+        return d?.skyDrawn==='true'&&Number(d.loadedChunks)===25&&
+          Number(d.pendingChunks)===0&&Number(d.renderedMeshVertices)>800;
+      },null,{timeout:90000});
+      const frameStart=await page.evaluate(()=>
+        Number(document.querySelector('#scene').dataset.renderedFrames));
+      await page.waitForFunction(n=>
+        Number(document.querySelector('#scene')?.dataset.renderedFrames)>=n+4,
+        frameStart,{timeout:30000});
       const file='m3-desert-current-v6-'+point.name+'-'+kind+'-'+width+'x'+height+'.png';
       const png=await page.screenshot({path:path.join(out,file),timeout:90000});
       const decoded=PNG.sync.read(png),buckets=new Set();

@@ -101,22 +101,33 @@ try{
   const heldNeutralFinger=touch(1,left.x,left.y);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[heldNeutralFinger]});
   await page.waitForTimeout(150);
-  await page.evaluate(()=>{
+  const sourceFixture=await page.evaluate(()=>{
     const t=window.__mythwroughtTest;
-    t.teleport(14.5,.5);
+    const safe=t.teleport(14.5,.5);
+    // On seeded V6 plains, real safe feet can vary with terrain; the
+    // original fixed height 18 could sit >6m above the actual eye.
+    // Set actual physical test voxels near the safe player eye; no
+    // mocked dataset, raycast, collision or world geometry provider.
+    const y=Math.max(2,Math.min(18,Math.floor(safe.feet+1.5)));
+    const fixture={x:16,y,z:0};
+    window.__touchFixture=fixture;
     t.placeFixture(14,13,0,0);
-    t.placeFixture(16,18,0,3);
-    t.placeFixture(17,18,0,3);
-    t.aimAt(16,18,0);
+    t.placeFixture(16,y,0,3);
+    t.placeFixture(17,y,0,3);
+    t.aimAt(16,y,0);
+    return fixture;
   });
-  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='16,18,0',null,{timeout:8000}).catch(async error=>{
+  // The same real cell is checked after cold reload; this read-only
+  // test coordinate does NOT create/overwrite any game save or actor state.
+  await page.addInitScript(f=>{window.__touchFixture=f;},sourceFixture);
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock===[16,window.__touchFixture.y,0].join(','),null,{timeout:8000}).catch(async error=>{
     const state=await page.evaluate(()=>({scene:{...document.querySelector('#scene').dataset},
       hero:{x:document.querySelector('#scene').dataset.playerX,feet:document.querySelector('#scene').dataset.playerFeet,z:document.querySelector('#scene').dataset.playerZ},
-      block:window.__mythwroughtTest.block(16,18,0)}));
+      block:window.__mythwroughtTest.block(16,window.__touchFixture.y,0)}));
     throw new Error('Mine fixture target unavailable: '+JSON.stringify(state),{cause:error});
   });
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[heldNeutralFinger,touch(8,mineCenter.x,mineCenter.y)]});
-  await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===0,null,{timeout:5000});
+  await page.waitForFunction(()=>window.__mythwroughtTest.block(16,window.__touchFixture.y,0)===0,null,{timeout:5000});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[heldNeutralFinger]});
   // Restore the known-good seam fixture from blocks-browser.mjs, where
   // targeting (17,18,0) exposes (16,18,0) as a valid placement cell.
@@ -124,26 +135,26 @@ try{
   await page.evaluate(()=>{
     window.__mythwroughtTest.placeFixture(14,13,0,3);
     window.__mythwroughtTest.teleport(14.5,.5);
-    window.__mythwroughtTest.placeFixture(16,18,0,0);
-    window.__mythwroughtTest.placeFixture(17,18,0,3);
-    window.__mythwroughtTest.aimAt(17,18,0);
+    window.__mythwroughtTest.placeFixture(16,window.__touchFixture.y,0,0);
+    window.__mythwroughtTest.placeFixture(17,window.__touchFixture.y,0,3);
+    window.__mythwroughtTest.aimAt(17,window.__touchFixture.y,0);
   });
-  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock==='17,18,0',null,{timeout:8000}).catch(async error=>{
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetBlock===[17,window.__touchFixture.y,0].join(','),null,{timeout:8000}).catch(async error=>{
     const state=await page.evaluate(()=>({scene:{...document.querySelector('#scene').dataset},
       support:window.__mythwroughtTest.block(14,13,0),
-      empty:window.__mythwroughtTest.block(16,18,0),
-      target:window.__mythwroughtTest.block(17,18,0)}));
+      empty:window.__mythwroughtTest.block(16,window.__touchFixture.y,0),
+      target:window.__mythwroughtTest.block(17,window.__touchFixture.y,0)}));
     throw new Error('Place fixture target unavailable: '+JSON.stringify(state),{cause:error});
   });
-  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetPlace==='16,18,0',null,{timeout:8000});
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.targetPlace===[16,window.__touchFixture.y,0].join(','),null,{timeout:8000});
   assert.equal(await page.evaluate(()=>document.querySelector('#scene').dataset.canPlace),'true','Seam fixture must expose a legal placement cell');
   // Keep the first finger down at the neutral pad center for a stable
   // build target; the earlier jump and mine actions exercised moving input.
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[heldNeutralFinger,touch(9,placeCenter.x,placeCenter.y)]});
-  await page.waitForFunction(()=>window.__mythwroughtTest.block(16,18,0)===3,null,{timeout:5000});
+  await page.waitForFunction(()=>window.__mythwroughtTest.block(16,window.__touchFixture.y,0)===3,null,{timeout:5000});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[heldNeutralFinger]});
   // A tap must perform one action, not pointerdown plus synthetic click.
-  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),3);
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,window.__touchFixture.y,0)),3);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   await page.waitForTimeout(90);
   const released=await v();
@@ -168,9 +179,9 @@ try{
       pointerId:window.__cancelledMousePointer,pointerType:'mouse',button:0,bubbles:true
     }));
   });
-  const beforeCancelledEdit=await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0));
+  const beforeCancelledEdit=await page.evaluate(()=>window.__mythwroughtTest.block(16,window.__touchFixture.y,0));
   await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:mouseX,y:mouseY,button:'left',clickCount:1});
-  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,18,0)),beforeCancelledEdit,
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(16,window.__touchFixture.y,0)),beforeCancelledEdit,
     'Cancelled mouse gesture must not edit the world');
   // Open settings once for modal-safe input assertions and stick-mode selection.
   await page.locator('#menu').click();
@@ -178,13 +189,13 @@ try{
   // Queued synthetic iOS events must not activate action buttons behind settings.
   const blocked=await page.evaluate(()=>{
     const scene=document.querySelector('#scene');
-    const before={jump:scene.dataset.playerVelocityY,edits:window.__mythwroughtTest.block(16,18,0)};
+    const before={jump:scene.dataset.playerVelocityY,edits:window.__mythwroughtTest.block(16,window.__touchFixture.y,0)};
     for(const id of ['jump','dig','place']){
       const button=document.getElementById(id);
       button.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true,pointerType:'touch'}));
       button.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,detail:0}));
     }
-    return {before,after:{jump:scene.dataset.playerVelocityY,edits:window.__mythwroughtTest.block(16,18,0)}};
+    return {before,after:{jump:scene.dataset.playerVelocityY,edits:window.__mythwroughtTest.block(16,window.__touchFixture.y,0)}};
   });
   assert.deepEqual(blocked.after,blocked.before,'Menu-open touch actions modified gameplay state');
   // A delayed grip/precision/mouse pointerdown while settings is visible
@@ -315,7 +326,7 @@ try{
   const hiddenKey=await page.evaluate(()=>{
     const scene=document.getElementById('scene');
     const before=Number(scene.dataset.playerFeet);
-    const beforeBlock=window.__mythwroughtTest.block(16,18,0);
+    const beforeBlock=window.__mythwroughtTest.block(16,window.__touchFixture.y,0);
     let afterBlock;
     Object.defineProperty(document,'hidden',{configurable:true,value:true});
     try{
@@ -330,7 +341,7 @@ try{
           bubbles:true,cancelable:true,detail:0
         }));
       }
-      afterBlock=window.__mythwroughtTest.block(16,18,0);
+      afterBlock=window.__mythwroughtTest.block(16,window.__touchFixture.y,0);
       scene.dispatchEvent(new KeyboardEvent('keydown',{
         code:'Space',bubbles:true,cancelable:true
       }));
