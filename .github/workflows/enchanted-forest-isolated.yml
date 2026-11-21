@@ -41,6 +41,9 @@ jobs:
           node --check src/manual-biomes/profile-world.mjs
       - name: Exact witness and biome-safety native regressions
         run: node --test tests/manual-biomes/enchanted-forest-phase1.test.mjs
+      - name: Existing generation, save, non-block habitat and streaming regression suites
+        run: |
+          node --test tests/manual-biomes/profile-world.test.mjs tests/manual-biomes/v6-balanced-biomes.test.mjs tests/nonblock-environment-profile.test.mjs tests/nonblock-environment-streaming.test.mjs tests/nonblock-habitat.test.mjs
       - name: Audit genuine M7 source provenance and deterministic seed samples
         run: node scripts/ci/enchanted-forest-phase1-audit.mjs
       - name: Preserve independent inspectable output
