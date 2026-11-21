@@ -317,6 +317,23 @@ try{
    }
    const heldUp=await proveHold('#place',1);
    const heldDown=await proveHold('#dig',-1);
+   // Random V6 natural terrain can spawn the player facing a tree or wall.
+   // Establish a clear flight corridor using ONLY the original real CDP
+   // touchscreen UP control before testing MOVE + LOOK + UP together.
+   // Never teleport or bypass collision/readiness. Still fail if real upward
+   // movement cannot safely gain height, then require real three-touch MOVE.
+   const lowFlight=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   let clearance=lowFlight,clearanceActions=0;
+   while(clearance.position.y-lowFlight.position.y<6&&clearanceActions<24){
+     await proveHold('#place',1);
+     clearanceActions++;
+     clearance=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+     assert.equal(clearance.bodyClear,true,'Real ascent entered original physical collision');
+     assert.equal(clearance.resident,true,'Real ascent outran original loaded GPU chunks');
+   }
+   assert.ok(clearance.position.y-lowFlight.position.y>=6,
+     'Original real UP touches could not clear V6 natural obstacles: '+
+     JSON.stringify({lowFlight,clearance,clearanceActions}));
    // Genuine independent three-touch CDP input: MOVE + LOOK + UP held together.
    const cdp=await context.newCDPSession(page);
    const beforeThree=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
