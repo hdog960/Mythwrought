@@ -1,0 +1,44 @@
+name: Isolated actual WebGL renderer load vs error-query timing (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-gpu-draw-load-291-20261121
+permissions:
+  contents: read
+jobs:
+  original-game-draw-load:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert unchanged exact PR game and diagnostic-only script
+        run: |
+          test "$(git rev-parse HEAD^)" = "82f8828945b464acf0a71faddfe2d18ffa4df245"
+          git diff --exit-code 82f8828945b464acf0a71faddfe2d18ffa4df245 HEAD -- src/ index.html styles.css sw-m5.js
+          node --check scripts/ci/iphone-webgl-draw-load-probe.mjs
+      - name: Install real original-game Chromium with WebGL2 software driver
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Pin real published production baseline for source identity
+        uses: actions/checkout@v4
+        with:
+          ref: 8de40ca8451b6268cfdfefaa5d9a66b72caca799
+          path: baseline-main
+      - name: Compare active balanced, active economy, suspended original rendering
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/gpu-draw-probe.log 2>&1 &
+          node scripts/ci/iphone-webgl-draw-load-probe.mjs
+      - name: Preserve every original browser sample and real screenshot even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iphone-original-webgl-render-draw-load-diagnostic
+          path: artifacts/iphone-webgl-draw-load/
+          if-no-files-found: warn
+          retention-days: 14
