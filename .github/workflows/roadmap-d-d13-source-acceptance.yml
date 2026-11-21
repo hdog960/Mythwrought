@@ -1,0 +1,43 @@
+name: MYTHWROUGHT Builder D Wave13 253-source 2326 strict D4 and genuine 48 PNG WebGL2 (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave13.mjs'
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave13*'
+      - 'tests/building-pool/roadmap-d/audit-wave13-gallery.mjs'
+      - 'tests/roadmap-d-wave13.test.mjs'
+      - '.github/workflows/roadmap-d-d13-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-d-wave13-source-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  wave13-253-source-2326-bidirectional-d4-real-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Demand 153 protected historical and 100 original new source 4B designs and all 2326 bidirectional eight-way D4 <0.89 comparisons
+        run: node --test --test-concurrency=1 tests/building-pool/roadmap-d/d1-original-institutions-wave13.test.mjs tests/building-pool/roadmap-d/d5-historical-bidirectional-d4.test.mjs
+      - name: Demand genuine locally installed Chrome and independently decoded PNG evidence
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+          npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Capture eight real original coordinate source buildings exterior/true cutaway at three phone landscapes in actual Chromium WebGL2
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave13-webgl2.test.mjs
+      - name: Independently check all 48 PNG CRC SHA Git source hash source pixel/camera projection zero GL and real cutaway geometry
+        run: node tests/building-pool/roadmap-d/audit-wave13-gallery.mjs
+      - name: Upload actual 48-frame evidence archive, do not claim Pack physical mesh, iPhone or live gameplay acceptance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-wave13-48-real-chromium-source-frames
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave13-webgl2-cube-proxy/
+          if-no-files-found: ignore
