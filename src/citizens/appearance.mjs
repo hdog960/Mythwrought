@@ -1,3 +1,4 @@
+import {agricultureClothes, agricultureOutfit, agricultureTool} from './agriculture-appearance.mjs';
 import {PROFESSIONS} from './registry.mjs';
 
 export const CITIZEN_VERTEX_FLOATS = 9;
@@ -106,9 +107,11 @@ function facialFeatures(box, race, variant, width, headY, pivot, skin, hair) {
   }
 }
 
-function equipment(box, pivot, x, y, profession) {
-  const prop = (dx,dy,z,w,h,d,c) => box(JOINT.rightArm,pivot,x+dx,y+dy,z,w,h,d,c);
-  if (profession?.id === 'blacksmith') {
+function equipment(box, pivot, x, y, profession, outfit) {
+  const prop = (dx,dy,z,w,h,d,c) => box(JOINT.rightArm,pivot,x+dx,y+dy,z-.066,w,h,d,c);
+  if (outfit) {
+    agricultureTool(outfit.tool,prop);
+  } else if (profession?.id === 'blacksmith') {
     prop(0,.05,.10,.045,.29,.046,'#785039');
     prop(0,.20,.10,.162,.094,.085,'#606972');
   } else if (profession?.threatResponse === 'defend') {
@@ -118,9 +121,6 @@ function equipment(box, pivot, x, y, profession) {
   } else if (profession?.id === 'astronomer') {
     prop(0,.07,.118,.098,.25,.095,'#8f6337');
     prop(0,.20,.118,.119,.053,.122,'#d1a26c');
-  } else if (profession?.group === 'agriculture-food') {
-    prop(0,.062,.09,.045,.28,.047,'#8f653a');
-    prop(.043,.20,.09,.125,.061,.068,'#a9a38d');
   } else if (profession) {
     prop(0,.04,.10,.11,.135,.063,'#8b6247');
     prop(0,.043,.134,.049,.038,.012,'#d1a566');
@@ -133,6 +133,7 @@ export function buildCitizenMesh(citizen) {
   const style = styles[citizen.style];
   const profession = PROFESSIONS[citizen.profession];
   const variant = citizen.variant - 1;
+  const outfit = agricultureOutfit(citizen.profession);
   const outer = profession ? professionColors[profession.group] : biome.outer;
   const {box,finish} = makeGeometry();
   const {height,width,head} = rig;
@@ -161,7 +162,7 @@ export function buildCitizenMesh(citizen) {
     box(arm,[shoulder,0],ax,(shoulder+wrist)*.5,0,armWidth,shoulder-wrist,armWidth,outer);
     box(arm,[shoulder,0],ax,wrist+.07,0,armWidth*1.01,.053,armWidth*1.02,biome.lining);
     box(arm,[shoulder,0],ax,wrist,0,armWidth*.92,.11,armWidth,skin);
-    if (side === 1) equipment(box,[shoulder,0],ax,wrist,profession);
+    if (side === 1) equipment(box,[shoulder,0],ax,wrist,profession,outfit);
   }
 
   facialFeatures(box,citizen.race,variant,head,headY,[headY,0],skin,hair);
@@ -178,6 +179,10 @@ export function buildCitizenMesh(citizen) {
   } else if (citizen.biome === 'mountain') {
     body(0,shoulder-.043,-bodyDepth*.51,width*.85,.13,.07,biome.outer);
     body(-width*.28,shoulder-.13,bodyDepth*.52,.063,.16,.045,biome.outer);
+  }
+  if (outfit) {
+    const headClothes = (x,y,z,w,h,d,c) => headBox(x*head,y,z*head,w*head,h,d*head,c);
+    agricultureClothes(outfit,{body,head:headClothes,width,shoulder,hip,depth:bodyDepth,variant});
   }
   return finish();
 }
