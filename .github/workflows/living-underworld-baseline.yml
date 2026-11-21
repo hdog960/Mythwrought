@@ -1,0 +1,59 @@
+name: Living Underworld Phase 1 — Real M7 Cave Density (isolated)
+
+on:
+  pull_request:
+    paths:
+      - 'src/living-underworld/**'
+      - 'scripts/underworld/**'
+      - 'tests/living-underworld-foundation.test.mjs'
+      - '.github/workflows/living-underworld-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-natural-voxel-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact PR head (no merge commit)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Configure Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source and run detached native tests
+        run: |
+          node --check src/living-underworld/density-audit.mjs
+          node --check src/living-underworld/procedural-core.mjs
+          node --check scripts/underworld/audit-m7-density.mjs
+          node --test tests/living-underworld-foundation.test.mjs
+      - name: Read real M7 natural voxels on six distinct seeds
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/living-underworld
+          git rev-parse HEAD > artifacts/living-underworld/checked-out-head.txt
+          for seed in 179 -17 2026 314159 -987 451; do
+            echo "Measuring natural voxels for seed ${seed}"
+            node scripts/underworld/audit-m7-density.mjs "${seed}" 8 > "artifacts/living-underworld/m7-seed-${seed}.json"
+          done
+          sha256sum artifacts/living-underworld/*.json > artifacts/living-underworld/SHA256SUMS
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          for (const file of fs.readdirSync('artifacts/living-underworld').filter(x=>x.endsWith('.json'))) {
+            const r=JSON.parse(fs.readFileSync('artifacts/living-underworld/'+file,'utf8'));
+            console.log(file, 'AIR', r.overall.air+'/'+r.overall.total, 'PERCENT', r.overall.percentage.toFixed(4)+'%');
+          }
+          NODE
+      - name: Preserve honest measurement JSON and exact checked-out SHA
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: living-underworld-phase1-real-m7-density
+          path: artifacts/living-underworld/
+          if-no-files-found: warn
+          retention-days: 14
