@@ -60,9 +60,62 @@ test('the cap-only fallback cannot touch other biomes, shoulders or protected gr
   assert.equal(planEnvironmentalColumn(x,z,seed,blockedCap,{name:'enchanted',weight:1}).size,0,
     'original landmark cap is not rewritten');
   const cavern=(a,y,c)=>y===old-1?BLOCK.AIR:read(y);
-  assert.equal(planEnvironmentalColumn(x,z,seed,cavern,{name:'enchanted',weight:1}).size,0,
-    'underground air/caves remain protected');
+  const caveCap=planEnvironmentalColumn(x,z,seed,cavern,{name:'enchanted',weight:1});
+  assert.equal(caveCap.size,1,'underground cave AIR must receive no terrain writes');
+  assert.equal(caveCap.has(old-1),false,'cave AIR is not filled by cosmetic cap change');
+  assert.ok(enchantSoils.has(caveCap.get(old)));
+  assert.equal(planEnvironmentalColumn(x,z,seed,cavern,{name:'enchanted',weight:.55}).size,0,
+    'unchanged enchanted biome shoulders cannot overwrite cave');
+  for(const name of ['desert','snow','mountain'])
+    assert.equal(planEnvironmentalColumn(x,z,seed,cavern,{name,weight:1}).size,0,
+      'cave below cap remains protected in non-enchanted '+name);
   const clear=(a,y,c)=>y>old?BLOCK.AIR:read(y);
   assert.ok(planEnvironmentalColumn(x,z,seed,clear,{name:'enchanted',weight:1}).size>1,
     'ordinary unoccupied enchanted terrain still generates full height/subsoil');
+});
+
+test('seven-seed real subterranean AIR rejection keeps cavities void and changes only enchanted cap',()=>{
+  // Actual first witnesses from failing exact source audit #44951588596.
+  const sites=[
+    {seed:179,x:40,z:-494,caveY:[7,8]},
+    {seed:179,x:34,z:-488,caveY:[7,8]},
+    {seed:179,x:92,z:-568,caveY:[6,7]},
+    {seed:179,x:96,z:-568,caveY:[5,6]},
+    {seed:7919,x:-92,z:-624,caveY:[5,6]},
+    {seed:7919,x:36,z:-624,caveY:[3,4]}
+  ];
+  for(const {seed,x,z,caveY} of sites){
+    const world=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
+    const legacy=new VoxelWorld(seed);
+    const old=terrainHeight(x,z,seed);
+    const biome=v6BiomeAt(x,z,seed);
+    assert.equal(biome?.name,'enchanted','real failing site is enchanted');
+    assert.ok(biome.weight>=.7,'not an intended border material');
+    assert.equal(legacy.naturalAndLandmarkBlock(x,old,z),BLOCK.GRASS);
+    for(const y of caveY){
+      assert.ok(y<old,'cavern witness must be below surface');
+      assert.equal(world._environmentBaseline(x,y,z),BLOCK.AIR,'actual original AIR provenance');
+    }
+    const plan=world._columnPlan(x,z);
+    assert.equal(plan.size,1,'only cosmetic cap change allowed over original cave');
+    assert.ok(enchantSoils.has(plan.get(old)),'enchanted ground changed from plains');
+    assert.equal(world.naturalAndLandmarkBlock(x,old,z),plan.get(old));
+    for(const y of caveY)
+      assert.equal(world.naturalAndLandmarkBlock(x,y,z),BLOCK.AIR,'original physical cave AIR preserved');
+    for(let y=old+1;y<=19;y++)
+      assert.equal(world.naturalAndLandmarkBlock(x,y,z),
+        legacy.naturalAndLandmarkBlock(x,y,z),'original skyline/landmarks preserved');
+    assert.equal(world.edits.size,0,'no schema-1 edits');
+  }
+});
+test('non-AIR protected subsoil cannot be overwritten by cap-only cave fallback',()=>{
+  const seed=179,x=40,z=-494,old=terrainHeight(x,z,seed);
+  const support=(a,y,c)=>y>old?BLOCK.AIR:y===old?BLOCK.GRASS:
+    y===old-1?BLOCK.ORE:BLOCK.DIRT;
+  assert.equal(planEnvironmentalColumn(x,z,seed,support,{name:'enchanted',weight:1}).size,0,
+    'ore below cap is not a cave and must not be replaced');
+  const buried=(a,y,c)=>y>old?BLOCK.AIR:y===old?BLOCK.STONE:
+    y===old-1?BLOCK.AIR:BLOCK.DIRT;
+  assert.equal(planEnvironmentalColumn(x,z,seed,buried,{name:'enchanted',weight:1}).size,0,
+    'original STONE top cannot be recolored');
 });
