@@ -9,7 +9,7 @@ import {chromium} from 'playwright';
 const REPO='hdog960/Mythwrought';
 const ORIGINAL='82f8828945b464acf0a71faddfe2d18ffa4df245';
 const MAIN='8de40ca8451b6268cfdfefaa5d9a66b72caca799';
-assert.equal(execFileSync('git',['rev-parse','HEAD^'],{encoding:'utf8'}).trim(),ORIGINAL);
+assert.equal(execFileSync('git',['rev-parse','HEAD~2'],{encoding:'utf8'}).trim(),ORIGINAL);
 assert.deepEqual(execFileSync('git',['diff','--name-only',ORIGINAL,'HEAD'],{encoding:'utf8'}).trim().split('\n').sort(),[
   '.github/workflows/iphone-webgl-draw-load-probe.yml',
   'scripts/ci/iphone-webgl-draw-load-probe.mjs'
@@ -23,6 +23,7 @@ const report={kind:'SOURCE_EXACT_RENDER_DRAW_LOAD_VS_QUERY_OVERHEAD_DIAGNOSTIC_N
   prHead:ORIGINAL,productionMain:MAIN,sourceGameSHA256:baseGameHash,gpuRecoverySHA256:gpuHash,
   actualPhysicalIphone:false,changedProduction:false,originalStrictGateUnchanged:true,
   variants:['balanced-foreground','economy-foreground','hidden-pause'],
+  unsupportedConditions:[],
   conditions:'No added WebGL getError, no fake browser frames, original staged GPU buffers/error rollback/save',
   cases:[],errors:[],complete:false};
 const vpList=[[844,390],[956,440]],modes=['balanced-foreground','economy-foreground','hidden-pause'];
@@ -37,7 +38,7 @@ async function one(viewport,mode,round){
   const ctx=await browser.newContext({viewport:{width,height},
     deviceScaleFactor:1,isMobile:true,hasTouch:true});
   const page=await ctx.newPage(),pageErrors=[];
-  const cdp=await ctx.newCDPSession(page);
+  let backgroundTab=null;
   page.on('pageerror',error=>pageErrors.push(String(error)));
   page.on('response',response=>{if(response.status()>=400)
     pageErrors.push('HTTP '+response.status()+' '+response.url());});
@@ -77,7 +78,21 @@ async function one(viewport,mode,round){
     assert.ok(before.width>0&&before.height>0);
     await page.screenshot({path:outdir+'/'+mode+'-'+width+'x'+height+'-round'+round+'.png'});
     if(mode==='hidden-pause'){
-      await cdp.send('Emulation.setPageVisibilityState',{visibilityState:'hidden'});
+      // Real Chromium tab transition only. Never override document.hidden or
+      // synthetic rAF/time; headless Chromium may keep every tab visible.
+      backgroundTab=await ctx.newPage();
+      await backgroundTab.goto('about:blank');
+      await backgroundTab.bringToFront();
+      await page.waitForTimeout(250);
+      const actualHidden=await page.evaluate(()=>document.hidden);
+      if(!actualHidden){
+        report.unsupportedConditions.push({viewport:width+'x'+height,
+          mode,round,reason:'Chromium keeps background tab visible in this headless driver'});
+        console.log('SOURCE_REAL_DRAW_LOAD_UNSUPPORTED',JSON.stringify(
+          report.unsupportedConditions.at(-1)));
+        await writeFile(outdir+'/draw-load-probe.json',JSON.stringify(report,null,2)+'\n');
+        return;
+      }
       await page.waitForFunction(()=>document.hidden===true,null,{polling:100,timeout:15000});
       const framesBefore=await page.evaluate(()=>Number(document.querySelector('#scene').dataset.renderedFrames));
       await page.waitForTimeout(350);
@@ -137,7 +152,7 @@ async function one(viewport,mode,round){
     }
     // Resume visibility via the original handler, without reloading before save.
     if(mode==='hidden-pause'){
-      await cdp.send('Emulation.setPageVisibilityState',{visibilityState:'visible'});
+      await page.bringToFront();
       await page.waitForFunction(()=>document.hidden===false,null,{timeout:15000});
       await page.waitForFunction(previous=>Number(document.querySelector('#scene').dataset.renderedFrames)>
         previous,metrics.endFrames,{timeout:45000});
@@ -165,7 +180,8 @@ async function one(viewport,mode,round){
       preErrorP95:row.drain.p95,postErrorP95:row.post.p95,
       cadenceP95:row.cadence.p95,resident:row.maxResident}));
   }finally{
-    try{await cdp.send('Emulation.setPageVisibilityState',{visibilityState:'visible'});}catch(_){}
+    try{await page.bringToFront();}catch(_){}
+    try{await backgroundTab?.close();}catch(_){}
     await ctx.close();
   }
 }
@@ -178,6 +194,7 @@ try{
   for(const [w,h] of vpList)for(const mode of modes){
     const group=report.cases.filter(c=>c.viewport===w+'x'+h&&c.mode===mode);
     const samples=group.flatMap(c=>c.samples);
+    if(group.length===0)continue;
     report.pooled.push({viewport:w+'x'+h,mode,replicates:group.length,
       edits:samples.length,frames:group.reduce((sum,c)=>sum+c.renderedFrames,0),
       frameBuffers:group.map(c=>c.frameBuffer),

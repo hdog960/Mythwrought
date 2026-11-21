@@ -12,13 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 3
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Assert unchanged exact PR game and diagnostic-only script
         run: |
-          test "$(git rev-parse HEAD^)" = "82f8828945b464acf0a71faddfe2d18ffa4df245"
+          test "$(git rev-parse HEAD~2)" = "82f8828945b464acf0a71faddfe2d18ffa4df245"
           git diff --exit-code 82f8828945b464acf0a71faddfe2d18ffa4df245 HEAD -- src/ index.html styles.css sw-m5.js
           node --check scripts/ci/iphone-webgl-draw-load-probe.mjs
       - name: Install real original-game Chromium with WebGL2 software driver
