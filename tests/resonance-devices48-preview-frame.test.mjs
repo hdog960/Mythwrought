@@ -17,6 +17,6 @@ test('safe power loss, disabled demand and no fabricated motion',()=>{
 });
 test('reject duplicates, unknown and excess grants, wrong seed, oversized frames',()=>{
  const base={seed:3,tick:4,specs:[specs[0]]};
- for(const patch of [{specs:[specs[0],specs[0]]},{grants:[{id:'other',granted:1}]},{grants:[{id:'lamp_a',granted:2}]},{grants:[{id:'lamp_a',granted:1},{id:'lamp_a',granted:1}]},{specs:[{...specs[0],seed:99}]},{specs:Array(65).fill(specs[0])}])
+ for(const patch of [{specs:[specs[0],specs[0]]},{grants:[{id:'other',granted:1}]},{grants:[{id:'lamp_a',granted:2}]},{grants:[{id:'lamp_a',granted:1},{id:'lamp_a',granted:1}]},{specs:[{...specs[0],anchor:[1.5,2,3]}]},{specs:Array(65).fill(specs[0])}])
  assert.throws(()=>buildDevicePreviewFrame({...base,...patch}));
 });
