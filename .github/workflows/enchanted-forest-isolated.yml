@@ -6,6 +6,7 @@ on:
     paths:
       - 'scripts/ci/enchanted-forest-phase1-audit.mjs'
       - 'scripts/ci/enchanted-forest-phase1-edge-audit.mjs'
+      - 'scripts/ci/enchanted-forest-ground-color-audit.mjs'
       - 'tests/manual-biomes/enchanted-forest-phase1.test.mjs'
       - 'src/manual-biomes/environment-v7.mjs'
       - 'src/manual-biomes/profile-world.mjs'
@@ -39,6 +40,7 @@ jobs:
         run: |
           node --check scripts/ci/enchanted-forest-phase1-audit.mjs
           node --check scripts/ci/enchanted-forest-phase1-edge-audit.mjs
+          node --check scripts/ci/enchanted-forest-ground-color-audit.mjs
           node --check src/manual-biomes/environment-v7.mjs
           node --check src/manual-biomes/profile-world.mjs
       - name: Exact witness and biome-safety native regressions
@@ -50,6 +52,8 @@ jobs:
         run: node scripts/ci/enchanted-forest-phase1-audit.mjs
       - name: Audit seven seed interiors and actual warped biome-edge transects
         run: node scripts/ci/enchanted-forest-phase1-edge-audit.mjs
+      - name: Trace original screenshot area ground material IDs and registered source colors
+        run: node scripts/ci/enchanted-forest-ground-color-audit.mjs
       - name: Preserve independent inspectable output
         if: always()
         uses: actions/upload-artifact@v4
@@ -58,5 +62,6 @@ jobs:
           path: |
             artifacts/enchanted-forest/phase1-source-audit.json
             artifacts/enchanted-forest/phase1-wide-edge-audit.json
+            artifacts/enchanted-forest/phase1-ground-color-provenance.json
           if-no-files-found: warn
           retention-days: 14
