@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   MAX_CAPTURE_MS,MAX_CAPTURE_BYTES,CAPTURE_FPS,MIME_PREFERENCES,
-  recordingMime,recordingFilename
+  recordingMime,recordingMimeForUserAgent,recordingFilename
 } from '../src/gameplay-recorder.mjs';
 test('10-second maximum and bounded recording memory',()=>{
   assert.equal(MAX_CAPTURE_MS,10000);
@@ -40,4 +40,24 @@ test('video filename is timestamped and extension matches encoding',()=>{
   const stamp=new Date('2026-11-18T23:30:00.000Z');
   assert.equal(recordingFilename(stamp,'video/mp4'),'mythwrought-2026-11-18T23-30-00-000Z.mp4');
   assert.equal(recordingFilename(stamp,'video/webm'),'mythwrought-2026-11-18T23-30-00-000Z.webm');
+});
+
+test('desktop Chromium with source H264 temporal-truncation prefers authentic supported VP8',()=>{
+  class ChromeRecorder {}
+  ChromeRecorder.isTypeSupported=type=>[
+    'video/mp4;codecs=avc1.42E01E','video/webm;codecs=vp8'
+  ].includes(type);
+  assert.equal(recordingMimeForUserAgent(ChromeRecorder,
+    'Mozilla/5.0 (X11; Linux x86_64) HeadlessChrome/145.0.1 Safari/537.36'),
+    'video/webm;codecs=vp8');
+  assert.equal(recordingMimeForUserAgent(ChromeRecorder,
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 Version/26.6 Mobile Safari/604.1'),
+    'video/mp4;codecs=avc1.42E01E');
+});
+test('unsupported real VP8 or absent MediaRecorder never changes original MP4/iPhone selection',()=>{
+  class H264Only {}
+  H264Only.isTypeSupported=type=>type==='video/mp4;codecs=avc1.42E01E';
+  assert.equal(recordingMimeForUserAgent(H264Only,
+    'Mozilla/5.0 HeadlessChrome/145'),'video/mp4;codecs=avc1.42E01E');
+  assert.equal(recordingMimeForUserAgent(null,'HeadlessChrome/145'),null);
 });

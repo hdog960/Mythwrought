@@ -209,7 +209,7 @@ async function pose(page,alignment){
   await page.waitForTimeout(420);
 }
 async function activate(page,phase,age,expected,alignment=false){
-  await page.evaluate(({phase,age})=>{
+  const anchorWall=await page.evaluate(({phase,age})=>{
     const wallNow=Date.now();
     const seed=window.__mythwroughtTest.snapshot().seed;
     localStorage.setItem('mythwrought-sky-s1-clock-'+seed,
@@ -218,6 +218,7 @@ async function activate(page,phase,age,expected,alignment=false){
     localStorage.setItem('mythwrought-sky-s3-lunar-'+seed,
       JSON.stringify({version:1,seed,
         wallEpochMs:wallNow-Math.floor(age*1440000)}));
+    return wallNow;
   },{phase,age});
   await page.reload({waitUntil:'networkidle',timeout:45000});
   await settle(page);
@@ -230,11 +231,36 @@ async function activate(page,phase,age,expected,alignment=false){
   await page.waitForFunction(start=>
     +document.querySelector('#scene').dataset.renderedFrames>=start+14,
     poseFrame,{timeout:35000});
-  await page.waitForFunction(({kind,phase})=>{
+  // The REAL 24-minute source clock advances while Chromium reloads,
+  // renders 25 source chunks and the player physically aims the camera.
+  // Comparing to the original, static wall anchor creates a false timeout
+  // after >16s of actual renderer work. Keep the SAME 16000ms tolerance
+  // against the correct advancing expected source time (with wraparound).
+  await page.waitForFunction(({kind,phase,anchorWall})=>{
     const c=document.querySelector('#scene');
+    if(!c)return false;
+    const actual=+c.dataset.skyClockPhaseMs,day=1440000;
+    const elapsed=Math.max(0,Date.now()-anchorWall);
+    const predicted=((Math.floor(phase*day)+elapsed)%day+day)%day;
+    const delta=Math.abs(actual-predicted);
     return +c.dataset.skyS5EventType===kind&&
-      Math.abs(+c.dataset.skyClockPhaseMs-phase*1440000)<16000;
-  },{kind:expected,phase},{timeout:30000});
+      Math.min(delta,day-delta)<16000;
+  },{kind:expected,phase,anchorWall},{timeout:30000}).catch(async error=>{
+    const diagnostic=await page.evaluate(({expected,phase,anchorWall})=>{
+      const d=document.querySelector('#scene')?.dataset,day=1440000;
+      const elapsed=Math.max(0,Date.now()-anchorWall);
+      const target=((Math.floor(phase*day)+elapsed)%day+day)%day;
+      const actual=Number(d?.skyClockPhaseMs);
+      return {expectedKind:expected,actualKind:Number(d?.skyS5EventType),
+        elapsedMs:elapsed,expectedPhase:target,actualPhase:actual,
+        sourcePhaseErrorMs:Math.min(Math.abs(actual-target),
+          day-Math.abs(actual-target)),
+        lunarAge:d?.skyLunarAgeDays,
+        eventId:d?.skyS5EventId};
+    },{expected,phase,anchorWall});
+    throw Error('Authentic S5 temporal/event gate did not pass: '+
+      JSON.stringify(diagnostic),{cause:error});
+  });
   const status=await state(page);
   assert.equal(status.kind,expected);
   assert.equal(status.glError,status.glNoError);

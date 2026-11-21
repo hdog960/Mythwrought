@@ -129,21 +129,40 @@ try{
       const live=await screenshot(page,egg.id,'live');
       await page.reload({waitUntil:'networkidle',timeout:45000});
       await page.waitForFunction(id=>{
-        const t=window.__mythwroughtTest;
-        return t?.mobStatus()?.creativeSpawned>=1&&
-          t.mobRoster().some(m=>m.species===id);
-      },egg.id,{timeout:45000});
+        const t=window.__mythwroughtTest,s=t?.mobStatus();
+        return s&&!s.readonly&&!s.damaged&&s.creativeSpawned>=1&&
+          t.mobPersistedRoster().some(m=>m.species===id);
+      },egg.id,{timeout:45000}).catch(async error=>{
+        const truth=await page.evaluate(({id,mobKey})=>{
+          const t=window.__mythwroughtTest;
+          const raw=localStorage.getItem(mobKey);
+          let payload=null;try{payload=raw?JSON.parse(JSON.parse(raw).payload):null;}catch(_){}
+          return {species:id,status:t?.mobStatus()??null,
+            loaded:t?.mobPersistedRoster()??[],
+            rendered:t?.mobRoster()??[],
+            sourceSaveEntities:payload?.engine?.entities?.map(e=>({
+              id:e.id,species:e.species,state:e.state
+            }))??[],creativeSpawnIds:payload?.creativeSpawnIds??[],
+            canonicalPresent:Boolean(raw)};
+        },{id:egg.id,mobKey});
+        throw new Error('Original per-seed Creative mob identity did not restore: '+
+          JSON.stringify(truth),{cause:error});
+      });
       const post=await page.evaluate(({worldKey,mobKey})=>{
         const t=window.__mythwroughtTest,c=document.querySelector('#scene');
         return {world:localStorage.getItem(worldKey),
           mobs:localStorage.getItem(mobKey),status:t.mobStatus(),
-          roster:t.mobRoster(),generator:t.fourBiomeProfile()?.generator,
+          roster:t.mobRoster(),persisted:t.mobPersistedRoster(),
+          generator:t.fourBiomeProfile()?.generator,
           glError:c.getContext('webgl2').getError()};
       },{worldKey,mobKey});
       assert.equal(post.generator,M6_BALANCED_GENERATOR);
       assert.equal(post.world,canonical,'Creature action rewrote schema-1 terrain');
-      assert.ok(post.mobs?.includes(egg.id)&&post.status.creativeSpawned>=1&&
-        post.roster.some(m=>m.species===egg.id));
+      assert.ok(post.mobs?.includes(egg.id)&&
+        !post.status.readonly&&!post.status.damaged&&
+        post.status.creativeSpawned>=1&&
+        post.persisted.some(m=>m.species===egg.id),
+        'Restored checked-source engine lost actual Creative actor identity');
       assert.equal(post.glError,0);
       const reloaded=await screenshot(page,egg.id,'reloaded');
       assert.notEqual(live.sha256,reloaded.sha256,
@@ -153,7 +172,9 @@ try{
       report.species.push({id:egg.id,classification:spec.classification,
         seed,sourceBody:spec.body,
         observedActor:pre.roster.find(m=>m.species===egg.id),
-        coldReloadedActor:post.roster.find(m=>m.species===egg.id),
+        coldReloadedActor:post.persisted.find(m=>m.species===egg.id),
+        coldReloadRendered:Boolean(post.roster.find(m=>m.species===egg.id)),
+        coldReloadDormant:post.persisted.some(m=>m.species===egg.id&&m.state==='dormant'),
         originalCanonicalSHA256:sha(Buffer.from(canonical)),
         originalMobSHA256:sha(Buffer.from(pre.mobs)),
         restoredMobSHA256:sha(Buffer.from(post.mobs)),

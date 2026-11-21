@@ -19,6 +19,7 @@ import {createManual14SavedBridge} from '../src/builder-assets/manual14-layer.mj
 import {createPack3LiveBridge} from '../src/builder-assets/pack3-live.mjs';
 import {createPack5LiveAdapter} from '../src/pack5-integration/live-adapter.mjs';
 import {createManualFivePackLiveBuilder} from '../src/builder-assets/manual-five-pack-live.mjs';
+import {MANUAL_FIVE_PACK_CATALOG} from '../src/builder-assets/manual-five-pack.mjs';
 const sha=value=>createHash('sha256').update(value).digest('hex');
 function device(){
   const data=new Map();
@@ -58,6 +59,12 @@ test('Every one of 241 Creative block IDs physically places and survives origina
   const fresh=()=>new FourRegionWorld(seed,fourRegionProfile(seed,M6_BALANCED_GENERATOR));
   const {world,pack3,manual14,pack5,builder}=mounted(fresh(),storage);
   assert.equal(world.base.generationProfile.generator,M6_BALANCED_GENERATOR);
+  // Pack2 Creative uses the already-registered numeric ID. Cross-check
+  // its original authored family symbol rather than inventing one or
+  // changing production inventory IDs.
+  const pack2Symbols=new Map(MANUAL_FIVE_PACK_CATALOG.filter(x=>x.pack===2)
+    .map(x=>[x.numericId,x.symbol]));
+  assert.equal(pack2Symbols.size,18,'Original Pack2 source family registry incomplete');
   const records=[];
   for(const [i,item] of catalog.blocks.entries()){
     const at=[1000+i*8,15,1000],owner=item.owner;
@@ -71,7 +78,10 @@ test('Every one of 241 Creative block IDs physically places and survives origina
       result={ok:world.set(...at,item.id),verifiedSave:false,
         sourceExact:true};
     }else{
-      shape=builder.resolve(item.symbol,{
+      const sourceSymbol=owner==='pack2'?pack2Symbols.get(item.id):item.symbol;
+      assert.match(sourceSymbol,/^pack[1-5]:[0-9]{3}$/,
+        'Physical builder lacks original source symbol for '+item.key);
+      shape=builder.resolve(sourceSymbol,{
         numericId:item.id,orientation:0,
         variant:owner==='pack5'?item.variants?.[0]??null:null,state:{}
       });
@@ -92,7 +102,7 @@ test('Every one of 241 Creative block IDs physically places and survives origina
             'Could not create authentic structural support '+item.key);
       }
       result=await builder.place({
-        asset:item.symbol,numericId:item.id,at,orientation:0,
+        asset:sourceSymbol,numericId:item.id,at,orientation:0,
         ...(owner==='pack5'?{variant:item.variants[0]}:{}),
         ...(supportAt?{supportAt}:{})
       });
@@ -110,7 +120,8 @@ test('Every one of 241 Creative block IDs physically places and survives origina
     else seen=world.get(...at);
     assert.equal(seen,owner==='pack5'?item.symbol:item.id,
       item.key+' physical owner did not materialize source asset');
-    records.push({key:item.key,owner,id:item.id,symbol:item.symbol??null,
+    records.push({key:item.key,owner,id:item.id,
+      symbol:owner==='pack2'?pack2Symbols.get(item.id):item.symbol??null,
       at,sourcePhysical:true,backing:supportAt});
   }
   assert.equal(records.length,241);

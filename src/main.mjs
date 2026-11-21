@@ -3198,6 +3198,14 @@ function start(){
       };},
       mobStatus(){return mobSession?.status()??null;},
       mobRoster(){return mobSession?.drawEntities().map(m=>({id:m.id,species:m.species.id,position:m.position,state:m.state}))??[];},
+      // Localhost-only READ-ONLY original engine snapshot. Real cold-reloaded
+      // Creative actors may correctly be DORMANT in unloaded physical chunks
+      // and therefore excluded by drawEntities(); do not confuse dormancy
+      // with a lost saved identity, or bypass the original roster checksum.
+      mobPersistedRoster(){return mobSession?.engine.checkpoint().entities.map(m=>({
+        id:m.id,species:m.species,position:[...m.position],state:m.state,
+        important:m.important
+      }))??[];},
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
         frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats(),

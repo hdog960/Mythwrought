@@ -15,6 +15,27 @@ export function recordingMime(MediaRecorderType){
     try{return MediaRecorderType.isTypeSupported(type);}catch(_){return false;}
   })??'';
 }
+// Original Safari/WebKit MP4 remains preferred on iPhone. Chromium's
+// software SwiftShader H264 MediaRecorder produced source-original videos
+// with only 1-9 encoded frames for a true 3s canvas capture (FFprobe
+// .0333s and .3002s), despite real complete WebGL draw + requestFrame.
+ // Use the browser's real supported VP8/WebM encoder on *desktop Chromium*
+ // only, retaining the same native MediaRecorder, real frame source, genuine
+ // FFprobe duration and full decode gates. Unsupported VP8 -> original MP4.
+export function recordingMimeForUserAgent(MediaRecorderType,userAgent=''){
+  const fallback=recordingMime(MediaRecorderType);
+  if(fallback===null)return null;
+  const ua=String(userAgent);
+  const chromium=/(?:Chrome|Chromium)\//.test(ua)&&
+    !/(?:iPhone|iPad|iPod|CriOS|FxiOS)/.test(ua);
+  if(chromium&&typeof MediaRecorderType.isTypeSupported==='function'){
+    try{
+      if(MediaRecorderType.isTypeSupported('video/webm;codecs=vp8'))
+        return 'video/webm;codecs=vp8';
+    }catch(_){/* Proven MP4/default policy remains fail-safe. */}
+  }
+  return fallback;
+}
 export function recordingFilename(date=new Date(),mime='video/mp4'){
   const time=Number.isFinite(date?.getTime?.())?date.toISOString().replace(/[:.]/g,'-'):'undated';
   return 'mythwrought-'+time+(String(mime).includes('webm')?'.webm':'.mp4');
@@ -137,7 +158,7 @@ export function installGameplayRecorder({
     if(state==='recording'||state==='finalizing')return;
     clearPreview();panel.hidden=true;video.hidden=true;
     const MediaRecorderType=globalThis.MediaRecorder;
-    const type=recordingMime(MediaRecorderType);
+    const type=recordingMimeForUserAgent(MediaRecorderType,navigator.userAgent);
     if(type===null||typeof canvas.captureStream!=='function'){
       reportError('Canvas video recording is not available in this browser');return;
     }
