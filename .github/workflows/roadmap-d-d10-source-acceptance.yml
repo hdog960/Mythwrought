@@ -1,0 +1,43 @@
+name: MYTHWROUGHT Builder D Wave10 229-source 1456 D4 and real 48-frame acceptance (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave10.mjs'
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave10*'
+      - 'tests/building-pool/roadmap-d/audit-wave10-gallery.mjs'
+      - 'tests/roadmap-d-wave10.test.mjs'
+      - '.github/workflows/roadmap-d-d10-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-d-wave10-real-source-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  builder-d-wave10-protected-originals-and-real-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Preserve 153 originally protected historical plus 76 genuine D1-D10 original source buildings, 1456 bidirectional eight-way D4 strict checks
+        run: node --test --test-concurrency=1 tests/building-pool/roadmap-d/d1-original-institutions-wave10.test.mjs tests/building-pool/roadmap-d/d5-historical-bidirectional-d4.test.mjs
+      - name: Demand actual installed Chrome and independent PNG decoder
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+          npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Render eight actual original source volumetric buildings in real Chromium WebGL2 exterior/section at all three phone landscape sizes
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave10-webgl2.test.mjs
+      - name: Independently decode and SHA/CRC audit all 48 original PNGs, source fingerprints, GL zero errors and camera/section identities
+        run: node tests/building-pool/roadmap-d/audit-wave10-gallery.mjs
+      - name: Save authentic 48-image source-only WebGL2 diagnostic artifact for independent review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-wave10-48-real-chromium-source-frames
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave10-webgl2-cube-proxy/
+          if-no-files-found: ignore
