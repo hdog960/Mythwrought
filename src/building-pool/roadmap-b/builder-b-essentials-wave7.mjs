@@ -47,8 +47,9 @@ export function buildRimeglassCrescentSunGreenhouse(){
   const y=roofs.get(K(x,z));if(!y||!has(x,z))throw Error('Rimeglass roof support off original greenhouse floor '+K(x,z));
   b.support(x,z,y-1,'live:wood','source-winter-column-load-unapproved');
  }
- for(const [x,z,side] of [[19,2,'north'],[26,2,'north'],[3,18,'west'],[3,26,'west'],
-  [40,17,'east'],[40,29,'east'],[15,40,'south'],[29,40,'south'],[2,34,'west']]){
+ const originalGroundFacadeWindows=[[19,2,'north'],[26,2,'north'],[3,18,'west'],[3,26,'west'],
+  [40,17,'east'],[40,29,'east'],[15,40,'south'],[29,40,'south'],[2,34,'west']];
+ for(const [x,z,side] of originalGroundFacadeWindows){
   if(!has(x,z))throw Error('Rimeglass glasswall off source footprint '+K(x,z));
   b.pane(x,z,side);
  }
@@ -89,6 +90,9 @@ export function buildRimeglassCrescentSunGreenhouse(){
  const glazedWallColumns=[];
  for(const key of foot){
   const [x,z]=key.split(',').map(Number);
+  // Old y2 opening panes must retain their framed ground-floor openings.
+  // They are not a solid support sill for any new upper-band clerestory pane.
+  if(originalGroundFacadeWindows.some(([gx,gz])=>gx===x&&gz===z))continue;
   if(![2,3,4,5,6].every(y=>!b.clear(x,y,z)))continue;
   // Restrict to truly single-face exposed wall columns; corners keep full posts.
   const exterior=offsets.filter(([,dx,dz])=>!has(x+dx,z+dz));
