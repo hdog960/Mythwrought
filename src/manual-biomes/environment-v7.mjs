@@ -80,7 +80,11 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline,biome=v6BiomeAt(x,
   const writes=new Map(),shoulder=sharedShoulder(biome,x,z,seed);
   // The shoulder replaces the grass in a broad contiguous band. The
   // natural wood and cave checks above remain authoritative.
-  if(blend<.065&&shoulder===null)return writes;
+  // A Desert-classified column must never retain legacy green grass merely
+  // because it is at the outermost, low-weight edge of the biome. Keep the
+  // original terrain height and protected-geometry vetoes; use dry materials
+  // at that height, while other biomes preserve their existing feathering.
+  if(blend<.065&&shoulder===null&&biome.name!=='desert')return writes;
   const {cap,subsoil,rock}=groundAt(biome.name,x,z,seed,top,outcrop);
   for(let y=old-1;y<=top;y++)
     writes.set(y,y===top?(shoulder??cap):y>=top-2?subsoil:rock);
