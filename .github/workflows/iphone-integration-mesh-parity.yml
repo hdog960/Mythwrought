@@ -1,0 +1,38 @@
+name: Isolated new production environment-ground mesh exact-byte parity (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-integration-mesh-parity-291-20261121
+permissions:
+  contents: read
+jobs:
+  current-main-environment-ground-geometry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert merged main exact ancestry, unchanged sources and test syntax
+        run: |
+          test "$(git rev-parse HEAD^)" = "7016e14cd6289f45eaf7fc6a79a362b47996df65"
+          git diff --exit-code 7016e14cd6289f45eaf7fc6a79a362b47996df65 HEAD -- src/ index.html styles.css tests/ sw-m5.js
+          node --check scripts/ci/iphone-integration-mesh-parity.mjs
+      - name: Pin protected draft exact SHA as source reference
+        uses: actions/checkout@v4
+        with:
+          ref: 82f8828945b464acf0a71faddfe2d18ffa4df245
+          path: baseline-draft
+      - name: Test byte-identical original merged world geometry for deep edits and all 11 new ground IDs
+        run: node scripts/ci/iphone-integration-mesh-parity.mjs
+      - name: Preserve every original native byte comparison even when failing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integrated-environment-mesh-source-byte-parity
+          path: artifacts/iphone-integration-mesh-parity/
+          if-no-files-found: warn
+          retention-days: 14
