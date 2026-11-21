@@ -17,22 +17,3 @@ export function bufferDimensions(cssWidth,cssHeight,mode,deviceRatio){
     scale:ratio
   };
 }
-
-// The existing economy shader and established framebuffer budget are reused
-// during ACTIVE deep digging only. No change to CSS size, voxel geometry,
-// PWA shell, world saves, default chosen render preset, or the rest of the world.
-// Restore full creator-selected quality after 4 seconds without a deep edit.
-export const DEEP_MINING_RENDER_SCALE_CAP=0.65;
-export const DEEP_MINING_QUALITY_HOLD_MS=4000;
-export function deepMiningRenderActive(feet,caveWorld,lastEditAt,now){
-  return Number.isFinite(feet)&&feet<=-48&&caveWorld===false&&
-    Number.isFinite(lastEditAt)&&Number.isFinite(now)&&
-    now>=lastEditAt&&now-lastEditAt<=DEEP_MINING_QUALITY_HOLD_MS;
-}
-export function deepMiningBufferDimensions(cssWidth,cssHeight,mode,deviceRatio,active){
-  const original=bufferDimensions(cssWidth,cssHeight,mode,deviceRatio);
-  if(active!==true)return original;
-  const scale=Math.min(original.scale,DEEP_MINING_RENDER_SCALE_CAP);
-  return {width:Math.max(1,Math.floor(cssWidth*scale)),
-    height:Math.max(1,Math.floor(cssHeight*scale)),scale};
-}
