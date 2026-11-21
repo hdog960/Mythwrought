@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditCameraFollowTrace as audit} from '../src/movement12/camera-follow-audit.mjs';
+const make=()=>Array.from({length:5},(_,i)=>({time:i/60,player:{x:i/60,y:2,z:0},camera:{x:i/60,y:2,z:0}}));
+test('constant-speed camera passes',()=>assert.deepEqual(audit(make()),{safe:true,reason:'smooth',index:-1}));
+test('camera position lag fails closed',()=>{const s=make();s[2].camera.x+=1;assert.equal(audit(s).reason,'camera-lag')});
+test('camera acceleration spike is detected',()=>{const s=make();s[2].camera.x+=.15;assert.equal(audit(s,{maxLag:1}).reason,'camera-acceleration-spike')});
+test('missing sample evidence rejected',()=>assert.equal(audit(make().slice(0,2)).reason,'missing-samples'));
+test('invalid limits rejected',()=>assert.equal(audit(make(),{maxJerk:0}).reason,'invalid-limits'));
+test('nonfinite coordinates rejected',()=>{const s=make();s[1].player.y=NaN;assert.equal(audit(s).reason,'nonfinite-frame')});
+test('nonmonotonic timestamps rejected',()=>{const s=make();s[2].time=s[1].time;assert.equal(audit(s).reason,'nonmonotonic-time')});
+test('missing intervals rejected',()=>{const s=make();s[2].time+=1;assert.equal(audit(s).reason,'missing-interval')});
