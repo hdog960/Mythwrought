@@ -31,6 +31,7 @@ const evidence={schema:'mythwrought-enchanted-phase1-readonly-v1',head:HEAD,seed
  seeds:SEEDS,worldGenerator:M7_ENVIRONMENT_GENERATOR,columns:0,interiorColumns:0,
  interiorGrass:0,expectedSoil:0,otherSoil:{},soilIds:{},grassWitnesses:[],seedRegions:[],
  legacyTreeInvestigations:[],repeatabilityChecks:0,invalidCanopies:0};
+evidence.unexpectedSoilWitnesses=[];
 const groundSet=new Set([G.woodlandLoam,G.woodlandPeat,G.woodlandMoss]);
 for(const seed of SEEDS){
   const world=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
@@ -50,7 +51,24 @@ for(const seed of SEEDS){
       evidence.soilIds[final]=(evidence.soilIds[final]??0)+1;
       seedResult.soilIds[final]=(seedResult.soilIds[final]??0)+1;
       if(groundSet.has(final))evidence.expectedSoil++;
-      else evidence.otherSoil[final]=(evidence.otherSoil[final]??0)+1;
+      else {
+        evidence.otherSoil[final]=(evidence.otherSoil[final]??0)+1;
+        if(evidence.unexpectedSoilWitnesses.length<30){
+          const baselineRejections=[];
+          for(let y=oldTop-2;y<=19;y++){
+            const raw=legacy.naturalAndLandmarkBlock(x,y,z);
+            const prior=world._environmentBaseline(x,y,z);
+            const rejects=y>oldTop?prior!==BLOCK.AIR:![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior);
+            if(rejects)baselineRejections.push({y,prior,raw,original:baseBlock(x,y,z,seed),cave:world.environmentCaves?.get(x,y,z)});
+          }
+          const district=world.liveDistrictCache.get(Math.floor(x/128)+','+Math.floor(z/128));
+          evidence.unexpectedSoilWitnesses.push({seed,x,z,oldTop,plannedTop,final,biomeWeight:biome.weight,
+            reasons:baselineRejections.slice(0,8),districtLandmarks:{court:district?.court?.origin,
+              rotunda:district?.rotunda?.origin,twinwood:district?.twinwood?.origin,
+              canopyGate:district?.canopyGate?.origin,archwood:district?.archwood?.origin,
+              fallenGiant:district?.fallenGiant?.origin}});
+        }
+      }
       let foundGrass=false;
       for(let y=oldTop-2;y<=Math.min(oldTop+5,19);y++){
         if(world.naturalAndLandmarkBlock(x,y,z)!==BLOCK.GRASS)continue;
@@ -108,5 +126,6 @@ console.log('ENCHANTED PHASE1 SOURCE AUDIT '+JSON.stringify({
   interiorGrass:evidence.interiorGrass,soilIds:evidence.soilIds,
   otherSoil:evidence.otherSoil,repeatability:evidence.repeatabilityChecks,
   grassWitnesses:evidence.grassWitnesses.slice(0,10),
-  legacyTreeInvestigations:evidence.legacyTreeInvestigations.slice(0,8)
+  legacyTreeInvestigations:evidence.legacyTreeInvestigations.slice(0,8),
+  unexpectedSoilWitnesses:evidence.unexpectedSoilWitnesses
 }));
