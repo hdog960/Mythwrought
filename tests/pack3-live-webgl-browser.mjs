@@ -46,10 +46,22 @@ try {
       const canonicalBefore=await page.evaluate(key=>localStorage.getItem(key),canonicalKey);
       assert.ok(canonicalBefore,'Actual V6 canonical schema-1 save absent');
       const verticesBefore=await page.evaluate(()=>Number(document.querySelector('#scene').dataset.renderedMeshVertices));
-      await page.locator('#menu').click();
-      await page.locator('#pack3Material').selectOption('116');
-      await page.locator('#pack3Rotation').selectOption('1');
-      await page.locator('#playerMenu .player-menu-close').click();
+      // The retired developer dropdown is intentionally hidden. Require
+      // the genuine visible Creative inventory owner and rotation control.
+      await page.locator('#creativeToggle').click();
+      assert.equal(await page.locator('#creativeToggle').getAttribute('aria-pressed'),'true');
+      await page.locator('#creativeInventoryToggle').click();
+      await page.locator('.mw-inventory-search').fill('block:116');
+      await page.locator('.mw-inventory-grid [data-key="block:116"]').click();
+      await page.waitForFunction(()=>
+        document.getElementById('pack3Material').value==='116',
+        null,{timeout:15000});
+      await page.locator('.mw-inventory-context button').first().click();
+      await page.waitForFunction(()=>
+        document.getElementById('pack3Rotation').value==='1',
+        null,{timeout:15000});
+      await page.locator('.mw-inventory-close').click();
+      assert.equal(await page.locator('#creativeInventory').isVisible(),false);
       await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.canPlace==='true');
       // The ray/face normal chooses the actual highlighted adjacent cell.
       // It is not necessarily the western cell of our legacy stone anchor.

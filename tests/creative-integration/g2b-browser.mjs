@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import {mkdirSync,readFileSync} from 'node:fs';
 import {inspectReadOnlyGameArchive} from '../../src/creative-integration/world-safety.mjs';
+import {buildCreativeCatalog} from '../../src/creative-integration/creative-catalog.mjs';
 import {chromium} from 'playwright';
 const origin=process.env.G2B_BROWSER_ORIGIN||'http://127.0.0.1:4174';
 const sizes=[[568,320],[667,375],[844,390],[932,430],[956,440],[1180,520]];
@@ -109,10 +110,40 @@ try{
      assert.equal(await page.locator('.mw-inventory-grid button').count(),48,
        'Source-driven inventory must use bounded initial rendering');
      await page.screenshot({path:'artifacts/mythwrought-creative-items-'+width+'x'+height+'.png'});
+     // Materialize the real 48-at-a-time virtualized catalog, ensuring all
+     // 241 installed physical producer IDs are reachable in the user UI.
+     const expectedCatalog=buildCreativeCatalog();
+     assert.equal(expectedCatalog.blocks.length,241);
+     assert.equal(expectedCatalog.creatures.length,40);
+     for(let batch=0;batch<8;batch++){
+       if(await page.locator('.mw-inventory-grid button[data-key]').count()===241)break;
+       await page.locator('.mw-inventory-grid').evaluate(node=>{
+         node.scrollTop=node.scrollHeight;
+         node.dispatchEvent(new Event('scroll'));
+       });
+     }
+     const blockKeys=await page.locator('.mw-inventory-grid button[data-key]')
+       .evaluateAll(nodes=>nodes.map(node=>node.dataset.key));
+     assert.deepEqual(blockKeys,expectedCatalog.blocks.map(item=>item.key),
+       'Live iPhone inventory did not expose all 241 physical source IDs in original catalog order');
+     assert.equal(await page.locator('.mw-inventory-grid canvas[data-fallback="true"]').count(),0,
+       'At least one physical item displayed placeholder geometry');
      await page.locator('.mw-inventory-category').filter({hasText:'Creatures'}).click();
-     assert.equal(await page.locator('.mw-inventory-grid button').count(),40,
-       'All 40 genuine live creature spawn sigils must be present');
+     const eggKeys=await page.locator('.mw-inventory-grid button[data-key]')
+       .evaluateAll(nodes=>nodes.map(node=>node.dataset.key));
+     assert.deepEqual(eggKeys,expectedCatalog.creatures.map(item=>item.key),
+       'Some registered live creature eggs are missing or reordered');
      await page.screenshot({path:'artifacts/mythwrought-creative-eggs-'+width+'x'+height+'.png'});
+     // Real user click for ALL forty: source registry lookup, selected state
+     // and live owner response, not a synthetic DOM count or mock species.
+     for(const key of eggKeys){
+       await page.locator('.mw-inventory-grid [data-key="'+key+'"]').click();
+       await page.waitForFunction(value=>
+         document.querySelector('.mw-inventory-grid [data-key="'+value+'"]')
+           ?.getAttribute('aria-selected')==='true',key,{timeout:15000});
+       assert.match(await page.locator('.mw-inventory-preview').textContent(),
+         /creature sigil/,'Failed live species selection: '+key);
+     }
      await page.locator('.mw-inventory-grid [data-key="spawn:horse"]').click();
      assert.match(await page.locator('.mw-inventory-preview').textContent(),/Horse/);
      await page.locator('.mw-inventory-close').click();
