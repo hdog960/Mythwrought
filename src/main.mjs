@@ -43,7 +43,8 @@ import {GpuUploadRetry,uploadChunkBuffer,uploadEditedChunkBuffer,uploadEditedChu
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
-import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
+import {normalizeRenderPreset,bufferDimensions,deepMiningRenderActive,
+  deepMiningBufferDimensions,RENDER_PREF} from './render-budget.mjs';
 import {installExplorationMap} from './exploration-map.mjs';
 import {createG2FlightState,armG2Flight,selectG2FlightProfile,planG2FlightStep,
   holdG2Flight} from './creative-integration/g2-flight.mjs';
@@ -806,6 +807,9 @@ function start(){
   }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
+  // Temporary adaptive visual workload while mining deep. No GPU upload or
+  // world mutation gets delayed, and the chosen graphics preference is intact.
+  let lastSuccessfulDeepEditAt=-Infinity;
   let lastEditMeshTiming={meshMs:0,uploadMs:0,chunks:0};
   const recentDigEdits=[];
   function recordDigEdit(actionMs,saveMs){
@@ -918,6 +922,8 @@ function start(){
       retireEditedChunkBuffers(old);
     }
     editMeshBatches++;
+    if(player.feet<=-48&&!caveSession)
+      lastSuccessfulDeepEditAt=performance.now();
     lastEditMeshKeys=ready.map(item=>item.key);
     lastEditMeshTiming={meshMs,uploadMs,chunks:ready.length,
       reusedGpuBuffers:editGpuReuses-gpuReusesBefore,gpuStageTimes};
@@ -1211,10 +1217,19 @@ function start(){
         caveDiscovery=updateCaveDiscovery(caveDiscovery,naturalCaveCorridor(world,player),now);
         if(caveDiscovery.entered)message('Natural cave passage discovered · explore carefully');
       }
-      const buffer=bufferDimensions(canvas.clientWidth,canvas.clientHeight,renderPreset,devicePixelRatio||1);
+      // Rendering workload, not gameplay, is adaptive during active deep
+      // mining. The large procedural per-pixel rock shader is a major source
+      // of queued software WebGL work when fail-closed GPU error checks run.
+      // Reuse the ORIGINAL economy shader path; never skip upload validation.
+      const deepMiningFocus=deepMiningRenderActive(
+        player.feet,!!caveSession,lastSuccessfulDeepEditAt,now);
+      const buffer=deepMiningBufferDimensions(canvas.clientWidth,
+        canvas.clientHeight,renderPreset,devicePixelRatio||1,deepMiningFocus);
       const w=buffer.width,h=buffer.height;
       canvas.dataset.renderPreset=renderPreset;
-      canvas.dataset.storybookQuality=renderPreset==='economy'?'base-colors':'painted-materials';
+      canvas.dataset.deepMiningAdaptiveQuality=String(deepMiningFocus);
+      canvas.dataset.storybookQuality=(renderPreset==='economy'||deepMiningFocus)?
+        'base-colors':'painted-materials';
       canvas.dataset.renderScale=String(buffer.scale);
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
       // S2 uses one authoritative S1 timestamp for the sky, terrain fog and
@@ -1283,7 +1298,7 @@ function start(){
       // bounded S3 lunar contribution if at least one moon illuminates night.
       gl.uniform3fv(U.uSkyLight,atmosphere.light);
       if(lunar.moonlight>0)gl.uniform3fv(U.uSkyLight,skyLight);
-      gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
+      gl.uniform1f(U.uArtQuality,(renderPreset==='economy'||deepMiningFocus)?0:1);
       if(frame%12===0){
         canvas.dataset.skySunAltitude=String(atmosphere.elevation.toFixed(4));
         canvas.dataset.skySunScreen=JSON.stringify(sunScreen.map(v=>Number(v.toFixed(4))));
