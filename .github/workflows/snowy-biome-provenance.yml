@@ -8,6 +8,7 @@ on:
       - 'nonblock-stage-assets.json'
       - 'scripts/ci/snowy-s0-probe.mjs'
       - 'scripts/ci/snowy-s0-webgl2.mjs'
+      - 'tests/snowy-biome-provenance.test.mjs'
       - '.github/workflows/snowy-biome-provenance.yml'
 
 permissions:
@@ -39,6 +40,7 @@ jobs:
       - name: Strict natural-ice, older-profile and edited-ice mesh regressions
         run: |
           node --test tests/snowy-biome-checkerboard.test.mjs
+          node --test tests/snowy-biome-provenance.test.mjs
           node --test tests/nonblock-environment-profile.test.mjs
       - name: Real M7 seed and coordinate material provenance (no mocks)
         run: node scripts/ci/snowy-s0-probe.mjs
