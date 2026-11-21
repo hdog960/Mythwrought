@@ -49,7 +49,7 @@ try {
       },null,{timeout:45000});
       // Sampling from the real game's 360-frame foreground ring buffer.
       await page.waitForTimeout(8500);
-      const scene=await page.evaluate(()=>{
+      const scene=await page.evaluate(seed=>{
         const c=document.getElementById('scene'),v=c.getBoundingClientRect(),
           l=document.querySelector('.left').getBoundingClientRect(),
           r=document.querySelector('.right').getBoundingClientRect(),gl=c.getContext('webgl2');
@@ -59,9 +59,9 @@ try {
           framebuffer:[c.width,c.height],viewport:[v.width,v.height],
           gripClearance:[v.left-l.right,r.left-v.right],
           preset:c.dataset.renderPreset,seed:document.querySelector('#seed').textContent,
-          saveSchema:localStorage.getItem('mythwrought-v002-world-179'),
+          saveSchema:localStorage.getItem('mythwrought-v002-world-'+seed),
           noticeHidden:document.querySelector('#notice').hidden};
-      });
+      },admitted.seed);
       assert.equal(scene.webgl2,true,'No WebGL2 context');
       assert.equal(scene.glError,scene.glNoError,'GL error in original scene');
       assert.equal(scene.loadedChunks,25,'Not all original-world chunks loaded');
@@ -83,6 +83,7 @@ try {
       // The built-in diagnostic is the primary measured frame-time source.
       const keysBefore=await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage)));
       await page.locator('#menu').click();
+      await page.locator('.player-menu-safety-link').click();
       await page.locator('#runAudit').click();
       await page.waitForFunction(()=>document.querySelector('#auditReport')?.value.includes('Foreground play frames:'),
         null,{timeout:10000});

@@ -8,27 +8,28 @@ import {createServer} from 'node:http';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {Pack2LiveWorld} from '../../src/pack2-world.mjs';
-import {FourRegionWorld,fourRegionProfile,FOUR_REGION_GENERATOR,
-  M5_EXPERIMENTAL_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
-import {planM5NaturalOverland,M5_OVERLAND_TARGETS} from
-  '../../src/manual-biomes/overland-walk-m5.mjs';
-import {surfaceBiomeAt} from '../../src/surface-regions/regions.mjs';
+import {FourRegionWorld,fourRegionProfile,M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
+import {planV6NaturalOverland,V6_OVERLAND_TARGETS} from
+  '../../src/manual-biomes/overland-walk-v6.mjs';
+import {v6BiomeAt} from '../../src/manual-biomes/v6-balanced-biomes.mjs';
 
 const dims={'667x375':[667,375],'844x390':[844,390],'932x430':[932,430]};
 const viewport=process.env.M5_VIEWPORT||'667x375';
 if(!Object.hasOwn(dims,viewport))throw Error('Unsupported viewport');
-const [width,height]=dims[viewport],seed=179;
+const [width,height]=dims[viewport];
+let activeSeed=null;
 const root=process.cwd(),out=path.join(root,'artifacts/manual-biomes-m5-long-'+viewport);
 await mkdir(out,{recursive:true});
 const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
-const savedKey='mythwrought-v002-world-'+seed;
-const world=new Pack2LiveWorld(new FourRegionWorld(seed,
-  fourRegionProfile(seed,M5_EXPERIMENTAL_GENERATOR)));
-if(world.base.generationProfile.generator!==M5_EXPERIMENTAL_GENERATOR||
-   new FourRegionWorld(seed).generationProfile.generator!==FOUR_REGION_GENERATOR)
-  throw Error('Historical default v4 or explicit v5 generator changed');
-const routes=M5_OVERLAND_TARGETS.map(target=>{
-  const p=planM5NaturalOverland(world,{target:target.name});
+// Build each exact-seed V6 route from the seed ACTUALLY created by real UI.
+// This never injects a preset world or invents safe waypoints.
+const targets=V6_OVERLAND_TARGETS;
+function routeFor(seed,target){
+  const world=new Pack2LiveWorld(new FourRegionWorld(seed,
+    fourRegionProfile(seed,M6_BALANCED_GENERATOR)));
+  if(world.base.generationProfile.generator!==M6_BALANCED_GENERATOR)
+    throw Error('Current V6 generator changed while planning physical route');
+  const p=planV6NaturalOverland(world,{seed,target:target.name});
   if(!p.ok||!p.withoutTerrainEdits||p.path.length<450)
     throw Error('Source natural route is not certified '+target.name);
   const segments=[];
@@ -39,9 +40,9 @@ const routes=M5_OVERLAND_TARGETS.map(target=>{
     if(segments.at(-1)?.key===key)segments.at(-1).end=b;
     else segments.push({key,end:b});
   }
-  return {name:target.name,plan:p,segments,
+  return {name:target.name,seed,plan:p,segments,
     hash:sha256(Buffer.from(JSON.stringify(p.path)))};
-});
+}
 const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript',
   '.mjs':'text/javascript','.json':'application/json','.png':'image/png',
   '.svg':'image/svg+xml','.webmanifest':'application/manifest+json'};
@@ -60,7 +61,7 @@ const browser=await chromium.launch({headless:true,args:[
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
   '--disable-gpu-sandbox','--no-sandbox']});
 const report={kind:'m5-full-distance-real-game-keyboard-v1',
-  viewport,width,height,seed,profile:M5_EXPERIMENTAL_GENERATOR,
+  viewport,width,height,seed:'individual admitted V6 seeds',profile:M6_BALANCED_GENERATOR,
   defaultV4Preserved:true,teleportUsed:false,directPlayerMutation:false,
   syntheticFrameClock:false,physicalIphone:false,
   complete:false,journeys:[],screenshots:[],errors:[]};
@@ -101,7 +102,7 @@ async function exploration(page){
   await page.locator('#miniMapButton').click();
   const map=await page.evaluate(()=>({
     size:Number(document.getElementById('miniMap').dataset.discovered||0),
-    raw:localStorage.getItem('mythwrought-exploration-v1-179'),
+    raw:localStorage.getItem('mythwrought-exploration-v1-'+window.__mythwroughtTest.snapshot().seed),
     text:document.getElementById('explorationCoordinates').textContent
   }));
   await page.locator('#closeExploration').click();
@@ -127,7 +128,7 @@ async function liveSegment(page,segment,route,progress){
     while(remain>.2){
       await page.waitForTimeout(remain>6?450:remain>2?150:45);
       const p=await pose(page);checks++;
-      if(p.seed!==seed||p.creative||!Number.isFinite(p.feet))
+      if(p.seed!==activeSeed||p.creative||!Number.isFinite(p.feet))
         throw Error('Actor seed/creative or finite-body invariant failed');
       const orthogonal=axis==='x'?'z':'x';
       if(Math.abs(p[orthogonal]-(segment.end[orthogonal]+.5))>.65)
@@ -164,15 +165,11 @@ async function liveSegment(page,segment,route,progress){
     observed:[last.x,last.z],checks,ms:Date.now()-began});
 }
 try{
-  for(const route of routes){
+  for(const target of targets){
     const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
     const errors=[];
     page.on('pageerror',e=>errors.push(e.message));
     page.on('dialog',d=>d.accept());
-    await page.addInitScript(()=>{
-      if(localStorage.getItem('mythwrought-v002-selected-seed')===null)
-        localStorage.setItem('mythwrought-v002-selected-seed','7');
-    });
     try{
       await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',
         {waitUntil:'load',timeout:90000});
@@ -181,10 +178,15 @@ try{
       if(!await page.evaluate(()=>Boolean(
         document.getElementById('scene').getContext('webgl2'))))
         throw Error('Genuine WebGL2 context unavailable');
-      await page.locator('#menu').click();
-      await page.locator('#seedInput').fill(String(seed));
-      await page.locator('#createExperimentalV5World').click();
-      await page.locator('#closeHelp').click();
+      await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+      if(!await page.locator('#help').isVisible())
+        throw Error('Protected V6 admission was bypassed');
+      await page.getByRole('button',{name:/NEW WORLD/}).click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+      activeSeed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+      const seed=activeSeed;
+      const savedKey='mythwrought-v002-world-'+seed;
+      const route=routeFor(seed,target);
       const first=await pose(page);
       if(first.seed!==seed||first.creative||Math.abs(first.yaw-Math.PI)>.001||
          Math.hypot(first.x-(route.plan.start.x+.5),
@@ -192,11 +194,11 @@ try{
         throw Error('Wrong real-game spawn or yaw; no debug camera steering');
       if(await page.evaluate(()=>
         window.__mythwroughtTest.fourBiomeProfile()?.generator)!==
-        M5_EXPERIMENTAL_GENERATOR)throw Error('Explicit v5 UI activation failed');
+        M6_BALANCED_GENERATOR)throw Error('Current V6 world admission failed');
       const rawBefore=await page.evaluate(k=>localStorage.getItem(k),savedKey);
       if(!rawBefore)throw Error('Missing new world canonical save');
       const mapBefore=await exploration(page);
-      const entry={biome:route.name,sourceRouteSha256:route.hash,
+      const entry={biome:route.name,seed,sourceRouteSha256:route.hash,
         plannedSteps:route.plan.path.length-1,
         plannedSegments:route.segments.length,spawn:first,
         initiallyDiscovered:mapBefore.size,segments:[],arrived:false};
@@ -217,7 +219,7 @@ try{
       const at=await pose(page),lastCell=route.plan.path.at(-1);
       if(Math.hypot(at.x-(lastCell.x+.5),at.z-(lastCell.z+.5))>.7)
         throw Error('Real player failed to reach natural biome interior');
-      const region=surfaceBiomeAt(at.x,at.z,seed);
+      const region=v6BiomeAt(at.x,at.z,seed);
       if(region?.name!==route.name||region.weight<.72)
         throw Error('Real browser actor not inside requested source biome');
       entry.arrived=true;entry.arrival=at;
@@ -226,7 +228,7 @@ try{
       await page.locator('#miniMapButton').click();
       const seen=await page.evaluate(()=>({
         size:Number(document.getElementById('miniMap').dataset.discovered||0),
-        raw:localStorage.getItem('mythwrought-exploration-v1-179')
+        raw:localStorage.getItem('mythwrought-exploration-v1-'+window.__mythwroughtTest.snapshot().seed)
       }));
       await screen(page,route,'map',at);
       await page.locator('#closeExploration').click();
@@ -235,7 +237,10 @@ try{
          !JSON.parse(seen.raw).cells.includes(cell))
         throw Error('No authentic location-specific physical map discovery');
       await page.locator('#menu').click();
-      await page.locator('#save').click();
+      await page.locator('.player-menu-safety-link').click();
+      await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
+      await page.locator('.player-safety-back').click();
+      await page.locator('.player-menu-close').click();
       const saved=await page.evaluate(k=>({
         raw:localStorage.getItem(k),
         priorMap:localStorage.getItem('mythwrought-exploration-v1-7'),
@@ -249,7 +254,7 @@ try{
         {timeout:90000});
       if(await page.evaluate(()=>
         window.__mythwroughtTest.fourBiomeProfile()?.generator)!==
-        M5_EXPERIMENTAL_GENERATOR)
+        M6_BALANCED_GENERATOR)
         throw Error('Cold reload selected a different terrain generator');
       const mapAfter=await exploration(page);
       if(mapAfter.size<seen.size||!JSON.parse(mapAfter.raw).cells.includes(cell))
@@ -264,7 +269,7 @@ try{
       entry.savedAndReloaded=true;entry.discoveryAfter=mapAfter.size;
       entry.canonicalSha256=sha256(Buffer.from(rawBefore));
       await write();
-      console.log('PASS M5 FULL REAL CHROMIUM KEYBOARD '+JSON.stringify({
+      console.log('PASS V6 FULL REAL CHROMIUM KEYBOARD '+JSON.stringify({
         viewport,biome:route.name,steps:entry.plannedSteps,
         sec:entry.actualWallSeconds,discoveries:entry.discoveryAfter}));
     }finally{await page.close()}
@@ -275,7 +280,7 @@ try{
      new Set(report.screenshots.filter(s=>s.kind==='map').map(s=>s.sha256)).size!==4)
     throw Error('All 4 genuine routes and 12 unique images are mandatory');
   report.complete=true;await write();
-  console.log('PASS M5 FOUR COMPLETE ACTUAL-GAME WASD BIOME ROUTES '+viewport);
+  console.log('PASS V6 FOUR COMPLETE ACTUAL-GAME WASD BIOME ROUTES '+viewport);
 }catch(e){report.errors.push(String(e));await write();throw e;}
 finally{
   await browser.close();

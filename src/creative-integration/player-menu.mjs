@@ -94,6 +94,12 @@ export function installPlayerMenu({
   returnSettings.classList.add('player-safety-back');
   safety.append(returnSettings,safetyHeading,safetyNote,archive,
     archiveDownload,safetyFeedback,actions,updater);
+  const deviceCheck=container.querySelector('section[aria-label="iPhone Foundation Gate A device diagnostics"]');
+  if(!deviceCheck?.querySelector('#runAudit')||!deviceCheck?.querySelector('#auditReport'))
+    throw Error('Original read-only device diagnostic missing');
+  // Move the ORIGINAL functional diagnostics into advanced recovery, preserving
+  // its existing read-only handler without restoring a scrolling main menu.
+  safety.append(deviceCheck);
   const backing=[...container.querySelectorAll('.vault-settings,.mirror-settings')];
   if(backing.length!==2)throw Error('Original save-vault and mirror controls missing');
   for(const original of backing)safety.append(original);
