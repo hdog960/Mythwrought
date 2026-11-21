@@ -54,7 +54,10 @@ test('V7 environmental tree chunks never emit Desert-side foliage and remain loa
   const sites=[[0,0],[1,0],[-1,0],
     [Math.floor((edge-16)/16),0],[Math.floor(edge/16),0],
     [Math.floor((edge+16)/16),0],
-    [Math.floor(512/16),0],[Math.floor(512/16)+1,0]];
+    [Math.floor(512/16),0],[Math.floor(512/16)+1,0],
+    // Environment trees are climate-specific; healthy Snow/Enchanted sites
+    // are the positive controls, rather than original Plains grove trees.
+    [0,32],[1,32],[-1,32],[0,-32],[1,-32],[-1,-32]];
   let trees=0;
   for(const [cx,cz] of sites){
     const first=environmentalTreesForChunk(cx,cz,SEED,readColumn,readCell);
@@ -63,7 +66,7 @@ test('V7 environmental tree chunks never emit Desert-side foliage and remain loa
     for(const [key,id] of first){
       const [x,,z]=key.split(',').map(Number);
       assert.equal(isDesert(x,z),false,'Natural tree voxel leaked into Desert at '+key);
-      assert.ok([BLOCK.WOOD,406,407,409,410].includes(id),
+      assert.ok([BLOCK.WOOD,406,407,408,409,410].includes(id),
         'Unexpected natural tree material '+id);
       trees++;
     }
