@@ -16,8 +16,9 @@ import {WORLD_MAX_Y} from '../../src/depth.mjs';
 
 const root=process.cwd(),out=path.join(root,'artifacts/manual-v6-live');
 await mkdir(out,{recursive:true});
-const seed=179,sourceWorld=new FourRegionWorld(seed,
-  fourRegionProfile(seed,M6_BALANCED_GENERATOR));
+// Each NEW WORLD makes a truly unused seed; validate its real V6 geometry.
+let seed=null,sourceWorld=null;
+const CANDIDATE_CACHE='mythwrought-m5-shell-20261120-creative-m1m6-candidate1';
 const registered={
   plains:new Set([BLOCK.GRASS]),
   desert:new Set([256,257,258,259,260,261,262,263,264,266]),
@@ -46,8 +47,7 @@ function findNaturalPhysicalAnchor(name,[cx,cz]){
   }
   throw Error('V6 '+name+' has no visible true solid source anchor around '+cx+','+cz);
 }
-const anchors=Object.entries(centers).map(([name,center])=>
-  findNaturalPhysicalAnchor(name,center));
+let anchors=[];
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const mime={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript',
   '.css':'text/css','.json':'application/json','.svg':'image/svg+xml',
@@ -112,16 +112,25 @@ try{
     if(!await page.evaluate(()=>
       Boolean(document.getElementById('scene').getContext('webgl2'))))
       throw Error('V6 actual Chromium WebGL2 missing at '+width+'x'+height);
-    await page.locator('#menu').click();
-    await page.locator('#seedInput').fill(String(seed));
-    if(await page.locator('#createBalancedV6World').count()!==1)
-      throw Error('V6 real-game UI action missing');
-    await page.locator('#createBalancedV6World').click();
-    const profile=await page.evaluate(()=>
-      window.__mythwroughtTest.fourBiomeProfile()?.generator);
-    if(profile!==M6_BALANCED_GENERATOR)
-      throw Error('V6 real-game profile did not activate: '+profile);
-    await page.locator('#closeHelp').click();
+    // User-visible NEW WORLD and real Chromium confirm are mandatory.
+    // A legacy selector cannot make an obsolete version playable.
+    await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+    if(!await page.locator('#help').isVisible())
+      throw Error('Unprofiled world bypassed current-only admission');
+    await page.getByRole('button',{name:/NEW WORLD/}).click();
+    await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+    const actual=await page.evaluate(()=>{
+      const t=window.__mythwroughtTest,seed=t.snapshot().seed;
+      return {seed,generator:t.fourBiomeProfile()?.generator,
+        raw:localStorage.getItem('mythwrought-v002-world-'+seed)};
+    });
+    if(actual.generator!==M6_BALANCED_GENERATOR||!actual.raw)
+      throw Error('Actual creator-confirmed V6 world did not persist: '+JSON.stringify(actual));
+    seed=actual.seed;
+    sourceWorld=new FourRegionWorld(seed,fourRegionProfile(seed,M6_BALANCED_GENERATOR));
+    anchors=Object.entries(centers).map(([name,center])=>
+      findNaturalPhysicalAnchor(name,center));
+    const profile=actual.generator;
     for(const anchor of anchors){
       const observed=await page.evaluate(({x,y,z})=>{
         const test=window.__mythwroughtTest;
@@ -159,7 +168,7 @@ try{
         diag.snapshot.gpuRetry.failures>0||diag.faults.length)
         throw Error('V6 blank/error GPU proof '+JSON.stringify({name,colors:colors.size,
           chunks:diag.snapshot.chunks.length,faults:diag.faults}));
-      frames.push({name,width,height,anchor,observed,cameraMovedForEvidence:true,
+      frames.push({name,width,height,seed,anchor,observed,cameraMovedForEvidence:true,
         actualPlayerWalkingProof:false,realChromium:true,webgl2:true,
         sourceGenerator:M6_BALANCED_GENERATOR,sha256:sha(bytes),
         bytes:bytes.length,colorBuckets:colors.size,
@@ -183,16 +192,17 @@ try{
         urls.some(url=>url.endsWith('/src/manual-biomes/v6-balanced-biomes.mjs'))&&
         urls.some(url=>url.endsWith('/src/app-update.mjs'))&&
         urls.some(url=>url.endsWith('/src/gameplay-recorder.mjs'));
-    },'mythwrought-m5-shell-20261120-five-systems-rc11',{timeout:180000});
+    },CANDIDATE_CACHE,{timeout:180000});
     const before=await page.evaluate(async()=>{
-      const name='mythwrought-m5-shell-20261120-five-systems-rc11';
+      const name='mythwrought-m5-shell-20261120-creative-m1m6-candidate1';
       const cache=await caches.open(name);
       const files=(await cache.keys()).map(x=>x.url);
       return {assets:files.length,hasV6:files.some(x=>
         x.endsWith('/src/manual-biomes/v6-balanced-biomes.mjs')),
         hasMain:files.some(x=>x.endsWith('/src/main.mjs')),
         controlled:Boolean(navigator.serviceWorker.controller),
-        save:localStorage.getItem('mythwrought-v002-world-179')};
+        save:localStorage.getItem('mythwrought-v002-world-'+
+          window.__mythwroughtTest.snapshot().seed)};
     });
     if(!before.hasV6||!before.hasMain||before.assets<190||
        !before.controlled||!before.save)
@@ -206,7 +216,8 @@ try{
       generator:window.__mythwroughtTest.fourBiomeProfile()?.generator,
       webgl2:Boolean(document.getElementById('scene').getContext('webgl2')),
       chunks:window.__mythwroughtTest.snapshot().chunks.length,
-      save:localStorage.getItem('mythwrought-v002-world-179')
+      save:localStorage.getItem('mythwrought-v002-world-'+
+          window.__mythwroughtTest.snapshot().seed)
     }));
     if(after.generator!==M6_BALANCED_GENERATOR||!after.webgl2||
       after.chunks<4||after.save!==before.save)
@@ -223,7 +234,8 @@ try{
     throw Error('V6 incomplete real screenshot/offline evidence '+JSON.stringify({
       frames:frames.length,checks:checks.length,errors}));
   await writeFile(path.join(out,'manifest.json'),JSON.stringify({
-    kind:'mythwrought-v6-real-chromium-five-biomes',seed,
+    kind:'mythwrought-v6-real-chromium-five-biomes',
+     seeds:[...new Set(frames.map(frame=>frame.seed))],
     generator:M6_BALANCED_GENERATOR,physicalIphone:false,
     simulatedOfflineHomeScreenNotPhysicalIphone:true,
     cameraRelocationOnlyForVisualEvidence:true,realFootJourneyEvidence:false,
