@@ -29,7 +29,7 @@ The draft starts from main at `7016e14cd6289f45eaf7fc6a79a362b47996df65`, verifi
 | Repository foundation | Main and open work audited. Citizen worktree based on the verified main commit. |
 | Data architecture | Six races, 82 careers, five biome inputs, three settlement styles, immutable identity records, and compatible workplace assignment. Targeted tests validate all 4,920 working appearance inputs. |
 | Visuals | 4,920 / 4,920 working, 50 / 50 ordinary, 6 / 6 races rendered in the shared rig, 8 / 8 rendered and inspected visual groups. |
-| AI and persistence | Movement, boundaries, fear, defender combat, and sidecar save acceptance pending. |
+| AI and persistence | Bounded roaming, compatible workplace navigation, fear, and five defender reactions pass real-voxel and MobEngine tests. Sidecar and live fixture acceptance pending. |
 | Professions | 0 / 82 accepted in gameplay. Service availability will be tracked per profession. |
 | Quality | Shared rig verified in Chromium WebGL2 at 844×390 and 1280×640. Full citizen performance and protected-system acceptance pending. |
 
@@ -86,3 +86,9 @@ Run the working visual check with `commerce` or `administration` as the wave arg
 | Ordinary citizens | 50 | 609,120 | [Contact sheet](evidence/ordinary-contact-sheet.png) · [Manifest](evidence/ordinary-render-manifest.json) |
 
 The 4,920 working and 50 ordinary base combinations have unique visible pixel hashes across the combined catalog. The ordinary contact sheet exercises standing and walking plus all three settlement styles across five biomes. The gallery's ordinary selection exposes ten actual catalog appearances per biome. These figures concern character visuals and do not certify workplace services or settlement population performance.
+
+## C5 and C6 movement and creature encounters
+
+The citizen runtime reuses the existing local navigator, voxel collision, support probes, line of sight, MobEngine damage, and MobCombat intake. It bounds wander choices to settlement regions, rates failed work approaches, pauses unloaded entities, and distinguishes deliberately displaced citizens. The baseline movement profile uses local paths up to the existing navigator's radius. Large settlements will supply intermediate anchors during integration.
+
+Tests cover a real wall detour, work anchor loss, loaded and unloaded cells, displaced citizens, all 77 civilian careers plus ordinary citizens fleeing a real Briarlurker, and all five defenders damaging the same creature through MobEngine. Existing MobCombat also damages a guard through its normal health-target interface. Downed citizens remain incapacitated in the fixture so the settlement owner can choose a removal or recovery policy.
