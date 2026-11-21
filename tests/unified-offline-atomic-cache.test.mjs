@@ -8,7 +8,7 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261120-creative-m1m6-candidate1';
+const RELEASE='20261120-creative-m1m6-candidate2';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
 
 const PREVIOUS='mythwrought-m5-shell-20261118-v5-recorder';

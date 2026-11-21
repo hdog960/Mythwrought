@@ -18,7 +18,7 @@ const root=process.cwd(),out=path.join(root,'artifacts/manual-v6-live');
 await mkdir(out,{recursive:true});
 // Each NEW WORLD makes a truly unused seed; validate its real V6 geometry.
 let seed=null,sourceWorld=null;
-const CANDIDATE_CACHE='mythwrought-m5-shell-20261120-creative-m1m6-candidate1';
+const CANDIDATE_CACHE='mythwrought-m5-shell-20261120-creative-m1m6-candidate2';
 const registered={
   plains:new Set([BLOCK.GRASS]),
   desert:new Set([256,257,258,259,260,261,262,263,264,266]),
@@ -194,7 +194,7 @@ try{
         urls.some(url=>url.endsWith('/src/gameplay-recorder.mjs'));
     },CANDIDATE_CACHE,{timeout:180000});
     const before=await page.evaluate(async()=>{
-      const name='mythwrought-m5-shell-20261120-creative-m1m6-candidate1';
+      const name='mythwrought-m5-shell-20261120-creative-m1m6-candidate2';
       const cache=await caches.open(name);
       const files=(await cache.keys()).map(x=>x.url);
       return {assets:files.length,hasV6:files.some(x=>
