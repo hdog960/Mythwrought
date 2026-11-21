@@ -1,0 +1,4 @@
+# Movement12 cadence evidence v1 — 2026-11-20
+This opt-in evidence gate compares full actual stepPlayer recordings at 30/60/120 Hz. It detects transient position drift and velocity drift, unlike endpoint-only diagnostics. Required frame count and timestamps fail closed; source-only, never registered in production.
+Run: node --test tests/movement12-cadence-evidence.test.mjs. This suite is authored; exact-head execution must be independently confirmed. captureCadenceEvidence uses the existing genuine stepPlayer recorder; synthetic test trajectories are not live acceptance.
+Known limitations: interpolation, 240 checkpoints, no continuous swept-volume proof; equal-time inputAt must represent identical physical controls. Production world seed, shaped geometry, flight toggle, WebGL2 screenshots, offline saves and physical iPhone remain unverified. No merge/deploy authorized.
