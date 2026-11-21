@@ -1,0 +1,31 @@
+// Node CPU diagnostic ONLY; NOT mobile FPS / WebGL GPU or latency certification.
+import fs from 'node:fs';
+import {performance} from 'node:perf_hooks';
+import {detachedCalibratedUnderworldAirAt}
+ from '../../src/living-underworld/depth-calibrated-proposal.mjs';
+import {networkAirAt} from '../../src/living-underworld/worldwide-network.mjs';
+const queries=Array.from({length:12288},(_,i)=>{
+ const x=-3680+((i*7919)%7399),y=-4-((i*37)%207),z=1070+((i*4373)%7237);
+ return [x,y,z];
+});
+function bench(name,fn){
+ for(let i=0;i<256;i++)fn(...queries[i]);
+ const samples=[];let air=0;
+ for(let start=0;start<queries.length;start+=256){
+  const t0=performance.now();
+  for(let i=start;i<start+256;i++)if(fn(...queries[i]))air++;
+  samples.push(performance.now()-t0);
+ }
+ samples.sort((a,b)=>a-b);
+ return {name,queries:queries.length,air,meanMsPer256Batch:samples.reduce((a,b)=>a+b,0)/samples.length,
+  medianMsPer256Batch:samples[Math.floor(samples.length*.5)],
+  p95MsPer256Batch:samples[Math.min(samples.length-1,Math.floor(samples.length*.95))],
+  maxMsPer256Batch:samples.at(-1)};
+}
+const result={kind:'NODE_CPU_ONLY_NOT_IPHONE_GPU_OR_FRAME_TIMES',
+ nodeVersion:process.version,seed:179,samplesPerImplementation:queries.length,
+ results:[bench('network-only',(...a)=>networkAirAt(179,...a)),
+  bench('calibrated-network-cavern',(...a)=>detachedCalibratedUnderworldAirAt(179,...a))],
+ baselineAgainstM7:false,hardwareSpecific:true,productionRegressionsNotTested:true};
+if(process.argv[2])fs.writeFileSync(process.argv[2],JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify(result));

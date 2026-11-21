@@ -9,6 +9,7 @@ on:
       - 'tests/living-underworld-network.test.mjs'
       - 'tests/living-underworld-entry-city.test.mjs'
       - 'tests/living-underworld-calibration.test.mjs'
+      - 'tests/living-underworld-physical-connectivity.test.mjs'
       - '.github/workflows/living-underworld-baseline.yml'
   workflow_dispatch:
 
@@ -36,8 +37,11 @@ jobs:
           node --check src/living-underworld/surface-entrance-proposal.mjs
           node --check src/living-underworld/city-floor-proposal.mjs
           node --check src/living-underworld/depth-calibrated-proposal.mjs
+          node --check src/living-underworld/physical-connectivity-audit.mjs
+          node --check scripts/underworld/audit-real-m7-entrance-terrain.mjs
+          node --check scripts/underworld/benchmark-node-proposal.mjs
           node --check scripts/underworld/audit-m7-density.mjs
-          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs tests/living-underworld-entry-city.test.mjs tests/living-underworld-calibration.test.mjs
+          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs tests/living-underworld-entry-city.test.mjs tests/living-underworld-calibration.test.mjs tests/living-underworld-physical-connectivity.test.mjs
       - name: Attempt ALL twenty real M7 seeds and fail closed on any genuine crash
         shell: bash
         run: |
@@ -92,6 +96,18 @@ jobs:
         run: |
           mkdir -p artifacts/living-underworld
           node scripts/underworld/audit-calibrated-proposal.mjs artifacts/living-underworld/CALIBRATED_PROPOSAL_SUMMARY.json > artifacts/living-underworld/CALIBRATED_PROPOSAL_20_SEEDS.jsonl
+      - name: Read-only actual M7 terrain entrance proposals for five biomes
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-real-m7-entrance-terrain.mjs artifacts/living-underworld/M7_TERRAIN_ENTRANCE_PROPOSALS.json > artifacts/living-underworld/M7_TERRAIN_ENTRANCE_LOG.txt
+      - name: Detached Node CPU-only query benchmark
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/benchmark-node-proposal.mjs artifacts/living-underworld/DETACHED_CPU_ONLY_BENCHMARK.json > artifacts/living-underworld/DETACHED_CPU_ONLY_BENCHMARK.log
       - name: Preserve SHA256 for every actual report, failure and prototype output
         if: always()
         shell: bash
