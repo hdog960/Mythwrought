@@ -8,7 +8,8 @@ const root=dirname(fileURLToPath(import.meta.url));
 const files=['builder-b-homes-wave1.test.mjs','builder-b-hospitality-wave2.test.mjs',
  'builder-b-inns-wave3.test.mjs','builder-b-homes-wave4.test.mjs',
  'builder-b-hospitality-wave5.test.mjs','builder-b-homes-wave6.test.mjs',
- 'builder-b-homes-wave7.test.mjs'];
+ 'builder-b-homes-wave7.test.mjs',
+ 'builder-b-hospitality-wave8.test.mjs'];
 test('every 1A Builder B wave imports unique real exported original symbols, with no duplicate lexical bindings',()=>{
  for(const name of files){
   const file=resolve(root,name),body=readFileSync(file,'utf8'),seen=new Set(),builderImports=[];
