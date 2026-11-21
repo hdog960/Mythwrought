@@ -33,21 +33,29 @@ jobs:
           node --check src/living-underworld/worldwide-network.mjs
           node --check scripts/underworld/audit-m7-density.mjs
           node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs
-      - name: Read actual M7 natural voxels across twenty seeds
+      - name: Attempt ALL twenty real M7 seeds and fail closed on any genuine crash
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p artifacts/living-underworld
           git rev-parse HEAD > artifacts/living-underworld/checked-out-head.txt
+          : > artifacts/living-underworld/FAILED_SEEDS.txt
           for seed in 179 -17 2026 314159 -987 451 0 1 17 42 12345 -12345 8675309 -8675309 777 991 -991 65535 24680 13579; do
-            node scripts/underworld/audit-m7-density.mjs "${seed}" 8 > "artifacts/living-underworld/m7-seed-${seed}.json"
+            output="artifacts/living-underworld/m7-seed-${seed}.json"
+            errorlog="artifacts/living-underworld/m7-seed-${seed}.stderr.txt"
+            if node scripts/underworld/audit-m7-density.mjs "${seed}" > "${output}" 2>"${errorlog}"; then
+              rm -f "${errorlog}"
+            else
+              rm -f "${output}"
+              printf '%s\n' "${seed}" >> artifacts/living-underworld/FAILED_SEEDS.txt
+              echo "::error::Actual M7 new-world generator refused seed ${seed}; preserving unmodified stderr evidence."
+            fi
           done
-          sha256sum artifacts/living-underworld/*.json > artifacts/living-underworld/SHA256SUMS
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const dir='artifacts/living-underworld';
-          const files=fs.readdirSync(dir).filter(x=>x.endsWith('.json'));
-          if(files.length!==20)throw Error('Expected exactly 20 real M7 density reports');
+          const files=fs.readdirSync(dir).filter(x=>/^m7-seed-.*\.json$/.test(x));
+          const failedSeeds=fs.readFileSync(dir+'/FAILED_SEEDS.txt','utf8').trim().split('\n').filter(Boolean).map(Number);
           let air=0,total=0;
           for(const file of files){
             const r=JSON.parse(fs.readFileSync(dir+'/'+file,'utf8'));
@@ -55,17 +63,31 @@ jobs:
               throw Error('Untrusted M7 report '+file);
             air+=r.overall.air;total+=r.overall.total;
           }
+          if(files.length+failedSeeds.length!==20)throw Error('Incomplete seed attempt inventory');
           const result={exactHead:fs.readFileSync(dir+'/checked-out-head.txt','utf8').trim(),
-            seedCount:files.length,air,total,percentage:100*air/total,
-            note:'Real M7 natural voxel sampling; excludes player edits; connectivity and entrances unmeasured'};
+            attemptedSeeds:20,successfulSeeds:files.length,failedSeeds,
+            air,total,percentage:total?100*air/total:null,
+            status:failedSeeds.length?'INHERITED_M7_SEED_FAILURE':'ALL_SEEDS_MEASURED',
+            note:'Actual M7 baseline; no generator changes; failures are real and NOT accepted'};
           fs.writeFileSync(dir+'/SUMMARY.json',JSON.stringify(result,null,2)+'\n');
-          console.log('Real M7 aggregate',JSON.stringify(result));
+          console.log('Real M7 twenty-seed audit',JSON.stringify(result));
           NODE
-          sha256sum artifacts/living-underworld/SUMMARY.json >> artifacts/living-underworld/SHA256SUMS
-      - name: Measure detached worldwide network candidate separately (NOT playable M7)
+          if [[ -s artifacts/living-underworld/FAILED_SEEDS.txt ]]; then
+            echo "::error::Real M7 baseline is not universally constructible for the attempted seeds; keeping CI RED."
+            exit 1
+          fi
+      - name: Measure detached worldwide network candidate independently
+        if: always()
         run: |
+          mkdir -p artifacts/living-underworld
           node scripts/underworld/audit-network-prototype.mjs > artifacts/living-underworld/NETWORK_PROTOTYPE_ONLY.jsonl
-          sha256sum artifacts/living-underworld/NETWORK_PROTOTYPE_ONLY.jsonl >> artifacts/living-underworld/SHA256SUMS
+      - name: Preserve SHA256 for every actual report, failure and prototype output
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          find artifacts/living-underworld -type f ! -name SHA256SUMS -print0 | sort -z |
+            xargs -0 sha256sum > artifacts/living-underworld/SHA256SUMS
       - name: Preserve exact-head M7 + explicitly unintegrated network evidence
         uses: actions/upload-artifact@v4
         if: always()
