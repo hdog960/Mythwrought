@@ -1,0 +1,45 @@
+name: Isolated WebGL2 GPU backlog vs validation timing (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-gpu-backlog-291-20261121
+permissions:
+  contents: read
+jobs:
+  real-gpu-backlog-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert exact protected source and syntax (no game changes)
+        run: |
+          test "$(git rev-parse HEAD^)" = "82f8828945b464acf0a71faddfe2d18ffa4df245"
+          git diff --exit-code 82f8828945b464acf0a71faddfe2d18ffa4df245 HEAD -- src/ index.html styles.css sw-m5.js
+          node --check scripts/ci/iphone-gpu-backlog-probe.mjs
+      - name: Install real original-game Chromium WebGL2 driver
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Fetch exact published original source baseline
+        uses: actions/checkout@v4
+        with:
+          ref: 8de40ca8451b6268cfdfefaa5d9a66b72caca799
+          path: baseline-main
+      - name: Real deep WebGL2 no-sync vs gl.flush vs gl.finish probe
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/gpu-probe-candidate.log 2>&1 &
+          python3 -m http.server 4174 --directory baseline-main >/tmp/gpu-probe-baseline.log 2>&1 &
+          node scripts/ci/iphone-gpu-backlog-probe.mjs
+      - name: Preserve original real WebGL2 samples and screen evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iphone-real-gl-gpu-backlog-probe
+          path: artifacts/iphone-gpu-backlog/
+          if-no-files-found: warn
+          retention-days: 14
