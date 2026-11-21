@@ -366,8 +366,8 @@ export const ROADMAP_D_WAVE13_PLANS=Object.freeze([
       ],
       [
         "west-dune-timekeeping",
-        12,
-        54
+        13,
+        62
       ]
     ],
     "div": [
@@ -746,8 +746,8 @@ export const ROADMAP_D_WAVE13_PLANS=Object.freeze([
       ],
       [
         "east-crystal-resonator",
-        95,
-        52
+        94,
+        61
       ]
     ],
     "div": [
@@ -891,8 +891,8 @@ export const ROADMAP_D_WAVE13_PLANS=Object.freeze([
       [
         55,
         99,
-        9,
-        8
+        7,
+        6
       ]
     ],
     "holes": [
@@ -1554,8 +1554,8 @@ export const ROADMAP_D_WAVE13_PLANS=Object.freeze([
       ],
       [
         "east-starlight-chant",
-        89,
-        55
+        88,
+        62
       ]
     ],
     "div": [
