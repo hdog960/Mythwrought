@@ -72,21 +72,37 @@ try{
   // Aim at an actual seeded natural surface block in the current V6 world.
   // This uses the same read-only aiming/teleport test hook as original Pack3;
   // the MINE interaction below remains the real player-facing button.
-  const target=await page.evaluate(()=>{
-    const t=window.__mythwroughtTest,x=16,z=0;
-    let y=null;
-    // The full original game enforces WORLD_MAX_Y=19, including its
-    // independently saved Pack 3 physical overlay. Never query 20..30
-    // (or block19's nonexistent y20 above-neighbor) through t.block().
-    for(let at=19;at>=0;at--){
-      if(t.block(x,at,z)!==0&&(at===19||t.block(x,at+1,z)===0)){
-        y=at;break;
+  const target=await page.evaluate(async()=>{
+    const t=window.__mythwroughtTest,scene=document.getElementById('scene');
+    // The current V6 generation has random actual terrain elevations.
+    // Search the SAME ORIGINAL game raycast used by the player-facing MINE
+    // action, not a synthetic target label or scripted mutation.
+    const origin=t.teleport(14.5,.5);
+    const baseX=Math.floor(origin.x),baseZ=Math.floor(origin.z);
+    const offsets=[[2,0],[0,2],[-2,0],[0,-2],[3,0],[0,3],[-3,0],[0,-3],
+      [2,2],[-2,2],[2,-2],[-2,-2],[4,0],[0,4],[-4,0],[0,-4]];
+    const attempts=[];
+    for(const [dx,dz] of offsets){
+      const x=baseX+dx,z=baseZ+dz;
+      // Respect exact WORLD_MAX_Y=19 on every source query.
+      for(let y=19;y>=0;y--){
+        const block=t.block(x,y,z);
+        if(block===0||(y<19&&t.block(x,y+1,z)!==0))continue;
+        t.aimAt(x,y,z);
+        await new Promise(ok=>requestAnimationFrame(()=>
+          requestAnimationFrame(ok)));
+        const observed=scene.dataset.targetBlock;
+        if(observed===x+','+y+','+z)
+          return {x,y,z,sourceBlock:block,rayHit:observed,origin};
+        attempts.push({x,y,z,block,observed});
+        break;
       }
     }
-    if(y===null)throw Error('No authentic exposed V6 surface block for root mining proof');
-    t.teleport(14.5,.5);t.aimAt(x,y,z);
-    return {x,y,z};
+    throw Error('No source-valid original V6 mine ray target: '+
+      JSON.stringify({origin,attempts}));
   });
+  assert.equal(target.rayHit,target.x+','+target.y+','+target.z,
+    'Source scan never hit the original physical raycast');
   await page.waitForFunction(({x,y,z})=>
     document.querySelector('#scene')?.dataset.targetBlock===x+','+y+','+z,
     target,{timeout:30000});

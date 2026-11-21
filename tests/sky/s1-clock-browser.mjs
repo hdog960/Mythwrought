@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
+import {waitForRealStableMap} from './source-map-stability.mjs';
 import {M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
 
 const dir='artifacts/sky-s1';
@@ -85,6 +86,7 @@ try{
       await page.locator('.player-menu-safety-link').click();
       await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
       await page.locator('.player-safety-back').click();
+      const originalMap=await waitForRealStableMap(page,seed);
       const worldBefore=await storageExceptClock();
       assert.ok(worldBefore[worldKey],'Current V6 canonical save not available');
       assert.equal(JSON.parse(worldBefore[worldKey]).schema,1);
@@ -116,6 +118,8 @@ try{
       await page.locator('.player-menu-close').click();
       await shot('day-world');
       const worldAfter=await storageExceptClock();
+      assert.equal(worldAfter[originalMap.key],originalMap.raw,
+        'Original current-world fog changed due to DAY/NIGHT sky controls');
       assert.deepEqual(worldAfter,worldBefore,'Sky controls changed non-sky storage');
       await page.reload({waitUntil:'networkidle'});
       await page.waitForFunction(()=>+document.querySelector('#scene')?.dataset.loadedChunks===25,
@@ -161,6 +165,10 @@ try{
       // Measure actual game FrameHistory rather than claiming FPS from CI success.
       // These are software Chromium/SwiftShader observations, not iPhone results.
       await page.waitForTimeout(4000);
+      // The second genuine V6 world may naturally commit its map before
+      // the read-only diagnostic; await its actual first persistent snapshot.
+      await waitForRealStableMap(page,await page.evaluate(()=>
+        window.__mythwroughtTest.snapshot().seed));
       const beforeAudit=await storageExceptClock();
       await page.locator('#menu').click();
       await page.locator('.player-menu-safety-link').click();

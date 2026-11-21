@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
+import {waitForRealStableMap} from './source-map-stability.mjs';
 import {M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
 import pngjs from 'pngjs';
 const {PNG}=pngjs;
@@ -142,6 +143,7 @@ try{
       await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
       await page.locator('.player-safety-back').click();
       await page.locator('.player-menu-close').click();
+      await waitForRealStableMap(page,seed);
       const saved=await nonSky(page);
       const worldKey='mythwrought-v002-world-'+seed;
       assert.equal(JSON.parse(saved[worldKey]).schema,1);
