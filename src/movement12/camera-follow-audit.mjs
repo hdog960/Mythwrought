@@ -3,7 +3,7 @@ export function auditCameraFollowTrace(samples,{maxLag=0.5,maxJerk=250,maxGapSec
  const fail=(reason,index=-1)=>({safe:false,reason,index});
  if(!Array.isArray(samples)||samples.length<3)return fail('missing-samples');
  if(![maxLag,maxJerk,maxGapSeconds].every(v=>Number.isFinite(v)&&v>0))return fail('invalid-limits');
- let prev=null,previousVelocity=null;
+ let prev=null,previousVelocity=null,previousDt=null;
  for(let i=0;i<samples.length;i++){
   const s=samples[i];
   if(!s||!Number.isFinite(s.time)||!s.player||!s.camera||
@@ -16,10 +16,13 @@ export function auditCameraFollowTrace(samples,{maxLag=0.5,maxJerk=250,maxGapSec
    if(dt>maxGapSeconds)return fail('missing-interval',i);
    const velocity=['x','y','z'].map(k=>(s.camera[k]-prev.camera[k])/dt);
    if(previousVelocity){
-    const jerk=Math.hypot(...velocity.map((v,j)=>(v-previousVelocity[j])/dt));
-    if(jerk>maxJerk+1e-9)return fail('camera-acceleration-spike',i);
+    // Segment velocities are centered at their interval midpoints.
+    const midpointDt=(previousDt+dt)/2;
+    const acceleration=Math.hypot(...velocity.map((v,j)=>(v-previousVelocity[j])/midpointDt));
+    if(acceleration>maxJerk+1e-9)return fail('camera-acceleration-spike',i);
    }
    previousVelocity=velocity;
+   previousDt=dt;
   }
   prev=s;
  }
