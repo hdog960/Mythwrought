@@ -1,0 +1,44 @@
+name: Isolated real WebGL2 chunk frustum geometry READ ONLY (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-gpu-frustum-291-20261121
+permissions:
+  contents: read
+jobs:
+  original-visibility-census:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reject any changed renderer, gameplay, save, or strict-test source
+        run: |
+          test "$(git rev-parse HEAD^)" = "82f8828945b464acf0a71faddfe2d18ffa4df245"
+          git diff --exit-code 82f8828945b464acf0a71faddfe2d18ffa4df245 HEAD -- src/ index.html styles.css sw-m5.js tests/
+          node --check scripts/ci/iphone-frustum-readonly-probe.mjs
+      - name: Install original Chromium software WebGL2 test dependencies
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Independently pin original released production hash
+        uses: actions/checkout@v4
+        with:
+          ref: 8de40ca8451b6268cfdfefaa5d9a66b72caca799
+          path: baseline-main
+      - name: Original-world actual chunk residency and camera clip census
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/iphone-frustum.log 2>&1 &
+          node scripts/ci/iphone-frustum-readonly-probe.mjs
+      - name: Preserve authentic original-world JSON and PNGs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iphone-original-frustum-visibility-readonly
+          path: artifacts/iphone-frustum/
+          if-no-files-found: warn
+          retention-days: 14
