@@ -1,0 +1,29 @@
+name: Desert Phase 2 Original Grass Provenance (diagnostic only)
+on:
+  push:
+    branches:
+      - probe/desert-grass-v7-provenance-20261121
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: desert-grass-provenance-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  native-grass-provenance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm protected Phase 1 source ancestry and exact source bytes
+        run: |
+          git merge-base --is-ancestor f50778251e38b78f56cc379748435785f0a34385 HEAD
+          git diff --name-only f50778251e38b78f56cc379748435785f0a34385 HEAD | sort
+          node --check scripts/ci/desert-v7-grass-provenance.mjs
+      - name: Classify every real grass block in Phase 1 screenshot evidence
+        run: node --test scripts/ci/desert-v7-grass-provenance.mjs
