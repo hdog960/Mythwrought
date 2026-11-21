@@ -7,6 +7,7 @@ on:
       - 'scripts/underworld/**'
       - 'tests/living-underworld-foundation.test.mjs'
       - 'tests/living-underworld-network.test.mjs'
+      - 'tests/living-underworld-entry-city.test.mjs'
       - '.github/workflows/living-underworld-baseline.yml'
   workflow_dispatch:
 
@@ -31,8 +32,10 @@ jobs:
           node --check src/living-underworld/density-audit.mjs
           node --check src/living-underworld/procedural-core.mjs
           node --check src/living-underworld/worldwide-network.mjs
+          node --check src/living-underworld/surface-entrance-proposal.mjs
+          node --check src/living-underworld/city-floor-proposal.mjs
           node --check scripts/underworld/audit-m7-density.mjs
-          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs
+          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs tests/living-underworld-entry-city.test.mjs
       - name: Attempt ALL twenty real M7 seeds and fail closed on any genuine crash
         shell: bash
         run: |
