@@ -3,7 +3,7 @@
 import {ROADMAP_A_WAVE07_SHOPS} from '../../../src/building-pool/roadmap-2a/roadmap-a-wave07.mjs';
 const designs=[...ROADMAP_A_WAVE07_SHOPS];
 const byId=new Map(designs.map(x=>[x.id,x]));
-if(designs.length!==12||byId.size!==12)throw Error('Unexpected 19 Roadmap A source-authored buildings');
+if(designs.length!==12||byId.size!==12)throw Error('Unexpected 12 Roadmap A Wave07 source-authored buildings');
 const select=document.getElementById('building'),mode=document.getElementById('view');
 for(const b of designs){const el=document.createElement('option');el.value=b.id;el.textContent=b.title+' · '+b.biome+'/'+b.size;select.append(el);}
 const params=new URLSearchParams(location.search);
