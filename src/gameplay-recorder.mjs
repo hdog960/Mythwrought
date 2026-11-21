@@ -26,14 +26,16 @@ export function installGameplayRecorder({
   if(!canvas||!button||!panel||!video||!info||!saveLink||!shareButton||!closeButton)
     throw Error('Gameplay recorder controls missing');
   let state='idle',recorder=null,stream=null,chunks=[],bytes=0,started=0;
-  let tickTimer=null,finishTimer=null,watchdog=null,objectUrl=null,output=null;
+  let tickTimer=null,finishTimer=null,watchdog=null,framePulseTimer=null;
+  let objectUrl=null,output=null;
   let outputName='',recordedMime='',initialWidth=0,initialHeight=0,generation=0;
 
   function timers(){
     if(tickTimer!==null)clearInterval(tickTimer);
     if(finishTimer!==null)clearTimeout(finishTimer);
     if(watchdog!==null)clearTimeout(watchdog);
-    tickTimer=finishTimer=watchdog=null;
+    if(framePulseTimer!==null)clearInterval(framePulseTimer);
+    tickTimer=finishTimer=watchdog=framePulseTimer=null;
   }
   function releaseTracks(){
     try{stream?.getTracks().forEach(track=>track.stop());}catch(_){}
@@ -157,6 +159,24 @@ export function installGameplayRecorder({
         presentClip();
       };
       recorder.start(1000);
+      // Chromium software WebGL2 produced a genuine but truncated 0.304s
+      // 3-frame MP4 despite the user's 3s recording interval. Its canvas
+      // track can request source-canvas frames explicitly, independently of
+      // the renderer's GPU upload cadence. Every pulse captures the ACTUAL
+      // WebGL canvas; no synthetic image, simulated clock, replay or audio.
+      // Safari implementations without requestFrame keep ordinary capture.
+      const videoTrack=stream.getVideoTracks()[0];
+      if(typeof videoTrack?.requestFrame==='function'){
+        try{videoTrack.requestFrame();}catch(_){}
+        framePulseTimer=setInterval(()=>{
+          if(state!=='recording')return;
+          try{videoTrack.requestFrame();}catch(error){
+            // Some browsers disallow explicit capture while continuing their
+            // implicit canvas stream. Stop this optional pulse, not recording.
+            clearInterval(framePulseTimer);framePulseTimer=null;
+          }
+        },100);
+      }
       buttonState();
       tickTimer=setInterval(()=>{
         if(canvas.width!==initialWidth||canvas.height!==initialHeight){
