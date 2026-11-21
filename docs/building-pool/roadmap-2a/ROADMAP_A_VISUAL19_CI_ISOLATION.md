@@ -1,0 +1,9 @@
+# Roadmap A Visual19 lean — isolated strict gallery HTTP fix (source-only)
+
+Protected lean-roof PR #327 HEAD `b7ce02124b83db65512e5b054e166ca0948b29a7` is left untouched. Production main externally advanced to `7016e14cd6289f45eaf7fc6a79a362b47996df65` and must not be rebased, merged, overwritten or changed by this development lane.
+
+Completed exact-head Actions showed PR #321: visual19 114/114 genuine WebGL2 frames PASSED, then sibling Wave05 72-frame browser driver failed with `net::ERR_CONNECTION_REFUSED` on fixed `127.0.0.1:4173`. PR #327: Visual19 114/114 PASSED, exact lean-budget original source tests PASSED (`24015 -> 10987` roof source cells), but lean Chromium gallery timed out waiting for the ready marker, and sibling Wave04/05 gallery drivers independently failed on the same hardcoded 4173 service. Root 920/920 passed in both.
+
+Only Wave04, Wave05, Visual19, and Visual19-lean *browser-test drivers* are adjusted. Every driver now owns a Python `ThreadingHTTPServer` listening on an OS-selected local ephemeral port. Its page URLs are derived from the bound socket, and its cleanup shuts down only its own instance. All four still use original Chromium WebGL2, same source modules, shader, 667×375 / 844×390 / 932×430 viewports, every source cell, frame pixel-readback, identity and SHA/PNG/camera-in-bounds checks. This does not weaken or skip any test and does not alter a single original or revised blueprint voxel.
+
+**Remaining proof:** Fresh exact-head GitHub Actions full root/focused and all inherited browser tests must pass, 114 new lean-candidate screenshots must be independently downloaded/checked, plus original 114 rendered baseline. The lean study's 54.25% fewer *additional source voxels* is not a proven GPU/frame-time saving; physical Manual Pack roof supports, mobile performance and creator art remain unaccepted. No merge, deployment, gameplay registration, saved-world schema changes, other builders or automations.

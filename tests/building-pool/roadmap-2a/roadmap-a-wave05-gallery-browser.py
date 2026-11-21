@@ -2,10 +2,17 @@
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import hashlib,json,os,subprocess,sys,time,urllib.request,struct
+from functools import partial
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
+from threading import Thread
 root=Path(__file__).resolve().parents[3]
 out=root/'artifacts'/'roadmap-a-wave05-cube-proxy'
 out.mkdir(parents=True,exist_ok=True)
-srv=subprocess.Popen([sys.executable,'-m','http.server','4173','--bind','127.0.0.1'],cwd=root,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+srv=ThreadingHTTPServer(('127.0.0.1',0),partial(SimpleHTTPRequestHandler,directory=str(root)))
+srv.daemon_threads=True
+server_thread=Thread(target=srv.serve_forever,daemon=True)
+server_thread.start()
+base_url=f'http://127.0.0.1:{srv.server_port}'
 records=[];groups=[];errors=[]
 expected_source_ids=set(["r2:general-store:desert:small:05","r2:general-store:snow:large:05","r2:pet-shop:mountain:large:05","r2:pet-shop:enchanted-forest:small:05","r2:magic-shop:desert:medium:05","r2:magic-shop:temperate:medium:05","r2:potion-shop:mountain:large:05","r2:potion-shop:snow:medium:05","r2:bakery:enchanted-forest:large:05","r2:bakery:desert:medium:05","r2:bank:snow:small:03","r2:bank:enchanted-forest:large:03"])
 source_file=root/'src'/'building-pool'/'roadmap-2a'/'roadmap-a-wave05.mjs'
@@ -22,7 +29,7 @@ branch_head=github_event.get('pull_request',{}).get('head',{}).get('sha')
 try:
  for t in range(100):
   try:
-   urllib.request.urlopen('http://127.0.0.1:4173/tests/building-pool/roadmap-2a/roadmap-a-wave05-gallery.html',timeout=.5)
+   urllib.request.urlopen(base_url+'/tests/building-pool/roadmap-2a/roadmap-a-wave05-gallery.html',timeout=.5)
    break
   except Exception:time.sleep(.2)
  else:raise RuntimeError('Source gallery HTTP server not responding')
@@ -34,7 +41,7 @@ try:
    page=br.new_page(viewport={'width':w,'height':h},device_scale_factor=1)
    page.on('pageerror',lambda e: errors.append(str(e)))
    for view in ['exterior','cutaway']:
-    page.goto('http://127.0.0.1:4173/tests/building-pool/roadmap-2a/roadmap-a-wave05-gallery.html?view='+view)
+    page.goto(base_url+'/tests/building-pool/roadmap-2a/roadmap-a-wave05-gallery.html?view='+view)
     page.wait_for_function('window.__MW2A_GALLERY?.ready === true',timeout=45000)
     ids=page.locator('#building option').evaluate_all('(nodes)=>nodes.map(n=>n.value)')
     if len(ids)!=12 or set(ids)!=expected_source_ids:raise AssertionError('Source ID mismatch against exact Wave05 canonical source ledger: '+repr(ids))
@@ -89,6 +96,6 @@ try:
  (out/'ROADMAP_A_WAVE05_72_WEBGL2_EVIDENCE.json').write_text(json.dumps(report,indent=2)+'\n')
  print('BUILDER_2A_GALLERY_PASS 72/72 genuine WebGL2 source-driven exterior/cutaway screenshots',flush=True)
 finally:
- srv.terminate()
- try:srv.wait(timeout=3)
- except subprocess.TimeoutExpired:srv.kill()
+ srv.shutdown()
+ srv.server_close()
+ server_thread.join(timeout=5)
