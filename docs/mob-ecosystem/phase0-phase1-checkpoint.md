@@ -1,29 +1,26 @@
-# Mythwrought Living Ecosystem — Phase 0 / Phase 1 checkpoint
+# Living Ecosystem — exact-head Phase 0 and Phase 1/2 checkpoint
 
-**Isolation:** Standalone ChatGPT development track. No Codex, hourly automation, other lane changes, or production writes.
+## Verified ancestor and CI
 
-## Source-backed baseline — November 21, 2026
+- Production main: `7016e14cd6289f45eaf7fc6a79a362b47996df65` (same when verified).
+- Original isolated draft HEAD `fc78ff9842d91f291366ebceeed79035a356a0d1`.
+- [Original root Actions 44948785040](https://github.com/hdog960/Mythwrought/actions/runs/44948785040): FAILURE, 15/16 CI contract tests PASS, one strict source manifest test FAIL because `src/mobs/ecology.mjs` changed but its staged-cache hash remained the original. The `npm test` step did not run.
+- [Original 40-creature WebGL2 Actions 44948785133](https://github.com/hdog960/Mythwrought/actions/runs/44948785133): SUCCESS; 12/12 native five-system tests, 2/2 cache tests, 5/5 full-roster, 4/4 persistence, and all authored-model Chromium capture steps succeeded. The browser workflow manually inserts actors and does not establish natural spawning.
 
-- Production main is 7016e14cd6289f45eaf7fc6a79a362b47996df65 (merged non-block PR #285).
-- Production verification run 44936122712 and Pages workflows 44936122765 and 44936120912 completed successfully at the exact SHA. This does not prove what an iPhone Home Screen shortcut currently caches.
-- Main naturally advances mobs from loaded world chunks, under guards for render availability, menu state, and protected runtime failures.
-- Existing forty-model browser test uses an injected acceptance fixture, NOT a normal ecological birth. Its screenshot success is evidence of rendering, not spontaneous spawns.
-- Source ecology globally selects all forty species before biome eligibility, tests at most six attempts per region evaluation, and probes only player feet +1 to feet -1.5 for ground.
-- Ecological spawn distance extends to 26 while active radius is 18; unprotected dormant entities may be deleted after six seconds.
-- Live limit remains eight awake and 32 total. None of these observations alone proves the actual physical iPhone failure.
+## Safe correction
 
-## Implemented in this isolated checkpoint
+`src/mobs/ecology.mjs` is restored to its byte-identical production blob `b145ab48d5a993f0796b1b321ce2b0ba0a7e1b23`. The `nonblock-stage-assets.json`, `sw-nonblock-stage.js`, and the PWA delivery files are unchanged. The protected source-verified offline worker version `20261121-v36` is preserved. Do not regenerate that manifest for an unactivated draft or reuse an already published staging version with altered source.
 
-Opt-in diagnostics on PopulationManager: constructor diagnostics=true records a fixed rejection histogram and aggregate attempted/spawned/despawned/dormant transitions. The default remains disabled. Only a direct call to diagnostics() snapshots counts. No changed spawning probability, timing, identity, rendering, save, or PWA logic.
+Phase 1 adds `src/mobs/ecosystem-diagnostics.mjs`, a standalone development-only replay of the original deterministic six-candidate sampler with a bounded rejection-reason census. It reads voxel collision and habitat via the actual world query but never inserts any mobs. The native test also advances original `PopulationManager` with the original 40-species roster and counts real natural births. Both are controlled meadow observations over actual VoxelWorld geometry; this is not complete V6 biome evidence.
 
-A focused root-level test checks unchanged seeded births with diagnostics off versus on, biome and unloaded-voxel rejections, and native real VoxelWorld seed samples. The native samples are fixed-height single-region observations; they are NOT full five-biome tests, cave coverage, genuine WebGL2 footage, or physical-iPhone evidence.
+Phase 2 adds `src/mobs/ecosystem-habitat.mjs` containing an isolated, deterministic biome+depth+light eligibility pool and rarity-weighted picker. The original runtime does NOT import it yet. No tuned weights, population limits, spawn radius, save schema, rendering or combat were modified.
 
-## Remaining gates
+## Remaining
 
-1. Inspect actual exact-head GitHub CI test logs and record authentic measured seed results.
-2. Separate the root causes of natural spawn failure from renderer/simulation shutdown and installed-PWA caching.
-3. Expand native sampling to five biomes, deep caves, distant coordinates, flight and water.
-4. Add real-game natural-spawn WebGL2 acceptance without injection of actor fixtures.
-5. Only then change habitat selection and placement, preserving original gameplay and saves.
+- Verify new exact-head CI including independent root tests and strict manifest contract.
+- Measure actual five-biome V6 terrain, cave sections and far coordinates with naturally created entities.
+- Verify original Home Screen cache generation and physical iPhone runtime separately.
+- Design a safely versioned staging integration before changing live `ecology.mjs`; do not defeat cache integrity or alter non-block automation branches.
+- Apply Phase 2 to production spawning only after separate source-supported integration verification.
 
-**Strict hold: Draft-only. No merge or deployment without creator approval.**
+**Release HOLD: protected DRAFT PR #380; no merge or deployment.**
