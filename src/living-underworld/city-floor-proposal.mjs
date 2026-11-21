@@ -62,3 +62,15 @@ export function auditDetachedCityFloor(seed,rx,rz,{sampleStep=3}={}){
   actualPlayerWalkabilityNotYetValidated:true,
   settlementPlacementNotPerformed:true});
 }
+
+// The same city-site footprint used for solid slabs, but above the pad.
+export function cityClearanceAt(seed,x,y,z){
+ if(!integer(seed)||seed!==(seed|0)||![x,y,z].every(integer))
+   throw new TypeError('Invalid city clearance candidate voxel');
+ if(y<-210||y>-4)return false;
+ for(const city of neighboringCitySites(seed,x,z)){
+  const nx=(x-city.x)/(city.rx*.55),nz=(z-city.z)/(city.rz*.55);
+  if(nx*nx+nz*nz<=1&&y>=city.y-7&&y<=city.y+4)return true;
+ }
+ return false;
+}

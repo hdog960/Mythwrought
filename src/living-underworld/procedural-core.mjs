@@ -48,3 +48,30 @@ export function candidateCaveAt(seed,x,y,z,{minY=-210,maxY=-4}={}){
   }
   return false;
 }
+
+// Explicit geometric components for the *calibrated* detached candidate. No
+// changes to the historic candidateCaveAt API or any active game generator.
+export function candidateNoiseScoreAt(seed,x,y,z){
+ if(![seed,x,y,z].every(Number.isSafeInteger)||seed!==(seed|0))
+  throw new TypeError('Invalid underworld noise sample');
+ const a=valueNoise3(x/83,y/33,z/83,seed+101),
+   b=valueNoise3(x/31,y/15,z/31,seed+307),
+   c=valueNoise3(x/173,y/59,z/173,seed+503);
+ return a*.55+b*.30+c*.15;
+}
+export function candidateChamberAt(seed,x,y,z){
+ if(![seed,x,y,z].every(Number.isSafeInteger)||seed!==(seed|0))
+  throw new TypeError('Invalid underworld chamber sample');
+ if(y<-210||y>-4)return false;
+ const tileX=Math.floor(x/128),tileZ=Math.floor(z/128);
+ for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)
+  for(let index=0;index<2;index++){
+   const room=chamber(seed,tileX+dx,tileZ+dz,index);
+   const nx=(x-room.centerX)/room.radiusX,
+    nz=(z-room.centerZ)/room.radiusZ,
+    ny=(y-room.centerY)/room.radiusY;
+   const wobble=.09*valueNoise3(x/19,y/13,z/19,seed+index+1009);
+   if(nx*nx+ny*ny+nz*nz<1+wobble)return true;
+  }
+ return false;
+}
