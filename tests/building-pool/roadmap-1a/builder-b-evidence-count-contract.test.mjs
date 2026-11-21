@@ -26,7 +26,7 @@ for(const [family,auditName,captureName,sourceName] of [
   assert.ok(audit.includes('PNG.sync.read(buf,{checkCRC:true})'),'Auditor missing real PNG CRC decoder');
   assert.ok(audit.includes('sha(buf)'),'Auditor missing actual source PNG hash');
   assert.ok(audit.includes('sourceHead!==expectedHead'),'Auditor missing exact head proof');
-  assert.ok(capture.includes('assert.equal(wanted.length,1)'),'Real source gallery isn't single-original');
+  assert.ok(capture.includes('assert.equal(wanted.length,1)'),"Real source gallery is not single-original");
   assert.ok(capture.includes('assert.equal(captures.length,6)'),'Chromium cube gallery does not assert 6 images');
   assert.ok(capture.includes('assert.equal(physicalWanted.length,1)'),'Physical Pack AABB gallery source count incorrect');
  });
