@@ -146,8 +146,8 @@ export const ROADMAP_D_WAVE8_PLANS=Object.freeze([
       ],
       [
         "tundra-ship-design",
-        91,
-        55
+        94,
+        63
       ],
       [
         "snow-navigation-readings",
