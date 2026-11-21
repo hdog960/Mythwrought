@@ -11,7 +11,7 @@ test('Alderglass greenhouse is original Builder B ID, not historical or Builder 
  assert.equal(validateAllocation([b]).authored,1);
  assert.equal(b.worldPlacement,false);
 });
-test('Alderglass truly glazed roof, grounded timber and accessible growing rooms',()=>{
+test('Alderglass true cardinal upright greenhouse glazing, supported opaque roof and accessible growing rooms',()=>{
  const b=buildAlderglassTrellisConservatory(),K=p=>p.join(','),grid=new Set(b.placements.map(x=>K(x.at)));
  assert.equal(b.rooms.length,6);assert.equal(b.portals.length,8);
  assert.ok(b.walkable.length>=650);
@@ -19,11 +19,21 @@ test('Alderglass truly glazed roof, grounded timber and accessible growing rooms
   assert.ok(!b.placements.some(p=>p.at[0]===x&&p.at[2]===z),'garden must be genuine sky-open absent foundation');
  }
  const roof=b.placements.filter(p=>p.role==='roof'),
- glass=roof.filter(p=>p.glazed);
- assert.ok(glass.length>=250,'not enough genuine glazed roof surface');
- assert.ok(b.placements.filter(p=>p.role==='window').length>=12,'missing vertical greenhouse glazing');
- for(const p of roof.filter(p=>!p.glazed))
-  assert.ok(grid.has(K([p.at[0],p.at[1]-1,p.at[2]])),'unsupported non-glazed roof '+K(p.at));
+  glass=b.placements.filter(p=>p.role==='window'&&p.originalGlazing===true);
+ assert.ok(glass.length>=300,'original 300+ translucent source surfaces must not disappear');
+ assert.equal(glass.length,371,'exact original 371 transparent source panes were not preserved');
+ assert.equal(b.placements.filter(p=>p.asset==='pack4:030').length,383,
+  'original twelve ground windows and all 371 new upright windows must be preserved');
+ assert.equal(roof.length,1097,'original source roof silhouette changed');
+ assert.ok(roof.filter(p=>p.asset==='pack3:026').length>=350,
+  'original at-least-350 opaque ribs must not disappear');
+ assert.ok(roof.every(p=>p.asset==='pack3:026'&&p.glazed!==true),
+  'Pack4:030 upright opening-window cannot be assigned as a roof tile');
+ for(const p of roof)
+  assert.ok(grid.has(K([p.at[0],p.at[1]-1,p.at[2]])),'unsupported original roof '+K(p.at));
+ assert.equal(b.architecturalIdentity.glassRoofPanels,0,'false horizontal glass roof claim');
+ assert.equal(b.architecturalIdentity.sourceUprightGlazingPanels,371);
+ assert.equal(b.architecturalIdentity.opaqueRoofSourceCells,1097);
  assert.ok(b.placements.filter(p=>p.role==='support').length>=250);
  for(const p of b.portals){
   assert.ok(!grid.has(K(p.at)),'blocked passage');
