@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {ROADMAP_A_WAVE07_SHOPS} from '../../../src/building-pool/roadmap-2a/roadmap-a-wave07.mjs';
+test('Wave07 Chromium source capture HTML names actual Wave07 cohort, never inherited Wave06 title or 19 models',()=>{
+ const html=readFileSync(fileURLToPath(new URL('./roadmap-a-wave07-gallery.html',import.meta.url)),'utf8');
+ const js=readFileSync(fileURLToPath(new URL('./roadmap-a-wave07-gallery.mjs',import.meta.url)),'utf8');
+ assert.match(html,/ROADMAP A · WAVE07 · 12 NEW ORIGINAL BUILDINGS/);
+ assert.doesNotMatch(html,/WAVE06/);
+ assert.match(html,/src="\.\/roadmap-a-wave07-gallery\.mjs"/);
+ assert.match(js,/import \{ROADMAP_A_WAVE07_SHOPS\}/);
+ assert.match(js,/const designs=\[\.\.\.ROADMAP_A_WAVE07_SHOPS\]/);
+ assert.match(js,/Unexpected 12 Roadmap A Wave07 source-authored buildings/);
+ assert.doesNotMatch(js,/Unexpected 19 Roadmap A source-authored buildings/);
+ assert.match(js,/gl\.drawArraysInstanced/);
+ assert.match(js,/window\.__MW2A_GALLERY=\{ready:true/);
+ assert.equal(ROADMAP_A_WAVE07_SHOPS.length,12);
+ assert.equal(new Set(ROADMAP_A_WAVE07_SHOPS.map(b=>b.id)).size,12);
+ assert.ok(ROADMAP_A_WAVE07_SHOPS.every(b=>b.id.startsWith('r2:')));
+});
