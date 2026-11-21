@@ -9,6 +9,11 @@ const waves = [
     'hunter','fisherman','miller','baker','butcher','brewer'], expected:720},
   {name:'craftsmanship', professions:['miner','prospector','quarry-worker','lumberjack','forester','blacksmith',
     'armorer','carpenter','stonemason','potter','glassmaker','tailor','jeweler'], expected:780},
+
+  {name:'commerce', professions:['general-merchant','market-vendor','caravan-trader','banker','moneychanger',
+    'innkeeper','tavern-keeper','cook','stablekeeper','pet-shopkeeper','bathhouse-attendant'], expected:660},
+  {name:'administration', professions:['mayor','councilor','clerk','treasurer','judge','diplomat',
+    'guildmaster','town-planner','messenger'], expected:540},
 ];
 const races = ['human','elf','dwarf','thornkin','asteri','glassborn'];
 const biomes = ['temperate','desert','snow','enchanted-forest','mountain'];

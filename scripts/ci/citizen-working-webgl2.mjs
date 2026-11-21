@@ -7,6 +7,8 @@ const origin = process.env.CITIZEN_PREVIEW_ORIGIN ?? 'http://127.0.0.1:4197';
 const waves = {
   agriculture: {group:'agriculture-food', count:720},
   craftsmanship: {group:'resources-craftsmanship', count:780},
+  commerce: {group:'commerce-hospitality', count:660},
+  administration: {group:'government-administration', count:540},
 };
 const wave = process.argv[2] ?? 'agriculture';
 assert(Object.hasOwn(waves,wave),'Unknown citizen appearance wave');

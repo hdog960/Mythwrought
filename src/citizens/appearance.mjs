@@ -1,4 +1,5 @@
 import {agricultureOutfit, agricultureTool} from './agriculture-appearance.mjs';
+import {civicOutfit} from './civic-appearance.mjs';
 import {craftsmanshipOutfit} from './craftsmanship-appearance.mjs';
 import {buildWorkClothes} from './work-clothes.mjs';
 import {PROFESSIONS} from './registry.mjs';
@@ -134,7 +135,8 @@ export function buildCitizenMesh(citizen) {
   const style = styles[citizen.style];
   const profession = PROFESSIONS[citizen.profession];
   const variant = citizen.variant - 1;
-  const outfit = agricultureOutfit(citizen.profession) ?? craftsmanshipOutfit(citizen.profession);
+  const outfit = agricultureOutfit(citizen.profession) ?? craftsmanshipOutfit(citizen.profession) ??
+    civicOutfit(citizen.profession);
   const outer = profession ? professionColors[profession.group] : biome.outer;
   const {box,finish} = makeGeometry();
   const {height,width,head} = rig;

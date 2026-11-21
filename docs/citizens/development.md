@@ -28,7 +28,7 @@ The draft starts from main at `7016e14cd6289f45eaf7fc6a79a362b47996df65`, verifi
 | --- | --- |
 | Repository foundation | Main and open work audited. Citizen worktree based on the verified main commit. |
 | Data architecture | Six races, 82 careers, five biome inputs, three settlement styles, immutable identity records, and compatible workplace assignment. Targeted tests validate all 4,920 working appearance inputs. |
-| Visuals | 1,500 / 4,920 working, 0 / 50 ordinary, 6 / 6 races rendered in the shared rig, 2 / 8 rendered and inspected visual groups. |
+| Visuals | 2,700 / 4,920 working, 0 / 50 ordinary, 6 / 6 races rendered in the shared rig, 4 / 8 rendered and inspected visual groups. |
 | AI and persistence | Movement, boundaries, fear, defender combat, and sidecar save acceptance pending. |
 | Professions | 0 / 82 accepted in gameplay. Service availability will be tracked per profession. |
 | Quality | Shared rig verified in Chromium WebGL2 at 844×390 and 1280×640. Full citizen performance and protected-system acceptance pending. |
@@ -65,3 +65,12 @@ The 13 occupations have original hand-held tools or articles and their own workw
 - [All 780 race, biome, and variation render records](evidence/craftsmanship-render-manifest.json)
 
 Run `node scripts/ci/citizen-working-webgl2.mjs craftsmanship` against the development server.
+
+## C3 V3 and V4 commerce and administration
+
+Commerce and hospitality verified 660 visible WebGL2 combinations across 11 professions. The 12-mesh cache peaked at 741,312 bytes. Government and administration verified 540 visible combinations across nine professions. Its cache peaked at 694,656 bytes.
+
+- [Commerce contact sheet](evidence/commerce-contact-sheet.png) and [660-render manifest](evidence/commerce-render-manifest.json)
+- [Administration contact sheet](evidence/administration-contact-sheet.png) and [540-render manifest](evidence/administration-render-manifest.json)
+
+Run the working visual check with `commerce` or `administration` as the wave argument.

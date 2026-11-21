@@ -11,6 +11,16 @@ export function buildWorkClothes(outfit, {body,head,width,shoulder,hip,depth,var
       body(side*width*.23,middle,front,width*.28,.27,.053,leather);
       body(side*width*.26,middle-.053,front+.031,width*.17,.084,.026,trim);
     }
+  } else if (cut === 'lapels') {
+    for (const side of [-1,1]) {
+      body(side*width*.28,middle,front,width*.31,.35,.054,leather);
+      body(side*width*.14,shoulder-.059,front+.027,.055,.118,.031,trim);
+    }
+    body(0,middle-.103,front+.02,.05,.038,.022,trim);
+  } else if (cut === 'sash') {
+    body(0,hip+.064,front,width*.9,.115,.057,leather);
+    body(variant ? -width*.3 : width*.3,hip-.067,front,.077,.196,.058,leather);
+    body(0,hip+.082,front+.033,width*.86,.027,.019,trim);
   } else if (cut === 'mantle') {
     body(0,shoulder-.031,0,width*1.03,.108,depth+.083,leather);
     body(0,shoulder-.092,front,.082,.083,.055,trim);
