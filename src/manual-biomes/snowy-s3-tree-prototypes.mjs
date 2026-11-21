@@ -11,7 +11,7 @@ export const SNOWY_S3_STYLES=Object.freeze([
 ]);
 const profiles=Object.freeze({
   'compact-fir':{height:5,tiers:[0,0,2,2,1,1,0],shift:0},
-  'layered-spruce':{height:7,tiers:[0,0,3,2,3,1,2,1,0],shift:0},
+  'layered-spruce':{height:7,tiers:[0,0,3,2,2,1,1,1,0],shift:0},
   'highland-pine':{height:9,tiers:[0,0,0,0,0,2,2,1,2,1,0],shift:0},
   'windswept-alpine':{height:6,tiers:[0,0,0,1,2,1,1,0],shift:1}
 });
