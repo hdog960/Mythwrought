@@ -50,6 +50,7 @@ try{
           samples.push({y,actionMs,meshMs:result?.meshMs??null,
             uploadMs:result?.uploadMs??null,saveMs:result?.saveMs??null,
             saved:result?.saved??null,reusedGpuBuffers:result?.reusedGpuBuffers??null,
+            gpuStageTimes:result?.gpuStageTimes??null,
             frameMs:nextFrame-lastFrame,
             resident:Number(scene.dataset.loadedChunks),
             pending:Number(scene.dataset.pendingChunks)});
@@ -67,6 +68,14 @@ try{
           mesh:stat('meshMs'),upload:stat('uploadMs'),
           save:stat('saveMs'),frame:stat('frameMs'),
           totalReusedGpuBuffers:samples.reduce((n,s)=>n+(s.reusedGpuBuffers??0),0),
+          // Source GL function timings explain the real stalls; gate unchanged.
+          gpuStageP95:Object.fromEntries(
+            ['createBufferMs','drainErrorMs','bindBufferMs','allocateBufferMs',
+              'bufferSubDataMs','checkErrorMs','fallbackUploadMs'].map(key=>{
+              const values=samples.map(s=>s.gpuStageTimes?.[key]??0).sort((a,b)=>a-b);
+              return [key,+values[Math.floor((values.length-1)*.95)].toFixed(2)];
+            })),
+          gpuUploadedBytes:samples.reduce((n,s)=>n+(s.gpuStageTimes?.uploadBytes??0),0),
           framesOver33:samples.filter(s=>s.frameMs>33).length,
           maxResident:Math.max(...samples.map(s=>s.resident)),
           maxPending:Math.max(...samples.map(s=>s.pending)),

@@ -781,12 +781,15 @@ function start(){
   function uploadPack2Chunk(vertices,water,edited=false){
     let buffer=null,waterBuffer=null;
     let bufferCapacity=vertices.byteLength,waterCapacity=water.byteLength;
+    const gpuStageTimes=edited?{}:null;
     try{
       if(edited){
-        const opaque=uploadEditedChunkBuffer(gl,vertices,takeEditGpuSpare(vertices.byteLength));
+        const opaque=uploadEditedChunkBuffer(gl,vertices,
+          takeEditGpuSpare(vertices.byteLength),gpuStageTimes);
         buffer=opaque.buffer;bufferCapacity=opaque.capacity;
         if(water.length){
-          const liquid=uploadEditedChunkBuffer(gl,water,takeEditGpuSpare(water.byteLength));
+          const liquid=uploadEditedChunkBuffer(gl,water,
+            takeEditGpuSpare(water.byteLength),gpuStageTimes);
           waterBuffer=liquid.buffer;waterCapacity=liquid.capacity;
         }
       }else{
@@ -794,7 +797,7 @@ function start(){
         if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
       }
       return {buffer,count:vertices.length/9,bufferCapacity,
-        waterBuffer,waterCount:water.length/9,waterCapacity};
+        waterBuffer,waterCount:water.length/9,waterCapacity,gpuStageTimes};
     }catch(error){
       if(buffer)gl.deleteBuffer(buffer);
       if(waterBuffer)gl.deleteBuffer(waterBuffer);
@@ -853,6 +856,7 @@ function start(){
     // sections at Y-seams. All buffers stage before any published replacement.
     const batch=[];
     let meshMs=0,uploadMs=0;
+    const gpuStageTimes={};
     const gpuReusesBefore=editGpuReuses;
     try{
       for(const section of verticalEditSections(y))
@@ -882,6 +886,8 @@ function start(){
         const start=performance.now();
         const uploaded=uploadPack2Chunk(item.vertices,item.water,true);
         uploadMs+=performance.now()-start;
+        for(const [stage,measured] of Object.entries(uploaded.gpuStageTimes||{}))
+          gpuStageTimes[stage]=(gpuStageTimes[stage]||0)+measured;
         ready.push({...item,...uploaded});
       }
     }catch(err){
@@ -900,7 +906,7 @@ function start(){
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
     lastEditMeshTiming={meshMs,uploadMs,chunks:ready.length,
-      reusedGpuBuffers:editGpuReuses-gpuReusesBefore};
+      reusedGpuBuffers:editGpuReuses-gpuReusesBefore,gpuStageTimes};
     if(caveSession)caveFarGpu?.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
   }

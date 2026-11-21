@@ -58,6 +58,19 @@ test('bounded edit staging returns only unpublished buffers and reuses capacity'
   assert.deepEqual(t.ops,['bind','alloc','sub']);
 });
 
+test('optional WebGL call timings preserve the original bounded upload semantics',()=>{
+  const t=fakeGL(),times={};
+  const a=uploadEditedChunkBuffer(t.gl,packed(2),null,times);
+  assert.equal(a.capacity,4096);
+  assert.equal(times.uploadCalls,1);
+  assert.equal(times.uploadBytes,packed(2).byteLength);
+  for(const key of ['createBufferMs','drainErrorMs','bindBufferMs',
+    'allocateBufferMs','bufferSubDataMs','checkErrorMs'])
+    assert.ok(Number.isFinite(times[key])&&times[key]>=0,key);
+  assert.deepEqual(t.ops,['bind','alloc','sub']);
+  assert.equal(a.buffer.deleted,false);
+});
+
 test('GPU edit error deletes only the unpublished buffer',()=>{
   const t=fakeGL(),visible=uploadEditedChunkBuffer(t.gl,packed(2)),
     staging=uploadEditedChunkBuffer(t.gl,packed(3));
