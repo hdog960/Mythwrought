@@ -3,7 +3,7 @@
 // modify M7, the player's world, save data or surface biomes.
 import {candidateNoiseScoreAt,candidateChamberAt} from './procedural-core.mjs';
 import {networkAirAt} from './worldwide-network.mjs';
-import {cityFloorAt,cityClearanceAt} from './city-floor-proposal.mjs';
+import {cityMaterialOverrideAt} from './city-floor-proposal.mjs';
 
 const valid=(seed,x,y,z)=>[seed,x,y,z].every(Number.isSafeInteger)&&seed===(seed|0);
 const smooth=t=>t*t*(3-2*t);
@@ -30,8 +30,9 @@ export function detachedCalibratedUnderworldAirAt(seed,x,y,z){
  if(!valid(seed,x,y,z))throw new TypeError('Invalid calibrated cavern query');
  if(y<-210||y>-4)return false;
  // No city-floor hole can be carved by any noise or network component.
- if(cityFloorAt(seed,x,y,z))return false;
- if(cityClearanceAt(seed,x,y,z))return true;
+ const cityMaterial=cityMaterialOverrideAt(seed,x,y,z);
+ if(cityMaterial<0)return false;
+ if(cityMaterial>0)return true;
  if(networkAirAt(seed,x,y,z))return true;
  if(candidateNoiseScoreAt(seed,x,y,z)>caveThresholdForDepth(y))return true;
  return candidateChamberAt(seed,x,y,z);

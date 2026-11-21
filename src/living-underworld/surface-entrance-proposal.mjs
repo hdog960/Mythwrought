@@ -28,10 +28,11 @@ function testTunnel(x,y,z,a,b,radius){
  return ex*ex+ey*ey+ez*ez<=radius*radius;
 }
 export function planUnderworldSurfaceEntrance(seed,rx,rz,{
- surfaceHeightAt,protectedAt=()=>false,biomeAt=()=> 'unknown'
+ surfaceHeightAt,protectedAt=()=>false,biomeAt=()=> 'unknown',requiredBiome=null
 }={}){
  if(!seedOK(seed)||![rx,rz].every(integer)||typeof surfaceHeightAt!=='function'||
-   typeof protectedAt!=='function'||typeof biomeAt!=='function')
+   typeof protectedAt!=='function'||typeof biomeAt!=='function'||
+   (requiredBiome!==null&&(typeof requiredBiome!=='string'||!requiredBiome.trim())))
    throw new TypeError('Invalid detached cave entrance inputs');
  const region=planUnderworldRegion(seed,rx,rz);
  const start=region.layers[0].hub;
@@ -50,7 +51,8 @@ export function planUnderworldSurfaceEntrance(seed,rx,rz,{
     rejections.push(direction.name+':surface-range');continue;
   }
   const biome=biomeAt(endX,endZ);
-  if(typeof biome!=='string'||!biome.trim()){
+  if(typeof biome!=='string'||!biome.trim()||
+    (requiredBiome!==null&&biome!==requiredBiome)){
     rejections.push(direction.name+':biome');continue;
   }
   let obstruction=false;

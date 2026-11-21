@@ -4,6 +4,10 @@ import {performance} from 'node:perf_hooks';
 import {detachedCalibratedUnderworldAirAt}
  from '../../src/living-underworld/depth-calibrated-proposal.mjs';
 import {networkAirAt} from '../../src/living-underworld/worldwide-network.mjs';
+import {cityFloorAt,cityClearanceAt} from '../../src/living-underworld/city-floor-proposal.mjs';
+import {candidateNoiseScoreAt,candidateChamberAt}
+ from '../../src/living-underworld/procedural-core.mjs';
+import {caveThresholdForDepth} from '../../src/living-underworld/depth-calibrated-proposal.mjs';
 const queries=Array.from({length:12288},(_,i)=>{
  const x=-3680+((i*7919)%7399),y=-4-((i*37)%207),z=1070+((i*4373)%7237);
  return [x,y,z];
@@ -22,9 +26,18 @@ function bench(name,fn){
   p95MsPer256Batch:samples[Math.min(samples.length-1,Math.floor(samples.length*.95))],
   maxMsPer256Batch:samples.at(-1)};
 }
+const originalTwoPass=(seed,x,y,z)=>{
+ if(y<-210||y>-4)return false;
+ if(cityFloorAt(seed,x,y,z))return false;
+ if(cityClearanceAt(seed,x,y,z))return true;
+ if(networkAirAt(seed,x,y,z))return true;
+ if(candidateNoiseScoreAt(seed,x,y,z)>caveThresholdForDepth(y))return true;
+ return candidateChamberAt(seed,x,y,z);
+};
 const result={kind:'NODE_CPU_ONLY_NOT_IPHONE_GPU_OR_FRAME_TIMES',
  nodeVersion:process.version,seed:179,samplesPerImplementation:queries.length,
  results:[bench('network-only',(...a)=>networkAirAt(179,...a)),
+  bench('two-pass-city-reference',(...a)=>originalTwoPass(179,...a)),
   bench('calibrated-network-cavern',(...a)=>detachedCalibratedUnderworldAirAt(179,...a))],
  baselineAgainstM7:false,hardwareSpecific:true,productionRegressionsNotTested:true};
 if(process.argv[2])fs.writeFileSync(process.argv[2],JSON.stringify(result,null,2)+'\n');

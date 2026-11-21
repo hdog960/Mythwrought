@@ -5,9 +5,10 @@ import fs from 'node:fs';
 import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR}
  from '../../src/manual-biomes/profile-world.mjs';
 import {v6BiomeAt} from '../../src/manual-biomes/v6-balanced-biomes.mjs';
-import {BLOCK} from '../../src/voxel.mjs';
+import {BLOCK,baseBlock,VoxelWorld} from '../../src/voxel.mjs';
 import {planUnderworldSurfaceEntrance}
  from '../../src/living-underworld/surface-entrance-proposal.mjs';
+import {auditProtectedEntranceEnvelope} from '../../src/living-underworld/protected-entrance-envelope.mjs';
 import {auditProposedSurfaceConnection}
  from '../../src/living-underworld/physical-connectivity-audit.mjs';
 
@@ -15,7 +16,7 @@ const seeds=[179,-17,2026,314159,8675309,13579];
 const biomes=['plains','desert','snow','mountain','enchanted'];
 const getBiome=(x,z,seed)=>v6BiomeAt(x,z,seed)?.name??'plains';
 const report={schema:'living-underworld-m7-surface-entrance-source-survey-v1',
- status:'READ_ONLY_NOT_LIVE_ENTRANCES',seeds:[],totalAccepted:0,
+ status:'READ_ONLY_STRICT_SURFACE_ENVELOPE_PROPOSALS',seeds:[],totalAccepted:0,
  byBiome:Object.fromEntries(biomes.map(x=>[x,{tested:0,accepted:0,rejected:0}])),
  constructorFailures:[],sourceProvenanceProtectionVerified:false,
  liveGameCarvingVerified:false,actualTraversalVerified:false};
@@ -35,6 +36,7 @@ for(const seed of seeds){
   selection[biome].push({rx,rz});
  }
  const seedReport={seed,status:'PROBED',biomes:{}};
+ const original=new VoxelWorld(seed);
  const ground=new Map();
  const heightAt=(x,z)=>{
   const k=x+','+z;if(ground.has(k))return ground.get(k);
@@ -53,18 +55,30 @@ for(const seed of seeds){
   const outcomes=[];
   for(const {rx,rz} of selection[biome]){
    const result=planUnderworldSurfaceEntrance(seed,rx,rz,{
-    surfaceHeightAt:heightAt,biomeAt:(x,z)=>getBiome(x,z,seed),
+    surfaceHeightAt:heightAt,biomeAt:(x,z)=>getBiome(x,z,seed),requiredBiome:biome,
     protectedAt:(x,y,z)=>world.edits.has(x+','+y+','+z)||
       [BLOCK.WOOD,BLOCK.LEAVES].includes(world.naturalAndLandmarkBlock(x,y,z))
    });
    const route=result.ok?auditProposedSurfaceConnection(seed,result):null;
-   const status=result.ok&&route?.pass?'PROPOSAL_GEOMETRY_OK':result.ok?
-     'PROPOSAL_ROUTE_DISCONTINUITY':'PROPOSAL_REJECTED';
+   const safe=result.ok&&route?.pass?auditProtectedEntranceEnvelope(result,{
+    naturalAt:(x,y,z)=>world.naturalAndLandmarkBlock(x,y,z),
+    authoredAt:(x,y,z)=>world.environmentCaves?.get(x,y,z),
+    editedAt:(x,y,z)=>world.edits.has(x+','+y+','+z),
+    protectedAt:(x,y,z)=>original.naturalAndLandmarkBlock(x,y,z)!==
+      baseBlock(x,y,z,seed)
+   }):null;
+   const status=!result.ok?'PROPOSAL_REJECTED':!route?.pass?
+    'PROPOSAL_ROUTE_DISCONTINUITY':safe?.ok?
+    'SOURCE_ENVELOPE_SAFETY_CANDIDATE':'SOURCE_ENVELOPE_REJECTED';
    outcomes.push({rx,rz,status,biome:result.biome??biome,
     mouth:result.mouth??null,reasons:result.rejectionHistory??[],
-    routeFailure:route?.failures??[]});
+    routeFailure:route?.failures??[],envelope:safe?{
+     ok:safe.ok,checkedCells:safe.checkedCells,reason:safe.reason,
+     sourceOwned:safe.sourceOwned,edits:safe.edits,
+     protectedOriginal:safe.protectedOriginal,unsafeMaterials:safe.unsafeMaterials,
+     examples:safe.examples}:null});
    const totals=report.byBiome[biome];totals.tested++;
-   if(status==='PROPOSAL_GEOMETRY_OK'){totals.accepted++;report.totalAccepted++;}
+   if(status==='SOURCE_ENVELOPE_SAFETY_CANDIDATE'){totals.accepted++;report.totalAccepted++;}
    else totals.rejected++;
   }
   seedReport.biomes[biome]=outcomes;

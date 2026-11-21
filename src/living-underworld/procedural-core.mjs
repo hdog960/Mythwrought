@@ -70,8 +70,13 @@ export function candidateChamberAt(seed,x,y,z){
    const nx=(x-room.centerX)/room.radiusX,
     nz=(z-room.centerZ)/room.radiusZ,
     ny=(y-room.centerY)/room.radiusY;
+   const radiusSquared=nx*nx+ny*ny+nz*nz;
+   // The wobble is mathematically confined to [-.09,+.09].
+   // Avoid 8 expensive noise-corner hashes for almost all distant rooms.
+   if(radiusSquared>=1.09)continue;
+   if(radiusSquared<.91)return true;
    const wobble=.09*valueNoise3(x/19,y/13,z/19,seed+index+1009);
-   if(nx*nx+ny*ny+nz*nz<1+wobble)return true;
+   if(radiusSquared<1+wobble)return true;
   }
  return false;
 }

@@ -74,3 +74,22 @@ export function cityClearanceAt(seed,x,y,z){
  }
  return false;
 }
+
+// Single lookup retaining the existing strict FLOOR-over-AIR precedence
+// even where two rare city caverns overlap. -1 rock, +1 clear air, 0 none.
+// Previous cityFloorAt and cityClearanceAt APIs remain unchanged and audit-safe.
+export function cityMaterialOverrideAt(seed,x,y,z){
+ if(!integer(seed)||seed!==(seed|0)||![x,y,z].every(integer))
+  throw new TypeError('Invalid city material override voxel');
+ if(y<-210||y>-4)return 0;
+ let clearance=false;
+ for(const candidate of neighboringCitySites(seed,x,z)){
+  const nx=(x-candidate.x)/(candidate.rx*.55),
+   nz=(z-candidate.z)/(candidate.rz*.55);
+  if(nx*nx+nz*nz>1)continue;
+  const floorY=candidate.y-8;
+  if(y>=floorY-5&&y<=floorY)return -1;
+  if(y>=candidate.y-7&&y<=candidate.y+4)clearance=true;
+ }
+ return clearance?1:0;
+}
