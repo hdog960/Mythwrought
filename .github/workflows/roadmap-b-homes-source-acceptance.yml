@@ -30,6 +30,9 @@ jobs:
         env:
           BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
         run: test "$(git rev-parse HEAD)" = "$BUILDER_B_EXPECTED_HEAD"
+      - name: Parse every Builder B native and screenshot audit module before starting expensive historical source tests
+        run: |
+          find tests/building-pool/roadmap-1a -maxdepth 1 -type f \\( -name 'builder-b-*.test.mjs' -o -name 'audit-builder-b-*.mjs' \\) -print -exec node --check {} \\;
       - name: Run genuine original 1A historical uniqueness, native source and physical producer audits
         run: |
           node --test --test-concurrency=1 \
