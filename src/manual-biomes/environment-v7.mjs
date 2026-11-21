@@ -75,7 +75,20 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline,biome=v6BiomeAt(x,
   const top=Math.min(WORLD_MAX_Y-2,Math.round(old+(height-old)*blend));
   for(let y=old-2;y<=WORLD_MAX_Y;y++){
     const prior=readBaseline(x,y,z);
-    if(y>old?prior!==BLOCK.AIR:![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior))return new Map();
+    if(y>old?prior!==BLOCK.AIR:![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior)){
+      // Mountain-only, material-only rescue for legacy grass exposed when
+      // existing trees/landmarks ABOVE the old surface veto full uplift.
+      // Do not raise this column, replace its protected content, or seal
+      // cave/opening supports. Keep the complete original veto envelope.
+      if(biome.name==='mountain'&&y>old&&blend>=.065&&
+        readBaseline(x,old,z)===BLOCK.GRASS&&
+        [BLOCK.DIRT,BLOCK.STONE].includes(readBaseline(x,old-1,z))){
+        const shoulder=sharedShoulder(biome,x,z,seed);
+        const safeCap=shoulder??groundAt('mountain',x,z,seed,old,0).cap;
+        return new Map([[old,safeCap]]);
+      }
+      return new Map();
+    }
   }
   const writes=new Map(),shoulder=sharedShoulder(biome,x,z,seed);
   // The shoulder replaces the grass in a broad contiguous band. The
