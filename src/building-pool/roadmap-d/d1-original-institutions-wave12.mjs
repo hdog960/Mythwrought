@@ -843,6 +843,12 @@ export const ROADMAP_D_WAVE12_PLANS=Object.freeze([
         100,
         75,
         84
+      ],
+      [
+        1,
+        33,
+        1,
+        22
       ]
     ],
     "discs": [
@@ -1437,6 +1443,12 @@ export const ROADMAP_D_WAVE12_PLANS=Object.freeze([
         91,
         64,
         72
+      ],
+      [
+        67,
+        100,
+        1,
+        20
       ]
     ],
     "discs": [
