@@ -97,3 +97,42 @@ test('an unassigned worker selects compatible local work and safely loses a miss
   assert.equal(state.citizen.workplaceId,null);
   assert.notEqual(state.state,'perform-job');
 });
+
+test('a messenger visits configured waypoints while keeping its permanent job', () => {
+  const query=createWorldQuery({get:(_x,y)=>y<0?BLOCK.STONE:BLOCK.AIR},{
+    resident:()=>true,observe:()=>({hazard:false}),
+  });
+  const simulation=createCitizenSimulation({query,settlement:{id:'hamlet',
+    regions:[{minX:-5,maxX:5,minZ:-5,maxZ:5}],
+    workplaces:[{id:'route',settlementId:'hamlet',tags:['message-post'],position:[.5,0,.5],
+      waypoints:[[2.5,0,.5],[2.5,0,2.5]]}]}});
+  const citizen=createCitizen({worldSeed:179,settlementId:'hamlet',slot:4,race:'human',
+    biome:'plains',style:'village',profession:'messenger'});
+  simulation.add(citizen,[-.5,0,.5]);
+  const visited=new Set();
+  for(let tick=0;tick<250;tick++) {
+    const [citizen]=simulation.step(.1);
+    if (citizen.state==='perform-job') {
+      const [x,,z]=citizen.position;
+      visited.add(`${Math.floor(x)},${Math.floor(z)}`);
+      assert.equal(citizen.citizen.profession,'messenger');
+    }
+  }
+  assert(visited.has('0,0') && visited.has('2,0') && visited.has('2,2'));
+});
+
+test('a loaded distant citizen receives fewer navigation updates than the same nearby citizen', () => {
+  const near=fixture();
+  const far=fixture();
+  near.simulation.add(near.make(8),[-2.5,0,-3.5]);
+  far.simulation.add(far.make(8),[-2.5,0,-3.5]);
+  const recorded=[new Set(),new Set()];
+  for(let tick=0;tick<55;tick++) {
+    const here=near.simulation.step(.1,{focus:[-2.5,0,-3.5]})[0].position;
+    const distant=far.simulation.step(.1,{focus:[32,0,0]})[0].position;
+    recorded[0].add(here.map(value=>value.toFixed(2)).join(','));
+    recorded[1].add(distant.map(value=>value.toFixed(2)).join(','));
+  }
+  assert(recorded[0].size>15 && recorded[1].size>=3);
+  assert(recorded[1].size<recorded[0].size);
+});

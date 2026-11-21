@@ -1,38 +1,16 @@
 import {assignWorkplace, workplaceCompatible} from './entity.mjs';
+import {citizenInteraction, citizenJob, useCitizenService} from './jobs.mjs';
 import {PROFESSIONS} from './registry.mjs';
+import {movementProfile, settlementBoundary, standingAt} from './spatial.mjs';
 import {LocalNavigator} from '../mobs/navigation.mjs';
 import {moveBody, supportedPosition} from '../mobs/movement.mjs';
 import {validPoint} from '../mobs/world-query.mjs';
 
-const profiles = {
-  human: [.29,1.95], elf:[.27,2.06], dwarf:[.35,1.68],
-  thornkin:[.33,2.15], asteri:[.29,2.05], glassborn:[.34,2.04],
-};
 const activeHostile = mob => mob && mob.health>0 &&
   mob.species.classification==='hostile' && ['active','idle'].includes(mob.state);
 const eye = (position,height) => [position[0],position[1]+height*.72,position[2]];
 const distance = (a,b) => Math.hypot(a[0]-b[0],a[2]-b[2]);
 const loc = point => [Math.floor(point[0])+.5,point[1],Math.floor(point[2])+.5];
-
-function movementProfile(race) {
-  const [radius,height] = profiles[race];
-  return {
-    body:{radius,height},
-    movement:{capabilities:['walk'],stepHeight:.56,speed:1.38},
-    riding:{eligible:false},
-  };
-}
-
-function settlementBoundary(regions) {
-  if (!Array.isArray(regions) || !regions.length) throw TypeError('Citizen settlement needs safe regions');
-  const bounds = regions.map(({minX,maxX,minZ,maxZ}) => {
-    if (![minX,maxX,minZ,maxZ].every(Number.isFinite) || maxX-minX<.8 || maxZ-minZ<.8)
-      throw RangeError('Invalid citizen region bounds');
-    return {minX,maxX,minZ,maxZ};
-  });
-  return ([x,,z],margin=.35) => bounds.some(({minX,maxX,minZ,maxZ}) =>
-    x>=minX+margin && x<=maxX-margin && z>=minZ+margin && z<=maxZ-margin);
-}
 
 function random(actor) {
   let seed=actor.random;
@@ -41,11 +19,6 @@ function random(actor) {
   seed ^= seed<<5;
   actor.random=seed>>>0;
   return actor.random/2**32;
-}
-
-function standingAt(query,position,body) {
-  return validPoint(position) && query.residentAt(position) &&
-    !query.environment(position).hazard && query.grounded(position,body);
 }
 
 function safeHeight(query,from,point,body) {
@@ -61,7 +34,7 @@ function snapshot(actor, clock) {
   };
 }
 
-export function createCitizenSimulation({query,settlement,mobEngine=null,maxHealth=24}) {
+export function createCitizenSimulation({query,settlement,mobEngine=null,maxHealth=24,jobHost=null}) {
   if (typeof query?.volume !== 'function' || typeof settlement?.id !== 'string')
     throw TypeError('Citizen simulation needs shared physics and a settlement');
   if (!Number.isFinite(maxHealth) || maxHealth<=0)
@@ -81,7 +54,8 @@ export function createCitizenSimulation({query,settlement,mobEngine=null,maxHeal
         workplace.settlementId!==settlement.id || typeof workplace.id!=='string' ||
         !Array.isArray(workplace.tags) || workplaces.has(workplace.id))
       throw RangeError('Invalid citizen workplace');
-    workplaces.set(workplace.id,{...workplace,position:[...workplace.position],tags:[...workplace.tags]});
+    const waypoints=(workplace.waypoints??[]).filter(point=>validPoint(point)&&contains(point)).map(point=>[...point]);
+    workplaces.set(workplace.id,{...workplace,position:[...workplace.position],tags:[...workplace.tags],waypoints});
   }
   const navigator=new LocalNavigator(localQuery);
   const returnNavigator=new LocalNavigator(query);
@@ -236,7 +210,16 @@ export function createCitizenSimulation({query,settlement,mobEngine=null,maxHeal
     if (actor.target && distance(actor.position,actor.target)<.19 && Math.abs(actor.position[1]-actor.target[1])<.18) {
       if (actor.state==='move-to-workplace') {
         stop(actor,'perform-job');
-        actor.action='work';
+        const workplace=workplaces.get(actor.citizen.workplaceId);
+        const job=citizenJob(actor.citizen,workplace);
+        if (job?.availability==='workplace') {
+          actor.action=job.pose==='patrol'?'observe':job.pose;
+          if (job.pose==='patrol' && workplace.waypoints.length) {
+            actor.workRouteIndex=(actor.workRouteIndex+1)%(workplace.waypoints.length+1);
+          }
+          const perform=jobHost?.activities?.[job.activity];
+          if (typeof perform==='function') perform({citizen:actor.citizen,workplace});
+        }
         return;
       }
       stop(actor);
@@ -259,12 +242,18 @@ export function createCitizenSimulation({query,settlement,mobEngine=null,maxHeal
       if (workplace) actor.citizen=assignWorkplace(actor.citizen,workplace);
       else actor.workRetry=clock+8;
     }
-    if (workplace && clock>=actor.workRetry && actor.state!=='perform-job') {
-      if (standingAt(localQuery,workplace.position,actor.species.body)) {
-        seek(actor,workplace.position,'move-to-workplace');
-        return;
+    if (workplace && clock>=actor.workRetry) {
+      const job=citizenJob(actor.citizen,workplace);
+      const patrol=job?.pose==='patrol'&&workplace.waypoints.length>0;
+      if (patrol || actor.state!=='perform-job') {
+        const point=(patrol&&workplace.waypoints[actor.workRouteIndex-1])||workplace.position;
+        if (standingAt(localQuery,point,actor.species.body)) {
+          seek(actor,point,'move-to-workplace');
+          return;
+        }
+        if (patrol) actor.workRouteIndex=(actor.workRouteIndex+1)%(workplace.waypoints.length+1);
+        actor.workRetry=clock+8;
       }
-      actor.workRetry=clock+8;
     }
     if (actor.state==='perform-job') {
       actor.workRetry=clock+5;
@@ -274,8 +263,9 @@ export function createCitizenSimulation({query,settlement,mobEngine=null,maxHeal
   }
 
   return {
-    add(citizen,position) {
+    add(citizen,position,{health=maxHealth}={}) {
       if (actors.has(citizen.id)) throw Error('Duplicate citizen identity');
+      if (!Number.isFinite(health) || health<0 || health>maxHealth) throw RangeError('Invalid citizen health');
       const species=movementProfile(citizen.race);
       if (citizen.settlementId!==settlement.id || !standingAt(localQuery,position,species.body))
         throw RangeError('Unsafe citizen spawn position');
@@ -283,10 +273,10 @@ export function createCitizenSimulation({query,settlement,mobEngine=null,maxHeal
       const record=workplaceCompatible(citizen,savedWorkplace)?citizen:assignWorkplace(citizen,null);
       const actor={
         id:citizen.id,citizen:record,species,position:[...position],spawn:[...position],velocity:[0,0,0],
-        yaw:0,grounded:true,state:'idle',action:'idle',target:null,deadline:0,ready:clock,
-        health:maxHealth, hurtUntil:0, attackUntil:0, nextAttack:0, nextSense:clock, nextThreatRoute:clock,
+        yaw:0,grounded:true,state:health?'idle':'incapacitated',action:'idle',target:null,deadline:0,ready:clock,
+        health, hurtUntil:0, attackUntil:0, nextAttack:0, nextSense:clock, nextThreatRoute:clock, nextDistant:clock,
         threatId:null, defender:PROFESSIONS[record.profession]?.threatResponse==='defend',
-        workRetry:0,autoWork:true,random:citizen.appearanceSeed || 1,
+        workRetry:0,workRouteIndex:0,autoWork:true,random:citizen.appearanceSeed || 1,
       };
       actors.set(citizen.id,actor);
       return snapshot(actor,clock);
@@ -299,6 +289,7 @@ export function createCitizenSimulation({query,settlement,mobEngine=null,maxHeal
       actor.autoWork=workplaceId!==null;
       stop(actor);
       actor.workRetry=0;
+      actor.workRouteIndex=0;
       actor.ready=clock;
       return snapshot(actor,clock);
     },
@@ -309,6 +300,34 @@ export function createCitizenSimulation({query,settlement,mobEngine=null,maxHeal
       actor.velocity=[0,0,0];
       stop(actor);
       return snapshot(actor,clock);
+    },
+    inspect(id,{sky=null}={}) {
+      const actor=actors.get(id);
+      if (!actor || !query.residentAt(actor.position)) return null;
+      const workplace=workplaces.get(actor.citizen.workplaceId);
+      const host=workplace&&distance(actor.position,workplace.position)<=.4?jobHost:null;
+      return citizenInteraction(actor.citizen,{settlement,sky,host,workplace});
+    },
+    interact(id,{player,sky=null,service=false}={}) {
+      const actor=actors.get(id);
+      if (!actor || !actor.health || !validPoint(player?.position) ||
+          Math.hypot(distance(player.position,actor.position),player.position[1]-actor.position[1])>2.6 ||
+          !query.lineOfSight(eye(player.position,1.72),eye(actor.position,actor.species.body.height)) ||
+          ['flee','defend'].includes(actor.state)) return null;
+      const workplace=workplaces.get(actor.citizen.workplaceId);
+      const present=workplace&&distance(actor.position,workplace.position)<=.4&&
+        Math.abs(actor.position[1]-workplace.position[1])<.5;
+      const description=citizenInteraction(actor.citizen,{settlement,sky,host:present?jobHost:null,workplace});
+      if (service) {
+        // A staffed service requires the worker at its anchor in addition to
+        // the separate player range, line-of-sight and threat gates.
+        if (!present || !description.service?.available) return null;
+        return useCitizenService(actor.citizen,{settlement,workplace,host:jobHost,player});
+      }
+      stop(actor,'interact-with-player');
+      actor.action='interact';
+      actor.yaw=Math.atan2(player.position[0]-actor.position[0],player.position[2]-actor.position[2]);
+      return description;
     },
     combatTarget(id) {
       const actor=actors.get(id);
@@ -341,7 +360,7 @@ export function createCitizenSimulation({query,settlement,mobEngine=null,maxHeal
       returnNavigator.forget(id);
       return actors.delete(id);
     },
-    step(dt) {
+    step(dt,{focus=null}={}) {
       if (!Number.isFinite(dt) || dt<=0) throw RangeError('Invalid citizen time step');
       const seconds=Math.min(dt,.1);
       clock+=seconds;
@@ -352,10 +371,19 @@ export function createCitizenSimulation({query,settlement,mobEngine=null,maxHeal
       navigator.beginTick();
       returnNavigator.beginTick();
       const current=[...actors.values()];
-      for (let index=0;index<current.length;index++) update(current[(index+rotation)%current.length],seconds);
+      const haveFocus=validPoint(focus);
+      for (let index=0;index<current.length;index++) {
+        const actor=current[(index+rotation)%current.length];
+        if (haveFocus && distance(actor.position,focus)>16) {
+          if (clock<actor.nextDistant) continue;
+          actor.nextDistant=clock+.34;
+        }
+        update(actor,seconds);
+      }
       if (current.length) rotation=(rotation+1)%current.length;
       return current.map(actor=>snapshot(actor,clock));
     },
+    snapshots() { return [...actors.values()].map(actor=>snapshot(actor,clock)); },
     get navigationWork() { return navigator.work+returnNavigator.work; },
   };
 }

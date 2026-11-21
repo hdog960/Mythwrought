@@ -50,10 +50,11 @@ function color(hex) {
   return [(value >> 16) & 255, (value >> 8) & 255, value & 255].map(channel => channel / 255);
 }
 
-function makeGeometry() {
+function makeGeometry(detail) {
   const vertices = [];
   return {
     box(joint, pivot, x, y, z, width, height, depth, hex) {
+      if (detail==='far' && width*height*depth<.0012) return;
       const rgb = color(hex);
       for (const [corners, shade] of faces) for (const index of triangles) {
         const corner = corners[index];
@@ -121,7 +122,7 @@ function equipment(box, pivot, x, y, outfit) {
   }
 }
 
-export function buildCitizenMesh(citizen) {
+export function buildCitizenMesh(citizen,{detail='near'}={}) {
   const rig = races[citizen.race];
   const biome = biomes[citizen.biome];
   const style = styles[citizen.style];
@@ -133,7 +134,7 @@ export function buildCitizenMesh(citizen) {
     : ordinaryOutfit(citizen,biome);
   const outer = profession ? professionColors[profession.group] : biome.outer;
   if (profession && !outfit) throw Error('Missing equipment for '+profession.id);
-  const {box,finish} = makeGeometry();
+  const {box,finish} = makeGeometry(detail);
   const {height,width,head} = rig;
   const hip = height * .45, shoulder = height * .78, headY = height - head * .45;
   const bodyDepth = width * .59, armWidth = width * .25;
@@ -185,14 +186,19 @@ export function buildCitizenMesh(citizen) {
   return finish();
 }
 
+const poseActivity = {
+    work:[5,1],craft:[6.5,1],tend:[3.3,.65],read:[1.8,.48],observe:[2.2,.77],
+    perform:[5.2,.82],carry:[2.5,.4],interact:[5,.38],attack:[8,1],
+};
+
 export function citizenPose(action, time) {
   const walking = action === 'walk' || action === 'flee';
   const fleeing = action === 'flee';
-  const working = action === 'work' || action === 'attack' || action === 'interact';
+  const activity = poseActivity[action];
   return {
     swing: walking ? Math.sin(time * (fleeing ? 10 : 8)) * (fleeing ? .77 : .45) : 0,
     lift: Math.sin(time * 3) * .011,
-    action: working ? Math.max(0, Math.sin(time * (action === 'attack' ? 8 : 5))) * (action === 'interact' ? .38 : 1) : 0,
+    action: activity ? Math.max(0, Math.sin(time * activity[0])) * activity[1] : 0,
     turn: action === 'turn' ? Math.sin(time * 3) * .42 : Math.sin(time * 1.8) * .073,
     hurt: action === 'damage' ? Math.max(0, Math.sin(time * 8)) : 0,
   };

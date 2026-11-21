@@ -29,9 +29,9 @@ The draft starts from main at `7016e14cd6289f45eaf7fc6a79a362b47996df65`, verifi
 | Repository foundation | Main and open work audited. Citizen worktree based on the verified main commit. |
 | Data architecture | Six races, 82 careers, five biome inputs, three settlement styles, immutable identity records, and compatible workplace assignment. Targeted tests validate all 4,920 working appearance inputs. |
 | Visuals | 4,920 / 4,920 working, 50 / 50 ordinary, 6 / 6 races rendered in the shared rig, 8 / 8 rendered and inspected visual groups. |
-| AI and persistence | Bounded roaming, compatible workplace navigation, fear, and five defender reactions pass real-voxel and MobEngine tests. Sidecar and live fixture acceptance pending. |
-| Professions | 0 / 82 accepted in gameplay. Service availability will be tracked per profession. |
-| Quality | Shared rig verified in Chromium WebGL2 at 844×390 and 1280×640. Full citizen performance and protected-system acceptance pending. |
+| AI and persistence | Bounded roaming, workplace navigation, all five defender reactions, civilian fear, and verified citizen sidecar recovery pass voxel and mob tests. The standalone fixture repeats the key behavior in Chromium. |
+| Professions | 82 / 82 reach a compatible work marker and have an offline interaction in automated tests. Transactional services are gated on authoritative gameplay backends. The mayor and astronomer supply contextual information. |
+| Quality | 114 targeted tests, 4,970 distinct render hashes, 15 fixture configurations, and four population stress tiers verified locally. Latest full hosted regression and physical iPhone measurements are separate acceptance checks. |
 
 Race display names Thornkin, Asteri, and Glassborn are provisional. Actual population sizes, race frequencies, worker ratios, and natural settlement generation are deferred.
 
@@ -92,3 +92,24 @@ The 4,920 working and 50 ordinary base combinations have unique visible pixel ha
 The citizen runtime reuses the existing local navigator, voxel collision, support probes, line of sight, MobEngine damage, and MobCombat intake. It bounds wander choices to settlement regions, rates failed work approaches, pauses unloaded entities, and distinguishes deliberately displaced citizens. The baseline movement profile uses local paths up to the existing navigator's radius. Large settlements will supply intermediate anchors during integration.
 
 Tests cover a real wall detour, work anchor loss, loaded and unloaded cells, displaced citizens, all 77 civilian careers plus ordinary citizens fleeing a real Briarlurker, and all five defenders damaging the same creature through MobEngine. Existing MobCombat also damages a guard through its normal health-target interface. Downed citizens remain incapacitated in the fixture so the settlement owner can choose a removal or recovery policy.
+
+## C7 through C11 profession, persistence and integration evidence
+
+The profession suite drives all 82 careers into an actual compatible work marker with the shared voxel query. It distinguishes role activity from unavailable services. The fixture verifies touchscreen inputs, offline conversation, exact identity restoration, unchanged Schema-1 bytes, a civilian fleeing a live mob, a guard damaging a live mob, and paused simulation while unloaded. All 15 settlement style and biome combinations were opened and populated.
+
+| Citizens | Frame p50 | Frame p95 | AI p95 | Scene draw calls |
+| ---: | ---: | ---: | ---: | ---: |
+| 0 | 16.7 ms | 16.7 ms | 0.1 ms | 1 |
+| 1 | 16.7 ms | 16.8 ms | 0.2 ms | 2 |
+| 8 | 16.7 ms | 16.7 ms | 0.4 ms | 2 |
+| 24 | 16.7 ms | 16.8 ms | 0.8 ms | 2 |
+| 48 | 16.7 ms | 33.3 ms | 1.6 ms | 2 |
+
+This is a Chromium software WebGL2 run at 844×390 with repeated, instanced citizen appearances in the load fixture. The 48-citizen scene used 445,536 uploaded bytes including 416,016 bytes of terrain. Different nearby meshes add draws, and the result supplies no physical iPhone frame timing.
+
+- [Blacksmith fixture](evidence/village-blacksmith.png)
+- [Ordinary citizen fleeing](evidence/ordinary-citizen-fleeing.png)
+- [Guard with a real hostile creature](evidence/guard-and-hostile.png)
+- [City with 48 citizens](evidence/city-48-citizens.png)
+- [Full browser and performance report](evidence/settlement-report.json)
+- [Settlement adapter and service handoff](integration.md)
