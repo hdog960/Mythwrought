@@ -1,0 +1,50 @@
+name: Enchanted Forest Real WebGL2 Source Evidence (isolated)
+on:
+  push:
+    branches:
+      - dev/enchanted-forest-overhaul-*
+    paths:
+      - 'scripts/ci/enchanted-forest-real-webgl2.mjs'
+      - 'src/manual-biomes/environment-v7.mjs'
+      - '.github/workflows/enchanted-forest-real-webgl2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: enchanted-forest-webgl2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  actual-game-enchanted:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact source and test-only screenshot script syntax
+        run: |
+          git rev-parse HEAD
+          node --check scripts/ci/enchanted-forest-real-webgl2.mjs
+          node --check src/manual-biomes/environment-v7.mjs
+          node --test tests/manual-biomes/enchanted-forest-phase1.test.mjs
+      - name: Install pinned original-game Chromium/WebGL2 validation tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Capture original M7 game, verify genuine grass witness IDs and source-authentic PNGs
+        run: node scripts/ci/enchanted-forest-real-webgl2.mjs
+      - name: Preserve actual source-authentic screenshots, SHA256 manifest and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: enchanted-forest-real-webgl2-source-proof
+          path: artifacts/enchanted-forest/real-webgl2/
+          if-no-files-found: warn
+          retention-days: 14
