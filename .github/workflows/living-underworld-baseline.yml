@@ -14,6 +14,9 @@ on:
       - 'tests/living-underworld-provenance.test.mjs'
       - 'tests/living-underworld-stairs.test.mjs'
       - 'tests/living-underworld-optimization.test.mjs'
+      - 'tests/living-underworld-entrance-alternatives.test.mjs'
+      - 'tests/living-underworld-seam-components.test.mjs'
+      - 'tests/living-underworld-city-neighbor-cache.test.mjs'
       - '.github/workflows/living-underworld-baseline.yml'
   workflow_dispatch:
 
@@ -46,11 +49,14 @@ jobs:
           node --check src/living-underworld/city-full-floor-audit.mjs
           node --check src/living-underworld/protected-entrance-envelope.mjs
           node --check src/living-underworld/walkable-entrance-stairs.mjs
+          node --check src/living-underworld/entrance-candidate-search.mjs
+          node --check src/living-underworld/region-seam-components.mjs
+          node --check scripts/underworld/audit-region-seams.mjs
           node --check scripts/underworld/audit-candidate-physical-proof.mjs
           node --check scripts/underworld/audit-real-m7-entrance-terrain.mjs
           node --check scripts/underworld/benchmark-node-proposal.mjs
           node --check scripts/underworld/audit-m7-density.mjs
-          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs tests/living-underworld-entry-city.test.mjs tests/living-underworld-calibration.test.mjs tests/living-underworld-physical-connectivity.test.mjs tests/living-underworld-components-floor.test.mjs tests/living-underworld-provenance.test.mjs tests/living-underworld-stairs.test.mjs tests/living-underworld-optimization.test.mjs
+          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs tests/living-underworld-entry-city.test.mjs tests/living-underworld-calibration.test.mjs tests/living-underworld-physical-connectivity.test.mjs tests/living-underworld-components-floor.test.mjs tests/living-underworld-provenance.test.mjs tests/living-underworld-stairs.test.mjs tests/living-underworld-optimization.test.mjs tests/living-underworld-entrance-alternatives.test.mjs tests/living-underworld-seam-components.test.mjs tests/living-underworld-city-neighbor-cache.test.mjs
       - name: Attempt ALL twenty real M7 seeds and fail closed on any genuine crash
         shell: bash
         run: |
@@ -123,6 +129,12 @@ jobs:
         run: |
           mkdir -p artifacts/living-underworld
           node scripts/underworld/audit-candidate-physical-proof.mjs artifacts/living-underworld/CANDIDATE_PHYSICAL_PROOF.json > artifacts/living-underworld/CANDIDATE_PHYSICAL_PROOF.log
+      - name: Strict 3D face-connected physical region seam census
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-region-seams.mjs artifacts/living-underworld/STRICT_REGION_SEAMS_3D.json > artifacts/living-underworld/STRICT_REGION_SEAMS_3D.log
       - name: Preserve SHA256 for every actual report, failure and prototype output
         if: always()
         shell: bash

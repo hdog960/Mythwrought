@@ -4,15 +4,27 @@ import {planUnderworldRegion,networkAirAt,UNDERWORLD_REGION_SIDE}
  from './worldwide-network.mjs';
 import {candidateCaveAt} from './procedural-core.mjs';
 const integer=n=>Number.isSafeInteger(n);
+// This small LRU caches immutable candidates ONLY for a single horizontal
+// region neighborhood. It never caches a block answer, source edit or save.
+const cityNeighborhoodCache=new Map(),CITY_NEIGHBOR_CACHE_LIMIT=48;
 function neighboringCitySites(seed,x,z){
  const rx=Math.floor(x/UNDERWORLD_REGION_SIDE),rz=Math.floor(z/UNDERWORLD_REGION_SIDE);
- const out=[];
- for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){
-  const candidate=planUnderworldRegion(seed,rx+dx,rz+dz).cityCandidate;
-  if(candidate&&Math.abs(x-candidate.x)<=candidate.rx*.57&&
-    Math.abs(z-candidate.z)<=candidate.rz*.57)out.push(candidate);
+ const key=seed+':'+rx+':'+rz;
+ let candidates=cityNeighborhoodCache.get(key);
+ if(candidates===undefined){
+  const list=[];
+  for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){
+   const candidate=planUnderworldRegion(seed,rx+dx,rz+dz).cityCandidate;
+   if(candidate)list.push(candidate);
+  }
+  candidates=Object.freeze(list);
+  cityNeighborhoodCache.set(key,candidates);
+  if(cityNeighborhoodCache.size>CITY_NEIGHBOR_CACHE_LIMIT)
+   cityNeighborhoodCache.delete(cityNeighborhoodCache.keys().next().value);
  }
- return out;
+ return candidates.filter(candidate=>
+   Math.abs(x-candidate.x)<=candidate.rx*.57&&
+   Math.abs(z-candidate.z)<=candidate.rz*.57);
 }
 export function cityFloorAt(seed,x,y,z){
  if(!integer(seed)||seed!==(seed|0)||![x,y,z].every(integer))

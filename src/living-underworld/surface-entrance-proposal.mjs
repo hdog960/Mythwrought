@@ -28,18 +28,19 @@ function testTunnel(x,y,z,a,b,radius){
  return ex*ex+ey*ey+ez*ez<=radius*radius;
 }
 export function planUnderworldSurfaceEntrance(seed,rx,rz,{
- surfaceHeightAt,protectedAt=()=>false,biomeAt=()=> 'unknown',requiredBiome=null
+ surfaceHeightAt,protectedAt=()=>false,biomeAt=()=> 'unknown',requiredBiome=null,searchStart=0
 }={}){
  if(!seedOK(seed)||![rx,rz].every(integer)||typeof surfaceHeightAt!=='function'||
    typeof protectedAt!=='function'||typeof biomeAt!=='function'||
-   (requiredBiome!==null&&(typeof requiredBiome!=='string'||!requiredBiome.trim())))
+   (requiredBiome!==null&&(typeof requiredBiome!=='string'||!requiredBiome.trim()))||
+   !integer(searchStart)||searchStart<0||searchStart>3)
    throw new TypeError('Invalid detached cave entrance inputs');
  const region=planUnderworldRegion(seed,rx,rz);
  const start=region.layers[0].hub;
  const rejections=[];
  const order=hash(seed,rx,rz,991)%4;
  for(let index=0;index<4;index++){
-  const direction=directions[(index+order)%4];
+  const direction=directions[(index+order+searchStart)%4];
   const distance=76+hash(seed,rx,rz,1021+index)%13;
   const endX=start.x+direction.dx*distance,endZ=start.z+direction.dz*distance;
   if(Math.floor(endX/UNDERWORLD_REGION_SIDE)!==rx||
@@ -73,7 +74,7 @@ export function planUnderworldSurfaceEntrance(seed,rx,rz,{
   // player-walkability check must be performed before any future integration.
   return Object.freeze({
    ok:true,kind:'detached-surface-gallery-proposal-v1',seed,rx,rz,biome,
-   direction:direction.name,start,mid,mouth:end,surfaceHeight:height,segments,
+   direction:direction.name,searchStart,start,mid,mouth:end,surfaceHeight:height,segments,
    protectedTerrainSurveyComplete:false,
    physicallyVerifiedInLiveWorld:false,
    rejectionHistory:Object.freeze(rejections)
