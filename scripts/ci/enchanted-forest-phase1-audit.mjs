@@ -116,6 +116,7 @@ for(const seed of SEEDS){
   evidence.seedRegions.push(seedResult);
 }
 assert.equal(evidence.columns,evidence.interiorColumns);
+assert.equal(evidence.interiorGrass,0,'Unexpected original GRASS inside sampled enchanted interior; inspect artifact witnesses');
 assert.ok(evidence.expectedSoil>0,'not sampling the enchanted ground');
 mkdirSync('artifacts/enchanted-forest',{recursive:true});
 writeFileSync('artifacts/enchanted-forest/phase1-source-audit.json',
