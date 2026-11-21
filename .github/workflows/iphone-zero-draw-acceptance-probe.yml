@@ -1,0 +1,44 @@
+name: Isolated exact-source ZERO-vertex draw omission perf probe (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-zero-draw-291-20261121
+permissions:
+  contents: read
+jobs:
+  zero-draw-opaque-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fail closed if any actual source or original test changed
+        run: |
+          test "$(git rev-parse HEAD^)" = "82f8828945b464acf0a71faddfe2d18ffa4df245"
+          git diff --exit-code 82f8828945b464acf0a71faddfe2d18ffa4df245 HEAD -- src/ index.html styles.css sw-m5.js tests/
+          node --check scripts/ci/iphone-zero-draw-acceptance-probe.mjs
+      - name: Install real original-game pinned Chromium WebGL2 tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Confirm exact original published production
+        uses: actions/checkout@v4
+        with:
+          ref: 8de40ca8451b6268cfdfefaa5d9a66b72caca799
+          path: baseline-main
+      - name: Genuine WebGL2 original vs zero-count-only test response 2x2
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/iphone-zero-draw.log 2>&1 &
+          node scripts/ci/iphone-zero-draw-acceptance-probe.mjs
+      - name: Preserve original and test-only screenshots plus samples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-vs-zero-count-only-real-gl-proof
+          path: artifacts/iphone-zero-draw/
+          if-no-files-found: warn
+          retention-days: 14
