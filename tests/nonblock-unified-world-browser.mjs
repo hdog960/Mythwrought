@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
+import pngjs from 'pngjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
+import {createStagedCaveRuntime} from '../src/manual-caves/opt-in-runtime.mjs';
+import {HISTORIC_NAMED_TARGETS,findNamedCavePlayerRoute} from '../src/manual-caves/named-destination-audit.mjs';
+import {expectedDeepSceneResidency} from './cave-roadmap-depth-frame-gate.mjs';
 
 const origin=process.env.MYTHWROUGHT_TEST_ORIGIN??'http://127.0.0.1:4173/';
 const output='artifacts/unified-world';
@@ -57,6 +61,33 @@ try{
       Number(d.nonblockWaterEffects)>0&&Number(d.pendingChunks)===0;
   });
   await page.screenshot({path:output+'/ordinary-desert-oasis-844x390.png',timeout:90000});
+  const originalCaves=createStagedCaveRuntime(initial.seed,undefined,{approved:true}).world;
+  const chamber=HISTORIC_NAMED_TARGETS.find(entry=>entry.name==='Stepped Echo Hall');
+  const route=findNamedCavePlayerRoute(originalCaves,chamber);
+  assert.equal(route.ok,true);
+  const at={x:route.target.x,y:route.target.floor+1,z:route.target.z};
+  const aim=route.route.at(-4);
+  await page.evaluate(({at,aim})=>{
+    const api=window.__mythwroughtTest;
+    api.teleportCave(at.x,at.y,at.z);
+    api.aimAt(aim.x,aim.floor+2,aim.z);
+  },{at,aim});
+  const depth=expectedDeepSceneResidency(at);
+  await wait(({expectedCenter,requiredChunks})=>{
+    const d=document.querySelector('#scene').dataset;
+    return d.chunkCenter===expectedCenter&&Number(d.loadedChunks)===requiredChunks&&
+      Number(d.pendingChunks)===0&&d.skyBackdrop==='deep-cave';
+  },depth);
+  const deepPng=await page.screenshot({path:output+'/ordinary-stepped-echo-hall-844x390.png',timeout:90000});
+  const pixels=pngjs.PNG.sync.read(deepPng);
+  let brightSkyPixels=0;
+  for(let y=Math.floor(pixels.height*.09);y<Math.floor(pixels.height*.56);y++){
+    for(let x=Math.floor(pixels.width*.19);x<Math.floor(pixels.width*.70);x++){
+      const i=4*(y*pixels.width+x),[r,g,b]=pixels.data.subarray(i,i+3);
+      if(r>=140&&g>=155&&b>=170&&b-r>=10)brightSkyPixels++;
+    }
+  }
+  assert.equal(brightSkyPixels,0,'Procedural outdoor sky leaked into the sealed deep chamber');
 
   async function switchSeed(seed){
     await page.locator('#menu').click();
@@ -101,6 +132,7 @@ try{
   assert.equal(reopened.generator,initial.generator);
   assert.equal(reopened.oldSave,legacy);
   assert.deepEqual(errors,[]);
-  await writeFile(output+'/report.json',JSON.stringify({initial,oasis,existing,created,night,reopened},null,2)+'\n');
+  const deep={chamber:chamber.name,at,brightSkyPixels,requiredChunks:depth.requiredChunks};
+  await writeFile(output+'/report.json',JSON.stringify({initial,oasis,deep,existing,created,night,reopened},null,2)+'\n');
   console.log('Verified ordinary creation, legacy seed bytes, day/night and generation-aware vault and mirror in WebGL2');
 }finally{await browser.close();}

@@ -1,0 +1,202 @@
+[
+  {
+    "label": "before",
+    "biome": "plains",
+    "generator": "mythwrought-five-surface-regions-v6",
+    "pose": {
+      "x": 15.5,
+      "z": 8.5,
+      "feet": 9
+    },
+    "live": {
+      "gl": true,
+      "chunks": 25,
+      "daylight": "12:00",
+      "scenery": 0,
+      "sceneryGpuBytes": 0,
+      "frames": 99
+    },
+    "aerial": false,
+    "head": "8de40ca8451b6268cfdfefaa5d9a66b72caca799"
+  },
+  {
+    "label": "before",
+    "biome": "desert",
+    "generator": "mythwrought-five-surface-regions-v6",
+    "pose": {
+      "x": 506.5,
+      "z": 2.5,
+      "feet": 9
+    },
+    "live": {
+      "gl": true,
+      "chunks": 25,
+      "daylight": "12:01",
+      "scenery": 0,
+      "sceneryGpuBytes": 0,
+      "frames": 200
+    },
+    "aerial": false,
+    "head": "8de40ca8451b6268cfdfefaa5d9a66b72caca799"
+  },
+  {
+    "label": "before",
+    "biome": "snow",
+    "generator": "mythwrought-five-surface-regions-v6",
+    "pose": {
+      "x": 3.5,
+      "z": 505.5,
+      "feet": 10
+    },
+    "live": {
+      "gl": true,
+      "chunks": 25,
+      "daylight": "12:02",
+      "scenery": 0,
+      "sceneryGpuBytes": 0,
+      "frames": 303
+    },
+    "aerial": false,
+    "head": "8de40ca8451b6268cfdfefaa5d9a66b72caca799"
+  },
+  {
+    "label": "before",
+    "biome": "mountain",
+    "generator": "mythwrought-five-surface-regions-v6",
+    "pose": {
+      "x": -509.5,
+      "z": 4.5,
+      "feet": 12
+    },
+    "live": {
+      "gl": true,
+      "chunks": 25,
+      "daylight": "12:00",
+      "scenery": 0,
+      "sceneryGpuBytes": 0,
+      "frames": 405
+    },
+    "aerial": false,
+    "head": "8de40ca8451b6268cfdfefaa5d9a66b72caca799"
+  },
+  {
+    "label": "before",
+    "biome": "enchanted",
+    "generator": "mythwrought-five-surface-regions-v6",
+    "pose": {
+      "x": 8.5,
+      "z": -517.5,
+      "feet": 9
+    },
+    "live": {
+      "gl": true,
+      "chunks": 25,
+      "daylight": "12:03",
+      "scenery": 0,
+      "sceneryGpuBytes": 0,
+      "frames": 502
+    },
+    "aerial": false,
+    "head": "8de40ca8451b6268cfdfefaa5d9a66b72caca799"
+  },
+  {
+    "label": "after",
+    "biome": "plains",
+    "generator": "mythwrought-five-surface-regions-v7",
+    "pose": {
+      "x": 15.5,
+      "z": 8.5,
+      "feet": 9
+    },
+    "live": {
+      "gl": true,
+      "chunks": 25,
+      "daylight": "12:00",
+      "scenery": 25,
+      "sceneryGpuBytes": 298080,
+      "frames": 101
+    },
+    "aerial": false,
+    "head": "e3a41d1407f239a30db6c9efb84597ea2f91b5a7"
+  },
+  {
+    "label": "after",
+    "biome": "desert",
+    "generator": "mythwrought-five-surface-regions-v7",
+    "pose": {
+      "x": 506.5,
+      "z": 2.5,
+      "feet": 12
+    },
+    "live": {
+      "gl": true,
+      "chunks": 25,
+      "daylight": "12:00",
+      "scenery": 18,
+      "sceneryGpuBytes": 184464,
+      "frames": 201
+    },
+    "aerial": false,
+    "head": "e3a41d1407f239a30db6c9efb84597ea2f91b5a7"
+  },
+  {
+    "label": "after",
+    "biome": "snow",
+    "generator": "mythwrought-five-surface-regions-v7",
+    "pose": {
+      "x": 3.5,
+      "z": 505.5,
+      "feet": 11
+    },
+    "live": {
+      "gl": true,
+      "chunks": 25,
+      "daylight": "12:00",
+      "scenery": 27,
+      "sceneryGpuBytes": 254772,
+      "frames": 301
+    },
+    "aerial": false,
+    "head": "e3a41d1407f239a30db6c9efb84597ea2f91b5a7"
+  },
+  {
+    "label": "after",
+    "biome": "mountain",
+    "generator": "mythwrought-five-surface-regions-v7",
+    "pose": {
+      "x": -509.5,
+      "z": 4.5,
+      "feet": 13
+    },
+    "live": {
+      "gl": true,
+      "chunks": 25,
+      "daylight": "12:00",
+      "scenery": 26,
+      "sceneryGpuBytes": 312660,
+      "frames": 403
+    },
+    "aerial": false,
+    "head": "e3a41d1407f239a30db6c9efb84597ea2f91b5a7"
+  },
+  {
+    "label": "after",
+    "biome": "enchanted",
+    "generator": "mythwrought-five-surface-regions-v7",
+    "pose": {
+      "x": 8.5,
+      "z": -517.5,
+      "feet": 9
+    },
+    "live": {
+      "gl": true,
+      "chunks": 25,
+      "daylight": "12:00",
+      "scenery": 25,
+      "sceneryGpuBytes": 320544,
+      "frames": 507
+    },
+    "aerial": false,
+    "head": "e3a41d1407f239a30db6c9efb84597ea2f91b5a7"
+  }
+]

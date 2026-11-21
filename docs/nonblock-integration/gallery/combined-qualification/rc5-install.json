@@ -1,0 +1,20 @@
+{
+  "published": "8de40ca8451b6268cfdfefaa5d9a66b72caca799",
+  "candidate": "e3a41d1407f239a30db6c9efb84597ea2f91b5a7",
+  "originalManifestAndIcon": true,
+  "physicalIphone": false,
+  "legacyBytesPreserved": 8,
+  "networkRequests": 0,
+  "originServerClosed": true,
+  "rollbackPreservedBothWorlds": true,
+  "reappliedCombinedProfile": true,
+  "state": {
+    "generator": "mythwrought-five-surface-regions-v7",
+    "seed": 2026,
+    "entrances": 4,
+    "mobs": 40,
+    "canvas": "true",
+    "world": "{\"schema\":1,\"seed\":2026,\"edits\":[]}",
+    "controller": "http://127.0.0.1:38413/Mythwrought/sw-m5.js"
+  }
+}

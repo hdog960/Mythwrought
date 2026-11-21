@@ -84,7 +84,7 @@ export function openM2World(storage,choice){
   const type=loaded.world.base instanceof FourRegionWorld?'four-regions':'legacy';
   if(type!==result.mode)throw Error('Biome profile/engine mismatch');
   return Object.freeze({
-    world:loaded.world,base:result.world,mode:type,
+    world:loaded.world,base:result.world,mode:type,source:result.source,
     created:Boolean(result.created),
     recovered:Boolean(result.recovered||loaded.recovered),
     warning:loaded.warning||''

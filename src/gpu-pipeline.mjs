@@ -50,7 +50,7 @@ export function buildGpuPipeline(gl,{terrainVertex,terrainFragment,skyVertex,sky
       gl.enableVertexAttribArray(index);
     }
     resources.uniforms={};
-    for(const key of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog','uArtQuality','uSkyLight'])
+    for(const key of ['uEye','uForward','uRight','uUp','uAspect','uTan','uFog','uArtQuality','uSkyLight','uCaveHaze'])
       resources.uniforms[key]=gl.getUniformLocation(resources.terrainProgram,key);
     resources.skyUniforms={
       resolution:gl.getUniformLocation(resources.skyProgram,'uResolution'),

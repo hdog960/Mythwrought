@@ -394,7 +394,10 @@ function start(nonblockStage=null){
   ].join('\n');
   // Reserved transparent-water material 20; legacy materials stay unchanged.
   const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER
-    .replace('uniform vec3 uFog;','uniform vec3 uFog; uniform vec3 uSkyLight;')
+    .replace('uniform vec3 uFog;',
+      'uniform vec3 uFog; uniform vec3 uSkyLight; uniform float uCaveHaze;'+
+      'float worldFog(float distanceToEye){ return smoothstep(mix(29.0,9.0,uCaveHaze),'+
+        'mix(68.0,27.0,uCaveHaze),distanceToEye); }')
     .replace('mix(vColor,uFog,distant)','mix(vColor*uSkyLight,uFog,distant)')
     .replace('mix(colored,uFog,fog)','mix(colored*uSkyLight,uFog,fog)')
     .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
@@ -405,7 +408,7 @@ function start(nonblockStage=null){
       'outColor=vec4(mix(vColor,uFog,f),1.0); return; }'+
       'if(vMat==23){ float f=smoothstep(14.0,24.0,vDistance);'+
       'outColor=vec4(vColor,vPack2Alpha*(1.0-f)); return; }'
-    );
+    ).replaceAll('smoothstep(29.0,68.0,vDistance)','worldFog(vDistance)');
   let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
   function initializeGpuPipeline(){
     const resources=buildGpuPipeline(gl,{
@@ -1328,39 +1331,47 @@ function start(nonblockStage=null){
         projectSunToScreen(skyEvent.direction,player.yaw,player.pitch,w/h);
       const skyLight=atmosphere.light.map((v,i)=>
         Math.min(1,v+lunar.moonlight*[.71,.84,1][i]));
-      gl.clearColor(...atmosphere.fog,1);
-      if(s6Biome)gl.clearColor(...s6Mood.fog,1);
+      // Deep cave visibility falls into a dark atmosphere beyond the real
+      // near and far rock meshes. Surface entrances keep their outdoor sky.
+      const caveShade=combinedWorld()?Math.max(0,Math.min(1,(-player.feet-10)/10)):0;
+      const caveFog=[.053,.068,.088];
+      const fadeCave=(color,target=caveFog)=>caveShade===0?color:
+        color.map((value,i)=>value+(target[i]-value)*caveShade);
+      const fog=fadeCave(s6Biome?s6Mood.fog:atmosphere.fog);
+      gl.clearColor(...fog,1);
       gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
       // Cheap procedural WebGL sky; the depth buffer is reserved for editable voxels.
-      gl.disable(gl.DEPTH_TEST);
-      gl.useProgram(skyProgram);
-      gl.uniform2f(skyU.resolution,w,h);
-      gl.uniform1f(skyU.yaw,player.yaw);
-      gl.uniform1f(skyU.pitch,player.pitch);
-      gl.uniform2f(skyU.sunScreen,...sunScreen);
-      gl.uniform1f(skyU.sunVisibility,atmosphere.sunVisibility);
-      gl.uniform3fv(skyU.horizon,s6Mood.horizon);
-      gl.uniform3fv(skyU.zenith,s6Mood.zenith);
-      gl.uniform3fv(skyU.cloud,s6Mood.cloud);
-      gl.uniform3fv(skyU.ridge,s6Mood.ridge);
-      gl.uniform3fv(skyU.fog,s6Mood.fog);
-      gl.uniform3fv(skyU.sunColor,atmosphere.sunColor);
-      gl.uniform2fv(skyU.lunarScreen,moonScreens.flat());
-      gl.uniform2fv(skyU.lunarPhase,lunar.moons.flatMap(m=>m.terminator));
-      gl.uniform3fv(skyU.lunarColor,lunar.moons.flatMap(m=>m.color));
-      gl.uniform1fv(skyU.lunarRadius,lunar.moons.map(m=>m.radius));
-      gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility));
-      gl.uniform1f(skyU.starVisibility,nightCanvas.starVisibility);
-      gl.uniform1f(skyU.twinkleAngle,nightCanvas.twinkleAngle);
-      gl.uniform2fv(skyU.cloudShiftA,nightCanvas.cloudA);
-      gl.uniform2fv(skyU.cloudShiftB,nightCanvas.cloudB);
-      gl.uniform1i(skyU.s5Type,skyEvent.kind);
-      gl.uniform1f(skyU.s5Strength,skyEvent.strength);
-      gl.uniform1f(skyU.s5Progress,skyEvent.progress);
-      gl.uniform2fv(skyU.s5Center,skyEventCenter);
-      gl.uniform2fv(skyU.s5Vector,skyEvent.vector);
-      gl.uniform3fv(skyU.s5Color,skyEvent.color);
-      gl.drawArrays(gl.TRIANGLES,0,3);
+      if(caveShade<1){
+        gl.disable(gl.DEPTH_TEST);
+        gl.useProgram(skyProgram);
+        gl.uniform2f(skyU.resolution,w,h);
+        gl.uniform1f(skyU.yaw,player.yaw);
+        gl.uniform1f(skyU.pitch,player.pitch);
+        gl.uniform2f(skyU.sunScreen,...sunScreen);
+        gl.uniform1f(skyU.sunVisibility,atmosphere.sunVisibility*(1-caveShade));
+        gl.uniform3fv(skyU.horizon,fadeCave(s6Mood.horizon));
+        gl.uniform3fv(skyU.zenith,fadeCave(s6Mood.zenith));
+        gl.uniform3fv(skyU.cloud,fadeCave(s6Mood.cloud));
+        gl.uniform3fv(skyU.ridge,fadeCave(s6Mood.ridge));
+        gl.uniform3fv(skyU.fog,fadeCave(s6Mood.fog));
+        gl.uniform3fv(skyU.sunColor,atmosphere.sunColor);
+        gl.uniform2fv(skyU.lunarScreen,moonScreens.flat());
+        gl.uniform2fv(skyU.lunarPhase,lunar.moons.flatMap(m=>m.terminator));
+        gl.uniform3fv(skyU.lunarColor,lunar.moons.flatMap(m=>m.color));
+        gl.uniform1fv(skyU.lunarRadius,lunar.moons.map(m=>m.radius));
+        gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility*(1-caveShade)));
+        gl.uniform1f(skyU.starVisibility,nightCanvas.starVisibility*(1-caveShade));
+        gl.uniform1f(skyU.twinkleAngle,nightCanvas.twinkleAngle);
+        gl.uniform2fv(skyU.cloudShiftA,nightCanvas.cloudA);
+        gl.uniform2fv(skyU.cloudShiftB,nightCanvas.cloudB);
+        gl.uniform1i(skyU.s5Type,skyEvent.kind);
+        gl.uniform1f(skyU.s5Strength,skyEvent.strength*(1-caveShade));
+        gl.uniform1f(skyU.s5Progress,skyEvent.progress);
+        gl.uniform2fv(skyU.s5Center,skyEventCenter);
+        gl.uniform2fv(skyU.s5Vector,skyEvent.vector);
+        gl.uniform3fv(skyU.s5Color,skyEvent.color);
+        gl.drawArrays(gl.TRIANGLES,0,3);
+      }
       gl.enable(gl.DEPTH_TEST);
       gl.useProgram(program);
       gl.uniform3fv(U.uEye,eye());
@@ -1369,12 +1380,14 @@ function start(nonblockStage=null){
       gl.uniform3fv(U.uUp,[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),-Math.sin(player.pitch)*Math.cos(player.yaw)]);
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
-      gl.uniform3fv(U.uFog,atmosphere.fog);
-      if(s6Biome)gl.uniform3fv(U.uFog,s6Mood.fog);
+      gl.uniform3fv(U.uFog,fog);
+      gl.uniform1f(U.uCaveHaze,caveShade);
       // Preserve S2's exact live ambient uniform path, then layer only the
       // bounded S3 lunar contribution if at least one moon illuminates night.
       gl.uniform3fv(U.uSkyLight,atmosphere.light);
       if(lunar.moonlight>0)gl.uniform3fv(U.uSkyLight,skyLight);
+      if(caveShade>0)
+        gl.uniform3fv(U.uSkyLight,fadeCave(lunar.moonlight>0?skyLight:atmosphere.light,[.76,.81,.91]));
       gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
       if(frame%12===0){
         canvas.dataset.skySunAltitude=String(atmosphere.elevation.toFixed(4));
@@ -1388,7 +1401,8 @@ function start(nonblockStage=null){
         canvas.dataset.skyMoonPhases=JSON.stringify(lunar.moons.map(m=>Number(m.phaseFraction.toFixed(5))));
         canvas.dataset.skyMoonIlluminations=JSON.stringify(lunar.moons.map(m=>Number(m.illumination.toFixed(5))));
         canvas.dataset.skyMoonVisibilities=JSON.stringify(lunar.moons.map(m=>Number(m.visibility.toFixed(5))));
-        canvas.dataset.skyFog=JSON.stringify(s6Mood.fog.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyFog=JSON.stringify(fadeCave(s6Mood.fog).map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyBackdrop=caveShade===1?'deep-cave':caveShade>0?'cave-transition':'outdoor';
         canvas.dataset.skyS6SourceStatus=s6SourceState;
         canvas.dataset.skyS6BiomeName=s6Biome?.name??'none';
         canvas.dataset.skyS6WorldBiomeName=s6V6?(s6Biome?.name??'plains'):
@@ -2416,7 +2430,7 @@ function start(nonblockStage=null){
             loadWorldSafe(localStorage,world.seed);
           const same=JSON.stringify(loaded.world.save())===JSON.stringify(world.save());
           saved=(same?'Current world matches stored edits':'MISMATCH: world edits differ')+
-            '; source='+(loaded.source??loaded.mode);
+            '; source='+loaded.source;
         }
       }catch(err){saved='UNVERIFIED: '+String(err);}
       const probe=probeTemporaryStorage(localStorage,

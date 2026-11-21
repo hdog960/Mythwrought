@@ -108,11 +108,11 @@ export function loadFourRegionWorld(storage,seed,{
   if(enableNew){
     if(metadata)throw Error('Use existing profile; do not recreate');
     return Object.freeze({world:activateFourRegionProfile(storage,seed,
-      {explicitNewWorld:true,generator:newGenerator}),mode:'four-regions',created:true});
+      {explicitNewWorld:true,generator:newGenerator}),mode:'four-regions',source:'new',created:true});
   }
   const loaded=loadWorldSafe(storage,seed);
   if(!metadata)return Object.freeze({world:loaded.world,mode:'legacy',
-    recovered:Boolean(loaded.recovered)});
+    source:loaded.source,recovered:Boolean(loaded.recovered)});
   if(loaded.source==='legacy')
     throw Error('A profiled seed cannot load legacy-default bytes');
   const world=loaded.source==='new'?
@@ -120,7 +120,7 @@ export function loadFourRegionWorld(storage,seed,{
     restoreFourRegionWorld(selectedWorldPayload(storage,seed,loaded.source),
       metadata.profile);
   return Object.freeze({world,mode:'four-regions',
-    recovered:Boolean(loaded.recovered||metadata.recovered)});
+    source:loaded.source,recovered:Boolean(loaded.recovered||metadata.recovered)});
 }
 export function saveFourRegionWorld(storage,world,{allowReplaceCorrupt=false}={}){
   if(!(world instanceof FourRegionWorld))throw Error('Not an authoritative biome world');
