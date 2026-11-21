@@ -1,0 +1,39 @@
+name: Source-exact integrated main original guarded GPU upload timing (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-current-main-upload-stages-291-20261121
+permissions:
+  contents: read
+jobs:
+  original-source-no-error-query-modifications:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require exact integrated production parent and original source integrity
+        run: |
+          test "$(git rev-parse HEAD^)" = "7016e14cd6289f45eaf7fc6a79a362b47996df65"
+          git diff --exit-code 7016e14cd6289f45eaf7fc6a79a362b47996df65 HEAD -- src/ index.html styles.css sw-m5.js tests/
+          node --check scripts/ci/iphone-current-main-upload-stage.mjs
+      - name: Install authentic Chromium WebGL2 source renderer plus PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: True native original-current-main per-edit stage and GL validation latency
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/current-main-upload-stage.log 2>&1 &
+          node scripts/ci/iphone-current-main-upload-stage.mjs
+      - name: Preserve source-authenticated real WebGL2 stage timings PNGs and saves
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-main-original-guarded-gpu-upload-stage-times
+          path: artifacts/iphone-current-main-upload-stage/
+          if-no-files-found: warn
+          retention-days: 14
