@@ -9,7 +9,7 @@ import {m3DesertFreshColumn,M3_XERIC_IDS} from './desert-m3.mjs';
 import {m4ThreeRegionFreshColumn,M4_REGION_NAMES} from './three-regions-m4.mjs';
 import {m5V5MountainFreshColumn} from './mountain-pass-v5.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
-import {environmentalTreesForChunk,keepLegacyGroveTree,planEnvironmentalColumn} from './environment-v7.mjs';
+import {environmentalTreesForChunk,keepLegacyGroveTree,naturalTreeTouchesDesert,planEnvironmentalColumn} from './environment-v7.mjs';
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
@@ -150,8 +150,9 @@ export class FourRegionWorld extends VoxelWorld{
   _environmentBaseline(x,y,z,block=super.naturalAndLandmarkBlock(x,y,z)){
     const cave=this.environmentCaves.get(x,y,z);
     if(cave!==undefined)return cave;
-    // Only ordinary grove provenance can be suppressed. Named old landmarks,
-    // player edits and cave geometry continue through their original readers.
+    // Suppress only naturally seeded WOOD/LEAVES from grove trees and authored
+    // tree-shaped landmarks that would cross Desert. Non-tree landmarks, caves
+    // and player edits retain their independent readers and precedence.
     if(block!==BLOCK.WOOD&&block!==BLOCK.LEAVES)return block;
     const districtKey=Math.floor(x/LIVE_DISTRICT_SIZE)+','+Math.floor(z/LIVE_DISTRICT_SIZE);
     let hidden=this._environmentGroveMasks.get(districtKey);
@@ -160,6 +161,13 @@ export class FourRegionWorld extends VoxelWorld{
       const district=this.liveDistrictCache.get(districtKey);
       for(const tree of district?.trees??[]){
         if(keepLegacyGroveTree(this.seed,tree))continue;
+        for(const [tx,ty,tz] of tree.cells)hidden.add(worldKey(tx,ty,tz));
+      }
+      // Rare seeded tree landmarks use the same no-Desert footprint policy.
+      // Do not suppress courts, rotundas, caves, or player-authored structures.
+      for(const tree of [district?.twinwood,district?.canopyGate,
+        district?.archwood,district?.fallenGiant]){
+        if(!tree?.cells||!naturalTreeTouchesDesert(this.seed,tree.cells,tree.origin))continue;
         for(const [tx,ty,tz] of tree.cells)hidden.add(worldKey(tx,ty,tz));
       }
       this._environmentGroveMasks.set(districtKey,hidden);
