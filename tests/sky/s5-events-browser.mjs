@@ -105,16 +105,22 @@ async function pose(page,alignment){
     const c=document.querySelector('#scene');
     return {pitch:+c.dataset.cameraPitch,yaw:+c.dataset.cameraYaw};
   });
-  if(current.pitch<.42){
+  // A random V6 tree can truly occlude the conjunction at the original
+  // lower-sky camera aim, as demonstrated by the 932x430 real GPU artifact.
+  // For the rare three-moon alignment, raise the EVENT IN THE SCREEN by
+  // physically looking nearer the horizon via actual ArrowDown keyboard.
+  // Do not change the pixel brightness, source event, moon state or thresholds.
+  const lowPitch=alignment?.12:.42,highPitch=alignment?.20:.54;
+  if(current.pitch<lowPitch){
     await page.keyboard.down('ArrowUp');
-    try{await page.waitForFunction(()=>
-      +document.querySelector('#scene').dataset.cameraPitch>.42,
-      null,{timeout:23000});}finally{await page.keyboard.up('ArrowUp');}
-  }else if(current.pitch>.54){
+    try{await page.waitForFunction(limit=>
+      +document.querySelector('#scene').dataset.cameraPitch>limit,
+      lowPitch,{timeout:23000});}finally{await page.keyboard.up('ArrowUp');}
+  }else if(current.pitch>highPitch){
     await page.keyboard.down('ArrowDown');
-    try{await page.waitForFunction(()=>
-      +document.querySelector('#scene').dataset.cameraPitch<.54,
-      null,{timeout:23000});}finally{await page.keyboard.up('ArrowDown');}
+    try{await page.waitForFunction(limit=>
+      +document.querySelector('#scene').dataset.cameraPitch<limit,
+      highPitch,{timeout:23000});}finally{await page.keyboard.up('ArrowDown');}
   }
   const yaw=+await page.evaluate(()=>
     document.querySelector('#scene').dataset.cameraYaw);

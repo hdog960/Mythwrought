@@ -7,6 +7,7 @@ const context=await browser.newContext({viewport:{width:932,height:430},deviceSc
 const page=await context.newPage();
 const errors=[];
 page.on('pageerror',e=>errors.push(e.message));
+page.on('dialog',dialog=>dialog.accept());
 const v=async()=>page.evaluate(()=>{
   const c=document.getElementById('scene');
   return {x:Number(c.dataset.playerX),z:Number(c.dataset.playerZ),yaw:Number(c.dataset.cameraYaw),
@@ -18,7 +19,15 @@ const touch=(id,x,y)=>({id,x:Math.round(x),y:Math.round(y)});
 const deltaYaw=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 try{
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
-  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,{timeout:20000});
+  await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+  assert.equal(await page.locator('#help').isVisible(),true,
+    'Two-thumb test must not bypass current-V6-only admission');
+  await page.getByRole('button',{name:/NEW WORLD/}).click();
+  await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+  assert.equal(await page.evaluate(()=>
+    window.__mythwroughtTest.fourBiomeProfile()?.generator),
+    'mythwrought-five-surface-regions-v6');
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,null,{timeout:45000});
   // Browser-level keyboard focus contract: nested controls must keep their
   // own Space/arrow handling; the game canvas still receives shortcuts.
   const focusIsolation=await page.evaluate(()=>{
@@ -195,9 +204,13 @@ try{
   });
   assert.deepEqual(modalInput,{move:false,look:false,precision:false},
     'Modal-open delayed pointers captured a gameplay grip');
+  await page.locator('.player-menu-safety-link').click();
+  assert.equal(await page.locator('#lookMode').isVisible(),true,
+    'Advanced settings must retain real accessible camera-mode picker');
   await page.locator('#lookMode').selectOption('stick');
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v004-look-mode')),'stick');
-  await page.locator('#closeHelp').click();
+  await page.locator('.player-safety-back').click();
+  await page.locator('.player-menu-close').click();
   const beforeStick=await v();
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[touch(3,right.x+32,right.y)]});
   await page.waitForTimeout(500);
@@ -267,8 +280,10 @@ try{
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
   await page.locator('#menu').click();
+  await page.locator('.player-menu-safety-link').click();
   assert.equal(await page.locator('#lookMode').inputValue(),'stick','Look mode not persisted after reload');
-  await page.locator('#closeHelp').click();
+  await page.locator('.player-safety-back').click();
+  await page.locator('.player-menu-close').click();
   // Page blur must clear any active stick to prevent motion after app-switching.
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[touch(5,left.x,left.y-32)]});
   await page.waitForTimeout(160);

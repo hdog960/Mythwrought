@@ -7,7 +7,9 @@ import {createServer} from 'node:http';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
-import {FourRegionWorld,FOUR_REGION_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
+import {FourRegionWorld,FOUR_REGION_GENERATOR,fourRegionProfile,
+  M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
+import {v6BiomeAt} from '../../src/manual-biomes/v6-balanced-biomes.mjs';
 import {m4PhysicalTerrainHeight,M4_PHYSICAL_MATERIALS}
   from '../../src/manual-biomes/three-regions-m4.mjs';
 
@@ -27,7 +29,10 @@ const definitions=[
   {name:'mountain',x:-512,z:0,prior:M4_PHYSICAL_MATERIALS.mountain.cap},
   {name:'enchanted',x:0,z:-512,prior:M4_PHYSICAL_MATERIALS.enchanted.cap}
 ];
+// Legacy source geometry remains auditable but is NEVER playable in current V6.
 const baseline=new FourRegionWorld(179),anchors=[];
+if(baseline.generationProfile.generator!==FOUR_REGION_GENERATOR)
+  throw Error('Historical M4 exact original source profile changed');
 for(const region of definitions){
   let found=null;
   // Seek a *genuinely changed* visible material, not the unchanged canonical
@@ -74,22 +79,50 @@ try{
     const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
     page.on('pageerror',e=>jsErrors.push(width+'x'+height+': '+e.message));
     page.on('dialog',dialog=>dialog.accept());
-    await page.addInitScript(()=>{
-      if(localStorage.getItem('mythwrought-v002-selected-seed')===null)
-        localStorage.setItem('mythwrought-v002-selected-seed','7');
-    });
     await page.goto(url,{waitUntil:'load'});
     await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:25000});
     const gl=await page.evaluate(()=>
       Boolean(document.getElementById('scene').getContext('webgl2')));
     if(!gl)throw Error('Actual M4 game WebGL2 unavailable');
-    await page.locator('#menu').click();
-    await page.locator('#seedInput').fill('179');
-    await page.locator('#createFourBiomeWorld').click();
-    if(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator)!==
-        FOUR_REGION_GENERATOR)
-      throw Error('M4 explicitly new world did not activate v4 immutable profile');
-    await page.locator('#closeHelp').click();
+    await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+    if(!await page.locator('#help').isVisible())
+      throw Error('Original archived M4 source bypassed current-V6 startup protection');
+    const archivedWorld=JSON.stringify({schema:1,seed:179,edits:[]});
+    await page.evaluate(raw=>localStorage.setItem('mythwrought-v002-world-179',raw),archivedWorld);
+    await page.getByRole('button',{name:/NEW WORLD/}).click();
+    await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+    const currentSeed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+    if(currentSeed===179||await page.evaluate(()=>
+      window.__mythwroughtTest.fourBiomeProfile()?.generator)!==M6_BALANCED_GENERATOR)
+      throw Error('M4 current-only new world admission did not activate V6');
+    const currentWorld=new FourRegionWorld(currentSeed,
+      fourRegionProfile(currentSeed,M6_BALANCED_GENERATOR));
+    // Source EXACT original M4 anchors are above (M4 original seed179).
+    // The V6 camera is only pointed at actual V6 physical cells; do not
+    // portray retired v4 mountain/snow/enchantment as current-world art.
+    const liveAnchors=anchors.map(legacy=>{
+      const center=definitions.find(d=>d.name===legacy.name);
+      if(!center)throw Error('M4 original source anchor category lost');
+      const x=center.x+Math.round((legacy.x-center.x)*.5);
+      const z=center.z+Math.round((legacy.z-center.z)*.5);
+      const biome=v6BiomeAt(x,z,currentSeed);
+      if(biome?.name!==legacy.name||biome.weight<.72)
+        throw Error('M4 current V6 source biome disagrees '+JSON.stringify({legacy,biome}));
+      let y=null,id=null;
+      for(let at=19;at>=0;at--){
+        const block=currentWorld.get(x,at,z);
+        if(block!==0&&(at===19||currentWorld.get(x,at+1,z)===0)){
+          y=at;id=block;break;
+        }
+      }
+      if(y===null||!Number.isInteger(id)||id===0)
+        throw Error('M4 current V6 physical source surface missing');
+      return {...legacy,archivedSource:legacy,
+        archivedGenerator:FOUR_REGION_GENERATOR,
+        currentGenerator:M6_BALANCED_GENERATOR,x,z,y,id};
+    });
+    if(new Set(liveAnchors.map(p=>p.x+','+p.z)).size!==3)
+      throw Error('M4 current-V6 source physical anchors overlap');
     const capture=async(point,kind)=>{
       const actual=await page.evaluate(({x,y,z,kind,name})=>{
         const t=window.__mythwroughtTest;
@@ -110,10 +143,10 @@ try{
           mode:t.fourBiomeMode()};
       },{...point,kind});
       if(actual.value!==(kind==='cutaway'?0:point.id)||
-         actual.profile!==FOUR_REGION_GENERATOR||actual.mode!=='four-regions')
+         actual.profile!==M6_BALANCED_GENERATOR||actual.mode!=='four-regions')
         throw Error('Actual M4 '+point.name+' terrain not source-exact '+JSON.stringify(actual));
       await page.waitForTimeout(1600);
-      const file='m4-'+point.name+'-'+kind+'-'+width+'x'+height+'.png';
+      const file='m4-current-v6-'+point.name+'-'+kind+'-'+width+'x'+height+'.png';
       const png=await page.screenshot({path:path.join(out,file),timeout:90000});
       const decoded=PNG.sync.read(png);
       if(decoded.width!==width||decoded.height!==height)
@@ -138,7 +171,10 @@ try{
         throw Error('M4 '+file+' blank or GPU upload failure '+JSON.stringify({
           colors:colors.size,diag
         }));
-      const sample={file,width,height,region:point.name,kind,seed:179,
+      const sample={file,width,height,region:point.name,kind,seed:currentSeed,
+        archivedSeed:179,archivedSourceBlock:point.archivedSource.id,
+        archivedGenerator:FOUR_REGION_GENERATOR,
+        sourceGenerator:M6_BALANCED_GENERATOR,
         sourceBlock:point.id,observedBlock:actual.value,
         worldX:point.x,worldY:point.y,worldZ:point.z,
         shaderContext:'genuine-WebGL2',bytes:png.length,sha256:sha(png),
@@ -149,7 +185,7 @@ try{
       console.log('PASS M4 actual '+point.name+' '+kind+' '+width+'x'+height+
         ' solid '+point.id+' GPU '+sample.residentGpuChunks);
     };
-    for(const point of anchors){
+    for(const point of liveAnchors){
       await capture(point,'exterior');
       const edited=await page.evaluate(({x,y,z})=>
         window.__mythwroughtTest.editBiomeCell(x,y,z,0),point);
@@ -157,20 +193,29 @@ try{
       await capture(point,'cutaway');
     }
     await page.locator('#menu').click();
-    await page.locator('#save').click();
+    await page.locator('.player-menu-safety-link').click();
+    await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
+    await page.locator('.player-safety-back').click();
+    await page.locator('.player-menu-close').click();
     await page.reload({waitUntil:'load'});
     await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:25000});
-    const restored=await page.evaluate(points=>({
+    const restored=await page.evaluate(({points,currentSeed})=>({
       blocks:points.map(p=>window.__mythwroughtTest.block(p.x,p.y,p.z)),
       profile:window.__mythwroughtTest.fourBiomeProfile()?.generator,
       oldSeedUnprofiled:localStorage.getItem(
         'mythwrought-v002-world-7-four-biomes-profile-v1')===null,
+      archivedSourceUnprofiled:localStorage.getItem(
+        'mythwrought-v002-world-179-four-biomes-profile-v1')===null,
+      archivedBytes:localStorage.getItem('mythwrought-v002-world-179'),
       newSeedProfiled:localStorage.getItem(
-        'mythwrought-v002-world-179-four-biomes-profile-v1')!==null
-    }),anchors);
-    if(restored.blocks.some(x=>x!==0)||restored.profile!==FOUR_REGION_GENERATOR||
-       !restored.oldSeedUnprofiled||!restored.newSeedProfiled)
-      throw Error('M4 genuine all-three-region edit/save/reload failed '+
+        'mythwrought-v002-world-'+currentSeed+'-four-biomes-profile-v1')!==null,
+      newSchema:JSON.parse(localStorage.getItem('mythwrought-v002-world-'+currentSeed)||'null')?.schema
+    }),{points:liveAnchors,currentSeed});
+    if(restored.blocks.some(x=>x!==0)||restored.profile!==M6_BALANCED_GENERATOR||
+       !restored.oldSeedUnprofiled||!restored.archivedSourceUnprofiled||
+       restored.archivedBytes!==archivedWorld||
+       !restored.newSeedProfiled||restored.newSchema!==1)
+      throw Error('M4 genuine V6 three-source physical edit/reload or archive protection failed '+
         JSON.stringify(restored));
     await page.close();
   }
@@ -178,12 +223,14 @@ try{
     throw Error('M4 expected 18 distinct source-specific actual browser scenes');
   if(jsErrors.length)throw Error('Actual game JS errors '+jsErrors.join('; '));
   await writeFile(path.join(out,'manifest.json'),JSON.stringify({
-    kind:'mythwrought-manual-m4-registered-terrain-physical',
-    generator:FOUR_REGION_GENERATOR,source:exactSource,
+    kind:'mythwrought-manual-m4-archived-source-and-current-v6-physical',
+    archivedGenerator:FOUR_REGION_GENERATOR,
+    currentOnlyGenerator:M6_BALANCED_GENERATOR,
+    legacyPlayable:false,source:exactSource,
     seedsPreserved:true,creatorIphoneTested:false,published:false,
     anchors,scenes,jsErrors
   },null,2));
-  console.log('PASS M4 18/18 genuine Snow, Mountain and Enchanted exterior/cutaway WebGL2 captures');
+  console.log('PASS M4 original archive source provenance + 18/18 genuine CURRENT V6 Snow/Mountain/Enchanted exterior/cutaway WebGL2 captures');
 }catch(e){
   await writeFile(path.join(out,'failure.json'),JSON.stringify({
     error:String(e),source:exactSource,anchors,scenes,jsErrors

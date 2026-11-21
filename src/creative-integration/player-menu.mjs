@@ -100,6 +100,31 @@ export function installPlayerMenu({
   // Move the ORIGINAL functional diagnostics into advanced recovery, preserving
   // its existing read-only handler without restoring a scrolling main menu.
   safety.append(deviceCheck);
+  // Original Cave World has a separate, checksummed save, not an obsolete
+  // ordinary generation. Expose the ORIGINAL cave handlers only in advanced
+  // recovery; three-row everyday new-world entry stays current V6 only.
+  const caveSeedInput=container.querySelector('#seedInput');
+  const caveCreate=container.querySelector('#caveCreateWorld');
+  const caveLoad=container.querySelector('#caveLoadWorld');
+  const caveStatus=container.querySelector('#caveWorldStatus');
+  if(!caveSeedInput||!caveCreate||!caveLoad||!caveStatus)
+    throw Error('Original separate cave profile controls missing');
+  const cavePanel=make('section','looksetting player-cave-recovery');
+  cavePanel.setAttribute('aria-label','Advanced separate Cave World profile');
+  const caveLabel=make('label','controlhint','Separate Cave World seed');
+  caveLabel.setAttribute('for','seedInput');
+  cavePanel.append(
+    make('h2','audit-title','OPTIONAL CAVE WORLD · EXPERIMENTAL'),
+    make('p','controlhint','Explicitly separate cave saves only. Current worlds and historic archives are not converted or overwritten.'),
+    caveLabel,caveSeedInput,caveCreate,caveLoad,caveStatus
+  );
+  safety.append(cavePanel);
+  // Original iPhone camera mode is preserved in advanced controls instead
+  // of reappearing in the compact everyday menu.
+  const lookModeSetting=container.querySelector('#lookMode')?.closest('.looksetting');
+  if(!lookModeSetting||!lookModeSetting.querySelector('#lookMode'))
+    throw Error('Original camera mode selection control missing');
+  safety.append(lookModeSetting);
   const pack3Backup=container.querySelector('[aria-label="Pack 3 physical building palette"]');
   if(!pack3Backup?.querySelector('#pack3Export')||!pack3Backup?.querySelector('#pack3Import'))
     throw Error('Original Pack3 portable backup actions missing');

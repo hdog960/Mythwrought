@@ -6,11 +6,18 @@ import {createServer} from 'node:http';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
-import {FourRegionWorld,FOUR_REGION_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
+import {FourRegionWorld,FOUR_REGION_GENERATOR,fourRegionProfile,
+  M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
+import {v6BiomeAt} from '../../src/manual-biomes/v6-balanced-biomes.mjs';
 import {surfaceBiomeAt} from '../../src/surface-regions/regions.mjs';
 import {M3_DESERT_IDS,m3DesertHeight} from '../../src/manual-biomes/desert-m3.mjs';
 
+// Exact original M3 seed179 archival geometry is audited in pure source, but
+// NEVER entered as a playable world. All Chromium WebGL2 images below come
+// from a newly admitted, genuinely current V6 source seed.
 const seed=179,sourceWorld=new FourRegionWorld(seed);
+if(sourceWorld.generationProfile.generator!==FOUR_REGION_GENERATOR)
+  throw Error('Original M3 archived four-region generator changed');
 const root=process.cwd(),out=path.join(root,'artifacts/manual-biomes-m3-desert');
 await mkdir(out,{recursive:true});
 const materials=new Set([M3_DESERT_IDS.pale,M3_DESERT_IDS.red,M3_DESERT_IDS.salt]);
@@ -68,22 +75,47 @@ try{
     const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
     page.on('pageerror',error=>pageErrors.push(width+'x'+height+': '+error.message));
     page.on('dialog',dialog=>dialog.accept());
-    await page.addInitScript(()=>{
-      // Set up a separate legacy starting seed once; NEVER overwrite the
-      // actual game's newly selected biome seed during the cold reload.
-      if(localStorage.getItem('mythwrought-v002-selected-seed')===null)
-        localStorage.setItem('mythwrought-v002-selected-seed','7');
-    });
     await page.goto(url,{waitUntil:'load'});
     await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:30000});
     if(!await page.evaluate(()=>Boolean(document.getElementById('scene').getContext('webgl2'))))
       throw Error('No genuine WebGL2 at '+width+'x'+height);
-    await page.locator('#menu').click();
-    await page.locator('#seedInput').fill(String(seed));
-    await page.locator('#createFourBiomeWorld').click();
-    if(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator)!==
-       FOUR_REGION_GENERATOR)throw Error('M3 UI did not create the versioned v3 generation profile');
-    await page.locator('#closeHelp').click();
+    await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+    if(!await page.locator('#help').isVisible())
+      throw Error('Original M3 historical world bypassed current-V6 admission');
+    // A real archived schema-1 record must stay byte-identical, but must not
+    // become playable. This record exists only in isolated test browser storage.
+    const oldSave=JSON.stringify({schema:1,seed,edits:[]});
+    await page.evaluate(raw=>localStorage.setItem('mythwrought-v002-world-179',raw),oldSave);
+    await page.getByRole('button',{name:/NEW WORLD/}).click();
+    await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+    const currentSeed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+    const generator=await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator);
+    if(currentSeed===seed||generator!==M6_BALANCED_GENERATOR)
+      throw Error('M3 dual archival/current acceptance did not enter genuine V6');
+    const currentWorld=new FourRegionWorld(currentSeed,
+      fourRegionProfile(currentSeed,M6_BALANCED_GENERATOR));
+    // Original M3 four source anchors remain independently authoritative.
+    // Project the legacy relative offsets into the guaranteed V6 Desert
+    // interior, verifying each source-defined physical block and biome.
+    const liveAnchors=anchors.map(archive=>{
+      const x=512+Math.round((archive.x-512)*.2),z=Math.round(archive.z*.4);
+      const biome=v6BiomeAt(x,z,currentSeed);
+      if(biome?.name!=='desert'||biome.weight<.72)
+        throw Error('M3 current V6 anchor not Desert: '+JSON.stringify({archive,x,z,biome}));
+      let y=null,id=null;
+      for(let at=19;at>=0;at--){
+        const a=currentWorld.get(x,at,z);
+        if(a!==0&&(at===19||currentWorld.get(x,at+1,z)===0)){
+          y=at;id=a;break;
+        }
+      }
+      if(y===null||!Number.isInteger(id)||id===0)
+        throw Error('M3 current V6 exposed physical source cell missing');
+      return {...archive,archivedSource:archive,sourceGenerator:FOUR_REGION_GENERATOR,
+        x,z,y,id,currentSeed,currentGenerator:M6_BALANCED_GENERATOR};
+    });
+    if(new Set(liveAnchors.map(a=>a.x+','+a.z)).size!==4)
+      throw Error('M3 current V6 physical anchors collapsed/duplicated');
     const capture=async(point,kind='exterior')=>{
       const observed=await page.evaluate(({x,z,y,kind})=>{
         const test=window.__mythwroughtTest;
@@ -98,10 +130,10 @@ try{
           mode:test.fourBiomeMode(),generator:test.fourBiomeProfile()?.generator};
       },{...point,kind});
       if(observed.block!==point.id||observed.mode!=='four-regions'||
-         observed.generator!==FOUR_REGION_GENERATOR)
+         observed.generator!==M6_BALANCED_GENERATOR)
         throw Error('Wrong M3 real physical '+point.name+' source '+JSON.stringify(observed));
       await page.waitForTimeout(1700);
-      const file='m3-desert-'+point.name+'-'+kind+'-'+width+'x'+height+'.png';
+      const file='m3-desert-current-v6-'+point.name+'-'+kind+'-'+width+'x'+height+'.png';
       const png=await page.screenshot({path:path.join(out,file),timeout:90000});
       const decoded=PNG.sync.read(png),buckets=new Set();
       if(decoded.width!==width||decoded.height!==height)
@@ -123,8 +155,9 @@ try{
         throw Error('M3 genuine '+file+' has blank world or GPU failures '+JSON.stringify({
           buckets:buckets.size,diag
         }));
-      const item={file,width,height,source:{...point},kind,seed,
-        sourceGenerator:FOUR_REGION_GENERATOR,realGameWebGL2:true,
+      const item={file,width,height,source:{...point},kind,seed:currentSeed,
+        archiveSeed:seed,archivedGenerator:FOUR_REGION_GENERATOR,
+        sourceGenerator:M6_BALANCED_GENERATOR,realGameWebGL2:true,
         bytes:png.length,sha256:createHash('sha256').update(png).digest('hex'),
         residentChunks:diag.snapshot.chunks.length,colorBuckets:buckets.size,
         gpuUpload:diag.snapshot.gpuRetry};
@@ -132,41 +165,50 @@ try{
       console.log('PASS M3 source-exact Desert WebGL2 '+file+
         ' ID='+point.id+' y='+point.y+' GPU='+item.residentChunks);
     };
-    for(const point of anchors)await capture(point);
+    for(const point of liveAnchors)await capture(point);
     // Mine the ACTUAL Desert cap, place different hardpan, save, restore and
     // replay the world. The cutaway is real edited voxel geometry, not a
     // camera-only preview. Re-enter the region after visiting other terrain.
-    const edit=anchors[0],under={...edit,name:'real-mined-dune-cutaway',id:0};
+    const edit=liveAnchors[0],under={...edit,name:'real-mined-dune-cutaway',id:0};
     const removed=await page.evaluate(({x,y,z})=>
       window.__mythwroughtTest.editBiomeCell(x,y,z,0),
       {x:edit.x,y:edit.y,z:edit.z});
     if(!removed)throw Error('M3 real game mine/edit did not change a dune cap');
     await capture(under,'cutaway');
     await page.locator('#menu').click();
-    await page.locator('#save').click();
+    await page.locator('.player-menu-safety-link').click();
+    await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
+    await page.locator('.player-safety-back').click();
+    await page.locator('.player-menu-close').click();
     await page.reload({waitUntil:'load'});
     await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:30000});
-    const persisted=await page.evaluate(({x,y,z})=>({
+    const persisted=await page.evaluate(({x,y,z,currentSeed})=>({
       value:window.__mythwroughtTest.block(x,y,z),
       generator:window.__mythwroughtTest.fourBiomeProfile()?.generator,
-      legacyProfile:localStorage.getItem('mythwrought-v002-world-7-four-biomes-profile-v1'),
-      biomeProfile:localStorage.getItem('mythwrought-v002-world-179-four-biomes-profile-v1')
-    }),{x:edit.x,y:edit.y,z:edit.z});
-    if(persisted.value!==0||persisted.generator!==FOUR_REGION_GENERATOR||
-       persisted.legacyProfile!==null||!persisted.biomeProfile)
-      throw Error('M3 real-game edited dune/save/reload or legacy parity failed');
+      currentProfile:localStorage.getItem(
+        'mythwrought-v002-world-'+currentSeed+'-four-biomes-profile-v1'),
+      archivedProfile:localStorage.getItem('mythwrought-v002-world-179-four-biomes-profile-v1'),
+      archivedWorld:localStorage.getItem('mythwrought-v002-world-179'),
+      canonical:localStorage.getItem('mythwrought-v002-world-'+currentSeed)
+    }),{x:edit.x,y:edit.y,z:edit.z,currentSeed});
+    if(persisted.value!==0||persisted.generator!==M6_BALANCED_GENERATOR||
+       !persisted.currentProfile||persisted.archivedProfile!==null||
+       persisted.archivedWorld!==oldSave||
+       JSON.parse(persisted.canonical)?.schema!==1)
+      throw Error('M3 real current-V6 source edit/save/reload or archived-byte parity failed');
     await page.close();
   }
   if(scenes.length!==15||new Set(scenes.map(s=>s.sha256)).size!==15)
     throw Error('M3 missing real Desert exterior/cutaway images or image repeats');
   if(pageErrors.length)throw Error('Actual Chromium page JS errors '+pageErrors.join('; '));
   await writeFile(path.join(out,'manifest.json'),JSON.stringify({
-    kind:'mythwrought-manual-desert-m3-real-game',
-    parent:'manual-m2',generator:FOUR_REGION_GENERATOR,seed,
+    kind:'mythwrought-manual-desert-m3-dual-archive-current-v6',
+    parent:'manual-m2',archivedGenerator:FOUR_REGION_GENERATOR,archiveSeed:seed,
+    currentOnlyGenerator:M6_BALANCED_GENERATOR,legacyPlayable:false,
     sourceAnchors:anchors,screenshots:scenes,pageErrors,
     physicalIphone:false,publicDeployment:false
   },null,2));
-  console.log('PASS M3 15/15 genuine Desert landscape + mined cutaway captures; profile and legacy safety');
+  console.log('PASS M3 archived original source anchors + 15/15 genuine CURRENT V6 Desert landscape/mined cutaway screenshots, old-world bytes preserved');
 }catch(error){
   await writeFile(path.join(out,'failure.json'),JSON.stringify({
     error:String(error),sourceAnchors:anchors,finished:scenes,pageErrors
