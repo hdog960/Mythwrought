@@ -1,0 +1,50 @@
+name: Citizen population draft acceptance
+on:
+  pull_request:
+    paths:
+      - 'src/citizens/**'
+      - 'citizen-preview/**'
+      - 'tests/citizens-*.test.mjs'
+      - 'scripts/ci/citizen-*.mjs'
+      - '.github/workflows/citizen-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: citizen-visual-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify role, movement, combat and persistence contracts
+        run: node --test tests/citizens-*.test.mjs
+      - name: Install pinned browser tools
+        run: |
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+      - name: Render the catalog and exercise the isolated settlement
+        run: |
+          python3 -m http.server 4197 --bind 127.0.0.1 > /tmp/citizen-http.log 2>&1 &
+          preview_server=$!
+          trap 'kill "$preview_server"' EXIT
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4197/citizen-preview/ -o /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/ci/citizen-rig-webgl2.mjs
+          for wave in agriculture craftsmanship commerce administration defense knowledge arcane culture ordinary; do
+            node scripts/ci/citizen-catalog-webgl2.mjs "$wave"
+          done
+          node scripts/ci/citizen-settlement-webgl2.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: citizen-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/citizen-*/

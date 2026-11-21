@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mythwrought Citizen Test Settlement</title>
+<style>
+  :root { color-scheme:dark; background:#142022; color:#f4e6ca; font:15px system-ui,sans-serif; }
+  main { max-width:70rem; margin:auto; padding:.8rem; }
+  header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; }
+  h1 { font-size:1.45rem; margin:0; }
+  a { color:#dbbf89; }
+  #controls, #interaction { display:flex; flex-wrap:wrap; align-items:end; gap:.45rem .65rem; margin:.55rem 0; }
+  label { display:grid; gap:.2rem; font-size:.85rem; }
+  select,button { min-height:2.65rem; font:inherit; }
+  button { background:#30494a; color:#f4e6ca; border:1px solid #758880; border-radius:.4rem; padding:0 .55rem; }
+  button:disabled { opacity:.5; }
+  canvas { width:100%; height:min(54vh,34rem); min-height:168px; display:block; background:#587179; border-radius:.5rem; }
+  #report { font-variant-numeric:tabular-nums; font-size:.85rem; margin:.5rem 0; }
+  #message,#citizenDetails { margin:.5rem 0; }
+</style>
+</head>
+<body>
+<main>
+  <header><h1>Citizen test settlement</h1><a href="./">Appearance gallery</a></header>
+  <div id="controls">
+    <label>Setting<select id="style"></select></label>
+    <label>Biome<select id="biome"></select></label>
+    <label>Profession<select id="profession"></select></label>
+    <label>Race<select id="race"></select></label>
+    <label>Appearance<select id="variant"><option>1</option><option>2</option></select></label>
+    <label>Spawn count<select id="count"><option>1</option><option>8</option><option>24</option><option>48</option></select></label>
+    <label>View<select id="view"><option value="follow">Follow selected</option><option value="overview">Whole settlement</option></select></label>
+    <button id="spawn">Spawn citizens</button>
+    <button id="clear">Clear fixture</button>
+    <label>Hostile<select id="hostile"></select></label>
+    <button id="spawnHostile">Spawn hostile</button>
+    <button id="save">Save citizens</button>
+    <button id="reload">Load saved citizens</button>
+    <button id="residency">Unload settlement</button>
+  </div>
+  <canvas id="scene" aria-label="3D fixture settlement with voxel terrain and citizens"></canvas>
+  <div id="interaction">
+    <label>Citizen<select id="citizen"></select></label>
+    <label>Workplace<select id="workplace"></select></label>
+    <button id="assign">Assign workplace</button>
+    <button id="talk">Approach and talk</button>
+  </div>
+  <p id="citizenDetails" aria-live="polite"></p>
+  <p id="message" role="status"></p>
+  <p id="report"></p>
+</main>
+<script type="module" src="./settlement.mjs"></script>
+</body>
+</html>

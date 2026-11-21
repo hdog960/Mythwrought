@@ -1,0 +1,38 @@
+[
+  {
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "races": 6,
+    "drawCalls": 6,
+    "gpuBytes": 304560,
+    "coverage": [
+      5216,
+      3581,
+      2935,
+      3819,
+      3571,
+      5387
+    ],
+    "walkFramesDiffer": true
+  },
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 640
+    },
+    "races": 6,
+    "drawCalls": 6,
+    "gpuBytes": 304560,
+    "coverage": [
+      12506,
+      8839,
+      7777,
+      10052,
+      9097,
+      13539
+    ],
+    "walkFramesDiffer": true
+  }
+]
