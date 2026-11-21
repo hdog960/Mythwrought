@@ -1,0 +1,44 @@
+name: Isolated original WebGL draw CPU lexical chunk census READ ONLY (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-gpu-chunk-census-291-20261121
+permissions:
+  contents: read
+jobs:
+  genuine-original-cpu-chunk-census:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact protected game tree/strict-test untouched and diagnostic script syntax
+        run: |
+          test "$(git rev-parse HEAD^)" = "82f8828945b464acf0a71faddfe2d18ffa4df245"
+          git diff --exit-code 82f8828945b464acf0a71faddfe2d18ffa4df245 HEAD -- src/ index.html styles.css sw-m5.js tests/
+          node --check scripts/ci/iphone-chunk-draw-debugger-census.mjs
+      - name: Install real original-game Chromium WebGL2 software renderer
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Validate exact published production ref separately
+        uses: actions/checkout@v4
+        with:
+          ref: 8de40ca8451b6268cfdfefaa5d9a66b72caca799
+          path: baseline-main
+      - name: One-shot original draw lexical counts; real gameplay deep edit+reload
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/original-draw-census.log 2>&1 &
+          node scripts/ci/iphone-chunk-draw-debugger-census.mjs
+      - name: Preserve actual untouched-game GPU frame, CPU chunk map and stage proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-webgl2-chunk-draw-debugger-proof
+          path: artifacts/iphone-chunk-draw-census/
+          if-no-files-found: warn
+          retention-days: 14
