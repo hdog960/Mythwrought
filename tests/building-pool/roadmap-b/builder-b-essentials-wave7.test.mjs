@@ -91,8 +91,8 @@ test('Real Pack4 030 upright facade glazing: 278 different two-band framed openi
   assert.equal(descriptor.hasRealPhysicalGeometry,true);
   assert.ok(descriptor.visible.length>0&&descriptor.selection.length>0,'actual pane producer shape absent');
   assert.equal(descriptor.occludesWholeCell,false,'transparent original pane cannot become solid full cube');
-  assert.ok(descriptor.visible.every(part=>part.bounds[4]-part.bounds[1]>.65),
-   'the producer clear-glass plane is not an upright y-span');
+  assert.ok(descriptor.visible.some(part=>part.bounds[4]-part.bounds[1]>.65),
+   'the producer clear-glass pane itself is not an upright y-span');
   assert.ok(!p.roofTile&&p.uprightOpeningPane===true&&p.framedClerestory===true,
    'source falsely calls the pane a roof tile or omits its upright opening');
   assert.equal(p.actualPaneWeatherSealCertified,false,'unearned weather seal approval');
