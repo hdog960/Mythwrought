@@ -861,8 +861,8 @@ export const ROADMAP_D_WAVE12_PLANS=Object.freeze([
       [
         51,
         106,
-        11,
-        10
+        8,
+        7
       ]
     ],
     "holes": [
@@ -1250,8 +1250,8 @@ export const ROADMAP_D_WAVE12_PLANS=Object.freeze([
       [
         45,
         85,
-        10,
-        9
+        8,
+        7
       ]
     ],
     "holes": [
