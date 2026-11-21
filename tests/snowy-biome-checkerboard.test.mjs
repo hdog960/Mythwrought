@@ -24,11 +24,16 @@ function snowFixture(generator,{playerEdited=false}={}){
 }
 function interiorTopVertices(world){
   const mesh=meshChunk(world,0,0),result=[];
-  for(let i=0;i<mesh.length;i+=9){
-    const [x,y,z]=[mesh[i],mesh[i+1],mesh[i+2]];
-    // Exclude material borders: sample only the middle of the blue ice patch.
-    if(y===4&&x>=5&&x<=11&&z>=5&&z<=11)
-      result.push({r:mesh[i+3],g:mesh[i+4],b:mesh[i+5],material:mesh[i+8]});
+  // meshChunk emits TRIANGLES: selecting individual y=4 vertices also pulls
+  // in vertical side faces whose upper corners reach y=4. Those faces have
+  // different intentional face lighting. Only compare planar, upward faces.
+  assert.equal(mesh.length%27,0,'Expected genuine 3-vertex mesh triangles');
+  for(let i=0;i<mesh.length;i+=27){
+    const offsets=[i,i+9,i+18];
+    if(!offsets.every(k=>mesh[k+1]===4&&
+        mesh[k]>=5&&mesh[k]<=11&&mesh[k+2]>=5&&mesh[k+2]<=11))continue;
+    for(const k of offsets)
+      result.push({r:mesh[k+3],g:mesh[k+4],b:mesh[k+5],material:mesh[k+8]});
   }
   return result;
 }
