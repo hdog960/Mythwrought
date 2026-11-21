@@ -1256,8 +1256,8 @@ export const ROADMAP_D_WAVE10_PLANS=Object.freeze([
       ],
       [
         "east-aether-practice",
-        110,
-        56
+        112,
+        65
       ],
       [
         "west-forest-spells",
@@ -1469,8 +1469,8 @@ export const ROADMAP_D_WAVE10_PLANS=Object.freeze([
       ],
       [
         "east-storm-runecraft",
-        103,
-        54
+        112,
+        65
       ]
     ],
     "div": [
