@@ -24,3 +24,20 @@ Phase 2 adds `src/mobs/ecosystem-habitat.mjs` containing an isolated, determinis
 - Apply Phase 2 to production spawning only after separate source-supported integration verification.
 
 **Release HOLD: protected DRAFT PR #380; no merge or deployment.**
+
+## Phase 1 precision and Phase 2 independent streams
+
+Original source arithmetic revealed a deterministic species/X coordinate lock:
+speciesIndex=random%40 and localX=random&15 share three low bits,
+restricting each species to two of sixteen chunk columns. This is not
+a terrain fixture artifact. The new isolated prototype uses independent
+deterministic streams for candidate species, X and Z, without any runtime
+imports, PWA modifications, or save changes.
+
+The Phase 1 observer now accepts explicit localCounts and matches the
+production short-circuit ordering of habitat eligibility before overlap.
+Tests check a full per-species population cap, production stripe lock,
+unrestricted proposed X coverage, determinism, remote coordinates and
+negative chunk handling.
+
+These modules remain unactivated; actual game spawning is not repaired.

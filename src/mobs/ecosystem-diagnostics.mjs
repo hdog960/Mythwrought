@@ -41,9 +41,10 @@ export function classifySpawnCandidate(world,species,point,observer){
  * Inspects at most six real world-query candidates with the original
  * algorithm. No entity creation, world mutation, save data, console logging
  * or service-worker modification. Counters are snapshots, not live gameplay.
+ * Pass localCounts and occupants when reproducing an occupied region.
  */
 export function probeOriginalSpawnRegion(world,species,{
-  seed,cx,cz,section,feet,observer,attempts=6,serial=0,occupants=[]
+  seed,cx,cz,section,feet,observer,attempts=6,serial=0,occupants=[],localCounts={}
 }={}){
   if(!world||typeof world.volume!=='function'||
       !Array.isArray(species)||!species.length||!Array.isArray(observer)||
@@ -51,6 +52,8 @@ export function probeOriginalSpawnRegion(world,species,{
       ![seed,cx,cz,section,serial].every(Number.isSafeInteger)||
       !Number.isFinite(feet)||!Number.isInteger(attempts)||
       attempts<1||attempts>6||!Array.isArray(occupants)||
+      !localCounts||typeof localCounts!=='object'||Array.isArray(localCounts)||
+      !Object.values(localCounts).every(v=>Number.isSafeInteger(v)&&v>=0)||
       sectionForY(Math.floor(feet))!==section)
     throw new TypeError('Invalid natural spawn probe input');
   const counts=Object.fromEntries(REJECTION_KINDS.map(name=>[name,0]));
@@ -61,15 +64,19 @@ export function probeOriginalSpawnRegion(world,species,{
     const x=cx*CHUNK_SIZE+(random&15)+.5;
     const z=cz*CHUNK_SIZE+((random>>>4)&15)+.5;
     let reason;
-    if((random>>>16)/65536>creature.population.rarity)reason='rarity';
+    if((localCounts[creature.id]??0)>=creature.population.localLimit)reason='population';
+    else if((random>>>16)/65536>creature.population.rarity)reason='rarity';
     else{
       const point=supportedPosition(world,x,z,feet+1,feet-1.5,creature.body);
       if(!point){
         reason=world.volume([x,feet+1,z],creature.body)==='unknown'?
           'unloaded':'unsupported-terrain';
       }else if(sectionForY(Math.floor(point[1]))!==section)reason='wrong-section';
-      else if(occupants.some(m=>distanceTo(m.position,point)<1.2))reason='occupied';
-      else reason=classifySpawnCandidate(world,creature,point,observer);
+      else{
+        reason=classifySpawnCandidate(world,creature,point,observer);
+        if(reason==='eligible'&&occupants.some(m=>distanceTo(m.position,point)<1.2))
+          reason='occupied';
+      }
     }
     counts[reason]++;
     chosen.push(Object.freeze({species:creature.id,reason,x,z}));

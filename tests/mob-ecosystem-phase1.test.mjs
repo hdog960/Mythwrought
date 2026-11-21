@@ -8,7 +8,7 @@ import {speciesRegistry,getSpecies} from '../src/mobs/species.mjs';
 import {arena} from './mobs/fixture.mjs';
 import {baselineRandom,probeOriginalSpawnRegion,REJECTION_KINDS}
   from '../src/mobs/ecosystem-diagnostics.mjs';
-import {eligibleHabitatPool,chooseHabitatSpecies,deterministicHabitatRoll,ACTIVE_HABITATS}
+import {eligibleHabitatPool,chooseHabitatSpecies,deterministicHabitatRoll,planHabitatCandidate,ACTIVE_HABITATS}
   from '../src/mobs/ecosystem-habitat.mjs';
 
 function queryFor(world,biome='meadow',resident=()=>true){
@@ -122,5 +122,73 @@ test('three real VoxelWorld seeds produce sampled natural failure reasons withou
       firstSix:probe.reasons
     }));
     engine.dispose();
+  }
+});
+
+
+test('Phase 1 counters respect original per-species population cap',()=>{
+  const field=queryFor(arena({floor:3,bounds:[-8,17,-8,17]}));
+  const deer=getSpecies('deer');
+  const region={seed:61,cx:0,cz:0,section:0,feet:4,
+    observer:[-2,4,3],localCounts:{deer:deer.population.localLimit}};
+  const stats=probeOriginalSpawnRegion(field,[deer],region);
+  assert.equal(stats.reasons.population,6);
+  assert.equal(stats.eligible,0);
+  assert.throws(()=>probeOriginalSpawnRegion(field,[deer],
+    {...region,localCounts:{deer:-1}}),/Invalid natural spawn probe input/);
+});
+
+test('original global species lottery locks each species into two X stripes',()=>{
+  for(const seed of [179,379,1001]){
+    const columns=new Map();
+    for(let i=1;i<=2048;i++){
+      const value=baselineRandom(seed,0,0,0,i);
+      const speciesIndex=value%40,localX=value&15;
+      assert.equal(speciesIndex%8,localX%8);
+      const positions=columns.get(speciesIndex)??new Set();
+      positions.add(localX);
+      columns.set(speciesIndex,positions);
+    }
+    assert.equal(columns.size,40);
+    for(const positions of columns.values())
+      assert.ok(positions.size<=2,'A creature unexpectedly escaped the production stripe lock');
+  }
+});
+
+test('Phase 2 independent streams cover all sixteen X columns without altering source world',()=>{
+  const pool=['cow','deer','horse','rabbit'].map(getSpecies);
+  const columns=new Map(pool.map(c=>[c.id,new Set()]));
+  const positions=new Set();
+  for(let serial=1;serial<=1024;serial++){
+    const opts={seed:179,cx:0,cz:0,section:0,serial};
+    const candidate=planHabitatCandidate(pool,opts);
+    assert.deepEqual(candidate,planHabitatCandidate(pool,opts));
+    assert.ok(pool.includes(candidate.species));
+    assert.ok(Number.isInteger(candidate.x-.5)&&candidate.x>=.5&&candidate.x<16);
+    assert.ok(Number.isInteger(candidate.z-.5)&&candidate.z>=.5&&candidate.z<16);
+    assert.ok(Object.isFrozen(candidate));
+    columns.get(candidate.species.id).add(candidate.x-.5);
+    positions.add(candidate.x+','+candidate.z);
+  }
+  for(const [id,cols] of columns)
+    assert.equal(cols.size,16,id+' must be able to appear in every local X column');
+  assert.ok(positions.size>100);
+  assert.equal(planHabitatCandidate([],{seed:1,cx:0,cz:0,section:0,serial:1}),null);
+  assert.throws(()=>planHabitatCandidate(pool,{seed:1,cx:0,cz:0,section:1,serial:1}),
+    /Invalid habitat candidate inputs/);
+});
+
+test('Phase 2 independent coordinates support remote and negative world chunks',()=>{
+  for(const [cx,cz,section] of [[-37,19,0],[8192,-4096,0],[-90,-81,-3]]){
+    const biome=section===0?'desert':'cave';
+    const feet=section===0?9:-40;
+    const pool=eligibleHabitatPool({biome,feet,light:section===0?.8:.2});
+    assert.ok(pool.length>0);
+    for(let serial=1;serial<=30;serial++){
+      const candidate=planHabitatCandidate(pool,{seed:1001,cx,cz,section,serial});
+      assert.ok(candidate.x>=cx*16+.5&&candidate.x<cx*16+16);
+      assert.ok(candidate.z>=cz*16+.5&&candidate.z<cz*16+16);
+      assert.ok(candidate.species.habitat.biomes.includes(biome));
+    }
   }
 });
