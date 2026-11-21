@@ -76,7 +76,7 @@ export function createObservedNavigator({seed,discovery,storage=null}){
       }
       const toScreen=p=>({x:width/2+(Math.floor(p.x/NAV00_CELL_SIZE)-cx)*zoom,
         y:height/2+(Math.floor(p.z/NAV00_CELL_SIZE)-cz)*zoom});
-      return {version:NAV00_VERSION,cells,pins:this.visiblePins().map(p=>({...p,...toScreen(p)})).filter(p=>p.x>=-zoom&&p.x<=width+zoom&&p.y>=-zoom&&p.y<=height+zoom),
+      return {version:NAV00_VERSION,cells,pins:this.visiblePins().map(p=>{const screen=toScreen(p);return {...p,worldX:p.x,worldZ:p.z,screenX:screen.x,screenY:screen.y};}).filter(p=>p.screenX>=-zoom&&p.screenX<=width+zoom&&p.screenY>=-zoom&&p.screenY<=height+zoom),
         player:{...toScreen(player),bearing:((player.yaw*180/Math.PI)%360+360)%360,
           x:player.x,z:player.z},zoom,center:{x:cx,z:cz}};
     }
