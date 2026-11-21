@@ -95,7 +95,7 @@ Tests cover a real wall detour, work anchor loss, loaded and unloaded cells, dis
 
 ## C7 through C11 profession, persistence and integration evidence
 
-The profession suite drives all 82 careers into an actual compatible work marker with the shared voxel query. It distinguishes role activity from unavailable services. The fixture verifies touchscreen inputs, offline conversation, exact identity restoration, unchanged Schema-1 bytes, a civilian fleeing a live mob, a guard damaging a live mob, and paused simulation while unloaded. All 15 settlement style and biome combinations were opened and populated.
+The profession suite drives all 82 careers into an actual compatible work marker with the shared voxel query. It distinguishes role activity from unavailable services. The fixture verifies touchscreen inputs, offline conversation, workplace reassignment that survives reload, exact identity restoration, unchanged Schema-1 bytes, a civilian fleeing a live mob, a guard damaging a live mob, and paused simulation while unloaded. All 15 settlement style and biome combinations were opened and populated.
 
 | Citizens | Frame p50 | Frame p95 | AI p95 | Scene draw calls |
 | ---: | ---: | ---: | ---: | ---: |
@@ -113,3 +113,14 @@ This is a Chromium software WebGL2 run at 844×390 with repeated, instanced citi
 - [City with 48 citizens](evidence/city-48-citizens.png)
 - [Full browser and performance report](evidence/settlement-report.json)
 - [Settlement adapter and service handoff](integration.md)
+
+
+## Mixed population and existing game acceptance
+
+The 932×430 city fixture spawns 24 working and 24 ordinary citizens across all six races. A worker may choose an alternate reachable station when the primary marker is too far from its home. Housing clearance includes the full citizen body. The browser test saves the group and restores all 48 exact identities in a fresh browser context. The measured scene used seven draw calls and 581,616 uploaded bytes. This was a separate Chromium run with regression work running concurrently. Its frame timings describe that run.
+
+The original game files and installed app identity are byte-identical to the live base. In a disposable Chromium installation, all 301 files in the original PWA shell matched their verified hashes. A regular five-biome world rendered with the established 40-creature roster, changed to night, and reopened offline.
+
+- [48 citizens across six races](evidence/city-48-mixed-citizens.png)
+- [Mixed population browser and performance report](evidence/settlement-mixed-report.json)
+- [Existing game offline reopening report](evidence/existing-game-offline-report.json)

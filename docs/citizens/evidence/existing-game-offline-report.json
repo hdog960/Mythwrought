@@ -1,0 +1,18 @@
+{
+  "origin": "http://127.0.0.1:4199/",
+  "release": "20261121-unified-environment-rc7",
+  "seed": 2026,
+  "world": {
+    "biomes": 5,
+    "scenery": 9,
+    "mobSpecies": 40,
+    "skySource": "authoritative-v6-biome-source",
+    "skyClockSeed": 2026
+  },
+  "cached": {
+    "verified": 301,
+    "differences": []
+  },
+  "nightVerified": true,
+  "offlineReopenVerified": true
+}

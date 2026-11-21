@@ -1,0 +1,121 @@
+{
+  "qualification": "Chromium software WebGL2 fixture; no physical iPhone measurements",
+  "tiers": [
+    {
+      "citizens": 0,
+      "draws": 1,
+      "gpuBytes": 416016,
+      "terrainBytes": 416016,
+      "vertices": 0,
+      "samples": 112,
+      "frameP50Ms": 16.69999999999891,
+      "frameP95Ms": 16.700000000000728,
+      "aiP95Ms": 0.10000000149011612,
+      "drawCpuP95Ms": 0.10000000149011612,
+      "navigationP95": 0,
+      "fixtureSetupMs": 14.5,
+      "populationSetupMs": 0,
+      "approximateJsHeapBytes": 10000000
+    },
+    {
+      "citizens": 1,
+      "draws": 2,
+      "gpuBytes": 443268,
+      "terrainBytes": 416016,
+      "vertices": 756,
+      "samples": 104,
+      "frameP50Ms": 16.69999999999891,
+      "frameP95Ms": 16.700000000000728,
+      "aiP95Ms": 0.19999999552965164,
+      "drawCpuP95Ms": 0.19999999552965164,
+      "navigationP95": 0,
+      "fixtureSetupMs": 18,
+      "populationSetupMs": 0.5999999940395355,
+      "approximateJsHeapBytes": 10000000
+    },
+    {
+      "citizens": 8,
+      "draws": 2,
+      "gpuBytes": 443520,
+      "terrainBytes": 416016,
+      "vertices": 6048,
+      "samples": 106,
+      "frameP50Ms": 16.69999999999891,
+      "frameP95Ms": 16.700000000000728,
+      "aiP95Ms": 0.3999999985098839,
+      "drawCpuP95Ms": 0.19999999552965164,
+      "navigationP95": 2,
+      "fixtureSetupMs": 5.600000001490116,
+      "populationSetupMs": 0.3999999985098839,
+      "approximateJsHeapBytes": 10000000
+    },
+    {
+      "citizens": 24,
+      "draws": 2,
+      "gpuBytes": 444384,
+      "terrainBytes": 416016,
+      "vertices": 18144,
+      "samples": 106,
+      "frameP50Ms": 16.69999999999891,
+      "frameP95Ms": 33.29999999999927,
+      "aiP95Ms": 0.6000000014901161,
+      "drawCpuP95Ms": 0.20000000298023224,
+      "navigationP95": 21,
+      "fixtureSetupMs": 5.5,
+      "populationSetupMs": 0.5,
+      "approximateJsHeapBytes": 10000000
+    },
+    {
+      "citizens": 48,
+      "draws": 2,
+      "gpuBytes": 445536,
+      "terrainBytes": 416016,
+      "vertices": 36288,
+      "samples": 102,
+      "frameP50Ms": 83.39999999999782,
+      "frameP95Ms": 383.2999999999993,
+      "aiP95Ms": 3.399999998509884,
+      "drawCpuP95Ms": 0.20000000298023224,
+      "navigationP95": 20,
+      "fixtureSetupMs": 7.100000001490116,
+      "populationSetupMs": 0.8000000044703484,
+      "approximateJsHeapBytes": 10000000
+    }
+  ],
+  "functional": {
+    "workplace": true,
+    "interaction": true,
+    "offlineInteraction": true,
+    "previousSchema1": true,
+    "savedIdentity": true,
+    "ordinaryFled": true,
+    "guardDamagedRealMob": true,
+    "unloadReload": true
+  },
+  "fixtureConfigurations": 15,
+  "mixedPopulation": {
+    "viewport": {
+      "width": 932,
+      "height": 430
+    },
+    "races": 6,
+    "working": 24,
+    "ordinary": 24,
+    "coldBrowserContext": true,
+    "restored": 48,
+    "performance": {
+      "samples": 120,
+      "frameP50Ms": 50,
+      "frameP95Ms": 83.39999999999964,
+      "aiP95Ms": 2.2999999970197678,
+      "drawCpuP95Ms": 0.3999999985098839,
+      "navigationP95": 24,
+      "fixtureSetupMs": 60.70000000298023,
+      "populationSetupMs": 0.30000000447034836,
+      "approximateJsHeapBytes": 10000000,
+      "visible": 48,
+      "draws": 7,
+      "gpuBytes": 581616
+    }
+  }
+}

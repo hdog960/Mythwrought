@@ -1,4 +1,5 @@
 import {BIOMES,PROFESSIONS,RACES,SETTLEMENT_STYLES} from '../src/citizens/registry.mjs';
+import {workplaceCompatible} from '../src/citizens/entity.mjs';
 import {citizenInteraction} from '../src/citizens/jobs.mjs';
 import {ordinaryAppearancePool} from '../src/citizens/ordinary-appearance.mjs';
 import {planSettlementCitizens} from '../src/citizens/population.mjs';
@@ -21,6 +22,7 @@ const playerBody={radius:.28,height:1.78};
 const gl=canvas.getContext('webgl2',{alpha:false,antialias:true});
 const worldSeed=179;
 const fixtureLimit=48;
+const housingColumns=[3.5,5.3,7.1,8.9,10.7,12.5,14.5,16.1];
 const fixtureSizes={village:20,town:24,city:28};
 const pools={temperate:BLOCK.GRASS,desert:BLOCK.DIRT,snow:BLOCK.STONE,
   'enchanted-forest':BLOCK.GRASS,mountain:BLOCK.DEEPSTONE};
@@ -41,13 +43,20 @@ function makeSettlement(style,biome) {
     regions:[{minX:1,maxX:side-1,minZ:1,maxZ:side-1}],
     housing:Array.from({length:fixtureLimit},(_,index)=>({
       id:`home-${String(index).padStart(2,'0')}`,
-      position:[3.5+(index%8)*1.8,0,3.5+Math.floor(index/8)*1.7],
+      position:[housingColumns[index%8],0,3.5+Math.floor(index/8)*1.7],
     })),
-    workplaces:Object.values(PROFESSIONS).map((role,index)=>({
-      id:`work-${String(index).padStart(2,'0')}`,settlementId:id,label:role.name+' station',
-      tags:[role.workplaceTags[0]],position:[3.5+(index%8)*1.8,0,3.5+Math.floor(index%40/8)*1.7],
-      waypoints:[[7.5,0,9.5],[11.5,0,12.5]],
-    })),
+    workplaces:Object.values(PROFESSIONS).flatMap((role,index)=>{
+      const idPrefix=`work-${String(index).padStart(2,'0')}`;
+      const tags=[role.workplaceTags[0]];
+      const label=role.name+' station';
+      const primary=[3.5+(index%8)*1.8,0,3.5+Math.floor(index%40/8)*1.7];
+      // A large fixture needs reachable anchors for the later housing rows.
+      // The original anchor ID stays valid for previously saved fixtures.
+      return [primary,[primary[0]+.6,0,primary[2]],[5.5,0,10.5],[10.5,0,10.5],[15.5,0,10.5]].map((position,slot)=>({
+        id:slot===0?idPrefix:`${idPrefix}-${slot}`,settlementId:id,label,tags,position,
+        waypoints:[[7.5,0,9.5],[11.5,0,12.5]],
+      }));
+    }),
     gathering:[[3.5,0,3.5],[12.5,0,11.5]],
   };
   // Authored rectangular test grounds, simple walls, and no production assets.
@@ -90,7 +99,20 @@ function refreshCitizenOptions() {
     return [citizen.id,`${description.name} · ${description.profession??'Ordinary'}`];
   }));
   if (citizens.some(row=>row.citizen.id===current)) field('citizen').value=current;
-  field('assign').disabled=field('talk').disabled=citizens.length===0;
+  field('talk').disabled=citizens.length===0;
+  refreshWorkplaceOptions();
+}
+
+function refreshWorkplaceOptions() {
+  const citizen=citizens.find(row=>row.citizen.id===field('citizen').value)?.citizen;
+  const compatible=citizen?.profession
+    ? fixture.settlement.workplaces.filter(workplace=>workplaceCompatible(citizen,workplace))
+    : [];
+  const fieldName=field('workplace');
+  options('workplace',compatible.length ? compatible.map(({id,label,position:[x,,z]})=>
+    [id,`${label} (${x.toFixed(1)}, ${z.toFixed(1)})`]) : [['','No compatible workplace']]);
+  if (compatible.some(place=>place.id===citizen.workplaceId)) fieldName.value=citizen.workplaceId;
+  fieldName.disabled=field('assign').disabled=compatible.length===0;
 }
 
 function resetFixture() {
@@ -278,11 +300,12 @@ else {
     tell(`Loaded ${citizens.length} saved citizens.`);
   });
   action('assign',()=>{
-    const current=citizens.find(row=>row.citizen.id===field('citizen').value);
-    const job=PROFESSIONS[current?.citizen.profession];
-    if (!job) throw Error('Choose a professional citizen.');
-    const available=fixture.settlement.workplaces.find(workplace=>workplace.label===job.name+' station');
-    simulation.assign(current.citizen.id,available.id);
+    const id=field('citizen').value;
+    const available=fixture.settlement.workplaces.find(workplace=>workplace.id===field('workplace').value);
+    if (!available) throw Error('Choose a compatible workplace.');
+    simulation.assign(id,available.id);
+    citizens=simulation.snapshots();
+    refreshWorkplaceOptions();
     tell(`Assigned ${available.label}.`);
   });
   action('talk',()=>{
@@ -303,6 +326,7 @@ else {
       ? `${description.name} · ${description.profession??'Ordinary citizen'}. ${description.message}`
       : 'This citizen is unavailable nearby.';
   });
+  field('citizen').addEventListener('change',refreshWorkplaceOptions);
   for(const id of ['style','biome']) field(id).addEventListener('change',resetFixture);
   canvas.addEventListener('webglcontextlost',event=>{
     event.preventDefault();
