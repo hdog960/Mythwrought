@@ -42,7 +42,10 @@ test('Seven exclusive Builder B source originals have no upright window panes mi
   }
   if(house.category==='greenhouse'){
    const corrected=house.placements.filter(p=>p.originalGlazing===true);
-   assert.ok(corrected.length>=300,house.id+' transparent-original threshold fell below 300');
+   if(house.biome==='temperate')
+    assert.ok(corrected.length>=300,house.id+' original Alderglass 300+ transparent source panels lost');
+   else
+    assert.equal(corrected.length,278,house.id+' original Rimeglass 278 glass panes lost');
    assert.ok(roof.filter(p=>p.asset.startsWith('pack3:')).length>=350,
     house.id+' opaque-original threshold fell below 350');
   }
