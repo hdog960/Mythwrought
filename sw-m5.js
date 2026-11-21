@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261121-unified-environment-rc6';
-const ASSET_RELEASE='20261121-unified-environment-rc6';
+const CACHE_NAME=CACHE_PREFIX+'20261121-unified-environment-rc7';
+const ASSET_RELEASE='20261121-unified-environment-rc7';
 const SOURCE_ASSETS=[
   "./src/nonblock/staged-habitats.mjs",
   "./src/environment-ground.mjs",

@@ -1338,7 +1338,11 @@ function start(nonblockStage=null){
       const fadeCave=(color,target=caveFog)=>caveShade===0?color:
         color.map((value,i)=>value+(target[i]-value)*caveShade);
       const fog=fadeCave(s6Biome?s6Mood.fog:atmosphere.fog);
-      gl.clearColor(...fog,1);
+      if(caveShade>0)gl.clearColor(...fog,1);
+      else{
+        gl.clearColor(...atmosphere.fog,1);
+        if(s6Biome)gl.clearColor(...s6Mood.fog,1);
+      }
       gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
       // Cheap procedural WebGL sky; the depth buffer is reserved for editable voxels.
       if(caveShade<1){
@@ -1359,8 +1363,13 @@ function start(nonblockStage=null){
         gl.uniform2fv(skyU.lunarPhase,lunar.moons.flatMap(m=>m.terminator));
         gl.uniform3fv(skyU.lunarColor,lunar.moons.flatMap(m=>m.color));
         gl.uniform1fv(skyU.lunarRadius,lunar.moons.map(m=>m.radius));
-        gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility*(1-caveShade)));
-        gl.uniform1f(skyU.starVisibility,nightCanvas.starVisibility*(1-caveShade));
+        if(caveShade>0){
+          gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility*(1-caveShade)));
+          gl.uniform1f(skyU.starVisibility,nightCanvas.starVisibility*(1-caveShade));
+        }else{
+          gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility));
+          gl.uniform1f(skyU.starVisibility,nightCanvas.starVisibility);
+        }
         gl.uniform1f(skyU.twinkleAngle,nightCanvas.twinkleAngle);
         gl.uniform2fv(skyU.cloudShiftA,nightCanvas.cloudA);
         gl.uniform2fv(skyU.cloudShiftB,nightCanvas.cloudB);
@@ -1380,7 +1389,11 @@ function start(nonblockStage=null){
       gl.uniform3fv(U.uUp,[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),-Math.sin(player.pitch)*Math.cos(player.yaw)]);
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
-      gl.uniform3fv(U.uFog,fog);
+      if(caveShade>0)gl.uniform3fv(U.uFog,fog);
+      else{
+        gl.uniform3fv(U.uFog,atmosphere.fog);
+        if(s6Biome)gl.uniform3fv(U.uFog,s6Mood.fog);
+      }
       gl.uniform1f(U.uCaveHaze,caveShade);
       // Preserve S2's exact live ambient uniform path, then layer only the
       // bounded S3 lunar contribution if at least one moon illuminates night.
