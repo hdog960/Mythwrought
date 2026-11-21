@@ -7,6 +7,7 @@ import {spawn,spawnSync} from 'node:child_process';
 import {resolve,join,extname,sep} from 'node:path';
 import {tmpdir} from 'node:os';
 import {setTimeout as delay} from 'node:timers/promises';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 
 const root=process.cwd(),out=resolve('artifacts/pack2-live-webgl');
 const mime={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript',
@@ -199,7 +200,7 @@ test('approved Pack 2 real WebGL2 gameplay mesh, legacy save isolation, reload, 
           "raw:localStorage.getItem('mythwrought-v002-world-'+seed),"+
           "legacy:localStorage.getItem('mythwrought-v002-world-179')};})()");
         assert.notEqual(admission.seed,179,'Legacy world became playable during Pack 2 validation');
-        assert.equal(admission.profile,'mythwrought-five-balanced-v6',
+        assert.equal(admission.profile,M6_BALANCED_GENERATOR,
           'Pack 2 was not placed in the creator-approved current generator');
         assert.equal(admission.selected,String(admission.seed));
         assert.ok(admission.raw&&admission.legacy,
