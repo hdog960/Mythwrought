@@ -1,4 +1,4 @@
-// Roadmap C 1A original house Wave10: all 265 historical sources preserved; real geometry and physical audit.
+// Builder B source-only new enchanted-forest inn. Strict original 271 historical and prior nine independent source / roof / bed audits.
 import test from 'node:test';import assert from 'node:assert/strict';
 import {getM1Blueprints} from '../../../src/building-pool/roadmap-1a/legacy-buildings.mjs';
 import {getM1InnExemplars} from '../../../src/building-pool/roadmap-1a/m1-inn-exemplars.mjs';
@@ -59,7 +59,7 @@ test('Moonweave new enchanted-forest canopy inn is 281st unique provisional 1A s
  assert.equal(new Set(pool.map(structuralFingerprint)).size,281);
  assert.deepEqual(findMirroredOrRotatedDuplicates(pool),[]);
 });
-test('Moonweave is true six-room, backed enchanted-forest split-wing inn with real absent-ground canopy entry courts',()=>{
+test('Moonweave is true nine-room, backed enchanted-forest split-wing inn with real absent-ground canopy entry courts',()=>{
  const b=fresh[0],v=vox(b);
  assert.equal(validateBlueprint(b),true);
  assert.equal(b.rooms.length,9);assert.equal(b.portals.length,13);
