@@ -62,7 +62,7 @@ test('GPU edit error deletes only the unpublished buffer',()=>{
   const t=fakeGL(),visible=uploadEditedChunkBuffer(t.gl,packed(2)),
     staging=uploadEditedChunkBuffer(t.gl,packed(3));
   t.fail();
-  assert.throws(()=>uploadEditedChunkBuffer(t.gl,packed(4),staging),/GPU staged edit upload error/);
+  assert.throws(()=>uploadEditedChunkBuffer(t.gl,packed(4),staging),/WebGL staged edit upload error 1285/);
   assert.equal(staging.buffer.deleted,true);
   assert.equal(visible.buffer.deleted,false,'formerly published geometry remains untouched');
 });
