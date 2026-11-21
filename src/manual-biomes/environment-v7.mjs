@@ -37,7 +37,7 @@ function mountainRelief(x,z,phase){
   return 5.1+11.2*crest+3.5*buttress;
 }
 
-function groundAt(name,x,z,seed,top,outcrop){
+function groundAt(name,x,z,seed,top,outcrop,biomeWeight=1){
   const phase=(seed%223)*.19;
   const band=undulation(x*.043+z*.028+phase+Math.sin(z*.026)*.63);
   const patch=undulation(x*.023-z*.028-phase+Math.sin(x*.032)*.84);
@@ -63,7 +63,7 @@ function groundAt(name,x,z,seed,top,outcrop){
     .8*Math.sin(x*.067+z*.045));
   const mossPocket=.64*mossWisp+.36*mossPulse;
   return {
-    cap:band>.79&&mossPocket>.66?G.woodlandMoss:
+    cap:band>.79&&(biomeWeight<.70||mossPocket>.66)?G.woodlandMoss:
       patch<.25?G.woodlandPeat:G.woodlandLoam,
     subsoil:G.woodlandPeat,rock:BLOCK.STONE
   };
@@ -115,7 +115,7 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline,biome=v6BiomeAt(x,
   // The shoulder replaces the grass in a broad contiguous band. The
   // natural wood and cave checks above remain authoritative.
   if(blend<.065&&shoulder===null)return writes;
-  const {cap,subsoil,rock}=groundAt(biome.name,x,z,seed,top,outcrop);
+  const {cap,subsoil,rock}=groundAt(biome.name,x,z,seed,top,outcrop,biome.weight);
   for(let y=old-1;y<=top;y++)
     writes.set(y,y===top?(shoulder??cap):y>=top-2?subsoil:rock);
   return writes;
