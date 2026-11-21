@@ -34,7 +34,10 @@ test('real physics: full-block step is bounded by authored STEP_HEIGHT',()=>{
  const r=trace(w,hero(),()=>({forward:1}),1.25);
  assertClear(w,r);
  assert.ok(r.events.some(e=>e.stepped),'real step event');
- assert.ok(r.final.feet>1.9&&r.final.feet<2.1,'single block step');
+ const stepFrames=r.events.flatMap((event,i)=>event.stepped?[r.samples[i+1]]:[]);
+ assert.ok(stepFrames.some(s=>s.position.feet>1.9&&s.position.feet<2.1),'single block step reaches supported top');
+ // The trace continues moving after the step, so the final position may have
+ // descended off the far edge. Check the event, not an unrelated endpoint.
 });
 test('real physics: two-block wall cannot be climbed by step resolver',()=>{
  const w=worldWithFloor();
