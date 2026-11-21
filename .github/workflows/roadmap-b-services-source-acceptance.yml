@@ -50,7 +50,8 @@ jobs:
             tests/building-pool/roadmap-b/builder-b-essentials-wave5.test.mjs \
             tests/building-pool/roadmap-b/builder-b-essentials-wave6.test.mjs \
             tests/building-pool/roadmap-b/builder-b-essentials-wave7.test.mjs \
-            tests/building-pool/roadmap-b/builder-b-seven-originals-roof-pack-physical.test.mjs
+            tests/building-pool/roadmap-b/builder-b-seven-originals-roof-pack-physical.test.mjs \
+            tests/building-pool/roadmap-b/builder-b-alderglass-historical-228-d4.test.mjs
       - name: Install exact pinned standalone visual audit dependencies
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
