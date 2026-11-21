@@ -28,9 +28,21 @@ The draft starts from main at `7016e14cd6289f45eaf7fc6a79a362b47996df65`, verifi
 | --- | --- |
 | Repository foundation | Main and open work audited. Citizen worktree based on the verified main commit. |
 | Data architecture | Six races, 82 careers, five biome inputs, three settlement styles, immutable identity records, and compatible workplace assignment. Targeted tests validate all 4,920 working appearance inputs. |
-| Visuals | 0 / 4,920 working, 0 / 50 ordinary, 0 / 6 rendered races, 0 / 8 accepted groups. |
+| Visuals | 0 / 4,920 working, 0 / 50 ordinary, 6 / 6 races rendered in the shared rig, 0 / 8 accepted groups. |
 | AI and persistence | Movement, boundaries, fear, defender combat, and sidecar save acceptance pending. |
 | Professions | 0 / 82 accepted in gameplay. Service availability will be tracked per profession. |
-| Quality | Browser, mobile performance, and protected-system acceptance pending. |
+| Quality | Shared rig verified in Chromium WebGL2 at 844×390 and 1280×640. Full citizen performance and protected-system acceptance pending. |
 
 Race display names Thornkin, Asteri, and Glassborn are provisional. Actual population sizes, race frequencies, worker ratios, and natural settlement generation are deferred.
+
+
+## C2 rig evidence
+
+The draft-only preview runs from `/citizen-preview/` under an ordinary static development server. It opens with six blacksmiths in a walking cycle so proportions, limb pivots, and tool attachment can be compared. The view also supports individual races, biome, settlement style, appearance variant, and pose selection.
+
+- [Six races walking at 844×390](evidence/rig-walk-844.png)
+- [Six races walking at 1280×640](evidence/rig-walk-1280.png)
+- [Glassborn in snow with city styling at 844×390](evidence/rig-glassborn-snow-city-844.png)
+- [Browser report with pixel coverage, draw counts, and mesh bytes](evidence/rig-report.json)
+
+Run `python -m http.server 4197 --bind 127.0.0.1` from the draft checkout. With the repository's pinned Playwright and PNGJS test tools available, run `node scripts/ci/citizen-rig-webgl2.mjs` in another terminal. The rig evidence covers base races and shared motion. Occupation-specific outfit waves and ordinary appearance counts require their own rendered checks.
