@@ -1,0 +1,130 @@
+{
+  "counts": {
+    "instances": 10,
+    "vertices": 3915,
+    "gpuBytes": 140940,
+    "drawCalls": 1,
+    "terrainChunks": 25
+  },
+  "frameSamples": {
+    "softwareRenderer": "Chromium SwiftShader",
+    "withScenery": {
+      "count": 24,
+      "medianMs": 183.300000000002,
+      "p95Ms": 450
+    },
+    "withoutScenery": {
+      "count": 24,
+      "medianMs": 250,
+      "p95Ms": 683.3000000000029
+    }
+  },
+  "storageSummary": {
+    "tombstones": 10,
+    "schema1SaveBytesUnchanged": true,
+    "reopenedVisibleCount": 0
+  },
+  "checks": [
+    {
+      "sceneId": "scene48:shelf-fungus",
+      "instanceKey": "nb1:scene48%3Ashelf-fungus:179:11,8,10:2:r2",
+      "triangles": 126,
+      "file": "artifacts/nonblock-enchanted-fungi/shelf-fungus.png",
+      "sha256": "b719609dede934823b048608a97d16f338e0cdad65ed4f52baccd1ea17a708af"
+    },
+    {
+      "sceneId": "scene48:glowing-vine",
+      "instanceKey": "nb1:scene48%3Aglowing-vine:179:10,8,11:1:r1",
+      "triangles": 134,
+      "file": "artifacts/nonblock-enchanted-fungi/glowing-vine.png",
+      "sha256": "c2d1e2ace4fd7dd83093ec9fed331800c1b2906d7083a840066e4bc2cd3b95e4"
+    },
+    {
+      "sceneId": "scene48:cavecap",
+      "instanceKey": "nb1:scene48%3Acavecap:179:-8,8,-9:1",
+      "triangles": 108,
+      "file": "artifacts/nonblock-enchanted-fungi/cavecap.png",
+      "sha256": "765840fa08fceb6e4697bba4db0fcda9b224978356d0a8b76ed9e6328b49d48c"
+    },
+    {
+      "sceneId": "scene48:spore-pod",
+      "instanceKey": "nb1:scene48%3Aspore-pod:179:-5,10,-9:1",
+      "triangles": 204,
+      "file": "artifacts/nonblock-enchanted-fungi/spore-pod.png",
+      "sha256": "658fc4fc02f25d09fde333a83326134202a8ab44ff47aa71a262b829a979d8e1"
+    },
+    {
+      "sceneId": "scene48:enchanted-flower",
+      "instanceKey": "nb1:scene48%3Aenchanted-flower:179:-2,11,-9:1",
+      "triangles": 82,
+      "file": "artifacts/nonblock-enchanted-fungi/enchanted-flower.png",
+      "sha256": "f02f37d26e736b47a23006d2c96cc882bf1539cc31b49f88dccbf012c41ae5a5"
+    },
+    {
+      "sceneId": "scene48:lantern-mushroom",
+      "instanceKey": "nb1:scene48%3Alantern-mushroom:179:1,11,-9:1",
+      "triangles": 82,
+      "file": "artifacts/nonblock-enchanted-fungi/lantern-mushroom.png",
+      "sha256": "4b71427ff26177f5e4d28bdb346b887d3cb6bd745ce43ffe57260546b4500bf4"
+    },
+    {
+      "sceneId": "scene48:ringed-morel",
+      "instanceKey": "nb1:scene48%3Aringed-morel:179:4,11,-9:1",
+      "triangles": 252,
+      "file": "artifacts/nonblock-enchanted-fungi/ringed-morel.png",
+      "sha256": "57e5656f2a78bd12ef37bbc2c385eff5bd3ad8969c942a63f6214b1b1356f135"
+    },
+    {
+      "sceneId": "scene48:starpetal",
+      "instanceKey": "nb1:scene48%3Astarpetal:179:7,11,-9:1",
+      "triangles": 68,
+      "file": "artifacts/nonblock-enchanted-fungi/starpetal.png",
+      "sha256": "11357d3aeb8f3f65b8e7adeadd0429cfe13236c0d147b8fa4a99cb3a151785e7"
+    },
+    {
+      "sceneId": "scene48:inkcap-cluster",
+      "instanceKey": "nb1:scene48%3Ainkcap-cluster:179:10,15,-9:1",
+      "triangles": 144,
+      "file": "artifacts/nonblock-enchanted-fungi/inkcap-cluster.png",
+      "sha256": "8586b559f3766f5bceb2b5b5f81c938a6648ad8c0e24341a9c73e145c6e9f53f"
+    },
+    {
+      "sceneId": "scene48:velvet-cup",
+      "instanceKey": "nb1:scene48%3Avelvet-cup:179:13,10,-9:1",
+      "triangles": 105,
+      "file": "artifacts/nonblock-enchanted-fungi/velvet-cup.png",
+      "sha256": "e13a77ebd18f601cda997565a6a46ed54b7abbbd9fec9ab5f87fb4eb627eb5b4"
+    }
+  ],
+  "sourceSha256": {
+    "src/main.mjs": "bb528d40e11d5b0b8070099c7217ca10cdd3f1ee1f8b0ed7ed67882be150da5e",
+    "src/voxel.mjs": "6df6d3c5a0223cee405656afd0548fea3a957ae0c5185d7130a34d7198c3f981",
+    "src/physics.mjs": "c59a949f0e004cdf8acf0a58a5bcc12789a7d1a2ae51d4de3eeee89bd204f689",
+    "tests/nonblock-catalog-browser.mjs": "49ad9d48f8ac28381b06822fc2895cc8bf95f6f0af8a124d051496ac38c08e35",
+    "src/nonblock/candidate-families.mjs": "155a92cbd046c3d136cd1f4b6352421e03dafafbc468fe176a58ad09b9c216d1",
+    "src/nonblock/candidate-scene.mjs": "483f4d92bd27f998c78f0c95a1c4d6059a257e58f32ed9242d7f2dd0d5ccb6e2",
+    "src/nonblock/stage-offline.mjs": "c74fc6d09a4ef96cf476a9158004f88cc15a6dc1efe0d44943f83c77b5e155a8",
+    "src/nonblock-environments24/agave-rosette.mjs": "05d324294d808c81c6bbac1a626530cadc1c11a700b3b13bdf27a7e9c238d3db",
+    "src/nonblock-environments24/alpine-wildflower.mjs": "4ee8317a14c4043cd43d7d8dfe9c3d1475573d88946bc88822b714cdd880d60c",
+    "src/nonblock-environments24/cave-formations.mjs": "d4cdb3dbda921304e5ce1830b30bab833bc144d0ffde683426b46a6fd98e6ce5",
+    "src/nonblock-environments24/cave-rubble-cluster.mjs": "25d9d37ebb62f57b548298217ef9d78b0d05a8ec07fffb49b49a80d5104e22a3",
+    "src/nonblock-environments24/desert-bloom.mjs": "7862693515cb9d3e757baccc8be6e5827ec12aa07736aa05da75c5a946ad0155",
+    "src/nonblock-environments24/desert-scrub.mjs": "48b8eabaa7e33e1abf80fe5d2847500597461d2c1ae0bb67f0af033d535b564a",
+    "src/nonblock-environments24/dwarf-juniper.mjs": "be8493eaf0dbcbbe52e703d6d1e9366a6822be94c89a9c3b79830ef7a237ca67",
+    "src/nonblock-environments24/frost-fern.mjs": "7b2e5329be0a61aefb76bcab3a9c8fe66c19275858e0047b3583ad7c57b622b8",
+    "src/nonblock-environments24/pebble-scatter.mjs": "32520748be51385a6cf8861d1d61b78fb113424cde434f6cbe1789af1fff8870",
+    "src/nonblock-environments24/saltgrass.mjs": "ac729d8acae64c763333163585872b16f12e1c958e2ecf9142e575aa41a7f361",
+    "src/nonblock-environments24/snowgrass.mjs": "519c241b2d0a8eb4e6cfefaffdb0c4d2d963221204630a240e4c46390c2e257e",
+    "src/nonblock-environments24/tumblebrush.mjs": "f00b26b92c90f95cf5bf6e1159326c6829a0d18c8c4b3206ff29b5efa4cb4682",
+    "src/nonblock-scene48/enchanted-fungi.mjs": "3a5fbcf0e50b089b361a344b71515100cd4ce9b3f89a47d786b4c1a14998d87d",
+    "src/nonblock-scene48/flora-phase1.mjs": "5ced9c4a8b9cfef11fc38e3bfa537b4047c12a54fcf71e3296b5b4cb580187ca",
+    "src/nonblock-scene48/forest-lichen-patch.mjs": "48ae5290ceb87660d5140b869e65bccf81becd9ee5ad9446f4d0347703bb7a70",
+    "src/nonblock-scene48/forest-moss-mat.mjs": "ff8ec93e023528d5837456d81ee0e44db98513885c6ef20ad82499f20eba6f43",
+    "src/nonblock-scene48/forest-phase1-candidates.mjs": "39e5941c7ce1d8f0a792c8060bc35885ec169f01cc438b629a77c4bab5841486",
+    "src/nonblock-scene48/meadow-woodland.mjs": "96997beca7f282e75b980ce96380f093ccda59b90fbc80ade070396b085a249a",
+    "src/nonblock-scene48/undergrowth-phase1.mjs": "db682e1579a45ac1756186f8d7739a709f7cec6ad3d8c3d745268ec2453a809c",
+    "src/nonblock-scene48/woodland-sapling.mjs": "b21086f06296ec4c52dc06091a16b4a1e70f3e219e1934c5b3e68d9c30004225",
+    "src/nonblock-scene48/woodland-shrub.mjs": "7edf4b5621d66b851709cb3eb7368fda02be369c5774b665c39db94e02fcc6de",
+    "src/nonblock-fittings36/fittings-phase1.mjs": "3f14401a237ef7c09173fc6985d45ec4d124777f8bd45dfdfe8554f0152c9f7f"
+  }
+}

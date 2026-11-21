@@ -3,9 +3,46 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261120-five-systems-rc11';
-const ASSET_RELEASE='20261120-five-systems-rc11';
+const CACHE_NAME=CACHE_PREFIX+'20261121-unified-environment-rc7';
+const ASSET_RELEASE='20261121-unified-environment-rc7';
 const SOURCE_ASSETS=[
+  "./src/nonblock/staged-habitats.mjs",
+  "./src/environment-ground.mjs",
+  "./src/manual-biomes/environment-v7.mjs",
+  "./src/manual-biomes/environment-oasis.mjs",
+  "./src/nonblock/candidate-effects.mjs",
+  "./src/nonblock/candidate-families.mjs",
+  "./src/nonblock/candidate-scene.mjs",
+  "./src/nonblock/physical-fittings.mjs",
+  "./src/nonblock/staged-inherited-families.mjs",
+  "./src/nonblock-environments24/agave-rosette.mjs",
+  "./src/nonblock-environments24/branching-crystal-cluster.mjs",
+  "./src/nonblock-environments24/column-cactus.mjs",
+  "./src/nonblock-environments24/geode-opening.mjs",
+  "./src/nonblock-environments24/mineral-encrustation.mjs",
+  "./src/nonblock-environments24/prickly-pear-cactus.mjs",
+  "./src/nonblock-environments24/alpine-wildflower.mjs",
+  "./src/nonblock-environments24/cave-formations.mjs",
+  "./src/nonblock-environments24/cave-rubble-cluster.mjs",
+  "./src/nonblock-environments24/desert-bloom.mjs",
+  "./src/nonblock-environments24/desert-scrub.mjs",
+  "./src/nonblock-environments24/dwarf-juniper.mjs",
+  "./src/nonblock-environments24/frost-fern.mjs",
+  "./src/nonblock-environments24/pebble-scatter.mjs",
+  "./src/nonblock-environments24/saltgrass.mjs",
+  "./src/nonblock-environments24/snowgrass.mjs",
+  "./src/nonblock-environments24/tumblebrush.mjs",
+  "./src/nonblock-fittings36/fittings-phase1.mjs",
+  "./src/nonblock-fittings36/world-props.mjs",
+  "./src/nonblock-scene48/enchanted-fungi.mjs",
+  "./src/nonblock-scene48/flora-phase1.mjs",
+  "./src/nonblock-scene48/forest-lichen-patch.mjs",
+  "./src/nonblock-scene48/forest-moss-mat.mjs",
+  "./src/nonblock-scene48/forest-phase1-candidates.mjs",
+  "./src/nonblock-scene48/meadow-woodland.mjs",
+  "./src/nonblock-scene48/undergrowth-phase1.mjs",
+  "./src/nonblock-scene48/woodland-sapling.mjs",
+  "./src/nonblock-scene48/woodland-shrub.mjs",
   "./src/mobs/animal-interactions.mjs",
   "./src/mobs/behavior.mjs",
   "./src/mobs/combat.mjs",

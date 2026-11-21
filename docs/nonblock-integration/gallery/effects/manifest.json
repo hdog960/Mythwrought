@@ -1,0 +1,131 @@
+{
+  "seed": 179,
+  "effects": [
+    {
+      "sceneId": "scene48:flame",
+      "anchor": [
+        10,
+        9,
+        7
+      ],
+      "parentKey": "nb1:scene48%3Asingle-wildflower:179:10,9,7:0"
+    },
+    {
+      "sceneId": "scene48:embers",
+      "anchor": [
+        11,
+        9,
+        7
+      ]
+    },
+    {
+      "sceneId": "scene48:smoke",
+      "anchor": [
+        12,
+        9,
+        7
+      ]
+    },
+    {
+      "sceneId": "scene48:flicker",
+      "anchor": [
+        10,
+        9,
+        8
+      ]
+    },
+    {
+      "sceneId": "scene48:magic-dust",
+      "anchor": [
+        11,
+        9,
+        8
+      ]
+    },
+    {
+      "sceneId": "scene48:cave-drip",
+      "anchor": [
+        12,
+        9,
+        8
+      ]
+    },
+    {
+      "sceneId": "scene48:spray",
+      "anchor": [
+        13,
+        9,
+        8
+      ]
+    },
+    {
+      "sceneId": "scene48:mist",
+      "anchor": [
+        10,
+        9,
+        9
+      ]
+    },
+    {
+      "sceneId": "scene48:wisps",
+      "anchor": [
+        11,
+        9,
+        9
+      ]
+    },
+    {
+      "sceneId": "scene48:pollen",
+      "anchor": [
+        12,
+        9,
+        9
+      ]
+    },
+    {
+      "sceneId": "scene48:snow-gust",
+      "anchor": [
+        13,
+        9,
+        9
+      ]
+    },
+    {
+      "sceneId": "scene48:surface-ripples",
+      "anchor": [
+        11,
+        9,
+        10
+      ]
+    }
+  ],
+  "captures": [
+    {
+      "file": "artifacts/nonblock-effects/scene-effects-first.png",
+      "sha256": "278ec30be483a646973268d284467a86ebc5cd9e02e7594b090edfea7c70906b"
+    },
+    {
+      "file": "artifacts/nonblock-effects/scene-effects-next.png",
+      "sha256": "08c2c87084bdb78ee4a29f46002954bfa058a6b81da897b75710d5f12ac8d557"
+    },
+    {
+      "file": "artifacts/nonblock-effects/scene-effects-restored.png",
+      "sha256": "5d70ad7f5cfeff9554e8f9e3b2a0b8c71b27787eac8170981d3d9d99dd272e4a"
+    }
+  ],
+  "observed": [
+    {
+      "effects": 12,
+      "vertexCount": 1152
+    },
+    {
+      "effects": 11,
+      "afterRemovalAndContextRestore": true
+    }
+  ],
+  "sourceSha256": {
+    "src/main.mjs": "34e73098d8f32ec62c93ae2bf8fdfb7a21102e8f1d25cdb64b2999fef05e5fd3",
+    "src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
+    "tests/nonblock-effects-browser.mjs": "38744c804e0eb8d1e934ae96de9d371270dd16a75ee33284ec591ebe2e65e2f2"
+  }
+}

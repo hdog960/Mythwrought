@@ -4,6 +4,7 @@ import {BLOCK,CHUNK_SIZE} from './voxel.mjs';
 import {isPack2LiveId,pack2WorldVertices} from './pack2-integration.mjs';
 import {isBiome130BlockId,biome130Block,biome130Color} from './biome130-registry.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
+import {environmentGround} from './environment-ground.mjs';
 import {sectionBounds} from './depth.mjs';
 
 const FACES=[
@@ -97,7 +98,8 @@ export function meshDepthSection(world,cx,cz,section){
           }
           continue;
         }
-        const color=COLORS[id]||COLORS[3];
+        const naturalGround=environmentGround(id);
+        const color=naturalGround?.color??COLORS[id]??COLORS[3];
         for(const face of FACES){
           const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
           if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor))continue;
@@ -106,7 +108,7 @@ export function meshDepthSection(world,cx,cz,section){
           for(const k of [0,1,2,0,2,3]){
             const p=face.q[k],uv=UV[k];
             emit(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],
-              id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
+              naturalGround?0:id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
           }
         }
       }

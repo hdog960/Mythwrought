@@ -79,6 +79,10 @@ try{
     const ctx=await browser.newContext({viewport:{width:w,height:h},
       deviceScaleFactor:1,isMobile:true,hasTouch:true});
     const page=await ctx.newPage(),errors=[],missing=[];
+    await page.addInitScript(()=>{
+      if(localStorage.getItem('mythwrought-v002-selected-seed')===null)
+        localStorage.setItem('mythwrought-v002-selected-seed','179');
+    });
     page.on('pageerror',e=>errors.push(String(e.message)));
     page.on('response',r=>{if(r.status()>=400)missing.push(r.status()+' '+r.url());});
     try{

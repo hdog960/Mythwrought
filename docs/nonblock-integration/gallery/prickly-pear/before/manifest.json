@@ -1,0 +1,60 @@
+{
+  "seed": 179,
+  "generator": "mythwrought-four-surface-regions-v4",
+  "renderPreset": "economy",
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
+    "src/nonblock/candidate-families.mjs": "7b136f75bd586298dafc844deccbf952029af2b0bb3f0ab10c770b92bae218bc",
+    "src/manual-biomes/profile-world.mjs": "ae374a51657bcd895f0a07163f90b35e0177cdd382ac543d8c540871276687f8",
+    "src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
+    "src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
+    "src/render-budget.mjs": "2da16f5acfddb3e6d1989b337c5b80ae40987336be2f3cff680cd038400218b3",
+    "tests/nonblock-habitat-browser.mjs": "c2dad443870e7b57435bcdbc093f555cbe8562b3d610c80bcd140a2d3a8e2c82",
+    "src/nonblock-environments24/prickly-pear-cactus.mjs": "2df88401215b3beec1f974a6bad06cfda0a795d3a3ce9240f3c7a276267ebbc1",
+    "src/nonblock/staged-inherited-families.mjs": "deb1dbb950395ced53e563aaa428fbe70f9584f74bccbed105dc560ef0a254eb"
+  },
+  "captures": [
+    {
+      "habitat": "desert",
+      "placement": {
+        "sceneId": "nonblock:d:prickly-pear-cactus",
+        "anchor": [
+          512,
+          9,
+          0
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Aprickly-pear-cactus:179:512,9,0:2",
+      "ground": 256,
+      "triangles": 128,
+      "collisionParts": 4,
+      "view": {
+        "pose": [
+          512.5,
+          -0.5
+        ],
+        "point": [
+          512.61600749,
+          9.77522405,
+          0.79790874
+        ]
+      },
+      "rendererState": {
+        "instances": 1,
+        "vertices": 384,
+        "gpuBytes": 13824,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "file": "artifacts/nonblock-prickly-pear-before/desert.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "ae3ae5aca8aef7edf01a83a8244612075e1f695fac74394bc35a7fc528e9294c"
+    }
+  ],
+  "nonemptySchema1AndProfileBytesUnchanged": true
+}

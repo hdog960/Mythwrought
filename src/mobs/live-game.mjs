@@ -42,7 +42,7 @@ export function classifyLiveBiome(name,feet,cave){
 
 export function createLiveMobSession({
   world,seed,storage,resident,biomeAt,skyAt,caveAt,playerAt,
-  worldKind='normal',allowWrites=()=>true,onPlayerDamage=()=>{}
+  worldKind='normal',spawnOnFirstVisit=false,allowWrites=()=>true,onPlayerDamage=()=>{}
 }={}){
   if(!world||typeof world.get!=='function'||!storage||!Number.isSafeInteger(seed)||
     typeof resident!=='function'||typeof biomeAt!=='function'||
@@ -106,7 +106,7 @@ export function createLiveMobSession({
     companions=new CompanionManager(engine,query,combat);
     animals=new AnimalInteractions(engine,query);
   }
-  const ecology=new PopulationManager(engine,query,{seed,species:[...modelIds],
+  const ecology=new PopulationManager(engine,query,{seed,species:[...modelIds],spawnOnFirstVisit,
     // Tame ownership persists in the existing per-seed checksummed sidecar.
     // Protect it from six-second ecology GC without elevating a horse to a
     // bonded-only MobEngine.important checkpoint bit.

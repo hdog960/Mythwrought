@@ -3,7 +3,7 @@
 // schema or main branch registration; explicitly approved *new* cave worlds.
 import {VoxelWorld,worldKey} from '../voxel.mjs';
 import {Pack2LiveWorld} from '../pack2-world.mjs';
-import {CAVE_PROFILE_KIND,CaveVoxelWorld} from './cave-voxel-world.mjs';
+import {CAVE_PROFILE_KIND,CaveVoxelWorld,sourceCaveCell} from './cave-voxel-world.mjs';
 import {planNewCaveEntrances} from './entrance-preflight.mjs';
 import {planSpiralSurfaceTransition,inspectSpiralSurfaceTransition} from './surface-transition.mjs';
 
@@ -55,4 +55,19 @@ export function restoreStagedCaveRuntime(payload,{approved=false,profile}={}){
     throw Error('Cave profile restore requires explicit matching new-world marker');
   const base=CaveVoxelWorld.restore(payload,{approved:true});
   return attachVerifiedEntrances(base);
+}
+
+const combinedCaves=new Map();
+export function combinedEnvironmentCaves(seed){
+  if(!combinedCaves.has(seed)){
+    const {world,entrancePlan}=attachVerifiedEntrances(new CaveVoxelWorld(seed,{approved:true}));
+    const base=world.base;
+    combinedCaves.set(seed,Object.freeze({
+      get:(x,y,z)=>sourceCaveCell(base,x,y,z),
+      cavePlanReport:base.cavePlanReport,
+      entranceSites:Object.freeze(entrancePlan.entrances.map(({name,mouth})=>Object.freeze({name,mouth})))
+    }));
+    if(combinedCaves.size>4)combinedCaves.delete(combinedCaves.keys().next().value);
+  }
+  return combinedCaves.get(seed);
 }

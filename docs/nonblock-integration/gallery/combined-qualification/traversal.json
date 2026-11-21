@@ -1,0 +1,391 @@
+{
+  "seed": 2026,
+  "viewport": [
+    844,
+    390
+  ],
+  "head": "54f4419",
+  "physicalIphone": false,
+  "scenes": [
+    {
+      "name": "plains-ground",
+      "pose": {
+        "x": 15.720966262319676,
+        "z": 8.822950691082603,
+        "feet": 9,
+        "yaw": 0.6000502134017536,
+        "seed": 2026,
+        "creative": false,
+        "onGround": true
+      },
+      "flight": {
+        "creativeEnabled": false,
+        "active": false,
+        "profile": "off",
+        "position": {
+          "x": 15.720966262319676,
+          "y": 9,
+          "z": 8.822950691082603
+        },
+        "blocked": false,
+        "reason": "off",
+        "controlsPaused": true,
+        "heldKeys": [],
+        "token": "2026#1",
+        "pendingPlans": 0,
+        "minY": -210,
+        "maxY": 67,
+        "bodyClear": true,
+        "resident": true,
+        "residentChunks": 25
+      },
+      "biome": "plains",
+      "chunks": 25,
+      "scenery": 25,
+      "mobs": [],
+      "sceneryBytes": 216108,
+      "meshVertices": 76554,
+      "frames": 95,
+      "farCaveBytes": 0,
+      "walkStart": {
+        "x": 15.5,
+        "z": 8.5,
+        "feet": 9,
+        "yaw": 0.6000502134017536,
+        "seed": 2026,
+        "creative": false,
+        "onGround": true
+      }
+    },
+    {
+      "name": "desert-ground",
+      "pose": {
+        "x": 505.7249503022258,
+        "z": 1.8287735186376302,
+        "feet": 8,
+        "yaw": 0.6000502134017536,
+        "seed": 2026,
+        "creative": false,
+        "onGround": true
+      },
+      "flight": {
+        "creativeEnabled": false,
+        "active": false,
+        "profile": "off",
+        "position": {
+          "x": 505.7249503022258,
+          "y": 8,
+          "z": 1.8287735186376302
+        },
+        "blocked": false,
+        "reason": "off",
+        "controlsPaused": true,
+        "heldKeys": [],
+        "token": "2026#1",
+        "pendingPlans": 0,
+        "minY": -210,
+        "maxY": 67,
+        "bodyClear": true,
+        "resident": true,
+        "residentChunks": 25
+      },
+      "biome": "desert",
+      "chunks": 25,
+      "scenery": 18,
+      "mobs": [],
+      "sceneryBytes": 180360,
+      "meshVertices": 66834,
+      "frames": 193,
+      "farCaveBytes": 0,
+      "walkStart": {
+        "x": 505.5,
+        "z": 1.5,
+        "feet": 8,
+        "yaw": 0.6000502134017536,
+        "seed": 2026,
+        "creative": false,
+        "onGround": true
+      }
+    },
+    {
+      "name": "desert-creative",
+      "pose": {
+        "x": 505.7266662028403,
+        "z": 1.8312813733819928,
+        "feet": 24.06991500000012,
+        "yaw": 0.6720825589188968,
+        "seed": 2026,
+        "creative": true,
+        "onGround": false
+      },
+      "flight": {
+        "creativeEnabled": true,
+        "active": true,
+        "profile": "normal",
+        "position": {
+          "x": 505.7266662028403,
+          "y": 24.06991500000012,
+          "z": 1.8312813733819928
+        },
+        "blocked": false,
+        "reason": "Hover ready",
+        "controlsPaused": false,
+        "heldKeys": [],
+        "token": "2026#1",
+        "pendingPlans": 0,
+        "minY": -210,
+        "maxY": 67,
+        "bodyClear": true,
+        "resident": true,
+        "residentChunks": 25
+      },
+      "biome": "desert",
+      "chunks": 25,
+      "scenery": 18,
+      "mobs": [],
+      "sceneryBytes": 180360,
+      "meshVertices": 66834,
+      "frames": 342,
+      "farCaveBytes": 0,
+      "input": "Real two-tap Creative entry and E-key ascent"
+    },
+    {
+      "name": "snow-ground",
+      "pose": {
+        "x": 3.7249503022257464,
+        "z": 505.82877351863755,
+        "feet": 10,
+        "yaw": 0.6000502134017536,
+        "seed": 2026,
+        "creative": false,
+        "onGround": true
+      },
+      "flight": {
+        "creativeEnabled": false,
+        "active": false,
+        "profile": "off",
+        "position": {
+          "x": 3.7249503022257464,
+          "y": 10,
+          "z": 505.82877351863755
+        },
+        "blocked": false,
+        "reason": "off",
+        "controlsPaused": true,
+        "heldKeys": [],
+        "token": "2026#0",
+        "pendingPlans": 0,
+        "minY": -210,
+        "maxY": 67,
+        "bodyClear": true,
+        "resident": true,
+        "residentChunks": 25
+      },
+      "biome": "snow",
+      "chunks": 25,
+      "scenery": 26,
+      "mobs": [],
+      "sceneryBytes": 294192,
+      "meshVertices": 95832,
+      "frames": 85,
+      "farCaveBytes": 0,
+      "walkStart": {
+        "x": 3.5,
+        "z": 505.5,
+        "feet": 10,
+        "yaw": 0.6000502134017536,
+        "seed": 2026,
+        "creative": false,
+        "onGround": true
+      }
+    },
+    {
+      "name": "mountain-ground",
+      "pose": {
+        "x": -509.2376338496318,
+        "z": 4.883458219769145,
+        "feet": 6,
+        "yaw": 0.6000502134017536,
+        "seed": 2026,
+        "creative": false,
+        "onGround": true
+      },
+      "flight": {
+        "creativeEnabled": false,
+        "active": false,
+        "profile": "off",
+        "position": {
+          "x": -509.2376338496318,
+          "y": 6,
+          "z": 4.883458219769145
+        },
+        "blocked": false,
+        "reason": "off",
+        "controlsPaused": true,
+        "heldKeys": [],
+        "token": "2026#0",
+        "pendingPlans": 0,
+        "minY": -210,
+        "maxY": 67,
+        "bodyClear": true,
+        "resident": true,
+        "residentChunks": 25
+      },
+      "biome": "mountain",
+      "chunks": 25,
+      "scenery": 27,
+      "mobs": [],
+      "sceneryBytes": 287820,
+      "meshVertices": 89046,
+      "frames": 185,
+      "farCaveBytes": 0,
+      "walkStart": {
+        "x": -509.5,
+        "z": 4.5,
+        "feet": 6,
+        "yaw": 0.6000502134017536,
+        "seed": 2026,
+        "creative": false,
+        "onGround": true
+      }
+    },
+    {
+      "name": "mountain-creative",
+      "pose": {
+        "x": -509.2348780349049,
+        "z": 4.887485948985403,
+        "feet": 24.054230517000107,
+        "yaw": 0.672354270915105,
+        "seed": 2026,
+        "creative": true,
+        "onGround": false
+      },
+      "flight": {
+        "creativeEnabled": true,
+        "active": true,
+        "profile": "normal",
+        "position": {
+          "x": -509.2348780349049,
+          "y": 24.054230517000107,
+          "z": 4.887485948985403
+        },
+        "blocked": false,
+        "reason": "Hover ready",
+        "controlsPaused": false,
+        "heldKeys": [],
+        "token": "2026#0",
+        "pendingPlans": 0,
+        "minY": -210,
+        "maxY": 67,
+        "bodyClear": true,
+        "resident": true,
+        "residentChunks": 25
+      },
+      "biome": "mountain",
+      "chunks": 25,
+      "scenery": 25,
+      "mobs": [],
+      "sceneryBytes": 272268,
+      "meshVertices": 89046,
+      "frames": 344,
+      "farCaveBytes": 0,
+      "input": "Real two-tap Creative entry and E-key ascent"
+    },
+    {
+      "name": "enchanted-ground",
+      "pose": {
+        "x": 8.762486394599312,
+        "z": -517.1163660386624,
+        "feet": 11,
+        "yaw": 0.6000502134017536,
+        "seed": 2026,
+        "creative": false,
+        "onGround": true
+      },
+      "flight": {
+        "creativeEnabled": false,
+        "active": false,
+        "profile": "off",
+        "position": {
+          "x": 8.762486394599312,
+          "y": 11,
+          "z": -517.1163660386624
+        },
+        "blocked": false,
+        "reason": "off",
+        "controlsPaused": true,
+        "heldKeys": [],
+        "token": "2026#0",
+        "pendingPlans": 0,
+        "minY": -210,
+        "maxY": 67,
+        "bodyClear": true,
+        "resident": true,
+        "residentChunks": 25
+      },
+      "biome": "enchanted",
+      "chunks": 25,
+      "scenery": 26,
+      "mobs": [],
+      "sceneryBytes": 259740,
+      "meshVertices": 103956,
+      "frames": 88,
+      "farCaveBytes": 0,
+      "walkStart": {
+        "x": 8.5,
+        "z": -517.5,
+        "feet": 11,
+        "yaw": 0.6000502134017536,
+        "seed": 2026,
+        "creative": false,
+        "onGround": true
+      }
+    },
+    {
+      "name": "authored-cave-mouth-walk",
+      "pose": {
+        "x": 44.505023653582015,
+        "z": 64.5,
+        "feet": 7.1649653679999625,
+        "yaw": 1.5707963267948966,
+        "seed": 2026,
+        "creative": false,
+        "onGround": false
+      },
+      "flight": {
+        "creativeEnabled": false,
+        "active": false,
+        "profile": "off",
+        "position": {
+          "x": 44.505023653582015,
+          "y": 7.1649653679999625,
+          "z": 64.5
+        },
+        "blocked": false,
+        "reason": "off",
+        "controlsPaused": true,
+        "heldKeys": [],
+        "token": "2026#0",
+        "pendingPlans": 0,
+        "minY": -210,
+        "maxY": 67,
+        "bodyClear": true,
+        "resident": true,
+        "residentChunks": 25
+      },
+      "biome": "plains",
+      "chunks": 25,
+      "scenery": 24,
+      "mobs": [],
+      "sceneryBytes": 323028,
+      "meshVertices": 79764,
+      "frames": 216,
+      "farCaveBytes": 0,
+      "walkStart": {
+        "x": 40.5,
+        "feet": 9.01,
+        "z": 64.5
+      }
+    }
+  ]
+}

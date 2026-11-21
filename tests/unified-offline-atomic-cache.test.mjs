@@ -8,9 +8,9 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261120-five-systems-rc11';
+const RELEASE='20261121-unified-environment-rc7';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
-const PREVIOUS='mythwrought-m5-shell-20261118-v5-recorder';
+const PREVIOUS='mythwrought-m5-shell-20261120-five-systems-rc11';
 const ROOT='https://example.test/Mythwrought/';
 assert.ok(source.includes("const ASSET_RELEASE='"+RELEASE+"'"));
 assert.ok(source.includes("const CACHE_NAME=CACHE_PREFIX+'"+RELEASE+"'"));
@@ -76,7 +76,7 @@ function stage({missing=null}={}){
     get peak(){return peak;}};
 }
 
-test('complete RC5 original Home Screen shell installs source-exact and leaves prior cache',async()=>{
+test('complete unified original Home Screen shell installs source-exact and leaves prior cache',async()=>{
   const candidate=stage();
   await candidate.install();
   assert.equal(candidate.skipped,1,'Only complete verified shell can activate');
@@ -91,6 +91,9 @@ test('complete RC5 original Home Screen shell installs source-exact and leaves p
   assert.ok(entries.has(ROOT+'src/manual-caves/c6-far-wall-gpu.mjs'));
   assert.ok(entries.has(ROOT+'src/sky-atmosphere.mjs'));
   assert.ok(entries.has(ROOT+'src/gameplay-recorder.mjs'));
+  assert.ok(entries.has(ROOT+'src/manual-biomes/environment-v7.mjs'));
+  assert.ok(entries.has(ROOT+'src/nonblock/staged-habitats.mjs'));
+  assert.ok(entries.has(ROOT+'src/nonblock/candidate-scene.mjs'));
   assert.ok(entries.has(ROOT+'index.html'));
   await candidate.activate();
   assert.equal(candidate.all.get(PREVIOUS).size,1,

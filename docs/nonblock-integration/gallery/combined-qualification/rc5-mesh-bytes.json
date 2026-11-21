@@ -1,0 +1,117 @@
+{
+  "head": "e3a41d1407f239a30db6c9efb84597ea2f91b5a7",
+  "unit": "bytes",
+  "scope": "one surface chunk plus all-near planned scenery window",
+  "samples": [
+    {
+      "seed": 179,
+      "biome": "plains",
+      "cx": 0,
+      "cz": 0,
+      "oldTerrain": 111024,
+      "terrain": 111024,
+      "water": 0,
+      "sceneryAllNear": 321300,
+      "placements": 27
+    },
+    {
+      "seed": 179,
+      "biome": "desert",
+      "cx": 32,
+      "cz": 0,
+      "oldTerrain": 1375056,
+      "terrain": 172368,
+      "water": 0,
+      "sceneryAllNear": 210060,
+      "placements": 18
+    },
+    {
+      "seed": 179,
+      "biome": "snow",
+      "cx": 0,
+      "cz": 32,
+      "oldTerrain": 919296,
+      "terrain": 165240,
+      "water": 0,
+      "sceneryAllNear": 236844,
+      "placements": 26
+    },
+    {
+      "seed": 179,
+      "biome": "mountain",
+      "cx": -32,
+      "cz": 0,
+      "oldTerrain": 1187568,
+      "terrain": 135864,
+      "water": 0,
+      "sceneryAllNear": 312660,
+      "placements": 26
+    },
+    {
+      "seed": 179,
+      "biome": "enchanted",
+      "cx": 0,
+      "cz": -32,
+      "oldTerrain": 3705480,
+      "terrain": 132192,
+      "water": 0,
+      "sceneryAllNear": 373572,
+      "placements": 26
+    },
+    {
+      "seed": 2026,
+      "biome": "plains",
+      "cx": 0,
+      "cz": 0,
+      "oldTerrain": 94392,
+      "terrain": 94392,
+      "water": 0,
+      "sceneryAllNear": 271404,
+      "placements": 27
+    },
+    {
+      "seed": 2026,
+      "biome": "desert",
+      "cx": 32,
+      "cz": 0,
+      "oldTerrain": 2861352,
+      "terrain": 152496,
+      "water": 0,
+      "sceneryAllNear": 169668,
+      "placements": 18
+    },
+    {
+      "seed": 2026,
+      "biome": "snow",
+      "cx": 0,
+      "cz": 32,
+      "oldTerrain": 945216,
+      "terrain": 175392,
+      "water": 0,
+      "sceneryAllNear": 276480,
+      "placements": 26
+    },
+    {
+      "seed": 2026,
+      "biome": "mountain",
+      "cx": -32,
+      "cz": 0,
+      "oldTerrain": 1221264,
+      "terrain": 148176,
+      "water": 0,
+      "sceneryAllNear": 287820,
+      "placements": 27
+    },
+    {
+      "seed": 2026,
+      "biome": "enchanted",
+      "cx": 0,
+      "cz": -32,
+      "oldTerrain": 3704832,
+      "terrain": 168264,
+      "water": 0,
+      "sceneryAllNear": 292788,
+      "placements": 27
+    }
+  ]
+}

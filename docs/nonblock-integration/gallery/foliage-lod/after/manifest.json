@@ -1,0 +1,81 @@
+{
+  "mode": "after",
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/nonblock/candidate-scene.mjs": "117603583035b7436c8b50eb4b206afaba7cff72d287f5a79a4d6058768549c8",
+    "src/nonblock-scene48/flora-phase1.mjs": "3abb46a9e5b3fee140506bb74c90219034850dfea23168e86943d82187d45745",
+    "src/nonblock/candidate-families.mjs": "05b0fecb85acdb0941e4a65adcf86d37bcb5651ece2f8b279ea5979b768f92a1",
+    "src/nonblock/candidate-effects.mjs": "ac1b85406589f6558581dfcff2647dc3e0dc2ce3db05fc8b9693bfada5fc60cb",
+    "tests/nonblock-lod-browser.mjs": "90fce74209da634ea5313e524bf7fce53bad70e236469c7744548283b050e7ee"
+  },
+  "captures": [
+    {
+      "file": "artifacts/nonblock-lod/near.png",
+      "x": 10.5,
+      "z": 5.5,
+      "point": [
+        10.8,
+        9.35,
+        7.5
+      ],
+      "width": 932,
+      "height": 430,
+      "sha256": "ba7a085fc28b525aaae1428ed94ca8cf6dee3c401fdacb2ae26e9923449b8467"
+    },
+    {
+      "file": "artifacts/nonblock-lod/far.png",
+      "x": 20.5,
+      "z": 22.5,
+      "point": [
+        11,
+        9.32,
+        7.5
+      ],
+      "width": 932,
+      "height": 430,
+      "sha256": "d65a44473e6992c16fee38ec9abdf98b7b587137e31d79189b8b8157f988a29e"
+    }
+  ],
+  "observations": [
+    {
+      "name": "near",
+      "bytes": 35856,
+      "far": 0,
+      "drawCalls": 1,
+      "terrainChunks": 25,
+      "parentEffectDrawn": true
+    },
+    {
+      "name": "boundary",
+      "bytes": 35856,
+      "far": 0,
+      "drawCalls": 1,
+      "terrainChunks": 25,
+      "parentEffectDrawn": true
+    },
+    {
+      "name": "far",
+      "bytes": 20088,
+      "far": 4,
+      "drawCalls": 1,
+      "terrainChunks": 25,
+      "parentEffectDrawn": true
+    },
+    {
+      "name": "boundary",
+      "bytes": 20088,
+      "far": 4,
+      "drawCalls": 1,
+      "terrainChunks": 25,
+      "parentEffectDrawn": true
+    },
+    {
+      "name": "near",
+      "bytes": 35856,
+      "far": 0,
+      "drawCalls": 1,
+      "terrainChunks": 25,
+      "parentEffectDrawn": true
+    }
+  ]
+}

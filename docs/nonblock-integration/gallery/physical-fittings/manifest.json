@@ -1,0 +1,285 @@
+{
+  "seed": 179,
+  "plans": [
+    {
+      "sceneId": "scene36:hinged-door-leaf",
+      "options": {
+        "anchor": [
+          9,
+          9,
+          7
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            9,
+            9,
+            7
+          ],
+          "numericId": 67
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:double-door-pair",
+      "options": {
+        "anchor": [
+          10,
+          9,
+          7
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            10,
+            9,
+            7
+          ],
+          "numericId": 67
+        },
+        {
+          "at": [
+            11,
+            9,
+            7
+          ],
+          "numericId": 67
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:trapdoor",
+      "options": {
+        "anchor": [
+          12,
+          9,
+          7
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            12,
+            9,
+            7
+          ],
+          "numericId": 68
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:swinging-gate",
+      "options": {
+        "anchor": [
+          13,
+          9,
+          7
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            13,
+            9,
+            7
+          ],
+          "numericId": 66
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:window-shutters",
+      "options": {
+        "anchor": [
+          14,
+          9,
+          7
+        ],
+        "orientation": 2
+      },
+      "items": [
+        {
+          "at": [
+            14,
+            9,
+            7
+          ],
+          "numericId": 163
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:hinged-hatch",
+      "options": {
+        "anchor": [
+          15,
+          10,
+          7
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            15,
+            10,
+            7
+          ],
+          "numericId": 68
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:fence-rail",
+      "options": {
+        "anchor": [
+          16,
+          10,
+          7
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            16,
+            10,
+            7
+          ],
+          "numericId": 65
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:fabric-awning",
+      "options": {
+        "anchor": [
+          10,
+          11,
+          8
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            10,
+            11,
+            8
+          ],
+          "numericId": 175
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:wall-torch-bracket",
+      "options": {
+        "anchor": [
+          10,
+          12,
+          8
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            10,
+            12,
+            8
+          ],
+          "numericId": 168
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:hanging-lantern",
+      "options": {
+        "anchor": [
+          11,
+          11,
+          8
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            11,
+            11,
+            8
+          ],
+          "numericId": 166
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:direction-sign",
+      "options": {
+        "anchor": [
+          17,
+          10,
+          7
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            17,
+            10,
+            7
+          ],
+          "numericId": 173
+        }
+      ]
+    },
+    {
+      "sceneId": "scene36:pennant-flag",
+      "options": {
+        "anchor": [
+          10,
+          10,
+          9
+        ],
+        "orientation": 0
+      },
+      "items": [
+        {
+          "at": [
+            10,
+            10,
+            9
+          ],
+          "numericId": 174
+        }
+      ]
+    }
+  ],
+  "captures": [
+    {
+      "filename": "artifacts/nonblock-physical-fittings/owned-fittings-932x430.png",
+      "sha256": "a2180dc4946ffe01eee097df7ba5e9af6956aeb466a45975efa0b4c069fb7cd5"
+    }
+  ],
+  "minedCell": [
+    10,
+    9,
+    7
+  ],
+  "sourceSha256": {
+    "src/main.mjs": "34e73098d8f32ec62c93ae2bf8fdfb7a21102e8f1d25cdb64b2999fef05e5fd3",
+    "src/nonblock/physical-fittings.mjs": "c9dc6bcb1d42e21e0fb2a0f304caa9d5053cbbccc06d60fea7769dfd714ee16e",
+    "src/pack2-world.mjs": "656ed8f871b6ed08ebd92cb072443e99c8736a1a15ac015fb59b2f644a8cfa94",
+    "src/builder-assets/manual-five-pack.mjs": "9638332c3f235699dc1bbaeae8fe5f7f28f8f8d8275357125af91c964b3b6063",
+    "src/builder-assets/manual-five-pack-live.mjs": "86ebc68be5bb5e4d196fb5472868e6522c46c6f16fc814d3e51036cd90c4b7be",
+    "tests/nonblock-physical-fittings-browser.mjs": "5c1670e105cd09b78114a42c17806c016c37e896a4ec61afbe7d1041094decbb"
+  },
+  "schema1SaveBytesUnchanged": true
+}

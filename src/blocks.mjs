@@ -1,6 +1,7 @@
 // MYTHWROUGHT v0.08 — predictable, reversible basic block interactions.
 // This prototype adds no new inventory or automated mining powers.
 import {BLOCK,WORLD_MAX_Y,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
+import {ENVIRONMENT_GROUND,environmentGround} from './environment-ground.mjs';
 import {WORLD_MIN_Y} from './depth.mjs';
 import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,
   pack2BodyIntersects,pack2NormalizeState} from './pack2-integration.mjs';
@@ -17,6 +18,7 @@ export const BLOCK_NAMES=Object.freeze({
   [BLOCK.AIR]:'air',[BLOCK.GRASS]:'grass',[BLOCK.DIRT]:'earth',
   [BLOCK.STONE]:'stone',[BLOCK.WOOD]:'timber',[BLOCK.CRYSTAL]:'crystal',
   [BLOCK.ORE]:'ore',[BLOCK.LEAVES]:'leaf canopy',[BLOCK.DEEPSTONE]:'deepstone',
+  ...Object.fromEntries(Object.values(ENVIRONMENT_GROUND).map(id=>[id,environmentGround(id).name])),
   ...Object.fromEntries(BIOME130_REGISTERED_IDS.map(id=>[id,biome130Block(id).name])),
   ...PACK2_LIVE_NAMES,
   ...Object.fromEntries(PACK3_BUILDER_IDS.map((id,i)=>[id,resolvePack3BuilderAsset(PACK3_BUILDER_SYMBOLS[i]).name])),

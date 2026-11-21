@@ -2,7 +2,8 @@
 import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
-import {biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
+import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
+import {environmentGround,M7_ENVIRONMENT_GENERATOR} from './environment-ground.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -20,6 +21,22 @@ const COLORS = {
   4:[0.60,0.39,0.23], 5:[0.36,0.79,0.92], 6:[0.70,0.58,0.33],
   7:[0.27,0.57,0.31], 8:[0.32,0.39,0.48]
 };
+const BIOME_SOLID_CUBES=new Set(BIOME130_REGISTERED_IDS.filter(id=>{
+  const {boxes,opacity,solid,transparent}=biome130Block(id);
+  return solid&&!transparent&&opacity===1&&boxes.some(box=>box.every((v,i)=>v===FULL_CUBE.boxes[0][i]));
+}));
+const BIOME_GROUND_COLORS=new Map([
+  256,257,258,259,260,261,262,263,264,272,277,278,279,286,289,293,294,302,303,305,307
+].map(id=>{
+  const {palette}=biome130Block(id);
+  return [id,palette[0].map((_,index)=>palette.reduce((sum,color)=>sum+color[index],0)/palette.length)];
+}));
+function terrainArtMaterial(id){
+  if(id<=264)return 40;
+  if(id<=279)return 41;
+  if(id>=400&&id<=402||id>=302&&id<=307)return 42;
+  return 43;
+}
 const FACE = [
   {d:[1,0,0],q:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],lit:.77},
   {d:[-1,0,0],q:[[0,0,1],[0,1,1],[0,1,0],[0,0,0]],lit:.73},
@@ -134,7 +151,7 @@ export class VoxelWorld{
   set(x,y,z,id,rotation=0){
     if(![x,y,z,id,rotation].every(Number.isInteger)||
        y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y||
-       !(id>=0&&id<=8||isBiome130BlockId(id))||
+       !(id>=0&&id<=8||isBiome130BlockId(id)||environmentGround(id))||
        rotation<0||rotation>3||rotation!==0&&!isBiome130BlockId(id))return false;
     const key=worldKey(x,y,z),previous=this.edits.get(key);
     if(isBiome130BlockId(previous))this.biomeCellCount--;
@@ -189,6 +206,15 @@ export function meshChunk(world,cx,cz){
   const cells=new Uint16Array(side*side*depth);
   cells.fill(65535); // 16-bit sentinel: old 255 remains reserved; biome130 uses 256..312.
   const extra=new Map();
+  const profile=world.base?.generationProfile??world.generationProfile;
+  const unifiedTerrain=profile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const groundTints=new Map();
+  function groundTint(x,z){
+    const key=x+','+z;
+    if(!groundTints.has(key))groundTints.set(key,.91+
+      noise(x/31,z/31,world.seed+2401)*.15+noise(x/9,z/9,world.seed+2479)*.045);
+    return groundTints.get(key);
+  }
   const blockAt=(x,y,z)=>{
     if(x<minX||x>=minX+side||z<minZ||z>=minZ+side||y<minY||y>=minY+depth){
       const key=x+','+y+','+z;
@@ -246,6 +272,7 @@ export function meshChunk(world,cx,cz){
         }
         if(isBiome130BlockId(id)){
           const surface=getBiomeGeometry(id,world.rotationAt?.(x,y,z)??0);
+          const groundColor=unifiedTerrain&&!world.edits?.has(worldKey(x,y,z))?BIOME_GROUND_COLORS.get(id):undefined;
           // Source-accurate union surface geometry; full neighboring legacy
           // solids hide only true boundary faces, preserving internal shapes.
           for(let t=0;t<surface.indices.length;t+=3){
@@ -262,20 +289,24 @@ export function meshChunk(world,cx,cz){
               }
             }
             if(boundary&&neighbor!==BLOCK.AIR&&
-                !isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))continue;
+                ((!isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))||
+                  unifiedTerrain&&BIOME_SOLID_CUBES.has(neighbor)))continue;
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const lit=[.77,.73,1,.48,.85,.67][face];
-            const color=biome130Color(id,x,y,z,face);
+            const color=groundColor??biome130Color(id,x,y,z,face);
             for(let u=t;u<t+3;u++){
               const i=surface.indices[u]*3,px=surface.positions[i],
                     py=surface.positions[i+1],pz=surface.positions[i+2];
-              appendVertex(x+px,y+py,z+pz,color[0]*lit,color[1]*lit,color[2]*lit,
-                nx?pz:px,ny?pz:py,0);
+              const shade=lit*(groundColor?groundTint(x+px,z+pz):1);
+              appendVertex(x+px,y+py,z+pz,clamp(color[0]*shade,0,1),clamp(color[1]*shade,0,1),clamp(color[2]*shade,0,1),
+                (nx?pz:px)+(groundColor?(nx?z:x):0),(ny?pz:py)+(groundColor?(ny?z:y):0),
+                groundColor?terrainArtMaterial(id):0);
             }
           }
           continue;
         }
-        const color=COLORS[id]||COLORS[3];
+        const newGround=environmentGround(id);
+        const color=newGround?.color??COLORS[id]??COLORS[3];
         // Most underground voxels are fully enclosed. Defer the two noise
         // samples and tint calculation until the FIRST exposed face; otherwise
         // a solid chunk pays for shading thousands of invisible blocks.
@@ -283,7 +314,8 @@ export function meshChunk(world,cx,cz){
         let variance;
         for(const face of FACE){
           const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
-          if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor))continue;
+          if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor)&&
+              (!unifiedTerrain||!isBiome130BlockId(neighbor)||BIOME_SOLID_CUBES.has(neighbor)))continue;
           if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
             hash(x+y*5,z-y*3,world.seed+91)*.08;
           const r=clamp(color[0]*variance*face.lit,0,1);
@@ -291,7 +323,15 @@ export function meshChunk(world,cx,cz){
           const b=clamp(color[2]*variance*face.lit,0,1);
           for(const k of [0,1,2,0,2,3]){
             const p=face.q[k],uv=FACE_UV[k];
-            appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
+            if(newGround){
+              const shade=face.lit*groundTint(x+p[0],z+p[2]);
+              const terrain=id<=405,nx=face.d[0],ny=face.d[1];
+              const u=terrain?(nx?z+p[2]:x+p[0]):uv[0];
+              const v=terrain?(ny?z+p[2]:y+p[1]):uv[1];
+              appendVertex(x+p[0],y+p[1],z+p[2],color[0]*shade,color[1]*shade,color[2]*shade,
+                u,v,terrain?terrainArtMaterial(id):id===408?4:18);
+            }else
+              appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
           }
         }
       }
@@ -453,5 +493,6 @@ export function collides(world,x,feet,z){
   if(world?.pack3Runtime?.size?.()>0 && !world.pack3Runtime.playerFits(body).fits)return true;
   if(typeof world?.manual14Collision==='function'&&world.manual14Collision(body))return true;
   if(typeof world?.pack5Collision==='function'&&world.pack5Collision(body))return true;
+  if(typeof world?.stagedNonblockCollision==='function'&&world.stagedNonblockCollision(body))return true;
   return false;
 }

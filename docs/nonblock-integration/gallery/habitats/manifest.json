@@ -1,0 +1,143 @@
+{
+  "seed": 179,
+  "generator": "mythwrought-four-surface-regions-v4",
+  "renderPreset": "economy",
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/candidate-scene.mjs": "117603583035b7436c8b50eb4b206afaba7cff72d287f5a79a4d6058768549c8",
+    "src/nonblock/candidate-families.mjs": "ad2cce4056048a4b1e55b8d0d0e3eabb69ea54e45243bd00f1034a1a457a05ef",
+    "src/manual-biomes/profile-world.mjs": "ae374a51657bcd895f0a07163f90b35e0177cdd382ac543d8c540871276687f8",
+    "src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
+    "src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
+    "src/render-budget.mjs": "2da16f5acfddb3e6d1989b337c5b80ae40987336be2f3cff680cd038400218b3",
+    "tests/nonblock-habitat-browser.mjs": "660d1d3766f8ad94d86b2925309da0fc276d75daa9809d880b3952a88e4d3fcc"
+  },
+  "captures": [
+    {
+      "habitat": "desert",
+      "placement": {
+        "sceneId": "nonblock:d:agave-rosette",
+        "anchor": [
+          512,
+          9,
+          0
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Aagave-rosette:179:512,9,0:2",
+      "ground": 256,
+      "triangles": 60,
+      "view": {
+        "pose": [
+          512.5,
+          -1.5
+        ],
+        "point": [
+          512.4627685546875,
+          9.135333061218262,
+          0.5939620733261108
+        ]
+      },
+      "file": "artifacts/nonblock-habitat/desert.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "6c95f938d4cfe93a0b1c91698cd6352c37cc51aca8f8f313da84497a9ff7f8de"
+    },
+    {
+      "habitat": "snow",
+      "placement": {
+        "sceneId": "nonblock:d:frost-fern",
+        "anchor": [
+          0,
+          10,
+          512
+        ],
+        "variant": 1,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Afrost-fern:179:0,10,512:1",
+      "ground": 272,
+      "triangles": 90,
+      "view": {
+        "pose": [
+          0.5,
+          510.5
+        ],
+        "point": [
+          0.5194334288438162,
+          10.057792663574219,
+          512.5266520182291
+        ]
+      },
+      "file": "artifacts/nonblock-habitat/snow.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "a0cd5821ece094b52a0fb9a76b732a59f4526dd1984980ff9dd44a39ef297fbd"
+    },
+    {
+      "habitat": "mountain",
+      "placement": {
+        "sceneId": "nonblock:d:alpine-wildflower",
+        "anchor": [
+          -512,
+          13,
+          0
+        ],
+        "variant": 0,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Aalpine-wildflower:179:-512,13,0:0",
+      "ground": 302,
+      "triangles": 36,
+      "view": {
+        "pose": [
+          -511.5,
+          -1.5
+        ],
+        "point": [
+          -511.5088704427083,
+          13.103333473205566,
+          0.43803099791208905
+        ]
+      },
+      "file": "artifacts/nonblock-habitat/mountain.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "9f881cd2bc6b20d5511606ace4334f937afc83b983045baabdc8f426c2fa6766"
+    },
+    {
+      "habitat": "enchanted",
+      "placement": {
+        "sceneId": "scene48:enchanted-flower",
+        "anchor": [
+          0,
+          9,
+          -512
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:scene48%3Aenchanted-flower:179:0,9,-512:2",
+      "ground": 286,
+      "triangles": 82,
+      "view": {
+        "pose": [
+          0.5,
+          -513.5
+        ],
+        "point": [
+          0.44479501247406006,
+          9.095100084940592,
+          -511.55690511067706
+        ]
+      },
+      "file": "artifacts/nonblock-habitat/enchanted.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "3f80354a466a07cd6923aedbff0e40b8798cf8e99bf4aae859f36b44bfc036b9"
+    }
+  ],
+  "nonemptySchema1AndProfileBytesUnchanged": true
+}

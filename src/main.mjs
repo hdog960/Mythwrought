@@ -27,11 +27,11 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
-import {readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
+import {isUnclaimedWorldSeed,readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
-  exportM2World,inspectM2WorldExport} from './manual-biomes/m2-runtime-bridge.mjs';
+  exportM2World,inspectM2WorldExport,inspectSnapshotWorld} from './manual-biomes/m2-runtime-bridge.mjs';
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {installGameplayRecorder} from './gameplay-recorder.mjs';
 import {installGameUpdater} from './app-update.mjs';
@@ -58,10 +58,12 @@ import {createManualFivePackLiveBuilder} from './builder-assets/manual-five-pack
 import {createPack3LiveBridge,combinePack3ChunkMesh,isPack3BlockId} from './builder-assets/pack3-live.mjs';
 import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
 import {exportPack3Portable,inspectPack3Portable,restorePack3Portable} from './builder-assets/pack3-portable.mjs';
+import {createCaveFarWallGpu} from './manual-caves/c6-far-wall-gpu.mjs';
+import * as nonblockGeometry from './nonblock/candidate-scene.mjs';
+import {environmentalWaterEffects,prepareCandidateEffects,prepareEnvironmentalEffects,readCandidateEffectLayout} from './nonblock/candidate-effects.mjs';
+import {planEnvironmentalScenery} from './nonblock/staged-habitats.mjs';
 
- // Cave profile admission remains synchronous for every ordinary world;
- // source-heavy cave modules are loaded only after explicit cave selection.
- // The key, journal and backup names match cave profile-store exactly.
+// Separate historical Cave World slots keep their original storage identity.
 const CAVE_PROFILE_PREFIX='mythwrought-caves-v1-seed-';
 function caveProfileStorageKey(seed){
  if(!Number.isSafeInteger(seed)||seed!==(seed|0))throw Error('Invalid cave seed');
@@ -86,11 +88,26 @@ const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,powe
 function message(s){status.textContent=s;}
 function fatal(s){notice.hidden=false;notice.textContent=s;message('3D renderer unavailable');}
 if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or desktop browser is required.');
-else start();
+else if(['localhost','127.0.0.1'].includes(location.hostname)&&
+    new URLSearchParams(location.search).has('nonblock-stage')){
+  const url=new URL(location.href);
+  let layout;
+  try{layout=nonblockGeometry.readCandidateLayout(url);}
+  catch(error){console.warn('Nonblock staging layout disabled',error);}
+  const offline=url.searchParams.get('nonblock-offline')==='1';
+  let effects=null;
+  if(layout&&url.searchParams.has('nonblock-fx')){
+    try{effects=prepareCandidateEffects(readCandidateEffectLayout(url));}
+    catch(error){console.warn('Nonblock staging effects disabled',error);}
+  }
+  start(layout?{layout,offline,effects}:null);
+}else start();
 
-function start(){
+function start(nonblockStage=null){
   let gameplayRecorder=null;
   let world,storageReadOnly=false,recoveryNote='',caveSession=null,caveOps=null;
+  const combinedWorld=()=>world.base?.generationProfile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const hasLiveScenery=()=>Boolean(nonblockStage||combinedWorld());
   function loadWorld(seed){
     // Legacy startup must NEVER silently reuse a seed reserved for the
     // creator's explicitly chosen new cave profile sidecar.
@@ -105,6 +122,10 @@ function start(){
       return result.world;
     }
     const result=loadWorldSafe(localStorage,seed);
+    if(!nonblockStage&&isUnclaimedWorldSeed(localStorage,seed,result)){
+      const choice=planM2WorldChoice(String(seed),M2_WORLD_MODE.CREATE_ENVIRONMENT_V7,{confirmed:true});
+      return openM2World(localStorage,choice).world;
+    }
     if(result.recovered)recoveryNote=result.warning;
     const p2=loadPack2LiveWorld(localStorage,result.world);
     if(p2.recovered||p2.warning)recoveryNote=p2.warning||recoveryNote;
@@ -119,11 +140,175 @@ function start(){
     recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
   }
   let pack3=createPack3LiveBridge(world,localStorage);
-  // Only a previously selected immutable v5 world may opt into M5 PWA caching.
-  if(world.base instanceof FourRegionWorld&&
-      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR].includes(
-        world.base.generationProfile.generator))
-    void ensureM5OfflineCache();
+  let nonblockWorld,nonblockChunk,nonblockScene,nonblockBuffer,nonblockDrawKey='',nonblockVertexCount=0;
+  let nonblockParents=new Set();
+  let effectBuffer,effectBytes=0,effectVertexCount=0,lastEffectUpload=-Infinity,worldEffects=null;
+  function retireLiveScenery(){
+    if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
+    nonblockWorld=null;nonblockScene=null;nonblockBuffer=null;nonblockVertexCount=0;nonblockDrawKey='';
+    nonblockParents.clear();effectVertexCount=0;lastEffectUpload=-Infinity;worldEffects=null;
+    for(const key of ['nonblockVertices','nonblockInstances','nonblockFarInstances',
+      'nonblockGpuBytes','nonblockDrawCalls','nonblockEffects','nonblockEffectVertices','nonblockWaterEffects'])
+      canvas.dataset[key]='0';
+    canvas.dataset.nonblockTarget='';
+    canvas.dataset.nonblockSaveState='unavailable';
+  }
+
+  function stagedScene(){
+    if(storageReadOnly)return null;
+    const streamed=combinedWorld()&&!nonblockStage?.layout.length;
+    const cx=streamed?chunkCoord(player.x):0,cz=streamed?chunkCoord(player.z):0;
+    const roof=streamed?terrainHeight(Math.floor(player.x),Math.floor(player.z),world.seed)-2:null;
+    const caveSection=streamed&&player.feet<roof?Math.floor(player.feet/8):null;
+    const center=streamed?cx+','+cz+(caveSection===null?'':':'+caveSection):null;
+    if(nonblockWorld!==world||nonblockChunk!==center){
+      nonblockWorld=world;
+      nonblockChunk=center;
+      nonblockScene=null;
+      try{
+        const worldId=caveSession?.profile??world.base?.generationProfile?.generator??'legacy';
+        const placed=(x,y,z)=>Boolean(manual14.layer.get([x,y,z])||pack3.getAt(x,y,z)||
+          pack5Builder?.layer.cell([x,y,z])||world.getPack2State?.(x,y,z));
+        const layout=streamed?planEnvironmentalScenery(world.base,cx,cz,{occupied:placed,caveSection}):nonblockStage.layout;
+        nonblockScene=nonblockGeometry.createCandidateScene(world.seed,worldId,layout,{
+          storage:localStorage,
+          residentAt:(x,y,z)=>!streamed||chunks.has(depthMeshKey(chunkCoord(x),chunkCoord(z),sectionForY(y))),
+          blockAt:(x,y,z)=>{
+            if(manual14.layer.get([x,y,z])||pack3.getAt(x,y,z)||
+                pack5Builder?.layer.cell([x,y,z]))return true;
+            const block=world.get(x,y,z);
+            return block!==BLOCK.AIR&&block!==76;
+          },
+          editedAt:(x,y,z)=>world.edits.has([x,y,z].join(','))||Boolean(streamed&&placed(x,y,z)),
+          voxelPick:(origin,direction,maxDistance)=>{
+            const voxel=raycast(world,origin,direction,maxDistance);
+            const furniture=pack5Builder?.layer.raycast(origin,direction,maxDistance);
+            return furniture&&(!voxel||furniture.distance<voxel.distance)?furniture:voxel;
+          }
+        });
+        const scene=nonblockScene, loadedWorld=world;
+        world.stagedNonblockCollision=body=>!storageReadOnly&&world===loadedWorld&&
+          Boolean(nonblockBuffer)&&scene.bodyIntersects(body);
+        world.stagedNonblockClimb=current=>!storageReadOnly&&world===loadedWorld&&
+          Boolean(nonblockBuffer)&&scene.climbableAt(current);
+      }catch(error){
+        console.warn('Nonblock staging scene disabled',error);
+      }
+    }
+    return nonblockScene;
+  }
+
+  function drawStagedScene(){
+    const origin=eye();
+    const scene=stagedScene();
+    const saveState=scene?(scene.recovered?'recovered':'ready'):'unavailable';
+    if(canvas.dataset.nonblockSaveState!==saveState)canvas.dataset.nonblockSaveState=saveState;
+    const {objects,hit}=scene?.frame(origin,help.hidden?facing():null)??{objects:[],hit:null};
+    const key=objects.map(o=>o.instanceKey+(o.detail==='far'?'#far':'')).join('|');
+    if(key!==nonblockDrawKey){
+      const vertices=nonblockGeometry.candidateVertices(objects);
+      try{
+        const next=vertices.length?uploadChunkBuffer(gl,vertices):null;
+        if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
+        nonblockBuffer=next;
+        nonblockVertexCount=vertices.length/9;
+        nonblockDrawKey=key;
+        nonblockParents=new Set(objects.map(o=>o.instanceKey));
+        if(combinedWorld()&&!nonblockStage?.layout.length){
+          worldEffects=prepareEnvironmentalEffects(objects);
+          lastEffectUpload=-Infinity;
+          effectVertexCount=0;
+          if(!worldEffects){canvas.dataset.nonblockEffects='0';canvas.dataset.nonblockEffectVertices='0';}
+        }
+      }catch(error){
+        // An upload failure must not expose selectable invisible scenery.
+        if(nonblockBuffer)gl.deleteBuffer(nonblockBuffer);
+        nonblockBuffer=null;
+        nonblockDrawKey='';
+        nonblockVertexCount=0;
+        worldEffects=null;effectVertexCount=0;
+        canvas.dataset.nonblockDrawCalls='0';
+        canvas.dataset.nonblockGpuBytes='0';
+        canvas.dataset.nonblockTarget='';
+        canvas.dataset.nonblockVertices='0';
+        canvas.dataset.nonblockInstances='0';
+        canvas.dataset.nonblockFarInstances='0';
+        console.warn('Nonblock staging geometry upload failed',error);
+        return null;
+      }
+    }
+    if(nonblockBuffer){
+      gl.bindBuffer(gl.ARRAY_BUFFER,nonblockBuffer);
+      gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
+      gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
+      gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
+      gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
+      gl.drawArrays(gl.TRIANGLES,0,nonblockVertexCount);
+    }
+    canvas.dataset.nonblockVertices=String(nonblockVertexCount);
+    canvas.dataset.nonblockInstances=String(objects.length);
+    canvas.dataset.nonblockFarInstances=String(objects.filter(o=>o.detail==='far').length);
+    canvas.dataset.nonblockGpuBytes=String(nonblockVertexCount*36);
+    canvas.dataset.nonblockDrawCalls=String(Number(Boolean(nonblockBuffer)));
+    canvas.dataset.nonblockTarget=hit?.instanceKey??'';
+    return hit;
+  }
+  const emptyEffects={instances:0,vertices:new Float32Array()};
+  function drawStagedEffects(now,sampleEffects,waterChunks){
+    if(now-lastEffectUpload>=65){
+      lastEffectUpload=now;
+      const parents=nonblockBuffer?nonblockParents:new Set();
+      const state={seconds:now/1000,seed:world.seed,viewer:eye(),parents};
+      let effects=sampleEffects?.(state)??emptyEffects;
+      const water=waterChunks?.length?environmentalWaterEffects(world,waterChunks,state.viewer,16-effects.instances):[];
+      canvas.dataset.nonblockWaterEffects=String(water.length);
+      if(water.length){
+        const wet=prepareCandidateEffects(water)(state);
+        const vertices=new Float32Array(effects.vertices.length+wet.vertices.length);
+        vertices.set(effects.vertices);vertices.set(wet.vertices,effects.vertices.length);
+        effects={instances:effects.instances+wet.instances,vertices};
+      }
+      const {vertices}=effects;
+      effectVertexCount=vertices.length/9;
+      canvas.dataset.nonblockEffects=String(effects.instances);
+      canvas.dataset.nonblockEffectVertices=String(effectVertexCount);
+      canvas.dataset.nonblockEffectFrame=String(now);
+      if(effectVertexCount){
+        effectBuffer??=gl.createBuffer();
+        if(!effectBuffer){effectVertexCount=0;return;}
+        gl.bindBuffer(gl.ARRAY_BUFFER,effectBuffer);
+        if(vertices.byteLength>effectBytes){
+          effectBytes=2**Math.ceil(Math.log2(vertices.byteLength));
+          gl.bufferData(gl.ARRAY_BUFFER,effectBytes,gl.DYNAMIC_DRAW);
+        }
+        gl.bufferSubData(gl.ARRAY_BUFFER,0,vertices);
+      }
+    }
+    if(!effectVertexCount)return;
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+    gl.depthMask(false);
+    gl.bindBuffer(gl.ARRAY_BUFFER,effectBuffer);
+    gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
+    gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
+    gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);
+    gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
+    gl.drawArrays(gl.TRIANGLES,0,effectVertexCount);
+    gl.depthMask(true);
+    gl.disable(gl.BLEND);
+  }
+  // Every supported offline profile uses the original installation scope.
+  function ensureWorldOfflineCache(){
+    if(!nonblockStage?.offline)return ensureM5OfflineCache();
+    return import('./nonblock/stage-offline.mjs').then(async ({ensureStagedOfflineCache})=>{
+      const registration=await ensureStagedOfflineCache();
+      return registration?{supported:true,registration}:{supported:false,reason:'Staged offline worker unavailable'};
+    }).catch(error=>({supported:false,reason:String(error)}));
+  }
+  if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
+      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR].includes(
+        world.base.generationProfile.generator)))
+    void ensureWorldOfflineCache();
   seedLabel.textContent='WORLD '+world.seed;
   // S1: separate per-seed clock sidecar; never modify original schema-1 saves.
   // The monotonic clock advances even while settings overlay is open.
@@ -209,13 +394,21 @@ function start(){
   ].join('\n');
   // Reserved transparent-water material 20; legacy materials stay unchanged.
   const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER
-    .replace('uniform vec3 uFog;','uniform vec3 uFog; uniform vec3 uSkyLight;')
+    .replace('uniform vec3 uFog;',
+      'uniform vec3 uFog; uniform vec3 uSkyLight; uniform float uCaveHaze;'+
+      'float worldFog(float distanceToEye){ return smoothstep(mix(29.0,9.0,uCaveHaze),'+
+        'mix(68.0,27.0,uCaveHaze),distanceToEye); }')
     .replace('mix(vColor,uFog,distant)','mix(vColor*uSkyLight,uFog,distant)')
     .replace('mix(colored,uFog,fog)','mix(colored*uSkyLight,uFog,fog)')
     .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
     .replace('void main(){',
       'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
-      'outColor=vec4(mix(vColor*uSkyLight,uFog,f),vPack2Alpha); return; }');
+      'outColor=vec4(mix(vColor*uSkyLight,uFog,f),vPack2Alpha); return; }'+
+      `if(vMat==${nonblockGeometry.NONBLOCK_SCENERY_MATERIAL}){ float f=smoothstep(29.0,68.0,vDistance);`+
+      'outColor=vec4(mix(vColor,uFog,f),1.0); return; }'+
+      'if(vMat==23){ float f=smoothstep(14.0,24.0,vDistance);'+
+      'outColor=vec4(vColor,vPack2Alpha*(1.0-f)); return; }'
+    ).replaceAll('smoothstep(29.0,68.0,vDistance)','worldFog(vDistance)');
   let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
   function initializeGpuPipeline(){
     const resources=buildGpuPipeline(gl,{
@@ -241,7 +434,7 @@ function start(){
   const chunks=new Map(),pending=new Map();
   // Cave-only outer-ring opaque meshes, never scheduled in normal save profiles.
   // Keep accepted M5/legacy module graph free of cave-only imports.
-  let caveFarGpu=null;
+  const caveFarGpu=createCaveFarWallGpu(gl);
   const name=chunkKey;
   const player=newPlayer(world);
   let mobSession=null,mobRenderer=null,mobEnvironment=null,mobLastSave=0;
@@ -253,6 +446,7 @@ function start(){
       mobSession=createLiveMobSession({
         world,seed:world.seed,storage:localStorage,
         worldKind:caveSession?'cave':'normal',
+        spawnOnFirstVisit:combinedWorld(),
         resident:(cx,cz,section)=>chunks.has(depthMeshKey(cx,cz,section)),
         biomeAt:point=>{
           // Every genuine deep mined shaft is underground, not just the
@@ -619,14 +813,17 @@ function start(){
   }
   function verifiedLiveBytes(){
     if(caveSession)throw Error('Cave profiles are isolated; legacy mirror cannot capture a cave world');
-    // The legacy mirror stores ONLY schema-1 bytes, not immutable generator
-    // profile metadata. Never mirror a biome world as if it were legacy.
-    if(world.base instanceof FourRegionWorld)
-      throw Error('Four-biome world: use WORLD EXPORT (profile-safe JSON); legacy mirror disabled');
     if(storageReadOnly)throw Error('Protected read-only world: keep original damaged data');
     const raw=localStorage.getItem(worldSlotKey(world.seed));
     if(!raw||raw!==JSON.stringify(world.save()))
       throw Error('Live world does not match a verified primary save. Use SAVE first.');
+    if(world.base instanceof FourRegionWorld){
+      const verified=openM2World(localStorage,planM2WorldChoice(String(world.seed)));
+      const bundle=exportM2World(world);
+      if(verified.warning||exportM2World(verified.world)!==bundle)
+        throw Error('Live profile or Pack 2 state differs from the verified save. Use SAVE first.');
+      return bundle;
+    }
     return raw;
   }
   function queueMirror(seed,raw){
@@ -710,6 +907,7 @@ function start(){
       }
       changed=false;
       saveHealth.textContent='Verified biome-generation profile, schema-1 edits and Pack 2 sidecar; use profile-safe WORLD EXPORT for off-device backup.';
+      scheduleMirrorForWorld();
       return true;
     }
     const overlay=savePack2LiveWorld(localStorage,world);
@@ -804,7 +1002,7 @@ function start(){
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
-    if(caveSession)caveFarGpu?.invalidate();
+    if(caveSession||combinedWorld())caveFarGpu.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
   function refreshPhysicalChunk(x,z,y){
@@ -889,8 +1087,26 @@ function start(){
       }else message(result.reason||'Pack 5 construction rejected');
       return;
     }
+    if(mode==='mine'&&hasLiveScenery()&&nonblockWorld===world&&nonblockBuffer){
+      const scene=stagedScene();
+      const origin=eye(), direction=facing();
+      const hit=scene?.pick(origin,direction);
+      if(hit){
+        const removed=scene.breakHit(hit,origin,direction);
+        if(scene.recovered)message('Staged scenery recovered from backup · removals are read-only');
+        else message(removed?'Scenery removed · staged save verified':'Scenery removal could not be saved');
+        return;
+      }
+    }
     const physicalState=inspectBlockTarget(world,eye(),facing(),selected,player,
       isPack3BlockId(selected)?pack3Yaw:selectedRotation);
+    if(mode==='place'&&hasLiveScenery()&&physicalState.adjacent){
+      const cell=physicalState.adjacent;
+      if(stagedScene()?.bodyIntersects([...cell,...cell.map(n=>n+1)])){
+        message('Building space occupied by scenery');
+        return;
+      }
+    }
     const existingPack3=physicalState.hit?pack3.getAt(...physicalState.hit):null;
     const existingManual14=physicalState.hit?manual14.layer.get(physicalState.hit):null;
     if((mode==='place'&&manual14Ids.has(selected))||(mode==='mine'&&existingManual14)){
@@ -1115,39 +1331,56 @@ function start(){
         projectSunToScreen(skyEvent.direction,player.yaw,player.pitch,w/h);
       const skyLight=atmosphere.light.map((v,i)=>
         Math.min(1,v+lunar.moonlight*[.71,.84,1][i]));
-      gl.clearColor(...atmosphere.fog,1);
-      if(s6Biome)gl.clearColor(...s6Mood.fog,1);
+      // Deep cave visibility falls into a dark atmosphere beyond the real
+      // near and far rock meshes. Surface entrances keep their outdoor sky.
+      const caveShade=combinedWorld()?Math.max(0,Math.min(1,(-player.feet-10)/10)):0;
+      const caveFog=[.053,.068,.088];
+      const fadeCave=(color,target=caveFog)=>caveShade===0?color:
+        color.map((value,i)=>value+(target[i]-value)*caveShade);
+      const fog=fadeCave(s6Biome?s6Mood.fog:atmosphere.fog);
+      if(caveShade>0)gl.clearColor(...fog,1);
+      else{
+        gl.clearColor(...atmosphere.fog,1);
+        if(s6Biome)gl.clearColor(...s6Mood.fog,1);
+      }
       gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
       // Cheap procedural WebGL sky; the depth buffer is reserved for editable voxels.
-      gl.disable(gl.DEPTH_TEST);
-      gl.useProgram(skyProgram);
-      gl.uniform2f(skyU.resolution,w,h);
-      gl.uniform1f(skyU.yaw,player.yaw);
-      gl.uniform1f(skyU.pitch,player.pitch);
-      gl.uniform2f(skyU.sunScreen,...sunScreen);
-      gl.uniform1f(skyU.sunVisibility,atmosphere.sunVisibility);
-      gl.uniform3fv(skyU.horizon,s6Mood.horizon);
-      gl.uniform3fv(skyU.zenith,s6Mood.zenith);
-      gl.uniform3fv(skyU.cloud,s6Mood.cloud);
-      gl.uniform3fv(skyU.ridge,s6Mood.ridge);
-      gl.uniform3fv(skyU.fog,s6Mood.fog);
-      gl.uniform3fv(skyU.sunColor,atmosphere.sunColor);
-      gl.uniform2fv(skyU.lunarScreen,moonScreens.flat());
-      gl.uniform2fv(skyU.lunarPhase,lunar.moons.flatMap(m=>m.terminator));
-      gl.uniform3fv(skyU.lunarColor,lunar.moons.flatMap(m=>m.color));
-      gl.uniform1fv(skyU.lunarRadius,lunar.moons.map(m=>m.radius));
-      gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility));
-      gl.uniform1f(skyU.starVisibility,nightCanvas.starVisibility);
-      gl.uniform1f(skyU.twinkleAngle,nightCanvas.twinkleAngle);
-      gl.uniform2fv(skyU.cloudShiftA,nightCanvas.cloudA);
-      gl.uniform2fv(skyU.cloudShiftB,nightCanvas.cloudB);
-      gl.uniform1i(skyU.s5Type,skyEvent.kind);
-      gl.uniform1f(skyU.s5Strength,skyEvent.strength);
-      gl.uniform1f(skyU.s5Progress,skyEvent.progress);
-      gl.uniform2fv(skyU.s5Center,skyEventCenter);
-      gl.uniform2fv(skyU.s5Vector,skyEvent.vector);
-      gl.uniform3fv(skyU.s5Color,skyEvent.color);
-      gl.drawArrays(gl.TRIANGLES,0,3);
+      if(caveShade<1){
+        gl.disable(gl.DEPTH_TEST);
+        gl.useProgram(skyProgram);
+        gl.uniform2f(skyU.resolution,w,h);
+        gl.uniform1f(skyU.yaw,player.yaw);
+        gl.uniform1f(skyU.pitch,player.pitch);
+        gl.uniform2f(skyU.sunScreen,...sunScreen);
+        gl.uniform1f(skyU.sunVisibility,atmosphere.sunVisibility*(1-caveShade));
+        gl.uniform3fv(skyU.horizon,fadeCave(s6Mood.horizon));
+        gl.uniform3fv(skyU.zenith,fadeCave(s6Mood.zenith));
+        gl.uniform3fv(skyU.cloud,fadeCave(s6Mood.cloud));
+        gl.uniform3fv(skyU.ridge,fadeCave(s6Mood.ridge));
+        gl.uniform3fv(skyU.fog,fadeCave(s6Mood.fog));
+        gl.uniform3fv(skyU.sunColor,atmosphere.sunColor);
+        gl.uniform2fv(skyU.lunarScreen,moonScreens.flat());
+        gl.uniform2fv(skyU.lunarPhase,lunar.moons.flatMap(m=>m.terminator));
+        gl.uniform3fv(skyU.lunarColor,lunar.moons.flatMap(m=>m.color));
+        gl.uniform1fv(skyU.lunarRadius,lunar.moons.map(m=>m.radius));
+        if(caveShade>0){
+          gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility*(1-caveShade)));
+          gl.uniform1f(skyU.starVisibility,nightCanvas.starVisibility*(1-caveShade));
+        }else{
+          gl.uniform1fv(skyU.lunarVisibility,lunar.moons.map(m=>m.visibility));
+          gl.uniform1f(skyU.starVisibility,nightCanvas.starVisibility);
+        }
+        gl.uniform1f(skyU.twinkleAngle,nightCanvas.twinkleAngle);
+        gl.uniform2fv(skyU.cloudShiftA,nightCanvas.cloudA);
+        gl.uniform2fv(skyU.cloudShiftB,nightCanvas.cloudB);
+        gl.uniform1i(skyU.s5Type,skyEvent.kind);
+        gl.uniform1f(skyU.s5Strength,skyEvent.strength*(1-caveShade));
+        gl.uniform1f(skyU.s5Progress,skyEvent.progress);
+        gl.uniform2fv(skyU.s5Center,skyEventCenter);
+        gl.uniform2fv(skyU.s5Vector,skyEvent.vector);
+        gl.uniform3fv(skyU.s5Color,skyEvent.color);
+        gl.drawArrays(gl.TRIANGLES,0,3);
+      }
       gl.enable(gl.DEPTH_TEST);
       gl.useProgram(program);
       gl.uniform3fv(U.uEye,eye());
@@ -1156,12 +1389,18 @@ function start(){
       gl.uniform3fv(U.uUp,[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),-Math.sin(player.pitch)*Math.cos(player.yaw)]);
       gl.uniform1f(U.uAspect,w/h);
       gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
-      gl.uniform3fv(U.uFog,atmosphere.fog);
-      if(s6Biome)gl.uniform3fv(U.uFog,s6Mood.fog);
+      if(caveShade>0)gl.uniform3fv(U.uFog,fog);
+      else{
+        gl.uniform3fv(U.uFog,atmosphere.fog);
+        if(s6Biome)gl.uniform3fv(U.uFog,s6Mood.fog);
+      }
+      gl.uniform1f(U.uCaveHaze,caveShade);
       // Preserve S2's exact live ambient uniform path, then layer only the
       // bounded S3 lunar contribution if at least one moon illuminates night.
       gl.uniform3fv(U.uSkyLight,atmosphere.light);
       if(lunar.moonlight>0)gl.uniform3fv(U.uSkyLight,skyLight);
+      if(caveShade>0)
+        gl.uniform3fv(U.uSkyLight,fadeCave(lunar.moonlight>0?skyLight:atmosphere.light,[.76,.81,.91]));
       gl.uniform1f(U.uArtQuality,renderPreset==='economy'?0:1);
       if(frame%12===0){
         canvas.dataset.skySunAltitude=String(atmosphere.elevation.toFixed(4));
@@ -1175,7 +1414,8 @@ function start(){
         canvas.dataset.skyMoonPhases=JSON.stringify(lunar.moons.map(m=>Number(m.phaseFraction.toFixed(5))));
         canvas.dataset.skyMoonIlluminations=JSON.stringify(lunar.moons.map(m=>Number(m.illumination.toFixed(5))));
         canvas.dataset.skyMoonVisibilities=JSON.stringify(lunar.moons.map(m=>Number(m.visibility.toFixed(5))));
-        canvas.dataset.skyFog=JSON.stringify(s6Mood.fog.map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyFog=JSON.stringify(fadeCave(s6Mood.fog).map(v=>Number(v.toFixed(4))));
+        canvas.dataset.skyBackdrop=caveShade===1?'deep-cave':caveShade>0?'cave-transition':'outdoor';
         canvas.dataset.skyS6SourceStatus=s6SourceState;
         canvas.dataset.skyS6BiomeName=s6Biome?.name??'none';
         canvas.dataset.skyS6WorldBiomeName=s6V6?(s6Biome?.name??'plains'):
@@ -1222,7 +1462,7 @@ function start(){
         }
       }
       const c6Far=caveFarGpu?.step({world,player,nearChunks:chunks,
-        nearPending:pending,frame,viewport:[w,h],enabled:!!caveSession})??
+        nearPending:pending,frame,viewport:[w,h],enabled:!!caveSession||combinedWorld()})??
         {chunks:0,bytes:0,pending:0,uncovered:0,vertices:0,failures:0,uploads:0,lastMeshMs:0};
       canvas.dataset.c6FarChunks=String(c6Far.chunks);
       canvas.dataset.c6FarBytes=String(c6Far.bytes);
@@ -1289,6 +1529,8 @@ function start(){
         canvas.dataset.pack5PendingPages='0';
         canvas.dataset.pack5BudgetExcluded='0';
       }
+      if(nonblockWorld&&!hasLiveScenery())retireLiveScenery();
+      const sceneryHit=hasLiveScenery()?drawStagedScene():null;
       // Real depth-tested 40-model instancing, inside the existing WebGL pass.
       if(mobRenderer&&mobSession&&!mobRuntimeError){
         try{
@@ -1317,10 +1559,12 @@ function start(){
         canvas.dataset.mobDrawCalls='0';canvas.dataset.mobSpecies='0';
       }
       // Genuine transparent-water pass, only for chunks with water candidates.
-      if([...chunks.values()].some(c=>c.waterBuffer)){
+      const waterChunks=[...chunks.values()].filter(c=>c.waterBuffer);
+      canvas.dataset.waterSections=String(waterChunks.length);
+      if(waterChunks.length){
         gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
         gl.depthMask(false);
-        const waterChunks=[...chunks.values()].filter(c=>c.waterBuffer).sort((a,b)=>{
+        waterChunks.sort((a,b)=>{
           const distance=c=>((c.x*16+8-player.x)**2+(c.z*16+8-player.z)**2+
             (c.section*16-player.feet)**2);
           return distance(b)-distance(a);
@@ -1335,14 +1579,25 @@ function start(){
         }
         gl.depthMask(true);gl.disable(gl.BLEND);
       }
+      const effects=nonblockStage?.effects??worldEffects;
+      const wet=combinedWorld()&&!nonblockStage?.effects?waterChunks:null;
+      if(effects||wet?.length)drawStagedEffects(now,effects,wet);
+      else if(effectVertexCount){
+        effectVertexCount=0;lastEffectUpload=-Infinity;
+        canvas.dataset.nonblockEffects='0';canvas.dataset.nonblockEffectVertices='0';
+        canvas.dataset.nonblockWaterEffects='0';
+      }
       // A faint world-space targeted-block outline, never a HUD covering the scene.
-      const focused=help.hidden?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
+      const focused=help.hidden&&!sceneryHit?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
       const focusKey=focused?.hit?.join(',')||'';
       const placeKey=focused?.canPlace?focused.adjacent.join(','):'';
       canvas.dataset.targetBlock=focusKey;
       canvas.dataset.targetPlace=placeKey;
       canvas.dataset.canPlace=String(Boolean(placeKey));
-      const display=focused?.hit?
+      const display=sceneryHit
+        ? sceneryHit.sceneId.split(':').at(-1).replaceAll('-',' ').toUpperCase()+
+          ' · '+sceneryHit.distance.toFixed(1)+'m\nMINE = REMOVE SCENERY'
+        : focused?.hit?
         (BLOCK_NAMES[focused.block]||'block').toUpperCase()+' · '+focused.distance.toFixed(1)+'m'+
         '\n'+(focused.canPlace?'GOLD = BUILD SPACE':'PLACE BLOCKED'):
         'LOOK AT A BLOCK';
@@ -2183,7 +2438,9 @@ function start(){
         const raw=localStorage.getItem(worldSlotKey(world.seed));
         if(raw===null)saved='No canonical save for this seed yet';
         else{
-          const loaded=loadWorldSafe(localStorage,world.seed);
+          const loaded=world.base instanceof FourRegionWorld?
+            openM2World(localStorage,planM2WorldChoice(String(world.seed))):
+            loadWorldSafe(localStorage,world.seed);
           const same=JSON.stringify(loaded.world.save())===JSON.stringify(world.save());
           saved=(same?'Current world matches stored edits':'MISMATCH: world edits differ')+
             '; source='+loaded.source;
@@ -2229,6 +2486,20 @@ function start(){
   const vaultLink=document.getElementById('vaultDownloadLink');
   const vaultButtons=[...document.querySelectorAll('.vault-settings button')];
   let vaultBusy=false,vaultObjectUrl=null;
+  function prepareSnapshotRestore(raw,seed){
+    rejectLegacyWorldWhereCaveExists(localStorage,seed);
+    const restored=inspectSnapshotWorld(raw,seed);
+    const profile=readFourRegionProfile(localStorage,seed)?.profile;
+    if(restored instanceof Pack2LiveWorld){
+      if(!profile||JSON.stringify(profile)!==JSON.stringify(restored.base.generationProfile))
+        throw Error('Backup generation profile differs from this seed. Use WORLD IMPORT to open a profiled backup on an unused seed.');
+      return restored;
+    }
+    if(profile)throw Error('A legacy snapshot cannot replace a seed with a saved generation profile');
+    const bundle=JSON.parse(raw);
+    return bundle.pack2?pack2ImportBundle(bundle,restored):
+      loadPack2LiveWorld(localStorage,restored).world;
+  }
   function clearVaultLink(){
     if(vaultObjectUrl){URL.revokeObjectURL(vaultObjectUrl);vaultObjectUrl=null;}
     vaultLink.hidden=true;vaultLink.removeAttribute('href');
@@ -2273,18 +2544,14 @@ function start(){
   document.getElementById('vaultRefresh').onclick=()=>useVault(()=>refreshVault());
   document.getElementById('vaultBackup').onclick=()=>useVault(async()=>{
     if(storageReadOnly)throw Error('Current world is in protected read-only mode; select a healthy seed or import a backup');
-    if(world.base instanceof FourRegionWorld)
-      throw Error('Four-biome backups require WORLD EXPORT with generation profile. Legacy vault cannot safely back up this world');
     const capturedSeed=world.seed;
-    // Legacy vault parser accepts the original schema-1 envelope while the
-    // additional Pack 2 sidecar is retained for a complete JSON restore.
-    const raw=JSON.stringify(world.pack2Cells.size?
+    const raw=world.base instanceof FourRegionWorld?exportM2World(world):JSON.stringify(world.pack2Cells.size?
       pack2ExportBundle(world):world.save());
     const snapshot=await createVaultBackup(raw);
     if(capturedSeed!==snapshot.seed)throw Error('Snapshot seed mismatch');
     await refreshVault(snapshot.id);
     vaultStatus.textContent='Verified device backup for seed '+snapshot.seed+
-      ' ('+snapshot.edits+' legacy edits'+
+      ' ('+snapshot.edits+' world edits'+
       (world.pack2Cells.size?', '+world.pack2Cells.size+' Pack 2 placements':'')+
       '). Download JSON for an independent off-device copy.';
   });
@@ -2302,14 +2569,7 @@ function start(){
     clearVaultLink();
     const activeSeed=world.seed;
     const snapshot=await inspectVaultBackup(chosenVaultId());
-    if(world.base instanceof FourRegionWorld||readFourRegionProfile(localStorage,snapshot.seed))
-      throw Error('Legacy vault restore cannot overwrite a biome-profile world. Use profile-safe WORLD EXPORT; no save was changed');
-    const imported=importWorldData(snapshot.raw);
-    // Legacy vault snapshots retain schema-1 bytes. Restore the independently
-    // verified Pack 2 overlay for this seed, or abort before touching saves.
-    const candidate=JSON.parse(snapshot.raw).pack2?
-      pack2ImportBundle(JSON.parse(snapshot.raw),imported):
-      loadPack2LiveWorld(localStorage,imported).world;
+    const candidate=prepareSnapshotRestore(snapshot.raw,snapshot.seed);
     // Always require approval, including when restoring a different seed.
     if(!window.confirm('RESTORE device backup for seed '+snapshot.seed+' with '+snapshot.edits+
       ' edits? The current saved world will be preserved in the previous-good slot where possible. Cancel changes nothing.')) {
@@ -2318,8 +2578,15 @@ function start(){
     if(world.seed!==activeSeed)throw Error('Current world changed while restoring; retry');
     if(!storageReadOnly&&changed&&!save())throw Error('Current world has unsaved edits. Export it before restoring');
     let damaged=false;
-    try{loadWorldSafe(localStorage,imported.seed);}catch(_){damaged=true;}
-    const result=saveWorldSafe(localStorage,imported,{allowReplaceCorrupt:damaged});
+    try{loadWorldSafe(localStorage,candidate.seed);}catch(_){damaged=true;}
+    if(candidate.base instanceof FourRegionWorld){
+      const status=saveM2World(localStorage,candidate,{allowReplaceCorrupt:damaged});
+      if(!status.ok)throw Error('Profile snapshot restore failed: '+status.reason);
+      enterPreparedM2World(candidate,'Restored device backup for seed '+candidate.seed);
+      vaultStatus.textContent='Verified device snapshot restored with the matching generation profile.';
+      return;
+    }
+    const result=saveWorldSafe(localStorage,candidate.base,{allowReplaceCorrupt:damaged});
     if(!result.ok)throw Error('Restore failed without replacing the active game: '+result.detail);
     const overlay=savePack2LiveWorld(localStorage,candidate);
     if(!overlay.ok)throw Error('Pack 2 verified overlay not updated; export backups before retry: '+overlay.reason);
@@ -2327,7 +2594,10 @@ function start(){
     chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
-    g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
+    disposeLiveMobSession();g2NewWorld();caveFarGpu.invalidate();
+    world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);
+    resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
+    reactivateSkyClock();resetLiveMobSession();
     clearMirrorDownload();
     respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
     document.getElementById('seedInput').value=String(world.seed);
@@ -2367,8 +2637,6 @@ function start(){
       // a damaged world; otherwise a reload could accidentally opt the user in.
       if(requested&&caveSession)throw Error('Normal-world mirroring is disabled in Cave World; use separate Cave SAVE / EXPORT');
       if(requested&&storageReadOnly)throw Error('Selected world is protected read-only; export or select a healthy seed first');
-      if(requested&&world.base instanceof FourRegionWorld)
-        throw Error('Four-biome world requires profile-safe WORLD EXPORT; legacy mirror cannot hold its generation identity');
       localStorage.setItem(MIRROR_PREF,requested?'enabled':'disabled');
       if(localStorage.getItem(MIRROR_PREF)!==(requested?'enabled':'disabled'))
         throw Error('Preference read-back failed');
@@ -2419,8 +2687,6 @@ function start(){
   });
   mirrorSlot.addEventListener('change',clearMirrorDownload);
   document.getElementById('mirrorPrepare').onclick=()=>withMirror(async()=>{
-    if(world.base instanceof FourRegionWorld)
-      throw Error('Use profile-safe WORLD EXPORT for four-biome backups; this mirror contains only legacy schema-1 bytes');
     await settleMirrorWrites();
     const selectedSeed=world.seed,selectedVersion=mirrorSlot.value;
     const snap=await getMirrorCopy(selectedSeed,selectedVersion);
@@ -2429,26 +2695,27 @@ function start(){
     mirrorDownload.href=mirrorDownloadUrl;
     mirrorDownload.download='mythwrought-mirror-seed-'+selectedSeed+'-'+selectedVersion+'.json';
     mirrorDownload.hidden=false;
-    mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap the separate DOWNLOAD link to export this original schema-1 JSON file.';
+    mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap the separate DOWNLOAD link to export the verified world JSON.';
   });
   document.getElementById('mirrorRestore').onclick=()=>withMirror(async()=>{
-    if(world.base instanceof FourRegionWorld||readFourRegionProfile(localStorage,world.seed))
-      throw Error('Refusing legacy mirror restore on a four-biome profile; generation identity would be lost');
     if(storageReadOnly)throw Error('Read-only startup protection active; use the regular IMPORT flow to repair damaged saved bytes');
     await settleMirrorWrites(); // Never let an older queued write race a restore.
     const seed=world.seed,which=mirrorSlot.value;
     const snap=await getMirrorCopy(seed,which);
-    const restored=importWorldData(snap.raw);
-    const candidate=JSON.parse(snap.raw).pack2?
-      pack2ImportBundle(JSON.parse(snap.raw),restored):
-      loadPack2LiveWorld(localStorage,restored).world;
-    if(restored.seed!==seed)throw Error('Mirror seed does not match the active world');
+    const candidate=prepareSnapshotRestore(snap.raw,seed);
     if(!window.confirm('RESTORE the '+which+' verified mirror of seed '+seed+
       ' with '+snap.edits+' edits? The current primary will be kept in the previous-good local backup. Cancel changes nothing.')){
       mirrorStatus.textContent='Restore cancelled. No world or mirror copy changed.';return;
     }
     if(world.seed!==seed||changed)throw Error('World changed or contains unsaved edits; export or SAVE before restoring');
-    const out=saveWorldSafe(localStorage,restored);
+    if(candidate.base instanceof FourRegionWorld){
+      const status=saveM2World(localStorage,candidate);
+      if(!status.ok)throw Error('Profile mirror restore failed: '+status.reason);
+      enterPreparedM2World(candidate,'Restored '+which+' device mirror for seed '+seed);
+      mirrorStatus.textContent='Restore verified with the matching generation profile.';
+      return;
+    }
+    const out=saveWorldSafe(localStorage,candidate.base);
     if(!out.ok)throw Error('Canonical world restore failed; '+out.detail);
     const overlay=savePack2LiveWorld(localStorage,candidate);
     if(!overlay.ok)throw Error('Cannot verify Pack 2 state after restore: '+overlay.reason);
@@ -2480,9 +2747,7 @@ function start(){
       // The accepted M5 service worker caches its unchanged biome module list.
       // Load cave code only on explicitly confirmed Cave World selection;
       // the separate cave SW caches/validates all cave modules for offline.
-      const [loadedOps,farModule]=await Promise.all([
-        import('./manual-caves/game-startup-contract.mjs'),
-        import('./manual-caves/c6-far-wall-gpu.mjs')]);
+      const loadedOps=await import('./manual-caves/game-startup-contract.mjs');
       if(!storageReadOnly&&loadedOps.existingWorldNeedsSaveBeforeCaveSwitch(localStorage,world,changed)&&!save())
         throw Error('Current world is not safely saved; export before entering caves');
       // Validate storage and all source-authored entrances *before* committing
@@ -2492,13 +2757,11 @@ function start(){
       const selected=loadedOps.prepareExplicitCaveWorld(localStorage,next,{action,approved:true});
       const mouth=selected.runtime.entrancePlan.entrances[0].mouth;
       const spawn=findSafeSpawn(selected.world,mouth.x,mouth.z);
-      // Validate the actual renderer before clearing a previous world.
-      const newCaveFar=farModule.createCaveFarWallGpu(gl);
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
       gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       disposeLiveMobSession();g2NewWorld();world=selected.world;caveOps=loadedOps;
-      caveFarGpu?.invalidate();caveFarGpu=newCaveFar;caveSession=selected;
+      caveFarGpu.invalidate();caveSession=selected;
       world.nextPack2State=pack2Selection;
       pack3=createPack3LiveBridge(world,localStorage);
       resetManual14ForWorld();resetPack5ForWorld();
@@ -2514,7 +2777,7 @@ function start(){
       message('Cave world ready · source-authored routes · ordinary worlds protected');
       // Use the EXISTING same-scope M5 PWA registration for explicit cave
       // profiles as well: no second worker can replace the Home Screen app.
-      void ensureM5OfflineCache().then(result=>{
+      void ensureWorldOfflineCache().then(result=>{
         if(result.supported)
           caveWorldStatus.textContent+=' · shared offline shell requested; complete its install while online';
         else caveWorldStatus.textContent+=' · offline not verified: '+result.reason;
@@ -2531,7 +2794,7 @@ function start(){
   createFourBiomeButton.setAttribute('aria-label','Create separate new world with Desert, Snow, Mountains and Enchanted Forest');
   const biomeChoiceHint=document.createElement('p');
   biomeChoiceHint.className='controlhint';
-  biomeChoiceHint.textContent='New and unused seeds only. Ordinary LOAD / CREATE retains all legacy terrain and saves. Four-biome worlds use a separate, immutable generation profile.';
+  biomeChoiceHint.textContent='LOAD / CREATE opens saved seeds or starts the current game on an unused seed.';
   const seedRow=document.getElementById('switchWorld').closest('.seedrow');
   if(seedRow){
     seedRow.insertAdjacentElement('afterend',createFourBiomeButton);
@@ -2572,14 +2835,14 @@ function start(){
     // explicitly NEW four-biome world path. World assignment is separate
     // so existing restore paths retain their original exact contracts.
     disposeLiveMobSession();g2NewWorld();
-    caveSession=null;world=candidate;world.nextPack2State=pack2Selection;
+    caveFarGpu.invalidate();caveSession=null;world=candidate;world.nextPack2State=pack2Selection;
     pack3=createPack3LiveBridge(world,localStorage);
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
     // Register *after* the explicit unused-seed v5 creation is safely saved.
-    if(world.base instanceof FourRegionWorld&&
-        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR].includes(
-          world.base.generationProfile.generator))
-      void ensureM5OfflineCache();
+    if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
+        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR].includes(
+          world.base.generationProfile.generator)))
+      void ensureWorldOfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
     storageReadOnly=false;resetLiveMobSession();changed=false;respawnPrototype();
     clearMirrorDownload();
@@ -2665,6 +2928,11 @@ function start(){
         saveM2World(localStorage,candidate):
         saveWorldSafe(localStorage,candidate);
       if(!result.ok)throw Error(result.reason||result.detail||'World save refused');
+      if(candidate.base instanceof FourRegionWorld){
+        enterPreparedM2World(candidate,'World '+next+' ready to explore.');
+        return;
+      }
+      caveFarGpu.invalidate();
       for(const c of chunks.values())deleteChunkBuffers(c);
       chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
@@ -2810,6 +3078,8 @@ function start(){
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
       chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
       caveFarGpu?.resetForLostContext();
+      nonblockBuffer=null;nonblockDrawKey='';nonblockVertexCount=0;
+      effectBuffer=null;effectBytes=0;effectVertexCount=0;lastEffectUpload=-Infinity;
       pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
       outlineKey='';outlineCount=0;lastTargetText='';
@@ -2856,6 +3126,7 @@ function start(){
         saveIsolation:!caveSession||localStorage.getItem(worldSlotKey(world.seed))===null};},
       fourBiomeMode(){return world.base instanceof FourRegionWorld?'four-regions':'legacy';},
       fourBiomeProfile(){return world.base instanceof FourRegionWorld?world.base.generationProfile:null;},
+      environmentEntrances(){return world.base?.environmentCaves?.entranceSites??[];},
       // M5 read-only local browser acceptance: no displacement/rotation methods.
       m5ObservedPose(){return Object.freeze({x:player.x,z:player.z,feet:player.feet,
         yaw:player.yaw,seed:world.seed,creative:g2Active(),onGround:player.onGround});},
@@ -2888,11 +3159,33 @@ function start(){
         player.yaw=Math.atan2(dx,dz);
         player.pitch=Math.atan2(dy,Math.hypot(dx,dz));
       },
+      aimAtStagedPoint(x,y,z){
+        if(!hasLiveScenery()||![x,y,z].every(Number.isFinite))throw Error('Invalid scenery aim');
+        const [ex,ey,ez]=eye();
+        player.yaw=Math.atan2(x-ex,z-ez);
+        player.pitch=Math.atan2(y-ey,Math.hypot(x-ex,z-ez));
+      },
       block(x,y,z){return manual14.layer.get([x,y,z])?.numericId??pack3.getAt(x,y,z)?.id??world.get(x,y,z);},
       manual14Block(x,y,z){return manual14.layer.get([x,y,z])??null;},
       // Localhost-only building-roadmap acceptance: the actual internal
       // production builder contract, not a separate mock voxel world.
       placeBuilderAsset(row){return fivePackBuilder.place(row);},
+      async placeOwnedFitting(sceneId,options){
+        if(!nonblockStage||storageReadOnly||graphicsLost||document.hidden)
+          throw Error('Owned fitting stage is unavailable');
+        const originalWorld=world;
+        const {planOwnedFitting,placeOwnedDoorPair}=await import('./nonblock/physical-fittings.mjs');
+        if(originalWorld!==world||storageReadOnly||graphicsLost||document.hidden)
+          throw Error('World changed before owned fitting placement');
+        if(sceneId==='scene36:double-door-pair'){
+          const result=placeOwnedDoorPair(options,{world,storage:localStorage,
+            rebuild:refreshEditedMeshes,player});
+          if(result.requiresRecovery)storageReadOnly=true;
+          return result;
+        }
+        const {placements}=planOwnedFitting(sceneId,options);
+        return fivePackBuilder.place(placements[0]);
+      },
       placeManualBuilderBatch(rows){return fivePackBuilder.placeManual14Batch(rows);},
       builderInventory(){return fivePackBuilder.inventory;},
       placeManual14Fixture(x,y,z,id,yaw=0,variant='lower'){

@@ -1,0 +1,59 @@
+{
+  "seed": 179,
+  "generator": "mythwrought-four-surface-regions-v4",
+  "renderPreset": "economy",
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
+    "src/nonblock/candidate-families.mjs": "7b136f75bd586298dafc844deccbf952029af2b0bb3f0ab10c770b92bae218bc",
+    "src/manual-biomes/profile-world.mjs": "ae374a51657bcd895f0a07163f90b35e0177cdd382ac543d8c540871276687f8",
+    "src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
+    "src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
+    "src/render-budget.mjs": "2da16f5acfddb3e6d1989b337c5b80ae40987336be2f3cff680cd038400218b3",
+    "tests/nonblock-habitat-browser.mjs": "c2dad443870e7b57435bcdbc093f555cbe8562b3d610c80bcd140a2d3a8e2c82",
+    "src/nonblock-environments24/dwarf-juniper.mjs": "be8493eaf0dbcbbe52e703d6d1e9366a6822be94c89a9c3b79830ef7a237ca67"
+  },
+  "captures": [
+    {
+      "habitat": "mountain",
+      "placement": {
+        "sceneId": "nonblock:d:dwarf-juniper",
+        "anchor": [
+          -512,
+          13,
+          0
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Adwarf-juniper:179:-512,13,0:2",
+      "ground": 302,
+      "triangles": 48,
+      "collisionParts": 0,
+      "view": {
+        "pose": [
+          -511.5,
+          -0.5
+        ],
+        "point": [
+          -511.68595378,
+          13.16605028,
+          0.433787
+        ]
+      },
+      "rendererState": {
+        "instances": 1,
+        "vertices": 144,
+        "gpuBytes": 5184,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "file": "artifacts/nonblock-dwarf-juniper-before/mountain.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "437a1e1f3cc6a181f22920f12efb7c52105281f8cf5668ca85f300ab665e231e"
+    }
+  ],
+  "nonemptySchema1AndProfileBytesUnchanged": true
+}

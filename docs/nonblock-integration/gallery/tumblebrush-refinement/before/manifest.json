@@ -1,0 +1,51 @@
+{
+  "seed": 179,
+  "generator": "mythwrought-four-surface-regions-v4",
+  "renderPreset": "economy",
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/candidate-scene.mjs": "117603583035b7436c8b50eb4b206afaba7cff72d287f5a79a4d6058768549c8",
+    "src/nonblock/candidate-families.mjs": "ad2cce4056048a4b1e55b8d0d0e3eabb69ea54e45243bd00f1034a1a457a05ef",
+    "src/manual-biomes/profile-world.mjs": "ae374a51657bcd895f0a07163f90b35e0177cdd382ac543d8c540871276687f8",
+    "src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
+    "src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
+    "src/render-budget.mjs": "2da16f5acfddb3e6d1989b337c5b80ae40987336be2f3cff680cd038400218b3",
+    "tests/nonblock-habitat-browser.mjs": "cbb2b7bb2b0e1f3611aba7a3c69d20a502411667300a249635ac74cd221278de",
+    "src/nonblock-environments24/tumblebrush.mjs": "f00b26b92c90f95cf5bf6e1159326c6829a0d18c8c4b3206ff29b5efa4cb4682"
+  },
+  "captures": [
+    {
+      "habitat": "desert",
+      "placement": {
+        "sceneId": "nonblock:d:tumblebrush",
+        "anchor": [
+          512,
+          9,
+          0
+        ],
+        "variant": 1,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Atumblebrush:179:512,9,0:1",
+      "ground": 256,
+      "triangles": 32,
+      "view": {
+        "pose": [
+          512.5,
+          -0.5
+        ],
+        "point": [
+          512.41583252,
+          9.30278524,
+          0.53196516
+        ]
+      },
+      "file": "artifacts/nonblock-tumblebrush-before/desert.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "fd83099b8e4f36a541229ef72383a3d407d26b174979349797694400d1f836de"
+    }
+  ],
+  "nonemptySchema1AndProfileBytesUnchanged": true
+}

@@ -1,0 +1,635 @@
+{
+  "kind": "desert crossing diagnosis",
+  "renderer": "Chromium WebGL2 with SwiftShader",
+  "viewport": [
+    932,
+    430
+  ],
+  "seed": 179,
+  "initialDiagnosticSpawn": [
+    453.5,
+    11,
+    0.5
+  ],
+  "afterSpawnInput": "continuous A key through Playwright",
+  "startedLocallyAtTheCrossing": true,
+  "countsAsFullJourneyAcceptance": false,
+  "captures": [
+    {
+      "build": "published",
+      "revision": "64245c76a9e265f17bf387e3fd209bbfc9f6d950",
+      "profile": {
+        "kind": "mythwrought-generation-profile",
+        "version": 1,
+        "generator": "mythwrought-four-surface-regions-v5",
+        "seed": 179
+      },
+      "sourceSha256": {
+        "src/main.mjs": "b8d8bd6a185d1a11efa0027d75e1d9db3c6142e71af8290c38595f9ddbaa8103",
+        "src/physics.mjs": "c59a949f0e004cdf8acf0a58a5bcc12789a7d1a2ae51d4de3eeee89bd204f689",
+        "src/manual-biomes/profile-world.mjs": "ae374a51657bcd895f0a07163f90b35e0177cdd382ac543d8c540871276687f8"
+      },
+      "holdToNextObservedAdvanceMs": 16425,
+      "renderedCallbacks": 11,
+      "observations": [
+        {
+          "frames": 3,
+          "time": 3178.7000000029802,
+          "actor": {
+            "x": 453.5,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 24,
+          "time": 5688,
+          "actor": {
+            "x": 455.68910509430054,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 28,
+          "time": 9409,
+          "actor": {
+            "x": 456.2058993891869,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 31,
+          "time": 12180.20000000298,
+          "actor": {
+            "x": 456.5743738451422,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 34,
+          "time": 16425.60000000149,
+          "actor": {
+            "x": 456.9428487347047,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 37,
+          "time": 19974.80000000447,
+          "actor": {
+            "x": 457.3818737108555,
+            "z": 0.5,
+            "feet": 10.995498125,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": false
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 40,
+          "time": 25492,
+          "actor": {
+            "x": 457.7200084678926,
+            "z": 0.5,
+            "feet": 10.884945892999996,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": false
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 42,
+          "time": 28003.90000000596,
+          "actor": {
+            "x": 457.7200098978319,
+            "z": 0.5,
+            "feet": 10.748897147999992,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": false
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 43,
+          "time": 34186.30000000447,
+          "actor": {
+            "x": 457.7200098978319,
+            "z": 0.5,
+            "feet": 10.627012097999991,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": false
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 46,
+          "time": 39410.20000000298,
+          "actor": {
+            "x": 457.7200098978319,
+            "z": 0.5,
+            "feet": 10.319633725999976,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": false
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 51,
+          "time": 41917.10000000149,
+          "actor": {
+            "x": 457.87868299334485,
+            "z": 0.5,
+            "feet": 11.00062719402436,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 52,
+          "time": 45881,
+          "actor": {
+            "x": 458.0017153663412,
+            "z": 0.5,
+            "feet": 11.00062719402436,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 55,
+          "time": 50878.70000000298,
+          "actor": {
+            "x": 458.3470793071925,
+            "z": 0.5,
+            "feet": 11.00062719402436,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 58,
+          "time": 55621.90000000596,
+          "actor": {
+            "x": 458.6332086122411,
+            "z": 0.5,
+            "feet": 11.00062719402436,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 61,
+          "time": 59783.20000000298,
+          "actor": {
+            "x": 459.00036721295305,
+            "z": 0.5,
+            "feet": 11.00062719402436,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 63,
+          "time": 62288.30000000447,
+          "actor": {
+            "x": 459.21988646428093,
+            "z": 0.5,
+            "feet": 11.00062719402436,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 64,
+          "time": 69082,
+          "actor": {
+            "x": 459.36857499241785,
+            "z": 0.5,
+            "feet": 11.00062719402436,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        }
+      ]
+    },
+    {
+      "build": "candidate",
+      "revision": "b009c731214df906cc8802243c1346c648237856",
+      "profile": {
+        "kind": "mythwrought-generation-profile",
+        "version": 1,
+        "generator": "mythwrought-four-surface-regions-v5",
+        "seed": 179
+      },
+      "sourceSha256": {
+        "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+        "src/physics.mjs": "385a29bf15659f8064d12109c6501df7e0a049ad9b8afb92cf0890842bb1991f",
+        "src/manual-biomes/profile-world.mjs": "ae374a51657bcd895f0a07163f90b35e0177cdd382ac543d8c540871276687f8"
+      },
+      "holdToNextObservedAdvanceMs": 21819,
+      "renderedCallbacks": 12,
+      "observations": [
+        {
+          "frames": 3,
+          "time": 2097.1999999955297,
+          "actor": {
+            "x": 453.5,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 25,
+          "time": 4744.89999999851,
+          "actor": {
+            "x": 455.75920719176526,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 28,
+          "time": 8077,
+          "actor": {
+            "x": 456.12725344254665,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 31,
+          "time": 10926.19999999553,
+          "actor": {
+            "x": 456.4953026805328,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 34,
+          "time": 16035.69999999553,
+          "actor": {
+            "x": 456.86377752537527,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 37,
+          "time": 19325.69999999553,
+          "actor": {
+            "x": 457.1540524970858,
+            "z": 0.5,
+            "feet": 11,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 42,
+          "time": 21837.69999999553,
+          "actor": {
+            "x": 457.7200076354814,
+            "z": 0.5,
+            "feet": 10.889934403333335,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": false
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 43,
+          "time": 28861.79999999702,
+          "actor": {
+            "x": 457.7200098598314,
+            "z": 0.5,
+            "feet": 10.805367753333337,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": false
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 45,
+          "time": 31380.60000000149,
+          "actor": {
+            "x": 457.7200098598314,
+            "z": 0.5,
+            "feet": 10.636588772333335,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": false
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 46,
+          "time": 36667.5,
+          "actor": {
+            "x": 457.7200098598314,
+            "z": 0.5,
+            "feet": 10.492545922333335,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": false
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 49,
+          "time": 41152.19999999553,
+          "actor": {
+            "x": 457.7200098598314,
+            "z": 0.5,
+            "feet": 10.032393047333311,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": false
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 54,
+          "time": 43656.69999999553,
+          "actor": {
+            "x": 458.0069899809419,
+            "z": 0.5,
+            "feet": 11.000627428394864,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 55,
+          "time": 47043.89999999851,
+          "actor": {
+            "x": 458.14264967753286,
+            "z": 0.5,
+            "feet": 11.000627428394864,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 58,
+          "time": 51381.29999999702,
+          "actor": {
+            "x": 458.49957352398144,
+            "z": 0.5,
+            "feet": 11.000627428394864,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 61,
+          "time": 56469.19999999553,
+          "actor": {
+            "x": 458.93651902536664,
+            "z": 0.5,
+            "feet": 11.000627428394864,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 62,
+          "time": 58976.39999999851,
+          "actor": {
+            "x": 459.08506049573066,
+            "z": 0.5,
+            "feet": 11.000627428394864,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        },
+        {
+          "frames": 64,
+          "time": 64022.89999999851,
+          "actor": {
+            "x": 459.3050686691937,
+            "z": 0.5,
+            "feet": 11.000627428394864,
+            "yaw": 3.141592653589793,
+            "seed": 179,
+            "creative": false,
+            "onGround": true
+          },
+          "canvas": [
+            596,
+            369
+          ]
+        }
+      ]
+    }
+  ]
+}

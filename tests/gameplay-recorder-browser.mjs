@@ -27,6 +27,15 @@ const errors=[],badResponses=[];
 page.on('pageerror',error=>errors.push(error.message));
 page.on('response',r=>{if(r.status()>=400)badResponses.push(r.status()+' '+r.url());});
 const saved=()=>page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
+const canvasSize=()=>page.locator('#scene').evaluate(({width,height})=>[width,height]);
+function checkVideoSize(clip,canvas){
+  // Encoders may preserve the odd last row/column or align a coded frame
+  // down to even dimensions. Check each output against its actual canvas.
+  for(const [index,pixels] of [clip.width,clip.height].entries()){
+    const source=canvas[index],even=source-source%2;
+    assert.ok(pixels===source||pixels===even,`Unexpected video dimension ${pixels} from canvas ${source}`);
+  }
+}
 async function getClip(){
   await page.waitForFunction(()=>{
     const panel=document.querySelector('#capturePanel');
@@ -108,6 +117,7 @@ try{
     'Record 10 seconds of gameplay');
   const beforeSave=await saved();
   const firstFrame=Number(await page.locator('#scene').getAttribute('data-rendered-frames'));
+  const shortCanvas=await canvasSize();
   await page.locator('#captureToggle').click();
   await page.locator('#scene').focus();
   await page.keyboard.down('ArrowRight');
@@ -117,6 +127,7 @@ try{
   const short=await getClip();
   assert.ok(short.bytes>2048,'3-second recording has no encoded video bytes');
   assert.ok(short.width>200&&short.height>100,'3-second recording is missing actual scene pixels');
+  checkVideoSize(short,shortCanvas);
   assert.ok(short.controls,'Inline video preview has no playback controls');
   assert.match(short.name,/^mythwrought-.+\.(mp4|webm)$/);
   assert.ok(Number(await page.locator('#scene').getAttribute('data-rendered-frames'))>firstFrame);
@@ -130,6 +141,8 @@ try{
   console.log('PASS REAL 3s VIDEO',short,'frame screenshot SHA256',sha256);
   await page.locator('#captureClose').click();
   assert.ok(await page.locator('#capturePanel').isHidden());
+  const fullCanvas=await canvasSize();
+  assert.deepEqual(fullCanvas,shortCanvas,'Canvas dimensions changed between recordings');
   await page.locator('#captureToggle').click();
   await page.locator('#scene').focus();
   await page.keyboard.down('ArrowRight');
@@ -138,6 +151,7 @@ try{
   const full=await getClip(); // natural ten-second stop; do not simulate timer
   assert.ok(full.bytes>2048,'10-second recording has no encoded video bytes');
   assert.ok(full.width>200&&full.height>100);
+  checkVideoSize(full,fullCanvas);
   assert.equal(full.width,short.width,'Unexpected video resolution difference');
   // MediaRecorder/MP4 may encode an odd-height WebGL frame at the neighboring
   // even pixel height. Verify the same genuine full-width moving scene, with

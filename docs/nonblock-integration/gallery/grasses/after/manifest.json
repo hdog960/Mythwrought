@@ -1,0 +1,99 @@
+{
+  "seed": 179,
+  "generator": "mythwrought-four-surface-regions-v4",
+  "renderPreset": "economy",
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/candidate-scene.mjs": "d8a2b77f645df257c99306b9ed2f0a5a286373eb886e10b0c15ec8355acc01d0",
+    "src/nonblock/candidate-families.mjs": "38cb8e73802d05a6e4a85318b3dc54af5a803f058a0a8dbe8ee46032a483f594",
+    "src/manual-biomes/profile-world.mjs": "ae374a51657bcd895f0a07163f90b35e0177cdd382ac543d8c540871276687f8",
+    "src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
+    "src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
+    "src/render-budget.mjs": "2da16f5acfddb3e6d1989b337c5b80ae40987336be2f3cff680cd038400218b3",
+    "tests/nonblock-habitat-browser.mjs": "d8ee93f9ca01e65bc64fc7423c632e68951814317064668df2863ffd2ba3dd31",
+    "src/nonblock-environments24/saltgrass.mjs": "c03a71e12e2a2437b8d5cf482f05ed4731d5116b281e3dbc872140a162170dc8",
+    "src/nonblock-environments24/snowgrass.mjs": "b288656b6237a871b1e58a2cd63fd9be88f5266dc867fdf8855f540ded0182cf"
+  },
+  "captures": [
+    {
+      "habitat": "desert",
+      "placement": {
+        "sceneId": "nonblock:d:saltgrass",
+        "anchor": [
+          512,
+          9,
+          0
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Asaltgrass:179:512,9,0:2",
+      "ground": 256,
+      "triangles": 51,
+      "collisionParts": 0,
+      "view": {
+        "pose": [
+          512.5,
+          -0.5
+        ],
+        "point": [
+          512.60579427,
+          9.33146636,
+          0.51460687
+        ]
+      },
+      "rendererState": {
+        "instances": 1,
+        "vertices": 153,
+        "gpuBytes": 5508,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "file": "artifacts/nonblock-grasses-after/desert.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "2bc6a945e8e329de680d69d6657b996d8741c2ddd3aaec85529b52f011f84157"
+    },
+    {
+      "habitat": "snow",
+      "placement": {
+        "sceneId": "nonblock:d:snowgrass",
+        "anchor": [
+          0,
+          10,
+          512
+        ],
+        "variant": 1,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Asnowgrass:179:0,10,512:1",
+      "ground": 272,
+      "triangles": 54,
+      "collisionParts": 0,
+      "view": {
+        "pose": [
+          0.5,
+          511.5
+        ],
+        "point": [
+          0.56369885,
+          10.15166664,
+          512.50976563
+        ]
+      },
+      "rendererState": {
+        "instances": 1,
+        "vertices": 162,
+        "gpuBytes": 5832,
+        "drawCalls": 1,
+        "terrainChunks": 25
+      },
+      "file": "artifacts/nonblock-grasses-after/snow.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "de44a7db6ed45f0b62f8ef8c00b4f51857754cbc8b70de3625b25ec5197f0616"
+    }
+  ],
+  "nonemptySchema1AndProfileBytesUnchanged": true
+}

@@ -1,0 +1,275 @@
+{
+  "counts": {
+    "instances": 31,
+    "vertices": 4491,
+    "gpuBytes": 161676,
+    "drawCalls": 1,
+    "terrainChunks": 25
+  },
+  "frameSamples": {
+    "softwareRenderer": "Chromium SwiftShader",
+    "withScenery": {
+      "count": 24,
+      "medianMs": 100.05000000000018,
+      "p95Ms": 216.70000000000073
+    },
+    "withoutScenery": {
+      "count": 24,
+      "medianMs": 158.25,
+      "p95Ms": 366.6000000000058
+    },
+    "comparisonLimit": "The two measurements used different camera poses. These timings do not establish a delta or physical device performance."
+  },
+  "storageSummary": {
+    "tombstones": 31,
+    "schema1SaveBytesUnchanged": true,
+    "reopenedVisibleCount": 0
+  },
+  "checks": [
+    {
+      "sceneId": "scene36:cloth-banner",
+      "instanceKey": "nb1:scene36%3Acloth-banner:179:11,9,10:0:r2",
+      "triangles": 112,
+      "file": "artifacts/nonblock-catalog/cloth-banner.png",
+      "sha256": "15c05795b9a6c1e272ebe785c371a65ab6592f8dc77302244614ea29faebb200"
+    },
+    {
+      "sceneId": "scene48:low-grass",
+      "instanceKey": "nb1:scene48%3Alow-grass:179:-8,8,-9:1",
+      "triangles": 10,
+      "file": "artifacts/nonblock-catalog/low-grass.png",
+      "sha256": "6dc0dd4eedddb634a16a79fab2e85ecb4f77ead6f49bf6f08ac6998b94419770"
+    },
+    {
+      "sceneId": "scene48:short-fern",
+      "instanceKey": "nb1:scene48%3Ashort-fern:179:-5,10,-9:1",
+      "triangles": 48,
+      "file": "artifacts/nonblock-catalog/short-fern.png",
+      "sha256": "17e746e820ca7881aa5d5f301d06cae26ea67b0362b9a58b7fe7a0d6ea668ae5"
+    },
+    {
+      "sceneId": "scene48:single-wildflower",
+      "instanceKey": "nb1:scene48%3Asingle-wildflower:179:-2,11,-9:1",
+      "triangles": 13,
+      "file": "artifacts/nonblock-catalog/single-wildflower.png",
+      "sha256": "b69d56f0f47947d7a3c16699d104fbaa50f8e45d44bb655f25cb0874e3e3ed59"
+    },
+    {
+      "sceneId": "scene48:lavender-spike",
+      "instanceKey": "nb1:scene48%3Alavender-spike:179:1,11,-9:1",
+      "triangles": 54,
+      "file": "artifacts/nonblock-catalog/lavender-spike.png",
+      "sha256": "a6405538c9eaf5a5b395128e232cac139a7840955800b306c7c1090261bf2025"
+    },
+    {
+      "sceneId": "scene48:heather-sprig",
+      "instanceKey": "nb1:scene48%3Aheather-sprig:179:4,11,-9:1",
+      "triangles": 50,
+      "file": "artifacts/nonblock-catalog/heather-sprig.png",
+      "sha256": "979960cb5ef8ac3661fecce6a7970e93c5e154cf896875354fc5da1097fd2ddf"
+    },
+    {
+      "sceneId": "scene48:clover-clump",
+      "instanceKey": "nb1:scene48%3Aclover-clump:179:7,11,-9:1",
+      "triangles": 32,
+      "file": "artifacts/nonblock-catalog/clover-clump.png",
+      "sha256": "86e034bef5a3b3b4346b72c71c5c6d8ec159f94563645edbf5beaf064a0babc8"
+    },
+    {
+      "sceneId": "scene48:meadow-sedge",
+      "instanceKey": "nb1:scene48%3Ameadow-sedge:179:13,10,-9:1",
+      "triangles": 14,
+      "file": "artifacts/nonblock-catalog/meadow-sedge.png",
+      "sha256": "8a96610cb280ab629ce34b1d3762499d16859d6333a66cac29c11936d4dbd970"
+    },
+    {
+      "sceneId": "scene48:button-mushroom",
+      "instanceKey": "nb1:scene48%3Abutton-mushroom:179:-8,9,-6:1",
+      "triangles": 32,
+      "file": "artifacts/nonblock-catalog/button-mushroom.png",
+      "sha256": "6da57777ee22d9d1b533ab1396db0d86e2aeb5b413ef35974ad47f972fa8f107"
+    },
+    {
+      "sceneId": "scene48:clover-patch",
+      "instanceKey": "nb1:scene48%3Aclover-patch:179:-5,11,-6:1",
+      "triangles": 42,
+      "file": "artifacts/nonblock-catalog/clover-patch.png",
+      "sha256": "59dd522b0ce69837efe3eb61f965b95f7c4d3ef8af750f42eec8ecc0d1daa097"
+    },
+    {
+      "sceneId": "scene48:bracken-fern",
+      "instanceKey": "nb1:scene48%3Abracken-fern:179:-2,12,-6:1",
+      "triangles": 56,
+      "file": "artifacts/nonblock-catalog/bracken-fern.png",
+      "sha256": "0eb7b185495af0efc3f4f07f3797e21ae5a4286e71a46edf26f9b8ec84653f50"
+    },
+    {
+      "sceneId": "scene48:moss-cushion",
+      "instanceKey": "nb1:scene48%3Amoss-cushion:179:1,12,-6:1",
+      "triangles": 35,
+      "file": "artifacts/nonblock-catalog/moss-cushion.png",
+      "sha256": "b52b2a85846795b7f149f6aeda570d93d6151d29b3a25d5e9aa8517e79bdc56c"
+    },
+    {
+      "sceneId": "scene48:clustered-toadstools",
+      "instanceKey": "nb1:scene48%3Aclustered-toadstools:179:4,11,-6:1",
+      "triangles": 63,
+      "file": "artifacts/nonblock-catalog/clustered-toadstools.png",
+      "sha256": "68b3933644d7739a897acb145c639838c2985ae9a17fb9e266777366eba0d311"
+    },
+    {
+      "sceneId": "scene48:exposed-root",
+      "instanceKey": "nb1:scene48%3Aexposed-root:179:7,11,-6:1",
+      "triangles": 60,
+      "file": "artifacts/nonblock-catalog/exposed-root.png",
+      "sha256": "5c5ffd7faadb5036bea6ad648bee1c45ac57df97ff9af252f455b81e767ff26f"
+    },
+    {
+      "sceneId": "scene48:fallen-branch",
+      "instanceKey": "nb1:scene48%3Afallen-branch:179:10,11,-6:1",
+      "triangles": 50,
+      "file": "artifacts/nonblock-catalog/fallen-branch.png",
+      "sha256": "9dfdd0f386471d7977d09c2798abb2143b19e6f5c0e2561ed770f238313feee7"
+    },
+    {
+      "sceneId": "scene48:woodland-sapling",
+      "instanceKey": "nb1:scene48%3Awoodland-sapling:179:13,11,-6:1",
+      "triangles": 68,
+      "file": "artifacts/nonblock-catalog/woodland-sapling.png",
+      "sha256": "5350ee184ae82258c21f0259d4a2824f6c42dae12c3b1d4bc1f0cf35610ae01c"
+    },
+    {
+      "sceneId": "scene48:woodland-shrub",
+      "instanceKey": "nb1:scene48%3Awoodland-shrub:179:-8,10,-3:1",
+      "triangles": 40,
+      "file": "artifacts/nonblock-catalog/woodland-shrub.png",
+      "sha256": "a0ac609e8d0faa8647526746778c3612bbf77c6764086afc00b0693911261cf8"
+    },
+    {
+      "sceneId": "scene48:forest-lichen-patch",
+      "instanceKey": "nb1:scene48%3Aforest-lichen-patch:179:-5,11,-3:1",
+      "triangles": 21,
+      "file": "artifacts/nonblock-catalog/forest-lichen-patch.png",
+      "sha256": "ebce39e7a3e1aaf22da5e12254d5a42ecab508c272dcb3ea0902eca83cff8ab9"
+    },
+    {
+      "sceneId": "scene48:forest-moss-mat",
+      "instanceKey": "nb1:scene48%3Aforest-moss-mat:179:-2,12,-3:1",
+      "triangles": 40,
+      "file": "artifacts/nonblock-catalog/forest-moss-mat.png",
+      "sha256": "c808b6cab690d0b2a03f7631bbc063c4b4f9e656928ade49adc6f3f1219c85a1"
+    },
+    {
+      "sceneId": "nonblock:d:agave-rosette",
+      "instanceKey": "nb1:nonblock%3Ad%3Aagave-rosette:179:1,12,-3:1",
+      "triangles": 48,
+      "file": "artifacts/nonblock-catalog/agave-rosette.png",
+      "sha256": "6908bdcc05625a959ecccdc533af92744b44a92ae9c255a86670b7960b8fda95"
+    },
+    {
+      "sceneId": "nonblock:d:alpine-wildflower",
+      "instanceKey": "nb1:nonblock%3Ad%3Aalpine-wildflower:179:4,12,-3:1",
+      "triangles": 53,
+      "file": "artifacts/nonblock-catalog/alpine-wildflower.png",
+      "sha256": "13cac29ae283e56ce9793133592d8f2f56ffc35ebb09bb1f91a33fe023c3b86e"
+    },
+    {
+      "sceneId": "nonblock:d:desert-bloom",
+      "instanceKey": "nb1:nonblock%3Ad%3Adesert-bloom:179:7,11,-3:1",
+      "triangles": 34,
+      "file": "artifacts/nonblock-catalog/desert-bloom.png",
+      "sha256": "628a317e4ee3569a92298ca83d22c70d416a142d0ce766722d3e873887e32cb9"
+    },
+    {
+      "sceneId": "nonblock:d:desert-scrub",
+      "instanceKey": "nb1:nonblock%3Ad%3Adesert-scrub:179:10,11,-3:1",
+      "triangles": 35,
+      "file": "artifacts/nonblock-catalog/desert-scrub.png",
+      "sha256": "cce3e81b0a4306f8093499d7d1a3d37c2e6c74729d6c7e7785b0f34645fec297"
+    },
+    {
+      "sceneId": "nonblock:d:dwarf-juniper",
+      "instanceKey": "nb1:nonblock%3Ad%3Adwarf-juniper:179:13,11,-3:1",
+      "triangles": 41,
+      "file": "artifacts/nonblock-catalog/dwarf-juniper.png",
+      "sha256": "2f38c0922f9805996d3a845c8337ca450f64de154ae5237c90e255054742c4d2"
+    },
+    {
+      "sceneId": "nonblock:d:frost-fern",
+      "instanceKey": "nb1:nonblock%3Ad%3Afrost-fern:179:-8,10,0:1",
+      "triangles": 54,
+      "file": "artifacts/nonblock-catalog/frost-fern.png",
+      "sha256": "aeefb956ea2f371ace3c63a9735386257284f86fd70d9f07f92c2e9343858882"
+    },
+    {
+      "sceneId": "nonblock:d:saltgrass",
+      "instanceKey": "nb1:nonblock%3Ad%3Asaltgrass:179:-5,11,0:1",
+      "triangles": 42,
+      "file": "artifacts/nonblock-catalog/saltgrass.png",
+      "sha256": "4e816a4ed0461e4f4eb2d67ad08592200776657e8f21d2515fef334884d9d25e"
+    },
+    {
+      "sceneId": "nonblock:d:snowgrass",
+      "instanceKey": "nb1:nonblock%3Ad%3Asnowgrass:179:-2,12,0:1",
+      "triangles": 18,
+      "file": "artifacts/nonblock-catalog/snowgrass.png",
+      "sha256": "6e97f95387ff83c21a92fd304287b271b69bd1f56f23d5955f1aae38208787a2"
+    },
+    {
+      "sceneId": "nonblock:d:tumblebrush",
+      "instanceKey": "nb1:nonblock%3Ad%3Atumblebrush:179:1,12,0:1",
+      "triangles": 32,
+      "file": "artifacts/nonblock-catalog/tumblebrush.png",
+      "sha256": "06d28ba83e08b2591510305408cddb202865d5f9c36bc764630e8d1294a030f3"
+    },
+    {
+      "sceneId": "nonblock:e:pebble-scatter",
+      "instanceKey": "nb1:nonblock%3Ae%3Apebble-scatter:179:4,12,0:1",
+      "triangles": 32,
+      "file": "artifacts/nonblock-catalog/pebble-scatter.png",
+      "sha256": "a056cc488239e7ef1a0a8341da1fd8675f14a9800f2dc3a189c7e0ab2d54a539"
+    },
+    {
+      "sceneId": "nonblock:e:cave-rubble-cluster",
+      "instanceKey": "nb1:nonblock%3Ae%3Acave-rubble-cluster:179:7,11,0:1",
+      "triangles": 40,
+      "file": "artifacts/nonblock-catalog/cave-rubble-cluster.png",
+      "sha256": "c4318b1fa386040b6bc61b1ad7cbd38f7420eb62aaba08f1343c74635f82d6b8"
+    },
+    {
+      "sceneId": "scene36:rope-coil",
+      "instanceKey": "nb1:scene36%3Arope-coil:179:10,11,0:1:r0",
+      "triangles": 228,
+      "file": "artifacts/nonblock-catalog/rope-coil.png",
+      "sha256": "690afa936cb8ac8ca70fb3c28da46c319b50aacafd30c82a62f81c076c9b0c82"
+    }
+  ],
+  "sourceSha256": {
+    "src/main.mjs": "4299b4a492d9f893df3235bf43432159fb2211e1cbb63343d0ce3a8d8fa9fa97",
+    "src/voxel.mjs": "805147e6b413742a4911472e674bc57180a9f99bdd91f6cb4380709dcd3b19c8",
+    "src/physics.mjs": "c59a949f0e004cdf8acf0a58a5bcc12789a7d1a2ae51d4de3eeee89bd204f689",
+    "tests/nonblock-catalog-browser.mjs": "8ef597932ce436badd122a849e7046d3f5a6b171b877fcce83f2e2d713fff2ee",
+    "src/nonblock/candidate-families.mjs": "cfe3da5dcf80f0b819b9bf79ef1b1789d74e802623668c44e8b0fa6680f5b9b9",
+    "src/nonblock/candidate-scene.mjs": "cda6ce02dde17465c62bbac52178edb76cc3a97a7cc984cbce4330a0c8fcfd6b",
+    "src/nonblock-environments24/agave-rosette.mjs": "05d324294d808c81c6bbac1a626530cadc1c11a700b3b13bdf27a7e9c238d3db",
+    "src/nonblock-environments24/alpine-wildflower.mjs": "4ee8317a14c4043cd43d7d8dfe9c3d1475573d88946bc88822b714cdd880d60c",
+    "src/nonblock-environments24/cave-formations.mjs": "d4cdb3dbda921304e5ce1830b30bab833bc144d0ffde683426b46a6fd98e6ce5",
+    "src/nonblock-environments24/cave-rubble-cluster.mjs": "25d9d37ebb62f57b548298217ef9d78b0d05a8ec07fffb49b49a80d5104e22a3",
+    "src/nonblock-environments24/desert-bloom.mjs": "7862693515cb9d3e757baccc8be6e5827ec12aa07736aa05da75c5a946ad0155",
+    "src/nonblock-environments24/desert-scrub.mjs": "48b8eabaa7e33e1abf80fe5d2847500597461d2c1ae0bb67f0af033d535b564a",
+    "src/nonblock-environments24/dwarf-juniper.mjs": "be8493eaf0dbcbbe52e703d6d1e9366a6822be94c89a9c3b79830ef7a237ca67",
+    "src/nonblock-environments24/frost-fern.mjs": "7b2e5329be0a61aefb76bcab3a9c8fe66c19275858e0047b3583ad7c57b622b8",
+    "src/nonblock-environments24/pebble-scatter.mjs": "32520748be51385a6cf8861d1d61b78fb113424cde434f6cbe1789af1fff8870",
+    "src/nonblock-environments24/saltgrass.mjs": "ac729d8acae64c763333163585872b16f12e1c958e2ecf9142e575aa41a7f361",
+    "src/nonblock-environments24/snowgrass.mjs": "519c241b2d0a8eb4e6cfefaffdb0c4d2d963221204630a240e4c46390c2e257e",
+    "src/nonblock-environments24/tumblebrush.mjs": "f00b26b92c90f95cf5bf6e1159326c6829a0d18c8c4b3206ff29b5efa4cb4682",
+    "src/nonblock-scene48/flora-phase1.mjs": "5ced9c4a8b9cfef11fc38e3bfa537b4047c12a54fcf71e3296b5b4cb580187ca",
+    "src/nonblock-scene48/forest-lichen-patch.mjs": "48ae5290ceb87660d5140b869e65bccf81becd9ee5ad9446f4d0347703bb7a70",
+    "src/nonblock-scene48/forest-moss-mat.mjs": "ff8ec93e023528d5837456d81ee0e44db98513885c6ef20ad82499f20eba6f43",
+    "src/nonblock-scene48/forest-phase1-candidates.mjs": "39e5941c7ce1d8f0a792c8060bc35885ec169f01cc438b629a77c4bab5841486",
+    "src/nonblock-scene48/undergrowth-phase1.mjs": "db682e1579a45ac1756186f8d7739a709f7cec6ad3d8c3d745268ec2453a809c",
+    "src/nonblock-scene48/woodland-sapling.mjs": "b21086f06296ec4c52dc06091a16b4a1e70f3e219e1934c5b3e68d9c30004225",
+    "src/nonblock-scene48/woodland-shrub.mjs": "7edf4b5621d66b851709cb3eb7368fda02be369c5774b665c39db94e02fcc6de",
+    "src/nonblock-fittings36/fittings-phase1.mjs": "3f14401a237ef7c09173fc6985d45ec4d124777f8bd45dfdfe8554f0152c9f7f"
+  }
+}

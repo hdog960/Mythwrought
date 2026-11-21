@@ -223,6 +223,13 @@ ${CARVED_TRIM_GLSL}  }else if(vMat==18){ // Physical leaf voxels: layered canopy
     shade=.81+.14*band+.09*fleck;
     base=mix(base,vec3(.23,.32,.43),.19*band*near);
     base=mix(base,vec3(.68,.76,.79),.15*seam*near);
+  }else if(vMat>=40&&vMat<=43){ // Natural terrain uses world-space UV at chunk seams.
+    float grit=hashCell(floor(vUv*15.0)+float(vMat));
+    float sweep=sin(vUv.x*.46+vUv.y*.61+.82*sin(vUv.y*.19));
+    if(vMat==40)      shade=1.0+.045*sin(vUv.x*1.45+vUv.y*.61+1.2*sweep)+.04*(grit-.5);
+    else if(vMat==41) shade=1.0+.025*sweep+.065*(grit-.5);
+    else if(vMat==42) shade=1.0+.06*sin(vUv.y*1.23+.82*sweep)+.085*(grit-.5);
+    else              shade=1.0+.035*sweep+.12*(grit-.5);
   }else if(vMat==13||vMat==14){ // Original carved tree-star cave-wall sigils.
     // Matte warm gold or cool turquoise pigment, no transparent glow pass.
     shade=1.0;

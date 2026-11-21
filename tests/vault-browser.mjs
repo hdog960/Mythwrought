@@ -16,6 +16,10 @@ const seen=async(fragment)=>page.waitForFunction(fragment=>document.querySelecto
 const scene=async()=>page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>=18,null,{timeout:25000});
 const firstOption=()=>page.locator('#vaultSelect option:not([value=""])').first().getAttribute('value');
 try{
+ await page.addInitScript(()=>{
+  if(localStorage.getItem('mythwrought-v002-selected-seed')===null)
+   localStorage.setItem('mythwrought-v002-selected-seed','179');
+ });
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
  await scene();
  await page.evaluate(()=>window.__mythwroughtTest.placeFixture(15,18,-1,4));

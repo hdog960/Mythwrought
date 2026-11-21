@@ -93,26 +93,32 @@ try{
     const capture=async(point,kind)=>{
       const actual=await page.evaluate(({x,y,z,kind,name})=>{
         const t=window.__mythwroughtTest;
+        let pose;
         if(kind==='cutaway'){
-          t.teleport(x-6,z-6);
+          pose=t.teleport(x-6,z-6);
           t.aimAt(x,y,z);
         }else if(name==='enchanted'){
           // Previous source-specific Enchanted exterior aimed OUT of the
           // biome at the empty sky; frame from a safe outward shoulder and
           // look INWARD across real glade stone and legacy canopy.
-          t.teleport(x,z+7);
+          pose=t.teleport(x,z+7);
           t.aimAt(x+4,Math.max(2,y),z-11);
         }else{
-          t.teleport(x,z);
+          pose=t.teleport(x,z);
           t.aimAt(x+6,Math.max(2,y),z+6);
         }
-        return {value:t.block(x,y,z),profile:t.fourBiomeProfile()?.generator,
+        return {value:t.block(x,y,z),profile:t.fourBiomeProfile()?.generator,pose,
           mode:t.fourBiomeMode()};
       },{...point,kind});
       if(actual.value!==(kind==='cutaway'?0:point.id)||
          actual.profile!==FOUR_REGION_GENERATOR||actual.mode!=='four-regions')
         throw Error('Actual M4 '+point.name+' terrain not source-exact '+JSON.stringify(actual));
-      await page.waitForTimeout(1600);
+      await page.waitForFunction(({x,z})=>{
+        const d=document.querySelector('#scene').dataset;
+        const center=Math.floor(x/16)+','+Math.floor(z/16);
+        return d.chunkCenter?.split('|')[0]===center&&
+          Number(d.loadedChunks)>=25&&Number(d.pendingChunks)===0;
+      },actual.pose,{timeout:90000});
       const file='m4-'+point.name+'-'+kind+'-'+width+'x'+height+'.png';
       const png=await page.screenshot({path:path.join(out,file),timeout:90000});
       const decoded=PNG.sync.read(png);

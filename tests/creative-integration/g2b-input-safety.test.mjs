@@ -112,7 +112,11 @@ test('G2B mode UI is optional, accessible, not persisted, and labels dynamically
  assert.ok(!src.includes("localStorage.setItem('g2b"));
 });
 test('G2B world switches and all restore paths reset airborne state before new spawn',()=>{
- assert.equal(src.split('g2NewWorld();world=candidate;').length-1,4);
+ const switches=[...src.matchAll(/\bworld=(?:candidate|selected\.world)\b/g)];
+ assert.equal(switches.length,6);
+ for(const {index} of switches){
+   assert.match(src.slice(index-105,index),/g2NewWorld\(\);[^{}]*$/);
+ }
  assert.ok(src.includes('g2Epoch++'));
  assert.ok(src.includes('g2Flight=null;g2Controls=createG2ControlState()'));
 });

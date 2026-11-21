@@ -1,0 +1,125 @@
+{
+  "seed": 179,
+  "sourceSha256": {
+    "src/main.mjs": "8b2b962e6b503ac49abb6108f356590163e123f3c9bffb5f00003eacf8526b53",
+    "src/voxel.mjs": "6df6d3c5a0223cee405656afd0548fea3a957ae0c5185d7130a34d7198c3f981",
+    "src/nonblock/candidate-scene.mjs": "161893ecfc05b571b531bd228fea9cca92767e269ead91d0829cc3e33648d81f",
+    "src/nonblock/candidate-families.mjs": "b8e2fd8d56feb1ff8eac6a590c33768b7e4f8f8996e3760d966c42359313d435",
+    "src/nonblock-environments24/cave-formations.mjs": "d4cdb3dbda921304e5ce1830b30bab833bc144d0ffde683426b46a6fd98e6ce5",
+    "tests/nonblock-cave-browser.mjs": "6db559a4218d67688faac629c8d4e4c9afa116fedd91626ad5098b6ba52c9a3f"
+  },
+  "captures": [
+    {
+      "placement": {
+        "sceneId": "nonblock:e:giant-stalagmite-spire",
+        "anchor": [
+          16,
+          3,
+          6
+        ],
+        "variant": 7
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Agiant-stalagmite-spire:179:16,3,6:7",
+      "solid": true,
+      "view": {
+        "cell": [
+          17,
+          3,
+          6
+        ],
+        "point": [
+          16.53062629699707,
+          3.0866666634877524,
+          6.800623099009196
+        ]
+      },
+      "triangles": 84,
+      "file": "artifacts/nonblock-caves/giant-stalagmite-spire.png",
+      "sha256": "4b3559b59704fb521762d1a40d852d3a0637d9eae37ac8fe93a7c99bbb14b2b2"
+    },
+    {
+      "placement": {
+        "sceneId": "nonblock:e:clustered-dripstone",
+        "anchor": [
+          16,
+          5,
+          9
+        ],
+        "variant": 7
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Aclustered-dripstone:179:16,5,9:7",
+      "solid": false,
+      "view": {
+        "cell": [
+          17,
+          4,
+          9
+        ],
+        "point": [
+          16.66141128540039,
+          5.913551012674968,
+          9.765937169392904
+        ]
+      },
+      "triangles": 160,
+      "file": "artifacts/nonblock-caves/clustered-dripstone.png",
+      "sha256": "deae95cac5ea3993a42820fe0bd6ef48b4682161bb24db862c3e5ba899942ee4"
+    },
+    {
+      "placement": {
+        "sceneId": "nonblock:e:limestone-cave-column",
+        "anchor": [
+          17,
+          2,
+          3
+        ],
+        "variant": 7
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Alimestone-cave-column:179:17,2,3:7",
+      "solid": true,
+      "view": {
+        "cell": [
+          18,
+          2,
+          3
+        ],
+        "point": [
+          17.74624188741048,
+          2.0966666539510093,
+          3.777069330215454
+        ]
+      },
+      "triangles": 96,
+      "file": "artifacts/nonblock-caves/limestone-cave-column.png",
+      "sha256": "496bf1e82af030d24fdc64a7b2f504fa81e633bcd34e5867c6179f7014da4323"
+    },
+    {
+      "placement": {
+        "sceneId": "nonblock:e:flowstone-curtain",
+        "anchor": [
+          18,
+          2,
+          -1
+        ],
+        "variant": 7
+      },
+      "instanceKey": "nb1:nonblock%3Ae%3Aflowstone-curtain:179:18,2,-1:7",
+      "solid": false,
+      "view": {
+        "cell": [
+          19,
+          0,
+          -1
+        ],
+        "point": [
+          18.127957026163738,
+          2.8981396357218423,
+          -0.5504667262236277
+        ]
+      },
+      "triangles": 156,
+      "file": "artifacts/nonblock-caves/flowstone-curtain.png",
+      "sha256": "e9c870819c8bb7c0fa342bc1c603901c02b064dcc2e7ced9d80a67a4da2d2a5a"
+    }
+  ]
+}

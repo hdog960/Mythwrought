@@ -1,0 +1,52 @@
+{
+  "baselineRevision": "8de40ca8451b6268cfdfefaa5d9a66b72caca799",
+  "baselineSha256": {
+    "index.html": "badd99a93eaed299b9568aa0606d540f9bc42dab8aeed8af682e3c17874993c7",
+    "manifest.webmanifest": "0e9e0ab922ba9a1239982ae35b665503dc1f5772737e78e950c9baf0c82fc3b8",
+    "assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
+    "sw-m5.js": "b9a5ea052e180c0ce528011833d2fe08204e9e38c7f0c35ed66ff0f5536edac3",
+    "src/main.mjs": "017fb2c06466a15513764f288924574418d2c625eef35507d6e2eba855022f20"
+  },
+  "sourceSha256": {
+    "index.html": "badd99a93eaed299b9568aa0606d540f9bc42dab8aeed8af682e3c17874993c7",
+    "manifest.webmanifest": "0e9e0ab922ba9a1239982ae35b665503dc1f5772737e78e950c9baf0c82fc3b8",
+    "assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
+    "sw-m5.js": "b9a5ea052e180c0ce528011833d2fe08204e9e38c7f0c35ed66ff0f5536edac3",
+    "src/main.mjs": "21bd45622f230bd291bc7af240841b60accb298222d03699cfc315e8140ef98a",
+    "sw-nonblock-stage.js": "4e6e8663af1f596921bd49a52e904a7cee28a7268fe6de2561c1cd3f0a23fee2",
+    "nonblock-stage-assets.json": "65fb71746f893b2712e6c02212d73500687a85c66c03dd67f3cfb63f41f6285d",
+    "tests/nonblock-install-rehearsal-browser.mjs": "fcdd6879d0e08befa2e1a9861d63d9354569ca725b6250af97c1dee7b55c2271"
+  },
+  "appPath": "/Mythwrought/",
+  "manifestAndIconEqual": true,
+  "ordinaryAndPhysicalBytesUnchanged": true,
+  "previousGoodBackupsUnchanged": true,
+  "stagedRemovalRetainedAfterRollback": true,
+  "persistedAcrossChromiumProcessRestart": true,
+  "captures": [
+    {
+      "file": "artifacts/nonblock-install-rehearsal/original-offline.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "52af0df511a8b3cb679bfb3e167039b697b9ed0afcd7db562ddb169b6332f9a2"
+    },
+    {
+      "file": "artifacts/nonblock-install-rehearsal/stage-before-mining.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "cc6704367c69a5a4b675b5922dede9b21c108bda2e416f017817a62c7a7f59f0"
+    },
+    {
+      "file": "artifacts/nonblock-install-rehearsal/rollback-offline.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "356020f0d25394d2050d930d82650cf42e2ff376baac987ca1f591adee3c4bcf"
+    },
+    {
+      "file": "artifacts/nonblock-install-rehearsal/process-restart-offline.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "d9800c46b3593382ec24f4ea1bb4f27f4ebda4e840508a8d9fe8f89c845ac59f"
+    }
+  ]
+}

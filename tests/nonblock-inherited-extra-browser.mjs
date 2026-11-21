@@ -1,0 +1,210 @@
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {mkdir,readdir,readFile,writeFile} from 'node:fs/promises';
+import {chromium} from 'playwright';
+import {PNG} from 'pngjs';
+import {VoxelWorld,chunkCoord,collides,raycast,terrainHeight} from '../src/voxel.mjs';
+import {createCandidateScene} from '../src/nonblock/candidate-scene.mjs';
+import {stagedWorldPropFamilies} from '../src/nonblock/candidate-families.mjs';
+import {inheritedStageFamilies} from '../src/nonblock/staged-inherited-families.mjs';
+
+const seed=179;
+const base=process.env.NONBLOCK_EXTRA_ORIGIN||'http://127.0.0.1:4173';
+const worldProps=process.env.NONBLOCK_EXTRA_SET==='world-props';
+const comparison=process.env.NONBLOCK_EXTRA_COMPARISON;
+if(comparison&&!['before','after'].includes(comparison))throw Error('Invalid fitting comparison label');
+const rebuilds=process.env.NONBLOCK_EXTRA_SET==='rebuilds';
+if(rebuilds&&!comparison)throw Error('Expected a rebuild comparison label');
+const directory=comparison?'artifacts/nonblock-'+(rebuilds?'rebuilds':'fitting-comparison')+'-'+comparison:
+  worldProps?'artifacts/nonblock-world-props':'artifacts/nonblock-inherited-extra';
+const world=new VoxelWorld(seed);
+const deps={
+  storage:{getItem:()=>null},
+  blockAt:(...p)=>Boolean(world.get(...p)),
+  voxelPick:(...ray)=>raycast(world,...ray)
+};
+const viewpoints=[
+  [0,-3],[0,3],[-3,0],[3,0],[-2,-2],[2,-2],[-2,2],[2,2],
+  [-2,0],[2,0],[0,-2],[0,2],[-1,0],[1,0],[0,-1],[0,1]
+];
+const digest=body=>createHash('sha256').update(body).digest('hex');
+const samples=[];
+const targetFamily=process.env.NONBLOCK_EXTRA_FAMILY;
+const sceneFor=placement=>createCandidateScene(seed,'legacy',[placement],deps);
+const occupied=(x,y,z)=>world.get(x,y,z)!==0;
+function sample(placement,view,object){
+  const [x,y,z]=object.anchor;
+  return {placement,view,instanceKey:object.instanceKey,solid:object.colliders.length>0,
+    triangles:object.positions.length/9,underSurface:terrainHeight(x,z,seed)-y>=3};
+}
+
+function findView(scene,object){
+  const [x,y,z]=object.anchor, points=object.positions;
+  for(const [dx,dz] of viewpoints){
+    for(let feet=y-3;feet<=y+1;feet++){
+      if(!occupied(x+dx,feet-1,z+dz)||collides(world,x+dx+.5,feet+.01,z+dz+.5))continue;
+      const eye=[x+dx+.5,feet+1.56,z+dz+.5];
+      const center=object.min.map((n,i)=>(n+object.max[i])/2);
+      const targets=[];
+      for(let i=0;i<points.length;i+=9){
+        const point=[0,1,2].map(k=>(points[i+k]+points[i+3+k]+points[i+6+k])/3);
+        targets.push(point);
+      }
+      targets.sort((a,b)=>Math.hypot(...a.map((n,i)=>n-center[i]))-
+        Math.hypot(...b.map((n,i)=>n-center[i])));
+      for(const point of targets){
+        if(scene.pick(eye,point.map((n,k)=>n-eye[k]))?.instanceKey===object.instanceKey)
+          return {cell:[x+dx,feet,z+dz],point};
+      }
+    }
+  }
+  return null;
+}
+
+if(comparison){
+  const reviewSites=rebuilds?[
+    ['nonblock:d:icicle-spear',[16,4,4],[16,3,6],[16.37281291,4.43536997,4.34329510]],
+    ['nonblock:e:small-stalagmite',[15,4,7],[16,4,9],[15.54660034,4.55951325,7.69637076]],
+    ['nonblock:e:hanging-stalactite',[15,5,7],[16,4,9],[15.37281227,5.38680315,7.34329510]],
+    ['nonblock:e:crystal-shard',[15,4,7],[16,4,9],[15.34399986,4.47764969,7.40999985]],
+    ['scene36:hanging-cobweb',[13,11,13],[11,7,14],[13.62916470,11.61504555,13.01799965]]
+  ]:[
+    ['scene36:signpost',[7,10,5],[7,11,3],[7.3,11.66,5.52]],
+    ['scene36:hanging-chain',[9,10,10],[7,9,10],[9.54949760,10.15168699,10.51666641]]
+  ];
+  for(const [sceneId,anchor,cell,point] of reviewSites){
+    const placement={sceneId,anchor,variant:2,orientation:0};
+    const scene=sceneFor(placement);
+    const [object]=scene.visible();
+    assert.ok(object,sceneId+' lacks a natural mount');
+    const [x,y,z]=cell,eye=[x+.5,y+(rebuilds?1.55:1.56),z+.5];
+    assert.equal(scene.pick(eye,point.map((coord,i)=>coord-eye[i]))?.instanceKey,object.instanceKey);
+    samples.push(sample(placement,{cell,point},object));
+  }
+}else for(const [sceneId,family] of (worldProps?stagedWorldPropFamilies:inheritedStageFamilies)){
+  if(targetFamily&&sceneId!==targetFamily)continue;
+  const orientations=family.wall?[0,1,2,3]:[0];
+  const yOrder=family.attachment==='ceiling'?[9,8,10,7,6,5,4,3,2,1,0,11,12]:
+    [10,9,11,8,12,7,6,5,4,3,2,1,0,13,14];
+  search:for(let x=7;x<=27;x++)for(let z=5;z<=20;z++)for(const y of yOrder){
+    if(occupied(x,y,z))continue;
+    if(!family.wall&&family.attachment!=='ceiling'&&!occupied(x,y-1,z))continue;
+    if(family.attachment==='ceiling'&&!occupied(x,y+1,z))continue;
+    for(const orientation of orientations){
+      const placement={sceneId,anchor:[x,y,z],variant:2,orientation};
+      const scene=sceneFor(placement);
+      const [object]=scene.visible();
+      if(!object)continue;
+      const view=findView(scene,object);
+      if(!view)continue;
+      samples.push(sample(placement,view,object));
+      break search;
+    }
+  }
+  assert.equal(samples.at(-1)?.placement.sceneId,sceneId,'No natural support and target for '+sceneId);
+}
+console.log('Located natural supports for '+samples.length+' scenery families');
+
+await mkdir(directory,{recursive:true});
+const browser=await chromium.launch({headless:true,args:[
+  '--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'
+]});
+const results=[];
+try{
+  const savedWorld=JSON.stringify({schema:1,seed,edits:[[100,12,100,3]]});
+  const context=await browser.newContext({
+    viewport:{width:932,height:430},hasTouch:true,isMobile:true,deviceScaleFactor:1,
+    storageState:{cookies:[],origins:[{origin:base,localStorage:[{
+      name:'mythwrought-v002-world-179',value:savedWorld
+    }]}]}
+  });
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  const count=n=>page.waitForFunction(value=>
+    Number(document.querySelector('#scene').dataset.nonblockInstances)===value,n,{timeout:45000});
+  for(const sample of samples){
+    const {placement,view,instanceKey}=sample;
+    const route=base+'/?nonblock-stage='+encodeURIComponent(JSON.stringify([placement]));
+    await page.goto(route);
+    await count(1);
+    await page.evaluate(cell=>window.__mythwroughtTest.teleportCave(...cell),view.cell);
+    // The helper starts 0.01 above the floor. Aim after gravity settles so
+    // thin authored strands are tested at the real standing eye position.
+    await page.waitForFunction(y=>
+      Math.abs(Number(document.querySelector('#scene').dataset.playerFeet)-y)<.002,
+      view.cell[1],{timeout:15000});
+    if(rebuilds)await page.waitForFunction(center=>{
+      const data=document.querySelector('#scene').dataset;
+      return data.chunkCenter===center&&Number(data.loadedChunks)===25&&Number(data.pendingChunks)===0;
+    },chunkCoord(view.cell[0])+','+chunkCoord(view.cell[2]),{timeout:65000});
+    await page.evaluate(point=>window.__mythwroughtTest.aimAtStagedPoint(...point),view.point);
+    try{
+      await page.waitForFunction(key=>document.querySelector('#scene').dataset.nonblockTarget===key,
+        instanceKey,{timeout:16000});
+    }catch(error){
+      const actual=await page.locator('#scene').evaluate(c=>({
+        hit:c.dataset.nonblockTarget,block:c.dataset.targetBlock,
+        x:c.dataset.playerX,y:c.dataset.playerFeet,z:c.dataset.playerZ,
+        yaw:c.dataset.cameraYaw,pitch:c.dataset.cameraPitch
+      }));
+      throw Error('Gameplay target mismatch '+JSON.stringify({placement,view,actual}),{cause:error});
+    }
+    const render=rebuilds?await page.locator('#scene').evaluate(canvas=>{
+      const data=canvas.dataset;
+      return {gpuBytes:Number(data.nonblockGpuBytes),drawCalls:Number(data.nonblockDrawCalls),
+        terrainChunks:Number(data.loadedChunks)};
+    }):null;
+    if(rebuilds)assert.deepEqual(render,{gpuBytes:sample.triangles*108,drawCalls:1,terrainChunks:25});
+    const filename=directory+'/'+placement.sceneId.split(':').at(-1)+'.png';
+    const screenshot=await page.screenshot({path:filename});
+    assert.equal(PNG.sync.read(screenshot).width,932);
+    assert.equal(PNG.sync.read(screenshot).height,430);
+    await page.locator('#dig').tap();
+    await count(0);
+    assert.match(await page.locator('#status').textContent(),/Scenery removed/);
+    await page.reload();
+    await count(0);
+    results.push({...sample,...(rebuilds?{render}:{}),filename,sha256:digest(screenshot)});
+    console.log('PASS',placement.sceneId,sample.triangles);
+  }
+  const stored=await page.evaluate(()=>{
+    return {world:localStorage.getItem('mythwrought-v002-world-179'),
+      primary:localStorage.getItem('mythwrought:nonblock-stage:v1:legacy:179'),
+      backup:localStorage.getItem('mythwrought:nonblock-stage:v1:legacy:179:previous-good')};
+  });
+  assert.equal(stored.world,savedWorld);
+  assert.deepEqual(JSON.parse(stored.primary).tombstones,samples.map(s=>s.instanceKey).sort());
+  if(rebuilds)assert.equal(stored.primary,stored.backup);
+  if(worldProps){
+    // The low tree-trunk mount makes the ladder reachable with the same
+    // movement input as the original game. Both source loads use real terrain.
+    const climbing=[{sceneId:'scene36:ladder-assembly',anchor:[11,8,10],orientation:2}];
+    await page.goto(base+'/?nonblock-stage='+encodeURIComponent(JSON.stringify(climbing)));
+    await count(1);
+    await page.evaluate(()=>{
+      window.__mythwroughtTest.teleportCave(11,8,10);
+      window.__mythwroughtTest.aimAt(11,9,11);
+    });
+    await page.keyboard.down('w');
+    try{
+      await page.waitForFunction(()=>Number(document.querySelector('#scene').dataset.playerFeet)>8.5,
+        null,{timeout:15000});
+    }finally{
+      await page.keyboard.up('w');
+    }
+    console.log('PASS regular game movement climbs the staged ladder');
+  }
+  assert.deepEqual(errors,[]);
+  await context.close();
+}finally{
+  await browser.close();
+}
+const sources=['src/main.mjs','src/voxel.mjs','tests/nonblock-inherited-extra-browser.mjs'];
+for(const path of ['src/nonblock','src/nonblock-environments24','src/nonblock-fittings36'])
+  for(const name of (await readdir(path)).sort())if(name.endsWith('.mjs'))sources.push(path+'/'+name);
+const sourceSha256=Object.fromEntries(await Promise.all(sources.map(async path=>[path,digest(await readFile(path))])));
+await writeFile(directory+'/manifest.json',JSON.stringify({seed,results,sourceSha256,
+  ...(rebuilds?{label:comparison,removalAndColdReopen:true,nonemptySchema1SaveBytesUnchanged:true}:{})
+},null,2)+'\n');
+console.log('PASS exact gameplay lifecycle for',results.length,'scenery props');

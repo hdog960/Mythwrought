@@ -4,11 +4,11 @@
 // Pack2LiveWorld adapter used by player mesh, raycast, collision and editing.
 import {VoxelWorld} from '../voxel.mjs';
 import {worldSeedFromText} from '../seeds.mjs';
-import {loadWorldSafe,saveWorldSafe,importWorldData} from '../persistence.mjs';
+import {loadWorldSafe,saveWorldSafe,importWorldData,parseWorldData,MAX_IMPORT_BYTES} from '../persistence.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,
   pack2ExportBundle,pack2ImportBundle} from '../pack2-world.mjs';
 import {FourRegionWorld,fourRegionProfile,FOUR_REGION_GENERATOR,
-  M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR} from './profile-world.mjs';
+  M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from './profile-world.mjs';
 import {loadFourRegionWorld,saveFourRegionWorld,readFourRegionProfile,
   exportFourRegionWorld,inspectFourRegionExport} from './profile-storage.mjs';
 
@@ -17,6 +17,7 @@ export const M2_WORLD_MODE=Object.freeze({
   CREATE_FOUR:'create-new-four-biomes',
   CREATE_FOUR_V5:'create-new-four-biomes-experimental-v5',
   CREATE_BALANCED_V6:'create-new-balanced-five-biomes-v6',
+  CREATE_ENVIRONMENT_V7:'create-new-environment-five-biomes-v7',
   IMPORT_PROFILE:'import-verified-four-biome-profile'
 });
 
@@ -65,7 +66,8 @@ function validChoice(c){
 export function openM2World(storage,choice){
   if(!validChoice(choice))throw Error('Invalid/unconfirmed M2 world choice');
   const fresh=choice.mode!==M2_WORLD_MODE.OPEN;
-  const newGenerator=choice.mode===M2_WORLD_MODE.CREATE_BALANCED_V6?
+  const newGenerator=choice.mode===M2_WORLD_MODE.CREATE_ENVIRONMENT_V7?
+    M7_ENVIRONMENT_GENERATOR:choice.mode===M2_WORLD_MODE.CREATE_BALANCED_V6?
     M6_BALANCED_GENERATOR:choice.mode===M2_WORLD_MODE.CREATE_FOUR_V5?
     M5_EXPERIMENTAL_GENERATOR:choice.mode===M2_WORLD_MODE.IMPORT_PROFILE?
       choice.generator:FOUR_REGION_GENERATOR;
@@ -82,7 +84,7 @@ export function openM2World(storage,choice){
   const type=loaded.world.base instanceof FourRegionWorld?'four-regions':'legacy';
   if(type!==result.mode)throw Error('Biome profile/engine mismatch');
   return Object.freeze({
-    world:loaded.world,base:result.world,mode:type,
+    world:loaded.world,base:result.world,mode:type,source:result.source,
     created:Boolean(result.created),
     recovered:Boolean(result.recovered||loaded.recovered),
     warning:loaded.warning||''
@@ -93,7 +95,7 @@ export function openM2World(storage,choice){
  * If either step fails, do not pretend an atomic success: surface a FAILED
  * result including whether a sidecar write may already have completed.
  */
-export function saveM2World(storage,world){
+export function saveM2World(storage,world,{allowReplaceCorrupt=false}={}){
   if(!(world instanceof Pack2LiveWorld)||
      !(world.base instanceof VoxelWorld)||world.seed!==world.base.seed)
     throw Error('Expected real Pack2LiveWorld with VoxelWorld base');
@@ -108,8 +110,8 @@ export function saveM2World(storage,world){
   if(!p2.ok)return Object.freeze({ok:false,stage:'pack2',
     partialCommit:false,reason:p2.reason});
   let base;
-  try{base=profiled?saveFourRegionWorld(storage,world.base):
-    saveWorldSafe(storage,world);}
+  try{base=profiled?saveFourRegionWorld(storage,world.base,{allowReplaceCorrupt}):
+    saveWorldSafe(storage,world,{allowReplaceCorrupt});}
   catch(e){return Object.freeze({ok:false,stage:'base',
     partialCommit:!p2.unchanged,reason:String(e)});}
   if(!base?.ok)return Object.freeze({ok:false,stage:'base',
@@ -159,4 +161,17 @@ export function inspectM2WorldExport(raw){
     throw Error('Profile-bearing export cannot be treated as legacy');
   const base=importWorldData(raw),world=pack2ImportBundle(record,base);
   return Object.freeze({mode:'legacy',world,seed:base.seed});
+}
+
+export function inspectSnapshotWorld(raw,seed){
+  if(typeof raw!=='string'||raw.length>MAX_IMPORT_BYTES)throw Error('Snapshot is invalid or oversized');
+  const record=JSON.parse(raw);
+  if(record?.kind!=='mythwrought-four-biomes-export'){
+    if(record&&(Object.hasOwn(record,'profile')||Object.hasOwn(record,'kind')))
+      throw Error('Unsupported snapshot profile');
+    return parseWorldData(raw,seed);
+  }
+  const {world}=inspectM2WorldExport(raw);
+  if(seed!==undefined&&seed!==world.seed)throw Error('Snapshot world seed mismatch');
+  return world;
 }

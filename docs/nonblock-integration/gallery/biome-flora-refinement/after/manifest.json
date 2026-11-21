@@ -1,0 +1,83 @@
+{
+  "seed": 179,
+  "generator": "mythwrought-four-surface-regions-v4",
+  "renderPreset": "economy",
+  "sourceSha256": {
+    "src/main.mjs": "b6a0fbeae506ee5e7525721c2b1f3650f51bbad4f070945528502fe0a4c49307",
+    "src/nonblock/staged-habitats.mjs": "99d2ea2abc3070901f08d12917c36b017510d85b76b03203b8bb722a93498502",
+    "src/nonblock/candidate-scene.mjs": "117603583035b7436c8b50eb4b206afaba7cff72d287f5a79a4d6058768549c8",
+    "src/nonblock/candidate-families.mjs": "ad2cce4056048a4b1e55b8d0d0e3eabb69ea54e45243bd00f1034a1a457a05ef",
+    "src/manual-biomes/profile-world.mjs": "ae374a51657bcd895f0a07163f90b35e0177cdd382ac543d8c540871276687f8",
+    "src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
+    "src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
+    "src/render-budget.mjs": "2da16f5acfddb3e6d1989b337c5b80ae40987336be2f3cff680cd038400218b3",
+    "tests/nonblock-habitat-browser.mjs": "660d1d3766f8ad94d86b2925309da0fc276d75daa9809d880b3952a88e4d3fcc",
+    "src/nonblock-environments24/desert-bloom.mjs": "2961e396787056570dad5f57814fc93c5f3ebe79de95dd2fc02f6235865e6769",
+    "src/nonblock-environments24/frost-fern.mjs": "0b31422adf207983679f7d111f05d5d7436fd98c1945dc148ad86b4de22cfff1"
+  },
+  "captures": [
+    {
+      "habitat": "desert",
+      "placement": {
+        "sceneId": "nonblock:d:desert-bloom",
+        "anchor": [
+          512,
+          9,
+          0
+        ],
+        "variant": 2,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Adesert-bloom:179:512,9,0:2",
+      "ground": 256,
+      "triangles": 44,
+      "view": {
+        "pose": [
+          512.5,
+          -0.5
+        ],
+        "point": [
+          512.40311686,
+          9.27933311,
+          0.52881004
+        ]
+      },
+      "file": "artifacts/nonblock-biome-flora-after/desert.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "0ec6015273947ff862aaedf9fc27c11b1b6a4639e4bd0f20767729f5619bb8d7"
+    },
+    {
+      "habitat": "snow",
+      "placement": {
+        "sceneId": "nonblock:d:frost-fern",
+        "anchor": [
+          0,
+          10,
+          512
+        ],
+        "variant": 1,
+        "orientation": 0
+      },
+      "instanceKey": "nb1:nonblock%3Ad%3Afrost-fern:179:0,10,512:1",
+      "ground": 272,
+      "triangles": 90,
+      "view": {
+        "pose": [
+          0.5,
+          511.5
+        ],
+        "point": [
+          0.67367985,
+          10.35231654,
+          512.71217855
+        ]
+      },
+      "file": "artifacts/nonblock-biome-flora-after/snow.png",
+      "width": 932,
+      "height": 430,
+      "sha256": "2c17b9a937546f63e67b0c5fea9ca58eda7cd3f17bfe0e87c9d1064211a00141"
+    }
+  ],
+  "nonemptySchema1AndProfileBytesUnchanged": true
+}

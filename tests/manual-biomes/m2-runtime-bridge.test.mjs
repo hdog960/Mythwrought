@@ -75,8 +75,15 @@ test('M2: authoritative mountain shelf edits + schema-1 persisted through live w
   assert.equal(JSON.parse(raw).schema,1);
   const reopened=openM2World(store,choice(179));
   assert.equal(reopened.mode,'four-regions');
+  assert.equal(reopened.source,'primary');
   assert.equal(reopened.world.get(x,top,z),BLOCK.AIR);
   assert.equal(JSON.stringify(reopened.world.save()),raw);
+  store.setItem(worldSlotKey(179),'{damaged');
+  const recovered=openM2World(store,choice(179));
+  assert.equal(recovered.source,'journal');
+  assert.equal(recovered.recovered,true);
+  assert.equal(JSON.stringify(recovered.world.save()),raw);
+  assert.equal(store.getItem(worldSlotKey(179)),'{damaged');
 });
 
 test('M2: pack2 placement above genuinely generated biome height saves with profile',()=>{
