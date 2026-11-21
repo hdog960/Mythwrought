@@ -68,6 +68,12 @@ export const ROADMAP_D_WAVE9_PLANS=Object.freeze([
         78,
         93,
         105
+      ],
+      [
+        18,
+        97,
+        74,
+        103
       ]
     ],
     "discs": [
@@ -270,6 +276,12 @@ export const ROADMAP_D_WAVE9_PLANS=Object.freeze([
         88,
         36,
         54
+      ],
+      [
+        16,
+        76,
+        61,
+        83
       ]
     ],
     "discs": [
@@ -629,6 +641,12 @@ export const ROADMAP_D_WAVE9_PLANS=Object.freeze([
         68,
         84,
         93
+      ],
+      [
+        13,
+        82,
+        62,
+        93
       ]
     ],
     "discs": [
@@ -707,8 +725,8 @@ export const ROADMAP_D_WAVE9_PLANS=Object.freeze([
       ],
       [
         "west-root-antenna",
-        11,
-        52
+        10,
+        43
       ]
     ],
     "div": [
@@ -1036,6 +1054,12 @@ export const ROADMAP_D_WAVE9_PLANS=Object.freeze([
         80,
         101,
         114
+      ],
+      [
+        1,
+        102,
+        70,
+        113
       ]
     ],
     "discs": [
@@ -1046,7 +1070,7 @@ export const ROADMAP_D_WAVE9_PLANS=Object.freeze([
         10
       ],
       [
-        97,
+        95,
         52,
         9,
         10
@@ -1254,9 +1278,9 @@ export const ROADMAP_D_WAVE9_PLANS=Object.freeze([
         10
       ],
       [
-        106,
+        105,
         56,
-        11,
+        10,
         10
       ],
       [
@@ -1462,7 +1486,7 @@ export const ROADMAP_D_WAVE9_PLANS=Object.freeze([
         9
       ],
       [
-        98,
+        96,
         57,
         10,
         10
