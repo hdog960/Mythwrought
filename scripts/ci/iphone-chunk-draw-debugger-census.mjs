@@ -17,7 +17,7 @@ const expected=[
 ];
 const dir='artifacts/iphone-chunk-draw-census';
 await mkdir(dir,{recursive:true});
-assert.equal(execFileSync('git',['rev-parse','HEAD^'],{encoding:'utf8'}).trim(),PR);
+assert.equal(execFileSync('git',['rev-parse','HEAD~2'],{encoding:'utf8'}).trim(),PR);
 assert.deepEqual(execFileSync('git',['diff','--name-only',PR,'HEAD'],{encoding:'utf8'})
  .trim().split('\n').sort(),expected);
 assert.equal(execFileSync('git',['-C','baseline-main','rev-parse','HEAD'],{encoding:'utf8'}).trim(),MAIN);
@@ -59,6 +59,12 @@ async function inspect(page,cdp,viewport,label,yaw,pitch){
  await page.evaluate(({yaw,pitch})=>window.__mythwroughtTest.setOrientation(yaw,pitch),
   {yaw,pitch});
  await page.waitForTimeout(85); // genuine browser frame proceeds unmodified
+ const sourceUrl=await page.evaluate(()=>{
+   const script=[...document.scripts].find(s=>s.type==='module'&&s.src.includes('/src/main.mjs'));
+   return script?.src??null;
+ });
+ assert.ok(sourceUrl?.startsWith('http://127.0.0.1:4173/src/main.mjs?'),
+   'Original main module requires exact source release query string: '+sourceUrl);
  const promise=new Promise((resolve,reject)=>{
   let done=false,id='';
   const timeout=setTimeout(async()=>{
@@ -85,7 +91,7 @@ async function inspect(page,cdp,viewport,label,yaw,pitch){
   };
   cdp.once('Debugger.paused',onPaused);
   void cdp.send('Debugger.setBreakpointByUrl',{
-   url:'http://127.0.0.1:4173/src/main.mjs',
+   url:sourceUrl,
    lineNumber:1384,columnNumber:0
   }).then(b=>{
    id=b.breakpointId;
