@@ -52,8 +52,19 @@ function groundAt(name,x,z,seed,top,outcrop){
     cap:top>=15&&patch>.52?272:band>.72?G.gneiss:patch<.36?G.scree:G.slate,
     subsoil:band>.66?G.gneiss:G.slate,rock:BLOCK.STONE
   };
+  // Moonlit moss is a deliberately green-gray enchanted material. The old
+  // single slow-varying band generated an almost unbroken moss carpet near
+  // seed 7919's genuine landmark camera (551/729 ground samples, 75.58%).
+  // Break those bands into organic smaller pockets without changing the
+  // physical terrain, protected caves, other biomes, or blended shoulders.
+  const mossWisp=undulation(x*.17-z*.11+phase*.43+
+    1.4*Math.sin(z*.11)+.7*Math.sin(x*.075));
+  const mossPulse=undulation(x*.103+z*.137-phase*.27+
+    .8*Math.sin(x*.067+z*.045));
+  const mossPocket=.64*mossWisp+.36*mossPulse;
   return {
-    cap:band>.79?G.woodlandMoss:patch<.25?G.woodlandPeat:G.woodlandLoam,
+    cap:band>.79&&mossPocket>.66?G.woodlandMoss:
+      patch<.25?G.woodlandPeat:G.woodlandLoam,
     subsoil:G.woodlandPeat,rock:BLOCK.STONE
   };
 }
