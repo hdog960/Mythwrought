@@ -1,0 +1,39 @@
+name: Isolated integrated-main far painted GLSL original-color parity and GPU cost (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-distant-painted-fragment-291-20261121
+permissions:
+  contents: read
+jobs:
+  real-WebGL2-original-painted-source-distant-material-visual-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm exact integrated main parent and zero modified game/strict sources
+        run: |
+          test "$(git rev-parse HEAD^)" = "7016e14cd6289f45eaf7fc6a79a362b47996df65"
+          git diff --exit-code 7016e14cd6289f45eaf7fc6a79a362b47996df65 HEAD -- src/ index.html styles.css sw-m5.js tests/
+          node --check scripts/ci/iphone-distant-painted-fragment.mjs
+      - name: Install genuine Chromium WebGL2 and PNG pixel comparator
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Test only original-color far fragment early return with untouched source GL safety checks
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/mw-far-painted-fragment.log 2>&1 &
+          node scripts/ci/iphone-distant-painted-fragment.mjs
+      - name: Preserve source-authentic original full-paint screenshots and timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-integrated-far-painted-fragment-pixel-and-gpu-cost
+          path: artifacts/iphone-distant-painted-fragment/
+          if-no-files-found: warn
+          retention-days: 14
