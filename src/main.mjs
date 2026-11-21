@@ -1458,6 +1458,9 @@ function start(){
       canvas.dataset.playerColliding=String(collides(world,player.x,player.feet,player.z));
       canvas.dataset.lookMode=lookMode;
       canvas.dataset.precision=String(precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight'));
+      // Only real, FULLY DRAWN source WebGL2 frames enter the existing
+      // optional MediaRecorder. This does not draw, upload or persist anything.
+      gameplayRecorder?.captureGameFrame(now);
     }
   }
   const frameDriver=new ForegroundFrameDriver(

@@ -133,8 +133,16 @@ try{
   // targeting (17,18,0) exposes (16,18,0) as a valid placement cell.
   // The movement thumb remains held at the neutral pad center.
   await page.evaluate(()=>{
-    window.__mythwroughtTest.placeFixture(14,13,0,3);
-    window.__mythwroughtTest.teleport(14.5,.5);
+    // The old fixed-height test restored a STONE support at (14,13,0)
+    // before PLACE, moving the new random-V6 safe spawn up five voxels.
+    // That changed the REAL camera height and selected a top face, not the
+    // certified western face (16,y,0). Preserve the exact same true source
+    // foothold/height from the successful preceding physical MINE instead.
+    window.__mythwroughtTest.placeFixture(14,13,0,0);
+    const safe=window.__mythwroughtTest.teleport(14.5,.5);
+    const expected=Math.max(2,Math.min(18,Math.floor(safe.feet+1.5)));
+    if(expected!==window.__touchFixture.y)
+      throw Error('Physical V6 support changed actor feet unexpectedly before PLACE');
     window.__mythwroughtTest.placeFixture(16,window.__touchFixture.y,0,0);
     window.__mythwroughtTest.placeFixture(17,window.__touchFixture.y,0,3);
     window.__mythwroughtTest.aimAt(17,window.__touchFixture.y,0);

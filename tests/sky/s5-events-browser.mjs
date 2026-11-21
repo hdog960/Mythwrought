@@ -1,11 +1,19 @@
 // S5 authentic original-game celestial event vs non-event visual acceptance.
-// No mock art, no teleports and no writes to canonical schema-1 saves.
+// Real local-only visual camera relocation is disclosed (NOT a walking route).
+// No mock art, synthetic time, renderer fakes or canonical schema-1 edits.
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {waitForRealStableMap} from './source-map-stability.mjs';
-import {M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
+import {FourRegionWorld,fourRegionProfile,M6_BALANCED_GENERATOR}
+  from '../../src/manual-biomes/profile-world.mjs';
+import {Pack2LiveWorld} from '../../src/pack2-world.mjs';
+import {raycast} from '../../src/voxel.mjs';
+import {findSafeSpawn} from '../../src/physics.mjs';
+import {v6BiomeAt} from '../../src/manual-biomes/v6-balanced-biomes.mjs';
+import {sampleThreeMoons} from '../../src/sky-moons.mjs';
+import {sampleS5Events} from '../../src/sky-events.mjs';
 import pngjs from 'pngjs';
 const {PNG}=pngjs;
 const HEAD=process.env.GITHUB_SHA||'UNVERIFIED';
@@ -18,8 +26,48 @@ const browser=await chromium.launch({headless:true,args:[
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const manifest={stage:'S5',sourceHead:HEAD,
   render:'real original-game Chromium WebGL2 SwiftShader',
-  physicalIPhone:false,images:[],viewports:[],errors:[]};
+  physicalIPhone:false,localVisualCameraRelocation:true,
+  actualFootTravelCertifiedHere:false,
+  sourcePhysicalRayClearBeforeScreenshot:true,
+  images:[],viewports:[],errors:[]};
 const phaseToMs=phase=>Math.floor(phase*1440000);
+let sourceVantage=null;
+// Source-authentic observation planning for the rare triple conjunction.
+// Never choose a "passing picture" by peeking at event contrast: use pure
+// original physically collision-aware voxel raycast BEFORE real GUI capture.
+// The same natural, ray-clear site must be used for each quiet/event pair.
+function selectSourceS5Vantage(seed){
+  const world=new Pack2LiveWorld(new FourRegionWorld(seed,
+    fourRegionProfile(seed,M6_BALANCED_GENERATOR)));
+  const trueEvent=sampleS5Events(0,sampleThreeMoons(0,1.25*1440000,0),0);
+  assert.equal(trueEvent.kind,4,'Original source triple lunar alignment changed');
+  const offsets=[0,32,-32,64,-64,96,-96];
+  let candidates=0,blocked=0;
+  for(const dx of offsets)for(const dz of offsets){
+    const x=512+dx,z=dz,biome=v6BiomeAt(x,z,seed);
+    if(biome?.name!=='desert'||biome.weight<.72)continue;
+    candidates++;
+    let p;try{p=findSafeSpawn(world,x,z);}catch{blocked++;continue;}
+    const eye=[p.x,p.feet+1.55,p.z];
+    // The conjunction is an actual painted AREA, not a mathematical
+    // single ray. Require an unobstructed original-source cone around the
+    // genuine lunar alignment so near-boundary foliage cannot hide most
+    // of the real GPU pixels while a center-only ray falsely says clear.
+    const perturbations=[[0,0,0],[.045,0,0],[-.045,0,0],
+      [0,.045,0],[0,-.045,0]];
+    const occluded=perturbations.some(offset=>{
+      const q=trueEvent.direction.map((v,i)=>v+offset[i]);
+      const len=Math.hypot(...q),unit=q.map(x=>x/len);
+      return raycast(world,eye,unit,64)!==null;
+    });
+    if(occluded){blocked++;continue;}
+    return Object.freeze({x,z,feet:p.feet,
+      eventSourceDirection:trueEvent.direction,sourceLOS:'genuine-voxel-ray-clear-64m',
+      candidateCount:candidates,blockedCount:blocked,visualOnlyTeleport:true});
+  }
+  throw Error('Cannot certify a genuine unoccluded current-V6 64m triple moon sky ray; '+
+    JSON.stringify({seed,candidates,blocked}));
+}
 const nonSky=page=>page.evaluate(()=>Object.fromEntries(
   Object.entries(localStorage).filter(([k])=>
     !k.startsWith('mythwrought-sky-s1-clock-')&&
@@ -97,6 +145,22 @@ function eventContrast(eventCanvas,quietCanvas,center,kind){
   return {brighter,peakDelta,maxLuminance,comparison:'same-time-no-event-GPU-control'};
 }
 async function pose(page,alignment){
+  assert.ok(sourceVantage&&sourceVantage.sourceLOS==='genuine-voxel-ray-clear-64m');
+  // Genuine local original-game browser *visual* camera relocation. The
+  // authoritative source ray is free from the 20m tree canopy that occluded
+  // actual conjunction controls on a random default V6 spawn. No synthetic
+  // actor positions, altered pixels or playable historical world.
+  const actual=await page.evaluate(({x,z})=>
+    window.__mythwroughtTest.teleport(x,z),sourceVantage);
+  assert.ok(Math.abs(actual.x-(Math.floor(sourceVantage.x)+.5))<.6&&
+    Math.abs(actual.z-(Math.floor(sourceVantage.z)+.5))<.6&&
+    Math.abs(actual.feet-sourceVantage.feet)<.08,
+    'Visible source camera position differs from exact grounded source world');
+  await page.waitForFunction(()=>{
+    const d=document.querySelector('#scene')?.dataset;
+    return d?.skyDrawn==='true'&&Number(d.loadedChunks)===25&&
+      Number(d.pendingChunks)===0&&Number(d.renderedMeshVertices)>800;
+  },null,{timeout:120000});
   await page.locator('#scene').focus();
   // Real source stepPlayer/look from genuine keyboard. Reloaded game cameras can
   // retain a previous pitch: blindly holding UP on each case climbs toward the
@@ -213,6 +277,7 @@ try{
       await page.getByRole('button',{name:/NEW WORLD/}).click();
       await page.locator('#help').waitFor({state:'hidden',timeout:45000});
       const seed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+      sourceVantage=selectSourceS5Vantage(seed);
       assert.equal(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator),
         M6_BALANCED_GENERATOR,'S5 must render genuine current V6');
       await settle(page);
@@ -290,6 +355,8 @@ try{
       assert.deepEqual(errors,[],'JavaScript browser errors');
       assert.deepEqual(bad,[],'Missing original game resources');
       manifest.viewports.push({viewport,ordinary,proof,day,repeat,
+        sourceVantage,visualCameraRelocationDisclosed:true,
+        naturalKeyboardWalk:false,
         ordinarySha256:ordinaryImage.item.sha256,
         canonicalWorldSha256:sha(Buffer.from(saved[key]))});
       console.log('SKY_S5_REAL_WEBGL_PASS',JSON.stringify({

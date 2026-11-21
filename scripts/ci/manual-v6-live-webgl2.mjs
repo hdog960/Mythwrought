@@ -144,9 +144,20 @@ try{
       if(observed.id!==anchor.id||observed.generator!==M6_BALANCED_GENERATOR)
         throw Error('V6 real-game geometry/profiling mismatch '+JSON.stringify({
           anchor,observed}));
-      await page.waitForFunction(()=>
-        window.__mythwroughtTest.snapshot().chunks.length>=4,null,{timeout:90000});
-      await page.waitForTimeout(1500);
+      // The authentic V6 mountain 667x375 screenshot was sampled with
+      // only TEN WebGL chunks resident (fifteen still pending); wait for
+      // full original source GPU residency before applying UNCHANGED strict
+      // biome 16-color threshold. Never synthesize GPU pixels.
+      await page.waitForFunction(()=>{
+        const d=document.querySelector('#scene')?.dataset;
+        return d?.skyDrawn==='true'&&Number(d.loadedChunks)===25&&
+          Number(d.pendingChunks)===0&&Number(d.renderedMeshVertices)>800;
+      },null,{timeout:120000});
+      const firstReady=await page.evaluate(()=>
+        Number(document.querySelector('#scene').dataset.renderedFrames));
+      await page.waitForFunction(n=>
+        Number(document.querySelector('#scene')?.dataset.renderedFrames)>=n+4,
+        firstReady,{timeout:30000});
       const name='v6-real-'+anchor.name+'-'+width+'x'+height+'.png';
       const bytes=await page.screenshot({path:path.join(out,name),timeout:90000});
       const image=PNG.sync.read(bytes);
