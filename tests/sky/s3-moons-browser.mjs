@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
+import {M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
 import pngjs from 'pngjs';
 const {PNG}=pngjs;
 const HEAD=process.env.GITHUB_SHA||'unverified',OUT='artifacts/sky-s3';
@@ -47,8 +48,8 @@ async function settle(page){
 async function choose(page,which){
   await page.locator('#menu').click();
   assert.ok(await page.locator('#help').isVisible());
-  await page.locator(which==='night'?'#skySetNight':'#skySetDay').click();
-  await page.locator('#closeHelp').click();
+  await page.locator('#playerMenu .player-menu-times button').nth(which==='night'?1:0).click();
+  await page.locator('.player-menu-close').click();
   await page.waitForFunction(which=>{
     const c=document.querySelector('#scene'),phase=+c.dataset.skyClockPhaseMs;
     return which==='night'?phase>=0&&phase<16000:
@@ -123,16 +124,26 @@ try{
       isMobile:true,hasTouch:true});
     const page=await context.newPage(),errors=[],bad=[];
     page.on('pageerror',e=>errors.push(e.message));
+    page.on('dialog',d=>d.accept());
     page.on('response',r=>{if(r.status()>=400)bad.push(r.status()+' '+r.url());});
     try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:45000});
+      await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+      assert.equal(await page.locator('#help').isVisible(),true);
+      await page.getByRole('button',{name:/NEW WORLD/}).click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+      const seed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+      assert.equal(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator),
+        M6_BALANCED_GENERATOR);
       await settle(page);
       // One authentic schema-1 save; sky controls must never change its bytes.
       await page.locator('#menu').click();
-      await page.locator('#save').click();
-      await page.locator('#closeHelp').click();
+      await page.locator('.player-menu-safety-link').click();
+      await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
+      await page.locator('.player-safety-back').click();
+      await page.locator('.player-menu-close').click();
       const saved=await nonSky(page);
-      const worldKey='mythwrought-v002-world-179';
+      const worldKey='mythwrought-v002-world-'+seed;
       assert.equal(JSON.parse(saved[worldKey]).schema,1);
       await choose(page,'night');
       await faceMoonSky(page);
@@ -173,9 +184,10 @@ try{
       // Two game days' lunar progression, installed only in independent lunar
       // sidecar; the S1 clock and saved voxel data are never rewritten.
       await page.evaluate(()=>{
-        const key='mythwrought-sky-s3-lunar-179';
+        const seed=window.__mythwroughtTest.snapshot().seed;
+        const key='mythwrought-sky-s3-lunar-'+seed;
         localStorage.setItem(key,JSON.stringify({
-          version:1,seed:179,wallEpochMs:Date.now()-2*1440000
+          version:1,seed,wallEpochMs:Date.now()-2*1440000
         }));
       });
       await page.reload({waitUntil:'networkidle',timeout:45000});
@@ -197,11 +209,12 @@ try{
       let corrupt=null;
       if(w===932){
         const corrupted='{"version":1,"seed":999,"wallEpochMs":1}';
-        await page.evaluate(raw=>localStorage.setItem('mythwrought-sky-s3-lunar-179',raw),corrupted);
+        await page.evaluate(({key,raw})=>localStorage.setItem(key,raw),
+          {key:'mythwrought-sky-s3-lunar-'+seed,raw:corrupted});
         await page.reload({waitUntil:'networkidle',timeout:45000});
         await settle(page);
         const broken=await state(page);
-        const raw=await page.evaluate(()=>localStorage.getItem('mythwrought-sky-s3-lunar-179'));
+        const raw=await page.evaluate(seed=>localStorage.getItem('mythwrought-sky-s3-lunar-'+seed),seed);
         assert.equal(raw,corrupted);
         assert.equal(broken.lunarPersistence,'protected');
         assert.equal(broken.glError,broken.glNoError);

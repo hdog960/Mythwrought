@@ -253,6 +253,29 @@ try{
    assert.equal(await page.locator('#dig').textContent(),'DOWN');
    assert.equal(await page.locator('#place').textContent(),'UP');
    assert.equal(await page.locator('#jump').textContent(),'LAND ×2');
+   // A random V6 spawn can have a real hillside against horizontal flight.
+   // Take off using the ACTUAL upward touch control before keyboard movement;
+   // never edit a position, collision contract or movement threshold.
+   const groundFlight=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   const takeoffRect=await page.locator('#place').boundingBox();
+   assert.ok(takeoffRect,'Original UP control missing in genuine flight');
+   const takeoffXY=center(takeoffRect),takeoffPoint=touch(770,takeoffXY.x,takeoffXY.y);
+   const takeoffCDP=await context.newCDPSession(page);
+   await takeoffCDP.send('Input.dispatchTouchEvent',{
+     type:'touchStart',touchPoints:[takeoffPoint]});
+   try{
+     await page.waitForFunction(initialY=>{
+       const flight=window.__mythwroughtTest.flightInfo();
+       return flight.position.y>initialY+2.4&&flight.bodyClear&&flight.resident;
+     },groundFlight.position.y,{timeout:15000});
+   }finally{
+     await takeoffCDP.send('Input.dispatchTouchEvent',{
+       type:'touchEnd',touchPoints:[]});
+   }
+   const clearedTakeoff=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.ok(clearedTakeoff.position.y>groundFlight.position.y+2.4&&
+     clearedTakeoff.bodyClear&&clearedTakeoff.resident,
+     'Real upward touch hold failed to clear actual spawn terrain');
    const before=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    // Focus the real world, then wait for actual simulated movement instead of
    // assuming SwiftShader renders a deterministic number of frames in 340ms.

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
+import {M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
 import pngjs from 'pngjs';
 const {PNG}=pngjs;
 const SOURCE=process.env.GITHUB_SHA||'UNVERIFIED';
@@ -94,8 +95,8 @@ async function settle(page){
 async function choose(page,which){
   await page.locator('#menu').click();
   assert.ok(await page.locator('#help').isVisible());
-  await page.locator(which==='night'?'#skySetNight':'#skySetDay').click();
-  await page.locator('#closeHelp').click();
+  await page.locator('#playerMenu .player-menu-times button').nth(which==='night'?1:0).click();
+  await page.locator('.player-menu-close').click();
   await page.waitForFunction(which=>{
     const c=document.querySelector('#scene'),phase=+c.dataset.skyClockPhaseMs,
       visibility=+c.dataset.skyS4StarVisibility;
@@ -114,8 +115,9 @@ async function pitchUp(page){
 }
 async function clockOnlyJump(page,phaseMs){
   await page.evaluate(phaseMs=>{
-    localStorage.setItem('mythwrought-sky-s1-clock-179',
-      JSON.stringify({version:1,seed:179,anchorPhaseMs:phaseMs,wallAnchorMs:Date.now()}));
+    const seed=window.__mythwroughtTest.snapshot().seed;
+    localStorage.setItem('mythwrought-sky-s1-clock-'+seed,
+      JSON.stringify({version:1,seed,anchorPhaseMs:phaseMs,wallAnchorMs:Date.now()}));
   },phaseMs);
   await page.reload({waitUntil:'networkidle',timeout:45000});
   await settle(page);
@@ -132,14 +134,25 @@ try{
       hasTouch:true,isMobile:true}),page=await ctx.newPage();
     const errors=[],bad=[];
     page.on('pageerror',e=>errors.push(String(e.message)));
+    page.on('dialog',d=>d.accept());
     page.on('response',r=>{if(r.status()>=400)bad.push(r.status()+' '+r.url())});
     try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:45000});
+      await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+      assert.equal(await page.locator('#help').isVisible(),true,
+        'S4 requires explicit current-generation world admission');
+      await page.getByRole('button',{name:/NEW WORLD/}).click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+      const seed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+      assert.equal(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator),
+        M6_BALANCED_GENERATOR,'S4 must render current V6 source world');
       await settle(page);
       await page.locator('#menu').click();
-      await page.locator('#save').click();
-      await page.locator('#closeHelp').click();
-      const original=await nonSky(page),key='mythwrought-v002-world-179';
+      await page.locator('.player-menu-safety-link').click();
+      await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
+      await page.locator('.player-safety-back').click();
+      await page.locator('.player-menu-close').click();
+      const original=await nonSky(page),key='mythwrought-v002-world-'+seed;
       assert.equal(JSON.parse(original[key]).schema,1);
       await choose(page,'night');
       await pitchUp(page);

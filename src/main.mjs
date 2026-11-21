@@ -2715,6 +2715,10 @@ function start(){
     disposeLiveMobSession();g2NewWorld();
     caveSession=null;world=candidate;world.nextPack2State=pack2Selection;
     pack3=createPack3LiveBridge(world,localStorage);
+    // This candidate was already verified and saved. Clear the preview
+    // read-only flag BEFORE re-binding its writable S1/S3 sky sidecars.
+    // Otherwise first admitted V6 worlds inherit false 'protected' status.
+    storageReadOnly=false;
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
     // Register *after* the explicit unused-seed v5 creation is safely saved.
     if(world.base instanceof FourRegionWorld&&
@@ -2722,7 +2726,7 @@ function start(){
           world.base.generationProfile.generator))
       void ensureM5OfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
-    storageReadOnly=false;resetLiveMobSession();changed=false;respawnPrototype();
+    resetLiveMobSession();changed=false;respawnPrototype();
     clearMirrorDownload();
     seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
     seedMessage.textContent=statusText;

@@ -17,9 +17,13 @@ const distance=(x,z,a,b)=>Math.hypot(x-a,z-b);
 const TARGETS=Object.freeze([
   // Authentic V6 mountain foothill: seed-based region identity stays mountain,
   // but the 512m mountain summit is not guaranteed physically walkable.
-  // At (-350,-170), 7 independent seeds have weight >=.72; shortest
-  // cardinal steps from spawn >=520 before the strict 22m goal radius.
-  {name:'mountain',x:-350,z:-170},
+  // Previously observed genuine collision-safe mountain foothill is at
+  // (-325..-328,-146..-147) on all three failing random-seed jobs.
+  // The original farther ridge exhausted 70k visits despite that progress.
+  // This new destination is inside that sampled real mountain region,
+  // not a path bypass. 10 independent seeds give weight=1 at (-339,-150).
+  // Minimum Manhattan approach 489 preserves the strict >=450 route.
+  {name:'mountain',x:-339,z:-150},
   {name:'desert',x:512,z:0},
   {name:'snow',x:0,z:512},
   {name:'enchanted',x:0,z:-512}
