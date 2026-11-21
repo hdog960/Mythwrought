@@ -15,7 +15,11 @@ const distance=(x,z,a,b)=>Math.hypot(x-a,z-b);
 // First V6 cardinal tiles are generated with exact quota-preserving biomes;
 // the source V6 warp never moves their 512m tile centres out of the target.
 const TARGETS=Object.freeze([
-  {name:'mountain',x:-512,z:0},
+  // Authentic V6 mountain foothill: seed-based region identity stays mountain,
+  // but the 512m mountain summit is not guaranteed physically walkable.
+  // At (-350,-170), 7 independent seeds have weight >=.72; shortest
+  // cardinal steps from spawn >=520 before the strict 22m goal radius.
+  {name:'mountain',x:-350,z:-170},
   {name:'desert',x:512,z:0},
   {name:'snow',x:0,z:512},
   {name:'enchanted',x:0,z:-512}

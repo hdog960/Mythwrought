@@ -300,12 +300,23 @@ try{
     generator:window.__mythwroughtTest.fourBiomeProfile()?.generator,
     world:localStorage.getItem(worldKey),
     profile:localStorage.getItem(profileKey),
-    journal:localStorage.getItem(journalKey)
+    journal:localStorage.getItem(journalKey),
+    selected:localStorage.getItem('mythwrought-v002-selected-seed'),
+    activeSeed:window.__mythwroughtTest.snapshot().seed,
+    admissionVisible:!document.getElementById('help').hidden,
+    admissionStatus:document.querySelector('#playerMenu .player-menu-status')?.textContent,
+    playableCanvasFocused:document.activeElement?.id==='scene'
   }),{worldKey,profileKey,journalKey});
+  // Current-only startup renders a READ-ONLY V6 *preview* after damaged
+  // metadata. A V6 profile object in that preview is NOT playable admission.
+  // Refuse any save mutation, wrong selected seed or hidden admission UI.
   check('corrupt-profile-fail-closed',bad.state.includes('READ ONLY')&&
-    !bad.generator&&bad.world===initial.world&&
+    bad.generator===report.sourceGenerator&&bad.activeSeed!==seed&&
+    bad.selected===String(seed)&&bad.admissionVisible&&
+    !bad.playableCanvasFocused&&
+    bad.world===initial.world&&
     bad.profile==='invalid-profile-protection-test'&&
-    bad.journal==='invalid-journal-protection-test');
+    bad.journal==='invalid-journal-protection-test',bad);
   await screenshot(page,'corrupt-profile-protected');
   await page.evaluate(({profileKey,journalKey,profile,journal})=>{
     localStorage.setItem(profileKey,profile);

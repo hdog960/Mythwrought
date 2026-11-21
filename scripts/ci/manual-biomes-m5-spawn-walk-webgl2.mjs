@@ -109,7 +109,7 @@ try{
    await page.reload({waitUntil:'load'});
    await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:30000});
    const after=await checkPosition();
-   const storage=await page.evaluate(()=>({
+   const storage=await page.evaluate(seed=>({
      map:localStorage.getItem('mythwrought-exploration-v1-'+seed),
      legacyMap:localStorage.getItem('mythwrought-exploration-v1-7'),
      legacyProfile:localStorage.getItem('mythwrought-v002-world-7-four-biomes-profile-v1'),

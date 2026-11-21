@@ -75,7 +75,10 @@ try{
       assert.ok(explored>start);
       await page.locator('#miniMapButton').click(); // flush discovery synchronously
       await page.locator('#closeExploration').click();
-      assert.ok(await page.evaluate(seed=>JSON.parse(localStorage.getItem('mythwrought-exploration-v1-'+seed)).cells.length>start,seed));
+      assert.ok(await page.evaluate(({seed,start})=>{
+        const raw=localStorage.getItem('mythwrought-exploration-v1-'+seed);
+        return raw!==null&&JSON.parse(raw).cells.length>start;
+      },{seed,start}),'Actual source visited-fog expansion not durably saved');
       await page.reload({waitUntil:'networkidle'});
       await page.waitForFunction(n=>Number(document.querySelector('#miniMap')?.dataset.discovered)>=n,explored);
       // The old seed switch is no longer playable. Use actual NEW WORLD UI
