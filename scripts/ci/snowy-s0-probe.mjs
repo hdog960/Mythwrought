@@ -14,7 +14,8 @@ for(const seed of [179,2026]){
   const world=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
   const m={seed,anchor:[0,512],step:8,validInterior:0,allSnow:0,
     caps:{},uncoveredGrass:0,emptyColumns:0,blockedAbove:0,
-    otherProtected:0,glacierSites:[],grassSites:[],blockedSites:[],rockSites:[]};
+    otherProtected:0,glacierSites:[],grassSites:[],blockedSites:[],rockSites:[],
+    rejectionReasons:{},rejectionExamples:[]};
   for(let x=-160;x<=160;x+=8)for(let z=352;z<=672;z+=8){
     const climate=v6BiomeAt(x,z,seed);
     if(climate?.name!=='snow')continue;
@@ -48,6 +49,28 @@ for(const seed of [179,2026]){
           legacy,baseline,obstruction});
       }
       else m.otherProtected++;
+      // A column is rejected by its first baseline cell that would be
+      // overwritten/buried. Classify each genuine prior block, including
+      // below-old protected cave/structure cells, rather than guessing trees.
+      let rejection=null;
+      for(let y=old-2;y<=19;y++){
+        const id=world._environmentBaseline(x,y,z);
+        if(y>old?id!==BLOCK.AIR:
+           ![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(id)){
+          const original=VoxelWorld.prototype.naturalAndLandmarkBlock.call(world,x,y,z);
+          const cave=world.environmentCaves?.get(x,y,z);
+          rejection={y,id,original,cave:cave===undefined?null:cave,
+            location:y>old?'above-old-ground':'protected-old-substrate'};
+          break;
+        }
+      }
+      const reason=rejection?
+        rejection.location+':'+rejection.id+':'+
+          (rejection.cave!==null?'cave':rejection.original!==rejection.id?'masked':'original'):
+        'no-rejection-found';
+      m.rejectionReasons[reason]=(m.rejectionReasons[reason]??0)+1;
+      if(m.rejectionExamples.length<35)
+        m.rejectionExamples.push({at:[x,old,z],reason,rejection});
     }
   }
   assert.ok(m.validInterior>=200,'Snow survey must sample a real M7 interior');
