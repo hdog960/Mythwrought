@@ -55,3 +55,47 @@ test('player-edited blue ice retains ordinary block palette shading',()=>{
   assert.ok(samples.length>30);
   assert.equal(samples.some(v=>v.material===41),false);
 });
+
+function topFlatSurface(world,{minX,maxX,minZ,maxZ}){
+  const mesh=meshChunk(world,0,0),samples=[];
+  assert.equal(mesh.length%27,0);
+  for(let i=0;i<mesh.length;i+=27){
+    const offsets=[i,i+9,i+18];
+    if(offsets.every(k=>mesh[k+1]===4&&mesh[k]>=minX&&mesh[k]<=maxX&&
+        mesh[k+2]>=minZ&&mesh[k+2]<=maxZ))
+      for(const k of offsets)samples.push({r:mesh[k+3],g:mesh[k+4],b:mesh[k+5],
+        material:mesh[k+8]});
+  }
+  return samples.filter(v=>v.material===41);
+}
+const mean=(items,key)=>items.reduce((sum,v)=>sum+v[key],0)/items.length;
+function internalBlueIceSideTriangles(world){
+  const mesh=meshChunk(world,0,0);let count=0;
+  for(let i=0;i<mesh.length;i+=27){
+    const offsets=[i,i+9,i+18],plane=offsets.map(k=>[mesh[k],mesh[k+1],mesh[k+2]]);
+    if(plane.every(([x,y,z])=>x===4&&y>=3&&y<=4&&z>=5&&z<=11)&&
+       plane.some(([,y])=>y===3)&&plane.some(([,y])=>y===4))count++;
+  }
+  return count;
+}
+test('M7 natural blue ice cap uses snow-dusted tint with no harsh adjacent blue/white contrast',()=>{
+  const world=snowFixture(M7_ENVIRONMENT_GENERATOR);
+  const ice=topFlatSurface(world,{minX:5,maxX:11,minZ:5,maxZ:11});
+  const snow=topFlatSurface(world,{minX:1,maxX:3,minZ:5,maxZ:11});
+  assert.ok(ice.length>30&&snow.length>20,'Expected genuine ice and snow top-face triangles');
+  // Adjacent cap blocks are physical distinct materials, but a natural frozen
+  // landscape must not become a saturated-blue/white tiled chessboard.
+  // This checks RGB contrast of actual source mesh, not a text-code assertion.
+  const gap=Math.max(...['r','g','b'].map(c=>Math.abs(mean(ice,c)-mean(snow,c))));
+  assert.ok(gap<.075,'Adjacent natural glacier and snow cap colors contrast too sharply: '+gap);
+});
+test('M7 culls internal ice/snow side walls while old profiles and edited ice retain authored geometry',()=>{
+  const natural=snowFixture(M7_ENVIRONMENT_GENERATOR);
+  assert.equal(internalBlueIceSideTriangles(natural),0,
+    'Opaque natural M7 snow and glacier must not expose internal checker tile walls');
+  const older=snowFixture(M6_BALANCED_GENERATOR),edited=snowFixture(M7_ENVIRONMENT_GENERATOR,{playerEdited:true});
+  assert.ok(internalBlueIceSideTriangles(older)>0,
+    'Older V6 ice translucency must remain unchanged');
+  assert.ok(internalBlueIceSideTriangles(edited)>0,
+    'Player-edited ice translucency must remain unchanged');
+});
