@@ -1,0 +1,42 @@
+name: MYTHWROUGHT Builder D Wave3 real Chromium CDP startup remediation acceptance (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave3-webgl2.test.mjs'
+      - 'docs/building-pool/roadmap-d/D3_CHROMIUM_CDP_STARTUP_REMEDIATION.md'
+      - '.github/workflows/roadmap-d-d3-cdp-startup-remediation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-d-wave3-real-cdp-repair-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  wave3-real-chromium-startup-and-48-screenshots:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require all protected historical plus eight Wave3 actual source objects and unweakened same-category D4
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave3.test.mjs
+      - name: Require installed real Chromium binary; no screenshot simulation or mock
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+      - name: Install pinned PNG decoder for independent genuine image integrity audit
+        run: npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Render all eight genuine Wave3 source buildings with actual Chromium WebGL2 and 48 exact landscape captures
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave3-webgl2.test.mjs
+      - name: Independently decode, verify full 48 PNG CRC/SHA, source bytes, no GL errors and exterior/cutaway identities
+        run: node tests/building-pool/roadmap-d/audit-wave3-gallery.mjs
+      - name: Upload only genuine Chromium WebGL2 source screenshots and audit manifests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-wave3-48-genuine-real-cdp-remediation-frames
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave3-webgl2-cube-proxy/
+          if-no-files-found: ignore
