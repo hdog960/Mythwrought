@@ -1,4 +1,4 @@
-// Source-only camera follow trace auditor. Does not hook production camera.
+// Source-only camera-follow trace auditor; maxJerk is the historical acceleration limit.
 export function auditCameraFollowTrace(samples,{maxLag=0.5,maxJerk=250,maxGapSeconds=0.1}={}){
  const fail=(reason,index=-1)=>({safe:false,reason,index});
  if(!Array.isArray(samples)||samples.length<3)return fail('missing-samples');
@@ -8,18 +8,20 @@ export function auditCameraFollowTrace(samples,{maxLag=0.5,maxJerk=250,maxGapSec
   const s=samples[i];
   if(!s||!Number.isFinite(s.time)||!s.player||!s.camera||
      ![s.player.x,s.player.y,s.player.z,s.camera.x,s.camera.y,s.camera.z].every(Number.isFinite))return fail('nonfinite-frame',i);
-  const lag=Math.hypot(s.player.x-s.camera.x,s.player.y-s.camera.y,s.player.z-s.camera.z);
-  if(lag>maxLag+1e-9)return fail('camera-lag',i);
   if(prev){
    const dt=s.time-prev.time;
    if(!(dt>0))return fail('nonmonotonic-time',i);
    if(dt>maxGapSeconds)return fail('missing-interval',i);
+  }
+  const lag=Math.hypot(s.player.x-s.camera.x,s.player.y-s.camera.y,s.player.z-s.camera.z);
+  if(lag>maxLag+1e-9)return fail('camera-lag',i);
+  if(prev){
+   const dt=s.time-prev.time;
    const velocity=['x','y','z'].map(k=>(s.camera[k]-prev.camera[k])/dt);
    if(previousVelocity){
-    // Segment velocities are centered at their interval midpoints.
     const midpointDt=(previousDt+dt)/2;
     const acceleration=Math.hypot(...velocity.map((v,j)=>(v-previousVelocity[j])/midpointDt));
-    if(acceleration>maxJerk+1e-9)return fail('camera-acceleration-spike',i);
+    if(!Number.isFinite(acceleration)||acceleration>maxJerk+1e-9)return fail('camera-acceleration-spike',i);
    }
    previousVelocity=velocity;
    previousDt=dt;
