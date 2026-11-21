@@ -3376,6 +3376,10 @@ function start(){
     help.hidden=false;
     playerSettings.showStatus('An earlier world is safely archived. '+
       'Choose NEW WORLD to create the current installed generation.');
+  }else if(help.hidden){
+    // Restore actual keyboard gameplay focus on same-install current V6 reload.
+    // Never focus the canvas while the protected old-world admission is open.
+    canvas.focus({preventScroll:true});
   }
   saveHealth.textContent=storageReadOnly?
     'READ ONLY: damaged world data preserved; import or select another seed.':
