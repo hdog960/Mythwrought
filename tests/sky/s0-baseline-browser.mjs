@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
+import {M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
 
 const out='artifacts/sky-s0';
 await mkdir(out,{recursive:true});
@@ -24,6 +25,23 @@ try {
     page.on('response',r=>{if(r.status()>=400)badRequests.push(r.status()+' '+r.url());});
     try {
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:45000});
+      // Original sky must be measured in a genuinely admitted CURRENT V6 world.
+      // Do not turn archived seed179 into a playable or mutable world.
+      await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+      assert.equal(await page.locator('#help').isVisible(),true,
+        'Protected current-world admission did not appear before sky acceptance');
+      page.once('dialog',dialog=>dialog.accept());
+      await page.getByRole('button',{name:/NEW WORLD/}).click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+      const admitted=await page.evaluate(()=>{
+        const test=window.__mythwroughtTest,seed=test.snapshot().seed;
+        return {seed,profile:test.fourBiomeProfile()?.generator,
+          raw:localStorage.getItem('mythwrought-v002-world-'+seed)};
+      });
+      assert.equal(admitted.profile,M6_BALANCED_GENERATOR,
+        'S0 original sky did not enter the current V6 generator');
+      assert.equal(JSON.parse(admitted.raw||'null')?.schema,1,
+        'S0 current V6 world lacked verified schema-1 save');
       await page.waitForFunction(()=>{
         const c=document.getElementById('scene');
         return c?.dataset.skyDrawn==='true' && +c.dataset.loadedChunks===25 &&
