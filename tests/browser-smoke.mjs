@@ -75,8 +75,13 @@ try{
   const target=await page.evaluate(()=>{
     const t=window.__mythwroughtTest,x=16,z=0;
     let y=null;
-    for(let at=30;at>=0;at--){
-      if(t.block(x,at,z)!==0&&t.block(x,at+1,z)===0){y=at;break;}
+    // The full original game enforces WORLD_MAX_Y=19, including its
+    // independently saved Pack 3 physical overlay. Never query 20..30
+    // (or block19's nonexistent y20 above-neighbor) through t.block().
+    for(let at=19;at>=0;at--){
+      if(t.block(x,at,z)!==0&&(at===19||t.block(x,at+1,z)===0)){
+        y=at;break;
+      }
     }
     if(y===null)throw Error('No authentic exposed V6 surface block for root mining proof');
     t.teleport(14.5,.5);t.aimAt(x,y,z);

@@ -34,15 +34,36 @@ try {
       const gpu=await page.evaluate(()=>!!document.querySelector('#scene').getContext('webgl2'));
       assert.equal(gpu,true,'Actual gameplay WebGL2 unavailable');
       assert.equal(await page.locator('#pack3Material option').count(),18);
-      // Place a source-true legacy anchor, as the existing genuine blocks-browser
-      // test does; the normal on-screen PLACE control must add the physical roof.
-      await page.evaluate(()=>{
-        const t=window.__mythwroughtTest;
-        t.placeFixture(16,18,0,3);
-        t.teleport(14.5,.5);t.aimAt(16,18,0);
+      // V6 NEW WORLD has a fresh *random* seed and different natural
+      // terrain: the old seed179 absolute camera/target at (16,18,0) is
+      // not necessarily ray-reachable. Use the ORIGINAL localhost-only
+      // source fixture and the game's true ray target, not a synthetic
+      // target dataset, mouse teleport bypass or mocked PLACE call.
+      const anchor=await page.evaluate(async()=>{
+        const t=window.__mythwroughtTest,scene=document.getElementById('scene');
+        const pos=t.teleport(14.5,.5);
+        const y0=Math.max(2,Math.min(18,Math.floor(pos.feet+1.5)));
+        const offsets=[[2,0],[0,2],[-2,0],[0,-2],[3,0],[0,3],[-3,0],[0,-3]];
+        const attempts=[];
+        for(const [dx,dz] of offsets)for(const dy of [0,1,-1,2]){
+          const x=Math.floor(pos.x)+dx,z=Math.floor(pos.z)+dz,y=y0+dy;
+          if(y<1||y>18||t.block(x,y,z)!==0)continue;
+          if(!t.placeFixture(x,y,z,3))continue;
+          t.aimAt(x,y,z);
+          await new Promise(resolve=>requestAnimationFrame(()=>
+            requestAnimationFrame(resolve)));
+          const hit=scene.dataset.targetBlock;
+          if(hit===x+','+y+','+z)return {x,y,z,player:pos,hit};
+          attempts.push({x,y,z,hit});
+          if(!t.placeFixture(x,y,z,0))
+            throw Error('Cannot clean up a failed original-game aiming probe');
+        }
+        throw Error('No actual physical V6 Pack3 ray target near the player: '+
+          JSON.stringify(attempts));
       });
-      await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.targetBlock==='16,18,0',
-        null,{timeout:12000});
+      await page.waitForFunction(({x,y,z})=>
+        document.querySelector('#scene')?.dataset.targetBlock===x+','+y+','+z',
+        anchor,{timeout:12000});
       const canonicalBefore=await page.evaluate(key=>localStorage.getItem(key),canonicalKey);
       assert.ok(canonicalBefore,'Actual V6 canonical schema-1 save absent');
       const verticesBefore=await page.evaluate(()=>Number(document.querySelector('#scene').dataset.renderedMeshVertices));
