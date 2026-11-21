@@ -5,6 +5,7 @@ on:
       - dev/enchanted-forest-overhaul-*
     paths:
       - 'scripts/ci/enchanted-forest-phase1-audit.mjs'
+      - 'scripts/ci/enchanted-forest-phase1-edge-audit.mjs'
       - 'tests/manual-biomes/enchanted-forest-phase1.test.mjs'
       - 'src/manual-biomes/environment-v7.mjs'
       - 'src/manual-biomes/profile-world.mjs'
@@ -37,6 +38,7 @@ jobs:
       - name: Exact-source syntax checks
         run: |
           node --check scripts/ci/enchanted-forest-phase1-audit.mjs
+          node --check scripts/ci/enchanted-forest-phase1-edge-audit.mjs
           node --check src/manual-biomes/environment-v7.mjs
           node --check src/manual-biomes/profile-world.mjs
       - name: Exact witness and biome-safety native regressions
@@ -46,11 +48,15 @@ jobs:
           node --test tests/manual-biomes/profile-world.test.mjs tests/manual-biomes/v6-balanced-biomes.test.mjs tests/nonblock-environment-profile.test.mjs tests/nonblock-environment-streaming.test.mjs tests/nonblock-habitat.test.mjs
       - name: Audit genuine M7 source provenance and deterministic seed samples
         run: node scripts/ci/enchanted-forest-phase1-audit.mjs
+      - name: Audit seven seed interiors and actual warped biome-edge transects
+        run: node scripts/ci/enchanted-forest-phase1-edge-audit.mjs
       - name: Preserve independent inspectable output
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: enchanted-forest-phase1-provenance
-          path: artifacts/enchanted-forest/phase1-source-audit.json
+          path: |
+            artifacts/enchanted-forest/phase1-source-audit.json
+            artifacts/enchanted-forest/phase1-wide-edge-audit.json
           if-no-files-found: warn
           retention-days: 14
