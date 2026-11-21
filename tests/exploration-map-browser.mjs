@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {chromium} from 'playwright';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 
 const browser=await chromium.launch({headless:true,args:[
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
@@ -11,6 +12,15 @@ try{
     page.on('pageerror',e=>errors.push(e.message));
     try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+      await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+      assert.equal(await page.locator('#help').isVisible(),true,
+        'Archived world bypassed mandatory current-world admission');
+      page.once('dialog',d=>d.accept());
+      await page.getByRole('button',{name:/NEW WORLD/}).click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+      const seed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+      assert.equal(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator),M6_BALANCED_GENERATOR);
+      assert.equal(await page.evaluate(seed=>JSON.parse(localStorage.getItem('mythwrought-v002-world-'+seed)||'null')?.schema,seed),1);
       await page.waitForFunction(()=>Number(document.querySelector('#miniMap')?.dataset.discovered)>0);
       const start=Number(await page.locator('#miniMap').getAttribute('data-discovered'));
       assert.ok(start>0&&start<60,'fresh seed must reveal only nearby spawn cells');
@@ -65,17 +75,26 @@ try{
       assert.ok(explored>start);
       await page.locator('#miniMapButton').click(); // flush discovery synchronously
       await page.locator('#closeExploration').click();
-      assert.ok(await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-exploration-v1-179')).cells.length)>start);
+      assert.ok(await page.evaluate(seed=>JSON.parse(localStorage.getItem('mythwrought-exploration-v1-'+seed)).cells.length>start,seed));
       await page.reload({waitUntil:'networkidle'});
       await page.waitForFunction(n=>Number(document.querySelector('#miniMap')?.dataset.discovered)>=n,explored);
+      // The old seed switch is no longer playable. Use actual NEW WORLD UI
+      // and retain the prior V6 world and fog bytes without mutation.
+      const priorFog=await page.evaluate(seed=>
+        localStorage.getItem('mythwrought-exploration-v1-'+seed),seed);
       await page.locator('#menu').click();
-      await page.locator('#seedInput').fill('28629');
-      await page.locator('#switchWorld').click();
-      await page.locator('#closeHelp').click();
-      await page.waitForFunction(()=>document.querySelector('#seed')?.textContent==='WORLD 28629');
-      await page.waitForFunction(()=>document.querySelector('#miniMap')?.dataset.seed==='28629');
+      page.once('dialog',d=>d.accept());
+      await page.getByRole('button',{name:/NEW WORLD/}).click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+      const newer=await page.evaluate(()=>({seed:window.__mythwroughtTest.snapshot().seed,
+        generator:window.__mythwroughtTest.fourBiomeProfile()?.generator}));
+      assert.notEqual(newer.seed,seed,'NEW WORLD reused previous saved world');
+      assert.equal(newer.generator,M6_BALANCED_GENERATOR);
+      await page.waitForFunction(seed=>document.querySelector('#miniMap')?.dataset.seed===String(seed),newer.seed);
       assert.ok(Number(await page.locator('#miniMap').getAttribute('data-discovered'))<explored,
-        'different seed must begin unexplored');
+        'Different current V6 world must start with fresh map discovery');
+      assert.equal(await page.evaluate(seed=>localStorage.getItem('mythwrought-exploration-v1-'+seed),seed),priorFog,
+        'NEW WORLD modified previous current-V6 discovery bytes');
       assert.deepEqual(errors,[],'Map browser JavaScript errors at '+width+'x'+height);
       console.log('PASS exploration map',width+'x'+height,{start,explored,placement});
     }finally{await context.close();}
