@@ -63,8 +63,9 @@ export function createObservedNavigator({seed,discovery,storage=null}){
     project({player,panX=0,panZ=0,zoom=7,width,height}){
       if(!player||![player.x,player.z,player.yaw,panX,panZ,zoom,width,height].every(finite)||
         width<=0||height<=0||width>4096||height>4096||zoom<NAV00_MIN_ZOOM||zoom>NAV00_MAX_ZOOM)throw Error('Invalid map camera');
-      const cx=Math.floor((player.x+panX)/NAV00_CELL_SIZE);
-      const cz=Math.floor((player.z+panZ)/NAV00_CELL_SIZE);
+      const centerX=(player.x+panX)/NAV00_CELL_SIZE;
+      const centerZ=(player.z+panZ)/NAV00_CELL_SIZE;
+      const cx=Math.floor(centerX),cz=Math.floor(centerZ);
       const radiusX=Math.ceil(width/(2*zoom))+1,radiusZ=Math.ceil(height/(2*zoom))+1;
       if((2*radiusX+1)*(2*radiusZ+1)>MAX_PROJECTED_CELLS)throw Error('Map viewport exceeds bounded discovery scan');
       const cells=[];
@@ -72,13 +73,13 @@ export function createObservedNavigator({seed,discovery,storage=null}){
         const x=cx+dx,z=cz+dz;
         // Do not query world height, block material, or landmarks before fog authorization.
         if(!discovery.seen.has(x+','+z))continue;
-        cells.push({x,z,screenX:width/2+dx*zoom,screenY:height/2+dz*zoom});
+        cells.push({x,z,screenX:width/2+(x-centerX)*zoom,screenY:height/2+(z-centerZ)*zoom});
       }
-      const toScreen=p=>({x:width/2+(Math.floor(p.x/NAV00_CELL_SIZE)-cx)*zoom,
-        y:height/2+(Math.floor(p.z/NAV00_CELL_SIZE)-cz)*zoom});
+      const toScreen=p=>({x:width/2+(Math.floor(p.x/NAV00_CELL_SIZE)-centerX)*zoom,
+        y:height/2+(Math.floor(p.z/NAV00_CELL_SIZE)-centerZ)*zoom});
       return {version:NAV00_VERSION,cells,pins:this.visiblePins().map(p=>{const screen=toScreen(p);return {...p,worldX:p.x,worldZ:p.z,screenX:screen.x,screenY:screen.y};}).filter(p=>p.screenX>=-zoom&&p.screenX<=width+zoom&&p.screenY>=-zoom&&p.screenY<=height+zoom),
         player:{...toScreen(player),bearing:((player.yaw*180/Math.PI)%360+360)%360,
-          x:player.x,z:player.z},zoom,center:{x:cx,z:cz}};
+          x:player.x,z:player.z},zoom,center:{x:centerX,z:centerZ}};
     }
   });
 }
