@@ -17,8 +17,8 @@ export function evaluateChainedBudget(generators, provider, startTick, tickCount
         !safe(checkpoint.nextTick) || checkpoint.nextTick !== startTick ||
         !Array.isArray(checkpoint.keys) || checkpoint.keys.length !== sorted.length ||
         checkpoint.keys.some((k,i) => k !== sorted[i]) ||
-        !safe(checkpoint.generatedCandidate) && !(Number.isFinite(checkpoint.generatedCandidate) && checkpoint.generatedCandidate >= 0) ||
-        !safe(checkpoint.fuelRequiredCandidate) ||
+        !(Number.isFinite(checkpoint.generatedCandidate) && checkpoint.generatedCandidate >= 0 && Number.isSafeInteger(Math.round(checkpoint.generatedCandidate * 1e6))) ||
+        !safe(checkpoint.fuelRequiredCandidate) || checkpoint.fuelRequiredCandidate > checkpoint.nextTick ||
         !Array.isArray(checkpoint.remainingReservations) ||
         checkpoint.remainingReservations.length !== sorted.length ||
         Object.keys(initialReservations).length !== 0)
