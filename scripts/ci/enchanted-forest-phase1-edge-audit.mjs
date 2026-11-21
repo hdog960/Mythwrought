@@ -50,14 +50,21 @@ function collect(world,legacy,seed,x,z,tag,result){
     if(weight>=.7){report.interiorGrassCount+=grass.length;result.interiorGrass+=grass.length;}
     else report.expectedEdgeGrassCount+=grass.length;
     if(report.witnesses.length<70){
-      const y=grass[0],above=[];
-      for(let ay=old+1;ay<=19;ay++){
-        const base=world._environmentBaseline(x,ay,z);
-        if(base!==BLOCK.AIR){above.push({y:ay,id:base,legacy:legacy.naturalAndLandmarkBlock(x,ay,z)});if(above.length===6)break;}
+      const y=grass[0],above=[],rejections=[];
+      for(let ay=old-2;ay<=19;ay++){
+        const prior=world._environmentBaseline(x,ay,z);
+        const rejected=ay>old?prior!==BLOCK.AIR:
+          ![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior);
+        if(rejected&&rejections.length<10)
+          rejections.push({y:ay,prior,cave:world.environmentCaves?.get(x,ay,z),
+            legacy:legacy.naturalAndLandmarkBlock(x,ay,z),
+            originalBase:baseBlock(x,ay,z,seed)});
+        if(ay>old&&prior!==BLOCK.AIR&&above.length<6)
+          above.push({y:ay,id:prior,legacy:legacy.naturalAndLandmarkBlock(x,ay,z)});
       }
       report.witnesses.push({seed,tag,x,y,z,biome:biome.name,weight,old,top,
         cap:id,plan:plan.size,base:baseBlock(x,y,z,seed),
-        legacy:legacy.naturalAndLandmarkBlock(x,y,z),above,
+        legacy:legacy.naturalAndLandmarkBlock(x,y,z),above,rejections,
         edited:world.edits.has(x+','+y+','+z)});
     }
   }
