@@ -1,0 +1,43 @@
+name: MYTHWROUGHT Builder D Wave8 original 213-source and genuine 48-frame Chromium acceptance (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave8.mjs'
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave8*'
+      - 'tests/building-pool/roadmap-d/audit-wave8-gallery.mjs'
+      - 'tests/roadmap-d-wave8.test.mjs'
+      - '.github/workflows/roadmap-d-d8-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-d-wave8-real-gl-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  wave8-213-originals-bidirectional-d4-and-real-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require protected 153 plus 60 original source buildings and unweakened 986 bidirectional 8-way D4 pairs
+        run: node --test --test-concurrency=1 tests/building-pool/roadmap-d/d1-original-institutions-wave8.test.mjs tests/building-pool/roadmap-d/d5-historical-bidirectional-d4.test.mjs
+      - name: Require genuine local Chromium executable and exact PNG decoder
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+          npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Render eight actual source-original WebGL2 buildings exterior and section x three phone landscapes
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave8-webgl2.test.mjs
+      - name: Independently verify all 48 original genuine Chromium PNGs with CRC/SHA, source bytes, camera and GL
+        run: node tests/building-pool/roadmap-d/audit-wave8-gallery.mjs
+      - name: Preserve actual 48 WebGL2 source cube-proxy PNGs for independent visual and SHA review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-wave8-48-real-chromium-source-frames
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave8-webgl2-cube-proxy/
+          if-no-files-found: ignore
