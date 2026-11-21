@@ -450,9 +450,9 @@ export const ROADMAP_D_WAVE8_PLANS=Object.freeze([
       ],
       [
         72,
-      42,
-      8,
-      8
+        42,
+        8,
+        8
       ],
       [
         39,
@@ -801,6 +801,12 @@ export const ROADMAP_D_WAVE8_PLANS=Object.freeze([
         81,
         39,
         60
+      ],
+      [
+        14,
+        78,
+        26,
+        70
       ]
     ],
     "discs": [
@@ -1001,9 +1007,9 @@ export const ROADMAP_D_WAVE8_PLANS=Object.freeze([
         10
       ],
       [
-        101,
+        99,
         55,
-        11,
+        10,
         9
       ],
       [
@@ -1074,8 +1080,8 @@ export const ROADMAP_D_WAVE8_PLANS=Object.freeze([
       ],
       [
         "sunshield-cooling-station",
-        101,
-        53
+        103,
+        60
       ]
     ],
     "div": [
@@ -1203,9 +1209,9 @@ export const ROADMAP_D_WAVE8_PLANS=Object.freeze([
         8
       ],
       [
-        67,
+        66,
         43,
-        9,
+        8,
         7
       ]
     ],
