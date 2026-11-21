@@ -9,6 +9,8 @@ on:
       - 'scripts/ci/snowy-s0-probe.mjs'
       - 'scripts/ci/snowy-s0-webgl2.mjs'
       - 'tests/snowy-biome-provenance.test.mjs'
+      - 'tests/snowy-biome-s3-candidates.test.mjs'
+      - 'src/manual-biomes/snowy-s3-tree-prototypes.mjs'
       - '.github/workflows/snowy-biome-provenance.yml'
 
 permissions:
@@ -41,6 +43,7 @@ jobs:
         run: |
           node --test tests/snowy-biome-checkerboard.test.mjs
           node --test tests/snowy-biome-provenance.test.mjs
+          node --test tests/snowy-biome-s3-candidates.test.mjs
           node --test tests/nonblock-environment-profile.test.mjs
       - name: Real M7 seed and coordinate material provenance (no mocks)
         run: node scripts/ci/snowy-s0-probe.mjs
