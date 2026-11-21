@@ -69,9 +69,9 @@ test('Original seven-room snow greenhouse has fully connected authentic XY/Z cir
  assert.ok(panes.every(p=>p.role==='window'),'Pack4 clear glass placed in non-window source role');
  assert.ok(roof.every(p=>vox.has(K([p.at[0],p.at[1]-1,p.at[2]]))),
   'opaque roof requires its actual authored under-roof support');
- assert.equal(b.sourceUprightGlazingCount,278);
- assert.equal(b.sourceOpaqueRoofCells,1261);
- assert.equal(b.sourceRoofGlassTiles,0);
+ assert.equal(b.architecturalIdentity.sourceUprightGlazingCount,278);
+ assert.equal(b.architecturalIdentity.sourceOpaqueRoofCells,1261);
+ assert.equal(b.architecturalIdentity.sourceRoofGlassTiles,0);
  for(const d of b.portals)
   assert.ok(!vox.has(K(d.at))&&!vox.has(K([d.at[0],d.at[1]+1,d.at[2]])),'physically blocked snow greenhouse portal');
  assert.equal(structuralFingerprint(b),structuralFingerprint(buildRimeglassCrescentSunGreenhouse()));
@@ -108,9 +108,9 @@ test('Real Pack4 030 upright facade glazing: 278 different two-band framed openi
  assert.equal(used.size,139,'278 panes must form two separated glazing bands in 139 distinct framed wall bays');
  assert.ok([...sides.values()].every(n=>n>=60),'all four original exterior facades require substantial real glazing');
  assert.equal(sides.size,4,'facade glazing entirely missing');
- assert.equal(b.winterGlassSnowLoadCertified,false);
- assert.equal(b.glassPanePhysicalCollisionCertified,false);
- assert.equal(b.roofSealingCertified,false);
+ assert.equal(b.architecturalIdentity.winterGlassSnowLoadCertified,false);
+ assert.equal(b.architecturalIdentity.glassPanePhysicalCollisionCertified,false);
+ assert.equal(b.architecturalIdentity.roofSealingCertified,false);
  assert.equal(b.productionRegistered,false);
  assert.equal(b.worldPlacement,false);
 });
