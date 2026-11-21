@@ -1,6 +1,8 @@
 import {agricultureOutfit, agricultureTool} from './agriculture-appearance.mjs';
 import {civicOutfit} from './civic-appearance.mjs';
 import {craftsmanshipOutfit} from './craftsmanship-appearance.mjs';
+import {ordinaryOutfit} from './ordinary-appearance.mjs';
+import {specialistOutfit} from './specialist-appearance.mjs';
 import {buildWorkClothes} from './work-clothes.mjs';
 import {PROFESSIONS} from './registry.mjs';
 
@@ -110,22 +112,12 @@ function facialFeatures(box, race, variant, width, headY, pivot, skin, hair) {
   }
 }
 
-function equipment(box, pivot, x, y, profession, outfit) {
+function equipment(box, pivot, x, y, outfit) {
   const prop = (dx,dy,z,w,h,d,c) => box(JOINT.rightArm,pivot,x+dx,y+dy,z-.066,w,h,d,c);
   if (outfit?.equipment) {
     for (const piece of outfit.equipment) prop(...piece);
-  } else if (outfit) {
+  } else if (outfit?.tool) {
     agricultureTool(outfit.tool,prop);
-  } else if (profession?.threatResponse === 'defend') {
-    prop(0,.05,.10,.043,.25,.049,'#7c5434');
-    prop(0,.21,.10,.14,.043,.054,'#ad9058');
-    prop(0,.37,.10,.076,.31,.042,'#9daeb2');
-  } else if (profession?.id === 'astronomer') {
-    prop(0,.07,.118,.098,.25,.095,'#8f6337');
-    prop(0,.20,.118,.119,.053,.122,'#d1a26c');
-  } else if (profession) {
-    prop(0,.04,.10,.11,.135,.063,'#8b6247');
-    prop(0,.043,.134,.049,.038,.012,'#d1a566');
   }
 }
 
@@ -135,9 +127,12 @@ export function buildCitizenMesh(citizen) {
   const style = styles[citizen.style];
   const profession = PROFESSIONS[citizen.profession];
   const variant = citizen.variant - 1;
-  const outfit = agricultureOutfit(citizen.profession) ?? craftsmanshipOutfit(citizen.profession) ??
-    civicOutfit(citizen.profession);
+  const outfit = profession
+    ? agricultureOutfit(profession.id) ?? craftsmanshipOutfit(profession.id) ??
+      civicOutfit(profession.id) ?? specialistOutfit(profession.id)
+    : ordinaryOutfit(citizen,biome);
   const outer = profession ? professionColors[profession.group] : biome.outer;
+  if (profession && !outfit) throw Error('Missing equipment for '+profession.id);
   const {box,finish} = makeGeometry();
   const {height,width,head} = rig;
   const hip = height * .45, shoulder = height * .78, headY = height - head * .45;
@@ -165,7 +160,7 @@ export function buildCitizenMesh(citizen) {
     box(arm,[shoulder,0],ax,(shoulder+wrist)*.5,0,armWidth,shoulder-wrist,armWidth,outer);
     box(arm,[shoulder,0],ax,wrist+.07,0,armWidth*1.01,.053,armWidth*1.02,biome.lining);
     box(arm,[shoulder,0],ax,wrist,0,armWidth*.92,.11,armWidth,skin);
-    if (side === 1) equipment(box,[shoulder,0],ax,wrist,profession,outfit);
+    if (side === 1) equipment(box,[shoulder,0],ax,wrist,outfit);
   }
 
   facialFeatures(box,citizen.race,variant,head,headY,[headY,0],skin,hair);

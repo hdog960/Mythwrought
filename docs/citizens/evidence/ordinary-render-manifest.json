@@ -1,0 +1,406 @@
+{
+  "variants": 50,
+  "maxCacheBytes": 609120,
+  "records": [
+    {
+      "profession": null,
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3867,
+      "digest": "08e363f9b2916c1538475012c93d31221a653bf0b6a76e073eb6c053b13f1c59"
+    },
+    {
+      "profession": null,
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3566,
+      "digest": "4ba67ac8ff2355568a13636c31d2b8118d977ce43b129c5c67b4281bc50a7b88"
+    },
+    {
+      "profession": null,
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4029,
+      "digest": "6e8ac96ee286ee3be7d84833aba43a9131f78ab2a047f43fb0856fe91feed998"
+    },
+    {
+      "profession": null,
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4837,
+      "digest": "da9dc2baa748b6f762c3d1c035fabe498c0a393e13a8f30260501c6278bcbdda"
+    },
+    {
+      "profession": null,
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3668,
+      "digest": "2f580c3f4a5c48239524a6465c91ba3b07e069821524b3cd96c6da7e1efd92fd"
+    },
+    {
+      "profession": null,
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4695,
+      "digest": "201d35e9520ec5beed8af8899d2e2a9c62ebbab2d3967f54b855b8d1a61a2642"
+    },
+    {
+      "profession": null,
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3907,
+      "digest": "4f5082f41ec3942533828c29622469e894e668669b2f856f3aea4f4c6eb7909e"
+    },
+    {
+      "profession": null,
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3628,
+      "digest": "66137877d7d9a7c12ed9ab5e0217e43ed3181e7e3c892644eaf0f075213deff9"
+    },
+    {
+      "profession": null,
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4023,
+      "digest": "132ac7df06a4170f47490469f04ccd491255f0700334e576179773381eea7c52"
+    },
+    {
+      "profession": null,
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4849,
+      "digest": "6bee044f8d0e828b0330d4bd37f0553154825eb077fa42686cb3b5b6a61ed3a1"
+    },
+    {
+      "profession": null,
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3878,
+      "digest": "67a96e52389dcb816fc8707c06a12a3bff7a6307b8e15763015997233215873e"
+    },
+    {
+      "profession": null,
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3597,
+      "digest": "e8db0b116c9b92ed20ab98944cb5e3437e9e3807de2bd309f14014e685a0c476"
+    },
+    {
+      "profession": null,
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4037,
+      "digest": "b49cfca1bf553d35674540106e179a1b8c5c7e05d61462e27a335a0aa6142a46"
+    },
+    {
+      "profession": null,
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4848,
+      "digest": "02f8400a0fd7b9484dd6e5304195db7a171766efbf50faabe115404dfe1c2b1a"
+    },
+    {
+      "profession": null,
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3693,
+      "digest": "1b05e15ceaaccb60b2b9b37eb25b4cbd9a65adffd2157d6f01e1f4818a1e132e"
+    },
+    {
+      "profession": null,
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4703,
+      "digest": "cf58f5556b41600f47bfe456bfc693152580049126b6ff0737c5b098bf8efabd"
+    },
+    {
+      "profession": null,
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3651,
+      "digest": "aab1c15445a2961f33c6cb3152bd5c8db3d4bef92fc5a5bac9c3955512792894"
+    },
+    {
+      "profession": null,
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4032,
+      "digest": "44a933c56b35de0bfa39a68a3a767e234b1c7b9c64d6e1354e2e10adee6be7ec"
+    },
+    {
+      "profession": null,
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4860,
+      "digest": "0101dbbf315602c0dc56f283f728ad799296da947660e9af44f70d4b612999d7"
+    },
+    {
+      "profession": null,
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3705,
+      "digest": "3e89eb12c9d3d65b74c3c0d0ad523e4fe2d181099b2f5bad2621974468820586"
+    },
+    {
+      "profession": null,
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3870,
+      "digest": "ee5ecf4221d1bc793f4df0ed8a13e5fbfe955384c32f14c0a196d636545d56b0"
+    },
+    {
+      "profession": null,
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3572,
+      "digest": "9c61fcb0f2671e73f5cd5ba29c5ff4c0f5e80b328261c04365d0c4c43971e9e6"
+    },
+    {
+      "profession": null,
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4029,
+      "digest": "9d13ee75c42dc4968fc41a2ffdcb7ddbbca6f9116c1df1ace66800ab9a237da3"
+    },
+    {
+      "profession": null,
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4840,
+      "digest": "2d9baa619ae10bdc227e5ddc398bedd6f29e48eb76f3e741e4ec939d9d63af63"
+    },
+    {
+      "profession": null,
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3671,
+      "digest": "28612116dd3c117db471239f358b416b6c1904834058a41f02ad7bc7e4662fdc"
+    },
+    {
+      "profession": null,
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4699,
+      "digest": "989e61f6961e2818747d109c328b8fd660c8dc02368384593896d4b6aca81ac0"
+    },
+    {
+      "profession": null,
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4023,
+      "digest": "365472c8062e1012170ea854903cdbad47b9dfd2f36140ee0ed78bbd7421e861"
+    },
+    {
+      "profession": null,
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4852,
+      "digest": "ce970aeb0673d8b59d99dbda4229b802d3d863b3d88997ac1fb78e91f13d7e79"
+    },
+    {
+      "profession": null,
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3683,
+      "digest": "4e8bfaadc341d258bbe12daffb68e2d5b9f727f94f5af421e18ee27d95e2f95e"
+    },
+    {
+      "profession": null,
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4707,
+      "digest": "b5617ac2e18fc4a3dcad9ddf11af588a039c01847ac85283a0b1e17a18620d7c"
+    },
+    {
+      "profession": null,
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3898,
+      "digest": "b8ef8269f2a0ab18dd7192310a19ecc49b9f7f662e71f9e9830a2e0076df9543"
+    },
+    {
+      "profession": null,
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3609,
+      "digest": "2719c46534bce4d41b1d1a8a44aa40cca3ba65f26c3bc9f01bf6809edf1f6df6"
+    },
+    {
+      "profession": null,
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4051,
+      "digest": "2d435c815e7b2ac422846463fa1bb2cebb75372461839b927167583684dcc808"
+    },
+    {
+      "profession": null,
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4850,
+      "digest": "98b3d8ad3bd7746aff8cf7035bafd82c229e23941b9ed5021853fd2be0329738"
+    },
+    {
+      "profession": null,
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3693,
+      "digest": "3614c259eb0a6f93843a906595ac64e04e46a188272955c86e241b8c120121b2"
+    },
+    {
+      "profession": null,
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4705,
+      "digest": "b6ab333f431e5e413e399c9a0e75dc9b2cee229ef6694cb98a5c2434412ddcd2"
+    },
+    {
+      "profession": null,
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4859,
+      "digest": "c70fac3f09a7a97f0923eb584cd66f717d17bbf53931bf7d422893eca4d76f05"
+    },
+    {
+      "profession": null,
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3697,
+      "digest": "60cebb32bc73c558297a96b92efc35d5a05a1e14f9a25fb636cd1671e7689be3"
+    },
+    {
+      "profession": null,
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4711,
+      "digest": "914bf0e2d8216cac44ab4324be4525386c39114da7fa5a6e4aa5ca1f1eb139c4"
+    },
+    {
+      "profession": null,
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3923,
+      "digest": "2c2fbf7e40c1aee551ea8e59f89b348a8cb99ea64a5479eecb9c3dcf709333bc"
+    },
+    {
+      "profession": null,
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3870,
+      "digest": "cd17586c73eabb1f41d7befd1842391e9675c693fdc39986576976446a9174f3"
+    },
+    {
+      "profession": null,
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3568,
+      "digest": "f328b3ee915b10e347647d9efe2ed2dfb392e08c08f6095ead0167aaf400089e"
+    },
+    {
+      "profession": null,
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4035,
+      "digest": "b6abe3d6682c17ce2391bce7bce07a4a952e50ad11ded84a7782356cbede8648"
+    },
+    {
+      "profession": null,
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4841,
+      "digest": "ea165e8b6c9446ca163fee1c2aed89191a6b46a7948b730a4805513436ad733e"
+    },
+    {
+      "profession": null,
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3671,
+      "digest": "03c5454fd43dd158f1a22af10c5133b18ebabe26b26e9716be6cf293723ee082"
+    },
+    {
+      "profession": null,
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4699,
+      "digest": "0a9f7e3d34a25dff23337e5102a76f652bad9e9a44b57fd53111da5c16f45a81"
+    },
+    {
+      "profession": null,
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3683,
+      "digest": "b3d6c07499ebb5b750ced53af67b06ad06e65d155af7c83d61adfdf541913b52"
+    },
+    {
+      "profession": null,
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4707,
+      "digest": "b477610f8fe72b60fb754ee0f29f08adb0a068c9e63a21beaf0470f8f2663015"
+    },
+    {
+      "profession": null,
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3910,
+      "digest": "a7b34daeb4d70a47a82a6dde02d21f90c06aa1326da58c9d57fe9895ddc62725"
+    },
+    {
+      "profession": null,
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3630,
+      "digest": "bed82910d3330b6604b0c983880408147515cf2edb2a2697f77455e117393dc0"
+    }
+  ]
+}

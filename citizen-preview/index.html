@@ -6,6 +6,7 @@
 <style>
   :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #142021; color: #f4e7d0; }
   body { margin: 0 auto; max-width: 72rem; padding: 1rem; }
+  [hidden] { display: none !important; }
   h1 { font-size: clamp(1.35rem, 4vw, 2rem); margin: 0 0 .8rem; }
   #controls { display: flex; flex-wrap: wrap; gap: .45rem 1rem; }
   label { display: grid; gap: .25rem; font-size: .875rem; }
@@ -18,9 +19,10 @@
   <h1>Citizen rig preview</h1>
   <div id="controls">
     <label>Profession<select id="profession"></select></label>
-    <label>Race<select id="race"></select></label>
+    <label id="raceChoice">Race<select id="race"></select></label>
     <label>Biome<select id="biome"></select></label>
-    <label>Appearance<select id="variant"><option>1</option><option>2</option></select></label>
+    <label id="variantChoice">Appearance<select id="variant"><option>1</option><option>2</option></select></label>
+    <label id="ordinaryChoice" hidden>Ordinary appearance<select id="ordinary"></select></label>
     <label>Settlement style<select id="style"></select></label>
     <label>Animation<select id="action"></select></label>
   </div>

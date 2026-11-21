@@ -1,5 +1,6 @@
 import {BIOMES, PROFESSIONS, RACES, SETTLEMENT_STYLES} from '../src/citizens/registry.mjs';
 import {createCitizen} from '../src/citizens/entity.mjs';
+import {ordinaryAppearancePool} from '../src/citizens/ordinary-appearance.mjs';
 import {createCitizenRenderer} from '../src/citizens/renderer.mjs';
 
 const field = id => document.getElementById(id);
@@ -28,19 +29,33 @@ if (!gl) {
   let start = 0;
 
   function selectCitizens() {
-    const races = field('race').value ? [field('race').value] : Object.keys(RACES);
     const profession = field('profession').value || null;
+    const biome = field('biome').value;
     const action = field('action').value;
+    field('raceChoice').hidden = profession === null;
+    field('variantChoice').hidden = profession === null;
+    field('ordinaryChoice').hidden = profession !== null;
+    let choices;
+    if (profession) {
+      const races = field('race').value ? [field('race').value] : Object.keys(RACES);
+      choices = races.map(race=>({race,profession,biome,variant:Number(field('variant').value)}));
+    } else {
+      const pool = ordinaryAppearancePool(biome);
+      const current = field('ordinary').value;
+      options('ordinary',[['','All ten appearances'],...pool.map(({race,variant},index)=>
+        [String(index),`${RACES[race].name} ${variant}`])]);
+      field('ordinary').value = current;
+      choices = current === '' ? pool : [pool[Number(current)]];
+    }
     const names = field('names');
-    names.style.gridTemplateColumns = `repeat(${races.length},1fr)`;
-    names.replaceChildren(...races.map(id => {
+    names.style.gridTemplateColumns = `repeat(${choices.length},1fr)`;
+    names.replaceChildren(...choices.map(({race,variant}) => {
       const label = document.createElement('span');
-      label.textContent = RACES[id].name;
+      label.textContent = profession ? RACES[race].name : `${RACES[race].name} ${variant}`;
       return label;
     }));
-    characters = races.map((race, slot) => ({
-      citizen: createCitizen({worldSeed:179,settlementId:'preview',slot,race,profession,
-        biome:field('biome').value,style:field('style').value,variant:Number(field('variant').value)}),
+    characters = choices.map((choice, slot) => ({
+      citizen: createCitizen({worldSeed:179,settlementId:'preview',slot,style:field('style').value,...choice}),
       action:action === 'attack' && PROFESSIONS[profession]?.threatResponse !== 'defend' ? 'idle' : action,
     }));
     start = performance.now();

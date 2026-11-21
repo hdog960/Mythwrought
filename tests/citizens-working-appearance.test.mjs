@@ -14,6 +14,15 @@ const waves = [
     'innkeeper','tavern-keeper','cook','stablekeeper','pet-shopkeeper','bathhouse-attendant'], expected:660},
   {name:'administration', professions:['mayor','councilor','clerk','treasurer','judge','diplomat',
     'guildmaster','town-planner','messenger'], expected:540},
+
+  {name:'defense', professions:['guard','watchman','soldier','ranger','scout','gatekeeper',
+    'animal-handler','dockworker','sailor','lighthouse-keeper'], expected:600},
+  {name:'knowledge', professions:['healer','apothecary','herbalist','teacher','librarian','archivist','scholar',
+    'astronomer','cartographer'], expected:540},
+  {name:'arcane', professions:['mage','alchemist','potion-maker','enchanter','arcane-researcher',
+    'crystal-attuner','arcane-teacher','magical-creature-keeper'], expected:480},
+  {name:'culture', professions:['actor','musician','temple-keeper','priest','artist','builder',
+    'architect','engineer','shipwright','resonance-technician'], expected:600},
 ];
 const races = ['human','elf','dwarf','thornkin','asteri','glassborn'];
 const biomes = ['temperate','desert','snow','enchanted-forest','mountain'];
