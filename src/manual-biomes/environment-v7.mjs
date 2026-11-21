@@ -73,9 +73,24 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline,biome=v6BiomeAt(x,
     biome.name==='mountain'?Math.max(old,mountainRelief(x,z,phase)):
     old+2.1*wind;
   const top=Math.min(WORLD_MAX_Y-2,Math.round(old+(height-old)*blend));
+  // An original landmark can occupy AIR above the old grass. Do not raise
+  // terrain into its stone/ore/wood, but allow the *unchanged* grass footprint
+  // to receive enchanted soil instead of leaving a bright plains patch.
+  // Other biomes, old profiles, underground caves and protected cap cells
+  // retain the original fail-closed terrain behavior.
+  let occupiedAbove=false;
   for(let y=old-2;y<=WORLD_MAX_Y;y++){
     const prior=readBaseline(x,y,z);
-    if(y>old?prior!==BLOCK.AIR:![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior))return new Map();
+    if(y>old&&prior!==BLOCK.AIR){
+      if(biome.name!=='enchanted'||biome.weight<.70)return new Map();
+      occupiedAbove=true;
+    }else if(y<=old&&![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior))
+      return new Map();
+  }
+  if(occupiedAbove){
+    if(readBaseline(x,old,z)!==BLOCK.GRASS)return new Map();
+    // Cap only: preserve all original landmark cells above and subsoil below.
+    return new Map([[old,groundAt('enchanted',x,z,seed,old,0).cap]]);
   }
   const writes=new Map(),shoulder=sharedShoulder(biome,x,z,seed);
   // The shoulder replaces the grass in a broad contiguous band. The
