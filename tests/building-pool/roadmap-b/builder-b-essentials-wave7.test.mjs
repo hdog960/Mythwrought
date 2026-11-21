@@ -111,7 +111,7 @@ test('Real Pack4 030 upright facade glazing: 278 different two-band framed openi
  assert.equal(b.architecturalIdentity.winterGlassSnowLoadCertified,false);
  assert.equal(b.architecturalIdentity.glassPanePhysicalCollisionCertified,false);
  assert.equal(b.architecturalIdentity.roofSealingCertified,false);
- assert.equal(b.productionRegistered,false);
+ assert.equal(b.architecturalIdentity.productionRegistered,false);
  assert.equal(b.worldPlacement,false);
 });
 test('Strict 8-way same-category D4 below .85 against every prior accepted 1B original', {timeout:240000},async()=>{
