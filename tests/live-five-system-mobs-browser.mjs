@@ -12,6 +12,7 @@ import {execFileSync} from 'node:child_process';
 import {chromium} from 'playwright';
 import pngjs from 'pngjs';
 import {speciesRegistry} from '../src/mobs/species.mjs';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 
 const {PNG}=pngjs;
 const OUT=resolve('artifacts/five-systems-live-mobs');
@@ -94,6 +95,15 @@ try{
     try{
       const page=await ctx.newPage();
       await page.goto('http://127.0.0.1:4179/',{waitUntil:'load',timeout:90000});
+      // Real current-generation admission is required before gameplay. Old
+      // acceptance clicked the hidden developer #closeHelp on a legacy seed
+      // and failed before any of the 120 original GPU pixel proofs ran.
+      await page.locator('#playerMenu').waitFor({state:'visible',timeout:60000});
+      assert.equal(await page.locator('#help').isVisible(),true,
+        'An unprofiled world must not bypass creator current-only admission');
+      page.once('dialog',dialog=>dialog.accept());
+      await page.getByRole('button',{name:/NEW WORLD/}).click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:45000});
       await page.waitForFunction(()=>Boolean(window.__mythwroughtTest?.mobAcceptanceFixture),
         null,{timeout:60000});
       await page.waitForFunction(()=>{
@@ -101,22 +111,31 @@ try{
         return +c?.dataset.loadedChunks>=20&&c?.dataset.skyDrawn==='true' &&
           +c.dataset.renderedFrames>=25;
       },null,{timeout:90000});
-      if(await page.locator('#help').isVisible())
-        await page.locator('#closeHelp').click();
       await page.locator('#menu').click();
-      await page.locator('#skySetDay').click();
-      await page.locator('#closeHelp').click();
+      await page.locator('#playerMenu .player-menu-times button').first().click();
+      await page.locator('#playerMenu .player-menu-close').click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:15000});
       const original=await page.evaluate(()=>({
-        world:localStorage.getItem('mythwrought-v002-world-179'),
-        schema:window.__mythwroughtTest.snapshot().seed,
+        seed:window.__mythwroughtTest.snapshot().seed,
+        profile:window.__mythwroughtTest.fourBiomeProfile()?.generator,
+        world:localStorage.getItem('mythwrought-v002-world-'+
+          window.__mythwroughtTest.snapshot().seed),
+        selected:localStorage.getItem('mythwrought-v002-selected-seed'),
         saveKeyCount:Object.keys(localStorage).filter(x=>x.startsWith('mythwrought-v002-world-')).length
       }));
+      assert.equal(original.profile,M6_BALANCED_GENERATOR,
+        'Actual GPU acceptance requires the installed current V6 world');
+      assert.notEqual(original.seed,179,'Legacy default seed was silently reused');
+      assert.equal(original.selected,String(original.seed),
+        'Actual new-world admission did not persist selected current seed');
+      assert.ok(original.world,'No verified canonical schema-1 save after V6 admission');
       const viewport={width,height,scenes:0};
       for(const id of ids){
         const scene=await page.evaluate(name=>
           window.__mythwroughtTest.mobAcceptanceFixture(name),id);
         assert.equal(scene.speciesId,id);
-        assert.equal(scene.worldSeed,179);
+        assert.equal(scene.worldSeed,original.seed,
+          'Original live creature fixture ran in a different world than verified V6 save');
         assert.equal(scene.schema,1);
         await rendered(page,1);
         const before=await page.evaluate(()=>
@@ -157,12 +176,14 @@ try{
         viewport.scenes++;
       }
       const preserved=await page.evaluate(()=>({
-        world:localStorage.getItem('mythwrought-v002-world-179'),
+        world:localStorage.getItem('mythwrought-v002-world-'+
+          window.__mythwroughtTest.snapshot().seed),
         saveKeyCount:Object.keys(localStorage).filter(x=>x.startsWith('mythwrought-v002-world-')).length,
         seed:window.__mythwroughtTest.snapshot().seed
       }));
       assert.equal(preserved.world,original.world,'Original Schema-1 save bytes changed');
-      assert.equal(preserved.seed,179);
+      assert.equal(preserved.seed,original.seed,
+        'Real-game source evidence unexpectedly changed world seed');
       assert.equal(preserved.saveKeyCount,original.saveKeyCount);
       assert.equal(viewport.scenes,40);
       report.viewports.push(viewport);

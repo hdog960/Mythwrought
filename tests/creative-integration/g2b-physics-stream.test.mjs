@@ -6,7 +6,8 @@ import {findSafeSpawn} from '../../src/physics.mjs';
 import {sectionForY,sectionWindow,sectionChunkRadius,depthMeshKey,
  WORLD_MIN_Y,WORLD_MAX_Y} from '../../src/depth.mjs';
 import {g2RegionKey,G2_MAX_NEW_PREFETCH,G2_MAX_PENDING_PREFETCH} from '../../src/creative-integration/g2-streaming.mjs';
-import {G2_FLIGHT_SPEEDS,G2_MAX_FRAME_SECONDS,G2_MAX_SEGMENT_LENGTH}
+import {G2_FLIGHT_SPEEDS,G2_MAX_FRAME_SECONDS,G2_MAX_SEGMENT_LENGTH,
+ createG2FlightState,selectG2FlightProfile}
  from '../../src/creative-integration/g2-flight.mjs';
 const main=readFileSync(new URL('../../src/main.mjs',import.meta.url),'utf8');
 const world=new VoxelWorld(179);
@@ -62,8 +63,13 @@ test('G2B flight refuses unknown physical data rather than assuming empty',()=>{
  assert.ok(main.includes('catch(_){return false;}'));
  assert.ok(main.includes('g2Ready(g2Flight.position)&&g2Clear(g2Flight.position)'));
 });
-test('G2B flight profiles and physical dimensions preserve G2A invariants',()=>{
- assert.deepEqual(G2_FLIGHT_SPEEDS,{precision:1.4,normal:4,fast:8,travel:15});
+test('G2B only permits speed 15 and retains source physical limits',()=>{
+ assert.deepEqual(G2_FLIGHT_SPEEDS,{travel:15});
+ const state=createG2FlightState({position:{x:0,y:5,z:0},
+  heightBounds:{minFeet:-10,maxFeet:90},worldToken:'test'});
+ assert.equal(state.profile,'travel');
+ for(const old of ['precision','normal','fast'])
+  assert.throws(()=>selectG2FlightProfile(state,old),/unknown flight profile/);
  assert.equal(G2_MAX_FRAME_SECONDS,.05);assert.equal(G2_MAX_SEGMENT_LENGTH,.25);
  assert.ok(WORLD_MIN_Y<WORLD_MAX_Y);
 });

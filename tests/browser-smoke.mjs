@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import pngjs from 'pngjs';
+import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 const {PNG}=pngjs;
 
 const browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
@@ -12,7 +14,37 @@ page.on('pageerror',e=>errors.push(e.message));
 page.on('response',r=>{if(r.status()>=400)badRequests.push(r.status()+' '+r.url());});
 try{
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:30000});
-  await page.waitForFunction(()=>document.querySelector('#scene')?.width>0,{timeout:20000});
+  // Actual root WebGL2 smoke is not allowed to bypass the new protected
+  // start: original seed179 bytes may exist but must NEVER become playable.
+  const old=new VoxelWorld(179);
+  assert.equal(old.set(2,15,2,BLOCK.CRYSTAL),true);
+  const historical=JSON.stringify(old.save());
+  await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+  assert.equal(await page.locator('#help').isVisible(),true,
+    'Unprofiled old world bypassed current-generation gate');
+  await page.evaluate(raw=>{
+    localStorage.setItem('mythwrought-v002-world-179',raw);
+    localStorage.setItem('mythwrought-v002-selected-seed','179');
+  },historical);
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:/NEW WORLD/}).click();
+  await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+  const first=await page.evaluate(()=>{
+    const t=window.__mythwroughtTest,seed=t.snapshot().seed;
+    return {seed,profile:t.fourBiomeProfile()?.generator,
+      saved:localStorage.getItem('mythwrought-v002-world-'+seed),
+      selected:localStorage.getItem('mythwrought-v002-selected-seed'),
+      legacy:localStorage.getItem('mythwrought-v002-world-179')};
+  });
+  assert.notEqual(first.seed,179,'Archived seed179 became playable');
+  assert.equal(first.profile,M6_BALANCED_GENERATOR,
+    'Original root WebGL2 game did not enter installed current V6');
+  assert.ok(first.saved?.includes('"schema":1'),'Current V6 schema-1 save missing');
+  assert.equal(first.selected,String(first.seed));
+  assert.equal(first.legacy,historical,'Creating V6 overwrote old schema-1 bytes');
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
+    null,{timeout:60000});
+  await page.waitForFunction(()=>document.querySelector('#scene')?.width>0,null,{timeout:20000});
   await page.waitForTimeout(1600);
   const state=await page.evaluate(()=>{
     const canvas=document.querySelector('#scene'),left=document.querySelector('.left').getBoundingClientRect();
@@ -37,47 +69,158 @@ try{
   await page.mouse.up();
   const changedYaw=Number(await page.locator('#scene').getAttribute('data-camera-yaw'));
   assert.ok(Math.abs(changedYaw-initialYaw)>.15,'Right thumb pad did not rotate the camera');
+  // Aim at an actual seeded natural surface block in the current V6 world.
+  // This uses the same read-only aiming/teleport test hook as original Pack3;
+  // the MINE interaction below remains the real player-facing button.
+  const target=await page.evaluate(async()=>{
+    const t=window.__mythwroughtTest,scene=document.getElementById('scene');
+    // The current V6 generation has random actual terrain elevations.
+    // Search the SAME ORIGINAL game raycast used by the player-facing MINE
+    // action, not a synthetic target label or scripted mutation.
+    const origin=t.teleport(14.5,.5);
+    const baseX=Math.floor(origin.x),baseZ=Math.floor(origin.z);
+    const offsets=[[2,0],[0,2],[-2,0],[0,-2],[3,0],[0,3],[-3,0],[0,-3],
+      [2,2],[-2,2],[2,-2],[-2,-2],[4,0],[0,4],[-4,0],[0,-4]];
+    const attempts=[];
+    for(const [dx,dz] of offsets){
+      const x=baseX+dx,z=baseZ+dz;
+      // Respect exact WORLD_MAX_Y=19 on every source query.
+      for(let y=19;y>=0;y--){
+        const block=t.block(x,y,z);
+        if(block===0||(y<19&&t.block(x,y+1,z)!==0))continue;
+        t.aimAt(x,y,z);
+        await new Promise(ok=>requestAnimationFrame(()=>
+          requestAnimationFrame(ok)));
+        const observed=scene.dataset.targetBlock;
+        if(observed===x+','+y+','+z)
+          return {x,y,z,sourceBlock:block,rayHit:observed,origin};
+        attempts.push({x,y,z,block,observed});
+        break;
+      }
+    }
+    throw Error('No source-valid original V6 mine ray target: '+
+      JSON.stringify({origin,attempts}));
+  });
+  assert.equal(target.rayHit,target.x+','+target.y+','+target.z,
+    'Source scan never hit the original physical raycast');
+  await page.waitForFunction(({x,y,z})=>
+    document.querySelector('#scene')?.dataset.targetBlock===x+','+y+','+z,
+    target,{timeout:30000});
+  const miningBefore=await page.evaluate(seed=>
+    localStorage.getItem('mythwrought-v002-world-'+seed),first.seed);
   await page.locator('#dig').click();
   const editStatus=await page.locator('#status').textContent();
-  assert.match(editStatus,/Removed (?:stone|earth|grass|ore|crystal|timber) · saved/,'Touch-side mining did not edit and save terrain');
-  const edits=await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v002-world-179')||'{}').edits);
-  assert.ok(Array.isArray(edits)&&edits.length>0,'Mining did not persist a real block edit');
+  assert.match(editStatus,/Removed .+ · saved/,
+    'Actual touch-side mining did not modify and verifiably save current-V6 terrain');
+  const mined=await page.evaluate(({seed,target})=>{
+    const raw=localStorage.getItem('mythwrought-v002-world-'+seed);
+    return {raw,edits:JSON.parse(raw).edits,
+      block:window.__mythwroughtTest.block(target.x,target.y,target.z)};
+  },{seed:first.seed,target});
+  assert.equal(mined.block,BLOCK.AIR,
+    'Live original-game MINE did not remove actual V6 natural terrain');
+  assert.ok(Array.isArray(mined.edits)&&mined.edits.length>0&&mined.raw!==miningBefore,
+    'Mined current-V6 block did not persist a real schema-1 terrain edit');
+  assert.equal(await page.evaluate(()=>
+    localStorage.getItem('mythwrought-v002-world-179')),historical,
+    'Mining the current V6 world changed the archived original');
   await page.locator('#menu').click();
-  assert.ok(await page.locator('#help').isVisible(),'Help should open');
-  const helpTouchAction=await page.locator('.helpbody').evaluate(el=>getComputedStyle(el).touchAction);
-  assert.equal(helpTouchAction,'pan-y','Settings modal must permit vertical finger scrolling on iPhone');
+  assert.ok(await page.locator('#help').isVisible(),'Current settings should open');
+  assert.equal(await page.locator('#playerMenu .player-menu-row').count(),3,
+    'Creator-approved main menu has exactly Test Code, time and New World');
+  const menuLayout=await page.evaluate(()=>{
+    const p=document.getElementById('playerMenu'),r=p.getBoundingClientRect();
+    return {scroll:p.scrollHeight,client:p.clientHeight,
+      left:r.left,right:r.right,top:r.top,bottom:r.bottom};
+  });
+  assert.ok(menuLayout.scroll<=menuLayout.client+1&&menuLayout.left>=0&&
+    menuLayout.right<=932+1&&menuLayout.top>=0&&menuLayout.bottom<=430+1,
+    'Main menu overflows or scrolls on a real mobile landscape viewport');
+  assert.equal(await page.locator('#save').isVisible(),false,
+    'Legacy developer SAVE must not reappear in compact player settings');
+  assert.equal(await page.locator('#switchWorld').isVisible(),false,
+    'Obsolete-world switch must never be user-facing');
+  const compactTouchAction=await page.locator('.helpbody').evaluate(el=>getComputedStyle(el).touchAction);
+  assert.equal(compactTouchAction,'manipulation',
+    'Compact three-row player menu must not scroll or swallow touch taps');
   const canvasTouchAction=await page.locator('#scene').evaluate(el=>getComputedStyle(el).touchAction);
   assert.equal(canvasTouchAction,'none','Gameplay canvas must not drag or scroll the page');
-  await page.locator('#lookSensitivity').focus();
-  await page.keyboard.press('End');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  // Original sensitivity host remains mounted and functional, but is no
+  // longer part of user-facing settings. Exercise its ORIGINAL input handler.
+  await page.evaluate(()=>{
+    const slider=document.getElementById('lookSensitivity');
+    slider.value='150';slider.dispatchEvent(new Event('input',{bubbles:true}));
+  });
   assert.equal(await page.locator('#lookValue').textContent(),'150%','Camera sensitivity did not update');
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v003-look-percent')),'150');
-  await page.locator('#save').click();
-  const save=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
-  assert.ok(save?.includes('"schema":1'),'Prototype save missing');
-  await page.locator('#seedInput').fill('Moonlit Vale');
-  await page.locator('#switchWorld').click();
-  assert.ok((await page.locator('#seed').textContent()).startsWith('WORLD '));
-  const savedSeed=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-selected-seed'));
-  assert.ok(savedSeed&&savedSeed!=='179','Named seed not selected');
+  await page.locator('.player-menu-safety-link').click();
+  assert.equal(await page.locator('#playerSafety').isVisible(),true);
+  const recoveryTouchAction=await page.locator('#playerSafety').evaluate(
+    el=>getComputedStyle(el).touchAction);
+  assert.equal(recoveryTouchAction,'pan-y',
+    'The real iPhone saved-world recovery drawer must remain finger-scrollable');
+  await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
+  const afterExplicitSave=await page.evaluate(seed=>
+    localStorage.getItem('mythwrought-v002-world-'+seed),first.seed);
+  assert.equal(afterExplicitSave,mined.raw,
+    'Current V6 save unexpectedly rewrote the already verified mined schema-1 bytes');
+  await page.locator('.player-safety-back').click();
+  await page.locator('.player-menu-close').click();
+  assert.equal(await page.locator('#help').isVisible(),false);
+  assert.equal(await page.evaluate(()=>document.activeElement?.id),'scene',
+    'Closing settings should restore actual world keyboard focus');
   await page.reload({waitUntil:'networkidle'});
-  await page.waitForFunction(()=>document.querySelector('#scene')?.width>0);
-  assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-selected-seed')),savedSeed);
+  await page.waitForFunction(()=>
+    Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
+    null,{timeout:60000});
+  assert.equal(await page.locator('#help').isVisible(),false,
+    'Saved current V6 world did not reopen directly on same-install reload');
+  assert.equal(await page.locator('#lookValue').textContent(),'150%',
+    'Original camera preference failed to persist during current-V6 reload');
+  assert.equal(await page.evaluate(seed=>
+    localStorage.getItem('mythwrought-v002-world-'+seed),first.seed),mined.raw,
+    'Current world lost its actual MINE edit after browser reload');
   await page.locator('#menu').click();
-  assert.equal(await page.locator('#lookValue').textContent(),'150%','Camera preference failed to survive reload');
-  await page.locator('#closeHelp').click();
-  await page.locator('#menu').click();
-  await page.locator('#seedInput').fill('179');
-  await page.locator('#switchWorld').click();
-  assert.equal(await page.locator('#seed').textContent(),'WORLD 179');
-  const oldEdits=await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v002-world-179')).edits);
-  assert.ok(oldEdits.length>0,'Seed switching lost the previous world edit');
-  await page.locator('#closeHelp').click();
-  assert.ok(!(await page.locator('#help').isVisible()),'Help should close');
-  assert.equal(await page.evaluate(()=>document.activeElement?.id),'scene','Closing settings should restore world keyboard focus');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:/NEW WORLD/}).click();
+  await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+  const second=await page.evaluate(()=>{
+    const t=window.__mythwroughtTest,seed=t.snapshot().seed;
+    return {seed,profile:t.fourBiomeProfile()?.generator,
+      saved:localStorage.getItem('mythwrought-v002-world-'+seed)};
+  });
+  assert.notEqual(second.seed,first.seed,
+    'Second current-world creation reused or overwrote prior saved identity');
+  assert.equal(second.profile,M6_BALANCED_GENERATOR);
+  assert.ok(second.saved?.includes('"schema":1'));
+  assert.equal(await page.evaluate(seed=>
+    localStorage.getItem('mythwrought-v002-world-'+seed),first.seed),mined.raw,
+    'New current world overwrote previous V6 mining work');
+  assert.equal(await page.evaluate(()=>
+    localStorage.getItem('mythwrought-v002-world-179')),historical,
+    'Second V6 world overwrote archived legacy seed179');
+  // Treat an old selected seed as a read-only recovery case, not a playable
+  // downgrade. Restore current selection without altering any world bytes.
+  await page.evaluate(()=>localStorage.setItem('mythwrought-v002-selected-seed','179'));
+  await page.reload({waitUntil:'networkidle'});
+  await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+  assert.equal(await page.locator('#help').isVisible(),true,
+    'Legacy selected seed incorrectly resumed playable world');
+  await page.getByRole('button',{name:'RETURN TO GAME'}).click();
+  assert.equal(await page.locator('#help').isVisible(),true,
+    'Legacy read-only world admission was bypassed');
+  assert.equal(await page.evaluate(()=>
+    localStorage.getItem('mythwrought-v002-world-179')),historical,
+    'Protected legacy gate modified archived original bytes');
+  await page.evaluate(seed=>
+    localStorage.setItem('mythwrought-v002-selected-seed',String(seed)),second.seed);
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForFunction(generator=>
+    window.__mythwroughtTest?.fourBiomeProfile?.()?.generator===generator,
+    M6_BALANCED_GENERATOR,{timeout:45000});
+  assert.equal(await page.locator('#help').isVisible(),false);
+  assert.equal(await page.evaluate(()=>document.activeElement?.id),'scene',
+    'Current-generation reload lost keyboard focus after protected recovery');
   const rightGrip=await page.locator('.right').boundingBox();
   const leftGrip=await page.locator('.left').boundingBox();
   for(const id of ['#lookPad','#jump','#dig','#place','#precision']){

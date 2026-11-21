@@ -7,6 +7,7 @@ import {spawn,spawnSync} from 'node:child_process';
 import {resolve,join,extname,sep} from 'node:path';
 import {tmpdir} from 'node:os';
 import {setTimeout as delay} from 'node:timers/promises';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 
 const root=process.cwd(),out=resolve('artifacts/pack2-live-webgl');
 const mime={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript',
@@ -157,14 +158,55 @@ test('approved Pack 2 real WebGL2 gameplay mesh, legacy save isolation, reload, 
       },'Chromium page');
       c=new Chrome(target.webSocketDebuggerUrl);await c.ready();
       await c.send('Page.enable');await c.send('Runtime.enable');
+      // An actual browser confirmation must be accepted, not overwritten by
+      // window.confirm=()=>true or skipped. Only the FIRST fresh page needs
+      // NEW WORLD; subsequent viewport navigations reload the saved V6.
+      c.ws.addEventListener('message',event=>{
+        const message=JSON.parse(event.data);
+        if(message.method==='Page.javascriptDialogOpening')
+          void c.send('Page.handleJavaScriptDialog',{accept:true}).catch(error=>{
+            c.errors.push('NEW WORLD confirmation failed: '+String(error));
+          });
+      });
       const origin='http://127.0.0.1:'+app.address().port+'/';
       const screenshots=[];
       for(const [width,height] of [[667,375],[844,390],[932,430]]){
         await c.send('Emulation.setDeviceMetricsOverride',
           {width,height,deviceScaleFactor:1,mobile:false});
         await c.send('Page.navigate',{url:origin});
+        await until(()=>c.eval("Boolean(document.querySelector('#playerMenu'))"),
+          'original player menu mounted '+width+'x'+height);
+        if(width===667){
+          // Create a TRUE original legacy schema-1 source in localStorage. The
+          // creator-approved new-world action must preserve every byte while
+          // admitting an entirely different current V6 playable seed.
+          await c.eval("(async()=>{"+
+            "const {VoxelWorld,BLOCK}=await import('./src/voxel.mjs');"+
+            "const legacy=new VoxelWorld(179);"+
+            "legacy.set(15,18,-1,BLOCK.WOOD);"+
+            "const raw=JSON.stringify(legacy.save());"+
+            "localStorage.setItem('mythwrought-v002-world-179',raw);"+
+            "const create=[...document.querySelectorAll('#playerMenu button')]"+
+              ".find(b=>b.textContent.includes('NEW WORLD'));"+
+            "if(!create)throw Error('Real current-gen NEW WORLD button missing');"+
+            "create.click();return raw})()");
+          await until(()=>c.eval("document.getElementById('help').hidden===true"),
+            'user-confirmed current V6 world admission');
+        }
+        const admission=await c.eval("(()=>{const t=window.__mythwroughtTest;"+
+          "const seed=t.snapshot().seed;"+
+          "return {seed,selected:localStorage.getItem('mythwrought-v002-selected-seed'),"+
+          "profile:t.fourBiomeProfile()?.generator,"+
+          "raw:localStorage.getItem('mythwrought-v002-world-'+seed),"+
+          "legacy:localStorage.getItem('mythwrought-v002-world-179')};})()");
+        assert.notEqual(admission.seed,179,'Legacy world became playable during Pack 2 validation');
+        assert.equal(admission.profile,M6_BALANCED_GENERATOR,
+          'Pack 2 was not placed in the creator-approved current generator');
+        assert.equal(admission.selected,String(admission.seed));
+        assert.ok(admission.raw&&admission.legacy,
+          'Current and archived original schema-1 bytes must both remain present');
         await until(()=>c.eval("Boolean(window.__mythwroughtTest)&&Number(document.querySelector('#scene')?.dataset.loadedChunks)===25"),
-          'live 25-chunk game '+width+'x'+height);
+          'live 25-chunk current V6 game '+width+'x'+height);
         const baseline=await c.eval("(() => {const e=document.querySelector('#scene');return {vertices:Number(e.dataset.renderedMeshVertices),gl:!!e.getContext('webgl2'),safe:document.querySelector('#notice').hidden}})()");
         assert.ok(baseline.gl&&baseline.safe&&baseline.vertices>0,'real game did not initialize WebGL2');
         if(width===667){
@@ -172,7 +214,22 @@ test('approved Pack 2 real WebGL2 gameplay mesh, legacy save isolation, reload, 
           assert.deepEqual(placed.map(x=>x[3]),[59,63,66,73,76]);
           await until(()=>c.eval("Object.keys(localStorage).some(k=>k.endsWith('-pack2-live-v1'))"),
             'verified Pack 2 sidecar');
-          const controls=await c.eval("(() => {document.querySelector('#menu').click();const e=document.querySelector('#pack2Materials [data-block=\"66\"]');if(!e)throw Error('missing Pack 2 selector');e.click();const r={pressed:e.getAttribute('aria-pressed'),state:document.querySelector('#pack2StateText').textContent};document.querySelector('#closeHelp').click();return r})()");
+          const controls=await c.eval("(async() => {"+
+            "const toggle=document.querySelector('#creativeToggle');"+
+            "if(!toggle)throw Error('Real Creative toggle missing');toggle.click();"+
+            "document.querySelector('#creativeInventoryToggle').click();"+
+            "const search=document.querySelector('.mw-inventory-search');"+
+            "search.value='block:66';search.dispatchEvent(new Event('input',{bubbles:true}));"+
+            "const item=document.querySelector('.mw-inventory-grid [data-key=\"block:66\"]');"+
+            "if(!item)throw Error('Real Pack 2 ID 66 absent from Creative inventory');"+
+            "item.click();await new Promise(ok=>setTimeout(ok,0));"+
+            "const e=document.querySelector('#pack2Materials [data-block=\"66\"]');"+
+            "if(!e)throw Error('Live Pack 2 producer ID66 missing');"+
+            "const r={pressed:e.getAttribute('aria-pressed'),"+
+            "state:document.querySelector('#pack2StateText').textContent};"+
+            "document.querySelector('.mw-inventory-close').click();"+
+            "if(!document.querySelector('#help').hidden)throw Error('Inventory failed to release game');"+
+            "return r})()");
           assert.equal(controls.pressed,'true');
           assert.ok(controls.state.includes('Latticed'),'creator-approved gate cannot be selected');
           await until(()=>c.eval("Number(document.querySelector('#scene')?.dataset.renderedMeshVertices)>0"),

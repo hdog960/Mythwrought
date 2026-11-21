@@ -5,6 +5,8 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
+import {waitForRealStableMap} from './source-map-stability.mjs';
+import {M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
 import pngjs from 'pngjs';
 const {PNG}=pngjs;
 const SOURCE=process.env.GITHUB_SHA||'UNVERIFIED';
@@ -72,9 +74,9 @@ const settle=page=>page.waitForFunction(()=>{
     c.dataset.skyFog&&c.dataset.skyAmbient&&document.querySelector('#notice').hidden;
 },null,{timeout:60000});
 async function open(page){await page.locator('#menu').click();assert.ok(await page.locator('#help').isVisible());}
-async function close(page){await page.locator('#closeHelp').click();assert.ok(!(await page.locator('#help').isVisible()));}
+async function close(page){await page.locator('.player-menu-close').click();assert.ok(!(await page.locator('#help').isVisible()));}
 async function select(page,which){
-  await page.locator(which==='day'?'#skySetDay':'#skySetNight').click();
+  await page.locator('#playerMenu .player-menu-times button').nth(which==='day'?0:1).click();
   await page.waitForFunction((target)=>{
     const p=+document.querySelector('#scene')?.dataset.skyClockPhaseMs;
     return target==='night'?p>=0&&p<15000:p>=720000&&p<735000;
@@ -82,7 +84,8 @@ async function select(page,which){
 }
 async function setPhaseBySidecar(page,phase){
   await page.evaluate(phase=>{
-    const seed=179,key='mythwrought-sky-s1-clock-'+seed;
+    const seed=window.__mythwroughtTest.snapshot().seed;
+    const key='mythwrought-sky-s1-clock-'+seed;
     localStorage.setItem(key,JSON.stringify({version:1,seed,anchorPhaseMs:phase,wallAnchorMs:Date.now()}));
   },phase);
   await page.reload({waitUntil:'networkidle',timeout:45000});
@@ -115,9 +118,18 @@ try{
       deviceScaleFactor:1,hasTouch:true,isMobile:true});
     const page=await ctx.newPage(),errors=[],badRequests=[];
     page.on('pageerror',err=>errors.push(err.message));
+    page.on('dialog',d=>d.accept());
     page.on('response',r=>{if(r.status()>=400)badRequests.push(r.status()+' '+r.url());});
     try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:45000});
+      await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+      assert.equal(await page.locator('#help').isVisible(),true,'S2 must require V6 admission');
+      await page.getByRole('button',{name:/NEW WORLD/}).click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+      const seed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+      const generator=await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator);
+      assert.equal(generator,M6_BALANCED_GENERATOR,'S2 only accepts current V6 world');
+      const worldKey='mythwrought-v002-world-'+seed;
       await settle(page);
       const initial=await scene(page);
       assert.equal(initial.cycle,1440000);
@@ -126,9 +138,12 @@ try{
       assert.equal(initial.glError,initial.noError);
       // Persist a genuine canonical schema-1 world, THEN verify sky actions never modify it.
       await open(page);
-      await page.locator('#save').click();
+      await page.locator('.player-menu-safety-link').click();
+      await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
+      await page.locator('.player-safety-back').click();
+      await waitForRealStableMap(page,seed);
       const protectedBytes=await nonSky(page);
-      const primary=protectedBytes['mythwrought-v002-world-179'];
+      const primary=protectedBytes[worldKey];
       assert.ok(primary&&JSON.parse(primary).schema===1,'Original schema-1 save missing');
       await select(page,'day');
       const dayMenu=await scene(page);

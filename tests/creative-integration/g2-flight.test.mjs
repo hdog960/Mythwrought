@@ -24,29 +24,30 @@ test('G2A requires explicit real readiness AND complete player-body clearance be
  assert.equal(armG2Flight(s,{enabled:true,isRegionReady:()=>true,isBodyClear:()=>false}).mode,'off');
  assert.equal(start().mode,'flight');
 });
-test('G2A preserves exactly four distinct speed profiles',()=>{
- assert.deepEqual(G2_FLIGHT_SPEEDS,{precision:1.4,normal:4,fast:8,travel:15});
- for(const [name,speed] of Object.entries(G2_FLIGHT_SPEEDS)){
-   const s=selectG2FlightProfile(start(),name);
-   const p=step(s,{forward:1});
-   assert.ok(Math.abs(p.state.position.z-speed*G2_MAX_FRAME_SECONDS)<1e-8,name);
-   assert.equal(p.state.position.y,6);
- }
- assert.throws(()=>selectG2FlightProfile(start(),'turbo'),/unknown/);
+test('G2A exposes only the creator-approved 15-speed flight and rejects retired modes',()=>{
+ assert.deepEqual(G2_FLIGHT_SPEEDS,{travel:15});
+ assert.ok(Object.isFrozen(G2_FLIGHT_SPEEDS));
+ const s=selectG2FlightProfile(start(),'travel');
+ const p=step(s,{forward:1});
+ assert.equal(s.profile,'travel');
+ assert.ok(Math.abs(p.state.position.z-15*G2_MAX_FRAME_SECONDS)<1e-8);
+ assert.equal(p.state.position.y,6);
+ for(const obsolete of ['precision','normal','fast','turbo'])
+   assert.throws(()=>selectG2FlightProfile(start(),obsolete),/unknown/);
 });
 test('G2A frame time caps at 50 ms and rejects non-finite or over-range inputs',()=>{
- assert.equal(step(start(),{forward:1,dt:100}).state.position.z,.2);
+ assert.equal(step(start(),{forward:1,dt:100}).state.position.z,.75);
  for(const bad of [{forward:NaN},{vertical:Infinity},{forward:1.1},{yaw:NaN},{pitch:Infinity}])
    assert.throws(()=>step(start(),bad),/flight:/);
 });
 test('G2A diagonals including vertical motion normalize to selected speed',()=>{
  const p=step(start(),{forward:1,strafe:1,vertical:1}).state.position;
  const distance=Math.hypot(p.x,p.y-6,p.z);
- assert.ok(Math.abs(distance-0.2)<1e-8);
+ assert.ok(Math.abs(distance-G2_FLIGHT_SPEEDS.travel*G2_MAX_FRAME_SECONDS)<1e-8);
 });
 test('G2A yaw rotates flight but does not adjust vertical position',()=>{
  const p=step(start(),{forward:1,yaw:Math.PI/2}).state.position;
- assert.ok(Math.abs(p.x-.2)<1e-8);assert.ok(Math.abs(p.z)<1e-8);assert.equal(p.y,6);
+ assert.ok(Math.abs(p.x-G2_FLIGHT_SPEEDS.travel*G2_MAX_FRAME_SECONDS)<1e-8);assert.ok(Math.abs(p.z)<1e-8);assert.equal(p.y,6);
 });
 test('G2A altitude bounds prevent unsafe overshoot, never clamp into a colliding surface',()=>{
  const s=armG2Flight(createG2FlightState({position:{x:0,y:23.95,z:0},

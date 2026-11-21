@@ -9,7 +9,7 @@ import {CompanionManager} from './companion.mjs';
 import {AnimalInteractions} from './animal-interactions.mjs';
 import {PopulationManager} from './ecology.mjs';
 import {serializeRoster,restoreRoster} from './roster-persistence.mjs';
-import {speciesRegistry} from './species.mjs';
+import {speciesRegistry,getSpecies} from './species.mjs';
 import {sectionForY} from '../depth.mjs';
 
 export const LIVE_MOB_COUNT=40;
@@ -89,10 +89,13 @@ export function createLiveMobSession({
   // Active-world residency is checked by createWorldQuery for every collision
   // and eye ray. No mob can spawn on an unloaded or unknown physical surface.
   let engine,behavior,combat,companions,animals;
+  const creativeSpawnIds=new Set();
   const raw=storage.getItem(key);
   if(raw!==null){
     try{
-      ({engine,behavior,combat,companions,animals}=restoreRoster(raw,query));
+      const restored=restoreRoster(raw,query);
+      ({engine,behavior,combat,companions,animals}=restored);
+      for(const id of restored.creativeSpawnIds)creativeSpawnIds.add(id);
       lastStored=raw;
     }catch(error){
       readOnly=true;
@@ -110,7 +113,7 @@ export function createLiveMobSession({
     // Tame ownership persists in the existing per-seed checksummed sidecar.
     // Protect it from six-second ecology GC without elevating a horse to a
     // bonded-only MobEngine.important checkpoint bit.
-    isProtected:mob=>animals.isTamed(mob.id,{id:OWNER})
+    isProtected:mob=>creativeSpawnIds.has(mob.id)||animals.isTamed(mob.id,{id:OWNER})
   });
   const player={
     id:OWNER,height:1.72,threatening:true,
@@ -253,11 +256,43 @@ export function createLiveMobSession({
     return companions.command(slot.id,player,mode)?
       mob.species.displayName+' ordered to '+mode:'Companion order rejected safely';
   }
+  function spawnCreative(speciesId,point){
+    if(readOnly||!allowWrites())return {ok:false,reason:'Saved creature roster is protected'};
+    const species=getSpecies(speciesId);
+    if(!species||species.implementation!=='preview')
+      return {ok:false,reason:'Unregistered or unimplemented species'};
+    if(!Array.isArray(point)||point.length!==3||!point.every(Number.isFinite))
+      return {ok:false,reason:'Invalid physical spawn position'};
+    if(!query.residentAt(point)||query.volume(point,species.body)!=='clear')
+      return {ok:false,reason:'Unloaded, obstructed or unsafe placement'};
+    const canFly=species.movement.capabilities.includes('fly');
+    const canSwim=species.movement.capabilities.includes('swim')&&
+      query.medium([point[0],point[1]+.1,point[2]])==='water';
+    if(!canFly&&!canSwim&&!query.grounded(point,species.body))
+      return {ok:false,reason:'This creature needs solid ground or valid water'};
+    if(engine.counts().total>=32||engine.counts().awake>=LIVE_MOB_ACTIVE_LIMIT)
+      return {ok:false,reason:'Creature simulation capacity reached'};
+    const overlapping=engine.all().some(mob=>
+      ['idle','active','dormant'].includes(mob.state)&&
+      Math.hypot(...mob.position.map((v,i)=>v-point[i]))<
+        mob.species.body.radius+species.body.radius+.08);
+    if(overlapping)return {ok:false,reason:'Another creature occupies this location'};
+    const id=engine.spawn(speciesId,point,{dormant:false,homeChunk:null});
+    if(!id)return {ok:false,reason:'Real creature engine rejected the spawn'};
+    creativeSpawnIds.add(id);
+    if(!save()){
+      creativeSpawnIds.delete(id);engine.transition(id,'removed');
+      return {ok:false,reason:'Creature save could not be verified; spawn reverted'};
+    }
+    return Object.freeze({ok:true,id,speciesId,position:Object.freeze([...point])});
+  }
   function save(){
     if(readOnly||!allowWrites())return false;
     let value;
     try{
-      value=serializeRoster({engine,companions,animals});
+      const live=new Set(engine.all().map(mob=>mob.id));
+      for(const id of creativeSpawnIds)if(!live.has(id))creativeSpawnIds.delete(id);
+      value=serializeRoster({engine,companions,animals,creativeSpawnIds:[...creativeSpawnIds]});
       if(value===lastStored)return true;
       const previous=storage.getItem(key);
       // Keep a verified previous-good copy even if a quota/storage error stops
@@ -272,10 +307,10 @@ export function createLiveMobSession({
   function status(){return {
     enabled:true,species:LIVE_MOB_COUNT,counts:engine.counts(),
     health,readonly:readOnly,damaged,companions:companions.slots().length,
-    mounted:Boolean(riderPosition()),gpuSafe:true,elapsed
+    mounted:Boolean(riderPosition()),creativeSpawned:creativeSpawnIds.size,gpuSafe:true,elapsed
   };}
   function dispose(){engine.dispose();}
-  return {advance,drawEntities,attack,interact,save,dispose,status,revive,
+  return {advance,drawEntities,attack,interact,spawnCreative,save,dispose,status,revive,
     toggleMount,dismount,riderPosition,steerMount,breedNearby,companionOrder,
     get query(){return query;}, get engine(){return engine;}};
 }

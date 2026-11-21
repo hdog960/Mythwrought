@@ -33,9 +33,16 @@ try{
     hasTouch:true,isMobile:true});
   const page=await context.newPage(),faults=[],badResponses=[];
   page.on('pageerror',e=>faults.push(e.message));
+  page.on('dialog',d=>d.accept());
   page.on('response',r=>{if(r.status()>=400)badResponses.push(r.url()+' '+r.status());});
   try{
    await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+   await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+   assert.equal(await page.locator('#help').isVisible(),true,
+     'Dense physical placement must not bypass current-V6 admission');
+   await page.getByRole('button',{name:/NEW WORLD/}).click();
+   await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+   const admittedSeed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
    await page.waitForFunction(()=>window.__mythwroughtTest&&
      Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
      null,{timeout:60000});
@@ -43,11 +50,14 @@ try{
     const t=window.__mythwroughtTest,c=document.querySelector('#scene');
     return {seed:t.snapshot().seed,chunks:t.snapshot().chunks,
      gpu:!!c.getContext('webgl2'),vertices:Number(c.dataset.renderedMeshVertices),
-     canonical:localStorage.getItem('mythwrought-v002-world-179'),
-     originalSidecar:localStorage.getItem('mythwrought-pack3-construction-v1:179')};
+     canonical:localStorage.getItem('mythwrought-v002-world-'+t.snapshot().seed),
+     originalSidecar:localStorage.getItem('mythwrought-pack3-construction-v1:'+t.snapshot().seed),
+     generator:t.fourBiomeProfile()?.generator};
    });
    assert.equal(initial.gpu,true);
-   assert.equal(initial.seed,179);
+   assert.equal(initial.seed,admittedSeed);
+   assert.equal(initial.generator,'mythwrought-five-surface-regions-v6');
+   assert.equal(JSON.parse(initial.canonical||'null')?.schema,1);
    assert.equal(initial.chunks.length,25);
    assert.equal(initial.originalSidecar,null);
    const baseline=await sampleFrames(page);
@@ -108,10 +118,12 @@ try{
      gpu:!!c.getContext('webgl2'),
      positions:records.map(r=>t.pack3Block(...r.at)?.id??null),
      rotations:records.map(r=>t.pack3Block(...r.at)?.yaw??null),
-     canonical:localStorage.getItem('mythwrought-v002-world-179')};
+     canonical:localStorage.getItem('mythwrought-v002-world-'+t.snapshot().seed),
+     seed:t.snapshot().seed};
    },staged.records);
    assert.equal(live.count,256);assert.equal(live.chunks,25);
    assert.equal(live.gpu,true);
+   assert.equal(live.seed,admittedSeed,'Dense save reload changed authoritative world seed');
    assert.deepEqual(live.positions,Array(256).fill(116));
    assert.deepEqual(live.rotations,Array(256).fill(1));
    assert.ok(live.vertices>=initial.vertices+staged.predicted,

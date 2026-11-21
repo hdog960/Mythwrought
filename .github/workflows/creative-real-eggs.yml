@@ -1,0 +1,58 @@
+name: Creative real source 40 eggs and cold reload — DRAFT only
+on:
+  pull_request:
+    paths:
+      - 'tests/creative-integration/physical-eggs-browser.mjs'
+      - '.github/workflows/creative-real-eggs.yml'
+      - 'src/creative-integration/**'
+      - 'src/mobs/**'
+      - 'src/main.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: creative-real-eggs-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  real-source-eggs:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.number == 292
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify actual original Creative and mob source contracts
+        run: |
+          node --check src/main.mjs
+          node --check tests/creative-integration/physical-eggs-browser.mjs
+          node --test tests/creative-catalog-live.test.mjs tests/mobs/registry.test.mjs
+      - name: Install source Chromium WebGL2 acceptance dependencies
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Ten real Creative UI egg placements and actual cold reloads
+        env:
+          EGG_SHARD: ${{ matrix.shard }}
+        run: |
+          python3 -m http.server 4174 >/tmp/eggs-http.log 2>&1 &
+          for n in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:4174/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4174/ >/dev/null
+          node tests/creative-integration/physical-eggs-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mythwrought-real-creative-eggs-${{ matrix.shard }}
+          path: artifacts/creative-eggs/shard-${{ matrix.shard }}/
+          if-no-files-found: ignore

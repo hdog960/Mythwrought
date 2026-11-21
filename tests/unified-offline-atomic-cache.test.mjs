@@ -8,8 +8,9 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261120-five-systems-rc11';
+const RELEASE='20261120-creative-m1m6-candidate2';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
+
 const PREVIOUS='mythwrought-m5-shell-20261118-v5-recorder';
 const ROOT='https://example.test/Mythwrought/';
 assert.ok(source.includes("const ASSET_RELEASE='"+RELEASE+"'"));
@@ -106,3 +107,15 @@ test('missing source aborts atomic install without replacing previous-good app',
   assert.equal(candidate.all.get(PREVIOUS).size,1,
     'Known good installed shell remains byte-identical');
 });
+
+test('all current Creative menu, world and recovery modules are in the same verified offline shell',()=>{
+  const sourceAssets=source.slice(source.indexOf('const SOURCE_ASSETS=['),
+    source.indexOf('];',source.indexOf('const SOURCE_ASSETS=['))+2);
+  for(const name of ['creative-catalog','creative-inventory','creative-thumbnails',
+    'current-world','player-menu','world-safety'])
+    assert.ok(sourceAssets.includes('./src/creative-integration/'+name+'.mjs'),
+      'New Creative source must be cached for same-install offline startup: '+name);
+  assert.ok(source.includes('const CACHE_NAME=CACHE_PREFIX+'+JSON.stringify(RELEASE).replaceAll('"',"'")),
+    'Creative shell must not reuse the existing installed RC11 cache');
+});
+

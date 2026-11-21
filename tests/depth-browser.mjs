@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import pngjs from 'pngjs';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 const {PNG}=pngjs;
 const browser=await chromium.launch({
   headless:true,
@@ -18,6 +19,20 @@ try{
     page.on('pageerror',e=>errors.push(e.message));
     try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:30000});
+      await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+      assert.equal(await page.locator('#help').isVisible(),true,
+        'Unprofiled old world may not silently enter deep gameplay');
+      page.once('dialog',dialog=>dialog.accept());
+      await page.getByRole('button',{name:/NEW WORLD/}).click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+      const current=await page.evaluate(()=>{
+        const t=window.__mythwroughtTest,seed=t.snapshot().seed;
+        return {seed,generator:t.fourBiomeProfile()?.generator,
+          raw:localStorage.getItem('mythwrought-v002-world-'+seed)};
+      });
+      assert.equal(current.generator,M6_BALANCED_GENERATOR);
+      assert.ok(current.raw&&JSON.parse(current.raw).schema===1,
+        'Current V6 world must save original schema-1 bytes');
       await page.waitForFunction(()=>window.__mythwroughtTest &&
         Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
         null,{timeout:60000});
@@ -35,9 +50,23 @@ try{
       await page.evaluate(()=>{
         const t=window.__mythwroughtTest;
         for(let x=0;x<=2;x++)for(let z=0;z<=2;z++)
-          for(let y=-78;y<=-76;y++)t.placeFixture(x,y,z,0);
-        t.teleportCave(1,-78,1);
+          for(let y=-78;y<=-76;y++)
+            if(!t.placeFixture(x,y,z,0))
+              throw Error('Original current V6 source deep edit failed');
       });
+      await page.locator('#menu').click();
+      await page.locator('.player-menu-safety-link').click();
+      await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
+      const verifiedSave=await page.evaluate(seed=>
+        localStorage.getItem('mythwrought-v002-world-'+seed),current.seed);
+      assert.ok(verifiedSave&&JSON.parse(verifiedSave).schema===1,
+        'Real SAVE CURRENT WORLD did not persist the deep 3x3x3 carve');
+      assert.ok(JSON.parse(verifiedSave).edits.some(row=>
+        row[0]===1&&row[1]===-78&&row[2]===1&&row[3]===0),
+        'Actual V6 profile-aware save lost the deep edit');
+      await page.locator('.player-safety-back').click();
+      await page.locator('.player-menu-close').click();
+      await page.evaluate(()=>window.__mythwroughtTest.teleportCave(1,-78,1));
       await page.waitForFunction(()=>{
         const scene=document.querySelector('#scene');
         return scene?.dataset.chunkCenter?.includes('|') &&
@@ -55,7 +84,8 @@ try{
           active:scene.dataset.chunkCenter,
           vertices:Number(scene.dataset.renderedMeshVertices),
           y:Number(scene.dataset.playerFeet),
-          saved:JSON.parse(localStorage.getItem('mythwrought-v002-world-179')||'{}'),
+          saved:JSON.parse(localStorage.getItem('mythwrought-v002-world-'+
+            window.__mythwroughtTest.snapshot().seed)||'{}'),
           air:t.block(1,-78,1),floor:t.block(1,-79,1),
           layout:left.right<=center.left+3&&right.left>=center.right-3,
           noticeHidden:document.querySelector('#notice').hidden,
@@ -68,6 +98,11 @@ try{
       assert.equal(deep.air,0);
       assert.ok(deep.floor>0);
       assert.equal(deep.saved.schema,1,'Save schema must stay at 1');
+      assert.equal(JSON.stringify(deep.saved),verifiedSave,
+        'Original deep renderer changed verified current V6 schema-1 bytes');
+      assert.equal(await page.evaluate(()=>
+        window.__mythwroughtTest.fourBiomeProfile()?.generator),
+        M6_BALANCED_GENERATOR);
       assert.ok(deep.saved.edits.some(row=>row[0]===1&&row[1]===-78&&row[2]===1&&row[3]===0));
       assert.ok(deep.gpu&&deep.layout&&deep.noticeHidden,'WebGL2/layout/notice fault');
       const raw=await page.screenshot({
@@ -84,6 +119,14 @@ try{
       await page.waitForFunction(()=>window.__mythwroughtTest,null,{timeout:30000});
       assert.equal(await page.evaluate(()=>window.__mythwroughtTest.block(1,-78,1)),0,
         'Deep schema-1 edit lost after reload');
+      const restored=await page.evaluate(()=>{
+        const t=window.__mythwroughtTest,seed=t.snapshot().seed;
+        return {seed,generator:t.fourBiomeProfile()?.generator,
+          raw:localStorage.getItem('mythwrought-v002-world-'+seed)};
+      });
+      assert.equal(restored.seed,current.seed,'Deep reload changed current V6 seed');
+      assert.equal(restored.generator,M6_BALANCED_GENERATOR);
+      assert.equal(restored.raw,verifiedSave,'Deep V6 reload changed save bytes');
       assert.deepEqual(errors,[],'Browser JavaScript errors at '+width+'x'+height);
       console.log('PASS depth Chromium WebGL2',width+'x'+height,
         JSON.stringify({deepChunks:deep.count,deepVertices:deep.vertices,

@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import pngjs from 'pngjs';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 const {PNG}=pngjs;
 const dims=[[667,375],[844,390],[932,430]];
 const browser=await chromium.launch({headless:true,
@@ -19,9 +20,19 @@ try{
   page.on('response',response=>{if(response.status()>=400)requests.push(response.url()+' '+response.status());});
   try{
    await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+   await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+   assert.equal(await page.locator('#help').isVisible(),true,
+     'Current-world admission required before physical Pack3 test');
+   page.once('dialog',dialog=>dialog.accept());
+   await page.getByRole('button',{name:/NEW WORLD/}).click();
+   await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+   const active=await page.evaluate(()=>({seed:window.__mythwroughtTest.snapshot().seed,
+     generator:window.__mythwroughtTest.fourBiomeProfile()?.generator}));
+   assert.equal(active.generator,M6_BALANCED_GENERATOR);
    await page.waitForFunction(()=>window.__mythwroughtTest&&
      Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,null,{timeout:60000});
-   const legacy=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
+   const canonical=await page.evaluate(seed=>localStorage.getItem('mythwrought-v002-world-'+seed),active.seed);
+   assert.equal(JSON.parse(canonical||'null')?.schema,1,'Current V6 schema-1 world missing');
    const snapshot=await page.evaluate(()=>{
     const canvas=document.querySelector('#scene');
     return {webgl2:!!canvas.getContext('webgl2'),
@@ -62,15 +73,15 @@ try{
     return {chunks:Number(c.dataset.loadedChunks),
       physical:Number(c.dataset.pack3PhysicalCount),
       vertices:Number(c.dataset.renderedMeshVertices),
-      canonical:localStorage.getItem('mythwrought-v002-world-179'),
-      overlay:JSON.parse(localStorage.getItem('mythwrought-pack3-construction-v1:179'))};
+      canonical:localStorage.getItem('mythwrought-v002-world-'+window.__mythwroughtTest.snapshot().seed),
+      overlay:JSON.parse(localStorage.getItem('mythwrought-pack3-construction-v1:'+window.__mythwroughtTest.snapshot().seed))};
    });
    assert.equal(initial.chunks,25,'Physical building inflated the GPU chunk budget');
    assert.equal(initial.physical,17);
    assert.ok(initial.vertices>snapshot.renderedVertices,
      'Actual physical vertices not present in live gameplay WebGL2 chunks');
    assert.equal(initial.overlay.entries.length,17);
-   assert.equal(initial.canonical,legacy,'Adding physical construction modified legacy schema-1 save');
+   assert.equal(initial.canonical,canonical,'Adding physical construction modified current V6 schema-1 save');
    const target=created.records[8].at;
    await page.evaluate(cell=>{
     const d=window.__mythwroughtTest;
@@ -100,12 +111,12 @@ try{
     assert.equal(restored[i].id,created.records[i].id);
     assert.equal(restored[i].yaw,created.records[i].orientation);
    }
-   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179')),legacy);
+   assert.equal(await page.evaluate(seed=>localStorage.getItem('mythwrought-v002-world-'+seed),active.seed),canonical);
    const removed=await page.evaluate(records=>{
     const t=window.__mythwroughtTest;
     for(const r of records){if(!t.removePack3Fixture(...r.at).ok)throw Error('Remove failed');}
     return {remaining:Number(document.querySelector('#scene').dataset.pack3PhysicalCount),
-      saved:JSON.parse(localStorage.getItem('mythwrought-pack3-construction-v1:179')).entries.length};
+      saved:JSON.parse(localStorage.getItem('mythwrought-pack3-construction-v1:'+t.snapshot().seed)).entries.length};
    },created.records);
    assert.equal(removed.saved,0);
    await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.pack3PhysicalCount)===0);

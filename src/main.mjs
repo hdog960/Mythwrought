@@ -27,7 +27,7 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,fourRegionProfile,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
@@ -35,6 +35,12 @@ import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
 import {FrameHistory,gripClearance,probeTemporaryStorage,formatPreflightReport} from './preflight.mjs';
 import {installGameplayRecorder} from './gameplay-recorder.mjs';
 import {installGameUpdater} from './app-update.mjs';
+import {installPlayerMenu} from './creative-integration/player-menu.mjs';
+import {buildReadOnlyGameArchive} from './creative-integration/world-safety.mjs';
+import {buildCreativeCatalog} from './creative-integration/creative-catalog.mjs';
+import {installCreativeInventory} from './creative-integration/creative-inventory.mjs';
+import {CURRENT_INSTALLED_GENERATOR,chooseUnusedCurrentSeed,
+  secureRandomWorldSeed} from './creative-integration/current-world.mjs';
 import {createLiveMobSession} from './mobs/live-game.mjs';
 import {createLiveMobRenderer} from './mobs/live-render.mjs';
 import {getSpecies} from './mobs/species.mjs';
@@ -42,7 +48,7 @@ import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
-import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
+import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy,listMirrorSeeds} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
 import {installExplorationMap} from './exploration-map.mjs';
 import {createG2FlightState,armG2Flight,selectG2FlightProfile,planG2FlightStep,
@@ -91,6 +97,7 @@ else start();
 function start(){
   let gameplayRecorder=null;
   let world,storageReadOnly=false,recoveryNote='',caveSession=null,caveOps=null;
+  let mustChooseCurrentWorld=false;
   function loadWorld(seed){
     // Legacy startup must NEVER silently reuse a seed reserved for the
     // creator's explicitly chosen new cave profile sidecar.
@@ -110,17 +117,35 @@ function start(){
     if(p2.recovered||p2.warning)recoveryNote=p2.warning||recoveryNote;
     return p2.world;
   }
+  // CURRENT-ONLY ENTRY: an old or unknown generator must never silently
+  // become the playable world. Show a protected, UNSAVED current-gen preview
+  // behind the new-world confirmation instead; legacy bytes remain untouched.
   try{
     const choice=localStorage.getItem(SELECTED_SEED_KEY);
-    world=loadWorld(choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice));
+    const requested=choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice);
+    const profile=readFourRegionProfile(localStorage,requested);
+    if(profile?.profile?.generator===CURRENT_INSTALLED_GENERATOR){
+      world=loadWorld(requested);
+    }else{
+      mustChooseCurrentWorld=true;storageReadOnly=true;
+      const previewSeed=chooseUnusedCurrentSeed(localStorage,secureRandomWorldSeed);
+      world=new Pack2LiveWorld(new FourRegionWorld(previewSeed,
+        fourRegionProfile(previewSeed,CURRENT_INSTALLED_GENERATOR)));
+      recoveryNote='The previous world is preserved but uses older or unknown terrain. '+
+        'Choose NEW WORLD to enter the current installed generation.';
+    }
   }catch(err){
-    // A damaged seed is NEVER replaced by auto-saving a fresh starter world.
-    storageReadOnly=true;world=new Pack2LiveWorld(new VoxelWorld(DEFAULT_WORLD_SEED));
-    recoveryNote='SAVE PROTECTION: '+err.message+' Choose a different seed or import backup.';
+    // Protect damaged metadata/edits. Never load obsolete terrain as a
+    // fallback, never convert or save a damaged world by guessing a version.
+    mustChooseCurrentWorld=true;storageReadOnly=true;
+    world=new Pack2LiveWorld(new FourRegionWorld(DEFAULT_WORLD_SEED,
+      fourRegionProfile(DEFAULT_WORLD_SEED,CURRENT_INSTALLED_GENERATOR)));
+    recoveryNote='SAVE PROTECTION: '+err.message+
+      ' · Old saved data untouched. Confirm a new current world to play.';
   }
   let pack3=createPack3LiveBridge(world,localStorage);
   // Only a previously selected immutable v5 world may opt into M5 PWA caching.
-  if(world.base instanceof FourRegionWorld&&
+  if(!mustChooseCurrentWorld&&world.base instanceof FourRegionWorld&&
       [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR].includes(
         world.base.generationProfile.generator))
     void ensureM5OfflineCache();
@@ -234,6 +259,7 @@ function start(){
 
   let caveDiscovery={inside:false,last:-Infinity,discoveries:0};
   let selected=BLOCK.STONE,selectedRotation=0,pack3Yaw=0;
+  let creativeSpawnSpecies=null;
   let pack2Selection=null;
   let outlineKey='',outlineCount=0,editFeedback=[];
   const targetInfo=document.getElementById('targetInfo');
@@ -392,6 +418,9 @@ function start(){
   const g2Toggle=document.getElementById('g2bFlightEnable');
   const g2Profile=document.getElementById('g2bFlightProfile');
   const g2Status=document.getElementById('g2bFlightStatus');
+  const g2Header=document.getElementById('creativeToggle');
+  const inventoryHeader=document.getElementById('creativeInventoryToggle');
+  let creativeInventory=null,creativeAirTools=null;
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
@@ -429,7 +458,17 @@ function start(){
   function g2Sync(){
     const on=g2Active();
     document.body.classList.toggle('g2b-flight-active',on);
-    g2Toggle.checked=g2CreativeEnabled;g2Profile.disabled=!g2CreativeEnabled;
+    g2Toggle.checked=g2CreativeEnabled;
+    // Only speed 15 is ever executable through the player Creative UI.
+    g2Profile.value='travel';g2Profile.disabled=true;
+    if(g2Header){
+      g2Header.setAttribute('aria-pressed',String(g2CreativeEnabled));
+      g2Header.classList.toggle('creative-enabled',g2CreativeEnabled);
+      g2Header.textContent=g2CreativeEnabled?'✦ CREATIVE ON':'✧ CREATIVE';
+    }
+    if(inventoryHeader)inventoryHeader.hidden=!g2CreativeEnabled;
+    creativeInventory?.setEnabled(g2CreativeEnabled);
+    if(creativeAirTools)creativeAirTools.hidden=!on;
     for(const [id,label,aria] of [
       ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
       ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
@@ -452,6 +491,9 @@ function start(){
   function g2NewWorld(){
     // The original world-change code immediately installs a safe newPlayer.
     g2CreativeEnabled=false;g2Flight=null;g2Controls=createG2ControlState();
+    // A creature sigil never silently carries into a newly created world.
+    // Quick-slot labels may remain, but deliberate re-selection is required.
+    creativeSpawnSpecies=null;
     g2TouchVertical.up=g2TouchVertical.down=false;g2Epoch++;g2Sync();
   }
   function g2Start(){
@@ -468,7 +510,7 @@ function start(){
         heightBounds:{minFeet:WORLD_MIN_Y,maxFeet:G2_FLIGHT_MAX_FEET}});
       const active=armG2Flight(initial,{enabled:true,isRegionReady:g2Ready,isBodyClear:g2Clear});
       if(active.mode!=='flight'){g2Status.textContent=active.reason;message(active.reason);return false;}
-      g2Flight=selectG2FlightProfile(active,g2Profile.value);
+      g2Flight=selectG2FlightProfile(active,'travel');
       g2Controls=enterG2ControlOwnership(createG2ControlState(),
         {featureEnabled:true,flightReady:true});
       player.vX=player.vY=player.vZ=0;player.onGround=false;player.coyote=0;
@@ -578,7 +620,7 @@ function start(){
       g2Status.textContent=g2Flight.reason;
     }catch(e){g2Pause('Flight failed safely: '+e.message);}
   }
-  g2CreativeEnabled=false;g2Toggle.checked=false;g2Profile.value='normal';g2Sync();
+  g2CreativeEnabled=false;g2Toggle.checked=false;g2Profile.value='travel';g2Sync();
   // Creative enablement is separate from flying: enabling never lifts the player.
   // A failed physical landing cannot silently turn Creative off midair.
   g2Toggle.addEventListener('change',()=>{
@@ -586,14 +628,25 @@ function start(){
     else if(g2Active()&&!g2Land()){
       g2CreativeEnabled=true;
       message('Creative remains enabled: land safely before switching off');
-    }else g2CreativeEnabled=false;
+    }else{
+      g2CreativeEnabled=false;
+      // A stale creature egg must never hijack normal Explore PLACE after Creative OFF.
+      creativeSpawnSpecies=null;
+    }
     lastG2JumpReleaseAt=-Infinity;
     g2Sync();
   });
+  // The old profile selector stays mounted solely to preserve dependencies.
+  // It has no player-visible or executable lower-speed mode.
   g2Profile.addEventListener('change',()=>{
-    if(!g2Active())return;
-    try{g2Flight=selectG2FlightProfile(g2Flight,g2Profile.value);g2Sync();}
-    catch(e){g2Status.textContent=e.message;}
+    g2Profile.value='travel';
+    if(g2Active())g2Flight=selectG2FlightProfile(g2Flight,'travel');
+    g2Sync();
+  });
+  g2Header?.addEventListener('click',()=>{
+    if(!help.hidden||exploration.isOpen()||graphicsLost)return;
+    g2Toggle.checked=!g2CreativeEnabled;
+    g2Toggle.dispatchEvent(new Event('change',{bubbles:true}));
   });
   // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
   const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
@@ -860,7 +913,19 @@ function start(){
   }
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
-    if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
+    if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return;
+    if(mode==='place'&&creativeSpawnSpecies){
+      const creature=getSpecies(creativeSpawnSpecies);
+      const target=raycast(world,eye(),facing(),6);
+      if(!g2CreativeEnabled||!creature||!target?.adjacent||!mobSession){
+        message('Creature sigil requires Creative, a real mob host and clear ground');return;
+      }
+      const [x,y,z]=target.adjacent,point=[x+.5,y,z+.5];
+      const result=mobSession.spawnCreative(creature.id,point);
+      if(!result.ok){message('Cannot summon '+creature.displayName+': '+result.reason);return;}
+      message('Summoned '+creature.displayName+' · verified creature roster saved');
+      return;
+    }
     if(mode==='mine'&&mobRenderer&&!mobRuntimeError){
       const hit=mobSession?.attack(eye(),facing());
       if(hit){mobSession.save();message('Hit '+hit.name+' · '+
@@ -1393,6 +1458,9 @@ function start(){
       canvas.dataset.playerColliding=String(collides(world,player.x,player.feet,player.z));
       canvas.dataset.lookMode=lookMode;
       canvas.dataset.precision=String(precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight'));
+      // Only real, FULLY DRAWN source WebGL2 frames enter the existing
+      // optional MediaRecorder. This does not draw, upload or persist anything.
+      gameplayRecorder?.captureGameFrame(now);
     }
   }
   const frameDriver=new ForegroundFrameDriver(
@@ -2158,6 +2226,7 @@ function start(){
   }
   document.getElementById('menu').onclick=()=>{gameplayRecorder?.interrupt('Settings opened');cancelAllPointers();help.hidden=false;};
   document.getElementById('closeHelp').onclick=()=>{
+    if(mustChooseCurrentWorld){message('Choose NEW WORLD before gameplay; previous world is preserved');return;}
     cancelAllPointers();help.hidden=true;
     // Return keyboard/gamepad-like input focus to world after closing modal.
     canvas.focus({preventScroll:true});
@@ -2248,7 +2317,13 @@ function start(){
     vaultStatus.textContent='Checking on-device backup storage…';
     try{await action();}
     catch(error){vaultStatus.textContent='Device vault: '+String(error.message||error)+'. Live world unchanged unless explicitly stated.';}
-    finally{vaultButtons.forEach(button=>button.disabled=false);vaultBusy=false;}
+    finally{
+      vaultButtons.forEach(button=>{
+        button.disabled=storageReadOnly&&
+          ['vaultBackup','vaultRestore','vaultDelete'].includes(button.id);
+      });
+      vaultBusy=false;
+    }
   }
   async function refreshVault(prefer=''){
     clearVaultLink();
@@ -2299,6 +2374,7 @@ function start(){
     vaultStatus.textContent='Backup verified. Tap DOWNLOAD VERIFIED JSON BACKUP; use regular IMPORT to restore this file later.';
   });
   document.getElementById('vaultRestore').onclick=()=>useVault(async()=>{
+    if(storageReadOnly)throw Error('Protected old world: direct vault restore is disabled. Download the snapshot as JSON without replacing the active world');
     clearVaultLink();
     const activeSeed=world.seed;
     const snapshot=await inspectVaultBackup(chosenVaultId());
@@ -2337,6 +2413,7 @@ function start(){
     scheduleMirrorForWorld();
   });
   document.getElementById('vaultDelete').onclick=()=>useVault(async()=>{
+    if(storageReadOnly)throw Error('Protected old world: device-vault deletion is disabled until current-generation recovery is complete');
     clearVaultLink();
     const id=chosenVaultId();
     const all=await listVaultBackups();
@@ -2354,7 +2431,46 @@ function start(){
   // startup. Only successful, read-back-verified canonical writes enqueue a
   // secondary copy, and only while the player has enabled this preference.
   const mirrorEnabledCheck=document.getElementById('mirrorEnabled');
+  // Archived IndexedDB mirrors must remain downloadable after the selected
+  // playable seed changes. Keep this inside the secondary recovery drawer.
+  const mirrorArchiveLabel=document.createElement('label');
+  mirrorArchiveLabel.htmlFor='mirrorArchiveSeed';
+  mirrorArchiveLabel.textContent='Mirror world to inspect (archives are download-only)';
+  const mirrorArchiveSeed=document.createElement('select');
+  mirrorArchiveSeed.id='mirrorArchiveSeed';
+  const activeMirrorOption=document.createElement('option');
+  activeMirrorOption.value='active';
+  activeMirrorOption.textContent='Current / last selected world';
+  mirrorArchiveSeed.append(activeMirrorOption);
+  const mirrorArchiveRefresh=document.createElement('button');
+  mirrorArchiveRefresh.id='mirrorArchiveRefresh';
+  mirrorArchiveRefresh.type='button';
+  mirrorArchiveRefresh.textContent='FIND SAVED MIRROR WORLDS';
+  document.querySelector('label[for="mirrorSlot"]').before(
+    mirrorArchiveLabel,mirrorArchiveSeed,mirrorArchiveRefresh);
+  const archivedMirrorSeeds=new Set();
   const mirrorButtons=[...document.querySelectorAll('.mirror-settings button')];
+  function previousMirrorSeed(){
+    if(!storageReadOnly)return world.seed;
+    const archived=localStorage.getItem(SELECTED_SEED_KEY);
+    return archived===null?DEFAULT_WORLD_SEED:worldSeedFromText(archived);
+  }
+  function mirrorInspectionSeed(){
+    if(mirrorArchiveSeed.value==='active')return previousMirrorSeed();
+    const seed=Number(mirrorArchiveSeed.value);
+    if(!Number.isSafeInteger(seed)||seed!==(seed|0)||!archivedMirrorSeeds.has(seed))
+      throw Error('This archived mirror was not independently enumerated');
+    return seed;
+  }
+  const mirrorReadOnlySelection=()=>storageReadOnly||mirrorArchiveSeed.value!=='active';
+  mirrorArchiveSeed.addEventListener('change',()=>{
+    clearMirrorDownload();
+    document.getElementById('mirrorRestore').disabled=
+      mirrorReadOnlySelection()||world.base instanceof FourRegionWorld;
+    mirrorStatus.textContent=mirrorArchiveSeed.value==='active'?
+      'Current/last selected mirror. CHECK MIRROR before export.':
+      'Archived seed '+mirrorInspectionSeed()+' is DOWNLOAD ONLY; never restored to current gameplay.';
+  });
   let mirrorBusy=false;
   mirrorEnabledCheck.checked=mirrorEnabled;
   mirrorStatus.textContent=mirrorEnabled?
@@ -2398,9 +2514,33 @@ function start(){
     try{await action();}
     catch(error){mirrorStatus.textContent='Mirror operation refused: '+String(error.message||error)+
       '. Check the current world and exported backups before retrying.';}
-    finally{mirrorBusy=false;mirrorButtons.forEach(button=>button.disabled=false);}
+    finally{
+      mirrorBusy=false;
+      mirrorButtons.forEach(button=>{
+        button.disabled=(storageReadOnly&&button.id==='mirrorSync')||
+          (button.id==='mirrorRestore'&&
+           (mirrorReadOnlySelection()||world.base instanceof FourRegionWorld));
+      });
+    }
   }
+  mirrorArchiveRefresh.onclick=()=>withMirror(async()=>{
+    const before=mirrorArchiveSeed.value;
+    const seeds=await listMirrorSeeds();
+    archivedMirrorSeeds.clear();
+    mirrorArchiveSeed.replaceChildren(activeMirrorOption);
+    for(const seed of seeds){
+      archivedMirrorSeeds.add(seed);
+      const option=document.createElement('option');
+      option.value=String(seed);
+      option.textContent='ARCHIVED SEED '+seed+' · download only';
+      mirrorArchiveSeed.append(option);
+    }
+    if(before!=='active'&&archivedMirrorSeeds.has(Number(before)))
+      mirrorArchiveSeed.value=before;
+    mirrorStatus.textContent=seeds.length+' saved mirror world(s) located. Select an archived seed, CHECK MIRROR, and PREPARE JSON EXPORT. No saved bytes changed.';
+  });
   document.getElementById('mirrorSync').onclick=()=>withMirror(async()=>{
+    if(storageReadOnly)throw Error('Protected older-world preview: mirror sync is disabled; inspect or export the checked archived copy instead');
     const raw=verifiedLiveBytes(),seed=world.seed;
     await settleMirrorWrites();
     const result=await queueMirror(seed,raw);
@@ -2409,22 +2549,23 @@ function start(){
   });
   document.getElementById('mirrorCheck').onclick=()=>withMirror(async()=>{
     await settleMirrorWrites();
-    const state=await inspectMirror(world.seed);
-    if(!state.exists){mirrorStatus.textContent='No device mirror for seed '+world.seed+'. Save and SYNC to make one.';return;}
+    const seed=mirrorInspectionSeed();
+    const state=await inspectMirror(seed);
+    if(!state.exists){mirrorStatus.textContent='No device mirror for seed '+seed+'. Save and SYNC to make one.';return;}
     const summarize=(label,slot)=>label+': '+(slot===null?'absent':
       slot.valid?'verified, '+slot.edits+' edits, '+slot.createdAt:'DAMAGED ('+slot.error+')');
-    mirrorStatus.textContent='Seed '+world.seed+' — '+
+    mirrorStatus.textContent='Seed '+seed+(mirrorReadOnlySelection()?' (archived read-only)':'')+' — '+
       summarize('latest',state.current)+'; '+summarize('previous',state.previous)+
       '. No restoration performed.';
   });
   mirrorSlot.addEventListener('change',clearMirrorDownload);
   document.getElementById('mirrorPrepare').onclick=()=>withMirror(async()=>{
-    if(world.base instanceof FourRegionWorld)
-      throw Error('Use profile-safe WORLD EXPORT for four-biome backups; this mirror contains only legacy schema-1 bytes');
+    if(!mirrorReadOnlySelection()&&world.base instanceof FourRegionWorld)
+      throw Error('Use profile-safe WORLD EXPORT for current four-biome backups; select an archived mirror for read-only historical download');
     await settleMirrorWrites();
-    const selectedSeed=world.seed,selectedVersion=mirrorSlot.value;
+    const selectedSeed=mirrorInspectionSeed(),selectedVersion=mirrorSlot.value;
     const snap=await getMirrorCopy(selectedSeed,selectedVersion);
-    if(world.seed!==selectedSeed)throw Error('Active world changed during export; select this seed again');
+    if(mirrorInspectionSeed()!==selectedSeed)throw Error('Archived world selection changed during mirror export; retry without modifying saves');
     mirrorDownloadUrl=URL.createObjectURL(new Blob([snap.raw],{type:'application/json'}));
     mirrorDownload.href=mirrorDownloadUrl;
     mirrorDownload.download='mythwrought-mirror-seed-'+selectedSeed+'-'+selectedVersion+'.json';
@@ -2432,6 +2573,9 @@ function start(){
     mirrorStatus.textContent='Verified '+mirrorSlot.value+' copy. Tap the separate DOWNLOAD link to export this original schema-1 JSON file.';
   });
   document.getElementById('mirrorRestore').onclick=()=>withMirror(async()=>{
+    if(storageReadOnly)throw Error('Protected older-world preview: mirror restoration is disabled; download the checked archived snapshot instead');
+    if(mirrorArchiveSeed.value!=='active')
+      throw Error('Archived mirrors are download-only; restoration to the current world is forbidden');
     if(world.base instanceof FourRegionWorld||readFourRegionProfile(localStorage,world.seed))
       throw Error('Refusing legacy mirror restore on a four-biome profile; generation identity would be lost');
     if(storageReadOnly)throw Error('Read-only startup protection active; use the regular IMPORT flow to repair damaged saved bytes');
@@ -2574,6 +2718,10 @@ function start(){
     disposeLiveMobSession();g2NewWorld();
     caveSession=null;world=candidate;world.nextPack2State=pack2Selection;
     pack3=createPack3LiveBridge(world,localStorage);
+    // This candidate was already verified and saved. Clear the preview
+    // read-only flag BEFORE re-binding its writable S1/S3 sky sidecars.
+    // Otherwise first admitted V6 worlds inherit false 'protected' status.
+    storageReadOnly=false;
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
     // Register *after* the explicit unused-seed v5 creation is safely saved.
     if(world.base instanceof FourRegionWorld&&
@@ -2581,7 +2729,7 @@ function start(){
           world.base.generationProfile.generator))
       void ensureM5OfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
-    storageReadOnly=false;resetLiveMobSession();changed=false;respawnPrototype();
+    resetLiveMobSession();changed=false;respawnPrototype();
     clearMirrorDownload();
     seedLabel.textContent='WORLD '+world.seed;seedInput.value=String(world.seed);
     seedMessage.textContent=statusText;
@@ -2719,10 +2867,14 @@ function start(){
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
       const rawImport=await f.text();
       const incoming=JSON.parse(rawImport);
+      if(incoming?.kind!=='mythwrought-four-biomes-export')
+        throw Error('Old or unprofiled world backups stay archived. Only verified current-generation bundles may be opened; use the read-only recovery download to preserve legacy bytes.');
       if(incoming?.kind==='mythwrought-four-biomes-export'){
         // Never flatten a profiled world through the legacy importer.
         // New-seed-only restore; no destructive overwrite of a prior seed.
         const examined=inspectM2WorldExport(rawImport);
+        if(examined.world.base.generationProfile.generator!==CURRENT_INSTALLED_GENERATOR)
+          throw Error('Previous-generation worlds may be archived but must not become current playable terrain');
         if(storageReadOnly)throw Error('Read-only save protection is active');
         if(examined.seed===world.seed)
           throw Error('Biome bundle cannot replace your active seed; export your world and choose a separate unused seed');
@@ -2929,7 +3081,7 @@ function start(){
         const old=world.get(x,y,z);
         if(!world.set(x,y,z,id))throw Error('Invalid test block');
         try{refreshEditedMeshes(x,z,y);}catch(err){world.set(x,y,z,old);throw err;}
-        save();
+        return save();
       },
       // Localhost-only real-game GPU fixture, unavailable on deployed Pages.
       // Used by Chromium to verify the actual terrain shader + Pack 5 buffer.
@@ -3054,6 +3206,187 @@ function start(){
         graphics:{lost:graphicsLost,lossCount:graphicsLossCount,
           restoredCount:graphicsRestoreCount,shaderReady:Boolean(program&&skyProgram)}};}
     });
+  }
+  // Distinct in-flight build controls: the established two-thumb MINE/PLACE
+  // rails remain DOWN/UP during flight. Never steal their vertical gestures.
+  creativeAirTools=document.createElement('div');
+  creativeAirTools.className='mw-creative-air-tools';
+  creativeAirTools.hidden=true;creativeAirTools.setAttribute('aria-label','In-flight building tools');
+  for(const [label,mode] of [['▦ PLACE','place'],['✕ MINE','mine']]){
+    const button=document.createElement('button');
+    button.type='button';button.textContent=label;
+    button.setAttribute('aria-label',mode==='place'?'Place selected item while flying':'Mine targeted block while flying');
+    button.addEventListener('click',()=>edit(mode));
+    creativeAirTools.append(button);
+  }
+  document.querySelector('.viewport').append(creativeAirTools);
+
+  // Production-source Creative item resolver. Every selection reuses its
+  // original physical placement owner rather than writing speculative voxels.
+  const creativeCatalog=buildCreativeCatalog();
+  creativeInventory=installCreativeInventory({
+    catalog:creativeCatalog,
+    onRotate:item=>{
+      if(item.kind!=='block')return 'Creature sigils have no orientation';
+      const next=field=>{
+        const n=(Number(field.value)+1)%4;field.value=String(n);
+        field.dispatchEvent(new Event('change',{bubbles:true}));
+        return item.name+' · rotated '+n*90+'°';
+      };
+      if(item.owner==='biome130')return next(biomeRotation);
+      if(item.owner==='pack1'||item.owner==='pack4')return next(manual14Rotate);
+      if(item.owner==='pack3'){
+        if(pack3Palette.yaw.disabled)return item.name+' has fixed orientation';
+        return next(pack3Palette.yaw);
+      }
+      if(item.owner==='pack2'){
+        document.getElementById('pack2Rotate').click();
+        return pack2StateText.textContent;
+      }
+      if(item.owner==='pack5')return next(document.getElementById('pack5Rotation'));
+      return item.name+' has no rotational variant';
+    },
+    onVariant:item=>{
+      if(item.kind!=='block')return 'Creature sigils have no variant settings';
+      if(item.owner==='pack2'){
+        const water=/water/i.test(item.name);
+        document.getElementById(water?'pack2WaterLevel':'pack2Variant').click();
+        return pack2StateText.textContent;
+      }
+      if(item.owner==='pack5'){
+        const field=pack5Variant,variants=item.variants||[];
+        if(variants.length<2)return item.name+' has one variant';
+        field.value=variants[(variants.indexOf(field.value)+1)%variants.length];
+        return item.name+' · '+field.value.replaceAll('-',' ');
+      }
+      return item.name+' · available variants are separate catalog entries';
+    },
+    onOpen:()=>{
+      if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return false;
+      gameplayRecorder?.interrupt('Creative inventory opened');
+      cancelAllPointers();
+      help.hidden=false;help.classList.add('mw-inventory-paused');
+      return true;
+    },
+    onClose:()=>{
+      help.classList.remove('mw-inventory-paused');help.hidden=true;
+      canvas.focus({preventScroll:true});
+    },
+    onSelect:async item=>{
+      if(!g2CreativeEnabled)throw Error('Creative Mode is off');
+      if(item.kind==='spawn'){
+        if(!getSpecies(item.id))throw Error('Unregistered live creature');
+        if(pack5Mode){pack5Mode=false;pack5Enabled.checked=false;}
+        creativeSpawnSpecies=item.id;
+        return;
+      }
+      if(caveSession&&!['core','biome130'].includes(item.owner))
+        throw Error('Shaped materials cannot be saved in a protected cave world');
+      creativeSpawnSpecies=null;
+      if(item.owner==='pack5'){
+        if(storageReadOnly)throw Error('Pack 5 needs an editable world');
+        if(!await ensurePack5Loaded())throw Error('Pack 5 did not finish loading');
+        pack5Enabled.checked=true;pack5Mode=true;
+        pack5Family.value=item.symbol;
+        pack5Family.dispatchEvent(new Event('change',{bubbles:true}));
+        pack5Variant.value=item.variants?.[0]??pack5Variant.value;
+        return;
+      }
+      if(pack5Mode){pack5Mode=false;pack5Enabled.checked=false;}
+      let target;
+      if(item.owner==='core'||item.owner==='pack2'){
+        target=help.querySelector('[data-block="'+item.id+'"]');
+      }else if(item.owner==='biome130')target=biomeSelect;
+      else if(item.owner==='pack1'||item.owner==='pack4')target=manual14Select;
+      else if(item.owner==='pack3')target=pack3Palette.material;
+      if(!target)throw Error('Production placement owner not mounted for '+item.key);
+      if(target.dataset.block)target.click();
+      else {target.value=String(item.id);target.dispatchEvent(new Event('change',{bubbles:true}));}
+    }
+  });
+  inventoryHeader?.addEventListener('click',()=>{
+    if(!g2CreativeEnabled||!creativeInventory)return;
+    if(creativeInventory.isOpen())creativeInventory.close();else creativeInventory.open();
+  });
+  g2Sync();
+
+  // Three-action player menu. Legacy controls retain their original DOM,
+  // listeners and storage contracts but are not player-visible settings.
+  let preparedDiagnosticSeed=null;
+  const playerSettings=installPlayerMenu({
+    container:help.querySelector('.helpbody'),
+    onDiagnostics:async()=>{
+      // iOS Safari requires a *fresh user gesture* for clipboard.writeText.
+      // Never await the expensive read-only diagnostic before attempting copy
+      // in the same click; generate on the first tap, copy on the second.
+      if(preparedDiagnosticSeed!==world.seed||!auditReport.value){
+        preparedDiagnosticSeed=null;
+        await document.getElementById('runAudit').onclick();
+        if(auditReport.value){
+          preparedDiagnosticSeed=world.seed;
+          playerSettings.showStatus('Diagnostic ready · tap COPY TEST CODE again to copy');
+        }else playerSettings.showStatus(auditStatus.textContent);
+        return;
+      }
+      await document.getElementById('copyAudit').onclick();
+      playerSettings.showStatus(document.getElementById('auditStatus').textContent);
+    },
+    onDay:()=>{
+      document.getElementById('skySetDay').click();
+      playerSettings.showStatus('Day selected · the 24-minute clock keeps running');
+    },
+    onNight:()=>{
+      document.getElementById('skySetNight').click();
+      playerSettings.showStatus('Night selected · the 24-minute clock keeps running');
+    },
+    onNewWorld:()=>{
+      if(!window.confirm('Create a new world with the current installed '+
+          CURRENT_INSTALLED_GENERATOR+' generator? Existing worlds and saves are preserved.'))
+        return;
+      if(!storageReadOnly&&!save())
+        throw Error('Save verification failed; old world preserved. Export your backup first');
+      const next=chooseUnusedCurrentSeed(localStorage,secureRandomWorldSeed);
+      const choice=planM2WorldChoice(String(next),
+        M2_WORLD_MODE.CREATE_BALANCED_V6,{confirmed:true});
+      const loaded=openM2World(localStorage,choice);
+      if(!(loaded.base instanceof FourRegionWorld)||
+         loaded.base.generationProfile.generator!==CURRENT_INSTALLED_GENERATOR)
+        throw Error('Refusing an obsolete or unknown world generator');
+      const stored=saveM2World(localStorage,loaded.world);
+      if(!stored.ok)throw Error('New world not verified: '+stored.reason);
+      enterPreparedM2World(loaded.world,'New current-generation world '+next+
+        ' · old worlds and saves remain protected');
+      mustChooseCurrentWorld=false;
+      document.getElementById('closeHelp').click();
+    },
+    isReadOnly:()=>storageReadOnly||mustChooseCurrentWorld,
+    onSave:()=>{
+      if(!save())throw Error('Current world could not be verified saved; export local archive before changing worlds');
+      playerSettings.showStatus('Current world save verified');
+    },
+    onExport:()=>{
+      if(!save())throw Error('Current world could not be safely saved before export');
+      document.getElementById('export').click(); // original profile-aware V6 exporter
+      playerSettings.showStatus('Current-generation export requested via native Save dialog');
+    },
+    onImport:()=>document.getElementById('import').click(),
+    onArchive:()=>{
+      // Archive the exact verified bytes synchronously, but DO NOT trigger a
+      // programmatic download. iPhone Safari needs a separate tapped link,
+      // which the dedicated safety drawer presents after preparation.
+      return buildReadOnlyGameArchive(localStorage);
+    },
+    onCheckUpdate:()=>document.getElementById('checkGameUpdate').click(),
+    onClose:()=>document.getElementById('closeHelp').click()
+  });
+  if(mustChooseCurrentWorld){
+    help.hidden=false;
+    playerSettings.showStatus('An earlier world is safely archived. '+
+      'Choose NEW WORLD to create the current installed generation.');
+  }else if(help.hidden){
+    // Restore actual keyboard gameplay focus on same-install current V6 reload.
+    // Never focus the canvas while the protected old-world admission is open.
+    canvas.focus({preventScroll:true});
   }
   saveHealth.textContent=storageReadOnly?
     'READ ONLY: damaged world data preserved; import or select another seed.':

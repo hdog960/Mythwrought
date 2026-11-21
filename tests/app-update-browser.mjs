@@ -10,10 +10,11 @@ import {chromium} from 'playwright';
 const BASE_REC_LESS='474f6c2439865454f80b995af31120c024cdbc2d';
 const BASE_CACHE_FIRST='edc6ceae728840bfc361cd8a6437e8a1fa674c42';
 const OLD_CACHE='mythwrought-m5-shell-20261118-v5-recorder';
-const NEW_CACHE='mythwrought-m5-shell-20261120-five-systems-rc11';
-const RELEASE='20261120-five-systems-rc11';
+const NEW_CACHE='mythwrought-m5-shell-20261120-creative-m1m6-candidate2';
+const RELEASE='20261120-creative-m1m6-candidate2';
 const oldFiles={
  'index.html':execFileSync('git',['show',BASE_REC_LESS+':index.html'],{encoding:'utf8'}),
+ 'styles.css':execFileSync('git',['show',BASE_REC_LESS+':styles.css'],{encoding:'utf8'}),
  'src/main.mjs':execFileSync('git',['show',BASE_REC_LESS+':src/main.mjs'],{encoding:'utf8'}),
  'sw-m5.js':execFileSync('git',['show',BASE_CACHE_FIRST+':sw-m5.js'],{encoding:'utf8'})
 };
@@ -112,7 +113,9 @@ try{
   assert.ok(prior.includes(OLD_CACHE),'Historical shell did not install');
   console.log('PASS OLD CACHE-FIRST APP NO REC',prior,'requests',requests);
 
-  // Server publishes the exact proposed new files, not a mock screenshot.
+  // The historical worker boot above must pair original REC-less HTML with
+ // its original CSS; new menu CSS intentionally hides legacy #save controls.
+ // Server publishes the exact proposed new files, not a mock screenshot.
   // A query request must bypass the OLD worker and return the NEW origin
   // before the new worker is permitted to install.
   deploy='new';
@@ -160,7 +163,7 @@ try{
       Boolean((await navigator.serviceWorker.getRegistration('/'))?.active);
   },{cacheName:NEW_CACHE,release:RELEASE},{timeout:180000});
   const installed=await page.evaluate(async()=>{
-    const cache=await caches.open('mythwrought-m5-shell-20261120-five-systems-rc11');
+    const cache=await caches.open('mythwrought-m5-shell-20261120-creative-m1m6-candidate2');
     const index=new URL('/index.html',location.href).href;
     const response=await cache.match(index);
     const rootResponse=await cache.match(new URL('/',location.href).href);
@@ -205,10 +208,17 @@ try{
   await page.screenshot({path:'artifacts/pwa-safe-refresh/updated-game-932x430.png'});
   console.log('PASS ONLINE UPGRADE REC VISIBLE',await caches(),'saved seed 11111222 intact');
 
-  await page.locator('#menu').click();
+  await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+  if(!await page.locator('#help').isVisible())
+    await page.locator('#menu').click();
+  assert.equal(await page.locator('#help').isVisible(),true,
+    'Old-generation saved world must remain behind protected admission');
+  await page.locator('.player-menu-safety-link').click();
+  assert.equal(await page.locator('#checkGameUpdate').count(),1,
+    'Original update handler must stay mounted behind the compact player menu');
   const [onlineRefresh]=await Promise.all([
     page.waitForNavigation({waitUntil:'networkidle',timeout:45000}),
-    page.locator('#checkGameUpdate').click()
+    page.getByRole('button',{name:'CHECK APP UPDATE'}).click()
   ]);
   assert.equal(onlineRefresh?.headers()['x-mw-server-epoch'],'b',
     'Explicit in-game update did not fetch a fresh document online');
@@ -217,9 +227,27 @@ try{
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-11111222')),saved);
   console.log('PASS IN-APP UPDATE BUTTON SAME INSTALL',page.url());
 
+  // Old worlds are intentionally archived after the upgrade. Enter a separate
+  // current V6 world using the real on-screen confirmation BEFORE the strict
+  // offline play test. All original seed 11111222 bytes must survive verbatim.
+  await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:/NEW WORLD/}).click();
+  await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+  const freshSeed=await page.evaluate(()=>
+    localStorage.getItem('mythwrought-v002-selected-seed'));
+  assert.notEqual(freshSeed,'11111222',
+    'Creative candidate reused an archived old-generation world identity');
+  assert.ok(await page.evaluate(seed=>localStorage.getItem('mythwrought-v002-world-'+seed),freshSeed),
+    'No verified current V6 save after explicit new-world creation');
+  assert.equal(await page.evaluate(()=>
+    localStorage.getItem('mythwrought-v002-world-11111222')),saved,
+    'Original legacy world was not preserved during current-world creation');
   // The manifest start URL is the clean root; verify a clean root boot before
   // the STRICT no-network offline test (not a query left from an update).
   await page.goto(target,{waitUntil:'networkidle',timeout:45000});
+  assert.equal(await page.locator('#help').isVisible(),false,
+    'Current V6 world must resume directly in the same Home Screen app');
   assert.equal(await page.locator('#captureToggle').count(),1);
   const beforeOfflineRequests=requests;
   await context.setOffline(true);
@@ -227,6 +255,9 @@ try{
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0,
     null,{timeout:45000});
   assert.equal(await page.locator('#captureToggle').count(),1);
+  assert.equal(await page.locator('#help').isVisible(),false,
+    'Offline Home Screen must resume the saved current world without legacy gate');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-selected-seed')),freshSeed);
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-11111222')),saved);
   const gl=await page.evaluate(()=>{
     const c=document.querySelector('#scene');const g=c.getContext('webgl2');

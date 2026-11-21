@@ -13,8 +13,20 @@ const layouts={'667x375':[667,375],'844x390':[844,390],
   '932x430':[932,430]};
 const selected=process.env.M5_VIEWPORT||'667x375';
 if(!Object.hasOwn(layouts,selected))throw Error('Invalid M5 viewport');
-const [width,height]=layouts[selected],seed=179;
+const [width,height]=layouts[selected];
+let seed=null,worldKey=null,profileKey=null,journalKey=null,mapKey=null;
 const root=process.cwd(),out=path.join(root,'artifacts/m5-offline-'+selected);
+// Strict source-defined SW cache identity; no obsolete RC11 hard-coded acceptance.
+const swSource=await readFile(path.join(root,'sw-m5.js'),'utf8');
+const prefix=/^const CACHE_PREFIX='([^']+)';$/m.exec(swSource)?.[1];
+const release=/^const CACHE_NAME=CACHE_PREFIX\+'([^']+)';$/m.exec(swSource)?.[1];
+const assetList=/const SOURCE_ASSETS=\[([\s\S]*?)\];/.exec(swSource)?.[1];
+if(prefix!=='mythwrought-m5-shell-'||!release||!assetList)
+  throw Error('Cannot verify exact original SW cache source contract');
+const assets=JSON.parse('['+assetList+']');
+if(assets.length<190||new Set(assets).size!==assets.length)
+  throw Error('Original SW source list incomplete/duplicate');
+const exactCacheName=prefix+release;
 await mkdir(out,{recursive:true});
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript',
@@ -53,10 +65,10 @@ const browser=await chromium.launch({headless:true,args:[
  '--disable-gpu-sandbox','--no-sandbox'
 ]});
 const report={kind:'mythwrought-m5-offline-pwa-chromium-v1',viewport:selected,
-  width,height,seed,sourceGenerator:'mythwrought-four-surface-regions-v5',
-  defaultGenerator:'mythwrought-four-surface-regions-v4',
+  width,height,seed:null,sourceGenerator:'mythwrought-five-surface-regions-v6',
+  defaultGenerator:'archived legacy worlds remain protected',
   sourceSchema:1,realChromium:true,offlineModeVerified:false,
-  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261120-five-systems-rc11',
+  physicalIphone:false,serviceWorkerVersion:exactCacheName,
   finished:false,screens:[],checks:[],errors:[]};
 const persist=()=>writeFile(path.join(out,'manifest.json'),JSON.stringify(report,null,2));
 const check=(name,ok,info={})=>{
@@ -99,7 +111,7 @@ async function map(page){
   await page.locator('#miniMapButton').click();
   const record=await page.evaluate(()=>({
     count:Number(document.getElementById('miniMap').dataset.discovered||0),
-    raw:localStorage.getItem('mythwrought-exploration-v1-179'),
+    raw:localStorage.getItem('mythwrought-exploration-v1-'+window.__mythwroughtTest.snapshot().seed),
     summary:document.getElementById('explorationSummary').textContent
   }));
   await page.locator('#closeExploration').click();
@@ -116,14 +128,7 @@ ctx.on('serviceworker',worker=>{
 });
 page.on('pageerror',e=>pageErrors.push(String(e.message)));
 page.on('dialog',dialog=>dialog.accept());
-const worldKey='mythwrought-v002-world-179',
-  profileKey=worldKey+'-four-biomes-profile-v1',
-  journalKey=profileKey+'-journal',mapKey='mythwrought-exploration-v1-179';
 try{
-  await page.addInitScript(()=>{
-    if(localStorage.getItem('mythwrought-v002-selected-seed')===null)
-      localStorage.setItem('mythwrought-v002-selected-seed','7');
-  });
   await page.goto(origin+'/index.html',{waitUntil:'load',timeout:90000});
   await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,
     {timeout:90000});
@@ -140,12 +145,18 @@ try{
     !navigator.serviceWorker.controller&&
     performance.getEntriesByType('resource')
       .every(e=>!e.name.endsWith('/sw-m5.js'))));
-  await page.locator('#menu').click();
-  await page.locator('#seedInput').fill(String(seed));
-  await page.locator('#createExperimentalV5World').click();
-  await page.locator('#closeHelp').click();
+  await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+  check('protected-current-only-entry',await page.locator('#help').isVisible());
+  await page.getByRole('button',{name:/NEW WORLD/}).click();
+  await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+  seed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+  report.seed=seed;
+  worldKey='mythwrought-v002-world-'+seed;
+  profileKey=worldKey+'-four-biomes-profile-v1';
+  journalKey=profileKey+'-journal';
+  mapKey='mythwrought-exploration-v1-'+seed;
   await page.waitForFunction(()=>window.__mythwroughtTest.fourBiomeProfile()
-    ?.generator==='mythwrought-four-surface-regions-v5',null,{timeout:30000});
+    ?.generator==='mythwrought-five-surface-regions-v6',null,{timeout:30000});
   // A broken installation must fail promptly with preserved evidence,
   // rather than leave three runners hung on an unbounded ready promise.
   try {
@@ -178,17 +189,17 @@ try{
   }
   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),null,
     {timeout:180000});
-  const online=await page.evaluate(async()=>{
+  const online=await page.evaluate(async exactCacheName=>{
     const keys=await caches.keys();
-    const name=keys.find(x=>x==='mythwrought-m5-shell-20261120-five-systems-rc11');
+    const name=keys.find(x=>x===exactCacheName);
     const cache=name?await caches.open(name):null;
     const urls=cache?await cache.keys():[];
     return {name,cacheCount:urls.length,controller:
       navigator.serviceWorker.controller?.scriptURL,urls:urls.map(x=>x.url),
       secure:window.isSecureContext};
-  });
+  },exactCacheName);
   check('atomic-versioned-shell-install',online.secure&&
-    online.name===report.serviceWorkerVersion&&online.cacheCount>=190&&
+    online.name===report.serviceWorkerVersion&&online.cacheCount===assets.length&&
     online.controller?.endsWith('/sw-m5.js')&&
     ['src/main.mjs','src/app-update.mjs','src/gameplay-recorder.mjs',
      'src/manual-biomes/profile-world.mjs',
@@ -203,9 +214,9 @@ try{
     generator:window.__mythwroughtTest.fourBiomeProfile()?.generator,
     legacy:localStorage.getItem('mythwrought-v002-world-7')
   }),{worldKey,profileKey,journalKey});
-  check('online-explicit-v5-saved',initial.world&&initial.profile&&initial.journal&&
-    JSON.parse(initial.world).schema===1&&initial.selected==='179'&&
-    initial.generator===report.sourceGenerator&&initial.legacy!==null);
+  check('online-current-v6-saved',initial.world&&initial.profile&&initial.journal&&
+    JSON.parse(initial.world).schema===1&&initial.selected===String(seed)&&
+    initial.generator===report.sourceGenerator&&initial.legacy===null);
   report.canonicalSha256=sha(Buffer.from(initial.world));
   report.profileSha256=sha(Buffer.from(initial.profile));
   const firstMap=await map(page);
@@ -252,7 +263,10 @@ try{
   await screenshot(page,'offline-discovered-map');
   await page.locator('#closeExploration').click();
   await page.locator('#menu').click();
-  await page.locator('#save').click();
+  await page.locator('.player-menu-safety-link').click();
+  await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
+  await page.locator('.player-safety-back').click();
+  await page.locator('.player-menu-close').click();
   const saved=await page.evaluate(({worldKey,profileKey,journalKey})=>({
     world:localStorage.getItem(worldKey),profile:localStorage.getItem(profileKey),
     journal:localStorage.getItem(journalKey)
@@ -264,7 +278,7 @@ try{
     {timeout:90000});
   const again=await map(page);
   check('second-offline-reload-persists',again.count>=newMap.count&&
-    JSON.parse(again.raw).seed===179&&
+    JSON.parse(again.raw).seed===seed&&
     (await page.evaluate(()=>
       window.__mythwroughtTest.fourBiomeProfile()?.generator))===
         report.sourceGenerator,{count:again.count,prior:newMap.count});
@@ -286,12 +300,23 @@ try{
     generator:window.__mythwroughtTest.fourBiomeProfile()?.generator,
     world:localStorage.getItem(worldKey),
     profile:localStorage.getItem(profileKey),
-    journal:localStorage.getItem(journalKey)
+    journal:localStorage.getItem(journalKey),
+    selected:localStorage.getItem('mythwrought-v002-selected-seed'),
+    activeSeed:window.__mythwroughtTest.snapshot().seed,
+    admissionVisible:!document.getElementById('help').hidden,
+    admissionStatus:document.querySelector('#playerMenu .player-menu-status')?.textContent,
+    playableCanvasFocused:document.activeElement?.id==='scene'
   }),{worldKey,profileKey,journalKey});
+  // Current-only startup renders a READ-ONLY V6 *preview* after damaged
+  // metadata. A V6 profile object in that preview is NOT playable admission.
+  // Refuse any save mutation, wrong selected seed or hidden admission UI.
   check('corrupt-profile-fail-closed',bad.state.includes('READ ONLY')&&
-    !bad.generator&&bad.world===initial.world&&
+    bad.generator===report.sourceGenerator&&bad.activeSeed!==seed&&
+    bad.selected===String(seed)&&bad.admissionVisible&&
+    !bad.playableCanvasFocused&&
+    bad.world===initial.world&&
     bad.profile==='invalid-profile-protection-test'&&
-    bad.journal==='invalid-journal-protection-test');
+    bad.journal==='invalid-journal-protection-test',bad);
   await screenshot(page,'corrupt-profile-protected');
   await page.evaluate(({profileKey,journalKey,profile,journal})=>{
     localStorage.setItem(profileKey,profile);
@@ -306,7 +331,7 @@ try{
       localStorage.getItem(profileKey)===profile&&
       localStorage.getItem(journalKey)===journal&&
       window.__mythwroughtTest.fourBiomeProfile()?.generator===
-        'mythwrought-four-surface-regions-v5',
+        'mythwrought-five-surface-regions-v6',
     {...initial,worldKey,profileKey,journalKey}));
   await screenshot(page,'profile-recovered');
   await page.evaluate(mapKey=>localStorage.setItem(mapKey,
@@ -339,7 +364,7 @@ try{
   report.offlineModeVerified=true;report.finished=true;
   report.finalDiscovered=finalMap.count;
   await persist();
-  console.log('PASS M5 REAL OFFLINE PWA WEBGL2 '+selected+
+  console.log('PASS V6 REAL OFFLINE PWA WEBGL2 '+selected+
     ' seven genuine PNG and persistent seed/profile/map/failure-safe checks');
 }catch(error){
   report.errors.push(String(error));

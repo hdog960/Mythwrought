@@ -2,7 +2,9 @@
 // Required localhost: http://127.0.0.1:4174 unless G2B_BROWSER_ORIGIN overrides.
 // Test file lives strictly within G2B ownership; never replays real user saves.
 import assert from 'node:assert/strict';
-import {mkdirSync} from 'node:fs';
+import {mkdirSync,readFileSync} from 'node:fs';
+import {inspectReadOnlyGameArchive} from '../../src/creative-integration/world-safety.mjs';
+import {buildCreativeCatalog} from '../../src/creative-integration/creative-catalog.mjs';
 import {chromium} from 'playwright';
 const origin=process.env.G2B_BROWSER_ORIGIN||'http://127.0.0.1:4174';
 const sizes=[[568,320],[667,375],[844,390],[932,430],[956,440],[1180,520]];
@@ -14,11 +16,18 @@ mkdirSync('artifacts',{recursive:true});
 try{
  for(const [width,height] of sizes){
   const context=await browser.newContext({viewport:{width,height},hasTouch:true,
-    isMobile:true,deviceScaleFactor:1});
+    isMobile:true,deviceScaleFactor:1,acceptDownloads:true});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   try{
    await page.goto(origin+'/',{waitUntil:'domcontentloaded',timeout:30000});
+   // A real empty browser has no accepted world: confirm V6 without bypasses.
+   await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+   page.once('dialog',dialog=>dialog.accept());
+   await page.getByRole('button',{name:/NEW WORLD/}).click();
+   await page.locator('#help').waitFor({state:'hidden',timeout:30000});
+   assert.equal(await page.locator('#help').isVisible(),false,
+     'V6 must save before completing protected new-world entry');
    await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,
      undefined,{timeout:40000});
    const state=await page.evaluate(()=>{
@@ -28,7 +37,9 @@ try{
      return {left:r('.grip.left'),right:r('.grip.right'),world,map,
        canvas:r('#scene'),gl:!!el.getContext('webgl2'),off:el.dataset.g2bFlight,
        loaded:Number(el.dataset.loadedChunks),notice:document.querySelector('#notice').hidden,
-       save:localStorage.getItem('mythwrought-v002-world-179')};
+       savedSeed:localStorage.getItem('mythwrought-v002-selected-seed'),
+       save:localStorage.getItem('mythwrought-v002-world-'+
+           localStorage.getItem('mythwrought-v002-selected-seed'))};
    });
    assert.ok(state.gl,'G2B requires actual WebGL2');
    assert.ok(state.notice,'G2B production renderer failed');
@@ -45,6 +56,101 @@ try{
    assert.equal(await page.locator('#explorationOverlay').isVisible(),true);
    await page.locator('#closeExploration').click();
    assert.equal(await page.locator('#explorationOverlay').isVisible(),false);
+   // Exercise the real iPhone-sized three-row menu and dynamic Creative
+   // inventory without mocked selectors or a second app-rendering harness.
+   if(width===956){
+     await page.locator('#menu').click();
+     assert.equal(await page.locator('#help').isVisible(),true);
+     assert.equal(await page.locator('#playerMenu .player-menu-row').count(),3,
+       'The user-facing menu must contain only Test Code, time and New World');
+     const menuGeometry=await page.evaluate(()=>{
+       const n=document.querySelector('#playerMenu'),r=n.getBoundingClientRect();
+       return {scroll:n.scrollHeight,client:n.clientHeight,
+         left:r.left,right:r.right,top:r.top,bottom:r.bottom};
+     });
+     assert.ok(menuGeometry.scroll<=menuGeometry.client+1,
+       'Main menu started scrolling in iPhone landscape: '+JSON.stringify(menuGeometry));
+     assert.ok(menuGeometry.left>=0&&menuGeometry.right<=width+1&&
+       menuGeometry.top>=0&&menuGeometry.bottom<=height+1,
+       'Main menu escapes real landscape viewport');
+     await page.screenshot({path:'artifacts/mythwrought-creative-settings-'+width+'x'+height+'.png'});
+     await page.locator('.player-menu-safety-link').click();
+     assert.equal(await page.locator('#playerSafety').isVisible(),true,
+       'Opt-in backup drawer must remain accessible without cluttering normal settings');
+     assert.equal(await page.locator('#vaultBackup').isVisible(),true,
+       'Original device-vault controls vanished from recovery drawer');
+     await page.screenshot({path:'artifacts/mythwrought-creative-recovery-'+width+'x'+height+'.png'});
+     // GitHub Pages shares origin storage across games. The real local archive
+     // must not leak another project's storage or modify the verified world.
+     await page.evaluate(()=>localStorage.setItem('unwritten-realms-owned','exclude-foreign-save'));
+     await page.locator('.player-safety-archive').click();
+     await page.locator('.player-safety-download').waitFor({state:'visible',timeout:15000});
+     const archivePromise=page.waitForEvent('download',{timeout:20000});
+     await page.locator('.player-safety-download').click();
+     const downloaded=await archivePromise;
+     assert.match(downloaded.suggestedFilename(),/^mythwrought-local-saves-\d{4}-\d{2}-\d{2}\.json$/);
+     const archive=inspectReadOnlyGameArchive(readFileSync(await downloaded.path(),'utf8'));
+     const records=new Map(archive.entries);
+     assert.equal(records.get('mythwrought-v002-world-'+state.savedSeed),state.save,
+       'Archive lost original selected schema-1 world bytes');
+     assert.ok(records.has('mythwrought-v002-world-'+state.savedSeed+'-four-biomes-profile-v1'),
+       'Archive omitted original current-generation profile');
+     assert.equal(records.has('unwritten-realms-owned'),false,
+       'Shared-origin archive accidentally exported another game');
+     await page.evaluate(()=>localStorage.removeItem('unwritten-realms-owned'));
+     await page.locator('.player-safety-back').click();
+     assert.equal(await page.locator('#playerSafety').isVisible(),false,
+       'Backup panel did not return to compact settings');
+     await page.getByRole('button',{name:'RETURN TO GAME'}).click();
+     await page.locator('#creativeToggle').click();
+     assert.equal(await page.locator('#creativeInventoryToggle').isVisible(),true);
+     await page.locator('#creativeInventoryToggle').click();
+     assert.equal(await page.locator('#creativeInventory').isVisible(),true);
+     assert.equal(await page.locator('.mw-inventory-category').count(),10);
+     assert.equal(await page.locator('.mw-inventory-grid button').count(),48,
+       'Source-driven inventory must use bounded initial rendering');
+     await page.screenshot({path:'artifacts/mythwrought-creative-items-'+width+'x'+height+'.png'});
+     // Materialize the real 48-at-a-time virtualized catalog, ensuring all
+     // 241 installed physical producer IDs are reachable in the user UI.
+     const expectedCatalog=buildCreativeCatalog();
+     assert.equal(expectedCatalog.blocks.length,241);
+     assert.equal(expectedCatalog.creatures.length,40);
+     for(let batch=0;batch<8;batch++){
+       if(await page.locator('.mw-inventory-grid button[data-key]').count()===241)break;
+       await page.locator('.mw-inventory-grid').evaluate(node=>{
+         node.scrollTop=node.scrollHeight;
+         node.dispatchEvent(new Event('scroll'));
+       });
+     }
+     const blockKeys=await page.locator('.mw-inventory-grid button[data-key]')
+       .evaluateAll(nodes=>nodes.map(node=>node.dataset.key));
+     assert.deepEqual(blockKeys,expectedCatalog.blocks.map(item=>item.key),
+       'Live iPhone inventory did not expose all 241 physical source IDs in original catalog order');
+     assert.equal(await page.locator('.mw-inventory-grid canvas[data-fallback="true"]').count(),0,
+       'At least one physical item displayed placeholder geometry');
+     await page.locator('.mw-inventory-category').filter({hasText:'Creatures'}).click();
+     const eggKeys=await page.locator('.mw-inventory-grid button[data-key]')
+       .evaluateAll(nodes=>nodes.map(node=>node.dataset.key));
+     assert.deepEqual(eggKeys,expectedCatalog.creatures.map(item=>item.key),
+       'Some registered live creature eggs are missing or reordered');
+     await page.screenshot({path:'artifacts/mythwrought-creative-eggs-'+width+'x'+height+'.png'});
+     // Real user click for ALL forty: source registry lookup, selected state
+     // and live owner response, not a synthetic DOM count or mock species.
+     for(const key of eggKeys){
+       await page.locator('.mw-inventory-grid [data-key="'+key+'"]').click();
+       await page.waitForFunction(value=>
+         document.querySelector('.mw-inventory-grid [data-key="'+value+'"]')
+           ?.getAttribute('aria-selected')==='true',key,{timeout:15000});
+       assert.match(await page.locator('.mw-inventory-preview').textContent(),
+         /creature sigil/,'Failed live species selection: '+key);
+     }
+     await page.locator('.mw-inventory-grid [data-key="spawn:horse"]').click();
+     assert.match(await page.locator('.mw-inventory-preview').textContent(),/Horse/);
+     await page.locator('.mw-inventory-close').click();
+     assert.equal(await page.locator('#creativeInventory').isVisible(),false);
+     await page.locator('#creativeToggle').click();
+     assert.equal(await page.locator('#creativeToggle').getAttribute('aria-pressed'),'false');
+   }
    // Genuine CDP touchstart/touchend makes a precise double-tap even when
    // software WebGL2 is slow; Playwright locator.tap() can insert long layout
    // waits *between* taps that are not part of an actual user's double-tap.
@@ -98,13 +204,12 @@ try{
    assert.equal(beforeCreative.creativeEnabled,false,'Creative must begin disabled');
    assert.equal(beforeCreative.active,false,'Double-tap cannot fly in Explore mode');
    await page.waitForTimeout(900);
-   await page.locator('#menu').click();
-   assert.equal(await page.locator('#g2bFlightEnable').isChecked(),false);
-   await page.locator('#g2bFlightEnable').check();
+   assert.equal(await page.locator('#creativeToggle').getAttribute('aria-pressed'),'false');
+   await page.locator('#creativeToggle').click();
    let enabled=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    assert.equal(enabled.creativeEnabled,true,'Creative toggle did not enable mode');
    assert.equal(enabled.active,false,'Enabling Creative must NOT automatically enter flight');
-   await page.locator('#closeHelp').click();
+   assert.equal(await page.locator('#creativeToggle').getAttribute('aria-pressed'),'true');
    await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,false,
      'One JUMP touch must not enable flight');
@@ -131,23 +236,46 @@ try{
      info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
      assert.equal(info.active,true,'Repeat double-tap JUMP did not re-enable flight: '+JSON.stringify(await jumpTouchProof()));
    }
-   await page.locator('#menu').click();
-   assert.equal(await page.locator('#g2bFlightEnable').isChecked(),true);
+   assert.equal(await page.locator('#creativeToggle').getAttribute('aria-pressed'),'true');
    assert.equal(info.creativeEnabled,true,'Creative should remain enabled in flight');
    assert.equal(info.bodyClear,true);
    assert.equal(info.resident,true);
    assert.ok(info.maxY>=60,'Sky flight ceiling must permit useful ascent above the surface');
-   for(const profile of ['precision','normal','fast','travel']){
-    await page.locator('#g2bFlightProfile').selectOption(profile);
-    info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
-    assert.equal(info.profile,profile,'G2B profile not applied');
-   }
-   await page.locator('#g2bFlightProfile').selectOption('normal');
-   await page.locator('#closeHelp').click();
+   assert.equal(await page.locator('#g2bFlightProfile').isDisabled(),true);
+   assert.equal(info.profile,'travel','The real flight speed must remain 15');
+   await page.evaluate(()=>{
+    const field=document.getElementById('g2bFlightProfile');
+    field.value='precision';field.dispatchEvent(new Event('change',{bubbles:true}));
+   });
+   info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.equal(info.profile,'travel','Spoofed lower speed must be blocked');
    await page.waitForTimeout(250); // paused controls may resume only after the next safe GPU frame.
    assert.equal(await page.locator('#dig').textContent(),'DOWN');
    assert.equal(await page.locator('#place').textContent(),'UP');
    assert.equal(await page.locator('#jump').textContent(),'LAND ×2');
+   // A random V6 spawn can have a real hillside against horizontal flight.
+   // Take off using the ACTUAL upward touch control before keyboard movement;
+   // never edit a position, collision contract or movement threshold.
+   const groundFlight=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   const takeoffRect=await page.locator('#place').boundingBox();
+   assert.ok(takeoffRect,'Original UP control missing in genuine flight');
+   const takeoffXY=center(takeoffRect),takeoffPoint=touch(770,takeoffXY.x,takeoffXY.y);
+   const takeoffCDP=await context.newCDPSession(page);
+   await takeoffCDP.send('Input.dispatchTouchEvent',{
+     type:'touchStart',touchPoints:[takeoffPoint]});
+   try{
+     await page.waitForFunction(initialY=>{
+       const flight=window.__mythwroughtTest.flightInfo();
+       return flight.position.y>initialY+2.4&&flight.bodyClear&&flight.resident;
+     },groundFlight.position.y,{timeout:15000});
+   }finally{
+     await takeoffCDP.send('Input.dispatchTouchEvent',{
+       type:'touchEnd',touchPoints:[]});
+   }
+   const clearedTakeoff=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   assert.ok(clearedTakeoff.position.y>groundFlight.position.y+2.4&&
+     clearedTakeoff.bodyClear&&clearedTakeoff.resident,
+     'Real upward touch hold failed to clear actual spawn terrain');
    const before=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    // Focus the real world, then wait for actual simulated movement instead of
    // assuming SwiftShader renders a deterministic number of frames in 340ms.
@@ -212,6 +340,23 @@ try{
    }
    const heldUp=await proveHold('#place',1);
    const heldDown=await proveHold('#dig',-1);
+   // Random V6 natural terrain can spawn the player facing a tree or wall.
+   // Establish a clear flight corridor using ONLY the original real CDP
+   // touchscreen UP control before testing MOVE + LOOK + UP together.
+   // Never teleport or bypass collision/readiness. Still fail if real upward
+   // movement cannot safely gain height, then require real three-touch MOVE.
+   const lowFlight=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+   let clearance=lowFlight,clearanceActions=0;
+   while(clearance.position.y-lowFlight.position.y<6&&clearanceActions<24){
+     await proveHold('#place',1);
+     clearanceActions++;
+     clearance=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
+     assert.equal(clearance.bodyClear,true,'Real ascent entered original physical collision');
+     assert.equal(clearance.resident,true,'Real ascent outran original loaded GPU chunks');
+   }
+   assert.ok(clearance.position.y-lowFlight.position.y>=6,
+     'Original real UP touches could not clear V6 natural obstacles: '+
+     JSON.stringify({lowFlight,clearance,clearanceActions}));
    // Genuine independent three-touch CDP input: MOVE + LOOK + UP held together.
    const cdp=await context.newCDPSession(page);
    const beforeThree=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
@@ -271,8 +416,12 @@ try{
    }
    await page.screenshot({path:'artifacts/mythwrought-g2b-'+width+'x'+height+'.png'});
    assert.deepEqual(errors,[],'Uncaught real-game runtime exceptions');
-   const still=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
-   assert.equal(still,state.save,'Flight changed the existing canonical world save bytes');
+   const still=await page.evaluate(()=>{
+     const seed=localStorage.getItem('mythwrought-v002-selected-seed');
+     return {seed,save:localStorage.getItem('mythwrought-v002-world-'+seed)};
+   });
+   assert.equal(still.seed,state.savedSeed,'Flight changed the current-world identity');
+   assert.equal(still.save,state.save,'Flight changed the existing canonical world save bytes');
    console.log('PASS G2B real Chromium WebGL2 flight and two-thumb safety '+width+'x'+height+
      ' · moved '+moved.toFixed(3)+' · gap '+firstDoubleGap.toFixed(0)+'ms'+
      ' · held up '+heldUp.toFixed(3)+' / down '+heldDown.toFixed(3)+

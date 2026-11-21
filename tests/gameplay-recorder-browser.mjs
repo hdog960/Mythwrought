@@ -5,6 +5,7 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {spawnSync,execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 const browser=await chromium.launch({headless:true,args:[
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'
 ]});
@@ -26,7 +27,10 @@ const report={
 const errors=[],badResponses=[];
 page.on('pageerror',error=>errors.push(error.message));
 page.on('response',r=>{if(r.status()>=400)badResponses.push(r.status()+' '+r.url());});
-const saved=()=>page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
+const saved=()=>page.evaluate(()=>{
+  const seed=window.__mythwroughtTest.snapshot().seed;
+  return localStorage.getItem('mythwrought-v002-world-'+seed);
+});
 async function getClip(){
   await page.waitForFunction(()=>{
     const panel=document.querySelector('#capturePanel');
@@ -95,6 +99,14 @@ async function preserveVerifiedClip(label,metadata){
 try{
   await mkdir(OUT,{recursive:true});
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:30000});
+  await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+  assert.equal(await page.locator('#help').isVisible(),true,
+    'Legacy preview became playable without the required current-V6 admission');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:/NEW WORLD/}).click();
+  await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator),
+    M6_BALANCED_GENERATOR,'Real recorder did not enter current V6 world');
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,
     null,{timeout:30000});
   const available=await page.evaluate(()=>({
@@ -107,6 +119,7 @@ try{
   assert.equal(await page.locator('#captureToggle').getAttribute('aria-label'),
     'Record 10 seconds of gameplay');
   const beforeSave=await saved();
+  assert.ok(beforeSave,'Real V6 world was not saved before recorder baseline');
   const firstFrame=Number(await page.locator('#scene').getAttribute('data-rendered-frames'));
   await page.locator('#captureToggle').click();
   await page.locator('#scene').focus();

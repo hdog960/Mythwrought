@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {mkdir} from 'node:fs/promises';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 const out='artifacts/manual14-live';
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch({headless:true,args:[
@@ -17,9 +18,23 @@ const page=await context.newPage();
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 try{
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
+ // The original 512-piece source/mesh stress must run on an authentic
+ // creator-confirmed, writable V6 world, never on old-world read-only preview.
+ await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+ assert.equal(await page.locator('#help').isVisible(),true);
+ page.once('dialog',dialog=>dialog.accept());
+ await page.getByRole('button',{name:/NEW WORLD/}).click();
+ await page.locator('#help').waitFor({state:'hidden',timeout:45000});
  await page.waitForFunction(()=>window.__mythwroughtTest?.snapshot&&
   Number(document.querySelector('#scene')?.dataset?.renderedFrames)>0,
   null,{timeout:45000});
+ const original=await page.evaluate(()=>{
+  const t=window.__mythwroughtTest,seed=t.snapshot().seed;
+  return {seed,profile:t.fourBiomeProfile()?.generator,
+   raw:localStorage.getItem('mythwrought-v002-world-'+seed)};
+ });
+ assert.equal(original.profile,M6_BALANCED_GENERATOR);
+ assert.ok(original.raw,'Original V6 schema-1 save was not written');
  const placement=await page.evaluate(async()=>{
   const t=window.__mythwroughtTest;
   const {MANUAL_FIVE_PACK_CATALOG}=await import('./src/builder-assets/manual-five-pack.mjs');
@@ -54,8 +69,11 @@ try{
   const t=window.__mythwroughtTest,c=document.querySelector('#scene'),
         s=t.snapshot(),l=document.querySelector('#movePad').getBoundingClientRect(),
         r=document.querySelector('#lookPad').getBoundingClientRect();
-  const saved=JSON.parse(localStorage.getItem('mythwrought.manual14.seed.179'));
-  return {worldSchema:1,sidecarCount:saved.entries.length,
+  const seed=s.seed;
+  const saved=JSON.parse(localStorage.getItem('mythwrought.manual14.seed.'+seed));
+  return {worldSchema:1,seed,
+   canonical:localStorage.getItem('mythwrought-v002-world-'+seed),
+   sidecarCount:saved.entries.length,
    pack1and4:s.manual14PhysicalBlocks,
    gpuResidentInstances:Number(c.dataset.manual14VisibleInstances),
    gpuResidentVertices:Number(c.dataset.manual14MeshVertices),
@@ -67,6 +85,9 @@ try{
  });
  assert.equal(placement.requested,512);
  assert.equal(rendered.sidecarCount,512);
+ assert.equal(rendered.seed,original.seed,'512-piece test changed current V6 seed');
+ assert.equal(rendered.canonical,original.raw,
+  'Actual 512 authored pieces changed authoritative schema-1 bytes');
  assert.equal(rendered.pack1and4,512);
  assert.ok(rendered.gpuResidentInstances>=32);
  assert.ok(rendered.gpuResidentVertices>1000);
@@ -83,11 +104,18 @@ try{
  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.manual14VisibleInstances)>=32,
   null,{timeout:90000});
  const restored=await page.evaluate(()=>{
-  const s=window.__mythwroughtTest.snapshot();
-  return {count:s.manual14PhysicalBlocks,gpuResident:
+  const t=window.__mythwroughtTest,s=t.snapshot();
+  return {count:s.manual14PhysicalBlocks,seed:s.seed,
+   profile:t.fourBiomeProfile()?.generator,
+   canonical:localStorage.getItem('mythwrought-v002-world-'+s.seed),
+   gpuResident:
    Number(document.querySelector('#scene').dataset.manual14MeshVertices),failures:s.gpuRetry.failures};
  });
  assert.equal(restored.count,512);
+ assert.equal(restored.seed,original.seed);
+ assert.equal(restored.profile,M6_BALANCED_GENERATOR);
+ assert.equal(restored.canonical,original.raw,
+  '512-piece reload modified original current-world save bytes');
  assert.ok(restored.gpuResident>1000);
  assert.equal(restored.failures,0);
  assert.deepEqual(errors,[],'Browser exception in actual 512-piece game');

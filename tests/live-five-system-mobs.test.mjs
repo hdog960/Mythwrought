@@ -314,3 +314,66 @@ test('tamed horse survives unloaded chunks beyond six-second ecology GC and rest
   assert.equal(JSON.stringify(world.save()),schema1);
   returned.dispose();
 });
+
+test('Creative creature sigils persist 40-species identities without touching schema-1 and survive unloads',()=>{
+  const seed=29743,world=new VoxelWorld(seed),storage=memoryStorage();
+  for(let x=-2;x<=3;x++)for(let z=-2;z<=3;z++){
+    assert.equal(world.set(x,9,z,BLOCK.STONE),true);
+    for(let y=10;y<=16;y++)assert.equal(world.set(x,y,z,BLOCK.AIR),true);
+  }
+  const original=JSON.stringify(world.save());
+  let resident=true;
+  const build=()=>createLiveMobSession({world,seed,storage,
+    resident:()=>resident,biomeAt:()=> 'plains',
+    skyAt:()=>({light:.8,dayPhase:'day'}),
+    caveAt:()=>({underground:false}),playerAt:()=>[.5,10,.5]});
+  const first=build(),position=[.5,10,1.5];
+  const created=first.spawnCreative('horse',position);
+  assert.equal(created.ok,true,'Creative must summon the original physical horse engine');
+  assert.equal(created.speciesId,'horse');
+  assert.equal(first.engine.get(created.id)?.species.id,'horse');
+  assert.equal(first.status().creativeSpawned,1);
+  const blob=storage.getItem(mobSaveKey(seed));
+  assert.ok(blob,'Creative summon must commit a checksummed real-game creature roster');
+  const snapshot=JSON.parse(JSON.parse(blob).payload);
+  assert.deepEqual(snapshot.creativeSpawnIds,[created.id]);
+  assert.equal(first.spawnCreative('horse',position).ok,false,
+    'Creative may not create overlapping physical actors');
+  assert.equal(first.spawnCreative('unknown-creature',[1.5,10,1.5]).ok,false,
+    'An unregistered spawn sigil must fail closed');
+  assert.equal(JSON.stringify(world.save()),original,
+    'Summoning a real mob must not modify original world voxel saves');
+  resident=false;
+  for(let i=0;i<90;i++)first.advance(.1,[]);
+  assert.equal(first.engine.get(created.id)?.state,'dormant',
+    'Creative placed actors cannot be erased by six-second ecology unloading');
+  assert.equal(first.save(),true);
+  first.dispose();
+  resident=true;
+  const restored=build();
+  assert.equal(restored.engine.get(created.id)?.species.id,'horse',
+    'Original creature identity must survive sidecar restore');
+  assert.equal(restored.status().creativeSpawned,1);
+  assert.equal(JSON.stringify(world.save()),original);
+  restored.dispose();
+});
+
+test('Creative creature save failures roll back the spawned actor and protect old worlds',()=>{
+  const seed=29744,world=new VoxelWorld(seed),storage=memoryStorage();
+  for(let x=-1;x<=2;x++)for(let z=-1;z<=2;z++){
+    assert.equal(world.set(x,9,z,BLOCK.STONE),true);
+    for(let y=10;y<=16;y++)assert.equal(world.set(x,y,z,BLOCK.AIR),true);
+  }
+  const original=JSON.stringify(world.save());
+  const session=createLiveMobSession({world,seed,storage,resident:()=>true,
+    biomeAt:()=> 'plains',skyAt:()=>({light:.7,dayPhase:'day'}),
+    caveAt:()=>({underground:false}),playerAt:()=>[.5,10,.5]});
+  storage.setItem=()=>{throw Error('Simulated localStorage write failure');};
+  const result=session.spawnCreative('horse',[.5,10,1.5]);
+  assert.equal(result.ok,false,'Never report success without a verified durable creature save');
+  assert.equal(session.engine.counts().total,0,'Unpersisted Creative summon was not rolled back');
+  assert.equal(session.status().readonly,true,'A failing creature sidecar must enter protected mode');
+  assert.equal(storage.getItem(mobSaveKey(seed)),null);
+  assert.equal(JSON.stringify(world.save()),original);
+  session.dispose();
+});

@@ -26,14 +26,22 @@ export function installGameplayRecorder({
   if(!canvas||!button||!panel||!video||!info||!saveLink||!shareButton||!closeButton)
     throw Error('Gameplay recorder controls missing');
   let state='idle',recorder=null,stream=null,chunks=[],bytes=0,started=0;
-  let tickTimer=null,finishTimer=null,watchdog=null,objectUrl=null,output=null;
+  let tickTimer=null,finishTimer=null,watchdog=null,framePulseTimer=null;
+  let objectUrl=null,output=null;
   let outputName='',recordedMime='',initialWidth=0,initialHeight=0,generation=0;
+  // The strict original Chromium recording showed a real 0.0333s/ONE-frame
+  // H264 artifact even while WebGL continued drawing. A timer pulse outside
+  // the WebGL draw phase can miss every real rendered canvas. Request source
+  // capture only AFTER finished genuine game WebGL frames; no fake clocks,
+  // staged pixels, extra rendering pass, altered formats or save writes.
+  let lastLiveVideoFrame=-Infinity,sourceFramePulses=0;
 
   function timers(){
     if(tickTimer!==null)clearInterval(tickTimer);
     if(finishTimer!==null)clearTimeout(finishTimer);
     if(watchdog!==null)clearTimeout(watchdog);
-    tickTimer=finishTimer=watchdog=null;
+    if(framePulseTimer!==null)clearInterval(framePulseTimer);
+    tickTimer=finishTimer=watchdog=framePulseTimer=null;
   }
   function releaseTracks(){
     try{stream?.getTracks().forEach(track=>track.stop());}catch(_){}
@@ -143,6 +151,7 @@ export function installGameplayRecorder({
       recorder=new MediaRecorderType(stream,type?{mimeType:type}:undefined);
       recordedMime=recorder.mimeType||type||'video/mp4';
       chunks=[];bytes=0;started=performance.now();state='recording';
+      lastLiveVideoFrame=-Infinity;sourceFramePulses=0;
       const token=++generation;
       recorder.ondataavailable=event=>{
         if(token!==generation||state==='aborted'||!event.data?.size)return;
@@ -157,6 +166,24 @@ export function installGameplayRecorder({
         presentClip();
       };
       recorder.start(1000);
+      // Chromium software WebGL2 produced a genuine but truncated 0.304s
+      // 3-frame MP4 despite the user's 3s recording interval. Its canvas
+      // track can request source-canvas frames explicitly, independently of
+      // the renderer's GPU upload cadence. Every pulse captures the ACTUAL
+      // WebGL canvas; no synthetic image, simulated clock, replay or audio.
+      // Safari implementations without requestFrame keep ordinary capture.
+      const videoTrack=stream.getVideoTracks()[0];
+      if(typeof videoTrack?.requestFrame==='function'){
+        try{videoTrack.requestFrame();}catch(_){}
+        framePulseTimer=setInterval(()=>{
+          if(state!=='recording')return;
+          try{videoTrack.requestFrame();}catch(error){
+            // Some browsers disallow explicit capture while continuing their
+            // implicit canvas stream. Stop this optional pulse, not recording.
+            clearInterval(framePulseTimer);framePulseTimer=null;
+          }
+        },100);
+      }
       buttonState();
       tickTimer=setInterval(()=>{
         if(canvas.width!==initialWidth||canvas.height!==initialHeight){
@@ -170,6 +197,16 @@ export function installGameplayRecorder({
       try{if(recorder?.state==='recording')recorder.stop();}catch(_){}
       reportError('Recording could not start: '+String(error?.message||error));
     }
+  }
+  function captureGameFrame(when=performance.now()){
+    if(state!=='recording'||!stream||!Number.isFinite(when)||
+       when-lastLiveVideoFrame<1000/CAPTURE_FPS)return false;
+    const track=stream.getVideoTracks?.()[0];
+    if(typeof track?.requestFrame!=='function')return false;
+    try{
+      track.requestFrame();lastLiveVideoFrame=when;sourceFramePulses++;
+      return true;
+    }catch(_){return false;}
   }
   function dismiss(){
     if(state==='recording'||state==='finalizing')interrupt('Recording canceled');
@@ -200,5 +237,8 @@ export function installGameplayRecorder({
   window.addEventListener('pagehide',()=>interrupt('Recording stopped when the page closed'));
   canvas.addEventListener('webglcontextlost',()=>interrupt('Graphics context was lost'));
   buttonState();
-  return Object.freeze({interrupt,state:()=>state});
+  return Object.freeze({
+    interrupt,state:()=>state,captureGameFrame,
+    framePulseCount:()=>sourceFramePulses
+  });
 }

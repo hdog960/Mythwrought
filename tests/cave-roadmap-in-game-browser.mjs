@@ -206,9 +206,19 @@ try{
   page.on('requestfailed',r=>errors.push('FAILED '+r.url()));
   try{
    assert.equal((await page.goto(origin+'/',{waitUntil:'domcontentloaded',timeout:30000}))?.status(),200);
+   await page.locator('#playerMenu').waitFor({state:'visible',timeout:80000});
+   assert.equal(await page.locator('#help').isVisible(),true,
+     'Cave acceptance must first pass the current-V6-only ordinary world gate');
+   await page.getByRole('button',{name:/NEW WORLD/}).click();
+   await page.locator('#help').waitFor({state:'hidden',timeout:90000});
    await page.waitForFunction(()=>window.__mythwroughtTest &&
      Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,
      null,{timeout:80000});
+   const ordinarySeed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+   const ordinarySaved=await page.evaluate(seed=>
+     localStorage.getItem('mythwrought-v002-world-'+seed),ordinarySeed);
+   assert.ok(ordinarySaved&&JSON.parse(ordinarySaved).schema===1,
+     'Genuine current V6 world lacks canonical protected schema-1 save');
    const original=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
    assert.equal(await page.evaluate(()=>window.__mythwroughtTest.caveMode().enabled),false);
    assert.equal(await page.locator('#scene').evaluate(
@@ -217,9 +227,12 @@ try{
    assert.ok(await page.locator('#scene').evaluate(el=>!!el.getContext('webgl2')));
    assert.equal(await page.locator('#dig').textContent(),'MINE');
    assert.equal(await page.locator('#jump').textContent(),'JUMP');
-   await page.evaluate(()=>document.getElementById('menu').click());
+   await page.locator('#menu').click();
+   await page.locator('.player-menu-safety-link').click();
+   assert.equal(await page.locator('.player-cave-recovery').isVisible(),true,
+     'Source-original separate cave profile UI is not accessible');
    await page.locator('#seedInput').fill(String(seed));
-   await page.evaluate(()=>document.getElementById('caveCreateWorld').click());
+   await page.locator('#caveCreateWorld').click();
    await page.waitForFunction(()=>window.__mythwroughtTest.caveMode().enabled,
     null,{timeout:90000});
    const status=await page.evaluate(()=>window.__mythwroughtTest.caveMode());
@@ -257,7 +270,8 @@ try{
      assert.equal(guards.pack5Sidecar,null,'Pack5 sidecar created in Cave World');
      assert.equal(guards.pack3Sidecar,null,'Pack3 sidecar created in Cave World');
    }
-   await page.evaluate(()=>document.getElementById('closeHelp').click());
+   await page.locator('.player-safety-back').click();
+   await page.locator('.player-menu-close').click();
    const shots=[...locators(status),...namedScenes,...secondaryScenes],hashes=new Set();
    assert.equal(shots.length,41,
     'Four original scenes + 21 named chambers + 16 historical secondary arms');
@@ -565,9 +579,10 @@ try{
     await page.waitForFunction(()=>window.__mythwroughtTest,null,{timeout:70000});
     assert.equal(await page.evaluate(()=>window.__mythwroughtTest.caveMode().enabled),false,
       'Caves must never silently auto-enable on ordinary startup');
-    await page.evaluate(()=>document.getElementById('menu').click());
+    await page.locator('#menu').click();
+    await page.locator('.player-menu-safety-link').click();
     await page.locator('#seedInput').fill(String(seed));
-    await page.evaluate(()=>document.getElementById('caveLoadWorld').click());
+    await page.locator('#caveLoadWorld').click();
     await page.waitForFunction(()=>window.__mythwroughtTest.caveMode().enabled,
       null,{timeout:90000});
     assert.equal(await page.evaluate(([x,y,z])=>window.__mythwroughtTest.block(x,y,z),
@@ -575,7 +590,10 @@ try{
     assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-'+314159)),null);
    }
    assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179')),original,
-    'Existing normal-world canonical save bytes changed while exploring caves');
+    'Archived ordinary-world bytes changed while exploring caves');
+   assert.equal(await page.evaluate(seed=>
+     localStorage.getItem('mythwrought-v002-world-'+seed),ordinarySeed),ordinarySaved,
+    'Separately saved cave world mutated original admitted current-V6 schema-1 bytes');
    assert.deepEqual(errors,[],'Actual game browser errors '+width+'x'+height);
    console.log('CAVE ACTUAL GAME PASS '+width+'x'+height+' · '+shots.length+
      ' authentic index.html/main.mjs WebGL2 screenshots; '+hashes.size+' unique SHA256');
