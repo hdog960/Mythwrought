@@ -1,7 +1,7 @@
 // 19 original Roadmap A commercial building source modules rendered in real Chromium WebGL2.
 // True authored occupied integer cells, NOT installed Pack partial meshes or physical hardware.
 import {ROADMAP_A_VISUAL19_LEAN_ALTERNATIVES} from '../../../src/building-pool/roadmap-2a/roadmap-a-silhouette-lean.mjs';
-const designs=[...ROADMAP_A_VISUAL19_ALTERNATIVES];
+const designs=[...ROADMAP_A_VISUAL19_LEAN_ALTERNATIVES];
 const byId=new Map(designs.map(x=>[x.id,x]));
 if(designs.length!==19||byId.size!==19)throw Error('Unexpected 19 Roadmap A source-authored buildings');
 const select=document.getElementById('building'),mode=document.getElementById('view');
