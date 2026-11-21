@@ -8,6 +8,7 @@ on:
       - 'scripts/ci/enchanted-forest-phase1-edge-audit.mjs'
       - 'scripts/ci/enchanted-forest-ground-color-audit.mjs'
       - 'tests/manual-biomes/enchanted-forest-phase1.test.mjs'
+      - 'tests/manual-biomes/enchanted-forest-moss-pockets.test.mjs'
       - 'src/manual-biomes/environment-v7.mjs'
       - 'src/manual-biomes/profile-world.mjs'
       - '.github/workflows/enchanted-forest-isolated.yml'
@@ -45,6 +46,8 @@ jobs:
           node --check src/manual-biomes/profile-world.mjs
       - name: Exact witness and biome-safety native regressions
         run: node --test tests/manual-biomes/enchanted-forest-phase1.test.mjs
+      - name: Strict actual M7 enchanted moss-pocket visual-material regression
+        run: node --test tests/manual-biomes/enchanted-forest-moss-pockets.test.mjs
       - name: Existing generation, save, non-block habitat and streaming regression suites
         run: |
           node --test tests/manual-biomes/profile-world.test.mjs tests/manual-biomes/v6-balanced-biomes.test.mjs tests/nonblock-environment-profile.test.mjs tests/nonblock-environment-streaming.test.mjs tests/nonblock-habitat.test.mjs
