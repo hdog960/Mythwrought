@@ -428,9 +428,9 @@ export const ROADMAP_D_WAVE11_PLANS=Object.freeze([
         8
       ],
       [
-        82,
+        80,
         48,
-        9,
+        8,
         8
       ],
       [
@@ -992,9 +992,9 @@ export const ROADMAP_D_WAVE11_PLANS=Object.freeze([
         10
       ],
       [
-        105,
+        102,
         59,
-        10,
+        9,
         10
       ],
       [
@@ -1200,9 +1200,9 @@ export const ROADMAP_D_WAVE11_PLANS=Object.freeze([
         9
       ],
       [
-        83,
+        81,
         50,
-        9,
+        8,
         9
       ],
       [
@@ -1399,9 +1399,9 @@ export const ROADMAP_D_WAVE11_PLANS=Object.freeze([
         9
       ],
       [
-        82,
+        80,
         48,
-        8,
+        7,
         9
       ],
       [
@@ -1467,8 +1467,8 @@ export const ROADMAP_D_WAVE11_PLANS=Object.freeze([
       ],
       [
         "eastern-aurora-chant",
-        82,
-        50
+        83,
+        62
       ]
     ],
     "div": [
