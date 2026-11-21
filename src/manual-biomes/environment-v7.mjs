@@ -78,18 +78,26 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline,biome=v6BiomeAt(x,
   // to receive enchanted soil instead of leaving a bright plains patch.
   // Other biomes, old profiles, underground caves and protected cap cells
   // retain the original fail-closed terrain behavior.
-  let occupiedAbove=false;
+  let occupiedAbove=false,openBelow=false;
   for(let y=old-2;y<=WORLD_MAX_Y;y++){
     const prior=readBaseline(x,y,z);
     if(y>old&&prior!==BLOCK.AIR){
       if(biome.name!=='enchanted'||biome.weight<.70)return new Map();
       occupiedAbove=true;
-    }else if(y<=old&&![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior))
-      return new Map();
+    }else if(y<=old&&![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior)){
+      // An existing cave/gallery can already remove the DIRT just beneath
+      // untouched surface GRASS (measured in 7-seed audit 44951588596).
+      // Never fill its AIR or replace protected rock/ore. Only the existing
+      // grass cap may change material, and only inside enchanted interiors.
+      if(y===old||prior!==BLOCK.AIR||
+        biome.name!=='enchanted'||biome.weight<.70)return new Map();
+      openBelow=true;
+    }
   }
-  if(occupiedAbove){
+  if(occupiedAbove||openBelow){
     if(readBaseline(x,old,z)!==BLOCK.GRASS)return new Map();
-    // Cap only: preserve all original landmark cells above and subsoil below.
+    // Cap only: preserve ALL original air, landmark cells and subsoil.
+    // This cannot create a new ceiling, fill a cave, or change terrain height.
     return new Map([[old,groundAt('enchanted',x,z,seed,old,0).cap]]);
   }
   const writes=new Map(),shoulder=sharedShoulder(biome,x,z,seed);
