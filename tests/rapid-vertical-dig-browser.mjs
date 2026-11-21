@@ -71,7 +71,7 @@ try{
           // Source GL function timings explain the real stalls; gate unchanged.
           gpuStageP95:Object.fromEntries(
             ['createBufferMs','drainErrorMs','bindBufferMs','allocateBufferMs',
-              'bufferSubDataMs','checkErrorMs','fallbackUploadMs'].map(key=>{
+              'bufferSubDataMs','checkErrorMs','batchCheckErrorMs','fallbackUploadMs'].map(key=>{
               const values=samples.map(s=>s.gpuStageTimes?.[key]??0).sort((a,b)=>a-b);
               return [key,+values[Math.floor((values.length-1)*.95)].toFixed(2)];
             })),

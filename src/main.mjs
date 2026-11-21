@@ -39,7 +39,7 @@ import {createLiveMobSession} from './mobs/live-game.mjs';
 import {createLiveMobRenderer} from './mobs/live-render.mjs';
 import {getSpecies} from './mobs/species.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
-import {GpuUploadRetry,uploadChunkBuffer,uploadEditedChunkBuffer,MAX_REUSABLE_EDIT_BYTES} from './gpu-recovery.mjs';
+import {GpuUploadRetry,uploadChunkBuffer,uploadEditedChunkBuffer,uploadEditedChunkBuffersAtomic,MAX_REUSABLE_EDIT_BYTES} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
@@ -882,13 +882,27 @@ function start(){
     }
     const ready=[];
     try{
-      for(const item of batch){
+      // The common tiny deep-voxel edit can commit an entire replacement
+      // batch after ONE fail-closed GPU error check. The old published buffers
+      // remain intact until the atomic check succeeds; large buffers preserve
+      // the original validated per-buffer path and all existing budgets.
+      const smallBatch=batch.length>0&&batch.every(item=>
+        item.vertices.byteLength<=MAX_REUSABLE_EDIT_BYTES&&
+        item.water.byteLength<=MAX_REUSABLE_EDIT_BYTES);
+      if(smallBatch){
         const start=performance.now();
-        const uploaded=uploadPack2Chunk(item.vertices,item.water,true);
+        const uploaded=uploadEditedChunkBuffersAtomic(gl,batch,takeEditGpuSpare,gpuStageTimes);
         uploadMs+=performance.now()-start;
-        for(const [stage,measured] of Object.entries(uploaded.gpuStageTimes||{}))
-          gpuStageTimes[stage]=(gpuStageTimes[stage]||0)+measured;
-        ready.push({...item,...uploaded});
+        for(let i=0;i<batch.length;i++)ready.push({...batch[i],...uploaded[i]});
+      }else{
+        for(const item of batch){
+          const start=performance.now();
+          const uploaded=uploadPack2Chunk(item.vertices,item.water,true);
+          uploadMs+=performance.now()-start;
+          for(const [stage,measured] of Object.entries(uploaded.gpuStageTimes||{}))
+            gpuStageTimes[stage]=(gpuStageTimes[stage]||0)+measured;
+          ready.push({...item,...uploaded});
+        }
       }
     }catch(err){
       for(const item of ready)deleteChunkBuffers(item);
