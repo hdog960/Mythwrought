@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {reconcileDelivery} from '../src/resonance/devices48/delivery-receipt-v1.mjs';
+const sourceSha='0cc51c6a89fce1a9928216caeebf2930b5e07f45';
+const candidate={contract:'resonance-devices48-network36-candidate-v1',seed:7,tick:4,sourceSha,delivered:false,productionBound:false,candidateGrants:[{id:'lamp',granted:3},{id:'gate',granted:5}]};
+const receipt={contract:'resonance-network36-delivery-v1',seed:7,tick:4,sourceSha,grants:[{id:'gate',delivered:4},{id:'lamp',delivered:3}]};
+const opts={expectedSeed:7,expectedTick:4,expectedNetworkSha:sourceSha,trustedReceiptContract:receipt.contract};
+test('bounded receipt never asserts production authority',()=>{const r=reconcileDelivery(candidate,receipt,opts);assert.equal(r.total,7);assert.deepEqual(r.grants,[{id:'gate',delivered:4},{id:'lamp',delivered:3}]);assert.equal(r.authoritative,false);assert.equal(r.productionBound,false);assert.ok(Object.isFrozen(r.grants));});
+test('unpinned contract fails closed',()=>assert.throws(()=>reconcileDelivery(candidate,receipt,{...opts,trustedReceiptContract:undefined})));
+test('world tick and SHA mismatch fail closed',()=>{for(const bad of [{seed:8},{tick:5},{sourceSha:'f'.repeat(40)}])assert.throws(()=>reconcileDelivery(candidate,{...receipt,...bad},opts));});
+test('duplicate missing excess and fractional grants fail closed',()=>{for(const grants of [[receipt.grants[0],receipt.grants[0]],[receipt.grants[0]],[{id:'gate',delivered:6},receipt.grants[1]],[{id:'gate',delivered:0.5},receipt.grants[1]]])assert.throws(()=>reconcileDelivery(candidate,{...receipt,grants},opts));});
+test('elevated candidate flags rejected',()=>assert.throws(()=>reconcileDelivery({...candidate,delivered:true},receipt,opts)));
