@@ -1,8 +1,8 @@
 {
-  "schema": "mythwrought.builder-b.1b.wave7-rimeglass-handoff.v1",
-  "status": "PROVISIONAL_SOURCE_ONLY_UNACCEPTED",
+  "schema": "mythwrought.builder-b.1b.wave7-rimeglass-upright-facade-handoff.v2",
+  "status": "SOURCE_ONLY_UPRIGHT_GLAZING_REPAIRED_NATIVE_CI_AND_NEW_BROWSER_ARTIFACT_PENDING",
   "sourceModule": "src/building-pool/roadmap-b/builder-b-essentials-wave7.mjs",
-  "sourceGitBlob": "979552e3d31d56e233dc3ed1b78ef969cb6ec15e",
+  "sourceGitBlob": "2551361fda0fe94e9da1574695fc3f06a75cf969",
   "acceptedHistorical1B": 228,
   "newBefore": 6,
   "newAfter": 7,
@@ -14,7 +14,7 @@
     "category": "greenhouse",
     "biome": "snow",
     "size": "small",
-    "coordinateFNV64": "e56497ac381779e2",
+    "coordinateFNV64": "421b262c7bae437c",
     "footprint": {
       "width": 44,
       "height": 28,
@@ -25,7 +25,7 @@
     "portals": 10,
     "walkableCells": 1006,
     "roofTiles": 1261,
-    "supportedOpaqueRoofTiles": 983,
+    "supportedOpaqueRoofTiles": 1261,
     "glazedSourcePanels": 278,
     "trulyAbsentGroundSunwellColumns": 30,
     "roomNames": [
@@ -148,7 +148,26 @@
         "passable": true,
         "opening": "two-high-physical-opening"
       }
-    ]
+    ],
+    "previousCoordinateFNV64": "e56497ac381779e2",
+    "opaquePack3RoofTiles": 1261,
+    "pitchedPack4RoofPaneCells": 0,
+    "frontalUprightClearGlassOpenings": 278,
+    "originalGroundFloorClearGlassOpenings": 9,
+    "totalPack4ClearGlassSourceWindows": 287,
+    "trueFramedClerestoryBays": 139,
+    "verticalGlazingLevels": [
+      3,
+      5
+    ],
+    "fourFacades": {
+      "north": 68,
+      "south": 70,
+      "east": 72,
+      "west": 68
+    },
+    "producerGlazingRef": "pack4:030",
+    "producerMountContract": "Pack4 opening:cardinalYaw, upright tall-Y thin-Z rotating facade pane, not approved roof"
   },
   "screenshots": {
     "actualCompleted": 0,
@@ -162,7 +181,8 @@
       "cutaway"
     ],
     "requiredSourceWebGL2Frames": 6,
-    "newSevenOriginalGalleryFrames": 42
+    "newSevenOriginalGalleryFrames": 42,
+    "requiresNewExactHeadReRender": true
   },
   "gates": {
     "realSnowWeatherLoad": false,
@@ -175,7 +195,10 @@
     "worldRegistered": false,
     "schema1SavesWritten": false,
     "merged": false,
-    "deployed": false
+    "deployed": false,
+    "actualPack4WindowProducerGeometryVerifiedByNativeTest": false,
+    "actualPaneMountAndWeatherTested": false
   },
-  "notes": "Translucent roof panels are only source-space declarations, not producer-certified glass physical/thermal/waterproof meshes. No simulated crop growing, weather, NPCs, heat, save or game-system changes."
+  "notes": "Replaces false Pack4:030 roof tiles with exactly 278 original-geometry vertical exterior clear-glass window openings in two separated bands across 139 framed wall bays, retaining all 1261 Pack3 roof cells and 9 historic low windows. Original historical 228 D4/B115/D92, actual Pack4 prototype geometry and new exact-head 42 browser shots still require green CI. Upright source geometry is not physical snow/rain sealing, load, real device or creator art certification.",
+  "previousSourceGitBlob": "979552e3d31d56e233dc3ed1b78ef969cb6ec15e"
 }
