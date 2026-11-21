@@ -5,6 +5,7 @@ on:
       - dev/enchanted-forest-overhaul-*
     paths:
       - 'scripts/ci/enchanted-forest-phase1-audit.mjs'
+      - 'tests/manual-biomes/enchanted-forest-phase1.test.mjs'
       - 'src/manual-biomes/environment-v7.mjs'
       - 'src/manual-biomes/profile-world.mjs'
       - '.github/workflows/enchanted-forest-isolated.yml'
@@ -38,6 +39,8 @@ jobs:
           node --check scripts/ci/enchanted-forest-phase1-audit.mjs
           node --check src/manual-biomes/environment-v7.mjs
           node --check src/manual-biomes/profile-world.mjs
+      - name: Exact witness and biome-safety native regressions
+        run: node --test tests/manual-biomes/enchanted-forest-phase1.test.mjs
       - name: Audit genuine M7 source provenance and deterministic seed samples
         run: node scripts/ci/enchanted-forest-phase1-audit.mjs
       - name: Preserve independent inspectable output
