@@ -1,0 +1,39 @@
+name: Read-only real integrated-main GPU query/ANGLE sync diagnostic (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-integrated-gl-query-291-20261121
+permissions:
+  contents: read
+jobs:
+  current-main-original-WebGL2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert exact published main parent and zero changed game/strict source
+        run: |
+          test "$(git rev-parse HEAD^)" = "7016e14cd6289f45eaf7fc6a79a362b47996df65"
+          git diff --exit-code 7016e14cd6289f45eaf7fc6a79a362b47996df65 HEAD -- src/ index.html styles.css sw-m5.js tests/
+          node --check scripts/ci/iphone-integrated-gpu-query-trace.mjs
+      - name: Install original-game Chromium ANGLE SwiftShader
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Genuine unchanged production WebGL2 96 trace and 96 original control edits
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/mythwrought-integrated-query.log 2>&1 &
+          node scripts/ci/iphone-integrated-gpu-query-trace.mjs
+      - name: Preserve authentic raw Chrome GPU traces, pixels, frame timing and saves
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integrated-main-original-GLES2-geterror-process-trace
+          path: artifacts/iphone-integrated-gpu-query-trace/
+          if-no-files-found: warn
+          retention-days: 14
