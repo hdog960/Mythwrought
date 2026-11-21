@@ -202,3 +202,30 @@ test('Phase 2 accepts the actual partial lowest deep section but no out-of-world
   assert.throws(()=>planHabitatCandidate(cave,{seed:179,cx:0,cz:0,section:-14,serial:5}),
     /Invalid habitat candidate inputs/);
 });
+
+
+test('Phase 1 separates blocked initial surface from ground outside narrow height window',()=>{
+  const field=arena({floor:3,bounds:[-8,17,-8,17]});
+  const world=queryFor(field);
+  const deer=[getSpecies('deer')];
+  const count=feet=>{
+    const sums={};
+    for(let serial=0;serial<120;serial+=6){
+      const sample=probeOriginalSpawnRegion(world,deer,{
+        seed:61,cx:0,cz:0,section:0,feet,
+        observer:[-2,feet,3],serial
+      });
+      for(const [name,n] of Object.entries(sample.reasons))
+        sums[name]=(sums[name]??0)+n;
+    }
+    return sums;
+  };
+  const blocked=count(2);
+  const noFloor=count(15);
+  assert.ok(blocked['initial-surface-overlap']>0,
+    'High placement must physically intersect the real stone floor');
+  assert.ok(noFloor['no-ground-in-height-window']>0,
+    'No ground in the 2.5-block search window must be diagnosed separately');
+  assert.equal(blocked.eligible,0);
+  assert.equal(noFloor.eligible,0);
+});

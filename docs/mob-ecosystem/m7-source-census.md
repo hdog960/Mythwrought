@@ -15,3 +15,8 @@ Critical distinction: 'habitatFirstPhysicallyEligible' is a non-mutating proposa
 Zero valid proposals/births are logged as genuine observations rather than rewritten into passing results. Check run logs for exact metrics; no metrics claimed until a completed source-exact job executes this file.
 
 All original ecology, production, PWA/offline staging manifests, saved worlds, builders, automations, Codex, biome cleanup, caves and lag work remain untouched. No merge or deploy.
+Phase 1 additionally isolates 'initial-surface-overlap' (the initial high
+candidate already lies inside a solid) and 'no-ground-in-height-window'
+(the initial body is clear but the entire 2.5-block search interval misses
+supported ground). This is a source-faithful, strictly bounded diagnostic
+distinction, not a gameplay change or evidence of corrected terrain.

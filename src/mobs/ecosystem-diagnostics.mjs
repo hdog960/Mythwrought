@@ -8,7 +8,8 @@ import {spawnEligible} from './ecology.mjs';
 import {distanceTo} from './behavior.mjs';
 
 export const REJECTION_KINDS=Object.freeze([
-  'rarity','population','unloaded','unsupported-terrain','wrong-section',
+  'rarity','population','unloaded','initial-surface-overlap',
+  'no-ground-in-height-window','unsupported-terrain','wrong-section',
   'too-close','too-distant','hazard','biome','light','depth',
   'clearance','occupied','eligible'
 ]);
@@ -69,8 +70,17 @@ export function probeOriginalSpawnRegion(world,species,{
     else{
       const point=supportedPosition(world,x,z,feet+1,feet-1.5,creature.body);
       if(!point){
-        reason=world.volume([x,feet+1,z],creature.body)==='unknown'?
-          'unloaded':'unsupported-terrain';
+        // The production function always rejects a blocked/unknown initial
+        // high point, then searches down only 2.5 blocks. Distinguish these
+        // source-authentic failure mechanisms without changing their rules.
+        const high=world.volume([x,feet+1,z],creature.body);
+        if(high==='unknown')reason='unloaded';
+        else if(high==='solid')reason='initial-surface-overlap';
+        else{
+          const low=world.volume([x,feet-1.5,z],creature.body);
+          reason=low==='clear'?'no-ground-in-height-window':
+            low==='unknown'?'unloaded':'unsupported-terrain';
+        }
       }else if(sectionForY(Math.floor(point[1]))!==section)reason='wrong-section';
       else{
         reason=classifySpawnCandidate(world,creature,point,observer);
