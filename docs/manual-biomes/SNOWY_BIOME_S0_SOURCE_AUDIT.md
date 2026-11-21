@@ -36,3 +36,41 @@ A new direct `meshChunk` test exercises natural M7 ice, V6 isolation and edited-
 - Record genuine baseline/proposed frame timing, geometry uploads and cave/digging effects.
 
 **Gate:** Do not mark S0 accepted or progress to broad terrain/tree fixes until these checks are documented. S1 visual acceptance requires genuine image evidence. Retain protected draft until creator approves final outcome.
+
+## Source-authentic S0 evidence update — 2026-11-21
+
+**Source/provenance acceptance:** The generator, physical ID, renderer, legacy protection, reference screenshots, and reproduction mechanism are now identified and source-probed. The full snow cleanup is **not complete**. No S2 generator changes are accepted.
+
+### Exact previous-head 4606d69a CI
+
+- Dedicated S0 #44951705817 **SUCCESS**: 5/5 strict ice native tests, 10/10 environment-profile tests, all 303 manifest assets verified and real Chromium WebGL2 before/after at 844x390, 956x440.
+- Depth #44951705801 **SUCCESS**: native 1748/1748 and 3 actual WebGL2 landscape gates.
+- Pack 3 #44951705792 and Manual Five-Pack #44951705802 **SUCCESS**.
+- Root #44951705796 still running at this source-analysis checkpoint; do not infer final success.
+
+### Authenticated real-game artifact
+
+Artifact **14726211985**, ZIP SHA256 **a7b7dc2f3371e92e0ecf6742d7b0d92892be78e866dadabbaf2d2673e8c3e59e**; all ZIP CRCs and PNG SHA256s passed independent audit. Original and renderer-draft captures share seed 179, real ice block 276 at (-144,8,528), camera pose (-133.5,9,515.5), 25 loaded chunks and native Chromium WebGL2. At 844x390, 7,870 of 329,160 pixels changed (2.39%); at 956x440, 9,008 of 420,640 changed (2.14%). Those are actual frame diffs, **not** proof the entire blue-white checkerboard disappeared: the baseline camera sees only a narrow edge of the ice field.
+
+A new elevated in-game comparison (via the existing localhost-only, collision-validated camera method) is now queued to show the real ice field from closer above. No game API or save data were changed to create this image.
+
+### Measured grass-column protection
+
+Sample: 1,681 high-weight snow columns per seed, two seeds (179, 2026), x [-160,160], z [352,672], 8-block spacing, total **3,362**.
+
+| Genuine M7 rejection case | seed 179 | seed 2026 | total |
+| --- | ---: | ---: | ---: |
+| protected legacy AIR in old substrate | 79 | 77 | 156 |
+| protected old STONE above surface | 16 | 14 | 30 |
+| protected old WOOD above surface | 12 | 11 | 23 |
+| protected old LEAVES above surface | 4 | 0 | 4 |
+| all empty protected columns | 111 | 102 | 213 |
+| retaining legacy GRASS at old top | 52 | 45 | 97 |
+
+These cases are **not interchangeable**. The 156 subsurface AIR rejections can be old caves/cutouts; **never fill them blindly**. The 57 above-surface blocks include potential ordinary trees, groves, and named objects, not all verified to be removable. The 97 legacy grass cells are material-level evidence; additional air/visibility qualification is needed before claiming all are visually exposed. There is no recorded cave override in the rejected sample examples.
+
+**S2 design gate:** A source-safe fix must distinguish harmless surface grass from all protected legacy caves/landmarks; prove unchanged original M7 world/save behavior or use a new explicit versioned generation profile if physical natural baseline changes. No blanket tree erasure or shader-only concealed broken terrain is accepted. Dedicated tests `tests/snowy-biome-provenance.test.mjs` lock authentic AIR/STONE/WOOD/LEAVES witnesses and schema-1 edit/reload; not yet accepted until new exact-head CI.
+
+**S1 design gate:** Five strict renderer tests passed at prior exact head and the current physical ice cap's material contrast was reduced. This alone is not visual acceptance of the wide checkerboard: await elevated before/after PNG inspection and multi-seed field checks before declaring S1 complete.
+
+**S3–S6:** visual vegetation, terrain/environment and physical-phone review remain future work, not implementation claims.
