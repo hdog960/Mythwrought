@@ -100,6 +100,12 @@ export function installPlayerMenu({
   // Move the ORIGINAL functional diagnostics into advanced recovery, preserving
   // its existing read-only handler without restoring a scrolling main menu.
   safety.append(deviceCheck);
+  const pack3Backup=container.querySelector('[aria-label="Pack 3 physical building palette"]');
+  if(!pack3Backup?.querySelector('#pack3Export')||!pack3Backup?.querySelector('#pack3Import'))
+    throw Error('Original Pack3 portable backup actions missing');
+  // Move original, live physical construction controls only into advanced backup.
+  // Everyday menu remains compact and no handler/save schema is replaced.
+  safety.append(pack3Backup);
   const backing=[...container.querySelectorAll('.vault-settings,.mirror-settings')];
   if(backing.length!==2)throw Error('Original save-vault and mirror controls missing');
   for(const original of backing)safety.append(original);

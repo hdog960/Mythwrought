@@ -8,6 +8,7 @@ import {createServer} from 'node:http';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
+import {M6_BALANCED_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
 
 const root=process.cwd(),out=path.join(root,'artifacts/manual-biomes-m5-spawn');
 await mkdir(out,{recursive:true});
@@ -36,30 +37,28 @@ try{
    const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
    page.on('pageerror',e=>errors.push(width+'x'+height+': '+e.message));
    page.on('dialog',dialog=>dialog.accept());
-   await page.addInitScript(()=>{
-     if(localStorage.getItem('mythwrought-v002-selected-seed')===null)
-       localStorage.setItem('mythwrought-v002-selected-seed','7');
-   });
    await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',
      {waitUntil:'load'});
    await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:30000});
    if(!await page.evaluate(()=>Boolean(
        document.getElementById('scene').getContext('webgl2'))))
      throw Error('Real WebGL2 unavailable in physical walking test');
-   await page.locator('#menu').click();
-   await page.locator('#seedInput').fill('179');
-   if(await page.locator('#createFourBiomeWorld').count()!==1)
-     throw Error('Accepted normal v4 new-world button unexpectedly removed');
-   await page.locator('#createExperimentalV5World').click();
+   await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+   if(!await page.locator('#help').isVisible())
+     throw Error('Current V6 admission was bypassed');
+   await page.getByRole('button',{name:/NEW WORLD/}).click();
+   await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+   const seed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
    if(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator)
-       !=='mythwrought-four-surface-regions-v5')
-     throw Error('New profile world selection failed');
-   await page.locator('#closeHelp').click();
+       !==M6_BALANCED_GENERATOR)
+     throw Error('Current V6 source generator did not activate');
+   if(await page.evaluate(seed=>JSON.parse(localStorage.getItem('mythwrought-v002-world-'+seed)||'null')?.schema,seed)!==1)
+     throw Error('Current V6 world lacked verified schema-1 save');
    const checkPosition=async()=>{
      await page.locator('#miniMapButton').click();
      const text=await page.locator('#explorationCoordinates').innerText();
      const match=text.match(/X\s+(-?\d+)\s*·\s*Z\s+(-?\d+)\s*·\s*Seed\s+(-?\d+)/);
-     if(!match||Number(match[3])!==179)
+     if(!match||Number(match[3])!==seed)
        throw Error('Authentic map coordinates unavailable: '+text);
      const found=await page.evaluate(()=>Number(
        document.getElementById('miniMap').dataset.discovered||'0'));
@@ -104,26 +103,26 @@ try{
    }
    const travel=Math.hypot(current.x-original.x,current.z-original.z);
    if(travel<5||current.discovered<=original.discovered)
-     throw Error('Actual input from legacy spawn did not move >=5 blocks and discover new map tiles: '+
+     throw Error('Actual V6 keyboard input did not move >=5 blocks and discover new map tiles: '+
        JSON.stringify({original,events}));
    await shot('walked-with-keys',current);
    await page.reload({waitUntil:'load'});
    await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:30000});
    const after=await checkPosition();
    const storage=await page.evaluate(()=>({
-     map:localStorage.getItem('mythwrought-exploration-v1-179'),
+     map:localStorage.getItem('mythwrought-exploration-v1-'+seed),
      legacyMap:localStorage.getItem('mythwrought-exploration-v1-7'),
      legacyProfile:localStorage.getItem('mythwrought-v002-world-7-four-biomes-profile-v1'),
      currentProfile:window.__mythwroughtTest.fourBiomeProfile()?.generator
-   }));
+   }),seed);
    if(!storage.map||storage.legacyMap||storage.legacyProfile||
-      storage.currentProfile!=='mythwrought-four-surface-regions-v5'||
-      JSON.parse(storage.map).seed!==179||
+      storage.currentProfile!==M6_BALANCED_GENERATOR||
+      JSON.parse(storage.map).seed!==seed||
       after.discovered<current.discovered)
      throw Error('M5 map cold reload leaked fog or seed identity '+JSON.stringify({
        after,current,hasMap:!!storage.map,hasLegacy:!!storage.legacyMap,
        legacyProfile:!!storage.legacyProfile,currentProfile:storage.currentProfile}));
-   journeys.push({width,height,spawn:original,lastPosition:current,
+   journeys.push({width,height,seed,spawn:original,lastPosition:current,
      physicalTravelFromSpawn:travel,keyboardLegs:events,
      persistentDiscoveredTiles:after.discovered,coldReload:true});
    await page.close();
@@ -134,8 +133,8 @@ try{
  await writeFile(path.join(out,'manifest.json'),JSON.stringify({
    kind:'mythwrought-m5-actual-keyboard-spawn-walk',
    complete512BlockJourneys:false,
-   sourceGenerator:'mythwrought-four-surface-regions-v5',
-   ordinaryNewWorldGeneratorPreserved:'mythwrought-four-surface-regions-v4',
+   sourceGenerator:M6_BALANCED_GENERATOR,
+   archivedOlderWorldsUnmodified:true,
    guarantee:'No debug teleport, no player-position writes, actual keyboard input',
    legacyWorldPreserved:true,realChromium:true,
    screens:scenes,journeys,errors

@@ -16,6 +16,17 @@ if(!Object.hasOwn(layouts,selected))throw Error('Invalid M5 viewport');
 const [width,height]=layouts[selected];
 let seed=null,worldKey=null,profileKey=null,journalKey=null,mapKey=null;
 const root=process.cwd(),out=path.join(root,'artifacts/m5-offline-'+selected);
+// Strict source-defined SW cache identity; no obsolete RC11 hard-coded acceptance.
+const swSource=await readFile(path.join(root,'sw-m5.js'),'utf8');
+const prefix=/^const CACHE_PREFIX='([^']+)';$/m.exec(swSource)?.[1];
+const release=/^const CACHE_NAME=CACHE_PREFIX\+'([^']+)';$/m.exec(swSource)?.[1];
+const assetList=/const SOURCE_ASSETS=\[([\s\S]*?)\];/.exec(swSource)?.[1];
+if(prefix!=='mythwrought-m5-shell-'||!release||!assetList)
+  throw Error('Cannot verify exact original SW cache source contract');
+const assets=JSON.parse('['+assetList+']');
+if(assets.length<190||new Set(assets).size!==assets.length)
+  throw Error('Original SW source list incomplete/duplicate');
+const exactCacheName=prefix+release;
 await mkdir(out,{recursive:true});
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript',
@@ -57,7 +68,7 @@ const report={kind:'mythwrought-m5-offline-pwa-chromium-v1',viewport:selected,
   width,height,seed:null,sourceGenerator:'mythwrought-five-surface-regions-v6',
   defaultGenerator:'archived legacy worlds remain protected',
   sourceSchema:1,realChromium:true,offlineModeVerified:false,
-  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261120-five-systems-rc11',
+  physicalIphone:false,serviceWorkerVersion:exactCacheName,
   finished:false,screens:[],checks:[],errors:[]};
 const persist=()=>writeFile(path.join(out,'manifest.json'),JSON.stringify(report,null,2));
 const check=(name,ok,info={})=>{
@@ -178,17 +189,17 @@ try{
   }
   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),null,
     {timeout:180000});
-  const online=await page.evaluate(async()=>{
+  const online=await page.evaluate(async exactCacheName=>{
     const keys=await caches.keys();
-    const name=keys.find(x=>x==='mythwrought-m5-shell-20261120-five-systems-rc11');
+    const name=keys.find(x=>x===exactCacheName);
     const cache=name?await caches.open(name):null;
     const urls=cache?await cache.keys():[];
     return {name,cacheCount:urls.length,controller:
       navigator.serviceWorker.controller?.scriptURL,urls:urls.map(x=>x.url),
       secure:window.isSecureContext};
-  });
+  },exactCacheName);
   check('atomic-versioned-shell-install',online.secure&&
-    online.name===report.serviceWorkerVersion&&online.cacheCount>=190&&
+    online.name===report.serviceWorkerVersion&&online.cacheCount===assets.length&&
     online.controller?.endsWith('/sw-m5.js')&&
     ['src/main.mjs','src/app-update.mjs','src/gameplay-recorder.mjs',
      'src/manual-biomes/profile-world.mjs',

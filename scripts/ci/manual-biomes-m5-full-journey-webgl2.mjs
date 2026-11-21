@@ -31,7 +31,7 @@ function routeFor(seed,target){
     throw Error('Current V6 generator changed while planning physical route');
   const p=planV6NaturalOverland(world,{seed,target:target.name});
   if(!p.ok||!p.withoutTerrainEdits||p.path.length<450)
-    throw Error('Source natural route is not certified '+target.name);
+    throw Error('Source natural route is not certified '+JSON.stringify({target:target.name,seed,reason:p.reason,visited:p.visited,sampled:p.sampled,unsafe:p.unsafe,closest:p.closest,pathLength:p.path?.length,minimumRequired:450}));
   const segments=[];
   for(let i=1;i<p.path.length;i++){
     const a=p.path[i-1],b=p.path[i],dx=b.x-a.x,dz=b.z-a.z;

@@ -37,11 +37,17 @@ try{
   throw Error('No suitable physical construction cell');
  });
  await page.locator('#menu').click();
+ await page.locator('.player-menu-safety-link').click();
+ assert.equal(await page.locator('#pack3Export').isVisible(),true);
  assert.equal(await page.locator('#pack3Export').count(),1);
  assert.equal(await page.locator('#pack3Import').count(),1);
- const downloading=page.waitForEvent('download');
+ const downloading=page.waitForEvent('download',{timeout:15000});
  await page.locator('#pack3Export').click();
- const file=await downloading,raw=await readFile(await file.path(),'utf8');
+ const file=await downloading.catch(async error=>{
+   const uiStatus=await page.locator('#pack3BackupStatus').innerText();
+   throw Error('Physical Pack3 download refused: '+uiStatus+'; browser='+String(error));
+ });
+ const raw=await readFile(await file.path(),'utf8');
  assert.equal(file.suggestedFilename(),`mythwrought-pack3-seed-${seed}.json`);
  assert.equal(JSON.parse(raw).overlay.entries.length,1);
  assert.equal(JSON.parse(raw).overlay.entries[0].orientation,1);
