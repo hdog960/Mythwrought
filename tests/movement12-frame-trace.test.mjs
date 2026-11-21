@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {compareFrameTraces,FRAME_TRACE_CONTRACT} from '../src/movement12/frame-trace.mjs';
+const p=x=>({x,feet:0,z:0});
+const traces=[{dt:1/30,positions:[p(0),p(.5),p(1)]},{dt:1/60,positions:[p(0),p(.25),p(.5),p(.75),p(1)]}];
+const run=(overrides={})=>compareFrameTraces({trajectories:traces,collides:()=>false,...overrides});
+test('version and never live',()=>{assert.equal(FRAME_TRACE_CONTRACT,'movement12-frame-trace-v1');assert.equal(run().live,false)});
+test('matching endpoints pass',()=>assert.equal(run().safe,true));
+test('different sample counts do not imply divergence',()=>assert.equal(run().reason,'consistent'));
+test('endpoint drift fails',()=>assert.equal(run({trajectories:[traces[0],{dt:1/60,positions:[p(0),p(.8)]}]}).reason,'endpoint-divergence'));
+test('wall collision fails even if endpoints match',()=>assert.equal(run({collides:(_,x)=>x>.45&&x<.55}).reason,'collision-or-budget'));
+test('budget failure fails closed',()=>assert.equal(run({maxSamples:2}).safe,false));
+test('invalid dt rejected',()=>assert.throws(()=>run({trajectories:[traces[0],{...traces[1],dt:0}]}),TypeError));
+test('invalid tolerance rejected',()=>assert.throws(()=>run({endpointTolerance:-1}),RangeError));
+test('nonfinite position rejected',()=>assert.throws(()=>run({trajectories:[traces[0],{dt:1/60,positions:[p(0),p(Infinity)]}]}),TypeError));
+test('collision reader cannot silently return numeric values',()=>assert.throws(()=>run({collides:()=>1}),TypeError));
+test('two traces required',()=>assert.throws(()=>run({trajectories:[traces[0]]}),RangeError));

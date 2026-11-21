@@ -1,0 +1,7 @@
+# :12 real stepPlayer trace bridge — 2026-11-20
+
+This is a **source-only** fixture harness importing actual `src/physics.mjs:stepPlayer` and `src/voxel.mjs:collides`, not a production integration or synthetic movement substitute. Uses a small deterministic in-memory voxel floor and real engine stepping at 30/60/120 Hz. Records actual per-frame events and compares time-aligned trajectories with the existing :12 diagnostics. It does not modify physics, controls, Creative flight, worlds, saves or graphics.
+
+Execute `node --test tests/movement12-real-step-trace.test.mjs` from repository root. These seven authored cases are **NOT execution-verified** until an exact-head Node run succeeds. A failing tolerance is a diagnostic finding, not permission to weaken checks. The 1/90 internal substep and easing can yield cadence-dependent trajectories; investigate and document before changing production. The harness tests normal ground physics only, not Creative flight, water, ladders, touch rails or browser frame pacing. A 1/60 jump is held only on first frame.
+
+Known limitations: finite position checks and post-frame collision checks cannot prove continuous collision safety. `auditTimeAlignedMovement` samples interpolated paths and may flag legitimate step motion or miss thin geometry. No physical iPhone or genuine Chromium/WebGL2 evidence. Source authentication must be repeated when production physics or voxel blobs change. No merge/deploy authorization.

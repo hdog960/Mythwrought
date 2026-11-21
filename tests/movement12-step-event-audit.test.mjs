@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditStepEvents} from '../src/movement12/step-event-audit.mjs';
+const p=(time,feet)=>({time,position:{x:0,feet,z:0}});
+const rec=(heights,events)=>({samples:heights.map((h,i)=>p(i/60,h)),events});
+test('normal grounded trace passes',()=>{const r=auditStepEvents(rec([1,1,1],[{},{}]));assert.equal(r.ok,true);assert.equal(r.frames,2);});
+test('step event and positive rise are counted',()=>{const r=auditStepEvents(rec([1,2],[{stepped:true}]));assert.equal(r.steps,1);assert.equal(r.ok,true);});
+test('step event without rise is flagged',()=>assert.deepEqual(auditStepEvents(rec([1,1],[{stepped:true}])).findings[0].kind,'step-without-rise'));
+test('large upward discontinuity is flagged',()=>assert.equal(auditStepEvents(rec([1,3],[{}])).findings[0].kind,'excessive-rise'));
+test('large downward discontinuity is flagged',()=>assert.equal(auditStepEvents(rec([50,1],[{}]),{maxDrop:5}).findings[0].kind,'excessive-drop'));
+test('wall event counted without requiring a displacement',()=>assert.equal(auditStepEvents(rec([1,1],[{hitWall:true}])).walls,1));
+test('descending frames counted',()=>assert.equal(auditStepEvents(rec([3,2,1],[{},{}])).descendingFrames,2));
+test('missing event evidence rejected',()=>assert.throws(()=>auditStepEvents(rec([1,2],[])),TypeError));
+test('nonfinite coordinates rejected',()=>assert.throws(()=>auditStepEvents(rec([1,NaN],[{}])),TypeError));
+test('invalid time order rejected',()=>{const r=rec([1,1],[{}]);r.samples[1].time=0;assert.throws(()=>auditStepEvents(r),TypeError);});
+test('invalid thresholds rejected',()=>assert.throws(()=>auditStepEvents(rec([1,1],[{}]),{maxRise:0}),RangeError));
+test('source-only provenance remains explicit',()=>{const r=auditStepEvents(rec([1,1],[{}]));assert.equal(r.live,false);assert.equal(r.productionHooked,false);});
