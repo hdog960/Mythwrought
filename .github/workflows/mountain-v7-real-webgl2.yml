@@ -1,0 +1,51 @@
+name: Mountain V7 Real Original-Game WebGL2 Evidence (draft only)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/manual-biomes/environment-v7.mjs'
+      - 'nonblock-stage-assets.json'
+      - 'tests/mountain-v7-alpine-live.test.mjs'
+      - 'tests/mountain-v7-alpine-candidate.test.mjs'
+      - 'scripts/ci/mountain-v7-real-webgl2.mjs'
+      - '.github/workflows/mountain-v7-real-webgl2.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mountain-v7-real-webgl2-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  original-game-mountain:
+    if: github.event.pull_request.number == 374 && github.event.pull_request.draft == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact source native alpine, cave and mesh tests
+        run: |
+          node --check scripts/ci/mountain-v7-real-webgl2.mjs
+          node --check src/manual-biomes/environment-v7.mjs
+          node --test tests/mountain-v7-alpine-candidate.test.mjs tests/mountain-v7-alpine-live.test.mjs tests/mountain-v7-guard.test.mjs tests/mountain-v7-cave-provenance.test.mjs
+      - name: Install pinned real Chromium/WebGL2 test tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Record authentic original-game V7 alpine PNGs at three phone viewports
+        run: node scripts/ci/mountain-v7-real-webgl2.mjs
+      - name: Retain complete strict PNG/manifest evidence even on a visual failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mountain-v7-authentic-webgl2-${{ github.run_id }}
+          path: artifacts/mountain-v7-real/
+          if-no-files-found: warn
+          retention-days: 30
