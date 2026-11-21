@@ -1,6 +1,7 @@
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection,meshDepthSectionUpdate,discardDepthMeshCache} from './depth-mesh.mjs';
+import {sourceVertexBounds,sourceBoundsInFrustum} from './depth-draw-cull.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
@@ -781,6 +782,7 @@ function start(){
   function uploadPack2Chunk(vertices,water,edited=false){
     let buffer=null,waterBuffer=null;
     let bufferCapacity=vertices.byteLength,waterCapacity=water.byteLength;
+    const drawBounds=sourceVertexBounds(vertices,water);
     const gpuStageTimes=edited?{}:null;
     try{
       if(edited){
@@ -797,7 +799,7 @@ function start(){
         if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
       }
       return {buffer,count:vertices.length/9,bufferCapacity,
-        waterBuffer,waterCount:water.length/9,waterCapacity,gpuStageTimes};
+        waterBuffer,waterCount:water.length/9,waterCapacity,gpuStageTimes,drawBounds};
     }catch(error){
       if(buffer)gl.deleteBuffer(buffer);
       if(waterBuffer)gl.deleteBuffer(waterBuffer);
@@ -893,7 +895,8 @@ function start(){
         const start=performance.now();
         const uploaded=uploadEditedChunkBuffersAtomic(gl,batch,takeEditGpuSpare,gpuStageTimes);
         uploadMs+=performance.now()-start;
-        for(let i=0;i<batch.length;i++)ready.push({...batch[i],...uploaded[i]});
+        for(let i=0;i<batch.length;i++)ready.push({...batch[i],...uploaded[i],
+          drawBounds:sourceVertexBounds(batch[i].vertices,batch[i].water)});
       }else{
         for(const item of batch){
           const start=performance.now();
@@ -914,7 +917,7 @@ function start(){
       chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
         buffer:item.buffer,count:item.count,bufferCapacity:item.bufferCapacity,
         waterBuffer:item.waterBuffer,waterCount:item.waterCount,
-        waterCapacity:item.waterCapacity});
+        waterCapacity:item.waterCapacity,drawBounds:item.drawBounds});
       retireEditedChunkBuffers(old);
     }
     editMeshBatches++;
@@ -967,7 +970,8 @@ function start(){
       const old=chunks.get(item.key);
       chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
         buffer:item.buffer,count:item.count,
-        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+        waterBuffer:item.waterBuffer,waterCount:item.waterCount,
+        drawBounds:item.drawBounds});
       deleteChunkBuffers(old);
     }
     if(ready.length){
@@ -1271,12 +1275,17 @@ function start(){
       gl.drawArrays(gl.TRIANGLES,0,3);
       gl.enable(gl.DEPTH_TEST);
       gl.useProgram(program);
-      gl.uniform3fv(U.uEye,eye());
-      gl.uniform3fv(U.uForward,facing());
-      gl.uniform3fv(U.uRight,[-Math.cos(player.yaw),0,Math.sin(player.yaw)]);
-      gl.uniform3fv(U.uUp,[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),-Math.sin(player.pitch)*Math.cos(player.yaw)]);
-      gl.uniform1f(U.uAspect,w/h);
-      gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
+      const viewEye=eye(),viewForward=facing();
+      const viewRight=[-Math.cos(player.yaw),0,Math.sin(player.yaw)],
+        viewUp=[-Math.sin(player.pitch)*Math.sin(player.yaw),
+          Math.cos(player.pitch),-Math.sin(player.pitch)*Math.cos(player.yaw)],
+        viewAspect=w/h,viewTan=Math.tan(72*Math.PI/360);
+      gl.uniform3fv(U.uEye,viewEye);
+      gl.uniform3fv(U.uForward,viewForward);
+      gl.uniform3fv(U.uRight,viewRight);
+      gl.uniform3fv(U.uUp,viewUp);
+      gl.uniform1f(U.uAspect,viewAspect);
+      gl.uniform1f(U.uTan,viewTan);
       gl.uniform3fv(U.uFog,atmosphere.fog);
       if(s6Biome)gl.uniform3fv(U.uFog,s6Mood.fog);
       // Preserve S2's exact live ambient uniform path, then layer only the
@@ -1376,7 +1385,15 @@ function start(){
       }
       canvas.dataset.manual14MeshVertices=String(manual14ResidentVerts);
       canvas.dataset.manual14VisibleInstances=String(manual14ResidentInstances);
+      // Retain original source buffers and 27-chunk streaming/saves; only
+      // skip triangles whose exact CPU source AABB is wholly outside the
+      // existing terrain-shader frustum. Surface and cave profiles untouched.
+      const belowGround=player.feet<-20&&!caveSession;
+      const visibleChunk=c=>!belowGround||sourceBoundsInFrustum(
+        c.drawBounds,viewEye,viewForward,viewRight,viewUp,viewAspect,viewTan);
+      let culledDrawChunks=0;
       for(const c of chunks.values()){
+        if(!visibleChunk(c)){culledDrawChunks++;continue;}
         gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);
         gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
         gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
@@ -1384,6 +1401,7 @@ function start(){
         gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);
         gl.drawArrays(gl.TRIANGLES,0,c.count);
       }
+      canvas.dataset.undergroundCulledDraws=String(culledDrawChunks);
       // Original source-composed far-rock opaque pass: same terrain shader,
       // depth buffer and fog, before the existing transparent-water draw.
       canvas.dataset.c6FarDrawn=String(caveFarGpu?.draw({atPos,atColor,atUv,atMat})??0);
@@ -1448,6 +1466,7 @@ function start(){
           return distance(b)-distance(a);
         });
         for(const chunk of waterChunks){
+          if(!visibleChunk(chunk))continue;
           gl.bindBuffer(gl.ARRAY_BUFFER,chunk.waterBuffer);
           gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
           gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
