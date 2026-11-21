@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditTraceContinuity} from '../src/movement12/trace-continuity.mjs';
+const trace=(frames)=>({samples:frames.map(([time,x,feet=1,z=0])=>({time,position:{x,feet,z}}))});
+test('smooth bounded movement accepted',()=>assert.equal(auditTraceContinuity(trace([[0,0],[.05,.1],[.1,.2]])).safe,true));
+test('missing evidence rejected',()=>assert.equal(auditTraceContinuity({samples:[]}).reason,'missing-samples'));
+test('duplicate timestamps rejected',()=>assert.equal(auditTraceContinuity(trace([[0,0],[0,1]])).reason,'nonmonotonic-time'));
+test('out of order timestamps rejected',()=>assert.equal(auditTraceContinuity(trace([[.1,0],[0,1]])).reason,'nonmonotonic-time'));
+test('horizontal teleport rejected',()=>assert.equal(auditTraceContinuity(trace([[0,0],[.05,5]])).reason,'horizontal-discontinuity'));
+test('vertical teleport rejected',()=>assert.equal(auditTraceContinuity(trace([[0,0],[.05,0,5]])).reason,'vertical-discontinuity'));
+test('large frame gap rejected',()=>assert.equal(auditTraceContinuity(trace([[0,0],[.5,0]])).reason,'missing-interval'));
+test('nonfinite position rejected',()=>assert.equal(auditTraceContinuity(trace([[0,0],[.05,NaN]])).reason,'nonfinite-frame'));
+test('invalid limits rejected',()=>assert.equal(auditTraceContinuity(trace([[0,0],[.05,0]]),{maxHorizontalSpeed:0}).reason,'invalid-limits'));
+test('custom strict speed budget honored',()=>assert.equal(auditTraceContinuity(trace([[0,0],[.05,.2]]),{maxHorizontalSpeed:2}).reason,'horizontal-discontinuity'));
