@@ -1,0 +1,5 @@
+# :24 candidate integer handoff for :36 N0/N1
+Signature: `resonance-generation24-network36-integer-v1`; target proposal `resonance-network36-proposal-v1` (observed :36 draft PR #339 at 72f6168630ccfd36a3f411ad6524859dd32ec70b).
+:36 expects integer output per tick; :24 environmental generator output can be fractional. Convert each validated per-tick evaluation to micro-Resonance (six decimal places), carry fractional remainder across strictly consecutive ticks for the same generator, and expose only whole integer **candidate** output. Never round up each tick, never allow replay, and never imply fuel withdrawal or network delivery. An external integrator must validate placement, observations, source ownership, reservations, and the exact :36 source contract; the checkpoint is untrusted and not a save.
+Run: `node --test tests/resonance-generation24-network36-integer.mjs`.
+This is an isolated opt-in prototype; no production integration, saves, worldgen, rendering, or sibling file changes. Browser/WebGL2 and actual :36 compatibility acceptance remain pending.

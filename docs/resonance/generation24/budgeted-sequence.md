@@ -1,0 +1,4 @@
+# G4 bounded fuel reservation sequence — candidate
+Contract: `resonance-generation-budget-sequence-v1`. The opt-in evaluator consumes externally provided, per-instance **candidate** fuel reservations once across a bounded observed-tick window, rather than treating repeated environmental fuel snapshots as new inventory. A reservation is not proof of an inventory withdrawal. Missing reservation blocks heat output, while crystal output remains independent. Every tick still requires exact, source-bound, externally verified evidence.
+
+Run `node --test tests/resonance-generation24-budgeted-sequence.mjs`. This is source-only: no production environment adapter, inventory transaction, persistence, network delivery, WebGL2 render, or iPhone validation. :36/:48 must treat `generatedCandidate` as uncommitted, and never infer actual delivered energy. Exact SHA pinning and manual integration remain required.
