@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {allocateVisibleChannelCapacity as solve} from '../src/resonance/network36/chunk-flow.mjs';
+const anchor=x=>({x,y:0,z:0});
+const base={nodes:[{id:'a',anchor:anchor(0)},{id:'b',anchor:anchor(16)}],generators:[{id:'g',anchor:anchor(0),at:'a',output:10}],devices:[{id:'d1',anchor:anchor(16),at:'b',demand:4},{id:'d2',anchor:anchor(16),at:'b',demand:4}],stores:[{id:'s',anchor:anchor(0),charge:7}]};
+const edges=[{id:'e',from:'a',to:'b',capacity:5}];
+test('shared throughput never double spends across chunk boundary',()=>{const r=solve(base,[[0,0,0],[1,0,0]],edges);assert.equal(r.used,4);assert.equal(r.deviceStates.d1,'active');assert.equal(r.deviceStates.d2,'shortage');assert.equal(r.nextCharges.s,7)});
+test('unloaded generator cannot supply power',()=>{const r=solve(base,[[1,0,0]],edges);assert.equal(r.used,0);assert.equal(r.deviceStates.d1,'shortage');assert.equal(r.activeEdges,0)});
+test('unloaded consumer is disconnected and reload is deterministic',()=>{const before=JSON.stringify(base);const r=solve(base,[[0,0,0]],edges);assert.equal(r.deviceStates.d1,'disconnected');assert.equal(r.deviceStates.d2,'disconnected');assert.equal(JSON.stringify(base),before);assert.deepEqual(solve(base,[[0,0,0],[1,0,0]],edges),solve(base,[[1,0,0],[0,0,0]],edges))});
+test('invalid edges and chunk budget fail closed',()=>{assert.throws(()=>solve(base,[[0,0,0]],[{...edges[0],capacity:-1}]),/invalid channel edge/);assert.throws(()=>solve(base,Array.from({length:26},(_,i)=>[i,0,0]),edges),/budget/)});
