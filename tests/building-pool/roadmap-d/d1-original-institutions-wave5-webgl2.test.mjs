@@ -63,24 +63,75 @@ async function launchChrome(){
     '/usr/bin/chromium','/usr/bin/chromium-browser'
   ].find(x=>x&&existsSync(x));
   if(!binary)throw Error('real Chromium binary unavailable; cannot pass M2 renderer acceptance');
-  const dir=mkdtempSync(join(tmpdir(),'mythwrought-4b-real-gl-'));
-  const child=spawn(binary,[
-    '--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-gpu-sandbox',
-    '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
-    '--enable-webgl','--ignore-gpu-blocklist','--remote-allow-origins=*',
-    '--remote-debugging-port=0','--user-data-dir='+dir,'about:blank'
-  ],{stdio:'ignore',detached:true});
-  let port;
-  for(let i=0;i<140;i++){
-    if(existsSync(join(dir,'DevToolsActivePort'))){
-      port=Number(readFileSync(join(dir,'DevToolsActivePort'),'utf8').split('\n')[0]);break;
+  // CI runner can be overloaded while launching many genuine Chromium workers.
+  // Chrome must still start for the test to pass: no mock, fallback image or skipped capture.
+  // A failed process attempt is fully terminated before exactly one fresh-profile retry.
+  let dir,child,port;
+  const startupDiagnostics=[];
+  for(let attempt=1;attempt<=2;attempt++){
+    dir=mkdtempSync(join(tmpdir(),'mythwrought-4b-real-gl-'));
+    child=spawn(binary,[
+      '--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-gpu-sandbox',
+      '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
+      '--enable-webgl','--ignore-gpu-blocklist','--remote-allow-origins=*',
+      '--remote-debugging-port=0','--user-data-dir='+dir,'about:blank'
+    ],{stdio:['ignore','ignore','pipe'],detached:true});
+    let stderr='',spawnError=null;
+    child.on('error',error=>{spawnError=error;});
+    child.stderr?.on('data',data=>{
+      if(stderr.length<16000)stderr+=String(data).slice(0,16000-stderr.length);
+    });
+    port=undefined;
+    const began=Date.now();
+    for(let i=0;i<400;i++){
+      const filename=join(dir,'DevToolsActivePort');
+      if(existsSync(filename)){
+        const candidate=Number(readFileSync(filename,'utf8').split('\n')[0]);
+        if(Number.isInteger(candidate)&&candidate>0){port=candidate;break;}
+      }
+      if(spawnError||child.exitCode!==null||child.signalCode!==null)break;
+      await sleep(100);
     }
-    if(child.exitCode!==null)break;
+    if(port){
+      console.log('Builder D REAL Chromium CDP startup PASS attempt '+attempt+' in '+(Date.now()-began)+'ms on port '+port);
+      break;
+    }
+    const diagnostics={
+      attempt,elapsedMs:Date.now()-began,exitCode:child.exitCode,
+      signalCode:child.signalCode,spawnError:spawnError?.message||null,
+      stderr:stderr.slice(-5000),devToolsFileExists:existsSync(join(dir,'DevToolsActivePort'))
+    };
+    startupDiagnostics.push(diagnostics);
+    console.warn('Builder D real Chromium CDP startup FAILED (no simulated browser)',JSON.stringify(diagnostics));
+    // Chromium was launched as a process group: terminate helpers as well as parent.
+    // Parent-only kill() can leave stale helper processes and cause the next real startup to fail.
+    try{if(child.pid)process.kill(-child.pid,'SIGTERM');}catch{}
+    await sleep(350);
+    try{if(child.pid)process.kill(-child.pid,'SIGKILL');}catch{}
+    try{await rmAsync(dir,{recursive:true,force:true,maxRetries:35,retryDelay:150});}
+    catch(e){console.warn('Builder D failed Chrome profile cleanup:',e.code,dir);}
+    if(attempt<2)await sleep(850);
+  }
+  if(!port){
+    throw Error('REAL Chromium failed to expose a DevTools port after two isolated starts; no fake/simulated fallback. '+JSON.stringify(startupDiagnostics));
+  }
+  // DevToolsActivePort can appear just before /json/version becomes responsive.
+  // Wait for the actual browser endpoint, never fabricate a debugger connection.
+  let version;
+  let versionError=null;
+  for(let i=0;i<50;i++){
+    try{
+      const response=await fetch('http://127.0.0.1:'+port+'/json/version');
+      if(response.ok){version=await response.json();break;}
+      versionError=Error('real Chromium /json/version HTTP '+response.status);
+    }catch(e){versionError=e;}
     await sleep(100);
   }
-  if(!port){child.kill();rmSync(dir,{recursive:true,force:true,maxRetries:30,retryDelay:100});
-    throw Error('Chromium did not expose a DevTools port (no simulated browser fallback)');}
-  const version=await (await fetch('http://127.0.0.1:'+port+'/json/version')).json();
+  if(!version?.webSocketDebuggerUrl){
+    try{if(child.pid)process.kill(-child.pid,'SIGTERM');}catch{}
+    try{if(child.pid)process.kill(-child.pid,'SIGKILL');}catch{}
+    throw Error('Real Chromium DevTools port was present but /json/version did not expose an actual CDP socket: '+String(versionError));
+  }
   const ws=new WebSocket(version.webSocketDebuggerUrl);
   try {
     await Promise.race([

@@ -1,0 +1,69 @@
+name: MYTHWROUGHT Builder D real Chrome recovered Wave1 Wave2 Wave5 serial evidence (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave1-webgl2.test.mjs'
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave2-webgl2.test.mjs'
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave5-webgl2.test.mjs'
+      - '.github/workflows/roadmap-d-wave125-cdp-recovery.yml'
+      - 'docs/building-pool/roadmap-d/D7_REAL_CHROMIUM_STARTUP_REMEDIATION.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-d-125-real-chrome-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  real-chromium-source-evidence-wave125-serial:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Preserve 205 original sources, all historic cross-category bidirectional D4 and original Wave1 Wave2 Wave5 native contracts
+        run: |
+          node --test tests/building-pool/roadmap-d/d1-original-institutions-wave7.test.mjs
+          node --test tests/building-pool/roadmap-d/d1-original-institutions-wave1.test.mjs
+          node --test tests/building-pool/roadmap-d/d1-original-institutions-wave2.test.mjs
+          node --test tests/building-pool/roadmap-d/d1-original-institutions-wave5.test.mjs
+      - name: Require real Chrome binary and exact unchanged independent PNG integrity dependency
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+          npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Wave1 actual Chromium WebGL2 36 frames, source integrity and real independent PNG audit
+        run: |
+          node --test tests/building-pool/roadmap-d/d1-original-institutions-wave1-webgl2.test.mjs
+          node tests/building-pool/roadmap-d/audit-wave1-gallery.mjs
+      - name: Wave2 REPAIRED physical Pinewater exact source 36 actual frames, independent PNG integrity
+        run: |
+          node --test tests/building-pool/roadmap-d/d1-original-institutions-wave2-webgl2.test.mjs
+          node tests/building-pool/roadmap-d/audit-wave2-gallery.mjs
+      - name: Wave5 exact source eight independent real Chromium WebGL2 originals and 48 PNG integrity checks
+        run: |
+          node --test tests/building-pool/roadmap-d/d1-original-institutions-wave5-webgl2.test.mjs
+          node tests/building-pool/roadmap-d/audit-wave5-gallery.mjs
+      - name: Preserve independently auditable genuine Wave1 36-frame source PNGs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-recovered-wave1-36-real-chromium
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave1-webgl2-cube-proxy/
+          if-no-files-found: ignore
+      - name: Preserve independently auditable genuine REPAIRED Wave2 36-frame PNGs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-recovered-wave2-36-real-chromium
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave2-webgl2-cube-proxy/
+          if-no-files-found: ignore
+      - name: Preserve independently auditable genuine Wave5 48-frame PNGs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-recovered-wave5-48-real-chromium
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave5-webgl2-cube-proxy/
+          if-no-files-found: ignore
