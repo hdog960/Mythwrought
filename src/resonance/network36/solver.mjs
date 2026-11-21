@@ -11,7 +11,7 @@ export function solveResonance({nodes=[], generators=[], devices=[], stores=[], 
   nonneg(tick,'tick');
   // Cap all candidate work, not just conductors: consumers otherwise make each tick unbounded.
   for (const [name,items] of [['nodes',nodes],['generators',generators],['devices',devices],['stores',stores]]) {
-    if (!Array.isArray(items) || items.length > 2048) throw Error(name+' budget exceeded');
+    if (!Array.isArray(items) || items.length > 2048) throw Error((name==='nodes'?'conductor':name)+' budget exceeded');
   }
   const all=[...nodes,...generators,...devices,...stores];
   const ids=new Set(), positions=new Set();
