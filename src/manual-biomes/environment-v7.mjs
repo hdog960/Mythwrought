@@ -87,7 +87,23 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline,biome=v6BiomeAt(x,
   return writes;
 }
 
+// A tree is forbidden if ANY of its naturally authored footprint occupies
+// Desert, including a canopy reaching across from Plains. This is a V7-only
+// generation policy: previously saved/older-profile worlds are untouched.
+export function naturalTreeTouchesDesert(seed,cells,origin=null){
+  if(origin&&v6BiomeAt(origin[0],origin[2],seed)?.name==='desert')return true;
+  const checked=new Set();
+  for(const [x,,z] of cells){
+    const column=x+','+z;
+    if(checked.has(column))continue;
+    checked.add(column);
+    if(v6BiomeAt(x,z,seed)?.name==='desert')return true;
+  }
+  return false;
+}
+
 export function keepLegacyGroveTree(seed,plan){
+  if(naturalTreeTouchesDesert(seed,plan.cells,plan.origin))return false;
   const [x,,z]=plan.origin;
   const climate=v6BiomeAt(x,z,seed);
   return !climate||climate.weight<.56;
@@ -151,6 +167,9 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell){
       const grounded=root===column.get(floor)&&readCell(x,floor-1,z)!==BLOCK.AIR;
       if(!grounded||floor>WORLD_MAX_Y-5)continue;
       const tree=treeVoxels(biome.name,x,floor,z,roll);
+      // Reject the whole candidate in every chunk, not just Desert-side leaves.
+      // Cross-chunk sites use the same world coordinates and decision.
+      if(naturalTreeTouchesDesert(seed,tree,[x,floor,z]))continue;
       if(tree.some(([a,b,c])=>b>WORLD_MAX_Y||readCell(a,b,c)!==BLOCK.AIR))continue;
       for(const [a,b,c,id] of tree)
         if(a>=minX&&a<=maxX&&c>=minZ&&c<=maxZ)cells.set(a+','+b+','+c,id);
