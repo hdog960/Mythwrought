@@ -120,7 +120,8 @@ export function buildAlderglassTrellisConservatory(){
  if(physicalGlazing!==371)throw Error('Must retain precisely 371 source transparent panes as real upright windows');
  return b.finish('True timber-supported bifurcated conservatory with exactly 371 upright and physically framed Pack4 clear-glass openings, all 1,097 original supported opaque roof tiles, a source-absent open central garden, connected planting aisles and inert seed archive; no plant growth or farming',{
   sourceAuthor:'Builder B uniquely surveyed Alderglass greenhouse second design',
-  glassRoofPanels:0,sourceUprightGlazingPanels:371,opaqueRoofSourceCells:1097,oldGroundGlassPanels:12,\n  openFoundationCourtyard:true,physicalGlassSupportAuditPending:true,
+  glassRoofPanels:0,sourceUprightGlazingPanels:371,opaqueRoofSourceCells:1097,oldGroundGlassPanels:12,
+  openFoundationCourtyard:true,physicalGlassSupportAuditPending:true,
   plantingAisles:true,plantGrowthEnabled:false,roofWeatherApproved:false,
   physicalPackABIApproved:false,rendererAndCollisionAccepted:false,
   liveIntegration:false,worldPlacement:false,productionRegistered:false
