@@ -14,6 +14,7 @@ const NEW_CACHE='mythwrought-m5-shell-20261120-creative-m1m6-candidate1';
 const RELEASE='20261120-creative-m1m6-candidate1';
 const oldFiles={
  'index.html':execFileSync('git',['show',BASE_REC_LESS+':index.html'],{encoding:'utf8'}),
+ 'styles.css':execFileSync('git',['show',BASE_REC_LESS+':styles.css'],{encoding:'utf8'}),
  'src/main.mjs':execFileSync('git',['show',BASE_REC_LESS+':src/main.mjs'],{encoding:'utf8'}),
  'sw-m5.js':execFileSync('git',['show',BASE_CACHE_FIRST+':sw-m5.js'],{encoding:'utf8'})
 };
@@ -112,7 +113,9 @@ try{
   assert.ok(prior.includes(OLD_CACHE),'Historical shell did not install');
   console.log('PASS OLD CACHE-FIRST APP NO REC',prior,'requests',requests);
 
-  // Server publishes the exact proposed new files, not a mock screenshot.
+  // The historical worker boot above must pair original REC-less HTML with
+ // its original CSS; new menu CSS intentionally hides legacy #save controls.
+ // Server publishes the exact proposed new files, not a mock screenshot.
   // A query request must bypass the OLD worker and return the NEW origin
   // before the new worker is permitted to install.
   deploy='new';
