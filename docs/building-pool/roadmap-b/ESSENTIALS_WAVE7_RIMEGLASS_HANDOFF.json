@@ -1,0 +1,181 @@
+{
+  "schema": "mythwrought.builder-b.1b.wave7-rimeglass-handoff.v1",
+  "status": "PROVISIONAL_SOURCE_ONLY_UNACCEPTED",
+  "sourceModule": "src/building-pool/roadmap-b/builder-b-essentials-wave7.mjs",
+  "sourceGitBlob": "979552e3d31d56e233dc3ed1b78ef969cb6ec15e",
+  "acceptedHistorical1B": 228,
+  "newBefore": 6,
+  "newAfter": 7,
+  "exclusiveB115": true,
+  "exclusiveD92Claim": false,
+  "source": {
+    "id": "r1:greenhouse:snow:small:002",
+    "title": "Rimeglass Crescent-Sun Greenhouse",
+    "category": "greenhouse",
+    "biome": "snow",
+    "size": "small",
+    "coordinateFNV64": "e56497ac381779e2",
+    "footprint": {
+      "width": 44,
+      "height": 28,
+      "depth": 42
+    },
+    "voxels": 5374,
+    "rooms": 7,
+    "portals": 10,
+    "walkableCells": 1006,
+    "roofTiles": 1261,
+    "supportedOpaqueRoofTiles": 983,
+    "glazedSourcePanels": 278,
+    "trulyAbsentGroundSunwellColumns": 30,
+    "roomNames": [
+      "north-snowdoor-windbreak",
+      "western-seedling-bank",
+      "eastern-winterherb-gallery",
+      "east-cold-frame-collection",
+      "central-frostglass-exhibit",
+      "south-planting-and-potting-court",
+      "west-bark-and-lantern-store"
+    ],
+    "portalsTable": [
+      {
+        "from": "outside",
+        "to": "north-snowdoor-windbreak",
+        "at": [
+          21,
+          1,
+          2
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "north-snowdoor-windbreak",
+        "to": "western-seedling-bank",
+        "at": [
+          17,
+          1,
+          12
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "north-snowdoor-windbreak",
+        "to": "eastern-winterherb-gallery",
+        "at": [
+          29,
+          1,
+          13
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "western-seedling-bank",
+        "to": "central-frostglass-exhibit",
+        "at": [
+          18,
+          1,
+          20
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "eastern-winterherb-gallery",
+        "to": "central-frostglass-exhibit",
+        "at": [
+          27,
+          1,
+          23
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "eastern-winterherb-gallery",
+        "to": "east-cold-frame-collection",
+        "at": [
+          34,
+          1,
+          29
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "central-frostglass-exhibit",
+        "to": "south-planting-and-potting-court",
+        "at": [
+          23,
+          1,
+          29
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "south-planting-and-potting-court",
+        "to": "west-bark-and-lantern-store",
+        "at": [
+          12,
+          1,
+          35
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "western-seedling-bank",
+        "to": "west-bark-and-lantern-store",
+        "at": [
+          9,
+          1,
+          28
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "south-planting-and-potting-court",
+        "to": "east-cold-frame-collection",
+        "at": [
+          32,
+          1,
+          31
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      }
+    ]
+  },
+  "screenshots": {
+    "actualCompleted": 0,
+    "sizes": [
+      "667x375",
+      "844x390",
+      "932x430"
+    ],
+    "views": [
+      "exterior",
+      "cutaway"
+    ],
+    "requiredSourceWebGL2Frames": 6,
+    "newSevenOriginalGalleryFrames": 42
+  },
+  "gates": {
+    "realSnowWeatherLoad": false,
+    "glassCollisionAndMount": false,
+    "realRoofPhysicalSpan": false,
+    "manualFivePackGeometryApproval": false,
+    "doorSwingCollision": false,
+    "iPhoneFrameTiming": false,
+    "creatorArt": false,
+    "worldRegistered": false,
+    "schema1SavesWritten": false,
+    "merged": false,
+    "deployed": false
+  },
+  "notes": "Translucent roof panels are only source-space declarations, not producer-certified glass physical/thermal/waterproof meshes. No simulated crop growing, weather, NPCs, heat, save or game-system changes."
+}
