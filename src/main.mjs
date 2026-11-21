@@ -1,6 +1,6 @@
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
-import {meshDepthSection} from './depth-mesh.mjs';
+import {meshDepthSection,meshDepthSectionUpdate,discardDepthMeshCache} from './depth-mesh.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
@@ -39,7 +39,7 @@ import {createLiveMobSession} from './mobs/live-game.mjs';
 import {createLiveMobRenderer} from './mobs/live-render.mjs';
 import {getSpecies} from './mobs/species.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
-import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
+import {GpuUploadRetry,uploadChunkBuffer,uploadEditedChunkBuffer,uploadEditedChunkBuffersAtomic,MAX_REUSABLE_EDIT_BYTES} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
@@ -736,13 +736,68 @@ function start(){
     gl.deleteBuffer(chunk.buffer);
     if(chunk.waterBuffer)gl.deleteBuffer(chunk.waterBuffer);
   }
-  // Both buffers stage before publishing; on failure neither can leak.
-  function uploadPack2Chunk(vertices,water){
+  // At most three retired buffers (<=768 KiB total) may be reused by future
+  // edits; never stage over a published chunk or a recently drawn buffer.
+  // This pool is not part of the original 25/34/27 resident chunk budgets.
+  const editGpuSparePool=[];
+  let editGpuReuses=0;
+  const MAX_EDIT_GPU_SPARES=3;
+  function releaseEditGpuSparePool(contextWasLost=false){
+    // After WebGL context restoration, old buffer handles belong to a dead
+    // context. Drop references without issuing INVALID_OPERATION to the new
+    // context. Normal world transitions still explicitly delete every spare.
+    if(!contextWasLost)
+      for(const spare of editGpuSparePool)gl.deleteBuffer(spare.buffer);
+    editGpuSparePool.length=0;
+  }
+  function takeEditGpuSpare(bytes){
+    for(let i=0;i<editGpuSparePool.length;i++){
+      const spare=editGpuSparePool[i];
+      if(frame-spare.retiredFrame>=3&&spare.capacity>=bytes){
+        editGpuSparePool.splice(i,1);
+        editGpuReuses++;
+        return spare;
+      }
+    }
+    return null;
+  }
+  function retireEditGpuBuffer(buffer,capacity){
+    if(!buffer)return;
+    if(!Number.isInteger(capacity)||capacity<0||
+       capacity>MAX_REUSABLE_EDIT_BYTES||
+       editGpuSparePool.length>=MAX_EDIT_GPU_SPARES){
+      gl.deleteBuffer(buffer);return;
+    }
+    editGpuSparePool.push({buffer,capacity,retiredFrame:frame});
+  }
+  function retireEditedChunkBuffers(chunk){
+    if(!chunk)return;
+    retireEditGpuBuffer(chunk.buffer,chunk.bufferCapacity??chunk.count*36);
+    if(chunk.waterBuffer)
+      retireEditGpuBuffer(chunk.waterBuffer,chunk.waterCapacity??chunk.waterCount*36);
+  }
+  // Both buffers stage before publishing. A failed upload may destroy only
+  // unpublished staging buffers; the previously visible chunk is untouched.
+  function uploadPack2Chunk(vertices,water,edited=false){
     let buffer=null,waterBuffer=null;
+    let bufferCapacity=vertices.byteLength,waterCapacity=water.byteLength;
+    const gpuStageTimes=edited?{}:null;
     try{
-      buffer=uploadChunkBuffer(gl,vertices);
-      if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
-      return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
+      if(edited){
+        const opaque=uploadEditedChunkBuffer(gl,vertices,
+          takeEditGpuSpare(vertices.byteLength),gpuStageTimes);
+        buffer=opaque.buffer;bufferCapacity=opaque.capacity;
+        if(water.length){
+          const liquid=uploadEditedChunkBuffer(gl,water,
+            takeEditGpuSpare(water.byteLength),gpuStageTimes);
+          waterBuffer=liquid.buffer;waterCapacity=liquid.capacity;
+        }
+      }else{
+        buffer=uploadChunkBuffer(gl,vertices);
+        if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
+      }
+      return {buffer,count:vertices.length/9,bufferCapacity,
+        waterBuffer,waterCount:water.length/9,waterCapacity,gpuStageTimes};
     }catch(error){
       if(buffer)gl.deleteBuffer(buffer);
       if(waterBuffer)gl.deleteBuffer(waterBuffer);
@@ -751,6 +806,23 @@ function start(){
   }
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
+  let lastEditMeshTiming={meshMs:0,uploadMs:0,chunks:0};
+  const recentDigEdits=[];
+  function recordDigEdit(actionMs,saveMs){
+    recentDigEdits.push({actionMs,saveMs,...lastEditMeshTiming});
+    if(recentDigEdits.length>128)recentDigEdits.shift();
+  }
+  function digEditStats(){
+    if(!recentDigEdits.length)return 'no measured edits in this session';
+    const stat=key=>{
+      const v=recentDigEdits.map(e=>e[key]).sort((a,b)=>a-b);
+      return 'p95 '+v[Math.floor((v.length-1)*.95)].toFixed(1)+
+        ' ms; max '+v[v.length-1].toFixed(1)+' ms';
+    };
+    return recentDigEdits.length+' latest edits · action '+stat('actionMs')+
+      ', mesh '+stat('meshMs')+', upload '+stat('uploadMs')+
+      ', save '+stat('saveMs');
+  }
   function manual14AtChunk(cx,cz,section){
     const key=depthMeshKey(cx,cz,section);
     if(manual14MeshCache.has(key))return manual14MeshCache.get(key);
@@ -765,10 +837,15 @@ function start(){
     combined.set(base);combined.set(extra,base.length);
     return combined;
   }
-  function meshPlayableChunk(cx,cz,section){
-    const original=section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section);
-    const pack3Mesh=combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
-    return combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
+  function meshPlayableChunk(cx,cz,section,editedCell=null){
+    // Deep edits expose strict source-column byte parity. No apparent geometry
+    // change means no need to allocate and upload another WebGL buffer.
+    const update=section===0?{vertices:meshChunk(world,cx,cz),changed:true}:
+      editedCell?meshDepthSectionUpdate(world,cx,cz,section,editedCell):
+        {vertices:meshDepthSection(world,cx,cz,section),changed:true};
+    const pack3Mesh=combinePack3ChunkMesh(update.vertices,pack3.runtime,cx,cz,section);
+    const vertices=combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
+    return editedCell?{vertices,changed:update.changed}:vertices;
   }
   function meshPlayableWater(cx,cz,section){
     return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
@@ -778,32 +855,72 @@ function start(){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
     const batch=[];
-    for(const section of verticalEditSections(y))
-      for(const {cx,cz} of editAffectedChunks(x,z)){
-        const key=depthMeshKey(cx,cz,section);
-        if(!chunks.has(key))continue;
-        const vertices=meshPlayableChunk(cx,cz,section);
-        const water=meshPlayableWater(cx,cz,section);
-        batch.push({key,cx,cz,section,vertices,water});
-      }
+    let meshMs=0,uploadMs=0;
+    const gpuStageTimes={};
+    const gpuReusesBefore=editGpuReuses;
+    try{
+      for(const section of verticalEditSections(y))
+        for(const {cx,cz} of editAffectedChunks(x,z)){
+          const key=depthMeshKey(cx,cz,section);
+          if(!chunks.has(key))continue;
+          const start=performance.now();
+          const update=meshPlayableChunk(cx,cz,section,[x,y,z]);
+          const old=chunks.get(key);
+          // Water may have changed even if opaque geometry did not. Keep the
+          // existing fluid rebuild path whenever water is or was present.
+          if(!update.changed&&!world.pack2Cells?.size&&!old?.waterCount){
+            meshMs+=performance.now()-start;
+            continue;
+          }
+          const water=meshPlayableWater(cx,cz,section);
+          meshMs+=performance.now()-start;
+          batch.push({key,cx,cz,section,vertices:update.vertices,water});
+        }
+    }catch(error){
+      discardDepthMeshCache(world);
+      throw error;
+    }
     const ready=[];
     try{
-      for(const item of batch){
-        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
+      // The common tiny deep-voxel edit can commit an entire replacement
+      // batch after ONE fail-closed GPU error check. The old published buffers
+      // remain intact until the atomic check succeeds; large buffers preserve
+      // the original validated per-buffer path and all existing budgets.
+      const smallBatch=batch.length>0&&batch.every(item=>
+        item.vertices.byteLength<=MAX_REUSABLE_EDIT_BYTES&&
+        item.water.byteLength<=MAX_REUSABLE_EDIT_BYTES);
+      if(smallBatch){
+        const start=performance.now();
+        const uploaded=uploadEditedChunkBuffersAtomic(gl,batch,takeEditGpuSpare,gpuStageTimes);
+        uploadMs+=performance.now()-start;
+        for(let i=0;i<batch.length;i++)ready.push({...batch[i],...uploaded[i]});
+      }else{
+        for(const item of batch){
+          const start=performance.now();
+          const uploaded=uploadPack2Chunk(item.vertices,item.water,true);
+          uploadMs+=performance.now()-start;
+          for(const [stage,measured] of Object.entries(uploaded.gpuStageTimes||{}))
+            gpuStageTimes[stage]=(gpuStageTimes[stage]||0)+measured;
+          ready.push({...item,...uploaded});
+        }
       }
     }catch(err){
       for(const item of ready)deleteChunkBuffers(item);
+      discardDepthMeshCache(world);
       throw err;
     }
     for(const item of ready){
       const old=chunks.get(item.key);
       chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
-        buffer:item.buffer,count:item.count,
-        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
-      deleteChunkBuffers(old);
+        buffer:item.buffer,count:item.count,bufferCapacity:item.bufferCapacity,
+        waterBuffer:item.waterBuffer,waterCount:item.waterCount,
+        waterCapacity:item.waterCapacity});
+      retireEditedChunkBuffers(old);
     }
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
+    lastEditMeshTiming={meshMs,uploadMs,chunks:ready.length,
+      reusedGpuBuffers:editGpuReuses-gpuReusesBefore,gpuStageTimes};
     if(caveSession)caveFarGpu?.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
@@ -979,12 +1096,16 @@ function start(){
         return;
       }
     }
+    const actionBegin=performance.now();
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
+    const actionMs=performance.now()-actionBegin;
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;
+    const saveBegin=performance.now();
     const persisted=save();
+    recordDigEdit(actionMs,performance.now()-saveBegin);
     const label=BLOCK_NAMES[result.block]||'block';
     const action=mode==='mine'?'Removed':'Placed';
     message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
@@ -1238,6 +1359,7 @@ function start(){
       canvas.dataset.pendingChunks=String(pending.size);
       canvas.dataset.chunkCenter=lastStreamingCenter;
       canvas.dataset.meshEditBatches=String(editMeshBatches);
+      canvas.dataset.editGpuBufferReuses=String(editGpuReuses);
       canvas.dataset.lastEditedChunks=lastEditMeshKeys.join(';');
       canvas.dataset.renderedMeshVertices=String([...chunks.values()].reduce((sum,c)=>sum+c.count,0));
       canvas.dataset.pack3PhysicalCount=String(pack3.runtime.size());
@@ -2205,7 +2327,7 @@ function start(){
         dimensions:innerWidth+'×'+innerHeight+' CSS px, DPR '+(devicePixelRatio||1),
         homeScreen:standalone?'standalone reported, not independently confirmed':'browser or unknown',
         grips,frames:frameHistory.stats(),
-        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels; mesh uploads '+meshCadence.meshes+', deferred frames '+meshCadence.skipped+', longest measured mesh '+meshCadence.slowestMs+' ms; GPU upload retry faults '+gpuRetry.stats().failures+', pending '+gpuRetry.stats().pendingRetries,
+        render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels; mesh uploads '+meshCadence.meshes+', deferred frames '+meshCadence.skipped+', longest measured mesh '+meshCadence.slowestMs+' ms; GPU upload retry faults '+gpuRetry.stats().failures+', pending '+gpuRetry.stats().pendingRetries+'; underground edit timings: '+digEditStats(),
         save:saved,probe,quota
       });
       auditStatus.textContent='Report ready. Copy it for Gate A review; manual iPhone and art approval remain open.';
@@ -2324,7 +2446,7 @@ function start(){
     const overlay=savePack2LiveWorld(localStorage,candidate);
     if(!overlay.ok)throw Error('Pack 2 verified overlay not updated; export backups before retry: '+overlay.reason);
     for(const c of chunks.values())deleteChunkBuffers(c);
-    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();storageReadOnly=false;changed=false;
@@ -2453,7 +2575,7 @@ function start(){
     const overlay=savePack2LiveWorld(localStorage,candidate);
     if(!overlay.ok)throw Error('Cannot verify Pack 2 state after restore: '+overlay.reason);
     for(const c of chunks.values())deleteChunkBuffers(c);
-    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
     outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     disposeLiveMobSession();g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();changed=false;respawnPrototype();
@@ -2495,7 +2617,7 @@ function start(){
       // Validate the actual renderer before clearing a previous world.
       const newCaveFar=farModule.createCaveFarWallGpu(gl);
       for(const c of chunks.values())deleteChunkBuffers(c);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
       gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       disposeLiveMobSession();g2NewWorld();world=selected.world;caveOps=loadedOps;
       caveFarGpu?.invalidate();caveFarGpu=newCaveFar;caveSession=selected;
@@ -2566,7 +2688,7 @@ function start(){
   function enterPreparedM2World(candidate,statusText){
     // This commits only a PREVIOUSLY verified and persisted candidate.
     for(const c of chunks.values())deleteChunkBuffers(c);
-    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+    releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];
     // Preserve Creative flight's full reset-before-spawn invariant on the
     // explicitly NEW four-biome world path. World assignment is separate
@@ -2666,7 +2788,7 @@ function start(){
         saveWorldSafe(localStorage,candidate);
       if(!result.ok)throw Error(result.reason||result.detail||'World save refused');
       for(const c of chunks.values())deleteChunkBuffers(c);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       disposeLiveMobSession();g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();
@@ -2775,7 +2897,7 @@ function start(){
       disposeLiveMobSession();g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();storageReadOnly=false;changed=false;
       clearMirrorDownload();
       for(const c of chunks.values())deleteChunkBuffers(c);
-      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
+      releaseEditGpuSparePool();chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();
     gpuRetry.clear();
       outlineKey='';outlineCount=0;lastEditMeshKeys=[];
       respawnPrototype();seedLabel.textContent='WORLD '+world.seed;
@@ -2808,7 +2930,7 @@ function start(){
       initializeGpuPipeline();
       restartMobRenderer();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
-      chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
+      releaseEditGpuSparePool(true);chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
       caveFarGpu?.resetForLostContext();
       pack5Gpu?.invalidate();
       gpuRetry.clear();meshCadence.resetCooldown();
@@ -2926,10 +3048,15 @@ function start(){
         player.yaw=yaw;player.pitch=Math.max(-MAX_PITCH,Math.min(MAX_PITCH,pitch));
       },
       placeFixture(x,y,z,id){
-        const old=world.get(x,y,z);
+        const old=world.get(x,y,z),actionBegin=performance.now();
         if(!world.set(x,y,z,id))throw Error('Invalid test block');
-        try{refreshEditedMeshes(x,z,y);}catch(err){world.set(x,y,z,old);throw err;}
-        save();
+        try{refreshEditedMeshes(x,z,y);}catch(err){
+          world.set(x,y,z,old);discardDepthMeshCache(world);throw err;
+        }
+        const actionMs=performance.now()-actionBegin,saveBegin=performance.now();
+        const saved=save(),saveMs=performance.now()-saveBegin;
+        recordDigEdit(actionMs,saveMs);
+        return {saved,actionMs,saveMs,...lastEditMeshTiming};
       },
       // Localhost-only real-game GPU fixture, unavailable on deployed Pages.
       // Used by Chromium to verify the actual terrain shader + Pack 5 buffer.
