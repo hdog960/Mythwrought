@@ -1,0 +1,39 @@
+name: Original current-main WebGL2 detailed GPU tracer overhead study (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-chrome-gpu-trace-tax-291-20261121
+permissions:
+  contents: read
+jobs:
+  original-webgl2-same-source-gpu-tracer-on-off:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require direct original integrated main and no edited source
+        run: |
+          test "$(git rev-parse HEAD^)" = "7016e14cd6289f45eaf7fc6a79a362b47996df65"
+          git diff --exit-code 7016e14cd6289f45eaf7fc6a79a362b47996df65 HEAD -- src/ index.html styles.css sw-m5.js tests/
+          node --check scripts/ci/iphone-chrome-gpu-trace-tax.mjs
+      - name: Install genuine WebGL2 Chromium and original PNG comparator
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Same original game and identical GL upload timestamps with detailed GPU tracing off/on
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/mythwrought-gpu-tracer-tax.log 2>&1 &
+          node scripts/ci/iphone-chrome-gpu-trace-tax.mjs
+      - name: Preserve original PNGs, source samples and raw native GPU traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-main-gpu-tracer-instrumentation-overhead
+          path: artifacts/iphone-chrome-gpu-trace-tax/
+          if-no-files-found: warn
+          retention-days: 14
