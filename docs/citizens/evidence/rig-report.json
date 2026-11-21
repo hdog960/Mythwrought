@@ -6,14 +6,14 @@
     },
     "races": 6,
     "drawCalls": 6,
-    "gpuBytes": 250128,
+    "gpuBytes": 304560,
     "coverage": [
-      4936,
-      3524,
-      2965,
-      3871,
-      3563,
-      5288
+      5216,
+      3581,
+      2935,
+      3819,
+      3571,
+      5387
     ],
     "walkFramesDiffer": true
   },
@@ -24,14 +24,14 @@
     },
     "races": 6,
     "drawCalls": 6,
-    "gpuBytes": 250128,
+    "gpuBytes": 304560,
     "coverage": [
-      12227,
-      8829,
-      7802,
-      10141,
-      9093,
-      13376
+      12506,
+      8839,
+      7777,
+      10052,
+      9097,
+      13539
     ],
     "walkFramesDiffer": true
   }

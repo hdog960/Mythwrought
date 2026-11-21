@@ -1,0 +1,6246 @@
+{
+  "variants": 780,
+  "maxCacheBytes": 710208,
+  "records": [
+    {
+      "profession": "miner",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4138,
+      "digest": "02773788221d4212459ec9c3684e9c5354c347c36d81cd3ac6bab004eb699b79"
+    },
+    {
+      "profession": "miner",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4140,
+      "digest": "e7faf06fa9de72d575073e5a099aad9e804a6cf7d2331bcd74821005bc95386a"
+    },
+    {
+      "profession": "miner",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4152,
+      "digest": "d1e93e80ed1bfaf7b194e20820bc9415940d8416a583b458ac02e655791fcf87"
+    },
+    {
+      "profession": "miner",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4154,
+      "digest": "aa740eac35231b4a92976d27c8e2e44cd0efa98b9b18762d8d7765ec8beb065f"
+    },
+    {
+      "profession": "miner",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4140,
+      "digest": "2ccdb5c018cfdcb063d95b5f3b8a1c7b902fab9ed517d50de91d497e984af7b8"
+    },
+    {
+      "profession": "miner",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4142,
+      "digest": "e74db86f5d115325b2c35a1ed999de1972054043de2952265b6234ed73e9b177"
+    },
+    {
+      "profession": "miner",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4148,
+      "digest": "70c45739e7ae6f4282789df4dea3bb885a2f6e64570a06fbda93d62e5860c163"
+    },
+    {
+      "profession": "miner",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4150,
+      "digest": "67f2e1305fdd1fdc5c5d223e2c9861d9952d8ad1d282a99c7d999b1cb56a3cf4"
+    },
+    {
+      "profession": "miner",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4141,
+      "digest": "256996e595205b419e38fe6e9f2c4ed4e52bce3df9a761239109a97e64ebd21d"
+    },
+    {
+      "profession": "miner",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4143,
+      "digest": "92d159d2e71f7ef3b62e189ed2ea6fa1e2d53d914110b6bf4f8fcb97dd01d312"
+    },
+    {
+      "profession": "miner",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3837,
+      "digest": "47d1e6be4d6bbbd5860ce90c51513ca25efa4002c903d23cd13d465e9aa5de78"
+    },
+    {
+      "profession": "miner",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3845,
+      "digest": "06ae503e3714bec333042f34aa09cc6fae67be2c74c391da1b048f49d7873a95"
+    },
+    {
+      "profession": "miner",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3859,
+      "digest": "fe9fc022b3cea0bb1796688ac28de268770a20d20e87cca745c16a3869a45b78"
+    },
+    {
+      "profession": "miner",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3867,
+      "digest": "5991588904849686e18e56402e28ac1e0cf7ec13763fcef2df023d10436377c4"
+    },
+    {
+      "profession": "miner",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3841,
+      "digest": "b5d9fd5585b913c467c039e6ab49fd515325bd3d92520e65ed7084b0ba67b4f7"
+    },
+    {
+      "profession": "miner",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3849,
+      "digest": "30af7ab50ad47097971ac4b65927a3b72af74b7d006c2d4d2252b60ec1c0b901"
+    },
+    {
+      "profession": "miner",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3853,
+      "digest": "4d502c7d9089f62abf31425af1597558418f6f698a6926c5d907ef7da6fb07a8"
+    },
+    {
+      "profession": "miner",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3861,
+      "digest": "6c6208ce89866f1d98dc1d0594e5f2852f9541fd7bdd8dfd238d40a156e34ebb"
+    },
+    {
+      "profession": "miner",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3839,
+      "digest": "e3eb6fc41bcc8a1995ddb2e1a1563dfcef20bed564191db88d083006228cb64a"
+    },
+    {
+      "profession": "miner",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3847,
+      "digest": "ea1f9507fe58f21a3a1ba379d07aeee00994be06c6d2cb373dac220bae921ea6"
+    },
+    {
+      "profession": "miner",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4266,
+      "digest": "4f1adf3678a3b388990a4f606bd38004ec9d1a5f05bbb79fd1672b4dcb7e5892"
+    },
+    {
+      "profession": "miner",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4263,
+      "digest": "cf2c096b2e59fc5eb801cd78764dd1f3754aa24b6f43de96d6a6ede3be375099"
+    },
+    {
+      "profession": "miner",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4275,
+      "digest": "c63920488fe8593194d3f38b8511b244c89feab66d502b1008c94e7f305983a1"
+    },
+    {
+      "profession": "miner",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4272,
+      "digest": "65c2e6a765dcb79a7dd67d944a2ccef4517e543fdf125f91e0efc6037458e7df"
+    },
+    {
+      "profession": "miner",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4266,
+      "digest": "1ad57d094c7292bf8f6840d2a0df563ae071e97e079b36dfb8530f6b20b0f57a"
+    },
+    {
+      "profession": "miner",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4263,
+      "digest": "4673b3dbd8488fc2f420f6c05365ac07306dfff048d47c2615b515f3e02d9297"
+    },
+    {
+      "profession": "miner",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4274,
+      "digest": "4dff81587c59cfcded4d406993cdae4efe9d045340875f01610963f0b0c100d2"
+    },
+    {
+      "profession": "miner",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4271,
+      "digest": "3021ac6a3c2e61bee10db369763b61f6b5e84283662b6c14bc8dd17faeb2f96e"
+    },
+    {
+      "profession": "miner",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4272,
+      "digest": "b1f9973dae72975291276657166fe106687dcb0fe8c59aa02ab5e1d295f837cc"
+    },
+    {
+      "profession": "miner",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4269,
+      "digest": "684d99704dd43867bf6517e1a24e35f59f0e1db7e5edc22397a9a25d4b808293"
+    },
+    {
+      "profession": "miner",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5037,
+      "digest": "0491395082751097ba62f180bc62718b9f07954888fa993f57bda22972110bc5"
+    },
+    {
+      "profession": "miner",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5045,
+      "digest": "202ad9b5cef17f84194750ada1c2c1171f50ee2ecb8a342bace6c34be53b6765"
+    },
+    {
+      "profession": "miner",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5051,
+      "digest": "89c61c421d18e6ae6a32314e72f36ddb946d218746f8ba85ebba2541fd410f0a"
+    },
+    {
+      "profession": "miner",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5059,
+      "digest": "1373ccb4acec9f65e53b4906f96267160701db59eef449c9fb21aa91ccdc96d5"
+    },
+    {
+      "profession": "miner",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5038,
+      "digest": "6a4515d480ce856910edafa01b5936764c3cb18da990fe6d85dbb083c1e88c4d"
+    },
+    {
+      "profession": "miner",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5046,
+      "digest": "ec181a84ee6024968367082e1d85d32ab23de4f09965149f58409cb4a51dcf52"
+    },
+    {
+      "profession": "miner",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5047,
+      "digest": "d2a264b89feb7209cd88c3d3652e86efa324924e7bfab5b953e3c4a7d6a756c8"
+    },
+    {
+      "profession": "miner",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5055,
+      "digest": "c5ce479aeeb8ccdb6ba5b48bbc165e74f91b5c813eb4224a97e46059b93e4fa8"
+    },
+    {
+      "profession": "miner",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5041,
+      "digest": "69fe353f19b09ff7d805ccffcffd9e1f183e53b0c62c2ce7626c58d117d97c41"
+    },
+    {
+      "profession": "miner",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5049,
+      "digest": "1e255283a7cd52ccc6fba8a7094ede1d74ce3566f7f5728378ee50e9b8ae39aa"
+    },
+    {
+      "profession": "miner",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3881,
+      "digest": "4be60b953cffaaf885825c6d1042507692361e63e07f0905b22d4d95b70625ec"
+    },
+    {
+      "profession": "miner",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3886,
+      "digest": "14e0c9c5f16d2e23a5d1eb3a09b7ce0c27912daad737d0a212766fe4b42f9ffe"
+    },
+    {
+      "profession": "miner",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3906,
+      "digest": "4e1a64b2bb71becede292e49954cf90ad59c734d6957a2f4a3a72ab955a7c95e"
+    },
+    {
+      "profession": "miner",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3911,
+      "digest": "58567fce3fe260ef27d5ac2311f9f4deb3ca0f13333757a534d3ff0bc09c3287"
+    },
+    {
+      "profession": "miner",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3883,
+      "digest": "3932138246603cba39961a614064cf257011de988f0e4377e8a6eb313302578e"
+    },
+    {
+      "profession": "miner",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3888,
+      "digest": "c2c6e872997c5d450f684aef8d4403490cf8e464c2bf8fe9cfa95246f3b46a29"
+    },
+    {
+      "profession": "miner",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3894,
+      "digest": "5d9464d7897e89673ad17a9d5f9a1be6d68f96a943e1373c74d97a66b0a2561b"
+    },
+    {
+      "profession": "miner",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3899,
+      "digest": "9edd8eecd7c20ee42897ca79a090d9ea674e5381b6c82d3a9012fe407a11d528"
+    },
+    {
+      "profession": "miner",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3884,
+      "digest": "f06430e2519699961542b2978b918fef3f6be0eb8ed9d082095c3094c3d73e40"
+    },
+    {
+      "profession": "miner",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3889,
+      "digest": "6a75810b817d495ee51a898f0d5bf4f56727f0772a6f6addee866da589990dc0"
+    },
+    {
+      "profession": "miner",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4896,
+      "digest": "5a4ad3196111cf60c6e46c9ffa3fcd4efc939dc0299e53dd7810ef966792787f"
+    },
+    {
+      "profession": "miner",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4901,
+      "digest": "a7f6422dfa14bbb31fcac9ac38c1120b4632fbe03cd75e2062f0030942093ab8"
+    },
+    {
+      "profession": "miner",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4905,
+      "digest": "f7a76f025cf2974ea0108cd12fb169929579c9bf95c00a5ab9c1698a8bf78da3"
+    },
+    {
+      "profession": "miner",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4910,
+      "digest": "135bd3ac5ea7bdeac1fe77b36809e8e81ceef15be1ba56ab931a2270a97a8dfc"
+    },
+    {
+      "profession": "miner",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4898,
+      "digest": "dd9060861a3c6b45469f2667892f474e977dad7fd1dfb231dfb52ba555c44b3d"
+    },
+    {
+      "profession": "miner",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4903,
+      "digest": "1aecc28a6bdf1037e52c2bbe4429ddca7fd47e1b133e014e7921e64f88d2b916"
+    },
+    {
+      "profession": "miner",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4902,
+      "digest": "14ab054c932aa9d7181494230d3ba1097ff232b05549718e9ca7f10a79f7e62a"
+    },
+    {
+      "profession": "miner",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4907,
+      "digest": "b4e53981ffc7113128b9180e7ea9e79c1995f6d6379e28149042348681a19381"
+    },
+    {
+      "profession": "miner",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4900,
+      "digest": "dbf56fcc52775f6bef1f1ba4024f25b68630b897cb03e436a28c30af14f63a0d"
+    },
+    {
+      "profession": "miner",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4905,
+      "digest": "0a918915fc7582489c9e00b96844f621666062c00302ada5054be486b0b117aa"
+    },
+    {
+      "profession": "prospector",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4138,
+      "digest": "73c1b38517bd734fd270e5eeb64ea7e3cffa6e01579dc3a0f28d4207a1b3c29e"
+    },
+    {
+      "profession": "prospector",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4138,
+      "digest": "484656d61e320303965235a8ccd055ed355bb6b58740b4a4495519a78e06bb80"
+    },
+    {
+      "profession": "prospector",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4147,
+      "digest": "8acaa528fa78015a014583b8ca91fe912db9b5804eaba6836d5359a0a55ab568"
+    },
+    {
+      "profession": "prospector",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4147,
+      "digest": "7ea0bfb6f36ab31aaea11888e63b54f60fdb29c7228cd19c69ea9f5658163b74"
+    },
+    {
+      "profession": "prospector",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4140,
+      "digest": "f2d3dd671f5d25fd794c6d303baf9dfa0d0b0e454cc6af4ce8c0e2c52fe92bb0"
+    },
+    {
+      "profession": "prospector",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4140,
+      "digest": "e24ba9ba93c642119d33b0303dc12ec694b5968199a5aa53ebe92e183009cd18"
+    },
+    {
+      "profession": "prospector",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4146,
+      "digest": "81746a1261a94862e05584ff5749429cde1a6427f1a79a2e182e18b7e03dfb41"
+    },
+    {
+      "profession": "prospector",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4146,
+      "digest": "f6b024a121597fb23389657849418da86d62f1ac9208e555d5b8e9dfe75971d8"
+    },
+    {
+      "profession": "prospector",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4141,
+      "digest": "8363c49d2f9a1ccec5dfeaddc8c5dcaf93219d88a3c60aa3a13776d515a6529d"
+    },
+    {
+      "profession": "prospector",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4141,
+      "digest": "412c03949af5eacfad5bfb01a9c7e0b023653d77c2a64b599342ca1095b578ab"
+    },
+    {
+      "profession": "prospector",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3837,
+      "digest": "bd41d00e23902db15ef986280c151e1fb6958bc1c160767b66fd47e6803ca496"
+    },
+    {
+      "profession": "prospector",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3844,
+      "digest": "b1ce8f85189c3a7dc08b5e9854e35bc3c06954dcff9b25ecf9ca41404b9cdeb5"
+    },
+    {
+      "profession": "prospector",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3854,
+      "digest": "115c1ca86be35aa9b6366c88166c9f35e35eee878081c8ad04a1d8f8c21df393"
+    },
+    {
+      "profession": "prospector",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3861,
+      "digest": "cf6a7278c3ab941c462fda645dbbbff71b950cec348e9b07642ea3730d984638"
+    },
+    {
+      "profession": "prospector",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3841,
+      "digest": "90f603cf9ba36e53369e98702dcf8f68e7d967f999f24c6cda52ae7a15c9193d"
+    },
+    {
+      "profession": "prospector",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3848,
+      "digest": "b18fab3b589ca1f18ce47d21d948571f9731fdc50fd9376777d7d10a2f1b42cc"
+    },
+    {
+      "profession": "prospector",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3847,
+      "digest": "a56f40405a84485e4216cef7379c136b798fa77859656599c1683bde9ea123a9"
+    },
+    {
+      "profession": "prospector",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3854,
+      "digest": "2c7e0f0d57393081b577f0f1a1bb100507e33d2293465dbecb127558dd4b2618"
+    },
+    {
+      "profession": "prospector",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3839,
+      "digest": "578eb147d0f273a887a0e69bd930a17bf2ea4a82ce1fe18e5fcde0a1b5438373"
+    },
+    {
+      "profession": "prospector",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3846,
+      "digest": "bfb916df25c54622969601aa3ae9aa12cfa277c5af49e219e21261d52f81a541"
+    },
+    {
+      "profession": "prospector",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4249,
+      "digest": "a8ad5dc4d21829bf11832a129eecbeb308db4ac7d1c93bef022f63a31d28a535"
+    },
+    {
+      "profession": "prospector",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4244,
+      "digest": "ddf01fc628c8aca0eba6a93ee44058524a912a8ad07c697ffc81137f56973a75"
+    },
+    {
+      "profession": "prospector",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4256,
+      "digest": "cf92c58f7f16dd340c471cd45c495f991c5d2d6eff85f1ec0147dde0786a81f2"
+    },
+    {
+      "profession": "prospector",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4251,
+      "digest": "f8cd6f042e04eaafcdb030940e9fe85f026dd87f841b52b7ffa80d61764c7b24"
+    },
+    {
+      "profession": "prospector",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4249,
+      "digest": "5cb63ed26f1f873f5677ccf073f37aaf335477499eac848b4f4deb46631ba3ea"
+    },
+    {
+      "profession": "prospector",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4244,
+      "digest": "95cb3b0b902808be6f8a237136859225c3010d7ed51b3bb4a899e4bd7c141b87"
+    },
+    {
+      "profession": "prospector",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4259,
+      "digest": "905803f005682fefa8918dbd82dcaee293216fef4ae4b06613bf5a0a6f228926"
+    },
+    {
+      "profession": "prospector",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4254,
+      "digest": "d54f34ccb44cc13a41c8bb9c8c9ef6d76adafc88fa5f62309f26ed9d6129c9c0"
+    },
+    {
+      "profession": "prospector",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4255,
+      "digest": "6cb7d561a2794fd810caf2695b91cf40a0f451aee7c2dc9641261559c70e69ea"
+    },
+    {
+      "profession": "prospector",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4250,
+      "digest": "d6cd10d87d63eed46b065bbafab5b1aa06a45f09efc832f07bbab2d155217a23"
+    },
+    {
+      "profession": "prospector",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5050,
+      "digest": "18557f1043365442e665424ee53a1eee165633632fe1358a6f7af778e1675585"
+    },
+    {
+      "profession": "prospector",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5056,
+      "digest": "f4da5cc5bde9da28dbdde594eda12e7f7fed93ccba30ff0a8b1b8032f1523545"
+    },
+    {
+      "profession": "prospector",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5059,
+      "digest": "929c6e65e16dea538034a0e1a1b1d1b2ffe7c95bb5cfcaa47a22586946cb01ec"
+    },
+    {
+      "profession": "prospector",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5065,
+      "digest": "6651186a3ccaac8c8b64a768d3b09fab840c692cc9ca28cc657ec0ee324b8005"
+    },
+    {
+      "profession": "prospector",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5051,
+      "digest": "3cc00da73cfb4c4895d5ba1aadbfa18ea3fe4098cf8cd034e1ac0a1c878327ef"
+    },
+    {
+      "profession": "prospector",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5057,
+      "digest": "a187dc4d51a00593f403467fed17ccc765420317c183ee605c01c129bc25fd85"
+    },
+    {
+      "profession": "prospector",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5054,
+      "digest": "6100378732fd149b10eebd4327bd2ec88513a3e25ddaa792f4bd621339273649"
+    },
+    {
+      "profession": "prospector",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5060,
+      "digest": "42beec11693d74a1cdbea26e37b2f7df3e9b0df85f1f6adf01ded93c44572e0a"
+    },
+    {
+      "profession": "prospector",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5054,
+      "digest": "d16ec8c3774021583b68c6cf62a1a1599ba3fe30aeb4e8feef70bb568eac4341"
+    },
+    {
+      "profession": "prospector",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5060,
+      "digest": "b0d35892aa3d8b0fe5720cae28d93066dd77cf0678ce694d72c4c6bd116b0aed"
+    },
+    {
+      "profession": "prospector",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3876,
+      "digest": "b6b47d9871efebc8e2f118e19e112ac370a8312ed21c7253085cdf2dd49c7662"
+    },
+    {
+      "profession": "prospector",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3880,
+      "digest": "28932c645def20b0b06453f3c52a1e276aac1d978c6d705c786caeb35b5f7a45"
+    },
+    {
+      "profession": "prospector",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3897,
+      "digest": "c223559bd83ee7635edc6b4861f9ebe6eb5e4f9ba466721736b6d2a2586935a0"
+    },
+    {
+      "profession": "prospector",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3901,
+      "digest": "ef5668350045d72ca51ba38b24dc1dbea279721375c8c677ac08952dd4c9bc3c"
+    },
+    {
+      "profession": "prospector",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3878,
+      "digest": "ad31ec0b9fb2b2075fb631b13b3d99a0abcfc5267fba82c1150deb22a73ac648"
+    },
+    {
+      "profession": "prospector",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3882,
+      "digest": "6acdc5cba99152519a24f054a53a492769bb57ccae106772e8afae380f65d56c"
+    },
+    {
+      "profession": "prospector",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3884,
+      "digest": "98c3b85ac1b64d39898c8819673034ea5906cf0b0975be6a8445a2ffd29f6b25"
+    },
+    {
+      "profession": "prospector",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3888,
+      "digest": "0e7f0258ffc096be2ae39f1e6db85426110dbbc09ebdf923d59b9065e13d5a00"
+    },
+    {
+      "profession": "prospector",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3879,
+      "digest": "5a7af4ea29925816d9e755af973cbc769a3b8a3454684509df40783e3a227901"
+    },
+    {
+      "profession": "prospector",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3883,
+      "digest": "4f9217e5979efb143f239951c135d5577b2faf36bf1fb9e496bc2695e03e13de"
+    },
+    {
+      "profession": "prospector",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4898,
+      "digest": "21a0b31c9fb4cab9f4ea496a1aac97fb9aa67a388538d0005e3eea49b0a43692"
+    },
+    {
+      "profession": "prospector",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4903,
+      "digest": "fc9cdb506a799cee72b0b22e1ce0ec6aac140dc8ec8fbd5efaeea3067026124e"
+    },
+    {
+      "profession": "prospector",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4905,
+      "digest": "9187c67b3f03bf83995a0d87b121224cc2628e76e4d4cc9992e79502f04895ad"
+    },
+    {
+      "profession": "prospector",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4910,
+      "digest": "ee11df92b8372bd286fb6bcd88174793593a3768b1d6fae049846ebe22304592"
+    },
+    {
+      "profession": "prospector",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4900,
+      "digest": "8b65cc009b45a16123ed70dac3154ca04540d347820b71a6a1c663c9492ffeb5"
+    },
+    {
+      "profession": "prospector",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4905,
+      "digest": "94f3ab5906a6005a720027350f2b32aabc66f34f0fd39617e312e1daa0c73253"
+    },
+    {
+      "profession": "prospector",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4902,
+      "digest": "0f554786c3d716879da7c84df70c45787ad668b693e746d1059257139ec36835"
+    },
+    {
+      "profession": "prospector",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4907,
+      "digest": "e1f4f0383599bd9b212520c456e24c3cccfbe4efef6e3f52fdb34195871fc7ae"
+    },
+    {
+      "profession": "prospector",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4902,
+      "digest": "da04df261a02db35b9856a6b438ab31105c01ff28c5cff76560362be9a13331d"
+    },
+    {
+      "profession": "prospector",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4907,
+      "digest": "023028864ebbe8847a50d67a4683eed6eba122643d51892db12d2e589ed6a8f0"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4047,
+      "digest": "e3143645e0af3bfdd25745c182f86c3d81c5380d5bb595f4c2abc690725d1e60"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4047,
+      "digest": "41bf822e7bde294d08ddf407b5a19a5a09333cfb2557dd8344537a7b8a568a23"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4058,
+      "digest": "2b4104de72db861b820fe059a438e3964c797ee96bb6a9b65f5828dab650b4bc"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4058,
+      "digest": "d9c685156f87a12bdff3971192072bdb3c7c6e81cb36745752ef3d3718c8f33f"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4047,
+      "digest": "20b213dd5e89ea6c223f80a2e02759c45cc974bfeac6c3c84d93148761eb4a76"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4047,
+      "digest": "4fee6a20222d39efc97bc9fd28a1129df78e8a72ad57865a22d5fa3299400fd8"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4078,
+      "digest": "c2a12a8005e271009651f0f75ae03983a2459ec5cd1c83d054685c954e7b2d20"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4078,
+      "digest": "98a560dd4b37893fef862e1b92e3278459864607663c3d777179de8208f8d8b7"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4047,
+      "digest": "bb8fa385b985c63a378229631ebdc288731a651de565447667cd5fbf220b580f"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4047,
+      "digest": "297c9cd0c258f1a34520a53875ec96a27b7ad0215b1c24eec5f3d36da62f25f2"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3739,
+      "digest": "79dd0e9ff9c343b70d4bf6d05c44ba007e92e15502bb4d957429a48de5fc22e9"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3746,
+      "digest": "325bc1130dd9363ae25cc5ff652fa1c55634b30bc28fc52e10a923c172601428"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3770,
+      "digest": "8580137d6b1a1af5e8b643a43ee25a7b542c59f7fb746d50675f9d1b1041b697"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3777,
+      "digest": "7d399253b4e2f72b96cbea5312273c8a236bbcec20ccdd57d9d4fc6676a223d5"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3739,
+      "digest": "f250fac147296dcb7677fc9d0760cbbb44b0444df0c2e38182394293c07975cc"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3746,
+      "digest": "4d3d5d797ca8e234594aa7b51525f15584a765766b1f23e604db5710195f3410"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3782,
+      "digest": "897df77bce5808af90076281a948064e2c177db4118e0e0cc00e01253d235aec"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3789,
+      "digest": "3dd21050c2e4246cc75fb23d67a1f7421eb76429b8a1cab46582bd08bf3cf810"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3739,
+      "digest": "9537f2a908486172e9afe385192e3d7cba0fd1c4ded44c236ac97487f0495a2a"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3746,
+      "digest": "e982ac639a72f0bee3a9f29eacc0c10aeda84efeb10ea61dfc940bbc956fa6a6"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4193,
+      "digest": "77a983037bb16e89fa1c6da3b9bf18d87935d7c46199f4789a666576ccad3f8a"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4188,
+      "digest": "11f4244b9aa1ffde6af6d39a0cd59d253690d91649a8ebfa199ac63d68a9d571"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4201,
+      "digest": "d593244fcda0d6ea87aba9d1ffb87114361d1c17307e3bc1b3c075892b0c917f"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4196,
+      "digest": "91d7d2881a3abd50eb81dd5f9f8e80a5e6750bb09bd2fd231c1aa4152cacffe3"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4193,
+      "digest": "ccaf920f23a33b8c888266551c6169273106dc900818b80dbca57afc530c0726"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4188,
+      "digest": "caa316ced9988b989ca9e24bb233021a5b0d43d33927feea4becc32d67320468"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4215,
+      "digest": "9b8d617ce0b0605078d94420cb52e9b0177e066316fbf1f8cfd87e84f291f27a"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4210,
+      "digest": "22c8160f92a8a48b7fd83aebcbd9365e67bad3b39990dc8bc9efa1f6d2212c57"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4193,
+      "digest": "f47980570dd89b286a3197e2f1a2998d68cf2421e5096b07f4d452a81ee226b7"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4188,
+      "digest": "fe4d591faaca0bdf1982559203cb387c18cd7ae4a395a7564bfe365306f30fe5"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5043,
+      "digest": "a6cd020691cb6ca7984dd27d60f794fbc7f6622dd0ebbf6c295ba0cb30b72e97"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5049,
+      "digest": "86d7dd1d37fa27ef2984259f87d0432daef7f9ae24efff8c2ecd282ef31155b9"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5054,
+      "digest": "8f7e5dd1db3eae6286a80dd59a758fe86d37931bd970dd96f0f0d0e085a5611f"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5060,
+      "digest": "1705f794bbd9d9f1b69bff153ac36f0bd969ce5a4394c8198285788380f684b7"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5043,
+      "digest": "76b679e6da7ed2c7624d35495a92af24397ea1e1958bd0322b214709b359e6d4"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5049,
+      "digest": "b8b6aaad5ac55aff721b259b61b0afeb7eccac83cd2139a09980e7d64f789721"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5056,
+      "digest": "829a506977aa6206dcd831b6ba6c207b9187a8ffc1c83e80c669a9454a62356c"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5062,
+      "digest": "d59a38d94536f5929645bb0e271e4a790471f26d9cb020828572dbbebd299450"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5043,
+      "digest": "9a6b55bfa7997cbbf9050ef61496f3de04ea754a62bd07a9c755195e2cad52b7"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5049,
+      "digest": "db58583229371709de1d875434bbfb46e24e2ca1f3b522b328377749d4d3a85d"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3832,
+      "digest": "457c523517d2261a023bfecefba5e70aded3b0c6082cc69c88d3a60068c48840"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3836,
+      "digest": "8d393e4a28e8ea4c1c680748dd13f3b4ee01e4458c5106ecf26084f7a4a81d8f"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3857,
+      "digest": "3b758931fd806770efdda87c38da953bc9d83ab787611115f82942632191bc99"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3861,
+      "digest": "b8a0036d0f127f9d2b3957defe66ccbdb720f86e204f4ecaf15869445eb3efb7"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3832,
+      "digest": "1076441703bf9288fec3b7ded6402fd0835f1c2c791eeb92d818292baaca16a2"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3836,
+      "digest": "9fd683fa6f74f8d7e98e95b4108eca99bd09605704502e5d99289322edac1c13"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3857,
+      "digest": "78c3adc991fae00450ef2724d3e4f429ed2311a66e9a1399091ffb8795a9ea4a"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3861,
+      "digest": "119cd24cffd3ff512eef94e7fd1c47278c36ff16fad2b90f0f20cbf1306cff43"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3832,
+      "digest": "84f5e5bcf348edc145f8062b0a9a3af509f9a087bdfa544438e24f36c62fccc1"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3836,
+      "digest": "9de1084f87f0603aa4923cea17f03767f4813882a34350c9da3812c20d82b5d0"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4902,
+      "digest": "d2e7537fc6671fda5dc24975e857d3e2d10964212fc881f79927b4777f32439e"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4907,
+      "digest": "d354449d57842c772f543da2089d09709e86d1ba41d492cb5f64fd5cab1b4da8"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4910,
+      "digest": "cb0e7612bd61ea3b911cccc029cfc4d318e53f48e78bf42b922506b0559a4c2b"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4915,
+      "digest": "ea2427b98555e3196d1a5c3c077dfb6a8d08d21c54b33fa875173a27a48d2c49"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4902,
+      "digest": "3ba582a55c456a1062c598d5d0c96387aead28d11248094cef4adb867907150c"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4907,
+      "digest": "4ed66a012fab7ae925a7c9c0afba24021a9342d1def8df8a436d24c09b87f78a"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4912,
+      "digest": "906f6796ae736832e6a053dbae9e63f2af0513428d4e4d7077cf313356966f1d"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4917,
+      "digest": "5101250d3a5281844d1b95c0d1c9059e199f4f8d02e78d53c7828484f48f991d"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4902,
+      "digest": "cad76b2381660ae9144f5b39603bb6d09a1453292af935bb7a4d041285fb4f34"
+    },
+    {
+      "profession": "quarry-worker",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4907,
+      "digest": "0f3aaa43236e5ec1d1152439b31ed6345c47bcfed5729dbb4e4ec0ac309664d0"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4057,
+      "digest": "f11fad589e578690950e2efa7f7caedb3a1f693c6eb331498be4d6061d47e908"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4057,
+      "digest": "e3cae918c34eeec307f1411204ceb8cf7d3a4993f8fd16431bdac86d57324290"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4068,
+      "digest": "2fa5964ba150a6cbbe4382d5974350498ad76e1565149742d3f8d83c03a67472"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4068,
+      "digest": "b778e700364499050ba6276d0f7c4ffedc263dcc8e69e9703c2a42348ad79f85"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4059,
+      "digest": "5d915b7ca0d31b018b18adcc3f3a3ce35dd788facf1c32a933dd7a9516fc1eca"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4059,
+      "digest": "71360027d4b5ca9530800b244fd50fa576e493e11c2b18ab4216b72718d4cdfc"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4088,
+      "digest": "51feedf55073158b27ff9da8a1649d0c29df7732e81bcbbbbf9ffaa9fdc3541b"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4088,
+      "digest": "0e58ca09cf6c550e463791b56984116faae37458a94fb02289868f8f180e84dd"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4060,
+      "digest": "66812f13a964d0804a30f47fa25aa802e2903e0b79e2524a63fe41825db74630"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4060,
+      "digest": "665d55868c24c242da0364ec26116d57dcbd601c136a87217d62478e31a509c0"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3742,
+      "digest": "e9c3588433b0d637feb87ec3e74d826a495d5f17465ae3030679822bd9169897"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3749,
+      "digest": "4dc50dbb1fd895033233bc517bdc12120fe1a1682a216b05413644e9befc9459"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3773,
+      "digest": "a015f517aa4e5915df0650bb3d935b6dabb0ffb37d05b7afd382e2ee61d3c9fb"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3780,
+      "digest": "d642b51ff3a9f500b1945a36dc654a2c383d416ccc235a5ed25308b4293532e9"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3746,
+      "digest": "4e81fb2a8c187dd6409933e6c189e7967f061625015d38a6496cde9e619401ac"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3753,
+      "digest": "3d2fe8a403cb1d321d75c1164fab59fbacfa1c5df17a7991bdfb03f2cb79b823"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3785,
+      "digest": "379874c7ef5738df71f0660a5c5cfb60f6671f5dca2385d06bc9a87129c97363"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3792,
+      "digest": "fde1ac22e45340e794b4d2355c22ced02e02952ce9992c85044fe4cf9f6cf950"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3744,
+      "digest": "d8291e87bd042032614ee63b12afcae493c377f739535da2c35ee67d6f3709e0"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3751,
+      "digest": "507b551a351fca5098bbd5a4422705f2d52e51db71ec851addca1d8b95e447b9"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4200,
+      "digest": "449c455ce9989d454edbe9f6ce51809b4f5d5890f330920d6b9b1c4948c6bbb2"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4195,
+      "digest": "45e4df19afab5fead6bfb0584739804635037c953de14ee78d77c5d314eaba32"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4208,
+      "digest": "2f158e64be4b24da1ec46fe51da022239874a671c82c29ca6f99b6411d5cdc62"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4203,
+      "digest": "4b80614b60cc49a87627a4a529dd6dda8bd3067ad2f9075c747ccd0343b0ca20"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4200,
+      "digest": "4691a0335a741a0d0f93f370cf514dfa56cb8ac013dc5c0822779beabffba700"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4195,
+      "digest": "527422eb6cd602bbf28953b87db02241736ee2b62613b54d64da13e7c88ac5f0"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4222,
+      "digest": "ea9730c533919be2f628c087b3f5760876a15c2b10ef075d6a9c4b0392f458fd"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4217,
+      "digest": "804d386597c4da12264827d7dc4783291700c6dd6391a185ed647d08622e2e32"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4206,
+      "digest": "30d7f30a50e6f0b30736f694f41c43c0f8ad3efce95b9e6097d8996cce54a9c8"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4201,
+      "digest": "57f647d85cd747bebdf05ba59282564c54ba7c154712f2251bed2c5141983827"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5048,
+      "digest": "0da7d69001bace89fcca0aa4a6701652a9f8bcd47cf4e780686d722c683500ab"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5054,
+      "digest": "1c31fb1586edcf332069b68995ed5f4c96dab7bcdb5e381def05f5f44213116f"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5059,
+      "digest": "e8e85dde11793add7227609890362ac688c765c60711a2e85d5a962b72a10c39"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5065,
+      "digest": "5bef8777b8ec9d7af8aa06fb2b471a8b63af0209d31eba03351c0eb7081e411b"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5049,
+      "digest": "469335871845c3d99706504d9cca057ecc777cd362b655731e42c2bc1de2478f"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5055,
+      "digest": "76073a501585ef11586a647db2233ac163edd2711acdf1b16c15eb28bd0caca6"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5061,
+      "digest": "80438198cdd9ffd7c5647434dd52ad42db46ef5c90ad5d24949875dd521e4d3a"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5067,
+      "digest": "9d2ae638e48c8bb133b4b06f0079e1a56910fdd740ce5c970cd6b1422870d603"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5052,
+      "digest": "908742dde4389740e762323f042064f060da8c1860ef4c092f9ad75ab0af1c2b"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5058,
+      "digest": "e63fe3c01e9bb38d9fdfe3b52de3dedb4bcdbb31601a95bc23446ba24ba7e22f"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3834,
+      "digest": "4eaf065a6824541e3e65bfc245c008ed1ff8f057a671832dcb12d3a305fe0b29"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3838,
+      "digest": "9cc0e5015792a0662a44eca5bd8fecb76379273feca6d64197608874d00909dc"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3859,
+      "digest": "8194c20cd2a7e5bdc48f453100b403c72c87326c6a0a0a04e2ad8cbacab48da2"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3863,
+      "digest": "8a186ffdb44b893d0acd4f947f4b7e657628e39252e15199b2bd7622ae94ffb8"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3836,
+      "digest": "cb132d1cc073128ec814bff0cf58ac99b288fee313ae8906cb6f08e3022cec9c"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3840,
+      "digest": "5049c4b5d01ce82f1468c1833df7bfc419d195a2c9d42b41a6d55b0b5812f59a"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3859,
+      "digest": "7291a250cc752e7240a5e4a755bb3c0a2af9a2c64bcb45e60d2503f79df87318"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3863,
+      "digest": "41613cacc86ff7c0b1752d0c6f35c2618e90e7db5993c2ef2e7869935ecc8dd6"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3837,
+      "digest": "086d6ed2fa7121c1c7b022f1471e5eff058856c5955402c98b0419f9ce9ec4ea"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3841,
+      "digest": "84702d04e7f7c6d27b90ed061e1b86e591ac8520594428b4038c73467bb16741"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4906,
+      "digest": "e80738c6d8b8ccd762c8812ce9454f714481b563dd3bca574796185740099f22"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4911,
+      "digest": "9d31d7071433ce7dd3f56d5b38ac40f5ed68372ea727128e2ac5645f0b0fcda0"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4914,
+      "digest": "43408b1ae28f35bfae2cd21ffb5f9fa9351b8637f630f5695b1b7ec6669bef9f"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4919,
+      "digest": "3c591e340b0fc956a56c760bf40b389b89f336af1936fdd804bf77b08f3041fd"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4908,
+      "digest": "9c5b1a52bee135ad93dab2598fdbb25d0a71e08eada9e5fecfdc2b0bac4f3921"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4913,
+      "digest": "0f38b67dc184ec2bfe55d00f9c817b9035d992ba3eaf531b1bc144a39bb86c43"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4916,
+      "digest": "17ed1a9cb3b965628819f9817b907ba2673786b9b82d385e02f288c8b05faa2a"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4921,
+      "digest": "bf5bab01bec6b9021f05ddc1a80c598356d804c7bde8e14ebd9227f46ba45f11"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4910,
+      "digest": "d6e8a7e914c6e38f484cf1d691bfb80d02aebb83db8dcf284aa113d8537dcdbe"
+    },
+    {
+      "profession": "lumberjack",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4915,
+      "digest": "b83f150d13bab18d7d67170a8ca9540c3604f1929bb3cbdb1f1eacd72b660632"
+    },
+    {
+      "profession": "forester",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4136,
+      "digest": "a46557ad93749e48d25a52912300f60117b66156ba7dadfffcf2f41ca26159f7"
+    },
+    {
+      "profession": "forester",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4136,
+      "digest": "fc23184ad2b5d5f4a795451e825901a1660224f92e486a47bce3b4b378c256e8"
+    },
+    {
+      "profession": "forester",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4145,
+      "digest": "c7c3f35e88cd7882982da4a609d2c86052532f8d4c46126261298735881c07a7"
+    },
+    {
+      "profession": "forester",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4145,
+      "digest": "f2b3c43d985d3b000d863b12a5bf22d6446a0ef5d3bee95a02ec8b09486308c8"
+    },
+    {
+      "profession": "forester",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4138,
+      "digest": "86b38c54fc6d4ebd94e072f13bd4757fd5e309fc706f7fe1132b7fb8967a0ad9"
+    },
+    {
+      "profession": "forester",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4138,
+      "digest": "d2384baf59ce8212eff8746256f020d90f62928b514944cbc38daad31f36e3fd"
+    },
+    {
+      "profession": "forester",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4144,
+      "digest": "b517051937be15e3a214b8c0ac16f4a05dc5d4e2ef82ac68b531ab00aebd7d36"
+    },
+    {
+      "profession": "forester",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4144,
+      "digest": "dc315ed6a9e98a26001990f241e62f7eb047f2add45c7a83a76deb3346f627dc"
+    },
+    {
+      "profession": "forester",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4139,
+      "digest": "762ce4f6ef7b71f206127750e4ddea746686c13151e116bbe7c203f4eef55caf"
+    },
+    {
+      "profession": "forester",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4139,
+      "digest": "43ff016d3feb98963ecfff50f208282fb5b57e9c93e4361870e365b7c61d3aa0"
+    },
+    {
+      "profession": "forester",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3835,
+      "digest": "ee04d2177d14042dafa6757641dddd100feaed79e9bcc26861c6d1be0e5a8dcd"
+    },
+    {
+      "profession": "forester",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3844,
+      "digest": "9740648bbfa9a4868280082d700f2714d587ff4888f480b43797d9d93e70595e"
+    },
+    {
+      "profession": "forester",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3852,
+      "digest": "f8e9b14edb2fe778b7530360aa4eaf8025db4dd2c63b42c386d162ec47f15cf2"
+    },
+    {
+      "profession": "forester",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3861,
+      "digest": "740d7d9c4baa37a3fce70e892da92dfb8651fbb70c848bcc06968cc7975a03a2"
+    },
+    {
+      "profession": "forester",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3839,
+      "digest": "fef43d18b6a3dad8433694ad08630d9b2425c6f1b6b033a463d40199bdf83881"
+    },
+    {
+      "profession": "forester",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3846,
+      "digest": "990f1ab73f488c5c9b45bb956c7b95dc2981248254a5bf03393d105102133a4d"
+    },
+    {
+      "profession": "forester",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3845,
+      "digest": "3d197fd67a51eb95a3ac4d9867b2e3605215824c91ca8dfde6931798ec2996a6"
+    },
+    {
+      "profession": "forester",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3854,
+      "digest": "38f26d484c0af57da898698020d2f6d66de8487daecd475cb765f7c980244a08"
+    },
+    {
+      "profession": "forester",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3837,
+      "digest": "41cb45e9bb9bf9d626589a4ebe607e492097e2896fcb449a3113f7e828ae8869"
+    },
+    {
+      "profession": "forester",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3846,
+      "digest": "cd9861a6b4a6961bc2dae1c85fe33c1121c14ce9ecd342dfced64d6dab19b516"
+    },
+    {
+      "profession": "forester",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4249,
+      "digest": "897ef96d549cce537bf07eeeb7e75ab706d1afe140cc4b5aaf811cab2a7fd337"
+    },
+    {
+      "profession": "forester",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4244,
+      "digest": "323a4acd71a0d1dfb4196b11f5acc2fc7e015ba069899fda626c67c24c79baab"
+    },
+    {
+      "profession": "forester",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4256,
+      "digest": "6726a585eebaffe17a1f7f60b0cbb82685b4a7f890324ad45efc6873ff505b53"
+    },
+    {
+      "profession": "forester",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4251,
+      "digest": "6637480ca4965e80ad90c49d7041dcec8603a8010ca7ad5f0f5cd57400d01323"
+    },
+    {
+      "profession": "forester",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4249,
+      "digest": "7f9f5ecdb7577461d25d4edb02d6c9eaa7323c93e4d0ef8f7c9f191cab3111ff"
+    },
+    {
+      "profession": "forester",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4244,
+      "digest": "1fdde4e020f7c3bf415e0c8c36f4c193dcc90befa8ff8e03ecb717745d045a29"
+    },
+    {
+      "profession": "forester",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4259,
+      "digest": "4af6ccfacccdcef9927e900d8b8a53b1ed26aaee34a6024041400416cb7bbc7d"
+    },
+    {
+      "profession": "forester",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4254,
+      "digest": "7d652f8f2c530094b69fe3aac1bc5c0273833ab95029a44eee19b4e047d3d408"
+    },
+    {
+      "profession": "forester",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4255,
+      "digest": "37b83ded50fa4a4a3bf099176bbc57ce49855665550ed5f407545f01f2b1d100"
+    },
+    {
+      "profession": "forester",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4250,
+      "digest": "6c1d779c87cda3882a8a246e657d5572c579e9084bea3bd5af90adaca73d8aed"
+    },
+    {
+      "profession": "forester",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5049,
+      "digest": "5bd37acc5036058c92fb8f217fe718750860a2a2cccb65e3c47ec13e5e66a16a"
+    },
+    {
+      "profession": "forester",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5055,
+      "digest": "b7a29ab37554f127ec82e2f477e2d8cfc1f996b120745ab8914611aa5e926bb5"
+    },
+    {
+      "profession": "forester",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5058,
+      "digest": "23ee8c0bfb9881e822ed19577b2077ff7fdb6a2a70d9e5ed76efbf542c9015ad"
+    },
+    {
+      "profession": "forester",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5064,
+      "digest": "156014ae3ec823eaca8d946062e7162edd9b7bf3ae50c83357169d5fa814e71d"
+    },
+    {
+      "profession": "forester",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5050,
+      "digest": "96b1113572d390800314eab1679e76b697bf8f6523273c790c9164460702607b"
+    },
+    {
+      "profession": "forester",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5056,
+      "digest": "d75efc2562b79edf8887994ecf198174b5aad6c0fce075847b36f20b8938ce12"
+    },
+    {
+      "profession": "forester",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5053,
+      "digest": "7644a8eca83fdb44131a9b747dde37abfbafb7917e837dd93f49c6947e5b17ed"
+    },
+    {
+      "profession": "forester",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5059,
+      "digest": "5ad0e03b9cfeb6e113080b5caa1b6c6db6673acdb5c73828d235460c6cb54feb"
+    },
+    {
+      "profession": "forester",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5053,
+      "digest": "d38e3762a72d94e4628c572bea6096a81dd8de28ea2a43b5127bff1f077ad1b7"
+    },
+    {
+      "profession": "forester",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5059,
+      "digest": "504a424e0aaccfc371766a2de939d625b563a07d51699e46bc3b913c73f70d1a"
+    },
+    {
+      "profession": "forester",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3877,
+      "digest": "f8c95af3490a7a5951d0a945e27c30ac74e9ab7c4d6a30e1c77589e58d38cf1d"
+    },
+    {
+      "profession": "forester",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3881,
+      "digest": "e8e0b8419e184158f9abb9bd31d8c21cdf9486233624c78b4dea834c5f37f085"
+    },
+    {
+      "profession": "forester",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3898,
+      "digest": "faa12afe099466f9aeb3208b04fd67fa00835aa86cb2d8e34f3db2d6ac5d226a"
+    },
+    {
+      "profession": "forester",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3902,
+      "digest": "625677e3bdfc6caabce4c2b567493e936ca23c1f576b7892f63668196b42e335"
+    },
+    {
+      "profession": "forester",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3879,
+      "digest": "cc23b04b5085721b9c1b9f382576d58e71ea5d48cd6abc767c6541300a3cc7ee"
+    },
+    {
+      "profession": "forester",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3883,
+      "digest": "779cfcccbbcaa04ba2700669ebd8b99f6513b8bc5eb0c26a6820fa4a6409c5c5"
+    },
+    {
+      "profession": "forester",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3885,
+      "digest": "1dcad5c249ad9763b1ecd166f0293d39b10b66f8af630de713cc58f7b905a90e"
+    },
+    {
+      "profession": "forester",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3889,
+      "digest": "5b01c971473d5851abe57fe652fa5b4597bd21d7fa81b3c104d163b0d5520f47"
+    },
+    {
+      "profession": "forester",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3880,
+      "digest": "2a50b767f938e07357ac98c9abb3527a5f458c6acf458c5f40ad5c52c61bc94c"
+    },
+    {
+      "profession": "forester",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3884,
+      "digest": "93fe67039e0850a651373b0b4a0f7fcdf95d2880a9a252fb4ab97aeaa19c76d6"
+    },
+    {
+      "profession": "forester",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4898,
+      "digest": "395f39f4dab1c9311d30849cd00de1ba98cb3c08de5301907b137d2a4d98844c"
+    },
+    {
+      "profession": "forester",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4903,
+      "digest": "f614ffc492b1f279d9f29d4dfcca042ef550cb0f45b1a6ae5c1a4b69b8bcd450"
+    },
+    {
+      "profession": "forester",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4905,
+      "digest": "b786007761b88d8d52051fed83e9673d07da4905d231f46d6b7893d080575c0e"
+    },
+    {
+      "profession": "forester",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4910,
+      "digest": "47ce055c4e2ed95968b0a06c59d0f49acdb21f3703dc4eec21dfd204793fc684"
+    },
+    {
+      "profession": "forester",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4900,
+      "digest": "8c441913130a1f1cef16121fce9a40311ca31aeefd2352eb2dc7623580c73f7d"
+    },
+    {
+      "profession": "forester",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4905,
+      "digest": "c1288502ee3c2a115c86f59a189c043b840faf9c4a181a113887f3599a336e6c"
+    },
+    {
+      "profession": "forester",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4902,
+      "digest": "c52122dd888cc9022813ae9f8162223d6c8224dddacd41eeba03bb7e0d794c31"
+    },
+    {
+      "profession": "forester",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4907,
+      "digest": "a3cdadf6a525f6977bcf17bfe033ecfb3a2f6ce6afd110f1c899ae37da648278"
+    },
+    {
+      "profession": "forester",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4902,
+      "digest": "db371ad7be88687ccbdd767ed6e774c99cc2192b386fc236a00f3c60c531a8e3"
+    },
+    {
+      "profession": "forester",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4907,
+      "digest": "583ca093fc4f9bd0f382ae572b4d158cceda9ecb5f04c3c19b5af957f7cc70d5"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4025,
+      "digest": "d4e1d1b55f750001663f65401017b95bcb582e653f1fc437cf1e5b54b1db6b9b"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4027,
+      "digest": "19d5b383a0dfa859fac19b23ffd3538b55b76a09f9bccf4c6a45e06f0f997e3a"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4036,
+      "digest": "53fa2b634fba9e1f0d114068f47542929f1cbf87468beca75dbd2e8e9694b53c"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4038,
+      "digest": "426b04044ba6d5eb44e284a8f7434fff05049e3da5d26034778628a0a44a2059"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4027,
+      "digest": "ffb5d5b02b0c119299a1ba39524df684c449f8f7f1fb73c2b9add0762bc00fed"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4029,
+      "digest": "89e98f226a0b5c49b5184c7603a6bd20233915476f625a909608d4246a2cf6e1"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4056,
+      "digest": "e0c7378bdfa66d05b6df7f0330a2743add05445b34782bd912e3091d153e86be"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4058,
+      "digest": "52eba2b87e5f40742571d84d100e9b3d1fd5005f5670e775345cd62ef6783571"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4028,
+      "digest": "ec5c086419d493a7de1aa05143ae7a74970dcbf12f779f7a1bd6f1b126d0c22b"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4030,
+      "digest": "823ebd67aedfffa4830e25d2b17f5f844f0622044ace2c823dba489cda8c8215"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3716,
+      "digest": "28e7d6443bb73078416f019934331009f3a6336c2c2f9493db3a283576c0e998"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3724,
+      "digest": "df8907220408fff5bd903302a4e37b78f86e79acf3b69836fb552b30e339cc23"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3747,
+      "digest": "08093d05514145a8724cb44d40a7779a7e59bc40437d1e74080ba32354db3145"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3755,
+      "digest": "8ac66e8fc3700bc7b638fab0c26f7c3b31ff4fffbb52eb4663487dde0319b00e"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3720,
+      "digest": "dc74a7c94e7ec5da0ffacbc60541622237ad4e656d46fdb85cf16e51fb7bb64a"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3728,
+      "digest": "c9bba6d1575792db205e761aa047833badaa8485c0929660d539477efacf5991"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3759,
+      "digest": "88c03690402166dda45384ea2da4a2e445002417e054e927b4220cb73e5e3263"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3767,
+      "digest": "104221ddb4003a77f076c5cede677109886d0ab64b46bd70706937396b62fb07"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3718,
+      "digest": "313f1307694943ab2fd9eded04310e9cece8666dc9be4f9e3fff53201bde7bed"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3726,
+      "digest": "021a4a0ec11e24770559d7aa29acd39dd25b3780b3fdca3e328834defbec9bc8"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4168,
+      "digest": "a02309b538a5862b10e9a90a75fa10121bcee90323f7593c7da0d6ad9bdf6260"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4165,
+      "digest": "a79c4f4ccfb8348286d22eaeab83e1f023e652589ab9ec0f462d9caed222bbf0"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4176,
+      "digest": "f82711934218d1fcfea6fcdefda6eda850ca6247a81e92420e2bcedbfc0f3d08"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4173,
+      "digest": "b341fb11358dc686fefa0afd1328e14cbf4c3ea726ca3457354e28a3edd3ccad"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4168,
+      "digest": "86630eed941c0673410bda6b19a12cb6db426df71551b38b93480d37cbde4879"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4165,
+      "digest": "736c95530f5ae9f541c0aa2eb752c2bb795182f564889ff55a51fcea07dc7f1b"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4190,
+      "digest": "a84fb00859ef07c15c64dcdb22cfe579a1081d725174508d597d883dc58b85b8"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4187,
+      "digest": "ca2229bac0133337e40b89d2aa0560393dde7615b94a9c475a399a3181be28d7"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4174,
+      "digest": "5b09fa005308b2f25d1af3a560b405c7783f83630ac7913d3b1bfddfab642f1a"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4171,
+      "digest": "3decb3e171cbf381d7785338d1fcd45050900a295ef3c280089bb2a9657e10f4"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5017,
+      "digest": "3782353b96d43373687465ebe19eac5298e6288bd484de364366a2e176dc2129"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5025,
+      "digest": "efbf3e3555caa231562d1673eaa18fcdccad32fe47a9f16efa8610cb1eb32b3c"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5028,
+      "digest": "211e194e278288fb9cdfce705b6a46babe7a34d274f8dc9440f7054ae52482dc"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5036,
+      "digest": "41b9c7b7b3e499c134d0fae4d4f77eeaaaba655c17cf86979766f74ac5afe291"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5018,
+      "digest": "2c345cb3aea6f3e8bcca7012100253e2cb58b725e232dfe51cbbf307e3953df1"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5026,
+      "digest": "9d2a234f3501169f161b374138e8a06aaf6b45f53ff2e7d6a8c44c46908f4111"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5030,
+      "digest": "8593701422bcec963846556f4af06e690e2df08bc67ba15e0094445c3dbbd53f"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5038,
+      "digest": "bc745aba44a24539f3a3d0dd63785eba0ea1fa2c0c48d9de6e9db0021d561375"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5021,
+      "digest": "ff236714e7154c0e6c3c235fb409df97d8df18b439976a9fd22cdf15fdbf216c"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5029,
+      "digest": "d440d2af61b9038205acfc23818f535c4ac5a5d1a7a69979e5b7b919826b9793"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3805,
+      "digest": "3739baa81be6709a0722065e0bd47bed92ac4f2842801f9c4d643bc7baf3fa4a"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3810,
+      "digest": "4e1855b93310e84646cf20a18d1cbce6fc3c330fc0128be4e8af8aff3321fe67"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3830,
+      "digest": "f9ce60812c98d066f29d093e556601eecc0d47a3da9e2f88f02e1a81b8c14a24"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3835,
+      "digest": "3f167c739f4efee6bcda1393b6a3a54ea66a98c635d147f037549b82e4c50760"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3807,
+      "digest": "e5276795c129b06d6c4bf93722cdb5118dfd4b442850376047dba772cadfc1d0"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3812,
+      "digest": "7173942f1d10d34d2256d710ba78da10dbfadec1538713b5bc0c478f2bd64d25"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3830,
+      "digest": "5b103add6c63a6b0aaadea7127f82fc7f2598b26c2ae55c28ca7e9354bcf42a0"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3835,
+      "digest": "b7ebd6a7b8cdc7cb292cbb06c99a7adec5236ebdab2c1f7e01e89fb5d753b09d"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3808,
+      "digest": "617261775c8d3ac48cb6b79da2b9dc8ea88ddde8419b7da5746190901019f72d"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3813,
+      "digest": "e0abb5bbebd0de380ced0c22780f346922abab4f168a303f075f8c5abbea703b"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4872,
+      "digest": "4b993978ae09605cffa7031fd711dd6192145f8ba2f9807e79008a9603af8667"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4877,
+      "digest": "c7347d830ce97f96871df6d44f3102da1a88137f838e68f289faf9e0d3ac0306"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4880,
+      "digest": "7d93c6dee22dccffa9b0ec3328d28342e48d6328c2061e7be9ffaba7725a58d9"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4885,
+      "digest": "26985a24ca416d685b0260c1983b9933a442a87270dbaccbae0b0e44ad3bfc28"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4874,
+      "digest": "01e72cfa13b4875b46735ef9e32643e67326559a2023d9af11ed174ed47f719d"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4879,
+      "digest": "626f1373320ffe372371ab4cdb379f48a90d0131d42774f1a03f87e9fb020798"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4882,
+      "digest": "f89634320658f01d21cca4ac233ab89e651ae86a38b4211121cf006ec3fa4fdc"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4887,
+      "digest": "8f52f3eadfe2fb9cd742bac052e81b420fcb5055177c44e8c06814790906f6c6"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4876,
+      "digest": "9439e8840b4bbfe861dfda5aa8eb3454a044b2dd780f1b27aca0434f4fa77cb5"
+    },
+    {
+      "profession": "blacksmith",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4881,
+      "digest": "3c910d3c5e213bfc0fab4df4a5be0bb01075598a020f98efb87426151594faa7"
+    },
+    {
+      "profession": "armorer",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4104,
+      "digest": "749d3cd4bc2bce38b9d7a92406b9716fd250e72d31c8eac7ecb78c430626ef89"
+    },
+    {
+      "profession": "armorer",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4104,
+      "digest": "17a43223ffad429e5cedb970d5bd0e41d282f9cf7cb748d846052d477d0ede77"
+    },
+    {
+      "profession": "armorer",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4115,
+      "digest": "10cde75c1fbdf01033507aeb0c36c1aba37b2c0d5ae230d3ea8bfd2ff9d11d2d"
+    },
+    {
+      "profession": "armorer",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4115,
+      "digest": "52903c998e072bebd77eb6f8bc4ba3ba88f7ea73e795c6dcd03a02f1c8e69c16"
+    },
+    {
+      "profession": "armorer",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4104,
+      "digest": "fa1cd77fdc502299234cc92c2a895a5c28678be2d3554cca96139b58ea8b9b4c"
+    },
+    {
+      "profession": "armorer",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4104,
+      "digest": "7639430d8cb61cf57d495bf1daea5282a12df91425790135b1031709dcfad2f6"
+    },
+    {
+      "profession": "armorer",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4120,
+      "digest": "58f437af3853c29fbb75d7616fd90c10d3c58c7a840dd058d25f11be69d6ccef"
+    },
+    {
+      "profession": "armorer",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4120,
+      "digest": "e9737df873f28b05973aa97d86462723de0e29235df43868557086f1e89cf6bd"
+    },
+    {
+      "profession": "armorer",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4104,
+      "digest": "8c0f48addd5fee1d2947fc129abf569dcff410ddcea001ae13547bdb82f65cbb"
+    },
+    {
+      "profession": "armorer",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4104,
+      "digest": "65885584aff87625e9d5a3d5d049187d766e15cb29fadadd4ca2564e7830a507"
+    },
+    {
+      "profession": "armorer",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3811,
+      "digest": "d22ca76c557538d22ca259f430b080b45c6f60222eed769406165d1b27c435c3"
+    },
+    {
+      "profession": "armorer",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3818,
+      "digest": "3a8cbfd2590c7207e2d07a78701c77c42a07c4cbdcbba6fc9fc81eb0ca4ef029"
+    },
+    {
+      "profession": "armorer",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3834,
+      "digest": "134a53e535fc39d856425daa4ab2e657a0c727a99ea9cb0deb1120edc68a26ea"
+    },
+    {
+      "profession": "armorer",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3841,
+      "digest": "83994e7888c516beb084e8b7c1af89ca1e76088f0b0540c10b51ecdd5dbd078c"
+    },
+    {
+      "profession": "armorer",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3811,
+      "digest": "80868b859dc9b790806ba594cd76eea4814584c0ae1b42ef1c6bab0a57299c66"
+    },
+    {
+      "profession": "armorer",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3818,
+      "digest": "04f65312c4de7c3a239acdcfb3f48cf52f2c6d17af8cec299e8ddc27d19b96df"
+    },
+    {
+      "profession": "armorer",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3831,
+      "digest": "b1ddb2bd594340dda4b7e6a8aa38167a27e9566af4c8448e9456a4f465329c3f"
+    },
+    {
+      "profession": "armorer",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3838,
+      "digest": "8657ea0a06789ad32a94a1aac76b7de9f52b2462cb4e88fabce247a5891fbf03"
+    },
+    {
+      "profession": "armorer",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3811,
+      "digest": "b1327a74a1ed6cf52cbde177aca6211a70b96b3290584e80dcc2feecc16d4f35"
+    },
+    {
+      "profession": "armorer",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3818,
+      "digest": "206341df2fc623d8e7c224a0327e0aadbe4486f7d5e2844a4455a1f2fdae8c4c"
+    },
+    {
+      "profession": "armorer",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4203,
+      "digest": "af2d2101fa9449ee870c9ce475f28a5bda80b39bf475949d7b1e91dd7c38f38b"
+    },
+    {
+      "profession": "armorer",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4198,
+      "digest": "13d10aa4d0125c5d88bafb2e6d4f32477361fccaed200c45cc1c9439b3106fcc"
+    },
+    {
+      "profession": "armorer",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4212,
+      "digest": "0874faa6da99e7bdc2354ddaaccdaca3fcfbccc5e6e3871abd2949d72840a031"
+    },
+    {
+      "profession": "armorer",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4207,
+      "digest": "1ae29530044d38357c9bd121b2340ddd1014ba539d308dae1955ec173bfda8cc"
+    },
+    {
+      "profession": "armorer",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4203,
+      "digest": "d722593ba802e14c5c602832512d18076de6e0144e33c8cecfdd54133d512f80"
+    },
+    {
+      "profession": "armorer",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4198,
+      "digest": "08174b4494320b422a7f5a5707ca8a055c92bb0c6b425a1bdcabc76bedba533a"
+    },
+    {
+      "profession": "armorer",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4225,
+      "digest": "22b477df8dce42d61032faad4e5efbef3e187b68cdf7c1666037925d13ffa9b8"
+    },
+    {
+      "profession": "armorer",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4220,
+      "digest": "f9117ccb0dd4e85a2e939177c86a398681a76730be4f4bd23d42c5898733f548"
+    },
+    {
+      "profession": "armorer",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4203,
+      "digest": "a82c7a25edb398250cd9c44990e3d84ae0e5177a04a4dd0eaf4ece516ac9299c"
+    },
+    {
+      "profession": "armorer",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4198,
+      "digest": "c3adf375da4d817498f1a8fb617b2759329fe794fd8c9d590d8c363634ee82ac"
+    },
+    {
+      "profession": "armorer",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5067,
+      "digest": "7658023ab751e7989b54db0ad9d943262a2e6534a8dc969c1970dbff2a9ae347"
+    },
+    {
+      "profession": "armorer",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5073,
+      "digest": "cf76e4274e4bfcbc0c56b772df60dc7520f88dd985aaabb16ce7c605af5ff700"
+    },
+    {
+      "profession": "armorer",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5078,
+      "digest": "2a33ec96cc106861ce6ce7ae899c0e6bcf8f198895ad4415ed682ec995256d68"
+    },
+    {
+      "profession": "armorer",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5084,
+      "digest": "e93dc7d017aa02f6e85ef1a13c876c4f398db747cf78f2115043d5fc8aac12b8"
+    },
+    {
+      "profession": "armorer",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5067,
+      "digest": "e57cdbe26cff3fd1afbccbb45b22cdd7646727e319f241ff6ed6ae4ac8c2e8be"
+    },
+    {
+      "profession": "armorer",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5073,
+      "digest": "9ffeaf4a7e41227c649f37270906a33e7c323393d3ac4d351bbaf0195b5cdb57"
+    },
+    {
+      "profession": "armorer",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5077,
+      "digest": "e3aaf436356931dd8dd406b3049de74dd1ea9f156da2d0f5d99293a83e0b4b31"
+    },
+    {
+      "profession": "armorer",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5083,
+      "digest": "1ccc807043152e851860fccc465fdac2341009bcd083be76c7ce8e3df92e4a6d"
+    },
+    {
+      "profession": "armorer",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5067,
+      "digest": "fdb8bf1aabfd47b44ecc4254f8327611c0b8f0525b0c0c07a49b4b8127101e9d"
+    },
+    {
+      "profession": "armorer",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5073,
+      "digest": "6606e558cf54b2051becbf097039517d3b80937f6722030e1a5fc52f47e553f1"
+    },
+    {
+      "profession": "armorer",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3858,
+      "digest": "1abf08959f5a905e68b7f740360aeab3f72bb6a7c29fe650a78322e51daf92d1"
+    },
+    {
+      "profession": "armorer",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3862,
+      "digest": "f79e4603e27803c07b640beeb36f7b2479af12ef33a0b9d979a8af12b28e41d6"
+    },
+    {
+      "profession": "armorer",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3883,
+      "digest": "1e55035483778bc00a92006faa29c17aea0557424e1b224ab5b68d27980f3e1c"
+    },
+    {
+      "profession": "armorer",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3887,
+      "digest": "61e002077b12b1b412f95ca36b2f554fc99f8a64ddc658269808d599b4bcd6b8"
+    },
+    {
+      "profession": "armorer",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3858,
+      "digest": "66ce2dab65cead00c55d6592cb96df1c8acf4f93da6ac6cd19d8d95b687a83e4"
+    },
+    {
+      "profession": "armorer",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3862,
+      "digest": "5fbe3cf8f5350a65e45e4a09fc47221c22f7b9e29f4e1db6f72d9f7735762ee0"
+    },
+    {
+      "profession": "armorer",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3875,
+      "digest": "4f1d0117ecb1e794b21e4bea933064341747526771cc13565ff08a08f3285c09"
+    },
+    {
+      "profession": "armorer",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3879,
+      "digest": "26eab7223af09a897bbd26866863811004da1443051c1ae14cd78e9c7720689f"
+    },
+    {
+      "profession": "armorer",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3858,
+      "digest": "5407b9e2529b25a16d99feb029c23a304483822e23d9d5c56b76fcc9a9f76bb0"
+    },
+    {
+      "profession": "armorer",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3862,
+      "digest": "0a1ea3bd12573051283375ba7bbf86def7475041e13c93a91ba8e56d5ed0396b"
+    },
+    {
+      "profession": "armorer",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4920,
+      "digest": "233bc37e400fd4121e321397a2c1c627e23c4053c51a67933815aeb923d994f4"
+    },
+    {
+      "profession": "armorer",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4925,
+      "digest": "c46a0dfd4f0443e8e1e72275eea37b826d1f4750f9b1722ef0a78b80bcad4c0d"
+    },
+    {
+      "profession": "armorer",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4929,
+      "digest": "d8631d4c8ea3b14ef6026da5339b0a5a64e64f40b738f904cd2279b0f4e7d576"
+    },
+    {
+      "profession": "armorer",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4934,
+      "digest": "8801a7b5bd4a12b7a9747048fcf48ea3d111ee71aa119595f14228bb3f06f8f4"
+    },
+    {
+      "profession": "armorer",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4920,
+      "digest": "2700ee8b86c5ccbda0165ab710711881bc42bbc8dc567b3c5266fd56eb287e59"
+    },
+    {
+      "profession": "armorer",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4925,
+      "digest": "3c72b020f176d4c23861d072d8f926356d98500027efcd117ace50ba5195645e"
+    },
+    {
+      "profession": "armorer",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4928,
+      "digest": "391c690e15708a037925d4ebfb7a550dac9d75460241a5442a3df3440f9bd11b"
+    },
+    {
+      "profession": "armorer",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4933,
+      "digest": "0634d70c5d93c2aaec31745fef62201cca47b708d7ad102cbaecb0fcd1054a8e"
+    },
+    {
+      "profession": "armorer",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4920,
+      "digest": "63ed43175f2063c77667036a9c4c7f17b1974bd5f489b08067f3ac625032be29"
+    },
+    {
+      "profession": "armorer",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4925,
+      "digest": "641b8ffeb8a07077ac821c30ce0d7b17144f6639e60280c6b05154abd66f1481"
+    },
+    {
+      "profession": "carpenter",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4098,
+      "digest": "10d4c86a3969b5a6c76777f866e21444f501f844185213a345dff4a18c7fde00"
+    },
+    {
+      "profession": "carpenter",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4098,
+      "digest": "fa319635dc2206c34c27c0670c71470d07febb7710522b15fb31374314d84c62"
+    },
+    {
+      "profession": "carpenter",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4109,
+      "digest": "a60da3b0335b1be39dd56c317021fabf4341fa856e57e4008db5bc4517871888"
+    },
+    {
+      "profession": "carpenter",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4109,
+      "digest": "b8826bf1d2cfcb96088f9d27cc8b5871f98640220021bad589332fd0c0784765"
+    },
+    {
+      "profession": "carpenter",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4100,
+      "digest": "13cd4f3d63beaaf7be6e761034afe66beffc99414ba6bc3cbb6ca657ca994cd7"
+    },
+    {
+      "profession": "carpenter",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4100,
+      "digest": "ed199bb0cc725e1ff15ee50a4cd2f0d42e54c7df35e139350df488c2a4c67b31"
+    },
+    {
+      "profession": "carpenter",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4114,
+      "digest": "3b396b2ca825d2057fc391514ca782f29c25a27a1e0434b5b7286ed745407b74"
+    },
+    {
+      "profession": "carpenter",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4114,
+      "digest": "acf7172dca23d73a7d59c9dccb75069c40db3930338389ab212d31389d452467"
+    },
+    {
+      "profession": "carpenter",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4101,
+      "digest": "83008b34a19d26718dc3baf8eaf2b0655c44f98ddae4fa6668c36345be716c9d"
+    },
+    {
+      "profession": "carpenter",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4101,
+      "digest": "97d11df7da91205bd5e40c57b9f9cbb47b52a359239061af6c516d8c5726c957"
+    },
+    {
+      "profession": "carpenter",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3808,
+      "digest": "6e13676e8d869d3d9e93e9eab0e253c06e02c222439715e3929c50c663003765"
+    },
+    {
+      "profession": "carpenter",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3815,
+      "digest": "367485048386311dd9a92169da3835b6eb329973085029f24f5cc0094c414756"
+    },
+    {
+      "profession": "carpenter",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3831,
+      "digest": "3c5b68f57c10e73df73c24756127168fe41f106702ad831b4a6bab93006b4b4d"
+    },
+    {
+      "profession": "carpenter",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3838,
+      "digest": "6281930688bdb40a22851b07f6042e40ea03a516f5d2b5e224c61cccc8424611"
+    },
+    {
+      "profession": "carpenter",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3812,
+      "digest": "9a5506a2b28021f6ee7fce957c845fd3a4e4af8e00b846f75c87528c13d9ddcd"
+    },
+    {
+      "profession": "carpenter",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3819,
+      "digest": "459052eb2538ab4cc766b9616c8501adab2091883a26a5be908946efffddc09c"
+    },
+    {
+      "profession": "carpenter",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3828,
+      "digest": "b9d46df2028b8f30159a164cb87aa3ec9dfc64cd67297885630889054b909258"
+    },
+    {
+      "profession": "carpenter",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3835,
+      "digest": "87572a872a20ae5cac2783bdcc164b131634df4a93c074ab47ab77b225bc6bb2"
+    },
+    {
+      "profession": "carpenter",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3810,
+      "digest": "e024a0adc43ca6a74726ded8d50e7ee7d5c1c9125e3cf50f363d7b6eb63dc16f"
+    },
+    {
+      "profession": "carpenter",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3817,
+      "digest": "24f26d1aa6f96934aac1a7c0f6f0b5cb0098da0335c761fa40111dd56669501b"
+    },
+    {
+      "profession": "carpenter",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4193,
+      "digest": "5d6007e1b6ee799d8e880fe9700545ce374e9866c2945b022a3cdc2d59a55bb1"
+    },
+    {
+      "profession": "carpenter",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4188,
+      "digest": "8e6b4d7b50d4ff8a396ca0a7bdd22b7210094c5c65b854ab6c1a0ef17bd65304"
+    },
+    {
+      "profession": "carpenter",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4202,
+      "digest": "658a5a13dbf7632993f2f94efd6fc808d7663741d513d919533960951fcec8e3"
+    },
+    {
+      "profession": "carpenter",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4197,
+      "digest": "e19fd2070521bd98048d001f3dfed9ec6efb379dc7a10b9248f33d8a47a894f6"
+    },
+    {
+      "profession": "carpenter",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4193,
+      "digest": "a12e68c664d7cabddce4081cf7e83987fdab1343e0784747051656a648b94876"
+    },
+    {
+      "profession": "carpenter",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4188,
+      "digest": "ae0384dd5fca118cc9f699669eb5443ee572f0a4c3c2d67560e7a30b49c123db"
+    },
+    {
+      "profession": "carpenter",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4215,
+      "digest": "4bb902802dac28756905e099c4ba84b7f15c5afa7a089079daf54c972c372a81"
+    },
+    {
+      "profession": "carpenter",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4210,
+      "digest": "ce194a94aee2b351f6eaa8c848997dee29cb7e42fda7901d682e742a2c797f38"
+    },
+    {
+      "profession": "carpenter",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4199,
+      "digest": "3d50c5145dca810f6202ef2c8b56fac972dc66456eecce9970221af99a179a7a"
+    },
+    {
+      "profession": "carpenter",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4194,
+      "digest": "051612467959886a06b3cc6b27509deb8eef2acb235aa62a8538d570ca143afb"
+    },
+    {
+      "profession": "carpenter",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5061,
+      "digest": "fa8e2985f1f73088eff9a5e9cb3ffe8070cf8febaf634624838613f2d7ee788c"
+    },
+    {
+      "profession": "carpenter",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5067,
+      "digest": "145d6ebb520689e165e278bd917b481004d361d5021f765b429c87f936ea4219"
+    },
+    {
+      "profession": "carpenter",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5072,
+      "digest": "0400471900dd935066581ea4836171783481188144419103066499668432698c"
+    },
+    {
+      "profession": "carpenter",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5078,
+      "digest": "5b42697fb4a33ca6b723300ce310d0fd5b27c2448a754ed7db78c2a8648de265"
+    },
+    {
+      "profession": "carpenter",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5062,
+      "digest": "e8480d47df81dd5581b659c9a1736c6f4625875b215fa86fdb8c1edb1474148b"
+    },
+    {
+      "profession": "carpenter",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5068,
+      "digest": "faf36f5a3c7a2c6848101575bb75a78c4ca4de471db4a2291980e45849687e44"
+    },
+    {
+      "profession": "carpenter",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5071,
+      "digest": "077831d2e4ac8c7648589b9c41ce816f832ff0f3ecc61f00d50b68a39a264eab"
+    },
+    {
+      "profession": "carpenter",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5077,
+      "digest": "7bf325107bf62354ff696ec4aa0563476499ba7c5e358f2e67f4542929227e47"
+    },
+    {
+      "profession": "carpenter",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5065,
+      "digest": "c8710ce511b9356cfc9203083f241025bfa1e0a26e7e8446e389bd5d56cb4b9d"
+    },
+    {
+      "profession": "carpenter",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5071,
+      "digest": "ecaedda6fd91c7ebfc17d6fe7a4212cf4f55eb64834914594411d4c8f9d62742"
+    },
+    {
+      "profession": "carpenter",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3851,
+      "digest": "9b7395a7a016070fcb846ef4f912c30a92d1122b6478e1a350073e307bf0a8c7"
+    },
+    {
+      "profession": "carpenter",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3855,
+      "digest": "a52814f4dff37185e956244b45c498a10f43df3c8bb3c46ee7233668082fc383"
+    },
+    {
+      "profession": "carpenter",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3876,
+      "digest": "17830217d14d8bdd31927fa2b8a3d98aa409431ccaf454021f31f81388e0044f"
+    },
+    {
+      "profession": "carpenter",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3880,
+      "digest": "b2d5c0a49051b771f642a9f37b8477b0fa3798b7787654f86a0d9d50568513ef"
+    },
+    {
+      "profession": "carpenter",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3853,
+      "digest": "1b1e99920c71d5112bfbd16f15da46d9d13d239739ad9f06323ad3c4a692ccde"
+    },
+    {
+      "profession": "carpenter",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3857,
+      "digest": "07a0694cdd5fc21c32cc80435cdb403c115be61dffd4f1ed3c602e9513672e79"
+    },
+    {
+      "profession": "carpenter",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3868,
+      "digest": "d0855f3f8984dc97f8a1153f4f79529e864d679c20e62e6b10d25f57beaeea14"
+    },
+    {
+      "profession": "carpenter",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3872,
+      "digest": "6726590ba96f0cc6d3f41a68f93949c4cc4fc8e0c380a8c8337c44033e2cee25"
+    },
+    {
+      "profession": "carpenter",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3854,
+      "digest": "bce91de2a0ff6fafc2b4180ff195bfc12ca9cef9090b272c831f4e9a0fd052c6"
+    },
+    {
+      "profession": "carpenter",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3858,
+      "digest": "d97c2b111ac7d3409b763271ed4a854e13a1b9966ef1329ca5fa5e44a29661a3"
+    },
+    {
+      "profession": "carpenter",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4908,
+      "digest": "9e841fa07cef43953795429f9810d1f9a587fb99b28454399dfddb202ecea52a"
+    },
+    {
+      "profession": "carpenter",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4913,
+      "digest": "d5eec08b05d757e3fe5195cc7a64d2d30505c2affa00c5cced9e77c3fe9088f9"
+    },
+    {
+      "profession": "carpenter",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4917,
+      "digest": "368ecbb61c29d7d5dce56b540e1f58a5d6c4338378dc91e02b34aeb25e2f5f49"
+    },
+    {
+      "profession": "carpenter",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4922,
+      "digest": "a2d22a3b7860fa0dc01acfd6f83c48d2c4b7314a309d2ffaf2f528a2ff2c1483"
+    },
+    {
+      "profession": "carpenter",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4910,
+      "digest": "f6dc908f49cdeec111cc4782dd6c4b214dc6e2f49e5f2ae76be41140beb6dc9b"
+    },
+    {
+      "profession": "carpenter",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4915,
+      "digest": "0ad778d6b6cea7509fb61d1bf8189f4611b30af51c76ee1ca130ad31e2d35b64"
+    },
+    {
+      "profession": "carpenter",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4916,
+      "digest": "a8647522e80850d4477179d3f7ef2fc4b3c09c8383f0161c7a138a368f455062"
+    },
+    {
+      "profession": "carpenter",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4921,
+      "digest": "b80892b9843906df531c04140d728244f1dc53a28bca93b2712c52c6c3456be3"
+    },
+    {
+      "profession": "carpenter",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4912,
+      "digest": "5c93385473353fdf9bc032a9c679c6a01d0da8bdbf0408bbb63307f1d98ae8ab"
+    },
+    {
+      "profession": "carpenter",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4917,
+      "digest": "37310bb8b68b9ed353aa655f84e75450bc139995147cadacb4d6aa407e9fa338"
+    },
+    {
+      "profession": "stonemason",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4116,
+      "digest": "54340af5d4d3b3af2205d5cf3a350a83a93b9d908bf2e059e3fac14469eef315"
+    },
+    {
+      "profession": "stonemason",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4118,
+      "digest": "aee4139c6288245c857d007618b9f5b68bf3a9ca15b808b69fa1f42f5ed5e25c"
+    },
+    {
+      "profession": "stonemason",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4130,
+      "digest": "13218764d5b4508453fd52cb38dec15368ab7e8d49e1e296b3583653be0e12cb"
+    },
+    {
+      "profession": "stonemason",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4132,
+      "digest": "4651e1ae365e8f0bcdff76353623c4848e7296347c65970146fb4b83d1875574"
+    },
+    {
+      "profession": "stonemason",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4118,
+      "digest": "d3162f3cf23a800700eac583f8988473a06fb82659887ee441682ad1d30771d8"
+    },
+    {
+      "profession": "stonemason",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4120,
+      "digest": "6c039e23b345862f03549079c56aa95248488c533dc094d5b20c996fda5d98d1"
+    },
+    {
+      "profession": "stonemason",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4126,
+      "digest": "e4fad29250963c881503ee5b5c8c25f126534ac6f47154ac972db42eda0dd1c9"
+    },
+    {
+      "profession": "stonemason",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4128,
+      "digest": "3388a23e47ea48c1f875e8f36ecb5cd5669040d9bdde4cec21d88ce598a6b693"
+    },
+    {
+      "profession": "stonemason",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4119,
+      "digest": "e640655a63a9242ec8c60ff26be34abb62695d80c294fc3d59f92ad05e00f854"
+    },
+    {
+      "profession": "stonemason",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4121,
+      "digest": "0bd8a9517d9e50524c9d3004a9196688888ffad2bf197e764011665df46ca946"
+    },
+    {
+      "profession": "stonemason",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3808,
+      "digest": "0f613c47d70d9c59647685afc90f2919baeaf024dd531faf330dc70992ca6eb1"
+    },
+    {
+      "profession": "stonemason",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3816,
+      "digest": "3f235b08ac09e7149d7f0ac536efb80903ac97c126346c0a44aa77c7e29da04a"
+    },
+    {
+      "profession": "stonemason",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3830,
+      "digest": "d8c4c4d25a0041be86d6006dde6a3f5cef381ba0b353e39272552ebb38abf107"
+    },
+    {
+      "profession": "stonemason",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3838,
+      "digest": "e835ebfae018f11a3dca823363c58358538ab36dc6187ad5a2ea816eaa29636d"
+    },
+    {
+      "profession": "stonemason",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3812,
+      "digest": "c671b18160f988aa9ddbc55effb11c4d1bde4d13224a9bf52d6aab6072e95fec"
+    },
+    {
+      "profession": "stonemason",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3820,
+      "digest": "898b613c004b972b18d6d5e6459e374ecafa109576a4d51287a901f821e65f60"
+    },
+    {
+      "profession": "stonemason",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3824,
+      "digest": "462cfc9f313a87b62a5b3b84bb3b430aa9166ba3020f51c4f012756bb0fa9585"
+    },
+    {
+      "profession": "stonemason",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3832,
+      "digest": "c1bf1d7d79531871e9b53b77f7d7676945b199352e26142876156adac9a2bc95"
+    },
+    {
+      "profession": "stonemason",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3810,
+      "digest": "0bba12cf506f02219ac7b2517ae9cd19714604f655cab94496272e9dff9892d8"
+    },
+    {
+      "profession": "stonemason",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3818,
+      "digest": "753b5a3ef56751c5a63293a8f76cba2d98339765c2a4b575ead5883e00595958"
+    },
+    {
+      "profession": "stonemason",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4254,
+      "digest": "858ab1aa1f2841f38bce5637f8843c320084ca591d134cdc0d082a3a019fe132"
+    },
+    {
+      "profession": "stonemason",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4251,
+      "digest": "48ce6d3aad3af1c2fb072926110cc3fb975785f449150c19fdf7454083c09699"
+    },
+    {
+      "profession": "stonemason",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4263,
+      "digest": "80afbfc9737f01e387f63de0de167b91ea8ab2e4193fe45ad38b6d848e94c3b3"
+    },
+    {
+      "profession": "stonemason",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4260,
+      "digest": "e3e9a0f615e82bd3d81ac82b92437d0aa876d2862a635c530f20fc8fb35465e4"
+    },
+    {
+      "profession": "stonemason",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4254,
+      "digest": "4aca56efeb0325c0831b557682f1ee892c90c56006717b6b0a95d7fff675566c"
+    },
+    {
+      "profession": "stonemason",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4251,
+      "digest": "dea161b8ef5676330fece62b60318a0a5747e715ec2c7f751d5e71e07cee7ec4"
+    },
+    {
+      "profession": "stonemason",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4262,
+      "digest": "1d54c210979ca61e38511e31a1b7091fbbd6415f6caba89bde3429b87d7836b0"
+    },
+    {
+      "profession": "stonemason",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4259,
+      "digest": "32fd98e33b10e7d9b6cccf199471f8fff044dc3c9507ea7d2d48bb0b7fab5a43"
+    },
+    {
+      "profession": "stonemason",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4260,
+      "digest": "68e3efb22a2167decbd4c7b457a62208ef87ca82ffc13a341cdc6d61b02d3036"
+    },
+    {
+      "profession": "stonemason",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4257,
+      "digest": "881742edea7f64ca7c3d8aa47d2f981620d18ad7b247cbd5f8fc30c41dbf4b02"
+    },
+    {
+      "profession": "stonemason",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5018,
+      "digest": "2e19cc81f0fcb2051008851a8f6f517db50503768567b7dd998e47f4bdb1bb7d"
+    },
+    {
+      "profession": "stonemason",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5026,
+      "digest": "411f6140caf0e435056cb6a3673db17bd966bc4809de04d6786c75a9ff428cdd"
+    },
+    {
+      "profession": "stonemason",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5032,
+      "digest": "b09f90e2b99c566abf144abe1ae55a8acd219f0b6c728405092755c91ccf4899"
+    },
+    {
+      "profession": "stonemason",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5040,
+      "digest": "1eb5fec1d919d526bdb4c6ccb4696333413cf39f2ed02acdba7cb394e43db7bd"
+    },
+    {
+      "profession": "stonemason",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5019,
+      "digest": "52f186567c7e468ca1b995e321f616542b863401476322fe7e24f09f380a4376"
+    },
+    {
+      "profession": "stonemason",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5027,
+      "digest": "97d9ca73896a34176c85781e2712f276e39a15504ca26d8dddfd9136be60c961"
+    },
+    {
+      "profession": "stonemason",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5028,
+      "digest": "604c41e54543c3b006306efa1ff371b0352631858d52451ca74bda2b75eeb1bc"
+    },
+    {
+      "profession": "stonemason",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5036,
+      "digest": "9a7d1117e811a108107a474b3b88e0f626e8e7d66e0adc0ab594e77d25a99537"
+    },
+    {
+      "profession": "stonemason",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5022,
+      "digest": "9c111f3ad480ce3d5a05d1739cbd039cfd2a129ef74fe073cfe6636e508ed0b4"
+    },
+    {
+      "profession": "stonemason",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5030,
+      "digest": "b90d76b4f99d86db143fdcf67cdd2bb32c4beaa1666c8a9e5e422d4f19645c57"
+    },
+    {
+      "profession": "stonemason",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3857,
+      "digest": "bfdcc41d032ddfbf47224d674bfe3f2ccfa26346281127a1564c2421ca4c3320"
+    },
+    {
+      "profession": "stonemason",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3862,
+      "digest": "2684f524d8e0750acd5339173c2c64135009810396463783da975317b7519cae"
+    },
+    {
+      "profession": "stonemason",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3882,
+      "digest": "1dea96776e13e3991ce8110225d27bd845fa9ba9a290ee501cdb9cb2e91caa29"
+    },
+    {
+      "profession": "stonemason",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3887,
+      "digest": "4b692e34bcaa1267abc8e3e070dd6295d8f7871388485c96f48aadcdc6d72d41"
+    },
+    {
+      "profession": "stonemason",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3859,
+      "digest": "fd3209c4a39b46e687aa2c047a3e8221686a7e7ae64b124bdc81dbd1e6ba921e"
+    },
+    {
+      "profession": "stonemason",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3864,
+      "digest": "95104909a064dd4619c0626bafc7253a87892856ef6550bf211fa36bd22e8d7b"
+    },
+    {
+      "profession": "stonemason",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3870,
+      "digest": "9a8bd31cc6474e6dae32ac8b8d6d89005f05e598f1528a5ee6beff95ab03c83b"
+    },
+    {
+      "profession": "stonemason",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3875,
+      "digest": "4d422001ca9d53f0bc3d5f358970d477188241dd79504128a1aeef27b7e1fb4b"
+    },
+    {
+      "profession": "stonemason",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3860,
+      "digest": "e904a967411107687b866aafa23314bed80db731d29bfd4a56a32fba7ce479ce"
+    },
+    {
+      "profession": "stonemason",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3865,
+      "digest": "e8dc0d0eccb15e7cf9bb01833874ebf5210c970408cfe48feb96f7533a77b9f9"
+    },
+    {
+      "profession": "stonemason",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4881,
+      "digest": "0ba69650e63ce5fcd60ba20b454322f2419bc2d5a531c7826c8a80a90510476b"
+    },
+    {
+      "profession": "stonemason",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4886,
+      "digest": "24127d5d6b907ce9de7f8a5cd209d3113da77d79db8e0cc1dd7e2def6b1780be"
+    },
+    {
+      "profession": "stonemason",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4890,
+      "digest": "f2d44919f1744e48d830b0460746dcc177f64dfc3e0060483c257665d3ee4751"
+    },
+    {
+      "profession": "stonemason",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4895,
+      "digest": "63848969893652e8b853a159f17f10301ffd7d4c8a4431328542436196eb2f44"
+    },
+    {
+      "profession": "stonemason",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4883,
+      "digest": "103b8982ce60d5cab8b2ba7ce7f5f578a79824a518e61dc3133f7ef0e071f2ab"
+    },
+    {
+      "profession": "stonemason",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4888,
+      "digest": "cf7c96938138b6b7d5b58bf4626160d48068f3b13d517dc2cb63ad5d4d29b6b4"
+    },
+    {
+      "profession": "stonemason",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4887,
+      "digest": "cea35415c3d2298c78ad8b9d063ea5b04ca02512b0a74c6355bdc1b509e0ebb2"
+    },
+    {
+      "profession": "stonemason",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4892,
+      "digest": "dde8877131dd64a71b87b1bd9b8b2551b03ffcd5c1e857cbc4dac453ac0884d8"
+    },
+    {
+      "profession": "stonemason",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4885,
+      "digest": "b589d2ac29ed507fb16902b9c24c6742db98206157df5453ca402b0026266ee9"
+    },
+    {
+      "profession": "stonemason",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4890,
+      "digest": "d3ff20c4f46d94a3928d73343f44b433155ea9201b0b51ec97442fa5f67b72ae"
+    },
+    {
+      "profession": "potter",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4057,
+      "digest": "b2e73b5322fe7fad7947f3eb53a4ab25330be3d4cdbd2cf505f31aa9da2a3613"
+    },
+    {
+      "profession": "potter",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4059,
+      "digest": "055f3497ae3a08a5aa9541cb530b5488cd9527b31b7ed03e0a870592549365c6"
+    },
+    {
+      "profession": "potter",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4068,
+      "digest": "febab8108750e4c0e006d972bfbdc150a60d3cd7763c0e8ef4f96bb406c77aea"
+    },
+    {
+      "profession": "potter",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4070,
+      "digest": "6dd09f0e7b476bc40ded94d8121c9f07662103cb0dd6e0389ce5dc0abecbde55"
+    },
+    {
+      "profession": "potter",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4059,
+      "digest": "7511a489d2ccc4bad313f685311bde7dcd0f7775b48e790bbc99a8d5a29c0922"
+    },
+    {
+      "profession": "potter",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4061,
+      "digest": "474c272ef6a325b3170e6de42b5577087a55823c9e4f127bf0440943547af5f0"
+    },
+    {
+      "profession": "potter",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4088,
+      "digest": "377d441c5169f0819bd7fa2969cbd18223c49a84250417f92b70d97544f002d4"
+    },
+    {
+      "profession": "potter",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4090,
+      "digest": "69825b296442767522265b06c378ae3e5559fad1896d72e6887ad3811e0a6696"
+    },
+    {
+      "profession": "potter",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4060,
+      "digest": "37b0a69e0f908e7c38f332f080225c2d26a71032264b255a5bbede6060f2c54f"
+    },
+    {
+      "profession": "potter",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4062,
+      "digest": "6b957b1ec9cadfb63638bedb3af4b55f73709df528e02cc89b6cb1d6f2feace5"
+    },
+    {
+      "profession": "potter",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3750,
+      "digest": "f156f66dcb758eb7a808b7387e9112595fc66f7eccdaa84e52fe400f86e5a313"
+    },
+    {
+      "profession": "potter",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3758,
+      "digest": "e919c8d90994d99b70d0f6586b5d1f719f33de4ca4bbe81144b28fa938954833"
+    },
+    {
+      "profession": "potter",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3781,
+      "digest": "827ac1e1e1499f2e666cd3e00e9fe50501d026d07c0c3cbd78ba10848dac416f"
+    },
+    {
+      "profession": "potter",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3789,
+      "digest": "0ad931a36d6615ee2e1c51c90704efb55aae8cfe2564e94f758f65d1136c88a5"
+    },
+    {
+      "profession": "potter",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3754,
+      "digest": "e71bdf41b84c276b52c75bab6e3eb0537ad121bef116b1c04358af09dcbc238c"
+    },
+    {
+      "profession": "potter",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3762,
+      "digest": "55f55d5c3c5bcf04a04e77015c365a9c6d7771a654ff47f8c4bb7cfca42aa9cd"
+    },
+    {
+      "profession": "potter",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3793,
+      "digest": "9ed2c3fe8c785d20fba207551a7b78869306215f030dbdc7e6a26802d326d7b6"
+    },
+    {
+      "profession": "potter",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3801,
+      "digest": "182f10dbb1e10988d236c4b57fdd61d63c32312dcda2710b811ed7dc1330fb6f"
+    },
+    {
+      "profession": "potter",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3752,
+      "digest": "9e4297f1cc03cee94e9b978bb9bd1674c60d7392be2bc569a22c866efe6b4b54"
+    },
+    {
+      "profession": "potter",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3760,
+      "digest": "4e02e7e52c7eb535344b5ba1eba40afa5766eada26da8c29d906902adcf616b0"
+    },
+    {
+      "profession": "potter",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4189,
+      "digest": "6723fd350904b049a035e7dca791c4b8f39380b88cdc8e6ad943779c0a21aad9"
+    },
+    {
+      "profession": "potter",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4186,
+      "digest": "611ff1abf42445e21d2891f00f767c129851f996b5e257d783bd0739db48b6bc"
+    },
+    {
+      "profession": "potter",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4197,
+      "digest": "c67b7080ca7ef8ee07bb6e1ff9a0ccf2d173af63bd393d7ba2c1ccc4ba3c241a"
+    },
+    {
+      "profession": "potter",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4194,
+      "digest": "49512ccc2b6d6ebd039783a34fe72d58fddaadf3067fdecb2869af3b9527053a"
+    },
+    {
+      "profession": "potter",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4189,
+      "digest": "4b3f1d878d2d17e8b96f3cf2efcbddc11188b8245324d263f8c56fc1f26f53ff"
+    },
+    {
+      "profession": "potter",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4186,
+      "digest": "94f78a89b0ce78f69be52b86e1ab04a6ac45b38d23f4edc0e4cd6dc2b311c845"
+    },
+    {
+      "profession": "potter",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4211,
+      "digest": "1032854bb356d3bea41028a14278d887caa25dc3d67ee3c91a718477fca9572b"
+    },
+    {
+      "profession": "potter",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4208,
+      "digest": "23a0eb359e78ea6b260cc4d506e0fd58dcf1397c87d02cbbcfea1e665cef0654"
+    },
+    {
+      "profession": "potter",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4195,
+      "digest": "223c17264cb20bcb034fc331a4cbed25076a1843585e64d3e18be04e01b7db80"
+    },
+    {
+      "profession": "potter",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4192,
+      "digest": "d823f989b0ad4df6dd99082d5f03575132d46e762887cccf95edc1c841f43a96"
+    },
+    {
+      "profession": "potter",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5047,
+      "digest": "e301037b49aafe1c61b2d1f5df17a8ae528ba2606f2867d443e21482654f8226"
+    },
+    {
+      "profession": "potter",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5055,
+      "digest": "dfa7c55374e86d4fcbaff3e50f97279c36719380a75e36c3d467117abd4c49b8"
+    },
+    {
+      "profession": "potter",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5058,
+      "digest": "ec7cf16aea269f169d2a4223aa46b2d94f5fca1ec681427f791f6611f22cda85"
+    },
+    {
+      "profession": "potter",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5066,
+      "digest": "2b6c755de5a9257542096c06e12534c2bd4f3b791b0ac69db80c9f91c83d5627"
+    },
+    {
+      "profession": "potter",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5048,
+      "digest": "46d0401cba8679423bf264a982f35847e365deb8586fa274c81225bacffeac0c"
+    },
+    {
+      "profession": "potter",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5056,
+      "digest": "43f1fd4ca39631fdf10d97a14c6da092b3f977e50d34f55da516ae149cf3ae6e"
+    },
+    {
+      "profession": "potter",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5060,
+      "digest": "29557ae13e1041068ff8919f05246b9c8ed07cc0b3659d1d01554aa6adef9d0a"
+    },
+    {
+      "profession": "potter",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5068,
+      "digest": "9eabb65fc4819c5ea0f8e5da8b64fec6ca362dac1219ffa80c95f5d0fba3b8b9"
+    },
+    {
+      "profession": "potter",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5051,
+      "digest": "6f8c276d6117a957dd787a00b373b4230e53eb5e6a0b1e24648d7abeba7752e8"
+    },
+    {
+      "profession": "potter",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5059,
+      "digest": "78bcc9f42c8d7b1da7d55c6f312deb06147d69917b4abac1737bbb8bdc70e4aa"
+    },
+    {
+      "profession": "potter",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3836,
+      "digest": "06e5aba531c3825d84e89c0065248c9c2300a89f0d2727c71053e4ec8e6257ff"
+    },
+    {
+      "profession": "potter",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3841,
+      "digest": "c75c87315a25dc53da5a56ea22c5dc3f1f71128630aafb8311386c8eb356c9b8"
+    },
+    {
+      "profession": "potter",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3861,
+      "digest": "f9a38cb03e371ad6afc14f9d12a1dc4f1fca160fff4940901667809a47f928c8"
+    },
+    {
+      "profession": "potter",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3866,
+      "digest": "2faf8220e8f9e22a1c8b59848721357036f0e612d408167bfa12268cd6de5636"
+    },
+    {
+      "profession": "potter",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3838,
+      "digest": "3b0de0ef53050179539261db42b0f1d11d26eeef586455d90c36a5bf1853fc0c"
+    },
+    {
+      "profession": "potter",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3843,
+      "digest": "a4d8d5d00c39b8c6b95edcdcc49e0d0f1fba71c7103a4c52769469f5fc68c6b7"
+    },
+    {
+      "profession": "potter",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3861,
+      "digest": "ef6dc9ae3a1c34c17647c4eab1201a35d7568d233a9109f8e4d6d692e323e5e9"
+    },
+    {
+      "profession": "potter",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3866,
+      "digest": "749f5f79dcaaebf57c279cb19554b0298a1676f631f1e9d987ab181294feffc4"
+    },
+    {
+      "profession": "potter",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3839,
+      "digest": "35e6517b11154503cbc9e49cfea7178a3f1c845015a9b3595a8cc5d1df7b7364"
+    },
+    {
+      "profession": "potter",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3844,
+      "digest": "5b228e6d3f0d91c26f963f6d37ea8422c44a45669658d7248e95f2227bcae940"
+    },
+    {
+      "profession": "potter",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4898,
+      "digest": "350d12d25eac7a770e99554582302a30c8e0a6b95f73c36bcdf0fd62b655cc63"
+    },
+    {
+      "profession": "potter",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4903,
+      "digest": "c8a5b1504ccb85b28c1f7737e72ba67c5a5df26662b98f67d410368a5fcd03c3"
+    },
+    {
+      "profession": "potter",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4906,
+      "digest": "e327b4b3e26326b890cc820c758aa6d3ce787790a2ad51534166cef07fe22c72"
+    },
+    {
+      "profession": "potter",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4911,
+      "digest": "0a13ba32598419bca05393524e6c3a4b9f9c9b80944fca92157b850d2c1add91"
+    },
+    {
+      "profession": "potter",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4900,
+      "digest": "e2598e066321bbcb8048671755f33798182e816ec20279adf9ca1393d4c3b404"
+    },
+    {
+      "profession": "potter",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4905,
+      "digest": "e0aedbd61953b9f9185de2e5f5abe60d44e2c8f1f408147e72637ee36ba5b48f"
+    },
+    {
+      "profession": "potter",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4908,
+      "digest": "8da8d100de1c39969d12e787f2e87f6c1fcb9b89d69f25e51091a7d72db76251"
+    },
+    {
+      "profession": "potter",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4913,
+      "digest": "cfd989a4ee317286ecf19c14c48e727bdc5cdaf085c810022560e0a2797028d9"
+    },
+    {
+      "profession": "potter",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4902,
+      "digest": "ef634cbe92af7fd295f47b6002df76d1cf94adc6c2cc347f4a707fc943f876c7"
+    },
+    {
+      "profession": "potter",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4907,
+      "digest": "47f8d04e33bc63bfbc11f101d39d6ba619696afc01d4e7a45c4595ad7773f938"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4063,
+      "digest": "a35d74e20277ffd3cfcc149bb5ac51e33848c6e6f6d27d311b48e09464a3eb44"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4065,
+      "digest": "2a676e706fd60c8da475f00b8ea111d12ee5e546fbb60a6c7ef37f191269275d"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4074,
+      "digest": "c4172e90baf9243474667c6a2f9e813ba5ff3f6b10923723e098c3539f6ff9bf"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4076,
+      "digest": "13ba662add146ed44a37886536ead7b9c7d1f52c12325701f923deea45cc089e"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4065,
+      "digest": "9699a7040ecdc86795343bac64ee68a53bc44f89a1db7655e97533ae0114095d"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4067,
+      "digest": "4d392fe196b91387d1a24a2c70b4217d1b0456a63339045e09b6b6031af7fb0a"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4079,
+      "digest": "368a493478d83888e962d9499aeafd6b2214869ffeeb3a91e2bd4f5c3c60cc82"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4081,
+      "digest": "ccfa9ac32f838eee11cbd5b660944c2df2ada92b75657f4d41caafe7e090d9a6"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4066,
+      "digest": "7ff5cca507f25450d9662f60a0dbb916f9432a7a6b0f82572287ebbac0b47fa0"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4068,
+      "digest": "d379312d74b16e662b122b4590b993ab899940406cd2d196312de5054c9402b8"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3775,
+      "digest": "243219db20b28d635aa564693f0222640afaa6a61665492b9f3e33da6f9b3c73"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3783,
+      "digest": "c37d728c4ed93b04d965df78c2145e3392b4b01b3cb1f6a6355b44f32cef4800"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3798,
+      "digest": "75c50dbaec3cc1c7bebae8172deebce96b73424c166b2fafff2976adab502ae3"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3806,
+      "digest": "c9c0945520d220cecc79cf30bf849408d65fcd3d7f178bfe690229e366baa957"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3779,
+      "digest": "5a7bf9650b71656935fd183f016e632c8494a1d3c43313bdfff37534241cd7c6"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3787,
+      "digest": "b7c9fa422b0eb05540d7b68b22105ae3b25a714e46f4c4870573e239c9482710"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3795,
+      "digest": "108157a8abb544a5dea9d237da57a942d3bde89adcf65486477e2445d2dc5cbd"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3803,
+      "digest": "469196b1eeba099fa140c8863d1fa022a672e7364a0ffc3a3deb183a86fb9365"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3777,
+      "digest": "9869da0d8dbfdffea504b2f71eb91b1dc40eeecdf371c514ab4c0adda91a465e"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3785,
+      "digest": "8b291027201e0f3ef3d764b3e5480548459cd3ead9a507b7a90c3aebe7a534ae"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4164,
+      "digest": "704a9a5b9143d0b3271ac01d4261eca68840b3acdc85aa4396d78d2e3dd8d0ed"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4161,
+      "digest": "5bc75e881eb0cbb7f4c6021519e9b7594954b76a07f88dc3787baeec8820d840"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4173,
+      "digest": "a56b23885026f83277c3954bd1181c5859848f848ac6ecaff6ccbd4248b69091"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4170,
+      "digest": "ece787c4c1cefa5560023d20218788c6154bdd572bf14844ad378db751c635d6"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4164,
+      "digest": "1f2005ed53af3c7ae1d99f33fa63e49ab74bad167d7587a5ea94cf930ff40af2"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4161,
+      "digest": "7f4da9f0f4858c631dbac35b9224834a2627195630c14c84f6b9dc0d3937bf89"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4186,
+      "digest": "e2b9c3bda40e7d6ca75ca1c2661a07857996157e4f88d665aa158343f7638677"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4183,
+      "digest": "fdc0d31abd8cde2eb185d98af109cd49b61588081bbacbd5cb36e0c06e5a9343"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4170,
+      "digest": "4d0d13f3f3a0edd4589581a865fdee437a6dbaab145dc74d86bfc7b4a91551a2"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4167,
+      "digest": "15a4f62526cd4aee7221278b904aef0b4d55484d36a44e32b06bdf64ff345907"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5016,
+      "digest": "6f42734ba32325ac32a1014bc004ca88a251b0f544f5e93a0588eb8a741ed210"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5024,
+      "digest": "9253eef68d0e842fe6d3e6d8ff62fa16ee06d2987aa5148e1fbac1e834987c6c"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5027,
+      "digest": "8ab1f552191a4467368665f45ccfd5ab894baa105521c7b904c4cb86094143ec"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5035,
+      "digest": "e4be437d517a974b07ead78c747690b94dc8ae5726eb5f9e9450ed830e414e4b"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5017,
+      "digest": "81a2344fca0df21be04ab95ee84e740f7f05157b89ad71db1f7eddc35f29aa92"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5025,
+      "digest": "59d1fb3fa763c0841a1a02cfc03202cf35fd64fa9e3b605569c421443cf9418e"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5026,
+      "digest": "48f79d4e96c924fb31589f409c6cfce7a40bf84c283affed2f51e4746db251ae"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5034,
+      "digest": "767c6449e9573bc87f12ffa26dd5b775ae0074c498d052da8b8447538e394b03"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5020,
+      "digest": "731603d67dc39aece07c28b01086baf373f18cbd636f42bcba4c45817f0b53f1"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5028,
+      "digest": "6f94734e66ecb1ac565cb41e53dc6c75da830585ac40c27dfeecfdf2bd0030f6"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3814,
+      "digest": "4530a4da2e8cf0701f5c8709fc7e89cd6bdd622d472dd63520033c51c6aef415"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3819,
+      "digest": "1c3b6c53b3d02c626ab579853c6aa69d31286e9fe0336367b923a628a7db62d7"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3839,
+      "digest": "8ce4efabf2088ef851182947cc8c44b611100f45c44a6ae4316fa59be6abc8ac"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3844,
+      "digest": "002d7e6600a44ccd1bcaaafe62ded680e0d78e4be63c6a836da7ce6e7f00836c"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3816,
+      "digest": "c351473eb6bb70fc67a52a61a0446cd58ca891da5476d2d2bf8072ee9c1a1bdf"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3821,
+      "digest": "84b8285852fee7648e7e8474da214fc6923e1680e4893e541f57afd0f028f705"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3831,
+      "digest": "8117032f684a3db2032eef044c209703624b8a331981d13462f32c59b344c5ec"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3836,
+      "digest": "28505ce427baf7b4cdf794a818f9e06489242fca720f5719e77e592828f40ce3"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3817,
+      "digest": "70d56254b28b7560321b2506a365b76e91dcf5adc8fbd3d306c97974cdf119b0"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3822,
+      "digest": "14581517718d21d76dbdf09231c0838efa3499859abfd30510138a71bb716f29"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4870,
+      "digest": "fe8d5a84fb9ae3dee07bbc299376142844e0086727e28590f0d4ff1c39d7a515"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4875,
+      "digest": "138ddb2a03a736ab51a1cd4707877b33a7364bce4fdab5422a1800fee80e444a"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4879,
+      "digest": "9c6e655a1df5047922d72d000c8b05ae82919eff6ee7a4b4407d639a1de282a1"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4884,
+      "digest": "e0e95ad2d9d25c3d1f8252bc8175da53b14b710baa46ba2c196d213609703498"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4872,
+      "digest": "2598bbcc64e6ead3158eaedeb8351f4e2e0e88a64d701708934987b2c680f283"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4877,
+      "digest": "5d3e3e93d7e7872a09fae87b0a998da38872422aa68b2bf4e15646689adbf128"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4878,
+      "digest": "1dd9459833718f61312add89768eb003de974940078c6870fabceb72df78c909"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4883,
+      "digest": "09c89635fa2d62e27cbeca65b7f2e685e0b63b48903f9fa5972b6523c67a51f2"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4874,
+      "digest": "e3fc9c38bd1e383c0369b49169fd850a916ead908c0c9e96a821b08d7f534283"
+    },
+    {
+      "profession": "glassmaker",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4879,
+      "digest": "fa48824832e6f581f05adbbe6046adc5bd58e9ed7e3dad633d520a3de2979b7b"
+    },
+    {
+      "profession": "tailor",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4050,
+      "digest": "afca1d7397f4e49c8eed07c5c9368de99100bd2001826a91cd4140613e4b2c6f"
+    },
+    {
+      "profession": "tailor",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4050,
+      "digest": "9df0d1baa72e7219445ea400724b113985dc0b02717bbcc53379fd371c45ce81"
+    },
+    {
+      "profession": "tailor",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4061,
+      "digest": "aebf0e694b38857de457aa9f87e1df659ac18d568afcb7a1d9f1016d6411e6d2"
+    },
+    {
+      "profession": "tailor",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4061,
+      "digest": "c0d160e984b8c2db25aae83491e4cf504dc73bf7e241e81b29cb132a345e1c84"
+    },
+    {
+      "profession": "tailor",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4052,
+      "digest": "0a4a246b6faadfcf4fcc7da3cad535fdae72b7aca59f301dd90369a48dd4dca1"
+    },
+    {
+      "profession": "tailor",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4052,
+      "digest": "6fc6b13e49c200cbd405d87dff97f76b916e6d4e78d918a68c65d0bc8330db75"
+    },
+    {
+      "profession": "tailor",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4081,
+      "digest": "26d570725ac4f3203815d9523ac0ba9af514938c4944ec84910984fd9b1604eb"
+    },
+    {
+      "profession": "tailor",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4081,
+      "digest": "25040402ea31acb4333f3941176dd90b0d515f72b0f945cf4f61e7aad5112724"
+    },
+    {
+      "profession": "tailor",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4053,
+      "digest": "79ae33aa9372082b722ec61c4bd407d09dcfe3a744b2d8778fc27370e34b9247"
+    },
+    {
+      "profession": "tailor",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4053,
+      "digest": "93d6c8db5557c88c04e55914e88846d8d7863cc78aec3b3ed88fe9088ca29782"
+    },
+    {
+      "profession": "tailor",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3741,
+      "digest": "0c990d454028e63f85e616675ad2aba218b9e3cdda1e389435732cdfdcda55e6"
+    },
+    {
+      "profession": "tailor",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3748,
+      "digest": "c40e47659b9b3284788d536772351342b2e4cdae162c62ce5a41395897bed90e"
+    },
+    {
+      "profession": "tailor",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3772,
+      "digest": "b268e6a60cf21fcad49c0305ee4b351bd36ba76476e97e0c03b99e7849bb819f"
+    },
+    {
+      "profession": "tailor",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3779,
+      "digest": "4923e4be75b0deaf50da1fb97535eb7341d54b207636fcceb43db2b4d2dc2735"
+    },
+    {
+      "profession": "tailor",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3745,
+      "digest": "36129580303ec55a730b62f3990585efd4ff64ad14e1f6b5977c25c89c1c5e90"
+    },
+    {
+      "profession": "tailor",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3752,
+      "digest": "7c931cc12b9c01130006dfd9b54e62a385e0debd175e33434b4fef3175f0f471"
+    },
+    {
+      "profession": "tailor",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3784,
+      "digest": "f8cfba5eb32dac32fbab165edbc3b8d6c6b40732515910713d04e87f2aca6e99"
+    },
+    {
+      "profession": "tailor",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3791,
+      "digest": "7508be8d10b254d80f1dd7b4937c041da19b9816522d994365345fa312e4eb56"
+    },
+    {
+      "profession": "tailor",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3743,
+      "digest": "ecb6618bee2a8af84fd04e2920e3237904ea7c248a53b166979223eb1f7e8f63"
+    },
+    {
+      "profession": "tailor",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3750,
+      "digest": "9ce6f2b3c86f00b59ad0ddebe50a071f360d636620e27ffb9c14696242ed8520"
+    },
+    {
+      "profession": "tailor",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4177,
+      "digest": "d3a4d7931bca738a2cbd8c5f0e7116744de5941d142a8a147727967e8828f448"
+    },
+    {
+      "profession": "tailor",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4172,
+      "digest": "e22a60ae7f2c8bd2729cbe14af0f1bf4f5a6ee36430d21e6b62e98b6ea0f3d7c"
+    },
+    {
+      "profession": "tailor",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4185,
+      "digest": "7ffeb770ae76a319bcf530d61f0c1b79757cbfb76db5f48dc22f7d44620cdb20"
+    },
+    {
+      "profession": "tailor",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4180,
+      "digest": "473dfe9d22f6b51b55f679ff2607531035281109bbcd62cacd2f8998b96a6f26"
+    },
+    {
+      "profession": "tailor",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4177,
+      "digest": "68a1e068916aa475f0831fd8c913c5df168d12c353dfe2260acf63a55e02bfa4"
+    },
+    {
+      "profession": "tailor",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4172,
+      "digest": "4929b8708636024f903abd3cb258cca42830e2ef9594b8937bc780f3d3a2d587"
+    },
+    {
+      "profession": "tailor",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4199,
+      "digest": "cd0bde220570bc17c7c66606eb75ec3d9d0453dc8c56d4d1f4801afaa20c272a"
+    },
+    {
+      "profession": "tailor",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4194,
+      "digest": "70abb52e8641bc4eec0df4c4bce654dc94dcdb41697a3fea515bfeb3e025604f"
+    },
+    {
+      "profession": "tailor",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4183,
+      "digest": "fc20a8169790cbd494daf8928239e6e64708f373e492cd610e694ca4728b03e8"
+    },
+    {
+      "profession": "tailor",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4178,
+      "digest": "c4a02b7aaa92754869e98f8a8cedcac36a8c3a8f55c3b3f04a0e045cd45c9fb5"
+    },
+    {
+      "profession": "tailor",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5042,
+      "digest": "63bd2bee24d39054cd5c5504a9a2fbe4dabe89e75eb39340dedcb0d0739a5718"
+    },
+    {
+      "profession": "tailor",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5048,
+      "digest": "92909d60280862d27879933bd39cc63c81d229fc46107ac1da83c64c6800760e"
+    },
+    {
+      "profession": "tailor",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5053,
+      "digest": "53ed56a58ee55b221f8e0a43c4ab039d7277a0dfc04750419ec16303bc665284"
+    },
+    {
+      "profession": "tailor",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5059,
+      "digest": "9843cc25130220563a2bb9217e7e824858d8807841bda4bf9e025c5dcdb60243"
+    },
+    {
+      "profession": "tailor",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5043,
+      "digest": "a47163e7a8638ac9474ba01bb6718f0583272456e8f764903df0be170510d836"
+    },
+    {
+      "profession": "tailor",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5049,
+      "digest": "945b7c2bdcf81f51b3f2c563084c1c9540d704a5f8464846096f4364902e1ac6"
+    },
+    {
+      "profession": "tailor",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5055,
+      "digest": "db865604b7db20cf60a6ba2807e3569f5c438a9b51f441af4b211bd5700f7001"
+    },
+    {
+      "profession": "tailor",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5061,
+      "digest": "0c868ce5278e615790326b3092ab2daa16ef345584fd14e676d826b8383c495c"
+    },
+    {
+      "profession": "tailor",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5046,
+      "digest": "77143d71e731af7a546fc6c96d284413f45f1cfeab1b0f87816f5646a37ccad1"
+    },
+    {
+      "profession": "tailor",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5052,
+      "digest": "fbc84a203e2f0ed500d2b5e388633e0a89b12936b717c4e010c09819df045deb"
+    },
+    {
+      "profession": "tailor",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3836,
+      "digest": "2e20caa8915db80435cc90e12c82e961af83cee610ba7d840f06735e3a5c9e7c"
+    },
+    {
+      "profession": "tailor",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3840,
+      "digest": "deae18dfb53fa3a39cf5caa0b932966bfc9e94912a823c192bbaafa0a694d3d8"
+    },
+    {
+      "profession": "tailor",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3861,
+      "digest": "82c0ddf7702031380da5f07e04c097c2298ba434061377e49313bc768927e56f"
+    },
+    {
+      "profession": "tailor",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3865,
+      "digest": "099e5e4dbe0c9aecbd3104f152191fa3dd2585e2c184eb3248ac8b812fab2629"
+    },
+    {
+      "profession": "tailor",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3838,
+      "digest": "fb56be5fc169eb947f2d05d9276b0b76e28ee7f445dd6589ec0cd313ccaa1d1d"
+    },
+    {
+      "profession": "tailor",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3842,
+      "digest": "8348e564a1797ee38c26b2dd9064dde5c5e687013861fa1702a5c82064719a2f"
+    },
+    {
+      "profession": "tailor",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3861,
+      "digest": "91b3394faac5eb92a981a5f26f2007486c1f79cf672630c14d76fe569cedddcc"
+    },
+    {
+      "profession": "tailor",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3865,
+      "digest": "1153c4834acf586dea75527d5a1dadce631cb04b7cd77ae602f688fa54bd7519"
+    },
+    {
+      "profession": "tailor",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3839,
+      "digest": "a1005a59ff9144d2434c5b5b8c4914aa7f02a2b1548ce696cef44d68a50498d9"
+    },
+    {
+      "profession": "tailor",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3843,
+      "digest": "9f8455d0bcbeed8207d080775622813661c44a0fe55df363ecc141134da13832"
+    },
+    {
+      "profession": "tailor",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4893,
+      "digest": "6d049548cf1d9acf49d81309974d600b05c141be2e15cce0968da446c69b172a"
+    },
+    {
+      "profession": "tailor",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4898,
+      "digest": "26f25c9685cd81713d7e19a200a29106c447bb68e3cd47ec02587b5244ae7883"
+    },
+    {
+      "profession": "tailor",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4901,
+      "digest": "a2dc5711b056aefaf0fccf9b507f133b2f0f5cd6e5e24220eacbae34215d979c"
+    },
+    {
+      "profession": "tailor",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4906,
+      "digest": "0895e9fc11117b1c11a7adbb72334490a82068ef1601ca10feb57661b736fc1e"
+    },
+    {
+      "profession": "tailor",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4895,
+      "digest": "5bd4f595c829419dc661be02e462339c0ff3a4c102406c8a40574a75ade47b28"
+    },
+    {
+      "profession": "tailor",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4900,
+      "digest": "ddd98be48c7fe86eaa9c59952a6afb9efc1fb394b6fd820fa0a7559f231fcdfe"
+    },
+    {
+      "profession": "tailor",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4903,
+      "digest": "2110e3b42d930548a1182b983d4437883d473f576ae1d98a3c46f9803671c63b"
+    },
+    {
+      "profession": "tailor",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4908,
+      "digest": "9b2feb2120ec00656561cf706879df418b06bea5f692047dfb6d009b13e6aa07"
+    },
+    {
+      "profession": "tailor",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4897,
+      "digest": "5d9a5364007f772313096b52c09963b1427102434ad836859ce8a42ee2fa69ee"
+    },
+    {
+      "profession": "tailor",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4902,
+      "digest": "f7fe50de8af7da031d94d8c5bf8f6bbc72ac31e5a587e673621cfd9cd55dd2b6"
+    },
+    {
+      "profession": "jeweler",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4078,
+      "digest": "c408a1135d58098bede5b6a27d11afa08d4b206e7068751a65193d95226a06fc"
+    },
+    {
+      "profession": "jeweler",
+      "race": "human",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4078,
+      "digest": "249b15f119c5c996eba6d070078e251a7c8d7d86cf88a9b43c8796c139e44e0b"
+    },
+    {
+      "profession": "jeweler",
+      "race": "human",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4089,
+      "digest": "de8c2bcf449337266a053e0148c500ab7674c70c306ddb66ff74c0864ef0671d"
+    },
+    {
+      "profession": "jeweler",
+      "race": "human",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4089,
+      "digest": "edb83c4fb6d2be51045d242766c86b95f8e92ae84c167d04fa346ae41623e0c0"
+    },
+    {
+      "profession": "jeweler",
+      "race": "human",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4080,
+      "digest": "12371a537219cc718fdad09e9346fa92fa5a1e83114ee31d510392ca399ebd7b"
+    },
+    {
+      "profession": "jeweler",
+      "race": "human",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4080,
+      "digest": "1418aaf8238fbc65d772fafeaa9c61254a3e6c2ee5bbf26f9637e4434f7c785b"
+    },
+    {
+      "profession": "jeweler",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4094,
+      "digest": "1bb7d846e2beb95ff132b6b06b5a4f0972bc2ec5ccac8b932613c9879523f423"
+    },
+    {
+      "profession": "jeweler",
+      "race": "human",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4094,
+      "digest": "3d11fd3d8bb0a438f4bcf20e843b5e7603e2c2c85a9f94eb10dba9cc46712f80"
+    },
+    {
+      "profession": "jeweler",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4081,
+      "digest": "b96a95b5b717309cb8dea3d0df8304068066511b63527d716bf34e9e48646a26"
+    },
+    {
+      "profession": "jeweler",
+      "race": "human",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4081,
+      "digest": "4042ec4a45326be789194cd9cf15fa4dad0de73dc3f6cb50ef686f5baf831d61"
+    },
+    {
+      "profession": "jeweler",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3783,
+      "digest": "31e80cf4b62abc2b482aece38cf82c188293279a5854604059541322ade66bb2"
+    },
+    {
+      "profession": "jeweler",
+      "race": "elf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3792,
+      "digest": "3bc594f7e30384126fc64319b0844183e29e09c487f6ade80a3f6e8472e848b6"
+    },
+    {
+      "profession": "jeweler",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3806,
+      "digest": "77206e18c47bc0d25ed0ee7e630ebfa2eb8053d62f3e24795f44a75bf456c503"
+    },
+    {
+      "profession": "jeweler",
+      "race": "elf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3815,
+      "digest": "a65bf921a1a3abae364cc768e59d569526171e67d2b4c2750164db8a0d2fe245"
+    },
+    {
+      "profession": "jeweler",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3787,
+      "digest": "644b89f92b3a48748cb2648d8d58806eed970df39a27e2d07bc6c0bdaa2c2c86"
+    },
+    {
+      "profession": "jeweler",
+      "race": "elf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3794,
+      "digest": "6073b15de887626bf89ab951577f62be0670f3abe90e5d3dae01a451a0ef7b62"
+    },
+    {
+      "profession": "jeweler",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3803,
+      "digest": "3b74e3ca1000936118c4f7356c369af084b1eb51bcdc16023436e267eecec6ef"
+    },
+    {
+      "profession": "jeweler",
+      "race": "elf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3812,
+      "digest": "f3542cbe1480f549aaf5f8b6f10bf01ab3c6c83815c627300298b5c8f9107742"
+    },
+    {
+      "profession": "jeweler",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3785,
+      "digest": "80f33140acc8b1a4b4b0be359174295189f35f3569941edcbe067c5b286230b3"
+    },
+    {
+      "profession": "jeweler",
+      "race": "elf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3794,
+      "digest": "4caf7d4ee7cb1a40c94467272834f2fb8b48604f3f01547549f75309aa641bc2"
+    },
+    {
+      "profession": "jeweler",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4173,
+      "digest": "b86e86367bb891687eb31f98082dad7469afed605228a05b2e0535aa5b982dd1"
+    },
+    {
+      "profession": "jeweler",
+      "race": "dwarf",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4168,
+      "digest": "2665372316010326334b70b69caa7ee93a05b3198b1baf09a6859cbecb98903d"
+    },
+    {
+      "profession": "jeweler",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4182,
+      "digest": "b8b0ebe7303f15eb51959d7dcb9171e302acbfba5a2288cd5a16b0a536ef8ca6"
+    },
+    {
+      "profession": "jeweler",
+      "race": "dwarf",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4177,
+      "digest": "696a4c36ebd265a36b11f92722f6b1f210951367ed48d65bf5a3ff5e554f1334"
+    },
+    {
+      "profession": "jeweler",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4173,
+      "digest": "adf0cbca3b25da561cc936d4e67ad84e0f9aea56ab6d571cec72c43b7375669b"
+    },
+    {
+      "profession": "jeweler",
+      "race": "dwarf",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4168,
+      "digest": "688d56ab9058a9644016af9806bd9b8f5ababa0c8af9a123b7e50edf7310ee99"
+    },
+    {
+      "profession": "jeweler",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4195,
+      "digest": "1863b4852a0f4d5a9e33dad38536b44fce2dcb37d2135bd0a223944b39e22f52"
+    },
+    {
+      "profession": "jeweler",
+      "race": "dwarf",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4190,
+      "digest": "706e0f7ea6c1b54b105e1af2b905530cd54ced5e89e9d75943222e256ce30831"
+    },
+    {
+      "profession": "jeweler",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4179,
+      "digest": "0935aa5fda73051494d6f47ba9c17a2216b6b5959100702f7c12a407981e6a77"
+    },
+    {
+      "profession": "jeweler",
+      "race": "dwarf",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4174,
+      "digest": "c7a11a0ce6f867cb3315bf9da70b10ec6ce8bcb7de7d855e6aa34d642f42fb70"
+    },
+    {
+      "profession": "jeweler",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 5038,
+      "digest": "77af1bccd19352a78b72ba331c3c4b987ee164e0f266f2e5b7be1ccd684519c2"
+    },
+    {
+      "profession": "jeweler",
+      "race": "thornkin",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 5044,
+      "digest": "b8c1de9b9573fdca316dc46cb4bdcbc06405f63cf0cedb2c1d9d0f5551f13819"
+    },
+    {
+      "profession": "jeweler",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 5049,
+      "digest": "7fe67acec71dc0933d65537ef15d810fd8f731b98629d9c8954560e6a97e1bd4"
+    },
+    {
+      "profession": "jeweler",
+      "race": "thornkin",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 5055,
+      "digest": "09439b4674487818dd14418d3148a0b9a45fa64e29d6f915f84f6859d035e027"
+    },
+    {
+      "profession": "jeweler",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 5039,
+      "digest": "932da8172dcfbc7249afaa7464e6ea58c61bd319914f51d13e2c61c08adb50b7"
+    },
+    {
+      "profession": "jeweler",
+      "race": "thornkin",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 5045,
+      "digest": "f053bc39571f56557200439370aca7b2acf613cef1c3dff825782080740425ea"
+    },
+    {
+      "profession": "jeweler",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 5048,
+      "digest": "d72b5e63e9b6dcfb1cd4d669ebf62e52e8f5b3ae836e153d43ff217fe58e38e1"
+    },
+    {
+      "profession": "jeweler",
+      "race": "thornkin",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 5054,
+      "digest": "80a38059a59f0c1becf7bc7847998f2f9821aaf318107da358dd6d1fcfdc054e"
+    },
+    {
+      "profession": "jeweler",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 5042,
+      "digest": "aebf6f0c5a152038be433e9fb58dbac6a13675c2dea6bf46619f342abd30721e"
+    },
+    {
+      "profession": "jeweler",
+      "race": "thornkin",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 5048,
+      "digest": "edde461dd622818be0109edada720e183f4ba7bf3fa9a9731666374e5dc48670"
+    },
+    {
+      "profession": "jeweler",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 3828,
+      "digest": "397d6a0eb228d6d9e264059f8a1d621deb972ac1bfc05ce30123c6853078385e"
+    },
+    {
+      "profession": "jeweler",
+      "race": "asteri",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 3832,
+      "digest": "55aec489eb595bf4b29d8b4ab03ff7e932b252f8940f4a7a3689bcd01f0a8b4c"
+    },
+    {
+      "profession": "jeweler",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 3853,
+      "digest": "63dfda885302147a4adb51f8cd2f1a2b624ff588a54e3e8f19b05e83b56ad28e"
+    },
+    {
+      "profession": "jeweler",
+      "race": "asteri",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 3857,
+      "digest": "05c39c66ef27174f728bbceabbb062da1fac9753924bf85c776323012eff0cc5"
+    },
+    {
+      "profession": "jeweler",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 3830,
+      "digest": "7198f5265d2b75bbd0e501aff79005cd5160f839a7cb6ebea0a542455b6e982b"
+    },
+    {
+      "profession": "jeweler",
+      "race": "asteri",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 3834,
+      "digest": "5ff1e1a730a4d83062a9ca756b607d59977c7a014a5c488027fa105ffe92c68e"
+    },
+    {
+      "profession": "jeweler",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 3845,
+      "digest": "76a85d6ec1971e88876b912cfb1c1adcfd9ea1279d17c92477d5fe3749001f0b"
+    },
+    {
+      "profession": "jeweler",
+      "race": "asteri",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 3849,
+      "digest": "85f8e2b4f42adb99e07ae7aa725786b268c89ed0476eb9220229985f311c3a57"
+    },
+    {
+      "profession": "jeweler",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 3831,
+      "digest": "8cfedbd25d05accadae6507efbc773e01ed009916ddded781bbf53278e639ed9"
+    },
+    {
+      "profession": "jeweler",
+      "race": "asteri",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 3835,
+      "digest": "b8bb6a82cda859467283af0f90b6bd11b6bc41d4524a69b2497e01e9cae8e2a0"
+    },
+    {
+      "profession": "jeweler",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 1,
+      "visible": 4886,
+      "digest": "154c777c69681dd6fe9bf36cfe8b5e55e09e7bf1e6fb6b0468cce6a037abc3bf"
+    },
+    {
+      "profession": "jeweler",
+      "race": "glassborn",
+      "biome": "temperate",
+      "variant": 2,
+      "visible": 4891,
+      "digest": "eed4a2f9a73e740b7301bd66917bfcf5d4fbbc4c45a49e9b86a77f66fbc81b0e"
+    },
+    {
+      "profession": "jeweler",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 1,
+      "visible": 4895,
+      "digest": "1fb534d93a09ef3bd2b12f8151a499248d461e70f2c0558ba94498a3254788c3"
+    },
+    {
+      "profession": "jeweler",
+      "race": "glassborn",
+      "biome": "desert",
+      "variant": 2,
+      "visible": 4900,
+      "digest": "97bdab0482c52100f31c38bad48be610f615731e82b7e0ba3e59fe2dca6116f2"
+    },
+    {
+      "profession": "jeweler",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 1,
+      "visible": 4888,
+      "digest": "99d51432ddb03292eecbd7591d42a8396b652e52e749856545c963413a8c9f46"
+    },
+    {
+      "profession": "jeweler",
+      "race": "glassborn",
+      "biome": "snow",
+      "variant": 2,
+      "visible": 4893,
+      "digest": "db7b179dd55530ce65ed3b5b1fc63b691cdc79dd5562c4046c71a89ea7139e03"
+    },
+    {
+      "profession": "jeweler",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 1,
+      "visible": 4894,
+      "digest": "c7727a906f6f35ceacd3d5dc4ded4ac7546035e9125dd79b893ec662c88ebac4"
+    },
+    {
+      "profession": "jeweler",
+      "race": "glassborn",
+      "biome": "enchanted-forest",
+      "variant": 2,
+      "visible": 4899,
+      "digest": "96374b87903ed0deadfc19d0dd08fc768d0f7008d5cce1799f345eec6a1a683a"
+    },
+    {
+      "profession": "jeweler",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 1,
+      "visible": 4890,
+      "digest": "a4ad6674d3805d8114954c244d0162209b5ee8c7ebd9ada14a85ff102d9d0233"
+    },
+    {
+      "profession": "jeweler",
+      "race": "glassborn",
+      "biome": "mountain",
+      "variant": 2,
+      "visible": 4895,
+      "digest": "fefff7277576a51b8acdd282e337b0e25a4b5d28fbb44116552069d44227a75d"
+    }
+  ]
+}

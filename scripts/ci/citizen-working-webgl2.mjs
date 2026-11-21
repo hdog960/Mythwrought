@@ -4,12 +4,19 @@ import {join} from 'node:path';
 import {chromium} from 'playwright';
 
 const origin = process.env.CITIZEN_PREVIEW_ORIGIN ?? 'http://127.0.0.1:4197';
-const output = process.env.CITIZEN_PREVIEW_OUTPUT ?? 'artifacts/citizen-agriculture';
+const waves = {
+  agriculture: {group:'agriculture-food', count:720},
+  craftsmanship: {group:'resources-craftsmanship', count:780},
+};
+const wave = process.argv[2] ?? 'agriculture';
+assert(Object.hasOwn(waves,wave),'Unknown citizen appearance wave');
+const {group,count} = waves[wave];
+const output = process.env.CITIZEN_PREVIEW_OUTPUT ?? `artifacts/citizen-${wave}`;
 const browser = await chromium.launch({args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 try {
   const page = await browser.newPage();
   await page.goto(new URL('/citizen-preview/',origin).href);
-  const result = await page.evaluate(async () => {
+  const result = await page.evaluate(async group => {
     const {createCitizen} = await import('/src/citizens/entity.mjs');
     const {createCitizenRenderer} = await import('/src/citizens/renderer.mjs');
     const {BIOMES,PROFESSIONS,RACES} = await import('/src/citizens/registry.mjs');
@@ -23,10 +30,10 @@ try {
     const renderer = createCitizenRenderer(gl,{maxCachedMeshes:12});
     const pixels = new Uint8Array(view.width*view.height*4);
     const races = Object.keys(RACES);
-    const occupations = Object.values(PROFESSIONS).filter(row=>row.group==='agriculture-food');
+    const occupations = Object.values(PROFESSIONS).filter(row=>row.group===group);
     const contact = document.createElement('canvas');
     contact.width=6*view.width;
-    contact.height=2*(view.height+30);
+    contact.height=Math.ceil(occupations.length/6)*(view.height+30);
     const sheet = contact.getContext('2d');
     sheet.fillStyle='#172b2e';
     sheet.fillRect(0,0,contact.width,contact.height);
@@ -37,7 +44,7 @@ try {
     let maxCacheBytes=0;
 
     function render(profession,race,biome,variant,style='village') {
-      const citizen = createCitizen({worldSeed:179,settlementId:'agriculture-gallery',slot:0,
+      const citizen = createCitizen({worldSeed:179,settlementId:'worker-gallery',slot:0,
         race,biome,style,variant,profession:profession.id});
       gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
       const stats=renderer.draw([{citizen,position:[0,0,0],heading:.32,action:'work'}],{
@@ -70,16 +77,16 @@ try {
     }
     renderer.dispose();
     return {records,maxCacheBytes,sheet:contact.toDataURL('image/png').split(',')[1]};
-  });
-  assert.equal(result.records.length,720);
-  assert.equal(new Set(result.records.map(record=>record.digest)).size,720);
+  },group);
+  assert.equal(result.records.length,count);
+  assert.equal(new Set(result.records.map(record=>record.digest)).size,count);
   assert(result.records.every(record=>record.visible>1000));
   await mkdir(output,{recursive:true});
-  await writeFile(join(output,'agriculture-contact-sheet.png'),Buffer.from(result.sheet,'base64'));
-  await writeFile(join(output,'agriculture-render-manifest.json'),JSON.stringify({
+  await writeFile(join(output,`${wave}-contact-sheet.png`),Buffer.from(result.sheet,'base64'));
+  await writeFile(join(output,`${wave}-render-manifest.json`),JSON.stringify({
     variants:result.records.length,maxCacheBytes:result.maxCacheBytes,records:result.records,
   },null,2)+'\n');
-  console.log(`720 distinct actual WebGL2 renders · ${result.maxCacheBytes} peak cached mesh bytes`);
+  console.log(`${count} distinct actual WebGL2 renders · ${result.maxCacheBytes} peak cached mesh bytes`);
 } finally {
   await browser.close();
 }

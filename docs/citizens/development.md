@@ -28,7 +28,7 @@ The draft starts from main at `7016e14cd6289f45eaf7fc6a79a362b47996df65`, verifi
 | --- | --- |
 | Repository foundation | Main and open work audited. Citizen worktree based on the verified main commit. |
 | Data architecture | Six races, 82 careers, five biome inputs, three settlement styles, immutable identity records, and compatible workplace assignment. Targeted tests validate all 4,920 working appearance inputs. |
-| Visuals | 720 / 4,920 working, 0 / 50 ordinary, 6 / 6 races rendered in the shared rig, 1 / 8 rendered and inspected visual groups. |
+| Visuals | 1,500 / 4,920 working, 0 / 50 ordinary, 6 / 6 races rendered in the shared rig, 2 / 8 rendered and inspected visual groups. |
 | AI and persistence | Movement, boundaries, fear, defender combat, and sidecar save acceptance pending. |
 | Professions | 0 / 82 accepted in gameplay. Service availability will be tracked per profession. |
 | Quality | Shared rig verified in Chromium WebGL2 at 844×390 and 1280×640. Full citizen performance and protected-system acceptance pending. |
@@ -55,4 +55,13 @@ All 720 planned village-style base combinations rendered on the shared WebGL2 ri
 - [Twelve occupation contact sheet](evidence/agriculture-contact-sheet.png)
 - [All 720 race, biome, and variation render records](evidence/agriculture-render-manifest.json)
 
-Run `node scripts/ci/citizen-agriculture-webgl2.mjs` with the same development server and pinned browser tools.
+Run `node scripts/ci/citizen-working-webgl2.mjs agriculture` with the same development server and pinned browser tools.
+
+## C3 V2 resources and craftsmanship
+
+The 13 occupations have original hand-held tools or articles and their own workwear. All 780 village-style base combinations rendered with unique pixel hashes and nonempty coverage. The 12-mesh cache peaked at 710,208 bytes in the verification fixture. V1 was rerun after sharing the tailoring code, and its contact sheet and render manifest matched byte for byte.
+
+- [Thirteen occupation contact sheet](evidence/craftsmanship-contact-sheet.png)
+- [All 780 race, biome, and variation render records](evidence/craftsmanship-render-manifest.json)
+
+Run `node scripts/ci/citizen-working-webgl2.mjs craftsmanship` against the development server.

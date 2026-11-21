@@ -4,12 +4,16 @@ import test from 'node:test';
 import {buildCitizenMesh, CITIZEN_VERTEX_FLOATS} from '../src/citizens/appearance.mjs';
 import {createCitizen} from '../src/citizens/entity.mjs';
 
-const professions = ['farmer','rancher','shepherd','gardener','greenhouse-grower','beekeeper',
-  'hunter','fisherman','miller','baker','butcher','brewer'];
+const waves = [
+  {name:'agriculture', professions:['farmer','rancher','shepherd','gardener','greenhouse-grower','beekeeper',
+    'hunter','fisherman','miller','baker','butcher','brewer'], expected:720},
+  {name:'craftsmanship', professions:['miner','prospector','quarry-worker','lumberjack','forester','blacksmith',
+    'armorer','carpenter','stonemason','potter','glassmaker','tailor','jeweler'], expected:780},
+];
 const races = ['human','elf','dwarf','thornkin','asteri','glassborn'];
 const biomes = ['temperate','desert','snow','enchanted-forest','mountain'];
 
-test('agriculture visual wave builds 720 distinct meshes and distinct hand-held tool geometries', () => {
+for (const {name,professions,expected} of waves) test(`${name} wave builds ${expected} different meshes and distinct tool shapes`, () => {
   const signatures = new Set();
   const handSignatures = new Set();
   for (const profession of professions) for (const race of races) {
@@ -26,6 +30,6 @@ test('agriculture visual wave builds 720 distinct meshes and distinct hand-held 
       handSignatures.add(rightHandPositions.join(','));
     }
   }
-  assert.equal(signatures.size,720);
-  assert.equal(handSignatures.size,12);
+  assert.equal(signatures.size,expected);
+  assert.equal(handSignatures.size,professions.length);
 });

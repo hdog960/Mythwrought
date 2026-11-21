@@ -1,4 +1,6 @@
-import {agricultureClothes, agricultureOutfit, agricultureTool} from './agriculture-appearance.mjs';
+import {agricultureOutfit, agricultureTool} from './agriculture-appearance.mjs';
+import {craftsmanshipOutfit} from './craftsmanship-appearance.mjs';
+import {buildWorkClothes} from './work-clothes.mjs';
 import {PROFESSIONS} from './registry.mjs';
 
 export const CITIZEN_VERTEX_FLOATS = 9;
@@ -109,11 +111,10 @@ function facialFeatures(box, race, variant, width, headY, pivot, skin, hair) {
 
 function equipment(box, pivot, x, y, profession, outfit) {
   const prop = (dx,dy,z,w,h,d,c) => box(JOINT.rightArm,pivot,x+dx,y+dy,z-.066,w,h,d,c);
-  if (outfit) {
+  if (outfit?.equipment) {
+    for (const piece of outfit.equipment) prop(...piece);
+  } else if (outfit) {
     agricultureTool(outfit.tool,prop);
-  } else if (profession?.id === 'blacksmith') {
-    prop(0,.05,.10,.045,.29,.046,'#785039');
-    prop(0,.20,.10,.162,.094,.085,'#606972');
   } else if (profession?.threatResponse === 'defend') {
     prop(0,.05,.10,.043,.25,.049,'#7c5434');
     prop(0,.21,.10,.14,.043,.054,'#ad9058');
@@ -133,7 +134,7 @@ export function buildCitizenMesh(citizen) {
   const style = styles[citizen.style];
   const profession = PROFESSIONS[citizen.profession];
   const variant = citizen.variant - 1;
-  const outfit = agricultureOutfit(citizen.profession);
+  const outfit = agricultureOutfit(citizen.profession) ?? craftsmanshipOutfit(citizen.profession);
   const outer = profession ? professionColors[profession.group] : biome.outer;
   const {box,finish} = makeGeometry();
   const {height,width,head} = rig;
@@ -182,7 +183,7 @@ export function buildCitizenMesh(citizen) {
   }
   if (outfit) {
     const headClothes = (x,y,z,w,h,d,c) => headBox(x*head,y,z*head,w*head,h,d*head,c);
-    agricultureClothes(outfit,{body,head:headClothes,width,shoulder,hip,depth:bodyDepth,variant});
+    buildWorkClothes(outfit,{body,head:headClothes,width,shoulder,hip,depth:bodyDepth,variant});
   }
   return finish();
 }
