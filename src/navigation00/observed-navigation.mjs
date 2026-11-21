@@ -63,8 +63,9 @@ export function createObservedNavigator({seed,discovery,storage=null}){
     project({player,panX=0,panZ=0,zoom=7,width,height}){
       if(!player||![player.x,player.z,player.yaw,panX,panZ,zoom,width,height].every(finite)||
         width<=0||height<=0||width>4096||height>4096||zoom<NAV00_MIN_ZOOM||zoom>NAV00_MAX_ZOOM)throw Error('Invalid map camera');
-      const centerX=(player.x+panX)/NAV00_CELL_SIZE;
-      const centerZ=(player.z+panZ)/NAV00_CELL_SIZE;
+      // Anchor to the player's discovered cell; retain sub-cell pan precision.
+      const centerX=Math.floor(player.x/NAV00_CELL_SIZE)+panX/NAV00_CELL_SIZE;
+      const centerZ=Math.floor(player.z/NAV00_CELL_SIZE)+panZ/NAV00_CELL_SIZE;
       const cx=Math.floor(centerX),cz=Math.floor(centerZ);
       const radiusX=Math.ceil(width/(2*zoom))+1,radiusZ=Math.ceil(height/(2*zoom))+1;
       if((2*radiusX+1)*(2*radiusZ+1)>MAX_PROJECTED_CELLS)throw Error('Map viewport exceeds bounded discovery scan');
@@ -79,7 +80,7 @@ export function createObservedNavigator({seed,discovery,storage=null}){
         y:height/2+(Math.floor(p.z/NAV00_CELL_SIZE)-centerZ)*zoom});
       return {version:NAV00_VERSION,cells,pins:this.visiblePins().map(p=>{const screen=toScreen(p);return {...p,worldX:p.x,worldZ:p.z,screenX:screen.x,screenY:screen.y};}).filter(p=>p.screenX>=-zoom&&p.screenX<=width+zoom&&p.screenY>=-zoom&&p.screenY<=height+zoom),
         player:{...toScreen(player),bearing:((player.yaw*180/Math.PI)%360+360)%360,
-          x:player.x,z:player.z},zoom,center:{x:centerX,z:centerZ}};
+          worldX:player.x,worldZ:player.z},zoom,center:{x:centerX,z:centerZ}};
     }
   });
 }
