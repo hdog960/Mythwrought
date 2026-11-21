@@ -10,8 +10,12 @@ import {chromium} from 'playwright';
 const CANDIDATE='82f8828945b464acf0a71faddfe2d18ffa4df245';
 const BASELINE='8de40ca8451b6268cfdfefaa5d9a66b72caca799';
 const sha=dir=>execFileSync('git',['-C',dir,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
-assert.equal(execFileSync('git',['rev-parse','HEAD^'],{encoding:'utf8'}).trim(),CANDIDATE,
-  'Probe MUST be direct child of exact protected PR source');
+assert.equal(execFileSync('git',['rev-parse','HEAD~2'],{encoding:'utf8'}).trim(),CANDIDATE,
+  'Probe must descend exactly two commits from protected PR source');
+const paths=execFileSync('git',['diff','--name-only',CANDIDATE,'HEAD'],{encoding:'utf8'}).trim().split('\n').sort();
+assert.deepEqual(paths,['.github/workflows/iphone-gpu-phase-probe.yml',
+  'scripts/ci/iphone-gpu-phase-probe.mjs'],
+  'Diagnostic branch MUST retain exact PR game source bytes');
 assert.equal(sha('baseline-main'),BASELINE,'Baseline MUST be exact pinned main');
 const artifactDir='artifacts/iphone-gpu-phase';
 await mkdir(artifactDir,{recursive:true});
@@ -63,7 +67,7 @@ async function capture(label,viewport,phase,round){
         Number(scene.dataset.loadedChunks)>=18&&
         Number(scene.dataset.playerFeet)<-70;
     },null,{timeout:120000});
-    const raw=await page.evaluate(async ({phase})=>{
+    const raw=await page.evaluate(async ({phase,label})=>{
       const t=window.__mythwroughtTest,scene=document.querySelector('#scene');
       const raf=()=>new Promise(resolve=>requestAnimationFrame(resolve));
       let prev=await raf(),passive=[];
@@ -80,21 +84,23 @@ async function capture(label,viewport,phase,round){
           await new Promise(resolve=>setTimeout(resolve,8));
         const start=performance.now(),framePhaseDelay=start-startRaf;
         const result=t.placeFixture(1,y,1,0);
-        if(t.block(1,y,1)!==0||result?.saved!==true)
-          throw Error('Real deep edit or original schema save failed at Y '+y);
+        if(t.block(1,y,1)!==0)
+          throw Error('Original game deep edit failed at Y '+y);
+        if(label==='candidate'&&result?.saved!==true)
+          throw Error('Candidate schema-1 save failed at Y '+y);
         t.teleportCave(1,y,1);
         const actionMs=performance.now()-start,after=await raf();
-        const timing=result.gpuStageTimes||{};
+        const timing=result?.gpuStageTimes||{};
         samples.push({y,phase,framePhaseDelay,actionMs,
-          meshMs:result.meshMs,uploadMs:result.uploadMs,saveMs:result.saveMs,
-          preErrorMs:timing.batchDrainErrorMs??timing.drainErrorMs??0,
-          postErrorMs:timing.batchCheckErrorMs??timing.checkErrorMs??0,
-          bufferSubDataMs:timing.bufferSubDataMs??0,
+          meshMs:result?.meshMs??null,uploadMs:result?.uploadMs??null,saveMs:result?.saveMs??null,
+          preErrorMs:result?timing.batchDrainErrorMs??timing.drainErrorMs??0:null,
+          postErrorMs:result?timing.batchCheckErrorMs??timing.checkErrorMs??0:null,
+          bufferSubDataMs:result?timing.bufferSubDataMs??0:null,
           gpuBytes:timing.uploadBytes??0,
           renderFrameMs:after-startRaf,
           loadedChunks:Number(scene.dataset.loadedChunks),
           pendingChunks:Number(scene.dataset.pendingChunks),
-          reusedGpuBuffers:result.reusedGpuBuffers??0});
+          reusedGpuBuffers:result?.reusedGpuBuffers??0});
       }
       const saved=JSON.parse(localStorage.getItem('mythwrought-v002-world-179')||'{}');
       if(saved.schema!==1)throw Error('Canonical schema-1 was not retained');
@@ -102,7 +108,7 @@ async function capture(label,viewport,phase,round){
         maxResident:Math.max(...samples.map(s=>s.loadedChunks)),
         maxPending:Math.max(...samples.map(s=>s.pendingChunks)),
         finalFeet:Number(scene.dataset.playerFeet)};
-    },{phase});
+    },{phase,label});
     assert.equal(raw.samples.length,24);
     assert.ok(raw.maxResident<=27,'Exceeded original 27 resident GPU budget');
     assert.ok(raw.finalFeet<-100,'Did not cross actual deep section seam');
