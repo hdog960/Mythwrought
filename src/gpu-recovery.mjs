@@ -124,12 +124,12 @@ export function uploadEditedChunkBuffer(gl,vertices,spare=null,stageTimings=null
 
 
 // Atomic EDIT-only small-buffer staging. All replacement buffers are uploaded
-// first, then ONE WebGL error checkpoint validates the entire batch before the
-// caller publishes anything. A nonzero error or JS exception deletes *every*
-// unpublished buffer, never a caller's original displayed geometry. Unlike
-// the legacy single-buffer helper, we do NOT drain and discard pre-existing
-// GL errors: even a stale error causes a conservative rollback. Larger uploads
-// deliberately stay on the original individually verified fallback path.
+// first, then ONE post-upload WebGL error checkpoint validates the entire batch
+// BEFORE publication. As in the original upload helpers, pre-existing driver
+// errors must first be drained with an eight-query bound; otherwise an old
+// INVALID_OPERATION gets incorrectly attributed to this batch. If the queue
+// cannot clear, or any fresh error occurs, discard EVERY unpublished buffer.
+// Existing published geometry, save bytes and large-upload fallback survive.
 export function uploadEditedChunkBuffersAtomic(gl,items,acquireSpare,stageTimings=null){
   if(!Array.isArray(items)||!items.length||
      typeof acquireSpare!=='function')
@@ -176,6 +176,17 @@ export function uploadEditedChunkBuffersAtomic(gl,items,acquireSpare,stageTiming
     return {buffer,capacity};
   };
   try{
+    // Production drawing and other modules can leave a prior GL error queued.
+    // The old single-buffer uploader drains it before measuring upload errors.
+    // Preserve that exact bounded policy ONCE per atomic batch, not per buffer.
+    let cleared=false;
+    for(let i=0;i<8;i++){
+      const prior=timed('batchDrainErrorMs',()=>gl.getError());
+      if(prior===gl.NO_ERROR){cleared=true;break;}
+      if(stageTimings)stageTimings.preexistingErrors=
+        (stageTimings.preexistingErrors||0)+1;
+    }
+    if(!cleared)throw Error('GPU atomic edit error queue could not drain');
     for(const item of items){
       const opaque=stage(item.vertices),liquid=item.water.length?stage(item.water):null;
       ready.push({buffer:opaque.buffer,count:item.vertices.length/9,

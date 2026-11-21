@@ -10,7 +10,7 @@ function fakeGL(){
   const buffers=[],ops=[];
   const gl={
     ARRAY_BUFFER:34962,STATIC_DRAW:35044,DYNAMIC_DRAW:35048,
-    NO_ERROR:0,OUT_OF_MEMORY:1285,
+    NO_ERROR:0,INVALID_OPERATION:1282,OUT_OF_MEMORY:1285,
     createBuffer(){
       const b={id:nextId++,deleted:false,capacity:0,contents:new Uint8Array()};
       buffers.push(b);return b;
@@ -38,7 +38,7 @@ function fakeGL(){
     deleteBuffer(b){b.deleted=true;ops.push('delete');}
   };
   return {gl,buffers,ops,get errorReads(){return errorReads;},
-    fail(){failNextUpload=true;}};
+    injectError(code){error=code;},fail(){failNextUpload=true;}};
 }
 const packed=n=>new Float32Array(n*9);
 
@@ -72,19 +72,20 @@ test('optional WebGL call timings preserve the original bounded upload semantics
   assert.equal(a.buffer.deleted,false);
 });
 
-test('atomic small-edit batch checkpoints WebGL error once before publication',()=>{
+test('atomic small-edit batch has one POST-upload check and bounded preflight',()=>{
   const t=fakeGL(),times={},a=packed(2),water=packed(1);
   const old=uploadEditedChunkBuffer(t.gl,packed(2));
   const before=t.errorReads;
   const result=uploadEditedChunkBuffersAtomic(t.gl,
     [{vertices:a,water},{vertices:a,water:packed(0)}],()=>null,times);
-  assert.equal(t.errorReads-before,1,'only one synchronized GPU error check');
+  assert.equal(t.errorReads-before,2,'one preflight and one post-upload check for all three buffers');
   assert.equal(result.length,2);
   assert.equal(result[0].count,2);
   assert.equal(result[0].waterCount,1);
   assert.equal(result[1].waterBuffer,null);
   assert.equal(times.uploadCalls,3);
   assert.equal(times.uploadBytes,3*a.byteLength+water.byteLength-a.byteLength);
+  assert.ok(Number.isFinite(times.batchDrainErrorMs));
   assert.ok(Number.isFinite(times.batchCheckErrorMs));
   assert.ok(result.every(r=>!r.buffer.deleted));
   assert.equal(old.buffer.deleted,false,'previously published GPU buffer unchanged');
@@ -97,10 +98,32 @@ test('atomic edit batch OOM deletes EVERY unpublished buffer but never the old o
   assert.throws(()=>uploadEditedChunkBuffersAtomic(t.gl,
     [{vertices:packed(2),water:packed(1)},{vertices:packed(2),water:packed(0)}],
     ()=>null),/WebGL staged batch upload error 1285/);
-  assert.equal(t.errorReads-before,1);
+  assert.equal(t.errorReads-before,2);
   assert.equal(old.buffer.deleted,false,'visible geometry must survive GPU failure');
   assert.equal(t.buffers.length,4);
   assert.equal(t.buffers.filter(b=>b.deleted).length,3);
+});
+
+test('atomic GPU edit drains unrelated prior errors but still verifies new upload',()=>{
+  const t=fakeGL(),times={},old=uploadEditedChunkBuffer(t.gl,packed(1));
+  t.injectError(t.gl.INVALID_OPERATION);
+  const before=t.errorReads;
+  const ready=uploadEditedChunkBuffersAtomic(t.gl,
+    [{vertices:packed(2),water:packed(0)}],()=>null,times);
+  assert.equal(t.errorReads-before,3,'prior INVALID_OPERATION, clean preflight, then validated upload');
+  assert.equal(times.preexistingErrors,1);
+  assert.equal(ready.length,1);
+  assert.equal(ready[0].buffer.deleted,false);
+  assert.equal(old.buffer.deleted,false);
+});
+
+test('atomic GPU batch rejects a persistently uncleared driver error before staging',()=>{
+  const t=fakeGL();
+  t.gl.getError=()=>t.gl.INVALID_OPERATION;
+  assert.throws(()=>uploadEditedChunkBuffersAtomic(t.gl,
+    [{vertices:packed(2),water:packed(0)}],()=>null),
+    /GPU atomic edit error queue could not drain/);
+  assert.equal(t.buffers.length,0,'must not allocate with a poisoned GL queue');
 });
 
 test('atomic staging rejects large geometry before allocating or borrowing',()=>{
