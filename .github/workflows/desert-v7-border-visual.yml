@@ -1,0 +1,48 @@
+name: Desert P1 V7 Multi-Seed Real WebGL2 Proof (test-only)
+on:
+  push:
+    branches:
+      - probe/desert-v7-visual-boundaries-20261121
+  workflow_dispatch:
+
+# This probe tests the exact source from protected draft PR #357. It never
+# runs on production main and never deploys or merges anything.
+permissions:
+  contents: read
+
+concurrency:
+  group: desert-p1-v7-visual-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-authentic-two-seed-boundary-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native strict Desert multi-seed boundary and world-reader census
+        run: |
+          node --check scripts/ci/desert-v7-border-visual-browser.mjs
+          node --test tests/desert-tree-exclusion-phase1.test.mjs tests/desert-tree-v7-multiseed-census.test.mjs
+      - name: Install pinned real Chromium WebGL2 runtime
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Real original-game two-seed four-border visual proof
+        run: |
+          python3 -m http.server 4173 > /tmp/desert-v7-proof-site.log 2>&1 &
+          site_server=$!
+          trap 'kill "$site_server" 2>/dev/null || true' EXIT
+          node scripts/ci/desert-v7-border-visual-browser.mjs
+      - name: Upload source-authenticated PNGs, SHA256 and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desert-v7-source-authentic-two-seed-four-border
+          path: artifacts/desert-v7-border-visual/
+          if-no-files-found: warn
