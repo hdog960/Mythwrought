@@ -62,7 +62,7 @@ try {
           JSON.stringify(attempts));
       });
       await page.waitForFunction(({x,y,z})=>
-        document.querySelector('#scene')?.dataset.targetBlock===x+','+y+','+z',
+        document.querySelector('#scene')?.dataset.targetBlock===x+','+y+','+z,
         anchor,{timeout:12000});
       const canonicalBefore=await page.evaluate(key=>localStorage.getItem(key),canonicalKey);
       assert.ok(canonicalBefore,'Actual V6 canonical schema-1 save absent');

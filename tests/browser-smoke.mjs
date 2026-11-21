@@ -124,8 +124,9 @@ try{
     'Legacy developer SAVE must not reappear in compact player settings');
   assert.equal(await page.locator('#switchWorld').isVisible(),false,
     'Obsolete-world switch must never be user-facing');
-  const helpTouchAction=await page.locator('.helpbody').evaluate(el=>getComputedStyle(el).touchAction);
-  assert.equal(helpTouchAction,'pan-y','Recovery drawer must permit vertical finger scrolling on iPhone');
+  const compactTouchAction=await page.locator('.helpbody').evaluate(el=>getComputedStyle(el).touchAction);
+  assert.equal(compactTouchAction,'manipulation',
+    'Compact three-row player menu must not scroll or swallow touch taps');
   const canvasTouchAction=await page.locator('#scene').evaluate(el=>getComputedStyle(el).touchAction);
   assert.equal(canvasTouchAction,'none','Gameplay canvas must not drag or scroll the page');
   // Original sensitivity host remains mounted and functional, but is no
@@ -138,6 +139,10 @@ try{
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v003-look-percent')),'150');
   await page.locator('.player-menu-safety-link').click();
   assert.equal(await page.locator('#playerSafety').isVisible(),true);
+  const recoveryTouchAction=await page.locator('#playerSafety').evaluate(
+    el=>getComputedStyle(el).touchAction);
+  assert.equal(recoveryTouchAction,'pan-y',
+    'The real iPhone saved-world recovery drawer must remain finger-scrollable');
   await page.getByRole('button',{name:'SAVE CURRENT WORLD'}).click();
   const afterExplicitSave=await page.evaluate(seed=>
     localStorage.getItem('mythwrought-v002-world-'+seed),first.seed);

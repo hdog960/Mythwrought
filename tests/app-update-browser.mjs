@@ -208,7 +208,11 @@ try{
   await page.screenshot({path:'artifacts/pwa-safe-refresh/updated-game-932x430.png'});
   console.log('PASS ONLINE UPGRADE REC VISIBLE',await caches(),'saved seed 11111222 intact');
 
-  await page.locator('#menu').click();
+  await page.locator('#playerMenu').waitFor({state:'visible',timeout:30000});
+  if(!await page.locator('#help').isVisible())
+    await page.locator('#menu').click();
+  assert.equal(await page.locator('#help').isVisible(),true,
+    'Old-generation saved world must remain behind protected admission');
   await page.locator('.player-menu-safety-link').click();
   assert.equal(await page.locator('#checkGameUpdate').count(),1,
     'Original update handler must stay mounted behind the compact player menu');
