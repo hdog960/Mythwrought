@@ -14,7 +14,6 @@ import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR}
 import {v6BiomeAt} from '../../src/manual-biomes/v6-balanced-biomes.mjs';
 import {ENVIRONMENT_GROUND as G} from '../../src/environment-ground.mjs';
 import {BLOCK,terrainHeight,chunkCoord} from '../../src/voxel.mjs';
-import {SELECTED_SEED_KEY} from '../../src/seeds.mjs';
 
 const seed=7919,root=process.cwd(),out=path.join(root,'artifacts/enchanted-forest/real-webgl2');
 await mkdir(out,{recursive:true});
@@ -64,15 +63,40 @@ try{
   for(const [width,height] of [[844,390],[932,430]]){
     const context=await browser.newContext({viewport:{width,height},
       deviceScaleFactor:1,hasTouch:true,isMobile:true,serviceWorkers:'block'});
-    await context.addInitScript(({key,seed})=>{
-      localStorage.setItem(key,String(seed));
-    },{key:SELECTED_SEED_KEY,seed});
+    // Never preselect seed 7919 in storage: that makes it "claimed" and
+    // intentionally disables new M7 generation (isUnclaimedWorldSeed).
+    // Start with a truly empty browser profile so the original game creates
+    // its default seed 179 as M7, then switch through the real UI to 7919.
     const page=await context.newPage();
     page.on('pageerror',e=>errors.push(width+'x'+height+': '+e.message));
     page.on('dialog',dialog=>dialog.accept());
+    async function requireM7Seed(expectedSeed,stage){
+      try{
+        await page.waitForFunction(({seed,generator})=>{
+          const t=window.__mythwroughtTest;
+          return t?.snapshot().seed===seed&&t.fourBiomeProfile()?.generator===generator;
+        },{seed:expectedSeed,generator:M7_ENVIRONMENT_GENERATOR},{timeout:55000});
+      }catch(error){
+        const diagnostic=await page.evaluate(()=>{
+          const t=window.__mythwroughtTest;
+          return {seed:t?.snapshot()?.seed,profile:t?.fourBiomeProfile?.(),
+            selected:localStorage.getItem('mythwrought-v002-selected-seed'),
+            storageKeys:Object.keys(localStorage).filter(k=>k.includes('179')||k.includes('7919')),
+            status:document.getElementById('status')?.textContent,
+            seedMessage:document.getElementById('seedMessage')?.textContent,
+            saveHealth:document.getElementById('saveHealth')?.textContent,
+            scene:document.getElementById('scene')?.dataset};
+        });
+        throw Error('M7 '+stage+' did not activate '+JSON.stringify(diagnostic),{cause:error});
+      }
+    }
     await page.goto(origin+'/index.html',{waitUntil:'domcontentloaded',timeout:90000});
-    await page.waitForFunction(generator=>window.__mythwroughtTest?.fourBiomeProfile()?.generator===generator,
-      M7_ENVIRONMENT_GENERATOR,{timeout:100000});
+    await requireM7Seed(179,'fresh default');
+    await page.locator('#menu').click();
+    await page.locator('#seedInput').fill(String(seed));
+    await page.locator('#switchWorld').click();
+    await requireM7Seed(seed,'real UI seed switch');
+    await page.locator('#closeHelp').click();
     const initial=await page.evaluate(points=>{
       const test=window.__mythwroughtTest;
       const canvas=document.getElementById('scene');
