@@ -15,7 +15,9 @@ const gallery=[
  ['builder-b-homes-wave6-preview.mjs','builder-b-homes-wave6-preview.html',
  ['builder-b-homes-wave6.mjs'],['getBuilderBHomesWave6']],
  ['builder-b-homes-wave7-preview.mjs','builder-b-homes-wave7-preview.html',
- ['builder-b-homes-wave7.mjs'],['getBuilderBHomesWave7']]
+ ['builder-b-homes-wave7.mjs'],['getBuilderBHomesWave7']],
+ ['builder-b-hospitality-wave8-preview.mjs','builder-b-hospitality-wave8-preview.html',
+ ['builder-b-hospitality-wave8.mjs'],['getBuilderBHospitalityWave8']]
 ];
 test('all Builder B 1A source-preview imports resolve to real building and geometry-camera exports',()=>{
  for(const [sourceName,htmlName,sourceFiles,sourceSymbols] of gallery){
