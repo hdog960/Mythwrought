@@ -74,6 +74,40 @@ try{
         pngSize:bytes.length,dimensions:[png.width,png.height],scene,glinfo};
       captures.push(capture);
       console.log('SNOW_S0_REAL_WEBGL2 '+JSON.stringify(capture));
+      // The ground-level angle sees only a narrow edge of the ice field.
+      // Inspect it again from a real original-game elevated camera, without
+      // modifying the game, world, local saves, or its render pipeline.
+      const look=await page.evaluate(({gx,gy,gz})=>{
+        const api=window.__mythwroughtTest;
+        const candidates=[[gx,17,gz-12],[gx+3,17,gz-11],[gx-4,17,gz-10],
+          [gx,16,gz-8],[gx+6,18,gz-8],[gx-6,18,gz-8]];
+        let pose=null,chosen=null;
+        for(const candidate of candidates){
+          try{
+            pose=api.teleportCave(...candidate);
+            chosen=candidate;break;
+          }catch(_error){ /* protected player collisions reject this site */ }
+        }
+        if(!pose)throw Error('No real collision-safe elevated lookout above the glacier');
+        api.aimAt(gx,gy,gz);
+        return {pose,chosen,aim:[gx,gy,gz],iceBlock:api.block(gx,gy,gz)};
+      },{gx,gy,gz});
+      assert.equal(look.iceBlock,276);
+      const atStart=await page.evaluate(()=>
+        Number(document.querySelector('#scene').dataset.renderedFrames));
+      await page.waitForFunction(start=>Number(document.querySelector('#scene').dataset.renderedFrames)>start,
+        atStart,{timeout:60000});
+      const overlookName=stage+'-snowy-overlook-'+viewport.width+'x'+viewport.height+'.png';
+      const overlookBytes=await page.screenshot({path:out+'/'+overlookName,timeout:90000});
+      const overlookPng=pngjs.PNG.sync.read(overlookBytes);
+      assert.deepEqual([overlookPng.width,overlookPng.height],[viewport.width,viewport.height]);
+      assert.deepEqual(errors,[],'Lookout introduced game JS errors');
+      const overlook={stage,view:'overlook',name:overlookName,
+        sha256:createHash('sha256').update(overlookBytes).digest('hex'),
+        pngSize:overlookBytes.length,dimensions:[overlookPng.width,overlookPng.height],
+        scene:{...scene,lookout:look},glinfo};
+      captures.push(overlook);
+      console.log('SNOW_S0_REAL_WEBGL2_OVERLOOK '+JSON.stringify(overlook));
     }finally{await context.close();}
   }
 }finally{await browser.close();}
@@ -81,4 +115,4 @@ await writeFile(out+'/'+stage+'-webgl2.json',JSON.stringify({
   exactHead:process.env.SNOW_EXPECTED_HEAD??null,
   base:process.env.SNOW_BASE??null,stage,captures
 },null,2)+'\n');
-assert.equal(captures.length,2);
+assert.equal(captures.length,4);
