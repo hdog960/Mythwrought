@@ -26,7 +26,9 @@ const BIOME_SOLID_CUBES=new Set(BIOME130_REGISTERED_IDS.filter(id=>{
   return solid&&!transparent&&opacity===1&&boxes.some(box=>box.every((v,i)=>v===FULL_CUBE.boxes[0][i]));
 }));
 const BIOME_GROUND_COLORS=new Map([
-  256,257,258,259,260,261,262,263,264,272,277,278,279,286,289,293,294,302,303,305,307
+  // Frozen blue glacier ice (276) is natural M7 snow terrain too: it must
+  // use smooth world-space ground tint rather than a per-cell random palette.
+  256,257,258,259,260,261,262,263,264,272,276,277,278,279,286,289,293,294,302,303,305,307
 ].map(id=>{
   const {palette}=biome130Block(id);
   return [id,palette[0].map((_,index)=>palette.reduce((sum,color)=>sum+color[index],0)/palette.length)];
