@@ -3074,7 +3074,7 @@ function start(){
         const old=world.get(x,y,z);
         if(!world.set(x,y,z,id))throw Error('Invalid test block');
         try{refreshEditedMeshes(x,z,y);}catch(err){world.set(x,y,z,old);throw err;}
-        save();
+        return save();
       },
       // Localhost-only real-game GPU fixture, unavailable on deployed Pages.
       // Used by Chromium to verify the actual terrain shader + Pack 5 buffer.
