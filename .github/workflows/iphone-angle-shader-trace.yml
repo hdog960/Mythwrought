@@ -1,0 +1,44 @@
+name: Isolated original shader workload and Chrome ANGLE trace (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-angle-shader-trace-291-20261121
+permissions:
+  contents: read
+jobs:
+  source-exact-gl-tracing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fail if any game/renderer/visual/strict-test source changed
+        run: |
+          test "$(git rev-parse HEAD^)" = "82f8828945b464acf0a71faddfe2d18ffa4df245"
+          git diff --exit-code 82f8828945b464acf0a71faddfe2d18ffa4df245 HEAD -- src/ index.html styles.css sw-m5.js tests/
+          node --check scripts/ci/iphone-angle-shader-trace.mjs
+      - name: Install real unmodified original-game Chrome WebGL2 tools
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Source pin published production as additional guard
+        uses: actions/checkout@v4
+        with:
+          ref: 8de40ca8451b6268cfdfefaa5d9a66b72caca799
+          path: baseline-main
+      - name: Actual shader vs pixel counts and GPU process trace
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/iphone-angle-trace.log 2>&1 &
+          node scripts/ci/iphone-angle-shader-trace.mjs
+      - name: Preserve exact original Chrome trace and genuine WebGL screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-webgl-angle-shader-workload-trace
+          path: artifacts/iphone-angle-trace/
+          if-no-files-found: warn
+          retention-days: 14
