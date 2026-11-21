@@ -192,3 +192,13 @@ test('Phase 2 independent coordinates support remote and negative world chunks',
     }
   }
 });
+
+
+test('Phase 2 accepts the actual partial lowest deep section but no out-of-world sections',()=>{
+  const cave=eligibleHabitatPool({biome:'cave',feet:-209,light:.2});
+  assert.ok(cave.some(s=>s.classification==='hostile'));
+  const proposal=planHabitatCandidate(cave,{seed:179,cx:-401,cz:11,section:-13,serial:5});
+  assert.ok(proposal&&proposal.section===-13);
+  assert.throws(()=>planHabitatCandidate(cave,{seed:179,cx:0,cz:0,section:-14,serial:5}),
+    /Invalid habitat candidate inputs/);
+});

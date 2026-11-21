@@ -2,7 +2,7 @@
 // Deterministic candidate pooling avoids global 40-species lottery rejections.
 import {speciesRegistry} from './species.mjs';
 import {CHUNK_SIZE} from '../voxel.mjs';
-import {sectionForY} from '../depth.mjs';
+import {LOWEST_SECTION} from '../depth.mjs';
 
 export const ACTIVE_HABITATS=Object.freeze([
   'meadow','forest','alpine','desert','snow','cave'
@@ -63,7 +63,7 @@ export function planHabitatCandidate(pool,{
 }={}){
   if(!Array.isArray(pool)||![seed,cx,cz,section,serial].every(Number.isSafeInteger)||
       Math.abs(cx)>=2**22||Math.abs(cz)>=2**22||serial<1||
-      sectionForY(section===0?0:-3+section*16)!==section)
+      section<LOWEST_SECTION||section>0)
     throw new TypeError('Invalid habitat candidate inputs');
   if(!pool.length)return null;
   const species=chooseHabitatSpecies(pool,
