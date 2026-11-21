@@ -1,0 +1,68 @@
+name: Snowy Biome S0 Genuine Provenance & WebGL2 (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'src/voxel.mjs'
+      - 'tests/snowy-biome-checkerboard.test.mjs'
+      - 'nonblock-stage-assets.json'
+      - 'scripts/ci/snowy-s0-probe.mjs'
+      - 'scripts/ci/snowy-s0-webgl2.mjs'
+      - '.github/workflows/snowy-biome-provenance.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  actual-snowy-source-and-game:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      SNOW_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+      SNOW_BASE: ${{ github.event.pull_request.base.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact draft source, test syntax and offline shell integrity
+        run: |
+          test "$(git rev-parse HEAD)" = "$SNOW_EXPECTED_HEAD"
+          node --check src/voxel.mjs
+          node --check scripts/ci/snowy-s0-probe.mjs
+          node --check scripts/ci/snowy-s0-webgl2.mjs
+          node --check tests/snowy-biome-checkerboard.test.mjs
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+      - name: Strict natural-ice, older-profile and edited-ice mesh regressions
+        run: |
+          node --test tests/snowy-biome-checkerboard.test.mjs
+          node --test tests/nonblock-environment-profile.test.mjs
+      - name: Real M7 seed and coordinate material provenance (no mocks)
+        run: node scripts/ci/snowy-s0-probe.mjs
+      - name: Install free pinned Chromium WebGL2 and genuine PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Capture ORIGINAL and FIXED real game at identical ice scene and phone viewports
+        run: |
+          git cat-file -e "$SNOW_BASE:src/voxel.mjs"
+          git cat-file -e "$SNOW_EXPECTED_HEAD:src/voxel.mjs"
+          python3 -m http.server 4173 > /tmp/mythwrought-snow-s0.log 2>&1 &
+          site_server=$!
+          trap 'kill "$site_server" 2>/dev/null || true' EXIT
+          git show "$SNOW_BASE:src/voxel.mjs" > src/voxel.mjs
+          node scripts/ci/snowy-s0-webgl2.mjs before
+          git show "$SNOW_EXPECTED_HEAD:src/voxel.mjs" > src/voxel.mjs
+          node scripts/ci/snowy-s0-webgl2.mjs after
+          git diff --exit-code -- src/voxel.mjs
+      - name: Preserve real material map, before/after WebGL2 PNG and exact SHA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snowy-s0-source-real-webgl2
+          path: artifacts/snowy-s0-provenance/
+          if-no-files-found: warn
+          retention-days: 14
