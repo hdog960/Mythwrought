@@ -449,10 +449,10 @@ export const ROADMAP_D_WAVE8_PLANS=Object.freeze([
         8
       ],
       [
-        73,
-        42,
-        9,
-        8
+        72,
+      42,
+      8,
+      8
       ],
       [
         39,
