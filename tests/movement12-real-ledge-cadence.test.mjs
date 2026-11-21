@@ -42,5 +42,8 @@ test('real multi-cadence stationary comparison produces complete genuine engine 
  assert.equal(r.recordings.length,3);
  assert.deepEqual(r.recordings.map(x=>x.events.length),[30,60,120]);
  assert.ok(r.recordings.every(x=>x.source==='src/physics.mjs:stepPlayer'&&x.live===false));
- assert.equal(r.audit.ok,true);
+ assert.equal(r.audit.safe,true,`real cadence audit: ${r.audit.reason}; worst divergence ${r.audit.worstDivergence}`);
+ assert.equal(r.audit.reason,'consistent');
+ assert.equal(r.audit.collisionAudits.length,3);
+ assert.ok(r.audit.collisionAudits.every(a=>a.safe));
 });
