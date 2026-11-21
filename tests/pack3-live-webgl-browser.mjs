@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import pngjs from 'pngjs';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 const {PNG}=pngjs;
 const browser=await chromium.launch({headless:true,
   args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
@@ -17,6 +18,17 @@ try {
     page.on('response',r=>{if(r.status()>=400)missing.push(r.url()+' '+r.status());});
     try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+      await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+      assert.equal(await page.locator('#help').isVisible(),true,
+        'Legacy preview entered gameplay before current-only admission');
+      page.once('dialog',dialog=>dialog.accept());
+      await page.getByRole('button',{name:/NEW WORLD/}).click();
+      await page.locator('#help').waitFor({state:'hidden',timeout:45000});
+      assert.equal(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator),
+        M6_BALANCED_GENERATOR,'Pack3 original game did not load current V6');
+      const selectedSeed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+      const canonicalKey='mythwrought-v002-world-'+selectedSeed;
+      const pack3SidecarKey='mythwrought-pack3-construction-v1:'+selectedSeed;
       await page.waitForFunction(()=>window.__mythwroughtTest&&
         Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,null,{timeout:60000});
       const gpu=await page.evaluate(()=>!!document.querySelector('#scene').getContext('webgl2'));
@@ -31,12 +43,13 @@ try {
       });
       await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.targetBlock==='16,18,0',
         null,{timeout:12000});
-      const legacyBefore=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
+      const canonicalBefore=await page.evaluate(key=>localStorage.getItem(key),canonicalKey);
+      assert.ok(canonicalBefore,'Actual V6 canonical schema-1 save absent');
       const verticesBefore=await page.evaluate(()=>Number(document.querySelector('#scene').dataset.renderedMeshVertices));
       await page.locator('#menu').click();
       await page.locator('#pack3Material').selectOption('116');
       await page.locator('#pack3Rotation').selectOption('1');
-      await page.locator('#closeHelp').click();
+      await page.locator('#playerMenu .player-menu-close').click();
       await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.canPlace==='true');
       // The ray/face normal chooses the actual highlighted adjacent cell.
       // It is not necessarily the western cell of our legacy stone anchor.
@@ -56,20 +69,20 @@ try {
         placedCell,{timeout:15000});
       assert.equal(await page.evaluate(cell=>window.__mythwroughtTest.pack3Block(...cell)?.id,placedCell),
         116,'Physical block was not placed at the actual highlighted cell');
-      const now=await page.evaluate(()=>({
+      const now=await page.evaluate(([worldKey,sidecarKey])=>({
         entry:window.__mythwroughtTest.pack3Block(...window.__pack3PlacedCell),
         count:Number(document.querySelector('#scene').dataset.pack3PhysicalCount),
         vertices:Number(document.querySelector('#scene').dataset.renderedMeshVertices),
-        saved:localStorage.getItem('mythwrought-v002-world-179'),
-        sidecar:localStorage.getItem('mythwrought-pack3-construction-v1:179')
-      }));
+        saved:localStorage.getItem(worldKey),
+        sidecar:localStorage.getItem(sidecarKey)
+      }),[canonicalKey,pack3SidecarKey]);
       assert.equal(now.entry.id,116);
       assert.equal(now.entry.yaw,1);
       assert.equal(now.count,1);
       const changedChunks=await page.evaluate(()=>window.__mythwroughtTest.snapshot().lastEditMeshKeys);
       assert.ok(changedChunks.length<=1,'Pack3 physical edit rebuilt unrelated GPU chunks');
       assert.ok(now.vertices>verticesBefore,'Physical WebGL2 chunk vertices not uploaded');
-      assert.equal(now.saved,legacyBefore,'Physical placement rewrote schema-1 save');
+      assert.equal(now.saved,canonicalBefore,'Physical placement rewrote V6 schema-1 save');
       assert.ok(JSON.parse(now.sidecar).entries.some(e=>e.asset==='pack3:069'&&e.orientation===1));
       const pngBytes=await page.screenshot({path:`artifacts/pack3-live/pack3-webgl2-${width}x${height}.png`});
       const image=PNG.sync.read(pngBytes);
@@ -86,13 +99,17 @@ try {
       await page.evaluate(cell=>{window.__pack3PlacedCell=cell;},placedCell);
       await page.waitForFunction(()=>window.__mythwroughtTest&&
         Number(document.querySelector('#scene')?.dataset.loadedChunks)>0,null,{timeout:45000});
-      const restored=await page.evaluate(()=>({
+      const restored=await page.evaluate(worldKey=>({
         entry:window.__mythwroughtTest.pack3Block(...window.__pack3PlacedCell),
-        saved:localStorage.getItem('mythwrought-v002-world-179')
-      }));
+        saved:localStorage.getItem(worldKey),
+        generator:window.__mythwroughtTest.fourBiomeProfile()?.generator
+      }),canonicalKey);
       assert.equal(restored.entry.id,116);
       assert.equal(restored.entry.yaw,1,'Yaw state lost after reload');
-      assert.equal(restored.saved,legacyBefore,'Original canonical save was changed on reload');
+      assert.equal(restored.saved,canonicalBefore,
+        'Original V6 canonical save was changed on reload');
+      assert.equal(restored.generator,M6_BALANCED_GENERATOR,
+        'Pack3 physical scene reload no longer uses current V6 generator');
       const removed=await page.evaluate(()=>window.__mythwroughtTest.removePack3Fixture(...window.__pack3PlacedCell));
       assert.equal(removed.ok,true);
       assert.equal(await page.evaluate(()=>window.__mythwroughtTest.pack3Block(...window.__pack3PlacedCell)),null);
@@ -100,7 +117,8 @@ try {
       assert.deepEqual(missing,[],'Missing gameplay source');
       evidence.push({viewport:`${width}x${height}`,webgl2:gpu,
         physicalId:116,yaw:1,placed:true,meshVerticesDelta:now.vertices-verticesBefore,
-        reload:true,removed:true,canvasColorSamples:colors.size,legacySaveUnchanged:true});
+        reload:true,removed:true,canvasColorSamples:colors.size,
+        currentV6Seed:selectedSeed,canonicalSaveUnchanged:true});
       console.log('PASS Pack3 live WebGL2',JSON.stringify(evidence.at(-1)));
     }finally{await context.close();}
   }

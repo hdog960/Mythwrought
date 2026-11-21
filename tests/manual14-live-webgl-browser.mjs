@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {mkdir} from 'node:fs/promises';
+import {M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 const out='artifacts/manual14-live';
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch({headless:true,args:[
@@ -18,9 +19,19 @@ try{
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
+  // Creator-approved CURRENT-only startup: the genuine original WebGL2 app
+  // must create V6 before any physical builder can legally edit the world.
+  await page.locator('#playerMenu').waitFor({state:'visible',timeout:45000});
+  assert.equal(await page.locator('#help').isVisible(),true,
+    'Unprofiled old-world preview bypassed current-only admission');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:/NEW WORLD/}).click();
+  await page.locator('#help').waitFor({state:'hidden',timeout:45000});
   await page.waitForFunction(()=>Boolean(window.__mythwroughtTest&&
     Number(document.querySelector('#scene')?.dataset?.renderedFrames)>0),
-    {timeout:45000});
+    null,{timeout:45000});
+  assert.equal(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator),
+    M6_BALANCED_GENERATOR,'Physical Pack1/4 test did not enter current V6');
   const scene=await page.evaluate(async()=>{
    const t=window.__mythwroughtTest;
    if(!document.getElementById('manual14Select')||
@@ -34,6 +45,9 @@ try{
    if(t.block(...first)!==0||t.block(...second)!==0)
     throw Error('Test terrain does not expose empty cells for authored fixtures');
    const before=t.snapshot();
+   const seed=before.seed;
+   const canonical=localStorage.getItem('mythwrought-v002-world-'+seed);
+   if(typeof canonical!=='string')throw Error('Current V6 schema-1 save was not persisted');
    const p1=await t.placeBuilderAsset({asset:symbol(9),numericId:9,at:first,orientation:0});
    const p4=await t.placeBuilderAsset({asset:symbol(159),numericId:159,at:second,orientation:0});
    if(!p1.ok||!p4.ok)throw Error('Unified Builder AI cannot place both packs: '+p1.reason+' / '+p4.reason);
@@ -41,7 +55,9 @@ try{
    const after=t.snapshot();
    if(t.block(...first)!==9||t.block(...second)!==159)
     throw Error('Physical Pack1/Pack4 registration not exposed in local gameplay bridge');
-   return {first,second,p1,p4,before:before.manual14PhysicalBlocks,
+   if(localStorage.getItem('mythwrought-v002-world-'+seed)!==canonical)
+     throw Error('Manual builder physically placed an asset by modifying canonical schema-1 bytes');
+   return {first,second,p1,p4,seed,canonical,before:before.manual14PhysicalBlocks,
      after:after.manual14PhysicalBlocks,
      meshBatches:after.editMeshBatches-before.editMeshBatches,
      schema:p4.worldSchema,loadedChunks:after.chunks.length};
@@ -81,10 +97,19 @@ try{
     null,{timeout:60000});
   const reloaded=await page.evaluate(([p1,p4])=>({
    ids:[window.__mythwroughtTest.block(...p1),window.__mythwroughtTest.block(...p4)],
-   sidecar:JSON.parse(localStorage.getItem('mythwrought.manual14.seed.179')),
+   sidecar:JSON.parse(localStorage.getItem('mythwrought.manual14.seed.'+
+      window.__mythwroughtTest.snapshot().seed)),
+   seed:window.__mythwroughtTest.snapshot().seed,
+   canonical:localStorage.getItem('mythwrought-v002-world-'+
+      window.__mythwroughtTest.snapshot().seed),
+   profile:window.__mythwroughtTest.fourBiomeProfile()?.generator,
    gpu:document.querySelector('#scene').dataset.manual14PhysicalCount
   }),[scene.first,scene.second]);
   assert.deepEqual(reloaded.ids,[9,159]);
+  assert.equal(reloaded.seed,scene.seed,'Reload changed physical construction seed');
+  assert.equal(reloaded.profile,M6_BALANCED_GENERATOR,'Reload changed V6 generator');
+  assert.equal(reloaded.canonical,scene.canonical,
+    'Pack1/4 placement or reload changed original V6 canonical save bytes');
   assert.equal(reloaded.sidecar.format,'mythwrought.manual-block-packs-1-and-4.v1');
   assert.equal(reloaded.sidecar.entries.length,2);
   assert.equal(Number(reloaded.gpu),2);
