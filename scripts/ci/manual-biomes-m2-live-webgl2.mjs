@@ -187,7 +187,7 @@ try{
     const sample=scenes.find(scene=>scene.width===width&&scene.name==='snow');
     if(!sample)throw Error('Missing real current V6 snow source capture sample');
     const didEdit=await page.evaluate(({x,y,z})=>
-      window.__mythwroughtTest.editBiomeCell(x,y,z,BLOCK.AIR),
+      window.__mythwroughtTest.editBiomeCell(x,y,z,0),
       {x:sample.x,y:sample.y,z:sample.z});
     if(!didEdit)throw Error('Actual current V6 biome physical edit refused');
     await page.locator('#menu').click();
