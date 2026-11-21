@@ -1,0 +1,84 @@
+// Read-only, actual original-game Chromium WebGL2 snow scene evidence.
+// Two modes are run in separate processes against base and draft voxel sources.
+import assert from 'node:assert/strict';
+import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {chromium} from 'playwright';
+import pngjs from 'pngjs';
+
+const stage=process.argv[2];
+assert.ok(['before','after'].includes(stage),'Expected before or after');
+const info=JSON.parse(await readFile('artifacts/snowy-s0-provenance/reader-metrics.json','utf8'));
+const sites=info.seedResults.find(s=>s.seed===179);
+assert.ok(sites?.glacierSites?.length,'No genuine physical glacier cap sampled');
+const [gx,gy,gz]=sites.glacierSites[Math.floor(sites.glacierSites.length/2)];
+const out='artifacts/snowy-s0-provenance';
+await mkdir(out,{recursive:true});
+const browser=await chromium.launch({headless:true,args:[
+  '--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'
+]});
+const captures=[];
+try{
+  for(const viewport of [{width:844,height:390},{width:956,height:440}]){
+    const context=await browser.newContext({
+      viewport,deviceScaleFactor:1,hasTouch:true,isMobile:true,serviceWorkers:'block'
+    });
+    const page=await context.newPage(),errors=[];
+    page.on('pageerror',e=>errors.push(String(e?.message??e)));
+    page.on('dialog',d=>d.accept());
+    try{
+      await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:90000});
+      await page.waitForFunction(()=>{
+        const api=window.__mythwroughtTest,canvas=document.querySelector('#scene');
+        return api&&canvas&&Number(canvas.dataset.renderedFrames)>2&&
+          Number(canvas.dataset.loadedChunks)>=25&&Number(canvas.dataset.pendingChunks)===0;
+      },null,{timeout:110000});
+      const scene=await page.evaluate(({gx,gy,gz})=>{
+        const api=window.__mythwroughtTest;
+        const profile=api.fourBiomeProfile();
+        const target=api.block(gx,gy,gz);
+        const pose=api.teleport(gx+10,gz-13);
+        api.aimAt(gx,gy,gz);
+        return {seed:api.snapshot().seed,profile,iceBlock:target,pose,aim:[gx,gy,gz]};
+      },{gx,gy,gz});
+      assert.equal(scene.seed,179);
+      assert.equal(scene.profile?.generator,'mythwrought-five-surface-regions-v7');
+      assert.equal(scene.iceBlock,276,'Actual game voxel must be genuine glacier ice');
+      await page.waitForFunction(()=>{
+        const data=document.querySelector('#scene').dataset;
+        return data.skyS6WorldBiomeName==='snow'&&
+          Number(data.pendingChunks)===0&&Number(data.loadedChunks)>=25;
+      },null,{timeout:110000});
+      const first=await page.evaluate(()=>Number(document.querySelector('#scene').dataset.renderedFrames));
+      await page.waitForFunction(before=>
+        Number(document.querySelector('#scene').dataset.renderedFrames)>=before+8,
+        first,{timeout:60000});
+      const glinfo=await page.evaluate(()=>{
+        const canvas=document.querySelector('#scene'),gl=canvas.getContext('webgl2');
+        return {exists:!!gl,version:gl?.getParameter(gl.VERSION)??null,
+          viewport:[canvas.width,canvas.height],landscape:[window.innerWidth,window.innerHeight],
+          loadedChunks:Number(canvas.dataset.loadedChunks),
+          pendingChunks:Number(canvas.dataset.pendingChunks),
+          biome:canvas.dataset.skyS6WorldBiomeName,
+          renderedFrames:Number(canvas.dataset.renderedFrames)};
+      });
+      assert.ok(glinfo.exists&&String(glinfo.version).includes('WebGL 2'),'Authentic WebGL2 rendering required');
+      assert.equal(glinfo.biome,'snow');
+      assert.deepEqual(errors,[],'Actual game Javascript errors');
+      const name=stage+'-snowy-ice-'+viewport.width+'x'+viewport.height+'.png';
+      const bytes=await page.screenshot({path:out+'/'+name,timeout:90000});
+      const png=pngjs.PNG.sync.read(bytes);
+      assert.equal(png.width,viewport.width);
+      assert.equal(png.height,viewport.height);
+      const capture={stage,name,sha256:createHash('sha256').update(bytes).digest('hex'),
+        pngSize:bytes.length,dimensions:[png.width,png.height],scene,glinfo};
+      captures.push(capture);
+      console.log('SNOW_S0_REAL_WEBGL2 '+JSON.stringify(capture));
+    }finally{await context.close();}
+  }
+}finally{await browser.close();}
+await writeFile(out+'/'+stage+'-webgl2.json',JSON.stringify({
+  exactHead:process.env.SNOW_EXPECTED_HEAD??null,
+  base:process.env.SNOW_BASE??null,stage,captures
+},null,2)+'\n');
+assert.equal(captures.length,2);
