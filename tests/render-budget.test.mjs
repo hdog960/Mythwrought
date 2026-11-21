@@ -47,7 +47,7 @@ test('adaptive deep framebuffer saves pixel work but never enlarges or changes C
   assert.ok(deep.width*deep.height<normal.width*normal.height*.2);
   assert.deepEqual(deepMiningBufferDimensions(w,h,'balanced',3,false),normal);
   assert.deepEqual(deepMiningBufferDimensions(w,h,'economy',3,true),
-    bufferDimensions(w,h,'economy',3),'preserve user's already-lighter preset');
+    bufferDimensions(w,h,'economy',3),"preserve user\'s already-lighter preset");
   assert.deepEqual(deepMiningBufferDimensions(w,h,'balanced',1,false),
     bufferDimensions(w,h,'balanced',1),'restore exact original viewport');
   assert.equal(RENDER_PREF,'mythwrought-v010-render-preset');
