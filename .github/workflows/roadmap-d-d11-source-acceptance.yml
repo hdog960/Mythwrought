@@ -1,0 +1,43 @@
+name: MYTHWROUGHT Builder D Wave11 237-source 1724 D4 and true 48-frame acceptance (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave11.mjs'
+      - 'tests/building-pool/roadmap-d/d1-original-institutions-wave11*'
+      - 'tests/building-pool/roadmap-d/audit-wave11-gallery.mjs'
+      - 'tests/roadmap-d-wave11.test.mjs'
+      - '.github/workflows/roadmap-d-d11-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-d-wave11-source-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  wave11-237-originals-bidirectional-d4-and-real-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Demand 153 protected and 84 original new building sources, 1724 bidirectional 8-way D4 all historic/native contracts
+        run: node --test --test-concurrency=1 tests/building-pool/roadmap-d/d1-original-institutions-wave11.test.mjs tests/building-pool/roadmap-d/d5-historical-bidirectional-d4.test.mjs
+      - name: Require genuine local Chrome binary and PNG decoder
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+          npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Render eight actual original source buildings in genuine Chromium WebGL2 both views and three phone landscapes
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave11-webgl2.test.mjs
+      - name: Independently check PNG CRC SHA pixels source byte SHA GL camera and real section geometry for all 48
+        run: node tests/building-pool/roadmap-d/audit-wave11-gallery.mjs
+      - name: Preserve 48 genuine Chromium WebGL2 source-only frame evidence, not physical Pack or iPhone acceptance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-wave11-48-real-chromium-source-frames
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave11-webgl2-cube-proxy/
+          if-no-files-found: ignore
