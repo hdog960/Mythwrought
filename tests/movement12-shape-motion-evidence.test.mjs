@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditShapeMotionEvidence as audit} from '../src/movement12/shape-motion-evidence.mjs';
+const wall={min:{x:1,y:0,z:-1},max:{x:1.001,y:2,z:1}};
+const base={start:{x:0,y:0,z:0},end:{x:3,y:0,z:0},halfWidth:0.2,height:1.8,shapes:[wall]};
+test('detects thin obstacle continuously',()=>assert.equal(audit(base).contacts.length,1));
+test('preserves source geometry',()=>{audit(base);assert.equal(wall.min.x,1)});
+test('rejects unsupported shapes',()=>assert.equal(audit({...base,shapes:[{kind:'rotated'}]}).ok,false));
+test('rejects nonfinite movement',()=>assert.equal(audit({...base,end:{x:Infinity,y:0,z:0}}).ok,false));
+test('rejects over-budget shapes',()=>assert.equal(audit({...base,maxShapes:0}).reason,'shape-budget'));
+test('clear parallel motion',()=>assert.equal(audit({...base,start:{x:0,y:0,z:3},end:{x:3,y:0,z:3}}).contacts.length,0));
+test('reports initial overlap',()=>assert.equal(audit({...base,start:{x:1,y:0,z:0},end:{x:1,y:0,z:0}}).contacts[0].initialOverlap,true));
