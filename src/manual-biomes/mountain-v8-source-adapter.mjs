@@ -13,10 +13,12 @@ const hash=(x,z,seed)=>{
 /** One guaranteed candidate coordinate per tile, independently of loop order. */
 export function mountainV8TileRoot(tileX,tileZ,seed){
   if(![tileX,tileZ,seed].every(validInteger)||seed!==(seed|0))return null;
-  return Object.freeze({
-    rootX:tileX*8+2+Math.floor(hash(tileX,tileZ,seed+7921)*4),
-    rootZ:tileZ*8+2+Math.floor(hash(tileX,tileZ,seed+7927)*4)
-  });
+  const rootX=tileX*8+2+Math.floor(hash(tileX,tileZ,seed+7921)*4);
+  const rootZ=tileZ*8+2+Math.floor(hash(tileX,tileZ,seed+7927)*4);
+  // Never alias a remote tile into an imprecise coordinate via IEEE-754.
+  if(!validInteger(rootX)||!validInteger(rootZ)||
+     Math.floor(rootX/8)!==tileX||Math.floor(rootZ/8)!==tileZ)return null;
+  return Object.freeze({rootX,rootZ});
 }
 
 /** Returns null on missing or protected provenance. All callbacks must be read-only.
