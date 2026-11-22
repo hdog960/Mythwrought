@@ -74,7 +74,12 @@ function authenticCandidateSite(site){
  assert.ok(anchors.length,'no shared original-source safe camera pose '+species);
  return {...site,witnesses,treeCells:tree.cells.length,anchor:anchors[0]};
 }
-const evidence=sites.map(authenticCandidateSite);
+// Source changes after the first accepted three-species milestone should
+// only retest the AFFECTED species, never repeat six expensive screenshots.
+const selected=process.env.ENCHANTED_VISUAL_SPECIES?
+  sites.filter(s=>s.species===process.env.ENCHANTED_VISUAL_SPECIES):sites;
+assert.ok(selected.length,'unknown enchanted visual target species');
+const evidence=selected.map(authenticCandidateSite);
 const profileSource=await readFile(path.join(root,'src/manual-biomes/profile-world.mjs'),'utf8');
 const needle='{experimentalEnchantedTrees:this.experimentalEnchantedTrees});';
 const changed='{experimentalEnchantedTrees:true});';
@@ -201,9 +206,11 @@ try{
     candidateColors:visibleColors.size,
     old:old.record.name,new:now.record.name});
  }
- assert.equal(captures.length,6);assert.deepEqual(pageFaults,[]);
+ assert.equal(captures.length,selected.length*2);
+ assert.deepEqual(pageFaults,[]);
  const manifest={kind:'enchanted-phase2-three-species-current-source-original-engine',
-   head,sourceBlobs,seed,sites:evidence.map(({species,x,y,z,treeCells,witnesses,anchor})=>({
+   head,sourceBlobs,seed,targetSpecies:selected.map(s=>s.species),
+   sites:evidence.map(({species,x,y,z,treeCells,witnesses,anchor})=>({
       species,source:[x,y,z],treeCells,witnesses:witnesses.length,anchor})),
    profileResponseInstrumentation:{unmodifiedHash:hash(profileSource),
      ephemeralCandidateHash:hash(instrumented),needle,replacement:changed},
