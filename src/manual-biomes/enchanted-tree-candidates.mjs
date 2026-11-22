@@ -72,12 +72,13 @@ export function buildEnchantedTreeCandidate(x,floor,z,styleRoll){
     for(let dy=1;dy<=trunk;dy++)put(dy>=trunk-2?bend:0,dy,0,G.aetherBark);
     // The bent willow shaft must connect by a FACE, not merely by an edge.
     put(bend,trunk-3,0,G.aetherBark);
-    // Moonwillow is a broad, horizontally arched umbrella, NOT a pine.
-    // Three deliberately different horizontal tiers: open underside,
-    // broad moonlit outer boughs and a thin, irregular upper rim.
-    // Offset bends are clipped to the same physical +/-4 cube envelope.
+    // Broad willow canopy with a shallow top tuft, not a pine-like roof.
+    // Keep the horizontal halo and supported underside ring while reducing
+    // exposed top surfaces. Fewer raised moonleaf cubes also prevent the
+    // drapes from reading as one solid tall curtain from a low camera.
+    // All offsets remain clipped to the original +/-4 physical envelope.
     for(let dy=trunk-1;dy<=trunk+1;dy++){
-      const radius=dy===trunk-1?3:dy===trunk?4:2;
+      const radius=dy===trunk-1?3:dy===trunk?4:1;
       for(let dz=-radius;dz<=radius;dz++)for(let dx=-radius;dx<=radius;dx++){
         if(Math.abs(bend+dx)>ENCHANTED_TREE_MAX_RADIUS)continue;
         const distance=Math.abs(dx)+Math.abs(dz);
@@ -90,15 +91,16 @@ export function buildEnchantedTreeCandidate(x,floor,z,styleRoll){
           dy===trunk-1?G.aetherLeaves:G.moonLeaves);
       }
     }
-    // Twelve separate drooping strands create the characteristic willow
-    // curtain silhouette. No vine can enter either original walking
-    // headroom voxel: lowest leaf is at dy=3 for trunkHeight=7.
-    // The existing real-world 3x3 terrain/headroom filter additionally
-    // removes leaves near raised shoulders, caves and landmarks.
+    // Twelve separate, *staggered* curtains: short two-block drops
+    // alternate with medium and long drapes. Staggering the bottom tips
+    // opens visible moonlit gaps where the older full-length strands
+    // appeared as one continuous block wall at phone camera height.
+    // Longest drop remains only dy=trunk-4 >= 3 at minimum trunk=7.
+    // Original 3x3 cave/landmark/player-clearance filter still has veto.
     for(const [dx,dz,hang] of [
-      [-3,0,4],[3,0,4],[0,-3,4],[0,3,4],
-      [-2,-2,4],[2,2,4],[-2,2,3],[2,-2,3],
-      [-3,-1,3],[3,1,3],[1,-3,4],[-1,3,3]
+      [-3,0,4],[3,0,3],[0,-3,4],[0,3,3],
+      [-2,-2,3],[2,2,4],[-2,2,2],[2,-2,3],
+      [-3,-1,2],[3,1,2],[1,-3,3],[-1,3,2]
     ])for(let dy=trunk-hang;dy<=trunk;dy++)
       put(bend+dx,dy,dz,G.moonLeaves);
     // Four physical outward arms keep the foliage curtains visually
