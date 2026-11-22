@@ -27,3 +27,8 @@ export function desertSeamVertexTint(base,distanceSquared){
   if(weight<=0)return base;
   return [0,1,2].map(i=>base[i]*(1-weight)+DESERT_SCREe_EDGE_COLOR[i]*weight);
 }
+
+export function canBlendNaturalDesertSurface({id,edited,region,sourceSurface,y}){
+  return id===258&&!edited&&region?.name==='desert'&&region.weight<=.50&&
+    sourceSurface?.top===y&&sourceSurface.id===258;
+}
