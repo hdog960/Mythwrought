@@ -5,6 +5,7 @@ import {VoxelWorld,BLOCK,terrainHeight} from '../voxel.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {WORLD_MAX_Y} from '../depth.mjs';
 import {surveyMountainV8OriginalWorld} from './mountain-v8-original-world.mjs';
+import {mountainV8TileRoot} from './mountain-v8-source-adapter.mjs';
 import {planMountainV8PlantCells} from './mountain-v8-vegetation-cells.mjs';
 
 const TILE=8;
@@ -14,7 +15,7 @@ const key=(x,z)=>x+','+z;
  * No hypothetical random tree height is assumed; all plant cells are
  * verified against the untouched original world's existing AIR/landmarks.
  * The caller can inspect per-seed veto counts before any V8 integration.
- * Bounded to 64 tiles and at most 8x8*64 source columns per call.
+ * Bounded to 64 tiles and exactly one source-backed site per tile.
  */
 export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
   world,inspect=sourcSurvey}={}){
@@ -30,19 +31,14 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
   };
   for(let dz=0;dz<height;dz++)for(let dx=0;dx<width;dx++){
     const tx=tileX+dx,tz=tileZ+dz;
-    // The source adapter owns the unique tile root. Probe the entire tile
-    // only until its deterministic chosen coordinate has been encountered.
-    let chosen=null,attempted=0;
-    for(let z=tz*TILE;z<tz*TILE+TILE;z++)
-      for(let x=tx*TILE;x<tx*TILE+TILE;x++){
-        const proposal=inspect(x,z,seed,{world:source});
-        attempted++;
-        if(proposal?.vegetationSite?.chosen){
-          if(chosen)throw Error('Multiple plant owners in a single tile');
-          chosen=proposal;
-        }
-      }
-    stats.seen+=attempted;
+    // One source-backed read at the unique owner site: 64x fewer
+    // candidate surveys than scanning every square of each 8x8 tile.
+    const {rootX,rootZ}=mountainV8TileRoot(tx,tz,seed);
+    const chosen=inspect(rootX,rootZ,seed,{world:source});
+    stats.seen++;
+    if(chosen&&(chosen.x!==rootX||chosen.z!==rootZ||
+       !chosen.vegetationSite?.chosen))
+      throw Error('V8 tile root or provenance mismatch');
     if(!chosen){stats.rejected++;continue;}
     stats.eligible++;
     if(chosen.cliff)stats.cliff++;
