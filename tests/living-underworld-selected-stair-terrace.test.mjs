@@ -43,7 +43,7 @@ test('mutually obstructing chosen stairways fail before any source reads',()=>{
 test('chosen stair index compares both floor-in-air and air-in-floor',()=>{
  const idx=compileSelectedStairPedestrianClearance([flat]);
  assert.equal(idx.ok,true);
- assert.equal(idx.inspectCell(center.x,center.y,center.z,'support'),null);
+ assert.equal(idx.inspectCell(center.x,center.y-1,center.z,'support'),null);
  assert.equal(idx.inspectCell(center.x,center.y+1,center.z,'support').routeIndex,0);
  assert.equal(idx.inspectCell(center.x,center.y-1,center.z,'clearance').routeIndex,0);
  assert.throws(()=>idx.inspectCell(center.x,center.y,center.z,'nonsense'));
