@@ -8,6 +8,7 @@ import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
 import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR,
   M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
 import {planEnvironmentalColumn} from '../src/manual-biomes/environment-v7.mjs';
+import {ENVIRONMENT_GROUND as G} from '../src/environment-ground.mjs';
 
 const seed=179;
 const simple=(x,y,z)=>{
@@ -43,6 +44,36 @@ test('M7 mountain native planner genuinely generates bounded connected alpine gr
   console.log('MOUNTAIN M7 LIVE ALPINE CAPS '+JSON.stringify({
     seed,sampled:rows.length,alpine:meadows.length,rock:rock.length,
     neighbors:adjacent.length,anchors:meadows.slice(0,8)}));
+});
+
+test('seed 2026 mountain retains substantial real mineable stone around alpine patches',()=>{
+  // This independently reinforces the existing strict 72/121 source contract
+  // in nonblock-environment-profile.test.mjs; never reduce its threshold.
+  const sourceSeed=2026;
+  const w=new FourRegionWorld(sourceSeed,
+    fourRegionProfile(sourceSeed,M7_ENVIRONMENT_GENERATOR));
+  const allowedRock=new Set([G.slate,G.scree,G.gneiss,272]);
+  let rock=0,grass=0,foreign=0,unsupported=0;
+  for(let x=-522;x<=-502;x+=2)for(let z=-10;z<=10;z+=2){
+    let id=BLOCK.AIR,y=0;
+    for(let level=19;level>=2;level--){
+      const cell=w.get(x,level,z);
+      if(cell!==BLOCK.AIR){id=cell;y=level;break;}
+    }
+    if(allowedRock.has(id))rock++;
+    else if(id===BLOCK.GRASS){
+      grass++;
+      if(w.get(x,y-1,z)===BLOCK.AIR)unsupported++;
+    }else foreign++;
+  }
+  assert.ok(rock>=72,'Source contract requires >=72 real rocky caps out of 121');
+  assert.ok(grass>=8,'Mountain meadow improvements disappeared entirely from this seed');
+  assert.ok(grass<=42,'Mountain grass overwhelmed rocky lower slopes');
+  assert.equal(unsupported,0,'A new alpine cap became unsupported');
+  assert.equal(w.edits.size,0,'Sampling naturally generated stone changed the save');
+  console.log('MOUNTAIN SEED 2026 EXPOSED STONE '+JSON.stringify({
+    rock,grass,foreign,unsupported,examined:121,seed:sourceSeed
+  }));
 });
 
 test('actual M7 VoxelWorld resolves native grass caps and protected cave-owned air',()=>{
