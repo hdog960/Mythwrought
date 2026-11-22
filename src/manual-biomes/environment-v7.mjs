@@ -173,7 +173,7 @@ function treeVoxels(climate,x,y,z,roll){
 
 export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   {experimentalEnchantedTrees=false,onCandidateCacheSummary=null,
-    onCandidateSiteSummary=null,
+    onCandidateSiteSummary=null,disableCandidateSiteCulling=false,
     candidateSourceCacheCapacity=DEFAULT_SOURCE_CACHE}={}){
   // This capacity parameter is for isolated source-memory experiments;
   // ordinary candidate runtime always uses its fixed reviewed default.
@@ -186,6 +186,10 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   if(onCandidateSiteSummary!==null&&
      typeof onCandidateSiteSummary!=='function')
     throw Error('Invalid enchanted site diagnostics callback');
+  // Test-only read-only control to compare this fast path against the
+  // previous exact source's unculled planner within the same live M7 world.
+  if(typeof disableCandidateSiteCulling!=='boolean')
+    throw Error('Invalid enchanted source site culling comparison flag');
   const minX=cx*16,minZ=cz*16,maxX=minX+15,maxZ=minZ+15;
   const cells=new Map();
   // Lazily created only when an experimental enchanted tree is present.
@@ -229,7 +233,7 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
       // readers. This path is NEVER entered by historical/default M7.
       // Non-enchanted original conifer/wood trees are smaller than this
       // envelope, so no original neighbor can be lost by this check.
-      if(experimentalEnchantedTrees&&(
+      if(experimentalEnchantedTrees&&!disableCandidateSiteCulling&&(
         x+ENCHANTED_TREE_MAX_RADIUS<minX||
         x-ENCHANTED_TREE_MAX_RADIUS>maxX||
         z+ENCHANTED_TREE_MAX_RADIUS<minZ||
