@@ -4,6 +4,7 @@
 // is NEVER okay, even when each route independently passes its own checks.
 import {auditSupportedEntranceStairs} from './walkable-entrance-stairs.mjs';
 import {planUnderworldRegion} from './worldwide-network.mjs';
+import {isCandidateGeologyMaterial} from './protected-entrance-envelope.mjs';
 const integer=Number.isSafeInteger;
 const key=(x,y,z)=>x+','+y+','+z;
 function footprint(proposal){
@@ -257,4 +258,70 @@ export function compileMainGalleryPedestrianClearance(seed,rx,rz,{
  if(INDEX_CACHE.size>MAX_INDEX_CACHE)
   INDEX_CACHE.delete(INDEX_CACHE.keys().next().value);
  return index;
+}
+
+ 
+// Strict READ-ONLY check of what exists in the ORIGINAL M7 voxels TODAY.
+// A geometric candidate may require new excavation/deck support; unless the
+// old world already has those AIR and floor blocks, it is NOT as-built walking.
+export function auditOriginalMainGalleryVoxelReadiness(seed,rx,rz,{
+ materialAt,editedAt=()=>false,maxCells=100000,maxExamples=8
+}={}){
+ if(!integer(seed)||seed!==(seed|0)||![rx,rz].every(integer)||
+  typeof materialAt!=='function'||typeof editedAt!=='function'||
+  !integer(maxCells)||maxCells<100||maxCells>200000||
+  !integer(maxExamples)||maxExamples<1||maxExamples>24)
+  throw TypeError('Invalid original M7 horizontal gallery voxel readiness');
+ const region=planUnderworldRegion(seed,rx,rz);
+ let checked=0,blockedHeadroom=0,unsupportedDeck=0,editedCells=0;
+ const examples=[],galleries=[];
+ for(const index of MAIN_GALLERY_PAIRS){
+  const f=footprint({ok:true,segments:[
+   region.capsules[index],region.capsules[index+1]
+  ]});
+  if(!f.ok)return Object.freeze({ok:false,
+   reason:'PLANNED_GALLERY_GRADE_UNSAFE',galleryIndex:index,
+   failures:f.failures??[],sampledCells:checked,worldChanged:false});
+  let blocked=0,missing=0,edits=0;
+  for(const [kind,set] of [['support',f.support],['clearance',f.clearance]]){
+   for(const cell of set){
+    if(++checked>maxCells)return Object.freeze({ok:false,
+     reason:'ORIGINAL_M7_GALLERY_VOXEL_BUDGET',galleryIndex:index,
+     sampledCells:checked,maxCells,worldChanged:false});
+    const [x,y,z]=cell.split(',').map(Number);
+    const block=materialAt(x,y,z);
+    if(!integer(block)||block<0)return Object.freeze({ok:false,
+     reason:'INVALID_ORIGINAL_M7_MATERIAL',galleryIndex:index,
+     cell,sampledCells:checked,worldChanged:false});
+    if(editedAt(x,y,z)){editedCells++;edits++;}
+    if(kind==='support'&&!isCandidateGeologyMaterial(block)){
+     missing++;unsupportedDeck++;
+     if(examples.length<maxExamples)examples.push(Object.freeze({
+      galleryIndex:index,cell,kind,reason:'UNSUPPORTED_EXISTING_DECK',material:block
+     }));
+    }
+    if(kind==='clearance'&&block!==0){
+     blocked++;blockedHeadroom++;
+     if(examples.length<maxExamples)examples.push(Object.freeze({
+      galleryIndex:index,cell,kind,reason:'BLOCKED_EXISTING_HEADROOM',material:block
+     }));
+    }
+   }
+  }
+  galleries.push(Object.freeze({galleryIndex:index,
+   checkedSupport:f.support.size,checkedClearance:f.clearance.size,
+   existingBlockedHeadroom:blocked,existingUnsupportedDeck:missing,
+   existingEditedCells:edits,
+   asBuiltDeckAndAirReady:blocked===0&&missing===0&&edits===0}));
+ }
+ return Object.freeze({ok:blockedHeadroom===0&&unsupportedDeck===0&&editedCells===0,
+  seed,rx,rz,reason:blockedHeadroom||unsupportedDeck||editedCells?
+   'PLANNED_GALLERIES_NOT_PRESENT_IN_ORIGINAL_M7':null,
+  galleriesChecked:MAIN_GALLERY_PAIRS.length,sampledCells:checked,
+  blockedHeadroom,unsupportedDeck,editedCells,
+  galleries:Object.freeze(galleries),examples:Object.freeze(examples),
+  actualThreeWideThreeHighVoxelReadinessChecked:true,
+  actualPlayerCollisionAndMovementNotTested:true,
+  environmentWorldEdited:false,worldChanged:false,
+  deviceGpuAndPwaUnverified:true});
 }
