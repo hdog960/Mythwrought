@@ -7,7 +7,8 @@ import {enchantedTreeFootingsSupported} from './enchanted-tree-footings.mjs';
 import {resolveEnchantedTreeOverlap} from './enchanted-tree-overlap.mjs';
 import {clearEnchantedCanopyForWalking} from './enchanted-tree-walking-clearance.mjs';
 import {EnchantedCandidateSourceCache,
-  ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES as MAX_SOURCE_CACHE}
+  ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES as MAX_SOURCE_CACHE,
+  ENCHANTED_CANDIDATE_SOURCE_CACHE_DEFAULT_ENTRIES as DEFAULT_SOURCE_CACHE}
   from './enchanted-tree-source-cache.mjs';
 
 const smooth=value=>value*value*(3-2*value);
@@ -172,7 +173,7 @@ function treeVoxels(climate,x,y,z,roll){
 
 export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   {experimentalEnchantedTrees=false,onCandidateCacheSummary=null,
-    candidateSourceCacheCapacity=MAX_SOURCE_CACHE}={}){
+    candidateSourceCacheCapacity=DEFAULT_SOURCE_CACHE}={}){
   // This capacity parameter is for isolated source-memory experiments;
   // ordinary candidate runtime always uses its fixed reviewed default.
   if(!Number.isInteger(candidateSourceCacheCapacity)||
