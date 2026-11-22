@@ -57,16 +57,32 @@ function originalPack4WorldMesh(cell,asset){
  if(stride!==10||!(mesh.opaque instanceof Float32Array)||
     !(mesh.translucent instanceof Float32Array))
    throw Error('Original Pack4 mesh has no typed 10-float source layout');
+ // Authentic window/bench/table source has 60/156/228 triangles respectively.
+ // Reject invalid or unbounded injected meshes BEFORE allocating the copy, so a
+ // malformed resolver cannot exhaust a phone's limited WebGL/CPU memory budget.
+ const maxTrianglesPerAsset=320;
+ if((mesh.opaque.length+mesh.translucent.length)/(stride*3)>maxTrianglesPerAsset)
+   throw Error('Original Pack4 physical sample triangle budget exceeded');
  const translate=group=>{
    if(group.length%(stride*3)!==0)throw Error('Pack4 source buffer is not complete triangles');
-   const transformed=new Float32Array(group);
-   for(let i=0;i<transformed.length;i+=stride){
-     for(let j=0;j<3;j++)transformed[i+j]+=cell.at[j];
-     for(let j=0;j<stride;j++)if(!Number.isFinite(transformed[i+j]))
+   // Audit all original local-space vertices before adding the world origin.
+   // This also detects hostile offsets that could otherwise silently render
+   // outside the authored single-cell structure, even with finite numbers.
+   for(let i=0;i<group.length;i+=stride){
+     for(let j=0;j<stride;j++)if(!Number.isFinite(group[i+j]))
        throw Error('Invalid original Pack4 RGBA source vertex');
-     for(let j=6;j<10;j++)if(transformed[i+j]<0||transformed[i+j]>1)
+     for(let j=0;j<3;j++)if(group[i+j]<-1e-6||group[i+j]>1+1e-6)
+       throw Error('Original Pack4 source local vertex exceeds its physical cell');
+     const nx=group[i+3],ny=group[i+4],nz=group[i+5];
+     const norm=Math.hypot(nx,ny,nz);
+     if(norm<.999||norm>1.001)
+       throw Error('Original Pack4 source normal is not a certified unit vector');
+     for(let j=6;j<10;j++)if(group[i+j]<0||group[i+j]>1)
        throw Error('Invalid original Pack4 physical material alpha or color');
    }
+   const transformed=new Float32Array(group);
+   for(let i=0;i<transformed.length;i+=stride)
+     for(let j=0;j<3;j++)transformed[i+j]+=cell.at[j];
    return transformed;
  };
  const opaque=translate(mesh.opaque),translucent=translate(mesh.translucent);
