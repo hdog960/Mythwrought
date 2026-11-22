@@ -31,9 +31,13 @@ function sourcePixelArtwork(getTexture,id,res){
  const faces={};
  let unique=new Set();
  for(const face of faceNames){
-  const rgba=getTexture(id,face,res);
-  if(!(rgba instanceof Uint8Array)||rgba.length!==res*res*4)
+  // The ORIGINAL Pack1 producer returns a provenance descriptor with pixels,
+  // not a bare Uint8Array. Verify id, face and physical dimensions before use.
+  const source=getTexture(id,face,res);
+  if(!source||source.id!==id||source.face!==face||source.width!==res||source.height!==res||
+     !(source.pixels instanceof Uint8Array)||source.pixels.length!==res*res*4)
     throw Error('Missing original Pack1 RGBA face artwork '+id+':'+face);
+  const rgba=source.pixels;
   for(let i=0;i<rgba.length;i+=4){
    if(rgba[i+3]!==255)throw Error('Pack1 wall material source unexpectedly transparent');
    unique.add(rgba[i]+','+rgba[i+1]+','+rgba[i+2]);
