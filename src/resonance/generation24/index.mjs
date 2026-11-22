@@ -22,6 +22,13 @@ export function describeGenerator({id, model, seed, anchor, level=0}) {
 }
 export function evaluateGenerator(descriptor, inputs={}) {
   if (descriptor?.contract!==CONTRACT.id || !Object.hasOwn(MODELS,descriptor.model) ||
+      !/^[a-z0-9_-]{1,64}$/.test(descriptor.id) ||
+      !Number.isSafeInteger(descriptor.seed) ||
+      !Array.isArray(descriptor.anchor) || descriptor.anchor.length!==3 ||
+      !descriptor.anchor.every(Number.isSafeInteger) ||
+      descriptor.instanceKey!==`resonance:g24:${descriptor.seed}:${descriptor.anchor.join(',')}:${descriptor.id}` ||
+      descriptor.sourceKind!==MODELS[descriptor.model].kind ||
+      descriptor.acquisition!==(MODELS[descriptor.model].acquisition??'constructed') ||
       !Number.isSafeInteger(descriptor.level) || descriptor.level<0 || descriptor.level>3 ||
       descriptor.capacity!==MODELS[descriptor.model].capacity+descriptor.level*2 ||
       descriptor.ratedOutput!==MODELS[descriptor.model].rate+descriptor.level)
