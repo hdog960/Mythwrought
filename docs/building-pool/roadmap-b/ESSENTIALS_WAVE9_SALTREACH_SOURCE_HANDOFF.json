@@ -1,0 +1,41 @@
+{
+  "schema": "mythwrought.builder-b.1b-wave9-source-provisional.v1",
+  "id": "r1:lighthouse:temperate:small:002",
+  "title": "Saltreach Tidal Lantern Station",
+  "baseProtectedPr": 407,
+  "baseProtectedExactHead": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "ownership": {
+    "frozenExisting1B": 228,
+    "builderBReserved": 115,
+    "builderDReserved": 92,
+    "newBuilderB1BCountAfterThisCandidate": 9,
+    "newBuilderB1BRemainingAfterThisCandidate": 106
+  },
+  "localSourceContractMirror": {
+    "status": "PASS using local sourcePlan contract adapter, NOT the repository compiler",
+    "sourceCells": 6287,
+    "roofCells": 1286,
+    "walkable": 987,
+    "rooms": 8,
+    "portals": 10,
+    "windows": 18,
+    "upperLanternUprightGlazing": 8,
+    "roofGlassTiles": 0,
+    "skyOpenCourtColumns": 16
+  },
+  "actualOriginalEngineNativeTests": "PENDING exact-head repository run",
+  "historical228EightWayD4": "PENDING exact-head run",
+  "newEightToNineSourceRoofAndWindowRegression": "PENDING exact-head run",
+  "realChromiumWebgl2SourceScreenshots": "PENDING exact-head dedicated acceptance",
+  "realPack4VisibleCollisionSelectionAudit": "PENDING exact-head run",
+  "liveWorldPlacement": false,
+  "creatorArtApproved": false,
+  "iPhoneLandscapeAccepted": false,
+  "productionRegistration": false,
+  "weatherproofCertified": false,
+  "beaconPowered": false,
+  "upperTowerNavigable": false,
+  "saveSchemaModified": false,
+  "workflowPolicy": "Git branch staging only during 14-queued/13-running Actions congestion. Do NOT open PR/restart exact-head CI until capacity and required gate plan are confirmed.",
+  "sourceIntegrity": "Existing 8 original source files and historical 228 source files unchanged; new original only"
+}
