@@ -1,0 +1,24 @@
+name: Roadmap A original Pack5 main shader camera projection native
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-projection-ray-native-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-projection-ray-native-ci.yml'
+permissions:
+  contents: read
+jobs:
+  original-main-shader-geometry-ray-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only original shader projection source and new test syntax
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-pack5-game-camera-projection-producer.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-game-camera-projection.test.mjs
+      - name: Seven new source-only original shader camera selection tests
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-game-camera-projection.test.mjs
