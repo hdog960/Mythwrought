@@ -54,3 +54,10 @@ test('deep original cave and protected foundation veto even when surface looks s
  assert.equal(plan(sample(),{...cfg,readOriginalBlock:cave}),null);
  assert.equal(plan(sample(),{...cfg,protectedAt:(x,y,z)=>y===4}),null);
 });
+
+test('foreign original landmark materials below meadow cap are protected',()=>{
+ const bad=(x,y,z)=>y===3?4:source(x,y,z);
+ assert.equal(plan(sample(),{...cfg,readOriginalBlock:bad}),null);
+ const bad2=(x,y,z)=>y===4?7:source(x,y,z);
+ assert.equal(plan(sample(),{...cfg,readOriginalBlock:bad2}),null);
+});
