@@ -9,6 +9,7 @@ import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR}
   from '../src/manual-biomes/profile-world.mjs';
 import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
 import {ENVIRONMENT_GROUND as G} from '../src/environment-ground.mjs';
+import {chunkCoord} from '../src/voxel.mjs';
 
 const phase=process.env.DESERT_JUNCTION_PHASE;
 assert.ok(['before','after'].includes(phase),'Set DESERT_JUNCTION_PHASE=before or after');
@@ -59,6 +60,10 @@ try{
       'Physical original source terrain must match requested before/after phase');
     assert.deepEqual(source.save().edits,[]);
     await switchSeed(seed);
+    // Fix the in-game sun to the same readable phase in each worktree.
+    await page.locator('#menu').click();
+    await page.locator('#skySetDay').click();
+    await page.locator('#closeHelp').click();
     const data=await page.evaluate(({x,z,top})=>{
       const api=window.__mythwroughtTest;
       const pose=api.teleport(x,z);
@@ -70,11 +75,15 @@ try{
     assert.equal(data.gameSeed,seed);
     assert.equal(data.generator,M7_ENVIRONMENT_GENERATOR);
     assert.equal(data.gameBlock,cap,'Actual original game reader must match source plan');
-    await wait(()=>{
+    // A distant teleport can leave the previous 25 chunks resident for one
+    // frame: require the NEW target center, not just a populated chunk count.
+    const targetCenter=chunkCoord(data.pose.x)+','+chunkCoord(data.pose.z);
+    await wait(expected=>{
       const d=document.querySelector('#scene')?.dataset;
-      return d&&Number(d.loadedChunks)>=25&&Number(d.pendingChunks)===0&&
+      return d&&String(d.chunkCenter).split('|')[0]===expected&&
+        Number(d.loadedChunks)>=25&&Number(d.pendingChunks)===0&&
         d.skyDrawn==='true'&&Number(d.renderedFrames)>10;
-    });
+    },targetCenter);
     await page.waitForTimeout(200);
     const gl=await page.evaluate(()=>!!document.querySelector('#scene')?.getContext('webgl2'));
     assert.ok(gl,'Actual WebGL2 context required');
@@ -89,7 +98,15 @@ try{
       colors.add([png.data[i]>>4,png.data[i+1]>>4,png.data[i+2]>>4].join(','));
     }
     assert.ok(colors.size>=4,'Actual rendered frame appears blank');
-    report.sites.push({...site,neighbors,top,cap,data,colorGroups:colors.size,file});
+    const canvasState=await page.evaluate(()=>{
+      const d=document.querySelector('#scene').dataset;
+      return {chunkCenter:d.chunkCenter,loadedChunks:Number(d.loadedChunks),
+        pendingChunks:Number(d.pendingChunks),daylight:Number(d.skyDaylight),
+        renderedFrames:Number(d.renderedFrames)};
+    });
+    assert.equal(canvasState.chunkCenter.split('|')[0],targetCenter);
+    assert.ok(canvasState.daylight>=.45,'Daylight must remain readable for comparison');
+    report.sites.push({...site,neighbors,top,cap,data,canvasState,colorGroups:colors.size,file});
   }
   assert.deepEqual(report.browserErrors,[],'Original game emitted browser exceptions');
   console.log('DESERT_JUNCTION_VISUAL '+JSON.stringify(report));
