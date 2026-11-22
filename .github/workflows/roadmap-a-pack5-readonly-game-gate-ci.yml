@@ -1,0 +1,22 @@
+name: Roadmap A Pack5 readonly game browser readiness source proof
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-readonly-game-gate-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-readonly-game-gate-ci.yml'
+permissions:
+  contents: read
+jobs:
+  original-pack5-browser-readiness-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only new original source browser readiness and physical mesh tests (NO browser)
+        run: |
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-game-readonly-browser.mjs
+          node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-game-browser-readiness.test.mjs
