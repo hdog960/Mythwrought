@@ -29,6 +29,7 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
   const before=source.save(),sites=[],stats={
     tiles:width*height,eligible:0,plants:0,plantCells:0,
     rejected:0,terrainRejected:0,seamRejected:0,terrainCells:0,
+    seamExposedFaces:0,
     nonMeadow:0,occupied:0,rock:0,snow:0,meadow:0,
     cliff:0,seen:0
   };
@@ -61,6 +62,9 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
         })
     });
     if(!seam){stats.seamRejected++;continue;}
+    if(!seam.physicallyVerified||seam.exposedFaces.length>8)
+      throw Error('Unverified V8 physical seam escaped rejection');
+    stats.seamExposedFaces+=seam.exposedFaces.length;
     stats.terrainCells+=terrain.estimatedCells;
     stats.eligible++;
     if(chosen.cliff)stats.cliff++;
