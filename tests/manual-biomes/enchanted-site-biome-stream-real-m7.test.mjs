@@ -58,8 +58,8 @@ test('128-entry immutable site memo is seed-scoped, deterministic, bounded and r
  assert.throws(()=>cache.getOrRead(1,1,1.5,reader),/lookup/);
 });
 
-test('actual original M7 world stream has identical ordered voxels across 192 consecutive chunks and bounded site cache',()=>{
- const seeds=[179,7919,-88],latitudes=[-34,-16],cxStart=-16,cxEnd=15;
+test('actual original M7 world stream has identical ordered voxels across 288 consecutive chunks and bounded site cache',()=>{
+ const seeds=[179,7919,-88],latitudes=[-34,-16,0],cxStart=-16,cxEnd=15;
  const metrics={chunks:0,voxels:0,sourceReadsReference:0,liveTreeCachePeak:0,
    biomeSiteCachePeak:0,biomeSiteHits:0,biomeSiteMisses:0,
    biomeSiteEvictions:0,uncachedLookups:0,visibleSourceMatches:0,
@@ -133,7 +133,8 @@ test('actual original M7 world stream has identical ordered voxels across 192 co
     if(firstPlans.length<2)firstPlans.push({cx,cz,cells:[...natural]});
    }
   }
-  // More than 64 chunk builds evict older original-world chunk Maps.
+  // Three 32-chunk latitudes = 96 builds per seed, genuinely exceeding
+  // the original fixed 64 chunk residency budget and forcing eviction.
   // Rebuilding from the SAME seed and immutable biome-site cache must not
   // alter source cells or accidentally mask a cave/saved world edit.
   assert.equal(live._environmentTreeChunks.has(firstPlans[0].cx+','+firstPlans[0].cz),
@@ -159,7 +160,7 @@ test('actual original M7 world stream has identical ordered voxels across 192 co
     cacheHits:cache.hits,cacheMisses:cache.misses,
     evictions:cache.evictions,nativeRunnerMs:+(performance.now()-started).toFixed(2)});
  }
- assert.equal(metrics.chunks,192);
+ assert.equal(metrics.chunks,288);
  assert.ok(metrics.voxels>8000,'must cover nonempty natural Enchanted source terrain');
  assert.ok(metrics.biomeSiteHits>100,'sequential chunk plan must share real immutable site classifications');
  assert.ok(metrics.biomeSiteMisses>0);
@@ -167,7 +168,7 @@ test('actual original M7 world stream has identical ordered voxels across 192 co
  assert.equal(metrics.liveTreeCachePeak,64);
  assert.ok(metrics.adjacentFacePairs>30);
  assert.ok(metrics.cacheRegenerationChecks>=6);
- console.log('# ENCHANTED ORIGINAL WORLD 192-CHUNK SITE BIOME RESIDENCY '+
+ console.log('# ENCHANTED ORIGINAL WORLD 288-CHUNK SITE BIOME RESIDENCY '+
    JSON.stringify({...metrics,seedRows,
      cachedTotalBiomes:metrics.biomeSiteHits+metrics.biomeSiteMisses,
      cachedHitPercent:+(100*metrics.biomeSiteHits/
