@@ -91,6 +91,7 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    firstRefusalCounts:Object.freeze({...firstRefusalTypes}),
    sourceRejectionCounts:Object.freeze({...countTotals}),
    diagnosticAll16GalleriesAttempted:false,
+   ...materialSummary(),...readerCallSummary(),
    worldChanged:false,nativePlayerWalkingVerified:false});
   for(const [idString,count] of Object.entries(
    checked.unsafeMaterialByBlockId??{})){
