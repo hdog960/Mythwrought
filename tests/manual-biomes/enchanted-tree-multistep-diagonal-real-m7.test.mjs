@@ -163,3 +163,66 @@ test('real 3-leg uphill/downhill diagonal forest routes preserve original moving
   physicalIphone:false
  }));
 });
+
+test('same continuous original M7 four-leg loop climbs AND descends around a diagonal forest ridge',()=>{
+ const cardinals=[[1,0],[-1,0],[0,1],[0,-1]];
+ const diagonals=[[1,1],[1,-1],[-1,1],[-1,-1]];
+ const loops=[];
+ for(const a of cardinals)for(const b of diagonals){
+   loops.push([a,b,[-a[0],-a[1]],[-b[0],-b[1]]]);
+   loops.push([b,a,[-b[0],-b[1]],[-a[0],-a[1]]]);
+ }
+ const accepted=[],totals={attempted:0,historicPass:0,prototypePass:0,
+   uphillLegs:0,downhillLegs:0,diagonalLegs:0};
+ for(const site of sites){
+   let example=null;
+   outer:
+   for(let x=site.x-8;x<=site.x+8;x++)
+     for(let z=site.z-8;z<=site.z+8;z++)
+       for(const steps of loops){
+         const nodes=pathFor(x,z,steps);
+         if(!nodes||barkAlongNodes(nodes))continue;
+         const elevations=nodes.slice(1).map((n,i)=>n.y-nodes[i].y);
+         if(!elevations.some(d=>d>0)||!elevations.some(d=>d<0))
+           continue; // real combined ascent AND descent, not unrelated routes
+         if(nodes.at(-1).x!==x||nodes.at(-1).z!==z)
+           throw Error('Non-closed test route; expected one continuous loop');
+         if(!nodes.every(n=>atStart(original,n)&&atStart(prototype,n)))
+           continue;
+         totals.attempted++;
+         const baseline=actuallyWalk(original,nodes);
+         if(!baseline.ok)continue; // physically original-source traversable only
+         totals.historicPass++;
+         const experimental=actuallyWalk(prototype,nodes);
+         assert.equal(experimental.ok,true,
+           'experimental enchanted foliage closed an existing mixed uphill/downhill route '+
+           JSON.stringify({site,nodes,elevations,baseline,experimental}));
+         assert.equal(experimental.wall,false);
+         assert.equal(experimental.ceiling,false);
+         assert.equal(experimental.legs,4);
+         assert.ok(Math.abs(experimental.feet-baseline.feet)<.15,
+           'same original terrain must yield the same final moving-player feet');
+         totals.prototypePass++;
+         totals.uphillLegs+=elevations.filter(d=>d>0).length;
+         totals.downhillLegs+=elevations.filter(d=>d<0).length;
+         totals.diagonalLegs+=steps.filter(([dx,dz])=>dx&&dz).length;
+         example={species:site.name,start:[x,z],steps,elevations,
+           oldTicks:baseline.ticks,newTicks:experimental.ticks,
+           finalFeet:+experimental.feet.toFixed(3)};
+         break outer;
+       }
+   accepted.push(example);
+ }
+ assert.ok(totals.prototypePass>=1,
+   'at least one ORIGINAL physically traversed mixed-height diagonal ridge loop is required');
+ assert.ok(totals.uphillLegs>=1&&totals.downhillLegs>=1,
+   'the SAME continuous native player path must climb and descend');
+ assert.ok(totals.diagonalLegs>=2,
+   'two genuine diagonal legs must occur in the same 4-leg circuit');
+ assert.deepEqual(original.save(),{schema:1,seed,edits:[]});
+ assert.throws(()=>prototype.save(),/cannot be saved as historical M7/);
+ console.log('# ENCHANTED M7 MIXED UP DOWN DIAGONAL CONTINUOUS LOOP '+JSON.stringify({
+   seed,totals,accepted,unchangedOriginalStepPlayer:true,
+   noTeleportBetweenLegs:true,physicalIphone:false
+ }));
+});
