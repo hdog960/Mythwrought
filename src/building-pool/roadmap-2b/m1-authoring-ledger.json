@@ -1,0 +1,741 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-2b.authoring-ledger.v1",
+  "lane": "roadmap-2b",
+  "legacySourcePR": 124,
+  "legacyPinnedHead": "07c45d27bd36f4f3aa3197bba0e4f49ce2a58c68",
+  "infrastructureMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "target": 420,
+  "sourceExactInheritedTemples": 15,
+  "originalNewModels": 131,
+  "authoredCandidates": 146,
+  "remainingUnauthored": 274,
+  "creatorAccepted": 0,
+  "integratedInGame": 0,
+  "placedInWorld": 0,
+  "byCategory": {
+    "market-square": {
+      "authored": 21,
+      "target": 60,
+      "remaining": 39
+    },
+    "tailor": {
+      "authored": 19,
+      "target": 60,
+      "remaining": 41
+    },
+    "butcher": {
+      "authored": 19,
+      "target": 60,
+      "remaining": 41
+    },
+    "jeweler": {
+      "authored": 19,
+      "target": 60,
+      "remaining": 41
+    },
+    "bookshop": {
+      "authored": 20,
+      "target": 60,
+      "remaining": 40
+    },
+    "temple": {
+      "authored": 26,
+      "target": 75,
+      "remaining": 49
+    },
+    "theater": {
+      "authored": 22,
+      "target": 45,
+      "remaining": 23
+    }
+  },
+  "originals": [
+    {
+      "id": "r2:market-square:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/market-square-temperate-small.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:temperate:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-trades-culture-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:desert:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:snow:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:enchanted-forest:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:mountain:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:desert:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:desert:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:mountain:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:mountain:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:enchanted-forest:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:enchanted-forest:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:snow:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-exemplars.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:temperate:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:desert:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:mountain:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:enchanted-forest:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:desert:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:mountain:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-public-monuments.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:snow:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:desert:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:enchanted-forest:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:desert:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:snow:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:temperate:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:enchanted-forest:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-new-region-architectures.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:temperate:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:snow:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:enchanted-forest:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:desert:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:snow:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:mountain:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:snow:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:temperate:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-specialty-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:temperate:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:desert:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:desert:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:enchanted-forest:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:mountain:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:desert:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:temperate:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-grand-complexes.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:mountain:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:snow:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:enchanted-forest:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:temperate:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:snow:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:enchanted-forest:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:desert:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-regional-galleries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:mountain:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:mountain:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:mountain:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:mountain:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:mountain:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:mountain:small:01",
+      "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:enchanted-forest:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:snow:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-cliff-and-festival.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:temperate:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-concave-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:desert:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-concave-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:mountain:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-concave-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:snow:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-concave-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:enchanted-forest:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-concave-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:snow:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:enchanted-forest:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:desert:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:temperate:large:01",
+      "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:mountain:medium:01",
+      "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-sculpted-regional.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:desert:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:mountain:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:desert:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-five-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:temperate:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-bespoke-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:enchanted-forest:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-bespoke-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:mountain:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-bespoke-courts.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:desert:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-ritual-trades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:enchanted-forest:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-ritual-trades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:desert:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-shadowstage.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:snow:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:mountain:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-northern-arcades.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:desert:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-guildwings.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-guildwings.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-guildwings.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:mountain:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:snow:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:desert:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:enchanted-forest:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-terraces-sanctuaries.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:snow:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-windfold-guilds.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:enchanted-forest:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-windfold-guilds.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:desert:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-windfold-guilds.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:enchanted-forest:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-crescent-merchants.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:desert:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-crescent-merchants.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:temperate:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-crescent-merchants.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-rime-and-river.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-rime-and-river.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:temperate:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-rime-and-river.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:mountain:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-forms.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-forms.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:mountain:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-regional-forms.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-crossbar-switchback.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:mountain:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-crossbar-switchback.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:mountain:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:snow:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:mountain:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:enchanted-forest:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-highland-grove-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:desert:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-weave-gem-triptych.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-weave-gem-triptych.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-weave-gem-triptych.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:jeweler:desert:medium:02",
+      "file": "src/building-pool/roadmap-2b/m1-diadem-folios.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:snow:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-diadem-folios.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:enchanted-forest:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-diadem-folios.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:butcher:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:mountain:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:temple:mountain:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:bookshop:temperate:large:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:tailor:temperate:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:snow:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-echo-six.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:market-square:temperate:small:02",
+      "file": "src/building-pool/roadmap-2b/m1-river-sundial.mjs",
+      "status": "authored-candidate"
+    },
+    {
+      "id": "r2:theater:desert:small:03",
+      "file": "src/building-pool/roadmap-2b/m1-river-sundial.mjs",
+      "status": "authored-candidate"
+    }
+  ],
+  "biomeSizeDistribution": {
+    "temperate": {
+      "small": 10,
+      "medium": 9,
+      "large": 10
+    },
+    "desert": {
+      "small": 9,
+      "medium": 9,
+      "large": 10
+    },
+    "snow": {
+      "small": 11,
+      "medium": 12,
+      "large": 8
+    },
+    "enchanted-forest": {
+      "small": 10,
+      "medium": 8,
+      "large": 10
+    },
+    "mountain": {
+      "small": 10,
+      "medium": 10,
+      "large": 10
+    }
+  },
+  "productionRegistryUnchanged": true,
+  "physicalShapeAbiCertified": false,
+  "screenshotClassification": "software WebGL2 cube proxies; neither physical-family WebGL2 nor live game",
+  "lastMilestone": "M1 — six new distinct sculpted, physically concave regional architectures; exact-head CI and Chromium review pending",
+  "evidenceClassification": "native source/test, genuine Chromium software-WebGL2 cube proxies only; physical-family/webgame/iPhone unapproved"
+}
