@@ -161,7 +161,7 @@ export function buildBriarcliffCrescentWalkLighthouse(){
   if(roofable(x,z)&&b.clear(x,1,z))b.fitting(x,z,label,'pack4:059');
  return b.finish('Original temperate medium lighthouse: one 34-tier complete lower-solid and higher-ring stone tower with 24 physically backed Pack3 crown blocks, eight fully outward high original Pack4 windows, 7 asymmetric grounded service roofs, two sky-exposed paved walkable courts and a genuine source-paved crescent promenade with linked legs. No lighthouse signal or real sea mechanics.',{
   builderBExclusiveWave:30,originalCrescentRoofWings:7,
-  genuineGroundedSkyCourts:[144,42],originalCrescentPavedCells:boardwalk.size,
+  genuineGroundedSkyCourts:[144,49],originalCrescentPavedCells:boardwalk.size,
   stoneTowerWallHeight:34,realStoneCrownCells:24,
   trulyElevatedUprightWindows:high,lowerExteriorWindows:low,
   liveBeacon:false,upperTowerNavigationAvailable:false,
