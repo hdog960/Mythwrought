@@ -69,7 +69,7 @@ test('Moonwillow 591 actual absent forest-clearing columns and 63 grounded fully
  assert.equal(b.architecturalIdentity.exteriorVoidFootprintCells,591);
  assert.deepEqual(b.architecturalIdentity.outdoorCourtyard,windcourt);
  let voids=0,court=0;
- for(let x=0;x<64;x++)for(let z=0;z<56;z++){
+ for(let x=0;x<68;x++)for(let z=0;z<58;z++){
   if(disabled(x,z)){
    voids++;
    for(let y=0;y<12;y++)assert.ok(!positions.has(key([x,y,z])),'void contains a source voxel');
