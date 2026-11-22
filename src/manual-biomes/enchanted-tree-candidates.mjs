@@ -4,13 +4,13 @@
 // Uses existing mineable IDs. No globals, no random calls, no save writes.
 import {WORLD_MAX_Y} from '../depth.mjs';
 import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
+import {resolveEnchantedTreeOverlap} from './enchanted-tree-overlap.mjs';
 
 export const ENCHANTED_TREE_CANDIDATE_KIND=Object.freeze({
   STARSPIRE:'starspire',MOONWILLOW:'moonwillow',ANCIENT_GIANT:'ancient-giant'
 });
 export const ENCHANTED_TREE_MAX_RADIUS=4;
 export const ENCHANTED_TREE_MAX_CELLS=240;
-const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 
 // Selection is independent of the existing seeded tree site and density rolls.
 // NEVER change treeRoll's existing sequence, including snow and conifer sites.
@@ -37,7 +37,13 @@ export function buildEnchantedTreeCandidate(x,floor,z,styleRoll){
     if(dy<1||Math.abs(dx)>ENCHANTED_TREE_MAX_RADIUS||
        Math.abs(dz)>ENCHANTED_TREE_MAX_RADIUS||
        floor+dy>WORLD_MAX_Y)throw Error('Candidate outside physical envelope');
-    items.set((x+dx)+','+(floor+dy)+','+(z+dz),[x+dx,floor+dy,z+dz,id]);
+    // The tree's own crown can revisit an already authored shaft or branch.
+    // Keep every mineable structural bark voxel connected and physical:
+    // later foliage cannot replace bark inside this same tree.
+    const at=(x+dx)+','+(floor+dy)+','+(z+dz);
+    const prior=items.get(at);
+    if(prior&&resolveEnchantedTreeOverlap(prior[3],id)===prior[3])return;
+    items.set(at,[x+dx,floor+dy,z+dz,id]);
   };
   if(species===ENCHANTED_TREE_CANDIDATE_KIND.STARSPIRE){
     // Slim offset shaft, tiered pointed moonlit crown and side spire tips.
@@ -53,6 +59,8 @@ export function buildEnchantedTreeCandidate(x,floor,z,styleRoll){
       }
     }
     for(const dir of [-1,1]){
+      // A one-voxel elbow joins the side spire to the central shaft.
+      put(bend+dir,trunk-2,0,G.aetherBark);
       put(bend+2*dir,trunk-2,0,G.aetherBark);
       put(bend+2*dir,trunk-1,0,G.moonLeaves);
       put(bend+2*dir,trunk,0,G.moonLeaves);
@@ -62,6 +70,8 @@ export function buildEnchantedTreeCandidate(x,floor,z,styleRoll){
     // lowest leaf wisps remain well above the ground, leaving player access.
     const bend=styleRoll<.81?-1:1;
     for(let dy=1;dy<=trunk;dy++)put(dy>=trunk-2?bend:0,dy,0,G.aetherBark);
+    // The bent willow shaft must connect by a FACE, not merely by an edge.
+    put(bend,trunk-3,0,G.aetherBark);
     for(let dy=trunk-2;dy<=trunk+1;dy++){
       const r=dy===trunk+1?1:dy===trunk-2?2:3;
       for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){
@@ -75,7 +85,10 @@ export function buildEnchantedTreeCandidate(x,floor,z,styleRoll){
     for(const [dx,dz] of [[-3,0],[3,0],[0,-3],[0,3],[-2,-2],[2,2]])
       for(let dy=trunk-3;dy<=trunk-1;dy++)
         put(bend+dx,dy,dz,G.moonLeaves);
-    for(const dx of [-2,2])put(bend+dx,trunk-1,0,G.aetherBark);
+    for(const dx of [-2,2]){
+      put(bend+Math.sign(dx),trunk-1,0,G.aetherBark);
+      put(bend+dx,trunk-1,0,G.aetherBark);
+    }
   }else{
     // A true mineable two-by-two old-growth shaft, rooted on four supporting
     // columns. Bounded branching crown reaches up to 4 voxels horizontally.
@@ -83,9 +96,15 @@ export function buildEnchantedTreeCandidate(x,floor,z,styleRoll){
       for(let dx=0;dx<=1;dx++)for(let dz=0;dz<=1;dz++)
         put(dx,dy,dz,G.aetherBark);
     }
-    for(const [dx,dz] of [[-2,0],[3,0],[0,-2],[0,3]])
+    for(const [dx,dz,bridgeX,bridgeZ] of [
+      [-2,0,-1,0],[3,0,2,0],[0,-2,0,-1],[0,3,0,2]
+    ]){
+      // Four heavy side branches previously stood a voxel away from the
+      // main 2x2 shaft. Give each a horizontal bearing beam.
+      put(bridgeX,trunk-3,bridgeZ,G.aetherBark);
       for(let dy=trunk-3;dy<=trunk-1;dy++)
         put(dx,dy,dz,G.aetherBark);
+    }
     for(let dy=trunk-3;dy<=trunk+2;dy++){
       const radius=dy<trunk-1?2:dy<=trunk?3:dy===trunk+1?3:1;
       for(let dz=-radius;dz<=radius;dz++)for(let dx=-radius;dx<=radius;dx++){
