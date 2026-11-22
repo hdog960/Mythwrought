@@ -38,3 +38,15 @@ test('no edits, mutation, random calls, or permission to skip source-ground vali
   assert.throws(()=>rooted(0.5,6,0,giant,column,read),/Invalid enchanted tree footing probe/);
   assert.throws(()=>rooted(0,6,0,[[0,'bad']],column,read),/Invalid enchanted tree footing offset/);
 });
+
+test('duplicate or incomplete giant footprints cannot bypass one of four true corners',()=>{
+  for(const offsets of [ [[0,0],[1,0]], [[0,0],[1,0],[0,1],[0,1]],
+    [[0,0],[1,0],[0,1],[2,1]] ])
+    assert.throws(()=>rooted(15,6,-529,offsets,surface,read),/Invalid Ancient Giant root footprint/);
+});
+test('undefined and noninteger caps or hidden subsoil fail closed',()=>{
+  assert.equal(probe(read,()=>new Map([[6,undefined]])),false);
+  assert.equal(probe(read,()=>new Map([[6,403.1]])),false);
+  assert.equal(probe((x,y,z)=>y===5?undefined:read(x,y,z)),false);
+  assert.equal(probe((x,y,z)=>y===5?NaN:read(x,y,z)),false);
+});
