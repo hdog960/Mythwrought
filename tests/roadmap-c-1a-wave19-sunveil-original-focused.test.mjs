@@ -4,7 +4,7 @@
 // These five tests are AUTHORED but not native-executed until a targeted test run.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {getRoadmapC1AInnWave19,ROADMAP_C_1A_WAVE19_INN_IDS} from '../src/building-pool/roadmap-1a/m3-inn-wave19-roadmap-c.mjs';
+import {getRoadmapC1AInnWave19,ROADMAP_C_1A_WAVE19_INN_IDS,ROADMAP_C_1A_WAVE19_INN_SPECS} from '../src/building-pool/roadmap-1a/m3-inn-wave19-roadmap-c.mjs';
 import {validateBlueprint,validatePool} from '../src/building-pool/roadmap-1a/legacy-schema.mjs';
 import {getHospitalityWave1} from '../src/building-pool/roadmap-1a/m3-hospitality-wave1.mjs';
 import {getHospitalityWave3} from '../src/building-pool/roadmap-1a/m3-hospitality-wave3.mjs';
@@ -133,4 +133,24 @@ test('Sunveil strictly differs under all D4 rotations/reflections from FOUR acce
   assert.ok(m<0.89,'D4 original inn near-duplicate: '+existing.id+' / '+m);
  }
  console.log('SUNVEIL_4_PRIOR_DESERT_LARGE_INNS_MAX_D4='+greatest+' nearest='+closest);
+});
+
+test('Sunveil all fourteen source roof wings construct physical mass instead of metadata-only labels',()=>{
+ const wings=ROADMAP_C_1A_WAVE19_INN_SPECS[0].roofWings;
+ const roof=b.placements.filter(p=>p.role==='roof');
+ assert.equal(wings.length,14);
+ assert.equal(roof.length,2497,'genuine original roof count must stay stable');
+ assert.ok(new Set(roof.map(p=>p.at[1])).size>=4,'flat repeated canopy instead of stepped roofs');
+ const present=new Set();
+ for(const wing of wings){
+  const [x0,z0,x1,z1]=wing.rect;
+  const contributed=roof.filter(p=>p.at[0]>=x0&&p.at[0]<=x1&&p.at[2]>=z0&&p.at[2]<=z1);
+  assert.ok(contributed.length>=40,'missing physical source roof wing '+wing.name+' '+contributed.length);
+  present.add(wing.name);
+ }
+ assert.equal(present.size,14);
+ const [x0,z0,x1,z1]=court;
+ for(const p of roof)
+  assert.ok(p.at[0]<x0||p.at[0]>x1||p.at[2]<z0||p.at[2]>z1,
+   'original roof blocks the authentic open-air windcourt');
 });
