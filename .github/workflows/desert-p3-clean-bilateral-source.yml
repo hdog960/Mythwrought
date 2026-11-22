@@ -1,0 +1,55 @@
+name: Desert P3 clean bilateral original V7 and visual edit fence
+on:
+  push:
+    branches:
+      - research/desert-p3-clean-bilateral-source-proposal-20261122
+    paths:
+      - .github/workflows/desert-p3-clean-bilateral-source.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-clean-bilateral-source
+  cancel-in-progress: false
+jobs:
+  clean-source-original-v7:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          path: accepted
+      - uses: actions/checkout@v4
+        with:
+          ref: f93c2b11572fa1df4ec79a007eaa8a7c40165ccc
+          path: research
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact clean lineage, only own source files, original blob integrity
+        run: |
+          set -euo pipefail
+          BASE=2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          test "$(git -C accepted rev-parse HEAD)" = "$BASE"
+          test "$(git -C research rev-parse HEAD)" = f93c2b11572fa1df4ec79a007eaa8a7c40165ccc
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(src/voxel.mjs|src/main.mjs|src/manual-biomes/desert-seam-vertex-tint.mjs|src/manual-biomes/desert-bilateral-rgb.mjs|src/manual-biomes/desert-seam-invalidation.mjs|tests/desert-p3-clean-source-and-invalidation.test.mjs|.github/workflows/desert-p3-clean-bilateral-source.yml|docs/desert/PHASE3_CLEAN_SOURCE_CUE_INVALIDATION_20261122.md)$' || true)
+          test -z "$unexpected"
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-seam-vertex-tint.mjs)" = 023bc3bad89cc524c68d675b3ed8e724d3f3fed8
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-bilateral-rgb.mjs)" = 5605d19064c216736d69e4422481637989110718
+          test "$(git -C candidate rev-parse HEAD:src/storybook-materials.mjs)" = a06a1f3408d99521485a48d2d84a577a7ac588c8
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/profile-world.mjs)" = ffad7e10c07e9252bfaaf8381962443ce658abff
+          test ! -f candidate/src/manual-biomes/desert-seam-shader.mjs
+          node --check candidate/src/main.mjs
+          node --check candidate/src/voxel.mjs
+          node --check candidate/src/manual-biomes/desert-seam-invalidation.mjs
+          node --check candidate/tests/desert-p3-clean-source-and-invalidation.test.mjs
+      - name: Only new exact clean transplant and M7 visual edit invalidation tests
+        run: cd candidate && node --test tests/desert-p3-clean-source-and-invalidation.test.mjs
