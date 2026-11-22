@@ -185,3 +185,62 @@ test('real Snow/Enchanted/Plains original climates and protected original veto c
   nonDesertOrMountainSamples:realExcluded,originalVetoColumns:originalVeto
  }));
 });
+
+
+test('real original M7 source-cap mining demonstrably changes nearby unrefreshed chunk RGB',()=>{
+ let found=null,examined=0;
+ for(const [seed,centerCx,centerCz] of sites){
+  const world=new FourRegionWorld(seed,fourRegionProfile(seed,M7));
+  const oldUnedited=new Map();
+  const options=[];
+  for(const [orient,localFixed] of [['east',13],['west',2],['south',13],['north',2]]){
+   for(let local=0;local<16;local++){
+    const x=centerCx*16+(orient==='east'||orient==='west'?localFixed:local);
+    const z=centerCz*16+(orient==='north'||orient==='south'?localFixed:local);
+    const top=topPlan(world,x,z);
+    if(!top||!(top.id===401||top.id===258))continue;
+    if(world.get(x,top.y,z)!==top.id)continue;
+    if(top.id===258){
+      const r=v6BiomeAt(x,z,seed);
+      if(r?.name!=='desert'||r.weight>.5)continue;
+    }
+    const {cx,cz}=orient==='east'?{cx:centerCx+1,cz:centerCz}:
+      orient==='west'?{cx:centerCx-1,cz:centerCz}:
+      orient==='south'?{cx:centerCx,cz:centerCz+1}:{cx:centerCx,cz:centerCz-1};
+    const legacy=editAffectedChunks(x,z);
+    if(legacy.some(v=>v.cx===cx&&v.cz===cz))continue;
+    const expanded=desertSeamEditAffectedChunks(world,x,z,top.y);
+    if(!expanded.some(v=>v.cx===cx&&v.cz===cz))continue;
+    options.push({seed,x,y:top.y,z,id:top.id,replacement:top.id===401?400:257,
+      recipient:[cx,cz],orient});
+   }
+  }
+  for(const option of options){
+    examined++;
+    const [cx,cz]=option.recipient,k=cx+','+cz;
+    let before=oldUnedited.get(k);
+    if(!before){before=cleanMesh(world,cx,cz);oldUnedited.set(k,before);}
+    assert.ok(world.set(option.x,option.y,option.z,option.replacement));
+    const after=cleanMesh(world,cx,cz);
+    assert.equal(after.length,before.length,'Source edit outside recipient may not alter recipient geometry');
+    let changedRGB=0;
+    for(let i=0;i<before.length;i+=9){
+      for(const j of [0,1,2,6,7,8])
+        assert.equal(after[i+j],before[i+j],
+          'Only original source-owned neighbor terrain RGB can react to edit');
+      if(before[i+3]!==after[i+3]||before[i+4]!==after[i+4]||
+         before[i+5]!==after[i+5]){
+        assert.ok(before[i+8]===40||before[i+8]===42);
+        changedRGB++;
+      }
+    }
+    assert.ok(world.set(option.x,option.y,option.z,option.id));
+    assert.deepEqual(world.save().edits,[],'Source edit restored cleanly');
+    if(changedRGB>0){found={...option,changedRGB,vertices:after.length/9};break;}
+  }
+  if(found)break;
+ }
+ console.log('DESERT_CLEAN_ACTUAL_NEIGHBOR_RGB_EDIT '+JSON.stringify({examined,found}));
+ assert.ok(found,
+   'Original M7 edit within visual halo must demonstrate a real changed recipient RGB under the new invalidation rule');
+});
