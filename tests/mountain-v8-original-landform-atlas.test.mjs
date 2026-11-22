@@ -14,6 +14,12 @@ const ATLASES=Object.freeze([
   Object.freeze({seed:2026,tileX:-80,tileZ:-24,label:'meadow-rock-mixed'})
 ]);
 const sum=(rows,key)=>rows.reduce((n,r)=>n+r.stats[key],0);
+const count=(items)=>Object.values(items).reduce((a,b)=>a+b,0);
+const reasons=(rows,key)=>Object.fromEntries(
+  Object.keys(rows[0].stats[key]).map(reason=>[
+    reason,rows.reduce((n,r)=>n+r.stats[key][reason],0)
+  ])
+);
 const digest=mesh=>createHash('sha256')
   .update(Buffer.from(mesh.buffer,mesh.byteOffset,mesh.byteLength)).digest('hex');
 test('four genuinely generated 64-tile alpine atlases retain diverse safe geometry and original V7 mesh',()=>{
@@ -42,6 +48,11 @@ test('four genuinely generated 64-tile alpine atlases retain diverse safe geomet
     assert.ok(report.stats.plantCells<=18*report.stats.plants);
     assert.ok(report.stats.terrainCells<=18*report.stats.eligible);
     assert.ok(report.stats.seamExposedFaces<=8*report.stats.eligible);
+    assert.equal(count(report.stats.seamVetoReasons),report.stats.seamRejected);
+    assert.equal(count(report.stats.rootSourceVetoReasons),report.stats.rejected);
+    assert.equal(count(report.stats.seamSourceVetoReasons),
+      report.stats.seamVetoReasons.biomeBoundary+
+      report.stats.seamVetoReasons.sourceUnavailableInMountain);
     assert.ok(report.stats.meadow+report.stats.snow+report.stats.rock===
       report.stats.eligible);
     assert.equal(JSON.stringify(world.save()),saveBefore,
@@ -89,6 +100,9 @@ test('four genuinely generated 64-tile alpine atlases retain diverse safe geomet
       sourceRejected:sum(own,'rejected'),
       sourceSites:sum(own,'sourceSites'),
       sourceCacheHits:sum(own,'sourceCacheHits'),
+      seamVetoReasons:reasons(own,'seamVetoReasons'),
+      rootSourceVetoReasons:reasons(own,'rootSourceVetoReasons'),
+      seamSourceVetoReasons:reasons(own,'seamSourceVetoReasons'),
       unchangedOriginalChunkMeshes:2}));
   }
   assert.equal(snapshots.length,4);
