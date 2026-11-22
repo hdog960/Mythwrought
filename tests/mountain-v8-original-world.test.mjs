@@ -7,7 +7,7 @@ import {surveyMountainV8OriginalWorld as survey}
   from '../src/manual-biomes/mountain-v8-original-world.mjs';
 
 test('real original-world reader never edits, converts or saves a V7 world',()=>{
-  const seed=179,world=new VoxelWorld(seed),before=world.save();
+  const seed=179,world=new VoxelWorld(seed),before=JSON.stringify(world.save());
   const sites=[[-512,0],[-516,0],[-520,0],[-524,8],[-508,12],[-536,-12]];
   for(const [x,z] of sites){
     const got=survey(x,z,seed,{world});
@@ -21,7 +21,7 @@ test('real original-world reader never edits, converts or saves a V7 world',()=>
       assert.equal(v6BiomeAt(x,z,seed)?.name,'mountain');
     }
   }
-  assert.equal(world.save(),before,'read-only original terrain survey changed schema-1 bytes');
+  assert.equal(JSON.stringify(world.save()),before,'read-only original terrain survey changed schema-1 bytes');
   assert.equal(world.edits.size,0);
 });
 test('genuine protected cave AIR and foreign biomes are never promoted into V8 terrain',()=>{
