@@ -10,7 +10,8 @@ const PAIRS=Object.freeze([0,2,4,6,8,10,12,14,17,19,21,23,26,28,30,32]);
 const FIELDS=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
 export function auditSourceProtectedMainGalleries(seed,rx,rz,{
  source,maxTotalSourceChecks=60000,maxCellsPerGallery=20000,
- maxFailureExamples=8,diagnoseAllGalleries=false
+ maxFailureExamples=8,diagnoseAllGalleries=false,
+ countEverySourceVeto=false
 }={}){
  if(!INT(seed)||seed!==(seed|0)||![rx,rz].every(INT)||
   !source||typeof source!=='object'||
@@ -18,7 +19,9 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
   !INT(maxTotalSourceChecks)||maxTotalSourceChecks<100||maxTotalSourceChecks>200000||
   !INT(maxCellsPerGallery)||maxCellsPerGallery<100||maxCellsPerGallery>20000||
   !INT(maxFailureExamples)||maxFailureExamples<1||maxFailureExamples>16||
-  typeof diagnoseAllGalleries!=='boolean')
+  typeof diagnoseAllGalleries!=='boolean'||
+  typeof countEverySourceVeto!=='boolean'||
+  (countEverySourceVeto&&!diagnoseAllGalleries))
   throw TypeError('Invalid source-protected gallery survey');
  const mutual=auditMutualMainGalleryClearance(seed,rx,rz);
  if(!mutual.ok)return Object.freeze({ok:false,seed,rx,rz,
@@ -52,7 +55,10 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    naturalAt:source.naturalAt,authoredAt:source.authoredAt,
    editedAt:source.editedAt,protectedAt:source.protectedAt,
    minY:-210,maxY:19,maxCells:Math.min(maxCellsPerGallery,remaining),
-   stopOnFirstUnsafe:true
+   // The default stays cheap and fail-first. The explicit research option
+   // exhaustively classifies eligible, completed per-gallery source cells,
+   // still capped by this region's remaining global M7 read budget.
+   stopOnFirstUnsafe:!countEverySourceVeto
   });
   sourceChecks+=checked.sourceChecks??0;
   if(sourceChecks>maxTotalSourceChecks)return Object.freeze({
@@ -67,7 +73,10 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    worldChanged:false,nativePlayerWalkingVerified:false});
   rows.push(Object.freeze({galleryIndex:index,ok:checked.ok,
    sourceChecks:checked.sourceChecks??0,
-   refusal:checked.firstRefusal??checked.reason??null,
+   refusal:checked.firstRefusal??checked.examples?.[0]?.reason??
+    checked.reason??null,
+   fullGallerySourceCellsClassified:countEverySourceVeto&&
+    checked.haltedEarly!==true&&checked.reason!=='SOURCE_QUERY_BUDGET_EXCEEDED',
    rejectedSourceCounts:checked.counts??null,
    examples:checked.examples??[]}));
   for(const [kind,count] of Object.entries(checked.counts??{}))
@@ -75,10 +84,12 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
     countTotals[kind]=(countTotals[kind]??0)+count;
   if(!checked.ok){
    sourceRejectedGalleries++;
-   const type=checked.firstRefusal??checked.reason??'UNKNOWN_REFUSAL';
+   const type=checked.firstRefusal??checked.examples?.[0]?.reason??
+    checked.reason??'UNKNOWN_REFUSAL';
    firstRefusalTypes[type]=(firstRefusalTypes[type]??0)+1;
    if(failures.length<maxFailureExamples)failures.push(Object.freeze({
-    galleryIndex:index,reason:checked.firstRefusal??checked.reason,
+    galleryIndex:index,reason:checked.firstRefusal??
+     checked.examples?.[0]?.reason??checked.reason,
     examples:checked.examples??[]
    }));
    // The default refusal is conclusive. Diagnostic mode inspects remaining
@@ -97,8 +108,13 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
   galleriesInspected:16,sourceChecks,
   sourceSafeGalleries:16-sourceRejectedGalleries,
   sourceRejectedGalleries,diagnosticAll16GalleriesAttempted:true,
+  completeSourceVetoCensus:countEverySourceVeto&&rows.length===16&&
+   rows.every(row=>row.fullGallerySourceCellsClassified),
+  sourceCountMethod:countEverySourceVeto?
+   'FULL_COMPLETED_GALLERY_SOURCE_VOXELS':'FIRST_REFUSAL_PER_GALLERY',
   firstRefusalCounts:Object.freeze({...firstRefusalTypes}),
   sourceRejectionCounts:Object.freeze({...countTotals}),
+  countsRepresentAllEligibleCells:countEverySourceVeto,
   rows:Object.freeze(rows),failures:Object.freeze(failures),
   mutuallyCollisionFree:true,
   allGallerySupportAndHeadroomSourceSafe:sourceRejectedGalleries===0,
