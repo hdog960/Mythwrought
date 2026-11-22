@@ -82,12 +82,22 @@ export function buildEnchantedTreeCandidate(x,floor,z,styleRoll){
         put(bend+dx,dy,dz,dy===trunk+1?G.moonLeaves:G.aetherLeaves);
       }
     }
-    for(const [dx,dz] of [[-3,0],[3,0],[0,-3],[0,3],[-2,-2],[2,2]])
-      for(let dy=trunk-3;dy<=trunk-1;dy++)
-        put(bend+dx,dy,dz,G.moonLeaves);
-    for(const dx of [-2,2]){
-      put(bend+Math.sign(dx),trunk-1,0,G.aetherBark);
-      put(bend+dx,trunk-1,0,G.aetherBark);
+    // Willow-specific split curtains, rather than another solid pine-like
+    // crown: eight uneven hanging strands beneath the airy upper shell.
+    // Their bottom dy>=3 leaves player headroom for the lowest trunk variant.
+    // The real terrain-aware canopy filter will prune raised-slope conflicts.
+    for(const [dx,dz,hang] of [
+      [-3,0,4],[3,0,4],[0,-3,4],[0,3,4],
+      [-2,-2,4],[2,2,4],[-2,2,3],[2,-2,3]
+    ])for(let dy=trunk-hang;dy<=trunk-1;dy++)
+      put(bend+dx,dy,dz,G.moonLeaves);
+    // Four physical outward arms keep the foliage curtains visually
+    // anchored to mineable, face-connected bark (not diagonal-only twigs).
+    for(const dir of [-1,1]){
+      put(bend+dir,trunk-1,0,G.aetherBark);
+      put(bend+2*dir,trunk-1,0,G.aetherBark);
+      put(bend,trunk-1,dir,G.aetherBark);
+      put(bend,trunk-1,2*dir,G.aetherBark);
     }
   }else{
     // A true mineable two-by-two old-growth shaft, rooted on four supporting
