@@ -29,7 +29,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'f134d5cbd642789849587cff7f1486780a82d0bd');
+    '60f3535304856d3d3df9d8ffda7a597360232077');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -386,4 +386,133 @@ test('unchanged public path rethrows original native fault without a local-only 
     assert.ok(!x.calls.includes('pause'));
     assert.ok(!x.calls.includes('fatal'));
   }
+});
+
+
+// Real original refreshEditedMeshes() source, injected multi-chunk GPU handles.
+// The upload fails on the 3rd candidate, AFTER two complete opaque+water
+// native allocations and BEFORE chunks.set() or C6 far-cache invalidation.
+function originalMultiStagedCleanupCase({
+  enabled=true,uploadFailureAt=3,failedNativeDeletes=[],failedBridgeIndex=0,
+  failPause=false,failFatal=false
+}={}){
+  const chunks=new Map([0,1,2].map(i=>[
+    i+',0,0',{buffer:{id:'resident-'+i},count:3}
+  ]));
+  const originalResidents=[...chunks.values()].map(c=>c.buffer);
+  const events=[],initialError=new Error('291_ORIGINAL_THIRD_GPU_UPLOAD_FAILURE');
+  let uploadN=0,bridgeN=0;
+  const scope={
+    chunks,near291Enabled:enabled,near291Fatal:false,
+    verticalEditSections:()=>[0],
+    editAffectedChunks:()=>[0,1,2].map(cx=>({cx,cz:0})),
+    depthMeshKey:(cx,cz,section)=>cx+','+cz+','+section,
+    meshPlayableChunk:()=>new Float32Array(9),
+    meshPlayableWater:()=>new Float32Array(9),
+    uploadPack2Chunk:()=>{
+      uploadN++;
+      events.push('upload-'+uploadN);
+      if(uploadN===uploadFailureAt)throw initialError;
+      return {buffer:{id:'staged-'+uploadN+'-opaque'},count:3,
+        waterBuffer:{id:'staged-'+uploadN+'-water'},waterCount:3};
+    },
+    originalDeleteChunkBuffers:({buffer})=>{
+      events.push('native-'+buffer.id);
+      if(failedNativeDeletes.includes(buffer.id))
+        throw Error('291_NATIVE_DELETE_'+buffer.id);
+    },
+    deleteChunkBuffers:item=>{
+      bridgeN++;
+      events.push('bridge-'+item.buffer.id);
+      if(bridgeN===failedBridgeIndex)throw Error('291_LEGACY_BRIDGE_CLEANUP_FAILURE');
+    },
+    caveSession:null,combinedWorld:()=>true,
+    caveFarGpu:{invalidate:()=>{events.push('far-invalidate');}},
+    editMeshBatches:0,lastEditMeshKeys:[],
+    frameDriver:{pause:()=>{events.push('pause');if(failPause)throw Error('291_STOP_FAULT');}},
+    fatal:()=>{events.push('fatal');if(failFatal)throw Error('291_UI_FAULT');}
+  };
+  let thrown=null;
+  try{makeExactNearPublisher(scope)(0,0,0);}
+  catch(error){thrown=error;}
+  return {scope,events,initialError,thrown,originalResidents};
+}
+
+test('third original upload fault exhausts ALL four uncommitted native opaque/water deletes',()=>{
+  const x=originalMultiStagedCleanupCase();
+  assert.equal(x.thrown,x.initialError);
+  assert.deepEqual(x.events,[
+    'upload-1','upload-2','upload-3',
+    'native-staged-1-opaque','native-staged-1-water',
+    'native-staged-2-opaque','native-staged-2-water'
+  ]);
+  assert.equal(x.scope.near291Fatal,false);
+  assert.deepEqual([...x.scope.chunks.values()].map(c=>c.buffer),x.originalResidents);
+});
+test('first opaque deletion fault still attempts its water buffer and every remaining handle',()=>{
+  const x=originalMultiStagedCleanupCase({failedNativeDeletes:['staged-1-opaque']});
+  assert.equal(x.thrown,x.initialError);
+  assert.deepEqual(x.events.slice(3,7),[
+    'native-staged-1-opaque','native-staged-1-water',
+    'native-staged-2-opaque','native-staged-2-water'
+  ]);
+  assert.deepEqual(x.events.slice(7),['pause','fatal']);
+  assert.equal(x.scope.near291Fatal,true);
+  assert.deepEqual([...x.scope.chunks.values()].map(c=>c.buffer),x.originalResidents);
+});
+test('transparent-water staged deletion failure cannot skip following chunks',()=>{
+  const x=originalMultiStagedCleanupCase({failedNativeDeletes:['staged-1-water']});
+  assert.equal(x.thrown,x.initialError);
+  assert.deepEqual(x.events.slice(3,7),[
+    'native-staged-1-opaque','native-staged-1-water',
+    'native-staged-2-opaque','native-staged-2-water'
+  ]);
+  assert.equal(x.scope.near291Fatal,true);
+});
+test('multiple failed staged GPU deletes still preserve originating upload error',()=>{
+  const x=originalMultiStagedCleanupCase({
+    failedNativeDeletes:['staged-1-opaque','staged-1-water','staged-2-water']
+  });
+  assert.equal(x.thrown,x.initialError);
+  assert.equal(x.events.filter(e=>e.startsWith('native-')).length,4);
+  assert.deepEqual(x.events.slice(-2),['pause','fatal']);
+  assert.equal(x.scope.near291Fatal,true);
+});
+test('broken fatal/UI callbacks cannot mask original staged upload exception',()=>{
+  const x=originalMultiStagedCleanupCase({
+    failedNativeDeletes:['staged-1-opaque'],failPause:true,failFatal:true
+  });
+  assert.equal(x.thrown,x.initialError);
+  assert.deepEqual(x.events.slice(-2),['pause','fatal']);
+  assert.equal(x.scope.near291Fatal,true);
+});
+test('first upload failure has zero completed handles and does not invent a fatal cleanup',()=>{
+  const x=originalMultiStagedCleanupCase({uploadFailureAt:1});
+  assert.equal(x.thrown,x.initialError);
+  assert.deepEqual(x.events,['upload-1']);
+  assert.equal(x.scope.near291Fatal,false);
+  assert.deepEqual([...x.scope.chunks.values()].map(c=>c.buffer),x.originalResidents);
+});
+test('public control preserves its original non-exhaustive error behavior unchanged',()=>{
+  const x=originalMultiStagedCleanupCase({
+    enabled:false,failedBridgeIndex:1
+  });
+  assert.equal(x.thrown?.message,'291_LEGACY_BRIDGE_CLEANUP_FAILURE');
+  assert.deepEqual(x.events,['upload-1','upload-2','upload-3',
+    'bridge-staged-1-opaque']);
+  assert.equal(x.scope.near291Fatal,false);
+  assert.deepEqual([...x.scope.chunks.values()].map(c=>c.buffer),x.originalResidents);
+});
+test('healthy public cleanup still uses original authoritative bridge without local flags',()=>{
+  const x=originalMultiStagedCleanupCase({enabled:false});
+  assert.equal(x.thrown,x.initialError);
+  assert.deepEqual(x.events,['upload-1','upload-2','upload-3',
+    'bridge-staged-1-opaque','bridge-staged-2-opaque']);
+  assert.equal(x.scope.near291Fatal,false);
+});
+test('staged cleanup never invokes VAO ownership bridge and never invalidates C6 far cache',()=>{
+  const x=originalMultiStagedCleanupCase();
+  assert.ok(x.events.every(e=>!e.startsWith('bridge-')));
+  assert.ok(!x.events.includes('far-invalidate'));
+  assert.deepEqual([...x.scope.chunks.values()].map(c=>c.buffer),x.originalResidents);
 });
