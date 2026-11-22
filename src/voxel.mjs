@@ -280,20 +280,9 @@ export function meshChunk(world,cx,cz){
           // one vertical step, interpolate EXISTING RGB on the boundary edge.
           // Four cardinal columns, at most three y-level probes each. These
           // occur only in the synchronous chunk mesh rebuild, never per frame.
-          let screeContact;
-          const findScree=(dx,dz)=>{
-            const ax=x+dx,az=z+dz;
-            for(let h=y-1;h<=y+1;h++)
-              if(!world.edits?.has(worldKey(ax,h,az))&&
-                 blockAt(ax,h,az)===401)return true;
-            return false;
-          };
-          const edgeTint=groundColor&&id===258&&
-            v6BiomeAt(x,z,world.seed)?.name==='desert';
-          if(edgeTint)screeContact={
-            east:findScree(1,0),west:findScree(-1,0),
-            south:findScree(0,1),north:findScree(0,-1)
-          };
+          // No biome lookups for completely occluded hardpan: this step must
+          // only run after at least one actual triangle survives face culling.
+          let screeContact,checkedVisibleHardpan=false;
           // Source-accurate union surface geometry; full neighboring legacy
           // solids hide only true boundary faces, preserving internal shapes.
           for(let t=0;t<surface.indices.length;t+=3){
@@ -312,6 +301,22 @@ export function meshChunk(world,cx,cz){
             if(boundary&&neighbor!==BLOCK.AIR&&
                 ((!isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))||
                   unifiedTerrain&&BIOME_SOLID_CUBES.has(neighbor)))continue;
+            if(!checkedVisibleHardpan&&groundColor&&id===258){
+              checkedVisibleHardpan=true;
+              if(v6BiomeAt(x,z,world.seed)?.name==='desert'){
+                const findScree=(dx,dz)=>{
+                  const ax=x+dx,az=z+dz;
+                  for(let h=y-1;h<=y+1;h++)
+                    if(!world.edits?.has(worldKey(ax,h,az))&&
+                       blockAt(ax,h,az)===401)return true;
+                  return false;
+                };
+                screeContact={
+                  east:findScree(1,0),west:findScree(-1,0),
+                  south:findScree(0,1),north:findScree(0,-1)
+                };
+              }
+            }
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const lit=[.77,.73,1,.48,.85,.67][face];
             const color=groundColor??biome130Color(id,x,y,z,face);
