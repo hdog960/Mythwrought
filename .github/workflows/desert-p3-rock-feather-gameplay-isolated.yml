@@ -1,0 +1,106 @@
+name: Desert P3 candidate exact original-game source and two-site WebGL2
+on:
+  push:
+    branches:
+      - dev/desert-p3-rock-feather-candidate-20261122
+    paths:
+      - .github/workflows/desert-p3-rock-feather-gameplay-isolated.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-rock-feather-gameplay-isolated
+  cancel-in-progress: false
+jobs:
+  exact-candidate-source-and-render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact immutable baseline and isolated diff scope
+        run: |
+          set -euo pipefail
+          test "$(git -C baseline rev-parse HEAD)" = 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          git -C candidate cat-file -e 7d4f5893746c518d96dfac9b20ca9565b0dbe363^{commit}
+          test "$(git -C candidate merge-base 7d4f5893746c518d96dfac9b20ca9565b0dbe363 HEAD)" = 7d4f5893746c518d96dfac9b20ca9565b0dbe363
+          unexpected=$(git -C candidate diff --name-only 7d4f5893746c518d96dfac9b20ca9565b0dbe363 HEAD | grep -Ev '^(src/manual-biomes/desert-rock-feather-candidate.mjs|src/manual-biomes/profile-world.mjs|tests/desert-p3-rock-feather-gameplay.test.mjs|.github/workflows/desert-p3-rock-feather-gameplay-isolated.yml|docs/desert/PHASE3_GAMEPLAY_ROCK_FEATHER_CANDIDATE_20261122.md)$' || true)
+          test -z "$unexpected"
+          node --check candidate/src/manual-biomes/profile-world.mjs
+          node --check candidate/src/manual-biomes/desert-rock-feather-candidate.mjs
+      - name: Only new genuine original-world candidate source tests
+        run: cd candidate && node --test tests/desert-p3-rock-feather-gameplay.test.mjs
+      - name: Install pinned browser tools only for focused visual proof
+        run: |
+          cd baseline
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+          cd ../candidate
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+      - name: Compare same original-game two-site views in actual WebGL2
+        run: |
+          set -euo pipefail
+          cd baseline
+          python3 -m http.server 4173 >/tmp/desert-candidate-baseline-http.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          DESERT_JUNCTION_PHASE=after DESERT_JUNCTION_OUTPUT=artifacts/desert-rock-candidate node tests/desert-phase3-triple-junction-browser.mjs
+          kill "$server" 2>/dev/null || true
+          cd ../candidate
+          python3 -m http.server 4173 >/tmp/desert-candidate-preview-http.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          DESERT_JUNCTION_PHASE=after DESERT_JUNCTION_OUTPUT=artifacts/desert-rock-candidate node tests/desert-phase3-triple-junction-browser.mjs
+      - name: Decode PNG and verify identical seed, position, original scree and captures
+        run: |
+          cd candidate
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import crypto from 'node:crypto';
+          import {PNG} from 'pngjs';
+          const b=JSON.parse(fs.readFileSync('../baseline/artifacts/desert-rock-candidate/after-manifest.json'));
+          const a=JSON.parse(fs.readFileSync('artifacts/desert-rock-candidate/after-manifest.json'));
+          assert.equal(b.sites.length,2);assert.equal(a.sites.length,2);
+          for(let i=0;i<2;i++){
+            const x=b.sites[i],y=a.sites[i];
+            for(const key of ['seed','x','z','cap','top','other'])
+              assert.deepEqual(x[key],y[key]);
+            assert.equal(x.cap,401);assert.equal(y.cap,401);
+            assert.equal(x.canvasState.daylight,1);assert.equal(y.canvasState.daylight,1);
+            assert.equal(x.data.generator,y.data.generator);
+            const file1='../baseline/'+x.file,file2=y.file;
+            const p=fs.readFileSync(file1),q=fs.readFileSync(file2);
+            const first=PNG.sync.read(p),second=PNG.sync.read(q);
+            for(const png of [first,second]){assert.equal(png.width,932);assert.equal(png.height,430);}
+            let diff=0;
+            for(let j=0;j<first.data.length;j+=4)
+              if(first.data[j]!==second.data[j]||first.data[j+1]!==second.data[j+1]||first.data[j+2]!==second.data[j+2])diff++;
+            console.log('DESERT_ROCK_CANDIDATE_WEBGL2 '+JSON.stringify({
+              seed:x.seed,site:[x.x,x.z],originalScree:x.cap,candidateScree:y.cap,
+              changedPixels:diff,totalPixels:932*430,
+              baselineSHA256:crypto.createHash('sha256').update(p).digest('hex'),
+              candidateSHA256:crypto.createHash('sha256').update(q).digest('hex')
+            }));
+          }
+          EOF
+      - name: Upload exact untouched baseline and candidate captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desert-p3-rock-feather-candidate-webgl2
+          path: |
+            baseline/artifacts/desert-rock-candidate/**
+            candidate/artifacts/desert-rock-candidate/**
+          if-no-files-found: warn
+          retention-days: 7
