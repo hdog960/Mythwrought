@@ -1,0 +1,92 @@
+{
+  "schema": "mythwrought.builder-b.1b-wave11-mossveil-original.v1",
+  "state": "PROVISIONAL_SOURCE_ONLY_NOT_ACCEPTED",
+  "project": "MYTHWROUGHT Builder B Roadmap B",
+  "basedOnFrozenDraftPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "currentStagingParentBeforeHandoff": "730539473121613f44205ec062adf892ca9d8884",
+  "source": {
+    "id": "r1:farm-barn:enchanted-forest:small:002",
+    "name": "Mossveil Twin-Court Spore Granary",
+    "path": "src/building-pool/roadmap-b/builder-b-essentials-wave11.mjs",
+    "blob": "0218a93efe3792e2327092602ee8031a45884d62",
+    "footprint": [
+      48,
+      30,
+      45
+    ],
+    "sourceVoxels": 6148,
+    "roofCells": 1431,
+    "walkableGroundCells": 1135,
+    "rooms": 8,
+    "portals": 11,
+    "uprightPack4OpeningPanes": 12,
+    "skyOpenCourt1": 30,
+    "skyOpenCourt2": 12,
+    "sourceRoofBackingMissing": 0,
+    "blockedTwoHighSourcePortals": 0,
+    "windowsFacingAnotherWing": 0
+  },
+  "focusOriginalChecks": {
+    "originalSourcePlanValidateBlueprintValidateAllocation": "PASS in isolated JavaScript evaluator against original repository modules, not Node test runner",
+    "sourceRoofWindowPortalSkyCourt": "PASS exact source authored geometry",
+    "stagedRoadmapBOriginalCommunityCensus": 58,
+    "stagedSameCategoryFarmBarn": 8,
+    "stagedSameCategoryEightWayD4Checks": 64,
+    "maxIoU": 0.26955307262569833,
+    "strictThreshold": 0.85,
+    "fullAccepted228HistoricalD4": "NOT RUN"
+  },
+  "sourceValidationFiles": [
+    {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-wave11.test.mjs",
+      "gitBlob": "6f8f2409cf3854f09e497b68ec0ec5e158c8f099"
+    },
+    {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-wave11-gallery-wiring.test.mjs",
+      "gitBlob": "d174892fbec78c55c0d8db09c74eaded3120e2e6"
+    },
+    {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-wave11-gallery.mjs",
+      "gitBlob": "71775e6b2834d727716b34b2c2c6f3d7d23f0e33"
+    },
+    {
+      "path": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave11-gallery.mjs",
+      "gitBlob": "3ea13563977a35ec5448f6b29c6617c6d3950f9a"
+    }
+  ],
+  "preview": {
+    "path": "tests/building-pool/roadmap-b/builder-b-essentials-wave11-preview.html",
+    "gitBlob": "6cfe4190a5d0d12dc2a5d299c08f7ba6966e3db7",
+    "mode": "original source-cell WebGL2 proof only, not final producer physical meshes"
+  },
+  "requiredMilestoneChecks": [
+    "focused native Node test cases on exact Wave11 head",
+    "strict authentic 228 historical 1B source eight-way D4",
+    "Pack3/Pack4 producer geometry and real source collision/support audit",
+    "true Chromium/WebGL2 six PNG frames in three landscape widths, exterior/cutaway",
+    "independent true PNG CRC/SHA/exact-head source digest verification",
+    "original live-game, iPhone performance and creator artwork signoff at final release"
+  ],
+  "claimLimitations": {
+    "actualNativeNodeRun": false,
+    "actualChromiumRun": false,
+    "artifactGenerated": false,
+    "weatherCertified": false,
+    "liveCollisionCertified": false,
+    "creatorApproved": false,
+    "worldPlacement": false,
+    "productionRegistered": false,
+    "saveSchemaChanged": false,
+    "merged": false,
+    "deployed": false
+  },
+  "portfolio": {
+    "newResidentialCandidates": 10,
+    "newServiceCandidates": 11,
+    "newOriginalTotal": 21,
+    "newOriginalTarget": 294,
+    "newOriginalsStillToAuthor": 273,
+    "newBuilderBServiceSlotsRemaining": 104
+  },
+  "ciEfficiency": "No new PR or Actions. Reused prior Wave8 exact-head result only for unchanged upstream. Future Wave9+10 12 PNG and Wave11 6 PNG can share one exact-head milestone, no duplicate capture."
+}
