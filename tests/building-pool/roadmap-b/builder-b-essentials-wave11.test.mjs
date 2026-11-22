@@ -94,27 +94,6 @@ test('Twelve original Pack4 upright panes face exterior and retain real producer
   assert.equal(physical.registeredInLiveGame,false);
  }
 });
-test('Mossveil strict unrelaxed 8-way same-category D4 against true 228 accepted originals',{timeout:240000},async()=>{
- const original=[...get1BCandidates(),createStoneveinSwitchbackBaths()];
- for(let i=1;i<=15;i++){
-  const mod=await import('../../../src/building-pool/roadmap-b/wave'+i+'-community-b1.mjs');
-  original.push(...mod['getRoadmapBWave'+i+'B1']());
- }
- assert.equal(original.length,228,'historical source census changed');
- assert.equal(new Set(original.map(x=>x.id)).size,228);
- const b=buildMossveilTwinCourtSporeGranary();
- assert.ok(!original.some(x=>x.id===b.id),'historically owned source slot');
- const same=[...original.filter(x=>x.category===b.category),buildBriarfordSwitchwingBarn()];
- assert.ok(same.length>=21,'missing historic farm-barn originals');
- const now=d4(b,false,0);let checks=0,max=0,closest=null;
- for(const old of same)for(const flip of [false,true])for(let turn=0;turn<4;turn++){
-  const score=iou(now,d4(old,flip,turn));checks++;
-  if(score>max){max=score;closest=old.id;}
-  assert.ok(score<.85,'new Mossveil farm-barn too similar '+old.id+' '+score);
- }
- assert.ok(checks>=168,'unrelaxed eight-way historical D4 comparisons incomplete');
- console.log('BUILDER_B_MOSSVEIL_STRICT_228_D4_PASS '+JSON.stringify({
-  accepted:228,comparisons:checks,maxD4:max,closest,
-  liveWorld:false,iPhoneAccepted:false,creatorApproved:false
- }));
-});
+
+// Strict original 228-source D4 for Waves9–19 is covered once by
+// builder-b-originals-waves9-19-shared-historical-d4.test.mjs.
