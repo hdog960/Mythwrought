@@ -275,6 +275,26 @@ export function auditOriginalMainGalleryVoxelReadiness(seed,rx,rz,{
  const region=planUnderworldRegion(seed,rx,rz);
  let checked=0,blockedHeadroom=0,unsupportedDeck=0,editedCells=0;
  const examples=[],galleries=[];
+ const blockedById=new Map(),unsupportedById=new Map();
+ let blockedIdsOverflow=0,unsupportedIdsOverflow=0;
+ const recordMaterial=(which,id)=>{
+  const counts=which==='headroom'?blockedById:unsupportedById;
+  if(counts.has(id))counts.set(id,counts.get(id)+1);
+  else if(counts.size<48)counts.set(id,1);
+  else if(which==='headroom')blockedIdsOverflow++;
+  else unsupportedIdsOverflow++;
+ };
+ const materialBreakdown=()=>Object.freeze({
+  blockedHeadroomByBlockId:Object.freeze(Object.fromEntries(
+   [...blockedById].sort(([a],[b])=>a-b)
+    .map(([id,count])=>[String(id),count]))),
+  unsupportedDeckByBlockId:Object.freeze(Object.fromEntries(
+   [...unsupportedById].sort(([a],[b])=>a-b)
+    .map(([id,count])=>[String(id),count]))),
+  blockedIdsOverflow,unsupportedIdsOverflow,
+  allBlockedMaterialIdsReported:blockedIdsOverflow===0&&
+   unsupportedIdsOverflow===0
+ });
  for(const index of MAIN_GALLERY_PAIRS){
   const f=footprint({ok:true,segments:[
    region.capsules[index],region.capsules[index+1]
@@ -293,16 +313,21 @@ export function auditOriginalMainGalleryVoxelReadiness(seed,rx,rz,{
     if(!integer(block)||block<0)return Object.freeze({ok:false,
      reason:'INVALID_ORIGINAL_M7_MATERIAL',galleryIndex:index,
      cell,sampledCells:checked,worldChanged:false});
-    if(editedAt(x,y,z)){editedCells++;edits++;}
+    const isEdited=editedAt(x,y,z);
+    if(typeof isEdited!=='boolean')
+     throw TypeError('Nonboolean original M7 as-built gallery edit source');
+    if(isEdited){editedCells++;edits++;}
     // AIR is cuttable clearance but is NEVER an existing walkable deck.
     if(kind==='support'&&(block===0||!isCandidateGeologyMaterial(block))){
      missing++;unsupportedDeck++;
+     recordMaterial('support',block);
      if(examples.length<maxExamples)examples.push(Object.freeze({
       galleryIndex:index,cell,kind,reason:'UNSUPPORTED_EXISTING_DECK',material:block
      }));
     }
     if(kind==='clearance'&&block!==0){
      blocked++;blockedHeadroom++;
+     recordMaterial('headroom',block);
      if(examples.length<maxExamples)examples.push(Object.freeze({
       galleryIndex:index,cell,kind,reason:'BLOCKED_EXISTING_HEADROOM',material:block
      }));
@@ -320,6 +345,7 @@ export function auditOriginalMainGalleryVoxelReadiness(seed,rx,rz,{
    'PLANNED_GALLERIES_NOT_PRESENT_IN_ORIGINAL_M7':null,
   galleriesChecked:MAIN_GALLERY_PAIRS.length,sampledCells:checked,
   blockedHeadroom,unsupportedDeck,editedCells,
+  ...materialBreakdown(),
   galleries:Object.freeze(galleries),examples:Object.freeze(examples),
   actualThreeWideThreeHighVoxelReadinessChecked:true,
   actualPlayerCollisionAndMovementNotTested:true,
