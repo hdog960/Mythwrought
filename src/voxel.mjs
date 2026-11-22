@@ -6,6 +6,7 @@ import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} f
 import {environmentGround,M7_ENVIRONMENT_GENERATOR} from './environment-ground.mjs';
 import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
 import {desertSeamVertexTint,nearestNaturalScreeSquared,canBlendNaturalDesertSurface} from './manual-biomes/desert-seam-vertex-tint.mjs';
+import {canWarmSourceScree,canUseDesertHardpanCue,nearestDesertHardpanSquared,warmScreeVertexColor} from './manual-biomes/desert-bilateral-rgb.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -214,7 +215,7 @@ export function meshChunk(world,cx,cz){
   // mutable cache or per-frame source queries. Original plans decide whether
   // a surface is real and protected rather than cave-exposed subsoil.
   const sourceWorld=world.base?.generationProfile?world.base:world;
-  const sourceCaps=new Map(),seamVertexDistances=new Map();
+  const sourceCaps=new Map(),seamVertexDistances=new Map(),screeWarmDistances=new Map();
   const hasEdit=(x,y,z)=>world.edits?.has(worldKey(x,y,z))||
     sourceWorld.edits?.has(worldKey(x,y,z));
   function originalSurface(x,z){
@@ -369,13 +370,27 @@ export function meshChunk(world,cx,cz){
         // samples and tint calculation until the FIRST exposed face; otherwise
         // a solid chunk pays for shading thousands of invisible blocks.
         // Keep world-space inputs and face order identical for save/seed parity.
-        let variance;
+        let variance,screenedScreeCap=false,screeScreened=false;
         for(const face of FACE){
           const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
           if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor)&&
               (!unifiedTerrain||!isBiome130BlockId(neighbor)||BIOME_SOLID_CUBES.has(neighbor)))continue;
           if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
             hash(x+y*5,z-y*3,world.seed+91)*.08;
+          // Reciprocal Desert-to-Mountain RGB only: screen the original top
+          // and biome AFTER a genuinely exposed face; no per-frame sampling.
+          // No other scree, caves, edited blocks or buried stone can qualify.
+          if(!screeScreened&&unifiedTerrain&&id===401&&newGround){
+            screeScreened=true;
+            if(!hasEdit(x,y,z)){
+              const region=v6BiomeAt(x,z,world.seed);
+              if(region?.name==='desert'||region?.name==='mountain'&&region.weight<=.55){
+                screenedScreeCap=canWarmSourceScree({
+                  id,edited:false,region,sourceSurface:originalSurface(x,z),y
+                });
+              }
+            }
+          }
           const r=clamp(color[0]*variance*face.lit,0,1);
           const g=clamp(color[1]*variance*face.lit,0,1);
           const b=clamp(color[2]*variance*face.lit,0,1);
@@ -386,7 +401,32 @@ export function meshChunk(world,cx,cz){
               const terrain=id<=405,nx=face.d[0],ny=face.d[1];
               const u=terrain?(nx?z+p[2]:x+p[0]):uv[0];
               const v=terrain?(ny?z+p[2]:y+p[1]):uv[1];
-              appendVertex(x+p[0],y+p[1],z+p[2],color[0]*shade,color[1]*shade,color[2]*shade,
+              let rgb=color;
+              if(screenedScreeCap){
+                const wx=x+p[0],wz=z+p[2];
+                // The same integer world vertex uses the same source query
+                // on either side of a chunk boundary; material tag stays 42.
+                if(Number.isInteger(wx)&&Number.isInteger(wz)){
+                  const key=wx+','+wz+','+y;
+                  let d2=screeWarmDistances.get(key);
+                  if(d2===undefined){
+                    d2=nearestDesertHardpanSquared(wx,wz,y,(ax,az,sourceY)=>{
+                      const source=originalSurface(ax,az);
+                      if(source?.id!==258||Math.abs(source.top-sourceY)>1)return false;
+                      const biome=v6BiomeAt(ax,az,world.seed);
+                      return canUseDesertHardpanCue({
+                        sourceSurface:source,region:biome,
+                        edited:hasEdit(ax,source.top,az),
+                        actualId:blockAt(ax,source.top,az),
+                        atY:source.top,sampleY:sourceY
+                      });
+                    });
+                    screeWarmDistances.set(key,d2);
+                  }
+                  rgb=warmScreeVertexColor(color,d2);
+                }
+              }
+              appendVertex(x+p[0],y+p[1],z+p[2],rgb[0]*shade,rgb[1]*shade,rgb[2]*shade,
                 u,v,terrain?terrainArtMaterial(id):id===408?4:18);
             }else
               appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
