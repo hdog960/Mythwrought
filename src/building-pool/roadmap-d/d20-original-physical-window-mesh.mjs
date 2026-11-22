@@ -54,8 +54,10 @@ function worldGlazingMesh(at,group){
    if(!Number.isFinite(x)||x<0||x>1)throw Error('Original Pack4 source exceeds local cell');
    result[i+axis]=x+at[axis];
   }
-  const normal=Math.hypot(group[i+3],group[i+4],group[i+5]);
-  if(Math.abs(normal-1)>1e-3)throw Error('Pack4 original source normals invalid');
+  const nx=group[i+3],ny=group[i+4],nz=group[i+5];
+  const normal=Math.hypot(nx,ny,nz);
+  if(![nx,ny,nz].every(Number.isFinite)||!Number.isFinite(normal)||
+     Math.abs(normal-1)>1e-3)throw Error('Pack4 original source normals invalid');
   for(let j=6;j<10;j++)if(!Number.isFinite(group[i+j])||group[i+j]<0||group[i+j]>1)
    throw Error('Pack4 physical source RGBA invalid');
  }
