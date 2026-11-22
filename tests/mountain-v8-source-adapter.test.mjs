@@ -62,3 +62,25 @@ test('all five source probes reject buried cave, foreign ore and protected under
  ])assert.equal(survey(make(patch)),null);
  assert.ok(survey(make()));
 });
+
+test('original-source veto diagnostics report cave, foreign substrate and biome exactly once',()=>{
+ const natural=(x,y,z)=>y>5?ids.AIR:y===5?ids.GRASS:ids.DIRT;
+ const probes=[
+  [{readBlock:(x,y,z)=>x===12&&y===2?ids.AIR:natural(x,y,z)},'cave-air'],
+  [{readBlock:(x,y,z)=>z===4&&y===3?6:natural(x,y,z)},'foreign-substrate'],
+  [{biomeAt:(x,z)=>x===12?{name:'snow',weight:1}:{name:'mountain',weight:1}},'biome-boundary'],
+  [{readBlock:(x,y,z)=>x===8&&y===6?4:natural(x,y,z)},'occupied-uplift'],
+  [{protectedAt:(x,y,z)=>x===8&&z===12&&y===3},'protected-substrate']
+ ];
+ for(const [patch,reason] of probes){
+  const observed=[];
+  assert.equal(survey(make({...patch,onVeto:issue=>observed.push(issue)})),null);
+  assert.equal(observed.length,1);
+  assert.equal(observed[0].reason,reason);
+  assert.ok(Number.isInteger(observed[0].x));
+  assert.ok(Number.isInteger(observed[0].z));
+ }
+ const events=[];
+ assert.ok(survey(make({onVeto:issue=>events.push(issue)})));
+ assert.deepEqual(events,[]);
+});
