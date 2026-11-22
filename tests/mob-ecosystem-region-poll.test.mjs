@@ -16,14 +16,15 @@ function world(){
     medium(){return 'air';}
   };
 }
-const opts=(w,entities,seed=179)=>({
-  world:w,seed,region,observer:[8,4,8],biome:'meadow',
-  light:.8,now:10,spawnOnFirstVisit:true,entities
+const engineOf=w=>new MobEngine(w,179,{maxEntities:32,maxActive:8});
+const opts=(w,engine,seed=179)=>({
+  engine,world:w,seed,region,observer:[8,4,8],biome:'meadow',
+  light:.8,now:10,spawnOnFirstVisit:true
 });
 
 test('original first-visit cooldown prevents premature candidate evaluation',()=>{
-  const w=world(),p=prepareOriginalMobPoll({
-    ...opts(w,[]),spawnOnFirstVisit:false
+  const w=world(),engine=engineOf(w),p=prepareOriginalMobPoll({
+    ...opts(w,engine),spawnOnFirstVisit:false
   });
   assert.equal(p.kind,'cooldown');
   assert.equal(p.attempts,0);
@@ -33,10 +34,10 @@ test('original first-visit cooldown prevents premature candidate evaluation',()=
 });
 
 test('source natural birth counts only after exact real engine admission proof',()=>{
-  const w=world(),engine=new MobEngine(w,179,{maxEntities:32,maxActive:8});
+  const w=world(),engine=engineOf(w);
   let found=null;
   for(let seed=1;seed<=256;seed++){
-    const candidate=prepareOriginalMobPoll(opts(w,engine.all(),seed));
+    const candidate=prepareOriginalMobPoll(opts(w,engine,seed));
     if(candidate.proposal){found=candidate;break;}
   }
   assert.ok(found,'One deterministic original-species proposal must be eligible');
@@ -47,9 +48,8 @@ test('source natural birth counts only after exact real engine admission proof',
     homeChunk:'0,0,0'
   });
   assert.ok(id,'The actual original MobEngine must admit the eligible candidate');
-  const after=engine.all();
   const posted=settleOriginalMobPoll(found,{
-    world:w,afterEntities:after,spawnedId:id
+    world:w,spawnedId:id
   });
   assert.equal(posted.next,11.5);
   assert.equal(posted.serial,found.attempts);
@@ -59,37 +59,33 @@ test('source natural birth counts only after exact real engine admission proof',
 });
 
 test('wrong species, mismatched origin or forged admission cannot prove a birth',()=>{
-  const w=world();
+  const w=world(),engine=engineOf(w);
   let candidate=null;
   for(let seed=1;seed<=256;seed++){
-    const p=prepareOriginalMobPoll(opts(w,[],seed));
+    const p=prepareOriginalMobPoll(opts(w,engine,seed));
     if(p.proposal){candidate=p;break;}
   }
   assert.ok(candidate);
+  assert.throws(()=>settleOriginalMobPoll(candidate,{
+    world:w,spawnedId:'forged'
+  }),/Original MobEngine admission proof mismatch/);
   const p=candidate.proposal;
-  const forged={
-    id:'forged',species:getSpecies('cow'),position:[...p.point],
-    homeChunk:'0,0,0',important:false
-  };
+  const wrong=engine.spawn(p.species.id,p.point,{
+    homeChunk:'1,0,0'
+  });
+  assert.ok(wrong);
   assert.throws(()=>settleOriginalMobPoll(candidate,{
-    world:w,afterEntities:[forged],spawnedId:'forged'
-  }),/Original MobEngine admission proof mismatch/);
-  assert.throws(()=>settleOriginalMobPoll(candidate,{
-    world:w,afterEntities:[{
-      ...forged,species:p.species,homeChunk:'1,0,0'
-    }],spawnedId:'forged'
-  }),/Original MobEngine admission proof mismatch/);
-  assert.throws(()=>settleOriginalMobPoll(candidate,{
-    world:w,afterEntities:[],spawnedId:'forged'
+    world:w,spawnedId:wrong
   }),/Original MobEngine admission proof mismatch/);
 });
 
 test('source world edits invalidate both proposal and subsequent admission',()=>{
   let revision=0;
   const w={...world(),revision(){return revision;}};
+  const engine=engineOf(w);
   let candidate;
   for(let seed=1;seed<=256;seed++){
-    const result=prepareOriginalMobPoll(opts(w,[],seed));
+    const result=prepareOriginalMobPoll(opts(w,engine,seed));
     if(result.proposal){candidate=result;break;}
   }
   assert.ok(candidate);
@@ -99,11 +95,27 @@ test('source world edits invalidate both proposal and subsequent admission',()=>
 });
 
 test('poll refuses candidate admission while full or cooling down',()=>{
-  const w=world();
+  const w=world(),engine=engineOf(w);
   const first=prepareOriginalMobPoll({
-    ...opts(w,[]),spawnOnFirstVisit:false
+    ...opts(w,engine),spawnOnFirstVisit:false
   });
   assert.throws(()=>settleOriginalMobPoll(first,{
-    world:w,spawnedId:'mob-1',afterEntities:[]
+    world:w,spawnedId:'mob-1'
   }),/No engine admission allowed during cooldown/);
+});
+
+test('original engine ownership rejects fabricated previews and double settlement',()=>{
+  const w=world(),engine=engineOf(w);
+  assert.throws(()=>prepareOriginalMobPoll({
+    ...opts(w,engine),engine:{all:()=>[]}
+  }),/Original MobEngine instance required/);
+  const plan=prepareOriginalMobPoll({
+    ...opts(w,engine),spawnOnFirstVisit:false
+  });
+  const forged=Object.freeze({...plan});
+  assert.throws(()=>settleOriginalMobPoll(forged,{world:w}),
+    /Invalid or stale original regional mob poll/);
+  assert.equal(settleOriginalMobPoll(plan,{world:w}).next,10.5);
+  assert.throws(()=>settleOriginalMobPoll(plan,{world:w}),
+    /Invalid or stale original regional mob poll/);
 });

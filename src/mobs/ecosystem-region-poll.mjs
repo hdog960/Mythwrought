@@ -1,15 +1,31 @@
 // Detached Phase 2 natural-spawn transaction preflight. Does not import or
 // mutate MobEngine, PopulationManager, source world or save sidecars.
+import {MobEngine} from './engine.mjs';
 import {deriveRegionalMobState,proposeMobFromRosterSnapshot}
   from './ecosystem-region-snapshot.mjs';
 import {createRegionalEcologySchedule,inspectRegionalEcologySchedule,
   settleRegionalEcologyPoll} from './ecosystem-region-cadence.mjs';
+
+// Keep actual source-engine ownership out of serializable preview objects.
+const owner=new WeakMap();
+const settled=new WeakSet();
 
 function snapshotIdentity(entities){
   return Object.freeze(entities.map(e=>Object.freeze({
     id:e.id,species:e.species,homeChunk:e.homeChunk,important:e.important,
     point:Object.freeze([...e.position])
   })));
+}
+function samePriorMob(old,entity){
+  return old.species===entity.species&&
+    old.homeChunk===entity.homeChunk&&
+    old.important===entity.important&&
+    old.point.every((v,i)=>v===entity.position[i]);
+}
+function sameRoster(before,after){
+  if(before.length!==after.length)return false;
+  const previous=new Map(before.map(e=>[e.id,e]));
+  return after.every(e=>previous.has(e.id)&&samePriorMob(previous.get(e.id),e));
 }
 function sourceUnchanged(before,after){
   if(after.length!==before.length+1)return null;
@@ -21,9 +37,7 @@ function sourceUnchanged(before,after){
     seen.add(entity.id);
     const old=previous.get(entity.id);
     if(old){
-      if(old.species!==entity.species||old.homeChunk!==entity.homeChunk||
-         old.important!==entity.important||
-         old.point.some((v,i)=>v!==entity.position[i]))return null;
+      if(!samePriorMob(old,entity))return null;
     }else{
       if(added)return null;
       added=entity;
@@ -37,9 +51,12 @@ function sourceUnchanged(before,after){
 // responsible for the original engine admission and for supplying after-state
 // proof separately. This function does not even have access to engine.spawn().
 export function prepareOriginalMobPoll({
-  world,seed,region,observer,biome,light,kind='surface',
-  now,record=null,entities,isProtected,spawnOnFirstVisit=false
+  engine,world,seed,region,observer,biome,light,kind='surface',
+  now,record=null,isProtected,spawnOnFirstVisit=false
 }={}){
+  if(!(engine instanceof MobEngine))
+    throw new TypeError('Original MobEngine instance required');
+  const entities=engine.all();
   const roster=deriveRegionalMobState(entities,region,{isProtected});
   if(typeof world?.revision!=='function')
     throw new TypeError('Original world edit revision is required');
@@ -66,27 +83,34 @@ export function prepareOriginalMobPoll({
   }
   if(world.revision()!==revision)
     throw new TypeError('Original world changed during regional poll');
-  return Object.freeze({
+  const prepared=Object.freeze({
     kind:inspected.ready?'evaluated':'cooldown',
     record:inspected.record,attempts,proposal,
     worldRevision:revision,
-    before:Object.freeze(snapshotIdentity(entities))
+    before:snapshotIdentity(entities)
   });
+  owner.set(prepared,engine);
+  return prepared;
 }
 
 // A candidate is NOT a birth. Original MobEngine.spawn must have run and its
 // new snapshot must prove EXACTLY one original creature was admitted, with
 // all previous IDs/species/home/positions unchanged. Otherwise fail closed.
 export function settleOriginalMobPoll(plan,{
-  world,afterEntities=null,spawnedId=null
+  world,spawnedId=null
 }={}){
-  if(!plan||!Object.isFrozen(plan)||!plan.record||
+  const engine=plan&&typeof plan==='object'?owner.get(plan):null;
+  if(!(engine instanceof MobEngine)||settled.has(plan)||
      typeof world?.revision!=='function'||
      world.revision()!==plan.worldRevision)
     throw new TypeError('Invalid or stale original regional mob poll');
+  // Only actual original-engine snapshots are authoritative. A fabricated
+  // afterEntities array cannot be substituted by an external caller.
+  const afterEntities=engine.all();
   if(plan.kind==='cooldown'){
-    if(spawnedId!==null||afterEntities!==null)
+    if(spawnedId!==null||!sameRoster(plan.before,afterEntities))
       throw new TypeError('No engine admission allowed during cooldown');
+    settled.add(plan);
     return plan.record;
   }
   if(plan.kind!=='evaluated'||!Number.isInteger(plan.attempts)||
@@ -111,15 +135,18 @@ export function settleOriginalMobPoll(plan,{
        added.position.some((v,i)=>v!==plan.proposal.point[i]))
       throw new TypeError('Original MobEngine admission proof mismatch');
     confirmed=true;speciesId=added.species.id;
-  }else if(afterEntities!==null){
-    throw new TypeError('No engine proof allowed without spawned ID');
+  }else if(!sameRoster(plan.before,afterEntities)){
+    throw new TypeError('No original-engine admission proof for changed roster');
   }
   if(plan.attempts===0){
     if(confirmed)throw new TypeError('Zero-trial poll cannot create a mob');
+    settled.add(plan);
     return plan.record;
   }
-  return settleRegionalEcologyPoll(plan.record,{
+  const next=settleRegionalEcologyPoll(plan.record,{
     now:plan.record.time,attempts:plan.attempts,
     successfulBirth:confirmed,speciesId
   });
+  settled.add(plan);
+  return next;
 }
