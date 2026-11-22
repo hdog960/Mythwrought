@@ -10,7 +10,7 @@ import {auditSupportedEntranceStairs} from './walkable-entrance-stairs.mjs';
 export function searchProtectedEntranceCandidates(seed,rx,rz,{
  surfaceHeightAt,biomeAt,requiredBiome,protectedAt=()=>false,
  naturalAt,authoredAt=()=>undefined,editedAt=()=>false,
- existingLandmarkAt=()=>false,maxCandidates=4,radialVariant=0
+ existingLandmarkAt=()=>false,maxCandidates=4,radialVariant=0,lateralVariant=0
 }={}){
  if(!Number.isSafeInteger(seed)||seed!==(seed|0)||
    ![rx,rz].every(Number.isSafeInteger)||
@@ -20,13 +20,14 @@ export function searchProtectedEntranceCandidates(seed,rx,rz,{
    typeof existingLandmarkAt!=='function'||
    typeof requiredBiome!=='string'||!requiredBiome.trim()||
    (!Number.isSafeInteger(maxCandidates)||maxCandidates<1||maxCandidates>4)||
-   !Number.isSafeInteger(radialVariant)||radialVariant<0||radialVariant>3)
+   !Number.isSafeInteger(radialVariant)||radialVariant<0||radialVariant>3||
+   !Number.isSafeInteger(lateralVariant)||lateralVariant<0||lateralVariant>3)
   throw new TypeError('Invalid protected entrance candidate search');
  const examined=[],seen=new Set();
  let accepted=null;
  for(let searchStart=0;searchStart<maxCandidates;searchStart++){
   const p=planUnderworldSurfaceEntrance(seed,rx,rz,{
-    surfaceHeightAt,biomeAt,requiredBiome,protectedAt,searchStart,radialVariant
+    surfaceHeightAt,biomeAt,requiredBiome,protectedAt,searchStart,radialVariant,lateralVariant
   });
   if(!p.ok){
    examined.push(Object.freeze({searchStart,ok:false,stage:'GEOMETRY',
@@ -103,4 +104,37 @@ export function searchExtendedProtectedEntrances(seed,rx,rz,options={}){
   audited:Object.freeze(audited),
   noOriginalCellsChanged:true,worldCarved:false,
   realM7FootstepAndDeviceUnverified:true});
+}
+
+// Full 4 compass x 4 radial x 4 lateral source-preserving research route set.
+// Each evaluated choice invokes the ORIGINAL strict provenance validator.
+// Earlier 4-way and 16-way APIs are unchanged for historical parity.
+export function searchWideProtectedEntrances(seed,rx,rz,options={}){
+ const {maxLaterals=4,...remaining}=options;
+ if(!Number.isSafeInteger(maxLaterals)||maxLaterals<1||maxLaterals>4)
+  throw new TypeError('Invalid lateral search bound');
+ const groups=[],seen=new Set();let accepted=null;
+ for(let lateralVariant=0;lateralVariant<maxLaterals;lateralVariant++){
+  const run=searchExtendedProtectedEntrances(seed,rx,rz,{
+    ...remaining,lateralVariant,maxVariants:4
+  });
+  const unique=[];
+  for(const family of run.audited)for(const q of family.uniqueExamined){
+   const key=q.mouth?q.mouth.x+':'+q.mouth.y+':'+q.mouth.z:null;
+   if(key&&seen.has(key))continue;
+   if(key)seen.add(key);
+   unique.push(Object.freeze({...q,lateralVariant}));
+  }
+  groups.push(Object.freeze({lateralVariant,attempts:run.attempts,
+    accepted:run.ok,firstFourWaySafe:run.audited[0]?.passes===true,
+    uniqueExamined:Object.freeze(unique)}));
+  if(run.ok){accepted=run.accepted;break;}
+ }
+ return Object.freeze({ok:!!accepted,seed,rx,rz,
+  requiredBiome:remaining.requiredBiome??null,accepted,
+  totalAttempts:groups.reduce((sum,g)=>sum+g.attempts,0),
+  lateralFamiliesExamined:groups.length,
+  groups:Object.freeze(groups),
+  sourceProtected:true,worldCarved:false,
+  originalM7Edited:false,playerWalkingUnverified:true});
 }

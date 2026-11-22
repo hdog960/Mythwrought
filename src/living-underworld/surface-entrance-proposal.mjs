@@ -28,24 +28,29 @@ function testTunnel(x,y,z,a,b,radius){
  return ex*ex+ey*ey+ez*ez<=radius*radius;
 }
 export function planUnderworldSurfaceEntrance(seed,rx,rz,{
- surfaceHeightAt,protectedAt=()=>false,biomeAt=()=> 'unknown',requiredBiome=null,searchStart=0,radialVariant=0
+ surfaceHeightAt,protectedAt=()=>false,biomeAt=()=> 'unknown',requiredBiome=null,searchStart=0,radialVariant=0,lateralVariant=0
 }={}){
  if(!seedOK(seed)||![rx,rz].every(integer)||typeof surfaceHeightAt!=='function'||
    typeof protectedAt!=='function'||typeof biomeAt!=='function'||
    (requiredBiome!==null&&(typeof requiredBiome!=='string'||!requiredBiome.trim()))||
    !integer(searchStart)||searchStart<0||searchStart>3||
-   !integer(radialVariant)||radialVariant<0||radialVariant>3)
+   !integer(radialVariant)||radialVariant<0||radialVariant>3||
+   !integer(lateralVariant)||lateralVariant<0||lateralVariant>3)
    throw new TypeError('Invalid detached cave entrance inputs');
  const region=planUnderworldRegion(seed,rx,rz);
  const start=region.layers[0].hub;
  const rejections=[];
  const order=hash(seed,rx,rz,991)%4;
  const radiusOffsets=[0,-18,12,-10];
+ // Variant 0 is byte-identical to all prior candidate geometry.
+ const lateralOffsets=[0,-24,24,-48];
  for(let index=0;index<4;index++){
   const direction=directions[(index+order+searchStart)%4];
   const distance=76+hash(seed,rx,rz,1021+index+radialVariant*137)%13+
    radiusOffsets[radialVariant];
-  const endX=start.x+direction.dx*distance,endZ=start.z+direction.dz*distance;
+  const offset=lateralOffsets[lateralVariant];
+  const endX=start.x+direction.dx*distance-direction.dz*offset,
+    endZ=start.z+direction.dz*distance+direction.dx*offset;
   if(Math.floor(endX/UNDERWORLD_REGION_SIDE)!==rx||
     Math.floor(endZ/UNDERWORLD_REGION_SIDE)!==rz){
     rejections.push(direction.name+':outside-region');continue;
@@ -77,7 +82,7 @@ export function planUnderworldSurfaceEntrance(seed,rx,rz,{
   // player-walkability check must be performed before any future integration.
   return Object.freeze({
    ok:true,kind:'detached-surface-gallery-proposal-v1',seed,rx,rz,biome,
-   direction:direction.name,searchStart,radialVariant,start,mid,mouth:end,surfaceHeight:height,segments,
+   direction:direction.name,searchStart,radialVariant,lateralVariant,start,mid,mouth:end,surfaceHeight:height,segments,
    protectedTerrainSurveyComplete:false,
    physicallyVerifiedInLiveWorld:false,
    rejectionHistory:Object.freeze(rejections)

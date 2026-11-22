@@ -9,14 +9,14 @@ import {v6BiomeAt} from '../../src/manual-biomes/v6-balanced-biomes.mjs';
 import {BLOCK,baseBlock,VoxelWorld} from '../../src/voxel.mjs';
 import {selectDistributedUnderworldRegions,UNDERWORLD_DISTRIBUTED_BIOMES}
  from '../../src/living-underworld/distributed-biome-regions.mjs';
-import {searchExtendedProtectedEntrances}
+import {searchWideProtectedEntrances}
  from '../../src/living-underworld/entrance-candidate-search.mjs';
 
 const seeds=[179,-17,2026,314159,8675309,13579];
 const readBiome=(x,z,seed)=>v6BiomeAt(x,z,seed)?.name??'plains';
 const tally=()=>({tested:0,fourWaySafe:0,sixteenWaySafe:0,
- additionalByRadial:0,totalExamined:0});
-const report={schema:'living-underworld-worldwide-protected-entrance-cohort-v1',
+ sixtyFourWaySafe:0,additionalByRadial:0,additionalByLateral:0,totalExamined:0});
+const report={schema:'living-underworld-worldwide-protected-entrance-cohort-v2',
  provenance:'genuine original FourRegionWorld naturalAndLandmarkBlock',
  candidateGeneration:'fully detached; never carved, deployed, or registered',
  regionSelection:'2 near + 2 middle + 2 remote per biome per constructible seed',
@@ -52,7 +52,7 @@ for(const seed of seeds){
  const rows=[];
  for(const biome of UNDERWORLD_DISTRIBUTED_BIOMES)for(const point of selection[biome]){
   const {rx,rz,tier}=point;
-  const result=searchExtendedProtectedEntrances(seed,rx,rz,{
+  const result=searchWideProtectedEntrances(seed,rx,rz,{
    surfaceHeightAt:heightAt,biomeAt:readBiome,requiredBiome:biome,
    protectedAt:(x,y,z)=>world.edits.has(x+','+y+','+z)||
      [BLOCK.WOOD,BLOCK.LEAVES].includes(world.naturalAndLandmarkBlock(x,y,z)),
@@ -62,13 +62,15 @@ for(const seed of seeds){
    existingLandmarkAt:(x,y,z)=>original.naturalAndLandmarkBlock(x,y,z)!==
      baseBlock(x,y,z,seed)
   });
-  const firstFour=result.audited[0]?.passes===true;
+  const firstFour=result.groups[0]?.firstFourWaySafe===true;
+  const firstSixteen=result.groups[0]?.accepted===true;
   const row={seed,biome,rx,rz,tier,fourWaySafe:firstFour,
-   sixteenWaySafe:result.ok,attempts:result.attempts,
+   sixteenWaySafe:firstSixteen,sixtyFourWaySafe:result.ok,attempts:result.totalAttempts,
    acceptedMouth:result.accepted?.proposal.mouth??null,
    acceptedDirection:result.accepted?.proposal.direction??null,
    acceptedRadialVariant:result.accepted?.proposal.radialVariant??null,
-   failureStages:result.audited.flatMap(g=>g.uniqueExamined)
+   acceptedLateralVariant:result.accepted?.proposal.lateralVariant??null,
+   failureStages:result.groups.flatMap(g=>g.uniqueExamined)
      .filter(x=>!x.ok).map(x=>({stage:x.stage,
        unsafe:x.unsafeMaterials??0,
        protectedOriginal:x.protectedOriginal??0,
@@ -78,8 +80,10 @@ for(const seed of seeds){
    const group=key===biome?report.byBiome[key]:report.byTier[key];
    group.tested++;group.totalExamined+=row.attempts;
    group.fourWaySafe+=Number(firstFour);
-   group.sixteenWaySafe+=Number(result.ok);
-   group.additionalByRadial+=Number(result.ok&&!firstFour);
+   group.sixteenWaySafe+=Number(firstSixteen);
+   group.sixtyFourWaySafe+=Number(result.ok);
+   group.additionalByRadial+=Number(firstSixteen&&!firstFour);
+   group.additionalByLateral+=Number(result.ok&&!firstSixteen);
   }
  }
  report.seeds.push({seed,status:'SOURCE_SURVEY_COMPLETE',rows});
@@ -88,7 +92,8 @@ for(const biome of UNDERWORLD_DISTRIBUTED_BIOMES){
  const g=report.byBiome[biome];
  if(g.tested!==24)throw Error('Incomplete geographically balanced '+biome+
   ' survey: '+g.tested);
- if(g.sixteenWaySafe<g.fourWaySafe)
+ if(g.sixteenWaySafe<g.fourWaySafe||
+    g.sixtyFourWaySafe<g.sixteenWaySafe)
   throw Error('Expanded protected search lost an original safe proposal');
 }
 if(report.constructorFailures.length>0)report.allM7SeedsAccepted=false;
