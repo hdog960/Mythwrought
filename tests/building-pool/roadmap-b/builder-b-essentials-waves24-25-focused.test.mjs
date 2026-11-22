@@ -147,7 +147,7 @@ test('Every symbolic source roof maps to actual original Pack3 candidate roster 
  const seen=new Set();
  for(const s of configurations){
   for(const p of s.build().placements.filter(p=>p.role==='roof')){
-   assert.match(p.asset,/^pack3:\\d{3}$/,'unknown symbolic original Pack3 roof name');
+   assert.match(p.asset,/^pack3:[0-9]{3}$/,'unknown symbolic original Pack3 roof name');
    assert.equal(p.occupancy.kind,'unresolved','invented real-game exact Pack3 collision bounds');
    const roster=Number(p.asset.slice('pack3:'.length));
    const candidate=byRoster.get(roster);
