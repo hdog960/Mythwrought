@@ -26,11 +26,19 @@ const BIOME_SOLID_CUBES=new Set(BIOME130_REGISTERED_IDS.filter(id=>{
   return solid&&!transparent&&opacity===1&&boxes.some(box=>box.every((v,i)=>v===FULL_CUBE.boxes[0][i]));
 }));
 const BIOME_GROUND_COLORS=new Map([
-  256,257,258,259,260,261,262,263,264,272,277,278,279,286,289,293,294,302,303,305,307
+  // Frozen blue glacier ice (276) is natural M7 snow terrain too: it must
+  // use smooth world-space ground tint rather than a per-cell random palette.
+  256,257,258,259,260,261,262,263,264,272,276,277,278,279,286,289,293,294,302,303,305,307
 ].map(id=>{
   const {palette}=biome130Block(id);
   return [id,palette[0].map((_,index)=>palette.reduce((sum,color)=>sum+color[index],0)/palette.length)];
 }));
+// Naturally generated M7 glacier patches are frost-dusted, not alternating
+// bright white and saturated blue squares. Keep physical ice ID 276 unchanged,
+// but harmonize its visible cap with adjacent compacted snow. Player-placed
+// ice and all non-M7 profiles still use the authored palette untouched.
+const snowTint=BIOME_GROUND_COLORS.get(272),glacierTint=BIOME_GROUND_COLORS.get(276);
+BIOME_GROUND_COLORS.set(276,snowTint.map((v,i)=>v*.82+glacierTint[i]*.18));
 function terrainArtMaterial(id){
   if(id<=264)return 40;
   if(id<=279)return 41;
@@ -290,7 +298,12 @@ export function meshChunk(world,cx,cz){
             }
             if(boundary&&neighbor!==BLOCK.AIR&&
                 ((!isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))||
-                  unifiedTerrain&&BIOME_SOLID_CUBES.has(neighbor)))continue;
+                  unifiedTerrain&&(BIOME_SOLID_CUBES.has(neighbor)||
+                    // The source catalog marks glacier ice translucent, but
+                    // naturally authored M7 ice caps are rendered opaque.
+                    // Cull internal snow/ice walls without modifying the
+                    // authored transparency of player-placed glacier blocks.
+                    neighbor===276&&!world.edits?.has(worldKey(x+nx,y+ny,z+nz)))))continue;
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const lit=[.77,.73,1,.48,.85,.67][face];
             const color=groundColor??biome130Color(id,x,y,z,face);

@@ -297,7 +297,7 @@
     "./src/voxel-shape-interactions.mjs": "46049b127f4496ac72b780dc196c72dd581c25e79bd0462df5fcd475425962c9",
     "./src/voxel-trees.mjs": "bfd15de08ff5c7768f9985ab1564827a472ec5dfde48022ec7aca88f3bae4549",
     "./src/voxel-watchtower.mjs": "b157c18c15a66be513013afde4701d3d529027337da660f2b7156e6a1e57008a",
-    "./src/voxel.mjs": "7ddc7c62598d09d49860d2b81964ca032f77e8261ac3ba1ca97593d42f910c9e",
+    "./src/voxel.mjs": "4943786eff97747f71c3af79bc81240116ffa0b8682ec1a989b47f8edd892ff2",
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "718c946759e7ea30206bcf94b825a540a5a8ada2b8325ce7aee98bb776814dfb",
