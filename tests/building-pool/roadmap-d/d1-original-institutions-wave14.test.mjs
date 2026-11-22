@@ -52,7 +52,8 @@ test('all 59 original Wave14 functional rooms, windows, open skywells, supported
   const occupied=new Map(b.cells.map(c=>[c.at.join(','),c]));
   assert.equal(occupied.size,b.cells.length,'duplicated physical coordinates '+b.id);
   for(const c of original.cells)assert.deepEqual(occupied.get(c.at.join(',')),c,'compiler original coordinate altered '+b.id);
-  const newCells=b.cells.filter(c=>!original.cells.some(x=>x.at[0]===c.at[0]&&x.at[1]===c.at[1]&&x.at[2]===c.at[2]));
+  const originalCoords=new Set(original.cells.map(c=>c.at.join(',')));
+  const newCells=b.cells.filter(c=>!originalCoords.has(c.at.join(',')));
   assert.equal(newCells.length,b.provenance.physicalCrownCells);
   assert.ok(newCells.length>=50,'no new true elevated source geometry '+b.id);
   assert.ok(Math.max(...newCells.map(c=>c.at[1]))>=14,'false tall crown '+b.id);
