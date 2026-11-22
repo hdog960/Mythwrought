@@ -7,7 +7,7 @@ const faceNames=Object.freeze(['north','south','east','west','top','bottom']);
 const boxKey=b=>b.map(v=>Math.round(v*1000000)).join(',');
 function requireBoxes(rows,at,source){
  if(!Array.isArray(rows)||!rows.length||rows.some(b=>!Array.isArray(b)||b.length!==6||
-    b.some(Number.isFinite) || b.some(x=>!Number.isFinite(x))))
+    b.some(x=>!Number.isFinite(x))))
    throw Error('Original '+source+' physical boxes were not certified');
  // Keep original box order; no hidden shell/cube substitution or simplification.
  return rows.map(b=>b.map((v,i)=>v+at[i%3]));
