@@ -50,7 +50,7 @@ export function searchSourceProtectedCityDetours(seed,rx,rz,{
  let tested=0,sourceChecks=0,lastRefusal=null;
  const refusals={grade:0,gallery:0,crossRoute:0,air:0,source:0,budget:0};
  const examples=[];
- for(const [dx,dz] of DIRS)for(const distance of DISTANCES){
+ outer:for(const [dx,dz] of DIRS)for(const distance of DISTANCES){
   if(tested>=maxCandidates)break;
   tested++;
   const mid={x:start.x+dx*distance,y:start.y,z:start.z+dz*distance};
@@ -105,7 +105,7 @@ export function searchSourceProtectedCityDetours(seed,rx,rz,{
    tested,sourceChecks,refusals:Object.freeze({...refusals}),
    examples:Object.freeze(examples),
    exactHistoricalHubAndLandingPreserved:true,
-   16GalleryMutualClearanceVerified:true,
+   all16GalleryMutualClearanceVerified:true,
    selectedStairMutualClearanceVerified:selectedStairProposals.length>0,
    detachedActualAIRCenterlineVerified:true,
    originalM7SourceCheckedByCaller:true,
@@ -116,7 +116,7 @@ export function searchSourceProtectedCityDetours(seed,rx,rz,{
   if(examples.length<maxExamples)examples.push(Object.freeze({
    bearing:Object.freeze({dx,dz}),distance,reason
   }));
-  if(reason==='DETOUR_SOURCE_QUERY_BUDGET')break;
+  if(reason==='DETOUR_SOURCE_QUERY_BUDGET')break outer;
  }
  return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
   reason:lastRefusal??'NO_SAFE_CITY_DETOUR',
