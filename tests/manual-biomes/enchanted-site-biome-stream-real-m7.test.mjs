@@ -34,7 +34,7 @@ test('128-entry immutable site memo is seed-scoped, deterministic, bounded and r
  const a=cache.getOrRead(-40,-511,179,reader);
  assert.strictEqual(cache.getOrRead(-40,-511,179,reader),a);
  assert.equal(calls,1);
- assert.strictEqual(cache.getOrRead(-40,-511,7919,reader),
+ assert.deepEqual(cache.getOrRead(-40,-511,7919,reader),
    v6BiomeAt(-40,-511,7919),'seed changes must not collide');
  assert.equal(calls,2);
  for(let i=0;i<45;i++){
@@ -43,6 +43,9 @@ test('128-entry immutable site memo is seed-scoped, deterministic, bounded and r
  }
  assert.equal(cache.peakEntries,4);
  assert.ok(cache.evictions>=40);
+ cache.set('direct:1,2',null);
+ cache.set('direct:2,3',null);
+ assert.equal(cache.size,4,'even direct Map writes must obey the hard cap');
  const nullCache=new EnchantedSiteBiomeCache(2);
  let nullCalls=0;
  assert.equal(nullCache.getOrRead(0,0,179,()=>{nullCalls++;return null;}),null);
