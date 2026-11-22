@@ -59,6 +59,8 @@ import {createPack3LiveBridge,combinePack3ChunkMesh,isPack3BlockId} from './buil
 import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
 import {exportPack3Portable,inspectPack3Portable,restorePack3Portable} from './builder-assets/pack3-portable.mjs';
 import {createCaveFarWallGpu} from './manual-caves/c6-far-wall-gpu.mjs';
+// Isolated localhost-only near-terrain VAO 291 experiment.
+import {createOpaqueNearLifecycle} from '../perf/issue-291/opaque-near-lifecycle.mjs';
 import * as nonblockGeometry from './nonblock/candidate-scene.mjs';
 import {environmentalWaterEffects,prepareCandidateEffects,prepareEnvironmentalEffects,readCandidateEffectLayout} from './nonblock/candidate-effects.mjs';
 import {planEnvironmentalScenery} from './nonblock/staged-habitats.mjs';
@@ -432,6 +434,9 @@ function start(nonblockStage=null){
   const targetInfo=document.getElementById('targetInfo');
   let lastTargetText='';
   const chunks=new Map(),pending=new Map();
+  const near291Enabled=['localhost','127.0.0.1'].includes(location.hostname)&&
+    new URLSearchParams(location.search).get('near-vao-291')==='1';
+  let near291=null;
   // Cave-only outer-ring opaque meshes, never scheduled in normal save profiles.
   // Keep accepted M5/legacy module graph free of cave-only imports.
   const caveFarGpu=createCaveFarWallGpu(gl);
@@ -929,10 +934,15 @@ function start(nonblockStage=null){
     if(result.warning)message(result.warning);
     return true;
   }
-  function deleteChunkBuffers(chunk){
+  // Original deletion of BOTH opaque and water remains authoritative.
+  function originalDeleteChunkBuffers(chunk){
     if(!chunk)return;
     gl.deleteBuffer(chunk.buffer);
     if(chunk.waterBuffer)gl.deleteBuffer(chunk.waterBuffer);
+  }
+  function deleteChunkBuffers(chunk){
+    if(!chunk)return;
+    return near291?near291.deleteChunkBuffers(chunk):originalDeleteChunkBuffers(chunk);
   }
   // Both buffers stage before publishing; on failure neither can leak.
   function uploadPack2Chunk(vertices,water){
@@ -1494,7 +1504,9 @@ function start(nonblockStage=null){
       }
       canvas.dataset.manual14MeshVertices=String(manual14ResidentVerts);
       canvas.dataset.manual14VisibleInstances=String(manual14ResidentInstances);
-      for(const c of chunks.values()){
+      // Exact unchanged default draw controls every non-opted-in game.
+      if(near291)near291.render(chunks.values());
+      else for(const c of chunks.values()){
         gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);
         gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
         gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
@@ -1653,6 +1665,21 @@ function start(nonblockStage=null){
   const frameDriver=new ForegroundFrameDriver(
     callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),draw
   );
+  if(near291Enabled){
+    try{
+      near291=createOpaqueNearLifecycle({gl,
+        attributes:{atPos,atColor,atUv,atMat},pipelineProgram:program,
+        originalDeleteChunkBuffers,stopRenderLoop:reason=>{
+          frameDriver.pause();
+          fatal('Local VAO 291 experiment stopped: '+reason);
+          return true;
+        }});
+    }catch(error){
+      frameDriver.pause();
+      fatal('Local VAO 291 initialization refused: '+error.message);
+      return;
+    }
+  }
   // iPhone Touch.identifier is stable across simultaneous fingers even if
   // WebKit drops a synthetic PointerEvent/pointer capture during another tap.
   // Keep a separate positive ID namespace for Touch Events.
@@ -3061,6 +3088,7 @@ function start(nonblockStage=null){
     e.preventDefault();
     if(graphicsLost)return;
     graphicsLost=true;graphicsLossCount++;
+    near291?.contextLost(); // no invalid GL deletion
     mobRenderer=null;
     caveFarGpu?.resetForLostContext();
     pack5Gpu?.invalidate();
@@ -3074,6 +3102,7 @@ function start(nonblockStage=null){
       // Context loss invalidates EVERY old WebGL object; rebuilding only the
       // terrain mesh buffers while keeping old programs produces black frames.
       initializeGpuPipeline();
+      near291?.contextRestored({atPos,atColor,atUv,atMat},program);
       restartMobRenderer();
       // Invalidate ephemeral GPU cache, never world edits or save metadata.
       chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';
@@ -3118,6 +3147,7 @@ function start(nonblockStage=null){
   if(['localhost','127.0.0.1'].includes(location.hostname)){
     // Local-only regression interface; absent from the public Pages runtime.
     window.__mythwroughtTest=Object.freeze({
+      nearOpaque291(){return near291?.status()??null;},
       caveMode(){return {enabled:!!caveSession,seed:world.seed,
         profile:caveSession?.profile??null,
         entranceSites:caveSession?.runtime.entrancePlan.entrances.map(e=>({
