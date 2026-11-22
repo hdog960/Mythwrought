@@ -16,12 +16,13 @@ const CONNECTOR_INDICES=Object.freeze([16,25,34,35]);
 const asPoint=(x,y,z)=>Object.freeze({x,y,z});
 const eq=(a,b)=>a.x===b.x&&a.y===b.y&&a.z===b.z;
 export function planDetachedPedestrianSwitchback(seed,rx,rz,index,{
- radius=44,cornerFlat=8
+ radius=44,cornerFlat=8,quarterTurns=0
 }={}){
  if(!INT(seed)||seed!==(seed|0)||![rx,rz].every(INT)||
     !CONNECTOR_INDICES.includes(index)||
  !INT(radius)||radius<14||radius>44||
- !INT(cornerFlat)||cornerFlat<4||cornerFlat>10||radius<cornerFlat+5)
+ !INT(cornerFlat)||cornerFlat<4||cornerFlat>10||radius<cornerFlat+5||
+ !INT(quarterTurns)||quarterTurns<0||quarterTurns>3)
   throw new TypeError('Invalid protected pedestrian connector input');
  const region=planUnderworldRegion(seed,rx,rz);
  const original=region.capsules[index],isSocket=index===35;
@@ -46,12 +47,20 @@ export function planDetachedPedestrianSwitchback(seed,rx,rz,index,{
   asPoint(cx+R,y3,cz-R+FLAT),
   asPoint(cx+R,y4,cz+R-FLAT),
   asPoint(cx+R,y4,cz+R),b];
- const segments=Object.freeze(pts.slice(1).map((v,i)=>
-  Object.freeze({a:pts[i],b:v,radius:3.8}))
+ const rotated=quarterTurns?pts.map((v,i)=>{
+  if(i===0||i===pts.length-1)return v;
+  const dx=v.x-cx,dz=v.z-cz;
+  const pair=quarterTurns===1?[-dz,dx]:
+   quarterTurns===2?[-dx,-dz]:[dz,-dx];
+  return asPoint(cx+pair[0],v.y,cz+pair[1]);
+ }):pts;
+ const segments=Object.freeze(rotated.slice(1).map((v,i)=>
+  Object.freeze({a:rotated[i],b:v,radius:3.8}))
   .filter(s=>!eq(s.a,s.b)));
  return Object.freeze({ok:true,seed,rx,rz,index,
   kind:isSocket?'underground-socket-handoff':'deep-interlevel-ramp',
   radiusBlocks:R,cornerFlatBlocks:FLAT,
+  quarterTurns,
   original,from:a,to:b,segments,
   radius:3.8,threeWideDryRunOnly:true,
   stopsBeforeProtectedSurface:isSocket,
@@ -61,10 +70,10 @@ export function planDetachedPedestrianSwitchback(seed,rx,rz,index,{
   existingVoxelOrAuthoredSourceProvenanceUnverified:true});
 }
 export function auditDetachedPedestrianSwitchback(seed,rx,rz,index,
- {validateCandidateAir=false,radius=44,cornerFlat=8}={}){
+ {validateCandidateAir=false,radius=44,cornerFlat=8,quarterTurns=0}={}){
  if(typeof validateCandidateAir!=='boolean')
   throw new TypeError('Invalid switchback AIR sampling flag');
- const proposal=planDetachedPedestrianSwitchback(seed,rx,rz,index,{radius,cornerFlat});
+ const proposal=planDetachedPedestrianSwitchback(seed,rx,rz,index,{radius,cornerFlat,quarterTurns});
  const step=auditSupportedEntranceStairs(proposal,{maxCells:20000});
  const isLocal=proposal.segments.every(({a,b})=>
   [a,b].every(p=>Math.floor(p.x/UNDERWORLD_REGION_SIDE)===rx&&
@@ -78,7 +87,7 @@ export function auditDetachedPedestrianSwitchback(seed,rx,rz,index,
  return Object.freeze({ok:step.ok&&isLocal&&
   (routeFaceConnected===null||routeFaceConnected),
   seed,rx,rz,index,kind:proposal.kind,
-  radiusBlocks:radius,cornerFlatBlocks:cornerFlat,
+  radiusBlocks:radius,cornerFlatBlocks:cornerFlat,quarterTurns,
   originalDirectGradePass:auditSupportedEntranceStairs({
    ok:true,segments:[proposal.original]}).ok,
   proposedStairGeometryPass:step.ok,

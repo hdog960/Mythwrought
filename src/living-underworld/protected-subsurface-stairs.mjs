@@ -8,13 +8,14 @@ const coords=s=>s.split(',').map(Number);
 export function auditProtectedSubsurfaceStairs(proposal,{
  naturalAt,authoredAt=()=>undefined,editedAt=()=>false,
  protectedAt=()=>false,materialAllowed=isCandidateGeologyMaterial,
- maxCells=20000,minY=-210,maxY=-4
+ maxCells=20000,minY=-210,maxY=-4,stopOnFirstUnsafe=false
 }={}){
  if(!proposal||proposal.ok!==true||!Array.isArray(proposal.segments)||
   typeof naturalAt!=='function'||typeof authoredAt!=='function'||
   typeof editedAt!=='function'||typeof protectedAt!=='function'||
-  typeof materialAllowed!=='function'||!integer(maxCells)||maxCells<100||
-  maxCells>100000||!integer(minY)||!integer(maxY)||minY>=maxY)
+  materialAllowed!==isCandidateGeologyMaterial||!integer(maxCells)||maxCells<100||
+  maxCells>100000||typeof stopOnFirstUnsafe!=='boolean'||!integer(minY)||!integer(maxY)||
+  minY< -210||maxY>19||minY>=maxY)
   throw new TypeError('Invalid source-preserving staircase survey');
  const geometry=auditSupportedEntranceStairs(proposal,{maxCells:Math.max(maxCells,20000)});
  if(!geometry.ok)return Object.freeze({ok:false,
@@ -92,6 +93,14 @@ export function auditProtectedSubsurfaceStairs(proposal,{
     }
    }
    if(reason&&examples.length<12)examples.push(Object.freeze({x,y,z,kind,reason}));
+   if(reason&&stopOnFirstUnsafe)return Object.freeze({
+    ok:false,reason:'PROTECTED_OR_UNSUPPORTED_SOURCE',haltedEarly:true,
+    firstRefusal:reason,sourceChecks:visited.size,
+    supportCells:geometry.supportCells,clearanceCells:geometry.clearanceCells,
+    counts:Object.freeze({...count}),examples:Object.freeze(examples),
+    sourceTerrainNeverWritten:true,originalM7Edited:false,
+    playerWalkingUnverified:true
+   });
   }
  }
  const ok=count.authored===0&&count.edited===0&&count.protected===0&&

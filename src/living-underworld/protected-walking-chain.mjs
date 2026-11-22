@@ -3,8 +3,8 @@
 // hub through independently source-inspected supported spiral stair decks.
 // This NEVER carves M7, registers a new-world profile or tests player physics.
 import {planUnderworldRegion} from './worldwide-network.mjs';
-import {optimizeDetachedPedestrianSwitchback,
- planDetachedPedestrianSwitchback} from './pedestrian-switchback.mjs';
+import {selectSourceProtectedInterlevelRamps}
+ from './source-aware-ramp-selection.mjs';
 import {auditProtectedSubsurfaceStairs} from './protected-subsurface-stairs.mjs';
 import {auditSupportedEntranceStairs} from './walkable-entrance-stairs.mjs';
 
@@ -48,32 +48,36 @@ export function auditProtectedUnderworldWalkingChain(seed,rx,rz,{
  };
  const entry=auditProtectedSubsurfaceStairs(p,sourceOpt);
  const entryGrade=auditSupportedEntranceStairs(p);
- const connectors=[];
- for(const [i,index] of [16,25,34].entries()){
-  const optimized=optimizeDetachedPedestrianSwitchback(seed,rx,rz,index);
-  const proposal=planDetachedPedestrianSwitchback(seed,rx,rz,index,{
-   radius:optimized.selectedRadius,
-   cornerFlat:optimized.selectedCornerFlat});
-  const join=matching(proposal.from,layers[i].hub)&&
-   matching(proposal.to,layers[i+1].hub);
-  const audit=join?auditProtectedSubsurfaceStairs(proposal,sourceOpt):null;
-  const sourceSafe=join&&optimized.ok&&audit?.ok===true;
-  connectors.push(Object.freeze({
+ // Reject source-unsafe and non-walkable surface galleries immediately.
+ // No amount of changing a deep ramp can justify unsafe historical surface.
+ const selected=entry.ok&&entryGrade.ok?
+  selectSourceProtectedInterlevelRamps(seed,rx,rz,{
+   source,entranceProposal:p,includeSocket:false,maxCells
+  }):null;
+ const connectors=[16,25,34].map((index,i)=>{
+  const choice=selected?.links?.[i],picked=choice?.selected,
+   rejected=choice?.rejectedCounts;
+  const sourceSafe=choice?.ok===true&&picked?.sourceSafe===true;
+  return Object.freeze({
    index,fromLevel:layers[i].name,toLevel:layers[i+1].name,
-   hubsMatch:join,sourceSafe,reason:!join?'HUB_MISMATCH':
-    audit?.reason??null,
-   originalM7SourceVisited:audit?.sourceChecks??0,
-   rejectsExistingCaveAir:audit?.counts?.existingAirSupport??0,
-   rejectsAuthoredCaveAir:audit?.counts?.authoredAirSupport??0,
-   rejectsOreOrUnsafe:audit?.counts?.unsafeMaterial??0,
-   rejectsOldAuthored:audit?.counts?.authored??0,
-   rejectsLandmarks:audit?.counts?.protected??0,
-   optimizedSupportCells:optimized.optimizedSupportCells,
-   optimizedRadius:optimized.selectedRadius,
+   hubsMatch:!!picked,
+   sourceSafe,
+   reason:sourceSafe?null:choice?.reason??'NOT_EVALUATED',
+   originalM7SourceVisited:picked?.sourceCellsChecked??0,
+   rejectsExistingCaveAir:rejected?.existingAirSupport??0,
+   rejectsAuthoredCaveAir:rejected?.authoredAirSupport??0,
+   rejectsOreOrUnsafe:rejected?.unsafeMaterial??0,
+   rejectsOldAuthored:rejected?.authored??0,
+   rejectsLandmarks:rejected?.protected??0,
+   attemptedAlternatives:choice?.examined??0,
+   optimizedSupportCells:picked?.supportCells??null,
+   optimizedRadius:picked?.radius??null,
+   chosenQuarterTurns:picked?.quarterTurns??null,
    candidateOnly:true
-  }));
- }
- const possible=entry.ok&&entryGrade.ok&&
+  });
+ });
+ const possible=entry.ok&&entryGrade.ok&&selected?.ok===true&&
+  selected.completeNetworkCollisionFree===true&&
   connectors.every(x=>x.sourceSafe);
  return Object.freeze({
   ok:possible,seed,rx,rz,reason:possible?null:
@@ -86,10 +90,17 @@ export function auditProtectedUnderworldWalkingChain(seed,rx,rz,{
   fullEntranceSourceChecks:entry.sourceChecks??0,
   fullEntranceReason:entry.reason??null,
   originalM7SourceChecks:(entry.sourceChecks??0)+
-   connectors.reduce((n,x)=>n+x.originalM7SourceVisited,0),
+     (selected?.sourceCellsChecked??0),
   sourceProtectedRoutes:Number(entry.ok)+
    connectors.filter(x=>x.sourceSafe).length,
   routeCount:4,
+  combinedNetworkSupportAndHeadroomSafe:selected?.ok===true,
+  combinedSelectedRampAirFaceConnected:selected?.allSelectedCandidateVoxelAirFaceConnected===true,
+  combinedDistinctProposedSupportCells:selected?.distinctProposedSupportCells??null,
+  combinedStairwayCollisions:selected?.combined?.crossRouteBlockedCells??null,
+  alternativeLayoutsExamined:selected?.inspected??0,
+  aggregateSourceRejectedAlternatives:selected?.sourceRejected??0,
+  sourceReaderIdentityAuthenticatedByCallerOnly:true,
   connectors:Object.freeze(connectors),
   potentialRareCityPresent:!!world.cityCandidate,
   rareCityEntranceToFloorNotProven:true,
