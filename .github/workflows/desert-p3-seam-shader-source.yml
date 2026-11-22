@@ -1,0 +1,44 @@
+name: Desert P3 seam texture 40.x focused native source contract
+on:
+  push:
+    branches:
+      - research/desert-p3-seam-shader-tag40-20261122
+    paths:
+      - .github/workflows/desert-p3-seam-shader-source.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-seam-shader-source
+  cancel-in-progress: false
+jobs:
+  original-source-tag40:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: f97669c071689819bba7740347b95f9e6ea961f5
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact original baseline and branch ownership
+        run: |
+          set -euo pipefail
+          BASE=f97669c071689819bba7740347b95f9e6ea961f5
+          test "$(git -C baseline rev-parse HEAD)" = "$BASE"
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(src/main.mjs|src/voxel.mjs|src/manual-biomes/desert-seam-vertex-tint.mjs|src/manual-biomes/desert-seam-shader.mjs|tests/desert-p3-seam-shader-original.test.mjs|.github/workflows/desert-p3-seam-shader-source.yml|docs/desert/PHASE3_SHADER_TAG40_RESEARCH_CHECKPOINT_20261122.md)$' || true)
+          test -z "$unexpected"
+          node --check candidate/src/main.mjs
+          node --check candidate/src/voxel.mjs
+          node --check candidate/src/manual-biomes/desert-seam-shader.mjs
+          node --check candidate/tests/desert-p3-seam-shader-original.test.mjs
+      - name: New genuine original-M7 mesh, legacy/save and exact shader guards only
+        run: node --test candidate/tests/desert-p3-seam-shader-original.test.mjs
