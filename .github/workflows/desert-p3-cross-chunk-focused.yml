@@ -34,9 +34,9 @@ jobs:
           test "$(git -C baseline rev-parse HEAD)" = "$BASE"
           test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
-          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(src/voxel.mjs|tests/desert-p3-cross-chunk-provenance.test.mjs|.github/workflows/desert-p3-cross-chunk-focused.yml|docs/desert/PHASE3_CROSS_CHUNK_SOURCE_AUDIT_20261122.md)$' || true)
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(src/voxel.mjs|src/manual-biomes/desert-seam-vertex-tint.mjs|tests/desert-p3-cross-chunk-provenance.test.mjs|.github/workflows/desert-p3-cross-chunk-focused.yml|docs/desert/PHASE3_CROSS_CHUNK_SOURCE_AUDIT_20261122.md)$' || true)
           test -z "$unexpected"
           node --check candidate/src/voxel.mjs
           node --check candidate/tests/desert-p3-cross-chunk-provenance.test.mjs
-      - name: Run ONLY three new genuine original-M7 tests, no browser
+      - name: Run ONLY new genuine cross-chunk, cache, distance and climate checks, no browser
         run: node --test candidate/tests/desert-p3-cross-chunk-provenance.test.mjs
