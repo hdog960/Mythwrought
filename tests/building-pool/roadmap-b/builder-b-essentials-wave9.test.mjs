@@ -102,27 +102,6 @@ test('Saltreach has eight true vertical source-glass lantern windows with produc
   assert.equal(actual.registeredInLiveGame,false);
  }
 });
-test('Saltreach strict unrelaxed eight-way historical lighthouse D4 against all 228 accepted 1B + Frostwake', {timeout:240000},async()=>{
- const old=[...get1BCandidates(),createStoneveinSwitchbackBaths()];
- for(let i=1;i<=15;i++){
-  const mod=await import('../../../src/building-pool/roadmap-b/wave'+i+'-community-b1.mjs');
-  old.push(...mod['getRoadmapBWave'+i+'B1']());
- }
- assert.equal(old.length,228,'historical accepted 1B source count changed');
- assert.equal(new Set(old.map(b=>b.id)).size,228);
- const b=buildSaltreachTidalLanternStation(),same=old.filter(x=>x.category===b.category);
- assert.ok(same.length>=20,'historic lighthouse source corpus missing');
- assert.ok(!old.some(p=>p.id===b.id),'historical accepted original collision');
- const current=d4(b,false,0),others=[...same,buildFrostwakeCrownbridgeLighthouse()];
- let closest=null,max=0,comparisons=0;
- for(const item of others)for(const flip of [false,true])for(const turn of [0,1,2,3]){
-  const similarity=iou(current,d4(item,flip,turn));comparisons++;
-  if(similarity>max){max=similarity;closest=item.id;}
-  assert.ok(similarity<.85,'Saltreach too similar to '+item.id+' IoU='+similarity);
- }
- assert.ok(comparisons>=248,'historic 8-way comparison incomplete');
- console.log('SALTREACH_STRICT_HISTORICAL_LIGHTHOUSE_D4_PASS '+JSON.stringify({
-  accepted:228,otherProvisionalCompared:1,comparisons,maxD4:max,closest,
-  creatorArtApproved:false,liveGamePlaced:false,iphoneTested:false
- }));
-});
+
+// Strict original 228-source D4 for Waves9–19 is covered once by
+// builder-b-originals-waves9-19-shared-historical-d4.test.mjs.
