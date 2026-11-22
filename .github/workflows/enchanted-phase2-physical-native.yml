@@ -1,6 +1,6 @@
 # One isolated original-M7 density-gate source experiment. Reuse existing
 # exact 14/14 native and original WebGL2 results where source is unchanged.
-# This run checks the changed density shortcut and connected climate tracks,
+# This rerun checks the original native .52+.34 floating point upper bound and connected climate tracks,
 # not the entire repo, browsers, other developer suites or CI queues.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
