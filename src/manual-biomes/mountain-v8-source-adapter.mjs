@@ -27,31 +27,48 @@ export function mountainV8TileRoot(tileX,tileZ,seed){
  * AIR/GRASS/DIRT/STONE are supplied by the owner; no guessed material IDs.
  */
 export function surveyMountainV8Column({x,z,seed,worldMaxY=30,biomeAt,
-    heightAt,readBlock,ids,protectedAt=()=>false}={}){
+    heightAt,readBlock,ids,protectedAt=()=>false,onVeto}={}){
   if(![x,z,seed,worldMaxY].every(validInteger)||
      ![biomeAt,heightAt,readBlock,protectedAt].every(f=>typeof f==='function')||
      !ids||![ids.AIR,ids.GRASS,ids.DIRT,ids.STONE].every(validInteger)||
-     new Set([ids.AIR,ids.GRASS,ids.DIRT,ids.STONE]).size!==4)return null;
+     new Set([ids.AIR,ids.GRASS,ids.DIRT,ids.STONE]).size!==4||
+     (onVeto!==undefined&&typeof onVeto!=='function'))return null;
+  const veto=(reason,px=x,pz=z,y=null)=>{
+    onVeto?.(Object.freeze({reason,x:px,z:pz,y}));
+    return null;
+  };
   const biome=biomeAt(x,z,seed),legacyTop=heightAt(x,z,seed);
-  if(biome?.name!=='mountain'||!(biome.weight>=.82)||
-     !validInteger(legacyTop)||legacyTop<2||legacyTop>=worldMaxY-2)return null;
+  if(biome?.name!=='mountain'||!(biome.weight>=.82))
+    return veto('biome-boundary');
+  if(!validInteger(legacyTop)||legacyTop<2||legacyTop>=worldMaxY-2)
+    return veto('height-unavailable');
   // A nearby cave, landmark, foreign cap or biome seam is not a valid build site.
   const probes=[[x,z],...neighborOffsets.map(([dx,dz])=>[x+dx,z+dz])];
   const neighboring=[],neighborWeights=[];
   for(const [px,pz] of probes){
     const climate=biomeAt(px,pz,seed),old=heightAt(px,pz,seed);
-    if(climate?.name!=='mountain'||!(climate.weight>=.82)||
-       !validInteger(old)||old<2||old>=worldMaxY-2)return null;
-    if(protectedAt(px,old,pz)||protectedAt(px,old-1,pz)||
-       protectedAt(px,old-2,pz)||protectedAt(px,old-3,pz)||
-       readBlock(px,old,pz)!==ids.GRASS||
-       ![ids.DIRT,ids.STONE].includes(readBlock(px,old-1,pz))||
-       ![ids.DIRT,ids.STONE].includes(readBlock(px,old-2,pz))||
-       ![ids.DIRT,ids.STONE].includes(readBlock(px,old-3,pz)))return null;
+    if(climate?.name!=='mountain'||!(climate.weight>=.82))
+      return veto('biome-boundary',px,pz);
+    if(!validInteger(old)||old<2||old>=worldMaxY-2)
+      return veto('height-unavailable',px,pz);
+    for(let depth=0;depth<=3;depth++)
+      if(protectedAt(px,old-depth,pz))
+        return veto('protected-substrate',px,pz,old-depth);
+    if(readBlock(px,old,pz)!==ids.GRASS)
+      return veto('non-grass-original-cap',px,pz,old);
+    for(let depth=1;depth<=3;depth++){
+      const original=readBlock(px,old-depth,pz);
+      if(original!==ids.DIRT&&original!==ids.STONE)
+        return veto(original===ids.AIR?'cave-air':'foreign-substrate',
+          px,pz,old-depth);
+    }
     // Inspect the complete finite uplift envelope: no overwrites of authored AIR,
     // caves, trees, settlements, structures or unknown voxels.
-    for(let y=old+1;y<=worldMaxY-2;y++)
-      if(protectedAt(px,y,pz)||readBlock(px,y,pz)!==ids.AIR)return null;
+    for(let y=old+1;y<=worldMaxY-2;y++){
+      if(protectedAt(px,y,pz))return veto('protected-uplift',px,pz,y);
+      if(readBlock(px,y,pz)!==ids.AIR)
+        return veto('occupied-uplift',px,pz,y);
+    }
     if(px!==x||pz!==z){
       neighboring.push(old);neighborWeights.push(climate.weight);
     }
@@ -60,12 +77,12 @@ export function surveyMountainV8Column({x,z,seed,worldMaxY=30,biomeAt,
     biomeWeight:biome.weight,neighborTops:neighboring,
     neighborBiomeWeights:neighborWeights,
     biomeName:biome.name,worldMaxY});
-  if(!result)return null;
+  if(!result)return veto('proposal-unavailable');
   // Intentional no in-world tree placement. A bounded, descriptive vegetation
   // proposal prevents canopy on cliffs, rock, snow, steeps or protected cells.
   const tileX=Math.floor(x/8),tileZ=Math.floor(z/8);
   const root=mountainV8TileRoot(tileX,tileZ,seed);
-  if(!root)return null;
+  if(!root)return veto('unsafe-tile');
   const {rootX,rootZ}=root;
   // Exactly one site may own this tile; unlike the earlier tile-wide roll,
   // neighboring eligible columns must not all materialize the same plant.
