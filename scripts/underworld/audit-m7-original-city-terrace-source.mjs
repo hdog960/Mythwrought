@@ -13,6 +13,7 @@ import {auditSourceProtectedCityFloorLink}
  from '../../src/living-underworld/source-protected-city-link.mjs';
 import {selectCityCompatibleDeepLinks}
  from '../../src/living-underworld/source-aware-city-deep-selection.mjs';
+const runStarted=performance.now();
 const seed=179,regions=Object.freeze([[2,0],[2,1]]);
 const world=new FourRegionWorld(seed,
  fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
@@ -26,6 +27,7 @@ const source=Object.freeze({
 });
 const rows=[];
 for(const [rx,rz] of regions){
+ const siteStarted=performance.now();
  if(!planUnderworldRegion(seed,rx,rz).cityCandidate)
   throw Error('Original deterministic city-site plan changed');
  // The new bounded city-aware optimizer invokes the COMPLETE original-source
@@ -45,6 +47,7 @@ for(const [rx,rz] of regions){
   proposeProtectedCityLandingTerrace(seed,rx,rz,{source});
  const fullPad=auditSourceProtectedCityFloorLink(seed,rx,rz,{source});
  rows.push(Object.freeze({seed,rx,rz,
+  regionAuditElapsedMs:Math.round((performance.now()-siteStarted)*1000)/1000,
   originalM7TerrainReadOnly:true,
   terraceCandidateSourceSafe:approved||terrace?.ok===true,
   terraceRadius:approved?joined.terraceRadius:terrace?.radius??null,
@@ -83,6 +86,7 @@ for(const [rx,rz] of regions){
 const report=Object.freeze({
  schema:'living-underworld-original-m7-rare-city-floor-and-terrace-v1',
  seed,rows:Object.freeze(rows),
+ fullAuditElapsedMs:Math.round((performance.now()-runStarted)*1000)/1000,
  originalSourceReaderAuthentic:true,
  seedConstructorFaults8675309And13579NotRetested:true,
  oldM7CavesUnchanged:true,noSettlementsPlaced:true,
