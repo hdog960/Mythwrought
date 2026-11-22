@@ -7,9 +7,12 @@ import {chromium} from 'playwright';
 import pngjs from 'pngjs';
 
 const stage=process.argv[2];
+const seed=process.argv[3]===undefined?179:Number(process.argv[3]);
 assert.ok(['before','after'].includes(stage),'Expected before or after');
+assert.ok([179,2026].includes(seed),'Strict real M7 seeds 179 and 2026 only');
+const suffix=seed===179?'':'-seed'+seed;
 const info=JSON.parse(await readFile('artifacts/snowy-s0-provenance/reader-metrics.json','utf8'));
-const sites=info.seedResults.find(s=>s.seed===179);
+const sites=info.seedResults.find(s=>s.seed===seed);
 assert.ok(sites?.glacierSites?.length,'No genuine physical glacier cap sampled');
 const [gx,gy,gz]=sites.glacierSites[Math.floor(sites.glacierSites.length/2)];
 const out='artifacts/snowy-s0-provenance';
@@ -26,6 +29,13 @@ try{
     const page=await context.newPage(),errors=[];
     page.on('pageerror',e=>errors.push(String(e?.message??e)));
     page.on('dialog',d=>d.accept());
+    // Genuine NEW seeded M7 world through the application's own startup
+    // pathway. No synthetic runtime, imported fake world or saved-world rewrite.
+    if(seed!==179)
+      await page.addInitScript(chosen=>{
+        if(location.protocol==='http:'&&location.hostname==='127.0.0.1')
+          localStorage.setItem('mythwrought-v002-selected-seed',String(chosen));
+      },seed);
     try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:90000});
       await page.waitForFunction(()=>{
@@ -41,7 +51,7 @@ try{
         api.aimAt(gx,gy,gz);
         return {seed:api.snapshot().seed,profile,iceBlock:target,pose,aim:[gx,gy,gz]};
       },{gx,gy,gz});
-      assert.equal(scene.seed,179);
+      assert.equal(scene.seed,seed);
       assert.equal(scene.profile?.generator,'mythwrought-five-surface-regions-v7');
       assert.equal(scene.iceBlock,276,'Actual game voxel must be genuine glacier ice');
       await page.waitForFunction(()=>{
@@ -65,7 +75,7 @@ try{
       assert.ok(glinfo.exists&&String(glinfo.version).includes('WebGL 2'),'Authentic WebGL2 rendering required');
       assert.equal(glinfo.biome,'snow');
       assert.deepEqual(errors,[],'Actual game Javascript errors');
-      const name=stage+'-snowy-ice-'+viewport.width+'x'+viewport.height+'.png';
+      const name=stage+'-snowy-ice'+suffix+'-'+viewport.width+'x'+viewport.height+'.png';
       const bytes=await page.screenshot({path:out+'/'+name,timeout:90000});
       const png=pngjs.PNG.sync.read(bytes);
       assert.equal(png.width,viewport.width);
@@ -80,7 +90,11 @@ try{
       const look=await page.evaluate(({gx,gy,gz})=>{
         const api=window.__mythwroughtTest;
         const candidates=[[gx,17,gz-12],[gx+3,17,gz-11],[gx-4,17,gz-10],
-          [gx,16,gz-8],[gx+6,18,gz-8],[gx-6,18,gz-8]];
+          [gx,16,gz-8],[gx+6,18,gz-8],[gx-6,18,gz-8],
+          // Extra fail-closed physical/collision-safe alternatives only if
+          // the real seed-2026 flora occupies the first chosen sky position.
+          ...[18,19].flatMap(y=>[[gx,y,gz-12],[gx-6,y,gz-10],
+            [gx+6,y,gz-10],[gx,y,gz-8]])];
         let pose=null,chosen=null;
         for(const candidate of candidates){
           try{
@@ -97,7 +111,7 @@ try{
         Number(document.querySelector('#scene').dataset.renderedFrames));
       await page.waitForFunction(start=>Number(document.querySelector('#scene').dataset.renderedFrames)>start,
         atStart,{timeout:60000});
-      const overlookName=stage+'-snowy-overlook-'+viewport.width+'x'+viewport.height+'.png';
+      const overlookName=stage+'-snowy-overlook'+suffix+'-'+viewport.width+'x'+viewport.height+'.png';
       const overlookBytes=await page.screenshot({path:out+'/'+overlookName,timeout:90000});
       const overlookPng=pngjs.PNG.sync.read(overlookBytes);
       assert.deepEqual([overlookPng.width,overlookPng.height],[viewport.width,viewport.height]);
@@ -111,8 +125,8 @@ try{
     }finally{await context.close();}
   }
 }finally{await browser.close();}
-await writeFile(out+'/'+stage+'-webgl2.json',JSON.stringify({
+await writeFile(out+'/'+stage+'-webgl2'+suffix+'.json',JSON.stringify({
   exactHead:process.env.SNOW_EXPECTED_HEAD??null,
-  base:process.env.SNOW_BASE??null,stage,captures
+  base:process.env.SNOW_BASE??null,stage,seed,captures
 },null,2)+'\n');
 assert.equal(captures.length,4);
