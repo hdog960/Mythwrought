@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessGateMotionContinuity as assess} from '../src/resonance/devices48/gate-motion-continuity-v1.mjs';
+const gate=(id='g',clear=true)=>({id,candidatePathClear:clear,movementAuthorized:false,physicsBound:false,authoritativeDelivery:false,productionBound:false});
+const frames=()=>[1,2,3].map(tick=>({worldId:'w',tick,gates:[gate()]}));
+test('clear continuity remains advisory',()=>{const r=assess(frames());assert.equal(r.gates[0].stableClear,true);assert.equal(r.movementAuthorized,false);assert.equal(r.gates[0].movementAuthorized,false);assert.ok(Object.isFrozen(r.gates));});
+test('intermediate obstruction blocks',()=>{const f=frames();f[1].gates[0].candidatePathClear=false;assert.equal(assess(f).gates[0].blocked,true);});
+test('skipped tick rejected',()=>{const f=frames();f[2].tick=4;assert.throws(()=>assess(f));});
+test('world change rejected',()=>{const f=frames();f[1].worldId='other';assert.throws(()=>assess(f));});
+test('roster change rejected',()=>{const f=frames();f[2].gates=[gate('other')];assert.throws(()=>assess(f));});
+test('forged permission rejected',()=>{const f=frames();f[1].gates[0].movementAuthorized=true;assert.throws(()=>assess(f));});
+test('duplicate identity rejected',()=>{const f=frames();f[0].gates.push(gate());assert.throws(()=>assess(f));});
+test('sorted deterministic output',()=>{const f=frames();for(const x of f)x.gates=[gate('z'),gate('a')];assert.deepEqual(assess(f).gates.map(g=>g.id),['a','z']);});
