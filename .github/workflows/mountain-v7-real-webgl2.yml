@@ -21,7 +21,9 @@ concurrency:
 jobs:
   original-game-mountain:
     if: github.event.pull_request.number == 374 && github.event.pull_request.draft == true
-    runs-on: ubuntu-latest
+    # Exact Playwright 1.58.2 cannot install Chromium on ubuntu26.04-x64.
+    # Pin 24.04 only in this independent mountain evidence workflow.
+    runs-on: ubuntu-24.04
     timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
