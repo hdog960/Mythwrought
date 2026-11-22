@@ -5,7 +5,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {performance} from 'node:perf_hooks';
 import {EnchantedCandidateSourceCache,
-  ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES as MAX}
+  ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES as MAX,
+  ENCHANTED_CANDIDATE_SOURCE_CACHE_DEFAULT_ENTRIES as DEFAULT}
   from '../../src/manual-biomes/enchanted-tree-source-cache.mjs';
 import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR}
   from '../../src/manual-biomes/profile-world.mjs';
@@ -15,7 +16,9 @@ import {BLOCK,chunkCoord} from '../../src/voxel.mjs';
 import {WORLD_MAX_Y} from '../../src/depth.mjs';
 
 test('bounded cache hard-stops at 2048 entries through thousands of distinct source coordinates',()=>{
-  assert.equal(MAX,2048,'review cache limit before relaxing mobile memory');
+  assert.equal(MAX,2048,'review hard maximum before relaxing mobile memory');
+  assert.equal(DEFAULT,1024,'measured default must remain half of reviewed hard cap');
+  assert.equal(new EnchantedCandidateSourceCache().limit,DEFAULT);
   assert.throws(()=>new EnchantedCandidateSourceCache(0),/capacity/);
   assert.throws(()=>new EnchantedCandidateSourceCache(MAX+1),/capacity/);
   assert.throws(()=>new EnchantedCandidateSourceCache(1.5),/capacity/);
@@ -100,8 +103,8 @@ test('dense original-source M7 sampling stays bounded, deterministic, cave-safe 
       observedProcessHeapPeak=Math.max(observedProcessHeapPeak,processHeapUsed);
       assert.ok(metrics,'one test-only synchronous metrics callback per chunk');
       assert.ok(Object.isFrozen(metrics));
-      assert.ok(metrics.peakEntries<=MAX,'hard cap must never be exceeded');
-      assert.ok(metrics.entries<=MAX);
+      assert.ok(metrics.peakEntries<=DEFAULT,'default cap must never be exceeded');
+      assert.ok(metrics.entries<=DEFAULT);
       assert.ok(metrics.evictions>=0);
       assert.ok(metrics.hits>=0&&metrics.misses>=0);
       assert.ok(metrics.misses<=sourceReadCalls,
@@ -111,7 +114,7 @@ test('dense original-source M7 sampling stays bounded, deterministic, cave-safe 
         hits:metrics.hits,misses:metrics.misses,
         peakEntries:metrics.peakEntries,evictions:metrics.evictions
       });
-      if(metrics.entries)assert.equal(metrics.limit,MAX);
+      if(metrics.entries)assert.equal(metrics.limit,DEFAULT);
       else assert.equal(metrics.limit,0,'nonenchanted chunk does not allocate cache');
       peak=Math.max(peak,metrics.peakEntries);
       sourcePeak=Math.max(sourcePeak,metrics.peakEntries);
@@ -150,7 +153,7 @@ test('dense original-source M7 sampling stays bounded, deterministic, cave-safe 
   assert.equal(denseWork.length,checked);
   console.log('# ENCHANTED REAL BOUNDED CACHE DENSE SOURCE '+JSON.stringify({
     chunks:checked,sourceVoxels:plannedVoxels,
-    peakEntries:peak,hardLimit:MAX,evictions,rows,
+    peakEntries:peak,defaultLimit:DEFAULT,hardLimit:MAX,evictions,rows,
     sourceReadCalls:totalReads,cacheHits,cacheMisses,
     nativeRunnerAvgChunkMs:averageMs,nativeRunnerP95ChunkMs:p95,
     worstReadChunks:byReads.slice(0,5),
