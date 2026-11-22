@@ -37,3 +37,17 @@ Reuse exact original-repository native Node 22.16.0 evidence: previous 15/15 new
 ### Still required for a real release
 
 Actual game player ray/selection and collision at adversarial camera angles; original authored triangle/renderer visibility proof; true mixed-pack wall/floor/roof bearing; explicit creator-approved A5 variant and yaw assignments, genuine iPhone WebGL2 acceptance and Creator art/physical approval. Neither current source-only study nor a passing native suite can supply these.
+
+## Exact new original-source native validation
+
+**[GitHub Actions #45055300060](https://github.com/hdog960/Mythwrought/actions/runs/45055300060)** completed **SUCCESS — 6/6 focused native tests PASS**, Node 22.16.0, original repository checkout and unmodified Pack5/voxel imports. The CI-only validation branch \`roadmap-a-pack5-native-ray-occlusion-ci-20261122\` exact commit \`fa2543ff4981d5513138203df78a7de333ab607d\` is based directly on source-only code \`14ecf9b56ea7b8196011ff18d01e3f3a04781d95\`. The only CI-only change is a separate one-time workflow, not any shared workflow.
+
+Tests cover (1) **432** deterministic original fired-brick yaw 2/3 +/-0.00000005 edge probes; (2) original independent source variants and no actual A5 choices; (3) retention of nonzero fixture selection-vs-source-mesh disagreements (the precise newly measured count is not emitted by the test logs, so DO NOT invent one); (4) source-authentic opt-in live adapter on immutable synthetic world with no terrain blocker; (5) original \`voxel.raycast\` terrain occluding a Pack5 target from front or rear; and (6) closer visible Pack5 relief winning over more distant legacy terrain.
+
+The four source-authored yaw 2/3 brick preview selections do **not** meet the canonical voxel-shape registry's maximum 32 boxes. The original Pack5 source fixture and construction layer intentionally use a separate detailed selection path while the original brick **collision** remains one full cube. This is a contract boundary, not proof of an original live-game bug and not a request to alter the existing raycaster or increase its box cap.
+
+This test is **not** an original active player camera/input loop, nor rendered WebGL2 pixel proof. The world used by the original opt-in live adapter is a small frozen **get-only** object with no \`set\`, \`save\`, storage, production instance or actual world. Its one temporary Pack5 fixture is discarded by the test runner. There were no changes to original game source, world, A5 building materials/yaws, schema1, PWA, 5 automations, or locked v0.11.
+
+**Prior verification reused:** 15/15 native original source ray Actions #45049471293 (24 alternative fixtures/3,600 analytical rays, 88 original grazing disagreement warnings), earlier 40/40 original native producer Actions #45044721507, 9/9 and 5/5 original footprint source tests, historical original Pack5 24/24 and controlled V8 58/58. No repeated full CI, browser/Chromium, deployment, or queue audit.
+
+**Remaining release gates:** actual running-game player selection at near-grazing angles, mixed Pack1-5 structural bearing + intentional authored material/yaw decisions, source mesh WebGL2/iPhone viewport and GPU cost, creator approval. Keep production main \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`, protected OPEN DRAFT PR406 \`1d71f5e37891280a21c777e5189f0762014ed8a9\` untouched. Roadmap A remains 207/420 source-only with 213 unwritten.
