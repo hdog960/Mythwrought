@@ -170,8 +170,11 @@ test('source ceiling clips a high surface window instead of discarding real grou
   });
   assert.ok(proposed,'Must allow real surface floor below the source ceiling');
   assert.equal(proposed.offset,0,'The original first window remains first');
-  assert.equal(proposed.point[1],floor);
+  assert.ok(proposed.point[1]>=floor&&proposed.point[1]<floor+.04,
+    'Original grounded semantics permit physically supported fractional feet');
   assert.equal(original.grounded(proposed.point,species.body),true);
+  assert.ok(proposed.point[1]+species.body.height<=20,
+    'Full source body must stay within existing Y=19 world ceiling');
   assert.equal(spawnEligible(original,species,proposed.point,observer),true);
   assert.ok(outOfWorldReads>=1);
 });
