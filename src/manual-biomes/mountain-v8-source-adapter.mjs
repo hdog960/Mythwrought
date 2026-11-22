@@ -49,14 +49,21 @@ export function surveyMountainV8Column({x,z,seed,worldMaxY=30,biomeAt,
   if(!result)return null;
   // Intentional no in-world tree placement. A bounded, descriptive vegetation
   // proposal prevents canopy on cliffs, rock, snow, steeps or protected cells.
-  const chance=hash(Math.floor(x/8),Math.floor(z/8),seed+7919);
-  const kind=result.cap==='alpine-grass'&&result.slope<.35?
+  const tileX=Math.floor(x/8),tileZ=Math.floor(z/8);
+  const rootX=tileX*8+2+Math.floor(hash(tileX,tileZ,seed+7921)*4);
+  const rootZ=tileZ*8+2+Math.floor(hash(tileX,tileZ,seed+7927)*4);
+  // Exactly one site may own this tile; unlike the earlier tile-wide roll,
+  // neighboring eligible columns must not all materialize the same plant.
+  const chosen=x===rootX&&z===rootZ;
+  const chance=hash(tileX,tileZ,seed+7919);
+  const kind=chosen&&result.cap==='alpine-grass'&&result.slope<.35?
     chance<.14?'dwarf-conifer':chance<.42?'alpine-flower':
     chance<.62?'low-heather':null:null;
   return Object.freeze({...result,vegetation:kind,
     sourceProvenance:Object.freeze({legacyTop,neighborTops:Object.freeze([...neighboring]),
       originalGroundIntact:true,protectedEnvelopeClear:true,
       neighborBiomeWeights:Object.freeze([...neighborWeights])}),
+    vegetationSite:Object.freeze({tileX,tileZ,rootX,rootZ,chosen}),
     estimatedExtraCells:kind==='dwarf-conifer'?18:kind?2:0,
     // Descriptive only; future renderer/owner must enforce actual mesh budgets.
     safeToIntegrate:false});
