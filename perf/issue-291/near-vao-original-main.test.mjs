@@ -29,7 +29,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '14510803189ce7acad3953275d2c7aa530f90613');
+    '42c172f0a1a5a73052311808272c0765f20eeac5');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -42,6 +42,14 @@ test('opt-in only on localhost and 127.0.0.1; public Pages always original contr
   one("const near291Enabled=['localhost','127.0.0.1'].includes(location.hostname)&&");
   one("new URLSearchParams(location.search).get('near-vao-291')==='1';");
   one('let near291=null;');
+});
+test('public Pages never imports the experimental module into its offline dependency graph',()=>{
+  assert.equal(source.includes("import {createOpaqueNearLifecycle}"),false);
+  one("import('../perf/issue-291/opaque-near-lifecycle.mjs')");
+  inOrder('if(near291Enabled){',
+    "import('../perf/issue-291/opaque-near-lifecycle.mjs')",
+    'if(graphicsLost||document.hidden)',
+    'near291=createOpaqueNearLifecycle({gl,');
 });
 test('the exact original near opaque draw loop survives as the A/B control',()=>{
   const start=source.indexOf('if(near291)near291.render(chunks.values());');

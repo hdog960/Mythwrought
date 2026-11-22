@@ -59,8 +59,7 @@ import {createPack3LiveBridge,combinePack3ChunkMesh,isPack3BlockId} from './buil
 import {installPack3Palette} from './builder-assets/pack3-palette.mjs';
 import {exportPack3Portable,inspectPack3Portable,restorePack3Portable} from './builder-assets/pack3-portable.mjs';
 import {createCaveFarWallGpu} from './manual-caves/c6-far-wall-gpu.mjs';
-// Isolated localhost-only near-terrain VAO 291 experiment.
-import {createOpaqueNearLifecycle} from '../perf/issue-291/opaque-near-lifecycle.mjs';
+// Isolated 291 near-VAO experiment imports no extra code on public Pages.
 import * as nonblockGeometry from './nonblock/candidate-scene.mjs';
 import {environmentalWaterEffects,prepareCandidateEffects,prepareEnvironmentalEffects,readCandidateEffectLayout} from './nonblock/candidate-effects.mjs';
 import {planEnvironmentalScenery} from './nonblock/staged-habitats.mjs';
@@ -1666,19 +1665,24 @@ function start(nonblockStage=null){
     callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),draw
   );
   if(near291Enabled){
-    try{
-      near291=createOpaqueNearLifecycle({gl,
-        attributes:{atPos,atColor,atUv,atMat},pipelineProgram:program,
-        originalDeleteChunkBuffers,stopRenderLoop:reason=>{
-          frameDriver.pause();
-          fatal('Local VAO 291 experiment stopped: '+reason);
-          return true;
-        }});
-    }catch(error){
-      frameDriver.pause();
-      fatal('Local VAO 291 initialization refused: '+error.message);
-      return;
-    }
+    // Public Pages and offline PWA control load ZERO experimental modules.
+    // The localhost-only import completes between animation frames.
+    import('../perf/issue-291/opaque-near-lifecycle.mjs')
+      .then(({createOpaqueNearLifecycle})=>{
+        if(graphicsLost||document.hidden)
+          throw Error('Graphics suspended before local VAO experiment armed');
+        near291=createOpaqueNearLifecycle({gl,
+          attributes:{atPos,atColor,atUv,atMat},pipelineProgram:program,
+          originalDeleteChunkBuffers,stopRenderLoop:reason=>{
+            frameDriver.pause();
+            fatal('Local VAO 291 experiment stopped: '+reason);
+            return true;
+          }});
+      })
+      .catch(error=>{
+        frameDriver.pause();
+        fatal('Local VAO 291 initialization refused: '+error.message);
+      });
   }
   // iPhone Touch.identifier is stable across simultaneous fingers even if
   // WebKit drops a synthetic PointerEvent/pointer capture during another tap.
