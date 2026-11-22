@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {speciesRegistry} from '../src/mobs/species.mjs';
+import {MobEngine} from '../src/mobs/engine.mjs';
+import {prepareOriginalMobPoll,settleOriginalMobPoll}
+  from '../src/mobs/ecosystem-region-poll.mjs';
 import {createRegionalEcologySchedule,inspectRegionalEcologySchedule,
   settleRegionalEcologyPoll}
   from '../src/mobs/ecosystem-region-cadence.mjs';
@@ -157,4 +160,58 @@ test('original Map insertion order survives region updates and respects 12s decl
   assert.equal(state.entries.length,64);
   assert.equal(state.entries[0][0],'0,0,0');
   assert.equal(state.entries.some(([key])=>key==='1,0,0'),false);
+});
+
+test('original global tick and real MobEngine admission grant one birth cooldown',()=>{
+  const region=location(0);
+  const world={
+    revision(){return 0;},
+    residentAt(){return true;},
+    volume(p){return p[1]<4?'solid':'clear';},
+    grounded(p){return p[1]>=4&&p[1]<4.04;},
+    environment(){return {biome:'meadow',light:.8,hazard:false};},
+    medium(){return 'air';},
+    set(){throw Error('No source terrain writes');},
+    save(){throw Error('No source saves');}
+  };
+  let matching=null;
+  for(let seed=1;seed<=256;seed++){
+    const engine=new MobEngine(world,seed,{maxEntities:32,maxActive:8});
+    const first=at(createGlobalEcologyClock(),.5,[region]);
+    const planned=prepareOriginalMobPoll({
+      engine,world,seed,region:first.selection.region,
+      observer:[8,4,8],biome:'meadow',light:.8,kind:'surface',
+      now:first.selection.time,spawnOnFirstVisit:true
+    });
+    if(planned.proposal){matching={engine,first,planned,seed};break;}
+    engine.dispose();
+  }
+  assert.ok(matching,'Source original 40-species registry must have a real proposal');
+  const {engine,first,planned,seed}=matching;
+  const id=engine.spawn(planned.proposal.species.id,planned.proposal.point,{
+    homeChunk:first.selection.key
+  });
+  assert.ok(id,'Real MobEngine must independently admit the proposed creature');
+  const record=settleOriginalMobPoll(planned,{world,spawnedId:id});
+  assert.equal(record.next,2);
+  assert.equal(record.serial,planned.attempts);
+  const global=commitGlobalEcologyRegion(first.clock,first.selection,record);
+  assert.equal(global.entries.length,1);
+  assert.equal(global.entries[0][0],'0,0,0');
+  const second=at(global,.5,[region]);
+  assert.equal(second.selection.record.next,2);
+  const cooling=prepareOriginalMobPoll({
+    engine,world,seed,region:second.selection.region,
+    observer:[8,4,8],biome:'meadow',light:.8,kind:'surface',
+    now:second.selection.time,record:second.selection.record
+  });
+  assert.equal(cooling.kind,'cooldown');
+  assert.equal(cooling.attempts,0);
+  const cold=settleOriginalMobPoll(cooling,{world});
+  assert.equal(cold.next,2);
+  const committed=commitGlobalEcologyRegion(second.clock,second.selection,cold);
+  assert.equal(committed.entries.length,1);
+  assert.equal(engine.counts().total,1,
+    'A proposal-only adapter must not manufacture a second creature');
+  engine.dispose();
 });
