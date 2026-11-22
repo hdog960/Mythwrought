@@ -1074,6 +1074,12 @@ function start(nonblockStage=null){
     }
   }
   function edit(mode){
+    // Local VAO fatal retirement/draw errors stop ALL edit-side effects,
+    // including mob attacks and separate Pack 5/scenery mutation paths.
+    // Public Pages never enter this experimental-only branch.
+    if(near291Enabled&&near291Fatal){
+      message('Local VAO 291 graphics stopped; edits blocked until reload');return;
+    }
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
     if(mode==='mine'&&mobRenderer&&!mobRuntimeError){
@@ -1312,6 +1318,8 @@ function start(nonblockStage=null){
     if(player.feet<WORLD_MIN_Y-12)respawnPrototype();
   }
   function draw(now){
+    // Even a queued frame may not advance gameplay after a local GPU fatal.
+    if(near291Enabled&&near291Fatal)return;
     const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
     frameHistory.frame(now,!document.hidden&&help.hidden&&!exploration.isOpen()&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
@@ -1456,6 +1464,10 @@ function start(nonblockStage=null){
         canvas.dataset.skyS5EventTypes=String(S5_EVENT_CONTRACT.kinds);
       }
       stream();
+      // stream() may CATCH a failed original native buffer retirement while
+      // its VAO owner has already latched a fatal stop. Do not continue this
+      // same in-flight frame into mobs, C6, near draw, water or save work.
+      if(near291Enabled&&near291Fatal)return;
       mobEnvironment=atmosphere;
       if(help.hidden&&!exploration.isOpen()&&mobSession&&mobRenderer&&
          !mobAcceptanceFrozen&&!mobRuntimeError){
