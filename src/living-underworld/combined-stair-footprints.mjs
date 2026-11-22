@@ -294,7 +294,8 @@ export function auditOriginalMainGalleryVoxelReadiness(seed,rx,rz,{
      reason:'INVALID_ORIGINAL_M7_MATERIAL',galleryIndex:index,
      cell,sampledCells:checked,worldChanged:false});
     if(editedAt(x,y,z)){editedCells++;edits++;}
-    if(kind==='support'&&!isCandidateGeologyMaterial(block)){
+    // AIR is cuttable clearance but is NEVER an existing walkable deck.
+    if(kind==='support'&&(block===0||!isCandidateGeologyMaterial(block))){
      missing++;unsupportedDeck++;
      if(examples.length<maxExamples)examples.push(Object.freeze({
       galleryIndex:index,cell,kind,reason:'UNSUPPORTED_EXISTING_DECK',material:block
