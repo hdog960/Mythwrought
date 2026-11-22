@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {captureStepTrace} from '../src/movement12/step-trace.mjs';
+const world={get:()=>0};
+const player=()=>({x:0,z:0,feet:1,vX:0,vZ:0,vY:0});
+const step=(w,p,input,dt)=>{p.x+=input.forward*dt;return {hitWall:false};};
+const run=opts=>captureStepTrace({world,player:player(),inputs:[{forward:1},{forward:1}],dt:.05,step,...opts});
+test('captures continuous callback results and zero displacement anchor',()=>{const r=run();assert.equal(r.frames.length,3);assert.deepEqual(r.frames[0].start,r.frames[0].end);assert.deepEqual(r.frames[1].start,r.frames[0].end);assert.deepEqual(r.frames[2].start,r.frames[1].end);assert.equal(r.finalPlayer.x,.1);assert.equal(r.integrated,false);});
+test('does not mutate caller player',()=>{const p=player();run({player:p});assert.deepEqual(p,player());});
+test('records collision events without inventing geometry',()=>{const r=run({step:(w,p)=>({hitWall:true,stepped:false})});assert.equal(r.frames[1].event.hitWall,true);assert.equal(r.finalPlayer.x,0);});
+test('rejects missing world or callback',()=>{assert.throws(()=>run({world:null}));assert.throws(()=>run({step:null}));});
+test('rejects invalid timing',()=>{assert.throws(()=>run({dt:0}));assert.throws(()=>run({dt:.06}));});
+test('rejects invalid input',()=>assert.throws(()=>run({inputs:[{forward:Infinity}]})));
+test('enforces bounded frames',()=>assert.throws(()=>run({maxFrames:1})));
+test('rejects nonfinite post-step coordinates',()=>assert.throws(()=>run({step:(w,p)=>{p.x=NaN;return {};}})));
+test('rejects missing event result',()=>assert.throws(()=>run({step:()=>undefined})));
+test('rejects array event result',()=>assert.throws(()=>run({step:()=>[]})));
