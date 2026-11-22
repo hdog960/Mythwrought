@@ -7,7 +7,7 @@ test('first tick sums and freezes',()=>{const x=step(null,frame());assert.deepEq
 test('rolling eight tick cap and deterministic totals',()=>{let x=null;for(let t=1;t<=12;t++)x=step(x,frame(t));assert.equal(x.history.length,8);assert.equal(x.history[0].tick,5);assert.equal(x.totals.deficit,24)});
 test('replay and skipped tick rejected',()=>{const x=step(null,frame());assert.throws(()=>step(x,frame(1)));assert.throws(()=>step(x,frame(3)))});
 test('cross-world and forged authority rejected',()=>{const x=step(null,frame());assert.throws(()=>step(x,{...frame(2),worldId:'other'}));assert.throws(()=>step(null,{...frame(),authoritativeDelivery:true}));});
-test('forged device state and inconsistent deficit rejected',()=>{assert.throws(()=>step(null,frame(1,[{...device(),energized:true}])));assert.throws(()=>step(null,frame(1,[{...device(),deficit:1}]))});
+test('forged device state and inconsistent deficit rejected',()=>{assert.throws(()=>step(null,frame(1,[{...device(),energized:true}])));assert.throws(()=>step(null,frame(1,[{...device(),deficit:1}])));});
 test('duplicate IDs and overdelivery rejected',()=>{assert.throws(()=>step(null,frame(1,[device(),device()])));assert.throws(()=>step(null,frame(1,[device(3,4)])))});
 test('empty devices and no power remain advisory',()=>{const x=step(null,frame(1,[]));assert.equal(x.totals.deficit,0);assert.equal(x.movementAuthorized,false)});
 test('tampered prior history rejected',()=>{const x=step(null,frame());assert.throws(()=>step({...x,history:[{tick:1,requested:5,observed:2,deficit:0}]},frame(2)))});
