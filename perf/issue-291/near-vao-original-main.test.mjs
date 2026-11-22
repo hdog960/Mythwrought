@@ -394,17 +394,17 @@ test('unchanged public path rethrows original native fault without a local-only 
 // native allocations and BEFORE chunks.set() or C6 far-cache invalidation.
 function originalMultiStagedCleanupCase({
   enabled=true,uploadFailureAt=3,failedNativeDeletes=[],failedBridgeIndex=0,
-  failPause=false,failFatal=false
+  failPause=false,failFatal=false,sections=[0]
 }={}){
-  const chunks=new Map([0,1,2].map(i=>[
-    i+',0,0',{buffer:{id:'resident-'+i},count:3}
-  ]));
+  const chunks=new Map(sections.flatMap(section=>[0,1,2].map(i=>[
+    i+',0,'+section,{buffer:{id:'resident-'+i+'-'+section},count:3}
+  ])));
   const originalResidents=[...chunks.values()].map(c=>c.buffer);
   const events=[],initialError=new Error('291_ORIGINAL_THIRD_GPU_UPLOAD_FAILURE');
   let uploadN=0,bridgeN=0;
   const scope={
     chunks,near291Enabled:enabled,near291Fatal:false,
-    verticalEditSections:()=>[0],
+    verticalEditSections:()=>sections,
     editAffectedChunks:()=>[0,1,2].map(cx=>({cx,cz:0})),
     depthMeshKey:(cx,cz,section)=>cx+','+cz+','+section,
     meshPlayableChunk:()=>new Float32Array(9),
@@ -514,5 +514,26 @@ test('staged cleanup never invokes VAO ownership bridge and never invalidates C6
   const x=originalMultiStagedCleanupCase();
   assert.ok(x.events.every(e=>!e.startsWith('bridge-')));
   assert.ok(!x.events.includes('far-invalidate'));
+  assert.deepEqual([...x.scope.chunks.values()].map(c=>c.buffer),x.originalResidents);
+});
+
+test('deep vertical boundary staging drains ten opaque/water handles after sixth upload fails',()=>{
+  const x=originalMultiStagedCleanupCase({sections:[-1,0],uploadFailureAt:6});
+  assert.equal(x.thrown,x.initialError);
+  assert.equal(x.events.filter(e=>e.startsWith('upload-')).length,6);
+  assert.deepEqual(x.events.slice(6),[1,2,3,4,5].flatMap(i=>[
+    'native-staged-'+i+'-opaque','native-staged-'+i+'-water'
+  ]));
+  assert.equal(x.scope.near291Fatal,false);
+  assert.deepEqual([...x.scope.chunks.values()].map(c=>c.buffer),x.originalResidents);
+  assert.ok(!x.events.includes('far-invalidate'));
+});
+test('deep seam cleanup retries all ten handles after early and late native failures',()=>{
+  const x=originalMultiStagedCleanupCase({sections:[-1,0],uploadFailureAt:6,
+    failedNativeDeletes:['staged-1-opaque','staged-5-water']});
+  assert.equal(x.thrown,x.initialError);
+  assert.equal(x.events.filter(e=>e.startsWith('native-')).length,10);
+  assert.deepEqual(x.events.slice(-2),['pause','fatal']);
+  assert.equal(x.scope.near291Fatal,true);
   assert.deepEqual([...x.scope.chunks.values()].map(c=>c.buffer),x.originalResidents);
 });
