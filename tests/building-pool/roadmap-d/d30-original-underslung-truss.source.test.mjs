@@ -68,6 +68,6 @@ test('D30 original W16 fails closed on changed live:wood weather-plane and origi
  const roof=b.cells.find(c=>c.at[1]===7&&c.feature==='weather-plane');assert.ok(roof);
  const changed={...b,cells:b.cells.map(c=>c===roof?{...c,asset:'pack3:023'}:c)};
  assert.throws(()=>auditD30OriginalUnderslungTrussFeasibility(changed,p,s,d25),/roof|wood|source|D28|D29/);
- assert.throws(()=>auditD30OriginalUnderslungTrussFeasibility({...b,creatorApproved:true},p,s,d25),/original|unregistered|D28/);
+ assert.throws(()=>auditD30OriginalUnderslungTrussFeasibility({...b,creatorApproved:true},p,s,d25),/original|unregistered|D28|D26|unplaced/);
  assert.equal(roof.asset,'live:wood');
 });

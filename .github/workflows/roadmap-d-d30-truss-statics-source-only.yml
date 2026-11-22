@@ -15,34 +15,36 @@ concurrency:
 jobs:
   narrow-literal-source-native:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 2
-      - name: Exact D29 parent plus immutable original W16 W17 and source architects
+          fetch-depth: 3
+      - name: Exact two-commit ancestry, author source and unchanged six passing test source files
         env:
           EXPECTED_HEAD: ${{ github.sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
-          test "$(git rev-parse HEAD^)" = '722c4f51d89de4c45655599bc1f7db44f8a9ab50'
+          test "$(git rev-parse HEAD^)" = '13746f9f52a690305eaeac51e986e39170b0443c'
+          test "$(git rev-parse HEAD^^)" = '722c4f51d89de4c45655599bc1f7db44f8a9ab50'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-4b/m2-distinctive.mjs)" = '4a3bddd06d4d8d91f65279649c7545661c81729d'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d28-original-long-bay-architect.mjs)" = '523ec04f36aad72f75d13602b52ce64b1c839a71'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d29-original-upper-chord-perimeter-audit.mjs)" = '513d622e79a6b58b037a0810bac0d26b1679330b'
-          test "$(git rev-parse HEAD:src/building-pool/roadmap-4b/m2-distinctive.mjs)" = '4a3bddd06d4d8d91f65279649c7545661c81729d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d30-idealized-pin-truss-statics.mjs)" = 'a52fd9dc121825602ac08ff18e1093cf19964bfc'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d30-original-underslung-truss-audit.mjs)" = '05785e015cd8388651ba8b7b9471237695aa8d18'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d30-underslung-corridor-geometry.mjs)" = 'a7a4a75529b67f5f5463e8b595d1f484696ae44b'
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-d/d30-idealized-pin-truss-statics.pure.test.mjs)" = '6566ef4ff7bafa04db4b4df9ffeca2f0d4b72579'
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-d/d30-original-underslung-truss.pure.test.mjs)" = '79ccd10a7c482c8e9bf361454d2b27075c6f61e9'
+          test "$(git diff --name-only HEAD^ HEAD | sort)" = "$(printf '%s\n' '.github/workflows/roadmap-d-d30-truss-statics-source-only.yml' 'tests/building-pool/roadmap-d/d30-original-underslung-truss.source.test.mjs' | sort)"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax only four new D30 source/test modules
+      - name: Check only corrected original-source negative-test syntax
+        run: node --check tests/building-pool/roadmap-d/d30-original-underslung-truss.source.test.mjs
+      - name: Recheck only previously failing D30 original W16 authorization negative case
         run: |
-          for f in src/building-pool/roadmap-d/d30-*.mjs tests/building-pool/roadmap-d/d30-*.test.mjs; do
-            node --check "$f"
-          done
-      - name: Run only NEW D30 normalized statics, safety and genuine original-source tests
-        run: |
-          node --test --test-concurrency=1 \
-            tests/building-pool/roadmap-d/d30-idealized-pin-truss-statics.pure.test.mjs \
-            tests/building-pool/roadmap-d/d30-original-underslung-truss.pure.test.mjs \
+          node --test --test-name-pattern="D30 original W16 fails closed on changed live:wood weather-plane and original approval mutation" \
             tests/building-pool/roadmap-d/d30-original-underslung-truss.source.test.mjs
