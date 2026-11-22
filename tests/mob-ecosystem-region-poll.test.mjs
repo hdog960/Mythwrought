@@ -59,21 +59,25 @@ test('source natural birth counts only after exact real engine admission proof',
 
 test('wrong species, mismatched origin or forged admission cannot prove a birth',()=>{
   const w=world(),engine=engineOf(w);
-  let candidate=null;
+  let candidate=null,selectedSeed=null;
   for(let seed=1;seed<=256;seed++){
     const p=prepareOriginalMobPoll(opts(w,engine,seed));
-    if(p.proposal){candidate=p;break;}
+    if(p.proposal){candidate=p;selectedSeed=seed;break;}
   }
   assert.ok(candidate);
   assert.throws(()=>settleOriginalMobPoll(candidate,{
     world:w,spawnedId:'forged'
   }),/Original MobEngine admission proof mismatch/);
-  const p=candidate.proposal;
+  assert.throws(()=>settleOriginalMobPoll(candidate,{world:w}),
+    /Invalid or stale original regional mob poll/,
+    'A rejected forged admission cannot be settled again');
+  const fresh=prepareOriginalMobPoll(opts(w,engine,selectedSeed));
+  const p=fresh.proposal;
   const wrong=engine.spawn(p.species.id,p.point,{
     homeChunk:'1,0,0'
   });
   assert.ok(wrong);
-  assert.throws(()=>settleOriginalMobPoll(candidate,{
+  assert.throws(()=>settleOriginalMobPoll(fresh,{
     world:w,spawnedId:wrong
   }),/Original MobEngine admission proof mismatch/);
 });
@@ -157,5 +161,36 @@ test('original engine health changes without moving invalidate source admission 
   assert.equal(engine.damage(id,1),true);
   assert.throws(()=>settleOriginalMobPoll(proposed,{world:w}),
     /Original MobEngine roster changed during inspection/);
+  engine.dispose();
+});
+
+test('same revision on a different world cannot settle original source ticket',()=>{
+  const original=world(),replacement=world();
+  assert.notEqual(original,replacement);
+  assert.equal(original.revision(),replacement.revision());
+  const engine=engineOf(original);
+  const ticket=prepareOriginalMobPoll({
+    ...opts(original,engine),spawnOnFirstVisit:false
+  });
+  assert.throws(()=>settleOriginalMobPoll(ticket,{world:replacement}),
+    /Invalid or stale original regional mob poll/);
+  assert.throws(()=>settleOriginalMobPoll(ticket,{world:original}),
+    /Invalid or stale original regional mob poll/,
+    'A wrong-world rejected ticket remains permanently consumed');
+  const fresh=prepareOriginalMobPoll({
+    ...opts(original,engine),spawnOnFirstVisit:false
+  });
+  assert.equal(settleOriginalMobPoll(fresh,{world:original}).next,10.5);
+  engine.dispose();
+});
+test('failed source admission does not permit later settlement replay',()=>{
+  const w=world(),engine=engineOf(w);
+  const ticket=prepareOriginalMobPoll({
+    ...opts(w,engine),spawnOnFirstVisit:false
+  });
+  assert.throws(()=>settleOriginalMobPoll(ticket,{world:w,spawnedId:'forged'}),
+    /No engine admission allowed during cooldown/);
+  assert.throws(()=>settleOriginalMobPoll(ticket,{world:w}),
+    /Invalid or stale original regional mob poll/);
   engine.dispose();
 });

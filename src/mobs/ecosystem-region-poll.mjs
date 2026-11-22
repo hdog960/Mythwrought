@@ -10,6 +10,7 @@ import {createRegionalEcologySchedule,inspectRegionalEcologySchedule,
 
 // Keep actual source-engine ownership out of serializable preview objects.
 const owner=new WeakMap();
+const sourceWorlds=new WeakMap();
 const fullRosters=new WeakMap();
 const settled=new WeakSet();
 
@@ -99,6 +100,7 @@ export function prepareOriginalMobPoll({
     before:snapshotIdentity(entities)
   });
   owner.set(prepared,engine);
+  sourceWorlds.set(prepared,world);
   fullRosters.set(prepared,rosterCertificate);
   return prepared;
 }
@@ -111,7 +113,13 @@ export function settleOriginalMobPoll(plan,{
 }={}){
   const engine=plan&&typeof plan==='object'?owner.get(plan):null;
   const certified=plan&&typeof plan==='object'?fullRosters.get(plan):null;
-  if(!(engine instanceof MobEngine)||!certified||settled.has(plan)||
+  if(!(engine instanceof MobEngine)||!certified||settled.has(plan))
+    throw new TypeError('Invalid or stale original regional mob poll');
+  // Reject the attempt permanently, including failed or forged admissions:
+  // no retry after a real engine or world state transition.
+  settled.add(plan);
+  // Numeric revision equality is NOT proof of source-world identity.
+  if(world!==sourceWorlds.get(plan)||
      typeof world?.revision!=='function'||
      world.revision()!==plan.worldRevision)
     throw new TypeError('Invalid or stale original regional mob poll');
@@ -122,7 +130,6 @@ export function settleOriginalMobPoll(plan,{
     if(spawnedId!==null||!sameRoster(plan.before,afterEntities))
       throw new TypeError('No engine admission allowed during cooldown');
     assertOriginalMobRosterUnchanged(certified,afterEntities);
-    settled.add(plan);
     return plan.record;
   }
   if(plan.kind!=='evaluated'||!Number.isInteger(plan.attempts)||
@@ -160,13 +167,11 @@ export function settleOriginalMobPoll(plan,{
   }
   if(plan.attempts===0){
     if(confirmed)throw new TypeError('Zero-trial poll cannot create a mob');
-    settled.add(plan);
     return plan.record;
   }
   const next=settleRegionalEcologyPoll(plan.record,{
     now:plan.record.time,attempts:plan.attempts,
     successfulBirth:confirmed,speciesId
   });
-  settled.add(plan);
   return next;
 }
