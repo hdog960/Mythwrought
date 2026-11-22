@@ -1,0 +1,187 @@
+{
+  "schema": "mythwrought.builder-b.1b.wave8-frostwake-source-handoff.v1",
+  "status": "NEW_AUTHORED_PROVISIONAL_NATIVE_CI_AND_CHROMIUM_PENDING",
+  "sourceHeadParent": "80a8dca485d4d1c84853cb16452faeaef0fceb41",
+  "sourceFile": "src/building-pool/roadmap-b/builder-b-essentials-wave8.mjs",
+  "sourceGitBlob": "07b3d57aa47dd034ccc20e4e9318b2a5dbe8b91a",
+  "sourceCoordinateFNV64": "b3945089fc6b353a",
+  "source": {
+    "id": "r1:lighthouse:snow:small:002",
+    "title": "Frostwake Crown-Bridge Lighthouse",
+    "category": "lighthouse",
+    "biome": "snow",
+    "size": "small",
+    "footprint": {
+      "width": 38,
+      "height": 32,
+      "depth": 41
+    },
+    "authoredCells": 4515,
+    "rooms": [
+      "north-windward-landing",
+      "entry-storm-door-vestibule",
+      "west-keeper-kitchen",
+      "east-charts-and-coastal-survey",
+      "ground-beacon-ring-circulation",
+      "northwest-snowcloak-nook",
+      "east-lens-spare-and-wick-store",
+      "south-winter-supply-drying-bridge"
+    ],
+    "portals": [
+      {
+        "from": "outside",
+        "to": "north-windward-landing",
+        "at": [
+          20,
+          1,
+          2
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "north-windward-landing",
+        "to": "entry-storm-door-vestibule",
+        "at": [
+          19,
+          1,
+          12
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "entry-storm-door-vestibule",
+        "to": "west-keeper-kitchen",
+        "at": [
+          15,
+          1,
+          17
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "entry-storm-door-vestibule",
+        "to": "east-charts-and-coastal-survey",
+        "at": [
+          25,
+          1,
+          17
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "entry-storm-door-vestibule",
+        "to": "ground-beacon-ring-circulation",
+        "at": [
+          19,
+          1,
+          16
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "west-keeper-kitchen",
+        "to": "northwest-snowcloak-nook",
+        "at": [
+          12,
+          1,
+          27
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "east-charts-and-coastal-survey",
+        "to": "east-lens-spare-and-wick-store",
+        "at": [
+          30,
+          1,
+          24
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "entry-storm-door-vestibule",
+        "to": "south-winter-supply-drying-bridge",
+        "at": [
+          20,
+          1,
+          30
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      },
+      {
+        "from": "ground-beacon-ring-circulation",
+        "to": "south-winter-supply-drying-bridge",
+        "at": [
+          20,
+          1,
+          24
+        ],
+        "passable": true,
+        "opening": "two-high-physical-opening"
+      }
+    ],
+    "walkableCells": 653,
+    "roofCells": 882,
+    "roofImmediateBackingMissing": 0,
+    "originalSnowCourtVoidColumns": 9,
+    "raisedTowerActualUprightGlassWindows": 8,
+    "groundFloorOriginalVerticalGlassWindows": 10,
+    "realPoweredBeacon": false,
+    "upperStairsBuilt": false
+  },
+  "allocation": {
+    "historicAccepted1B": 228,
+    "provisionalSource1BBefore": 7,
+    "provisionalSource1BAfter": 8,
+    "remainingSource1B": 427,
+    "totalProvisional1A": 10,
+    "totalProvisional1B": 8,
+    "totalNewSources": 18,
+    "totalNewTarget": 294,
+    "remainingNewSourceTarget": 276,
+    "freezeBuilderB115": true,
+    "freezeBuilderD92": true
+  },
+  "plannedCI": {
+    "requiresRealNativeBuild": true,
+    "requiresFull228HistoricalStrictEightWayD4": true,
+    "d4Limit": 0.85,
+    "requiresGenuineChromiumFrames": 6,
+    "fullEightOriginalsBrowserImages": 48,
+    "expectedSizes": [
+      "667x375",
+      "844x390",
+      "932x430"
+    ],
+    "views": [
+      "exterior",
+      "cutaway"
+    ],
+    "exactHead": "must be verified by authentic Actions",
+    "sourceSHAs": "must be independently reconciled with exact GitHub HEAD"
+  },
+  "holds": {
+    "actualPlayerUpperTowerClimbApproved": false,
+    "beaconLightEnabled": false,
+    "PowerSystemIntegration": false,
+    "realPackCollision": false,
+    "roofSnowLoadApproved": false,
+    "weatherSealApproved": false,
+    "realIPhoneTested": false,
+    "creatorArtApproved": false,
+    "worldPlacement": false,
+    "schema1SaveWritten": false,
+    "productionRegistered": false,
+    "merged": false,
+    "deployed": false
+  },
+  "notes": "Real authoring of one new B115-exclusive category lighthouse. Inert static source architecture and source-space pose/collision descriptors only, no world/release integration."
+}
