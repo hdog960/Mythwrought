@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {preflightLiftStop} from '../src/resonance/devices48/lift-stop-preflight-v1.mjs';
+const box=(minY,maxY)=>({minX:0,minY,minZ:0,maxX:1,maxY,maxZ:1});
+const base=()=>({worldId:'world1',fromTick:4,toTick:5,platform:box(0,0.25),deltaY:1,actors:[],obstacles:[]});
+test('clear candidate never authorizes movement',()=>{const r=preflightLiftStop(base());assert.equal(r.clearCandidate,true);assert.equal(r.movementAuthorized,false);assert.equal(r.authoritativeDelivery,false);assert.ok(Object.isFrozen(r));});
+test('actor between endpoints blocks swept travel',()=>{const r=preflightLiftStop({...base(),actors:[{id:'player',box:box(.5,.7)}]});assert.deepEqual(r.blocked,[{kind:'actor',id:'player'}]);});
+test('obstacle at destination blocks',()=>assert.equal(preflightLiftStop({...base(),obstacles:[{id:'stone',box:box(1,1.5)}]}).clearCandidate,false));
+test('boundary touch does not overlap',()=>assert.equal(preflightLiftStop({...base(),actors:[{id:'edge',box:{minX:1,maxX:2,minY:0,maxY:2,minZ:0,maxZ:1}}]}).clearCandidate,true));
+test('deterministic occupancy ordering',()=>{const a={...base(),actors:[{id:'z',box:box(.5,.7)},{id:'a',box:box(.5,.7)}]};const b={...a,actors:[...a.actors].reverse()};assert.deepEqual(preflightLiftStop(a),preflightLiftStop(b));});
+test('skipped ticks rejected',()=>assert.throws(()=>preflightLiftStop({...base(),toTick:7})));
+test('oversized travel rejected',()=>assert.throws(()=>preflightLiftStop({...base(),deltaY:3})));
+test('duplicate actor identities rejected',()=>assert.throws(()=>preflightLiftStop({...base(),actors:[{id:'a',box:box(2,3)},{id:'a',box:box(3,4)}]})));
+test('forged energy authority rejected',()=>assert.throws(()=>preflightLiftStop({...base(),energyCandidate:true})));
+test('malformed boxes rejected',()=>assert.throws(()=>preflightLiftStop({...base(),platform:box(2,1)})));
+test('descending sweep detects occupant',()=>assert.equal(preflightLiftStop({...base(),platform:box(2,2.25),deltaY:-2,actors:[{id:'a',box:box(1,1.5)}]}).clearCandidate,false));
