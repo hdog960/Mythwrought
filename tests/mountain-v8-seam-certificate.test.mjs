@@ -119,3 +119,32 @@ test('exposed face provenance refuses a high column without physical cells at co
     })),safeToIntegrate:false,requiresApprovedV8BlockMapping:true});
   assert.equal(certify(0,0,179,source,{readSupport:support}),null);
 });
+
+test('seam veto observer identifies exactly one missing source, unsafe face and steep step',()=>{
+  const read=create();
+  const report=(f,options={})=>{
+    const observed=[];
+    const result=certify(0,0,179,f,{...options,onVeto:issue=>observed.push(issue)});
+    return {result,observed};
+  };
+  const missing=report((x,z,s)=>x===1?null:read(x,z,s));
+  assert.equal(missing.result,null);
+  assert.deepEqual(missing.observed,[{reason:'source-unavailable',x:1,z:0}]);
+  const steep=report(create((x,z)=>x===1?15:12));
+  assert.equal(steep.result,null);
+  assert.deepEqual(steep.observed,[{reason:'too-steep',x:0,z:0}]);
+  const noPhysical=report(read,{readSupport:p=>p.x===1?null:{
+    x:p.x,z:p.z,top:p.top,legacyTop:p.legacyTop,cap:p.cap,
+    estimatedCells:p.top-p.legacyTop+1,
+    writes:Array.from({length:p.top-p.legacyTop+1},(_,i)=>({
+      x:p.x,z:p.z,y:p.legacyTop+i,
+      material:i===p.top-p.legacyTop?p.cap:'stone'
+    })),safeToIntegrate:false,requiresApprovedV8BlockMapping:true
+  }});
+  assert.equal(noPhysical.result,null);
+  assert.deepEqual(noPhysical.observed,[{reason:'no-physical-support',x:1,z:0}]);
+  const good=report(read);
+  assert.ok(good.result);
+  assert.deepEqual(good.observed,[]);
+  assert.equal(certify(0,0,179,read,{onVeto:123}),null);
+});
