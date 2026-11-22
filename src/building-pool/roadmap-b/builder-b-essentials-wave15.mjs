@@ -102,7 +102,7 @@ export function buildIcehavenBifurcatedSnowCustoms(){
   ['central-winter-cross-exchange','southwest-inert-salvage-inventory',19,31],
   ['central-winter-cross-exchange','southeast-dry-frozen-charts',29,31],
   ['west-ice-warning-register','low-west-old-rigging-shed',11,29],
-  ['low-west-old-rigging-shed','southwest-inert-salvage-inventory',12,37],
+  ['low-west-old-rigging-shed','southwest-inert-salvage-inventory',15,37],
   ['southwest-inert-salvage-inventory','southeast-dry-frozen-charts',27,36],
   ['central-winter-cross-exchange','central-windbreak-logbooks',26,18]
  ]){
