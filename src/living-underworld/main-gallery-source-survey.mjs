@@ -10,21 +10,24 @@ const PAIRS=Object.freeze([0,2,4,6,8,10,12,14,17,19,21,23,26,28,30,32]);
 const FIELDS=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
 export function auditSourceProtectedMainGalleries(seed,rx,rz,{
  source,maxTotalSourceChecks=60000,maxCellsPerGallery=20000,
- maxFailureExamples=8
+ maxFailureExamples=8,diagnoseAllGalleries=false
 }={}){
  if(!INT(seed)||seed!==(seed|0)||![rx,rz].every(INT)||
   !source||typeof source!=='object'||
   FIELDS.some(k=>typeof source[k]!=='function')||
   !INT(maxTotalSourceChecks)||maxTotalSourceChecks<100||maxTotalSourceChecks>200000||
   !INT(maxCellsPerGallery)||maxCellsPerGallery<100||maxCellsPerGallery>20000||
-  !INT(maxFailureExamples)||maxFailureExamples<1||maxFailureExamples>16)
+  !INT(maxFailureExamples)||maxFailureExamples<1||maxFailureExamples>16||
+  typeof diagnoseAllGalleries!=='boolean')
   throw TypeError('Invalid source-protected gallery survey');
  const mutual=auditMutualMainGalleryClearance(seed,rx,rz);
  if(!mutual.ok)return Object.freeze({ok:false,seed,rx,rz,
   reason:'MUTUAL_GALLERY_GEOMETRY_UNSAFE',mutual,
   galleriesInspected:0,sourceChecks:0,worldChanged:false});
  const plan=planUnderworldRegion(seed,rx,rz);
- const rows=[],failures=[];let sourceChecks=0;
+ const rows=[],failures=[];let sourceChecks=0,sourceRejectedGalleries=0;
+ const firstRefusalTypes=Object.create(null);
+ const countTotals=Object.create(null);
  for(const index of PAIRS){
   const proposal=Object.freeze({ok:true,segments:Object.freeze([
    plan.capsules[index],plan.capsules[index+1]
@@ -47,13 +50,21 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    refusal:checked.firstRefusal??checked.reason??null,
    rejectedSourceCounts:checked.counts??null,
    examples:checked.examples??[]}));
+  for(const [kind,count] of Object.entries(checked.counts??{}))
+   if(Number.isSafeInteger(count)&&count>=0)
+    countTotals[kind]=(countTotals[kind]??0)+count;
   if(!checked.ok){
+   sourceRejectedGalleries++;
+   const type=checked.firstRefusal??checked.reason??'UNKNOWN_REFUSAL';
+   firstRefusalTypes[type]=(firstRefusalTypes[type]??0)+1;
    if(failures.length<maxFailureExamples)failures.push(Object.freeze({
     galleryIndex:index,reason:checked.firstRefusal??checked.reason,
     examples:checked.examples??[]
    }));
-   // Refusal is conclusive. Don't continue into 15 more expensive M7 queries.
-   return Object.freeze({ok:false,seed,rx,rz,
+   // The default refusal is conclusive. Diagnostic mode inspects remaining
+   // galleries under the SAME hard aggregate source-query budget, but NEVER
+   // turns an already unsafe region into a positive admission.
+   if(!diagnoseAllGalleries)return Object.freeze({ok:false,seed,rx,rz,
     reason:'GALLERY_SOURCE_PROVENANCE_UNSAFE',
     galleriesInspected:rows.length,sourceChecks,
     failures:Object.freeze(failures),rows:Object.freeze(rows),
@@ -61,10 +72,16 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
     nativePlayerWalkingVerified:false});
   }
  }
- return Object.freeze({ok:true,seed,rx,rz,
+ return Object.freeze({ok:sourceRejectedGalleries===0,seed,rx,rz,
+  reason:sourceRejectedGalleries?'GALLERY_SOURCE_PROVENANCE_UNSAFE':null,
   galleriesInspected:16,sourceChecks,
-  rows:Object.freeze(rows),failures:Object.freeze([]),
-  mutuallyCollisionFree:true,allGallerySupportAndHeadroomSourceSafe:true,
+  sourceSafeGalleries:16-sourceRejectedGalleries,
+  sourceRejectedGalleries,diagnosticAll16GalleriesAttempted:true,
+  firstRefusalCounts:Object.freeze({...firstRefusalTypes}),
+  sourceRejectionCounts:Object.freeze({...countTotals}),
+  rows:Object.freeze(rows),failures:Object.freeze(failures),
+  mutuallyCollisionFree:true,
+  allGallerySupportAndHeadroomSourceSafe:sourceRejectedGalleries===0,
   sourceReaderIdentityVerifiedByCallerOnly:true,
   actualWorldNotCarved:true,worldChanged:false,
   actualPlayerWalkingVerified:false,iPhoneGpuVerified:false});
