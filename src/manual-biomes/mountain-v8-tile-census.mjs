@@ -7,14 +7,15 @@ import {WORLD_MAX_Y} from '../depth.mjs';
 import {surveyMountainV8OriginalWorld} from './mountain-v8-original-world.mjs';
 import {mountainV8TileRoot} from './mountain-v8-source-adapter.mjs';
 import {planMountainV8PlantCells} from './mountain-v8-vegetation-cells.mjs';
+import {planMountainV8PhysicalColumn} from './mountain-v8-physical-column.mjs';
 
-const TILE=8;
 const valid=n=>Number.isSafeInteger(n);
 const key=(x,z)=>x+','+z;
 /** Every tile candidate is sampled at its single source-selected root.
  * No hypothetical random tree height is assumed; all plant cells are
  * verified against the untouched original world's existing AIR/landmarks.
- * The caller can inspect per-seed veto counts before any V8 integration.
+ * The caller can inspect per-seed veto counts and supported physical-cell
+ * budgets before any V8 integration.
  * Bounded to 64 tiles and exactly one source-backed site per tile.
  */
 export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
@@ -26,7 +27,8 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
      source.edits.size||source.rotations.size)return null;
   const before=source.save(),sites=[],stats={
     tiles:width*height,eligible:0,plants:0,plantCells:0,
-    rejected:0,nonMeadow:0,occupied:0,rock:0,snow:0,meadow:0,
+    rejected:0,terrainRejected:0,terrainCells:0,
+    nonMeadow:0,occupied:0,rock:0,snow:0,meadow:0,
     cliff:0,seen:0
   };
   for(let dz=0;dz<height;dz++)for(let dx=0;dx<width;dx++){
@@ -40,6 +42,12 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
        !chosen.vegetationSite?.chosen))
       throw Error('V8 tile root or provenance mismatch');
     if(!chosen){stats.rejected++;continue;}
+    const terrain=planMountainV8PhysicalColumn(chosen,{
+      worldMaxY:WORLD_MAX_Y,ids:BLOCK,
+      readOriginalBlock:(x,y,z)=>source.naturalAndLandmarkBlock(x,y,z)
+    });
+    if(!terrain){stats.terrainRejected++;continue;}
+    stats.terrainCells+=terrain.estimatedCells;
     stats.eligible++;
     if(chosen.cliff)stats.cliff++;
     if(chosen.cap==='snow')stats.snow++;
