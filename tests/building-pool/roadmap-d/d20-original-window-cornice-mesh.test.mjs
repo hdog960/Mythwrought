@@ -73,6 +73,17 @@ test('all 193 original weak-jamb windows are accounted for and 126 actual source
    assert.ok(m.originalPack4OpaqueWorldVertices instanceof Float32Array);
    assert.ok(m.originalPack4TranslucentWorldVertices instanceof Float32Array);
    assert.equal(m.originalPack3CorniceTriangles,item.retainedOriginalPack3Parts*12);
+   // The new source-preserving opaque cornice triangles must have correct outward
+   // original physical face normals and CCW winding for real WebGL backface culling.
+   const V=m.originalPack3CorniceOpaqueWorldVertices;
+   for(let i=0;i<V.length;i+=30){
+    const a=[V[i],V[i+1],V[i+2]],u=[V[i+10]-a[0],V[i+11]-a[1],V[i+12]-a[2]],
+      v=[V[i+20]-a[0],V[i+21]-a[1],V[i+22]-a[2]];
+    const cross=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+    const provided=[V[i+3],V[i+4],V[i+5]];
+    assert.ok(cross.reduce((n,x,j)=>n+x*provided[j],0)>1e-10,
+      'original tone-colored physical cornice triangle has inverted WebGL face winding');
+   }
    assert.equal(m.sourceVertexBytes,item.originalRenderPreviewBytes);
    assert.ok(m.sourceVertexBytes<48*1024);
    for(const vertices of [m.originalPack3CorniceOpaqueWorldVertices,
