@@ -1,0 +1,51 @@
+{
+  "source": {
+    "artifactId": 14737638885,
+    "protectedHead": "59e449be7e73b25f259c4c72855cfb638a056517",
+    "artifactSha256": "62b2561a0b7700716a2ba47caaba151854668d6867124b5ee1f5be5d0d32a750",
+    "readerMetricsSha256": "8975df0311467d473f814e9a268e34fb749171591b50b116cd8016a901446878"
+  },
+  "seedResults": [
+    {
+      "seed": 179,
+      "step": 8,
+      "validInterior": 1681,
+      "allSnow": 1681,
+      "caps": {
+        "272": 1060,
+        "276": 275,
+        "279": 235
+      },
+      "uncoveredGrass": 52,
+      "emptyColumns": 111,
+      "blockedAbove": 32,
+      "otherProtected": 79,
+      "rejectionReasons": {
+        "protected-old-substrate:0:original": 79,
+        "above-old-ground:4:original": 12,
+        "above-old-ground:3:original": 16,
+        "above-old-ground:7:original": 4
+      }
+    },
+    {
+      "seed": 2026,
+      "step": 8,
+      "validInterior": 1681,
+      "allSnow": 1681,
+      "caps": {
+        "272": 1049,
+        "276": 274,
+        "279": 256
+      },
+      "uncoveredGrass": 45,
+      "emptyColumns": 102,
+      "blockedAbove": 25,
+      "otherProtected": 77,
+      "rejectionReasons": {
+        "protected-old-substrate:0:original": 77,
+        "above-old-ground:3:original": 14,
+        "above-old-ground:4:original": 11
+      }
+    }
+  ]
+}
