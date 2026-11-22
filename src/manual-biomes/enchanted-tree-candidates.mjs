@@ -86,7 +86,7 @@ export function buildEnchantedTreeCandidate(x,floor,z,styleRoll){
         // broad, flat overhanging cap rather than a conical voxel tier.
         if(dy===trunk-1&&(distance<2||distance>3))continue;
         if(dy===trunk&&distance>4)continue;
-        if(dy===trunk+1&&distance>2)continue;
+        if(dy===trunk+1&&distance>1)continue;
         put(bend+dx,dy,dz,
           dy===trunk-1?G.aetherLeaves:G.moonLeaves);
       }
