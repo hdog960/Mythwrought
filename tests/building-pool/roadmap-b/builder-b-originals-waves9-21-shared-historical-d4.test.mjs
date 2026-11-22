@@ -118,6 +118,6 @@ test('ONE original 228-source canonical 1B history: immutable B115/D92, 19 new I
    peerSources:peers.length,eightWayComparisons:comparisons,
    closestPeer:nearest,maxIoU,actualIphone:false,creatorArtworkAccepted:false});
  }
- assert.equal(reports.length,13,'expected only 13 brand-new Wave9–19 sources');
+ assert.equal(reports.length,13,'expected only 13 brand-new Wave9–21 sources');
  console.log('BUILDER_B_SHARED_WAVES9_21_GENUINE_228_HISTORICAL_D4_PASS '+JSON.stringify(reports));
 });
