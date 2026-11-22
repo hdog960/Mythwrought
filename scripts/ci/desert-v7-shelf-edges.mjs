@@ -31,7 +31,7 @@ export function detectHeightShelfRuns(terrain,{
            (kind!=='none')!==protectedColumns[z][x])))
       throw Error('Invalid or inconsistent source protection reason grid');
   }
-  const H=terrain.length,W=terrain[0].length,found=[];
+  const H=terrain.length,W=terrain[0].length,found=[],safeFound=[];
   const edgeCensus={totalSteepEdges:0,protectedEdges:0,
     protectedAirEdges:0,protectedSolidEdges:0,protectedUnknownEdges:0,
     unprotectedEdges:0,unprotectedSourceAmplifiedEdges:0,
@@ -41,7 +41,14 @@ export function detectHeightShelfRuns(terrain,{
     const transverse=axis==='x'?W-1:H-1;
     const along=axis==='x'?H:W;
     for(let cross=0;cross<transverse;cross++){
-      let current=null;
+      let current=null,safeRun=null;
+      function flushSafe(){
+        if(!safeRun)return;
+        safeFound.push({...safeRun,
+          meanStep:Number((safeRun.totalStep/safeRun.length).toFixed(3))});
+        delete safeFound[safeFound.length-1].totalStep;
+        safeRun=null;
+      }
       function flush(){
         if(!current)return;
         found.push({...current,meanStep:Number((current.totalStep/current.length).toFixed(3))});
@@ -56,7 +63,7 @@ export function detectHeightShelfRuns(terrain,{
           terrain[nz][nx]-terrain[z][x]:0;
         const sign=Math.abs(delta)>=minStep?Math.sign(delta):0;
         if(!sign||current?.sign!==sign)flush();
-        if(!sign)continue;
+        if(!sign){flushSafe();continue;}
         const legacyDelta=legacy[nz][nx]-legacy[z][x];
         const protects=protectedColumns?
           protectedColumns[z][x]||protectedColumns[nz][nx]:false;
@@ -91,17 +98,35 @@ export function detectHeightShelfRuns(terrain,{
         current.maxStep=Math.max(current.maxStep,Math.abs(delta));
         current.sourceAmplifiedEdges+=Number(amplified);
         current.protectedTouches+=Number(protects);
-        if(!protects)current.unprotectedEdges++;
-        else current[kind==='air'?'protectedAirEdges':
-          kind==='solid'?'protectedSolidEdges':'protectedUnknownEdges']++;
+        if(!protects){
+          current.unprotectedEdges++;
+          // An unprotected edge may be a short subsection of a longer
+          // protected run. Keep an independent uninterrupted safe sequence:
+          // filtering only WHOLE runs hid real unprotected cliffs.
+          if(safeRun?.sign!==sign)flushSafe();
+          if(!safeRun)safeRun={axis,sign,start:{x,z},end:{x,z},
+            length:0,totalStep:0,maxStep:0,sourceAmplifiedEdges:0,
+            protectedTouches:0,protectedAirEdges:0,
+            protectedSolidEdges:0,protectedUnknownEdges:0,
+            unprotectedEdges:0};
+          safeRun.end={x,z};safeRun.length++;safeRun.totalStep+=Math.abs(delta);
+          safeRun.maxStep=Math.max(safeRun.maxStep,Math.abs(delta));
+          safeRun.sourceAmplifiedEdges+=Number(amplified);
+          safeRun.unprotectedEdges++;
+        }else{
+          current[kind==='air'?'protectedAirEdges':
+            kind==='solid'?'protectedSolidEdges':'protectedUnknownEdges']++;
+          flushSafe();
+        }
       }
     }
   }
   found.sort((a,b)=>b.length-a.length||b.maxStep-a.maxStep||
     a.axis.localeCompare(b.axis)||a.start.z-b.start.z||a.start.x-b.start.x);
   const allRunCount=found.length;
-  const longestUnprotected=found.filter(run=>run.protectedTouches===0)
-    .slice(0,limit);
+  safeFound.sort((a,b)=>b.length-a.length||b.maxStep-a.maxStep||
+    a.axis.localeCompare(b.axis)||a.start.z-b.start.z||a.start.x-b.start.x);
+  const longestUnprotected=safeFound.slice(0,limit);
   return {minStep,allRunCount,longest:found.slice(0,limit),
     longestUnprotected,edgeCensus};
 }

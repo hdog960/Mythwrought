@@ -118,3 +118,18 @@ test('protected apertures cannot be counted as unprotected clifflines',()=>{
   assert.equal(result.edgeCensus.unprotectedEdges,2);
   assert.equal(result.longestUnprotected[0].length,2);
 });
+
+test('unprotected subsections inside long mixed-protection cliffs must not disappear',()=>{
+  const grid=[[1,4],[2,5],[3,6],[4,7],[5,8]];
+  const protectionReasons=[['none','none'],['none','none'],
+    ['air','none'],['none','none'],['none','none']];
+  const protectedColumns=protectionReasons.map(row=>row.map(k=>k!=='none'));
+  const r=detectHeightShelfRuns(grid,{protectedColumns,protectionReasons});
+  assert.equal(r.longest[0].length,5);
+  assert.equal(r.longest[0].protectedTouches,1);
+  assert.equal(r.edgeCensus.protectedEdges,1);
+  assert.equal(r.edgeCensus.unprotectedEdges,4);
+  assert.equal(r.longestUnprotected.length,2);
+  assert.deepEqual(r.longestUnprotected.map(s=>s.length),[2,2]);
+  assert.deepEqual(r.longestUnprotected.map(s=>s.start.z),[0,3]);
+});
