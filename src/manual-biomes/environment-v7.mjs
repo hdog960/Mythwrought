@@ -37,6 +37,45 @@ function mountainRelief(x,z,phase){
   return 5.1+11.2*crest+3.5*buttress;
 }
 
+// Phase 1: World-space deterministic alpine grass. No chunk coordinates,
+// tree state, saved edits or runtime RNG enter the decision.
+const mountainLattice=(x,z,seed)=>{
+  let h=Math.imul((x|0)^seed,0x27d4eb2d)^Math.imul((z|0)+seed,0x165667b1);
+  h^=h>>>15;h=Math.imul(h,0x85ebca6b);h^=h>>>13;
+  return (h>>>0)/4294967295;
+};
+function mountainCoherent(x,z,seed){
+  const a=Math.floor(x),b=Math.floor(z),u=smooth(x-a),v=smooth(z-b);
+  const p=mountainLattice(a,b,seed)*(1-u)+mountainLattice(a+1,b,seed)*u;
+  const q=mountainLattice(a,b+1,seed)*(1-u)+mountainLattice(a+1,b+1,seed)*u;
+  return p*(1-v)+q*v;
+}
+function mountainAlpineMeadow(x,z,seed,top,biome,readBaseline){
+  if(biome.name!=='mountain'||biome.weight<.92||top<5||top>11)return false;
+  const patch=.8*mountainCoherent(x/64,z/64,seed+7103)+
+    .2*mountainCoherent(x/20,z/20,seed+7139);
+  if(patch<.54)return false;
+  // A second independently seeded, world-space exposure field breaks up
+  // unusually broad lower meadows into naturally connected stone pockets.
+  // Keep mineable rock exposed even on gentle slopes without adding blocks,
+  // tree-relative grids, cave edits, or terrain-height modifications.
+  if(mountainCoherent(x/11,z/11,seed+30001)<.56)return false;
+  const phase=(seed%223)*.19;
+  // Neighbor prediction uses only height/biome math, not four recursive
+  // full column plans. Keep the extra baseline probes bounded and cave-safe.
+  for(const [dx,dz] of [[2,0],[-2,0],[0,2],[0,-2]]){
+    const nx=x+dx,nz=z+dz,neighbor=v6BiomeAt(nx,nz,seed);
+    if(neighbor?.name!=='mountain'||neighbor.weight<.90)return false;
+    const old=terrainHeight(nx,nz,seed);
+    const blend=smooth(clamp((neighbor.weight-.35)/.65));
+    const height=Math.max(old,mountainRelief(nx,nz,phase));
+    const nearbyTop=Math.min(WORLD_MAX_Y-2,Math.round(old+(height-old)*blend));
+    if(Math.abs(nearbyTop-top)>1||readBaseline(nx,old,nz)!==BLOCK.GRASS)
+      return false;
+  }
+  return true;
+}
+
 function groundAt(name,x,z,seed,top,outcrop){
   const phase=(seed%223)*.19;
   const band=undulation(x*.043+z*.028+phase+Math.sin(z*.026)*.63);
@@ -75,15 +114,31 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline,biome=v6BiomeAt(x,
   const top=Math.min(WORLD_MAX_Y-2,Math.round(old+(height-old)*blend));
   for(let y=old-2;y<=WORLD_MAX_Y;y++){
     const prior=readBaseline(x,y,z);
-    if(y>old?prior!==BLOCK.AIR:![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior))return new Map();
+    if(y>old?prior!==BLOCK.AIR:![BLOCK.GRASS,BLOCK.DIRT,BLOCK.STONE].includes(prior)){
+      // Mountain-only, material-only rescue for legacy grass exposed when
+      // existing trees/landmarks ABOVE the old surface veto full uplift.
+      // Do not raise this column, replace its protected content, or seal
+      // cave/opening supports. Keep the complete original veto envelope.
+      if(biome.name==='mountain'&&y>old&&blend>=.065&&
+        readBaseline(x,old,z)===BLOCK.GRASS&&
+        [BLOCK.DIRT,BLOCK.STONE].includes(readBaseline(x,old-1,z))){
+        const shoulder=sharedShoulder(biome,x,z,seed);
+        const safeCap=shoulder??groundAt('mountain',x,z,seed,old,0).cap;
+        return new Map([[old,safeCap]]);
+      }
+      return new Map();
+    }
   }
   const writes=new Map(),shoulder=sharedShoulder(biome,x,z,seed);
   // The shoulder replaces the grass in a broad contiguous band. The
   // natural wood and cave checks above remain authoritative.
   if(blend<.065&&shoulder===null)return writes;
   const {cap,subsoil,rock}=groundAt(biome.name,x,z,seed,top,outcrop);
+  const meadow=shoulder===null&&biome.name==='mountain'&&
+    mountainAlpineMeadow(x,z,seed,top,biome,readBaseline);
   for(let y=old-1;y<=top;y++)
-    writes.set(y,y===top?(shoulder??cap):y>=top-2?subsoil:rock);
+    writes.set(y,y===top?(meadow?BLOCK.GRASS:(shoulder??cap)):
+      y>=top-2?(meadow?BLOCK.DIRT:subsoil):rock);
   return writes;
 }
 
