@@ -108,7 +108,7 @@ function generatePostVertices(at,pieces,palette){
 }
 export function auditD21OriginalRoofSaddleContacts(blueprint,d19,{
  resolvePack2Asset,resolvePack2RawShape,resolveOriginalPostDefinition,
- resolveOriginalRoofAsset,maxSites=6,maxPreviewBytes=96*1024
+ resolveOriginalRoofAsset,maxSites=12,maxPreviewBytes=96*1024
 }={}){
  if(!blueprint||blueprint.integrated!==false||blueprint.worldPlaced!==false||
     blueprint.creatorApproved!==false||!Array.isArray(blueprint.cells)||
@@ -118,7 +118,7 @@ export function auditD21OriginalRoofSaddleContacts(blueprint,d19,{
  if(typeof resolvePack2Asset!=='function'||typeof resolvePack2RawShape!=='function'||
     typeof resolveOriginalPostDefinition!=='function'||typeof resolveOriginalRoofAsset!=='function')
    throw TypeError('Original Manual Pack2/3 source shape and palette resolvers required');
- if(!Number.isSafeInteger(maxSites)||maxSites<1||maxSites>6||
+ if(!Number.isSafeInteger(maxSites)||maxSites<1||maxSites>12||
     !Number.isSafeInteger(maxPreviewBytes)||maxPreviewBytes<8192||maxPreviewBytes>96*1024)
    throw RangeError('D21 original Pack2 roof-contact bounded sample budget invalid');
  const biome=Object.freeze({temperate:109,desert:110,snow:111,
