@@ -39,7 +39,7 @@ export function classifyExactHeadOriginalM7Triplet({
  if(!reportSchemasValid)reasons.push('UNKNOWN_OR_MISSING_M7_REPORT_SCHEMA');
  const galleryCohort=seed179(g)&&Array.isArray(g?.rows)&&g.rows.length===5&&
   distinct(g.rows,r=>r?.biome)&&
-  BIOMES.every(b=>g.rows.some(r=>r.biome===b&&
+  BIOMES.every(b=>g.rows.some(r=>r?.biome===b&&
    seed179(r)&&key(r)===REGION[b]))&&
   g.regions===5&&yes(g.readOnlyOriginalM7)&&
   yes(g.allFiveExactHistoricalMouthBiomesVerified);
@@ -51,7 +51,7 @@ export function classifyExactHeadOriginalM7Triplet({
  if(!cityCohort)reasons.push('INCOMPLETE_OR_UNTRUSTED_CITY_COHORT');
  const chunkCohort=seed179(k)&&Array.isArray(k?.rows)&&k.rows.length===5&&
   distinct(k.rows,r=>r?.biome)&&
-  BIOMES.every(b=>k.rows.some(r=>r.biome===b&&key(r)===REGION[b]))&&
+  BIOMES.every(b=>k.rows.some(r=>r?.biome===b&&key(r)===REGION[b]))&&
   k.totalChunks===5&&yes(k.actualOriginalM7SolidSource)&&
   yes(k.noWorldEdits);
  if(!chunkCohort)reasons.push('INCOMPLETE_OR_UNTRUSTED_CHUNK_COHORT');
