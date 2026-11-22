@@ -10,16 +10,22 @@ const shoulderSamples=[[14,0],[-14,0],[0,14],[0,-14]];
 
 function sharedShoulder(biome,x,z,seed){
   if(biome.weight>.50)return null;
+  let touchesPlains=false;
   for(const [dx,dz] of shoulderSamples){
     const neighbor=v6BiomeAt(x+dx,z+dz,seed);
-    if(!neighbor||neighbor.name===biome.name)continue;
+    // V6 represents real Plains as null, not {name:'plains'}. Skipping it
+    // entirely let bright salt-crust caps bleed right to the Desert/Plains
+    // edge. Preserve the special-biome material priority and make only the
+    // low-weight Desert-to-original-Plains fringe ordinary dune sand.
+    if(!neighbor){touchesPlains=true;continue;}
+    if(neighbor.name===biome.name)continue;
     // Both sides of a special-biome seam share an actual continuous material.
     const pair=[biome.name,neighbor.name];
     if(pair.includes('mountain'))return G.scree;
     if(pair.includes('snow')&&pair.includes('enchanted'))return G.woodlandMoss;
     return 258;
   }
-  return null;
+  return biome.name==='desert'&&touchesPlains?256:null;
 }
 
 function desertOutcrop(x,z,phase){
