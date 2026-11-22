@@ -29,7 +29,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '45d1fc881237ecc05b05848826d7da7597bc6bf7');
+    '4843ce63cd0f5af7d725eb7a2de01a77422afbd2');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -155,7 +155,8 @@ test('BFCache pageshow cannot revive a fatal VAO and can rearm only valid localh
   assert.ok(start>=0&&end>start);
   const body=source.slice(start,end);
   assert.ok(body.includes('near291PageSuspended=false;'));
-  assert.ok(body.includes('if(!document.hidden&&!graphicsLost&&near291CanResume()){'));
+  assert.ok(body.includes('if(!document.hidden&&!graphicsLost){'));
+  assert.ok(body.includes('if(near291CanResume()){'));
   assert.ok(body.includes('armNear291();'));
   assert.ok(body.includes('frameDriver.resume();'));
 });
@@ -203,4 +204,47 @@ test('the EXACT original-source resume gate executes correctly for all lifecycle
     ['public pagehide',[true,false,false,null],false],
     ['public pageshow',[false,false,false,null],true]
   ])assert.equal(gate(...args),expect,name);
+});
+
+test('startup hidden tab defers local VAO module before referencing graphicsLost',()=>{
+  const start=source.indexOf('function armNear291(){');
+  const end=source.indexOf('  armNear291();',start);
+  assert.ok(start>=0&&end>start);
+  const arm=source.slice(start,end);
+  assert.ok(arm.includes('near291PageSuspended||near291Fatal||document.hidden)return;'));
+  assert.ok(arm.indexOf('document.hidden)return;')<arm.indexOf('const epoch=++near291LoadEpoch;'));
+  assert.ok(arm.indexOf('const epoch=++near291LoadEpoch;')<
+    arm.indexOf("import('../perf/issue-291/opaque-near-lifecycle.mjs')"));
+});
+
+test('normal hidden or lost-context async import is deferred, not a fatal fault',()=>{
+  const start=source.indexOf("import('../perf/issue-291/opaque-near-lifecycle.mjs')");
+  const end=source.indexOf('.catch(error=>',start);
+  assert.ok(start>=0&&end>start);
+  const region=source.slice(start,end);
+  assert.ok(region.includes('if(graphicsLost||document.hidden)return;'));
+  assert.ok(!region.includes('Graphics suspended before local VAO experiment armed'));
+  assert.ok(region.indexOf('if(graphicsLost||document.hidden)return;')<
+    region.indexOf('near291=createOpaqueNearLifecycle({gl,'));
+  const finallyStart=source.indexOf('.finally(()=>{',end);
+  assert.ok(finallyStart>end);
+  assert.ok(source.slice(finallyStart,finallyStart+110).includes('near291Pending=false;'));
+});
+
+test('visibility/context restoration and BFCache can rearm before readiness, never resume before readiness',()=>{
+  const visibility=source.slice(source.indexOf("document.addEventListener('visibilitychange',"),
+    source.indexOf("const lookModeSelect=",source.indexOf("document.addEventListener('visibilitychange',")));
+  const contextRestored=source.slice(source.indexOf("canvas.addEventListener('webglcontextrestored',"),
+    source.indexOf("window.addEventListener('pagehide',"));
+  const pageshow=source.slice(source.indexOf("window.addEventListener('pageshow',"),
+    source.indexOf("if(['localhost','127.0.0.1'].includes(location.hostname))",source.indexOf("window.addEventListener('pageshow',")));
+  for(const [name,region] of [['visibility',visibility],['contextRestored',contextRestored],['pageshow',pageshow]]){
+    const arm=region.lastIndexOf('armNear291();');
+    const gate=region.lastIndexOf('near291CanResume()');
+    const resume=region.lastIndexOf('frameDriver.resume()');
+    assert.ok(arm>=0&&gate>arm&&resume>gate,name+' must rearm, check readiness, then resume');
+  }
+  assert.ok(visibility.includes('}else if(!graphicsLost){'));
+  assert.ok(contextRestored.includes('graphicsLost=false;graphicsRestoreCount++;'));
+  assert.ok(pageshow.includes('near291PageSuspended=false;'));
 });
