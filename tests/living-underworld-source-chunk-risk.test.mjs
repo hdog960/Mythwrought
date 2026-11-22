@@ -46,3 +46,15 @@ test('face budget fails even when original material is cuttable',()=>{
   candidateAirAt:point,maxFaceGrowth:0});
  assert.equal(r.ok,false);assert.equal(r.reason,'FACE_GROWTH_BUDGET');
 });
+test('candidate AIR callback must return an explicit boolean',()=>{
+ assert.throws(()=>auditSourceProtectedChunkRisk({origin,source,
+  candidateAirAt:()=>1}),/Nonboolean original M7 carve request/);
+});
+test('original player edit and landmark callbacks must return real booleans',()=>{
+ assert.throws(()=>auditSourceProtectedChunkRisk({origin,
+  source:{...source,editedAt:()=>1},candidateAirAt:point}),
+  /Nonboolean original M7 edit source/);
+ assert.throws(()=>auditSourceProtectedChunkRisk({origin,
+  source:{...source,protectedAt:()=>1},candidateAirAt:point}),
+  /Nonboolean original M7 landmark source/);
+});
