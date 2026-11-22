@@ -18,7 +18,7 @@ const ordinary=(x,y,z)=>{
 const obstruct=(x,z,y,id)=>((a,b,c)=>
   a===x&&b===y&&c===z?id:ordinary(a,b,c));
 
-test('V7 mountain retains normal raised geometry and regular cap with no protected cells',()=>{
+test('V7 mountain retains raised geometry and only supported stone, snow or lower alpine caps',()=>{
   const {x,z}=mountain,biome=v6BiomeAt(x,z,seed);
   assert.equal(biome.name,'mountain');
   const plan=planEnvironmentalColumn(x,z,seed,ordinary,biome);
@@ -26,7 +26,17 @@ test('V7 mountain retains normal raised geometry and regular cap with no protect
   const old=terrainHeight(x,z,seed);
   const top=Math.max(...plan.keys());
   assert.ok(top>old);
-  assert.ok([G.slate,G.scree,G.gneiss,272].includes(plan.get(top)));
+  const cap=plan.get(top);
+  assert.ok([G.slate,G.scree,G.gneiss,272,BLOCK.GRASS].includes(cap),
+    'Unregistered or unsupported mountain surface material');
+  // The legitimate new alpine cap is never a free-floating green ribbon:
+  // it has a limited lower elevation and two actual supported dirt layers.
+  if(cap===BLOCK.GRASS){
+    assert.ok(top>=5&&top<=11,'Alpine grass crossed the rocky peak envelope');
+    assert.ok(biome.weight>=.92,'Alpine grass crossed the mountain shoulder');
+    assert.equal(plan.get(top-1),BLOCK.DIRT,'Meadow grass lost supported topsoil');
+    assert.equal(plan.get(top-2),BLOCK.DIRT,'Meadow grass lost supported subsoil');
+  }
 });
 
 test('protected aboveground cell leaves mountain column geometry and foreign blocks unchanged',()=>{
