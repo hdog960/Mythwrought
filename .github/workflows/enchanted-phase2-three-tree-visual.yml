@@ -60,7 +60,7 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-      - name: One matched open-curtain Moonwillow pair after source-native exposed-face acceptance
+      - name: One matched five-voxel-tuft Moonwillow pair after original native face and collision acceptance
         env:
           ENCHANTED_VISUAL_SPECIES: moonwillow
         run: node scripts/ci/enchanted-phase2-three-tree-matched-webgl2.mjs
