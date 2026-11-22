@@ -36,3 +36,10 @@ test('rejects invalid seed or query budgets',()=>{
  assert.throws(()=>auditMutualMainGalleryClearance(2**40,0,0));
  assert.throws(()=>auditMutualMainGalleryClearance(179,0,0,{maxPairs:121}));
 });
+test('preserves original source grade refusal without misleading invalid-response label',()=>{
+ const r=auditMutualMainGalleryClearance(179,0,0,{pairAuditor:()=>({
+  ok:false,reason:'INDIVIDUAL_STAIR_UNSAFE',failures:['NONWALKABLE_STEP']
+ })});
+ assert.equal(r.ok,false);assert.equal(r.reason,'INDIVIDUAL_STAIR_UNSAFE');
+ assert.deepEqual(r.pair,[0,2]);
+});
