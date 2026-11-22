@@ -10,8 +10,12 @@ import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
 test('seeded V8 original-world site census is bounded, read-only and deterministic',()=>{
   for(const seed of [179,2026]){
     const world=new VoxelWorld(seed),save=JSON.stringify(world.save());
+    const started=performance.now();
     const first=census({seed,tileX:-65,tileZ:-2,width:3,height:3,world});
+    const firstElapsedMs=Number((performance.now()-started).toFixed(3));
+    const secondStarted=performance.now();
     const second=census({seed,tileX:-65,tileZ:-2,width:3,height:3,world});
+    const secondElapsedMs=Number((performance.now()-secondStarted).toFixed(3));
     assert.deepEqual(first,second);
     assert.equal(first.stats.tiles,9);
     assert.equal(first.stats.seen,9);
@@ -32,13 +36,16 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
     assert.ok(first.sites.every(s=>v6BiomeAt(s.x,s.z,seed)?.name==='mountain'));
     console.log('MOUNTAIN V8 REAL TILE CENSUS '+JSON.stringify({
       seed,tiles:first.stats.tiles,checked:first.stats.seen,
+      firstElapsedMs,secondElapsedMs,
       eligible:first.stats.eligible,plants:first.stats.plants,
       plantCells:first.stats.plantCells,terrainCells:first.stats.terrainCells,
       terrainRejected:first.stats.terrainRejected,
       seamRejected:first.stats.seamRejected,
       seamExposedFaces:first.stats.seamExposedFaces,
       sourceSites:first.stats.sourceSites,sourceCacheHits:first.stats.sourceCacheHits,
-      cachedSourceVetoes:first.stats.cachedSourceVetoes,rejected:first.stats.rejected
+      cachedSourceVetoes:first.stats.cachedSourceVetoes,
+      sourceBudgetExhausted:first.stats.sourceBudgetExhausted,
+      rejected:first.stats.rejected
     }));
   }
 });
