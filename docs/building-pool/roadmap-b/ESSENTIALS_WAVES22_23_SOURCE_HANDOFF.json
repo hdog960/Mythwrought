@@ -1,0 +1,192 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.waves22-23-original-source-handoff.v1",
+  "sourceStatus": "ISOLATED AUTHORED SOURCE ONLY — not real-game registered, creator approved, or Pack producer certified",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "startingHEAD": "e47c48e3ee3992305d9985e7e4c901d50639238e",
+  "parentProtectedPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "productionMainAtInitialReadOnlyCheck": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "originalSources": [
+    {
+      "wave": 22,
+      "id": "r1:farm-barn:desert:large:002",
+      "title": "Duneharp Spiral Granary",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave22.mjs",
+      "gitBlob": "a4a03510729c14f758094a43a3ac50859557a038",
+      "size": "large",
+      "sourceCells": 13114,
+      "pack3RoofCells": 2521,
+      "walkableSourceCells": 2775,
+      "rooms": 11,
+      "portals": 15,
+      "exteriorUprightPack4Windows": 35,
+      "originalIndependentRoofWings": 7,
+      "groundedSkyOpenWalkingCourts": [
+        529,
+        72
+      ],
+      "pavedApproachColumns": 81,
+      "siloWallTiers": [
+        28,
+        32
+      ],
+      "realTwoHighSiloDoorwaysWithSolidY3Lintels": 2,
+      "sourceRepairs": [
+        "Moved a support post off the roofless drying yard",
+        "Preserved real two-high silo entrances and installed true stone lintels with original intact side jambs"
+      ],
+      "focusedEightWayD4": {
+        "peers": [
+          "Briarford original farm barn",
+          "Mossveil original farm barn"
+        ],
+        "actualTransformations": 16,
+        "maxIoU": 0.23176936122102884
+      },
+      "notImplemented": [
+        "harvests",
+        "farming production",
+        "actual transport",
+        "wind power",
+        "tower stairs",
+        "world placement"
+      ]
+    },
+    {
+      "wave": 23,
+      "id": "r1:greenhouse:snow:medium:002",
+      "title": "Crystalfen Staggered Winterglass Conservatory",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave23.mjs",
+      "gitBlob": "f8aa2cf5426680708d2ba03c1ac345e91a7b409f",
+      "size": "medium",
+      "sourceCells": 10996,
+      "pack3RoofCells": 2750,
+      "walkableSourceCells": 2607,
+      "rooms": 10,
+      "portals": 15,
+      "actualFramedUprightPack4GlassCells": 96,
+      "authoredFourHighGlassBays": 24,
+      "originalIndependentRoofWings": 8,
+      "groundedSkyOpenWalkingCourts": [
+        169,
+        49
+      ],
+      "originalTrueWindowFrame": "Solid physical timber sill y1 and lintel y6; four original upright window cells y2..y5",
+      "focusedEightWayD4": {
+        "peers": [
+          "Rimeglass original greenhouse",
+          "Auroracrest original greenhouse"
+        ],
+        "actualTransformations": 16,
+        "maxIoU": 0.2854042322300597
+      },
+      "notImplemented": [
+        "crop growth",
+        "heat",
+        "irrigation",
+        "snow biome edits",
+        "weatherproofing",
+        "real collision",
+        "world placement"
+      ]
+    }
+  ],
+  "actualExecutedValidation": {
+    "exactSourceModules": "Original repository legacy-stable-schema.mjs, schema.mjs, and m2-community-structures.mjs evaluated with exact GitHub-returned source blobs in isolated JavaScript; real sourcePlan and unchanged validateBlueprint executed",
+    "result": "PASS for both new Waves22 and23",
+    "originalSource8WayD4AgainstPreviousAuthored": "32/32 PASS; full accepted corpus 228 NOT executed",
+    "roofSupport": "Every authored roof cell has original immediate y-1 physical source cell; NOT proof of full Pack producer load/collision path",
+    "walkableCourtyards": "All 819 paved sky-open source court columns physically have original stone foundation at y0, free y1+ and are in connected source walkable set",
+    "siloDoorFrames": "Both intentional two-high openings have actual original stone lintels and complete supported side jambs plus upper walls",
+    "crsytafenFourHighPack4": "96 authentic outward-oriented symbolic Pack4 vertical windows with grounded y1 sill/y6 lintel",
+    "B115AndD92": "Both IDs verified B115-only and absent from historical 228 and D92 frozen ledger",
+    "changesOutsideBuilderBAssignedDirectories": false
+  },
+  "newlyStagedUnexecutedTests": {
+    "focused": {
+      "file": "tests/building-pool/roadmap-b/builder-b-essentials-waves22-23-focused.test.mjs",
+      "gitBlob": "6ac8e3411d85829a24dd10806c044fec3050736e",
+      "state": "JS SYNTAX PASS; native node:test NOT EXECUTED"
+    },
+    "singleHistorical": {
+      "file": "tests/building-pool/roadmap-b/builder-b-originals-waves9-23-shared-historical-d4.test.mjs",
+      "gitBlob": "c0effd12f18cdee9349693b81aaecc21f796fc98",
+      "acceptedCorpus": 228,
+      "authoredNewPool": 23,
+      "waves9to23TargetCount": 15,
+      "realHistoricalSourceScansPlanned": 1,
+      "strictEightWayIoUThreshold": 0.85,
+      "state": "STAGED NOT EXECUTED; supersedes unexecuted Waves9–21 historical scan"
+    },
+    "oneCoordinatedVisualMilestone": {
+      "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-23-gallery.mjs",
+      "independentAuditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-23-gallery.mjs",
+      "wiringTest": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-23-gallery-wiring.test.mjs",
+      "galleryBlob": "330cadcb12c40ca1e8a68ab6f274daf3523df7ec",
+      "auditorBlob": "d0c97a6051b3c62e3266e28b2f89529c80de8a67",
+      "fifteenOriginalSourceBuildings": 15,
+      "sourceEvidenceFiles": 18,
+      "genuineChromiumScreenshotsRequired": 90,
+      "viewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "views": [
+        "exterior",
+        "cutaway"
+      ],
+      "independentCRCAndSHA256": true,
+      "exactHeadPin": true,
+      "state": "STAGED STATIC JS PASSED; CHROMIUM NOT RUN; NO PNG ARTIFACTS"
+    }
+  },
+  "outstandingReleaseGates": [
+    "Actual native Node tests on exact-head authentic repository checkout for all focused original designs",
+    "Single unrelaxed full 228 historical D4 on exact head",
+    "Pack1–5 original producer meshes and physical selection/collider/support integration and terrain/weather safety",
+    "One coordinated genuine 90-frame source-bound WebGL2 capture with independently authenticated PNG CRC/SHA/exact-commit evidence",
+    "Real-game registration, correct settlement/biome placement, gameplay/collision/navigation integration, iPhone Home Screen PWA/saves/performance and creator art review"
+  ],
+  "globalCIEfficiency": {
+    "checkedProtectedRefsAndPriorPR407CIOnce": true,
+    "successfulFrozenPR407RunsReusedOnlyForExactProtectedHead": [
+      44972498965,
+      44972499027
+    ],
+    "notClaimedAsNewHeadAcceptance": true,
+    "newActionsTriggered": false,
+    "repeatedQueueAudits": false,
+    "browserCaptureDuplicatesAvoided": true,
+    "canonicalHistorical228ScannedAtMostOncePlanned": true,
+    "requiredCheckThresholdsRetained": true
+  },
+  "protection": {
+    "productionMainUnchanged": true,
+    "protectedDraft407Unchanged": true,
+    "allOtherDeveloperBranchesUntouched": true,
+    "fiveHourlyAutomationsUntouched": true,
+    "sharedWorkflowInfrastructureUntouched": true,
+    "worldSavesUntouched": true,
+    "merge": false,
+    "deployed": false,
+    "cancelledWorkflows": false
+  },
+  "progress": {
+    "newResidentialSources": 10,
+    "newBuilderBServicesAuthored": 23,
+    "totalNewOriginalSources": 33,
+    "targetTotalNewOriginals": 294,
+    "remainingNewOriginals": 261,
+    "remainingResidential": 169,
+    "remainingBuilderBServices": 92
+  }
+}
