@@ -1,0 +1,43 @@
+name: Desert Phase 3 two-seed real Plains seam WebGL2 (test-only)
+on:
+  push:
+    branches:
+      - probe/desert-phase3-plains-real-webgl2-20261122
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desert-p3-plains-webgl2-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  exact-source-two-seed-plains:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Lightweight source-authentic script validation
+        run: node --check scripts/ci/desert-v7-border-visual-browser.mjs
+      - name: Install original-game Chromium WebGL2 runtime
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Capture only changed original-game Plains seams, two genuine seeds
+        run: |
+          python3 -m http.server 4173 >/tmp/desert-p3-plains-site.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          node scripts/ci/desert-v7-border-visual-browser.mjs
+      - name: Upload two source-authenticated PNGs and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desert-p3-plains-two-seed-source-authentic
+          path: artifacts/desert-v7-border-visual/
+          if-no-files-found: warn
