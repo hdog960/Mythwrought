@@ -62,7 +62,7 @@ export function buildDunewakeOasisReedworksFishingLodge(){
  for(const [x,z,side] of [
   [18,2,'north'],[27,2,'north'],[4,16,'west'],[4,24,'west'],
   [40,17,'east'],[40,26,'east'],[18,40,'south'],[29,40,'south'],
-  [3,34,'west'],[13,37,'east']
+  [3,34,'west'],[3,37,'west']
  ]){
   if(!has(x,z))throw Error('Dunewake glass not mounted on real wall '+K(x,z));
   b.pane(x,z,side);
