@@ -48,19 +48,25 @@ export function planMountainV8Candidate({x,z,seed,legacyTop,biomeWeight,
   // lookups. Comparing a V8 center height to V7 neighbor heights falsely
   // labels gently raised meadows as cliffs.
   const offsets=[[4,0],[-4,0],[0,4],[0,-4]];
-  const top=Math.min(worldMaxY-2,Math.max(legacyTop,
-    Math.round(legacyTop+upliftAt(x,z,biomeWeight))));
+  // Soften only the upper four blocks of the vertical envelope. A hard
+  // clamp previously turned >50% of two real-biome/source-height samples
+  // into identical flat Y=17 peaks. Preserve ordinary uplifts below knee.
+  const proposedTop=(old,uplift)=>{
+    const ceiling=worldMaxY-2,knee=ceiling-4,raw=old+uplift;
+    const softened=raw<=knee?raw:knee-4*Math.expm1(-(raw-knee)/4);
+    return Math.max(old,Math.min(ceiling,Math.round(softened)));
+  };
+  const top=proposedTop(legacyTop,upliftAt(x,z,biomeWeight));
   const proposedNeighbors=neighborTops.map((old,i)=>{
     const [dx,dz]=offsets[i];
     const weight=neighborBiomeWeights?.[i]??biomeWeight;
-    return Math.min(worldMaxY-2,Math.max(old,
-      Math.round(old+upliftAt(x+dx,z+dz,weight))));
+    return proposedTop(old,upliftAt(x+dx,z+dz,weight));
   });
   const slope=Math.max(...proposedNeighbors.map(n=>Math.abs(top-n)))/4;
   const aspect=field(x,z,seed+3301,73);
   const meadow=field(x,z,seed+3449,68)*.73+field(x,z,seed+3467,19)*.27;
   // Deterministic, irregular snowline; independent of the tree system.
-  const snowline=17.0+(aspect-.5)*5.4+(field(x,z,seed+3527,43)-.5)*2.4;
+  const snowline=16.3+(aspect-.5)*5.4+(field(x,z,seed+3527,43)-.5)*2.4;
   const snowy=top>=snowline;
   const cliff=slope>.8||top>=worldMaxY-4;
   const grassy=!snowy&&!cliff&&top<=13&&slope<=.52&&meadow>.47;
