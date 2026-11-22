@@ -12,6 +12,12 @@ export function auditSourceProtectedChunkRisk({origin,source,candidateAirAt,
   throw TypeError('Invalid source-protected chunk risk');
  const snapshot=new Map(),key=(x,y,z)=>x+','+y+','+z;
  let plannedCarves=0,unsafeCarves=0,approvedCarves=0;
+ // The one-cell halo is inspected for safe mesh boundary faces, but it is
+ // NOT part of this chunk's excavated 16^3 ownership. Keep BOTH counts.
+ let interiorRequestedCarves=0,interiorApprovedCarves=0,interiorRejectedCarves=0;
+ let haloRequestedCarves=0,haloApprovedCarves=0,haloRejectedCarves=0;
+ const interior=(x,y,z)=>x>=origin.x&&x<origin.x+side&&
+  y>=origin.y&&y<origin.y+side&&z>=origin.z&&z<origin.z+side;
  const counts={oreOrUnsafe:0,authoredSolid:0,authoredAirMismatch:0,
   originalEdit:0,landmark:0},examples=[];
  const projected=auditProposedChunkCarveDelta({origin,side,maxCells,maxFaceGrowth,
@@ -26,6 +32,9 @@ export function auditSourceProtectedChunkRisk({origin,source,candidateAirAt,
    if(typeof wantsAir!=='boolean')throw TypeError('Nonboolean original M7 carve request');
    if(!wantsAir)return false;
    plannedCarves++;
+   const inChunk=interior(x,y,z);
+   if(inChunk)interiorRequestedCarves++;
+   else haloRequestedCarves++;
    const block=snapshot.get(key(x,y,z));
    let refusal=null;
    const edited=source.editedAt(x,y,z);
@@ -43,16 +52,33 @@ export function auditSourceProtectedChunkRisk({origin,source,candidateAirAt,
      else if(authored===0&&block!==0)refusal='authoredAirMismatch';
     }
    }
-   if(refusal){unsafeCarves++;counts[refusal]++;
+   if(refusal){unsafeCarves++;
+    if(inChunk)interiorRejectedCarves++;
+    else haloRejectedCarves++;
+    counts[refusal]++;
     if(examples.length<maxExamples)examples.push(Object.freeze({x,y,z,refusal}));
     return false;
    }
-   approvedCarves++;return true;
+   approvedCarves++;
+   if(inChunk)interiorApprovedCarves++;
+   else haloApprovedCarves++;
+   return true;
   }});
+ // The ORIGINAL binary projection counts actual core-cell carving only.
+ // Fail closed if our independent core-cell census ever diverges.
+ if(Number.isSafeInteger(projected.newlyCarvedSolidCells)&&
+  projected.newlyCarvedSolidCells!==interiorApprovedCarves)
+  throw Error('Original chunk projection and protected core-cut census diverged');
  const ok=projected.ok===true&&unsafeCarves===0;
  return Object.freeze({ok,reason:unsafeCarves?'ORIGINAL_M7_CARVE_SOURCE_UNSAFE':
   projected.reason??null,origin:Object.freeze({...origin}),side,
   plannedCarves,unsafeCarves,approvedCarves,
+  interiorRequestedCarves,interiorApprovedCarves,interiorRejectedCarves,
+  haloRequestedCarves,haloApprovedCarves,haloRejectedCarves,
+  interiorCutCountMatchesOriginalProjection:
+   Number.isSafeInteger(projected.newlyCarvedSolidCells)?
+    projected.newlyCarvedSolidCells===interiorApprovedCarves:false,
+  proposedHaloSourceProtectionNotWritten:true,
   counts:Object.freeze(counts),examples:Object.freeze(examples),
   sourceHaloCells:projected.originalSourceQueries??0,
   baselineFaces:projected.baselineFaces??null,
