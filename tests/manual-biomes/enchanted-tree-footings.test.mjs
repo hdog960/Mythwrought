@@ -28,6 +28,12 @@ test('reject a raised neighbor, protected landmark column or empty biome plan',(
   assert.equal(probe((x,y,z)=>x===16&&z===-528&&y===6?3:read(x,y,z)),false);
   assert.equal(probe(read,(x,z)=>x===16&&z===-529?new Map():surface(x,z)),false);
   assert.equal(probe(read,(x,z)=>x===16&&z===-528?new Map([[5,403]]):surface(x,z)),false);
+  assert.equal(probe(read,(x,z)=>x===16&&z===-528?
+    new Map([[5,404],[6,403],[7,403]]):surface(x,z)),false,
+    'subsoil inside a taller M7 column is never a genuine supporting cap');
+  assert.equal(probe(read,(x,z)=>x===16&&z===-528?
+    new Map([[6,403],[6.5,404]]):surface(x,z)),false,
+    'malformed raised terrain height cannot masquerade as a real cap');
 });
 test('no edits, mutation, random calls, or permission to skip source-ground validation',()=>{
   const before=surface(1,1),snapshot=[...before.entries()];
