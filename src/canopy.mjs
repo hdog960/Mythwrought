@@ -18,13 +18,17 @@ function quad(out,a,b,c,d,color,mat){
 // Four low, tapered root buttresses anchor trees visually into editable ground.
 // Pure mesh detail: no collision, drops, world writes or saved data changes.
 function roots(out,x,y,z,variation){
-  const colors=[[.43,.28,.18],[.56,.36,.22],[.64,.43,.27],[.49,.32,.20]];
+  const colors=[[.43,.29,.19],[.50,.34,.23],[.54,.37,.26],[.46,.31,.21]];
   for(let i=0;i<4;i++){
-    const a=i*Math.PI/2+variation*.18,dx=Math.cos(a),dz=Math.sin(a);
-    const side=[-dz,dx],spread=.47+variation*.15;
-    const foot=[x+dx*spread,y+.025,z+dz*spread];
-    const left=[x+side[0]*.17,y+.54,z+side[1]*.17];
-    const right=[x-side[0]*.17,y+.54,z-side[1]*.17];
+    const a=i*Math.PI/2+variation*.28,dx=Math.cos(a),dz=Math.sin(a);
+    const side=[-dz,dx],spread=.33+variation*.10;
+    // Short, earth-contact buttresses: the old .54-high, .6-wide paper
+    // triangles looked like detached red spikes around a narrow trunk.
+    // Both upper corners meet inside the existing trunk silhouette, while
+    // each lower root rests 0.016 above the grass top, with no extra faces.
+    const foot=[x+dx*spread,y+.016,z+dz*spread];
+    const left=[x+dx*.13+side[0]*.12,y+.31,z+dz*.13+side[1]*.12];
+    const right=[x+dx*.13-side[0]*.12,y+.31,z+dz*.13-side[1]*.12];
     tri(out,left,right,foot,colors[i],4);
   }
 }
@@ -82,19 +86,26 @@ function branch(out,x,y,z,rise,angle,reach){
 }
 function crown(out,x,y,z,r,variation){
   const tint=[[.27,.55,.35],[.34,.65,.41],[.45,.72,.43],[.55,.76,.47]];
-  // Layered faceted crown, not crossed transparent billboards.
-  const rings=8, lower=[],middle=[],upper=[];
+  // The former three perfectly level octagons produced stacked tabletop
+  // edges when several crowns overlapped. Keep identical triangle/vertex
+  // counts, but scallop all three rings with deterministic, connected facets.
+  const rings=8,lower=[],middle=[],upper=[];
   for(let i=0;i<rings;i++){
     const a=i*Math.PI*2/rings+variation;
-    lower.push([x+Math.cos(a)*r*.68,y-.38,z+Math.sin(a)*r*.68]);
-    middle.push([x+Math.cos(a)*r,y+.18,z+Math.sin(a)*r]);
-    upper.push([x+Math.cos(a)*r*.48,y+.82,z+Math.sin(a)*r*.48]);
+    const ca=Math.cos(a),sa=Math.sin(a);
+    const l=.65+.065*Math.sin(a*3+variation*6);
+    const m=.90+.095*Math.cos(a*3-variation*4);
+    const u=.44+.06*Math.sin(a*5+variation*3);
+    lower.push([x+ca*r*l,y-.38+.095*Math.sin(a*2+variation),z+sa*r*l]);
+    middle.push([x+ca*r*m,y+.14+.155*Math.cos(a*2-variation),z+sa*r*m]);
+    upper.push([x+ca*r*u,y+.76+.13*Math.sin(a*3+variation),z+sa*r*u]);
   }
+  const apex=[x+Math.cos(variation*6)*r*.08,y+1.14,z+Math.sin(variation*6)*r*.08];
   for(let i=0;i<rings;i++){
     const j=(i+1)%rings,col=tint[(i+Math.floor(variation*7))%tint.length];
     quad(out,lower[i],lower[j],middle[j],middle[i],col,7);
     quad(out,middle[i],middle[j],upper[j],upper[i],tint[(i+1)%4],7);
-    tri(out,upper[i],upper[j],[x,y+1.14,z],tint[(i+2)%4],7);
+    tri(out,upper[i],upper[j],apex,tint[(i+2)%4],7);
   }
 }
 // Distinct upright evergreen silhouette: stacked, faceted needle tiers.
@@ -116,20 +127,69 @@ function evergreen(out,x,y,z,variation,beacon=false,profile='mixed'){
   const needles=beacon?
     [[.25,.48,.40],[.39,.62,.43],[.58,.70,.39],[.78,.77,.45]]:
     [[.19,.43,.38],[.26,.54,.43],[.34,.61,.46],[.40,.68,.48]];
-  for(let tier=0;tier<4;tier++){
-    const base=y+.65+tier*(beacon?1.26:profile==='grove'?.86:profile==='open'?.70:.77),rad=(beacon?1.48:profile==='grove'?1.49:profile==='open'?1.12:1.32)-tier*.19;
-    const top=base+(beacon?1.8:1.22);
+  // M2 A/B visual correction: the uninterrupted six-ring fir was too tall
+  // and read as a single smooth traffic cone. Keep its JOINED ring vertices
+  // (no detached hats), but shorten the crown, widen its lower shoulders and
+  // root eight uneven, downward-sweeping boughs onto the exact perimeter.
+  // All shapes are render-only; physical leaves, seed sites and saves remain
+  // byte-identical. Opaque facets reuse the current terrain draw call.
+  const canopyHeight=beacon?4.65:Math.min(4.15,height*.85);
+  const maxRadius=beacon?1.43:profile==='grove'?1.38:profile==='open'?1.09:1.29;
+  const levels=[0,.18,.37,.56,.76,.96];
+  const radii=[.90,1.04,.87,.73,.52,.16];
+  const boughRings=[];
+  for(let level=0;level<levels.length;level++){
+    const t=levels[level],verts=[];
     for(let i=0;i<8;i++){
-      const a=(i+variation)*Math.PI/4,b=(i+1+variation)*Math.PI/4;
-      const col=beacon&&tier===3?[[.91,.79,.42],[.98,.87,.55]][i%2]:needles[(i+tier)%needles.length];
-      tri(out,[x+Math.cos(a)*rad,base,z+Math.sin(a)*rad],
-        [x+Math.cos(b)*rad,base,z+Math.sin(b)*rad],
-        [x,top,z],col,7);
-      // A small sun-facing facet makes layered needle tiers readable at phone scale.
-      if(i%2===0)tri(out,[x+Math.cos(a)*rad*.79,base+.10,z+Math.sin(a)*rad*.79],
-        [x+Math.cos(b)*rad*.79,base+.10,z+Math.sin(b)*rad*.79],
-        [x,top-.15,z],needles[(i+tier+1)%needles.length],7);
+      const a=(i+variation)*Math.PI/4+t*(.07+variation*.09);
+      const wave=Math.sin(i*2.37+level*1.63+variation*5.1);
+      const rad=maxRadius*radii[level]*(.92+.12*wave);
+      const bend=t*t*.085;
+      verts.push([
+        x+Math.cos(a)*rad+Math.sin(variation*6)*bend,
+        y+.46+t*canopyHeight+.055*Math.sin(i*2.2+level+variation*4),
+        z+Math.sin(a)*rad+Math.cos(variation*5)*bend
+      ]);
     }
+    boughRings.push(verts);
+  }
+  // Shared vertices on both sides of every band guarantee contiguous foliage
+  // and reject the previous detached triangle/cone silhouette.
+  for(let level=0;level<boughRings.length-1;level++){
+    const lower=boughRings[level],upper=boughRings[level+1];
+    for(let i=0;i<8;i++){
+      const j=(i+1)%8;
+      quad(out,lower[i],lower[j],upper[j],upper[i],
+        needles[(i+level)%needles.length],7);
+    }
+  }
+  const cap=boughRings[boughRings.length-1];
+  const peak=[x+Math.sin(variation*6)*.12,
+    y+.46+canopyHeight+.07,z+Math.cos(variation*5)*.12];
+  for(let i=0;i<8;i++){
+    const j=(i+1)%8;
+    tri(out,cap[i],cap[j],peak,
+      beacon?[[.78,.82,.45],[.88,.82,.50]][i%2]:
+        needles[(i+2)%needles.length],7);
+  }
+  // Eight seed-varied bough lobes extend the joined silhouette beyond the
+  // smooth cone side. Each lobe is TWO attached triangles reaching a tip
+  // below its branch origin. No leaf hangs free: the three shared vertices
+  // are already occupied by the continuous live canopy mesh. Maximum source
+  // evergreen: 444 vertices including sentinel halo/band/star (<450 limit).
+  for(let level=0;level<4;level++)for(let fork=0;fork<2;fork++){
+    const i=(Math.floor(variation*8)+level*2+fork*4)%8,j=(i+1)%8;
+    const p=boughRings[level][i],q=boughRings[level][j],
+      upper=boughRings[level+1][i];
+    const angle=(i+.5+variation)*Math.PI/4;
+    const reach=maxRadius*(.19+.055*(1-level/4)+.035*Math.sin(variation*11+i));
+    const tip=[
+      (p[0]+q[0])*.5+Math.cos(angle)*reach,
+      (p[1]+q[1])*.5-.18-.045*(level%2),
+      (p[2]+q[2])*.5+Math.sin(angle)*reach
+    ];
+    tri(out,p,q,tip,needles[(i+level+1)%needles.length],7);
+    tri(out,upper,p,tip,needles[(i+level+2)%needles.length],7);
   }
   if(beacon){
     // Grounded eight-sided moss-and-amber root halo: a readable landmark
