@@ -157,6 +157,9 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
   detourDepartureBlocks:detour?.departureBlocks??null,
   detourBearing:detour?.bearing??null,
   sourceAuditedDetourAlreadyCountedOnce:!!detour,
+  // Read-only evidence for NEXT candidate district's exact support/headroom
+  // comparison. Do not infer a built or walked access route from this.
+  sourceAuditedCityAccessRouteGeometry:route,
   sourceAuditedTerraceAlreadyCountedOnce:detour?.terraceProof?.ok===true,
   requireCompleteDeepLinks,
   completeFourHubCandidateTopologyVerified:topology?.ok===true,
