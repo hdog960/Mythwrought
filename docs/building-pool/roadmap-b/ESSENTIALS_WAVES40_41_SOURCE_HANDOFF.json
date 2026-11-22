@@ -1,0 +1,213 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.waves40-41-original-source-handoff.v1",
+  "status": "UNREGISTERED ORIGINAL SOURCE CANDIDATES ONLY. Native Node, actual Pack3/4 collision/selection, original game, real Chromium, and iPhone/PWA NOT ACCEPTED",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "sessionStartingExactHEAD": "f9dd254c0997de0beda06a9ace17261f871d1c9a",
+  "protectedDraftPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "productionMainAtReadOnlyStart": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "authored": [
+    {
+      "wave": 40,
+      "title": "Moonfern Triskelion Arboretum",
+      "id": "r1:greenhouse:enchanted-forest:small:003",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave40.mjs",
+      "blob": "de3284ecd152d9dcef93436f4d0a9564a79e1ff3",
+      "sourceCells": 8605,
+      "actualBackedPack3Roofs": 2195,
+      "connectedSourceWalkableCells": 2291,
+      "distinctRoofWings": 8,
+      "rooms": 15,
+      "twoHighPortals": 19,
+      "realGroundedFullyOpenSkyCourts": [
+        81,
+        49,
+        56
+      ],
+      "additionalGroundedOutsideMoonstonePathCells": 158,
+      "originalOutsideOnlySourceBFS": "PASS actual y1 cardinal route from (8,1,54) to (48,1,54), constrained to outdoor z>=53, no interior-route shortcut",
+      "originalNineTierStoneMoonDial": "Grounded y0 stone source with 9 contiguous stone tiers and immediately backed Pack3 cap at y10, not a functional magical device",
+      "uprightPack4WindowCells": 68,
+      "fullyFramedFourHighPack4Bays": 17,
+      "originalFullWindowFrames": "true y1 solid timber sill, y2–5 upright Pack4 candidate cells, solid y6 timber header and outward source air",
+      "originalSourceEngineeringRepair": "A wrongly placed rafter at (39,39) inside open east courtyard was corrected to roof-supported (47,39), preserving full sky openness",
+      "focusedSameCategoryStrictEightWayD4": {
+        "oldOriginalWaves": [
+          13,
+          17,
+          29
+        ],
+        "transforms": 24,
+        "maxIoU": 0.4121983914209115,
+        "threshold": 0.85
+      },
+      "livePlantGrowth": false,
+      "liveMagicOrWeather": false,
+      "productionRegistered": false
+    },
+    {
+      "wave": 41,
+      "title": "Saltglass Tern-Fork Customs House",
+      "id": "r1:harbor-office:temperate:small:004",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave41.mjs",
+      "blob": "79b31383f347832f83a7e8a57d271585825c1c43",
+      "sourceCells": 9211,
+      "actualBackedPack3Roofs": 2336,
+      "connectedSourceWalkableCells": 2450,
+      "distinctRoofWings": 7,
+      "rooms": 14,
+      "twoHighPortals": 21,
+      "realGroundedFullyOpenSkyCourts": [
+        90,
+        49,
+        49
+      ],
+      "additionalGroundedOutsideForkedQuayCells": 197,
+      "originalOutsideOnlySourceBFS": "PASS true y1 cardinal three-fork stone piers from (11,1,58) to (48,1,58), constrained to outside z>=57",
+      "originalGroundedStoneSixTierBaffles": "Four separate y0-founded contiguous six-tier masonry harbor markers, no signal mechanism",
+      "uprightPack4WindowCells": 34,
+      "fullyFramedTwoHighPack4Bays": 17,
+      "originalFullWindowFrames": "true y1 timber sill, y2–3 upright Pack4 candidate cells, solid y4 timber header and outward source air",
+      "originalSourceEngineeringRepair": "A misplaced roof post at (13,44) inside the western roofless customs court moved to original backed west roof at (10,44)",
+      "focusedSameCategoryStrictEightWayD4": {
+        "oldOriginalWaves": [
+          6,
+          14,
+          32
+        ],
+        "transforms": 24,
+        "maxIoU": 0.4548587181254307,
+        "threshold": 0.85
+      },
+      "liveBoatsOrCustoms": false,
+      "liveWater": false,
+      "productionRegistered": false
+    }
+  ],
+  "executedSourceTests": {
+    "method": "Authentic immutable GitHub original source legacy-stable-schema, schema, sourcePlan/unchanged validateBlueprint loaded and executed in isolated JavaScript V8; supplementary original placement/court/window/exterior-only BFS and eight-way D4 of six earlier same-category actual source constructors. NOT native Node test runner, actual original WebGL2 or original game.",
+    "originalBlueprintCompilation": "PASS both sources",
+    "newlyAuthoredOriginalSourceCells": 17816,
+    "actualImmediateSolidBackedPack3RoofCells": 4531,
+    "connectedOriginalY1WalkableCells": 4741,
+    "originalStoneGroundedCompletelySkyOpenCourtCells": 374,
+    "additionalSourceGroundedOutdoorPathCells": 355,
+    "originalRooms": 29,
+    "sourceTwoHighPortals": 40,
+    "originalUprightPack4WindowCells": 102,
+    "completeSourceGlassBays": 34,
+    "actualOutdoorOnlyCardinalBFS": "PASS both crosspaths without traversal through roofed interiors",
+    "stoneMarkers": "PASS 9-tier Moonfern grounded stone marker and all 4 six-tier Saltglass baffles",
+    "strictSameCategoryEightWayD4": "PASS 48/48, max 0.4548587181254307 versus unchanged 0.85",
+    "originalFrozenOwnership": "PASS both unused frozen B115-only slots; not D92 nor historical accepted 228",
+    "originalPack3AndPack4PhysicalOccupancy": "Explicitly unresolved physical producer geometry, orientation, support, selection and collision; no live admission",
+    "sourceStaticJavaScriptSyntax": "PASS on all seven new mjs source/test/gallery files",
+    "authenticNativeNodeTests": "NOT_EXECUTED",
+    "actualChromiumWebGL2": "NOT_EXECUTED",
+    "realIphonePwaAndOriginalGame": "NOT_EXECUTED"
+  },
+  "stagedButNeverExecuted": {
+    "originalFocusedNativeNode": {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-waves40-41-focused.test.mjs",
+      "blob": "c3fd5ffff3e250f7f8d674772115e127ee84ca8e",
+      "scope": "7 focused cases covering frozen B115 ownership, original supported roofs, open courtyards, unobstructed two-high portals, exterior-only source y1 paths, framed glass/towers, strict 48 local D4 comparisons",
+      "actualNativeNodeRun": false
+    },
+    "oneSharedHistoricAccepted228": {
+      "path": "tests/building-pool/roadmap-b/builder-b-originals-waves9-41-shared-historical-d4.test.mjs",
+      "blob": "17debeefacbf876ce1f4af361e408ba4e37440ad",
+      "acceptedOriginals": 228,
+      "authoredBuilderBServiceSourceOriginals": 41,
+      "newAdditionalServiceOriginalsWaves9to41": 33,
+      "singleHistoricalCorpusCensus": true,
+      "unchangedEightWayIoUThreshold": 0.85,
+      "originalAllocationNow": 269,
+      "originalAllocationRemaining": 166,
+      "actuallyExecuted": false,
+      "supersededUnrunHistoricalWaves9to39Retired": true
+    },
+    "oneDeferredSourceWebGL2Proof": {
+      "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-41-gallery.mjs",
+      "galleryBlob": "8b521f655ec4f3248c6a8be3d82f96da647c7d92",
+      "independentAuditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-41-gallery.mjs",
+      "auditorBlob": "529135dab04e083ca97e908c5c03da8fde145292",
+      "exactSourceWiringTest": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-41-gallery-wiring.test.mjs",
+      "wiringBlob": "98d72de9530d72ee42834cc907c9da52032cdf36",
+      "newOriginalSourceBoundPreviews": [
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave40-preview.html",
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave41-preview.html"
+      ],
+      "originalServiceDesigns": 33,
+      "sourceProvenanceFiles": 36,
+      "realPNGFramesRequired": 198,
+      "sourceProxyViews": [
+        "exterior",
+        "cutaway"
+      ],
+      "cssPhoneViewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "commitHeadPinned": true,
+      "independentPNGCRC": true,
+      "independentUniquePNG_SHA256": true,
+      "actualChromiumFramesCaptured": 0,
+      "realBrowserExecuted": false,
+      "sourceProxyNotEquivalentToOriginalLiveGame": true
+    }
+  },
+  "outstanding": {
+    "originalNativeNode": "Genuine complete repository Node runner on exact source commit for focused tests + one historic 228 full eight-way D4",
+    "originalPackPhysical": "Exact original Pack3/4 real GL mesh envelopes, collision/selection support/mounting, shader/orientation and snow/weather approvals",
+    "genuineSourceProxyChromium": "One coordinated exact-HEAD genuine 198-frame WebGL2 PNG capture and independent PNG CRC/SHA/visual audit",
+    "actualGame": "Creator-authorized actual world/settlement registration, physical player movement/walking, save/offline/performance and iPhone installed Home Screen PWA and artwork acceptance"
+  },
+  "CICoordination": {
+    "protectedHeadsReadOnceAtSessionStart": true,
+    "priorPR407SuccessesHistoricalOnly": [
+      44972498965,
+      44972499027
+    ],
+    "newGitHubActionsRuns": 0,
+    "newChromiumRuns": 0,
+    "duplicatedAccepted228HistoricalRuns": 0,
+    "sharedWorkflowEdits": 0,
+    "cancelledCIJobs": 0,
+    "essentialThresholdsWeakened": false
+  },
+  "strictBoundaries": {
+    "historic228Untouched": true,
+    "frozenB115D92Untouched": true,
+    "allOtherBuilderBranchesUntouched": true,
+    "fiveAutomationsUntouched": true,
+    "productionMainUntouched": true,
+    "protectedDraftPR407Untouched": true,
+    "sourceWorldSavesUntouched": true,
+    "noMerge": true,
+    "noDeployment": true
+  },
+  "progress": {
+    "newResidentialOriginals": 10,
+    "newBuilderBServiceOriginals": 41,
+    "combinedOriginalsAuthoredOrStaged": 51,
+    "target": 294,
+    "remainingTotal": 243,
+    "remainingResidential": 169,
+    "remainingServices": 74
+  },
+  "estimatedRemainingFocusedDevelopmentSessions": {
+    "low": 70,
+    "high": 220,
+    "excludesFinalIntegrationAndRelease": true,
+    "uncertain": true
+  }
+}
