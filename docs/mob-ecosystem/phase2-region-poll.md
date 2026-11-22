@@ -1,0 +1,7 @@
+# Read-only original MobEngine admission transaction — detached Phase 2
+
+`src/mobs/ecosystem-region-poll.mjs` composes the source regional schedule, real roster snapshot and bounded habitat/terrain proposals. It DOES NOT call `engine.spawn()`, change original PopulationManager, save records, or mutate terrain. `prepareOriginalMobPoll` returns immutable candidate and prior record, with original revision and unchanged roster signature. If the original global interval or local cooldown has not expired, it returns no candidate.
+
+`settleOriginalMobPoll` advances the per-region serial by the true evaluated attempts. A proposed candidate alone does NOT start the 1.5s real-birth cooldown. To count as a successful birth, the caller must have independently executed actual `MobEngine.spawn`, and supply a valid original `engine.all()` snapshot with exactly one new original species identity at the exact proposed coordinate, correct home chunk, no importance, and all prior positions/identity unchanged; the source revision must still match. Only then may the record increase high-water and apply the 1.5s cooldown. Forged, stale, partial or mismatched snapshots fail closed.
+
+This is an isolated integration design, NOT production birth behavior; the global 0.5s ticker, 64-region limit, away/GC, save sidecar, real M7 multisite and iPhone/PWA tests are still required. No new Actions launched.
