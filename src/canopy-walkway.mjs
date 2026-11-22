@@ -6,20 +6,63 @@ export function planCanopyWalkway(world,a,b,y){
  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function'||
     !Array.isArray(a)||!Array.isArray(b)||a.length!==2||b.length!==2||
     ![...a,...b,y].every(Number.isInteger)||y<2||y+2>WORLD_MAX_Y)return null;
+ // Canonicalize the physical endpoints so requesting the same span from the
+ // opposite bank cannot generate a different crown or duplicate an edit.
+ // This is local opt-in geometry only; it does not change world generation.
+ const [start,end]=a[0]<b[0]||(a[0]===b[0]&&a[1]<=b[1])?[a,b]:[b,a];
+ a=start;b=end;
  const dx=b[0]-a[0],dz=b[1]-a[1],distance=Math.abs(dx)+Math.abs(dz);
  if((dx!==0&&dz!==0)||distance<3||distance>9)return null;
  const sx=Math.sign(dx),sz=Math.sign(dz),sideX=sz,sideZ=-sx;
  // Both ends must already be genuine physical timber crown supports.
  if(world.get(a[0],y,a[1])!==BLOCK.WOOD||
     world.get(b[0],y,b[1])!==BLOCK.WOOD)return null;
+ // A per-span stable signature prevents every bridge in one seeded world from
+ // repeating the same crown silhouette. Canonical endpoints make this invariant
+ // under reversed calls; no global generator state or save fields are involved.
+ // Mix high coordinate bits into low bits: the raw XOR's lowest bit is
+ // constant for equal-length spans (both endpoints contribute parity twice).
+ // Without avalanche, the alleged location-specific branch side never varies.
+ let variant=(Math.imul(a[0],73856093)^Math.imul(a[1],19349663)^
+  Math.imul(b[0],83492791)^Math.imul(b[1],1640531513)^world.seed)>>>0;
+ variant^=variant>>>16;
+ variant=Math.imul(variant,0x7feb352d)>>>0;
+ variant^=variant>>>15;
+ variant=Math.imul(variant,0x846ca68b)>>>0;
+ variant^=variant>>>16;
  const cells=[];
  for(let i=1;i<distance;i++){
   const x=a[0]+sx*i,z=a[1]+sz*i;
-  // Walkable solid timber deck, open two-block headroom and foliage side rails.
+  // Continuous timber deck. Each foliage cluster rests on a timber outrigger
+  // directly joined to the deck: no unsupported floating leaf bars.
   cells.push([x,y,z,BLOCK.WOOD]);
-  if(i>1&&i<distance-1){
-   cells.push([x+sideX,y+1,z+sideZ,BLOCK.LEAVES]);
-   cells.push([x-sideX,y+1,z-sideZ,BLOCK.LEAVES]);
+  // Leave real daylight gaps between crown branches instead of repeating
+  // a fence tooth at every step. Two end-biased forks frame the approach;
+  // only the longest spans need a third, off-center crown station.
+  // Spans up to six cells receive one fork, not two adjacent fence teeth.
+  const crownStation=distance<=6?i===Math.floor(distance/2):
+   (i===2||i===distance-2||(distance>=8&&i===Math.floor(distance/2)));
+  if(crownStation){
+   // Alternate banks deterministically. Branches remain attached to the
+   // solid deck; no free-floating foliage or solid railing is introduced.
+   // Station ordinal, not coordinate parity: even spans otherwise put every
+   // crown on the same bank (e.g. stations 2,4,6 on an eight-cell bridge).
+   const stationIndex=i===2?0:i===distance-2?(distance>=8?2:1):1;
+   const sides=[((stationIndex+variant)&1)===0?-1:1];
+   for(const side of sides){
+    const rx=x+side*sideX,rz=z+side*sideZ;
+    cells.push([rx,y,rz,BLOCK.WOOD]);
+    cells.push([rx,y+1,rz,BLOCK.LEAVES]);
+    // One seed-selected fork gets a longer taper; its partner stays short.
+    // This breaks the mirrored double-prong silhouette without introducing
+    // floating tips, paired fences, or additional solid block families.
+    // Keep the opposite bank clear at the central fork.
+    if(distance>=7&&i===( (variant&1)===0 ? 2 : distance-2 )&&sides.length===1){
+     const tx=rx+side*sideX,tz=rz+side*sideZ;
+     cells.push([tx,y,tz,BLOCK.WOOD]);
+     cells.push([tx,y+1,tz,BLOCK.LEAVES]);
+    }
+   }
   }
  }
  const seen=new Set();
