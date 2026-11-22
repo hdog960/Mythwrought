@@ -2,6 +2,7 @@ import {terrainHeight,BLOCK} from '../voxel.mjs';
 import {WORLD_MAX_Y} from '../depth.mjs';
 import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
+import {buildEnchantedTreeCandidate,ENCHANTED_TREE_MAX_RADIUS} from './enchanted-tree-candidates.mjs';
 
 const smooth=value=>value*value*(3-2*value);
 const clamp=value=>Math.max(0,Math.min(1,value));
@@ -163,18 +164,26 @@ function treeVoxels(climate,x,y,z,roll){
   return cells;
 }
 
-export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell){
+export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
+  {experimentalEnchantedTrees=false}={}){
   const minX=cx*16,minZ=cz*16,maxX=minX+15,maxZ=minZ+15;
   const cells=new Map();
-  // Each eight-block site can extend three blocks from its stem. Sample
-  // neighboring sites on every chunk build and keep only this chunk's part.
-  for(let tx=Math.floor((minX-3)/8);tx<=Math.floor((maxX+3)/8);tx++)
-    for(let tz=Math.floor((minZ-3)/8);tz<=Math.floor((maxZ+3)/8);tz++){
+  // The *default* M7 path keeps its exact historical +/-3 site sampling.
+  // Explicit Phase 2 prototypes need a +/-4 crown halo; sites outside the
+  // original envelope may add ONLY Enchanted candidate voxels, never conifers.
+  const oldTxMin=Math.floor((minX-3)/8),oldTxMax=Math.floor((maxX+3)/8);
+  const oldTzMin=Math.floor((minZ-3)/8),oldTzMax=Math.floor((maxZ+3)/8);
+  const radius=experimentalEnchantedTrees?ENCHANTED_TREE_MAX_RADIUS+1:3;
+  for(let tx=Math.floor((minX-radius)/8);tx<=Math.floor((maxX+radius)/8);tx++)
+    for(let tz=Math.floor((minZ-radius)/8);tz<=Math.floor((maxZ+radius)/8);tz++){
       const roll=treeRoll(tx,tz,seed);
       const x=tx*8+2+Math.floor(treeRoll(tx,tz,seed+51)*4);
       const z=tz*8+2+Math.floor(treeRoll(tx,tz,seed+89)*4);
       const biome=v6BiomeAt(x,z,seed);
       if(!biome||biome.weight<.65||biome.name==='desert')continue;
+      const candidate=experimentalEnchantedTrees&&biome.name==='enchanted';
+      if(!candidate&&(tx<oldTxMin||tx>oldTxMax||tz<oldTzMin||tz>oldTzMax))
+        continue;
       const canopy=undulation(x*.051+z*.037+Math.sin(z*.031));
       const threshold=biome.name==='enchanted'?.52+canopy*.34:biome.name==='snow'?.52:.13;
       if(roll>=threshold)continue;
@@ -183,8 +192,22 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell){
       const floor=Math.max(...column.keys());
       const root=readCell(x,floor,z);
       const grounded=root===column.get(floor)&&readCell(x,floor-1,z)!==BLOCK.AIR;
-      if(!grounded||floor>WORLD_MAX_Y-5)continue;
-      const tree=treeVoxels(biome.name,x,floor,z,roll);
+      if(!grounded)continue;
+      let tree;
+      if(candidate){
+        // Deterministic species choice independent of the legacy density roll.
+        const shaped=buildEnchantedTreeCandidate(x,floor,z,treeRoll(tx,tz,seed+151));
+        if(!shaped)continue;
+        // A two-by-two ancient trunk may only stand on genuinely supported
+        // terrain: no suspended roots or collision with an elevated neighbor.
+        if(shaped.footprint.some(([dx,dz])=>
+          readCell(x+dx,floor,z+dz)===BLOCK.AIR||
+          readCell(x+dx,floor+1,z+dz)!==BLOCK.AIR))continue;
+        tree=shaped.cells;
+      }else{
+        if(floor>WORLD_MAX_Y-5)continue;
+        tree=treeVoxels(biome.name,x,floor,z,roll);
+      }
       if(tree.some(([a,b,c])=>b>WORLD_MAX_Y||readCell(a,b,c)!==BLOCK.AIR))continue;
       for(const [a,b,c,id] of tree)
         if(a>=minX&&a<=maxX&&c>=minZ&&c<=maxZ)cells.set(a+','+b+','+c,id);
