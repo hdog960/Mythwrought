@@ -54,7 +54,7 @@ export function buildSaffronwindDoubleTowerHarborRegistry(){
     {originalSaffronwindRoofWing:name,actualSandproofSealUnapproved:true});
   }
  for(const [x,z] of [[19,7],[32,8],[44,8],[8,15],[18,39],[48,33],
-  [30,50],[44,52],[12,51],[55,41],[9,8],[37,20]]){
+  [27,50],[44,52],[12,51],[55,41],[9,8],[37,20]]){
   const y=roofs.get(K(x,z));
   if(!y)throw Error('Saffronwind authored masonry pier missing roof '+K(x,z));
   b.support(x,z,y-1,'live:stone','permanent-original-customs-pier');
