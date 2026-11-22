@@ -13,6 +13,8 @@ import {auditSourceProtectedCityFloorLink}
  from '../../src/living-underworld/source-protected-city-link.mjs';
 import {auditSourceProtectedCityTerraceAccess}
  from '../../src/living-underworld/source-protected-city-terrace-access.mjs';
+import {selectSourceProtectedInterlevelRamps}
+ from '../../src/living-underworld/source-aware-ramp-selection.mjs';
 const seed=179,regions=Object.freeze([[2,0],[2,1]]);
 const world=new FourRegionWorld(seed,
  fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
@@ -30,7 +32,18 @@ for(const [rx,rz] of regions){
   throw Error('Original deterministic city-site plan changed');
  const terrace=proposeProtectedCityLandingTerrace(seed,rx,rz,{source});
  const fullPad=auditSourceProtectedCityFloorLink(seed,rx,rz,{source});
- const joined=auditSourceProtectedCityTerraceAccess(seed,rx,rz,{source});
+ // Only a source-checked three-link selection may request the full four-hub
+ // city route flag. A partial/missing selection fails closed, not promoted.
+ const deep=selectSourceProtectedInterlevelRamps(seed,rx,rz,{
+  source,maxCandidatesPerLink:64,maxSourceChecks:30000,
+  requireMainGalleryClearance:true
+ });
+ const approved=deep.ok===true&&deep.links?.length===3&&
+  deep.links.every(link=>link.ok===true&&link.selected?.sourceSafe===true);
+ const selected=approved?deep.links.map(link=>link.selected.proposal):[];
+ const joined=auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
+  source,additionalStairProposals:selected,requireCompleteDeepLinks:true
+ });
  rows.push(Object.freeze({seed,rx,rz,
   originalM7TerrainReadOnly:true,
   terraceCandidateSourceSafe:terrace.ok===true,
@@ -41,10 +54,19 @@ for(const [rx,rz] of regions){
    radius:x.radius,ok:x.ok,reason:x.reason
   }))??[],
   existingFullPadAndAccessSourceSafe:fullPad.ok===true,
+  threeDeepLinksOriginalM7SourceSelected:approved,
+  threeDeepLinkSelectionRefusal:deep.ok?null:
+   deep.refusal??deep.reason??'UNSPECIFIED_LINK_REFUSAL',
+  threeDeepLinkCandidatesExamined:deep.inspected??0,
+  threeDeepLinkOriginalM7SourceCells:deep.sourceCellsChecked??0,
+  threeDeepLinkSelectedIndexList:approved?
+   deep.links.map(link=>link.selected.index):[],
   joinedCityTerraceAndActualApproachSourceSafe:joined.ok===true,
   joinedRouteRefusal:joined.reason??joined.refusal??null,
   joinedSourceChecks:joined.sourceChecks??0,
   joinedTerraceRadius:joined.terraceRadius??null,
+  joinedFourHubCandidateTopologyApproved:joined.completeFourHubCandidateTopologyVerified===true,
+  joinedFourHubSourceOwnershipApproved:joined.completeDeepLinkSourceOwnershipVerified===true,
   actuallyBuiltAndWalked:false,
   fullPadRefusal:fullPad.reason??null,
   fullPadSourceChecks:fullPad.sourceChecks??0,
