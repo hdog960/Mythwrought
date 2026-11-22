@@ -30,7 +30,7 @@ export function auditOriginalCityFloorProvenance(seed,rx,rz,{
   const nx=(x-city.x)/(city.rx*.55),nz=(z-city.z)/(city.rz*.55);
   if(nx*nx+nz*nz<=1)columns++;
  }
- if(columns>maxColumns||columns*15>maxSourceChecks)return Object.freeze({
+ if(columns>maxColumns)return Object.freeze({
   sitePresent:true,ok:false,seed,rx,rz,
   reason:'CITY_ORIGINAL_SOURCE_PREFLIGHT_BUDGET',columns,
   requiredSourceChecks:columns*15,maxColumns,maxSourceChecks,
@@ -41,21 +41,41 @@ export function auditOriginalCityFloorProvenance(seed,rx,rz,{
   seed,rx,rz,reason:'CITY_MAIN_GALLERY_INDEX_UNSAFE',
   galleryReason:galleries.reason,sourceChecks:0,
   worldChanged:false});
+ // Immutable geometry is a cheaper, definitive veto than old-world source.
+ // Do not burn up to 150k original terrain reads or hide a real collision
+ // behind a source-budget refusal. Check exactly the same 15 vertical cells
+ // per ellipse column as the eventual source pass, in matching raster order.
+ let geometryCellsInspected=0;
+ for(let z=minZ;z<=maxZ;z++)for(let x=minX;x<=maxX;x++){
+  const nx=(x-city.x)/(city.rx*.55),nz=(z-city.z)/(city.rz*.55);
+  if(nx*nx+nz*nz>1)continue;
+  for(let y=floorY-5;y<=floorY+9;y++){
+   geometryCellsInspected++;
+   const type=y<=floorY?'support':'clearance';
+   const conflict=galleries.inspectCell(x,y,z,type);
+   if(conflict)return Object.freeze({sitePresent:true,ok:false,
+    seed,rx,rz,reason:'CITY_PAD_CONFLICTS_WITH_MAIN_GALLERY',
+    horizontalPairIndex:conflict.horizontalPairIndex,
+    firstRejectedCell:Object.freeze({x,y,z,type}),columns,
+    geometryCellsInspected,requiredSourceChecks:columns*15,
+    sourceChecks:0,worldChanged:false,
+    cityPadAndOriginalGalleryMutualClearanceVerified:false});
+  }
+ }
+ if(columns*15>maxSourceChecks)return Object.freeze({
+  sitePresent:true,ok:false,seed,rx,rz,
+  reason:'CITY_ORIGINAL_SOURCE_PREFLIGHT_BUDGET',columns,
+  requiredSourceChecks:columns*15,maxColumns,maxSourceChecks,
+  geometryCellsInspected,sourceChecks:0,worldChanged:false
+ });
  let checked=0,solidSupport=0,existingHeadroomAir=0,excavation=0;
  for(let z=minZ;z<=maxZ;z++)for(let x=minX;x<=maxX;x++){
   const nx=(x-city.x)/(city.rx*.55),nz=(z-city.z)/(city.rz*.55);
   if(nx*nx+nz*nz>1)continue;
   for(let y=floorY-5;y<=floorY+9;y++){
    const type=y<=floorY?'support':'clearance';
-   // A solid city pad cannot consume an original gallery's walking AIR,
-   // and city headroom cannot consume any existing gallery's deck.
-   const conflict=galleries.inspectCell(x,y,z,type);
-   if(conflict)return Object.freeze({sitePresent:true,ok:false,
-    seed,rx,rz,reason:'CITY_PAD_CONFLICTS_WITH_MAIN_GALLERY',
-    horizontalPairIndex:conflict.horizontalPairIndex,
-    firstRejectedCell:Object.freeze({x,y,z,type}),columns,
-    sourceChecks:checked,worldChanged:false,
-    cityPadAndOriginalGalleryMutualClearanceVerified:false});
+   // Geometry was independently checked for the FULL immutable ellipse,
+   // before any source callback or budget handling. No second index probe.
    checked++;
    let refusal=null;
    if(y< -210||y>19)refusal='WORLD_BOUNDS';
@@ -89,6 +109,7 @@ export function auditOriginalCityFloorProvenance(seed,rx,rz,{
  }
  return Object.freeze({sitePresent:true,ok:true,seed,rx,rz,columns,
   sourceChecks:checked,solidSupport,existingHeadroomAir,excavation,
+  geometryCellsInspected,
   fullFootprintChecked:true,originalSourceOwned:true,
   cityPadAndOriginalGalleryMutualClearanceVerified:true,
   floorActuallyConstructed:false,worldChanged:false,
