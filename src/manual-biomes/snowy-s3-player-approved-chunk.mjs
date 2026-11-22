@@ -36,17 +36,32 @@ export function reviewSnowS3PlayerApprovedChunk(world,cx,cz,{collides,...source}
   const originalSource=sourceSnapshot(world,survey.admitted);
   if(originalSource===null)return fail('missing-original-cave-runtime-for-player-collision');
   let probes=0,connections=0;
+  // Approving trees against the original world INDEPENDENTLY is insufficient:
+  // the next candidate must be reviewed against earlier admitted trees too.
+  // This is an immutable, unsaved read-through view; it does not call set(),
+  // mutate M7, replace an original cave, or change the schema-1 baseline.
+  const stagedCells=new Map();
+  const staged=Object.create(world);
+  staged.get=(x,y,z)=>stagedCells.get(x+','+y+','+z)??world.get(x,y,z);
+  staged.save=()=>world.save();
   for(const tree of survey.admitted){
-    const result=auditSnowS3OriginalPlayerBody(world,tree,{collides});
+    // The original sparse site selector should already separate canopies.
+    // Fail the whole review if any future style breaks that invariant.
+    if(tree.cells.some(([x,y,z])=>stagedCells.has(x+','+y+','+z)))
+      return fail('overlapping-admitted-S3-physical-cells');
+    const result=auditSnowS3OriginalPlayerBody(staged,tree,{collides});
     probes+=result.collisionProbes??0;
     if(!result.safe){
-      if(result.reason==='original-schema-1-save-mutated-during-body-review'||
-         result.reason==='original-player-collision-callback-failed')
+      // Only a genuine severed passage is an ordinary site rejection.
+      // A broken source reader, exhausted budget or callback failure cannot
+      // be presented as a successfully reviewed forest with fewer trees.
+      if(result.reason!=='original-player-body-passage-severed')
         return fail(result.reason);
       rejected.push(Object.freeze({key:tree.key,reason:result.reason}));
       continue;
     }
     connections+=result.preservedPairs;
+    for(const [x,y,z,id] of tree.cells)stagedCells.set(x+','+y+','+z,id);
     admitted.push(tree);
   }
   if(JSON.stringify(world.save())!==before)
@@ -57,5 +72,6 @@ export function reviewSnowS3PlayerApprovedChunk(world,cx,cz,{collides,...source}
     sourceCandidates:survey.sourceCandidates,sourceAdmitted:survey.admitted.length,
     admitted:Object.freeze(admitted),rejected:Object.freeze(rejected),
     collisionProbes:probes,preservedPortalConnections:connections,
-    originalBodyCallbackRequired:true,notLiveM7:true,sourceWorldUnchanged:true});
+    originalBodyCallbackRequired:true,notLiveM7:true,sourceWorldUnchanged:true,
+    sequentialAggregateBodyReviewed:true,stagedCells:stagedCells.size});
 }

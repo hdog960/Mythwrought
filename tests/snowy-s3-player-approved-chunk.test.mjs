@@ -80,3 +80,42 @@ test('strict callback cannot silently inject a protected old cave without schema
   assert.equal(result.reason,'original-M7-cave-or-voxel-state-changed-during-player-review');
   assert.equal(world.edits.size,0);
 });
+
+test('subsequent S3 body reviews observe earlier admitted physical trees without world writes',()=>{
+  const {world,deps,collides,sites}=fixture();
+  const first=sites[0],next=sites[1];
+  let combinedBefore=0,firstAfter=0;
+  const tracking=(readWorld,x,feet,z)=>{
+    const old=world.get(first.x,7,first.z);
+    assert.equal(old,0,'Source world must never be painted to stage trees');
+    const painted=readWorld.get(first.x,7,first.z)===4;
+    if(painted&&x>next.x-3&&x<next.x+4&&z>next.z-4&&z<next.z+5)
+      combinedBefore++;
+    if(painted&&x<first.x+4&&z<first.z+5)firstAfter++;
+    return collides(readWorld,x,feet,z);
+  };
+  const result=reviewSnowS3PlayerApprovedChunk(world,0,32,{...deps,collides:tracking});
+  assert.equal(result.safe,true,JSON.stringify(result));
+  assert.equal(result.sequentialAggregateBodyReviewed,true);
+  assert.equal(result.admitted.length,3);
+  assert.ok(firstAfter>0,'Original first tree must be inserted into detached body review');
+  assert.ok(combinedBefore>0,'Later tree reviews must see earlier accepted WOOD');
+  assert.equal(world.get(first.x,7,first.z),0);
+  assert.equal(result.stagedCells,new Set(result.admitted.flatMap(t=>t.cells.map(c=>key(...c.slice(0,3))))).size);
+});
+
+test('original body collision probe budget exhaustion aborts entire forest, not one tree',()=>{
+  const {world,deps}=fixture();
+  const result=reviewSnowS3PlayerApprovedChunk(world,0,32,{...deps,
+    collides:()=>{throw new RangeError('original-player-collision-probe-budget-exceeded');}});
+  assert.equal(result.safe,false);
+  assert.equal(result.reason,'original-player-collision-probe-budget-exceeded');
+  assert.equal(world.edits.size,0);
+});
+
+test('incorrect collision return type cannot be counted as an ordinary rejected site',()=>{
+  const {world,deps}=fixture();
+  const result=reviewSnowS3PlayerApprovedChunk(world,0,32,{...deps,collides:()=>null});
+  assert.equal(result.safe,false);
+  assert.equal(result.reason,'original-player-collision-callback-failed');
+});

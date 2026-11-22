@@ -15,6 +15,9 @@ import {describeCandidateObject} from '../src/nonblock/candidate-scene.mjs';
 import {reviewSnowS3SafeChunk} from '../src/manual-biomes/snowy-s3-integrated-admission.mjs';
 import {reviewSnowS3PlayerApprovedChunk}
   from '../src/manual-biomes/snowy-s3-player-approved-chunk.mjs';
+import {previewSnowS3CanonicalOwnerChunk}
+  from '../src/manual-biomes/snowy-s3-owner-chunk-preview.mjs';
+import {stepPlayer} from '../src/physics.mjs';
 import {surveySnowS4ChunkSeams} from '../src/manual-biomes/snowy-s4-seam-evidence.mjs';
 import {reviewSnowS5Scenery} from '../src/manual-biomes/snowy-s5-existing-scenery-audit.mjs';
 
@@ -62,6 +65,44 @@ test('real M7 two-seed S3 walking and S5 scenery read-only provenance',()=>{
     assert.equal(body.sourceAdmitted,integrated.admitted.length);
     assert.equal(body.sourceWorldUnchanged,true);
     assert.ok(body.admitted.length<=integrated.admitted.length);
+    // Original deterministic owner semantics: overlapping original 16x16
+    // chunk requests must not produce two different approvals for the same
+    // tree stem, regardless of which chunk was requested first.
+    const ownerOpts={...deps,planScenery:planEnvironmentalScenery,
+      describeScene:describeCandidateObject,collides};
+    const western=previewSnowS3CanonicalOwnerChunk(world,-1,32,ownerOpts);
+    const eastern=previewSnowS3CanonicalOwnerChunk(world,0,32,ownerOpts);
+    assert.equal(western.safe,true,'Original owner West: '+western.reason);
+    assert.equal(eastern.safe,true,'Original owner East: '+eastern.reason);
+    const intersection=new Set(western.cells.map(c=>c.slice(0,3).join(',')));
+    for(const cell of eastern.cells){
+      assert.equal(Math.floor(cell[0]/16),0);
+      assert.ok(!intersection.has(cell.slice(0,3).join(',')),
+        'Duplicated physical voxel across original negative/positive chunks');
+    }
+    // One source-real stepPlayer test only if there is a physically admitted
+    // tree with an authentic free starting position. Never synthesize a
+    // cleared baseline or weaken the strict source/cave tests above.
+    let playerSteps=0;
+    if(body.admitted.length){
+      const first=body.admitted[0],near={
+        x:first.x+.5,z:first.z-2.5,feet:first.floor+1,
+        yaw:0,pitch:0,vX:0,vY:0,vZ:0,onGround:true,coyote:.09,jumpBuffer:0
+      };
+      if(!collides(world,near.x,near.feet,near.z)){
+        const stagedCells=new Map(first.cells.map(c=>[c.slice(0,3).join(','),c[3]]));
+        const staged=Object.create(world);
+        staged.get=(x,y,z)=>stagedCells.get(x+','+y+','+z)??world.get(x,y,z);
+        if(!collides(staged,near.x,near.feet,near.z)){
+          for(let i=0;i<45;i++){
+            stepPlayer(staged,near,{forward:1,strafe:0,jump:false},1/60);
+            assert.equal(collides(staged,near.x,near.feet,near.z),false,
+              'Original stepPlayer penetrated a source-approved physical tree');
+            playerSteps++;
+          }
+        }
+      }
+    }
     const seam=surveySnowS4ChunkSeams(world,
       {x:13,z:508,width:6,height:6},{biomeAt:v6BiomeAt,terrainHeight});
     assert.equal(seam.sampled,36);
@@ -82,6 +123,6 @@ test('real M7 two-seed S3 walking and S5 scenery read-only provenance',()=>{
         admitted:integrated.admitted.length,rejected:integrated.rejected},
       body:{sourceAdmitted:body.sourceAdmitted,playerBodyApproved:body.admitted.length,
         collisionProbes:body.collisionProbes,protectedPortalPairs:body.preservedPortalConnections},
-      seam:seam.counts}));
+      seam:seam.counts,playerSteps,owner:{west:western.physicalCells,east:eastern.physicalCells}}));
   }
 });
