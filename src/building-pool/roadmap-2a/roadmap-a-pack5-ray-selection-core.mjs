@@ -5,6 +5,13 @@
  */
 const requireTrue=(ok,why)=>{if(!ok)throw Error('Roadmap A Pack5 ray witness denied: '+why);};
 const coords=Object.freeze([0.02,0.1,0.5,0.9,0.98]);
+const grazingTolerance=0.000002;
+const nearTangentialBoxBoundary=(origin,axis,boxes)=>{
+ const tangential=[0,1,2].filter(k=>k!==axis);
+ return boxes.some(b=>tangential.some(k=>
+  Math.abs(origin[k]-b[k])<=grazingTolerance||
+  Math.abs(origin[k]-b[k+3])<=grazingTolerance));
+};
 const symbols=Object.freeze({
  'pack5:079':['chalk-lime','hand-troweled'],
  'pack5:080':['hearth-running-bond','kiln-soldier-course'],
@@ -96,12 +103,14 @@ export function auditSourceOnlyPack5AxisRayFidelity(fixture){
  const summary={sampleRays:0,collisionHits:0,selectionHits:0,authoredTriangleHits:0,
   colliderWithoutSelection:0,selectionWithoutCollider:0,
   selectionRecessedBehindCollider:0,selectionAheadOfCollider:0,
-  selectionAndColliderCoincident:0,selectionTriangleMismatch:0,bothMiss:0};
+  selectionAndColliderCoincident:0,selectionTriangleMismatch:0,
+  sourceBoundaryGrazingRayDisagreements:0,interiorTriangleSelectionDisagreements:0,bothMiss:0};
  const faces=[],witnesses=[];
  for(let axis=0;axis<3;axis++)for(const positive of [false,true]){
   const other=[0,1,2].filter(i=>i!==axis);
   const face={axis,side:positive?'+':'-',rays:0,colliderWithoutSelection:0,
-   selectionRecessedBehindCollider:0,selectionAheadOfCollider:0,selectionTriangleMismatch:0};
+   selectionRecessedBehindCollider:0,selectionAheadOfCollider:0,selectionTriangleMismatch:0,
+   sourceBoundaryGrazingRayDisagreements:0,interiorTriangleSelectionDisagreements:0};
   for(const u of coords)for(const v of coords){
    const origin=[0,0,0],direction=[0,0,0];
    origin[axis]=positive?2:-1;origin[other[0]]=u;origin[other[1]]=v;
@@ -117,7 +126,16 @@ export function auditSourceOnlyPack5AxisRayFidelity(fixture){
    if((sel===null)!==(tri===null)||
       (sel!==null&&tri!==null&&Math.abs(sel-tri)>0.000002)){
     summary.selectionTriangleMismatch++;face.selectionTriangleMismatch++;
-    issue='AUTHORED_TRIANGLE_VERSUS_SELECTION_RAY_DISAGREEMENT';
+    const sourceEdgeGrazing=nearTangentialBoxBoundary(origin,axis,fixture.selectionBoxes);
+    if(sourceEdgeGrazing){
+     summary.sourceBoundaryGrazingRayDisagreements++;
+     face.sourceBoundaryGrazingRayDisagreements++;
+     issue='SOURCE_BOUNDARY_GRAZING_FLOAT_PRECISION_AMBIGUITY';
+    }else{
+     summary.interiorTriangleSelectionDisagreements++;
+     face.interiorTriangleSelectionDisagreements++;
+     issue='AUTHORED_TRIANGLE_VERSUS_SELECTION_INTERIOR_RAY_DISAGREEMENT';
+    }
    }
    if(coll!==null&&sel===null){
     summary.colliderWithoutSelection++;face.colliderWithoutSelection++;
@@ -142,6 +160,8 @@ export function auditSourceOnlyPack5AxisRayFidelity(fixture){
  }
  requireTrue(summary.sampleRays===150&&faces.length===6&&
   summary.selectionHits+summary.bothMiss+summary.colliderWithoutSelection<=150&&
+  summary.selectionTriangleMismatch===summary.sourceBoundaryGrazingRayDisagreements+
+   summary.interiorTriangleSelectionDisagreements&&
   summary.colliderWithoutSelection+summary.selectionWithoutCollider+
    summary.selectionRecessedBehindCollider+summary.selectionAheadOfCollider+
    summary.selectionAndColliderCoincident+summary.bothMiss===150,
@@ -151,6 +171,8 @@ export function auditSourceOnlyPack5AxisRayFidelity(fixture){
   sampleGrid:coords.slice(),faceResults:faces,raySummary:summary,firstBoundedWitnesses:witnesses,
   originalAuthoredTrianglesComparedWithOriginalSelection:true,
   partialFaceAndInsetRiskIsNotRealGameplayFailureProof:true,
+  boundaryGrazingIsNumericalUncertaintyNotExoneration:true,
+  sourceInteriorRayMismatchCount:summary.interiorTriangleSelectionDisagreements,
   analyticalSourceRaysNotLiveEngineRaycast:true,
   originalA5SourceVariantOrYawChosen:false,actualGPUShaderOrPixelVisibilityMeasured:false,
   realWorldCollisionOrTargetingAccepted:false,

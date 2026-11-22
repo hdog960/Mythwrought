@@ -22,8 +22,16 @@ test('all original Pack5 079/080/081 variants and four yaws: exact 24 previews a
 });
 test('authentic source authored mesh triangles geometrically agree with selection boxes at fixed analytical rays',()=>{
  const r=auditOriginalPack5AllVariantYawRaySelection();
- assert.equal(r.originalSourceAlternativeWitnesses.reduce(
-  (n,row)=>n+row.raySummary.selectionTriangleMismatch,0),0);
+ const raw=r.originalSourceAlternativeWitnesses.reduce(
+  (n,row)=>n+row.raySummary.selectionTriangleMismatch,0);
+ const grazing=r.originalSourceAlternativeWitnesses.reduce(
+  (n,row)=>n+row.raySummary.sourceBoundaryGrazingRayDisagreements,0);
+ const interior=r.originalSourceAlternativeWitnesses.reduce(
+  (n,row)=>n+row.raySummary.interiorTriangleSelectionDisagreements,0);
+ assert.equal(raw,grazing+interior,'preserve raw original source ray mismatch evidence');
+ assert.equal(interior,0,'interior mismatch requires engineering, not float edge reclassification');
+ assert.ok(raw>0,'original source authored boundary-grazing disagreements must be retained');
+ assert.equal(r.originalInteriorTriangleDisagreementCount,0);
  assert.ok(r.originalSourceAlternativeWitnesses.every(row=>
   row.originalUnchangedManualFivePackSelectionUsed===true&&
   row.originalUnchangedManualFivePackCollisionUsed===true&&

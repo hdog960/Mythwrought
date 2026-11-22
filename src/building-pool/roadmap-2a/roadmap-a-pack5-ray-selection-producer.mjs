@@ -61,7 +61,8 @@ export function auditOriginalPack5AllVariantYawRaySelection(){
   requireTrue(family?.variants?.length===2,'original Pack5 catalog variants changed '+symbol);
   bySymbol[symbol]={authoredVariants:0,explicitYawWitnesses:0,
    sampleRays:0,colliderWithoutSelection:0,selectionRecessedBehindCollider:0,
-   selectionWithoutCollider:0,selectionTriangleMismatch:0};
+   selectionWithoutCollider:0,selectionTriangleMismatch:0,
+   sourceBoundaryGrazingRayDisagreements:0,interiorTriangleSelectionDisagreements:0};
   for(const variant of family.variants){
    bySymbol[symbol].authoredVariants++;
    for(let orientation=0;orientation<4;orientation++){
@@ -70,7 +71,8 @@ export function auditOriginalPack5AllVariantYawRaySelection(){
     const agg=bySymbol[symbol];
     agg.explicitYawWitnesses++;agg.sampleRays+=r.raySummary.sampleRays;
     for(const key of ['colliderWithoutSelection','selectionRecessedBehindCollider',
-     'selectionWithoutCollider','selectionTriangleMismatch'])
+     'selectionWithoutCollider','selectionTriangleMismatch',
+     'sourceBoundaryGrazingRayDisagreements','interiorTriangleSelectionDisagreements'])
      agg[key]+=r.raySummary[key];
     out.push(r);
    }
@@ -86,6 +88,9 @@ export function auditOriginalPack5AllVariantYawRaySelection(){
   originalSourceAlternativeWitnesses:out,
   variantsAndYawsExhaustivelyExaminedNotChosen:true,
   originalProducerMeshesSelectionsCollidersSupportCrosschecked:true,
+  boundaryGrazingDisagreementsRemainVisibleNotSilentlyAccepted:true,
+  originalInteriorTriangleDisagreementCount:Object.values(bySymbol).reduce(
+   (n,row)=>n+row.interiorTriangleSelectionDisagreements,0),
   actualGameOrPwaRaycasterNotExecuted:true,
   originalA5PhysicalMaterialOrYawChosen:false,
   actualRendererOrGameplayApprovalGranted:false,

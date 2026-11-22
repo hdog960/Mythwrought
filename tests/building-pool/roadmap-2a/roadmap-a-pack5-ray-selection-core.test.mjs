@@ -70,8 +70,22 @@ test('art protruding farther than collider is differentiated without changing ph
 test('source-authored triangle versus selection discrepancy cannot be treated as proof of visibility',()=>{
  const r=auditSourceOnlyPack5AxisRayFidelity(fixture([inset],[cube],boxMesh(cube)));
  assert.ok(r.raySummary.selectionTriangleMismatch>0);
+ assert.ok(r.raySummary.interiorTriangleSelectionDisagreements>0);
+ assert.equal(r.raySummary.selectionTriangleMismatch,
+  r.raySummary.sourceBoundaryGrazingRayDisagreements+
+  r.raySummary.interiorTriangleSelectionDisagreements);
  assert.equal(r.raySummary.authoredTriangleHits,150);
  assert.equal(r.originalA5SourceVariantOrYawChosen,false);
+});
+test('Float32 versus Float64 near-authored edge grazing is reported separately, never hidden',()=>{
+ const nearFloat=[.020000000000000018,0,0,1,1,1];
+ const x=auditSourceOnlyPack5AxisRayFidelity(fixture([nearFloat],[cube],boxMesh([.02,0,0,1,1,1])));
+ assert.ok(x.raySummary.selectionTriangleMismatch>0);
+ assert.ok(x.raySummary.sourceBoundaryGrazingRayDisagreements>0);
+ assert.equal(x.raySummary.selectionTriangleMismatch,
+  x.raySummary.sourceBoundaryGrazingRayDisagreements+
+  x.raySummary.interiorTriangleSelectionDisagreements);
+ assert.equal(x.boundaryGrazingIsNumericalUncertaintyNotExoneration,true);
 });
 test('exactly six original face directions and fixed 5x5 sampling, with bounded examples',()=>{
  const r=auditSourceOnlyPack5AxisRayFidelity(fixture([inset],[cube],boxMesh(inset)));
