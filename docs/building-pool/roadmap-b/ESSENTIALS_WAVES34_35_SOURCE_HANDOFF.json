@@ -1,0 +1,221 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.waves34-35-original-source-handoff.v1",
+  "state": "ISOLATED UNACCEPTED ORIGINAL BUILDER B SOURCE ONLY. No native node:test, original game, physical Pack install, real WebGL2, iPhone or PWA certification.",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "sessionStartingHEAD": "a7ef7805f52b15655de862d46eadca0be6655b36",
+  "protectedOpenDraftPR407HEAD": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "verifiedProductionMainAtSessionStart": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "originalSources": [
+    {
+      "wave": 34,
+      "id": "r1:farm-barn:desert:medium:003",
+      "name": "Coppermesa Comb-Lane Harvest Barn",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave34.mjs",
+      "blob": "addc0e13bbb84f1104f166d8dcae17cdcf105554",
+      "size": "medium",
+      "sourceAuthoredCells": 15848,
+      "roofCellsDirectlyBackedAtYMinusOne": 3678,
+      "connectedSourceWalkableCells": 3687,
+      "rooms": 14,
+      "twoHighPortals": 20,
+      "originalRoofWings": 8,
+      "originalGenuinelyUnroofedPavedWalkableCourts": [
+        208,
+        64
+      ],
+      "additionalUnroofedSourceCombLaneCells": 184,
+      "originalOuterCombThreeLanes": 3,
+      "realStoneSilos": 2,
+      "octagonalGroundedSiloTierHeights": [
+        29,
+        32
+      ],
+      "trueDirectlyBackedPack3SiloCrownCells": [
+        24,
+        24
+      ],
+      "originalElevatedPack4Windows": [
+        6,
+        6
+      ],
+      "otherUprightPack4Cells": 44,
+      "twoHighOtherGlassBays": 22,
+      "skyOpenCardinalWalkingBFS": "PASS from (19,1,70) to (51,1,70)",
+      "localStrictEightWayD4": {
+        "priorWaves": [
+          1,
+          11,
+          22
+        ],
+        "transforms": 24,
+        "maxIoU": 0.3433257918552036,
+        "threshold": 0.85
+      },
+      "workingGrainMachines": false,
+      "grainGrowth": false,
+      "liveWorldOrSaves": false
+    },
+    {
+      "wave": 35,
+      "id": "r1:bathhouse:snow:medium:003",
+      "name": "Frostmere Three-Court Bath Lodge",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave35.mjs",
+      "blob": "bc6cd2b22ae0e7aa59ed22bc56e416a3aa0530c3",
+      "size": "medium",
+      "sourceAuthoredCells": 14333,
+      "roofCellsDirectlyBackedAtYMinusOne": 3604,
+      "connectedSourceWalkableCells": 3755,
+      "rooms": 15,
+      "twoHighPortals": 21,
+      "originalRoofWings": 9,
+      "originalGenuinelyUnroofedPavedWalkableCourts": [
+        224,
+        72,
+        72
+      ],
+      "additionalUnroofedSourceWinterPromenadeCells": 183,
+      "cardinalPromenadeBFS": "PASS from (18,1,69) to (53,1,69)",
+      "uprightPack4Windows": 132,
+      "originalCompleteFourHighGlassBays": 33,
+      "windowPhysicalSource": "true y1 timber sill, y2 through y5 upright Pack4 window cells, genuine solid y6 lintel and exterior air, windows authored after real portal cuts",
+      "localStrictEightWayD4": {
+        "priorWaves": [
+          5,
+          18,
+          24
+        ],
+        "transforms": 24,
+        "maxIoU": 0.380218368657675,
+        "threshold": 0.85
+      },
+      "activeBathWater": false,
+      "heating": false,
+      "realIceSafety": false,
+      "liveWorldOrSaves": false
+    }
+  ],
+  "actuallyVerified": {
+    "method": "Exact original repository Git blobs for legacy-stable-schema, schema, sourcePlan and unchanged validateBlueprint + source-only physical/D4 audit executed in an isolated JS V8; this is NOT native Node nor live original game.",
+    "blueprintCompiler": "PASS both source designs",
+    "originalSourceCells": 30181,
+    "originalImmediateSupportedRoofCells": 7282,
+    "sourceConnectedWalkableCells": 7442,
+    "groundedUnroofedCourtCells": 640,
+    "additionalUnroofedConnectedOutdoorWalkingCells": 367,
+    "roomCount": 29,
+    "originalTwoHighPortalCount": 41,
+    "intactOriginalPack4WindowCells": 188,
+    "completeLowTwoHighGlassBays": 22,
+    "completeFourHighGlassBays": 33,
+    "elevatedSiloGlassCells": 12,
+    "sourceContinuousStoneSilos": "PASS both 7x9 full stone ground-to-y3 cores; 24 supported crown cells and six high stone-framed windows per tower",
+    "actualCardinalOutdoorWalkingBFS": "PASS both genuine y1 crosswalk connections",
+    "strictSourceSameCategoryEightWayD4": "PASS 48/48 rotations/reflections against six previous same-category original sources; maxIoU 0.380218368657675 (<0.85)",
+    "frozenB115D92Ownership": "PASS both new IDs exclusive B115, absent D92 and old 228 accepted",
+    "actualProducerPackColliderAndLiveWeatherProof": "NOT_CERTIFIED"
+  },
+  "stagedButNotRun": {
+    "focusedNativeNodeTest": {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-waves34-35-focused.test.mjs",
+      "blob": "837b26544cc4b25bb8ed67045520a880814dfeca",
+      "sourceStaticParse": "PASS",
+      "nativeNode": "NOT_EXECUTED"
+    },
+    "singleExpandedStrictHistoricalTest": {
+      "path": "tests/building-pool/roadmap-b/builder-b-originals-waves9-35-shared-historical-d4.test.mjs",
+      "blob": "1ce792313bce16213965fd7397edb25c1eabd834",
+      "actualAcceptedHistoricalOriginalSources": 228,
+      "authoredServiceSourcesOverall": 35,
+      "addedNewWave9to35Originals": 27,
+      "singleHistoricalSourceCensus": true,
+      "unrelaxedD4Threshold": 0.85,
+      "sourceAllocationTotal": 263,
+      "remainingSourceAllocation": 172,
+      "nativeNode": "NOT_EXECUTED"
+    },
+    "deferredOneCoordinatedGallery": {
+      "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-35-gallery.mjs",
+      "galleryBlob": "ab614dc9a63fc2ecf1949d4d2419626da03c76e6",
+      "independentAuditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-35-gallery.mjs",
+      "auditorBlob": "af0cdd511a7c683189ab73cb669a0dc5892f3c09",
+      "originalConstructorWiringTest": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-35-gallery-wiring.test.mjs",
+      "wiringBlob": "bf3a91aff8ce53f14c8b52d98b596ab826f06a2a",
+      "newSourcePreviewFiles": [
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave34-preview.html",
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave35-preview.html"
+      ],
+      "newSourceOriginals": 27,
+      "sourceEvidenceFiles": 30,
+      "expectedUniqueWebGL2ProxyPNGFrames": 162,
+      "viewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "views": [
+        "exterior",
+        "cutaway"
+      ],
+      "exactGitCommitPinned": true,
+      "independentGenuinePNGCRC": true,
+      "uniquePNG_SHA256": true,
+      "actualChromiumOrPNGExecution": "NOT_EXECUTED",
+      "sourceProxyNotActualOriginalGame": true
+    }
+  },
+  "outstandingAcceptance": [
+    "Authentic native Node focused full original repository tests and one consolidated accepted-228 eight-way D4 at exact branch HEAD.",
+    "Original Pack1–5 physical candidate geometry, mounted Pack3/Pack4 selection/collision, span/load/weather requirements.",
+    "One coordinated real Chromium WebGL2 162-frame original-source-proxy gallery with independent exact-HEAD PNG CRC/SHA, visual and performance audit.",
+    "Owner-controlled original-world/settlement placement, original-game pathing/physical collisions, iPhone installed Home Screen PWA testing, actual saves/offline/performance and creator artwork acceptance."
+  ],
+  "globalCI": {
+    "protectedRefsReadOnceAtStart": true,
+    "reusedPriorExactPR407SuccessfulActionsAsHistoricalEvidenceOnly": [
+      44972498965,
+      44972499027
+    ],
+    "newActionsRuns": 0,
+    "newChromiumRuns": 0,
+    "sharedCIWorkflowEdits": 0,
+    "duplicatedHistoricalD4Runs": 0,
+    "CIWorkflowCancellations": 0,
+    "requiredGatesWeakened": false
+  },
+  "boundaries": {
+    "sourceChangesBuilderBOnly": true,
+    "acceptedHistorical228Untouched": true,
+    "frozenB115D92Unmodified": true,
+    "otherDevelopersAndBuildersUntouched": true,
+    "fiveHourlyAutomationsUntouched": true,
+    "productionMainUntouched": true,
+    "protectedPR407Untouched": true,
+    "existingWorldSavesUntouched": true,
+    "noMerge": true,
+    "noDeploy": true
+  },
+  "progress": {
+    "residentialNewAuthored": 10,
+    "servicesNewAuthored": 35,
+    "totalNewOriginals": 45,
+    "targetNewOriginals": 294,
+    "remainingNewOriginals": 249,
+    "remainingResidential": 169,
+    "remainingServices": 80
+  },
+  "remainingSessionEstimate": {
+    "lower": 85,
+    "upper": 235,
+    "excludesFinalIntegrationAndRelease": true,
+    "broadUncertainEstimate": true
+  }
+}
