@@ -16,7 +16,13 @@ export function summarizeSourceProtectedChunkRisk(results,{
    maxTotalApprovedCarves>1000000||
   typeof requireInteriorEvidence!=='boolean')
   throw TypeError('Invalid source-protected chunk risk aggregation');
- const seen=new Set(),rows=[];
+ const seen=new Set(),rows=[],ownedBounds=[];
+ // Individual 16^3 reports must describe disjoint OWNED cell interiors.
+ // Halos are intentionally shared, but overlapping cores would double-count
+ // carved cells and per-core faces as if two independent chunks existed.
+ const overlaps=(a,b)=>['x','y','z'].every(axis=>
+  a.origin[axis]<b.origin[axis]+b.side&&
+  b.origin[axis]<a.origin[axis]+a.side);
  let sourceQueries=0,faceGrowth=0,approvedCarves=0,unsafeCarves=0;
  let approvedHaloProposals=0,rejectedHaloProposals=0;
  let requestedInteriorCarves=0,rejectedInteriorCarves=0;
@@ -56,10 +62,19 @@ export function summarizeSourceProtectedChunkRisk(results,{
      atIndex:i,worldChanged:false});
    observedCoreBreakdowns++;
   }
+  if(![p.x+r.side,p.y+r.side,p.z+r.side].every(INT))
+   return Object.freeze({ok:false,reason:'INVALID_CHUNK_INTERIOR_BOUNDS',
+    atIndex:i,worldChanged:false});
   const key=p.x+','+p.y+','+p.z;
   if(seen.has(key))return Object.freeze({ok:false,
    reason:'DUPLICATE_CHUNK_ORIGIN',atIndex:i,worldChanged:false});
   seen.add(key);
+  const volume=Object.freeze({origin:Object.freeze({...p}),side:r.side});
+  const overlapped=ownedBounds.findIndex(other=>overlaps(other,volume));
+  if(overlapped!==-1)return Object.freeze({ok:false,
+   reason:'OVERLAPPING_CHUNK_INTERIORS',atIndex:i,
+   overlapsIndex:overlapped,worldChanged:false});
+  ownedBounds.push(volume);
   // Halo budget failures have no complete original source census and cannot
   // be misrepresented as approved even when the caller supplies bogus zeros.
   if(r.ok&&r.sourceHaloCells!==(r.side+2)**3)
@@ -105,6 +120,8 @@ export function summarizeSourceProtectedChunkRisk(results,{
   approvedHaloProposals,rejectedHaloProposals,
   requestedInteriorCarves,rejectedInteriorCarves,
   completeCoreHaloEvidence:observedCoreBreakdowns===results.length,
+  ownedChunkInteriorsDisjoint:true,
+  haloOverlapPermittedAndNotCountedAsCore:true,
   actualInteriorOnlyCarveBudget:
    observedCoreBreakdowns===results.length,
   limitsExceeded:Object.freeze(limitsExceeded),
