@@ -21,6 +21,11 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
     assert.equal(world.edits.size,0);
     assert.equal(world.rotations.size,0);
     assert.ok(first.sites.every(s=>v6BiomeAt(s.x,s.z,seed)?.name==='mountain'));
+    console.log('MOUNTAIN V8 REAL TILE CENSUS '+JSON.stringify({
+      seed,tiles:first.stats.tiles,checked:first.stats.seen,
+      eligible:first.stats.eligible,plants:first.stats.plants,
+      plantCells:first.stats.plantCells,rejected:first.stats.rejected
+    }));
   }
 });
 test('physical dwarf conifer and flower cells refuse nonair and protected landmarks',()=>{
