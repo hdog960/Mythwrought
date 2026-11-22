@@ -1313,6 +1313,12 @@ export const ROADMAP_D_WAVE14_PLANS=Object.freeze([
         74,
         26,
         70
+      ],
+      [
+        16,
+        34,
+        40,
+        51
       ]
     ],
     "discs": [
