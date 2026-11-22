@@ -201,6 +201,15 @@ export class FourRegionWorld extends VoxelWorld{
     const overlay=this._columnPlan(x,z).get(y);
     if(this.profile.generator!==M7_ENVIRONMENT_GENERATOR)return overlay??base;
     const ground=overlay??this._environmentBaseline(x,y,z,base);
+    // Some Desert shoulder columns deliberately fail the full terrain plan
+    // because protected underlying cave air or authored geometry would be
+    // overwritten. Preserve that entire protected envelope; recolor ONLY
+    // the untouched natural surface grass at its original, unchanged height.
+    // Explicit edits remain authoritative in VoxelWorld.get, and all older
+    // generation profiles already returned above.
+    if(overlay===undefined&&ground===BLOCK.GRASS&&
+       y===terrainHeight(x,z,this.seed)&&
+       v6BiomeAt(x,z,this.seed)?.name==='desert')return 256;
     return ground===BLOCK.AIR&&y>terrainHeight(x,z,this.seed)?this._environmentTreeAt(x,y,z):ground;
   }
   set(x,y,z,id,rotation=0){
