@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"><title>Mythwrought — M4 detached building laboratory</title><link rel="stylesheet" href="./build-preview.css"></head>
+<body>
+<div id="portraitWarning" class="portrait-warning">Rotate to landscape for this M4 building preview.</div>
+<main class="shell" aria-label="Standalone Creative Mode build transaction preview — no live changes">
+ <aside class="rail left" aria-label="Protected left thumb rail"><div class="rail-title">✦ MOVE</div><div class="rail-hint">PROTECTED THUMB RAIL</div><div class="pad" aria-hidden="true"><span>✦</span></div><div class="rail-label">NO GAME INPUT</div></aside>
+ <section class="screen"><header class="header"><strong>MYTHWROUGHT</strong><span>BUILD LAB · M4</span><small>DETACHED ONLY</small></header>
+  <div class="world" id="world">
+   <div class="toolbar" role="group" aria-label="Synthetic material and orientation"><button type="button" id="chooseBlock" aria-pressed="true">STONE</button><button type="button" id="chooseObject" aria-pressed="false">ARCH</button><button type="button" id="rotateShape">ROTATE <span id="rotation">0°</span></button></div>
+   <div id="mapReservation" class="map" role="img" aria-label="Reserved upper-right minimap area, no live data">◇<small>MAP SPACE</small></div>
+   <div class="cell-grid" id="cellGrid" role="group" aria-label="Deterministic 10 by 10 synthetic world grid, tap to target cell"></div>
+   <div class="commands"><label>X <input type="number" id="targetX" min="-16" max="15" value="0"></label><label>Y <input type="number" id="targetY" min="0" max="23" value="0"></label><label>Z <input type="number" id="targetZ" min="-16" max="15" value="0"></label><button type="button" id="place">PLACE</button><button type="button" id="remove">REMOVE</button><button type="button" id="batch">3× BATCH</button></div>
+  </div><footer class="status"><span id="buildStatus" role="status" aria-live="polite">M4 isolated: select a test cell to plan an edit.</span><span>NO LIVE WORLD</span></footer>
+ </section>
+ <aside class="rail right" aria-label="Protected right thumb rail"><div class="rail-title">✦ LOOK</div><div class="rail-hint">PROTECTED THUMB RAIL</div><div class="pad" aria-hidden="true"><span>◇</span></div><div class="rail-tools"><button id="undoCandidate" type="button">UNDO PLAN</button><button id="resetLab" type="button">RESET</button></div><div class="rail-label">NO GAME ACTIONS</div></aside>
+</main>
+<div id="buildEvidence" hidden aria-hidden="true"></div>
+<script type="module" src="./build-preview.mjs"></script>
+</body></html>

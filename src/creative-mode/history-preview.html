@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"><title>Mythwrought — M5 detached undo and save laboratory</title><link rel="stylesheet" href="./build-preview.css"><link rel="stylesheet" href="./history-preview.css"></head>
+<body>
+<div id="portraitWarning" class="portrait-warning">Rotate to landscape for this M5 detached history preview.</div>
+<main class="shell" aria-label="Creative Mode detached history and recovery laboratory, no live game saves">
+ <aside class="rail left" aria-label="Protected left thumb rail"><div class="rail-title">✦ MOVE</div><div class="rail-hint">THUMB RAIL · PRESERVED</div><div class="pad" aria-hidden="true"><span>✦</span></div><div class="rail-tools storage-tools"><button type="button" id="saveHistory">SAVE</button><button type="button" id="reloadHistory">RELOAD</button><button type="button" id="simulateQuota">QUOTA TEST</button><button type="button" id="corruptPrimary">CORRUPT</button></div><div class="rail-label">MEMORY ONLY</div></aside>
+ <section class="screen"><header class="header"><strong>MYTHWROUGHT</strong><span>HISTORY · M5</span><small>DETACHED ONLY</small></header>
+  <div class="world" id="world">
+   <div class="toolbar" role="group" aria-label="Synthetic shape selection"><button type="button" id="chooseBlock" aria-pressed="true">STONE</button><button type="button" id="chooseObject" aria-pressed="false">ARCH</button><button type="button" id="rotateShape">ROTATE <span id="rotation">0°</span></button></div>
+   <div id="mapReservation" class="map" role="img" aria-label="Reserved upper-right minimap area without live map">◇<small>MAP SPACE</small></div>
+   <div class="history-readout" id="historyReadout" aria-live="polite">REV 0 · UNDO 0 · REDO 0</div>
+   <div class="cell-grid" id="cellGrid" role="group" aria-label="Synthetic grid, tap to target coordinate"></div>
+   <div class="commands"><label>X <input type="number" id="targetX" min="-16" max="15" value="0"></label><label>Y <input type="number" id="targetY" min="0" max="23" value="0"></label><label>Z <input type="number" id="targetZ" min="-16" max="15" value="0"></label><button type="button" id="place">PLACE</button><button type="button" id="remove">REMOVE</button><button type="button" id="batch">3× BATCH</button></div>
+  </div><footer class="status"><span id="historyStatus" role="status" aria-live="polite">M5 detached preview · no production persistence</span><span>NO LIVE SAVE</span></footer>
+ </section>
+ <aside class="rail right" aria-label="Protected right thumb rail"><div class="rail-title">✦ LOOK</div><div class="rail-hint">THUMB RAIL · PRESERVED</div><div class="pad" aria-hidden="true"><span>◇</span></div><div class="rail-tools"><button id="undoHistory" type="button">UNDO</button><button id="redoHistory" type="button">REDO</button><button id="staleRevision" type="button">STALE REV</button><button id="resetLab" type="button">RESET</button></div><div class="rail-label">NO GAME ACTIONS</div></aside>
+</main>
+<div id="historyEvidence" hidden aria-hidden="true"></div>
+<script type="module" src="./history-preview.mjs"></script>
+</body></html>

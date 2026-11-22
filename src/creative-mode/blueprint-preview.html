@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><title>Mythwrought Creative M7 · Blueprint Browser Lab</title><link rel="stylesheet" href="./build-preview.css"><link rel="stylesheet" href="./blueprint-preview.css"></head>
+<body>
+<div class="portrait-warning" id="portraitWarning">Rotate to landscape for the M7 detached blueprint browser.</div>
+<main class="shell" aria-label="M7 read-only synthetic blueprint browser, no builder assets or world integration">
+ <aside class="rail left" aria-label="Protected left thumb rail"><div class="rail-title">✦ MOVE</div><div class="rail-hint">LEFT THUMB · RESERVED</div><div class="pad" aria-hidden="true"><span>✦</span></div><div class="rail-meta">READ ONLY</div><div class="rail-label">NO WORLD EDITS</div></aside>
+ <section class="screen"><header class="header"><strong>MYTHWROUGHT</strong><span>BLUEPRINTS · M7</span><small>OFFLINE FIXTURE</small></header>
+  <div class="world blueprint-world">
+   <div class="filterbar" role="search" aria-label="Search and filter simulated blueprint records">
+    <input id="bpSearch" type="search" autocomplete="off" placeholder="Search samples" aria-label="Search accepted synthetic blueprints" maxlength="100">
+    <select id="bpBiome" aria-label="Filter biome"><option value="all">BIOMES</option><option value="temperate">Temperate</option><option value="desert">Desert</option><option value="snow">Snow</option><option value="enchanted">Enchanted</option><option value="mountain">Mountain</option></select>
+    <select id="bpKind" aria-label="Filter building category"><option value="all">TYPES</option><option value="home">Homes</option><option value="civic">Civic</option><option value="commerce">Shops</option><option value="industry">Industry</option><option value="culture">Culture</option><option value="fortification">Fortified</option><option value="arcane">Arcane</option></select>
+    <select id="bpSize" aria-label="Filter building size"><option value="all">SIZES</option><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select>
+   </div>
+   <div id="mapReservation" class="map" role="img" aria-label="Upper right minimap reservation, not a live minimap">◇<small>MAP SPACE</small></div>
+   <div class="catalog-body">
+    <section class="blueprint-list" aria-label="Eligible fixture catalog results">
+     <div class="list-caption"><span id="bpSummary" role="status" aria-live="polite">Validating mock feed...</span><span id="bpExcluded">0 excluded</span></div>
+     <div id="bpListScroller" class="bp-scroller" tabindex="0" aria-label="Scroll filtered blueprint results"><div id="bpListTop"></div><div id="bpListRows"></div><div id="bpListBottom"></div></div>
+    </section>
+    <section class="blueprint-detail" aria-label="Read-only selected synthetic blueprint preview">
+     <div class="detail-heading" id="bpTitle">Select a sample blueprint</div>
+     <canvas id="bpCanvas" width="320" height="180" role="img" aria-label="Capped source-data voxel thumbnail preview"></canvas>
+     <div class="detail-info" id="bpDescription">Only verified fixture records appear here.</div>
+     <div class="detail-stamp">NO PLACE / IMPORT / SAVE</div>
+    </section>
+   </div>
+   <div id="bpEvidence" aria-hidden="true"></div>
+  </div>
+  <footer class="status"><span id="bpStatus" role="status" aria-live="polite">M7 · DETACHED READ-ONLY CATALOG · NO LIVE BUILDER ASSETS</span><span>0 GAME WRITES</span></footer>
+ </section>
+ <aside class="rail right" aria-label="Protected right thumb rail"><div class="rail-title">✦ ACTION</div><div class="rail-hint">RIGHT THUMB · RESERVED</div><div class="pad" aria-hidden="true"><span>✧</span></div><div class="rail-meta">PREVIEW ONLY</div><div class="rail-label">NO GAME SAVE</div></aside>
+</main>
+<script type="module" src="./blueprint-preview.mjs"></script>
+</body></html>

@@ -1,0 +1,16 @@
+/* M6 detached visual laboratory: extend the proven M4 protected landscape rails. */
+.tool-readout{position:absolute;top:40px;left:8px;font-size:9px;letter-spacing:.045em;color:#f5e9c6;background:#1a3336d9;border:1px solid #a6ad88;padding:2px 5px;border-radius:4px;max-width:calc(100% - 95px);white-space:nowrap}
+.tool-help{position:absolute;bottom:7px;left:6px;right:6px;text-align:center;font-size:9px;letter-spacing:.025em;color:#f1dba9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;text-shadow:0 1px 3px #192d2d}
+.cell-grid{height:min(53%,183px);touch-action:manipulation}
+.cell[data-selected=true]{background:#557c71;border-color:#c1af69;box-shadow:inset 0 0 0 1px #daca8d77}
+.cell[data-ghost=true]{background:#86cb9d!important;border:1px solid #f7efb3;color:#1b3432;box-shadow:inset 0 0 0 1px #f2e4a8}
+.cell[data-occupied=true]{background:#dbbd7a;color:#273932}
+.cell[data-occupied=true][data-moss=true]{background:#92c8a7}
+.cell[data-selected=true][data-ghost=false]{outline:1px dashed #ecd790;outline-offset:-2px}
+.cell[data-first=true],.cell[data-last=true]{outline:2px solid #fff8bc;outline-offset:-1px}
+.toolbar{max-width:calc(100% - 80px)}
+.toolbar button{min-width:37px}
+.rail-tools button{min-height:25px;padding:4px 2px}
+.rail-label{font-size:7px}
+@media(max-width:690px){.cell-grid{height:min(50%,142px)}.tool-readout{top:34px;left:5px;font-size:8px;padding:1px 3px}.tool-help{font-size:7px;bottom:5px}.rail-tools{gap:3px}.rail-tools button{min-height:24px;font-size:9px}.toolbar button{min-width:29px;padding:2px}.toolbar{gap:2px}}
+@media(max-height:340px){.cell-grid{height:min(49%,134px)}.rail-tools button{min-height:23px}.rail{gap:2px}.pad{height:61px}}
