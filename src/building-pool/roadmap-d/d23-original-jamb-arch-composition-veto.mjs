@@ -11,7 +11,16 @@ const AABB=a=>Array.isArray(a)&&a.length===6&&a.every(Number.isFinite)&&
 const collide=(a,b)=>[0,1,2].every(i=>Math.min(a[i+3],b[i+3])-Math.max(a[i],b[i])>1e-6);
 const contact=(a,b)=>{const x=[0,1,2].map(i=>Math.min(a[i+3],b[i+3])-Math.max(a[i],b[i]));
  return x.every(v=>v>=-1e-6)&&x.filter(v=>v>1e-6).length>=2;};
-export function auditD23OriginalJambArchCompatibility(blueprint,exclusive,d21,d22){
+export function auditD23OriginalJambArchCompatibility(blueprint,exclusive,d21,d22,{
+ resolveOriginalPack2PostShape,resolveOriginalPack3Ornament
+}={}){
+ if(typeof resolveOriginalPack2PostShape!=='function'||
+    typeof resolveOriginalPack3Ornament!=='function')
+   throw TypeError('D23 original Pack2 and Pack3 physical owner resolvers required');
+ const originalPost=resolveOriginalPack2PostShape(62,0);
+ if(!originalPost||originalPost.id!==62||!Array.isArray(originalPost.boxes)||
+    originalPost.boxes.length!==3||originalPost.boxes.some(b=>!AABB(b)))
+   throw Error('D23 physical source owner Pack2 ID62 changed');
  if(!blueprint||blueprint.worldPlaced!==false||blueprint.creatorApproved!==false||
     blueprint.integrated!==false||!Array.isArray(blueprint.cells)||
     !Array.isArray(blueprint.openings))
@@ -61,9 +70,13 @@ export function auditD23OriginalJambArchCompatibility(blueprint,exclusive,d21,d2
      cells.get(K([x,4,z]))?.asset!=='live:wood'||
      cells.get(K([x,4,z]))?.feature!=='lintel')
     throw Error('D23 original in-cell structural source ownership or material differs');
-  for(const piece of j.sourceParts)
-   if(!AABB(piece.physicalJambAabb)||piece.originalPack2Id62!==true)
-    throw Error('D23 invalid source geometry in true ID62 material jamb');
+  for(const piece of j.sourceParts){
+   const original=originalPost.boxes[piece.sourcePart];
+   if(!AABB(piece.physicalJambAabb)||piece.originalPack2Id62!==true||
+      !original||!AABB(piece.authenticPostSourceBox)||
+      original.some((v,i)=>Math.abs(v-piece.authenticPostSourceBox[i])>1e-7))
+    throw Error('D23 invalid source geometry in true original Pack2 ID62 jamb');
+  }
   jambs.set(K(j.at),j);
  }
  const deficient=exclusive.plannedOriginalWindowChoices.filter(c=>c.structuralJambCount<2);
@@ -80,10 +93,24 @@ export function auditD23OriginalJambArchCompatibility(blueprint,exclusive,d21,d2
      p.sourceConnectedParts!==13)
    throw Error('D23 cannot compare forged decorative arch source to original Pack2/4 jamb');
   touched.add(k);
+  const angle=({north:0,east:1,south:2,west:3})[p.facing];
+  const genuineArch=resolveOriginalPack3Ornament(121,angle);
+  if(!genuineArch||genuineArch.id!==121||genuineArch.parts?.length!==13||
+     genuineArch.rotation!==angle)throw Error('D23 original Pack3 ID121 sculpted arch owner missing');
   let interfering=0;const leftover=[];
+  const seenPart=new Set();
   for(const part of p.sourceShapeParts){
-   if(!AABB(part.sourceBox)||part.originalPack3Id121===false||
-      part.index<0||part.index>12)throw Error('D23 illegitimate Pack3 original part');
+   const raw=genuineArch.parts[part.index];
+   if(!AABB(part.sourceBox)||part.originalPack3Id121!==true||
+      !Number.isSafeInteger(part.index)||part.index<0||part.index>12||
+      seenPart.has(part.index)||!raw||part.tone!==raw.tone||
+      part.color!==genuineArch.colors[raw.tone]||
+      !Array.isArray(part.originalBox)||part.originalBox.length!==6||
+      raw.box.some((v,i)=>Math.abs(v-part.originalBox[i])>1e-7)||
+      [0,1,2].some(i=>part.sourceBox[i]<raw.box[i]-1e-7||
+        part.sourceBox[i+3]>raw.box[i+3]+1e-7))
+    throw Error('D23 counterfeit, duplicate or overextended original Pack3 source ornament');
+   seenPart.add(part.index);
    const hit=j.sourceParts.some(x=>collide(part.sourceBox,x.physicalJambAabb));
    if(hit)interfering++;
    else leftover.push(part);
