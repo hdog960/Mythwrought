@@ -98,6 +98,12 @@ export function buildBramblecrossSplitRailCoachStables(){
   if(!hasFloor(x,z))throw Error('Source coach passage has no real foundation '+K(x,z));
   b.opening(x,z);b.portal(from,to,x,z);
  }
+ // Source-level wall intersection (39,33) is genuinely isolated from all
+ // other y1 walk cells; fill it as a four-high grounded structural pier instead
+ // of pretending the player can step through surrounding partitions.
+ for(let y=1;y<=4;y++)if(b.clear(39,y,33))
+  b.put(39,y,33,'partition','live:wood','none',
+   {sealedEastHarnessBearingPier:true,nonWalkableOriginal:true});
  const side={north:[0,-1],south:[0,1],west:[-1,0],east:[1,0]};
  let windows=0;
  for(const key of wingFloor){
