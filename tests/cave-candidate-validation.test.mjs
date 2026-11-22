@@ -9,9 +9,10 @@ for(const seed of [179,1,2026,-77]){
     const world=new VoxelWorld(seed);
     const before=JSON.stringify(world.save());
     const trace=caveTraversalTrace(world);
-    assert.equal(trace.samples.length,CAVE_CANDIDATE.length+5);
+    assert.equal(trace.samples.length,CAVE_CANDIDATE.length+9);
     assert.deepEqual(trace.failures,[],JSON.stringify(trace.failures));
     assert.equal(trace.walkable,true);
+    assert.deepEqual(trace.westGallery,[CAVE_CANDIDATE.x+12,trace.samples[CAVE_CANDIDATE.length+6].y,CAVE_CANDIDATE.z-4]);
     const cx=Math.floor(CAVE_CANDIDATE.x/CHUNK_SIZE),cz=Math.floor(CAVE_CANDIDATE.z/CHUNK_SIZE);
     const candidate=caveCandidateMesh(world,cx,cz);
     const ordinary=meshChunk(world,cx,cz);

@@ -1,5 +1,5 @@
 // Gate A experimental cave: opt-in only; default seeded terrain and saves stay unchanged.
-// Eastbound three-wide descending passage, with a side grotto and a terminal chamber.
+// Eastbound three-wide descending passage, with two connected side galleries and a terminal chamber.
 import {BLOCK, terrainHeight, WORLD_MIN_Y, WORLD_MAX_Y, worldKey} from './voxel.mjs';
 
 export const CAVE_CANDIDATE = Object.freeze({x:64,z:64,length:28,width:3});
@@ -8,6 +8,7 @@ export function caveRoute(seed=179, origin=CAVE_CANDIDATE){
   const floorAt=t=>Math.max(WORLD_MIN_Y+2,top-1-Math.floor(t/5));
   return {
     entrance:[origin.x,top,origin.z],
+    westGallery:[origin.x+12,floorAt(12)+1,origin.z-4],
     grotto:[origin.x+origin.length-10,floorAt(origin.length-10)+1,origin.z+3],
     chamber:[origin.x+origin.length-3,floorAt(origin.length-3)+1,origin.z],
     floorAt
@@ -31,9 +32,11 @@ export function experimentalCaveWorld(world,origin=CAVE_CANDIDATE){
       // A connected side chamber, accessible through the +Z corridor wall.
       // Two blocks of its throat overlap the main corridor; no isolated void.
       const grotto=t>=length-13&&t<=length-8&&dz>=1&&dz<=4;
-      if(!chamber&&!corridor&&!grotto)return world.get(px,py,pz);
+      // West gallery joins the main corridor through a full-width open throat.
+      const westGallery=t>=10&&t<=16&&dz<=-1&&dz>=-4;
+      if(!chamber&&!corridor&&!grotto&&!westGallery)return world.get(px,py,pz);
       const floor=floorAt(t);
-      const ceiling=floor+(chamber||grotto?5:3);
+      const ceiling=floor+(chamber||grotto||westGallery?5:3);
       if(py===floor)return BLOCK.STONE;
       // Open the approach to daylight, including any elevated natural grass cap.
       // The remainder stays roofed, allowing a genuinely underground chamber.
