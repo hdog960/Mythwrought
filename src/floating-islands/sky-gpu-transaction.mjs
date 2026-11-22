@@ -11,10 +11,13 @@ export function stageSkyIslandGpuTransaction({gl,existingChunks,batch,desiredKey
   if(!gl||typeof gl.deleteBuffer!=='function'||!(existingChunks instanceof Map)||
      !batch||!Array.isArray(batch.meshes)||batch.meshes.length>SKY_GPU_MAX_UPLOADS_PER_FRAME||
      !Array.isArray(desiredKeys)||typeof uploadBuffer!=='function'||
-     !safe(maxResident)||maxResident<1||maxResident>27||desiredKeys.length>maxResident||
+     !safe(maxResident)||maxResident<1||maxResident>SKY_GPU_SHARED_MAX_SLOTS||desiredKeys.length>maxResident||
      !desiredKeys.every(k=>typeof k==='string'&&k.length>0)||
      new Set(desiredKeys).size!==desiredKeys.length)
     fail('bounded renderer owner, desired keys, and uploader required');
+  // Capture the renderer's exact previous map before an upload callback can
+  // reorder, replace or mutate it. The subsequent publisher uses this CAS.
+  const baseEntries=Object.freeze([...existingChunks.entries()].map(pair=>Object.freeze([...pair])));
   const target=new Set(desiredKeys),meshKeys=new Set();
   for(const m of batch.meshes){
     if(!m||typeof m.key!=='string'||!m.key.startsWith('sky:')||
@@ -51,7 +54,8 @@ export function stageSkyIslandGpuTransaction({gl,existingChunks,batch,desiredKey
     if(!nextChunks.has(key)||nextChunks.get(key)!==old)
       if(old?.buffer)obsolete.push(old.buffer);
   return Object.freeze({
-    nextChunks,
+    baseChunks:existingChunks,baseEntries,nextChunks,
+    nextEntries:Object.freeze([...nextChunks.entries()].map(pair=>Object.freeze([...pair]))),
     stagedBuffers:Object.freeze(staged.map(row=>row.buffer)),
     obsoleteBuffers:Object.freeze(obsolete),
     committed:false,
