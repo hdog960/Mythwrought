@@ -4,8 +4,8 @@ export const NAV00_GESTURE_HISTORY_VERSION = 1;
 const finite = n => typeof n === 'number' && Number.isFinite(n);
 export function createNavigationGestureHistory({maxTravel=12, dispatch=dispatchNavigationMapPointer}={}) {
   if (!finite(maxTravel) || maxTravel < 0 || maxTravel > 64 || typeof dispatch !== 'function') throw Error('Invalid gesture configuration');
-  let tracked=null, poisoned=false;
-  const clear=()=>{tracked=null;poisoned=false;};
+  let tracked=null, poisoned=false, recoverable=false;
+  const clear=()=>{tracked=null;poisoned=false;recoverable=false;};
   const none=session=>Object.freeze({version:NAV00_GESTURE_HISTORY_VERSION,action:null,session});
   function handle(session,event,options={}) {
     if (!event || !['start','move','end','cancel'].includes(event.phase) ||
@@ -15,13 +15,19 @@ export function createNavigationGestureHistory({maxTravel=12, dispatch=dispatchN
     const {phase,id,x,y,activeTouches,movementTouchActive}=event;
     if (!session?.open) {clear();return none(session);}
     if (phase==='cancel') {clear();return none(session);}
-    if (movementTouchActive || activeTouches>1) poisoned=true;
+    if (movementTouchActive || activeTouches>1) {poisoned=true;recoverable=false;}
     if (phase==='start') {
+      // Recover only after a fully ended orphan touch, never during active movement.
+      if (!tracked && poisoned && recoverable && activeTouches===1 && !movementTouchActive) {poisoned=false;recoverable=false;}
       if (tracked || poisoned || activeTouches!==1 || movementTouchActive) {poisoned=true;return none(session);}
       tracked={id,x,y,startX:x,startY:y};
       return none(session);
     }
-    if (!tracked || tracked.id!==id) {poisoned=true;return none(session);}
+    if (!tracked || tracked.id!==id) {
+      poisoned=true;
+      recoverable=!tracked && phase==='end' && activeTouches===0 && !movementTouchActive;
+      return none(session);
+    }
     if (Math.hypot(x-tracked.startX,y-tracked.startY)>maxTravel) poisoned=true;
     if (phase==='move') {tracked.x=x;tracked.y=y;return none(session);}
     const valid=!poisoned && activeTouches===0 && !movementTouchActive;

@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createNavigationGestureHistory} from '../src/navigation00/navigation-gesture-history.mjs';
+const session={open:true};
+const e=(phase,id=1,activeTouches=phase==='end'?0:1,movementTouchActive=false)=>({phase,id,x:50,y:50,activeTouches,movementTouchActive});
+const make=()=>{let calls=0;const guard=createNavigationGestureHistory({dispatch:s=>{calls++;return {action:'pin',session:s};}});return {guard,count:()=>calls};};
+test('orphan end with zero active touches permits subsequent clean tap',()=>{const {guard,count}=make();guard.handle(session,e('end'));guard.handle(session,e('start'));assert.equal(guard.handle(session,e('end')).action,'pin');assert.equal(count(),1);});
+test('orphan end with active pointer cannot authorize recovery',()=>{const {guard,count}=make();guard.handle(session,e('end',2,1));guard.handle(session,e('start'));guard.handle(session,e('end'));assert.equal(count(),0);});
+test('orphan end during movement cannot authorize recovery',()=>{const {guard,count}=make();guard.handle(session,e('end',2,0,true));guard.handle(session,e('start'));guard.handle(session,e('end'));assert.equal(count(),0);});
+test('wrong-pointer end while tracked cannot authorize recovery',()=>{const {guard,count}=make();guard.handle(session,e('start'));guard.handle(session,e('end',2,0));guard.handle(session,e('start',3));guard.handle(session,e('end',3));assert.equal(count(),0);});
+test('multitouch interruption never dispatches interrupted gesture',()=>{const {guard,count}=make();guard.handle(session,e('start'));guard.handle(session,e('start',2,2));guard.handle(session,e('end'));assert.equal(count(),0);});
+test('cancel permits fresh tap',()=>{const {guard,count}=make();guard.handle(session,e('start'));guard.handle(session,e('cancel'));guard.handle(session,e('start'));guard.handle(session,e('end'));assert.equal(count(),1);});
