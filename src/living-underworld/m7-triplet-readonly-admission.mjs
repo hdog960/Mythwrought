@@ -1,6 +1,8 @@
 // Fail-closed read-only classification of THREE authentic M7 research reports.
 // Exact native checkout execution and source integrity are enforced by caller.
 // Does not infer release approval or actual walking from candidate geology.
+import {inspectOriginalM7TripletAccounting}
+ from './m7-triplet-evidence-consistency.mjs';
 const SHA=/^[0-9a-f]{40}$/;
 const BIOMES=Object.freeze(['plains','desert','snow','mountain','enchanted']);
 const REGION=Object.freeze({
@@ -27,6 +29,11 @@ export function classifyExactHeadOriginalM7Triplet({
  const reasons=[],headMatched=actualHead===expectedHead;
  if(!headMatched)reasons.push('WRONG_OR_UNVERIFIED_HEAD');
  const g=gallery,c=city,k=chunk;
+ const arithmetic=inspectOriginalM7TripletAccounting({gallery:g,city:c,chunk:k});
+ if(!arithmetic.ok){
+  reasons.push('M7_REPORT_ARITHMETIC_INCONSISTENT');
+  reasons.push(...arithmetic.reasonCodes);
+ }
  const reportSchemasValid=g?.schema===SCHEMAS.gallery&&
   c?.schema===SCHEMAS.city&&k?.schema===SCHEMAS.chunk;
  if(!reportSchemasValid)reasons.push('UNKNOWN_OR_MISSING_M7_REPORT_SCHEMA');
@@ -85,7 +92,11 @@ export function classifyExactHeadOriginalM7Triplet({
   gallerySourceSafe,asBuiltGalleriesReady,citySourceSafe,
   chunkRiskSafe,
   proposalEvidenceAllPassed:nativeTripletReportsPresent&&
-   fullyDiagnosed&&gallerySourceSafe&&citySourceSafe&&chunkRiskSafe,
+   arithmetic.ok&&fullyDiagnosed&&gallerySourceSafe&&citySourceSafe&&chunkRiskSafe,
+  reportRowArithmeticReconciled:arithmetic.ok,
+  galleryAccountingReconciled:arithmetic.galleryAccountingReconciled,
+  cityAccountingReconciled:arithmetic.cityAccountingReconciled,
+  chunkAccountingReconciled:arithmetic.chunkAccountingReconciled,
   knownOriginalM7ConstructorFaultsUnresolved:Object.freeze([8675309,13579]),
   original20SeedConstructorGateAccepted:false,
   actualPlayerWalkingVerified:false,iPhoneGpuVerified:false,
