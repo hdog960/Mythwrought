@@ -1,7 +1,7 @@
 // Read-only Mountain V8 tile census. Not connected to the live V7 engine.
 // This deliberately calls the genuine read-only adapter with ONE shared
 // original VoxelWorld per seed. No save, edit, chunk mesh, or profile mutation.
-import {VoxelWorld,BLOCK,terrainHeight} from '../voxel.mjs';
+import {VoxelWorld,BLOCK} from '../voxel.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {WORLD_MAX_Y} from '../depth.mjs';
 import {surveyMountainV8OriginalWorld} from './mountain-v8-original-world.mjs';
@@ -46,8 +46,22 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     else if(chosen.cap==='alpine-grass')stats.meadow++;
     else stats.rock++;
     if(!chosen.vegetation){stats.nonMeadow++;continue;}
+    // Vegetation must also clear terrain *after* the V8 uplift, not merely
+    // original AIR. Read at most five horizontal footprint coordinates,
+    // memoized across every occupied cell of this sparse plant.
+    const elevations=new Map();
+    const proposedSurfaceAt=(x,z)=>{
+      const k=key(x,z);
+      if(!elevations.has(k)){
+        const p=x===rootX&&z===rootZ?chosen:
+          sourcSurvey(x,z,seed,{world:source});
+        elevations.set(k,p?.top??null);
+      }
+      return elevations.get(k);
+    };
     const physical=planMountainV8PlantCells(chosen,{
       worldMaxY:WORLD_MAX_Y,airId:BLOCK.AIR,
+      proposedSurfaceAt,
       readOriginalBlock:(x,y,z)=>source.naturalAndLandmarkBlock(x,y,z),
       protectedAt:()=>false,
       mountainAt:(x,z)=>{const b=v6BiomeAt(x,z,seed);
