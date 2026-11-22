@@ -8,6 +8,7 @@ import {surveyMountainV8OriginalWorld} from './mountain-v8-original-world.mjs';
 import {mountainV8TileRoot} from './mountain-v8-source-adapter.mjs';
 import {planMountainV8PlantCells} from './mountain-v8-vegetation-cells.mjs';
 import {planMountainV8PhysicalColumn} from './mountain-v8-physical-column.mjs';
+import {certifyMountainV8Seam} from './mountain-v8-seam-certificate.mjs';
 
 const valid=n=>Number.isSafeInteger(n);
 const key=(x,z)=>x+','+z;
@@ -27,7 +28,7 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
      source.edits.size||source.rotations.size)return null;
   const before=source.save(),sites=[],stats={
     tiles:width*height,eligible:0,plants:0,plantCells:0,
-    rejected:0,terrainRejected:0,terrainCells:0,
+    rejected:0,terrainRejected:0,seamRejected:0,terrainCells:0,
     nonMeadow:0,occupied:0,rock:0,snow:0,meadow:0,
     cliff:0,seen:0
   };
@@ -47,6 +48,13 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
       readOriginalBlock:(x,y,z)=>source.naturalAndLandmarkBlock(x,y,z)
     });
     if(!terrain){stats.terrainRejected++;continue;}
+    // Source-backed one-block adjacency, not the 4-block noise slope proxy.
+    // A protected cave or >2-height seam fails closed before admission.
+    const seam=certifyMountainV8Seam(rootX,rootZ,seed,(x,z)=>{
+      return x===rootX&&z===rootZ?chosen:
+        sourcSurvey(x,z,seed,{world:source});
+    });
+    if(!seam){stats.seamRejected++;continue;}
     stats.terrainCells+=terrain.estimatedCells;
     stats.eligible++;
     if(chosen.cliff)stats.cliff++;
