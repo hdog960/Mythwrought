@@ -1,0 +1,54 @@
+name: MYTHWROUGHT Builder D Wave14 261-original 2562-D4 literal-head genuine Chromium (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d1-original-institutions-wave14.mjs'
+      - 'tests/building-pool/roadmap-d/*wave14*'
+      - 'tests/roadmap-d-wave14.test.mjs'
+      - '.github/workflows/roadmap-d-d14-arcane-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-d-wave14-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  wave14-literal-head-original-source-d4-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 85
+    steps:
+      - name: Checkout literal draft branch HEAD, not GitHub synthetic merge
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - name: Verify literal protected event head and no unexpected base or ref substitution
+        env:
+          EXPECTED_LITERAL_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          test -n "$EXPECTED_LITERAL_HEAD"
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_LITERAL_HEAD"
+          echo "Literal Builder D Wave14 branch HEAD: $actual"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rerun preserved 253/285 and 2326 D4 plus eight original 4B school forms and 236 new D4 comparisons
+        run: node --test --test-concurrency=1 tests/building-pool/roadmap-d/d1-original-institutions-wave14.test.mjs
+      - name: Demand actual locally installed Chrome and independent decoded PNG audit tooling
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+          npm install --no-save --no-audit --no-fund pngjs@7.0.0
+      - name: Generate 48 GENUINE Chrome WebGL2 source-coordinate cube-proxy exteriors and physical cutaways
+        run: node --test tests/building-pool/roadmap-d/d1-original-institutions-wave14-webgl2.test.mjs
+      - name: Audit original Git source exact bytes and PNG full CRC SHA camera context and real cutaway, fail closed on literal SHA drift
+        env:
+          EXPECTED_LITERAL_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node tests/building-pool/roadmap-d/audit-wave14-gallery.mjs
+      - name: Upload Wave14 real-browser evidence if generated (not actual Manual Pack family art)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-d-wave14-48-real-chromium-original-frames
+          path: artifacts/building-pool/roadmap-d/d1-original-institutions-wave14-webgl2-cube-proxy/
+          if-no-files-found: ignore
