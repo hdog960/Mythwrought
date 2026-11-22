@@ -60,7 +60,8 @@ for(const [rx,rz] of regions){
    deep.reason??'UNSPECIFIED_LINK_REFUSAL',
   threeDeepLinkCandidatesExamined:deep.examined?.reduce((n,x)=>n+x.attempted,0)??0,
   fullNetworkCombinationsInspected:deep.inspectedCombinations??0,
-  threeDeepLinkOriginalM7SourceCells:deep.sourceChecks??0,
+  fullJoinedCandidateOriginalM7SourceChecks:deep.sourceChecks??0,
+  deepLinkOnlySourceChecksNotSeparatelyMeasured:true,
   threeDeepLinkSelectedIndexList:approved?
    deep.chosen.map(link=>link.index):[],
   selectedDeepLinkConfigurations:approved?deep.chosen:[],
