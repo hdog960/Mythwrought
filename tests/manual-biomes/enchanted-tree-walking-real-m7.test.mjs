@@ -9,6 +9,8 @@ import {environmentalTreesForChunk}
 import {ENVIRONMENT_GROUND as G} from '../../src/environment-ground.mjs';
 import {BODY_HEIGHT,BODY_RADIUS,BLOCK,collides,chunkCoord}
   from '../../src/voxel.mjs';
+import {ENCHANTED_WALKING_GROUND_NEIGHBORS}
+  from '../../src/manual-biomes/enchanted-tree-walking-clearance.mjs';
 import {stepPlayer} from '../../src/physics.mjs';
 import {WORLD_MAX_Y} from '../../src/depth.mjs';
 
@@ -38,10 +40,12 @@ test('actual M7 experimental tree leaves always preserve two original air layers
     const [x,y,z]=at.split(',').map(Number);
     assert.equal(readCell(x,y,z),BLOCK.AIR,
       'experimental canopy may not overwrite original protected cave/landmark/terrain');
-    assert.equal(readCell(x,y-1,z),BLOCK.AIR,
-      'real full-cube player body layer one needs open baseline air');
-    assert.equal(readCell(x,y-2,z),BLOCK.AIR,
-      'real 1.78-tall body layer two needs open baseline air');
+    for(const [dx,dz] of ENCHANTED_WALKING_GROUND_NEIGHBORS){
+      assert.equal(readCell(x+dx,y-1,z+dz),BLOCK.AIR,
+        'real original body edge needs clear first air layer at '+dx+','+dz);
+      assert.equal(readCell(x+dx,y-2,z+dz),BLOCK.AIR,
+        'real original body corner needs clear second air layer at '+dx+','+dz);
+    }
     assert.equal(world.get(x,y,z),id,'actual original world reader material must match chunk planner');
     assert.ok(y<=WORLD_MAX_Y);
     checkedLeaves++;
@@ -128,4 +132,53 @@ test('actual original stepPlayer can traverse a naturally clear adjacent corrido
   }
  }
  assert.ok(tested,'at least one original-source, player-width, floor-supported corridor must exist');
+});
+
+test('original real M7 raised-ground edge and corner poses stay collision-clear with candidate leaves',()=>{
+ const world=new FourRegionWorld(seed,profile,{experimentalEnchantedTrees:true});
+ const historical=new FourRegionWorld(seed,profile);
+ let compared=0,uneven=0,existingTrunks=0;
+ const examples=[];
+ for(const [centerX,,centerZ] of sites){
+  for(let dx=-6;dx<=6;dx++)for(let dz=-6;dz<=6;dz++){
+   const x=centerX+dx,z=centerZ+dz;
+   const capPlan=world._columnPlan(x,z);
+   if(!capPlan.size)continue;
+   const cap=Math.max(...capPlan.keys()),feet=cap+1;
+   if(feet>WORLD_MAX_Y-2)continue;
+   const raised=ENCHANTED_WALKING_GROUND_NEIGHBORS.slice(1).some(([ox,oz])=>{
+     const neighbor=world._columnPlan(x+ox,z+oz);
+     return neighbor.size&&Math.max(...neighbor.keys())!==cap;
+   });
+   for(const pxOff of [.22,.78])for(const pzOff of [.22,.78]){
+     const px=x+pxOff,pz=z+pzOff;
+     if(collides(historical,px,feet,pz)||
+       !collides(historical,px,feet-.065,pz))continue;
+     // Real mineable bark is deliberately solid, not supposed to be hollowed
+     // to make a tree look "walkable".
+     let hitsBark=false;
+     for(let bx=Math.floor(px-BODY_RADIUS+1e-5);
+       bx<=Math.floor(px+BODY_RADIUS-1e-5);bx++)
+       for(let bz=Math.floor(pz-BODY_RADIUS+1e-5);
+         bz<=Math.floor(pz+BODY_RADIUS-1e-5);bz++)
+         for(let by=Math.floor(feet+1e-5);
+           by<=Math.floor(feet+BODY_HEIGHT-1e-5);by++)
+           hitsBark ||= world.get(bx,by,bz)===G.aetherBark;
+     if(hitsBark){existingTrunks++;continue;}
+     compared++;if(raised)uneven++;
+     assert.equal(collides(world,px,feet,pz),false,
+       'experimental moonleaf cannot block an originally walkable AABB edge/corner '+
+         JSON.stringify({x,z,feet,px,pz,raised}));
+     assert.equal(collides(world,px,feet-.065,pz),true,
+       'real supporting ground must remain intact beneath edge/corner position');
+     if(raised&&examples.length<5)examples.push({x,z,feet,px,pz});
+   }
+  }
+ }
+ assert.ok(compared>=120,'must exercise substantial physically authentic edge/corner poses');
+ assert.ok(uneven>=10,'must exercise genuinely uneven neighboring M7 terrain, not only a synthetic flat plane');
+ console.log('# ENCHANTED REAL RAISED EDGE AND CORNER WALK '+JSON.stringify({
+   compared,uneven,existingTrunks,examples,originalBodyRadius:BODY_RADIUS,
+   originalBodyHeight:BODY_HEIGHT
+ }));
 });
