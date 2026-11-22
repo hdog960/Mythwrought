@@ -1,7 +1,7 @@
-# Changed experimental immutable site-cache canonical-key correction, plus
-# authentic extended original-M7 climate boundary walking and player AIR edits.
-# Reuse exact previous cache 6/6, Moonwillow native/WebGL2 and 288-chunk
-# source proofs where their source bodies are unchanged. No broad CI/browser.
+# Isolated changed-test recovery: original native cache canonical-key
+# rejection and 288-chunk source parity only. On previous exact unchanged
+# source, the genuine four 14-leg climate walks plus player-edit cache
+# eviction test passed 2/2 in #45084113198. Do NOT rerun them or Chromium.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -15,9 +15,9 @@ permissions:
   contents: read
 
 jobs:
-  original-m7-cross-climate-pedestrian-safety:
+  original-m7-immutable-site-key-recovery:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,14 +26,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact original source and affected syntax
+      - name: Exact source and changed-test syntax
         run: |
           git rev-parse HEAD
           node --check src/manual-biomes/enchanted-tree-site-biome-cache.mjs
           node --check tests/manual-biomes/enchanted-site-biome-stream-real-m7.test.mjs
-          node --check tests/manual-biomes/enchanted-biome-seam-long-walk-real-m7.test.mjs
-      - name: Source-authentic M7 climate border routes, authoritative edits and immutable memo
-        run: |
-          node --test \
-            tests/manual-biomes/enchanted-biome-seam-long-walk-real-m7.test.mjs \
-            tests/manual-biomes/enchanted-site-biome-stream-real-m7.test.mjs
+      - name: Original-world canonical keys, bounded FIFO, cave veto and 288-chunk regression
+        run: node --test tests/manual-biomes/enchanted-site-biome-stream-real-m7.test.mjs
