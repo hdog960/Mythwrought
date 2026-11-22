@@ -221,3 +221,33 @@ test('refused due tick preserves original source clock, not just new replacement
   settleGlobalMobTick(tick,{world});
   engine.dispose();
 });
+
+test('source region mutation during resident callback leaves certified clock reusable',()=>{
+  const w=flatWorld(),engine=new MobEngine(w,179,{maxEntities:32,maxActive:8});
+  const id=engine.spawn('deer',[9,4,8]);
+  assert.ok(id);
+  const regions=[{...region}],clock=createGlobalEcologyClock();
+  const query={...w,residentAt(){regions[0].cx=1;return true;}};
+  assert.throws(()=>prepareGlobalMobTick({
+    ...options(clock,engine,query),regions
+  }),/Original source selection changed during reconcile/);
+  regions[0].cx=0;
+  const valid=prepareGlobalMobTick({
+    ...options(clock,engine,w),regions
+  });
+  assert.equal(valid.regionKey,'0,0,0');
+  settleGlobalMobTick(valid,{world:w});
+  engine.dispose();
+});
+test('source regional revision rejection occurs before global clock consumption',()=>{
+  const w=flatWorld(),engine=new MobEngine(w,179,{maxEntities:32,maxActive:8});
+  const source=createGlobalEcologyClock();
+  const bad={...w,revision(){return NaN;}};
+  assert.throws(()=>prepareGlobalMobTick({
+    ...options(source,engine,bad)
+  }),/Invalid original world revision/);
+  const good=prepareGlobalMobTick(options(source,engine,w));
+  assert.equal(good.clock.cursor,1);
+  settleGlobalMobTick(good,{world:w});
+  engine.dispose();
+});

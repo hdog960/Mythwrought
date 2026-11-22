@@ -3,13 +3,22 @@
 import {validPoint} from './world-query.mjs';
 import {inspectOriginalReconcileReadiness}
   from './ecosystem-reconcile-readiness.mjs';
-import {previewGlobalEcologyTick,advanceGlobalEcologyClock,
+import {previewGlobalEcologySelection,advanceGlobalEcologyClock,
   commitGlobalEcologyRegion} from './ecosystem-global-clock.mjs';
 import {prepareOriginalMobPoll,settleOriginalMobPoll}
   from './ecosystem-region-poll.mjs';
 
 const tickets=new WeakMap();
 const closed=new WeakSet();
+
+function unchangedSelection(a,b){
+  return a.reason===b.reason&&a.time===b.time&&
+    a.nextCursor===b.nextCursor&&a.key===b.key&&
+    a.record===b.record&&a.evictKey===b.evictKey&&
+    (a.region===null?b.region===null:
+      b.region!==null&&['cx','cz','section','feet'].every(
+        key=>Object.is(a.region[key],b.region[key])));
+}
 
 export function prepareGlobalMobTick({
   clock,seconds,regions,engine,world,seed,observer,biome,light,
@@ -19,36 +28,54 @@ export function prepareGlobalMobTick({
   // its clock; the detached source must not silently advance time either.
   if(!validPoint(observer))
     throw new TypeError('Invalid original ecology observer');
-  // Only the certified clock can preview a tick. #reconcile must refuse
-  // BEFORE that clock is consumed, so the identical original tick can be
-  // attempted after its rightful owner resolves wake/away obligations.
-  const forecast=previewGlobalEcologyTick(clock,{seconds,regions});
-  if(forecast.due){
+  // Certified source preview includes BOTH global due-ness and the
+  // original first-64 region/capacity/oldest-stale selection. Nothing here
+  // consumes clock identity or allocates an executable selection ticket.
+  const planned=previewGlobalEcologySelection(clock,{seconds,regions});
+  if(planned.reason!=='interval'){
     const checked=inspectOriginalReconcileReadiness({
       engine,world,observer,isProtected
     });
     if(!checked.ready)
       throw new TypeError('Original ecology reconciliation required');
   }
+  if(!unchangedSelection(planned,
+      previewGlobalEcologySelection(clock,{seconds,regions})))
+    throw new TypeError('Original source selection changed during reconcile');
+
+  // Prepare the real original-engine roster and voxel/rarity/cooldown query
+  // BEFORE global advance consumes the one-shot certified source clock.
+  // Failed source residency, world revision, malformed roster, or an engine
+  // mutation inside a protection callback now leaves that clock reusable.
+  let plan=null;
+  if(planned.reason==='selected'){
+    plan=prepareOriginalMobPoll({
+      engine,world,seed,region:planned.region,observer,
+      biome,light,kind,isProtected,spawnOnFirstVisit,
+      now:planned.time,record:planned.record
+    });
+  }
+  if(!unchangedSelection(planned,
+      previewGlobalEcologySelection(clock,{seconds,regions})))
+    throw new TypeError('Original source selection changed during poll');
+
   const tick=advanceGlobalEcologyClock(clock,{seconds,regions});
+  if(tick.reason!==planned.reason||
+     (tick.selection!==null&&
+      (tick.selection.key!==planned.key||
+       tick.selection.record!==planned.record||
+       tick.selection.time!==planned.time)))
+    throw new TypeError('Original source tick changed after preflight');
   if(tick.selection===null){
     return Object.freeze({
       kind:'skipped',clock:tick.clock,reason:tick.reason,
       proposal:null,attempts:0,rejected:null
     });
   }
-  const chosen=tick.selection;
-  // The exact real-engine roster, original edit revision, source region and
-  // local 12-second replenishment/cooldown all remain strictly checked here.
-  const plan=prepareOriginalMobPoll({
-    engine,world,seed,region:chosen.region,observer,
-    biome,light,kind,isProtected,spawnOnFirstVisit,
-    now:chosen.time,record:chosen.record
-  });
   const result=Object.freeze({
     kind:plan.kind,clock:tick.clock,reason:'selected',
-    regionKey:chosen.key,proposal:plan.proposal,attempts:plan.attempts,
-    rejected:plan.rejected
+    regionKey:tick.selection.key,proposal:plan.proposal,
+    attempts:plan.attempts,rejected:plan.rejected
   });
   tickets.set(result,Object.freeze({tick,plan,world}));
   return result;

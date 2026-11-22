@@ -1,6 +1,8 @@
 // Detached Phase 2 natural-spawn transaction preflight. Does not import or
 // mutate MobEngine, PopulationManager, source world or save sidecars.
 import {MobEngine} from './engine.mjs';
+import {captureOriginalMobRoster,assertOriginalMobRosterUnchanged}
+  from './ecosystem-roster-integrity.mjs';
 import {deriveRegionalMobState,proposeMobFromRosterSnapshot}
   from './ecosystem-region-snapshot.mjs';
 import {createRegionalEcologySchedule,inspectRegionalEcologySchedule,
@@ -57,6 +59,7 @@ export function prepareOriginalMobPoll({
   if(!(engine instanceof MobEngine))
     throw new TypeError('Original MobEngine instance required');
   const entities=engine.all();
+  const rosterCertificate=captureOriginalMobRoster(entities);
   const roster=deriveRegionalMobState(entities,region,{isProtected});
   if(typeof world?.revision!=='function')
     throw new TypeError('Original world edit revision is required');
@@ -84,6 +87,10 @@ export function prepareOriginalMobPoll({
   }
   if(world.revision()!==revision)
     throw new TypeError('Original world changed during regional poll');
+  // Source protection and terrain callbacks may edit MobEngine state without
+  // incrementing world.revision. A stale proposal cannot consume a global
+  // clock or become an actual natural-birth claim.
+  assertOriginalMobRosterUnchanged(rosterCertificate,engine.all());
   const prepared=Object.freeze({
     kind:inspected.ready?'evaluated':'cooldown',
     record:inspected.record,attempts,proposal,rejected,

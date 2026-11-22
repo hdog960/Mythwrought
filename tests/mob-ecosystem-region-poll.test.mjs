@@ -118,3 +118,18 @@ test('original engine ownership rejects fabricated previews and double settlemen
   assert.throws(()=>settleOriginalMobPoll(plan,{world:w}),
     /Invalid or stale original regional mob poll/);
 });
+
+test('original source protection mutation during prepare cannot produce stale plan',()=>{
+  const w=world(),engine=new MobEngine(w,179,{maxEntities:32,maxActive:8});
+  const id=engine.spawn('deer',[8,4,8],{homeChunk:'0,0,0'});
+  assert.ok(id);
+  assert.throws(()=>prepareOriginalMobPoll({
+    ...opts(w,engine),
+    isProtected:mob=>{
+      engine.transition(mob.id,'dormant');
+      return false;
+    }
+  }),/Original MobEngine roster changed during inspection/);
+  assert.equal(engine.get(id).state,'dormant');
+  engine.dispose();
+});
