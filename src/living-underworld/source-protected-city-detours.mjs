@@ -12,24 +12,32 @@ import {compileMainGalleryPedestrianClearance,
  auditCombinedStairFootprints} from './combined-stair-footprints.mjs';
 import {auditProtectedSubsurfaceStairs}
  from './protected-subsurface-stairs.mjs';
+import {proposeProtectedCityLandingTerrace}
+ from './city-landing-terrace-proposal.mjs';
 
 const INT=Number.isSafeInteger;
 const DIRS=Object.freeze([
  [1,1],[0,1],[1,0],[-1,1],[1,-1],[-1,0],[0,-1],[-1,-1]
 ].map(v=>Object.freeze(v)));
 const DISTANCES=Object.freeze([4,6,8,10,12,16,20,24,28,32]);
+// Finish the descent OUTSIDE the solid terrace; enter on level steps.
+const LANDING_DIRS=Object.freeze([
+ [-1,1],[-1,-1],[1,-1],[1,1],[0,1],[1,0],[-1,0],[0,-1]
+].map(v=>Object.freeze(v)));
+const LANDING_DISTANCES=Object.freeze([12,14,16,20,24]);
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
 const eq=(a,b)=>a&&b&&a.x===b.x&&a.y===b.y&&a.z===b.z;
 export function searchSourceProtectedCityDetours(seed,rx,rz,{
  source,selectedStairProposals=[],maxCandidates=80,
- maxSourceChecks=30000,maxExamples=10
+ maxSourceChecks=30000,maxExamples=10,requireTerraceJoin=false
 }={}){
  if(!INT(seed)||seed!==(seed|0)||![rx,rz].every(INT)||
   !source||typeof source!=='object'||ROLES.some(k=>typeof source[k]!=='function')||
   !Array.isArray(selectedStairProposals)||selectedStairProposals.length>7||
   !INT(maxCandidates)||maxCandidates<1||maxCandidates>80||
   !INT(maxSourceChecks)||maxSourceChecks<100||maxSourceChecks>100000||
-  !INT(maxExamples)||maxExamples<1||maxExamples>24)
+  !INT(maxExamples)||maxExamples<1||maxExamples>24||
+  typeof requireTerraceJoin!=='boolean')
   throw TypeError('Invalid protected rare-cavern city detour search');
  const region=planUnderworldRegion(seed,rx,rz),city=region.cityCandidate;
  if(!city)return Object.freeze({sitePresent:false,seed,rx,rz,
@@ -48,22 +56,32 @@ export function searchSourceProtectedCityDetours(seed,rx,rz,{
  if(!gallery.ok)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
   reason:gallery.reason,tested:0,sourceChecks:0,worldChanged:false});
  let tested=0,sourceChecks=0,lastRefusal=null;
- const refusals={grade:0,gallery:0,crossRoute:0,air:0,source:0,budget:0};
+ const refusals={grade:0,gallery:0,crossRoute:0,air:0,
+  source:0,terrace:0,budget:0};
  const examples=[];
- outer:for(const [dx,dz] of DIRS)for(const distance of DISTANCES){
-  if(tested>=maxCandidates)break;
+ outer:for(const [dx,dz] of DIRS)for(const distance of DISTANCES)
+  for(const [approachDx,approachDz] of (requireTerraceJoin?LANDING_DIRS:[[0,0]]))
+  for(const approachBlocks of (requireTerraceJoin?LANDING_DISTANCES:[0])){
+  if(tested>=maxCandidates)break outer;
   tested++;
-  const mid={x:start.x+dx*distance,y:start.y,z:start.z+dz*distance};
+  const mid=Object.freeze({x:start.x+dx*distance,y:start.y,z:start.z+dz*distance});
+  const approach=requireTerraceJoin?Object.freeze({
+   x:end.x+approachDx*approachBlocks,y:end.y,
+   z:end.z+approachDz*approachBlocks
+  }):null;
+  const legs=requireTerraceJoin?[
+   {a:start,b:mid,radius:3.8},
+   {a:mid,b:approach,radius:3.8},
+   {a:approach,b:end,radius:3.8}
+  ]:[{a:start,b:mid,radius:3.8},{a:mid,b:end,radius:3.8}];
   const p=Object.freeze({ok:true,seed,rx,rz,
    kind:'detached-source-protected-city-detour',
    from:start,to:end,
    bearing:Object.freeze({dx,dz}),departureBlocks:distance,
-   segments:Object.freeze([
-    Object.freeze({a:start,b:Object.freeze(mid),radius:3.8}),
-    Object.freeze({a:Object.freeze(mid),b:end,radius:3.8})
-   ])});
-  let reason=null,grade=null;
-  if(![start,mid,end].every(q=>
+   landingApproach:approach,landingApproachBlocks:approachBlocks,
+   segments:Object.freeze(legs.map(x=>Object.freeze(x)))});
+  let reason=null,grade=null,terraceProof=null;
+  if(![start,mid,...(approach?[approach]:[]),end].every(q=>
    Math.floor(q.x/256)===rx&&Math.floor(q.z/256)===rz&&
    q.y>=-210&&q.y<=-4))reason='REGION_OR_WORLD_BOUNDS';
   if(!reason){
@@ -98,9 +116,30 @@ export function searchSourceProtectedCityDetours(seed,rx,rz,{
     refusals.source++;
    }
   }
+  if(!reason&&requireTerraceJoin){
+   const remaining=maxSourceChecks-sourceChecks;
+   if(remaining<100){reason='DETOUR_SOURCE_QUERY_BUDGET';refusals.budget++;}
+   else{
+    terraceProof=proposeProtectedCityLandingTerrace(seed,rx,rz,{
+     source,selectedStairProposals:[p,...selectedStairProposals],
+     maxSourceChecks:Math.min(60000,remaining)
+    });
+    sourceChecks+=terraceProof.sourceChecks??0;
+    if(!terraceProof.ok){
+     reason=terraceProof.reason??'TERRACE_GEOMETRY_OR_SOURCE_UNSAFE';
+     refusals.terrace++;
+     if(sourceChecks>=maxSourceChecks){
+      reason='DETOUR_SOURCE_QUERY_BUDGET';refusals.budget++;
+     }
+    }
+   }
+  }
   if(!reason)return Object.freeze({sitePresent:true,ok:true,
    seed,rx,rz,proposal:p,departureBlocks:distance,
-   bearing:p.bearing,
+   bearing:p.bearing,landingApproach:approach,
+   landingApproachBlocks:approachBlocks,
+   requireTerraceJoin,terraceProof,
+   sourceSafeTerraceJoined:terraceProof?.ok===true,
    supportCells:grade.supportCells,clearanceCells:grade.clearanceCells,
    tested,sourceChecks,refusals:Object.freeze({...refusals}),
    examples:Object.freeze(examples),
