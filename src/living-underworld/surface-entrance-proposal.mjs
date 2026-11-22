@@ -115,3 +115,41 @@ export function auditProposedEntranceCenterline(proposal){
  return Object.freeze({candidateOnly:true,centerlineSamples:count,
    connectedByProposedAir:true,worldCollisionsNotYetValidated:true});
 }
+
+// Optional source-only hub departure, preserving the exact historical mouth,
+// original hub, midpoint, terrain ownership and all protection requirements.
+// A flat four-block exit can leave shared hub headroom before the ascent;
+// the default surface entrance proposal never calls this helper.
+const DEPARTURE_BEARINGS=Object.freeze([
+ Object.freeze([1,1]),Object.freeze([1,-1]),
+ Object.freeze([-1,1]),Object.freeze([-1,-1]),
+ Object.freeze([1,0]),Object.freeze([0,1]),
+ Object.freeze([-1,0]),Object.freeze([0,-1])
+]);
+export function planHubDepartingSurfaceEntrance(proposal,{
+ bearing=0,flatBlocks=4
+}={}){
+ if(!proposal||proposal.ok!==true||
+  !Number.isSafeInteger(proposal.seed)||proposal.seed!==(proposal.seed|0)||
+  !Array.isArray(proposal.segments)||proposal.segments.length!==2||
+  !integer(bearing)||bearing<0||bearing>=DEPARTURE_BEARINGS.length||
+  !integer(flatBlocks)||flatBlocks<4||flatBlocks>16||
+  proposal.segments[0].a!==proposal.start||
+  proposal.segments[1].b!==proposal.mouth)
+  throw TypeError('Invalid detached protected hub departure');
+ const [dx,dz]=DEPARTURE_BEARINGS[bearing];
+ const departure=point(proposal.start.x+dx*flatBlocks,
+  proposal.start.y,proposal.start.z+dz*flatBlocks);
+ const segments=Object.freeze([
+  Object.freeze({a:proposal.start,b:departure,radius:3.8}),
+  Object.freeze({a:departure,b:proposal.mid,radius:3.8}),
+  Object.freeze({a:proposal.mid,b:proposal.mouth,radius:3.8})
+ ]);
+ return Object.freeze({...proposal,
+  kind:'detached-surface-gallery-hub-departure-proposal-v1',
+  segments,hubDeparture:Object.freeze({bearing,flatBlocks,departure}),
+  originalHistoricalMouthPreserved:true,
+  actualM7WorldUnmodified:true,
+  physicalPlayerWalkingUnverified:true
+ });
+}

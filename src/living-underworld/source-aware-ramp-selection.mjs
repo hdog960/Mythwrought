@@ -12,7 +12,8 @@ import {auditCaveCenterline}
  from './physical-connectivity-audit.mjs';
 import {proposedSurfaceAirAt}
  from './surface-entrance-proposal.mjs';
-import {auditCombinedStairFootprints}
+import {auditCombinedStairFootprints,
+ compileMainGalleryPedestrianClearance}
  from './combined-stair-footprints.mjs';
 import {auditProtectedSubsurfaceStairs}
  from './protected-subsurface-stairs.mjs';
@@ -23,14 +24,17 @@ const RADII=Object.freeze([14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44]);
 const FLATS=Object.freeze([6,8,10,4]);
 export function selectSourceProtectedInterlevelRamps(seed,rx,rz,{
  source=null,entranceProposal=null,includeSocket=false,
- maxCandidatesPerLink=64,maxCells=20000,maxSourceChecks=30000
+ maxCandidatesPerLink=64,maxCells=20000,maxSourceChecks=30000,
+ requireMainGalleryClearance=false
 }={}){
  if(!INT(seed)||seed!==(seed|0)||![rx,rz].every(INT)||
   !(source===null||(typeof source==='object'&&
     SOURCE_KEYS.every(k=>typeof source[k]==='function')))||
   !(entranceProposal===null||(entranceProposal.ok===true&&
     Array.isArray(entranceProposal.segments)))||
-  typeof includeSocket!=='boolean'||!INT(maxCandidatesPerLink)||
+  typeof includeSocket!=='boolean'||
+  typeof requireMainGalleryClearance!=='boolean'||
+  !INT(maxCandidatesPerLink)||
   maxCandidatesPerLink<4||maxCandidatesPerLink>256||
   !INT(maxCells)||maxCells<100||maxCells>20000||
   !INT(maxSourceChecks)||maxSourceChecks<1000||maxSourceChecks>200000)
@@ -44,7 +48,25 @@ export function selectSourceProtectedInterlevelRamps(seed,rx,rz,{
  const proposed=entranceProposal?[entranceProposal]:[];
  const results=[],ids=includeSocket?[16,25,34,35]:[16,25,34];
  let totalCandidates=0,sourceCellsChecked=0,sourceRejected=0;
- let geometryRejected=0,crossRouteRejected=0,boundsRejected=0;
+ let geometryRejected=0,crossRouteRejected=0,boundsRejected=0,
+  galleryRejected=0;
+ const gallery=requireMainGalleryClearance?
+  compileMainGalleryPedestrianClearance(seed,rx,rz):null;
+ if(gallery&&!gallery.ok)return Object.freeze({
+  ok:false,seed,rx,rz,reason:gallery.reason,
+  inspected:0,approvedLinkCount:0,noWorldEdits:true
+ });
+ if(entranceProposal&&gallery){
+  const g=gallery.inspect(entranceProposal);
+  if(!g.ok)return Object.freeze({
+   ok:false,seed,rx,rz,
+   reason:'ENTRANCE_BLOCKS_HORIZONTAL_GALLERY',
+   refusal:g.reason,galleryBlockedCells:g.blockedCells??null,
+   galleryExamples:g.examples??[],inspected:0,
+   approvedLinkCount:0,noWorldEdits:true,
+   completeNetworkCollisionFree:false
+  });
+ }
  const readers=source?{
   naturalAt:source.naturalAt,authoredAt:source.authoredAt,
   editedAt:source.editedAt,protectedAt:source.protectedAt,
@@ -90,6 +112,14 @@ export function selectSourceProtectedInterlevelRamps(seed,rx,rz,{
     });
     if(!network.ok){crossRouteRejected++;
      lastRefusal=network.reason;continue;}
+    // Fail before expensive original-source callbacks if the staircase
+    // would overwrite the walking clearance of ANY horizontal gallery.
+    const galleryFit=gallery?gallery.inspect(proposal):null;
+    if(galleryFit&&!galleryFit.ok){
+     galleryRejected++;
+     lastRefusal=galleryFit.reason;
+     continue;
+    }
     let safety=null;
     if(readers){
      safety=auditProtectedSubsurfaceStairs(proposal,readers);
@@ -111,6 +141,7 @@ export function selectSourceProtectedInterlevelRamps(seed,rx,rz,{
      independentlyWalkableGeometry:true,
      candidateSixFaceVoxelAirContinuous:true,
      nonblockingRelativeToPreviousRoutes:true,
+     horizontalGalleryClearanceSafe:gallery?.ok===true,
      proposal,stepsActuallyPlaced:false});
     proposed.push(proposal);break outer;
    }
@@ -124,6 +155,7 @@ export function selectSourceProtectedInterlevelRamps(seed,rx,rz,{
    failedIndex:index,refusal:lastRefusal,
    inspected:totalCandidates,sourceCellsChecked,maxSourceChecks,
    sourceRejected,geometryRejected,crossRouteRejected,boundsRejected,
+   galleryRejected,
    approvedLinkCount:results.filter(x=>x.ok).length,
    links:Object.freeze(results),
    completeNetworkCollisionFree:false,
@@ -136,6 +168,7 @@ export function selectSourceProtectedInterlevelRamps(seed,rx,rz,{
  return Object.freeze({ok:true,seed,rx,rz,
   inspected:totalCandidates,
   sourceCellsChecked,maxSourceChecks,sourceRejected,geometryRejected,crossRouteRejected,boundsRejected,
+  galleryRejected,
   approvedLinkCount:ids.length,
   links:Object.freeze(results),
   combined,
@@ -145,6 +178,8 @@ export function selectSourceProtectedInterlevelRamps(seed,rx,rz,{
   initialEntranceSourceProvenanceVerifiedByCaller:false,
   linkSourceOwnershipChecked:!!readers,
   completeNetworkCollisionFree:true,
+  allOriginalHorizontalGalleriesClear:gallery?.ok===true,
+  allMainGalleryPairsChecked:gallery?.pedestrianHorizontalPairsChecked??0,
   allSelectedCandidateVoxelAirFaceConnected:true,
   genuineM7SourceVerified:false,
   noWorldEdits:true,stepsActuallyPlaced:false,

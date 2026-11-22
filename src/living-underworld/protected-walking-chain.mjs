@@ -54,7 +54,8 @@ export function auditProtectedUnderworldWalkingChain(seed,rx,rz,{
  // No amount of changing a deep ramp can justify unsafe historical surface.
  const selected=entry.ok&&entryGrade.ok?
   selectSourceProtectedInterlevelRamps(seed,rx,rz,{
-   source,entranceProposal:p,includeSocket:false,maxCells
+   source,entranceProposal:p,includeSocket:false,maxCells,
+   requireMainGalleryClearance:true
   }):null;
  const connectors=[16,25,34].map((index,i)=>{
   const choice=selected?.links?.[i],picked=choice?.selected,
@@ -81,7 +82,14 @@ export function auditProtectedUnderworldWalkingChain(seed,rx,rz,{
  const gallery=selected?.ok===true?
   auditProposedSupportsAgainstMainGalleries(seed,rx,rz,[
    p,...selected.links.map(x=>x.selected.proposal)
-  ]):null;
+  ]):
+  selected?.reason==='ENTRANCE_BLOCKS_HORIZONTAL_GALLERY'?
+  Object.freeze({ok:false,
+   blockedCells:selected.galleryBlockedCells??null,
+   reason:selected.refusal,
+   pedestrianHorizontalPairsChecked:16,
+   routes:[],examples:selected.galleryExamples??[]
+  }):null;
  const possible=entry.ok&&entryGrade.ok&&selected?.ok===true&&
   gallery?.ok===true&&
   selected.completeNetworkCollisionFree===true&&
@@ -90,6 +98,8 @@ export function auditProtectedUnderworldWalkingChain(seed,rx,rz,{
   ok:possible,seed,rx,rz,reason:possible?null:
    !entry.ok?'ENTRANCE_FULL_FOOTPRINT_UNSAFE':
    !entryGrade.ok?'ENTRANCE_NOT_SUPPORTED_STAIRS':
+   selected?.reason==='ENTRANCE_BLOCKS_HORIZONTAL_GALLERY'?
+    'MAIN_GALLERY_CLEARANCE_BLOCKED':
    !selected?.ok?'DEEP_LINKS_SOURCE_UNSAFE':
    'MAIN_GALLERY_CLEARANCE_BLOCKED',
   surfaceMouth:p.mouth,

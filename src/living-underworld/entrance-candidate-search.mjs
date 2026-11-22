@@ -2,15 +2,19 @@
 // edit or ore: a corridor is a candidate ONLY if the SAME strict full-volume
 // envelope check, geometric air continuity and supported-stair test all pass.
 // It does not mutate M7 terrain or install the candidate into a world.
-import {planUnderworldSurfaceEntrance} from './surface-entrance-proposal.mjs';
+import {planUnderworldSurfaceEntrance,planHubDepartingSurfaceEntrance}
+ from './surface-entrance-proposal.mjs';
 import {auditProtectedEntranceEnvelope} from './protected-entrance-envelope.mjs';
 import {auditProposedSurfaceConnection} from './physical-connectivity-audit.mjs';
 import {auditSupportedEntranceStairs} from './walkable-entrance-stairs.mjs';
+import {compileMainGalleryPedestrianClearance}
+ from './combined-stair-footprints.mjs';
 
 export function searchProtectedEntranceCandidates(seed,rx,rz,{
  surfaceHeightAt,biomeAt,requiredBiome,protectedAt=()=>false,
  naturalAt,authoredAt=()=>undefined,editedAt=()=>false,
- existingLandmarkAt=()=>false,maxCandidates=4,radialVariant=0,lateralVariant=0
+ existingLandmarkAt=()=>false,maxCandidates=4,radialVariant=0,lateralVariant=0,
+ avoidMainGalleryInterference=false
 }={}){
  if(!Number.isSafeInteger(seed)||seed!==(seed|0)||
    ![rx,rz].every(Number.isSafeInteger)||
@@ -21,9 +25,18 @@ export function searchProtectedEntranceCandidates(seed,rx,rz,{
    typeof requiredBiome!=='string'||!requiredBiome.trim()||
    (!Number.isSafeInteger(maxCandidates)||maxCandidates<1||maxCandidates>4)||
    !Number.isSafeInteger(radialVariant)||radialVariant<0||radialVariant>3||
-   !Number.isSafeInteger(lateralVariant)||lateralVariant<0||lateralVariant>3)
+   !Number.isSafeInteger(lateralVariant)||lateralVariant<0||lateralVariant>3||
+   typeof avoidMainGalleryInterference!=='boolean')
   throw new TypeError('Invalid protected entrance candidate search');
  const examined=[],seen=new Set();
+ const horizontal=avoidMainGalleryInterference?
+  compileMainGalleryPedestrianClearance(seed,rx,rz):null;
+ if(horizontal&&!horizontal.ok)return Object.freeze({
+  ok:false,seed,rx,rz,requiredBiome,
+  tested:0,accepted:null,examined:Object.freeze([]),
+  reason:horizontal.reason,sourceResearchOnly:true,
+  noOriginalCellsChanged:true,worldCarved:false
+ });
  let accepted=null;
  for(let searchStart=0;searchStart<maxCandidates;searchStart++){
   const p=planUnderworldSurfaceEntrance(seed,rx,rz,{
@@ -40,6 +53,8 @@ export function searchProtectedEntranceCandidates(seed,rx,rz,{
    continue;
   }
   seen.add(key);
+  // Preserve historical default validations and returned object shapes.
+  if(!avoidMainGalleryInterference){
   const geometry=auditProposedSurfaceConnection(seed,p);
   if(!geometry.pass){
    examined.push(Object.freeze({searchStart,ok:false,stage:'FACE_CONNECTED',
@@ -63,12 +78,69 @@ export function searchProtectedEntranceCandidates(seed,rx,rz,{
     sourceOwned:envelope.sourceOwned,edits:envelope.edits,
     reason:envelope.reason,biome:p.biome,mouth:p.mouth}));
   if(envelope.ok){accepted=Object.freeze({proposal:p,envelope,stairs,geometry});break;}
+   continue;
+  }
+  // Default search remains historical two-segment geometry, unchanged.
+  // Strict optional search also tries at most eight flat hub departures,
+  // each independently undergoing ORIGINAL face, stair, geology and authoring
+  // validation. No callback can waive any of the required checks.
+  const proposals=avoidMainGalleryInterference?
+   [p,...Array.from({length:8},(_,bearing)=>
+     planHubDepartingSurfaceEntrance(p,{bearing,flatBlocks:4}))]:[p];
+  for(const candidate of proposals){
+   const departure=candidate.hubDeparture?.bearing??null;
+   const geometry=auditProposedSurfaceConnection(seed,candidate);
+   if(!geometry.pass){
+    examined.push(Object.freeze({searchStart,hubDepartureBearing:departure,
+     ok:false,stage:'FACE_CONNECTED',
+     reason:geometry.failures[0]?.reason??'UNKNOWN'}));
+    continue;
+   }
+   const stairs=auditSupportedEntranceStairs(candidate);
+   if(!stairs.ok){
+    examined.push(Object.freeze({searchStart,hubDepartureBearing:departure,
+     ok:false,stage:'STAIR_SUPPORT',
+     reason:stairs.failures[0]??'UNKNOWN'}));
+    continue;
+   }
+   // A cheap deterministic gallery-footprint rejection prevents expensive
+   // original M7 per-voxel source queries on already-unwalkable geometry.
+   const walking=horizontal?horizontal.inspect(candidate):null;
+   if(walking&&!walking.ok){
+    examined.push(Object.freeze({searchStart,hubDepartureBearing:departure,
+     ok:false,stage:'HORIZONTAL_GALLERY_BLOCKED',
+     reason:walking.reason,
+     horizontalGalleryBlockedCells:walking.blockedCells,
+     biome:candidate.biome,mouth:candidate.mouth}));
+    continue;
+   }
+   const envelope=auditProtectedEntranceEnvelope(candidate,{
+    naturalAt,authoredAt,editedAt,protectedAt:existingLandmarkAt
+   });
+   examined.push(Object.freeze({searchStart,hubDepartureBearing:departure,
+    ok:envelope.ok,
+    stage:envelope.ok?'STRICT_SOURCE_CANDIDATE':'STRICT_SOURCE_REJECTED',
+    checkedCells:envelope.checkedCells,
+    unsafeMaterials:envelope.unsafeMaterials,
+    protectedOriginal:envelope.protectedOriginal,
+    sourceOwned:envelope.sourceOwned,edits:envelope.edits,
+    reason:envelope.reason,
+    horizontalGalleryBlockedCells:walking?.blockedCells??null,
+    biome:candidate.biome,mouth:candidate.mouth}));
+   if(envelope.ok){
+    accepted=Object.freeze({proposal:candidate,envelope,stairs,geometry,
+     mainGalleryCleared:!horizontal||walking?.ok===true});
+    break;
+   }
+  }
+  if(accepted)break;
  }
  return Object.freeze({ok:!!accepted,seed,rx,rz,requiredBiome,
    tested:examined.length,accepted,
    examined:Object.freeze(examined),
    noOriginalCellsChanged:true,worldCarved:false,
-   actualPhysicsAndGPUUnverified:true});
+   actualPhysicsAndGPUUnverified:true,
+   ...(avoidMainGalleryInterference?{horizontalGalleryFilterApplied:true}:{})});
 }
 
 // Four offset families x four compass approaches, with the IDENTICAL full
@@ -103,7 +175,8 @@ export function searchExtendedProtectedEntrances(seed,rx,rz,options={}){
   radialVariantsExamined:audited.length,accepted,
   audited:Object.freeze(audited),
   noOriginalCellsChanged:true,worldCarved:false,
-  realM7FootstepAndDeviceUnverified:true});
+  realM7FootstepAndDeviceUnverified:true,
+  ...(remaining.avoidMainGalleryInterference===true?{horizontalGalleryFilterApplied:true}:{})});
 }
 
 // Full 4 compass x 4 radial x 4 lateral source-preserving research route set.
@@ -136,5 +209,6 @@ export function searchWideProtectedEntrances(seed,rx,rz,options={}){
   lateralFamiliesExamined:groups.length,
   groups:Object.freeze(groups),
   sourceProtected:true,worldCarved:false,
-  originalM7Edited:false,playerWalkingUnverified:true});
+  originalM7Edited:false,playerWalkingUnverified:true,
+  ...(remaining.avoidMainGalleryInterference===true?{horizontalGalleryFilterApplied:true}:{})});
 }

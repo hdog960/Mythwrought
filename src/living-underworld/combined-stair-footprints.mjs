@@ -101,7 +101,7 @@ export function auditProposedSupportsAgainstMainGalleries(
   !integer(maxExamples)||maxExamples<1||maxExamples>30)
   throw TypeError('Invalid main gallery pedestrian clearance audit');
  const plan=planUnderworldRegion(seed,rx,rz);
- const horizontal=new Map();
+ const horizontal=new Map(),horizontalSupport=new Map();
  let rawCells=0;
  for(const index of MAIN_GALLERY_PAIRS){
   const gallery=footprint({ok:true,segments:[
@@ -118,6 +118,8 @@ export function auditProposedSupportsAgainstMainGalleries(
   });
   for(const cell of gallery.clearance)
    if(!horizontal.has(cell))horizontal.set(cell,index);
+  for(const cell of gallery.support)
+   if(!horizontalSupport.has(cell))horizontalSupport.set(cell,index);
  }
  const routes=[],examples=[];
  let blockedCells=0;
@@ -137,7 +139,17 @@ export function auditProposedSupportsAgainstMainGalleries(
    if(crossed===undefined)continue;
    affected++;blockedCells++;
    if(examples.length<maxExamples)examples.push(Object.freeze({
-    cell,routeIndex:route,horizontalPairIndex:crossed
+    cell,routeIndex:route,horizontalPairIndex:crossed,
+    type:'PROPOSED_SUPPORT_IN_GALLERY_HEADROOM'
+   }));
+  }
+  for(const cell of current.clearance){
+   const crossed=horizontalSupport.get(cell);
+   if(crossed===undefined)continue;
+   affected++;blockedCells++;
+   if(examples.length<maxExamples)examples.push(Object.freeze({
+    cell,routeIndex:route,horizontalPairIndex:crossed,
+    type:'GALLERY_SUPPORT_IN_PROPOSED_HEADROOM'
    }));
   }
   routes.push(Object.freeze({routeIndex:route,blockingCells:affected}));
@@ -148,6 +160,7 @@ export function auditProposedSupportsAgainstMainGalleries(
   seed,rx,rz,
   pedestrianHorizontalPairsChecked:MAIN_GALLERY_PAIRS.length,
   distinctGalleryClearanceCells:horizontal.size,
+  distinctGallerySupportCells:horizontalSupport.size,
   proposedStairsAudited:proposals.length,blockedCells,rawCells,
   routes:Object.freeze(routes),examples:Object.freeze(examples),
   exactThreeWideThreeHighGradeSource:true,
@@ -156,4 +169,81 @@ export function auditProposedSupportsAgainstMainGalleries(
   newTerrainActuallyCarved:false,
   worldChanged:false
  });
+}
+
+// Reusable, bounded and read-only MAIN gallery index. The same exact strict
+// footprint() routine powers the legacy full audit and this candidate-search
+// preflight, so neither accepts a support placed in gallery headroom.
+// Only deterministic detached planned geometry is cached, never old M7 voxels.
+const INDEX_CACHE=new Map(),MAX_INDEX_CACHE=8;
+export function compileMainGalleryPedestrianClearance(seed,rx,rz,{
+ maxCells=90000,maxExamples=12
+}={}){
+ if(!integer(seed)||seed!==(seed|0)||![rx,rz].every(integer)||
+  !integer(maxCells)||maxCells<1000||maxCells>250000||
+  !integer(maxExamples)||maxExamples<1||maxExamples>30)
+  throw TypeError('Invalid bounded horizontal gallery index');
+ const cacheKey=seed+':'+rx+':'+rz;
+ const cached=INDEX_CACHE.get(cacheKey);
+ if(cached&&cached.rawCells<=maxCells&&cached.maxExamples>=maxExamples)
+  return cached;
+ const region=planUnderworldRegion(seed,rx,rz);
+ const horizontal=new Map(),horizontalSupport=new Map();let rawCells=0;
+ for(const index of MAIN_GALLERY_PAIRS){
+  const q=footprint({ok:true,segments:[
+   region.capsules[index],region.capsules[index+1]
+  ]});
+  if(!q.ok)return Object.freeze({ok:false,
+   reason:'HORIZONTAL_GALLERY_WALKING_GRADE_UNSAFE',
+   galleryIndex:index,noWorldEdits:true});
+  rawCells+=q.support.size+q.clearance.size;
+  if(rawCells>maxCells)return Object.freeze({ok:false,
+   reason:'GALLERY_FOOTPRINT_BUDGET',rawCells,maxCells,
+   noWorldEdits:true});
+  for(const k of q.clearance)if(!horizontal.has(k))
+   horizontal.set(k,index);
+  for(const k of q.support)if(!horizontalSupport.has(k))
+   horizontalSupport.set(k,index);
+ }
+ const index=Object.freeze({
+  ok:true,seed,rx,rz,rawCells,maxExamples,
+  pedestrianHorizontalPairsChecked:MAIN_GALLERY_PAIRS.length,
+  distinctGalleryClearanceCells:horizontal.size,
+  distinctGallerySupportCells:horizontalSupport.size,
+  inspect(proposal){
+   const q=footprint(proposal);
+   if(!q.ok)return Object.freeze({ok:false,
+    reason:q.reason,failures:q.failures??[],worldChanged:false});
+   const examples=[];let blockedCells=0;
+   for(const cell of q.support){
+    const horizontalPairIndex=horizontal.get(cell);
+    if(horizontalPairIndex===undefined)continue;
+    blockedCells++;
+    if(examples.length<maxExamples)examples.push(Object.freeze({
+     cell,horizontalPairIndex,
+     type:'PROPOSED_SUPPORT_IN_GALLERY_HEADROOM'
+    }));
+   }
+   for(const cell of q.clearance){
+    const horizontalPairIndex=horizontalSupport.get(cell);
+    if(horizontalPairIndex===undefined)continue;
+    blockedCells++;
+    if(examples.length<maxExamples)examples.push(Object.freeze({
+     cell,horizontalPairIndex,
+     type:'GALLERY_SUPPORT_IN_PROPOSED_HEADROOM'
+    }));
+   }
+   return Object.freeze({ok:blockedCells===0,
+    reason:blockedCells?'PROPOSED_SUPPORT_BLOCKS_HORIZONTAL_GALLERY':null,
+    blockedCells,supportCells:q.support.size,
+    examples:Object.freeze(examples),
+    worldChanged:false,sourceOnly:true,
+    oldM7GeologyUnverified:true,
+    nativePlayerWalkingUnverified:true});
+  }
+ });
+ INDEX_CACHE.set(cacheKey,index);
+ if(INDEX_CACHE.size>MAX_INDEX_CACHE)
+  INDEX_CACHE.delete(INDEX_CACHE.keys().next().value);
+ return index;
 }
