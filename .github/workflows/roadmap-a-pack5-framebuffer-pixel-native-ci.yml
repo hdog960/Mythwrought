@@ -1,0 +1,24 @@
+name: Roadmap A original Pack5 framebuffer pixel center native
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-framebuffer-pixel-native-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-framebuffer-pixel-native-ci.yml'
+permissions:
+  contents: read
+jobs:
+  original-framebuffer-source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only own-lane source/test syntax
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-pack5-framebuffer-pixel-risk-producer.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-framebuffer-pixel-risk.test.mjs
+      - name: Only nine new original Pack5 frame pixel source tests
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-framebuffer-pixel-risk.test.mjs
