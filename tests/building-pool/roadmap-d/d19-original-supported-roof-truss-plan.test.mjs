@@ -22,6 +22,7 @@ test('all 16 canonical sources produce real bounded short two-bearing truss span
   assert.ok(p.proposedSpanCount>=1&&p.proposedSpanCount<=12);
   assert.ok(p.proposedBeamCount>=3&&p.proposedBeamCount<=72);
   assert.equal(p.proposedBeamCells.length,p.proposedBeamCount);
+  assert.equal(p.verifiedSourceBearingToFoundation,true);
   assert.equal(p.proposedTrussSpans.length,p.proposedSpanCount);
   assert.equal(p.originalWindowSourceCount,b.openings.filter(o=>o.kind==='window').length);
   assert.ok(p.originalWeatherPlaneCellsWithoutVerticalBearing>0);
@@ -39,6 +40,14 @@ test('all 16 canonical sources produce real bounded short two-bearing truss span
    assert.ok(roots.has(originalSource.get(K(span.bearingEnd))?.role));
    assert.equal(span.authoredRoofAboveEveryCell,true);
    assert.equal(span.originalRoofLoadAcceptance,false);
+   assert.equal(span.bothBearingsReachUnbrokenOriginalFoundation,true);
+   for(const bearingAt of [span.bearingStart,span.bearingEnd]){
+    for(let y=6;y>=0;y--){
+     const source=originalSource.get(K([bearingAt[0],y,bearingAt[2]]));
+     assert.ok(source&&['foundation','floor','wall','beam','partition','column'].includes(source.role),
+       'original source roof bearing interrupted by window, doorway or AIR at Y='+y+' in '+b.id);
+    }
+   }
    assert.equal(span.jointContinuityNeedsOriginalPhysicalReview,true);
    for(const at of span.points){
     assert.ok(!originalSource.has(K(at)),'proposed beam overwrites original source voxel '+K(at));
@@ -65,7 +74,7 @@ test('all 16 canonical sources produce real bounded short two-bearing truss span
   both+=p.originalWindowJambCensus.both;
  }
  assert.deepEqual({spans,beams,windows,none,one,both},
-  {spans:95,beams:695,windows:1233,none:63,one:130,both:1040},
+  {spans:90,beams:676,windows:1233,none:63,one:130,both:1040},
   'source original 16-building D19 structural census changed; review true source, never lower checks');
 });
 test('all proposed original-roster timber beams resolve as Pack2 real authored geometry; no fake replacement cube or remapped ID',()=>{
