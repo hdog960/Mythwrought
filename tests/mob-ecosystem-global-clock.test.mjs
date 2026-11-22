@@ -1,0 +1,125 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {speciesRegistry} from '../src/mobs/species.mjs';
+import {createRegionalEcologySchedule,inspectRegionalEcologySchedule}
+  from '../src/mobs/ecosystem-region-cadence.mjs';
+import {createGlobalEcologyClock,advanceGlobalEcologyClock,
+  commitGlobalEcologyRegion,ORIGINAL_MAX_REGION_RECORDS,
+  ORIGINAL_MAX_TIME_ADVANCE} from '../src/mobs/ecosystem-global-clock.mjs';
+
+const ids=speciesRegistry.filter(s=>s.implementation==='preview').map(s=>s.id);
+const counts=()=>new Map(ids.map(id=>[id,0]));
+const location=(cx,cz=0,section=0,feet=4)=>({cx,cz,section,feet});
+const at=(state,seconds,regions)=>advanceGlobalEcologyClock(state,{seconds,regions});
+const recordFor=(ticket,spawnOnFirstVisit=false)=>createRegionalEcologySchedule({
+  regionKey:ticket.key,now:ticket.time,localCounts:counts(),spawnOnFirstVisit
+});
+
+test('source 0.5-second ticker skips premature polls, clamps time to one second',()=>{
+  const start=createGlobalEcologyClock();
+  assert.equal(start.time,0);
+  assert.equal(start.next,.5);
+  assert.equal(ORIGINAL_MAX_REGION_RECORDS,64);
+  assert.equal(ORIGINAL_MAX_TIME_ADVANCE,1);
+  const early=at(start,.49,[location(0)]);
+  assert.equal(early.reason,'interval');
+  assert.equal(early.selection,null);
+  assert.equal(early.clock.cursor,0);
+  const tick=at(early.clock,.02,[location(0)]);
+  assert.equal(tick.reason,'selected');
+  assert.equal(tick.selection.key,'0,0,0');
+  assert.equal(tick.clock.cursor,1);
+  assert.equal(tick.clock.next,1.01);
+  const updated=commitGlobalEcologyRegion(tick.clock,tick.selection,recordFor(tick.selection));
+  assert.equal(updated.entries.length,1);
+  const big=at(updated,40,[location(0)]);
+  assert.equal(big.clock.time,1.51);
+  assert.equal(big.clock.next,2.01);
+  assert.equal(big.clock.cursor,2);
+  const again=commitGlobalEcologyRegion(big.clock,big.selection,
+    inspectRegionalEcologySchedule(big.selection.record,{
+      now:1.51,localCounts:counts()
+    }).record);
+  assert.equal(again.entries.length,1);
+});
+
+test('global rotation uses only first 64 source regions and consumes invalid slot',()=>{
+  let state=createGlobalEcologyClock();
+  const sites=[location(0),location(1),location(2)];
+  const observed=[];
+  for(let i=0;i<4;i++){
+    const t=at(state,.5,sites);
+    observed.push(t.selection?.key);
+    state=commitGlobalEcologyRegion(t.clock,t.selection,recordFor(t.selection,true));
+  }
+  assert.deepEqual(observed,['0,0,0','1,0,0','2,0,0','0,0,0']);
+  const many=Array.from({length:65},(_,i)=>location(i));
+  state=createGlobalEcologyClock();
+  for(let i=0;i<64;i++){
+    const t=at(state,.5,many);
+    assert.equal(t.selection.key,i+',0,0');
+    state=commitGlobalEcologyRegion(t.clock,t.selection,recordFor(t.selection,true));
+  }
+  const next=at(state,.5,many);
+  assert.equal(next.selection.key,'0,0,0',
+    'Original manager intentionally limits considered regions to first 64');
+  assert.equal(next.clock.entries.length,64);
+  assert.equal(next.clock.cursor,65);
+});
+
+test('original full 64-region ledger rejects new region without stale eviction',()=>{
+  let state=createGlobalEcologyClock();
+  for(let i=0;i<64;i++){
+    const t=at(state,.5,[location(i)]);
+    state=commitGlobalEcologyRegion(t.clock,t.selection,recordFor(t.selection,true));
+  }
+  assert.equal(state.entries.length,64);
+  const t=at(state,.5,[location(90)]);
+  assert.equal(t.reason,'capacity');
+  assert.equal(t.selection,null);
+  assert.equal(t.clock.entries.length,64);
+  assert.equal(t.clock.cursor,65);
+});
+
+test('original region eviction uses first entry with next at least 12s old',()=>{
+  let state=createGlobalEcologyClock();
+  for(let i=0;i<64;i++){
+    const t=at(state,.5,[location(i)]);
+    state=commitGlobalEcologyRegion(t.clock,t.selection,recordFor(t.selection,true));
+  }
+  // After 64 half-second ticks, region #0 was created at t=.5.
+  // t=32.5 means it is sufficiently stale and must be evicted first.
+  const t=at(state,.5,[location(999)]);
+  assert.equal(t.selection.evictKey,'0,0,0');
+  state=commitGlobalEcologyRegion(t.clock,t.selection,recordFor(t.selection,true));
+  assert.equal(state.entries.length,64);
+  assert.equal(state.entries.some(([key])=>key==='0,0,0'),false);
+  assert.equal(state.entries.some(([key])=>key==='999,0,0'),true);
+});
+
+test('source selection and commit cannot be forged, skipped or replayed',()=>{
+  const source=createGlobalEcologyClock();
+  const t=at(source,.5,[location(0)]);
+  assert.throws(()=>at(source,.5,[location(0)]),/Invalid original ecology global advance/);
+  assert.throws(()=>at(t.clock,.5,[location(1)]),/Invalid original ecology global advance/);
+  assert.throws(()=>commitGlobalEcologyRegion(t.clock,{...t.selection},recordFor(t.selection)),
+    /Invalid original ecology global region commit/);
+  assert.throws(()=>commitGlobalEcologyRegion(t.clock,t.selection,
+    recordFor({...t.selection,key:'1,0,0'})),
+    /Invalid original ecology global region commit/);
+  const committed=commitGlobalEcologyRegion(t.clock,t.selection,recordFor(t.selection));
+  assert.equal(committed.entries.length,1);
+  assert.throws(()=>commitGlobalEcologyRegion(t.clock,t.selection,recordFor(t.selection)),
+    /Invalid original ecology global region commit/);
+});
+
+test('original empty and invalid region slots advance ticker but not region ledger',()=>{
+  const source=createGlobalEcologyClock();
+  const empty=at(source,.5,[]);
+  assert.equal(empty.reason,'empty');
+  assert.equal(empty.clock.cursor,0);
+  const invalid=at(empty.clock,.5,[location(0,0,-2,4)]);
+  assert.equal(invalid.reason,'invalid-region');
+  assert.equal(invalid.clock.cursor,1);
+  assert.equal(invalid.clock.entries.length,0);
+});
