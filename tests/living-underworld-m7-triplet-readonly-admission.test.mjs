@@ -202,3 +202,31 @@ test('invalid original chunk coordinate outside declared region is a refusal',()
  assert.equal(r.chunkAccountingReconciled,false);
  assert.equal(r.releaseApproved,false);
 });
+
+test('null synthetic gallery or chunk rows refuse with explicit evidence codes',()=>{
+ for(const kind of ['gallery','chunk']){
+  const record=kind==='gallery'?gallery():chunk();
+  record.rows[1]=null;
+  const r=check({[kind]:record});
+  assert.equal(r.proposalEvidenceAllPassed,false);
+  assert.equal(r.nativeTripletReportsPresent,false);
+  assert.ok(r.reasonCodes.includes(kind==='gallery'?
+   'INCOMPLETE_OR_UNTRUSTED_GALLERY_COHORT':
+   'INCOMPLETE_OR_UNTRUSTED_CHUNK_COHORT'));
+ }
+});
+test('source veto categories are conserved independently of claimed gallery totals',()=>{
+ const g=gallery();
+ g.voxelSourceVetoCategoryTotals.edited=1;
+ const r=check({gallery:g});
+ assert.equal(r.proposalEvidenceAllPassed,false);
+ assert.equal(r.reportRowArithmeticReconciled,false);
+ assert.ok(r.reasonCodes.includes('M7_GALLERY_AGGREGATES_DO_NOT_MATCH_ROWS'));
+});
+test('forged zero refused chunks cannot hide real refusal categories',()=>{
+ const k=chunk();k.rows[2].refusalCounts.oreOrUnsafe=1;
+ const r=check({chunk:k});
+ assert.equal(r.chunkAccountingReconciled,false);
+ assert.equal(r.proposalEvidenceAllPassed,false);
+ assert.ok(r.reasonCodes.includes('M7_CHUNK_CORE_HALO_ARITHMETIC_INVALID'));
+});
