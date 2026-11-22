@@ -7,8 +7,9 @@
 const str=x=>x.join(',');
 const bearing=new Set(['wall','partition','column']);
 const validAt=a=>Array.isArray(a)&&a.length===3&&a.every(Number.isSafeInteger);
-const directions=Object.freeze([{dx:1,dz:0,axis:'x',orientation:'east'},
-                                {dx:0,dz:1,axis:'z',orientation:'north'}]);
+// Original Pack2 ID61 is X-axis in zero/north rotation; east/quarter-turn rotates it along Z.
+const directions=Object.freeze([{dx:1,dz:0,axis:'x',orientation:'north'},
+                                {dx:0,dz:1,axis:'z',orientation:'east'}]);
 export function planD19SourceProvenRoofTrusses(blueprint,{maxSpans=12,maxBeamCells=72,maxSpan=12,clearance=2}={}){
  if(!blueprint||!Array.isArray(blueprint.cells)||blueprint.creatorApproved!==false||
     blueprint.worldPlaced!==false||blueprint.integrated!==false||
