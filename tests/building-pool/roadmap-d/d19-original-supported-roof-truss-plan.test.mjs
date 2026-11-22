@@ -32,6 +32,8 @@ test('all 16 canonical sources produce real bounded short two-bearing truss span
   const locations=new Set();
   for(const span of p.proposedTrussSpans){
    assert.ok(span.spanCells>=2&&span.spanCells<=12);
+   assert.equal(span.orientation,span.axis==='x'?'north':'east',
+     'real Pack2 ironbound beam X-axis zero rotation must not be reversed');
    assert.equal(span.spanCells,span.points.length);
    assert.ok(roots.has(originalSource.get(K(span.bearingStart))?.role));
    assert.ok(roots.has(originalSource.get(K(span.bearingEnd))?.role));
@@ -77,6 +79,11 @@ test('all proposed original-roster timber beams resolve as Pack2 real authored g
   assert.equal(p.triangleCount,156);
   assert.equal(p.shape.boxes.length,3);
   assert.equal(p.yaw,facing==='east'?1:0);
+  // Original source ID61 three-box timber spine must occupy entire cell span
+  // along the inferred truss direction, so adjoining pieces can meet.
+  const axis=facing==='east'?2:0;
+  assert.ok(p.shape.boxes.some(box=>box[axis]===0&&box[axis+3]===1),
+    'original physical Pack2 timber mesh fails required face-to-face continuity');
  }
 });
 test('original roof-bearing proposal rejects tampered source, unapproved sizes and already registered live world structures',()=>{
