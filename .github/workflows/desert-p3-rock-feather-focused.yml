@@ -1,0 +1,36 @@
+name: Desert P3 research-only rock feather source audit
+on:
+  push:
+    branches:
+      - research/desert-p3-hardpan-rock-feather-20261122
+    paths:
+      - .github/workflows/desert-p3-rock-feather-focused.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-rock-feather-research
+  cancel-in-progress: false
+jobs:
+  focused-original-world:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fail closed to isolated research-only file scope
+        run: |
+          set -euo pipefail
+          BASE=a02b0100c7b9521d758591343314bafd7c6ce5d7
+          test "$(git merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(scripts/ci/desert-p3-rock-feather-proposal.mjs|scripts/ci/desert-p3-rock-feather-original-source.test.mjs|.github/workflows/desert-p3-rock-feather-focused.yml|docs/desert/PHASE3_HARDPAN_ROCK_FEATHER_RESEARCH_20261122.md)$' || true)
+          test -z "$unexpected"
+          node --check scripts/ci/desert-p3-rock-feather-proposal.mjs
+          node --check scripts/ci/desert-p3-rock-feather-original-source.test.mjs
+      - name: Only new actual-world feather source checks
+        run: |
+          node --test scripts/ci/desert-p3-rock-feather-original-source.test.mjs
