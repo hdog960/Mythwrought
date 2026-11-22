@@ -13,6 +13,7 @@ import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR}
 import {planEnvironmentalColumn} from '../../src/manual-biomes/environment-v7.mjs';
 import {v6BiomeAt} from '../../src/manual-biomes/v6-balanced-biomes.mjs';
 import {terrainHeight,BLOCK} from '../../src/voxel.mjs';
+import {ENVIRONMENT_GROUND as G} from '../../src/environment-ground.mjs';
 
 const root=process.cwd(),out=path.join(root,'artifacts/mountain-v7-real');
 await mkdir(out,{recursive:true});
@@ -34,7 +35,7 @@ function anchors(){
     const y=Math.max(...plan.keys()),id=world.get(x,y,z);
     if(id===BLOCK.GRASS&&y>=5&&y<=11&&world.get(x,y+1,z)===BLOCK.AIR)
       grass.push({x,y,z,id,kind:'native-alpine-grass'});
-    if(id!==BLOCK.GRASS&&id!==BLOCK.AIR&&y>=10&&
+    if([G.slate,G.scree,G.gneiss,272].includes(id)&&y>=10&&
       world.get(x,y+1,z)===BLOCK.AIR)
       stone.push({x,y,z,id,kind:'original-mountain-rock'});
   }
@@ -72,15 +73,23 @@ try{
     const page=await context.newPage();
     page.on('pageerror',e=>errors.push(width+'x'+height+': '+e.message));
     page.on('dialog',dialog=>dialog.accept());
+    // Start on a separate untouched seed. The original game's explicit
+    // SWITCH WORLD action activates an unused seed as a genuine M7 profile.
+    // Starting with seed 179 already selected would intentionally fail the
+    // original isUnclaimedWorldSeed guard and load a legacy world instead.
     await page.addInitScript(()=>localStorage.setItem(
-      'mythwrought-v002-selected-seed','179'));
+      'mythwrought-v002-selected-seed','7'));
     await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',
       {waitUntil:'load',timeout:90000});
     await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,
       {timeout:90000});
+    await page.locator('#menu').click();
+    await page.locator('#seedInput').fill(String(seed));
+    await page.locator('#switchWorld').click();
     const activated=await page.evaluate(()=>({
       generator:window.__mythwroughtTest.fourBiomeProfile()?.generator,
-      webgl2:Boolean(document.getElementById('scene')?.getContext('webgl2'))
+      webgl2:Boolean(document.getElementById('scene')?.getContext('webgl2')),
+      status:document.getElementById('seedMessage')?.textContent??null
     }));
     if(activated.generator!==M7_ENVIRONMENT_GENERATOR||!activated.webgl2)
       throw Error('Original-game M7 physical profile did not activate '+
