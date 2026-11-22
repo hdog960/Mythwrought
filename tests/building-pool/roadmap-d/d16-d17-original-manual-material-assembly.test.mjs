@@ -86,3 +86,37 @@ test('physical material build rejects synthesized/fraudulent source geometry and
    visibleBoxes:[],selectionBoxes:[],collisionBoxes:[]});
  assert.throws(()=>assembleD16D17OriginalPhysicalPreview(b,{...truth(),resolveManualAsset:fake}),/owner contract|physical/);
 });
+
+test('physical Pack4 source mesh anti-forgery rejects out-of-cell vertices, invalid normals/RGBA, incomplete triangles and memory abuse',()=>{
+ const b=originals[0]; // authentic unmodified Desert W16 plan with 12 source window samples
+ const original=pack4BuilderAsset('pack4:030',{candidateId:159,rotation:'north'});
+ const originalVertices=new Float32Array(original.previewMesh.translucent);
+ function broken(mode){
+  return (ref,opts)=>{
+   const a=pack4BuilderAsset(ref,opts);
+   if(ref!=='pack4:030')return a;
+   const mesh=a.previewMesh;
+   let t=new Float32Array(mesh.translucent);
+   if(mode==='out-of-cell')t[0]=1.2;
+   if(mode==='bad-normal'){t[3]=0;t[4]=0;t[5]=0;}
+   if(mode==='bad-alpha')t[9]=1.25;
+   if(mode==='incomplete')t=t.subarray(0,t.length-10);
+   if(mode==='oversized')t=new Float32Array(321*30); // intentionally > real 228 max
+   return {...a,previewMesh:{...mesh,translucent:t}};
+  };
+ }
+ for(const [mode,error] of [
+  ['out-of-cell',/local vertex/],
+  ['bad-normal',/unit vector/],
+  ['bad-alpha',/alpha or color/],
+  ['incomplete',/complete triangles/],
+  ['oversized',/triangle budget/]
+ ]){
+  assert.throws(()=>assembleD16D17OriginalPhysicalPreview(b,{
+    ...truth(),resolvePack4Asset:broken(mode)
+  }),error,'expected fail closed for '+mode);
+ }
+ const unchanged=pack4BuilderAsset('pack4:030',{candidateId:159,rotation:'north'});
+ assert.deepEqual([...unchanged.previewMesh.translucent],[...originalVertices],
+   'original Pack4 family source mesh was modified by rejection path');
+});
