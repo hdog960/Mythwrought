@@ -9,7 +9,7 @@ import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
 
 test('seeded V8 original-world site census is bounded, read-only and deterministic',()=>{
   for(const seed of [179,2026]){
-    const world=new VoxelWorld(seed),save=world.save();
+    const world=new VoxelWorld(seed),save=JSON.stringify(world.save());
     const first=census({seed,tileX:-65,tileZ:-2,width:3,height:3,world});
     const second=census({seed,tileX:-65,tileZ:-2,width:3,height:3,world});
     assert.deepEqual(first,second);
@@ -26,7 +26,7 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
     assert.ok(first.stats.seamExposedFaces<=first.stats.eligible*8);
     assert.ok(first.stats.terrainCells>=first.stats.eligible);
     assert.ok(first.stats.plantCells<=first.stats.plants*18);
-    assert.equal(world.save(),save);
+    assert.equal(JSON.stringify(world.save()),save);
     assert.equal(world.edits.size,0);
     assert.equal(world.rotations.size,0);
     assert.ok(first.sites.every(s=>v6BiomeAt(s.x,s.z,seed)?.name==='mountain'));
