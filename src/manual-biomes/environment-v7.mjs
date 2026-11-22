@@ -5,6 +5,7 @@ import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {buildEnchantedTreeCandidate,ENCHANTED_TREE_MAX_RADIUS} from './enchanted-tree-candidates.mjs';
 import {enchantedTreeFootingsSupported} from './enchanted-tree-footings.mjs';
 import {resolveEnchantedTreeOverlap} from './enchanted-tree-overlap.mjs';
+import {clearEnchantedCanopyForWalking} from './enchanted-tree-walking-clearance.mjs';
 
 const smooth=value=>value*value*(3-2*value);
 const clamp=value=>Math.max(0,Math.min(1,value));
@@ -216,6 +217,11 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
         tree=treeVoxels(biome.name,x,floor,z,roll);
       }
       if(tree.some(([a,b,c])=>b>WORLD_MAX_Y||readCell(a,b,c)!==BLOCK.AIR))continue;
+      // The game treats moonleaf/aetherleaf as true solid cubes. Real
+      // player height is 1.78: leave both voxels immediately above nearby
+      // M7 ground unobstructed, without changing mineable bark or terrain.
+      // Only experimental candidates use this additional headroom filter.
+      if(candidate)tree=clearEnchantedCanopyForWalking(tree,readCell,BLOCK.AIR);
       for(const [a,b,c,id] of tree)if(a>=minX&&a<=maxX&&c>=minZ&&c<=maxZ){
         const key=a+','+b+','+c;
         // The old M7 path and non-enchanted trees retain exactly their
