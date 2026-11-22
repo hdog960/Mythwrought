@@ -15,16 +15,20 @@ const INT=Number.isSafeInteger;
 const CONNECTOR_INDICES=Object.freeze([16,25,34,35]);
 const asPoint=(x,y,z)=>Object.freeze({x,y,z});
 const eq=(a,b)=>a.x===b.x&&a.y===b.y&&a.z===b.z;
-export function planDetachedPedestrianSwitchback(seed,rx,rz,index){
+export function planDetachedPedestrianSwitchback(seed,rx,rz,index,{
+ radius=44,cornerFlat=8
+}={}){
  if(!INT(seed)||seed!==(seed|0)||![rx,rz].every(INT)||
-    !CONNECTOR_INDICES.includes(index))
+    !CONNECTOR_INDICES.includes(index)||
+ !INT(radius)||radius<14||radius>44||
+ !INT(cornerFlat)||cornerFlat<4||cornerFlat>10||radius<cornerFlat+5)
   throw new TypeError('Invalid protected pedestrian connector input');
  const region=planUnderworldRegion(seed,rx,rz);
  const original=region.capsules[index],isSocket=index===35;
  const a=original.a;
  const b=isSocket?asPoint(original.b.x,-7,original.b.z):original.b;
  const cx=Math.round((a.x+b.x)/2),cz=Math.round((a.z+b.z)/2);
- const R=44,FLAT=8;
+ const R=radius,FLAT=cornerFlat;
  const ys=[a.y,...[1,2,3].map(k=>
   Math.round(a.y+(b.y-a.y)*k/4)),b.y];
  const [y0,y1,y2,y3,y4]=ys;
@@ -47,6 +51,7 @@ export function planDetachedPedestrianSwitchback(seed,rx,rz,index){
   .filter(s=>!eq(s.a,s.b)));
  return Object.freeze({ok:true,seed,rx,rz,index,
   kind:isSocket?'underground-socket-handoff':'deep-interlevel-ramp',
+  radiusBlocks:R,cornerFlatBlocks:FLAT,
   original,from:a,to:b,segments,
   radius:3.8,threeWideDryRunOnly:true,
   stopsBeforeProtectedSurface:isSocket,
@@ -56,10 +61,10 @@ export function planDetachedPedestrianSwitchback(seed,rx,rz,index){
   existingVoxelOrAuthoredSourceProvenanceUnverified:true});
 }
 export function auditDetachedPedestrianSwitchback(seed,rx,rz,index,
- {validateCandidateAir=false}={}){
+ {validateCandidateAir=false,radius=44,cornerFlat=8}={}){
  if(typeof validateCandidateAir!=='boolean')
   throw new TypeError('Invalid switchback AIR sampling flag');
- const proposal=planDetachedPedestrianSwitchback(seed,rx,rz,index);
+ const proposal=planDetachedPedestrianSwitchback(seed,rx,rz,index,{radius,cornerFlat});
  const step=auditSupportedEntranceStairs(proposal,{maxCells:20000});
  const isLocal=proposal.segments.every(({a,b})=>
   [a,b].every(p=>Math.floor(p.x/UNDERWORLD_REGION_SIDE)===rx&&
@@ -73,6 +78,7 @@ export function auditDetachedPedestrianSwitchback(seed,rx,rz,index,
  return Object.freeze({ok:step.ok&&isLocal&&
   (routeFaceConnected===null||routeFaceConnected),
   seed,rx,rz,index,kind:proposal.kind,
+  radiusBlocks:radius,cornerFlatBlocks:cornerFlat,
   originalDirectGradePass:auditSupportedEntranceStairs({
    ok:true,segments:[proposal.original]}).ok,
   proposedStairGeometryPass:step.ok,
@@ -121,4 +127,50 @@ export function auditDetachedNetworkPedestrianReadiness(seed,rx,rz){
   onlyDryRunGeometricCandidates:true,
   realPlayerWalkingNotProven:true,
   actualM7AirCarved:false});
+}
+
+// Finds the cheapest SOURCE-GEOMETRY deck in a bounded radius/landing grid.
+// Baseline 44/8 and every old audit remain unchanged. This must NOT be
+// interpreted as successful excavation in the protected original world.
+export function optimizeDetachedPedestrianSwitchback(seed,rx,rz,index){
+ let best=null;
+ let examined=0,rejectedByGrade=0,rejectedByRegion=0;
+ for(const radius of [14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44]){
+  for(const cornerFlat of [8,10,6,4]){
+   if(radius<cornerFlat+5)continue;
+   const candidate=auditDetachedPedestrianSwitchback(seed,rx,rz,index,{
+    radius,cornerFlat
+   });
+   examined++;
+   if(!candidate.withinOriginalRegion){
+    rejectedByRegion++;continue;
+   }
+   if(!candidate.proposedStairGeometryPass){
+    rejectedByGrade++;continue;
+   }
+   if(!best||candidate.candidateSupportCells<best.candidateSupportCells){
+    best=candidate;
+   }
+  }
+ }
+ const baseline=auditDetachedPedestrianSwitchback(seed,rx,rz,index);
+ if(!baseline.ok)throw Error('Previously verified 44/8 switchback no longer safe');
+ if(!best)throw Error('No bounded nonintersecting switchback option');
+ if(best.candidateSupportCells>baseline.candidateSupportCells)
+  throw Error('Optimizer regressed original support count');
+ return Object.freeze({
+  ok:true,seed,rx,rz,index,
+  baselineSupportCells:baseline.candidateSupportCells,
+  optimizedSupportCells:best.candidateSupportCells,
+  savedProposedSupportCells:baseline.candidateSupportCells-best.candidateSupportCells,
+  selectedRadius:best.radiusBlocks,selectedCornerFlat:best.cornerFlatBlocks,
+  candidateGradePassed:best.proposedStairGeometryPass,
+  originalRegionBounded:best.withinOriginalRegion,
+  choicesExamined:examined,rejectedByGrade,rejectedByRegion,
+  actualM7VoxelsModified:false,
+  originalM7SourceOwnershipUnverified:true,
+  actualPlayerWalkingUnverified:true,
+  GPUCostsUnmeasured:true,
+  sourceOnly:true
+ });
 }

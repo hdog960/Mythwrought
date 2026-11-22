@@ -31,3 +31,9 @@ Source-exact dry-run inventory across six seeds [179,-17,2026,314159,8675309,135
 - Original 64-way genuine M7 biome entrance census on the **same geographically distributed 120-site cohort**, plus inherited positive seed constructor failures 8675309/13579. The user explicitly prohibits bypassing the original `switchback36` protection.
 - Full-world connected AIR from genuine protected surface to city interior, physical player walking and vehicle/stair collision, absence of original authored-source collisions below the surface, non-block detail minability/persistence, actual chunk mesh bytes and 55–60FPS iPhone Home Screen shortcut acceptance.
 - No merges, deployments, force pushes, edits to other lanes or player saves.
+
+## Phase 3 optimization follow-up, candidate child only
+- The original 44-block-radius, 8-block-corner plan is preserved as the default, with all old 3-wide/3-high grade, region and support checks enforced.
+- A bounded 16-radius × 4-corner search chooses minimum supporting floor cells (14–44 block radius, 4–10 corner flats), rejecting any shape that fails the same strict checks or exits its 256-block region.
+- Independent exact-source 96-link evaluation: **128,731 original proposed support cells vs 45,866 optimized** across six seeds × four distant regions × four connectors, **64.37% fewer**. None placed. A proposed candidate AIR continuity sample also passed, still not a player-physics or existing-M7 provenance approval.
+- This reduces only theoretical staircase material; total generated tunnel AIR, original M7 terrain, saves, GPU uploads and mobile FPS are NOT changed or measured. New tests guard cost monotonicity, default geometry and the historical protected Y=-7 socket handoff.

@@ -25,6 +25,7 @@ on:
       - 'tests/living-underworld-multidepth-topology.test.mjs'
       - 'tests/living-underworld-pedestrian-switchback.test.mjs'
       - 'tests/living-underworld-chunk-exposure.test.mjs'
+      - 'tests/living-underworld-switchback-optimization.test.mjs'
       - '.github/workflows/living-underworld-baseline.yml'
   workflow_dispatch:
 
@@ -72,7 +73,7 @@ jobs:
           node --check scripts/underworld/audit-real-m7-entrance-terrain.mjs
           node --check scripts/underworld/benchmark-node-proposal.mjs
           node --check scripts/underworld/audit-m7-density.mjs
-          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs tests/living-underworld-entry-city.test.mjs tests/living-underworld-calibration.test.mjs tests/living-underworld-physical-connectivity.test.mjs tests/living-underworld-components-floor.test.mjs tests/living-underworld-provenance.test.mjs tests/living-underworld-stairs.test.mjs tests/living-underworld-optimization.test.mjs tests/living-underworld-entrance-alternatives.test.mjs tests/living-underworld-seam-components.test.mjs tests/living-underworld-city-neighbor-cache.test.mjs tests/living-underworld-radial-search.test.mjs tests/living-underworld-geography.test.mjs tests/living-underworld-network-cache-parity.test.mjs tests/living-underworld-lateral-search.test.mjs tests/living-underworld-city-access.test.mjs tests/living-underworld-multidepth-topology.test.mjs tests/living-underworld-pedestrian-switchback.test.mjs tests/living-underworld-chunk-exposure.test.mjs
+          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs tests/living-underworld-entry-city.test.mjs tests/living-underworld-calibration.test.mjs tests/living-underworld-physical-connectivity.test.mjs tests/living-underworld-components-floor.test.mjs tests/living-underworld-provenance.test.mjs tests/living-underworld-stairs.test.mjs tests/living-underworld-optimization.test.mjs tests/living-underworld-entrance-alternatives.test.mjs tests/living-underworld-seam-components.test.mjs tests/living-underworld-city-neighbor-cache.test.mjs tests/living-underworld-radial-search.test.mjs tests/living-underworld-geography.test.mjs tests/living-underworld-network-cache-parity.test.mjs tests/living-underworld-lateral-search.test.mjs tests/living-underworld-city-access.test.mjs tests/living-underworld-multidepth-topology.test.mjs tests/living-underworld-pedestrian-switchback.test.mjs tests/living-underworld-chunk-exposure.test.mjs tests/living-underworld-switchback-optimization.test.mjs
       - name: Attempt ALL twenty real M7 seeds and fail closed on any genuine crash
         shell: bash
         run: |

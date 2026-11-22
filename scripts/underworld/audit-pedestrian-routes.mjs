@@ -2,13 +2,19 @@
 // switchback options. No excavation, no ramps placed, no player walking claims.
 import fs from 'node:fs';
 import {auditDetachedNetworkPedestrianReadiness,
- auditDetachedPedestrianSwitchback}
+ auditDetachedPedestrianSwitchback,optimizeDetachedPedestrianSwitchback}
  from '../../src/living-underworld/pedestrian-switchback.mjs';
 const seeds=[179,-17,2026,314159,8675309,13579],
  regions=[[0,0],[-7,13],[300,-302],[-300,250]];
 const rows=[];
 for(const seed of seeds)for(const [rx,rz] of regions){
  const r=auditDetachedNetworkPedestrianReadiness(seed,rx,rz);
+ const optimized=[16,25,34,35].map(index=>
+  optimizeDetachedPedestrianSwitchback(seed,rx,rz,index));
+ if(optimized.some(q=>!q.ok||!q.candidateGradePassed||
+    !q.originalRegionBounded||q.optimizedSupportCells>q.baselineSupportCells))
+  throw Error('Optimized candidate broke the same original stair contract');
+
  if(r.horizontalPairedPassed!==16||r.proposedSwitchbackPassed!==4)
   throw Error('Candidate switchback geometry refused: '+JSON.stringify(r));
  rows.push({seed,rx,rz,horizontalPairs:r.horizontalPairedTotal,
@@ -18,6 +24,9 @@ for(const seed of seeds)for(const [rx,rz] of regions){
   newDryRunLinks:r.proposedSwitchbackTotal,
   newDryRunPassed:r.proposedSwitchbackPassed,
   supportCells:r.switchbacks.map(s=>s.candidateSupportCells),
+  optimizedSupportCells:optimized.map(q=>q.optimizedSupportCells),
+  optimizedRadius:optimized.map(q=>q.selectedRadius),
+  optimizedCornerFlat:optimized.map(q=>q.selectedCornerFlat),
   gradeFailures:r.directConnectors.filter(v=>!v.ok).map(v=>v.index)});
 }
 const proof=auditDetachedPedestrianSwitchback(179,0,0,16,
@@ -31,10 +40,12 @@ const totals={regions:rows.length,
  originalDirectGradePassing:rows.reduce((a,b)=>a+b.originalDirectPassed,0),
  switchbackProposals:rows.reduce((a,b)=>a+b.newDryRunLinks,0),
  switchbacksGeometryPassing:rows.reduce((a,b)=>a+b.newDryRunPassed,0),
- summedSupportCells:rows.reduce((a,b)=>a+b.supportCells.reduce((x,y)=>x+y,0),0)};
-if(totals.regions!==24||totals.switchbacksGeometryPassing!==96)
+ summedSupportCells:rows.reduce((a,b)=>a+b.supportCells.reduce((x,y)=>x+y,0),0),
+ optimizedSupportCells:rows.reduce((a,b)=>a+b.optimizedSupportCells.reduce((x,y)=>x+y,0),0)};
+if(totals.regions!==24||totals.switchbacksGeometryPassing!==96||
+ totals.optimizedSupportCells>totals.summedSupportCells)
  throw Error('Incomplete original route inventory');
-const result={schema:'living-underworld-pedestrian-dryrun-readiness-v1',
+const result={schema:'living-underworld-pedestrian-dryrun-readiness-v2',
  sourceOnly:true,originalNetworkUnchanged:true,
   deepAndSocketDirectLinksMostlyUnwalkable:true,
   safeSourceExcavationNotPerformed:true,
