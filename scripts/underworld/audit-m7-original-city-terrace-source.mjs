@@ -82,6 +82,10 @@ for(const [rx,rz] of regions){
   candidateDistrictColumns:district.columns??null,
   candidateDistrictMarginCells:district.marginCells??1,
   candidateDistrictFloorSourceChecks:district.floorSourceChecks??0,
+  candidateDistrictOriginalReaderMethodCalls:
+   district.districtActualOriginalReaderMethodCalls??null,
+  candidateDistrictOriginalReaderCallsByRole:
+   district.districtActualOriginalReaderCallsByRole??null,
   candidateDistrictTotalOriginalSourceChecks:
    district.sourceChecks??null,
   candidateDistrictDeepSourceChecksAlreadyCountedInJoined:
