@@ -20,12 +20,24 @@ export function nearestNaturalScreeSquared(wx,wz,y,originalScreeAt){
   return best;
 }
 
-export function desertSeamVertexTint(base,distanceSquared){
-  if(distanceSquared>=DESERT_SEAM_RADIUS**2||!Number.isFinite(distanceSquared))return base;
+export function desertSeamBlendWeight(distanceSquared){
+  if(distanceSquared>=DESERT_SEAM_RADIUS**2||!Number.isFinite(distanceSquared))return 0;
   const linear=1-Math.sqrt(distanceSquared)/DESERT_SEAM_RADIUS;
-  const weight=DESERT_SEAM_MAX_BLEND*linear*linear*(3-2*linear);
+  return DESERT_SEAM_MAX_BLEND*linear*linear*(3-2*linear);
+}
+export function desertSeamVertexTint(base,distanceSquared){
+  const weight=desertSeamBlendWeight(distanceSquared);
   if(weight<=0)return base;
   return [0,1,2].map(i=>base[i]*(1-weight)+DESERT_SCREe_EDGE_COLOR[i]*weight);
+}
+// aMat is still 1 Float32 per vertex. The integer ID remains the original
+// terrain art material 40. Only natural eligible Desert boundary vertices
+// receive a small fractional shader-mix factor; water/particles use other IDs.
+export function desertSeamPackedTerrainTag(originalArtTag,weight){
+  if(originalArtTag!==40||weight<=0)return originalArtTag;
+  if(!Number.isFinite(weight)||weight>DESERT_SEAM_MAX_BLEND)
+    throw Error('Invalid Desert seam material mix');
+  return 40+weight;
 }
 
 export function canBlendNaturalDesertSurface({id,edited,region,sourceSurface,y}){
