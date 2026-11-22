@@ -55,7 +55,7 @@ export const ROADMAP_D_WAVE13_VISUAL_INTENT = Object.freeze(
     "silhouette": "long basalt optics laboratory ending in a prominent elevated lens observatory",
     "roofIntent": "flat shaded stone workshops contrasted with a stepped lens drum",
     "facadeIntent": "dark basalt ribs, sun-bleached sandstone reliefs and deeply recessed windows",
-    "signatureFeature": "tiered solar-lens drum",
+    "signatureFeature": "tiered solar-lens observatory drum",
     "interiorIntent": "lens cradles, light shafts, optical rail and calibration benches"
   },
   {
@@ -77,7 +77,7 @@ export const ROADMAP_D_WAVE13_VISUAL_INTENT = Object.freeze(
     "silhouette": "quadrangular lecture wings dominated by a tall frost bellspire",
     "roofIntent": "steep staggered slate roofs and stepped bellspire spirecap",
     "facadeIntent": "blue-gray granite buttresses, iced tracery and protected northern arcade",
-    "signatureFeature": "frost-rune bellspire",
+    "signatureFeature": "frost-rune bellspire and signaling gallery",
     "interiorIntent": "tiered lecture hall, rune benches and suspended bell apparatus"
   },
   {
