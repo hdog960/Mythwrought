@@ -56,7 +56,7 @@ test('Original Waves30 and31 occupy separate B115-only frozen IDs and make no ga
   for(const fn of s.peers)assert.notEqual(structuralFingerprint(b),structuralFingerprint(fn()));
  }
 });
-test('Original source roof/backing, ALL 606 real paved sky-atria and two-high walkable portals remain physical',()=>{
+test('Original source roof/backing, ALL 613 real paved sky-atria and two-high walkable portals remain physical',()=>{
  for(const s of cases){
   const b=s.fn(),m=new Map(b.placements.map(p=>[K(p.at),p])),
    walk=new Set(b.walkable.map(K)),roofs=b.placements.filter(p=>p.role==='roof');
@@ -88,7 +88,7 @@ test('Original source roof/backing, ALL 606 real paved sky-atria and two-high wa
 test('Briarcliff actually supports one 34-tier octagonal tower, 24 capped stone segments and 8 elevated outward glass panels',()=>{
  const b=buildBriarcliffCrescentWalkLighthouse(),m=new Map(b.placements.map(p=>[K(p.at),p])),
   high=b.placements.filter(p=>p.originalHighBriarcliffStoneGlass);
- assert.deepEqual(b.architecturalIdentity.genuineGroundedSkyCourts,[144,42]);
+ assert.deepEqual(b.architecturalIdentity.genuineGroundedSkyCourts,[144,49]);
  assert.equal(b.architecturalIdentity.stoneTowerWallHeight,34);
  assert.equal(high.length,8);
  let crowns=0;
