@@ -11,8 +11,8 @@ function count(value, name) {
 }
 function short(value) {
   if (value < 1000) return String(value);
-  if (value < 1_000_000) return (Math.floor(value / 100) / 10).toFixed(1).replace(/\\.0$/, '') + 'k';
-  return (Math.floor(value / 100_000) / 10).toFixed(1).replace(/\\.0$/, '') + 'm';
+  if (value < 1_000_000) return (Math.floor(value / 100) / 10).toFixed(1).replace(/\.0$/, '') + 'k';
+  return (Math.floor(value / 100_000) / 10).toFixed(1).replace(/\.0$/, '') + 'm';
 }
 /**
  * @param {{produced:number,used:number,stored:number,requested:number,missing:number}} observed
