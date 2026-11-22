@@ -1,0 +1,212 @@
+{
+  "sourceArtifactId": 14737638885,
+  "sourceArtifactSha256": "62b2561a0b7700716a2ba47caaba151854668d6867124b5ee1f5be5d0d32a750",
+  "head": "59e449be7e73b25f259c4c72855cfb638a056517",
+  "records": [
+    {
+      "seed": 179,
+      "sampled": 1681,
+      "grass": 52,
+      "proposed": 7,
+      "skippedProtected": 45,
+      "rejectedReasons": {
+        "unsupported-subsoil-0": 13,
+        "protected-above-4": 12,
+        "protected-above-3": 16,
+        "protected-above-7": 4
+      },
+      "rejectionExamples": [
+        {
+          "at": [
+            -160,
+            7,
+            464
+          ],
+          "reason": "unsupported-subsoil-0",
+          "blockAbove": null,
+          "support": 0
+        },
+        {
+          "at": [
+            -152,
+            7,
+            368
+          ],
+          "reason": "protected-above-4",
+          "blockAbove": {
+            "id": 4,
+            "y": 8
+          },
+          "support": 2
+        },
+        {
+          "at": [
+            -104,
+            9,
+            360
+          ],
+          "reason": "protected-above-3",
+          "blockAbove": {
+            "id": 3,
+            "y": 10
+          },
+          "support": 2
+        },
+        {
+          "at": [
+            -104,
+            8,
+            456
+          ],
+          "reason": "protected-above-7",
+          "blockAbove": {
+            "id": 7,
+            "y": 15
+          },
+          "support": 2
+        }
+      ],
+      "examples": [
+        [
+          -96,
+          8,
+          408
+        ],
+        [
+          -88,
+          7,
+          400
+        ],
+        [
+          -88,
+          8,
+          416
+        ],
+        [
+          -88,
+          7,
+          536
+        ],
+        [
+          -88,
+          9,
+          544
+        ],
+        [
+          40,
+          8,
+          528
+        ],
+        [
+          40,
+          8,
+          664
+        ]
+      ],
+      "protectedAirWitnesses": 7
+    },
+    {
+      "seed": 2026,
+      "sampled": 1681,
+      "grass": 45,
+      "proposed": 10,
+      "skippedProtected": 35,
+      "rejectedReasons": {
+        "unsupported-subsoil-0": 10,
+        "protected-above-3": 14,
+        "protected-above-4": 11
+      },
+      "rejectionExamples": [
+        {
+          "at": [
+            -160,
+            6,
+            456
+          ],
+          "reason": "unsupported-subsoil-0",
+          "blockAbove": null,
+          "support": 0
+        },
+        {
+          "at": [
+            -104,
+            9,
+            360
+          ],
+          "reason": "protected-above-3",
+          "blockAbove": {
+            "id": 3,
+            "y": 10
+          },
+          "support": 2
+        },
+        {
+          "at": [
+            -16,
+            7,
+            416
+          ],
+          "reason": "protected-above-4",
+          "blockAbove": {
+            "id": 4,
+            "y": 16
+          },
+          "support": 2
+        }
+      ],
+      "examples": [
+        [
+          -160,
+          6,
+          464
+        ],
+        [
+          -88,
+          7,
+          536
+        ],
+        [
+          -32,
+          7,
+          456
+        ],
+        [
+          -32,
+          9,
+          584
+        ],
+        [
+          -24,
+          8,
+          456
+        ],
+        [
+          -24,
+          10,
+          584
+        ],
+        [
+          40,
+          6,
+          656
+        ],
+        [
+          40,
+          5,
+          664
+        ],
+        [
+          48,
+          7,
+          656
+        ],
+        [
+          48,
+          6,
+          664
+        ]
+      ],
+      "protectedAirWitnesses": 10
+    }
+  ]
+}
