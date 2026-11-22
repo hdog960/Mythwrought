@@ -1,0 +1,61 @@
+name: Builder D25 original livewood roof source-only narrow native
+on:
+  push:
+    branches:
+      - builder-d-d25-livewood-zones-isolated-20261122
+    paths:
+      - 'src/building-pool/roadmap-d/d24-roof-support-admission.mjs'
+      - 'src/building-pool/roadmap-d/d25-original-livewood-roof-zones.mjs'
+      - 'tests/building-pool/roadmap-d/d24-roof-support-admission.test.mjs'
+      - 'tests/building-pool/roadmap-d/d25-original-livewood-roof-zones.*.test.mjs'
+      - '.github/workflows/roadmap-d-d25-isolated-narrow-native.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d25-isolated-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  literal-source-narrow-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Confirm exact isolated parent and immutable original source owners
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '7396311339d0a950384b878259fa6485884c1485'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d23-original-roof-navigation-invariants.mjs)" = 'd0a4db0eb38872701b2b122bb27438b364884012'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: New focused D24 and D25 native tests against exact original source
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d24-roof-support-admission.test.mjs \
+            tests/building-pool/roadmap-d/d25-original-livewood-roof-zones.synthetic.test.mjs \
+            tests/building-pool/roadmap-d/d25-original-livewood-roof-zones.source.test.mjs
+      - name: One genuine targeted native legacy W14-W17 and D19-D23 compatibility pass
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d1-original-institutions-wave14.test.mjs \
+            tests/building-pool/roadmap-d/d1-original-institutions-wave15-focused.test.mjs \
+            tests/building-pool/roadmap-d/d1-original-institutions-wave16-focused.test.mjs \
+            tests/building-pool/roadmap-d/d1-original-institutions-wave17-focused.test.mjs \
+            tests/building-pool/roadmap-d/d19-original-supported-roof-truss-plan.test.mjs \
+            tests/building-pool/roadmap-d/d19-original-exclusive-window-variants.test.mjs \
+            tests/building-pool/roadmap-d/d20-original-window-cornice-mesh.test.mjs \
+            tests/building-pool/roadmap-d/d21-original-grounded-exterior-arch-shell.test.mjs \
+            tests/building-pool/roadmap-d/d21-original-roof-saddle-contact.test.mjs \
+            tests/building-pool/roadmap-d/d22-original-secondary-roof-trusses.test.mjs \
+            tests/building-pool/roadmap-d/d22-original-window-cell-jamb-splices.test.mjs \
+            tests/building-pool/roadmap-d/d23-original-roof-navigation-invariants.test.mjs \
+            tests/building-pool/roadmap-d/d23-original-jamb-arch-composition-veto.test.mjs \
+            tests/building-pool/roadmap-d/d23-original-framed-window-exterior-decor.test.mjs \
+            tests/building-pool/roadmap-d/d23-original-interior-furnishing-contact.test.mjs
