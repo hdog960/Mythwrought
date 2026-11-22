@@ -31,10 +31,16 @@ export function auditMutualMainGalleryClearance(seed,rx,rz,{
   });
   examined++;
   if(!result||typeof result!=='object'||
-   !INT(result.rawCells)||result.rawCells<0||
-   typeof result.ok!=='boolean')return Object.freeze({ok:false,
+   typeof result.ok!=='boolean'||
+   (result.rawCells!==undefined&&(!INT(result.rawCells)||result.rawCells<0))||
+   (result.ok&&result.rawCells===undefined))return Object.freeze({ok:false,
     reason:'INVALID_PAIR_AUDIT_RESULT',examined,pair:[PAIRS[i],PAIRS[j]],
     worldChanged:false});
+  if(!result.ok&&result.rawCells===undefined)return Object.freeze({
+   ok:false,reason:result.reason??'PAIR_GRADE_UNSAFE',
+   examined,pair:[PAIRS[i],PAIRS[j]],
+   failures:result.failures??[],worldChanged:false
+  });
   examinedCells+=result.rawCells;
   if(examinedCells>maxCells)return Object.freeze({ok:false,
    reason:'MUTUAL_GALLERY_CELL_BUDGET',examined,examinedCells,
