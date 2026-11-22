@@ -12,9 +12,9 @@ import {WORLD_MAX_Y} from '../../src/depth.mjs';
 const pos=(x,y,z)=>x+','+y+','+z;
 const directions=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
 const drapes=[
- [-3,0,4],[3,0,4],[0,-3,4],[0,3,4],
- [-2,-2,4],[2,2,4],[-2,2,3],[2,-2,3],
- [-3,-1,3],[3,1,3],[1,-3,4],[-1,3,3]
+ [-3,0,4],[3,0,3],[0,-3,4],[0,3,3],
+ [-2,-2,3],[2,2,4],[-2,2,2],[2,-2,3],
+ [-3,-1,2],[3,1,2],[1,-3,3],[-1,3,2]
 ];
 
 test('five authentic Moonwillow styles make a wide, open umbrella instead of a solid conical canopy',()=>{
@@ -30,6 +30,12 @@ test('five authentic Moonwillow styles make a wide, open umbrella instead of a s
   assert.ok(broad.length>=37,'flat mid-crown must be broadly spread, not a pine cone');
   assert.ok(underside.length<broad.length,'open hollow lower skirt must be less dense than the moonlit cap');
   assert.ok(upper.length<broad.length,'thin top rim must be less dense than the horizontal cap');
+  assert.ok(upper.length<=5,
+    'moonlit top tuft must not rebuild the pine-like solid upper crown');
+  const low=tree.cells.filter(([x,y,z,id])=>id===G.moonLeaves&&
+    y<=floor+tree.trunkHeight-3);
+  assert.ok(low.length>=7&&low.length<=17,
+    'keep separated hanging tips without restoring a continuous solid lower curtain');
   assert.ok(tree.cells.every(([x,y,z,id])=>Number.isInteger(x)&&
     Number.isInteger(y)&&Number.isInteger(z)&&Number.isInteger(id)&&
     Math.abs(x)<=4&&Math.abs(z)<=4&&y>=floor+1&&y<=WORLD_MAX_Y));
@@ -37,7 +43,7 @@ test('five authentic Moonwillow styles make a wide, open umbrella instead of a s
     'no Moonwillow pendant may block the original player head on level roots');
  }
 });
-test('twelve distinct drapes hang below the real Moonwillow canopy without severing structural bark',()=>{
+test('twelve staggered drapes remain separated and attached to the original rooted bark arms',()=>{
  for(const roll of [.63,.75,.8,.82,.99]){
   const tree=buildEnchantedTreeCandidate(0,3,0,roll);
   const at=new Map(tree.cells.map(([x,y,z,id])=>[pos(x,y,z),id]));
