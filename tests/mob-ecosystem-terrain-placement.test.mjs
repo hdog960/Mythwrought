@@ -147,3 +147,48 @@ test('memoized unknown terrain remains unknown and is never reclassified',()=>{
   }),null);
   assert.ok(reads>0);
 });
+
+test('source ceiling clips a high surface window instead of discarding real ground',()=>{
+  const species=getSpecies('deer'),floor=18,feet=19,observer=[0,19,0],x=8,z=8;
+  let outOfWorldReads=0;
+  const original={
+    volume(point,body){
+      if(point[1]+body.height>20+1e-7){outOfWorldReads++;return 'unknown';}
+      return point[1]<floor?'solid':'clear';
+    },
+    grounded(point,body){
+      return point[1]>=floor&&point[1]<floor+.04&&
+        point[1]+body.height<=20+1e-7;
+    },
+    environment(){return {biome:'meadow',light:.8,hazard:false};},
+    medium(){return 'air';}
+  };
+  assert.equal(supportedPosition(original,x,z,feet+1,feet-1.5,species.body),null,
+    'The original first probe extends above the native Y=19 ceiling');
+  const proposed=proposeTerrainAwarePosition(original,{
+    species,x,z,feet,section:0,observer,kind:'surface'
+  });
+  assert.ok(proposed,'Must allow real surface floor below the source ceiling');
+  assert.equal(proposed.offset,0,'The original first window remains first');
+  assert.equal(proposed.point[1],floor);
+  assert.equal(original.grounded(proposed.point,species.body),true);
+  assert.equal(spawnEligible(original,species,proposed.point,observer),true);
+  assert.ok(outOfWorldReads>=1);
+});
+
+test('ceiling clipping never creates headroom that the source world rejects',()=>{
+  const species=getSpecies('deer'),floor=19,feet=19;
+  let reads=0;
+  const blocked={
+    ...sourceFloorWorld(floor),
+    volume(point,body){reads++;return point[1]+body.height>20?'unknown':
+      point[1]<floor?'solid':'clear';},
+    grounded(point,body){return point[1]>=floor&&
+      point[1]+body.height<=20;}
+  };
+  const proposal=proposeTerrainAwarePosition(blocked,{
+    species,x:8,z:8,feet,section:0,observer:[0,19,0],kind:'surface'
+  });
+  assert.equal(proposal,null,'Tall creatures cannot exceed world height');
+  assert.ok(reads>0,'Candidate must be based on actual source collision reads');
+});

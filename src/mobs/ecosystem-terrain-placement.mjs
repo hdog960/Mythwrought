@@ -58,10 +58,16 @@ export function proposeTerrainAwarePosition(world,{
   let tested=0;
   for(const offset of offsets){
     if(++tested>MAX_WINDOWS)throw Error('Terrain placement window budget exceeded');
-    const high=feet+1+offset,low=feet-1.5+offset;
-    // Never issue an unknown/out-of-world body query. This does not grant
-    // permissions to synthesize rock above or below the original world.
-    if(high+species.body.height>WORLD_MAX_Y+1-EPS)continue;
+    const originalHigh=feet+1+offset,low=feet-1.5+offset;
+    // At the authentic Y=19 ceiling, skipping an entire window loses
+    // physically legal ground below it. Clamp ONLY the upper surface probe
+    // so the complete body still lies inside the existing world envelope.
+    // Original valid windows are unchanged; do not extend or alter caves.
+    const high=kind==='surface'?
+      Math.min(originalHigh,WORLD_MAX_Y+1-species.body.height-EPS):
+      originalHigh;
+    if(high<low||high+species.body.height>WORLD_MAX_Y+1-EPS)
+      continue;
     const point=supportedPosition(collision,x,z,high,low,species.body);
     if(!point||sectionForY(Math.floor(point[1]))!==section)continue;
     if(!spawnEligible(world,species,point,observer))continue;
