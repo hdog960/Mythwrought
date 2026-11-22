@@ -259,3 +259,34 @@ test('actual far original MobEngine birth must be dormant at 18-block source thr
     /Original natural spawn admission state mismatch/);
   engine.dispose();
 });
+
+test('source protection census cannot edit world before establishing revision baseline',()=>{
+  let edits=0;
+  const w={...world(),revision(){return edits;}};
+  const engine=engineOf(w);
+  const id=engine.spawn('deer',[8,4,8],{homeChunk:'0,0,0'});
+  assert.ok(id);
+  let protectionCalls=0;
+  assert.throws(()=>prepareOriginalMobPoll({
+    ...opts(w,engine),spawnOnFirstVisit:false,
+    isProtected:()=>{protectionCalls++;edits++;return false;}
+  }),/Original world changed during regional poll/);
+  assert.equal(protectionCalls,1,
+    'The original local-count census did invoke the potentially mutating callback');
+  assert.equal(edits,1);
+  assert.equal(engine.counts().total,1);
+  engine.dispose();
+});
+
+test('invalid original world revision rejects before local protection callback',()=>{
+  const w={...world(),revision(){return NaN;}},engine=engineOf(w);
+  const id=engine.spawn('deer',[8,4,8],{homeChunk:'0,0,0'});
+  assert.ok(id);
+  let protectionCalls=0;
+  assert.throws(()=>prepareOriginalMobPoll({
+    ...opts(w,engine),spawnOnFirstVisit:false,
+    isProtected:()=>{protectionCalls++;return false;}
+  }),/Invalid original world revision/);
+  assert.equal(protectionCalls,0);
+  engine.dispose();
+});

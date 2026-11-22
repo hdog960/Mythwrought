@@ -2,6 +2,8 @@
 // mutate MobEngine, PopulationManager, source world or save sidecars.
 import {MobEngine} from './engine.mjs';
 import {validPoint} from './world-query.mjs';
+import {captureOriginalWorldRevision,assertOriginalWorldRevisionUnchanged}
+  from './ecosystem-world-revision-fence.mjs';
 import {verifyOriginalNaturalMobAdmission}
   from './ecosystem-natural-admission.mjs';
 import {captureOriginalMobRoster,assertOriginalMobRosterUnchanged}
@@ -69,14 +71,15 @@ export function prepareOriginalMobPoll({
   if(!validPoint(observer))
     throw new TypeError('Invalid original regional mob observer');
   const sourceObserver=Object.freeze([...observer]);
+  // Capture the authoritative original edit revision BEFORE any source
+  // engine/roster/protection callback can edit the live world. The previous
+  // baseline was read AFTER deriveRegionalMobState, silently accepting a
+  // revision advanced inside isProtected().
+  const revision=captureOriginalWorldRevision(world);
   const entities=engine.all();
   const rosterCertificate=captureOriginalMobRoster(entities);
   const roster=deriveRegionalMobState(entities,region,{isProtected});
-  if(typeof world?.revision!=='function')
-    throw new TypeError('Original world edit revision is required');
-  const revision=world.revision();
-  if(!Number.isSafeInteger(revision)||revision<0)
-    throw new TypeError('Invalid original world revision');
+  assertOriginalWorldRevisionUnchanged(world,revision);
   if(record!==null&&record.regionKey!==roster.regionName)
     throw new TypeError('Original regional schedule belongs to another region');
   const sourceRecord=record??createRegionalEcologySchedule({
@@ -96,8 +99,7 @@ export function prepareOriginalMobPoll({
     proposal=poll.proposal;
     rejected=poll.rejected;
   }
-  if(world.revision()!==revision)
-    throw new TypeError('Original world changed during regional poll');
+  assertOriginalWorldRevisionUnchanged(world,revision);
   // Source protection and terrain callbacks may edit MobEngine state without
   // incrementing world.revision. A stale proposal cannot consume a global
   // clock or become an actual natural-birth claim.
