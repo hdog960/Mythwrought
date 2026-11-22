@@ -11,10 +11,8 @@ import {proposeProtectedCityLandingTerrace}
  from '../../src/living-underworld/city-landing-terrace-proposal.mjs';
 import {auditSourceProtectedCityFloorLink}
  from '../../src/living-underworld/source-protected-city-link.mjs';
-import {auditSourceProtectedCityTerraceAccess}
- from '../../src/living-underworld/source-protected-city-terrace-access.mjs';
-import {selectSourceProtectedInterlevelRamps}
- from '../../src/living-underworld/source-aware-ramp-selection.mjs';
+import {selectCityCompatibleDeepLinks}
+ from '../../src/living-underworld/source-aware-city-deep-selection.mjs';
 const seed=179,regions=Object.freeze([[2,0],[2,1]]);
 const world=new FourRegionWorld(seed,
  fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
@@ -30,38 +28,42 @@ const rows=[];
 for(const [rx,rz] of regions){
  if(!planUnderworldRegion(seed,rx,rz).cityCandidate)
   throw Error('Original deterministic city-site plan changed');
- const terrace=proposeProtectedCityLandingTerrace(seed,rx,rz,{source});
+ // The new bounded city-aware optimizer invokes the COMPLETE original-source
+ // route and terrace validator. Reuse its final proof; do not query M7 again
+ // for the same selected three-deep-link + joined terrace route.
+ const deep=selectCityCompatibleDeepLinks(seed,rx,rz,{
+  source,maxCandidatesPerLink:64,maxSuitablePerLink:8,
+  maxCombinations:160,maxTotalSourceChecks:60000,minTerraceRadius:8
+ });
+ const approved=deep.ok===true&&deep.chosen?.length===3&&deep.joined?.ok===true;
+ const joined=approved?deep.joined:
+  Object.freeze({ok:false,reason:deep.reason??'NO_SOURCE_SAFE_CITY_NETWORK',
+   sourceChecks:deep.sourceChecks??0});
+ // Independent fallback diagnostics ONLY on refusal. On success the joined
+ // source survey already checked every candidate terrace footprint cell.
+ const terrace=approved?null:
+  proposeProtectedCityLandingTerrace(seed,rx,rz,{source});
  const fullPad=auditSourceProtectedCityFloorLink(seed,rx,rz,{source});
- // Only a source-checked three-link selection may request the full four-hub
- // city route flag. A partial/missing selection fails closed, not promoted.
- const deep=selectSourceProtectedInterlevelRamps(seed,rx,rz,{
-  source,maxCandidatesPerLink:64,maxSourceChecks:30000,
-  requireMainGalleryClearance:true
- });
- const approved=deep.ok===true&&deep.links?.length===3&&
-  deep.links.every(link=>link.ok===true&&link.selected?.sourceSafe===true);
- const selected=approved?deep.links.map(link=>link.selected.proposal):[];
- const joined=auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
-  source,additionalStairProposals:selected,
-  requireCompleteDeepLinks:true,useSourceAwareDetour:true
- });
  rows.push(Object.freeze({seed,rx,rz,
   originalM7TerrainReadOnly:true,
-  terraceCandidateSourceSafe:terrace.ok===true,
-  terraceRadius:terrace.radius??null,
-  terraceSourceChecks:terrace.sourceChecks??0,
-  terraceRefusal:terrace.reason??null,
-  terraceAttempts:terrace.attempts?.map(x=>({
+  terraceCandidateSourceSafe:approved||terrace?.ok===true,
+  terraceRadius:approved?joined.terraceRadius:terrace?.radius??null,
+  terraceSourceAuditedInJoinedProof:approved,
+  terraceSourceChecks:terrace?.sourceChecks??0,
+  terraceRefusal:terrace?.reason??null,
+  terraceAttempts:terrace?.attempts?.map(x=>({
    radius:x.radius,ok:x.ok,reason:x.reason
   }))??[],
   existingFullPadAndAccessSourceSafe:fullPad.ok===true,
   threeDeepLinksOriginalM7SourceSelected:approved,
-  threeDeepLinkSelectionRefusal:deep.ok?null:
-   deep.refusal??deep.reason??'UNSPECIFIED_LINK_REFUSAL',
-  threeDeepLinkCandidatesExamined:deep.inspected??0,
-  threeDeepLinkOriginalM7SourceCells:deep.sourceCellsChecked??0,
+  threeDeepLinkSelectionRefusal:approved?null:
+   deep.reason??'UNSPECIFIED_LINK_REFUSAL',
+  threeDeepLinkCandidatesExamined:deep.examined?.reduce((n,x)=>n+x.attempted,0)??0,
+  fullNetworkCombinationsInspected:deep.inspectedCombinations??0,
+  threeDeepLinkOriginalM7SourceCells:deep.sourceChecks??0,
   threeDeepLinkSelectedIndexList:approved?
-   deep.links.map(link=>link.selected.index):[],
+   deep.chosen.map(link=>link.index):[],
+  selectedDeepLinkConfigurations:approved?deep.chosen:[],
   joinedCityTerraceAndActualApproachSourceSafe:joined.ok===true,
   joinedRouteRefusal:joined.reason??joined.refusal??null,
   joinedSourceChecks:joined.sourceChecks??0,
