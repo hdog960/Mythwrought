@@ -295,14 +295,81 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
    });
  if(audited.sourceChecks!==planned.originalVoxelSourceVisitsRequired)
   throw Error('Thin underpass original-source and geometry census differ');
+ // The destination is a REAL 3x3 future landing, not an isolated safe
+ // point. Its complete 6-support+9-headroom footprint and one-cell
+ // no-build margin were vetted against old gallery and selected stairs.
+ const center=planned.centerSidePad;
+ let padSourceVisits=0,padSupport=0,padHeadroomAir=0,
+  padExcavation=0;
+ for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)
+  for(let y=planned.floorY-5;y<=planned.floorY+9;y++){
+   const x=center.x+dx,z=center.z+dz;
+   padSourceVisits++;
+   const support=y<=planned.floorY;
+   const edited=source.editedAt(x,y,z);
+   if(typeof edited!=='boolean')
+    throw TypeError('Nonboolean original M7 underpass landing edit source');
+   let refusal=null;
+   if(edited)refusal='PLAYER_EDIT';
+   else{
+    const owner=source.authoredAt(x,y,z);
+    if(owner!==undefined&&(!INT(owner)||owner<0))
+     throw TypeError('Invalid original M7 underpass landing authored material');
+    if(owner!==undefined&&owner!==0)refusal='AUTHORED_SOURCE';
+    else if(support&&owner===0)refusal='AUTHORED_AIR_SUPPORT';
+    else{
+     const protectedOriginal=source.protectedAt(x,y,z);
+     if(typeof protectedOriginal!=='boolean')
+      throw TypeError('Nonboolean original M7 underpass landing landmark source');
+     if(protectedOriginal)refusal='PROTECTED_LANDMARK';
+     else{
+      const material=source.naturalAt(x,y,z);
+      if(!INT(material)||material<0)
+       throw TypeError('Invalid original M7 underpass landing material');
+      if(!isCandidateGeologyMaterial(material))
+       refusal='UNSAFE_MATERIAL';
+      else if(owner===0&&material!==0)
+       refusal='AUTHORED_AIR_MISMATCH';
+      else if(support){
+       if(material===0)refusal='OLD_NATURAL_AIR_SUPPORT';
+       else padSupport++;
+      }else if(material===0)padHeadroomAir++;
+      else padExcavation++;
+     }
+    }
+   }
+   if(refusal)return failure(seed,rx,rz,
+    'CENTER_SIDE_PAD_ORIGINAL_SOURCE_UNSAFE',{
+     firstRefusal:refusal,
+     firstRejectedCell:Object.freeze({x,y,z,
+      kind:support?'support':'clearance'}),
+     originalFourHubSourceChecks:previous,
+     underpassSourceVisits:audited.sourceChecks,
+     centerPadSourceVisits:padSourceVisits,
+     sourceChecks:total+padSourceVisits,
+     oldM7ReaderIdentityByCallerOnly:true
+    });
+  }
+ if(padSourceVisits!==planned.centerSidePadOriginalSourceVisitsRequired)
+  throw Error('Three-wide full-depth center landing pad source census drifted');
  return Object.freeze({ok:true,sitePresent:true,seed,rx,rz,
   kind:planned.kind,pivot:planned.pivot,segments:planned.segments,
-  sourceChecks:total,originalFourHubSourceChecks:previous,
+  originalCityCenter:planned.originalCityCenter,
+  centerSidePad:planned.centerSidePad,
+  sourceChecks:total+padSourceVisits,
+  originalFourHubSourceChecks:previous,
   underpassSourceVisits:audited.sourceChecks,
+  centerPadSourceVisits:padSourceVisits,
+  centerPadSolidSupports:padSupport,
+  centerPadNaturalAirClearance:padHeadroomAir,
+  centerPadProspectiveExcavation:padExcavation,
+  centerPadThreeWideFullDepthGeometryAndSourceChecked:true,
+  exactOriginalCityCenterThreeWideLandingUnverified:true,
   gradeSupportCells:planned.threeWideSupportCells,
   gradeClearanceCells:planned.threeHighClearanceCells,
   originalSourceCounts:audited.counts,
-  historicalCityCenterJoinedByCandidatePedestrianUnderpass:true,
+  centerSideThreeWideLandingJoinedByCandidatePedestrianUnderpass:true,
+  originalLiteralCityCenterNotNecessarilyThreeWideConnected:true,
   onlyCandidateDeckAndAIRNotActuallyBuilt:true,
   selectedFourHubAndCityApproachSourceProofProvidedByCallerOnly:true,
   originalM7ReaderIdentityByCallerOnly:true,
