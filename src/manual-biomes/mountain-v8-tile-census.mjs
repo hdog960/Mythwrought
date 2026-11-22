@@ -50,7 +50,8 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
       worldMaxY:WORLD_MAX_Y,airId:BLOCK.AIR,
       readOriginalBlock:(x,y,z)=>source.naturalAndLandmarkBlock(x,y,z),
       protectedAt:()=>false,
-      mountainAt:(x,z)=>v6BiomeAt(x,z,seed)?.name==='mountain'
+      mountainAt:(x,z)=>{const b=v6BiomeAt(x,z,seed);
+        return b?.name==='mountain'&&b.weight>=.82;}
     });
     if(!physical){stats.occupied++;continue;}
     stats.plants++;stats.plantCells+=physical.estimatedCells;
