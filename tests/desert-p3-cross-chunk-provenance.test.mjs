@@ -10,6 +10,8 @@ import {FourRegionWorld as OldWorld,fourRegionProfile as oldProfile,
 import {FourRegionWorld as NewWorld,fourRegionProfile as newProfile}
   from '../src/manual-biomes/profile-world.mjs';
 import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
+import {nearestNaturalScreeSquared,desertSeamVertexTint,DESERT_SEAM_RADIUS} from '../src/manual-biomes/desert-seam-vertex-tint.mjs';
+import {warmScreeVertexColor} from '../src/manual-biomes/desert-bilateral-rgb.mjs';
 const sites=[[179,-50,-111],[2026,-178,-49]];
 const directions=[['west',-1,0],['east',1,0],['north',0,-1],['south',0,1]];
 const topSourceCache=new Map();
@@ -142,4 +144,43 @@ test('true V6 non-Desert/Snow/Enchanted selection excludes all original warmth c
    seed,gridWidth:49,sampledZ:25,desertEligible:desert,otherClimateExcluded:nonDesert
   }));
  }
+});
+
+test('radius-three distance pruning is appearance-equivalent to exact previous exhaustive 36 probes',()=>{
+ let tested=0,skipped=0,foundInRadius=0;
+ const rgbDesert=[.55,.4,.26],rgbScree=[.46,.43,.40];
+ for(let mask=0;mask<128;mask++){
+  let baselineCalls=0,nextCalls=0;
+  const predicate=(x,z)=>{
+   const nx=x+3,nz=z+3;
+   const code=(nx*31+nz*17+mask*7)%13;
+   return code===0||code===mask%13;
+  };
+  let minimum=Infinity;
+  for(let x=-3;x<=2;x++)for(let z=-3;z<=2;z++){
+   baselineCalls++;
+   const dx=-x-.5,dz=-z-.5,d2=dx*dx+dz*dz;
+   if(predicate(x,z)&&d2<minimum)minimum=d2;
+  }
+  const optimized=nearestNaturalScreeSquared(0,0,4,(x,z)=>{
+   nextCalls++;return predicate(x,z);
+  });
+  if(minimum<DESERT_SEAM_RADIUS*DESERT_SEAM_RADIUS){
+   assert.equal(optimized,minimum,'Must preserve actual nearest source within displayed band');
+   foundInRadius++;
+  }else assert.equal(optimized,Infinity,'Ignore source outside displayed radius');
+  assert.deepEqual(desertSeamVertexTint(rgbDesert,optimized),
+    desertSeamVertexTint(rgbDesert,minimum),'Desert-side appearance must be identical');
+  assert.deepEqual(warmScreeVertexColor(rgbScree,optimized),
+    warmScreeVertexColor(rgbScree,minimum),'Scree-side appearance must be identical');
+  assert.ok(nextCalls<=baselineCalls);
+  tested++;skipped+=baselineCalls-nextCalls;
+ }
+ assert.ok(foundInRadius>0);
+ assert.ok(skipped>=512,'Reject many unnecessary source-plan callbacks, not just four corners');
+ console.log('DESERT_P3_RADIUS3_PRUNING '+JSON.stringify({
+  masks:tested,avoidedSourceCallbackInvocations:skipped,
+  candidateChecks:tested*36-skipped,priorChecks:tested*36,
+  result:'both color functions exactly invariant for every representative mask'
+ }));
 });
