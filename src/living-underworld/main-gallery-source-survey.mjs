@@ -32,19 +32,39 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
   const proposal=Object.freeze({ok:true,segments:Object.freeze([
    plan.capsules[index],plan.capsules[index+1]
   ])});
+  // Refuse before starting an unaffordable next gallery. Keep all already
+  // collected evidence; never use a previous successful partial count to
+  // certify the remaining uninspected galleries.
+  const remaining=maxTotalSourceChecks-sourceChecks;
+  if(remaining<100)return Object.freeze({ok:false,seed,rx,rz,
+   reason:'SOURCE_GALLERY_TOTAL_BUDGET',
+   galleriesInspected:rows.length,sourceChecks,maxTotalSourceChecks,
+   rows:Object.freeze(rows),failures:Object.freeze(failures),
+   sourceSafeGalleries:rows.length-sourceRejectedGalleries,
+   sourceRejectedGalleries,
+   firstRefusalCounts:Object.freeze({...firstRefusalTypes}),
+   sourceRejectionCounts:Object.freeze({...countTotals}),
+   diagnosticAll16GalleriesAttempted:false,
+   worldChanged:false,nativePlayerWalkingVerified:false});
   // The ORIGINAL immutable fixed geology allowlist cannot be widened by a
-  // caller. The original validator sees all three height levels of headroom.
+  // caller. Limit each next source raster by the REMAINING global cell budget.
   const checked=auditProtectedSubsurfaceStairs(proposal,{
    naturalAt:source.naturalAt,authoredAt:source.authoredAt,
    editedAt:source.editedAt,protectedAt:source.protectedAt,
-   minY:-210,maxY:19,maxCells:maxCellsPerGallery,
+   minY:-210,maxY:19,maxCells:Math.min(maxCellsPerGallery,remaining),
    stopOnFirstUnsafe:true
   });
   sourceChecks+=checked.sourceChecks??0;
   if(sourceChecks>maxTotalSourceChecks)return Object.freeze({
    ok:false,seed,rx,rz,reason:'SOURCE_GALLERY_TOTAL_BUDGET',
    galleriesInspected:rows.length+1,sourceChecks,maxTotalSourceChecks,
-   worldChanged:false});
+   rows:Object.freeze(rows),failures:Object.freeze(failures),
+   sourceSafeGalleries:rows.length-sourceRejectedGalleries,
+   sourceRejectedGalleries,
+   firstRefusalCounts:Object.freeze({...firstRefusalTypes}),
+   sourceRejectionCounts:Object.freeze({...countTotals}),
+   diagnosticAll16GalleriesAttempted:false,
+   worldChanged:false,nativePlayerWalkingVerified:false});
   rows.push(Object.freeze({galleryIndex:index,ok:checked.ok,
    sourceChecks:checked.sourceChecks??0,
    refusal:checked.firstRefusal??checked.reason??null,
