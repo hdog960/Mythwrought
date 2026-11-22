@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {surveyMountainV8Column as survey} from '../src/manual-biomes/mountain-v8-source-adapter.mjs';
+import {surveyMountainV8Column as survey,mountainV8TileRoot as tileRoot}
+ from '../src/manual-biomes/mountain-v8-source-adapter.mjs';
 const ids={AIR:0,GRASS:1,DIRT:2,STONE:3};
 const make=(patch={})=>({x:8,z:8,seed:179,worldMaxY:30,ids,
  biomeAt:()=>({name:'mountain',weight:1}),heightAt:()=>5,
@@ -35,4 +36,18 @@ test('honors bounded numeric input and baseline reader, no writes or generated b
  assert.equal(survey(make({x:NaN})),null);
  assert.equal(survey(make({ids:{AIR:0,GRASS:0,DIRT:2,STONE:3}})),null);
  assert.equal(v.generatorIdentityRequired,'v8-new-opt-in');
+});
+
+test('sparse root remains inside its exact tile and refuses overflow/aliases',()=>{
+ for(const tileX of [-100000,-2,-1,0,1,20000])
+  for(const tileZ of [-30000,-1,0,1,28000]){
+   const root=tileRoot(tileX,tileZ,179);
+   assert.ok(root);
+   assert.equal(Math.floor(root.rootX/8),tileX);
+   assert.equal(Math.floor(root.rootZ/8),tileZ);
+   assert.ok(Number.isSafeInteger(root.rootX)&&Number.isSafeInteger(root.rootZ));
+  }
+ assert.equal(tileRoot(Number.MAX_SAFE_INTEGER,0,179),null);
+ assert.equal(tileRoot(0,Number.MIN_SAFE_INTEGER,179),null);
+ assert.equal(tileRoot(Infinity,0,179),null);
 });
