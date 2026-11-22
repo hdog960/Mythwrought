@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {speciesRegistry} from '../src/mobs/species.mjs';
-import {createRegionalEcologySchedule,inspectRegionalEcologySchedule}
+import {createRegionalEcologySchedule,inspectRegionalEcologySchedule,
+  settleRegionalEcologyPoll}
   from '../src/mobs/ecosystem-region-cadence.mjs';
 import {createGlobalEcologyClock,advanceGlobalEcologyClock,
   commitGlobalEcologyRegion,ORIGINAL_MAX_REGION_RECORDS,
@@ -67,7 +68,7 @@ test('global rotation uses only first 64 source regions and consumes invalid slo
   assert.equal(next.clock.cursor,65);
 });
 
-test('original full 64-region ledger rejects new region without stale eviction',()=>{
+test('source half-second survey naturally evicts stale slots at 64-region capacity',()=>{
   let state=createGlobalEcologyClock();
   for(let i=0;i<64;i++){
     const t=at(state,.5,[location(i)]);
@@ -75,10 +76,15 @@ test('original full 64-region ledger rejects new region without stale eviction',
   }
   assert.equal(state.entries.length,64);
   const t=at(state,.5,[location(90)]);
-  assert.equal(t.reason,'capacity');
-  assert.equal(t.selection,null);
-  assert.equal(t.clock.entries.length,64);
+  // Original strict ticker takes 32s to fill 64 regions. Its oldest
+  // record is ALREADY stale by the time a 65th is selected.
+  assert.equal(t.reason,'selected');
+  assert.equal(t.selection.evictKey,'0,0,0');
   assert.equal(t.clock.cursor,65);
+  state=commitGlobalEcologyRegion(t.clock,t.selection,recordFor(t.selection,true));
+  assert.equal(state.entries.length,64);
+  assert.equal(state.entries.some(([key])=>key==='0,0,0'),false);
+  assert.equal(state.entries.some(([key])=>key==='90,0,0'),true);
 });
 
 test('original region eviction uses first entry with next at least 12s old',()=>{
@@ -122,4 +128,33 @@ test('original empty and invalid region slots advance ticker but not region ledg
   assert.equal(invalid.reason,'invalid-region');
   assert.equal(invalid.clock.cursor,1);
   assert.equal(invalid.clock.entries.length,0);
+});
+
+test('original Map insertion order survives region updates and respects 12s decline',()=>{
+  let state=createGlobalEcologyClock();
+  for(let i=0;i<64;i++){
+    const t=at(state,.5,[location(i)]);
+    let entry=recordFor(t.selection,true);
+    if(i===0)entry=settleRegionalEcologyPoll(entry,{
+      now:t.selection.time,attempts:1,successfulBirth:true,speciesId:'deer'
+    });
+    state=commitGlobalEcologyRegion(t.clock,t.selection,entry);
+  }
+  const renewed=at(state,.5,[location(0)]);
+  assert.equal(renewed.selection.record.highWater[ids.indexOf('deer')][1],1);
+  const decrease=inspectRegionalEcologySchedule(renewed.selection.record,{
+    now:renewed.selection.time,localCounts:counts()
+  });
+  assert.equal(decrease.record.next,renewed.selection.time+12);
+  state=commitGlobalEcologyRegion(renewed.clock,renewed.selection,decrease.record);
+  assert.equal(state.entries[0][0],'0,0,0',
+    'Updating Map existing key must NEVER change its insertion order');
+  const newcomer=at(state,.5,[location(90)]);
+  assert.equal(newcomer.selection.evictKey,'1,0,0',
+    'Recently depleted first entry remains protected by original 12s delay');
+  state=commitGlobalEcologyRegion(newcomer.clock,newcomer.selection,
+    recordFor(newcomer.selection,true));
+  assert.equal(state.entries.length,64);
+  assert.equal(state.entries[0][0],'0,0,0');
+  assert.equal(state.entries.some(([key])=>key==='1,0,0'),false);
 });

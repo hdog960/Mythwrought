@@ -110,11 +110,17 @@ export function commitGlobalEcologyRegion(clockState,selection,record){
   });
   if(selection.record&&record.serial<selection.record.serial)
     throw new TypeError('Original region serial cannot rewind');
-  const entries=clockState.entries.filter(([key])=>
-    key!==selection.key&&key!==selection.evictKey);
-  if(entries.length>=ORIGINAL_MAX_REGION_RECORDS)
-    throw new TypeError('Original 64-region ledger is full');
-  entries.push([selection.key,record]);
+  // Source #regions is a JavaScript Map: Map.set EXISTING key updates its
+  // value WITHOUT reordering insertion; only new keys append. This order
+  // determines which stale record will be evicted first.
+  const entries=clockState.entries
+    .filter(([key])=>key!==selection.evictKey)
+    .map(([key,old])=>key===selection.key?[key,record]:[key,old]);
+  if(!entries.some(([key])=>key===selection.key)){
+    if(entries.length>=ORIGINAL_MAX_REGION_RECORDS)
+      throw new TypeError('Original 64-region ledger is full');
+    entries.push([selection.key,record]);
+  }
   pending.delete(clockState);
   consumed.add(clockState);
   issued.delete(selection);
