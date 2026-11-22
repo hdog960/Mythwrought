@@ -63,17 +63,20 @@ test('128-entry immutable site memo is seed-scoped, deterministic, bounded and r
    assert.equal(cache.size,occupancy);
    assert.equal(cache.evictions,evicted);
  }
+ assert.equal(cache.evictions,evictionsBeforeRejection,
+   'all rejected direct-key aliases and mutable entries must cause ZERO evictions');
  assert.equal(cache.getOrRead(0,0,179,()=>null),null,
    'canonical zero site must still support a real null Plains classification');
  assert.throws(()=>cache.getOrRead(9007199254740992,0,179,reader),/lookup/);
+ const evictionsAfterValidZero=cache.evictions;
  const directNested=Object.freeze({name:'enchanted',weight:1,
    center:Object.freeze([0,0])});
  cache.set('179:50,51',directNested);
  assert.strictEqual(cache.getOrRead(50,51,179,reader),directNested);
  assert.equal(cache.size,4);
  assert.equal(beforeRejection.length,4);
- assert.equal(cache.evictions,evictionsBeforeRejection+1,
-   'invalid direct writes may never evict a valid classification');
+ assert.equal(cache.evictions,evictionsAfterValidZero+1,
+   'one additional valid insertion may evict exactly one old entry');
  const nullCache=new EnchantedSiteBiomeCache(2);
  let nullCalls=0;
  assert.equal(nullCache.getOrRead(0,0,179,()=>{nullCalls++;return null;}),null);
