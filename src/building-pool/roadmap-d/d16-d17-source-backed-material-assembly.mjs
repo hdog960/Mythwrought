@@ -153,14 +153,24 @@ export function assembleD16D17OriginalPhysicalPreview(blueprint,{
  // All glazing/furniture shapes come from actual original Pack4 candidate mesh/shape
  // resolver. These are samples, not fabricated complete physical structures.
  const glazing=inspectD16D17Pack4PhysicalSamples(blueprint,{resolvePack4Asset,maxWindows:windowBudget});
+ // 12 original windows (60 triangles each), bench (156), table (228) occupy
+ // exactly 132,480 bytes of source-authored RGBA vertex payload per building.
+ // The bounded CPU sample is not a world or GPU upload; reject attempts to
+ // exceed 192 KiB before claiming the source preview is phone-feasible.
+ const previewVertexByteBudget=192*1024;
+ let previewVertexBytes=0;
  for(const g of [...glazing.sampledPhysicalWindows,...glazing.sampledPhysicalFurniture]){
    const c=occupancy.get(key(g.at));
    if(!c||!c.asset?.startsWith('pack4:'))throw Error('Lost original Pack4 source at '+key(g.at));
    const orientation=g.facadeFacing??'north';
    const originalPack4=resolvePack4Asset(c.asset,{candidateId:g.originalNumericId,rotation:orientation});
    const physicallyResolved=physicalAt(c,c.asset,g.originalNumericId,orientation,4,resolveManualAsset,g.kind);
+   const actualMesh=originalPack4WorldMesh(c,originalPack4);
+   previewVertexBytes+=actualMesh.opaqueWorldVertices.byteLength+actualMesh.translucentWorldVertices.byteLength;
+   if(previewVertexBytes>previewVertexByteBudget)
+     throw Error('Original Pack4 per-building physical preview vertex budget exceeded');
    samples.push(Object.freeze({...physicallyResolved,
-     originalRealPack4WorldMesh:originalPack4WorldMesh(c,originalPack4)}));
+     originalRealPack4WorldMesh:actualMesh}));
  }
  if(samples.length>facadeBudget+4+roofBudget+ridgeBudget+towerBudget+windowBudget+2)
    throw Error('Unbounded physical sample packet');
@@ -170,6 +180,7 @@ export function assembleD16D17OriginalPhysicalPreview(blueprint,{
   sampledCount:samples.length,sampleCounts:counts,physicalSamples:Object.freeze(samples),
   pack4MeshGlazingCount:glazing.sampledPhysicalWindows.length,
   originalWindowFacadeCorrections:glazing.sampledPhysicalWindows.filter(x=>x.sourceCellFacingIgnored).length,
+  originalPack4VertexBytes:previewVertexBytes,originalPack4PreviewVertexBudgetBytes:previewVertexByteBudget,
   underlyingSourceCellsMutated:false,completeWorldStructure:false,
   fullManualFamilyArtworkAccepted:false,worldSupportAndMountsAccepted:false,
   sourcePacksUsed:Object.freeze([...new Set(samples.map(p=>p.sourceOriginalPack))].sort()),sourceOnly:true,worldPlaced:false,
