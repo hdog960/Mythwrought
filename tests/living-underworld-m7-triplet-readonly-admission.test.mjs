@@ -123,6 +123,9 @@ test('a failed actual M7 city deep link or chunk face risk cannot be waived',()=
 });
 test('as-built floor/headroom failures hold walking even when planned source is safe',()=>{
  const g=gallery();g.rows[0].oldM7AsBuiltGalleryDeckAndAirPresent=false;
+ g.rows[0].oldM7AsBuiltBlockedHeadroomCells=1;
+ g.rows[0].oldM7AsBuiltHeadroomBlockedByBlockId={'3':1};
+ g.asBuiltGalleryRegions=4;
  const r=check({gallery:g});
  assert.equal(r.asBuiltGalleriesReady,false);
  assert.equal(r.proposalEvidenceAllPassed,true);
