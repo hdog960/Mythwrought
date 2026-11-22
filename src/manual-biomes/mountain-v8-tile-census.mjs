@@ -14,6 +14,13 @@ import {createMountainV8SurveyCache} from './mountain-v8-survey-cache.mjs';
 const valid=n=>Number.isSafeInteger(n);
 const key=(x,z)=>x+','+z;
 const biomeProbes=Object.freeze([[0,0],[4,0],[-4,0],[0,4],[0,-4]]);
+const SOURCE_VETO_CODES=Object.freeze([
+  'biome-boundary','cave-air','foreign-substrate','height-unavailable',
+  'invalid-original-world','non-grass-original-cap','protected-substrate',
+  'protected-uplift','occupied-uplift','proposal-unavailable',
+  'unsafe-tile','original-world-mutated','unclassified-original-source'
+]);
+const emptySourceVetoCounts=()=>Object.fromEntries(SOURCE_VETO_CODES.map(k=>[k,0]));
 /** Every tile candidate is sampled at its single source-selected root.
  * No hypothetical random tree height is assumed; all plant cells are
  * verified against the untouched original world's existing AIR/landmarks.
@@ -36,13 +43,30 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
       foreignProposal:0,noPhysicalSupport:0,invalidPhysicalDescriptor:0,
       physicalBudget:0,tooSteep:0,unsupportedExposedFace:0,
       faceBudget:0,unsafeCoordinate:0},
+    rootSourceVetoReasons:emptySourceVetoCounts(),
+    seamSourceVetoReasons:emptySourceVetoCounts(),
     nonMeadow:0,occupied:0,rock:0,snow:0,meadow:0,
     cliff:0,seen:0
   };
+  // Capture exact source explanations at the same time as the original
+  // cached reads. No second biome/cave/landmark or world sampling pass.
+  const originalVetoes=new Map();
+  function explainUnavailable(x,z){
+    const reported=originalVetoes.get(key(x,z))?.reason;
+    if(SOURCE_VETO_CODES.includes(reported))return reported;
+    // Third-party inspect callbacks may not support onVeto. Only the
+    // authoritative V6 classifier can positively identify their boundaries.
+    const outside=biomeProbes.some(([dx,dz])=>{
+      const b=v6BiomeAt(x+dx,z+dz,seed);
+      return b?.name!=='mountain'||b.weight<.82;
+    });
+    return outside?'biome-boundary':'unclassified-original-source';
+  }
   // Reuse authentic original-world proposals across seam and foliage checks.
   // Nine possible sites per tile: one root, four seams, four foliage offsets.
   const cache=createMountainV8SurveyCache({seed,maxSites:width*height*9,
-    read:(x,z)=>inspect(x,z,seed,{world:source})});
+    read:(x,z)=>inspect(x,z,seed,{world:source,
+      onVeto:issue=>{originalVetoes.set(key(x,z),issue);}})});
   if(!cache)return null;
   for(let dz=0;dz<height;dz++)for(let dx=0;dx<width;dx++){
     const tx=tileX+dx,tz=tileZ+dz;
@@ -57,7 +81,11 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     if(chosen&&(chosen.x!==rootX||chosen.z!==rootZ||
        !chosen.vegetationSite?.chosen))
       throw Error('V8 tile root or provenance mismatch');
-    if(!chosen){stats.rejected++;continue;}
+    if(!chosen){
+      stats.rejected++;
+      stats.rootSourceVetoReasons[explainUnavailable(rootX,rootZ)]++;
+      continue;
+    }
     const terrain=planMountainV8PhysicalColumn(chosen,{
       worldMaxY:WORLD_MAX_Y,ids:BLOCK,
       readOriginalBlock:(x,y,z)=>source.naturalAndLandmarkBlock(x,y,z)
@@ -81,14 +109,10 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
       const code=seamVeto.reason;
       let category;
       if(code==='source-unavailable'){
-        // A missing proposal could be a protected cave/landmark, but only
-        // authoritative V6 climate can prove the missing site is a biome
-        // border. Never guess a cave/landmark classification from null.
-        const outside=biomeProbes.some(([dx,dz])=>{
-          const b=v6BiomeAt(seamVeto.x+dx,seamVeto.z+dz,seed);
-          return b?.name!=='mountain'||b.weight<.82;
-        });
-        category=outside?'biomeBoundary':'sourceUnavailableInMountain';
+        const sourceReason=explainUnavailable(seamVeto.x,seamVeto.z);
+        stats.seamSourceVetoReasons[sourceReason]++;
+        category=sourceReason==='biome-boundary'?
+          'biomeBoundary':'sourceUnavailableInMountain';
       }else category=({
         'foreign-proposal':'foreignProposal',
         'no-physical-support':'noPhysicalSupport',
@@ -142,9 +166,16 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
       top:chosen.top,cap:chosen.cap,kind:physical.kind,
       cells:physical.estimatedCells}));
   }
-  if(Object.values(stats.seamVetoReasons).reduce((a,b)=>a+b,0)!==stats.seamRejected)
-    throw Error('V8 seam diagnostic counts failed to reconcile');
+  const total=items=>Object.values(items).reduce((a,b)=>a+b,0);
+  if(total(stats.seamVetoReasons)!==stats.seamRejected||
+     total(stats.rootSourceVetoReasons)!==stats.rejected||
+     total(stats.seamSourceVetoReasons)!==
+       stats.seamVetoReasons.biomeBoundary+
+       stats.seamVetoReasons.sourceUnavailableInMountain)
+    throw Error('V8 original-source and seam veto counts failed to reconcile');
   Object.freeze(stats.seamVetoReasons);
+  Object.freeze(stats.rootSourceVetoReasons);
+  Object.freeze(stats.seamSourceVetoReasons);
   const readCosts=cache.stats();
   if(!readCosts.complete)throw Error('Mountain V8 source census budget exhausted');
   stats.sourceBudgetExhausted=readCosts.exhausted;
