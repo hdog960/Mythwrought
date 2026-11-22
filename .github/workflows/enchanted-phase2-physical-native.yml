@@ -1,0 +1,41 @@
+name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
+on:
+  push:
+    branches:
+      - research/enchanted-p2-physical-root-safety-20261121
+    paths:
+      - .github/workflows/enchanted-phase2-physical-native.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-only-m7-tree-footings-and-seams:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact source revision and changed native module syntax
+        run: |
+          git rev-parse HEAD
+          git status --short
+          node --check src/manual-biomes/enchanted-tree-footings.mjs
+          node --check src/manual-biomes/enchanted-tree-overlap.mjs
+          node --check src/manual-biomes/environment-v7.mjs
+          node --check tests/manual-biomes/enchanted-tree-physical-census-seams.test.mjs
+          node --check tests/manual-biomes/enchanted-tree-footings-real-m7.test.mjs
+      - name: Focused actual-source M7 roots, source seams, prototype saves and prior candidate regression only
+        run: |
+          node --test \
+            tests/manual-biomes/enchanted-tree-footings.test.mjs \
+            tests/manual-biomes/enchanted-tree-overlap.test.mjs \
+            tests/manual-biomes/enchanted-tree-footings-real-m7.test.mjs \
+            tests/manual-biomes/enchanted-tree-physical-census-seams.test.mjs \
+            tests/manual-biomes/enchanted-trees-phase2.test.mjs
