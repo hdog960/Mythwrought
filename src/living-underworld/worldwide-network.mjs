@@ -105,6 +105,26 @@ export function planUnderworldRegion(seed,rx,rz){
   if(cache.size>MAX_CACHED_REGIONS)cache.delete(cache.keys().next().value);
   return result;
 }
+// Immutable 3x3 rare-cavern neighborhood cache, bounded independently of
+// region graph cache. Stores site metadata only, NEVER voxel answers or edits.
+// No change to planned region topology, saves, mining or player collision.
+const rareCityNeighborhoods=new Map(),MAX_RARE_NEIGHBORHOODS=48;
+function nearbyRareCities(seed,rx,rz){
+  const key=seed+':'+rx+':'+rz;
+  let sites=rareCityNeighborhoods.get(key);
+  if(sites===undefined){
+    const found=[];
+    for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){
+      const city=planUnderworldRegion(seed,rx+dx,rz+dz).cityCandidate;
+      if(city)found.push(city);
+    }
+    sites=Object.freeze(found);
+    rareCityNeighborhoods.set(key,sites);
+    if(rareCityNeighborhoods.size>MAX_RARE_NEIGHBORHOODS)
+      rareCityNeighborhoods.delete(rareCityNeighborhoods.keys().next().value);
+  }
+  return sites;
+}
 export function networkAirAt(seed,x,y,z){
   if(!seedOK(seed)||![x,y,z].every(Number.isSafeInteger))
     throw new TypeError('Invalid underground voxel coordinates');
@@ -113,11 +133,10 @@ export function networkAirAt(seed,x,y,z){
   const local=planUnderworldRegion(seed,rx,rz);
   if(local.layers.some(layer=>inRoom(x,y,z,layer.room)))return true;
   if(local.capsules.some(t=>inTube(x,y,z,t)))return true;
-  // Very large chambers can overlap up to one adjacent region in both axes.
-  for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){
-    const city=(dx===0&&dz===0?local:planUnderworldRegion(seed,rx+dx,rz+dz)).cityCandidate;
-    if(city&&inRoom(x,y,z,city))return true;
-  }
+  // Rare city candidates can cross region seams, but querying the *same*
+  // region repeatedly no longer requires nine plan/cache lookups per voxel.
+  for(const city of nearbyRareCities(seed,rx,rz))
+    if(inRoom(x,y,z,city))return true;
   return false;
 }
 export function auditUnderworldRegionGraph(seed,rx,rz){

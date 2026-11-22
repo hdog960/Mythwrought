@@ -10,7 +10,7 @@ import {auditSupportedEntranceStairs} from './walkable-entrance-stairs.mjs';
 export function searchProtectedEntranceCandidates(seed,rx,rz,{
  surfaceHeightAt,biomeAt,requiredBiome,protectedAt=()=>false,
  naturalAt,authoredAt=()=>undefined,editedAt=()=>false,
- existingLandmarkAt=()=>false,maxCandidates=4
+ existingLandmarkAt=()=>false,maxCandidates=4,radialVariant=0
 }={}){
  if(!Number.isSafeInteger(seed)||seed!==(seed|0)||
    ![rx,rz].every(Number.isSafeInteger)||
@@ -19,13 +19,14 @@ export function searchProtectedEntranceCandidates(seed,rx,rz,{
    typeof authoredAt!=='function'||typeof editedAt!=='function'||
    typeof existingLandmarkAt!=='function'||
    typeof requiredBiome!=='string'||!requiredBiome.trim()||
-   !Number.isSafeInteger(maxCandidates)||maxCandidates<1||maxCandidates>4)
+   (!Number.isSafeInteger(maxCandidates)||maxCandidates<1||maxCandidates>4)||
+   !Number.isSafeInteger(radialVariant)||radialVariant<0||radialVariant>3)
   throw new TypeError('Invalid protected entrance candidate search');
  const examined=[],seen=new Set();
  let accepted=null;
  for(let searchStart=0;searchStart<maxCandidates;searchStart++){
   const p=planUnderworldSurfaceEntrance(seed,rx,rz,{
-    surfaceHeightAt,biomeAt,requiredBiome,protectedAt,searchStart
+    surfaceHeightAt,biomeAt,requiredBiome,protectedAt,searchStart,radialVariant
   });
   if(!p.ok){
    examined.push(Object.freeze({searchStart,ok:false,stage:'GEOMETRY',
@@ -67,4 +68,39 @@ export function searchProtectedEntranceCandidates(seed,rx,rz,{
    examined:Object.freeze(examined),
    noOriginalCellsChanged:true,worldCarved:false,
    actualPhysicsAndGPUUnverified:true});
+}
+
+// Four offset families x four compass approaches, with the IDENTICAL full
+// per-candidate protections. Zero old-world writes; stop on first safe result.
+// All old four-way tests, defaults and the 4-way benchmark stay unchanged.
+export function searchExtendedProtectedEntrances(seed,rx,rz,options={}){
+ const {maxVariants=4,...remaining}=options;
+ if(!Number.isSafeInteger(maxVariants)||maxVariants<1||maxVariants>4)
+  throw new TypeError('Invalid radial search bound');
+ const audited=[],seen=new Set();let accepted=null;
+ for(let radialVariant=0;radialVariant<maxVariants;radialVariant++){
+  const group=searchProtectedEntranceCandidates(seed,rx,rz,{
+    ...remaining,radialVariant,maxCandidates:4
+  });
+  const unique=[];
+  for(const attempt of group.examined){
+   const key=attempt.mouth?
+    attempt.mouth.x+':'+attempt.mouth.y+':'+attempt.mouth.z:
+    null;
+   if(key&&seen.has(key))continue;
+   if(key)seen.add(key);
+   unique.push(Object.freeze({...attempt,radialVariant}));
+  }
+  audited.push(Object.freeze({radialVariant,passes:group.ok,
+   examined:group.tested,uniqueExamined:Object.freeze(unique),
+   acceptedDirection:group.accepted?.proposal.direction??null}));
+  if(group.ok){accepted=group.accepted;break;}
+ }
+ const attempts=audited.reduce((sum,g)=>sum+g.examined,0);
+ return Object.freeze({ok:!!accepted,seed,rx,rz,
+  requiredBiome:remaining.requiredBiome??null,attempts,
+  radialVariantsExamined:audited.length,accepted,
+  audited:Object.freeze(audited),
+  noOriginalCellsChanged:true,worldCarved:false,
+  realM7FootstepAndDeviceUnverified:true});
 }

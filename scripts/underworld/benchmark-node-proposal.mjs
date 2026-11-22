@@ -64,13 +64,51 @@ for(const args of queries){
  if(uncachedReference(179,...args)!==detachedCalibratedUnderworldAirAt(179,...args))
   throw Error('Uncached CPU reference changed a cave voxel: '+args.join(','));
 }
+
+// Exact old network algorithm retained solely for A/B CPU evidence.
+// It does NOT import or replace a playable world.
+const referenceRoom=(x,y,z,r)=>{
+ if(Math.abs(x-r.x)>r.rx||Math.abs(y-r.y)>r.ry||Math.abs(z-r.z)>r.rz)
+  return false;
+ const a=(x-r.x)/r.rx,b=(y-r.y)/r.ry,c=(z-r.z)/r.rz;
+ return a*a+b*b+c*c<=1;
+};
+const referenceTube=(x,y,z,t)=>{
+ const b=t.bounds;
+ if(x<b.minX||x>b.maxX||y<b.minY||y>b.maxY||z<b.minZ||z>b.maxZ)
+  return false;
+ const dx=t.b.x-t.a.x,dy=(t.b.y-t.a.y)*1.5,dz=t.b.z-t.a.z;
+ const px=x-t.a.x,py=(y-t.a.y)*1.5,pz=z-t.a.z;
+ const den=dx*dx+dy*dy+dz*dz;
+ const frac=den?Math.max(0,Math.min(1,(px*dx+py*dy+pz*dz)/den)):0;
+ const ax=px-frac*dx,ay=py-frac*dy,az=pz-frac*dz;
+ return ax*ax+ay*ay+az*az<=t.radius*t.radius;
+};
+const uncachedNetwork=(seed,x,y,z)=>{
+ if(y<-210||y>-4)return false;
+ const rx=Math.floor(x/UNDERWORLD_REGION_SIDE),rz=Math.floor(z/UNDERWORLD_REGION_SIDE);
+ const local=planUnderworldRegion(seed,rx,rz);
+ if(local.layers.some(l=>referenceRoom(x,y,z,l.room)))return true;
+ if(local.capsules.some(t=>referenceTube(x,y,z,t)))return true;
+ for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){
+  const city=(dx===0&&dz===0?local:
+    planUnderworldRegion(seed,rx+dx,rz+dz)).cityCandidate;
+  if(city&&referenceRoom(x,y,z,city))return true;
+ }
+ return false;
+};
+for(const [x,y,z] of queries)
+ if(uncachedNetwork(179,x,y,z)!==networkAirAt(179,x,y,z))
+  throw Error('Network cache changed an actual cave voxel: '+x+','+y+','+z);
 const result={kind:'NODE_CPU_ONLY_NOT_IPHONE_GPU_OR_FRAME_TIMES',
  nodeVersion:process.version,seed:179,samplesPerImplementation:queries.length,
- results:[bench('network-only',(...a)=>networkAirAt(179,...a)),
+ results:[bench('uncached-network-reference',(...a)=>uncachedNetwork(179,...a)),
+  bench('network-only',(...a)=>networkAirAt(179,...a)),
   bench('uncached-city-reference',(...a)=>uncachedReference(179,...a)),
   bench('two-pass-city-reference',(...a)=>originalTwoPass(179,...a)),
   bench('calibrated-network-cavern',(...a)=>detachedCalibratedUnderworldAirAt(179,...a))],
  baselineAgainstM7:false,hardwareSpecific:true,productionRegressionsNotTested:true,
- zeroChangedVoxelCountAcrossReference:true};
+ zeroChangedVoxelCountAcrossReference:true,
+ zeroChangedNetworkQueries:queries.length};
 if(process.argv[2])fs.writeFileSync(process.argv[2],JSON.stringify(result,null,2)+'\n');
 console.log(JSON.stringify(result));
