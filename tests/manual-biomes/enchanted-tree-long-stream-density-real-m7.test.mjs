@@ -29,7 +29,8 @@ const mkReader=(world,counts)=>{
 const k=(x,y,z)=>x+','+y+','+z;
 
 test('maximal possible Enchanted density never exceeds exact source roll cutoff',()=>{
- assert.equal(ENCHANTED_TREE_MAX_DENSITY_THRESHOLD,.86);
+ assert.equal(ENCHANTED_TREE_MAX_DENSITY_THRESHOLD,.52+.34,
+   'use the exact native JavaScript addition of the maximum Enchanted threshold');
  let high=0;
  // Actual original density selection formula is .52+(.5+.5*sin(t))*.34.
  // Check extreme and intermediate full phase rotations with no epsilon
@@ -43,7 +44,8 @@ test('maximal possible Enchanted density never exceeds exact source roll cutoff'
   assert.ok(max<=ENCHANTED_TREE_MAX_DENSITY_THRESHOLD);
   high=Math.max(high,max);
  }
- assert.ok(Math.abs(high-.86)<1e-12);
+ assert.equal(high,ENCHANTED_TREE_MAX_DENSITY_THRESHOLD,
+   'the source threshold must agree with the greatest native JS canopy phase');
 });
 
 test('original M7 sequential 288-chunk climate crossing preserves exact ordered tree voxels and saves',()=>{
