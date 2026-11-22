@@ -1,0 +1,154 @@
+{
+  "schema": "mythwrought.builder-b.waves18-19-isolated-original-source-handoff.v1",
+  "project": "MYTHWROUGHT Builder B Roadmap B",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "parentProtectedDraftPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "beganAtExactHead": "895fc5c0dfa3369220c7d2ffae7bb7c29fa87c5c",
+  "status": "ISOLATED SOURCE-ONLY, NOT MERGED OR ORIGINAL-GAME ACCEPTED",
+  "frozenOwnership": {
+    "historicalAccepted": 228,
+    "reservedBuilderB": 115,
+    "reservedBuilderD": 92,
+    "productionMainPreserved": "7016e14cd6289f45eaf7fc6a79a362b47996df65"
+  },
+  "authoredOriginals": [
+    {
+      "wave": 18,
+      "id": "r1:bathhouse:snow:small:002",
+      "name": "Hearthspan Double-Court Winter Bathhouse",
+      "file": "src/building-pool/roadmap-b/builder-b-essentials-wave18.mjs",
+      "blob": "1cf9a9dbee2e1b0d650fbe950529d7eab76a7de1",
+      "sourceCells": 6322,
+      "roofCells": 1466,
+      "groundWalkable": 1152,
+      "rooms": 7,
+      "portalLinks": 11,
+      "uprightPack4Windows": 21,
+      "originalRoofWings": 7,
+      "emptySkyCourtColumns": [
+        36,
+        12
+      ],
+      "groundedChimneyTiers": 24,
+      "sourceFunction": "buildHearthspanDoubleCourtWinterBathhouse",
+      "realBathingSteamHeat": false,
+      "focusedNovelty": {
+        "old": "Sunshard Split-Well Bathhouse",
+        "eightWayComparisons": 8,
+        "maxIoU": 0.21367521367521367
+      }
+    },
+    {
+      "wave": 19,
+      "id": "r1:greenhouse:snow:small:003",
+      "name": "Auroracrest Folded-Frost Seedhouse",
+      "file": "src/building-pool/roadmap-b/builder-b-essentials-wave19.mjs",
+      "blob": "f1456ffa011a6f758b569e11cb2b00a5b96069e1",
+      "sourceCells": 7754,
+      "roofCells": 1822,
+      "groundWalkable": 1455,
+      "rooms": 8,
+      "portalLinks": 12,
+      "twoHighUprightPack4WindowCells": 60,
+      "physicallyFramedGlassBays": 30,
+      "originalRoofWings": 8,
+      "emptySkyCourtColumns": [
+        42,
+        20
+      ],
+      "groundedUnpoweredVaneTiers": 23,
+      "sourceFunction": "buildAuroracrestFoldedFrostSeedhouse",
+      "realCropWaterHeatOrAurora": false,
+      "focusedNovelty": {
+        "old": [
+          "Alderglass",
+          "Rimeglass",
+          "Glimmerbough",
+          "Amberwell"
+        ],
+        "eightWayComparisons": 32,
+        "maxIoU": 0.3853056646102075
+      }
+    }
+  ],
+  "actualCompletedEngineering": {
+    "originalRepositorySourcePlanAndValidateBlueprintInIsolatedJS": "PASS for Waves18/19",
+    "realPhysicalSourceGroundRoofYMinusOne": "PASS both",
+    "sourceCirculationConnectivityAndTwoHighDoors": "PASS both by original engine source validator",
+    "realAbsentGroundSkyCourts": "PASS both",
+    "sillLintelExternalPack4": "PASS both",
+    "exactB115VersusD92AndAccepted228Slot": "PASS both",
+    "focusedEightWayD4PreviousAuthoredSources": "PASS 40/40 (not full historical)",
+    "realNativeNodeRunner": false,
+    "genuineChromium": false,
+    "realIphone": false
+  },
+  "globalCIEfficiency": {
+    "historicalCorpusSharedTest": "tests/building-pool/roadmap-b/builder-b-originals-waves9-19-shared-historical-d4.test.mjs",
+    "historicalCorpusSharedTestState": "STAGED, NOT EXECUTED",
+    "correctnessPreserved": "Exact 228 original accepted census compiled once, 19 authored ID/fingerprint source validation, strict same-category 8 transforms IoU<0.85 for every Wave9-19 original",
+    "redundantTestsEliminated": "Removed ONLY final expensive duplicate historical blocks from per-wave test files Waves9-15, retaining 3 focused physical tests each; superseded Waves16-17 shared historical duplicate file replaced by stronger Waves9-19 test",
+    "focusedNewTest": "tests/building-pool/roadmap-b/builder-b-essentials-waves18-19-focused.test.mjs",
+    "nativeFileSyntax": "PASS static syntax, not native execution",
+    "expensiveBrowserMilestone": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-19-gallery.mjs",
+    "independentBrowserAuditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-19-gallery.mjs",
+    "sourceWiringTest": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-19-gallery-wiring.test.mjs",
+    "newVisualMilestone": {
+      "authoredBuildings": 11,
+      "pinnedSourceFiles": 14,
+      "genuineChromiumPNGFrames": 66,
+      "threeViewportSizes": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "pairedViews": [
+        "exterior",
+        "cutaway"
+      ],
+      "PNGCRC": true,
+      "SHA256": true,
+      "exactCheckoutHead": true,
+      "runState": "NOT EXECUTED"
+    },
+    "noNewActionsOrPR": true,
+    "previousWave8SuccessReusedOnlyForExactFrozenPR407": true
+  },
+  "outstanding": [
+    "Native Node focused tests on exact new head for Waves9-19",
+    "Single authentic 228 prior source shared eight-way D4 must execute",
+    "True producer Pack3/4 oriented meshes, selection and collision plus weatherproofing and roof bearing",
+    "One coordinated source-specific 66-frame genuine Chromium WebGL2/PNG CRC/SHA proof",
+    "Actual game world registration and real iPhone landscape PWA/saves/performance/artwork release acceptance"
+  ],
+  "protection": {
+    "mainNotModified": true,
+    "drafts407_403_397_384NotModified": true,
+    "otherBuildersNotModified": true,
+    "automationsNotModified": true,
+    "sharedCIInfrastructureNotModified": true,
+    "savesNotModified": true,
+    "noMerge": true,
+    "noDeploy": true,
+    "noWorkflowCancellation": true,
+    "noRequiredGateWeakened": true
+  },
+  "progress": {
+    "newResidentialAuthored": 10,
+    "newServiceAuthored": 19,
+    "newOriginalsAuthored": 29,
+    "newOriginalTarget": 294,
+    "remainingNewOriginals": 265,
+    "remainingResidential": 169,
+    "remainingServices": 96
+  }
+}
