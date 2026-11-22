@@ -13,6 +13,7 @@ import {hasValidatedV6SkyProfile,resolveV6SkyBiome} from './sky-v6-adapter.mjs';
 import {SKY_DAY_MS,SKY_DAY_TARGET_MS,SKY_NIGHT_TARGET_MS,
   loadSkyClock,sampleSkyClock,selectSkyClockTime,formatSkyTime} from './world-clock.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
+import {withDesertSeamTextureBlend} from './manual-biomes/desert-seam-shader.mjs';
 import {clampLook,forwardVector,compassDegrees,MAX_PITCH} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
 import {chunkKey,editAffectedChunks} from './chunks.mjs';
@@ -409,10 +410,14 @@ function start(nonblockStage=null){
       'if(vMat==23){ float f=smoothstep(14.0,24.0,vDistance);'+
       'outColor=vec4(vColor,vPack2Alpha*(1.0-f)); return; }'
     ).replaceAll('smoothstep(29.0,68.0,vDistance)','worldFog(vDistance)');
+  // Research-only, exact original-shader text substitution. Opts in solely
+  // for naturally tagged Desert material40.x; all original 40.0/42/20/23
+  // shader behavior stays identical (including water/particles and fog).
+  const FSTerrain=withDesertSeamTextureBlend(FS);
   let program,skyProgram,atPos,atColor,atUv,atMat,U,skyU,outlineBuffer;
   function initializeGpuPipeline(){
     const resources=buildGpuPipeline(gl,{
-      terrainVertex:VS,terrainFragment:FS,
+      terrainVertex:VS,terrainFragment:FSTerrain,
       skyVertex:SKY_VERTEX_SHADER,skyFragment:SKY_FRAGMENT_SHADER
     });
     program=resources.terrainProgram;skyProgram=resources.skyProgram;
