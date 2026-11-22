@@ -28,6 +28,8 @@ import {createGlobalEcologyClock}
   from '../src/mobs/ecosystem-global-clock.mjs';
 import {prepareGlobalMobTick,settleGlobalMobTick}
   from '../src/mobs/ecosystem-global-preflight.mjs';
+import {inspectOriginalReconcileReadiness}
+  from '../src/mobs/ecosystem-reconcile-readiness.mjs';
 import {deriveRegionalMobState}
   from '../src/mobs/ecosystem-region-snapshot.mjs';
 
@@ -99,6 +101,15 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
         maxEntities:32,maxActive:8
       });
       const sourceRoster=deriveRegionalMobState(sourceEngine.all(),sourceRegion);
+      // Original #reconcile executes at due global ticks even when no
+      // regions are available. This source M7 census uses a truly empty
+      // engine; explicitly prove it has no hidden transition obligation.
+      const reconciliation=inspectOriginalReconcileReadiness({
+        engine:sourceEngine,world:proposedQuery,observer
+      });
+      assert.equal(reconciliation.ready,true);
+      assert.equal(reconciliation.inspected,0);
+      assert.equal(reconciliation.required.length,0);
       assert.equal(sourceRoster.regionName,[cx,cz,section].join(','));
       assert.equal(sourceRoster.localCounts.size,40,
         'Source bridge must cover all 40 original creature species');
