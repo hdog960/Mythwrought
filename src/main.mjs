@@ -1007,7 +1007,27 @@ function start(nonblockStage=null){
         ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
       }
     }catch(err){
-      for(const item of ready)deleteChunkBuffers(item);
+      if(!near291Enabled){
+        // Public/installed PWA retains the exact original cleanup behavior.
+        for(const item of ready)deleteChunkBuffers(item);
+        throw err;
+      }
+      // All ready[] buffers were freshly allocated but NEVER published to
+      // chunks or rendered, so no VAO can own them. Retire using the actual
+      // original native opaque+water deletion, not a live VAO cache bridge.
+      // Finish every retirement even when an earlier GL deletion throws.
+      // An uncertain cleanup is fatal; NEVER mask the initiating upload
+      // exception that applyBlockAction needs for original voxel rollback.
+      let near291CleanupUnverified=false;
+      for(const item of ready){
+        try{originalDeleteChunkBuffers(item);}
+        catch(_){near291CleanupUnverified=true;}
+      }
+      if(near291CleanupUnverified){
+        near291Fatal=true;
+        try{frameDriver.pause();}catch(_){}
+        try{fatal('Local VAO 291 staged GPU cleanup unverified; reload before mining');}catch(_){}
+      }
       throw err;
     }
     // Original voxel rollback does NOT restore published/retired native GPU
