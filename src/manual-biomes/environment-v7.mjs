@@ -6,6 +6,7 @@ import {buildEnchantedTreeCandidate,ENCHANTED_TREE_MAX_RADIUS} from './enchanted
 import {enchantedTreeFootingsSupported} from './enchanted-tree-footings.mjs';
 import {resolveEnchantedTreeOverlap} from './enchanted-tree-overlap.mjs';
 import {clearEnchantedCanopyForWalking} from './enchanted-tree-walking-clearance.mjs';
+import {EnchantedCandidateSourceCache} from './enchanted-tree-source-cache.mjs';
 
 const smooth=value=>value*value*(3-2*value);
 const clamp=value=>Math.max(0,Math.min(1,value));
@@ -168,7 +169,10 @@ function treeVoxels(climate,x,y,z,roll){
 }
 
 export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
-  {experimentalEnchantedTrees=false}={}){
+  {experimentalEnchantedTrees=false,onCandidateCacheSummary=null}={}){
+  if(onCandidateCacheSummary!==null&&
+     typeof onCandidateCacheSummary!=='function')
+    throw Error('Invalid enchanted cache diagnostics callback');
   const minX=cx*16,minZ=cz*16,maxX=minX+15,maxZ=minZ+15;
   const cells=new Map();
   // Lazily created only when an experimental enchanted tree is present.
@@ -181,7 +185,7 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   // A fresh chunk-scoped cache prevents repeated cave/landmark/terrain
   // lookups. No cache exists for the historical M7 tree path.
   const candidateReadCell=(x,y,z)=>{
-    candidateClearanceCache??=new Map();
+    candidateClearanceCache??=new EnchantedCandidateSourceCache();
     const key=x+','+y+','+z;
     if(!candidateClearanceCache.has(key))
       candidateClearanceCache.set(key,readCell(x,y,z));
@@ -239,7 +243,7 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
       // M7 ground unobstructed, without changing mineable bark or terrain.
       // Only experimental candidates use this additional headroom filter.
       if(candidate){
-        candidateClearanceCache??=new Map();
+        candidateClearanceCache??=new EnchantedCandidateSourceCache();
         tree=clearEnchantedCanopyForWalking(tree,candidateReadCell,BLOCK.AIR,
           candidateClearanceCache);
       }
@@ -256,5 +260,13 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
           resolveEnchantedTreeOverlap(previous,id));
       }
     }
+  if(onCandidateCacheSummary){
+    onCandidateCacheSummary(Object.freeze({
+      entries:candidateClearanceCache?.size??0,
+      peakEntries:candidateClearanceCache?.peakEntries??0,
+      evictions:candidateClearanceCache?.evictions??0,
+      limit:candidateClearanceCache?.limit??0
+    }));
+  }
   return cells;
 }
