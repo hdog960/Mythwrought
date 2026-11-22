@@ -18,6 +18,8 @@ test('16 original W16/17 source buildings map to exactly bounded real Pack1 maso
   assert.equal(scene.sampledCount,44);
   assert.equal(scene.physicalSamples.length,44);
   assert.equal(scene.pack4MeshGlazingCount,12);
+  assert.equal(scene.originalPack4VertexBytes,132480,'original 12 glass + bench/table physical source mesh bytes drifted');
+  assert.equal(scene.originalPack4PreviewVertexBudgetBytes,192*1024);
   assert.deepEqual(scene.sourcePacksUsed,[1,2,3,4]);
   assert.equal(scene.originalSourceCellCount,before);
   assert.equal(b.cells.length,before,'original source structure mutated');
@@ -119,4 +121,11 @@ test('physical Pack4 source mesh anti-forgery rejects out-of-cell vertices, inva
  const unchanged=pack4BuilderAsset('pack4:030',{candidateId:159,rotation:'north'});
  assert.deepEqual([...unchanged.previewMesh.translucent],[...originalVertices],
    'original Pack4 family source mesh was modified by rejection path');
+});
+
+
+test('original per-building Pack4 source RGBA mesh fails closed before excessive 48-window preview memory can be accepted',()=>{
+ assert.throws(()=>assembleD16D17OriginalPhysicalPreview(originals[0],{
+  ...truth(),windowBudget:48
+ }),/per-building physical preview vertex budget exceeded/);
 });
