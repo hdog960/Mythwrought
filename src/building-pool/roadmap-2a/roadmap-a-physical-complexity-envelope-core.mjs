@@ -14,7 +14,7 @@ const natural=x=>Number.isSafeInteger(x)&&x>=0;
 const sum=a=>a.reduce((x,y)=>x+y,0);
 const counters=()=>({sourceCells:0,conditionalMinBoxes:0,conditionalMaxBoxes:0,
  conditionalMinTriangles:0,conditionalMaxTriangles:0,conditionalMinVertices:0,conditionalMaxVertices:0});
-function plus(total,row){for(const k of Object.keys(total))total[k]+=row[k];}
+function plus(total,row){for(const k of Object.keys(row)){requireTrue(natural(row[k])&&natural(total[k]),'non-numeric conditional sum '+k);total[k]+=row[k];}}
 export function buildRoadmapAConditionalPack5GeometryEnvelope(census,producerOptions){
  requireTrue(census?.schema==='mythwrought.roadmap-a.2a-all79-four-yaw-real-pack5-source-support-census.v1', 'unrecognized original source census');
  requireTrue(census.originalA5207Intact===true&&census.original79SourcesIntact===true&&
