@@ -1,6 +1,8 @@
 // Detached Phase 2: atomic original MobEngine/global ecology preflight.
 // No actual world/mob/save writes, no live PopulationManager replacement.
 import {validPoint} from './world-query.mjs';
+import {captureOriginalReconcileObserver,assertOriginalReconcileObserverUnchanged}
+  from './ecosystem-reconcile-observer.mjs';
 import {inspectOriginalReconcileReadiness}
   from './ecosystem-reconcile-readiness.mjs';
 import {previewGlobalEcologySelection,advanceGlobalEcologyClock,
@@ -31,7 +33,12 @@ export function prepareGlobalMobTick({
   // Certified source preview includes BOTH global due-ness and the
   // original first-64 region/capacity/oldest-stale selection. Nothing here
   // consumes clock identity or allocates an executable selection ticket.
+  // One observer identity spans the complete global reconcile, selected
+  // region preview, physical poll, and the final certified clock advance.
+  // A callback may rewrite the caller's observer without editing the world.
+  const observerCertificate=captureOriginalReconcileObserver(observer);
   const planned=previewGlobalEcologySelection(clock,{seconds,regions});
+  assertOriginalReconcileObserverUnchanged(observerCertificate,observer);
   if(planned.reason!=='interval'){
     const checked=inspectOriginalReconcileReadiness({
       engine,world,observer,isProtected
@@ -39,9 +46,10 @@ export function prepareGlobalMobTick({
     if(!checked.ready)
       throw new TypeError('Original ecology reconciliation required');
   }
-  if(!unchangedSelection(planned,
-      previewGlobalEcologySelection(clock,{seconds,regions})))
+  const reconciledSelection=previewGlobalEcologySelection(clock,{seconds,regions});
+  if(!unchangedSelection(planned,reconciledSelection))
     throw new TypeError('Original source selection changed during reconcile');
+  assertOriginalReconcileObserverUnchanged(observerCertificate,observer);
 
   // Prepare the real original-engine roster and voxel/rarity/cooldown query
   // BEFORE global advance consumes the one-shot certified source clock.
@@ -55,11 +63,16 @@ export function prepareGlobalMobTick({
       now:planned.time,record:planned.record
     });
   }
-  if(!unchangedSelection(planned,
-      previewGlobalEcologySelection(clock,{seconds,regions})))
+  const polledSelection=previewGlobalEcologySelection(clock,{seconds,regions});
+  if(!unchangedSelection(planned,polledSelection))
     throw new TypeError('Original source selection changed during poll');
+  assertOriginalReconcileObserverUnchanged(observerCertificate,observer);
 
-  const tick=advanceGlobalEcologyClock(clock,{seconds,regions});
+  // Do not invoke caller-controlled region getters a fourth time AFTER the
+  // final observer barrier. The clock authenticates this one-use preview.
+  const tick=advanceGlobalEcologyClock(clock,{
+    seconds,regions,certifiedSelection:polledSelection
+  });
   if(tick.reason!==planned.reason||
      (tick.selection!==null&&
       (tick.selection.key!==planned.key||

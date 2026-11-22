@@ -15,6 +15,14 @@ const certified=new WeakSet();
 const consumed=new WeakSet();
 const pending=new WeakSet();
 const issued=new WeakMap();
+// Opaque one-use proofs of an exact read-only selection preview. The global
+// preflight may reuse its FINAL verified preview without reentering caller
+// region accessors after the last observer/world/roster barrier.
+const previewTickets=new WeakMap();
+function certifyPreview(preview,state,seconds,regions){
+  previewTickets.set(preview,Object.freeze({state,seconds,regions}));
+  return preview;
+}
 
 function clock(time,next,cursor,entries){
   const result=Object.freeze({
@@ -63,24 +71,41 @@ export function previewGlobalEcologySelection(state,{
 }={}){
   const due=previewGlobalEcologyTick(state,{seconds,regions});
   if(!due.due)
-    return Object.freeze({
+    return certifyPreview(Object.freeze({
       reason:'interval',time:due.time,nextCursor:state.cursor,
       key:null,region:null,record:null,evictKey:null
-    });
+    }),state,seconds,regions);
   const chosen=previewSourceEcologyRegion({
     regions,cursor:state.cursor,time:due.time,
     records:state.entries,isValidRegion:validRegion
   });
-  return Object.freeze({...chosen,time:due.time});
+  return certifyPreview(Object.freeze({...chosen,time:due.time}),
+    state,seconds,regions);
 }
 
 // A single consuming source tick uses the SAME bounded source selection
 // algorithm as the preview; invalid/capacity/empty slots still advance
 // time and the original cursor when appropriate.
 export function advanceGlobalEcologyClock(state,{
-  seconds,regions
+  seconds,regions,certifiedSelection=null
 }={}){
-  const predicted=previewGlobalEcologySelection(state,{seconds,regions});
+  let predicted;
+  if(certifiedSelection!==null){
+    // Preserve existing public direct-advance behavior. Only a preview
+    // issued by THIS clock for the SAME state, region array and time step
+    // may avoid a fourth invocation of potentially effectful region getters.
+    const proof=certifiedSelection&&typeof certifiedSelection==='object'?
+      previewTickets.get(certifiedSelection):null;
+    if(!certifiedClock(state)||!Array.isArray(regions)||
+       !Number.isFinite(seconds)||seconds<0||!proof||
+       proof.state!==state||!Object.is(proof.seconds,seconds)||
+       proof.regions!==regions)
+      throw new TypeError('Uncertified original ecology selection preview');
+    previewTickets.delete(certifiedSelection);
+    predicted=certifiedSelection;
+  }else{
+    predicted=previewGlobalEcologySelection(state,{seconds,regions});
+  }
   consumed.add(state);
   const time=predicted.time;
   if(predicted.reason==='interval')
