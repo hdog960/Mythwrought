@@ -42,7 +42,7 @@ export function buildMoonfernTriskelionArboretum(){
  for(let y=1;y<=9;y++)b.put(bx,y,bz,'support','live:stone','none',
   {originalGroundedMoonDialTier:y,unpoweredMarker:true});
  b.put(bx,10,bz,'roof','pack3:025','north',{directlySourceBackedMoonDialCap:true});
- for(const [x,z] of [[17,7],[28,8],[40,8],[11,21],[45,22],[18,38],[39,39],[26,43],[12,46],[45,46]]){
+ for(const [x,z] of [[17,7],[28,8],[40,8],[11,21],[45,22],[18,38],[47,39],[26,43],[12,46],[45,46]]){
   const y=roof.get(key(x,z));if(!y)throw Error('Moonfern roof rafter misses real roof '+key(x,z));
   b.support(x,z,y-1,'live:wood','ground-to-moonfern-roof-bent');
  }
