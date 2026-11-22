@@ -13,6 +13,7 @@ import {auditSourceProtectedMainGalleries}
  from '../../src/living-underworld/main-gallery-source-survey.mjs';
 import {auditOriginalMainGalleryVoxelReadiness}
  from '../../src/living-underworld/combined-stair-footprints.mjs';
+const runStarted=performance.now();
 const seed=179;
 const sites=Object.freeze([
  // Coordinates are from the authenticated ORIGINAL M7 protected parent
@@ -36,6 +37,7 @@ const source=Object.freeze({
 });
 const rows=[];
 for(const site of sites){
+ const siteStarted=performance.now();
  // An original-M7-biome witness is verified by its exact historical mouth,
  // NOT inferred from a region-center label (a prior false-positive error).
  const realBiome=v6BiomeAt(site.mouth.x,site.mouth.z,seed)?.name??'plains';
@@ -53,6 +55,7 @@ for(const site of sites){
   materialAt:source.naturalAt,editedAt:source.editedAt
  });
  rows.push(Object.freeze({...site,seed,
+  regionAuditElapsedMs:Math.round((performance.now()-siteStarted)*1000)/1000,
   originalM7HistoricalSurfaceMouthVerifiedByPriorArtifact:true,
   surfaceMouthCurrentSourceRechecked:false,
   exactHistoricalMouthBiomeCurrentlyMatches:true,
@@ -77,6 +80,7 @@ for(const site of sites){
 }
 const report=Object.freeze({schema:'living-underworld-authentic-m7-five-biome-gallery-provenance-v1',
  readOnlyOriginalM7:true,seed,regions:rows.length,
+ fullAuditElapsedMs:Math.round((performance.now()-runStarted)*1000)/1000,
  allFiveExactHistoricalMouthBiomesVerified:rows.length===5,
  historicalSurfaceEvidenceOnlyNotDeepOrActualWalking:true,
  mutualPairs:rows.reduce((n,r)=>n+(r.checkedPairs??0),0),
