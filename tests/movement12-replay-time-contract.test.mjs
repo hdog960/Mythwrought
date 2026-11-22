@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditReplayTiming} from '../src/movement12/replay-time-contract.mjs';
+const p=x=>({x,y:0,z:0});
+const f=(time,a,b)=>({time,start:p(a),end:p(b)});
+test('valid time-aligned replay',()=>assert.equal(auditReplayTiming({frames:[f(0,0,0),f(.05,0,.5)]}).ok,true));
+test('empty replay cannot pass',()=>assert.equal(auditReplayTiming({frames:[]}).reason,'invalid-contract'));
+test('duplicate timestamps fail',()=>assert.equal(auditReplayTiming({frames:[f(0,0,0),f(0,0,0)]}).reason,'invalid-cadence'));
+test('large frame gap fails',()=>assert.equal(auditReplayTiming({frames:[f(0,0,0),f(.2,0,0)]}).reason,'invalid-cadence'));
+test('teleport fails',()=>assert.equal(auditReplayTiming({frames:[f(0,0,0),f(.05,1,1)]}).reason,'discontinuous'));
+test('speed budget fails',()=>assert.equal(auditReplayTiming({frames:[f(0,0,0),f(.05,0,2)]}).reason,'speed-budget'));
+test('nonfinite coordinate fails',()=>assert.equal(auditReplayTiming({frames:[f(0,0,0),f(.05,0,NaN)]}).reason,'invalid-frame'));
+test('invalid budget fails',()=>assert.equal(auditReplayTiming({frames:[f(0,0,0)],maxSpeed:0}).reason,'invalid-contract'));
+test('first frame cannot bypass speed budget',()=>assert.equal(auditReplayTiming({frames:[f(0,0,100)]}).reason,'unbounded-first-frame'));
