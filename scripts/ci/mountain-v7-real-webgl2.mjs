@@ -103,16 +103,51 @@ try{
     const before=await page.evaluate(()=>localStorage.getItem(
       'mythwrought-v002-world-179'));
     for(const site of sites){
+      // A real source block ID does not establish that the original camera
+      // can SEE it. Earlier frames looked into an intervening gray wall or
+      // empty skyline. Sample actual live block occlusion before recording.
+      // Keep all camera movement in the localhost-only diagnostic interface.
       const observed=await page.evaluate(({x,y,z})=>{
         const api=window.__mythwroughtTest;
-        const camera=api.teleport(x-19,z-19);
+        const offsets=[[-10,-10],[10,10],[-10,10],[10,-10],
+          [-14,0],[14,0],[0,-14],[0,14],
+          [-18,-8],[18,8],[-8,18],[8,-18]];
+        const attempts=[];
+        for(const [dx,dz] of offsets){
+          const camera=api.teleport(x+dx,z+dz);
+          const distance=Math.hypot(x+.5-camera.x,z+.5-camera.z);
+          if(distance<6||distance>30)continue;
+          const start=[camera.x,camera.feet+1.55,camera.z];
+          const end=[x+.5,y+1.02,z+.5];
+          const length=Math.hypot(...end.map((v,i)=>v-start[i]));
+          let obstruction=null;
+          for(let d=.7;d<length-1.1;d+=.4){
+            const t=d/length;
+            const bx=Math.floor(start[0]+t*(end[0]-start[0]));
+            const by=Math.floor(start[1]+t*(end[1]-start[1]));
+            const bz=Math.floor(start[2]+t*(end[2]-start[2]));
+            const block=api.block(bx,by,bz);
+            if(block!==0){obstruction={x:bx,y:by,z:bz,id:block};break;}
+          }
+          attempts.push({camera,distance,obstruction});
+        }
+        const clear=attempts.filter(a=>!a.obstruction)
+          .sort((a,b)=>Math.abs(a.distance-13)-Math.abs(b.distance-13));
+        if(!clear.length)return {id:api.block(x,y,z),
+          generator:api.fourBiomeProfile()?.generator,
+          sightlineVerified:false,attempts};
+        const chosen=clear[0];
+        api.teleport(chosen.camera.x,chosen.camera.z);
         api.aimAt(x,y,z);
-        return {id:api.block(x,y,z),camera,
-          generator:api.fourBiomeProfile()?.generator};
+        return {id:api.block(x,y,z),camera:chosen.camera,
+          generator:api.fourBiomeProfile()?.generator,
+          sightlineVerified:true,clearCandidates:clear.length,
+          sightlineDistance:chosen.distance};
       },site);
       if(observed.id!==site.id||
-        observed.generator!==M7_ENVIRONMENT_GENERATOR)
-        throw Error('Source/world mismatch '+JSON.stringify({site,observed}));
+        observed.generator!==M7_ENVIRONMENT_GENERATOR||
+        !observed.sightlineVerified)
+        throw Error('Source/world or visible-target mismatch '+JSON.stringify({site,observed}));
       await page.waitForFunction(()=>window.__mythwroughtTest.snapshot().chunks.length>=4,
         null,{timeout:120000});
       await page.waitForTimeout(1250);
@@ -139,6 +174,8 @@ try{
         throw Error('Real M7 screenshot GPU failure '+
           JSON.stringify({file,colors:colors.size,state}));
       frames.push({file,width,height,site,cameraTestOnly:true,
+        camera:observed.camera,sourceSightlineVerified:observed.sightlineVerified,
+        clearCameraCandidates:observed.clearCandidates,
         actualWalking:false,realChromiumWebGL2:true,
         sha256:digest(bytes),colorBuckets:colors.size,
         residentChunks:state.snapshot.chunks.length,
