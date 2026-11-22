@@ -4,6 +4,7 @@ import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {buildEnchantedTreeCandidate,ENCHANTED_TREE_MAX_RADIUS} from './enchanted-tree-candidates.mjs';
 import {enchantedTreeFootingsSupported} from './enchanted-tree-footings.mjs';
+import {resolveEnchantedTreeOverlap} from './enchanted-tree-overlap.mjs';
 
 const smooth=value=>value*value*(3-2*value);
 const clamp=value=>Math.max(0,Math.min(1,value));
@@ -215,8 +216,15 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
         tree=treeVoxels(biome.name,x,floor,z,roll);
       }
       if(tree.some(([a,b,c])=>b>WORLD_MAX_Y||readCell(a,b,c)!==BLOCK.AIR))continue;
-      for(const [a,b,c,id] of tree)
-        if(a>=minX&&a<=maxX&&c>=minZ&&c<=maxZ)cells.set(a+','+b+','+c,id);
+      for(const [a,b,c,id] of tree)if(a>=minX&&a<=maxX&&c>=minZ&&c<=maxZ){
+        const key=a+','+b+','+c;
+        // The old M7 path and non-enchanted trees retain exactly their
+        // historical write order. Only overlapping experimental Enchanted
+        // crowns use order-independent ownership: physical bark always
+        // survives incoming leaves, even across neighboring chunk rebuilds.
+        cells.set(key,candidate?
+          resolveEnchantedTreeOverlap(cells.get(key),id):id);
+      }
     }
   return cells;
 }
