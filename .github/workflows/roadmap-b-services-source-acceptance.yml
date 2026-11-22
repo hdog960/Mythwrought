@@ -51,7 +51,8 @@ jobs:
             tests/building-pool/roadmap-b/builder-b-essentials-wave6.test.mjs \
             tests/building-pool/roadmap-b/builder-b-essentials-wave7.test.mjs \
             tests/building-pool/roadmap-b/builder-b-seven-originals-roof-pack-physical.test.mjs \
-            tests/building-pool/roadmap-b/builder-b-alderglass-historical-228-d4.test.mjs
+            tests/building-pool/roadmap-b/builder-b-alderglass-historical-228-d4.test.mjs \
+            tests/building-pool/roadmap-b/builder-b-essentials-wave8.test.mjs
       - name: Install exact pinned standalone visual audit dependencies
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
@@ -104,11 +105,19 @@ jobs:
         env:
           BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
         run: node tests/building-pool/roadmap-b/audit-builder-b-essentials-wave7-gallery.mjs
+      - name: Capture six original Frostwake snow lighthouse true Chromium source WebGL2 landscape exterior/cutaway frames
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node tests/building-pool/roadmap-b/builder-b-essentials-wave8-gallery.mjs
+      - name: Independently check Frostwake six source PNG CRC SHA and exact original Git provenance
+        env:
+          BUILDER_B_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node tests/building-pool/roadmap-b/audit-builder-b-essentials-wave8-gallery.mjs
       - name: Export draft-only genuine source frames and independent audit
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: builder-b-essentials-seven-originals-42-real-chromium-source-frames
+          name: builder-b-essentials-eight-originals-48-real-chromium-source-frames
           path: |
             artifacts/builder-b-essentials-two-originals-webgl2/
             artifacts/builder-b-essentials-wave3-sedgewatch-webgl2/
@@ -116,4 +125,5 @@ jobs:
             artifacts/builder-b-essentials-wave5-sunshard-webgl2/
             artifacts/builder-b-essentials-wave6-tidehollow-webgl2/
             artifacts/builder-b-essentials-wave7-rimeglass-webgl2/
+            artifacts/builder-b-essentials-wave8-frostwake-webgl2/
           if-no-files-found: ignore
