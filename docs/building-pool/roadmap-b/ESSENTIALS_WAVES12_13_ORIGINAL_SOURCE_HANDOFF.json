@@ -1,0 +1,126 @@
+{
+  "schema": "mythwrought.builder-b.1b-waves12-13-provisional-source.v1",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "originProtectedPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "sourceStatus": "authored-source-only; not native Node accepted, original live game registered or iPhone tested",
+  "frozenOwners": {
+    "previousHistoricAccepted1B": 228,
+    "builderBReserved115": 115,
+    "builderDReserved92": 92
+  },
+  "newOriginals": [
+    {
+      "wave": 12,
+      "id": "r1:stable:desert:small:002",
+      "name": "Sunspoke Forked-Shelter Corral Stables",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave12.mjs",
+      "expectedSourceBlob": "d130865907aa2a467866a62bad345ad269ae9552",
+      "sourceCells": 6498,
+      "roofCells": 1472,
+      "walkable": 1138,
+      "rooms": 8,
+      "portals": 12,
+      "uprightWindows": 12,
+      "openCourtSourceColumns": [
+        36,
+        16
+      ],
+      "focusedNovelty": {
+        "against": "prior original Meadowstep stable",
+        "eightWayComparisons": 8,
+        "maxIoU": 0.3000570450656018
+      },
+      "sourceEngineeringFix": "Converted originally isolated (17,33) false-pedestrian pocket into four-high authored physical timber pier",
+      "originalRepositoryBlueprintValidator": "PASS in JavaScript evaluator"
+    },
+    {
+      "wave": 13,
+      "id": "r1:greenhouse:enchanted-forest:small:002",
+      "name": "Glimmerbough Split-Sun Orchid House",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave13.mjs",
+      "expectedSourceBlob": "4813622592632b0b6f28b4180136ea7192495db2",
+      "sourceCells": 6729,
+      "roofCells": 1516,
+      "walkable": 1175,
+      "rooms": 8,
+      "portals": 12,
+      "uprightWindows": 195,
+      "glassBays": 65,
+      "openCourtSourceColumns": [
+        36,
+        16
+      ],
+      "focusedNovelty": {
+        "against": "previous original Alderglass and Rimeglass greenhouses",
+        "eightWayComparisons": 16,
+        "maxIoU": 0.3411501954215522
+      },
+      "sourceEngineeringFix": "Excluded north doorway (26,2) from glazing so its y1/y2 entrance stays clear with original solid y3/y4 wood arch. Eliminated upper glass without a real sill.",
+      "originalRepositoryBlueprintValidator": "PASS in JavaScript evaluator"
+    }
+  ],
+  "strictValidation": {
+    "originalSourcePlanSchemaAndB115Exclusive": "PASS source geometry in isolated JavaScript evaluation",
+    "frozenBranchHeads": "READ-ONLY checked at session start; unchanged",
+    "originalSourceSupportCourtyardPortalExterior": "PASS focused checks on each new source",
+    "strictPriorSameCategorySubsetEightWayD4": "PASS with counts and max scores above; historical 228 all-category corpus NOT tested",
+    "nativeNodeRunnerOnNewExactHead": "NOT RUN",
+    "full228HistoricalStrictEightWayD4": "NOT RUN",
+    "physicalOriginalPack1To5Meshes": "NOT APPROVED",
+    "realChromiumWebGL2": "NOT RUN",
+    "CRC_SHA_PNG_30Frames": "NOT RUN",
+    "actualOriginalLiveGameAndIphone": "NOT RUN",
+    "creatorFinalAcceptance": "NOT APPROVED"
+  },
+  "plannedVisualMilestone": {
+    "canonicalGallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-13-gallery.mjs",
+    "canonicalIndependentAuditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-13-gallery.mjs",
+    "canonicalNativeWiringTest": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-13-gallery-wiring.test.mjs",
+    "images": 30,
+    "originalBuildings": 5,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "views": [
+      "exterior",
+      "cutaway"
+    ],
+    "expectedSourceEvidenceFiles": 8,
+    "sha256AndCRCRequired": true,
+    "gitCheckoutExactHeadRequired": true,
+    "deprecatedDraftEarlyGalleries": "The earlier unpublished Wave9+10 12-frame and Wave9-12 24-frame draft scripts are retained for history but need NOT be executed separately; run one 30-frame coordinated milestone on final exact HEAD."
+  },
+  "portfolio": {
+    "newResidentialOriginals": 10,
+    "newServicesOriginals": 13,
+    "combinedNewOriginals": 23,
+    "newOriginalTarget": 294,
+    "remainingToAuthor": 271,
+    "residentialRemaining": 169,
+    "servicesRemaining": 102
+  },
+  "safety": {
+    "otherBuildersModified": false,
+    "automationsModified": false,
+    "mainModified": false,
+    "protectedPRsModified": false,
+    "sharedCIChanged": false,
+    "merged": false,
+    "deployed": false,
+    "newActionsTriggered": false,
+    "cancelledWorkflows": false,
+    "worldSavesChanged": false
+  },
+  "queuePolicy": "Reused exact PR407 previously authenticated CI, did not recheck current queue repeatedly. No PR opened and no new CI fan-out. Native/Chromium final acceptance still required."
+}
