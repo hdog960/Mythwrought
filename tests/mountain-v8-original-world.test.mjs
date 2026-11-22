@@ -55,3 +55,14 @@ test('rejects profiled world subclasses even when save maps happen to be empty',
   assert.equal(survey(-512,0,179,{world:profiled}),null,
     'An opt-in profile must never masquerade as the pristine legacy source');
 });
+
+test('original Schema-1 save returns fresh objects but equal deterministic bytes',()=>{
+  const world=new VoxelWorld(179);
+  const first=world.save(),second=world.save();
+  assert.notStrictEqual(first,second,'Original source must return fresh save objects');
+  assert.equal(first.schema,1);
+  assert.deepEqual(first,second);
+  assert.equal(JSON.stringify(first),JSON.stringify(second));
+  assert.equal(world.edits.size,0);
+  assert.equal(world.rotations.size,0);
+});
