@@ -48,7 +48,8 @@ test('authentic 48-chunk three-seed site cull preserves EVERY original M7 candid
   const chunks=[];
   for(let cx=-3;cx<=0;cx++)for(let cz=-34;cz<=-31;cz++)
     chunks.push([cx,cz]);
-  const summary={chunks:0,totalSites:0,culled:0,biomeLookupFast:0,
+  const summary={chunks:0,totalSites:0,culled:0,
+    densityCulledFast:0,densityCulledUnculled:0,biomeLookupFast:0,
     biomeLookupUnculled:0,sourceFast:0,sourceUnculled:0,
     sourceCells:0,changedVoxels:0,activeChunkPlans:0};
   const witnesses=[];
@@ -94,9 +95,11 @@ test('authentic 48-chunk three-seed site cull preserves EVERY original M7 candid
       assert.equal(aSummary.experimental,true);
       assert.equal(aSummary.sampledSites,bSummary.sampledSites);
       assert.equal(bSummary.geometricallyCulledSites,0);
-      assert.equal(bSummary.sampledSites,bSummary.biomeLookupSites);
+      assert.equal(bSummary.sampledSites,
+        bSummary.biomeLookupSites+bSummary.densityCulledSites);
       assert.equal(aSummary.sampledSites,
-        aSummary.biomeLookupSites+aSummary.geometricallyCulledSites);
+        aSummary.biomeLookupSites+aSummary.geometricallyCulledSites+
+        aSummary.densityCulledSites);
       // Exact ordered source maps, not merely cell totals or shape silhouettes.
       assert.deepEqual([...actual],[...previous],
         'original scan and early-cull source generated different M7 voxel/IDs');
@@ -115,6 +118,8 @@ test('authentic 48-chunk three-seed site cull preserves EVERY original M7 candid
       summary.chunks++;
       summary.totalSites+=aSummary.sampledSites;
       summary.culled+=aSummary.geometricallyCulledSites;
+      summary.densityCulledFast+=aSummary.densityCulledSites;
+      summary.densityCulledUnculled+=bSummary.densityCulledSites;
       summary.biomeLookupFast+=aSummary.biomeLookupSites;
       summary.biomeLookupUnculled+=bSummary.biomeLookupSites;
       summary.sourceFast+=fastReads.calls-startFast;
@@ -136,7 +141,8 @@ test('authentic 48-chunk three-seed site cull preserves EVERY original M7 candid
   assert.ok(summary.culled>0,
     'same 48 original chunk plans must actually skip useless sites');
   assert.equal(summary.biomeLookupUnculled-summary.biomeLookupFast,
-    summary.culled,'every rejected site must bypass its biome lookup');
+    summary.culled+summary.densityCulledFast-summary.densityCulledUnculled,
+    'skipped geometric site counts must subtract rolls rejected by density in the old scan');
   assert.ok(summary.sourceCells>500,'test must inspect real source-generated trees');
   assert.ok(summary.sourceFast<=summary.sourceUnculled,
     'physically off-chunk site culling must never create more baseline reads');
