@@ -61,7 +61,8 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  const detour=useSourceAwareDetour?
   searchSourceProtectedCityDetours(seed,rx,rz,{
    source,selectedStairProposals:additionalStairProposals,
-   maxSourceChecks:Math.min(30000,maxTotalSourceChecks)
+   maxSourceChecks:Math.min(30000,maxTotalSourceChecks),
+   requireTerraceJoin:true
   }):null;
  if(detour&&!detour.ok)return Object.freeze({sitePresent:true,ok:false,
   seed,rx,rz,reason:'CITY_SOURCE_PROTECTED_DETOUR_UNSAFE',
@@ -112,10 +113,10 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  // protection for the terrace, including BOTH directions of cross-route
  // floor/air collision.
  const remaining=maxTotalSourceChecks-inspected;
- if(remaining<100)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
+ if(remaining<100&&!detour?.terraceProof)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
   reason:'CITY_LINK_TOTAL_SOURCE_BUDGET',sourceChecks:inspected,
   maxTotalSourceChecks,worldChanged:false});
- const terrace=proposeProtectedCityLandingTerrace(seed,rx,rz,{
+ const terrace=detour?.terraceProof??proposeProtectedCityLandingTerrace(seed,rx,rz,{
   source,selectedStairProposals:selected,
   maxSourceChecks:Math.min(60000,remaining)
  });
@@ -132,6 +133,7 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
   detourDepartureBlocks:detour?.departureBlocks??null,
   detourBearing:detour?.bearing??null,
   sourceAuditedDetourAlreadyCountedOnce:!!detour,
+  sourceAuditedTerraceAlreadyCountedOnce:detour?.terraceProof?.ok===true,
   requireCompleteDeepLinks,
   completeFourHubCandidateTopologyVerified:topology?.ok===true,
   completeDeepLinkSourceOwnershipVerified:topology?.ok===true,
