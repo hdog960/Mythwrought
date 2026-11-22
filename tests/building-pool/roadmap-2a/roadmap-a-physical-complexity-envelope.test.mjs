@@ -21,6 +21,9 @@ test('all79 authentic A5 source roles: exact conditional unchosen Pack5 physical
   conditionalMinTriangles:75383436,conditionalMaxTriangles:96735828,
   conditionalMinVertices:150766872,conditionalMaxVertices:193471656
  });
+ assert.equal(d.byOriginalRole['pack5:079'].originalRole,'wall-mount-surface');
+ assert.equal(d.byOriginalRole['pack5:080'].originalRole,'full-solid-masonry-as-roof');
+ assert.equal(d.byOriginalRole['pack5:081'].originalRole,'thin-supported-tile-as-floor');
  assert.equal(d.validForRealGpuOrFpsPredictions,false);
  assert.equal(d.validForRuntimeTriangleCounts,false);
  assert.equal(d.physicalGeometryInstantiated,false);
