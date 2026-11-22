@@ -32,6 +32,8 @@ import {inspectOriginalReconcileReadiness}
   from '../src/mobs/ecosystem-reconcile-readiness.mjs';
 import {deriveRegionalMobState}
   from '../src/mobs/ecosystem-region-snapshot.mjs';
+import {createM7SourceMutationWitness}
+  from './helpers/m7-source-mutation-witness.mjs';
 
 const SURFACE=Object.freeze([
   {biome:'meadow',source:'plains',x:0,z:0},
@@ -50,6 +52,11 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
   for(const seed of [179,379,1001]){
     const base=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
     const world=new Pack2LiveWorld(base),reader=createM7MobCollisionReader(world);
+    // Original createWorldQuery silently defaults revision to ()=>0 when
+    // host-view options omit it. Never treat that as an authoritative edit
+    // counter for this source M7 research. Observe the genuine Schema-1
+    // delta and Pack2 overlay byte snapshots without touching the world.
+    const mutationWitness=createM7SourceMutationWitness(world);
     const before=JSON.stringify(base.save());
     const route=deepCaveRoute();
     const samples=[
@@ -74,7 +81,7 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
       const cx=chunkCoord(player.x),cz=chunkCoord(player.z);
       const resident=(x,z,s)=>s===section&&Math.abs(x-cx)<=2&&Math.abs(z-cz)<=2;
       const options={
-        resident,
+        resident,revision:mutationWitness.revision,
         biomeAt:point=>({
           id:point[1]<-3.5?'cave':
             classifyLiveBiome(sourceBiome(point[0],point[2],seed),point[1],false),
@@ -242,6 +249,8 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
     }
     assert.equal(JSON.stringify(base.save()),before,
       'Reading real source voxels must preserve Schema-1 saved bytes');
+    assert.equal(mutationWitness.assertUnchanged(),true,
+      'The original M7 Schema-1 and Pack2 states must remain byte-identical');
   }
   assert.equal(outcomes.length,21);
   const summary={
