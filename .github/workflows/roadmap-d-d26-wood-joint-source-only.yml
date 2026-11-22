@@ -1,0 +1,46 @@
+name: Builder D26 narrow authentic Pack2-to-wood source contact
+on:
+  push:
+    branches:
+      - builder-d-d26-wood-interface-isolated-20261122
+    paths:
+      - 'src/building-pool/roadmap-d/d26-livewood-roof-joint-contact.mjs'
+      - 'tests/building-pool/roadmap-d/d26-livewood-roof-joint-contact.*.test.mjs'
+      - '.github/workflows/roadmap-d-d26-wood-joint-source-only.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d26-original-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  d26-only-original-node:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Verify exact new isolated parent and original source owners
+        env:
+          EXPECTED: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          test "$(git rev-parse HEAD^)" = '474a7206d3345628c42eea71d21cd96ca7ce6b35'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d25-original-livewood-roof-zones.mjs)" = '93284baae402bf99d239e6ba8cf327e4b9513ce5'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/pack2-integration.mjs)" = 'cb8858688917a409dc1d52acf3730cf63567d48b'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Only NEW D26 focused native source tests (reuse D25 green 71)
+        run: |
+          node --check src/building-pool/roadmap-d/d26-livewood-roof-joint-contact.mjs
+          node --check tests/building-pool/roadmap-d/d26-livewood-roof-joint-contact.source.test.mjs
+          node --check tests/building-pool/roadmap-d/d26-livewood-roof-joint-contact.synthetic.test.mjs
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d26-livewood-roof-joint-contact.synthetic.test.mjs \
+            tests/building-pool/roadmap-d/d26-livewood-roof-joint-contact.source.test.mjs
