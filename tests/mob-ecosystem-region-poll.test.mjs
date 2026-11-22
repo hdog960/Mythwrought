@@ -290,3 +290,30 @@ test('invalid original world revision rejects before local protection callback',
   assert.equal(protectionCalls,0);
   engine.dispose();
 });
+
+test('source census callback cannot change live region coordinates mid-poll',()=>{
+  const w=world(),engine=engineOf(w);
+  const id=engine.spawn('deer',[8,4,8],{homeChunk:'0,0,0'});
+  assert.ok(id);
+  const mutable={...region};
+  assert.throws(()=>prepareOriginalMobPoll({
+    ...opts(w,engine),region:mutable,spawnOnFirstVisit:false,
+    isProtected:()=>{mutable.cx++;return false;}
+  }),/Original regional source inputs changed during poll/);
+  assert.equal(mutable.cx,1);
+  assert.equal(engine.counts().total,1);
+  engine.dispose();
+});
+
+test('source census callback cannot change player observer mid-poll',()=>{
+  const w=world(),engine=engineOf(w);
+  const id=engine.spawn('deer',[8,4,8],{homeChunk:'0,0,0'});
+  assert.ok(id);
+  const observer=[8,4,8];
+  assert.throws(()=>prepareOriginalMobPoll({
+    ...opts(w,engine),observer,spawnOnFirstVisit:false,
+    isProtected:()=>{observer[0]+=10;return false;}
+  }),/Original regional source inputs changed during poll/);
+  assert.equal(observer[0],18);
+  engine.dispose();
+});

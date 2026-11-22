@@ -4,6 +4,8 @@ import {MobEngine} from './engine.mjs';
 import {validPoint} from './world-query.mjs';
 import {captureOriginalWorldRevision,assertOriginalWorldRevisionUnchanged}
   from './ecosystem-world-revision-fence.mjs';
+import {captureOriginalRegionalInputs,assertOriginalRegionalInputsUnchanged}
+  from './ecosystem-region-input-fence.mjs';
 import {verifyOriginalNaturalMobAdmission}
   from './ecosystem-natural-admission.mjs';
 import {captureOriginalMobRoster,assertOriginalMobRosterUnchanged}
@@ -70,15 +72,17 @@ export function prepareOriginalMobPoll({
   // regional cooldown; never admit a direct plan without that observer.
   if(!validPoint(observer))
     throw new TypeError('Invalid original regional mob observer');
-  const sourceObserver=Object.freeze([...observer]);
-  // Capture the authoritative original edit revision BEFORE any source
-  // engine/roster/protection callback can edit the live world. The previous
-  // baseline was read AFTER deriveRegionalMobState, silently accepting a
-  // revision advanced inside isProtected().
+  // Capture the authoritative world revision before reading external
+  // source input properties or invoking source protection/terrain callbacks.
   const revision=captureOriginalWorldRevision(world);
+  // Use frozen observer/region snapshots throughout the original census and
+  // physical proposal; reject any mutation of the caller-owned inputs.
+  const inputs=captureOriginalRegionalInputs(region,observer);
+  const sourceObserver=inputs.observer,sourceRegion=inputs.region;
   const entities=engine.all();
   const rosterCertificate=captureOriginalMobRoster(entities);
-  const roster=deriveRegionalMobState(entities,region,{isProtected});
+  const roster=deriveRegionalMobState(entities,sourceRegion,{isProtected});
+  assertOriginalRegionalInputsUnchanged(inputs,region,observer);
   assertOriginalWorldRevisionUnchanged(world,revision);
   if(record!==null&&record.regionKey!==roster.regionName)
     throw new TypeError('Original regional schedule belongs to another region');
@@ -92,13 +96,14 @@ export function prepareOriginalMobPoll({
   let attempts=0,proposal=null,rejected=null;
   if(inspected.ready){
     const poll=proposeMobFromRosterSnapshot({
-      world,seed,region,observer,biome,light,kind,
+      world,seed,region:sourceRegion,observer:sourceObserver,biome,light,kind,
       entities,isProtected,startSerial:inspected.record.serial
     });
     attempts=poll.attempts;
     proposal=poll.proposal;
     rejected=poll.rejected;
   }
+  assertOriginalRegionalInputsUnchanged(inputs,region,observer);
   assertOriginalWorldRevisionUnchanged(world,revision);
   // Source protection and terrain callbacks may edit MobEngine state without
   // incrementing world.revision. A stale proposal cannot consume a global
