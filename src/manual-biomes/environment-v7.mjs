@@ -17,10 +17,13 @@ const undulation=(angle)=>.5+.5*Math.sin(angle);
 const shoulderSamples=[[14,0],[-14,0],[0,14],[0,-14]];
 // The source's largest possible tree admission threshold is Enchanted:
 // .52 + undulation(...)*.34, where undulation is bounded to [0,1].
-// In explicit experimental generation only, roll >= .86 cannot plant
-// a tree in ANY biome. Reject before the costly warped-biome lookup.
+// Use the ORIGINAL JavaScript arithmetic expression for the maximum:
+// literal .86 is one representable float below (.52+.34) in JS, so the
+// exact cutoff MUST be (.52+.34) to avoid any rounding-boundary ambiguity.
+// In explicit experimental generation only, a roll at or above the
+// computed maximum cannot plant any tree in any V6 biome.
 // Do NOT apply this early filter to historical/default M7.
-export const ENCHANTED_TREE_MAX_DENSITY_THRESHOLD=.86;
+export const ENCHANTED_TREE_MAX_DENSITY_THRESHOLD=.52+.34;
 
 function sharedShoulder(biome,x,z,seed){
   if(biome.weight>.50)return null;
