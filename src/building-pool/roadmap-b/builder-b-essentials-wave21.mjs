@@ -112,7 +112,7 @@ export function buildSunscarOpenOculusLanternwatch(){
  ]){
   const [dx,dz]=sides[facing],y=22;
   if(!towerWall(x,z)||b.clear(x,y,z)||b.clear(x,y-1,z)||b.clear(x,y+1,z)||
-      !b.clear(x+dx,y,z))
+      !b.clear(x+dx,y,z+dz))
    throw Error('Sunscar high pane lacks actual stone frame/exterior air '+K(x,z));
   b.cut(x,y,z);
   b.put(x,y,z,'window','pack4:030',facing,{
