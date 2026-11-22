@@ -56,6 +56,18 @@ export function auditProtectedSubsurfaceStairs(proposal,{
   authoredAirClearance:0,sourceInconsistency:0,
   preexistingAirClearance:0,preexistingSolidSupport:0};
  const examples=[];
+ // Bound potentially corrupt source-ID cardinality. Counts beyond the
+ // visible 32 IDs are retained in an explicit overflow, never silently
+ // reported as a complete material provenance inventory.
+ const unsafeMaterialIds=new Map();
+ let otherUnsafeMaterialCells=0;
+ const materialSummary=()=>Object.freeze({
+  unsafeMaterialByBlockId:Object.freeze(Object.fromEntries(
+   [...unsafeMaterialIds].sort(([a],[b])=>a-b)
+    .map(([id,n])=>[String(id),n]))),
+  otherUnsafeMaterialCells,
+  allUnsafeMaterialIdsEnumerated:otherUnsafeMaterialCells===0
+ });
  for(const [kind,set] of [['clearance',air],['support',support]]){
   for(const key of set){
    if(visited.has(key))continue;visited.add(key);
@@ -82,8 +94,14 @@ export function auditProtectedSubsurfaceStairs(proposal,{
       count.protected++;reason='PROTECTED_LANDMARK';
     }else{
       const material=naturalAt(x,y,z);
+      if(!integer(material)||material<0)
+       throw TypeError('Invalid original M7 stair material source');
       if(!materialAllowed(material,x,y,z)){
        count.unsafeMaterial++;reason='UNSAFE_MATERIAL';
+       if(unsafeMaterialIds.has(material))
+        unsafeMaterialIds.set(material,unsafeMaterialIds.get(material)+1);
+       else if(unsafeMaterialIds.size<32)unsafeMaterialIds.set(material,1);
+       else otherUnsafeMaterialCells++;
       }else if(owner===0&&material!==0){
        count.sourceInconsistency++;reason='AUTHORED_AIR_MISMATCH';
       }else if(kind==='clearance'){
@@ -104,6 +122,7 @@ export function auditProtectedSubsurfaceStairs(proposal,{
     firstRefusal:reason,sourceChecks:visited.size,
     supportCells:geometry.supportCells,clearanceCells:geometry.clearanceCells,
     counts:Object.freeze({...count}),examples:Object.freeze(examples),
+    ...materialSummary(),
     sourceTerrainNeverWritten:true,originalM7Edited:false,
     playerWalkingUnverified:true
    });
@@ -117,6 +136,7 @@ export function auditProtectedSubsurfaceStairs(proposal,{
   sourceChecks:visited.size,
   supportCells:geometry.supportCells,clearanceCells:geometry.clearanceCells,
   counts:Object.freeze(count),examples:Object.freeze(examples),
+  ...materialSummary(),
   actualSourceIdentityNotAuthenticated:true,
   authoredAirAndNaturalCaveAirNeverFilled:true,
   candidateOnly:true,notYetWalkable:true,
