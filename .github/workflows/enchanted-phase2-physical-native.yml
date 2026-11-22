@@ -1,7 +1,8 @@
 # Isolated candidate-only source validation. Previous 44/44 authentic M7
 # tests at commit 15f7521f92954d1861163d2a295712c8483b5975 remain reusable.
-# This revision adds a five-capacity original-M7 data comparison;
-# prior 9/9 exact-source tests are reused for unchanged code.
+# This revision applies the measured 1024-entry experimental default and
+# requires <=5% more original source reads than the exact 2048-entry baseline,
+# with original M7 terrain, save and chunk parity on current source.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
