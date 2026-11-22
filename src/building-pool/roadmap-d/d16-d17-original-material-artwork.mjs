@@ -37,18 +37,44 @@ function originalRoofPaint(sample,resolvePack3BuilderAsset){
     originalBlockId:part.blockId,rotation:part.yaw,sourcePack:3,originalColoredParts:Object.freeze(world),
     sourceIsActualPack3Material:true,renderedInLiveGame:false});
 }
+// Pack 2's original mesh is NOT a box stand-in: xyz, RGB, uv and authored
+// material are nine floats per expanded triangle vertex. No engine upload here.
+function originalPack2WoodMesh(sample,resolvePack2BuilderAsset,pack2WorldVertices){
+ const original=resolvePack2BuilderAsset(sample.sourceOriginalSymbol,'north',{});
+ if(!original||original.symbol!=='pack2:013'||original.blockId!==59||
+   original.sourcePack!==2||original.physical!==true||
+   original.worldRegistered!==false||original.livePlaceable!==false||
+   original.triangleCount<=0)throw Error('Missing original Pack2 timber source renderer');
+ const vertices=pack2WorldVertices(original.blockId,original.state,sample.sourceAt);
+ if(!(vertices instanceof Float32Array)||vertices.length%27!==0||!vertices.length||
+    vertices.some(x=>!Number.isFinite(x)))throw Error('Pack2 original authored timber triangles are missing');
+ const expected=vertices.length/27;
+ if(expected!==original.triangleCount)throw Error('Pack2 timber original authored mesh triangle count mismatched');
+ return Object.freeze({sourceOriginalSymbol:sample.sourceOriginalSymbol,
+   originalNumericId:original.blockId,sourceAt:sample.sourceAt,
+   authoredWorldVertices:vertices,stride:9,originalTriangles:expected,
+   source:'original-pack2-approved-planed-wood-grain-triangles',
+   sourcePack:2,worldRegistered:false,livePlaceable:false,
+   physicalCreatorArtNotInFinalGame:true});
+}
+
 export function createD16D17OriginalMaterialArtwork(blueprint,{
- resolveManualAsset,resolvePack4Asset,resolvePack3BuilderAsset,masonryTexture,...budgets
+ resolveManualAsset,resolvePack4Asset,resolvePack3BuilderAsset,masonryTexture,
+ resolvePack2BuilderAsset,pack2WorldVertices,...budgets
 }={}){
- if(typeof resolvePack3BuilderAsset!=='function'||typeof masonryTexture!=='function')
+ if(typeof resolvePack3BuilderAsset!=='function'||typeof masonryTexture!=='function'||
+    typeof resolvePack2BuilderAsset!=='function'||typeof pack2WorldVertices!=='function')
    throw TypeError('Original Pack1 masonryTexture + Pack3 physical materials required, no palette simulation');
  const scene=assembleD16D17OriginalPhysicalPreview(blueprint,{
    resolveManualAsset,resolvePack4Asset,...budgets
  });
  const wall=scene.physicalSamples.find(s=>s.sampleKind==='external-masonry');
- if(!wall||wall.sourceOriginalPack!==1)throw Error('Missing original stonewall texture owner');
- const wallTextures=Object.freeze(['north','top'].map(face=>verifyTexture(
-   masonryTexture(wall.sourceNumericId,face,24),wall.sourceNumericId,face)));
+ const wood=scene.physicalSamples.filter(s=>s.sampleKind==='original-planed-wood-facade');
+ if(!wall&&!wood.length)throw Error('No original masonry or timber facade materials');
+ const wallTextures=Object.freeze(wall?['north','top'].map(face=>verifyTexture(
+   masonryTexture(wall.sourceNumericId,face,24),wall.sourceNumericId,face)):[]);
+ const woodMeshes=Object.freeze(wood.map(s=>originalPack2WoodMesh(s,
+   resolvePack2BuilderAsset,pack2WorldVertices)));
  const roofs=Object.freeze(scene.physicalSamples.filter(x=>x.sourceOriginalPack===3)
    .map(sample=>originalRoofPaint(sample,resolvePack3BuilderAsset)));
  const meshes=scene.physicalSamples.filter(x=>x.sourceOriginalPack===4);
@@ -61,10 +87,11 @@ export function createD16D17OriginalMaterialArtwork(blueprint,{
  if(triangles.opaque+triangles.translucent<=0)throw Error('No original Pack4 physical RGBA vertices');
  return Object.freeze({format:'mythwrought.builder-d.original-manual-material-artwork.v1',
    blueprintId:scene.blueprintId,biome:scene.biome,
-   masonryFaceTextures:wallTextures,originalPack3ColorParts:roofs,
+   masonryFaceTextures:wallTextures,originalPlanedWoodMeshes:woodMeshes,
+   originalPack3ColorParts:roofs,
    originalPack4TriangleCounts:triangles,originalPack4WorldMeshes:Object.freeze(meshes),
-   sampledOriginalPhysicalCells:scene.sampledCount,sourceOwnerPackIds:Object.freeze([1,3,4]),
-   sourcePack2AndPack5ArtNotApplied:true,originalPack3ColorsPreserved:true,
+   sampledOriginalPhysicalCells:scene.sampledCount,sourceOwnerPackIds:scene.sourcePacksUsed,
+   sourcePack5ArtNotApplied:true,originalPack2TimberGrainPreserved:true,originalPack3ColorsPreserved:true,
    originalPack4TransparencyPreserved:true,originalPack1PixelArtPreserved:true,
    originalSourceCellsUnchanged:true,worldPlacementAccepted:false,transparencySortingAccepted:false,
    iphoneRendererAccepted:false,finalPhysicalArtworkAccepted:false,
