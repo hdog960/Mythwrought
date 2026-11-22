@@ -47,6 +47,39 @@ function physicalAt(cell,symbol,id,orientation,pack,resolveManualAsset,tag){
    sampleKind:tag
  });
 }
+// Preserve actual original Pack4 typed RGBA mesh vertices instead of substituting
+// box-shaped fake glazing. The original format is position xyz, normal xyz,
+// diffuse rgba (10 floats per vertex, three vertices per triangle).
+function originalPack4WorldMesh(cell,asset){
+ if(!asset||asset.hasRealPhysicalGeometry!==true||asset.registeredInLiveGame!==false)
+   throw Error('Pack4 physical producer authenticity failed');
+ const mesh=asset.previewMesh,stride=mesh?.stride;
+ if(stride!==10||!(mesh.opaque instanceof Float32Array)||
+    !(mesh.translucent instanceof Float32Array))
+   throw Error('Original Pack4 mesh has no typed 10-float source layout');
+ const translate=group=>{
+   if(group.length%(stride*3)!==0)throw Error('Pack4 source buffer is not complete triangles');
+   const transformed=new Float32Array(group);
+   for(let i=0;i<transformed.length;i+=stride){
+     for(let j=0;j<3;j++)transformed[i+j]+=cell.at[j];
+     for(let j=0;j<stride;j++)if(!Number.isFinite(transformed[i+j]))
+       throw Error('Invalid original Pack4 RGBA source vertex');
+     for(let j=6;j<10;j++)if(transformed[i+j]<0||transformed[i+j]>1)
+       throw Error('Invalid original Pack4 physical material alpha or color');
+   }
+   return transformed;
+ };
+ const opaque=translate(mesh.opaque),translucent=translate(mesh.translucent);
+ if(!opaque.length&&!translucent.length)throw Error('Empty original Pack4 visible source mesh');
+ return Object.freeze({
+   source:'original-pack4-actual-preview-vertices',stride,
+   opaqueWorldVertices:opaque,translucentWorldVertices:translucent,
+   opaqueTriangles:opaque.length/(stride*3),translucentTriangles:translucent.length/(stride*3),
+   materialRGBAUnmodified:true,vertexNormalsUnmodified:true,sourceCellUnmodified:true,
+   preSortedTransparency:false,worldRendererAcceptance:false
+ });
+}
+
 function inferRidgeAxis(c,all){
  // The W16/17 authored p.ridges remain actual source voxel courses. Determine
  // axis only from adjacent exact-y graded/roof source neighbors; never infer
@@ -91,7 +124,10 @@ export function assembleD16D17OriginalPhysicalPreview(blueprint,{
    const c=occupancy.get(key(g.at));
    if(!c||!c.asset?.startsWith('pack4:'))throw Error('Lost original Pack4 source at '+key(g.at));
    const orientation=g.facadeFacing??'north';
-   samples.push(physicalAt(c,c.asset,g.originalNumericId,orientation,4,resolveManualAsset,g.kind));
+   const originalPack4=resolvePack4Asset(c.asset,{candidateId:g.originalNumericId,rotation:orientation});
+   const physicallyResolved=physicalAt(c,c.asset,g.originalNumericId,orientation,4,resolveManualAsset,g.kind);
+   samples.push(Object.freeze({...physicallyResolved,
+     originalRealPack4WorldMesh:originalPack4WorldMesh(c,originalPack4)}));
  }
  if(samples.length>facadeBudget+roofBudget+ridgeBudget+towerBudget+windowBudget+2)
    throw Error('Unbounded physical sample packet');
