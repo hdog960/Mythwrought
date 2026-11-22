@@ -45,3 +45,23 @@ A genuine Pack5 **in-game** visual/player interaction acceptance would require a
 Source-only Roadmap A remains **207/420 drafted, 213 unwritten**. Historic 128 commerce, 345 industrial and 315 government unchanged. All original 79 A5 source designs remain unmodified, with no real variant/yaw assignment, world-placement, mixed Pack1–5 structural approval or full-game Pack5 visual acceptance.
 
 Protected production main \`7016e14cd6289f45eaf7fc6a79a362b47996df65\` and OPEN DRAFT PR406 code HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\` remain unchanged. No modification of other builders, five hourly automations, pre-existing workflows, original renderer/camera/input, saved worlds, schema1, installed Home Screen PWA, locked v0.11, no merge/deployment/cancellation. Source-only evidence must never be interpreted as permission to approve a live Pack5 building or a finished release.
+
+## Native original-source acceptance checkpoint, November 22, 2026
+
+Original source-only engineering commit \`7ae798c3f1fb7aa224f008efeeb8276bb5c4af4d\` is parented directly on \`e70ffb43e210e83748ed99e068ed9c1ceccc28a2\` and adds exactly four isolated Roadmap A files; **no original source gameplay module was edited**.
+
+The only new GitHub test was a narrowly scoped CI-only child \`roadmap-a-pack5-readonly-game-gate-ci-20261122\` HEAD \`47f6ba971053891a420a68adfbc6986363aa9346\`. Authentic original-repository **Node 22.16.0** [Actions #45061280438](https://github.com/hdog960/Mythwrought/actions/runs/45061280438) completed **SUCCESS — 8/8 new focused native tests passed; 0 failures**, with \`node --check\` passing on the **manual, not executed** Playwright one-viewport browser harness. No Chromium/real WebGL2/browser screenshot was run in this checkpoint.
+
+Focused native source results:
+
+- Authenticated 12 existing \`main.mjs\` camera/WebGL2/edit guard/localhost-only debug expressions and previous actual browser acceptance source path
+- Locked exact one-viewport 844x390 ephemeral context and 72 **planned** browser source-only numerical rays across both authored fired-brick alternatives at yaw2/yaw3; **0 rays actually run in browser in this checkpoint**
+- Imported original Pack5 generator and original 9-float GPU staging path; all four genuine variant/yaw authored physical meshes have full-cube colliders, complex selection/visible geometry, finite terrain shader staging, neutral material channel 0, and individually fit the untouched 384-KiB original page budget; actual renderer upload or screen pixels **not measured**
+- Tested a strictly synthetic *validator-only* result and negative evidence cases for spoofed WebGL2, wrong viewport, bad/short ray census, invalid camera, unauthorized sidecar/live instance/gameplay edits, fake iPhone or creator approval, page/console errors
+- Reviewed manual browser harness for standard privileged game edit hooks and one-time private context contract; it does not run automatically in native CI
+
+These results **do not prove** that a future browser has WebGL2, can run the live game without errors, or can render/target real Pack5 world placements. The browser pilot must be executed separately and any resulting screenshot would be of the **unchanged original main game**, *not* a placed Pack5 object. A real in-game Pack5 integration would require an additional separate, authorized, disposable-world test and eventual genuine physical iPhone acceptance.
+
+**No redundant CI:** prior authentic 7/7 camera native #45057409771, 6/6 ray/occlusion #45055300060, 15/15 original-source mathematical rays #45049471293 (retain 88 raw authored boundary warnings), older 40/40 source physical producer #45044721507, 9/9 footprint + 5/5 original footprint producer, historical Pack5 24/24 and controlled V8 58/58 are reused, not repeated.
+
+**Creator-approval and ownership holds unchanged:** protected \`main\` exact \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`, protected OPEN DRAFT PR406 code HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\`. Roadmap A \`207/420\` SOURCE-ONLY with 213 unwritten; historical 128 commerce, 345 industrial, 315 government, all A5 original source candidates, other builders and 5 automations unaffected. No A5 material/yaw decisions, original game/world/save/PWA/schema1 edits, locked v0.11 changes, preexisting CI workflow changes, structural approval, renderer/gameplay installation, merge, deployment or cancellation.
