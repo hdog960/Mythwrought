@@ -286,7 +286,7 @@ export function auditSourceProtectedGalleryEasementDistrict(seed,rx,rz,{
   threeDeepLinksAndCityAccessGeometryChecked:true,
   originalDeepLinkAndAccessSourceRightsProvidedByCaller:true,
   originalM7ReaderIdentityByCallerOnly:true,
-  originalFullCityFloorStillRejected:true,
+  historicalFullCityFloorNotReevaluatedOrReplacedHere:true,
   detachedCityCenterWithinLandingDistrict:
    proposed.cityCenterWithinConnectedLandingDistrict,
   detachedFullCityCenterConnectionNotCertified:true,
