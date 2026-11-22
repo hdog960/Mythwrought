@@ -111,23 +111,31 @@ export function selectCityCompatibleDeepLinks(seed,rx,rz,{
    sourceChecks:0,worldChanged:false});
  }
  let combinations=0,sourceChecks=0,lastRefusal=null;
+ let sourceBudgetHit=false,combinationBudgetHit=false;
  // A source refusal never gets converted into an approved answer. Explore
  // only mutually compatible alternatives and cap the SUM of actual queries.
- for(const a of options[0])for(const b of options[1])for(const c of options[2]){
-  if(combinations>=maxCombinations)break;
+ search:for(const a of options[0])for(const b of options[1])for(const c of options[2]){
+  if(combinations>=maxCombinations){
+   combinationBudgetHit=true;break search;
+  }
   combinations++;
   const chosen=[a,b,c],proposals=chosen.map(x=>x.proposal);
   const coupled=compileSelectedStairPedestrianClearance(proposals);
   if(!coupled.ok){lastRefusal='DEEP_RAMPS_MUTUALLY_BLOCKED';continue;}
   const remaining=maxTotalSourceChecks-sourceChecks;
-  if(remaining<1000)break;
+  if(remaining<1000){
+   sourceBudgetHit=true;break search;
+  }
   const joined=auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
    source,additionalStairProposals:proposals,
    requireCompleteDeepLinks:true,useSourceAwareDetour:true,
    maxTotalSourceChecks:Math.min(60000,remaining)
   });
   sourceChecks+=joined.sourceChecks??0;
-  if(sourceChecks>maxTotalSourceChecks){lastRefusal='CITY_SOURCE_QUERY_BUDGET';break;}
+  if(sourceChecks>maxTotalSourceChecks){
+   sourceBudgetHit=true;lastRefusal='CITY_SOURCE_QUERY_BUDGET';
+   break search;
+  }
   if(!joined.ok){lastRefusal=joined.reason;continue;}
   return Object.freeze({sitePresent:true,ok:true,seed,rx,rz,
    chosen:Object.freeze(chosen.map(x=>Object.freeze({
@@ -143,8 +151,12 @@ export function selectCityCompatibleDeepLinks(seed,rx,rz,{
    settlementsPlaced:false,worldChanged:false});
  }
  return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
-  reason:sourceChecks>=maxTotalSourceChecks?'CITY_SOURCE_QUERY_BUDGET':
+  reason:sourceBudgetHit||sourceChecks>=maxTotalSourceChecks?
+   'CITY_SOURCE_QUERY_BUDGET':
+   combinationBudgetHit?'CITY_COMBINATION_SEARCH_BUDGET':
    lastRefusal??'NO_CONNECTED_DEEP_CITY_ROUTE',
+  sourceBudgetHit,combinationBudgetHit,
+  searchFullyExhausted:!sourceBudgetHit&&!combinationBudgetHit,
   sourceChecks,inspectedCombinations:combinations,
   examined:Object.freeze(examined),worldChanged:false,
   originalM7PlayerWalkingUnverified:true});
