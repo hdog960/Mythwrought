@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {proposedSnowTree} from '../src/manual-biomes/snowy-s3-tree-prototypes.mjs';
 import test from 'node:test';
 import {snowS3SitesForChunk,snowS3StyleAt,proposeSnowS3PhysicalSite,
   SNOW_S3_STYLES} from '../src/manual-biomes/snowy-s3-sites-detached.mjs';
@@ -19,6 +20,14 @@ test('S3 absolute sites are deterministic, sparse, unique and chunk-border invar
     assert.deepEqual([...a],[...b]);
     assert.ok(a.size>35&&a.size<350);
     assert.equal(new Set([...a.values()].map(s=>s.x+','+s.z)).size,a.size);
+    // A prospective tree radius may reach three cells in every direction;
+    // potential neighboring canopy volumes must never overlap regardless of
+    // which 16x16 chunk is constructed first.
+    const centers=[...a.values()];
+    for(let i=0;i<centers.length;i++)for(let j=i+1;j<centers.length;j++)
+      assert.ok(Math.abs(centers[i].x-centers[j].x)>6||
+        Math.abs(centers[i].z-centers[j].z)>6,
+        'Two tree sites could compete for the same physical canopy volume');
     for(const s of a.values()){
       assert.ok([-1,1].includes(s.wind));
       assert.ok(Number.isSafeInteger(s.x)&&Number.isSafeInteger(s.z));
@@ -37,18 +46,27 @@ test('S3 four real styles occur with altitude-dependent visual variety',()=>{
     high.set(snowS3StyleAt(site,11),high.get(snowS3StyleAt(site,11))+1);
   }
   assert.ok([...low.values()].every(v=>v>0));
-  assert.ok([...high.values()].every(v=>v>0));
+  // Real Y=19 roof: 9-block pines plus top snow cannot spawn at Y=11.
+  assert.ok(['compact-fir','layered-spruce','windswept-alpine'].every(
+    style=>high.get(style)>0));
+  assert.equal(high.get('highland-pine'),0);
   assert.ok(low.get('compact-fir')>high.get('compact-fir'));
   assert.ok(high.get('windswept-alpine')>low.get('windswept-alpine'));
   assert.equal(snowS3StyleAt(null,3),null);
   assert.equal(snowS3StyleAt({styleRoll:0},19),null);
+  for(const floor of [2,5,8,9,10,11,12,13,14,18]){
+    for(const roll of Array.from({length:101},(_,i)=>i/101)){
+      const style=snowS3StyleAt({key:'a',x:1,z:1,wind:1,styleRoll:roll},floor);
+      const height={'compact-fir':5,'layered-spruce':7,
+        'highland-pine':9,'windswept-alpine':6}[style];
+      if(style)assert.ok(floor+height+1<=19,
+        'S3 selected an impossible snowy tree above original world Y=19');
+      else assert.ok(floor>=14,'Lower snow site must have a viable prototype');
+    }
+  }
 });
 const realStyle=s=>SNOW_S3_STYLES.includes(s);
-const proto=(style,x,floor,z)=>({height:5,cells:[
-  ...Array.from({length:5},(_,i)=>[x,floor+1+i,z,4]),
-  ...Array.from({length:15},(_,i)=>[x+((i%3)-1),floor+2+Math.floor(i/9),
-    z+((Math.floor(i/3)%3)-1),i%3===0?407:406])
-].filter(([a,b,c,id],index,all)=>id===4||!(a===x&&c===z))});
+const proto=proposedSnowTree;
 test('S3 physical candidate rejects edits, unsupported floor, canopy, legacy and malformed shapes',()=>{
   const site=[...chunks(179).values()][0],floor=6;
   const blocks=new Map([[site.x+','+floor+','+site.z,272],
@@ -85,6 +103,8 @@ test('S3 physical candidate rejects edits, unsupported floor, canopy, legacy and
     {...ctx,inspect:()=>({...ctx.inspect(),floor:16})},
     {...ctx,makeTree:()=>({...tree,cells:[...tree.cells,[site.x,floor+1,site.z,7]]})},
     {...ctx,makeTree:()=>({...tree,cells:tree.cells.filter(r=>!(r[0]===site.x&&r[1]===floor+3&&r[2]===site.z))})},
-    {...ctx,makeTree:()=>{throw Error('Invalid shape source')}}
+    {...ctx,makeTree:()=>{throw Error('Invalid shape source')}},
+    {...ctx,makeTree:(...a)=>({...proto(...a),style:'incorrect'})},
+    {...ctx,makeTree:(...a)=>({...proto(...a),height:1})}
   ])assert.equal(proposeSnowS3PhysicalSite(site,invalid),null);
 });
