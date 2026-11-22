@@ -1674,15 +1674,16 @@ function start(nonblockStage=null){
   );
   function armNear291(){
     if(!near291Enabled||near291||near291Pending||
-       near291PageSuspended||near291Fatal)return;
+       near291PageSuspended||near291Fatal||document.hidden)return;
     // Only localhost/?near-vao-291=1 can import the experiment.
     const epoch=++near291LoadEpoch;
     near291Pending=true;
     import('../perf/issue-291/opaque-near-lifecycle.mjs')
       .then(({createOpaqueNearLifecycle})=>{
         if(epoch!==near291LoadEpoch||near291PageSuspended||near291Fatal)return;
-        if(graphicsLost||document.hidden)
-          throw Error('Graphics suspended before local VAO experiment armed');
+        // Backgrounding/context loss is expected on iPhone, not a fatal GPU
+        // failure. Leave the old import unarmed and retry on visible/restore.
+        if(graphicsLost||document.hidden)return;
         near291=createOpaqueNearLifecycle({gl,
           attributes:{atPos,atColor,atUv,atMat},pipelineProgram:program,
           originalDeleteChunkBuffers,stopRenderLoop:reason=>{
@@ -1937,10 +1938,10 @@ function start(nonblockStage=null){
       frameHistory.frame(performance.now(),false);
       cancelAllPointers();
       if(mirrorEnabled&&pendingMirrors.size)flushMirror();
-    }else if(!graphicsLost&&near291CanResume()){
+    }else if(!graphicsLost){
       lastFrame=performance.now(); // never simulate hidden time as movement
-      armNear291();
-      frameDriver.resume();
+      armNear291(); // start deferred local import even before a ready adapter
+      if(near291CanResume())frameDriver.resume();
     }
   });
   const lookModeSelect=document.getElementById('lookMode');
@@ -3148,7 +3149,10 @@ function start(nonblockStage=null){
       graphicsLost=false;graphicsRestoreCount++;
       notice.hidden=true;
       message('Graphics restored · rebuilding the nearby world without reloading saves');
-      if(!document.hidden&&near291CanResume())frameDriver.resume();
+      if(!document.hidden){
+        armNear291(); // retry local import that settled during context loss
+        if(near291CanResume())frameDriver.resume();
+      }
     }catch(error){
       // Fail closed: no half-initialized rendering loop and no world writes.
       graphicsLost=true;frameDriver.pause();
@@ -3178,10 +3182,12 @@ function start(nonblockStage=null){
   window.addEventListener('pageshow',()=>{
     // iOS Safari BFCache restoration can resume without rerunning this module.
     near291PageSuspended=false;
-    if(!document.hidden&&!graphicsLost&&near291CanResume()){
-      armNear291(); // re-arm if pagehide invalidated an import in flight
-      lastFrame=performance.now();
-      frameDriver.resume();
+    if(!document.hidden&&!graphicsLost){
+      armNear291(); // re-arm after pagehide, even while adapter is absent
+      if(near291CanResume()){
+        lastFrame=performance.now();
+        frameDriver.resume();
+      }
     }
   });
   if(['localhost','127.0.0.1'].includes(location.hostname)){
